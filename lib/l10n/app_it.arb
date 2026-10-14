@@ -1,0 +1,176 @@
+{
+  "@@locale": "it",
+  "appName": "Codecore",
+  "chooseFolder": "Scegli cartella",
+  "scan": "Scansiona",
+  "noTracks": "Nessun brano. Scegli una cartella e scansiona.",
+  "openSettings": "Apri impostazioni",
+  "permissionDenied": "Permesso di lettura audio negato",
+  "permissionExplain": "Codecore ha bisogno del permesso di leggere i file audio per mostrare la tua musica.",
+  "navLibrary": "Libreria",
+  "navFavorites": "Preferiti",
+  "navPlaylists": "Playlist",
+  "navSettings": "Impostazioni",
+  "tracks": "Brani",
+  "albums": "Album",
+  "artists": "Artisti",
+  "searchHint": "Cerca",
+  "sortBy": "Ordina per",
+  "addMusicFolder": "Aggiungi la tua cartella musicale",
+  "addFolder": "Aggiungi cartella",
+  "folders": "Cartelle musicali",
+  "refreshLibrary": "Aggiorna libreria",
+  "removeFolder": "Rimuovi cartella",
+  "unknownArtist": "Artista sconosciuto",
+  "unknownAlbum": "Album sconosciuto",
+  "variousArtists": "Artisti vari",
+  "play": "Riproduci",
+  "shuffle": "Casuale",
+  "queue": "Coda",
+  "nowPlaying": "In riproduzione",
+  "nothingPlaying": "Nessun brano in riproduzione",
+  "mute": "Muto",
+  "scanning": "Scansione in corso…",
+  "emptyQueue": "La coda è vuota",
+  "noResults": "Nessun risultato",
+  "sortDefault": "Predefinito",
+  "sortTitle": "Titolo",
+  "sortArtist": "Artista",
+  "sortAlbum": "Album",
+  "sortYear": "Anno",
+  "sortAdded": "Aggiunti di recente",
+  "sortDuration": "Durata",
+  "tracksCount": "{count, plural, one{1 brano} other{{count} brani}}",
+  "@tracksCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "albumsCount": "{count, plural, one{1 album} other{{count} album}}",
+  "@albumsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "missingTracksCount": "Brani non trovati ({count})",
+  "@missingTracksCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "addedToFavorites": "Aggiunto ai preferiti",
+  "removedFromFavorites": "Rimosso dai preferiti",
+  "undo": "Annulla",
+  "noFavorites": "Nessun preferito ancora",
+  "newPlaylist": "Nuova playlist",
+  "newPlaylistEllipsis": "Nuova playlist…",
+  "playlistName": "Nome della playlist",
+  "create": "Crea",
+  "cancel": "Annulla",
+  "save": "Salva",
+  "delete": "Elimina",
+  "rename": "Rinomina",
+  "noPlaylists": "Nessuna playlist. Creane una.",
+  "addToPlaylist": "Aggiungi a playlist…",
+  "addedToPlaylist": "Aggiunto a «{name}»",
+  "@addedToPlaylist": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "playNext": "Riproduci dopo",
+  "addToQueue": "Aggiungi alla coda",
+  "addedToQueue": "Aggiunto alla coda",
+  "favorite": "Preferito",
+  "removeFromFavorites": "Rimuovi dai preferiti",
+  "removeFromList": "Rimuovi",
+  "editInfo": "Modifica info",
+  "details": "Dettagli",
+  "showInFolder": "Mostra nella cartella",
+  "detailPath": "Percorso",
+  "detailFormat": "Formato",
+  "detailSize": "Dimensione",
+  "detailDuration": "Durata",
+  "detailAdded": "Aggiunto il",
+  "detailPlays": "Riproduzioni",
+  "close": "Chiudi",
+  "fieldTitle": "Titolo",
+  "fieldArtist": "Artista",
+  "fieldAlbum": "Album",
+  "fieldAlbumArtist": "Artista album",
+  "fieldYear": "Anno",
+  "fieldTrackNumber": "Numero traccia",
+  "fieldGenre": "Genere",
+  "restoreFromFile": "Ripristina dai tag del file",
+  "titleRequired": "Il titolo non può essere vuoto",
+  "settingsAppearance": "Aspetto",
+  "settingsTheme": "Tema",
+  "themeOled": "OLED",
+  "themeCarbon": "Carbone",
+  "themeNavy": "Blu notte",
+  "themeLight": "Chiaro",
+  "settingsTextSize": "Dimensione testo",
+  "textSmall": "Piccolo",
+  "textNormal": "Normale",
+  "textLarge": "Grande",
+  "settingsCompact": "Modalità compatta",
+  "settingsReducedMotion": "Animazioni ridotte",
+  "settingsLanguage": "Lingua",
+  "settingsLibrary": "Libreria",
+  "rescanNow": "Riscansiona ora",
+  "clearCoverCache": "Svuota cache copertine",
+  "coverCacheCleared": "Cache copertine svuotata",
+  "settingsOnline": "Online",
+  "autoEnrich": "Arricchimento automatico",
+  "autoEnrichHint": "Cerca metadati e copertine online per i brani nuovi",
+  "autoLyrics": "Testi automatici",
+  "autoLyricsHint": "Scarica i testi da LRCLIB per i brani nuovi",
+  "settingsAbout": "Info",
+  "appVersion": "Versione {version}",
+  "@appVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "licenses": "Licenze",
+  "personalUse": "App per uso personale",
+  "missingTracksTitle": "Brani non trovati",
+  "removeFromLibrary": "Rimuovi dalla libreria",
+  "ignore": "Ignora",
+  "confirmRemoveTitle": "Rimuovere dalla libreria?",
+  "confirmRemoveBody": "Il file non viene toccato; perdi preferiti e playlist di questo brano.",
+  "noMissingTracks": "Nessun brano mancante",
+  "retry": "Riprova",
+  "scanFailed": "Scansione non riuscita: {error}",
+  "@scanFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "playbackError": "Impossibile riprodurre «{title}»: {reason}",
+  "@playbackError": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "reasonFileMissing": "file non trovato",
+  "reasonUnplayable": "file non riproducibile",
+  "reasonNotInLibrary": "brano non presente in libreria"
+}

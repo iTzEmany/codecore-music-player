@@ -6,24 +6,19 @@ import '../../core/platform.dart';
 import '../../providers/nav_providers.dart';
 import '../../providers/player_providers.dart';
 import '../../providers/ui_providers.dart';
+import '../../services/audio/codecore_audio_handler.dart';
 import '../screens/library/library_screen.dart';
 import '../screens/placeholder_screen.dart';
-import '../strings_it.dart';
+import '../../l10n/l10n_ext.dart';
 import '../widgets/mini_player.dart';
 
 const _wideBreakpoint = 840.0;
 
-class _Destination {
-  const _Destination(this.label, this.icon);
-  final String label;
-  final IconData icon;
-}
-
-const _destinations = [
-  _Destination(S.library, Icons.library_music),
-  _Destination(S.favorites, Icons.favorite),
-  _Destination(S.playlists, Icons.queue_music),
-  _Destination(S.settings, Icons.settings),
+const _icons = [
+  Icons.library_music,
+  Icons.favorite,
+  Icons.queue_music,
+  Icons.settings,
 ];
 
 class AppShell extends ConsumerWidget {
@@ -65,14 +60,30 @@ class AppShell extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.listen(playerFailuresProvider, (_, next) {
+      final f = next.value;
+      if (f == null) return;
+      final l = context.l10n;
+      final reason = switch (f.reason) {
+        PlaybackFailureReason.fileMissing => l.reasonFileMissing,
+        PlaybackFailureReason.unplayable => l.reasonUnplayable,
+        PlaybackFailureReason.notInLibrary => l.reasonNotInLibrary,
+      };
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(
+            SnackBar(content: Text(l.playbackError(f.title ?? '', reason))));
+    });
     final index = ref.watch(navIndexProvider);
     final wide = MediaQuery.sizeOf(context).width >= _wideBreakpoint;
     void select(int i) => ref.read(navIndexProvider.notifier).set(i);
-    final body = IndexedStack(index: index, children: const [
+    final l = context.l10n;
+    final labels = [l.navLibrary, l.navFavorites, l.navPlaylists, l.navSettings];
+    final body = IndexedStack(index: index, children: [
       LibraryScreen(),
-      PlaceholderScreen(title: S.favorites),
-      PlaceholderScreen(title: S.playlists),
-      PlaceholderScreen(title: S.settings),
+      PlaceholderScreen(title: labels[1]),
+      PlaceholderScreen(title: context.l10n.navPlaylists),
+      PlaceholderScreen(title: context.l10n.navSettings),
     ]);
     Widget content = Scaffold(
       body: SafeArea(
@@ -83,9 +94,9 @@ class AppShell extends ConsumerWidget {
               onDestinationSelected: select,
               labelType: NavigationRailLabelType.all,
               destinations: [
-                for (final d in _destinations)
+                for (var i = 0; i < labels.length; i++)
                   NavigationRailDestination(
-                      icon: Icon(d.icon), label: Text(d.label)),
+                      icon: Icon(_icons[i]), label: Text(labels[i])),
               ],
             ),
           Expanded(
@@ -102,8 +113,8 @@ class AppShell extends ConsumerWidget {
               selectedIndex: index,
               onDestinationSelected: select,
               destinations: [
-                for (final d in _destinations)
-                  NavigationDestination(icon: Icon(d.icon), label: d.label),
+                for (var i = 0; i < labels.length; i++)
+                  NavigationDestination(icon: Icon(_icons[i]), label: labels[i]),
               ],
             ),
     );

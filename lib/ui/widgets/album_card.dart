@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../data/repositories/library_queries.dart';
-import '../strings_it.dart';
+import '../../l10n/l10n_ext.dart';
 import 'cover_image.dart';
 
 class AlbumCard extends StatelessWidget {
@@ -13,8 +13,8 @@ class AlbumCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final artist = album.variousArtists
-        ? S.variousArtists
-        : (album.artist ?? S.unknownArtist);
+        ? context.l10n.variousArtists
+        : (album.artist ?? context.l10n.unknownArtist);
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(8),
@@ -28,7 +28,7 @@ class AlbumCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 6),
-          Text(album.title ?? S.unknownAlbum,
+          Text(album.title ?? context.l10n.unknownAlbum,
               maxLines: 1, overflow: TextOverflow.ellipsis),
           Text(artist,
               maxLines: 1,

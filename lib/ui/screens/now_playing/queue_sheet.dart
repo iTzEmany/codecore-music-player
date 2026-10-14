@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../providers/player_providers.dart';
-import '../../strings_it.dart';
+import '../../../l10n/l10n_ext.dart';
 import '../../widgets/cover_image.dart';
 
 class QueueSheet extends ConsumerWidget {
@@ -16,7 +16,7 @@ class QueueSheet extends ConsumerWidget {
     final current = ref.watch(currentTrackProvider).value?.id;
     final ctrl = ref.read(playerControllerProvider);
     if (queue.isEmpty) {
-      return const Center(child: Text(S.emptyQueue));
+      return Center(child: Text(context.l10n.emptyQueue));
     }
     return ReorderableListView.builder(
       scrollController: scrollController,

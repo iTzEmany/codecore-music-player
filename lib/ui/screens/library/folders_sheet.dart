@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/permissions.dart';
 import '../../../providers/database_providers.dart';
 import '../../../providers/library_providers.dart';
-import '../../strings_it.dart';
+import '../../../l10n/l10n_ext.dart';
 
 Future<void> scanWithPermission(WidgetRef ref) async {
   if (!await ensureAudioPermission()) return;
@@ -29,15 +29,15 @@ class FoldersSheet extends ConsumerWidget {
     return SafeArea(
       child: Column(mainAxisSize: MainAxisSize.min, children: [
         ListTile(
-          title: const Text(S.folders),
+          title: Text(context.l10n.folders),
           trailing: Wrap(children: [
             IconButton(
-              tooltip: S.refreshLibrary,
+              tooltip: context.l10n.refreshLibrary,
               onPressed: scanning ? null : () => scanWithPermission(ref),
               icon: const Icon(Icons.refresh),
             ),
             IconButton(
-              tooltip: S.addFolder,
+              tooltip: context.l10n.addFolder,
               onPressed: () => addFolderAndScan(ref),
               icon: const Icon(Icons.create_new_folder),
             ),
@@ -48,7 +48,7 @@ class FoldersSheet extends ConsumerWidget {
             leading: const Icon(Icons.folder),
             title: Text(f.path, maxLines: 1, overflow: TextOverflow.ellipsis),
             trailing: IconButton(
-              tooltip: S.removeFolder,
+              tooltip: context.l10n.removeFolder,
               icon: const Icon(Icons.delete_outline),
               onPressed: () =>
                   ref.read(folderRepositoryProvider).remove(f.id),

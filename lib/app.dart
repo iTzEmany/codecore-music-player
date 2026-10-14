@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'l10n/app_localizations.dart';
 import 'providers/settings_providers.dart';
 import 'ui/shell/app_shell.dart';
 import 'ui/theme/app_theme.dart';
@@ -15,6 +16,9 @@ class CodecoreApp extends ConsumerWidget {
       title: 'Codecore',
       debugShowCheckedModeBanner: false,
       theme: buildTheme(appThemeIdFromName(s.theme), s.fontScale, s.compactMode),
+      locale: Locale(s.language),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       home: const AppShell(),
     );
   }

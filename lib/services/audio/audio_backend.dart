@@ -1,9 +1,10 @@
 enum BackendState { idle, loading, ready, playing, paused, completed, error }
 
 class BackendException implements Exception {
-  const BackendException(this.message);
+  const BackendException(this.message, {this.fileMissing = false});
 
   final String message;
+  final bool fileMissing;
 
   @override
   String toString() => 'BackendException: $message';

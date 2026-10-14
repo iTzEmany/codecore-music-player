@@ -33,7 +33,7 @@ Future<void> main() async {
   final db = AppDatabase.production();
   final tracks = TrackRepository(db);
   final covers = CoverStore(Directory(await coversDir()));
-  final errors = StreamController<String>.broadcast();
+  final errors = StreamController<PlaybackFailure>.broadcast();
   CodecoreAudioHandler build() => CodecoreAudioHandler(
         JustAudioBackend(),
         PlayQueue(),

@@ -8,21 +8,24 @@ import '../../../providers/library_providers.dart';
 import '../../../providers/player_providers.dart';
 import '../../../providers/settings_providers.dart';
 import '../../../providers/ui_providers.dart';
-import '../../strings_it.dart';
+import '../../../l10n/l10n_ext.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/track_tile.dart';
 import 'folders_sheet.dart';
 
-const _sortLabels = {
-  SortOption.defaultOrder: S.sortDefault,
-  SortOption.title: S.sortTitle,
-  SortOption.artist: S.sortArtist,
-  SortOption.album: S.sortAlbum,
-  SortOption.year: S.sortYear,
-  SortOption.addedAt: S.sortAdded,
-  SortOption.duration: S.sortDuration,
-};
+String _sortLabel(BuildContext context, SortOption o) {
+  final l = context.l10n;
+  return switch (o) {
+    SortOption.defaultOrder => l.sortDefault,
+    SortOption.title => l.sortTitle,
+    SortOption.artist => l.sortArtist,
+    SortOption.album => l.sortAlbum,
+    SortOption.year => l.sortYear,
+    SortOption.addedAt => l.sortAdded,
+    SortOption.duration => l.sortDuration,
+  };
+}
 
 class TracksTab extends ConsumerStatefulWidget {
   const TracksTab({super.key});
@@ -67,8 +70,8 @@ class _TracksTabState extends ConsumerState<TracksTab> {
               controller: _controller,
               focusNode: ref.watch(searchFocusProvider),
               onChanged: _onChanged,
-              decoration: const InputDecoration(
-                hintText: S.search,
+              decoration: InputDecoration(
+                hintText: context.l10n.searchHint,
                 prefixIcon: Icon(Icons.search),
                 isDense: true,
                 border: OutlineInputBorder(),
@@ -76,19 +79,19 @@ class _TracksTabState extends ConsumerState<TracksTab> {
             ),
           ),
           PopupMenuButton<SortOption>(
-            tooltip: S.sortBy,
+            tooltip: context.l10n.sortBy,
             icon: const Icon(Icons.sort),
             initialValue: query.sort,
             onSelected: (s) => ref
                 .read(trackQueryProvider.notifier)
                 .update((q) => q.copyWith(sort: s)),
             itemBuilder: (_) => [
-              for (final e in _sortLabels.entries)
-                PopupMenuItem(value: e.key, child: Text(e.value)),
+              for (final o in SortOption.values)
+                PopupMenuItem(value: o, child: Text(_sortLabel(context, o))),
             ],
           ),
           IconButton(
-            tooltip: S.folders,
+            tooltip: context.l10n.folders,
             icon: const Icon(Icons.folder_open),
             onPressed: () => showModalBottomSheet<void>(
                 context: context, builder: (_) => const FoldersSheet()),
@@ -110,23 +113,23 @@ class _TracksTabState extends ConsumerState<TracksTab> {
               if (folders != null && folders.isEmpty) {
                 return EmptyState(
                   icon: Icons.library_music,
-                  message: S.addMusicFolder,
-                  actionLabel: S.addFolder,
+                  message: context.l10n.addMusicFolder,
+                  actionLabel: context.l10n.addFolder,
                   onAction: () => addFolderAndScan(ref),
                 );
               }
               return EmptyState(
                   icon: query.text.isEmpty ? Icons.music_off : Icons.search_off,
                   message: query.text.isEmpty
-                      ? (scan.running ? S.scanning : S.noTracks)
-                      : S.noResults);
+                      ? (scan.running ? context.l10n.scanning : context.l10n.noTracks)
+                      : context.l10n.noResults);
             }
             return Column(children: [
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                 child: Align(
                     alignment: Alignment.centerLeft,
-                    child: Text(S.tracksCount(list.length),
+                    child: Text(context.l10n.tracksCount(list.length),
                         style: Theme.of(context).textTheme.bodySmall)),
               ),
               Expanded(

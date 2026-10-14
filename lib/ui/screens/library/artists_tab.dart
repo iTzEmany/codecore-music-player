@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/repositories/library_queries.dart';
 import '../../../providers/library_providers.dart';
-import '../../strings_it.dart';
+import '../../../l10n/l10n_ext.dart';
 import '../../widgets/album_grid.dart';
 import '../../widgets/empty_state.dart';
 import 'album_detail_screen.dart';
@@ -18,7 +18,7 @@ class ArtistsTab extends ConsumerWidget {
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (e, _) => Center(child: Text('$e')),
       data: (list) => list.isEmpty
-          ? const EmptyState(icon: Icons.person, message: S.noResults)
+          ? EmptyState(icon: Icons.person, message: context.l10n.noResults)
           : ListView.builder(
               itemExtent: 64,
               itemCount: list.length,
@@ -26,10 +26,10 @@ class ArtistsTab extends ConsumerWidget {
                 final a = list[i];
                 return ListTile(
                   leading: const CircleAvatar(child: Icon(Icons.person)),
-                  title: Text(a.name ?? S.unknownArtist,
+                  title: Text(a.name ?? context.l10n.unknownArtist,
                       maxLines: 1, overflow: TextOverflow.ellipsis),
                   subtitle: Text(
-                      '${S.albumsCount(a.albumCount)} • ${S.tracksCount(a.trackCount)}'),
+                      '${context.l10n.albumsCount(a.albumCount)} • ${context.l10n.tracksCount(a.trackCount)}'),
                   onTap: () => Navigator.of(context).push(
                       MaterialPageRoute<void>(
                           builder: (_) => ArtistDetailScreen(artist: a))),
@@ -49,7 +49,7 @@ class ArtistDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final albums = ref.watch(artistAlbumsProvider(artist.key));
     return Scaffold(
-      appBar: AppBar(title: Text(artist.name ?? S.unknownArtist)),
+      appBar: AppBar(title: Text(artist.name ?? context.l10n.unknownArtist)),
       body: albums.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('$e')),

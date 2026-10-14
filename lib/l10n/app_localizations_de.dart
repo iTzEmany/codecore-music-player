@@ -1,0 +1,403 @@
+// ignore: unused_import
+import 'package:intl/intl.dart' as intl;
+
+import 'app_localizations.dart';
+
+// ignore_for_file: type=lint
+
+/// The translations for German (`de`).
+class AppLocalizationsDe extends AppLocalizations {
+  AppLocalizationsDe([String locale = 'de']) : super(locale);
+
+  @override
+  String get appName => 'Codecore';
+
+  @override
+  String get chooseFolder => 'Ordner wählen';
+
+  @override
+  String get scan => 'Scannen';
+
+  @override
+  String get noTracks => 'Keine Titel. Ordner wählen und scannen.';
+
+  @override
+  String get openSettings => 'Einstellungen öffnen';
+
+  @override
+  String get permissionDenied => 'Leseberechtigung für Audio verweigert';
+
+  @override
+  String get permissionExplain =>
+      'Codecore benötigt die Berechtigung, Audiodateien zu lesen, um deine Musik anzuzeigen.';
+
+  @override
+  String get navLibrary => 'Bibliothek';
+
+  @override
+  String get navFavorites => 'Favoriten';
+
+  @override
+  String get navPlaylists => 'Playlists';
+
+  @override
+  String get navSettings => 'Einstellungen';
+
+  @override
+  String get tracks => 'Titel';
+
+  @override
+  String get albums => 'Alben';
+
+  @override
+  String get artists => 'Künstler';
+
+  @override
+  String get searchHint => 'Suchen';
+
+  @override
+  String get sortBy => 'Sortieren nach';
+
+  @override
+  String get addMusicFolder => 'Füge deinen Musikordner hinzu';
+
+  @override
+  String get addFolder => 'Ordner hinzufügen';
+
+  @override
+  String get folders => 'Musikordner';
+
+  @override
+  String get refreshLibrary => 'Bibliothek aktualisieren';
+
+  @override
+  String get removeFolder => 'Ordner entfernen';
+
+  @override
+  String get unknownArtist => 'Unbekannter Künstler';
+
+  @override
+  String get unknownAlbum => 'Unbekanntes Album';
+
+  @override
+  String get variousArtists => 'Verschiedene Künstler';
+
+  @override
+  String get play => 'Wiedergabe';
+
+  @override
+  String get shuffle => 'Zufall';
+
+  @override
+  String get queue => 'Warteschlange';
+
+  @override
+  String get nowPlaying => 'Wiedergabe läuft';
+
+  @override
+  String get nothingPlaying => 'Keine Wiedergabe';
+
+  @override
+  String get mute => 'Stumm';
+
+  @override
+  String get scanning => 'Scanvorgang läuft…';
+
+  @override
+  String get emptyQueue => 'Die Warteschlange ist leer';
+
+  @override
+  String get noResults => 'Keine Ergebnisse';
+
+  @override
+  String get sortDefault => 'Standard';
+
+  @override
+  String get sortTitle => 'Titel';
+
+  @override
+  String get sortArtist => 'Künstler';
+
+  @override
+  String get sortAlbum => 'Album';
+
+  @override
+  String get sortYear => 'Jahr';
+
+  @override
+  String get sortAdded => 'Zuletzt hinzugefügt';
+
+  @override
+  String get sortDuration => 'Dauer';
+
+  @override
+  String tracksCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Titel',
+      one: '1 Titel',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String albumsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Alben',
+      one: '1 Album',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String missingTracksCount(int count) {
+    return 'Fehlende Titel ($count)';
+  }
+
+  @override
+  String get addedToFavorites => 'Zu Favoriten hinzugefügt';
+
+  @override
+  String get removedFromFavorites => 'Aus Favoriten entfernt';
+
+  @override
+  String get undo => 'Rückgängig';
+
+  @override
+  String get noFavorites => 'Noch keine Favoriten';
+
+  @override
+  String get newPlaylist => 'Neue Playlist';
+
+  @override
+  String get newPlaylistEllipsis => 'Neue Playlist…';
+
+  @override
+  String get playlistName => 'Name der Playlist';
+
+  @override
+  String get create => 'Erstellen';
+
+  @override
+  String get cancel => 'Abbrechen';
+
+  @override
+  String get save => 'Speichern';
+
+  @override
+  String get delete => 'Löschen';
+
+  @override
+  String get rename => 'Umbenennen';
+
+  @override
+  String get noPlaylists => 'Keine Playlists. Erstelle eine.';
+
+  @override
+  String get addToPlaylist => 'Zu Playlist hinzufügen…';
+
+  @override
+  String addedToPlaylist(String name) {
+    return 'Zu „$name“ hinzugefügt';
+  }
+
+  @override
+  String get playNext => 'Als Nächstes spielen';
+
+  @override
+  String get addToQueue => 'Zur Warteschlange';
+
+  @override
+  String get addedToQueue => 'Zur Warteschlange hinzugefügt';
+
+  @override
+  String get favorite => 'Favorit';
+
+  @override
+  String get removeFromFavorites => 'Aus Favoriten entfernen';
+
+  @override
+  String get removeFromList => 'Entfernen';
+
+  @override
+  String get editInfo => 'Infos bearbeiten';
+
+  @override
+  String get details => 'Details';
+
+  @override
+  String get showInFolder => 'Im Ordner anzeigen';
+
+  @override
+  String get detailPath => 'Pfad';
+
+  @override
+  String get detailFormat => 'Format';
+
+  @override
+  String get detailSize => 'Größe';
+
+  @override
+  String get detailDuration => 'Dauer';
+
+  @override
+  String get detailAdded => 'Hinzugefügt am';
+
+  @override
+  String get detailPlays => 'Wiedergaben';
+
+  @override
+  String get close => 'Schließen';
+
+  @override
+  String get fieldTitle => 'Titel';
+
+  @override
+  String get fieldArtist => 'Künstler';
+
+  @override
+  String get fieldAlbum => 'Album';
+
+  @override
+  String get fieldAlbumArtist => 'Albumkünstler';
+
+  @override
+  String get fieldYear => 'Jahr';
+
+  @override
+  String get fieldTrackNumber => 'Titelnummer';
+
+  @override
+  String get fieldGenre => 'Genre';
+
+  @override
+  String get restoreFromFile => 'Aus Datei-Tags wiederherstellen';
+
+  @override
+  String get titleRequired => 'Der Titel darf nicht leer sein';
+
+  @override
+  String get settingsAppearance => 'Darstellung';
+
+  @override
+  String get settingsTheme => 'Design';
+
+  @override
+  String get themeOled => 'OLED';
+
+  @override
+  String get themeCarbon => 'Karbon';
+
+  @override
+  String get themeNavy => 'Marineblau';
+
+  @override
+  String get themeLight => 'Hell';
+
+  @override
+  String get settingsTextSize => 'Textgröße';
+
+  @override
+  String get textSmall => 'Klein';
+
+  @override
+  String get textNormal => 'Normal';
+
+  @override
+  String get textLarge => 'Groß';
+
+  @override
+  String get settingsCompact => 'Kompaktmodus';
+
+  @override
+  String get settingsReducedMotion => 'Animationen reduzieren';
+
+  @override
+  String get settingsLanguage => 'Sprache';
+
+  @override
+  String get settingsLibrary => 'Bibliothek';
+
+  @override
+  String get rescanNow => 'Jetzt neu scannen';
+
+  @override
+  String get clearCoverCache => 'Cover-Cache leeren';
+
+  @override
+  String get coverCacheCleared => 'Cover-Cache geleert';
+
+  @override
+  String get settingsOnline => 'Online';
+
+  @override
+  String get autoEnrich => 'Automatische Anreicherung';
+
+  @override
+  String get autoEnrichHint =>
+      'Metadaten und Cover für neue Titel online suchen';
+
+  @override
+  String get autoLyrics => 'Automatische Songtexte';
+
+  @override
+  String get autoLyricsHint => 'Songtexte von LRCLIB für neue Titel laden';
+
+  @override
+  String get settingsAbout => 'Info';
+
+  @override
+  String appVersion(String version) {
+    return 'Version $version';
+  }
+
+  @override
+  String get licenses => 'Lizenzen';
+
+  @override
+  String get personalUse => 'App für den persönlichen Gebrauch';
+
+  @override
+  String get missingTracksTitle => 'Fehlende Titel';
+
+  @override
+  String get removeFromLibrary => 'Aus Bibliothek entfernen';
+
+  @override
+  String get ignore => 'Ignorieren';
+
+  @override
+  String get confirmRemoveTitle => 'Aus Bibliothek entfernen?';
+
+  @override
+  String get confirmRemoveBody =>
+      'Die Datei bleibt unverändert; Favoriten und Playlists dieses Titels gehen verloren.';
+
+  @override
+  String get noMissingTracks => 'Keine fehlenden Titel';
+
+  @override
+  String get retry => 'Erneut versuchen';
+
+  @override
+  String scanFailed(String error) {
+    return 'Scan fehlgeschlagen: $error';
+  }
+
+  @override
+  String playbackError(String reason, String title) {
+    return '„$title“ kann nicht abgespielt werden: $reason';
+  }
+
+  @override
+  String get reasonFileMissing => 'Datei nicht gefunden';
+
+  @override
+  String get reasonUnplayable => 'Datei nicht abspielbar';
+
+  @override
+  String get reasonNotInLibrary => 'Titel nicht in der Bibliothek';
+}

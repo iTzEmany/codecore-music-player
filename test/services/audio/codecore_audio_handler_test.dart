@@ -16,7 +16,7 @@ void main() {
   late TrackRepository repo;
   late FakeBackend backend;
   late CodecoreAudioHandler handler;
-  late List<String> errors;
+  late List<PlaybackFailure> errors;
   late List<int> ids;
 
   setUp(() async {
@@ -73,7 +73,8 @@ void main() {
     backend.failing.add('/m/b.mp3');
     await handler.playQueue(ids, 1);
     await settle();
-    expect(errors.single, contains('b'));
+    expect(errors.single.title, 'b');
+    expect(errors.single.reason, PlaybackFailureReason.fileMissing);
     expect(backend.loaded.last, '/m/c.mp3');
   });
 

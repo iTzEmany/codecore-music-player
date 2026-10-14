@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:codecore/data/db/app_database.dart';
+import 'package:codecore/l10n/app_localizations.dart';
 import 'package:codecore/data/repositories/track_repository.dart';
 import 'package:codecore/data/settings/settings_store.dart';
 import 'package:codecore/providers/database_providers.dart';
@@ -60,7 +61,14 @@ class Harness {
 
   Future<void> pump(WidgetTester tester, Widget child) async {
     await tester.pumpWidget(
-        ProviderScope(overrides: overrides, child: MaterialApp(home: child)));
+        ProviderScope(
+        overrides: overrides,
+        child: MaterialApp(
+          locale: const Locale('it'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: child,
+        )));
     await tester.pump(const Duration(milliseconds: 100));
     await tester.pump(const Duration(milliseconds: 100));
   }

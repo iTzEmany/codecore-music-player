@@ -31,13 +31,13 @@ class JustAudioBackend implements AudioBackend {
   @override
   Future<void> load(String filePath) async {
     if (!await File(filePath).exists()) {
-      throw const BackendException('file mancante');
+      throw const BackendException('file missing', fileMissing: true);
     }
     try {
       await _player.setFilePath(filePath);
     } on Object catch (e, st) {
       AppLog.w('load failed: $filePath', e, st);
-      throw BackendException('file non riproducibile: $e');
+      throw BackendException('unplayable file: $e');
     }
   }
 

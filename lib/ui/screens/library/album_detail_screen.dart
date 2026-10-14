@@ -5,7 +5,7 @@ import '../../../data/repositories/library_queries.dart';
 import '../../../providers/library_providers.dart';
 import '../../../providers/player_providers.dart';
 import '../../../providers/settings_providers.dart';
-import '../../strings_it.dart';
+import '../../../l10n/l10n_ext.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/cover_image.dart';
 import '../../widgets/format_utils.dart';
@@ -21,10 +21,10 @@ class AlbumDetailScreen extends ConsumerWidget {
     final tracks = ref.watch(albumTracksProvider(album.albumKey));
     final compact = ref.watch(settingsProvider).compactMode;
     final artist = album.variousArtists
-        ? S.variousArtists
-        : (album.artist ?? S.unknownArtist);
+        ? context.l10n.variousArtists
+        : (album.artist ?? context.l10n.unknownArtist);
     return Scaffold(
-      appBar: AppBar(title: Text(album.title ?? S.unknownAlbum)),
+      appBar: AppBar(title: Text(album.title ?? context.l10n.unknownAlbum)),
       body: tracks.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('$e')),
@@ -79,7 +79,7 @@ class _Header extends StatelessWidget {
   Widget build(BuildContext context) {
     final meta = [
       if (album.year != null) '${album.year}',
-      S.tracksCount(album.trackCount),
+      context.l10n.tracksCount(album.trackCount),
       formatDuration(album.durationMs),
     ].join(' • ');
     return Padding(
@@ -89,7 +89,7 @@ class _Header extends StatelessWidget {
         const SizedBox(width: 16),
         Expanded(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(album.title ?? S.unknownAlbum,
+            Text(album.title ?? context.l10n.unknownAlbum,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.titleLarge),
@@ -100,11 +100,11 @@ class _Header extends StatelessWidget {
               FilledButton.icon(
                   onPressed: onPlay,
                   icon: const Icon(Icons.play_arrow),
-                  label: const Text(S.play)),
+                  label: Text(context.l10n.play)),
               OutlinedButton.icon(
                   onPressed: onShuffle,
                   icon: const Icon(Icons.shuffle),
-                  label: const Text(S.shuffle)),
+                  label: Text(context.l10n.shuffle)),
             ]),
           ]),
         ),

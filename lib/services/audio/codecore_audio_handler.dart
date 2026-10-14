@@ -8,6 +8,15 @@ import '../../data/repositories/track_repository.dart';
 import 'audio_backend.dart';
 import 'play_queue.dart';
 
+enum PlaybackFailureReason { fileMissing, unplayable, notInLibrary }
+
+class PlaybackFailure {
+  const PlaybackFailure(this.title, this.reason);
+
+  final String? title;
+  final PlaybackFailureReason reason;
+}
+
 class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   CodecoreAudioHandler(
     this._backend,
@@ -27,7 +36,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   final AudioBackend _backend;
   final PlayQueue _queue;
   final TrackRepository _tracks;
-  final void Function(String message) onError;
+  final void Function(PlaybackFailure failure) onError;
   final String? Function(Track track)? coverPathFor;
   final List<StreamSubscription<Object?>> _subs = [];
   final _trackController = StreamController<Track?>.broadcast();
@@ -78,7 +87,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     final track = await _tracks.getById(id);
     if (token != _loadToken) return;
     if (track == null) {
-      await _failAndSkip('brano non trovato', null, token);
+      await _failAndSkip(PlaybackFailureReason.notInLibrary, null, token);
       return;
     }
     _playCounted = false;
@@ -98,14 +107,20 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
       if (play) await _backend.play();
     } on BackendException catch (e) {
       if (token != _loadToken) return;
-      await _failAndSkip(e.message, track, token);
+      AppLog.w('load failed: ${e.message}');
+      await _failAndSkip(
+          e.fileMissing
+              ? PlaybackFailureReason.fileMissing
+              : PlaybackFailureReason.unplayable,
+          track,
+          token);
     }
   }
 
-  Future<void> _failAndSkip(String reason, Track? track, int token) async {
+  Future<void> _failAndSkip(
+      PlaybackFailureReason reason, Track? track, int token) async {
     _consecutiveErrors++;
-    final name = track?.title ?? 'brano';
-    onError('Impossibile riprodurre «$name»: $reason');
+    onError(PlaybackFailure(track?.title, reason));
     if (_consecutiveErrors > maxConsecutiveErrors) {
       await _goIdle();
       return;

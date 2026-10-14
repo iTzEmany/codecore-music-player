@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../strings_it.dart';
+import '../../../l10n/l10n_ext.dart';
 import 'albums_tab.dart';
 import 'artists_tab.dart';
 import 'tracks_tab.dart';
@@ -10,13 +10,13 @@ class LibraryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const DefaultTabController(
+    return DefaultTabController(
       length: 3,
       child: Column(children: [
         TabBar(tabs: [
-          Tab(text: S.tracks),
-          Tab(text: S.albums),
-          Tab(text: S.artists),
+          Tab(text: context.l10n.tracks),
+          Tab(text: context.l10n.albums),
+          Tab(text: context.l10n.artists),
         ]),
         Expanded(
           child: TabBarView(

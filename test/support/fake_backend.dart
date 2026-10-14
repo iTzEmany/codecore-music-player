@@ -19,7 +19,7 @@ class FakeBackend implements AudioBackend {
 
   @override
   Future<void> load(String filePath) async {
-    if (failing.contains(filePath)) throw const BackendException('file mancante');
+    if (failing.contains(filePath)) throw const BackendException('missing', fileMissing: true);
     loaded.add(filePath);
     stateC.add(BackendState.paused);
   }

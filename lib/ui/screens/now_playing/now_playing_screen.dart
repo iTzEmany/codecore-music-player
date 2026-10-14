@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/platform.dart';
 import '../../../providers/player_providers.dart';
 import '../../../services/audio/play_queue.dart';
-import '../../strings_it.dart';
+import '../../../l10n/l10n_ext.dart';
 import '../../widgets/cover_image.dart';
 import '../../widgets/format_utils.dart';
 import '../../widgets/quality_badge.dart';
@@ -26,10 +26,10 @@ class NowPlayingScreen extends ConsumerWidget {
         leading: IconButton(
             icon: const Icon(Icons.keyboard_arrow_down),
             onPressed: () => Navigator.of(context).maybePop()),
-        title: const Text(S.nowPlaying),
+        title: Text(context.l10n.nowPlaying),
         actions: [
           IconButton(
-            tooltip: S.queue,
+            tooltip: context.l10n.queue,
             icon: const Icon(Icons.queue_music),
             onPressed: () => showModalBottomSheet<void>(
               context: context,
@@ -45,7 +45,7 @@ class NowPlayingScreen extends ConsumerWidget {
         ],
       ),
       body: track == null
-          ? const Center(child: Text(S.nothingPlaying))
+          ? Center(child: Text(context.l10n.nothingPlaying))
           : Center(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 520),
@@ -68,7 +68,7 @@ class NowPlayingScreen extends ConsumerWidget {
                         textAlign: TextAlign.center,
                         overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.titleLarge),
-                    Text(track.artist ?? S.unknownArtist,
+                    Text(track.artist ?? context.l10n.unknownArtist,
                         style: TextStyle(color: scheme.onSurfaceVariant)),
                     const SizedBox(height: 8),
                     QualityBadge(track),
@@ -158,7 +158,7 @@ class _VolumeRow extends ConsumerWidget {
     final n = ref.read(volumeProvider.notifier);
     return Row(children: [
       IconButton(
-        tooltip: S.mute,
+        tooltip: context.l10n.mute,
         onPressed: n.toggleMute,
         icon: Icon(v == 0 ? Icons.volume_off : Icons.volume_up),
       ),

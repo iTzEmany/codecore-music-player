@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/player_providers.dart';
 import '../../core/platform.dart';
 import '../screens/now_playing/now_playing_screen.dart';
-import '../strings_it.dart';
+import '../../l10n/l10n_ext.dart';
 import 'cover_image.dart';
 
 class MiniPlayer extends ConsumerWidget {
@@ -51,7 +51,7 @@ class MiniPlayer extends ConsumerWidget {
                     children: [
                       Text(track.title,
                           maxLines: 1, overflow: TextOverflow.ellipsis),
-                      Text(track.artist ?? S.unknownArtist,
+                      Text(track.artist ?? context.l10n.unknownArtist,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: Theme.of(context).textTheme.bodySmall),

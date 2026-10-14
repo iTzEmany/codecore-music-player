@@ -19,8 +19,8 @@ final audioHandlerProvider = Provider<CodecoreAudioHandler>(
 
 final playbackPersistenceProvider = Provider<PlaybackPersistence?>((ref) => null);
 
-final playerErrorsProvider =
-    Provider<Stream<String>>((ref) => const Stream<String>.empty());
+final playerErrorsProvider = Provider<Stream<PlaybackFailure>>(
+    (ref) => const Stream<PlaybackFailure>.empty());
 
 class PlayerController {
   PlayerController(this._handler, this._persistence);
@@ -150,3 +150,6 @@ class VolumeNotifier extends Notifier<double> {
 
 final volumeProvider =
     NotifierProvider<VolumeNotifier, double>(VolumeNotifier.new);
+
+final playerFailuresProvider = StreamProvider<PlaybackFailure>(
+    (ref) => ref.watch(playerErrorsProvider));
