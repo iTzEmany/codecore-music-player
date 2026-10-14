@@ -306,6 +306,11 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     _publish(playbackState.value.processingState);
   }
 
+  void setShuffleAndRepeat({required bool shuffle, required RepeatMode repeat}) {
+    _queue.shuffle = shuffle;
+    _queue.repeat = repeat;
+  }
+
   Future<void> setVolume(double v) => _backend.setVolume(v.clamp(0, 1));
 
   Future<void> dispose() async {

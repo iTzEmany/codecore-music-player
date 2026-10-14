@@ -27,9 +27,9 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 2.1 PlayQueue (+ test)
 - [x] 2.2 AudioBackend / JustAudioBackend
 - [x] 2.3 CodecoreAudioHandler (+ test)
-- [ ] 2.4 Inizializzazione per piattaforma
-- [ ] 2.5 Provider di stato e controller
-- [ ] 2.6 Persistenza e checklist manuale
+- [~] 2.4 Inizializzazione per piattaforma
+- [x] 2.5 Provider di stato e controller
+- [~] 2.6 Persistenza e checklist manuale
 
 ## Fase 3 — Interfaccia (`fase-3-interfaccia.md`)
 - [ ] 3.1 Tema

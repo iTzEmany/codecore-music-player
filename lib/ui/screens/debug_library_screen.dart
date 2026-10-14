@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
@@ -9,7 +10,9 @@ import '../../core/permissions.dart';
 import '../../data/db/app_database.dart';
 import '../../providers/database_providers.dart';
 import '../../providers/library_providers.dart';
+import '../../providers/player_providers.dart';
 import '../strings_it.dart';
+import 'debug_player_bar.dart';
 
 class DebugLibraryScreen extends ConsumerStatefulWidget {
   const DebugLibraryScreen({super.key});
@@ -20,6 +23,24 @@ class DebugLibraryScreen extends ConsumerStatefulWidget {
 
 class _DebugLibraryScreenState extends ConsumerState<DebugLibraryScreen> {
   bool _denied = false;
+  StreamSubscription<String>? _errors;
+
+  @override
+  void initState() {
+    super.initState();
+    _errors = ref.read(playerErrorsProvider).listen((m) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(m)));
+    });
+  }
+
+  @override
+  void dispose() {
+    _errors?.cancel();
+    super.dispose();
+  }
 
   Future<void> _pick() async {
     final path = await FilePicker.getDirectoryPath();
@@ -43,6 +64,7 @@ class _DebugLibraryScreenState extends ConsumerState<DebugLibraryScreen> {
     final progress = scan.progress;
     return Scaffold(
       appBar: AppBar(title: const Text(S.appName)),
+      bottomNavigationBar: const DebugPlayerBar(),
       body: Column(
         children: [
           Padding(
@@ -122,6 +144,8 @@ class _TrackList extends ConsumerWidget {
           ),
           title: Text(t.title, maxLines: 1, overflow: TextOverflow.ellipsis),
           subtitle: Text(t.artist ?? '', maxLines: 1),
+          onTap: () =>
+              ref.read(playerControllerProvider).playFromList(list, i),
         );
       },
     );
