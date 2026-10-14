@@ -5,18 +5,18 @@ Spunta a fine task (dopo `flutter analyze` + `flutter test` verdi). Annota **una
 L'agente riparte sempre dal primo task non spuntato.
 
 ## Fase 0 — Setup (`fase-0-setup.md`)
-- [ ] 0.1 Verifica toolchain
-- [ ] 0.2 Creare il progetto Flutter
-- [ ] 0.3 Dipendenze
-- [ ] 0.4 Scheletro cartelle e utilità (AppLog, platform, paths, text_utils + test)
-- [ ] 0.5 main.dart / app.dart
+- [x] 0.1 Verifica toolchain
+- [x] 0.2 Creare il progetto Flutter
+- [x] 0.3 Dipendenze
+- [x] 0.4 Scheletro cartelle e utilità (AppLog, platform, paths, text_utils + test)
+- [x] 0.5 main.dart / app.dart
 - [ ] 0.6 Primo build Android
-- [ ] 0.7 .gitignore
+- [x] 0.7 .gitignore
 
 ## Fase 1 — Dati e scansione (`fase-1-dati-e-scansione.md`)
-- [ ] 1.1 Tabelle drift
-- [ ] 1.2 TagReader + implementazione
-- [ ] 1.3 Repository
+- [x] 1.1 Tabelle drift
+- [x] 1.2 TagReader + implementazione
+- [x] 1.3 Repository
 - [ ] 1.4 Scanner
 - [ ] 1.5 Copertine
 - [ ] 1.6 Provider
@@ -86,3 +86,8 @@ L'agente riparte sempre dal primo task non spuntato.
 
 ## Note di deviazione
 <!-- una riga per deviazione: data — task — cosa è cambiato e perché -->
+
+## Note di deviazione
+- 0.3: `generate: true` (l10n) rimandato alla fase 4 (senza ARB `flutter gen-l10n` fallirebbe). `flutter_localizations` già aggiunto.
+- 0.2: MainActivity spostata nel package `com.codecore.player`; `compileSdk = 37` (richiesto da permission_handler_android).
+- 1.2: test con fixture mp3/flac generate con ffmpeg in `test/fixtures/`.
