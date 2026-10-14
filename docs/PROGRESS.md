@@ -62,9 +62,9 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 5.6 EnrichmentService (+ test)
 - [x] 5.7 UI arricchimento
 - [x] 5.8 Schermata testi
-- [ ] 5.9 YoutubeService
-- [ ] 5.10 Coda di download
-- [ ] 5.11 Schermata YouTube
+- [~] 5.9 YoutubeService
+- [~] 5.10 Coda di download
+- [~] 5.11 Schermata YouTube
 
 ## Fase 6 — Condivisione LAN, opzionale (`fase-6-condivisione-lan.md`)
 - [ ] 6.1 Server
@@ -94,3 +94,6 @@ L'agente riparte sempre dal primo task non spuntato.
 - 4.5: versione app in `lib/core/app_info.dart` (nessun package_info_plus, non previsto). Cartelle musicali nel DB (tabella folders), non in shared_preferences.
 - 4.6: messaggi di errore del player passano da `PlaybackFailure` (enum) e sono localizzati in UI. Nomi lingua (Italiano/English/…) restano nativi.
 - 4.3/4.4: prova a mano delle azioni (menu ⋯ brano, modifica info) su telefono/desktop.
+- 5.3: con artista ignoto un titolo di una sola parola (es. "Intro") non viene mai accettato; si ferma alla prima query che dà un risultato *accettato*.
+- 5.9: contenitore webm salvato come `.webm` (aggiunto agli estensioni scansionate); mp4 → `.m4a`.
+- 5.9–5.11: la rete YouTube non è testabile in automatico: verificare a mano (Tocca a te).

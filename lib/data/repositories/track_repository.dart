@@ -172,6 +172,12 @@ class TrackRepository {
       const TracksCompanion(
           hasCover: Value(false), coverKey: Value(null), mtimeMs: Value(0)));
 
+  Future<int?> idForPath(String path) async {
+    final t = await (_db.select(_db.tracks)..where((r) => r.path.equals(path)))
+        .getSingleOrNull();
+    return t?.id;
+  }
+
   Future<void> setFavorite(int id, bool value) =>
       (_db.update(_db.tracks)..where((t) => t.id.equals(id)))
           .write(TracksCompanion(isFavorite: Value(value)));

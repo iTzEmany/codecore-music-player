@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/constants.dart';
 import '../../core/platform.dart';
 import '../../providers/nav_providers.dart';
 import '../../providers/player_providers.dart';
@@ -11,6 +12,7 @@ import '../screens/library/library_screen.dart';
 import '../screens/library/tracks_tab.dart';
 import '../screens/playlists/playlists_screen.dart';
 import '../screens/settings/settings_screen.dart';
+import '../screens/youtube/youtube_screen.dart';
 import '../../l10n/l10n_ext.dart';
 import '../widgets/enrich_job_banner.dart';
 import '../widgets/mini_player.dart';
@@ -21,6 +23,7 @@ const _icons = [
   Icons.library_music,
   Icons.favorite,
   Icons.queue_music,
+  if (kEnableYoutube) Icons.smart_display,
   Icons.settings,
 ];
 
@@ -81,11 +84,18 @@ class AppShell extends ConsumerWidget {
     final wide = MediaQuery.sizeOf(context).width >= _wideBreakpoint;
     void select(int i) => ref.read(navIndexProvider.notifier).set(i);
     final l = context.l10n;
-    final labels = [l.navLibrary, l.navFavorites, l.navPlaylists, l.navSettings];
+    final labels = [
+      l.navLibrary,
+      l.navFavorites,
+      l.navPlaylists,
+      if (kEnableYoutube) l.youtube,
+      l.navSettings,
+    ];
     final body = IndexedStack(index: index, children: [
       LibraryScreen(),
       TracksTab(favoritesOnly: true),
       PlaylistsScreen(),
+      if (kEnableYoutube) YoutubeScreen(),
       SettingsScreen(),
     ]);
     Widget content = Scaffold(

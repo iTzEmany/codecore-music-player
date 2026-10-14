@@ -12,7 +12,8 @@ import '../covers/cover_store.dart';
 import '../tags/tag_reader.dart';
 
 const audioExtensions = {
-  'mp3', 'flac', 'wav', 'ogg', 'oga', 'opus', 'm4a', 'aac', 'aiff', 'aif', 'wma',
+  'mp3', 'flac', 'wav', 'ogg', 'oga', 'opus', 'm4a', 'aac', 'aiff', 'aif',
+  'wma', 'webm',
 };
 
 class ScanProgress {
@@ -78,6 +79,23 @@ class LibraryScanner {
       return;
     }
 
+    yield* _process(folder, found, markMissing: true);
+  }
+
+  /// Scans only [paths] (e.g. a freshly downloaded file); never marks
+  /// anything missing.
+  Stream<ScanProgress> scanFiles(Folder folder, List<String> paths) async* {
+    final found = <_Found>[];
+    for (final path in paths) {
+      final st = await File(path).stat();
+      if (st.type != FileSystemEntityType.file) continue;
+      found.add(_Found(path, st.size, st.modified.millisecondsSinceEpoch));
+    }
+    yield* _process(folder, found, markMissing: false);
+  }
+
+  Stream<ScanProgress> _process(Folder folder, List<_Found> found,
+      {required bool markMissing}) async* {
     final index = await _tracks.fileIndexForFolder(folder.id);
     final changed = found.where((f) {
       final old = index[f.path];
@@ -110,6 +128,10 @@ class LibraryScanner {
     }
     if (pending.isNotEmpty) await _tracks.upsertBatch(pending);
 
+    if (!markMissing) {
+      yield ScanProgress(done: done, total: changed.length, finished: true);
+      return;
+    }
     final seen = {for (final f in found) f.path};
     final gone = index.keys.where((k) => !seen.contains(k)).toSet();
     await _tracks.markMissing(gone, true);
