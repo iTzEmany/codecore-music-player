@@ -24,9 +24,9 @@ L'agente riparte sempre dal primo task non spuntato.
 - [~] 1.8 Schermata di debug
 
 ## Fase 2 — Player (`fase-2-player.md`)
-- [ ] 2.1 PlayQueue (+ test)
-- [ ] 2.2 AudioBackend / JustAudioBackend
-- [ ] 2.3 CodecoreAudioHandler (+ test)
+- [x] 2.1 PlayQueue (+ test)
+- [x] 2.2 AudioBackend / JustAudioBackend
+- [x] 2.3 CodecoreAudioHandler (+ test)
 - [ ] 2.4 Inizializzazione per piattaforma
 - [ ] 2.5 Provider di stato e controller
 - [ ] 2.6 Persistenza e checklist manuale

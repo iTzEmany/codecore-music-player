@@ -147,6 +147,17 @@ class TrackRepository {
     return [for (final id in ids) if (byId[id] != null) byId[id]!];
   }
 
+  Future<void> registerPlay(int id) async {
+    await _db.customUpdate(
+      'UPDATE tracks SET play_count = play_count + 1, last_played_at = ? WHERE id = ?',
+      variables: [
+        Variable.withInt(DateTime.now().millisecondsSinceEpoch),
+        Variable.withInt(id),
+      ],
+      updates: {_db.tracks},
+    );
+  }
+
   Future<int> countAll() async {
     final c = _db.tracks.id.count();
     final row = await (_db.selectOnly(_db.tracks)..addColumns([c])).getSingle();
