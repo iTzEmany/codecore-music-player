@@ -17,8 +17,8 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 1.1 Tabelle drift
 - [x] 1.2 TagReader + implementazione
 - [x] 1.3 Repository
-- [ ] 1.4 Scanner
-- [ ] 1.5 Copertine
+- [x] 1.4 Scanner
+- [x] 1.5 Copertine
 - [ ] 1.6 Provider
 - [ ] 1.7 Permessi Android e cartella predefinita
 - [ ] 1.8 Schermata di debug
