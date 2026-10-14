@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:dio/dio.dart';
 
@@ -53,7 +54,7 @@ class DioWebClient implements WebClient {
           options: Options(responseType: ResponseType.json));
       _checkRateLimit(res.statusCode);
       if (res.statusCode != 200) return null;
-      return res.data;
+      return decodeJsonBody(res.data);
     } on DioException catch (e, st) {
       if (CancelToken.isCancel(e)) rethrow;
       AppLog.w('GET failed: $url', e, st);
@@ -82,6 +83,19 @@ class DioWebClient implements WebClient {
       return null;
     }
   }
+}
+
+/// Some APIs (iTunes) send JSON as `text/javascript`, which Dio leaves as text.
+Object? decodeJsonBody(Object? data) {
+  if (data is String) {
+    try {
+      return jsonDecode(data);
+    } on FormatException catch (e) {
+      AppLog.w('invalid JSON body', e);
+      return null;
+    }
+  }
+  return data;
 }
 
 /// Enforces a minimum gap between consecutive calls to [wait].

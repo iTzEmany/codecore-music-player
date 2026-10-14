@@ -29,12 +29,8 @@ class LrclibClient {
     if (artist.trim().isEmpty) return null;
     final primary = extractPrimaryArtist(artist);
     final core = coreTitle(title);
-    final attempts = <(String, String)>[];
-    for (final a in [artist, primary]) {
-      for (final t in [title, core]) {
-        if (!attempts.contains((a, t))) attempts.add((a, t));
-      }
-    }
+    final attempts = <(String, String)>[(artist, title)];
+    if (primary != artist || core != title) attempts.add((primary, core));
     for (final (a, t) in attempts) {
       final get = await _web.getJson('$_base/get',
           query: {
@@ -46,6 +42,8 @@ class LrclibClient {
           cancel: cancel);
       final direct = _validated(get, artist, durationSec);
       if (direct != null) return direct;
+    }
+    for (final (a, t) in attempts) {
       final search = await _web.getJson('$_base/search',
           query: {'track_name': t, 'artist_name': a}, cancel: cancel);
       if (search is List) {

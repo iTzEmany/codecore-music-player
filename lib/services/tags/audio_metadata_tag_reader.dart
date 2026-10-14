@@ -23,7 +23,7 @@ class AudioMetadataTagReader implements TagReader {
         genre: m.genres.isEmpty ? null : _clean(m.genres.first),
         trackNumber: m.trackNumber,
         discNumber: m.discNumber,
-        year: m.year?.year,
+        year: (m.year?.year ?? 0) > 0 ? m.year!.year : null,
         durationMs: (ms == null || ms <= 0) ? null : ms,
         // The package may report bps or kbps depending on the container.
         bitrateKbps: br == null || br <= 0 ? null : (br >= 5000 ? br ~/ 1000 : br),

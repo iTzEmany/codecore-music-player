@@ -88,22 +88,34 @@ class EnrichmentService {
       bool curiosity = true,
       bool metadata = true}) async {
     final c = cleanSearchQuery(t.title, t.artist ?? '');
-    final meta =
-        metadata ? await itunes.search(c.title, c.artist, cancel: cancel) : null;
-    LyricsResult? lr;
-    if (lyrics) {
-      lr = await lrclib.find(
-        title: c.title,
-        artist: c.artist,
-        album: t.album,
-        durationSec: t.durationMs > 0 ? (t.durationMs / 1000).round() : null,
-        cancel: cancel,
-      );
-    }
-    Curiosity? cu;
-    if (curiosity) {
-      cu = await wikipedia.find(c.title, c.artist, language(), cancel: cancel);
-    }
+    // Independent services run in parallel; a slow one cannot block the others.
+    Future<T?> guarded<T>(Future<T?> f) => f
+        .timeout(const Duration(seconds: 25))
+        .catchError((Object e, StackTrace st) {
+      if (e is RateLimitedException || e is DioException) throw e;
+      AppLog.w('enrichment source failed', e, st);
+      return null as T?;
+    });
+    final results = await Future.wait<Object?>([
+      metadata
+          ? guarded(itunes.search(c.title, c.artist, cancel: cancel))
+          : Future<Object?>.value(),
+      lyrics
+          ? guarded(lrclib.find(
+              title: c.title,
+              artist: c.artist,
+              album: t.album,
+              durationSec:
+                  t.durationMs > 0 ? (t.durationMs / 1000).round() : null,
+              cancel: cancel))
+          : Future<Object?>.value(),
+      curiosity
+          ? guarded(wikipedia.find(c.title, c.artist, language(), cancel: cancel))
+          : Future<Object?>.value(),
+    ]);
+    final meta = results[0] as ItunesMatch?;
+    final lr = results[1] as LyricsResult?;
+    final cu = results[2] as Curiosity?;
     return EnrichmentProposal(
         track: t, meta: meta, lyrics: lr, curiosity: cu);
   }

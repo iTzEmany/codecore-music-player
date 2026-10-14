@@ -156,4 +156,10 @@ void main() {
     expect(c!.source.toString(), 'https://en.wikipedia.org/wiki/Real_Song');
     expect(c.text.length, lessThanOrEqualTo(1000));
   });
+
+  test('decodeJsonBody handles text/javascript payloads', () {
+    expect(decodeJsonBody('{"results":[1]}'), {'results': [1]});
+    expect(decodeJsonBody('not json'), isNull);
+    expect(decodeJsonBody({'a': 1}), {'a': 1});
+  });
 }
