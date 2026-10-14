@@ -538,4 +538,8 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get useDefaultFolder => 'Musikordner des Geräts verwenden';
+
+  @override
+  String get ytErrToolMissing =>
+      'yt-dlp nicht gefunden: installieren (pip install -U yt-dlp) und erneut versuchen';
 }

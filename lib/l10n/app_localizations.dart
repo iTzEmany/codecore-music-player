@@ -1085,6 +1085,12 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Usa la cartella Musica del dispositivo'**
   String get useDefaultFolder;
+
+  /// No description provided for @ytErrToolMissing.
+  ///
+  /// In it, this message translates to:
+  /// **'yt-dlp non trovato: installalo (pip install -U yt-dlp) e riprova'**
+  String get ytErrToolMissing;
 }
 
 class _AppLocalizationsDelegate

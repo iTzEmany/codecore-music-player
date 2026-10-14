@@ -55,6 +55,7 @@ class _YoutubeScreenState extends ConsumerState<YoutubeScreen> {
       YtErrorKind.unavailable => l.ytErrUnavailable,
       YtErrorKind.network => l.ytErrNetwork,
       YtErrorKind.changed => l.ytErrChanged,
+      YtErrorKind.toolMissing => l.ytErrToolMissing,
     };
   }
 

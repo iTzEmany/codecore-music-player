@@ -163,5 +163,6 @@
   "ytErrChanged": "YouTube cambió algo: actualiza la app o el paquete",
   "ytNoFolder": "Añade primero una carpeta de música",
   "ytLegal": "Solo para uso personal. Respeta los derechos de autor y los términos de YouTube.",
-  "useDefaultFolder": "Usar la carpeta Música del dispositivo"
+  "useDefaultFolder": "Usar la carpeta Música del dispositivo",
+  "ytErrToolMissing": "yt-dlp no encontrado: instálalo (pip install -U yt-dlp) y reintenta"
 }
