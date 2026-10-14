@@ -22,7 +22,7 @@ class LyricsScreen extends ConsumerStatefulWidget {
 }
 
 class _LyricsScreenState extends ConsumerState<LyricsScreen> {
-  static const _rowExtent = 48.0;
+  static const _rowExtent = 72.0;
   final _scroll = ScrollController();
   List<LrcLine> _lines = const [];
   String? _parsedFor;
@@ -168,7 +168,7 @@ class _LyricsScreenState extends ConsumerState<LyricsScreen> {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                fontSize: i == _index ? 20 : 16,
+                fontSize: i == _index ? 18 : 16,
                 fontWeight: i == _index ? FontWeight.bold : FontWeight.normal,
                 color: i == _index ? scheme.primary : scheme.onSurfaceVariant,
               ),
