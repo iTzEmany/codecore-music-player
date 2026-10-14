@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'ui/screens/debug_library_screen.dart';
+
 class CodecoreApp extends StatelessWidget {
   const CodecoreApp({super.key});
 
@@ -15,7 +17,7 @@ class CodecoreApp extends StatelessWidget {
           brightness: Brightness.dark,
         ),
       ),
-      home: const Scaffold(body: Center(child: Text('Codecore'))),
+      home: const DebugLibraryScreen(),
     );
   }
 }

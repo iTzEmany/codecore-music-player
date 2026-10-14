@@ -10,7 +10,7 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 0.3 Dipendenze
 - [x] 0.4 Scheletro cartelle e utilità (AppLog, platform, paths, text_utils + test)
 - [x] 0.5 main.dart / app.dart
-- [ ] 0.6 Primo build Android
+- [x] 0.6 Primo build Android
 - [x] 0.7 .gitignore
 
 ## Fase 1 — Dati e scansione (`fase-1-dati-e-scansione.md`)
@@ -19,9 +19,9 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 1.3 Repository
 - [x] 1.4 Scanner
 - [x] 1.5 Copertine
-- [ ] 1.6 Provider
-- [ ] 1.7 Permessi Android e cartella predefinita
-- [ ] 1.8 Schermata di debug
+- [x] 1.6 Provider
+- [~] 1.7 Permessi Android e cartella predefinita
+- [~] 1.8 Schermata di debug
 
 ## Fase 2 — Player (`fase-2-player.md`)
 - [ ] 2.1 PlayQueue (+ test)
