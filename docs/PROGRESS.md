@@ -73,7 +73,7 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 6.4 Integrazione
 
 ## Fase 7 — Rifinitura (`fase-7-rifinitura.md`)
-- [ ] 7.1 Import dal vecchio DB Python
+- [x] 7.1 Import dal vecchio DB Python
 - [ ] 7.2 Gapless
 - [ ] 7.3 ReplayGain
 - [ ] 7.4 Controlli multimediali desktop

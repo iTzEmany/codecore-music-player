@@ -196,5 +196,9 @@
   "shareFirewall": "Windows puede pedir permiso del firewall la primera vez.",
   "shareHint": "En la misma Wi‑Fi, abre «Recibir» en el otro dispositivo e introduce dirección y PIN.",
   "shareMenu": "Compartir…",
-  "shareDeviceName": "Nombre del dispositivo"
+  "shareDeviceName": "Nombre del dispositivo",
+  "importOld": "Importar de la app antigua",
+  "importOldHint": "Elige codecore_library.db de la versión Python",
+  "importSummary": "{favorites} favoritos, {playlists} listas, {lyrics} letras importadas, {unmatched} sin emparejar",
+  "importFailed": "Importación fallida: archivo no válido"
 }

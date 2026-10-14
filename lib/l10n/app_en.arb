@@ -196,5 +196,9 @@
   "shareFirewall": "Windows may ask for firewall permission the first time.",
   "shareHint": "On the same Wi‑Fi, open “Receive” on the other device and enter address and PIN.",
   "shareMenu": "Share…",
-  "shareDeviceName": "Device name"
+  "shareDeviceName": "Device name",
+  "importOld": "Import from the old app",
+  "importOldHint": "Choose codecore_library.db from the Python version",
+  "importSummary": "{favorites} favorites, {playlists} playlists, {lyrics} lyrics imported, {unmatched} unmatched",
+  "importFailed": "Import failed: invalid file"
 }

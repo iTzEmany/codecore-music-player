@@ -654,4 +654,23 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get shareDeviceName => 'Gerätename';
+
+  @override
+  String get importOld => 'Aus der alten App importieren';
+
+  @override
+  String get importOldHint => 'codecore_library.db der Python-Version wählen';
+
+  @override
+  String importSummary(
+    int favorites,
+    int lyrics,
+    int playlists,
+    int unmatched,
+  ) {
+    return '$favorites Favoriten, $playlists Playlists, $lyrics Songtexte importiert, $unmatched nicht zugeordnet';
+  }
+
+  @override
+  String get importFailed => 'Import fehlgeschlagen: ungültige Datei';
 }

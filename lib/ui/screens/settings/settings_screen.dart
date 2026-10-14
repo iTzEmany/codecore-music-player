@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -15,6 +17,7 @@ import '../library/folders_sheet.dart';
 import '../../../providers/share_providers.dart';
 import '../playlists/playlist_dialogs.dart';
 import '../share/share_screen.dart';
+import '../../../services/migration/python_db_importer.dart';
 import 'missing_tracks_screen.dart';
 
 const _languages = {
@@ -145,6 +148,12 @@ class SettingsScreen extends ConsumerWidget {
         subtitle: Text(ref.watch(deviceNameProvider)),
         onTap: () => _editDeviceName(context, ref),
       ),
+      ListTile(
+        leading: const Icon(Icons.history),
+        title: Text(l.importOld),
+        subtitle: Text(l.importOldHint),
+        onTap: () => _importOld(context, ref),
+      ),
       header(l.settingsOnline),
       ListTile(
         leading: const Icon(Icons.travel_explore),
@@ -178,6 +187,25 @@ class SettingsScreen extends ConsumerWidget {
         title: Text(l.personalUse),
       ),
     ]);
+  }
+
+  Future<void> _importOld(BuildContext context, WidgetRef ref) async {
+    final l = context.l10n;
+    final messenger = ScaffoldMessenger.of(context);
+    final picked = await FilePicker.pickFiles();
+    final path = picked.isEmpty ? null : picked.first.path;
+    if (path == null) return;
+    String text;
+    try {
+      final s = await PythonDbImporter(ref.read(databaseProvider)).import(path);
+      text = l.importSummary(s.favorites, s.playlists, s.lyrics, s.unmatched);
+    } on Object catch (e, st) {
+      AppLog.w('python import failed', e, st);
+      text = l.importFailed;
+    }
+    messenger
+      ..clearSnackBars()
+      ..showSnackBar(SnackBar(content: Text(text)));
   }
 
   Future<void> _editDeviceName(BuildContext context, WidgetRef ref) async {
