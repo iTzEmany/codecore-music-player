@@ -27,6 +27,16 @@ android {
         // flag during build.
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        ndk {
+            abiFilters += listOf("arm64-v8a", "armeabi-v7a")
+        }
+    }
+
+    packaging {
+        jniLibs {
+            // yt-dlp's Python and QuickJS are executed from the native lib dir.
+            useLegacyPackaging = true
+        }
     }
 
     buildTypes {
@@ -42,6 +52,12 @@ kotlin {
     compilerOptions {
         jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
     }
+}
+
+dependencies {
+    // yt-dlp + Python + QuickJS (JS challenge solver) embedded in the app.
+    implementation("io.github.junkfood02.youtubedl-android:library:0.18.1")
+    implementation("io.github.junkfood02.youtubedl-android:ffmpeg:0.18.1")
 }
 
 flutter {

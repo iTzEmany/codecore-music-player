@@ -11,6 +11,7 @@ import '../core/platform.dart';
 import '../data/db/app_database.dart';
 import '../services/online/download_index.dart';
 import '../services/online/download_queue.dart';
+import '../services/online/android_yt_dlp_service.dart';
 import '../services/online/yt_dlp_process_service.dart';
 import '../services/online/youtube_service.dart';
 import 'database_providers.dart';
@@ -19,7 +20,8 @@ import 'online_providers.dart';
 import 'settings_providers.dart';
 
 final youtubeServiceProvider = Provider<YoutubeService>((ref) {
-  final YoutubeService s = YtDlpProcessService();
+  final YoutubeService s =
+      isAndroid ? AndroidYtDlpService() : YtDlpProcessService();
   ref.onDispose(s.close);
   return s;
 });
