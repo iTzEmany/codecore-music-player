@@ -534,4 +534,7 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get ytLegal =>
       'Personal use only. Respect copyright and YouTube’s terms.';
+
+  @override
+  String get useDefaultFolder => 'Use the device Music folder';
 }

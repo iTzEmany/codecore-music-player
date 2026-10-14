@@ -162,5 +162,6 @@
   "ytErrNetwork": "Netzwerk nicht verfügbar",
   "ytErrChanged": "YouTube hat etwas geändert: App oder Paket aktualisieren",
   "ytNoFolder": "Füge zuerst einen Musikordner hinzu",
-  "ytLegal": "Nur für den persönlichen Gebrauch. Urheberrecht und YouTube-Bedingungen beachten."
+  "ytLegal": "Nur für den persönlichen Gebrauch. Urheberrecht und YouTube-Bedingungen beachten.",
+  "useDefaultFolder": "Musikordner des Geräts verwenden"
 }

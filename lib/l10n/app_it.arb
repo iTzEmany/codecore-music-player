@@ -244,5 +244,6 @@
   "ytErrNetwork": "Rete non disponibile",
   "ytErrChanged": "YouTube ha cambiato qualcosa: aggiorna l’app o il pacchetto",
   "ytNoFolder": "Aggiungi prima una cartella musicale",
-  "ytLegal": "Solo per uso personale. Rispetta i diritti d’autore e i termini di YouTube."
+  "ytLegal": "Solo per uso personale. Rispetta i diritti d’autore e i termini di YouTube.",
+  "useDefaultFolder": "Usa la cartella Musica del dispositivo"
 }

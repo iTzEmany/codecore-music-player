@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/permissions.dart';
+import '../../../core/platform.dart';
 import '../../../providers/database_providers.dart';
 import '../../../providers/library_providers.dart';
 import '../../../l10n/l10n_ext.dart';
@@ -17,6 +20,13 @@ Future<void> scanWithPermission(WidgetRef ref) async {
 Future<void> addFolderAndScan(WidgetRef ref) async {
   final path = await FilePicker.getDirectoryPath();
   if (path == null) return;
+  await ref.read(folderRepositoryProvider).add(path);
+  await scanWithPermission(ref);
+}
+
+Future<void> addDefaultFolderAndScan(WidgetRef ref) async {
+  final path = await defaultMusicDir();
+  if (!await Directory(path).exists()) return;
   await ref.read(folderRepositoryProvider).add(path);
   await scanWithPermission(ref);
 }

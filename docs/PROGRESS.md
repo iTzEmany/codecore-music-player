@@ -97,3 +97,5 @@ L'agente riparte sempre dal primo task non spuntato.
 - 5.3: con artista ignoto un titolo di una sola parola (es. "Intro") non viene mai accettato; si ferma alla prima query che dà un risultato *accettato*.
 - 5.9: contenitore webm salvato come `.webm` (aggiunto agli estensioni scansionate); mp4 → `.m4a`.
 - 5.9–5.11: la rete YouTube non è testabile in automatico: verificare a mano (Tocca a te).
+- Verifica su telefono (Mi A3, Android 11, 2026-10-14): APK debug installato; scansione di /sdcard/Music (mp3+flac) ok, riproduzione e avanzamento automatico ok, sessione media attiva (notifica). Non provati a mano: tasti cuffie, schermo spento 5 min, YouTube/arricchimento (rete; l'orologio del telefono è al 2022 → errori SSL).
+- Etichette NavigationBar: solo la voce selezionata (5 voci su schermo stretto).

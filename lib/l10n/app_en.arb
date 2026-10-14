@@ -162,5 +162,6 @@
   "ytErrNetwork": "Network unavailable",
   "ytErrChanged": "YouTube changed something: update the app or package",
   "ytNoFolder": "Add a music folder first",
-  "ytLegal": "Personal use only. Respect copyright and YouTube’s terms."
+  "ytLegal": "Personal use only. Respect copyright and YouTube’s terms.",
+  "useDefaultFolder": "Use the device Music folder"
 }

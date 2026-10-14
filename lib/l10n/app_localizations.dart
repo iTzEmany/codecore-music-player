@@ -1079,6 +1079,12 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Solo per uso personale. Rispetta i diritti d’autore e i termini di YouTube.'**
   String get ytLegal;
+
+  /// No description provided for @useDefaultFolder.
+  ///
+  /// In it, this message translates to:
+  /// **'Usa la cartella Musica del dispositivo'**
+  String get useDefaultFolder;
 }
 
 class _AppLocalizationsDelegate

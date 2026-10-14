@@ -126,6 +126,7 @@ class AppShell extends ConsumerWidget {
           : NavigationBar(
               selectedIndex: index,
               onDestinationSelected: select,
+              labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
               destinations: [
                 for (var i = 0; i < labels.length; i++)
                   NavigationDestination(icon: Icon(_icons[i]), label: labels[i]),

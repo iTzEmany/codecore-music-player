@@ -141,6 +141,8 @@ class _TracksTabState extends ConsumerState<TracksTab> {
                   message: context.l10n.addMusicFolder,
                   actionLabel: context.l10n.addFolder,
                   onAction: () => addFolderAndScan(ref),
+                  secondaryLabel: context.l10n.useDefaultFolder,
+                  onSecondary: () => addDefaultFolderAndScan(ref),
                 );
               }
               return EmptyState(

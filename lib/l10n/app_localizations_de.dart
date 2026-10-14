@@ -535,4 +535,7 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get ytLegal =>
       'Nur für den persönlichen Gebrauch. Urheberrecht und YouTube-Bedingungen beachten.';
+
+  @override
+  String get useDefaultFolder => 'Musikordner des Geräts verwenden';
 }
