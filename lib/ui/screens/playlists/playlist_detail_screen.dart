@@ -40,7 +40,7 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
         ..showSnackBar(SnackBar(content: Text(l.coverTooLarge)));
       return;
     }
-    final dir = await ref.read(coversDirProvider.future);
+    final dir = ref.read(coversDirProvider);
     final store = CoverStore(dir);
     // A new key per pick, so the image cache never shows the old picture.
     final key = await store.saveFromBytes(

@@ -7,8 +7,7 @@ import '../../providers/library_providers.dart';
 
 /// Resolves a cover file once per key (no repeated disk checks while scrolling).
 final coverFileProvider = Provider.family<File?, String>((ref, key) {
-  final dir = ref.watch(coversDirProvider).value;
-  if (dir == null) return null;
+  final dir = ref.watch(coversDirProvider);
   for (final ext in const ['jpg', 'png']) {
     final f = File('${dir.path}/$key.$ext');
     if (f.existsSync()) return f;

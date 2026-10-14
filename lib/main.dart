@@ -74,7 +74,7 @@ Future<void> main() async {
       audioHandlerProvider.overrideWithValue(handler),
       playbackPersistenceProvider.overrideWithValue(persistence),
       playerErrorsProvider.overrideWithValue(errors.stream),
-      coversDirProvider.overrideWith((ref) async => covers.dir),
+      coversDirProvider.overrideWithValue(covers.dir),
     ],
     child: const CodecoreApp(),
   ));

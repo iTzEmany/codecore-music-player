@@ -56,7 +56,7 @@ class Harness {
         databaseProvider.overrideWithValue(db),
         audioHandlerProvider.overrideWithValue(handler),
         settingsStoreProvider.overrideWithValue(store),
-        coversDirProvider.overrideWith((ref) async => Directory.systemTemp),
+        coversDirProvider.overrideWithValue(Directory.systemTemp),
       ];
 
   Future<void> pump(WidgetTester tester, Widget child) async {

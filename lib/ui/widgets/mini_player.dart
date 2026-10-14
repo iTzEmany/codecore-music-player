@@ -20,6 +20,7 @@ class MiniPlayer extends ConsumerWidget {
     return Material(
       color: scheme.surfaceContainerHigh,
       child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
         onTap: () => Navigator.of(context).push(PageRouteBuilder<void>(
           pageBuilder: (_, _, _) => const NowPlayingScreen(),
           transitionsBuilder: (_, anim, _, child) => SlideTransition(

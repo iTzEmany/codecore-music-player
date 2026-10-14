@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/app_log.dart';
-import '../core/paths.dart';
 import '../data/db/app_database.dart';
 import '../data/repositories/library_queries.dart';
 import '../data/repositories/track_repository.dart';
@@ -19,11 +18,12 @@ import 'settings_providers.dart';
 final tagReaderProvider =
     Provider<TagReader>((ref) => const AudioMetadataTagReader());
 
-final coversDirProvider = FutureProvider<Directory>(
-    (ref) async => Directory(await coversDir()));
+/// Resolved once in `main` (and overridden in tests): synchronous everywhere.
+final coversDirProvider = Provider<Directory>(
+    (ref) => throw UnimplementedError('coversDirProvider not overridden'));
 
 final coverStoreProvider = Provider<CoverStore>((ref) {
-  final dir = ref.watch(coversDirProvider).requireValue;
+  final dir = ref.watch(coversDirProvider);
   return CoverStore(dir);
 });
 
@@ -98,7 +98,6 @@ class ScanNotifier extends Notifier<ScanState> {
     if (state.running) return;
     state = const ScanState(running: true);
     try {
-      await ref.read(coversDirProvider.future);
       final folders = await ref.read(folderRepositoryProvider).getAll();
       final scanner = ref.read(libraryScannerProvider);
       String? error;

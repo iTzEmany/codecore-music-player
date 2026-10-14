@@ -48,7 +48,7 @@ Future<String?> localIpAddress() async {
 /// Tracks -> shareable entries (paths stay on this side of the connection).
 Future<List<ShareEntry>> buildShareEntries(
     Ref ref, List<Track> tracks) async {
-  final dir = await ref.read(coversDirProvider.future);
+  final dir = ref.read(coversDirProvider);
   String? coverPath(Track t) {
     final k = t.coverKey;
     if (k == null) return null;

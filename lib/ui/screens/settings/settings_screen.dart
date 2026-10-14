@@ -225,7 +225,7 @@ class SettingsScreen extends ConsumerWidget {
   Future<void> _clearCovers(BuildContext context, WidgetRef ref) async {
     final msg = context.l10n.coverCacheCleared;
     try {
-      final dir = await ref.read(coversDirProvider.future);
+      final dir = ref.read(coversDirProvider);
       if (await dir.exists()) {
         await for (final e in dir.list()) {
           if (e is File) await e.delete();
