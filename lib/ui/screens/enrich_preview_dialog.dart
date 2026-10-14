@@ -50,6 +50,7 @@ class _State extends ConsumerState<_EnrichPreviewDialog> {
       setState(() {
         _proposal = p;
         _loading = false;
+        _preselect();
       });
     } on RateLimitedException {
       if (!mounted) return;
@@ -89,6 +90,25 @@ class _State extends ConsumerState<_EnrichPreviewDialog> {
       if (p.curiosity != null)
         _Row(EnrichField.curiosity, l.fieldCuriosity, null, p.curiosity!.text),
     ];
+  }
+
+  /// Artist, album and the other facts are applied by default so the track is
+  /// filed under the right artist/album; the title only when the proposal is
+  /// the same title without noise (e.g. "Queen - Song" -> "Song").
+  void _preselect() {
+    final t = widget.track;
+    for (final r in _rows(context)) {
+      if (_locked(r)) continue;
+      if (r.field == EnrichField.title) {
+        final cur = t.title.toLowerCase();
+        final next = (r.proposed ?? '').toLowerCase();
+        if (next.isEmpty || !cur.contains(next)) continue;
+      }
+      if (r.field == EnrichField.curiosity && widget.track.curiosities != null) {
+        continue;
+      }
+      _selected.add(r.field);
+    }
   }
 
   bool _locked(_Row r) =>

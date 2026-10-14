@@ -34,6 +34,24 @@ final downloadIndexProvider = FutureProvider<DownloadIndex>((ref) async {
 
 /// Destination folder for downloads, registered as a scanned folder.
 Future<(Directory, Folder)?> resolveDownloadFolder(Ref ref) async {
+  final res = await _resolveDownloadFolder(ref);
+  if (res != null) await _removeStalePartFiles(res.$1);
+  return res;
+}
+
+/// The queue is sequential, so any `.part` left here belongs to a download
+/// that was interrupted (app killed) and will never be completed.
+Future<void> _removeStalePartFiles(Directory dir) async {
+  try {
+    await for (final e in dir.list()) {
+      if (e is File && e.path.endsWith('.part')) await e.delete();
+    }
+  } on FileSystemException catch (e, st) {
+    AppLog.w('stale .part cleanup failed: ${dir.path}', e, st);
+  }
+}
+
+Future<(Directory, Folder)?> _resolveDownloadFolder(Ref ref) async {
   final repo = ref.read(folderRepositoryProvider);
   if (isAndroid) {
     final ext = await getExternalStorageDirectory();

@@ -21,7 +21,9 @@ Future<void> toggleFavorite(
   ScaffoldMessenger.of(context)
     ..clearSnackBars()
     ..showSnackBar(SnackBar(
-      duration: const Duration(seconds: 5),
+      // A snackbar with an action never times out unless `persist` is false.
+      persist: false,
+      duration: const Duration(seconds: 3),
       content: Text(previous ? l.removedFromFavorites : l.addedToFavorites),
       action: SnackBarAction(
         label: l.undo,

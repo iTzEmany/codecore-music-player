@@ -112,4 +112,27 @@ void main() {
     expect(rows.where((t) => t.hasCover).length, 3);
     expect(rows.firstWhere((t) => t.title == 'x').hasCover, false);
   });
+
+  test('a replaced file (new size) is re-read and its duration updated',
+      () async {
+    final d = music();
+    final folder = await folders.add(d.path);
+    await scanner.scan(folder).drain<void>();
+    final before = await (db.select(db.tracks)
+          ..where((t) => t.title.equals('a.mp3')))
+        .getSingle();
+    expect(before.durationMs, 1000);
+
+    reader.byName['a.mp3'] = const TagInfo(
+        title: 'a.mp3', artist: 'Art', album: 'Alb', durationMs: 355000);
+    File(p.join(d.path, 'a.mp3')).writeAsBytesSync(List.filled(500, 1));
+    reader.calls = 0;
+    await scanner.scan(folder).drain<void>();
+    expect(reader.calls, 1);
+    final after = await (db.select(db.tracks)
+          ..where((t) => t.title.equals('a.mp3')))
+        .getSingle();
+    expect(after.durationMs, 355000);
+    expect(after.sizeBytes, 500);
+  });
 }

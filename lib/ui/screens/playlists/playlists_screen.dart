@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/database_providers.dart';
 import '../../widgets/empty_state.dart';
+import '../../widgets/cover_image.dart';
 import 'playlist_detail_screen.dart';
 import 'playlist_dialogs.dart';
 
@@ -36,7 +37,7 @@ class PlaylistsScreen extends ConsumerWidget {
                 itemBuilder: (_, i) {
                   final p = items[i];
                   return ListTile(
-                    leading: const CircleAvatar(child: Icon(Icons.queue_music)),
+                    leading: CoverImage(coverKey: p.coverKey, size: 48),
                     title: Text(p.playlist.name,
                         maxLines: 1, overflow: TextOverflow.ellipsis),
                     subtitle: Text(l.tracksCount(p.trackCount)),

@@ -161,7 +161,7 @@ class _TracksTabState extends ConsumerState<TracksTab> {
               ),
               Expanded(
                 child: ListView.builder(
-                  itemExtent: trackRowExtent(compact),
+                  itemExtent: trackRowExtentOf(context, compact),
                   itemCount: list.length,
                   itemBuilder: (_, i) => LiveTrackTile(
                     track: list[i],

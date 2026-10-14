@@ -542,4 +542,24 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get ytErrToolMissing =>
       'yt-dlp nicht gefunden: installieren (pip install -U yt-dlp) und erneut versuchen';
+
+  @override
+  String get playlistChangeCover => 'Cover ändern';
+
+  @override
+  String get playlistRemoveCover => 'Cover entfernen';
+
+  @override
+  String get coverTooLarge => 'Bild zu groß (max. 4 MB)';
+
+  @override
+  String get addSongs => 'Titel hinzufügen';
+
+  @override
+  String addNSongs(int count) {
+    return 'Hinzufügen ($count)';
+  }
+
+  @override
+  String get allSongsInPlaylist => 'Alle Titel sind bereits in der Playlist';
 }

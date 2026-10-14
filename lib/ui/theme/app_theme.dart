@@ -7,7 +7,9 @@ AppThemeId appThemeIdFromName(String name) => AppThemeId.values
 
 const _seed = Color(0xFF6C5CE7);
 
-ThemeData buildTheme(AppThemeId id, double fontScale, bool compact) {
+/// Text size is applied app-wide through MediaQuery's text scaler (see app.dart):
+/// scaling the TextTheme directly asserts on styles without a font size.
+ThemeData buildTheme(AppThemeId id, bool compact) {
   final dark = id != AppThemeId.light;
   var scheme = ColorScheme.fromSeed(
     seedColor: _seed,
@@ -39,16 +41,23 @@ ThemeData buildTheme(AppThemeId id, double fontScale, bool compact) {
           const Color(0x14FFFFFF), card ?? background),
     );
   }
-  final base = ThemeData(
+  return ThemeData(
     useMaterial3: true,
     colorScheme: scheme,
     scaffoldBackgroundColor: scheme.surface,
     visualDensity: compact ? VisualDensity.compact : VisualDensity.standard,
-  );
-  return base.copyWith(
-    textTheme: base.textTheme.apply(fontSizeFactor: fontScale),
+    // Keeps "Impostazioni"/"Einstellungen" on one line in the 5-item bar.
+    navigationBarTheme: const NavigationBarThemeData(
+      labelTextStyle: WidgetStatePropertyAll(TextStyle(fontSize: 11)),
+    ),
   );
 }
 
 /// Row height for track lists (fixed so lists can use `itemExtent`).
 double trackRowExtent(bool compact) => compact ? 48 : 64;
+
+/// Same, grown with the user's text size so two-line rows never overflow.
+double trackRowExtentOf(BuildContext context, bool compact) {
+  final scale = MediaQuery.textScalerOf(context).scale(16) / 16;
+  return trackRowExtent(compact) * (scale > 1 ? scale : 1);
+}

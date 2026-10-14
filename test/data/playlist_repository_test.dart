@@ -69,4 +69,17 @@ void main() {
     expect((await tracks.getById(ids[0]))!.isFavorite, false);
     expect((await tracks.watchTracks(favoritesOnly: true).first), isEmpty);
   });
+
+  test('custom cover wins over the first track cover', () async {
+    final p = await repo.create('Mix');
+    await repo.addTracks(p, [ids[0]]);
+    await TrackRepository(db).setCoverForAlbum('k', true, 'auto-key');
+    var s = (await repo.watchAll().first).single;
+    expect(s.coverKey, 'auto-key');
+    await repo.setCover(p, 'mine');
+    s = (await repo.watchAll().first).single;
+    expect(s.coverKey, 'mine');
+    await repo.setCover(p, null);
+    expect((await repo.watchAll().first).single.coverKey, 'auto-key');
+  });
 }

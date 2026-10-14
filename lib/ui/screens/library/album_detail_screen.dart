@@ -66,7 +66,7 @@ class AlbumDetailScreen extends ConsumerWidget {
             }
             final t = list[i - 1];
             return SizedBox(
-              height: trackRowExtent(compact),
+              height: trackRowExtentOf(context, compact),
               child: LiveTrackTile(
                 track: t,
                 compact: compact,

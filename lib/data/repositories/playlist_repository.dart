@@ -3,10 +3,14 @@ import 'package:drift/drift.dart';
 import '../db/app_database.dart';
 
 class PlaylistSummary {
-  const PlaylistSummary(this.playlist, this.trackCount);
+  const PlaylistSummary(this.playlist, this.trackCount, [this.autoCoverKey]);
 
   final Playlist playlist;
   final int trackCount;
+  final String? autoCoverKey;
+
+  /// Custom cover if set, otherwise the first track that has one.
+  String? get coverKey => playlist.coverKey ?? autoCoverKey;
 }
 
 class PlaylistRepository {
@@ -23,16 +27,24 @@ class PlaylistRepository {
       (_db.update(_db.playlists)..where((p) => p.id.equals(id)))
           .write(PlaylistsCompanion(name: Value(name.trim())));
 
+  Future<void> setCover(int id, String? coverKey) =>
+      (_db.update(_db.playlists)..where((p) => p.id.equals(id)))
+          .write(PlaylistsCompanion(coverKey: Value(coverKey)));
+
   Future<void> delete(int id) =>
       (_db.delete(_db.playlists)..where((p) => p.id.equals(id))).go();
 
   Stream<List<PlaylistSummary>> watchAll() {
     return _db
         .customSelect(
-          'SELECT p.id, p.name, p.created_at, COUNT(pt.track_id) AS n '
+          'SELECT p.id, p.name, p.created_at, p.cover_key AS custom_cover, '
+          '(SELECT t.cover_key FROM playlist_tracks x JOIN tracks t ON t.id = x.track_id '
+          'WHERE x.playlist_id = p.id AND t.cover_key IS NOT NULL '
+          'ORDER BY x.position LIMIT 1) AS auto_cover, '
+          'COUNT(pt.track_id) AS n '
           'FROM playlists p LEFT JOIN playlist_tracks pt ON pt.playlist_id = p.id '
           'GROUP BY p.id ORDER BY p.name COLLATE NOCASE',
-          readsFrom: {_db.playlists, _db.playlistTracks},
+          readsFrom: {_db.playlists, _db.playlistTracks, _db.tracks},
         )
         .watch()
         .map((rows) => [
@@ -42,8 +54,10 @@ class PlaylistRepository {
                     id: r.read<int>('id'),
                     name: r.read<String>('name'),
                     createdAt: r.read<int>('created_at'),
+                    coverKey: r.read<String?>('custom_cover'),
                   ),
                   r.read<int>('n'),
+                  r.read<String?>('auto_cover'),
                 ),
             ]);
   }

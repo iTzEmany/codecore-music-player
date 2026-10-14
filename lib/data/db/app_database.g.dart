@@ -2092,8 +2092,19 @@ class $PlaylistsTable extends Playlists
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _coverKeyMeta = const VerificationMeta(
+    'coverKey',
+  );
   @override
-  List<GeneratedColumn> get $columns => [id, name, createdAt];
+  late final GeneratedColumn<String> coverKey = GeneratedColumn<String>(
+    'cover_key',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, name, createdAt, coverKey];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -2125,6 +2136,12 @@ class $PlaylistsTable extends Playlists
     } else if (isInserting) {
       context.missing(_createdAtMeta);
     }
+    if (data.containsKey('cover_key')) {
+      context.handle(
+        _coverKeyMeta,
+        coverKey.isAcceptableOrUnknown(data['cover_key']!, _coverKeyMeta),
+      );
+    }
     return context;
   }
 
@@ -2146,6 +2163,10 @@ class $PlaylistsTable extends Playlists
         DriftSqlType.int,
         data['${effectivePrefix}created_at'],
       )!,
+      coverKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}cover_key'],
+      ),
     );
   }
 
@@ -2159,10 +2180,14 @@ class Playlist extends DataClass implements Insertable<Playlist> {
   final int id;
   final String name;
   final int createdAt;
+
+  /// File name inside the covers folder; null = use the first track's cover.
+  final String? coverKey;
   const Playlist({
     required this.id,
     required this.name,
     required this.createdAt,
+    this.coverKey,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2170,6 +2195,9 @@ class Playlist extends DataClass implements Insertable<Playlist> {
     map['id'] = Variable<int>(id);
     map['name'] = Variable<String>(name);
     map['created_at'] = Variable<int>(createdAt);
+    if (!nullToAbsent || coverKey != null) {
+      map['cover_key'] = Variable<String>(coverKey);
+    }
     return map;
   }
 
@@ -2178,6 +2206,9 @@ class Playlist extends DataClass implements Insertable<Playlist> {
       id: Value(id),
       name: Value(name),
       createdAt: Value(createdAt),
+      coverKey: coverKey == null && nullToAbsent
+          ? const Value.absent()
+          : Value(coverKey),
     );
   }
 
@@ -2190,6 +2221,7 @@ class Playlist extends DataClass implements Insertable<Playlist> {
       id: serializer.fromJson<int>(json['id']),
       name: serializer.fromJson<String>(json['name']),
       createdAt: serializer.fromJson<int>(json['createdAt']),
+      coverKey: serializer.fromJson<String?>(json['coverKey']),
     );
   }
   @override
@@ -2199,19 +2231,27 @@ class Playlist extends DataClass implements Insertable<Playlist> {
       'id': serializer.toJson<int>(id),
       'name': serializer.toJson<String>(name),
       'createdAt': serializer.toJson<int>(createdAt),
+      'coverKey': serializer.toJson<String?>(coverKey),
     };
   }
 
-  Playlist copyWith({int? id, String? name, int? createdAt}) => Playlist(
+  Playlist copyWith({
+    int? id,
+    String? name,
+    int? createdAt,
+    Value<String?> coverKey = const Value.absent(),
+  }) => Playlist(
     id: id ?? this.id,
     name: name ?? this.name,
     createdAt: createdAt ?? this.createdAt,
+    coverKey: coverKey.present ? coverKey.value : this.coverKey,
   );
   Playlist copyWithCompanion(PlaylistsCompanion data) {
     return Playlist(
       id: data.id.present ? data.id.value : this.id,
       name: data.name.present ? data.name.value : this.name,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      coverKey: data.coverKey.present ? data.coverKey.value : this.coverKey,
     );
   }
 
@@ -2220,46 +2260,53 @@ class Playlist extends DataClass implements Insertable<Playlist> {
     return (StringBuffer('Playlist(')
           ..write('id: $id, ')
           ..write('name: $name, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('coverKey: $coverKey')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name, createdAt);
+  int get hashCode => Object.hash(id, name, createdAt, coverKey);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Playlist &&
           other.id == this.id &&
           other.name == this.name &&
-          other.createdAt == this.createdAt);
+          other.createdAt == this.createdAt &&
+          other.coverKey == this.coverKey);
 }
 
 class PlaylistsCompanion extends UpdateCompanion<Playlist> {
   final Value<int> id;
   final Value<String> name;
   final Value<int> createdAt;
+  final Value<String?> coverKey;
   const PlaylistsCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.coverKey = const Value.absent(),
   });
   PlaylistsCompanion.insert({
     this.id = const Value.absent(),
     required String name,
     required int createdAt,
+    this.coverKey = const Value.absent(),
   }) : name = Value(name),
        createdAt = Value(createdAt);
   static Insertable<Playlist> custom({
     Expression<int>? id,
     Expression<String>? name,
     Expression<int>? createdAt,
+    Expression<String>? coverKey,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (name != null) 'name': name,
       if (createdAt != null) 'created_at': createdAt,
+      if (coverKey != null) 'cover_key': coverKey,
     });
   }
 
@@ -2267,11 +2314,13 @@ class PlaylistsCompanion extends UpdateCompanion<Playlist> {
     Value<int>? id,
     Value<String>? name,
     Value<int>? createdAt,
+    Value<String?>? coverKey,
   }) {
     return PlaylistsCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
       createdAt: createdAt ?? this.createdAt,
+      coverKey: coverKey ?? this.coverKey,
     );
   }
 
@@ -2287,6 +2336,9 @@ class PlaylistsCompanion extends UpdateCompanion<Playlist> {
     if (createdAt.present) {
       map['created_at'] = Variable<int>(createdAt.value);
     }
+    if (coverKey.present) {
+      map['cover_key'] = Variable<String>(coverKey.value);
+    }
     return map;
   }
 
@@ -2295,7 +2347,8 @@ class PlaylistsCompanion extends UpdateCompanion<Playlist> {
     return (StringBuffer('PlaylistsCompanion(')
           ..write('id: $id, ')
           ..write('name: $name, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('coverKey: $coverKey')
           ..write(')'))
         .toString();
   }
@@ -3673,11 +3726,13 @@ typedef $$PlaylistsTableCreateCompanionBuilder = PlaylistsCompanion Function({
   Value<int> id,
   required String name,
   required int createdAt,
+  Value<String?> coverKey,
 });
 typedef $$PlaylistsTableUpdateCompanionBuilder = PlaylistsCompanion Function({
   Value<int> id,
   Value<String> name,
   Value<int> createdAt,
+  Value<String?> coverKey,
 });
 
 final class $$PlaylistsTableReferences
@@ -3724,6 +3779,11 @@ class $$PlaylistsTableFilterComposer
 
   ColumnFilters<int> get createdAt => $composableBuilder(
     column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get coverKey => $composableBuilder(
+    column: $table.coverKey,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3776,6 +3836,11 @@ class $$PlaylistsTableOrderingComposer
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get coverKey => $composableBuilder(
+    column: $table.coverKey,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$PlaylistsTableAnnotationComposer
@@ -3795,6 +3860,9 @@ class $$PlaylistsTableAnnotationComposer
 
   GeneratedColumn<int> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get coverKey =>
+      $composableBuilder(column: $table.coverKey, builder: (column) => column);
 
   Expression<T> playlistTracksRefs<T extends Object>(
     Expression<T> Function($$PlaylistTracksTableAnnotationComposer a) f,
@@ -3848,20 +3916,29 @@ class $$PlaylistsTableTableManager
               $$PlaylistsTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
               $$PlaylistsTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<int> id = const Value.absent(),
-            Value<String> name = const Value.absent(),
-            Value<int> createdAt = const Value.absent(),
-          }) => PlaylistsCompanion(id: id, name: name, createdAt: createdAt),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<int> createdAt = const Value.absent(),
+                Value<String?> coverKey = const Value.absent(),
+              }) => PlaylistsCompanion(
+                id: id,
+                name: name,
+                createdAt: createdAt,
+                coverKey: coverKey,
+              ),
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
                 required String name,
                 required int createdAt,
+                Value<String?> coverKey = const Value.absent(),
               }) => PlaylistsCompanion.insert(
                 id: id,
                 name: name,
                 createdAt: createdAt,
+                coverKey: coverKey,
               ),
           withReferenceMapper: (p0) => p0
               .map(

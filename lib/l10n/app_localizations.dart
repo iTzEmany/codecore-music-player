@@ -1091,6 +1091,42 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'yt-dlp non trovato: installalo (pip install -U yt-dlp) e riprova'**
   String get ytErrToolMissing;
+
+  /// No description provided for @playlistChangeCover.
+  ///
+  /// In it, this message translates to:
+  /// **'Cambia copertina'**
+  String get playlistChangeCover;
+
+  /// No description provided for @playlistRemoveCover.
+  ///
+  /// In it, this message translates to:
+  /// **'Rimuovi copertina'**
+  String get playlistRemoveCover;
+
+  /// No description provided for @coverTooLarge.
+  ///
+  /// In it, this message translates to:
+  /// **'Immagine troppo grande (max 4 MB)'**
+  String get coverTooLarge;
+
+  /// No description provided for @addSongs.
+  ///
+  /// In it, this message translates to:
+  /// **'Aggiungi brani'**
+  String get addSongs;
+
+  /// No description provided for @addNSongs.
+  ///
+  /// In it, this message translates to:
+  /// **'Aggiungi ({count})'**
+  String addNSongs(int count);
+
+  /// No description provided for @allSongsInPlaylist.
+  ///
+  /// In it, this message translates to:
+  /// **'Tutti i brani sono già nella playlist'**
+  String get allSongsInPlaylist;
 }
 
 class _AppLocalizationsDelegate

@@ -52,6 +52,9 @@ class Playlists extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get name => text()();
   IntColumn get createdAt => integer()();
+
+  /// File name inside the covers folder; null = use the first track's cover.
+  TextColumn get coverKey => text().nullable()();
 }
 
 @TableIndex(name: 'playlist_tracks_track', columns: {#trackId})

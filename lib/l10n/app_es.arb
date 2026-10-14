@@ -164,5 +164,11 @@
   "ytNoFolder": "Añade primero una carpeta de música",
   "ytLegal": "Solo para uso personal. Respeta los derechos de autor y los términos de YouTube.",
   "useDefaultFolder": "Usar la carpeta Música del dispositivo",
-  "ytErrToolMissing": "yt-dlp no encontrado: instálalo (pip install -U yt-dlp) y reintenta"
+  "ytErrToolMissing": "yt-dlp no encontrado: instálalo (pip install -U yt-dlp) y reintenta",
+  "playlistChangeCover": "Cambiar carátula",
+  "playlistRemoveCover": "Quitar carátula",
+  "coverTooLarge": "Imagen demasiado grande (máx. 4 MB)",
+  "addSongs": "Añadir canciones",
+  "addNSongs": "Añadir ({count})",
+  "allSongsInPlaylist": "Todas las canciones ya están en la lista"
 }

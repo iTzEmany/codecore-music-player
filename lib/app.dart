@@ -15,13 +15,15 @@ class CodecoreApp extends ConsumerWidget {
     return MaterialApp(
       title: 'Codecore',
       debugShowCheckedModeBanner: false,
-      theme: buildTheme(appThemeIdFromName(s.theme), s.fontScale, s.compactMode),
+      theme: buildTheme(appThemeIdFromName(s.theme), s.compactMode),
       locale: Locale(s.language),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       builder: (context, child) => MediaQuery(
-        data: MediaQuery.of(context)
-            .copyWith(disableAnimations: s.reducedMotion),
+        data: MediaQuery.of(context).copyWith(
+          disableAnimations: s.reducedMotion,
+          textScaler: TextScaler.linear(s.fontScale),
+        ),
         child: child ?? const SizedBox.shrink(),
       ),
       home: const AppShell(),
