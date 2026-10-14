@@ -46,6 +46,7 @@ class TrackRepository {
           mtimeMs: row.mtimeMs,
           hasCover: row.hasCover,
           coverKey: row.coverKey,
+          replayGainDb: row.replayGainDb,
           missing: const Value(false),
         ));
       }

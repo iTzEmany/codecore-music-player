@@ -704,4 +704,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get back => 'Back';
+
+  @override
+  String get settingsPlayback => 'Playback';
+
+  @override
+  String get normalizeVolume => 'Normalize volume';
+
+  @override
+  String get normalizeVolumeHint =>
+      'Uses files’ ReplayGain to lower tracks that are too loud';
 }

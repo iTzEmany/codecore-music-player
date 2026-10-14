@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:audio_service/audio_service.dart';
 
@@ -54,6 +55,10 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   /// Sleep timer "end of track": the next track is loaded but not started.
   bool pauseAtTrackEnd = false;
 
+  double _baseVolume = 1.0;
+  bool _normalize = false;
+  double _gainFactor = 1.0;
+
   Track? get currentTrack => _current;
   Stream<Track?> get currentTrackStream => _trackController.stream;
   Stream<void> get queueChanges => _queueController.stream;
@@ -94,6 +99,8 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
       return;
     }
     _playCounted = false;
+    _gainFactor = gainFactor(track.replayGainDb);
+    if (_normalize) unawaited(_applyVolume());
     _position = Duration.zero;
     _duration = track.durationMs > 0 ? Duration(milliseconds: track.durationMs) : null;
     _current = track;
@@ -336,7 +343,24 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     _queue.repeat = repeat;
   }
 
-  Future<void> setVolume(double v) => _backend.setVolume(v.clamp(0, 1));
+  Future<void> setVolume(double v) {
+    _baseVolume = v.clamp(0, 1).toDouble();
+    return _applyVolume();
+  }
+
+  /// ReplayGain: scale the volume down for loud tracks (never above 1.0).
+  Future<void> setNormalize(bool enabled) {
+    _normalize = enabled;
+    return _applyVolume();
+  }
+
+  static double gainFactor(double? db) =>
+      db == null ? 1.0 : (db >= 0 ? 1.0 : _pow10(db / 20));
+
+  static double _pow10(double x) => math.exp(x * math.ln10);
+
+  Future<void> _applyVolume() => _backend
+      .setVolume((_baseVolume * (_normalize ? _gainFactor : 1.0)).clamp(0, 1));
 
   Future<void> dispose() async {
     for (final s in _subs) {

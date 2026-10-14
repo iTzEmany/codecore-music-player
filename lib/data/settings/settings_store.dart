@@ -13,11 +13,15 @@ class AppSettings {
     this.autoLyrics = false,
     this.showUndoSnackbar = true,
     this.deviceName,
+    this.normalizeVolume = false,
   });
 
   final String theme;
   final double fontScale;
   final bool compactMode, reducedMotion, autoEnrich, autoLyrics, showUndoSnackbar;
+
+  /// Applies ReplayGain (track gain) at playback time.
+  final bool normalizeVolume;
   final String language;
 
   /// Shown to the device on the other side of a LAN share; null = hostname.
@@ -33,6 +37,7 @@ class AppSettings {
     bool? autoLyrics,
     bool? showUndoSnackbar,
     String? deviceName,
+    bool? normalizeVolume,
   }) =>
       AppSettings(
         theme: theme ?? this.theme,
@@ -44,6 +49,7 @@ class AppSettings {
         autoLyrics: autoLyrics ?? this.autoLyrics,
         showUndoSnackbar: showUndoSnackbar ?? this.showUndoSnackbar,
         deviceName: deviceName ?? this.deviceName,
+        normalizeVolume: normalizeVolume ?? this.normalizeVolume,
       );
 }
 
@@ -82,6 +88,7 @@ class SettingsStore {
         autoLyrics: _prefs.getBool('autoLyrics') ?? false,
         showUndoSnackbar: _prefs.getBool('showUndoSnackbar') ?? true,
         deviceName: _prefs.getString('deviceName'),
+        normalizeVolume: _prefs.getBool('normalizeVolume') ?? false,
       );
 
   Future<void> writeSettings(AppSettings s) async {
@@ -93,6 +100,7 @@ class SettingsStore {
     await _prefs.setBool('autoEnrich', s.autoEnrich);
     await _prefs.setBool('autoLyrics', s.autoLyrics);
     await _prefs.setBool('showUndoSnackbar', s.showUndoSnackbar);
+    await _prefs.setBool('normalizeVolume', s.normalizeVolume);
     final dn = s.deviceName;
     if (dn == null || dn.isEmpty) {
       await _prefs.remove('deviceName');

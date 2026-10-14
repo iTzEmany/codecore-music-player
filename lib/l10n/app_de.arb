@@ -210,5 +210,8 @@
   "previousTrack": "Vorheriger Titel",
   "repeat": "Wiederholen",
   "moreOptions": "Weitere Optionen",
-  "back": "Zurück"
+  "back": "Zurück",
+  "settingsPlayback": "Wiedergabe",
+  "normalizeVolume": "Lautstärke normalisieren",
+  "normalizeVolumeHint": "Nutzt ReplayGain der Dateien, um zu laute Titel zu senken"
 }

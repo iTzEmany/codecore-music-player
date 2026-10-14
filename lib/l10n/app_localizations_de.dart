@@ -705,4 +705,14 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get back => 'Zurück';
+
+  @override
+  String get settingsPlayback => 'Wiedergabe';
+
+  @override
+  String get normalizeVolume => 'Lautstärke normalisieren';
+
+  @override
+  String get normalizeVolumeHint =>
+      'Nutzt ReplayGain der Dateien, um zu laute Titel zu senken';
 }

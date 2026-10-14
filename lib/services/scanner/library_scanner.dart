@@ -193,6 +193,7 @@ class LibraryScanner {
       channels: Value(t.channels),
       hasCover: Value(coverKey != null),
       coverKey: Value(coverKey),
+      replayGainDb: Value(t.replayGainDb),
     );
   }
 

@@ -38,6 +38,7 @@ class Tracks extends Table {
   TextColumn get sha256 => text().nullable()();
   IntColumn get addedAt => integer()();
   IntColumn get playCount => integer().withDefault(const Constant(0))();
+  RealColumn get replayGainDb => real().nullable()();
   IntColumn get lastPlayedAt => integer().nullable()();
 }
 

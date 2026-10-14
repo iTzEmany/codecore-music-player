@@ -360,5 +360,8 @@
   "previousTrack": "Brano precedente",
   "repeat": "Ripeti",
   "moreOptions": "Altre opzioni",
-  "back": "Indietro"
+  "back": "Indietro",
+  "settingsPlayback": "Riproduzione",
+  "normalizeVolume": "Normalizza volume",
+  "normalizeVolumeHint": "Usa il ReplayGain dei file per ridurre i brani troppo forti"
 }

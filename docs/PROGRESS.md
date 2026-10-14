@@ -75,13 +75,13 @@ L'agente riparte sempre dal primo task non spuntato.
 ## Fase 7 — Rifinitura (`fase-7-rifinitura.md`)
 - [x] 7.1 Import dal vecchio DB Python
 - [ ] 7.2 Gapless
-- [ ] 7.3 ReplayGain
+- [x] 7.3 ReplayGain
 - [~] 7.4 Controlli multimediali desktop
 - [~] 7.5 Prestazioni
 - [x] 7.6 Accessibilità
 - [~] 7.7 Timer di spegnimento
 - [x] 7.8 Icona e nome app
-- [ ] 7.9 Build di rilascio
+- [~] 7.9 Build di rilascio
 - [x] 7.10 Documentazione finale
 
 ## Note di deviazione
@@ -108,3 +108,5 @@ L'agente riparte sempre dal primo task non spuntato.
 - Fase 6 (2026-10-14): server/client LAN in Dart (shelf, PIN a 6 cifre, blocco 60 s dopo 5 errori, Range con 416, id interi, stop all'uscita e dopo 10 min). Provato sul Mi A3 via adb: /hello, 401 senza PIN, manifest, Range 206, 416, id con path → 404, blocco 429 dopo 5 errori, server fermo all'uscita dalla schermata. Non implementato: scanner QR (mobile_scanner, opzionale nel piano; il QR si mostra e il link con `?pin=` si può incollare). Da provare con due dispositivi: ricezione tramite l'app (telefono ↔ PC), annullamento a metà.
 - Test desktop Linux + due dispositivi (2026-10-14): app compilata (`flutter build linux`) e avviata sul PC (libmpv2 estratto da .deb in una cartella locale, senza sudo; `LD_LIBRARY_PATH`). Provati con screenshot e click: scansione, riproduzione (libmpv), scorciatoie (Spazio, Ctrl+→), Now Playing con volume, impostazioni (tema/lingua a caldo), YouTube con yt-dlp (ricerca + download MP3 + scansione automatica), «Cerca info sul web» (artista/album/copertina applicati), condivisione PC→telefono (via `adb reverse`): 7 brani ricevuti identici. Bug trovati e corretti: `coverStoreProvider` leggeva un provider ancora in caricamento (download→scansione falliva), area di tocco del mini-player (ora `opaque`).
 - Annullamento download su Linux (2026-10-14, schermo HDMI secondo): provato due volte (a ~0,8 s e a ~2,5 s, durante download+conversione): stato «Annullato», nessun .mp3/.webm/.part rimasto, nessun processo yt-dlp/ffmpeg attivo.
+- Fase 7 (2026-10-14): 7.1 import vecchio DB (test con 3 casi) · 7.3 ReplayGain (colonna `replay_gain_db`, schema v3 con migrazione testata, opzione «Normalizza volume», lettura FLAC/OGG e ID3 TXXX) · 7.5 20.000 brani: ricerca ~40 ms, lista completa ~0,6 s (JIT), albums/artisti <60 ms; frame time da misurare con `flutter run --profile` · 7.6 tooltip, 150% testo senza overflow, contrasto AA nei 4 temi · 7.7 timer 15/30/45/60 min o fine brano con fade 5 s · 7.8 icona + nome «Codecore» (Android, Windows, Linux) · 7.9 Android: APK release firmati con keystore personale (`android/codecore-release.jks`, ignorato da git: **fare un backup**) arm64 65 MB; Linux: `scripts/package-linux.sh` → `build/codecore-linux-x64.zip` (43 MB); Windows non compilabile da Linux · 7.10 README. NON fatti: 7.2 gapless (richiede riscrivere la coda sul backend nativo; rischio alto, non richiesto), 7.4 MPRIS/SMTC (solo tasti multimediali a finestra attiva). Versione 1.1.0+2.
+- Attenzione firma: gli APK release usano ora una chiave diversa da quella di debug; sul telefono con l'app firmata in debug serve disinstallare prima (si perdono i dati dell'app).

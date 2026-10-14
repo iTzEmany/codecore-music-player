@@ -24,4 +24,16 @@ void main() {
     final t = await reader.read('test/fixtures/nope.mp3');
     expect(t.title, isNull);
   });
+
+  test('reads ReplayGain from FLAC (and not from files without it)', () async {
+    final rg = await reader.read('test/fixtures/replaygain.flac');
+    expect(rg.replayGainDb, -6.5);
+    final plain = await reader.read('test/fixtures/sample.flac');
+    expect(plain.replayGainDb, isNull);
+  });
+
+  test('reads ReplayGain from an ID3 TXXX frame', () async {
+    final rg = await reader.read('test/fixtures/replaygain.mp3');
+    expect(rg.replayGainDb, -4.0);
+  });
 }

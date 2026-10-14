@@ -210,5 +210,8 @@
   "previousTrack": "Previous track",
   "repeat": "Repeat",
   "moreOptions": "More options",
-  "back": "Back"
+  "back": "Back",
+  "settingsPlayback": "Playback",
+  "normalizeVolume": "Normalize volume",
+  "normalizeVolumeHint": "Uses files’ ReplayGain to lower tracks that are too loud"
 }

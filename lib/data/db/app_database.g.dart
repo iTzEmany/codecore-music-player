@@ -366,6 +366,17 @@ class $TracksTable extends Tracks with TableInfo<$TracksTable, Track> {
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
+  static const VerificationMeta _replayGainDbMeta = const VerificationMeta(
+    'replayGainDb',
+  );
+  @override
+  late final GeneratedColumn<double> replayGainDb = GeneratedColumn<double>(
+    'replay_gain_db',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _lastPlayedAtMeta = const VerificationMeta(
     'lastPlayedAt',
   );
@@ -411,6 +422,7 @@ class $TracksTable extends Tracks with TableInfo<$TracksTable, Track> {
     sha256,
     addedAt,
     playCount,
+    replayGainDb,
     lastPlayedAt,
   ];
   @override
@@ -652,6 +664,15 @@ class $TracksTable extends Tracks with TableInfo<$TracksTable, Track> {
         playCount.isAcceptableOrUnknown(data['play_count']!, _playCountMeta),
       );
     }
+    if (data.containsKey('replay_gain_db')) {
+      context.handle(
+        _replayGainDbMeta,
+        replayGainDb.isAcceptableOrUnknown(
+          data['replay_gain_db']!,
+          _replayGainDbMeta,
+        ),
+      );
+    }
     if (data.containsKey('last_played_at')) {
       context.handle(
         _lastPlayedAtMeta,
@@ -798,6 +819,10 @@ class $TracksTable extends Tracks with TableInfo<$TracksTable, Track> {
         DriftSqlType.int,
         data['${effectivePrefix}play_count'],
       )!,
+      replayGainDb: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}replay_gain_db'],
+      ),
       lastPlayedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}last_played_at'],
@@ -844,6 +869,7 @@ class Track extends DataClass implements Insertable<Track> {
   final String? sha256;
   final int addedAt;
   final int playCount;
+  final double? replayGainDb;
   final int? lastPlayedAt;
   const Track({
     required this.id,
@@ -878,6 +904,7 @@ class Track extends DataClass implements Insertable<Track> {
     this.sha256,
     required this.addedAt,
     required this.playCount,
+    this.replayGainDb,
     this.lastPlayedAt,
   });
   @override
@@ -949,6 +976,9 @@ class Track extends DataClass implements Insertable<Track> {
     }
     map['added_at'] = Variable<int>(addedAt);
     map['play_count'] = Variable<int>(playCount);
+    if (!nullToAbsent || replayGainDb != null) {
+      map['replay_gain_db'] = Variable<double>(replayGainDb);
+    }
     if (!nullToAbsent || lastPlayedAt != null) {
       map['last_played_at'] = Variable<int>(lastPlayedAt);
     }
@@ -1021,6 +1051,9 @@ class Track extends DataClass implements Insertable<Track> {
           : Value(sha256),
       addedAt: Value(addedAt),
       playCount: Value(playCount),
+      replayGainDb: replayGainDb == null && nullToAbsent
+          ? const Value.absent()
+          : Value(replayGainDb),
       lastPlayedAt: lastPlayedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(lastPlayedAt),
@@ -1065,6 +1098,7 @@ class Track extends DataClass implements Insertable<Track> {
       sha256: serializer.fromJson<String?>(json['sha256']),
       addedAt: serializer.fromJson<int>(json['addedAt']),
       playCount: serializer.fromJson<int>(json['playCount']),
+      replayGainDb: serializer.fromJson<double?>(json['replayGainDb']),
       lastPlayedAt: serializer.fromJson<int?>(json['lastPlayedAt']),
     );
   }
@@ -1104,6 +1138,7 @@ class Track extends DataClass implements Insertable<Track> {
       'sha256': serializer.toJson<String?>(sha256),
       'addedAt': serializer.toJson<int>(addedAt),
       'playCount': serializer.toJson<int>(playCount),
+      'replayGainDb': serializer.toJson<double?>(replayGainDb),
       'lastPlayedAt': serializer.toJson<int?>(lastPlayedAt),
     };
   }
@@ -1141,6 +1176,7 @@ class Track extends DataClass implements Insertable<Track> {
     Value<String?> sha256 = const Value.absent(),
     int? addedAt,
     int? playCount,
+    Value<double?> replayGainDb = const Value.absent(),
     Value<int?> lastPlayedAt = const Value.absent(),
   }) => Track(
     id: id ?? this.id,
@@ -1175,6 +1211,7 @@ class Track extends DataClass implements Insertable<Track> {
     sha256: sha256.present ? sha256.value : this.sha256,
     addedAt: addedAt ?? this.addedAt,
     playCount: playCount ?? this.playCount,
+    replayGainDb: replayGainDb.present ? replayGainDb.value : this.replayGainDb,
     lastPlayedAt: lastPlayedAt.present ? lastPlayedAt.value : this.lastPlayedAt,
   );
   Track copyWithCompanion(TracksCompanion data) {
@@ -1235,6 +1272,9 @@ class Track extends DataClass implements Insertable<Track> {
       sha256: data.sha256.present ? data.sha256.value : this.sha256,
       addedAt: data.addedAt.present ? data.addedAt.value : this.addedAt,
       playCount: data.playCount.present ? data.playCount.value : this.playCount,
+      replayGainDb: data.replayGainDb.present
+          ? data.replayGainDb.value
+          : this.replayGainDb,
       lastPlayedAt: data.lastPlayedAt.present
           ? data.lastPlayedAt.value
           : this.lastPlayedAt,
@@ -1276,6 +1316,7 @@ class Track extends DataClass implements Insertable<Track> {
           ..write('sha256: $sha256, ')
           ..write('addedAt: $addedAt, ')
           ..write('playCount: $playCount, ')
+          ..write('replayGainDb: $replayGainDb, ')
           ..write('lastPlayedAt: $lastPlayedAt')
           ..write(')'))
         .toString();
@@ -1315,6 +1356,7 @@ class Track extends DataClass implements Insertable<Track> {
     sha256,
     addedAt,
     playCount,
+    replayGainDb,
     lastPlayedAt,
   ]);
   @override
@@ -1353,6 +1395,7 @@ class Track extends DataClass implements Insertable<Track> {
           other.sha256 == this.sha256 &&
           other.addedAt == this.addedAt &&
           other.playCount == this.playCount &&
+          other.replayGainDb == this.replayGainDb &&
           other.lastPlayedAt == this.lastPlayedAt);
 }
 
@@ -1389,6 +1432,7 @@ class TracksCompanion extends UpdateCompanion<Track> {
   final Value<String?> sha256;
   final Value<int> addedAt;
   final Value<int> playCount;
+  final Value<double?> replayGainDb;
   final Value<int?> lastPlayedAt;
   const TracksCompanion({
     this.id = const Value.absent(),
@@ -1423,6 +1467,7 @@ class TracksCompanion extends UpdateCompanion<Track> {
     this.sha256 = const Value.absent(),
     this.addedAt = const Value.absent(),
     this.playCount = const Value.absent(),
+    this.replayGainDb = const Value.absent(),
     this.lastPlayedAt = const Value.absent(),
   });
   TracksCompanion.insert({
@@ -1458,6 +1503,7 @@ class TracksCompanion extends UpdateCompanion<Track> {
     this.sha256 = const Value.absent(),
     required int addedAt,
     this.playCount = const Value.absent(),
+    this.replayGainDb = const Value.absent(),
     this.lastPlayedAt = const Value.absent(),
   }) : path = Value(path),
        title = Value(title),
@@ -1499,6 +1545,7 @@ class TracksCompanion extends UpdateCompanion<Track> {
     Expression<String>? sha256,
     Expression<int>? addedAt,
     Expression<int>? playCount,
+    Expression<double>? replayGainDb,
     Expression<int>? lastPlayedAt,
   }) {
     return RawValuesInsertable({
@@ -1534,6 +1581,7 @@ class TracksCompanion extends UpdateCompanion<Track> {
       if (sha256 != null) 'sha256': sha256,
       if (addedAt != null) 'added_at': addedAt,
       if (playCount != null) 'play_count': playCount,
+      if (replayGainDb != null) 'replay_gain_db': replayGainDb,
       if (lastPlayedAt != null) 'last_played_at': lastPlayedAt,
     });
   }
@@ -1571,6 +1619,7 @@ class TracksCompanion extends UpdateCompanion<Track> {
     Value<String?>? sha256,
     Value<int>? addedAt,
     Value<int>? playCount,
+    Value<double?>? replayGainDb,
     Value<int?>? lastPlayedAt,
   }) {
     return TracksCompanion(
@@ -1606,6 +1655,7 @@ class TracksCompanion extends UpdateCompanion<Track> {
       sha256: sha256 ?? this.sha256,
       addedAt: addedAt ?? this.addedAt,
       playCount: playCount ?? this.playCount,
+      replayGainDb: replayGainDb ?? this.replayGainDb,
       lastPlayedAt: lastPlayedAt ?? this.lastPlayedAt,
     );
   }
@@ -1709,6 +1759,9 @@ class TracksCompanion extends UpdateCompanion<Track> {
     if (playCount.present) {
       map['play_count'] = Variable<int>(playCount.value);
     }
+    if (replayGainDb.present) {
+      map['replay_gain_db'] = Variable<double>(replayGainDb.value);
+    }
     if (lastPlayedAt.present) {
       map['last_played_at'] = Variable<int>(lastPlayedAt.value);
     }
@@ -1750,6 +1803,7 @@ class TracksCompanion extends UpdateCompanion<Track> {
           ..write('sha256: $sha256, ')
           ..write('addedAt: $addedAt, ')
           ..write('playCount: $playCount, ')
+          ..write('replayGainDb: $replayGainDb, ')
           ..write('lastPlayedAt: $lastPlayedAt')
           ..write(')'))
         .toString();
@@ -2727,6 +2781,7 @@ typedef $$TracksTableCreateCompanionBuilder = TracksCompanion Function({
   Value<String?> sha256,
   required int addedAt,
   Value<int> playCount,
+  Value<double?> replayGainDb,
   Value<int?> lastPlayedAt,
 });
 typedef $$TracksTableUpdateCompanionBuilder = TracksCompanion Function({
@@ -2762,6 +2817,7 @@ typedef $$TracksTableUpdateCompanionBuilder = TracksCompanion Function({
   Value<String?> sha256,
   Value<int> addedAt,
   Value<int> playCount,
+  Value<double?> replayGainDb,
   Value<int?> lastPlayedAt,
 });
 
@@ -2954,6 +3010,11 @@ class $$TracksTableFilterComposer
 
   ColumnFilters<int> get playCount => $composableBuilder(
     column: $table.playCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get replayGainDb => $composableBuilder(
+    column: $table.replayGainDb,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3157,6 +3218,11 @@ class $$TracksTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<double> get replayGainDb => $composableBuilder(
+    column: $table.replayGainDb,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get lastPlayedAt => $composableBuilder(
     column: $table.lastPlayedAt,
     builder: (column) => ColumnOrderings(column),
@@ -3292,6 +3358,11 @@ class $$TracksTableAnnotationComposer
   GeneratedColumn<int> get playCount =>
       $composableBuilder(column: $table.playCount, builder: (column) => column);
 
+  GeneratedColumn<double> get replayGainDb => $composableBuilder(
+    column: $table.replayGainDb,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<int> get lastPlayedAt => $composableBuilder(
     column: $table.lastPlayedAt,
     builder: (column) => column,
@@ -3383,6 +3454,7 @@ class $$TracksTableTableManager
                 Value<String?> sha256 = const Value.absent(),
                 Value<int> addedAt = const Value.absent(),
                 Value<int> playCount = const Value.absent(),
+                Value<double?> replayGainDb = const Value.absent(),
                 Value<int?> lastPlayedAt = const Value.absent(),
               }) => TracksCompanion(
                 id: id,
@@ -3417,6 +3489,7 @@ class $$TracksTableTableManager
                 sha256: sha256,
                 addedAt: addedAt,
                 playCount: playCount,
+                replayGainDb: replayGainDb,
                 lastPlayedAt: lastPlayedAt,
               ),
           createCompanionCallback:
@@ -3453,6 +3526,7 @@ class $$TracksTableTableManager
                 Value<String?> sha256 = const Value.absent(),
                 required int addedAt,
                 Value<int> playCount = const Value.absent(),
+                Value<double?> replayGainDb = const Value.absent(),
                 Value<int?> lastPlayedAt = const Value.absent(),
               }) => TracksCompanion.insert(
                 id: id,
@@ -3487,6 +3561,7 @@ class $$TracksTableTableManager
                 sha256: sha256,
                 addedAt: addedAt,
                 playCount: playCount,
+                replayGainDb: replayGainDb,
                 lastPlayedAt: lastPlayedAt,
               ),
           withReferenceMapper: (p0) => p0

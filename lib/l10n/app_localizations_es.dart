@@ -705,4 +705,14 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get back => 'Atrás';
+
+  @override
+  String get settingsPlayback => 'Reproducción';
+
+  @override
+  String get normalizeVolume => 'Normalizar volumen';
+
+  @override
+  String get normalizeVolumeHint =>
+      'Usa el ReplayGain de los archivos para bajar canciones muy fuertes';
 }

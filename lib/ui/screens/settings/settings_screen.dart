@@ -103,6 +103,14 @@ class SettingsScreen extends ConsumerWidget {
             RadioListTile<String>(value: e.key, title: Text(e.value)),
         ]),
       ),
+      header(l.settingsPlayback),
+      SwitchListTile(
+        title: Text(l.normalizeVolume),
+        subtitle: Text(l.normalizeVolumeHint),
+        value: s.normalizeVolume,
+        onChanged: (v) =>
+            notifier.update((c) => c.copyWith(normalizeVolume: v)),
+      ),
       header(l.settingsLibrary),
       for (final f in folders)
         ListTile(

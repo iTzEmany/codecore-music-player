@@ -210,5 +210,8 @@
   "previousTrack": "Canción anterior",
   "repeat": "Repetir",
   "moreOptions": "Más opciones",
-  "back": "Atrás"
+  "back": "Atrás",
+  "settingsPlayback": "Reproducción",
+  "normalizeVolume": "Normalizar volumen",
+  "normalizeVolumeHint": "Usa el ReplayGain de los archivos para bajar canciones muy fuertes"
 }

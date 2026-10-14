@@ -1367,6 +1367,24 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Indietro'**
   String get back;
+
+  /// No description provided for @settingsPlayback.
+  ///
+  /// In it, this message translates to:
+  /// **'Riproduzione'**
+  String get settingsPlayback;
+
+  /// No description provided for @normalizeVolume.
+  ///
+  /// In it, this message translates to:
+  /// **'Normalizza volume'**
+  String get normalizeVolume;
+
+  /// No description provided for @normalizeVolumeHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Usa il ReplayGain dei file per ridurre i brani troppo forti'**
+  String get normalizeVolumeHint;
 }
 
 class _AppLocalizationsDelegate

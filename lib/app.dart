@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'l10n/app_localizations.dart';
+import 'providers/player_providers.dart';
 import 'providers/settings_providers.dart';
 import 'ui/shell/app_shell.dart';
 import 'ui/theme/app_theme.dart';
@@ -12,6 +13,7 @@ class CodecoreApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final s = ref.watch(settingsProvider);
+    ref.read(audioHandlerProvider).setNormalize(s.normalizeVolume);
     return MaterialApp(
       title: 'Codecore',
       debugShowCheckedModeBanner: false,

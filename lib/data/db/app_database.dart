@@ -12,12 +12,13 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.production() : super(driftDatabase(name: 'codecore'));
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
         onUpgrade: (m, from, to) async {
           if (from < 2) await m.addColumn(playlists, playlists.coverKey);
+          if (from < 3) await m.addColumn(tracks, tracks.replayGainDb);
         },
         beforeOpen: (details) async {
           await customStatement('PRAGMA foreign_keys = ON');

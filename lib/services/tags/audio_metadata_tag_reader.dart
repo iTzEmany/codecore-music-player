@@ -30,10 +30,30 @@ class AudioMetadataTagReader implements TagReader {
         sampleRateHz: m.sampleRate,
         coverBytes: pic?.bytes,
         coverMime: pic?.mimetype,
+        replayGainDb: _replayGain(path),
       );
     } on Object catch (e, st) {
       AppLog.w('tag read failed: $path', e, st);
       return const TagInfo();
+    }
+  }
+
+  double? _replayGain(String path) {
+    try {
+      final tag = readAllMetadata(File(path), getImage: false);
+      return switch (tag) {
+        VorbisMetadata t => parseReplayGain(
+            t.replayGainTrackGain.isEmpty ? null : t.replayGainTrackGain.first),
+        Mp3Metadata t => parseReplayGain(
+            t.customMetadata.entries
+                .where((e) => e.key.toLowerCase() == 'replaygain_track_gain')
+                .map((e) => e.value)
+                .firstOrNull),
+        _ => null,
+      };
+    } on Object catch (e, st) {
+      AppLog.d('replaygain read skipped: $path', e, st);
+      return null;
     }
   }
 
