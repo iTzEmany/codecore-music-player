@@ -140,7 +140,14 @@ class YoutubeService {
       final total = info.size.totalBytes;
       var received = 0;
       try {
-        await for (final chunk in _yt.videos.streamsClient.get(info)) {
+        // YouTube may accept the request and then never send data; fail
+        // instead of leaving the queue stuck forever.
+        final source = _yt.videos.streamsClient.get(info).timeout(
+              const Duration(seconds: 30),
+              onTimeout: (sink) => sink.addError(
+                  const YtException(YtErrorKind.changed, 'stream stalled')),
+            );
+        await for (final chunk in source) {
           if (cancel?.isCancelled ?? false) break;
           sink.add(chunk);
           received += chunk.length;
