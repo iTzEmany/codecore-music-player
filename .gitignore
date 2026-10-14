@@ -1,0 +1,14 @@
+# Claude Code (stato locale dell'obiettivo autonomo)
+.claude/obiettivi/
+.claude/settings.local.json
+
+# Flutter / Dart
+.dart_tool/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# Segreti di firma
+android/key.properties
+*.jks
+*.keystore

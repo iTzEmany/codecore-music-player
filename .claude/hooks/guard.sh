@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+# Guardia PreToolUse: nega ciò che è distruttivo o fuori dal progetto. Exit 2 + messaggio su stderr = negato.
+# Un errore dello script non nega nulla (exit 0).
+set -uo pipefail
+
+input=$(cat)
+tool=$(jq -r '.tool_name // empty' <<<"$input" 2>/dev/null) || exit 0
+proj=${CLAUDE_PROJECT_DIR:-$PWD}
+proj=$(cd "$proj" 2>/dev/null && pwd -P) || exit 0
+
+deny() {
+  echo "Guardia: $1" >&2
+  exit 2
+}
+
+# percorso consentito per le scritture: dentro il progetto o nello scratchpad /tmp/claude-*
+inside() {
+  local p=$1
+  case $p in /*) ;; *) p=$PWD/$p ;; esac
+  p=$(realpath -m -- "$p" 2>/dev/null) || return 1
+  case $p in
+  "$proj" | "$proj"/*) return 0 ;;
+  /tmp/claude-*) return 0 ;;
+  esac
+  return 1
+}
+
+case $tool in
+Edit | Write | MultiEdit | NotebookEdit)
+  f=$(jq -r '.tool_input.file_path // .tool_input.notebook_path // empty' <<<"$input")
+  [ -n "$f" ] || exit 0
+  inside "$f" || deny "scrittura fuori dal progetto negata ($f). Lavora solo dentro $proj."
+  case $(basename "$f") in .env | key.properties | *.jks | *.keystore) deny "file di segreti: non toccarlo." ;; esac
+  ;;
+Bash)
+  c=$(jq -r '.tool_input.command // empty' <<<"$input")
+  [ -n "$c" ] || exit 0
+  grep -Eq '(^|[;&|[:space:]])sudo([[:space:]]|$)' <<<"$c" && deny "sudo: mettilo in «Tocca a te» per l'utente."
+  grep -Eq 'git[[:space:]]+push' <<<"$c" && deny "git push: il lavoro resta in locale."
+  grep -Eq 'git[[:space:]]+(reset[[:space:]]+--hard|clean|checkout[[:space:]]+(--[[:space:]]+)?\.)' <<<"$c" && deny "comando git distruttivo: usa un'alternativa non distruttiva."
+  grep -Eq '(curl|wget)[^|]*\|[[:space:]]*(ba)?sh' <<<"$c" && deny "esecuzione di script scaricati negata."
+  grep -Eq '(^|[[:space:]])(mkfs|dd[[:space:]]+if=|shutdown|reboot)' <<<"$c" && deny "comando di sistema negato."
+  # rm ricorsivo: ogni argomento deve stare dentro il progetto o nello scratchpad
+  if grep -Eq '(^|[;&|[:space:]])rm[[:space:]]+(-[a-zA-Z]*[rR]|--recursive)' <<<"$c"; then
+    for tok in $c; do
+      case $tok in -* | rm | "&&" | ";" | "|") continue ;; esac
+      case $tok in *'$'* | '~'* | '*') deny "rm -r con percorso non verificabile ($tok)." ;; esac
+      case $tok in /* | ./* | ../* | [a-zA-Z0-9_.]*) inside "$tok" || deny "rm -r fuori dal progetto negato ($tok)." ;; esac
+    done
+  fi
+  ;;
+esac
+exit 0
