@@ -1,0 +1,182 @@
+import 'dart:io';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../core/app_log.dart';
+import '../../../core/app_info.dart';
+import '../../../l10n/l10n_ext.dart';
+import '../../../providers/database_providers.dart';
+import '../../../providers/library_providers.dart';
+import '../../../providers/settings_providers.dart';
+import '../../widgets/cover_image.dart';
+import '../library/folders_sheet.dart';
+import 'missing_tracks_screen.dart';
+
+const _languages = {
+  'it': 'Italiano',
+  'en': 'English',
+  'de': 'Deutsch',
+  'es': 'Español',
+};
+
+class SettingsScreen extends ConsumerWidget {
+  const SettingsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    final s = ref.watch(settingsProvider);
+    final notifier = ref.read(settingsProvider.notifier);
+    final folders = ref.watch(foldersProvider).value ?? const [];
+    final missing = ref.watch(missingTracksProvider).value ?? const [];
+    Widget header(String t) => Padding(
+          padding: const EdgeInsets.fromLTRB(16, 20, 16, 4),
+          child: Text(t,
+              style: Theme.of(context)
+                  .textTheme
+                  .titleSmall
+                  ?.copyWith(color: Theme.of(context).colorScheme.primary)),
+        );
+    return ListView(children: [
+      header(l.settingsAppearance),
+      ListTile(
+        title: Text(l.settingsTheme),
+        subtitle: Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: SegmentedButton<String>(
+            showSelectedIcon: false,
+            segments: [
+              ButtonSegment(value: 'oled', label: Text(l.themeOled)),
+              ButtonSegment(value: 'carbon', label: Text(l.themeCarbon)),
+              ButtonSegment(value: 'navy', label: Text(l.themeNavy)),
+              ButtonSegment(value: 'light', label: Text(l.themeLight)),
+            ],
+            selected: {s.theme},
+            onSelectionChanged: (v) =>
+                notifier.update((c) => c.copyWith(theme: v.first)),
+          ),
+        ),
+      ),
+      ListTile(
+        title: Text(l.settingsTextSize),
+        subtitle: Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: SegmentedButton<double>(
+            showSelectedIcon: false,
+            segments: [
+              ButtonSegment(value: 0.9, label: Text(l.textSmall)),
+              ButtonSegment(value: 1.0, label: Text(l.textNormal)),
+              ButtonSegment(value: 1.15, label: Text(l.textLarge)),
+            ],
+            selected: {s.fontScale},
+            onSelectionChanged: (v) =>
+                notifier.update((c) => c.copyWith(fontScale: v.first)),
+          ),
+        ),
+      ),
+      SwitchListTile(
+        title: Text(l.settingsCompact),
+        value: s.compactMode,
+        onChanged: (v) => notifier.update((c) => c.copyWith(compactMode: v)),
+      ),
+      SwitchListTile(
+        title: Text(l.settingsReducedMotion),
+        value: s.reducedMotion,
+        onChanged: (v) => notifier.update((c) => c.copyWith(reducedMotion: v)),
+      ),
+      header(l.settingsLanguage),
+      RadioGroup<String>(
+        groupValue: s.language,
+        onChanged: (v) {
+          if (v != null) notifier.update((c) => c.copyWith(language: v));
+        },
+        child: Column(children: [
+          for (final e in _languages.entries)
+            RadioListTile<String>(value: e.key, title: Text(e.value)),
+        ]),
+      ),
+      header(l.settingsLibrary),
+      for (final f in folders)
+        ListTile(
+          leading: const Icon(Icons.folder),
+          title: Text(f.path, maxLines: 1, overflow: TextOverflow.ellipsis),
+          trailing: IconButton(
+            tooltip: l.removeFolder,
+            icon: const Icon(Icons.delete_outline),
+            onPressed: () => ref.read(folderRepositoryProvider).remove(f.id),
+          ),
+        ),
+      ListTile(
+        leading: const Icon(Icons.create_new_folder),
+        title: Text(l.addFolder),
+        onTap: () => addFolderAndScan(ref),
+      ),
+      ListTile(
+        leading: const Icon(Icons.refresh),
+        title: Text(l.rescanNow),
+        onTap: () => scanWithPermission(ref),
+      ),
+      ListTile(
+        leading: const Icon(Icons.image_not_supported_outlined),
+        title: Text(l.clearCoverCache),
+        onTap: () => _clearCovers(context, ref),
+      ),
+      ListTile(
+        leading: const Icon(Icons.report_problem_outlined),
+        title: Text(l.missingTracksCount(missing.length)),
+        onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(
+            builder: (_) => const MissingTracksScreen())),
+      ),
+      header(l.settingsOnline),
+      SwitchListTile(
+        title: Text(l.autoEnrich),
+        subtitle: Text(l.autoEnrichHint),
+        value: s.autoEnrich,
+        onChanged: (v) => notifier.update((c) => c.copyWith(autoEnrich: v)),
+      ),
+      SwitchListTile(
+        title: Text(l.autoLyrics),
+        subtitle: Text(l.autoLyricsHint),
+        value: s.autoLyrics,
+        onChanged: (v) => notifier.update((c) => c.copyWith(autoLyrics: v)),
+      ),
+      header(l.settingsAbout),
+      ListTile(
+        leading: const Icon(Icons.info_outline),
+        title: Text(l.appVersion(kAppVersion)),
+      ),
+      ListTile(
+        leading: const Icon(Icons.description_outlined),
+        title: Text(l.licenses),
+        onTap: () => showLicensePage(context: context),
+      ),
+      ListTile(
+        leading: const Icon(Icons.person_outline),
+        title: Text(l.personalUse),
+      ),
+    ]);
+  }
+
+  Future<void> _clearCovers(BuildContext context, WidgetRef ref) async {
+    final msg = context.l10n.coverCacheCleared;
+    try {
+      final dir = await ref.read(coversDirProvider.future);
+      if (await dir.exists()) {
+        await for (final e in dir.list()) {
+          if (e is File) await e.delete();
+        }
+      }
+      await ref.read(trackRepositoryProvider).resetCovers();
+      ref.invalidate(coverFileProvider);
+    } on Object catch (e, st) {
+      AppLog.e('clear covers failed', e, st);
+    }
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context)
+      ..clearSnackBars()
+      ..showSnackBar(SnackBar(content: Text(msg)));
+    await scanWithPermission(ref);
+  }
+}
+

@@ -6,6 +6,7 @@ import '../../../providers/player_providers.dart';
 import '../../../services/audio/play_queue.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../widgets/cover_image.dart';
+import '../../widgets/favorite_actions.dart';
 import '../../widgets/format_utils.dart';
 import '../../widgets/quality_badge.dart';
 import 'queue_sheet.dart';
@@ -15,7 +16,8 @@ class NowPlayingScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final track = ref.watch(currentTrackProvider).value;
+    final track = ref.watch(liveCurrentTrackProvider).value ??
+        ref.watch(currentTrackProvider).value;
     final playing = ref.watch(isPlayingProvider).value ?? false;
     final shuffle = ref.watch(shuffleProvider).value ?? false;
     final repeat = ref.watch(repeatProvider).value ?? PlayRepeat.off;
@@ -28,6 +30,15 @@ class NowPlayingScreen extends ConsumerWidget {
             onPressed: () => Navigator.of(context).maybePop()),
         title: Text(context.l10n.nowPlaying),
         actions: [
+          if (track != null)
+            IconButton(
+              tooltip: context.l10n.favorite,
+              onPressed: () => toggleFavorite(context, ref, track),
+              color: track.isFavorite ? scheme.primary : null,
+              icon: Icon(track.isFavorite
+                  ? Icons.favorite
+                  : Icons.favorite_border),
+            ),
           IconButton(
             tooltip: context.l10n.queue,
             icon: const Icon(Icons.queue_music),

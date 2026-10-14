@@ -158,6 +158,28 @@ class TrackRepository {
     );
   }
 
+  Stream<List<Track>> watchMissing() =>
+      (_db.select(_db.tracks)
+            ..where((t) => t.missing.equals(true))
+            ..orderBy([(t) => OrderingTerm.asc(t.path)]))
+          .watch();
+
+  Future<void> deleteTrack(int id) =>
+      (_db.delete(_db.tracks)..where((t) => t.id.equals(id))).go();
+
+  /// Forgets cover info and forces the next scan to re-read every file.
+  Future<void> resetCovers() => _db.update(_db.tracks).write(
+      const TracksCompanion(
+          hasCover: Value(false), coverKey: Value(null), mtimeMs: Value(0)));
+
+  Future<void> setFavorite(int id, bool value) =>
+      (_db.update(_db.tracks)..where((t) => t.id.equals(id)))
+          .write(TracksCompanion(isFavorite: Value(value)));
+
+  Stream<Track?> watchById(int id) =>
+      (_db.select(_db.tracks)..where((t) => t.id.equals(id)))
+          .watchSingleOrNull();
+
   Future<int> countAll() async {
     final c = _db.tracks.id.count();
     final row = await (_db.selectOnly(_db.tracks)..addColumns([c])).getSingle();

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/repositories/track_repository.dart';
@@ -28,7 +29,9 @@ String _sortLabel(BuildContext context, SortOption o) {
 }
 
 class TracksTab extends ConsumerStatefulWidget {
-  const TracksTab({super.key});
+  const TracksTab({super.key, this.favoritesOnly = false});
+
+  final bool favoritesOnly;
 
   @override
   ConsumerState<TracksTab> createState() => _TracksTabState();
@@ -49,15 +52,15 @@ class _TracksTabState extends ConsumerState<TracksTab> {
     _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 250), () {
       ref
-          .read(trackQueryProvider.notifier)
+          .read(trackQueryProvider(widget.favoritesOnly).notifier)
           .update((q) => q.copyWith(text: text));
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final tracks = ref.watch(tracksProvider);
-    final query = ref.watch(trackQueryProvider);
+    final tracks = ref.watch(tracksProvider(widget.favoritesOnly));
+    final query = ref.watch(trackQueryProvider(widget.favoritesOnly));
     final folders = ref.watch(foldersProvider).value;
     final scan = ref.watch(scanStateProvider);
     final compact = ref.watch(settingsProvider).compactMode;
@@ -68,7 +71,8 @@ class _TracksTabState extends ConsumerState<TracksTab> {
           Expanded(
             child: TextField(
               controller: _controller,
-              focusNode: ref.watch(searchFocusProvider),
+              focusNode:
+                  widget.favoritesOnly ? null : ref.watch(searchFocusProvider),
               onChanged: _onChanged,
               decoration: InputDecoration(
                 hintText: context.l10n.searchHint,
@@ -83,7 +87,7 @@ class _TracksTabState extends ConsumerState<TracksTab> {
             icon: const Icon(Icons.sort),
             initialValue: query.sort,
             onSelected: (s) => ref
-                .read(trackQueryProvider.notifier)
+                .read(trackQueryProvider(widget.favoritesOnly).notifier)
                 .update((q) => q.copyWith(sort: s)),
             itemBuilder: (_) => [
               for (final o in SortOption.values)
@@ -98,6 +102,15 @@ class _TracksTabState extends ConsumerState<TracksTab> {
           ),
         ]),
       ),
+      if (scan.error != null && !scan.running)
+        MaterialBanner(
+          content: Text(context.l10n.scanFailed(scan.error!)),
+          actions: [
+            TextButton(
+                onPressed: () => scanWithPermission(ref),
+                child: Text(context.l10n.retry)),
+          ],
+        ),
       if (scan.running)
         LinearProgressIndicator(
           value: (scan.progress == null || scan.progress!.total == 0)
@@ -105,11 +118,23 @@ class _TracksTabState extends ConsumerState<TracksTab> {
               : scan.progress!.done / scan.progress!.total,
         ),
       Expanded(
-        child: tracks.when(
+        child: ref.watch(permissionDeniedProvider)
+            ? EmptyState(
+                icon: Icons.lock,
+                message: context.l10n.permissionExplain,
+                actionLabel: context.l10n.openSettings,
+                onAction: openAppSettings,
+              )
+            : tracks.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (e, _) => Center(child: Text('$e')),
           data: (list) {
             if (list.isEmpty) {
+              if (widget.favoritesOnly && query.text.isEmpty) {
+                return EmptyState(
+                    icon: Icons.favorite_border,
+                    message: context.l10n.noFavorites);
+              }
               if (folders != null && folders.isEmpty) {
                 return EmptyState(
                   icon: Icons.library_music,

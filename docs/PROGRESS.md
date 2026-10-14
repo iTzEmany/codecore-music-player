@@ -44,14 +44,14 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 3.10 Rimozione schermata di debug
 
 ## Fase 4 — Funzioni libreria (`fase-4-funzioni-libreria.md`)
-- [ ] 4.1 Preferiti
-- [ ] 4.2 Playlist
-- [ ] 4.3 Menu azioni brano
-- [ ] 4.4 Modifica info brano
-- [ ] 4.5 Impostazioni
-- [ ] 4.6 Localizzazione it/en/de/es
-- [ ] 4.7 Brani mancanti e stati di errore
-- [ ] 4.8 Ripresa riproduzione
+- [x] 4.1 Preferiti
+- [x] 4.2 Playlist
+- [x] 4.3 Menu azioni brano
+- [x] 4.4 Modifica info brano
+- [x] 4.5 Impostazioni
+- [x] 4.6 Localizzazione it/en/de/es
+- [x] 4.7 Brani mancanti e stati di errore
+- [x] 4.8 Ripresa riproduzione
 
 ## Fase 5 — Online (`fase-5-online.md`)
 - [ ] 5.1 HTTP di base
@@ -91,3 +91,6 @@ L'agente riparte sempre dal primo task non spuntato.
 - 0.3: `generate: true` (l10n) rimandato alla fase 4 (senza ARB `flutter gen-l10n` fallirebbe). `flutter_localizations` già aggiunto.
 - 0.2: MainActivity spostata nel package `com.codecore.player`; `compileSdk = 37` (richiesto da permission_handler_android).
 - 1.2: test con fixture mp3/flac generate con ffmpeg in `test/fixtures/`.
+- 4.5: versione app in `lib/core/app_info.dart` (nessun package_info_plus, non previsto). Cartelle musicali nel DB (tabella folders), non in shared_preferences.
+- 4.6: messaggi di errore del player passano da `PlaybackFailure` (enum) e sono localizzati in UI. Nomi lingua (Italiano/English/…) restano nativi.
+- 4.3/4.4: prova a mano delle azioni (menu ⋯ brano, modifica info) su telefono/desktop.

@@ -153,3 +153,10 @@ final volumeProvider =
 
 final playerFailuresProvider = StreamProvider<PlaybackFailure>(
     (ref) => ref.watch(playerErrorsProvider));
+
+/// Current track kept in sync with DB edits (favourite flag, title, ...).
+final liveCurrentTrackProvider = StreamProvider<Track?>((ref) {
+  final id = ref.watch(currentTrackProvider.select((t) => t.value?.id));
+  if (id == null) return Stream.value(null);
+  return ref.watch(trackRepositoryProvider).watchById(id);
+});

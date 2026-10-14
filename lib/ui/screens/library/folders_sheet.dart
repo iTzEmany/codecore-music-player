@@ -8,7 +8,9 @@ import '../../../providers/library_providers.dart';
 import '../../../l10n/l10n_ext.dart';
 
 Future<void> scanWithPermission(WidgetRef ref) async {
-  if (!await ensureAudioPermission()) return;
+  final ok = await ensureAudioPermission();
+  ref.read(permissionDeniedProvider.notifier).set(!ok);
+  if (!ok) return;
   await ref.read(scanStateProvider.notifier).scanAll();
 }
 

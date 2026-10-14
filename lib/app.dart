@@ -19,6 +19,11 @@ class CodecoreApp extends ConsumerWidget {
       locale: Locale(s.language),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
+      builder: (context, child) => MediaQuery(
+        data: MediaQuery.of(context)
+            .copyWith(disableAnimations: s.reducedMotion),
+        child: child ?? const SizedBox.shrink(),
+      ),
       home: const AppShell(),
     );
   }

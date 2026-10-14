@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/db/app_database.dart';
 import '../../providers/player_providers.dart';
 import 'cover_image.dart';
+import 'favorite_actions.dart';
+import 'track_actions_sheet.dart';
 import 'format_utils.dart';
 
 /// Fixed-height row; pair with `itemExtent` in the list.
@@ -15,13 +17,14 @@ class TrackTile extends StatelessWidget {
     required this.isPlaying,
     required this.onTap,
     this.onMore,
+    this.onFavorite,
     this.compact = false,
   });
 
   final Track track;
   final bool isCurrent, isPlaying, compact;
   final VoidCallback onTap;
-  final VoidCallback? onMore;
+  final VoidCallback? onMore, onFavorite;
 
   @override
   Widget build(BuildContext context) {
@@ -65,10 +68,14 @@ class TrackTile extends StatelessWidget {
             ),
           Text(formatDuration(track.durationMs),
               style: Theme.of(context).textTheme.bodySmall),
-          if (track.isFavorite)
-            Padding(
-              padding: const EdgeInsets.only(left: 8),
-              child: Icon(Icons.favorite, size: 16, color: scheme.primary),
+          if (onFavorite != null)
+            IconButton(
+              onPressed: onFavorite,
+              visualDensity: VisualDensity.compact,
+              icon: Icon(
+                  track.isFavorite ? Icons.favorite : Icons.favorite_border,
+                  size: 20,
+                  color: track.isFavorite ? scheme.primary : null),
             ),
           if (onMore != null)
             IconButton(
@@ -106,7 +113,8 @@ class LiveTrackTile extends ConsumerWidget {
       isCurrent: isCurrent,
       isPlaying: playing,
       onTap: onTap,
-      onMore: onMore,
+      onMore: () => showTrackActions(context, ref, track),
+      onFavorite: () => toggleFavorite(context, ref, track),
       compact: compact,
     );
   }

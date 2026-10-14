@@ -8,7 +8,9 @@ import '../../providers/player_providers.dart';
 import '../../providers/ui_providers.dart';
 import '../../services/audio/codecore_audio_handler.dart';
 import '../screens/library/library_screen.dart';
-import '../screens/placeholder_screen.dart';
+import '../screens/library/tracks_tab.dart';
+import '../screens/playlists/playlists_screen.dart';
+import '../screens/settings/settings_screen.dart';
 import '../../l10n/l10n_ext.dart';
 import '../widgets/mini_player.dart';
 
@@ -81,9 +83,9 @@ class AppShell extends ConsumerWidget {
     final labels = [l.navLibrary, l.navFavorites, l.navPlaylists, l.navSettings];
     final body = IndexedStack(index: index, children: [
       LibraryScreen(),
-      PlaceholderScreen(title: labels[1]),
-      PlaceholderScreen(title: context.l10n.navPlaylists),
-      PlaceholderScreen(title: context.l10n.navSettings),
+      TracksTab(favoritesOnly: true),
+      PlaylistsScreen(),
+      SettingsScreen(),
     ]);
     Widget content = Scaffold(
       body: SafeArea(

@@ -11,6 +11,7 @@ import '../services/covers/cover_store.dart';
 import '../services/scanner/library_scanner.dart';
 import '../services/tags/audio_metadata_tag_reader.dart';
 import '../services/tags/tag_reader.dart';
+import '../services/library/track_editor.dart';
 import 'database_providers.dart';
 
 final tagReaderProvider =
@@ -50,18 +51,25 @@ class TrackQuery {
 }
 
 class TrackQueryNotifier extends Notifier<TrackQuery> {
+  TrackQueryNotifier(this.favoritesOnly);
+
+  final bool favoritesOnly;
+
   @override
-  TrackQuery build() => const TrackQuery();
+  TrackQuery build() => TrackQuery(favoritesOnly: favoritesOnly);
 
   void update(TrackQuery Function(TrackQuery) change) =>
       state = change(state);
 }
 
+/// Argument: favoritesOnly. Each list (all tracks / favourites) keeps its own
+/// search text and sort order.
 final trackQueryProvider =
-    NotifierProvider<TrackQueryNotifier, TrackQuery>(TrackQueryNotifier.new);
+    NotifierProvider.family<TrackQueryNotifier, TrackQuery, bool>(
+        TrackQueryNotifier.new);
 
-final tracksProvider = StreamProvider<List<Track>>((ref) {
-  final q = ref.watch(trackQueryProvider);
+final tracksProvider = StreamProvider.family<List<Track>, bool>((ref, fav) {
+  final q = ref.watch(trackQueryProvider(fav));
   return ref.watch(trackRepositoryProvider).watchTracks(
         query: q.text,
         sort: q.sort,
@@ -135,3 +143,20 @@ final albumTracksProvider = StreamProvider.family<List<Track>, String>(
 
 final artistAlbumsProvider = StreamProvider.family<List<AlbumSummary>, String>(
     (ref, key) => ref.watch(libraryQueriesProvider).watchArtistAlbums(key));
+
+final trackEditorProvider = Provider<TrackEditor>((ref) =>
+    TrackEditor(ref.watch(databaseProvider), ref.watch(tagReaderProvider)));
+
+final missingTracksProvider = StreamProvider<List<Track>>(
+    (ref) => ref.watch(trackRepositoryProvider).watchMissing());
+
+class PermissionDeniedNotifier extends Notifier<bool> {
+  @override
+  bool build() => false;
+
+  void set(bool v) => state = v;
+}
+
+final permissionDeniedProvider =
+    NotifierProvider<PermissionDeniedNotifier, bool>(
+        PermissionDeniedNotifier.new);
