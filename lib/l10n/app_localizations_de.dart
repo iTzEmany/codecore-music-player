@@ -687,4 +687,22 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get sleepCancel => 'Timer abbrechen';
+
+  @override
+  String get pause => 'Pause';
+
+  @override
+  String get nextTrack => 'Nächster Titel';
+
+  @override
+  String get previousTrack => 'Vorheriger Titel';
+
+  @override
+  String get repeat => 'Wiederholen';
+
+  @override
+  String get moreOptions => 'Weitere Optionen';
+
+  @override
+  String get back => 'Zurück';
 }

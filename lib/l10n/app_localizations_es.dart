@@ -687,4 +687,22 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get sleepCancel => 'Cancelar temporizador';
+
+  @override
+  String get pause => 'Pausa';
+
+  @override
+  String get nextTrack => 'Siguiente canción';
+
+  @override
+  String get previousTrack => 'Canción anterior';
+
+  @override
+  String get repeat => 'Repetir';
+
+  @override
+  String get moreOptions => 'Más opciones';
+
+  @override
+  String get back => 'Atrás';
 }

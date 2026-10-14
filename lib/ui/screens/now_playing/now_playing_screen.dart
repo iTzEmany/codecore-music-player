@@ -28,6 +28,7 @@ class NowPlayingScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
+            tooltip: context.l10n.back,
             icon: const Icon(Icons.keyboard_arrow_down),
             onPressed: () => Navigator.of(context).maybePop()),
         title: Text(context.l10n.nowPlaying),
@@ -95,24 +96,29 @@ class NowPlayingScreen extends ConsumerWidget {
                     const _SeekBar(),
                     Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                       IconButton(
+                        tooltip: context.l10n.shuffle,
                         onPressed: ctrl.toggleShuffle,
                         color: shuffle ? scheme.primary : null,
                         icon: const Icon(Icons.shuffle),
                       ),
                       IconButton(
+                          tooltip: context.l10n.previousTrack,
                           iconSize: 36,
                           onPressed: ctrl.previous,
                           icon: const Icon(Icons.skip_previous)),
                       IconButton.filled(
+                        tooltip: playing ? context.l10n.pause : context.l10n.play,
                         iconSize: 44,
                         onPressed: ctrl.togglePlayPause,
                         icon: Icon(playing ? Icons.pause : Icons.play_arrow),
                       ),
                       IconButton(
+                          tooltip: context.l10n.nextTrack,
                           iconSize: 36,
                           onPressed: ctrl.next,
                           icon: const Icon(Icons.skip_next)),
                       IconButton(
+                        tooltip: context.l10n.repeat,
                         onPressed: ctrl.cycleRepeat,
                         color: repeat == PlayRepeat.off ? null : scheme.primary,
                         icon: Icon(repeat == PlayRepeat.one

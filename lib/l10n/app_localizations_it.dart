@@ -687,4 +687,22 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get sleepCancel => 'Annulla timer';
+
+  @override
+  String get pause => 'Pausa';
+
+  @override
+  String get nextTrack => 'Brano successivo';
+
+  @override
+  String get previousTrack => 'Brano precedente';
+
+  @override
+  String get repeat => 'Ripeti';
+
+  @override
+  String get moreOptions => 'Altre opzioni';
+
+  @override
+  String get back => 'Indietro';
 }

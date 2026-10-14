@@ -354,5 +354,11 @@
     }
   },
   "sleepEndOfTrack": "A fine brano",
-  "sleepCancel": "Annulla timer"
+  "sleepCancel": "Annulla timer",
+  "pause": "Pausa",
+  "nextTrack": "Brano successivo",
+  "previousTrack": "Brano precedente",
+  "repeat": "Ripeti",
+  "moreOptions": "Altre opzioni",
+  "back": "Indietro"
 }

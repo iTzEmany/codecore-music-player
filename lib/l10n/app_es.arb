@@ -204,5 +204,11 @@
   "sleepTimer": "Temporizador de apagado",
   "sleepMinutes": "{count} minutos",
   "sleepEndOfTrack": "Al final de la canción",
-  "sleepCancel": "Cancelar temporizador"
+  "sleepCancel": "Cancelar temporizador",
+  "pause": "Pausa",
+  "nextTrack": "Siguiente canción",
+  "previousTrack": "Canción anterior",
+  "repeat": "Repetir",
+  "moreOptions": "Más opciones",
+  "back": "Atrás"
 }

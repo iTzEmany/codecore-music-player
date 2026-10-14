@@ -1331,6 +1331,42 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Annulla timer'**
   String get sleepCancel;
+
+  /// No description provided for @pause.
+  ///
+  /// In it, this message translates to:
+  /// **'Pausa'**
+  String get pause;
+
+  /// No description provided for @nextTrack.
+  ///
+  /// In it, this message translates to:
+  /// **'Brano successivo'**
+  String get nextTrack;
+
+  /// No description provided for @previousTrack.
+  ///
+  /// In it, this message translates to:
+  /// **'Brano precedente'**
+  String get previousTrack;
+
+  /// No description provided for @repeat.
+  ///
+  /// In it, this message translates to:
+  /// **'Ripeti'**
+  String get repeat;
+
+  /// No description provided for @moreOptions.
+  ///
+  /// In it, this message translates to:
+  /// **'Altre opzioni'**
+  String get moreOptions;
+
+  /// No description provided for @back.
+  ///
+  /// In it, this message translates to:
+  /// **'Indietro'**
+  String get back;
 }
 
 class _AppLocalizationsDelegate

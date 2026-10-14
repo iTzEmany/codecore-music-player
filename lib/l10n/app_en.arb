@@ -204,5 +204,11 @@
   "sleepTimer": "Sleep timer",
   "sleepMinutes": "{count} minutes",
   "sleepEndOfTrack": "At end of track",
-  "sleepCancel": "Cancel timer"
+  "sleepCancel": "Cancel timer",
+  "pause": "Pause",
+  "nextTrack": "Next track",
+  "previousTrack": "Previous track",
+  "repeat": "Repeat",
+  "moreOptions": "More options",
+  "back": "Back"
 }

@@ -60,11 +60,14 @@ class MiniPlayer extends ConsumerWidget {
                   ),
                 ),
                 IconButton(
+                  tooltip: playing ? context.l10n.pause : context.l10n.play,
                   onPressed: ctrl.togglePlayPause,
                   icon: Icon(playing ? Icons.pause : Icons.play_arrow),
                 ),
                 IconButton(
-                    onPressed: ctrl.next, icon: const Icon(Icons.skip_next)),
+                    tooltip: context.l10n.nextTrack,
+                    onPressed: ctrl.next,
+                    icon: const Icon(Icons.skip_next)),
               ]),
             ),
           ]),

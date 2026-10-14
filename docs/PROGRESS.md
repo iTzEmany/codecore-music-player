@@ -77,8 +77,8 @@ L'agente riparte sempre dal primo task non spuntato.
 - [ ] 7.2 Gapless
 - [ ] 7.3 ReplayGain
 - [~] 7.4 Controlli multimediali desktop
-- [ ] 7.5 Prestazioni
-- [ ] 7.6 Accessibilità
+- [~] 7.5 Prestazioni
+- [x] 7.6 Accessibilità
 - [~] 7.7 Timer di spegnimento
 - [x] 7.8 Icona e nome app
 - [ ] 7.9 Build di rilascio

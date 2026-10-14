@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../support/app_harness.dart';
 
 void main() {
-  for (final scale in [0.9, 1.15]) {
+  for (final scale in [0.9, 1.15, 1.5]) {
     testWidgets('app builds without errors at text scale $scale', (tester) async {
       tester.view.physicalSize = const Size(400, 800);
       tester.view.devicePixelRatio = 1;

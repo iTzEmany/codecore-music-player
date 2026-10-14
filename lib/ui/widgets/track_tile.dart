@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/db/app_database.dart';
+import '../../l10n/l10n_ext.dart';
 import '../../providers/player_providers.dart';
 import 'cover_image.dart';
 import 'favorite_actions.dart';
@@ -70,6 +71,7 @@ class TrackTile extends StatelessWidget {
               style: Theme.of(context).textTheme.bodySmall),
           if (onFavorite != null)
             IconButton(
+              tooltip: context.l10n.favorite,
               onPressed: onFavorite,
               visualDensity: VisualDensity.compact,
               icon: Icon(
@@ -79,6 +81,7 @@ class TrackTile extends StatelessWidget {
             ),
           if (onMore != null)
             IconButton(
+                tooltip: context.l10n.moreOptions,
                 onPressed: onMore,
                 icon: const Icon(Icons.more_vert),
                 visualDensity: VisualDensity.compact),

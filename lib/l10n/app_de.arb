@@ -204,5 +204,11 @@
   "sleepTimer": "Schlaftimer",
   "sleepMinutes": "{count} Minuten",
   "sleepEndOfTrack": "Am Ende des Titels",
-  "sleepCancel": "Timer abbrechen"
+  "sleepCancel": "Timer abbrechen",
+  "pause": "Pause",
+  "nextTrack": "Nächster Titel",
+  "previousTrack": "Vorheriger Titel",
+  "repeat": "Wiederholen",
+  "moreOptions": "Weitere Optionen",
+  "back": "Zurück"
 }
