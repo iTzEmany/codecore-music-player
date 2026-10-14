@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/repositories/library_queries.dart';
 import '../../../providers/library_providers.dart';
+import '../../../providers/online_providers.dart';
 import '../../../providers/player_providers.dart';
 import '../../../providers/settings_providers.dart';
 import '../../../l10n/l10n_ext.dart';
@@ -24,7 +25,25 @@ class AlbumDetailScreen extends ConsumerWidget {
         ? context.l10n.variousArtists
         : (album.artist ?? context.l10n.unknownArtist);
     return Scaffold(
-      appBar: AppBar(title: Text(album.title ?? context.l10n.unknownAlbum)),
+      appBar: AppBar(
+        title: Text(album.title ?? context.l10n.unknownAlbum),
+        actions: [
+          IconButton(
+            tooltip: context.l10n.enrichAlbum,
+            icon: const Icon(Icons.travel_explore),
+            onPressed: () {
+              final ids = (tracks.value ?? const []).map((t) => t.id).toList();
+              final ok = ref.read(enrichJobProvider.notifier).start(ids);
+              if (!ok) {
+                ScaffoldMessenger.of(context)
+                  ..clearSnackBars()
+                  ..showSnackBar(
+                      SnackBar(content: Text(context.l10n.enrichBusy)));
+              }
+            },
+          ),
+        ],
+      ),
       body: tracks.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('$e')),

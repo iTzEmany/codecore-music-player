@@ -400,4 +400,139 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get reasonNotInLibrary => 'brano non presente in libreria';
+
+  @override
+  String get searchWeb => 'Cerca info sul web';
+
+  @override
+  String get enrichPreviewTitle => 'Anteprima informazioni';
+
+  @override
+  String get currentValue => 'Attuale';
+
+  @override
+  String get proposedValue => 'Proposto';
+
+  @override
+  String get apply => 'Applica';
+
+  @override
+  String get nothingFound => 'Nessuna informazione trovata';
+
+  @override
+  String get userEditedLocked => 'Modificato da te: non viene sovrascritto';
+
+  @override
+  String get fieldCover => 'Copertina';
+
+  @override
+  String get fieldLyrics => 'Testo';
+
+  @override
+  String get fieldCuriosity => 'Curiosità';
+
+  @override
+  String get enrichAlbum => 'Arricchisci album';
+
+  @override
+  String get enrichLibrary => 'Arricchisci tutta la libreria';
+
+  @override
+  String get enrichConfirmTitle => 'Arricchire la libreria?';
+
+  @override
+  String enrichConfirmBody(int count, int minutes) {
+    return '$count brani, circa $minutes minuti. Vengono riempiti solo i campi vuoti.';
+  }
+
+  @override
+  String enrichRunning(int done, int total) {
+    return 'Arricchimento $done/$total';
+  }
+
+  @override
+  String enrichResult(int notFound, int updated) {
+    return '$updated aggiornati, $notFound non trovati';
+  }
+
+  @override
+  String get enrichBusy => 'Un arricchimento è già in corso';
+
+  @override
+  String get serviceUnavailable =>
+      'Servizio non disponibile, riprova più tardi';
+
+  @override
+  String get lyrics => 'Testo';
+
+  @override
+  String get searchLyrics => 'Cerca testo';
+
+  @override
+  String get noLyrics => 'Nessun testo disponibile';
+
+  @override
+  String get lyricsNotFound => 'Testo non trovato';
+
+  @override
+  String get copy => 'Copia';
+
+  @override
+  String get copied => 'Copiato';
+
+  @override
+  String get sourceWikipedia => 'Fonte: Wikipedia (CC BY-SA)';
+
+  @override
+  String get youtube => 'YouTube';
+
+  @override
+  String get ytHint => 'Cerca o incolla un link';
+
+  @override
+  String get ytDownload => 'Scarica';
+
+  @override
+  String get ytAlreadyInLibrary => 'Già in libreria';
+
+  @override
+  String get ytNoResults => 'Nessun risultato';
+
+  @override
+  String get ytQueued => 'In coda';
+
+  @override
+  String get ytDownloading => 'Download in corso';
+
+  @override
+  String get ytDone => 'Completato';
+
+  @override
+  String get ytFailed => 'Non riuscito';
+
+  @override
+  String get ytCancelled => 'Annullato';
+
+  @override
+  String get ytClearCompleted => 'Svuota completati';
+
+  @override
+  String get ytCancel => 'Annulla download';
+
+  @override
+  String get ytErrUnavailable => 'Video non disponibile (età/regione/privato)';
+
+  @override
+  String get ytErrNetwork => 'Rete non disponibile';
+
+  @override
+  String get ytErrChanged =>
+      'YouTube ha cambiato qualcosa: aggiorna l’app o il pacchetto';
+
+  @override
+  String get ytNoFolder => 'Aggiungi prima una cartella musicale';
+
+  @override
+  String get ytLegal =>
+      'Solo per uso personale. Rispetta i diritti d’autore e i termini di YouTube.';
 }

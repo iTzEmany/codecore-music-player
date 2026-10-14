@@ -9,6 +9,7 @@ import '../../widgets/cover_image.dart';
 import '../../widgets/favorite_actions.dart';
 import '../../widgets/format_utils.dart';
 import '../../widgets/quality_badge.dart';
+import '../lyrics/lyrics_screen.dart';
 import 'queue_sheet.dart';
 
 class NowPlayingScreen extends ConsumerWidget {
@@ -39,6 +40,12 @@ class NowPlayingScreen extends ConsumerWidget {
                   ? Icons.favorite
                   : Icons.favorite_border),
             ),
+          IconButton(
+            tooltip: context.l10n.lyrics,
+            icon: const Icon(Icons.lyrics_outlined),
+            onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(builder: (_) => const LyricsScreen())),
+          ),
           IconButton(
             tooltip: context.l10n.queue,
             icon: const Icon(Icons.queue_music),

@@ -12,6 +12,7 @@ import '../screens/library/tracks_tab.dart';
 import '../screens/playlists/playlists_screen.dart';
 import '../screens/settings/settings_screen.dart';
 import '../../l10n/l10n_ext.dart';
+import '../widgets/enrich_job_banner.dart';
 import '../widgets/mini_player.dart';
 
 const _wideBreakpoint = 840.0;
@@ -104,6 +105,7 @@ class AppShell extends ConsumerWidget {
           Expanded(
             child: Column(children: [
               Expanded(child: body),
+              const EnrichJobBanner(),
               const MiniPlayer(),
             ]),
           ),

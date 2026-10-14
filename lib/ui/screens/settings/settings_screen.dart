@@ -8,6 +8,7 @@ import '../../../core/app_info.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/database_providers.dart';
 import '../../../providers/library_providers.dart';
+import '../../../providers/online_providers.dart';
 import '../../../providers/settings_providers.dart';
 import '../../widgets/cover_image.dart';
 import '../library/folders_sheet.dart';
@@ -129,6 +130,11 @@ class SettingsScreen extends ConsumerWidget {
             builder: (_) => const MissingTracksScreen())),
       ),
       header(l.settingsOnline),
+      ListTile(
+        leading: const Icon(Icons.travel_explore),
+        title: Text(l.enrichLibrary),
+        onTap: () => _enrichLibrary(context, ref),
+      ),
       SwitchListTile(
         title: Text(l.autoEnrich),
         subtitle: Text(l.autoEnrichHint),
@@ -156,6 +162,38 @@ class SettingsScreen extends ConsumerWidget {
         title: Text(l.personalUse),
       ),
     ]);
+  }
+
+  Future<void> _enrichLibrary(BuildContext context, WidgetRef ref) async {
+    final l = context.l10n;
+    final ids = (await ref.read(tracksProvider(false).future))
+        .where((t) => t.enrichStatus != 2)
+        .map((t) => t.id)
+        .toList();
+    if (!context.mounted) return;
+    final minutes = (ids.length * 3 / 60).ceil();
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (c) => AlertDialog(
+        title: Text(l.enrichConfirmTitle),
+        content: Text(l.enrichConfirmBody(ids.length, minutes)),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.of(c).pop(false),
+              child: Text(l.cancel)),
+          FilledButton(
+              onPressed: () => Navigator.of(c).pop(true),
+              child: Text(l.apply)),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    final started = ref.read(enrichJobProvider.notifier).start(ids);
+    if (!started && context.mounted) {
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(SnackBar(content: Text(l.enrichBusy)));
+    }
   }
 
   Future<void> _clearCovers(BuildContext context, WidgetRef ref) async {

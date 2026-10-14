@@ -172,5 +172,77 @@
   },
   "reasonFileMissing": "file non trovato",
   "reasonUnplayable": "file non riproducibile",
-  "reasonNotInLibrary": "brano non presente in libreria"
+  "reasonNotInLibrary": "brano non presente in libreria",
+  "searchWeb": "Cerca info sul web",
+  "enrichPreviewTitle": "Anteprima informazioni",
+  "currentValue": "Attuale",
+  "proposedValue": "Proposto",
+  "apply": "Applica",
+  "nothingFound": "Nessuna informazione trovata",
+  "userEditedLocked": "Modificato da te: non viene sovrascritto",
+  "fieldCover": "Copertina",
+  "fieldLyrics": "Testo",
+  "fieldCuriosity": "Curiosità",
+  "enrichAlbum": "Arricchisci album",
+  "enrichLibrary": "Arricchisci tutta la libreria",
+  "enrichConfirmTitle": "Arricchire la libreria?",
+  "enrichConfirmBody": "{count} brani, circa {minutes} minuti. Vengono riempiti solo i campi vuoti.",
+  "@enrichConfirmBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "enrichRunning": "Arricchimento {done}/{total}",
+  "@enrichRunning": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "enrichResult": "{updated} aggiornati, {notFound} non trovati",
+  "@enrichResult": {
+    "placeholders": {
+      "notFound": {
+        "type": "int"
+      },
+      "updated": {
+        "type": "int"
+      }
+    }
+  },
+  "enrichBusy": "Un arricchimento è già in corso",
+  "serviceUnavailable": "Servizio non disponibile, riprova più tardi",
+  "lyrics": "Testo",
+  "searchLyrics": "Cerca testo",
+  "noLyrics": "Nessun testo disponibile",
+  "lyricsNotFound": "Testo non trovato",
+  "copy": "Copia",
+  "copied": "Copiato",
+  "sourceWikipedia": "Fonte: Wikipedia (CC BY-SA)",
+  "youtube": "YouTube",
+  "ytHint": "Cerca o incolla un link",
+  "ytDownload": "Scarica",
+  "ytAlreadyInLibrary": "Già in libreria",
+  "ytNoResults": "Nessun risultato",
+  "ytQueued": "In coda",
+  "ytDownloading": "Download in corso",
+  "ytDone": "Completato",
+  "ytFailed": "Non riuscito",
+  "ytCancelled": "Annullato",
+  "ytClearCompleted": "Svuota completati",
+  "ytCancel": "Annulla download",
+  "ytErrUnavailable": "Video non disponibile (età/regione/privato)",
+  "ytErrNetwork": "Rete non disponibile",
+  "ytErrChanged": "YouTube ha cambiato qualcosa: aggiorna l’app o il pacchetto",
+  "ytNoFolder": "Aggiungi prima una cartella musicale",
+  "ytLegal": "Solo per uso personale. Rispetta i diritti d’autore e i termini di YouTube."
 }

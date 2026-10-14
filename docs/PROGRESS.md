@@ -59,9 +59,9 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 5.3 Client iTunes (+ test)
 - [x] 5.4 Client LRCLIB + parser LRC (+ test)
 - [x] 5.5 Client Wikipedia
-- [ ] 5.6 EnrichmentService (+ test)
-- [ ] 5.7 UI arricchimento
-- [ ] 5.8 Schermata testi
+- [x] 5.6 EnrichmentService (+ test)
+- [x] 5.7 UI arricchimento
+- [x] 5.8 Schermata testi
 - [ ] 5.9 YoutubeService
 - [ ] 5.10 Coda di download
 - [ ] 5.11 Schermata YouTube

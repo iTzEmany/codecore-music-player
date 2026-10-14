@@ -19,15 +19,19 @@ class CoverStore {
       sha1.convert(utf8.encode(albumKey)).toString();
 
   /// Writes the image once per album and returns its `coverKey`.
-  Future<String?> saveFromBytes(
-      String albumKey, List<int> bytes, String? mime) async {
+  Future<String?> saveFromBytes(String albumKey, List<int> bytes, String? mime,
+      {bool overwrite = false}) async {
     if (bytes.isEmpty) return null;
     if (bytes.length > maxBytes) {
       AppLog.w('cover too large (${bytes.length} B) for $albumKey, skipped');
       return null;
     }
     final key = coverKeyFor(albumKey);
-    if (fileFor(key) != null) return key;
+    final existing = fileFor(key);
+    if (existing != null) {
+      if (!overwrite) return key;
+      await existing.delete();
+    }
     final ext = (mime ?? '').toLowerCase().contains('png') ? 'png' : 'jpg';
     try {
       await dir.create(recursive: true);

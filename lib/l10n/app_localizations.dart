@@ -827,6 +827,258 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'brano non presente in libreria'**
   String get reasonNotInLibrary;
+
+  /// No description provided for @searchWeb.
+  ///
+  /// In it, this message translates to:
+  /// **'Cerca info sul web'**
+  String get searchWeb;
+
+  /// No description provided for @enrichPreviewTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Anteprima informazioni'**
+  String get enrichPreviewTitle;
+
+  /// No description provided for @currentValue.
+  ///
+  /// In it, this message translates to:
+  /// **'Attuale'**
+  String get currentValue;
+
+  /// No description provided for @proposedValue.
+  ///
+  /// In it, this message translates to:
+  /// **'Proposto'**
+  String get proposedValue;
+
+  /// No description provided for @apply.
+  ///
+  /// In it, this message translates to:
+  /// **'Applica'**
+  String get apply;
+
+  /// No description provided for @nothingFound.
+  ///
+  /// In it, this message translates to:
+  /// **'Nessuna informazione trovata'**
+  String get nothingFound;
+
+  /// No description provided for @userEditedLocked.
+  ///
+  /// In it, this message translates to:
+  /// **'Modificato da te: non viene sovrascritto'**
+  String get userEditedLocked;
+
+  /// No description provided for @fieldCover.
+  ///
+  /// In it, this message translates to:
+  /// **'Copertina'**
+  String get fieldCover;
+
+  /// No description provided for @fieldLyrics.
+  ///
+  /// In it, this message translates to:
+  /// **'Testo'**
+  String get fieldLyrics;
+
+  /// No description provided for @fieldCuriosity.
+  ///
+  /// In it, this message translates to:
+  /// **'Curiosità'**
+  String get fieldCuriosity;
+
+  /// No description provided for @enrichAlbum.
+  ///
+  /// In it, this message translates to:
+  /// **'Arricchisci album'**
+  String get enrichAlbum;
+
+  /// No description provided for @enrichLibrary.
+  ///
+  /// In it, this message translates to:
+  /// **'Arricchisci tutta la libreria'**
+  String get enrichLibrary;
+
+  /// No description provided for @enrichConfirmTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Arricchire la libreria?'**
+  String get enrichConfirmTitle;
+
+  /// No description provided for @enrichConfirmBody.
+  ///
+  /// In it, this message translates to:
+  /// **'{count} brani, circa {minutes} minuti. Vengono riempiti solo i campi vuoti.'**
+  String enrichConfirmBody(int count, int minutes);
+
+  /// No description provided for @enrichRunning.
+  ///
+  /// In it, this message translates to:
+  /// **'Arricchimento {done}/{total}'**
+  String enrichRunning(int done, int total);
+
+  /// No description provided for @enrichResult.
+  ///
+  /// In it, this message translates to:
+  /// **'{updated} aggiornati, {notFound} non trovati'**
+  String enrichResult(int notFound, int updated);
+
+  /// No description provided for @enrichBusy.
+  ///
+  /// In it, this message translates to:
+  /// **'Un arricchimento è già in corso'**
+  String get enrichBusy;
+
+  /// No description provided for @serviceUnavailable.
+  ///
+  /// In it, this message translates to:
+  /// **'Servizio non disponibile, riprova più tardi'**
+  String get serviceUnavailable;
+
+  /// No description provided for @lyrics.
+  ///
+  /// In it, this message translates to:
+  /// **'Testo'**
+  String get lyrics;
+
+  /// No description provided for @searchLyrics.
+  ///
+  /// In it, this message translates to:
+  /// **'Cerca testo'**
+  String get searchLyrics;
+
+  /// No description provided for @noLyrics.
+  ///
+  /// In it, this message translates to:
+  /// **'Nessun testo disponibile'**
+  String get noLyrics;
+
+  /// No description provided for @lyricsNotFound.
+  ///
+  /// In it, this message translates to:
+  /// **'Testo non trovato'**
+  String get lyricsNotFound;
+
+  /// No description provided for @copy.
+  ///
+  /// In it, this message translates to:
+  /// **'Copia'**
+  String get copy;
+
+  /// No description provided for @copied.
+  ///
+  /// In it, this message translates to:
+  /// **'Copiato'**
+  String get copied;
+
+  /// No description provided for @sourceWikipedia.
+  ///
+  /// In it, this message translates to:
+  /// **'Fonte: Wikipedia (CC BY-SA)'**
+  String get sourceWikipedia;
+
+  /// No description provided for @youtube.
+  ///
+  /// In it, this message translates to:
+  /// **'YouTube'**
+  String get youtube;
+
+  /// No description provided for @ytHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Cerca o incolla un link'**
+  String get ytHint;
+
+  /// No description provided for @ytDownload.
+  ///
+  /// In it, this message translates to:
+  /// **'Scarica'**
+  String get ytDownload;
+
+  /// No description provided for @ytAlreadyInLibrary.
+  ///
+  /// In it, this message translates to:
+  /// **'Già in libreria'**
+  String get ytAlreadyInLibrary;
+
+  /// No description provided for @ytNoResults.
+  ///
+  /// In it, this message translates to:
+  /// **'Nessun risultato'**
+  String get ytNoResults;
+
+  /// No description provided for @ytQueued.
+  ///
+  /// In it, this message translates to:
+  /// **'In coda'**
+  String get ytQueued;
+
+  /// No description provided for @ytDownloading.
+  ///
+  /// In it, this message translates to:
+  /// **'Download in corso'**
+  String get ytDownloading;
+
+  /// No description provided for @ytDone.
+  ///
+  /// In it, this message translates to:
+  /// **'Completato'**
+  String get ytDone;
+
+  /// No description provided for @ytFailed.
+  ///
+  /// In it, this message translates to:
+  /// **'Non riuscito'**
+  String get ytFailed;
+
+  /// No description provided for @ytCancelled.
+  ///
+  /// In it, this message translates to:
+  /// **'Annullato'**
+  String get ytCancelled;
+
+  /// No description provided for @ytClearCompleted.
+  ///
+  /// In it, this message translates to:
+  /// **'Svuota completati'**
+  String get ytClearCompleted;
+
+  /// No description provided for @ytCancel.
+  ///
+  /// In it, this message translates to:
+  /// **'Annulla download'**
+  String get ytCancel;
+
+  /// No description provided for @ytErrUnavailable.
+  ///
+  /// In it, this message translates to:
+  /// **'Video non disponibile (età/regione/privato)'**
+  String get ytErrUnavailable;
+
+  /// No description provided for @ytErrNetwork.
+  ///
+  /// In it, this message translates to:
+  /// **'Rete non disponibile'**
+  String get ytErrNetwork;
+
+  /// No description provided for @ytErrChanged.
+  ///
+  /// In it, this message translates to:
+  /// **'YouTube ha cambiato qualcosa: aggiorna l’app o il pacchetto'**
+  String get ytErrChanged;
+
+  /// No description provided for @ytNoFolder.
+  ///
+  /// In it, this message translates to:
+  /// **'Aggiungi prima una cartella musicale'**
+  String get ytNoFolder;
+
+  /// No description provided for @ytLegal.
+  ///
+  /// In it, this message translates to:
+  /// **'Solo per uso personale. Rispetta i diritti d’autore e i termini di YouTube.'**
+  String get ytLegal;
 }
 
 class _AppLocalizationsDelegate
