@@ -67,8 +67,8 @@ L'agente riparte sempre dal primo task non spuntato.
 - [~] 5.11 Schermata YouTube
 
 ## Fase 6 — Condivisione LAN, opzionale (`fase-6-condivisione-lan.md`)
-- [ ] 6.1 Server
-- [ ] 6.2 Client
+- [x] 6.1 Server
+- [x] 6.2 Client
 - [ ] 6.3 UI
 - [ ] 6.4 Integrazione
 
