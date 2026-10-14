@@ -259,5 +259,69 @@
       }
     }
   },
-  "allSongsInPlaylist": "Tutti i brani sono già nella playlist"
+  "allSongsInPlaylist": "Tutti i brani sono già nella playlist",
+  "shareTitle": "Condivisione",
+  "shareSend": "Invia",
+  "shareReceive": "Ricevi",
+  "shareAll": "Tutta la libreria",
+  "shareSelection": "Selezione ({count} brani)",
+  "@shareSelection": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sharePick": "Scegli brani",
+  "shareStart": "Avvia condivisione",
+  "shareStop": "Ferma",
+  "shareActive": "Condivisione attiva",
+  "shareAddress": "Indirizzo (IP:porta)",
+  "sharePin": "PIN",
+  "shareConnect": "Connetti",
+  "shareDownloadSelected": "Scarica selezionati ({count})",
+  "@shareDownloadSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shareProgress": "Brano {done} di {total}",
+  "@shareProgress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "shareDone": "{count} brani ricevuti",
+  "@shareDone": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shareConnectedTo": "Connesso a {name}",
+  "@shareConnectedTo": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shareErrUnreachable": "Dispositivo non raggiungibile: controlla indirizzo e Wi‑Fi",
+  "shareErrPin": "PIN errato",
+  "shareErrBlocked": "Troppi tentativi: riprova tra un minuto",
+  "shareErrNotCodecore": "Non è un dispositivo Codecore",
+  "shareErrFailed": "Trasferimento non riuscito",
+  "shareNoNetwork": "Nessuna rete locale trovata",
+  "shareFirewall": "Windows può chiedere il permesso del firewall alla prima condivisione.",
+  "shareHint": "Sullo stesso Wi‑Fi, apri «Ricevi» sull’altro dispositivo e inserisci indirizzo e PIN.",
+  "shareMenu": "Condividi…",
+  "shareDeviceName": "Nome dispositivo"
 }

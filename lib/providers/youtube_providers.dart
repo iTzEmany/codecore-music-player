@@ -9,6 +9,7 @@ import '../core/app_log.dart';
 import '../core/paths.dart';
 import '../core/platform.dart';
 import '../data/db/app_database.dart';
+import '../data/repositories/folder_repository.dart';
 import '../services/online/download_index.dart';
 import '../services/online/download_queue.dart';
 import '../services/online/android_yt_dlp_service.dart';
@@ -33,8 +34,8 @@ final downloadIndexProvider = FutureProvider<DownloadIndex>((ref) async {
 });
 
 /// Destination folder for downloads, registered as a scanned folder.
-Future<(Directory, Folder)?> resolveDownloadFolder(Ref ref) async {
-  final res = await _resolveDownloadFolder(ref);
+Future<(Directory, Folder)?> resolveDownloadFolder(FolderRepository repo) async {
+  final res = await _resolveDownloadFolder(repo);
   if (res != null) await _removeStalePartFiles(res.$1);
   return res;
 }
@@ -51,8 +52,7 @@ Future<void> _removeStalePartFiles(Directory dir) async {
   }
 }
 
-Future<(Directory, Folder)?> _resolveDownloadFolder(Ref ref) async {
-  final repo = ref.read(folderRepositoryProvider);
+Future<(Directory, Folder)?> _resolveDownloadFolder(FolderRepository repo) async {
   if (isAndroid) {
     final ext = await getExternalStorageDirectory();
     if (ext == null) return null;
@@ -75,7 +75,7 @@ class DownloadsNotifier extends Notifier<List<DownloadItem>> {
     _queue = DownloadQueue(
       downloader: (r, dir, cancel) => yt.download(r, dir, cancel: cancel),
       outDir: () async {
-        final res = await resolveDownloadFolder(ref);
+        final res = await resolveDownloadFolder(ref.read(folderRepositoryProvider));
         folder = res?.$2;
         return res?.$1;
       },

@@ -562,4 +562,96 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get allSongsInPlaylist => 'Alle Titel sind bereits in der Playlist';
+
+  @override
+  String get shareTitle => 'Teilen';
+
+  @override
+  String get shareSend => 'Senden';
+
+  @override
+  String get shareReceive => 'Empfangen';
+
+  @override
+  String get shareAll => 'Ganze Bibliothek';
+
+  @override
+  String shareSelection(int count) {
+    return 'Auswahl ($count Titel)';
+  }
+
+  @override
+  String get sharePick => 'Titel wählen';
+
+  @override
+  String get shareStart => 'Freigabe starten';
+
+  @override
+  String get shareStop => 'Stopp';
+
+  @override
+  String get shareActive => 'Freigabe aktiv';
+
+  @override
+  String get shareAddress => 'Adresse (IP:Port)';
+
+  @override
+  String get sharePin => 'PIN';
+
+  @override
+  String get shareConnect => 'Verbinden';
+
+  @override
+  String shareDownloadSelected(int count) {
+    return 'Auswahl herunterladen ($count)';
+  }
+
+  @override
+  String shareProgress(int done, int total) {
+    return 'Titel $done von $total';
+  }
+
+  @override
+  String shareDone(int count) {
+    return '$count Titel empfangen';
+  }
+
+  @override
+  String shareConnectedTo(String name) {
+    return 'Verbunden mit $name';
+  }
+
+  @override
+  String get shareErrUnreachable =>
+      'Gerät nicht erreichbar: Adresse und WLAN prüfen';
+
+  @override
+  String get shareErrPin => 'Falsche PIN';
+
+  @override
+  String get shareErrBlocked =>
+      'Zu viele Versuche: in einer Minute erneut versuchen';
+
+  @override
+  String get shareErrNotCodecore => 'Kein Codecore-Gerät';
+
+  @override
+  String get shareErrFailed => 'Übertragung fehlgeschlagen';
+
+  @override
+  String get shareNoNetwork => 'Kein lokales Netzwerk gefunden';
+
+  @override
+  String get shareFirewall =>
+      'Windows fragt beim ersten Mal ggf. nach der Firewall-Freigabe.';
+
+  @override
+  String get shareHint =>
+      'Im selben WLAN auf dem anderen Gerät „Empfangen“ öffnen und Adresse und PIN eingeben.';
+
+  @override
+  String get shareMenu => 'Teilen…';
+
+  @override
+  String get shareDeviceName => 'Gerätename';
 }

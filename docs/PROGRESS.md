@@ -69,8 +69,8 @@ L'agente riparte sempre dal primo task non spuntato.
 ## Fase 6 — Condivisione LAN, opzionale (`fase-6-condivisione-lan.md`)
 - [x] 6.1 Server
 - [x] 6.2 Client
-- [ ] 6.3 UI
-- [ ] 6.4 Integrazione
+- [~] 6.3 UI
+- [x] 6.4 Integrazione
 
 ## Fase 7 — Rifinitura (`fase-7-rifinitura.md`)
 - [ ] 7.1 Import dal vecchio DB Python

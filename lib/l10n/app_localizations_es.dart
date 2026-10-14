@@ -563,4 +563,95 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get allSongsInPlaylist => 'Todas las canciones ya están en la lista';
+
+  @override
+  String get shareTitle => 'Compartir';
+
+  @override
+  String get shareSend => 'Enviar';
+
+  @override
+  String get shareReceive => 'Recibir';
+
+  @override
+  String get shareAll => 'Toda la biblioteca';
+
+  @override
+  String shareSelection(int count) {
+    return 'Selección ($count canciones)';
+  }
+
+  @override
+  String get sharePick => 'Elegir canciones';
+
+  @override
+  String get shareStart => 'Iniciar compartición';
+
+  @override
+  String get shareStop => 'Detener';
+
+  @override
+  String get shareActive => 'Compartición activa';
+
+  @override
+  String get shareAddress => 'Dirección (IP:puerto)';
+
+  @override
+  String get sharePin => 'PIN';
+
+  @override
+  String get shareConnect => 'Conectar';
+
+  @override
+  String shareDownloadSelected(int count) {
+    return 'Descargar seleccionadas ($count)';
+  }
+
+  @override
+  String shareProgress(int done, int total) {
+    return 'Canción $done de $total';
+  }
+
+  @override
+  String shareDone(int count) {
+    return '$count canciones recibidas';
+  }
+
+  @override
+  String shareConnectedTo(String name) {
+    return 'Conectado a $name';
+  }
+
+  @override
+  String get shareErrUnreachable =>
+      'Dispositivo inaccesible: revisa la dirección y el Wi‑Fi';
+
+  @override
+  String get shareErrPin => 'PIN incorrecto';
+
+  @override
+  String get shareErrBlocked => 'Demasiados intentos: reintenta en un minuto';
+
+  @override
+  String get shareErrNotCodecore => 'No es un dispositivo Codecore';
+
+  @override
+  String get shareErrFailed => 'Transferencia fallida';
+
+  @override
+  String get shareNoNetwork => 'No se encontró red local';
+
+  @override
+  String get shareFirewall =>
+      'Windows puede pedir permiso del firewall la primera vez.';
+
+  @override
+  String get shareHint =>
+      'En la misma Wi‑Fi, abre «Recibir» en el otro dispositivo e introduce dirección y PIN.';
+
+  @override
+  String get shareMenu => 'Compartir…';
+
+  @override
+  String get shareDeviceName => 'Nombre del dispositivo';
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../data/db/app_database.dart';
 import '../../../data/repositories/library_queries.dart';
 import '../../../providers/library_providers.dart';
 import '../../../providers/online_providers.dart';
@@ -9,6 +10,7 @@ import '../../../providers/settings_providers.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/cover_image.dart';
+import '../share/share_screen.dart';
 import '../../widgets/format_utils.dart';
 import '../../widgets/track_tile.dart';
 
@@ -28,6 +30,14 @@ class AlbumDetailScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(album.title ?? context.l10n.unknownAlbum),
         actions: [
+          IconButton(
+            tooltip: context.l10n.shareMenu,
+            icon: const Icon(Icons.wifi_tethering),
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(
+                builder: (_) => ShareScreen(initialTrackIds: [
+                      for (final t in tracks.value ?? const <Track>[]) t.id
+                    ]))),
+          ),
           IconButton(
             tooltip: context.l10n.enrichAlbum,
             icon: const Icon(Icons.travel_explore),

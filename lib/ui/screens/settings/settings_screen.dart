@@ -12,6 +12,9 @@ import '../../../providers/online_providers.dart';
 import '../../../providers/settings_providers.dart';
 import '../../widgets/cover_image.dart';
 import '../library/folders_sheet.dart';
+import '../../../providers/share_providers.dart';
+import '../playlists/playlist_dialogs.dart';
+import '../share/share_screen.dart';
 import 'missing_tracks_screen.dart';
 
 const _languages = {
@@ -129,6 +132,19 @@ class SettingsScreen extends ConsumerWidget {
         onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(
             builder: (_) => const MissingTracksScreen())),
       ),
+      header(l.shareTitle),
+      ListTile(
+        leading: const Icon(Icons.wifi_tethering),
+        title: Text(l.shareTitle),
+        onTap: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(builder: (_) => const ShareScreen())),
+      ),
+      ListTile(
+        leading: const Icon(Icons.badge_outlined),
+        title: Text(l.shareDeviceName),
+        subtitle: Text(ref.watch(deviceNameProvider)),
+        onTap: () => _editDeviceName(context, ref),
+      ),
       header(l.settingsOnline),
       ListTile(
         leading: const Icon(Icons.travel_explore),
@@ -162,6 +178,16 @@ class SettingsScreen extends ConsumerWidget {
         title: Text(l.personalUse),
       ),
     ]);
+  }
+
+  Future<void> _editDeviceName(BuildContext context, WidgetRef ref) async {
+    final l = context.l10n;
+    final name = await askPlaylistName(context,
+        initial: ref.read(deviceNameProvider), confirmLabel: l.save);
+    if (name == null) return;
+    ref
+        .read(settingsProvider.notifier)
+        .update((s) => s.copyWith(deviceName: name));
   }
 
   Future<void> _enrichLibrary(BuildContext context, WidgetRef ref) async {

@@ -561,4 +561,95 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get allSongsInPlaylist => 'All songs are already in the playlist';
+
+  @override
+  String get shareTitle => 'Sharing';
+
+  @override
+  String get shareSend => 'Send';
+
+  @override
+  String get shareReceive => 'Receive';
+
+  @override
+  String get shareAll => 'Whole library';
+
+  @override
+  String shareSelection(int count) {
+    return 'Selection ($count tracks)';
+  }
+
+  @override
+  String get sharePick => 'Choose tracks';
+
+  @override
+  String get shareStart => 'Start sharing';
+
+  @override
+  String get shareStop => 'Stop';
+
+  @override
+  String get shareActive => 'Sharing is on';
+
+  @override
+  String get shareAddress => 'Address (IP:port)';
+
+  @override
+  String get sharePin => 'PIN';
+
+  @override
+  String get shareConnect => 'Connect';
+
+  @override
+  String shareDownloadSelected(int count) {
+    return 'Download selected ($count)';
+  }
+
+  @override
+  String shareProgress(int done, int total) {
+    return 'Track $done of $total';
+  }
+
+  @override
+  String shareDone(int count) {
+    return '$count tracks received';
+  }
+
+  @override
+  String shareConnectedTo(String name) {
+    return 'Connected to $name';
+  }
+
+  @override
+  String get shareErrUnreachable =>
+      'Device unreachable: check address and Wi‑Fi';
+
+  @override
+  String get shareErrPin => 'Wrong PIN';
+
+  @override
+  String get shareErrBlocked => 'Too many attempts: retry in a minute';
+
+  @override
+  String get shareErrNotCodecore => 'Not a Codecore device';
+
+  @override
+  String get shareErrFailed => 'Transfer failed';
+
+  @override
+  String get shareNoNetwork => 'No local network found';
+
+  @override
+  String get shareFirewall =>
+      'Windows may ask for firewall permission the first time.';
+
+  @override
+  String get shareHint =>
+      'On the same Wi‑Fi, open “Receive” on the other device and enter address and PIN.';
+
+  @override
+  String get shareMenu => 'Share…';
+
+  @override
+  String get shareDeviceName => 'Device name';
 }

@@ -12,12 +12,16 @@ class AppSettings {
     this.autoEnrich = false,
     this.autoLyrics = false,
     this.showUndoSnackbar = true,
+    this.deviceName,
   });
 
   final String theme;
   final double fontScale;
   final bool compactMode, reducedMotion, autoEnrich, autoLyrics, showUndoSnackbar;
   final String language;
+
+  /// Shown to the device on the other side of a LAN share; null = hostname.
+  final String? deviceName;
 
   AppSettings copyWith({
     String? theme,
@@ -28,6 +32,7 @@ class AppSettings {
     bool? autoEnrich,
     bool? autoLyrics,
     bool? showUndoSnackbar,
+    String? deviceName,
   }) =>
       AppSettings(
         theme: theme ?? this.theme,
@@ -38,6 +43,7 @@ class AppSettings {
         autoEnrich: autoEnrich ?? this.autoEnrich,
         autoLyrics: autoLyrics ?? this.autoLyrics,
         showUndoSnackbar: showUndoSnackbar ?? this.showUndoSnackbar,
+        deviceName: deviceName ?? this.deviceName,
       );
 }
 
@@ -75,6 +81,7 @@ class SettingsStore {
         autoEnrich: _prefs.getBool('autoEnrich') ?? false,
         autoLyrics: _prefs.getBool('autoLyrics') ?? false,
         showUndoSnackbar: _prefs.getBool('showUndoSnackbar') ?? true,
+        deviceName: _prefs.getString('deviceName'),
       );
 
   Future<void> writeSettings(AppSettings s) async {
@@ -86,6 +93,12 @@ class SettingsStore {
     await _prefs.setBool('autoEnrich', s.autoEnrich);
     await _prefs.setBool('autoLyrics', s.autoLyrics);
     await _prefs.setBool('showUndoSnackbar', s.showUndoSnackbar);
+    final dn = s.deviceName;
+    if (dn == null || dn.isEmpty) {
+      await _prefs.remove('deviceName');
+    } else {
+      await _prefs.setString('deviceName', dn);
+    }
   }
 
   SavedPlayback readPlayback() {

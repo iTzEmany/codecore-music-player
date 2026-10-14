@@ -1127,6 +1127,162 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Tutti i brani sono già nella playlist'**
   String get allSongsInPlaylist;
+
+  /// No description provided for @shareTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Condivisione'**
+  String get shareTitle;
+
+  /// No description provided for @shareSend.
+  ///
+  /// In it, this message translates to:
+  /// **'Invia'**
+  String get shareSend;
+
+  /// No description provided for @shareReceive.
+  ///
+  /// In it, this message translates to:
+  /// **'Ricevi'**
+  String get shareReceive;
+
+  /// No description provided for @shareAll.
+  ///
+  /// In it, this message translates to:
+  /// **'Tutta la libreria'**
+  String get shareAll;
+
+  /// No description provided for @shareSelection.
+  ///
+  /// In it, this message translates to:
+  /// **'Selezione ({count} brani)'**
+  String shareSelection(int count);
+
+  /// No description provided for @sharePick.
+  ///
+  /// In it, this message translates to:
+  /// **'Scegli brani'**
+  String get sharePick;
+
+  /// No description provided for @shareStart.
+  ///
+  /// In it, this message translates to:
+  /// **'Avvia condivisione'**
+  String get shareStart;
+
+  /// No description provided for @shareStop.
+  ///
+  /// In it, this message translates to:
+  /// **'Ferma'**
+  String get shareStop;
+
+  /// No description provided for @shareActive.
+  ///
+  /// In it, this message translates to:
+  /// **'Condivisione attiva'**
+  String get shareActive;
+
+  /// No description provided for @shareAddress.
+  ///
+  /// In it, this message translates to:
+  /// **'Indirizzo (IP:porta)'**
+  String get shareAddress;
+
+  /// No description provided for @sharePin.
+  ///
+  /// In it, this message translates to:
+  /// **'PIN'**
+  String get sharePin;
+
+  /// No description provided for @shareConnect.
+  ///
+  /// In it, this message translates to:
+  /// **'Connetti'**
+  String get shareConnect;
+
+  /// No description provided for @shareDownloadSelected.
+  ///
+  /// In it, this message translates to:
+  /// **'Scarica selezionati ({count})'**
+  String shareDownloadSelected(int count);
+
+  /// No description provided for @shareProgress.
+  ///
+  /// In it, this message translates to:
+  /// **'Brano {done} di {total}'**
+  String shareProgress(int done, int total);
+
+  /// No description provided for @shareDone.
+  ///
+  /// In it, this message translates to:
+  /// **'{count} brani ricevuti'**
+  String shareDone(int count);
+
+  /// No description provided for @shareConnectedTo.
+  ///
+  /// In it, this message translates to:
+  /// **'Connesso a {name}'**
+  String shareConnectedTo(String name);
+
+  /// No description provided for @shareErrUnreachable.
+  ///
+  /// In it, this message translates to:
+  /// **'Dispositivo non raggiungibile: controlla indirizzo e Wi‑Fi'**
+  String get shareErrUnreachable;
+
+  /// No description provided for @shareErrPin.
+  ///
+  /// In it, this message translates to:
+  /// **'PIN errato'**
+  String get shareErrPin;
+
+  /// No description provided for @shareErrBlocked.
+  ///
+  /// In it, this message translates to:
+  /// **'Troppi tentativi: riprova tra un minuto'**
+  String get shareErrBlocked;
+
+  /// No description provided for @shareErrNotCodecore.
+  ///
+  /// In it, this message translates to:
+  /// **'Non è un dispositivo Codecore'**
+  String get shareErrNotCodecore;
+
+  /// No description provided for @shareErrFailed.
+  ///
+  /// In it, this message translates to:
+  /// **'Trasferimento non riuscito'**
+  String get shareErrFailed;
+
+  /// No description provided for @shareNoNetwork.
+  ///
+  /// In it, this message translates to:
+  /// **'Nessuna rete locale trovata'**
+  String get shareNoNetwork;
+
+  /// No description provided for @shareFirewall.
+  ///
+  /// In it, this message translates to:
+  /// **'Windows può chiedere il permesso del firewall alla prima condivisione.'**
+  String get shareFirewall;
+
+  /// No description provided for @shareHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Sullo stesso Wi‑Fi, apri «Ricevi» sull’altro dispositivo e inserisci indirizzo e PIN.'**
+  String get shareHint;
+
+  /// No description provided for @shareMenu.
+  ///
+  /// In it, this message translates to:
+  /// **'Condividi…'**
+  String get shareMenu;
+
+  /// No description provided for @shareDeviceName.
+  ///
+  /// In it, this message translates to:
+  /// **'Nome dispositivo'**
+  String get shareDeviceName;
 }
 
 class _AppLocalizationsDelegate

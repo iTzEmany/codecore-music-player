@@ -562,4 +562,95 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get allSongsInPlaylist => 'Tutti i brani sono già nella playlist';
+
+  @override
+  String get shareTitle => 'Condivisione';
+
+  @override
+  String get shareSend => 'Invia';
+
+  @override
+  String get shareReceive => 'Ricevi';
+
+  @override
+  String get shareAll => 'Tutta la libreria';
+
+  @override
+  String shareSelection(int count) {
+    return 'Selezione ($count brani)';
+  }
+
+  @override
+  String get sharePick => 'Scegli brani';
+
+  @override
+  String get shareStart => 'Avvia condivisione';
+
+  @override
+  String get shareStop => 'Ferma';
+
+  @override
+  String get shareActive => 'Condivisione attiva';
+
+  @override
+  String get shareAddress => 'Indirizzo (IP:porta)';
+
+  @override
+  String get sharePin => 'PIN';
+
+  @override
+  String get shareConnect => 'Connetti';
+
+  @override
+  String shareDownloadSelected(int count) {
+    return 'Scarica selezionati ($count)';
+  }
+
+  @override
+  String shareProgress(int done, int total) {
+    return 'Brano $done di $total';
+  }
+
+  @override
+  String shareDone(int count) {
+    return '$count brani ricevuti';
+  }
+
+  @override
+  String shareConnectedTo(String name) {
+    return 'Connesso a $name';
+  }
+
+  @override
+  String get shareErrUnreachable =>
+      'Dispositivo non raggiungibile: controlla indirizzo e Wi‑Fi';
+
+  @override
+  String get shareErrPin => 'PIN errato';
+
+  @override
+  String get shareErrBlocked => 'Troppi tentativi: riprova tra un minuto';
+
+  @override
+  String get shareErrNotCodecore => 'Non è un dispositivo Codecore';
+
+  @override
+  String get shareErrFailed => 'Trasferimento non riuscito';
+
+  @override
+  String get shareNoNetwork => 'Nessuna rete locale trovata';
+
+  @override
+  String get shareFirewall =>
+      'Windows può chiedere il permesso del firewall alla prima condivisione.';
+
+  @override
+  String get shareHint =>
+      'Sullo stesso Wi‑Fi, apri «Ricevi» sull’altro dispositivo e inserisci indirizzo e PIN.';
+
+  @override
+  String get shareMenu => 'Condividi…';
+
+  @override
+  String get shareDeviceName => 'Nome dispositivo';
 }
