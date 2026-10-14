@@ -28,6 +28,7 @@ class _LyricsScreenState extends ConsumerState<LyricsScreen> {
   String? _parsedFor;
   int _index = -1;
   bool _searching = false;
+  final _curiosityTried = <int>{};
 
   @override
   void dispose() {
@@ -85,28 +86,37 @@ class _LyricsScreenState extends ConsumerState<LyricsScreen> {
       return;
     }
     final result = found;
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (c) => AlertDialog(
-        title: Text(l.lyrics),
-        content: SingleChildScrollView(
-            child: Text(result.plain ?? result.synced ?? '')),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.of(c).pop(false),
-              child: Text(l.cancel)),
-          FilledButton(
-              onPressed: () => Navigator.of(c).pop(true),
-              child: Text(l.save)),
-        ],
-      ),
-    );
-    if (ok != true) return;
-    await (ref.read(databaseProvider).update(ref.read(databaseProvider).tracks)
-          ..where((r) => r.id.equals(t.id)))
-        .write(TracksCompanion(
+    await _saveLyrics(t, result);
+  }
+
+  Future<void> _saveLyrics(Track t, LyricsResult result) async {
+    final db = ref.read(databaseProvider);
+    await (db.update(db.tracks)..where((r) => r.id.equals(t.id))).write(
+        TracksCompanion(
             lyricsPlain: Value(result.plain),
             lyricsSynced: Value(result.synced)));
+  }
+
+  /// Fetches the Wikipedia trivia once per track and stores it.
+  Future<void> _autoCuriosity(Track t) async {
+    if (t.curiosities != null || !_curiosityTried.add(t.id)) return;
+    try {
+      final c = t.artist == null && t.title.isEmpty
+          ? null
+          : cleanSearchQuery(t.title, t.artist ?? '');
+      if (c == null) return;
+      final found = await ref
+          .read(wikipediaClientProvider)
+          .find(c.title, c.artist, ref.read(settingsProvider).language);
+      if (found == null || !mounted) return;
+      final db = ref.read(databaseProvider);
+      await (db.update(db.tracks)..where((r) => r.id.equals(t.id))).write(
+          TracksCompanion(
+              curiosities: Value('${found.text}\n${found.source}')));
+    } on RateLimitedException {
+      // Try again next time the screen opens.
+      _curiosityTried.remove(t.id);
+    }
   }
 
   @override
@@ -123,6 +133,9 @@ class _LyricsScreenState extends ConsumerState<LyricsScreen> {
           body: Center(child: Text(l.nothingPlaying)));
     }
     _ensureParsed(track.lyricsSynced);
+    if (track.curiosities == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _autoCuriosity(track));
+    }
     final plain = track.lyricsPlain ??
         (_lines.isEmpty ? null : _lines.map((e) => e.text).join('\n'));
     final cur = track.curiosities;
