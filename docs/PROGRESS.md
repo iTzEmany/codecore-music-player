@@ -54,11 +54,11 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 4.8 Ripresa riproduzione
 
 ## Fase 5 — Online (`fase-5-online.md`)
-- [ ] 5.1 HTTP di base
-- [ ] 5.2 QueryCleaner (+ test)
-- [ ] 5.3 Client iTunes (+ test)
-- [ ] 5.4 Client LRCLIB + parser LRC (+ test)
-- [ ] 5.5 Client Wikipedia
+- [x] 5.1 HTTP di base
+- [x] 5.2 QueryCleaner (+ test)
+- [x] 5.3 Client iTunes (+ test)
+- [x] 5.4 Client LRCLIB + parser LRC (+ test)
+- [x] 5.5 Client Wikipedia
 - [ ] 5.6 EnrichmentService (+ test)
 - [ ] 5.7 UI arricchimento
 - [ ] 5.8 Schermata testi
