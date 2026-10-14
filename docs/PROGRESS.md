@@ -76,13 +76,13 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 7.1 Import dal vecchio DB Python
 - [ ] 7.2 Gapless
 - [ ] 7.3 ReplayGain
-- [ ] 7.4 Controlli multimediali desktop
+- [~] 7.4 Controlli multimediali desktop
 - [ ] 7.5 Prestazioni
 - [ ] 7.6 Accessibilità
-- [ ] 7.7 Timer di spegnimento
-- [ ] 7.8 Icona e nome app
+- [~] 7.7 Timer di spegnimento
+- [x] 7.8 Icona e nome app
 - [ ] 7.9 Build di rilascio
-- [ ] 7.10 Documentazione finale
+- [x] 7.10 Documentazione finale
 
 ## Note di deviazione
 <!-- una riga per deviazione: data — task — cosa è cambiato e perché -->

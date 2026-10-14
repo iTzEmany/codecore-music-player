@@ -673,4 +673,18 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get importFailed => 'Import fehlgeschlagen: ungültige Datei';
+
+  @override
+  String get sleepTimer => 'Schlaftimer';
+
+  @override
+  String sleepMinutes(int count) {
+    return '$count Minuten';
+  }
+
+  @override
+  String get sleepEndOfTrack => 'Am Ende des Titels';
+
+  @override
+  String get sleepCancel => 'Timer abbrechen';
 }

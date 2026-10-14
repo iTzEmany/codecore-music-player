@@ -53,6 +53,12 @@ class AppShell extends ConsumerWidget {
           ctrl.next,
       const SingleActivator(LogicalKeyboardKey.arrowLeft, control: true):
           ctrl.previous,
+      // Hardware media keys (delivered to the focused window).
+      const SingleActivator(LogicalKeyboardKey.mediaPlayPause):
+          ctrl.togglePlayPause,
+      const SingleActivator(LogicalKeyboardKey.mediaTrackNext): ctrl.next,
+      const SingleActivator(LogicalKeyboardKey.mediaTrackPrevious):
+          ctrl.previous,
       const SingleActivator(LogicalKeyboardKey.keyF, control: true): () {
         ref.read(navIndexProvider.notifier).set(0);
         ref.read(searchFocusProvider).requestFocus();

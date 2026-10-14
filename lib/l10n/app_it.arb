@@ -343,5 +343,16 @@
       }
     }
   },
-  "importFailed": "Importazione non riuscita: file non valido"
+  "importFailed": "Importazione non riuscita: file non valido",
+  "sleepTimer": "Timer di spegnimento",
+  "sleepMinutes": "{count} minuti",
+  "@sleepMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sleepEndOfTrack": "A fine brano",
+  "sleepCancel": "Annulla timer"
 }

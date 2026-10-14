@@ -51,6 +51,9 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   bool _playCounted = false;
   bool _handlingCompleted = false;
 
+  /// Sleep timer "end of track": the next track is loaded but not started.
+  bool pauseAtTrackEnd = false;
+
   Track? get currentTrack => _current;
   Stream<Track?> get currentTrackStream => _trackController.stream;
   Stream<void> get queueChanges => _queueController.stream;
@@ -174,10 +177,12 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     _handlingCompleted = true;
     try {
       final next = _queue.next(auto: true);
+      final stay = pauseAtTrackEnd;
+      pauseAtTrackEnd = false;
       if (next == null) {
         await _goIdle();
       } else {
-        await _loadCurrent(play: true);
+        await _loadCurrent(play: !stay);
       }
     } finally {
       _handlingCompleted = false;

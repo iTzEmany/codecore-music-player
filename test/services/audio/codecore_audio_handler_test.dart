@@ -122,4 +122,15 @@ void main() {
     expect(t!.playCount, 1);
     expect(t.lastPlayedAt, isNotNull);
   });
+
+  test('pauseAtTrackEnd loads the next track without playing', () async {
+    await handler.playQueue(ids, 0);
+    await settle();
+    handler.pauseAtTrackEnd = true;
+    backend.stateC.add(BackendState.completed);
+    await settle();
+    expect(handler.currentTrack!.title, 'b');
+    expect(handler.isPlaying, false);
+    expect(handler.pauseAtTrackEnd, false);
+  });
 }

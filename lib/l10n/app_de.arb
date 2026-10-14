@@ -200,5 +200,9 @@
   "importOld": "Aus der alten App importieren",
   "importOldHint": "codecore_library.db der Python-Version wählen",
   "importSummary": "{favorites} Favoriten, {playlists} Playlists, {lyrics} Songtexte importiert, {unmatched} nicht zugeordnet",
-  "importFailed": "Import fehlgeschlagen: ungültige Datei"
+  "importFailed": "Import fehlgeschlagen: ungültige Datei",
+  "sleepTimer": "Schlaftimer",
+  "sleepMinutes": "{count} Minuten",
+  "sleepEndOfTrack": "Am Ende des Titels",
+  "sleepCancel": "Timer abbrechen"
 }

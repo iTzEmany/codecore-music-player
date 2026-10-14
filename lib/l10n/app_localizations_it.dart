@@ -673,4 +673,18 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get importFailed => 'Importazione non riuscita: file non valido';
+
+  @override
+  String get sleepTimer => 'Timer di spegnimento';
+
+  @override
+  String sleepMinutes(int count) {
+    return '$count minuti';
+  }
+
+  @override
+  String get sleepEndOfTrack => 'A fine brano';
+
+  @override
+  String get sleepCancel => 'Annulla timer';
 }

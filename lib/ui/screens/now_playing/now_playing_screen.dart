@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/platform.dart';
 import '../../../providers/player_providers.dart';
+import '../../../providers/sleep_timer_provider.dart';
 import '../../../services/audio/play_queue.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../widgets/cover_image.dart';
@@ -31,6 +32,7 @@ class NowPlayingScreen extends ConsumerWidget {
             onPressed: () => Navigator.of(context).maybePop()),
         title: Text(context.l10n.nowPlaying),
         actions: [
+          const _SleepTimerButton(),
           if (track != null)
             IconButton(
               tooltip: context.l10n.favorite,
@@ -182,5 +184,38 @@ class _VolumeRow extends ConsumerWidget {
       ),
       Expanded(child: Slider(value: v, onChanged: n.set)),
     ]);
+  }
+}
+
+class _SleepTimerButton extends ConsumerWidget {
+  const _SleepTimerButton();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    final timer = ref.watch(sleepTimerProvider);
+    final notifier = ref.read(sleepTimerProvider.notifier);
+    return PopupMenuButton<int>(
+      tooltip: l.sleepTimer,
+      icon: Icon(timer.active ? Icons.bedtime : Icons.bedtime_outlined,
+          color: timer.active ? Theme.of(context).colorScheme.primary : null),
+      onSelected: (v) {
+        switch (v) {
+          case 0:
+            notifier.cancel();
+          case -1:
+            notifier.startAtTrackEnd();
+          default:
+            notifier.startMinutes(v);
+        }
+      },
+      itemBuilder: (_) => [
+        for (final m in const [15, 30, 45, 60])
+          PopupMenuItem(value: m, child: Text(l.sleepMinutes(m))),
+        PopupMenuItem(value: -1, child: Text(l.sleepEndOfTrack)),
+        if (timer.active)
+          PopupMenuItem(value: 0, child: Text(l.sleepCancel)),
+      ],
+    );
   }
 }

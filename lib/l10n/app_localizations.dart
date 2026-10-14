@@ -1307,6 +1307,30 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Importazione non riuscita: file non valido'**
   String get importFailed;
+
+  /// No description provided for @sleepTimer.
+  ///
+  /// In it, this message translates to:
+  /// **'Timer di spegnimento'**
+  String get sleepTimer;
+
+  /// No description provided for @sleepMinutes.
+  ///
+  /// In it, this message translates to:
+  /// **'{count} minuti'**
+  String sleepMinutes(int count);
+
+  /// No description provided for @sleepEndOfTrack.
+  ///
+  /// In it, this message translates to:
+  /// **'A fine brano'**
+  String get sleepEndOfTrack;
+
+  /// No description provided for @sleepCancel.
+  ///
+  /// In it, this message translates to:
+  /// **'Annulla timer'**
+  String get sleepCancel;
 }
 
 class _AppLocalizationsDelegate
