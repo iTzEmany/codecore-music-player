@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/app_log.dart';
 import '../core/paths.dart';
 import '../data/db/app_database.dart';
+import '../data/repositories/library_queries.dart';
 import '../data/repositories/track_repository.dart';
 import '../services/covers/cover_store.dart';
 import '../services/scanner/library_scanner.dart';
@@ -107,3 +108,30 @@ class ScanNotifier extends Notifier<ScanState> {
 
 final scanStateProvider =
     NotifierProvider<ScanNotifier, ScanState>(ScanNotifier.new);
+
+final libraryQueriesProvider =
+    Provider<LibraryQueries>((ref) => LibraryQueries(ref.watch(databaseProvider)));
+
+class AlbumSortNotifier extends Notifier<AlbumSort> {
+  @override
+  AlbumSort build() => AlbumSort.title;
+
+  void set(AlbumSort s) => state = s;
+}
+
+final albumSortProvider =
+    NotifierProvider<AlbumSortNotifier, AlbumSort>(AlbumSortNotifier.new);
+
+final albumsProvider = StreamProvider<List<AlbumSummary>>((ref) => ref
+    .watch(libraryQueriesProvider)
+    .watchAlbums(sort: ref.watch(albumSortProvider)));
+
+final artistsProvider = StreamProvider<List<ArtistSummary>>(
+    (ref) => ref.watch(libraryQueriesProvider).watchArtists());
+
+final albumTracksProvider = StreamProvider.family<List<Track>, String>(
+    (ref, albumKey) =>
+        ref.watch(libraryQueriesProvider).watchAlbumTracks(albumKey));
+
+final artistAlbumsProvider = StreamProvider.family<List<AlbumSummary>, String>(
+    (ref, key) => ref.watch(libraryQueriesProvider).watchArtistAlbums(key));

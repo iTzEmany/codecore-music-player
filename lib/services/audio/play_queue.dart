@@ -1,6 +1,6 @@
 import 'dart:math';
 
-enum RepeatMode { off, all, one }
+enum PlayRepeat { off, all, one }
 
 /// Pure queue logic. Items are track ids in their natural order; `_order`
 /// maps play position -> natural index (identity unless shuffled).
@@ -16,7 +16,7 @@ class PlayQueue {
   int _pos = -1;
   bool _shuffle = false;
 
-  RepeatMode repeat = RepeatMode.off;
+  PlayRepeat repeat = PlayRepeat.off;
 
   List<int> get items => List.unmodifiable(_items);
   int get currentIndex => _pos < 0 ? -1 : _order[_pos];
@@ -83,13 +83,13 @@ class PlayQueue {
   /// `auto` is true when a track ended by itself.
   int? next({bool auto = false}) {
     if (_pos < 0) return null;
-    if (auto && repeat == RepeatMode.one) return currentId;
+    if (auto && repeat == PlayRepeat.one) return currentId;
     if (_pos + 1 < _order.length) {
       _pushHistory(currentIndex);
       _pos++;
       return currentId;
     }
-    if (repeat == RepeatMode.off) return null;
+    if (repeat == PlayRepeat.off) return null;
     _pushHistory(currentIndex);
     if (_shuffle) {
       final last = currentIndex;
@@ -118,7 +118,7 @@ class PlayQueue {
     }
     if (_pos > 0) {
       _pos--;
-    } else if (repeat == RepeatMode.all) {
+    } else if (repeat == PlayRepeat.all) {
       _pos = _order.length - 1;
     }
     return currentId;
@@ -153,6 +153,34 @@ class PlayQueue {
       _pos = _order.length - 1;
     }
     return wasCurrent;
+  }
+
+  /// Moves an item in natural order, keeping the current track playing.
+  void move(int from, int to) {
+    if (from < 0 || from >= _items.length || to < 0 || to >= _items.length) return;
+    if (from == to) return;
+    final currentNatural = currentIndex;
+    final ids = List<int>.from(_items);
+    final moved = ids.removeAt(from);
+    ids.insert(to, moved);
+    int remap(int i) {
+      if (i == from) return to;
+      if (from < to && i > from && i <= to) return i - 1;
+      if (from > to && i >= to && i < from) return i + 1;
+      return i;
+    }
+    _items
+      ..clear()
+      ..addAll(ids);
+    for (var h = 0; h < _history.length; h++) {
+      _history[h] = remap(_history[h]);
+    }
+    if (_shuffle) {
+      _order = [for (final i in _order) remap(i)];
+    } else {
+      _order = List.generate(_items.length, (i) => i);
+    }
+    if (currentNatural >= 0) _pos = _order.indexOf(remap(currentNatural));
   }
 
   void insertNext(int trackId) {

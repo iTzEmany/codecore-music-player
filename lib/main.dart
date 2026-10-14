@@ -16,6 +16,7 @@ import 'data/settings/settings_store.dart';
 import 'providers/database_providers.dart';
 import 'providers/library_providers.dart';
 import 'providers/player_providers.dart';
+import 'providers/settings_providers.dart';
 import 'services/audio/codecore_audio_handler.dart';
 import 'services/audio/just_audio_backend.dart';
 import 'services/audio/play_queue.dart';
@@ -57,8 +58,8 @@ Future<void> main() async {
     handler = build();
   }
 
-  final persistence =
-      PlaybackPersistence(handler, await SettingsStore.open());
+  final settingsStore = await SettingsStore.open();
+  final persistence = PlaybackPersistence(handler, settingsStore);
   try {
     await persistence.restore();
   } on Object catch (e, st) {
@@ -69,6 +70,7 @@ Future<void> main() async {
   runApp(ProviderScope(
     overrides: [
       databaseProvider.overrideWithValue(db),
+      settingsStoreProvider.overrideWithValue(settingsStore),
       audioHandlerProvider.overrideWithValue(handler),
       playbackPersistenceProvider.overrideWithValue(persistence),
       playerErrorsProvider.overrideWithValue(errors.stream),

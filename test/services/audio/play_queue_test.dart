@@ -29,19 +29,19 @@ void main() {
   });
 
   test('repeat all wraps', () {
-    final q = make([1, 2])..repeat = RepeatMode.all;
+    final q = make([1, 2])..repeat = PlayRepeat.all;
     q.next();
     expect(q.next(auto: true), 1);
   });
 
   test('repeat one: auto keeps, manual advances', () {
-    final q = make([1, 2, 3])..repeat = RepeatMode.one;
+    final q = make([1, 2, 3])..repeat = PlayRepeat.one;
     expect(q.next(auto: true), 1);
     expect(q.next(), 2);
   });
 
   test('repeat one manual at the end wraps like all', () {
-    final q = make([1, 2], start: 1)..repeat = RepeatMode.one;
+    final q = make([1, 2], start: 1)..repeat = PlayRepeat.one;
     expect(q.next(), 1);
   });
 
@@ -121,5 +121,16 @@ void main() {
     expect(q.items, [1, 2, 7]);
     q.next();
     expect(q.next(), 7);
+  });
+
+  test('move keeps current track', () {
+    final q = make([1, 2, 3, 4], start: 1);
+    q.move(0, 3);
+    expect(q.items, [2, 3, 4, 1]);
+    expect(q.currentId, 2);
+    q.move(0, 2);
+    expect(q.items, [3, 4, 2, 1]);
+    expect(q.currentId, 2);
+    expect(q.next(), 1);
   });
 }

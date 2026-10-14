@@ -52,7 +52,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   List<int> get queueIds => _queue.items;
   int get currentIndex => _queue.currentIndex;
   bool get shuffleEnabled => _queue.shuffle;
-  RepeatMode get repeatMode => _queue.repeat;
+  PlayRepeat get repeatMode => _queue.repeat;
 
   Future<void> playQueue(List<int> ids, int index) async {
     _queue.setItems(ids, startIndex: index);
@@ -202,9 +202,9 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
           ? AudioServiceShuffleMode.all
           : AudioServiceShuffleMode.none,
       repeatMode: switch (_queue.repeat) {
-        RepeatMode.off => AudioServiceRepeatMode.none,
-        RepeatMode.all => AudioServiceRepeatMode.all,
-        RepeatMode.one => AudioServiceRepeatMode.one,
+        PlayRepeat.off => AudioServiceRepeatMode.none,
+        PlayRepeat.all => AudioServiceRepeatMode.all,
+        PlayRepeat.one => AudioServiceRepeatMode.one,
       },
     ));
   }
@@ -279,6 +279,11 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     if (wasCurrent) await _loadCurrent(play: _state == BackendState.playing);
   }
 
+  void moveInQueue(int from, int to) {
+    _queue.move(from, to);
+    _queueController.add(null);
+  }
+
   void playNext(int trackId) {
     _queue.insertNext(trackId);
     _queueController.add(null);
@@ -299,14 +304,14 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   @override
   Future<void> setRepeatMode(AudioServiceRepeatMode repeatMode) async {
     _queue.repeat = switch (repeatMode) {
-      AudioServiceRepeatMode.none => RepeatMode.off,
-      AudioServiceRepeatMode.one => RepeatMode.one,
-      _ => RepeatMode.all,
+      AudioServiceRepeatMode.none => PlayRepeat.off,
+      AudioServiceRepeatMode.one => PlayRepeat.one,
+      _ => PlayRepeat.all,
     };
     _publish(playbackState.value.processingState);
   }
 
-  void setShuffleAndRepeat({required bool shuffle, required RepeatMode repeat}) {
+  void setShuffleAndRepeat({required bool shuffle, required PlayRepeat repeat}) {
     _queue.shuffle = shuffle;
     _queue.repeat = repeat;
   }

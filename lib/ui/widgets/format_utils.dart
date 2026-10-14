@@ -1,0 +1,32 @@
+import '../../data/db/app_database.dart';
+
+String formatDuration(int ms) {
+  if (ms <= 0) return '0:00';
+  final total = ms ~/ 1000;
+  final h = total ~/ 3600;
+  final m = (total % 3600) ~/ 60;
+  final s = total % 60;
+  final ss = s.toString().padLeft(2, '0');
+  if (h > 0) return '$h:${m.toString().padLeft(2, '0')}:$ss';
+  return '$m:$ss';
+}
+
+const _lossless = {'flac', 'wav', 'aiff', 'aif', 'alac'};
+
+/// Quality text per docs/04 §8; never invents missing values.
+String qualityLabel(Track t) {
+  final fmt = t.format.toUpperCase();
+  if (_lossless.contains(t.format.toLowerCase())) {
+    final parts = <String>[];
+    if (t.bitDepth != null) parts.add('${t.bitDepth} bit');
+    if (t.sampleRateHz != null) {
+      final khz = t.sampleRateHz! / 1000;
+      final text = khz == khz.roundToDouble()
+          ? khz.toStringAsFixed(0)
+          : khz.toStringAsFixed(1);
+      parts.add('$text kHz');
+    }
+    return parts.isEmpty ? fmt : '$fmt • ${parts.join(' / ')}';
+  }
+  return t.bitrateKbps == null ? fmt : '$fmt • ${t.bitrateKbps} kbps';
+}

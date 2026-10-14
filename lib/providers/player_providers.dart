@@ -10,6 +10,7 @@ import '../services/audio/codecore_audio_handler.dart';
 import '../services/audio/play_queue.dart';
 import '../services/audio/playback_persistence.dart';
 import 'database_providers.dart';
+import 'settings_providers.dart';
 
 /// Overridden in `main` once the handler has been created (and, on Android,
 /// registered with `AudioService.init`).
@@ -41,6 +42,10 @@ class PlayerController {
   Future<void> seek(Duration position) => _handler.seek(position);
   Future<void> jumpToQueueIndex(int index) => _handler.skipToQueueItem(index);
   Future<void> removeFromQueue(int index) => _handler.removeFromQueue(index);
+  void reorderQueue(int from, int to) {
+    _handler.moveInQueue(from, to);
+  }
+
   void playNext(int trackId) => _handler.playNext(trackId);
   void addToQueue(int trackId) => _handler.addToQueue(trackId);
 
@@ -53,11 +58,14 @@ class PlayerController {
       ? AudioServiceShuffleMode.none
       : AudioServiceShuffleMode.all);
 
+  Future<void> setShuffle(bool on) => _handler.setShuffleMode(
+      on ? AudioServiceShuffleMode.all : AudioServiceShuffleMode.none);
+
   Future<void> cycleRepeat() => _handler.setRepeatMode(
         switch (_handler.repeatMode) {
-          RepeatMode.off => AudioServiceRepeatMode.all,
-          RepeatMode.all => AudioServiceRepeatMode.one,
-          RepeatMode.one => AudioServiceRepeatMode.none,
+          PlayRepeat.off => AudioServiceRepeatMode.all,
+          PlayRepeat.all => AudioServiceRepeatMode.one,
+          PlayRepeat.one => AudioServiceRepeatMode.none,
         },
       );
 
@@ -90,15 +98,15 @@ final shuffleProvider = StreamProvider<bool>((ref) {
       .distinct();
 });
 
-final repeatProvider = StreamProvider<RepeatMode>((ref) {
+final repeatProvider = StreamProvider<PlayRepeat>((ref) {
   final h = ref.watch(audioHandlerProvider);
   return h.playbackState
       .map((s) => switch (s.repeatMode) {
-            AudioServiceRepeatMode.one => RepeatMode.one,
+            AudioServiceRepeatMode.one => PlayRepeat.one,
             AudioServiceRepeatMode.all ||
             AudioServiceRepeatMode.group =>
-              RepeatMode.all,
-            AudioServiceRepeatMode.none => RepeatMode.off,
+              PlayRepeat.all,
+            AudioServiceRepeatMode.none => PlayRepeat.off,
           })
       .distinct();
 });
@@ -118,3 +126,27 @@ final queueProvider = StreamProvider<List<Track>>((ref) async* {
     yield await repo.getByIds(h.queueIds);
   }
 });
+
+class VolumeNotifier extends Notifier<double> {
+  double _beforeMute = 1.0;
+
+  @override
+  double build() => ref.read(settingsStoreProvider).readPlayback().volume;
+
+  void set(double v) {
+    state = v;
+    ref.read(playerControllerProvider).setVolume(v);
+  }
+
+  void toggleMute() {
+    if (state > 0) {
+      _beforeMute = state;
+      set(0);
+    } else {
+      set(_beforeMute <= 0 ? 1.0 : _beforeMute);
+    }
+  }
+}
+
+final volumeProvider =
+    NotifierProvider<VolumeNotifier, double>(VolumeNotifier.new);

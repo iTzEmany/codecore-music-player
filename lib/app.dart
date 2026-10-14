@@ -1,23 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'ui/screens/debug_library_screen.dart';
+import 'providers/settings_providers.dart';
+import 'ui/shell/app_shell.dart';
+import 'ui/theme/app_theme.dart';
 
-class CodecoreApp extends StatelessWidget {
+class CodecoreApp extends ConsumerWidget {
   const CodecoreApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final s = ref.watch(settingsProvider);
     return MaterialApp(
       title: 'Codecore',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.deepPurple,
-          brightness: Brightness.dark,
-        ),
-      ),
-      home: const DebugLibraryScreen(),
+      theme: buildTheme(appThemeIdFromName(s.theme), s.fontScale, s.compactMode),
+      home: const AppShell(),
     );
   }
 }

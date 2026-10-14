@@ -32,16 +32,16 @@ L'agente riparte sempre dal primo task non spuntato.
 - [~] 2.6 Persistenza e checklist manuale
 
 ## Fase 3 — Interfaccia (`fase-3-interfaccia.md`)
-- [ ] 3.1 Tema
-- [ ] 3.2 Shell adattiva
-- [ ] 3.3 Widget riusabili
-- [ ] 3.4 Tab Brani
-- [ ] 3.5 Tab Album + dettaglio
-- [ ] 3.6 Tab Artisti
-- [ ] 3.7 Mini-player
-- [ ] 3.8 Now Playing + coda
-- [ ] 3.9 Scorciatoie da tastiera
-- [ ] 3.10 Rimozione schermata di debug
+- [x] 3.1 Tema
+- [x] 3.2 Shell adattiva
+- [x] 3.3 Widget riusabili
+- [~] 3.4 Tab Brani
+- [x] 3.5 Tab Album + dettaglio
+- [x] 3.6 Tab Artisti
+- [x] 3.7 Mini-player
+- [x] 3.8 Now Playing + coda
+- [~] 3.9 Scorciatoie da tastiera
+- [x] 3.10 Rimozione schermata di debug
 
 ## Fase 4 — Funzioni libreria (`fase-4-funzioni-libreria.md`)
 - [ ] 4.1 Preferiti

@@ -2,6 +2,45 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../services/audio/play_queue.dart';
 
+class AppSettings {
+  const AppSettings({
+    this.theme = 'oled',
+    this.fontScale = 1.0,
+    this.compactMode = false,
+    this.reducedMotion = false,
+    this.language = 'it',
+    this.autoEnrich = false,
+    this.autoLyrics = false,
+    this.showUndoSnackbar = true,
+  });
+
+  final String theme;
+  final double fontScale;
+  final bool compactMode, reducedMotion, autoEnrich, autoLyrics, showUndoSnackbar;
+  final String language;
+
+  AppSettings copyWith({
+    String? theme,
+    double? fontScale,
+    bool? compactMode,
+    bool? reducedMotion,
+    String? language,
+    bool? autoEnrich,
+    bool? autoLyrics,
+    bool? showUndoSnackbar,
+  }) =>
+      AppSettings(
+        theme: theme ?? this.theme,
+        fontScale: fontScale ?? this.fontScale,
+        compactMode: compactMode ?? this.compactMode,
+        reducedMotion: reducedMotion ?? this.reducedMotion,
+        language: language ?? this.language,
+        autoEnrich: autoEnrich ?? this.autoEnrich,
+        autoLyrics: autoLyrics ?? this.autoLyrics,
+        showUndoSnackbar: showUndoSnackbar ?? this.showUndoSnackbar,
+      );
+}
+
 class SavedPlayback {
   const SavedPlayback({
     this.queueIds = const [],
@@ -9,14 +48,14 @@ class SavedPlayback {
     this.positionMs = 0,
     this.volume = 1.0,
     this.shuffle = false,
-    this.repeat = RepeatMode.off,
+    this.repeat = PlayRepeat.off,
   });
 
   final List<int> queueIds;
   final int index, positionMs;
   final double volume;
   final bool shuffle;
-  final RepeatMode repeat;
+  final PlayRepeat repeat;
 }
 
 class SettingsStore {
@@ -27,14 +66,36 @@ class SettingsStore {
   static Future<SettingsStore> open() async =>
       SettingsStore(await SharedPreferences.getInstance());
 
+  AppSettings readSettings() => AppSettings(
+        theme: _prefs.getString('theme') ?? 'oled',
+        fontScale: _prefs.getDouble('fontScale') ?? 1.0,
+        compactMode: _prefs.getBool('compactMode') ?? false,
+        reducedMotion: _prefs.getBool('reducedMotion') ?? false,
+        language: _prefs.getString('language') ?? 'it',
+        autoEnrich: _prefs.getBool('autoEnrich') ?? false,
+        autoLyrics: _prefs.getBool('autoLyrics') ?? false,
+        showUndoSnackbar: _prefs.getBool('showUndoSnackbar') ?? true,
+      );
+
+  Future<void> writeSettings(AppSettings s) async {
+    await _prefs.setString('theme', s.theme);
+    await _prefs.setDouble('fontScale', s.fontScale);
+    await _prefs.setBool('compactMode', s.compactMode);
+    await _prefs.setBool('reducedMotion', s.reducedMotion);
+    await _prefs.setString('language', s.language);
+    await _prefs.setBool('autoEnrich', s.autoEnrich);
+    await _prefs.setBool('autoLyrics', s.autoLyrics);
+    await _prefs.setBool('showUndoSnackbar', s.showUndoSnackbar);
+  }
+
   SavedPlayback readPlayback() {
     final ids = (_prefs.getStringList('lastQueueIds') ?? const [])
         .map(int.tryParse)
         .whereType<int>()
         .toList();
-    final repeat = RepeatMode.values.firstWhere(
+    final repeat = PlayRepeat.values.firstWhere(
       (r) => r.name == _prefs.getString('repeat'),
-      orElse: () => RepeatMode.off,
+      orElse: () => PlayRepeat.off,
     );
     return SavedPlayback(
       queueIds: ids,

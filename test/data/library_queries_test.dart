@@ -1,0 +1,60 @@
+import 'package:codecore/data/db/app_database.dart';
+import 'package:codecore/data/repositories/library_queries.dart';
+import 'package:codecore/data/repositories/track_repository.dart';
+import 'package:drift/drift.dart' show Value;
+import 'package:drift/native.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+TracksCompanion t(String path, String album, String artist, String key,
+        {int? track, String? albumArtist}) =>
+    TracksCompanion.insert(
+      path: path,
+      title: path,
+      albumKey: key,
+      format: 'mp3',
+      sizeBytes: 1,
+      mtimeMs: 1,
+      addedAt: 1,
+      album: Value(album),
+      artist: Value(artist),
+      albumArtist: Value(albumArtist),
+      trackNumber: Value(track),
+      durationMs: const Value(1000),
+    );
+
+void main() {
+  late AppDatabase db;
+  late LibraryQueries q;
+  setUp(() async {
+    db = AppDatabase(NativeDatabase.memory());
+    q = LibraryQueries(db);
+    await TrackRepository(db).upsertBatch([
+      t('/1', 'Greatest Hits', 'Queen', 'queen|greatest hits', track: 2),
+      t('/2', 'Greatest Hits', 'Queen', 'queen|greatest hits', track: 1),
+      t('/3', 'Greatest Hits', 'ABBA', 'abba|greatest hits'),
+      t('/4', 'Mix', 'A', 'unknown|/mix'),
+      t('/5', 'Mix', 'B', 'unknown|/mix'),
+    ]);
+  });
+  tearDown(() => db.close());
+
+  test('same album name, different artists -> two albums', () async {
+    final albums = await q.watchAlbums().first;
+    expect(albums.where((a) => a.title == 'Greatest Hits').length, 2);
+  });
+
+  test('compilation detected', () async {
+    final albums = await q.watchAlbums().first;
+    expect(albums.firstWhere((a) => a.title == 'Mix').variousArtists, true);
+    expect(albums.firstWhere((a) => a.artist == 'Queen').trackCount, 2);
+  });
+
+  test('artists and album tracks order', () async {
+    final artists = await q.watchArtists().first;
+    expect(artists.map((a) => a.key), ['a', 'abba', 'b', 'queen']);
+    final tr = await q.watchAlbumTracks('queen|greatest hits').first;
+    expect(tr.map((e) => e.path), ['/2', '/1']);
+    final al = await q.watchArtistAlbums('queen').first;
+    expect(al.single.albumKey, 'queen|greatest hits');
+  });
+}

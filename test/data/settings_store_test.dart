@@ -14,7 +14,7 @@ void main() {
       positionMs: 4500,
       volume: 0.5,
       shuffle: true,
-      repeat: RepeatMode.all,
+      repeat: PlayRepeat.all,
     ));
     final s = store.readPlayback();
     expect(s.queueIds, [3, 1, 2]);
@@ -22,6 +22,6 @@ void main() {
     expect(s.positionMs, 4500);
     expect(s.volume, 0.5);
     expect(s.shuffle, true);
-    expect(s.repeat, RepeatMode.all);
+    expect(s.repeat, PlayRepeat.all);
   });
 }
