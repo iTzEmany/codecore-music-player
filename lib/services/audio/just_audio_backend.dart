@@ -41,6 +41,17 @@ class JustAudioBackend implements AudioBackend {
     }
   }
 
+  @override
+  Future<void> loadUri(Uri uri,
+      {Map<String, String> headers = const {}}) async {
+    try {
+      await _player.setAudioSource(AudioSource.uri(uri, headers: headers));
+    } on Object catch (e, st) {
+      AppLog.w('stream load failed: ${uri.host}', e, st);
+      throw BackendException('unplayable stream: $e');
+    }
+  }
+
   // play() completes only when playback ends or pauses: never await it.
   @override
   Future<void> play() async {

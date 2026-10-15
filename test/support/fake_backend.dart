@@ -24,6 +24,17 @@ class FakeBackend implements AudioBackend {
     stateC.add(BackendState.paused);
   }
 
+  final loadedUris = <({Uri uri, Map<String, String> headers})>[];
+
+  @override
+  Future<void> loadUri(Uri uri, {Map<String, String> headers = const {}}) async {
+    if (failing.contains(uri.toString())) {
+      throw const BackendException('unreachable');
+    }
+    loadedUris.add((uri: uri, headers: headers));
+    stateC.add(BackendState.paused);
+  }
+
   @override
   Future<void> play() async {
     playing = true;

@@ -17,6 +17,9 @@ abstract class AudioBackend {
 
   /// Throws [BackendException] when the file cannot be played.
   Future<void> load(String filePath);
+
+  /// Streams from [uri] (Jam: another device on the LAN). Same errors as [load].
+  Future<void> loadUri(Uri uri, {Map<String, String> headers = const {}});
   Future<void> play();
   Future<void> pause();
   Future<void> stop();
