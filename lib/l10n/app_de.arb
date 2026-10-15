@@ -592,5 +592,16 @@
         "type": "int"
       }
     }
+  },
+  "settingsLocalNetwork": "Lokales Netzwerk",
+  "removeAll": "Alle entfernen",
+  "confirmRemoveAllTitle": "Alle aus der Bibliothek entfernen?",
+  "confirmRemoveAllBody": "{n} fehlende Titel werden aus der Bibliothek entfernt. Die Dateien bleiben unberührt; Favoriten und Playlist-Einträge gehen verloren.",
+  "@confirmRemoveAllBody": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
   }
 }

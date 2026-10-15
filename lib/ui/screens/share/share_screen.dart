@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/share_hub.dart';
+import '../../theme/tokens.dart';
 import 'receive_tab.dart';
 import 'send_tab.dart';
 
@@ -54,9 +55,24 @@ class _ShareScreenState extends ConsumerState<ShareScreen> {
         body: Column(
           children: [
             if (Platform.isWindows)
-              MaterialBanner(
-                content: Text(l.shareFirewall),
-                actions: const [SizedBox.shrink()],
+              Container(
+                width: double.infinity,
+                margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: context.cc.surface1,
+                  borderRadius: BorderRadius.circular(CcDims.rCard),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.info_outline_rounded,
+                      color: context.cc.accentSoft,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(child: Text(l.shareFirewall)),
+                  ],
+                ),
               ),
             Expanded(
               child: TabBarView(

@@ -592,5 +592,16 @@
         "type": "int"
       }
     }
+  },
+  "settingsLocalNetwork": "Local network",
+  "removeAll": "Remove all",
+  "confirmRemoveAllTitle": "Remove all from the library?",
+  "confirmRemoveAllBody": "{n} missing tracks will be removed from the library. Files are not touched; you lose their favourites and playlist entries.",
+  "@confirmRemoveAllBody": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
   }
 }

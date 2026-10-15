@@ -2351,6 +2351,30 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'{n} attività in corso'**
   String activityRunning(int n);
+
+  /// No description provided for @settingsLocalNetwork.
+  ///
+  /// In it, this message translates to:
+  /// **'Rete locale'**
+  String get settingsLocalNetwork;
+
+  /// No description provided for @removeAll.
+  ///
+  /// In it, this message translates to:
+  /// **'Rimuovi tutti'**
+  String get removeAll;
+
+  /// No description provided for @confirmRemoveAllTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Rimuovere tutti dalla libreria?'**
+  String get confirmRemoveAllTitle;
+
+  /// No description provided for @confirmRemoveAllBody.
+  ///
+  /// In it, this message translates to:
+  /// **'{n} brani non trovati verranno tolti dalla libreria. I file non vengono toccati; perdi preferiti e playlist di questi brani.'**
+  String confirmRemoveAllBody(int n);
 }
 
 class _AppLocalizationsDelegate

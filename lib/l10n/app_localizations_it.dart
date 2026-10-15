@@ -1281,4 +1281,18 @@ class AppLocalizationsIt extends AppLocalizations {
   String activityRunning(int n) {
     return '$n attività in corso';
   }
+
+  @override
+  String get settingsLocalNetwork => 'Rete locale';
+
+  @override
+  String get removeAll => 'Rimuovi tutti';
+
+  @override
+  String get confirmRemoveAllTitle => 'Rimuovere tutti dalla libreria?';
+
+  @override
+  String confirmRemoveAllBody(int n) {
+    return '$n brani non trovati verranno tolti dalla libreria. I file non vengono toccati; perdi preferiti e playlist di questi brani.';
+  }
 }

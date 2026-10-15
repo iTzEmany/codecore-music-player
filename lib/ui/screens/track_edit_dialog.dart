@@ -7,7 +7,16 @@ import '../../providers/library_providers.dart';
 import '../../services/library/track_editor.dart';
 import '../widgets/confirm.dart';
 
+/// A dialog on wide screens, a full page under 600 px.
 Future<void> showTrackEditDialog(BuildContext context, Track track) {
+  if (MediaQuery.sizeOf(context).width < 600) {
+    return Navigator.of(context, rootNavigator: true).push(
+      MaterialPageRoute<void>(
+        fullscreenDialog: true,
+        builder: (_) => _TrackEditDialog(track: track, page: true),
+      ),
+    );
+  }
   return showDialog<void>(
     context: context,
     builder: (_) => _TrackEditDialog(track: track),
@@ -15,9 +24,10 @@ Future<void> showTrackEditDialog(BuildContext context, Track track) {
 }
 
 class _TrackEditDialog extends ConsumerStatefulWidget {
-  const _TrackEditDialog({required this.track});
+  const _TrackEditDialog({required this.track, this.page = false});
 
   final Track track;
+  final bool page;
 
   @override
   ConsumerState<_TrackEditDialog> createState() => _TrackEditDialogState();
@@ -109,33 +119,49 @@ class _TrackEditDialogState extends ConsumerState<_TrackEditDialog> {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    return AlertDialog(
-      title: Text(l.editInfo),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+    final form = Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _field(
+          _title,
+          l.fieldTitle,
+          error: _titleEmpty ? l.titleRequired : null,
+        ),
+        _field(_artist, l.fieldArtist),
+        _field(_album, l.fieldAlbum),
+        _field(_albumArtist, l.fieldAlbumArtist),
+        Row(
           children: [
-            _field(
-              _title,
-              l.fieldTitle,
-              error: _titleEmpty ? l.titleRequired : null,
-            ),
-            _field(_artist, l.fieldArtist),
-            _field(_album, l.fieldAlbum),
-            _field(_albumArtist, l.fieldAlbumArtist),
-            _field(_year, l.fieldYear, number: true),
-            _field(_number, l.fieldTrackNumber, number: true),
-            _field(_genre, l.fieldGenre),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: TextButton(
-                onPressed: _restore,
-                child: Text(l.restoreFromFile),
-              ),
-            ),
+            Expanded(child: _field(_year, l.fieldYear, number: true)),
+            const SizedBox(width: 12),
+            Expanded(child: _field(_number, l.fieldTrackNumber, number: true)),
           ],
         ),
-      ),
+        _field(_genre, l.fieldGenre),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton(
+            onPressed: _restore,
+            child: Text(l.restoreFromFile),
+          ),
+        ),
+      ],
+    );
+    if (widget.page) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(l.editInfo),
+          actions: [TextButton(onPressed: _save, child: Text(l.save))],
+        ),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: form,
+        ),
+      );
+    }
+    return AlertDialog(
+      title: Text(l.editInfo),
+      content: SingleChildScrollView(child: form),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),

@@ -13,6 +13,7 @@ import '../../../services/share/discovery.dart';
 import '../../../services/share/lan_server.dart';
 import '../jam/jam_screen.dart';
 import '../../../providers/jam_providers.dart';
+import '../devices/peer_card.dart';
 import 'offer_status_label.dart';
 import 'track_picker_screen.dart';
 
@@ -167,45 +168,10 @@ class _SendTabState extends ConsumerState<SendTab> {
             ),
           ),
         for (final peer in hub.peers)
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ListTile(
-                leading: Icon(_platformIcon(peer.platform)),
-                title: Text(
-                  peer.name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                subtitle: Text(peer.host),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 16, bottom: 8),
-                child: Wrap(
-                  spacing: 8,
-                  runSpacing: 4,
-                  children: [
-                    FilledButton(
-                      onPressed: () => _sendTo(peer),
-                      child: Text(
-                        l.sendToDevice(peer.name),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    OutlinedButton.icon(
-                      onPressed: () => _startJam(peer),
-                      icon: const Icon(Icons.queue_music),
-                      label: Text(
-                        l.jamStartWith(peer.name),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+          PeerCard(
+            peer: peer,
+            onSend: () => _sendTo(peer),
+            onJam: () => _startJam(peer),
           ),
         if (hub.peers.isEmpty && hub.active)
           Text(l.noDevicesHint, style: Theme.of(context).textTheme.bodySmall),
@@ -264,12 +230,6 @@ class _SendTabState extends ConsumerState<SendTab> {
       ],
     );
   }
-
-  IconData _platformIcon(String p) => switch (p) {
-    'android' => Icons.smartphone,
-    'windows' || 'linux' => Icons.computer,
-    _ => Icons.devices,
-  };
 }
 
 class _Active extends StatelessWidget {

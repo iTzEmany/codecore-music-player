@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../theme/tokens.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/db/app_database.dart';
@@ -169,22 +172,56 @@ class _State extends ConsumerState<_EnrichPreviewDialog> {
                       subtitle: r.field == EnrichField.cover
                           ? Align(
                               alignment: Alignment.centerLeft,
-                              child: Image.network(
-                                r.proposed!,
-                                width: 72,
-                                height: 72,
-                                errorBuilder: (_, _, _) =>
-                                    const Icon(Icons.image_not_supported),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: Image.network(
+                                  r.proposed!,
+                                  width: 72,
+                                  height: 72,
+                                  errorBuilder: (_, _, _) =>
+                                      const Icon(Icons.image_not_supported),
+                                ),
                               ),
                             )
-                          : Text(
-                              _locked(r)
-                                  ? l.userEditedLocked
-                                  : '${l.currentValue}: ${r.current ?? '—'}\n'
-                                        '${l.proposedValue}: ${r.proposed}',
-                              maxLines: 5,
-                              overflow: TextOverflow.ellipsis,
-                            ),
+                          : (_locked(r)
+                                ? Text(l.userEditedLocked)
+                                : Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          r.current ?? '—',
+                                          maxLines: 3,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            decoration:
+                                                TextDecoration.lineThrough,
+                                            color: context.cc.textMuted,
+                                          ),
+                                        ),
+                                      ),
+                                      const Padding(
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                        ),
+                                        child: Icon(
+                                          Icons.arrow_forward_rounded,
+                                          size: 16,
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: Text(
+                                          r.proposed ?? '',
+                                          maxLines: 3,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            color: context.cc.accentSoft,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  )),
                     ),
                 ],
               ),

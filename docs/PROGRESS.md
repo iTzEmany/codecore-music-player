@@ -133,7 +133,7 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 11.14 Coda, Testi, menu del brano
 - [x] 11.15 Jam
 - [x] 11.16 Centro Attività
-- [ ] 11.17 Impostazioni, Condivisione, dialoghi
+- [x] 11.17 Impostazioni, Condivisione, dialoghi
 - [ ] 11.18 Rifinitura e controlli finali
 - [ ] 11.19 Prova a mano (utente)
 
@@ -152,6 +152,7 @@ L'agente riparte sempre dal primo task non spuntato.
 - 11.14 (2026-10-16): `track_actions_sheet.dart` → `track_actions.dart` (modello `TrackActionGroup`, foglio + menu al puntatore). La Coda mostra «In riproduzione» + «Prossimi» in ordine naturale della coda (con casuale attivo l'ordine di ascolto può differire). La schermata Testi non cerca più le curiosità da sola (ora solo con tocco in Now Playing). Provato su Mi A3: coda, menu → Vai all'album (1114_*.png); testo sincronizzato dal vivo coperto solo dai test (nessun brano con testo a disposizione), riordino/rimozione coda non provati a mano.
 - 11.15 (2026-10-16): Jam rifatta (header con avatar, `JamPlayerCard`, `JamOutputsSheet`; ✕ solo dove consentito, quindi il messaggio «non puoi rimuovere» non compare più). Non avviata sul telefono (regola: niente Jam verso altri dispositivi): verificata con widget test e scatto da test (phone_jam.png). L'attesa mostra avatar pulsanti.
 - 11.16 (2026-10-16): `activityProvider` aggrega scansione, arricchimento, download e invii (`buildActivity` pura, testata); «Pulisci» nasconde i completati con un insieme di chiavi in memoria. `EnrichJobBanner` → `EnrichResultListener` (solo snackbar a fine lavoro); la barra di scansione è sparita dalle liste (resta il banner d'errore); il chip «Download (N)» di Cerca è sostituito dal bottone Attività. Provato solo con widget test (il telefono non ha attività in corso da mostrare senza avviare scansioni/download).
+- 11.17 (2026-10-16): Impostazioni a gruppi (`_Group`), lingua in un dialogo, Condivisione con `PeerCard` e riquadro firewall, anteprima arricchimento a due colonne, modifica info a pagina intera <600 px con Anno/N° traccia affiancati, brani non trovati con ⋮ e «Rimuovi tutti» (conferma). Provato su Mi A3 solo la pagina Impostazioni (1117_*.png); gli altri dialoghi sono coperti dai test esistenti (nessuna modifica dei dati dell'utente).
 - 11.1 (2026-10-15): su richiesta dell'utente la verifica visiva dei task 11.x si fa **sul telefono** (hot reload); gli scatti da test (`scripts/shots.sh`) restano per testo/layout ma le copertine non si caricano nei golden (I/O reale in fake async) e ogni scatto costa ~1 min. Font di ripiego: Liberation Sans al posto di Roboto finché non ci sono i font dell'app.
 - 0.3: `generate: true` (l10n) rimandato alla fase 4 (senza ARB `flutter gen-l10n` fallirebbe). `flutter_localizations` già aggiunto.
 - 0.2: MainActivity spostata nel package `com.codecore.player`; `compileSdk = 37` (richiesto da permission_handler_android).

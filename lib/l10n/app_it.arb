@@ -783,5 +783,16 @@
         "type": "int"
       }
     }
+  },
+  "settingsLocalNetwork": "Rete locale",
+  "removeAll": "Rimuovi tutti",
+  "confirmRemoveAllTitle": "Rimuovere tutti dalla libreria?",
+  "confirmRemoveAllBody": "{n} brani non trovati verranno tolti dalla libreria. I file non vengono toccati; perdi preferiti e playlist di questi brani.",
+  "@confirmRemoveAllBody": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
   }
 }

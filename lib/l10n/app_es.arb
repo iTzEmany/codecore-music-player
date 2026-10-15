@@ -592,5 +592,16 @@
         "type": "int"
       }
     }
+  },
+  "settingsLocalNetwork": "Red local",
+  "removeAll": "Quitar todas",
+  "confirmRemoveAllTitle": "¿Quitar todas de la biblioteca?",
+  "confirmRemoveAllBody": "Se quitarán {n} canciones no encontradas de la biblioteca. Los archivos no se tocan; pierdes favoritos y listas de estas canciones.",
+  "@confirmRemoveAllBody": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
   }
 }
