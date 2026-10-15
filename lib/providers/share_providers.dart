@@ -20,10 +20,16 @@ final lanServerProvider = Provider<LanServer>((ref) {
   return s;
 });
 
+/// Name the OS gives the device (overridden at start-up on Android, where the
+/// hostname is just "localhost").
+final systemDeviceNameProvider =
+    Provider<String>((ref) => Platform.localHostname);
+
 final deviceNameProvider = Provider<String>((ref) {
   final custom = ref.watch(settingsProvider.select((s) => s.deviceName));
   if (custom != null && custom.trim().isNotEmpty) return custom.trim();
-  return Platform.localHostname;
+  final system = ref.watch(systemDeviceNameProvider).trim();
+  return system.isEmpty || system == 'localhost' ? 'Codecore' : system;
 });
 
 /// Local LAN address: the Wi-Fi IP when the OS reports it, otherwise the

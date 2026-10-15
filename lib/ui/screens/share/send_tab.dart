@@ -149,25 +149,27 @@ class _SendTabState extends ConsumerState<SendTab> {
           ]),
         ),
       for (final peer in hub.peers)
-        Column(children: [
+        Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           ListTile(
             leading: Icon(_platformIcon(peer.platform)),
             title: Text(peer.name, maxLines: 1, overflow: TextOverflow.ellipsis),
             subtitle: Text(peer.host),
-            trailing: FilledButton(
-              onPressed: () => _sendTo(peer),
-              child: Text(l.sendToDevice(peer.name),
-                  maxLines: 1, overflow: TextOverflow.ellipsis),
-            ),
           ),
-          Align(
-            alignment: Alignment.centerRight,
-            child: TextButton.icon(
-              onPressed: () => _startJam(peer),
-              icon: const Icon(Icons.queue_music),
-              label: Text(l.jamStartWith(peer.name),
-                  maxLines: 1, overflow: TextOverflow.ellipsis),
-            ),
+          Padding(
+            padding: const EdgeInsets.only(left: 16, bottom: 8),
+            child: Wrap(spacing: 8, runSpacing: 4, children: [
+              FilledButton(
+                onPressed: () => _sendTo(peer),
+                child: Text(l.sendToDevice(peer.name),
+                    maxLines: 1, overflow: TextOverflow.ellipsis),
+              ),
+              OutlinedButton.icon(
+                onPressed: () => _startJam(peer),
+                icon: const Icon(Icons.queue_music),
+                label: Text(l.jamStartWith(peer.name),
+                    maxLines: 1, overflow: TextOverflow.ellipsis),
+              ),
+            ]),
           ),
         ]),
       if (hub.peers.isEmpty && hub.active)

@@ -69,6 +69,16 @@ class MainActivity : AudioServiceActivity() {
                     result.success(null)
                 }
                 "isForeground" -> result.success(ShareBridge.foreground)
+                "deviceName" -> {
+                    // The user-visible device name, falling back to the model.
+                    val name = try {
+                        android.provider.Settings.Global.getString(
+                            ctx.contentResolver, "device_name")
+                    } catch (e: Exception) {
+                        null
+                    }
+                    result.success(if (name.isNullOrBlank()) android.os.Build.MODEL else name)
+                }
                 "clearOffer" -> {
                     ShareNotifications.clearOffer(ctx, call.argument<String>("offerId")!!)
                     result.success(null)

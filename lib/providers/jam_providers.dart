@@ -82,6 +82,7 @@ class JamController extends Notifier<JamUiState> {
   StreamSubscription<void>? _hostSub, _guestSub, _lostSub;
   StreamSubscription<JamRequest>? _reqSub;
   JamRequest? _guestInfo; // host side: the connected guest
+  Timer? _alive;
   var _failures = 0;
   var _held = false;
 
@@ -190,6 +191,15 @@ class JamController extends Notifier<JamUiState> {
       ..onItemFailed = _onItemFailed;
     _host?.resolveFile = _localFile;
     state = state.copyWith(phase: JamPhase.active, role: role, jam: s);
+    if (role == JamRole.host) {
+      // A guest that vanished (crash, Wi-Fi off) must not keep the Jam open.
+      _alive = Timer.periodic(const Duration(seconds: 10), (_) {
+        if (_host?.guestStale(const Duration(seconds: 75)) ?? false) {
+          _host?.endSession();
+          unawaited(_finish(lost: true));
+        }
+      });
+    }
     _onState(s);
   }
 
@@ -315,6 +325,8 @@ class JamController extends Notifier<JamUiState> {
     if (state.role == JamRole.host) {
       _host?.endSession();
       await Future<void>.delayed(const Duration(milliseconds: 300));
+    } else {
+      await _guest?.leave();
     }
     await _finish();
   }
@@ -326,6 +338,8 @@ class JamController extends Notifier<JamUiState> {
   }
 
   Future<void> _teardown({bool release = true}) async {
+    _alive?.cancel();
+    _alive = null;
     await _hostSub?.cancel();
     await _guestSub?.cancel();
     await _lostSub?.cancel();

@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show MethodChannel;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio_media_kit/just_audio_media_kit.dart';
 
@@ -17,6 +18,7 @@ import 'providers/database_providers.dart';
 import 'providers/library_providers.dart';
 import 'providers/player_providers.dart';
 import 'providers/settings_providers.dart';
+import 'providers/share_providers.dart';
 import 'services/audio/codecore_audio_handler.dart';
 import 'services/audio/just_audio_backend.dart';
 import 'services/audio/play_queue.dart';
@@ -67,8 +69,20 @@ Future<void> main() async {
   }
   persistence.start();
 
+  var systemName = Platform.localHostname;
+  if (Platform.isAndroid) {
+    try {
+      systemName = await const MethodChannel('codecore/share')
+              .invokeMethod<String>('deviceName') ??
+          systemName;
+    } on Object catch (e) {
+      AppLog.d('device name lookup failed', e);
+    }
+  }
+
   runApp(ProviderScope(
     overrides: [
+      systemDeviceNameProvider.overrideWithValue(systemName),
       databaseProvider.overrideWithValue(db),
       settingsStoreProvider.overrideWithValue(settingsStore),
       audioHandlerProvider.overrideWithValue(handler),

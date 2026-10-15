@@ -217,6 +217,16 @@ class JamGuest {
 
   /// Leaves the Jam. The host keeps running with the guest gone.
   Future<void> leave() async {
+    if (_running && _base != null) {
+      try {
+        await _dio.post<dynamic>('$_base/$_sid/leave',
+            options: Options(
+                headers: _auth, sendTimeout: const Duration(seconds: 2),
+                receiveTimeout: const Duration(seconds: 2)));
+      } on DioException {
+        // The host notices the missing polls and ends the Jam by itself.
+      }
+    }
     await _close();
   }
 

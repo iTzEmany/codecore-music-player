@@ -71,6 +71,7 @@ class JamHost {
   JamState? _state;
   String? _sid, _token;
   JamRequest? _guest;
+  DateTime? _guestSeen;
 
   // Active session as guest (set by the client, see attachGuest).
   String? _gSid, _gToken;
@@ -80,6 +81,12 @@ class JamHost {
   String? get sessionId => _sid;
   String? get sessionToken => _token;
   JamRequest? get guest => _guest;
+  /// True when the guest has not polled or sent anything for [timeout].
+  bool guestStale(Duration timeout) {
+    final seen = _guestSeen;
+    return hosting && seen != null && _now().difference(seen) > timeout;
+  }
+
   bool get hosting => _state != null && !_state!.ended;
   Stream<void> get changes => _changes.stream;
 
@@ -115,6 +122,7 @@ class JamHost {
     _sid = r.sessionId;
     _token = r.sessionToken;
     _guest = r;
+    _guestSeen = _now();
     _state = JamState(
       hostDeviceId: deviceId,
       outputDeviceId: deviceId,
@@ -291,8 +299,13 @@ class JamHost {
       return Response.ok('ok');
     });
 
-    bool hostAuth(Request r, String sid) =>
-        _sid != null && sid == _sid && _tokenOk(_token, r.headers['x-jam-token']);
+    bool hostAuth(Request r, String sid) {
+      final ok = _sid != null &&
+          sid == _sid &&
+          _tokenOk(_token, r.headers['x-jam-token']);
+      if (ok) _guestSeen = _now();
+      return ok;
+    }
 
     // Host: state, long polling on `since`.
     router.get('/<sid>/state', (Request r, String sid) async {
@@ -327,6 +340,13 @@ class JamHost {
       final res = apply(cmd, from: from);
       if (!res.isOk) return _fail(res.error!);
       return _json(res.state!.toJson());
+    });
+
+    // Host: the guest leaves, which ends the Jam (two devices only).
+    router.post('/<sid>/leave', (Request r, String sid) {
+      if (!hostAuth(r, sid)) return Response(401, body: 'unauthorized');
+      endSession();
+      return Response.ok('ok');
     });
 
     // Owner: stream a queued item that this device owns.
