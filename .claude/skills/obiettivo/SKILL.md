@@ -19,7 +19,7 @@ Interpretazione:
 ## Regole fisse (non si discutono durante l'obiettivo)
 1. **Non chiedere niente all'utente.** Niente `AskUserQuestion`, niente «procedo?», niente «vuoi che…?». Se la documentazione è ambigua scegli l'opzione più semplice coerente con `docs/01…04` e annotala (passo 5).
 2. **La memoria sei tu fuori dal contesto**: il file dell'obiettivo (`scripts/obiettivo.sh file`) e `docs/PROGRESS.md`. Dopo una compattazione del contesto la prima cosa è rileggerli.
-3. **Mai `flutter run`** né programmi che aprono finestre o restano in attesa. Verifica = `flutter analyze` + `flutter test` + (quando serve) `flutter build`. Per ogni schermata nuova scrivi almeno **un widget test** di fumo (`testWidgets`: si costruisce senza eccezioni, mostra gli elementi chiave): è la tua unica verifica visiva.
+3. **Niente programmi in primo piano che restano in attesa** (mai `flutter run` in primo piano, mai finestre desktop). Verifica = `flutter analyze` + `flutter test` + (quando serve) `flutter build`. Per ogni schermata nuova scrivi almeno **un widget test** di fumo (`testWidgets`: si costruisce senza eccezioni, mostra gli elementi chiave). Unica eccezione ammessa: la **prova su telefono** del §6.1, quando un documento di fase la chiede.
 4. **Comandi lunghi sempre con stima**, in background, via `scripts/sorveglia.sh <stima> <log> -- <comando>` (a 2× diagnosi, a 3× viene fermato). Stime: `flutter pub get` 2m · `dart run build_runner build --delete-conflicting-outputs` 4m · `flutter analyze` 2m · `flutter test` 4m · `flutter build apk --debug` 20m la prima volta, 8m dopo · `flutter build linux` 10m · `flutter create` 3m. Mai `sleep` in ciclo.
 5. **Lavora solo dentro `codecore_flutter/`.** La vecchia app in `../codecore/` è solo da leggere. La guardia (`.claude/hooks/guard.sh`) nega sudo, push, comandi git distruttivi e scritture fuori progetto: se nega, **leggi il motivo e segui l'alternativa**, non aggirare.
 6. L'hook Stop ti rimanda al lavoro finché lo stato è `IN CORSO`. Per fermarti davvero: `scripts/obiettivo.sh chiudi FATTO|BLOCCATO|PAUSA "<motivo>"`.
@@ -59,7 +59,19 @@ Quando tutti i task della fase sono `[x]`/`[~]`: verifica la sua «Definition of
 ## 6. Quando serve l'utente o ti blocchi
 - Tutto ciò che è solo suo va in «Tocca a te» con **comandi da incollare** e dispositivo. Non blocca gli altri task.
 - Se `PushNotification` è disponibile, manda **una** notifica quando compare la prima voce «Tocca a te» e una a fine obiettivo; mai più di una ogni ora.
-- Android con telefono collegato (`adb devices` mostra un dispositivo): puoi `flutter install`/`adb install` l'APK di debug per lasciarlo pronto, ma **non** avviare né pilotare l'app.
+- Android con telefono collegato (`adb devices` mostra un dispositivo): puoi `flutter install`/`adb install` l'APK di debug per lasciarlo pronto. Avviarlo e pilotarlo solo con la procedura del §6.1.
+
+### 6.1 Prova su telefono (solo se il documento di fase la chiede)
+Prerequisiti, altrimenti **salta** e scrivi la prova in «Tocca a te»: `adb devices` mostra un dispositivo `device`; dopo `adb shell input keyevent KEYCODE_WAKEUP` lo screenshot **non** mostra la schermata di blocco.
+0. `mkdir -p build/device_shots` (ignorata da git).
+1. Avvio **in background** (strumento Bash con `run_in_background`, non via `sorveglia.sh`):
+   `flutter run -d <id> --debug --pid-file "build/device_shots/cc.pid" > "build/device_shots/run.log" 2>&1`. Pronto quando il log contiene `Flutter run key commands` (aspetta con Monitor, mai `sleep` in ciclo; tetto 15 min alla prima compilazione).
+2. Dopo una modifica: `kill -USR1 $(cat "build/device_shots/cc.pid")` = hot reload; `kill -USR2` = hot restart (serve se cambi provider, `main`, costanti). Controlla nel log `Reloaded`.
+3. Screenshot: `adb exec-out screencap -p > "build/device_shots/<task>_<nome>.png"` e **aprilo** con lo strumento di lettura immagini. Gesti: `adb shell input tap X Y`, `adb shell input swipe X1 Y1 X2 Y2 300`, `adb shell input keyevent KEYCODE_BACK`. Ricava le coordinate dallo screenshot (risoluzione: `adb shell wm size`).
+4. A fine prova: `kill $(cat "build/device_shots/cc.pid")`. Mai lasciare `flutter run` attivo tra un task e l'altro.
+5. **Mai disinstallare l'app** né cancellarne i dati (`adb uninstall`, `pm clear`): sul telefono c'è la libreria vera dell'utente. Se l'installazione fallisce per firma diversa (APK release già installato) o versione più bassa, **fermati**, non accettare la reinstallazione proposta da `flutter run`, e scrivi in «Tocca a te» cosa serve.
+6. Non toccare i dati dell'utente durante la prova: niente eliminazione di playlist/cartelle, niente svuota cache, niente invii o Jam verso altri dispositivi.
+7. Esito: screenshot citati nel registro (`scripts/obiettivo.sh registro`), difetti visti → correggili nello stesso task. La prova su telefono **non sostituisce** `flutter analyze`/`flutter test`.
 
 ## 7. Chiusura
 Quando non resta nessun `[ ]` nel perimetro (o restano solo bloccati/da fare dell'utente):

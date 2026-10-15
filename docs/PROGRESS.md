@@ -116,6 +116,27 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 10.9 Prova reale e misura (misura acustica ripetuta con il controllore proporzionale: vedi nota)
 - [x] 10.10 Documentazione
 
+## Fase 11 — Interfaccia nuova (`fase-11-interfaccia-nuova.md`)
+- [ ] 11.1 Banco visivo (scatti da test)
+- [ ] 11.2 Token, tema e font
+- [ ] 11.3 Componenti base
+- [ ] 11.4 Correzioni rapide
+- [ ] 11.5 Shell: tre schede e navigatore annidato
+- [ ] 11.6 Colore dalla copertina
+- [ ] 11.7 Mini-player e foglio Dispositivi
+- [ ] 11.8 Now Playing
+- [ ] 11.9 Desktop: barra laterale, barra player, pannello destro
+- [ ] 11.10 Libreria e «Tutti i brani»
+- [ ] 11.11 Pagine di raccolta: album, artista, playlist, Preferiti
+- [ ] 11.12 Home
+- [ ] 11.13 Cerca (con YouTube)
+- [ ] 11.14 Coda, Testi, menu del brano
+- [ ] 11.15 Jam
+- [ ] 11.16 Centro Attività
+- [ ] 11.17 Impostazioni, Condivisione, dialoghi
+- [ ] 11.18 Rifinitura e controlli finali
+- [ ] 11.19 Prova a mano (utente)
+
 ## Note di deviazione
 <!-- una riga per deviazione: data — task — cosa è cambiato e perché -->
 
