@@ -21,6 +21,9 @@ class SimDevice {
   double speed = 1.0;
   bool playing = false;
 
+  /// Speed commands take a tick to reach the audio path.
+  double? pendingSpeed;
+
   int local(int trueMs) => trueMs + skewMs;
 }
 
@@ -60,19 +63,23 @@ void main() {
         // 500 ms ticks = 10 minutes
         trueNow += 500;
         for (final d in devs) {
+          if (d.pendingSpeed != null) {
+            d.speed = d.pendingSpeed!;
+            d.pendingSpeed = null;
+          }
           if (d.playing) d.posMs += 500 * d.rate * d.speed;
           final a = ctl.decide(
             playing: true,
             positionMs: 0,
             positionAtMs: positionAt,
             jamNowMs: d.clock.jamNowMs(),
-            measuredMs: d.posMs.round(),
+            measuredMs: d.posMs.round() + d.rng.nextInt(21) - 10,
             backendPlaying: d.playing,
             speed: d.speed,
             latencyMs: d.latencyMs,
           );
           if (a.seekToMs != null) d.posMs = a.seekToMs!.toDouble();
-          if (a.speed != null) d.speed = a.speed!;
+          if (a.speed != null) d.pendingSpeed = a.speed;
           if (a.play != null) d.playing = a.play!;
           if (a.playInMs != null && a.playInMs! <= 500) d.playing = true;
         }

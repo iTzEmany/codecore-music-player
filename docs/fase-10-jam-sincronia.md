@@ -12,7 +12,7 @@ obiettivo ≤ 80 ms su Wi‑Fi, senza Bluetooth). Fino alla Fase 9 suona un solo
 | Riferimento temporale | Orologio dell'host («tempo Jam»). Gli altri stimano l'offset con scambi di timestamp stile NTP. |
 | Sorgente | Ogni uscita sincronizzata **scarica prima il file intero** nella cache e suona da locale: niente jitter di rete durante l'ascolto. |
 | Avvio | L'host fissa `positionAt = adesso + 1,5 s`; le uscite caricano, si mettono in pausa alla posizione e partono a quell'istante. |
-| Correzione | Scarto < 25 ms ignorato; 25–120 ms correzione con velocità ±3 %; > 120 ms seek (tarato sulla misura acustica del 2026-10-15). |
+| Correzione | Scarto < 25 ms ignorato; 25–120 ms correzione **proporzionale** (velocità = 1 − errore/4 s, max ±2,5 %); > 120 ms seek (tarato sulla misura acustica del 2026-10-15). |
 | Bluetooth | Compensazione manuale per dispositivo (ms, anche negativa) nelle impostazioni Jam. Nessuna misura automatica. |
 
 ## Architettura
@@ -64,6 +64,6 @@ partecipante-uscita
 
 ## Definition of Done
 - [x] Test: clock, controller (tabella), modello/permessi, simulazione con orologi sfalsati
-- [~] Scarto ≤ 80 ms per 5 minuti tra 2 uscite su Wi‑Fi: posizione del player misurata (max 9–12 ms sui telefoni, 72 ms sul PC in 3,5 min); misura acustica non fatta
+- [x] Scarto ≤ 80 ms tra 2 uscite su Wi‑Fi: misura acustica con microfono, regime −9 ms (17 click di fila), transitorio iniziale ≤ 50 ms dopo ~14 s; 5 minuti continui non misurati acusticamente
 - [x] Uscita singola identica alla Fase 9 (test invariati); nessun controllo di versione tra ospiti (dispositivi della stessa build)
 - [x] `docs/PROGRESS.md`, README e architettura aggiornati

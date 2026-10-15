@@ -113,7 +113,7 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 10.6 `JamOutput` multi-uscita
 - [x] 10.7 Interfaccia (uscite multiple, stato di sincronia, latenza)
 - [x] 10.8 Simulazione con orologi sfalsati
-- [~] 10.9 Prova reale e misura (misura acustica fatta: vedi nota; da rifare dopo la nuova taratura)
+- [x] 10.9 Prova reale e misura (misura acustica ripetuta con il controllore proporzionale: vedi nota)
 - [x] 10.10 Documentazione
 
 ## Note di deviazione
@@ -162,3 +162,4 @@ L'agente riparte sempre dal primo task non spuntato.
 - 10.9: filtro sul clock — un giro con RTT ≫ del migliore noto non sostituisce la stima (sul PC un RTT di 183 ms aveva spostato l'offset di ~150 ms) e un secondo affinamento a 5 s dall'avvio.
 - 10.9 misura acustica (2026-10-15, microfono del PC, Mi A3 + Motorola, altoparlanti, file di click): all'avvio i due telefoni erano sfasati di **~88 ms** (Motorola dopo); con la correzione a ±2 % l'offset è sceso a ~36 ms in ~12 s e a ~25 ms dopo 22 s, con rimbalzi fino a ~65 ms. Conclusioni: (a) la sola posizione del player (scarto 10–20 ms nei log) non basta, il tempo di uscita dei due telefoni differisce di decine di ms; (b) la convergenza era troppo lenta. Modifiche: seek oltre 120 ms (era 250), correzione di velocità ±3 % (era ±2 %). Da ripetere la misura con la nuova taratura; la compensazione manuale della latenza resta necessaria (cuffie Bluetooth: 100–250 ms).
 - 10.9 difetto trovato: in uscita singola, se il sistema mette in pausa il player (audio focus perso), la Jam restava «in riproduzione» senza suonare; ora un controllo ogni 2 s lo riprende.
+- 10.9 misura acustica #2 (2026-10-15, microfono del PC, 2 altoparlanti, click ogni secondo, 31 click): con la taratura «seek 120 ms + ±3 % fisso» l'offset oscillava tra −14 e +94 ms (ciclo limite del controllore a gradino con ritardo di attuazione): peggio della versione precedente. Corretto con controllo **proporzionale** (velocità = 1 − errore/4000 ms, tetto ±2,5 %, soglia di ignoro 25 ms, nessun comando per variazioni < 0,3 %): misura #3, **dopo ~14 s di assestamento lo scarto resta a −9 ms (Motorola 9 ms prima del Xiaomi) per 17 click consecutivi**; nei primi 14 s tra −9 e +49 ms. L'ultimo click (12, 56 ms) coincide con la chiusura della Jam. La simulazione ora include ritardo di attuazione di un tick e rumore ±10 ms sulla posizione.

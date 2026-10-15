@@ -35,7 +35,8 @@ class JamSyncTuning {
     this.ignoreMs = 25,
     this.resetMs = 10,
     this.seekMs = 120,
-    this.speedDelta = 0.03,
+    this.speedDelta = 0.025,
+    this.gainMs = 4000,
     this.idleSeekMs = 150,
   });
 
@@ -48,8 +49,12 @@ class JamSyncTuning {
   /// Above this error the position is simply set.
   final int seekMs;
 
-  /// Speed change used to absorb a medium error (±3 %).
+  /// Largest speed change used to absorb an error (±2.5 %).
   final double speedDelta;
+
+  /// Proportional gain: the speed offset is `error / gainMs` (so 80 ms ahead
+  /// slows playback by 2 %), which avoids the limit cycle of a fixed step.
+  final int gainMs;
 
   /// Tolerance for the paused position.
   final int idleSeekMs;
@@ -116,8 +121,12 @@ class JamSyncController {
       return JamSyncAction(seekToMs: expected, speed: speed != 1.0 ? 1.0 : null);
     }
     if (abs >= t.ignoreMs) {
-      final want = err > 0 ? 1.0 - t.speedDelta : 1.0 + t.speedDelta;
-      return want == speed ? JamSyncAction.noop : JamSyncAction(speed: want);
+      final k = (err / t.gainMs).clamp(-t.speedDelta, t.speedDelta).toDouble();
+      final want = double.parse((1.0 - k).toStringAsFixed(4));
+      // Do not chatter the player for tiny changes of the target speed.
+      return (want - speed).abs() < 0.003
+          ? JamSyncAction.noop
+          : JamSyncAction(speed: want);
     }
     if (speed != 1.0 && abs <= t.resetMs) return const JamSyncAction(speed: 1.0);
     return JamSyncAction.noop;
