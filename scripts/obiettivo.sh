@@ -38,7 +38,7 @@ log_line() {
   printf -- '- %s %s\n' "$(date '+%m-%d %H:%M')" "$2" >>"$1"
   touch_line "$1"
 }
-stato_di() { sed -n 's/^stato: *//p' "$1" | head -1; }
+stato_di() { sed -n 's/^stato: *//p' "$1" 2>/dev/null | head -1; }
 
 cmd=${1:-stato}
 shift || true
@@ -125,9 +125,10 @@ stato)
       echo "nessun obiettivo in $dir"
       exit 0
     }
-    for g in $(printf '%s\n' "${files[@]}" | sort -r); do
-      printf '%-40s %-17s %s\n' "$(stato_di "$g" | cut -c1-40)" "$(sed -n 's/^aggiornato: //p' "$g")" "$(basename "$g")"
-    done
+    # righe, non parole: il percorso del progetto può contenere spazi
+    while IFS= read -r g; do
+      printf '%-40s %-17s %s\n' "$(stato_di "$g" | cut -c1-40)" "$(sed -n 's/^aggiornato: //p' "$g" 2>/dev/null)" "$(basename "$g")"
+    done < <(printf '%s\n' "${files[@]}" | sort -r)
     exit 0
   fi
   [ -f "$f" ] || die "non trovo $f"
