@@ -1521,8 +1521,26 @@ abstract class AppLocalizations {
   /// No description provided for @receiveFromLanHint.
   ///
   /// In it, this message translates to:
-  /// **'Rende il dispositivo visibile e riceve richieste mentre l’app è aperta'**
+  /// **'Rende il dispositivo visibile e riceve richieste anche in background. Su Android mostra una notifica fissa con cui puoi disattivarlo'**
   String get receiveFromLanHint;
+
+  /// No description provided for @receiveServiceTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Codecore è visibile sulla rete'**
+  String get receiveServiceTitle;
+
+  /// No description provided for @receiveServiceText.
+  ///
+  /// In it, this message translates to:
+  /// **'Pronto a ricevere brani dai dispositivi vicini'**
+  String get receiveServiceText;
+
+  /// No description provided for @receiveServiceDisable.
+  ///
+  /// In it, this message translates to:
+  /// **'Disattiva'**
+  String get receiveServiceDisable;
 }
 
 class _AppLocalizationsDelegate

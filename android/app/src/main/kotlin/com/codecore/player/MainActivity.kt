@@ -27,6 +27,43 @@ class MainActivity : AudioServiceActivity() {
         super.configureFlutterEngine(flutterEngine)
         channel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "codecore/ytdlp")
         channel.setMethodCallHandler { call, result -> handle(call, result) }
+
+        val share = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "codecore/share")
+        ShareBridge.channel = share
+        share.setMethodCallHandler { call, result ->
+            val ctx = applicationContext
+            when (call.method) {
+                "startService" -> {
+                    ReceiveService.start(
+                        ctx,
+                        call.argument<String>("title") ?: "Codecore",
+                        call.argument<String>("text") ?: "",
+                        call.argument<String>("disable") ?: "Stop",
+                    )
+                    result.success(null)
+                }
+                "stopService" -> {
+                    ReceiveService.stop(ctx)
+                    result.success(null)
+                }
+                "showOffer" -> {
+                    ShareNotifications.showOffer(
+                        ctx,
+                        call.argument<String>("offerId")!!,
+                        call.argument<String>("title") ?: "",
+                        call.argument<String>("body") ?: "",
+                        call.argument<String>("accept") ?: "OK",
+                        call.argument<String>("decline") ?: "No",
+                    )
+                    result.success(null)
+                }
+                "clearOffer" -> {
+                    ShareNotifications.clearOffer(ctx, call.argument<String>("offerId")!!)
+                    result.success(null)
+                }
+                else -> result.notImplemented()
+            }
+        }
     }
 
     @Synchronized

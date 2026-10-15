@@ -1,15 +1,21 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:ui' show AppLifecycleState, Locale;
 
 import 'package:dio/dio.dart';
+import 'package:flutter/widgets.dart' show AppLifecycleListener, WidgetsBinding;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
+import 'package:permission_handler/permission_handler.dart';
 
 import '../core/app_log.dart';
 import '../data/db/app_database.dart';
 import '../services/share/discovery.dart';
 import '../services/share/lan_client.dart';
+import '../l10n/app_localizations.dart';
 import '../services/share/offers.dart';
+import '../services/share/share_notifier.dart';
+import '../core/platform.dart';
 import 'database_providers.dart';
 import 'library_providers.dart';
 import 'settings_providers.dart';
@@ -62,14 +68,102 @@ class ShareHubNotifier extends Notifier<ShareHubState> {
   bool _starting = false;
   final _cancels = <String, CancelToken>{};
   final _newIncoming = StreamController<IncomingOffer>.broadcast();
+  final _notified = <String>{}; // offers currently shown as notifications
+  AppLifecycleListener? _lifecycle;
 
   /// New pending offers (the shell turns them into a dialog).
   Stream<IncomingOffer> get newIncoming => _newIncoming.stream;
 
+  ShareNotifier get _platform => ref.read(shareNotifierProvider);
+
+  AppLocalizations get _l10n => lookupAppLocalizations(
+      Locale(ref.read(settingsProvider).language));
+
+  bool get _inForeground {
+    final s = WidgetsBinding.instance.lifecycleState;
+    return s == null || s == AppLifecycleState.resumed;
+  }
+
   @override
   ShareHubState build() {
     ref.onDispose(_teardown);
+    final platform = ref.read(shareNotifierProvider);
+    platform.onOfferAction = _onNotificationAction;
+    platform.onDisableReceive = () => ref
+        .read(settingsProvider.notifier)
+        .update((s) => s.copyWith(receiveFromLan: false));
+    _lifecycle = AppLifecycleListener(onResume: _onResume);
+    ref.listen(settingsProvider.select((s) => s.receiveFromLan),
+        (_, on) => _applyReceiveSetting(on));
+    if (ref.read(settingsProvider).receiveFromLan) {
+      scheduleMicrotask(() => _applyReceiveSetting(true));
+    }
     return const ShareHubState();
+  }
+
+  /// "Receive from the local network" on/off: endpoint, discovery and (on
+  /// Android) the foreground service with its notification.
+  Future<void> _applyReceiveSetting(bool on) async {
+    if (!ref.mounted) return;
+    if (on) {
+      if (isAndroid) await Permission.notification.request();
+      await _ensureRunning();
+      final l = _l10n;
+      await _platform.startService(
+        title: l.receiveServiceTitle,
+        text: l.receiveServiceText,
+        disable: l.receiveServiceDisable,
+      );
+    } else {
+      await _platform.stopService();
+      _maybeStop();
+    }
+  }
+
+  void _onNotificationAction(String offerId, bool accept) {
+    final o = _service?.incoming[offerId];
+    if (o == null || o.status != OfferStatus.pending) return;
+    _notified.remove(offerId);
+    accept ? this.accept(o) : decline(o);
+  }
+
+  void _onResume() {
+    // Offers that arrived while in the background become a normal dialog.
+    for (final id in _notified.toList()) {
+      final o = _service?.incoming[id];
+      _platform.clearOffer(id);
+      if (o != null && o.status == OfferStatus.pending) _newIncoming.add(o);
+    }
+    _notified.clear();
+  }
+
+  void _surfaceIncoming(IncomingOffer o) {
+    if (_inForeground) {
+      _newIncoming.add(o);
+      return;
+    }
+    final l = _l10n;
+    final mb = (o.totalBytes / 1048576).toStringAsFixed(1);
+    _notified.add(o.offerId);
+    _platform.showOffer(
+      offerId: o.offerId,
+      title: l.incomingTitle(o.fromName),
+      body: l.incomingBody(o.items.length, mb),
+      accept: l.accept,
+      decline: l.decline,
+    );
+  }
+
+  void _clearStaleNotifications() {
+    final s = _service;
+    if (s == null) return;
+    for (final id in _notified.toList()) {
+      final o = s.incoming[id];
+      if (o == null || o.status != OfferStatus.pending) {
+        _notified.remove(id);
+        _platform.clearOffer(id);
+      }
+    }
   }
 
   Future<void> enter() async {
@@ -92,7 +186,7 @@ class ShareHubNotifier extends Notifier<ShareHubState> {
         deviceName: ref.read(deviceNameProvider),
       )..onIncoming = (o) {
           _publish();
-          _newIncoming.add(o);
+          _surfaceIncoming(o);
         };
       final node = OfferNode(service);
       final port = await node.start();
@@ -112,6 +206,7 @@ class ShareHubNotifier extends Notifier<ShareHubState> {
       _discovery = discovery;
       _peerSub = discovery.peers.listen((_) => _publish());
       _changeSub = service.changes.listen((_) {
+        _clearStaleNotifications();
         _publish();
         _maybeStop();
       });
@@ -162,6 +257,8 @@ class ShareHubNotifier extends Notifier<ShareHubState> {
 
   /// Stops sockets and timers; safe to call from `onDispose` (touches no state).
   Future<void> _teardown() async {
+    _lifecycle?.dispose();
+    _lifecycle = null;
     _sweep?.cancel();
     _sweep = null;
     await _peerSub?.cancel();
@@ -305,7 +402,9 @@ final shareOffersProvider = StreamProvider<IncomingOffer>(
 
 /// Starts listening at launch when "receive from the local network" is on.
 final shareAutoStartProvider = Provider<void>((ref) {
-  if (ref.read(settingsProvider).receiveFromLan) {
-    ref.read(shareHubProvider.notifier).enter();
-  }
+  // Creating the hub is enough: it applies the saved setting by itself.
+  ref.read(shareHubProvider);
 });
+
+final shareNotifierProvider =
+    Provider<ShareNotifier>((ref) => createShareNotifier());

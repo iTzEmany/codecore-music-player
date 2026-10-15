@@ -236,5 +236,8 @@
   "receivingProgress": "Empfang {done}/{total}",
   "manualConnection": "Manuelle Verbindung (IP und PIN)",
   "receiveFromLan": "Aus dem lokalen Netzwerk empfangen",
-  "receiveFromLanHint": "Macht das Gerät sichtbar und empfängt Anfragen, solange die App geöffnet ist"
+  "receiveFromLanHint": "Macht das Gerät sichtbar und empfängt Anfragen auch im Hintergrund. Unter Android erscheint eine feste Benachrichtigung zum Ausschalten",
+  "receiveServiceTitle": "Codecore ist im Netzwerk sichtbar",
+  "receiveServiceText": "Bereit, Titel von Geräten in der Nähe zu empfangen",
+  "receiveServiceDisable": "Ausschalten"
 }

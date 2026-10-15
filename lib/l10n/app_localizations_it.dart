@@ -795,5 +795,15 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get receiveFromLanHint =>
-      'Rende il dispositivo visibile e riceve richieste mentre l’app è aperta';
+      'Rende il dispositivo visibile e riceve richieste anche in background. Su Android mostra una notifica fissa con cui puoi disattivarlo';
+
+  @override
+  String get receiveServiceTitle => 'Codecore è visibile sulla rete';
+
+  @override
+  String get receiveServiceText =>
+      'Pronto a ricevere brani dai dispositivi vicini';
+
+  @override
+  String get receiveServiceDisable => 'Disattiva';
 }

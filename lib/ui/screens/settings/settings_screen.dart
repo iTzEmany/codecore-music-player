@@ -14,7 +14,6 @@ import '../../../providers/online_providers.dart';
 import '../../../providers/settings_providers.dart';
 import '../../widgets/cover_image.dart';
 import '../library/folders_sheet.dart';
-import '../../../providers/share_hub.dart';
 import '../../../providers/share_providers.dart';
 import '../playlists/playlist_dialogs.dart';
 import '../share/share_screen.dart';
@@ -155,11 +154,9 @@ class SettingsScreen extends ConsumerWidget {
         title: Text(l.receiveFromLan),
         subtitle: Text(l.receiveFromLanHint),
         value: s.receiveFromLan,
-        onChanged: (v) {
-          notifier.update((c) => c.copyWith(receiveFromLan: v));
-          final hub = ref.read(shareHubProvider.notifier);
-          v ? hub.enter() : hub.leave();
-        },
+        // The hub reacts to this setting (service, notification, discovery).
+        onChanged: (v) =>
+            notifier.update((c) => c.copyWith(receiveFromLan: v)),
       ),
       ListTile(
         leading: const Icon(Icons.badge_outlined),

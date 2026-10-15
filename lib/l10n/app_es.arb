@@ -236,5 +236,8 @@
   "receivingProgress": "Recibiendo {done}/{total}",
   "manualConnection": "Conexión manual (IP y PIN)",
   "receiveFromLan": "Recibir de la red local",
-  "receiveFromLanHint": "Hace visible el dispositivo y recibe solicitudes mientras la app está abierta"
+  "receiveFromLanHint": "Hace visible el dispositivo y recibe solicitudes también en segundo plano. En Android muestra una notificación fija para desactivarlo",
+  "receiveServiceTitle": "Codecore es visible en la red",
+  "receiveServiceText": "Listo para recibir canciones de dispositivos cercanos",
+  "receiveServiceDisable": "Desactivar"
 }

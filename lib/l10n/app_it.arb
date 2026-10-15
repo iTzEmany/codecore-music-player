@@ -427,5 +427,8 @@
   },
   "manualConnection": "Collegamento manuale (IP e PIN)",
   "receiveFromLan": "Ricevi dalla rete locale",
-  "receiveFromLanHint": "Rende il dispositivo visibile e riceve richieste mentre l’app è aperta"
+  "receiveFromLanHint": "Rende il dispositivo visibile e riceve richieste anche in background. Su Android mostra una notifica fissa con cui puoi disattivarlo",
+  "receiveServiceTitle": "Codecore è visibile sulla rete",
+  "receiveServiceText": "Pronto a ricevere brani dai dispositivi vicini",
+  "receiveServiceDisable": "Disattiva"
 }
