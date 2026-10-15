@@ -379,5 +379,7 @@
   "removedFromQueue": "Quitada de la cola",
   "playNextDone": "Sonará a continuación",
   "ytSearchPrompt": "Busca una canción o pega un enlace",
-  "loadFailed": "No se pudieron cargar los datos."
+  "loadFailed": "No se pudieron cargar los datos.",
+  "navHome": "Inicio",
+  "navSearch": "Buscar"
 }

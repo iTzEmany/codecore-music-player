@@ -379,5 +379,7 @@
   "removedFromQueue": "Removed from the queue",
   "playNextDone": "Will play next",
   "ytSearchPrompt": "Search for a track or paste a link",
-  "loadFailed": "Couldn't load the data."
+  "loadFailed": "Couldn't load the data.",
+  "navHome": "Home",
+  "navSearch": "Search"
 }

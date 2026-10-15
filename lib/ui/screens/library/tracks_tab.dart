@@ -30,9 +30,16 @@ String _sortLabel(BuildContext context, SortOption o) {
 }
 
 class TracksTab extends ConsumerStatefulWidget {
-  const TracksTab({super.key, this.favoritesOnly = false});
+  const TracksTab({
+    super.key,
+    this.favoritesOnly = false,
+    this.primarySearch = false,
+  });
 
   final bool favoritesOnly;
+
+  /// The Search tab's field owns the shared [searchFocusProvider] node.
+  final bool primarySearch;
 
   @override
   ConsumerState<TracksTab> createState() => _TracksTabState();
@@ -73,7 +80,7 @@ class _TracksTabState extends ConsumerState<TracksTab> {
             child: TextField(
               controller: _controller,
               focusNode:
-                  widget.favoritesOnly ? null : ref.watch(searchFocusProvider),
+                  widget.primarySearch ? ref.watch(searchFocusProvider) : null,
               onChanged: _onChanged,
               decoration: InputDecoration(
                 hintText: context.l10n.searchHint,

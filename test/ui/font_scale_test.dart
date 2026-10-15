@@ -24,6 +24,9 @@ void main() {
       await tester.pump(const Duration(milliseconds: 600));
       await tester.pump(const Duration(milliseconds: 600));
       expect(tester.takeException(), isNull);
+      await tester.tap(find.text('Libreria'));
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(tester.takeException(), isNull);
       expect(find.text('Song 0'), findsOneWidget);
       await h.dispose(tester);
     });

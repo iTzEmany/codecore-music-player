@@ -1835,6 +1835,18 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Non riesco a caricare i dati.'**
   String get loadFailed;
+
+  /// No description provided for @navHome.
+  ///
+  /// In it, this message translates to:
+  /// **'Home'**
+  String get navHome;
+
+  /// No description provided for @navSearch.
+  ///
+  /// In it, this message translates to:
+  /// **'Cerca'**
+  String get navSearch;
 }
 
 class _AppLocalizationsDelegate

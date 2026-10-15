@@ -981,4 +981,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get loadFailed => 'Couldn\'t load the data.';
+
+  @override
+  String get navHome => 'Home';
+
+  @override
+  String get navSearch => 'Search';
 }

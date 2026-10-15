@@ -570,5 +570,7 @@
   "removedFromQueue": "Rimosso dalla coda",
   "playNextDone": "Verrà riprodotto dopo",
   "ytSearchPrompt": "Cerca un brano o incolla un link",
-  "loadFailed": "Non riesco a caricare i dati."
+  "loadFailed": "Non riesco a caricare i dati.",
+  "navHome": "Home",
+  "navSearch": "Cerca"
 }

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/constants.dart';
 import '../../core/platform.dart';
 import '../../providers/nav_providers.dart';
 import '../../providers/player_providers.dart';
@@ -14,22 +13,13 @@ import '../../providers/jam_providers.dart';
 import '../../providers/share_hub.dart';
 import '../screens/jam/jam_request_dialog.dart';
 import '../screens/library/tracks_tab.dart';
-import '../screens/playlists/playlists_screen.dart';
-import '../screens/settings/settings_screen.dart';
-import '../screens/youtube/youtube_screen.dart';
+import '../screens/home/home_screen.dart';
 import '../../l10n/l10n_ext.dart';
 import '../widgets/enrich_job_banner.dart';
 import '../widgets/mini_player.dart';
+import 'bottom_bar.dart';
 
 const _wideBreakpoint = 840.0;
-
-const _icons = [
-  Icons.library_music,
-  Icons.favorite,
-  Icons.queue_music,
-  if (kEnableYoutube) Icons.smart_display,
-  Icons.settings,
-];
 
 class AppShell extends ConsumerWidget {
   const AppShell({super.key});
@@ -64,8 +54,9 @@ class AppShell extends ConsumerWidget {
       const SingleActivator(LogicalKeyboardKey.mediaTrackPrevious):
           ctrl.previous,
       const SingleActivator(LogicalKeyboardKey.keyF, control: true): () {
-        ref.read(navIndexProvider.notifier).set(0);
-        ref.read(searchFocusProvider).requestFocus();
+        ref.read(navIndexProvider.notifier).set(NavTab.search.index);
+        WidgetsBinding.instance.addPostFrameCallback(
+            (_) => ref.read(searchFocusProvider).requestFocus());
       },
       const SingleActivator(LogicalKeyboardKey.arrowUp, control: true): () =>
           guarded(() => bump(0.05)),
@@ -107,25 +98,36 @@ class AppShell extends ConsumerWidget {
       );
     });
     final index = ref.watch(navIndexProvider);
+    final keys = ref.watch(tabNavigatorKeysProvider);
     final wide = MediaQuery.sizeOf(context).width >= _wideBreakpoint;
-    void select(int i) => ref.read(navIndexProvider.notifier).set(i);
     final l = context.l10n;
-    final labels = [
-      l.navLibrary,
-      l.navFavorites,
-      l.navPlaylists,
-      if (kEnableYoutube) l.youtube,
-      l.navSettings,
+    void select(int i) {
+      if (i == index) {
+        keys[i].currentState?.popUntil((r) => r.isFirst);
+      } else {
+        ref.read(navIndexProvider.notifier).set(i);
+      }
+    }
+
+    final items = [
+      BottomBarItem(Icons.home_outlined, Icons.home_rounded, l.navHome),
+      BottomBarItem(Icons.search_rounded, Icons.search_rounded, l.navSearch),
+      BottomBarItem(Icons.library_music_outlined, Icons.library_music_rounded,
+          l.navLibrary),
     ];
+    Widget tab(int i, Widget root) => Navigator(
+          key: keys[i],
+          onGenerateRoute: (_) =>
+              MaterialPageRoute<void>(builder: (_) => root),
+        );
     final body = IndexedStack(index: index, children: [
-      LibraryScreen(),
-      TracksTab(favoritesOnly: true),
-      PlaylistsScreen(),
-      if (kEnableYoutube) YoutubeScreen(),
-      SettingsScreen(),
+      tab(NavTab.home.index, const HomeScreen()),
+      tab(NavTab.search.index, const TracksTab(primarySearch: true)),
+      tab(NavTab.library.index, const LibraryScreen()),
     ]);
     Widget content = Scaffold(
       body: SafeArea(
+        bottom: false,
         child: Row(children: [
           if (wide)
             NavigationRail(
@@ -133,31 +135,44 @@ class AppShell extends ConsumerWidget {
               onDestinationSelected: select,
               labelType: NavigationRailLabelType.all,
               destinations: [
-                for (var i = 0; i < labels.length; i++)
+                for (final it in items)
                   NavigationRailDestination(
-                      icon: Icon(_icons[i]), label: Text(labels[i])),
+                      icon: Icon(it.icon),
+                      selectedIcon: Icon(it.selectedIcon),
+                      label: Text(it.label)),
               ],
             ),
           Expanded(
             child: Column(children: [
               Expanded(child: body),
               const EnrichJobBanner(),
-              const MiniPlayer(),
+              if (wide) const MiniPlayer(),
             ]),
           ),
         ]),
       ),
       bottomNavigationBar: wide
           ? null
-          : NavigationBar(
-              selectedIndex: index,
-              onDestinationSelected: select,
-              labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
-              destinations: [
-                for (var i = 0; i < labels.length; i++)
-                  NavigationDestination(icon: Icon(_icons[i]), label: labels[i]),
-              ],
-            ),
+          : Column(mainAxisSize: MainAxisSize.min, children: [
+              const MiniPlayer(),
+              BottomBar(items: items, selected: index, onSelect: select),
+            ]),
+    );
+    // Android back: nested navigator first, then Home, then leave the app.
+    content = PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        final nav = keys[index].currentState;
+        if (nav != null && nav.canPop()) {
+          nav.pop();
+        } else if (index != 0) {
+          ref.read(navIndexProvider.notifier).set(0);
+        } else {
+          SystemNavigator.pop();
+        }
+      },
+      child: content,
     );
     if (isDesktop) {
       content = CallbackShortcuts(

@@ -379,5 +379,7 @@
   "removedFromQueue": "Aus der Warteschlange entfernt",
   "playNextDone": "Wird als Nächstes gespielt",
   "ytSearchPrompt": "Titel suchen oder Link einfügen",
-  "loadFailed": "Die Daten konnten nicht geladen werden."
+  "loadFailed": "Die Daten konnten nicht geladen werden.",
+  "navHome": "Start",
+  "navSearch": "Suche"
 }

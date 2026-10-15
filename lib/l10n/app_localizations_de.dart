@@ -984,4 +984,10 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get loadFailed => 'Die Daten konnten nicht geladen werden.';
+
+  @override
+  String get navHome => 'Start';
+
+  @override
+  String get navSearch => 'Suche';
 }
