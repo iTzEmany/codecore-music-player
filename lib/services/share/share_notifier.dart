@@ -19,11 +19,17 @@ abstract class ShareNotifier {
   });
   Future<void> clearOffer(String offerId);
 
+  /// Whether the app UI is on screen (activity resumed).
+  Future<bool> isForeground();
+
   /// Called when a notification button is pressed.
   void Function(String offerId, bool accept)? onOfferAction;
 
   /// Called when "turn off" is pressed in the service notification.
   void Function()? onDisableReceive;
+
+  /// Called when the app UI comes back to the foreground.
+  void Function()? onAppResumed;
 }
 
 class NoopShareNotifier implements ShareNotifier {
@@ -31,6 +37,8 @@ class NoopShareNotifier implements ShareNotifier {
   void Function(String offerId, bool accept)? onOfferAction;
   @override
   void Function()? onDisableReceive;
+  @override
+  void Function()? onAppResumed;
 
   @override
   Future<void> startService(
@@ -47,6 +55,8 @@ class NoopShareNotifier implements ShareNotifier {
   }) async {}
   @override
   Future<void> clearOffer(String offerId) async {}
+  @override
+  Future<bool> isForeground() async => true;
 }
 
 class AndroidShareNotifier implements ShareNotifier {
@@ -60,6 +70,8 @@ class AndroidShareNotifier implements ShareNotifier {
   void Function(String offerId, bool accept)? onOfferAction;
   @override
   void Function()? onDisableReceive;
+  @override
+  void Function()? onAppResumed;
 
   Future<dynamic> _onCall(MethodCall call) async {
     switch (call.method) {
@@ -68,6 +80,8 @@ class AndroidShareNotifier implements ShareNotifier {
         onOfferAction?.call('${a['offerId']}', a['action'] == 'accept');
       case 'disableReceive':
         onDisableReceive?.call();
+      case 'appResumed':
+        onAppResumed?.call();
     }
     return null;
   }
@@ -107,6 +121,15 @@ class AndroidShareNotifier implements ShareNotifier {
   @override
   Future<void> clearOffer(String offerId) =>
       _invoke('clearOffer', {'offerId': offerId});
+
+  @override
+  Future<bool> isForeground() async {
+    try {
+      return await _channel.invokeMethod<bool>('isForeground') ?? true;
+    } on PlatformException {
+      return true;
+    }
+  }
 }
 
 ShareNotifier createShareNotifier() =>

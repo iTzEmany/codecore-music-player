@@ -12,7 +12,7 @@ void main() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (call) async {
       calls.add(call);
-      return null;
+      return call.method == 'isForeground' ? false : null;
     });
   });
 
@@ -23,8 +23,14 @@ void main() {
         offerId: 'o1', title: 'A', body: 'B', accept: 'Yes', decline: 'No');
     await n.clearOffer('o1');
     await n.stopService();
-    expect(calls.map((c) => c.method),
-        ['startService', 'showOffer', 'clearOffer', 'stopService']);
+    expect(await n.isForeground(), false);
+    expect(calls.map((c) => c.method), [
+      'startService',
+      'showOffer',
+      'clearOffer',
+      'stopService',
+      'isForeground',
+    ]);
     expect((calls[1].arguments as Map)['offerId'], 'o1');
   });
 

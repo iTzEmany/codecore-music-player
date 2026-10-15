@@ -6,4 +6,8 @@ import io.flutter.plugin.common.MethodChannel
 object ShareBridge {
     @Volatile
     var channel: MethodChannel? = null
+
+    /** True while the activity is resumed (the lifecycle seen by Flutter is unreliable with a cached engine). */
+    @Volatile
+    var foreground: Boolean = false
 }

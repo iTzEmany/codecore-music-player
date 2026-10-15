@@ -65,8 +65,8 @@ class LanDiscovery {
   Future<void> start(int httpPort) async {
     await stop();
     _httpPort = httpPort;
-    final reusePort =
-        Platform.isLinux || Platform.isMacOS || Platform.isAndroid;
+    // SO_REUSEPORT is unsupported by Dart on Android and Windows.
+    final reusePort = Platform.isLinux || Platform.isMacOS;
     final s = await RawDatagramSocket.bind(
       InternetAddress.anyIPv4,
       port,

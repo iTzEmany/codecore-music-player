@@ -23,6 +23,17 @@ class MainActivity : AudioServiceActivity() {
     private var initialized = false
     private var updateTried = false
 
+    override fun onResume() {
+        super.onResume()
+        ShareBridge.foreground = true
+        ShareBridge.channel?.invokeMethod("appResumed", null)
+    }
+
+    override fun onPause() {
+        ShareBridge.foreground = false
+        super.onPause()
+    }
+
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         channel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "codecore/ytdlp")
@@ -57,6 +68,7 @@ class MainActivity : AudioServiceActivity() {
                     )
                     result.success(null)
                 }
+                "isForeground" -> result.success(ShareBridge.foreground)
                 "clearOffer" -> {
                     ShareNotifications.clearOffer(ctx, call.argument<String>("offerId")!!)
                     result.success(null)

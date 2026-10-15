@@ -1,9 +1,8 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:ui' show AppLifecycleState, Locale;
+import 'dart:ui' show Locale;
 
 import 'package:dio/dio.dart';
-import 'package:flutter/widgets.dart' show AppLifecycleListener, WidgetsBinding;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 import 'package:permission_handler/permission_handler.dart';
@@ -69,7 +68,6 @@ class ShareHubNotifier extends Notifier<ShareHubState> {
   final _cancels = <String, CancelToken>{};
   final _newIncoming = StreamController<IncomingOffer>.broadcast();
   final _notified = <String>{}; // offers currently shown as notifications
-  AppLifecycleListener? _lifecycle;
 
   /// New pending offers (the shell turns them into a dialog).
   Stream<IncomingOffer> get newIncoming => _newIncoming.stream;
@@ -79,11 +77,6 @@ class ShareHubNotifier extends Notifier<ShareHubState> {
   AppLocalizations get _l10n => lookupAppLocalizations(
       Locale(ref.read(settingsProvider).language));
 
-  bool get _inForeground {
-    final s = WidgetsBinding.instance.lifecycleState;
-    return s == null || s == AppLifecycleState.resumed;
-  }
-
   @override
   ShareHubState build() {
     ref.onDispose(_teardown);
@@ -92,7 +85,7 @@ class ShareHubNotifier extends Notifier<ShareHubState> {
     platform.onDisableReceive = () => ref
         .read(settingsProvider.notifier)
         .update((s) => s.copyWith(receiveFromLan: false));
-    _lifecycle = AppLifecycleListener(onResume: _onResume);
+    platform.onAppResumed = _onResume;
     ref.listen(settingsProvider.select((s) => s.receiveFromLan),
         (_, on) => _applyReceiveSetting(on));
     if (ref.read(settingsProvider).receiveFromLan) {
@@ -137,8 +130,8 @@ class ShareHubNotifier extends Notifier<ShareHubState> {
     _notified.clear();
   }
 
-  void _surfaceIncoming(IncomingOffer o) {
-    if (_inForeground) {
+  Future<void> _surfaceIncoming(IncomingOffer o) async {
+    if (await _platform.isForeground()) {
       _newIncoming.add(o);
       return;
     }
@@ -257,8 +250,6 @@ class ShareHubNotifier extends Notifier<ShareHubState> {
 
   /// Stops sockets and timers; safe to call from `onDispose` (touches no state).
   Future<void> _teardown() async {
-    _lifecycle?.dispose();
-    _lifecycle = null;
     _sweep?.cancel();
     _sweep = null;
     await _peerSub?.cancel();
