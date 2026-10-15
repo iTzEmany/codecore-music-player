@@ -107,7 +107,7 @@ L'agente riparte sempre dal primo task non spuntato.
 ## Fase 10 — Riproduzione sincronizzata (`fase-10-jam-sincronia.md`)
 - [x] 10.1 Orologio condiviso (`JamClock`, rotta `/time`)
 - [x] 10.2 Modello a più uscite (`outputDeviceIds`, `ready`)
-- [ ] 10.3 Controller di sincronia puro
+- [x] 10.3 Controller di sincronia puro
 - [ ] 10.4 Backend: velocità e posizione precisa
 - [ ] 10.5 Precarico obbligatorio e handshake `ready`
 - [ ] 10.6 `JamOutput` multi-uscita
