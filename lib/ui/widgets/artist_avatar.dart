@@ -43,7 +43,8 @@ class ArtistAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     if (coverKey != null) {
       return ClipOval(
-          child: CoverImage(coverKey: coverKey, size: size, radius: 0));
+        child: CoverImage(coverKey: coverKey, size: size, radius: 0),
+      );
     }
     final hue = artistHue(name);
     final top = HSLColor.fromAHSL(1, hue, 0.45, 0.30).toColor();
@@ -55,15 +56,19 @@ class ArtistAvatar extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [top, bottom]),
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [top, bottom],
+        ),
       ),
-      child: Text(artistMonogram(name),
-          style: TextStyle(
-              fontSize: size * 0.36,
-              fontWeight: FontWeight.w700,
-              color: context.cc.text)),
+      child: Text(
+        artistMonogram(name),
+        style: TextStyle(
+          fontSize: size * 0.36,
+          fontWeight: FontWeight.w700,
+          color: context.cc.text,
+        ),
+      ),
     );
   }
 }

@@ -39,31 +39,47 @@ class PlaylistCover extends StatelessWidget {
       child = DecoratedBox(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [cc.accent, cc.heroBase]),
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [cc.accent, cc.heroBase],
+          ),
         ),
         child: Center(
-            child: Icon(Icons.favorite_rounded,
-                size: size * 0.45, color: Colors.white)),
+          child: Icon(
+            Icons.favorite_rounded,
+            size: size * 0.45,
+            color: Colors.white,
+          ),
+        ),
       );
     } else if (coverKeys.isEmpty) {
       child = ColoredBox(
         color: cc.surface3,
-        child: Icon(Icons.queue_music_rounded,
-            size: size * 0.5, color: cc.textMuted),
+        child: Icon(
+          Icons.queue_music_rounded,
+          size: size * 0.5,
+          color: cc.textMuted,
+        ),
       );
     } else if (coverKeys.length < 4) {
       child = CoverImage(coverKey: coverKeys.first, size: size, radius: 0);
     } else {
       final half = size / 2;
-      child = Column(children: [
-        for (var r = 0; r < 2; r++)
-          Row(children: [
-            for (var c = 0; c < 2; c++)
-              CoverImage(coverKey: coverKeys[r * 2 + c], size: half, radius: 0),
-          ]),
-      ]);
+      child = Column(
+        children: [
+          for (var r = 0; r < 2; r++)
+            Row(
+              children: [
+                for (var c = 0; c < 2; c++)
+                  CoverImage(
+                    coverKey: coverKeys[r * 2 + c],
+                    size: half,
+                    radius: 0,
+                  ),
+              ],
+            ),
+        ],
+      );
     }
     return ClipRRect(
       borderRadius: BorderRadius.circular(radius),

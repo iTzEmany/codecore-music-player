@@ -15,7 +15,7 @@ import '../screens/jam/jam_request_dialog.dart';
 import '../screens/search/search_screen.dart';
 import '../screens/home/home_screen.dart';
 import '../../l10n/l10n_ext.dart';
-import '../widgets/enrich_job_banner.dart';
+import '../widgets/enrich_result_listener.dart';
 import '../widgets/mini_player.dart';
 import 'bottom_bar.dart';
 import 'desktop_player_bar.dart';
@@ -151,7 +151,7 @@ class AppShell extends ConsumerWidget {
                       child: Column(
                         children: [
                           Expanded(child: body),
-                          const EnrichJobBanner(),
+                          const EnrichResultListener(),
                         ],
                       ),
                     ),
@@ -171,7 +171,7 @@ class AppShell extends ConsumerWidget {
           child: Column(
             children: [
               Expanded(child: body),
-              const EnrichJobBanner(),
+              const EnrichResultListener(),
             ],
           ),
         ),

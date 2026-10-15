@@ -62,25 +62,26 @@ class JamUiState {
     JamJoinOutcome? outcome,
     bool? lost,
     int? syncErrorMs,
-  }) =>
-      JamUiState(
-        phase: phase ?? this.phase,
-        role: role ?? this.role,
-        jam: jam ?? this.jam,
-        peerName: peerName ?? this.peerName,
-        peerId: peerId ?? this.peerId,
-        outcome: outcome ?? this.outcome,
-        lost: lost ?? this.lost,
-        syncErrorMs: syncErrorMs ?? this.syncErrorMs,
-      );
+  }) => JamUiState(
+    phase: phase ?? this.phase,
+    role: role ?? this.role,
+    jam: jam ?? this.jam,
+    peerName: peerName ?? this.peerName,
+    peerId: peerId ?? this.peerId,
+    outcome: outcome ?? this.outcome,
+    lost: lost ?? this.lost,
+    syncErrorMs: syncErrorMs ?? this.syncErrorMs,
+  );
 }
 
 /// Creates the backend used for Jam playback (overridden in tests).
-final jamBackendFactoryProvider =
-    Provider<AudioBackend Function()>((ref) => JustAudioBackend.new);
+final jamBackendFactoryProvider = Provider<AudioBackend Function()>(
+  (ref) => JustAudioBackend.new,
+);
 
-final jamCacheDirProvider = FutureProvider<Directory>((ref) async =>
-    Directory(p.join(await appSupportDir(), 'jam_cache')));
+final jamCacheDirProvider = FutureProvider<Directory>(
+  (ref) async => Directory(p.join(await appSupportDir(), 'jam_cache')),
+);
 
 /// Orchestrates one Jam: protocol (host or guest), playback and cache.
 class JamController extends Notifier<JamUiState> {
@@ -109,7 +110,8 @@ class JamController extends Notifier<JamUiState> {
     final hub = _hub = ref.read(shareHubProvider.notifier);
     _reqSub = hub.newJamRequests.listen(_incoming.add);
     hub.onJamEnd = end;
-    hub.onJamAction = (req, accept) => accept ? acceptRequest(req) : decline(req);
+    hub.onJamAction = (req, accept) =>
+        accept ? acceptRequest(req) : decline(req);
     return const JamUiState();
   }
 
@@ -128,13 +130,18 @@ class JamController extends Notifier<JamUiState> {
   Future<void> request(Peer peer) async {
     if (state.phase == JamPhase.requesting || state.active) return;
     state = JamUiState(
-        phase: JamPhase.requesting, peerName: peer.name, peerId: peer.id);
+      phase: JamPhase.requesting,
+      peerName: peer.name,
+      peerId: peer.id,
+    );
     await _hold();
     final host = _host, port = _hub.port;
     if (host == null || port == null) {
       await _release();
       state = state.copyWith(
-          phase: JamPhase.idle, outcome: JamJoinOutcome.unreachable);
+        phase: JamPhase.idle,
+        outcome: JamJoinOutcome.unreachable,
+      );
       return;
     }
     final guest = JamGuest(local: host);
@@ -198,25 +205,28 @@ class JamController extends Notifier<JamUiState> {
     await _cache!.clear();
     _failures = 0;
     final clock = _clock = _makeClock(role);
-    _output = JamOutput(
-      deviceId: _ownId,
-      backend: ref.read(jamBackendFactoryProvider)(),
-      resolve: _resolve,
-      clock: clock,
-      latencyMs: ref.read(settingsProvider).jamLatencyMs,
-    )
-      ..onSyncError = (e) {
-        if (!state.active) return;
-        state = state.copyWith(syncErrorMs: e);
-        if (++_syncLogs % 10 == 0) {
-          AppLog.i('jam sync: error ${e}ms, clock offset '
-              '${_clock?.offsetMs}ms (rtt ${_clock?.rttMs}ms)');
-        }
-      }
-      ..onTrackEnded = (id) {
-        send(JamCommand.trackEnded(id));
-      }
-      ..onItemFailed = _onItemFailed;
+    _output =
+        JamOutput(
+            deviceId: _ownId,
+            backend: ref.read(jamBackendFactoryProvider)(),
+            resolve: _resolve,
+            clock: clock,
+            latencyMs: ref.read(settingsProvider).jamLatencyMs,
+          )
+          ..onSyncError = (e) {
+            if (!state.active) return;
+            state = state.copyWith(syncErrorMs: e);
+            if (++_syncLogs % 10 == 0) {
+              AppLog.i(
+                'jam sync: error ${e}ms, clock offset '
+                '${_clock?.offsetMs}ms (rtt ${_clock?.rttMs}ms)',
+              );
+            }
+          }
+          ..onTrackEnded = (id) {
+            send(JamCommand.trackEnded(id));
+          }
+          ..onItemFailed = _onItemFailed;
     _host?.resolveFile = _localFile;
     state = state.copyWith(phase: JamPhase.active, role: role, jam: s);
     if (role == JamRole.host) {
@@ -247,7 +257,9 @@ class JamController extends Notifier<JamUiState> {
   /// Latency compensation changed in the settings.
   void setLatencyMs(int ms) {
     final v = ms.clamp(-500, 1000);
-    ref.read(settingsProvider.notifier).update((s) => s.copyWith(jamLatencyMs: v));
+    ref
+        .read(settingsProvider.notifier)
+        .update((s) => s.copyWith(jamLatencyMs: v));
     _output?.latencyMs = v;
   }
 
@@ -275,7 +287,9 @@ class JamController extends Notifier<JamUiState> {
 
   Uri? _remoteUri(JamItem item) {
     final s = state.jam;
-    final sid = state.role == JamRole.guest ? _guest?.sessionId : _host?.sessionId;
+    final sid = state.role == JamRole.guest
+        ? _guest?.sessionId
+        : _host?.sessionId;
     if (s == null || sid == null) return null;
     final owner = s.participant(item.ownerDeviceId);
     if (owner == null) return null;
@@ -291,11 +305,10 @@ class JamController extends Notifier<JamUiState> {
   }
 
   Map<String, String> get _headers => {
-        jamFileHeader: (state.role == JamRole.guest
-                ? _guest?.fileToken
-                : _host?.fileToken) ??
-            '',
-      };
+    jamFileHeader:
+        (state.role == JamRole.guest ? _guest?.fileToken : _host?.fileToken) ??
+        '',
+  };
 
   Future<JamSource?> _resolve(JamItem item) async {
     if (item.ownerDeviceId == _ownId) {
@@ -325,7 +338,9 @@ class JamController extends Notifier<JamUiState> {
     final keep = <int>{};
     final cur = s.current;
     final nextIdx = s.currentIndex + 1;
-    final next = nextIdx >= 0 && nextIdx < s.items.length ? s.items[nextIdx] : null;
+    final next = nextIdx >= 0 && nextIdx < s.items.length
+        ? s.items[nextIdx]
+        : null;
     for (final i in [cur, next]) {
       if (i == null) continue;
       keep.add(i.id);
@@ -356,17 +371,21 @@ class JamController extends Notifier<JamUiState> {
     for (final t in tracks) {
       final ext = p.extension(t.path).replaceFirst('.', '').toLowerCase();
       if (!jamExts.contains(ext)) continue;
-      final err = await send(JamCommand.add(JamItem(
-        id: 0,
-        ownerDeviceId: _ownId,
-        title: t.title,
-        artist: t.artist,
-        album: t.album,
-        durationMs: t.durationMs,
-        ext: ext,
-        sizeBytes: t.sizeBytes,
-        ref: t.id.toString(),
-      )));
+      final err = await send(
+        JamCommand.add(
+          JamItem(
+            id: 0,
+            ownerDeviceId: _ownId,
+            title: t.title,
+            artist: t.artist,
+            album: t.album,
+            durationMs: t.durationMs,
+            ext: ext,
+            sizeBytes: t.sizeBytes,
+            ref: t.id.toString(),
+          ),
+        ),
+      );
       if (err == null) added++;
       if (err == JamError.full) break;
     }
@@ -383,9 +402,11 @@ class JamController extends Notifier<JamUiState> {
         ? now.where((d) => d != deviceId).toList()
         : [...now, deviceId];
     if (next.isEmpty) return Future.value();
-    return send(next.length == 1
-        ? JamCommand.setOutput(next.first)
-        : JamCommand.setOutputs(next));
+    return send(
+      next.length == 1
+          ? JamCommand.setOutput(next.first)
+          : JamCommand.setOutputs(next),
+    );
   }
 
   /// Host ends for both; the guest just leaves.
@@ -444,9 +465,11 @@ class JamController extends Notifier<JamUiState> {
   }
 }
 
-final jamProvider =
-    NotifierProvider<JamController, JamUiState>(JamController.new);
+final jamProvider = NotifierProvider<JamController, JamUiState>(
+  JamController.new,
+);
 
 /// Requests to show as an accept/decline dialog.
 final jamRequestsProvider = StreamProvider<JamRequest>(
-    (ref) => ref.watch(jamProvider.notifier).incomingRequests);
+  (ref) => ref.watch(jamProvider.notifier).incomingRequests,
+);

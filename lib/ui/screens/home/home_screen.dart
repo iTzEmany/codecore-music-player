@@ -13,6 +13,7 @@ import '../../../providers/library_providers.dart';
 import '../../../providers/player_providers.dart';
 import '../../shell/shell_nav.dart';
 import '../../theme/tokens.dart';
+import '../../widgets/activity_button.dart';
 import '../../widgets/cover_image.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/playlist_cover.dart';
@@ -63,6 +64,7 @@ class HomeScreen extends ConsumerWidget {
               style: theme.headlineSmall,
             ),
           ),
+          const ActivityButton(),
           IconButton(
             tooltip: l.navSettings,
             icon: const Icon(Icons.settings_outlined),

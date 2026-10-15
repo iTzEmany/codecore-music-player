@@ -15,23 +15,27 @@ import 'database_providers.dart';
 import 'online_providers.dart';
 import 'settings_providers.dart';
 
-final tagReaderProvider =
-    Provider<TagReader>((ref) => const AudioMetadataTagReader());
+final tagReaderProvider = Provider<TagReader>(
+  (ref) => const AudioMetadataTagReader(),
+);
 
 /// Resolved once in `main` (and overridden in tests): synchronous everywhere.
 final coversDirProvider = Provider<Directory>(
-    (ref) => throw UnimplementedError('coversDirProvider not overridden'));
+  (ref) => throw UnimplementedError('coversDirProvider not overridden'),
+);
 
 final coverStoreProvider = Provider<CoverStore>((ref) {
   final dir = ref.watch(coversDirProvider);
   return CoverStore(dir);
 });
 
-final libraryScannerProvider = Provider<LibraryScanner>((ref) => LibraryScanner(
-      ref.watch(tagReaderProvider),
-      ref.watch(trackRepositoryProvider),
-      ref.watch(coverStoreProvider),
-    ));
+final libraryScannerProvider = Provider<LibraryScanner>(
+  (ref) => LibraryScanner(
+    ref.watch(tagReaderProvider),
+    ref.watch(trackRepositoryProvider),
+    ref.watch(coverStoreProvider),
+  ),
+);
 
 class TrackQuery {
   const TrackQuery({
@@ -60,27 +64,26 @@ class TrackQueryNotifier extends Notifier<TrackQuery> {
   @override
   TrackQuery build() => TrackQuery(favoritesOnly: favoritesOnly);
 
-  void update(TrackQuery Function(TrackQuery) change) =>
-      state = change(state);
+  void update(TrackQuery Function(TrackQuery) change) => state = change(state);
 }
 
 /// Argument: favoritesOnly. Each list (all tracks / favourites) keeps its own
 /// search text and sort order.
 final trackQueryProvider =
     NotifierProvider.family<TrackQueryNotifier, TrackQuery, bool>(
-        TrackQueryNotifier.new);
+      TrackQueryNotifier.new,
+    );
 
 final tracksProvider = StreamProvider.family<List<Track>, bool>((ref, fav) {
   final q = ref.watch(trackQueryProvider(fav));
-  return ref.watch(trackRepositoryProvider).watchTracks(
-        query: q.text,
-        sort: q.sort,
-        favoritesOnly: q.favoritesOnly,
-      );
+  return ref
+      .watch(trackRepositoryProvider)
+      .watchTracks(query: q.text, sort: q.sort, favoritesOnly: q.favoritesOnly);
 });
 
 final foldersProvider = StreamProvider<List<Folder>>(
-    (ref) => ref.watch(folderRepositoryProvider).watchAll());
+  (ref) => ref.watch(folderRepositoryProvider).watchAll(),
+);
 
 class ScanState {
   const ScanState({this.running = false, this.progress, this.error});
@@ -122,16 +125,23 @@ class ScanNotifier extends Notifier<ScanState> {
         .where((t) => t.enrichStatus == 0)
         .map((t) => t.id)
         .toList();
-    ref.read(enrichJobProvider.notifier).start(fresh,
-        includeLyrics: s.autoLyrics, includeMetadata: s.autoEnrich);
+    ref
+        .read(enrichJobProvider.notifier)
+        .start(
+          fresh,
+          includeLyrics: s.autoLyrics,
+          includeMetadata: s.autoEnrich,
+        );
   }
 }
 
-final scanStateProvider =
-    NotifierProvider<ScanNotifier, ScanState>(ScanNotifier.new);
+final scanStateProvider = NotifierProvider<ScanNotifier, ScanState>(
+  ScanNotifier.new,
+);
 
-final libraryQueriesProvider =
-    Provider<LibraryQueries>((ref) => LibraryQueries(ref.watch(databaseProvider)));
+final libraryQueriesProvider = Provider<LibraryQueries>(
+  (ref) => LibraryQueries(ref.watch(databaseProvider)),
+);
 
 class AlbumSortNotifier extends Notifier<AlbumSort> {
   @override
@@ -140,46 +150,58 @@ class AlbumSortNotifier extends Notifier<AlbumSort> {
   void set(AlbumSort s) => state = s;
 }
 
-final albumSortProvider =
-    NotifierProvider<AlbumSortNotifier, AlbumSort>(AlbumSortNotifier.new);
+final albumSortProvider = NotifierProvider<AlbumSortNotifier, AlbumSort>(
+  AlbumSortNotifier.new,
+);
 
-final albumsProvider = StreamProvider<List<AlbumSummary>>((ref) => ref
-    .watch(libraryQueriesProvider)
-    .watchAlbums(sort: ref.watch(albumSortProvider)));
+final albumsProvider = StreamProvider<List<AlbumSummary>>(
+  (ref) => ref
+      .watch(libraryQueriesProvider)
+      .watchAlbums(sort: ref.watch(albumSortProvider)),
+);
 
 final artistsProvider = StreamProvider<List<ArtistSummary>>(
-    (ref) => ref.watch(libraryQueriesProvider).watchArtists());
+  (ref) => ref.watch(libraryQueriesProvider).watchArtists(),
+);
 
 final albumTracksProvider = StreamProvider.family<List<Track>, String>(
-    (ref, albumKey) =>
-        ref.watch(libraryQueriesProvider).watchAlbumTracks(albumKey));
+  (ref, albumKey) =>
+      ref.watch(libraryQueriesProvider).watchAlbumTracks(albumKey),
+);
 
 final genresProvider = StreamProvider<List<GenreSummary>>(
-    (ref) => ref.watch(libraryQueriesProvider).watchGenres());
+  (ref) => ref.watch(libraryQueriesProvider).watchGenres(),
+);
 
 final genreTracksProvider = StreamProvider.family<List<Track>, String>(
-    (ref, genre) =>
-        ref.watch(libraryQueriesProvider).watchGenreTracks(genre));
+  (ref, genre) => ref.watch(libraryQueriesProvider).watchGenreTracks(genre),
+);
 
 /// Tracks matching a search text (title / artist / album).
 final searchTracksProvider = StreamProvider.family<List<Track>, String>(
-    (ref, text) =>
-        ref.watch(trackRepositoryProvider).watchTracks(query: text));
+  (ref, text) => ref.watch(trackRepositoryProvider).watchTracks(query: text),
+);
 
 final topTracksProvider = StreamProvider<List<Track>>(
-    (ref) => ref.watch(libraryQueriesProvider).watchTopTracks());
+  (ref) => ref.watch(libraryQueriesProvider).watchTopTracks(),
+);
 
 final artistTracksProvider = StreamProvider.family<List<Track>, String>(
-    (ref, key) => ref.watch(libraryQueriesProvider).watchArtistTracks(key));
+  (ref, key) => ref.watch(libraryQueriesProvider).watchArtistTracks(key),
+);
 
 final artistAlbumsProvider = StreamProvider.family<List<AlbumSummary>, String>(
-    (ref, key) => ref.watch(libraryQueriesProvider).watchArtistAlbums(key));
+  (ref, key) => ref.watch(libraryQueriesProvider).watchArtistAlbums(key),
+);
 
-final trackEditorProvider = Provider<TrackEditor>((ref) =>
-    TrackEditor(ref.watch(databaseProvider), ref.watch(tagReaderProvider)));
+final trackEditorProvider = Provider<TrackEditor>(
+  (ref) =>
+      TrackEditor(ref.watch(databaseProvider), ref.watch(tagReaderProvider)),
+);
 
 final missingTracksProvider = StreamProvider<List<Track>>(
-    (ref) => ref.watch(trackRepositoryProvider).watchMissing());
+  (ref) => ref.watch(trackRepositoryProvider).watchMissing(),
+);
 
 class PermissionDeniedNotifier extends Notifier<bool> {
   @override
@@ -190,4 +212,5 @@ class PermissionDeniedNotifier extends Notifier<bool> {
 
 final permissionDeniedProvider =
     NotifierProvider<PermissionDeniedNotifier, bool>(
-        PermissionDeniedNotifier.new);
+      PermissionDeniedNotifier.new,
+    );

@@ -44,21 +44,30 @@ class _ShareScreenState extends ConsumerState<ShareScreen> {
       child: Scaffold(
         appBar: AppBar(
           title: Text(l.shareTitle),
-          bottom: TabBar(tabs: [Tab(text: l.shareSend), Tab(text: l.shareReceive)]),
-        ),
-        body: Column(children: [
-          if (Platform.isWindows)
-            MaterialBanner(
-              content: Text(l.shareFirewall),
-              actions: const [SizedBox.shrink()],
-            ),
-          Expanded(
-            child: TabBarView(children: [
-              SendTab(initialTrackIds: widget.initialTrackIds),
-              const ReceiveTab(),
-            ]),
+          bottom: TabBar(
+            tabs: [
+              Tab(text: l.shareSend),
+              Tab(text: l.shareReceive),
+            ],
           ),
-        ]),
+        ),
+        body: Column(
+          children: [
+            if (Platform.isWindows)
+              MaterialBanner(
+                content: Text(l.shareFirewall),
+                actions: const [SizedBox.shrink()],
+              ),
+            Expanded(
+              child: TabBarView(
+                children: [
+                  SendTab(initialTrackIds: widget.initialTrackIds),
+                  const ReceiveTab(),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

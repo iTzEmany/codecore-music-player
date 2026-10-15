@@ -25,22 +25,25 @@ class EmptyState extends StatelessWidget {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Icon(icon, size: 56, color: cc.textFaint),
-          const SizedBox(height: 12),
-          Text(message,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 56, color: cc.textFaint),
+            const SizedBox(height: 12),
+            Text(
+              message,
               textAlign: TextAlign.center,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyLarge
-                  ?.copyWith(fontWeight: FontWeight.w500)),
-          if (actionLabel != null) ...[
-            const SizedBox(height: 16),
-            FilledButton(onPressed: onAction, child: Text(actionLabel!)),
+              style: Theme.of(context).textTheme.bodyLarge
+                  ?.copyWith(fontWeight: FontWeight.w500),
+            ),
+            if (actionLabel != null) ...[
+              const SizedBox(height: 16),
+              FilledButton(onPressed: onAction, child: Text(actionLabel!)),
+            ],
+            if (secondaryLabel != null)
+              TextButton(onPressed: onSecondary, child: Text(secondaryLabel!)),
           ],
-          if (secondaryLabel != null)
-            TextButton(onPressed: onSecondary, child: Text(secondaryLabel!)),
-        ]),
+        ),
       ),
     );
   }

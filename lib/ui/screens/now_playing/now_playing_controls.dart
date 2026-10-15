@@ -161,24 +161,34 @@ class NpBottomRow extends ConsumerWidget {
             Flexible(
               child: TextButton.icon(
                 onPressed: () => DevicesSheet.show(context),
-                icon: Icon(Icons.devices_rounded,
-                    size: 20, color: jam ? cc.accent : cc.textMuted),
-                label: Text(jam ? l.devicesJamShort : l.devicesTitle,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(color: jam ? cc.accent : cc.textMuted)),
+                icon: Icon(
+                  Icons.devices_rounded,
+                  size: 20,
+                  color: jam ? cc.accent : cc.textMuted,
+                ),
+                label: Text(
+                  jam ? l.devicesJamShort : l.devicesTitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(color: jam ? cc.accent : cc.textMuted),
+                ),
               ),
             ),
             const _SleepChip(),
             Flexible(
               child: TextButton.icon(
                 onPressed: () => showQueueSheet(context),
-                icon: Icon(Icons.queue_music_rounded,
-                    size: 20, color: cc.textMuted),
-                label: Text(l.queue,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(color: cc.textMuted)),
+                icon: Icon(
+                  Icons.queue_music_rounded,
+                  size: 20,
+                  color: cc.textMuted,
+                ),
+                label: Text(
+                  l.queue,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(color: cc.textMuted),
+                ),
               ),
             ),
           ],

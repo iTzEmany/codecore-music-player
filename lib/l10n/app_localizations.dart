@@ -2291,6 +2291,66 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Nessuna Jam in corso'**
   String get jamWaitingEmpty;
+
+  /// No description provided for @activityTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Attività'**
+  String get activityTitle;
+
+  /// No description provided for @activityScan.
+  ///
+  /// In it, this message translates to:
+  /// **'Scansione · {done}/{total}'**
+  String activityScan(int done, int total);
+
+  /// No description provided for @activityScanIdle.
+  ///
+  /// In it, this message translates to:
+  /// **'Scansione in corso'**
+  String get activityScanIdle;
+
+  /// No description provided for @activityEnrich.
+  ///
+  /// In it, this message translates to:
+  /// **'Arricchimento · {done}/{total}'**
+  String activityEnrich(int done, int total);
+
+  /// No description provided for @activityDownload.
+  ///
+  /// In it, this message translates to:
+  /// **'Download · {title}'**
+  String activityDownload(String title);
+
+  /// No description provided for @activityTransfer.
+  ///
+  /// In it, this message translates to:
+  /// **'Invio a {name} · {n} brani'**
+  String activityTransfer(String name, int n);
+
+  /// No description provided for @activityNone.
+  ///
+  /// In it, this message translates to:
+  /// **'Nessuna attività'**
+  String get activityNone;
+
+  /// No description provided for @activityCompleted.
+  ///
+  /// In it, this message translates to:
+  /// **'Completate'**
+  String get activityCompleted;
+
+  /// No description provided for @activityClear.
+  ///
+  /// In it, this message translates to:
+  /// **'Pulisci'**
+  String get activityClear;
+
+  /// No description provided for @activityRunning.
+  ///
+  /// In it, this message translates to:
+  /// **'{n} attività in corso'**
+  String activityRunning(int n);
 }
 
 class _AppLocalizationsDelegate

@@ -5,8 +5,10 @@ import 'tokens.dart';
 enum AppThemeId { notte, oled }
 
 /// Unknown or retired names (carbon, navy, light) fall back to `notte`.
-AppThemeId appThemeIdFromName(String name) => AppThemeId.values
-    .firstWhere((e) => e.name == name, orElse: () => AppThemeId.notte);
+AppThemeId appThemeIdFromName(String name) => AppThemeId.values.firstWhere(
+  (e) => e.name == name,
+  orElse: () => AppThemeId.notte,
+);
 
 /// Text size is applied app-wide through MediaQuery's text scaler (see app.dart):
 /// scaling the TextTheme directly asserts on styles without a font size.
@@ -46,7 +48,8 @@ ThemeData buildTheme(AppThemeId id, bool compact) {
   final text = buildTextTheme(c);
   const pill = StadiumBorder();
   RoundedRectangleBorder top(double r) => RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(r)));
+    borderRadius: BorderRadius.vertical(top: Radius.circular(r)),
+  );
   return ThemeData(
     useMaterial3: true,
     brightness: Brightness.dark,
@@ -76,7 +79,8 @@ ThemeData buildTheme(AppThemeId id, bool compact) {
       contentTextStyle: text.bodyLarge?.copyWith(fontWeight: FontWeight.w500),
       actionTextColor: c.accentSoft,
       shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(CcDims.rGrid)),
+        borderRadius: BorderRadius.circular(CcDims.rGrid),
+      ),
     ),
     bottomSheetTheme: BottomSheetThemeData(
       backgroundColor: c.surface1,
@@ -90,7 +94,8 @@ ThemeData buildTheme(AppThemeId id, bool compact) {
       backgroundColor: c.surface1,
       surfaceTintColor: Colors.transparent,
       shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(CcDims.rSheet)),
+        borderRadius: BorderRadius.circular(CcDims.rSheet),
+      ),
       titleTextStyle: text.titleMedium,
       contentTextStyle: text.bodyMedium?.copyWith(color: c.text),
     ),
@@ -98,40 +103,50 @@ ThemeData buildTheme(AppThemeId id, bool compact) {
       filled: true,
       fillColor: c.surface2,
       isDense: true,
-      contentPadding:
-          const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       border: const OutlineInputBorder(
-          borderRadius: BorderRadius.all(Radius.circular(999)),
-          borderSide: BorderSide.none),
+        borderRadius: BorderRadius.all(Radius.circular(999)),
+        borderSide: BorderSide.none,
+      ),
       enabledBorder: const OutlineInputBorder(
-          borderRadius: BorderRadius.all(Radius.circular(999)),
-          borderSide: BorderSide.none),
+        borderRadius: BorderRadius.all(Radius.circular(999)),
+        borderSide: BorderSide.none,
+      ),
       focusedBorder: OutlineInputBorder(
-          borderRadius: const BorderRadius.all(Radius.circular(999)),
-          borderSide: BorderSide(color: c.accent, width: 1.5)),
+        borderRadius: const BorderRadius.all(Radius.circular(999)),
+        borderSide: BorderSide(color: c.accent, width: 1.5),
+      ),
       hintStyle: text.bodyLarge?.copyWith(
-          color: c.textMuted, fontWeight: FontWeight.w400),
+        color: c.textMuted,
+        fontWeight: FontWeight.w400,
+      ),
     ),
     filledButtonTheme: FilledButtonThemeData(
-        style: FilledButton.styleFrom(
-            shape: pill,
-            backgroundColor: c.accent,
-            foregroundColor: c.onAccent,
-            textStyle: text.labelLarge)),
+      style: FilledButton.styleFrom(
+        shape: pill,
+        backgroundColor: c.accent,
+        foregroundColor: c.onAccent,
+        textStyle: text.labelLarge,
+      ),
+    ),
     elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-            shape: pill, textStyle: text.labelLarge)),
+      style: ElevatedButton.styleFrom(shape: pill, textStyle: text.labelLarge),
+    ),
     outlinedButtonTheme: OutlinedButtonThemeData(
-        style: OutlinedButton.styleFrom(
-            shape: pill,
-            side: BorderSide(color: c.surface3),
-            foregroundColor: c.text,
-            textStyle: text.labelLarge)),
+      style: OutlinedButton.styleFrom(
+        shape: pill,
+        side: BorderSide(color: c.surface3),
+        foregroundColor: c.text,
+        textStyle: text.labelLarge,
+      ),
+    ),
     textButtonTheme: TextButtonThemeData(
-        style: TextButton.styleFrom(
-            shape: pill,
-            foregroundColor: c.accentSoft,
-            textStyle: text.labelLarge)),
+      style: TextButton.styleFrom(
+        shape: pill,
+        foregroundColor: c.accentSoft,
+        textStyle: text.labelLarge,
+      ),
+    ),
     chipTheme: ChipThemeData(
       shape: pill,
       side: BorderSide.none,
@@ -163,7 +178,8 @@ ThemeData buildTheme(AppThemeId id, bool compact) {
       color: c.surface2,
       surfaceTintColor: Colors.transparent,
       shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(CcDims.rGrid)),
+        borderRadius: BorderRadius.circular(CcDims.rGrid),
+      ),
       textStyle: text.bodyLarge?.copyWith(fontWeight: FontWeight.w500),
     ),
     progressIndicatorTheme: ProgressIndicatorThemeData(
@@ -172,10 +188,12 @@ ThemeData buildTheme(AppThemeId id, bool compact) {
       circularTrackColor: c.surface3,
     ),
     switchTheme: SwitchThemeData(
-      trackColor: WidgetStateProperty.resolveWith((s) =>
-          s.contains(WidgetState.selected) ? c.accent : c.surface3),
-      thumbColor: WidgetStateProperty.resolveWith((s) =>
-          s.contains(WidgetState.selected) ? c.onAccent : c.textMuted),
+      trackColor: WidgetStateProperty.resolveWith(
+        (s) => s.contains(WidgetState.selected) ? c.accent : c.surface3,
+      ),
+      thumbColor: WidgetStateProperty.resolveWith(
+        (s) => s.contains(WidgetState.selected) ? c.onAccent : c.textMuted,
+      ),
       trackOutlineColor: const WidgetStatePropertyAll(Colors.transparent),
     ),
     scrollbarTheme: ScrollbarThemeData(

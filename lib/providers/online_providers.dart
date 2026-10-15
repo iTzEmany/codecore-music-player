@@ -12,12 +12,15 @@ import 'settings_providers.dart';
 
 final webClientProvider = Provider<WebClient>((ref) => DioWebClient());
 
-final itunesClientProvider =
-    Provider((ref) => ItunesClient(ref.watch(webClientProvider)));
-final lrclibClientProvider =
-    Provider((ref) => LrclibClient(ref.watch(webClientProvider)));
-final wikipediaClientProvider =
-    Provider((ref) => WikipediaClient(ref.watch(webClientProvider)));
+final itunesClientProvider = Provider(
+  (ref) => ItunesClient(ref.watch(webClientProvider)),
+);
+final lrclibClientProvider = Provider(
+  (ref) => LrclibClient(ref.watch(webClientProvider)),
+);
+final wikipediaClientProvider = Provider(
+  (ref) => WikipediaClient(ref.watch(webClientProvider)),
+);
 
 final enrichmentServiceProvider = Provider<EnrichmentService>((ref) {
   final web = ref.watch(webClientProvider);
@@ -50,10 +53,12 @@ class EnrichJobNotifier extends Notifier<EnrichJobState> {
   EnrichJobState build() => const EnrichJobState();
 
   /// Returns false when another job is already running.
-  bool start(List<int> ids,
-      {bool includeLyrics = true,
-      bool includeCuriosities = false,
-      bool includeMetadata = true}) {
+  bool start(
+    List<int> ids, {
+    bool includeLyrics = true,
+    bool includeCuriosities = false,
+    bool includeMetadata = true,
+  }) {
     if (state.running || ids.isEmpty) return false;
     _cancel = CancelToken();
     state = const EnrichJobState(running: true);
@@ -62,16 +67,23 @@ class EnrichJobNotifier extends Notifier<EnrichJobState> {
   }
 
   Future<void> _run(
-      List<int> ids, bool lyrics, bool curiosities, bool metadata) async {
+    List<int> ids,
+    bool lyrics,
+    bool curiosities,
+    bool metadata,
+  ) async {
     BatchProgress? last;
     try {
-      await for (final p in ref.read(enrichmentServiceProvider).enrichMany(
-            ids,
-            cancel: _cancel,
-            includeLyrics: lyrics,
-            includeCuriosities: curiosities,
-            includeMetadata: metadata,
-          )) {
+      await for (final p
+          in ref
+              .read(enrichmentServiceProvider)
+              .enrichMany(
+                ids,
+                cancel: _cancel,
+                includeLyrics: lyrics,
+                includeCuriosities: curiosities,
+                includeMetadata: metadata,
+              )) {
         last = p;
         state = EnrichJobState(running: !p.finished, progress: p);
       }
@@ -86,5 +98,6 @@ class EnrichJobNotifier extends Notifier<EnrichJobState> {
   void clearResult() => state = const EnrichJobState();
 }
 
-final enrichJobProvider =
-    NotifierProvider<EnrichJobNotifier, EnrichJobState>(EnrichJobNotifier.new);
+final enrichJobProvider = NotifierProvider<EnrichJobNotifier, EnrichJobState>(
+  EnrichJobNotifier.new,
+);

@@ -49,8 +49,10 @@ Color heroTint(Color c, Color base) {
 }
 
 /// Tint of one cover, computed once per key and kept alive.
-final coverTintProvider =
-    FutureProvider.family<Color?, String>((ref, coverKey) async {
+final coverTintProvider = FutureProvider.family<Color?, String>((
+  ref,
+  coverKey,
+) async {
   ref.keepAlive();
   final file = ref.watch(coverFileProvider(coverKey));
   if (file == null) return null;
@@ -58,8 +60,9 @@ final coverTintProvider =
     final bytes = await file.readAsBytes();
     final codec = await ui.instantiateImageCodec(bytes, targetWidth: 24);
     final frame = await codec.getNextFrame();
-    final data =
-        await frame.image.toByteData(format: ui.ImageByteFormat.rawRgba);
+    final data = await frame.image.toByteData(
+      format: ui.ImageByteFormat.rawRgba,
+    );
     frame.image.dispose();
     codec.dispose();
     if (data == null) return null;

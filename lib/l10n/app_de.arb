@@ -538,5 +538,59 @@
   "queueCleared": "Warteschlange geleert",
   "jamOutputsAndSync": "Ausgänge und Sync",
   "jamHostTag": "Host",
-  "jamWaitingEmpty": "Keine Jam aktiv"
+  "jamWaitingEmpty": "Keine Jam aktiv",
+  "activityTitle": "Aktivität",
+  "activityScan": "Scan · {done}/{total}",
+  "@activityScan": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "activityScanIdle": "Scan läuft",
+  "activityEnrich": "Anreichern · {done}/{total}",
+  "@activityEnrich": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "activityDownload": "Download · {title}",
+  "@activityDownload": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "activityTransfer": "Senden an {name} · {n} Titel",
+  "@activityTransfer": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "activityNone": "Keine Aktivität",
+  "activityCompleted": "Abgeschlossen",
+  "activityClear": "Leeren",
+  "activityRunning": "{n} Aktivitäten laufen",
+  "@activityRunning": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  }
 }

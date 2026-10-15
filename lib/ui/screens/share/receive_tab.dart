@@ -76,7 +76,11 @@ class _ReceiveTabState extends ConsumerState<ReceiveTab> {
     final client = ref.read(lanClientProvider);
     try {
       final info = await client.hello(target.host, target.port);
-      final list = await client.manifest(target.host, target.port, _pin.text.trim());
+      final list = await client.manifest(
+        target.host,
+        target.port,
+        _pin.text.trim(),
+      );
       if (!mounted) return;
       setState(() {
         _target = target;
@@ -96,14 +100,18 @@ class _ReceiveTabState extends ConsumerState<ReceiveTab> {
   Future<void> _download() async {
     final target = _target;
     if (target == null || _selected.isEmpty) return;
-    final base =
-        await resolveDownloadFolder(ref.read(folderRepositoryProvider));
+    final base = await resolveDownloadFolder(
+      ref.read(folderRepositoryProvider),
+    );
     if (base == null) {
       if (mounted) setState(() => _error = context.l10n.ytNoFolder);
       return;
     }
     final out = Directory(p.join(base.$1.path, 'Ricevuti'));
-    final todo = [for (final t in _tracks) if (_selected.contains(t.id)) t];
+    final todo = [
+      for (final t in _tracks)
+        if (_selected.contains(t.id)) t,
+    ];
     final cancel = _cancel = CancelToken();
     setState(() {
       _busy = true;
@@ -118,8 +126,13 @@ class _ReceiveTabState extends ConsumerState<ReceiveTab> {
       for (final t in todo) {
         if (cancel.isCancelled) break;
         await for (final e in client.download(
-            target.host, target.port, _pin.text.trim(), t, out,
-            cancel: cancel)) {
+          target.host,
+          target.port,
+          _pin.text.trim(),
+          t,
+          out,
+          cancel: cancel,
+        )) {
           if (!mounted) return;
           setState(() => _fileProgress = e.fraction);
           if (e.path != null) saved.add(e.path!);
@@ -127,7 +140,10 @@ class _ReceiveTabState extends ConsumerState<ReceiveTab> {
         if (mounted) setState(() => _doneCount++);
       }
       if (saved.isNotEmpty) {
-        await ref.read(libraryScannerProvider).scanFiles(base.$2, saved).drain<void>();
+        await ref
+            .read(libraryScannerProvider)
+            .scanFiles(base.$2, saved)
+            .drain<void>();
       }
       if (mounted) setState(() => _received = saved.length);
     } on LanException catch (e) {
@@ -144,8 +160,10 @@ class _ReceiveTabState extends ConsumerState<ReceiveTab> {
     final hub = ref.watch(shareHubProvider);
     final head = <Widget>[
       if (hub.incoming.isNotEmpty) ...[
-        Text(l.receivedRequests,
-            style: Theme.of(context).textTheme.titleMedium),
+        Text(
+          l.receivedRequests,
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
         for (final o in hub.incoming) IncomingOfferTile(offer: o),
         const Divider(height: 32),
       ],
@@ -156,7 +174,9 @@ class _ReceiveTabState extends ConsumerState<ReceiveTab> {
         enabled: !_busy,
         keyboardType: TextInputType.url,
         decoration: InputDecoration(
-            labelText: l.shareAddress, border: const OutlineInputBorder()),
+          labelText: l.shareAddress,
+          border: const OutlineInputBorder(),
+        ),
       ),
       const SizedBox(height: 12),
       TextField(
@@ -165,7 +185,9 @@ class _ReceiveTabState extends ConsumerState<ReceiveTab> {
         keyboardType: TextInputType.number,
         maxLength: 6,
         decoration: InputDecoration(
-            labelText: l.sharePin, border: const OutlineInputBorder()),
+          labelText: l.sharePin,
+          border: const OutlineInputBorder(),
+        ),
       ),
       FilledButton(
         onPressed: _busy ? null : _connect,
@@ -174,13 +196,17 @@ class _ReceiveTabState extends ConsumerState<ReceiveTab> {
       if (_error != null)
         Padding(
           padding: const EdgeInsets.only(top: 12),
-          child: Text(_error!,
-              style: TextStyle(color: Theme.of(context).colorScheme.error)),
+          child: Text(
+            _error!,
+            style: TextStyle(color: Theme.of(context).colorScheme.error),
+          ),
         ),
       if (_remoteName != null) ...[
         const SizedBox(height: 16),
-        Text(l.shareConnectedTo(_remoteName!),
-            style: Theme.of(context).textTheme.titleMedium),
+        Text(
+          l.shareConnectedTo(_remoteName!),
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
       ],
     ];
     final foot = <Widget>[
@@ -189,8 +215,7 @@ class _ReceiveTabState extends ConsumerState<ReceiveTab> {
         if (_busy && _totalCount > 0) ...[
           Text(l.shareProgress(_doneCount + 1, _totalCount)),
           LinearProgressIndicator(value: _fileProgress),
-          TextButton(
-              onPressed: () => _cancel?.cancel(), child: Text(l.cancel)),
+          TextButton(onPressed: () => _cancel?.cancel(), child: Text(l.cancel)),
         ] else
           FilledButton.icon(
             onPressed: _selected.isEmpty ? null : _download,
@@ -218,8 +243,10 @@ class _ReceiveTabState extends ConsumerState<ReceiveTab> {
           value: _selected.contains(t.id),
           onChanged: _busy
               ? null
-              : (v) => setState(() =>
-                  v == true ? _selected.add(t.id) : _selected.remove(t.id)),
+              : (v) => setState(
+                  () =>
+                      v == true ? _selected.add(t.id) : _selected.remove(t.id),
+                ),
           title: Text(t.title, maxLines: 1, overflow: TextOverflow.ellipsis),
           subtitle: Text(t.artist ?? '', maxLines: 1),
         );

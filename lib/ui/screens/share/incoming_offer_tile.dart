@@ -20,32 +20,43 @@ class IncomingOfferTile extends ConsumerWidget {
     final accepted = offer.status == OfferStatus.accepted;
     return ListTile(
       leading: const Icon(Icons.south_west),
-      title: Text(l.incomingTitle(offer.fromName),
-          maxLines: 2, overflow: TextOverflow.ellipsis),
+      title: Text(
+        l.incomingTitle(offer.fromName),
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+      ),
       subtitle: accepted
-          ? Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(l.receivingProgress(offer.received, offer.items.length)),
-              LinearProgressIndicator(
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(l.receivingProgress(offer.received, offer.items.length)),
+                LinearProgressIndicator(
                   value: offer.items.isEmpty
                       ? null
-                      : offer.received / offer.items.length),
-            ])
-          : Text(pending
-              ? l.incomingBody(offer.items.length, mb)
-              : offerStatusLabel(l, offer.status)),
+                      : offer.received / offer.items.length,
+                ),
+              ],
+            )
+          : Text(
+              pending
+                  ? l.incomingBody(offer.items.length, mb)
+                  : offerStatusLabel(l, offer.status),
+            ),
       trailing: pending
-          ? Wrap(children: [
-              IconButton(
-                tooltip: l.decline,
-                icon: const Icon(Icons.close),
-                onPressed: () => hub.decline(offer),
-              ),
-              IconButton(
-                tooltip: l.accept,
-                icon: const Icon(Icons.check),
-                onPressed: () => hub.accept(offer),
-              ),
-            ])
+          ? Wrap(
+              children: [
+                IconButton(
+                  tooltip: l.decline,
+                  icon: const Icon(Icons.close),
+                  onPressed: () => hub.decline(offer),
+                ),
+                IconButton(
+                  tooltip: l.accept,
+                  icon: const Icon(Icons.check),
+                  onPressed: () => hub.accept(offer),
+                ),
+              ],
+            )
           : null,
     );
   }

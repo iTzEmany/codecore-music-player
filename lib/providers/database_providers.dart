@@ -11,17 +11,22 @@ final databaseProvider = Provider<AppDatabase>((ref) {
   return db;
 });
 
-final trackRepositoryProvider =
-    Provider<TrackRepository>((ref) => TrackRepository(ref.watch(databaseProvider)));
+final trackRepositoryProvider = Provider<TrackRepository>(
+  (ref) => TrackRepository(ref.watch(databaseProvider)),
+);
 
-final folderRepositoryProvider =
-    Provider<FolderRepository>((ref) => FolderRepository(ref.watch(databaseProvider)));
+final folderRepositoryProvider = Provider<FolderRepository>(
+  (ref) => FolderRepository(ref.watch(databaseProvider)),
+);
 
 final playlistRepositoryProvider = Provider<PlaylistRepository>(
-    (ref) => PlaylistRepository(ref.watch(databaseProvider)));
+  (ref) => PlaylistRepository(ref.watch(databaseProvider)),
+);
 
 final playlistsProvider = StreamProvider<List<PlaylistSummary>>(
-    (ref) => ref.watch(playlistRepositoryProvider).watchAll());
+  (ref) => ref.watch(playlistRepositoryProvider).watchAll(),
+);
 
 final playlistTracksProvider = StreamProvider.family<List<Track>, int>(
-    (ref, id) => ref.watch(playlistRepositoryProvider).watchTracks(id));
+  (ref, id) => ref.watch(playlistRepositoryProvider).watchTracks(id),
+);

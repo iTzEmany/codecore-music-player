@@ -78,7 +78,8 @@ class _TrackRowState extends State<TrackRow> {
       case TrackRowVariant.album:
         final a = t.artist;
         if (a != null &&
-            a.trim().toLowerCase() != (widget.albumArtist ?? '').trim().toLowerCase()) {
+            a.trim().toLowerCase() !=
+                (widget.albumArtist ?? '').trim().toLowerCase()) {
           parts.add(a);
         }
       case _:
@@ -98,25 +99,31 @@ class _TrackRowState extends State<TrackRow> {
         child: Center(
           child: widget.isCurrent
               ? NowPlayingBars(playing: widget.isPlaying, size: 16)
-              : Text(n == null ? '' : '$n',
-                  style: Theme.of(context).textTheme.labelSmall),
+              : Text(
+                  n == null ? '' : '$n',
+                  style: Theme.of(context).textTheme.labelSmall,
+                ),
         ),
       );
     }
     final image = CoverImage(coverKey: t.coverKey, size: cover);
     if (!widget.isCurrent) return image;
-    return Stack(alignment: Alignment.center, children: [
-      image,
-      Container(
-        width: cover,
-        height: cover,
-        decoration: BoxDecoration(
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        image,
+        Container(
+          width: cover,
+          height: cover,
+          decoration: BoxDecoration(
             color: cc.bg.withValues(alpha: 0.5),
-            borderRadius: BorderRadius.circular(CcDims.rList)),
-        alignment: Alignment.center,
-        child: NowPlayingBars(playing: widget.isPlaying, size: cover * 0.4),
-      ),
-    ]);
+            borderRadius: BorderRadius.circular(CcDims.rList),
+          ),
+          alignment: Alignment.center,
+          child: NowPlayingBars(playing: widget.isPlaying, size: cover * 0.4),
+        ),
+      ],
+    );
   }
 
   Widget _trailing(BuildContext context, bool wide) {
@@ -128,10 +135,11 @@ class _TrackRowState extends State<TrackRow> {
         return Padding(
           padding: const EdgeInsets.only(left: 8),
           child: Icon(
-              widget.picked
-                  ? Icons.check_circle_rounded
-                  : Icons.add_circle_outline_rounded,
-              color: widget.picked ? cc.accent : cc.textMuted),
+            widget.picked
+                ? Icons.check_circle_rounded
+                : Icons.add_circle_outline_rounded,
+            color: widget.picked ? cc.accent : cc.textMuted,
+          ),
         );
       case TrackRowVariant.queue:
         final i = widget.reorderIndex;
@@ -141,37 +149,46 @@ class _TrackRowState extends State<TrackRow> {
               ? Icon(Icons.drag_handle_rounded, color: cc.textMuted)
               : ReorderableDragStartListener(
                   index: i,
-                  child: Icon(Icons.drag_handle_rounded, color: cc.textMuted)),
+                  child: Icon(Icons.drag_handle_rounded, color: cc.textMuted),
+                ),
         );
       case _:
     }
     final showActions = !wide || _hover || fav;
-    return Row(mainAxisSize: MainAxisSize.min, children: [
-      if (wide && (_hover || fav) && widget.onFavorite != null)
-        IconButton(
-          tooltip: fav ? l.removeFromFavorites : l.favorite,
-          onPressed: widget.onFavorite,
-          visualDensity: VisualDensity.compact,
-          icon: Icon(fav ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-              size: 18, color: fav ? cc.accent : cc.textMuted),
-        )
-      else if (fav)
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4),
-          child: Icon(Icons.favorite_rounded, size: 16, color: cc.accent),
-        ),
-      if (widget.onMore != null)
-        Opacity(
-          opacity: showActions ? 1 : 0,
-          child: IconButton(
-            tooltip: l.moreOptions,
-            onPressed: widget.onMore,
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (wide && (_hover || fav) && widget.onFavorite != null)
+          IconButton(
+            tooltip: fav ? l.removeFromFavorites : l.favorite,
+            onPressed: widget.onFavorite,
             visualDensity: VisualDensity.compact,
-            icon: Icon(wide ? Icons.more_horiz_rounded : Icons.more_vert_rounded,
-                color: cc.textMuted),
+            icon: Icon(
+              fav ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+              size: 18,
+              color: fav ? cc.accent : cc.textMuted,
+            ),
+          )
+        else if (fav)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: Icon(Icons.favorite_rounded, size: 16, color: cc.accent),
           ),
-        ),
-    ]);
+        if (widget.onMore != null)
+          Opacity(
+            opacity: showActions ? 1 : 0,
+            child: IconButton(
+              tooltip: l.moreOptions,
+              onPressed: widget.onMore,
+              visualDensity: VisualDensity.compact,
+              icon: Icon(
+                wide ? Icons.more_horiz_rounded : Icons.more_vert_rounded,
+                color: cc.textMuted,
+              ),
+            ),
+          ),
+      ],
+    );
   }
 
   @override
@@ -183,19 +200,26 @@ class _TrackRowState extends State<TrackRow> {
     final subtitle = _subtitle(context);
     final cover = widget.compact ? 40.0 : 48.0;
     final titleStyle = theme.textTheme.bodyLarge?.copyWith(
-        color: widget.isCurrent ? cc.accent : cc.text);
+      color: widget.isCurrent ? cc.accent : cc.text,
+    );
 
     final titleBlock = Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(t.title,
-            maxLines: 1, overflow: TextOverflow.ellipsis, style: titleStyle),
+        Text(
+          t.title,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: titleStyle,
+        ),
         if (subtitle.isNotEmpty)
-          Text(subtitle,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.bodyMedium),
+          Text(
+            subtitle,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.bodyMedium,
+          ),
       ],
     );
 
@@ -204,44 +228,58 @@ class _TrackRowState extends State<TrackRow> {
       final num = widget.variant == TrackRowVariant.album
           ? t.trackNumber
           : widget.index;
-      row = Row(children: [
-        SizedBox(
-          width: 40,
-          child: widget.isCurrent
-              ? Center(child: NowPlayingBars(playing: widget.isPlaying, size: 16))
-              : Center(
-                  child: Text(num == null ? '' : '$num',
-                      style: theme.textTheme.labelSmall)),
-        ),
-        if (widget.variant != TrackRowVariant.album) ...[
-          _leading(context, cover),
-          const SizedBox(width: 12),
-        ],
-        Expanded(flex: 5, child: titleBlock),
-        if (widget.variant != TrackRowVariant.album) ...[
-          const SizedBox(width: 12),
-          Expanded(
-            flex: 3,
-            child: Text(t.album ?? '',
+      row = Row(
+        children: [
+          SizedBox(
+            width: 40,
+            child: widget.isCurrent
+                ? Center(
+                    child: NowPlayingBars(playing: widget.isPlaying, size: 16),
+                  )
+                : Center(
+                    child: Text(
+                      num == null ? '' : '$num',
+                      style: theme.textTheme.labelSmall,
+                    ),
+                  ),
+          ),
+          if (widget.variant != TrackRowVariant.album) ...[
+            _leading(context, cover),
+            const SizedBox(width: 12),
+          ],
+          Expanded(flex: 5, child: titleBlock),
+          if (widget.variant != TrackRowVariant.album) ...[
+            const SizedBox(width: 12),
+            Expanded(
+              flex: 3,
+              child: Text(
+                t.album ?? '',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.bodyMedium),
+                style: theme.textTheme.bodyMedium,
+              ),
+            ),
+          ],
+          SizedBox(
+            width: 56,
+            child: Text(
+              formatDuration(t.durationMs),
+              textAlign: TextAlign.end,
+              style: theme.textTheme.labelSmall,
+            ),
           ),
+          _trailing(context, true),
         ],
-        SizedBox(
-          width: 56,
-          child: Text(formatDuration(t.durationMs),
-              textAlign: TextAlign.end, style: theme.textTheme.labelSmall),
-        ),
-        _trailing(context, true),
-      ]);
+      );
     } else {
-      row = Row(children: [
-        _leading(context, cover),
-        const SizedBox(width: 12),
-        Expanded(child: titleBlock),
-        _trailing(context, false),
-      ]);
+      row = Row(
+        children: [
+          _leading(context, cover),
+          const SizedBox(width: 12),
+          Expanded(child: titleBlock),
+          _trailing(context, false),
+        ],
+      );
     }
 
     return MouseRegion(
@@ -298,7 +336,8 @@ class LiveTrackRow extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isCurrent = ref.watch(
-        currentTrackProvider.select((t) => t.value?.id == track.id));
+      currentTrackProvider.select((t) => t.value?.id == track.id),
+    );
     final playing = isCurrent && (ref.watch(isPlayingProvider).value ?? false);
     void actions() => showTrackActions(context, ref, track);
     return TrackRow(

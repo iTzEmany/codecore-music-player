@@ -44,53 +44,64 @@ class _State extends ConsumerState<TrackPickerScreen> {
           ),
         ],
       ),
-      body: Column(children: [
-        Padding(
-          padding: const EdgeInsets.all(12),
-          child: TextField(
-            controller: _controller,
-            onChanged: (t) {
-              _debounce?.cancel();
-              _debounce = Timer(const Duration(milliseconds: 250), () {
-                if (mounted) setState(() => _query = t);
-              });
-            },
-            decoration: InputDecoration(
-              hintText: l.searchHint,
-              prefixIcon: const Icon(Icons.search),
-              isDense: true,
-              border: const OutlineInputBorder(),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: TextField(
+              controller: _controller,
+              onChanged: (t) {
+                _debounce?.cancel();
+                _debounce = Timer(const Duration(milliseconds: 250), () {
+                  if (mounted) setState(() => _query = t);
+                });
+              },
+              decoration: InputDecoration(
+                hintText: l.searchHint,
+                prefixIcon: const Icon(Icons.search),
+                isDense: true,
+                border: const OutlineInputBorder(),
+              ),
             ),
           ),
-        ),
-        Expanded(
-          child: StreamBuilder<List<Track>>(
-            stream:
-                ref.watch(trackRepositoryProvider).watchTracks(query: _query),
-            builder: (context, snap) {
-              final tracks = snap.data ?? const <Track>[];
-              return ListView.builder(
-                itemExtent: 64,
-                itemCount: tracks.length,
-                itemBuilder: (_, i) {
-                  final t = tracks[i];
-                  return CheckboxListTile(
-                    value: _selected.contains(t.id),
-                    onChanged: (v) => setState(() => v == true
-                        ? _selected.add(t.id)
-                        : _selected.remove(t.id)),
-                    secondary: CoverImage(coverKey: t.coverKey, size: 44),
-                    title: Text(t.title,
-                        maxLines: 1, overflow: TextOverflow.ellipsis),
-                    subtitle: Text(t.artist ?? '',
-                        maxLines: 1, overflow: TextOverflow.ellipsis),
-                  );
-                },
-              );
-            },
+          Expanded(
+            child: StreamBuilder<List<Track>>(
+              stream: ref
+                  .watch(trackRepositoryProvider)
+                  .watchTracks(query: _query),
+              builder: (context, snap) {
+                final tracks = snap.data ?? const <Track>[];
+                return ListView.builder(
+                  itemExtent: 64,
+                  itemCount: tracks.length,
+                  itemBuilder: (_, i) {
+                    final t = tracks[i];
+                    return CheckboxListTile(
+                      value: _selected.contains(t.id),
+                      onChanged: (v) => setState(
+                        () => v == true
+                            ? _selected.add(t.id)
+                            : _selected.remove(t.id),
+                      ),
+                      secondary: CoverImage(coverKey: t.coverKey, size: 44),
+                      title: Text(
+                        t.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      subtitle: Text(
+                        t.artist ?? '',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
           ),
-        ),
-      ]),
+        ],
+      ),
     );
   }
 }

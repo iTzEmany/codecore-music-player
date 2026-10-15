@@ -29,30 +29,38 @@ class ThemeSwatch extends StatelessWidget {
         onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.all(4),
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
-            Container(
-              width: 72,
-              height: 72,
-              decoration: BoxDecoration(
-                color: colors.bg,
-                borderRadius: BorderRadius.circular(CcDims.rCard),
-                border: Border.all(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 72,
+                height: 72,
+                decoration: BoxDecoration(
+                  color: colors.bg,
+                  borderRadius: BorderRadius.circular(CcDims.rCard),
+                  border: Border.all(
                     color: selected ? cc.accent : cc.surface3,
-                    width: selected ? 2 : 1),
+                    width: selected ? 2 : 1,
+                  ),
+                ),
+                alignment: Alignment.center,
+                child: Container(
+                  width: 20,
+                  height: 20,
+                  decoration: BoxDecoration(
+                    color: colors.accent,
+                    shape: BoxShape.circle,
+                  ),
+                ),
               ),
-              alignment: Alignment.center,
-              child: Container(
-                width: 20,
-                height: 20,
-                decoration:
-                    BoxDecoration(color: colors.accent, shape: BoxShape.circle),
+              const SizedBox(height: 6),
+              Text(
+                label,
+                style: Theme.of(context).textTheme.labelMedium
+                    ?.copyWith(color: selected ? cc.text : cc.textMuted),
               ),
-            ),
-            const SizedBox(height: 6),
-            Text(label,
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    color: selected ? cc.text : cc.textMuted)),
-          ]),
+            ],
+          ),
         ),
       ),
     );

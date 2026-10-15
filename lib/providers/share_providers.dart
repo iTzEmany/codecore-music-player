@@ -22,8 +22,9 @@ final lanServerProvider = Provider<LanServer>((ref) {
 
 /// Name the OS gives the device (overridden at start-up on Android, where the
 /// hostname is just "localhost").
-final systemDeviceNameProvider =
-    Provider<String>((ref) => Platform.localHostname);
+final systemDeviceNameProvider = Provider<String>(
+  (ref) => Platform.localHostname,
+);
 
 final deviceNameProvider = Provider<String>((ref) {
   final custom = ref.watch(settingsProvider.select((s) => s.deviceName));
@@ -42,7 +43,9 @@ Future<String?> localIpAddress() async {
     AppLog.w('wifi ip lookup failed', e, st);
   }
   final ifaces = await NetworkInterface.list(
-      type: InternetAddressType.IPv4, includeLoopback: false);
+    type: InternetAddressType.IPv4,
+    includeLoopback: false,
+  );
   for (final i in ifaces) {
     for (final a in i.addresses) {
       if (!a.isLoopback) return a.address;
@@ -52,8 +55,7 @@ Future<String?> localIpAddress() async {
 }
 
 /// Tracks -> shareable entries (paths stay on this side of the connection).
-Future<List<ShareEntry>> buildShareEntries(
-    Ref ref, List<Track> tracks) async {
+Future<List<ShareEntry>> buildShareEntries(Ref ref, List<Track> tracks) async {
   final dir = ref.read(coversDirProvider);
   String? coverPath(Track t) {
     final k = t.coverKey;
@@ -95,7 +97,9 @@ class ShareController {
     final entries = await buildShareEntries(_ref, tracks);
     final host = await localIpAddress();
     if (host == null) return null;
-    return _ref.read(lanServerProvider).start(
+    return _ref
+        .read(lanServerProvider)
+        .start(
           entries: entries,
           host: host,
           deviceName: _ref.read(deviceNameProvider),
@@ -105,5 +109,6 @@ class ShareController {
   Future<void> stopSharing() => _ref.read(lanServerProvider).stop();
 }
 
-final shareControllerProvider =
-    Provider<ShareController>((ref) => ShareController(ref));
+final shareControllerProvider = Provider<ShareController>(
+  (ref) => ShareController(ref),
+);

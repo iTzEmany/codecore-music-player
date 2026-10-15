@@ -17,7 +17,9 @@ class NowPlayingBars extends StatefulWidget {
 class _NowPlayingBarsState extends State<NowPlayingBars>
     with SingleTickerProviderStateMixin {
   late final AnimationController _c = AnimationController(
-      vsync: this, duration: const Duration(milliseconds: 900));
+    vsync: this,
+    duration: const Duration(milliseconds: 900),
+  );
 
   bool _animate(BuildContext context) =>
       widget.playing && !MediaQuery.disableAnimationsOf(context);
@@ -78,8 +80,9 @@ class _BarsPainter extends CustomPainter {
       final h = size.height * v;
       canvas.drawRRect(
         RRect.fromRectAndRadius(
-            Rect.fromLTWH(i * w * 2, size.height - h, w, h),
-            Radius.circular(w / 2)),
+          Rect.fromLTWH(i * w * 2, size.height - h, w, h),
+          Radius.circular(w / 2),
+        ),
         paint,
       );
     }

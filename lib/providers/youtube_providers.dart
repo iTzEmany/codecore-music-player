@@ -21,8 +21,9 @@ import 'online_providers.dart';
 import 'settings_providers.dart';
 
 final youtubeServiceProvider = Provider<YoutubeService>((ref) {
-  final YoutubeService s =
-      isAndroid ? AndroidYtDlpService() : YtDlpProcessService();
+  final YoutubeService s = isAndroid
+      ? AndroidYtDlpService()
+      : YtDlpProcessService();
   ref.onDispose(s.close);
   return s;
 });
@@ -34,7 +35,9 @@ final downloadIndexProvider = FutureProvider<DownloadIndex>((ref) async {
 });
 
 /// Destination folder for downloads, registered as a scanned folder.
-Future<(Directory, Folder)?> resolveDownloadFolder(FolderRepository repo) async {
+Future<(Directory, Folder)?> resolveDownloadFolder(
+  FolderRepository repo,
+) async {
   final res = await _resolveDownloadFolder(repo);
   if (res != null) await _removeStalePartFiles(res.$1);
   return res;
@@ -52,7 +55,9 @@ Future<void> _removeStalePartFiles(Directory dir) async {
   }
 }
 
-Future<(Directory, Folder)?> _resolveDownloadFolder(FolderRepository repo) async {
+Future<(Directory, Folder)?> _resolveDownloadFolder(
+  FolderRepository repo,
+) async {
   if (isAndroid) {
     final ext = await getExternalStorageDirectory();
     if (ext == null) return null;
@@ -80,7 +85,9 @@ class DownloadsNotifier extends Notifier<List<DownloadItem>> {
     _queue = DownloadQueue(
       downloader: (r, dir, cancel) => yt.download(r, dir, cancel: cancel),
       outDir: () async {
-        final res = await resolveDownloadFolder(ref.read(folderRepositoryProvider));
+        final res = await resolveDownloadFolder(
+          ref.read(folderRepositoryProvider),
+        );
         folder = res?.$2;
         return res?.$1;
       },
@@ -88,9 +95,9 @@ class DownloadsNotifier extends Notifier<List<DownloadItem>> {
       onDownloaded: (path) async {
         final f = folder;
         if (f == null) return;
-        await for (final _ in ref
-            .read(libraryScannerProvider)
-            .scanFiles(f, [path])) {}
+        await for (final _ in ref.read(libraryScannerProvider).scanFiles(f, [
+          path,
+        ])) {}
         final item = _queue.items.where((e) => e.path == path).firstOrNull;
         if (item != null) {
           final idx = await ref.read(downloadIndexProvider.future);
@@ -109,8 +116,13 @@ class DownloadsNotifier extends Notifier<List<DownloadItem>> {
     try {
       final id = await ref.read(trackRepositoryProvider).idForPath(path);
       if (id == null) return;
-      ref.read(enrichJobProvider.notifier).start([id],
-          includeLyrics: s.autoLyrics, includeMetadata: s.autoEnrich);
+      ref
+          .read(enrichJobProvider.notifier)
+          .start(
+            [id],
+            includeLyrics: s.autoLyrics,
+            includeMetadata: s.autoEnrich,
+          );
     } on Object catch (e, st) {
       AppLog.w('auto enrich after download failed', e, st);
     }
@@ -123,4 +135,5 @@ class DownloadsNotifier extends Notifier<List<DownloadItem>> {
 
 final downloadsProvider =
     NotifierProvider<DownloadsNotifier, List<DownloadItem>>(
-        DownloadsNotifier.new);
+      DownloadsNotifier.new,
+    );

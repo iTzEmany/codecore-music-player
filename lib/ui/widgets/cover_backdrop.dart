@@ -15,25 +15,27 @@ class CoverBackdrop extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cc = context.cc;
     final tint = resolvedHeroTint(context, ref, coverKey);
-    return Stack(children: [
-      Positioned.fill(child: ColoredBox(color: cc.bg)),
-      Positioned.fill(
-        child: FractionallySizedBox(
-          alignment: Alignment.topCenter,
-          heightFactor: 0.6,
-          child: AnimatedContainer(
-            duration: ccDuration(context, CcMotion.color),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [tint, cc.bg],
+    return Stack(
+      children: [
+        Positioned.fill(child: ColoredBox(color: cc.bg)),
+        Positioned.fill(
+          child: FractionallySizedBox(
+            alignment: Alignment.topCenter,
+            heightFactor: 0.6,
+            child: AnimatedContainer(
+              duration: ccDuration(context, CcMotion.color),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [tint, cc.bg],
+                ),
               ),
             ),
           ),
         ),
-      ),
-      Positioned.fill(child: child),
-    ]);
+        Positioned.fill(child: child),
+      ],
+    );
   }
 }

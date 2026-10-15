@@ -14,16 +14,20 @@ class SectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(CcDims.margin, 20, CcDims.margin, 8),
-      child: Row(children: [
-        Expanded(
-          child: Text(title,
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              title,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.titleMedium),
-        ),
-        if (actionLabel != null)
-          TextButton(onPressed: onAction, child: Text(actionLabel!)),
-      ]),
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+          ),
+          if (actionLabel != null)
+            TextButton(onPressed: onAction, child: Text(actionLabel!)),
+        ],
+      ),
     );
   }
 }

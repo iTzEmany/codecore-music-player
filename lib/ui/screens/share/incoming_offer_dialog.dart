@@ -26,8 +26,11 @@ class IncomingOfferDialog extends ConsumerWidget {
           Text(l.incomingBody(offer.items.length, mb)),
           const SizedBox(height: 8),
           for (final it in shown)
-            Text(it.artist == null ? it.title : '${it.artist} – ${it.title}',
-                maxLines: 1, overflow: TextOverflow.ellipsis),
+            Text(
+              it.artist == null ? it.title : '${it.artist} – ${it.title}',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
           if (offer.items.length > shown.length)
             Text('…', style: Theme.of(context).textTheme.bodySmall),
         ],

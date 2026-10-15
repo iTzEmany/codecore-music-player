@@ -9,7 +9,9 @@ import '../../services/online/http_client.dart';
 
 Future<void> showEnrichPreview(BuildContext context, Track track) {
   return showDialog<void>(
-      context: context, builder: (_) => _EnrichPreviewDialog(track: track));
+    context: context,
+    builder: (_) => _EnrichPreviewDialog(track: track),
+  );
 }
 
 class _Row {
@@ -43,9 +45,7 @@ class _State extends ConsumerState<_EnrichPreviewDialog> {
 
   Future<void> _load() async {
     try {
-      final p = await ref
-          .read(enrichmentServiceProvider)
-          .propose(widget.track);
+      final p = await ref.read(enrichmentServiceProvider).propose(widget.track);
       if (!mounted) return;
       setState(() {
         _proposal = p;
@@ -80,13 +80,21 @@ class _State extends ConsumerState<_EnrichPreviewDialog> {
       if (differs(t.genre, m?.genre) != null)
         _Row(EnrichField.genre, l.fieldGenre, t.genre, m!.genre),
       if (m?.trackNumber != null && m!.trackNumber != t.trackNumber)
-        _Row(EnrichField.trackNumber, l.fieldTrackNumber,
-            '${t.trackNumber ?? ''}', '${m.trackNumber}'),
+        _Row(
+          EnrichField.trackNumber,
+          l.fieldTrackNumber,
+          '${t.trackNumber ?? ''}',
+          '${m.trackNumber}',
+        ),
       if (m?.artworkUrl != null)
         _Row(EnrichField.cover, l.fieldCover, null, m!.artworkUrl),
       if (p.lyrics != null && !p.lyrics!.isEmpty)
-        _Row(EnrichField.lyrics, l.fieldLyrics, null,
-            (p.lyrics!.plain ?? p.lyrics!.synced ?? '')),
+        _Row(
+          EnrichField.lyrics,
+          l.fieldLyrics,
+          null,
+          (p.lyrics!.plain ?? p.lyrics!.synced ?? ''),
+        ),
       if (p.curiosity != null)
         _Row(EnrichField.curiosity, l.fieldCuriosity, null, p.curiosity!.text),
     ];
@@ -104,7 +112,8 @@ class _State extends ConsumerState<_EnrichPreviewDialog> {
         final next = (r.proposed ?? '').toLowerCase();
         if (next.isEmpty || !cur.contains(next)) continue;
       }
-      if (r.field == EnrichField.curiosity && widget.track.curiosities != null) {
+      if (r.field == EnrichField.curiosity &&
+          widget.track.curiosities != null) {
         continue;
       }
       _selected.add(r.field);
@@ -113,8 +122,11 @@ class _State extends ConsumerState<_EnrichPreviewDialog> {
 
   bool _locked(_Row r) =>
       widget.track.userEdited &&
-      const {EnrichField.title, EnrichField.artist, EnrichField.album}
-          .contains(r.field);
+      const {
+        EnrichField.title,
+        EnrichField.artist,
+        EnrichField.album,
+      }.contains(r.field);
 
   Future<void> _apply() async {
     await ref
@@ -129,7 +141,9 @@ class _State extends ConsumerState<_EnrichPreviewDialog> {
     Widget body;
     if (_loading) {
       body = const SizedBox(
-          height: 80, child: Center(child: CircularProgressIndicator()));
+        height: 80,
+        child: Center(child: CircularProgressIndicator()),
+      );
     } else if (_rateLimited) {
       body = Text(l.serviceUnavailable);
     } else {
@@ -137,35 +151,43 @@ class _State extends ConsumerState<_EnrichPreviewDialog> {
       body = rows.isEmpty
           ? Text(l.nothingFound)
           : SingleChildScrollView(
-              child: Column(mainAxisSize: MainAxisSize.min, children: [
-                for (final r in rows)
-                  CheckboxListTile(
-                    dense: true,
-                    value: _selected.contains(r.field),
-                    onChanged: _locked(r)
-                        ? null
-                        : (v) => setState(() => v == true
-                            ? _selected.add(r.field)
-                            : _selected.remove(r.field)),
-                    title: Text(r.label),
-                    subtitle: r.field == EnrichField.cover
-                        ? Align(
-                            alignment: Alignment.centerLeft,
-                            child: Image.network(r.proposed!,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (final r in rows)
+                    CheckboxListTile(
+                      dense: true,
+                      value: _selected.contains(r.field),
+                      onChanged: _locked(r)
+                          ? null
+                          : (v) => setState(
+                              () => v == true
+                                  ? _selected.add(r.field)
+                                  : _selected.remove(r.field),
+                            ),
+                      title: Text(r.label),
+                      subtitle: r.field == EnrichField.cover
+                          ? Align(
+                              alignment: Alignment.centerLeft,
+                              child: Image.network(
+                                r.proposed!,
                                 width: 72,
                                 height: 72,
                                 errorBuilder: (_, _, _) =>
-                                    const Icon(Icons.image_not_supported)),
-                          )
-                        : Text(
-                            _locked(r)
-                                ? l.userEditedLocked
-                                : '${l.currentValue}: ${r.current ?? '—'}\n'
-                                    '${l.proposedValue}: ${r.proposed}',
-                            maxLines: 5,
-                            overflow: TextOverflow.ellipsis),
-                  ),
-              ]),
+                                    const Icon(Icons.image_not_supported),
+                              ),
+                            )
+                          : Text(
+                              _locked(r)
+                                  ? l.userEditedLocked
+                                  : '${l.currentValue}: ${r.current ?? '—'}\n'
+                                        '${l.proposedValue}: ${r.proposed}',
+                              maxLines: 5,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                    ),
+                ],
+              ),
             );
     }
     return AlertDialog(
@@ -173,11 +195,13 @@ class _State extends ConsumerState<_EnrichPreviewDialog> {
       content: SizedBox(width: 420, child: body),
       actions: [
         TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(l.cancel)),
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(l.cancel),
+        ),
         FilledButton(
-            onPressed: _selected.isEmpty ? null : _apply,
-            child: Text(l.apply)),
+          onPressed: _selected.isEmpty ? null : _apply,
+          child: Text(l.apply),
+        ),
       ],
     );
   }

@@ -538,5 +538,59 @@
   "queueCleared": "Cola vaciada",
   "jamOutputsAndSync": "Salidas y sincronía",
   "jamHostTag": "anfitrión",
-  "jamWaitingEmpty": "No hay ninguna Jam en curso"
+  "jamWaitingEmpty": "No hay ninguna Jam en curso",
+  "activityTitle": "Actividad",
+  "activityScan": "Escaneo · {done}/{total}",
+  "@activityScan": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "activityScanIdle": "Escaneando",
+  "activityEnrich": "Enriquecimiento · {done}/{total}",
+  "@activityEnrich": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "activityDownload": "Descarga · {title}",
+  "@activityDownload": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "activityTransfer": "Envío a {name} · {n} canciones",
+  "@activityTransfer": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "activityNone": "Sin actividad",
+  "activityCompleted": "Completadas",
+  "activityClear": "Limpiar",
+  "activityRunning": "{n} actividades en curso",
+  "@activityRunning": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  }
 }

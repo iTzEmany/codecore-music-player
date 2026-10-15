@@ -36,8 +36,11 @@ class CoverImage extends ConsumerWidget {
     final cc = context.cc;
     final placeholder = ColoredBox(
       color: cc.surface3,
-      child: Icon(Icons.music_note_rounded,
-          size: size * 0.5, color: cc.textMuted),
+      child: Icon(
+        Icons.music_note_rounded,
+        size: size * 0.5,
+        color: cc.textMuted,
+      ),
     );
     final key = coverKey;
     final file = key == null ? null : ref.watch(coverFileProvider(key));

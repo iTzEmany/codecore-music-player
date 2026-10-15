@@ -180,7 +180,11 @@ class _Player extends ConsumerWidget {
     // The page only needs the same key `watchArtists` groups by.
     final key = (track.artist ?? '').trim().toLowerCase();
     final artist = ArtistSummary(
-        key: key, name: track.artist, trackCount: 0, albumCount: 0);
+      key: key,
+      name: track.artist,
+      trackCount: 0,
+      albumCount: 0,
+    );
     ShellNav.openInLibrary(context, ref, ArtistDetailScreen(artist: artist));
   }
 
@@ -308,7 +312,7 @@ class _Player extends ConsumerWidget {
             ],
           ),
           NpSeekRow(track: track),
-        const SizedBox(height: 8),
+          const SizedBox(height: 8),
           const NpControls(),
           const NpBottomRow(),
           const SizedBox(height: 8),

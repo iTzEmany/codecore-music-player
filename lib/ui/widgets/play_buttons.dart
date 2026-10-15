@@ -33,9 +33,10 @@ class PlayCircleButton extends StatelessWidget {
           child: SizedBox.square(
             dimension: size,
             child: Icon(
-                playing ? Icons.pause_rounded : Icons.play_arrow_rounded,
-                size: size * 0.6,
-                color: cc.onAccent),
+              playing ? Icons.pause_rounded : Icons.play_arrow_rounded,
+              size: size * 0.6,
+              color: cc.onAccent,
+            ),
           ),
         ),
       ),
@@ -62,18 +63,25 @@ class ShuffleButton extends StatelessWidget {
     return IconButton(
       tooltip: context.l10n.shuffle,
       onPressed: onPressed,
-      icon: Column(mainAxisSize: MainAxisSize.min, children: [
-        Icon(Icons.shuffle_rounded,
-            size: size, color: active ? cc.accent : cc.textMuted),
-        const SizedBox(height: 2),
-        Container(
-          width: 4,
-          height: 4,
-          decoration: BoxDecoration(
+      icon: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.shuffle_rounded,
+            size: size,
+            color: active ? cc.accent : cc.textMuted,
+          ),
+          const SizedBox(height: 2),
+          Container(
+            width: 4,
+            height: 4,
+            decoration: BoxDecoration(
               color: active ? cc.accent : Colors.transparent,
-              shape: BoxShape.circle),
-        ),
-      ]),
+              shape: BoxShape.circle,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

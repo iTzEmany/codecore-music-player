@@ -17,21 +17,26 @@ class ErrorState extends StatelessWidget {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Icon(Icons.error_outline_rounded, size: 48, color: cc.error),
-          const SizedBox(height: 12),
-          Text(message,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.error_outline_rounded, size: 48, color: cc.error),
+            const SizedBox(height: 12),
+            Text(
+              message,
               textAlign: TextAlign.center,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyLarge
-                  ?.copyWith(fontWeight: FontWeight.w500)),
-          if (onRetry != null) ...[
-            const SizedBox(height: 16),
-            OutlinedButton(
-                onPressed: onRetry, child: Text(context.l10n.retry)),
+              style: Theme.of(context).textTheme.bodyLarge
+                  ?.copyWith(fontWeight: FontWeight.w500),
+            ),
+            if (onRetry != null) ...[
+              const SizedBox(height: 16),
+              OutlinedButton(
+                onPressed: onRetry,
+                child: Text(context.l10n.retry),
+              ),
+            ],
           ],
-        ]),
+        ),
       ),
     );
   }
@@ -39,7 +44,11 @@ class ErrorState extends StatelessWidget {
 
 /// For `AsyncValue.when(error:)`: logs the exception, shows a plain message.
 Widget loadErrorState(
-    BuildContext context, Object error, StackTrace stack, {VoidCallback? onRetry}) {
+  BuildContext context,
+  Object error,
+  StackTrace stack, {
+  VoidCallback? onRetry,
+}) {
   AppLog.e('load failed', error, stack);
   return ErrorState(message: context.l10n.loadFailed, onRetry: onRetry);
 }

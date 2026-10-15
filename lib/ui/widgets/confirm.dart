@@ -20,12 +20,15 @@ Future<bool> showConfirm(
       content: body == null ? null : Text(body),
       actions: [
         TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(ctx.l10n.cancel)),
+          onPressed: () => Navigator.pop(ctx, false),
+          child: Text(ctx.l10n.cancel),
+        ),
         FilledButton(
           style: destructive
               ? FilledButton.styleFrom(
-                  backgroundColor: cc.error, foregroundColor: cc.bg)
+                  backgroundColor: cc.error,
+                  foregroundColor: cc.bg,
+                )
               : null,
           onPressed: () => Navigator.pop(ctx, true),
           child: Text(confirmLabel),
@@ -41,10 +44,12 @@ Future<bool> showConfirm(
 void showUndoSnack(BuildContext context, String text, VoidCallback onUndo) {
   ScaffoldMessenger.of(context)
     ..clearSnackBars()
-    ..showSnackBar(SnackBar(
-      persist: false,
-      duration: const Duration(seconds: 3),
-      content: Text(text),
-      action: SnackBarAction(label: context.l10n.undo, onPressed: onUndo),
-    ));
+    ..showSnackBar(
+      SnackBar(
+        persist: false,
+        duration: const Duration(seconds: 3),
+        content: Text(text),
+        action: SnackBarAction(label: context.l10n.undo, onPressed: onUndo),
+      ),
+    );
 }

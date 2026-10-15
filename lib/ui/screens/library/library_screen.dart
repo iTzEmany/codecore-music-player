@@ -10,6 +10,7 @@ import '../../../providers/nav_providers.dart';
 import '../../../providers/settings_providers.dart';
 import '../../shell/shell_nav.dart';
 import '../../theme/tokens.dart';
+import '../../widgets/activity_button.dart';
 import '../../widgets/artist_avatar.dart';
 import '../../widgets/cover_image.dart';
 import '../../widgets/empty_state.dart';
@@ -149,6 +150,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
             child: Row(
               children: [
                 Expanded(child: Text(l.navLibrary, style: theme.headlineSmall)),
+                const ActivityButton(),
                 IconButton(
                   tooltip: l.navSearch,
                   icon: const Icon(Icons.search_rounded),

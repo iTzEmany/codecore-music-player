@@ -9,7 +9,10 @@ import '../../providers/settings_providers.dart';
 /// Toggles the favourite flag and shows a single "Undo" snackbar that
 /// restores the state of the last change.
 Future<void> toggleFavorite(
-    BuildContext context, WidgetRef ref, Track track) async {
+  BuildContext context,
+  WidgetRef ref,
+  Track track,
+) async {
   final repo = ref.read(trackRepositoryProvider);
   final fresh = await repo.getById(track.id);
   if (fresh == null) return;
@@ -20,14 +23,16 @@ Future<void> toggleFavorite(
   final l = context.l10n;
   ScaffoldMessenger.of(context)
     ..clearSnackBars()
-    ..showSnackBar(SnackBar(
-      // A snackbar with an action never times out unless `persist` is false.
-      persist: false,
-      duration: const Duration(seconds: 3),
-      content: Text(previous ? l.removedFromFavorites : l.addedToFavorites),
-      action: SnackBarAction(
-        label: l.undo,
-        onPressed: () => repo.setFavorite(track.id, previous),
+    ..showSnackBar(
+      SnackBar(
+        // A snackbar with an action never times out unless `persist` is false.
+        persist: false,
+        duration: const Duration(seconds: 3),
+        content: Text(previous ? l.removedFromFavorites : l.addedToFavorites),
+        action: SnackBarAction(
+          label: l.undo,
+          onPressed: () => repo.setFavorite(track.id, previous),
+        ),
       ),
-    ));
+    );
 }

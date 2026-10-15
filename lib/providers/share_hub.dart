@@ -44,14 +44,13 @@ class ShareHubState {
     List<OutgoingOffer>? outgoing,
     LanError? error,
     bool clearError = false,
-  }) =>
-      ShareHubState(
-        active: active ?? this.active,
-        peers: peers ?? this.peers,
-        incoming: incoming ?? this.incoming,
-        outgoing: outgoing ?? this.outgoing,
-        error: clearError ? null : (error ?? this.error),
-      );
+  }) => ShareHubState(
+    active: active ?? this.active,
+    peers: peers ?? this.peers,
+    incoming: incoming ?? this.incoming,
+    outgoing: outgoing ?? this.outgoing,
+    error: clearError ? null : (error ?? this.error),
+  );
 }
 
 /// Owns the offer endpoint and the discovery beacon. It runs while someone
@@ -119,8 +118,8 @@ class ShareHubNotifier extends Notifier<ShareHubState> {
 
   ShareNotifier get _platform => ref.read(shareNotifierProvider);
 
-  AppLocalizations get _l10n => lookupAppLocalizations(
-      Locale(ref.read(settingsProvider).language));
+  AppLocalizations get _l10n =>
+      lookupAppLocalizations(Locale(ref.read(settingsProvider).language));
 
   @override
   ShareHubState build() {
@@ -137,8 +136,10 @@ class ShareHubNotifier extends Notifier<ShareHubState> {
           .update((s) => s.copyWith(receiveFromLan: false));
     };
     platform.onAppResumed = _onResume;
-    ref.listen(settingsProvider.select((s) => s.receiveFromLan),
-        (_, on) => _applyReceiveSetting(on));
+    ref.listen(
+      settingsProvider.select((s) => s.receiveFromLan),
+      (_, on) => _applyReceiveSetting(on),
+    );
     if (ref.read(settingsProvider).receiveFromLan) {
       scheduleMicrotask(() => _applyReceiveSetting(true));
     }
@@ -259,18 +260,23 @@ class ShareHubNotifier extends Notifier<ShareHubState> {
     _starting = true;
     try {
       final store = ref.read(settingsStoreProvider);
-      final service = OfferService(
-        deviceId: await store.deviceId(),
-        deviceName: ref.read(deviceNameProvider),
-      )..onIncoming = (o) {
-          _publish();
-          _surfaceIncoming(o);
-        };
+      final service =
+          OfferService(
+              deviceId: await store.deviceId(),
+              deviceName: ref.read(deviceNameProvider),
+            )
+            ..onIncoming = (o) {
+              _publish();
+              _surfaceIncoming(o);
+            };
       final jam = JamHost(
         deviceId: service.deviceId,
         deviceName: service.deviceName,
       )..onRequest = _surfaceJamRequest;
-      final node = OfferNode(service, extraRoutes: {'/jam': jam.buildRouter().call});
+      final node = OfferNode(
+        service,
+        extraRoutes: {'/jam': jam.buildRouter().call},
+      );
       final port = await node.start();
       final discovery = LanDiscovery(
         deviceId: service.deviceId,
@@ -367,10 +373,18 @@ class ShareHubNotifier extends Notifier<ShareHubState> {
     final entries = await buildShareEntries(ref, tracks);
     if (entries.isEmpty) return false;
     final offer = service.createOutgoing(
-        toId: peer.id, toName: peer.name, entries: entries);
+      toId: peer.id,
+      toName: peer.name,
+      entries: entries,
+    );
     try {
-      await ref.read(lanClientProvider).sendOffer(
-          peer.host, peer.port, service.offerPayload(offer, node.port!));
+      await ref
+          .read(lanClientProvider)
+          .sendOffer(
+            peer.host,
+            peer.port,
+            service.offerPayload(offer, node.port!),
+          );
       _publish();
       return true;
     } on LanException catch (e) {
@@ -389,7 +403,13 @@ class ShareHubNotifier extends Notifier<ShareHubState> {
       try {
         await ref
             .read(lanClientProvider)
-            .offerAction(peer.host, peer.port, offer.offerId, 'cancel', offer.token);
+            .offerAction(
+              peer.host,
+              peer.port,
+              offer.offerId,
+              'cancel',
+              offer.token,
+            );
       } on LanException {
         // The receiver may be gone; the offer is closed on our side anyway.
       }
@@ -415,7 +435,12 @@ class ShareHubNotifier extends Notifier<ShareHubState> {
     final client = ref.read(lanClientProvider);
     try {
       await client.offerAction(
-          o.fromHost, o.fromPort, o.offerId, 'accept', o.token);
+        o.fromHost,
+        o.fromPort,
+        o.offerId,
+        'accept',
+        o.token,
+      );
     } on LanException catch (e) {
       AppLog.w('offer accept failed: $e');
       o.status = OfferStatus.failed;
@@ -428,7 +453,9 @@ class ShareHubNotifier extends Notifier<ShareHubState> {
     final cancel = _cancels[o.offerId] = CancelToken();
     final saved = <String>[];
     try {
-      final base = await resolveDownloadFolder(ref.read(folderRepositoryProvider));
+      final base = await resolveDownloadFolder(
+        ref.read(folderRepositoryProvider),
+      );
       if (base == null) {
         AppLog.w('offer: no destination folder');
         throw const LanException(LanError.failed);
@@ -437,8 +464,14 @@ class ShareHubNotifier extends Notifier<ShareHubState> {
       for (final item in o.items) {
         if (cancel.isCancelled) break;
         await for (final e in client.downloadOfferItem(
-            o.fromHost, o.fromPort, o.offerId, o.token, item, out,
-            cancel: cancel)) {
+          o.fromHost,
+          o.fromPort,
+          o.offerId,
+          o.token,
+          item,
+          out,
+          cancel: cancel,
+        )) {
           if (e.path != null) saved.add(e.path!);
         }
         o.received++;
@@ -450,10 +483,17 @@ class ShareHubNotifier extends Notifier<ShareHubState> {
             .scanFiles(base.$2, saved)
             .drain<void>();
       }
-      o.status = o.received == o.items.length ? OfferStatus.done : OfferStatus.failed;
+      o.status = o.received == o.items.length
+          ? OfferStatus.done
+          : OfferStatus.failed;
       try {
         await client.offerAction(
-            o.fromHost, o.fromPort, o.offerId, 'done', o.token);
+          o.fromHost,
+          o.fromPort,
+          o.offerId,
+          'done',
+          o.token,
+        );
       } on LanException {
         // Informational only.
       }
@@ -470,19 +510,23 @@ class ShareHubNotifier extends Notifier<ShareHubState> {
   void clearFinished() {
     final s = _service;
     if (s == null) return;
-    s.incoming.removeWhere((_, o) => o.status != OfferStatus.pending &&
-        o.status != OfferStatus.accepted);
+    s.incoming.removeWhere(
+      (_, o) =>
+          o.status != OfferStatus.pending && o.status != OfferStatus.accepted,
+    );
     s.outgoing.removeWhere((_, o) => !o.open);
     _publish();
   }
 }
 
-final shareHubProvider =
-    NotifierProvider<ShareHubNotifier, ShareHubState>(ShareHubNotifier.new);
+final shareHubProvider = NotifierProvider<ShareHubNotifier, ShareHubState>(
+  ShareHubNotifier.new,
+);
 
 /// New pending offers, for the app-wide accept/decline dialog.
 final shareOffersProvider = StreamProvider<IncomingOffer>(
-    (ref) => ref.watch(shareHubProvider.notifier).newIncoming);
+  (ref) => ref.watch(shareHubProvider.notifier).newIncoming,
+);
 
 /// Starts listening at launch when "receive from the local network" is on.
 final shareAutoStartProvider = Provider<void>((ref) {
@@ -490,5 +534,6 @@ final shareAutoStartProvider = Provider<void>((ref) {
   ref.read(shareHubProvider);
 });
 
-final shareNotifierProvider =
-    Provider<ShareNotifier>((ref) => createShareNotifier());
+final shareNotifierProvider = Provider<ShareNotifier>(
+  (ref) => createShareNotifier(),
+);

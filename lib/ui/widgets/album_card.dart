@@ -20,21 +20,32 @@ class AlbumCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(8),
       child: Padding(
         padding: const EdgeInsets.all(6),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Expanded(
-            child: LayoutBuilder(
-              builder: (context, c) => CoverImage(
-                  coverKey: album.coverKey, size: c.biggest.shortestSide, radius: 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: LayoutBuilder(
+                builder: (context, c) => CoverImage(
+                  coverKey: album.coverKey,
+                  size: c.biggest.shortestSide,
+                  radius: 8,
+                ),
+              ),
             ),
-          ),
-          const SizedBox(height: 6),
-          Text(album.title ?? context.l10n.unknownAlbum,
-              maxLines: 1, overflow: TextOverflow.ellipsis),
-          Text(artist,
+            const SizedBox(height: 6),
+            Text(
+              album.title ?? context.l10n.unknownAlbum,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.bodySmall),
-        ]),
+            ),
+            Text(
+              artist,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
+        ),
       ),
     );
   }

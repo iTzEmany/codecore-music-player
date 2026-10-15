@@ -10,8 +10,9 @@ class NavIndexNotifier extends Notifier<int> {
   void set(int i) => state = i;
 }
 
-final navIndexProvider =
-    NotifierProvider<NavIndexNotifier, int>(NavIndexNotifier.new);
+final navIndexProvider = NotifierProvider<NavIndexNotifier, int>(
+  NavIndexNotifier.new,
+);
 
 /// One navigator per tab, so pages opened in a tab keep the mini-player and
 /// the bottom bar on screen.
@@ -35,5 +36,6 @@ class SidePanelNotifier extends Notifier<SidePanel> {
   void close() => state = SidePanel.none;
 }
 
-final sidePanelProvider =
-    NotifierProvider<SidePanelNotifier, SidePanel>(SidePanelNotifier.new);
+final sidePanelProvider = NotifierProvider<SidePanelNotifier, SidePanel>(
+  SidePanelNotifier.new,
+);

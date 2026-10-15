@@ -729,5 +729,59 @@
   "queueCleared": "Coda svuotata",
   "jamOutputsAndSync": "Uscite e sincronia",
   "jamHostTag": "host",
-  "jamWaitingEmpty": "Nessuna Jam in corso"
+  "jamWaitingEmpty": "Nessuna Jam in corso",
+  "activityTitle": "Attività",
+  "activityScan": "Scansione · {done}/{total}",
+  "@activityScan": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "activityScanIdle": "Scansione in corso",
+  "activityEnrich": "Arricchimento · {done}/{total}",
+  "@activityEnrich": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "activityDownload": "Download · {title}",
+  "@activityDownload": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "activityTransfer": "Invio a {name} · {n} brani",
+  "@activityTransfer": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "activityNone": "Nessuna attività",
+  "activityCompleted": "Completate",
+  "activityClear": "Pulisci",
+  "activityRunning": "{n} attività in corso",
+  "@activityRunning": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  }
 }

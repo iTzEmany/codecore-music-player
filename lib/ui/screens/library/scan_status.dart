@@ -25,12 +25,6 @@ class ScanStatus extends ConsumerWidget {
               ),
             ],
           ),
-        if (scan.running)
-          LinearProgressIndicator(
-            value: (scan.progress == null || scan.progress!.total == 0)
-                ? null
-                : scan.progress!.done / scan.progress!.total,
-          ),
       ],
     );
   }

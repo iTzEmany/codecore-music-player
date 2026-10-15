@@ -39,8 +39,10 @@ class SleepTimerNotifier extends Notifier<SleepTimerState> {
     cancel();
     final total = Duration(minutes: minutes);
     state = SleepTimerState(endsAt: DateTime.now().add(total));
-    _timer = Timer(total > fadeDuration ? total - fadeDuration : Duration.zero,
-        _startFade);
+    _timer = Timer(
+      total > fadeDuration ? total - fadeDuration : Duration.zero,
+      _startFade,
+    );
   }
 
   void startAtTrackEnd() {
@@ -61,7 +63,8 @@ class SleepTimerNotifier extends Notifier<SleepTimerState> {
     final original = ref.read(volumeProvider);
     var step = 0;
     final interval = Duration(
-        milliseconds: fadeDuration.inMilliseconds ~/ _fadeSteps);
+      milliseconds: fadeDuration.inMilliseconds ~/ _fadeSteps,
+    );
     _fade = Timer.periodic(interval, (t) async {
       step++;
       if (step < _fadeSteps) {
@@ -78,4 +81,5 @@ class SleepTimerNotifier extends Notifier<SleepTimerState> {
 
 final sleepTimerProvider =
     NotifierProvider<SleepTimerNotifier, SleepTimerState>(
-        SleepTimerNotifier.new);
+      SleepTimerNotifier.new,
+    );

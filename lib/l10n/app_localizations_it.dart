@@ -1241,4 +1241,44 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get jamWaitingEmpty => 'Nessuna Jam in corso';
+
+  @override
+  String get activityTitle => 'Attività';
+
+  @override
+  String activityScan(int done, int total) {
+    return 'Scansione · $done/$total';
+  }
+
+  @override
+  String get activityScanIdle => 'Scansione in corso';
+
+  @override
+  String activityEnrich(int done, int total) {
+    return 'Arricchimento · $done/$total';
+  }
+
+  @override
+  String activityDownload(String title) {
+    return 'Download · $title';
+  }
+
+  @override
+  String activityTransfer(String name, int n) {
+    return 'Invio a $name · $n brani';
+  }
+
+  @override
+  String get activityNone => 'Nessuna attività';
+
+  @override
+  String get activityCompleted => 'Completate';
+
+  @override
+  String get activityClear => 'Pulisci';
+
+  @override
+  String activityRunning(int n) {
+    return '$n attività in corso';
+  }
 }

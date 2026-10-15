@@ -26,11 +26,13 @@ class _MissingTracksScreenState extends ConsumerState<MissingTracksScreen> {
         content: Text(l.confirmRemoveBody),
         actions: [
           TextButton(
-              onPressed: () => Navigator.of(c).pop(false),
-              child: Text(l.cancel)),
+            onPressed: () => Navigator.of(c).pop(false),
+            child: Text(l.cancel),
+          ),
           FilledButton(
-              onPressed: () => Navigator.of(c).pop(true),
-              child: Text(l.removeFromLibrary)),
+            onPressed: () => Navigator.of(c).pop(true),
+            child: Text(l.removeFromLibrary),
+          ),
         ],
       ),
     );
@@ -46,22 +48,37 @@ class _MissingTracksScreenState extends ConsumerState<MissingTracksScreen> {
     return Scaffold(
       appBar: AppBar(title: Text(l.missingTracksTitle)),
       body: items.isEmpty
-          ? EmptyState(icon: Icons.check_circle_outline, message: l.noMissingTracks)
+          ? EmptyState(
+              icon: Icons.check_circle_outline,
+              message: l.noMissingTracks,
+            )
           : ListView.builder(
               itemCount: items.length,
               itemBuilder: (_, i) {
                 final t = items[i];
                 return ListTile(
-                  title: Text(t.title, maxLines: 1, overflow: TextOverflow.ellipsis),
-                  subtitle: Text(t.path, maxLines: 2, overflow: TextOverflow.ellipsis),
-                  trailing: Wrap(children: [
-                    TextButton(
+                  title: Text(
+                    t.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  subtitle: Text(
+                    t.path,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  trailing: Wrap(
+                    children: [
+                      TextButton(
                         onPressed: () => setState(() => _ignored.add(t.id)),
-                        child: Text(l.ignore)),
-                    TextButton(
+                        child: Text(l.ignore),
+                      ),
+                      TextButton(
                         onPressed: () => _confirmRemove(t.id),
-                        child: Text(l.removeFromLibrary)),
-                  ]),
+                        child: Text(l.removeFromLibrary),
+                      ),
+                    ],
+                  ),
                 );
               },
             ),

@@ -56,19 +56,19 @@ class CcColors extends ThemeExtension<CcColors> {
 
   @override
   CcColors copyWith({Color? bg, Color? accent}) => CcColors(
-        bg: bg ?? this.bg,
-        surface1: surface1,
-        surface2: surface2,
-        surface3: surface3,
-        accent: accent ?? this.accent,
-        accentSoft: accentSoft,
-        onAccent: onAccent,
-        text: text,
-        textMuted: textMuted,
-        textFaint: textFaint,
-        heroBase: heroBase,
-        error: error,
-      );
+    bg: bg ?? this.bg,
+    surface1: surface1,
+    surface2: surface2,
+    surface3: surface3,
+    accent: accent ?? this.accent,
+    accentSoft: accentSoft,
+    onAccent: onAccent,
+    text: text,
+    textMuted: textMuted,
+    textFaint: textFaint,
+    heroBase: heroBase,
+    error: error,
+  );
 
   @override
   CcColors lerp(ThemeExtension<CcColors>? other, double t) =>
@@ -76,8 +76,7 @@ class CcColors extends ThemeExtension<CcColors> {
 }
 
 extension CcContext on BuildContext {
-  CcColors get cc =>
-      Theme.of(this).extension<CcColors>() ?? CcColors.notte;
+  CcColors get cc => Theme.of(this).extension<CcColors>() ?? CcColors.notte;
 }
 
 /// Radii, spacing and sizes shared by every screen.
@@ -120,29 +119,26 @@ TextStyle ccStyle(
   required Color color,
   double? height,
   bool tabular = false,
-}) =>
-    TextStyle(
-      fontFamily: family,
-      fontSize: size,
-      fontWeight: FontWeight.values[(weight ~/ 100) - 1],
-      fontVariations: [FontVariation.weight(weight.toDouble())],
-      color: color,
-      height: height,
-      fontFeatures: tabular ? const [FontFeature.tabularFigures()] : null,
-    );
+}) => TextStyle(
+  fontFamily: family,
+  fontSize: size,
+  fontWeight: FontWeight.values[(weight ~/ 100) - 1],
+  fontVariations: [FontVariation.weight(weight.toDouble())],
+  color: color,
+  height: height,
+  fontFeatures: tabular ? const [FontFeature.tabularFigures()] : null,
+);
 
 TextTheme buildTextTheme(CcColors c) => TextTheme(
-      displaySmall:
-          ccStyle(_unbounded, 30, 700, color: c.text, height: 1.1),
-      headlineSmall: ccStyle(_unbounded, 24, 600, color: c.text),
-      titleLarge: ccStyle(_figtree, 22, 700, color: c.text),
-      titleMedium: ccStyle(_figtree, 18, 700, color: c.text),
-      titleSmall: ccStyle(_figtree, 14, 700, color: c.text),
-      bodyLarge: ccStyle(_figtree, 15, 600, color: c.text),
-      bodyMedium: ccStyle(_figtree, 13, 400, color: c.textMuted),
-      bodySmall: ccStyle(_figtree, 12, 400, color: c.textMuted),
-      labelLarge: ccStyle(_figtree, 14, 700, color: c.text),
-      labelMedium: ccStyle(_figtree, 12, 600, color: c.textMuted),
-      labelSmall:
-          ccStyle(_figtree, 12, 500, color: c.textMuted, tabular: true),
-    );
+  displaySmall: ccStyle(_unbounded, 30, 700, color: c.text, height: 1.1),
+  headlineSmall: ccStyle(_unbounded, 24, 600, color: c.text),
+  titleLarge: ccStyle(_figtree, 22, 700, color: c.text),
+  titleMedium: ccStyle(_figtree, 18, 700, color: c.text),
+  titleSmall: ccStyle(_figtree, 14, 700, color: c.text),
+  bodyLarge: ccStyle(_figtree, 15, 600, color: c.text),
+  bodyMedium: ccStyle(_figtree, 13, 400, color: c.textMuted),
+  bodySmall: ccStyle(_figtree, 12, 400, color: c.textMuted),
+  labelLarge: ccStyle(_figtree, 14, 700, color: c.text),
+  labelMedium: ccStyle(_figtree, 12, 600, color: c.textMuted),
+  labelSmall: ccStyle(_figtree, 12, 500, color: c.textMuted, tabular: true),
+);
