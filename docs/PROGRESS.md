@@ -86,7 +86,7 @@ L'agente riparte sempre dal primo task non spuntato.
 
 ## Fase 8 — Jam sulla rete locale (`fase-8-jam.md`)
 - [x] 8.1 Modello e logica pura (JamItem, JamState, comandi, permessi)
-- [ ] 8.2 Sessione lato host (richiesta, accettazione, stato, long polling)
+- [x] 8.2 Sessione lato host (richiesta, accettazione, stato, long polling)
 - [ ] 8.3 Client ospite
 - [ ] 8.4 Riproduzione di elementi remoti (URL + token)
 - [ ] 8.5 Uscita audio selezionabile e controllo remoto
@@ -128,3 +128,5 @@ L'agente riparte sempre dal primo task non spuntato.
 - Ricezione in background su Android (2026-10-15): `ReceiveService` (servizio in primo piano `specialUse`, notifica fissa «Codecore è visibile sulla rete» con pulsante «Disattiva»), notifiche di richiesta con Accetta/Rifiuta (canale ad alta priorità), stato primo piano letto dall'activity (`ShareBridge.foreground`). L'impostazione «Ricevi dalla rete locale» governa servizio, endpoint e scoperta; si può spegnere anche dalla notifica. Verificato sul Mi A3: servizio attivo con notifica (id 4101) e telefono visibile dal PC a schermo bloccato; la notifica di richiesta e i pulsanti sono da provare con telefono sbloccato (il blocco schermo sicuro impedisce di avviare l'app da adb). `reusePort` non più richiesto su Android (errore Dart).
 - Notifiche di richiesta su Android (2026-10-15, Mi A3): la notifica viene creata (log `notify offer`, `isForeground=false` con app in background) ma sul telefono di test viene subito cancellata da un'altra app con accesso alle notifiche (`com.cleanmaster.security … NotificationMonitorService`, evento `notification_canceled` motivo 10 = REASON_LISTENER_CANCEL), non dal nostro codice. La notifica fissa del servizio (ongoing) resta. Da provare dopo aver tolto a quell'app l'accesso alle notifiche (o escluso Codecore).
 - Ricezione in background Android PROVATA (2026-10-15, Mi A3 ↔ PC): con l'app in background arriva la notifica «vuole inviarti dei brani» con ACCETTA/RIFIUTA; ACCETTA dalla notifica avvia il trasferimento senza aprire l'app (file in `Ricevuti`, nome con suffisso se esiste già, richiesta «Completata» sul mittente); «DISATTIVA» nella notifica fissa ferma servizio, annuncio e ricezione (impostazione → off, telefono sparisce dall'elenco del PC). Prerequisito sul telefono di test: l'app `com.cleanmaster.security` cancellava le notifiche (listener) → accesso alle notifiche tolto con `cmd notification disallow_listener`.
+
+- 8.2 (2026-10-15): deviazione dal piano: la risposta alla richiesta Jam si ottiene con `GET /jam/request/<id>` (polling dell'ospite, token di richiesta) invece di `POST /jam/<sid>/respond` sull'ospite; l'ospite non deve quindi esporre un endpoint prima di essere accettato. `JamItem.ref` = chiave opaca del proprietario per risolvere il file locale.

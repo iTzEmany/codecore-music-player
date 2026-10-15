@@ -17,6 +17,7 @@ class JamItem {
     required this.ext,
     this.sizeBytes = 0,
     this.available = true,
+    this.ref,
   });
 
   /// Assigned by the host; unique within a session.
@@ -31,6 +32,9 @@ class JamItem {
   /// False once the owner became unreachable and nothing is cached.
   final bool available;
 
+  /// Opaque key meaningful only to the owner (maps to a local file).
+  final String? ref;
+
   JamItem copyWith({int? id, bool? available}) => JamItem(
         id: id ?? this.id,
         ownerDeviceId: ownerDeviceId,
@@ -41,6 +45,7 @@ class JamItem {
         ext: ext,
         sizeBytes: sizeBytes,
         available: available ?? this.available,
+        ref: ref,
       );
 
   Map<String, Object?> toJson() => {
@@ -53,6 +58,7 @@ class JamItem {
         'ext': ext,
         'size': sizeBytes,
         'ok': available,
+        if (ref != null) 'ref': ref,
       };
 
   /// Strict parser: returns null for anything malformed.
@@ -78,6 +84,7 @@ class JamItem {
       ext: ext.toLowerCase(),
       sizeBytes: size is int && size >= 0 ? size : 0,
       available: j['ok'] is bool ? j['ok'] as bool : true,
+      ref: opt(j['ref']),
     );
   }
 }

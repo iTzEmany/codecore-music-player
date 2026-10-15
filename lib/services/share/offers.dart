@@ -415,9 +415,13 @@ class OfferService {
 /// The HTTP endpoint of this device while discovery/receiving is on.
 /// Bound to all interfaces; every route refuses non-local peers.
 class OfferNode {
-  OfferNode(this.service, {this.allowLoopback = false});
+  OfferNode(this.service,
+      {this.allowLoopback = false, this.extraRoutes = const {}});
 
   final OfferService service;
+
+  /// Extra routers mounted by prefix (e.g. `/jam`), behind the same filter.
+  final Map<String, Handler> extraRoutes;
   final bool allowLoopback;
   HttpServer? _server;
 
@@ -437,6 +441,7 @@ class OfferNode {
           headers: {'content-type': 'application/json'},
         ));
     root.mount('/offer', service.buildRouter().call);
+    extraRoutes.forEach(root.mount);
     final handler = const Pipeline()
         .addMiddleware(_localOnly(allowLoopback))
         .addHandler(root.call);
