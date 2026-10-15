@@ -605,5 +605,14 @@
   "openQueue": "Apri coda",
   "copyLink": "Copia link",
   "moreActions": "Altre azioni",
-  "sleepChipEnd": "fine brano"
+  "sleepChipEnd": "fine brano",
+  "yourLibrary": "La tua libreria",
+  "playlistCountLabel": "Playlist · {n} brani",
+  "@playlistCountLabel": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  }
 }

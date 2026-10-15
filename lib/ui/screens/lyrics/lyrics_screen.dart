@@ -15,7 +15,10 @@ import '../../../services/online/lrclib_client.dart';
 import '../../../services/online/query_cleaner.dart';
 
 class LyricsScreen extends ConsumerStatefulWidget {
-  const LyricsScreen({super.key});
+  const LyricsScreen({super.key, this.embedded = false});
+
+  /// Inside the desktop side panel: no app bar of its own.
+  final bool embedded;
 
   @override
   ConsumerState<LyricsScreen> createState() => _LyricsScreenState();
@@ -49,14 +52,19 @@ class _LyricsScreenState extends ConsumerState<LyricsScreen> {
     if (i == _index) return;
     setState(() => _index = i);
     if (i < 0 || !_scroll.hasClients) return;
-    final target = (i * _rowExtent - _scroll.position.viewportDimension / 2 +
-            _rowExtent / 2)
-        .clamp(0.0, _scroll.position.maxScrollExtent);
+    final target =
+        (i * _rowExtent -
+                _scroll.position.viewportDimension / 2 +
+                _rowExtent / 2)
+            .clamp(0.0, _scroll.position.maxScrollExtent);
     if (ref.read(settingsProvider).reducedMotion) {
       _scroll.jumpTo(target);
     } else {
-      _scroll.animateTo(target,
-          duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
+      _scroll.animateTo(
+        target,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
     }
   }
 
@@ -67,11 +75,15 @@ class _LyricsScreenState extends ConsumerState<LyricsScreen> {
     var limited = false;
     try {
       final c = cleanSearchQuery(t.title, t.artist ?? '');
-      found = await ref.read(lrclibClientProvider).find(
+      found = await ref
+          .read(lrclibClientProvider)
+          .find(
             title: c.title,
             artist: c.artist,
             album: t.album,
-            durationSec: t.durationMs > 0 ? (t.durationMs / 1000).round() : null,
+            durationSec: t.durationMs > 0
+                ? (t.durationMs / 1000).round()
+                : null,
           );
     } on RateLimitedException {
       limited = true;
@@ -81,8 +93,11 @@ class _LyricsScreenState extends ConsumerState<LyricsScreen> {
     if (found == null) {
       ScaffoldMessenger.of(context)
         ..clearSnackBars()
-        ..showSnackBar(SnackBar(
-            content: Text(limited ? l.serviceUnavailable : l.lyricsNotFound)));
+        ..showSnackBar(
+          SnackBar(
+            content: Text(limited ? l.serviceUnavailable : l.lyricsNotFound),
+          ),
+        );
       return;
     }
     final result = found;
@@ -92,9 +107,11 @@ class _LyricsScreenState extends ConsumerState<LyricsScreen> {
   Future<void> _saveLyrics(Track t, LyricsResult result) async {
     final db = ref.read(databaseProvider);
     await (db.update(db.tracks)..where((r) => r.id.equals(t.id))).write(
-        TracksCompanion(
-            lyricsPlain: Value(result.plain),
-            lyricsSynced: Value(result.synced)));
+      TracksCompanion(
+        lyricsPlain: Value(result.plain),
+        lyricsSynced: Value(result.synced),
+      ),
+    );
   }
 
   /// Fetches the Wikipedia trivia once per track and stores it.
@@ -111,8 +128,8 @@ class _LyricsScreenState extends ConsumerState<LyricsScreen> {
       if (found == null || !mounted) return;
       final db = ref.read(databaseProvider);
       await (db.update(db.tracks)..where((r) => r.id.equals(t.id))).write(
-          TracksCompanion(
-              curiosities: Value('${found.text}\n${found.source}')));
+        TracksCompanion(curiosities: Value('${found.text}\n${found.source}')),
+      );
     } on RateLimitedException {
       // Try again next time the screen opens.
       _curiosityTried.remove(t.id);
@@ -129,38 +146,52 @@ class _LyricsScreenState extends ConsumerState<LyricsScreen> {
     });
     if (track == null) {
       return Scaffold(
-          appBar: AppBar(title: Text(l.lyrics)),
-          body: Center(child: Text(l.nothingPlaying)));
+        backgroundColor: widget.embedded ? Colors.transparent : null,
+        appBar: widget.embedded ? null : AppBar(title: Text(l.lyrics)),
+        body: Center(child: Text(l.nothingPlaying)),
+      );
     }
     _ensureParsed(track.lyricsSynced);
     if (track.curiosities == null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) => _autoCuriosity(track));
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _autoCuriosity(track),
+      );
     }
-    final plain = track.lyricsPlain ??
+    final plain =
+        track.lyricsPlain ??
         (_lines.isEmpty ? null : _lines.map((e) => e.text).join('\n'));
     final cur = track.curiosities;
     return Scaffold(
-      appBar: AppBar(
-        title: Text(track.title, maxLines: 1, overflow: TextOverflow.ellipsis),
-        actions: [
-          if (plain != null)
-            IconButton(
-              tooltip: l.copy,
-              icon: const Icon(Icons.copy),
-              onPressed: () async {
-                await Clipboard.setData(ClipboardData(text: plain));
-                if (!context.mounted) return;
-                ScaffoldMessenger.of(context)
-                  ..clearSnackBars()
-                  ..showSnackBar(SnackBar(content: Text(l.copied)));
-              },
+      backgroundColor: widget.embedded ? Colors.transparent : null,
+      appBar: widget.embedded
+          ? null
+          : AppBar(
+              title: Text(
+                track.title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              actions: [
+                if (plain != null)
+                  IconButton(
+                    tooltip: l.copy,
+                    icon: const Icon(Icons.copy),
+                    onPressed: () async {
+                      await Clipboard.setData(ClipboardData(text: plain));
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context)
+                        ..clearSnackBars()
+                        ..showSnackBar(SnackBar(content: Text(l.copied)));
+                    },
+                  ),
+              ],
             ),
+      body: Column(
+        children: [
+          Expanded(child: _lyricsBody(track, plain)),
+          if (cur != null) _Curiosity(raw: cur),
         ],
       ),
-      body: Column(children: [
-        Expanded(child: _lyricsBody(track, plain)),
-        if (cur != null) _Curiosity(raw: cur),
-      ]),
     );
   }
 
@@ -192,17 +223,24 @@ class _LyricsScreenState extends ConsumerState<LyricsScreen> {
     }
     if (plain != null) {
       return SingleChildScrollView(
-          padding: const EdgeInsets.all(16), child: SelectableText(plain));
+        padding: const EdgeInsets.all(16),
+        child: SelectableText(plain),
+      );
     }
     return Center(
-      child: Column(mainAxisSize: MainAxisSize.min, children: [
-        Text(l.noLyrics),
-        const SizedBox(height: 12),
-        _searching
-            ? const CircularProgressIndicator()
-            : FilledButton(
-                onPressed: () => _search(track), child: Text(l.searchLyrics)),
-      ]),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(l.noLyrics),
+          const SizedBox(height: 12),
+          _searching
+              ? const CircularProgressIndicator()
+              : FilledButton(
+                  onPressed: () => _search(track),
+                  child: Text(l.searchLyrics),
+                ),
+        ],
+      ),
     );
   }
 }
@@ -223,16 +261,23 @@ class _Curiosity extends StatelessWidget {
       color: Theme.of(context).colorScheme.surfaceContainer,
       padding: const EdgeInsets.all(12),
       child: SingleChildScrollView(
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(context.l10n.fieldCuriosity,
-              style: Theme.of(context).textTheme.titleSmall),
-          Text(text),
-          const SizedBox(height: 4),
-          Text(context.l10n.sourceWikipedia,
-              style: Theme.of(context).textTheme.bodySmall),
-          if (url != null)
-            SelectableText(url, style: Theme.of(context).textTheme.bodySmall),
-        ]),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              context.l10n.fieldCuriosity,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+            Text(text),
+            const SizedBox(height: 4),
+            Text(
+              context.l10n.sourceWikipedia,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            if (url != null)
+              SelectableText(url, style: Theme.of(context).textTheme.bodySmall),
+          ],
+        ),
       ),
     );
   }

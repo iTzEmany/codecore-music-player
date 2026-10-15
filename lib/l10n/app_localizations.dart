@@ -1961,6 +1961,18 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'fine brano'**
   String get sleepChipEnd;
+
+  /// No description provided for @yourLibrary.
+  ///
+  /// In it, this message translates to:
+  /// **'La tua libreria'**
+  String get yourLibrary;
+
+  /// No description provided for @playlistCountLabel.
+  ///
+  /// In it, this message translates to:
+  /// **'Playlist · {n} brani'**
+  String playlistCountLabel(int n);
 }
 
 class _AppLocalizationsDelegate

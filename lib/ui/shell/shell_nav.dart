@@ -17,7 +17,8 @@ abstract final class ShellNav {
     final root = Navigator.of(context, rootNavigator: true);
     root.popUntil((r) => r.isFirst);
     ref.read(navIndexProvider.notifier).set(NavTab.library.index);
-    final nav = ref.read(tabNavigatorKeysProvider)[NavTab.library.index]
+    final nav = ref
+        .read(tabNavigatorKeysProvider)[NavTab.library.index]
         .currentState;
     nav?.push(MaterialPageRoute<void>(builder: (_) => page));
   }

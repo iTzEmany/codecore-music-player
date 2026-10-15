@@ -1049,4 +1049,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sleepChipEnd => 'end of track';
+
+  @override
+  String get yourLibrary => 'Your library';
+
+  @override
+  String playlistCountLabel(int n) {
+    return 'Playlist · $n tracks';
+  }
 }

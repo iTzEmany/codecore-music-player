@@ -414,5 +414,14 @@
   "openQueue": "Warteschlange öffnen",
   "copyLink": "Link kopieren",
   "moreActions": "Weitere Aktionen",
-  "sleepChipEnd": "Titelende"
+  "sleepChipEnd": "Titelende",
+  "yourLibrary": "Deine Bibliothek",
+  "playlistCountLabel": "Playlist · {n} Titel",
+  "@playlistCountLabel": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  }
 }

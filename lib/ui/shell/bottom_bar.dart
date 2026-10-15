@@ -31,42 +31,44 @@ class BottomBar extends StatelessWidget {
         top: false,
         child: SizedBox(
           height: CcDims.bottomBarHeight,
-          child: Row(children: [
-            for (var i = 0; i < items.length; i++)
-              Expanded(
-                child: Semantics(
-                  button: true,
-                  selected: i == selected,
-                  label: items[i].label,
-                  child: InkWell(
-                    onTap: () => onSelect(i),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          i == selected
-                              ? items[i].selectedIcon
-                              : items[i].icon,
-                          size: 24,
-                          color: i == selected ? cc.text : cc.textMuted,
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          items[i].label,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
+          child: Row(
+            children: [
+              for (var i = 0; i < items.length; i++)
+                Expanded(
+                  child: Semantics(
+                    button: true,
+                    selected: i == selected,
+                    label: items[i].label,
+                    child: InkWell(
+                      onTap: () => onSelect(i),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            i == selected
+                                ? items[i].selectedIcon
+                                : items[i].icon,
+                            size: 24,
                             color: i == selected ? cc.text : cc.textMuted,
                           ),
-                        ),
-                      ],
+                          const SizedBox(height: 2),
+                          Text(
+                            items[i].label,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: i == selected ? cc.text : cc.textMuted,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-          ]),
+            ],
+          ),
         ),
       ),
     );

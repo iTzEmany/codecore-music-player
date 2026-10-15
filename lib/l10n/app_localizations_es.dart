@@ -1052,4 +1052,12 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get sleepChipEnd => 'fin de la canción';
+
+  @override
+  String get yourLibrary => 'Tu biblioteca';
+
+  @override
+  String playlistCountLabel(int n) {
+    return 'Lista · $n canciones';
+  }
 }

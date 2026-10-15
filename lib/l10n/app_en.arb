@@ -414,5 +414,14 @@
   "openQueue": "Open queue",
   "copyLink": "Copy link",
   "moreActions": "More actions",
-  "sleepChipEnd": "end of track"
+  "sleepChipEnd": "end of track",
+  "yourLibrary": "Your library",
+  "playlistCountLabel": "Playlist · {n} tracks",
+  "@playlistCountLabel": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  }
 }

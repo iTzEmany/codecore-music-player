@@ -59,6 +59,13 @@ void main() {
             await s.expectShot('album');
           }));
 
+      testWidgets('shell_playing', (tester) => withShot(tester, size, (s) async {
+            await tester.runAsync(
+                () => s.h.handler.playQueue(s.seed.trackIds, 3));
+            await s.show(const AppShell());
+            await s.expectShot('shell_playing');
+          }));
+
       testWidgets('now_playing', (tester) => withShot(tester, size, (s) async {
             await tester.runAsync(
                 () => s.h.handler.playQueue(s.seed.trackIds, 12));

@@ -5,7 +5,7 @@ import '../../../core/constants.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../shell/shell_nav.dart';
 import '../../theme/tokens.dart';
-import '../library/tracks_tab.dart';
+import '../library/favorites_screen.dart';
 import '../playlists/playlists_screen.dart';
 import '../settings/settings_screen.dart';
 import '../youtube/youtube_screen.dart';
@@ -51,7 +51,7 @@ class HomeScreen extends ConsumerWidget {
             ]),
           ),
           shortcut(Icons.favorite_rounded, l.navFavorites,
-              titled(l.navFavorites, const TracksTab(favoritesOnly: true))),
+              const FavoritesScreen()),
           shortcut(Icons.queue_music_rounded, l.navPlaylists,
               titled(l.navPlaylists, const PlaylistsScreen())),
           if (kEnableYoutube)

@@ -18,6 +18,9 @@ import '../../l10n/l10n_ext.dart';
 import '../widgets/enrich_job_banner.dart';
 import '../widgets/mini_player.dart';
 import 'bottom_bar.dart';
+import 'desktop_player_bar.dart';
+import 'desktop_sidebar.dart';
+import 'side_panel.dart';
 
 const _wideBreakpoint = 840.0;
 
@@ -56,7 +59,8 @@ class AppShell extends ConsumerWidget {
       const SingleActivator(LogicalKeyboardKey.keyF, control: true): () {
         ref.read(navIndexProvider.notifier).set(NavTab.search.index);
         WidgetsBinding.instance.addPostFrameCallback(
-            (_) => ref.read(searchFocusProvider).requestFocus());
+          (_) => ref.read(searchFocusProvider).requestFocus(),
+        );
       },
       const SingleActivator(LogicalKeyboardKey.arrowUp, control: true): () =>
           guarded(() => bump(0.05)),
@@ -79,7 +83,8 @@ class AppShell extends ConsumerWidget {
       ScaffoldMessenger.of(context)
         ..clearSnackBars()
         ..showSnackBar(
-            SnackBar(content: Text(l.playbackError(f.title ?? '', reason))));
+          SnackBar(content: Text(l.playbackError(f.title ?? '', reason))),
+        );
     });
     ref.listen(shareOffersProvider, (_, next) {
       final o = next.value;
@@ -112,52 +117,73 @@ class AppShell extends ConsumerWidget {
     final items = [
       BottomBarItem(Icons.home_outlined, Icons.home_rounded, l.navHome),
       BottomBarItem(Icons.search_rounded, Icons.search_rounded, l.navSearch),
-      BottomBarItem(Icons.library_music_outlined, Icons.library_music_rounded,
-          l.navLibrary),
+      BottomBarItem(
+        Icons.library_music_outlined,
+        Icons.library_music_rounded,
+        l.navLibrary,
+      ),
     ];
     Widget tab(int i, Widget root) => Navigator(
-          key: keys[i],
-          onGenerateRoute: (_) =>
-              MaterialPageRoute<void>(builder: (_) => root),
-        );
-    final body = IndexedStack(index: index, children: [
-      tab(NavTab.home.index, const HomeScreen()),
-      tab(NavTab.search.index, const TracksTab(primarySearch: true)),
-      tab(NavTab.library.index, const LibraryScreen()),
-    ]);
-    Widget content = Scaffold(
-      body: SafeArea(
-        bottom: false,
-        child: Row(children: [
-          if (wide)
-            NavigationRail(
-              selectedIndex: index,
-              onDestinationSelected: select,
-              labelType: NavigationRailLabelType.all,
-              destinations: [
-                for (final it in items)
-                  NavigationRailDestination(
-                      icon: Icon(it.icon),
-                      selectedIcon: Icon(it.selectedIcon),
-                      label: Text(it.label)),
-              ],
-            ),
-          Expanded(
-            child: Column(children: [
+      key: keys[i],
+      onGenerateRoute: (_) => MaterialPageRoute<void>(builder: (_) => root),
+    );
+    final body = IndexedStack(
+      index: index,
+      children: [
+        tab(NavTab.home.index, const HomeScreen()),
+        tab(NavTab.search.index, const TracksTab(primarySearch: true)),
+        tab(NavTab.library.index, const LibraryScreen()),
+      ],
+    );
+    Widget content;
+    if (wide) {
+      final panel = ref.watch(sidePanelProvider);
+      final collapsed = MediaQuery.sizeOf(context).width < 1000;
+      content = Scaffold(
+        body: SafeArea(
+          child: Column(
+            children: [
+              Expanded(
+                child: Row(
+                  children: [
+                    DesktopSidebar(collapsed: collapsed),
+                    Expanded(
+                      child: Column(
+                        children: [
+                          Expanded(child: body),
+                          const EnrichJobBanner(),
+                        ],
+                      ),
+                    ),
+                    if (panel != SidePanel.none) SidePanelView(panel: panel),
+                  ],
+                ),
+              ),
+              const DesktopPlayerBar(),
+            ],
+          ),
+        ),
+      );
+    } else {
+      content = Scaffold(
+        body: SafeArea(
+          bottom: false,
+          child: Column(
+            children: [
               Expanded(child: body),
               const EnrichJobBanner(),
-              if (wide) const MiniPlayer(),
-            ]),
+            ],
           ),
-        ]),
-      ),
-      bottomNavigationBar: wide
-          ? null
-          : Column(mainAxisSize: MainAxisSize.min, children: [
-              const MiniPlayer(),
-              BottomBar(items: items, selected: index, onSelect: select),
-            ]),
-    );
+        ),
+        bottomNavigationBar: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const MiniPlayer(),
+            BottomBar(items: items, selected: index, onSelect: select),
+          ],
+        ),
+      );
+    }
     // Android back: nested navigator first, then Home, then leave the app.
     content = PopScope(
       canPop: false,

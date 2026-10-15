@@ -414,5 +414,14 @@
   "openQueue": "Abrir cola",
   "copyLink": "Copiar enlace",
   "moreActions": "Más acciones",
-  "sleepChipEnd": "fin de la canción"
+  "sleepChipEnd": "fin de la canción",
+  "yourLibrary": "Tu biblioteca",
+  "playlistCountLabel": "Lista · {n} canciones",
+  "@playlistCountLabel": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  }
 }

@@ -21,3 +21,19 @@ final tabNavigatorKeysProvider = Provider<List<GlobalKey<NavigatorState>>>(
       GlobalKey<NavigatorState>(debugLabel: 'tab-${t.name}'),
   ],
 );
+
+/// Right-hand panel of the desktop layout.
+enum SidePanel { none, queue, lyrics, info }
+
+class SidePanelNotifier extends Notifier<SidePanel> {
+  @override
+  SidePanel build() => SidePanel.none;
+
+  /// Tapping the open panel's button again closes it.
+  void toggle(SidePanel p) => state = state == p ? SidePanel.none : p;
+
+  void close() => state = SidePanel.none;
+}
+
+final sidePanelProvider =
+    NotifierProvider<SidePanelNotifier, SidePanel>(SidePanelNotifier.new);

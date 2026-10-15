@@ -1,4 +1,7 @@
 import 'package:codecore/ui/shell/app_shell.dart';
+import 'package:codecore/ui/shell/desktop_player_bar.dart';
+import 'package:codecore/ui/shell/desktop_sidebar.dart';
+import 'package:codecore/ui/shell/side_panel.dart';
 import 'package:codecore/ui/widgets/mini_player.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -42,14 +45,29 @@ void main() {
     await h.dispose(tester);
   });
 
-  testWidgets('wide: side navigation instead of the bottom bar',
+  testWidgets('wide: sidebar and player bar, no rail, no mini-player',
       (tester) async {
-    tester.view.physicalSize = const Size(1200, 800);
+    tester.view.physicalSize = const Size(1280, 800);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
-    final h = await Harness.create(tester);
+    final h = await Harness.create(tester, tracks: 2);
+    final rows = await tester.runAsync(() => h.db.select(h.db.tracks).get());
+    await tester.runAsync(() => h.handler.playQueue([rows!.first.id], 0));
     await h.pump(tester, const AppShell());
-    expect(find.byType(NavigationRail), findsOneWidget);
+    await _settle(tester);
+    expect(find.byType(NavigationRail), findsNothing);
+    expect(find.byType(NavigationBar), findsNothing);
+    expect(find.byType(MiniPlayer), findsNothing);
+    expect(find.byType(DesktopSidebar), findsOneWidget);
+    expect(find.byType(DesktopPlayerBar), findsOneWidget);
+    expect(find.text('La tua libreria'), findsOneWidget);
+    expect(find.text('Preferiti'), findsWidgets);
+    // The queue opens in the right-hand panel.
+    expect(find.byType(SidePanelView), findsNothing);
+    await tester.tap(find.byIcon(Icons.queue_music_rounded).last);
+    await _settle(tester);
+    expect(find.byType(SidePanelView), findsOneWidget);
+    expect(tester.takeException(), isNull);
     await h.dispose(tester);
   });
 
