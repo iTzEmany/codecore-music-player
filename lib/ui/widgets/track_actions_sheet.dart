@@ -58,7 +58,7 @@ class _TrackActionsSheet extends ConsumerWidget {
             onTap: () {
               ctrl.playNext(track.id);
               close();
-              _snack(l.addedToQueue);
+              _snack(l.playNextDone);
             },
           ),
           ListTile(

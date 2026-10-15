@@ -59,7 +59,7 @@
   "addToPlaylist": "Zu Playlist hinzufügen…",
   "addedToPlaylist": "Zu „{name}“ hinzugefügt",
   "playNext": "Als Nächstes spielen",
-  "addToQueue": "Zur Warteschlange",
+  "addToQueue": "Zur Warteschlange hinzufügen",
   "addedToQueue": "Zur Warteschlange hinzugefügt",
   "favorite": "Favorit",
   "removeFromFavorites": "Aus Favoriten entfernen",
@@ -358,5 +358,26 @@
     }
   },
   "jamLatencyHint": "Für Bluetooth-Kopfhörer oder -Lautsprecher: erhöhen, bis die Ausgaben zusammenpassen.",
-  "jamOutputsHint": "Mehrere Ausgaben spielen gleichzeitig"
+  "jamOutputsHint": "Mehrere Ausgaben spielen gleichzeitig",
+  "renamePlaylist": "Playlist umbenennen",
+  "confirmDeletePlaylistTitle": "Playlist löschen?",
+  "confirmDeletePlaylistBody": "„{name}“ wird gelöscht. Die Titel bleiben in der Bibliothek.",
+  "@confirmDeletePlaylistBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "confirmRemoveFolderTitle": "Ordner entfernen?",
+  "confirmRemoveFolderBody": "Die Titel verschwinden aus der Bibliothek. Die Dateien bleiben auf dem Gerät.",
+  "confirmClearCoversTitle": "Cover-Cache leeren?",
+  "confirmClearCoversBody": "Die Cover werden beim nächsten Scan neu erstellt.",
+  "confirmRestoreTitle": "Aus den Datei-Tags wiederherstellen?",
+  "confirmRestoreBody": "Deine Änderungen an diesem Titel werden durch die Daten der Datei ersetzt.",
+  "removedFromPlaylist": "Aus der Playlist entfernt",
+  "removedFromQueue": "Aus der Warteschlange entfernt",
+  "playNextDone": "Wird als Nächstes gespielt",
+  "ytSearchPrompt": "Titel suchen oder Link einfügen",
+  "loadFailed": "Die Daten konnten nicht geladen werden."
 }

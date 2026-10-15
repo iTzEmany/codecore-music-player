@@ -13,6 +13,7 @@ import '../../widgets/cover_image.dart';
 import '../share/share_screen.dart';
 import '../../widgets/format_utils.dart';
 import '../../widgets/track_row.dart';
+import '../../widgets/error_state.dart';
 
 class AlbumDetailScreen extends ConsumerWidget {
   const AlbumDetailScreen({super.key, required this.album});
@@ -56,7 +57,8 @@ class AlbumDetailScreen extends ConsumerWidget {
       ),
       body: tracks.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('$e')),
+        error: (e, st) => loadErrorState(context, e, st,
+            onRetry: () => ref.invalidate(albumTracksProvider(album.albumKey))),
         data: (list) => ListView.builder(
           itemCount: list.length + 1,
           itemBuilder: (context, i) {

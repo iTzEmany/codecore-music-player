@@ -19,6 +19,7 @@ class _YoutubeScreenState extends ConsumerState<YoutubeScreen> {
   final _controller = TextEditingController();
   List<YtResult> _results = const [];
   bool _searching = false;
+  bool _searched = false;
   YtErrorKind? _error;
   int _requestId = 0;
 
@@ -40,7 +41,10 @@ class _YoutubeScreenState extends ConsumerState<YoutubeScreen> {
     try {
       final res = await ref.read(youtubeServiceProvider).search(q);
       if (!mounted || id != _requestId) return;
-      setState(() => _results = res);
+      setState(() {
+        _results = res;
+        _searched = true;
+      });
     } on YtException catch (e) {
       if (!mounted || id != _requestId) return;
       setState(() => _error = e.kind);
@@ -99,7 +103,9 @@ class _YoutubeScreenState extends ConsumerState<YoutubeScreen> {
       if (downloads.isNotEmpty) _Downloads(items: downloads, errorText: _errorText),
       Expanded(
         child: _results.isEmpty
-            ? EmptyState(icon: Icons.smart_display, message: l.ytNoResults)
+            ? EmptyState(
+                icon: Icons.smart_display,
+                message: _searched ? l.ytNoResults : l.ytSearchPrompt)
             : ListView.builder(
                 itemExtent: 72,
                 itemCount: _results.length,
@@ -116,6 +122,7 @@ class _YoutubeScreenState extends ConsumerState<YoutubeScreen> {
                         : Image.network(r.thumbnailUrl!,
                             width: 80,
                             height: 56,
+                            cacheWidth: 160,
                             fit: BoxFit.cover,
                             errorBuilder: (_, _, _) =>
                                 const Icon(Icons.music_video)),

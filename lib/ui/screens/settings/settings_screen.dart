@@ -12,6 +12,7 @@ import '../../../providers/database_providers.dart';
 import '../../../providers/library_providers.dart';
 import '../../../providers/online_providers.dart';
 import '../../../providers/settings_providers.dart';
+import '../../widgets/confirm.dart';
 import '../../widgets/cover_image.dart';
 import '../library/folders_sheet.dart';
 import '../../../providers/share_providers.dart';
@@ -126,7 +127,7 @@ class SettingsScreen extends ConsumerWidget {
           trailing: IconButton(
             tooltip: l.removeFolder,
             icon: const Icon(Icons.delete_outline),
-            onPressed: () => ref.read(folderRepositoryProvider).remove(f.id),
+            onPressed: () => confirmRemoveFolder(context, ref, f.id),
           ),
         ),
       ListTile(
@@ -144,12 +145,13 @@ class SettingsScreen extends ConsumerWidget {
         title: Text(l.clearCoverCache),
         onTap: () => _clearCovers(context, ref),
       ),
-      ListTile(
-        leading: const Icon(Icons.report_problem_outlined),
-        title: Text(l.missingTracksCount(missing.length)),
-        onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(
-            builder: (_) => const MissingTracksScreen())),
-      ),
+      if (missing.isNotEmpty)
+        ListTile(
+          leading: const Icon(Icons.report_problem_outlined),
+          title: Text(l.missingTracksCount(missing.length)),
+          onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(
+              builder: (_) => const MissingTracksScreen())),
+        ),
       header(l.shareTitle),
       ListTile(
         leading: const Icon(Icons.wifi_tethering),
@@ -205,10 +207,6 @@ class SettingsScreen extends ConsumerWidget {
         title: Text(l.licenses),
         onTap: () => showLicensePage(context: context),
       ),
-      ListTile(
-        leading: const Icon(Icons.person_outline),
-        title: Text(l.personalUse),
-      ),
     ]);
   }
 
@@ -234,7 +232,10 @@ class SettingsScreen extends ConsumerWidget {
   Future<void> _editDeviceName(BuildContext context, WidgetRef ref) async {
     final l = context.l10n;
     final name = await askPlaylistName(context,
-        initial: ref.read(deviceNameProvider), confirmLabel: l.save);
+        initial: ref.read(deviceNameProvider),
+        confirmLabel: l.save,
+        title: l.shareDeviceName,
+        label: l.shareDeviceName);
     if (name == null) return;
     ref
         .read(settingsProvider.notifier)
@@ -274,7 +275,13 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   Future<void> _clearCovers(BuildContext context, WidgetRef ref) async {
-    final msg = context.l10n.coverCacheCleared;
+    final l = context.l10n;
+    final msg = l.coverCacheCleared;
+    final ok = await showConfirm(context,
+        title: l.confirmClearCoversTitle,
+        body: l.confirmClearCoversBody,
+        confirmLabel: l.clearCoverCache);
+    if (!ok || !context.mounted) return;
     try {
       final dir = ref.read(coversDirProvider);
       if (await dir.exists()) {

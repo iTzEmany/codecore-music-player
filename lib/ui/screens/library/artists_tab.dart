@@ -7,6 +7,7 @@ import '../../../l10n/l10n_ext.dart';
 import '../../widgets/album_grid.dart';
 import '../../widgets/empty_state.dart';
 import 'album_detail_screen.dart';
+import '../../widgets/error_state.dart';
 
 class ArtistsTab extends ConsumerWidget {
   const ArtistsTab({super.key});
@@ -16,7 +17,8 @@ class ArtistsTab extends ConsumerWidget {
     final artists = ref.watch(artistsProvider);
     return artists.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text('$e')),
+      error: (e, st) => loadErrorState(context, e, st,
+          onRetry: () => ref.invalidate(artistsProvider)),
       data: (list) => list.isEmpty
           ? EmptyState(icon: Icons.person, message: context.l10n.noResults)
           : ListView.builder(
@@ -52,7 +54,8 @@ class ArtistDetailScreen extends ConsumerWidget {
       appBar: AppBar(title: Text(artist.name ?? context.l10n.unknownArtist)),
       body: albums.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('$e')),
+        error: (e, st) => loadErrorState(context, e, st,
+            onRetry: () => ref.invalidate(artistAlbumsProvider(artist.key))),
         data: (list) => AlbumGrid(
           albums: list,
           onOpen: (a) => Navigator.of(context).push(MaterialPageRoute<void>(

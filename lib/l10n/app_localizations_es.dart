@@ -936,4 +936,52 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get jamOutputsHint => 'Varias salidas suenan juntas';
+
+  @override
+  String get renamePlaylist => 'Renombrar lista';
+
+  @override
+  String get confirmDeletePlaylistTitle => '¿Eliminar la lista?';
+
+  @override
+  String confirmDeletePlaylistBody(String name) {
+    return '«$name» se eliminará. Las canciones siguen en la biblioteca.';
+  }
+
+  @override
+  String get confirmRemoveFolderTitle => '¿Quitar la carpeta?';
+
+  @override
+  String get confirmRemoveFolderBody =>
+      'Sus canciones salen de la biblioteca. Los archivos siguen en el dispositivo.';
+
+  @override
+  String get confirmClearCoversTitle => '¿Vaciar la caché de carátulas?';
+
+  @override
+  String get confirmClearCoversBody =>
+      'Las carátulas se recrean en el próximo escaneo.';
+
+  @override
+  String get confirmRestoreTitle =>
+      '¿Restaurar desde las etiquetas del archivo?';
+
+  @override
+  String get confirmRestoreBody =>
+      'Tus cambios en esta canción se sustituyen por los datos del archivo.';
+
+  @override
+  String get removedFromPlaylist => 'Quitada de la lista';
+
+  @override
+  String get removedFromQueue => 'Quitada de la cola';
+
+  @override
+  String get playNextDone => 'Sonará a continuación';
+
+  @override
+  String get ytSearchPrompt => 'Busca una canción o pega un enlace';
+
+  @override
+  String get loadFailed => 'No se pudieron cargar los datos.';
 }

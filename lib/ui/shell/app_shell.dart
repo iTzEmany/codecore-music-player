@@ -67,9 +67,9 @@ class AppShell extends ConsumerWidget {
         ref.read(navIndexProvider.notifier).set(0);
         ref.read(searchFocusProvider).requestFocus();
       },
-      const SingleActivator(LogicalKeyboardKey.arrowUp): () =>
+      const SingleActivator(LogicalKeyboardKey.arrowUp, control: true): () =>
           guarded(() => bump(0.05)),
-      const SingleActivator(LogicalKeyboardKey.arrowDown): () =>
+      const SingleActivator(LogicalKeyboardKey.arrowDown, control: true): () =>
           guarded(() => bump(-0.05)),
     };
   }

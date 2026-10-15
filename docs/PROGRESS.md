@@ -120,7 +120,7 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 11.1 Banco visivo (scatti da test)
 - [x] 11.2 Token, tema e font
 - [x] 11.3 Componenti base
-- [ ] 11.4 Correzioni rapide
+- [x] 11.4 Correzioni rapide
 - [ ] 11.5 Shell: tre schede e navigatore annidato
 - [ ] 11.6 Colore dalla copertina
 - [ ] 11.7 Mini-player e foglio Dispositivi

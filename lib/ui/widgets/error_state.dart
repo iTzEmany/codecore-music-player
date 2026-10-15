@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/app_log.dart';
 import '../../l10n/l10n_ext.dart';
 import '../theme/tokens.dart';
 
@@ -34,4 +35,11 @@ class ErrorState extends StatelessWidget {
       ),
     );
   }
+}
+
+/// For `AsyncValue.when(error:)`: logs the exception, shows a plain message.
+Widget loadErrorState(
+    BuildContext context, Object error, StackTrace stack, {VoidCallback? onRetry}) {
+  AppLog.e('load failed', error, stack);
+  return ErrorState(message: context.l10n.loadFailed, onRetry: onRetry);
 }

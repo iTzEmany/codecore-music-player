@@ -459,13 +459,13 @@ abstract class AppLocalizations {
   /// No description provided for @addToQueue.
   ///
   /// In it, this message translates to:
-  /// **'Aggiungi alla coda'**
+  /// **'Aggiungi in coda'**
   String get addToQueue;
 
   /// No description provided for @addedToQueue.
   ///
   /// In it, this message translates to:
-  /// **'Aggiunto alla coda'**
+  /// **'Aggiunto in coda'**
   String get addedToQueue;
 
   /// No description provided for @favorite.
@@ -1751,6 +1751,90 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Più uscite suonano insieme'**
   String get jamOutputsHint;
+
+  /// No description provided for @renamePlaylist.
+  ///
+  /// In it, this message translates to:
+  /// **'Rinomina playlist'**
+  String get renamePlaylist;
+
+  /// No description provided for @confirmDeletePlaylistTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Eliminare la playlist?'**
+  String get confirmDeletePlaylistTitle;
+
+  /// No description provided for @confirmDeletePlaylistBody.
+  ///
+  /// In it, this message translates to:
+  /// **'«{name}» verrà eliminata. I brani restano nella libreria.'**
+  String confirmDeletePlaylistBody(String name);
+
+  /// No description provided for @confirmRemoveFolderTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Rimuovere la cartella?'**
+  String get confirmRemoveFolderTitle;
+
+  /// No description provided for @confirmRemoveFolderBody.
+  ///
+  /// In it, this message translates to:
+  /// **'I suoi brani spariscono dalla libreria. I file restano sul dispositivo.'**
+  String get confirmRemoveFolderBody;
+
+  /// No description provided for @confirmClearCoversTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Svuotare la cache delle copertine?'**
+  String get confirmClearCoversTitle;
+
+  /// No description provided for @confirmClearCoversBody.
+  ///
+  /// In it, this message translates to:
+  /// **'Le copertine verranno ricreate alla prossima scansione.'**
+  String get confirmClearCoversBody;
+
+  /// No description provided for @confirmRestoreTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Ripristinare dai tag del file?'**
+  String get confirmRestoreTitle;
+
+  /// No description provided for @confirmRestoreBody.
+  ///
+  /// In it, this message translates to:
+  /// **'Le tue modifiche a questo brano verranno sostituite con i dati del file.'**
+  String get confirmRestoreBody;
+
+  /// No description provided for @removedFromPlaylist.
+  ///
+  /// In it, this message translates to:
+  /// **'Rimosso dalla playlist'**
+  String get removedFromPlaylist;
+
+  /// No description provided for @removedFromQueue.
+  ///
+  /// In it, this message translates to:
+  /// **'Rimosso dalla coda'**
+  String get removedFromQueue;
+
+  /// No description provided for @playNextDone.
+  ///
+  /// In it, this message translates to:
+  /// **'Verrà riprodotto dopo'**
+  String get playNextDone;
+
+  /// No description provided for @ytSearchPrompt.
+  ///
+  /// In it, this message translates to:
+  /// **'Cerca un brano o incolla un link'**
+  String get ytSearchPrompt;
+
+  /// No description provided for @loadFailed.
+  ///
+  /// In it, this message translates to:
+  /// **'Non riesco a caricare i dati.'**
+  String get loadFailed;
 }
 
 class _AppLocalizationsDelegate

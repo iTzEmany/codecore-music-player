@@ -935,4 +935,50 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get jamOutputsHint => 'Several outputs play together';
+
+  @override
+  String get renamePlaylist => 'Rename playlist';
+
+  @override
+  String get confirmDeletePlaylistTitle => 'Delete the playlist?';
+
+  @override
+  String confirmDeletePlaylistBody(String name) {
+    return '“$name” will be deleted. The tracks stay in your library.';
+  }
+
+  @override
+  String get confirmRemoveFolderTitle => 'Remove the folder?';
+
+  @override
+  String get confirmRemoveFolderBody =>
+      'Its tracks leave the library. The files stay on the device.';
+
+  @override
+  String get confirmClearCoversTitle => 'Clear the cover cache?';
+
+  @override
+  String get confirmClearCoversBody => 'Covers are rebuilt at the next scan.';
+
+  @override
+  String get confirmRestoreTitle => 'Restore from the file tags?';
+
+  @override
+  String get confirmRestoreBody =>
+      'Your edits to this track are replaced with the data in the file.';
+
+  @override
+  String get removedFromPlaylist => 'Removed from the playlist';
+
+  @override
+  String get removedFromQueue => 'Removed from the queue';
+
+  @override
+  String get playNextDone => 'Will play next';
+
+  @override
+  String get ytSearchPrompt => 'Search for a track or paste a link';
+
+  @override
+  String get loadFailed => 'Couldn\'t load the data.';
 }

@@ -142,7 +142,7 @@ class _ReceiveTabState extends ConsumerState<ReceiveTab> {
   Widget build(BuildContext context) {
     final l = context.l10n;
     final hub = ref.watch(shareHubProvider);
-    return ListView(padding: const EdgeInsets.all(16), children: [
+    final head = <Widget>[
       if (hub.incoming.isNotEmpty) ...[
         Text(l.receivedRequests,
             style: Theme.of(context).textTheme.titleMedium),
@@ -181,17 +181,10 @@ class _ReceiveTabState extends ConsumerState<ReceiveTab> {
         const SizedBox(height: 16),
         Text(l.shareConnectedTo(_remoteName!),
             style: Theme.of(context).textTheme.titleMedium),
-        for (final t in _tracks)
-          CheckboxListTile(
-            dense: true,
-            value: _selected.contains(t.id),
-            onChanged: _busy
-                ? null
-                : (v) => setState(() =>
-                    v == true ? _selected.add(t.id) : _selected.remove(t.id)),
-            title: Text(t.title, maxLines: 1, overflow: TextOverflow.ellipsis),
-            subtitle: Text(t.artist ?? '', maxLines: 1),
-          ),
+      ],
+    ];
+    final foot = <Widget>[
+      if (_remoteName != null) ...[
         const SizedBox(height: 8),
         if (_busy && _totalCount > 0) ...[
           Text(l.shareProgress(_doneCount + 1, _totalCount)),
@@ -210,6 +203,27 @@ class _ReceiveTabState extends ConsumerState<ReceiveTab> {
             child: Text(l.shareDone(_received!)),
           ),
       ],
-    ]);
+    ];
+    final shown = _remoteName == null ? 0 : _tracks.length;
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: head.length + shown + foot.length,
+      itemBuilder: (_, i) {
+        if (i < head.length) return head[i];
+        i -= head.length;
+        if (i >= shown) return foot[i - shown];
+        final t = _tracks[i];
+        return CheckboxListTile(
+          dense: true,
+          value: _selected.contains(t.id),
+          onChanged: _busy
+              ? null
+              : (v) => setState(() =>
+                  v == true ? _selected.add(t.id) : _selected.remove(t.id)),
+          title: Text(t.title, maxLines: 1, overflow: TextOverflow.ellipsis),
+          subtitle: Text(t.artist ?? '', maxLines: 1),
+        );
+      },
+    );
   }
 }

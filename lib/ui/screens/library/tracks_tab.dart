@@ -14,6 +14,7 @@ import '../../theme/app_theme.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/track_row.dart';
 import 'folders_sheet.dart';
+import '../../widgets/error_state.dart';
 
 String _sortLabel(BuildContext context, SortOption o) {
   final l = context.l10n;
@@ -127,7 +128,8 @@ class _TracksTabState extends ConsumerState<TracksTab> {
               )
             : tracks.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, _) => Center(child: Text('$e')),
+          error: (e, st) => loadErrorState(context, e, st,
+              onRetry: () => ref.invalidate(tracksProvider(widget.favoritesOnly))),
           data: (list) {
             if (list.isEmpty) {
               if (widget.favoritesOnly && query.text.isEmpty) {

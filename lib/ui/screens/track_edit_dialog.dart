@@ -5,6 +5,7 @@ import '../../data/db/app_database.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../providers/library_providers.dart';
 import '../../services/library/track_editor.dart';
+import '../widgets/confirm.dart';
 
 Future<void> showTrackEditDialog(BuildContext context, Track track) {
   return showDialog<void>(
@@ -61,6 +62,12 @@ class _TrackEditDialogState extends ConsumerState<_TrackEditDialog> {
   }
 
   Future<void> _restore() async {
+    final l = context.l10n;
+    final ok = await showConfirm(context,
+        title: l.confirmRestoreTitle,
+        body: l.confirmRestoreBody,
+        confirmLabel: l.restoreFromFile);
+    if (!ok || !mounted) return;
     await ref.read(trackEditorProvider).restoreFromFile(widget.track);
     if (mounted) Navigator.of(context).pop();
   }

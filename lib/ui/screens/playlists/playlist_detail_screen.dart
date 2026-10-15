@@ -10,7 +10,9 @@ import '../../../providers/database_providers.dart';
 import '../../../providers/library_providers.dart';
 import '../../../providers/player_providers.dart';
 import '../../../services/covers/cover_store.dart';
+import '../../widgets/confirm.dart';
 import '../../widgets/cover_image.dart';
+import '../../widgets/dismiss_background.dart';
 import 'add_tracks_screen.dart';
 import 'playlist_dialogs.dart';
 
@@ -92,11 +94,19 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
                   await repo.setCover(id, null);
                 case 'rename':
                   final n = await askPlaylistName(context,
-                      initial: _name, confirmLabel: l.save);
+                      initial: _name,
+                      confirmLabel: l.save,
+                      title: l.renamePlaylist);
                   if (n == null) return;
                   await repo.rename(id, n);
                   if (mounted) setState(() => _name = n);
                 case 'delete':
+                  final ok = await showConfirm(context,
+                      title: l.confirmDeletePlaylistTitle,
+                      body: l.confirmDeletePlaylistBody(_name),
+                      confirmLabel: l.delete,
+                      destructive: true);
+                  if (!ok) return;
                   await repo.delete(id);
                   if (context.mounted) Navigator.of(context).pop();
               }
@@ -143,7 +153,16 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
               final t = tracks[i];
               return Dismissible(
                 key: ValueKey('pl-${t.id}'),
-                onDismissed: (_) => repo.removeTrack(id, t.id),
+                background: const DismissBackground(),
+                secondaryBackground: const DismissBackground(alignEnd: true),
+                onDismissed: (_) async {
+                  await repo.removeTrack(id, t.id);
+                  if (!context.mounted) return;
+                  showUndoSnack(context, l.removedFromPlaylist, () async {
+                    await repo.addTracks(id, [t.id]);
+                    await repo.reorder(id, tracks.length - 1, i);
+                  });
+                },
                 child: ListTile(
                   leading: CoverImage(coverKey: t.coverKey, size: 40),
                   title: Text(t.title,

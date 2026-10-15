@@ -208,10 +208,10 @@ class AppLocalizationsIt extends AppLocalizations {
   String get playNext => 'Riproduci dopo';
 
   @override
-  String get addToQueue => 'Aggiungi alla coda';
+  String get addToQueue => 'Aggiungi in coda';
 
   @override
-  String get addedToQueue => 'Aggiunto alla coda';
+  String get addedToQueue => 'Aggiunto in coda';
 
   @override
   String get favorite => 'Preferito';
@@ -937,4 +937,51 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get jamOutputsHint => 'Più uscite suonano insieme';
+
+  @override
+  String get renamePlaylist => 'Rinomina playlist';
+
+  @override
+  String get confirmDeletePlaylistTitle => 'Eliminare la playlist?';
+
+  @override
+  String confirmDeletePlaylistBody(String name) {
+    return '«$name» verrà eliminata. I brani restano nella libreria.';
+  }
+
+  @override
+  String get confirmRemoveFolderTitle => 'Rimuovere la cartella?';
+
+  @override
+  String get confirmRemoveFolderBody =>
+      'I suoi brani spariscono dalla libreria. I file restano sul dispositivo.';
+
+  @override
+  String get confirmClearCoversTitle => 'Svuotare la cache delle copertine?';
+
+  @override
+  String get confirmClearCoversBody =>
+      'Le copertine verranno ricreate alla prossima scansione.';
+
+  @override
+  String get confirmRestoreTitle => 'Ripristinare dai tag del file?';
+
+  @override
+  String get confirmRestoreBody =>
+      'Le tue modifiche a questo brano verranno sostituite con i dati del file.';
+
+  @override
+  String get removedFromPlaylist => 'Rimosso dalla playlist';
+
+  @override
+  String get removedFromQueue => 'Rimosso dalla coda';
+
+  @override
+  String get playNextDone => 'Verrà riprodotto dopo';
+
+  @override
+  String get ytSearchPrompt => 'Cerca un brano o incolla un link';
+
+  @override
+  String get loadFailed => 'Non riesco a caricare i dati.';
 }

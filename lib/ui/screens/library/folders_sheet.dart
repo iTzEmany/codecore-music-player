@@ -9,6 +9,7 @@ import '../../../core/platform.dart';
 import '../../../providers/database_providers.dart';
 import '../../../providers/library_providers.dart';
 import '../../../l10n/l10n_ext.dart';
+import '../../widgets/confirm.dart';
 
 Future<void> scanWithPermission(WidgetRef ref) async {
   final ok = await ensureAudioPermission();
@@ -29,6 +30,18 @@ Future<void> addDefaultFolderAndScan(WidgetRef ref) async {
   if (!await Directory(path).exists()) return;
   await ref.read(folderRepositoryProvider).add(path);
   await scanWithPermission(ref);
+}
+
+/// Asks before dropping a folder (its tracks leave the library).
+Future<void> confirmRemoveFolder(
+    BuildContext context, WidgetRef ref, int folderId) async {
+  final l = context.l10n;
+  final ok = await showConfirm(context,
+      title: l.confirmRemoveFolderTitle,
+      body: l.confirmRemoveFolderBody,
+      confirmLabel: l.removeFolder,
+      destructive: true);
+  if (ok) await ref.read(folderRepositoryProvider).remove(folderId);
 }
 
 class FoldersSheet extends ConsumerWidget {
@@ -62,8 +75,7 @@ class FoldersSheet extends ConsumerWidget {
             trailing: IconButton(
               tooltip: context.l10n.removeFolder,
               icon: const Icon(Icons.delete_outline),
-              onPressed: () =>
-                  ref.read(folderRepositoryProvider).remove(f.id),
+              onPressed: () => confirmRemoveFolder(context, ref, f.id),
             ),
           ),
       ]),

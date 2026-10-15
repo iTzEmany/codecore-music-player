@@ -87,8 +87,8 @@
     }
   },
   "playNext": "Riproduci dopo",
-  "addToQueue": "Aggiungi alla coda",
-  "addedToQueue": "Aggiunto alla coda",
+  "addToQueue": "Aggiungi in coda",
+  "addedToQueue": "Aggiunto in coda",
   "favorite": "Preferito",
   "removeFromFavorites": "Rimuovi dai preferiti",
   "removeFromList": "Rimuovi",
@@ -549,5 +549,26 @@
     }
   },
   "jamLatencyHint": "Per cuffie o casse Bluetooth: aumenta finché le uscite suonano insieme.",
-  "jamOutputsHint": "Più uscite suonano insieme"
+  "jamOutputsHint": "Più uscite suonano insieme",
+  "renamePlaylist": "Rinomina playlist",
+  "confirmDeletePlaylistTitle": "Eliminare la playlist?",
+  "confirmDeletePlaylistBody": "«{name}» verrà eliminata. I brani restano nella libreria.",
+  "@confirmDeletePlaylistBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "confirmRemoveFolderTitle": "Rimuovere la cartella?",
+  "confirmRemoveFolderBody": "I suoi brani spariscono dalla libreria. I file restano sul dispositivo.",
+  "confirmClearCoversTitle": "Svuotare la cache delle copertine?",
+  "confirmClearCoversBody": "Le copertine verranno ricreate alla prossima scansione.",
+  "confirmRestoreTitle": "Ripristinare dai tag del file?",
+  "confirmRestoreBody": "Le tue modifiche a questo brano verranno sostituite con i dati del file.",
+  "removedFromPlaylist": "Rimosso dalla playlist",
+  "removedFromQueue": "Rimosso dalla coda",
+  "playNextDone": "Verrà riprodotto dopo",
+  "ytSearchPrompt": "Cerca un brano o incolla un link",
+  "loadFailed": "Non riesco a caricare i dati."
 }

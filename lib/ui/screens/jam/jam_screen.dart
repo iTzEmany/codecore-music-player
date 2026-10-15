@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -11,6 +9,7 @@ import '../../../providers/share_hub.dart';
 import '../../../services/jam/jam_guest.dart';
 import '../../../services/jam/jam_models.dart';
 import '../share/track_picker_screen.dart';
+import 'jam_seek_bar.dart';
 import '../../../providers/database_providers.dart';
 
 /// The Jam: waiting for the answer, then the shared queue and controls.
@@ -22,23 +21,7 @@ class JamScreen extends ConsumerStatefulWidget {
 }
 
 class _JamScreenState extends ConsumerState<JamScreen> {
-  Timer? _tick;
-  double? _dragging; // slider position while the user drags
   bool _popped = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _tick = Timer.periodic(const Duration(milliseconds: 500), (_) {
-      if (mounted && _dragging == null) setState(() {});
-    });
-  }
-
-  @override
-  void dispose() {
-    _tick?.cancel();
-    super.dispose();
-  }
 
   void _leave(String? message) {
     if (_popped || !mounted) return;
@@ -126,12 +109,6 @@ class _JamScreenState extends ConsumerState<JamScreen> {
     final ownId = ref.read(shareHubProvider.notifier).deviceId ?? '';
     final isHost = s.isHost;
     final cur = jam.current;
-    final now = DateTime.now().millisecondsSinceEpoch;
-    final dur = (cur?.durationMs ?? 0).toDouble();
-    final pos =
-        (_dragging ??
-                jam.positionAtTime(now).toDouble().clamp(0, dur > 0 ? dur : 1))
-            .toDouble();
 
     final others = [
       for (final p in jam.participants)
@@ -202,16 +179,9 @@ class _JamScreenState extends ConsumerState<JamScreen> {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],
-                Slider(
-                  value: pos.clamp(0, dur > 0 ? dur : 1).toDouble(),
-                  max: dur > 0 ? dur : 1,
-                  onChanged: cur == null || dur <= 0
-                      ? null
-                      : (v) => setState(() => _dragging = v),
-                  onChangeEnd: (v) {
-                    setState(() => _dragging = null);
-                    ctrl.send(JamCommand.seek(v.round()));
-                  },
+                JamSeekBar(
+                  jam: jam,
+                  onSeek: (ms) => ctrl.send(JamCommand.seek(ms)),
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,

@@ -208,7 +208,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get playNext => 'Als Nächstes spielen';
 
   @override
-  String get addToQueue => 'Zur Warteschlange';
+  String get addToQueue => 'Zur Warteschlange hinzufügen';
 
   @override
   String get addedToQueue => 'Zur Warteschlange hinzugefügt';
@@ -937,4 +937,51 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get jamOutputsHint => 'Mehrere Ausgaben spielen gleichzeitig';
+
+  @override
+  String get renamePlaylist => 'Playlist umbenennen';
+
+  @override
+  String get confirmDeletePlaylistTitle => 'Playlist löschen?';
+
+  @override
+  String confirmDeletePlaylistBody(String name) {
+    return '„$name“ wird gelöscht. Die Titel bleiben in der Bibliothek.';
+  }
+
+  @override
+  String get confirmRemoveFolderTitle => 'Ordner entfernen?';
+
+  @override
+  String get confirmRemoveFolderBody =>
+      'Die Titel verschwinden aus der Bibliothek. Die Dateien bleiben auf dem Gerät.';
+
+  @override
+  String get confirmClearCoversTitle => 'Cover-Cache leeren?';
+
+  @override
+  String get confirmClearCoversBody =>
+      'Die Cover werden beim nächsten Scan neu erstellt.';
+
+  @override
+  String get confirmRestoreTitle => 'Aus den Datei-Tags wiederherstellen?';
+
+  @override
+  String get confirmRestoreBody =>
+      'Deine Änderungen an diesem Titel werden durch die Daten der Datei ersetzt.';
+
+  @override
+  String get removedFromPlaylist => 'Aus der Playlist entfernt';
+
+  @override
+  String get removedFromQueue => 'Aus der Warteschlange entfernt';
+
+  @override
+  String get playNextDone => 'Wird als Nächstes gespielt';
+
+  @override
+  String get ytSearchPrompt => 'Titel suchen oder Link einfügen';
+
+  @override
+  String get loadFailed => 'Die Daten konnten nicht geladen werden.';
 }

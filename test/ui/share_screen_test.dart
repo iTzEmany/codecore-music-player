@@ -13,6 +13,9 @@ void main() {
     await h.pump(tester, const ShareScreen());
     expect(find.text('Dispositivi vicini'), findsOneWidget);
     expect(find.text('Tutta la libreria'), findsOneWidget);
+    // Opened without tracks the selection starts empty, not «whole library».
+    expect(find.text('Selezione (0 brani)'), findsOneWidget);
+    expect(find.text('Scegli brani'), findsOneWidget);
     await tester.tap(find.text('Collegamento manuale (IP e PIN)'));
     await tester.pump(const Duration(milliseconds: 500));
     expect(find.text('Avvia condivisione'), findsOneWidget);

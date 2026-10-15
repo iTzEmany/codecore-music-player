@@ -26,9 +26,9 @@ class SendTab extends ConsumerStatefulWidget {
 }
 
 class _SendTabState extends ConsumerState<SendTab> {
-  /// null = whole library.
-  late Set<int>? _ids =
-      widget.initialTrackIds == null ? null : {...widget.initialTrackIds!};
+  /// null = whole library. Opened without tracks, the selection starts empty
+  /// («Scegli brani»): sharing everything must be a deliberate choice.
+  late Set<int>? _ids = {...?widget.initialTrackIds};
   ShareInfo? _info;
   bool _starting = false;
   bool _noNetwork = false;
@@ -181,7 +181,8 @@ class _SendTabState extends ConsumerState<SendTab> {
           ListTile(
             leading: const Icon(Icons.north_east),
             title: Text(o.toName),
-            subtitle: Text('${o.entries.length} · ${offerStatusLabel(l, o.status)}'),
+            subtitle: Text(
+                '${l.tracksCount(o.entries.length)} · ${offerStatusLabel(l, o.status)}'),
             trailing: o.open
                 ? IconButton(
                     tooltip: l.cancel,

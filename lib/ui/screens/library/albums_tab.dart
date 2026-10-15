@@ -7,6 +7,7 @@ import '../../../l10n/l10n_ext.dart';
 import '../../widgets/album_grid.dart';
 import '../../widgets/empty_state.dart';
 import 'album_detail_screen.dart';
+import '../../widgets/error_state.dart';
 
 class AlbumsTab extends ConsumerWidget {
   const AlbumsTab({super.key});
@@ -33,7 +34,8 @@ class AlbumsTab extends ConsumerWidget {
       Expanded(
         child: albums.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, _) => Center(child: Text('$e')),
+          error: (e, st) => loadErrorState(context, e, st,
+              onRetry: () => ref.invalidate(albumsProvider)),
           data: (list) => list.isEmpty
               ? EmptyState(icon: Icons.album, message: context.l10n.noResults)
               : AlbumGrid(

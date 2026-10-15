@@ -7,18 +7,23 @@ import '../../../providers/database_providers.dart';
 
 /// Asks for a playlist name (1..60 chars). Returns null when cancelled.
 Future<String?> askPlaylistName(BuildContext context,
-    {String initial = '', String? confirmLabel}) {
+    {String initial = '', String? confirmLabel, String? title, String? label}) {
   return showDialog<String>(
     context: context,
-    builder: (_) => _NameDialog(initial: initial, confirmLabel: confirmLabel),
+    builder: (_) => _NameDialog(
+        initial: initial,
+        confirmLabel: confirmLabel,
+        title: title,
+        label: label),
   );
 }
 
 class _NameDialog extends StatefulWidget {
-  const _NameDialog({required this.initial, this.confirmLabel});
+  const _NameDialog(
+      {required this.initial, this.confirmLabel, this.title, this.label});
 
   final String initial;
-  final String? confirmLabel;
+  final String? confirmLabel, title, label;
 
   @override
   State<_NameDialog> createState() => _NameDialogState();
@@ -43,12 +48,12 @@ class _NameDialogState extends State<_NameDialog> {
   Widget build(BuildContext context) {
     final l = context.l10n;
     return AlertDialog(
-      title: Text(l.newPlaylist),
+      title: Text(widget.title ?? l.newPlaylist),
       content: TextField(
         controller: _c,
         autofocus: true,
         maxLength: 60,
-        decoration: InputDecoration(hintText: l.playlistName),
+        decoration: InputDecoration(hintText: widget.label ?? l.playlistName),
         onSubmitted: (_) => _submit(),
       ),
       actions: [

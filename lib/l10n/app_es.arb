@@ -358,5 +358,26 @@
     }
   },
   "jamLatencyHint": "Para auriculares o altavoces Bluetooth: súbela hasta que las salidas coincidan.",
-  "jamOutputsHint": "Varias salidas suenan juntas"
+  "jamOutputsHint": "Varias salidas suenan juntas",
+  "renamePlaylist": "Renombrar lista",
+  "confirmDeletePlaylistTitle": "¿Eliminar la lista?",
+  "confirmDeletePlaylistBody": "«{name}» se eliminará. Las canciones siguen en la biblioteca.",
+  "@confirmDeletePlaylistBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "confirmRemoveFolderTitle": "¿Quitar la carpeta?",
+  "confirmRemoveFolderBody": "Sus canciones salen de la biblioteca. Los archivos siguen en el dispositivo.",
+  "confirmClearCoversTitle": "¿Vaciar la caché de carátulas?",
+  "confirmClearCoversBody": "Las carátulas se recrean en el próximo escaneo.",
+  "confirmRestoreTitle": "¿Restaurar desde las etiquetas del archivo?",
+  "confirmRestoreBody": "Tus cambios en esta canción se sustituyen por los datos del archivo.",
+  "removedFromPlaylist": "Quitada de la lista",
+  "removedFromQueue": "Quitada de la cola",
+  "playNextDone": "Sonará a continuación",
+  "ytSearchPrompt": "Busca una canción o pega un enlace",
+  "loadFailed": "No se pudieron cargar los datos."
 }

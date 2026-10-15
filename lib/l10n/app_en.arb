@@ -358,5 +358,26 @@
     }
   },
   "jamLatencyHint": "For Bluetooth headphones or speakers: raise it until the outputs line up.",
-  "jamOutputsHint": "Several outputs play together"
+  "jamOutputsHint": "Several outputs play together",
+  "renamePlaylist": "Rename playlist",
+  "confirmDeletePlaylistTitle": "Delete the playlist?",
+  "confirmDeletePlaylistBody": "“{name}” will be deleted. The tracks stay in your library.",
+  "@confirmDeletePlaylistBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "confirmRemoveFolderTitle": "Remove the folder?",
+  "confirmRemoveFolderBody": "Its tracks leave the library. The files stay on the device.",
+  "confirmClearCoversTitle": "Clear the cover cache?",
+  "confirmClearCoversBody": "Covers are rebuilt at the next scan.",
+  "confirmRestoreTitle": "Restore from the file tags?",
+  "confirmRestoreBody": "Your edits to this track are replaced with the data in the file.",
+  "removedFromPlaylist": "Removed from the playlist",
+  "removedFromQueue": "Removed from the queue",
+  "playNextDone": "Will play next",
+  "ytSearchPrompt": "Search for a track or paste a link",
+  "loadFailed": "Couldn't load the data."
 }
