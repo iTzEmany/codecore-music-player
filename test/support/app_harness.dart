@@ -28,6 +28,9 @@ class Harness {
   final FakeBackend backend;
   final SettingsStore store;
 
+  /// Overridable before `pump`: where cover files are looked up.
+  Directory coversDir = Directory.systemTemp;
+
   static Future<Harness> create(WidgetTester tester, {int tracks = 0}) async {
     SharedPreferences.setMockInitialValues({});
     final store = await SettingsStore.open();
@@ -56,7 +59,7 @@ class Harness {
         databaseProvider.overrideWithValue(db),
         audioHandlerProvider.overrideWithValue(handler),
         settingsStoreProvider.overrideWithValue(store),
-        coversDirProvider.overrideWithValue(Directory.systemTemp),
+        coversDirProvider.overrideWithValue(coversDir),
       ];
 
   Future<void> pump(WidgetTester tester, Widget child) async {

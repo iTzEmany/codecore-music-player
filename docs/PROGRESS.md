@@ -117,7 +117,7 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 10.10 Documentazione
 
 ## Fase 11 — Interfaccia nuova (`fase-11-interfaccia-nuova.md`)
-- [ ] 11.1 Banco visivo (scatti da test)
+- [x] 11.1 Banco visivo (scatti da test)
 - [ ] 11.2 Token, tema e font
 - [ ] 11.3 Componenti base
 - [ ] 11.4 Correzioni rapide
@@ -141,6 +141,7 @@ L'agente riparte sempre dal primo task non spuntato.
 <!-- una riga per deviazione: data — task — cosa è cambiato e perché -->
 
 ## Note di deviazione
+- 11.1 (2026-10-15): su richiesta dell'utente la verifica visiva dei task 11.x si fa **sul telefono** (hot reload); gli scatti da test (`scripts/shots.sh`) restano per testo/layout ma le copertine non si caricano nei golden (I/O reale in fake async) e ogni scatto costa ~1 min. Font di ripiego: Liberation Sans al posto di Roboto finché non ci sono i font dell'app.
 - 0.3: `generate: true` (l10n) rimandato alla fase 4 (senza ARB `flutter gen-l10n` fallirebbe). `flutter_localizations` già aggiunto.
 - 0.2: MainActivity spostata nel package `com.codecore.player`; `compileSdk = 37` (richiesto da permission_handler_android).
 - 1.2: test con fixture mp3/flac generate con ffmpeg in `test/fixtures/`.

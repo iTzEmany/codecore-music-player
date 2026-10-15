@@ -12,3 +12,6 @@ build/
 android/key.properties
 *.jks
 *.keystore
+
+# Scatti di schermate (task 11.1)
+test_shots/goldens/
