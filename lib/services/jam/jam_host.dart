@@ -441,6 +441,14 @@ class JamHost {
       return _json(res.state!.toJson());
     });
 
+    // Any participant: the host's clock, for synchronised playback.
+    router.get('/<sid>/time', (Request r, String sid) {
+      if (_memberFor(r, sid) == null) {
+        return Response(401, body: 'unauthorized');
+      }
+      return _json({'t': _now().millisecondsSinceEpoch});
+    });
+
     // Host: a guest forwards an invitation accepted on its screen.
     router.post('/<sid>/invite', (Request r, String sid) async {
       if (_memberFor(r, sid) == null) {

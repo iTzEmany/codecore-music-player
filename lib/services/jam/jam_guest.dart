@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 
 import '../../core/app_log.dart';
 import '../share/offers.dart' show newToken;
+import 'jam_clock.dart';
 import 'jam_host.dart';
 import 'jam_models.dart';
 
@@ -228,6 +229,23 @@ class JamGuest {
   Future<void> _close() async {
     _running = false;
     local.detachGuest();
+  }
+
+  /// One timestamp exchange with the host (null when it fails).
+  Future<JamTimeSample?> probeHostTime(int Function() localNow) async {
+    if (!_running || _base == null) return null;
+    final t0 = localNow();
+    try {
+      final r = await _dio.get<dynamic>('$_base/$_sid/time',
+          options: Options(
+              headers: _auth, receiveTimeout: const Duration(seconds: 3)));
+      final t1 = localNow();
+      final d = r.data;
+      if (r.statusCode != 200 || d is! Map || d['t'] is! int) return null;
+      return (t0: t0, hostMs: d['t'] as int, t1: t1);
+    } on DioException {
+      return null;
+    }
   }
 
   /// This device (a guest) accepted [request] from a newcomer: ask the host to
