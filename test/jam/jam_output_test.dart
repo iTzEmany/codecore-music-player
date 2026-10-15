@@ -1,4 +1,5 @@
 import 'package:codecore/services/audio/audio_backend.dart';
+import 'package:codecore/services/jam/jam_clock.dart';
 import 'package:codecore/services/jam/jam_models.dart';
 import 'package:codecore/services/jam/jam_output.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -6,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../support/fake_backend.dart';
 
 void main() {
+  syncTests();
   late FakeBackend backend;
   late JamOutput out;
   var now = 0;
@@ -80,8 +82,8 @@ void main() {
   });
 
   test('drift tolerance: small drift ignored, big drift seeks', () async {
-    final seeks = <Duration>[];
-    final b2 = _SeekSpy(seeks);
+    final b2 = FakeBackend();
+    final seeks = b2.seeks;
     final o = JamOutput(
         deviceId: 'me', backend: b2, nowMs: () => now,
         resolve: (i) async => const JamSource.local('/a.mp3'));
@@ -109,9 +111,130 @@ void main() {
   });
 }
 
-class _SeekSpy extends FakeBackend {
-  _SeekSpy(this.seeks);
-  final List<Duration> seeks;
-  @override
-  Future<void> seek(Duration position) async => seeks.add(position);
+void syncTests() {
+  group('synchronised output', () {
+    late FakeBackend backend;
+    late JamClock clock;
+    late JamOutput out;
+    var local = 0; // this device's clock
+    const hostSkew = 5000; // the host clock is 5 s ahead
+    final errors = <int>[];
+
+    const item = JamItem(
+        id: 1, ownerDeviceId: 'me', title: 'A', ext: 'mp3', ref: 'x', durationMs: 300000);
+
+    JamState st({
+      bool playing = true,
+      int pos = 0,
+      required int at,
+      List<String> outputs = const ['me', 'peer'],
+    }) =>
+        JamState(
+          version: 1,
+          items: const [item],
+          currentIndex: 0,
+          playing: playing,
+          positionMs: pos,
+          positionAt: at,
+          hostDeviceId: 'host',
+          outputDeviceId: outputs.first,
+          outputDeviceIds: outputs,
+          participants: const [
+            JamParticipant(id: 'host', name: 'H'),
+            JamParticipant(id: 'me', name: 'M', host: '10.0.0.2', port: 1),
+            JamParticipant(id: 'peer', name: 'P', host: '10.0.0.3', port: 1),
+          ],
+        );
+
+    setUp(() async {
+      local = 0;
+      errors.clear();
+      backend = FakeBackend();
+      clock = JamClock(
+        localNowMs: () => local,
+        samples: 1,
+        probe: () async => (t0: local, hostMs: local + hostSkew, t1: local),
+      );
+      await clock.sync();
+      out = JamOutput(
+        deviceId: 'me',
+        backend: backend,
+        clock: clock,
+        syncInterval: const Duration(hours: 1),
+        resolve: (i) async => const JamSource.local('/m.mp3'),
+      )..onSyncError = errors.add;
+    });
+
+    tearDown(() => out.dispose());
+
+    test('loads, waits for the instant, then plays from position', () async {
+      // jam time now = 5000; start scheduled 1.5 s ahead
+      await out.apply(st(at: 6500));
+      expect(backend.loaded, ['/m.mp3']);
+      expect(backend.playing, false);
+      expect(backend.seeks, isEmpty);
+
+      local = 1400; // jam 6400: still waiting
+      await out.apply(st(at: 6500));
+      expect(backend.playing, false);
+
+      local = 1500; // jam 6500: go
+      await out.apply(st(at: 6500));
+      expect(backend.playing, true);
+    });
+
+    test('a late joiner jumps to where the others are', () async {
+      local = 10000; // jam 15000, started at 6500 => 8.5 s in
+      await out.apply(st(at: 6500));
+      expect(backend.playing, true);
+      expect(backend.seeks.last, const Duration(milliseconds: 8500));
+    });
+
+    test('drift: small is ignored, medium slows down, big seeks', () async {
+      local = 10000;
+      await out.apply(st(at: 6500)); // now playing at 8500
+      backend.positionValue = const Duration(milliseconds: 8500);
+      local = 11000; // expected 9500
+      backend.positionValue = const Duration(milliseconds: 9515);
+      await out.apply(st(at: 6500));
+      expect(backend.speed, 1.0);
+      backend.positionValue = const Duration(milliseconds: 9650); // 150 ahead
+      await out.apply(st(at: 6500));
+      expect(backend.speed, closeTo(0.98, 1e-9));
+      backend.positionValue = const Duration(milliseconds: 12000); // far
+      await out.apply(st(at: 6500));
+      expect(backend.seeks.last, const Duration(milliseconds: 9500));
+      expect(backend.speed, 1.0);
+      expect(errors, isNotEmpty);
+    });
+
+    test('latency setting runs the player ahead', () async {
+      out.latencyMs = 200;
+      local = 10000;
+      await out.apply(st(at: 6500));
+      expect(backend.seeks.last, const Duration(milliseconds: 8700));
+    });
+
+    test('leaving the output set stops playback and restores speed', () async {
+      local = 10000;
+      await out.apply(st(at: 6500));
+      backend.positionValue = const Duration(milliseconds: 9000);
+      await out.apply(st(at: 6500));
+      await out.apply(st(at: 6500, outputs: const ['peer']));
+      expect(backend.playing, false);
+    });
+
+    test('without a clock a multi-output Jam behaves like one output', () async {
+      final plain = JamOutput(
+        deviceId: 'me',
+        backend: backend,
+        syncInterval: const Duration(hours: 1),
+        resolve: (i) async => const JamSource.local('/m.mp3'),
+        nowMs: () => local + hostSkew,
+      );
+      await plain.apply(st(at: 0));
+      expect(backend.playing, true);
+      await plain.dispose();
+    });
+  });
 }

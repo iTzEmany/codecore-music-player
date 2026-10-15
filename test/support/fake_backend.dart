@@ -54,9 +54,22 @@ class FakeBackend implements AudioBackend {
   }
 
   @override
-  Future<void> seek(Duration position) async {}
+  Future<void> seek(Duration position) async {
+    seeks.add(position);
+    positionValue = position;
+  }
   @override
   Future<void> setVolume(double volume) async {}
+
+  double speed = 1.0;
+  Duration positionValue = Duration.zero;
+  final seeks = <Duration>[];
+
+  @override
+  Future<void> setSpeed(double s) async => speed = s;
+
+  @override
+  Duration get positionNow => positionValue;
   @override
   Future<void> dispose() async {}
 }

@@ -341,5 +341,24 @@
   },
   "jamUnavailable": "Nicht verfügbar",
   "jamPlaying": "Jam ist aktiv",
-  "jamOpen": "Jam öffnen"
+  "jamOpen": "Jam öffnen",
+  "jamSynced": "Synchron · Abweichung {ms} ms",
+  "@jamSynced": {
+    "placeholders": {
+      "ms": {
+        "type": "int"
+      }
+    }
+  },
+  "jamSyncing": "Synchronisierung…",
+  "jamLatency": "Latenz dieser Ausgabe: {ms} ms",
+  "@jamLatency": {
+    "placeholders": {
+      "ms": {
+        "type": "int"
+      }
+    }
+  },
+  "jamLatencyHint": "Für Bluetooth-Kopfhörer oder -Lautsprecher: erhöhen, bis die Ausgaben zusammenpassen.",
+  "jamOutputsHint": "Mehrere Ausgaben spielen gleichzeitig"
 }

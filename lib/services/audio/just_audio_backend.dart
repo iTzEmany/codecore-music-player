@@ -73,5 +73,11 @@ class JustAudioBackend implements AudioBackend {
   Future<void> setVolume(double volume) => _player.setVolume(volume);
 
   @override
+  Future<void> setSpeed(double speed) => _player.setSpeed(speed);
+
+  @override
+  Duration get positionNow => _player.position;
+
+  @override
   Future<void> dispose() => _player.dispose();
 }

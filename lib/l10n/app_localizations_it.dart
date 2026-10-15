@@ -923,4 +923,24 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get jamOpen => 'Apri la Jam';
+
+  @override
+  String jamSynced(int ms) {
+    return 'Sincronizzato · scarto $ms ms';
+  }
+
+  @override
+  String get jamSyncing => 'Sincronizzazione in corso…';
+
+  @override
+  String jamLatency(int ms) {
+    return 'Latenza di questa uscita: $ms ms';
+  }
+
+  @override
+  String get jamLatencyHint =>
+      'Per cuffie o casse Bluetooth: aumenta finché le uscite suonano insieme.';
+
+  @override
+  String get jamOutputsHint => 'Più uscite suonano insieme';
 }

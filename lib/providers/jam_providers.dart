@@ -10,6 +10,7 @@ import '../data/db/app_database.dart';
 import '../services/audio/audio_backend.dart';
 import '../services/audio/just_audio_backend.dart';
 import '../services/jam/jam_cache.dart';
+import '../services/jam/jam_clock.dart';
 import '../services/jam/jam_guest.dart';
 import '../services/jam/jam_host.dart';
 import '../services/jam/jam_models.dart';
@@ -17,6 +18,7 @@ import '../services/jam/jam_output.dart';
 import '../services/share/discovery.dart';
 import 'database_providers.dart';
 import 'player_providers.dart';
+import 'settings_providers.dart';
 import 'share_hub.dart';
 import 'share_providers.dart';
 
@@ -33,6 +35,7 @@ class JamUiState {
     this.peerId = '',
     this.outcome,
     this.lost = false,
+    this.syncErrorMs,
   });
 
   final JamPhase phase;
@@ -43,6 +46,9 @@ class JamUiState {
   /// Result of the last request (declined, busy, unreachable...).
   final JamJoinOutcome? outcome;
   final bool lost;
+
+  /// Last measured offset from the shared position while synchronised (ms).
+  final int? syncErrorMs;
 
   bool get active => phase == JamPhase.active;
   bool get isHost => role == JamRole.host;
@@ -55,6 +61,7 @@ class JamUiState {
     String? peerId,
     JamJoinOutcome? outcome,
     bool? lost,
+    int? syncErrorMs,
   }) =>
       JamUiState(
         phase: phase ?? this.phase,
@@ -64,6 +71,7 @@ class JamUiState {
         peerId: peerId ?? this.peerId,
         outcome: outcome ?? this.outcome,
         lost: lost ?? this.lost,
+        syncErrorMs: syncErrorMs ?? this.syncErrorMs,
       );
 }
 
@@ -79,6 +87,7 @@ class JamController extends Notifier<JamUiState> {
   JamGuest? _guest;
   JamOutput? _output;
   JamCache? _cache;
+  JamClock? _clock;
   StreamSubscription<void>? _hostSub, _guestSub, _lostSub;
   StreamSubscription<JamRequest>? _reqSub;
   Timer? _alive;
@@ -187,11 +196,17 @@ class JamController extends Notifier<JamUiState> {
     _cache = JamCache(dir);
     await _cache!.clear();
     _failures = 0;
+    final clock = _clock = _makeClock(role);
     _output = JamOutput(
       deviceId: _ownId,
       backend: ref.read(jamBackendFactoryProvider)(),
       resolve: _resolve,
+      clock: clock,
+      latencyMs: ref.read(settingsProvider).jamLatencyMs,
     )
+      ..onSyncError = (e) {
+        if (state.active) state = state.copyWith(syncErrorMs: e);
+      }
       ..onTrackEnded = (id) {
         send(JamCommand.trackEnded(id));
       }
@@ -207,6 +222,27 @@ class JamController extends Notifier<JamUiState> {
       });
     }
     _onState(s);
+  }
+
+  /// Reference clock: the host's own for a host, estimated for a guest.
+  JamClock _makeClock(JamRole role) {
+    if (role == JamRole.host) {
+      return JamClock(
+        probe: () async => null,
+        localNowMs: () => DateTime.now().millisecondsSinceEpoch,
+      );
+    }
+    late final JamClock c;
+    c = JamClock(probe: () async => _guest?.probeHostTime(c.localNowMs));
+    unawaited(c.sync().then((_) => c.start()));
+    return c;
+  }
+
+  /// Latency compensation changed in the settings.
+  void setLatencyMs(int ms) {
+    final v = ms.clamp(-500, 1000);
+    ref.read(settingsProvider.notifier).update((s) => s.copyWith(jamLatencyMs: v));
+    _output?.latencyMs = v;
   }
 
   // ---- state & playback ----------------------------------------------------
@@ -262,8 +298,11 @@ class JamController extends Notifier<JamUiState> {
     }
     final uri = _remoteUri(item);
     final remote = uri == null ? null : JamSource.remote(uri, _headers);
-    final cached = _cache?.sourceFor(item, remote);
-    return cached;
+    // Synchronised outputs play from the local copy: no network jitter.
+    if (uri != null && (state.jam?.synced ?? false) && _cache != null) {
+      await _cache!.fetch(item, uri, _headers);
+    }
+    return _cache?.sourceFor(item, remote);
   }
 
   Future<String?> _localFile(JamItem item) async {
@@ -331,6 +370,18 @@ class JamController extends Notifier<JamUiState> {
   Future<void> setOutput(String deviceId) =>
       send(JamCommand.setOutput(deviceId));
 
+  /// Turns [deviceId] on or off as an output (at least one stays on).
+  Future<void> toggleOutput(String deviceId) {
+    final now = state.jam?.outputs ?? const <String>[];
+    final next = now.contains(deviceId)
+        ? now.where((d) => d != deviceId).toList()
+        : [...now, deviceId];
+    if (next.isEmpty) return Future.value();
+    return send(next.length == 1
+        ? JamCommand.setOutput(next.first)
+        : JamCommand.setOutputs(next));
+  }
+
   /// Host ends for both; the guest just leaves.
   Future<void> end() async {
     if (state.role == JamRole.host) {
@@ -355,6 +406,8 @@ class JamController extends Notifier<JamUiState> {
     await _guestSub?.cancel();
     await _lostSub?.cancel();
     _hostSub = _guestSub = _lostSub = null;
+    _clock?.stop();
+    _clock = null;
     await _output?.dispose();
     _output = null;
     await _cache?.clear();

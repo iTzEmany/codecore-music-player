@@ -532,5 +532,24 @@
   },
   "jamUnavailable": "Non disponibile",
   "jamPlaying": "La Jam è attiva",
-  "jamOpen": "Apri la Jam"
+  "jamOpen": "Apri la Jam",
+  "jamSynced": "Sincronizzato · scarto {ms} ms",
+  "@jamSynced": {
+    "placeholders": {
+      "ms": {
+        "type": "int"
+      }
+    }
+  },
+  "jamSyncing": "Sincronizzazione in corso…",
+  "jamLatency": "Latenza di questa uscita: {ms} ms",
+  "@jamLatency": {
+    "placeholders": {
+      "ms": {
+        "type": "int"
+      }
+    }
+  },
+  "jamLatencyHint": "Per cuffie o casse Bluetooth: aumenta finché le uscite suonano insieme.",
+  "jamOutputsHint": "Più uscite suonano insieme"
 }

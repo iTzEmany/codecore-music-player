@@ -32,8 +32,8 @@ class JamSyncAction {
 /// Thresholds of the drift controller (see docs/fase-10-jam-sincronia.md).
 class JamSyncTuning {
   const JamSyncTuning({
-    this.ignoreMs = 40,
-    this.resetMs = 15,
+    this.ignoreMs = 25,
+    this.resetMs = 10,
     this.seekMs = 250,
     this.speedDelta = 0.02,
     this.idleSeekMs = 150,

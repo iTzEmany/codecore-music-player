@@ -117,4 +117,46 @@ void main() {
     expect(find.text('apri'), findsOneWidget);
     await h.dispose(tester);
   });
+
+  testWidgets('synchronised outputs show the offset and the latency control',
+      (tester) async {
+    tester.view.physicalSize = const Size(500, 1100);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final h = await Harness.create(tester);
+    final base = active(host: true);
+    final synced = JamUiState(
+      phase: base.phase,
+      role: base.role,
+      peerName: base.peerName,
+      peerId: base.peerId,
+      syncErrorMs: -12,
+      jam: base.jam!.copyWith(
+        outputDeviceId: 'host',
+        outputDeviceIds: const ['host', 'peer'],
+        participants: const [
+          JamParticipant(id: 'host', name: 'PC'),
+          JamParticipant(id: 'peer', name: 'Telefono', host: '10.0.0.3', port: 1),
+        ],
+      ),
+    );
+    await tester.pumpWidget(ProviderScope(
+      overrides: [
+        ...h.overrides,
+        jamProvider.overrideWith(() => _FakeJam(synced)),
+      ],
+      child: MaterialApp(
+        locale: const Locale('it'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: const JamScreen(),
+      ),
+    ));
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.text('Sincronizzato · scarto 12 ms'), findsOneWidget);
+    expect(find.textContaining('Latenza di questa uscita'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox());
+    await h.dispose(tester);
+  });
 }

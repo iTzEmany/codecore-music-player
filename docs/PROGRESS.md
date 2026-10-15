@@ -108,11 +108,11 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 10.1 Orologio condiviso (`JamClock`, rotta `/time`)
 - [x] 10.2 Modello a più uscite (`outputDeviceIds`, `ready`)
 - [x] 10.3 Controller di sincronia puro
-- [ ] 10.4 Backend: velocità e posizione precisa
-- [ ] 10.5 Precarico obbligatorio e handshake `ready`
-- [ ] 10.6 `JamOutput` multi-uscita
-- [ ] 10.7 Interfaccia (uscite multiple, stato di sincronia, latenza)
-- [ ] 10.8 Simulazione con orologi sfalsati
+- [x] 10.4 Backend: velocità e posizione precisa
+- [x] 10.5 Precarico obbligatorio e handshake `ready`
+- [x] 10.6 `JamOutput` multi-uscita
+- [x] 10.7 Interfaccia (uscite multiple, stato di sincronia, latenza)
+- [x] 10.8 Simulazione con orologi sfalsati
 - [ ] 10.9 Prova reale e misura
 - [ ] 10.10 Documentazione
 
@@ -157,3 +157,4 @@ L'agente riparte sempre dal primo task non spuntato.
 - Prove su due telefoni reali (2026-10-15, Mi A3 = host, Motorola edge 40 = ospite): richiesta/accetta/rifiuta/annulla, aggiunta da entrambi, streaming incrociato con Range e seek, cambio uscita, regole di rimozione, uscita dell'ospite, host in background con servizio e schermo spento, accetta da notifica. Difetti trovati e corretti: HTTP in chiaro bloccato da ExoPlayer (`usesCleartextTraffic`), nome dispositivo «localhost» su Android (canale `deviceName`), ospite che esce non avvisava l'host (`/leave` + controllo di vitalità a 75 s), dialog host che usava `ref` dopo `pop`, dialog di richiesta che restava aperto dopo l'annullamento, nome lungo che spezzava l'IP in colonna nella scheda dispositivo.
 - Non provato: PC (manca `libmpv` per avviare il desktop), Wi‑Fi che cade a metà brano precaricato, schermo bloccato con PIN sul Mi A3 (non sbloccabile da adb).
 - Fase 9 (2026-10-15), prova su PC + Mi A3 + Motorola: Jam a 3 (host Mi A3, Motorola ospite, PC invitato dal Motorola che ha accettato per conto dell'host), streaming ospite→ospite con `fileToken`, uscita sul Motorola per un brano del PC, uscita del Motorola (invitante): PC e Mi A3 proseguono, i suoi brani spariscono e l'uscita torna all'host; l'ultimo ospite che esce chiude la Jam. Tetto 5 partecipanti (host incluso), vitalità 75 s per membro.
+- Fase 10 (2026-10-15): deviazioni — (a) niente comando `ready`: l'avvio ha un anticipo fisso di 1,5 s (`jamStartLeadMs`) e chi non è pronto entra dopo con seek; (b) soglia di ignoro 25 ms invece di 40 (la simulazione con 25 ms di jitter per tratta dava 97 ms di scarto massimo con 40); (c) le uscite sincronizzate scaricano il file nella cache prima di caricare (`JamController._resolve`).

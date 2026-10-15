@@ -1733,6 +1733,36 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Apri la Jam'**
   String get jamOpen;
+
+  /// No description provided for @jamSynced.
+  ///
+  /// In it, this message translates to:
+  /// **'Sincronizzato · scarto {ms} ms'**
+  String jamSynced(int ms);
+
+  /// No description provided for @jamSyncing.
+  ///
+  /// In it, this message translates to:
+  /// **'Sincronizzazione in corso…'**
+  String get jamSyncing;
+
+  /// No description provided for @jamLatency.
+  ///
+  /// In it, this message translates to:
+  /// **'Latenza di questa uscita: {ms} ms'**
+  String jamLatency(int ms);
+
+  /// No description provided for @jamLatencyHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Per cuffie o casse Bluetooth: aumenta finché le uscite suonano insieme.'**
+  String get jamLatencyHint;
+
+  /// No description provided for @jamOutputsHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Più uscite suonano insieme'**
+  String get jamOutputsHint;
 }
 
 class _AppLocalizationsDelegate

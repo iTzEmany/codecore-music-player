@@ -341,5 +341,24 @@
   },
   "jamUnavailable": "Unavailable",
   "jamPlaying": "Jam is active",
-  "jamOpen": "Open Jam"
+  "jamOpen": "Open Jam",
+  "jamSynced": "In sync · offset {ms} ms",
+  "@jamSynced": {
+    "placeholders": {
+      "ms": {
+        "type": "int"
+      }
+    }
+  },
+  "jamSyncing": "Synchronising…",
+  "jamLatency": "This output's latency: {ms} ms",
+  "@jamLatency": {
+    "placeholders": {
+      "ms": {
+        "type": "int"
+      }
+    }
+  },
+  "jamLatencyHint": "For Bluetooth headphones or speakers: raise it until the outputs line up.",
+  "jamOutputsHint": "Several outputs play together"
 }

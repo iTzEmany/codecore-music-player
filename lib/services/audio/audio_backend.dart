@@ -25,5 +25,11 @@ abstract class AudioBackend {
   Future<void> stop();
   Future<void> seek(Duration position);
   Future<void> setVolume(double volume);
+
+  /// Playback rate (1.0 = normal), used by the Jam to absorb small drifts.
+  Future<void> setSpeed(double speed);
+
+  /// Current position read on demand (not from the throttled stream).
+  Duration get positionNow;
   Future<void> dispose();
 }

@@ -15,6 +15,7 @@ class AppSettings {
     this.autoLyrics = false,
     this.showUndoSnackbar = true,
     this.deviceName,
+    this.jamLatencyMs = 0,
     this.normalizeVolume = false,
     this.receiveFromLan = false,
   });
@@ -33,6 +34,9 @@ class AppSettings {
   /// Shown to the device on the other side of a LAN share; null = hostname.
   final String? deviceName;
 
+  /// Extra output latency of this device in a synchronised Jam (ms).
+  final int jamLatencyMs;
+
   AppSettings copyWith({
     String? theme,
     double? fontScale,
@@ -43,6 +47,7 @@ class AppSettings {
     bool? autoLyrics,
     bool? showUndoSnackbar,
     String? deviceName,
+    int? jamLatencyMs,
     bool? normalizeVolume,
     bool? receiveFromLan,
   }) =>
@@ -56,6 +61,7 @@ class AppSettings {
         autoLyrics: autoLyrics ?? this.autoLyrics,
         showUndoSnackbar: showUndoSnackbar ?? this.showUndoSnackbar,
         deviceName: deviceName ?? this.deviceName,
+        jamLatencyMs: jamLatencyMs ?? this.jamLatencyMs,
         normalizeVolume: normalizeVolume ?? this.normalizeVolume,
         receiveFromLan: receiveFromLan ?? this.receiveFromLan,
       );
@@ -98,6 +104,7 @@ class SettingsStore {
         deviceName: _prefs.getString('deviceName'),
         normalizeVolume: _prefs.getBool('normalizeVolume') ?? false,
         receiveFromLan: _prefs.getBool('receiveFromLan') ?? false,
+        jamLatencyMs: _prefs.getInt('jamLatencyMs') ?? 0,
       );
 
   Future<void> writeSettings(AppSettings s) async {
@@ -111,6 +118,7 @@ class SettingsStore {
     await _prefs.setBool('showUndoSnackbar', s.showUndoSnackbar);
     await _prefs.setBool('normalizeVolume', s.normalizeVolume);
     await _prefs.setBool('receiveFromLan', s.receiveFromLan);
+    await _prefs.setInt('jamLatencyMs', s.jamLatencyMs);
     final dn = s.deviceName;
     if (dn == null || dn.isEmpty) {
       await _prefs.remove('deviceName');

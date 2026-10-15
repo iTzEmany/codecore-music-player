@@ -64,8 +64,8 @@ void main() {
 
   group('drift', () {
     test('small error is left alone', () {
-      // expected 5000, measured 5030
-      final a = decide(now: 6000, measured: 5030);
+      // expected 5000, measured 5020
+      final a = decide(now: 6000, measured: 5020);
       expect(a.isNoop, true);
     });
 
@@ -85,9 +85,9 @@ void main() {
     });
 
     test('normal speed resumes once close again', () {
-      expect(decide(now: 6000, measured: 5010, speed: 0.98).speed, 1.0);
+      expect(decide(now: 6000, measured: 5008, speed: 0.98).speed, 1.0);
       // between reset and ignore thresholds the speed is kept
-      expect(decide(now: 6000, measured: 5030, speed: 0.98).isNoop, true);
+      expect(decide(now: 6000, measured: 5020, speed: 0.98).isNoop, true);
     });
 
     test('own latency shifts the target', () {

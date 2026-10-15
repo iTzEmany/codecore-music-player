@@ -341,5 +341,24 @@
   },
   "jamUnavailable": "No disponible",
   "jamPlaying": "La Jam está activa",
-  "jamOpen": "Abrir Jam"
+  "jamOpen": "Abrir Jam",
+  "jamSynced": "Sincronizado · desvío {ms} ms",
+  "@jamSynced": {
+    "placeholders": {
+      "ms": {
+        "type": "int"
+      }
+    }
+  },
+  "jamSyncing": "Sincronizando…",
+  "jamLatency": "Latencia de esta salida: {ms} ms",
+  "@jamLatency": {
+    "placeholders": {
+      "ms": {
+        "type": "int"
+      }
+    }
+  },
+  "jamLatencyHint": "Para auriculares o altavoces Bluetooth: súbela hasta que las salidas coincidan.",
+  "jamOutputsHint": "Varias salidas suenan juntas"
 }
