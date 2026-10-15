@@ -89,4 +89,32 @@ void main() {
     expect(find.text('Rifiuta'), findsOneWidget);
     await h.dispose(tester);
   });
+
+  testWidgets('request dialog closes by itself when the requester cancels',
+      (tester) async {
+    final h = await Harness.create(tester);
+    final req = JamRequest(
+        id: 'r', fromId: 'x', fromName: 'Telefono', fromHost: '10.0.0.2',
+        fromPort: 1, token: 'tttttttt', receivedAt: DateTime.now());
+    await h.pump(
+        tester,
+        Builder(
+            builder: (c) => Scaffold(
+                body: Center(
+                    child: TextButton(
+                        onPressed: () => showDialog<void>(
+                            context: c,
+                            builder: (_) => JamRequestDialog(request: req)),
+                        child: const Text('apri'))))));
+    await tester.tap(find.text('apri'));
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.text('Telefono vuole avviare una Jam'), findsOneWidget);
+    req.status = JamRequestStatus.cancelled;
+    await tester.pump(const Duration(milliseconds: 1200));
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.text('Telefono vuole avviare una Jam'), findsNothing);
+    // the page underneath is still there
+    expect(find.text('apri'), findsOneWidget);
+    await h.dispose(tester);
+  });
 }

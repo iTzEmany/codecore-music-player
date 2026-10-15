@@ -28,8 +28,11 @@ class _JamRequestDialogState extends ConsumerState<JamRequestDialog> {
     super.initState();
     // The requester may cancel (or the request expire) while the dialog is up.
     _watch = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (request.status != JamRequestStatus.pending && mounted) {
-        _watch?.cancel();
+      if (request.status == JamRequestStatus.pending || !mounted) return;
+      _watch?.cancel();
+      // Only when the dialog itself is the top route: a pop() issued while it
+      // is already closing would take away the screen below.
+      if (ModalRoute.of(context)?.isCurrent ?? false) {
         Navigator.of(context).pop();
       }
     });
@@ -51,6 +54,7 @@ class _JamRequestDialogState extends ConsumerState<JamRequestDialog> {
       actions: [
         TextButton(
           onPressed: () {
+            _watch?.cancel();
             ctrl.decline(request);
             Navigator.of(context).pop();
           },
@@ -59,6 +63,7 @@ class _JamRequestDialogState extends ConsumerState<JamRequestDialog> {
         FilledButton(
           onPressed: () async {
             // The dialog is gone after pop(): keep what is needed beforehand.
+            _watch?.cancel();
             final nav = Navigator.of(context);
             final container = ProviderScope.containerOf(context);
             nav.pop();

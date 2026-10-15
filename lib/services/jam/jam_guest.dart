@@ -18,11 +18,12 @@ class JamGuest {
     Dio? dio,
     this.requestPoll = const Duration(seconds: 1),
     this.maxFailures = 6,
+    this.lostAfter = const Duration(seconds: 60),
     this.backoff = const Duration(seconds: 1),
   }) : _dio = dio ??
             Dio(BaseOptions(
               connectTimeout: const Duration(seconds: 5),
-              receiveTimeout: jamPollWait + const Duration(seconds: 10),
+              receiveTimeout: jamPollWait + const Duration(seconds: 5),
               validateStatus: (_) => true,
             ));
 
@@ -30,6 +31,9 @@ class JamGuest {
   final Dio _dio;
   final Duration requestPoll, backoff;
   final int maxFailures;
+
+  /// The session is given up when nothing came back for this long.
+  final Duration lostAfter;
 
   String? _base, _sid, _token, _requestId;
   JamState? _state;
@@ -145,6 +149,7 @@ class JamGuest {
 
   Future<void> _loop() async {
     var failures = 0;
+    var lastOk = DateTime.now();
     while (_running) {
       try {
         final since = _state?.version ?? -1;
@@ -153,6 +158,7 @@ class JamGuest {
         if (!_running) break;
         if (r.statusCode == 200) {
           failures = 0;
+          lastOk = DateTime.now();
           final s = JamState.tryParse(r.data);
           if (s != null) {
             _apply(s);
@@ -167,7 +173,8 @@ class JamGuest {
         }
         throw DioException(requestOptions: r.requestOptions, response: r);
       } on DioException {
-        if (++failures >= maxFailures) {
+        if (++failures >= maxFailures ||
+            DateTime.now().difference(lastOk) > lostAfter) {
           _markLost();
           return;
         }
