@@ -23,3 +23,12 @@ Per ogni rischio: **sintomo** → **cosa fare**. Se scatta un fallback che cambi
 - Niente Android Auto.
 - Niente scrittura dei tag nei file.
 - Condivisione LAN solo HTTP con PIN (non cifrata).
+
+## Jam (fase 8)
+| # | Rischio | Sintomo | Piano B |
+|---|---|---|---|
+| R13 | Il proprietario di un brano esce dalla rete | Il brano non parte / si interrompe | Precarico in cache del brano successivo; altrimenti salto con avviso |
+| R14 | Android ferma l'app in background (Doze, risparmio energetico) | La Jam si interrompe a schermo spento | Servizio in primo piano con notifica «Termina»; guida utente: escludere dall'ottimizzazione batteria |
+| R15 | Deriva tra stato e posizione di ascolto | Il telecomando mostra una posizione diversa | Soglia di correzione 1,5 s; nessuna promessa di sincronia (la riproduzione sincronizzata è fuori scope) |
+| R16 | Reti con isolamento dei client o sottoreti diverse | Nessun dispositivo trovato | Messaggio chiaro; collegamento manuale (IP:porta) come fallback |
+

@@ -84,6 +84,17 @@ L'agente riparte sempre dal primo task non spuntato.
 - [~] 7.9 Build di rilascio
 - [x] 7.10 Documentazione finale
 
+## Fase 8 — Jam sulla rete locale (`fase-8-jam.md`)
+- [ ] 8.1 Modello e logica pura (JamItem, JamState, comandi, permessi)
+- [ ] 8.2 Sessione lato host (richiesta, accettazione, stato, long polling)
+- [ ] 8.3 Client ospite
+- [ ] 8.4 Riproduzione di elementi remoti (URL + token)
+- [ ] 8.5 Uscita audio selezionabile e controllo remoto
+- [ ] 8.6 Precarico e resilienza (cache temporanea)
+- [ ] 8.7 Interfaccia (pulsante Jam, coda condivisa, uscita, termina)
+- [ ] 8.8 Background Android e rifinitura
+- [ ] 8.9 Documentazione
+
 ## Note di deviazione
 <!-- una riga per deviazione: data — task — cosa è cambiato e perché -->
 

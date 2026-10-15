@@ -13,7 +13,7 @@ Italiano, English, Deutsch, Español.
 - **Preferiti, playlist** (copertina personalizzabile, riordino), modifica info (solo nel DB), temi (OLED, carbone, blu notte, chiaro).
 - **Online (solo su azione tua o opzioni attive)**: info e copertine da iTunes, testi sincronizzati da LRCLIB,
   curiosità da Wikipedia, ricerca e download da YouTube con yt-dlp.
-- **Condivisione LAN** telefono ↔ PC con PIN e QR, senza server esterni.
+- **Condivisione LAN** telefono ↔ PC senza server esterni: scoperta automatica dei dispositivi, richiesta con accettazione (anche da notifica su Android, anche in background), collegamento manuale con PIN e QR.
 - **Import** di preferiti, testi e playlist dalla vecchia app Python (Impostazioni → «Importa dalla vecchia app»).
 
 ## Installare
@@ -34,6 +34,9 @@ flutter gen-l10n                                            # dopo modifiche agl
 ```
 Firma Android: crea `android/key.properties` (non versionato) con `storeFile`, `storePassword`, `keyAlias`, `keyPassword`;
 senza il file la build release usa la chiave di debug.
+
+## In programma
+- **Jam** sulla rete locale (coda condivisa, brani in streaming dal proprietario, uscita audio selezionabile): piano in [`docs/fase-8-jam.md`](docs/fase-8-jam.md).
 
 ## Limiti noti
 - Niente crossfade/gapless nativo, niente equalizzatore, niente scrittura dei tag nei file.

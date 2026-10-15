@@ -40,7 +40,8 @@ lib/
     online/wikipedia_client.dart
     online/enrichment_service.dart
     online/youtube_service.dart
-    share/lan_server.dart, lan_client.dart  # (fase 6)
+    share/lan_server.dart, lan_client.dart, offers.dart, discovery.dart  # (fase 6)
+    jam/jam_state.dart, jam_host.dart, jam_guest.dart, jam_output.dart, jam_cache.dart  # (fase 8)
   providers/                      # provider Riverpod (database, settings, player, library, ...)
   ui/
     theme/app_theme.dart
@@ -79,3 +80,11 @@ Scritture con debounce 400 ms, mai in un handler di slider a ogni tick.
 - Niente gapless/crossfade/"bit-perfect" nella v1: coda gestita a mano. Gapless in fase 7.
 - Niente traduzione automatica nella v1 (era un endpoint Google non ufficiale). Eventuale ML Kit solo Android, più avanti.
 - Niente server web, niente protocollo MSTP: la fase 6 è un semplice scambio HTTP con PIN.
+
+## Jam (fase 8, pianificata)
+- Un dispositivo suona alla volta (uscita selezionabile); l'altro è telecomando. Nessuna sincronia tra due uscite.
+- Stato condiviso autoritativo sull'host (`JamState` con `version`); comandi validati da una funzione pura
+  (`applyCommand`) con i permessi: l'ospite non può cambiare brano direttamente.
+- I brani restano sul dispositivo del proprietario e si leggono in streaming (`Range`, token di sessione) solo
+  se sono in coda; nessuna libreria esposta. Precarico del successivo in cache temporanea.
+- Trasporto: lo stesso endpoint HTTP delle offerte (`OfferNode`), aggiornamenti con long polling.
