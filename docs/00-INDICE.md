@@ -24,6 +24,8 @@ un'unica codebase Flutter per Android, Windows e Linux. Uso personale, niente co
 | 6 | `fase-6-condivisione-lan.md` | (Opzionale) invio brani tra dispositivi sulla stessa rete |
 | 7 | `fase-7-rifinitura.md` | Gapless, import dal vecchio DB, icone, build finali |
 | 8 | `fase-8-jam.md` | Jam sulla rete locale: coda condivisa, brani in streaming dal proprietario, uscita audio selezionabile |
+| 9 | `fase-9-jam-multi.md` | Jam con più di 2 dispositivi (fino a 5), inviti anche dagli ospiti |
+| 10 | `fase-10-jam-sincronia.md` | Riproduzione sincronizzata su più uscite (orologio condiviso, correzione della deriva) |
 
 Dopo la **Fase 3** l'app è già usabile come lettore. Le fasi 5 e 6 sono indipendenti tra loro. La fase 8 (Jam) richiede la 6.
 
