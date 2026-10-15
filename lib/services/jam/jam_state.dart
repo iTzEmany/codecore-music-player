@@ -26,6 +26,10 @@ JamResult applyCommand(
   JamState frozen() =>
       s.copyWith(positionMs: s.positionAtTime(nowMs), positionAt: nowMs);
 
+  /// When playback resumes: now, or a moment ahead when several devices have
+  /// to start together.
+  int startAt(JamState n) => n.synced ? nowMs + jamStartLeadMs : nowMs;
+
   switch (cmd.type) {
     case JamCommandType.add:
       final item = cmd.item!;
@@ -79,7 +83,8 @@ JamResult applyCommand(
 
     case JamCommandType.play:
       if (s.current == null) return const JamResult.fail(JamError.invalid);
-      return commit(frozen().copyWith(playing: true));
+      final started = frozen().copyWith(playing: true);
+      return commit(started.copyWith(positionAt: startAt(started)));
 
     case JamCommandType.pause:
       return commit(frozen().copyWith(playing: false));
@@ -90,7 +95,7 @@ JamResult applyCommand(
       if (s.current == null || p < 0 || (dur > 0 && p > dur)) {
         return const JamResult.fail(JamError.invalid);
       }
-      return commit(s.copyWith(positionMs: p, positionAt: nowMs));
+      return commit(s.copyWith(positionMs: p, positionAt: startAt(s)));
 
     case JamCommandType.volume:
       final v = cmd.volume!;
@@ -105,8 +110,23 @@ JamResult applyCommand(
           ? (d == s.hostDeviceId || d == from || isHost)
           : s.participant(d) != null;
       if (!known) return const JamResult.fail(JamError.invalid);
-      if (d == s.outputDeviceId) return JamResult.ok(s);
-      return commit(frozen().copyWith(outputDeviceId: d));
+      if (d == s.outputDeviceId && s.outputDeviceIds.isEmpty) {
+        return JamResult.ok(s);
+      }
+      return commit(
+          frozen().copyWith(outputDeviceId: d, outputDeviceIds: const []));
+
+    case JamCommandType.setOutputs:
+      final ids = cmd.deviceIds!.toSet().toList();
+      final allKnown = s.participants.isEmpty
+          ? ids.every((d) => d == s.hostDeviceId || d == from || isHost)
+          : ids.every((d) => s.participant(d) != null);
+      if (ids.isEmpty || !allKnown) return const JamResult.fail(JamError.invalid);
+      final n = frozen().copyWith(
+          outputDeviceId: ids.first,
+          outputDeviceIds: ids.length == 1 ? const [] : ids);
+      // Re-align everybody: the new set starts together a moment from now.
+      return commit(n.playing ? n.copyWith(positionAt: startAt(n)) : n);
 
     case JamCommandType.next:
       if (!isHost) return const JamResult.fail(JamError.forbidden);
@@ -117,7 +137,7 @@ JamResult applyCommand(
       final idx = indexOf(cmd.itemId);
       if (idx < 0) return const JamResult.fail(JamError.notFound);
       return commit(s.copyWith(
-          currentIndex: idx, positionMs: 0, positionAt: nowMs, playing: true));
+          currentIndex: idx, positionMs: 0, positionAt: startAt(s), playing: true));
 
     case JamCommandType.trackEnded:
       // Natural end of a track, reported by the output device (either role).
@@ -137,6 +157,8 @@ JamResult _advance(JamState s, int nowMs, JamResult Function(JamState) commit) {
     // Queue finished: stop on the last item, rewound.
     return commit(s.copyWith(playing: false, positionMs: 0, positionAt: nowMs));
   }
-  return commit(
-      s.copyWith(currentIndex: n, positionMs: 0, positionAt: nowMs));
+  return commit(s.copyWith(
+      currentIndex: n,
+      positionMs: 0,
+      positionAt: s.synced ? nowMs + jamStartLeadMs : nowMs));
 }

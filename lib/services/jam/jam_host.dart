@@ -222,8 +222,16 @@ class JamHost {
       if (r.isOk) s = r.state!;
     }
     // The output cannot be a device that left.
-    if (s.outputDeviceId == id) {
-      s = s.copyWith(outputDeviceId: deviceId, playing: false);
+    if (s.outputs.contains(id)) {
+      final left = s.outputs.where((o) => o != id).toList();
+      s = left.isEmpty
+          ? s.copyWith(
+              outputDeviceId: deviceId,
+              outputDeviceIds: const [],
+              playing: false)
+          : s.copyWith(
+              outputDeviceId: left.first,
+              outputDeviceIds: left.length == 1 ? const [] : left);
     }
     _publish(s);
     if (_members.isEmpty) endSession();

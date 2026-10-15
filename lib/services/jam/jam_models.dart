@@ -2,6 +2,10 @@ const maxJamItems = 200;
 
 /// Host included.
 const maxJamParticipants = 5;
+
+/// With several outputs playback starts this far in the future so that every
+/// output can be in position when the Jam clock gets there.
+const jamStartLeadMs = 1500;
 const maxJamText = 200;
 const jamExts = {
   'mp3', 'flac', 'wav', 'ogg', 'oga', 'opus', 'm4a', 'aac', 'aiff', 'aif',
@@ -131,6 +135,7 @@ class JamState {
     this.volume = 1.0,
     required this.hostDeviceId,
     required this.outputDeviceId,
+    this.outputDeviceIds = const [],
     this.nextItemId = 1,
     this.ended = false,
   });
@@ -146,6 +151,9 @@ class JamState {
   final int positionMs, positionAt;
   final double volume;
   final String hostDeviceId, outputDeviceId;
+
+  /// All outputs when more than one device plays (empty = just [outputDeviceId]).
+  final List<String> outputDeviceIds;
   final int nextItemId;
   final bool ended;
 
@@ -158,8 +166,14 @@ class JamState {
   JamItem? get current =>
       currentIndex >= 0 && currentIndex < items.length ? items[currentIndex] : null;
 
+  /// Devices that play, never empty.
+  List<String> get outputs =>
+      outputDeviceIds.isEmpty ? [outputDeviceId] : outputDeviceIds;
+
+  bool get synced => outputs.length > 1;
+
   int positionAtTime(int nowMs) {
-    if (!playing) return positionMs;
+    if (!playing || nowMs < positionAt) return positionMs;
     final p = positionMs + (nowMs - positionAt);
     return p < 0 ? 0 : p;
   }
@@ -174,6 +188,7 @@ class JamState {
     int? positionAt,
     double? volume,
     String? outputDeviceId,
+    List<String>? outputDeviceIds,
     int? nextItemId,
     bool? ended,
   }) =>
@@ -188,6 +203,7 @@ class JamState {
         volume: volume ?? this.volume,
         hostDeviceId: hostDeviceId,
         outputDeviceId: outputDeviceId ?? this.outputDeviceId,
+        outputDeviceIds: outputDeviceIds ?? this.outputDeviceIds,
         nextItemId: nextItemId ?? this.nextItemId,
         ended: ended ?? this.ended,
       );
@@ -203,6 +219,7 @@ class JamState {
         'volume': volume,
         'host': hostDeviceId,
         'output': outputDeviceId,
+        if (outputDeviceIds.isNotEmpty) 'outputs': outputDeviceIds,
         'next': nextItemId,
         'ended': ended,
       };
@@ -230,6 +247,15 @@ class JamState {
         people.add(p);
       }
     }
+    final rawOutputs = j['outputs'];
+    final outputs = <String>[];
+    if (rawOutputs is List) {
+      if (rawOutputs.length > maxJamParticipants) return null;
+      for (final o in rawOutputs) {
+        if (o is! String || o.isEmpty || o.length > 64) return null;
+        outputs.add(o);
+      }
+    }
     final cur = j['current'];
     final vol = j['volume'];
     return JamState(
@@ -243,6 +269,7 @@ class JamState {
       volume: vol is num ? vol.toDouble().clamp(0.0, 1.0) : 1.0,
       hostDeviceId: host,
       outputDeviceId: output,
+      outputDeviceIds: outputs,
       nextItemId: j['next'] is int ? j['next'] as int : items.length + 1,
       ended: j['ended'] == true,
     );
@@ -258,6 +285,7 @@ enum JamCommandType {
   seek,
   volume,
   setOutput,
+  setOutputs,
   next,
   jump,
   trackEnded,
@@ -266,7 +294,13 @@ enum JamCommandType {
 
 class JamCommand {
   const JamCommand._(this.type,
-      {this.item, this.itemId, this.toIndex, this.positionMs, this.volume, this.deviceId});
+      {this.item,
+      this.itemId,
+      this.toIndex,
+      this.positionMs,
+      this.volume,
+      this.deviceId,
+      this.deviceIds});
 
   const JamCommand.add(JamItem item) : this._(JamCommandType.add, item: item);
   const JamCommand.remove(int itemId)
@@ -280,6 +314,8 @@ class JamCommand {
   const JamCommand.volume(double v) : this._(JamCommandType.volume, volume: v);
   const JamCommand.setOutput(String deviceId)
       : this._(JamCommandType.setOutput, deviceId: deviceId);
+  const JamCommand.setOutputs(List<String> deviceIds)
+      : this._(JamCommandType.setOutputs, deviceIds: deviceIds);
   const JamCommand.next() : this._(JamCommandType.next);
   const JamCommand.jump(int itemId) : this._(JamCommandType.jump, itemId: itemId);
 
@@ -293,6 +329,7 @@ class JamCommand {
   final int? itemId, toIndex, positionMs;
   final double? volume;
   final String? deviceId;
+  final List<String>? deviceIds;
 
   Map<String, Object?> toJson() => {
         'cmd': type.name,
@@ -302,6 +339,7 @@ class JamCommand {
         if (positionMs != null) 'pos': positionMs,
         if (volume != null) 'volume': volume,
         if (deviceId != null) 'device': deviceId,
+        if (deviceIds != null) 'devices': deviceIds,
       };
 
   static JamCommand? tryParse(Object? j) {
@@ -336,6 +374,15 @@ class JamCommand {
         return d is String && d.isNotEmpty && d.length <= 64
             ? JamCommand.setOutput(d)
             : null;
+      case JamCommandType.setOutputs:
+        final d = j['devices'];
+        if (d is! List || d.isEmpty || d.length > maxJamParticipants) return null;
+        final ids = <String>[];
+        for (final e in d) {
+          if (e is! String || e.isEmpty || e.length > 64) return null;
+          ids.add(e);
+        }
+        return JamCommand.setOutputs(ids);
       case JamCommandType.next:
         return const JamCommand.next();
       case JamCommandType.jump:
