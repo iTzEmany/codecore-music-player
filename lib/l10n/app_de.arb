@@ -416,12 +416,20 @@
   "moreActions": "Weitere Aktionen",
   "sleepChipEnd": "Titelende",
   "yourLibrary": "Deine Bibliothek",
-  "playlistCountLabel": "Playlist · {n} Titel",
+  "playlistCountLabel": "{n, plural, one{Playlist · 1 Titel} other{Playlist · {n} Titel}}",
   "@playlistCountLabel": {
     "placeholders": {
       "n": {
         "type": "int"
       }
     }
-  }
+  },
+  "sortRecent": "Zuletzt gehört",
+  "sortAlphabetical": "Alphabetisch",
+  "sortAddedRecently": "Zuletzt hinzugefügt",
+  "viewAsGrid": "Als Raster anzeigen",
+  "viewAsList": "Als Liste anzeigen",
+  "kindAlbum": "Album",
+  "kindArtist": "Künstler",
+  "kindPlaylist": "Playlist"
 }

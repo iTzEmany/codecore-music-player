@@ -57,4 +57,29 @@ void main() {
     final al = await q.watchArtistAlbums('queen').first;
     expect(al.single.albumKey, 'queen|greatest hits');
   });
+
+  test('last played / added are the latest of the album\'s and artist\'s tracks',
+      () async {
+    await db.customStatement(
+        "UPDATE tracks SET last_played_at = 500 WHERE path = '/1'");
+    await db.customStatement(
+        "UPDATE tracks SET last_played_at = 900, added_at = 77 WHERE path = '/2'");
+    final albums = await q.watchAlbums().first;
+    final queen = albums.firstWhere((a) => a.artist == 'Queen');
+    expect(queen.lastPlayedAt, 900);
+    expect(queen.addedAt, 77);
+    expect(albums.firstWhere((a) => a.artist == 'ABBA').lastPlayedAt, isNull);
+    final artists = await q.watchArtists().first;
+    expect(artists.firstWhere((a) => a.key == 'queen').lastPlayedAt, 900);
+  });
+
+  test('artist cover is the most frequent cover among their tracks', () async {
+    await db.customStatement(
+        "UPDATE tracks SET cover_key = 'c1' WHERE path IN ('/1','/2')");
+    await db.customStatement("UPDATE tracks SET cover_key = 'c2' WHERE path = '/3'");
+    final artists = await q.watchArtists().first;
+    expect(artists.firstWhere((a) => a.key == 'queen').coverKey, 'c1');
+    expect(artists.firstWhere((a) => a.key == 'abba').coverKey, 'c2');
+    expect(artists.firstWhere((a) => a.key == 'a').coverKey, isNull);
+  });
 }

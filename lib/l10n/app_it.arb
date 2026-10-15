@@ -607,12 +607,20 @@
   "moreActions": "Altre azioni",
   "sleepChipEnd": "fine brano",
   "yourLibrary": "La tua libreria",
-  "playlistCountLabel": "Playlist · {n} brani",
+  "playlistCountLabel": "{n, plural, one{Playlist · 1 brano} other{Playlist · {n} brani}}",
   "@playlistCountLabel": {
     "placeholders": {
       "n": {
         "type": "int"
       }
     }
-  }
+  },
+  "sortRecent": "Recenti",
+  "sortAlphabetical": "Alfabetico",
+  "sortAddedRecently": "Aggiunti di recente",
+  "viewAsGrid": "Mostra come griglia",
+  "viewAsList": "Mostra come elenco",
+  "kindAlbum": "Album",
+  "kindArtist": "Artista",
+  "kindPlaylist": "Playlist"
 }

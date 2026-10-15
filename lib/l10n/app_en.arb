@@ -416,12 +416,20 @@
   "moreActions": "More actions",
   "sleepChipEnd": "end of track",
   "yourLibrary": "Your library",
-  "playlistCountLabel": "Playlist · {n} tracks",
+  "playlistCountLabel": "{n, plural, one{Playlist · 1 track} other{Playlist · {n} tracks}}",
   "@playlistCountLabel": {
     "placeholders": {
       "n": {
         "type": "int"
       }
     }
-  }
+  },
+  "sortRecent": "Recents",
+  "sortAlphabetical": "Alphabetical",
+  "sortAddedRecently": "Recently added",
+  "viewAsGrid": "Show as grid",
+  "viewAsList": "Show as list",
+  "kindAlbum": "Album",
+  "kindArtist": "Artist",
+  "kindPlaylist": "Playlist"
 }

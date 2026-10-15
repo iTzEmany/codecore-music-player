@@ -1058,6 +1058,36 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String playlistCountLabel(int n) {
-    return 'Lista · $n canciones';
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Lista · $n canciones',
+      one: 'Lista · 1 canción',
+    );
+    return '$_temp0';
   }
+
+  @override
+  String get sortRecent => 'Recientes';
+
+  @override
+  String get sortAlphabetical => 'Alfabético';
+
+  @override
+  String get sortAddedRecently => 'Añadidos recientemente';
+
+  @override
+  String get viewAsGrid => 'Ver como cuadrícula';
+
+  @override
+  String get viewAsList => 'Ver como lista';
+
+  @override
+  String get kindAlbum => 'Álbum';
+
+  @override
+  String get kindArtist => 'Artista';
+
+  @override
+  String get kindPlaylist => 'Lista';
 }

@@ -14,6 +14,7 @@ import '../../theme/app_theme.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/track_row.dart';
 import 'folders_sheet.dart';
+import 'scan_status.dart';
 import '../../widgets/error_state.dart';
 
 String _sortLabel(BuildContext context, SortOption o) {
@@ -108,33 +109,10 @@ class _TracksTabState extends ConsumerState<TracksTab> {
                     ),
                 ],
               ),
-              IconButton(
-                tooltip: context.l10n.folders,
-                icon: const Icon(Icons.folder_open),
-                onPressed: () => showModalBottomSheet<void>(
-                  context: context,
-                  builder: (_) => const FoldersSheet(),
-                ),
-              ),
             ],
           ),
         ),
-        if (scan.error != null && !scan.running)
-          MaterialBanner(
-            content: Text(context.l10n.scanFailed(scan.error!)),
-            actions: [
-              TextButton(
-                onPressed: () => scanWithPermission(ref),
-                child: Text(context.l10n.retry),
-              ),
-            ],
-          ),
-        if (scan.running)
-          LinearProgressIndicator(
-            value: (scan.progress == null || scan.progress!.total == 0)
-                ? null
-                : scan.progress!.done / scan.progress!.total,
-          ),
+        const ScanStatus(),
         Expanded(
           child: ref.watch(permissionDeniedProvider)
               ? EmptyState(

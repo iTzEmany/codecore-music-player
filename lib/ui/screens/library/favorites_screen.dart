@@ -9,7 +9,7 @@ class FavoritesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: Text(context.l10n.navFavorites)),
-        body: const TracksTab(favoritesOnly: true),
-      );
+    appBar: AppBar(title: Text(context.l10n.navFavorites)),
+    body: const TracksTab(favoritesOnly: true),
+  );
 }

@@ -77,7 +77,9 @@ void main() {
     final h = await Harness.create(tester, tracks: 3);
     await h.pump(tester, const AppShell());
     await tester.tap(find.text('Libreria'));
-    await tester.pump(const Duration(milliseconds: 300));
+    await _settle(tester);
+    await tester.tap(find.text('Tutti i brani'));
+    await _settle(tester);
     expect(find.text('Song 0'), findsWidgets);
     await tester.tap(find.text('Song 1').first);
     await _settle(tester);
@@ -94,20 +96,20 @@ void main() {
     await h.pump(tester, const AppShell());
     await tester.tap(find.text('Libreria'));
     await _settle(tester);
+    await tester.tap(find.text('Tutti i brani'));
+    await _settle(tester);
     await tester.tap(find.text('Song 0').first);
     await _settle(tester);
-    // Library → Albums tab → first album.
-    await tester.tap(find.text('Album').first);
+    await tester.tap(find.byIcon(Icons.arrow_back));
     await _settle(tester);
-    await _settle(tester);
-    await _settle(tester);
+    // Library lists the albums directly: open the first one.
     await tester.tap(find.text('Album 0').first);
     await _settle(tester);
     expect(find.byType(MiniPlayer), findsOneWidget);
     expect(find.text('Libreria'), findsWidgets); // bottom bar still there
-    // Android back: the album page goes first.
+    // Android back: the album page goes first, back on the Library.
     await tester.binding.handlePopRoute();
-    await tester.pump(const Duration(milliseconds: 500));
+    await _settle(tester);
     expect(find.text('Album 1'), findsWidgets);
     await h.dispose(tester);
   });
@@ -118,6 +120,8 @@ void main() {
     final h = await Harness.create(tester, tracks: 2);
     await h.pump(tester, const AppShell());
     await tester.tap(find.text('Libreria'));
+    await _settle(tester);
+    await tester.tap(find.text('Tutti i brani'));
     await _settle(tester);
     await tester.tap(find.text('Song 0').first);
     await _settle(tester);

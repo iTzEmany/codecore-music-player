@@ -1971,8 +1971,56 @@ abstract class AppLocalizations {
   /// No description provided for @playlistCountLabel.
   ///
   /// In it, this message translates to:
-  /// **'Playlist · {n} brani'**
+  /// **'{n, plural, one{Playlist · 1 brano} other{Playlist · {n} brani}}'**
   String playlistCountLabel(int n);
+
+  /// No description provided for @sortRecent.
+  ///
+  /// In it, this message translates to:
+  /// **'Recenti'**
+  String get sortRecent;
+
+  /// No description provided for @sortAlphabetical.
+  ///
+  /// In it, this message translates to:
+  /// **'Alfabetico'**
+  String get sortAlphabetical;
+
+  /// No description provided for @sortAddedRecently.
+  ///
+  /// In it, this message translates to:
+  /// **'Aggiunti di recente'**
+  String get sortAddedRecently;
+
+  /// No description provided for @viewAsGrid.
+  ///
+  /// In it, this message translates to:
+  /// **'Mostra come griglia'**
+  String get viewAsGrid;
+
+  /// No description provided for @viewAsList.
+  ///
+  /// In it, this message translates to:
+  /// **'Mostra come elenco'**
+  String get viewAsList;
+
+  /// No description provided for @kindAlbum.
+  ///
+  /// In it, this message translates to:
+  /// **'Album'**
+  String get kindAlbum;
+
+  /// No description provided for @kindArtist.
+  ///
+  /// In it, this message translates to:
+  /// **'Artista'**
+  String get kindArtist;
+
+  /// No description provided for @kindPlaylist.
+  ///
+  /// In it, this message translates to:
+  /// **'Playlist'**
+  String get kindPlaylist;
 }
 
 class _AppLocalizationsDelegate

@@ -416,12 +416,20 @@
   "moreActions": "Más acciones",
   "sleepChipEnd": "fin de la canción",
   "yourLibrary": "Tu biblioteca",
-  "playlistCountLabel": "Lista · {n} canciones",
+  "playlistCountLabel": "{n, plural, one{Lista · 1 canción} other{Lista · {n} canciones}}",
   "@playlistCountLabel": {
     "placeholders": {
       "n": {
         "type": "int"
       }
     }
-  }
+  },
+  "sortRecent": "Recientes",
+  "sortAlphabetical": "Alfabético",
+  "sortAddedRecently": "Añadidos recientemente",
+  "viewAsGrid": "Ver como cuadrícula",
+  "viewAsList": "Ver como lista",
+  "kindAlbum": "Álbum",
+  "kindArtist": "Artista",
+  "kindPlaylist": "Lista"
 }

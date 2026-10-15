@@ -14,6 +14,8 @@ class AlbumSummary {
     required this.durationMs,
     required this.year,
     required this.coverKey,
+    this.lastPlayedAt,
+    this.addedAt = 0,
   });
 
   final String albumKey;
@@ -23,6 +25,12 @@ class AlbumSummary {
   final int trackCount, durationMs;
   final int? year;
   final String? coverKey;
+
+  /// Latest play of any of its tracks (epoch ms), null if never played.
+  final int? lastPlayedAt;
+
+  /// Latest `addedAt` of its tracks.
+  final int addedAt;
 }
 
 class ArtistSummary {
@@ -31,11 +39,19 @@ class ArtistSummary {
     required this.name,
     required this.trackCount,
     required this.albumCount,
+    this.coverKey,
+    this.lastPlayedAt,
+    this.addedAt = 0,
   });
 
   final String key; // lowercase trimmed; '' = unknown artist
   final String? name;
   final int trackCount, albumCount;
+
+  /// Cover most present among the artist's tracks.
+  final String? coverKey;
+  final int? lastPlayedAt;
+  final int addedAt;
 }
 
 const _albumSelect = '''
@@ -47,7 +63,9 @@ SELECT album_key,
   COUNT(*) AS track_count,
   SUM(duration_ms) AS duration_ms,
   MAX(year) AS year,
-  MIN(cover_key) AS cover_key
+  MIN(cover_key) AS cover_key,
+  MAX(last_played_at) AS last_played,
+  MAX(added_at) AS added
 FROM tracks
 ''';
 
@@ -68,6 +86,8 @@ class LibraryQueries {
       durationMs: r.read<int?>('duration_ms') ?? 0,
       year: r.read<int?>('year'),
       coverKey: r.read<String?>('cover_key'),
+      lastPlayedAt: r.read<int?>('last_played'),
+      addedAt: r.read<int?>('added') ?? 0,
     );
   }
 
@@ -103,7 +123,14 @@ class LibraryQueries {
     return _db
         .customSelect(
           "SELECT lower(trim(COALESCE(artist, ''))) AS k, MIN(artist) AS name, "
-          'COUNT(*) AS track_count, COUNT(DISTINCT album_key) AS album_count '
+          'COUNT(*) AS track_count, COUNT(DISTINCT album_key) AS album_count, '
+          'MAX(last_played_at) AS last_played, MAX(added_at) AS added, '
+          '(SELECT t2.cover_key FROM tracks t2 WHERE t2.missing = 0 '
+          'AND t2.cover_key IS NOT NULL '
+          "AND lower(trim(COALESCE(t2.artist, ''))) = "
+          "lower(trim(COALESCE(tracks.artist, ''))) "
+          'GROUP BY t2.cover_key ORDER BY COUNT(*) DESC, t2.cover_key LIMIT 1) '
+          'AS cover_key '
           'FROM tracks WHERE missing = 0 GROUP BY k ORDER BY k COLLATE NOCASE',
           readsFrom: {_db.tracks},
         )
@@ -115,6 +142,9 @@ class LibraryQueries {
                   name: r.read<String?>('name'),
                   trackCount: r.read<int>('track_count'),
                   albumCount: r.read<int>('album_count'),
+                  coverKey: r.read<String?>('cover_key'),
+                  lastPlayedAt: r.read<int?>('last_played'),
+                  addedAt: r.read<int?>('added') ?? 0,
                 ),
             ]);
   }

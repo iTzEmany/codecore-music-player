@@ -3,11 +3,18 @@ import 'package:drift/drift.dart';
 import '../db/app_database.dart';
 
 class PlaylistSummary {
-  const PlaylistSummary(this.playlist, this.trackCount, [this.autoCoverKey]);
+  const PlaylistSummary(this.playlist, this.trackCount,
+      [this.autoCoverKey, this.lastPlayedAt, this.addedAt = 0]);
 
   final Playlist playlist;
   final int trackCount;
   final String? autoCoverKey;
+
+  /// Latest play of any of its tracks; null if none was ever played.
+  final int? lastPlayedAt;
+
+  /// When the latest track was added to the library (0 when empty).
+  final int addedAt;
 
   /// Custom cover if set, otherwise the first track that has one.
   String? get coverKey => playlist.coverKey ?? autoCoverKey;
@@ -41,7 +48,11 @@ class PlaylistRepository {
           '(SELECT t.cover_key FROM playlist_tracks x JOIN tracks t ON t.id = x.track_id '
           'WHERE x.playlist_id = p.id AND t.cover_key IS NOT NULL '
           'ORDER BY x.position LIMIT 1) AS auto_cover, '
-          'COUNT(pt.track_id) AS n '
+          'COUNT(pt.track_id) AS n, '
+          '(SELECT MAX(t.last_played_at) FROM playlist_tracks x JOIN tracks t '
+          'ON t.id = x.track_id WHERE x.playlist_id = p.id) AS last_played, '
+          '(SELECT MAX(t.added_at) FROM playlist_tracks x JOIN tracks t '
+          'ON t.id = x.track_id WHERE x.playlist_id = p.id) AS added '
           'FROM playlists p LEFT JOIN playlist_tracks pt ON pt.playlist_id = p.id '
           'GROUP BY p.id ORDER BY p.name COLLATE NOCASE',
           readsFrom: {_db.playlists, _db.playlistTracks, _db.tracks},
@@ -58,6 +69,8 @@ class PlaylistRepository {
                   ),
                   r.read<int>('n'),
                   r.read<String?>('auto_cover'),
+                  r.read<int?>('last_played'),
+                  r.read<int?>('added') ?? 0,
                 ),
             ]);
   }

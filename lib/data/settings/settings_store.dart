@@ -18,6 +18,8 @@ class AppSettings {
     this.jamLatencyMs = 0,
     this.normalizeVolume = false,
     this.receiveFromLan = false,
+    this.librarySort = 'recent',
+    this.libraryGrid = false,
   });
 
   final String theme;
@@ -30,6 +32,12 @@ class AppSettings {
   /// Listen for offers from nearby devices while the app is open.
   final bool receiveFromLan;
   final String language;
+
+  /// Library order: `recent` | `alpha` | `added`.
+  final String librarySort;
+
+  /// Library as a grid instead of a list.
+  final bool libraryGrid;
 
   /// Shown to the device on the other side of a LAN share; null = hostname.
   final String? deviceName;
@@ -50,6 +58,8 @@ class AppSettings {
     int? jamLatencyMs,
     bool? normalizeVolume,
     bool? receiveFromLan,
+    String? librarySort,
+    bool? libraryGrid,
   }) =>
       AppSettings(
         theme: theme ?? this.theme,
@@ -64,6 +74,8 @@ class AppSettings {
         jamLatencyMs: jamLatencyMs ?? this.jamLatencyMs,
         normalizeVolume: normalizeVolume ?? this.normalizeVolume,
         receiveFromLan: receiveFromLan ?? this.receiveFromLan,
+        librarySort: librarySort ?? this.librarySort,
+        libraryGrid: libraryGrid ?? this.libraryGrid,
       );
 }
 
@@ -105,6 +117,8 @@ class SettingsStore {
         normalizeVolume: _prefs.getBool('normalizeVolume') ?? false,
         receiveFromLan: _prefs.getBool('receiveFromLan') ?? false,
         jamLatencyMs: _prefs.getInt('jamLatencyMs') ?? 0,
+        librarySort: _prefs.getString('librarySort') ?? 'recent',
+        libraryGrid: _prefs.getBool('libraryGrid') ?? false,
       );
 
   Future<void> writeSettings(AppSettings s) async {
@@ -119,6 +133,8 @@ class SettingsStore {
     await _prefs.setBool('normalizeVolume', s.normalizeVolume);
     await _prefs.setBool('receiveFromLan', s.receiveFromLan);
     await _prefs.setInt('jamLatencyMs', s.jamLatencyMs);
+    await _prefs.setString('librarySort', s.librarySort);
+    await _prefs.setBool('libraryGrid', s.libraryGrid);
     final dn = s.deviceName;
     if (dn == null || dn.isEmpty) {
       await _prefs.remove('deviceName');
