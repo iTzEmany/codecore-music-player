@@ -715,4 +715,85 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get normalizeVolumeHint =>
       'Usa il ReplayGain dei file per ridurre i brani troppo forti';
+
+  @override
+  String get nearbyDevices => 'Dispositivi vicini';
+
+  @override
+  String get searchingDevices => 'Ricerca di dispositivi sulla rete…';
+
+  @override
+  String get noDevicesHint =>
+      'Nessun dispositivo trovato. Apri Condivisione anche sull’altro dispositivo, sulla stessa rete.';
+
+  @override
+  String sendToDevice(String name) {
+    return 'Invia a $name';
+  }
+
+  @override
+  String offerSent(String name) {
+    return 'Richiesta inviata a $name';
+  }
+
+  @override
+  String get offerChooseFirst => 'Scegli prima i brani da inviare';
+
+  @override
+  String get sentRequests => 'Richieste inviate';
+
+  @override
+  String get receivedRequests => 'Richieste ricevute';
+
+  @override
+  String get offerPending => 'In attesa di risposta';
+
+  @override
+  String get offerAccepted => 'Accettata';
+
+  @override
+  String get offerDeclined => 'Rifiutata';
+
+  @override
+  String get offerCancelled => 'Annullata';
+
+  @override
+  String get offerExpired => 'Scaduta';
+
+  @override
+  String get offerDone => 'Completata';
+
+  @override
+  String get offerFailed => 'Non riuscita';
+
+  @override
+  String incomingTitle(String name) {
+    return '$name vuole inviarti dei brani';
+  }
+
+  @override
+  String incomingBody(int count, String size) {
+    return '$count brani, $size MB';
+  }
+
+  @override
+  String get accept => 'Accetta';
+
+  @override
+  String get decline => 'Rifiuta';
+
+  @override
+  String receivingProgress(int done, int total) {
+    return 'Ricezione $done/$total';
+  }
+
+  @override
+  String get manualConnection => 'Collegamento manuale (IP e PIN)';
+
+  @override
+  String get receiveFromLan => 'Ricevi dalla rete locale';
+
+  @override
+  String get receiveFromLanHint =>
+      'Rende il dispositivo visibile e riceve richieste mentre l’app è aperta';
 }

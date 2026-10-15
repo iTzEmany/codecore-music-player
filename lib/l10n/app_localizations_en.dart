@@ -714,4 +714,85 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get normalizeVolumeHint =>
       'Uses files’ ReplayGain to lower tracks that are too loud';
+
+  @override
+  String get nearbyDevices => 'Nearby devices';
+
+  @override
+  String get searchingDevices => 'Looking for devices on the network…';
+
+  @override
+  String get noDevicesHint =>
+      'No device found. Open Sharing on the other device too, on the same network.';
+
+  @override
+  String sendToDevice(String name) {
+    return 'Send to $name';
+  }
+
+  @override
+  String offerSent(String name) {
+    return 'Request sent to $name';
+  }
+
+  @override
+  String get offerChooseFirst => 'Choose the tracks to send first';
+
+  @override
+  String get sentRequests => 'Sent requests';
+
+  @override
+  String get receivedRequests => 'Received requests';
+
+  @override
+  String get offerPending => 'Waiting for a reply';
+
+  @override
+  String get offerAccepted => 'Accepted';
+
+  @override
+  String get offerDeclined => 'Declined';
+
+  @override
+  String get offerCancelled => 'Cancelled';
+
+  @override
+  String get offerExpired => 'Expired';
+
+  @override
+  String get offerDone => 'Completed';
+
+  @override
+  String get offerFailed => 'Failed';
+
+  @override
+  String incomingTitle(String name) {
+    return '$name wants to send you tracks';
+  }
+
+  @override
+  String incomingBody(int count, String size) {
+    return '$count tracks, $size MB';
+  }
+
+  @override
+  String get accept => 'Accept';
+
+  @override
+  String get decline => 'Decline';
+
+  @override
+  String receivingProgress(int done, int total) {
+    return 'Receiving $done/$total';
+  }
+
+  @override
+  String get manualConnection => 'Manual connection (IP and PIN)';
+
+  @override
+  String get receiveFromLan => 'Receive from the local network';
+
+  @override
+  String get receiveFromLanHint =>
+      'Makes this device visible and receives requests while the app is open';
 }

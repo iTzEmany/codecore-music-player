@@ -12,6 +12,8 @@ import '../../../providers/library_providers.dart';
 import '../../../providers/share_providers.dart';
 import '../../../providers/youtube_providers.dart';
 import '../../../services/share/lan_client.dart';
+import '../../../providers/share_hub.dart';
+import 'incoming_offer_tile.dart';
 
 class ReceiveTab extends ConsumerStatefulWidget {
   const ReceiveTab({super.key});
@@ -139,7 +141,16 @@ class _ReceiveTabState extends ConsumerState<ReceiveTab> {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
+    final hub = ref.watch(shareHubProvider);
     return ListView(padding: const EdgeInsets.all(16), children: [
+      if (hub.incoming.isNotEmpty) ...[
+        Text(l.receivedRequests,
+            style: Theme.of(context).textTheme.titleMedium),
+        for (final o in hub.incoming) IncomingOfferTile(offer: o),
+        const Divider(height: 32),
+      ],
+      Text(l.manualConnection, style: Theme.of(context).textTheme.titleSmall),
+      const SizedBox(height: 8),
       TextField(
         controller: _address,
         enabled: !_busy,

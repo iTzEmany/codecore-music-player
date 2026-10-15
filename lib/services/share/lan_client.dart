@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -6,6 +7,7 @@ import 'package:path/path.dart' as p;
 
 import '../../core/text_utils.dart';
 import '../online/youtube_service.dart' show DownloadProgress, uniquePath;
+import 'offers.dart' show OfferItem;
 
 class RemoteInfo {
   const RemoteInfo(this.name);
@@ -133,23 +135,91 @@ class LanClient {
     RemoteTrack track,
     Directory outDir, {
     CancelToken? cancel,
+  }) =>
+      _fetch(
+        url: 'http://$host:$port/file/${track.id}',
+        headers: {'X-Pin': pin},
+        baseName: track.baseName,
+        ext: track.ext,
+        fallbackSize: track.sizeBytes,
+        outDir: outDir,
+        cancel: cancel,
+      );
+
+  /// Pulls one file of an accepted offer from the sender.
+  Stream<DownloadProgress> downloadOfferItem(
+    String host,
+    int port,
+    String offerId,
+    String token,
+    OfferItem item,
+    Directory outDir, {
+    CancelToken? cancel,
+  }) =>
+      _fetch(
+        url: 'http://$host:$port/offer/$offerId/file/${item.id}',
+        headers: {'X-Token': token},
+        baseName: item.baseName,
+        ext: item.ext,
+        fallbackSize: item.sizeBytes,
+        outDir: outDir,
+        cancel: cancel,
+      );
+
+  /// Delivers an offer (metadata only) to a receiver; it stays pending there.
+  Future<void> sendOffer(
+      String host, int port, Map<String, Object?> payload) async {
+    try {
+      final r = await _dio.post<Object?>('http://$host:$port/offer/',
+          data: jsonEncode(payload),
+          options: Options(contentType: 'application/json'));
+      if (r.statusCode == 202) return;
+      if (r.statusCode == 429) throw const LanException(LanError.blocked);
+      throw const LanException(LanError.failed);
+    } on DioException {
+      throw const LanException(LanError.unreachable);
+    }
+  }
+
+  /// `accept`, `decline` or `done` towards the sender; `cancel` towards the
+  /// receiver. All authenticated by the offer token.
+  Future<void> offerAction(String host, int port, String offerId,
+      String action, String token) async {
+    try {
+      final r = await _dio.post<Object?>(
+          'http://$host:$port/offer/$offerId/$action',
+          options: Options(headers: {'X-Token': token}));
+      if (r.statusCode != 200) throw const LanException(LanError.failed);
+    } on DioException {
+      throw const LanException(LanError.unreachable);
+    }
+  }
+
+  Stream<DownloadProgress> _fetch({
+    required String url,
+    required Map<String, String> headers,
+    required String baseName,
+    required String ext,
+    required int fallbackSize,
+    required Directory outDir,
+    CancelToken? cancel,
   }) async* {
     await outDir.create(recursive: true);
-    final target = uniquePath(outDir.path, track.baseName, track.ext,
-        (f) => File(f).existsSync());
+    final target =
+        uniquePath(outDir.path, baseName, ext, (f) => File(f).existsSync());
     final part = File('$target.part');
     IOSink? sink;
     try {
       final r = await _dio.get<ResponseBody>(
-        'http://$host:$port/file/${track.id}',
-        options: _options(pin, type: ResponseType.stream),
+        url,
+        options: Options(headers: headers, responseType: ResponseType.stream),
         cancelToken: cancel,
       );
       if (r.statusCode != 200) _fail(r);
       final body = r.data!;
-      final expected = int.tryParse(
-              r.headers.value(Headers.contentLengthHeader) ?? '') ??
-          track.sizeBytes;
+      final expected =
+          int.tryParse(r.headers.value(Headers.contentLengthHeader) ?? '') ??
+              fallbackSize;
       sink = part.openWrite();
       var received = 0;
       await for (final chunk in body.stream) {

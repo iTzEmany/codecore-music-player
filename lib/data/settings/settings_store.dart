@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../services/audio/play_queue.dart';
@@ -14,6 +16,7 @@ class AppSettings {
     this.showUndoSnackbar = true,
     this.deviceName,
     this.normalizeVolume = false,
+    this.receiveFromLan = false,
   });
 
   final String theme;
@@ -22,6 +25,9 @@ class AppSettings {
 
   /// Applies ReplayGain (track gain) at playback time.
   final bool normalizeVolume;
+
+  /// Listen for offers from nearby devices while the app is open.
+  final bool receiveFromLan;
   final String language;
 
   /// Shown to the device on the other side of a LAN share; null = hostname.
@@ -38,6 +44,7 @@ class AppSettings {
     bool? showUndoSnackbar,
     String? deviceName,
     bool? normalizeVolume,
+    bool? receiveFromLan,
   }) =>
       AppSettings(
         theme: theme ?? this.theme,
@@ -50,6 +57,7 @@ class AppSettings {
         showUndoSnackbar: showUndoSnackbar ?? this.showUndoSnackbar,
         deviceName: deviceName ?? this.deviceName,
         normalizeVolume: normalizeVolume ?? this.normalizeVolume,
+        receiveFromLan: receiveFromLan ?? this.receiveFromLan,
       );
 }
 
@@ -89,6 +97,7 @@ class SettingsStore {
         showUndoSnackbar: _prefs.getBool('showUndoSnackbar') ?? true,
         deviceName: _prefs.getString('deviceName'),
         normalizeVolume: _prefs.getBool('normalizeVolume') ?? false,
+        receiveFromLan: _prefs.getBool('receiveFromLan') ?? false,
       );
 
   Future<void> writeSettings(AppSettings s) async {
@@ -101,12 +110,25 @@ class SettingsStore {
     await _prefs.setBool('autoLyrics', s.autoLyrics);
     await _prefs.setBool('showUndoSnackbar', s.showUndoSnackbar);
     await _prefs.setBool('normalizeVolume', s.normalizeVolume);
+    await _prefs.setBool('receiveFromLan', s.receiveFromLan);
     final dn = s.deviceName;
     if (dn == null || dn.isEmpty) {
       await _prefs.remove('deviceName');
     } else {
       await _prefs.setString('deviceName', dn);
     }
+  }
+
+  /// Stable random id of this installation (used to recognise devices).
+  Future<String> deviceId() async {
+    final existing = _prefs.getString('deviceId');
+    if (existing != null && existing.length >= 16) return existing;
+    final r = Random.secure();
+    final id = List.generate(16, (_) => r.nextInt(256))
+        .map((v) => v.toRadixString(16).padLeft(2, '0'))
+        .join();
+    await _prefs.setString('deviceId', id);
+    return id;
   }
 
   SavedPlayback readPlayback() {

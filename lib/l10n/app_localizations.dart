@@ -1385,6 +1385,144 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Usa il ReplayGain dei file per ridurre i brani troppo forti'**
   String get normalizeVolumeHint;
+
+  /// No description provided for @nearbyDevices.
+  ///
+  /// In it, this message translates to:
+  /// **'Dispositivi vicini'**
+  String get nearbyDevices;
+
+  /// No description provided for @searchingDevices.
+  ///
+  /// In it, this message translates to:
+  /// **'Ricerca di dispositivi sulla rete…'**
+  String get searchingDevices;
+
+  /// No description provided for @noDevicesHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Nessun dispositivo trovato. Apri Condivisione anche sull’altro dispositivo, sulla stessa rete.'**
+  String get noDevicesHint;
+
+  /// No description provided for @sendToDevice.
+  ///
+  /// In it, this message translates to:
+  /// **'Invia a {name}'**
+  String sendToDevice(String name);
+
+  /// No description provided for @offerSent.
+  ///
+  /// In it, this message translates to:
+  /// **'Richiesta inviata a {name}'**
+  String offerSent(String name);
+
+  /// No description provided for @offerChooseFirst.
+  ///
+  /// In it, this message translates to:
+  /// **'Scegli prima i brani da inviare'**
+  String get offerChooseFirst;
+
+  /// No description provided for @sentRequests.
+  ///
+  /// In it, this message translates to:
+  /// **'Richieste inviate'**
+  String get sentRequests;
+
+  /// No description provided for @receivedRequests.
+  ///
+  /// In it, this message translates to:
+  /// **'Richieste ricevute'**
+  String get receivedRequests;
+
+  /// No description provided for @offerPending.
+  ///
+  /// In it, this message translates to:
+  /// **'In attesa di risposta'**
+  String get offerPending;
+
+  /// No description provided for @offerAccepted.
+  ///
+  /// In it, this message translates to:
+  /// **'Accettata'**
+  String get offerAccepted;
+
+  /// No description provided for @offerDeclined.
+  ///
+  /// In it, this message translates to:
+  /// **'Rifiutata'**
+  String get offerDeclined;
+
+  /// No description provided for @offerCancelled.
+  ///
+  /// In it, this message translates to:
+  /// **'Annullata'**
+  String get offerCancelled;
+
+  /// No description provided for @offerExpired.
+  ///
+  /// In it, this message translates to:
+  /// **'Scaduta'**
+  String get offerExpired;
+
+  /// No description provided for @offerDone.
+  ///
+  /// In it, this message translates to:
+  /// **'Completata'**
+  String get offerDone;
+
+  /// No description provided for @offerFailed.
+  ///
+  /// In it, this message translates to:
+  /// **'Non riuscita'**
+  String get offerFailed;
+
+  /// No description provided for @incomingTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'{name} vuole inviarti dei brani'**
+  String incomingTitle(String name);
+
+  /// No description provided for @incomingBody.
+  ///
+  /// In it, this message translates to:
+  /// **'{count} brani, {size} MB'**
+  String incomingBody(int count, String size);
+
+  /// No description provided for @accept.
+  ///
+  /// In it, this message translates to:
+  /// **'Accetta'**
+  String get accept;
+
+  /// No description provided for @decline.
+  ///
+  /// In it, this message translates to:
+  /// **'Rifiuta'**
+  String get decline;
+
+  /// No description provided for @receivingProgress.
+  ///
+  /// In it, this message translates to:
+  /// **'Ricezione {done}/{total}'**
+  String receivingProgress(int done, int total);
+
+  /// No description provided for @manualConnection.
+  ///
+  /// In it, this message translates to:
+  /// **'Collegamento manuale (IP e PIN)'**
+  String get manualConnection;
+
+  /// No description provided for @receiveFromLan.
+  ///
+  /// In it, this message translates to:
+  /// **'Ricevi dalla rete locale'**
+  String get receiveFromLan;
+
+  /// No description provided for @receiveFromLanHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Rende il dispositivo visibile e riceve richieste mentre l’app è aperta'**
+  String get receiveFromLanHint;
 }
 
 class _AppLocalizationsDelegate

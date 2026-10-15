@@ -9,6 +9,8 @@ import '../../providers/player_providers.dart';
 import '../../providers/ui_providers.dart';
 import '../../services/audio/codecore_audio_handler.dart';
 import '../screens/library/library_screen.dart';
+import '../screens/share/incoming_offer_dialog.dart';
+import '../../providers/share_hub.dart';
 import '../screens/library/tracks_tab.dart';
 import '../screens/playlists/playlists_screen.dart';
 import '../screens/settings/settings_screen.dart';
@@ -85,6 +87,14 @@ class AppShell extends ConsumerWidget {
         ..clearSnackBars()
         ..showSnackBar(
             SnackBar(content: Text(l.playbackError(f.title ?? '', reason))));
+    });
+    ref.listen(shareOffersProvider, (_, next) {
+      final o = next.value;
+      if (o == null) return;
+      showDialog<void>(
+        context: context,
+        builder: (_) => IncomingOfferDialog(offer: o),
+      );
     });
     final index = ref.watch(navIndexProvider);
     final wide = MediaQuery.sizeOf(context).width >= _wideBreakpoint;

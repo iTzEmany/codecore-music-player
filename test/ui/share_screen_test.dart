@@ -11,10 +11,14 @@ void main() {
     addTearDown(tester.view.reset);
     final h = await Harness.create(tester, tracks: 2);
     await h.pump(tester, const ShareScreen());
-    expect(find.text('Avvia condivisione'), findsOneWidget);
+    expect(find.text('Dispositivi vicini'), findsOneWidget);
     expect(find.text('Tutta la libreria'), findsOneWidget);
+    await tester.tap(find.text('Collegamento manuale (IP e PIN)'));
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.text('Avvia condivisione'), findsOneWidget);
     await tester.tap(find.text('Ricevi'));
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 500));
     expect(find.text('Connetti'), findsOneWidget);
     expect(find.text('PIN'), findsWidgets);
     await h.dispose(tester);

@@ -715,4 +715,85 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get normalizeVolumeHint =>
       'Usa el ReplayGain de los archivos para bajar canciones muy fuertes';
+
+  @override
+  String get nearbyDevices => 'Dispositivos cercanos';
+
+  @override
+  String get searchingDevices => 'Buscando dispositivos en la red…';
+
+  @override
+  String get noDevicesHint =>
+      'No se encontró ningún dispositivo. Abre Compartir también en el otro dispositivo, en la misma red.';
+
+  @override
+  String sendToDevice(String name) {
+    return 'Enviar a $name';
+  }
+
+  @override
+  String offerSent(String name) {
+    return 'Solicitud enviada a $name';
+  }
+
+  @override
+  String get offerChooseFirst => 'Elige primero las canciones a enviar';
+
+  @override
+  String get sentRequests => 'Solicitudes enviadas';
+
+  @override
+  String get receivedRequests => 'Solicitudes recibidas';
+
+  @override
+  String get offerPending => 'Esperando respuesta';
+
+  @override
+  String get offerAccepted => 'Aceptada';
+
+  @override
+  String get offerDeclined => 'Rechazada';
+
+  @override
+  String get offerCancelled => 'Cancelada';
+
+  @override
+  String get offerExpired => 'Caducada';
+
+  @override
+  String get offerDone => 'Completada';
+
+  @override
+  String get offerFailed => 'Fallida';
+
+  @override
+  String incomingTitle(String name) {
+    return '$name quiere enviarte canciones';
+  }
+
+  @override
+  String incomingBody(int count, String size) {
+    return '$count canciones, $size MB';
+  }
+
+  @override
+  String get accept => 'Aceptar';
+
+  @override
+  String get decline => 'Rechazar';
+
+  @override
+  String receivingProgress(int done, int total) {
+    return 'Recibiendo $done/$total';
+  }
+
+  @override
+  String get manualConnection => 'Conexión manual (IP y PIN)';
+
+  @override
+  String get receiveFromLan => 'Recibir de la red local';
+
+  @override
+  String get receiveFromLanHint =>
+      'Hace visible el dispositivo y recibe solicitudes mientras la app está abierta';
 }

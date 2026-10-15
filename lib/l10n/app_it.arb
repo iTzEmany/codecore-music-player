@@ -363,5 +363,69 @@
   "back": "Indietro",
   "settingsPlayback": "Riproduzione",
   "normalizeVolume": "Normalizza volume",
-  "normalizeVolumeHint": "Usa il ReplayGain dei file per ridurre i brani troppo forti"
+  "normalizeVolumeHint": "Usa il ReplayGain dei file per ridurre i brani troppo forti",
+  "nearbyDevices": "Dispositivi vicini",
+  "searchingDevices": "Ricerca di dispositivi sulla rete…",
+  "noDevicesHint": "Nessun dispositivo trovato. Apri Condivisione anche sull’altro dispositivo, sulla stessa rete.",
+  "sendToDevice": "Invia a {name}",
+  "@sendToDevice": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "offerSent": "Richiesta inviata a {name}",
+  "@offerSent": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "offerChooseFirst": "Scegli prima i brani da inviare",
+  "sentRequests": "Richieste inviate",
+  "receivedRequests": "Richieste ricevute",
+  "offerPending": "In attesa di risposta",
+  "offerAccepted": "Accettata",
+  "offerDeclined": "Rifiutata",
+  "offerCancelled": "Annullata",
+  "offerExpired": "Scaduta",
+  "offerDone": "Completata",
+  "offerFailed": "Non riuscita",
+  "incomingTitle": "{name} vuole inviarti dei brani",
+  "@incomingTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "incomingBody": "{count} brani, {size} MB",
+  "@incomingBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "accept": "Accetta",
+  "decline": "Rifiuta",
+  "receivingProgress": "Ricezione {done}/{total}",
+  "@receivingProgress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "manualConnection": "Collegamento manuale (IP e PIN)",
+  "receiveFromLan": "Ricevi dalla rete locale",
+  "receiveFromLanHint": "Rende il dispositivo visibile e riceve richieste mentre l’app è aperta"
 }

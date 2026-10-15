@@ -715,4 +715,85 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get normalizeVolumeHint =>
       'Nutzt ReplayGain der Dateien, um zu laute Titel zu senken';
+
+  @override
+  String get nearbyDevices => 'Geräte in der Nähe';
+
+  @override
+  String get searchingDevices => 'Suche nach Geräten im Netzwerk…';
+
+  @override
+  String get noDevicesHint =>
+      'Kein Gerät gefunden. Öffne Teilen auch auf dem anderen Gerät im selben Netzwerk.';
+
+  @override
+  String sendToDevice(String name) {
+    return 'An $name senden';
+  }
+
+  @override
+  String offerSent(String name) {
+    return 'Anfrage an $name gesendet';
+  }
+
+  @override
+  String get offerChooseFirst => 'Wähle zuerst die zu sendenden Titel';
+
+  @override
+  String get sentRequests => 'Gesendete Anfragen';
+
+  @override
+  String get receivedRequests => 'Empfangene Anfragen';
+
+  @override
+  String get offerPending => 'Warte auf Antwort';
+
+  @override
+  String get offerAccepted => 'Akzeptiert';
+
+  @override
+  String get offerDeclined => 'Abgelehnt';
+
+  @override
+  String get offerCancelled => 'Abgebrochen';
+
+  @override
+  String get offerExpired => 'Abgelaufen';
+
+  @override
+  String get offerDone => 'Abgeschlossen';
+
+  @override
+  String get offerFailed => 'Fehlgeschlagen';
+
+  @override
+  String incomingTitle(String name) {
+    return '$name möchte dir Titel senden';
+  }
+
+  @override
+  String incomingBody(int count, String size) {
+    return '$count Titel, $size MB';
+  }
+
+  @override
+  String get accept => 'Annehmen';
+
+  @override
+  String get decline => 'Ablehnen';
+
+  @override
+  String receivingProgress(int done, int total) {
+    return 'Empfang $done/$total';
+  }
+
+  @override
+  String get manualConnection => 'Manuelle Verbindung (IP und PIN)';
+
+  @override
+  String get receiveFromLan => 'Aus dem lokalen Netzwerk empfangen';
+
+  @override
+  String get receiveFromLanHint =>
+      'Macht das Gerät sichtbar und empfängt Anfragen, solange die App geöffnet ist';
 }
