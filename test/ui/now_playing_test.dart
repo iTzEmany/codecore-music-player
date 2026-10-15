@@ -1,5 +1,5 @@
 import 'package:codecore/providers/player_providers.dart';
-import 'package:codecore/ui/screens/library/artists_tab.dart';
+import 'package:codecore/ui/screens/library/artist_screen.dart';
 import 'package:codecore/ui/screens/now_playing/now_playing_screen.dart';
 import 'package:codecore/ui/shell/app_shell.dart';
 import 'package:flutter/material.dart';

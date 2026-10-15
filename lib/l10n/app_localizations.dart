@@ -2021,6 +2021,84 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Playlist'**
   String get kindPlaylist;
+
+  /// No description provided for @discN.
+  ///
+  /// In it, this message translates to:
+  /// **'Disco {n}'**
+  String discN(int n);
+
+  /// No description provided for @albumMeta.
+  ///
+  /// In it, this message translates to:
+  /// **'Album · {details}'**
+  String albumMeta(String details);
+
+  /// No description provided for @durationMinutes.
+  ///
+  /// In it, this message translates to:
+  /// **'{n} min'**
+  String durationMinutes(int n);
+
+  /// No description provided for @tracksAndDuration.
+  ///
+  /// In it, this message translates to:
+  /// **'{tracks}, {duration}'**
+  String tracksAndDuration(String tracks, String duration);
+
+  /// No description provided for @mostPlayed.
+  ///
+  /// In it, this message translates to:
+  /// **'Più ascoltati'**
+  String get mostPlayed;
+
+  /// No description provided for @albumsSection.
+  ///
+  /// In it, this message translates to:
+  /// **'Album'**
+  String get albumsSection;
+
+  /// No description provided for @artistMeta.
+  ///
+  /// In it, this message translates to:
+  /// **'{albums} · {tracks}'**
+  String artistMeta(String albums, String tracks);
+
+  /// No description provided for @addAllToQueue.
+  ///
+  /// In it, this message translates to:
+  /// **'Aggiungi in coda'**
+  String get addAllToQueue;
+
+  /// No description provided for @addedNToQueue.
+  ///
+  /// In it, this message translates to:
+  /// **'{n} brani aggiunti in coda'**
+  String addedNToQueue(int n);
+
+  /// No description provided for @editOrder.
+  ///
+  /// In it, this message translates to:
+  /// **'Modifica ordine'**
+  String get editOrder;
+
+  /// No description provided for @finishEditing.
+  ///
+  /// In it, this message translates to:
+  /// **'Fine'**
+  String get finishEditing;
+
+  /// No description provided for @removeFromPlaylistAction.
+  ///
+  /// In it, this message translates to:
+  /// **'Rimuovi dalla playlist'**
+  String get removeFromPlaylistAction;
+
+  /// No description provided for @noTracksInPlaylist.
+  ///
+  /// In it, this message translates to:
+  /// **'Questa playlist è vuota'**
+  String get noTracksInPlaylist;
 }
 
 class _AppLocalizationsDelegate

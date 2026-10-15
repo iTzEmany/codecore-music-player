@@ -3,17 +3,28 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/db/app_database.dart';
 import '../../../data/repositories/library_queries.dart';
+import '../../../l10n/l10n_ext.dart';
 import '../../../providers/library_providers.dart';
 import '../../../providers/online_providers.dart';
 import '../../../providers/player_providers.dart';
 import '../../../providers/settings_providers.dart';
-import '../../../l10n/l10n_ext.dart';
+import '../../shell/shell_nav.dart';
 import '../../theme/app_theme.dart';
+import '../../theme/tokens.dart';
+import '../../widgets/collection_header.dart';
 import '../../widgets/cover_image.dart';
-import '../devices/devices_sheet.dart';
-import '../../widgets/format_utils.dart';
-import '../../widgets/track_row.dart';
 import '../../widgets/error_state.dart';
+import '../../widgets/track_row.dart';
+import '../devices/devices_sheet.dart';
+import '../playlists/playlist_dialogs.dart';
+import 'artist_screen.dart';
+
+/// «12 brani, 48 min».
+String tracksAndMinutes(BuildContext context, int tracks, int durationMs) {
+  final l = context.l10n;
+  final minutes = (durationMs / 60000).round();
+  return l.tracksAndDuration(l.tracksCount(tracks), l.durationMinutes(minutes));
+}
 
 class AlbumDetailScreen extends ConsumerWidget {
   const AlbumDetailScreen({super.key, required this.album});
@@ -22,145 +33,144 @@ class AlbumDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
     final tracks = ref.watch(albumTracksProvider(album.albumKey));
     final compact = ref.watch(settingsProvider).compactMode;
-    final playCtx = PlayContext(
-      PlayContextKind.album,
-      album.title ?? context.l10n.unknownAlbum,
-    );
-    final artist = album.variousArtists
-        ? context.l10n.variousArtists
-        : (album.artist ?? context.l10n.unknownArtist);
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(album.title ?? context.l10n.unknownAlbum),
-        actions: [
-          IconButton(
-            tooltip: context.l10n.shareMenu,
-            icon: const Icon(Icons.wifi_tethering),
-            onPressed: () => DevicesSheet.show(
-              context,
-              trackIds: [for (final t in tracks.value ?? const <Track>[]) t.id],
-            ),
-          ),
-          IconButton(
-            tooltip: context.l10n.enrichAlbum,
-            icon: const Icon(Icons.travel_explore),
-            onPressed: () {
-              final ids = (tracks.value ?? const []).map((t) => t.id).toList();
-              final ok = ref.read(enrichJobProvider.notifier).start(ids);
-              if (!ok) {
-                ScaffoldMessenger.of(context)
-                  ..clearSnackBars()
-                  ..showSnackBar(
-                    SnackBar(content: Text(context.l10n.enrichBusy)),
-                  );
-              }
-            },
-          ),
-        ],
-      ),
-      body: tracks.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, st) => loadErrorState(
-          context,
-          e,
-          st,
-          onRetry: () => ref.invalidate(albumTracksProvider(album.albumKey)),
-        ),
-        data: (list) => ListView.builder(
-          itemCount: list.length + 1,
-          itemBuilder: (context, i) {
-            if (i == 0) {
-              return _Header(
-                album: album,
-                artist: artist,
-                onPlay: () => ref
-                    .read(playerControllerProvider)
-                    .playFromList(list, 0, context: playCtx),
-                onShuffle: () async {
-                  final c = ref.read(playerControllerProvider);
-                  await c.setShuffle(true);
-                  await c.playFromList(list, 0, context: playCtx);
-                },
-              );
-            }
-            final t = list[i - 1];
-            return SizedBox(
-              height: trackRowExtentOf(context, compact),
-              child: LiveTrackRow(
-                track: t,
-                compact: compact,
-                onTap: () => ref
-                    .read(playerControllerProvider)
-                    .playFromList(list, i - 1, context: playCtx),
-              ),
-            );
-          },
-        ),
-      ),
-    );
-  }
-}
+    final cc = context.cc;
+    final name = album.title ?? l.unknownAlbum;
+    final playCtx = PlayContext(PlayContextKind.album, name);
+    final artistName = album.variousArtists
+        ? l.variousArtists
+        : (album.artist ?? l.unknownArtist);
+    final list = tracks.value ?? const <Track>[];
+    final ctrl = ref.read(playerControllerProvider);
 
-class _Header extends StatelessWidget {
-  const _Header({
-    required this.album,
-    required this.artist,
-    required this.onPlay,
-    required this.onShuffle,
-  });
+    void snack(String text) => ScaffoldMessenger.of(context)
+      ..clearSnackBars()
+      ..showSnackBar(SnackBar(content: Text(text)));
 
-  final AlbumSummary album;
-  final String artist;
-  final VoidCallback onPlay, onShuffle;
-
-  @override
-  Widget build(BuildContext context) {
     final meta = [
       if (album.year != null) '${album.year}',
-      context.l10n.tracksCount(album.trackCount),
-      formatDuration(album.durationMs),
-    ].join(' • ');
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        children: [
-          CoverImage(coverKey: album.coverKey, size: 140, radius: 12),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  album.title ?? context.l10n.unknownAlbum,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.titleLarge,
+      tracksAndMinutes(context, album.trackCount, album.durationMs),
+    ].join(' · ');
+
+    final discs = {for (final t in list) t.discNumber ?? 1};
+    final multiDisc = discs.length > 1;
+    // Flat list of rows and disc headers, in disc order.
+    final items = <Object>[];
+    int? lastDisc;
+    for (final t in list) {
+      final d = t.discNumber ?? 1;
+      if (multiDisc && d != lastDisc) items.add(d);
+      lastDisc = d;
+      items.add(t);
+    }
+    final position = {for (var i = 0; i < list.length; i++) list[i].id: i};
+    final extent = trackRowExtentOf(context, compact);
+
+    return CollectionScaffold(
+      title: name,
+      name: name,
+      coverKey: album.coverKey,
+      cover: (s) =>
+          CoverImage(coverKey: album.coverKey, size: s, radius: CcDims.rGrid),
+      subtitle: album.variousArtists || album.artist == null
+          ? Text(artistName, style: Theme.of(context).textTheme.bodyLarge)
+          : InkWell(
+              onTap: () => ShellNav.open<void>(
+                context,
+                ArtistDetailScreen(
+                  artist: ArtistSummary(
+                    key: album.artist!.trim().toLowerCase(),
+                    name: album.artist,
+                    trackCount: 0,
+                    albumCount: 0,
+                  ),
                 ),
-                Text(artist),
-                Text(meta, style: Theme.of(context).textTheme.bodySmall),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  children: [
-                    FilledButton.icon(
-                      onPressed: onPlay,
-                      icon: const Icon(Icons.play_arrow),
-                      label: Text(context.l10n.play),
-                    ),
-                    OutlinedButton.icon(
-                      onPressed: onShuffle,
-                      icon: const Icon(Icons.shuffle),
-                      label: Text(context.l10n.shuffle),
-                    ),
-                  ],
-                ),
-              ],
+              ),
+              child: Text(
+                artistName,
+                style: Theme.of(context).textTheme.bodyLarge
+                    ?.copyWith(fontWeight: FontWeight.w700, color: cc.text),
+              ),
             ),
-          ),
+      meta: '${l.kindAlbum} · $meta',
+      onPlay: list.isEmpty
+          ? null
+          : () => ctrl.playFromList(list, 0, context: playCtx),
+      onShuffle: list.isEmpty
+          ? null
+          : () async {
+              await ctrl.setShuffle(true);
+              await ctrl.playFromList(list, 0, context: playCtx);
+            },
+      menu: PopupMenuButton<String>(
+        tooltip: l.moreActions,
+        icon: const Icon(Icons.more_horiz_rounded),
+        onSelected: (v) {
+          switch (v) {
+            case 'queue':
+              for (final t in list) {
+                ctrl.addToQueue(t.id);
+              }
+              snack(l.addedToQueue);
+            case 'playlist':
+              showAddToPlaylistSheet(context, ref, list);
+            case 'share':
+              DevicesSheet.show(
+                context,
+                trackIds: [for (final t in list) t.id],
+              );
+            case 'enrich':
+              final ok = ref.read(enrichJobProvider.notifier).start([
+                for (final t in list) t.id,
+              ]);
+              if (!ok) snack(l.enrichBusy);
+          }
+        },
+        itemBuilder: (_) => [
+          PopupMenuItem(value: 'queue', child: Text(l.addToQueue)),
+          PopupMenuItem(value: 'playlist', child: Text(l.addToPlaylist)),
+          PopupMenuItem(value: 'share', child: Text(l.shareMenu)),
+          PopupMenuItem(value: 'enrich', child: Text(l.enrichAlbum)),
         ],
       ),
+      slivers: [
+        if (tracks.hasError)
+          SliverToBoxAdapter(
+            child: SizedBox(
+              height: 240,
+              child: loadErrorState(
+                context,
+                tracks.error!,
+                StackTrace.current,
+                onRetry: () =>
+                    ref.invalidate(albumTracksProvider(album.albumKey)),
+              ),
+            ),
+          )
+        else
+          SliverList.builder(
+            itemCount: items.length,
+            itemBuilder: (_, i) {
+              final it = items[i];
+              if (it is int) return DiscHeader(it);
+              final t = it as Track;
+              final at = position[t.id] ?? 0;
+              return SizedBox(
+                height: extent,
+                child: LiveTrackRow(
+                  track: t,
+                  compact: compact,
+                  variant: TrackRowVariant.album,
+                  albumArtist: album.artist,
+                  index: at + 1,
+                  onTap: () => ctrl.playFromList(list, at, context: playCtx),
+                ),
+              );
+            },
+          ),
+      ],
     );
   }
 }

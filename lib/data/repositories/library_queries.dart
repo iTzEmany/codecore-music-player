@@ -149,6 +149,22 @@ class LibraryQueries {
             ]);
   }
 
+  /// Every track of an artist (same grouping key as [watchArtists]), by
+  /// album, then disc and track number.
+  Stream<List<Track>> watchArtistTracks(String artistKey) {
+    return _db
+        .customSelect(
+          'SELECT * FROM tracks WHERE missing = 0 '
+          "AND lower(trim(COALESCE(artist, ''))) = ? "
+          'ORDER BY album COLLATE NOCASE, disc_number, track_number, '
+          'title COLLATE NOCASE',
+          variables: [Variable<String>(artistKey)],
+          readsFrom: {_db.tracks},
+        )
+        .watch()
+        .map((rows) => [for (final r in rows) _db.tracks.map(r.data)]);
+  }
+
   Stream<List<Track>> watchAlbumTracks(String albumKey) {
     return (_db.select(_db.tracks)
           ..where((t) => t.albumKey.equals(albumKey) & t.missing.equals(false))

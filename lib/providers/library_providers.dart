@@ -154,6 +154,9 @@ final albumTracksProvider = StreamProvider.family<List<Track>, String>(
     (ref, albumKey) =>
         ref.watch(libraryQueriesProvider).watchAlbumTracks(albumKey));
 
+final artistTracksProvider = StreamProvider.family<List<Track>, String>(
+    (ref, key) => ref.watch(libraryQueriesProvider).watchArtistTracks(key));
+
 final artistAlbumsProvider = StreamProvider.family<List<AlbumSummary>, String>(
     (ref, key) => ref.watch(libraryQueriesProvider).watchArtistAlbums(key));
 

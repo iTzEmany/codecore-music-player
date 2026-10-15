@@ -6,10 +6,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/db/app_database.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/database_providers.dart';
-import '../../widgets/cover_image.dart';
+import '../../theme/tokens.dart';
 import '../../widgets/empty_state.dart';
+import '../../widgets/track_row.dart';
 
-/// Pick saved tracks to put into a playlist (opened by the "+" button).
+/// Pick saved tracks to put into a playlist: rows with a ＋ / ✓ circle and a
+/// fixed «Aggiungi N brani» bar at the bottom.
 class AddTracksScreen extends ConsumerStatefulWidget {
   const AddTracksScreen({super.key, required this.playlistId});
 
@@ -56,27 +58,33 @@ class _AddTracksScreenState extends ConsumerState<AddTracksScreen> {
         t.id,
     };
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l.addSongs),
-        actions: [
-          TextButton(
-            onPressed: _selected.isEmpty ? null : _add,
-            child: Text(l.addNSongs(_selected.length)),
-          ),
-        ],
-      ),
+      appBar: AppBar(title: Text(l.addSongs)),
+      bottomNavigationBar: _selected.isEmpty
+          ? null
+          : SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(CcDims.margin),
+                child: FilledButton(
+                  onPressed: _add,
+                  child: Text(l.addNSongs(_selected.length)),
+                ),
+              ),
+            ),
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.fromLTRB(
+              CcDims.margin,
+              4,
+              CcDims.margin,
+              8,
+            ),
             child: TextField(
               controller: _controller,
               onChanged: _onChanged,
               decoration: InputDecoration(
                 hintText: l.searchHint,
-                prefixIcon: const Icon(Icons.search),
-                isDense: true,
-                border: const OutlineInputBorder(),
+                prefixIcon: const Icon(Icons.search_rounded),
               ),
             ),
           ),
@@ -103,26 +111,14 @@ class _AddTracksScreenState extends ConsumerState<AddTracksScreen> {
                   itemCount: tracks.length,
                   itemBuilder: (_, i) {
                     final t = tracks[i];
-                    return CheckboxListTile(
-                      value: _selected.contains(t.id),
-                      onChanged: (v) => setState(
-                        () => v == true
-                            ? _selected.add(t.id)
-                            : _selected.remove(t.id),
-                      ),
-                      secondary: CoverImage(coverKey: t.coverKey, size: 44),
-                      title: Text(
-                        t.title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      subtitle: Text(
-                        [
-                          if (t.artist != null) t.artist!,
-                          if (t.album != null) t.album!,
-                        ].join(' • '),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                    return TrackRow(
+                      track: t,
+                      variant: TrackRowVariant.pick,
+                      picked: _selected.contains(t.id),
+                      onTap: () => setState(
+                        () => _selected.contains(t.id)
+                            ? _selected.remove(t.id)
+                            : _selected.add(t.id),
                       ),
                     );
                   },

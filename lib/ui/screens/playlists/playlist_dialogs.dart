@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/db/app_database.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/database_providers.dart';
+import '../../theme/tokens.dart';
+import '../../widgets/playlist_cover.dart';
 
 /// Asks for a playlist name (1..60 chars). Returns null when cancelled.
 Future<String?> askPlaylistName(
@@ -81,6 +83,14 @@ class _NameDialogState extends State<_NameDialog> {
   }
 }
 
+/// Argument: the track ids joined by «,» (a List has no value equality).
+final _playlistsWithProvider = FutureProvider.autoDispose
+    .family<Set<int>, String>(
+      (ref, ids) => ref.watch(playlistRepositoryProvider).containing([
+        for (final s in ids.split(',')) int.parse(s),
+      ]),
+    );
+
 /// Bottom sheet to add tracks to an existing or a new playlist.
 Future<void> showAddToPlaylistSheet(
   BuildContext context,
@@ -122,6 +132,12 @@ class _AddToPlaylistSheet extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
     final lists = ref.watch(playlistsProvider).value ?? const [];
+    // Playlists that already hold every picked track get a ✓.
+    final contains =
+        ref
+            .watch(_playlistsWithProvider(tracks.map((t) => t.id).join(',')))
+            .value ??
+        const <int>{};
     return SafeArea(
       child: ListView(
         shrinkWrap: true,
@@ -141,8 +157,21 @@ class _AddToPlaylistSheet extends ConsumerWidget {
           ),
           for (final p in lists)
             ListTile(
-              leading: const Icon(Icons.queue_music),
-              title: Text(p.playlist.name),
+              leading: PlaylistCover(
+                size: 40,
+                coverKeys: playlistCoverKeys(p.playlist.coverKey, [
+                  p.autoCoverKey,
+                ]),
+              ),
+              title: Text(
+                p.playlist.name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              subtitle: Text(l.playlistCountLabel(p.trackCount)),
+              trailing: contains.contains(p.playlist.id)
+                  ? Icon(Icons.check_circle_rounded, color: context.cc.accent)
+                  : null,
               onTap: () => _add(ref, context, p.playlist.id, p.playlist.name),
             ),
         ],

@@ -1,0 +1,111 @@
+import 'package:codecore/data/db/app_database.dart';
+import 'package:codecore/data/repositories/library_queries.dart';
+import 'package:codecore/data/repositories/playlist_repository.dart';
+import 'package:codecore/ui/screens/library/album_detail_screen.dart';
+import 'package:codecore/ui/screens/library/artist_screen.dart';
+import 'package:codecore/ui/screens/library/favorites_screen.dart';
+import 'package:codecore/ui/screens/playlists/playlist_detail_screen.dart';
+import 'package:codecore/ui/widgets/play_buttons.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+import '../support/app_harness.dart';
+
+Future<void> _settle(WidgetTester tester) async {
+  await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 150)));
+  await tester.pump(const Duration(milliseconds: 300));
+  await tester.pump(const Duration(milliseconds: 300));
+}
+
+void _phone(WidgetTester tester) {
+  tester.view.physicalSize = const Size(400, 900);
+  tester.view.devicePixelRatio = 1;
+  addTearDown(tester.view.reset);
+}
+
+void main() {
+  testWidgets('album page: header, Play, disc-less rows, artist link',
+      (tester) async {
+    _phone(tester);
+    final h = await Harness.create(tester, tracks: 4);
+    await h.pump(
+        tester,
+        const AlbumDetailScreen(
+            album: AlbumSummary(
+          albumKey: 'artist|album 0',
+          title: 'Album 0',
+          artist: 'Artist',
+          variousArtists: false,
+          trackCount: 2,
+          durationMs: 370000,
+          year: 2019,
+          coverKey: null,
+        )));
+    await _settle(tester);
+    expect(find.text('Album 0'), findsWidgets);
+    expect(find.text('Artist'), findsOneWidget);
+    expect(find.byType(PlayCircleButton), findsOneWidget);
+    expect(find.text('Song 0'), findsOneWidget);
+    expect(find.textContaining('2019'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await h.dispose(tester);
+  });
+
+  testWidgets('artist page: counts, Play and the albums', (tester) async {
+    _phone(tester);
+    final h = await Harness.create(tester, tracks: 4);
+    await h.pump(
+        tester,
+        const ArtistDetailScreen(
+            artist: ArtistSummary(
+                key: 'artist', name: 'Artist', trackCount: 4, albumCount: 2)));
+    await _settle(tester);
+    expect(find.text('Artist'), findsWidgets);
+    expect(find.text('2 album · 4 brani'), findsOneWidget);
+    expect(find.byType(PlayCircleButton), findsOneWidget);
+    expect(find.text('Album 0'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await h.dispose(tester);
+  });
+
+  testWidgets('playlist page: tracks, edit mode with handles', (tester) async {
+    _phone(tester);
+    final h = await Harness.create(tester, tracks: 3);
+    final id = await tester.runAsync(() async {
+      final repo = PlaylistRepository(h.db);
+      final id = await repo.create('Notte');
+      final rows = await h.db.select(h.db.tracks).get();
+      await repo.addTracks(id, [for (final t in rows) t.id]);
+      return id;
+    });
+    await h.pump(
+        tester,
+        PlaylistDetailScreen(
+            playlist: Playlist(id: id!, name: 'Notte', createdAt: 0)));
+    await _settle(tester);
+    expect(find.text('Notte'), findsWidgets);
+    expect(find.text('Song 0'), findsOneWidget);
+    expect(find.byType(PlayCircleButton), findsOneWidget);
+    await tester.tap(find.byTooltip('Altre azioni'));
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.tap(find.text('Modifica ordine'));
+    await _settle(tester);
+    expect(find.byIcon(Icons.drag_handle_rounded), findsNWidgets(3));
+    expect(tester.takeException(), isNull);
+    await h.dispose(tester);
+  });
+
+  testWidgets('favourites page: empty state and Play', (tester) async {
+    _phone(tester);
+    final h = await Harness.create(tester, tracks: 2);
+    await h.pump(tester, const FavoritesScreen());
+    await _settle(tester);
+    expect(find.text('Preferiti'), findsWidgets);
+    expect(find.text('Nessun preferito ancora'), findsOneWidget);
+    expect(find.byType(PlayCircleButton), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await h.dispose(tester);
+  });
+}

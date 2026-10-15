@@ -13,7 +13,7 @@ import '../../widgets/cover_image.dart';
 import '../../widgets/favorite_actions.dart';
 import '../../widgets/mini_player.dart' show kPlayerCoverHero;
 import '../../widgets/track_actions_sheet.dart';
-import '../library/artists_tab.dart';
+import '../library/artist_screen.dart';
 import 'now_playing_cards.dart';
 import 'now_playing_controls.dart';
 

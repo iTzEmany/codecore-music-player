@@ -20,7 +20,7 @@ import '../playlists/playlist_detail_screen.dart';
 import '../playlists/playlist_dialogs.dart';
 import 'album_detail_screen.dart';
 import 'all_tracks_screen.dart';
-import 'artists_tab.dart';
+import 'artist_screen.dart';
 import 'favorites_screen.dart';
 import 'folders_sheet.dart';
 import 'scan_status.dart';

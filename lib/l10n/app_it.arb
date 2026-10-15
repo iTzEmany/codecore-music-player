@@ -622,5 +622,66 @@
   "viewAsList": "Mostra come elenco",
   "kindAlbum": "Album",
   "kindArtist": "Artista",
-  "kindPlaylist": "Playlist"
+  "kindPlaylist": "Playlist",
+  "discN": "Disco {n}",
+  "@discN": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "albumMeta": "Album · {details}",
+  "@albumMeta": {
+    "placeholders": {
+      "details": {
+        "type": "String"
+      }
+    }
+  },
+  "durationMinutes": "{n} min",
+  "@durationMinutes": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "tracksAndDuration": "{tracks}, {duration}",
+  "@tracksAndDuration": {
+    "placeholders": {
+      "tracks": {
+        "type": "String"
+      },
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "mostPlayed": "Più ascoltati",
+  "albumsSection": "Album",
+  "artistMeta": "{albums} · {tracks}",
+  "@artistMeta": {
+    "placeholders": {
+      "albums": {
+        "type": "String"
+      },
+      "tracks": {
+        "type": "String"
+      }
+    }
+  },
+  "addAllToQueue": "Aggiungi in coda",
+  "addedNToQueue": "{n} brani aggiunti in coda",
+  "@addedNToQueue": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "editOrder": "Modifica ordine",
+  "finishEditing": "Fine",
+  "removeFromPlaylistAction": "Rimuovi dalla playlist",
+  "noTracksInPlaylist": "Questa playlist è vuota"
 }

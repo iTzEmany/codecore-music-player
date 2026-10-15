@@ -1090,4 +1090,55 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get kindPlaylist => 'Playlist';
+
+  @override
+  String discN(int n) {
+    return 'Disc $n';
+  }
+
+  @override
+  String albumMeta(String details) {
+    return 'Album · $details';
+  }
+
+  @override
+  String durationMinutes(int n) {
+    return '$n Min.';
+  }
+
+  @override
+  String tracksAndDuration(String tracks, String duration) {
+    return '$tracks, $duration';
+  }
+
+  @override
+  String get mostPlayed => 'Meistgespielt';
+
+  @override
+  String get albumsSection => 'Alben';
+
+  @override
+  String artistMeta(String albums, String tracks) {
+    return '$albums · $tracks';
+  }
+
+  @override
+  String get addAllToQueue => 'Zur Warteschlange hinzufügen';
+
+  @override
+  String addedNToQueue(int n) {
+    return '$n Titel zur Warteschlange hinzugefügt';
+  }
+
+  @override
+  String get editOrder => 'Reihenfolge ändern';
+
+  @override
+  String get finishEditing => 'Fertig';
+
+  @override
+  String get removeFromPlaylistAction => 'Aus Playlist entfernen';
+
+  @override
+  String get noTracksInPlaylist => 'Diese Playlist ist leer';
 }

@@ -41,6 +41,22 @@ class PlaylistRepository {
   Future<void> delete(int id) =>
       (_db.delete(_db.playlists)..where((p) => p.id.equals(id))).go();
 
+  /// Ids of the playlists that already hold every one of [trackIds].
+  Future<Set<int>> containing(List<int> trackIds) async {
+    if (trackIds.isEmpty) return {};
+    final marks = List.filled(trackIds.length, '?').join(',');
+    final rows = await _db.customSelect(
+      'SELECT playlist_id FROM playlist_tracks WHERE track_id IN ($marks) '
+      'GROUP BY playlist_id HAVING COUNT(DISTINCT track_id) = ?',
+      variables: [
+        for (final id in trackIds) Variable<int>(id),
+        Variable<int>(trackIds.toSet().length),
+      ],
+      readsFrom: {_db.playlistTracks},
+    ).get();
+    return {for (final r in rows) r.read<int>('playlist_id')};
+  }
+
   Stream<List<PlaylistSummary>> watchAll() {
     return _db
         .customSelect(

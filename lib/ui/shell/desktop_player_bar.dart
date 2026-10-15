@@ -11,7 +11,7 @@ import '../../services/audio/play_queue.dart';
 import '../../services/jam/jam_models.dart';
 import '../screens/devices/devices_sheet.dart';
 import '../screens/jam/jam_screen.dart';
-import '../screens/library/artists_tab.dart';
+import '../screens/library/artist_screen.dart';
 import '../screens/now_playing/now_playing_screen.dart';
 import '../theme/tokens.dart';
 import '../widgets/cover_image.dart';
