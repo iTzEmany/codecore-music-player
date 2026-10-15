@@ -24,4 +24,10 @@ void main() {
     expect(s.shuffle, true);
     expect(s.repeat, PlayRepeat.all);
   });
+
+  test('default theme is notte', () async {
+    SharedPreferences.setMockInitialValues({});
+    final store = await SettingsStore.open();
+    expect(store.readSettings().theme, 'notte');
+  });
 }

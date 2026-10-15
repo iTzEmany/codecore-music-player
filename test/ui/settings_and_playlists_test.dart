@@ -16,10 +16,11 @@ void main() {
     expect(find.text('Aspetto'), findsOneWidget);
     expect(find.text('Italiano'), findsOneWidget);
     expect(find.text('Arricchimento automatico'), findsOneWidget);
-    await tester.tap(find.text('Chiaro'));
+    expect(find.text('Notte viola'), findsOneWidget);
+    await tester.tap(find.text('Nero puro'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
-    expect(h.store.readSettings().theme, 'light');
+    expect(h.store.readSettings().theme, 'oled');
     await h.dispose(tester);
   });
 

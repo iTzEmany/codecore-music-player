@@ -612,29 +612,17 @@ abstract class AppLocalizations {
   /// **'Tema'**
   String get settingsTheme;
 
+  /// No description provided for @themeNotte.
+  ///
+  /// In it, this message translates to:
+  /// **'Notte viola'**
+  String get themeNotte;
+
   /// No description provided for @themeOled.
   ///
   /// In it, this message translates to:
-  /// **'OLED'**
+  /// **'Nero puro'**
   String get themeOled;
-
-  /// No description provided for @themeCarbon.
-  ///
-  /// In it, this message translates to:
-  /// **'Carbone'**
-  String get themeCarbon;
-
-  /// No description provided for @themeNavy.
-  ///
-  /// In it, this message translates to:
-  /// **'Blu notte'**
-  String get themeNavy;
-
-  /// No description provided for @themeLight.
-  ///
-  /// In it, this message translates to:
-  /// **'Chiaro'**
-  String get themeLight;
 
   /// No description provided for @settingsTextSize.
   ///

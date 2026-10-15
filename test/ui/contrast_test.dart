@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:codecore/ui/theme/app_theme.dart';
+import 'package:codecore/ui/theme/tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -17,21 +18,40 @@ double contrast(Color a, Color b) {
 
 void main() {
   for (final id in AppThemeId.values) {
-    test('${id.name}: text colours meet WCAG AA (4.5:1)', () {
-      final s = buildTheme(id, false).colorScheme;
+    test('${id.name}: token pairs meet WCAG AA (4.5:1)', () {
+      final c = buildTheme(id, false).extension<CcColors>()!;
       final pairs = {
-        'onSurface/surface': (s.onSurface, s.surface),
-        'onSurfaceVariant/surface': (s.onSurfaceVariant, s.surface),
-        'primary/surface': (s.primary, s.surface),
-        'onSurface/surfaceContainerHigh': (s.onSurface, s.surfaceContainerHigh),
-        'onSurfaceVariant/surfaceContainerHigh':
-            (s.onSurfaceVariant, s.surfaceContainerHigh),
-        'onPrimary/primary': (s.onPrimary, s.primary),
+        'text/bg': (c.text, c.bg),
+        'text/surface1': (c.text, c.surface1),
+        'text/surface2': (c.text, c.surface2),
+        'textMuted/bg': (c.textMuted, c.bg),
+        'textMuted/surface1': (c.textMuted, c.surface1),
+        'textMuted/surface2': (c.textMuted, c.surface2),
+        'accent/bg': (c.accent, c.bg),
+        'onAccent/accent': (c.onAccent, c.accent),
+        'accentSoft/surface1': (c.accentSoft, c.surface1),
+        'error/bg': (c.error, c.bg),
       };
       for (final e in pairs.entries) {
         expect(contrast(e.value.$1, e.value.$2), greaterThanOrEqualTo(4.5),
             reason: '${id.name} ${e.key}');
       }
     });
+
+    test('${id.name}: scheme text colours stay readable', () {
+      final s = buildTheme(id, false).colorScheme;
+      expect(contrast(s.onSurface, s.surface), greaterThanOrEqualTo(4.5));
+      expect(contrast(s.onSurfaceVariant, s.surfaceContainerHigh),
+          greaterThanOrEqualTo(4.5));
+      expect(contrast(s.onPrimary, s.primary), greaterThanOrEqualTo(4.5));
+    });
   }
+
+  test('retired or unknown theme names fall back to notte', () {
+    for (final n in ['carbon', 'navy', 'light', '', 'boh']) {
+      expect(appThemeIdFromName(n), AppThemeId.notte);
+    }
+    expect(appThemeIdFromName('oled'), AppThemeId.oled);
+    expect(appThemeIdFromName('notte'), AppThemeId.notte);
+  });
 }

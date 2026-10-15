@@ -1,60 +1,194 @@
 import 'package:flutter/material.dart';
 
-enum AppThemeId { oled, carbon, navy, light }
+import 'tokens.dart';
 
+enum AppThemeId { notte, oled }
+
+/// Unknown or retired names (carbon, navy, light) fall back to `notte`.
 AppThemeId appThemeIdFromName(String name) => AppThemeId.values
-    .firstWhere((e) => e.name == name, orElse: () => AppThemeId.oled);
-
-const _seed = Color(0xFF6C5CE7);
+    .firstWhere((e) => e.name == name, orElse: () => AppThemeId.notte);
 
 /// Text size is applied app-wide through MediaQuery's text scaler (see app.dart):
 /// scaling the TextTheme directly asserts on styles without a font size.
 ThemeData buildTheme(AppThemeId id, bool compact) {
-  final dark = id != AppThemeId.light;
-  var scheme = ColorScheme.fromSeed(
-    seedColor: _seed,
-    brightness: dark ? Brightness.dark : Brightness.light,
+  final c = id == AppThemeId.oled ? CcColors.oled : CcColors.notte;
+  final scheme = ColorScheme(
+    brightness: Brightness.dark,
+    primary: c.accent,
+    onPrimary: c.onAccent,
+    primaryContainer: c.surface3,
+    onPrimaryContainer: c.accentSoft,
+    secondary: c.accentSoft,
+    onSecondary: c.onAccent,
+    secondaryContainer: c.surface2,
+    onSecondaryContainer: c.text,
+    tertiary: c.accentSoft,
+    onTertiary: c.onAccent,
+    error: c.error,
+    onError: c.bg,
+    surface: c.bg,
+    onSurface: c.text,
+    onSurfaceVariant: c.textMuted,
+    surfaceContainerLowest: c.bg,
+    surfaceContainerLow: c.surface1,
+    surfaceContainer: c.surface1,
+    surfaceContainerHigh: c.surface2,
+    surfaceContainerHighest: c.surface3,
+    outline: c.textFaint,
+    outlineVariant: c.surface3,
+    inverseSurface: c.text,
+    onInverseSurface: c.bg,
+    inversePrimary: c.heroBase,
+    surfaceTint: Colors.transparent,
+    shadow: Colors.black,
+    scrim: Colors.black,
   );
-  Color? background;
-  Color? card;
-  switch (id) {
-    case AppThemeId.oled:
-      background = const Color(0xFF000000);
-      card = const Color(0xFF0A0A0A);
-    case AppThemeId.carbon:
-      background = const Color(0xFF121212);
-      card = const Color(0xFF1E1E1E);
-    case AppThemeId.navy:
-      background = const Color(0xFF10131A);
-      card = const Color(0xFF151822);
-    case AppThemeId.light:
-      break;
-  }
-  if (background != null) {
-    scheme = scheme.copyWith(
-      surface: background,
-      surfaceContainerLowest: background,
-      surfaceContainerLow: card,
-      surfaceContainer: card,
-      surfaceContainerHigh: card,
-      surfaceContainerHighest: Color.alphaBlend(
-          const Color(0x14FFFFFF), card ?? background),
-    );
-  }
+  final text = buildTextTheme(c);
+  const pill = StadiumBorder();
+  RoundedRectangleBorder top(double r) => RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(r)));
   return ThemeData(
     useMaterial3: true,
+    brightness: Brightness.dark,
     colorScheme: scheme,
-    scaffoldBackgroundColor: scheme.surface,
+    fontFamily: 'Figtree',
+    textTheme: text,
+    primaryTextTheme: text,
+    scaffoldBackgroundColor: c.bg,
+    canvasColor: c.bg,
+    dividerColor: c.surface3,
+    focusColor: c.accent.withValues(alpha: 0.24),
+    hoverColor: c.surface2.withValues(alpha: 0.5),
+    splashFactory: InkRipple.splashFactory,
     visualDensity: compact ? VisualDensity.compact : VisualDensity.standard,
-    // Keeps "Impostazioni"/"Einstellungen" on one line in the 5-item bar.
-    navigationBarTheme: const NavigationBarThemeData(
-      labelTextStyle: WidgetStatePropertyAll(TextStyle(fontSize: 11)),
+    extensions: [c],
+    appBarTheme: AppBarTheme(
+      backgroundColor: c.bg,
+      foregroundColor: c.text,
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      centerTitle: false,
+      titleTextStyle: text.titleMedium,
     ),
+    snackBarTheme: SnackBarThemeData(
+      behavior: SnackBarBehavior.floating,
+      backgroundColor: c.surface2,
+      contentTextStyle: text.bodyLarge?.copyWith(fontWeight: FontWeight.w500),
+      actionTextColor: c.accentSoft,
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(CcDims.rGrid)),
+    ),
+    bottomSheetTheme: BottomSheetThemeData(
+      backgroundColor: c.surface1,
+      surfaceTintColor: Colors.transparent,
+      modalBackgroundColor: c.surface1,
+      showDragHandle: true,
+      dragHandleColor: c.surface3,
+      shape: top(CcDims.rSheet),
+    ),
+    dialogTheme: DialogThemeData(
+      backgroundColor: c.surface1,
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(CcDims.rSheet)),
+      titleTextStyle: text.titleMedium,
+      contentTextStyle: text.bodyMedium?.copyWith(color: c.text),
+    ),
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: c.surface2,
+      isDense: true,
+      contentPadding:
+          const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      border: const OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(999)),
+          borderSide: BorderSide.none),
+      enabledBorder: const OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(999)),
+          borderSide: BorderSide.none),
+      focusedBorder: OutlineInputBorder(
+          borderRadius: const BorderRadius.all(Radius.circular(999)),
+          borderSide: BorderSide(color: c.accent, width: 1.5)),
+      hintStyle: text.bodyLarge?.copyWith(
+          color: c.textMuted, fontWeight: FontWeight.w400),
+    ),
+    filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+            shape: pill,
+            backgroundColor: c.accent,
+            foregroundColor: c.onAccent,
+            textStyle: text.labelLarge)),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+            shape: pill, textStyle: text.labelLarge)),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+            shape: pill,
+            side: BorderSide(color: c.surface3),
+            foregroundColor: c.text,
+            textStyle: text.labelLarge)),
+    textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+            shape: pill,
+            foregroundColor: c.accentSoft,
+            textStyle: text.labelLarge)),
+    chipTheme: ChipThemeData(
+      shape: pill,
+      side: BorderSide.none,
+      backgroundColor: c.surface2,
+      selectedColor: c.accent,
+      disabledColor: c.surface1,
+      labelStyle: text.labelLarge,
+      secondaryLabelStyle: text.labelLarge?.copyWith(color: c.onAccent),
+      checkmarkColor: c.onAccent,
+      showCheckmark: false,
+    ),
+    sliderTheme: SliderThemeData(
+      trackHeight: 4,
+      activeTrackColor: c.text,
+      inactiveTrackColor: c.text.withValues(alpha: 0.24),
+      thumbColor: c.text,
+      thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
+      overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
+      overlayColor: c.text.withValues(alpha: 0.12),
+    ),
+    listTileTheme: ListTileThemeData(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+      iconColor: c.textMuted,
+      textColor: c.text,
+      titleTextStyle: text.bodyLarge,
+      subtitleTextStyle: text.bodyMedium,
+    ),
+    popupMenuTheme: PopupMenuThemeData(
+      color: c.surface2,
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(CcDims.rGrid)),
+      textStyle: text.bodyLarge?.copyWith(fontWeight: FontWeight.w500),
+    ),
+    progressIndicatorTheme: ProgressIndicatorThemeData(
+      color: c.accent,
+      linearTrackColor: c.surface3,
+      circularTrackColor: c.surface3,
+    ),
+    switchTheme: SwitchThemeData(
+      trackColor: WidgetStateProperty.resolveWith((s) =>
+          s.contains(WidgetState.selected) ? c.accent : c.surface3),
+      thumbColor: WidgetStateProperty.resolveWith((s) =>
+          s.contains(WidgetState.selected) ? c.onAccent : c.textMuted),
+      trackOutlineColor: const WidgetStatePropertyAll(Colors.transparent),
+    ),
+    scrollbarTheme: ScrollbarThemeData(
+      thumbColor: WidgetStatePropertyAll(c.textMuted.withValues(alpha: 0.4)),
+      radius: const Radius.circular(999),
+    ),
+    iconTheme: IconThemeData(color: c.text),
+    dividerTheme: DividerThemeData(color: c.surface3, space: 1, thickness: 1),
   );
 }
 
 /// Row height for track lists (fixed so lists can use `itemExtent`).
-double trackRowExtent(bool compact) => compact ? 48 : 64;
+double trackRowExtent(bool compact) => compact ? 52 : 64;
 
 /// Same, grown with the user's text size so two-line rows never overflow.
 double trackRowExtentOf(BuildContext context, bool compact) {

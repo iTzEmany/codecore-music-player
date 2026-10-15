@@ -18,7 +18,10 @@ import '../../../providers/share_providers.dart';
 import '../playlists/playlist_dialogs.dart';
 import '../share/share_screen.dart';
 import '../../../services/migration/python_db_importer.dart';
+import '../../theme/app_theme.dart';
+import '../../theme/tokens.dart';
 import 'missing_tracks_screen.dart';
+import 'theme_swatch.dart';
 
 const _languages = {
   'it': 'Italiano',
@@ -51,18 +54,22 @@ class SettingsScreen extends ConsumerWidget {
         title: Text(l.settingsTheme),
         subtitle: Padding(
           padding: const EdgeInsets.only(top: 8),
-          child: SegmentedButton<String>(
-            showSelectedIcon: false,
-            segments: [
-              ButtonSegment(value: 'oled', label: Text(l.themeOled)),
-              ButtonSegment(value: 'carbon', label: Text(l.themeCarbon)),
-              ButtonSegment(value: 'navy', label: Text(l.themeNavy)),
-              ButtonSegment(value: 'light', label: Text(l.themeLight)),
-            ],
-            selected: {s.theme},
-            onSelectionChanged: (v) =>
-                notifier.update((c) => c.copyWith(theme: v.first)),
-          ),
+          child: Wrap(runSpacing: 8, children: [
+            for (final (id, label, colors) in [
+              ('notte', l.themeNotte, CcColors.notte),
+              ('oled', l.themeOled, CcColors.oled),
+            ])
+              Padding(
+                padding: const EdgeInsets.only(right: 12),
+                child: ThemeSwatch(
+                  label: label,
+                  colors: colors,
+                  selected: appThemeIdFromName(s.theme).name == id,
+                  onTap: () =>
+                      notifier.update((c) => c.copyWith(theme: id)),
+                ),
+              ),
+          ]),
         ),
       ),
       ListTile(

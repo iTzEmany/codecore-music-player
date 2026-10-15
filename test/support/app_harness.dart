@@ -10,6 +10,7 @@ import 'package:codecore/providers/player_providers.dart';
 import 'package:codecore/providers/settings_providers.dart';
 import 'package:codecore/services/audio/codecore_audio_handler.dart';
 import 'package:codecore/services/audio/play_queue.dart';
+import 'package:codecore/ui/theme/app_theme.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
@@ -67,6 +68,7 @@ class Harness {
         ProviderScope(
         overrides: overrides,
         child: MaterialApp(
+          theme: buildTheme(appThemeIdFromName(''), false),
           locale: const Locale('it'),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,

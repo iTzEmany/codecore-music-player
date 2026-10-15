@@ -6,7 +6,7 @@ import '../../services/audio/play_queue.dart';
 
 class AppSettings {
   const AppSettings({
-    this.theme = 'oled',
+    this.theme = 'notte',
     this.fontScale = 1.0,
     this.compactMode = false,
     this.reducedMotion = false,
@@ -93,7 +93,7 @@ class SettingsStore {
       SettingsStore(await SharedPreferences.getInstance());
 
   AppSettings readSettings() => AppSettings(
-        theme: _prefs.getString('theme') ?? 'oled',
+        theme: _prefs.getString('theme') ?? 'notte',
         fontScale: _prefs.getDouble('fontScale') ?? 1.0,
         compactMode: _prefs.getBool('compactMode') ?? false,
         reducedMotion: _prefs.getBool('reducedMotion') ?? false,

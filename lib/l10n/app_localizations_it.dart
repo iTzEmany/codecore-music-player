@@ -286,16 +286,10 @@ class AppLocalizationsIt extends AppLocalizations {
   String get settingsTheme => 'Tema';
 
   @override
-  String get themeOled => 'OLED';
+  String get themeNotte => 'Notte viola';
 
   @override
-  String get themeCarbon => 'Carbone';
-
-  @override
-  String get themeNavy => 'Blu notte';
-
-  @override
-  String get themeLight => 'Chiaro';
+  String get themeOled => 'Nero puro';
 
   @override
   String get settingsTextSize => 'Dimensione testo';

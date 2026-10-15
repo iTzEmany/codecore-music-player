@@ -3,7 +3,8 @@ import 'dart:io';
 
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show MethodChannel;
+import 'package:flutter/foundation.dart' show LicenseEntryWithLineBreaks, LicenseRegistry;
+import 'package:flutter/services.dart' show MethodChannel, rootBundle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio_media_kit/just_audio_media_kit.dart';
 
@@ -28,6 +29,12 @@ import 'services/covers/cover_store.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   AppLog.i('avvio');
+  LicenseRegistry.addLicense(() async* {
+    for (final f in const ['Figtree', 'Unbounded']) {
+      yield LicenseEntryWithLineBreaks(
+          [f], await rootBundle.loadString('assets/fonts/OFL-$f.txt'));
+    }
+  });
   if (Platform.isLinux || Platform.isWindows) {
     JustAudioMediaKit.ensureInitialized();
   }
