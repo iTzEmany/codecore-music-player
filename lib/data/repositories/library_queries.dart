@@ -16,6 +16,7 @@ class AlbumSummary {
     required this.coverKey,
     this.lastPlayedAt,
     this.addedAt = 0,
+    this.playCount = 0,
   });
 
   final String albumKey;
@@ -31,6 +32,9 @@ class AlbumSummary {
 
   /// Latest `addedAt` of its tracks.
   final int addedAt;
+
+  /// Sum of the plays of its tracks.
+  final int playCount;
 }
 
 class ArtistSummary {
@@ -65,7 +69,8 @@ SELECT album_key,
   MAX(year) AS year,
   MIN(cover_key) AS cover_key,
   MAX(last_played_at) AS last_played,
-  MAX(added_at) AS added
+  MAX(added_at) AS added,
+  SUM(play_count) AS plays
 FROM tracks
 ''';
 
@@ -88,6 +93,7 @@ class LibraryQueries {
       coverKey: r.read<String?>('cover_key'),
       lastPlayedAt: r.read<int?>('last_played'),
       addedAt: r.read<int?>('added') ?? 0,
+      playCount: r.read<int?>('plays') ?? 0,
     );
   }
 
@@ -159,6 +165,20 @@ class LibraryQueries {
           'ORDER BY album COLLATE NOCASE, disc_number, track_number, '
           'title COLLATE NOCASE',
           variables: [Variable<String>(artistKey)],
+          readsFrom: {_db.tracks},
+        )
+        .watch()
+        .map((rows) => [for (final r in rows) _db.tracks.map(r.data)]);
+  }
+
+  /// The most played tracks (never-played ones excluded).
+  Stream<List<Track>> watchTopTracks({int limit = 10}) {
+    return _db
+        .customSelect(
+          'SELECT * FROM tracks WHERE missing = 0 AND play_count > 0 '
+          'ORDER BY play_count DESC, last_played_at DESC, title COLLATE NOCASE '
+          'LIMIT ?',
+          variables: [Variable<int>(limit)],
           readsFrom: {_db.tracks},
         )
         .watch()

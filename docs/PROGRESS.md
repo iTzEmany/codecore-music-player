@@ -128,7 +128,7 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 11.9 Desktop: barra laterale, barra player, pannello destro
 - [x] 11.10 Libreria e «Tutti i brani»
 - [x] 11.11 Pagine di raccolta: album, artista, playlist, Preferiti
-- [ ] 11.12 Home
+- [x] 11.12 Home
 - [ ] 11.13 Cerca (con YouTube)
 - [ ] 11.14 Coda, Testi, menu del brano
 - [ ] 11.15 Jam
@@ -147,6 +147,7 @@ L'agente riparte sempre dal primo task non spuntato.
 - 11.9 (2026-10-15): verificato con test a 1280 px e scatto da test (`desktop_shell_playing`); l'app desktop non è stata avviata (regola «niente finestre desktop»). Il pannello destro mostra Coda/Testo (LyricsScreen `embedded`)/Info; il bottone «Info» nella barra non c'è (il pannello Info si apre da 11.14).
 - 11.10 (2026-10-15): chip filtro per tipo (Playlist/Album/Artisti) e chip ordinamento + interruttore griglia in `AppSettings` (`librarySort`, `libraryGrid`). «Tutti i brani» condivide `trackQueryProvider(false)` con la scheda Cerca (si azzera all'apertura). AlbumsTab/ArtistsTab non sono più usate dalla Libreria (ArtistDetailScreen resta in artists_tab.dart fino a 11.11). Provato su Mi A3 (1110_lib.png).
 - 11.11 (2026-10-16): `CollectionScaffold` unico per album/artista/playlist/Preferiti; `ArtistDetailScreen` spostata in `artist_screen.dart` (rimossi albums_tab/artists_tab). Provato su Mi A3 (artista e album, 1111_*.png); playlist e Preferiti coperti da widget test (modifica ordine con maniglie, stato vuoto), non provati a mano sul telefono (non modifico le playlist vere). Foglio «Aggiungi a playlist» con ✓ coperto solo da compilazione/test esistenti.
+- 11.12 (2026-10-16): le sezioni Home sono calcolate in Dart da albums/playlist (`home_sections.dart`, testate) + query `watchTopTracks`; «Da riscoprire» = ≥3 ascolti e fermo da 60 giorni. L'indicatore Attività arriva con 11.16. Il collegamento «YouTube» resta temporaneamente in Home fino a 11.13. Provato su Mi A3 (1112_home.png).
 - 11.1 (2026-10-15): su richiesta dell'utente la verifica visiva dei task 11.x si fa **sul telefono** (hot reload); gli scatti da test (`scripts/shots.sh`) restano per testo/layout ma le copertine non si caricano nei golden (I/O reale in fake async) e ogni scatto costa ~1 min. Font di ripiego: Liberation Sans al posto di Roboto finché non ci sono i font dell'app.
 - 0.3: `generate: true` (l10n) rimandato alla fase 4 (senza ARB `flutter gen-l10n` fallirebbe). `flutter_localizations` già aggiunto.
 - 0.2: MainActivity spostata nel package `com.codecore.player`; `compileSdk = 37` (richiesto da permission_handler_android).

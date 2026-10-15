@@ -2099,6 +2099,54 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Questa playlist è vuota'**
   String get noTracksInPlaylist;
+
+  /// No description provided for @greetingMorning.
+  ///
+  /// In it, this message translates to:
+  /// **'Buongiorno'**
+  String get greetingMorning;
+
+  /// No description provided for @greetingAfternoon.
+  ///
+  /// In it, this message translates to:
+  /// **'Buon pomeriggio'**
+  String get greetingAfternoon;
+
+  /// No description provided for @greetingEvening.
+  ///
+  /// In it, this message translates to:
+  /// **'Buonasera'**
+  String get greetingEvening;
+
+  /// No description provided for @homeResume.
+  ///
+  /// In it, this message translates to:
+  /// **'Riprendi'**
+  String get homeResume;
+
+  /// No description provided for @homeRecentlyPlayed.
+  ///
+  /// In it, this message translates to:
+  /// **'Ascoltati di recente'**
+  String get homeRecentlyPlayed;
+
+  /// No description provided for @homeRecentlyAdded.
+  ///
+  /// In it, this message translates to:
+  /// **'Aggiunti di recente'**
+  String get homeRecentlyAdded;
+
+  /// No description provided for @homeTopTracks.
+  ///
+  /// In it, this message translates to:
+  /// **'I più ascoltati'**
+  String get homeTopTracks;
+
+  /// No description provided for @homeRediscover.
+  ///
+  /// In it, this message translates to:
+  /// **'Da riscoprire'**
+  String get homeRediscover;
 }
 
 class _AppLocalizationsDelegate

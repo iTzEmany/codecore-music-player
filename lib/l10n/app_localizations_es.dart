@@ -1141,4 +1141,28 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get noTracksInPlaylist => 'Esta lista está vacía';
+
+  @override
+  String get greetingMorning => 'Buenos días';
+
+  @override
+  String get greetingAfternoon => 'Buenas tardes';
+
+  @override
+  String get greetingEvening => 'Buenas noches';
+
+  @override
+  String get homeResume => 'Continuar';
+
+  @override
+  String get homeRecentlyPlayed => 'Escuchado recientemente';
+
+  @override
+  String get homeRecentlyAdded => 'Añadido recientemente';
+
+  @override
+  String get homeTopTracks => 'Más escuchadas';
+
+  @override
+  String get homeRediscover => 'Para redescubrir';
 }

@@ -683,5 +683,13 @@
   "editOrder": "Modifica ordine",
   "finishEditing": "Fine",
   "removeFromPlaylistAction": "Rimuovi dalla playlist",
-  "noTracksInPlaylist": "Questa playlist è vuota"
+  "noTracksInPlaylist": "Questa playlist è vuota",
+  "greetingMorning": "Buongiorno",
+  "greetingAfternoon": "Buon pomeriggio",
+  "greetingEvening": "Buonasera",
+  "homeResume": "Riprendi",
+  "homeRecentlyPlayed": "Ascoltati di recente",
+  "homeRecentlyAdded": "Aggiunti di recente",
+  "homeTopTracks": "I più ascoltati",
+  "homeRediscover": "Da riscoprire"
 }

@@ -1141,4 +1141,28 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get noTracksInPlaylist => 'Questa playlist è vuota';
+
+  @override
+  String get greetingMorning => 'Buongiorno';
+
+  @override
+  String get greetingAfternoon => 'Buon pomeriggio';
+
+  @override
+  String get greetingEvening => 'Buonasera';
+
+  @override
+  String get homeResume => 'Riprendi';
+
+  @override
+  String get homeRecentlyPlayed => 'Ascoltati di recente';
+
+  @override
+  String get homeRecentlyAdded => 'Aggiunti di recente';
+
+  @override
+  String get homeTopTracks => 'I più ascoltati';
+
+  @override
+  String get homeRediscover => 'Da riscoprire';
 }

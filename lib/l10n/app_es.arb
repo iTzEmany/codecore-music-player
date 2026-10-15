@@ -492,5 +492,13 @@
   "editOrder": "Editar orden",
   "finishEditing": "Listo",
   "removeFromPlaylistAction": "Quitar de la lista",
-  "noTracksInPlaylist": "Esta lista está vacía"
+  "noTracksInPlaylist": "Esta lista está vacía",
+  "greetingMorning": "Buenos días",
+  "greetingAfternoon": "Buenas tardes",
+  "greetingEvening": "Buenas noches",
+  "homeResume": "Continuar",
+  "homeRecentlyPlayed": "Escuchado recientemente",
+  "homeRecentlyAdded": "Añadido recientemente",
+  "homeTopTracks": "Más escuchadas",
+  "homeRediscover": "Para redescubrir"
 }

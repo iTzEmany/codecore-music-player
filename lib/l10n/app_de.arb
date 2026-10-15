@@ -492,5 +492,13 @@
   "editOrder": "Reihenfolge ändern",
   "finishEditing": "Fertig",
   "removeFromPlaylistAction": "Aus Playlist entfernen",
-  "noTracksInPlaylist": "Diese Playlist ist leer"
+  "noTracksInPlaylist": "Diese Playlist ist leer",
+  "greetingMorning": "Guten Morgen",
+  "greetingAfternoon": "Guten Tag",
+  "greetingEvening": "Guten Abend",
+  "homeResume": "Weiterhören",
+  "homeRecentlyPlayed": "Zuletzt gehört",
+  "homeRecentlyAdded": "Zuletzt hinzugefügt",
+  "homeTopTracks": "Meistgespielt",
+  "homeRediscover": "Wiederentdecken"
 }

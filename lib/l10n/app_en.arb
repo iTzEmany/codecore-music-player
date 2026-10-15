@@ -492,5 +492,13 @@
   "editOrder": "Edit order",
   "finishEditing": "Done",
   "removeFromPlaylistAction": "Remove from playlist",
-  "noTracksInPlaylist": "This playlist is empty"
+  "noTracksInPlaylist": "This playlist is empty",
+  "greetingMorning": "Good morning",
+  "greetingAfternoon": "Good afternoon",
+  "greetingEvening": "Good evening",
+  "homeResume": "Jump back in",
+  "homeRecentlyPlayed": "Recently played",
+  "homeRecentlyAdded": "Recently added",
+  "homeTopTracks": "Most played",
+  "homeRediscover": "Rediscover"
 }
