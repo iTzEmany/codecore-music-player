@@ -340,7 +340,7 @@ class LiveTrackRow extends ConsumerWidget {
     );
     final playing = isCurrent && (ref.watch(isPlayingProvider).value ?? false);
     void actions() => showTrackActions(context, ref, track);
-    return TrackRow(
+    final row = TrackRow(
       track: track,
       variant: variant,
       isCurrent: isCurrent,
@@ -354,6 +354,30 @@ class LiveTrackRow extends ConsumerWidget {
       index: index,
       albumArtist: albumArtist,
       reorderIndex: reorderIndex,
+    );
+    // Queue and pick rows have their own gestures.
+    if (variant == TrackRowVariant.queue || variant == TrackRowVariant.pick) {
+      return row;
+    }
+    return Dismissible(
+      key: ValueKey('swipe-queue-${track.id}'),
+      direction: DismissDirection.startToEnd,
+      dismissThresholds: const {DismissDirection.startToEnd: 0.3},
+      background: Container(
+        alignment: Alignment.centerLeft,
+        padding: const EdgeInsets.only(left: 24),
+        color: context.cc.surface2,
+        child: Icon(Icons.queue_rounded, color: context.cc.accentSoft),
+      ),
+      // The row always comes back; only the queue changes.
+      confirmDismiss: (_) async {
+        ref.read(playerControllerProvider).addToQueue(track.id);
+        ScaffoldMessenger.of(context)
+          ..clearSnackBars()
+          ..showSnackBar(SnackBar(content: Text(context.l10n.addedToQueue)));
+        return false;
+      },
+      child: row,
     );
   }
 }

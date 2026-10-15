@@ -423,10 +423,10 @@ temi chiari. Si valutano dopo la prova a mano.
 | Task troppo grandi (11.8, 11.9, 11.11) | Spezzali in sotto-task annotati in PROGRESS (es. 11.11a album, 11.11b artista…) |
 
 ## Definition of Done
-- [ ] Mini-player e barra sempre visibili navigando su telefono; barra laterale + barra player su desktop
-- [ ] 3 schede (Home · Cerca · Libreria), YouTube dentro Cerca, Jam/invio dal bottone Dispositivi
-- [ ] Solo temi Notte viola e Nero puro; Figtree + Unbounded inclusi con licenze; contrasto ≥ 4.5 nei test
-- [ ] Ogni nome di artista/album porta alla sua pagina; ogni raccolta ha Play e Casuale
-- [ ] Una sola riga brano; nessun `Text('$e')`; conferme o annulla su tutte le azioni distruttive
-- [ ] `flutter analyze` pulito, `flutter test` verde, build apk debug e linux riuscite, scatti finali rivisti
-- [ ] `docs/PROGRESS.md`, `docs/02-architettura.md` e README aggiornati
+- [x] Mini-player e barra sempre visibili navigando su telefono; barra laterale + barra player su desktop
+- [x] 3 schede (Home · Cerca · Libreria), YouTube dentro Cerca, Jam/invio dal bottone Dispositivi
+- [x] Solo temi Notte viola e Nero puro; Figtree + Unbounded inclusi con licenze; contrasto ≥ 4.5 nei test
+- [x] Ogni nome di artista/album porta alla sua pagina; ogni raccolta ha Play e Casuale
+- [x] Una sola riga brano; nessun `Text('$e')`; conferme o annulla su tutte le azioni distruttive
+- [x] `flutter analyze` pulito, `flutter test` verde, build apk debug e linux riuscite, scatti finali rivisti
+- [x] `docs/PROGRESS.md`, `docs/02-architettura.md` e README aggiornati

@@ -44,10 +44,14 @@ lib/
     jam/jam_state.dart, jam_host.dart, jam_guest.dart, jam_output.dart, jam_cache.dart  # (fase 8)
   providers/                      # provider Riverpod (database, settings, player, library, ...)
   ui/
-    theme/app_theme.dart
-    shell/app_shell.dart          # navigazione adattiva + mini player
-    screens/                      # una cartella per schermata
-    widgets/                      # widget riusabili (track_tile, cover_image, ...)
+    theme/tokens.dart             # colori (CcColors), dimensioni (CcDims), movimento, font
+    theme/app_theme.dart          # ThemeData dai token (Notte viola / Nero puro)
+    theme/cover_tint.dart         # colore dalla copertina (heroTint, coverTintProvider)
+    shell/app_shell.dart          # 3 schede (Home/Cerca/Libreria), un Navigator per scheda, tasto indietro
+    shell/shell_nav.dart          # open / openInLibrary: aprire pagine senza perdere mini-player e barra
+    shell/bottom_bar.dart, desktop_sidebar.dart, desktop_player_bar.dart, side_panel.dart
+    screens/                      # una cartella per schermata (home, search, library, now_playing, jam, ...)
+    widgets/                      # TrackRow/LiveTrackRow, CoverImage, CollectionScaffold, mini_player, ...
   l10n/                           # app_it.arb, app_en.arb, app_de.arb, app_es.arb (fase 4)
 test/                             # specchio di lib/ per la logica pura
 ```
@@ -96,3 +100,25 @@ Scritture con debounce 400 ms, mai in un handler di slider a ogni tick.
   cambia brano; l'host fa tutto.
 - Fase 9: più ospiti. `JamState.participants` (elenco con indirizzi), token d'identità per membro + `fileToken` di sessione (intestazione `x-jam-file`), invito inoltrato da un ospite all'host (`/<sid>/invite`), uscita di un membro (`/<sid>/leave`) che toglie i suoi brani. Sincronia di più uscite prevista in Fase 10 (vedi `docs/fase-9-jam-multi.md`).
 - Fase 10: uscite multiple sincronizzate. `JamClock` (offset verso l'orologio dell'host, rotta `/time`, filtro sui giri lenti), `JamSyncController` (decisioni pure: avvio programmato, velocità ±2 %, seek), `JamOutput` in modalità sincrona (cache obbligatoria, anticipo di `jamStartLeadMs`), compensazione manuale della latenza in `AppSettings.jamLatencyMs`.
+
+## Interfaccia (fase 11)
+- **Navigazione:** tre schede (`NavTab.home|search|library`), ciascuna con un `Navigator` annidato (chiavi in
+  `tabNavigatorKeysProvider`) dentro un `IndexedStack`. Album, artista, playlist, Preferiti, Impostazioni si aprono
+  con `ShellNav.open` nella scheda corrente; `ShellNav.openInLibrary` (Now Playing, menu «Vai a») chiude le rotte
+  del navigatore principale e apre la pagina nella Libreria. Now Playing, Testi, Jam, dialoghi e fogli restano sul
+  navigatore principale. Indietro di Android: navigatore annidato → Home → uscita (`PopScope` in `AppShell`).
+- **Layout per larghezza (≥ 840):** barra laterale 240 (72 sotto i 1000 px) + barra player 80 + pannello destro
+  320 (`sidePanelProvider`: coda, testo, info). Sotto: mini-player a card sopra la barra in basso.
+- **Token:** nessun esadecimale nei widget; `context.cc` (estensione `CcColors`) e `Theme.of(context)`.
+  Font Figtree + Unbounded (asset OFL). Solo temi `notte` e `oled`.
+- **Colore dalla copertina:** `coverTintProvider` (24 px, in cache) → `heroTint` (luminosità limitata, testo ≥ 7:1)
+  → `CoverBackdrop` (Now Playing, Testi, pagine di raccolta) e fondo del mini-player.
+- **Una riga brano:** `TrackRow`/`LiveTrackRow` con varianti `standard|album|queue|pick`; tocco suona, pressione
+  lunga / clic destro = `trackActions` (modello unico dei gruppi di azioni), swipe a destra = «Aggiungi in coda».
+- **Contesto di riproduzione:** `PlayContext` (album, artista, playlist, Preferiti, libreria, ricerca) in
+  `playContextProvider`, solo in memoria; «In riproduzione da» in Now Playing.
+- **Attività:** `activityProvider` (scansione, arricchimento, download, invii) → `ActivityButton` → `ActivitySheet`.
+- **Dispositivi:** `DevicesSheet` (Jam attiva + dispositivi vicini con [Jam] [Invia]) dal mini-player, Now Playing e
+  barra desktop; `ShareScreen` resta per il collegamento manuale.
+- **Test visivi:** `test_shots/` (fuori da `flutter test`), `scripts/shots.sh`; prova su telefono con
+  `flutter build apk --debug --build-number=5000` + `adb install -r` (vedi nota in `docs/PROGRESS.md`, 11.5).

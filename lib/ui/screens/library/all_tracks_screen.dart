@@ -10,6 +10,8 @@ import '../../../providers/player_providers.dart';
 import '../../../providers/settings_providers.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/tokens.dart';
+import '../../../data/db/app_database.dart';
+import '../../widgets/alpha_scroller.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_state.dart';
 import '../../widgets/play_buttons.dart';
@@ -39,6 +41,7 @@ class AllTracksScreen extends ConsumerStatefulWidget {
 
 class _AllTracksScreenState extends ConsumerState<AllTracksScreen> {
   final _controller = TextEditingController();
+  final _scroll = ScrollController();
   Timer? _debounce;
   late final TrackQueryNotifier _query;
 
@@ -55,6 +58,7 @@ class _AllTracksScreenState extends ConsumerState<AllTracksScreen> {
   void dispose() {
     _debounce?.cancel();
     _controller.dispose();
+    _scroll.dispose();
     super.dispose();
   }
 
@@ -63,6 +67,38 @@ class _AllTracksScreenState extends ConsumerState<AllTracksScreen> {
     _debounce = Timer(
       const Duration(milliseconds: 250),
       () => _query.update((q) => q.copyWith(text: text)),
+    );
+  }
+
+  Widget _list(
+    List<Track> list,
+    SortOption sort,
+    bool compact,
+    PlayerController ctrl,
+    PlayContext ctx,
+  ) {
+    final extent = trackRowExtentOf(context, compact);
+    final view = ListView.builder(
+      controller: _scroll,
+      itemExtent: extent,
+      itemCount: list.length,
+      itemBuilder: (_, i) => LiveTrackRow(
+        track: list[i],
+        compact: compact,
+        onTap: () => ctrl.playFromList(list, i, context: ctx),
+      ),
+    );
+    // The A–Z strip only makes sense when the order is alphabetical.
+    final byTitle = sort == SortOption.title;
+    final byArtist = sort == SortOption.artist;
+    if (!byTitle && !byArtist) return view;
+    return AlphaScroller(
+      controller: _scroll,
+      itemExtent: extent,
+      letters: [
+        for (final t in list) leadingLetter(byTitle ? t.title : t.artist),
+      ],
+      child: view,
     );
   }
 
@@ -175,15 +211,7 @@ class _AllTracksScreenState extends ConsumerState<AllTracksScreen> {
                       ),
                     ),
                     Expanded(
-                      child: ListView.builder(
-                        itemExtent: trackRowExtentOf(context, compact),
-                        itemCount: list.length,
-                        itemBuilder: (_, i) => LiveTrackRow(
-                          track: list[i],
-                          compact: compact,
-                          onTap: () => ctrl.playFromList(list, i, context: ctx),
-                        ),
-                      ),
+                      child: _list(list, query.sort, compact, ctrl, ctx),
                     ),
                   ],
                 );

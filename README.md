@@ -5,12 +5,21 @@ Italiano, English, Deutsch, Español.
 
 - Piano di lavoro: [`docs/00-INDICE.md`](docs/00-INDICE.md) · avanzamento: [`docs/PROGRESS.md`](docs/PROGRESS.md)
 
+## Schermate
+- **Home** (saluto, «Riprendi», ascoltati/aggiunti di recente, più ascoltati, da riscoprire) · **Cerca** (libreria
+  in un colpo solo, generi, ricerche recenti, YouTube sull'invio) · **Libreria** (playlist, album e artisti insieme,
+  Preferiti e «Tutti i brani» fissati, ordinamenti, griglia).
+- Pagine di album, artista, playlist e Preferiti con Play e Casuale; **Now Playing** con colore dalla copertina,
+  testo, info e prossimi brani; coda a sezioni; pulsante **Dispositivi** per Jam e invio.
+- Desktop: barra laterale con le playlist, barra player completa, pannello destro (coda / testo), clic destro.
+- Temi: **Notte viola** (predefinito) e **Nero puro**.
+
 ## Funzioni
 - **Libreria**: scansione incrementale di cartelle, tag letti (mai riscritti), copertine, brani / album / artisti,
   ricerca e ordinamenti, brani mancanti gestiti senza perdere preferiti e playlist.
 - **Riproduzione**: coda separata dalla lista, shuffle senza ripetizioni, repeat off/all/one, ripresa all'avvio,
   notifica e tasti cuffie su Android, scorciatoie da tastiera su desktop, timer di spegnimento con fade-out.
-- **Preferiti, playlist** (copertina personalizzabile, riordino), modifica info (solo nel DB), temi (OLED, carbone, blu notte, chiaro).
+- **Preferiti, playlist** (copertina personalizzabile, riordino), modifica info (solo nel DB), temi (Notte viola, Nero puro).
 - **Online (solo su azione tua o opzioni attive)**: info e copertine da iTunes, testi sincronizzati da LRCLIB,
   curiosità da Wikipedia, ricerca e download da YouTube con yt-dlp.
 - **Condivisione LAN** telefono ↔ PC senza server esterni: scoperta automatica dei dispositivi, richiesta con accettazione (anche da notifica su Android, anche in background), collegamento manuale con PIN e QR.

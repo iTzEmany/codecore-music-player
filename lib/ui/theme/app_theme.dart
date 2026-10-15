@@ -2,6 +2,25 @@ import 'package:flutter/material.dart';
 
 import 'tokens.dart';
 
+/// The same fade-and-rise page transition on every platform; none at all
+/// with «Riduci animazioni».
+class CcPageTransitionsBuilder extends PageTransitionsBuilder {
+  const CcPageTransitionsBuilder();
+
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    if (MediaQuery.disableAnimationsOf(context)) return child;
+    return const FadeUpwardsPageTransitionsBuilder().buildTransitions(
+        route, context, animation, secondaryAnimation, child);
+  }
+}
+
 enum AppThemeId { notte, oled }
 
 /// Unknown or retired names (carbon, navy, light) fall back to `notte`.
@@ -63,6 +82,11 @@ ThemeData buildTheme(AppThemeId id, bool compact) {
     focusColor: c.accent.withValues(alpha: 0.24),
     hoverColor: c.surface2.withValues(alpha: 0.5),
     splashFactory: InkRipple.splashFactory,
+    pageTransitionsTheme: PageTransitionsTheme(
+      builders: {
+        for (final p in TargetPlatform.values) p: const CcPageTransitionsBuilder(),
+      },
+    ),
     visualDensity: compact ? VisualDensity.compact : VisualDensity.standard,
     extensions: [c],
     appBarTheme: AppBarTheme(
