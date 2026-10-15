@@ -31,7 +31,7 @@ class JamGuest {
   final Duration requestPoll, backoff;
   final int maxFailures;
 
-  String? _base, _sid, _token, _requestId, _requestToken;
+  String? _base, _sid, _token, _requestId;
   JamState? _state;
   bool _running = false, _cancel = false;
   final _states = StreamController<JamState>.broadcast();
@@ -76,7 +76,6 @@ class JamGuest {
       AppLog.w('jam: request failed', e);
       return JamJoinOutcome.unreachable;
     }
-    _requestToken = rtoken;
     final deadline = DateTime.now().add(timeout);
     var failures = 0;
     while (!_cancel && DateTime.now().isBefore(deadline)) {
