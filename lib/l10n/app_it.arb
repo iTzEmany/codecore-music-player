@@ -572,5 +572,28 @@
   "ytSearchPrompt": "Cerca un brano o incolla un link",
   "loadFailed": "Non riesco a caricare i dati.",
   "navHome": "Home",
-  "navSearch": "Cerca"
+  "navSearch": "Cerca",
+  "devicesTitle": "Dispositivi",
+  "devicesJamActive": "Jam attiva",
+  "jamPeople": "Jam · {n} persone",
+  "@jamPeople": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "devicesVisibleTitle": "Rendi visibile questo dispositivo",
+  "devicesVisibleHint": "Per ricevere brani o fare una Jam, gli altri dispositivi devono poterti vedere sulla rete.",
+  "devicesJamShort": "Jam",
+  "devicesSendShort": "Invia",
+  "devicesMore": "Condivisione e collegamento manuale",
+  "jamParticipantsCount": "{n} persone",
+  "@jamParticipantsCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  }
 }

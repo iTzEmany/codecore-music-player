@@ -38,6 +38,7 @@ class PlayerController {
 
   Future<void> togglePlayPause() => _handler.togglePlayPause();
   Future<void> next() => _handler.skipToNext();
+  bool get hasNext => _handler.hasNext;
   Future<void> previous() => _handler.skipToPrevious();
   Future<void> seek(Duration position) => _handler.seek(position);
   Future<void> jumpToQueueIndex(int index) => _handler.skipToQueueItem(index);

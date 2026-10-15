@@ -12,7 +12,7 @@ import '../../providers/jam_providers.dart';
 import '../../providers/player_providers.dart';
 import '../screens/playlists/playlist_dialogs.dart';
 import '../screens/enrich_preview_dialog.dart';
-import '../screens/share/share_screen.dart';
+import '../screens/devices/devices_sheet.dart';
 import '../screens/track_edit_dialog.dart';
 import 'favorite_actions.dart';
 import 'format_utils.dart';
@@ -120,8 +120,7 @@ class _TrackActionsSheet extends ConsumerWidget {
             title: Text(l.shareMenu),
             onTap: () {
               close();
-              Navigator.of(outer).push(MaterialPageRoute<void>(
-                  builder: (_) => ShareScreen(initialTrackIds: [track.id])));
+              DevicesSheet.show(outer, trackIds: [track.id]);
             },
           ),
           ListTile(

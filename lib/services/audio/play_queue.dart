@@ -80,6 +80,10 @@ class PlayQueue {
     if (_history.length > _maxHistory) _history.removeAt(0);
   }
 
+  /// Whether [next] would land on a track (not past the end).
+  bool get hasNext =>
+      _pos >= 0 && (_pos + 1 < _order.length || repeat != PlayRepeat.off);
+
   /// `auto` is true when a track ended by itself.
   int? next({bool auto = false}) {
     if (_pos < 0) return null;

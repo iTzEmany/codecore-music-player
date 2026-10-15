@@ -990,4 +990,36 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get navSearch => 'Buscar';
+
+  @override
+  String get devicesTitle => 'Dispositivos';
+
+  @override
+  String get devicesJamActive => 'Jam activa';
+
+  @override
+  String jamPeople(int n) {
+    return 'Jam · $n personas';
+  }
+
+  @override
+  String get devicesVisibleTitle => 'Hacer visible este dispositivo';
+
+  @override
+  String get devicesVisibleHint =>
+      'Para recibir canciones o iniciar una Jam, los demás dispositivos deben verte en la red.';
+
+  @override
+  String get devicesJamShort => 'Jam';
+
+  @override
+  String get devicesSendShort => 'Enviar';
+
+  @override
+  String get devicesMore => 'Compartir y conexión manual';
+
+  @override
+  String jamParticipantsCount(int n) {
+    return '$n personas';
+  }
 }

@@ -65,7 +65,7 @@ void main() {
     await _settle(tester);
     expect(h.handler.currentTrack?.title, 'Song 1');
     expect(find.byType(MiniPlayer), findsOneWidget);
-    expect(find.byIcon(Icons.skip_next), findsOneWidget);
+    expect(find.byIcon(Icons.devices_rounded), findsOneWidget);
     await h.dispose(tester);
   });
 
@@ -91,6 +91,26 @@ void main() {
     await tester.binding.handlePopRoute();
     await tester.pump(const Duration(milliseconds: 500));
     expect(find.text('Album 1'), findsWidgets);
+    await h.dispose(tester);
+  });
+
+  testWidgets('mini-player: favourite, devices sheet, no nearby devices',
+      (tester) async {
+    _phone(tester);
+    final h = await Harness.create(tester, tracks: 2);
+    await h.pump(tester, const AppShell());
+    await tester.tap(find.text('Libreria'));
+    await _settle(tester);
+    await tester.tap(find.text('Song 0').first);
+    await _settle(tester);
+    expect(find.byType(MiniPlayer), findsOneWidget);
+    expect(find.byIcon(Icons.favorite_border_rounded), findsWidgets);
+    await tester.tap(find.byIcon(Icons.devices_rounded));
+    await _settle(tester);
+    expect(find.text('Dispositivi'), findsWidgets);
+    expect(find.text('Rendi visibile questo dispositivo'), findsOneWidget);
+    expect(find.text('Collegamento manuale (IP e PIN)'), findsOneWidget);
+    expect(tester.takeException(), isNull);
     await h.dispose(tester);
   });
 

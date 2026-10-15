@@ -68,6 +68,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   bool get isPlaying => _state == BackendState.playing;
   List<int> get queueIds => _queue.items;
   int get currentIndex => _queue.currentIndex;
+  bool get hasNext => _queue.hasNext;
   bool get shuffleEnabled => _queue.shuffle;
   PlayRepeat get repeatMode => _queue.repeat;
 

@@ -381,5 +381,28 @@
   "ytSearchPrompt": "Busca una canción o pega un enlace",
   "loadFailed": "No se pudieron cargar los datos.",
   "navHome": "Inicio",
-  "navSearch": "Buscar"
+  "navSearch": "Buscar",
+  "devicesTitle": "Dispositivos",
+  "devicesJamActive": "Jam activa",
+  "jamPeople": "Jam · {n} personas",
+  "@jamPeople": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "devicesVisibleTitle": "Hacer visible este dispositivo",
+  "devicesVisibleHint": "Para recibir canciones o iniciar una Jam, los demás dispositivos deben verte en la red.",
+  "devicesJamShort": "Jam",
+  "devicesSendShort": "Enviar",
+  "devicesMore": "Compartir y conexión manual",
+  "jamParticipantsCount": "{n} personas",
+  "@jamParticipantsCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  }
 }

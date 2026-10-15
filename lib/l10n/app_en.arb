@@ -381,5 +381,28 @@
   "ytSearchPrompt": "Search for a track or paste a link",
   "loadFailed": "Couldn't load the data.",
   "navHome": "Home",
-  "navSearch": "Search"
+  "navSearch": "Search",
+  "devicesTitle": "Devices",
+  "devicesJamActive": "Active Jam",
+  "jamPeople": "Jam · {n} people",
+  "@jamPeople": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "devicesVisibleTitle": "Make this device visible",
+  "devicesVisibleHint": "To receive tracks or start a Jam, other devices need to see you on the network.",
+  "devicesJamShort": "Jam",
+  "devicesSendShort": "Send",
+  "devicesMore": "Sharing and manual connection",
+  "jamParticipantsCount": "{n} people",
+  "@jamParticipantsCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  }
 }

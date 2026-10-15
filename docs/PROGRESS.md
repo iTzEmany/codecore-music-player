@@ -123,7 +123,7 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 11.4 Correzioni rapide
 - [x] 11.5 Shell: tre schede e navigatore annidato
 - [x] 11.6 Colore dalla copertina
-- [ ] 11.7 Mini-player e foglio Dispositivi
+- [x] 11.7 Mini-player e foglio Dispositivi
 - [ ] 11.8 Now Playing
 - [ ] 11.9 Desktop: barra laterale, barra player, pannello destro
 - [ ] 11.10 Libreria e «Tutti i brani»
@@ -142,6 +142,7 @@ L'agente riparte sempre dal primo task non spuntato.
 
 ## Note di deviazione
 - 11.5 (2026-10-15): `flutter run` non accetta `--build-number`; per il Mi A3 (versionCode 5000) si usa `flutter build apk --debug --build-number=5000 --target-platform android-arm64` + `adb install -r`. Provato su telefono: avvio debug ~17 s. Nel segnaposto Home restano anche Playlist e YouTube (rifatti in 11.12/11.13). `TracksTab(primarySearch)`: solo la scheda Cerca usa il FocusNode condiviso.
+- 11.7 (2026-10-15): swipe a sinistra sul mini-player è ignorato (torna al posto) se non c'è un brano successivo (`PlayQueue.hasNext`), altrimenti il player andrebbe in idle e la card sparirebbe. Provato su Mi A3: foglio Dispositivi (stato «rendi visibile»), swipe corto/lungo, swipe su → Now Playing. Modalità Jam e swipe orizzontale con Jam: non provati su telefono (nessuna Jam avviata, per regola §6.1).
 - 11.1 (2026-10-15): su richiesta dell'utente la verifica visiva dei task 11.x si fa **sul telefono** (hot reload); gli scatti da test (`scripts/shots.sh`) restano per testo/layout ma le copertine non si caricano nei golden (I/O reale in fake async) e ogni scatto costa ~1 min. Font di ripiego: Liberation Sans al posto di Roboto finché non ci sono i font dell'app.
 - 0.3: `generate: true` (l10n) rimandato alla fase 4 (senza ARB `flutter gen-l10n` fallirebbe). `flutter_localizations` già aggiunto.
 - 0.2: MainActivity spostata nel package `com.codecore.player`; `compileSdk = 37` (richiesto da permission_handler_android).

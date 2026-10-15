@@ -381,5 +381,28 @@
   "ytSearchPrompt": "Titel suchen oder Link einfügen",
   "loadFailed": "Die Daten konnten nicht geladen werden.",
   "navHome": "Start",
-  "navSearch": "Suche"
+  "navSearch": "Suche",
+  "devicesTitle": "Geräte",
+  "devicesJamActive": "Aktive Jam",
+  "jamPeople": "Jam · {n} Personen",
+  "@jamPeople": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "devicesVisibleTitle": "Dieses Gerät sichtbar machen",
+  "devicesVisibleHint": "Um Titel zu empfangen oder eine Jam zu starten, müssen andere Geräte dich im Netzwerk sehen.",
+  "devicesJamShort": "Jam",
+  "devicesSendShort": "Senden",
+  "devicesMore": "Teilen und manuelle Verbindung",
+  "jamParticipantsCount": "{n} Personen",
+  "@jamParticipantsCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  }
 }

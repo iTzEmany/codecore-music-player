@@ -28,6 +28,16 @@ void main() {
     expect(q.currentId, 2);
   });
 
+  test('hasNext: false on the last track unless repeating', () {
+    final q = make([1, 2]);
+    expect(q.hasNext, isTrue);
+    q.next();
+    expect(q.hasNext, isFalse);
+    q.repeat = PlayRepeat.all;
+    expect(q.hasNext, isTrue);
+    expect(PlayQueue().hasNext, isFalse);
+  });
+
   test('repeat all wraps', () {
     final q = make([1, 2])..repeat = PlayRepeat.all;
     q.next();

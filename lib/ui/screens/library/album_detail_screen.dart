@@ -10,7 +10,7 @@ import '../../../providers/settings_providers.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/cover_image.dart';
-import '../share/share_screen.dart';
+import '../devices/devices_sheet.dart';
 import '../../widgets/format_utils.dart';
 import '../../widgets/track_row.dart';
 import '../../widgets/error_state.dart';
@@ -34,10 +34,9 @@ class AlbumDetailScreen extends ConsumerWidget {
           IconButton(
             tooltip: context.l10n.shareMenu,
             icon: const Icon(Icons.wifi_tethering),
-            onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(
-                builder: (_) => ShareScreen(initialTrackIds: [
-                      for (final t in tracks.value ?? const <Track>[]) t.id
-                    ]))),
+            onPressed: () => DevicesSheet.show(context, trackIds: [
+              for (final t in tracks.value ?? const <Track>[]) t.id
+            ]),
           ),
           IconButton(
             tooltip: context.l10n.enrichAlbum,

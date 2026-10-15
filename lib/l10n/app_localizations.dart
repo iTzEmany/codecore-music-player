@@ -1847,6 +1847,60 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Cerca'**
   String get navSearch;
+
+  /// No description provided for @devicesTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Dispositivi'**
+  String get devicesTitle;
+
+  /// No description provided for @devicesJamActive.
+  ///
+  /// In it, this message translates to:
+  /// **'Jam attiva'**
+  String get devicesJamActive;
+
+  /// No description provided for @jamPeople.
+  ///
+  /// In it, this message translates to:
+  /// **'Jam · {n} persone'**
+  String jamPeople(int n);
+
+  /// No description provided for @devicesVisibleTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Rendi visibile questo dispositivo'**
+  String get devicesVisibleTitle;
+
+  /// No description provided for @devicesVisibleHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Per ricevere brani o fare una Jam, gli altri dispositivi devono poterti vedere sulla rete.'**
+  String get devicesVisibleHint;
+
+  /// No description provided for @devicesJamShort.
+  ///
+  /// In it, this message translates to:
+  /// **'Jam'**
+  String get devicesJamShort;
+
+  /// No description provided for @devicesSendShort.
+  ///
+  /// In it, this message translates to:
+  /// **'Invia'**
+  String get devicesSendShort;
+
+  /// No description provided for @devicesMore.
+  ///
+  /// In it, this message translates to:
+  /// **'Condivisione e collegamento manuale'**
+  String get devicesMore;
+
+  /// No description provided for @jamParticipantsCount.
+  ///
+  /// In it, this message translates to:
+  /// **'{n} persone'**
+  String jamParticipantsCount(int n);
 }
 
 class _AppLocalizationsDelegate
