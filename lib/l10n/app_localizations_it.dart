@@ -1232,4 +1232,13 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get queueCleared => 'Coda svuotata';
+
+  @override
+  String get jamOutputsAndSync => 'Uscite e sincronia';
+
+  @override
+  String get jamHostTag => 'host';
+
+  @override
+  String get jamWaitingEmpty => 'Nessuna Jam in corso';
 }

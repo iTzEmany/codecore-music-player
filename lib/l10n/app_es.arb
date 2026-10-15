@@ -535,5 +535,8 @@
   "queueNowPlaying": "Reproduciendo",
   "queueNext": "A continuación",
   "queueClear": "Vaciar",
-  "queueCleared": "Cola vaciada"
+  "queueCleared": "Cola vaciada",
+  "jamOutputsAndSync": "Salidas y sincronía",
+  "jamHostTag": "anfitrión",
+  "jamWaitingEmpty": "No hay ninguna Jam en curso"
 }

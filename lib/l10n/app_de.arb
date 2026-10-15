@@ -535,5 +535,8 @@
   "queueNowPlaying": "Wiedergabe",
   "queueNext": "Als Nächstes",
   "queueClear": "Leeren",
-  "queueCleared": "Warteschlange geleert"
+  "queueCleared": "Warteschlange geleert",
+  "jamOutputsAndSync": "Ausgänge und Sync",
+  "jamHostTag": "Host",
+  "jamWaitingEmpty": "Keine Jam aktiv"
 }

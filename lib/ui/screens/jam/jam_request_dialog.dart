@@ -69,7 +69,9 @@ class _JamRequestDialogState extends ConsumerState<JamRequestDialog> {
             nav.pop();
             await ctrl.acceptRequest(request);
             if (container.read(jamProvider).active && nav.mounted) {
-              nav.push(MaterialPageRoute<void>(builder: (_) => const JamScreen()));
+              nav.push(
+                MaterialPageRoute<void>(builder: (_) => const JamScreen()),
+              );
             }
           },
           child: Text(l.accept),

@@ -4,12 +4,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/jam_providers.dart';
-import '../../../providers/settings_providers.dart';
 import '../../../providers/share_hub.dart';
 import '../../../services/jam/jam_guest.dart';
 import '../../../services/jam/jam_models.dart';
 import '../share/track_picker_screen.dart';
-import 'jam_seek_bar.dart';
+import '../../theme/tokens.dart';
+import '../../widgets/artist_avatar.dart';
+import '../../widgets/now_playing_bars.dart';
+import 'jam_player_card.dart';
 import '../../../providers/database_providers.dart';
 
 /// The Jam: waiting for the answer, then the shared queue and controls.
@@ -84,8 +86,8 @@ class _JamScreenState extends ConsumerState<JamScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const CircularProgressIndicator(),
-                const SizedBox(height: 16),
+                _PulsingAvatars(names: [s.peerName]),
+                const SizedBox(height: 24),
                 Text(l.jamWaiting(s.peerName), textAlign: TextAlign.center),
                 const SizedBox(height: 16),
                 OutlinedButton(
@@ -103,20 +105,13 @@ class _JamScreenState extends ConsumerState<JamScreen> {
     if (!s.active || jam == null) {
       return Scaffold(
         appBar: AppBar(title: Text(l.jamTitle)),
-        body: const SizedBox.shrink(),
+        body: Center(child: Text(l.jamWaitingEmpty)),
       );
     }
     final ownId = ref.read(shareHubProvider.notifier).deviceId ?? '';
     final isHost = s.isHost;
-    final cur = jam.current;
-
-    final others = [
-      for (final p in jam.participants)
-        if (p.id != ownId) p,
-    ];
-    final title = others.isEmpty
-        ? s.peerName
-        : others.map((p) => p.name).join(', ');
+    final cc = context.cc;
+    final theme = Theme.of(context).textTheme;
 
     String owner(JamItem i) {
       if (i.ownerDeviceId == ownId) return l.jamYou;
@@ -124,226 +119,263 @@ class _JamScreenState extends ConsumerState<JamScreen> {
       return n.isEmpty ? s.peerName : n;
     }
 
-    Future<void> guarded(Future<JamError?> f, {String? forbidden}) async {
-      final messenger = ScaffoldMessenger.of(context);
-      final e = await f;
-      if (e == JamError.forbidden) {
-        messenger
-          ..clearSnackBars()
-          ..showSnackBar(
-            SnackBar(content: Text(forbidden ?? l.jamGuestCannotSkip)),
-          );
-      }
-    }
-
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          l.jamWith(title),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        actions: [
-          TextButton(
-            onPressed: ctrl.end,
-            child: Text(isHost ? l.jamEnd : l.jamLeave),
-          ),
-        ],
-      ),
       floatingActionButton: FloatingActionButton.extended(
+        backgroundColor: cc.accent,
+        foregroundColor: cc.onAccent,
         onPressed: _add,
         icon: const Icon(Icons.add),
         label: Text(l.jamAddTracks),
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  cur == null ? l.jamNothingPlaying : l.jamNowPlaying,
-                  style: Theme.of(context).textTheme.labelMedium,
-                ),
-                if (cur != null) ...[
-                  Text(
-                    cur.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.titleLarge,
+      body: SafeArea(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(4, 8, CcDims.margin, 8),
+              child: Row(
+                children: [
+                  IconButton(
+                    tooltip: l.back,
+                    icon: const Icon(Icons.arrow_back),
+                    onPressed: () => Navigator.of(context).maybePop(),
                   ),
-                  Text(
-                    cur.artist ?? '',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-                JamSeekBar(
-                  jam: jam,
-                  onSeek: (ms) => ctrl.send(JamCommand.seek(ms)),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    IconButton.filled(
-                      iconSize: 36,
-                      tooltip: jam.playing ? l.pause : l.play,
-                      icon: Icon(jam.playing ? Icons.pause : Icons.play_arrow),
-                      onPressed: cur == null
-                          ? null
-                          : () => ctrl.send(
-                              jam.playing
-                                  ? const JamCommand.pause()
-                                  : const JamCommand.play(),
-                            ),
-                    ),
-                    if (isHost)
-                      IconButton(
-                        tooltip: l.nextTrack,
-                        icon: const Icon(Icons.skip_next),
-                        onPressed: cur == null
-                            ? null
-                            : () => ctrl.send(const JamCommand.next()),
-                      ),
-                  ],
-                ),
-                Row(
-                  children: [
-                    const Icon(Icons.volume_down),
-                    Expanded(
-                      child: Slider(
-                        value: jam.volume.clamp(0.0, 1.0),
-                        onChanged: (v) => ctrl.send(JamCommand.volume(v)),
-                      ),
-                    ),
-                    const Icon(Icons.volume_up),
-                  ],
-                ),
-                Text(
-                  l.jamOutput,
-                  style: Theme.of(context).textTheme.labelMedium,
-                ),
-                const SizedBox(height: 4),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 4,
-                  children: [
-                    ChoiceChip(
-                      label: Text(l.jamOutputHere),
-                      selected: jam.outputs.contains(ownId),
-                      onSelected: (_) => ctrl.toggleOutput(ownId),
-                    ),
-                    for (final p in others)
-                      ChoiceChip(
-                        label: Text(
-                          p.name,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        selected: jam.outputs.contains(p.id),
-                        onSelected: (_) => ctrl.toggleOutput(p.id),
-                      ),
-                  ],
-                ),
-                if (jam.synced) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    s.syncErrorMs == null
-                        ? l.jamSyncing
-                        : l.jamSynced(s.syncErrorMs!.abs()),
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                  Row(
-                    children: [
-                      IconButton(
-                        tooltip: '-50 ms',
-                        icon: const Icon(Icons.remove),
-                        onPressed: () => ctrl.setLatencyMs(
-                          ref.read(settingsProvider).jamLatencyMs - 50,
-                        ),
-                      ),
-                      Expanded(
-                        child: Text(
-                          l.jamLatency(
-                            ref.watch(settingsProvider).jamLatencyMs,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                      IconButton(
-                        tooltip: '+50 ms',
-                        icon: const Icon(Icons.add),
-                        onPressed: () => ctrl.setLatencyMs(
-                          ref.read(settingsProvider).jamLatencyMs + 50,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-                const SizedBox(height: 12),
-                Text(
-                  l.jamQueue,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: jam.items.isEmpty
-                ? Center(child: Text(l.jamEmpty))
-                : ReorderableListView.builder(
-                    padding: const EdgeInsets.only(bottom: 88),
-                    itemCount: jam.items.length,
-                    onReorderItem: (from, to) {
-                      ctrl.send(JamCommand.move(jam.items[from].id, to));
-                    },
-                    itemBuilder: (_, i) {
-                      final it = jam.items[i];
-                      final isCurrent = i == jam.currentIndex;
-                      final canRemove =
-                          isHost || (it.ownerDeviceId == ownId && !isCurrent);
-                      return ListTile(
-                        key: ValueKey(it.id),
-                        selected: isCurrent,
-                        leading: Icon(
-                          isCurrent
-                              ? Icons.graphic_eq
-                              : Icons.music_note_outlined,
-                        ),
-                        title: Text(
-                          it.title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        subtitle: Text(
-                          [
-                            if (it.artist != null) it.artist!,
-                            l.jamAddedBy(owner(it)),
-                            if (!it.available) l.jamUnavailable,
-                          ].join(' · '),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        onTap: isHost
-                            ? () => ctrl.send(JamCommand.jump(it.id))
+                  Text(l.jamTitle, style: theme.headlineSmall),
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: FilledButton(
+                        onPressed: ctrl.end,
+                        style: isHost
+                            ? FilledButton.styleFrom(
+                                backgroundColor: cc.error,
+                                foregroundColor: cc.bg,
+                              )
                             : null,
-                        trailing: IconButton(
-                          tooltip: l.delete,
-                          icon: const Icon(Icons.close),
-                          onPressed: canRemove
-                              ? () => ctrl.send(JamCommand.remove(it.id))
-                              : () => guarded(
-                                  Future.value(JamError.forbidden),
-                                  forbidden: l.jamRemoveForbidden,
-                                ),
+                        child: Text(
+                          isHost ? l.jamEnd : l.jamLeave,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                      );
-                    },
+                      ),
+                    ),
                   ),
-          ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                CcDims.margin,
+                0,
+                CcDims.margin,
+                12,
+              ),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: _Participants(
+                  jam: jam,
+                  ownId: ownId,
+                  hostId: jam.hostDeviceId,
+                ),
+              ),
+            ),
+            JamPlayerCard(state: s),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                CcDims.margin,
+                16,
+                CcDims.margin,
+                4,
+              ),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(l.jamQueue, style: theme.titleMedium),
+              ),
+            ),
+            Expanded(
+              child: jam.items.isEmpty
+                  ? Center(child: Text(l.jamEmpty))
+                  : ReorderableListView.builder(
+                      padding: const EdgeInsets.only(bottom: 88),
+                      itemCount: jam.items.length,
+                      onReorderItem: (from, to) {
+                        ctrl.send(JamCommand.move(jam.items[from].id, to));
+                      },
+                      itemBuilder: (_, i) {
+                        final it = jam.items[i];
+                        final isCurrent = i == jam.currentIndex;
+                        final canRemove =
+                            isHost || (it.ownerDeviceId == ownId && !isCurrent);
+                        final who = owner(it);
+                        return ListTile(
+                          key: ValueKey(it.id),
+                          leading: SizedBox(
+                            width: 36,
+                            child: Center(
+                              child: isCurrent
+                                  ? NowPlayingBars(
+                                      playing: jam.playing,
+                                      size: 20,
+                                    )
+                                  : _Avatar(name: who, size: 32),
+                            ),
+                          ),
+                          title: Text(
+                            it.title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: isCurrent ? cc.accent : null,
+                            ),
+                          ),
+                          subtitle: Text(
+                            [
+                              if (it.artist != null) it.artist!,
+                              l.jamAddedBy(who),
+                              if (!it.available) l.jamUnavailable,
+                            ].join(' · '),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          onTap: isHost
+                              ? () => ctrl.send(JamCommand.jump(it.id))
+                              : null,
+                          // The ✕ only appears where the removal is allowed.
+                          trailing: canRemove
+                              ? IconButton(
+                                  tooltip: l.delete,
+                                  icon: const Icon(Icons.close),
+                                  onPressed: () =>
+                                      ctrl.send(JamCommand.remove(it.id)),
+                                )
+                              : null,
+                        );
+                      },
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Initials on a tint taken from the name.
+class _Avatar extends StatelessWidget {
+  const _Avatar({required this.name, required this.size});
+
+  final String name;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final hue = artistHue(name);
+    final color = HSLColor.fromAHSL(1, hue, 0.45, 0.32).toColor();
+    return Container(
+      width: size,
+      height: size,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+      child: Text(
+        artistMonogram(name),
+        style: TextStyle(
+          fontSize: size * 0.38,
+          fontWeight: FontWeight.w700,
+          color: context.cc.text,
+        ),
+      ),
+    );
+  }
+}
+
+class _Participants extends StatelessWidget {
+  const _Participants({
+    required this.jam,
+    required this.ownId,
+    required this.hostId,
+  });
+
+  final JamState jam;
+  final String ownId, hostId;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final cc = context.cc;
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: [
+          for (final p in jam.participants)
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: Tooltip(
+                message: p.name,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _Avatar(name: p.name, size: 32),
+                    if (p.id == hostId)
+                      Text(
+                        l.jamHostTag,
+                        style: Theme.of(context).textTheme.labelSmall
+                            ?.copyWith(fontSize: 10, color: cc.textMuted),
+                      ),
+                  ],
+                ),
+              ),
+            ),
         ],
       ),
     );
   }
+}
+
+/// Avatars that pulse while the other device answers (still when the user
+/// asked for fewer animations).
+class _PulsingAvatars extends StatefulWidget {
+  const _PulsingAvatars({required this.names});
+
+  final List<String> names;
+
+  @override
+  State<_PulsingAvatars> createState() => _PulsingAvatarsState();
+}
+
+class _PulsingAvatarsState extends State<_PulsingAvatars>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _c = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1200),
+  );
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (MediaQuery.disableAnimationsOf(context)) {
+      _c.stop();
+    } else if (!_c.isAnimating) {
+      _c.repeat(reverse: true);
+    }
+  }
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => AnimatedBuilder(
+    animation: _c,
+    builder: (_, _) => Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (final n in widget.names)
+          Transform.scale(
+            scale: 1 + 0.12 * _c.value,
+            child: _Avatar(name: n, size: 72),
+          ),
+      ],
+    ),
+  );
 }

@@ -2273,6 +2273,24 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Coda svuotata'**
   String get queueCleared;
+
+  /// No description provided for @jamOutputsAndSync.
+  ///
+  /// In it, this message translates to:
+  /// **'Uscite e sincronia'**
+  String get jamOutputsAndSync;
+
+  /// No description provided for @jamHostTag.
+  ///
+  /// In it, this message translates to:
+  /// **'host'**
+  String get jamHostTag;
+
+  /// No description provided for @jamWaitingEmpty.
+  ///
+  /// In it, this message translates to:
+  /// **'Nessuna Jam in corso'**
+  String get jamWaitingEmpty;
 }
 
 class _AppLocalizationsDelegate

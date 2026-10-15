@@ -726,5 +726,8 @@
   "queueNowPlaying": "In riproduzione",
   "queueNext": "Prossimi",
   "queueClear": "Svuota",
-  "queueCleared": "Coda svuotata"
+  "queueCleared": "Coda svuotata",
+  "jamOutputsAndSync": "Uscite e sincronia",
+  "jamHostTag": "host",
+  "jamWaitingEmpty": "Nessuna Jam in corso"
 }

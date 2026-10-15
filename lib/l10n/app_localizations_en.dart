@@ -1229,4 +1229,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get queueCleared => 'Queue cleared';
+
+  @override
+  String get jamOutputsAndSync => 'Outputs and sync';
+
+  @override
+  String get jamHostTag => 'host';
+
+  @override
+  String get jamWaitingEmpty => 'No Jam in progress';
 }

@@ -535,5 +535,8 @@
   "queueNowPlaying": "Now playing",
   "queueNext": "Next up",
   "queueClear": "Clear",
-  "queueCleared": "Queue cleared"
+  "queueCleared": "Queue cleared",
+  "jamOutputsAndSync": "Outputs and sync",
+  "jamHostTag": "host",
+  "jamWaitingEmpty": "No Jam in progress"
 }

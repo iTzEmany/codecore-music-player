@@ -65,7 +65,7 @@ void main() {
         ),
       ));
       await tester.pump(const Duration(milliseconds: 100));
-      expect(find.text('Jam con Telefono'), findsOneWidget);
+      expect(find.text('Jam'), findsWidgets);
       expect(find.text('Prima'), findsWidgets);
       expect(find.text('Seconda'), findsOneWidget);
       expect(find.text('Aggiungi brani'), findsOneWidget);
@@ -153,6 +153,8 @@ void main() {
       ),
     ));
     await tester.pump(const Duration(milliseconds: 100));
+    await tester.tap(find.text('Uscite e sincronia'));
+    await tester.pump(const Duration(milliseconds: 400));
     expect(find.text('Sincronizzato · scarto 12 ms'), findsOneWidget);
     expect(find.textContaining('Latenza di questa uscita'), findsOneWidget);
     expect(tester.takeException(), isNull);
