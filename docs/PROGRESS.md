@@ -90,9 +90,9 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 8.3 Client ospite
 - [x] 8.4 Riproduzione di elementi remoti (URL + token)
 - [x] 8.5 Uscita audio selezionabile e controllo remoto
-- [ ] 8.6 Precarico e resilienza (cache temporanea)
-- [ ] 8.7 Interfaccia (pulsante Jam, coda condivisa, uscita, termina)
-- [ ] 8.8 Background Android e rifinitura
+- [x] 8.6 Precarico e resilienza (cache temporanea)
+- [x] 8.7 Interfaccia (pulsante Jam, coda condivisa, uscita, termina)
+- [~] 8.8 Background Android e rifinitura
 - [ ] 8.9 Documentazione
 
 ## Note di deviazione

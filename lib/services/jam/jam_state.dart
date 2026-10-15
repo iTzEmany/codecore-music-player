@@ -99,8 +99,9 @@ JamResult applyCommand(
 
     case JamCommandType.setOutput:
       final d = cmd.deviceId!;
-      // Only the two participants can be the output.
-      if (d != s.hostDeviceId && d != from) {
+      // Only the two participants can be the output (the host may name the
+      // guest, whose id it knows from the session).
+      if (!isHost && d != s.hostDeviceId && d != from) {
         return const JamResult.fail(JamError.invalid);
       }
       if (d == s.outputDeviceId) return JamResult.ok(s);

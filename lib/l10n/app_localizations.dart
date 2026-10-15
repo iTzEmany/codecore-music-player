@@ -1541,6 +1541,198 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Disattiva'**
   String get receiveServiceDisable;
+
+  /// No description provided for @jamTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Jam'**
+  String get jamTitle;
+
+  /// No description provided for @jamStart.
+  ///
+  /// In it, this message translates to:
+  /// **'Avvia una Jam'**
+  String get jamStart;
+
+  /// No description provided for @jamStartWith.
+  ///
+  /// In it, this message translates to:
+  /// **'Avvia Jam con {name}'**
+  String jamStartWith(String name);
+
+  /// No description provided for @jamWaiting.
+  ///
+  /// In it, this message translates to:
+  /// **'In attesa che {name} accetti…'**
+  String jamWaiting(String name);
+
+  /// No description provided for @jamDeclined.
+  ///
+  /// In it, this message translates to:
+  /// **'{name} ha rifiutato la Jam'**
+  String jamDeclined(String name);
+
+  /// No description provided for @jamBusy.
+  ///
+  /// In it, this message translates to:
+  /// **'{name} ha già una Jam in corso'**
+  String jamBusy(String name);
+
+  /// No description provided for @jamUnreachable.
+  ///
+  /// In it, this message translates to:
+  /// **'Dispositivo non raggiungibile'**
+  String get jamUnreachable;
+
+  /// No description provided for @jamIncomingTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'{name} vuole avviare una Jam'**
+  String jamIncomingTitle(String name);
+
+  /// No description provided for @jamIncomingBody.
+  ///
+  /// In it, this message translates to:
+  /// **'Ascoltate insieme da una coda condivisa.'**
+  String get jamIncomingBody;
+
+  /// No description provided for @jamIncomingDialog.
+  ///
+  /// In it, this message translates to:
+  /// **'{name} vuole avviare una Jam con te. La musica parte da questo dispositivo e potete aggiungere brani entrambi.'**
+  String jamIncomingDialog(String name);
+
+  /// No description provided for @jamQueue.
+  ///
+  /// In it, this message translates to:
+  /// **'Coda condivisa'**
+  String get jamQueue;
+
+  /// No description provided for @jamEmpty.
+  ///
+  /// In it, this message translates to:
+  /// **'La coda è vuota. Aggiungi dei brani.'**
+  String get jamEmpty;
+
+  /// No description provided for @jamAddedBy.
+  ///
+  /// In it, this message translates to:
+  /// **'aggiunto da {name}'**
+  String jamAddedBy(String name);
+
+  /// No description provided for @jamYou.
+  ///
+  /// In it, this message translates to:
+  /// **'te'**
+  String get jamYou;
+
+  /// No description provided for @jamAddTracks.
+  ///
+  /// In it, this message translates to:
+  /// **'Aggiungi brani'**
+  String get jamAddTracks;
+
+  /// No description provided for @jamAddToJam.
+  ///
+  /// In it, this message translates to:
+  /// **'Aggiungi alla Jam'**
+  String get jamAddToJam;
+
+  /// No description provided for @jamAdded.
+  ///
+  /// In it, this message translates to:
+  /// **'Aggiunti alla Jam: {count}'**
+  String jamAdded(int count);
+
+  /// No description provided for @jamOutput.
+  ///
+  /// In it, this message translates to:
+  /// **'Uscita audio'**
+  String get jamOutput;
+
+  /// No description provided for @jamOutputHere.
+  ///
+  /// In it, this message translates to:
+  /// **'Questo dispositivo'**
+  String get jamOutputHere;
+
+  /// No description provided for @jamOutputOther.
+  ///
+  /// In it, this message translates to:
+  /// **'{name}'**
+  String jamOutputOther(String name);
+
+  /// No description provided for @jamEnd.
+  ///
+  /// In it, this message translates to:
+  /// **'Termina Jam'**
+  String get jamEnd;
+
+  /// No description provided for @jamLeave.
+  ///
+  /// In it, this message translates to:
+  /// **'Esci dalla Jam'**
+  String get jamLeave;
+
+  /// No description provided for @jamEnded.
+  ///
+  /// In it, this message translates to:
+  /// **'La Jam è terminata'**
+  String get jamEnded;
+
+  /// No description provided for @jamLost.
+  ///
+  /// In it, this message translates to:
+  /// **'Connessione persa'**
+  String get jamLost;
+
+  /// No description provided for @jamGuestCannotSkip.
+  ///
+  /// In it, this message translates to:
+  /// **'Solo chi ha avviato la Jam può cambiare brano'**
+  String get jamGuestCannotSkip;
+
+  /// No description provided for @jamRemoveForbidden.
+  ///
+  /// In it, this message translates to:
+  /// **'Puoi rimuovere solo i tuoi brani'**
+  String get jamRemoveForbidden;
+
+  /// No description provided for @jamNowPlaying.
+  ///
+  /// In it, this message translates to:
+  /// **'In riproduzione'**
+  String get jamNowPlaying;
+
+  /// No description provided for @jamNothingPlaying.
+  ///
+  /// In it, this message translates to:
+  /// **'Niente in riproduzione'**
+  String get jamNothingPlaying;
+
+  /// No description provided for @jamWith.
+  ///
+  /// In it, this message translates to:
+  /// **'Jam con {name}'**
+  String jamWith(String name);
+
+  /// No description provided for @jamUnavailable.
+  ///
+  /// In it, this message translates to:
+  /// **'Non disponibile'**
+  String get jamUnavailable;
+
+  /// No description provided for @jamPlaying.
+  ///
+  /// In it, this message translates to:
+  /// **'La Jam è attiva'**
+  String get jamPlaying;
+
+  /// No description provided for @jamOpen.
+  ///
+  /// In it, this message translates to:
+  /// **'Apri la Jam'**
+  String get jamOpen;
 }
 
 class _AppLocalizationsDelegate

@@ -806,4 +806,121 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get receiveServiceDisable => 'Ausschalten';
+
+  @override
+  String get jamTitle => 'Jam';
+
+  @override
+  String get jamStart => 'Jam starten';
+
+  @override
+  String jamStartWith(String name) {
+    return 'Jam mit $name starten';
+  }
+
+  @override
+  String jamWaiting(String name) {
+    return 'Warte, bis $name annimmt…';
+  }
+
+  @override
+  String jamDeclined(String name) {
+    return '$name hat die Jam abgelehnt';
+  }
+
+  @override
+  String jamBusy(String name) {
+    return '$name hat bereits eine Jam';
+  }
+
+  @override
+  String get jamUnreachable => 'Gerät nicht erreichbar';
+
+  @override
+  String jamIncomingTitle(String name) {
+    return '$name möchte eine Jam starten';
+  }
+
+  @override
+  String get jamIncomingBody =>
+      'Gemeinsam aus einer geteilten Warteschlange hören.';
+
+  @override
+  String jamIncomingDialog(String name) {
+    return '$name möchte eine Jam mit dir starten. Die Musik läuft auf diesem Gerät und ihr könnt beide Titel hinzufügen.';
+  }
+
+  @override
+  String get jamQueue => 'Gemeinsame Warteschlange';
+
+  @override
+  String get jamEmpty => 'Die Warteschlange ist leer. Füge Titel hinzu.';
+
+  @override
+  String jamAddedBy(String name) {
+    return 'hinzugefügt von $name';
+  }
+
+  @override
+  String get jamYou => 'dir';
+
+  @override
+  String get jamAddTracks => 'Titel hinzufügen';
+
+  @override
+  String get jamAddToJam => 'Zur Jam hinzufügen';
+
+  @override
+  String jamAdded(int count) {
+    return 'Zur Jam hinzugefügt: $count';
+  }
+
+  @override
+  String get jamOutput => 'Audioausgabe';
+
+  @override
+  String get jamOutputHere => 'Dieses Gerät';
+
+  @override
+  String jamOutputOther(String name) {
+    return '$name';
+  }
+
+  @override
+  String get jamEnd => 'Jam beenden';
+
+  @override
+  String get jamLeave => 'Jam verlassen';
+
+  @override
+  String get jamEnded => 'Die Jam ist beendet';
+
+  @override
+  String get jamLost => 'Verbindung verloren';
+
+  @override
+  String get jamGuestCannotSkip => 'Nur der Host kann den Titel wechseln';
+
+  @override
+  String get jamRemoveForbidden => 'Du kannst nur eigene Titel entfernen';
+
+  @override
+  String get jamNowPlaying => 'Läuft gerade';
+
+  @override
+  String get jamNothingPlaying => 'Nichts läuft';
+
+  @override
+  String jamWith(String name) {
+    return 'Jam mit $name';
+  }
+
+  @override
+  String get jamUnavailable => 'Nicht verfügbar';
+
+  @override
+  String get jamPlaying => 'Jam ist aktiv';
+
+  @override
+  String get jamOpen => 'Jam öffnen';
 }

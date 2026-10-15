@@ -9,6 +9,7 @@ import 'package:permission_handler/permission_handler.dart';
 
 import '../core/app_log.dart';
 import '../data/db/app_database.dart';
+import '../services/jam/jam_host.dart';
 import '../services/share/discovery.dart';
 import '../services/share/lan_client.dart';
 import '../l10n/app_localizations.dart';
@@ -59,6 +60,7 @@ class ShareHubState {
 class ShareHubNotifier extends Notifier<ShareHubState> {
   OfferService? _service;
   OfferNode? _node;
+  JamHost? _jam;
   LanDiscovery? _discovery;
   StreamSubscription<List<Peer>>? _peerSub;
   StreamSubscription<void>? _changeSub;
@@ -69,8 +71,51 @@ class ShareHubNotifier extends Notifier<ShareHubState> {
   final _newIncoming = StreamController<IncomingOffer>.broadcast();
   final _notified = <String>{}; // offers currently shown as notifications
 
+  final _newJamRequests = StreamController<JamRequest>.broadcast();
+
   /// New pending offers (the shell turns them into a dialog).
   Stream<IncomingOffer> get newIncoming => _newIncoming.stream;
+
+  /// New Jam requests (dialog in the foreground, notification otherwise).
+  Stream<JamRequest> get newJamRequests => _newJamRequests.stream;
+
+  /// Jam protocol endpoint of this device; null while the hub is stopped.
+  JamHost? get jamHost => _jam;
+
+  /// Own device id, once the hub has been started.
+  String? get deviceId => _service?.deviceId;
+
+  /// Port of the HTTP endpoint (offers and Jam), while running.
+  int? get port => _node?.port;
+
+  /// Ensures the endpoint is up for a Jam and keeps it up until [releaseJam].
+  Future<void> holdJam() async {
+    _jamHeld = true;
+    await enter();
+    // Keeps the process alive with the screen off (Android foreground service).
+    final l = _l10n;
+    await _platform.startService(
+      title: l.jamPlaying,
+      text: l.jamIncomingBody,
+      disable: l.jamEnd,
+    );
+  }
+
+  Future<void> releaseJam() async {
+    _jamHeld = false;
+    if (!ref.read(settingsProvider).receiveFromLan) {
+      await _platform.stopService();
+    }
+    await leave();
+  }
+
+  bool _jamHeld = false;
+
+  /// Set by the Jam controller: "End" pressed on the service notification.
+  void Function()? onJamEnd;
+
+  /// Set by the Jam controller: the user answered a request from a notification.
+  void Function(JamRequest request, bool accept)? onJamAction;
 
   ShareNotifier get _platform => ref.read(shareNotifierProvider);
 
@@ -82,9 +127,15 @@ class ShareHubNotifier extends Notifier<ShareHubState> {
     ref.onDispose(_teardown);
     final platform = ref.read(shareNotifierProvider);
     platform.onOfferAction = _onNotificationAction;
-    platform.onDisableReceive = () => ref
-        .read(settingsProvider.notifier)
-        .update((s) => s.copyWith(receiveFromLan: false));
+    platform.onDisableReceive = () {
+      if (_jamHeld) {
+        onJamEnd?.call();
+        return;
+      }
+      ref
+          .read(settingsProvider.notifier)
+          .update((s) => s.copyWith(receiveFromLan: false));
+    };
     platform.onAppResumed = _onResume;
     ref.listen(settingsProvider.select((s) => s.receiveFromLan),
         (_, on) => _applyReceiveSetting(on));
@@ -114,6 +165,12 @@ class ShareHubNotifier extends Notifier<ShareHubState> {
   }
 
   void _onNotificationAction(String offerId, bool accept) {
+    final req = _jam?.requests[offerId];
+    if (req != null) {
+      _notified.remove(offerId);
+      onJamAction?.call(req, accept);
+      return;
+    }
     final o = _service?.incoming[offerId];
     if (o == null || o.status != OfferStatus.pending) return;
     _notified.remove(offerId);
@@ -126,6 +183,10 @@ class ShareHubNotifier extends Notifier<ShareHubState> {
       final o = _service?.incoming[id];
       _platform.clearOffer(id);
       if (o != null && o.status == OfferStatus.pending) _newIncoming.add(o);
+      final r = _jam?.requests[id];
+      if (r != null && r.status == JamRequestStatus.pending) {
+        _newJamRequests.add(r);
+      }
     }
     _notified.clear();
   }
@@ -147,10 +208,34 @@ class ShareHubNotifier extends Notifier<ShareHubState> {
     );
   }
 
+  Future<void> _surfaceJamRequest(JamRequest r) async {
+    if (await _platform.isForeground()) {
+      _newJamRequests.add(r);
+      return;
+    }
+    final l = _l10n;
+    _notified.add(r.id);
+    _platform.showOffer(
+      offerId: r.id,
+      title: l.jamIncomingTitle(r.fromName),
+      body: l.jamIncomingBody,
+      accept: l.accept,
+      decline: l.decline,
+    );
+  }
+
   void _clearStaleNotifications() {
     final s = _service;
     if (s == null) return;
     for (final id in _notified.toList()) {
+      final r = _jam?.requests[id];
+      if (r != null) {
+        if (r.status != JamRequestStatus.pending) {
+          _notified.remove(id);
+          _platform.clearOffer(id);
+        }
+        continue;
+      }
       final o = s.incoming[id];
       if (o == null || o.status != OfferStatus.pending) {
         _notified.remove(id);
@@ -181,7 +266,11 @@ class ShareHubNotifier extends Notifier<ShareHubState> {
           _publish();
           _surfaceIncoming(o);
         };
-      final node = OfferNode(service);
+      final jam = JamHost(
+        deviceId: service.deviceId,
+        deviceName: service.deviceName,
+      )..onRequest = _surfaceJamRequest;
+      final node = OfferNode(service, extraRoutes: {'/jam': jam.buildRouter().call});
       final port = await node.start();
       final discovery = LanDiscovery(
         deviceId: service.deviceId,
@@ -192,8 +281,10 @@ class ShareHubNotifier extends Notifier<ShareHubState> {
         await discovery.dispose();
         await node.stop();
         service.dispose();
+        jam.dispose();
         return;
       }
+      _jam = jam;
       _service = service;
       _node = node;
       _discovery = discovery;
@@ -233,7 +324,7 @@ class ShareHubNotifier extends Notifier<ShareHubState> {
   bool get _busy {
     final s = _service;
     if (s == null) return false;
-    return s.hasOpenOutgoing || _cancels.isNotEmpty;
+    return s.hasOpenOutgoing || _cancels.isNotEmpty || (_jam?.hosting ?? false);
   }
 
   void _maybeStop() {
@@ -258,6 +349,8 @@ class ShareHubNotifier extends Notifier<ShareHubState> {
     await _discovery?.dispose();
     await _node?.stop();
     _service?.dispose();
+    _jam?.dispose();
+    _jam = null;
     _discovery = null;
     _node = null;
     _service = null;

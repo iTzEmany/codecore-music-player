@@ -10,7 +10,9 @@ import '../../providers/ui_providers.dart';
 import '../../services/audio/codecore_audio_handler.dart';
 import '../screens/library/library_screen.dart';
 import '../screens/share/incoming_offer_dialog.dart';
+import '../../providers/jam_providers.dart';
 import '../../providers/share_hub.dart';
+import '../screens/jam/jam_request_dialog.dart';
 import '../screens/library/tracks_tab.dart';
 import '../screens/playlists/playlists_screen.dart';
 import '../screens/settings/settings_screen.dart';
@@ -94,6 +96,14 @@ class AppShell extends ConsumerWidget {
       showDialog<void>(
         context: context,
         builder: (_) => IncomingOfferDialog(offer: o),
+      );
+    });
+    ref.listen(jamRequestsProvider, (_, next) {
+      final r = next.value;
+      if (r == null) return;
+      showDialog<void>(
+        context: context,
+        builder: (_) => JamRequestDialog(request: r),
       );
     });
     final index = ref.watch(navIndexProvider);

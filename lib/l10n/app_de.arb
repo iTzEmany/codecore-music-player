@@ -239,5 +239,107 @@
   "receiveFromLanHint": "Macht das Gerät sichtbar und empfängt Anfragen auch im Hintergrund. Unter Android erscheint eine feste Benachrichtigung zum Ausschalten",
   "receiveServiceTitle": "Codecore ist im Netzwerk sichtbar",
   "receiveServiceText": "Bereit, Titel von Geräten in der Nähe zu empfangen",
-  "receiveServiceDisable": "Ausschalten"
+  "receiveServiceDisable": "Ausschalten",
+  "jamTitle": "Jam",
+  "jamStart": "Jam starten",
+  "jamStartWith": "Jam mit {name} starten",
+  "@jamStartWith": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "jamWaiting": "Warte, bis {name} annimmt…",
+  "@jamWaiting": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "jamDeclined": "{name} hat die Jam abgelehnt",
+  "@jamDeclined": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "jamBusy": "{name} hat bereits eine Jam",
+  "@jamBusy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "jamUnreachable": "Gerät nicht erreichbar",
+  "jamIncomingTitle": "{name} möchte eine Jam starten",
+  "@jamIncomingTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "jamIncomingBody": "Gemeinsam aus einer geteilten Warteschlange hören.",
+  "jamIncomingDialog": "{name} möchte eine Jam mit dir starten. Die Musik läuft auf diesem Gerät und ihr könnt beide Titel hinzufügen.",
+  "@jamIncomingDialog": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "jamQueue": "Gemeinsame Warteschlange",
+  "jamEmpty": "Die Warteschlange ist leer. Füge Titel hinzu.",
+  "jamAddedBy": "hinzugefügt von {name}",
+  "@jamAddedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "jamYou": "dir",
+  "jamAddTracks": "Titel hinzufügen",
+  "jamAddToJam": "Zur Jam hinzufügen",
+  "jamAdded": "Zur Jam hinzugefügt: {count}",
+  "@jamAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "jamOutput": "Audioausgabe",
+  "jamOutputHere": "Dieses Gerät",
+  "jamOutputOther": "{name}",
+  "@jamOutputOther": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "jamEnd": "Jam beenden",
+  "jamLeave": "Jam verlassen",
+  "jamEnded": "Die Jam ist beendet",
+  "jamLost": "Verbindung verloren",
+  "jamGuestCannotSkip": "Nur der Host kann den Titel wechseln",
+  "jamRemoveForbidden": "Du kannst nur eigene Titel entfernen",
+  "jamNowPlaying": "Läuft gerade",
+  "jamNothingPlaying": "Nichts läuft",
+  "jamWith": "Jam mit {name}",
+  "@jamWith": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "jamUnavailable": "Nicht verfügbar",
+  "jamPlaying": "Jam ist aktiv",
+  "jamOpen": "Jam öffnen"
 }

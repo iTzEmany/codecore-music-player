@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -9,6 +11,8 @@ import '../../../providers/share_hub.dart';
 import '../../../providers/share_providers.dart';
 import '../../../services/share/discovery.dart';
 import '../../../services/share/lan_server.dart';
+import '../jam/jam_screen.dart';
+import '../../../providers/jam_providers.dart';
 import 'offer_status_label.dart';
 import 'track_picker_screen.dart';
 
@@ -70,6 +74,14 @@ class _SendTabState extends ConsumerState<SendTab> {
           content: Text(ok ? l.offerSent(peer.name) : l.shareErrUnreachable)));
   }
 
+  void _startJam(Peer peer) {
+    final ctrl = ref.read(jamProvider.notifier);
+    final jam = ref.read(jamProvider);
+    if (!jam.active) unawaited(ctrl.request(peer));
+    Navigator.of(context)
+        .push(MaterialPageRoute<void>(builder: (_) => const JamScreen()));
+  }
+
   Future<void> _start() async {
     setState(() {
       _starting = true;
@@ -111,6 +123,18 @@ class _SendTabState extends ConsumerState<SendTab> {
           child: OutlinedButton(onPressed: _pick, child: Text(l.sharePick)),
         ),
       const SizedBox(height: 16),
+      if (ref.watch(jamProvider).active)
+        Card(
+          child: ListTile(
+            leading: const Icon(Icons.queue_music),
+            title: Text(l.jamPlaying),
+            trailing: TextButton(
+              onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(
+                  builder: (_) => const JamScreen())),
+              child: Text(l.jamOpen),
+            ),
+          ),
+        ),
       Text(l.nearbyDevices, style: Theme.of(context).textTheme.titleMedium),
       if (hub.peers.isEmpty)
         Padding(
@@ -125,16 +149,27 @@ class _SendTabState extends ConsumerState<SendTab> {
           ]),
         ),
       for (final peer in hub.peers)
-        ListTile(
-          leading: Icon(_platformIcon(peer.platform)),
-          title: Text(peer.name, maxLines: 1, overflow: TextOverflow.ellipsis),
-          subtitle: Text(peer.host),
-          trailing: FilledButton(
-            onPressed: () => _sendTo(peer),
-            child: Text(l.sendToDevice(peer.name),
-                maxLines: 1, overflow: TextOverflow.ellipsis),
+        Column(children: [
+          ListTile(
+            leading: Icon(_platformIcon(peer.platform)),
+            title: Text(peer.name, maxLines: 1, overflow: TextOverflow.ellipsis),
+            subtitle: Text(peer.host),
+            trailing: FilledButton(
+              onPressed: () => _sendTo(peer),
+              child: Text(l.sendToDevice(peer.name),
+                  maxLines: 1, overflow: TextOverflow.ellipsis),
+            ),
           ),
-        ),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton.icon(
+              onPressed: () => _startJam(peer),
+              icon: const Icon(Icons.queue_music),
+              label: Text(l.jamStartWith(peer.name),
+                  maxLines: 1, overflow: TextOverflow.ellipsis),
+            ),
+          ),
+        ]),
       if (hub.peers.isEmpty && hub.active)
         Text(l.noDevicesHint, style: Theme.of(context).textTheme.bodySmall),
       if (hub.outgoing.isNotEmpty) ...[

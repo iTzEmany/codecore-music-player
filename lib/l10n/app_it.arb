@@ -430,5 +430,107 @@
   "receiveFromLanHint": "Rende il dispositivo visibile e riceve richieste anche in background. Su Android mostra una notifica fissa con cui puoi disattivarlo",
   "receiveServiceTitle": "Codecore è visibile sulla rete",
   "receiveServiceText": "Pronto a ricevere brani dai dispositivi vicini",
-  "receiveServiceDisable": "Disattiva"
+  "receiveServiceDisable": "Disattiva",
+  "jamTitle": "Jam",
+  "jamStart": "Avvia una Jam",
+  "jamStartWith": "Avvia Jam con {name}",
+  "@jamStartWith": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "jamWaiting": "In attesa che {name} accetti…",
+  "@jamWaiting": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "jamDeclined": "{name} ha rifiutato la Jam",
+  "@jamDeclined": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "jamBusy": "{name} ha già una Jam in corso",
+  "@jamBusy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "jamUnreachable": "Dispositivo non raggiungibile",
+  "jamIncomingTitle": "{name} vuole avviare una Jam",
+  "@jamIncomingTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "jamIncomingBody": "Ascoltate insieme da una coda condivisa.",
+  "jamIncomingDialog": "{name} vuole avviare una Jam con te. La musica parte da questo dispositivo e potete aggiungere brani entrambi.",
+  "@jamIncomingDialog": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "jamQueue": "Coda condivisa",
+  "jamEmpty": "La coda è vuota. Aggiungi dei brani.",
+  "jamAddedBy": "aggiunto da {name}",
+  "@jamAddedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "jamYou": "te",
+  "jamAddTracks": "Aggiungi brani",
+  "jamAddToJam": "Aggiungi alla Jam",
+  "jamAdded": "Aggiunti alla Jam: {count}",
+  "@jamAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "jamOutput": "Uscita audio",
+  "jamOutputHere": "Questo dispositivo",
+  "jamOutputOther": "{name}",
+  "@jamOutputOther": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "jamEnd": "Termina Jam",
+  "jamLeave": "Esci dalla Jam",
+  "jamEnded": "La Jam è terminata",
+  "jamLost": "Connessione persa",
+  "jamGuestCannotSkip": "Solo chi ha avviato la Jam può cambiare brano",
+  "jamRemoveForbidden": "Puoi rimuovere solo i tuoi brani",
+  "jamNowPlaying": "In riproduzione",
+  "jamNothingPlaying": "Niente in riproduzione",
+  "jamWith": "Jam con {name}",
+  "@jamWith": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "jamUnavailable": "Non disponibile",
+  "jamPlaying": "La Jam è attiva",
+  "jamOpen": "Apri la Jam"
 }

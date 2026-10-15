@@ -239,5 +239,107 @@
   "receiveFromLanHint": "Makes this device visible and receives requests even in the background. On Android it shows a permanent notification you can use to turn it off",
   "receiveServiceTitle": "Codecore is visible on the network",
   "receiveServiceText": "Ready to receive tracks from nearby devices",
-  "receiveServiceDisable": "Turn off"
+  "receiveServiceDisable": "Turn off",
+  "jamTitle": "Jam",
+  "jamStart": "Start a Jam",
+  "jamStartWith": "Start Jam with {name}",
+  "@jamStartWith": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "jamWaiting": "Waiting for {name} to accept…",
+  "@jamWaiting": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "jamDeclined": "{name} declined the Jam",
+  "@jamDeclined": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "jamBusy": "{name} already has a Jam running",
+  "@jamBusy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "jamUnreachable": "Device unreachable",
+  "jamIncomingTitle": "{name} wants to start a Jam",
+  "@jamIncomingTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "jamIncomingBody": "Listen together from a shared queue.",
+  "jamIncomingDialog": "{name} wants to start a Jam with you. Music plays from this device and you can both add tracks.",
+  "@jamIncomingDialog": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "jamQueue": "Shared queue",
+  "jamEmpty": "The queue is empty. Add some tracks.",
+  "jamAddedBy": "added by {name}",
+  "@jamAddedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "jamYou": "you",
+  "jamAddTracks": "Add tracks",
+  "jamAddToJam": "Add to Jam",
+  "jamAdded": "Added to the Jam: {count}",
+  "@jamAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "jamOutput": "Audio output",
+  "jamOutputHere": "This device",
+  "jamOutputOther": "{name}",
+  "@jamOutputOther": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "jamEnd": "End Jam",
+  "jamLeave": "Leave Jam",
+  "jamEnded": "The Jam has ended",
+  "jamLost": "Connection lost",
+  "jamGuestCannotSkip": "Only the host can change track",
+  "jamRemoveForbidden": "You can only remove your own tracks",
+  "jamNowPlaying": "Now playing",
+  "jamNothingPlaying": "Nothing playing",
+  "jamWith": "Jam with {name}",
+  "@jamWith": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "jamUnavailable": "Unavailable",
+  "jamPlaying": "Jam is active",
+  "jamOpen": "Open Jam"
 }

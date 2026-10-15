@@ -8,6 +8,7 @@ import '../../core/app_log.dart';
 import '../../core/platform.dart';
 import '../../data/db/app_database.dart';
 import '../../l10n/l10n_ext.dart';
+import '../../providers/jam_providers.dart';
 import '../../providers/player_providers.dart';
 import '../screens/playlists/playlist_dialogs.dart';
 import '../screens/enrich_preview_dialog.dart';
@@ -69,6 +70,17 @@ class _TrackActionsSheet extends ConsumerWidget {
               _snack(l.addedToQueue);
             },
           ),
+          if (ref.watch(jamProvider).active)
+            ListTile(
+              leading: const Icon(Icons.queue_music),
+              title: Text(l.jamAddToJam),
+              onTap: () async {
+                close();
+                final n =
+                    await ref.read(jamProvider.notifier).addTracks([track]);
+                _snack(l.jamAdded(n));
+              },
+            ),
           ListTile(
             leading: const Icon(Icons.playlist_add),
             title: Text(l.addToPlaylist),
