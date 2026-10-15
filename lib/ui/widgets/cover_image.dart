@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../providers/library_providers.dart';
+import '../theme/tokens.dart';
 
 /// Resolves a cover file once per key (no repeated disk checks while scrolling).
 final coverFileProvider = Provider.family<File?, String>((ref, key) {
@@ -20,24 +21,28 @@ class CoverImage extends ConsumerWidget {
     super.key,
     required this.coverKey,
     required this.size,
-    this.radius = 6,
+    this.radius = CcDims.rList,
+    this.heroTag,
   });
 
   final String? coverKey;
   final double size, radius;
 
+  /// Shared-element tag (mini-player ↔ Now Playing); null = no Hero.
+  final Object? heroTag;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final scheme = Theme.of(context).colorScheme;
+    final cc = context.cc;
     final placeholder = ColoredBox(
-      color: scheme.surfaceContainerHighest,
-      child: Icon(Icons.music_note,
-          size: size * 0.5, color: scheme.onSurfaceVariant),
+      color: cc.surface3,
+      child: Icon(Icons.music_note_rounded,
+          size: size * 0.5, color: cc.textMuted),
     );
     final key = coverKey;
     final file = key == null ? null : ref.watch(coverFileProvider(key));
     final px = (size * MediaQuery.devicePixelRatioOf(context)).round();
-    return ClipRRect(
+    Widget image = ClipRRect(
       borderRadius: BorderRadius.circular(radius),
       child: SizedBox(
         width: size,
@@ -53,5 +58,7 @@ class CoverImage extends ConsumerWidget {
               ),
       ),
     );
+    if (heroTag != null) image = Hero(tag: heroTag!, child: image);
+    return image;
   }
 }

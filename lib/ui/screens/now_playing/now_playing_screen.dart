@@ -9,7 +9,7 @@ import '../../../l10n/l10n_ext.dart';
 import '../../widgets/cover_image.dart';
 import '../../widgets/favorite_actions.dart';
 import '../../widgets/format_utils.dart';
-import '../../widgets/quality_badge.dart';
+import '../../widgets/quality_tag.dart';
 import '../lyrics/lyrics_screen.dart';
 import 'queue_sheet.dart';
 
@@ -92,7 +92,7 @@ class NowPlayingScreen extends ConsumerWidget {
                     Text(track.artist ?? context.l10n.unknownArtist,
                         style: TextStyle(color: scheme.onSurfaceVariant)),
                     const SizedBox(height: 8),
-                    QualityBadge(track),
+                    QualityTag(track),
                     const _SeekBar(),
                     Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                       IconButton(

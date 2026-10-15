@@ -1,0 +1,320 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../data/db/app_database.dart';
+import '../../l10n/l10n_ext.dart';
+import '../../providers/player_providers.dart';
+import '../theme/tokens.dart';
+import 'cover_image.dart';
+import 'favorite_actions.dart';
+import 'format_utils.dart';
+import 'now_playing_bars.dart';
+import 'track_actions_sheet.dart';
+
+enum TrackRowVariant {
+  /// Cover, title, «artist · album».
+  standard,
+
+  /// Track number instead of the cover; artist only when it differs.
+  album,
+
+  /// Drag handle on the right (needs [TrackRow.reorderIndex]).
+  queue,
+
+  /// Round ＋/✓ on the right (selection lists).
+  pick,
+}
+
+/// The only track row of the app. Fixed height: pair it with `itemExtent`
+/// from `trackRowExtentOf`.
+class TrackRow extends StatefulWidget {
+  const TrackRow({
+    super.key,
+    required this.track,
+    required this.onTap,
+    this.variant = TrackRowVariant.standard,
+    this.isCurrent = false,
+    this.isPlaying = false,
+    this.compact = false,
+    this.onMore,
+    this.onFavorite,
+    this.onLongPress,
+    this.onSecondaryTap,
+    this.index,
+    this.albumArtist,
+    this.picked = false,
+    this.reorderIndex,
+  });
+
+  final Track track;
+  final VoidCallback onTap;
+  final TrackRowVariant variant;
+  final bool isCurrent, isPlaying, compact, picked;
+  final VoidCallback? onMore, onFavorite, onLongPress;
+
+  /// Right click on desktop; receives the global pointer position.
+  final void Function(Offset position)? onSecondaryTap;
+
+  /// 1-based position shown in the wide «#» column (track number if null).
+  final int? index;
+
+  /// Album variant: the artist is hidden when it equals this one.
+  final String? albumArtist;
+
+  /// Position inside a `ReorderableListView` for the drag handle.
+  final int? reorderIndex;
+
+  @override
+  State<TrackRow> createState() => _TrackRowState();
+}
+
+class _TrackRowState extends State<TrackRow> {
+  bool _hover = false;
+
+  String _subtitle(BuildContext context) {
+    final t = widget.track;
+    final parts = <String>[];
+    switch (widget.variant) {
+      case TrackRowVariant.album:
+        final a = t.artist;
+        if (a != null &&
+            a.trim().toLowerCase() != (widget.albumArtist ?? '').trim().toLowerCase()) {
+          parts.add(a);
+        }
+      case _:
+        if (t.artist != null) parts.add(t.artist!);
+        if (t.album != null) parts.add(t.album!);
+    }
+    return parts.join(' · ');
+  }
+
+  Widget _leading(BuildContext context, double cover) {
+    final cc = context.cc;
+    final t = widget.track;
+    if (widget.variant == TrackRowVariant.album) {
+      final n = t.trackNumber;
+      return SizedBox(
+        width: 32,
+        child: Center(
+          child: widget.isCurrent
+              ? NowPlayingBars(playing: widget.isPlaying, size: 16)
+              : Text(n == null ? '' : '$n',
+                  style: Theme.of(context).textTheme.labelSmall),
+        ),
+      );
+    }
+    final image = CoverImage(coverKey: t.coverKey, size: cover);
+    if (!widget.isCurrent) return image;
+    return Stack(alignment: Alignment.center, children: [
+      image,
+      Container(
+        width: cover,
+        height: cover,
+        decoration: BoxDecoration(
+            color: cc.bg.withValues(alpha: 0.5),
+            borderRadius: BorderRadius.circular(CcDims.rList)),
+        alignment: Alignment.center,
+        child: NowPlayingBars(playing: widget.isPlaying, size: cover * 0.4),
+      ),
+    ]);
+  }
+
+  Widget _trailing(BuildContext context, bool wide) {
+    final cc = context.cc;
+    final l = context.l10n;
+    final fav = widget.track.isFavorite;
+    switch (widget.variant) {
+      case TrackRowVariant.pick:
+        return Padding(
+          padding: const EdgeInsets.only(left: 8),
+          child: Icon(
+              widget.picked
+                  ? Icons.check_circle_rounded
+                  : Icons.add_circle_outline_rounded,
+              color: widget.picked ? cc.accent : cc.textMuted),
+        );
+      case TrackRowVariant.queue:
+        final i = widget.reorderIndex;
+        return Padding(
+          padding: const EdgeInsets.only(left: 8),
+          child: i == null
+              ? Icon(Icons.drag_handle_rounded, color: cc.textMuted)
+              : ReorderableDragStartListener(
+                  index: i,
+                  child: Icon(Icons.drag_handle_rounded, color: cc.textMuted)),
+        );
+      case _:
+    }
+    final showActions = !wide || _hover || fav;
+    return Row(mainAxisSize: MainAxisSize.min, children: [
+      if (wide && (_hover || fav) && widget.onFavorite != null)
+        IconButton(
+          tooltip: fav ? l.removeFromFavorites : l.favorite,
+          onPressed: widget.onFavorite,
+          visualDensity: VisualDensity.compact,
+          icon: Icon(fav ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+              size: 18, color: fav ? cc.accent : cc.textMuted),
+        )
+      else if (fav)
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: Icon(Icons.favorite_rounded, size: 16, color: cc.accent),
+        ),
+      if (widget.onMore != null)
+        Opacity(
+          opacity: showActions ? 1 : 0,
+          child: IconButton(
+            tooltip: l.moreOptions,
+            onPressed: widget.onMore,
+            visualDensity: VisualDensity.compact,
+            icon: Icon(wide ? Icons.more_horiz_rounded : Icons.more_vert_rounded,
+                color: cc.textMuted),
+          ),
+        ),
+    ]);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cc = context.cc;
+    final theme = Theme.of(context);
+    final wide = MediaQuery.sizeOf(context).width >= CcDims.wideBreakpoint;
+    final t = widget.track;
+    final subtitle = _subtitle(context);
+    final cover = widget.compact ? 40.0 : 48.0;
+    final titleStyle = theme.textTheme.bodyLarge?.copyWith(
+        color: widget.isCurrent ? cc.accent : cc.text);
+
+    final titleBlock = Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(t.title,
+            maxLines: 1, overflow: TextOverflow.ellipsis, style: titleStyle),
+        if (subtitle.isNotEmpty)
+          Text(subtitle,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.bodyMedium),
+      ],
+    );
+
+    final Widget row;
+    if (wide && widget.variant != TrackRowVariant.pick) {
+      final num = widget.variant == TrackRowVariant.album
+          ? t.trackNumber
+          : widget.index;
+      row = Row(children: [
+        SizedBox(
+          width: 40,
+          child: widget.isCurrent
+              ? Center(child: NowPlayingBars(playing: widget.isPlaying, size: 16))
+              : Center(
+                  child: Text(num == null ? '' : '$num',
+                      style: theme.textTheme.labelSmall)),
+        ),
+        if (widget.variant != TrackRowVariant.album) ...[
+          _leading(context, cover),
+          const SizedBox(width: 12),
+        ],
+        Expanded(flex: 5, child: titleBlock),
+        if (widget.variant != TrackRowVariant.album) ...[
+          const SizedBox(width: 12),
+          Expanded(
+            flex: 3,
+            child: Text(t.album ?? '',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.bodyMedium),
+          ),
+        ],
+        SizedBox(
+          width: 56,
+          child: Text(formatDuration(t.durationMs),
+              textAlign: TextAlign.end, style: theme.textTheme.labelSmall),
+        ),
+        _trailing(context, true),
+      ]);
+    } else {
+      row = Row(children: [
+        _leading(context, cover),
+        const SizedBox(width: 12),
+        Expanded(child: titleBlock),
+        _trailing(context, false),
+      ]);
+    }
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hover = true),
+      onExit: (_) => setState(() => _hover = false),
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onSecondaryTapDown: widget.onSecondaryTap == null
+            ? null
+            : (d) => widget.onSecondaryTap!(d.globalPosition),
+        child: Material(
+          color: _hover && wide
+              ? cc.surface2.withValues(alpha: 0.5)
+              : Colors.transparent,
+          child: InkWell(
+            onTap: widget.onTap,
+            onLongPress: widget.onLongPress,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: CcDims.margin),
+              child: row,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Rebuilds only when this row's «current / playing» state changes.
+class LiveTrackRow extends ConsumerWidget {
+  const LiveTrackRow({
+    super.key,
+    required this.track,
+    required this.onTap,
+    this.variant = TrackRowVariant.standard,
+    this.compact = false,
+    this.index,
+    this.albumArtist,
+    this.onMore,
+    this.reorderIndex,
+  });
+
+  final Track track;
+  final VoidCallback onTap;
+  final TrackRowVariant variant;
+  final bool compact;
+  final int? index;
+  final String? albumArtist;
+
+  /// Replaces the default actions sheet (e.g. «Rimuovi dalla playlist»).
+  final VoidCallback? onMore;
+  final int? reorderIndex;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isCurrent = ref.watch(
+        currentTrackProvider.select((t) => t.value?.id == track.id));
+    final playing = isCurrent && (ref.watch(isPlayingProvider).value ?? false);
+    void actions() => showTrackActions(context, ref, track);
+    return TrackRow(
+      track: track,
+      variant: variant,
+      isCurrent: isCurrent,
+      isPlaying: playing,
+      onTap: onTap,
+      onMore: onMore ?? actions,
+      onLongPress: actions,
+      onSecondaryTap: (_) => actions(),
+      onFavorite: () => toggleFavorite(context, ref, track),
+      compact: compact,
+      index: index,
+      albumArtist: albumArtist,
+      reorderIndex: reorderIndex,
+    );
+  }
+}

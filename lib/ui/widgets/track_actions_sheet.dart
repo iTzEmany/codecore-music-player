@@ -16,7 +16,7 @@ import '../screens/share/share_screen.dart';
 import '../screens/track_edit_dialog.dart';
 import 'favorite_actions.dart';
 import 'format_utils.dart';
-import 'quality_badge.dart';
+import 'quality_tag.dart';
 
 Future<void> showTrackActions(
     BuildContext context, WidgetRef ref, Track track) {
@@ -185,7 +185,7 @@ class _DetailsDialog extends StatelessWidget {
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           row(l.detailPath, track.path),
           row(l.detailFormat, track.format.toUpperCase()),
-          Align(alignment: Alignment.centerLeft, child: QualityBadge(track)),
+          Align(alignment: Alignment.centerLeft, child: QualityTag(track)),
           row(l.detailSize, mb(track.sizeBytes)),
           row(l.detailDuration, formatDuration(track.durationMs)),
           row(l.detailAdded, added.toIso8601String().substring(0, 10)),

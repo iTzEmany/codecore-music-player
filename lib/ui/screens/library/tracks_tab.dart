@@ -12,7 +12,7 @@ import '../../../providers/ui_providers.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/empty_state.dart';
-import '../../widgets/track_tile.dart';
+import '../../widgets/track_row.dart';
 import 'folders_sheet.dart';
 
 String _sortLabel(BuildContext context, SortOption o) {
@@ -163,7 +163,7 @@ class _TracksTabState extends ConsumerState<TracksTab> {
                 child: ListView.builder(
                   itemExtent: trackRowExtentOf(context, compact),
                   itemCount: list.length,
-                  itemBuilder: (_, i) => LiveTrackTile(
+                  itemBuilder: (_, i) => LiveTrackRow(
                     track: list[i],
                     compact: compact,
                     onTap: () => ref

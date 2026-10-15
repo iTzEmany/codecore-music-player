@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../theme/tokens.dart';
+
 class EmptyState extends StatelessWidget {
   const EmptyState({
     super.key,
@@ -19,14 +21,19 @@ class EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
+    final cc = context.cc;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Icon(icon, size: 56, color: scheme.onSurfaceVariant),
+          Icon(icon, size: 56, color: cc.textFaint),
           const SizedBox(height: 12),
-          Text(message, textAlign: TextAlign.center),
+          Text(message,
+              textAlign: TextAlign.center,
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyLarge
+                  ?.copyWith(fontWeight: FontWeight.w500)),
           if (actionLabel != null) ...[
             const SizedBox(height: 16),
             FilledButton(onPressed: onAction, child: Text(actionLabel!)),

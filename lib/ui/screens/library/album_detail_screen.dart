@@ -12,7 +12,7 @@ import '../../theme/app_theme.dart';
 import '../../widgets/cover_image.dart';
 import '../share/share_screen.dart';
 import '../../widgets/format_utils.dart';
-import '../../widgets/track_tile.dart';
+import '../../widgets/track_row.dart';
 
 class AlbumDetailScreen extends ConsumerWidget {
   const AlbumDetailScreen({super.key, required this.album});
@@ -77,7 +77,7 @@ class AlbumDetailScreen extends ConsumerWidget {
             final t = list[i - 1];
             return SizedBox(
               height: trackRowExtentOf(context, compact),
-              child: LiveTrackTile(
+              child: LiveTrackRow(
                 track: t,
                 compact: compact,
                 onTap: () => ref
