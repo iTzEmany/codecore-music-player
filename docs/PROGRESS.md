@@ -140,8 +140,8 @@ L'agente riparte sempre dal primo task non spuntato.
 ## Fase 12 — Import playlist da CSV (`fase-12-import-csv.md`)
 - [x] 12.1 Verifiche preliminari (YouTube Music con yt-dlp, CSV vero di Exportify)
 - [x] 12.2 Parser CSV Exportify (+ test)
-- [ ] 12.3 Abbinamento e punteggio (+ test)
-- [ ] 12.4 Ricerca su YouTube Music nel `YoutubeService`
+- [x] 12.3 Abbinamento e punteggio (+ test)
+- [x] 12.4 Ricerca su YouTube Music nel `YoutubeService`
 - [ ] 12.5 Tabelle dell'importazione (schema v4)
 - [ ] 12.6 Posizione nella playlist secondo il CSV
 - [ ] 12.7 Coda di download con tag
@@ -216,3 +216,4 @@ L'agente riparte sempre dal primo task non spuntato.
 
 ## Note di deviazione (Fase 12)
 - 12.1 (2026-10-16): CSV vero = `Just_a_mood.csv` (34 brani; intestazioni `Track URI, ISRC, Track Name, Album Name, Artist Name(s), …, Duration (ms)`; **più artisti separati da `;`**). yt-dlp di sistema 2024.04.09 NON legge più YouTube («Please sign in»): provato con yt-dlp 2026.08.19 (binario standalone). `https://music.youtube.com/search?q=…#songs` funziona; in modalità flat dà ~460 voci con solo `id`/`title` (nessuna durata), **senza `--flat-playlist` e con `--playlist-items 1-5`** ogni voce ha `channel`, `artists[]`, `track`, `album`, `duration` in ~5–8 s → si usa quella. `YtResult` guadagna `artists` e `album`.
+- 12.4 (2026-10-16): `searchSongs` usa `-J --playlist-items 1-N` (non flat) sull'URL YouTube Music; Android: `items` nel canale `search` (nessun parametro `target`). Nuovo errore `rateLimited` (HTTP 429 / «not a bot») distinto da `unavailable`; chiave ARB `ytErrRateLimited` in it/en/de/es.

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:codecore/services/online/yt_dlp_process_service.dart';
 import 'package:codecore/services/online/youtube_service.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -31,5 +33,42 @@ void main() {
     expect(ytExceptionFromStderr('Temporary failure in name resolution').kind,
         YtErrorKind.network);
     expect(ytExceptionFromStderr('HTTP Error 403').kind, YtErrorKind.changed);
+  });
+
+  test('parses a YouTube Music search page with artists and album', () {
+    final raw = File('test/fixtures/ytmusic_search.json').readAsStringSync();
+    final r = parseYtDlpJson(raw);
+    expect(r, hasLength(3));
+    expect(r.first.id, 'MNvH8BzIXGY');
+    expect(r.first.title, 'Felicità');
+    expect(r.first.channel, 'Lucio Dalla');
+    expect(r.first.artists, ['Lucio Dalla']);
+    expect(r.first.album, 'Dalla/Morandi');
+    expect(r.first.duration, const Duration(seconds: 345));
+  });
+
+  test('channel falls back to the first credited artist', () {
+    final r = parseYtDlpJson(
+        '{"id":"a","title":"T","artists":["A","B"],"duration":10}');
+    expect(r.single.channel, 'A');
+    expect(r.single.artists, ['A', 'B']);
+  });
+
+  test('rate limiting is told apart from unavailable videos', () {
+    expect(ytExceptionFromStderr('HTTP Error 429: Too Many Requests').kind,
+        YtErrorKind.rateLimited);
+    expect(
+        ytExceptionFromStderr(
+                "ERROR: Sign in to confirm you're not a bot").kind,
+        YtErrorKind.rateLimited);
+    expect(ytExceptionFromStderr('Sign in to confirm your age').kind,
+        YtErrorKind.unavailable);
+  });
+
+  test('YouTube Music search URL is encoded and filtered on songs', () {
+    final u = youtubeMusicSearchUri('Lucio Dalla & Co: Felicità');
+    expect(u.host, 'music.youtube.com');
+    expect(u.queryParameters['q'], 'Lucio Dalla & Co: Felicità');
+    expect(u.fragment, 'songs');
   });
 }

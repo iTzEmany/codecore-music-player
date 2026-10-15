@@ -537,6 +537,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'yt-dlp not found: install it (pip install -U yt-dlp) and retry';
 
   @override
+  String get ytErrRateLimited =>
+      'YouTube asked to slow down: try again in a few minutes';
+
+  @override
   String get playlistChangeCover => 'Change cover';
 
   @override

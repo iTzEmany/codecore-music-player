@@ -117,10 +117,16 @@ class MainActivity : AudioServiceActivity() {
                 updateOnce()
                 val query = call.argument<String>("query")!!
                 val isUrl = call.argument<Boolean>("isUrl") ?: false
+                // `items` = a search page with full metadata for the first N results.
+                val items = call.argument<Int>("items")
                 val req = YoutubeDLRequest(if (isUrl) query else "ytsearch10:$query")
                 req.addOption("-J")
                 req.addOption("--no-warnings")
-                req.addOption(if (isUrl) "--no-playlist" else "--flat-playlist")
+                if (items != null) {
+                    req.addOption("--playlist-items", "1-$items")
+                } else {
+                    req.addOption(if (isUrl) "--no-playlist" else "--flat-playlist")
+                }
                 YoutubeDL.getInstance().execute(req).out
             }
             "download" -> run(result) {

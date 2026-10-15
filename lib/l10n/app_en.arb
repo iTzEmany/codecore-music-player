@@ -163,6 +163,7 @@
   "ytLegal": "Personal use only. Respect copyright and YouTube’s terms.",
   "useDefaultFolder": "Use the device Music folder",
   "ytErrToolMissing": "yt-dlp not found: install it (pip install -U yt-dlp) and retry",
+  "ytErrRateLimited": "YouTube asked to slow down: try again in a few minutes",
   "playlistChangeCover": "Change cover",
   "playlistRemoveCover": "Remove cover",
   "coverTooLarge": "Image too large (max 4 MB)",

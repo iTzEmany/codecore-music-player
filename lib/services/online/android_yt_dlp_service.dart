@@ -41,6 +41,22 @@ class AndroidYtDlpService implements YoutubeService {
   }
 
   @override
+  Future<List<YtResult>> searchSongs(String query, {int limit = 5}) async {
+    final q = query.trim();
+    if (q.isEmpty) return const [];
+    try {
+      final raw = await _channel.invokeMethod<String>('search', {
+        'query': youtubeMusicSearchUri(q).toString(),
+        'isUrl': true,
+        'items': limit,
+      });
+      return parseYtDlpJson(raw ?? '{}');
+    } on PlatformException catch (e) {
+      throw ytExceptionFromStderr(e.message ?? '');
+    }
+  }
+
+  @override
   Stream<DownloadProgress> download(YtResult r, Directory outDir,
       {CancelToken? cancel}) async* {
     await outDir.create(recursive: true);

@@ -163,6 +163,7 @@
   "ytLegal": "Nur für den persönlichen Gebrauch. Urheberrecht und YouTube-Bedingungen beachten.",
   "useDefaultFolder": "Musikordner des Geräts verwenden",
   "ytErrToolMissing": "yt-dlp nicht gefunden: installieren (pip install -U yt-dlp) und erneut versuchen",
+  "ytErrRateLimited": "YouTube verlangt eine Pause: versuche es in einigen Minuten erneut",
   "playlistChangeCover": "Cover ändern",
   "playlistRemoveCover": "Cover entfernen",
   "coverTooLarge": "Bild zu groß (max. 4 MB)",

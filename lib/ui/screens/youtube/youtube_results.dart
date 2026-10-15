@@ -18,6 +18,7 @@ String ytErrorText(BuildContext context, YtErrorKind k) {
     YtErrorKind.network => l.ytErrNetwork,
     YtErrorKind.changed => l.ytErrChanged,
     YtErrorKind.toolMissing => l.ytErrToolMissing,
+    YtErrorKind.rateLimited => l.ytErrRateLimited,
   };
 }
 

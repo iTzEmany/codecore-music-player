@@ -13,11 +13,17 @@ class YtResult {
     required this.channel,
     required this.duration,
     this.thumbnailUrl,
+    this.artists = const [],
+    this.album,
   });
 
   final String id, title, channel;
   final Duration? duration;
   final String? thumbnailUrl;
+
+  /// Credited artists and album: only present on YouTube Music results.
+  final List<String> artists;
+  final String? album;
 }
 
 class DownloadProgress {
@@ -31,7 +37,7 @@ class DownloadProgress {
   double get fraction => total <= 0 ? 0 : received / total;
 }
 
-enum YtErrorKind { unavailable, network, changed, toolMissing }
+enum YtErrorKind { unavailable, network, changed, toolMissing, rateLimited }
 
 class YtException implements Exception {
   const YtException(this.kind, [this.detail]);
@@ -42,6 +48,10 @@ class YtException implements Exception {
   @override
   String toString() => 'YtException($kind, $detail)';
 }
+
+/// `music.youtube.com` search page filtered on songs.
+Uri youtubeMusicSearchUri(String query) => Uri.parse(
+    'https://music.youtube.com/search?q=${Uri.encodeQueryComponent(query)}#songs');
 
 const _youtubeHosts = {'youtube.com', 'www.youtube.com', 'm.youtube.com', 'youtu.be'};
 
@@ -72,6 +82,10 @@ String uniquePath(String dir, String base, String ext, bool Function(String) exi
 /// calls yt-dlp embedded in the app through a platform channel.
 abstract class YoutubeService {
   Future<List<YtResult>> search(String query);
+
+  /// YouTube Music "Songs" results, with channel, credited artists, album and
+  /// duration filled in (one request, no per-video lookups).
+  Future<List<YtResult>> searchSongs(String query, {int limit = 5});
 
   /// Emits progress; the last event carries the final file path. A cancelled
   /// download ends without a path and leaves no partial files.

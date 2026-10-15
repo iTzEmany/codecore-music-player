@@ -1080,6 +1080,12 @@ abstract class AppLocalizations {
   /// **'yt-dlp non trovato: installalo (pip install -U yt-dlp) e riprova'**
   String get ytErrToolMissing;
 
+  /// No description provided for @ytErrRateLimited.
+  ///
+  /// In it, this message translates to:
+  /// **'YouTube ha chiesto di rallentare: riprova tra qualche minuto'**
+  String get ytErrRateLimited;
+
   /// No description provided for @playlistChangeCover.
   ///
   /// In it, this message translates to:

@@ -25,13 +25,21 @@ List<YtResult> parseYtDlpJson(String raw) {
       final last = thumbs.last;
       if (last is Map) thumb = last['url'] as String?;
     }
+    final artists = [
+      for (final a in (e['artists'] is List ? e['artists'] as List : const []))
+        if (a is String && a.trim().isNotEmpty) a.trim(),
+    ];
     final d = e['duration'];
     out.add(YtResult(
       id: id,
       title: title,
-      channel: (e['channel'] ?? e['uploader'] ?? '') as String,
+      channel: (e['channel'] ??
+          e['uploader'] ??
+          (artists.isEmpty ? '' : artists.first)) as String,
       duration: d is num ? Duration(seconds: d.round()) : null,
       thumbnailUrl: thumb,
+      artists: artists,
+      album: e['album'] as String?,
     ));
   }
   return out;
@@ -52,6 +60,11 @@ DownloadProgress? parseProgressLine(String line) {
 /// Maps yt-dlp's stderr to a user-facing error kind.
 YtException ytExceptionFromStderr(String err) {
   final t = err.toLowerCase();
+  if (t.contains('http error 429') ||
+      t.contains('too many requests') ||
+      (t.contains('confirm') && t.contains('not a bot'))) {
+    return YtException(YtErrorKind.rateLimited, err);
+  }
   if (t.contains('name or service') ||
       t.contains('network is unreachable') ||
       t.contains('temporary failure in name resolution') ||
@@ -124,6 +137,32 @@ class YtDlpProcessService implements YoutubeService {
       return parseYtDlpJson('${r.stdout}');
     } on FormatException catch (e, st) {
       AppLog.w('yt-dlp search output not JSON', e, st);
+      throw const YtException(YtErrorKind.changed, 'bad output');
+    }
+  }
+
+  @override
+  Future<List<YtResult>> searchSongs(String query, {int limit = 5}) async {
+    final q = query.trim();
+    if (q.isEmpty) return const [];
+    await _ensureTool();
+    final r = await Process.run(
+        _exe,
+        [
+          '-J',
+          '--no-warnings',
+          '--playlist-items',
+          '1-$limit',
+          ...await _jsArgs(),
+          youtubeMusicSearchUri(q).toString(),
+        ],
+        stdoutEncoding: utf8,
+        stderrEncoding: utf8);
+    if (r.exitCode != 0) throw ytExceptionFromStderr('${r.stderr}');
+    try {
+      return parseYtDlpJson('${r.stdout}');
+    } on FormatException catch (e, st) {
+      AppLog.w('yt-dlp music search output not JSON', e, st);
       throw const YtException(YtErrorKind.changed, 'bad output');
     }
   }

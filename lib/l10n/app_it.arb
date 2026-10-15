@@ -245,6 +245,7 @@
   "ytLegal": "Solo per uso personale. Rispetta i diritti d’autore e i termini di YouTube.",
   "useDefaultFolder": "Usa la cartella Musica del dispositivo",
   "ytErrToolMissing": "yt-dlp non trovato: installalo (pip install -U yt-dlp) e riprova",
+  "ytErrRateLimited": "YouTube ha chiesto di rallentare: riprova tra qualche minuto",
   "playlistChangeCover": "Cambia copertina",
   "playlistRemoveCover": "Rimuovi copertina",
   "coverTooLarge": "Immagine troppo grande (max 4 MB)",
