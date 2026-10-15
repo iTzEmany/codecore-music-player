@@ -137,6 +137,19 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 11.18 Rifinitura e controlli finali
 - [ ] 11.19 Prova a mano (utente)
 
+## Fase 12 — Import playlist da CSV (`fase-12-import-csv.md`)
+- [x] 12.1 Verifiche preliminari (YouTube Music con yt-dlp, CSV vero di Exportify)
+- [x] 12.2 Parser CSV Exportify (+ test)
+- [ ] 12.3 Abbinamento e punteggio (+ test)
+- [ ] 12.4 Ricerca su YouTube Music nel `YoutubeService`
+- [ ] 12.5 Tabelle dell'importazione (schema v4)
+- [ ] 12.6 Posizione nella playlist secondo il CSV
+- [ ] 12.7 Coda di download con tag
+- [ ] 12.8 `PlaylistImportService`
+- [ ] 12.9 Pulsante «Importa da Exportify» e anteprima
+- [ ] 12.10 Avanzamento, «Da verificare» e «Non trovati»
+- [ ] 12.11 Rifinitura e prova a mano
+
 ## Note di deviazione
 <!-- una riga per deviazione: data — task — cosa è cambiato e perché -->
 
@@ -200,3 +213,6 @@ L'agente riparte sempre dal primo task non spuntato.
 - 10.9 misura acustica (2026-10-15, microfono del PC, Mi A3 + Motorola, altoparlanti, file di click): all'avvio i due telefoni erano sfasati di **~88 ms** (Motorola dopo); con la correzione a ±2 % l'offset è sceso a ~36 ms in ~12 s e a ~25 ms dopo 22 s, con rimbalzi fino a ~65 ms. Conclusioni: (a) la sola posizione del player (scarto 10–20 ms nei log) non basta, il tempo di uscita dei due telefoni differisce di decine di ms; (b) la convergenza era troppo lenta. Modifiche: seek oltre 120 ms (era 250), correzione di velocità ±3 % (era ±2 %). Da ripetere la misura con la nuova taratura; la compensazione manuale della latenza resta necessaria (cuffie Bluetooth: 100–250 ms).
 - 10.9 difetto trovato: in uscita singola, se il sistema mette in pausa il player (audio focus perso), la Jam restava «in riproduzione» senza suonare; ora un controllo ogni 2 s lo riprende.
 - 10.9 misura acustica #2 (2026-10-15, microfono del PC, 2 altoparlanti, click ogni secondo, 31 click): con la taratura «seek 120 ms + ±3 % fisso» l'offset oscillava tra −14 e +94 ms (ciclo limite del controllore a gradino con ritardo di attuazione): peggio della versione precedente. Corretto con controllo **proporzionale** (velocità = 1 − errore/4000 ms, tetto ±2,5 %, soglia di ignoro 25 ms, nessun comando per variazioni < 0,3 %): misura #3, **dopo ~14 s di assestamento lo scarto resta a −9 ms (Motorola 9 ms prima del Xiaomi) per 17 click consecutivi**; nei primi 14 s tra −9 e +49 ms. L'ultimo click (12, 56 ms) coincide con la chiusura della Jam. La simulazione ora include ritardo di attuazione di un tick e rumore ±10 ms sulla posizione.
+
+## Note di deviazione (Fase 12)
+- 12.1 (2026-10-16): CSV vero = `Just_a_mood.csv` (34 brani; intestazioni `Track URI, ISRC, Track Name, Album Name, Artist Name(s), …, Duration (ms)`; **più artisti separati da `;`**). yt-dlp di sistema 2024.04.09 NON legge più YouTube («Please sign in»): provato con yt-dlp 2026.08.19 (binario standalone). `https://music.youtube.com/search?q=…#songs` funziona; in modalità flat dà ~460 voci con solo `id`/`title` (nessuna durata), **senza `--flat-playlist` e con `--playlist-items 1-5`** ogni voce ha `channel`, `artists[]`, `track`, `album`, `duration` in ~5–8 s → si usa quella. `YtResult` guadagna `artists` e `album`.
