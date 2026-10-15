@@ -9,7 +9,7 @@ import 'cover_image.dart';
 import 'favorite_actions.dart';
 import 'format_utils.dart';
 import 'now_playing_bars.dart';
-import 'track_actions_sheet.dart';
+import 'track_actions.dart';
 
 enum TrackRowVariant {
   /// Cover, title, «artist · album».
@@ -309,7 +309,7 @@ class LiveTrackRow extends ConsumerWidget {
       onTap: onTap,
       onMore: onMore ?? actions,
       onLongPress: actions,
-      onSecondaryTap: (_) => actions(),
+      onSecondaryTap: (pos) => showTrackContextMenu(context, ref, track, pos),
       onFavorite: () => toggleFavorite(context, ref, track),
       compact: compact,
       index: index,

@@ -715,5 +715,16 @@
   "gotIt": "Ho capito",
   "searchEmptyLibrary": "Nessun risultato in libreria",
   "ytInfoTooltip": "Informazioni sull’uso",
-  "removeRecentSearch": "Rimuovi dalle ricerche recenti"
+  "removeRecentSearch": "Rimuovi dalle ricerche recenti",
+  "groupGoTo": "Vai a",
+  "goToAlbum": "Vai all’album",
+  "goToArtist": "Vai all’artista",
+  "groupQueue": "Coda",
+  "groupCollection": "Raccolta",
+  "groupEdit": "Modifica",
+  "groupOther": "Altro",
+  "queueNowPlaying": "In riproduzione",
+  "queueNext": "Prossimi",
+  "queueClear": "Svuota",
+  "queueCleared": "Coda svuotata"
 }

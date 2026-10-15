@@ -1199,4 +1199,37 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get removeRecentSearch => 'Quitar de búsquedas recientes';
+
+  @override
+  String get groupGoTo => 'Ir a';
+
+  @override
+  String get goToAlbum => 'Ir al álbum';
+
+  @override
+  String get goToArtist => 'Ir al artista';
+
+  @override
+  String get groupQueue => 'Cola';
+
+  @override
+  String get groupCollection => 'Colección';
+
+  @override
+  String get groupEdit => 'Editar';
+
+  @override
+  String get groupOther => 'Más';
+
+  @override
+  String get queueNowPlaying => 'Reproduciendo';
+
+  @override
+  String get queueNext => 'A continuación';
+
+  @override
+  String get queueClear => 'Vaciar';
+
+  @override
+  String get queueCleared => 'Cola vaciada';
 }

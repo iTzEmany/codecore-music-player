@@ -130,7 +130,7 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 11.11 Pagine di raccolta: album, artista, playlist, Preferiti
 - [x] 11.12 Home
 - [x] 11.13 Cerca (con YouTube)
-- [ ] 11.14 Coda, Testi, menu del brano
+- [x] 11.14 Coda, Testi, menu del brano
 - [ ] 11.15 Jam
 - [ ] 11.16 Centro Attività
 - [ ] 11.17 Impostazioni, Condivisione, dialoghi
@@ -149,6 +149,7 @@ L'agente riparte sempre dal primo task non spuntato.
 - 11.11 (2026-10-16): `CollectionScaffold` unico per album/artista/playlist/Preferiti; `ArtistDetailScreen` spostata in `artist_screen.dart` (rimossi albums_tab/artists_tab). Provato su Mi A3 (artista e album, 1111_*.png); playlist e Preferiti coperti da widget test (modifica ordine con maniglie, stato vuoto), non provati a mano sul telefono (non modifico le playlist vere). Foglio «Aggiungi a playlist» con ✓ coperto solo da compilazione/test esistenti.
 - 11.12 (2026-10-16): le sezioni Home sono calcolate in Dart da albums/playlist (`home_sections.dart`, testate) + query `watchTopTracks`; «Da riscoprire» = ≥3 ascolti e fermo da 60 giorni. L'indicatore Attività arriva con 11.16. Il collegamento «YouTube» resta temporaneamente in Home fino a 11.13. Provato su Mi A3 (1112_home.png).
 - 11.13 (2026-10-16): la ricerca libreria è calcolata in memoria su artisti/album/playlist (`library_search.dart`, testata) + SQL per i brani. «Mostra tutti» apre `SearchTracksScreen`. Ricerche recenti e avviso YouTube visto in `AppSettings`. Il chip «Download (N)» apre `DownloadsSheet` (sostituita da 11.16). Rimossi `youtube_screen.dart` e `tracks_tab.dart`. Ricerca YouTube dal vivo non provata (rete); provati Generi, ricerca libreria, chip YouTube senza ricerca automatica su Mi A3 (1113_*.png).
+- 11.14 (2026-10-16): `track_actions_sheet.dart` → `track_actions.dart` (modello `TrackActionGroup`, foglio + menu al puntatore). La Coda mostra «In riproduzione» + «Prossimi» in ordine naturale della coda (con casuale attivo l'ordine di ascolto può differire). La schermata Testi non cerca più le curiosità da sola (ora solo con tocco in Now Playing). Provato su Mi A3: coda, menu → Vai all'album (1114_*.png); testo sincronizzato dal vivo coperto solo dai test (nessun brano con testo a disposizione), riordino/rimozione coda non provati a mano.
 - 11.1 (2026-10-15): su richiesta dell'utente la verifica visiva dei task 11.x si fa **sul telefono** (hot reload); gli scatti da test (`scripts/shots.sh`) restano per testo/layout ma le copertine non si caricano nei golden (I/O reale in fake async) e ogni scatto costa ~1 min. Font di ripiego: Liberation Sans al posto di Roboto finché non ci sono i font dell'app.
 - 0.3: `generate: true` (l10n) rimandato alla fase 4 (senza ARB `flutter gen-l10n` fallirebbe). `flutter_localizations` già aggiunto.
 - 0.2: MainActivity spostata nel package `com.codecore.player`; `compileSdk = 37` (richiesto da permission_handler_android).

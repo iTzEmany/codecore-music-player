@@ -524,5 +524,16 @@
   "gotIt": "Got it",
   "searchEmptyLibrary": "No results in your library",
   "ytInfoTooltip": "About usage",
-  "removeRecentSearch": "Remove from recent searches"
+  "removeRecentSearch": "Remove from recent searches",
+  "groupGoTo": "Go to",
+  "goToAlbum": "Go to album",
+  "goToArtist": "Go to artist",
+  "groupQueue": "Queue",
+  "groupCollection": "Collection",
+  "groupEdit": "Edit",
+  "groupOther": "More",
+  "queueNowPlaying": "Now playing",
+  "queueNext": "Next up",
+  "queueClear": "Clear",
+  "queueCleared": "Queue cleared"
 }

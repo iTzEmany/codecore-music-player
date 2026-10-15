@@ -17,7 +17,7 @@ import '../../widgets/collection_header.dart';
 import '../../shell/shell_nav.dart';
 import '../../widgets/confirm.dart';
 import '../../widgets/playlist_cover.dart';
-import '../../widgets/track_actions_sheet.dart';
+import '../../widgets/track_actions.dart';
 import '../../widgets/track_row.dart';
 import '../library/album_detail_screen.dart' show tracksAndMinutes;
 import 'add_tracks_screen.dart';

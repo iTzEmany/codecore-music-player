@@ -524,5 +524,16 @@
   "gotIt": "Entendido",
   "searchEmptyLibrary": "Sin resultados en la biblioteca",
   "ytInfoTooltip": "Información de uso",
-  "removeRecentSearch": "Quitar de búsquedas recientes"
+  "removeRecentSearch": "Quitar de búsquedas recientes",
+  "groupGoTo": "Ir a",
+  "goToAlbum": "Ir al álbum",
+  "goToArtist": "Ir al artista",
+  "groupQueue": "Cola",
+  "groupCollection": "Colección",
+  "groupEdit": "Editar",
+  "groupOther": "Más",
+  "queueNowPlaying": "Reproduciendo",
+  "queueNext": "A continuación",
+  "queueClear": "Vaciar",
+  "queueCleared": "Cola vaciada"
 }

@@ -2207,6 +2207,72 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Rimuovi dalle ricerche recenti'**
   String get removeRecentSearch;
+
+  /// No description provided for @groupGoTo.
+  ///
+  /// In it, this message translates to:
+  /// **'Vai a'**
+  String get groupGoTo;
+
+  /// No description provided for @goToAlbum.
+  ///
+  /// In it, this message translates to:
+  /// **'Vai all’album'**
+  String get goToAlbum;
+
+  /// No description provided for @goToArtist.
+  ///
+  /// In it, this message translates to:
+  /// **'Vai all’artista'**
+  String get goToArtist;
+
+  /// No description provided for @groupQueue.
+  ///
+  /// In it, this message translates to:
+  /// **'Coda'**
+  String get groupQueue;
+
+  /// No description provided for @groupCollection.
+  ///
+  /// In it, this message translates to:
+  /// **'Raccolta'**
+  String get groupCollection;
+
+  /// No description provided for @groupEdit.
+  ///
+  /// In it, this message translates to:
+  /// **'Modifica'**
+  String get groupEdit;
+
+  /// No description provided for @groupOther.
+  ///
+  /// In it, this message translates to:
+  /// **'Altro'**
+  String get groupOther;
+
+  /// No description provided for @queueNowPlaying.
+  ///
+  /// In it, this message translates to:
+  /// **'In riproduzione'**
+  String get queueNowPlaying;
+
+  /// No description provided for @queueNext.
+  ///
+  /// In it, this message translates to:
+  /// **'Prossimi'**
+  String get queueNext;
+
+  /// No description provided for @queueClear.
+  ///
+  /// In it, this message translates to:
+  /// **'Svuota'**
+  String get queueClear;
+
+  /// No description provided for @queueCleared.
+  ///
+  /// In it, this message translates to:
+  /// **'Coda svuotata'**
+  String get queueCleared;
 }
 
 class _AppLocalizationsDelegate

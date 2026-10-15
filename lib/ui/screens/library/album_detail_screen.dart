@@ -22,7 +22,9 @@ import 'artist_screen.dart';
 /// «12 brani, 48 min».
 String tracksAndMinutes(BuildContext context, int tracks, int durationMs) {
   final l = context.l10n;
-  final minutes = (durationMs / 60000).round();
+  final minutes = durationMs <= 0
+      ? 0
+      : (durationMs / 60000).round().clamp(1, 99999);
   return l.tracksAndDuration(l.tracksCount(tracks), l.durationMinutes(minutes));
 }
 

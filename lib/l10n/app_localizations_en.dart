@@ -1196,4 +1196,37 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get removeRecentSearch => 'Remove from recent searches';
+
+  @override
+  String get groupGoTo => 'Go to';
+
+  @override
+  String get goToAlbum => 'Go to album';
+
+  @override
+  String get goToArtist => 'Go to artist';
+
+  @override
+  String get groupQueue => 'Queue';
+
+  @override
+  String get groupCollection => 'Collection';
+
+  @override
+  String get groupEdit => 'Edit';
+
+  @override
+  String get groupOther => 'More';
+
+  @override
+  String get queueNowPlaying => 'Now playing';
+
+  @override
+  String get queueNext => 'Next up';
+
+  @override
+  String get queueClear => 'Clear';
+
+  @override
+  String get queueCleared => 'Queue cleared';
 }
