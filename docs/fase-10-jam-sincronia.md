@@ -12,7 +12,7 @@ obiettivo ≤ 80 ms su Wi‑Fi, senza Bluetooth). Fino alla Fase 9 suona un solo
 | Riferimento temporale | Orologio dell'host («tempo Jam»). Gli altri stimano l'offset con scambi di timestamp stile NTP. |
 | Sorgente | Ogni uscita sincronizzata **scarica prima il file intero** nella cache e suona da locale: niente jitter di rete durante l'ascolto. |
 | Avvio | L'host fissa `positionAt = adesso + 1,5 s`; le uscite caricano, si mettono in pausa alla posizione e partono a quell'istante. |
-| Correzione | Scarto < 25 ms ignorato; 25–250 ms correzione con velocità ±2 %; > 250 ms seek. |
+| Correzione | Scarto < 25 ms ignorato; 25–120 ms correzione con velocità ±3 %; > 120 ms seek (tarato sulla misura acustica del 2026-10-15). |
 | Bluetooth | Compensazione manuale per dispositivo (ms, anche negativa) nelle impostazioni Jam. Nessuna misura automatica. |
 
 ## Architettura

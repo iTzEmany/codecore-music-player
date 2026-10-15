@@ -149,7 +149,16 @@ class JamOutput {
       await _tick();
       return;
     }
-    _stopSync();
+    // Single output: no follower, but keep a light watch so that a pause the
+    // OS imposed (audio focus lost to a notification) does not outlive the
+    // shared "playing" state.
+    _startTimer?.cancel();
+    _startTimer = null;
+    if (_speed != 1.0) {
+      _speed = 1.0;
+      unawaited(backend.setSpeed(1.0));
+    }
+    _syncTimer ??= Timer.periodic(syncInterval * 4, (_) => unawaited(_tick()));
     if (s.playing && !_backendPlaying) {
       await backend.play();
     } else if (!s.playing && _backendPlaying) {
@@ -173,7 +182,12 @@ class JamOutput {
   /// One step of the synchronised follower (also runs every [syncInterval]).
   Future<void> _tick() async {
     final s = _state, c = clock;
-    if (_disposed || _ticking || s == null || c == null || _loadedId == null) {
+    if (_disposed || _ticking || s == null || _loadedId == null) return;
+    if (c == null || !s.synced) {
+      // single output: only resume what the OS paused behind our back
+      if (s.playing && !_backendPlaying && s.outputs.contains(deviceId)) {
+        await backend.play();
+      }
       return;
     }
     _ticking = true;

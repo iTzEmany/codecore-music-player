@@ -198,9 +198,9 @@ void syncTests() {
       backend.positionValue = const Duration(milliseconds: 9515);
       await out.apply(st(at: 6500));
       expect(backend.speed, 1.0);
-      backend.positionValue = const Duration(milliseconds: 9650); // 150 ahead
+      backend.positionValue = const Duration(milliseconds: 9590); // 90 ahead
       await out.apply(st(at: 6500));
-      expect(backend.speed, closeTo(0.98, 1e-9));
+      expect(backend.speed, closeTo(0.97, 1e-9));
       backend.positionValue = const Duration(milliseconds: 12000); // far
       await out.apply(st(at: 6500));
       expect(backend.seeks.last, const Duration(milliseconds: 9500));

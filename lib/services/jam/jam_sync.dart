@@ -34,8 +34,8 @@ class JamSyncTuning {
   const JamSyncTuning({
     this.ignoreMs = 25,
     this.resetMs = 10,
-    this.seekMs = 250,
-    this.speedDelta = 0.02,
+    this.seekMs = 120,
+    this.speedDelta = 0.03,
     this.idleSeekMs = 150,
   });
 
@@ -48,7 +48,7 @@ class JamSyncTuning {
   /// Above this error the position is simply set.
   final int seekMs;
 
-  /// Speed change used to absorb a medium error (±2 %).
+  /// Speed change used to absorb a medium error (±3 %).
   final double speedDelta;
 
   /// Tolerance for the paused position.

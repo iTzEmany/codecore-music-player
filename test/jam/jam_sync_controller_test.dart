@@ -71,30 +71,30 @@ void main() {
 
     test('medium error is absorbed with speed', () {
       final ahead = decide(now: 6000, measured: 5100);
-      expect(ahead.speed, closeTo(0.98, 1e-9));
+      expect(ahead.speed, closeTo(0.97, 1e-9));
       final behind = decide(now: 6000, measured: 4900);
-      expect(behind.speed, closeTo(1.02, 1e-9));
+      expect(behind.speed, closeTo(1.03, 1e-9));
       // already correcting: no repeated command
-      expect(decide(now: 6000, measured: 5100, speed: 0.98).isNoop, true);
+      expect(decide(now: 6000, measured: 5100, speed: 0.97).isNoop, true);
     });
 
     test('large error is a seek', () {
-      final a = decide(now: 6000, measured: 7000, speed: 0.98);
+      final a = decide(now: 6000, measured: 7000, speed: 0.97);
       expect(a.seekToMs, 5000);
       expect(a.speed, 1.0);
     });
 
     test('normal speed resumes once close again', () {
-      expect(decide(now: 6000, measured: 5008, speed: 0.98).speed, 1.0);
+      expect(decide(now: 6000, measured: 5008, speed: 0.97).speed, 1.0);
       // between reset and ignore thresholds the speed is kept
-      expect(decide(now: 6000, measured: 5020, speed: 0.98).isNoop, true);
+      expect(decide(now: 6000, measured: 5020, speed: 0.97).isNoop, true);
     });
 
     test('own latency shifts the target', () {
       // a device that needs to run 120 ms ahead is on target at 5120...
       expect(decide(now: 6000, measured: 5120, latency: 120).isNoop, true);
       // ...and is 'behind' at 5000, so it speeds up a little
-      expect(decide(now: 6000, measured: 5000, latency: 120).speed, 1.02);
+      expect(decide(now: 6000, measured: 5000, latency: 120).speed, 1.03);
       // a big latency gap is a seek
       expect(decide(now: 6000, measured: 5000, latency: 400).seekToMs, 5400);
     });

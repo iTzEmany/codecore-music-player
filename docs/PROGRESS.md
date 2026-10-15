@@ -113,7 +113,7 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 10.6 `JamOutput` multi-uscita
 - [x] 10.7 Interfaccia (uscite multiple, stato di sincronia, latenza)
 - [x] 10.8 Simulazione con orologi sfalsati
-- [~] 10.9 Prova reale e misura (scarto di posizione misurato; manca la misura acustica)
+- [~] 10.9 Prova reale e misura (misura acustica fatta: vedi nota; da rifare dopo la nuova taratura)
 - [x] 10.10 Documentazione
 
 ## Note di deviazione
@@ -160,3 +160,5 @@ L'agente riparte sempre dal primo task non spuntato.
 - Fase 10 (2026-10-15): deviazioni — (a) niente comando `ready`: l'avvio ha un anticipo fisso di 1,5 s (`jamStartLeadMs`) e chi non è pronto entra dopo con seek; (b) soglia di ignoro 25 ms invece di 40 (la simulazione con 25 ms di jitter per tratta dava 97 ms di scarto massimo con 40); (c) le uscite sincronizzate scaricano il file nella cache prima di caricare (`JamController._resolve`).
 - 10.9 (2026-10-15), prova reale con Mi A3 (host), Motorola edge 40 e PC (Linux, mpv), tutti e tre come uscite per ~3,5 minuti su Wi‑Fi di casa: scarto della posizione del player rispetto a quella attesa — Mi A3 max 12 ms (media 11), Motorola max 9 ms (media 7), PC max 72 ms (media 30; mpv aggiorna la posizione a scatti). Offset degli orologi tra telefoni fino a 430 ms, compensato dallo scambio di timestamp (RTT 9–25 ms). Seek, pausa/ripresa e ingresso a metà brano riallineano entro ~5 s. **Non misurato:** lo scarto acustico (serve un microfono): i valori sopra sono posizione del player, non suono.
 - 10.9: filtro sul clock — un giro con RTT ≫ del migliore noto non sostituisce la stima (sul PC un RTT di 183 ms aveva spostato l'offset di ~150 ms) e un secondo affinamento a 5 s dall'avvio.
+- 10.9 misura acustica (2026-10-15, microfono del PC, Mi A3 + Motorola, altoparlanti, file di click): all'avvio i due telefoni erano sfasati di **~88 ms** (Motorola dopo); con la correzione a ±2 % l'offset è sceso a ~36 ms in ~12 s e a ~25 ms dopo 22 s, con rimbalzi fino a ~65 ms. Conclusioni: (a) la sola posizione del player (scarto 10–20 ms nei log) non basta, il tempo di uscita dei due telefoni differisce di decine di ms; (b) la convergenza era troppo lenta. Modifiche: seek oltre 120 ms (era 250), correzione di velocità ±3 % (era ±2 %). Da ripetere la misura con la nuova taratura; la compensazione manuale della latenza resta necessaria (cuffie Bluetooth: 100–250 ms).
+- 10.9 difetto trovato: in uscita singola, se il sistema mette in pausa il player (audio focus perso), la Jam restava «in riproduzione» senza suonare; ora un controllo ogni 2 s lo riprende.
