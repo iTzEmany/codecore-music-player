@@ -101,8 +101,8 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 9.3 Client (credenziali, invito da ospite, `base`)
 - [x] 9.4 Controller (URL proprietario da elenco, accettazione da ospite, scarto)
 - [x] 9.5 Interfaccia (partecipanti, uscita a più voci)
-- [ ] 9.6 Prova su dispositivi reali
-- [ ] 9.7 Documentazione
+- [x] 9.6 Prova su dispositivi reali
+- [x] 9.7 Documentazione
 
 ## Note di deviazione
 <!-- una riga per deviazione: data — task — cosa è cambiato e perché -->
@@ -144,3 +144,4 @@ L'agente riparte sempre dal primo task non spuntato.
 - 8.8 (2026-10-15): da provare a mano su due dispositivi reali (PC + telefono): Jam di 10 minuti con schermo spento, cambio uscita, chiusura improvvisa, accetta da notifica. Il servizio in primo piano riusa `ReceiveService` (azione «Termina Jam»).
 - Prove su due telefoni reali (2026-10-15, Mi A3 = host, Motorola edge 40 = ospite): richiesta/accetta/rifiuta/annulla, aggiunta da entrambi, streaming incrociato con Range e seek, cambio uscita, regole di rimozione, uscita dell'ospite, host in background con servizio e schermo spento, accetta da notifica. Difetti trovati e corretti: HTTP in chiaro bloccato da ExoPlayer (`usesCleartextTraffic`), nome dispositivo «localhost» su Android (canale `deviceName`), ospite che esce non avvisava l'host (`/leave` + controllo di vitalità a 75 s), dialog host che usava `ref` dopo `pop`, dialog di richiesta che restava aperto dopo l'annullamento, nome lungo che spezzava l'IP in colonna nella scheda dispositivo.
 - Non provato: PC (manca `libmpv` per avviare il desktop), Wi‑Fi che cade a metà brano precaricato, schermo bloccato con PIN sul Mi A3 (non sbloccabile da adb).
+- Fase 9 (2026-10-15), prova su PC + Mi A3 + Motorola: Jam a 3 (host Mi A3, Motorola ospite, PC invitato dal Motorola che ha accettato per conto dell'host), streaming ospite→ospite con `fileToken`, uscita sul Motorola per un brano del PC, uscita del Motorola (invitante): PC e Mi A3 proseguono, i suoi brani spariscono e l'uscita torna all'host; l'ultimo ospite che esce chiude la Jam. Tetto 5 partecipanti (host incluso), vitalità 75 s per membro.

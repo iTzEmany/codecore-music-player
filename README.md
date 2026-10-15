@@ -14,7 +14,7 @@ Italiano, English, Deutsch, Español.
 - **Online (solo su azione tua o opzioni attive)**: info e copertine da iTunes, testi sincronizzati da LRCLIB,
   curiosità da Wikipedia, ricerca e download da YouTube con yt-dlp.
 - **Condivisione LAN** telefono ↔ PC senza server esterni: scoperta automatica dei dispositivi, richiesta con accettazione (anche da notifica su Android, anche in background), collegamento manuale con PIN e QR.
-- **Jam sulla rete locale**: coda condivisa tra due dispositivi, ognuno aggiunge brani dalla propria libreria (streaming dal proprietario, precarico del successivo), uscita audio selezionabile; l'ospite non può cambiare brano. Schermata Condivisione → «Avvia Jam con …». Piano in [`docs/fase-8-jam.md`](docs/fase-8-jam.md).
+- **Jam sulla rete locale**: coda condivisa tra fino a 5 dispositivi (anche un ospite può accettare nuovi arrivati), ognuno aggiunge brani dalla propria libreria (streaming dal proprietario, precarico del successivo), uscita audio selezionabile; l'ospite non può cambiare brano. Schermata Condivisione → «Avvia Jam con …». Piano in [`docs/fase-8-jam.md`](docs/fase-8-jam.md).
 - **Import** di preferiti, testi e playlist dalla vecchia app Python (Impostazioni → «Importa dalla vecchia app»).
 
 ## Installare
@@ -38,7 +38,7 @@ senza il file la build release usa la chiave di debug.
 
 
 ## Limiti noti
-- Jam: solo 2 dispositivi, nessuna sincronia tra due uscite audio, nessun controllo da notifica di sistema/MPRIS; la richiesta Jam in background Android passa dalla notifica «Accetta/Rifiuta».
+- Jam: massimo 5 partecipanti, nessuna sincronia tra due uscite audio, nessun controllo da notifica di sistema/MPRIS; la richiesta Jam in background Android passa dalla notifica «Accetta/Rifiuta».
 - Niente crossfade/gapless nativo, niente equalizzatore, niente scrittura dei tag nei file.
 - Controlli multimediali di sistema (MPRIS / SMTC) non implementati; i tasti multimediali funzionano a finestra attiva.
 - Condivisione LAN in HTTP in chiaro (protetta da PIN, solo per reti domestiche).
