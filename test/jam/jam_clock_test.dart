@@ -108,6 +108,29 @@ void main() {
     expect(c.offsetMs, 130);
   });
 
+  test('a much slower round does not replace a good estimate', () async {
+    var now = 0;
+    var delay = 5;
+    var skew = 300;
+    final c = JamClock(
+      localNowMs: () => now,
+      samples: 3,
+      probe: () async {
+        final t0 = now;
+        now += delay;
+        final host = now + skew;
+        now += delay;
+        return (t0: t0, hostMs: host, t1: now);
+      },
+    );
+    await c.sync();
+    expect(c.offsetMs, 300);
+    delay = 400; // congestion: RTT 800 ms
+    skew = 999;
+    expect(await c.sync(), false);
+    expect(c.offsetMs, 300);
+  });
+
   test('/time answers members with the host clock and refuses others', () async {
     final now = DateTime.fromMillisecondsSinceEpoch(1234567);
     final h = JamHost(deviceId: 'h', deviceName: 'H', now: () => now);

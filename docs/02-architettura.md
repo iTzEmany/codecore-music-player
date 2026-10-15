@@ -95,3 +95,4 @@ Scritture con debounce 400 ms, mai in un handler di slider a ogni tick.
 - Permessi coda: tutti aggiungono e riordinano; l'ospite rimuove solo i propri brani (mai quello in riproduzione) e non
   cambia brano; l'host fa tutto.
 - Fase 9: più ospiti. `JamState.participants` (elenco con indirizzi), token d'identità per membro + `fileToken` di sessione (intestazione `x-jam-file`), invito inoltrato da un ospite all'host (`/<sid>/invite`), uscita di un membro (`/<sid>/leave`) che toglie i suoi brani. Sincronia di più uscite prevista in Fase 10 (vedi `docs/fase-9-jam-multi.md`).
+- Fase 10: uscite multiple sincronizzate. `JamClock` (offset verso l'orologio dell'host, rotta `/time`, filtro sui giri lenti), `JamSyncController` (decisioni pure: avvio programmato, velocità ±2 %, seek), `JamOutput` in modalità sincrona (cache obbligatoria, anticipo di `jamStartLeadMs`), compensazione manuale della latenza in `AppSettings.jamLatencyMs`.

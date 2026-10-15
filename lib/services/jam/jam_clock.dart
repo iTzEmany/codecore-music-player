@@ -62,6 +62,10 @@ class JamClock {
     }
     if (good.isEmpty) return false;
     good.sort((a, b) => a.rtt.compareTo(b.rtt));
+    // A round that was much slower than what we already know carries a
+    // larger error: keep the old estimate (it still follows slow drift when
+    // a good round comes in).
+    if (_synced && good.first.rtt > _bestRttMs * 3 + 30) return false;
     final best = good.take(keepBest).toList()
       ..sort((a, b) => a.offset.compareTo(b.offset));
     _offsetMs = best[best.length ~/ 2].offset;
@@ -73,6 +77,10 @@ class JamClock {
   /// Re-syncs every [every] until [stop].
   void start({Duration every = const Duration(seconds: 30)}) {
     _timer?.cancel();
+    // A first refinement soon after the initial burst (Wi-Fi often settles).
+    Timer(const Duration(seconds: 5), () {
+      if (_timer != null) unawaited(sync());
+    });
     _timer = Timer.periodic(every, (_) => unawaited(sync()));
   }
 

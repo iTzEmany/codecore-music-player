@@ -91,6 +91,7 @@ class JamController extends Notifier<JamUiState> {
   StreamSubscription<void>? _hostSub, _guestSub, _lostSub;
   StreamSubscription<JamRequest>? _reqSub;
   Timer? _alive;
+  var _syncLogs = 0;
   var _failures = 0;
   var _held = false;
 
@@ -205,7 +206,12 @@ class JamController extends Notifier<JamUiState> {
       latencyMs: ref.read(settingsProvider).jamLatencyMs,
     )
       ..onSyncError = (e) {
-        if (state.active) state = state.copyWith(syncErrorMs: e);
+        if (!state.active) return;
+        state = state.copyWith(syncErrorMs: e);
+        if (++_syncLogs % 10 == 0) {
+          AppLog.i('jam sync: error ${e}ms, clock offset '
+              '${_clock?.offsetMs}ms (rtt ${_clock?.rttMs}ms)');
+        }
       }
       ..onTrackEnded = (id) {
         send(JamCommand.trackEnded(id));

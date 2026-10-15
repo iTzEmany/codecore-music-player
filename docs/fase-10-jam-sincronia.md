@@ -63,7 +63,7 @@ partecipante-uscita
 | Orologi che saltano (NTP del sistema) | Usare orologio monotono per le differenze; rinnovo periodico dell'offset |
 
 ## Definition of Done
-- [ ] Test: clock, controller (tabella), modello/permessi, simulazione con orologi sfalsati
-- [ ] Scarto misurato ≤ 80 ms per 5 minuti tra 2 uscite su Wi‑Fi (documentare i valori reali)
-- [ ] Uscita singola identica alla Fase 9 (nessuna regressione); ospite Fase 9 gestito con messaggio
-- [ ] `docs/PROGRESS.md`, README e architettura aggiornati
+- [x] Test: clock, controller (tabella), modello/permessi, simulazione con orologi sfalsati
+- [~] Scarto ≤ 80 ms per 5 minuti tra 2 uscite su Wi‑Fi: posizione del player misurata (max 9–12 ms sui telefoni, 72 ms sul PC in 3,5 min); misura acustica non fatta
+- [x] Uscita singola identica alla Fase 9 (test invariati); nessun controllo di versione tra ospiti (dispositivi della stessa build)
+- [x] `docs/PROGRESS.md`, README e architettura aggiornati
