@@ -93,7 +93,7 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 8.6 Precarico e resilienza (cache temporanea)
 - [x] 8.7 Interfaccia (pulsante Jam, coda condivisa, uscita, termina)
 - [~] 8.8 Background Android e rifinitura
-- [ ] 8.9 Documentazione
+- [x] 8.9 Documentazione
 
 ## Note di deviazione
 <!-- una riga per deviazione: data — task — cosa è cambiato e perché -->
@@ -131,3 +131,5 @@ L'agente riparte sempre dal primo task non spuntato.
 
 - 8.2 (2026-10-15): deviazione dal piano: la risposta alla richiesta Jam si ottiene con `GET /jam/request/<id>` (polling dell'ospite, token di richiesta) invece di `POST /jam/<sid>/respond` sull'ospite; l'ospite non deve quindi esporre un endpoint prima di essere accettato. `JamItem.ref` = chiave opaca del proprietario per risolvere il file locale.
 - 8.4 (2026-10-15): deviazione: la Jam usa un proprio `AudioBackend` (secondo `AudioPlayer`, `JamOutput`) invece di passare dall'handler/`PlayQueue`: non sporca la coda locale. All'avvio della Jam la riproduzione locale viene messa in pausa. I controlli di notifica per la Jam sono rimandati a 8.8.
+- 8.7 (2026-10-15): regole coda definitive: tutti aggiungono e riordinano, l'ospite rimuove solo i propri brani (non quello in riproduzione), solo l'host salta/«avanti». L'uscita verso l'ospite la sceglie l'host con `setOutput` (consentito all'host anche per l'id dell'ospite).
+- 8.8 (2026-10-15): da provare a mano su due dispositivi reali (PC + telefono): Jam di 10 minuti con schermo spento, cambio uscita, chiusura improvvisa, accetta da notifica. Il servizio in primo piano riusa `ReceiveService` (azione «Termina Jam»).

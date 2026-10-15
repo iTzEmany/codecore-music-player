@@ -81,10 +81,16 @@ Scritture con debounce 400 ms, mai in un handler di slider a ogni tick.
 - Niente traduzione automatica nella v1 (era un endpoint Google non ufficiale). Eventuale ML Kit solo Android, più avanti.
 - Niente server web, niente protocollo MSTP: la fase 6 è un semplice scambio HTTP con PIN.
 
-## Jam (fase 8, pianificata)
+## Jam (fase 8)
 - Un dispositivo suona alla volta (uscita selezionabile); l'altro è telecomando. Nessuna sincronia tra due uscite.
 - Stato condiviso autoritativo sull'host (`JamState` con `version`); comandi validati da una funzione pura
   (`applyCommand`) con i permessi: l'ospite non può cambiare brano direttamente.
 - I brani restano sul dispositivo del proprietario e si leggono in streaming (`Range`, token di sessione) solo
   se sono in coda; nessuna libreria esposta. Precarico del successivo in cache temporanea.
 - Trasporto: lo stesso endpoint HTTP delle offerte (`OfferNode`), aggiornamenti con long polling.
+- Codice: `lib/services/jam/` (`jam_models`, `jam_state` = riduttore puro, `jam_host` = rotte `/jam` montate da `OfferNode`,
+  `jam_guest` = client, `jam_output` = applica lo stato a un `AudioBackend`, `jam_cache`), orchestrazione in
+  `lib/providers/jam_providers.dart` (`JamController`), UI in `lib/ui/screens/jam/`.
+- La Jam usa un proprio `AudioBackend`: la coda locale (`PlayQueue`) non viene toccata; la riproduzione locale va in pausa all'avvio.
+- Permessi coda: tutti aggiungono e riordinano; l'ospite rimuove solo i propri brani (mai quello in riproduzione) e non
+  cambia brano; l'host fa tutto.

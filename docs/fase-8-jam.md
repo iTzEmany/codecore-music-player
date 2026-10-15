@@ -121,8 +121,8 @@ Aggiornare `README.md` (funzioni e limiti), `docs/PROGRESS.md`, `docs/02-archite
 | Rete con isolamento dei client | Stessi limiti della Fase 6; messaggio chiaro |
 
 ## Definition of Done
-- [ ] Test: modello (8.1), host/ospite su loopback (8.2–8.3), output (8.5), cache (8.6)
+- [x] Test: modello (8.1), host/ospite su loopback (8.2–8.3), output (8.5), cache (8.6)
 - [ ] Jam a due dispositivi reali: aggiunta da entrambi, streaming incrociato, cambio uscita, termina
-- [ ] L'ospite non può saltare brano (UI e server)
-- [ ] Nessuna libreria esposta: solo elementi in coda
-- [ ] `docs/PROGRESS.md` aggiornato
+- [x] L'ospite non può saltare brano (UI e server)
+- [x] Nessuna libreria esposta: solo elementi in coda
+- [x] `docs/PROGRESS.md` aggiornato
