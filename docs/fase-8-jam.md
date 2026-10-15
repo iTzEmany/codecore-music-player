@@ -11,7 +11,7 @@ Solo rete locale, nessun server esterno, nessuna sincronia tra due uscite audio.
 | Modalità | Ascolto remoto + coda condivisa (A+B). **Niente riproduzione sincronizzata su due dispositivi (C scartata).** |
 | Ruoli | **Host** = chi accetta la Jam: tiene lo stato autoritativo. **Ospite** = chi la richiede. |
 | Uscita audio | **Un solo dispositivo suona** alla volta. Di default l'**host**. Si può cambiare il dispositivo di uscita (host ↔ ospite) in qualsiasi momento: nessuna sincronia, l'altro diventa telecomando. |
-| Coda | Entrambi possono **aggiungere, rimuovere, riordinare** e vedere la coda. Ogni elemento mostra chi l'ha aggiunto. |
+| Coda | Accesso completo a entrambi: **aggiungere e riordinare** anche i brani aggiunti dall'altro, vedere chi li ha aggiunti. **L'ospite non può rimuovere** i brani dell'host (può togliere solo i propri, mai quello in riproduzione); l'host rimuove tutto. |
 | Controlli | L'ospite può play/pausa, seek e volume; **non può cambiare brano direttamente** (niente salto a un brano, né «avanti/indietro»). Solo l'host salta. |
 | Privacy | Nessuno vede o sfoglia la libreria dell'altro: nella Jam esistono solo i brani messi in coda. |
 | Precarico | Il brano successivo viene scaricato in cache temporanea (cancellata a fine Jam) per non dipendere dalla presenza del proprietario. |

@@ -85,7 +85,7 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 7.10 Documentazione finale
 
 ## Fase 8 — Jam sulla rete locale (`fase-8-jam.md`)
-- [ ] 8.1 Modello e logica pura (JamItem, JamState, comandi, permessi)
+- [x] 8.1 Modello e logica pura (JamItem, JamState, comandi, permessi)
 - [ ] 8.2 Sessione lato host (richiesta, accettazione, stato, long polling)
 - [ ] 8.3 Client ospite
 - [ ] 8.4 Riproduzione di elementi remoti (URL + token)
