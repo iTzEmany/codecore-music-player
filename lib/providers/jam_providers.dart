@@ -81,7 +81,6 @@ class JamController extends Notifier<JamUiState> {
   JamCache? _cache;
   StreamSubscription<void>? _hostSub, _guestSub, _lostSub;
   StreamSubscription<JamRequest>? _reqSub;
-  JamRequest? _guestInfo; // host side: the connected guest
   Timer? _alive;
   var _failures = 0;
   var _held = false;
@@ -151,20 +150,28 @@ class JamController extends Notifier<JamUiState> {
 
   void cancelRequest() => _guest?.cancelJoin();
 
-  /// Host side: the user accepted [req].
+  /// The user accepted [req]: the host admits it directly; a guest forwards
+  /// the invitation to the host.
   Future<void> acceptRequest(JamRequest req) async {
     final host = _host;
-    if (host == null || state.active) return;
+    if (host == null) return;
+    if (state.active) {
+      if (state.role == JamRole.host) {
+        host.accept(req.id);
+      } else if (!await (_guest?.invite(req) ?? Future.value(false))) {
+        host.decline(req.id);
+      }
+      return;
+    }
     final s = host.accept(req.id);
     if (s == null) return;
-    _guestInfo = req;
     await _hold();
     _hostSub = host.changes.listen((_) {
       final js = host.state;
       if (js != null) _onState(js);
     });
     state = state.copyWith(peerName: req.fromName, peerId: req.fromId);
-    await _begin(JamRole.host, s);
+    await _begin(JamRole.host, host.state ?? s);
   }
 
   void decline(JamRequest req) => _host?.decline(req.id);
@@ -194,10 +201,9 @@ class JamController extends Notifier<JamUiState> {
     if (role == JamRole.host) {
       // A guest that vanished (crash, Wi-Fi off) must not keep the Jam open.
       _alive = Timer.periodic(const Duration(seconds: 10), (_) {
-        if (_host?.guestStale(const Duration(seconds: 75)) ?? false) {
-          _host?.endSession();
-          unawaited(_finish(lost: true));
-        }
+        _host?.dropStale(const Duration(seconds: 75));
+        final js = _host?.state;
+        if (js != null) _onState(js);
       });
     }
     _onState(s);
@@ -227,20 +233,25 @@ class JamController extends Notifier<JamUiState> {
 
   Uri? _remoteUri(JamItem item) {
     final s = state.jam;
-    if (s == null) return null;
-    if (state.role == JamRole.guest) {
-      final base = _guest?.hostBase, sid = _guest?.sessionId;
-      return base == null ? null : Uri.parse('$base/$sid/file/${item.id}');
+    final sid = state.role == JamRole.guest ? _guest?.sessionId : _host?.sessionId;
+    if (s == null || sid == null) return null;
+    final owner = s.participant(item.ownerDeviceId);
+    if (owner == null) return null;
+    // The host is reached at the address a guest used to join; a guest at
+    // the one the host saw for it.
+    String? base;
+    if (owner.id == s.hostDeviceId) {
+      base = state.role == JamRole.guest ? _guest?.hostBase : null;
+    } else if (owner.host.isNotEmpty) {
+      base = 'http://${owner.host}:${owner.port}/jam';
     }
-    final g = _guestInfo, sid = _host?.sessionId;
-    if (g == null || sid == null) return null;
-    return Uri.parse('http://${g.fromHost}:${g.fromPort}/jam/$sid/file/${item.id}');
+    return base == null ? null : Uri.parse('$base/$sid/file/${item.id}');
   }
 
   Map<String, String> get _headers => {
-        'x-jam-token': (state.role == JamRole.guest
-                ? _guest?.sessionToken
-                : _host?.sessionToken) ??
+        jamFileHeader: (state.role == JamRole.guest
+                ? _guest?.fileToken
+                : _host?.fileToken) ??
             '',
       };
 
@@ -353,7 +364,6 @@ class JamController extends Notifier<JamUiState> {
     final g = _guest;
     _guest = null;
     await g?.dispose();
-    _guestInfo = null;
     if (release) await _release();
   }
 

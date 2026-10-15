@@ -123,8 +123,19 @@ class _JamScreenState extends ConsumerState<JamScreen> {
         .toDouble();
     final iAmOutput = jam.outputDeviceId == ownId;
 
-    String owner(JamItem i) =>
-        i.ownerDeviceId == ownId ? l.jamYou : s.peerName;
+    final others = [
+      for (final p in jam.participants)
+        if (p.id != ownId) p
+    ];
+    final title = others.isEmpty
+        ? s.peerName
+        : others.map((p) => p.name).join(', ');
+
+    String owner(JamItem i) {
+      if (i.ownerDeviceId == ownId) return l.jamYou;
+      final n = jam.nameOf(i.ownerDeviceId);
+      return n.isEmpty ? s.peerName : n;
+    }
 
     Future<void> guarded(Future<JamError?> f, {String? forbidden}) async {
       final messenger = ScaffoldMessenger.of(context);
@@ -138,7 +149,7 @@ class _JamScreenState extends ConsumerState<JamScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l.jamWith(s.peerName)),
+        title: Text(l.jamWith(title), maxLines: 1, overflow: TextOverflow.ellipsis),
         actions: [
           TextButton(
             onPressed: ctrl.end,
@@ -208,18 +219,20 @@ class _JamScreenState extends ConsumerState<JamScreen> {
             ]),
             Text(l.jamOutput, style: Theme.of(context).textTheme.labelMedium),
             const SizedBox(height: 4),
-            SegmentedButton<bool>(
-              showSelectedIcon: false,
-              segments: [
-                ButtonSegment(value: true, label: Text(l.jamOutputHere)),
-                ButtonSegment(
-                    value: false, label: Text(l.jamOutputOther(s.peerName))),
-              ],
-              selected: {iAmOutput},
-              onSelectionChanged: (v) {
-                ctrl.setOutput(v.first ? ownId : s.peerId);
-              },
-            ),
+            Wrap(spacing: 8, runSpacing: 4, children: [
+              ChoiceChip(
+                label: Text(l.jamOutputHere),
+                selected: iAmOutput,
+                onSelected: (_) => ctrl.setOutput(ownId),
+              ),
+              for (final p in others)
+                ChoiceChip(
+                  label: Text(p.name,
+                      maxLines: 1, overflow: TextOverflow.ellipsis),
+                  selected: jam.outputDeviceId == p.id,
+                  onSelected: (_) => ctrl.setOutput(p.id),
+                ),
+            ]),
             const SizedBox(height: 12),
             Text(l.jamQueue, style: Theme.of(context).textTheme.titleMedium),
           ]),

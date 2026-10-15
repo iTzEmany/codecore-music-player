@@ -14,6 +14,12 @@ import 'jam_state.dart';
 const jamRequestTtl = Duration(minutes: 5);
 const jamPollWait = Duration(seconds: 25);
 
+/// Header with the participant's identity token (state, commands, invites).
+const jamTokenHeader = 'x-jam-token';
+
+/// Header with the session-wide token that only gates file downloads.
+const jamFileHeader = 'x-jam-file';
+
 /// Resolves an item this device owns (via [JamItem.ref]) to a local file.
 typedef JamFileResolver = Future<String?> Function(JamItem item);
 
@@ -34,14 +40,27 @@ class JamRequest {
   final int fromPort;
   final DateTime receivedAt;
   JamRequestStatus status = JamRequestStatus.pending;
-  String? sessionId, sessionToken;
+
+  /// Credentials handed to the requester once accepted.
+  String? sessionId, sessionToken, fileToken;
+
+  /// Where the requester must connect (set when a guest accepted for the host).
+  String? base;
+}
+
+class _Member {
+  _Member(this.id, this.name, this.host, this.port, this.token, this.seen);
+
+  final String id, name, host, token;
+  final int port;
+  DateTime seen;
 }
 
 /// Routes of the Jam protocol, mounted under `/jam` by [OfferNode].
 ///
-/// Both roles use it: the host serves `/request`, `/<sid>/state`, `/<sid>/cmd`;
-/// every participant serves `/<sid>/file/<itemId>` for the items it owns,
-/// and only for items currently in the queue.
+/// The host serves `/request`, `/<sid>/state`, `/<sid>/cmd`, `/<sid>/invite`
+/// and `/<sid>/leave`; every participant serves `/<sid>/file/<n>` for the
+/// items it owns, and only for items currently in the queue.
 class JamHost {
   JamHost({
     required this.deviceId,
@@ -50,12 +69,13 @@ class JamHost {
     DateTime Function()? now,
     this.pollWait = jamPollWait,
     this.maxRequestsPerMinute = 5,
+    this.maxParticipants = maxJamParticipants,
   }) : _now = now ?? DateTime.now;
 
   final String deviceId, deviceName;
   final bool allowLoopback;
   final Duration pollWait;
-  final int maxRequestsPerMinute;
+  final int maxRequestsPerMinute, maxParticipants;
   final DateTime Function() _now;
 
   JamFileResolver? resolveFile;
@@ -69,25 +89,28 @@ class JamHost {
 
   // Active session as host.
   JamState? _state;
-  String? _sid, _token;
-  JamRequest? _guest;
-  DateTime? _guestSeen;
+  String? _sid, _fileToken;
+  final _members = <String, _Member>{};
 
   // Active session as guest (set by the client, see attachGuest).
-  String? _gSid, _gToken;
+  String? _gSid, _gFileToken;
   JamState? Function()? _gState;
 
   JamState? get state => _state;
   String? get sessionId => _sid;
-  String? get sessionToken => _token;
-  JamRequest? get guest => _guest;
-  /// True when the guest has not polled or sent anything for [timeout].
-  bool guestStale(Duration timeout) {
-    final seen = _guestSeen;
-    return hosting && seen != null && _now().difference(seen) > timeout;
-  }
+  String? get fileToken => _fileToken;
+
+  /// Identity token of a guest (tests).
+  String? tokenOf(String memberId) => _members[memberId]?.token;
+
+  /// Ids of the guests currently in the session.
+  List<String> get memberIds => _members.keys.toList();
 
   bool get hosting => _state != null && !_state!.ended;
+
+  /// True while this device is a guest of somebody else's Jam.
+  bool get isGuest => _gSid != null;
+
   Stream<void> get changes => _changes.stream;
 
   void _notify() {
@@ -109,26 +132,59 @@ class JamHost {
 
   // ---- host API ------------------------------------------------------------
 
-  /// Accepts [id]: creates the session and returns its initial state.
-  JamState? accept(String id) {
-    expire();
-    final r = requests[id];
-    if (r == null || r.status != JamRequestStatus.pending || hosting) {
-      return null;
+  List<JamParticipant> _roster() => [
+        JamParticipant(id: deviceId, name: deviceName),
+        for (final m in _members.values)
+          JamParticipant(id: m.id, name: m.name, host: m.host, port: m.port),
+      ];
+
+  void _publish(JamState s) {
+    _state = s.copyWith(version: s.version + 1, participants: _roster());
+    _notify();
+  }
+
+  /// Registers a guest and returns its credentials; starts the session if
+  /// this is the first one. Null when the session is full or over.
+  ({String sid, String token, String fileToken})? addMember(
+      {required String id,
+      required String name,
+      required String host,
+      required int port}) {
+    if (_state?.ended ?? false) return null;
+    final existing = _members[id];
+    if (existing != null) {
+      return (sid: _sid!, token: existing.token, fileToken: _fileToken!);
     }
+    if (_members.length + 1 >= maxParticipants || id == deviceId) return null;
+    if (_state == null) {
+      _sid = newToken();
+      _fileToken = newToken();
+      _state = JamState(
+        hostDeviceId: deviceId,
+        outputDeviceId: deviceId,
+        positionAt: _now().millisecondsSinceEpoch,
+        participants: [JamParticipant(id: deviceId, name: deviceName)],
+      );
+      AppLog.i('jam: session started');
+    }
+    final m = _Member(id, name, host, port, newToken(), _now());
+    _members[id] = m;
+    _publish(_state!);
+    return (sid: _sid!, token: m.token, fileToken: _fileToken!);
+  }
+
+  /// Accepts a request that reached this device directly.
+  JamState? accept(String requestId) {
+    expire();
+    final r = requests[requestId];
+    if (r == null || r.status != JamRequestStatus.pending) return null;
+    final c = addMember(
+        id: r.fromId, name: r.fromName, host: r.fromHost, port: r.fromPort);
+    if (c == null) return null;
     r.status = JamRequestStatus.accepted;
-    r.sessionId = newToken();
-    r.sessionToken = newToken();
-    _sid = r.sessionId;
-    _token = r.sessionToken;
-    _guest = r;
-    _guestSeen = _now();
-    _state = JamState(
-      hostDeviceId: deviceId,
-      outputDeviceId: deviceId,
-      positionAt: _now().millisecondsSinceEpoch,
-    );
-    AppLog.i('jam: session started with ${r.fromHost}');
+    r.sessionId = c.sid;
+    r.sessionToken = c.token;
+    r.fileToken = c.fileToken;
     _notify();
     return _state;
   }
@@ -154,30 +210,62 @@ class JamHost {
     return r;
   }
 
-  /// Marks the session ended; the guest sees `ended` on its next poll.
+  /// Removes a guest and every item it owns. The session ends when nobody is
+  /// left but the host.
+  void removeMember(String id) {
+    if (_members.remove(id) == null || _state == null) return;
+    var s = _state!;
+    final now = _now().millisecondsSinceEpoch;
+    for (final item in s.items.where((i) => i.ownerDeviceId == id).toList()) {
+      final r = applyCommand(s, JamCommand.remove(item.id),
+          from: deviceId, nowMs: now);
+      if (r.isOk) s = r.state!;
+    }
+    // The output cannot be a device that left.
+    if (s.outputDeviceId == id) {
+      s = s.copyWith(outputDeviceId: deviceId, playing: false);
+    }
+    _publish(s);
+    if (_members.isEmpty) endSession();
+  }
+
+  /// Drops guests that have not been heard from for [timeout]; returns them.
+  List<String> dropStale(Duration timeout) {
+    final now = _now();
+    final stale = [
+      for (final m in _members.values)
+        if (now.difference(m.seen) > timeout) m.id
+    ];
+    for (final id in stale) {
+      removeMember(id);
+    }
+    return stale;
+  }
+
+  /// Marks the session ended; guests see `ended` on their next poll.
   void endSession() {
     if (_state != null && !_state!.ended) apply(const JamCommand.end());
   }
 
-  /// Drops every trace of the session (after the guest had time to see it).
+  /// Drops every trace of the session (after the guests had time to see it).
   void clearSession() {
     _state = null;
     _sid = null;
-    _token = null;
-    _guest = null;
+    _fileToken = null;
+    _members.clear();
     _notify();
   }
 
   // ---- guest API -----------------------------------------------------------
 
-  void attachGuest(String sid, String token, JamState? Function() state) {
+  void attachGuest(String sid, String fileToken, JamState? Function() state) {
     _gSid = sid;
-    _gToken = token;
+    _gFileToken = fileToken;
     _gState = state;
   }
 
   void detachGuest() {
-    _gSid = _gToken = null;
+    _gSid = _gFileToken = null;
     _gState = null;
   }
 
@@ -211,17 +299,33 @@ class JamHost {
         JamError.ended => Response(410, body: 'ended'),
       };
 
+  /// The guest that owns the identity token of [r], if the session matches.
+  _Member? _memberFor(Request r, String sid) {
+    if (_sid == null || sid != _sid) return null;
+    final given = r.headers[jamTokenHeader];
+    for (final m in _members.values) {
+      if (_tokenOk(m.token, given)) {
+        m.seen = _now();
+        return m;
+      }
+    }
+    return null;
+  }
+
   Router buildRouter({String Function(Request)? clientIp}) {
     final router = Router();
 
-    // Host: a device asks to start a Jam.
+    // Any Jam device: someone asks to join. A host adds them itself; a guest
+    // forwards the invitation to the host once the user accepts.
     router.post('/request', (Request r) async {
       final ip = _ip(r, clientIp);
       if (!isLocalNetworkAddress(ip, allowLoopback: allowLoopback)) {
         return Response.forbidden('local network only');
       }
       expire();
-      if (hosting) return Response(409, body: 'busy');
+      if (hosting && _members.length + 1 >= maxParticipants) {
+        return Response(409, body: 'full');
+      }
       if (requests.values.any((q) => q.status == JamRequestStatus.pending)) {
         return Response(409, body: 'busy');
       }
@@ -268,7 +372,7 @@ class JamHost {
       return _json({'requestId': req.id}, 202);
     });
 
-    // Host: the requester polls the answer (token = its own request token).
+    // The requester polls the answer (token = its own request token).
     router.get('/request/<id>', (Request r, String id) {
       expire();
       final q = requests[id];
@@ -282,11 +386,13 @@ class JamHost {
         if (q.status == JamRequestStatus.accepted) ...{
           'sessionId': q.sessionId,
           'token': q.sessionToken,
+          'fileToken': q.fileToken,
+          if (q.base != null) 'base': q.base,
         },
       });
     });
 
-    // Host: the requester withdraws.
+    // The requester withdraws.
     router.post('/request/<id>/cancel', (Request r, String id) {
       final q = requests[id];
       if (q == null || !_tokenOk(q.token, r.headers['x-token'])) {
@@ -299,17 +405,11 @@ class JamHost {
       return Response.ok('ok');
     });
 
-    bool hostAuth(Request r, String sid) {
-      final ok = _sid != null &&
-          sid == _sid &&
-          _tokenOk(_token, r.headers['x-jam-token']);
-      if (ok) _guestSeen = _now();
-      return ok;
-    }
-
     // Host: state, long polling on `since`.
     router.get('/<sid>/state', (Request r, String sid) async {
-      if (!hostAuth(r, sid)) return Response(401, body: 'unauthorized');
+      if (_memberFor(r, sid) == null) {
+        return Response(401, body: 'unauthorized');
+      }
       final since = int.tryParse(r.url.queryParameters['since'] ?? '') ?? -1;
       var s = _state;
       if (s == null) return Response.notFound('no session');
@@ -324,9 +424,10 @@ class JamHost {
       return _json(s.toJson());
     });
 
-    // Host: commands from the guest.
+    // Host: commands from a guest.
     router.post('/<sid>/cmd', (Request r, String sid) async {
-      if (!hostAuth(r, sid)) return Response(401, body: 'unauthorized');
+      final m = _memberFor(r, sid);
+      if (m == null) return Response(401, body: 'unauthorized');
       Object? body;
       try {
         body = jsonDecode(await r.readAsString());
@@ -335,17 +436,50 @@ class JamHost {
       }
       final cmd = JamCommand.tryParse(body);
       if (cmd == null) return Response(400, body: 'bad command');
-      final from = _guest?.fromId;
-      if (from == null) return Response.notFound('no session');
-      final res = apply(cmd, from: from);
+      final res = apply(cmd, from: m.id);
       if (!res.isOk) return _fail(res.error!);
       return _json(res.state!.toJson());
     });
 
-    // Host: the guest leaves, which ends the Jam (two devices only).
+    // Host: a guest forwards an invitation accepted on its screen.
+    router.post('/<sid>/invite', (Request r, String sid) async {
+      if (_memberFor(r, sid) == null) {
+        return Response(401, body: 'unauthorized');
+      }
+      Object? body;
+      try {
+        body = jsonDecode(await r.readAsString());
+      } on FormatException {
+        return Response(400, body: 'bad json');
+      }
+      if (body is! Map) return Response(400, body: 'bad request');
+      final id = body['id'], name = body['name'];
+      final host = body['host'], port = body['port'];
+      if (id is! String ||
+          id.isEmpty ||
+          id.length > 64 ||
+          name is! String ||
+          host is! String ||
+          port is! int ||
+          port < 1 ||
+          port > 65535 ||
+          !isLocalNetworkAddress(host, allowLoopback: allowLoopback)) {
+        return Response(400, body: 'bad request');
+      }
+      final c = addMember(
+          id: id,
+          name: name.length > 60 ? name.substring(0, 60) : name,
+          host: host,
+          port: port);
+      if (c == null) return Response(409, body: 'full');
+      return _json({'token': c.token, 'fileToken': c.fileToken});
+    });
+
+    // Host: a guest leaves (only that guest and its items go away).
     router.post('/<sid>/leave', (Request r, String sid) {
-      if (!hostAuth(r, sid)) return Response(401, body: 'unauthorized');
-      endSession();
+      final m = _memberFor(r, sid);
+      if (m == null) return Response(401, body: 'unauthorized');
+      removeMember(m.id);
       return Response.ok('ok');
     });
 
@@ -354,8 +488,8 @@ class JamHost {
       final hostSide = _sid != null && sid == _sid;
       final guestSide = _gSid != null && sid == _gSid;
       if (!hostSide && !guestSide) return Response(401, body: 'unauthorized');
-      final token = hostSide ? _token : _gToken;
-      if (!_tokenOk(token, r.headers['x-jam-token'])) {
+      final token = hostSide ? _fileToken : _gFileToken;
+      if (!_tokenOk(token, r.headers[jamFileHeader])) {
         return Response(401, body: 'unauthorized');
       }
       final st = hostSide ? _state : _gState?.call();

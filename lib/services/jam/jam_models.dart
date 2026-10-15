@@ -1,4 +1,7 @@
 const maxJamItems = 200;
+
+/// Host included.
+const maxJamParticipants = 5;
 const maxJamText = 200;
 const jamExts = {
   'mp3', 'flac', 'wav', 'ogg', 'oga', 'opus', 'm4a', 'aac', 'aiff', 'aif',
@@ -89,10 +92,38 @@ class JamItem {
   }
 }
 
+/// A device taking part in the Jam. [host] is empty for the Jam host itself
+/// ("the address you reached me at").
+class JamParticipant {
+  const JamParticipant({
+    required this.id,
+    required this.name,
+    this.host = '',
+    this.port = 0,
+  });
+
+  final String id, name, host;
+  final int port;
+
+  Map<String, Object?> toJson() =>
+      {'id': id, 'name': name, 'host': host, 'port': port};
+
+  static JamParticipant? tryParse(Object? j) {
+    if (j is! Map) return null;
+    final id = j['id'], name = j['name'], host = j['host'], port = j['port'];
+    if (id is! String || id.isEmpty || id.length > 64) return null;
+    if (name is! String || name.length > 60) return null;
+    if (host is! String || host.length > 64) return null;
+    if (port is! int || port < 0 || port > 65535) return null;
+    return JamParticipant(id: id, name: name, host: host, port: port);
+  }
+}
+
 class JamState {
   const JamState({
     this.version = 0,
     this.items = const [],
+    this.participants = const [],
     this.currentIndex = -1,
     this.playing = false,
     this.positionMs = 0,
@@ -106,6 +137,7 @@ class JamState {
 
   final int version;
   final List<JamItem> items;
+  final List<JamParticipant> participants;
   final int currentIndex;
   final bool playing;
 
@@ -116,6 +148,12 @@ class JamState {
   final String hostDeviceId, outputDeviceId;
   final int nextItemId;
   final bool ended;
+
+  JamParticipant? participant(String id) =>
+      participants.where((p) => p.id == id).firstOrNull;
+
+  /// Name to show for a device id ("" when unknown).
+  String nameOf(String id) => participant(id)?.name ?? '';
 
   JamItem? get current =>
       currentIndex >= 0 && currentIndex < items.length ? items[currentIndex] : null;
@@ -129,6 +167,7 @@ class JamState {
   JamState copyWith({
     int? version,
     List<JamItem>? items,
+    List<JamParticipant>? participants,
     int? currentIndex,
     bool? playing,
     int? positionMs,
@@ -141,6 +180,7 @@ class JamState {
       JamState(
         version: version ?? this.version,
         items: items ?? this.items,
+        participants: participants ?? this.participants,
         currentIndex: currentIndex ?? this.currentIndex,
         playing: playing ?? this.playing,
         positionMs: positionMs ?? this.positionMs,
@@ -155,6 +195,7 @@ class JamState {
   Map<String, Object?> toJson() => {
         'version': version,
         'items': [for (final i in items) i.toJson()],
+        'participants': [for (final p in participants) p.toJson()],
         'current': currentIndex,
         'playing': playing,
         'pos': positionMs,
@@ -179,11 +220,22 @@ class JamState {
       if (i == null) return null;
       items.add(i);
     }
+    final rawPeople = j['participants'];
+    final people = <JamParticipant>[];
+    if (rawPeople is List) {
+      if (rawPeople.length > maxJamParticipants) return null;
+      for (final r in rawPeople) {
+        final p = JamParticipant.tryParse(r);
+        if (p == null) return null;
+        people.add(p);
+      }
+    }
     final cur = j['current'];
     final vol = j['volume'];
     return JamState(
       version: version,
       items: items,
+      participants: people,
       currentIndex: cur is int && cur >= -1 && cur < items.length ? cur : -1,
       playing: j['playing'] == true,
       positionMs: j['pos'] is int && (j['pos'] as int) >= 0 ? j['pos'] as int : 0,

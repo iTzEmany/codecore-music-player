@@ -99,11 +99,12 @@ JamResult applyCommand(
 
     case JamCommandType.setOutput:
       final d = cmd.deviceId!;
-      // Only the two participants can be the output (the host may name the
-      // guest, whose id it knows from the session).
-      if (!isHost && d != s.hostDeviceId && d != from) {
-        return const JamResult.fail(JamError.invalid);
-      }
+      // Any participant can be the output. Before a roster exists (tests,
+      // old peers) only the host and the sender are accepted.
+      final known = s.participants.isEmpty
+          ? (d == s.hostDeviceId || d == from || isHost)
+          : s.participant(d) != null;
+      if (!known) return const JamResult.fail(JamError.invalid);
       if (d == s.outputDeviceId) return JamResult.ok(s);
       return commit(frozen().copyWith(outputDeviceId: d));
 

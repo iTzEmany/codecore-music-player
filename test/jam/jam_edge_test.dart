@@ -202,17 +202,19 @@ void main() {
       h.clearSession();
       expect((await call('POST', 'request', body: req(id: 'g2'))).statusCode, 202);
       expect(h.accept(h.requests.keys.last), isNotNull);
-      expect(h.guest!.fromId, 'g2');
+      expect(h.memberIds, ['g2']);
     });
 
     test('wrong session id / token on every host route', () async {
       await call('POST', 'request', body: req());
       h.accept(h.requests.keys.single);
-      final sid = h.sessionId!, tok = h.sessionToken!;
+      final sid = h.sessionId!, tok = h.tokenOf('g')!;
       final good = {'x-jam-token': tok};
       expect((await call('GET', 'nope/state', headers: good)).statusCode, 401);
       expect((await call('POST', 'nope/cmd', body: {'cmd': 'play'}, headers: good)).statusCode, 401);
-      expect((await call('GET', '$sid/file/1', headers: {'x-jam-token': 'a' * tok.length})).statusCode, 401);
+      expect((await call('GET', '$sid/file/1', headers: {'x-jam-file': 'a' * tok.length})).statusCode, 401);
+      // the identity token does not open files, only the file token does
+      expect((await call('GET', '$sid/file/1', headers: good)).statusCode, 401);
       expect((await call('POST', '$sid/cmd', raw: '{bad', headers: good)).statusCode, 400);
     });
 
@@ -224,7 +226,7 @@ void main() {
       await call('POST', 'request', body: req());
       h.accept(h.requests.keys.single);
       final sid = h.sessionId!;
-      final a = {'x-jam-token': h.sessionToken!};
+      final a = {'x-jam-file': h.fileToken!};
       h.apply(JamCommand.add(JamItem(id: 0, ownerDeviceId: host, title: 'a', ext: 'mp3', ref: 'ok')));
       h.apply(JamCommand.add(JamItem(id: 0, ownerDeviceId: host, title: 'b', ext: 'mp3', ref: 'gone')));
       expect((await call('GET', '$sid/file/abc', headers: a)).statusCode, 404);
@@ -272,26 +274,66 @@ void main() {
 }
 
 void leaveTests() {
-  test('guest leave ends the session; stale guest is detected', () async {
+  test('guest leave removes only that guest; stale guests are dropped', () async {
     var now = DateTime(2026, 1, 1);
     final h = JamHost(deviceId: 'host', deviceName: 'PC', now: () => now);
     final handler = h.buildRouter(clientIp: (_) => '192.168.1.5').call;
     Future<Response> call(String m, String p, {Object? body, Map<String, String>? hd}) =>
         Future.sync(() => handler(Request(m, Uri.parse('http://x/$p'),
             body: body == null ? null : jsonEncode(body), headers: hd)));
-    await call('POST', 'request', body: {
-      'fromId': 'g', 'fromName': 'G', 'port': 4000, 'token': 'token-1234'
-    });
-    h.accept(h.requests.keys.single);
-    expect(h.guestStale(const Duration(seconds: 75)), false);
+    Future<void> join(String id) async {
+      h.requests.clear();
+      await call('POST', 'request', body: {
+        'fromId': id, 'fromName': id, 'port': 4000, 'token': 'token-$id-1234'
+      });
+      h.accept(h.requests.keys.single);
+    }
+
+    await join('a');
+    await join('b');
+    expect(h.memberIds, ['a', 'b']);
+    expect(h.state!.participants.map((p) => p.id), ['host', 'a', 'b']);
+    h.apply(JamCommand.add(const JamItem(id: 0, ownerDeviceId: 'a', title: 'A', ext: 'mp3')), from: 'a');
+    h.apply(JamCommand.add(const JamItem(id: 0, ownerDeviceId: 'b', title: 'B', ext: 'mp3')), from: 'b');
+    h.apply(const JamCommand.setOutput('a'), from: 'host');
+    expect(h.state!.outputDeviceId, 'a');
+
+    final sid = h.sessionId!;
+    expect((await call('POST', '$sid/leave')).statusCode, 401);
+    expect((await call('POST', '$sid/leave', hd: {'x-jam-token': h.tokenOf('a')!})).statusCode, 200);
+    // a's items are gone, output falls back to the host, the session lives
+    expect(h.memberIds, ['b']);
+    expect(h.state!.items.map((i) => i.title), ['B']);
+    expect(h.state!.outputDeviceId, 'host');
+    expect(h.state!.ended, false);
+
+    // b goes silent: dropped, and with nobody left the session ends
     now = now.add(const Duration(seconds: 80));
-    expect(h.guestStale(const Duration(seconds: 75)), true);
-    final auth = {'x-jam-token': h.sessionToken!};
-    // any authenticated call refreshes the liveness
-    await call('GET', '${h.sessionId}/state?since=-1', hd: auth);
-    expect(h.guestStale(const Duration(seconds: 75)), false);
-    expect((await call('POST', '${h.sessionId}/leave')).statusCode, 401);
-    expect((await call('POST', '${h.sessionId}/leave', hd: auth)).statusCode, 200);
+    expect(h.dropStale(const Duration(seconds: 75)), ['b']);
     expect(h.state!.ended, true);
+  });
+
+  test('session is capped and invites come only from members', () async {
+    final h = JamHost(deviceId: 'host', deviceName: 'PC', maxParticipants: 3);
+    final handler = h.buildRouter(clientIp: (_) => '192.168.1.5').call;
+    Future<Response> call(String m, String p, {Object? body, Map<String, String>? hd}) =>
+        Future.sync(() => handler(Request(m, Uri.parse('http://x/$p'),
+            body: body == null ? null : jsonEncode(body), headers: hd)));
+    final a = h.addMember(id: 'a', name: 'A', host: '192.168.1.6', port: 1000)!;
+    final inv = {'id': 'b', 'name': 'B', 'host': '192.168.1.7', 'port': 1001};
+    expect((await call('POST', '${a.sid}/invite', body: inv)).statusCode, 401);
+    final ok = await call('POST', '${a.sid}/invite',
+        body: inv, hd: {'x-jam-token': a.token});
+    expect(ok.statusCode, 200);
+    expect(h.memberIds, ['a', 'b']);
+    // third guest would be the 4th participant
+    expect(h.addMember(id: 'c', name: 'C', host: '192.168.1.8', port: 1), isNull);
+    final full = await call('POST', 'request',
+        body: {'fromId': 'c', 'fromName': 'C', 'port': 4000, 'token': 'token-1234'});
+    expect(full.statusCode, 409);
+    // bad invitations
+    expect((await call('POST', '${a.sid}/invite',
+            body: {...inv, 'host': '8.8.8.8'}, hd: {'x-jam-token': a.token}))
+        .statusCode, 400);
   });
 }

@@ -96,11 +96,11 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 8.9 Documentazione
 
 ## Fase 9 — Jam con più di 2 dispositivi (`fase-9-jam-multi.md`)
-- [ ] 9.1 Modello (partecipanti in `JamState`)
-- [ ] 9.2 Host a N partecipanti (token per membro, invito, uscita, tetto)
-- [ ] 9.3 Client (credenziali, invito da ospite, `base`)
-- [ ] 9.4 Controller (URL proprietario da elenco, accettazione da ospite, scarto)
-- [ ] 9.5 Interfaccia (partecipanti, uscita a più voci)
+- [x] 9.1 Modello (partecipanti in `JamState`)
+- [x] 9.2 Host a N partecipanti (token per membro, invito, uscita, tetto)
+- [x] 9.3 Client (credenziali, invito da ospite, `base`)
+- [x] 9.4 Controller (URL proprietario da elenco, accettazione da ospite, scarto)
+- [x] 9.5 Interfaccia (partecipanti, uscita a più voci)
 - [ ] 9.6 Prova su dispositivi reali
 - [ ] 9.7 Documentazione
 

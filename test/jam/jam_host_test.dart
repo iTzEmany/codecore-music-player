@@ -97,14 +97,15 @@ void main() {
 
     var st = await json(await call('GET', '${s.sid}/state?since=-1',
         headers: auth));
-    expect(st['version'], 0);
+    final v0 = st['version'] as int;
+    expect(v0, greaterThan(0));
 
     final add = JamCommand.add(const JamItem(
         id: 0, ownerDeviceId: 'guest', title: 'Song', ext: 'mp3', ref: '7'));
     final res = await call('POST', '${s.sid}/cmd', body: add.toJson(), headers: auth);
     expect(res.statusCode, 200);
     st = await json(res);
-    expect(st['version'], 1);
+    expect(st['version'], v0 + 1);
     expect(host.state!.items.single.ownerDeviceId, 'guest');
 
     // guest cannot jump / end
@@ -115,20 +116,23 @@ void main() {
     // garbage
     expect((await call('POST', '${s.sid}/cmd', body: {'cmd': 'x'}, headers: auth))
         .statusCode, 400);
-    // a second guest is rejected while hosting
+    // a second guest can join the running session
     expect((await call('POST', 'request', body: reqBody(id: 'g2'))).statusCode,
-        409);
+        202);
+    expect(host.accept(seen.last.id), isNotNull);
+    expect(host.memberIds, ['guest', 'g2']);
   });
 
   test('long poll wakes up on change and times out otherwise', () async {
     final s = await startSession();
     final auth = {'x-jam-token': s.token};
-    final timeout = await call('GET', '${s.sid}/state?since=0', headers: auth);
-    expect((await json(timeout))['version'], 0);
+    final v0 = host.state!.version;
+    final timeout = await call('GET', '${s.sid}/state?since=$v0', headers: auth);
+    expect((await json(timeout))['version'], v0);
 
-    final pending = call('GET', '${s.sid}/state?since=0', headers: auth);
+    final pending = call('GET', '${s.sid}/state?since=$v0', headers: auth);
     host.apply(const JamCommand.volume(0.5));
-    expect((await json(await pending))['version'], 1);
+    expect((await json(await pending))['version'], v0 + 1);
   });
 
   test('end is visible to the guest and then clears', () async {
@@ -149,7 +153,7 @@ void main() {
     final f = File(p.join(dir.path, 'a.mp3'))..writeAsBytesSync(List.generate(100, (i) => i));
     host.resolveFile = (item) async => item.ref == 'mine' ? f.path : null;
     final s = await startSession();
-    final auth = {'x-jam-token': s.token};
+    final auth = {'x-jam-file': host.fileToken!};
     host.apply(const JamCommand.add(
         JamItem(id: 0, ownerDeviceId: 'host', title: 'A', ext: 'mp3', ref: 'mine')));
     host.apply(const JamCommand.add(

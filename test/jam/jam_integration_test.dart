@@ -97,7 +97,7 @@ void main() {
         .timeout(const Duration(seconds: 5));
 
     final dio = Dio(BaseOptions(responseType: ResponseType.bytes));
-    final h = {'x-jam-token': guest.sessionToken};
+    final h = {'x-jam-file': guest.fileToken};
     final fromHost = await dio.get<List<int>>(
         'http://127.0.0.1:$hostPort/jam/${guest.sessionId}/file/2',
         options: Options(headers: h));
@@ -105,7 +105,7 @@ void main() {
     // the host fetches the guest's file with the same session token
     final fromGuest = await dio.get<List<int>>(
         'http://127.0.0.1:$guestPort/jam/${guest.sessionId}/file/1',
-        options: Options(headers: {'x-jam-token': hostJam.sessionToken}));
+        options: Options(headers: {'x-jam-file': hostJam.fileToken}));
     expect(fromGuest.data, [9, 9]);
   });
 
@@ -131,5 +131,69 @@ void main() {
     await hostNode.stop();
     await lost.timeout(const Duration(seconds: 15));
     expect(guest.active, false);
+  });
+
+  test('three devices: a guest accepts a newcomer on behalf of the host',
+      () async {
+    await join();
+    final jamB = JamHost(
+        deviceId: 'guestB', deviceName: 'Tablet', allowLoopback: true,
+        pollWait: const Duration(seconds: 2));
+    final nodeB = OfferNode(
+        OfferService(deviceId: 'guestB', deviceName: 'Tablet', allowLoopback: true),
+        allowLoopback: true,
+        extraRoutes: {'/jam': jamB.buildRouter().call});
+    final portB = await nodeB.start();
+    final guestB = JamGuest(
+        local: jamB,
+        requestPoll: const Duration(milliseconds: 50),
+        backoff: const Duration(milliseconds: 20),
+        maxFailures: 3);
+    addTearDown(() async {
+      await guestB.dispose();
+      await nodeB.stop();
+    });
+    // The first guest answers for the host.
+    guestJam.onRequest = (r) => guest.invite(r);
+
+    final o = await guestB.join(
+        host: '127.0.0.1',
+        port: guestPort, // asks the guest, not the host
+        ownDeviceId: 'guestB',
+        ownName: 'Tablet',
+        ownPort: portB);
+    expect(o, JamJoinOutcome.accepted);
+    expect(hostJam.memberIds, containsAll(['guest', 'guestB']));
+    expect(guestB.hostBase, 'http://127.0.0.1:$hostPort/jam');
+
+    // everyone sees the same roster
+    await guestB.states
+        .firstWhere((s) => s.participants.length == 3)
+        .timeout(const Duration(seconds: 5), onTimeout: () => guestB.state!);
+    expect(guestB.state!.participants.map((p) => p.name),
+        containsAll(['PC', 'Phone', 'Tablet']));
+
+    // B adds a track it owns; the original guest can fetch it from B
+    final gf = File('${dir.path}/b.mp3')..writeAsBytesSync([5, 6, 7]);
+    jamB.resolveFile = (i) async => gf.path;
+    final r = await guestB.send(const JamCommand.add(JamItem(
+        id: 0, ownerDeviceId: 'guestB', title: 'B', ext: 'mp3', ref: '1')));
+    expect(r.isOk, true);
+    await guest.states
+        .firstWhere((s) => s.items.length == 1)
+        .timeout(const Duration(seconds: 5));
+    final owner = guest.state!.participant('guestB')!;
+    final dio = Dio(BaseOptions(responseType: ResponseType.bytes));
+    final got = await dio.get<List<int>>(
+        'http://${owner.host}:${owner.port}/jam/${guest.sessionId}/file/1',
+        options: Options(headers: {'x-jam-file': guest.fileToken}));
+    expect(got.data, [5, 6, 7]);
+
+    // B leaves: its track vanishes, the others stay
+    await guestB.leave();
+    await guest.states
+        .firstWhere((s) => s.items.isEmpty && s.participants.length == 2)
+        .timeout(const Duration(seconds: 5));
+    expect(hostJam.state!.ended, false);
   });
 }

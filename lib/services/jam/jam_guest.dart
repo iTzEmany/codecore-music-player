@@ -35,7 +35,7 @@ class JamGuest {
   /// The session is given up when nothing came back for this long.
   final Duration lostAfter;
 
-  String? _base, _sid, _token, _requestId;
+  String? _base, _sid, _token, _fileToken, _requestId;
   JamState? _state;
   bool _running = false, _cancel = false;
   final _states = StreamController<JamState>.broadcast();
@@ -46,12 +46,13 @@ class JamGuest {
   String? get hostBase => _base;
   String? get sessionId => _sid;
   String? get sessionToken => _token;
+  String? get fileToken => _fileToken;
   Stream<JamState> get states => _states.stream;
 
   /// Fires when the host stops answering (the session is gone).
   Stream<void> get lost => _lost.stream;
 
-  Map<String, String> get _auth => {'x-jam-token': _token ?? ''};
+  Map<String, String> get _auth => {jamTokenHeader: _token ?? ''};
 
   /// Sends the request and waits for the host's answer (up to [timeout]).
   Future<JamJoinOutcome> join({
@@ -94,10 +95,17 @@ class JamGuest {
         switch (d['status']) {
           case 'accepted':
             final sid = d['sessionId'], tok = d['token'];
-            if (sid is! String || tok is! String) return JamJoinOutcome.unreachable;
-            _base = base;
+            final ftok = d['fileToken'], through = d['base'];
+            if (sid is! String || tok is! String || ftok is! String) {
+              return JamJoinOutcome.unreachable;
+            }
+            // A guest that accepted us tells where the host really is.
+            _base = through is String && through.startsWith('http://')
+                ? through
+                : base;
             _sid = sid;
             _token = tok;
+            _fileToken = ftok;
             await _bootstrap();
             return _running ? JamJoinOutcome.accepted : JamJoinOutcome.unreachable;
           case 'declined':
@@ -133,7 +141,7 @@ class JamGuest {
       final s = r.statusCode == 200 ? JamState.tryParse(r.data) : null;
       if (s == null) return;
       _apply(s);
-      local.attachGuest(_sid!, _token!, () => _state);
+      local.attachGuest(_sid!, _fileToken!, () => _state);
       _running = true;
       unawaited(_loop());
     } on DioException catch (e) {
@@ -220,6 +228,34 @@ class JamGuest {
   Future<void> _close() async {
     _running = false;
     local.detachGuest();
+  }
+
+  /// This device (a guest) accepted [request] from a newcomer: ask the host to
+  /// admit it and hand it the host's address and credentials.
+  Future<bool> invite(JamRequest request) async {
+    if (!_running || _base == null) return false;
+    try {
+      final r = await _dio.post<dynamic>('$_base/$_sid/invite',
+          data: {
+            'id': request.fromId,
+            'name': request.fromName,
+            'host': request.fromHost,
+            'port': request.fromPort,
+          },
+          options: Options(headers: _auth));
+      final d = r.data;
+      if (r.statusCode != 200 || d is! Map) return false;
+      final tok = d['token'], ftok = d['fileToken'];
+      if (tok is! String || ftok is! String) return false;
+      request.status = JamRequestStatus.accepted;
+      request.sessionId = _sid;
+      request.sessionToken = tok;
+      request.fileToken = ftok;
+      request.base = _base;
+      return true;
+    } on DioException {
+      return false;
+    }
   }
 
   /// Leaves the Jam. The host keeps running with the guest gone.
