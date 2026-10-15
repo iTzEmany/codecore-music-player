@@ -1,0 +1,61 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../data/db/app_database.dart';
+import '../../../l10n/l10n_ext.dart';
+import '../../../providers/library_providers.dart';
+import '../../../providers/player_providers.dart';
+import '../../../providers/settings_providers.dart';
+import '../../theme/app_theme.dart';
+import '../../widgets/play_buttons.dart';
+import '../../widgets/track_row.dart';
+
+/// Tracks of one genre.
+class GenreScreen extends ConsumerWidget {
+  const GenreScreen({super.key, required this.genre});
+
+  final String genre;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    final tracks =
+        ref.watch(genreTracksProvider(genre)).value ?? const <Track>[];
+    final ctrl = ref.read(playerControllerProvider);
+    final compact = ref.watch(settingsProvider).compactMode;
+    final ctx = PlayContext(PlayContextKind.playlist, genre);
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(genre),
+        actions: [
+          ShuffleButton(
+            onPressed: tracks.isEmpty
+                ? null
+                : () async {
+                    await ctrl.setShuffle(true);
+                    await ctrl.playFromList(tracks, 0, context: ctx);
+                  },
+          ),
+          PlayCircleButton(
+            size: 40,
+            onPressed: tracks.isEmpty
+                ? null
+                : () => ctrl.playFromList(tracks, 0, context: ctx),
+          ),
+          const SizedBox(width: 8),
+        ],
+      ),
+      body: tracks.isEmpty
+          ? Center(child: Text(l.noResults))
+          : ListView.builder(
+              itemExtent: trackRowExtentOf(context, compact),
+              itemCount: tracks.length,
+              itemBuilder: (_, i) => LiveTrackRow(
+                track: tracks[i],
+                compact: compact,
+                onTap: () => ctrl.playFromList(tracks, i, context: ctx),
+              ),
+            ),
+    );
+  }
+}

@@ -12,7 +12,7 @@ import '../screens/share/incoming_offer_dialog.dart';
 import '../../providers/jam_providers.dart';
 import '../../providers/share_hub.dart';
 import '../screens/jam/jam_request_dialog.dart';
-import '../screens/library/tracks_tab.dart';
+import '../screens/search/search_screen.dart';
 import '../screens/home/home_screen.dart';
 import '../../l10n/l10n_ext.dart';
 import '../widgets/enrich_job_banner.dart';
@@ -131,7 +131,7 @@ class AppShell extends ConsumerWidget {
       index: index,
       children: [
         tab(NavTab.home.index, const HomeScreen()),
-        tab(NavTab.search.index, const TracksTab(primarySearch: true)),
+        tab(NavTab.search.index, const SearchScreen()),
         tab(NavTab.library.index, const LibraryScreen()),
       ],
     );

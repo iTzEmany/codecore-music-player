@@ -2147,6 +2147,66 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Da riscoprire'**
   String get homeRediscover;
+
+  /// No description provided for @searchMainResult.
+  ///
+  /// In it, this message translates to:
+  /// **'Risultato principale'**
+  String get searchMainResult;
+
+  /// No description provided for @showAll.
+  ///
+  /// In it, this message translates to:
+  /// **'Mostra tutti'**
+  String get showAll;
+
+  /// No description provided for @searchOnYoutube.
+  ///
+  /// In it, this message translates to:
+  /// **'Cerca «{query}» su YouTube'**
+  String searchOnYoutube(String query);
+
+  /// No description provided for @recentSearches.
+  ///
+  /// In it, this message translates to:
+  /// **'Ricerche recenti'**
+  String get recentSearches;
+
+  /// No description provided for @genresTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Generi'**
+  String get genresTitle;
+
+  /// No description provided for @downloadsChip.
+  ///
+  /// In it, this message translates to:
+  /// **'Download ({n})'**
+  String downloadsChip(int n);
+
+  /// No description provided for @gotIt.
+  ///
+  /// In it, this message translates to:
+  /// **'Ho capito'**
+  String get gotIt;
+
+  /// No description provided for @searchEmptyLibrary.
+  ///
+  /// In it, this message translates to:
+  /// **'Nessun risultato in libreria'**
+  String get searchEmptyLibrary;
+
+  /// No description provided for @ytInfoTooltip.
+  ///
+  /// In it, this message translates to:
+  /// **'Informazioni sull’uso'**
+  String get ytInfoTooltip;
+
+  /// No description provided for @removeRecentSearch.
+  ///
+  /// In it, this message translates to:
+  /// **'Rimuovi dalle ricerche recenti'**
+  String get removeRecentSearch;
 }
 
 class _AppLocalizationsDelegate

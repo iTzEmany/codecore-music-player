@@ -1165,4 +1165,38 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get homeRediscover => 'Wiederentdecken';
+
+  @override
+  String get searchMainResult => 'Bestes Ergebnis';
+
+  @override
+  String get showAll => 'Alle anzeigen';
+
+  @override
+  String searchOnYoutube(String query) {
+    return '„$query“ auf YouTube suchen';
+  }
+
+  @override
+  String get recentSearches => 'Letzte Suchen';
+
+  @override
+  String get genresTitle => 'Genres';
+
+  @override
+  String downloadsChip(int n) {
+    return 'Downloads ($n)';
+  }
+
+  @override
+  String get gotIt => 'Verstanden';
+
+  @override
+  String get searchEmptyLibrary => 'Keine Ergebnisse in der Bibliothek';
+
+  @override
+  String get ytInfoTooltip => 'Hinweis zur Nutzung';
+
+  @override
+  String get removeRecentSearch => 'Aus letzten Suchen entfernen';
 }

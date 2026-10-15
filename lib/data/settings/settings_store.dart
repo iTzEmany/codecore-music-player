@@ -20,6 +20,8 @@ class AppSettings {
     this.receiveFromLan = false,
     this.librarySort = 'recent',
     this.libraryGrid = false,
+    this.recentSearches = const [],
+    this.ytNoticeSeen = false,
   });
 
   final String theme;
@@ -38,6 +40,12 @@ class AppSettings {
 
   /// Library as a grid instead of a list.
   final bool libraryGrid;
+
+  /// Latest library searches, newest first (max 10).
+  final List<String> recentSearches;
+
+  /// The YouTube legal notice was dismissed once.
+  final bool ytNoticeSeen;
 
   /// Shown to the device on the other side of a LAN share; null = hostname.
   final String? deviceName;
@@ -60,6 +68,8 @@ class AppSettings {
     bool? receiveFromLan,
     String? librarySort,
     bool? libraryGrid,
+    List<String>? recentSearches,
+    bool? ytNoticeSeen,
   }) =>
       AppSettings(
         theme: theme ?? this.theme,
@@ -76,6 +86,8 @@ class AppSettings {
         receiveFromLan: receiveFromLan ?? this.receiveFromLan,
         librarySort: librarySort ?? this.librarySort,
         libraryGrid: libraryGrid ?? this.libraryGrid,
+        recentSearches: recentSearches ?? this.recentSearches,
+        ytNoticeSeen: ytNoticeSeen ?? this.ytNoticeSeen,
       );
 }
 
@@ -119,6 +131,8 @@ class SettingsStore {
         jamLatencyMs: _prefs.getInt('jamLatencyMs') ?? 0,
         librarySort: _prefs.getString('librarySort') ?? 'recent',
         libraryGrid: _prefs.getBool('libraryGrid') ?? false,
+        recentSearches: _prefs.getStringList('recentSearches') ?? const [],
+        ytNoticeSeen: _prefs.getBool('ytNoticeSeen') ?? false,
       );
 
   Future<void> writeSettings(AppSettings s) async {
@@ -135,6 +149,8 @@ class SettingsStore {
     await _prefs.setInt('jamLatencyMs', s.jamLatencyMs);
     await _prefs.setString('librarySort', s.librarySort);
     await _prefs.setBool('libraryGrid', s.libraryGrid);
+    await _prefs.setStringList('recentSearches', s.recentSearches);
+    await _prefs.setBool('ytNoticeSeen', s.ytNoticeSeen);
     final dn = s.deviceName;
     if (dn == null || dn.isEmpty) {
       await _prefs.remove('deviceName');

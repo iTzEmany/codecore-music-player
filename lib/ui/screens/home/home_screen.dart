@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/constants.dart';
 import '../../../data/db/app_database.dart';
 import '../../../data/repositories/home_sections.dart';
 import '../../../data/repositories/library_entries.dart';
@@ -23,7 +22,6 @@ import '../library/favorites_screen.dart';
 import '../library/folders_sheet.dart';
 import '../playlists/playlist_detail_screen.dart';
 import '../settings/settings_screen.dart';
-import '../youtube/youtube_screen.dart';
 
 String _greeting(AppLocalizations l, int hour) =>
     switch (greetingForHour(hour)) {
@@ -274,24 +272,6 @@ class HomeScreen extends ConsumerWidget {
             l.homeRediscover,
             albumCards(rediscoverAlbums(albums, DateTime.now())),
           ),
-          if (kEnableYoutube)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(CcDims.margin, 16, 0, 0),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: TextButton.icon(
-                  icon: const Icon(Icons.smart_display_outlined),
-                  label: Text(l.youtube),
-                  onPressed: () => ShellNav.open<void>(
-                    context,
-                    Scaffold(
-                      appBar: AppBar(title: Text(l.youtube)),
-                      body: const YoutubeScreen(),
-                    ),
-                  ),
-                ),
-              ),
-            ),
           const SizedBox(height: 24),
         ],
       ),

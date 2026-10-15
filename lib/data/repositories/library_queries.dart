@@ -37,6 +37,13 @@ class AlbumSummary {
   final int playCount;
 }
 
+class GenreSummary {
+  const GenreSummary(this.name, this.trackCount);
+
+  final String name;
+  final int trackCount;
+}
+
 class ArtistSummary {
   const ArtistSummary({
     required this.key,
@@ -179,6 +186,36 @@ class LibraryQueries {
           'ORDER BY play_count DESC, last_played_at DESC, title COLLATE NOCASE '
           'LIMIT ?',
           variables: [Variable<int>(limit)],
+          readsFrom: {_db.tracks},
+        )
+        .watch()
+        .map((rows) => [for (final r in rows) _db.tracks.map(r.data)]);
+  }
+
+  /// Genres present in the library with their track counts, biggest first.
+  Stream<List<GenreSummary>> watchGenres() {
+    return _db
+        .customSelect(
+          'SELECT trim(genre) AS g, COUNT(*) AS n FROM tracks '
+          "WHERE missing = 0 AND genre IS NOT NULL AND trim(genre) <> '' "
+          'GROUP BY lower(trim(genre)) ORDER BY n DESC, g COLLATE NOCASE',
+          readsFrom: {_db.tracks},
+        )
+        .watch()
+        .map((rows) => [
+              for (final r in rows)
+                GenreSummary(r.read<String>('g'), r.read<int>('n')),
+            ]);
+  }
+
+  Stream<List<Track>> watchGenreTracks(String genre) {
+    return _db
+        .customSelect(
+          'SELECT * FROM tracks WHERE missing = 0 '
+          'AND lower(trim(genre)) = lower(trim(?)) '
+          'ORDER BY artist COLLATE NOCASE, album COLLATE NOCASE, '
+          'disc_number, track_number, title COLLATE NOCASE',
+          variables: [Variable<String>(genre)],
           readsFrom: {_db.tracks},
         )
         .watch()

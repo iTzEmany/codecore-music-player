@@ -500,5 +500,29 @@
   "homeRecentlyPlayed": "Zuletzt gehört",
   "homeRecentlyAdded": "Zuletzt hinzugefügt",
   "homeTopTracks": "Meistgespielt",
-  "homeRediscover": "Wiederentdecken"
+  "homeRediscover": "Wiederentdecken",
+  "searchMainResult": "Bestes Ergebnis",
+  "showAll": "Alle anzeigen",
+  "searchOnYoutube": "„{query}“ auf YouTube suchen",
+  "@searchOnYoutube": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "recentSearches": "Letzte Suchen",
+  "genresTitle": "Genres",
+  "downloadsChip": "Downloads ({n})",
+  "@downloadsChip": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "gotIt": "Verstanden",
+  "searchEmptyLibrary": "Keine Ergebnisse in der Bibliothek",
+  "ytInfoTooltip": "Hinweis zur Nutzung",
+  "removeRecentSearch": "Aus letzten Suchen entfernen"
 }

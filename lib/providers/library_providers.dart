@@ -154,6 +154,18 @@ final albumTracksProvider = StreamProvider.family<List<Track>, String>(
     (ref, albumKey) =>
         ref.watch(libraryQueriesProvider).watchAlbumTracks(albumKey));
 
+final genresProvider = StreamProvider<List<GenreSummary>>(
+    (ref) => ref.watch(libraryQueriesProvider).watchGenres());
+
+final genreTracksProvider = StreamProvider.family<List<Track>, String>(
+    (ref, genre) =>
+        ref.watch(libraryQueriesProvider).watchGenreTracks(genre));
+
+/// Tracks matching a search text (title / artist / album).
+final searchTracksProvider = StreamProvider.family<List<Track>, String>(
+    (ref, text) =>
+        ref.watch(trackRepositoryProvider).watchTracks(query: text));
+
 final topTracksProvider = StreamProvider<List<Track>>(
     (ref) => ref.watch(libraryQueriesProvider).watchTopTracks());
 
