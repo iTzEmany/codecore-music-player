@@ -236,6 +236,7 @@ class ShareHubNotifier extends Notifier<ShareHubState> {
       await client.offerAction(
           o.fromHost, o.fromPort, o.offerId, 'accept', o.token);
     } on LanException catch (e) {
+      AppLog.w('offer accept failed: $e');
       o.status = OfferStatus.failed;
       state = state.copyWith(error: e.error);
       _service?.notify();
@@ -247,7 +248,10 @@ class ShareHubNotifier extends Notifier<ShareHubState> {
     final saved = <String>[];
     try {
       final base = await resolveDownloadFolder(ref.read(folderRepositoryProvider));
-      if (base == null) throw const LanException(LanError.failed);
+      if (base == null) {
+        AppLog.w('offer: no destination folder');
+        throw const LanException(LanError.failed);
+      }
       final out = Directory(p.join(base.$1.path, 'Ricevuti'));
       for (final item in o.items) {
         if (cancel.isCancelled) break;
@@ -273,6 +277,7 @@ class ShareHubNotifier extends Notifier<ShareHubState> {
         // Informational only.
       }
     } on LanException catch (e) {
+      AppLog.w('offer download failed: $e');
       o.status = OfferStatus.failed;
       state = state.copyWith(error: e.error);
     } finally {

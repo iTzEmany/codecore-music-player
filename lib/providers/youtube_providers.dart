@@ -61,8 +61,13 @@ Future<(Directory, Folder)?> _resolveDownloadFolder(FolderRepository repo) async
     return (dir, await repo.add(dir.path));
   }
   final folders = await repo.getAll();
-  if (folders.isEmpty) return null;
-  return (Directory(folders.first.path), folders.first);
+  if (folders.isNotEmpty) {
+    return (Directory(folders.first.path), folders.first);
+  }
+  // No library folder yet: fall back to the system Music folder.
+  final music = Directory(await defaultMusicDir());
+  await music.create(recursive: true);
+  return (music, await repo.add(music.path));
 }
 
 class DownloadsNotifier extends Notifier<List<DownloadItem>> {
