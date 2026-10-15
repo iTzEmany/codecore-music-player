@@ -17,8 +17,12 @@ class ArtistsTab extends ConsumerWidget {
     final artists = ref.watch(artistsProvider);
     return artists.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, st) => loadErrorState(context, e, st,
-          onRetry: () => ref.invalidate(artistsProvider)),
+      error: (e, st) => loadErrorState(
+        context,
+        e,
+        st,
+        onRetry: () => ref.invalidate(artistsProvider),
+      ),
       data: (list) => list.isEmpty
           ? EmptyState(icon: Icons.person, message: context.l10n.noResults)
           : ListView.builder(
@@ -28,13 +32,19 @@ class ArtistsTab extends ConsumerWidget {
                 final a = list[i];
                 return ListTile(
                   leading: const CircleAvatar(child: Icon(Icons.person)),
-                  title: Text(a.name ?? context.l10n.unknownArtist,
-                      maxLines: 1, overflow: TextOverflow.ellipsis),
+                  title: Text(
+                    a.name ?? context.l10n.unknownArtist,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                   subtitle: Text(
-                      '${context.l10n.albumsCount(a.albumCount)} • ${context.l10n.tracksCount(a.trackCount)}'),
+                    '${context.l10n.albumsCount(a.albumCount)} • ${context.l10n.tracksCount(a.trackCount)}',
+                  ),
                   onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                          builder: (_) => ArtistDetailScreen(artist: a))),
+                    MaterialPageRoute<void>(
+                      builder: (_) => ArtistDetailScreen(artist: a),
+                    ),
+                  ),
                 );
               },
             ),
@@ -54,12 +64,19 @@ class ArtistDetailScreen extends ConsumerWidget {
       appBar: AppBar(title: Text(artist.name ?? context.l10n.unknownArtist)),
       body: albums.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, st) => loadErrorState(context, e, st,
-            onRetry: () => ref.invalidate(artistAlbumsProvider(artist.key))),
+        error: (e, st) => loadErrorState(
+          context,
+          e,
+          st,
+          onRetry: () => ref.invalidate(artistAlbumsProvider(artist.key)),
+        ),
         data: (list) => AlbumGrid(
           albums: list,
-          onOpen: (a) => Navigator.of(context).push(MaterialPageRoute<void>(
-              builder: (_) => AlbumDetailScreen(album: a))),
+          onOpen: (a) => Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (_) => AlbumDetailScreen(album: a),
+            ),
+          ),
         ),
       ),
     );

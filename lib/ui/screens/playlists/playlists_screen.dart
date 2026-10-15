@@ -29,8 +29,12 @@ class PlaylistsScreen extends ConsumerWidget {
       ),
       body: lists.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, st) => loadErrorState(context, e, st,
-            onRetry: () => ref.invalidate(playlistsProvider)),
+        error: (e, st) => loadErrorState(
+          context,
+          e,
+          st,
+          onRetry: () => ref.invalidate(playlistsProvider),
+        ),
         data: (items) => items.isEmpty
             ? EmptyState(icon: Icons.queue_music, message: l.noPlaylists)
             : ListView.builder(
@@ -40,13 +44,18 @@ class PlaylistsScreen extends ConsumerWidget {
                   final p = items[i];
                   return ListTile(
                     leading: CoverImage(coverKey: p.coverKey, size: 48),
-                    title: Text(p.playlist.name,
-                        maxLines: 1, overflow: TextOverflow.ellipsis),
+                    title: Text(
+                      p.playlist.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                     subtitle: Text(l.tracksCount(p.trackCount)),
                     onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                            builder: (_) =>
-                                PlaylistDetailScreen(playlist: p.playlist))),
+                      MaterialPageRoute<void>(
+                        builder: (_) =>
+                            PlaylistDetailScreen(playlist: p.playlist),
+                      ),
+                    ),
                   );
                 },
               ),

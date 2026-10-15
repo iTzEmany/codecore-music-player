@@ -24,6 +24,10 @@ class AlbumDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final tracks = ref.watch(albumTracksProvider(album.albumKey));
     final compact = ref.watch(settingsProvider).compactMode;
+    final playCtx = PlayContext(
+      PlayContextKind.album,
+      album.title ?? context.l10n.unknownAlbum,
+    );
     final artist = album.variousArtists
         ? context.l10n.variousArtists
         : (album.artist ?? context.l10n.unknownArtist);
@@ -34,9 +38,10 @@ class AlbumDetailScreen extends ConsumerWidget {
           IconButton(
             tooltip: context.l10n.shareMenu,
             icon: const Icon(Icons.wifi_tethering),
-            onPressed: () => DevicesSheet.show(context, trackIds: [
-              for (final t in tracks.value ?? const <Track>[]) t.id
-            ]),
+            onPressed: () => DevicesSheet.show(
+              context,
+              trackIds: [for (final t in tracks.value ?? const <Track>[]) t.id],
+            ),
           ),
           IconButton(
             tooltip: context.l10n.enrichAlbum,
@@ -48,7 +53,8 @@ class AlbumDetailScreen extends ConsumerWidget {
                 ScaffoldMessenger.of(context)
                   ..clearSnackBars()
                   ..showSnackBar(
-                      SnackBar(content: Text(context.l10n.enrichBusy)));
+                    SnackBar(content: Text(context.l10n.enrichBusy)),
+                  );
               }
             },
           ),
@@ -56,8 +62,12 @@ class AlbumDetailScreen extends ConsumerWidget {
       ),
       body: tracks.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, st) => loadErrorState(context, e, st,
-            onRetry: () => ref.invalidate(albumTracksProvider(album.albumKey))),
+        error: (e, st) => loadErrorState(
+          context,
+          e,
+          st,
+          onRetry: () => ref.invalidate(albumTracksProvider(album.albumKey)),
+        ),
         data: (list) => ListView.builder(
           itemCount: list.length + 1,
           itemBuilder: (context, i) {
@@ -67,11 +77,11 @@ class AlbumDetailScreen extends ConsumerWidget {
                 artist: artist,
                 onPlay: () => ref
                     .read(playerControllerProvider)
-                    .playFromList(list, 0),
+                    .playFromList(list, 0, context: playCtx),
                 onShuffle: () async {
                   final c = ref.read(playerControllerProvider);
                   await c.setShuffle(true);
-                  await c.playFromList(list, 0);
+                  await c.playFromList(list, 0, context: playCtx);
                 },
               );
             }
@@ -83,7 +93,7 @@ class AlbumDetailScreen extends ConsumerWidget {
                 compact: compact,
                 onTap: () => ref
                     .read(playerControllerProvider)
-                    .playFromList(list, i - 1),
+                    .playFromList(list, i - 1, context: playCtx),
               ),
             );
           },
@@ -114,31 +124,43 @@ class _Header extends StatelessWidget {
     ].join(' • ');
     return Padding(
       padding: const EdgeInsets.all(16),
-      child: Row(children: [
-        CoverImage(coverKey: album.coverKey, size: 140, radius: 12),
-        const SizedBox(width: 16),
-        Expanded(
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(album.title ?? context.l10n.unknownAlbum,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.titleLarge),
-            Text(artist),
-            Text(meta, style: Theme.of(context).textTheme.bodySmall),
-            const SizedBox(height: 8),
-            Wrap(spacing: 8, children: [
-              FilledButton.icon(
-                  onPressed: onPlay,
-                  icon: const Icon(Icons.play_arrow),
-                  label: Text(context.l10n.play)),
-              OutlinedButton.icon(
-                  onPressed: onShuffle,
-                  icon: const Icon(Icons.shuffle),
-                  label: Text(context.l10n.shuffle)),
-            ]),
-          ]),
-        ),
-      ]),
+      child: Row(
+        children: [
+          CoverImage(coverKey: album.coverKey, size: 140, radius: 12),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  album.title ?? context.l10n.unknownAlbum,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                Text(artist),
+                Text(meta, style: Theme.of(context).textTheme.bodySmall),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  children: [
+                    FilledButton.icon(
+                      onPressed: onPlay,
+                      icon: const Icon(Icons.play_arrow),
+                      label: Text(context.l10n.play),
+                    ),
+                    OutlinedButton.icon(
+                      onPressed: onShuffle,
+                      icon: const Icon(Icons.shuffle),
+                      label: Text(context.l10n.shuffle),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

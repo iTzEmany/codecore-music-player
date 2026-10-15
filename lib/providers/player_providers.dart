@@ -15,23 +15,57 @@ import 'settings_providers.dart';
 /// Overridden in `main` once the handler has been created (and, on Android,
 /// registered with `AudioService.init`).
 final audioHandlerProvider = Provider<CodecoreAudioHandler>(
-    (ref) => throw UnimplementedError('audioHandlerProvider not overridden'));
+  (ref) => throw UnimplementedError('audioHandlerProvider not overridden'),
+);
 
-final playbackPersistenceProvider = Provider<PlaybackPersistence?>((ref) => null);
+final playbackPersistenceProvider = Provider<PlaybackPersistence?>(
+  (ref) => null,
+);
 
 final playerErrorsProvider = Provider<Stream<PlaybackFailure>>(
-    (ref) => const Stream<PlaybackFailure>.empty());
+  (ref) => const Stream<PlaybackFailure>.empty(),
+);
+
+/// Where the current queue came from, shown as «In riproduzione da».
+enum PlayContextKind { album, artist, playlist, favorites, library, search }
+
+class PlayContext {
+  const PlayContext(this.kind, [this.name]);
+
+  final PlayContextKind kind;
+
+  /// Album / playlist / artist name; null for the fixed kinds.
+  final String? name;
+}
+
+class PlayContextNotifier extends Notifier<PlayContext?> {
+  @override
+  PlayContext? build() => null;
+
+  void set(PlayContext? c) => state = c;
+}
+
+/// In memory only: not persisted across launches.
+final playContextProvider = NotifierProvider<PlayContextNotifier, PlayContext?>(
+  PlayContextNotifier.new,
+);
 
 class PlayerController {
-  PlayerController(this._handler, this._persistence);
+  PlayerController(this._handler, this._persistence, {this.onContext});
 
   final CodecoreAudioHandler _handler;
+  final void Function(PlayContext?)? onContext;
   final PlaybackPersistence? _persistence;
   bool _askedNotifications = false;
 
   /// Only the ids travel to the player; it resolves tracks via the repository.
-  Future<void> playFromList(List<Track> snapshot, int index) async {
+  Future<void> playFromList(
+    List<Track> snapshot,
+    int index, {
+    PlayContext? context,
+  }) async {
     if (snapshot.isEmpty) return;
+    onContext?.call(context);
     _requestNotificationPermissionOnce();
     await _handler.playQueue([for (final t in snapshot) t.id], index);
   }
@@ -55,20 +89,22 @@ class PlayerController {
     return _handler.setVolume(v);
   }
 
-  Future<void> toggleShuffle() => _handler.setShuffleMode(_handler.shuffleEnabled
-      ? AudioServiceShuffleMode.none
-      : AudioServiceShuffleMode.all);
+  Future<void> toggleShuffle() => _handler.setShuffleMode(
+    _handler.shuffleEnabled
+        ? AudioServiceShuffleMode.none
+        : AudioServiceShuffleMode.all,
+  );
 
   Future<void> setShuffle(bool on) => _handler.setShuffleMode(
-      on ? AudioServiceShuffleMode.all : AudioServiceShuffleMode.none);
+    on ? AudioServiceShuffleMode.all : AudioServiceShuffleMode.none,
+  );
 
-  Future<void> cycleRepeat() => _handler.setRepeatMode(
-        switch (_handler.repeatMode) {
-          PlayRepeat.off => AudioServiceRepeatMode.all,
-          PlayRepeat.all => AudioServiceRepeatMode.one,
-          PlayRepeat.one => AudioServiceRepeatMode.none,
-        },
-      );
+  Future<void> cycleRepeat() =>
+      _handler.setRepeatMode(switch (_handler.repeatMode) {
+        PlayRepeat.off => AudioServiceRepeatMode.all,
+        PlayRepeat.all => AudioServiceRepeatMode.one,
+        PlayRepeat.one => AudioServiceRepeatMode.none,
+      });
 
   void _requestNotificationPermissionOnce() {
     if (_askedNotifications || !isAndroid) return;
@@ -77,9 +113,13 @@ class PlayerController {
   }
 }
 
-final playerControllerProvider = Provider<PlayerController>((ref) =>
-    PlayerController(ref.watch(audioHandlerProvider),
-        ref.watch(playbackPersistenceProvider)));
+final playerControllerProvider = Provider<PlayerController>(
+  (ref) => PlayerController(
+    ref.watch(audioHandlerProvider),
+    ref.watch(playbackPersistenceProvider),
+    onContext: (c) => ref.read(playContextProvider.notifier).set(c),
+  ),
+);
 
 final currentTrackProvider = StreamProvider<Track?>((ref) async* {
   final h = ref.watch(audioHandlerProvider);
@@ -102,22 +142,25 @@ final shuffleProvider = StreamProvider<bool>((ref) {
 final repeatProvider = StreamProvider<PlayRepeat>((ref) {
   final h = ref.watch(audioHandlerProvider);
   return h.playbackState
-      .map((s) => switch (s.repeatMode) {
-            AudioServiceRepeatMode.one => PlayRepeat.one,
-            AudioServiceRepeatMode.all ||
-            AudioServiceRepeatMode.group =>
-              PlayRepeat.all,
-            AudioServiceRepeatMode.none => PlayRepeat.off,
-          })
+      .map(
+        (s) => switch (s.repeatMode) {
+          AudioServiceRepeatMode.one => PlayRepeat.one,
+          AudioServiceRepeatMode.all ||
+          AudioServiceRepeatMode.group => PlayRepeat.all,
+          AudioServiceRepeatMode.none => PlayRepeat.off,
+        },
+      )
       .distinct();
 });
 
 /// Separate from everything else so only the slider rebuilds on each tick.
 final positionProvider = StreamProvider<Duration>(
-    (ref) => ref.watch(audioHandlerProvider).positionStream);
+  (ref) => ref.watch(audioHandlerProvider).positionStream,
+);
 
 final durationProvider = StreamProvider<Duration?>(
-    (ref) => ref.watch(audioHandlerProvider).durationStream);
+  (ref) => ref.watch(audioHandlerProvider).durationStream,
+);
 
 final queueProvider = StreamProvider<List<Track>>((ref) async* {
   final h = ref.watch(audioHandlerProvider);
@@ -149,11 +192,13 @@ class VolumeNotifier extends Notifier<double> {
   }
 }
 
-final volumeProvider =
-    NotifierProvider<VolumeNotifier, double>(VolumeNotifier.new);
+final volumeProvider = NotifierProvider<VolumeNotifier, double>(
+  VolumeNotifier.new,
+);
 
 final playerFailuresProvider = StreamProvider<PlaybackFailure>(
-    (ref) => ref.watch(playerErrorsProvider));
+  (ref) => ref.watch(playerErrorsProvider),
+);
 
 /// Current track kept in sync with DB edits (favourite flag, title, ...).
 final liveCurrentTrackProvider = StreamProvider<Track?>((ref) {

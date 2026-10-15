@@ -404,5 +404,15 @@
         "type": "int"
       }
     }
-  }
+  },
+  "playingFrom": "Reproduciendo desde",
+  "playContextSearch": "Búsqueda",
+  "allTracks": "Todas las canciones",
+  "trackInfo": "Información de la canción",
+  "searchCuriosity": "Buscar curiosidades",
+  "upNext": "A continuación",
+  "openQueue": "Abrir cola",
+  "copyLink": "Copiar enlace",
+  "moreActions": "Más acciones",
+  "sleepChipEnd": "fin de la canción"
 }

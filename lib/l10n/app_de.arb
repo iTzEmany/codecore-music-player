@@ -404,5 +404,15 @@
         "type": "int"
       }
     }
-  }
+  },
+  "playingFrom": "Wiedergabe von",
+  "playContextSearch": "Suche",
+  "allTracks": "Alle Titel",
+  "trackInfo": "Infos zum Titel",
+  "searchCuriosity": "Wissenswertes suchen",
+  "upNext": "Als Nächstes",
+  "openQueue": "Warteschlange öffnen",
+  "copyLink": "Link kopieren",
+  "moreActions": "Weitere Aktionen",
+  "sleepChipEnd": "Titelende"
 }

@@ -1,227 +1,319 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/platform.dart';
-import '../../../providers/player_providers.dart';
-import '../../../providers/sleep_timer_provider.dart';
-import '../../../services/audio/play_queue.dart';
+import '../../../data/db/app_database.dart';
+import '../../../data/repositories/library_queries.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../l10n/l10n_ext.dart';
+import '../../../providers/player_providers.dart';
+import '../../shell/shell_nav.dart';
+import '../../theme/tokens.dart';
+import '../../widgets/cover_backdrop.dart';
 import '../../widgets/cover_image.dart';
 import '../../widgets/favorite_actions.dart';
-import '../../widgets/format_utils.dart';
-import '../../widgets/quality_tag.dart';
-import '../lyrics/lyrics_screen.dart';
-import 'queue_sheet.dart';
+import '../../widgets/mini_player.dart' show kPlayerCoverHero;
+import '../../widgets/track_actions_sheet.dart';
+import '../library/artists_tab.dart';
+import 'now_playing_cards.dart';
+import 'now_playing_controls.dart';
 
-class NowPlayingScreen extends ConsumerWidget {
+const _wideBreakpoint = 900.0;
+const _closeDistance = 120.0;
+const _closeVelocity = 700.0;
+
+/// «In riproduzione da»: the name of where the queue came from.
+String? playContextName(AppLocalizations l, PlayContext? c) {
+  if (c == null) return null;
+  return switch (c.kind) {
+    PlayContextKind.album ||
+    PlayContextKind.artist ||
+    PlayContextKind.playlist => c.name,
+    PlayContextKind.favorites => l.navFavorites,
+    PlayContextKind.library => l.allTracks,
+    PlayContextKind.search => l.playContextSearch,
+  };
+}
+
+class NowPlayingScreen extends ConsumerStatefulWidget {
   const NowPlayingScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final track = ref.watch(liveCurrentTrackProvider).value ??
+  ConsumerState<NowPlayingScreen> createState() => _NowPlayingScreenState();
+}
+
+class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
+  double _dy = 0;
+  bool _dragging = false;
+
+  void _onDragEnd(DragEndDetails d) {
+    final v = d.primaryVelocity ?? 0;
+    if (_dy > _closeDistance || v > _closeVelocity) {
+      Navigator.of(context).maybePop();
+      return;
+    }
+    setState(() {
+      _dragging = false;
+      _dy = 0;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final track =
+        ref.watch(liveCurrentTrackProvider).value ??
         ref.watch(currentTrackProvider).value;
-    final playing = ref.watch(isPlayingProvider).value ?? false;
-    final shuffle = ref.watch(shuffleProvider).value ?? false;
-    final repeat = ref.watch(repeatProvider).value ?? PlayRepeat.off;
-    final ctrl = ref.read(playerControllerProvider);
-    final scheme = Theme.of(context).colorScheme;
+    final cc = context.cc;
+    final wide = MediaQuery.sizeOf(context).width >= _wideBreakpoint;
+    final reduce = MediaQuery.disableAnimationsOf(context);
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-            tooltip: context.l10n.back,
-            icon: const Icon(Icons.keyboard_arrow_down),
-            onPressed: () => Navigator.of(context).maybePop()),
-        title: Text(context.l10n.nowPlaying),
-        actions: [
-          const _SleepTimerButton(),
-          if (track != null)
-            IconButton(
-              tooltip: context.l10n.favorite,
-              onPressed: () => toggleFavorite(context, ref, track),
-              color: track.isFavorite ? scheme.primary : null,
-              icon: Icon(track.isFavorite
-                  ? Icons.favorite
-                  : Icons.favorite_border),
-            ),
-          IconButton(
-            tooltip: context.l10n.lyrics,
-            icon: const Icon(Icons.lyrics_outlined),
-            onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(builder: (_) => const LyricsScreen())),
+      backgroundColor: cc.bg,
+      body: CoverBackdrop(
+        coverKey: track?.coverKey,
+        child: SafeArea(
+          child: AnimatedContainer(
+            duration: _dragging || reduce ? Duration.zero : CcMotion.sheet,
+            transform: Matrix4.translationValues(0, _dy, 0),
+            child: track == null
+                ? _Empty(onClose: () => Navigator.of(context).maybePop())
+                : LayoutBuilder(
+                    builder: (context, c) {
+                      final player = _Player(
+                        track: track,
+                        onDragUpdate: (d) => setState(() {
+                          _dragging = true;
+                          _dy = (_dy + d.delta.dy).clamp(0.0, 600.0);
+                        }),
+                        onDragEnd: _onDragEnd,
+                      );
+                      if (wide) {
+                        return Row(
+                          children: [
+                            Expanded(child: player),
+                            SizedBox(
+                              width: 380,
+                              child: ListView(
+                                padding: const EdgeInsets.fromLTRB(
+                                  0,
+                                  16,
+                                  16,
+                                  16,
+                                ),
+                                children: [
+                                  LyricsCard(track: track),
+                                  const SizedBox(height: 12),
+                                  InfoCard(track: track),
+                                  const SizedBox(height: 12),
+                                  const UpNextCard(),
+                                ],
+                              ),
+                            ),
+                          ],
+                        );
+                      }
+                      return CustomScrollView(
+                        slivers: [
+                          SliverToBoxAdapter(
+                            child: SizedBox(height: c.maxHeight, child: player),
+                          ),
+                          SliverPadding(
+                            padding: const EdgeInsets.fromLTRB(
+                              CcDims.margin,
+                              0,
+                              CcDims.margin,
+                              24,
+                            ),
+                            sliver: SliverList.list(
+                              children: [
+                                LyricsCard(track: track),
+                                const SizedBox(height: 12),
+                                InfoCard(track: track),
+                                const SizedBox(height: 12),
+                                const UpNextCard(),
+                              ],
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
           ),
-          IconButton(
-            tooltip: context.l10n.queue,
-            icon: const Icon(Icons.queue_music),
-            onPressed: () => showModalBottomSheet<void>(
-              context: context,
-              isScrollControlled: true,
-              builder: (_) => DraggableScrollableSheet(
-                expand: false,
-                initialChildSize: 0.7,
-                maxChildSize: 0.95,
-                builder: (_, sc) => QueueSheet(scrollController: sc),
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
-      body: track == null
-          ? Center(child: Text(context.l10n.nothingPlaying))
-          : Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 520),
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(children: [
-                    Expanded(
-                      child: LayoutBuilder(
-                        builder: (_, c) => Center(
-                          child: CoverImage(
-                              coverKey: track.coverKey,
-                              size: c.biggest.shortestSide.clamp(80, 420),
-                              radius: 16),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(track.title,
-                        maxLines: 2,
-                        textAlign: TextAlign.center,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.titleLarge),
-                    Text(track.artist ?? context.l10n.unknownArtist,
-                        style: TextStyle(color: scheme.onSurfaceVariant)),
-                    const SizedBox(height: 8),
-                    QualityTag(track),
-                    const _SeekBar(),
-                    Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                      IconButton(
-                        tooltip: context.l10n.shuffle,
-                        onPressed: ctrl.toggleShuffle,
-                        color: shuffle ? scheme.primary : null,
-                        icon: const Icon(Icons.shuffle),
-                      ),
-                      IconButton(
-                          tooltip: context.l10n.previousTrack,
-                          iconSize: 36,
-                          onPressed: ctrl.previous,
-                          icon: const Icon(Icons.skip_previous)),
-                      IconButton.filled(
-                        tooltip: playing ? context.l10n.pause : context.l10n.play,
-                        iconSize: 44,
-                        onPressed: ctrl.togglePlayPause,
-                        icon: Icon(playing ? Icons.pause : Icons.play_arrow),
-                      ),
-                      IconButton(
-                          tooltip: context.l10n.nextTrack,
-                          iconSize: 36,
-                          onPressed: ctrl.next,
-                          icon: const Icon(Icons.skip_next)),
-                      IconButton(
-                        tooltip: context.l10n.repeat,
-                        onPressed: ctrl.cycleRepeat,
-                        color: repeat == PlayRepeat.off ? null : scheme.primary,
-                        icon: Icon(repeat == PlayRepeat.one
-                            ? Icons.repeat_one
-                            : Icons.repeat),
-                      ),
-                    ]),
-                    if (isDesktop) const _VolumeRow(),
-                  ]),
-                ),
-              ),
-            ),
     );
   }
 }
 
-class _SeekBar extends ConsumerStatefulWidget {
-  const _SeekBar();
+class _Empty extends StatelessWidget {
+  const _Empty({required this.onClose});
+
+  final VoidCallback onClose;
 
   @override
-  ConsumerState<_SeekBar> createState() => _SeekBarState();
+  Widget build(BuildContext context) => Column(
+    children: [
+      Align(
+        alignment: Alignment.centerLeft,
+        child: IconButton(
+          tooltip: context.l10n.back,
+          icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 32),
+          onPressed: onClose,
+        ),
+      ),
+      Expanded(child: Center(child: Text(context.l10n.nothingPlaying))),
+    ],
+  );
 }
 
-class _SeekBarState extends ConsumerState<_SeekBar> {
-  double? _dragging;
+/// Header, cover, title row, seek, controls and the bottom row.
+class _Player extends ConsumerWidget {
+  const _Player({
+    required this.track,
+    required this.onDragUpdate,
+    required this.onDragEnd,
+  });
 
-  @override
-  Widget build(BuildContext context) {
-    final pos = ref.watch(positionProvider).value ?? Duration.zero;
-    final dur = ref.watch(durationProvider).value ?? Duration.zero;
-    final max = dur.inMilliseconds.toDouble();
-    final shown = (_dragging ?? pos.inMilliseconds.toDouble())
-        .clamp(0.0, max <= 0 ? 1.0 : max);
-    return Column(children: [
-      Slider(
-        value: shown,
-        max: max <= 0 ? 1 : max,
-        onChanged: max <= 0 ? null : (v) => setState(() => _dragging = v),
-        onChangeEnd: (v) {
-          setState(() => _dragging = null);
-          ref
-              .read(playerControllerProvider)
-              .seek(Duration(milliseconds: v.round()));
-        },
-      ),
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          Text(formatDuration(shown.round())),
-          Text('-${formatDuration((max - shown).round())}'),
-        ]),
-      ),
-    ]);
+  final Track track;
+  final GestureDragUpdateCallback onDragUpdate;
+  final GestureDragEndCallback onDragEnd;
+
+  void _openArtist(BuildContext context, WidgetRef ref) {
+    // The page only needs the same key `watchArtists` groups by.
+    final key = (track.artist ?? '').trim().toLowerCase();
+    final artist = ArtistSummary(
+        key: key, name: track.artist, trackCount: 0, albumCount: 0);
+    ShellNav.openInLibrary(context, ref, ArtistDetailScreen(artist: artist));
   }
-}
-
-class _VolumeRow extends ConsumerWidget {
-  const _VolumeRow();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final v = ref.watch(volumeProvider);
-    final n = ref.read(volumeProvider.notifier);
-    return Row(children: [
-      IconButton(
-        tooltip: context.l10n.mute,
-        onPressed: n.toggleMute,
-        icon: Icon(v == 0 ? Icons.volume_off : Icons.volume_up),
-      ),
-      Expanded(child: Slider(value: v, onChanged: n.set)),
-    ]);
-  }
-}
-
-class _SleepTimerButton extends ConsumerWidget {
-  const _SleepTimerButton();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
-    final timer = ref.watch(sleepTimerProvider);
-    final notifier = ref.read(sleepTimerProvider.notifier);
-    return PopupMenuButton<int>(
-      tooltip: l.sleepTimer,
-      icon: Icon(timer.active ? Icons.bedtime : Icons.bedtime_outlined,
-          color: timer.active ? Theme.of(context).colorScheme.primary : null),
-      onSelected: (v) {
-        switch (v) {
-          case 0:
-            notifier.cancel();
-          case -1:
-            notifier.startAtTrackEnd();
-          default:
-            notifier.startMinutes(v);
-        }
-      },
-      itemBuilder: (_) => [
-        for (final m in const [15, 30, 45, 60])
-          PopupMenuItem(value: m, child: Text(l.sleepMinutes(m))),
-        PopupMenuItem(value: -1, child: Text(l.sleepEndOfTrack)),
-        if (timer.active)
-          PopupMenuItem(value: 0, child: Text(l.sleepCancel)),
-      ],
+    final cc = context.cc;
+    final theme = Theme.of(context).textTheme;
+    final ctx = playContextName(l, ref.watch(playContextProvider));
+    final ctrl = ref.read(playerControllerProvider);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: CcDims.margin),
+      child: Column(
+        children: [
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onVerticalDragUpdate: onDragUpdate,
+            onVerticalDragEnd: onDragEnd,
+            child: SizedBox(
+              height: 56,
+              child: Row(
+                children: [
+                  IconButton(
+                    tooltip: l.back,
+                    icon: const Icon(
+                      Icons.keyboard_arrow_down_rounded,
+                      size: 32,
+                    ),
+                    onPressed: () => Navigator.of(context).maybePop(),
+                  ),
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          ctx == null ? l.nowPlaying : l.playingFrom,
+                          style: theme.labelSmall?.copyWith(
+                            fontSize: 11,
+                            color: cc.textMuted,
+                          ),
+                        ),
+                        if (ctx != null)
+                          Text(
+                            ctx,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.bodyMedium?.copyWith(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: cc.text,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: l.moreActions,
+                    icon: const Icon(Icons.more_horiz_rounded),
+                    onPressed: () => showTrackActions(context, ref, track),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Expanded(
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onVerticalDragUpdate: onDragUpdate,
+              onVerticalDragEnd: onDragEnd,
+              onHorizontalDragEnd: (d) {
+                final v = d.primaryVelocity ?? 0;
+                if (v < -300 && ctrl.hasNext) ctrl.next();
+                if (v > 300) ctrl.previous();
+              },
+              child: LayoutBuilder(
+                builder: (_, c) => Center(
+                  child: CoverImage(
+                    coverKey: track.coverKey,
+                    size: (c.biggest.shortestSide).clamp(80.0, 460.0),
+                    radius: CcDims.rGrid,
+                    heroTag: kPlayerCoverHero,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      track.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.titleLarge,
+                    ),
+                    InkWell(
+                      onTap: () => _openArtist(context, ref),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 2),
+                        child: Text(
+                          track.artist ?? l.unknownArtist,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.bodyLarge?.copyWith(color: cc.textMuted),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              IconButton(
+                tooltip: track.isFavorite ? l.removeFromFavorites : l.favorite,
+                onPressed: () => toggleFavorite(context, ref, track),
+                icon: Icon(
+                  track.isFavorite
+                      ? Icons.favorite_rounded
+                      : Icons.favorite_border_rounded,
+                  color: track.isFavorite ? cc.accent : cc.text,
+                ),
+              ),
+            ],
+          ),
+          NpSeekRow(track: track),
+        const SizedBox(height: 8),
+          const NpControls(),
+          const NpBottomRow(),
+          const SizedBox(height: 8),
+        ],
+      ),
     );
   }
 }

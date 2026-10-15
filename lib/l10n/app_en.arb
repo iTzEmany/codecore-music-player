@@ -404,5 +404,15 @@
         "type": "int"
       }
     }
-  }
+  },
+  "playingFrom": "Playing from",
+  "playContextSearch": "Search",
+  "allTracks": "All tracks",
+  "trackInfo": "About this track",
+  "searchCuriosity": "Look up trivia",
+  "upNext": "Up next",
+  "openQueue": "Open queue",
+  "copyLink": "Copy link",
+  "moreActions": "More actions",
+  "sleepChipEnd": "end of track"
 }

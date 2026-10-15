@@ -6,21 +6,31 @@ import '../../../l10n/l10n_ext.dart';
 import '../../../providers/database_providers.dart';
 
 /// Asks for a playlist name (1..60 chars). Returns null when cancelled.
-Future<String?> askPlaylistName(BuildContext context,
-    {String initial = '', String? confirmLabel, String? title, String? label}) {
+Future<String?> askPlaylistName(
+  BuildContext context, {
+  String initial = '',
+  String? confirmLabel,
+  String? title,
+  String? label,
+}) {
   return showDialog<String>(
     context: context,
     builder: (_) => _NameDialog(
-        initial: initial,
-        confirmLabel: confirmLabel,
-        title: title,
-        label: label),
+      initial: initial,
+      confirmLabel: confirmLabel,
+      title: title,
+      label: label,
+    ),
   );
 }
 
 class _NameDialog extends StatefulWidget {
-  const _NameDialog(
-      {required this.initial, this.confirmLabel, this.title, this.label});
+  const _NameDialog({
+    required this.initial,
+    this.confirmLabel,
+    this.title,
+    this.label,
+  });
 
   final String initial;
   final String? confirmLabel, title, label;
@@ -30,8 +40,9 @@ class _NameDialog extends StatefulWidget {
 }
 
 class _NameDialogState extends State<_NameDialog> {
-  late final TextEditingController _c =
-      TextEditingController(text: widget.initial);
+  late final TextEditingController _c = TextEditingController(
+    text: widget.initial,
+  );
 
   @override
   void dispose() {
@@ -58,10 +69,13 @@ class _NameDialogState extends State<_NameDialog> {
       ),
       actions: [
         TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(l.cancel)),
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(l.cancel),
+        ),
         FilledButton(
-            onPressed: _submit, child: Text(widget.confirmLabel ?? l.create)),
+          onPressed: _submit,
+          child: Text(widget.confirmLabel ?? l.create),
+        ),
       ],
     );
   }
@@ -69,10 +83,14 @@ class _NameDialogState extends State<_NameDialog> {
 
 /// Bottom sheet to add tracks to an existing or a new playlist.
 Future<void> showAddToPlaylistSheet(
-    BuildContext context, WidgetRef ref, List<Track> tracks) {
+  BuildContext context,
+  WidgetRef ref,
+  List<Track> tracks,
+) {
   return showModalBottomSheet<void>(
     context: context,
-    builder: (sheetContext) => _AddToPlaylistSheet(tracks: tracks, outer: context),
+    builder: (sheetContext) =>
+        _AddToPlaylistSheet(tracks: tracks, outer: context),
   );
 }
 
@@ -82,8 +100,12 @@ class _AddToPlaylistSheet extends ConsumerWidget {
   final List<Track> tracks;
   final BuildContext outer;
 
-  Future<void> _add(WidgetRef ref, BuildContext sheetContext, int id,
-      String name) async {
+  Future<void> _add(
+    WidgetRef ref,
+    BuildContext sheetContext,
+    int id,
+    String name,
+  ) async {
     final repo = ref.read(playlistRepositoryProvider);
     await repo.addTracks(id, [for (final t in tracks) t.id]);
     if (sheetContext.mounted) Navigator.of(sheetContext).pop();
@@ -91,7 +113,8 @@ class _AddToPlaylistSheet extends ConsumerWidget {
       ScaffoldMessenger.of(outer)
         ..clearSnackBars()
         ..showSnackBar(
-            SnackBar(content: Text(outer.l10n.addedToPlaylist(name))));
+          SnackBar(content: Text(outer.l10n.addedToPlaylist(name))),
+        );
     }
   }
 
@@ -100,25 +123,30 @@ class _AddToPlaylistSheet extends ConsumerWidget {
     final l = context.l10n;
     final lists = ref.watch(playlistsProvider).value ?? const [];
     return SafeArea(
-      child: ListView(shrinkWrap: true, children: [
-        ListTile(
-          leading: const Icon(Icons.add),
-          title: Text(l.newPlaylistEllipsis),
-          onTap: () async {
-            final name = await askPlaylistName(context);
-            if (name == null || !context.mounted) return;
-            final id = await ref.read(playlistRepositoryProvider).create(name);
-            if (!context.mounted) return;
-            await _add(ref, context, id, name);
-          },
-        ),
-        for (final p in lists)
+      child: ListView(
+        shrinkWrap: true,
+        children: [
           ListTile(
-            leading: const Icon(Icons.queue_music),
-            title: Text(p.playlist.name),
-            onTap: () => _add(ref, context, p.playlist.id, p.playlist.name),
+            leading: const Icon(Icons.add),
+            title: Text(l.newPlaylistEllipsis),
+            onTap: () async {
+              final name = await askPlaylistName(context);
+              if (name == null || !context.mounted) return;
+              final id = await ref
+                  .read(playlistRepositoryProvider)
+                  .create(name);
+              if (!context.mounted) return;
+              await _add(ref, context, id, name);
+            },
           ),
-      ]),
+          for (final p in lists)
+            ListTile(
+              leading: const Icon(Icons.queue_music),
+              title: Text(p.playlist.name),
+              onTap: () => _add(ref, context, p.playlist.id, p.playlist.name),
+            ),
+        ],
+      ),
     );
   }
 }

@@ -1022,4 +1022,34 @@ class AppLocalizationsIt extends AppLocalizations {
   String jamParticipantsCount(int n) {
     return '$n persone';
   }
+
+  @override
+  String get playingFrom => 'In riproduzione da';
+
+  @override
+  String get playContextSearch => 'Ricerca';
+
+  @override
+  String get allTracks => 'Tutti i brani';
+
+  @override
+  String get trackInfo => 'Info sul brano';
+
+  @override
+  String get searchCuriosity => 'Cerca curiosità';
+
+  @override
+  String get upNext => 'Prossimi';
+
+  @override
+  String get openQueue => 'Apri coda';
+
+  @override
+  String get copyLink => 'Copia link';
+
+  @override
+  String get moreActions => 'Altre azioni';
+
+  @override
+  String get sleepChipEnd => 'fine brano';
 }

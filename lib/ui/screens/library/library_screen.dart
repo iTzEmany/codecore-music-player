@@ -12,17 +12,22 @@ class LibraryScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: 3,
-      child: Column(children: [
-        TabBar(tabs: [
-          Tab(text: context.l10n.tracks),
-          Tab(text: context.l10n.albums),
-          Tab(text: context.l10n.artists),
-        ]),
-        Expanded(
-          child: TabBarView(
-              children: [TracksTab(), AlbumsTab(), ArtistsTab()]),
-        ),
-      ]),
+      child: Column(
+        children: [
+          TabBar(
+            tabs: [
+              Tab(text: context.l10n.tracks),
+              Tab(text: context.l10n.albums),
+              Tab(text: context.l10n.artists),
+            ],
+          ),
+          Expanded(
+            child: TabBarView(
+              children: [TracksTab(), AlbumsTab(), ArtistsTab()],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

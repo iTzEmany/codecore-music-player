@@ -46,9 +46,10 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
     final store = CoverStore(dir);
     // A new key per pick, so the image cache never shows the old picture.
     final key = await store.saveFromBytes(
-        'playlist:$id:${DateTime.now().microsecondsSinceEpoch}',
-        bytes,
-        path.toLowerCase().endsWith('.png') ? 'image/png' : 'image/jpeg');
+      'playlist:$id:${DateTime.now().microsecondsSinceEpoch}',
+      bytes,
+      path.toLowerCase().endsWith('.png') ? 'image/png' : 'image/jpeg',
+    );
     if (key == null) return;
     final old = ref
         .read(playlistsProvider)
@@ -82,8 +83,11 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
           IconButton(
             tooltip: l.addSongs,
             icon: const Icon(Icons.add),
-            onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(
-                builder: (_) => AddTracksScreen(playlistId: id))),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => AddTracksScreen(playlistId: id),
+              ),
+            ),
           ),
           PopupMenuButton<String>(
             onSelected: (v) async {
@@ -93,19 +97,23 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
                 case 'clear':
                   await repo.setCover(id, null);
                 case 'rename':
-                  final n = await askPlaylistName(context,
-                      initial: _name,
-                      confirmLabel: l.save,
-                      title: l.renamePlaylist);
+                  final n = await askPlaylistName(
+                    context,
+                    initial: _name,
+                    confirmLabel: l.save,
+                    title: l.renamePlaylist,
+                  );
                   if (n == null) return;
                   await repo.rename(id, n);
                   if (mounted) setState(() => _name = n);
                 case 'delete':
-                  final ok = await showConfirm(context,
-                      title: l.confirmDeletePlaylistTitle,
-                      body: l.confirmDeletePlaylistBody(_name),
-                      confirmLabel: l.delete,
-                      destructive: true);
+                  final ok = await showConfirm(
+                    context,
+                    title: l.confirmDeletePlaylistTitle,
+                    body: l.confirmDeletePlaylistBody(_name),
+                    confirmLabel: l.delete,
+                    destructive: true,
+                  );
                   if (!ok) return;
                   await repo.delete(id);
                   if (context.mounted) Navigator.of(context).pop();
@@ -120,61 +128,84 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
           ),
         ],
       ),
-      body: Column(children: [
-        Padding(
-          padding: const EdgeInsets.all(12),
-          child: Row(children: [
-            CoverImage(coverKey: cover, size: 56, radius: 8),
-            const SizedBox(width: 12),
-            FilledButton.icon(
-              onPressed:
-                  tracks.isEmpty ? null : () => ctrl.playFromList(tracks, 0),
-              icon: const Icon(Icons.play_arrow),
-              label: Text(l.play),
-            ),
-            const SizedBox(width: 8),
-            OutlinedButton.icon(
-              onPressed: tracks.isEmpty
-                  ? null
-                  : () async {
-                      await ctrl.setShuffle(true);
-                      await ctrl.playFromList(tracks, 0);
-                    },
-              icon: const Icon(Icons.shuffle),
-              label: Text(l.shuffle),
-            ),
-          ]),
-        ),
-        Expanded(
-          child: ReorderableListView.builder(
-            itemCount: tracks.length,
-            onReorderItem: (from, to) => repo.reorder(id, from, to),
-            itemBuilder: (_, i) {
-              final t = tracks[i];
-              return Dismissible(
-                key: ValueKey('pl-${t.id}'),
-                background: const DismissBackground(),
-                secondaryBackground: const DismissBackground(alignEnd: true),
-                onDismissed: (_) async {
-                  await repo.removeTrack(id, t.id);
-                  if (!context.mounted) return;
-                  showUndoSnack(context, l.removedFromPlaylist, () async {
-                    await repo.addTracks(id, [t.id]);
-                    await repo.reorder(id, tracks.length - 1, i);
-                  });
-                },
-                child: ListTile(
-                  leading: CoverImage(coverKey: t.coverKey, size: 40),
-                  title: Text(t.title,
-                      maxLines: 1, overflow: TextOverflow.ellipsis),
-                  subtitle: Text(t.artist ?? '', maxLines: 1),
-                  onTap: () => ctrl.playFromList(tracks, i),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              children: [
+                CoverImage(coverKey: cover, size: 56, radius: 8),
+                const SizedBox(width: 12),
+                FilledButton.icon(
+                  onPressed: tracks.isEmpty
+                      ? null
+                      : () => ctrl.playFromList(
+                          tracks,
+                          0,
+                          context: PlayContext(PlayContextKind.playlist, _name),
+                        ),
+                  icon: const Icon(Icons.play_arrow),
+                  label: Text(l.play),
                 ),
-              );
-            },
+                const SizedBox(width: 8),
+                OutlinedButton.icon(
+                  onPressed: tracks.isEmpty
+                      ? null
+                      : () async {
+                          await ctrl.setShuffle(true);
+                          await ctrl.playFromList(
+                            tracks,
+                            0,
+                            context: PlayContext(
+                              PlayContextKind.playlist,
+                              _name,
+                            ),
+                          );
+                        },
+                  icon: const Icon(Icons.shuffle),
+                  label: Text(l.shuffle),
+                ),
+              ],
+            ),
           ),
-        ),
-      ]),
+          Expanded(
+            child: ReorderableListView.builder(
+              itemCount: tracks.length,
+              onReorderItem: (from, to) => repo.reorder(id, from, to),
+              itemBuilder: (_, i) {
+                final t = tracks[i];
+                return Dismissible(
+                  key: ValueKey('pl-${t.id}'),
+                  background: const DismissBackground(),
+                  secondaryBackground: const DismissBackground(alignEnd: true),
+                  onDismissed: (_) async {
+                    await repo.removeTrack(id, t.id);
+                    if (!context.mounted) return;
+                    showUndoSnack(context, l.removedFromPlaylist, () async {
+                      await repo.addTracks(id, [t.id]);
+                      await repo.reorder(id, tracks.length - 1, i);
+                    });
+                  },
+                  child: ListTile(
+                    leading: CoverImage(coverKey: t.coverKey, size: 40),
+                    title: Text(
+                      t.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    subtitle: Text(t.artist ?? '', maxLines: 1),
+                    onTap: () => ctrl.playFromList(
+                      tracks,
+                      i,
+                      context: PlayContext(PlayContextKind.playlist, _name),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

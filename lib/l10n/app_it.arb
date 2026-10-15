@@ -595,5 +595,15 @@
         "type": "int"
       }
     }
-  }
+  },
+  "playingFrom": "In riproduzione da",
+  "playContextSearch": "Ricerca",
+  "allTracks": "Tutti i brani",
+  "trackInfo": "Info sul brano",
+  "searchCuriosity": "Cerca curiosità",
+  "upNext": "Prossimi",
+  "openQueue": "Apri coda",
+  "copyLink": "Copia link",
+  "moreActions": "Altre azioni",
+  "sleepChipEnd": "fine brano"
 }

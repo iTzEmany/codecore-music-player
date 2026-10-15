@@ -50,8 +50,9 @@ class _AddTracksScreenState extends ConsumerState<AddTracksScreen> {
   Widget build(BuildContext context) {
     final l = context.l10n;
     final inPlaylist = {
-      for (final t in ref.watch(playlistTracksProvider(widget.playlistId)).value ??
-          const <Track>[])
+      for (final t
+          in ref.watch(playlistTracksProvider(widget.playlistId)).value ??
+              const <Track>[])
         t.id,
     };
     return Scaffold(
@@ -64,59 +65,73 @@ class _AddTracksScreenState extends ConsumerState<AddTracksScreen> {
           ),
         ],
       ),
-      body: Column(children: [
-        Padding(
-          padding: const EdgeInsets.all(12),
-          child: TextField(
-            controller: _controller,
-            onChanged: _onChanged,
-            decoration: InputDecoration(
-              hintText: l.searchHint,
-              prefixIcon: const Icon(Icons.search),
-              isDense: true,
-              border: const OutlineInputBorder(),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: TextField(
+              controller: _controller,
+              onChanged: _onChanged,
+              decoration: InputDecoration(
+                hintText: l.searchHint,
+                prefixIcon: const Icon(Icons.search),
+                isDense: true,
+                border: const OutlineInputBorder(),
+              ),
             ),
           ),
-        ),
-        Expanded(
-          child: StreamBuilder<List<Track>>(
-            stream: ref.watch(trackRepositoryProvider).watchTracks(query: _query),
-            builder: (context, snap) {
-              final tracks = [
-                for (final t in snap.data ?? const <Track>[])
-                  if (!inPlaylist.contains(t.id)) t,
-              ];
-              if (snap.hasData && tracks.isEmpty) {
-                return EmptyState(
+          Expanded(
+            child: StreamBuilder<List<Track>>(
+              stream: ref
+                  .watch(trackRepositoryProvider)
+                  .watchTracks(query: _query),
+              builder: (context, snap) {
+                final tracks = [
+                  for (final t in snap.data ?? const <Track>[])
+                    if (!inPlaylist.contains(t.id)) t,
+                ];
+                if (snap.hasData && tracks.isEmpty) {
+                  return EmptyState(
                     icon: Icons.library_music,
                     message: _query.isEmpty
                         ? l.allSongsInPlaylist
-                        : l.noResults);
-              }
-              return ListView.builder(
-                itemExtent: 64,
-                itemCount: tracks.length,
-                itemBuilder: (_, i) {
-                  final t = tracks[i];
-                  return CheckboxListTile(
-                    value: _selected.contains(t.id),
-                    onChanged: (v) => setState(() =>
-                        v == true ? _selected.add(t.id) : _selected.remove(t.id)),
-                    secondary: CoverImage(coverKey: t.coverKey, size: 44),
-                    title: Text(t.title,
-                        maxLines: 1, overflow: TextOverflow.ellipsis),
-                    subtitle: Text(
-                        [if (t.artist != null) t.artist!, if (t.album != null) t.album!]
-                            .join(' • '),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis),
+                        : l.noResults,
                   );
-                },
-              );
-            },
+                }
+                return ListView.builder(
+                  itemExtent: 64,
+                  itemCount: tracks.length,
+                  itemBuilder: (_, i) {
+                    final t = tracks[i];
+                    return CheckboxListTile(
+                      value: _selected.contains(t.id),
+                      onChanged: (v) => setState(
+                        () => v == true
+                            ? _selected.add(t.id)
+                            : _selected.remove(t.id),
+                      ),
+                      secondary: CoverImage(coverKey: t.coverKey, size: 44),
+                      title: Text(
+                        t.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      subtitle: Text(
+                        [
+                          if (t.artist != null) t.artist!,
+                          if (t.album != null) t.album!,
+                        ].join(' • '),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
           ),
-        ),
-      ]),
+        ],
+      ),
     );
   }
 }

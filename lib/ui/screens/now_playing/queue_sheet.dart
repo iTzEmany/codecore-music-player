@@ -7,6 +7,19 @@ import '../../widgets/confirm.dart';
 import '../../widgets/cover_image.dart';
 import '../../widgets/dismiss_background.dart';
 
+/// The queue as a draggable modal sheet (Now Playing, desktop bar).
+Future<void> showQueueSheet(BuildContext context) => showModalBottomSheet<void>(
+  context: context,
+  isScrollControlled: true,
+  useRootNavigator: true,
+  builder: (_) => DraggableScrollableSheet(
+    expand: false,
+    initialChildSize: 0.7,
+    maxChildSize: 0.95,
+    builder: (_, sc) => QueueSheet(scrollController: sc),
+  ),
+);
+
 class QueueSheet extends ConsumerWidget {
   const QueueSheet({super.key, required this.scrollController});
 
@@ -22,7 +35,7 @@ class QueueSheet extends ConsumerWidget {
     }
     final seen = <int, int>{};
     final keys = [
-      for (final t in queue) 'q-${t.id}-${seen[t.id] = (seen[t.id] ?? -1) + 1}'
+      for (final t in queue) 'q-${t.id}-${seen[t.id] = (seen[t.id] ?? -1) + 1}',
     ];
     return ReorderableListView.builder(
       scrollController: scrollController,

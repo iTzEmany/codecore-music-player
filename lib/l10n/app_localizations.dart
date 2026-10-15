@@ -1901,6 +1901,66 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'{n} persone'**
   String jamParticipantsCount(int n);
+
+  /// No description provided for @playingFrom.
+  ///
+  /// In it, this message translates to:
+  /// **'In riproduzione da'**
+  String get playingFrom;
+
+  /// No description provided for @playContextSearch.
+  ///
+  /// In it, this message translates to:
+  /// **'Ricerca'**
+  String get playContextSearch;
+
+  /// No description provided for @allTracks.
+  ///
+  /// In it, this message translates to:
+  /// **'Tutti i brani'**
+  String get allTracks;
+
+  /// No description provided for @trackInfo.
+  ///
+  /// In it, this message translates to:
+  /// **'Info sul brano'**
+  String get trackInfo;
+
+  /// No description provided for @searchCuriosity.
+  ///
+  /// In it, this message translates to:
+  /// **'Cerca curiosità'**
+  String get searchCuriosity;
+
+  /// No description provided for @upNext.
+  ///
+  /// In it, this message translates to:
+  /// **'Prossimi'**
+  String get upNext;
+
+  /// No description provided for @openQueue.
+  ///
+  /// In it, this message translates to:
+  /// **'Apri coda'**
+  String get openQueue;
+
+  /// No description provided for @copyLink.
+  ///
+  /// In it, this message translates to:
+  /// **'Copia link'**
+  String get copyLink;
+
+  /// No description provided for @moreActions.
+  ///
+  /// In it, this message translates to:
+  /// **'Altre azioni'**
+  String get moreActions;
+
+  /// No description provided for @sleepChipEnd.
+  ///
+  /// In it, this message translates to:
+  /// **'fine brano'**
+  String get sleepChipEnd;
 }
 
 class _AppLocalizationsDelegate
