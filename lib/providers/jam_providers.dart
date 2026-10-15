@@ -7,7 +7,9 @@ import 'package:path/path.dart' as p;
 import '../core/app_log.dart';
 import '../core/paths.dart';
 import '../data/db/app_database.dart';
+import '../data/repositories/track_repository.dart';
 import '../services/audio/audio_backend.dart';
+import '../services/audio/codecore_audio_handler.dart';
 import '../services/audio/just_audio_backend.dart';
 import '../services/jam/jam_cache.dart';
 import '../services/jam/jam_clock.dart';
@@ -84,6 +86,25 @@ final jamCacheDirProvider = FutureProvider<Directory>(
 );
 
 /// Orchestrates one Jam: protocol (host or guest), playback and cache.
+/// The queue as it plays out: from the current track to the end, then the
+/// ones that came before it. Nothing is dropped.
+List<int> rotateQueueFromCurrent(List<int> ids, int currentIndex) {
+  if (currentIndex <= 0 || currentIndex >= ids.length) return [...ids];
+  return [...ids.sublist(currentIndex), ...ids.sublist(0, currentIndex)];
+}
+
+/// The host's local queue, as tracks, to be the Jam's starting queue.
+Future<List<Track>> jamSeedTracks(
+  CodecoreAudioHandler handler,
+  TrackRepository repo,
+) async {
+  final ids = rotateQueueFromCurrent(handler.queueIds, handler.currentIndex);
+  return [
+    for (final t in await repo.getByIds(ids))
+      if (!t.missing) t,
+  ];
+}
+
 class JamController extends Notifier<JamUiState> {
   JamGuest? _guest;
   JamOutput? _output;
@@ -188,7 +209,27 @@ class JamController extends Notifier<JamUiState> {
       if (js != null) _onState(js);
     });
     state = state.copyWith(peerName: req.fromName, peerId: req.fromId);
+    // Read before the Jam pauses the local player: what was queued here
+    // becomes the Jam's starting queue.
+    final handler = ref.read(audioHandlerProvider);
+    final seed = await jamSeedTracks(
+      handler,
+      ref.read(trackRepositoryProvider),
+    );
+    final wasPlaying = handler.isPlaying;
+    final position = ref.read(positionProvider).value ?? Duration.zero;
     await _begin(JamRole.host, host.state ?? s);
+    if (seed.isNotEmpty) {
+      final n = await addTracks(seed);
+      AppLog.i('jam: $n of ${seed.length} queued tracks added to the Jam');
+      // Music that was playing keeps playing, from the same point.
+      if (n > 0 && wasPlaying) {
+        if (position > const Duration(seconds: 1)) {
+          await send(JamCommand.seek(position.inMilliseconds));
+        }
+        await send(const JamCommand.play());
+      }
+    }
   }
 
   void decline(JamRequest req) => _host?.decline(req.id);

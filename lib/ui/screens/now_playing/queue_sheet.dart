@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/db/app_database.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/player_providers.dart';
+import '../../theme/app_theme.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/confirm.dart';
 import '../../widgets/dismiss_background.dart';
@@ -26,9 +27,16 @@ Future<void> showQueueSheet(BuildContext context) => showModalBottomSheet<void>(
 /// «Coda»: the playing track and what comes next (already played tracks are
 /// hidden). Rows reorder with the handle and dismiss with a swipe + undo.
 class QueueSheet extends ConsumerWidget {
-  const QueueSheet({super.key, required this.scrollController});
+  const QueueSheet({
+    super.key,
+    required this.scrollController,
+    this.showTitle = true,
+  });
 
   final ScrollController scrollController;
+
+  /// The desktop side panel already has its own «Coda» title.
+  final bool showTitle;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -71,10 +79,12 @@ class QueueSheet extends ConsumerWidget {
           child: Row(
             children: [
               Expanded(
-                child: Text(
-                  l.queue,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
+                child: showTitle
+                    ? Text(
+                        l.queue,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      )
+                    : const SizedBox.shrink(),
               ),
               if (upcoming.isNotEmpty)
                 TextButton(onPressed: clearNext, child: Text(l.queueClear)),
@@ -85,6 +95,8 @@ class QueueSheet extends ConsumerWidget {
           child: ReorderableListView.builder(
             scrollController: scrollController,
             buildDefaultDragHandles: false,
+            proxyDecorator: (child, _, anim) =>
+                ccDragProxy(context, child, anim),
             header: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [

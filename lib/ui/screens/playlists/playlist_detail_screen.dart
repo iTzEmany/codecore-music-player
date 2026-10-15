@@ -152,6 +152,7 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
       );
     } else if (_editing) {
       list = SliverReorderableList(
+        proxyDecorator: (child, _, anim) => ccDragProxy(context, child, anim),
         itemCount: tracks.length,
         onReorderItem: (from, to) => repo.reorder(id, from, to),
         itemBuilder: (_, i) {

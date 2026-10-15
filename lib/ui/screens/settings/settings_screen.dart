@@ -41,206 +41,214 @@ class SettingsScreen extends ConsumerWidget {
     final notifier = ref.read(settingsProvider.notifier);
     final folders = ref.watch(foldersProvider).value ?? const [];
     final missing = ref.watch(missingTracksProvider).value ?? const [];
-    return ListView(
-      padding: const EdgeInsets.only(bottom: 24),
-      children: [
-        _Group(
-          title: l.settingsAppearance,
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 760),
+        child: ListView(
+          padding: const EdgeInsets.only(bottom: 24),
           children: [
-            ListTile(
-              title: Text(l.settingsTheme),
-              subtitle: Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: Wrap(
-                  runSpacing: 8,
-                  children: [
-                    for (final (id, label, colors) in [
-                      ('notte', l.themeNotte, CcColors.notte),
-                      ('oled', l.themeOled, CcColors.oled),
-                    ])
-                      Padding(
-                        padding: const EdgeInsets.only(right: 12),
-                        child: ThemeSwatch(
-                          label: label,
-                          colors: colors,
-                          selected: appThemeIdFromName(s.theme).name == id,
-                          onTap: () =>
-                              notifier.update((c) => c.copyWith(theme: id)),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            ),
-            ListTile(
-              title: Text(l.settingsTextSize),
-              subtitle: Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: SegmentedButton<double>(
-                  showSelectedIcon: false,
-                  segments: [
-                    ButtonSegment(value: 0.9, label: Text(l.textSmall)),
-                    ButtonSegment(value: 1.0, label: Text(l.textNormal)),
-                    ButtonSegment(value: 1.15, label: Text(l.textLarge)),
-                  ],
-                  selected: {s.fontScale},
-                  onSelectionChanged: (v) =>
-                      notifier.update((c) => c.copyWith(fontScale: v.first)),
-                ),
-              ),
-            ),
-            SwitchListTile(
-              title: Text(l.settingsCompact),
-              value: s.compactMode,
-              onChanged: (v) =>
-                  notifier.update((c) => c.copyWith(compactMode: v)),
-            ),
-            SwitchListTile(
-              title: Text(l.settingsReducedMotion),
-              value: s.reducedMotion,
-              onChanged: (v) =>
-                  notifier.update((c) => c.copyWith(reducedMotion: v)),
-            ),
-          ],
-        ),
-        _Group(
-          title: l.settingsLanguage,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.language_rounded),
-              title: Text(_languages[s.language] ?? s.language),
-              trailing: const Icon(Icons.chevron_right_rounded),
-              onTap: () => _pickLanguage(context, ref),
-            ),
-          ],
-        ),
-        _Group(
-          title: l.settingsPlayback,
-          children: [
-            SwitchListTile(
-              title: Text(l.normalizeVolume),
-              subtitle: Text(l.normalizeVolumeHint),
-              value: s.normalizeVolume,
-              onChanged: (v) =>
-                  notifier.update((c) => c.copyWith(normalizeVolume: v)),
-            ),
-          ],
-        ),
-        _Group(
-          title: l.settingsLibrary,
-          children: [
-            for (final f in folders)
-              ListTile(
-                leading: const Icon(Icons.folder),
-                title: Text(
-                  f.path,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                trailing: IconButton(
-                  tooltip: l.removeFolder,
-                  icon: const Icon(Icons.delete_outline),
-                  onPressed: () => confirmRemoveFolder(context, ref, f.id),
-                ),
-              ),
-            ListTile(
-              leading: const Icon(Icons.create_new_folder),
-              title: Text(l.addFolder),
-              onTap: () => addFolderAndScan(ref),
-            ),
-            ListTile(
-              leading: const Icon(Icons.refresh),
-              title: Text(l.rescanNow),
-              onTap: () => scanWithPermission(ref),
-            ),
-            ListTile(
-              leading: const Icon(Icons.image_not_supported_outlined),
-              title: Text(l.clearCoverCache),
-              onTap: () => _clearCovers(context, ref),
-            ),
-            if (missing.isNotEmpty)
-              ListTile(
-                leading: const Icon(Icons.report_problem_outlined),
-                title: Text(l.missingTracksCount(missing.length)),
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => const MissingTracksScreen(),
+            _Group(
+              title: l.settingsAppearance,
+              children: [
+                ListTile(
+                  title: Text(l.settingsTheme),
+                  subtitle: Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Wrap(
+                      runSpacing: 8,
+                      children: [
+                        for (final (id, label, colors) in [
+                          ('notte', l.themeNotte, CcColors.notte),
+                          ('oled', l.themeOled, CcColors.oled),
+                        ])
+                          Padding(
+                            padding: const EdgeInsets.only(right: 12),
+                            child: ThemeSwatch(
+                              label: label,
+                              colors: colors,
+                              selected: appThemeIdFromName(s.theme).name == id,
+                              onTap: () =>
+                                  notifier.update((c) => c.copyWith(theme: id)),
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
+                ListTile(
+                  title: Text(l.settingsTextSize),
+                  subtitle: Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: SegmentedButton<double>(
+                      showSelectedIcon: false,
+                      segments: [
+                        ButtonSegment(value: 0.9, label: Text(l.textSmall)),
+                        ButtonSegment(value: 1.0, label: Text(l.textNormal)),
+                        ButtonSegment(value: 1.15, label: Text(l.textLarge)),
+                      ],
+                      selected: {s.fontScale},
+                      onSelectionChanged: (v) => notifier.update(
+                        (c) => c.copyWith(fontScale: v.first),
+                      ),
+                    ),
+                  ),
+                ),
+                SwitchListTile(
+                  title: Text(l.settingsCompact),
+                  value: s.compactMode,
+                  onChanged: (v) =>
+                      notifier.update((c) => c.copyWith(compactMode: v)),
+                ),
+                SwitchListTile(
+                  title: Text(l.settingsReducedMotion),
+                  value: s.reducedMotion,
+                  onChanged: (v) =>
+                      notifier.update((c) => c.copyWith(reducedMotion: v)),
+                ),
+              ],
+            ),
+            _Group(
+              title: l.settingsLanguage,
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.language_rounded),
+                  title: Text(_languages[s.language] ?? s.language),
+                  trailing: const Icon(Icons.chevron_right_rounded),
+                  onTap: () => _pickLanguage(context, ref),
+                ),
+              ],
+            ),
+            _Group(
+              title: l.settingsPlayback,
+              children: [
+                SwitchListTile(
+                  title: Text(l.normalizeVolume),
+                  subtitle: Text(l.normalizeVolumeHint),
+                  value: s.normalizeVolume,
+                  onChanged: (v) =>
+                      notifier.update((c) => c.copyWith(normalizeVolume: v)),
+                ),
+              ],
+            ),
+            _Group(
+              title: l.settingsLibrary,
+              children: [
+                for (final f in folders)
+                  ListTile(
+                    leading: const Icon(Icons.folder),
+                    title: Text(
+                      f.path,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    trailing: IconButton(
+                      tooltip: l.removeFolder,
+                      icon: const Icon(Icons.delete_outline),
+                      onPressed: () => confirmRemoveFolder(context, ref, f.id),
+                    ),
+                  ),
+                ListTile(
+                  leading: const Icon(Icons.create_new_folder),
+                  title: Text(l.addFolder),
+                  onTap: () => addFolderAndScan(ref),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.refresh),
+                  title: Text(l.rescanNow),
+                  onTap: () => scanWithPermission(ref),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.image_not_supported_outlined),
+                  title: Text(l.clearCoverCache),
+                  onTap: () => _clearCovers(context, ref),
+                ),
+                if (missing.isNotEmpty)
+                  ListTile(
+                    leading: const Icon(Icons.report_problem_outlined),
+                    title: Text(l.missingTracksCount(missing.length)),
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => const MissingTracksScreen(),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            _Group(
+              title: l.settingsLocalNetwork,
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.wifi_tethering),
+                  title: Text(l.shareTitle),
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const ShareScreen(),
+                    ),
+                  ),
+                ),
+                SwitchListTile(
+                  title: Text(l.receiveFromLan),
+                  subtitle: Text(l.receiveFromLanHint),
+                  value: s.receiveFromLan,
+                  // The hub reacts to this setting (service, notification, discovery).
+                  onChanged: (v) =>
+                      notifier.update((c) => c.copyWith(receiveFromLan: v)),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.badge_outlined),
+                  title: Text(l.shareDeviceName),
+                  subtitle: Text(ref.watch(deviceNameProvider)),
+                  onTap: () => _editDeviceName(context, ref),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.history),
+                  title: Text(l.importOld),
+                  subtitle: Text(l.importOldHint),
+                  onTap: () => _importOld(context, ref),
+                ),
+              ],
+            ),
+            _Group(
+              title: l.settingsOnline,
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.travel_explore),
+                  title: Text(l.enrichLibrary),
+                  onTap: () => _enrichLibrary(context, ref),
+                ),
+                SwitchListTile(
+                  title: Text(l.autoEnrich),
+                  subtitle: Text(l.autoEnrichHint),
+                  value: s.autoEnrich,
+                  onChanged: (v) =>
+                      notifier.update((c) => c.copyWith(autoEnrich: v)),
+                ),
+                SwitchListTile(
+                  title: Text(l.autoLyrics),
+                  subtitle: Text(l.autoLyricsHint),
+                  value: s.autoLyrics,
+                  onChanged: (v) =>
+                      notifier.update((c) => c.copyWith(autoLyrics: v)),
+                ),
+              ],
+            ),
+            _Group(
+              title: l.settingsAbout,
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.info_outline),
+                  title: Text(l.appVersion(kAppVersion)),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.description_outlined),
+                  title: Text(l.licenses),
+                  onTap: () => showLicensePage(context: context),
+                ),
+              ],
+            ),
           ],
         ),
-        _Group(
-          title: l.settingsLocalNetwork,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.wifi_tethering),
-              title: Text(l.shareTitle),
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(builder: (_) => const ShareScreen()),
-              ),
-            ),
-            SwitchListTile(
-              title: Text(l.receiveFromLan),
-              subtitle: Text(l.receiveFromLanHint),
-              value: s.receiveFromLan,
-              // The hub reacts to this setting (service, notification, discovery).
-              onChanged: (v) =>
-                  notifier.update((c) => c.copyWith(receiveFromLan: v)),
-            ),
-            ListTile(
-              leading: const Icon(Icons.badge_outlined),
-              title: Text(l.shareDeviceName),
-              subtitle: Text(ref.watch(deviceNameProvider)),
-              onTap: () => _editDeviceName(context, ref),
-            ),
-            ListTile(
-              leading: const Icon(Icons.history),
-              title: Text(l.importOld),
-              subtitle: Text(l.importOldHint),
-              onTap: () => _importOld(context, ref),
-            ),
-          ],
-        ),
-        _Group(
-          title: l.settingsOnline,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.travel_explore),
-              title: Text(l.enrichLibrary),
-              onTap: () => _enrichLibrary(context, ref),
-            ),
-            SwitchListTile(
-              title: Text(l.autoEnrich),
-              subtitle: Text(l.autoEnrichHint),
-              value: s.autoEnrich,
-              onChanged: (v) =>
-                  notifier.update((c) => c.copyWith(autoEnrich: v)),
-            ),
-            SwitchListTile(
-              title: Text(l.autoLyrics),
-              subtitle: Text(l.autoLyricsHint),
-              value: s.autoLyrics,
-              onChanged: (v) =>
-                  notifier.update((c) => c.copyWith(autoLyrics: v)),
-            ),
-          ],
-        ),
-        _Group(
-          title: l.settingsAbout,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.info_outline),
-              title: Text(l.appVersion(kAppVersion)),
-            ),
-            ListTile(
-              leading: const Icon(Icons.description_outlined),
-              title: Text(l.licenses),
-              onTap: () => showLicensePage(context: context),
-            ),
-          ],
-        ),
-      ],
+      ),
     );
   }
 

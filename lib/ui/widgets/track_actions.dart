@@ -176,7 +176,10 @@ Future<void> showTrackContextMenu(
   Offset position,
 ) async {
   final groups = trackActions(context, ref, track);
-  final size = MediaQuery.sizeOf(context);
+  // `showMenu` positions inside the nearest overlay, which is offset from
+  // the window (sidebar, nested navigators): convert the pointer position.
+  final overlay = Overlay.of(context).context.findRenderObject()! as RenderBox;
+  final local = overlay.globalToLocal(position);
   final entries = <PopupMenuEntry<TrackAction>>[];
   for (var g = 0; g < groups.length; g++) {
     if (g > 0) entries.add(const PopupMenuDivider());
@@ -197,11 +200,9 @@ Future<void> showTrackContextMenu(
   }
   final picked = await showMenu<TrackAction>(
     context: context,
-    position: RelativeRect.fromLTRB(
-      position.dx,
-      position.dy,
-      size.width - position.dx,
-      size.height - position.dy,
+    position: RelativeRect.fromRect(
+      Rect.fromLTWH(local.dx, local.dy, 0, 0),
+      Offset.zero & overlay.size,
     ),
     items: entries,
   );

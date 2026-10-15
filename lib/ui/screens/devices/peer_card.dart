@@ -29,51 +29,61 @@ class PeerCard extends StatelessWidget {
     final theme = Theme.of(context).textTheme;
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 4),
-      padding: const EdgeInsets.fromLTRB(12, 8, 8, 8),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: cc.surface2,
         borderRadius: BorderRadius.circular(CcDims.rCard),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(platformIcon(peer.platform), color: cc.textMuted),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  peer.name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.bodyLarge,
+          Row(
+            children: [
+              Icon(platformIcon(peer.platform), color: cc.textMuted),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      peer.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.bodyLarge,
+                    ),
+                    Text(
+                      peer.host,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.labelSmall?.copyWith(color: cc.textMuted),
+                    ),
+                  ],
                 ),
-                Text(
-                  peer.host,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.labelSmall?.copyWith(color: cc.textMuted),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              OutlinedButton(
+                onPressed: onJam,
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size(0, 36),
+                  padding: const EdgeInsets.symmetric(horizontal: 18),
                 ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          OutlinedButton(
-            onPressed: onJam,
-            style: OutlinedButton.styleFrom(
-              minimumSize: const Size(0, 36),
-              padding: const EdgeInsets.symmetric(horizontal: 14),
-            ),
-            child: Text(l.devicesJamShort),
-          ),
-          const SizedBox(width: 6),
-          FilledButton(
-            onPressed: onSend,
-            style: FilledButton.styleFrom(
-              minimumSize: const Size(0, 36),
-              padding: const EdgeInsets.symmetric(horizontal: 14),
-            ),
-            child: Text(l.devicesSendShort),
+                child: Text(l.devicesJamShort),
+              ),
+              const SizedBox(width: 8),
+              FilledButton(
+                onPressed: onSend,
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size(0, 36),
+                  padding: const EdgeInsets.symmetric(horizontal: 18),
+                ),
+                child: Text(l.devicesSendShort),
+              ),
+            ],
           ),
         ],
       ),

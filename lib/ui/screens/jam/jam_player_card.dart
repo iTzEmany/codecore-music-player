@@ -55,6 +55,8 @@ class JamPlayerCard extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              // Same width as the «next» button: Play sits in the middle.
+              if (state.isHost) const SizedBox(width: 48),
               PlayCircleButton(
                 size: 56,
                 playing: jam.playing,

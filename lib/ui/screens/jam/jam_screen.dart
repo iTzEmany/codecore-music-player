@@ -8,6 +8,7 @@ import '../../../providers/share_hub.dart';
 import '../../../services/jam/jam_guest.dart';
 import '../../../services/jam/jam_models.dart';
 import '../share/track_picker_screen.dart';
+import '../../theme/app_theme.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/artist_avatar.dart';
 import '../../widgets/now_playing_bars.dart';
@@ -120,139 +121,178 @@ class _JamScreenState extends ConsumerState<JamScreen> {
     }
 
     return Scaffold(
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: cc.accent,
-        foregroundColor: cc.onAccent,
-        onPressed: _add,
-        icon: const Icon(Icons.add),
-        label: Text(l.jamAddTracks),
-      ),
       body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(4, 8, CcDims.margin, 8),
-              child: Row(
-                children: [
-                  IconButton(
-                    tooltip: l.back,
-                    icon: const Icon(Icons.arrow_back),
-                    onPressed: () => Navigator.of(context).maybePop(),
-                  ),
-                  Text(l.jamTitle, style: theme.headlineSmall),
-                  Expanded(
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: FilledButton(
-                        onPressed: ctrl.end,
-                        style: isHost
-                            ? FilledButton.styleFrom(
-                                backgroundColor: cc.error,
-                                foregroundColor: cc.bg,
-                              )
-                            : null,
-                        child: Text(
-                          isHost ? l.jamEnd : l.jamLeave,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 720),
+            child: Stack(
+              children: [
+                Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        4,
+                        8,
+                        CcDims.margin,
+                        8,
+                      ),
+                      child: Row(
+                        children: [
+                          IconButton(
+                            tooltip: l.back,
+                            icon: const Icon(Icons.arrow_back),
+                            onPressed: () => Navigator.of(context).maybePop(),
+                          ),
+                          Text(l.jamTitle, style: theme.headlineSmall),
+                          Expanded(
+                            child: Align(
+                              alignment: Alignment.centerRight,
+                              child: FilledButton(
+                                onPressed: ctrl.end,
+                                style: isHost
+                                    ? FilledButton.styleFrom(
+                                        backgroundColor: cc.error,
+                                        foregroundColor: cc.bg,
+                                      )
+                                    : null,
+                                child: Text(
+                                  isHost ? l.jamEnd : l.jamLeave,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        CcDims.margin,
+                        0,
+                        CcDims.margin,
+                        12,
+                      ),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: _Participants(
+                          jam: jam,
+                          ownId: ownId,
+                          hostId: jam.hostDeviceId,
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                CcDims.margin,
-                0,
-                CcDims.margin,
-                12,
-              ),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: _Participants(
-                  jam: jam,
-                  ownId: ownId,
-                  hostId: jam.hostDeviceId,
-                ),
-              ),
-            ),
-            JamPlayerCard(state: s),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                CcDims.margin,
-                16,
-                CcDims.margin,
-                4,
-              ),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(l.jamQueue, style: theme.titleMedium),
-              ),
-            ),
-            Expanded(
-              child: jam.items.isEmpty
-                  ? Center(child: Text(l.jamEmpty))
-                  : ReorderableListView.builder(
-                      padding: const EdgeInsets.only(bottom: 88),
-                      itemCount: jam.items.length,
-                      onReorderItem: (from, to) {
-                        ctrl.send(JamCommand.move(jam.items[from].id, to));
-                      },
-                      itemBuilder: (_, i) {
-                        final it = jam.items[i];
-                        final isCurrent = i == jam.currentIndex;
-                        final canRemove =
-                            isHost || (it.ownerDeviceId == ownId && !isCurrent);
-                        final who = owner(it);
-                        return ListTile(
-                          key: ValueKey(it.id),
-                          leading: SizedBox(
-                            width: 36,
-                            child: Center(
-                              child: isCurrent
-                                  ? NowPlayingBars(
-                                      playing: jam.playing,
-                                      size: 20,
-                                    )
-                                  : _Avatar(name: who, size: 32),
-                            ),
-                          ),
-                          title: Text(
-                            it.title,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: isCurrent ? cc.accent : null,
-                            ),
-                          ),
-                          subtitle: Text(
-                            [
-                              if (it.artist != null) it.artist!,
-                              l.jamAddedBy(who),
-                              if (!it.available) l.jamUnavailable,
-                            ].join(' · '),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          onTap: isHost
-                              ? () => ctrl.send(JamCommand.jump(it.id))
-                              : null,
-                          // The ✕ only appears where the removal is allowed.
-                          trailing: canRemove
-                              ? IconButton(
-                                  tooltip: l.delete,
-                                  icon: const Icon(Icons.close),
-                                  onPressed: () =>
-                                      ctrl.send(JamCommand.remove(it.id)),
-                                )
-                              : null,
-                        );
-                      },
+                    JamPlayerCard(state: s),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        CcDims.margin,
+                        16,
+                        CcDims.margin,
+                        4,
+                      ),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(l.jamQueue, style: theme.titleMedium),
+                      ),
                     ),
+                    Expanded(
+                      child: jam.items.isEmpty
+                          ? Center(child: Text(l.jamEmpty))
+                          : ReorderableListView.builder(
+                              padding: const EdgeInsets.only(bottom: 88),
+                              buildDefaultDragHandles: false,
+                              proxyDecorator: (child, _, anim) =>
+                                  ccDragProxy(context, child, anim),
+                              itemCount: jam.items.length,
+                              onReorderItem: (from, to) {
+                                ctrl.send(
+                                  JamCommand.move(jam.items[from].id, to),
+                                );
+                              },
+                              itemBuilder: (_, i) {
+                                final it = jam.items[i];
+                                final isCurrent = i == jam.currentIndex;
+                                final canRemove =
+                                    isHost ||
+                                    (it.ownerDeviceId == ownId && !isCurrent);
+                                final who = owner(it);
+                                return ListTile(
+                                  key: ValueKey(it.id),
+                                  leading: SizedBox(
+                                    width: 36,
+                                    child: Center(
+                                      child: isCurrent
+                                          ? NowPlayingBars(
+                                              playing: jam.playing,
+                                              size: 20,
+                                            )
+                                          : _Avatar(name: who, size: 32),
+                                    ),
+                                  ),
+                                  title: Text(
+                                    it.title,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      color: isCurrent ? cc.accent : null,
+                                    ),
+                                  ),
+                                  subtitle: Text(
+                                    [
+                                      if (it.artist != null) it.artist!,
+                                      l.jamAddedBy(who),
+                                      if (!it.available) l.jamUnavailable,
+                                    ].join(' · '),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  onTap: isHost
+                                      ? () => ctrl.send(JamCommand.jump(it.id))
+                                      : null,
+                                  // The ✕ only appears where the removal is allowed.
+                                  trailing: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      if (canRemove)
+                                        IconButton(
+                                          tooltip: l.delete,
+                                          icon: const Icon(Icons.close),
+                                          onPressed: () => ctrl.send(
+                                            JamCommand.remove(it.id),
+                                          ),
+                                        ),
+                                      ReorderableDragStartListener(
+                                        index: i,
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8),
+                                          child: Icon(
+                                            Icons.drag_handle_rounded,
+                                            color: cc.textMuted,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                    ),
+                  ],
+                ),
+                Positioned(
+                  right: CcDims.margin,
+                  bottom: CcDims.margin,
+                  child: FloatingActionButton.extended(
+                    backgroundColor: cc.accent,
+                    foregroundColor: cc.onAccent,
+                    onPressed: _add,
+                    icon: const Icon(Icons.add),
+                    label: Text(l.jamAddTracks),
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );

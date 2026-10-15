@@ -71,7 +71,9 @@ class TrackRow extends StatefulWidget {
 class _TrackRowState extends State<TrackRow> {
   bool _hover = false;
 
-  String _subtitle(BuildContext context) {
+  /// [albumColumn]: wide rows show the album in its own column, so the
+  /// subtitle keeps only the artist.
+  String _subtitle(BuildContext context, {bool albumColumn = false}) {
     final t = widget.track;
     final parts = <String>[];
     switch (widget.variant) {
@@ -84,12 +86,12 @@ class _TrackRowState extends State<TrackRow> {
         }
       case _:
         if (t.artist != null) parts.add(t.artist!);
-        if (t.album != null) parts.add(t.album!);
+        if (!albumColumn && t.album != null) parts.add(t.album!);
     }
     return parts.join(' · ');
   }
 
-  Widget _leading(BuildContext context, double cover) {
+  Widget _leading(BuildContext context, double cover, {bool bars = true}) {
     final cc = context.cc;
     final t = widget.track;
     if (widget.variant == TrackRowVariant.album) {
@@ -107,7 +109,7 @@ class _TrackRowState extends State<TrackRow> {
       );
     }
     final image = CoverImage(coverKey: t.coverKey, size: cover);
-    if (!widget.isCurrent) return image;
+    if (!widget.isCurrent || !bars) return image;
     return Stack(
       alignment: Alignment.center,
       children: [
@@ -121,6 +123,78 @@ class _TrackRowState extends State<TrackRow> {
           ),
           alignment: Alignment.center,
           child: NowPlayingBars(playing: widget.isPlaying, size: cover * 0.4),
+        ),
+      ],
+    );
+  }
+
+  /// Wide rows end with [heart slot] [duration] [more slot]: fixed widths so
+  /// the columns line up whether or not the actions are visible.
+  Widget _wideTail(BuildContext context) {
+    final cc = context.cc;
+    final l = context.l10n;
+    final theme = Theme.of(context).textTheme;
+    final fav = widget.track.isFavorite;
+    final showHeart = _hover || fav;
+    if (widget.variant == TrackRowVariant.pick ||
+        widget.variant == TrackRowVariant.queue) {
+      return Row(
+        children: [
+          SizedBox(
+            width: 56,
+            child: Text(
+              formatDuration(widget.track.durationMs),
+              textAlign: TextAlign.end,
+              style: theme.labelSmall,
+            ),
+          ),
+          _trailing(context, true),
+        ],
+      );
+    }
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox(
+          width: 40,
+          child: showHeart && widget.onFavorite != null
+              ? IconButton(
+                  tooltip: fav ? l.removeFromFavorites : l.favorite,
+                  onPressed: widget.onFavorite,
+                  visualDensity: VisualDensity.compact,
+                  icon: Icon(
+                    fav
+                        ? Icons.favorite_rounded
+                        : Icons.favorite_border_rounded,
+                    size: 18,
+                    color: fav ? cc.accent : cc.textMuted,
+                  ),
+                )
+              : null,
+        ),
+        SizedBox(
+          width: 56,
+          child: Text(
+            formatDuration(widget.track.durationMs),
+            textAlign: TextAlign.center,
+            style: theme.labelSmall?.copyWith(
+              fontFeatures: const [FontFeature.tabularFigures()],
+            ),
+          ),
+        ),
+        SizedBox(
+          width: 40,
+          child: widget.onMore == null
+              ? null
+              : Opacity(
+                  opacity: _hover ? 1 : 0,
+                  child: IconButton(
+                    tooltip: l.moreOptions,
+                    onPressed: widget.onMore,
+                    visualDensity: VisualDensity.compact,
+                    icon: Icon(Icons.more_horiz_rounded, color: cc.textMuted),
+                  ),
+                ),
         ),
       ],
     );
@@ -155,7 +229,7 @@ class _TrackRowState extends State<TrackRow> {
       case _:
     }
     final showActions = !wide || _hover || fav;
-    return Row(
+    final actions = Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         if (wide && (_hover || fav) && widget.onFavorite != null)
@@ -189,15 +263,34 @@ class _TrackRowState extends State<TrackRow> {
           ),
       ],
     );
+    // Same width whether or not the actions show, so the columns line up.
+    return wide
+        ? SizedBox(
+            width: 96,
+            child: Align(alignment: Alignment.centerRight, child: actions),
+          )
+        : actions;
   }
 
+  /// Columns (# · title · album · duration) only when the row itself is wide
+  /// enough: the desktop side panel is 320 px inside a wide window.
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, c) => _row(
+      context,
+      MediaQuery.sizeOf(context).width >= CcDims.wideBreakpoint &&
+          c.maxWidth >= 520,
+    ),
+  );
+
+  Widget _row(BuildContext context, bool wide) {
     final cc = context.cc;
     final theme = Theme.of(context);
-    final wide = MediaQuery.sizeOf(context).width >= CcDims.wideBreakpoint;
     final t = widget.track;
-    final subtitle = _subtitle(context);
+    final subtitle = _subtitle(
+      context,
+      albumColumn: wide && widget.variant != TrackRowVariant.pick,
+    );
     final cover = widget.compact ? 40.0 : 48.0;
     final titleStyle = theme.textTheme.bodyLarge?.copyWith(
       color: widget.isCurrent ? cc.accent : cc.text,
@@ -244,7 +337,8 @@ class _TrackRowState extends State<TrackRow> {
                   ),
           ),
           if (widget.variant != TrackRowVariant.album) ...[
-            _leading(context, cover),
+            // The bars already sit in the number column.
+            _leading(context, cover, bars: false),
             const SizedBox(width: 12),
           ],
           Expanded(flex: 5, child: titleBlock),
@@ -260,15 +354,7 @@ class _TrackRowState extends State<TrackRow> {
               ),
             ),
           ],
-          SizedBox(
-            width: 56,
-            child: Text(
-              formatDuration(t.durationMs),
-              textAlign: TextAlign.end,
-              style: theme.textTheme.labelSmall,
-            ),
-          ),
-          _trailing(context, true),
+          _wideTail(context),
         ],
       );
     } else {

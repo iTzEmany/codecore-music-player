@@ -42,7 +42,10 @@ class _SidePanelViewState extends ConsumerState<SidePanelView> {
       SidePanel.none => '',
     };
     final Widget body = switch (widget.panel) {
-      SidePanel.queue => QueueSheet(scrollController: _scroll),
+      SidePanel.queue => QueueSheet(
+        scrollController: _scroll,
+        showTitle: false,
+      ),
       SidePanel.lyrics => const LyricsScreen(embedded: true),
       SidePanel.info =>
         track == null

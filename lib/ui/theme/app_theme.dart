@@ -17,7 +17,12 @@ class CcPageTransitionsBuilder extends PageTransitionsBuilder {
   ) {
     if (MediaQuery.disableAnimationsOf(context)) return child;
     return const FadeUpwardsPageTransitionsBuilder().buildTransitions(
-        route, context, animation, secondaryAnimation, child);
+      route,
+      context,
+      animation,
+      secondaryAnimation,
+      child,
+    );
   }
 }
 
@@ -84,7 +89,8 @@ ThemeData buildTheme(AppThemeId id, bool compact) {
     splashFactory: InkRipple.splashFactory,
     pageTransitionsTheme: PageTransitionsTheme(
       builders: {
-        for (final p in TargetPlatform.values) p: const CcPageTransitionsBuilder(),
+        for (final p in TargetPlatform.values)
+          p: const CcPageTransitionsBuilder(),
       },
     ),
     visualDensity: compact ? VisualDensity.compact : VisualDensity.standard,
@@ -122,6 +128,7 @@ ThemeData buildTheme(AppThemeId id, bool compact) {
       ),
       titleTextStyle: text.titleMedium,
       contentTextStyle: text.bodyMedium?.copyWith(color: c.text),
+      constraints: const BoxConstraints(minWidth: 280, maxWidth: 480),
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
@@ -236,4 +243,24 @@ double trackRowExtent(bool compact) => compact ? 52 : 64;
 double trackRowExtentOf(BuildContext context, bool compact) {
   final scale = MediaQuery.textScalerOf(context).scale(16) / 16;
   return trackRowExtent(compact) * (scale > 1 ? scale : 1);
+}
+
+/// Look of a row while it is being dragged to a new position: a soft
+/// amethyst background and a little elevation, so it is clear it moves.
+Widget ccDragProxy(BuildContext context, Widget child, Animation<double> anim) {
+  final cc = context.cc;
+  return AnimatedBuilder(
+    animation: anim,
+    builder: (_, _) {
+      final t = Curves.easeOut.transform(anim.value);
+      return Material(
+        elevation: 6 * t,
+        color: Color.lerp(cc.surface1, cc.accent.withValues(alpha: 0.28), t),
+        shadowColor: Colors.black,
+        borderRadius: BorderRadius.circular(CcDims.rGrid),
+        clipBehavior: Clip.antiAlias,
+        child: child,
+      );
+    },
+  );
 }

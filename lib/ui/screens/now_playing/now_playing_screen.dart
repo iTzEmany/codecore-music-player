@@ -88,7 +88,16 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                       if (wide) {
                         return Row(
                           children: [
-                            Expanded(child: player),
+                            Expanded(
+                              child: Center(
+                                child: ConstrainedBox(
+                                  constraints: const BoxConstraints(
+                                    maxWidth: 560,
+                                  ),
+                                  child: player,
+                                ),
+                              ),
+                            ),
                             SizedBox(
                               width: 380,
                               child: ListView(
