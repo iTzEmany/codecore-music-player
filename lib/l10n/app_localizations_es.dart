@@ -1644,4 +1644,52 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get csvImportAlsoAccepts =>
       'También se aceptan: TuneMyMusic, Soundiiz, Last.fm (CSV), M3U/M3U8, XSPF.';
+
+  @override
+  String get csvImportPlanned => 'Coincidencias listas: revísalas y descarga';
+
+  @override
+  String get csvImportLinkOnly => 'Solo enlazar (sin descargas)';
+
+  @override
+  String get csvImportLinkOnlyHint =>
+      'Crea la lista con lo que ya tienes y nada más';
+
+  @override
+  String get csvImportPlanFirst => 'Revisar antes de descargar';
+
+  @override
+  String get csvImportPlanFirstHint =>
+      'Busca todo y luego eliges qué descargar';
+
+  @override
+  String get csvImportPlanTitle => 'Coincidencias';
+
+  @override
+  String csvImportPlanGo(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Descargar $n canciones',
+      one: 'Descargar 1 canción',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get csvImportPlanKnown => 'ya descargada';
+
+  @override
+  String get csvImportPlanEmpty => 'Nada que descargar';
+
+  @override
+  String csvImportBannerPlanned(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n canciones por descargar',
+      one: '1 canción por descargar',
+    );
+    return 'Coincidencias listas: $_temp0';
+  }
 }

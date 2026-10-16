@@ -882,5 +882,29 @@
     }
   },
   "csvImportTooBig": "Die Datei ist zu groß für eine Playlist (höchstens 5 MB und 10.000 Titel)",
-  "csvImportAlsoAccepts": "Auch akzeptiert: TuneMyMusic, Soundiiz, Last.fm (CSV), M3U/M3U8, XSPF."
+  "csvImportAlsoAccepts": "Auch akzeptiert: TuneMyMusic, Soundiiz, Last.fm (CSV), M3U/M3U8, XSPF.",
+  "csvImportPlanned": "Treffer bereit: prüfen und herunterladen",
+  "csvImportLinkOnly": "Nur verknüpfen (keine Downloads)",
+  "csvImportLinkOnlyHint": "Erstellt die Playlist nur aus dem, was du schon hast",
+  "csvImportPlanFirst": "Vor dem Download prüfen",
+  "csvImportPlanFirstHint": "Sucht alles, dann wählst du, was geladen wird",
+  "csvImportPlanTitle": "Treffer",
+  "csvImportPlanGo": "{n, plural, one{1 Titel laden} other{{n} Titel laden}}",
+  "csvImportPlanKnown": "bereits geladen",
+  "csvImportPlanEmpty": "Nichts herunterzuladen",
+  "csvImportBannerPlanned": "Treffer bereit: {n, plural, one{1 Titel zum Laden} other{{n} Titel zum Laden}}",
+  "@csvImportPlanGo": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@csvImportBannerPlanned": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  }
 }

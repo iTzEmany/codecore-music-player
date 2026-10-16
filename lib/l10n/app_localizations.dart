@@ -2933,6 +2933,66 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Accetta anche: TuneMyMusic, Soundiiz, Last.fm (CSV), M3U/M3U8, XSPF.'**
   String get csvImportAlsoAccepts;
+
+  /// No description provided for @csvImportPlanned.
+  ///
+  /// In it, this message translates to:
+  /// **'Abbinamenti pronti: controllali e scarica'**
+  String get csvImportPlanned;
+
+  /// No description provided for @csvImportLinkOnly.
+  ///
+  /// In it, this message translates to:
+  /// **'Solo collega (nessun download)'**
+  String get csvImportLinkOnly;
+
+  /// No description provided for @csvImportLinkOnlyHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Crea la playlist con quello che hai già e basta'**
+  String get csvImportLinkOnlyHint;
+
+  /// No description provided for @csvImportPlanFirst.
+  ///
+  /// In it, this message translates to:
+  /// **'Rivedi prima di scaricare'**
+  String get csvImportPlanFirst;
+
+  /// No description provided for @csvImportPlanFirstHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Cerca tutto, poi scegli cosa scaricare'**
+  String get csvImportPlanFirstHint;
+
+  /// No description provided for @csvImportPlanTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Abbinamenti'**
+  String get csvImportPlanTitle;
+
+  /// No description provided for @csvImportPlanGo.
+  ///
+  /// In it, this message translates to:
+  /// **'{n, plural, one{Scarica 1 brano} other{Scarica {n} brani}}'**
+  String csvImportPlanGo(int n);
+
+  /// No description provided for @csvImportPlanKnown.
+  ///
+  /// In it, this message translates to:
+  /// **'già scaricato'**
+  String get csvImportPlanKnown;
+
+  /// No description provided for @csvImportPlanEmpty.
+  ///
+  /// In it, this message translates to:
+  /// **'Niente da scaricare'**
+  String get csvImportPlanEmpty;
+
+  /// No description provided for @csvImportBannerPlanned.
+  ///
+  /// In it, this message translates to:
+  /// **'Abbinamenti pronti: {n, plural, one{1 brano da scaricare} other{{n} brani da scaricare}}'**
+  String csvImportBannerPlanned(int n);
 }
 
 class _AppLocalizationsDelegate

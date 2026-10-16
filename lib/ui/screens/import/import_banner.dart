@@ -5,6 +5,7 @@ import '../../../l10n/l10n_ext.dart';
 import '../../../providers/import_providers.dart';
 import '../../shell/shell_nav.dart';
 import '../../theme/tokens.dart';
+import 'import_plan_screen.dart';
 import 'import_review_screen.dart';
 
 /// Top of a playlist page while its CSV import is running or has rows that
@@ -18,12 +19,15 @@ class ImportBanner extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final p = ref.watch(playlistImportProgressProvider(playlistId));
     final running = ref.watch(importProgressProvider).any((i) => i.playlistId == playlistId);
-    if (p == null || (!running && p.review == 0 && p.missing == 0)) {
+    if (p == null ||
+        (!running && p.review == 0 && p.missing == 0 && p.planned == 0)) {
       return const SizedBox.shrink();
     }
     final l = context.l10n;
     final cc = context.cc;
-    final text = p.paused
+    final text = p.planned > 0 && p.paused
+        ? l.csvImportBannerPlanned(p.planned)
+        : p.paused
         ? l.csvImportBannerPaused(p.done, p.total, p.review, p.missing)
         : l.csvImportBanner(p.done, p.total, p.review, p.missing);
     final svc = ref.read(playlistImportServiceProvider);
@@ -42,12 +46,20 @@ class ImportBanner extends ConsumerWidget {
               Expanded(
                 child: Text(text, style: Theme.of(context).textTheme.bodyMedium),
               ),
-              if (p.paused)
+              if (p.paused && p.planned == 0)
                 TextButton(
                   onPressed: () => svc.resume(p.id),
                   child: Text(l.csvImportResume),
                 ),
-              if (p.review + p.missing > 0)
+              if (p.planned > 0)
+                TextButton(
+                  onPressed: () => ShellNav.open<void>(
+                    context,
+                    ImportPlanScreen(importId: p.id),
+                  ),
+                  child: Text(l.csvImportReview),
+                )
+              else if (p.review + p.missing > 0)
                 TextButton(
                   onPressed: () => ShellNav.open<void>(
                     context,

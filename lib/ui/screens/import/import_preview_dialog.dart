@@ -3,12 +3,15 @@ import 'package:flutter/material.dart';
 import '../../../core/constants.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../services/import/exportify_reader.dart';
+import '../../../services/import/import_options.dart';
 import '../../theme/tokens.dart';
 
 class ImportChoice {
-  const ImportChoice(this.name, this.intoPlaylistId);
+  const ImportChoice(this.name, this.intoPlaylistId,
+      [this.options = const ImportOptions()]);
 
   final String name;
+  final ImportOptions options;
 
   /// Existing playlist to update; null = create a new one.
   final int? intoPlaylistId;
@@ -37,6 +40,8 @@ class _State extends State<ImportPreviewDialog> {
     text: widget.csv.name,
   );
   bool _update = true;
+  bool _linkOnly = false;
+  bool _planFirst = false;
 
   @override
   void dispose() {
@@ -94,6 +99,23 @@ class _State extends State<ImportPreviewDialog> {
                   style: theme.bodySmall?.copyWith(color: cc.textMuted),
                 ),
               ),
+            if (kEnableYoutube && todo > 0) ...[
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(l.csvImportLinkOnly),
+                subtitle: Text(l.csvImportLinkOnlyHint),
+                value: _linkOnly,
+                onChanged: (v) => setState(() => _linkOnly = v),
+              ),
+              if (!_linkOnly)
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(l.csvImportPlanFirst),
+                  subtitle: Text(l.csvImportPlanFirstHint),
+                  value: _planFirst,
+                  onChanged: (v) => setState(() => _planFirst = v),
+                ),
+            ],
             if (same != null) ...[
               const SizedBox(height: 16),
               Text(l.csvImportExists, style: theme.titleSmall),
@@ -132,6 +154,10 @@ class _State extends State<ImportPreviewDialog> {
                   ImportChoice(
                     _name.text.trim(),
                     same != null && _update ? same : null,
+                    ImportOptions(
+                      linkOnly: _linkOnly,
+                      planFirst: _planFirst && !_linkOnly,
+                    ),
                   ),
                 ),
           child: Text(l.csvImportGo),

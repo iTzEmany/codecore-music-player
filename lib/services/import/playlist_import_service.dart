@@ -11,6 +11,7 @@ import '../online/download_queue.dart';
 import '../online/youtube_service.dart';
 import 'exportify_reader.dart';
 import 'import_candidate.dart';
+import 'import_options.dart';
 import 'playlist_paths.dart';
 import 'track_matcher.dart';
 
@@ -28,6 +29,7 @@ String importTag(int importId, int rowIndex) => '$_tagPrefix$importId:$rowIndex'
 }
 
 enum ImportEventKind {
+  planned,
   rateLimited,
   network,
   toolMissing,
@@ -116,6 +118,7 @@ class PlaylistImportService {
     ImportedPlaylist csv, {
     String? name,
     int? intoPlaylistId,
+    ImportOptions options = const ImportOptions(),
   }) async {
     final label = (name?.trim().isNotEmpty ?? false) ? name!.trim() : csv.name;
     final playlistId = intoPlaylistId ?? await playlists.create(label);
@@ -127,7 +130,12 @@ class PlaylistImportService {
         playlistId: playlistId,
         sourceName: label,
         rows: rows,
-        sourceKind: csv.kind);
+        sourceKind: csv.kind,
+        folderPath: options.folderPath,
+        numberFiles: options.numberFiles,
+        linkOnly: options.linkOnly,
+        planFirst: options.planFirst,
+        fetchCovers: options.fetchCovers);
     if (rows.isEmpty) {
       await imports.setStatus(id, ImportStatus.finished);
       _emit(ImportEvent(ImportEventKind.completed, id));
@@ -280,15 +288,30 @@ class PlaylistImportService {
       await _link(importId, row, hit.id);
       return;
     }
-    if (!youtubeEnabled) {
+    final imp = await imports.get(importId);
+    if (!youtubeEnabled || (imp?.linkOnly ?? false)) {
       await imports.setItem(importId, row.index,
-          status: ImportItemStatus.notFound);
+          status: ImportItemStatus.notFound,
+          note: Value(youtubeEnabled ? ImportNote.linkOnly : ImportNote.youtubeOff));
+      return;
+    }
+    // Approved in the plan screen: the choice is already made, no search.
+    final approved = _approvedChoice(item);
+    if (approved != null) {
+      await _queueDownload(row, importId, approved.toYtResult(),
+          score: item.score);
       return;
     }
     try {
       final decision = await _find(row);
       _failStreak = 0;
       switch (decision.kind) {
+        case MatchKind.sure when imp?.planFirst ?? false:
+          await imports.setItem(importId, row.index,
+              status: ImportItemStatus.planned,
+              videoId: Value(decision.best!.result.id),
+              candidates: Value(encodeCandidates(decision.top)),
+              score: Value(decision.best!.score));
         case MatchKind.sure:
           await _queueDownload(row, importId, decision.best!.result,
               score: decision.best!.score);
@@ -296,10 +319,12 @@ class PlaylistImportService {
           await imports.setItem(importId, row.index,
               status: ImportItemStatus.review,
               candidates: Value(encodeCandidates(decision.top)),
-              score: Value(decision.best!.score));
+              score: Value(decision.best!.score),
+              note: const Value(ImportNote.lowScore));
         case MatchKind.notFound:
           await imports.setItem(importId, row.index,
-              status: ImportItemStatus.notFound);
+              status: ImportItemStatus.notFound,
+              note: const Value(ImportNote.noResults));
       }
     } on YtException catch (e, st) {
       AppLog.w('import search failed for "${row.title}"', e, st);
@@ -307,6 +332,43 @@ class PlaylistImportService {
       return;
     }
     await Future<void>.delayed(searchGap);
+  }
+
+  /// A row put back to «pending» by [startPlanned] still carries the candidates
+  /// it was planned with; its chosen video is the one to download.
+  ImportCandidate? _approvedChoice(PlaylistImportItem item) {
+    final id = item.videoId;
+    if (id == null || item.candidates == null) return null;
+    final all = decodeCandidates(item.candidates);
+    for (final c in all) {
+      if (c.id == id) return c;
+    }
+    return all.isEmpty ? null : all.first;
+  }
+
+  // ---- planning -----------------------------------------------------------
+
+  /// The user picked another of the planned candidates for a row.
+  Future<void> choosePlanned(
+      int importId, int rowIndex, ImportCandidate choice) =>
+      imports.setItem(importId, rowIndex,
+          status: ImportItemStatus.planned,
+          videoId: Value(choice.id),
+          score: Value(choice.score));
+
+  /// «Scarica N brani»: every planned row goes back to the engine as already
+  /// decided, so the usual throttling and pausing apply. Returns how many.
+  Future<int> startPlanned(int importId) async {
+    var n = 0;
+    for (final it in await imports.items(importId)) {
+      if (it.state != ImportItemStatus.planned) continue;
+      await imports.setItem(importId, it.rowIndex,
+          status: ImportItemStatus.pending);
+      n++;
+    }
+    await imports.setStatus(importId, ImportStatus.running);
+    _kick();
+    return n;
   }
 
   /// The three searches made for [row]: ISRC, `artist title`, `artist - title`.
@@ -487,6 +549,11 @@ class PlaylistImportService {
     final c = await imports.counts(importId);
     if ((c[ImportItemStatus.pending] ?? 0) == 0 &&
         (c[ImportItemStatus.queued] ?? 0) == 0) {
+      if ((c[ImportItemStatus.planned] ?? 0) > 0) {
+        await imports.setStatus(importId, ImportStatus.paused);
+        _emit(ImportEvent(ImportEventKind.planned, importId));
+        return;
+      }
       await imports.setStatus(importId, ImportStatus.finished);
       _emit(ImportEvent(ImportEventKind.completed, importId));
     }

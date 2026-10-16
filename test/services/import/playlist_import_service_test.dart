@@ -7,6 +7,7 @@ import 'package:codecore/data/repositories/playlist_repository.dart';
 import 'package:codecore/data/repositories/track_repository.dart';
 import 'package:codecore/services/import/exportify_reader.dart';
 import 'package:codecore/services/import/import_candidate.dart';
+import 'package:codecore/services/import/import_options.dart';
 import 'package:codecore/services/import/playlist_import_service.dart';
 import 'package:codecore/services/online/download_queue.dart';
 import 'package:codecore/services/online/youtube_service.dart';
@@ -445,6 +446,85 @@ void main() {
       await idle();
       await finish(importTag(id, 0), '/m/one.mp3', seconds: 999);
       expect((await imports.item(id, 0))!.state, ImportItemStatus.downloaded);
+    });
+  });
+
+  group('link only', () {
+    test('links what the library has and never calls YouTube', () async {
+      await addTrack('/m/felicita.mp3', 'Felicità', 'Lucio Dalla', 345);
+      final id = await service.start(
+          csv([row(0, 'Felicità', 'Lucio Dalla', 345), row(1, 'One', 'Band', 200)]),
+          options: const ImportOptions(linkOnly: true));
+      await idle();
+      expect(yt.searches, 0);
+      expect(queued, isEmpty);
+      expect((await imports.item(id, 0))!.state, ImportItemStatus.linked);
+      final other = (await imports.item(id, 1))!;
+      expect(other.state, ImportItemStatus.notFound);
+      expect(other.note, ImportNote.linkOnly);
+      expect((await imports.get(id))!.state, ImportStatus.finished);
+      expect((await imports.get(id))!.linkOnly, isTrue);
+    });
+  });
+
+  group('review before downloading', () {
+    setUp(() {
+      yt.songs['one'] = [topic('v1', 'One', 'Band', 200)];
+      yt.songs['two'] = [
+        topic('v2', 'Two', 'Band', 210),
+        topic('v2b', 'Two (alt)', 'Band', 211),
+      ];
+    });
+
+    Future<int> plan() async {
+      final id = await service.start(
+          csv([row(0, 'One', 'Band', 200), row(1, 'Two', 'Band', 210)]),
+          options: const ImportOptions(planFirst: true));
+      await idle();
+      return id;
+    }
+
+    test('searches everything, downloads nothing and waits', () async {
+      final id = await plan();
+      expect(queued, isEmpty);
+      expect((await imports.item(id, 0))!.state, ImportItemStatus.planned);
+      expect((await imports.item(id, 1))!.state, ImportItemStatus.planned);
+      expect((await imports.item(id, 0))!.videoId, 'v1');
+      expect(decodeCandidates((await imports.item(id, 1))!.candidates), isNotEmpty);
+      expect((await imports.get(id))!.state, ImportStatus.paused);
+      expect(events.map((e) => e.kind), contains(ImportEventKind.planned));
+    });
+
+    test('«Scarica» sends the plan through the normal engine', () async {
+      final id = await plan();
+      expect(await service.startPlanned(id), 2);
+      await idle();
+      expect(queued.map((q) => q.$1.id), ['v1', 'v2']);
+      expect((await imports.item(id, 0))!.state, ImportItemStatus.queued);
+      expect((await imports.get(id))!.state, ImportStatus.running);
+      expect(yt.queries.where((q) => q.startsWith('songs:band')).length, 2,
+          reason: 'no new searches for the approved rows');
+    });
+
+    test('another candidate can be chosen first; a skipped row is not downloaded',
+        () async {
+      final id = await plan();
+      final alt = decodeCandidates((await imports.item(id, 1))!.candidates)
+          .firstWhere((c) => c.id == 'v2b');
+      await service.choosePlanned(id, 1, alt);
+      await service.skip(id, 0);
+      expect(await service.startPlanned(id), 1);
+      await idle();
+      expect(queued.map((q) => q.$1.id), ['v2b']);
+    });
+
+    test('after the downloads the import finishes as usual', () async {
+      final id = await plan();
+      await service.startPlanned(id);
+      await idle();
+      await finish(importTag(id, 0), '/m/one.mp3');
+      await finish(importTag(id, 1), '/m/two.mp3');
+      expect((await imports.get(id))!.state, ImportStatus.finished);
     });
   });
 

@@ -108,13 +108,14 @@ class ImportProgress {
     required this.review,
     required this.missing,
     required this.paused,
+    this.planned = 0,
   });
 
   factory ImportProgress.from(
     PlaylistImport imp,
     List<PlaylistImportItem> items,
   ) {
-    var done = 0, review = 0, missing = 0;
+    var done = 0, review = 0, missing = 0, planned = 0;
     // Rows a sync took out of the source are no longer part of the import.
     final live = [
       for (final i in items)
@@ -135,8 +136,10 @@ class ImportProgress {
           done++;
         case ImportItemStatus.downloaded:
         case ImportItemStatus.linked:
-        case ImportItemStatus.skipped:
         case ImportItemStatus.planned:
+          planned++;
+          done++;
+        case ImportItemStatus.skipped:
           done++;
       }
     }
@@ -149,10 +152,11 @@ class ImportProgress {
       review: review,
       missing: missing,
       paused: imp.state == ImportStatus.paused,
+      planned: planned,
     );
   }
 
-  final int id, playlistId, total, done, review, missing;
+  final int id, playlistId, total, done, review, missing, planned;
   final String name;
   final bool paused;
 

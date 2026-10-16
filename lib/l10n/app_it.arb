@@ -1073,5 +1073,29 @@
     }
   },
   "csvImportTooBig": "Il file è troppo grande per essere una playlist (massimo 5 MB e 10.000 brani)",
-  "csvImportAlsoAccepts": "Accetta anche: TuneMyMusic, Soundiiz, Last.fm (CSV), M3U/M3U8, XSPF."
+  "csvImportAlsoAccepts": "Accetta anche: TuneMyMusic, Soundiiz, Last.fm (CSV), M3U/M3U8, XSPF.",
+  "csvImportPlanned": "Abbinamenti pronti: controllali e scarica",
+  "csvImportLinkOnly": "Solo collega (nessun download)",
+  "csvImportLinkOnlyHint": "Crea la playlist con quello che hai già e basta",
+  "csvImportPlanFirst": "Rivedi prima di scaricare",
+  "csvImportPlanFirstHint": "Cerca tutto, poi scegli cosa scaricare",
+  "csvImportPlanTitle": "Abbinamenti",
+  "csvImportPlanGo": "{n, plural, one{Scarica 1 brano} other{Scarica {n} brani}}",
+  "csvImportPlanKnown": "già scaricato",
+  "csvImportPlanEmpty": "Niente da scaricare",
+  "csvImportBannerPlanned": "Abbinamenti pronti: {n, plural, one{1 brano da scaricare} other{{n} brani da scaricare}}",
+  "@csvImportPlanGo": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@csvImportBannerPlanned": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  }
 }

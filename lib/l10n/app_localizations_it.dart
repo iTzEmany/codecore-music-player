@@ -1644,4 +1644,51 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get csvImportAlsoAccepts =>
       'Accetta anche: TuneMyMusic, Soundiiz, Last.fm (CSV), M3U/M3U8, XSPF.';
+
+  @override
+  String get csvImportPlanned => 'Abbinamenti pronti: controllali e scarica';
+
+  @override
+  String get csvImportLinkOnly => 'Solo collega (nessun download)';
+
+  @override
+  String get csvImportLinkOnlyHint =>
+      'Crea la playlist con quello che hai già e basta';
+
+  @override
+  String get csvImportPlanFirst => 'Rivedi prima di scaricare';
+
+  @override
+  String get csvImportPlanFirstHint => 'Cerca tutto, poi scegli cosa scaricare';
+
+  @override
+  String get csvImportPlanTitle => 'Abbinamenti';
+
+  @override
+  String csvImportPlanGo(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Scarica $n brani',
+      one: 'Scarica 1 brano',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get csvImportPlanKnown => 'già scaricato';
+
+  @override
+  String get csvImportPlanEmpty => 'Niente da scaricare';
+
+  @override
+  String csvImportBannerPlanned(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n brani da scaricare',
+      one: '1 brano da scaricare',
+    );
+    return 'Abbinamenti pronti: $_temp0';
+  }
 }

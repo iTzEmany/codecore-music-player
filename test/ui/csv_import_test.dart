@@ -105,4 +105,46 @@ void main() {
     expect(picked!.intoPlaylistId, isNull);
     await h.dispose(tester);
   });
+
+  testWidgets('preview offers «solo collega» and «rivedi prima» and returns them',
+      (tester) async {
+    tester.view.physicalSize = const Size(600, 1800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final h = await Harness.create(tester);
+    ImportChoice? picked;
+    await h.pump(
+        tester,
+        Builder(
+            builder: (context) => Scaffold(
+                body: TextButton(
+                    onPressed: () async => picked = await showDialog<ImportChoice>(
+                        context: context,
+                        builder: (_) => ImportPreviewDialog(
+                            csv: fixture(), known: 0, existing: const {})),
+                    child: const Text('open')))));
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Solo collega (nessun download)'), findsOneWidget);
+    expect(find.text('Rivedi prima di scaricare'), findsOneWidget);
+    await tester.tap(find.text('Rivedi prima di scaricare'));
+    await tester.pump();
+    await tester.tap(find.text('Importa'));
+    await tester.pumpAndSettle();
+    expect(picked!.options.planFirst, isTrue);
+    expect(picked!.options.linkOnly, isFalse);
+
+    // «Solo collega» wins and hides the other switch.
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Solo collega (nessun download)'));
+    await tester.pump();
+    expect(find.text('Rivedi prima di scaricare'), findsNothing);
+    await tester.tap(find.text('Importa'));
+    await tester.pumpAndSettle();
+    expect(picked!.options.linkOnly, isTrue);
+    expect(picked!.options.planFirst, isFalse);
+    await h.dispose(tester);
+  });
 }

@@ -1646,4 +1646,52 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get csvImportAlsoAccepts =>
       'Auch akzeptiert: TuneMyMusic, Soundiiz, Last.fm (CSV), M3U/M3U8, XSPF.';
+
+  @override
+  String get csvImportPlanned => 'Treffer bereit: prüfen und herunterladen';
+
+  @override
+  String get csvImportLinkOnly => 'Nur verknüpfen (keine Downloads)';
+
+  @override
+  String get csvImportLinkOnlyHint =>
+      'Erstellt die Playlist nur aus dem, was du schon hast';
+
+  @override
+  String get csvImportPlanFirst => 'Vor dem Download prüfen';
+
+  @override
+  String get csvImportPlanFirstHint =>
+      'Sucht alles, dann wählst du, was geladen wird';
+
+  @override
+  String get csvImportPlanTitle => 'Treffer';
+
+  @override
+  String csvImportPlanGo(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n Titel laden',
+      one: '1 Titel laden',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get csvImportPlanKnown => 'bereits geladen';
+
+  @override
+  String get csvImportPlanEmpty => 'Nichts herunterzuladen';
+
+  @override
+  String csvImportBannerPlanned(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n Titel zum Laden',
+      one: '1 Titel zum Laden',
+    );
+    return 'Treffer bereit: $_temp0';
+  }
 }

@@ -41,6 +41,8 @@ class _State extends ConsumerState<ImportEventListener> {
           (c[ImportItemStatus.notFound] ?? 0) +
               (c[ImportItemStatus.failed] ?? 0),
         );
+      case ImportEventKind.planned:
+        text = l.csvImportPlanned;
       case ImportEventKind.rateLimited:
         text = l.ytErrRateLimited;
         action = SnackBarAction(

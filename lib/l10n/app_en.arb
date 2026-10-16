@@ -882,5 +882,29 @@
     }
   },
   "csvImportTooBig": "The file is too big to be a playlist (5 MB and 10,000 tracks at most)",
-  "csvImportAlsoAccepts": "Also accepted: TuneMyMusic, Soundiiz, Last.fm (CSV), M3U/M3U8, XSPF."
+  "csvImportAlsoAccepts": "Also accepted: TuneMyMusic, Soundiiz, Last.fm (CSV), M3U/M3U8, XSPF.",
+  "csvImportPlanned": "Matches ready: check them and download",
+  "csvImportLinkOnly": "Link only (no downloads)",
+  "csvImportLinkOnlyHint": "Builds the playlist from what you already have, nothing more",
+  "csvImportPlanFirst": "Review before downloading",
+  "csvImportPlanFirstHint": "Searches everything, then you pick what to download",
+  "csvImportPlanTitle": "Matches",
+  "csvImportPlanGo": "{n, plural, one{Download 1 song} other{Download {n} songs}}",
+  "csvImportPlanKnown": "already downloaded",
+  "csvImportPlanEmpty": "Nothing to download",
+  "csvImportBannerPlanned": "Matches ready: {n, plural, one{1 song to download} other{{n} songs to download}}",
+  "@csvImportPlanGo": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@csvImportBannerPlanned": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  }
 }

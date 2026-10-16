@@ -31,7 +31,10 @@ Future<void> startCsvImport(BuildContext context, WidgetRef ref) async {
   final started = context.l10n.csvImportStarted;
   await ref
       .read(playlistImportServiceProvider)
-      .start(csv, name: choice.name, intoPlaylistId: choice.intoPlaylistId);
+      .start(csv,
+          name: choice.name,
+          intoPlaylistId: choice.intoPlaylistId,
+          options: choice.options);
   messenger
     ..clearSnackBars()
     ..showSnackBar(SnackBar(content: Text(started)));
