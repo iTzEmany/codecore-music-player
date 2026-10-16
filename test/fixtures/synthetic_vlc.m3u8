@@ -1,0 +1,10 @@
+#EXTM3U
+#EXTINF:187,John Lennon - Imagine
+/home/user/Music/Beatles/John Lennon/Imagine.mp3
+#EXTINF:334,Pink Floyd - Wish You Were Here
+/home/user/Music/Pink Floyd/Wish You Were Here.flac
+#EXTINF:-1,Radio Capital
+http://radio.example.com/stream
+#EXTINF:180,Lucio Corsi - Sigarette
+../Lucio Corsi/Volevo essere un duro/02 Sigarette.mp3
+/home/user/Music/untagged/Senza titolo.ogg

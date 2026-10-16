@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:drift/drift.dart' show Value;
+import 'package:path/path.dart' as p;
 
 import '../../core/app_log.dart';
 import '../../data/db/app_database.dart';
@@ -10,6 +11,7 @@ import '../online/download_queue.dart';
 import '../online/youtube_service.dart';
 import 'exportify_reader.dart';
 import 'import_candidate.dart';
+import 'playlist_paths.dart';
 import 'track_matcher.dart';
 
 const _tagPrefix = 'import:';
@@ -117,7 +119,7 @@ class PlaylistImportService {
   }) async {
     final label = (name?.trim().isNotEmpty ?? false) ? name!.trim() : csv.name;
     final playlistId = intoPlaylistId ?? await playlists.create(label);
-    var rows = csv.rows;
+    var rows = _withAbsoluteLocations(csv);
     if (intoPlaylistId != null) {
       rows = await _withoutAlreadyImported(intoPlaylistId, rows);
     }
@@ -133,6 +135,20 @@ class PlaylistImportService {
       _kick();
     }
     return id;
+  }
+
+  /// Relative entries of a playlist file are saved relative to its folder, so
+  /// resuming later does not depend on where the file was.
+  List<ImportRow> _withAbsoluteLocations(ImportedPlaylist list) {
+    final base = list.baseDir;
+    if (base == null) return list.rows;
+    return [
+      for (final r in list.rows)
+        r.location != null && !isAbsoluteLocalPath(r.location!)
+            ? r.withLocation(p.posix.normalize(
+                '${base.replaceAll(r'\', '/')}/${r.location}'))
+            : r,
+    ];
   }
 
   Future<List<ImportRow>> _withoutAlreadyImported(

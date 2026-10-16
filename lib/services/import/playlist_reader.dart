@@ -4,12 +4,17 @@ import 'dart:typed_data';
 
 import 'csv_profiles.dart';
 import 'imported_playlist.dart';
+import 'm3u_reader.dart';
+import 'xspf_reader.dart';
 
 typedef PlaylistReader = ImportedPlaylist Function(String fileName, String text);
 
 /// File extensions the importer can read, each with the function that does.
 final Map<String, PlaylistReader> playlistReaders = {
   'csv': readCsvPlaylist,
+  'm3u': readM3u,
+  'm3u8': readM3u,
+  'xspf': readXspf,
 };
 
 List<String> get supportedPlaylistExtensions => playlistReaders.keys.toList();

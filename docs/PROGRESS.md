@@ -184,7 +184,7 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 15.2 Schema v5 per le importazioni
 - [x] 15.3 Interfaccia comune dei lettori
 - [~] 15.4 Lettori CSV: TuneMyMusic, Soundiiz, Last.fm, generico
-- [ ] 15.5 Lettori M3U/M3U8 e XSPF
+- [~] 15.5 Lettori M3U/M3U8 e XSPF
 - [ ] 15.6 Anteprima degli abbinamenti e «solo collega»
 - [ ] 15.7 Soglie regolabili e CSV grandi
 - [ ] 15.8 Contatore e tempo residuo
@@ -410,6 +410,8 @@ L'agente riparte sempre dal primo task non spuntato.
 - 15.3: `ImportedPlaylist` (con `kind`) in `imported_playlist.dart`; `ExportifyPlaylist` resta come `typedef`. `playlist_reader.dart`: registro `playlistReaders` per estensione (oggi `csv`; 15.5 aggiunge `m3u`, `m3u8`, `xspf`), `readPlaylistFile`, `…InIsolate`, `decodePlaylistBytes` (UTF-8 → Latin-1 per `.m3u`). Foglio d'importazione: «Importa una playlist», istruzioni Exportify per prime, riga «Accetta anche…»; `checkCsvSize` vale per qualunque file (5 MB). Chiave ARB `csvImportNotExportify` riscritta come «formato non riconosciuto».
 
 - 15.4: invece di profili separati, un unico lettore (`csv_profiles.dart`, `readCsvPlaylist`) che trova le colonne per sinonimi (`track name`/`track`/`title`/`song`…, `artist name(s)`/`artist name`/`artist`/`band`…, `duration (ms)`/`duration`/`length`…) e **etichetta** la sorgente dall'intestazione (`detectCsvKind`). Durata: `m:ss`/`h:mm:ss`, oppure numero (≥ 10 000 o intestazione «ms» → ms, altrimenti secondi). Artisti separati solo da `;`. Last.fm: righe ripetute (stesso titolo+artista, senza distinzione di maiuscole) → una sola, ordine della prima apparizione. Se il file ha una sola «Playlist (name)» quel nome vince su quello del file. **Fixture sintetiche** (`test/fixtures/synthetic_*.csv`) perché mancano file veri → `[~]`. `exportify_reader.dart` è ora un sottile involucro.
+
+- 15.5: lettori `m3u_reader.dart` (EXTINF, `#PLAYLIST`, `file://`, percorsi Windows, URL web solo etichetta, righe illeggibili in `skipped`) e `xspf_reader.dart` (nostro, a espressioni regolari: `location` decodificato, entità/CDATA, durata in ms) — **pacchetto `xml` non necessario** sulle fixture sintetiche (da riverificare con un file XSPF vero). `LibraryIndex.findByPath(location, baseDir)`: percorso assoluto esatto (senza distinzione di maiuscole), poi per cartelle finali (2–3 segmenti, solo se unico) — così funziona anche tra dispositivi; relativo: join con la cartella del file, poi per cartelle finali. `ImportedPlaylist.baseDir` (impostata dal foglio) e `start()` rende assoluti i percorsi relativi. Prestazioni: 5.000 voci lette e cercate in libreria in < 2 s (test). Fixture sintetiche → `[~]`.
 
 ## Note di deviazione (Fase 12)
 - 12.1 (2026-10-16): CSV vero = `Just_a_mood.csv` (34 brani; intestazioni `Track URI, ISRC, Track Name, Album Name, Artist Name(s), …, Duration (ms)`; **più artisti separati da `;`**). yt-dlp di sistema 2024.04.09 NON legge più YouTube («Please sign in»): provato con yt-dlp 2026.08.19 (binario standalone). `https://music.youtube.com/search?q=…#songs` funziona; in modalità flat dà ~460 voci con solo `id`/`title` (nessuna durata), **senza `--flat-playlist` e con `--playlist-items 1-5`** ogni voce ha `channel`, `artists[]`, `track`, `album`, `duration` in ~5–8 s → si usa quella. `YtResult` guadagna `artists` e `album`.

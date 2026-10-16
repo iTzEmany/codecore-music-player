@@ -22,6 +22,17 @@ class ImportRow {
   /// Path or URL of a local M3U/XSPF entry, tried against the library first.
   final String? location;
 
+  ImportRow withLocation(String? location) => ImportRow(
+        index: index,
+        title: title,
+        artists: artists,
+        album: album,
+        durationMs: durationMs,
+        isrc: isrc,
+        spotifyUri: spotifyUri,
+        location: location,
+      );
+
   String get primaryArtist => artists.isEmpty ? '' : artists.first;
   String get artistLine => artists.join(', ');
 }

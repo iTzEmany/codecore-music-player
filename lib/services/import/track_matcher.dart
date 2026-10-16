@@ -1,7 +1,10 @@
+import 'package:path/path.dart' as p;
+
 import '../../core/import_row.dart';
 import '../../core/text_utils.dart';
 import '../online/query_cleaner.dart';
 import '../online/youtube_service.dart';
+import 'playlist_paths.dart';
 
 final _remasterTail = RegExp(
     r'\s+[-–]\s+(\d{4}\s+)?(digital\s+)?remaster(ed)?\b.*$',
@@ -45,14 +48,68 @@ class LibraryIndex {
           .putIfAbsent('${matchTitleKey(t.title)}|${_artistKey(t.artist ?? '')}',
               () => [])
           .add(t);
+      final path = t.path;
+      if (path != null) {
+        final key = pathKey(path);
+        _byPath[key] = t;
+        _byBase.putIfAbsent(basenameOf(key), () => []).add((key, t));
+      }
     }
   }
 
   final Map<String, List<LibraryEntryLite>> _byKey = {};
+  final Map<String, LibraryEntryLite> _byPath = {};
+  final Map<String, List<(String, LibraryEntryLite)>> _byBase = {};
+
+  /// The library track a playlist entry points to. Absolute paths match
+  /// exactly; a path from another device or a relative one (to [baseDir], or
+  /// to wherever the library is) matches by its trailing folders when that
+  /// leaves a single candidate.
+  LibraryEntryLite? findByPath(String location, {String? baseDir}) {
+    final local = localPathFromLocation(location);
+    if (local == null || local.isEmpty) return null;
+    final key = pathKey(local);
+    if (isAbsoluteLocalPath(local)) {
+      return _byPath[key] ?? _bySuffix(key, minSegments: 2, maxSegments: 3);
+    }
+    if (baseDir != null) {
+      final joined = p.posix.normalize(
+          '${baseDir.replaceAll(r'\', '/')}/${local.replaceAll(r'\', '/')}');
+      final hit = _byPath[joined.toLowerCase()];
+      if (hit != null) return hit;
+    }
+    final clean = p.posix
+        .normalize(key)
+        .split('/')
+        .where((s) => s != '..' && s != '.')
+        .join('/');
+    return _bySuffix(clean, minSegments: 1, maxSegments: 4);
+  }
+
+  LibraryEntryLite? _bySuffix(String key,
+      {required int minSegments, required int maxSegments}) {
+    final candidates = _byBase[basenameOf(key)];
+    if (candidates == null) return null;
+    final parts = key.split('/').where((s) => s.isNotEmpty).toList();
+    for (var n = parts.length < maxSegments ? parts.length : maxSegments;
+        n >= minSegments && n >= 1;
+        n--) {
+      final suffix = '/${parts.sublist(parts.length - n).join('/')}';
+      final hits = [for (final c in candidates) if (c.$1.endsWith(suffix)) c.$2];
+      if (hits.length == 1) return hits.single;
+      if (hits.length > 1) return null;
+    }
+    return null;
+  }
 
   /// Same title and artist; when both lengths are known they must be within
   /// 5 s (the same recording is often a few seconds apart between services).
-  LibraryEntryLite? find(ImportRow r) {
+  LibraryEntryLite? find(ImportRow r, {String? baseDir}) {
+    final loc = r.location;
+    if (loc != null) {
+      final byPath = findByPath(loc, baseDir: baseDir);
+      if (byPath != null) return byPath;
+    }
     final c = _byKey['${matchTitleKey(r.title)}|${_artistKey(r.primaryArtist)}'];
     if (c == null) return null;
     final want = r.durationMs;

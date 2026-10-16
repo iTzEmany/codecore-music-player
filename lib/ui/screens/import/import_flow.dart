@@ -15,7 +15,7 @@ Future<void> startCsvImport(BuildContext context, WidgetRef ref) async {
   final library = LibraryIndex(
     await ref.read(trackRepositoryProvider).liteEntries(),
   );
-  final known = csv.rows.where((r) => library.find(r) != null).length;
+  final known = csv.rows.where((r) => library.find(r, baseDir: csv.baseDir) != null).length;
   final lists = await ref.read(playlistsProvider.future);
   if (!context.mounted) return;
   final choice = await showDialog<ImportChoice>(

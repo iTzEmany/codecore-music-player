@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
 import '../../../core/app_log.dart';
@@ -75,7 +76,7 @@ class _ImportIntroSheetState extends State<ImportIntroSheet> {
         );
         final csv = await readPlaylistFileInIsolate(files.first.name, text);
         if (!mounted) return;
-        Navigator.of(context).pop(csv);
+        Navigator.of(context).pop(csv.withBaseDir(p.dirname(path)));
         return;
       }
     } on CsvTooLargeException catch (e, st) {
