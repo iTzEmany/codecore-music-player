@@ -821,5 +821,23 @@
     }
   },
   "downloadParallel": "Gleichzeitige Downloads",
-  "downloadParallelHint": "Mehr gleichzeitig ist schneller, aber YouTube kann bremsen"
+  "downloadParallelHint": "Mehr gleichzeitig ist schneller, aber YouTube kann bremsen",
+  "downloadRateLimit": "Geschwindigkeitslimit",
+  "downloadRateNone": "Keins",
+  "downloadRateKb": "{kb} KB/s",
+  "downloadRateMb": "{mb} MB/s",
+  "@downloadRateKb": {
+    "placeholders": {
+      "kb": {
+        "type": "int"
+      }
+    }
+  },
+  "@downloadRateMb": {
+    "placeholders": {
+      "mb": {
+        "type": "int"
+      }
+    }
+  }
 }

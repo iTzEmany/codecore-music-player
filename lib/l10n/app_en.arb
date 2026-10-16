@@ -821,5 +821,23 @@
     }
   },
   "downloadParallel": "Simultaneous downloads",
-  "downloadParallelHint": "More at once is faster, but YouTube may ask you to slow down"
+  "downloadParallelHint": "More at once is faster, but YouTube may ask you to slow down",
+  "downloadRateLimit": "Speed limit",
+  "downloadRateNone": "None",
+  "downloadRateKb": "{kb} KB/s",
+  "downloadRateMb": "{mb} MB/s",
+  "@downloadRateKb": {
+    "placeholders": {
+      "kb": {
+        "type": "int"
+      }
+    }
+  },
+  "@downloadRateMb": {
+    "placeholders": {
+      "mb": {
+        "type": "int"
+      }
+    }
+  }
 }

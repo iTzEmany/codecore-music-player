@@ -145,6 +145,8 @@ class MainActivity : AudioServiceActivity() {
                     req.addOption("--audio-format", "mp3")
                     req.addOption("--audio-quality", "256K")
                 }
+                val rate = call.argument<Int>("rateLimit")
+                if (rate != null && rate > 0) req.addOption("--limit-rate", "${rate}K")
                 req.addOption("-o", "$stem.%(ext)s")
                 YoutubeDL.getInstance().execute(req, processId) { progress, _, line ->
                     main.post {

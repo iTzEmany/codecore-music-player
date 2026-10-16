@@ -59,7 +59,8 @@ class AndroidYtDlpService implements YoutubeService {
 
   @override
   Stream<DownloadProgress> download(YtResult r, Directory outDir,
-      {CancelToken? cancel}) async* {
+      {CancelToken? cancel,
+      DownloadOptions options = const DownloadOptions()}) async* {
     await outDir.create(recursive: true);
     final target = uniquePath(
         outDir.path, downloadBaseName(r), 'mp3', (f) => File(f).existsSync());
@@ -75,6 +76,7 @@ class AndroidYtDlpService implements YoutubeService {
       'stem': stem,
       'convert': true,
       'processId': processId,
+      'rateLimit': options.rateLimitKBps,
     }).then<String?>((path) => path).catchError((Object e) {
       if (cancel?.isCancelled ?? false) return null;
       final msg = e is PlatformException ? (e.message ?? '') : '$e';

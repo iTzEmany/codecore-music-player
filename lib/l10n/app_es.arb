@@ -821,5 +821,23 @@
     }
   },
   "downloadParallel": "Descargas simultáneas",
-  "downloadParallelHint": "Más a la vez es más rápido, pero YouTube puede pedir que vayas más despacio"
+  "downloadParallelHint": "Más a la vez es más rápido, pero YouTube puede pedir que vayas más despacio",
+  "downloadRateLimit": "Límite de velocidad",
+  "downloadRateNone": "Sin límite",
+  "downloadRateKb": "{kb} KB/s",
+  "downloadRateMb": "{mb} MB/s",
+  "@downloadRateKb": {
+    "placeholders": {
+      "kb": {
+        "type": "int"
+      }
+    }
+  },
+  "@downloadRateMb": {
+    "placeholders": {
+      "mb": {
+        "type": "int"
+      }
+    }
+  }
 }

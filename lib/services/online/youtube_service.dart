@@ -31,6 +31,14 @@ class YtResult {
   final String? downloadName;
 }
 
+/// How a download is run; read from the settings when it starts.
+class DownloadOptions {
+  const DownloadOptions({this.rateLimitKBps});
+
+  /// `--limit-rate` in KB/s; null or 0 = unlimited.
+  final int? rateLimitKBps;
+}
+
 class DownloadProgress {
   const DownloadProgress({this.received = 0, this.total = 0, this.path});
 
@@ -108,7 +116,7 @@ abstract class YoutubeService {
   /// Emits progress; the last event carries the final file path. A cancelled
   /// download ends without a path and leaves no partial files.
   Stream<DownloadProgress> download(YtResult r, Directory outDir,
-      {CancelToken? cancel});
+      {CancelToken? cancel, DownloadOptions options = const DownloadOptions()});
 
   /// Version string of the yt-dlp in use (`2026.08.19`); null when unknown or
   /// when the tool is missing.

@@ -6,6 +6,7 @@ import 'package:dio/dio.dart';
 import 'package:path/path.dart' as p;
 
 import '../../core/app_log.dart';
+import 'yt_dlp_args.dart';
 import 'yt_dlp_version.dart';
 import 'youtube_service.dart';
 
@@ -207,7 +208,8 @@ class YtDlpProcessService implements YoutubeService {
 
   @override
   Stream<DownloadProgress> download(YtResult r, Directory outDir,
-      {CancelToken? cancel}) async* {
+      {CancelToken? cancel,
+      DownloadOptions options = const DownloadOptions()}) async* {
     await _ensureTool();
     await outDir.create(recursive: true);
     _hasFfmpeg ??= await _exists('ffmpeg');
@@ -216,22 +218,13 @@ class YtDlpProcessService implements YoutubeService {
     final target = uniquePath(
         outDir.path, downloadBaseName(r), ext, (f) => File(f).existsSync());
     final stem = p.withoutExtension(target);
-    final args = [
-      '--no-playlist',
-      '--no-warnings',
-      '--newline',
-      '--no-part',
-      '--progress-template',
-      'download:PROG %(progress.downloaded_bytes)s '
-          '%(progress.total_bytes)s %(progress.total_bytes_estimate)s',
-      ...await _jsArgs(),
-      '-f',
-      convert ? 'bestaudio/best' : 'bestaudio[ext=m4a]/bestaudio/best',
-      if (convert) ...['-x', '--audio-format', 'mp3', '--audio-quality', '256K'],
-      '-o',
-      '$stem.%(ext)s',
-      'https://www.youtube.com/watch?v=${r.id}',
-    ];
+    final args = buildDownloadArgs(
+      id: r.id,
+      stem: stem,
+      convert: convert,
+      options: options,
+      jsArgs: await _jsArgs(),
+    );
     final proc = await Process.start(await _exe, args);
     final err = StringBuffer();
     proc.stderr.transform(utf8.decoder).listen(err.write);

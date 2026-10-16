@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/platform.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/settings_providers.dart';
 import '../../../providers/youtube_providers.dart';
@@ -16,6 +17,8 @@ class DownloadSettingsTiles extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
     final n = ref.watch(settingsProvider.select((s) => s.downloadParallel));
+    final rate =
+        ref.watch(settingsProvider.select((s) => s.downloadRateLimitKBps));
     return Column(
       children: [
         const _YtDlpTile(),
@@ -37,10 +40,35 @@ class DownloadSettingsTiles extends ConsumerWidget {
                     .update((c) => c.copyWith(downloadParallel: v)),
           ),
         ),
+        ListTile(
+          leading: const Icon(Icons.speed),
+          title: Text(l.downloadRateLimit),
+          trailing: DropdownButton<int>(
+            value: _rateChoices.contains(rate) ? rate : 0,
+            underline: const SizedBox.shrink(),
+            items: [
+              for (final v in _rateChoices)
+                DropdownMenuItem(value: v, child: Text(_rateLabel(l, v))),
+            ],
+            onChanged: (v) => v == null
+                ? null
+                : ref
+                    .read(settingsProvider.notifier)
+                    .update((c) => c.copyWith(downloadRateLimitKBps: v)),
+          ),
+        ),
       ],
     );
   }
 }
+
+const _rateChoices = [0, 500, 1000, 2000];
+
+String _rateLabel(AppLocalizations l, int kb) => kb == 0
+    ? l.downloadRateNone
+    : kb >= 1000
+        ? l.downloadRateMb(kb ~/ 1000)
+        : l.downloadRateKb(kb);
 
 class _YtDlpTile extends ConsumerWidget {
   const _YtDlpTile();

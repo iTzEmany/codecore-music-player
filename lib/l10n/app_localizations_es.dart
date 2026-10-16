@@ -1577,4 +1577,20 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get downloadParallelHint =>
       'Más a la vez es más rápido, pero YouTube puede pedir que vayas más despacio';
+
+  @override
+  String get downloadRateLimit => 'Límite de velocidad';
+
+  @override
+  String get downloadRateNone => 'Sin límite';
+
+  @override
+  String downloadRateKb(int kb) {
+    return '$kb KB/s';
+  }
+
+  @override
+  String downloadRateMb(int mb) {
+    return '$mb MB/s';
+  }
 }

@@ -23,6 +23,7 @@ class AppSettings {
     this.recentSearches = const [],
     this.ytNoticeSeen = false,
     this.downloadParallel = 2,
+    this.downloadRateLimitKBps = 0,
   });
 
   final String theme;
@@ -51,6 +52,9 @@ class AppSettings {
   /// Downloads running at once (1–3).
   final int downloadParallel;
 
+  /// Download speed cap in KB/s; 0 = none.
+  final int downloadRateLimitKBps;
+
   /// Shown to the device on the other side of a LAN share; null = hostname.
   final String? deviceName;
 
@@ -75,6 +79,7 @@ class AppSettings {
     List<String>? recentSearches,
     bool? ytNoticeSeen,
     int? downloadParallel,
+    int? downloadRateLimitKBps,
   }) =>
       AppSettings(
         theme: theme ?? this.theme,
@@ -94,6 +99,8 @@ class AppSettings {
         recentSearches: recentSearches ?? this.recentSearches,
         ytNoticeSeen: ytNoticeSeen ?? this.ytNoticeSeen,
         downloadParallel: downloadParallel ?? this.downloadParallel,
+        downloadRateLimitKBps:
+            downloadRateLimitKBps ?? this.downloadRateLimitKBps,
       );
 }
 
@@ -141,6 +148,7 @@ class SettingsStore {
         ytNoticeSeen: _prefs.getBool('ytNoticeSeen') ?? false,
         downloadParallel:
             (_prefs.getInt('downloadParallel') ?? 2).clamp(1, 3),
+        downloadRateLimitKBps: _prefs.getInt('downloadRateLimitKBps') ?? 0,
       );
 
   Future<void> writeSettings(AppSettings s) async {
@@ -160,6 +168,7 @@ class SettingsStore {
     await _prefs.setStringList('recentSearches', s.recentSearches);
     await _prefs.setBool('ytNoticeSeen', s.ytNoticeSeen);
     await _prefs.setInt('downloadParallel', s.downloadParallel);
+    await _prefs.setInt('downloadRateLimitKBps', s.downloadRateLimitKBps);
     final dn = s.deviceName;
     if (dn == null || dn.isEmpty) {
       await _prefs.remove('deviceName');

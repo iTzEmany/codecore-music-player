@@ -2849,6 +2849,30 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Più insieme è più veloce, ma YouTube può chiedere di rallentare'**
   String get downloadParallelHint;
+
+  /// No description provided for @downloadRateLimit.
+  ///
+  /// In it, this message translates to:
+  /// **'Limite di velocità'**
+  String get downloadRateLimit;
+
+  /// No description provided for @downloadRateNone.
+  ///
+  /// In it, this message translates to:
+  /// **'Nessuno'**
+  String get downloadRateNone;
+
+  /// No description provided for @downloadRateKb.
+  ///
+  /// In it, this message translates to:
+  /// **'{kb} KB/s'**
+  String downloadRateKb(int kb);
+
+  /// No description provided for @downloadRateMb.
+  ///
+  /// In it, this message translates to:
+  /// **'{mb} MB/s'**
+  String downloadRateMb(int mb);
 }
 
 class _AppLocalizationsDelegate

@@ -1012,5 +1012,23 @@
     }
   },
   "downloadParallel": "Download contemporanei",
-  "downloadParallelHint": "Più insieme è più veloce, ma YouTube può chiedere di rallentare"
+  "downloadParallelHint": "Più insieme è più veloce, ma YouTube può chiedere di rallentare",
+  "downloadRateLimit": "Limite di velocità",
+  "downloadRateNone": "Nessuno",
+  "downloadRateKb": "{kb} KB/s",
+  "downloadRateMb": "{mb} MB/s",
+  "@downloadRateKb": {
+    "placeholders": {
+      "kb": {
+        "type": "int"
+      }
+    }
+  },
+  "@downloadRateMb": {
+    "placeholders": {
+      "mb": {
+        "type": "int"
+      }
+    }
+  }
 }

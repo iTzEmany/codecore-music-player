@@ -44,7 +44,8 @@ class FakeYoutube implements YoutubeService {
 
   @override
   Stream<DownloadProgress> download(YtResult r, Directory outDir,
-          {CancelToken? cancel}) =>
+          {CancelToken? cancel,
+          DownloadOptions options = const DownloadOptions()}) =>
       const Stream.empty();
 
   @override
