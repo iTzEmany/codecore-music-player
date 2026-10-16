@@ -9,6 +9,7 @@ import '../../../data/repositories/playlist_repository.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/database_providers.dart';
+import '../../../providers/history_providers.dart';
 import '../../../providers/library_providers.dart';
 import '../../../providers/player_providers.dart';
 import '../../shell/shell_nav.dart';
@@ -23,6 +24,7 @@ import '../library/favorites_screen.dart';
 import '../library/folders_sheet.dart';
 import '../playlists/playlist_detail_screen.dart';
 import '../settings/settings_screen.dart';
+import '../stats/stats_screen.dart';
 
 String _greeting(AppLocalizations l, int hour) =>
     switch (greetingForHour(hour)) {
@@ -53,6 +55,20 @@ class HomeScreen extends ConsumerWidget {
     final folders = ref.watch(foldersProvider).value;
     final ctrl = ref.read(playerControllerProvider);
     final theme = Theme.of(context).textTheme;
+    // «Il tuo mese» only once there is something to say about it.
+    final today = DateTime.now();
+    final monthPlays = ref.watch(monthPlaysProvider).value ?? 0;
+    final month = monthPlays >= 10
+        ? ref
+              .watch(
+                periodStatsProvider((
+                  year: false,
+                  y: today.year,
+                  m: today.month,
+                )),
+              )
+              .value
+        : null;
 
     final header = Padding(
       padding: const EdgeInsets.fromLTRB(CcDims.margin, 16, 4, 8),
@@ -269,6 +285,58 @@ class HomeScreen extends ConsumerWidget {
               },
             ),
           ),
+          if (month != null && !month.isEmpty)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                CcDims.margin,
+                16,
+                CcDims.margin,
+                0,
+              ),
+              child: Material(
+                color: cc.surface1,
+                borderRadius: BorderRadius.circular(CcDims.rCard),
+                clipBehavior: Clip.antiAlias,
+                child: InkWell(
+                  onTap: () =>
+                      ShellNav.open<void>(context, const StatsScreen()),
+                  child: Padding(
+                    padding: const EdgeInsets.all(14),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.bar_chart_rounded,
+                          color: cc.accent,
+                          size: 32,
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(l.statsYourMonth, style: theme.titleMedium),
+                              Text(
+                                [
+                                  formatListened(l, month.playedMs),
+                                  if (month.topArtists.isNotEmpty)
+                                    l.statsTopArtistHome(
+                                      month.topArtists.first.name ?? '',
+                                    ),
+                                ].join(' · '),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: theme.bodyMedium,
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Icon(Icons.chevron_right_rounded),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
           shelf(l.homeRecentlyPlayed, albumCards(recentlyPlayedAlbums(albums))),
           shelf(l.homeRecentlyAdded, albumCards(recentlyAddedAlbums(albums))),
           shelf(l.homeTopTracks, topCards),

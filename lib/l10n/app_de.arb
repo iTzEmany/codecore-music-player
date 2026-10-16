@@ -1235,5 +1235,64 @@
   "historyClearBody": "Gelöscht wird nur die Liste der Wiedergaben: Zähler, Favoriten und Playlists bleiben unverändert.",
   "historyCleared": "Verlauf gelöscht",
   "settingsRecordHistory": "Hörverlauf speichern",
-  "settingsRecordHistoryHint": "Bleibt auf dem Gerät. Wenn aus, wird nichts mehr hinzugefügt."
+  "settingsRecordHistoryHint": "Bleibt auf dem Gerät. Wenn aus, wird nichts mehr hinzugefügt.",
+  "statsTitle": "Statistiken",
+  "statsSubtitle": "Wie viel und was du hörst",
+  "statsMonth": "Monat",
+  "statsYear": "Jahr",
+  "statsPrevious": "Voriger Zeitraum",
+  "statsNext": "Nächster Zeitraum",
+  "statsEmpty": "Keine Wiedergaben in diesem Zeitraum.",
+  "statsPlays": "{count, plural, one{1 Wiedergabe} other{{count} Wiedergaben}}",
+  "@statsPlays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "statsDistinct": "{count, plural, one{1 anderer Titel} other{{count} verschiedene Titel}}",
+  "@statsDistinct": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "statsHoursMinutes": "{hours} Std. {minutes} Min.",
+  "@statsHoursMinutes": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "statsTopTracks": "Meistgespielte Titel",
+  "statsTopArtists": "Meistgespielte Künstler",
+  "statsTopAlbums": "Meistgespielte Alben",
+  "statsFavouriteHour": "Lieblingsstunde",
+  "statsFirstListen": "Erste Wiedergabe",
+  "statsFirstValue": "{title} · {date}",
+  "@statsFirstValue": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "statsYourMonth": "Dein Monat",
+  "statsTopArtistHome": "Am meisten gehört: {name}",
+  "@statsTopArtistHome": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  }
 }

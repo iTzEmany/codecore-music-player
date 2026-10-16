@@ -5,7 +5,9 @@ import 'package:codecore/ui/screens/jam/jam_screen.dart';
 import 'package:codecore/ui/screens/library/album_detail_screen.dart';
 import 'package:codecore/ui/screens/now_playing/now_playing_screen.dart';
 import 'package:codecore/ui/screens/settings/settings_screen.dart';
+import 'package:codecore/data/repositories/play_history_repository.dart';
 import 'package:codecore/ui/screens/library/all_tracks_screen.dart';
+import 'package:codecore/ui/screens/stats/stats_screen.dart';
 import 'package:codecore/ui/shell/app_shell.dart';
 import 'package:codecore/ui/theme/app_theme.dart';
 import 'package:codecore/ui/widgets/track_row.dart';
@@ -140,6 +142,22 @@ void main() {
                   }));
         }
       }
+
+      testWidgets('stats', (tester) => withShot(tester, size, (s) async {
+            final repo = PlayHistoryRepository(s.h.db);
+            final ids = s.seed.trackIds;
+            await tester.runAsync(() async {
+              for (var d = 1; d <= 16; d++) {
+                for (var k = 0; k < 1 + d % 4; k++) {
+                  await repo.start(ids[(d + k) % ids.length],
+                      DateTime(2026, 10, d, 18 + k, 20).millisecondsSinceEpoch,
+                      msPlayed: (2 + (d * 7 + k * 3) % 5) * 60000);
+                }
+              }
+            });
+            await s.show(StatsScreen(now: DateTime(2026, 10, 16, 9)));
+            await s.expectShot('stats');
+          }));
 
       testWidgets('jam', (tester) => withShot(tester, size, (s) async {
             await s.show(const JamScreen(),

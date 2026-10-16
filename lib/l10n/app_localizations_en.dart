@@ -2238,4 +2238,80 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get settingsRecordHistoryHint =>
       'It stays on the device. When off, nothing more is added to the list.';
+
+  @override
+  String get statsTitle => 'Statistics';
+
+  @override
+  String get statsSubtitle => 'How much and what you listen to';
+
+  @override
+  String get statsMonth => 'Month';
+
+  @override
+  String get statsYear => 'Year';
+
+  @override
+  String get statsPrevious => 'Previous period';
+
+  @override
+  String get statsNext => 'Next period';
+
+  @override
+  String get statsEmpty => 'No listens in this period.';
+
+  @override
+  String statsPlays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count listens',
+      one: '1 listen',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String statsDistinct(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count different tracks',
+      one: '1 different track',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String statsHoursMinutes(int hours, int minutes) {
+    return '$hours h $minutes min';
+  }
+
+  @override
+  String get statsTopTracks => 'Most played tracks';
+
+  @override
+  String get statsTopArtists => 'Most played artists';
+
+  @override
+  String get statsTopAlbums => 'Most played albums';
+
+  @override
+  String get statsFavouriteHour => 'Favorite hour';
+
+  @override
+  String get statsFirstListen => 'First listen';
+
+  @override
+  String statsFirstValue(String title, String date) {
+    return '$title · $date';
+  }
+
+  @override
+  String get statsYourMonth => 'Your month';
+
+  @override
+  String statsTopArtistHome(String name) {
+    return 'Most played: $name';
+  }
 }

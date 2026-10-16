@@ -3819,6 +3819,114 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Resta sul dispositivo. Spenta, non si aggiunge nient’altro all’elenco.'**
   String get settingsRecordHistoryHint;
+
+  /// No description provided for @statsTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Statistiche'**
+  String get statsTitle;
+
+  /// No description provided for @statsSubtitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Quanto e cosa ascolti'**
+  String get statsSubtitle;
+
+  /// No description provided for @statsMonth.
+  ///
+  /// In it, this message translates to:
+  /// **'Mese'**
+  String get statsMonth;
+
+  /// No description provided for @statsYear.
+  ///
+  /// In it, this message translates to:
+  /// **'Anno'**
+  String get statsYear;
+
+  /// No description provided for @statsPrevious.
+  ///
+  /// In it, this message translates to:
+  /// **'Periodo precedente'**
+  String get statsPrevious;
+
+  /// No description provided for @statsNext.
+  ///
+  /// In it, this message translates to:
+  /// **'Periodo successivo'**
+  String get statsNext;
+
+  /// No description provided for @statsEmpty.
+  ///
+  /// In it, this message translates to:
+  /// **'Nessun ascolto in questo periodo.'**
+  String get statsEmpty;
+
+  /// No description provided for @statsPlays.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, one{1 ascolto} other{{count} ascolti}}'**
+  String statsPlays(int count);
+
+  /// No description provided for @statsDistinct.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, one{1 brano diverso} other{{count} brani diversi}}'**
+  String statsDistinct(int count);
+
+  /// No description provided for @statsHoursMinutes.
+  ///
+  /// In it, this message translates to:
+  /// **'{hours} h {minutes} min'**
+  String statsHoursMinutes(int hours, int minutes);
+
+  /// No description provided for @statsTopTracks.
+  ///
+  /// In it, this message translates to:
+  /// **'Brani più ascoltati'**
+  String get statsTopTracks;
+
+  /// No description provided for @statsTopArtists.
+  ///
+  /// In it, this message translates to:
+  /// **'Artisti più ascoltati'**
+  String get statsTopArtists;
+
+  /// No description provided for @statsTopAlbums.
+  ///
+  /// In it, this message translates to:
+  /// **'Album più ascoltati'**
+  String get statsTopAlbums;
+
+  /// No description provided for @statsFavouriteHour.
+  ///
+  /// In it, this message translates to:
+  /// **'Ora preferita'**
+  String get statsFavouriteHour;
+
+  /// No description provided for @statsFirstListen.
+  ///
+  /// In it, this message translates to:
+  /// **'Primo ascolto'**
+  String get statsFirstListen;
+
+  /// No description provided for @statsFirstValue.
+  ///
+  /// In it, this message translates to:
+  /// **'{title} · {date}'**
+  String statsFirstValue(String title, String date);
+
+  /// No description provided for @statsYourMonth.
+  ///
+  /// In it, this message translates to:
+  /// **'Il tuo mese'**
+  String get statsYourMonth;
+
+  /// No description provided for @statsTopArtistHome.
+  ///
+  /// In it, this message translates to:
+  /// **'Il più ascoltato: {name}'**
+  String statsTopArtistHome(String name);
 }
 
 class _AppLocalizationsDelegate

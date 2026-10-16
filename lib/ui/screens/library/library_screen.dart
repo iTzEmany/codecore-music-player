@@ -25,6 +25,7 @@ import 'all_tracks_screen.dart';
 import 'artist_screen.dart';
 import 'favorites_screen.dart';
 import '../history/history_screen.dart';
+import '../stats/stats_screen.dart';
 import 'folders_sheet.dart';
 import 'scan_status.dart';
 
@@ -132,6 +133,12 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
           title: l.historyTitle,
           subtitle: l.historySubtitle,
           onTap: () => ShellNav.open<void>(context, const HistoryScreen()),
+        ),
+        _Pinned(
+          icon: Icons.bar_chart_rounded,
+          title: l.statsTitle,
+          subtitle: l.statsSubtitle,
+          onTap: () => ShellNav.open<void>(context, const StatsScreen()),
         ),
       ];
       body = settings.libraryGrid

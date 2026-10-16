@@ -1235,5 +1235,64 @@
   "historyClearBody": "Only the list of listens is deleted: play counts, favorites and playlists stay as they are.",
   "historyCleared": "History cleared",
   "settingsRecordHistory": "Keep a listening history",
-  "settingsRecordHistoryHint": "It stays on the device. When off, nothing more is added to the list."
+  "settingsRecordHistoryHint": "It stays on the device. When off, nothing more is added to the list.",
+  "statsTitle": "Statistics",
+  "statsSubtitle": "How much and what you listen to",
+  "statsMonth": "Month",
+  "statsYear": "Year",
+  "statsPrevious": "Previous period",
+  "statsNext": "Next period",
+  "statsEmpty": "No listens in this period.",
+  "statsPlays": "{count, plural, one{1 listen} other{{count} listens}}",
+  "@statsPlays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "statsDistinct": "{count, plural, one{1 different track} other{{count} different tracks}}",
+  "@statsDistinct": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "statsHoursMinutes": "{hours} h {minutes} min",
+  "@statsHoursMinutes": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "statsTopTracks": "Most played tracks",
+  "statsTopArtists": "Most played artists",
+  "statsTopAlbums": "Most played albums",
+  "statsFavouriteHour": "Favorite hour",
+  "statsFirstListen": "First listen",
+  "statsFirstValue": "{title} · {date}",
+  "@statsFirstValue": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "statsYourMonth": "Your month",
+  "statsTopArtistHome": "Most played: {name}",
+  "@statsTopArtistHome": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -1426,5 +1426,64 @@
   "historyClearBody": "Apenas a lista de reproduções é apagada: os contadores, os favoritos e as playlists ficam como estão.",
   "historyCleared": "Histórico limpo",
   "settingsRecordHistory": "Guardar o histórico de reprodução",
-  "settingsRecordHistoryHint": "Fica no dispositivo. Desligado, nada mais é adicionado à lista."
+  "settingsRecordHistoryHint": "Fica no dispositivo. Desligado, nada mais é adicionado à lista.",
+  "statsTitle": "Estatísticas",
+  "statsSubtitle": "Quanto e o que ouve",
+  "statsMonth": "Mês",
+  "statsYear": "Ano",
+  "statsPrevious": "Período anterior",
+  "statsNext": "Período seguinte",
+  "statsEmpty": "Nenhuma reprodução neste período.",
+  "statsPlays": "{count, plural, one{1 reprodução} other{{count} reproduções}}",
+  "@statsPlays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "statsDistinct": "{count, plural, one{1 faixa diferente} other{{count} faixas diferentes}}",
+  "@statsDistinct": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "statsHoursMinutes": "{hours} h {minutes} min",
+  "@statsHoursMinutes": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "statsTopTracks": "Faixas mais ouvidas",
+  "statsTopArtists": "Artistas mais ouvidos",
+  "statsTopAlbums": "Álbuns mais ouvidos",
+  "statsFavouriteHour": "Hora preferida",
+  "statsFirstListen": "Primeira reprodução",
+  "statsFirstValue": "{title} · {date}",
+  "@statsFirstValue": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "statsYourMonth": "O seu mês",
+  "statsTopArtistHome": "O mais ouvido: {name}",
+  "@statsTopArtistHome": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -2,6 +2,7 @@ import 'package:codecore/data/repositories/track_repository.dart';
 import 'package:codecore/providers/preview_providers.dart';
 import 'package:codecore/ui/widgets/cover_image.dart';
 import 'package:codecore/ui/screens/library/album_detail_screen.dart';
+import 'package:codecore/ui/screens/library/all_tracks_screen.dart';
 import 'package:codecore/ui/screens/now_playing/queue_sheet.dart';
 import 'package:codecore/ui/shell/app_shell.dart';
 import 'package:codecore/ui/widgets/track_row.dart';
@@ -119,7 +120,10 @@ void main() {
     await tester.tap(find.text('Tutti i brani'));
     await _settle(tester);
 
-    final cover = find.byType(CoverImage).first;
+    // The cover of the first row of this page (the Library below has its own).
+    final cover = find
+        .descendant(of: find.byType(AllTracksScreen), matching: find.byType(CoverImage))
+        .first;
     final gesture = await tester.startGesture(tester.getCenter(cover));
     await tester.pump(const Duration(milliseconds: 700));
     await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));

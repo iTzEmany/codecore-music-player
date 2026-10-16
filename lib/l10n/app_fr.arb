@@ -1426,5 +1426,64 @@
   "historyClearBody": "Seule la liste des écoutes est effacée : les compteurs, les favoris et les playlists restent tels quels.",
   "historyCleared": "Historique effacé",
   "settingsRecordHistory": "Enregistrer l’historique d’écoute",
-  "settingsRecordHistoryHint": "Il reste sur l’appareil. Désactivé, plus rien n’est ajouté à la liste."
+  "settingsRecordHistoryHint": "Il reste sur l’appareil. Désactivé, plus rien n’est ajouté à la liste.",
+  "statsTitle": "Statistiques",
+  "statsSubtitle": "Combien et quoi vous écoutez",
+  "statsMonth": "Mois",
+  "statsYear": "Année",
+  "statsPrevious": "Période précédente",
+  "statsNext": "Période suivante",
+  "statsEmpty": "Aucune écoute sur cette période.",
+  "statsPlays": "{count, plural, =0{0 écoute} one{1 écoute} other{{count} écoutes}}",
+  "@statsPlays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "statsDistinct": "{count, plural, =0{0 titre différent} one{1 titre différent} other{{count} titres différents}}",
+  "@statsDistinct": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "statsHoursMinutes": "{hours} h {minutes} min",
+  "@statsHoursMinutes": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "statsTopTracks": "Titres les plus écoutés",
+  "statsTopArtists": "Artistes les plus écoutés",
+  "statsTopAlbums": "Albums les plus écoutés",
+  "statsFavouriteHour": "Heure préférée",
+  "statsFirstListen": "Première écoute",
+  "statsFirstValue": "{title} · {date}",
+  "@statsFirstValue": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "statsYourMonth": "Votre mois",
+  "statsTopArtistHome": "Le plus écouté : {name}",
+  "@statsTopArtistHome": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  }
 }

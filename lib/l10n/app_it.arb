@@ -1426,5 +1426,64 @@
   "historyClearBody": "Si cancella solo l’elenco degli ascolti: contatori, preferiti e playlist restano come sono.",
   "historyCleared": "Cronologia cancellata",
   "settingsRecordHistory": "Registra la cronologia di ascolto",
-  "settingsRecordHistoryHint": "Resta sul dispositivo. Spenta, non si aggiunge nient’altro all’elenco."
+  "settingsRecordHistoryHint": "Resta sul dispositivo. Spenta, non si aggiunge nient’altro all’elenco.",
+  "statsTitle": "Statistiche",
+  "statsSubtitle": "Quanto e cosa ascolti",
+  "statsMonth": "Mese",
+  "statsYear": "Anno",
+  "statsPrevious": "Periodo precedente",
+  "statsNext": "Periodo successivo",
+  "statsEmpty": "Nessun ascolto in questo periodo.",
+  "statsPlays": "{count, plural, one{1 ascolto} other{{count} ascolti}}",
+  "@statsPlays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "statsDistinct": "{count, plural, one{1 brano diverso} other{{count} brani diversi}}",
+  "@statsDistinct": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "statsHoursMinutes": "{hours} h {minutes} min",
+  "@statsHoursMinutes": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "statsTopTracks": "Brani più ascoltati",
+  "statsTopArtists": "Artisti più ascoltati",
+  "statsTopAlbums": "Album più ascoltati",
+  "statsFavouriteHour": "Ora preferita",
+  "statsFirstListen": "Primo ascolto",
+  "statsFirstValue": "{title} · {date}",
+  "@statsFirstValue": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "statsYourMonth": "Il tuo mese",
+  "statsTopArtistHome": "Il più ascoltato: {name}",
+  "@statsTopArtistHome": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  }
 }
