@@ -5,6 +5,7 @@ import 'package:audio_service/audio_service.dart';
 
 import '../../core/app_log.dart';
 import '../../data/db/app_database.dart';
+import '../../data/repositories/play_history_repository.dart';
 import '../../data/repositories/track_repository.dart';
 import 'audio_backend.dart';
 import 'crossfade_engine.dart';
@@ -30,6 +31,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     this._tracks, {
     required this.onError,
     this.coverPathFor,
+    this.history,
   })  : _backend = backend,
         _window = backend is GaplessCapable
             ? NextWindow(_queue, _tracks, backend as GaplessCapable)
@@ -48,6 +50,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   static const maxConsecutiveErrors = 3;
 
   final AudioBackend _backend;
+  final PlayHistoryRepository? history;
   final NextWindow? _window;
   final PlayQueue _queue;
   final TrackRepository _tracks;
@@ -66,6 +69,18 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   bool _playCounted = false;
   RemoteTransport? _remote;
   StreamSubscription<RemoteStatus>? _remoteSub;
+
+  /// The listening history (`plays`) is written only while this is on.
+  bool recordHistory = true;
+  int? _contextKind;
+  String? _contextName;
+
+  // The listen being timed: the row (once it counted as played), the time
+  // really spent playing the current track and the last position seen.
+  Future<int?>? _playRow;
+  int _playedMs = 0;
+  int _flushedMs = 0;
+  Duration? _lastTick;
   Duration _lastResumeSave = Duration.zero;
   bool _handlingCompleted = false;
 
@@ -138,6 +153,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
       return;
     }
     // The track we are leaving keeps its place (long tracks only).
+    _endListen();
     _saveResume();
     _lastResumeSave = Duration.zero;
     // An explicit position (restoring a session) wins over the bookmark.
@@ -172,6 +188,9 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   /// Makes [track] the current one (state, gain, notification).
   void _enterTrack(Track track) {
     _playCounted = false;
+    _playedMs = 0;
+    _flushedMs = 0;
+    _lastTick = null;
     _gainFactor = gainFactor(track.replayGainDb);
     if (_normalize) unawaited(_applyVolume());
     _position = Duration.zero;
@@ -198,6 +217,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   }
 
   Future<void> _goIdle() async {
+    _endListen();
     _saveResume();
     _window?.clear();
     _loadToken++;
@@ -224,7 +244,10 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   void _onBackendState(BackendState s) {
     final wasPlaying = _state == BackendState.playing;
     _state = s;
-    if (wasPlaying && s == BackendState.paused) _saveResume();
+    if (wasPlaying && s == BackendState.paused) {
+      _saveResume();
+      _flushListen();
+    }
     if (s == BackendState.completed) {
       unawaited(_onCompleted());
       return;
@@ -266,6 +289,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
 
   /// The backend moved on by itself to the track prepared in the window.
   Future<void> _onAdvanced() async {
+    _endListen();
     final prepared = _window?.consume();
     _forgetBookmarkOfFinished();
     final id = _queue.next(auto: true);
@@ -329,9 +353,70 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     await _refreshWindow();
   }
 
+  /// Time really spent playing the current track: the position moving on while
+  /// playing (a seek is a jump, not time; at 2× it is half the music).
+  void _tickPlayed(Duration p) {
+    final prev = _lastTick;
+    _lastTick = p;
+    if (prev == null || _state != BackendState.playing) return;
+    final d = p - prev;
+    if (d > Duration.zero && d < const Duration(seconds: 3)) {
+      _playedMs += (d.inMilliseconds / _speed).round();
+    }
+  }
+
+  /// Where the listen being recorded came from (`PlayContextKind.index`).
+  void setPlayContext(int? kind, String? name) {
+    _contextKind = kind;
+    _contextName = name;
+  }
+
+  /// The track just counted as played: opens its row in the history.
+  void _beginListen(Track track) {
+    final repo = history;
+    if (repo == null || !recordHistory) return;
+    _flushedMs = _playedMs;
+    _playRow = repo
+        .start(
+          track.id,
+          DateTime.now().millisecondsSinceEpoch,
+          context: _contextKind,
+          contextName: _contextName,
+          msPlayed: _playedMs,
+        )
+        .then<int?>((id) => id)
+        .catchError((Object e, StackTrace st) {
+          AppLog.w('could not record the listen', e, st);
+          return null;
+        });
+  }
+
+  /// Writes the time played so far into the row (it only grows).
+  void _flushListen() {
+    final row = _playRow;
+    if (row == null || _playedMs == _flushedMs) return;
+    final ms = _playedMs;
+    _flushedMs = ms;
+    unawaited(row.then((id) async {
+      if (id != null) await history!.finish(id, ms);
+    }).catchError((Object e, StackTrace st) {
+      AppLog.w('could not update the listen', e, st);
+    }));
+  }
+
+  void _endListen() {
+    _flushListen();
+    _playRow = null;
+    _playedMs = 0;
+    _flushedMs = 0;
+    _lastTick = null;
+  }
+
   void _onPosition(Duration p) {
     _position = p;
     final track = _current;
+    _tickPlayed(p);
+    if (_playRow != null && _playedMs - _flushedMs >= 30000) _flushListen();
     if (track != null &&
         _state == BackendState.playing &&
         (p - _lastResumeSave).abs() >= kResumeSaveEvery) {
@@ -346,6 +431,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
       _tracks.registerPlay(track.id).catchError((Object e, StackTrace st) {
         AppLog.w('registerPlay failed', e, st);
       });
+      _beginListen(track);
     }
   }
 
@@ -620,6 +706,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   }
 
   Future<void> dispose() async {
+    _endListen();
     await _remoteSub?.cancel();
     for (final s in _subs) {
       await s.cancel();

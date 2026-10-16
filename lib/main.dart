@@ -13,6 +13,7 @@ import 'core/app_log.dart';
 import 'core/paths.dart';
 import 'core/platform.dart';
 import 'data/db/app_database.dart';
+import 'data/repositories/play_history_repository.dart';
 import 'data/repositories/track_repository.dart';
 import 'data/settings/settings_store.dart';
 import 'providers/database_providers.dart';
@@ -49,6 +50,7 @@ Future<void> main() async {
         PlayQueue(),
         tracks,
         onError: errors.add,
+        history: PlayHistoryRepository(db),
         coverPathFor: (t) =>
             t.coverKey == null ? null : covers.fileFor(t.coverKey!)?.path,
       );

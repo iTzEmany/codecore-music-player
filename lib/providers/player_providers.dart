@@ -66,6 +66,7 @@ class PlayerController {
   }) async {
     if (snapshot.isEmpty) return;
     onContext?.call(context);
+    _handler.setPlayContext(context?.kind.index, context?.name);
     _requestNotificationPermissionOnce();
     await _handler.playQueue([for (final t in snapshot) t.id], index);
   }
