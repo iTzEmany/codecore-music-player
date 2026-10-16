@@ -58,7 +58,22 @@ def click_times(path, rel=0.3):
 
 
 PREFETCH = 'yes'
-SINK = 'alsa_output.pci-0000_05_00.6.analog-stereo'
+
+
+def find_sink():
+    """The first output PipeWire lists (CODECORE_SINK overrides it)."""
+    if os.environ.get('CODECORE_SINK'):
+        return os.environ['CODECORE_SINK']
+    out = subprocess.run(['pw-cli', 'ls', 'Node'], capture_output=True, text=True).stdout
+    for block in out.split('\n\tid '):
+        if 'media.class = "Audio/Sink"' in block:
+            for line in block.splitlines():
+                if 'node.name' in line:
+                    return line.split('"')[1]
+    raise SystemExit('no Audio/Sink found by pw-cli')
+
+
+SINK = None
 
 
 def ao_args(out, live):
@@ -75,7 +90,7 @@ def recording(out, live):
             self.p = None
             if live:
                 self.p = subprocess.Popen(
-                    ['pw-record', '--target', SINK, '-P', 'stream.capture.sink=true',
+                    ['pw-record', '--target', SINK or find_sink(), '-P', 'stream.capture.sink=true',
                      '--rate', '48000', '--channels', '1', '--format', 's16', out],
                     stderr=subprocess.DEVNULL)
                 time.sleep(1.0)
