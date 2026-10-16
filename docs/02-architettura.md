@@ -148,3 +148,9 @@ Scritture con debounce 400 ms, mai in un handler di slider a ogni tick.
 - **Libreria:** `LibraryIndex.find` prova prima `findByPath` (assoluto, poi per cartelle finali; relativo alla cartella del file), poi titolo+artista+durata ±5 s.
 - **Motore:** per riga → libreria → album (≥ 3 righe dello stesso album: una ricerca album, solo titoli equivalenti e `sure`) → ISRC → titolo+artista → `decide(soglie)`. `ImportOptions` (solo collega, rivedi prima, cartella, numerazione, copertine) sta sull'importazione; `planned` + `startPlanned` per l'anteprima; blocchi da 100 come importazioni in fila; `sync` crea un'importazione con tutto il file (`diffImport` + `reorderForSync`).
 - **Stato per riga:** note come codici (`ImportNote`), tradotte in `import_labels.dart`; `EtaEstimator` per il tempo residuo.
+
+## CI e test (fase 16)
+- **GitHub Actions** (`.github/workflows/`): `ci.yml` — job `check` (codice generato e l10n aggiornati, `flutter analyze`, `flutter test`) su ogni push/PR; `build-android`, `build-linux`, `build-windows` solo su tag `v*` o avvio manuale, con artefatti; il job Windows esegue anche la suite. `nightly.yml` — test `test/live/` con yt-dlp fissato e verificato, riepilogo di quali sorgenti rispondono (informativo). `deps.yml` — rapporto settimanale delle dipendenze (nessun aggiornamento automatico).
+- **Test:** `test/` (unitari e widget, ermetici: né rete né file fuori dal repo), `test/goldens/` (20 schermate, solo Linux, comparatore al 0,5 %, `coverImageStub`), `test/live/` (dietro `CODECORE_LIVE=1`), `test/data/performance*_test.dart` (budget a 20.000 e 50.000 brani). `integration_test/` (telefono/Linux) arriva con il pacchetto `integration_test` (da approvare).
+- **Banco visivo:** `test_shots/` + `scripts/shots.sh` per guardare le schermate; i golden riusano il suo `withShot`.
+

@@ -39,6 +39,12 @@ Italiano, English, Deutsch, Español.
 - **Windows**: su una macchina Windows con Visual Studio 2022 (C++): `flutter build windows --release`
   e zippare `build\windows\x64\runner\Release\`. Per YouTube servono `yt-dlp.exe` e `ffmpeg.exe` nel PATH.
 
+## CI
+![CI](https://github.com/UTENTE/REPOSITORY/actions/workflows/ci.yml/badge.svg)
+<!-- Sostituisci UTENTE/REPOSITORY con quelli del repository GitHub. -->
+
+Ogni push controlla codice generato, `flutter analyze` e `flutter test`. Un tag `v*` (o «Run workflow» a mano) produce anche gli artefatti **APK** (per ABI), **Linux** (zip) e **Windows** (zip): si scaricano dalla pagina dell'esecuzione, sezione *Artifacts*. Ogni notte i test dal vivo controllano che YouTube Music, iTunes e LRCLIB rispondano ancora; ogni lunedì un rapporto elenca le dipendenze da aggiornare. In locale: `flutter test` (golden compresi, solo Linux) e `scripts/deps_report.sh`.
+
 ## Compilare / sviluppare
 ```
 flutter pub get

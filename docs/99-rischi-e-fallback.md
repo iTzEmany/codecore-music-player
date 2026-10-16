@@ -57,3 +57,11 @@ Per ogni rischio: **sintomo** → **cosa fare**. Se scatta un fallback che cambi
 | R31 | Un servizio cambia le colonne del suo CSV | «Formato non riconosciuto» o titolo/artista vuoti | Colonne per sinonimi in `csv_profiles.dart` (aggiungere i nuovi nomi); basta un CSV con una colonna titolo e una artista |
 | R32 | «Sincronizza» toglie brani che si voleva tenere | La playlist perde brani dopo un aggiornamento del file | L'anteprima mostra quanti ne toglie; si toglie **solo dalla playlist** (file e libreria restano): si riaggiungono dalla libreria; i brani aggiunti a mano non si toccano |
 | R33 | M3U/XSPF con codifiche o percorsi strani | Brani non trovati in libreria o titoli storti | Latin-1 di ripiego per `.m3u`, `Uri.decodeFull`, ricerca per cartelle finali; le righe illeggibili sono contate come «ignorate», mai errore sull'intero file; il file XSPF si legge con un lettore a espressioni regolari (pacchetto `xml` solo se serve) |
+
+## CI e test automatici (fase 16)
+| # | Rischio | Sintomo | Piano B |
+|---|---|---|---|
+| R34 | Golden diversi tra macchine (font, antialiasing, versione Flutter) | Golden rossi in CI e verdi in locale (o viceversa) | Generati e confrontati solo su Linux con Flutter fissato (3.47.1); tolleranza 0,5 %; font dagli asset; rigenerare con `flutter test --update-goldens test/goldens` solo dopo aver guardato i PNG |
+| R35 | Test verdi in locale e rossi in CI (rete, HOME, percorsi, libmpv) | Un solo job rosso | La suite è verificata ermetica (HOME temporaneo, nessuna rete); i test live stanno dietro `CODECORE_LIVE`; per i percorsi `\` guardare il job Windows |
+| R36 | YouTube blocca i runner GitHub (IP dei datacenter) nei test live notturni | `nightly.yml` rosso | Sono informativi (`continue-on-error`); la verità resta la prova dal PC di casa |
+
