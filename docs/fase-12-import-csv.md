@@ -223,4 +223,5 @@ Altri formati (TuneMyMusic, Soundiiz, M3U), lettura diretta dei link Spotify, fo
 Fatta e provata dal vivo su PC (Linux) e telefono (Mi A3): vedi `docs/PROGRESS.md` (note «Fase 12»). Deviazioni principali:
 pulsante nel menu «+» (Libreria e barra laterale) e nel FAB di `PlaylistsScreen`; artisti salvati con `;`;
 «Cerca a mano» è un foglio dentro «Rivedi»; `LibraryIndex` tollera ±5 s; un ritento automatico per download falliti
-con errore transitorio. Da provare a mano: la scelta del file su Linux (selettore di sistema/portal).
+con errore transitorio. Il selettore di sistema su Linux (portal GNOME) è stato provato dopo la chiusura della fase:
+dialogo con titolo «Scegli file CSV», cartella iniziale Download; vedi `docs/PROGRESS.md`.

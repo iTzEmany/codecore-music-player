@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../../../core/app_log.dart';
 import '../../../core/constants.dart';
@@ -35,6 +36,17 @@ class _ImportIntroSheetState extends State<ImportIntroSheet> {
   bool _busy = false;
   String? _error;
 
+  /// Desktop pickers open in Downloads, where the browser leaves the CSV.
+  Future<String?> _startDir() async {
+    if (!isDesktop) return null;
+    try {
+      return (await getDownloadsDirectory())?.path;
+    } on Object catch (e, st) {
+      AppLog.w('downloads folder unknown', e, st);
+      return null;
+    }
+  }
+
   Future<void> _pick() async {
     final l = context.l10n;
     setState(() {
@@ -46,6 +58,8 @@ class _ImportIntroSheetState extends State<ImportIntroSheet> {
       // Some Android file pickers hide .csv behind a MIME filter, so there
       // the whole list is shown and the content is validated instead.
       final files = await FilePicker.pickFiles(
+        dialogTitle: l.csvImportPick,
+        initialDirectory: await _startDir(),
         type: isAndroid ? FileType.any : FileType.custom,
         allowedExtensions: isAndroid ? null : const ['csv'],
       );
