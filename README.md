@@ -62,6 +62,13 @@ senza il file la build release usa la chiave di debug.
 - **yt-dlp (desktop):** l'app usa quello scaricato da lei (`Aggiorna`) prima di quello nel PATH; se è più vecchio di `2025.11.12` mostra un avviso.
 - Le ricerche dell'importazione da CSV sono ricordate 30 giorni (**Svuota cache ricerche**); un file di durata molto diversa dal CSV finisce in «Da verificare».
 
+## Riproduzione (fase 17)
+- **Velocità** 0,5×–2× senza cambiare il tono (chip «1×» in Now Playing).
+- **Riprendi da qui:** i brani lunghi (≥ 20 min: podcast, audiolibri, DJ set) ripartono da dove li hai lasciati.
+- **Anteprima di 20 s:** tieni premuta la copertina (desktop: menu del brano).
+- **Equalizzatore** (Android): preset e curva propria, con profili separati per cuffie e altoparlante.
+- **Jam:** notifica e schermata di blocco mostrano il brano della Jam, con pausa/play e, per l'host, «avanti».
+
 ## Formati accettati dall'importazione
 CSV di **Exportify** (Spotify), **TuneMyMusic**, **Soundiiz**, **Last.fm** o qualunque CSV con una colonna titolo e una artista, e playlist **M3U/M3U8** e **XSPF** (VLC, Poweramp…). Le voci locali si cercano prima nella libreria (per percorso, anche se la cartella è cambiata). Nell'anteprima: **solo collega** (nessun download), **rivedi prima di scaricare**, cartella dedicata, file numerati, copertine, blocchi da 100 per file grandi. Soglie di abbinamento in Impostazioni → Avanzate. «Esporta esito» in «Rivedi» salva un CSV con il motivo di ogni riga non risolta.
 
@@ -70,7 +77,7 @@ Importando di nuovo un file aggiornato nella stessa playlist si sceglie **Sincro
 
 ## Limiti noti
 - Jam: massimo 5 partecipanti; la sincronia è misurata sulla posizione del player (scarto tipico 10–30 ms, non acustico), con Bluetooth serve la compensazione manuale della latenza; nessun controllo da notifica di sistema/MPRIS; la richiesta Jam in background Android passa dalla notifica «Accetta/Rifiuta».
-- Niente crossfade/gapless nativo, niente equalizzatore, niente scrittura dei tag nei file.
+- Niente crossfade/gapless nativo, niente scrittura dei tag nei file; l'equalizzatore c'è solo su Android.
 - Controlli multimediali di sistema (MPRIS / SMTC) non implementati; i tasti multimediali funzionano a finestra attiva.
 - Condivisione LAN in HTTP in chiaro (protetta da PIN, solo per reti domestiche).
 - Lo scanner QR non è incluso: inserire IP:porta e PIN o incollare il link del QR.

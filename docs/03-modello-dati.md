@@ -99,6 +99,8 @@ File scomparsi: `missing = true` **solo se la cartella radice è raggiungibile**
 - Preferiti: `isFavorite = 1`.
 - Ricerca: `LIKE ? ESCAPE '\'` su title, artist, album con `%`/`_` escapati.
 
+**Schema v6 (fase 17):** `tracks.resume_position_ms` (int?, null = nessun segnalibro); migrazione da v5 testata.
+
 ## Impostazioni (shared_preferences, non nel DB)
 | Chiave | Tipo | Default | Valori |
 |---|---|---|---|
@@ -119,5 +121,9 @@ File scomparsi: `missing = true` **solo se la cartella radice è raggiungibile**
 | `downloadParallel` | int | 2 | 1–3 (fase 14) |
 | `downloadRateLimitKBps` | int | 0 | 0 = nessun limite (fase 14) |
 | `downloadOriginal` | bool | false | audio originale senza ricodifica (fase 14) |
+| `playbackSpeed` | double | 1.0 | 0.5–2.0, globale (fase 17) |
+| `eqEnabled` | bool | false | equalizzatore acceso (fase 17) |
+| `eqPreset.speaker`, `eqPreset.headphones` | string | `flat` | nome del preset (`custom` = guadagni propri) |
+| `eqGains.speaker`, `eqGains.headphones` | list<string> | `[]` | guadagni in dB, uno per banda, usati con `custom` |
 
 Le vecchie impostazioni finte (crossfade, gapless, normalizzazione, "bit-perfect WASAPI", autoplay) **non** vengono portate.

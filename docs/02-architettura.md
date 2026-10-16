@@ -73,7 +73,9 @@ Scritture con debounce 400 ms, mai in un handler di slider a ogni tick.
 | Aspetto | Android | Windows / Linux |
 |---|---|---|
 | Backend audio | ExoPlayer (just_audio) | libmpv (just_audio_media_kit) |
-| Notifica / lock screen | `audio_service` | non nella v1 (opzionale fase 7) |
+| Notifica / lock screen | `audio_service` (anche per la Jam, fase 17) | controlli di sistema (MPRIS/SMTC) rimandati: pacchetti da approvare (fase 17.7/17.8) |
+| Equalizzatore | `AndroidEqualizer` (bande reali del telefono, profilo cuffie/altoparlante) | assente (il filtro `af` di mpv è occupato da `scaletempo`); voce nascosta |
+| Velocità 0,5×–2× | `setPlaybackParameters` (tono invariato) | mpv `scaletempo` (tono invariato, misurato) |
 | Permessi file | `READ_MEDIA_AUDIO` (+ `READ_EXTERNAL_STORAGE` ≤ API 32) | nessuno |
 | Cartella musica predefinita | `/storage/emulated/0/Music` | `~/Music` (Linux), `%USERPROFILE%\Music` (Windows) |
 | Cartella download | `getExternalStorageDirectory()/Music` (nessun permesso) | cartella musica scelta |
@@ -154,3 +156,9 @@ Scritture con debounce 400 ms, mai in un handler di slider a ogni tick.
 - **Test:** `test/` (unitari e widget, ermetici: né rete né file fuori dal repo), `test/goldens/` (20 schermate, solo Linux, comparatore al 0,5 %, `coverImageStub`), `test/live/` (dietro `CODECORE_LIVE=1`), `test/data/performance*_test.dart` (budget a 20.000 e 50.000 brani). `integration_test/` (telefono/Linux) arriva con il pacchetto `integration_test` (da approvare).
 - **Banco visivo:** `test_shots/` + `scripts/shots.sh` per guardare le schermate; i golden riusano il suo `withShot`.
 
+## Riproduzione avanzata (fase 17)
+- **Velocità:** la possiede `CodecoreAudioHandler.setSpeed` (0,5–2, impostazione globale `playbackSpeed`), riapplicata dopo ogni `load` e pubblicata in `playbackState.speed`. La Jam non la usa (R37).
+- **Segnalibro:** `tracks.resume_position_ms` (schema v6). Logica pura in `resume_point.dart`: solo brani ≥ 20 min, niente nei primi/ultimi 30 s, si riparte 5 s prima. L'handler salva a pausa, a cambio brano e ogni 15 s di avanzamento.
+- **Anteprima:** `PreviewPlayer` è un secondo `AudioBackend` (come quello della Jam): 20 s da un terzo del brano con rampe di volume; `previewProvider` mette in pausa il lettore principale solo se suonava e lo riprende dopo. Coda e conteggi non si toccano.
+- **Equalizzatore:** interfaccia `Equalizer` (`bands()`, `setEnabled`, `setGains`) esposta da `AudioBackend.equalizer` (null dove non esiste). Preset in `presetGains` (10 bande di riferimento interpolate sul logaritmo della frequenza, tagliate ai limiti del dispositivo). Due profili (`eqSpeaker`, `eqHeadphones`); `outputRouteSyncProvider` legge l'uscita dal canale `codecore/audio` e `equalizerApplierProvider` applica la curva giusta.
+- **Controlli di sistema per la Jam:** `RemoteTransport` (stato + play/pausa/avanti/seek). `JamTransport` lo ricava da `JamState`; `CodecoreAudioHandler.attachRemote` lo collega a notifica e schermata di blocco: finché è attaccato i tasti vanno alla Jam e mai al lettore locale. `JamController` lo attacca in `_begin` e lo stacca in `_teardown`.

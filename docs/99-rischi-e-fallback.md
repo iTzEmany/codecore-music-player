@@ -65,3 +65,11 @@ Per ogni rischio: **sintomo** → **cosa fare**. Se scatta un fallback che cambi
 | R35 | Test verdi in locale e rossi in CI (rete, HOME, percorsi, libmpv) | Un solo job rosso | La suite è verificata ermetica (HOME temporaneo, nessuna rete); i test live stanno dietro `CODECORE_LIVE`; per i percorsi `\` guardare il job Windows |
 | R36 | YouTube blocca i runner GitHub (IP dei datacenter) nei test live notturni | `nightly.yml` rosso | Sono informativi (`continue-on-error`); la verità resta la prova dal PC di casa |
 
+## Riproduzione avanzata (fase 17)
+| # | Rischio | Sintomo | Piano B |
+|---|---|---|---|
+| R37 | Cambiare l'opzione `pitch` di `just_audio_media_kit` altera la correzione di velocità della Jam | La Jam va fuori sincronia o cambia tono | Nessuna modifica fatta (misurato: `scaletempo` tiene 440 Hz a 0,75× e 1,5×); rilanciare `test/jam/` e la misura prima di toccarla |
+| R38 | `AndroidEqualizer` non disponibile o con bande strane su alcuni telefoni | Voce Equalizzatore assente o curva poco fedele | `equalizer == null` → voce nascosta; i preset sono interpolati sulle bande reali; errori loggati, riproduzione invariata |
+| R39 | Pacchetto MPRIS/SMTC abbandonato o incompatibile con `audio_service` | Niente tasti multimediali di sistema su desktop | Dietro un'interfaccia dedicata; fase 17.7/17.8 ferme in attesa di approvazione dei pacchetti; il resto non dipende |
+| R40 | Due notifiche (Jam e `audio_service`) o notifica che resta dopo la Jam | Notifica con il brano sbagliato | Un solo trasporto attivo, staccato in `_teardown`; test dell'handler con trasporto finto; prova con Jam terminata da host e ospite |
+
