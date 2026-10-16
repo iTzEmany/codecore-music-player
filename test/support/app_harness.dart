@@ -64,13 +64,14 @@ class Harness {
       ];
 
   Future<void> pump(WidgetTester tester, Widget child,
-      {List<Override> extraOverrides = const []}) async {
+      {List<Override> extraOverrides = const [],
+      Locale locale = const Locale('it')}) async {
     await tester.pumpWidget(
         ProviderScope(
         overrides: [...overrides, ...extraOverrides],
         child: MaterialApp(
           theme: buildTheme(appThemeIdFromName(''), false),
-          locale: const Locale('it'),
+          locale: locale,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           home: child,

@@ -1189,5 +1189,39 @@
   "accentAmbra": "Bernstein",
   "accentArancio": "Orange",
   "accentRosa": "Rosa",
-  "accentRosso": "Rot"
+  "accentRosso": "Rot",
+  "onboardingSkip": "Überspringen",
+  "onboardingNext": "Weiter",
+  "onboardingStart": "Los geht’s",
+  "onboardingPageOf": "Seite {page} von {total}",
+  "@onboardingPageOf": {
+    "placeholders": {
+      "page": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "onboardingWelcomeTitle": "Willkommen bei Codecore",
+  "onboardingWelcomeBody": "Dein persönlicher Musikplayer: kein Konto, kein Server. Deine Musik bleibt auf deinem Gerät.",
+  "onboardingFoldersTitle": "Deine Musik",
+  "onboardingFoldersBody": "Wähle die Ordner mit deinen Titeln. Codecore liest sie nur: Es ändert oder verschiebt sie nie.",
+  "onboardingFoldersAdded": "{count, plural, one{1 Ordner hinzugefügt} other{{count} Ordner hinzugefügt}}",
+  "@onboardingFoldersAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "onboardingAllowAccess": "Zugriff auf Audiodateien erlauben",
+  "onboardingAccessGranted": "Zugriff erlaubt",
+  "onboardingOnlineTitle": "Online-Funktionen",
+  "onboardingOnlineBody": "Sie sind aus: Codecore geht nie von allein online. Du kannst sie jetzt oder später in den Einstellungen einschalten.",
+  "onboardingShareTitle": "Downloads, Jam und Teilen",
+  "onboardingYoutubeBody": "Du kannst Titel von YouTube auf dein Gerät laden und wie den Rest deiner Musik hören.",
+  "onboardingJamBody": "Mit einer Jam hörst du dieselbe Musik gemeinsam mit einem anderen Gerät im selben Netzwerk.",
+  "onboardingSendBody": "Du kannst Titel mit einer PIN an andere Geräte in der Nähe senden, ohne Umweg über das Internet."
 }

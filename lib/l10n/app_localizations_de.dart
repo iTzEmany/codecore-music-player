@@ -2143,4 +2143,71 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get accentRosso => 'Rot';
+
+  @override
+  String get onboardingSkip => 'Überspringen';
+
+  @override
+  String get onboardingNext => 'Weiter';
+
+  @override
+  String get onboardingStart => 'Los geht’s';
+
+  @override
+  String onboardingPageOf(int page, int total) {
+    return 'Seite $page von $total';
+  }
+
+  @override
+  String get onboardingWelcomeTitle => 'Willkommen bei Codecore';
+
+  @override
+  String get onboardingWelcomeBody =>
+      'Dein persönlicher Musikplayer: kein Konto, kein Server. Deine Musik bleibt auf deinem Gerät.';
+
+  @override
+  String get onboardingFoldersTitle => 'Deine Musik';
+
+  @override
+  String get onboardingFoldersBody =>
+      'Wähle die Ordner mit deinen Titeln. Codecore liest sie nur: Es ändert oder verschiebt sie nie.';
+
+  @override
+  String onboardingFoldersAdded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Ordner hinzugefügt',
+      one: '1 Ordner hinzugefügt',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get onboardingAllowAccess => 'Zugriff auf Audiodateien erlauben';
+
+  @override
+  String get onboardingAccessGranted => 'Zugriff erlaubt';
+
+  @override
+  String get onboardingOnlineTitle => 'Online-Funktionen';
+
+  @override
+  String get onboardingOnlineBody =>
+      'Sie sind aus: Codecore geht nie von allein online. Du kannst sie jetzt oder später in den Einstellungen einschalten.';
+
+  @override
+  String get onboardingShareTitle => 'Downloads, Jam und Teilen';
+
+  @override
+  String get onboardingYoutubeBody =>
+      'Du kannst Titel von YouTube auf dein Gerät laden und wie den Rest deiner Musik hören.';
+
+  @override
+  String get onboardingJamBody =>
+      'Mit einer Jam hörst du dieselbe Musik gemeinsam mit einem anderen Gerät im selben Netzwerk.';
+
+  @override
+  String get onboardingSendBody =>
+      'Du kannst Titel mit einer PIN an andere Geräte in der Nähe senden, ohne Umweg über das Internet.';
 }

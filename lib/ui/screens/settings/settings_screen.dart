@@ -38,6 +38,8 @@ const _languages = {
   'en': 'English',
   'de': 'Deutsch',
   'es': 'Español',
+  'fr': 'Français',
+  'pt': 'Português',
 };
 
 class SettingsScreen extends ConsumerWidget {

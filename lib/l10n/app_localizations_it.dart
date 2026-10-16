@@ -2137,4 +2137,71 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get accentRosso => 'Rosso';
+
+  @override
+  String get onboardingSkip => 'Salta';
+
+  @override
+  String get onboardingNext => 'Avanti';
+
+  @override
+  String get onboardingStart => 'Inizia';
+
+  @override
+  String onboardingPageOf(int page, int total) {
+    return 'Pagina $page di $total';
+  }
+
+  @override
+  String get onboardingWelcomeTitle => 'Benvenuto in Codecore';
+
+  @override
+  String get onboardingWelcomeBody =>
+      'Il tuo lettore musicale personale: niente account, niente server. La musica resta sul tuo dispositivo.';
+
+  @override
+  String get onboardingFoldersTitle => 'La tua musica';
+
+  @override
+  String get onboardingFoldersBody =>
+      'Scegli le cartelle dove tieni i brani. Codecore li legge: non li modifica e non li sposta.';
+
+  @override
+  String onboardingFoldersAdded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count cartelle aggiunte',
+      one: '1 cartella aggiunta',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get onboardingAllowAccess => 'Consenti l’accesso ai file audio';
+
+  @override
+  String get onboardingAccessGranted => 'Accesso consentito';
+
+  @override
+  String get onboardingOnlineTitle => 'Funzioni online';
+
+  @override
+  String get onboardingOnlineBody =>
+      'Sono spente: Codecore non si collega a Internet per conto suo. Puoi accenderle ora o più tardi dalle Impostazioni.';
+
+  @override
+  String get onboardingShareTitle => 'Download, Jam e condivisione';
+
+  @override
+  String get onboardingYoutubeBody =>
+      'Puoi scaricare brani da YouTube sul tuo dispositivo, per ascoltarli come il resto della tua musica.';
+
+  @override
+  String get onboardingJamBody =>
+      'Con una Jam ascolti la stessa musica insieme a un altro dispositivo sulla stessa rete.';
+
+  @override
+  String get onboardingSendBody =>
+      'Puoi inviare brani ad altri dispositivi vicini, con un PIN, senza passare da Internet.';
 }

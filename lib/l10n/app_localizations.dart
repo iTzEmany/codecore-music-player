@@ -8,7 +8,9 @@ import 'package:intl/intl.dart' as intl;
 import 'app_localizations_de.dart';
 import 'app_localizations_en.dart';
 import 'app_localizations_es.dart';
+import 'app_localizations_fr.dart';
 import 'app_localizations_it.dart';
+import 'app_localizations_pt.dart';
 
 // ignore_for_file: type=lint
 
@@ -99,7 +101,9 @@ abstract class AppLocalizations {
     Locale('de'),
     Locale('en'),
     Locale('es'),
+    Locale('fr'),
     Locale('it'),
+    Locale('pt'),
   ];
 
   /// No description provided for @appName.
@@ -3641,6 +3645,108 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Rosso'**
   String get accentRosso;
+
+  /// No description provided for @onboardingSkip.
+  ///
+  /// In it, this message translates to:
+  /// **'Salta'**
+  String get onboardingSkip;
+
+  /// No description provided for @onboardingNext.
+  ///
+  /// In it, this message translates to:
+  /// **'Avanti'**
+  String get onboardingNext;
+
+  /// No description provided for @onboardingStart.
+  ///
+  /// In it, this message translates to:
+  /// **'Inizia'**
+  String get onboardingStart;
+
+  /// No description provided for @onboardingPageOf.
+  ///
+  /// In it, this message translates to:
+  /// **'Pagina {page} di {total}'**
+  String onboardingPageOf(int page, int total);
+
+  /// No description provided for @onboardingWelcomeTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Benvenuto in Codecore'**
+  String get onboardingWelcomeTitle;
+
+  /// No description provided for @onboardingWelcomeBody.
+  ///
+  /// In it, this message translates to:
+  /// **'Il tuo lettore musicale personale: niente account, niente server. La musica resta sul tuo dispositivo.'**
+  String get onboardingWelcomeBody;
+
+  /// No description provided for @onboardingFoldersTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'La tua musica'**
+  String get onboardingFoldersTitle;
+
+  /// No description provided for @onboardingFoldersBody.
+  ///
+  /// In it, this message translates to:
+  /// **'Scegli le cartelle dove tieni i brani. Codecore li legge: non li modifica e non li sposta.'**
+  String get onboardingFoldersBody;
+
+  /// No description provided for @onboardingFoldersAdded.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, one{1 cartella aggiunta} other{{count} cartelle aggiunte}}'**
+  String onboardingFoldersAdded(int count);
+
+  /// No description provided for @onboardingAllowAccess.
+  ///
+  /// In it, this message translates to:
+  /// **'Consenti l’accesso ai file audio'**
+  String get onboardingAllowAccess;
+
+  /// No description provided for @onboardingAccessGranted.
+  ///
+  /// In it, this message translates to:
+  /// **'Accesso consentito'**
+  String get onboardingAccessGranted;
+
+  /// No description provided for @onboardingOnlineTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Funzioni online'**
+  String get onboardingOnlineTitle;
+
+  /// No description provided for @onboardingOnlineBody.
+  ///
+  /// In it, this message translates to:
+  /// **'Sono spente: Codecore non si collega a Internet per conto suo. Puoi accenderle ora o più tardi dalle Impostazioni.'**
+  String get onboardingOnlineBody;
+
+  /// No description provided for @onboardingShareTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Download, Jam e condivisione'**
+  String get onboardingShareTitle;
+
+  /// No description provided for @onboardingYoutubeBody.
+  ///
+  /// In it, this message translates to:
+  /// **'Puoi scaricare brani da YouTube sul tuo dispositivo, per ascoltarli come il resto della tua musica.'**
+  String get onboardingYoutubeBody;
+
+  /// No description provided for @onboardingJamBody.
+  ///
+  /// In it, this message translates to:
+  /// **'Con una Jam ascolti la stessa musica insieme a un altro dispositivo sulla stessa rete.'**
+  String get onboardingJamBody;
+
+  /// No description provided for @onboardingSendBody.
+  ///
+  /// In it, this message translates to:
+  /// **'Puoi inviare brani ad altri dispositivi vicini, con un PIN, senza passare da Internet.'**
+  String get onboardingSendBody;
 }
 
 class _AppLocalizationsDelegate
@@ -3653,8 +3759,14 @@ class _AppLocalizationsDelegate
   }
 
   @override
-  bool isSupported(Locale locale) =>
-      <String>['de', 'en', 'es', 'it'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>[
+    'de',
+    'en',
+    'es',
+    'fr',
+    'it',
+    'pt',
+  ].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -3669,8 +3781,12 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
       return AppLocalizationsEn();
     case 'es':
       return AppLocalizationsEs();
+    case 'fr':
+      return AppLocalizationsFr();
     case 'it':
       return AppLocalizationsIt();
+    case 'pt':
+      return AppLocalizationsPt();
   }
 
   throw FlutterError(

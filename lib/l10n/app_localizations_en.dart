@@ -2133,4 +2133,71 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get accentRosso => 'Red';
+
+  @override
+  String get onboardingSkip => 'Skip';
+
+  @override
+  String get onboardingNext => 'Next';
+
+  @override
+  String get onboardingStart => 'Get started';
+
+  @override
+  String onboardingPageOf(int page, int total) {
+    return 'Page $page of $total';
+  }
+
+  @override
+  String get onboardingWelcomeTitle => 'Welcome to Codecore';
+
+  @override
+  String get onboardingWelcomeBody =>
+      'Your personal music player: no account, no server. Your music stays on your device.';
+
+  @override
+  String get onboardingFoldersTitle => 'Your music';
+
+  @override
+  String get onboardingFoldersBody =>
+      'Choose the folders where you keep your tracks. Codecore reads them: it never edits or moves them.';
+
+  @override
+  String onboardingFoldersAdded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count folders added',
+      one: '1 folder added',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get onboardingAllowAccess => 'Allow access to audio files';
+
+  @override
+  String get onboardingAccessGranted => 'Access granted';
+
+  @override
+  String get onboardingOnlineTitle => 'Online features';
+
+  @override
+  String get onboardingOnlineBody =>
+      'They are off: Codecore never goes online on its own. You can turn them on now or later in Settings.';
+
+  @override
+  String get onboardingShareTitle => 'Downloads, Jam and sharing';
+
+  @override
+  String get onboardingYoutubeBody =>
+      'You can download tracks from YouTube to your device and listen to them like the rest of your music.';
+
+  @override
+  String get onboardingJamBody =>
+      'With a Jam you listen to the same music together with another device on the same network.';
+
+  @override
+  String get onboardingSendBody =>
+      'You can send tracks to other nearby devices with a PIN, without going through the Internet.';
 }

@@ -6,6 +6,7 @@ import 'providers/equalizer_providers.dart';
 import 'providers/player_providers.dart';
 import 'providers/settings_providers.dart';
 import 'providers/share_hub.dart';
+import 'ui/screens/onboarding/onboarding_gate.dart';
 import 'ui/shell/app_shell.dart';
 import 'ui/theme/app_theme.dart';
 
@@ -44,7 +45,7 @@ class CodecoreApp extends ConsumerWidget {
         ),
         child: child ?? const SizedBox.shrink(),
       ),
-      home: const AppShell(),
+      home: const OnboardingGate(child: AppShell()),
     );
   }
 }

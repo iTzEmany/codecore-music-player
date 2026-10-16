@@ -49,8 +49,10 @@ void main() {
     'favourites': const FavoritesScreen(),
     'queue': Scaffold(body: _Queue()),
   };
+  // German and French are the languages with the longest texts.
+  for (final lang in ['it', 'fr', 'de', 'pt']) {
   for (final e in screens.entries) {
-    testWidgets('${e.key} has no overflow at 150% text', (tester) async {
+    testWidgets('${e.key} has no overflow at 150% text ($lang)', (tester) async {
       tester.view.physicalSize = const Size(400, 800);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);
@@ -66,6 +68,7 @@ void main() {
               textScaler: const TextScaler.linear(1.5)),
           child: e.value,
         ),
+        locale: Locale(lang),
       );
       await tester.runAsync(
           () => Future<void>.delayed(const Duration(milliseconds: 150)));
@@ -74,5 +77,6 @@ void main() {
       expect(tester.takeException(), isNull);
       await h.dispose(tester);
     });
+  }
   }
 }

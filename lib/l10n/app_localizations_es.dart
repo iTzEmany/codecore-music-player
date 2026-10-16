@@ -2140,4 +2140,72 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get accentRosso => 'Rojo';
+
+  @override
+  String get onboardingSkip => 'Omitir';
+
+  @override
+  String get onboardingNext => 'Siguiente';
+
+  @override
+  String get onboardingStart => 'Empezar';
+
+  @override
+  String onboardingPageOf(int page, int total) {
+    return 'Página $page de $total';
+  }
+
+  @override
+  String get onboardingWelcomeTitle => 'Te damos la bienvenida a Codecore';
+
+  @override
+  String get onboardingWelcomeBody =>
+      'Tu reproductor de música personal: sin cuenta y sin servidor. Tu música se queda en tu dispositivo.';
+
+  @override
+  String get onboardingFoldersTitle => 'Tu música';
+
+  @override
+  String get onboardingFoldersBody =>
+      'Elige las carpetas donde guardas tus canciones. Codecore solo las lee: no las modifica ni las mueve.';
+
+  @override
+  String onboardingFoldersAdded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count carpetas añadidas',
+      one: '1 carpeta añadida',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get onboardingAllowAccess =>
+      'Permitir el acceso a los archivos de audio';
+
+  @override
+  String get onboardingAccessGranted => 'Acceso permitido';
+
+  @override
+  String get onboardingOnlineTitle => 'Funciones en línea';
+
+  @override
+  String get onboardingOnlineBody =>
+      'Están desactivadas: Codecore nunca se conecta a Internet por su cuenta. Puedes activarlas ahora o más tarde en Ajustes.';
+
+  @override
+  String get onboardingShareTitle => 'Descargas, Jam y compartir';
+
+  @override
+  String get onboardingYoutubeBody =>
+      'Puedes descargar canciones de YouTube en tu dispositivo y escucharlas como el resto de tu música.';
+
+  @override
+  String get onboardingJamBody =>
+      'Con una Jam escuchas la misma música junto con otro dispositivo de la misma red.';
+
+  @override
+  String get onboardingSendBody =>
+      'Puedes enviar canciones a otros dispositivos cercanos con un PIN, sin pasar por Internet.';
 }

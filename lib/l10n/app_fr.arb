@@ -1,0 +1,1418 @@
+{
+  "@@locale": "fr",
+  "appName": "Codecore",
+  "chooseFolder": "Choisir un dossier",
+  "scan": "Analyser",
+  "noTracks": "Aucun titre. Choisissez un dossier et lancez l’analyse.",
+  "openSettings": "Ouvrir les paramètres",
+  "permissionDenied": "Autorisation de lecture audio refusée",
+  "permissionExplain": "Codecore a besoin de l’autorisation de lire les fichiers audio pour afficher votre musique.",
+  "navLibrary": "Bibliothèque",
+  "navFavorites": "Favoris",
+  "navPlaylists": "Playlists",
+  "navSettings": "Paramètres",
+  "tracks": "Titres",
+  "albums": "Albums",
+  "artists": "Artistes",
+  "searchHint": "Rechercher",
+  "sortBy": "Trier par",
+  "addMusicFolder": "Ajoutez votre dossier de musique",
+  "addFolder": "Ajouter un dossier",
+  "folders": "Dossiers de musique",
+  "refreshLibrary": "Actualiser la bibliothèque",
+  "removeFolder": "Retirer le dossier",
+  "unknownArtist": "Artiste inconnu",
+  "unknownAlbum": "Album inconnu",
+  "variousArtists": "Artistes divers",
+  "play": "Lire",
+  "shuffle": "Aléatoire",
+  "queue": "File d’attente",
+  "nowPlaying": "Lecture en cours",
+  "nothingPlaying": "Aucun titre en cours de lecture",
+  "mute": "Muet",
+  "scanning": "Analyse en cours…",
+  "emptyQueue": "La file d’attente est vide",
+  "noResults": "Aucun résultat",
+  "sortDefault": "Par défaut",
+  "sortTitle": "Titre",
+  "sortArtist": "Artiste",
+  "sortAlbum": "Album",
+  "sortYear": "Année",
+  "sortAdded": "Ajoutés récemment",
+  "sortDuration": "Durée",
+  "tracksCount": "{count, plural, =0{0 titre} one{1 titre} other{{count} titres}}",
+  "@tracksCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "albumsCount": "{count, plural, =0{0 album} one{1 album} other{{count} albums}}",
+  "@albumsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "missingTracksCount": "Titres introuvables ({count})",
+  "@missingTracksCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "addedToFavorites": "Ajouté aux favoris",
+  "removedFromFavorites": "Retiré des favoris",
+  "undo": "Annuler",
+  "noFavorites": "Aucun favori pour l’instant",
+  "newPlaylist": "Nouvelle playlist",
+  "newPlaylistEllipsis": "Nouvelle playlist…",
+  "playlistName": "Nom de la playlist",
+  "create": "Créer",
+  "cancel": "Annuler",
+  "save": "Enregistrer",
+  "delete": "Supprimer",
+  "rename": "Renommer",
+  "noPlaylists": "Aucune playlist. Créez-en une.",
+  "addToPlaylist": "Ajouter à une playlist…",
+  "addedToPlaylist": "Ajouté à « {name} »",
+  "@addedToPlaylist": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "playNext": "Lire ensuite",
+  "addToQueue": "Ajouter à la file d’attente",
+  "addedToQueue": "Ajouté à la file d’attente",
+  "favorite": "Favori",
+  "removeFromFavorites": "Retirer des favoris",
+  "removeFromList": "Retirer",
+  "editInfo": "Modifier les infos",
+  "details": "Détails",
+  "showInFolder": "Afficher dans le dossier",
+  "detailPath": "Chemin",
+  "detailFormat": "Format",
+  "detailSize": "Taille",
+  "detailDuration": "Durée",
+  "detailAdded": "Ajouté le",
+  "detailPlays": "Lectures",
+  "close": "Fermer",
+  "fieldTitle": "Titre",
+  "fieldArtist": "Artiste",
+  "fieldAlbum": "Album",
+  "fieldAlbumArtist": "Artiste de l’album",
+  "fieldYear": "Année",
+  "fieldTrackNumber": "Numéro de piste",
+  "fieldGenre": "Genre",
+  "restoreFromFile": "Restaurer depuis les tags du fichier",
+  "titleRequired": "Le titre ne peut pas être vide",
+  "settingsAppearance": "Apparence",
+  "settingsTheme": "Thème",
+  "themeNotte": "Nuit violette",
+  "themeOled": "Noir pur",
+  "settingsTextSize": "Taille du texte",
+  "textSmall": "Petit",
+  "textNormal": "Normal",
+  "textLarge": "Grand",
+  "settingsCompact": "Mode compact",
+  "settingsReducedMotion": "Animations réduites",
+  "settingsLanguage": "Langue",
+  "settingsLibrary": "Bibliothèque",
+  "rescanNow": "Réanalyser maintenant",
+  "clearCoverCache": "Vider le cache des pochettes",
+  "coverCacheCleared": "Cache des pochettes vidé",
+  "settingsOnline": "En ligne",
+  "autoEnrich": "Enrichissement automatique",
+  "autoEnrichHint": "Recherche en ligne les métadonnées et les pochettes des nouveaux titres",
+  "autoLyrics": "Paroles automatiques",
+  "autoLyricsHint": "Télécharge les paroles depuis LRCLIB pour les nouveaux titres",
+  "settingsAbout": "À propos",
+  "appVersion": "Version {version}",
+  "@appVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "licenses": "Licences",
+  "personalUse": "Application à usage personnel",
+  "missingTracksTitle": "Titres introuvables",
+  "removeFromLibrary": "Retirer de la bibliothèque",
+  "ignore": "Ignorer",
+  "confirmRemoveTitle": "Retirer de la bibliothèque ?",
+  "confirmRemoveBody": "Le fichier n’est pas modifié ; les favoris et playlists de ce titre seront perdus.",
+  "noMissingTracks": "Aucun titre manquant",
+  "retry": "Réessayer",
+  "scanFailed": "Échec de l’analyse : {error}",
+  "@scanFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "playbackError": "Impossible de lire « {title} » : {reason}",
+  "@playbackError": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "reasonFileMissing": "fichier introuvable",
+  "reasonUnplayable": "fichier illisible",
+  "reasonNotInLibrary": "titre absent de la bibliothèque",
+  "searchWeb": "Rechercher des infos sur le web",
+  "enrichPreviewTitle": "Aperçu des informations",
+  "currentValue": "Actuel",
+  "proposedValue": "Proposé",
+  "apply": "Appliquer",
+  "nothingFound": "Aucune information trouvée",
+  "userEditedLocked": "Modifié par vous : ne sera pas écrasé",
+  "fieldCover": "Pochette",
+  "fieldLyrics": "Paroles",
+  "fieldCuriosity": "Anecdotes",
+  "enrichAlbum": "Enrichir l’album",
+  "enrichLibrary": "Enrichir toute la bibliothèque",
+  "enrichConfirmTitle": "Enrichir la bibliothèque ?",
+  "enrichConfirmBody": "{count} titres, environ {minutes} minutes. Seuls les champs vides sont remplis.",
+  "@enrichConfirmBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "enrichRunning": "Enrichissement {done}/{total}",
+  "@enrichRunning": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "enrichResult": "{updated} mis à jour, {notFound} introuvables",
+  "@enrichResult": {
+    "placeholders": {
+      "notFound": {
+        "type": "int"
+      },
+      "updated": {
+        "type": "int"
+      }
+    }
+  },
+  "enrichBusy": "Un enrichissement est déjà en cours",
+  "serviceUnavailable": "Service indisponible, réessayez plus tard",
+  "lyrics": "Paroles",
+  "searchLyrics": "Rechercher les paroles",
+  "noLyrics": "Aucune parole disponible",
+  "lyricsNotFound": "Paroles introuvables",
+  "copy": "Copier",
+  "copied": "Copié",
+  "sourceWikipedia": "Source : Wikipédia (CC BY-SA)",
+  "youtube": "YouTube",
+  "ytHint": "Rechercher ou coller un lien",
+  "ytDownload": "Télécharger",
+  "ytAlreadyInLibrary": "Déjà dans la bibliothèque",
+  "ytNoResults": "Aucun résultat",
+  "ytQueued": "En attente",
+  "ytDownloading": "Téléchargement en cours",
+  "ytDone": "Terminé",
+  "ytFailed": "Échec",
+  "ytCancelled": "Annulé",
+  "ytClearCompleted": "Effacer les terminés",
+  "ytCancel": "Annuler le téléchargement",
+  "ytErrUnavailable": "Vidéo indisponible (âge/région/privée)",
+  "ytErrNetwork": "Réseau indisponible",
+  "ytErrChanged": "YouTube a changé quelque chose : mettez à jour l’application ou le paquet",
+  "ytNoFolder": "Ajoutez d’abord un dossier de musique",
+  "ytLegal": "Usage personnel uniquement. Respectez les droits d’auteur et les conditions d’utilisation de YouTube.",
+  "useDefaultFolder": "Utiliser le dossier Musique de l’appareil",
+  "ytErrToolMissing": "yt-dlp introuvable : installez-le (pip install -U yt-dlp) puis réessayez",
+  "ytErrRateLimited": "YouTube demande de ralentir : réessayez dans quelques minutes",
+  "playlistChangeCover": "Changer la pochette",
+  "playlistRemoveCover": "Retirer la pochette",
+  "coverTooLarge": "Image trop volumineuse (max 4 MB)",
+  "addSongs": "Ajouter des titres",
+  "addNSongs": "Ajouter ({count})",
+  "@addNSongs": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "allSongsInPlaylist": "Tous les titres sont déjà dans la playlist",
+  "shareTitle": "Partage",
+  "shareSend": "Envoyer",
+  "shareReceive": "Recevoir",
+  "shareAll": "Toute la bibliothèque",
+  "shareSelection": "Sélection ({count} titres)",
+  "@shareSelection": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sharePick": "Choisir des titres",
+  "shareStart": "Démarrer le partage",
+  "shareStop": "Arrêter",
+  "shareActive": "Partage actif",
+  "shareAddress": "Adresse (IP:port)",
+  "sharePin": "PIN",
+  "shareConnect": "Se connecter",
+  "shareDownloadSelected": "Télécharger la sélection ({count})",
+  "@shareDownloadSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shareProgress": "Titre {done} sur {total}",
+  "@shareProgress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "shareDone": "{count} titres reçus",
+  "@shareDone": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shareConnectedTo": "Connecté à {name}",
+  "@shareConnectedTo": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shareErrUnreachable": "Appareil injoignable : vérifiez l’adresse et le Wi‑Fi",
+  "shareErrPin": "PIN incorrect",
+  "shareErrBlocked": "Trop de tentatives : réessayez dans une minute",
+  "shareErrNotCodecore": "Ce n’est pas un appareil Codecore",
+  "shareErrFailed": "Échec du transfert",
+  "shareNoNetwork": "Aucun réseau local trouvé",
+  "shareFirewall": "Windows peut demander l’autorisation du pare-feu lors du premier partage.",
+  "shareHint": "Sur le même Wi‑Fi, ouvrez « Recevoir » sur l’autre appareil et saisissez l’adresse et le PIN.",
+  "shareMenu": "Partager…",
+  "shareDeviceName": "Nom de l’appareil",
+  "importOld": "Importer depuis l’ancienne application",
+  "importOldHint": "Choisissez codecore_library.db de la version Python",
+  "importSummary": "{favorites} favoris, {playlists} playlists, {lyrics} paroles importées, {unmatched} non associés",
+  "@importSummary": {
+    "placeholders": {
+      "favorites": {
+        "type": "int"
+      },
+      "lyrics": {
+        "type": "int"
+      },
+      "playlists": {
+        "type": "int"
+      },
+      "unmatched": {
+        "type": "int"
+      }
+    }
+  },
+  "importFailed": "Échec de l’importation : fichier invalide",
+  "sleepTimer": "Minuteur d’arrêt",
+  "sleepMinutes": "{count} minutes",
+  "@sleepMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sleepEndOfTrack": "À la fin du titre",
+  "sleepCancel": "Annuler le minuteur",
+  "pause": "Pause",
+  "nextTrack": "Titre suivant",
+  "previousTrack": "Titre précédent",
+  "repeat": "Répéter",
+  "moreOptions": "Plus d’options",
+  "back": "Retour",
+  "settingsPlayback": "Lecture",
+  "normalizeVolume": "Normaliser le volume",
+  "normalizeVolumeHint": "Utilise le ReplayGain des fichiers pour atténuer les titres trop forts",
+  "nearbyDevices": "Appareils à proximité",
+  "searchingDevices": "Recherche d’appareils sur le réseau…",
+  "noDevicesHint": "Aucun appareil trouvé. Ouvrez aussi Partage sur l’autre appareil, sur le même réseau.",
+  "sendToDevice": "Envoyer à {name}",
+  "@sendToDevice": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "offerSent": "Demande envoyée à {name}",
+  "@offerSent": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "offerChooseFirst": "Choisissez d’abord les titres à envoyer",
+  "sentRequests": "Demandes envoyées",
+  "receivedRequests": "Demandes reçues",
+  "offerPending": "En attente de réponse",
+  "offerAccepted": "Acceptée",
+  "offerDeclined": "Refusée",
+  "offerCancelled": "Annulée",
+  "offerExpired": "Expirée",
+  "offerDone": "Terminée",
+  "offerFailed": "Échec",
+  "incomingTitle": "{name} souhaite vous envoyer des titres",
+  "@incomingTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "incomingBody": "{count} titres, {size} MB",
+  "@incomingBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "accept": "Accepter",
+  "decline": "Refuser",
+  "receivingProgress": "Réception {done}/{total}",
+  "@receivingProgress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "manualConnection": "Connexion manuelle (IP et PIN)",
+  "receiveFromLan": "Recevoir depuis le réseau local",
+  "receiveFromLanHint": "Rend l’appareil visible et reçoit les demandes même en arrière-plan. Sur Android, une notification permanente permet de le désactiver",
+  "receiveServiceTitle": "Codecore est visible sur le réseau",
+  "receiveServiceText": "Prêt à recevoir des titres des appareils à proximité",
+  "receiveServiceDisable": "Désactiver",
+  "jamTitle": "Jam",
+  "jamStart": "Démarrer une Jam",
+  "jamStartWith": "Démarrer une Jam avec {name}",
+  "@jamStartWith": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "jamWaiting": "En attente de l’acceptation de {name}…",
+  "@jamWaiting": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "jamDeclined": "{name} a refusé la Jam",
+  "@jamDeclined": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "jamBusy": "{name} a déjà une Jam en cours",
+  "@jamBusy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "jamUnreachable": "Appareil injoignable",
+  "jamIncomingTitle": "{name} souhaite démarrer une Jam",
+  "@jamIncomingTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "jamIncomingBody": "Écoutez ensemble depuis une file d’attente partagée.",
+  "jamIncomingDialog": "{name} souhaite démarrer une Jam avec vous. La musique est lue depuis cet appareil et vous pouvez tous les deux ajouter des titres.",
+  "@jamIncomingDialog": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "jamQueue": "File d’attente partagée",
+  "jamEmpty": "La file d’attente est vide. Ajoutez des titres.",
+  "jamAddedBy": "ajouté par {name}",
+  "@jamAddedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "jamYou": "vous",
+  "jamAddTracks": "Ajouter des titres",
+  "jamAddToJam": "Ajouter à la Jam",
+  "jamAdded": "Ajoutés à la Jam : {count}",
+  "@jamAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "jamOutput": "Sortie audio",
+  "jamOutputHere": "Cet appareil",
+  "jamOutputOther": "{name}",
+  "@jamOutputOther": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "jamEnd": "Terminer la Jam",
+  "jamLeave": "Quitter la Jam",
+  "jamEnded": "La Jam est terminée",
+  "jamLost": "Connexion perdue",
+  "jamGuestCannotSkip": "Seul l’hôte de la Jam peut changer de titre",
+  "jamRemoveForbidden": "Vous ne pouvez retirer que vos propres titres",
+  "jamNowPlaying": "Lecture en cours",
+  "jamNothingPlaying": "Rien en cours de lecture",
+  "jamWith": "Jam avec {name}",
+  "@jamWith": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "jamUnavailable": "Indisponible",
+  "jamPlaying": "La Jam est active",
+  "jamOpen": "Ouvrir la Jam",
+  "jamSynced": "Synchronisé · décalage {ms} ms",
+  "@jamSynced": {
+    "placeholders": {
+      "ms": {
+        "type": "int"
+      }
+    }
+  },
+  "jamSyncing": "Synchronisation en cours…",
+  "jamLatency": "Latence de cette sortie : {ms} ms",
+  "@jamLatency": {
+    "placeholders": {
+      "ms": {
+        "type": "int"
+      }
+    }
+  },
+  "jamLatencyHint": "Pour casques ou enceintes Bluetooth : augmentez jusqu’à ce que les sorties soient synchronisées.",
+  "jamOutputsHint": "Plusieurs sorties jouent en même temps",
+  "renamePlaylist": "Renommer la playlist",
+  "confirmDeletePlaylistTitle": "Supprimer la playlist ?",
+  "confirmDeletePlaylistBody": "« {name} » sera supprimée. Les titres restent dans la bibliothèque.",
+  "@confirmDeletePlaylistBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "confirmRemoveFolderTitle": "Retirer le dossier ?",
+  "confirmRemoveFolderBody": "Ses titres disparaissent de la bibliothèque. Les fichiers restent sur l’appareil.",
+  "confirmClearCoversTitle": "Vider le cache des pochettes ?",
+  "confirmClearCoversBody": "Les pochettes seront recréées à la prochaine analyse.",
+  "confirmRestoreTitle": "Restaurer depuis les tags du fichier ?",
+  "confirmRestoreBody": "Vos modifications de ce titre seront remplacées par les données du fichier.",
+  "removedFromPlaylist": "Retiré de la playlist",
+  "removedFromQueue": "Retiré de la file d’attente",
+  "playNextDone": "Sera lu ensuite",
+  "ytSearchPrompt": "Recherchez un titre ou collez un lien",
+  "loadFailed": "Impossible de charger les données.",
+  "navHome": "Accueil",
+  "navSearch": "Rechercher",
+  "devicesTitle": "Appareils",
+  "devicesJamActive": "Jam active",
+  "jamPeople": "Jam · {n} personnes",
+  "@jamPeople": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "devicesVisibleTitle": "Rendre cet appareil visible",
+  "devicesVisibleHint": "Pour recevoir des titres ou lancer une Jam, les autres appareils doivent pouvoir vous voir sur le réseau.",
+  "devicesJamShort": "Jam",
+  "devicesSendShort": "Envoyer",
+  "devicesMore": "Partage et connexion manuelle",
+  "jamParticipantsCount": "{n} personnes",
+  "@jamParticipantsCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "playingFrom": "Lecture depuis",
+  "playContextSearch": "Recherche",
+  "allTracks": "Tous les titres",
+  "trackInfo": "Infos sur le titre",
+  "searchCuriosity": "Rechercher des anecdotes",
+  "upNext": "À suivre",
+  "openQueue": "Ouvrir la file d’attente",
+  "copyLink": "Copier le lien",
+  "moreActions": "Autres actions",
+  "sleepChipEnd": "fin du titre",
+  "yourLibrary": "Votre bibliothèque",
+  "playlistCountLabel": "{n, plural, =0{Playlist · 0 titre} one{Playlist · 1 titre} other{Playlist · {n} titres}}",
+  "@playlistCountLabel": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "sortRecent": "Récents",
+  "sortAlphabetical": "Alphabétique",
+  "sortAddedRecently": "Ajoutés récemment",
+  "viewAsGrid": "Afficher en grille",
+  "viewAsList": "Afficher en liste",
+  "kindAlbum": "Album",
+  "kindArtist": "Artiste",
+  "kindPlaylist": "Playlist",
+  "discN": "Disque {n}",
+  "@discN": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "albumMeta": "Album · {details}",
+  "@albumMeta": {
+    "placeholders": {
+      "details": {
+        "type": "String"
+      }
+    }
+  },
+  "durationMinutes": "{n} min",
+  "@durationMinutes": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "tracksAndDuration": "{tracks}, {duration}",
+  "@tracksAndDuration": {
+    "placeholders": {
+      "tracks": {
+        "type": "String"
+      },
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "mostPlayed": "Les plus écoutés",
+  "albumsSection": "Albums",
+  "artistMeta": "{albums} · {tracks}",
+  "@artistMeta": {
+    "placeholders": {
+      "albums": {
+        "type": "String"
+      },
+      "tracks": {
+        "type": "String"
+      }
+    }
+  },
+  "addAllToQueue": "Ajouter à la file d’attente",
+  "addedNToQueue": "{n} titres ajoutés à la file d’attente",
+  "@addedNToQueue": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "editOrder": "Modifier l’ordre",
+  "finishEditing": "Terminé",
+  "removeFromPlaylistAction": "Retirer de la playlist",
+  "noTracksInPlaylist": "Cette playlist est vide",
+  "greetingMorning": "Bonjour",
+  "greetingAfternoon": "Bon après-midi",
+  "greetingEvening": "Bonsoir",
+  "homeResume": "Reprendre",
+  "homeRecentlyPlayed": "Écoutés récemment",
+  "homeRecentlyAdded": "Ajoutés récemment",
+  "homeTopTracks": "Les plus écoutés",
+  "homeRediscover": "À redécouvrir",
+  "searchMainResult": "Résultat principal",
+  "showAll": "Tout afficher",
+  "searchOnYoutube": "Rechercher « {query} » sur YouTube",
+  "@searchOnYoutube": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "recentSearches": "Recherches récentes",
+  "genresTitle": "Genres",
+  "downloadsChip": "Téléchargements ({n})",
+  "@downloadsChip": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "gotIt": "Compris",
+  "searchEmptyLibrary": "Aucun résultat dans la bibliothèque",
+  "ytInfoTooltip": "Informations sur l’utilisation",
+  "removeRecentSearch": "Retirer des recherches récentes",
+  "groupGoTo": "Aller à",
+  "goToAlbum": "Aller à l’album",
+  "goToArtist": "Aller à l’artiste",
+  "groupQueue": "File d’attente",
+  "groupCollection": "Collection",
+  "groupEdit": "Modifier",
+  "groupOther": "Autre",
+  "queueNowPlaying": "Lecture en cours",
+  "queueNext": "À suivre",
+  "queueClear": "Vider",
+  "queueCleared": "File d’attente vidée",
+  "jamOutputsAndSync": "Sorties et synchro",
+  "jamHostTag": "hôte",
+  "jamWaitingEmpty": "Aucune Jam en cours",
+  "activityTitle": "Activité",
+  "activityScan": "Analyse · {done}/{total}",
+  "@activityScan": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "activityScanIdle": "Analyse en cours",
+  "activityEnrich": "Enrichissement · {done}/{total}",
+  "@activityEnrich": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "activityDownload": "Téléchargement · {title}",
+  "@activityDownload": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "activityTransfer": "Envoi à {name} · {n} titres",
+  "@activityTransfer": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "activityNone": "Aucune activité",
+  "activityCompleted": "Terminées",
+  "activityClear": "Effacer",
+  "activityRunning": "{n} activités en cours",
+  "@activityRunning": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsLocalNetwork": "Réseau local",
+  "removeAll": "Tout retirer",
+  "confirmRemoveAllTitle": "Tout retirer de la bibliothèque ?",
+  "confirmRemoveAllBody": "{n} titres introuvables seront retirés de la bibliothèque. Les fichiers ne sont pas modifiés ; les favoris et playlists de ces titres seront perdus.",
+  "@confirmRemoveAllBody": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "csvImportMenu": "Importer depuis Exportify (CSV)",
+  "csvImportIntroTitle": "Importer une playlist",
+  "csvImportIntroSource": "Le fichier CSV se crée gratuitement sur le site Exportify — exportify.net (aucune application nécessaire).",
+  "csvImportStep1": "Ouvrez https://exportify.net dans le navigateur (même depuis le téléphone).",
+  "csvImportStep2": "Appuyez sur « Get Started » et connectez-vous avec votre compte Spotify.",
+  "csvImportStep3": "À côté de la playlist souhaitée, appuyez sur « Export » : un fichier .csv portant le nom de la playlist est téléchargé.",
+  "csvImportStep4": "Revenez ici et appuyez sur « Choisir un fichier CSV ».",
+  "csvImportNote": "Codecore recherche les titres dans votre bibliothèque et télécharge les autres depuis YouTube Music.",
+  "csvImportNoteOffline": "Seuls les titres déjà présents dans votre bibliothèque seront liés.",
+  "csvImportCopy": "Copier l’adresse",
+  "csvImportCopied": "Adresse copiée",
+  "csvImportPick": "Choisir un fichier",
+  "csvImportNotExportify": "Format non reconnu. Choisissez un CSV (Exportify, TuneMyMusic, Soundiiz, Last.fm) ou une playlist M3U/M3U8/XSPF.",
+  "csvImportReadFailed": "Impossible de lire le fichier.",
+  "csvImportPreviewTitle": "Importer la playlist",
+  "csvImportName": "Nom de la playlist",
+  "csvImportSummary": "{total} titres · {known} déjà dans la bibliothèque · {todo} à télécharger",
+  "@csvImportSummary": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "known": {
+        "type": "int"
+      },
+      "todo": {
+        "type": "int"
+      }
+    }
+  },
+  "csvImportSkipped": "{n} lignes ignorées (podcasts ou fichiers locaux)",
+  "@csvImportSkipped": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "csvImportEstimate": "Durée estimée : environ {minutes} min",
+  "@csvImportEstimate": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "csvImportExists": "Une playlist portant ce nom existe déjà",
+  "csvImportUpdate": "Mettre à jour l’existante (n’ajoute que les nouveaux titres)",
+  "csvImportNew": "Créer une nouvelle playlist",
+  "csvImportGo": "Importer",
+  "csvImportStarted": "Importation lancée : suivez-la dans le Centre d’activité",
+  "activityImport": "Importation « {name} » · {done}/{total}",
+  "@activityImport": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "activityImportPaused": "Importation « {name} » · en pause · {done}/{total}",
+  "@activityImportPaused": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "csvImportBanner": "Importation : {done}/{total} · {review} à vérifier · {missing} introuvables",
+  "@csvImportBanner": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "review": {
+        "type": "int"
+      },
+      "missing": {
+        "type": "int"
+      }
+    }
+  },
+  "csvImportBannerPaused": "Importation en pause : {done}/{total} · {review} à vérifier · {missing} introuvables",
+  "@csvImportBannerPaused": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "review": {
+        "type": "int"
+      },
+      "missing": {
+        "type": "int"
+      }
+    }
+  },
+  "csvImportReview": "Revoir",
+  "csvImportResume": "Reprendre",
+  "csvImportPause": "Pause",
+  "csvImportCancelTitle": "Annuler l’importation ?",
+  "csvImportCancelBody": "Les titres déjà téléchargés restent dans la playlist.",
+  "csvImportDone": "Importation terminée : {added} ajoutés, {review} à vérifier, {missing} introuvables",
+  "@csvImportDone": {
+    "placeholders": {
+      "added": {
+        "type": "int"
+      },
+      "review": {
+        "type": "int"
+      },
+      "missing": {
+        "type": "int"
+      }
+    }
+  },
+  "csvImportFailing": "Trop d’erreurs consécutives : importation en pause",
+  "csvImportReviewTitle": "Revoir",
+  "csvImportToReview": "À vérifier",
+  "csvImportNotFound": "Introuvables",
+  "csvImportErrors": "Avec erreurs",
+  "csvImportRetryAll": "Tout réessayer",
+  "csvImportSkip": "Passer",
+  "csvImportManual": "Rechercher manuellement",
+  "csvImportNothing": "Rien à revoir.",
+  "csvImportSearch": "Rechercher",
+  "csvImportWanted": "Recherché : {title} · {artist} · {duration}",
+  "@csvImportWanted": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "artist": {
+        "type": "String"
+      },
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "csvImportDownload": "Télécharger",
+  "csvImportCancelGo": "Annuler l’importation",
+  "exportLog": "Exporter le journal",
+  "exportLogHint": "Fichier texte sans chemins personnels, adresses réseau ni PIN",
+  "exportLogDebugOnly": "Disponible uniquement dans la version installée (en debug, le journal n’est pas écrit dans un fichier)",
+  "exportLogNone": "Aucun journal à exporter pour l’instant",
+  "exportLogSaved": "Journal enregistré",
+  "exportLogFailed": "Impossible d’enregistrer le journal",
+  "exportPlaylist": "Exporter…",
+  "exportPlaylistTitle": "Exporter la playlist",
+  "exportFormatM3u8": "M3U8 · pour d’autres lecteurs",
+  "exportFormatCsv": "CSV · comme Exportify",
+  "exportFormatJson": "JSON · format Codecore",
+  "exportRelativePaths": "Chemins relatifs",
+  "exportRelativeHint": "Relatifs au dossier commun des titres : enregistrez-y le fichier",
+  "exportAction": "Exporter",
+  "exportSaved": "Playlist exportée",
+  "exportEmpty": "La playlist est vide",
+  "exportFailed": "Impossible d’exporter la playlist",
+  "ytErrToolOutdated": "yt-dlp est trop ancien : mettez-le à jour (Paramètres → Téléchargements → Mettre à jour) et réessayez",
+  "ytDlpOutdatedBanner": "yt-dlp {version} est trop ancien : les téléchargements pourraient ne pas fonctionner",
+  "@ytDlpOutdatedBanner": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsDownloads": "Téléchargements",
+  "ytDlpVersion": "yt-dlp {version}",
+  "@ytDlpVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "ytDlpUnknownVersion": "yt-dlp introuvable",
+  "ytDlpUpdate": "Mettre à jour",
+  "ytDlpUpdating": "Mise à jour… {percent} %",
+  "@ytDlpUpdating": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "ytDlpUpdated": "Mis à jour vers la version {version}",
+  "@ytDlpUpdated": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "ytDlpTooOld": "Trop ancien : appuyez sur Mettre à jour",
+  "ytDlpUpdateErrNetwork": "Échec de la mise à jour : réseau injoignable",
+  "ytDlpUpdateErrHash": "Mise à jour annulée : le fichier téléchargé n’a pas réussi la vérification d’intégrité",
+  "ytDlpUpdateErrOther": "Échec de la mise à jour (détails dans le journal)",
+  "downloadParallel": "Téléchargements simultanés",
+  "downloadParallelHint": "Plus à la fois, c’est plus rapide, mais YouTube peut demander de ralentir",
+  "downloadRateLimit": "Limite de vitesse",
+  "downloadRateNone": "Aucune",
+  "downloadRateKb": "{kb} KB/s",
+  "@downloadRateKb": {
+    "placeholders": {
+      "kb": {
+        "type": "int"
+      }
+    }
+  },
+  "downloadRateMb": "{mb} MB/s",
+  "@downloadRateMb": {
+    "placeholders": {
+      "mb": {
+        "type": "int"
+      }
+    }
+  },
+  "activityDownloadRetry": "Téléchargement · {title} · nouvelle tentative dans {seconds} s ({attempt}/{max})",
+  "@activityDownloadRetry": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "seconds": {
+        "type": "int"
+      },
+      "attempt": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "downloadOriginal": "Qualité d’origine (sans réencodage)",
+  "downloadOriginalHint": "Conserve l’audio de YouTube tel quel (M4A/Opus) : aucune perte, fichiers plus petits. Désactivé : MP3 256 kbps",
+  "searchCacheClear": "Vider le cache des recherches",
+  "searchCacheCount": "{count, plural, =0{Vide} one{1 recherche enregistrée} other{{count} recherches enregistrées}}",
+  "@searchCacheCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "searchCacheCleared": "Cache vidé",
+  "csvImportLengthOff": "Durée différente : {found} au lieu de {wanted}",
+  "@csvImportLengthOff": {
+    "placeholders": {
+      "found": {
+        "type": "String"
+      },
+      "wanted": {
+        "type": "String"
+      }
+    }
+  },
+  "csvImportKeep": "Garder celui-ci",
+  "csvImportTooBig": "Le fichier est trop volumineux pour une playlist (5 MB et 10 000 titres maximum)",
+  "csvImportAlsoAccepts": "Également acceptés : TuneMyMusic, Soundiiz, Last.fm (CSV), M3U/M3U8, XSPF.",
+  "csvImportPlanned": "Correspondances prêtes : vérifiez-les et téléchargez",
+  "csvImportLinkOnly": "Lier uniquement (aucun téléchargement)",
+  "csvImportLinkOnlyHint": "Crée la playlist avec ce que vous avez déjà, sans plus",
+  "csvImportPlanFirst": "Vérifier avant de télécharger",
+  "csvImportPlanFirstHint": "Recherche tout, puis vous choisissez quoi télécharger",
+  "csvImportPlanTitle": "Correspondances",
+  "csvImportPlanGo": "{n, plural, =0{Télécharger 0 titre} one{Télécharger 1 titre} other{Télécharger {n} titres}}",
+  "@csvImportPlanGo": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "csvImportPlanKnown": "déjà téléchargé",
+  "csvImportPlanEmpty": "Rien à télécharger",
+  "csvImportBannerPlanned": "Correspondances prêtes : {n, plural, =0{0 titre à télécharger} one{1 titre à télécharger} other{{n} titres à télécharger}}",
+  "@csvImportBannerPlanned": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsAdvanced": "Avancé",
+  "importSureThreshold": "Correspondance sûre à partir de",
+  "importSureThresholdHint": "Au-dessus de ce score, un titre importé est téléchargé sans demander",
+  "importReviewThreshold": "À vérifier à partir de",
+  "importReviewThresholdHint": "Entre ce score et le score sûr, le titre va dans « À vérifier » ; en dessous, dans « Introuvables »",
+  "importThresholdsReset": "Rétablir les valeurs par défaut",
+  "csvImportEstimateHours": "Durée estimée : environ {hours} h {minutes} min",
+  "@csvImportEstimateHours": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "csvImportBlocks": "Importer par blocs de {size}",
+  "@csvImportBlocks": {
+    "placeholders": {
+      "size": {
+        "type": "int"
+      }
+    }
+  },
+  "csvImportBigWarning": "{n} titres à télécharger : cela prendra des heures. Par blocs, l’un après l’autre, l’ordre de la playlist reste correct et vous pouvez vous arrêter entre deux blocs.",
+  "@csvImportBigWarning": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "etaLessThanMinute": "moins de 1 min",
+  "etaMinutes": "environ {minutes} min",
+  "@etaMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "etaHours": "environ {hours} h {minutes} min",
+  "@etaHours": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "csvImportOwnFolder": "Dossier pour cette playlist",
+  "csvImportOwnFolderHint": "Enregistre les titres téléchargés dans un sous-dossier portant le nom de la playlist",
+  "csvImportNumberFiles": "Numéroter les fichiers",
+  "csvImportNumberFilesHint": "07 - Artiste - Titre : le dossier se lit dans le bon ordre, même en dehors de Codecore",
+  "csvImportFetchCovers": "Rechercher les pochettes",
+  "csvImportFetchCoversHint": "Après chaque téléchargement, recherche la pochette de l’album sur iTunes (album et artiste du fichier)",
+  "csvImportExport": "Exporter le résultat",
+  "csvImportExported": "Résultat enregistré",
+  "csvOutHeaderRow": "Ligne",
+  "csvOutHeaderTitle": "Titre",
+  "csvOutHeaderArtists": "Artistes",
+  "csvOutHeaderAlbum": "Album",
+  "csvOutHeaderDuration": "Durée (ms)",
+  "csvOutHeaderIsrc": "ISRC",
+  "csvOutHeaderStatus": "Résultat",
+  "csvOutHeaderNote": "Motif",
+  "csvOutHeaderVideo": "Vidéo choisie",
+  "csvOutHeaderScore": "Score",
+  "importStatusPending": "À rechercher",
+  "importStatusQueued": "En attente",
+  "importStatusDownloaded": "Téléchargé",
+  "importStatusLinked": "Déjà dans la bibliothèque",
+  "importStatusReview": "À vérifier",
+  "importStatusNotFound": "Introuvable",
+  "importStatusFailed": "Erreur",
+  "importStatusSkipped": "Ignoré",
+  "importStatusPlanned": "Planifié",
+  "importStatusRemoved": "Retiré de la source",
+  "importNoteNoResults": "Aucun résultat",
+  "importNoteLowScore": "Correspondance peu sûre",
+  "importNoteLinkOnly": "Liaison seule : non recherché",
+  "importNoteYoutubeOff": "Téléchargement désactivé",
+  "importNoteDownloadFailed": "Échec du téléchargement",
+  "importNoteLengthOff": "Durée différente de celle du fichier",
+  "importNoteUnchanged": "Déjà dans la playlist",
+  "csvImportSync": "Synchroniser",
+  "csvImportSyncCounts": "+{added} nouveaux · −{removed} retirés de la playlist (les fichiers restent)",
+  "@csvImportSyncCounts": {
+    "placeholders": {
+      "added": {
+        "type": "int"
+      },
+      "removed": {
+        "type": "int"
+      }
+    }
+  },
+  "csvImportSyncChecking": "Vérification des différences…",
+  "playbackSpeed": "Vitesse de lecture",
+  "playbackSpeedHint": "La hauteur du son reste inchangée. Le minuteur d’arrêt compte le temps réel, pas celui du titre.",
+  "resumeFrom": "reprendre à {time}",
+  "@resumeFrom": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "restartFromBeginning": "Recommencer depuis le début",
+  "previewTrack": "Aperçu de 20 s",
+  "equalizer": "Égaliseur",
+  "eqOutputSpeaker": "Haut-parleur",
+  "eqOutputHeadphones": "Casque",
+  "eqHint": "Chaque sortie mémorise sa courbe : elle change toute seule quand vous branchez un casque.",
+  "eqPresetFlat": "Plat",
+  "eqPresetBass": "Basses",
+  "eqPresetVoice": "Voix",
+  "eqPresetTreble": "Aigus",
+  "eqPresetCustom": "Personnalisé",
+  "eqReset": "Réinitialiser",
+  "eqWaiting": "Les bandes apparaissent au démarrage du premier titre.",
+  "eqUnavailable": "L’égaliseur n’est pas disponible sur cet appareil.",
+  "transitionMode": "Transition entre les titres",
+  "transitionNormal": "Normal",
+  "transitionGapless": "Sans pause",
+  "transitionCrossfade": "Fondu enchaîné",
+  "transitionHint": "Le mode Sans pause fonctionne mieux avec des titres du même format (par exemple tous en FLAC).",
+  "crossfadeLength": "Durée du fondu enchaîné : {seconds} s",
+  "@crossfadeLength": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "crossfadePlainInAlbum": "Pas de fondu dans un même album",
+  "crossfadePlainInAlbumHint": "Dans un album, les titres s’enchaînent sans pause et sans chevauchement.",
+  "selectedRow": "Sélectionné",
+  "selectedCount": "{count, plural, =0{0 sélectionné} one{1 sélectionné} other{{count} sélectionnés}}",
+  "@selectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectAll": "Tout sélectionner",
+  "exitSelection": "Quitter la sélection",
+  "bulkActions": "Actions",
+  "playNextMany": "{count, plural, =0{0 titre sera lu ensuite} one{1 titre sera lu ensuite} other{{count} titres seront lus ensuite}}",
+  "@playNextMany": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "addedToQueueMany": "{count, plural, =0{0 titre ajouté à la file d’attente} one{1 titre ajouté à la file d’attente} other{{count} titres ajoutés à la file d’attente}}",
+  "@addedToQueueMany": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "addedToPlaylistMany": "{count, plural, =0{0 titre ajouté à « {name} »} one{1 titre ajouté à « {name} »} other{{count} titres ajoutés à « {name} »}}",
+  "@addedToPlaylistMany": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "addedToPlaylistSkipped": "{added} ajoutés à « {name} », {skipped} déjà présents",
+  "@addedToPlaylistSkipped": {
+    "placeholders": {
+      "added": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "allAlreadyInPlaylist": "Ils étaient déjà tous dans « {name} »",
+  "@allAlreadyInPlaylist": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "favoritesAdded": "{count, plural, =0{0 titre ajouté aux favoris} one{1 titre ajouté aux favoris} other{{count} titres ajoutés aux favoris}}",
+  "@favoritesAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "favoritesRemoved": "{count, plural, =0{0 titre retiré des favoris} one{1 titre retiré des favoris} other{{count} titres retirés des favoris}}",
+  "@favoritesRemoved": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bulkAddToFavorites": "Ajouter aux favoris",
+  "bulkRemoveFromFavorites": "Retirer des favoris",
+  "removeManyFromPlaylistTitle": "{count, plural, =0{Retirer 0 titre de la playlist ?} one{Retirer 1 titre de la playlist ?} other{Retirer {count} titres de la playlist ?}}",
+  "@removeManyFromPlaylistTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "removeManyFromPlaylistBody": "Les fichiers et la bibliothèque ne sont pas modifiés.",
+  "removedManyFromPlaylist": "{count, plural, =0{0 titre retiré} one{1 titre retiré} other{{count} titres retirés}}",
+  "@removedManyFromPlaylist": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "removeManyFromLibraryTitle": "{count, plural, =0{Retirer 0 titre de la bibliothèque ?} one{Retirer 1 titre de la bibliothèque ?} other{Retirer {count} titres de la bibliothèque ?}}",
+  "@removeManyFromLibraryTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "removeManyFromLibraryBody": "Les fichiers n’existent plus : ils disparaissent seulement de la bibliothèque (les favoris et playlists de ces titres seront perdus).",
+  "removedManyFromLibrary": "{count, plural, =0{0 titre retiré de la bibliothèque} one{1 titre retiré de la bibliothèque} other{{count} titres retirés de la bibliothèque}}",
+  "@removedManyFromLibrary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ytDownloadsStarted": "{count, plural, =0{0 téléchargement lancé} one{1 téléchargement lancé} other{{count} téléchargements lancés}}",
+  "@ytDownloadsStarted": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ytDownloadsSkipped": "{started} téléchargements lancés, {skipped} déjà dans la bibliothèque ou en cours",
+  "@ytDownloadsSkipped": {
+    "placeholders": {
+      "started": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      }
+    }
+  },
+  "ytNothingToDownload": "Tous sont déjà dans la bibliothèque ou en cours",
+  "themeChiaro": "Clair",
+  "settingsAccent": "Couleur d’accent",
+  "accentViola": "Violet",
+  "accentBlu": "Bleu",
+  "accentAcqua": "Turquoise",
+  "accentVerde": "Vert",
+  "accentAmbra": "Ambre",
+  "accentArancio": "Orange",
+  "accentRosa": "Rose",
+  "accentRosso": "Rouge",
+  "onboardingSkip": "Passer",
+  "onboardingNext": "Suivant",
+  "onboardingStart": "Commencer",
+  "onboardingPageOf": "Page {page} sur {total}",
+  "@onboardingPageOf": {
+    "placeholders": {
+      "page": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "onboardingWelcomeTitle": "Bienvenue dans Codecore",
+  "onboardingWelcomeBody": "Votre lecteur de musique personnel : sans compte et sans serveur. Votre musique reste sur votre appareil.",
+  "onboardingFoldersTitle": "Votre musique",
+  "onboardingFoldersBody": "Choisissez les dossiers où se trouvent vos titres. Codecore les lit seulement : il ne les modifie ni ne les déplace.",
+  "onboardingFoldersAdded": "{count, plural, one{1 dossier ajouté} other{{count} dossiers ajoutés}}",
+  "@onboardingFoldersAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "onboardingAllowAccess": "Autoriser l’accès aux fichiers audio",
+  "onboardingAccessGranted": "Accès autorisé",
+  "onboardingOnlineTitle": "Fonctions en ligne",
+  "onboardingOnlineBody": "Elles sont désactivées : Codecore ne se connecte jamais à Internet de lui-même. Vous pouvez les activer maintenant ou plus tard dans les Paramètres.",
+  "onboardingShareTitle": "Téléchargements, Jam et partage",
+  "onboardingYoutubeBody": "Vous pouvez télécharger des titres depuis YouTube sur votre appareil et les écouter comme le reste de votre musique.",
+  "onboardingJamBody": "Avec une Jam, vous écoutez la même musique avec un autre appareil du même réseau.",
+  "onboardingSendBody": "Vous pouvez envoyer des titres à d’autres appareils proches avec un PIN, sans passer par Internet."
+}

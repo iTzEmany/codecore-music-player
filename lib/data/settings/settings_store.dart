@@ -38,6 +38,7 @@ class AppSettings {
     this.libraryGrid = false,
     this.recentSearches = const [],
     this.ytNoticeSeen = false,
+    this.onboardingDone = false,
     this.downloadParallel = 2,
     this.downloadRateLimitKBps = 0,
     this.downloadOriginal = false,
@@ -53,6 +54,9 @@ class AppSettings {
   });
 
   final String theme;
+
+  /// The first-run guide was finished or skipped (never shown again).
+  final bool onboardingDone;
 
   /// One of the eight accent names (`CcAccent`); unknown ones mean violet.
   final String accent;
@@ -129,6 +133,7 @@ class AppSettings {
     bool? libraryGrid,
     List<String>? recentSearches,
     bool? ytNoticeSeen,
+    bool? onboardingDone,
     int? downloadParallel,
     int? downloadRateLimitKBps,
     bool? downloadOriginal,
@@ -160,6 +165,7 @@ class AppSettings {
         libraryGrid: libraryGrid ?? this.libraryGrid,
         recentSearches: recentSearches ?? this.recentSearches,
         ytNoticeSeen: ytNoticeSeen ?? this.ytNoticeSeen,
+        onboardingDone: onboardingDone ?? this.onboardingDone,
         downloadParallel: downloadParallel ?? this.downloadParallel,
         downloadRateLimitKBps:
             downloadRateLimitKBps ?? this.downloadRateLimitKBps,
@@ -221,6 +227,7 @@ class SettingsStore {
         libraryGrid: _prefs.getBool('libraryGrid') ?? false,
         recentSearches: _prefs.getStringList('recentSearches') ?? const [],
         ytNoticeSeen: _prefs.getBool('ytNoticeSeen') ?? false,
+        onboardingDone: _prefs.getBool('onboardingDone') ?? false,
         downloadParallel:
             (_prefs.getInt('downloadParallel') ?? 2).clamp(1, 3),
         downloadRateLimitKBps: _prefs.getInt('downloadRateLimitKBps') ?? 0,
@@ -274,6 +281,7 @@ class SettingsStore {
     await _prefs.setBool('libraryGrid', s.libraryGrid);
     await _prefs.setStringList('recentSearches', s.recentSearches);
     await _prefs.setBool('ytNoticeSeen', s.ytNoticeSeen);
+    await _prefs.setBool('onboardingDone', s.onboardingDone);
     await _prefs.setInt('downloadParallel', s.downloadParallel);
     await _prefs.setInt('downloadRateLimitKBps', s.downloadRateLimitKBps);
     await _prefs.setBool('downloadOriginal', s.downloadOriginal);

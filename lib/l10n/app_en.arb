@@ -1189,5 +1189,39 @@
   "accentAmbra": "Amber",
   "accentArancio": "Orange",
   "accentRosa": "Pink",
-  "accentRosso": "Red"
+  "accentRosso": "Red",
+  "onboardingSkip": "Skip",
+  "onboardingNext": "Next",
+  "onboardingStart": "Get started",
+  "onboardingPageOf": "Page {page} of {total}",
+  "@onboardingPageOf": {
+    "placeholders": {
+      "page": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "onboardingWelcomeTitle": "Welcome to Codecore",
+  "onboardingWelcomeBody": "Your personal music player: no account, no server. Your music stays on your device.",
+  "onboardingFoldersTitle": "Your music",
+  "onboardingFoldersBody": "Choose the folders where you keep your tracks. Codecore reads them: it never edits or moves them.",
+  "onboardingFoldersAdded": "{count, plural, one{1 folder added} other{{count} folders added}}",
+  "@onboardingFoldersAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "onboardingAllowAccess": "Allow access to audio files",
+  "onboardingAccessGranted": "Access granted",
+  "onboardingOnlineTitle": "Online features",
+  "onboardingOnlineBody": "They are off: Codecore never goes online on its own. You can turn them on now or later in Settings.",
+  "onboardingShareTitle": "Downloads, Jam and sharing",
+  "onboardingYoutubeBody": "You can download tracks from YouTube to your device and listen to them like the rest of your music.",
+  "onboardingJamBody": "With a Jam you listen to the same music together with another device on the same network.",
+  "onboardingSendBody": "You can send tracks to other nearby devices with a PIN, without going through the Internet."
 }

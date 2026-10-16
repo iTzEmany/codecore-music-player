@@ -1380,5 +1380,39 @@
   "accentAmbra": "Ambra",
   "accentArancio": "Arancio",
   "accentRosa": "Rosa",
-  "accentRosso": "Rosso"
+  "accentRosso": "Rosso",
+  "onboardingSkip": "Salta",
+  "onboardingNext": "Avanti",
+  "onboardingStart": "Inizia",
+  "onboardingPageOf": "Pagina {page} di {total}",
+  "@onboardingPageOf": {
+    "placeholders": {
+      "page": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "onboardingWelcomeTitle": "Benvenuto in Codecore",
+  "onboardingWelcomeBody": "Il tuo lettore musicale personale: niente account, niente server. La musica resta sul tuo dispositivo.",
+  "onboardingFoldersTitle": "La tua musica",
+  "onboardingFoldersBody": "Scegli le cartelle dove tieni i brani. Codecore li legge: non li modifica e non li sposta.",
+  "onboardingFoldersAdded": "{count, plural, one{1 cartella aggiunta} other{{count} cartelle aggiunte}}",
+  "@onboardingFoldersAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "onboardingAllowAccess": "Consenti l’accesso ai file audio",
+  "onboardingAccessGranted": "Accesso consentito",
+  "onboardingOnlineTitle": "Funzioni online",
+  "onboardingOnlineBody": "Sono spente: Codecore non si collega a Internet per conto suo. Puoi accenderle ora o più tardi dalle Impostazioni.",
+  "onboardingShareTitle": "Download, Jam e condivisione",
+  "onboardingYoutubeBody": "Puoi scaricare brani da YouTube sul tuo dispositivo, per ascoltarli come il resto della tua musica.",
+  "onboardingJamBody": "Con una Jam ascolti la stessa musica insieme a un altro dispositivo sulla stessa rete.",
+  "onboardingSendBody": "Puoi inviare brani ad altri dispositivi vicini, con un PIN, senza passare da Internet."
 }
