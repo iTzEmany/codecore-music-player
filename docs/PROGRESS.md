@@ -183,7 +183,7 @@ L'agente riparte sempre dal primo task non spuntato.
 - [~] 15.1 Verifiche preliminari (file veri dei formati, album su YouTube Music, iTunes per ISRC)
 - [x] 15.2 Schema v5 per le importazioni
 - [x] 15.3 Interfaccia comune dei lettori
-- [ ] 15.4 Lettori CSV: TuneMyMusic, Soundiiz, Last.fm, generico
+- [~] 15.4 Lettori CSV: TuneMyMusic, Soundiiz, Last.fm, generico
 - [ ] 15.5 Lettori M3U/M3U8 e XSPF
 - [ ] 15.6 Anteprima degli abbinamenti e «solo collega»
 - [ ] 15.7 Soglie regolabili e CSV grandi
@@ -408,6 +408,8 @@ L'agente riparte sempre dal primo task non spuntato.
 - 15.2: migrazione v4→v5 con `else if (from < 5)` (chi arriva da <4 crea le tabelle già con le colonne v5). `ImportRow.location` anticipato qui perché lo scrive il repository; `ImportItemStatus` + `planned`(8), `removed`(9); `setItem(note:)`. `ImportProgress` non conta le righe `removed`.
 
 - 15.3: `ImportedPlaylist` (con `kind`) in `imported_playlist.dart`; `ExportifyPlaylist` resta come `typedef`. `playlist_reader.dart`: registro `playlistReaders` per estensione (oggi `csv`; 15.5 aggiunge `m3u`, `m3u8`, `xspf`), `readPlaylistFile`, `…InIsolate`, `decodePlaylistBytes` (UTF-8 → Latin-1 per `.m3u`). Foglio d'importazione: «Importa una playlist», istruzioni Exportify per prime, riga «Accetta anche…»; `checkCsvSize` vale per qualunque file (5 MB). Chiave ARB `csvImportNotExportify` riscritta come «formato non riconosciuto».
+
+- 15.4: invece di profili separati, un unico lettore (`csv_profiles.dart`, `readCsvPlaylist`) che trova le colonne per sinonimi (`track name`/`track`/`title`/`song`…, `artist name(s)`/`artist name`/`artist`/`band`…, `duration (ms)`/`duration`/`length`…) e **etichetta** la sorgente dall'intestazione (`detectCsvKind`). Durata: `m:ss`/`h:mm:ss`, oppure numero (≥ 10 000 o intestazione «ms» → ms, altrimenti secondi). Artisti separati solo da `;`. Last.fm: righe ripetute (stesso titolo+artista, senza distinzione di maiuscole) → una sola, ordine della prima apparizione. Se il file ha una sola «Playlist (name)» quel nome vince su quello del file. **Fixture sintetiche** (`test/fixtures/synthetic_*.csv`) perché mancano file veri → `[~]`. `exportify_reader.dart` è ora un sottile involucro.
 
 ## Note di deviazione (Fase 12)
 - 12.1 (2026-10-16): CSV vero = `Just_a_mood.csv` (34 brani; intestazioni `Track URI, ISRC, Track Name, Album Name, Artist Name(s), …, Duration (ms)`; **più artisti separati da `;`**). yt-dlp di sistema 2024.04.09 NON legge più YouTube («Please sign in»): provato con yt-dlp 2026.08.19 (binario standalone). `https://music.youtube.com/search?q=…#songs` funziona; in modalità flat dà ~460 voci con solo `id`/`title` (nessuna durata), **senza `--flat-playlist` e con `--playlist-items 1-5`** ogni voce ha `channel`, `artists[]`, `track`, `album`, `duration` in ~5–8 s → si usa quella. `YtResult` guadagna `artists` e `album`.

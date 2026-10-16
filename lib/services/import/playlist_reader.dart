@@ -2,13 +2,14 @@ import 'dart:convert';
 import 'dart:isolate';
 import 'dart:typed_data';
 
-import 'exportify_reader.dart';
+import 'csv_profiles.dart';
+import 'imported_playlist.dart';
 
 typedef PlaylistReader = ImportedPlaylist Function(String fileName, String text);
 
 /// File extensions the importer can read, each with the function that does.
 final Map<String, PlaylistReader> playlistReaders = {
-  'csv': readExportify,
+  'csv': readCsvPlaylist,
 };
 
 List<String> get supportedPlaylistExtensions => playlistReaders.keys.toList();
