@@ -768,5 +768,16 @@
   "exportLogDebugOnly": "Solo en la versión instalada (en depuración el registro no se escribe en un archivo)",
   "exportLogNone": "Todavía no hay ningún registro para exportar",
   "exportLogSaved": "Registro guardado",
-  "exportLogFailed": "No se pudo guardar el registro"
+  "exportLogFailed": "No se pudo guardar el registro",
+  "exportPlaylist": "Exportar…",
+  "exportPlaylistTitle": "Exportar lista",
+  "exportFormatM3u8": "M3U8 · para otros reproductores",
+  "exportFormatCsv": "CSV · como Exportify",
+  "exportFormatJson": "JSON · formato Codecore",
+  "exportRelativePaths": "Rutas relativas",
+  "exportRelativeHint": "Relativas a la carpeta común de las canciones: guarda el archivo allí",
+  "exportAction": "Exportar",
+  "exportSaved": "Lista exportada",
+  "exportEmpty": "La lista está vacía",
+  "exportFailed": "No se pudo exportar la lista"
 }

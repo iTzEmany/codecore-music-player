@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:path/path.dart' as p;
 
 import '../../data/db/app_database.dart';
+import '../../data/repositories/backup_queries.dart' show trackRefFor;
+import '../../core/text_utils.dart';
 import '../backup/user_data.dart';
 import '../import/csv_parser.dart';
 
@@ -51,3 +53,61 @@ String toPlaylistJson(PlaylistData playlist) =>
       'format': kUserDataFormat,
       'playlists': [playlist.toJson()],
     });
+
+enum ExportFormat { m3u8, csv, json }
+
+extension ExportFormatX on ExportFormat {
+  String get extension => switch (this) {
+        ExportFormat.m3u8 => 'm3u8',
+        ExportFormat.csv => 'csv',
+        ExportFormat.json => 'json',
+      };
+
+  String get mimeType => switch (this) {
+        ExportFormat.m3u8 => 'audio/x-mpegurl',
+        ExportFormat.csv => 'text/csv',
+        ExportFormat.json => 'application/json',
+      };
+}
+
+String exportFileName(String playlistName, ExportFormat f) =>
+    '${sanitizeFileName(playlistName)}.${f.extension}';
+
+/// Deepest folder that holds every track (the base for relative M3U8 paths).
+String commonDirectory(List<Track> tracks) {
+  if (tracks.isEmpty) return '';
+  var parts = p.split(p.dirname(tracks.first.path));
+  for (final t in tracks.skip(1)) {
+    final other = p.split(p.dirname(t.path));
+    var n = 0;
+    while (n < parts.length && n < other.length && parts[n] == other[n]) {
+      n++;
+    }
+    parts = parts.sublist(0, n);
+  }
+  return parts.isEmpty ? '' : p.joinAll(parts);
+}
+
+/// The text of [playlist] in [format]. [folders] (id -> root path) and
+/// [isrcByTrack] only matter for JSON and CSV.
+String renderPlaylist(
+  ExportFormat format, {
+  required String name,
+  required int createdAt,
+  String? coverKey,
+  required List<Track> tracks,
+  Map<int, String> isrcByTrack = const {},
+  Map<int, String> folders = const {},
+  bool relativePaths = false,
+}) =>
+    switch (format) {
+      ExportFormat.m3u8 => toM3u8(name, tracks,
+          relativeTo: relativePaths ? commonDirectory(tracks) : null),
+      ExportFormat.csv => toExportifyCsv(tracks, isrcByTrack),
+      ExportFormat.json => toPlaylistJson(PlaylistData(
+          name: name,
+          createdAt: createdAt,
+          coverKey: coverKey,
+          items: [for (final t in tracks) trackRefFor(t, folders)],
+        )),
+    };

@@ -768,5 +768,16 @@
   "exportLogDebugOnly": "Nur in der installierten Version (im Debug-Modus wird das Protokoll nicht in eine Datei geschrieben)",
   "exportLogNone": "Es gibt noch kein Protokoll zum Exportieren",
   "exportLogSaved": "Protokoll gespeichert",
-  "exportLogFailed": "Protokoll konnte nicht gespeichert werden"
+  "exportLogFailed": "Protokoll konnte nicht gespeichert werden",
+  "exportPlaylist": "Exportieren…",
+  "exportPlaylistTitle": "Playlist exportieren",
+  "exportFormatM3u8": "M3U8 · für andere Player",
+  "exportFormatCsv": "CSV · wie Exportify",
+  "exportFormatJson": "JSON · Codecore-Format",
+  "exportRelativePaths": "Relative Pfade",
+  "exportRelativeHint": "Relativ zum gemeinsamen Ordner aller Titel: Datei dort speichern",
+  "exportAction": "Exportieren",
+  "exportSaved": "Playlist exportiert",
+  "exportEmpty": "Die Playlist ist leer",
+  "exportFailed": "Playlist konnte nicht exportiert werden"
 }

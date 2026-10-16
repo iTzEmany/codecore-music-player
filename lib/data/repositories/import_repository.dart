@@ -192,4 +192,18 @@ class ImportRepository {
   Future<void> delete(int importId) => (_db.delete(_db.playlistImports)
         ..where((i) => i.id.equals(importId)))
       .go();
+
+  /// ISRC of the tracks that entered [playlistId] through a CSV import.
+  Future<Map<int, String>> isrcByTrack(int playlistId) async {
+    final rows = await _db.customSelect(
+      'SELECT i.track_id AS track_id, i.isrc AS isrc '
+      'FROM playlist_import_items i JOIN playlist_imports m ON m.id = i.import_id '
+      'WHERE m.playlist_id = ? AND i.track_id IS NOT NULL AND i.isrc IS NOT NULL',
+      variables: [Variable<int>(playlistId)],
+      readsFrom: {_db.playlistImportItems, _db.playlistImports},
+    ).get();
+    return {
+      for (final r in rows) r.read<int>('track_id'): r.read<String>('isrc'),
+    };
+  }
 }

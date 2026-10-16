@@ -30,6 +30,7 @@ Track t(int id, String path, String title, String? artist, int ms,
     );
 
 void main() {
+  renderTests();
   final tracks = [
     t(1, '/music/a/one.mp3', 'One', 'Band', 180400, album: 'Alb'),
     t(2, '/music/b/two.mp3', 'Two, "the" sequel', null, 0),
@@ -89,5 +90,41 @@ void main() {
         items: [TrackRef(title: 'One', artist: 'Band', durationMs: 1)])));
     final d = UserData.fromJson({...json as Map<String, dynamic>, 'createdAt': 1});
     expect(d.playlists.single.items.single.title, 'One');
+  });
+}
+
+void renderTests() {
+  final tracks = [
+    t(1, '/music/a/x/one.mp3', 'One', 'Band', 1000),
+    t(2, '/music/a/y/two.mp3', 'Two', 'Band', 2000),
+  ];
+
+  group('renderPlaylist', () {
+    test('common directory and relative M3U8', () {
+      expect(commonDirectory(tracks), '/music/a');
+      final m = renderPlaylist(ExportFormat.m3u8,
+          name: 'Mix', createdAt: 1, tracks: tracks, relativePaths: true);
+      expect(m, contains('\nx/one.mp3\n'));
+      expect(m, contains('\ny/two.mp3\n'));
+      expect(commonDirectory(const []), '');
+    });
+
+    test('JSON keeps the folder and relative path of each track', () {
+      final j = renderPlaylist(ExportFormat.json,
+          name: 'Mix',
+          createdAt: 1,
+          tracks: [tracks.first],
+          folders: {1: '/music'});
+      final d = UserData.fromJson({
+        ...jsonDecode(j) as Map<String, dynamic>,
+        'createdAt': 0,
+      });
+      expect(d.playlists.single.items.single.title, 'One');
+    });
+
+    test('file names are safe and carry the extension', () {
+      expect(exportFileName('AC/DC: Live?', ExportFormat.m3u8), 'ACDC Live.m3u8');
+      expect(exportFileName('Mix', ExportFormat.csv), 'Mix.csv');
+    });
   });
 }

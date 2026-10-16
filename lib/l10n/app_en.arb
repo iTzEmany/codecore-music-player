@@ -768,5 +768,16 @@
   "exportLogDebugOnly": "Only in the installed version (debug builds don't write the log to a file)",
   "exportLogNone": "There is no log to export yet",
   "exportLogSaved": "Log saved",
-  "exportLogFailed": "Couldn't save the log"
+  "exportLogFailed": "Couldn't save the log",
+  "exportPlaylist": "Export…",
+  "exportPlaylistTitle": "Export playlist",
+  "exportFormatM3u8": "M3U8 · for other players",
+  "exportFormatCsv": "CSV · like Exportify",
+  "exportFormatJson": "JSON · Codecore format",
+  "exportRelativePaths": "Relative paths",
+  "exportRelativeHint": "Relative to the folder shared by all tracks: save the file there",
+  "exportAction": "Export",
+  "exportSaved": "Playlist exported",
+  "exportEmpty": "The playlist is empty",
+  "exportFailed": "Couldn't export the playlist"
 }

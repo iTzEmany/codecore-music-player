@@ -22,6 +22,7 @@ import '../../widgets/track_row.dart';
 import '../import/import_banner.dart';
 import '../library/album_detail_screen.dart' show tracksAndMinutes;
 import 'add_tracks_screen.dart';
+import 'export_dialog.dart';
 import 'playlist_dialogs.dart';
 
 class PlaylistDetailScreen extends ConsumerStatefulWidget {
@@ -251,6 +252,9 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
               await _pickCover(id);
             case 'clear':
               await repo.setCover(id, null);
+            case 'export':
+              await exportPlaylistFlow(context, ref,
+                  playlist: widget.playlist, name: _name, tracks: tracks);
             case 'rename':
               final n = await askPlaylistName(
                 context,
@@ -283,6 +287,7 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
           PopupMenuItem(value: 'cover', child: Text(l.playlistChangeCover)),
           if (custom != null)
             PopupMenuItem(value: 'clear', child: Text(l.playlistRemoveCover)),
+          PopupMenuItem(value: 'export', child: Text(l.exportPlaylist)),
           PopupMenuItem(value: 'rename', child: Text(l.rename)),
           PopupMenuItem(value: 'delete', child: Text(l.delete)),
         ],

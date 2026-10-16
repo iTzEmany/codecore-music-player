@@ -155,14 +155,14 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 13.2 Formato portabile user_data.json (+ test)
 - [x] 13.3 Estrazione dei dati utente dal DB (+ test)
 - [x] 13.4 Riconoscere i brani al ripristino (+ test)
-- [ ] 13.5 Creare il backup (+ test)
-- [ ] 13.6 Ripristino sullo stesso dispositivo (sostituzione al riavvio)
-- [ ] 13.7 Ripristino su un altro dispositivo (unione)
-- [ ] 13.8 Sezione «Backup» nelle Impostazioni
+- [ ] 13.5 Creare il backup (+ test) (BLOCCATO: pacchetto `archive` da approvare)
+- [ ] 13.6 Ripristino sullo stesso dispositivo (sostituzione al riavvio) (BLOCCATO: pacchetto `archive` da approvare)
+- [ ] 13.7 Ripristino su un altro dispositivo (unione) (BLOCCATO: pacchetto `archive` da approvare)
+- [ ] 13.8 Sezione «Backup» nelle Impostazioni (BLOCCATO: pacchetto `archive` da approvare)
 - [x] 13.9 Esportazione delle playlist: M3U8, CSV, JSON (+ test)
-- [ ] 13.10 Interfaccia di esportazione
+- [ ] 13.10 Interfaccia di esportazione (parziale: «Esporta…» di una playlist fatto; «Esporta tutte» in zip BLOCCATO: pacchetto `archive` da approvare)
 - [x] 13.11 «Esporta log» senza dati personali
-- [ ] 13.12 Rifinitura, documentazione e prova a mano
+- [ ] 13.12 Rifinitura, documentazione e prova a mano (in attesa dei task bloccati)
 
 ## Fase 14 — Download robusti (`fase-14-download-robusti.md`)
 - [ ] 14.1 Verifiche preliminari (release yt-dlp, --limit-rate, ISRC, formato originale, versione Android)

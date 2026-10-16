@@ -959,5 +959,16 @@
   "exportLogDebugOnly": "Disponibile solo nella versione installata (in debug il log non viene scritto su file)",
   "exportLogNone": "Non c'è ancora nessun log da esportare",
   "exportLogSaved": "Log salvato",
-  "exportLogFailed": "Impossibile salvare il log"
+  "exportLogFailed": "Impossibile salvare il log",
+  "exportPlaylist": "Esporta…",
+  "exportPlaylistTitle": "Esporta playlist",
+  "exportFormatM3u8": "M3U8 · per altri lettori",
+  "exportFormatCsv": "CSV · come Exportify",
+  "exportFormatJson": "JSON · formato Codecore",
+  "exportRelativePaths": "Percorsi relativi",
+  "exportRelativeHint": "Rispetto alla cartella comune dei brani: salva il file lì",
+  "exportAction": "Esporta",
+  "exportSaved": "Playlist esportata",
+  "exportEmpty": "La playlist è vuota",
+  "exportFailed": "Impossibile esportare la playlist"
 }

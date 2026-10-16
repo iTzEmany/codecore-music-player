@@ -1485,4 +1485,38 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get exportLogFailed => 'Couldn\'t save the log';
+
+  @override
+  String get exportPlaylist => 'Export…';
+
+  @override
+  String get exportPlaylistTitle => 'Export playlist';
+
+  @override
+  String get exportFormatM3u8 => 'M3U8 · for other players';
+
+  @override
+  String get exportFormatCsv => 'CSV · like Exportify';
+
+  @override
+  String get exportFormatJson => 'JSON · Codecore format';
+
+  @override
+  String get exportRelativePaths => 'Relative paths';
+
+  @override
+  String get exportRelativeHint =>
+      'Relative to the folder shared by all tracks: save the file there';
+
+  @override
+  String get exportAction => 'Export';
+
+  @override
+  String get exportSaved => 'Playlist exported';
+
+  @override
+  String get exportEmpty => 'The playlist is empty';
+
+  @override
+  String get exportFailed => 'Couldn\'t export the playlist';
 }

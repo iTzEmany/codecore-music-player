@@ -2699,6 +2699,72 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Impossibile salvare il log'**
   String get exportLogFailed;
+
+  /// No description provided for @exportPlaylist.
+  ///
+  /// In it, this message translates to:
+  /// **'Esporta…'**
+  String get exportPlaylist;
+
+  /// No description provided for @exportPlaylistTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Esporta playlist'**
+  String get exportPlaylistTitle;
+
+  /// No description provided for @exportFormatM3u8.
+  ///
+  /// In it, this message translates to:
+  /// **'M3U8 · per altri lettori'**
+  String get exportFormatM3u8;
+
+  /// No description provided for @exportFormatCsv.
+  ///
+  /// In it, this message translates to:
+  /// **'CSV · come Exportify'**
+  String get exportFormatCsv;
+
+  /// No description provided for @exportFormatJson.
+  ///
+  /// In it, this message translates to:
+  /// **'JSON · formato Codecore'**
+  String get exportFormatJson;
+
+  /// No description provided for @exportRelativePaths.
+  ///
+  /// In it, this message translates to:
+  /// **'Percorsi relativi'**
+  String get exportRelativePaths;
+
+  /// No description provided for @exportRelativeHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Rispetto alla cartella comune dei brani: salva il file lì'**
+  String get exportRelativeHint;
+
+  /// No description provided for @exportAction.
+  ///
+  /// In it, this message translates to:
+  /// **'Esporta'**
+  String get exportAction;
+
+  /// No description provided for @exportSaved.
+  ///
+  /// In it, this message translates to:
+  /// **'Playlist esportata'**
+  String get exportSaved;
+
+  /// No description provided for @exportEmpty.
+  ///
+  /// In it, this message translates to:
+  /// **'La playlist è vuota'**
+  String get exportEmpty;
+
+  /// No description provided for @exportFailed.
+  ///
+  /// In it, this message translates to:
+  /// **'Impossibile esportare la playlist'**
+  String get exportFailed;
 }
 
 class _AppLocalizationsDelegate
