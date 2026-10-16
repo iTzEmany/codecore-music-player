@@ -13,7 +13,16 @@ import 'settings_providers.dart';
 final webClientProvider = Provider<WebClient>((ref) => DioWebClient());
 
 final itunesClientProvider = Provider(
-  (ref) => ItunesClient(ref.watch(webClientProvider)),
+  (ref) => ItunesClient(
+    ref.watch(webClientProvider),
+    // The store follows the app language: its catalogue has the local music.
+    country: () => switch (ref.read(settingsProvider).language) {
+      'it' => 'IT',
+      'de' => 'DE',
+      'es' => 'ES',
+      _ => 'US',
+    },
+  ),
 );
 final lrclibClientProvider = Provider(
   (ref) => LrclibClient(ref.watch(webClientProvider)),

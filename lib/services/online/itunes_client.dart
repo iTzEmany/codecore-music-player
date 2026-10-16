@@ -31,9 +31,17 @@ final _albumNoise = RegExp(
     caseSensitive: false);
 
 class ItunesClient {
-  ItunesClient(this._web);
+  /// [country] (ISO code, e.g. `IT`) picks the store: each one has its own
+  /// catalogue, and the default (US) lacks much local music.
+  ItunesClient(this._web, {this.country});
 
   final WebClient _web;
+  final String? Function()? country;
+
+  Map<String, String> _store() {
+    final c = country?.call();
+    return c == null || c.isEmpty ? const {} : {'country': c};
+  }
 
   static const _endpoint = 'https://itunes.apple.com/search';
 
@@ -59,7 +67,13 @@ class ItunesClient {
       {CancelToken? cancel}) async {
     for (final q in buildQueries(title, artist)) {
       final data = await _web.getJson(_endpoint,
-          query: {'term': q, 'media': 'music', 'entity': 'song', 'limit': '8'},
+          query: {
+            'term': q,
+            'media': 'music',
+            'entity': 'song',
+            'limit': '8',
+            ..._store(),
+          },
           cancel: cancel);
       final results = data is Map ? data['results'] : null;
       if (results is! List) continue;
@@ -82,6 +96,7 @@ class ItunesClient {
           'media': 'music',
           'entity': 'album',
           'limit': '6',
+          ..._store(),
         },
         cancel: cancel);
     final results = data is Map ? data['results'] : null;

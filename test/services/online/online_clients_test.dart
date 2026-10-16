@@ -69,6 +69,29 @@ void main() {
       expect(await ItunesClient(web).searchAlbum('Greatest Hits', 'Queen'), isNull);
     });
 
+    test('the store country is sent with song and album searches', () async {
+      final seen = <String?>[];
+      final web = FakeWeb((_, q) {
+        seen.add(q['country']);
+        return {'results': []};
+      });
+      final it = ItunesClient(web, country: () => 'IT');
+      await it.search('Sigarette', 'Lucio Corsi');
+      await it.searchAlbum('Volevo essere un duro', 'Lucio Corsi');
+      expect(seen, isNotEmpty);
+      expect(seen.every((c) => c == 'IT'), isTrue);
+    });
+
+    test('without a country the default store is used', () async {
+      final seen = <Map<String, String>>[];
+      final web = FakeWeb((_, q) {
+        seen.add(q);
+        return {'results': []};
+      });
+      await ItunesClient(web).search('x', 'y');
+      expect(seen.every((q) => !q.containsKey('country')), isTrue);
+    });
+
     test('album search: no album name means no call result', () async {
       final web = FakeWeb((_, _) => {'results': []});
       expect(await ItunesClient(web).searchAlbum('  ', 'Queen'), isNull);

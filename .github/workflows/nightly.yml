@@ -1,0 +1,56 @@
+name: Live sources (nightly)
+
+# Informative only: it tells whether YouTube Music, iTunes and LRCLIB still answer
+# the way the app expects. GitHub runner IPs are often blocked by YouTube, so a
+# red run here is a hint, not a verdict (the home PC is the reference).
+on:
+  schedule:
+    - cron: '17 3 * * *'
+  workflow_dispatch:
+
+env:
+  FLUTTER_VERSION: '3.47.1'
+  # Pinned release of the official standalone yt-dlp and its published SHA-256.
+  YTDLP_VERSION: '2026.08.19'
+  YTDLP_SHA256: '58162f9bfdc27458ea47bfcb311cf47028f17d8154a8bf7d689861d46399230a'
+
+jobs:
+  live:
+    name: Live tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - name: ffmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+      - name: yt-dlp (pinned, verified)
+        run: |
+          curl -fsSL -o yt-dlp "https://github.com/yt-dlp/yt-dlp/releases/download/${YTDLP_VERSION}/yt-dlp_linux"
+          echo "${YTDLP_SHA256}  yt-dlp" | sha256sum -c -
+          chmod +x yt-dlp
+          ./yt-dlp --version
+      - run: flutter pub get
+      - name: Live tests
+        id: live
+        continue-on-error: true
+        env:
+          CODECORE_LIVE: '1'
+        run: |
+          export YTDLP="$PWD/yt-dlp"
+          flutter test test/live/ --reporter json > live.jsonl
+      - name: Summary
+        if: always()
+        run: python3 scripts/live_summary.py live.jsonl >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: live-log
+          path: live.jsonl
