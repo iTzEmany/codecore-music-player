@@ -1,6 +1,8 @@
 import 'package:drift/drift.dart';
 
 import '../../core/import_row.dart';
+import '../../services/library/rules/rule_ast.dart';
+import '../../services/library/rules/rule_sql.dart';
 import '../db/app_database.dart';
 
 enum SortOption { defaultOrder, title, artist, album, year, addedAt, duration }
@@ -135,6 +137,90 @@ class TrackRepository {
           (t) => nocase(t.title),
         ],
     };
+  }
+
+  /// The `ORDER BY` of [sort] in SQL (the same orders as [watchTracks]), or a
+  /// shuffle that stays the same for a given [randomSeed].
+  static String _orderSql(SortOption sort, int? randomSeed) {
+    if (randomSeed != null) {
+      // Not linear in the id (a seed would only rotate the order).
+      final s = randomSeed.abs() % 1000003;
+      return '(((((id + $s) * (id + $s)) % 1000003) * 104729) + id * 7919) % 1000003, id';
+    }
+    return switch (sort) {
+      SortOption.title => 'title COLLATE NOCASE',
+      SortOption.artist => 'artist COLLATE NOCASE, title COLLATE NOCASE',
+      SortOption.album =>
+        'album COLLATE NOCASE, disc_number, track_number',
+      SortOption.year => 'year DESC, title COLLATE NOCASE',
+      SortOption.addedAt => 'added_at DESC',
+      SortOption.duration => 'duration_ms DESC',
+      SortOption.defaultOrder =>
+        'album_key, disc_number, track_number, title COLLATE NOCASE',
+    };
+  }
+
+  ({String sql, List<Variable> vars}) _byRules(
+    RuleExpr rules,
+    SortOption sort,
+    int? limit,
+    int? randomSeed,
+    int nowMs,
+  ) {
+    final q = toSql(rules, nowMs: nowMs);
+    final vars = [...q.vars];
+    final lim = limit == null ? '' : ' LIMIT ?';
+    if (limit != null) vars.add(Variable<int>(limit));
+    return (
+      sql: 'SELECT * FROM tracks WHERE ${q.where} '
+          'ORDER BY ${_orderSql(sort, randomSeed)}$lim',
+      vars: vars,
+    );
+  }
+
+  Set<TableInfo> get _ruleTables => {_db.tracks, _db.trackTags, _db.userTags};
+
+  /// Tracks matching [rules] (the rule language of the search and of the smart
+  /// playlists), kept up to date. «Added» terms count back from [now] at the
+  /// time of the call.
+  Stream<List<Track>> watchByRules(
+    RuleExpr rules, {
+    SortOption sort = SortOption.defaultOrder,
+    int? limit,
+    int? randomSeed,
+    DateTime? now,
+  }) {
+    final q = _byRules(rules, sort, limit, randomSeed,
+        (now ?? DateTime.now()).millisecondsSinceEpoch);
+    return _db
+        .customSelect(q.sql, variables: q.vars, readsFrom: _ruleTables)
+        .watch()
+        .map((rows) => [for (final r in rows) _db.tracks.map(r.data)]);
+  }
+
+  Future<List<Track>> tracksByRules(
+    RuleExpr rules, {
+    SortOption sort = SortOption.defaultOrder,
+    int? limit,
+    int? randomSeed,
+    DateTime? now,
+  }) async {
+    final q = _byRules(rules, sort, limit, randomSeed,
+        (now ?? DateTime.now()).millisecondsSinceEpoch);
+    final rows = await _db
+        .customSelect(q.sql, variables: q.vars, readsFrom: _ruleTables)
+        .get();
+    return [for (final r in rows) _db.tracks.map(r.data)];
+  }
+
+  /// How many tracks match (for the «37 brani» of the editor).
+  Future<int> countByRules(RuleExpr rules, {DateTime? now}) async {
+    final q = toSql(rules, nowMs: (now ?? DateTime.now()).millisecondsSinceEpoch);
+    final rows = await _db
+        .customSelect('SELECT COUNT(*) AS n FROM tracks WHERE ${q.where}',
+            variables: q.vars, readsFrom: _ruleTables)
+        .get();
+    return rows.single.read<int>('n');
   }
 
   Future<Track?> getById(int id) =>
