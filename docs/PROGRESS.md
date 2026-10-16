@@ -150,6 +150,178 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 12.10 Avanzamento, «Da verificare» e «Non trovati»
 - [x] 12.11 Rifinitura e prova a mano
 
+## Fase 13 — Backup, ripristino ed export (`fase-13-backup-export.md`)
+- [ ] 13.1 Verifiche preliminari (pacchetto archive, percorso DB, VACUUM INTO, saveFile su Android)
+- [ ] 13.2 Formato portabile user_data.json (+ test)
+- [ ] 13.3 Estrazione dei dati utente dal DB (+ test)
+- [ ] 13.4 Riconoscere i brani al ripristino (+ test)
+- [ ] 13.5 Creare il backup (+ test)
+- [ ] 13.6 Ripristino sullo stesso dispositivo (sostituzione al riavvio)
+- [ ] 13.7 Ripristino su un altro dispositivo (unione)
+- [ ] 13.8 Sezione «Backup» nelle Impostazioni
+- [ ] 13.9 Esportazione delle playlist: M3U8, CSV, JSON (+ test)
+- [ ] 13.10 Interfaccia di esportazione
+- [ ] 13.11 «Esporta log» senza dati personali
+- [ ] 13.12 Rifinitura, documentazione e prova a mano
+
+## Fase 14 — Download robusti (`fase-14-download-robusti.md`)
+- [ ] 14.1 Verifiche preliminari (release yt-dlp, --limit-rate, ISRC, formato originale, versione Android)
+- [ ] 14.2 Versione di yt-dlp e avviso «troppo vecchio»
+- [ ] 14.3 Aggiornamento di yt-dlp in-app (desktop)
+- [ ] 14.4 Download in parallelo
+- [ ] 14.5 Limite di banda
+- [ ] 14.6 Ritento a scalare
+- [ ] 14.7 Formato: MP3 o originale senza ricodifica
+- [ ] 14.8 Ricerca per ISRC come primo tentativo
+- [ ] 14.9 Cache delle ricerche
+- [ ] 14.10 Controllo della durata a fine download
+- [ ] 14.11 Validazioni: CSV troppo grandi e ricerche bloccate
+- [ ] 14.12 (Opzionale) Impronta audio con Chromaprint — chiedere all'utente
+- [ ] 14.13 Rifinitura, documentazione e prova a mano
+
+## Fase 15 — Importazione 2 (`fase-15-importazione-2.md`)
+- [ ] 15.1 Verifiche preliminari (file veri dei formati, album su YouTube Music, iTunes per ISRC)
+- [ ] 15.2 Schema v5 per le importazioni
+- [ ] 15.3 Interfaccia comune dei lettori
+- [ ] 15.4 Lettori CSV: TuneMyMusic, Soundiiz, Last.fm, generico
+- [ ] 15.5 Lettori M3U/M3U8 e XSPF
+- [ ] 15.6 Anteprima degli abbinamenti e «solo collega»
+- [ ] 15.7 Soglie regolabili e CSV grandi
+- [ ] 15.8 Contatore e tempo residuo
+- [ ] 15.9 Cartella dedicata e file numerati
+- [ ] 15.10 Copertine dal CSV ed esito esportabile
+- [ ] 15.11 Sincronizza da CSV
+- [ ] 15.12 Importazione per album intero
+- [ ] 15.13 Rifinitura, documentazione e prova a mano
+
+## Fase 16 — CI e test automatici (`fase-16-ci-test.md`)
+- [ ] 16.1 Verifiche preliminari (versione Flutter, test senza rete, pacchetti apt, remote GitHub)
+- [ ] 16.2 Workflow `ci.yml`: analyze e test
+- [ ] 16.3 Build Android e Linux con artefatti
+- [ ] 16.4 Build Windows (`windows-latest`)
+- [ ] 16.5 Test d'integrazione sul telefono: base (scansione)
+- [ ] 16.6 Test d'integrazione: riproduzione, playlist, importazione
+- [ ] 16.7 Golden test delle schermate principali (100 % e 150 %)
+- [ ] 16.8 Test live notturni e controllo delle dipendenze
+- [ ] 16.9 Profilo prestazioni su 50.000 brani
+- [ ] 16.10 Rifinitura, documentazione e prova a mano
+
+## Fase 17 — Riproduzione e controlli di sistema (`fase-17-riproduzione.md`)
+- [ ] 17.1 Verifiche preliminari (tono con la velocità, equalizzatore, MPRIS/SMTC, Jam e audio_service)
+- [ ] 17.2 Velocità di riproduzione
+- [ ] 17.3 Segnalibro «riprendi da qui» (schema v6)
+- [ ] 17.4 Anteprima di 20 secondi
+- [ ] 17.5 Equalizzatore: motore
+- [ ] 17.6 Equalizzatore: interfaccia e profilo per uscita
+- [ ] 17.7 MPRIS su Linux
+- [ ] 17.8 SMTC su Windows
+- [ ] 17.9 Controlli della Jam nella notifica e nella schermata di blocco
+- [ ] 17.10 Rifinitura, documentazione e prova a mano
+
+## Fase 18 — Gapless e crossfade (`fase-18-gapless-crossfade.md`)
+- [ ] 18.1 Verifiche preliminari (API playlist just_audio/mpv, file di prova, prototipo e misura)
+- [ ] 18.2 `PlayQueue.peekNext()` e `revision` (+ test)
+- [ ] 18.3 Backend con finestra di due brani (`GaplessCapable`)
+- [ ] 18.4 Handler in modalità gapless
+- [ ] 18.5 Motore crossfade (+ test)
+- [ ] 18.6 Handler in modalità crossfade
+- [ ] 18.7 Impostazioni e interfaccia
+- [ ] 18.8 Non regressione della Jam e del lettore normale
+- [ ] 18.9 Misura del gap e del crossfade
+- [ ] 18.10 Rifinitura, documentazione e prova a mano
+
+## Fase 19 — Interfaccia: selezione, temi, tablet, lingue, onboarding (`fase-19-interfaccia.md`)
+- [ ] 19.1 `SelectionController` (logica pura + test)
+- [ ] 19.2 `TrackRow` selezionabile
+- [ ] 19.3 Barra azioni e azioni di massa
+- [ ] 19.4 Collegare le liste
+- [ ] 19.5 Trascinare brani sulle playlist (desktop)
+- [ ] 19.6 Tema chiaro e colore d'accento
+- [ ] 19.7 Layout ≥ 1200 px
+- [ ] 19.8 Lingue francese e portoghese
+- [ ] 19.9 Onboarding al primo avvio
+- [ ] 19.10 Rifinitura, documentazione e prova a mano
+
+## Fase 20 — Libreria intelligente (`fase-20-libreria-intelligente.md`)
+- [ ] 20.1 Tabelle (schema v7)
+- [ ] 20.2 Registrare gli ascolti
+- [ ] 20.3 Cronologia
+- [ ] 20.4 Statistiche e recap
+- [ ] 20.5 Linguaggio delle regole: parser e AST
+- [ ] 20.6 Dalle regole all'SQL
+- [ ] 20.7 Ricerca con operatori
+- [ ] 20.8 Playlist intelligenti
+- [ ] 20.9 Etichette utente
+- [ ] 20.10 Rifinitura, documentazione e prova a mano
+
+## Fase 21 — Pulizia libreria e tag nei file (`fase-21-pulizia-tag.md`)
+- [ ] 21.1 Verifiche preliminari (pacchetto per scrivere i tag)
+- [ ] 21.2 Colonna `ignored` (schema v8) e viste
+- [ ] 21.3 Ricerca dei duplicati
+- [ ] 21.4 Fusione dei dati utente
+- [ ] 21.5 Schermata «Duplicati»
+- [ ] 21.6 Unire e dividere album a mano
+- [ ] 21.7 `TagWriter` (interfaccia e implementazione)
+- [ ] 21.8 Opzione «Scrivi le modifiche nei file»
+- [ ] 21.9 Regole e documenti aggiornati
+- [ ] 21.10 Rifinitura, documentazione e prova a mano
+
+## Fase 22 — Nuove fonti (`fase-22-nuove-fonti.md`)
+- [ ] 22.1 Verifiche preliminari (SoundCloud, playlist/canali, ML Kit)
+- [ ] 22.2 Fonte nel modello e nel download
+- [ ] 22.3 Ricerca SoundCloud e filtro anteprime
+- [ ] 22.4 Punteggio per fonte
+- [ ] 22.5 Selettore di fonte in Cerca e ripiego nell'importazione
+- [ ] 22.6 Playlist e canali YouTube come sorgente
+- [ ] 22.7 Traduzione dei testi on-device (solo Android)
+- [ ] 22.8 Rifinitura, documentazione e prova a mano
+
+## Fase 23 — Podcast (`fase-23-podcast.md`)
+- [ ] 23.1 Verifiche preliminari (feed veri, ricerca iTunes podcast, API del pacchetto `xml`)
+- [ ] 23.2 Parser RSS (+ test)
+- [ ] 23.3 Schema v9: `tracks.kind`, `podcasts`, `podcast_episodes`
+- [ ] 23.4 Escludere gli episodi dalle viste musicali
+- [ ] 23.5 `PodcastRepository` e `PodcastService`
+- [ ] 23.6 Download degli episodi
+- [ ] 23.7 Ascoltato, posizione e pulizia
+- [ ] 23.8 Interfaccia: sezione Podcast
+- [ ] 23.9 Rifinitura, documentazione e prova a mano
+
+## Fase 24 — Dispositivi fidati e sync (`fase-24-dispositivi-fidati.md`)
+- [ ] 24.1 Verifiche preliminari (certificati, bindSecure, ExoPlayer/mpv su HTTPS, mobile_scanner)
+- [ ] 24.2 Identità del dispositivo
+- [ ] 24.3 Elenco dei dispositivi fidati
+- [ ] 24.4 HTTPS su `OfferNode` (Jam esclusa)
+- [ ] 24.5 Abbinamento con PIN
+- [ ] 24.6 Offerte dai fidati
+- [ ] 24.7 Scanner QR (Android)
+- [ ] 24.8 Schema v10: playlist con `uuid` e `updated_at`
+- [ ] 24.9 Sincronizzazione delle playlist
+- [ ] 24.10 Rifinitura, documentazione e prova a mano
+
+## Fase 25 — Android esteso (`fase-25-android-esteso.md`)
+- [ ] 25.1 Verifiche preliminari (audio_service browsing, tasto multimediale a freddo, DHU, home_widget)
+- [ ] 25.2 Ponte dati verso il widget (lato Dart)
+- [ ] 25.3 Widget Android (lato Kotlin)
+- [ ] 25.4 Tile rapida
+- [ ] 25.5 Albero di navigazione (`MediaBrowseTree`, + test)
+- [ ] 25.6 Android Auto
+- [ ] 25.7 Wear OS (verifica)
+- [ ] 25.8 Modalità in auto nell'app
+- [ ] 25.9 Rifinitura, documentazione e prova a mano
+
+## Fase 26 — Distribuzione (`fase-26-distribuzione.md`)
+- [ ] 26.1 Verifiche preliminari (strumenti di packaging, licenza ffmpeg, dimensioni attuali)
+- [ ] 26.2 AppImage e .deb
+- [ ] 26.3 Flatpak
+- [ ] 26.4 Installer Windows (Inno Setup)
+- [ ] 26.5 APK più leggero e flavor `lite`
+- [ ] 26.6 Avviso di aggiornamento
+- [ ] 26.7 Valutazione F-Droid
+- [ ] 26.8 Build di prova macOS / iOS
+- [ ] 26.9 Guida utente
+- [ ] 26.10 Rifinitura, documentazione e prova a mano
+
 ## Note di deviazione
 <!-- una riga per deviazione: data — task — cosa è cambiato e perché -->
 

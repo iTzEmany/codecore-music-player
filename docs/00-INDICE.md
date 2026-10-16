@@ -28,9 +28,29 @@ un'unica codebase Flutter per Android, Windows e Linux. Uso personale, niente co
 | 10 | `fase-10-jam-sincronia.md` | Riproduzione sincronizzata su più uscite (orologio condiviso, correzione della deriva) |
 | 11 | `fase-11-interfaccia-nuova.md` | Interfaccia nuova nero/viola: Home · Cerca · Libreria, player sempre visibile, desktop a tre zone |
 | 12 | `fase-12-import-csv.md` | Importare playlist Spotify da CSV di Exportify: abbinamento con la libreria, ricerca su YouTube Music, download in ordine |
-| — | `13-idee-future.md` | Idee per dopo la base: backup, export, gapless, MPRIS, CI… (non è una fase: raccolta ragionata) |
+| — | `13-idee-future.md` | Idee per dopo la base (raccolta ragionata): le voci tenute sono diventate le fasi 13–26 |
+| 13 | `fase-13-backup-export.md` | Backup e ripristino completo, formato portabile dei dati utente, export playlist (M3U8/CSV/JSON), esporta log |
+| 14 | `fase-14-download-robusti.md` | yt-dlp aggiornabile in-app, download in parallelo, ritento a scalare, formato senza ricodifica, ISRC, cache, controllo durata |
+| 15 | `fase-15-importazione-2.md` | Import M3U/XSPF e CSV generici, «Sincronizza da CSV», album interi, migliorie della fase 12 |
+| 16 | `fase-16-ci-test.md` | CI GitHub (analyze, test, build apk/linux/windows), test d'integrazione su telefono, live notturni, golden, 50.000 brani |
+| 17 | `fase-17-riproduzione.md` | Velocità, «riprendi da qui», anteprima, equalizzatore, MPRIS/SMTC, controlli Jam in notifica |
+| 18 | `fase-18-gapless-crossfade.md` | Gapless (dietro un'opzione) e crossfade, senza toccare la Jam |
+| 19 | `fase-19-interfaccia.md` | Selezione multipla, trascinamento su playlist, tema chiaro e accento, tablet, nuove lingue, onboarding |
+| 20 | `fase-20-libreria-intelligente.md` | Cronologia, statistiche/recap, ricerca con operatori, playlist intelligenti, etichette |
+| 21 | `fase-21-pulizia-tag.md` | Duplicati e fusione, unire/dividere album, scrittura dei tag nei file (atomica, opzionale) |
+| 22 | `fase-22-nuove-fonti.md` | SoundCloud, playlist e canali YouTube come sorgente, traduzione dei testi on-device |
+| 23 | `fase-23-podcast.md` | Podcast da RSS: iscrizioni, episodi scaricabili, stato «ascoltato» |
+| 24 | `fase-24-dispositivi-fidati.md` | Abbinamento dispositivi, TLS con pinning, scanner QR, sincronizzazione playlist in LAN |
+| 25 | `fase-25-android-esteso.md` | Widget, tile rapida, Android Auto, Wear OS, modalità in auto |
+| 26 | `fase-26-distribuzione.md` | Pacchetti Linux, installer Windows, APK più piccolo, avviso aggiornamenti, F-Droid, macOS/iOS, guida utente |
 
 Dopo la **Fase 3** l'app è già usabile come lettore. Le fasi 5 e 6 sono indipendenti tra loro. La fase 8 (Jam) richiede la 6.
+
+**Fasi 13–26** (dopo la base): raggruppate per area, così ogni fase tocca un sottosistema solo. Ordine consigliato
+quello della tabella; dipendenze vere: 15 ← 13 + 14 · 18 ← 17 · 20 ← 19 (selezione multipla per le etichette) ·
+21 ← 20 (fusione della cronologia) · 23 ← 17 (segnalibro) · 24 ← 13 (formato portabile) · 26 ← 16 (CI).
+Le altre si possono spostare. Le versioni di schema (v5…v10) sono assegnate in quest'ordine: se se ne salta una,
+si usa la prossima libera. Ogni fase elenca i **pacchetti nuovi da approvare** prima del task che li usa.
 
 ## Come lanciare una fase (prompt da incollare)
 ```

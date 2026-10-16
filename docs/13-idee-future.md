@@ -7,6 +7,25 @@ Scritta il 2026-10-16, a base completata (fasi 0–12). Punto di partenza: app s
 Linux e Windows; libreria locale, player con coda, playlist, testi, arricchimento web, download da YouTube con
 yt-dlp, condivisione LAN, Jam (anche sincronizzata), interfaccia nero/viola, importazione di playlist Spotify da CSV.
 
+## Dove è finita ogni idea (2026-10-16)
+Le voci rimaste in questo file sono state divise in fasi per gruppi compatibili (stessa area di codice):
+| Fase | Idee |
+|---|---|
+| 13 | Backup e ripristino · export playlist M3U8/CSV/JSON · esportazione del log |
+| 14 | Aggiornamento yt-dlp · download in parallelo · ritento a scalare · formato senza ricodifica · ISRC · cache delle ricerche · controllo «brano sbagliato» · validazioni di rete |
+| 15 | Import M3U/XSPF/CSV generici · «Sincronizza da CSV» · import per album · tutte le idee specifiche della fase 12 |
+| 16 | CI · test d'integrazione su telefono · live notturni · golden · verifica dipendenze · profilo 50.000 brani |
+| 17 | Velocità · segnalibro «riprendi da qui» · anteprima al tocco prolungato · equalizzatore · MPRIS/SMTC · controlli Jam in notifica |
+| 18 | Gapless e crossfade |
+| 19 | Selezione multipla · trascinare su playlist · tema chiaro/accento · tablet · altre lingue · onboarding |
+| 20 | Cronologia · statistiche · ricerca con operatori · playlist intelligenti · etichette |
+| 21 | Duplicati · merge/split album · scrittura tag nei file |
+| 22 | SoundCloud · playlist e canali YouTube · traduzione testi on-device |
+| 23 | Podcast (RSS) |
+| 24 | Abbinamento · TLS · scanner QR · sincronizzazione playlist tra dispositivi |
+| 25 | Widget e tile Android · Android Auto / Wear OS · modalità in auto |
+| 26 | Pacchetti Linux · installer Windows · APK più piccolo · avviso aggiornamenti · F-Droid · macOS/iOS · documentazione utente |
+
 ## Come leggere le tabelle
 | Colonna | Significato |
 |---|---|
@@ -44,9 +63,9 @@ Ordinate per «valore ÷ costo», tenendo conto dei difetti già visti sul campo
 | MPRIS (Linux) e SMTC (Windows) | ★★★ | M | Controlli e metadati nel sistema, anche a finestra non attiva. Dietro l'interfaccia `AudioBackend`/handler esistente. |
 | Controlli della Jam nella notifica/lock screen | ★★ | M | Oggi la Jam non ha i controlli di notifica (rimandato in 8.8). |
 | Android Auto / Wear OS | ★ | L | Richiede browsing tree di `audio_service`; testare in auto reale. |
-| Visualizzatore (barre/onda) | ★ | M | Solo desktop o Android con `Visualizer` (permesso microfono): poco valore, molto attrito. |
-| Sveglia musicale / timer di avvio | ★ | S | Il timer di spegnimento c'è; l'inverso è un'ora + una playlist. |
-| Ripetizione A–B su un brano | ★ | S | Per studiare uno strumento. |
+|  |  |  |  |
+|  |  |  |  |
+|  |  |  |  |
 | Anteprima al tocco prolungato sulla copertina | ★ | S | Ascolta 20 s senza cambiare la coda. |
 
 ## 2. Libreria e metadati
@@ -55,13 +74,13 @@ Ordinate per «valore ÷ costo», tenendo conto dei difetti già visti sul campo
 | Ricerca duplicati (hash, titolo+artista+durata) e fusione | ★★★ | M | Mostrare sempre un'anteprima; mai cancellare file senza conferma esplicita. |
 | Scrittura dei tag nei file (copia temporanea + `rename` atomico) | ★★ | M | Decisione v1: «solo DB». Se si riapre: mai in-place; backup del file; solo per formati noti (MP3/FLAC/M4A). Vedi R10. |
 | Playlist intelligenti (regole: genere, anno, mai ascoltati, aggiunti di recente) | ★★★ | M | Query salvate sul DB: riuso di `library_queries`. |
-| Valutazione a stelle e «non mi piace» | ★★ | S | Una colonna; alimenta le playlist intelligenti e la Home. |
+|  |  |  |  |
 | Statistiche di ascolto («recap» mensile/annuale) | ★★ | M | I dati ci sono già (`playCount`, `lastPlayedAt`); manca la cronologia per evento. |
 | Cronologia di ascolto con data/ora | ★★ | S | Nuova tabella `plays`; base per statistiche e scrobbling. |
-| Cartelle osservate in tempo reale (file watcher) | ★★ | M | Su Android limitato (permessi/Doze): scansione all'apertura è accettabile. |
-| Immagini degli artisti | ★★ | M | Da Wikipedia/Wikidata (CC), con cache e attribuzione. |
-| Generi e «mood» automatici (da tag, da iTunes) | ★ | M | I generi ci sono; il mood no. |
-| Più copertine per album (fronte/retro) e scelta tra le proposte | ★ | S | Oggi una copertina per album. |
+|  |  |  |  |
+|  |  |  |  |
+|  |  |  |  |
+|  |  |  |  |
 | Merge/split manuale di album | ★★ | S | Utile dopo importazioni con tag da CSV diversi. |
 | Etichette personalizzate (tag utente) | ★ | M | Filtri e playlist intelligenti. |
 
@@ -73,11 +92,11 @@ Ordinate per «valore ÷ costo», tenendo conto dei difetti già visti sul campo
 | Backup e ripristino completo (zip: DB, impostazioni, copertine, `downloads.json`) | ★★★ | M | Include un numero di versione dello schema; il ripristino passa per le migrazioni. |
 | Sincronizzazione playlist tra i propri dispositivi (via LAN) | ★★ | L | Conflitti: «ultima modifica vince» per playlist, con anteprima. Riuso del canale di condivisione. |
 | «Sincronizza da CSV» (differenze: aggiunte e rimozioni) | ★★ | M | Usa `isrc`/chiave titolo+artista già salvati negli item. |
-| Import da link pubblici di playlist (senza CSV) | ★★ | M | La pagina *embed* di Spotify cambia struttura e carica poche voci: tenerla come «provvisoria» dietro la stessa interfaccia. |
-| Import da Apple Music / YouTube Music (URL playlist) | ★★ | M | yt-dlp legge già playlist YouTube; Apple richiede scraping fragile. |
+|  |  |  |  |
+|  |  |  |  |
 | Importazione da album intero (cerca l'album, non il singolo) | ★★ | M | Migliora la coerenza di album/copertina; ricerca per `Album Name` + numero tracce. |
-| Importare le cartelle di un'altra app (Poweramp, VLC) | ★ | M | Le loro playlist sono M3U. |
-| Scrobbling a Last.fm / ListenBrainz | ★★ | M | Richiede account e chiave API: opzionale e spento di default (regola «nessuna telemetria»). |
+|  |  |  |  |
+|  |  |  |  |
 
 ## 4. Download e fonti online
 | Idea | Valore | Costo | Rischio / note |
@@ -86,12 +105,12 @@ Ordinate per «valore ÷ costo», tenendo conto dei difetti già visti sul campo
 | Ritento a scalare con ripresa dopo errori transitori | ★★★ | S | Fatto un ritento singolo in fase 12: generalizzare con tentativi e pausa crescenti. |
 | Aggiornamento di yt-dlp in-app (desktop) e controllo versione all'avvio | ★★★ | M | Scarica il binario ufficiale in una cartella dell'app, verifica la firma/hash, avvisa se < versione minima. |
 | Scelta formato/qualità e **nessuna ricodifica** (tenere Opus/M4A) | ★★ | S | MP3 256k da sorgente ~160 kbps Opus è solo più grande. Controllare supporto del lettore tag. |
-| Fonti alternative: SoundCloud, Bandcamp | ★★ | M | yt-dlp li supporta; il punteggio di `track_matcher` va adattato (niente canale «- Topic»). Filtrare le anteprime da 30 s. |
+| Fonti alternative: SoundCloud | ★★ | M | yt-dlp li supporta; il punteggio di `track_matcher` va adattato (niente canale «- Topic»). Filtrare le anteprime da 30 s. |
 | Ricerca per ISRC come primo tentativo | ★★ | S | Riduce i «da verificare»; non sempre indicizzato. |
 | Cache dei risultati di ricerca per riga (evita rifare 34 ricerche) | ★ | S | Utile quando si reimporta una playlist cambiata poco. |
 | Playlist e canali YouTube come sorgente | ★★ | M | Già gestibile con `--flat-playlist`; manca la UI. |
 | Podcast (RSS) con episodi scaricabili | ★★ | L | Nuovo dominio (episodi, stato «ascoltato», pulizia automatica). |
-| Più fonti di testi (oltre LRCLIB) e sincronizzazione manuale | ★★ | M | Un editor per allineare i timestamp riga per riga. |
+|  |  |  |  |
 | Traduzione dei testi on-device | ★ | M | ML Kit solo Android; esclusa dalla v1 per non usare endpoint non ufficiali. |
 | Rilevamento «brano sbagliato» a download concluso (confronto durata/impronta) | ★★ | L | Impronta audio (Chromaprint) per confermare il brano. |
 
@@ -101,12 +120,12 @@ Ordinate per «valore ÷ costo», tenendo conto dei difetti già visti sul campo
 | Cifratura TLS con certificati autofirmati e *pinning* all'abbinamento | ★★ | M | Oggi HTTP in chiaro con PIN: limite accettato per reti domestiche. |
 | Abbinamento dispositivi (una volta sola) e fiducia reciproca | ★★ | M | Evita il PIN a ogni invio; elenco dispositivi fidati. |
 | Scanner QR (invito/PIN) | ★ | S | Era opzionale nella fase 6; richiede `mobile_scanner` (permesso fotocamera). |
-| Telecomando del PC dal telefono (e viceversa) senza Jam | ★★ | M | Riuso del trasporto della Jam, senza coda condivisa. |
-| Uscita su DLNA/UPnP e Chromecast | ★★ | L | Stack di rete diverso; sincronia con le altre uscite non garantita. |
-| Jam fuori dalla LAN (relay opzionale, auto-ospitato) | ★ | L | Introduce un server: contraddice «nessun backend». Solo se davvero richiesto. |
-| Taratura automatica della latenza (microfono) | ★★ | M | Le misure acustiche mostrano ancora ~25 ms di scarto e 100–250 ms col Bluetooth. |
-| Più di 5 partecipanti alla Jam | ★ | M | Limite scelto per la banda in Wi-Fi domestico. |
-| Controllo da smartwatch | ★ | M | Dipende da Wear OS. |
+|  |  |  |  |
+|  |  |  |  |
+|  |  |  |  |
+|  |  |  |  |
+|  |  |  |  |
+|  |  |  |  |
 
 ## 6. Interfaccia e accessibilità
 | Idea | Valore | Costo | Rischio / note |
@@ -117,11 +136,11 @@ Ordinate per «valore ÷ costo», tenendo conto dei difetti già visti sul campo
 | Widget Android (in riproduzione, controlli) e tile rapida | ★★ | M | `home_widget`; aggiornamento dallo stato del player. |
 | Modalità in auto (pulsanti grandi, niente liste lunghe) | ★ | M | Utile se non si arriva ad Android Auto. |
 | Layout tablet/ripiegabili | ★ | M | Il layout a tre zone esiste già ≥ 840 px: verificare ≥ 1200 px. |
-| Scorciatoie personalizzabili (desktop) | ★ | S | Oggi fisse (spazio, Ctrl+←/→, Ctrl+F…). |
+|  |  |  |  |
 | Ricerca globale con filtri e operatori («artista:», «anno:») | ★★ | M | Estende la ricerca SQL esistente. |
-| Ricerca vocale | ★ | S | Plugin di riconoscimento: dipende dal servizio di sistema. |
-| Home personalizzabile (sezioni e ordine) | ★ | M | |
-| Audit con screen reader (TalkBack/Orca) e navigazione da tastiera completa | ★★ | M | Controllare `Semantics` su liste, foglio Dispositivi, revisione importazione. |
+|  |  |  |  |
+|  |  |  | |
+|  |  |  |  |
 | Altre lingue (fr, pt, ru…) | ★ | S | Dopo it/en/de/es: solo ARB; il resto è già pronto. |
 | Onboarding al primo avvio | ★ | S | Scelta cartelle, permessi, spiegazione dei download (con avviso legale). |
 
