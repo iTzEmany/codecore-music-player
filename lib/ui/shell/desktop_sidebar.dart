@@ -11,6 +11,7 @@ import '../screens/playlists/playlist_detail_screen.dart';
 import '../screens/playlists/playlist_dialogs.dart';
 import '../theme/tokens.dart';
 import '../widgets/playlist_cover.dart';
+import '../widgets/track_drag.dart';
 import 'shell_nav.dart';
 
 /// Left column of the desktop layout: Home, Search, the library with the
@@ -74,48 +75,74 @@ class DesktopSidebar extends ConsumerWidget {
       );
     }
 
+    void say(String text) => ScaffoldMessenger.of(context)
+      ..clearSnackBars()
+      ..showSnackBar(SnackBar(content: Text(text)));
+
+    Future<void> dropOnPlaylist(int id, String name, List<int> ids) async {
+      final added = await ref
+          .read(playlistRepositoryProvider)
+          .addTracks(id, ids);
+      say(addedToPlaylistText(l, total: ids.length, added: added, name: name));
+    }
+
+    Future<void> dropOnFavorites(List<int> ids) async {
+      final repo = ref.read(trackRepositoryProvider);
+      final fresh = await repo.getByIds(ids);
+      final changed = [
+        for (final t in fresh)
+          if (!t.isFavorite) t.id,
+      ];
+      await repo.setFavoriteMany(changed, true);
+      say(l.favoritesAdded(changed.length));
+    }
+
     Widget rowWithCover(
       Widget cover,
       String title,
       String subtitle,
-      VoidCallback onTap,
-    ) {
+      VoidCallback onTap, {
+      required void Function(List<int> ids) onDrop,
+    }) {
       final theme = Theme.of(context).textTheme;
-      return Tooltip(
-        message: title,
-        child: InkWell(
-          onTap: onTap,
-          // Grows with the text size: two lines at 150 % no longer fit in 56.
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: 56),
-            child: Row(
-              children: [
-                SizedBox(width: collapsed ? 16 : 12),
-                cover,
-                if (!collapsed) ...[
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.bodyLarge,
-                        ),
-                        Text(
-                          subtitle,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.bodyMedium,
-                        ),
-                      ],
+      return TrackDropTarget(
+        onDrop: onDrop,
+        child: Tooltip(
+          message: title,
+          child: InkWell(
+            onTap: onTap,
+            // Grows with the text size: two lines at 150 % no longer fit in 56.
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 56),
+              child: Row(
+                children: [
+                  SizedBox(width: collapsed ? 16 : 12),
+                  cover,
+                  if (!collapsed) ...[
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.bodyLarge,
+                          ),
+                          Text(
+                            subtitle,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.bodyMedium,
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
         ),
@@ -179,6 +206,7 @@ class DesktopSidebar extends ConsumerWidget {
                       ref,
                       const FavoritesScreen(),
                     ),
+                    onDrop: dropOnFavorites,
                   ),
                   for (final p in lists)
                     rowWithCover(
@@ -195,6 +223,8 @@ class DesktopSidebar extends ConsumerWidget {
                         ref,
                         PlaylistDetailScreen(playlist: p.playlist),
                       ),
+                      onDrop: (ids) =>
+                          dropOnPlaylist(p.playlist.id, p.playlist.name, ids),
                     ),
                 ],
               ),

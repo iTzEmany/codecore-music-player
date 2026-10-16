@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/db/app_database.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/database_providers.dart';
 import '../../theme/tokens.dart';
@@ -83,6 +84,21 @@ class _NameDialogState extends State<_NameDialog> {
   }
 }
 
+/// What to say after adding [total] tracks of which [added] were new. One
+/// track keeps the short message; several say how many were already there.
+String addedToPlaylistText(
+  AppLocalizations l, {
+  required int total,
+  required int added,
+  required String name,
+}) {
+  final skipped = total - added;
+  if (total == 1) return l.addedToPlaylist(name);
+  if (added == 0) return l.allAlreadyInPlaylist(name);
+  if (skipped == 0) return l.addedToPlaylistMany(added, name);
+  return l.addedToPlaylistSkipped(added, skipped, name);
+}
+
 /// Argument: the track ids joined by «,» (a List has no value equality).
 final _playlistsWithProvider = FutureProvider.autoDispose
     .family<Set<int>, String>(
@@ -122,19 +138,20 @@ class _AddToPlaylistSheet extends ConsumerWidget {
     final added = await repo.addTracks(id, [for (final t in tracks) t.id]);
     if (sheetContext.mounted) Navigator.of(sheetContext).pop(true);
     if (outer.mounted) {
-      final l = outer.l10n;
-      final skipped = tracks.length - added;
-      // One track keeps the short message; several say how many were new.
-      final text = tracks.length == 1
-          ? l.addedToPlaylist(name)
-          : added == 0
-          ? l.allAlreadyInPlaylist(name)
-          : skipped == 0
-          ? l.addedToPlaylistMany(added, name)
-          : l.addedToPlaylistSkipped(added, skipped, name);
       ScaffoldMessenger.of(outer)
         ..clearSnackBars()
-        ..showSnackBar(SnackBar(content: Text(text)));
+        ..showSnackBar(
+          SnackBar(
+            content: Text(
+              addedToPlaylistText(
+                outer.l10n,
+                total: tracks.length,
+                added: added,
+                name: name,
+              ),
+            ),
+          ),
+        );
     }
   }
 

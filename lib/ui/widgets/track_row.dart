@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/db/app_database.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../providers/player_providers.dart';
+import '../../core/platform.dart';
 import '../../providers/selection_providers.dart';
 import '../theme/tokens.dart';
 import 'cover_image.dart';
@@ -13,6 +14,7 @@ import 'format_utils.dart';
 import 'now_playing_bars.dart';
 import 'preview_cover.dart';
 import 'track_actions.dart';
+import 'track_drag.dart';
 import 'track_row_selection.dart';
 
 enum TrackRowVariant {
@@ -517,12 +519,30 @@ class LiveTrackRow extends ConsumerWidget {
       albumArtist: albumArtist,
       reorderIndex: reorderIndex,
     );
+    // On a desktop a row can be dragged onto a playlist of the sidebar: the
+    // whole selection when the row is part of it, otherwise just this track.
+    Widget draggable(Widget child) {
+      if (sel == null || !isDesktop) return child;
+      List<int> ids() {
+        final s = ref.read(selectionProvider(sel.listKey));
+        return s.active && s.contains(track.id)
+            ? s.inOrderOf(sel.visibleIds)
+            : [track.id];
+      }
+
+      return Draggable<TrackDragData>(
+        data: TrackDragData(ids),
+        dragAnchorStrategy: pointerDragAnchorStrategy,
+        feedback: DragPill(countOf: () => ids().length),
+        child: child,
+      );
+    }
+
     // Queue and pick rows have their own gestures.
-    if (variant == TrackRowVariant.queue ||
-        variant == TrackRowVariant.pick ||
-        active) {
+    if (variant == TrackRowVariant.queue || variant == TrackRowVariant.pick) {
       return row;
     }
+    if (active) return draggable(row);
     return Dismissible(
       key: ValueKey('swipe-queue-${track.id}'),
       direction: DismissDirection.startToEnd,
@@ -541,7 +561,7 @@ class LiveTrackRow extends ConsumerWidget {
           ..showSnackBar(SnackBar(content: Text(context.l10n.addedToQueue)));
         return false;
       },
-      child: row,
+      child: draggable(row),
     );
   }
 }
