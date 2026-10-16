@@ -143,4 +143,141 @@ void main() {
     expect(q.currentId, 2);
     expect(q.next(), 1);
   });
+
+  group('peekNext / revision', () {
+    test(
+      'peekNext announces what next(auto: true) delivers, over random use',
+      () {
+        final ops = Random(2024);
+        for (var seed = 0; seed < 200; seed++) {
+          final q = PlayQueue(random: Random(seed));
+          final ids = List.generate(1 + ops.nextInt(7), (i) => 100 + i);
+          q.setItems(ids, startIndex: ops.nextInt(ids.length));
+          var nextId = 500;
+          for (var step = 0; step < 60; step++) {
+            switch (ops.nextInt(11)) {
+              case 0:
+                q.shuffle = !q.shuffle;
+              case 1:
+                q.repeat = PlayRepeat.values[ops.nextInt(3)];
+              case 2:
+                if (q.items.length > 1) {
+                  q.move(ops.nextInt(q.items.length), ops.nextInt(q.items.length));
+                }
+              case 3:
+                if (q.items.length > 1) q.removeAt(ops.nextInt(q.items.length));
+              case 4:
+                q.insertNext(nextId++);
+              case 5:
+                q.append(nextId++);
+              case 6:
+                if (q.items.isNotEmpty) q.jumpTo(ops.nextInt(q.items.length));
+              case 7:
+                q.previous();
+              case 8:
+                q.next();
+              default:
+                final announced = q.peekNext();
+                final again = q.peekNext();
+                expect(
+                  again,
+                  announced,
+                  reason: 'peeking twice gives the same answer (seed $seed)',
+                );
+                expect(
+                  q.next(auto: true),
+                  announced,
+                  reason: 'seed $seed step $step',
+                );
+            }
+          }
+        }
+      },
+    );
+
+    test(
+      'peekNext changes neither the position, the history nor the revision',
+      () {
+        final q = PlayQueue(random: Random(3))
+          ..setItems([1, 2, 3], startIndex: 2)
+          ..shuffle = true
+          ..repeat = PlayRepeat.all;
+        final before = [q.currentId, q.currentIndex, q.revision, ...q.playOrder];
+        q.peekNext();
+        q.peekNext(auto: false);
+        expect([q.currentId, q.currentIndex, q.revision, ...q.playOrder], before);
+        q.previous(); // the history was not touched by the peeks: nothing to go back to
+        expect(q.currentId, isNotNull);
+      },
+    );
+
+    test(
+      'at the end of a shuffled lap the announced track is the one that comes',
+      () {
+        for (var seed = 0; seed < 50; seed++) {
+          final q = PlayQueue(random: Random(seed))
+            ..setItems([1, 2, 3, 4, 5])
+            ..shuffle = true
+            ..repeat = PlayRepeat.all;
+          for (var i = 0; i < 4; i++) {
+            q.next();
+          }
+          final last = q.currentId;
+          final announced = q.peekNext();
+          expect(q.next(auto: true), announced);
+          expect(
+            announced,
+            isNot(last),
+            reason: 'never the same track twice in a row',
+          );
+        }
+      },
+    );
+
+    test('repeat one announces the same track only for automatic advances', () {
+      final q = make([1, 2, 3])..repeat = PlayRepeat.one;
+      expect(q.peekNext(), 1);
+      expect(q.peekNext(auto: false), 2);
+    });
+
+    test('the end of the queue announces nothing', () {
+      final q = make([1, 2], start: 1);
+      expect(q.peekNext(), isNull);
+      expect(PlayQueue().peekNext(), isNull);
+    });
+
+    test('every change moves the revision, a peek does not', () {
+      final q = make([1, 2, 3]);
+      var r = q.revision;
+      void expectBump(String what) {
+        expect(q.revision, greaterThan(r), reason: what);
+        r = q.revision;
+      }
+
+      q.shuffle = true;
+      expectBump('shuffle');
+      q.shuffle = true;
+      expect(q.revision, r, reason: 'same value, no change');
+      q.repeat = PlayRepeat.all;
+      expectBump('repeat');
+      q.insertNext(9);
+      expectBump('insertNext');
+      q.append(8);
+      expectBump('append');
+      q.move(0, 1);
+      expectBump('move');
+      q.removeAt(0);
+      expectBump('removeAt');
+      q.jumpTo(1);
+      expectBump('jumpTo');
+      q.next();
+      expectBump('next');
+      q.previous();
+      expectBump('previous');
+      q.setItems([4, 5]);
+      expectBump('setItems');
+      q.peekNext();
+      expect(q.revision, r);
+    });
+  });
 }

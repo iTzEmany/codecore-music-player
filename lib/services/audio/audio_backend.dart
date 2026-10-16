@@ -2,6 +2,10 @@ import 'equalizer.dart';
 
 enum BackendState { idle, loading, ready, playing, paused, completed, error }
 
+/// How one track gives way to the next: as today (a new load), joined with no
+/// pause, or overlapped with a fade.
+enum TransitionMode { normal, gapless, crossfade }
+
 class BackendException implements Exception {
   const BackendException(this.message, {this.fileMissing = false});
 
@@ -38,4 +42,19 @@ abstract class AudioBackend {
   /// Current position read on demand (not from the throttled stream).
   Duration get positionNow;
   Future<void> dispose();
+}
+
+/// A backend that can hold the next track ready, so the change from one to the
+/// other needs no new load: either a seamless join (gapless) or an overlap
+/// (crossfade). The queue stays the only authority on the order: the backend
+/// plays what it is given and says when it moved on.
+abstract class GaplessCapable {
+  /// Prepares [path] to follow the current track (null: nothing follows), at
+  /// [volume] once it is playing. A new call replaces the previous one.
+  /// [overlap] says whether the two tracks may play over each other (a
+  /// crossfade) or must simply follow one another.
+  Future<void> setNext(String? path, {double volume = 1.0, bool overlap = true});
+
+  /// Fires when playback has moved on to the track given to [setNext].
+  Stream<void> get advanced;
 }

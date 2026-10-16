@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:codecore/services/audio/audio_backend.dart';
 import 'package:codecore/services/audio/equalizer.dart';
 
-class FakeBackend implements AudioBackend {
+class FakeBackend implements AudioBackend, GaplessCapable {
   final stateC = StreamController<BackendState>.broadcast();
   final posC = StreamController<Duration>.broadcast();
   final durC = StreamController<Duration?>.broadcast();
@@ -18,9 +18,35 @@ class FakeBackend implements AudioBackend {
   @override
   Stream<Duration?> get duration => durC.stream;
 
+  /// What was prepared to follow the current track (null: nothing).
+  String? nextPath;
+  double nextVolume = 1.0;
+  bool nextOverlap = true;
+  final nextCalls = <String?>[];
+  final advancedC = StreamController<void>.broadcast();
+
+  @override
+  Stream<void> get advanced => advancedC.stream;
+
+  @override
+  Future<void> setNext(String? path,
+      {double volume = 1.0, bool overlap = true}) async {
+    nextCalls.add(path);
+    nextPath = path;
+    nextVolume = volume;
+    nextOverlap = overlap;
+  }
+
+  /// The backend moves on to the prepared track by itself.
+  void advance() {
+    nextPath = null;
+    advancedC.add(null);
+  }
+
   @override
   Future<void> load(String filePath) async {
     if (failing.contains(filePath)) throw const BackendException('missing', fileMissing: true);
+    nextPath = null;
     loaded.add(filePath);
     if (forgetSpeedOnLoad) speed = 1.0;
     stateC.add(BackendState.paused);

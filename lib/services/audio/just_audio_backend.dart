@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:just_audio/just_audio.dart';
@@ -6,7 +7,7 @@ import '../../core/app_log.dart';
 import 'audio_backend.dart';
 import 'equalizer.dart';
 
-class JustAudioBackend implements AudioBackend {
+class JustAudioBackend implements AudioBackend, GaplessCapable {
   /// [withEqualizer] (Android only) puts an `AndroidEqualizer` in the player's
   /// audio pipeline. Only the main player asks for it.
   factory JustAudioBackend({bool withEqualizer = false}) {
@@ -20,9 +21,21 @@ class JustAudioBackend implements AudioBackend {
     return JustAudioBackend._(AudioPlayer(), null);
   }
 
-  JustAudioBackend._(this._player, this.equalizer);
+  JustAudioBackend._(this._player, this.equalizer) {
+    _indexSub = _player.currentIndexStream.listen(_onIndex);
+  }
 
   final AudioPlayer _player;
+  late final StreamSubscription<int?> _indexSub;
+  final _advanced = StreamController<void>.broadcast();
+
+  // The playlist holds the current track and, when [setNext] was called, the
+  // one that follows. Edits run one after the other; `load` makes the ones
+  // still waiting obsolete.
+  Future<void> _window = Future<void>.value();
+  int _generation = 0;
+  int _index = 0;
+  String? _nextPath;
 
   @override
   final Equalizer? equalizer;
@@ -34,22 +47,77 @@ class JustAudioBackend implements AudioBackend {
   Stream<Duration?> get duration => _player.durationStream;
 
   @override
-  Stream<BackendState> get state =>
-      _player.playerStateStream.map((s) => switch (s.processingState) {
-            ProcessingState.idle => BackendState.idle,
-            ProcessingState.loading ||
-            ProcessingState.buffering =>
-              BackendState.loading,
-            ProcessingState.ready =>
-              s.playing ? BackendState.playing : BackendState.paused,
-            ProcessingState.completed => BackendState.completed,
-          });
+  Stream<BackendState> get state => _player.playerStateStream.map(
+    (s) => switch (s.processingState) {
+      ProcessingState.idle => BackendState.idle,
+      ProcessingState.loading ||
+      ProcessingState.buffering => BackendState.loading,
+      ProcessingState.ready =>
+        s.playing ? BackendState.playing : BackendState.paused,
+      ProcessingState.completed => BackendState.completed,
+    },
+  );
+
+  @override
+  Stream<void> get advanced => _advanced.stream;
+
+  void _onIndex(int? i) {
+    if (i == null) return;
+    final moved = i == 1 && _index == 0 && _nextPath != null;
+    _index = i;
+    if (!moved) return;
+    _nextPath = null;
+    _advanced.add(null);
+    // The finished track leaves the playlist: the window is [current] again.
+    _enqueue(() => _player.removeAudioSourceAt(0));
+  }
+
+  void _enqueue(Future<void> Function() edit) {
+    final generation = _generation;
+    _window = _window.then((_) async {
+      if (generation != _generation) return;
+      try {
+        await edit();
+      } on Object catch (e, st) {
+        AppLog.w('gapless window edit failed', e, st);
+      }
+    });
+  }
+
+  @override
+  Future<void> setNext(String? path,
+      {double volume = 1.0, bool overlap = true}) {
+    _enqueue(() async {
+      var wanted = path;
+      if (wanted != null && !await File(wanted).exists()) wanted = null;
+      if (wanted == _nextPath) return;
+      // Playback may have moved on while this edit waited: leave it to the
+      // next call, which the move itself triggers.
+      if (_player.currentIndex != 0) return;
+      if (_player.audioSources.length > 1) {
+        await _player.removeAudioSourceAt(1);
+      }
+      _nextPath = null;
+      if (wanted != null) {
+        await _player.addAudioSource(AudioSource.file(wanted));
+        _nextPath = wanted;
+      }
+    });
+    return _window;
+  }
+
+  void _resetWindow() {
+    _generation++;
+    _nextPath = null;
+    _index = 0;
+  }
 
   @override
   Future<void> load(String filePath) async {
     if (!await File(filePath).exists()) {
       throw const BackendException('file missing', fileMissing: true);
     }
+    _resetWindow();
     try {
       await _player.setFilePath(filePath);
     } on Object catch (e, st) {
@@ -59,8 +127,10 @@ class JustAudioBackend implements AudioBackend {
   }
 
   @override
-  Future<void> loadUri(Uri uri,
-      {Map<String, String> headers = const {}}) async {
+  Future<void> loadUri(
+    Uri uri, {
+    Map<String, String> headers = const {},
+  }) async {
     try {
       await _player.setAudioSource(AudioSource.uri(uri, headers: headers));
     } on Object catch (e, st) {
@@ -96,7 +166,12 @@ class JustAudioBackend implements AudioBackend {
   Duration get positionNow => _player.position;
 
   @override
-  Future<void> dispose() => _player.dispose();
+  Future<void> dispose() async {
+    _generation++;
+    await _indexSub.cancel();
+    await _advanced.close();
+    await _player.dispose();
+  }
 }
 
 class _AndroidEq implements Equalizer {
@@ -122,7 +197,9 @@ class _AndroidEq implements Equalizer {
     final p = await _eq.parameters;
     for (var i = 0; i < p.bands.length; i++) {
       final g = i < gainsDb.length ? gainsDb[i] : 0.0;
-      await p.bands[i].setGain(g.clamp(p.minDecibels, p.maxDecibels).toDouble());
+      await p.bands[i].setGain(
+        g.clamp(p.minDecibels, p.maxDecibels).toDouble(),
+      );
     }
   }
 }
