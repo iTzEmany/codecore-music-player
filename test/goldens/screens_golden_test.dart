@@ -10,6 +10,10 @@ import 'package:codecore/providers/import_providers.dart' show searchCacheCountP
 import 'package:codecore/providers/youtube_providers.dart';
 import 'package:codecore/services/jam/jam_models.dart';
 import 'package:codecore/ui/screens/jam/jam_screen.dart';
+import 'package:codecore/ui/screens/library/all_tracks_screen.dart';
+import 'package:codecore/ui/screens/onboarding/onboarding_screen.dart';
+import 'package:codecore/ui/theme/app_theme.dart';
+import 'package:codecore/ui/widgets/track_row.dart';
 import 'package:codecore/ui/screens/library/album_detail_screen.dart';
 import 'package:codecore/ui/screens/now_playing/now_playing_screen.dart';
 import 'package:codecore/ui/screens/settings/settings_screen.dart';
@@ -111,6 +115,31 @@ void main() {
                 searchCacheCountProvider.overrideWith((_) async => 0),
               ]);
               await s.expectGolden('${tag}_settings.png');
+            }));
+
+        testWidgets('selection', (tester) => withShot(tester, size, (s) async {
+              await s.show(const AllTracksScreen(), textScale: scale);
+              await tester.longPress(find.byType(TrackRow).at(1));
+              await tester.tap(find.byType(TrackRow).at(3));
+              await s.settle();
+              await s.expectGolden('${tag}_selection.png');
+            }));
+
+        testWidgets('light_library', (tester) => withShot(tester, size, (s) async {
+              await s.show(const AppShell(),
+                  textScale: scale,
+                  theme: AppThemeId.chiaro,
+                  accent: CcAccent.blu,
+                  extra: [navIndexProvider.overrideWith(_LibraryTab.new)]);
+              await s.expectGolden('${tag}_light_library.png');
+            }));
+
+        testWidgets('onboarding', (tester) => withShot(tester, size, (s) async {
+              await s.show(const OnboardingScreen(askAudioPermission: true),
+                  textScale: scale);
+              await tester.tap(find.text('Avanti'));
+              await s.settle();
+              await s.expectGolden('${tag}_onboarding.png');
             }));
 
         testWidgets('jam', (tester) => withShot(tester, size, (s) async {

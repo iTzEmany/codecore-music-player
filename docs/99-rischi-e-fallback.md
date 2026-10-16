@@ -80,3 +80,10 @@ Per ogni rischio: **sintomo** → **cosa fare**. Se scatta un fallback che cambi
 | R42 | mpv o ExoPlayer non sono davvero gapless con certi formati o telefoni | Buco o «clic» al confine | Misurato su Linux (0 ms; mp3 −11 ms per il taglio dell'inizio). `scripts/gap_probe.py` e `test/live/gapless_live_test.dart` rifanno la misura; su Android/Windows prova a orecchio; «Normale» resta disponibile |
 | R43 | Regressioni nella Jam o nel timer di spegnimento | Jam fuori sincronia, timer «fine brano» che non ferma | Nessuna modifica ai file della Jam (`git diff` vuoto) e test che lo impediscono (`test/jam/jam_transition_test.dart`); `pauseAtTrackEnd` svuota la finestra e impedisce la dissolvenza |
 
+## Interfaccia (fase 19)
+| # | Rischio | Sintomo | Piano B |
+|---|---|---|---|
+| R44 | Gesti in conflitto (pressione lunga, swipe «In coda», riordino, `Draggable` desktop) | Una riga che non si seleziona o che scatta in coda mentre si trascina | In selezione niente swipe; il riordino di una playlist è una modalità a parte (entrando si esce dalla selezione); su desktop il trascinamento parte da pochi pixel (test con mouse simulato) e vince sullo swipe; il menu del brano resta su ⋯, clic destro e (desktop) pressione lunga |
+| R45 | Tema chiaro con contrasto insufficiente (copertine chiare, accento giallo) | Testo o icone poco leggibili al sole | Palette chiusa di 8 accenti (scuri nel chiaro), test AA su ogni combinazione (24), `heroTint` chiaro ≥ 7:1; si torna a «Notte viola» da Impostazioni → Aspetto |
+| — | Azione di massa sbagliata | Si tolgono 300 brani da una playlist | Conferma col numero, «Annulla» nello snackbar (ripristina le posizioni), niente tocco ai file, backup della fase 13 |
+

@@ -172,3 +172,11 @@ Scritture con debounce 400 ms, mai in un handler di slider a ogni tick.
 - **Jam:** invariata (backend e sincronia propri); nessun sorgente di `lib/services/jam/` conosce la finestra (test).
 - **Differenza desktop/Android in Normale:** su desktop mpv segnala la fine quando il decoder arriva a EOF, prima che l'audio nel buffer sia uscito: il caricamento del successivo ne scarta ~0,2 s (misurato). «Senza pause» lo evita.
 
+## Interfaccia (fase 19)
+- **Selezione multipla:** `Selection` (immutabile: `toggle`, `selectRange` dall'ancora, `selectAll`, `retainWhere`, `inOrderOf`) in `selectionProvider(chiave)` — uno per lista (`all`, `favorites`, `album:<chiave>`, `artist:<chiave>`, `playlist:<id>`, `genre:<nome>`, `search`, `search-all`, `youtube`), quindi uscire dalla pagina o cambiare scheda la annulla. `LiveTrackRow(selection: RowSelection(chiave, idVisibili))` la rende selezionabile: pressione lunga sul telefono (il menu resta su ⋯), Ctrl/Maiusc+clic su desktop. `SelectionScope` gestisce Indietro, Esc, Ctrl+A e il filtro che nasconde righe; `SelectionBar` / `SelectableAppBar` / `SelectionBarSlot` sono la barra; `bulkActions(…)` riusa il modello `TrackAction` del menu del brano con i brani **nell'ordine della lista**. Nessuna azione tocca i file: «rimuovi» è solo riga di DB o di playlist; dalla libreria si tolgono **soltanto** i brani `missing`.
+- **Trascinamento (desktop):** `Draggable<TrackDragData>` sulle righe (la selezione intera se la riga ne fa parte), `TrackDropTarget` sulle voci playlist/Preferiti di `DesktopSidebar`.
+- **Temi:** `palette.dart` (`AppThemeId {notte, oled, chiaro}`, `CcAccent` con 8 accenti, `buildPalette(tema, accento)`); nel chiaro gli accenti sono scuri. Contrasto AA verificato per **tutti** gli abbinamenti (`contrast_test.dart`); `heroTint(…, light:)` per il fondo dietro le copertine.
+- **Layout ≥ 1200 px:** pannello destro (coda) automatico a 360 px quando parte un brano (finché l'utente non lo chiude), griglia album con celle ≥ 168 px, Home a 3 colonne da 900 px, cerniera verticale rispettata (`MediaQuery.displayFeatures`).
+- **Lingue:** it (template), en, de, es, fr, pt (europeo); `test/l10n/arb_test.dart` controlla chiavi, segnaposto e stringhe rimaste in italiano.
+- **Onboarding:** `OnboardingGate` davanti ad `AppShell`; solo con libreria e cartelle vuote e `onboardingDone` falso.
+

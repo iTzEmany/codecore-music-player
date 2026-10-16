@@ -58,41 +58,50 @@ class SelectionBar extends ConsumerWidget implements PreferredSizeWidget {
               a.icon == Icons.favorite_border_rounded)
             a,
     ];
-    return SelectionBarFrame(
-      count: selection.count,
-      belowStatusBar: belowStatusBar,
-      onClose: notifier.clear,
-      onSelectAll: () => notifier.selectAll([for (final t in tracks) t.id]),
-      actions: [
-        for (final a in quick)
-          IconButton(
-            tooltip: a.label,
-            icon: Icon(a.icon),
-            onPressed: picked.isEmpty ? null : a.run,
-          ),
-        PopupMenuButton<TrackAction>(
-          tooltip: l.bulkActions,
-          enabled: picked.isNotEmpty,
-          icon: const Icon(Icons.more_vert_rounded),
-          onSelected: (a) => a.run(),
-          itemBuilder: (_) => [
-            for (var g = 0; g < groups.length; g++) ...[
-              if (g > 0) const PopupMenuDivider(),
-              for (final a in groups[g].actions)
-                PopupMenuItem<TrackAction>(
-                  value: a,
-                  child: Row(
-                    children: [
-                      Icon(a.icon, size: 20),
-                      const SizedBox(width: 12),
-                      Flexible(child: Text(a.label)),
-                    ],
-                  ),
+    return LayoutBuilder(
+      builder: (context, c) {
+        // With big text or a narrow bar the quick actions go into the menu, so
+        // the count keeps room to be read.
+        final scale = MediaQuery.textScalerOf(context).scale(1);
+        final roomy = c.maxWidth / scale >= 340;
+        return SelectionBarFrame(
+          count: selection.count,
+          belowStatusBar: belowStatusBar,
+          onClose: notifier.clear,
+          onSelectAll: () => notifier.selectAll([for (final t in tracks) t.id]),
+          actions: [
+            if (roomy)
+              for (final a in quick)
+                IconButton(
+                  tooltip: a.label,
+                  icon: Icon(a.icon),
+                  onPressed: picked.isEmpty ? null : a.run,
                 ),
-            ],
+            PopupMenuButton<TrackAction>(
+              tooltip: l.bulkActions,
+              enabled: picked.isNotEmpty,
+              icon: const Icon(Icons.more_vert_rounded),
+              onSelected: (a) => a.run(),
+              itemBuilder: (_) => [
+                for (var g = 0; g < groups.length; g++) ...[
+                  if (g > 0) const PopupMenuDivider(),
+                  for (final a in groups[g].actions)
+                    PopupMenuItem<TrackAction>(
+                      value: a,
+                      child: Row(
+                        children: [
+                          Icon(a.icon, size: 20),
+                          const SizedBox(width: 12),
+                          Flexible(child: Text(a.label)),
+                        ],
+                      ),
+                    ),
+                ],
+              ],
+            ),
           ],
-        ),
-      ],
+        );
+      },
     );
   }
 }

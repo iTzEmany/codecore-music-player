@@ -104,7 +104,9 @@ File scomparsi: `missing = true` **solo se la cartella radice è raggiungibile**
 ## Impostazioni (shared_preferences, non nel DB)
 | Chiave | Tipo | Default | Valori |
 |---|---|---|---|
-| `theme` | string | `oled` | `oled`, `carbon`, `navy`, `light` |
+| `theme` | string | `notte` | `notte`, `oled`, `chiaro` (`light` = `chiaro`; i nomi ritirati `carbon`, `navy` → `notte`) |
+| `accent` | string | `viola` | `viola`, `blu`, `acqua`, `verde`, `ambra`, `arancio`, `rosa`, `rosso` (fase 19; valore ignoto = `viola`) |
+| `onboardingDone` | bool | false | la guida al primo avvio è finita o saltata (fase 19) |
 | `fontScale` | double | 1.0 | 0.9, 1.0, 1.15 |
 | `compactMode` | bool | false | |
 | `reducedMotion` | bool | false | |

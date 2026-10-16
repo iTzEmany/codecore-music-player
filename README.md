@@ -19,7 +19,7 @@ Italiano, English, Deutsch, Español.
   ricerca e ordinamenti, brani mancanti gestiti senza perdere preferiti e playlist.
 - **Riproduzione**: coda separata dalla lista, shuffle senza ripetizioni, repeat off/all/one, ripresa all'avvio,
   notifica e tasti cuffie su Android, scorciatoie da tastiera su desktop, timer di spegnimento con fade-out.
-- **Preferiti, playlist** (copertina personalizzabile, riordino), modifica info (solo nel DB), temi (Notte viola, Nero puro).
+- **Preferiti, playlist** (copertina personalizzabile, riordino), modifica info (solo nel DB), temi (Notte viola, Nero puro, Chiaro) con 8 colori d'accento.
 - **Online (solo su azione tua o opzioni attive)**: info e copertine da iTunes, testi sincronizzati da LRCLIB,
   curiosità da Wikipedia, ricerca e download da YouTube con yt-dlp.
 - **Condivisione LAN** telefono ↔ PC senza server esterni: scoperta automatica dei dispositivi, richiesta con accettazione (anche da notifica su Android, anche in background), collegamento manuale con PIN e QR.
@@ -61,6 +61,13 @@ senza il file la build release usa la chiave di debug.
 - Un errore di rete o un 403 passeggero viene ritentato da solo (dopo 5, 20 e 60 secondi); un limite di YouTube (429) mette in pausa.
 - **yt-dlp (desktop):** l'app usa quello scaricato da lei (`Aggiorna`) prima di quello nel PATH; se è più vecchio di `2025.11.12` mostra un avviso.
 - Le ricerche dell'importazione da CSV sono ricordate 30 giorni (**Svuota cache ricerche**); un file di durata molto diversa dal CSV finisce in «Da verificare».
+
+## Interfaccia (fase 19)
+- **Selezione multipla:** pressione lunga su un brano (telefono) o Ctrl/Maiusc+clic (PC), poi Riproduci / Riproduci dopo / In coda / Aggiungi a playlist / Preferiti / Rimuovi dalla playlist; sui risultati di YouTube «Scarica». Nessuna azione tocca i tuoi file.
+- **Trascinamento (PC):** trascina uno o più brani sulle playlist o sui Preferiti della barra laterale.
+- **Aspetto:** tema Chiaro e 8 colori d'accento; su schermi larghi (≥ 1200 px) la coda si apre da sola a destra.
+- **Lingue:** italiano, inglese, tedesco, spagnolo, francese e portoghese.
+- Al primo avvio una guida in 4 pagine (saltabile) spiega cartelle, funzioni online, download, Jam e condivisione.
 
 ## Riproduzione (fase 17)
 - **Velocità** 0,5×–2× senza cambiare il tono (chip «1×» in Now Playing).
