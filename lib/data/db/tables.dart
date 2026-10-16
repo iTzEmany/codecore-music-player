@@ -139,3 +139,57 @@ class PlaylistImportItems extends Table {
   @override
   Set<Column> get primaryKey => {importId, rowIndex};
 }
+
+/// One listen: a track that played past the «counts as played» threshold.
+/// The history starts empty (nothing is invented from `play_count`).
+@TableIndex(name: 'plays_track', columns: {#trackId})
+@TableIndex(name: 'plays_at', columns: {#playedAt})
+class Plays extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get trackId =>
+      integer().references(Tracks, #id, onDelete: KeyAction.cascade)();
+
+  /// Epoch ms of the moment it counted as played.
+  IntColumn get playedAt => integer()();
+
+  /// Time really spent playing it (seeks do not count); grows until the
+  /// track changes.
+  IntColumn get msPlayed => integer().withDefault(const Constant(0))();
+
+  /// `PlayContextKind.index` of where it was started from, if known.
+  IntColumn get context => integer().nullable()();
+  TextColumn get contextName => text().nullable()();
+}
+
+/// A playlist defined by rules (text in the rule language), computed live.
+class SmartPlaylists extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get name => text()();
+  TextColumn get rules => text()();
+
+  /// `SortOption` name, or `random`; null = the default order.
+  TextColumn get sort => text().nullable()();
+  IntColumn get limitCount => integer().nullable()();
+  IntColumn get createdAt => integer()();
+}
+
+/// The user's own labels for tracks (distinct from the file tags).
+class UserTags extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get name =>
+      text().customConstraint('NOT NULL UNIQUE COLLATE NOCASE')();
+
+  /// Index of one of the eight accent tokens; null = none.
+  IntColumn get color => integer().nullable()();
+}
+
+class TrackTags extends Table {
+  IntColumn get trackId =>
+      integer().references(Tracks, #id, onDelete: KeyAction.cascade)();
+  IntColumn get tagId =>
+      integer().references(UserTags, #id, onDelete: KeyAction.cascade)();
+
+  @override
+  Set<Column> get primaryKey => {trackId, tagId};
+}
+

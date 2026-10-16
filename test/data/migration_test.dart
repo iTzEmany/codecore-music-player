@@ -138,4 +138,71 @@ void main() {
     expect(cols.map((c) => c.read<String>('name')), contains('resume_position_ms'));
     await db.close();
   });
+
+  test('v6 database gets the history, smart playlist and tag tables and keeps its data', () async {
+    final dir = Directory.systemTemp.createTempSync('mig7');
+    addTearDown(() => dir.deleteSync(recursive: true));
+    final file = File(p.join(dir.path, 'v6.db'));
+    final db = AppDatabase(NativeDatabase(file, setup: (raw) {
+      if (raw.userVersion == 0) {
+        raw.execute('CREATE TABLE tracks (id INTEGER PRIMARY KEY AUTOINCREMENT, '
+            'path TEXT NOT NULL, title TEXT NOT NULL, album_key TEXT NOT NULL, '
+            'format TEXT NOT NULL, size_bytes INTEGER NOT NULL, mtime_ms INTEGER '
+            'NOT NULL, added_at INTEGER NOT NULL, play_count INTEGER NOT NULL '
+            'DEFAULT 0, replay_gain_db REAL, resume_position_ms INTEGER)');
+        raw.execute("INSERT INTO tracks (path, title, album_key, format, size_bytes, "
+            "mtime_ms, added_at, play_count) VALUES ('/a.mp3', 'Old', 'k', 'mp3', 1, 1, 1, 7)");
+        raw.userVersion = 6;
+      }
+    }));
+    final t = (await db.customSelect('SELECT title, play_count FROM tracks').get()).single;
+    expect(t.read<String>('title'), 'Old');
+    expect(t.read<int>('play_count'), 7, reason: 'the old counter is untouched');
+    final tables = (await db
+            .customSelect("SELECT name FROM sqlite_master WHERE type = 'table'")
+            .get())
+        .map((r) => r.read<String>('name'));
+    expect(tables, containsAll(['plays', 'smart_playlists', 'user_tags', 'track_tags']));
+    expect(await db.select(db.plays).get(), isEmpty, reason: 'new tables start empty');
+    expect(await db.select(db.smartPlaylists).get(), isEmpty);
+    expect(await db.select(db.userTags).get(), isEmpty);
+    expect(await db.select(db.trackTags).get(), isEmpty);
+    final indexes = (await db
+            .customSelect("SELECT name FROM sqlite_master WHERE type = 'index'")
+            .get())
+        .map((r) => r.read<String>('name'));
+    expect(indexes, containsAll(['plays_track', 'plays_at']));
+    await db.close();
+  });
+
+  test('a fresh install has the v7 tables and indexes too', () async {
+    final db = AppDatabase(NativeDatabase.memory());
+    final names = (await db
+            .customSelect("SELECT name FROM sqlite_master WHERE type IN ('table', 'index')")
+            .get())
+        .map((r) => r.read<String>('name'));
+    expect(names, containsAll(['plays', 'smart_playlists', 'user_tags', 'track_tags', 'plays_track', 'plays_at']));
+    await db.close();
+  });
+
+  test('deleting a track takes its listens and its tag links with it, and a tag name is unique ignoring case', () async {
+    final db = AppDatabase(NativeDatabase.memory());
+    await db.into(db.tracks).insert(TracksCompanion.insert(
+        path: '/a.mp3', title: 'A', albumKey: 'k', format: 'mp3',
+        sizeBytes: 1, mtimeMs: 1, addedAt: 1));
+    final trackId = (await db.select(db.tracks).getSingle()).id;
+    final tagId = await db.into(db.userTags).insert(UserTagsCompanion.insert(name: 'Live'));
+    await db.into(db.trackTags).insert(TrackTagsCompanion.insert(trackId: trackId, tagId: tagId));
+    await db.into(db.plays).insert(PlaysCompanion.insert(trackId: trackId, playedAt: 5));
+    await expectLater(
+      db.into(db.userTags).insert(UserTagsCompanion.insert(name: 'LIVE')),
+      throwsA(anything),
+    );
+    await (db.delete(db.tracks)..where((t) => t.id.equals(trackId))).go();
+    expect(await db.select(db.plays).get(), isEmpty);
+    expect(await db.select(db.trackTags).get(), isEmpty);
+    expect(await db.select(db.userTags).get(), hasLength(1), reason: 'the label stays');
+    await db.close();
+  });
 }
+

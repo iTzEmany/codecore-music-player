@@ -243,7 +243,7 @@ L'agente riparte sempre dal primo task non spuntato.
 - [~] 19.10 Rifinitura, documentazione e prova a mano
 
 ## Fase 20 — Libreria intelligente (`fase-20-libreria-intelligente.md`)
-- [ ] 20.1 Tabelle (schema v7)
+- [x] 20.1 Tabelle (schema v7)
 - [ ] 20.2 Registrare gli ascolti
 - [ ] 20.3 Cronologia
 - [ ] 20.4 Statistiche e recap
@@ -485,6 +485,8 @@ L'agente riparte sempre dal primo task non spuntato.
 - 19.9: `OnboardingGate` (in `app.dart` davanti ad `AppShell`) mostra la guida solo se `onboardingDone` è falso **e** libreria e cartelle sono vuote; chi aggiorna l'app (libreria non vuota) non la vede e `onboardingDone` viene segnato in silenzio; una volta iniziata resta anche se si aggiunge una cartella. 4 pagine (benvenuto · cartelle con, su Android, spiegazione e richiesta del permesso audio **prima** della richiesta di sistema · funzioni online spente con i due interruttori · download/Jam/invio con l'avviso sui termini di YouTube); «Salta» ovunque; «Inizia» segna `ytNoticeSeen` (saltando prima no) e avvia la scansione delle cartelle scelte. 9 test (`onboarding_test.dart`). Nota di test: in un widget test un `insert` fuori transazione mentre uno stream drift è attivo blocca il `select` successivo (il clock finto trattiene i timer): nei test si usa `db.transaction`.
 
 - 19.10: ARB in parità in tutte e sei le lingue (607 chiavi, test). Documentazione: `docs/02-architettura.md` («Interfaccia (fase 19)»), `docs/03-modello-dati.md` (`theme` con `chiaro`, `accent`, `onboardingDone`), `docs/99` (R44, R45), README. Scatti a 100 % e 150 % (golden, telefono e desktop): barra di selezione, tema chiaro (Libreria con accento blu) e onboarding (pagina cartelle). Guardandoli a 150 % sul telefono il conteggio della barra («2 selezionati») era troncato: ora con testo grande o barra stretta (`larghezza / scala < 340`) le azioni rapide passano nel menu ⋮.
+
+- 20.1: schema **v7** (dopo la v6 della fase 17): `plays` (indici `plays_track`, `plays_at`; `track_id` con cascade), `smart_playlists`, `user_tags` (nome **unico ignorando maiuscole**: `UNIQUE COLLATE NOCASE`), `track_tags` (cascade su brano ed etichetta: togliere un brano toglie i suoi collegamenti, togliere un'etichetta non tocca i brani). Migrazione `from < 7` con `createTable` ×4 e i due indici; nessun dato esistente toccato (`play_count` resta). 3 test nuovi in `migration_test.dart` (v6→v7 con dati, installazione nuova, cascade e unicità).
 
 ## Note di deviazione (Fase 12)
 - 12.1 (2026-10-16): CSV vero = `Just_a_mood.csv` (34 brani; intestazioni `Track URI, ISRC, Track Name, Album Name, Artist Name(s), …, Duration (ms)`; **più artisti separati da `;`**). yt-dlp di sistema 2024.04.09 NON legge più YouTube («Please sign in»): provato con yt-dlp 2026.08.19 (binario standalone). `https://music.youtube.com/search?q=…#songs` funziona; in modalità flat dà ~460 voci con solo `id`/`title` (nessuna durata), **senza `--flat-playlist` e con `--playlist-items 1-5`** ogni voce ha `channel`, `artists[]`, `track`, `album`, `duration` in ~5–8 s → si usa quella. `YtResult` guadagna `artists` e `album`.

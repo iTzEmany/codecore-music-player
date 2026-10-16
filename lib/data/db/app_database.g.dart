@@ -4240,6 +4240,1282 @@ class PlaylistImportItemsCompanion extends UpdateCompanion<PlaylistImportItem> {
   }
 }
 
+class $PlaysTable extends Plays with TableInfo<$PlaysTable, Play> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PlaysTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _trackIdMeta = const VerificationMeta(
+    'trackId',
+  );
+  @override
+  late final GeneratedColumn<int> trackId = GeneratedColumn<int>(
+    'track_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES tracks (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _playedAtMeta = const VerificationMeta(
+    'playedAt',
+  );
+  @override
+  late final GeneratedColumn<int> playedAt = GeneratedColumn<int>(
+    'played_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _msPlayedMeta = const VerificationMeta(
+    'msPlayed',
+  );
+  @override
+  late final GeneratedColumn<int> msPlayed = GeneratedColumn<int>(
+    'ms_played',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _contextMeta = const VerificationMeta(
+    'context',
+  );
+  @override
+  late final GeneratedColumn<int> context = GeneratedColumn<int>(
+    'context',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _contextNameMeta = const VerificationMeta(
+    'contextName',
+  );
+  @override
+  late final GeneratedColumn<String> contextName = GeneratedColumn<String>(
+    'context_name',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    trackId,
+    playedAt,
+    msPlayed,
+    context,
+    contextName,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'plays';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<Play> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('track_id')) {
+      context.handle(
+        _trackIdMeta,
+        trackId.isAcceptableOrUnknown(data['track_id']!, _trackIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_trackIdMeta);
+    }
+    if (data.containsKey('played_at')) {
+      context.handle(
+        _playedAtMeta,
+        playedAt.isAcceptableOrUnknown(data['played_at']!, _playedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_playedAtMeta);
+    }
+    if (data.containsKey('ms_played')) {
+      context.handle(
+        _msPlayedMeta,
+        msPlayed.isAcceptableOrUnknown(data['ms_played']!, _msPlayedMeta),
+      );
+    }
+    if (data.containsKey('context')) {
+      context.handle(
+        _contextMeta,
+        this.context.isAcceptableOrUnknown(data['context']!, _contextMeta),
+      );
+    }
+    if (data.containsKey('context_name')) {
+      context.handle(
+        _contextNameMeta,
+        contextName.isAcceptableOrUnknown(
+          data['context_name']!,
+          _contextNameMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  Play map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Play(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      trackId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}track_id'],
+      )!,
+      playedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}played_at'],
+      )!,
+      msPlayed: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}ms_played'],
+      )!,
+      context: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}context'],
+      ),
+      contextName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}context_name'],
+      ),
+    );
+  }
+
+  @override
+  $PlaysTable createAlias(String alias) {
+    return $PlaysTable(attachedDatabase, alias);
+  }
+}
+
+class Play extends DataClass implements Insertable<Play> {
+  final int id;
+  final int trackId;
+
+  /// Epoch ms of the moment it counted as played.
+  final int playedAt;
+
+  /// Time really spent playing it (seeks do not count); grows until the
+  /// track changes.
+  final int msPlayed;
+
+  /// `PlayContextKind.index` of where it was started from, if known.
+  final int? context;
+  final String? contextName;
+  const Play({
+    required this.id,
+    required this.trackId,
+    required this.playedAt,
+    required this.msPlayed,
+    this.context,
+    this.contextName,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['track_id'] = Variable<int>(trackId);
+    map['played_at'] = Variable<int>(playedAt);
+    map['ms_played'] = Variable<int>(msPlayed);
+    if (!nullToAbsent || context != null) {
+      map['context'] = Variable<int>(context);
+    }
+    if (!nullToAbsent || contextName != null) {
+      map['context_name'] = Variable<String>(contextName);
+    }
+    return map;
+  }
+
+  PlaysCompanion toCompanion(bool nullToAbsent) {
+    return PlaysCompanion(
+      id: Value(id),
+      trackId: Value(trackId),
+      playedAt: Value(playedAt),
+      msPlayed: Value(msPlayed),
+      context: context == null && nullToAbsent
+          ? const Value.absent()
+          : Value(context),
+      contextName: contextName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(contextName),
+    );
+  }
+
+  factory Play.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Play(
+      id: serializer.fromJson<int>(json['id']),
+      trackId: serializer.fromJson<int>(json['trackId']),
+      playedAt: serializer.fromJson<int>(json['playedAt']),
+      msPlayed: serializer.fromJson<int>(json['msPlayed']),
+      context: serializer.fromJson<int?>(json['context']),
+      contextName: serializer.fromJson<String?>(json['contextName']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'trackId': serializer.toJson<int>(trackId),
+      'playedAt': serializer.toJson<int>(playedAt),
+      'msPlayed': serializer.toJson<int>(msPlayed),
+      'context': serializer.toJson<int?>(context),
+      'contextName': serializer.toJson<String?>(contextName),
+    };
+  }
+
+  Play copyWith({
+    int? id,
+    int? trackId,
+    int? playedAt,
+    int? msPlayed,
+    Value<int?> context = const Value.absent(),
+    Value<String?> contextName = const Value.absent(),
+  }) => Play(
+    id: id ?? this.id,
+    trackId: trackId ?? this.trackId,
+    playedAt: playedAt ?? this.playedAt,
+    msPlayed: msPlayed ?? this.msPlayed,
+    context: context.present ? context.value : this.context,
+    contextName: contextName.present ? contextName.value : this.contextName,
+  );
+  Play copyWithCompanion(PlaysCompanion data) {
+    return Play(
+      id: data.id.present ? data.id.value : this.id,
+      trackId: data.trackId.present ? data.trackId.value : this.trackId,
+      playedAt: data.playedAt.present ? data.playedAt.value : this.playedAt,
+      msPlayed: data.msPlayed.present ? data.msPlayed.value : this.msPlayed,
+      context: data.context.present ? data.context.value : this.context,
+      contextName: data.contextName.present
+          ? data.contextName.value
+          : this.contextName,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('Play(')
+          ..write('id: $id, ')
+          ..write('trackId: $trackId, ')
+          ..write('playedAt: $playedAt, ')
+          ..write('msPlayed: $msPlayed, ')
+          ..write('context: $context, ')
+          ..write('contextName: $contextName')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, trackId, playedAt, msPlayed, context, contextName);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Play &&
+          other.id == this.id &&
+          other.trackId == this.trackId &&
+          other.playedAt == this.playedAt &&
+          other.msPlayed == this.msPlayed &&
+          other.context == this.context &&
+          other.contextName == this.contextName);
+}
+
+class PlaysCompanion extends UpdateCompanion<Play> {
+  final Value<int> id;
+  final Value<int> trackId;
+  final Value<int> playedAt;
+  final Value<int> msPlayed;
+  final Value<int?> context;
+  final Value<String?> contextName;
+  const PlaysCompanion({
+    this.id = const Value.absent(),
+    this.trackId = const Value.absent(),
+    this.playedAt = const Value.absent(),
+    this.msPlayed = const Value.absent(),
+    this.context = const Value.absent(),
+    this.contextName = const Value.absent(),
+  });
+  PlaysCompanion.insert({
+    this.id = const Value.absent(),
+    required int trackId,
+    required int playedAt,
+    this.msPlayed = const Value.absent(),
+    this.context = const Value.absent(),
+    this.contextName = const Value.absent(),
+  }) : trackId = Value(trackId),
+       playedAt = Value(playedAt);
+  static Insertable<Play> custom({
+    Expression<int>? id,
+    Expression<int>? trackId,
+    Expression<int>? playedAt,
+    Expression<int>? msPlayed,
+    Expression<int>? context,
+    Expression<String>? contextName,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (trackId != null) 'track_id': trackId,
+      if (playedAt != null) 'played_at': playedAt,
+      if (msPlayed != null) 'ms_played': msPlayed,
+      if (context != null) 'context': context,
+      if (contextName != null) 'context_name': contextName,
+    });
+  }
+
+  PlaysCompanion copyWith({
+    Value<int>? id,
+    Value<int>? trackId,
+    Value<int>? playedAt,
+    Value<int>? msPlayed,
+    Value<int?>? context,
+    Value<String?>? contextName,
+  }) {
+    return PlaysCompanion(
+      id: id ?? this.id,
+      trackId: trackId ?? this.trackId,
+      playedAt: playedAt ?? this.playedAt,
+      msPlayed: msPlayed ?? this.msPlayed,
+      context: context ?? this.context,
+      contextName: contextName ?? this.contextName,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (trackId.present) {
+      map['track_id'] = Variable<int>(trackId.value);
+    }
+    if (playedAt.present) {
+      map['played_at'] = Variable<int>(playedAt.value);
+    }
+    if (msPlayed.present) {
+      map['ms_played'] = Variable<int>(msPlayed.value);
+    }
+    if (context.present) {
+      map['context'] = Variable<int>(context.value);
+    }
+    if (contextName.present) {
+      map['context_name'] = Variable<String>(contextName.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PlaysCompanion(')
+          ..write('id: $id, ')
+          ..write('trackId: $trackId, ')
+          ..write('playedAt: $playedAt, ')
+          ..write('msPlayed: $msPlayed, ')
+          ..write('context: $context, ')
+          ..write('contextName: $contextName')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $SmartPlaylistsTable extends SmartPlaylists
+    with TableInfo<$SmartPlaylistsTable, SmartPlaylist> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SmartPlaylistsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _rulesMeta = const VerificationMeta('rules');
+  @override
+  late final GeneratedColumn<String> rules = GeneratedColumn<String>(
+    'rules',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sortMeta = const VerificationMeta('sort');
+  @override
+  late final GeneratedColumn<String> sort = GeneratedColumn<String>(
+    'sort',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _limitCountMeta = const VerificationMeta(
+    'limitCount',
+  );
+  @override
+  late final GeneratedColumn<int> limitCount = GeneratedColumn<int>(
+    'limit_count',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    name,
+    rules,
+    sort,
+    limitCount,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'smart_playlists';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SmartPlaylist> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('rules')) {
+      context.handle(
+        _rulesMeta,
+        rules.isAcceptableOrUnknown(data['rules']!, _rulesMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_rulesMeta);
+    }
+    if (data.containsKey('sort')) {
+      context.handle(
+        _sortMeta,
+        sort.isAcceptableOrUnknown(data['sort']!, _sortMeta),
+      );
+    }
+    if (data.containsKey('limit_count')) {
+      context.handle(
+        _limitCountMeta,
+        limitCount.isAcceptableOrUnknown(data['limit_count']!, _limitCountMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  SmartPlaylist map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SmartPlaylist(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      rules: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}rules'],
+      )!,
+      sort: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sort'],
+      ),
+      limitCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}limit_count'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $SmartPlaylistsTable createAlias(String alias) {
+    return $SmartPlaylistsTable(attachedDatabase, alias);
+  }
+}
+
+class SmartPlaylist extends DataClass implements Insertable<SmartPlaylist> {
+  final int id;
+  final String name;
+  final String rules;
+
+  /// `SortOption` name, or `random`; null = the default order.
+  final String? sort;
+  final int? limitCount;
+  final int createdAt;
+  const SmartPlaylist({
+    required this.id,
+    required this.name,
+    required this.rules,
+    this.sort,
+    this.limitCount,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['name'] = Variable<String>(name);
+    map['rules'] = Variable<String>(rules);
+    if (!nullToAbsent || sort != null) {
+      map['sort'] = Variable<String>(sort);
+    }
+    if (!nullToAbsent || limitCount != null) {
+      map['limit_count'] = Variable<int>(limitCount);
+    }
+    map['created_at'] = Variable<int>(createdAt);
+    return map;
+  }
+
+  SmartPlaylistsCompanion toCompanion(bool nullToAbsent) {
+    return SmartPlaylistsCompanion(
+      id: Value(id),
+      name: Value(name),
+      rules: Value(rules),
+      sort: sort == null && nullToAbsent ? const Value.absent() : Value(sort),
+      limitCount: limitCount == null && nullToAbsent
+          ? const Value.absent()
+          : Value(limitCount),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory SmartPlaylist.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SmartPlaylist(
+      id: serializer.fromJson<int>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      rules: serializer.fromJson<String>(json['rules']),
+      sort: serializer.fromJson<String?>(json['sort']),
+      limitCount: serializer.fromJson<int?>(json['limitCount']),
+      createdAt: serializer.fromJson<int>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'name': serializer.toJson<String>(name),
+      'rules': serializer.toJson<String>(rules),
+      'sort': serializer.toJson<String?>(sort),
+      'limitCount': serializer.toJson<int?>(limitCount),
+      'createdAt': serializer.toJson<int>(createdAt),
+    };
+  }
+
+  SmartPlaylist copyWith({
+    int? id,
+    String? name,
+    String? rules,
+    Value<String?> sort = const Value.absent(),
+    Value<int?> limitCount = const Value.absent(),
+    int? createdAt,
+  }) => SmartPlaylist(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    rules: rules ?? this.rules,
+    sort: sort.present ? sort.value : this.sort,
+    limitCount: limitCount.present ? limitCount.value : this.limitCount,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  SmartPlaylist copyWithCompanion(SmartPlaylistsCompanion data) {
+    return SmartPlaylist(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      rules: data.rules.present ? data.rules.value : this.rules,
+      sort: data.sort.present ? data.sort.value : this.sort,
+      limitCount: data.limitCount.present
+          ? data.limitCount.value
+          : this.limitCount,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SmartPlaylist(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('rules: $rules, ')
+          ..write('sort: $sort, ')
+          ..write('limitCount: $limitCount, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, name, rules, sort, limitCount, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SmartPlaylist &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.rules == this.rules &&
+          other.sort == this.sort &&
+          other.limitCount == this.limitCount &&
+          other.createdAt == this.createdAt);
+}
+
+class SmartPlaylistsCompanion extends UpdateCompanion<SmartPlaylist> {
+  final Value<int> id;
+  final Value<String> name;
+  final Value<String> rules;
+  final Value<String?> sort;
+  final Value<int?> limitCount;
+  final Value<int> createdAt;
+  const SmartPlaylistsCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.rules = const Value.absent(),
+    this.sort = const Value.absent(),
+    this.limitCount = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  SmartPlaylistsCompanion.insert({
+    this.id = const Value.absent(),
+    required String name,
+    required String rules,
+    this.sort = const Value.absent(),
+    this.limitCount = const Value.absent(),
+    required int createdAt,
+  }) : name = Value(name),
+       rules = Value(rules),
+       createdAt = Value(createdAt);
+  static Insertable<SmartPlaylist> custom({
+    Expression<int>? id,
+    Expression<String>? name,
+    Expression<String>? rules,
+    Expression<String>? sort,
+    Expression<int>? limitCount,
+    Expression<int>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (rules != null) 'rules': rules,
+      if (sort != null) 'sort': sort,
+      if (limitCount != null) 'limit_count': limitCount,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  SmartPlaylistsCompanion copyWith({
+    Value<int>? id,
+    Value<String>? name,
+    Value<String>? rules,
+    Value<String?>? sort,
+    Value<int?>? limitCount,
+    Value<int>? createdAt,
+  }) {
+    return SmartPlaylistsCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      rules: rules ?? this.rules,
+      sort: sort ?? this.sort,
+      limitCount: limitCount ?? this.limitCount,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (rules.present) {
+      map['rules'] = Variable<String>(rules.value);
+    }
+    if (sort.present) {
+      map['sort'] = Variable<String>(sort.value);
+    }
+    if (limitCount.present) {
+      map['limit_count'] = Variable<int>(limitCount.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SmartPlaylistsCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('rules: $rules, ')
+          ..write('sort: $sort, ')
+          ..write('limitCount: $limitCount, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $UserTagsTable extends UserTags with TableInfo<$UserTagsTable, UserTag> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $UserTagsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL UNIQUE COLLATE NOCASE',
+  );
+  static const VerificationMeta _colorMeta = const VerificationMeta('color');
+  @override
+  late final GeneratedColumn<int> color = GeneratedColumn<int>(
+    'color',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, name, color];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'user_tags';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<UserTag> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('color')) {
+      context.handle(
+        _colorMeta,
+        color.isAcceptableOrUnknown(data['color']!, _colorMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  UserTag map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return UserTag(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      color: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}color'],
+      ),
+    );
+  }
+
+  @override
+  $UserTagsTable createAlias(String alias) {
+    return $UserTagsTable(attachedDatabase, alias);
+  }
+}
+
+class UserTag extends DataClass implements Insertable<UserTag> {
+  final int id;
+  final String name;
+
+  /// Index of one of the eight accent tokens; null = none.
+  final int? color;
+  const UserTag({required this.id, required this.name, this.color});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['name'] = Variable<String>(name);
+    if (!nullToAbsent || color != null) {
+      map['color'] = Variable<int>(color);
+    }
+    return map;
+  }
+
+  UserTagsCompanion toCompanion(bool nullToAbsent) {
+    return UserTagsCompanion(
+      id: Value(id),
+      name: Value(name),
+      color: color == null && nullToAbsent
+          ? const Value.absent()
+          : Value(color),
+    );
+  }
+
+  factory UserTag.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return UserTag(
+      id: serializer.fromJson<int>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      color: serializer.fromJson<int?>(json['color']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'name': serializer.toJson<String>(name),
+      'color': serializer.toJson<int?>(color),
+    };
+  }
+
+  UserTag copyWith({
+    int? id,
+    String? name,
+    Value<int?> color = const Value.absent(),
+  }) => UserTag(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    color: color.present ? color.value : this.color,
+  );
+  UserTag copyWithCompanion(UserTagsCompanion data) {
+    return UserTag(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      color: data.color.present ? data.color.value : this.color,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('UserTag(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('color: $color')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, name, color);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is UserTag &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.color == this.color);
+}
+
+class UserTagsCompanion extends UpdateCompanion<UserTag> {
+  final Value<int> id;
+  final Value<String> name;
+  final Value<int?> color;
+  const UserTagsCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.color = const Value.absent(),
+  });
+  UserTagsCompanion.insert({
+    this.id = const Value.absent(),
+    required String name,
+    this.color = const Value.absent(),
+  }) : name = Value(name);
+  static Insertable<UserTag> custom({
+    Expression<int>? id,
+    Expression<String>? name,
+    Expression<int>? color,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (color != null) 'color': color,
+    });
+  }
+
+  UserTagsCompanion copyWith({
+    Value<int>? id,
+    Value<String>? name,
+    Value<int?>? color,
+  }) {
+    return UserTagsCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      color: color ?? this.color,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (color.present) {
+      map['color'] = Variable<int>(color.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('UserTagsCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('color: $color')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $TrackTagsTable extends TrackTags
+    with TableInfo<$TrackTagsTable, TrackTag> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $TrackTagsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _trackIdMeta = const VerificationMeta(
+    'trackId',
+  );
+  @override
+  late final GeneratedColumn<int> trackId = GeneratedColumn<int>(
+    'track_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES tracks (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _tagIdMeta = const VerificationMeta('tagId');
+  @override
+  late final GeneratedColumn<int> tagId = GeneratedColumn<int>(
+    'tag_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES user_tags (id) ON DELETE CASCADE',
+    ),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [trackId, tagId];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'track_tags';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<TrackTag> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('track_id')) {
+      context.handle(
+        _trackIdMeta,
+        trackId.isAcceptableOrUnknown(data['track_id']!, _trackIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_trackIdMeta);
+    }
+    if (data.containsKey('tag_id')) {
+      context.handle(
+        _tagIdMeta,
+        tagId.isAcceptableOrUnknown(data['tag_id']!, _tagIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_tagIdMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {trackId, tagId};
+  @override
+  TrackTag map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return TrackTag(
+      trackId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}track_id'],
+      )!,
+      tagId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}tag_id'],
+      )!,
+    );
+  }
+
+  @override
+  $TrackTagsTable createAlias(String alias) {
+    return $TrackTagsTable(attachedDatabase, alias);
+  }
+}
+
+class TrackTag extends DataClass implements Insertable<TrackTag> {
+  final int trackId;
+  final int tagId;
+  const TrackTag({required this.trackId, required this.tagId});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['track_id'] = Variable<int>(trackId);
+    map['tag_id'] = Variable<int>(tagId);
+    return map;
+  }
+
+  TrackTagsCompanion toCompanion(bool nullToAbsent) {
+    return TrackTagsCompanion(trackId: Value(trackId), tagId: Value(tagId));
+  }
+
+  factory TrackTag.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return TrackTag(
+      trackId: serializer.fromJson<int>(json['trackId']),
+      tagId: serializer.fromJson<int>(json['tagId']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'trackId': serializer.toJson<int>(trackId),
+      'tagId': serializer.toJson<int>(tagId),
+    };
+  }
+
+  TrackTag copyWith({int? trackId, int? tagId}) =>
+      TrackTag(trackId: trackId ?? this.trackId, tagId: tagId ?? this.tagId);
+  TrackTag copyWithCompanion(TrackTagsCompanion data) {
+    return TrackTag(
+      trackId: data.trackId.present ? data.trackId.value : this.trackId,
+      tagId: data.tagId.present ? data.tagId.value : this.tagId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TrackTag(')
+          ..write('trackId: $trackId, ')
+          ..write('tagId: $tagId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(trackId, tagId);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is TrackTag &&
+          other.trackId == this.trackId &&
+          other.tagId == this.tagId);
+}
+
+class TrackTagsCompanion extends UpdateCompanion<TrackTag> {
+  final Value<int> trackId;
+  final Value<int> tagId;
+  final Value<int> rowid;
+  const TrackTagsCompanion({
+    this.trackId = const Value.absent(),
+    this.tagId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  TrackTagsCompanion.insert({
+    required int trackId,
+    required int tagId,
+    this.rowid = const Value.absent(),
+  }) : trackId = Value(trackId),
+       tagId = Value(tagId);
+  static Insertable<TrackTag> custom({
+    Expression<int>? trackId,
+    Expression<int>? tagId,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (trackId != null) 'track_id': trackId,
+      if (tagId != null) 'tag_id': tagId,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  TrackTagsCompanion copyWith({
+    Value<int>? trackId,
+    Value<int>? tagId,
+    Value<int>? rowid,
+  }) {
+    return TrackTagsCompanion(
+      trackId: trackId ?? this.trackId,
+      tagId: tagId ?? this.tagId,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (trackId.present) {
+      map['track_id'] = Variable<int>(trackId.value);
+    }
+    if (tagId.present) {
+      map['tag_id'] = Variable<int>(tagId.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TrackTagsCompanion(')
+          ..write('trackId: $trackId, ')
+          ..write('tagId: $tagId, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -4252,6 +5528,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   );
   late final $PlaylistImportItemsTable playlistImportItems =
       $PlaylistImportItemsTable(this);
+  late final $PlaysTable plays = $PlaysTable(this);
+  late final $SmartPlaylistsTable smartPlaylists = $SmartPlaylistsTable(this);
+  late final $UserTagsTable userTags = $UserTagsTable(this);
+  late final $TrackTagsTable trackTags = $TrackTagsTable(this);
   late final Index tracksAlbumKey = Index(
     'tracks_album_key',
     'CREATE INDEX tracks_album_key ON tracks (album_key)',
@@ -4276,6 +5556,14 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     'playlist_tracks_track',
     'CREATE INDEX playlist_tracks_track ON playlist_tracks (track_id)',
   );
+  late final Index playsTrack = Index(
+    'plays_track',
+    'CREATE INDEX plays_track ON plays (track_id)',
+  );
+  late final Index playsAt = Index(
+    'plays_at',
+    'CREATE INDEX plays_at ON plays (played_at)',
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -4287,12 +5575,18 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     playlistTracks,
     playlistImports,
     playlistImportItems,
+    plays,
+    smartPlaylists,
+    userTags,
+    trackTags,
     tracksAlbumKey,
     tracksArtist,
     tracksFavorite,
     tracksMissing,
     tracksTitle,
     playlistTracksTrack,
+    playsTrack,
+    playsAt,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -4330,6 +5624,27 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('playlist_import_items', kind: UpdateKind.update)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'tracks',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('plays', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'tracks',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('track_tags', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'user_tags',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('track_tags', kind: UpdateKind.delete)],
     ),
   ]);
 }
@@ -4450,6 +5765,43 @@ final class $$TracksTableReferences
     final cache = $_typedResult.readTableOrNull(
       _playlistImportItemsRefsTable($_db),
     );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$PlaysTable, List<Play>> _playsRefsTable(
+    _$AppDatabase db,
+  ) => MultiTypedResultKey.fromTable(
+    db.plays,
+    aliasName: 'tracks__id__plays__track_id',
+  );
+
+  $$PlaysTableProcessedTableManager get playsRefs {
+    final manager = $$PlaysTableTableManager(
+      $_db,
+      $_db.plays,
+    ).filter((f) => f.trackId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_playsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$TrackTagsTable, List<TrackTag>>
+  _trackTagsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.trackTags,
+    aliasName: 'tracks__id__track_tags__track_id',
+  );
+
+  $$TrackTagsTableProcessedTableManager get trackTagsRefs {
+    final manager = $$TrackTagsTableTableManager(
+      $_db,
+      $_db.trackTags,
+    ).filter((f) => f.trackId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_trackTagsRefsTable($_db));
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
     );
@@ -4681,6 +6033,56 @@ class $$TracksTableFilterComposer
           }) => $$PlaylistImportItemsTableFilterComposer(
             $db: $db,
             $table: $db.playlistImportItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> playsRefs(
+    Expression<bool> Function($$PlaysTableFilterComposer f) f,
+  ) {
+    final $$PlaysTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.plays,
+      getReferencedColumn: (t) => t.trackId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PlaysTableFilterComposer(
+            $db: $db,
+            $table: $db.plays,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> trackTagsRefs(
+    Expression<bool> Function($$TrackTagsTableFilterComposer f) f,
+  ) {
+    final $$TrackTagsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.trackTags,
+      getReferencedColumn: (t) => t.trackId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TrackTagsTableFilterComposer(
+            $db: $db,
+            $table: $db.trackTags,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -5070,6 +6472,56 @@ class $$TracksTableAnnotationComposer
         );
     return f(composer);
   }
+
+  Expression<T> playsRefs<T extends Object>(
+    Expression<T> Function($$PlaysTableAnnotationComposer a) f,
+  ) {
+    final $$PlaysTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.plays,
+      getReferencedColumn: (t) => t.trackId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PlaysTableAnnotationComposer(
+            $db: $db,
+            $table: $db.plays,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<T> trackTagsRefs<T extends Object>(
+    Expression<T> Function($$TrackTagsTableAnnotationComposer a) f,
+  ) {
+    final $$TrackTagsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.trackTags,
+      getReferencedColumn: (t) => t.trackId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TrackTagsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.trackTags,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$TracksTableTableManager
@@ -5088,6 +6540,8 @@ class $$TracksTableTableManager
           PrefetchHooks Function({
             bool playlistTracksRefs,
             bool playlistImportItemsRefs,
+            bool playsRefs,
+            bool trackTagsRefs,
           })
         > {
   $$TracksTableTableManager(_$AppDatabase db, $TracksTable table)
@@ -5258,12 +6712,19 @@ class $$TracksTableTableManager
               )
               .toList(),
           prefetchHooksCallback:
-              ({playlistTracksRefs = false, playlistImportItemsRefs = false}) {
+              ({
+                playlistTracksRefs = false,
+                playlistImportItemsRefs = false,
+                playsRefs = false,
+                trackTagsRefs = false,
+              }) {
                 return PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [
                     if (playlistTracksRefs) db.playlistTracks,
                     if (playlistImportItemsRefs) db.playlistImportItems,
+                    if (playsRefs) db.plays,
+                    if (trackTagsRefs) db.trackTags,
                   ],
                   addJoins: null,
                   getPrefetchedDataCallback: (items) async {
@@ -5310,6 +6771,40 @@ class $$TracksTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (playsRefs)
+                        await $_getPrefetchedData<Track, $TracksTable, Play>(
+                          currentTable: table,
+                          referencedTable: $$TracksTableReferences
+                              ._playsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$TracksTableReferences(db, table, p0).playsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.trackId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (trackTagsRefs)
+                        await $_getPrefetchedData<
+                          Track,
+                          $TracksTable,
+                          TrackTag
+                        >(
+                          currentTable: table,
+                          referencedTable: $$TracksTableReferences
+                              ._trackTagsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$TracksTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).trackTagsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.trackId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -5333,6 +6828,8 @@ typedef $$TracksTableProcessedTableManager =
       PrefetchHooks Function({
         bool playlistTracksRefs,
         bool playlistImportItemsRefs,
+        bool playsRefs,
+        bool trackTagsRefs,
       })
     >;
 typedef $$FoldersTableCreateCompanionBuilder = FoldersCompanion Function({
@@ -7392,6 +8889,1145 @@ typedef $$PlaylistImportItemsTableProcessedTableManager =
       PlaylistImportItem,
       PrefetchHooks Function({bool importId, bool trackId})
     >;
+typedef $$PlaysTableCreateCompanionBuilder = PlaysCompanion Function({
+  Value<int> id,
+  required int trackId,
+  required int playedAt,
+  Value<int> msPlayed,
+  Value<int?> context,
+  Value<String?> contextName,
+});
+typedef $$PlaysTableUpdateCompanionBuilder = PlaysCompanion Function({
+  Value<int> id,
+  Value<int> trackId,
+  Value<int> playedAt,
+  Value<int> msPlayed,
+  Value<int?> context,
+  Value<String?> contextName,
+});
+
+final class $$PlaysTableReferences
+    extends BaseReferences<_$AppDatabase, $PlaysTable, Play> {
+  $$PlaysTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $TracksTable _trackIdTable(_$AppDatabase db) =>
+      db.tracks.createAlias('plays__track_id__tracks__id');
+
+  $$TracksTableProcessedTableManager get trackId {
+    final $_column = $_itemColumn<int>('track_id')!;
+
+    final manager = $$TracksTableTableManager(
+      $_db,
+      $_db.tracks,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_trackIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$PlaysTableFilterComposer extends Composer<_$AppDatabase, $PlaysTable> {
+  $$PlaysTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get playedAt => $composableBuilder(
+    column: $table.playedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get msPlayed => $composableBuilder(
+    column: $table.msPlayed,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get context => $composableBuilder(
+    column: $table.context,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get contextName => $composableBuilder(
+    column: $table.contextName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$TracksTableFilterComposer get trackId {
+    final $$TracksTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.trackId,
+      referencedTable: $db.tracks,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TracksTableFilterComposer(
+            $db: $db,
+            $table: $db.tracks,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$PlaysTableOrderingComposer
+    extends Composer<_$AppDatabase, $PlaysTable> {
+  $$PlaysTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get playedAt => $composableBuilder(
+    column: $table.playedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get msPlayed => $composableBuilder(
+    column: $table.msPlayed,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get context => $composableBuilder(
+    column: $table.context,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get contextName => $composableBuilder(
+    column: $table.contextName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$TracksTableOrderingComposer get trackId {
+    final $$TracksTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.trackId,
+      referencedTable: $db.tracks,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TracksTableOrderingComposer(
+            $db: $db,
+            $table: $db.tracks,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$PlaysTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PlaysTable> {
+  $$PlaysTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get playedAt =>
+      $composableBuilder(column: $table.playedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get msPlayed =>
+      $composableBuilder(column: $table.msPlayed, builder: (column) => column);
+
+  GeneratedColumn<int> get context =>
+      $composableBuilder(column: $table.context, builder: (column) => column);
+
+  GeneratedColumn<String> get contextName => $composableBuilder(
+    column: $table.contextName,
+    builder: (column) => column,
+  );
+
+  $$TracksTableAnnotationComposer get trackId {
+    final $$TracksTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.trackId,
+      referencedTable: $db.tracks,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TracksTableAnnotationComposer(
+            $db: $db,
+            $table: $db.tracks,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$PlaysTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PlaysTable,
+          Play,
+          $$PlaysTableFilterComposer,
+          $$PlaysTableOrderingComposer,
+          $$PlaysTableAnnotationComposer,
+          $$PlaysTableCreateCompanionBuilder,
+          $$PlaysTableUpdateCompanionBuilder,
+          (Play, $$PlaysTableReferences),
+          Play,
+          PrefetchHooks Function({bool trackId})
+        > {
+  $$PlaysTableTableManager(_$AppDatabase db, $PlaysTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PlaysTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PlaysTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PlaysTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> trackId = const Value.absent(),
+                Value<int> playedAt = const Value.absent(),
+                Value<int> msPlayed = const Value.absent(),
+                Value<int?> context = const Value.absent(),
+                Value<String?> contextName = const Value.absent(),
+              }) => PlaysCompanion(
+                id: id,
+                trackId: trackId,
+                playedAt: playedAt,
+                msPlayed: msPlayed,
+                context: context,
+                contextName: contextName,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int trackId,
+                required int playedAt,
+                Value<int> msPlayed = const Value.absent(),
+                Value<int?> context = const Value.absent(),
+                Value<String?> contextName = const Value.absent(),
+              }) => PlaysCompanion.insert(
+                id: id,
+                trackId: trackId,
+                playedAt: playedAt,
+                msPlayed: msPlayed,
+                context: context,
+                contextName: contextName,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$PlaysTable, Play>(table),
+                  $$PlaysTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({trackId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (trackId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.trackId,
+                        referencedTable: $$PlaysTableReferences._trackIdTable(
+                          db,
+                        ),
+                        referencedColumn: $$PlaysTableReferences
+                            ._trackIdTable(db)
+                            .id,
+                      ) as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$PlaysTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PlaysTable,
+      Play,
+      $$PlaysTableFilterComposer,
+      $$PlaysTableOrderingComposer,
+      $$PlaysTableAnnotationComposer,
+      $$PlaysTableCreateCompanionBuilder,
+      $$PlaysTableUpdateCompanionBuilder,
+      (Play, $$PlaysTableReferences),
+      Play,
+      PrefetchHooks Function({bool trackId})
+    >;
+typedef $$SmartPlaylistsTableCreateCompanionBuilder =
+    SmartPlaylistsCompanion Function({
+      Value<int> id,
+      required String name,
+      required String rules,
+      Value<String?> sort,
+      Value<int?> limitCount,
+      required int createdAt,
+    });
+typedef $$SmartPlaylistsTableUpdateCompanionBuilder =
+    SmartPlaylistsCompanion Function({
+      Value<int> id,
+      Value<String> name,
+      Value<String> rules,
+      Value<String?> sort,
+      Value<int?> limitCount,
+      Value<int> createdAt,
+    });
+
+class $$SmartPlaylistsTableFilterComposer
+    extends Composer<_$AppDatabase, $SmartPlaylistsTable> {
+  $$SmartPlaylistsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get rules => $composableBuilder(
+    column: $table.rules,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sort => $composableBuilder(
+    column: $table.sort,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get limitCount => $composableBuilder(
+    column: $table.limitCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SmartPlaylistsTableOrderingComposer
+    extends Composer<_$AppDatabase, $SmartPlaylistsTable> {
+  $$SmartPlaylistsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get rules => $composableBuilder(
+    column: $table.rules,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sort => $composableBuilder(
+    column: $table.sort,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get limitCount => $composableBuilder(
+    column: $table.limitCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SmartPlaylistsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SmartPlaylistsTable> {
+  $$SmartPlaylistsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get rules =>
+      $composableBuilder(column: $table.rules, builder: (column) => column);
+
+  GeneratedColumn<String> get sort =>
+      $composableBuilder(column: $table.sort, builder: (column) => column);
+
+  GeneratedColumn<int> get limitCount => $composableBuilder(
+    column: $table.limitCount,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$SmartPlaylistsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SmartPlaylistsTable,
+          SmartPlaylist,
+          $$SmartPlaylistsTableFilterComposer,
+          $$SmartPlaylistsTableOrderingComposer,
+          $$SmartPlaylistsTableAnnotationComposer,
+          $$SmartPlaylistsTableCreateCompanionBuilder,
+          $$SmartPlaylistsTableUpdateCompanionBuilder,
+          (
+            SmartPlaylist,
+            BaseReferences<_$AppDatabase, $SmartPlaylistsTable, SmartPlaylist>,
+          ),
+          SmartPlaylist,
+          PrefetchHooks Function()
+        > {
+  $$SmartPlaylistsTableTableManager(
+    _$AppDatabase db,
+    $SmartPlaylistsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SmartPlaylistsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SmartPlaylistsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SmartPlaylistsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String> rules = const Value.absent(),
+                Value<String?> sort = const Value.absent(),
+                Value<int?> limitCount = const Value.absent(),
+                Value<int> createdAt = const Value.absent(),
+              }) => SmartPlaylistsCompanion(
+                id: id,
+                name: name,
+                rules: rules,
+                sort: sort,
+                limitCount: limitCount,
+                createdAt: createdAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String name,
+                required String rules,
+                Value<String?> sort = const Value.absent(),
+                Value<int?> limitCount = const Value.absent(),
+                required int createdAt,
+              }) => SmartPlaylistsCompanion.insert(
+                id: id,
+                name: name,
+                rules: rules,
+                sort: sort,
+                limitCount: limitCount,
+                createdAt: createdAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$SmartPlaylistsTable, SmartPlaylist>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $SmartPlaylistsTable,
+                    SmartPlaylist
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SmartPlaylistsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SmartPlaylistsTable,
+      SmartPlaylist,
+      $$SmartPlaylistsTableFilterComposer,
+      $$SmartPlaylistsTableOrderingComposer,
+      $$SmartPlaylistsTableAnnotationComposer,
+      $$SmartPlaylistsTableCreateCompanionBuilder,
+      $$SmartPlaylistsTableUpdateCompanionBuilder,
+      (
+        SmartPlaylist,
+        BaseReferences<_$AppDatabase, $SmartPlaylistsTable, SmartPlaylist>,
+      ),
+      SmartPlaylist,
+      PrefetchHooks Function()
+    >;
+typedef $$UserTagsTableCreateCompanionBuilder = UserTagsCompanion Function({
+  Value<int> id,
+  required String name,
+  Value<int?> color,
+});
+typedef $$UserTagsTableUpdateCompanionBuilder = UserTagsCompanion Function({
+  Value<int> id,
+  Value<String> name,
+  Value<int?> color,
+});
+
+final class $$UserTagsTableReferences
+    extends BaseReferences<_$AppDatabase, $UserTagsTable, UserTag> {
+  $$UserTagsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$TrackTagsTable, List<TrackTag>>
+  _trackTagsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.trackTags,
+    aliasName: 'user_tags__id__track_tags__tag_id',
+  );
+
+  $$TrackTagsTableProcessedTableManager get trackTagsRefs {
+    final manager = $$TrackTagsTableTableManager(
+      $_db,
+      $_db.trackTags,
+    ).filter((f) => f.tagId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_trackTagsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$UserTagsTableFilterComposer
+    extends Composer<_$AppDatabase, $UserTagsTable> {
+  $$UserTagsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get color => $composableBuilder(
+    column: $table.color,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  Expression<bool> trackTagsRefs(
+    Expression<bool> Function($$TrackTagsTableFilterComposer f) f,
+  ) {
+    final $$TrackTagsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.trackTags,
+      getReferencedColumn: (t) => t.tagId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TrackTagsTableFilterComposer(
+            $db: $db,
+            $table: $db.trackTags,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$UserTagsTableOrderingComposer
+    extends Composer<_$AppDatabase, $UserTagsTable> {
+  $$UserTagsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get color => $composableBuilder(
+    column: $table.color,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$UserTagsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $UserTagsTable> {
+  $$UserTagsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<int> get color =>
+      $composableBuilder(column: $table.color, builder: (column) => column);
+
+  Expression<T> trackTagsRefs<T extends Object>(
+    Expression<T> Function($$TrackTagsTableAnnotationComposer a) f,
+  ) {
+    final $$TrackTagsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.trackTags,
+      getReferencedColumn: (t) => t.tagId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TrackTagsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.trackTags,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$UserTagsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $UserTagsTable,
+          UserTag,
+          $$UserTagsTableFilterComposer,
+          $$UserTagsTableOrderingComposer,
+          $$UserTagsTableAnnotationComposer,
+          $$UserTagsTableCreateCompanionBuilder,
+          $$UserTagsTableUpdateCompanionBuilder,
+          (UserTag, $$UserTagsTableReferences),
+          UserTag,
+          PrefetchHooks Function({bool trackTagsRefs})
+        > {
+  $$UserTagsTableTableManager(_$AppDatabase db, $UserTagsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$UserTagsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$UserTagsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$UserTagsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            Value<String> name = const Value.absent(),
+            Value<int?> color = const Value.absent(),
+          }) => UserTagsCompanion(id: id, name: name, color: color),
+          createCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            required String name,
+            Value<int?> color = const Value.absent(),
+          }) => UserTagsCompanion.insert(id: id, name: name, color: color),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$UserTagsTable, UserTag>(table),
+                  $$UserTagsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({trackTagsRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [if (trackTagsRefs) db.trackTags],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (trackTagsRefs)
+                    await $_getPrefetchedData<
+                      UserTag,
+                      $UserTagsTable,
+                      TrackTag
+                    >(
+                      currentTable: table,
+                      referencedTable: $$UserTagsTableReferences
+                          ._trackTagsRefsTable(db),
+                      managerFromTypedResult: (p0) => $$UserTagsTableReferences(
+                        db,
+                        table,
+                        p0,
+                      ).trackTagsRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where((e) => e.tagId == item.id),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$UserTagsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $UserTagsTable,
+      UserTag,
+      $$UserTagsTableFilterComposer,
+      $$UserTagsTableOrderingComposer,
+      $$UserTagsTableAnnotationComposer,
+      $$UserTagsTableCreateCompanionBuilder,
+      $$UserTagsTableUpdateCompanionBuilder,
+      (UserTag, $$UserTagsTableReferences),
+      UserTag,
+      PrefetchHooks Function({bool trackTagsRefs})
+    >;
+typedef $$TrackTagsTableCreateCompanionBuilder = TrackTagsCompanion Function({
+  required int trackId,
+  required int tagId,
+  Value<int> rowid,
+});
+typedef $$TrackTagsTableUpdateCompanionBuilder = TrackTagsCompanion Function({
+  Value<int> trackId,
+  Value<int> tagId,
+  Value<int> rowid,
+});
+
+final class $$TrackTagsTableReferences
+    extends BaseReferences<_$AppDatabase, $TrackTagsTable, TrackTag> {
+  $$TrackTagsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $TracksTable _trackIdTable(_$AppDatabase db) =>
+      db.tracks.createAlias('track_tags__track_id__tracks__id');
+
+  $$TracksTableProcessedTableManager get trackId {
+    final $_column = $_itemColumn<int>('track_id')!;
+
+    final manager = $$TracksTableTableManager(
+      $_db,
+      $_db.tracks,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_trackIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $UserTagsTable _tagIdTable(_$AppDatabase db) =>
+      db.userTags.createAlias('track_tags__tag_id__user_tags__id');
+
+  $$UserTagsTableProcessedTableManager get tagId {
+    final $_column = $_itemColumn<int>('tag_id')!;
+
+    final manager = $$UserTagsTableTableManager(
+      $_db,
+      $_db.userTags,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_tagIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$TrackTagsTableFilterComposer
+    extends Composer<_$AppDatabase, $TrackTagsTable> {
+  $$TrackTagsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  $$TracksTableFilterComposer get trackId {
+    final $$TracksTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.trackId,
+      referencedTable: $db.tracks,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TracksTableFilterComposer(
+            $db: $db,
+            $table: $db.tracks,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$UserTagsTableFilterComposer get tagId {
+    final $$UserTagsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.tagId,
+      referencedTable: $db.userTags,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UserTagsTableFilterComposer(
+            $db: $db,
+            $table: $db.userTags,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$TrackTagsTableOrderingComposer
+    extends Composer<_$AppDatabase, $TrackTagsTable> {
+  $$TrackTagsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  $$TracksTableOrderingComposer get trackId {
+    final $$TracksTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.trackId,
+      referencedTable: $db.tracks,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TracksTableOrderingComposer(
+            $db: $db,
+            $table: $db.tracks,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$UserTagsTableOrderingComposer get tagId {
+    final $$UserTagsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.tagId,
+      referencedTable: $db.userTags,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UserTagsTableOrderingComposer(
+            $db: $db,
+            $table: $db.userTags,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$TrackTagsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $TrackTagsTable> {
+  $$TrackTagsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  $$TracksTableAnnotationComposer get trackId {
+    final $$TracksTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.trackId,
+      referencedTable: $db.tracks,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TracksTableAnnotationComposer(
+            $db: $db,
+            $table: $db.tracks,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$UserTagsTableAnnotationComposer get tagId {
+    final $$UserTagsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.tagId,
+      referencedTable: $db.userTags,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UserTagsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.userTags,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$TrackTagsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $TrackTagsTable,
+          TrackTag,
+          $$TrackTagsTableFilterComposer,
+          $$TrackTagsTableOrderingComposer,
+          $$TrackTagsTableAnnotationComposer,
+          $$TrackTagsTableCreateCompanionBuilder,
+          $$TrackTagsTableUpdateCompanionBuilder,
+          (TrackTag, $$TrackTagsTableReferences),
+          TrackTag,
+          PrefetchHooks Function({bool trackId, bool tagId})
+        > {
+  $$TrackTagsTableTableManager(_$AppDatabase db, $TrackTagsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$TrackTagsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$TrackTagsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$TrackTagsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> trackId = const Value.absent(),
+                Value<int> tagId = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => TrackTagsCompanion(
+                trackId: trackId,
+                tagId: tagId,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required int trackId,
+                required int tagId,
+                Value<int> rowid = const Value.absent(),
+              }) => TrackTagsCompanion.insert(
+                trackId: trackId,
+                tagId: tagId,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$TrackTagsTable, TrackTag>(table),
+                  $$TrackTagsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({trackId = false, tagId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (trackId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.trackId,
+                        referencedTable: $$TrackTagsTableReferences
+                            ._trackIdTable(db),
+                        referencedColumn: $$TrackTagsTableReferences
+                            ._trackIdTable(db)
+                            .id,
+                      ) as T;
+                    }
+                    if (tagId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.tagId,
+                        referencedTable: $$TrackTagsTableReferences._tagIdTable(
+                          db,
+                        ),
+                        referencedColumn: $$TrackTagsTableReferences
+                            ._tagIdTable(db)
+                            .id,
+                      ) as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$TrackTagsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $TrackTagsTable,
+      TrackTag,
+      $$TrackTagsTableFilterComposer,
+      $$TrackTagsTableOrderingComposer,
+      $$TrackTagsTableAnnotationComposer,
+      $$TrackTagsTableCreateCompanionBuilder,
+      $$TrackTagsTableUpdateCompanionBuilder,
+      (TrackTag, $$TrackTagsTableReferences),
+      TrackTag,
+      PrefetchHooks Function({bool trackId, bool tagId})
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -7408,4 +10044,12 @@ class $AppDatabaseManager {
       $$PlaylistImportsTableTableManager(_db, _db.playlistImports);
   $$PlaylistImportItemsTableTableManager get playlistImportItems =>
       $$PlaylistImportItemsTableTableManager(_db, _db.playlistImportItems);
+  $$PlaysTableTableManager get plays =>
+      $$PlaysTableTableManager(_db, _db.plays);
+  $$SmartPlaylistsTableTableManager get smartPlaylists =>
+      $$SmartPlaylistsTableTableManager(_db, _db.smartPlaylists);
+  $$UserTagsTableTableManager get userTags =>
+      $$UserTagsTableTableManager(_db, _db.userTags);
+  $$TrackTagsTableTableManager get trackTags =>
+      $$TrackTagsTableTableManager(_db, _db.trackTags);
 }
