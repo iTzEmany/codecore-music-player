@@ -1739,4 +1739,18 @@ class AppLocalizationsIt extends AppLocalizations {
   String etaHours(int hours, int minutes) {
     return 'circa $hours h $minutes min';
   }
+
+  @override
+  String get csvImportOwnFolder => 'Cartella per questa playlist';
+
+  @override
+  String get csvImportOwnFolderHint =>
+      'Salva i brani scaricati in una sottocartella col nome della playlist';
+
+  @override
+  String get csvImportNumberFiles => 'Numera i file';
+
+  @override
+  String get csvImportNumberFilesHint =>
+      '07 - Artista - Titolo: la cartella si ascolta nell\'ordine giusto anche fuori da Codecore';
 }

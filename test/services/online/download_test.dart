@@ -227,4 +227,23 @@ void main() {
       expect(make(0).q.maxParallel, 1);
     });
   });
+
+  test('subdir sends the download to a sanitised sub-folder', () async {
+    final seen = <String>[];
+    final root = Directory.systemTemp.createTempSync('cc_sub');
+    addTearDown(() => root.deleteSync(recursive: true));
+    final q = DownloadQueue(
+      downloader: (res, dir, cancel) async* {
+        seen.add(dir.path);
+        yield DownloadProgress(received: 1, total: 1, path: '${dir.path}/x');
+      },
+      outDir: () async => root,
+      onChanged: (_) {},
+    );
+    q.add(const YtResult(
+        id: 'a', title: 't', channel: 'c', duration: null, subdir: 'Road/Trip: 2026'));
+    q.add(const YtResult(id: 'b', title: 't', channel: 'c', duration: null));
+    await Future<void>.delayed(const Duration(milliseconds: 100));
+    expect(seen, ['${root.path}/RoadTrip 2026', root.path]);
+  });
 }

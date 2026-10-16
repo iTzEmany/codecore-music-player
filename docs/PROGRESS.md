@@ -188,7 +188,7 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 15.6 Anteprima degli abbinamenti e «solo collega»
 - [x] 15.7 Soglie regolabili e CSV grandi
 - [x] 15.8 Contatore e tempo residuo
-- [ ] 15.9 Cartella dedicata e file numerati
+- [x] 15.9 Cartella dedicata e file numerati
 - [ ] 15.10 Copertine dal CSV ed esito esportabile
 - [ ] 15.11 Sincronizza da CSV
 - [ ] 15.12 Importazione per album intero
@@ -418,6 +418,8 @@ L'agente riparte sempre dal primo task non spuntato.
 - 15.7: `MatchThresholds` (sure/review, `clamped()`: review ≤ sure − 0,05, limiti 0,30–0,98) passate a `decide`; il motore le rilegge a ogni ricerca (`thresholds:`), le Impostazioni → **Avanzate** (`AdvancedSettingsTiles`) hanno due cursori e «Ripristina». Oltre 200 brani da scaricare l'anteprima propone **blocchi da 100** (acceso di default): `start(blockSize:)` crea più importazioni (`Nome (1/3)`…) con i numeri di riga originali; i blocchi 2..n nascono **in pausa** e partono quando il precedente finisce (catena in memoria: dopo un riavvio restano in pausa e si riprendono a mano). Stima oltre 60 min in «h min». Bug trovato e corretto: `_loop` terminava appena un blocco finiva, senza vedere il successivo (`_checkFinished` ora restituisce bool).
 
 - 15.8: `EtaEstimator` (media mobile esponenziale degli intervalli tra due righe concluse; righe collegate escluse; pausa non conteggiata; stima dopo 3 campioni) tenuto per importazione nel motore (`etaFor`); «circa 18 min» nella riga del Centro Attività e nel banner (`etaLabel`, 4 lingue). Solo a importazione in corso, non in pausa.
+
+- 15.9: `YtResult.subdir` (la coda scarica in `<cartella>/<sottocartella sanificata>`; `scanFiles` accetta percorsi in sottocartelle) e `importDownloadName` (`NN - Artista - Titolo`, larghezza = cifre del **massimo indice di riga di tutte le importazioni della playlist**, minimo 2, così i blocchi condividono la stessa larghezza). Interruttori «Cartella per questa playlist» (nome = quello della playlist) e «Numera i file» nell'anteprima.
 
 ## Note di deviazione (Fase 12)
 - 12.1 (2026-10-16): CSV vero = `Just_a_mood.csv` (34 brani; intestazioni `Track URI, ISRC, Track Name, Album Name, Artist Name(s), …, Duration (ms)`; **più artisti separati da `;`**). yt-dlp di sistema 2024.04.09 NON legge più YouTube («Please sign in»): provato con yt-dlp 2026.08.19 (binario standalone). `https://music.youtube.com/search?q=…#songs` funziona; in modalità flat dà ~460 voci con solo `id`/`title` (nessuna durata), **senza `--flat-playlist` e con `--playlist-items 1-5`** ogni voce ha `channel`, `artists[]`, `track`, `album`, `duration` in ~5–8 s → si usa quella. `YtResult` guadagna `artists` e `album`.

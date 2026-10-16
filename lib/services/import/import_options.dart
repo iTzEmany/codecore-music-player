@@ -1,3 +1,5 @@
+import '../../core/import_row.dart';
+
 /// What the user chose in the preview, stored with the import.
 class ImportOptions {
   const ImportOptions({
@@ -32,4 +34,14 @@ abstract final class ImportNote {
   static const youtubeOff = 'youtube_off';
   static const downloadFailed = 'download_failed';
   static const lengthOff = 'length_off';
+}
+
+/// File name (no extension) of a row: `Artist - Title`, or with its position
+/// `007 - Artist - Title` so a folder plays in playlist order in any player.
+/// [total] fixes the width of the number (at least two digits).
+String importDownloadName(ImportRow row, {required bool number, required int total}) {
+  final base = '${row.artistLine} - ${row.title}';
+  if (!number) return base;
+  final width = total.toString().length < 2 ? 2 : total.toString().length;
+  return '${(row.index + 1).toString().padLeft(width, '0')} - $base';
 }

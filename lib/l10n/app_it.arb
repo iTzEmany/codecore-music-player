@@ -1150,5 +1150,9 @@
         "type": "int"
       }
     }
-  }
+  },
+  "csvImportOwnFolder": "Cartella per questa playlist",
+  "csvImportOwnFolderHint": "Salva i brani scaricati in una sottocartella col nome della playlist",
+  "csvImportNumberFiles": "Numera i file",
+  "csvImportNumberFilesHint": "07 - Artista - Titolo: la cartella si ascolta nell'ordine giusto anche fuori da Codecore"
 }

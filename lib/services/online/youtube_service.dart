@@ -16,6 +16,7 @@ class YtResult {
     this.artists = const [],
     this.album,
     this.downloadName,
+    this.subdir,
   });
 
   final String id, title, channel;
@@ -29,6 +30,9 @@ class YtResult {
   /// File base name to use instead of the one derived from title and channel
   /// (CSV imports name files after the Spotify title and artist).
   final String? downloadName;
+
+  /// Sub-folder of the download folder to save into (a playlist's own folder).
+  final String? subdir;
 }
 
 /// `mp3` = convert to MP3 256 kbps; `original` = keep the audio as served.

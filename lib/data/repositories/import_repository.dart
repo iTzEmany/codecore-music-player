@@ -223,4 +223,16 @@ class ImportRepository {
       for (final r in rows) r.read<int>('track_id'): r.read<String>('isrc'),
     };
   }
+
+  /// Highest row number over every import of [playlistId] (blocks included),
+  /// to size the numbers in file names; -1 when there are none.
+  Future<int> maxRowIndexForPlaylist(int playlistId) async {
+    final r = await _db.customSelect(
+      'SELECT MAX(i.row_index) AS m FROM playlist_import_items i '
+      'JOIN playlist_imports m ON m.id = i.import_id WHERE m.playlist_id = ?',
+      variables: [Variable<int>(playlistId)],
+      readsFrom: {_db.playlistImportItems, _db.playlistImports},
+    ).getSingle();
+    return r.read<int?>('m') ?? -1;
+  }
 }

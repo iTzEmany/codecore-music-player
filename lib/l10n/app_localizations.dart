@@ -3065,6 +3065,30 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'circa {hours} h {minutes} min'**
   String etaHours(int hours, int minutes);
+
+  /// No description provided for @csvImportOwnFolder.
+  ///
+  /// In it, this message translates to:
+  /// **'Cartella per questa playlist'**
+  String get csvImportOwnFolder;
+
+  /// No description provided for @csvImportOwnFolderHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Salva i brani scaricati in una sottocartella col nome della playlist'**
+  String get csvImportOwnFolderHint;
+
+  /// No description provided for @csvImportNumberFiles.
+  ///
+  /// In it, this message translates to:
+  /// **'Numera i file'**
+  String get csvImportNumberFiles;
+
+  /// No description provided for @csvImportNumberFilesHint.
+  ///
+  /// In it, this message translates to:
+  /// **'07 - Artista - Titolo: la cartella si ascolta nell\'ordine giusto anche fuori da Codecore'**
+  String get csvImportNumberFilesHint;
 }
 
 class _AppLocalizationsDelegate

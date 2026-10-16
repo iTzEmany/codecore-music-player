@@ -2,8 +2,10 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:path/path.dart' as p;
 
 import '../../core/app_log.dart';
+import '../../core/text_utils.dart';
 import 'retry_policy.dart';
 import 'youtube_service.dart';
 
@@ -210,12 +212,16 @@ class DownloadQueue {
       }
       var lastEmit = DateTime.fromMillisecondsSinceEpoch(0);
       String? path;
-      await for (final p in downloader(item.result, dir, token)) {
-        if (p.path != null) path = p.path;
+      final sub = item.result.subdir;
+      final target = sub == null || sanitizeFileName(sub) == 'track'
+          ? dir
+          : Directory(p.join(dir.path, sanitizeFileName(sub)));
+      await for (final prog in downloader(item.result, target, token)) {
+        if (prog.path != null) path = prog.path;
         final now = DateTime.now();
         if (now.difference(lastEmit) >= uiInterval) {
           lastEmit = now;
-          _replace(item.id, (e) => e.copyWith(progress: p.fraction));
+          _replace(item.id, (e) => e.copyWith(progress: prog.fraction));
           _emit();
         }
       }

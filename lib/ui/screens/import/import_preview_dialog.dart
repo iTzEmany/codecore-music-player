@@ -50,6 +50,8 @@ class _State extends State<ImportPreviewDialog> {
   bool _linkOnly = false;
   late bool _blocks = (widget.csv.rows.length - widget.known) > bigImportRows;
   bool _planFirst = false;
+  bool _ownFolder = false;
+  bool _numberFiles = false;
 
   @override
   void dispose() {
@@ -125,7 +127,7 @@ class _State extends State<ImportPreviewDialog> {
                 value: _linkOnly,
                 onChanged: (v) => setState(() => _linkOnly = v),
               ),
-              if (!_linkOnly)
+              if (!_linkOnly) ...[
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
                   title: Text(l.csvImportPlanFirst),
@@ -133,6 +135,21 @@ class _State extends State<ImportPreviewDialog> {
                   value: _planFirst,
                   onChanged: (v) => setState(() => _planFirst = v),
                 ),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(l.csvImportOwnFolder),
+                  subtitle: Text(l.csvImportOwnFolderHint),
+                  value: _ownFolder,
+                  onChanged: (v) => setState(() => _ownFolder = v),
+                ),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(l.csvImportNumberFiles),
+                  subtitle: Text(l.csvImportNumberFilesHint),
+                  value: _numberFiles,
+                  onChanged: (v) => setState(() => _numberFiles = v),
+                ),
+              ],
             ],
             if (same != null) ...[
               const SizedBox(height: 16),
@@ -175,6 +192,10 @@ class _State extends State<ImportPreviewDialog> {
                     ImportOptions(
                       linkOnly: _linkOnly,
                       planFirst: _planFirst && !_linkOnly,
+                      folderPath: _ownFolder && !_linkOnly
+                          ? _name.text.trim()
+                          : null,
+                      numberFiles: _numberFiles && !_linkOnly,
                     ),
                     todo > bigImportRows && _blocks && !_linkOnly
                         ? importBlockSize

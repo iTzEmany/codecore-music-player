@@ -959,5 +959,9 @@
         "type": "int"
       }
     }
-  }
+  },
+  "csvImportOwnFolder": "Folder for this playlist",
+  "csvImportOwnFolderHint": "Saves the downloads in a sub-folder named after the playlist",
+  "csvImportNumberFiles": "Number the files",
+  "csvImportNumberFilesHint": "07 - Artist - Title: the folder plays in the right order even outside Codecore"
 }

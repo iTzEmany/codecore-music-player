@@ -613,6 +613,49 @@ void main() {
     });
   });
 
+  group('folder and numbered file names', () {
+    ImportRow nth(int i) =>
+        ImportRow(index: i, title: 'Song', artists: const ['Band']);
+
+    test('importDownloadName: width follows the total, at least two digits', () {
+      expect(importDownloadName(nth(6), number: true, total: 34), '07 - Band - Song');
+      expect(importDownloadName(nth(6), number: true, total: 120), '007 - Band - Song');
+      expect(importDownloadName(nth(0), number: true, total: 5), '01 - Band - Song');
+      expect(importDownloadName(nth(6), number: false, total: 120), 'Band - Song');
+    });
+
+    test('the queued download carries the number and the folder', () async {
+      yt.songs['one'] = [topic('v1', 'One', 'Band', 200)];
+      final rows = [row(0, 'One', 'Band', 200)];
+      final id = await service.start(csv(rows),
+          options: const ImportOptions(numberFiles: true, folderPath: 'Mood'));
+      await idle();
+      expect(queued.single.$1.downloadName, '01 - Band - One');
+      expect(queued.single.$1.subdir, 'Mood');
+      expect((await imports.get(id))!.folderPath, 'Mood');
+    });
+
+    test('without options the name and folder are as before', () async {
+      yt.songs['one'] = [topic('v1', 'One', 'Band', 200)];
+      await service.start(csv([row(0, 'One', 'Band', 200)]));
+      await idle();
+      expect(queued.single.$1.downloadName, 'Band - One');
+      expect(queued.single.$1.subdir, isNull);
+    });
+
+    test('blocks share one number width, sized on the whole playlist', () async {
+      yt.songs['song'] = [topic('v', 'Song 0', 'Band', 200)];
+      final first = await service.start(
+          csv([for (var i = 0; i < 120; i++) row(i, 'Song $i', 'Band', 200)]),
+          options: const ImportOptions(numberFiles: true, planFirst: true),
+          blockSize: 40);
+      await service.cancel(first);
+      expect(await imports.maxRowIndexForPlaylist(
+              (await imports.get(first))!.playlistId),
+          119);
+    });
+  });
+
   test('tag parsing', () {
     expect(parseImportTag('import:3:12'), (3, 12));
     expect(parseImportTag('other'), isNull);

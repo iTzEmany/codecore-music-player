@@ -1735,4 +1735,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String etaHours(int hours, int minutes) {
     return 'about $hours h $minutes min';
   }
+
+  @override
+  String get csvImportOwnFolder => 'Folder for this playlist';
+
+  @override
+  String get csvImportOwnFolderHint =>
+      'Saves the downloads in a sub-folder named after the playlist';
+
+  @override
+  String get csvImportNumberFiles => 'Number the files';
+
+  @override
+  String get csvImportNumberFilesHint =>
+      '07 - Artist - Title: the folder plays in the right order even outside Codecore';
 }

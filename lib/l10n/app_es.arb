@@ -959,5 +959,9 @@
         "type": "int"
       }
     }
-  }
+  },
+  "csvImportOwnFolder": "Carpeta para esta lista",
+  "csvImportOwnFolderHint": "Guarda las descargas en una subcarpeta con el nombre de la lista",
+  "csvImportNumberFiles": "Numerar los archivos",
+  "csvImportNumberFilesHint": "07 - Artista - Título: la carpeta suena en el orden correcto incluso fuera de Codecore"
 }

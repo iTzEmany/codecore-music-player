@@ -504,6 +504,10 @@ class PlaylistImportService {
         return;
       }
     }
+    final imp = await imports.get(importId);
+    final total = imp == null || !imp.numberFiles
+        ? 0
+        : await imports.maxRowIndexForPlaylist(imp.playlistId) + 1;
     await imports.setItem(importId, row.index,
         status: ImportItemStatus.queued,
         videoId: Value(r.id),
@@ -518,7 +522,9 @@ class PlaylistImportService {
         thumbnailUrl: r.thumbnailUrl,
         artists: r.artists,
         album: r.album,
-        downloadName: '${row.artistLine} - ${row.title}',
+        downloadName: importDownloadName(row,
+            number: imp?.numberFiles ?? false, total: total),
+        subdir: imp?.folderPath,
       ),
       importTag(importId, row.index),
     );

@@ -959,5 +959,9 @@
         "type": "int"
       }
     }
-  }
+  },
+  "csvImportOwnFolder": "Ordner für diese Playlist",
+  "csvImportOwnFolderHint": "Speichert die Downloads in einem Unterordner mit dem Namen der Playlist",
+  "csvImportNumberFiles": "Dateien nummerieren",
+  "csvImportNumberFilesHint": "07 - Interpret - Titel: der Ordner spielt auch außerhalb von Codecore in der richtigen Reihenfolge"
 }
