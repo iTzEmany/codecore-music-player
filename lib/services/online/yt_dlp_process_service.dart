@@ -83,9 +83,16 @@ YtException ytExceptionFromStderr(String err) {
 }
 
 class YtDlpProcessService implements YoutubeService {
-  YtDlpProcessService({String? executable}) : _exe = executable ?? 'yt-dlp';
+  /// [locate] picks the binary to run (first call only); without it, and
+  /// without [executable], `yt-dlp` is taken from the PATH.
+  YtDlpProcessService({this.executable, this.locate});
 
-  final String _exe;
+  final String? executable;
+  final Future<String?> Function()? locate;
+  Future<String>? _resolved;
+
+  Future<String> get _exe => _resolved ??=
+      Future(() async => executable ?? await locate?.call() ?? 'yt-dlp');
   List<String>? _jsRuntimeArgs;
   bool? _hasFfmpeg;
 
@@ -115,10 +122,16 @@ class YtDlpProcessService implements YoutubeService {
 
   Future<String?>? _version;
 
+  /// Forget the located binary and its version (after an in-app update).
+  void refresh() {
+    _resolved = null;
+    _version = null;
+  }
+
   @override
   Future<String?> toolVersion() => _version ??= () async {
         try {
-          final r = await Process.run(_exe, ['--version']);
+          final r = await Process.run(await _exe, ['--version']);
           if (r.exitCode != 0) return null;
           return '${r.stdout}'.trim().split('\n').first.trim();
         } on ProcessException {
@@ -138,7 +151,7 @@ class YtDlpProcessService implements YoutubeService {
   }
 
   Future<void> _ensureTool() async {
-    if (!await _exists(_exe)) {
+    if (!await _exists(await _exe)) {
       throw const YtException(YtErrorKind.toolMissing, 'yt-dlp');
     }
   }
@@ -155,7 +168,7 @@ class YtDlpProcessService implements YoutubeService {
       if (isUrl) '--no-playlist' else '--flat-playlist',
       isUrl ? q : 'ytsearch10:$q',
     ];
-    final r = await Process.run(_exe, args,
+    final r = await Process.run(await _exe, args,
         stdoutEncoding: utf8, stderrEncoding: utf8);
     if (r.exitCode != 0) throw await _explain(r.stderr);
     try {
@@ -172,7 +185,7 @@ class YtDlpProcessService implements YoutubeService {
     if (q.isEmpty) return const [];
     await _ensureTool();
     final r = await Process.run(
-        _exe,
+        await _exe,
         [
           '-J',
           '--no-warnings',
@@ -219,7 +232,7 @@ class YtDlpProcessService implements YoutubeService {
       '$stem.%(ext)s',
       'https://www.youtube.com/watch?v=${r.id}',
     ];
-    final proc = await Process.start(_exe, args);
+    final proc = await Process.start(await _exe, args);
     final err = StringBuffer();
     proc.stderr.transform(utf8.decoder).listen(err.write);
     final lines =

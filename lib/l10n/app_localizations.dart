@@ -2777,6 +2777,66 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'yt-dlp {version} è troppo vecchio: i download potrebbero non funzionare'**
   String ytDlpOutdatedBanner(String version);
+
+  /// No description provided for @settingsDownloads.
+  ///
+  /// In it, this message translates to:
+  /// **'Download'**
+  String get settingsDownloads;
+
+  /// No description provided for @ytDlpVersion.
+  ///
+  /// In it, this message translates to:
+  /// **'yt-dlp {version}'**
+  String ytDlpVersion(String version);
+
+  /// No description provided for @ytDlpUnknownVersion.
+  ///
+  /// In it, this message translates to:
+  /// **'yt-dlp non trovato'**
+  String get ytDlpUnknownVersion;
+
+  /// No description provided for @ytDlpUpdate.
+  ///
+  /// In it, this message translates to:
+  /// **'Aggiorna'**
+  String get ytDlpUpdate;
+
+  /// No description provided for @ytDlpUpdating.
+  ///
+  /// In it, this message translates to:
+  /// **'Aggiornamento… {percent}%'**
+  String ytDlpUpdating(int percent);
+
+  /// No description provided for @ytDlpUpdated.
+  ///
+  /// In it, this message translates to:
+  /// **'Aggiornato alla versione {version}'**
+  String ytDlpUpdated(String version);
+
+  /// No description provided for @ytDlpTooOld.
+  ///
+  /// In it, this message translates to:
+  /// **'Troppo vecchio: tocca Aggiorna'**
+  String get ytDlpTooOld;
+
+  /// No description provided for @ytDlpUpdateErrNetwork.
+  ///
+  /// In it, this message translates to:
+  /// **'Aggiornamento non riuscito: rete non raggiungibile'**
+  String get ytDlpUpdateErrNetwork;
+
+  /// No description provided for @ytDlpUpdateErrHash.
+  ///
+  /// In it, this message translates to:
+  /// **'Aggiornamento annullato: il file scaricato non ha superato il controllo di integrità'**
+  String get ytDlpUpdateErrHash;
+
+  /// No description provided for @ytDlpUpdateErrOther.
+  ///
+  /// In it, this message translates to:
+  /// **'Aggiornamento non riuscito (dettagli nel log)'**
+  String get ytDlpUpdateErrOther;
 }
 
 class _AppLocalizationsDelegate

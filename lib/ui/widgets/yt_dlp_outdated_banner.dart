@@ -5,6 +5,8 @@ import '../../core/platform.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../providers/youtube_providers.dart';
 import '../theme/tokens.dart';
+import '../../providers/yt_dlp_update_providers.dart';
+import 'yt_dlp_update_button.dart';
 
 /// «yt-dlp è troppo vecchio»: shown on desktop when `yt-dlp --version` is
 /// older than the minimum the downloads need. Nothing otherwise.
@@ -17,6 +19,8 @@ class YtDlpOutdatedBanner extends ConsumerWidget {
     final status = ref.watch(ytDlpStatusProvider).value;
     if (status == null || !status.outdated) return const SizedBox.shrink();
     final cc = context.cc;
+    final message = ytDlpUpdateMessage(
+        context.l10n, ref.watch(ytDlpUpdateProvider));
     return Padding(
       padding: const EdgeInsets.fromLTRB(
           CcDims.margin, 4, CcDims.margin, 8),
@@ -32,11 +36,23 @@ class YtDlpOutdatedBanner extends ConsumerWidget {
             Icon(Icons.warning_amber_rounded, color: cc.error),
             const SizedBox(width: 12),
             Expanded(
-              child: Text(
-                context.l10n.ytDlpOutdatedBanner(status.version ?? ''),
-                style: Theme.of(context).textTheme.bodyMedium,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    context.l10n.ytDlpOutdatedBanner(status.version ?? ''),
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  if (message != null)
+                    Text(message,
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodySmall
+                            ?.copyWith(color: cc.textMuted)),
+                ],
               ),
             ),
+            const YtDlpUpdateButton(),
           ],
         ),
       ),

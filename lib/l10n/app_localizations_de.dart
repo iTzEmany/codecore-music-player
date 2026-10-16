@@ -1533,4 +1533,43 @@ class AppLocalizationsDe extends AppLocalizations {
   String ytDlpOutdatedBanner(String version) {
     return 'yt-dlp $version ist zu alt: Downloads funktionieren möglicherweise nicht';
   }
+
+  @override
+  String get settingsDownloads => 'Downloads';
+
+  @override
+  String ytDlpVersion(String version) {
+    return 'yt-dlp $version';
+  }
+
+  @override
+  String get ytDlpUnknownVersion => 'yt-dlp nicht gefunden';
+
+  @override
+  String get ytDlpUpdate => 'Aktualisieren';
+
+  @override
+  String ytDlpUpdating(int percent) {
+    return 'Aktualisierung… $percent%';
+  }
+
+  @override
+  String ytDlpUpdated(String version) {
+    return 'Auf Version $version aktualisiert';
+  }
+
+  @override
+  String get ytDlpTooOld => 'Zu alt: Aktualisieren tippen';
+
+  @override
+  String get ytDlpUpdateErrNetwork =>
+      'Aktualisierung fehlgeschlagen: Netzwerk nicht erreichbar';
+
+  @override
+  String get ytDlpUpdateErrHash =>
+      'Aktualisierung abgebrochen: Die heruntergeladene Datei hat die Integritätsprüfung nicht bestanden';
+
+  @override
+  String get ytDlpUpdateErrOther =>
+      'Aktualisierung fehlgeschlagen (siehe Protokoll)';
 }

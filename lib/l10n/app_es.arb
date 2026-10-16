@@ -788,5 +788,36 @@
         "type": "String"
       }
     }
+  },
+  "settingsDownloads": "Descargas",
+  "ytDlpVersion": "yt-dlp {version}",
+  "ytDlpUnknownVersion": "yt-dlp no encontrado",
+  "ytDlpUpdate": "Actualizar",
+  "ytDlpUpdating": "Actualizando… {percent}%",
+  "ytDlpUpdated": "Actualizado a la versión {version}",
+  "ytDlpTooOld": "Demasiado antiguo: toca Actualizar",
+  "ytDlpUpdateErrNetwork": "Error al actualizar: red inaccesible",
+  "ytDlpUpdateErrHash": "Actualización cancelada: el archivo descargado no pasó la comprobación de integridad",
+  "ytDlpUpdateErrOther": "Error al actualizar (consulta el registro)",
+  "@ytDlpVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "@ytDlpUpdating": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "@ytDlpUpdated": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
   }
 }

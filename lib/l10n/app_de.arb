@@ -788,5 +788,36 @@
         "type": "String"
       }
     }
+  },
+  "settingsDownloads": "Downloads",
+  "ytDlpVersion": "yt-dlp {version}",
+  "ytDlpUnknownVersion": "yt-dlp nicht gefunden",
+  "ytDlpUpdate": "Aktualisieren",
+  "ytDlpUpdating": "Aktualisierung… {percent}%",
+  "ytDlpUpdated": "Auf Version {version} aktualisiert",
+  "ytDlpTooOld": "Zu alt: Aktualisieren tippen",
+  "ytDlpUpdateErrNetwork": "Aktualisierung fehlgeschlagen: Netzwerk nicht erreichbar",
+  "ytDlpUpdateErrHash": "Aktualisierung abgebrochen: Die heruntergeladene Datei hat die Integritätsprüfung nicht bestanden",
+  "ytDlpUpdateErrOther": "Aktualisierung fehlgeschlagen (siehe Protokoll)",
+  "@ytDlpVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "@ytDlpUpdating": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "@ytDlpUpdated": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
   }
 }

@@ -788,5 +788,36 @@
         "type": "String"
       }
     }
+  },
+  "settingsDownloads": "Downloads",
+  "ytDlpVersion": "yt-dlp {version}",
+  "ytDlpUnknownVersion": "yt-dlp not found",
+  "ytDlpUpdate": "Update",
+  "ytDlpUpdating": "Updating… {percent}%",
+  "ytDlpUpdated": "Updated to version {version}",
+  "ytDlpTooOld": "Too old: tap Update",
+  "ytDlpUpdateErrNetwork": "Update failed: network unreachable",
+  "ytDlpUpdateErrHash": "Update cancelled: the downloaded file failed the integrity check",
+  "ytDlpUpdateErrOther": "Update failed (see the log)",
+  "@ytDlpVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "@ytDlpUpdating": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "@ytDlpUpdated": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
   }
 }

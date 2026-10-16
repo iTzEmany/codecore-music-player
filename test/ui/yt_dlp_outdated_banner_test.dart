@@ -1,5 +1,8 @@
 import 'package:codecore/providers/youtube_providers.dart';
 import 'package:codecore/ui/widgets/yt_dlp_outdated_banner.dart';
+import 'package:codecore/providers/yt_dlp_update_providers.dart';
+import 'package:codecore/services/online/yt_dlp_updater.dart';
+import 'package:codecore/ui/screens/settings/download_settings_tiles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -34,4 +37,41 @@ void main() {
     await show(tester, null);
     expect(find.textContaining('troppo vecchio'), findsNothing);
   });
+
+  testWidgets('the banner offers «Aggiorna» and explains a failed update',
+      (tester) async {
+    final h = await Harness.create(tester);
+    await h.pump(
+      tester,
+      const Scaffold(body: YtDlpOutdatedBanner()),
+      extraOverrides: [
+        ytDlpStatusProvider
+            .overrideWith((_) async => const YtDlpStatus('2024.04.09')),
+        ytDlpUpdateProvider.overrideWith(_FailedUpdate.new),
+      ],
+    );
+    expect(find.text('Aggiorna'), findsOneWidget);
+    expect(find.textContaining('rete non raggiungibile'), findsOneWidget);
+    await h.dispose(tester);
+  });
+
+  testWidgets('settings row shows the yt-dlp version', (tester) async {
+    final h = await Harness.create(tester);
+    await h.pump(
+      tester,
+      const Scaffold(body: DownloadSettingsTiles()),
+      extraOverrides: [
+        ytDlpStatusProvider
+            .overrideWith((_) async => const YtDlpStatus('2026.08.19')),
+      ],
+    );
+    expect(find.text('yt-dlp 2026.08.19'), findsOneWidget);
+    await h.dispose(tester);
+  });
+}
+
+class _FailedUpdate extends YtDlpUpdateNotifier {
+  @override
+  YtDlpUpdateState build() => const YtDlpUpdateState(YtDlpUpdatePhase.failed,
+      error: YtDlpUpdateError.network);
 }

@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/app_log.dart';
 import '../../../core/app_info.dart';
+import '../../../core/constants.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/database_providers.dart';
 import '../../../providers/library_providers.dart';
@@ -21,6 +22,7 @@ import '../share/share_screen.dart';
 import '../../../services/migration/python_db_importer.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/tokens.dart';
+import 'download_settings_tiles.dart';
 import 'log_export_tile.dart';
 import 'missing_tracks_screen.dart';
 import 'theme_swatch.dart';
@@ -233,6 +235,11 @@ class SettingsScreen extends ConsumerWidget {
                 ),
               ],
             ),
+            if (kEnableYoutube)
+              _Group(
+                title: l.settingsDownloads,
+                children: const [DownloadSettingsTiles()],
+              ),
             _Group(
               title: l.settingsAbout,
               children: [

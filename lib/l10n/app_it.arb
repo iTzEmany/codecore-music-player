@@ -979,5 +979,36 @@
         "type": "String"
       }
     }
+  },
+  "settingsDownloads": "Download",
+  "ytDlpVersion": "yt-dlp {version}",
+  "ytDlpUnknownVersion": "yt-dlp non trovato",
+  "ytDlpUpdate": "Aggiorna",
+  "ytDlpUpdating": "Aggiornamento… {percent}%",
+  "ytDlpUpdated": "Aggiornato alla versione {version}",
+  "ytDlpTooOld": "Troppo vecchio: tocca Aggiorna",
+  "ytDlpUpdateErrNetwork": "Aggiornamento non riuscito: rete non raggiungibile",
+  "ytDlpUpdateErrHash": "Aggiornamento annullato: il file scaricato non ha superato il controllo di integrità",
+  "ytDlpUpdateErrOther": "Aggiornamento non riuscito (dettagli nel log)",
+  "@ytDlpVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "@ytDlpUpdating": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "@ytDlpUpdated": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
   }
 }

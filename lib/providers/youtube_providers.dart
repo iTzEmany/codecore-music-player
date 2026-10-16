@@ -19,12 +19,13 @@ import '../services/online/youtube_service.dart';
 import 'database_providers.dart';
 import 'library_providers.dart';
 import 'online_providers.dart';
+import 'yt_dlp_update_providers.dart' show locateYtDlp;
 import 'settings_providers.dart';
 
 final youtubeServiceProvider = Provider<YoutubeService>((ref) {
   final YoutubeService s = isAndroid
       ? AndroidYtDlpService()
-      : YtDlpProcessService();
+      : YtDlpProcessService(locate: locateYtDlp);
   ref.onDispose(s.close);
   return s;
 });
