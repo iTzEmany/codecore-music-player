@@ -1,4 +1,5 @@
 import 'package:codecore/data/settings/settings_store.dart';
+import 'package:codecore/services/audio/audio_backend.dart' show TransitionMode;
 import 'package:codecore/services/audio/play_queue.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -50,5 +51,28 @@ void main() {
     expect(store.readSettings().playbackSpeed, 1.5);
     SharedPreferences.setMockInitialValues({'playbackSpeed': 7.0});
     expect((await SettingsStore.open()).readSettings().playbackSpeed, 2.0);
+  });
+
+  test('the track transition defaults to normal, with a 6 s crossfade kept within 2–12', () async {
+    SharedPreferences.setMockInitialValues({});
+    final store = await SettingsStore.open();
+    var s = store.readSettings();
+    expect(s.transition, TransitionMode.normal);
+    expect(s.crossfadeSeconds, 6);
+    expect(s.crossfadePlainInAlbum, isTrue);
+    await store.writeSettings(const AppSettings(
+        transition: TransitionMode.crossfade,
+        crossfadeSeconds: 9,
+        crossfadePlainInAlbum: false));
+    s = store.readSettings();
+    expect(s.transition, TransitionMode.crossfade);
+    expect(s.crossfadeSeconds, 9);
+    expect(s.crossfadePlainInAlbum, isFalse);
+    SharedPreferences.setMockInitialValues({'crossfadeSeconds': 99, 'transition': 'gapless'});
+    s = (await SettingsStore.open()).readSettings();
+    expect(s.crossfadeSeconds, 12);
+    expect(s.transition, TransitionMode.gapless);
+    SharedPreferences.setMockInitialValues({'transition': 'something-old'});
+    expect((await SettingsStore.open()).readSettings().transition, TransitionMode.normal);
   });
 }

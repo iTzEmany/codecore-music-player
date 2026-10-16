@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../services/audio/audio_backend.dart' show TransitionMode;
 import '../../services/audio/equalizer.dart';
 import '../../services/audio/play_queue.dart';
 
@@ -45,6 +46,9 @@ class AppSettings {
     this.eqEnabled = false,
     this.eqSpeaker = const EqProfile(),
     this.eqHeadphones = const EqProfile(),
+    this.transition = TransitionMode.normal,
+    this.crossfadeSeconds = 6,
+    this.crossfadePlainInAlbum = true,
   });
 
   final String theme;
@@ -90,6 +94,13 @@ class AppSettings {
   final bool eqEnabled;
   final EqProfile eqSpeaker, eqHeadphones;
 
+  /// How one track gives way to the next, and the length of a crossfade.
+  final TransitionMode transition;
+  final int crossfadeSeconds;
+
+  /// Inside an album the tracks follow each other plainly, with no fade.
+  final bool crossfadePlainInAlbum;
+
   /// Shown to the device on the other side of a LAN share; null = hostname.
   final String? deviceName;
 
@@ -122,6 +133,9 @@ class AppSettings {
     bool? eqEnabled,
     EqProfile? eqSpeaker,
     EqProfile? eqHeadphones,
+    TransitionMode? transition,
+    int? crossfadeSeconds,
+    bool? crossfadePlainInAlbum,
   }) =>
       AppSettings(
         theme: theme ?? this.theme,
@@ -151,6 +165,10 @@ class AppSettings {
         eqEnabled: eqEnabled ?? this.eqEnabled,
         eqSpeaker: eqSpeaker ?? this.eqSpeaker,
         eqHeadphones: eqHeadphones ?? this.eqHeadphones,
+        transition: transition ?? this.transition,
+        crossfadeSeconds: crossfadeSeconds ?? this.crossfadeSeconds,
+        crossfadePlainInAlbum:
+            crossfadePlainInAlbum ?? this.crossfadePlainInAlbum,
       );
 }
 
@@ -207,6 +225,12 @@ class SettingsStore {
         eqEnabled: _prefs.getBool('eqEnabled') ?? false,
         eqSpeaker: _readEq('speaker'),
         eqHeadphones: _readEq('headphones'),
+        transition: TransitionMode.values.firstWhere(
+          (m) => m.name == _prefs.getString('transition'),
+          orElse: () => TransitionMode.normal,
+        ),
+        crossfadeSeconds: (_prefs.getInt('crossfadeSeconds') ?? 6).clamp(2, 12),
+        crossfadePlainInAlbum: _prefs.getBool('crossfadePlainInAlbum') ?? true,
       );
 
   EqProfile _readEq(String profile) => EqProfile(
@@ -251,6 +275,9 @@ class SettingsStore {
     await _prefs.setBool('eqEnabled', s.eqEnabled);
     await _writeEq('speaker', s.eqSpeaker);
     await _writeEq('headphones', s.eqHeadphones);
+    await _prefs.setString('transition', s.transition.name);
+    await _prefs.setInt('crossfadeSeconds', s.crossfadeSeconds);
+    await _prefs.setBool('crossfadePlainInAlbum', s.crossfadePlainInAlbum);
     final dn = s.deviceName;
     if (dn == null || dn.isEmpty) {
       await _prefs.remove('deviceName');

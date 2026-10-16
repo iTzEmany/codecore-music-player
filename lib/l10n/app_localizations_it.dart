@@ -1914,4 +1914,32 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get eqUnavailable =>
       'L\'equalizzatore non è disponibile su questo dispositivo.';
+
+  @override
+  String get transitionMode => 'Passaggio tra i brani';
+
+  @override
+  String get transitionNormal => 'Normale';
+
+  @override
+  String get transitionGapless => 'Senza pause';
+
+  @override
+  String get transitionCrossfade => 'Dissolvenza';
+
+  @override
+  String get transitionHint =>
+      'Senza pause funziona meglio con brani dello stesso formato (per esempio tutti FLAC).';
+
+  @override
+  String crossfadeLength(int seconds) {
+    return 'Durata della dissolvenza: $seconds s';
+  }
+
+  @override
+  String get crossfadePlainInAlbum => 'Non sfumare nello stesso album';
+
+  @override
+  String get crossfadePlainInAlbumHint =>
+      'Dentro un album i brani si susseguono senza pause, senza sovrapporsi.';
 }

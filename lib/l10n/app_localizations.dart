@@ -3395,6 +3395,54 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'L\'equalizzatore non è disponibile su questo dispositivo.'**
   String get eqUnavailable;
+
+  /// No description provided for @transitionMode.
+  ///
+  /// In it, this message translates to:
+  /// **'Passaggio tra i brani'**
+  String get transitionMode;
+
+  /// No description provided for @transitionNormal.
+  ///
+  /// In it, this message translates to:
+  /// **'Normale'**
+  String get transitionNormal;
+
+  /// No description provided for @transitionGapless.
+  ///
+  /// In it, this message translates to:
+  /// **'Senza pause'**
+  String get transitionGapless;
+
+  /// No description provided for @transitionCrossfade.
+  ///
+  /// In it, this message translates to:
+  /// **'Dissolvenza'**
+  String get transitionCrossfade;
+
+  /// No description provided for @transitionHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Senza pause funziona meglio con brani dello stesso formato (per esempio tutti FLAC).'**
+  String get transitionHint;
+
+  /// No description provided for @crossfadeLength.
+  ///
+  /// In it, this message translates to:
+  /// **'Durata della dissolvenza: {seconds} s'**
+  String crossfadeLength(int seconds);
+
+  /// No description provided for @crossfadePlainInAlbum.
+  ///
+  /// In it, this message translates to:
+  /// **'Non sfumare nello stesso album'**
+  String get crossfadePlainInAlbum;
+
+  /// No description provided for @crossfadePlainInAlbumHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Dentro un album i brani si susseguono senza pause, senza sovrapporsi.'**
+  String get crossfadePlainInAlbumHint;
 }
 
 class _AppLocalizationsDelegate

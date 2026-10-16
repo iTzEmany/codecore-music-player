@@ -7,6 +7,7 @@ import '../../core/app_log.dart';
 import '../../data/db/app_database.dart';
 import '../../data/repositories/track_repository.dart';
 import 'audio_backend.dart';
+import 'crossfade_engine.dart';
 import 'equalizer.dart';
 import 'next_window.dart';
 import 'play_queue.dart';
@@ -81,7 +82,8 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   TransitionMode get transition => _transition;
 
   /// In the crossfade, tracks of the same album follow each other plainly.
-  bool _fadeSameAlbum = false;
+  bool _plainInAlbum = false;
+  int _crossfadeSeconds = 6;
 
   /// Playback speed, kept by the handler so every new track gets it again.
   static const minSpeed = 0.5, maxSpeed = 2.0;
@@ -297,7 +299,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
         volumeFor: _volumeFor,
         overlap: (a, b) =>
             _transition == TransitionMode.crossfade &&
-            !(_fadeSameAlbum && a.albumKey == b.albumKey),
+            !(_plainInAlbum && a.albumKey == b.albumKey),
       );
     } on Object catch (e, st) {
       AppLog.w('could not prepare the next track', e, st);
@@ -305,9 +307,24 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   }
 
   /// Chooses how tracks follow each other. Takes effect from the next join.
-  Future<void> setTransition(TransitionMode mode, {bool fadeSameAlbum = false}) async {
+  Future<void> setTransition(
+    TransitionMode mode, {
+    bool plainInAlbum = false,
+    int crossfadeSeconds = 6,
+  }) async {
+    if (mode == _transition &&
+        plainInAlbum == _plainInAlbum &&
+        crossfadeSeconds == _crossfadeSeconds) {
+      return;
+    }
     _transition = mode;
-    _fadeSameAlbum = fadeSameAlbum;
+    _plainInAlbum = plainInAlbum;
+    _crossfadeSeconds = crossfadeSeconds;
+    final engine = _backend;
+    if (engine is CrossfadeEngine) {
+      engine.crossfade =
+          mode == TransitionMode.crossfade ? Duration(seconds: crossfadeSeconds) : null;
+    }
     _window?.invalidate();
     await _refreshWindow();
   }
@@ -501,13 +518,27 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
 
   Future<void> setVolume(double v) {
     _baseVolume = v.clamp(0, 1).toDouble();
+    _volumeChangedForWindow();
     return _applyVolume();
   }
 
   /// ReplayGain: scale the volume down for loud tracks (never above 1.0).
   Future<void> setNormalize(bool enabled) {
     _normalize = enabled;
+    _volumeChangedForWindow();
     return _applyVolume();
+  }
+
+  /// The next track is announced with its own volume: tell the backend again.
+  void _volumeChangedForWindow() {
+    final window = _window;
+    if (window == null ||
+        window.track == null ||
+        _transition != TransitionMode.crossfade) {
+      return; // only a crossfade plays the next track before its turn
+    }
+    window.invalidate();
+    unawaited(_refreshWindow());
   }
 
   static double gainFactor(double? db) =>

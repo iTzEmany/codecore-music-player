@@ -1,0 +1,69 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../l10n/l10n_ext.dart';
+import '../../../providers/settings_providers.dart';
+import '../../../services/audio/audio_backend.dart' show TransitionMode;
+
+/// «Passaggio tra i brani»: normal, gapless or crossfade, and its options.
+class TransitionSettingsTiles extends ConsumerWidget {
+  const TransitionSettingsTiles({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    final s = ref.watch(settingsProvider);
+    final notifier = ref.read(settingsProvider.notifier);
+    String label(TransitionMode m) => switch (m) {
+          TransitionMode.normal => l.transitionNormal,
+          TransitionMode.gapless => l.transitionGapless,
+          TransitionMode.crossfade => l.transitionCrossfade,
+        };
+    return Column(
+      children: [
+        ListTile(
+          leading: const Icon(Icons.swap_horiz_rounded),
+          title: Text(l.transitionMode),
+          subtitle: Text(l.transitionHint),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+          child: Wrap(
+            spacing: 8,
+            runSpacing: 4,
+            children: [
+              for (final m in TransitionMode.values)
+                ChoiceChip(
+                  label: Text(label(m)),
+                  selected: s.transition == m,
+                  onSelected: (_) =>
+                      notifier.update((c) => c.copyWith(transition: m)),
+                ),
+            ],
+          ),
+        ),
+        if (s.transition == TransitionMode.crossfade) ...[
+          ListTile(
+            title: Text(l.crossfadeLength(s.crossfadeSeconds)),
+            subtitle: Slider(
+              min: 2,
+              max: 12,
+              divisions: 10,
+              value: s.crossfadeSeconds.toDouble(),
+              label: '${s.crossfadeSeconds} s',
+              onChanged: (v) => notifier
+                  .update((c) => c.copyWith(crossfadeSeconds: v.round())),
+            ),
+          ),
+          SwitchListTile(
+            title: Text(l.crossfadePlainInAlbum),
+            subtitle: Text(l.crossfadePlainInAlbumHint),
+            value: s.crossfadePlainInAlbum,
+            onChanged: (v) =>
+                notifier.update((c) => c.copyWith(crossfadePlainInAlbum: v)),
+          ),
+        ],
+      ],
+    );
+  }
+}

@@ -1031,5 +1031,20 @@
   "eqPresetCustom": "Personalizado",
   "eqReset": "Restablecer",
   "eqWaiting": "Las bandas aparecen cuando empieza la primera canción.",
-  "eqUnavailable": "El ecualizador no está disponible en este dispositivo."
+  "eqUnavailable": "El ecualizador no está disponible en este dispositivo.",
+  "transitionMode": "Transición entre canciones",
+  "transitionNormal": "Normal",
+  "transitionGapless": "Sin pausas",
+  "transitionCrossfade": "Fundido cruzado",
+  "transitionHint": "Sin pausas funciona mejor con canciones del mismo formato (por ejemplo, todas en FLAC).",
+  "crossfadeLength": "Duración del fundido: {seconds} s",
+  "@crossfadeLength": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "crossfadePlainInAlbum": "No fundir dentro de un álbum",
+  "crossfadePlainInAlbumHint": "Dentro de un álbum las canciones se suceden sin pausas y sin solaparse."
 }

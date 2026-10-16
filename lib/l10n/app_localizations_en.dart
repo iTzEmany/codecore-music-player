@@ -1909,4 +1909,32 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get eqUnavailable => 'The equalizer is not available on this device.';
+
+  @override
+  String get transitionMode => 'Between tracks';
+
+  @override
+  String get transitionNormal => 'Normal';
+
+  @override
+  String get transitionGapless => 'Gapless';
+
+  @override
+  String get transitionCrossfade => 'Crossfade';
+
+  @override
+  String get transitionHint =>
+      'Gapless works best with tracks of the same format (for example all FLAC).';
+
+  @override
+  String crossfadeLength(int seconds) {
+    return 'Crossfade length: $seconds s';
+  }
+
+  @override
+  String get crossfadePlainInAlbum => 'Don\'t fade inside an album';
+
+  @override
+  String get crossfadePlainInAlbumHint =>
+      'Inside an album the tracks follow each other without a gap and without overlapping.';
 }

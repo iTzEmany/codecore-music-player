@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:audio_service/audio_service.dart';
@@ -5,6 +6,7 @@ import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/data/repositories/track_repository.dart';
 import 'package:codecore/services/audio/audio_backend.dart';
 import 'package:codecore/services/audio/codecore_audio_handler.dart';
+import 'package:codecore/services/audio/crossfade_engine.dart';
 import 'package:codecore/services/audio/play_queue.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
@@ -239,11 +241,144 @@ void main() {
     await handler.setTransition(TransitionMode.crossfade);
     await settle();
     expect(backend.nextOverlap, isTrue);
-    await handler.setTransition(TransitionMode.crossfade, fadeSameAlbum: true);
+    await handler.setTransition(TransitionMode.crossfade, plainInAlbum: true);
     await settle();
     expect(backend.nextOverlap, isFalse, reason: 'x and y share an album');
     backend.advance();
     await settle();
     expect(backend.nextOverlap, isTrue, reason: 'y to a: different albums');
   });
+
+  group('with the crossfade engine', () {
+    late List<FakeBackend> players;
+    late CodecoreAudioHandler fader;
+    late _Ticks ticks;
+
+    setUp(() async {
+      players = [];
+      ticks = _Ticks();
+      fader = CodecoreAudioHandler(
+        CrossfadeEngine(() {
+          final f = FakeBackend();
+          players.add(f);
+          return f;
+        }, ticker: ticks.ticker),
+        PlayQueue(),
+        repo,
+        onError: errors.add,
+      );
+    });
+    tearDown(() => fader.dispose());
+
+    Future<void> aboutToFade() async {
+      await fader.playQueue(ids, 0);
+      await fader.setTransition(TransitionMode.crossfade, crossfadeSeconds: 6);
+      await settle();
+      players[0].durC.add(const Duration(seconds: 100));
+      players[1].durC.add(const Duration(seconds: 100));
+      await settle();
+    }
+
+    test('the engine is told the length, and the next track waits on the other player', () async {
+      await aboutToFade();
+      expect(players, hasLength(2));
+      expect(players[1].loaded, ['/m/b.mp3']);
+    });
+
+    test('the notification changes halfway through the fade', () async {
+      await aboutToFade();
+      players[0].posC.add(const Duration(seconds: 94));
+      await settle();
+      ticks.tick(9);
+      await settle();
+      expect(fader.currentTrack!.title, 'a');
+      ticks.tick(1);
+      await settle();
+      expect(fader.currentTrack!.title, 'b');
+      expect(fader.mediaItem.value!.title, 'b');
+      expect(fader.currentIndex, 1);
+    });
+
+    test('the new track is counted as played from the join', () async {
+      await aboutToFade();
+      players[0].posC.add(const Duration(seconds: 94));
+      await settle();
+      ticks.tick(10);
+      await settle();
+      players[1].posC.add(const Duration(seconds: 60));
+      await settle();
+      expect((await repo.getById(ids[1]))!.playCount, 1);
+    });
+
+    test('ReplayGain of the entering track is on its own ramp', () async {
+      await fader.setNormalize(true);
+      await aboutToFade();
+      players[0].posC.add(const Duration(seconds: 94));
+      await settle();
+      ticks.tick(20);
+      await settle();
+      // b has -6 dB of ReplayGain: its full level is that factor
+      expect(players[1].volumes.last,
+          closeTo(CodecoreAudioHandler.gainFactor(-6), 1e-9));
+    });
+
+    test('with the end-of-track timer there is no fade', () async {
+      await aboutToFade();
+      fader.pauseAtTrackEnd = true;
+      await settle();
+      players[0].posC.add(const Duration(seconds: 95));
+      await settle();
+      expect(ticks.timers, isEmpty);
+      expect(players[1].playing, isFalse);
+    });
+
+    test('a new volume reaches the track waiting to come in', () async {
+      await aboutToFade();
+      await fader.setVolume(0.4);
+      await settle();
+      players[0].posC.add(const Duration(seconds: 94));
+      await settle();
+      ticks.tick(20);
+      await settle();
+      expect(players[1].volumes.last, closeTo(0.4, 1e-9));
+    });
+
+    test('changing back to normal removes the overlap', () async {
+      await aboutToFade();
+      await fader.setTransition(TransitionMode.normal);
+      await settle();
+      players[0].posC.add(const Duration(seconds: 95));
+      await settle();
+      expect(ticks.timers, isEmpty);
+    });
+  });
 }
+
+class _FakeTimer implements Timer {
+  bool active = true;
+  @override
+  void cancel() => active = false;
+  @override
+  bool get isActive => active;
+  @override
+  int get tick => 0;
+}
+
+class _Ticks {
+  final timers = <_FakeTimer>[];
+  void Function()? _onTick;
+
+  RampTicker get ticker => (p, cb) {
+        _onTick = cb;
+        final t = _FakeTimer();
+        timers.add(t);
+        return t;
+      };
+
+  void tick([int n = 1]) {
+    for (var i = 0; i < n; i++) {
+      if (timers.isNotEmpty && timers.last.active) _onTick!();
+    }
+  }
+}
+
