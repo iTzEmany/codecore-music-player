@@ -207,14 +207,14 @@ L'agente riparte sempre dal primo task non spuntato.
 - [~] 16.10 Rifinitura, documentazione e prova a mano
 
 ## Fase 17 — Riproduzione e controlli di sistema (`fase-17-riproduzione.md`)
-- [ ] 17.1 Verifiche preliminari (tono con la velocità, equalizzatore, MPRIS/SMTC, Jam e audio_service)
+- [~] 17.1 Verifiche preliminari (tono con la velocità, equalizzatore, MPRIS/SMTC, Jam e audio_service)
 - [ ] 17.2 Velocità di riproduzione
 - [ ] 17.3 Segnalibro «riprendi da qui» (schema v6)
 - [ ] 17.4 Anteprima di 20 secondi
 - [ ] 17.5 Equalizzatore: motore
 - [ ] 17.6 Equalizzatore: interfaccia e profilo per uscita
-- [ ] 17.7 MPRIS su Linux
-- [ ] 17.8 SMTC su Windows
+- [ ] 17.7 MPRIS su Linux (BLOCCATO: pacchetto `dbus`/`audio_service_mpris` (Linux) o `smtc_windows` (Windows) da approvare)
+- [ ] 17.8 SMTC su Windows (BLOCCATO: pacchetto `dbus`/`audio_service_mpris` (Linux) o `smtc_windows` (Windows) da approvare)
 - [ ] 17.9 Controlli della Jam nella notifica e nella schermata di blocco
 - [ ] 17.10 Rifinitura, documentazione e prova a mano
 
@@ -438,6 +438,8 @@ L'agente riparte sempre dal primo task non spuntato.
 - 16.9 (2026-10-16, PC, JIT, 50.000 brani sintetici, 2.000 album, 800 artisti): ricerca **30 ms** (budget 80) · `watchAlbums` **89 ms** (150) · `watchArtists` **70 ms** (150) · generi 42 ms · `liteEntries` **188 ms** (400) · apertura di un DB su file da 50.000 righe + prime query della Home **~80 ms** · lista completa «Tutti i brani» **~860 ms** (budget del documento 300 ms: **non raggiunto**). Per 20.000 brani la fase 7.5 annotava ricerca ~40 ms e lista ~0,6 s. **Difetti trovati e corretti (senza toccare lo schema):** (1) `watchArtists` impiegava **4,8 s**: la copertina dell\'artista era una sottoquery correlata che scandiva tutta la tabella per ogni artista (quadratico) → ora una sola passata con CTE e `ROW_NUMBER()` (70 ms, stessi risultati: test di `library_queries` verdi); (2) `liteEntries` 820 ms → 158 ms con `customSelect` (l\'API tipizzata di drift costa ~15 µs per riga). **Proposta (non fatta):** «Tutti i brani» carica l\'intera lista a ogni modifica della tabella (anche un conteggio di ascolti): a 50.000 righe sono ~860 ms spesi nel mapping delle righe, nessun indice aiuta → paginare/finestrare la lista (`LIMIT/OFFSET` o keyset) e ricaricare solo la finestra visibile, in una fase futura. Nel test il budget della lista completa è 1,5 s (×2 in CI).
 
 - 16.10: README (badge con segnaposto `UTENTE/REPOSITORY`, artefatti, rapporto dipendenze), `docs/02-architettura.md` («CI e test»), `docs/99` (R34–R36). **Non** rimossa da R6 la frase «Windows non compilabile da Linux»: 16.4 non è ancora verde (serve il push). `scripts/integration.sh` non esiste: dipende da 16.5/16.6 (bloccati da `integration_test`).
+
+- 17.1 (2026-10-16): **Velocità e tono, misurati:** tono sinusoidale 440 Hz reso da mpv su file PCM — con `scaletempo` (il percorso di `media_kit` con `pitch=true`, predefinito di `just_audio_media_kit`: `audio-pitch-correction=no` + `af=scaletempo:scale=<velocità>`) a 1,5× il brano dura 4,02 s e il tono resta **440 Hz**; a 0,75× dura 7,98 s, **440 Hz** (senza correzione sarebbe 660/330 Hz). `speed` di mpv resta 1 e `time-pos` segue la posizione nel file. ExoPlayer: `just_audio` chiama `setPlaybackParameters(PlaybackParameters(speed, params.pitch))` con pitch 1,0 → tono preservato. **Nessuna modifica a `JustAudioMediaKit.pitch`** → la Jam (R37) non cambia. **Equalizzatore:** Android `AudioPipeline(androidAudioEffects: [AndroidEqualizer])`, `AndroidEqualizerParameters(minDecibels, maxDecibels, bands)` e `band.setGain`; desktop **no**: `MediaKitPlayer` non espone il `Player` e il filtro `af` di mpv è già occupato da `scaletempo` per la velocità (servirebbe comporlo) → voce nascosta su desktop. **audio_service 0.18.19:** `MediaControl.custom(androidIcon:, label:, name:)` esiste e inoltra a `AudioHandler.customAction` → «Termina Jam» possibile come controllo personalizzato. **MPRIS/SMTC:** non verificato (serve l'approvazione dei pacchetti) → 17.7/17.8 bloccati.
 
 ## Note di deviazione (Fase 12)
 - 12.1 (2026-10-16): CSV vero = `Just_a_mood.csv` (34 brani; intestazioni `Track URI, ISRC, Track Name, Album Name, Artist Name(s), …, Duration (ms)`; **più artisti separati da `;`**). yt-dlp di sistema 2024.04.09 NON legge più YouTube («Please sign in»): provato con yt-dlp 2026.08.19 (binario standalone). `https://music.youtube.com/search?q=…#songs` funziona; in modalità flat dà ~460 voci con solo `id`/`title` (nessuna durata), **senza `--flat-playlist` e con `--playlist-items 1-5`** ogni voce ha `channel`, `artists[]`, `track`, `album`, `duration` in ~5–8 s → si usa quella. `YtResult` guadagna `artists` e `album`.
