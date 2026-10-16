@@ -62,6 +62,7 @@ Indice su `trackId`.
 |---|---|---|
 | `playlist_imports` | `id`, `playlist_id` → playlists (cascade), `source_name`, `created_at`, `status` | `status`: 0 in corso · 1 in pausa · 2 finita · 3 annullata |
 | `playlist_import_items` | PK (`import_id` cascade, `row_index`), `title`, `artists` (separati da `;`), `album?`, `duration_ms?`, `isrc?`, `status`, `video_id?`, `candidates?` (JSON), `track_id?` → tracks (set null), `score?` | `status`: 0 da cercare · 1 in coda · 2 scaricato · 3 collegato · 4 da verificare · 5 non trovato · 6 errore · 7 saltato |
+**Schema v5 (fase 15):** `playlist_imports` + `source_kind` (`exportify`|`tunemymusic`|`soundiiz`|`lastfm`|`csv`|`m3u`|`xspf`, default `exportify`), `folder_path?`, `number_files`, `link_only`, `plan_first`, `fetch_covers` (bool, default false); `playlist_import_items` + `note?`, `location?`; stati riga nuovi **8 pianificato** · **9 rimosso dalla sorgente**.
 Allo avvio le importazioni «in corso» diventano «in pausa» e le righe «in coda» tornano «da cercare»:
 niente rete senza un'azione dell'utente. Cancellare la playlist cancella l'importazione.
 

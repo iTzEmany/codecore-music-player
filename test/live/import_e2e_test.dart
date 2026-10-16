@@ -28,7 +28,7 @@ void main() {
   test('3 real rows: found, downloaded, tagged and ordered', () async {
     final parallel = int.tryParse(Platform.environment['CC_PARALLEL'] ?? '');
     SharedPreferences.setMockInitialValues(
-        {if (parallel != null) 'downloadParallel': parallel});
+        {'downloadParallel': ?parallel});
     final clock = Stopwatch()..start();
     final store = await SettingsStore.open();
     final tmp = Directory.systemTemp.createTempSync('cc_e2e');

@@ -8,6 +8,7 @@ class ImportRow {
     this.durationMs,
     this.isrc,
     this.spotifyUri,
+    this.location,
   });
 
   final int index;
@@ -17,6 +18,9 @@ class ImportRow {
   final int? durationMs;
   final String? isrc;
   final String? spotifyUri;
+
+  /// Path or URL of a local M3U/XSPF entry, tried against the library first.
+  final String? location;
 
   String get primaryArtist => artists.isEmpty ? '' : artists.first;
   String get artistLine => artists.join(', ');

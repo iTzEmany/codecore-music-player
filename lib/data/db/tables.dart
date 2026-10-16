@@ -80,6 +80,25 @@ class PlaylistImports extends Table {
 
   /// 0 running · 1 paused · 2 finished · 3 cancelled.
   IntColumn get status => integer().withDefault(const Constant(0))();
+
+  /// Where the rows came from: `exportify` · `tunemymusic` · `soundiiz` ·
+  /// `lastfm` · `csv` · `m3u` · `xspf`.
+  TextColumn get sourceKind => text().withDefault(const Constant('exportify'))();
+
+  /// Sub-folder of the download folder for this import (null = none).
+  TextColumn get folderPath => text().nullable()();
+
+  /// Prefix downloaded files with their position (`007 - Artist - Title`).
+  BoolColumn get numberFiles => boolean().withDefault(const Constant(false))();
+
+  /// Link what the library has and download nothing.
+  BoolColumn get linkOnly => boolean().withDefault(const Constant(false))();
+
+  /// Search everything first and wait for the user before downloading.
+  BoolColumn get planFirst => boolean().withDefault(const Constant(false))();
+
+  /// Look the album cover up after each download.
+  BoolColumn get fetchCovers => boolean().withDefault(const Constant(false))();
 }
 
 /// One row of the CSV, in playlist order.
@@ -96,7 +115,8 @@ class PlaylistImportItems extends Table {
   TextColumn get isrc => text().nullable()();
 
   /// 0 to search · 1 queued · 2 downloaded · 3 linked (already in library)
-  /// · 4 to review · 5 not found · 6 failed · 7 skipped by the user.
+  /// · 4 to review · 5 not found · 6 failed · 7 skipped by the user
+  /// · 8 planned (chosen, waiting for «Download») · 9 removed from the source.
   IntColumn get status => integer().withDefault(const Constant(0))();
   TextColumn get videoId => text().nullable()();
 
@@ -106,6 +126,12 @@ class PlaylistImportItems extends Table {
       .nullable()
       .references(Tracks, #id, onDelete: KeyAction.setNull)();
   RealColumn get score => real().nullable()();
+
+  /// Why a row is «not found» or «to review» (shown and exported).
+  TextColumn get note => text().nullable()();
+
+  /// Path or URL of a local M3U/XSPF entry.
+  TextColumn get location => text().nullable()();
 
   @override
   Set<Column> get primaryKey => {importId, rowIndex};

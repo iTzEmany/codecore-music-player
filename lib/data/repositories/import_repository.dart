@@ -14,6 +14,8 @@ enum ImportItemStatus {
   notFound,
   failed,
   skipped,
+  planned,
+  removed,
 }
 
 extension PlaylistImportX on PlaylistImport {
@@ -45,13 +47,25 @@ class ImportRepository {
     required int playlistId,
     required String sourceName,
     required List<ImportRow> rows,
+    String sourceKind = 'exportify',
+    String? folderPath,
+    bool numberFiles = false,
+    bool linkOnly = false,
+    bool planFirst = false,
+    bool fetchCovers = false,
   }) {
     return _db.transaction(() async {
       final id = await _db.into(_db.playlistImports).insert(
           PlaylistImportsCompanion.insert(
               playlistId: playlistId,
               sourceName: sourceName,
-              createdAt: DateTime.now().millisecondsSinceEpoch));
+              createdAt: DateTime.now().millisecondsSinceEpoch,
+              sourceKind: Value(sourceKind),
+              folderPath: Value(folderPath),
+              numberFiles: Value(numberFiles),
+              linkOnly: Value(linkOnly),
+              planFirst: Value(planFirst),
+              fetchCovers: Value(fetchCovers)));
       await _db.batch((b) {
         b.insertAll(_db.playlistImportItems, [
           for (final r in rows)
@@ -63,6 +77,7 @@ class ImportRepository {
               album: Value(r.album),
               durationMs: Value(r.durationMs),
               isrc: Value(r.isrc),
+              location: Value(r.location),
             ),
         ]);
       });
@@ -137,6 +152,7 @@ class ImportRepository {
     Value<String?> candidates = const Value.absent(),
     Value<int?> trackId = const Value.absent(),
     Value<double?> score = const Value.absent(),
+    Value<String?> note = const Value.absent(),
   }) =>
       (_db.update(_db.playlistImportItems)
             ..where((i) =>
@@ -147,6 +163,7 @@ class ImportRepository {
         candidates: candidates,
         trackId: trackId,
         score: score,
+        note: note,
       ));
 
   Future<void> setStatus(int importId, ImportStatus status) =>

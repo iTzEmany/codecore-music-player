@@ -108,4 +108,36 @@ void main() {
     expect(await repo.get(id), isNull);
     expect(await repo.items(id), isEmpty);
   });
+
+  test('import options, notes and locations are stored', () async {
+    final id = await repo.create(
+      playlistId: playlistId,
+      sourceName: 'P',
+      sourceKind: 'm3u',
+      folderPath: 'P',
+      numberFiles: true,
+      linkOnly: true,
+      planFirst: true,
+      fetchCovers: true,
+      rows: const [
+        ImportRow(index: 0, title: 'A', artists: ['X'], location: '/m/a.mp3'),
+      ],
+    );
+    final imp = (await repo.get(id))!;
+    expect(
+        [imp.sourceKind, imp.folderPath, imp.numberFiles, imp.linkOnly,
+          imp.planFirst, imp.fetchCovers],
+        ['m3u', 'P', true, true, true, true]);
+    await repo.setItem(id, 0,
+        status: ImportItemStatus.notFound, note: const Value('nessun risultato'));
+    final it = (await repo.item(id, 0))!;
+    expect(it.location, '/m/a.mp3');
+    expect(it.note, 'nessun risultato');
+    await repo.setItem(id, 0, status: ImportItemStatus.planned);
+    expect((await repo.item(id, 0))!.state, ImportItemStatus.planned);
+    expect((await repo.item(id, 0))!.note, 'nessun risultato',
+        reason: 'an untouched note stays');
+    await repo.setItem(id, 0, status: ImportItemStatus.removed);
+    expect((await repo.item(id, 0))!.state, ImportItemStatus.removed);
+  });
 }

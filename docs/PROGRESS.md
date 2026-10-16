@@ -181,7 +181,7 @@ L'agente riparte sempre dal primo task non spuntato.
 
 ## Fase 15 — Importazione 2 (`fase-15-importazione-2.md`)
 - [~] 15.1 Verifiche preliminari (file veri dei formati, album su YouTube Music, iTunes per ISRC)
-- [ ] 15.2 Schema v5 per le importazioni
+- [x] 15.2 Schema v5 per le importazioni
 - [ ] 15.3 Interfaccia comune dei lettori
 - [ ] 15.4 Lettori CSV: TuneMyMusic, Soundiiz, Last.fm, generico
 - [ ] 15.5 Lettori M3U/M3U8 e XSPF
@@ -404,6 +404,8 @@ L'agente riparte sempre dal primo task non spuntato.
 - 14.1 nota: se bestaudio non ha un m4a, `-x` estrae `.opus`; l'estensione `opus` è già tra quelle scansionate.
 - 13.3: `tracks` di `user_data.json` contiene solo i brani con preferito/modifica/testi/ascolti; chi sta solo in una playlist compare nei riferimenti della playlist (niente duplicati). Brano fuori da ogni cartella: `folder` = percorso assoluto del file, `relPath` null. `trackRefFor` è pubblica (serve all'export JSON).
 - 13.4: `LibraryEntryLite` guadagna `path` (opzionale, riempito da `liteEntries`); `TrackResolver` tenta percorso relativo → titolo+artista+durata ±2 s → sha256.
+
+- 15.2: migrazione v4→v5 con `else if (from < 5)` (chi arriva da <4 crea le tabelle già con le colonne v5). `ImportRow.location` anticipato qui perché lo scrive il repository; `ImportItemStatus` + `planned`(8), `removed`(9); `setItem(note:)`. `ImportProgress` non conta le righe `removed`.
 
 ## Note di deviazione (Fase 12)
 - 12.1 (2026-10-16): CSV vero = `Just_a_mood.csv` (34 brani; intestazioni `Track URI, ISRC, Track Name, Album Name, Artist Name(s), …, Duration (ms)`; **più artisti separati da `;`**). yt-dlp di sistema 2024.04.09 NON legge più YouTube («Please sign in»): provato con yt-dlp 2026.08.19 (binario standalone). `https://music.youtube.com/search?q=…#songs` funziona; in modalità flat dà ~460 voci con solo `id`/`title` (nessuna durata), **senza `--flat-playlist` e con `--playlist-items 1-5`** ogni voce ha `channel`, `artists[]`, `track`, `album`, `duration` in ~5–8 s → si usa quella. `YtResult` guadagna `artists` e `album`.

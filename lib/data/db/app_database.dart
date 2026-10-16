@@ -19,7 +19,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.production() : super(driftDatabase(name: 'codecore'));
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -27,8 +27,18 @@ class AppDatabase extends _$AppDatabase {
           if (from < 2) await m.addColumn(playlists, playlists.coverKey);
           if (from < 3) await m.addColumn(tracks, tracks.replayGainDb);
           if (from < 4) {
+            // Created from the current definition, v5 columns included.
             await m.createTable(playlistImports);
             await m.createTable(playlistImportItems);
+          } else if (from < 5) {
+            await m.addColumn(playlistImports, playlistImports.sourceKind);
+            await m.addColumn(playlistImports, playlistImports.folderPath);
+            await m.addColumn(playlistImports, playlistImports.numberFiles);
+            await m.addColumn(playlistImports, playlistImports.linkOnly);
+            await m.addColumn(playlistImports, playlistImports.planFirst);
+            await m.addColumn(playlistImports, playlistImports.fetchCovers);
+            await m.addColumn(playlistImportItems, playlistImportItems.note);
+            await m.addColumn(playlistImportItems, playlistImportItems.location);
           }
         },
         beforeOpen: (details) async {

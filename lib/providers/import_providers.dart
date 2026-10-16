@@ -115,10 +115,16 @@ class ImportProgress {
     List<PlaylistImportItem> items,
   ) {
     var done = 0, review = 0, missing = 0;
-    for (final i in items) {
+    // Rows a sync took out of the source are no longer part of the import.
+    final live = [
+      for (final i in items)
+        if (i.state != ImportItemStatus.removed) i,
+    ];
+    for (final i in live) {
       switch (i.state) {
         case ImportItemStatus.pending:
         case ImportItemStatus.queued:
+        case ImportItemStatus.removed:
           break;
         case ImportItemStatus.review:
           review++;
@@ -130,6 +136,7 @@ class ImportProgress {
         case ImportItemStatus.downloaded:
         case ImportItemStatus.linked:
         case ImportItemStatus.skipped:
+        case ImportItemStatus.planned:
           done++;
       }
     }
@@ -137,7 +144,7 @@ class ImportProgress {
       id: imp.id,
       playlistId: imp.playlistId,
       name: imp.sourceName,
-      total: items.length,
+      total: live.length,
       done: done,
       review: review,
       missing: missing,

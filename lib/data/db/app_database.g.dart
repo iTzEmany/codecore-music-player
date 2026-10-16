@@ -2747,6 +2747,89 @@ class $PlaylistImportsTable extends PlaylistImports
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
+  static const VerificationMeta _sourceKindMeta = const VerificationMeta(
+    'sourceKind',
+  );
+  @override
+  late final GeneratedColumn<String> sourceKind = GeneratedColumn<String>(
+    'source_kind',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('exportify'),
+  );
+  static const VerificationMeta _folderPathMeta = const VerificationMeta(
+    'folderPath',
+  );
+  @override
+  late final GeneratedColumn<String> folderPath = GeneratedColumn<String>(
+    'folder_path',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _numberFilesMeta = const VerificationMeta(
+    'numberFiles',
+  );
+  @override
+  late final GeneratedColumn<bool> numberFiles = GeneratedColumn<bool>(
+    'number_files',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("number_files" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _linkOnlyMeta = const VerificationMeta(
+    'linkOnly',
+  );
+  @override
+  late final GeneratedColumn<bool> linkOnly = GeneratedColumn<bool>(
+    'link_only',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("link_only" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _planFirstMeta = const VerificationMeta(
+    'planFirst',
+  );
+  @override
+  late final GeneratedColumn<bool> planFirst = GeneratedColumn<bool>(
+    'plan_first',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("plan_first" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _fetchCoversMeta = const VerificationMeta(
+    'fetchCovers',
+  );
+  @override
+  late final GeneratedColumn<bool> fetchCovers = GeneratedColumn<bool>(
+    'fetch_covers',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("fetch_covers" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -2754,6 +2837,12 @@ class $PlaylistImportsTable extends PlaylistImports
     sourceName,
     createdAt,
     status,
+    sourceKind,
+    folderPath,
+    numberFiles,
+    linkOnly,
+    planFirst,
+    fetchCovers,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -2800,6 +2889,48 @@ class $PlaylistImportsTable extends PlaylistImports
         status.isAcceptableOrUnknown(data['status']!, _statusMeta),
       );
     }
+    if (data.containsKey('source_kind')) {
+      context.handle(
+        _sourceKindMeta,
+        sourceKind.isAcceptableOrUnknown(data['source_kind']!, _sourceKindMeta),
+      );
+    }
+    if (data.containsKey('folder_path')) {
+      context.handle(
+        _folderPathMeta,
+        folderPath.isAcceptableOrUnknown(data['folder_path']!, _folderPathMeta),
+      );
+    }
+    if (data.containsKey('number_files')) {
+      context.handle(
+        _numberFilesMeta,
+        numberFiles.isAcceptableOrUnknown(
+          data['number_files']!,
+          _numberFilesMeta,
+        ),
+      );
+    }
+    if (data.containsKey('link_only')) {
+      context.handle(
+        _linkOnlyMeta,
+        linkOnly.isAcceptableOrUnknown(data['link_only']!, _linkOnlyMeta),
+      );
+    }
+    if (data.containsKey('plan_first')) {
+      context.handle(
+        _planFirstMeta,
+        planFirst.isAcceptableOrUnknown(data['plan_first']!, _planFirstMeta),
+      );
+    }
+    if (data.containsKey('fetch_covers')) {
+      context.handle(
+        _fetchCoversMeta,
+        fetchCovers.isAcceptableOrUnknown(
+          data['fetch_covers']!,
+          _fetchCoversMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -2829,6 +2960,30 @@ class $PlaylistImportsTable extends PlaylistImports
         DriftSqlType.int,
         data['${effectivePrefix}status'],
       )!,
+      sourceKind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source_kind'],
+      )!,
+      folderPath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}folder_path'],
+      ),
+      numberFiles: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}number_files'],
+      )!,
+      linkOnly: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}link_only'],
+      )!,
+      planFirst: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}plan_first'],
+      )!,
+      fetchCovers: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}fetch_covers'],
+      )!,
     );
   }
 
@@ -2846,12 +3001,37 @@ class PlaylistImport extends DataClass implements Insertable<PlaylistImport> {
 
   /// 0 running · 1 paused · 2 finished · 3 cancelled.
   final int status;
+
+  /// Where the rows came from: `exportify` · `tunemymusic` · `soundiiz` ·
+  /// `lastfm` · `csv` · `m3u` · `xspf`.
+  final String sourceKind;
+
+  /// Sub-folder of the download folder for this import (null = none).
+  final String? folderPath;
+
+  /// Prefix downloaded files with their position (`007 - Artist - Title`).
+  final bool numberFiles;
+
+  /// Link what the library has and download nothing.
+  final bool linkOnly;
+
+  /// Search everything first and wait for the user before downloading.
+  final bool planFirst;
+
+  /// Look the album cover up after each download.
+  final bool fetchCovers;
   const PlaylistImport({
     required this.id,
     required this.playlistId,
     required this.sourceName,
     required this.createdAt,
     required this.status,
+    required this.sourceKind,
+    this.folderPath,
+    required this.numberFiles,
+    required this.linkOnly,
+    required this.planFirst,
+    required this.fetchCovers,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2861,6 +3041,14 @@ class PlaylistImport extends DataClass implements Insertable<PlaylistImport> {
     map['source_name'] = Variable<String>(sourceName);
     map['created_at'] = Variable<int>(createdAt);
     map['status'] = Variable<int>(status);
+    map['source_kind'] = Variable<String>(sourceKind);
+    if (!nullToAbsent || folderPath != null) {
+      map['folder_path'] = Variable<String>(folderPath);
+    }
+    map['number_files'] = Variable<bool>(numberFiles);
+    map['link_only'] = Variable<bool>(linkOnly);
+    map['plan_first'] = Variable<bool>(planFirst);
+    map['fetch_covers'] = Variable<bool>(fetchCovers);
     return map;
   }
 
@@ -2871,6 +3059,14 @@ class PlaylistImport extends DataClass implements Insertable<PlaylistImport> {
       sourceName: Value(sourceName),
       createdAt: Value(createdAt),
       status: Value(status),
+      sourceKind: Value(sourceKind),
+      folderPath: folderPath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(folderPath),
+      numberFiles: Value(numberFiles),
+      linkOnly: Value(linkOnly),
+      planFirst: Value(planFirst),
+      fetchCovers: Value(fetchCovers),
     );
   }
 
@@ -2885,6 +3081,12 @@ class PlaylistImport extends DataClass implements Insertable<PlaylistImport> {
       sourceName: serializer.fromJson<String>(json['sourceName']),
       createdAt: serializer.fromJson<int>(json['createdAt']),
       status: serializer.fromJson<int>(json['status']),
+      sourceKind: serializer.fromJson<String>(json['sourceKind']),
+      folderPath: serializer.fromJson<String?>(json['folderPath']),
+      numberFiles: serializer.fromJson<bool>(json['numberFiles']),
+      linkOnly: serializer.fromJson<bool>(json['linkOnly']),
+      planFirst: serializer.fromJson<bool>(json['planFirst']),
+      fetchCovers: serializer.fromJson<bool>(json['fetchCovers']),
     );
   }
   @override
@@ -2896,6 +3098,12 @@ class PlaylistImport extends DataClass implements Insertable<PlaylistImport> {
       'sourceName': serializer.toJson<String>(sourceName),
       'createdAt': serializer.toJson<int>(createdAt),
       'status': serializer.toJson<int>(status),
+      'sourceKind': serializer.toJson<String>(sourceKind),
+      'folderPath': serializer.toJson<String?>(folderPath),
+      'numberFiles': serializer.toJson<bool>(numberFiles),
+      'linkOnly': serializer.toJson<bool>(linkOnly),
+      'planFirst': serializer.toJson<bool>(planFirst),
+      'fetchCovers': serializer.toJson<bool>(fetchCovers),
     };
   }
 
@@ -2905,12 +3113,24 @@ class PlaylistImport extends DataClass implements Insertable<PlaylistImport> {
     String? sourceName,
     int? createdAt,
     int? status,
+    String? sourceKind,
+    Value<String?> folderPath = const Value.absent(),
+    bool? numberFiles,
+    bool? linkOnly,
+    bool? planFirst,
+    bool? fetchCovers,
   }) => PlaylistImport(
     id: id ?? this.id,
     playlistId: playlistId ?? this.playlistId,
     sourceName: sourceName ?? this.sourceName,
     createdAt: createdAt ?? this.createdAt,
     status: status ?? this.status,
+    sourceKind: sourceKind ?? this.sourceKind,
+    folderPath: folderPath.present ? folderPath.value : this.folderPath,
+    numberFiles: numberFiles ?? this.numberFiles,
+    linkOnly: linkOnly ?? this.linkOnly,
+    planFirst: planFirst ?? this.planFirst,
+    fetchCovers: fetchCovers ?? this.fetchCovers,
   );
   PlaylistImport copyWithCompanion(PlaylistImportsCompanion data) {
     return PlaylistImport(
@@ -2923,6 +3143,20 @@ class PlaylistImport extends DataClass implements Insertable<PlaylistImport> {
           : this.sourceName,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       status: data.status.present ? data.status.value : this.status,
+      sourceKind: data.sourceKind.present
+          ? data.sourceKind.value
+          : this.sourceKind,
+      folderPath: data.folderPath.present
+          ? data.folderPath.value
+          : this.folderPath,
+      numberFiles: data.numberFiles.present
+          ? data.numberFiles.value
+          : this.numberFiles,
+      linkOnly: data.linkOnly.present ? data.linkOnly.value : this.linkOnly,
+      planFirst: data.planFirst.present ? data.planFirst.value : this.planFirst,
+      fetchCovers: data.fetchCovers.present
+          ? data.fetchCovers.value
+          : this.fetchCovers,
     );
   }
 
@@ -2933,14 +3167,31 @@ class PlaylistImport extends DataClass implements Insertable<PlaylistImport> {
           ..write('playlistId: $playlistId, ')
           ..write('sourceName: $sourceName, ')
           ..write('createdAt: $createdAt, ')
-          ..write('status: $status')
+          ..write('status: $status, ')
+          ..write('sourceKind: $sourceKind, ')
+          ..write('folderPath: $folderPath, ')
+          ..write('numberFiles: $numberFiles, ')
+          ..write('linkOnly: $linkOnly, ')
+          ..write('planFirst: $planFirst, ')
+          ..write('fetchCovers: $fetchCovers')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, playlistId, sourceName, createdAt, status);
+  int get hashCode => Object.hash(
+    id,
+    playlistId,
+    sourceName,
+    createdAt,
+    status,
+    sourceKind,
+    folderPath,
+    numberFiles,
+    linkOnly,
+    planFirst,
+    fetchCovers,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2949,7 +3200,13 @@ class PlaylistImport extends DataClass implements Insertable<PlaylistImport> {
           other.playlistId == this.playlistId &&
           other.sourceName == this.sourceName &&
           other.createdAt == this.createdAt &&
-          other.status == this.status);
+          other.status == this.status &&
+          other.sourceKind == this.sourceKind &&
+          other.folderPath == this.folderPath &&
+          other.numberFiles == this.numberFiles &&
+          other.linkOnly == this.linkOnly &&
+          other.planFirst == this.planFirst &&
+          other.fetchCovers == this.fetchCovers);
 }
 
 class PlaylistImportsCompanion extends UpdateCompanion<PlaylistImport> {
@@ -2958,12 +3215,24 @@ class PlaylistImportsCompanion extends UpdateCompanion<PlaylistImport> {
   final Value<String> sourceName;
   final Value<int> createdAt;
   final Value<int> status;
+  final Value<String> sourceKind;
+  final Value<String?> folderPath;
+  final Value<bool> numberFiles;
+  final Value<bool> linkOnly;
+  final Value<bool> planFirst;
+  final Value<bool> fetchCovers;
   const PlaylistImportsCompanion({
     this.id = const Value.absent(),
     this.playlistId = const Value.absent(),
     this.sourceName = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.status = const Value.absent(),
+    this.sourceKind = const Value.absent(),
+    this.folderPath = const Value.absent(),
+    this.numberFiles = const Value.absent(),
+    this.linkOnly = const Value.absent(),
+    this.planFirst = const Value.absent(),
+    this.fetchCovers = const Value.absent(),
   });
   PlaylistImportsCompanion.insert({
     this.id = const Value.absent(),
@@ -2971,6 +3240,12 @@ class PlaylistImportsCompanion extends UpdateCompanion<PlaylistImport> {
     required String sourceName,
     required int createdAt,
     this.status = const Value.absent(),
+    this.sourceKind = const Value.absent(),
+    this.folderPath = const Value.absent(),
+    this.numberFiles = const Value.absent(),
+    this.linkOnly = const Value.absent(),
+    this.planFirst = const Value.absent(),
+    this.fetchCovers = const Value.absent(),
   }) : playlistId = Value(playlistId),
        sourceName = Value(sourceName),
        createdAt = Value(createdAt);
@@ -2980,6 +3255,12 @@ class PlaylistImportsCompanion extends UpdateCompanion<PlaylistImport> {
     Expression<String>? sourceName,
     Expression<int>? createdAt,
     Expression<int>? status,
+    Expression<String>? sourceKind,
+    Expression<String>? folderPath,
+    Expression<bool>? numberFiles,
+    Expression<bool>? linkOnly,
+    Expression<bool>? planFirst,
+    Expression<bool>? fetchCovers,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -2987,6 +3268,12 @@ class PlaylistImportsCompanion extends UpdateCompanion<PlaylistImport> {
       if (sourceName != null) 'source_name': sourceName,
       if (createdAt != null) 'created_at': createdAt,
       if (status != null) 'status': status,
+      if (sourceKind != null) 'source_kind': sourceKind,
+      if (folderPath != null) 'folder_path': folderPath,
+      if (numberFiles != null) 'number_files': numberFiles,
+      if (linkOnly != null) 'link_only': linkOnly,
+      if (planFirst != null) 'plan_first': planFirst,
+      if (fetchCovers != null) 'fetch_covers': fetchCovers,
     });
   }
 
@@ -2996,6 +3283,12 @@ class PlaylistImportsCompanion extends UpdateCompanion<PlaylistImport> {
     Value<String>? sourceName,
     Value<int>? createdAt,
     Value<int>? status,
+    Value<String>? sourceKind,
+    Value<String?>? folderPath,
+    Value<bool>? numberFiles,
+    Value<bool>? linkOnly,
+    Value<bool>? planFirst,
+    Value<bool>? fetchCovers,
   }) {
     return PlaylistImportsCompanion(
       id: id ?? this.id,
@@ -3003,6 +3296,12 @@ class PlaylistImportsCompanion extends UpdateCompanion<PlaylistImport> {
       sourceName: sourceName ?? this.sourceName,
       createdAt: createdAt ?? this.createdAt,
       status: status ?? this.status,
+      sourceKind: sourceKind ?? this.sourceKind,
+      folderPath: folderPath ?? this.folderPath,
+      numberFiles: numberFiles ?? this.numberFiles,
+      linkOnly: linkOnly ?? this.linkOnly,
+      planFirst: planFirst ?? this.planFirst,
+      fetchCovers: fetchCovers ?? this.fetchCovers,
     );
   }
 
@@ -3024,6 +3323,24 @@ class PlaylistImportsCompanion extends UpdateCompanion<PlaylistImport> {
     if (status.present) {
       map['status'] = Variable<int>(status.value);
     }
+    if (sourceKind.present) {
+      map['source_kind'] = Variable<String>(sourceKind.value);
+    }
+    if (folderPath.present) {
+      map['folder_path'] = Variable<String>(folderPath.value);
+    }
+    if (numberFiles.present) {
+      map['number_files'] = Variable<bool>(numberFiles.value);
+    }
+    if (linkOnly.present) {
+      map['link_only'] = Variable<bool>(linkOnly.value);
+    }
+    if (planFirst.present) {
+      map['plan_first'] = Variable<bool>(planFirst.value);
+    }
+    if (fetchCovers.present) {
+      map['fetch_covers'] = Variable<bool>(fetchCovers.value);
+    }
     return map;
   }
 
@@ -3034,7 +3351,13 @@ class PlaylistImportsCompanion extends UpdateCompanion<PlaylistImport> {
           ..write('playlistId: $playlistId, ')
           ..write('sourceName: $sourceName, ')
           ..write('createdAt: $createdAt, ')
-          ..write('status: $status')
+          ..write('status: $status, ')
+          ..write('sourceKind: $sourceKind, ')
+          ..write('folderPath: $folderPath, ')
+          ..write('numberFiles: $numberFiles, ')
+          ..write('linkOnly: $linkOnly, ')
+          ..write('planFirst: $planFirst, ')
+          ..write('fetchCovers: $fetchCovers')
           ..write(')'))
         .toString();
   }
@@ -3175,6 +3498,26 @@ class $PlaylistImportItemsTable extends PlaylistImportItems
     type: DriftSqlType.double,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _noteMeta = const VerificationMeta('note');
+  @override
+  late final GeneratedColumn<String> note = GeneratedColumn<String>(
+    'note',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _locationMeta = const VerificationMeta(
+    'location',
+  );
+  @override
+  late final GeneratedColumn<String> location = GeneratedColumn<String>(
+    'location',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     importId,
@@ -3189,6 +3532,8 @@ class $PlaylistImportItemsTable extends PlaylistImportItems
     candidates,
     trackId,
     score,
+    note,
+    location,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -3282,6 +3627,18 @@ class $PlaylistImportItemsTable extends PlaylistImportItems
         score.isAcceptableOrUnknown(data['score']!, _scoreMeta),
       );
     }
+    if (data.containsKey('note')) {
+      context.handle(
+        _noteMeta,
+        note.isAcceptableOrUnknown(data['note']!, _noteMeta),
+      );
+    }
+    if (data.containsKey('location')) {
+      context.handle(
+        _locationMeta,
+        location.isAcceptableOrUnknown(data['location']!, _locationMeta),
+      );
+    }
     return context;
   }
 
@@ -3339,6 +3696,14 @@ class $PlaylistImportItemsTable extends PlaylistImportItems
         DriftSqlType.double,
         data['${effectivePrefix}score'],
       ),
+      note: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}note'],
+      ),
+      location: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}location'],
+      ),
     );
   }
 
@@ -3361,7 +3726,8 @@ class PlaylistImportItem extends DataClass
   final String? isrc;
 
   /// 0 to search · 1 queued · 2 downloaded · 3 linked (already in library)
-  /// · 4 to review · 5 not found · 6 failed · 7 skipped by the user.
+  /// · 4 to review · 5 not found · 6 failed · 7 skipped by the user
+  /// · 8 planned (chosen, waiting for «Download») · 9 removed from the source.
   final int status;
   final String? videoId;
 
@@ -3369,6 +3735,12 @@ class PlaylistImportItem extends DataClass
   final String? candidates;
   final int? trackId;
   final double? score;
+
+  /// Why a row is «not found» or «to review» (shown and exported).
+  final String? note;
+
+  /// Path or URL of a local M3U/XSPF entry.
+  final String? location;
   const PlaylistImportItem({
     required this.importId,
     required this.rowIndex,
@@ -3382,6 +3754,8 @@ class PlaylistImportItem extends DataClass
     this.candidates,
     this.trackId,
     this.score,
+    this.note,
+    this.location,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -3412,6 +3786,12 @@ class PlaylistImportItem extends DataClass
     if (!nullToAbsent || score != null) {
       map['score'] = Variable<double>(score);
     }
+    if (!nullToAbsent || note != null) {
+      map['note'] = Variable<String>(note);
+    }
+    if (!nullToAbsent || location != null) {
+      map['location'] = Variable<String>(location);
+    }
     return map;
   }
 
@@ -3441,6 +3821,10 @@ class PlaylistImportItem extends DataClass
       score: score == null && nullToAbsent
           ? const Value.absent()
           : Value(score),
+      note: note == null && nullToAbsent ? const Value.absent() : Value(note),
+      location: location == null && nullToAbsent
+          ? const Value.absent()
+          : Value(location),
     );
   }
 
@@ -3462,6 +3846,8 @@ class PlaylistImportItem extends DataClass
       candidates: serializer.fromJson<String?>(json['candidates']),
       trackId: serializer.fromJson<int?>(json['trackId']),
       score: serializer.fromJson<double?>(json['score']),
+      note: serializer.fromJson<String?>(json['note']),
+      location: serializer.fromJson<String?>(json['location']),
     );
   }
   @override
@@ -3480,6 +3866,8 @@ class PlaylistImportItem extends DataClass
       'candidates': serializer.toJson<String?>(candidates),
       'trackId': serializer.toJson<int?>(trackId),
       'score': serializer.toJson<double?>(score),
+      'note': serializer.toJson<String?>(note),
+      'location': serializer.toJson<String?>(location),
     };
   }
 
@@ -3496,6 +3884,8 @@ class PlaylistImportItem extends DataClass
     Value<String?> candidates = const Value.absent(),
     Value<int?> trackId = const Value.absent(),
     Value<double?> score = const Value.absent(),
+    Value<String?> note = const Value.absent(),
+    Value<String?> location = const Value.absent(),
   }) => PlaylistImportItem(
     importId: importId ?? this.importId,
     rowIndex: rowIndex ?? this.rowIndex,
@@ -3509,6 +3899,8 @@ class PlaylistImportItem extends DataClass
     candidates: candidates.present ? candidates.value : this.candidates,
     trackId: trackId.present ? trackId.value : this.trackId,
     score: score.present ? score.value : this.score,
+    note: note.present ? note.value : this.note,
+    location: location.present ? location.value : this.location,
   );
   PlaylistImportItem copyWithCompanion(PlaylistImportItemsCompanion data) {
     return PlaylistImportItem(
@@ -3528,6 +3920,8 @@ class PlaylistImportItem extends DataClass
           : this.candidates,
       trackId: data.trackId.present ? data.trackId.value : this.trackId,
       score: data.score.present ? data.score.value : this.score,
+      note: data.note.present ? data.note.value : this.note,
+      location: data.location.present ? data.location.value : this.location,
     );
   }
 
@@ -3545,7 +3939,9 @@ class PlaylistImportItem extends DataClass
           ..write('videoId: $videoId, ')
           ..write('candidates: $candidates, ')
           ..write('trackId: $trackId, ')
-          ..write('score: $score')
+          ..write('score: $score, ')
+          ..write('note: $note, ')
+          ..write('location: $location')
           ..write(')'))
         .toString();
   }
@@ -3564,6 +3960,8 @@ class PlaylistImportItem extends DataClass
     candidates,
     trackId,
     score,
+    note,
+    location,
   );
   @override
   bool operator ==(Object other) =>
@@ -3580,7 +3978,9 @@ class PlaylistImportItem extends DataClass
           other.videoId == this.videoId &&
           other.candidates == this.candidates &&
           other.trackId == this.trackId &&
-          other.score == this.score);
+          other.score == this.score &&
+          other.note == this.note &&
+          other.location == this.location);
 }
 
 class PlaylistImportItemsCompanion extends UpdateCompanion<PlaylistImportItem> {
@@ -3596,6 +3996,8 @@ class PlaylistImportItemsCompanion extends UpdateCompanion<PlaylistImportItem> {
   final Value<String?> candidates;
   final Value<int?> trackId;
   final Value<double?> score;
+  final Value<String?> note;
+  final Value<String?> location;
   final Value<int> rowid;
   const PlaylistImportItemsCompanion({
     this.importId = const Value.absent(),
@@ -3610,6 +4012,8 @@ class PlaylistImportItemsCompanion extends UpdateCompanion<PlaylistImportItem> {
     this.candidates = const Value.absent(),
     this.trackId = const Value.absent(),
     this.score = const Value.absent(),
+    this.note = const Value.absent(),
+    this.location = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   PlaylistImportItemsCompanion.insert({
@@ -3625,6 +4029,8 @@ class PlaylistImportItemsCompanion extends UpdateCompanion<PlaylistImportItem> {
     this.candidates = const Value.absent(),
     this.trackId = const Value.absent(),
     this.score = const Value.absent(),
+    this.note = const Value.absent(),
+    this.location = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : importId = Value(importId),
        rowIndex = Value(rowIndex),
@@ -3643,6 +4049,8 @@ class PlaylistImportItemsCompanion extends UpdateCompanion<PlaylistImportItem> {
     Expression<String>? candidates,
     Expression<int>? trackId,
     Expression<double>? score,
+    Expression<String>? note,
+    Expression<String>? location,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -3658,6 +4066,8 @@ class PlaylistImportItemsCompanion extends UpdateCompanion<PlaylistImportItem> {
       if (candidates != null) 'candidates': candidates,
       if (trackId != null) 'track_id': trackId,
       if (score != null) 'score': score,
+      if (note != null) 'note': note,
+      if (location != null) 'location': location,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -3675,6 +4085,8 @@ class PlaylistImportItemsCompanion extends UpdateCompanion<PlaylistImportItem> {
     Value<String?>? candidates,
     Value<int?>? trackId,
     Value<double?>? score,
+    Value<String?>? note,
+    Value<String?>? location,
     Value<int>? rowid,
   }) {
     return PlaylistImportItemsCompanion(
@@ -3690,6 +4102,8 @@ class PlaylistImportItemsCompanion extends UpdateCompanion<PlaylistImportItem> {
       candidates: candidates ?? this.candidates,
       trackId: trackId ?? this.trackId,
       score: score ?? this.score,
+      note: note ?? this.note,
+      location: location ?? this.location,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -3733,6 +4147,12 @@ class PlaylistImportItemsCompanion extends UpdateCompanion<PlaylistImportItem> {
     if (score.present) {
       map['score'] = Variable<double>(score.value);
     }
+    if (note.present) {
+      map['note'] = Variable<String>(note.value);
+    }
+    if (location.present) {
+      map['location'] = Variable<String>(location.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -3754,6 +4174,8 @@ class PlaylistImportItemsCompanion extends UpdateCompanion<PlaylistImportItem> {
           ..write('candidates: $candidates, ')
           ..write('trackId: $trackId, ')
           ..write('score: $score, ')
+          ..write('note: $note, ')
+          ..write('location: $location, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -5761,6 +6183,12 @@ typedef $$PlaylistImportsTableCreateCompanionBuilder =
       required String sourceName,
       required int createdAt,
       Value<int> status,
+      Value<String> sourceKind,
+      Value<String?> folderPath,
+      Value<bool> numberFiles,
+      Value<bool> linkOnly,
+      Value<bool> planFirst,
+      Value<bool> fetchCovers,
     });
 typedef $$PlaylistImportsTableUpdateCompanionBuilder =
     PlaylistImportsCompanion Function({
@@ -5769,6 +6197,12 @@ typedef $$PlaylistImportsTableUpdateCompanionBuilder =
       Value<String> sourceName,
       Value<int> createdAt,
       Value<int> status,
+      Value<String> sourceKind,
+      Value<String?> folderPath,
+      Value<bool> numberFiles,
+      Value<bool> linkOnly,
+      Value<bool> planFirst,
+      Value<bool> fetchCovers,
     });
 
 final class $$PlaylistImportsTableReferences
@@ -5851,6 +6285,36 @@ class $$PlaylistImportsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get sourceKind => $composableBuilder(
+    column: $table.sourceKind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get folderPath => $composableBuilder(
+    column: $table.folderPath,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get numberFiles => $composableBuilder(
+    column: $table.numberFiles,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get linkOnly => $composableBuilder(
+    column: $table.linkOnly,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get planFirst => $composableBuilder(
+    column: $table.planFirst,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get fetchCovers => $composableBuilder(
+    column: $table.fetchCovers,
+    builder: (column) => ColumnFilters(column),
+  );
+
   $$PlaylistsTableFilterComposer get playlistId {
     final $$PlaylistsTableFilterComposer composer = $composerBuilder(
       composer: this,
@@ -5929,6 +6393,36 @@ class $$PlaylistImportsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get sourceKind => $composableBuilder(
+    column: $table.sourceKind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get folderPath => $composableBuilder(
+    column: $table.folderPath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get numberFiles => $composableBuilder(
+    column: $table.numberFiles,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get linkOnly => $composableBuilder(
+    column: $table.linkOnly,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get planFirst => $composableBuilder(
+    column: $table.planFirst,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get fetchCovers => $composableBuilder(
+    column: $table.fetchCovers,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$PlaylistsTableOrderingComposer get playlistId {
     final $$PlaylistsTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -5975,6 +6469,32 @@ class $$PlaylistImportsTableAnnotationComposer
 
   GeneratedColumn<int> get status =>
       $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<String> get sourceKind => $composableBuilder(
+    column: $table.sourceKind,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get folderPath => $composableBuilder(
+    column: $table.folderPath,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get numberFiles => $composableBuilder(
+    column: $table.numberFiles,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get linkOnly =>
+      $composableBuilder(column: $table.linkOnly, builder: (column) => column);
+
+  GeneratedColumn<bool> get planFirst =>
+      $composableBuilder(column: $table.planFirst, builder: (column) => column);
+
+  GeneratedColumn<bool> get fetchCovers => $composableBuilder(
+    column: $table.fetchCovers,
+    builder: (column) => column,
+  );
 
   $$PlaylistsTableAnnotationComposer get playlistId {
     final $$PlaylistsTableAnnotationComposer composer = $composerBuilder(
@@ -6064,12 +6584,24 @@ class $$PlaylistImportsTableTableManager
                 Value<String> sourceName = const Value.absent(),
                 Value<int> createdAt = const Value.absent(),
                 Value<int> status = const Value.absent(),
+                Value<String> sourceKind = const Value.absent(),
+                Value<String?> folderPath = const Value.absent(),
+                Value<bool> numberFiles = const Value.absent(),
+                Value<bool> linkOnly = const Value.absent(),
+                Value<bool> planFirst = const Value.absent(),
+                Value<bool> fetchCovers = const Value.absent(),
               }) => PlaylistImportsCompanion(
                 id: id,
                 playlistId: playlistId,
                 sourceName: sourceName,
                 createdAt: createdAt,
                 status: status,
+                sourceKind: sourceKind,
+                folderPath: folderPath,
+                numberFiles: numberFiles,
+                linkOnly: linkOnly,
+                planFirst: planFirst,
+                fetchCovers: fetchCovers,
               ),
           createCompanionCallback:
               ({
@@ -6078,12 +6610,24 @@ class $$PlaylistImportsTableTableManager
                 required String sourceName,
                 required int createdAt,
                 Value<int> status = const Value.absent(),
+                Value<String> sourceKind = const Value.absent(),
+                Value<String?> folderPath = const Value.absent(),
+                Value<bool> numberFiles = const Value.absent(),
+                Value<bool> linkOnly = const Value.absent(),
+                Value<bool> planFirst = const Value.absent(),
+                Value<bool> fetchCovers = const Value.absent(),
               }) => PlaylistImportsCompanion.insert(
                 id: id,
                 playlistId: playlistId,
                 sourceName: sourceName,
                 createdAt: createdAt,
                 status: status,
+                sourceKind: sourceKind,
+                folderPath: folderPath,
+                numberFiles: numberFiles,
+                linkOnly: linkOnly,
+                planFirst: planFirst,
+                fetchCovers: fetchCovers,
               ),
           withReferenceMapper: (p0) => p0
               .map(
@@ -6189,6 +6733,8 @@ typedef $$PlaylistImportItemsTableCreateCompanionBuilder =
       Value<String?> candidates,
       Value<int?> trackId,
       Value<double?> score,
+      Value<String?> note,
+      Value<String?> location,
       Value<int> rowid,
     });
 typedef $$PlaylistImportItemsTableUpdateCompanionBuilder =
@@ -6205,6 +6751,8 @@ typedef $$PlaylistImportItemsTableUpdateCompanionBuilder =
       Value<String?> candidates,
       Value<int?> trackId,
       Value<double?> score,
+      Value<String?> note,
+      Value<String?> location,
       Value<int> rowid,
     });
 
@@ -6316,6 +6864,16 @@ class $$PlaylistImportItemsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get location => $composableBuilder(
+    column: $table.location,
+    builder: (column) => ColumnFilters(column),
+  );
+
   $$PlaylistImportsTableFilterComposer get importId {
     final $$PlaylistImportsTableFilterComposer composer = $composerBuilder(
       composer: this,
@@ -6422,6 +6980,16 @@ class $$PlaylistImportItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get location => $composableBuilder(
+    column: $table.location,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$PlaylistImportsTableOrderingComposer get importId {
     final $$PlaylistImportsTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -6511,6 +7079,12 @@ class $$PlaylistImportItemsTableAnnotationComposer
 
   GeneratedColumn<double> get score =>
       $composableBuilder(column: $table.score, builder: (column) => column);
+
+  GeneratedColumn<String> get note =>
+      $composableBuilder(column: $table.note, builder: (column) => column);
+
+  GeneratedColumn<String> get location =>
+      $composableBuilder(column: $table.location, builder: (column) => column);
 
   $$PlaylistImportsTableAnnotationComposer get importId {
     final $$PlaylistImportsTableAnnotationComposer composer = $composerBuilder(
@@ -6607,6 +7181,8 @@ class $$PlaylistImportItemsTableTableManager
                 Value<String?> candidates = const Value.absent(),
                 Value<int?> trackId = const Value.absent(),
                 Value<double?> score = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                Value<String?> location = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PlaylistImportItemsCompanion(
                 importId: importId,
@@ -6621,6 +7197,8 @@ class $$PlaylistImportItemsTableTableManager
                 candidates: candidates,
                 trackId: trackId,
                 score: score,
+                note: note,
+                location: location,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -6637,6 +7215,8 @@ class $$PlaylistImportItemsTableTableManager
                 Value<String?> candidates = const Value.absent(),
                 Value<int?> trackId = const Value.absent(),
                 Value<double?> score = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                Value<String?> location = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PlaylistImportItemsCompanion.insert(
                 importId: importId,
@@ -6651,6 +7231,8 @@ class $$PlaylistImportItemsTableTableManager
                 candidates: candidates,
                 trackId: trackId,
                 score: score,
+                note: note,
+                location: location,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

@@ -57,4 +57,59 @@ void main() {
     expect(await db.select(db.playlistImports).get(), isEmpty);
     await db.close();
   });
+
+  test('v4 database gets the v5 import columns and keeps its import intact',
+      () async {
+    final dir = Directory.systemTemp.createTempSync('mig5');
+    addTearDown(() => dir.deleteSync(recursive: true));
+    final file = File(p.join(dir.path, 'v4.db'));
+    final db = AppDatabase(NativeDatabase(file, setup: (raw) {
+      if (raw.userVersion == 0) {
+        raw.execute('CREATE TABLE playlists (id INTEGER PRIMARY KEY '
+            'AUTOINCREMENT, name TEXT NOT NULL, created_at INTEGER NOT NULL, '
+            'cover_key TEXT)');
+        raw.execute("INSERT INTO playlists (name, created_at) VALUES ('Mood', 1)");
+        raw.execute('CREATE TABLE tracks (id INTEGER PRIMARY KEY AUTOINCREMENT, '
+            'path TEXT NOT NULL, replay_gain_db REAL)');
+        raw.execute('CREATE TABLE playlist_imports (id INTEGER PRIMARY KEY '
+            'AUTOINCREMENT, playlist_id INTEGER NOT NULL, source_name TEXT NOT '
+            'NULL, created_at INTEGER NOT NULL, status INTEGER NOT NULL DEFAULT 0)');
+        raw.execute('CREATE TABLE playlist_import_items (import_id INTEGER NOT '
+            'NULL, row_index INTEGER NOT NULL, title TEXT NOT NULL, artists TEXT '
+            'NOT NULL, album TEXT, duration_ms INTEGER, isrc TEXT, status INTEGER '
+            'NOT NULL DEFAULT 0, video_id TEXT, candidates TEXT, track_id '
+            'INTEGER, score REAL, PRIMARY KEY (import_id, row_index))');
+        raw.execute("INSERT INTO playlist_imports (playlist_id, source_name, "
+            "created_at, status) VALUES (1, 'Mood', 5, 2)");
+        raw.execute("INSERT INTO playlist_import_items (import_id, row_index, "
+            "title, artists, status) VALUES (1, 0, 'Song', 'Band', 2)");
+        raw.userVersion = 4;
+      }
+    }));
+    final imp = (await db.select(db.playlistImports).get()).single;
+    expect(imp.sourceName, 'Mood');
+    expect(imp.status, 2);
+    expect(imp.sourceKind, 'exportify', reason: 'default for old imports');
+    expect(imp.folderPath, isNull);
+    expect(imp.numberFiles, isFalse);
+    expect(imp.linkOnly, isFalse);
+    expect(imp.planFirst, isFalse);
+    expect(imp.fetchCovers, isFalse);
+    final item = (await db.select(db.playlistImportItems).get()).single;
+    expect(item.title, 'Song');
+    expect(item.status, 2);
+    expect(item.note, isNull);
+    expect(item.location, isNull);
+    await db.close();
+  });
+
+  test('a fresh install and an upgrade from v3 both end with the v5 columns',
+      () async {
+    final db = AppDatabase(NativeDatabase.memory());
+    final cols = await db.customSelect('PRAGMA table_info(playlist_imports)').get();
+    expect(cols.map((c) => c.read<String>('name')),
+        containsAll(['source_kind', 'folder_path', 'number_files', 'link_only',
+          'plan_first', 'fetch_covers']));
+    await db.close();
+  });
 }
