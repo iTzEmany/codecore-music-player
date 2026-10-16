@@ -819,5 +819,7 @@
         "type": "String"
       }
     }
-  }
+  },
+  "downloadParallel": "Descargas simultáneas",
+  "downloadParallelHint": "Más a la vez es más rápido, pero YouTube puede pedir que vayas más despacio"
 }

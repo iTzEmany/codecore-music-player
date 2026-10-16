@@ -2837,6 +2837,18 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Aggiornamento non riuscito (dettagli nel log)'**
   String get ytDlpUpdateErrOther;
+
+  /// No description provided for @downloadParallel.
+  ///
+  /// In it, this message translates to:
+  /// **'Download contemporanei'**
+  String get downloadParallel;
+
+  /// No description provided for @downloadParallelHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Più insieme è più veloce, ma YouTube può chiedere di rallentare'**
+  String get downloadParallelHint;
 }
 
 class _AppLocalizationsDelegate

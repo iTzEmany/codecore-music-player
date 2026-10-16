@@ -819,5 +819,7 @@
         "type": "String"
       }
     }
-  }
+  },
+  "downloadParallel": "Gleichzeitige Downloads",
+  "downloadParallelHint": "Mehr gleichzeitig ist schneller, aber YouTube kann bremsen"
 }

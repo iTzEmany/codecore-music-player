@@ -48,16 +48,17 @@ class DownloadItem {
 typedef Downloader = Stream<DownloadProgress> Function(
     YtResult result, Directory outDir, CancelToken cancel);
 
-/// Sequential queue: one download at a time.
+/// Queue that runs up to [maxParallel] downloads at once, in arrival order.
 class DownloadQueue {
   DownloadQueue({
+    int maxParallel = 1,
     required this.downloader,
     required this.outDir,
     required this.onChanged,
     this.onDownloaded,
     this.onSettled,
     this.uiInterval = const Duration(milliseconds: 200),
-  });
+  }) : _maxParallel = maxParallel.clamp(1, 3);
 
   final Downloader downloader;
   final Future<Directory?> Function() outDir;
@@ -71,16 +72,26 @@ class DownloadQueue {
 
   final List<DownloadItem> _items = [];
   final Map<int, CancelToken> _tokens = {};
+  final Set<int> _active = {};
+  int _maxParallel;
   int _nextId = 1;
-  bool _running = false;
   bool _disposed = false;
+
+  int get maxParallel => _maxParallel;
+
+  /// Takes effect at once when raised; running downloads are never stopped
+  /// when it is lowered, the queue just starts fewer new ones.
+  set maxParallel(int v) {
+    _maxParallel = v.clamp(1, 3);
+    _pump();
+  }
 
   List<DownloadItem> get items => List.unmodifiable(_items);
 
   void add(YtResult r, {String? tag}) {
     _items.add(DownloadItem(id: _nextId++, result: r, tag: tag));
     _emit();
-    unawaited(_pump());
+    _pump();
   }
 
   void cancel(int id) {
@@ -138,27 +149,24 @@ class DownloadQueue {
     if (i >= 0) _items[i] = f(_items[i]);
   }
 
-  Future<void> _pump() async {
-    if (_running) return;
-    _running = true;
-    try {
-      while (!_disposed) {
-        final next = _items
-            .where((e) => e.status == DownloadStatus.queued)
-            .cast<DownloadItem?>()
-            .firstWhere((_) => true, orElse: () => null);
-        if (next == null) break;
-        await _runOne(next);
-      }
-    } finally {
-      _running = false;
+  void _pump() {
+    if (_disposed) return;
+    while (_active.length < _maxParallel) {
+      final i = _items.indexWhere((e) => e.status == DownloadStatus.queued);
+      if (i < 0) return;
+      final item = _items[i];
+      _active.add(item.id);
+      _items[i] = item.copyWith(status: DownloadStatus.downloading);
+      unawaited(_runOne(item).whenComplete(() {
+        _active.remove(item.id);
+        _pump();
+      }));
     }
   }
 
   Future<void> _runOne(DownloadItem item) async {
     final token = CancelToken();
     _tokens[item.id] = token;
-    _replace(item.id, (e) => e.copyWith(status: DownloadStatus.downloading));
     _emit();
     try {
       final dir = await outDir();

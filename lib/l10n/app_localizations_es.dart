@@ -1570,4 +1570,11 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get ytDlpUpdateErrOther =>
       'Error al actualizar (consulta el registro)';
+
+  @override
+  String get downloadParallel => 'Descargas simultáneas';
+
+  @override
+  String get downloadParallelHint =>
+      'Más a la vez es más rápido, pero YouTube puede pedir que vayas más despacio';
 }

@@ -819,5 +819,7 @@
         "type": "String"
       }
     }
-  }
+  },
+  "downloadParallel": "Simultaneous downloads",
+  "downloadParallelHint": "More at once is faster, but YouTube may ask you to slow down"
 }

@@ -131,4 +131,100 @@ void main() {
         downloadName: 'Queen - Bohemian Rhapsody: 2011 Remaster');
     expect(downloadBaseName(res), 'Queen - Bohemian Rhapsody 2011 Remaster');
   });
+
+  group('parallel queue', () {
+    /// Each download waits for its own completer; lets the test see how many
+    /// are running at any moment.
+    ({DownloadQueue q, Map<String, Completer<void>> gates, List<String> started})
+        make(int parallel) {
+      final gates = <String, Completer<void>>{};
+      final started = <String>[];
+      final q = DownloadQueue(
+        maxParallel: parallel,
+        downloader: (res, dir, cancel) async* {
+          started.add(res.id);
+          final gate = gates.putIfAbsent(res.id, Completer<void>.new);
+          await Future.any([gate.future, cancel.whenCancel]);
+          if (cancel.isCancelled) return;
+          yield DownloadProgress(received: 1, total: 1, path: '/o/${res.id}');
+        },
+        outDir: () async => Directory.systemTemp,
+        onChanged: (_) {},
+        uiInterval: Duration.zero,
+      );
+      return (q: q, gates: gates, started: started);
+    }
+
+    Future<void> settle() => Future<void>.delayed(const Duration(milliseconds: 30));
+
+    test('never more than N at once, started in arrival order', () async {
+      final t = make(2);
+      for (final id in ['a', 'b', 'c', 'd']) {
+        t.q.add(r(id));
+      }
+      await settle();
+      expect(t.started, ['a', 'b']);
+      t.gates['a']!.complete();
+      await settle();
+      expect(t.started, ['a', 'b', 'c']);
+      t.gates['b']!.complete();
+      t.gates['c']!.complete();
+      await settle();
+      expect(t.started, ['a', 'b', 'c', 'd']);
+      t.gates['d']!.complete();
+      await settle();
+      expect(t.q.items.every((e) => e.status == DownloadStatus.done), isTrue);
+    });
+
+    test('cancelling one does not stop the others', () async {
+      final t = make(2);
+      t.q.add(r('a'));
+      t.q.add(r('b'));
+      t.q.add(r('c'));
+      await settle();
+      t.q.cancel(1);
+      await settle();
+      expect(t.q.items[0].status, DownloadStatus.cancelled);
+      expect(t.q.items[1].status, DownloadStatus.downloading);
+      expect(t.started, ['a', 'b', 'c'], reason: 'the freed slot starts c');
+      t.gates['b']!.complete();
+      t.gates['c']!.complete();
+      await settle();
+      expect(t.q.items[1].status, DownloadStatus.done);
+      expect(t.q.items[2].status, DownloadStatus.done);
+    });
+
+    test('raising maxParallel starts more at once; lowering stops nothing',
+        () async {
+      final t = make(1);
+      for (final id in ['a', 'b', 'c']) {
+        t.q.add(r(id));
+      }
+      await settle();
+      expect(t.started, ['a']);
+      t.q.maxParallel = 3;
+      await settle();
+      expect(t.started, ['a', 'b', 'c']);
+      t.q.maxParallel = 1;
+      await settle();
+      expect(t.q.items.where((e) => e.status == DownloadStatus.downloading),
+          hasLength(3));
+      t.q.add(r('d'));
+      t.gates['a']!.complete();
+      t.gates['b']!.complete();
+      await settle();
+      expect(t.started, isNot(contains('d')),
+          reason: 'one still running and the limit is 1');
+      t.gates['c']!.complete();
+      await settle();
+      expect(t.started, contains('d'));
+      t.gates['d']!.complete();
+      await settle();
+    });
+
+    test('the limit is kept between 1 and 3', () {
+      expect(make(9).q.maxParallel, 3);
+      expect(make(0).q.maxParallel, 1);
+    });
+  });
 }

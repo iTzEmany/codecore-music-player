@@ -1010,5 +1010,7 @@
         "type": "String"
       }
     }
-  }
+  },
+  "downloadParallel": "Download contemporanei",
+  "downloadParallelHint": "Più insieme è più veloce, ma YouTube può chiedere di rallentare"
 }

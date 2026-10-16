@@ -33,14 +33,19 @@ class DownloadIndex {
     return path != null && File(path).existsSync() ? path : null;
   }
 
-  Future<void> add(String videoId, String path) async {
+  Future<void> _lastWrite = Future.value();
+
+  /// Writes are chained: parallel downloads must not interleave in the file.
+  Future<void> add(String videoId, String path) {
     _map[videoId] = path;
-    try {
-      await _file.parent.create(recursive: true);
-      await _file.writeAsString(jsonEncode(_map));
-    } on Object catch (e, st) {
-      AppLog.w('downloads index write failed', e, st);
-    }
+    return _lastWrite = _lastWrite.then((_) async {
+      try {
+        await _file.parent.create(recursive: true);
+        await _file.writeAsString(jsonEncode(_map));
+      } on Object catch (e, st) {
+        AppLog.w('downloads index write failed', e, st);
+      }
+    });
   }
 
   static File defaultFile(String supportDir) =>

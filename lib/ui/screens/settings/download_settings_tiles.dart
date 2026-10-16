@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/platform.dart';
 import '../../../l10n/l10n_ext.dart';
+import '../../../providers/settings_providers.dart';
 import '../../../providers/youtube_providers.dart';
 import '../../../providers/yt_dlp_update_providers.dart';
 import '../../widgets/yt_dlp_update_button.dart';
@@ -13,7 +14,31 @@ class DownloadSettingsTiles extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return const Column(children: [_YtDlpTile()]);
+    final l = context.l10n;
+    final n = ref.watch(settingsProvider.select((s) => s.downloadParallel));
+    return Column(
+      children: [
+        const _YtDlpTile(),
+        ListTile(
+          leading: const Icon(Icons.stacked_line_chart),
+          title: Text(l.downloadParallel),
+          subtitle: Text(l.downloadParallelHint),
+          trailing: DropdownButton<int>(
+            value: n,
+            underline: const SizedBox.shrink(),
+            items: [
+              for (final v in const [1, 2, 3])
+                DropdownMenuItem(value: v, child: Text('$v')),
+            ],
+            onChanged: (v) => v == null
+                ? null
+                : ref
+                    .read(settingsProvider.notifier)
+                    .update((c) => c.copyWith(downloadParallel: v)),
+          ),
+        ),
+      ],
+    );
   }
 }
 

@@ -1572,4 +1572,11 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get ytDlpUpdateErrOther =>
       'Aktualisierung fehlgeschlagen (siehe Protokoll)';
+
+  @override
+  String get downloadParallel => 'Gleichzeitige Downloads';
+
+  @override
+  String get downloadParallelHint =>
+      'Mehr gleichzeitig ist schneller, aber YouTube kann bremsen';
 }

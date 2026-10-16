@@ -53,14 +53,13 @@ final downloadIndexProvider = FutureProvider<DownloadIndex>((ref) async {
 Future<(Directory, Folder)?> resolveDownloadFolder(
   FolderRepository repo,
 ) async {
-  final res = await _resolveDownloadFolder(repo);
-  if (res != null) await _removeStalePartFiles(res.$1);
-  return res;
+  return _resolveDownloadFolder(repo);
 }
 
-/// The queue is sequential, so any `.part` left here belongs to a download
-/// that was interrupted (app killed) and will never be completed.
-Future<void> _removeStalePartFiles(Directory dir) async {
+/// Any `.part` found before the first download of a session belongs to a
+/// download that was interrupted (app killed) and will never be completed.
+/// Never call it while downloads are running.
+Future<void> removeStalePartFiles(Directory dir) async {
   try {
     await for (final e in dir.list()) {
       if (e is File && e.path.endsWith('.part')) await e.delete();
@@ -92,6 +91,9 @@ Future<(Directory, Folder)?> _resolveDownloadFolder(
 
 class DownloadsNotifier extends Notifier<List<DownloadItem>> {
   late final DownloadQueue _queue;
+
+  /// The one-off cleanup of leftovers; later downloads just wait for it.
+  Future<void>? _stale;
   final _settled = StreamController<DownloadItem>.broadcast();
 
   /// Every item that finished (done, failed or cancelled), after the file was
@@ -103,13 +105,16 @@ class DownloadsNotifier extends Notifier<List<DownloadItem>> {
     final yt = ref.watch(youtubeServiceProvider);
     Folder? folder;
     _queue = DownloadQueue(
+      maxParallel: ref.read(settingsProvider).downloadParallel,
       downloader: (r, dir, cancel) => yt.download(r, dir, cancel: cancel),
       outDir: () async {
         final res = await resolveDownloadFolder(
           ref.read(folderRepositoryProvider),
         );
         folder = res?.$2;
-        return res?.$1;
+        final dir = res?.$1;
+        if (dir != null) await (_stale ??= removeStalePartFiles(dir));
+        return dir;
       },
       onChanged: (items) => state = items,
       onSettled: (item) {
@@ -129,6 +134,8 @@ class DownloadsNotifier extends Notifier<List<DownloadItem>> {
         await _autoEnrich(path);
       },
     );
+    ref.listen(settingsProvider.select((s) => s.downloadParallel),
+        (_, n) => _queue.maxParallel = n);
     ref.onDispose(() {
       _queue.dispose();
       _settled.close();
