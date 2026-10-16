@@ -108,11 +108,17 @@ class DownloadsNotifier extends Notifier<List<DownloadItem>> {
     _queue = DownloadQueue(
       maxParallel: ref.read(settingsProvider).downloadParallel,
       retryPolicy: RetryPolicy(),
-      downloader: (r, dir, cancel) => yt.download(r, dir,
-          cancel: cancel,
-          options: DownloadOptions(
-              rateLimitKBps:
-                  ref.read(settingsProvider).downloadRateLimitKBps)),
+      downloader: (r, dir, cancel) {
+        final s = ref.read(settingsProvider);
+        return yt.download(r, dir,
+            cancel: cancel,
+            options: DownloadOptions(
+              rateLimitKBps: s.downloadRateLimitKBps,
+              format: s.downloadOriginal
+                  ? DownloadFormat.original
+                  : DownloadFormat.mp3,
+            ));
+      },
       outDir: () async {
         final res = await resolveDownloadFolder(
           ref.read(folderRepositoryProvider),

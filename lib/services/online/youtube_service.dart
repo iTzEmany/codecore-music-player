@@ -31,12 +31,16 @@ class YtResult {
   final String? downloadName;
 }
 
+/// `mp3` = convert to MP3 256 kbps; `original` = keep the audio as served.
+enum DownloadFormat { mp3, original }
+
 /// How a download is run; read from the settings when it starts.
 class DownloadOptions {
-  const DownloadOptions({this.rateLimitKBps});
+  const DownloadOptions({this.rateLimitKBps, this.format = DownloadFormat.mp3});
 
   /// `--limit-rate` in KB/s; null or 0 = unlimited.
   final int? rateLimitKBps;
+  final DownloadFormat format;
 }
 
 class DownloadProgress {

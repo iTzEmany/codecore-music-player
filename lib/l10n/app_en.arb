@@ -856,5 +856,7 @@
         "type": "int"
       }
     }
-  }
+  },
+  "downloadOriginal": "Original quality (no re-encoding)",
+  "downloadOriginalHint": "Keeps YouTube's audio as served (M4A/Opus): no extra loss, smaller files. Off: MP3 256 kbps"
 }

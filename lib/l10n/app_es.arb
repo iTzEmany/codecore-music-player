@@ -856,5 +856,7 @@
         "type": "int"
       }
     }
-  }
+  },
+  "downloadOriginal": "Calidad original (sin recodificar)",
+  "downloadOriginalHint": "Conserva el audio de YouTube tal cual (M4A/Opus): sin pérdida extra, archivos más pequeños. Desactivado: MP3 256 kbps"
 }

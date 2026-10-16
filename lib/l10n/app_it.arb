@@ -1047,5 +1047,7 @@
         "type": "int"
       }
     }
-  }
+  },
+  "downloadOriginal": "Qualità originale (senza ricodifica)",
+  "downloadOriginalHint": "Tiene l'audio di YouTube com'è (M4A/Opus): nessuna perdita, file più piccoli. Spento: MP3 256 kbps"
 }

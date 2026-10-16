@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:path/path.dart' as p;
 
 import '../../core/app_log.dart';
+import 'yt_dlp_args.dart';
 import 'yt_dlp_process_service.dart';
 import 'youtube_service.dart';
 
@@ -62,8 +63,12 @@ class AndroidYtDlpService implements YoutubeService {
       {CancelToken? cancel,
       DownloadOptions options = const DownloadOptions()}) async* {
     await outDir.create(recursive: true);
+    final mp3 = options.format == DownloadFormat.mp3;
     final target = uniquePath(
-        outDir.path, downloadBaseName(r), 'mp3', (f) => File(f).existsSync());
+        outDir.path,
+        downloadBaseName(r),
+        mp3 ? 'mp3' : 'm4a',
+        (f) => anyDownloadExtensionExists(f, (x) => File(x).existsSync()));
     final stem = p.withoutExtension(target);
     final processId = 'dl-${_counter++}';
     final controller = StreamController<DownloadProgress>();
@@ -74,7 +79,7 @@ class AndroidYtDlpService implements YoutubeService {
     final done = _channel.invokeMethod<String>('download', {
       'id': r.id,
       'stem': stem,
-      'convert': true,
+      'convert': mp3,
       'processId': processId,
       'rateLimit': options.rateLimitKBps,
     }).then<String?>((path) => path).catchError((Object e) {

@@ -2879,6 +2879,18 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Download · {title} · nuovo tentativo tra {seconds} s ({attempt}/{max})'**
   String activityDownloadRetry(String title, int seconds, int attempt, int max);
+
+  /// No description provided for @downloadOriginal.
+  ///
+  /// In it, this message translates to:
+  /// **'Qualità originale (senza ricodifica)'**
+  String get downloadOriginal;
+
+  /// No description provided for @downloadOriginalHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Tiene l\'audio di YouTube com\'è (M4A/Opus): nessuna perdita, file più piccoli. Spento: MP3 256 kbps'**
+  String get downloadOriginalHint;
 }
 
 class _AppLocalizationsDelegate

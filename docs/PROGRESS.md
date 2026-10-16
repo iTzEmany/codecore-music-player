@@ -171,7 +171,7 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 14.4 Download in parallelo
 - [~] 14.5 Limite di banda
 - [x] 14.6 Ritento a scalare
-- [ ] 14.7 Formato: MP3 o originale senza ricodifica
+- [~] 14.7 Formato: MP3 o originale senza ricodifica
 - [ ] 14.8 Ricerca per ISRC come primo tentativo
 - [ ] 14.9 Cache delle ricerche
 - [ ] 14.10 Controllo della durata a fine download
@@ -393,6 +393,7 @@ L'agente riparte sempre dal primo task non spuntato.
 - 14.4: `DownloadQueue(maxParallel)` (1–3, ricalibrabile a caldo; abbassare non ferma i download in corso). `_removeStalePartFiles` diventa `removeStalePartFiles` e gira **una volta** per sessione (future condivisa: i download successivi la aspettano); `resolveDownloadFolder` non pulisce più (lo usano anche condivisione e ricezione). `DownloadIndex.add` ora serializza le scritture di `downloads.json`. Impostazione `downloadParallel` (predefinito 2) nel gruppo «Download» come menu a tendina.
 - 14.5: `YoutubeService.download(..., options: DownloadOptions)` (struttura unica per limite di banda e, da 14.7, formato) invece di un parametro in più; argomenti costruiti da `buildDownloadArgs` (`yt_dlp_args.dart`, testata); Android: argomento `rateLimit` → `--limit-rate <n>K` in `MainActivity.kt`. Impostazione `downloadRateLimitKBps` (0/500/1000/2000) nel gruppo «Download». Resta la prova su telefono a 500 KB/s.
 - 14.6: il ritento vive in `DownloadQueue` (`RetryPolicy` 5/20/60 s ±20 %, solo `network`/`changed`); nuovo stato `DownloadStatus.waitingRetry` (non occupa uno slot) e `DownloadItem.attempt/retryDelay`; `onSettled` solo all'esito definitivo. Tolto `_retried` da `PlaylistImportService`. Centro Attività: «Download · titolo · nuovo tentativo tra N s (k/3)» (mostra l'attesa decisa, senza conto alla rovescia).
+- 14.7: `DownloadOptions.format` (`mp3`|`original`); `buildDownloadArgs(hasFfmpeg, options)`; con `original` e ffmpeg: `-f bestaudio[ext=m4a]/bestaudio/best -x` senza `--audio-format` (ffmpeg rimuxa); il nome file riserva `.m4a` ma `anyDownloadExtensionExists` evita sovrascritture contro mp3/m4a/opus/webm. Android: `convert=false` (stessa selezione, nessuna conversione). Impostazione `downloadOriginal` (predefinita **spenta** = MP3) nel gruppo «Download». Provato dal vivo su Linux (`CODECORE_LIVE=1 flutter test test/live/original_format_live_test.dart`): file .m4a letto dal tag reader, secondo download con nome diverso. Resta la prova su telefono (ExoPlayer).
 - 14.1 nota: se bestaudio non ha un m4a, `-x` estrae `.opus`; l'estensione `opus` è già tra quelle scansionate.
 - 13.3: `tracks` di `user_data.json` contiene solo i brani con preferito/modifica/testi/ascolti; chi sta solo in una playlist compare nei riferimenti della playlist (niente duplicati). Brano fuori da ogni cartella: `folder` = percorso assoluto del file, `relPath` null. `trackRefFor` è pubblica (serve all'export JSON).
 - 13.4: `LibraryEntryLite` guadagna `path` (opzionale, riempito da `liteEntries`); `TrackResolver` tenta percorso relativo → titolo+artista+durata ±2 s → sha256.

@@ -856,5 +856,7 @@
         "type": "int"
       }
     }
-  }
+  },
+  "downloadOriginal": "Originalqualität (ohne Neukodierung)",
+  "downloadOriginalHint": "Behält das Audio von YouTube unverändert (M4A/Opus): kein zusätzlicher Verlust, kleinere Dateien. Aus: MP3 256 kbps"
 }

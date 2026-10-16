@@ -213,15 +213,17 @@ class YtDlpProcessService implements YoutubeService {
     await _ensureTool();
     await outDir.create(recursive: true);
     _hasFfmpeg ??= await _exists('ffmpeg');
-    final convert = _hasFfmpeg!;
-    final ext = convert ? 'mp3' : 'm4a';
+    final hasFfmpeg = _hasFfmpeg!;
     final target = uniquePath(
-        outDir.path, downloadBaseName(r), ext, (f) => File(f).existsSync());
+        outDir.path,
+        downloadBaseName(r),
+        reservedExtension(hasFfmpeg: hasFfmpeg, options: options),
+        (f) => anyDownloadExtensionExists(f, (x) => File(x).existsSync()));
     final stem = p.withoutExtension(target);
     final args = buildDownloadArgs(
       id: r.id,
       stem: stem,
-      convert: convert,
+      hasFfmpeg: hasFfmpeg,
       options: options,
       jsArgs: await _jsArgs(),
     );

@@ -24,6 +24,7 @@ class AppSettings {
     this.ytNoticeSeen = false,
     this.downloadParallel = 2,
     this.downloadRateLimitKBps = 0,
+    this.downloadOriginal = false,
   });
 
   final String theme;
@@ -55,6 +56,9 @@ class AppSettings {
   /// Download speed cap in KB/s; 0 = none.
   final int downloadRateLimitKBps;
 
+  /// Keep the downloaded audio as served instead of converting to MP3.
+  final bool downloadOriginal;
+
   /// Shown to the device on the other side of a LAN share; null = hostname.
   final String? deviceName;
 
@@ -80,6 +84,7 @@ class AppSettings {
     bool? ytNoticeSeen,
     int? downloadParallel,
     int? downloadRateLimitKBps,
+    bool? downloadOriginal,
   }) =>
       AppSettings(
         theme: theme ?? this.theme,
@@ -101,6 +106,7 @@ class AppSettings {
         downloadParallel: downloadParallel ?? this.downloadParallel,
         downloadRateLimitKBps:
             downloadRateLimitKBps ?? this.downloadRateLimitKBps,
+        downloadOriginal: downloadOriginal ?? this.downloadOriginal,
       );
 }
 
@@ -149,6 +155,7 @@ class SettingsStore {
         downloadParallel:
             (_prefs.getInt('downloadParallel') ?? 2).clamp(1, 3),
         downloadRateLimitKBps: _prefs.getInt('downloadRateLimitKBps') ?? 0,
+        downloadOriginal: _prefs.getBool('downloadOriginal') ?? false,
       );
 
   Future<void> writeSettings(AppSettings s) async {
@@ -169,6 +176,7 @@ class SettingsStore {
     await _prefs.setBool('ytNoticeSeen', s.ytNoticeSeen);
     await _prefs.setInt('downloadParallel', s.downloadParallel);
     await _prefs.setInt('downloadRateLimitKBps', s.downloadRateLimitKBps);
+    await _prefs.setBool('downloadOriginal', s.downloadOriginal);
     final dn = s.deviceName;
     if (dn == null || dn.isEmpty) {
       await _prefs.remove('deviceName');

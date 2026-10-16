@@ -17,6 +17,8 @@ class DownloadSettingsTiles extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
     final n = ref.watch(settingsProvider.select((s) => s.downloadParallel));
+    final original =
+        ref.watch(settingsProvider.select((s) => s.downloadOriginal));
     final rate =
         ref.watch(settingsProvider.select((s) => s.downloadRateLimitKBps));
     return Column(
@@ -39,6 +41,15 @@ class DownloadSettingsTiles extends ConsumerWidget {
                     .read(settingsProvider.notifier)
                     .update((c) => c.copyWith(downloadParallel: v)),
           ),
+        ),
+        SwitchListTile(
+          secondary: const Icon(Icons.high_quality_outlined),
+          title: Text(l.downloadOriginal),
+          subtitle: Text(l.downloadOriginalHint),
+          value: original,
+          onChanged: (v) => ref
+              .read(settingsProvider.notifier)
+              .update((c) => c.copyWith(downloadOriginal: v)),
         ),
         ListTile(
           leading: const Icon(Icons.speed),

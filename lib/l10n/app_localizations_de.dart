@@ -1605,4 +1605,11 @@ class AppLocalizationsDe extends AppLocalizations {
   ) {
     return 'Download · $title · neuer Versuch in $seconds s ($attempt/$max)';
   }
+
+  @override
+  String get downloadOriginal => 'Originalqualität (ohne Neukodierung)';
+
+  @override
+  String get downloadOriginalHint =>
+      'Behält das Audio von YouTube unverändert (M4A/Opus): kein zusätzlicher Verlust, kleinere Dateien. Aus: MP3 256 kbps';
 }
