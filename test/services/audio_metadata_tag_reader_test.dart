@@ -36,4 +36,10 @@ void main() {
     final rg = await reader.read('test/fixtures/replaygain.mp3');
     expect(rg.replayGainDb, -4.0);
   });
+
+  test('reads the duration of an untagged m4a as downloaded without re-encoding',
+      () async {
+    final t = await reader.read('test/fixtures/original.m4a');
+    expect(t.durationMs, inInclusiveRange(2500, 3500));
+  });
 }

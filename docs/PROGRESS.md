@@ -165,7 +165,7 @@ L'agente riparte sempre dal primo task non spuntato.
 - [ ] 13.12 Rifinitura, documentazione e prova a mano (in attesa dei task bloccati)
 
 ## Fase 14 — Download robusti (`fase-14-download-robusti.md`)
-- [ ] 14.1 Verifiche preliminari (release yt-dlp, --limit-rate, ISRC, formato originale, versione Android)
+- [~] 14.1 Verifiche preliminari (release yt-dlp, --limit-rate, ISRC, formato originale, versione Android)
 - [ ] 14.2 Versione di yt-dlp e avviso «troppo vecchio»
 - [ ] 14.3 Aggiornamento di yt-dlp in-app (desktop)
 - [ ] 14.4 Download in parallelo
@@ -387,6 +387,8 @@ L'agente riparte sempre dal primo task non spuntato.
 - 10.9 misura acustica #2 (2026-10-15, microfono del PC, 2 altoparlanti, click ogni secondo, 31 click): con la taratura «seek 120 ms + ±3 % fisso» l'offset oscillava tra −14 e +94 ms (ciclo limite del controllore a gradino con ritardo di attuazione): peggio della versione precedente. Corretto con controllo **proporzionale** (velocità = 1 − errore/4000 ms, tetto ±2,5 %, soglia di ignoro 25 ms, nessun comando per variazioni < 0,3 %): misura #3, **dopo ~14 s di assestamento lo scarto resta a −9 ms (Motorola 9 ms prima del Xiaomi) per 17 click consecutivi**; nei primi 14 s tra −9 e +49 ms. L'ultimo click (12, 56 ms) coincide con la chiusura della Jam. La simulazione ora include ritardo di attuazione di un tick e rumore ±10 ms sulla posizione.
 
 ## Note di deviazione (Fase 13+)
+- 14.1 (2026-10-16, Linux): release yt-dlp `2026.08.19`, asset `yt-dlp_linux`, `yt-dlp_linux_aarch64`, `yt-dlp.exe` (+ `yt-dlp_arm64.exe`), `SHA2-256SUMS` con righe `<sha256>  <nome>`; `--version` → `2026.08.19`. `--limit-rate 300K` rispettato (media 292 KiB/s su 2,8 MiB). ISRC: 5 righe di `Just_a_mood.csv` cercate come `music.youtube.com/search?q=<ISRC>#songs` → **5/5 con il brano giusto al primo posto** → 14.8 si fa. Formato originale (`-f 'bestaudio[ext=m4a]/bestaudio' -x`, senza `--audio-format`): `.m4a` AAC 2,9 MB, durata 179,6 s, «Not converting audio»; `AudioMetadataTagReader` legge la durata (fixture `test/fixtures/original.m4a`, test aggiunto) e mpv lo riproduce. Android: la libreria 0.18.1 espone `YoutubeDL.version(Context)` e `versionName(Context)` (verificato con javap). Da provare sul telefono: riproduzione m4a con ExoPlayer e cosa restituisce `version()` (vedi «Tocca a te»).
+- 14.1 nota: se bestaudio non ha un m4a, `-x` estrae `.opus`; l'estensione `opus` è già tra quelle scansionate.
 - 13.3: `tracks` di `user_data.json` contiene solo i brani con preferito/modifica/testi/ascolti; chi sta solo in una playlist compare nei riferimenti della playlist (niente duplicati). Brano fuori da ogni cartella: `folder` = percorso assoluto del file, `relPath` null. `trackRefFor` è pubblica (serve all'export JSON).
 - 13.4: `LibraryEntryLite` guadagna `path` (opzionale, riempito da `liteEntries`); `TrackResolver` tenta percorso relativo → titolo+artista+durata ±2 s → sha256.
 
