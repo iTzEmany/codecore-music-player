@@ -2993,6 +2993,60 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Abbinamenti pronti: {n, plural, one{1 brano da scaricare} other{{n} brani da scaricare}}'**
   String csvImportBannerPlanned(int n);
+
+  /// No description provided for @settingsAdvanced.
+  ///
+  /// In it, this message translates to:
+  /// **'Avanzate'**
+  String get settingsAdvanced;
+
+  /// No description provided for @importSureThreshold.
+  ///
+  /// In it, this message translates to:
+  /// **'Abbinamento sicuro da'**
+  String get importSureThreshold;
+
+  /// No description provided for @importSureThresholdHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Sopra questo punteggio un brano dell\'importazione si scarica senza chiedere'**
+  String get importSureThresholdHint;
+
+  /// No description provided for @importReviewThreshold.
+  ///
+  /// In it, this message translates to:
+  /// **'Da verificare da'**
+  String get importReviewThreshold;
+
+  /// No description provided for @importReviewThresholdHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Tra questo punteggio e quello sicuro il brano finisce in «Da verificare»; sotto, in «Non trovati»'**
+  String get importReviewThresholdHint;
+
+  /// No description provided for @importThresholdsReset.
+  ///
+  /// In it, this message translates to:
+  /// **'Ripristina i valori predefiniti'**
+  String get importThresholdsReset;
+
+  /// No description provided for @csvImportEstimateHours.
+  ///
+  /// In it, this message translates to:
+  /// **'Tempo stimato: circa {hours} h {minutes} min'**
+  String csvImportEstimateHours(int hours, int minutes);
+
+  /// No description provided for @csvImportBlocks.
+  ///
+  /// In it, this message translates to:
+  /// **'Importa a blocchi da {size}'**
+  String csvImportBlocks(int size);
+
+  /// No description provided for @csvImportBigWarning.
+  ///
+  /// In it, this message translates to:
+  /// **'Sono {n} brani da scaricare: ci vorranno ore. A blocchi, uno dopo l\'altro, l\'ordine della playlist resta giusto e puoi fermarti tra un blocco e l\'altro.'**
+  String csvImportBigWarning(int n);
 }
 
 class _AppLocalizationsDelegate

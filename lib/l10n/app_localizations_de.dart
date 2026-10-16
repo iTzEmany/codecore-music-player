@@ -1694,4 +1694,39 @@ class AppLocalizationsDe extends AppLocalizations {
     );
     return 'Treffer bereit: $_temp0';
   }
+
+  @override
+  String get settingsAdvanced => 'Erweitert';
+
+  @override
+  String get importSureThreshold => 'Sicherer Treffer ab';
+
+  @override
+  String get importSureThresholdHint =>
+      'Über dieser Punktzahl wird ein importierter Titel ohne Rückfrage geladen';
+
+  @override
+  String get importReviewThreshold => 'Zur Prüfung ab';
+
+  @override
+  String get importReviewThresholdHint =>
+      'Zwischen dieser und der sicheren Punktzahl landet der Titel in «Zu prüfen», darunter in «Nicht gefunden»';
+
+  @override
+  String get importThresholdsReset => 'Standardwerte wiederherstellen';
+
+  @override
+  String csvImportEstimateHours(int hours, int minutes) {
+    return 'Geschätzte Zeit: etwa $hours Std. $minutes Min.';
+  }
+
+  @override
+  String csvImportBlocks(int size) {
+    return 'In Blöcken zu $size importieren';
+  }
+
+  @override
+  String csvImportBigWarning(int n) {
+    return '$n Titel zum Laden: das dauert Stunden. In Blöcken, einer nach dem anderen, bleibt die Reihenfolge richtig und du kannst zwischen den Blöcken anhalten.';
+  }
 }

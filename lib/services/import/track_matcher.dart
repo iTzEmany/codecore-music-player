@@ -242,13 +242,32 @@ double scoreCandidate(ImportRow r, YtResult c) {
   return score.clamp(0.0, 1.0).toDouble();
 }
 
-MatchDecision decide(ImportRow r, List<YtResult> candidates) {
+/// The two cut-offs the user may move in the advanced settings; [review] must
+/// stay at least [minGap] under [sure].
+class MatchThresholds {
+  const MatchThresholds({this.sure = sureThreshold, this.review = reviewThreshold});
+
+  static const minGap = 0.05;
+  static const limits = (min: 0.30, max: 0.98);
+
+  final double sure, review;
+
+  /// Keeps both inside the limits and [review] below [sure] by [minGap].
+  MatchThresholds clamped() {
+    final s = sure.clamp(limits.min + minGap, limits.max).toDouble();
+    final r = review.clamp(limits.min, s - minGap).toDouble();
+    return MatchThresholds(sure: s, review: r);
+  }
+}
+
+MatchDecision decide(ImportRow r, List<YtResult> candidates,
+    {MatchThresholds thresholds = const MatchThresholds()}) {
   final scored = [
     for (final c in candidates) ScoredCandidate(c, scoreCandidate(r, c)),
   ]..sort((a, b) => b.score.compareTo(a.score));
   final top = scored.take(3).toList();
   final best = top.isEmpty ? 0.0 : top.first.score;
-  if (best >= sureThreshold) return MatchDecision(MatchKind.sure, top);
-  if (best >= reviewThreshold) return MatchDecision(MatchKind.review, top);
+  if (best >= thresholds.sure) return MatchDecision(MatchKind.sure, top);
+  if (best >= thresholds.review) return MatchDecision(MatchKind.review, top);
   return MatchDecision(MatchKind.notFound, const []);
 }

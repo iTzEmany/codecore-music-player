@@ -147,4 +147,45 @@ void main() {
     expect(picked!.options.planFirst, isFalse);
     await h.dispose(tester);
   });
+
+  testWidgets('a big file suggests blocks of 100 and shows the time in hours',
+      (tester) async {
+    tester.view.physicalSize = const Size(600, 2000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final h = await Harness.create(tester);
+    final big = ImportedPlaylist(name: 'Big', rows: [
+      for (var i = 0; i < 400; i++)
+        ImportRow(index: i, title: 'S$i', artists: const ['A']),
+    ]);
+    ImportChoice? picked;
+    await h.pump(
+        tester,
+        Builder(
+            builder: (context) => Scaffold(
+                body: TextButton(
+                    onPressed: () async => picked = await showDialog<ImportChoice>(
+                        context: context,
+                        builder: (_) => ImportPreviewDialog(
+                            csv: big, known: 0, existing: const {})),
+                    child: const Text('open')))));
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('400 brani da scaricare'), findsOneWidget);
+    expect(find.text('Importa a blocchi da 100'), findsOneWidget);
+    expect(find.text('Tempo stimato: circa 1 h 20 min'), findsOneWidget);
+    await tester.tap(find.text('Importa'));
+    await tester.pumpAndSettle();
+    expect(picked!.blockSize, 100, reason: 'on by default above 200');
+
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Importa a blocchi da 100'));
+    await tester.pump();
+    await tester.tap(find.text('Importa'));
+    await tester.pumpAndSettle();
+    expect(picked!.blockSize, isNull);
+    await h.dispose(tester);
+  });
 }

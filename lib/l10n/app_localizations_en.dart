@@ -1687,4 +1687,39 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return 'Matches ready: $_temp0';
   }
+
+  @override
+  String get settingsAdvanced => 'Advanced';
+
+  @override
+  String get importSureThreshold => 'Sure match from';
+
+  @override
+  String get importSureThresholdHint =>
+      'Above this score an imported song is downloaded without asking';
+
+  @override
+  String get importReviewThreshold => 'To review from';
+
+  @override
+  String get importReviewThresholdHint =>
+      'Between this score and the sure one the song goes to «To review»; below it, to «Not found»';
+
+  @override
+  String get importThresholdsReset => 'Restore defaults';
+
+  @override
+  String csvImportEstimateHours(int hours, int minutes) {
+    return 'Estimated time: about $hours h $minutes min';
+  }
+
+  @override
+  String csvImportBlocks(int size) {
+    return 'Import in blocks of $size';
+  }
+
+  @override
+  String csvImportBigWarning(int n) {
+    return '$n songs to download: it will take hours. In blocks, one after the other, the playlist order stays right and you can stop between blocks.';
+  }
 }

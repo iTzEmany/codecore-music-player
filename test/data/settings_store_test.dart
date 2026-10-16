@@ -30,4 +30,15 @@ void main() {
     final store = await SettingsStore.open();
     expect(store.readSettings().theme, 'notte');
   });
+
+  test('import thresholds default to 0.80 / 0.55 and round trip', () async {
+    SharedPreferences.setMockInitialValues({});
+    final store = await SettingsStore.open();
+    expect(store.readSettings().importSureThreshold, 0.80);
+    expect(store.readSettings().importReviewThreshold, 0.55);
+    await store.writeSettings(const AppSettings(
+        importSureThreshold: 0.9, importReviewThreshold: 0.6));
+    expect(store.readSettings().importSureThreshold, 0.9);
+    expect(store.readSettings().importReviewThreshold, 0.6);
+  });
 }

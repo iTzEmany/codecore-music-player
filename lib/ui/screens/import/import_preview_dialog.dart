@@ -6,12 +6,19 @@ import '../../../services/import/exportify_reader.dart';
 import '../../../services/import/import_options.dart';
 import '../../theme/tokens.dart';
 
+/// Above this many songs to download the preview suggests splitting the import.
+const bigImportRows = 200;
+const importBlockSize = 100;
+
 class ImportChoice {
   const ImportChoice(this.name, this.intoPlaylistId,
-      [this.options = const ImportOptions()]);
+      [this.options = const ImportOptions(), this.blockSize]);
 
   final String name;
   final ImportOptions options;
+
+  /// Rows per import when a big file is split; null = a single import.
+  final int? blockSize;
 
   /// Existing playlist to update; null = create a new one.
   final int? intoPlaylistId;
@@ -41,6 +48,7 @@ class _State extends State<ImportPreviewDialog> {
   );
   bool _update = true;
   bool _linkOnly = false;
+  late bool _blocks = (widget.csv.rows.length - widget.known) > bigImportRows;
   bool _planFirst = false;
 
   @override
@@ -93,11 +101,21 @@ class _State extends State<ImportPreviewDialog> {
               Padding(
                 padding: const EdgeInsets.only(top: 8),
                 child: Text(
-                  kEnableYoutube
-                      ? l.csvImportEstimate(minutes < 1 ? 1 : minutes)
-                      : l.csvImportNoteOffline,
+                  !kEnableYoutube
+                      ? l.csvImportNoteOffline
+                      : minutes >= 60
+                      ? l.csvImportEstimateHours(minutes ~/ 60, minutes % 60)
+                      : l.csvImportEstimate(minutes < 1 ? 1 : minutes),
                   style: theme.bodySmall?.copyWith(color: cc.textMuted),
                 ),
+              ),
+            if (kEnableYoutube && todo > bigImportRows && !_linkOnly)
+              CheckboxListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(l.csvImportBlocks(importBlockSize)),
+                subtitle: Text(l.csvImportBigWarning(todo)),
+                value: _blocks,
+                onChanged: (v) => setState(() => _blocks = v ?? false),
               ),
             if (kEnableYoutube && todo > 0) ...[
               SwitchListTile(
@@ -158,6 +176,9 @@ class _State extends State<ImportPreviewDialog> {
                       linkOnly: _linkOnly,
                       planFirst: _planFirst && !_linkOnly,
                     ),
+                    todo > bigImportRows && _blocks && !_linkOnly
+                        ? importBlockSize
+                        : null,
                   ),
                 ),
           child: Text(l.csvImportGo),

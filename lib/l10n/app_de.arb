@@ -906,5 +906,38 @@
         "type": "int"
       }
     }
+  },
+  "settingsAdvanced": "Erweitert",
+  "importSureThreshold": "Sicherer Treffer ab",
+  "importSureThresholdHint": "Über dieser Punktzahl wird ein importierter Titel ohne Rückfrage geladen",
+  "importReviewThreshold": "Zur Prüfung ab",
+  "importReviewThresholdHint": "Zwischen dieser und der sicheren Punktzahl landet der Titel in «Zu prüfen», darunter in «Nicht gefunden»",
+  "importThresholdsReset": "Standardwerte wiederherstellen",
+  "csvImportEstimateHours": "Geschätzte Zeit: etwa {hours} Std. {minutes} Min.",
+  "csvImportBlocks": "In Blöcken zu {size} importieren",
+  "csvImportBigWarning": "{n} Titel zum Laden: das dauert Stunden. In Blöcken, einer nach dem anderen, bleibt die Reihenfolge richtig und du kannst zwischen den Blöcken anhalten.",
+  "@csvImportEstimateHours": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "@csvImportBlocks": {
+    "placeholders": {
+      "size": {
+        "type": "int"
+      }
+    }
+  },
+  "@csvImportBigWarning": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
   }
 }

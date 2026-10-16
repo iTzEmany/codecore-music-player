@@ -9,6 +9,7 @@ import 'package:codecore/services/import/exportify_reader.dart';
 import 'package:codecore/services/import/import_candidate.dart';
 import 'package:codecore/services/import/import_options.dart';
 import 'package:codecore/services/import/playlist_import_service.dart';
+import 'package:codecore/services/import/track_matcher.dart' show MatchThresholds;
 import 'package:codecore/services/online/download_queue.dart';
 import 'package:codecore/services/online/youtube_service.dart';
 import 'package:dio/dio.dart';
@@ -525,6 +526,90 @@ void main() {
       await finish(importTag(id, 0), '/m/one.mp3');
       await finish(importTag(id, 1), '/m/two.mp3');
       expect((await imports.get(id))!.state, ImportStatus.finished);
+    });
+  });
+
+  group('thresholds from the settings', () {
+    test('a stricter «sure» sends the same match to review', () async {
+      yt.songs['one'] = [topic('v1', 'One', 'Band', 200)];
+      final strict = PlaylistImportService(
+        imports: imports,
+        playlists: playlists,
+        loadLibrary: tracks.liteEntries,
+        youtube: yt,
+        enqueue: (r, tag) => queued.add((r, tag)),
+        cancelDownloads: (_) {},
+        settled: settled.stream,
+        trackIdForPath: tracks.idForPath,
+        pathForVideo: (_) async => null,
+        applyTags: (id, r) async {},
+        searchGap: Duration.zero,
+        thresholds: () => const MatchThresholds(sure: 1.01, review: 0.5),
+      );
+      addTearDown(strict.dispose);
+      final id = await strict.start(csv([row(0, 'One', 'Band', 200)]));
+      await idle();
+      expect((await imports.item(id, 0))!.state, ImportItemStatus.review);
+      expect(queued, isEmpty);
+    });
+  });
+
+  group('big files in blocks', () {
+    ImportedPlaylist rows250() => csv([
+          for (var i = 0; i < 250; i++) row(i, 'Song $i', 'Band', 200),
+        ]);
+
+    test('250 rows become 3 imports with their row numbers kept', () async {
+      final first = await service.start(rows250(),
+          options: const ImportOptions(linkOnly: true), blockSize: 100);
+      await idle();
+      final all = await imports.forPlaylist((await imports.get(first))!.playlistId);
+      expect(all, hasLength(3));
+      expect(all.map((i) => i.sourceName), ['Mood (1/3)', 'Mood (2/3)', 'Mood (3/3)']);
+      expect([for (final i in all) (await imports.items(i.id)).length], [100, 100, 50]);
+      expect((await imports.items(all[1].id)).first.rowIndex, 100);
+      expect((await imports.items(all[2].id)).last.rowIndex, 249);
+    });
+
+    test('the blocks run one after the other', () async {
+      final small = csv([
+        for (var i = 0; i < 30; i++) row(i, 'Song $i', 'Band', 200),
+      ]);
+      final first = await service.start(small,
+          options: const ImportOptions(linkOnly: true), blockSize: 10);
+      final pl = (await imports.get(first))!.playlistId;
+      final right = await imports.forPlaylist(pl);
+      expect(right[1].state, ImportStatus.paused,
+          reason: 'waits for the block before it');
+      expect(right[2].state, ImportStatus.paused);
+      var done = await imports.forPlaylist(pl);
+      for (var i = 0;
+          i < 60 && !done.every((x) => x.state == ImportStatus.finished);
+          i++) {
+        await Future<void>.delayed(const Duration(milliseconds: 250));
+        done = await imports.forPlaylist(pl);
+      }
+      expect(done.every((i) => i.state == ImportStatus.finished), isTrue,
+          reason: '${done.map((i) => i.state)}');
+    });
+
+    test('a small file is a single import', () async {
+      final first = await service.start(csv([row(0, 'One', 'Band', 200)]),
+          options: const ImportOptions(linkOnly: true), blockSize: 100);
+      await idle();
+      final all = await imports.forPlaylist((await imports.get(first))!.playlistId);
+      expect(all, hasLength(1));
+      expect(all.single.sourceName, 'Mood');
+    });
+
+    test('cancelling a block leaves the next ones waiting, not started', () async {
+      final first = await service.start(rows250(),
+          options: const ImportOptions(planFirst: true), blockSize: 100);
+      await service.cancel(first);
+      await idle();
+      final all = await imports.forPlaylist((await imports.get(first))!.playlistId);
+      expect(all[0].state, ImportStatus.cancelled);
+      expect(all[1].state, ImportStatus.paused);
     });
   });
 

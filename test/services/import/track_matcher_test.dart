@@ -212,4 +212,52 @@ void main() {
       expect(lib.find(row('Let It Be', ['Someone Else'], ms: 243000)), isNull);
     });
   });
+
+  group('adjustable thresholds', () {
+    // Right title and artist but 7 s off: a doubtful match with the defaults.
+    final r = row('Song', ['Band'], ms: 200000);
+    final cands = [yt('x', 'Song', 'Band - Topic', seconds: 207, artists: ['Band'])];
+
+    test('the default cut-offs are 0.80 and 0.55', () {
+      const t = MatchThresholds();
+      expect([t.sure, t.review], [0.80, 0.55]);
+      expect(decide(r, cands).kind, MatchKind.sure);
+    });
+
+    test('a cut-off just over the score demotes the match, just under keeps it',
+        () {
+      final score = decide(r, cands).best!.score;
+      expect(
+          decide(r, cands,
+                  thresholds: MatchThresholds(sure: score - 0.01, review: 0.4))
+              .kind,
+          MatchKind.sure);
+      expect(
+          decide(r, cands,
+                  thresholds: MatchThresholds(sure: score + 0.01, review: 0.4))
+              .kind,
+          MatchKind.review);
+    });
+
+    test('a higher «review» sends weak matches to «not found»', () {
+      final score = decide(r, cands).best!.score;
+      expect(
+          decide(r, cands,
+                  thresholds: MatchThresholds(sure: 0.98, review: score + 0.01))
+              .kind,
+          MatchKind.notFound);
+    });
+
+    test('clamped keeps review at least 0.05 under sure, inside the limits', () {
+      final t = const MatchThresholds(sure: 0.6, review: 0.7).clamped();
+      expect(t.sure, 0.6);
+      expect(t.review, closeTo(0.55, 1e-9));
+      final lo = const MatchThresholds(sure: 0.1, review: 0.0).clamped();
+      expect(lo.sure, closeTo(0.35, 1e-9));
+      expect(lo.review, 0.30);
+      final hi = const MatchThresholds(sure: 2, review: 5).clamped();
+      expect(hi.sure, 0.98);
+      expect(hi.review, closeTo(0.93, 1e-9));
+    });
+  });
 }

@@ -64,6 +64,7 @@ class PlaylistImportService {
     required this.applyTags,
     this.forgetSearches,
     this.trackDurationMs,
+    this.thresholds,
     this.youtubeEnabled = true,
     this.searchGap = const Duration(milliseconds: 1500),
     this.pollDelay = const Duration(milliseconds: 400),
@@ -87,6 +88,11 @@ class PlaylistImportService {
   /// Length of the downloaded file as read by the scanner; without it the
   /// «wrong length» check is skipped.
   final Future<int?> Function(int trackId)? trackDurationMs;
+
+  /// Cut-offs read at each search, so a change in the settings applies at once.
+  final MatchThresholds Function()? thresholds;
+
+  MatchThresholds get _cutoffs => thresholds?.call() ?? const MatchThresholds();
 
   /// Drops cached search answers; called when a chosen video proved unavailable.
   final void Function(List<String> queries)? forgetSearches;
@@ -113,12 +119,15 @@ class PlaylistImportService {
   }
 
   /// Creates the playlist (or reuses [intoPlaylistId]) and starts the import.
-  /// Rows already imported into that playlist are left out.
+  /// Rows already imported into that playlist are left out. With [blockSize]
+  /// the rows are split in several imports run one after the other (row
+  /// numbers are kept); returns the id of the first.
   Future<int> start(
     ImportedPlaylist csv, {
     String? name,
     int? intoPlaylistId,
     ImportOptions options = const ImportOptions(),
+    int? blockSize,
   }) async {
     final label = (name?.trim().isNotEmpty ?? false) ? name!.trim() : csv.name;
     final playlistId = intoPlaylistId ?? await playlists.create(label);
@@ -126,24 +135,45 @@ class PlaylistImportService {
     if (intoPlaylistId != null) {
       rows = await _withoutAlreadyImported(intoPlaylistId, rows);
     }
-    final id = await imports.create(
-        playlistId: playlistId,
-        sourceName: label,
-        rows: rows,
-        sourceKind: csv.kind,
-        folderPath: options.folderPath,
-        numberFiles: options.numberFiles,
-        linkOnly: options.linkOnly,
-        planFirst: options.planFirst,
-        fetchCovers: options.fetchCovers);
+    final size = blockSize != null && blockSize > 0 ? blockSize : rows.length;
+    final blocks = rows.isEmpty || rows.length <= size
+        ? [rows]
+        : [
+            for (var i = 0; i < rows.length; i += size)
+              rows.sublist(i, i + size > rows.length ? rows.length : i + size),
+          ];
+    int? first, previous;
+    for (var n = 0; n < blocks.length; n++) {
+      final id = await imports.create(
+          playlistId: playlistId,
+          sourceName: blocks.length == 1 ? label : '$label (${n + 1}/${blocks.length})',
+          rows: blocks[n],
+          sourceKind: csv.kind,
+          folderPath: options.folderPath,
+          numberFiles: options.numberFiles,
+          linkOnly: options.linkOnly,
+          planFirst: options.planFirst,
+          fetchCovers: options.fetchCovers);
+      first ??= id;
+      if (previous != null) {
+        // Waits for the block before it: the playlist order stays right.
+        await imports.setStatus(id, ImportStatus.paused);
+        _nextBlock[previous] = id;
+      }
+      previous = id;
+    }
     if (rows.isEmpty) {
-      await imports.setStatus(id, ImportStatus.finished);
-      _emit(ImportEvent(ImportEventKind.completed, id));
+      await imports.setStatus(first!, ImportStatus.finished);
+      _emit(ImportEvent(ImportEventKind.completed, first));
     } else {
       _kick();
     }
-    return id;
+    return first!;
   }
+
+  /// Import -> the block that starts when it finishes (lost on restart: the
+  /// blocks are then paused, and resumed by hand like any paused import).
+  final _nextBlock = <int, int>{};
 
   /// Relative entries of a playlist file are saved relative to its folder, so
   /// resuming later does not depend on where the file was.
@@ -201,6 +231,7 @@ class PlaylistImportService {
   /// Stops searching and drops the downloads still waiting; tracks already
   /// downloaded stay in the playlist.
   Future<void> cancel(int importId) async {
+    _nextBlock.remove(importId);
     await imports.setStatus(importId, ImportStatus.cancelled);
     cancelDownloads((i) => parseImportTag(i.tag)?.$1 == importId);
   }
@@ -250,7 +281,8 @@ class PlaylistImportService {
         for (final imp in running) {
           final item = await imports.nextPending(imp.id);
           if (item == null) {
-            await _checkFinished(imp.id);
+            // A finished import may have woken the next block: look again.
+            if (await _checkFinished(imp.id)) worked = true;
             continue;
           }
           final counts = await imports.counts(imp.id);
@@ -385,23 +417,26 @@ class PlaylistImportService {
     final isrc = row.isrc;
     if (isrc != null && isrc.isNotEmpty) {
       final byIsrc = await youtube.searchSongs(isrc, limit: 3);
-      final d = decide(row, byIsrc);
+      final d = decide(row, byIsrc, thresholds: _cutoffs);
       if (d.kind == MatchKind.sure) return d;
       await Future<void>.delayed(searchGap);
     }
     final queries = searchQueries(row);
     final query = queries[1];
     final songs = await youtube.searchSongs(query, limit: 5);
-    var decision = decide(row, songs);
+    var decision = decide(row, songs, thresholds: _cutoffs);
     if (decision.kind == MatchKind.sure) return decision;
     await Future<void>.delayed(searchGap);
     final plain = await youtube.search(queries[2]);
     final seen = {for (final s in songs) s.id};
-    decision = decide(row, [
-      ...songs,
-      for (final p in plain.take(5))
-        if (seen.add(p.id)) p,
-    ]);
+    decision = decide(
+        row,
+        [
+          ...songs,
+          for (final p in plain.take(5))
+            if (seen.add(p.id)) p,
+        ],
+        thresholds: _cutoffs);
     return decision;
   }
 
@@ -543,20 +578,26 @@ class PlaylistImportService {
   Future<void> keepDownloaded(int importId, int rowIndex) =>
       imports.setItem(importId, rowIndex, status: ImportItemStatus.downloaded);
 
-  Future<void> _checkFinished(int importId) async {
+  /// Finishes (or pauses for planning) an import with nothing left to do;
+  /// true when its state changed.
+  Future<bool> _checkFinished(int importId) async {
     final imp = await imports.get(importId);
-    if (imp == null || imp.state != ImportStatus.running) return;
+    if (imp == null || imp.state != ImportStatus.running) return false;
     final c = await imports.counts(importId);
-    if ((c[ImportItemStatus.pending] ?? 0) == 0 &&
-        (c[ImportItemStatus.queued] ?? 0) == 0) {
-      if ((c[ImportItemStatus.planned] ?? 0) > 0) {
-        await imports.setStatus(importId, ImportStatus.paused);
-        _emit(ImportEvent(ImportEventKind.planned, importId));
-        return;
-      }
-      await imports.setStatus(importId, ImportStatus.finished);
-      _emit(ImportEvent(ImportEventKind.completed, importId));
+    if ((c[ImportItemStatus.pending] ?? 0) != 0 ||
+        (c[ImportItemStatus.queued] ?? 0) != 0) {
+      return false;
     }
+    if ((c[ImportItemStatus.planned] ?? 0) > 0) {
+      await imports.setStatus(importId, ImportStatus.paused);
+      _emit(ImportEvent(ImportEventKind.planned, importId));
+      return true;
+    }
+    await imports.setStatus(importId, ImportStatus.finished);
+    _emit(ImportEvent(ImportEventKind.completed, importId));
+    final next = _nextBlock.remove(importId);
+    if (next != null) await resume(next);
+    return true;
   }
 
   void _emit(ImportEvent e) {

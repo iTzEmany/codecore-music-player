@@ -22,6 +22,7 @@ import '../share/share_screen.dart';
 import '../../../services/migration/python_db_importer.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/tokens.dart';
+import 'advanced_section.dart';
 import 'download_settings_tiles.dart';
 import 'log_export_tile.dart';
 import 'missing_tracks_screen.dart';
@@ -240,6 +241,10 @@ class SettingsScreen extends ConsumerWidget {
                 title: l.settingsDownloads,
                 children: const [DownloadSettingsTiles()],
               ),
+            _Group(
+              title: l.settingsAdvanced,
+              children: const [AdvancedSettingsTiles()],
+            ),
             _Group(
               title: l.settingsAbout,
               children: [

@@ -25,6 +25,8 @@ class AppSettings {
     this.downloadParallel = 2,
     this.downloadRateLimitKBps = 0,
     this.downloadOriginal = false,
+    this.importSureThreshold = 0.80,
+    this.importReviewThreshold = 0.55,
   });
 
   final String theme;
@@ -59,6 +61,10 @@ class AppSettings {
   /// Keep the downloaded audio as served instead of converting to MP3.
   final bool downloadOriginal;
 
+  /// CSV import: score from which a match is downloaded without asking, and
+  /// from which it is at least proposed (advanced settings).
+  final double importSureThreshold, importReviewThreshold;
+
   /// Shown to the device on the other side of a LAN share; null = hostname.
   final String? deviceName;
 
@@ -85,6 +91,8 @@ class AppSettings {
     int? downloadParallel,
     int? downloadRateLimitKBps,
     bool? downloadOriginal,
+    double? importSureThreshold,
+    double? importReviewThreshold,
   }) =>
       AppSettings(
         theme: theme ?? this.theme,
@@ -107,6 +115,9 @@ class AppSettings {
         downloadRateLimitKBps:
             downloadRateLimitKBps ?? this.downloadRateLimitKBps,
         downloadOriginal: downloadOriginal ?? this.downloadOriginal,
+        importSureThreshold: importSureThreshold ?? this.importSureThreshold,
+        importReviewThreshold:
+            importReviewThreshold ?? this.importReviewThreshold,
       );
 }
 
@@ -156,6 +167,8 @@ class SettingsStore {
             (_prefs.getInt('downloadParallel') ?? 2).clamp(1, 3),
         downloadRateLimitKBps: _prefs.getInt('downloadRateLimitKBps') ?? 0,
         downloadOriginal: _prefs.getBool('downloadOriginal') ?? false,
+        importSureThreshold: _prefs.getDouble('importSureThreshold') ?? 0.80,
+        importReviewThreshold: _prefs.getDouble('importReviewThreshold') ?? 0.55,
       );
 
   Future<void> writeSettings(AppSettings s) async {
@@ -177,6 +190,8 @@ class SettingsStore {
     await _prefs.setInt('downloadParallel', s.downloadParallel);
     await _prefs.setInt('downloadRateLimitKBps', s.downloadRateLimitKBps);
     await _prefs.setBool('downloadOriginal', s.downloadOriginal);
+    await _prefs.setDouble('importSureThreshold', s.importSureThreshold);
+    await _prefs.setDouble('importReviewThreshold', s.importReviewThreshold);
     final dn = s.deviceName;
     if (dn == null || dn.isEmpty) {
       await _prefs.remove('deviceName');

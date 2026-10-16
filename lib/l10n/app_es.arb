@@ -906,5 +906,38 @@
         "type": "int"
       }
     }
+  },
+  "settingsAdvanced": "Avanzado",
+  "importSureThreshold": "Coincidencia segura desde",
+  "importSureThresholdHint": "Por encima de esta puntuación una canción importada se descarga sin preguntar",
+  "importReviewThreshold": "Por revisar desde",
+  "importReviewThresholdHint": "Entre esta puntuación y la segura la canción va a «Por revisar»; por debajo, a «No encontradas»",
+  "importThresholdsReset": "Restablecer valores predeterminados",
+  "csvImportEstimateHours": "Tiempo estimado: unas {hours} h {minutes} min",
+  "csvImportBlocks": "Importar en bloques de {size}",
+  "csvImportBigWarning": "{n} canciones por descargar: tardará horas. En bloques, uno tras otro, el orden de la lista se mantiene y puedes parar entre bloques.",
+  "@csvImportEstimateHours": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "@csvImportBlocks": {
+    "placeholders": {
+      "size": {
+        "type": "int"
+      }
+    }
+  },
+  "@csvImportBigWarning": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
   }
 }

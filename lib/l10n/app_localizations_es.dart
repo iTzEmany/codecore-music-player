@@ -1692,4 +1692,39 @@ class AppLocalizationsEs extends AppLocalizations {
     );
     return 'Coincidencias listas: $_temp0';
   }
+
+  @override
+  String get settingsAdvanced => 'Avanzado';
+
+  @override
+  String get importSureThreshold => 'Coincidencia segura desde';
+
+  @override
+  String get importSureThresholdHint =>
+      'Por encima de esta puntuación una canción importada se descarga sin preguntar';
+
+  @override
+  String get importReviewThreshold => 'Por revisar desde';
+
+  @override
+  String get importReviewThresholdHint =>
+      'Entre esta puntuación y la segura la canción va a «Por revisar»; por debajo, a «No encontradas»';
+
+  @override
+  String get importThresholdsReset => 'Restablecer valores predeterminados';
+
+  @override
+  String csvImportEstimateHours(int hours, int minutes) {
+    return 'Tiempo estimado: unas $hours h $minutes min';
+  }
+
+  @override
+  String csvImportBlocks(int size) {
+    return 'Importar en bloques de $size';
+  }
+
+  @override
+  String csvImportBigWarning(int n) {
+    return '$n canciones por descargar: tardará horas. En bloques, uno tras otro, el orden de la lista se mantiene y puedes parar entre bloques.';
+  }
 }

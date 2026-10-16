@@ -1691,4 +1691,39 @@ class AppLocalizationsIt extends AppLocalizations {
     );
     return 'Abbinamenti pronti: $_temp0';
   }
+
+  @override
+  String get settingsAdvanced => 'Avanzate';
+
+  @override
+  String get importSureThreshold => 'Abbinamento sicuro da';
+
+  @override
+  String get importSureThresholdHint =>
+      'Sopra questo punteggio un brano dell\'importazione si scarica senza chiedere';
+
+  @override
+  String get importReviewThreshold => 'Da verificare da';
+
+  @override
+  String get importReviewThresholdHint =>
+      'Tra questo punteggio e quello sicuro il brano finisce in «Da verificare»; sotto, in «Non trovati»';
+
+  @override
+  String get importThresholdsReset => 'Ripristina i valori predefiniti';
+
+  @override
+  String csvImportEstimateHours(int hours, int minutes) {
+    return 'Tempo stimato: circa $hours h $minutes min';
+  }
+
+  @override
+  String csvImportBlocks(int size) {
+    return 'Importa a blocchi da $size';
+  }
+
+  @override
+  String csvImportBigWarning(int n) {
+    return 'Sono $n brani da scaricare: ci vorranno ore. A blocchi, uno dopo l\'altro, l\'ordine della playlist resta giusto e puoi fermarti tra un blocco e l\'altro.';
+  }
 }

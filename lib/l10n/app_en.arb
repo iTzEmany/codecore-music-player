@@ -906,5 +906,38 @@
         "type": "int"
       }
     }
+  },
+  "settingsAdvanced": "Advanced",
+  "importSureThreshold": "Sure match from",
+  "importSureThresholdHint": "Above this score an imported song is downloaded without asking",
+  "importReviewThreshold": "To review from",
+  "importReviewThresholdHint": "Between this score and the sure one the song goes to «To review»; below it, to «Not found»",
+  "importThresholdsReset": "Restore defaults",
+  "csvImportEstimateHours": "Estimated time: about {hours} h {minutes} min",
+  "csvImportBlocks": "Import in blocks of {size}",
+  "csvImportBigWarning": "{n} songs to download: it will take hours. In blocks, one after the other, the playlist order stays right and you can stop between blocks.",
+  "@csvImportEstimateHours": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "@csvImportBlocks": {
+    "placeholders": {
+      "size": {
+        "type": "int"
+      }
+    }
+  },
+  "@csvImportBigWarning": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
   }
 }

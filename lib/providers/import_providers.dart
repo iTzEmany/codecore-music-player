@@ -9,11 +9,13 @@ import '../data/repositories/import_repository.dart';
 import '../core/constants.dart';
 import '../data/db/app_database.dart';
 import '../services/import/playlist_import_service.dart';
+import '../services/import/track_matcher.dart' show MatchThresholds;
 import '../services/library/track_editor.dart';
 import '../services/online/cached_youtube_service.dart';
 import '../services/online/search_cache.dart';
 import 'database_providers.dart';
 import 'library_providers.dart';
+import 'settings_providers.dart';
 import 'youtube_providers.dart';
 
 /// Single import engine. Created at app start by the shell, which also turns
@@ -48,6 +50,12 @@ final playlistImportServiceProvider = Provider<PlaylistImportService>((ref) {
     loadLibrary: tracks.liteEntries,
     youtube: cached,
     forgetSearches: (queries) => unawaited(cached.forget(queries)),
+    thresholds: () {
+      final s = ref.read(settingsProvider);
+      return MatchThresholds(
+              sure: s.importSureThreshold, review: s.importReviewThreshold)
+          .clamped();
+    },
     enqueue: (r, tag) => downloads.add(r, tag: tag),
     cancelDownloads: downloads.cancelWhere,
     settled: downloads.settled,
