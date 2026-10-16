@@ -29,10 +29,14 @@ class LibraryEntryLite {
     required this.title,
     required this.artist,
     required this.durationMs,
+    this.path,
   });
 
   final int id;
   final String title;
   final String? artist;
   final int durationMs;
+
+  /// Only filled where the path matters (backup restore).
+  final String? path;
 }

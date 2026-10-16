@@ -61,3 +61,12 @@ List<List<String>> parseCsv(String text) {
   if (fieldStarted || field.isNotEmpty || row.isNotEmpty) endRow();
   return rows;
 }
+
+/// RFC 4180 writer: `\r\n` between records, quotes only where needed.
+String writeCsv(List<List<String>> rows) {
+  String cell(String v) => v.contains(RegExp(r'[",\r\n]'))
+      ? '"${v.replaceAll('"', '""')}"'
+      : v;
+  return rows.map((r) => r.map(cell).join(',')).join('\r\n') +
+      (rows.isEmpty ? '' : '\r\n');
+}

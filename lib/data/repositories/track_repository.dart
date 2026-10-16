@@ -183,6 +183,7 @@ class TrackRepository {
         _db.tracks.title,
         _db.tracks.artist,
         _db.tracks.durationMs,
+        _db.tracks.path,
       ])
       ..where(_db.tracks.missing.equals(false));
     final rows = await q.get();
@@ -193,6 +194,7 @@ class TrackRepository {
           title: r.read(_db.tracks.title) ?? '',
           artist: r.read(_db.tracks.artist),
           durationMs: r.read(_db.tracks.durationMs) ?? 0,
+          path: r.read(_db.tracks.path),
         ),
     ];
   }

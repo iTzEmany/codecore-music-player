@@ -151,15 +151,15 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 12.11 Rifinitura e prova a mano
 
 ## Fase 13 — Backup, ripristino ed export (`fase-13-backup-export.md`)
-- [ ] 13.1 Verifiche preliminari (pacchetto archive, percorso DB, VACUUM INTO, saveFile su Android)
-- [ ] 13.2 Formato portabile user_data.json (+ test)
-- [ ] 13.3 Estrazione dei dati utente dal DB (+ test)
-- [ ] 13.4 Riconoscere i brani al ripristino (+ test)
+- [ ] 13.1 Verifiche preliminari (pacchetto archive, percorso DB, VACUUM INTO, saveFile su Android) (BLOCCATO: pacchetto `archive` da approvare)
+- [x] 13.2 Formato portabile user_data.json (+ test)
+- [x] 13.3 Estrazione dei dati utente dal DB (+ test)
+- [x] 13.4 Riconoscere i brani al ripristino (+ test)
 - [ ] 13.5 Creare il backup (+ test)
 - [ ] 13.6 Ripristino sullo stesso dispositivo (sostituzione al riavvio)
 - [ ] 13.7 Ripristino su un altro dispositivo (unione)
 - [ ] 13.8 Sezione «Backup» nelle Impostazioni
-- [ ] 13.9 Esportazione delle playlist: M3U8, CSV, JSON (+ test)
+- [x] 13.9 Esportazione delle playlist: M3U8, CSV, JSON (+ test)
 - [ ] 13.10 Interfaccia di esportazione
 - [ ] 13.11 «Esporta log» senza dati personali
 - [ ] 13.12 Rifinitura, documentazione e prova a mano
@@ -385,6 +385,10 @@ L'agente riparte sempre dal primo task non spuntato.
 - 10.9 misura acustica (2026-10-15, microfono del PC, Mi A3 + Motorola, altoparlanti, file di click): all'avvio i due telefoni erano sfasati di **~88 ms** (Motorola dopo); con la correzione a ±2 % l'offset è sceso a ~36 ms in ~12 s e a ~25 ms dopo 22 s, con rimbalzi fino a ~65 ms. Conclusioni: (a) la sola posizione del player (scarto 10–20 ms nei log) non basta, il tempo di uscita dei due telefoni differisce di decine di ms; (b) la convergenza era troppo lenta. Modifiche: seek oltre 120 ms (era 250), correzione di velocità ±3 % (era ±2 %). Da ripetere la misura con la nuova taratura; la compensazione manuale della latenza resta necessaria (cuffie Bluetooth: 100–250 ms).
 - 10.9 difetto trovato: in uscita singola, se il sistema mette in pausa il player (audio focus perso), la Jam restava «in riproduzione» senza suonare; ora un controllo ogni 2 s lo riprende.
 - 10.9 misura acustica #2 (2026-10-15, microfono del PC, 2 altoparlanti, click ogni secondo, 31 click): con la taratura «seek 120 ms + ±3 % fisso» l'offset oscillava tra −14 e +94 ms (ciclo limite del controllore a gradino con ritardo di attuazione): peggio della versione precedente. Corretto con controllo **proporzionale** (velocità = 1 − errore/4000 ms, tetto ±2,5 %, soglia di ignoro 25 ms, nessun comando per variazioni < 0,3 %): misura #3, **dopo ~14 s di assestamento lo scarto resta a −9 ms (Motorola 9 ms prima del Xiaomi) per 17 click consecutivi**; nei primi 14 s tra −9 e +49 ms. L'ultimo click (12, 56 ms) coincide con la chiusura della Jam. La simulazione ora include ritardo di attuazione di un tick e rumore ±10 ms sulla posizione.
+
+## Note di deviazione (Fase 13+)
+- 13.3: `tracks` di `user_data.json` contiene solo i brani con preferito/modifica/testi/ascolti; chi sta solo in una playlist compare nei riferimenti della playlist (niente duplicati). Brano fuori da ogni cartella: `folder` = percorso assoluto del file, `relPath` null. `trackRefFor` è pubblica (serve all'export JSON).
+- 13.4: `LibraryEntryLite` guadagna `path` (opzionale, riempito da `liteEntries`); `TrackResolver` tenta percorso relativo → titolo+artista+durata ±2 s → sha256.
 
 ## Note di deviazione (Fase 12)
 - 12.1 (2026-10-16): CSV vero = `Just_a_mood.csv` (34 brani; intestazioni `Track URI, ISRC, Track Name, Album Name, Artist Name(s), …, Duration (ms)`; **più artisti separati da `;`**). yt-dlp di sistema 2024.04.09 NON legge più YouTube («Please sign in»): provato con yt-dlp 2026.08.19 (binario standalone). `https://music.youtube.com/search?q=…#songs` funziona; in modalità flat dà ~460 voci con solo `id`/`title` (nessuna durata), **senza `--flat-playlist` e con `--playlist-items 1-5`** ogni voce ha `channel`, `artists[]`, `track`, `album`, `duration` in ~5–8 s → si usa quella. `YtResult` guadagna `artists` e `album`.
