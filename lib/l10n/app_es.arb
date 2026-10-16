@@ -779,5 +779,14 @@
   "exportAction": "Exportar",
   "exportSaved": "Lista exportada",
   "exportEmpty": "La lista está vacía",
-  "exportFailed": "No se pudo exportar la lista"
+  "exportFailed": "No se pudo exportar la lista",
+  "ytErrToolOutdated": "yt-dlp es demasiado antiguo: actualízalo (Ajustes → Descargas → Actualizar) e inténtalo de nuevo",
+  "ytDlpOutdatedBanner": "yt-dlp {version} es demasiado antiguo: puede que las descargas no funcionen",
+  "@ytDlpOutdatedBanner": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  }
 }

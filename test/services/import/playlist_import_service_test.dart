@@ -48,6 +48,9 @@ class FakeYoutube implements YoutubeService {
       const Stream.empty();
 
   @override
+  Future<String?> toolVersion() async => '2026.08.19';
+
+  @override
   void close() {}
 }
 

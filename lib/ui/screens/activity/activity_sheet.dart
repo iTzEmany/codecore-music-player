@@ -10,6 +10,7 @@ import '../../../providers/youtube_providers.dart';
 import '../../../services/share/offers.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/confirm.dart';
+import '../../widgets/yt_dlp_outdated_banner.dart';
 
 /// Everything that runs in the background, with Cancel where it exists.
 class ActivitySheet extends ConsumerWidget {
@@ -143,6 +144,7 @@ class ActivitySheet extends ConsumerWidget {
               ),
               child: Text(l.activityTitle, style: theme.titleMedium),
             ),
+            const YtDlpOutdatedBanner(),
             if (state.isEmpty)
               Padding(
                 padding: const EdgeInsets.all(CcDims.margin),

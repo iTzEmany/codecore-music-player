@@ -42,7 +42,16 @@ class DownloadProgress {
   double get fraction => total <= 0 ? 0 : received / total;
 }
 
-enum YtErrorKind { unavailable, network, changed, toolMissing, rateLimited }
+enum YtErrorKind {
+  unavailable,
+  network,
+  changed,
+  toolMissing,
+  rateLimited,
+
+  /// yt-dlp is older than `kMinYtDlpVersion` and the request failed.
+  toolOutdated,
+}
 
 class YtException implements Exception {
   const YtException(this.kind, [this.detail]);
@@ -100,6 +109,10 @@ abstract class YoutubeService {
   /// download ends without a path and leaves no partial files.
   Stream<DownloadProgress> download(YtResult r, Directory outDir,
       {CancelToken? cancel});
+
+  /// Version string of the yt-dlp in use (`2026.08.19`); null when unknown or
+  /// when the tool is missing.
+  Future<String?> toolVersion();
 
   void close() {}
 }

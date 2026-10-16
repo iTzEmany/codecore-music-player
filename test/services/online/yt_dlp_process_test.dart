@@ -71,4 +71,42 @@ void main() {
     expect(u.queryParameters['q'], 'Lucio Dalla & Co: Felicità');
     expect(u.fragment, 'songs');
   });
+
+  group('with a stand-in yt-dlp script', () {
+    late Directory dir;
+    setUp(() => dir = Directory.systemTemp.createTempSync('cc_ytdlp'));
+    tearDown(() => dir.deleteSync(recursive: true));
+
+    String fake(String version) {
+      final f = File('${dir.path}/yt-dlp')
+        ..writeAsStringSync('#!/bin/sh\n'
+            'if [ "\$1" = "--version" ]; then echo $version; exit 0; fi\n'
+            'echo "ERROR: Sign in to confirm your age" >&2\n'
+            'exit 1\n');
+      Process.runSync('chmod', ['+x', f.path]);
+      return f.path;
+    }
+
+    test('a failing search on an old yt-dlp says it is outdated', () async {
+      final svc = YtDlpProcessService(executable: fake('2024.04.09'));
+      expect(await svc.toolVersion(), '2024.04.09');
+      expect(
+          svc.search('x'),
+          throwsA(isA<YtException>()
+              .having((e) => e.kind, 'kind', YtErrorKind.toolOutdated)));
+    });
+
+    test('the same failure on a recent yt-dlp stays «unavailable»', () async {
+      final svc = YtDlpProcessService(executable: fake('2026.08.19'));
+      expect(
+          svc.searchSongs('x'),
+          throwsA(isA<YtException>()
+              .having((e) => e.kind, 'kind', YtErrorKind.unavailable)));
+    });
+
+    test('a missing tool has no version', () async {
+      final svc = YtDlpProcessService(executable: '${dir.path}/nope');
+      expect(await svc.toolVersion(), isNull);
+    });
+  }, skip: Platform.isWindows ? 'needs a POSIX shell' : false);
 }

@@ -2765,6 +2765,18 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Impossibile esportare la playlist'**
   String get exportFailed;
+
+  /// No description provided for @ytErrToolOutdated.
+  ///
+  /// In it, this message translates to:
+  /// **'yt-dlp è troppo vecchio: aggiornalo (Impostazioni → Download → Aggiorna) e riprova'**
+  String get ytErrToolOutdated;
+
+  /// No description provided for @ytDlpOutdatedBanner.
+  ///
+  /// In it, this message translates to:
+  /// **'yt-dlp {version} è troppo vecchio: i download potrebbero non funzionare'**
+  String ytDlpOutdatedBanner(String version);
 }
 
 class _AppLocalizationsDelegate

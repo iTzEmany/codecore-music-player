@@ -6,6 +6,7 @@ import '../../core/platform.dart';
 import '../../providers/nav_providers.dart';
 import '../../providers/player_providers.dart';
 import '../../providers/ui_providers.dart';
+import '../../providers/youtube_providers.dart' show ytDlpStatusProvider;
 import '../../services/audio/codecore_audio_handler.dart';
 import '../screens/library/library_screen.dart';
 import '../screens/share/incoming_offer_dialog.dart';
@@ -72,6 +73,9 @@ class AppShell extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Desktop only: starts the yt-dlp version check at launch (Android would
+    // have to boot its embedded Python for it).
+    if (isDesktop) ref.listen(ytDlpStatusProvider, (_, _) {});
     ref.listen(playerFailuresProvider, (_, next) {
       final f = next.value;
       if (f == null) return;

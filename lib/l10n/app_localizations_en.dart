@@ -1519,4 +1519,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get exportFailed => 'Couldn\'t export the playlist';
+
+  @override
+  String get ytErrToolOutdated =>
+      'yt-dlp is too old: update it (Settings → Downloads → Update) and try again';
+
+  @override
+  String ytDlpOutdatedBanner(String version) {
+    return 'yt-dlp $version is too old: downloads may not work';
+  }
 }

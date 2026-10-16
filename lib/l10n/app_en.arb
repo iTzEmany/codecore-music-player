@@ -779,5 +779,14 @@
   "exportAction": "Export",
   "exportSaved": "Playlist exported",
   "exportEmpty": "The playlist is empty",
-  "exportFailed": "Couldn't export the playlist"
+  "exportFailed": "Couldn't export the playlist",
+  "ytErrToolOutdated": "yt-dlp is too old: update it (Settings → Downloads → Update) and try again",
+  "ytDlpOutdatedBanner": "yt-dlp {version} is too old: downloads may not work",
+  "@ytDlpOutdatedBanner": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  }
 }

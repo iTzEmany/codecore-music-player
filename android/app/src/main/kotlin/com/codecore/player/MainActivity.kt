@@ -161,6 +161,10 @@ class MainActivity : AudioServiceActivity() {
                     ?.absolutePath
                     ?: throw IllegalStateException("output file not found")
             }
+            "version" -> run(result) {
+                ensureInit()
+                YoutubeDL.getInstance().version(applicationContext)
+            }
             "cancel" -> {
                 val processId = call.argument<String>("processId")
                 if (processId != null) YoutubeDL.getInstance().destroyProcessById(processId)

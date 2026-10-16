@@ -6,6 +6,7 @@ import 'package:dio/dio.dart';
 import 'package:path/path.dart' as p;
 
 import '../../core/app_log.dart';
+import 'yt_dlp_version.dart';
 import 'youtube_service.dart';
 
 /// Parses `yt-dlp -J --flat-playlist` output (a playlist or a single video).
@@ -112,6 +113,30 @@ class YtDlpProcessService implements YoutubeService {
     return _jsRuntimeArgs = args;
   }
 
+  Future<String?>? _version;
+
+  @override
+  Future<String?> toolVersion() => _version ??= () async {
+        try {
+          final r = await Process.run(_exe, ['--version']);
+          if (r.exitCode != 0) return null;
+          return '${r.stdout}'.trim().split('\n').first.trim();
+        } on ProcessException {
+          return null;
+        }
+      }();
+
+  /// A failure on an outdated yt-dlp is most likely YouTube having moved on.
+  Future<YtException> _explain(Object stderr) async {
+    final e = ytExceptionFromStderr('$stderr');
+    final stale = e.kind == YtErrorKind.changed ||
+        e.kind == YtErrorKind.unavailable;
+    if (stale && isYtDlpOutdated(await toolVersion())) {
+      return YtException(YtErrorKind.toolOutdated, e.detail);
+    }
+    return e;
+  }
+
   Future<void> _ensureTool() async {
     if (!await _exists(_exe)) {
       throw const YtException(YtErrorKind.toolMissing, 'yt-dlp');
@@ -132,7 +157,7 @@ class YtDlpProcessService implements YoutubeService {
     ];
     final r = await Process.run(_exe, args,
         stdoutEncoding: utf8, stderrEncoding: utf8);
-    if (r.exitCode != 0) throw ytExceptionFromStderr('${r.stderr}');
+    if (r.exitCode != 0) throw await _explain(r.stderr);
     try {
       return parseYtDlpJson('${r.stdout}');
     } on FormatException catch (e, st) {
@@ -158,7 +183,7 @@ class YtDlpProcessService implements YoutubeService {
         ],
         stdoutEncoding: utf8,
         stderrEncoding: utf8);
-    if (r.exitCode != 0) throw ytExceptionFromStderr('${r.stderr}');
+    if (r.exitCode != 0) throw await _explain(r.stderr);
     try {
       return parseYtDlpJson('${r.stdout}');
     } on FormatException catch (e, st) {
@@ -214,7 +239,7 @@ class YtDlpProcessService implements YoutubeService {
       }
       if (code != 0) {
         await _cleanup(stem);
-        throw ytExceptionFromStderr('$err');
+        throw await _explain(err);
       }
       final out = await _findOutput(stem);
       if (out == null) throw const YtException(YtErrorKind.changed, 'no output');

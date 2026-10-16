@@ -55,6 +55,8 @@ class _State extends ConsumerState<ImportEventListener> {
         );
       case ImportEventKind.toolMissing:
         text = l.ytErrToolMissing;
+      case ImportEventKind.toolOutdated:
+        text = l.ytErrToolOutdated;
       case ImportEventKind.failing:
         text = l.csvImportFailing;
     }

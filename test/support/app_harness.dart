@@ -63,10 +63,11 @@ class Harness {
         coversDirProvider.overrideWithValue(coversDir),
       ];
 
-  Future<void> pump(WidgetTester tester, Widget child) async {
+  Future<void> pump(WidgetTester tester, Widget child,
+      {List<Override> extraOverrides = const []}) async {
     await tester.pumpWidget(
         ProviderScope(
-        overrides: overrides,
+        overrides: [...overrides, ...extraOverrides],
         child: MaterialApp(
           theme: buildTheme(appThemeIdFromName(''), false),
           locale: const Locale('it'),

@@ -25,7 +25,14 @@ String importTag(int importId, int rowIndex) => '$_tagPrefix$importId:$rowIndex'
   return a == null || b == null ? null : (a, b);
 }
 
-enum ImportEventKind { rateLimited, network, toolMissing, failing, completed }
+enum ImportEventKind {
+  rateLimited,
+  network,
+  toolMissing,
+  toolOutdated,
+  failing,
+  completed,
+}
 
 class ImportEvent {
   const ImportEvent(this.kind, this.importId);
@@ -301,6 +308,8 @@ class PlaylistImportService {
         stop = ImportEventKind.network;
       case YtErrorKind.toolMissing:
         stop = ImportEventKind.toolMissing;
+      case YtErrorKind.toolOutdated:
+        stop = ImportEventKind.toolOutdated;
       case YtErrorKind.unavailable:
       case YtErrorKind.changed:
         _failStreak++;

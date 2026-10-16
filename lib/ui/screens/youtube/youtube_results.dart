@@ -10,6 +10,7 @@ import '../../theme/tokens.dart';
 import '../../widgets/activity_button.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/format_utils.dart';
+import '../../widgets/yt_dlp_outdated_banner.dart';
 
 String ytErrorText(BuildContext context, YtErrorKind k) {
   final l = context.l10n;
@@ -19,6 +20,7 @@ String ytErrorText(BuildContext context, YtErrorKind k) {
     YtErrorKind.changed => l.ytErrChanged,
     YtErrorKind.toolMissing => l.ytErrToolMissing,
     YtErrorKind.rateLimited => l.ytErrRateLimited,
+    YtErrorKind.toolOutdated => l.ytErrToolOutdated,
   };
 }
 
@@ -90,6 +92,7 @@ class _YoutubeResultsState extends ConsumerState<YoutubeResults> {
     final theme = Theme.of(context).textTheme;
     return Column(
       children: [
+        const YtDlpOutdatedBanner(),
         if (!seen)
           Padding(
             padding: const EdgeInsets.fromLTRB(

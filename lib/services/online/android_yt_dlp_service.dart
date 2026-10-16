@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart' as p;
 
+import '../../core/app_log.dart';
 import 'yt_dlp_process_service.dart';
 import 'youtube_service.dart';
 
@@ -107,6 +108,17 @@ class AndroidYtDlpService implements YoutubeService {
       if (e is File && p.basename(e.path).startsWith('$base.')) {
         await e.delete();
       }
+    }
+  }
+
+  @override
+  Future<String?> toolVersion() async {
+    try {
+      final v = await _channel.invokeMethod<String>('version');
+      return (v == null || v.trim().isEmpty) ? null : v.trim();
+    } on PlatformException catch (e, st) {
+      AppLog.w('yt-dlp version lookup failed', e, st);
+      return null;
     }
   }
 

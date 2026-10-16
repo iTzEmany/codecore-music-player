@@ -14,6 +14,7 @@ import '../services/online/download_index.dart';
 import '../services/online/download_queue.dart';
 import '../services/online/android_yt_dlp_service.dart';
 import '../services/online/yt_dlp_process_service.dart';
+import '../services/online/yt_dlp_version.dart';
 import '../services/online/youtube_service.dart';
 import 'database_providers.dart';
 import 'library_providers.dart';
@@ -26,6 +27,19 @@ final youtubeServiceProvider = Provider<YoutubeService>((ref) {
       : YtDlpProcessService();
   ref.onDispose(s.close);
   return s;
+});
+
+/// What `yt-dlp --version` said; [outdated] drives the banner on desktop.
+class YtDlpStatus {
+  const YtDlpStatus(this.version);
+
+  final String? version;
+  bool get outdated => isYtDlpOutdated(version);
+}
+
+final ytDlpStatusProvider = FutureProvider<YtDlpStatus>((ref) async {
+  final v = await ref.watch(youtubeServiceProvider).toolVersion();
+  return YtDlpStatus(v);
 });
 
 final downloadIndexProvider = FutureProvider<DownloadIndex>((ref) async {
