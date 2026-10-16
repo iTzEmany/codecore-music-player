@@ -17,12 +17,16 @@ class CcColors extends ThemeExtension<CcColors> {
     required this.textFaint,
     required this.heroBase,
     required this.error,
+    this.isLight = false,
   });
 
   final Color bg, surface1, surface2, surface3;
   final Color accent, accentSoft, onAccent;
   final Color text, textMuted, textFaint;
   final Color heroBase, error;
+
+  /// A light palette: dark text on light surfaces.
+  final bool isLight;
 
   static const notte = CcColors(
     bg: Color(0xFF07050C),
@@ -54,6 +58,22 @@ class CcColors extends ThemeExtension<CcColors> {
     error: Color(0xFFFF6B81),
   );
 
+  static const chiaro = CcColors(
+    bg: Color(0xFFFAF8FD),
+    surface1: Color(0xFFF2EEF9),
+    surface2: Color(0xFFE9E3F4),
+    surface3: Color(0xFFDAD1EB),
+    accent: Color(0xFF6A35D8),
+    accentSoft: Color(0xFF5B2BBE),
+    onAccent: Color(0xFFFFFFFF),
+    text: Color(0xFF1B1427),
+    textMuted: Color(0xFF5C5170),
+    textFaint: Color(0xFF8C829E),
+    heroBase: Color(0xFFE6DAFA),
+    error: Color(0xFFC8203B),
+    isLight: true,
+  );
+
   @override
   CcColors copyWith({Color? bg, Color? accent}) => CcColors(
     bg: bg ?? this.bg,
@@ -68,6 +88,7 @@ class CcColors extends ThemeExtension<CcColors> {
     textFaint: textFaint,
     heroBase: heroBase,
     error: error,
+    isLight: isLight,
   );
 
   @override

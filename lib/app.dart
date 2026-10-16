@@ -29,7 +29,11 @@ class CodecoreApp extends ConsumerWidget {
     return MaterialApp(
       title: 'Codecore',
       debugShowCheckedModeBanner: false,
-      theme: buildTheme(appThemeIdFromName(s.theme), s.compactMode),
+      theme: buildTheme(
+        appThemeIdFromName(s.theme),
+        s.compactMode,
+        accent: accentFromName(s.accent),
+      ),
       locale: Locale(s.language),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,

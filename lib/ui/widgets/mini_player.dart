@@ -307,7 +307,7 @@ class _MiniProgress extends ConsumerWidget {
     return LinearProgressIndicator(
       value: value,
       minHeight: 2,
-      backgroundColor: Colors.white.withValues(alpha: 0.12),
+      backgroundColor: context.cc.text.withValues(alpha: 0.12),
     );
   }
 }

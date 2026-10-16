@@ -59,4 +59,21 @@ void main() {
       expect(_contrast(CcColors.notte.text, t), greaterThanOrEqualTo(7));
     }
   });
+
+  test('on the light theme the tint is pale and the dark text keeps ≥ 7:1', () {
+    final base = CcColors.chiaro.heroBase;
+    for (final c in [
+      const Color(0xFFFF0000),
+      const Color(0xFFFFFF00),
+      const Color(0xFF00FFFF),
+      const Color(0xFF0000FF),
+      const Color(0xFFFFFFFF),
+      const Color(0xFF101010),
+    ]) {
+      final t = heroTint(c, base, light: true);
+      expect(HSLColor.fromColor(t).lightness, greaterThanOrEqualTo(0.799));
+      expect(_contrast(CcColors.chiaro.text, t), greaterThanOrEqualTo(7));
+    }
+  });
 }
+

@@ -3581,6 +3581,66 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Sono già tutti in libreria o in corso'**
   String get ytNothingToDownload;
+
+  /// No description provided for @themeChiaro.
+  ///
+  /// In it, this message translates to:
+  /// **'Chiaro'**
+  String get themeChiaro;
+
+  /// No description provided for @settingsAccent.
+  ///
+  /// In it, this message translates to:
+  /// **'Colore d\'accento'**
+  String get settingsAccent;
+
+  /// No description provided for @accentViola.
+  ///
+  /// In it, this message translates to:
+  /// **'Viola'**
+  String get accentViola;
+
+  /// No description provided for @accentBlu.
+  ///
+  /// In it, this message translates to:
+  /// **'Blu'**
+  String get accentBlu;
+
+  /// No description provided for @accentAcqua.
+  ///
+  /// In it, this message translates to:
+  /// **'Verde acqua'**
+  String get accentAcqua;
+
+  /// No description provided for @accentVerde.
+  ///
+  /// In it, this message translates to:
+  /// **'Verde'**
+  String get accentVerde;
+
+  /// No description provided for @accentAmbra.
+  ///
+  /// In it, this message translates to:
+  /// **'Ambra'**
+  String get accentAmbra;
+
+  /// No description provided for @accentArancio.
+  ///
+  /// In it, this message translates to:
+  /// **'Arancio'**
+  String get accentArancio;
+
+  /// No description provided for @accentRosa.
+  ///
+  /// In it, this message translates to:
+  /// **'Rosa'**
+  String get accentRosa;
+
+  /// No description provided for @accentRosso.
+  ///
+  /// In it, this message translates to:
+  /// **'Rosso'**
+  String get accentRosso;
 }
 
 class _AppLocalizationsDelegate

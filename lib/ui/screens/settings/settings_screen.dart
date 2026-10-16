@@ -24,6 +24,7 @@ import '../share/share_screen.dart';
 import '../../../services/migration/python_db_importer.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/tokens.dart';
+import 'accent_picker.dart';
 import 'advanced_section.dart';
 import 'download_settings_tiles.dart';
 import 'equalizer_screen.dart';
@@ -49,6 +50,7 @@ class SettingsScreen extends ConsumerWidget {
     final notifier = ref.read(settingsProvider.notifier);
     final folders = ref.watch(foldersProvider).value ?? const [];
     final missing = ref.watch(missingTracksProvider).value ?? const [];
+    final accent = accentFromName(s.accent);
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 760),
@@ -66,8 +68,12 @@ class SettingsScreen extends ConsumerWidget {
                       runSpacing: 8,
                       children: [
                         for (final (id, label, colors) in [
-                          ('notte', l.themeNotte, CcColors.notte),
-                          ('oled', l.themeOled, CcColors.oled),
+                          for (final (t, name) in [
+                            (AppThemeId.notte, l.themeNotte),
+                            (AppThemeId.oled, l.themeOled),
+                            (AppThemeId.chiaro, l.themeChiaro),
+                          ])
+                            (t.name, name, buildPalette(t, accent)),
                         ])
                           Padding(
                             padding: const EdgeInsets.only(right: 12),
@@ -80,6 +86,18 @@ class SettingsScreen extends ConsumerWidget {
                             ),
                           ),
                       ],
+                    ),
+                  ),
+                ),
+                ListTile(
+                  title: Text(l.settingsAccent),
+                  subtitle: Padding(
+                    padding: const EdgeInsets.only(top: 12),
+                    child: AccentPicker(
+                      theme: appThemeIdFromName(s.theme),
+                      selected: accent,
+                      onSelected: (a) =>
+                          notifier.update((c) => c.copyWith(accent: a.name)),
                     ),
                   ),
                 ),

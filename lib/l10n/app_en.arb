@@ -1179,5 +1179,15 @@
       }
     }
   },
-  "ytNothingToDownload": "They are all in the library or in progress already"
+  "ytNothingToDownload": "They are all in the library or in progress already",
+  "themeChiaro": "Light",
+  "settingsAccent": "Accent colour",
+  "accentViola": "Violet",
+  "accentBlu": "Blue",
+  "accentAcqua": "Teal",
+  "accentVerde": "Green",
+  "accentAmbra": "Amber",
+  "accentArancio": "Orange",
+  "accentRosa": "Pink",
+  "accentRosso": "Red"
 }

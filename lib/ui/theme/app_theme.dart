@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
+import 'palette.dart';
 import 'tokens.dart';
+
+export 'palette.dart';
 
 /// The same fade-and-rise page transition on every platform; none at all
 /// with «Riduci animazioni».
@@ -26,20 +29,17 @@ class CcPageTransitionsBuilder extends PageTransitionsBuilder {
   }
 }
 
-enum AppThemeId { notte, oled }
-
-/// Unknown or retired names (carbon, navy, light) fall back to `notte`.
-AppThemeId appThemeIdFromName(String name) => AppThemeId.values.firstWhere(
-  (e) => e.name == name,
-  orElse: () => AppThemeId.notte,
-);
-
 /// Text size is applied app-wide through MediaQuery's text scaler (see app.dart):
 /// scaling the TextTheme directly asserts on styles without a font size.
-ThemeData buildTheme(AppThemeId id, bool compact) {
-  final c = id == AppThemeId.oled ? CcColors.oled : CcColors.notte;
+ThemeData buildTheme(
+  AppThemeId id,
+  bool compact, {
+  CcAccent accent = CcAccent.viola,
+}) {
+  final c = buildPalette(id, accent);
+  final brightness = c.isLight ? Brightness.light : Brightness.dark;
   final scheme = ColorScheme(
-    brightness: Brightness.dark,
+    brightness: brightness,
     primary: c.accent,
     onPrimary: c.onAccent,
     primaryContainer: c.surface3,
@@ -76,7 +76,7 @@ ThemeData buildTheme(AppThemeId id, bool compact) {
   );
   return ThemeData(
     useMaterial3: true,
-    brightness: Brightness.dark,
+    brightness: brightness,
     colorScheme: scheme,
     fontFamily: 'Figtree',
     textTheme: text,

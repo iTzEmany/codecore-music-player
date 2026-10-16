@@ -33,12 +33,27 @@ Color? tintFromPixels(Uint8List rgba) {
 /// Highest luminance that keeps the primary text (`#F4F0FA`) at ≥ 7:1.
 const _maxHeroLuminance = 0.08;
 
+/// Lowest luminance that keeps the dark text of the light theme (`#1B1427`)
+/// at ≥ 7:1.
+const _minLightHeroLuminance = 0.42;
+
 /// Pulls [c] towards the base violet and clamps lightness to at most 0.30
 /// (at least 0.16 unless a bright hue like yellow needs to go darker to keep
-/// the primary text at ≥ 7:1 contrast).
-Color heroTint(Color c, Color base) {
+/// the primary text at ≥ 7:1 contrast). With [light] it is the other way
+/// round: pale, lightness at least 0.80, for the dark text of the light theme.
+Color heroTint(Color c, Color base, {bool light = false}) {
   final mixed = Color.lerp(c, base, 0.45)!;
   final hsl = HSLColor.fromColor(mixed);
+  if (light) {
+    final pale = hsl.withSaturation(hsl.saturation.clamp(0.0, 0.7));
+    var l = hsl.lightness.clamp(0.80, 0.92);
+    var out = pale.withLightness(l).toColor();
+    while (out.computeLuminance() < _minLightHeroLuminance && l < 0.98) {
+      l += 0.01;
+      out = pale.withLightness(l).toColor();
+    }
+    return out;
+  }
   var l = hsl.lightness.clamp(0.16, 0.30);
   var out = hsl.withLightness(l).toColor();
   while (out.computeLuminance() > _maxHeroLuminance && l > 0.02) {
@@ -76,8 +91,9 @@ final coverTintProvider = FutureProvider.family<Color?, String>((
 /// The colour behind a cover: its tint pulled towards the theme's violet,
 /// or `heroBase` while loading / without cover.
 Color resolvedHeroTint(BuildContext context, WidgetRef ref, String? coverKey) {
-  final base = context.cc.heroBase;
+  final cc = context.cc;
+  final base = cc.heroBase;
   if (coverKey == null) return base;
   final tint = ref.watch(coverTintProvider(coverKey)).value;
-  return tint == null ? base : heroTint(tint, base);
+  return tint == null ? base : heroTint(tint, base, light: cc.isLight);
 }

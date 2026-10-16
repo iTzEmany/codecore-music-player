@@ -75,4 +75,15 @@ void main() {
     SharedPreferences.setMockInitialValues({'transition': 'something-old'});
     expect((await SettingsStore.open()).readSettings().transition, TransitionMode.normal);
   });
+
+  test('the accent defaults to violet and the light theme name is kept', () async {
+    SharedPreferences.setMockInitialValues({});
+    final store = await SettingsStore.open();
+    expect(store.readSettings().accent, 'viola');
+    await store.writeSettings(const AppSettings(theme: 'chiaro', accent: 'rosa'));
+    final s = store.readSettings();
+    expect(s.theme, 'chiaro');
+    expect(s.accent, 'rosa');
+  });
 }
+

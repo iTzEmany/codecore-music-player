@@ -1179,5 +1179,15 @@
       }
     }
   },
-  "ytNothingToDownload": "Alle sind schon in der Bibliothek oder in Arbeit"
+  "ytNothingToDownload": "Alle sind schon in der Bibliothek oder in Arbeit",
+  "themeChiaro": "Hell",
+  "settingsAccent": "Akzentfarbe",
+  "accentViola": "Violett",
+  "accentBlu": "Blau",
+  "accentAcqua": "Türkis",
+  "accentVerde": "Grün",
+  "accentAmbra": "Bernstein",
+  "accentArancio": "Orange",
+  "accentRosa": "Rosa",
+  "accentRosso": "Rot"
 }

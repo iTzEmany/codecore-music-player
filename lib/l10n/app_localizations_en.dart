@@ -2103,4 +2103,34 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get ytNothingToDownload =>
       'They are all in the library or in progress already';
+
+  @override
+  String get themeChiaro => 'Light';
+
+  @override
+  String get settingsAccent => 'Accent colour';
+
+  @override
+  String get accentViola => 'Violet';
+
+  @override
+  String get accentBlu => 'Blue';
+
+  @override
+  String get accentAcqua => 'Teal';
+
+  @override
+  String get accentVerde => 'Green';
+
+  @override
+  String get accentAmbra => 'Amber';
+
+  @override
+  String get accentArancio => 'Orange';
+
+  @override
+  String get accentRosa => 'Pink';
+
+  @override
+  String get accentRosso => 'Red';
 }

@@ -1370,5 +1370,15 @@
       }
     }
   },
-  "ytNothingToDownload": "Sono già tutti in libreria o in corso"
+  "ytNothingToDownload": "Sono già tutti in libreria o in corso",
+  "themeChiaro": "Chiaro",
+  "settingsAccent": "Colore d'accento",
+  "accentViola": "Viola",
+  "accentBlu": "Blu",
+  "accentAcqua": "Verde acqua",
+  "accentVerde": "Verde",
+  "accentAmbra": "Ambra",
+  "accentArancio": "Arancio",
+  "accentRosa": "Rosa",
+  "accentRosso": "Rosso"
 }

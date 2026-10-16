@@ -79,12 +79,15 @@ class Shot {
 
   /// Pumps [home] inside the real theme; [extra] adds provider overrides.
   Future<void> show(Widget home,
-      {List<Override> extra = const [], double textScale = 1}) async {
+      {List<Override> extra = const [],
+      double textScale = 1,
+      AppThemeId theme = AppThemeId.notte,
+      CcAccent accent = CcAccent.viola}) async {
     await tester.pumpWidget(ProviderScope(
       overrides: [...overrides, ...extra],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        theme: buildTheme(appThemeIdFromName(''), false),
+        theme: buildTheme(theme, false, accent: accent),
         locale: const Locale('it'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,

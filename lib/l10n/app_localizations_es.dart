@@ -2110,4 +2110,34 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get ytNothingToDownload =>
       'Ya están todos en la biblioteca o en curso';
+
+  @override
+  String get themeChiaro => 'Claro';
+
+  @override
+  String get settingsAccent => 'Color de acento';
+
+  @override
+  String get accentViola => 'Violeta';
+
+  @override
+  String get accentBlu => 'Azul';
+
+  @override
+  String get accentAcqua => 'Turquesa';
+
+  @override
+  String get accentVerde => 'Verde';
+
+  @override
+  String get accentAmbra => 'Ámbar';
+
+  @override
+  String get accentArancio => 'Naranja';
+
+  @override
+  String get accentRosa => 'Rosa';
+
+  @override
+  String get accentRosso => 'Rojo';
 }

@@ -22,6 +22,7 @@ class EqProfile {
 class AppSettings {
   const AppSettings({
     this.theme = 'notte',
+    this.accent = 'viola',
     this.fontScale = 1.0,
     this.compactMode = false,
     this.reducedMotion = false,
@@ -52,6 +53,9 @@ class AppSettings {
   });
 
   final String theme;
+
+  /// One of the eight accent names (`CcAccent`); unknown ones mean violet.
+  final String accent;
   final double fontScale;
   final bool compactMode, reducedMotion, autoEnrich, autoLyrics, showUndoSnackbar;
 
@@ -109,6 +113,7 @@ class AppSettings {
 
   AppSettings copyWith({
     String? theme,
+    String? accent,
     double? fontScale,
     bool? compactMode,
     bool? reducedMotion,
@@ -139,6 +144,7 @@ class AppSettings {
   }) =>
       AppSettings(
         theme: theme ?? this.theme,
+        accent: accent ?? this.accent,
         fontScale: fontScale ?? this.fontScale,
         compactMode: compactMode ?? this.compactMode,
         reducedMotion: reducedMotion ?? this.reducedMotion,
@@ -199,6 +205,7 @@ class SettingsStore {
 
   AppSettings readSettings() => AppSettings(
         theme: _prefs.getString('theme') ?? 'notte',
+        accent: _prefs.getString('accent') ?? 'viola',
         fontScale: _prefs.getDouble('fontScale') ?? 1.0,
         compactMode: _prefs.getBool('compactMode') ?? false,
         reducedMotion: _prefs.getBool('reducedMotion') ?? false,
@@ -252,6 +259,7 @@ class SettingsStore {
 
   Future<void> writeSettings(AppSettings s) async {
     await _prefs.setString('theme', s.theme);
+    await _prefs.setString('accent', s.accent);
     await _prefs.setDouble('fontScale', s.fontScale);
     await _prefs.setBool('compactMode', s.compactMode);
     await _prefs.setBool('reducedMotion', s.reducedMotion);
