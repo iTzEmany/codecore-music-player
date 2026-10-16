@@ -83,6 +83,10 @@ class YtException implements Exception {
 Uri youtubeMusicSearchUri(String query) => Uri.parse(
     'https://music.youtube.com/search?q=${Uri.encodeQueryComponent(query)}#songs');
 
+/// `music.youtube.com` search page filtered on albums.
+Uri youtubeMusicAlbumsUri(String query) => Uri.parse(
+    'https://music.youtube.com/search?q=${Uri.encodeQueryComponent(query)}#albums');
+
 const _youtubeHosts = {'youtube.com', 'www.youtube.com', 'm.youtube.com', 'youtu.be'};
 
 bool isYoutubeUrl(String input) {
@@ -120,6 +124,14 @@ abstract class YoutubeService {
   /// YouTube Music "Songs" results, with channel, credited artists, album and
   /// duration filled in (one request, no per-video lookups).
   Future<List<YtResult>> searchSongs(String query, {int limit = 5});
+
+  /// Albums matching [query] on YouTube Music: [YtResult.id] is the link of the
+  /// album page (there is no other data without opening it).
+  Future<List<YtResult>> searchAlbums(String query, {int limit = 3});
+
+  /// The tracks of an album page found by [searchAlbums], in album order, with
+  /// artists, album name and length filled in.
+  Future<List<YtResult>> albumTracks(String albumLink);
 
   /// Emits progress; the last event carries the final file path. A cancelled
   /// download ends without a path and leaves no partial files.

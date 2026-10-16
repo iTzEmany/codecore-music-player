@@ -15,7 +15,7 @@ YtResult yr(String id) => YtResult(
     album: 'Alb');
 
 class Counting implements YoutubeService {
-  int songsCalls = 0, plainCalls = 0;
+  int songsCalls = 0, plainCalls = 0, albumSearches = 0, albumPages = 0;
 
   @override
   Future<List<YtResult>> searchSongs(String query, {int limit = 5}) async {
@@ -34,6 +34,18 @@ class Counting implements YoutubeService {
           {CancelToken? cancel,
           DownloadOptions options = const DownloadOptions()}) =>
       const Stream.empty();
+
+  @override
+  Future<List<YtResult>> searchAlbums(String query, {int limit = 3}) async {
+    albumSearches++;
+    return [yr('https://music.youtube.com/browse/MPREb_$query')];
+  }
+
+  @override
+  Future<List<YtResult>> albumTracks(String albumLink) async {
+    albumPages++;
+    return [yr('t-$albumLink')];
+  }
 
   @override
   Future<String?> toolVersion() async => null;

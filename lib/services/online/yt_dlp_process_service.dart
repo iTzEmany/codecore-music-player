@@ -47,6 +47,22 @@ List<YtResult> parseYtDlpJson(String raw) {
   return out;
 }
 
+/// Album page links from a flat YouTube Music album search.
+List<YtResult> parseYtAlbumLinks(String raw) {
+  final data = jsonDecode(raw);
+  if (data is! Map || data['entries'] is! List) return const [];
+  return [
+    for (final e in data['entries'] as List)
+      if (e is Map &&
+          '${e['url'] ?? ''}'.startsWith('https://music.youtube.com/browse/'))
+        YtResult(
+            id: '${e['url']}',
+            title: '${e['url']}',
+            channel: '',
+            duration: null),
+  ];
+}
+
 /// Parses a line produced by our `--progress-template`:
 /// `PROG <downloaded> <total> <estimate>` ("NA" when unknown).
 DownloadProgress? parseProgressLine(String line) {
@@ -219,6 +235,49 @@ class YtDlpProcessService implements YoutubeService {
       return parseYtDlpJson(r.out);
     } on FormatException catch (e, st) {
       AppLog.w('yt-dlp music search output not JSON', e, st);
+      throw const YtException(YtErrorKind.changed, 'bad output');
+    }
+  }
+
+  @override
+  Future<List<YtResult>> searchAlbums(String query, {int limit = 3}) async {
+    final q = query.trim();
+    if (q.isEmpty) return const [];
+    await _ensureTool();
+    final r = await _runSearch([
+      '-J',
+      '--no-warnings',
+      '--flat-playlist',
+      '--playlist-items',
+      '1-$limit',
+      ...await _jsArgs(),
+      youtubeMusicAlbumsUri(q).toString(),
+    ]);
+    if (r.code != 0) throw await _explain(r.err);
+    try {
+      return parseYtAlbumLinks(r.out);
+    } on FormatException catch (e, st) {
+      AppLog.w('yt-dlp album search output not JSON', e, st);
+      throw const YtException(YtErrorKind.changed, 'bad output');
+    }
+  }
+
+  @override
+  Future<List<YtResult>> albumTracks(String albumLink) async {
+    await _ensureTool();
+    final r = await _runSearch([
+      '-J',
+      '--no-warnings',
+      '--playlist-items',
+      '1-80',
+      ...await _jsArgs(),
+      albumLink,
+    ]);
+    if (r.code != 0) throw await _explain(r.err);
+    try {
+      return parseYtDlpJson(r.out);
+    } on FormatException catch (e, st) {
+      AppLog.w('yt-dlp album page output not JSON', e, st);
       throw const YtException(YtErrorKind.changed, 'bad output');
     }
   }

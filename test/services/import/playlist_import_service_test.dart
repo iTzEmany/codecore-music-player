@@ -21,6 +21,8 @@ import 'package:flutter_test/flutter_test.dart';
 class FakeYoutube implements YoutubeService {
   final Map<String, List<YtResult>> songs = {};
   final Map<String, List<YtResult>> plain = {};
+  final Map<String, List<YtResult>> albums = {};
+  int albumSearches = 0, albumPages = 0;
   YtException? failWith;
   int searches = 0;
   final queries = <String>[];
@@ -45,6 +47,24 @@ class FakeYoutube implements YoutubeService {
         .firstWhere((e) => query.contains(e.key),
             orElse: () => const MapEntry('', []))
         .value;
+  }
+
+  @override
+  Future<List<YtResult>> searchAlbums(String query, {int limit = 3}) async {
+    albumSearches++;
+    queries.add('albums:$query');
+    if (failWith != null) throw failWith!;
+    return [
+      for (final k in albums.keys)
+        if (query.toLowerCase().contains(k))
+          YtResult(id: 'link:$k', title: k, channel: '', duration: null),
+    ];
+  }
+
+  @override
+  Future<List<YtResult>> albumTracks(String albumLink) async {
+    albumPages++;
+    return albums[albumLink.substring(5)] ?? const [];
   }
 
   @override
@@ -828,6 +848,86 @@ void main() {
           csv([song(0, 'A')]), pid);
       expect(diff.removed.map((o) => o.title), ['B']);
       expect(diff.kept, hasLength(1));
+    });
+  });
+
+  group('whole albums', () {
+    ImportRow inAlbum(int i, String title, String album) => ImportRow(
+        index: i,
+        title: title,
+        artists: const ['Band'],
+        album: album,
+        durationMs: 200000);
+
+    YtResult albumTrack(String id, String title, String album) => YtResult(
+        id: id,
+        title: title,
+        channel: 'Band - Topic',
+        duration: const Duration(seconds: 200),
+        artists: const ['Band'],
+        album: album);
+
+    test('4 songs of one album: one album search, one page, no single searches',
+        () async {
+      yt.albums['mood'] = [
+        for (var i = 0; i < 4; i++) albumTrack('a$i', 'Song $i', 'Mood'),
+      ];
+      maxInFlight = 10;
+      service = build();
+      final id = await service.start(csv([
+        for (var i = 0; i < 4; i++) inAlbum(i, 'Song $i', 'Mood'),
+      ]));
+      await idle();
+      expect(yt.albumSearches, 1);
+      expect(yt.albumPages, 1);
+      expect(yt.queries.where((q) => !q.startsWith('albums:')), isEmpty);
+      expect(queued.map((q) => q.$1.id), ['a0', 'a1', 'a2', 'a3']);
+      expect((await imports.item(id, 2))!.state, ImportItemStatus.queued);
+    });
+
+    test('fewer than 3 songs in the album: the usual single searches', () async {
+      yt.albums['mood'] = [albumTrack('a0', 'Song 0', 'Mood')];
+      yt.songs['song'] = [topic('s', 'Song 0', 'Band', 200)];
+      await service.start(csv([
+        inAlbum(0, 'Song 0', 'Mood'),
+        inAlbum(1, 'Song 1', 'Mood'),
+      ]));
+      await idle();
+      expect(yt.albumSearches, 0);
+    });
+
+    test('a song missing from the album page falls back to its own search',
+        () async {
+      yt.albums['mood'] = [
+        albumTrack('a0', 'Song 0', 'Mood'),
+        albumTrack('a1', 'Song 1', 'Mood'),
+      ];
+      yt.songs['song 2'] = [topic('solo', 'Song 2', 'Band', 200)];
+      await service.start(csv([
+        for (var i = 0; i < 3; i++) inAlbum(i, 'Song $i', 'Mood'),
+      ]));
+      await idle();
+      expect(yt.albumSearches, 1);
+      expect(queued.map((q) => q.$1.id), ['a0', 'a1', 'solo']);
+    });
+
+    test('the album found must be the one in the file', () async {
+      yt.albums['mood'] = [
+        for (var i = 0; i < 3; i++) albumTrack('x$i', 'Song $i', 'Greatest Hits'),
+      ];
+      yt.songs['song'] = [topic('s', 'Song 0', 'Band', 200)];
+      await service.start(csv([
+        for (var i = 0; i < 3; i++) inAlbum(i, 'Song $i', 'Mood'),
+      ]));
+      await idle();
+      expect(queued.map((q) => q.$1.id), isNot(contains('x0')));
+    });
+
+    test('rows without an album never look an album up', () async {
+      yt.songs['one'] = [topic('v1', 'One', 'Band', 200)];
+      await service.start(csv([row(0, 'One', 'Band', 200)]));
+      await idle();
+      expect(yt.albumSearches, 0);
     });
   });
 

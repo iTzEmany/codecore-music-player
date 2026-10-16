@@ -72,6 +72,39 @@ void main() {
     expect(u.fragment, 'songs');
   });
 
+  test('album search results are the browse links, nothing else', () {
+    const raw = '{"entries":['
+        '{"id":"MPREb_1","url":"https://music.youtube.com/browse/MPREb_1","title":null},'
+        '{"id":"x","url":"https://example.com/other"},'
+        '{"id":"MPREb_2","url":"https://music.youtube.com/browse/MPREb_2"}]}';
+    final links = parseYtAlbumLinks(raw);
+    expect(links.map((l) => l.id), [
+      'https://music.youtube.com/browse/MPREb_1',
+      'https://music.youtube.com/browse/MPREb_2',
+    ]);
+    expect(parseYtAlbumLinks('{}'), isEmpty);
+  });
+
+  test('an album page parses into its tracks with album and artists', () {
+    const raw = '{"title":"Album - Volevo essere un duro","entries":['
+        '{"id":"a","title":"Sigarette","artists":["Lucio Corsi"],'
+        '"album":"Volevo essere un duro","duration":180},'
+        '{"id":"b","title":"Francis Delacroix","artists":["Lucio Corsi"],'
+        '"album":"Volevo essere un duro","duration":193}]}';
+    final t = parseYtDlpJson(raw);
+    expect(t.map((x) => x.title), ['Sigarette', 'Francis Delacroix']);
+    expect(t.first.album, 'Volevo essere un duro');
+    expect(t.first.artists, ['Lucio Corsi']);
+    expect(t.first.duration, const Duration(seconds: 180));
+  });
+
+  test('the YouTube Music albums URL is filtered on albums', () {
+    final u = youtubeMusicAlbumsUri('Lucio Corsi Volevo essere un duro');
+    expect(u.host, 'music.youtube.com');
+    expect(u.fragment, 'albums');
+    expect(u.queryParameters['q'], 'Lucio Corsi Volevo essere un duro');
+  });
+
   group('with a stand-in yt-dlp script', () {
     late Directory dir;
     setUp(() => dir = Directory.systemTemp.createTempSync('cc_ytdlp'));

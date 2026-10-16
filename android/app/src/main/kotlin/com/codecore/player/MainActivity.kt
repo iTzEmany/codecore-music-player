@@ -122,8 +122,10 @@ class MainActivity : AudioServiceActivity() {
                 val req = YoutubeDLRequest(if (isUrl) query else "ytsearch10:$query")
                 req.addOption("-J")
                 req.addOption("--no-warnings")
+                val flat = call.argument<Boolean>("flat") ?: false
                 if (items != null) {
                     req.addOption("--playlist-items", "1-$items")
+                    if (flat) req.addOption("--flat-playlist")
                 } else {
                     req.addOption(if (isUrl) "--no-playlist" else "--flat-playlist")
                 }

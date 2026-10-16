@@ -34,13 +34,14 @@ class AndroidYtDlpService implements YoutubeService {
 
   /// Calls the `search` method with a process id so that a search that hangs
   /// can be killed on the Kotlin side after [searchTimeout].
-  Future<List<YtResult>> _search(Map<String, Object?> args) async {
+  Future<List<YtResult>> _search(Map<String, Object?> args,
+      {List<YtResult> Function(String raw) parse = parseYtDlpJson}) async {
     final processId = 'sr-${_counter++}';
     try {
       final raw = await _channel
           .invokeMethod<String>('search', {...args, 'processId': processId})
           .timeout(searchTimeout);
-      return parseYtDlpJson(raw ?? '{}');
+      return parse(raw ?? '{}');
     } on TimeoutException {
       await _channel.invokeMethod<void>('cancel', {'processId': processId});
       throw const YtException(YtErrorKind.network, 'search timed out');
@@ -66,6 +67,22 @@ class AndroidYtDlpService implements YoutubeService {
       'items': limit,
     });
   }
+
+  @override
+  Future<List<YtResult>> searchAlbums(String query, {int limit = 3}) async {
+    final q = query.trim();
+    if (q.isEmpty) return const [];
+    return _search({
+      'query': youtubeMusicAlbumsUri(q).toString(),
+      'isUrl': true,
+      'items': limit,
+      'flat': true,
+    }, parse: parseYtAlbumLinks);
+  }
+
+  @override
+  Future<List<YtResult>> albumTracks(String albumLink) =>
+      _search({'query': albumLink, 'isUrl': true, 'items': 80});
 
   @override
   Stream<DownloadProgress> download(YtResult r, Directory outDir,

@@ -191,7 +191,7 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 15.9 Cartella dedicata e file numerati
 - [x] 15.10 Copertine dal CSV ed esito esportabile
 - [x] 15.11 Sincronizza da CSV
-- [ ] 15.12 Importazione per album intero
+- [x] 15.12 Importazione per album intero
 - [ ] 15.13 Rifinitura, documentazione e prova a mano
 
 ## Fase 16 — CI e test automatici (`fase-16-ci-test.md`)
@@ -424,6 +424,8 @@ L'agente riparte sempre dal primo task non spuntato.
 - 15.10: `ItunesClient.searchAlbum` (entity=album, **l\'artista deve combaciare**; ISRC non usato: iTunes non lo risolve, vedi 15.1) e `EnrichmentService.coverForAlbum` (una sola copertina per album: se c\'è già non cerca); il motore la chiama dopo `applyTags` solo con «Cerca le copertine» e un errore non fa fallire la riga. Le **note** delle righe sono codici (`ImportNote`: `no_results`, `low_score`, `link_only`, `youtube_off`, `download_failed`, `length_off`) tradotti in UI (`import_labels.dart`); mostrate sotto la riga in «Rivedi». «Esporta esito» (icona nella barra di «Rivedi») salva un CSV con BOM: riga, titolo, artisti, album, durata, ISRC, esito, motivo, URL del video, punteggio (`importOutcomeCsv`).
 
 - 15.11: `diffImport` (ISRC poi titolo+artista principale, uno-a-uno) e `reorderForSync` (in `core/playlist_order.dart`: i brani aggiunti a mano restano dopo quello che li precedeva). `sync()` crea una **nuova importazione con tutto il file**: le righe già presenti nascono `linked` con nota `unchanged` (non contano come «aggiunti» nello snackbar finale), le nuove restano `pending` e il motore le inserisce accanto ai vicini del file; i brani spariti escono dalla playlist (`removeTrack`) e le loro righe vecchie diventano `removed` — file e libreria intatti. I «precedenti» sono l'ultima riga per brano fra tutte le importazioni della playlist. Anteprima: terza scelta «Sincronizza» con «+N nuovi · −M rimossi dalla playlist (i file restano)».
+
+- 15.12: `YoutubeService.searchAlbums` (link `browse/MPREb_…` da `#albums` in modalità flat) e `albumTracks` (pagina dell\'album, fino a 80 tracce); Android: argomento `flat` nel canale `search`. Il motore, con **≥ 3 righe pendenti** dello stesso album (`matchKey`), cerca l\'album una volta per importazione, espande il primo risultato e accetta solo se il nome dell\'album combacia con quello del file; per ogni riga si considerano **solo le tracce con titolo equivalente** (`matchTitleKey`) e solo l\'esito `sure`; altrimenti si ricade sul flusso normale (ISRC → titolo+artista). Un rate limit non viene ricordato (si ripete dopo «Riprendi»). Risultati nella cache delle ricerche (chiavi `albums|…`, `album|<link>`). Provato dal vivo su Linux (`test/live/album_live_test.dart`: 9 tracce di «Volevo essere un duro» con album, artista e durata).
 
 ## Note di deviazione (Fase 12)
 - 12.1 (2026-10-16): CSV vero = `Just_a_mood.csv` (34 brani; intestazioni `Track URI, ISRC, Track Name, Album Name, Artist Name(s), …, Duration (ms)`; **più artisti separati da `;`**). yt-dlp di sistema 2024.04.09 NON legge più YouTube («Please sign in»): provato con yt-dlp 2026.08.19 (binario standalone). `https://music.youtube.com/search?q=…#songs` funziona; in modalità flat dà ~460 voci con solo `id`/`title` (nessuna durata), **senza `--flat-playlist` e con `--playlist-items 1-5`** ogni voce ha `channel`, `artists[]`, `track`, `album`, `duration` in ~5–8 s → si usa quella. `YtResult` guadagna `artists` e `album`.

@@ -423,7 +423,9 @@ class PlaylistImportService {
       return;
     }
     try {
-      final decision = await _find(row);
+      // Songs from one album are looked up on the album page: one search for
+      // all of them. Only a sure match counts; the rest goes the usual way.
+      final decision = await _fromAlbum(importId, row) ?? await _find(row);
       _failStreak = 0;
       switch (decision.kind) {
         case MatchKind.sure when imp?.planFirst ?? false:
@@ -455,6 +457,66 @@ class PlaylistImportService {
       return;
     }
     await Future<void>.delayed(searchGap);
+  }
+
+  // ---- albums -------------------------------------------------------------
+
+  /// Rows that must share an album before it is worth looking the album up.
+  static const albumMinRows = 3;
+
+  final _albumCounts = <int, Map<String, int>>{};
+  final _albumTracks = <String, Future<List<YtResult>>>{};
+
+  String _albumKey(ImportRow r) => matchKey(r.album ?? '');
+
+  Future<Map<String, int>> _countAlbums(int importId) async {
+    final counts = <String, int>{};
+    for (final it in await imports.items(importId)) {
+      if (it.state != ImportItemStatus.pending) continue;
+      final k = _albumKey(it.toRow());
+      if (k.isNotEmpty) counts[k] = (counts[k] ?? 0) + 1;
+    }
+    return counts;
+  }
+
+  Future<MatchDecision?> _fromAlbum(int importId, ImportRow row) async {
+    final key = _albumKey(row);
+    if (key.isEmpty) return null;
+    final counts = _albumCounts[importId] ??= await _countAlbums(importId);
+    if ((counts[key] ?? 0) < albumMinRows) return null;
+    final id = '$importId|$key';
+    final tracks = await (_albumTracks[id] ??= _loadAlbum(row).catchError(
+      (Object e) {
+        // A rate limit must be retried after «Riprendi», not remembered.
+        _albumTracks.remove(id);
+        throw e;
+      },
+    ));
+    // On an album page the song is the one with the same title; a similar
+    // title (the next track) must not win on artist and length alone.
+    final want = matchTitleKey(row.title);
+    final same = [
+      for (final t in tracks)
+        if (matchTitleKey(t.title) == want) t,
+    ];
+    if (same.isEmpty) return null;
+    final d = decide(row, same, thresholds: _cutoffs);
+    return d.kind == MatchKind.sure ? d : null;
+  }
+
+  /// The tracks of the album [row] belongs to, or none when the best album
+  /// found is not the one named in the file.
+  Future<List<YtResult>> _loadAlbum(ImportRow row) async {
+    final album = row.album!;
+    final hits = await youtube.searchAlbums('${row.primaryArtist} $album', limit: 3);
+    if (hits.isEmpty) return const [];
+    await Future<void>.delayed(searchGap);
+    final tracks = await youtube.albumTracks(hits.first.id);
+    final name = matchKey(tracks.isEmpty ? '' : tracks.first.album ?? '');
+    final want = matchKey(album);
+    final same = name.isNotEmpty && (name == want || name.contains(want) || want.contains(name));
+    await Future<void>.delayed(searchGap);
+    return same ? tracks : const [];
   }
 
   /// A row put back to «pending» by [startPlanned] still carries the candidates

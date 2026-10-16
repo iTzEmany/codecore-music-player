@@ -35,6 +35,26 @@ class CachedYoutubeService implements YoutubeService {
     return res;
   }
 
+  @override
+  Future<List<YtResult>> searchAlbums(String query, {int limit = 3}) async {
+    final key = 'albums|${_norm(query)}|$limit';
+    final hit = await cache.get(key);
+    if (hit != null) return hit;
+    final res = await inner.searchAlbums(query, limit: limit);
+    await cache.put(key, res);
+    return res;
+  }
+
+  @override
+  Future<List<YtResult>> albumTracks(String albumLink) async {
+    final key = 'album|$albumLink';
+    final hit = await cache.get(key);
+    if (hit != null) return hit;
+    final res = await inner.albumTracks(albumLink);
+    await cache.put(key, res);
+    return res;
+  }
+
   /// Forgets every cached answer to [queries] (a video that turned out to be
   /// unavailable must not be proposed again from the cache).
   Future<void> forget(Iterable<String> queries) {
