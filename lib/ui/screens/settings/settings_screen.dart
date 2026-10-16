@@ -30,6 +30,7 @@ import 'equalizer_screen.dart';
 import 'log_export_tile.dart';
 import 'missing_tracks_screen.dart';
 import 'theme_swatch.dart';
+import 'transition_settings_tiles.dart';
 
 const _languages = {
   'it': 'Italiano',
@@ -135,6 +136,7 @@ class SettingsScreen extends ConsumerWidget {
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => ShellNav.open<void>(context, const EqualizerScreen()),
                   ),
+                const TransitionSettingsTiles(),
                 SwitchListTile(
                   title: Text(l.normalizeVolume),
                   subtitle: Text(l.normalizeVolumeHint),

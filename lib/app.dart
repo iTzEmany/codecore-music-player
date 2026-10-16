@@ -20,7 +20,12 @@ class CodecoreApp extends ConsumerWidget {
     final s = ref.watch(settingsProvider);
     ref.read(audioHandlerProvider)
       ..setNormalize(s.normalizeVolume)
-      ..setSpeed(s.playbackSpeed);
+      ..setSpeed(s.playbackSpeed)
+      ..setTransition(
+        s.transition,
+        plainInAlbum: s.crossfadePlainInAlbum,
+        crossfadeSeconds: s.crossfadeSeconds,
+      );
     return MaterialApp(
       title: 'Codecore',
       debugShowCheckedModeBanner: false,

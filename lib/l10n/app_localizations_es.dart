@@ -1916,4 +1916,32 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get eqUnavailable =>
       'El ecualizador no está disponible en este dispositivo.';
+
+  @override
+  String get transitionMode => 'Transición entre canciones';
+
+  @override
+  String get transitionNormal => 'Normal';
+
+  @override
+  String get transitionGapless => 'Sin pausas';
+
+  @override
+  String get transitionCrossfade => 'Fundido cruzado';
+
+  @override
+  String get transitionHint =>
+      'Sin pausas funciona mejor con canciones del mismo formato (por ejemplo, todas en FLAC).';
+
+  @override
+  String crossfadeLength(int seconds) {
+    return 'Duración del fundido: $seconds s';
+  }
+
+  @override
+  String get crossfadePlainInAlbum => 'No fundir dentro de un álbum';
+
+  @override
+  String get crossfadePlainInAlbumHint =>
+      'Dentro de un álbum las canciones se suceden sin pausas y sin solaparse.';
 }

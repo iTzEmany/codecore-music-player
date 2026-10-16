@@ -7,7 +7,9 @@ import '../../core/app_log.dart';
 import '../../data/db/app_database.dart';
 import '../../data/repositories/track_repository.dart';
 import 'audio_backend.dart';
+import 'crossfade_engine.dart';
 import 'equalizer.dart';
+import 'next_window.dart';
 import 'play_queue.dart';
 import 'remote_transport.dart';
 import 'resume_point.dart';
@@ -23,21 +25,30 @@ class PlaybackFailure {
 
 class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   CodecoreAudioHandler(
-    this._backend,
+    AudioBackend backend,
     this._queue,
     this._tracks, {
     required this.onError,
     this.coverPathFor,
-  }) {
+  })  : _backend = backend,
+        _window = backend is GaplessCapable
+            ? NextWindow(_queue, _tracks, backend as GaplessCapable)
+            : null {
     _subs
       ..add(_backend.state.listen(_onBackendState))
       ..add(_backend.position.listen(_onPosition))
       ..add(_backend.duration.listen((d) => _duration = d));
+    if (backend is GaplessCapable) {
+      _subs.add((backend as GaplessCapable)
+          .advanced
+          .listen((_) => unawaited(_onAdvanced())));
+    }
   }
 
   static const maxConsecutiveErrors = 3;
 
   final AudioBackend _backend;
+  final NextWindow? _window;
   final PlayQueue _queue;
   final TrackRepository _tracks;
   final void Function(PlaybackFailure failure) onError;
@@ -59,7 +70,20 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   bool _handlingCompleted = false;
 
   /// Sleep timer "end of track": the next track is loaded but not started.
-  bool pauseAtTrackEnd = false;
+  bool get pauseAtTrackEnd => _pauseAtTrackEnd;
+  set pauseAtTrackEnd(bool value) {
+    _pauseAtTrackEnd = value;
+    unawaited(_refreshWindow()); // nothing may follow on its own
+  }
+
+  bool _pauseAtTrackEnd = false;
+
+  TransitionMode _transition = TransitionMode.normal;
+  TransitionMode get transition => _transition;
+
+  /// In the crossfade, tracks of the same album follow each other plainly.
+  bool _plainInAlbum = false;
+  int _crossfadeSeconds = 6;
 
   /// Playback speed, kept by the handler so every new track gets it again.
   static const minSpeed = 0.5, maxSpeed = 2.0;
@@ -120,14 +144,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     final start = (startAt != null && startAt > Duration.zero)
         ? startAt
         : resumeStartFor(track.resumePositionMs);
-    _playCounted = false;
-    _gainFactor = gainFactor(track.replayGainDb);
-    if (_normalize) unawaited(_applyVolume());
-    _position = Duration.zero;
-    _duration = track.durationMs > 0 ? Duration(milliseconds: track.durationMs) : null;
-    _current = track;
-    _trackController.add(track);
-    mediaItem.add(_toMediaItem(track));
+    _enterTrack(track);
     _publish(AudioProcessingState.loading);
     try {
       await _backend.load(track.path);
@@ -139,6 +156,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
       }
       _consecutiveErrors = 0;
       if (play) await _backend.play();
+      unawaited(_refreshWindow());
     } on BackendException catch (e) {
       if (token != _loadToken) return;
       AppLog.w('load failed: ${e.message}');
@@ -149,6 +167,18 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
           track,
           token);
     }
+  }
+
+  /// Makes [track] the current one (state, gain, notification).
+  void _enterTrack(Track track) {
+    _playCounted = false;
+    _gainFactor = gainFactor(track.replayGainDb);
+    if (_normalize) unawaited(_applyVolume());
+    _position = Duration.zero;
+    _duration = track.durationMs > 0 ? Duration(milliseconds: track.durationMs) : null;
+    _current = track;
+    _trackController.add(track);
+    mediaItem.add(_toMediaItem(track));
   }
 
   Future<void> _failAndSkip(
@@ -169,6 +199,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
 
   Future<void> _goIdle() async {
     _saveResume();
+    _window?.clear();
     _loadToken++;
     await _backend.stop();
     _current = null;
@@ -210,14 +241,10 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     if (_handlingCompleted) return;
     _handlingCompleted = true;
     try {
-      final finished = _current;
-      if (finished != null &&
-          (finished.resumePositionMs != null || _savedResume[finished.id] != null)) {
-        unawaited(_writeResume(finished, null));
-      }
+      _forgetBookmarkOfFinished();
       final next = _queue.next(auto: true);
-      final stay = pauseAtTrackEnd;
-      pauseAtTrackEnd = false;
+      final stay = _pauseAtTrackEnd;
+      _pauseAtTrackEnd = false;
       if (next == null) {
         await _goIdle();
       } else {
@@ -226,6 +253,80 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     } finally {
       _handlingCompleted = false;
     }
+  }
+
+  /// A track played to its end has no place to come back to.
+  void _forgetBookmarkOfFinished() {
+    final finished = _current;
+    if (finished != null &&
+        (finished.resumePositionMs != null || _savedResume[finished.id] != null)) {
+      unawaited(_writeResume(finished, null));
+    }
+  }
+
+  /// The backend moved on by itself to the track prepared in the window.
+  Future<void> _onAdvanced() async {
+    final prepared = _window?.consume();
+    _forgetBookmarkOfFinished();
+    final id = _queue.next(auto: true);
+    if (prepared == null || id != prepared.id) {
+      // The queue changed after the window was set: play what the queue says.
+      if (id == null) {
+        await _goIdle();
+      } else {
+        await _loadCurrent(play: true);
+      }
+      return;
+    }
+    _consecutiveErrors = 0;
+    _lastResumeSave = Duration.zero;
+    _enterTrack(prepared);
+    _publish(AudioProcessingState.ready);
+    await _refreshWindow();
+  }
+
+  double _volumeFor(Track t) =>
+      (_baseVolume * (_normalize ? gainFactor(t.replayGainDb) : 1.0)).clamp(0, 1).toDouble();
+
+  Future<void> _refreshWindow() async {
+    final window = _window;
+    final current = _current;
+    if (window == null || current == null) return;
+    try {
+      await window.refresh(
+        current,
+        enabled: _transition != TransitionMode.normal && !_pauseAtTrackEnd,
+        volumeFor: _volumeFor,
+        overlap: (a, b) =>
+            _transition == TransitionMode.crossfade &&
+            !(_plainInAlbum && a.albumKey == b.albumKey),
+      );
+    } on Object catch (e, st) {
+      AppLog.w('could not prepare the next track', e, st);
+    }
+  }
+
+  /// Chooses how tracks follow each other. Takes effect from the next join.
+  Future<void> setTransition(
+    TransitionMode mode, {
+    bool plainInAlbum = false,
+    int crossfadeSeconds = 6,
+  }) async {
+    if (mode == _transition &&
+        plainInAlbum == _plainInAlbum &&
+        crossfadeSeconds == _crossfadeSeconds) {
+      return;
+    }
+    _transition = mode;
+    _plainInAlbum = plainInAlbum;
+    _crossfadeSeconds = crossfadeSeconds;
+    final engine = _backend;
+    if (engine is CrossfadeEngine) {
+      engine.crossfade =
+          mode == TransitionMode.crossfade ? Duration(seconds: crossfadeSeconds) : null;
+    }
+    _window?.invalidate();
+    await _refreshWindow();
   }
 
   void _onPosition(Duration p) {
@@ -355,28 +456,36 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   Future<void> removeFromQueue(int index) async {
     final wasCurrent = _queue.removeAt(index);
     _queueController.add(null);
-    if (wasCurrent) await _loadCurrent(play: _state == BackendState.playing);
+    if (wasCurrent) {
+      await _loadCurrent(play: _state == BackendState.playing);
+    } else {
+      unawaited(_refreshWindow());
+    }
   }
 
   void moveInQueue(int from, int to) {
     _queue.move(from, to);
     _queueController.add(null);
+    unawaited(_refreshWindow());
   }
 
   void playNext(int trackId) {
     _queue.insertNext(trackId);
     _queueController.add(null);
+    unawaited(_refreshWindow());
   }
 
   void addToQueue(int trackId) {
     _queue.append(trackId);
     _queueController.add(null);
+    unawaited(_refreshWindow());
   }
 
   @override
   Future<void> setShuffleMode(AudioServiceShuffleMode shuffleMode) async {
     _queue.shuffle = shuffleMode != AudioServiceShuffleMode.none;
     _queueController.add(null);
+    unawaited(_refreshWindow());
     _publish(playbackState.value.processingState);
   }
 
@@ -387,12 +496,14 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
       AudioServiceRepeatMode.one => PlayRepeat.one,
       _ => PlayRepeat.all,
     };
+    unawaited(_refreshWindow());
     _publish(playbackState.value.processingState);
   }
 
   void setShuffleAndRepeat({required bool shuffle, required PlayRepeat repeat}) {
     _queue.shuffle = shuffle;
     _queue.repeat = repeat;
+    unawaited(_refreshWindow());
   }
 
   /// 0.5×–2×, tone unchanged (mpv `scaletempo`, ExoPlayer pitch 1.0).
@@ -407,13 +518,27 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
 
   Future<void> setVolume(double v) {
     _baseVolume = v.clamp(0, 1).toDouble();
+    _volumeChangedForWindow();
     return _applyVolume();
   }
 
   /// ReplayGain: scale the volume down for loud tracks (never above 1.0).
   Future<void> setNormalize(bool enabled) {
     _normalize = enabled;
+    _volumeChangedForWindow();
     return _applyVolume();
+  }
+
+  /// The next track is announced with its own volume: tell the backend again.
+  void _volumeChangedForWindow() {
+    final window = _window;
+    if (window == null ||
+        window.track == null ||
+        _transition != TransitionMode.crossfade) {
+      return; // only a crossfade plays the next track before its turn
+    }
+    window.invalidate();
+    unawaited(_refreshWindow());
   }
 
   static double gainFactor(double? db) =>

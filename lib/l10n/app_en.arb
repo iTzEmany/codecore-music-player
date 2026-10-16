@@ -1031,5 +1031,20 @@
   "eqPresetCustom": "Custom",
   "eqReset": "Reset",
   "eqWaiting": "The bands appear once the first song starts.",
-  "eqUnavailable": "The equalizer is not available on this device."
+  "eqUnavailable": "The equalizer is not available on this device.",
+  "transitionMode": "Between tracks",
+  "transitionNormal": "Normal",
+  "transitionGapless": "Gapless",
+  "transitionCrossfade": "Crossfade",
+  "transitionHint": "Gapless works best with tracks of the same format (for example all FLAC).",
+  "crossfadeLength": "Crossfade length: {seconds} s",
+  "@crossfadeLength": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "crossfadePlainInAlbum": "Don't fade inside an album",
+  "crossfadePlainInAlbumHint": "Inside an album the tracks follow each other without a gap and without overlapping."
 }

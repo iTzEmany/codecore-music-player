@@ -1222,5 +1222,20 @@
   "eqPresetCustom": "Personalizzato",
   "eqReset": "Reimposta",
   "eqWaiting": "Le bande compaiono quando parte il primo brano.",
-  "eqUnavailable": "L'equalizzatore non è disponibile su questo dispositivo."
+  "eqUnavailable": "L'equalizzatore non è disponibile su questo dispositivo.",
+  "transitionMode": "Passaggio tra i brani",
+  "transitionNormal": "Normale",
+  "transitionGapless": "Senza pause",
+  "transitionCrossfade": "Dissolvenza",
+  "transitionHint": "Senza pause funziona meglio con brani dello stesso formato (per esempio tutti FLAC).",
+  "crossfadeLength": "Durata della dissolvenza: {seconds} s",
+  "@crossfadeLength": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "crossfadePlainInAlbum": "Non sfumare nello stesso album",
+  "crossfadePlainInAlbumHint": "Dentro un album i brani si susseguono senza pause, senza sovrapporsi."
 }

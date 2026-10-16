@@ -74,7 +74,7 @@ L'agente riparte sempre dal primo task non spuntato.
 
 ## Fase 7 — Rifinitura (`fase-7-rifinitura.md`)
 - [x] 7.1 Import dal vecchio DB Python
-- [ ] 7.2 Gapless
+- [x] 7.2 Gapless (rimandato qui e fatto nella fase 18)
 - [x] 7.3 ReplayGain
 - [~] 7.4 Controlli multimediali desktop
 - [~] 7.5 Prestazioni
@@ -219,16 +219,16 @@ L'agente riparte sempre dal primo task non spuntato.
 - [~] 17.10 Rifinitura, documentazione e prova a mano
 
 ## Fase 18 — Gapless e crossfade (`fase-18-gapless-crossfade.md`)
-- [ ] 18.1 Verifiche preliminari (API playlist just_audio/mpv, file di prova, prototipo e misura)
-- [ ] 18.2 `PlayQueue.peekNext()` e `revision` (+ test)
-- [ ] 18.3 Backend con finestra di due brani (`GaplessCapable`)
-- [ ] 18.4 Handler in modalità gapless
-- [ ] 18.5 Motore crossfade (+ test)
-- [ ] 18.6 Handler in modalità crossfade
-- [ ] 18.7 Impostazioni e interfaccia
-- [ ] 18.8 Non regressione della Jam e del lettore normale
-- [ ] 18.9 Misura del gap e del crossfade
-- [ ] 18.10 Rifinitura, documentazione e prova a mano
+- [~] 18.1 Verifiche preliminari (API playlist just_audio/mpv, file di prova, prototipo e misura)
+- [x] 18.2 `PlayQueue.peekNext()` e `revision` (+ test)
+- [x] 18.3 Backend con finestra di due brani (`GaplessCapable`)
+- [x] 18.4 Handler in modalità gapless
+- [x] 18.5 Motore crossfade (+ test)
+- [x] 18.6 Handler in modalità crossfade
+- [x] 18.7 Impostazioni e interfaccia
+- [~] 18.8 Non regressione della Jam e del lettore normale
+- [~] 18.9 Misura del gap e del crossfade
+- [~] 18.10 Rifinitura, documentazione e prova a mano
 
 ## Fase 19 — Interfaccia: selezione, temi, tablet, lingue, onboarding (`fase-19-interfaccia.md`)
 - [ ] 19.1 `SelectionController` (logica pura + test)
@@ -454,6 +454,21 @@ L'agente riparte sempre dal primo task non spuntato.
 - 17.9: `RemoteTransport` (stato + `play/pause/next/seek`) e `JamTransport` (traduce `JamState` in titolo/artista/album/durata/posizione che avanza e i tasti in `JamCommand`; l'ospite non ha «avanti»). `CodecoreAudioHandler.attachRemote`: finché c'è un trasporto remoto notifica e schermata di blocco mostrano la Jam (MediaItem `jam`, controlli play/pausa + avanti se host, seek di sistema), i tasti vanno alla Jam e **mai** al lettore locale, gli eventi del lettore locale non sovrascrivono la notifica; staccandolo torna il brano locale (o nulla). `JamController` lo attacca in `_begin`, lo aggiorna in `_onState` e lo stacca in `_teardown`. **Decisione:** nessun controllo personalizzato «Termina Jam» nella notifica (resta l'azione già presente nel servizio di ricezione): evita un tasto distruttivo a portata di tasca. Prova a mano: vedi «Tocca a te».
 
 - 17.10: ARB it/en/de/es già in parità (549 chiavi ciascuno, aggiunte task per task). Documentazione: `docs/02-architettura.md` («Riproduzione avanzata», righe nuove in «Differenze per piattaforma»), `docs/03-modello-dati.md` (schema v6, impostazioni), `docs/99` (R37–R40), README. Restano **17.7/17.8** (MPRIS/SMTC) bloccati in attesa dei pacchetti; la fase si chiude con questi due `[ ]` annotati.
+
+- 18.1 (2026-10-16): **API:** `just_audio` 0.10.6 ha `setAudioSources/addAudioSource/removeAudioSourceAt`, `currentIndexStream`; `completed` solo alla fine dell'ultima sorgente. Adattatore desktop (`just_audio_media_kit` 2.1.0): `concatenatingInsertAll` → `Player.add`, `RemoveRange` → `Player.remove`; `completed` solo in fondo alla playlist; a ogni cambio di indice azzera `_position` (rimuovere la sorgente 0 mentre suona la 1 fa tornare **per un istante** la posizione a 0: l'handler deve ignorarla). **Misura su Linux** (`scripts/gap_probe.py`, file di click ogni 500 ms tagliati a metà tra due click in `test/fixtures/gapless/`, 178 KB; mpv 0.37 → PipeWire, registrando il monitor del sink): scarto dei click ai due confini **0,0 ms** per mp3→mp3→mp3, flac, misto mp3/flac/mp3, anche con `gapless-audio=weak` e **senza** `prefetch-playlist`; con la finestra dell'app (suona il primo, il secondo è aggiunto, a metà del secondo si toglie il primo e si aggiunge il terzo) **0,0 ms**; controllo negativo con `gapless-audio=no`: **+8 ms** a ogni confine (il metodo vede i buchi). **Decisioni:** `JustAudioMediaKit.prefetchPlaylist` resta `false` (non serve ed è «sperimentale»); la modalità «Senza pause» è offerta su tutte le piattaforme. **Android (ExoPlayer) e Windows (libmpv + WASAPI) non misurabili da qui** → «Tocca a te» (`scripts/gap_probe.py` non gira su telefono: ascolto di un album dal vivo).
+
+- 18.2: `PlayQueue.peekNext({auto})` (stessa risposta di `next`, senza toccare stato, cronologia né revisione; a fine giro in shuffle con repeat-all fissa in `_pendingOrder` l'ordine del giro dopo, che `next` poi usa davvero) e `revision` (cresce a ogni modifica, anche a `next`/`previous`; `repeat` è ora getter/setter). Test: 200 sequenze casuali di 60 operazioni, `peekNext() == next(auto: true)`.
+- 18.3: `GaplessCapable` (`setNext(path, {volume, overlap})`, `advanced`) in `audio_backend.dart`, con `TransitionMode {normal, gapless, crossfade}`. `JustAudioBackend`: la playlist è `[corrente]` o `[corrente, prossimo]`; le modifiche sono messe in fila (e annullate da un `load`), `File.exists` toglie il prossimo mancante, al passaggio 0→1 emette `advanced` e toglie la sorgente 0. `setNext` salta se nel frattempo il lettore è già passato al brano 1 (il passaggio stesso fa rifare la finestra). **Non** coperto da test automatici (serve la piattaforma): lo verifica 18.9. `prefetchPlaylist` non toccato (18.1).
+- 18.4: `NextWindow` (`next_window.dart`) tiene il «prossimo» del backend allineato alla coda (`peekNext` + `revision`; non fa nulla se non è cambiato niente, e in modalità Normale non tocca mai il backend). Handler: `setTransition(mode, {fadeSameAlbum})`, `pauseAtTrackEnd` ora è una proprietà (spegnere/accendere ricalcola la finestra), `_onAdvanced` (stesso trattamento di fine brano: segnalibro, conteggio, guadagno ReplayGain, notifica) con rete di sicurezza: se la coda non è più quella annunciata si carica il brano giusto nel modo normale. Un brano successivo con segnalibro («riprendi da qui») o mancante nella libreria non entra nella finestra: il passaggio avviene col caricamento di sempre. Un file danneggiato ma presente non viene visto prima del passaggio (come in Normale solo al caricamento): limite noto, vedi R41.
+
+- 18.5: `CrossfadeEngine` (`crossfade_engine.dart`) è un `AudioBackend` fatto di due `AudioBackend` (il secondo si crea alla prima dissolvenza): `setNext` carica il prossimo sul lettore libero a volume 0; quando la posizione del principale arriva a `durata − crossfade × velocità` parte il secondo e 20 passi di rampa a potenza costante (cos/sin) la cui durata reale è il tempo che resta (con 1,5× la dissolvenza dura comunque 6 s); **a metà rampa** i ruoli si scambiano, `advanced` esce e i flussi di posizione/durata/stato seguono il nuovo principale; alla fine il vecchio si ferma. Pausa ferma entrambi e la rampa; seek prima della metà annulla e riprepara il prossimo, dopo la metà tiene il nuovo e ferma subito il vecchio; `load`/`stop` annullano tutto. Brani sotto 2 × durata (corrente o entrante) e giunzioni con `overlap: false` passano alla finestra gapless del lettore principale; un `setNext` arrivato durante la dissolvenza aspetta la fine. Equalizzatore in specchio verso entrambi i lettori; velocità a entrambi. Il tempo è iniettabile (`RampTicker`): 21 test con orologio manuale, niente attese vere.
+- 18.6: `main.dart` costruisce `CrossfadeEngine(() => JustAudioBackend(withEqualizer: true))`; in Normale/Senza pause il motore è un semplice passante verso il lettore principale. `setTransition(mode, {plainInAlbum, crossfadeSeconds})` configura `engine.crossfade` (ignorata se non cambia nulla); un cambio di volume o di normalizzazione rimanda al motore il volume del prossimo (solo in dissolvenza). Test dell'handler con motore e lettori finti: notifica e indice cambiano a metà dissolvenza, conteggio ascolti del nuovo brano, ReplayGain sulla sua rampa, nessuna dissolvenza con il timer «fine brano».
+- 18.7: `AppSettings.transition`/`crossfadeSeconds` (2–12, predefinito 6)/`crossfadePlainInAlbum` (predefinito sì), letti con valori sconosciuti → Normale; `app.dart` le applica come velocità e normalizzazione. UI: `TransitionSettingsTiles` in Impostazioni → Riproduzione (chip a capo, non un menu: a testo grande non sfora), cursore e interruttore solo con «Dissolvenza». Nessuna piattaforma esclusa da 18.1, quindi «Senza pause» è sempre selezionabile. Golden delle Impostazioni rigenerati (4, riga nuova).
+
+- 18.8: `test/jam/jam_transition_test.dart`: il `JamOutput` non chiama mai `setNext` neanche su un backend che potrebbe; nessun sorgente di `lib/services/jam/` nomina `GaplessCapable`/`CrossfadeEngine`/`NextWindow`/`setNext(`; con gapless o crossfade attivi, avviare una Jam mette in pausa il lettore locale e poi i comandi vanno solo alla Jam (nessun caricamento né finestra locale). `git diff master -- lib/services/jam` è **vuoto**; tutta `test/jam/` (103 test) verde. **Manca** il test d'integrazione sui file di `test/fixtures/gapless/` (serve `integration_test`, non approvato): lo sostituisce il test dal vivo di 18.9.
+- 18.9 (Linux, 2026-10-16): `test/live/gapless_live_test.dart` (`CODECORE_LIVE=1`, PipeWire) fa suonare **il vero `JustAudioBackend`** (just_audio → media_kit → libmpv) con la sua finestra a due brani e registra il monitor dell'uscita: scarto dei click ai confini **flac 0,0 / 0,0 ms**, **mp3 −10,8 / −10,8 ms**, **mp3→flac→mp3 −0,3 / −10,8 ms** (tutti sotto i 20 ms; i −10,8 ms sono il taglio dell'inizio dei file mp3 di mpv, non un buco). **Scoperta sul modo Normale:** caricando il brano dopo il `completed` come fa l'handler il confine misura **−216 ms**: mpv segnala la fine quando il decoder arriva a EOF, ma l'audio ancora nel buffer di uscita (~0,2 s) viene scartato dal caricamento del brano successivo, cioè **su desktop gli ultimi ~0,2 s di ogni brano si perdono nel passaggio automatico**. È un comportamento di oggi e non cambia (Normale deve restare identico); «Senza pause» lo evita. Proposta per dopo: far partire il brano successivo solo dopo lo svuotamento del buffer anche in Normale (o consigliare «Senza pause» su desktop). **Non misurati qui:** Android (ExoPlayer), Windows, e la dissolvenza a orecchio (due toni coerenti in fase non danno una misura pulita dell'equal-power): «Tocca a te».
+
+- 18.10: ARB già in parità (it/en/de/es, aggiunte in 18.7). `docs/02-architettura.md` («Gapless e crossfade»; tolto «Niente gapless/crossfade nella v1»), `docs/03-modello-dati.md` (3 impostazioni), `docs/99` (R41–R43 e «Limiti accettati»), README; 7.2 segnato fatto. Prova di una settimana con «Senza pause» in «Tocca a te».
 
 ## Note di deviazione (Fase 12)
 - 12.1 (2026-10-16): CSV vero = `Just_a_mood.csv` (34 brani; intestazioni `Track URI, ISRC, Track Name, Album Name, Artist Name(s), …, Duration (ms)`; **più artisti separati da `;`**). yt-dlp di sistema 2024.04.09 NON legge più YouTube («Please sign in»): provato con yt-dlp 2026.08.19 (binario standalone). `https://music.youtube.com/search?q=…#songs` funziona; in modalità flat dà ~460 voci con solo `id`/`title` (nessuna durata), **senza `--flat-playlist` e con `--playlist-items 1-5`** ogni voce ha `channel`, `artists[]`, `track`, `album`, `duration` in ~5–8 s → si usa quella. `YtResult` guadagna `artists` e `album`.

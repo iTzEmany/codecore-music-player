@@ -15,8 +15,28 @@ class PlayQueue {
   final List<int> _history = []; // natural indices, most recent last
   int _pos = -1;
   bool _shuffle = false;
+  PlayRepeat _repeat = PlayRepeat.off;
+  int _revision = 0;
 
-  PlayRepeat repeat = PlayRepeat.off;
+  /// The shuffled order the next wrap-around will use, fixed in advance by
+  /// [peekNext] so that [next] lands on the very track that was announced.
+  List<int>? _pendingOrder;
+
+  PlayRepeat get repeat => _repeat;
+  set repeat(PlayRepeat value) {
+    if (value == _repeat) return;
+    _repeat = value;
+    _changed();
+  }
+
+  /// Grows with every change to the queue (items, order, position, modes), so
+  /// whoever prepared «the next track» knows when to prepare it again.
+  int get revision => _revision;
+
+  void _changed() {
+    _pendingOrder = null;
+    _revision++;
+  }
 
   List<int> get items => List.unmodifiable(_items);
   int get currentIndex => _pos < 0 ? -1 : _order[_pos];
@@ -32,6 +52,7 @@ class PlayQueue {
     _shuffle = value;
     final current = currentIndex;
     _rebuildOrder(current);
+    _changed();
   }
 
   void setItems(List<int> trackIds, {int startIndex = 0}) {
@@ -39,6 +60,7 @@ class PlayQueue {
       ..clear()
       ..addAll(trackIds);
     _history.clear();
+    _changed();
     if (_items.isEmpty) {
       _order = [];
       _pos = -1;
@@ -63,16 +85,33 @@ class PlayQueue {
     final full = firstIndex < 0;
     final rest = [
       for (var i = 0; i < _items.length; i++)
-        if (full || i != idx) i
+        if (full || i != idx) i,
     ];
-    for (var i = rest.length - 1; i > 0; i--) {
-      final j = _random.nextInt(i + 1);
-      final tmp = rest[i];
-      rest[i] = rest[j];
-      rest[j] = tmp;
-    }
+    _shuffleInPlace(rest);
     _order = full ? rest : [idx, ...rest];
     _pos = 0;
+  }
+
+  void _shuffleInPlace(List<int> list) {
+    for (var i = list.length - 1; i > 0; i--) {
+      final j = _random.nextInt(i + 1);
+      final tmp = list[i];
+      list[i] = list[j];
+      list[j] = tmp;
+    }
+  }
+
+  /// A fresh shuffle of every item for the next lap, never starting with the
+  /// track that just played when there is a choice.
+  List<int> _newLapOrder() {
+    final order = List<int>.generate(_items.length, (i) => i);
+    _shuffleInPlace(order);
+    if (order.length > 1 && order[0] == currentIndex) {
+      final swap = order[1];
+      order[1] = order[0];
+      order[0] = swap;
+    }
+    return order;
   }
 
   void _pushHistory(int naturalIndex) {
@@ -84,6 +123,18 @@ class PlayQueue {
   bool get hasNext =>
       _pos >= 0 && (_pos + 1 < _order.length || repeat != PlayRepeat.off);
 
+  /// The id [next] would return with the same [auto], without changing the
+  /// queue, the history or the revision. At the end of a shuffled lap with
+  /// repeat-all it fixes the next lap's order, so [next] agrees with it.
+  int? peekNext({bool auto = true}) {
+    if (_pos < 0) return null;
+    if (auto && repeat == PlayRepeat.one) return currentId;
+    if (_pos + 1 < _order.length) return _items[_order[_pos + 1]];
+    if (repeat == PlayRepeat.off) return null;
+    if (!_shuffle) return _items[_order[0]];
+    return _items[(_pendingOrder ??= _newLapOrder())[0]];
+  }
+
   /// `auto` is true when a track ended by itself.
   int? next({bool auto = false}) {
     if (_pos < 0) return null;
@@ -91,29 +142,23 @@ class PlayQueue {
     if (_pos + 1 < _order.length) {
       _pushHistory(currentIndex);
       _pos++;
+      _changed();
       return currentId;
     }
     if (repeat == PlayRepeat.off) return null;
     _pushHistory(currentIndex);
     if (_shuffle) {
-      final last = currentIndex;
-      _rebuildOrder(-1);
-      // Avoid the same track twice in a row when possible.
-      if (_order.length > 1 && _order[0] == last) {
-        final swap = _order[1];
-        _order[1] = _order[0];
-        _order[0] = swap;
-      }
-      _pos = 0;
-    } else {
-      _pos = 0;
+      _order = _pendingOrder ?? _newLapOrder();
     }
+    _pos = 0;
+    _changed();
     return currentId;
   }
 
   /// Returns the id to play, or null only for an empty queue.
   int? previous() {
     if (_pos < 0) return null;
+    _changed();
     if (_history.isNotEmpty) {
       final idx = _history.removeLast();
       final p = _order.indexOf(idx);
@@ -132,23 +177,26 @@ class PlayQueue {
     if (index < 0 || index >= _items.length) return;
     if (_pos >= 0 && currentIndex != index) _pushHistory(currentIndex);
     _pos = _order.indexOf(index);
+    _changed();
   }
 
   /// Returns true when the removed item was the current one (the caller must
   /// load [currentId] again, which now points at the following item).
   bool removeAt(int index) {
     if (index < 0 || index >= _items.length) return false;
+    _changed();
     final removedPos = _order.indexOf(index);
     final wasCurrent = removedPos == _pos;
     _items.removeAt(index);
     _order = [
       for (final i in _order)
-        if (i != index) i > index ? i - 1 : i
+        if (i != index) i > index ? i - 1 : i,
     ];
     _history
       ..removeWhere((i) => i == index)
-      ..replaceRange(
-          0, _history.length, [for (final i in _history) i > index ? i - 1 : i]);
+      ..replaceRange(0, _history.length, [
+        for (final i in _history) i > index ? i - 1 : i,
+      ]);
     if (_items.isEmpty) {
       _pos = -1;
     } else if (removedPos < _pos) {
@@ -163,6 +211,7 @@ class PlayQueue {
   void move(int from, int to) {
     if (from < 0 || from >= _items.length || to < 0 || to >= _items.length) return;
     if (from == to) return;
+    _changed();
     final currentNatural = currentIndex;
     final ids = List<int>.from(_items);
     final moved = ids.removeAt(from);
@@ -173,6 +222,7 @@ class PlayQueue {
       if (from > to && i >= to && i < from) return i + 1;
       return i;
     }
+
     _items
       ..clear()
       ..addAll(ids);
@@ -192,6 +242,7 @@ class PlayQueue {
       setItems([trackId]);
       return;
     }
+    _changed();
     final at = currentIndex + 1;
     _items.insert(at, trackId);
     _order = [for (final i in _order) i >= at ? i + 1 : i];
@@ -206,6 +257,7 @@ class PlayQueue {
       setItems([trackId]);
       return;
     }
+    _changed();
     _items.add(trackId);
     _order.add(_items.length - 1);
   }

@@ -21,6 +21,7 @@ import 'providers/player_providers.dart';
 import 'providers/settings_providers.dart';
 import 'providers/share_providers.dart';
 import 'services/audio/codecore_audio_handler.dart';
+import 'services/audio/crossfade_engine.dart';
 import 'services/audio/just_audio_backend.dart';
 import 'services/audio/play_queue.dart';
 import 'services/audio/playback_persistence.dart';
@@ -44,7 +45,7 @@ Future<void> main() async {
   final covers = CoverStore(Directory(await coversDir()));
   final errors = StreamController<PlaybackFailure>.broadcast();
   CodecoreAudioHandler build() => CodecoreAudioHandler(
-        JustAudioBackend(withEqualizer: true),
+        CrossfadeEngine(() => JustAudioBackend(withEqualizer: true)),
         PlayQueue(),
         tracks,
         onError: errors.add,

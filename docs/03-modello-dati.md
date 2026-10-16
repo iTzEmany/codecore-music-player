@@ -125,5 +125,8 @@ File scomparsi: `missing = true` **solo se la cartella radice è raggiungibile**
 | `eqEnabled` | bool | false | equalizzatore acceso (fase 17) |
 | `eqPreset.speaker`, `eqPreset.headphones` | string | `flat` | nome del preset (`custom` = guadagni propri) |
 | `eqGains.speaker`, `eqGains.headphones` | list<string> | `[]` | guadagni in dB, uno per banda, usati con `custom` |
+| `transition` | string | `normal` | `normal`, `gapless`, `crossfade` (fase 18) |
+| `crossfadeSeconds` | int | 6 | 2–12 |
+| `crossfadePlainInAlbum` | bool | true | tra brani dello stesso album niente dissolvenza |
 
 Le vecchie impostazioni finte (crossfade, gapless, normalizzazione, "bit-perfect WASAPI", autoplay) **non** vengono portate.

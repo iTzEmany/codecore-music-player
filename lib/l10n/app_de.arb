@@ -1031,5 +1031,20 @@
   "eqPresetCustom": "Eigene",
   "eqReset": "Zurücksetzen",
   "eqWaiting": "Die Bänder erscheinen, sobald der erste Titel läuft.",
-  "eqUnavailable": "Der Equalizer ist auf diesem Gerät nicht verfügbar."
+  "eqUnavailable": "Der Equalizer ist auf diesem Gerät nicht verfügbar.",
+  "transitionMode": "Übergang zwischen Titeln",
+  "transitionNormal": "Normal",
+  "transitionGapless": "Lückenlos",
+  "transitionCrossfade": "Überblenden",
+  "transitionHint": "Lückenlos funktioniert am besten mit Titeln im selben Format (zum Beispiel alle FLAC).",
+  "crossfadeLength": "Dauer der Überblendung: {seconds} s",
+  "@crossfadeLength": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "crossfadePlainInAlbum": "Innerhalb eines Albums nicht überblenden",
+  "crossfadePlainInAlbumHint": "Innerhalb eines Albums folgen die Titel lückenlos aufeinander, ohne sich zu überlagern."
 }

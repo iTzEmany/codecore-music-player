@@ -1918,4 +1918,33 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get eqUnavailable =>
       'Der Equalizer ist auf diesem Gerät nicht verfügbar.';
+
+  @override
+  String get transitionMode => 'Übergang zwischen Titeln';
+
+  @override
+  String get transitionNormal => 'Normal';
+
+  @override
+  String get transitionGapless => 'Lückenlos';
+
+  @override
+  String get transitionCrossfade => 'Überblenden';
+
+  @override
+  String get transitionHint =>
+      'Lückenlos funktioniert am besten mit Titeln im selben Format (zum Beispiel alle FLAC).';
+
+  @override
+  String crossfadeLength(int seconds) {
+    return 'Dauer der Überblendung: $seconds s';
+  }
+
+  @override
+  String get crossfadePlainInAlbum =>
+      'Innerhalb eines Albums nicht überblenden';
+
+  @override
+  String get crossfadePlainInAlbumHint =>
+      'Innerhalb eines Albums folgen die Titel lückenlos aufeinander, ohne sich zu überlagern.';
 }
