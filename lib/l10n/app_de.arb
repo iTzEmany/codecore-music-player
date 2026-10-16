@@ -1007,5 +1007,7 @@
         "type": "int"
       }
     }
-  }
+  },
+  "playbackSpeed": "Wiedergabegeschwindigkeit",
+  "playbackSpeedHint": "Die Tonhöhe bleibt original. Der Einschlaf-Timer zählt echte Zeit, nicht die des Titels."
 }

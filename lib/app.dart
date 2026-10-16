@@ -15,7 +15,9 @@ class CodecoreApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     ref.watch(shareAutoStartProvider);
     final s = ref.watch(settingsProvider);
-    ref.read(audioHandlerProvider).setNormalize(s.normalizeVolume);
+    ref.read(audioHandlerProvider)
+      ..setNormalize(s.normalizeVolume)
+      ..setSpeed(s.playbackSpeed);
     return MaterialApp(
       title: 'Codecore',
       debugShowCheckedModeBanner: false,

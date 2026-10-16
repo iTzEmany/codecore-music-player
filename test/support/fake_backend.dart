@@ -21,6 +21,7 @@ class FakeBackend implements AudioBackend {
   Future<void> load(String filePath) async {
     if (failing.contains(filePath)) throw const BackendException('missing', fileMissing: true);
     loaded.add(filePath);
+    if (forgetSpeedOnLoad) speed = 1.0;
     stateC.add(BackendState.paused);
   }
 
@@ -62,11 +63,18 @@ class FakeBackend implements AudioBackend {
   Future<void> setVolume(double volume) async {}
 
   double speed = 1.0;
+
+  /// Like a native player that drops its rate when a new file is loaded.
+  bool forgetSpeedOnLoad = false;
+  final speedCalls = <double>[];
   Duration positionValue = Duration.zero;
   final seeks = <Duration>[];
 
   @override
-  Future<void> setSpeed(double s) async => speed = s;
+  Future<void> setSpeed(double s) async {
+    speedCalls.add(s);
+    speed = s;
+  }
 
   @override
   Duration get positionNow => positionValue;

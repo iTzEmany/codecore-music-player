@@ -27,6 +27,7 @@ class AppSettings {
     this.downloadOriginal = false,
     this.importSureThreshold = 0.80,
     this.importReviewThreshold = 0.55,
+    this.playbackSpeed = 1.0,
   });
 
   final String theme;
@@ -65,6 +66,9 @@ class AppSettings {
   /// from which it is at least proposed (advanced settings).
   final double importSureThreshold, importReviewThreshold;
 
+  /// Playback speed (0.5–2.0), the same for every track; tone is preserved.
+  final double playbackSpeed;
+
   /// Shown to the device on the other side of a LAN share; null = hostname.
   final String? deviceName;
 
@@ -93,6 +97,7 @@ class AppSettings {
     bool? downloadOriginal,
     double? importSureThreshold,
     double? importReviewThreshold,
+    double? playbackSpeed,
   }) =>
       AppSettings(
         theme: theme ?? this.theme,
@@ -118,6 +123,7 @@ class AppSettings {
         importSureThreshold: importSureThreshold ?? this.importSureThreshold,
         importReviewThreshold:
             importReviewThreshold ?? this.importReviewThreshold,
+        playbackSpeed: playbackSpeed ?? this.playbackSpeed,
       );
 }
 
@@ -169,6 +175,8 @@ class SettingsStore {
         downloadOriginal: _prefs.getBool('downloadOriginal') ?? false,
         importSureThreshold: _prefs.getDouble('importSureThreshold') ?? 0.80,
         importReviewThreshold: _prefs.getDouble('importReviewThreshold') ?? 0.55,
+        playbackSpeed:
+            (_prefs.getDouble('playbackSpeed') ?? 1.0).clamp(0.5, 2.0),
       );
 
   Future<void> writeSettings(AppSettings s) async {
@@ -192,6 +200,7 @@ class SettingsStore {
     await _prefs.setBool('downloadOriginal', s.downloadOriginal);
     await _prefs.setDouble('importSureThreshold', s.importSureThreshold);
     await _prefs.setDouble('importReviewThreshold', s.importReviewThreshold);
+    await _prefs.setDouble('playbackSpeed', s.playbackSpeed);
     final dn = s.deviceName;
     if (dn == null || dn.isEmpty) {
       await _prefs.remove('deviceName');

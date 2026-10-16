@@ -1007,5 +1007,7 @@
         "type": "int"
       }
     }
-  }
+  },
+  "playbackSpeed": "Playback speed",
+  "playbackSpeedHint": "The pitch stays the original one. The sleep timer counts real time, not the song's."
 }

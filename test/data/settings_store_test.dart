@@ -41,4 +41,14 @@ void main() {
     expect(store.readSettings().importSureThreshold, 0.9);
     expect(store.readSettings().importReviewThreshold, 0.6);
   });
+
+  test('playback speed defaults to 1× and is kept within 0.5–2', () async {
+    SharedPreferences.setMockInitialValues({});
+    final store = await SettingsStore.open();
+    expect(store.readSettings().playbackSpeed, 1.0);
+    await store.writeSettings(const AppSettings(playbackSpeed: 1.5));
+    expect(store.readSettings().playbackSpeed, 1.5);
+    SharedPreferences.setMockInitialValues({'playbackSpeed': 7.0});
+    expect((await SettingsStore.open()).readSettings().playbackSpeed, 2.0);
+  });
 }

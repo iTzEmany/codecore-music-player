@@ -14,6 +14,7 @@ import '../../theme/tokens.dart';
 import '../../widgets/format_utils.dart';
 import '../../widgets/play_buttons.dart';
 import '../../widgets/quality_tag.dart';
+import '../../widgets/speed_button.dart';
 import '../devices/devices_sheet.dart';
 import 'queue_sheet.dart';
 
@@ -63,7 +64,18 @@ class _NpSeekRowState extends ConsumerState<NpSeekRow> {
           child: Row(
             children: [
               Text(formatDuration(shown.round()), style: style),
-              Expanded(child: Center(child: QualityTag(widget.track))),
+              Expanded(
+                child: Center(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      QualityTag(widget.track),
+                      const SizedBox(width: 8),
+                      const SpeedButton(),
+                    ],
+                  ),
+                ),
+              ),
               InkWell(
                 onTap: () => setState(() => _remaining = !_remaining),
                 child: Text(

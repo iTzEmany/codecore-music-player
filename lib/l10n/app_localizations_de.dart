@@ -1861,4 +1861,11 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get csvImportSyncChecking => 'Unterschiede werden geprüft…';
+
+  @override
+  String get playbackSpeed => 'Wiedergabegeschwindigkeit';
+
+  @override
+  String get playbackSpeedHint =>
+      'Die Tonhöhe bleibt original. Der Einschlaf-Timer zählt echte Zeit, nicht die des Titels.';
 }

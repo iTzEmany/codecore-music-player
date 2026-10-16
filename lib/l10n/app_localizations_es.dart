@@ -1859,4 +1859,11 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get csvImportSyncChecking => 'Comprobando las diferencias…';
+
+  @override
+  String get playbackSpeed => 'Velocidad de reproducción';
+
+  @override
+  String get playbackSpeedHint =>
+      'El tono se mantiene. El temporizador de apagado cuenta tiempo real, no el de la canción.';
 }

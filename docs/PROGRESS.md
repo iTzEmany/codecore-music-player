@@ -208,7 +208,7 @@ L'agente riparte sempre dal primo task non spuntato.
 
 ## Fase 17 — Riproduzione e controlli di sistema (`fase-17-riproduzione.md`)
 - [~] 17.1 Verifiche preliminari (tono con la velocità, equalizzatore, MPRIS/SMTC, Jam e audio_service)
-- [ ] 17.2 Velocità di riproduzione
+- [x] 17.2 Velocità di riproduzione
 - [ ] 17.3 Segnalibro «riprendi da qui» (schema v6)
 - [ ] 17.4 Anteprima di 20 secondi
 - [ ] 17.5 Equalizzatore: motore
@@ -440,6 +440,8 @@ L'agente riparte sempre dal primo task non spuntato.
 - 16.10: README (badge con segnaposto `UTENTE/REPOSITORY`, artefatti, rapporto dipendenze), `docs/02-architettura.md` («CI e test»), `docs/99` (R34–R36). **Non** rimossa da R6 la frase «Windows non compilabile da Linux»: 16.4 non è ancora verde (serve il push). `scripts/integration.sh` non esiste: dipende da 16.5/16.6 (bloccati da `integration_test`).
 
 - 17.1 (2026-10-16): **Velocità e tono, misurati:** tono sinusoidale 440 Hz reso da mpv su file PCM — con `scaletempo` (il percorso di `media_kit` con `pitch=true`, predefinito di `just_audio_media_kit`: `audio-pitch-correction=no` + `af=scaletempo:scale=<velocità>`) a 1,5× il brano dura 4,02 s e il tono resta **440 Hz**; a 0,75× dura 7,98 s, **440 Hz** (senza correzione sarebbe 660/330 Hz). `speed` di mpv resta 1 e `time-pos` segue la posizione nel file. ExoPlayer: `just_audio` chiama `setPlaybackParameters(PlaybackParameters(speed, params.pitch))` con pitch 1,0 → tono preservato. **Nessuna modifica a `JustAudioMediaKit.pitch`** → la Jam (R37) non cambia. **Equalizzatore:** Android `AudioPipeline(androidAudioEffects: [AndroidEqualizer])`, `AndroidEqualizerParameters(minDecibels, maxDecibels, bands)` e `band.setGain`; desktop **no**: `MediaKitPlayer` non espone il `Player` e il filtro `af` di mpv è già occupato da `scaletempo` per la velocità (servirebbe comporlo) → voce nascosta su desktop. **audio_service 0.18.19:** `MediaControl.custom(androidIcon:, label:, name:)` esiste e inoltra a `AudioHandler.customAction` → «Termina Jam» possibile come controllo personalizzato. **MPRIS/SMTC:** non verificato (serve l'approvazione dei pacchetti) → 17.7/17.8 bloccati.
+
+- 17.2: `AppSettings.playbackSpeed` (0,5–2, globale), `CodecoreAudioHandler.setSpeed` (anche `BaseAudioHandler.setSpeed`, quindi i comandi di sistema lo usano; riapplicata dopo ogni `load`; `playbackState.speed` vero per notifica/MPRIS), `app.dart` la applica come `setNormalize`. UI: chip «1×» accanto al tag qualità in Now Playing e nella riga di avanzamento della barra desktop (nella colonna centrale: nella colonna destra andava in overflow sotto 1000 px); il foglio è un `Wrap` di `ChoiceChip` (la versione a 7 righe sforava l\'altezza anche su telefono, trovato dal test). Golden di Now Playing/Libreria desktop rigenerati (cambio voluto). Il timer di spegnimento conta tempo reale: detto nel testo del foglio.
 
 ## Note di deviazione (Fase 12)
 - 12.1 (2026-10-16): CSV vero = `Just_a_mood.csv` (34 brani; intestazioni `Track URI, ISRC, Track Name, Album Name, Artist Name(s), …, Duration (ms)`; **più artisti separati da `;`**). yt-dlp di sistema 2024.04.09 NON legge più YouTube («Please sign in»): provato con yt-dlp 2026.08.19 (binario standalone). `https://music.youtube.com/search?q=…#songs` funziona; in modalità flat dà ~460 voci con solo `id`/`title` (nessuna durata), **senza `--flat-playlist` e con `--playlist-items 1-5`** ogni voce ha `channel`, `artists[]`, `track`, `album`, `duration` in ~5–8 s → si usa quella. `YtResult` guadagna `artists` e `album`.

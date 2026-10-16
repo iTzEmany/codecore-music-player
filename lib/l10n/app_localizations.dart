@@ -3293,6 +3293,18 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Controllo le differenze…'**
   String get csvImportSyncChecking;
+
+  /// No description provided for @playbackSpeed.
+  ///
+  /// In it, this message translates to:
+  /// **'Velocità di riproduzione'**
+  String get playbackSpeed;
+
+  /// No description provided for @playbackSpeedHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Il tono resta quello originale. Il timer di spegnimento conta il tempo reale, non quello del brano.'**
+  String get playbackSpeedHint;
 }
 
 class _AppLocalizationsDelegate

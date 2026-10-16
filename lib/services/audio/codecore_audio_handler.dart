@@ -55,6 +55,11 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   /// Sleep timer "end of track": the next track is loaded but not started.
   bool pauseAtTrackEnd = false;
 
+  /// Playback speed, kept by the handler so every new track gets it again.
+  static const minSpeed = 0.5, maxSpeed = 2.0;
+  double _speed = 1.0;
+  double get speed => _speed;
+
   double _baseVolume = 1.0;
   bool _normalize = false;
   double _gainFactor = 1.0;
@@ -111,6 +116,8 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     try {
       await _backend.load(track.path);
       if (token != _loadToken) return;
+      // Some backends forget the rate when a new file is loaded.
+      if (_speed != 1.0) await _backend.setSpeed(_speed);
       if (startAt != null && startAt > Duration.zero) {
         await _backend.seek(startAt);
       }
@@ -224,7 +231,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
       androidCompactActionIndices: const [0, 1, 2],
       systemActions: const {MediaAction.seek},
       updatePosition: _position,
-      speed: 1,
+      speed: _speed,
       queueIndex: _queue.currentIndex < 0 ? null : _queue.currentIndex,
       shuffleMode: _queue.shuffle
           ? AudioServiceShuffleMode.all
@@ -342,6 +349,16 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   void setShuffleAndRepeat({required bool shuffle, required PlayRepeat repeat}) {
     _queue.shuffle = shuffle;
     _queue.repeat = repeat;
+  }
+
+  /// 0.5×–2×, tone unchanged (mpv `scaletempo`, ExoPlayer pitch 1.0).
+  @override
+  Future<void> setSpeed(double value) async {
+    final v = value.clamp(minSpeed, maxSpeed).toDouble();
+    if (v == _speed) return;
+    _speed = v;
+    await _backend.setSpeed(v);
+    _publish(playbackState.value.processingState);
   }
 
   Future<void> setVolume(double v) {

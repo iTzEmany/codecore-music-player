@@ -14,6 +14,7 @@ import '../screens/jam/jam_screen.dart';
 import '../screens/library/artist_screen.dart';
 import '../screens/now_playing/now_playing_screen.dart';
 import '../theme/tokens.dart';
+import '../widgets/speed_button.dart';
 import '../widgets/cover_image.dart';
 import '../widgets/favorite_actions.dart';
 import '../widgets/format_utils.dart';
@@ -353,6 +354,7 @@ class _BarSeekState extends ConsumerState<_BarSeek> {
           width: 44,
           child: Text(formatDuration(max.round()), style: style),
         ),
+        const SpeedButton(),
       ],
     );
   }

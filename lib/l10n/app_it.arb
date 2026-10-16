@@ -1198,5 +1198,7 @@
         "type": "int"
       }
     }
-  }
+  },
+  "playbackSpeed": "Velocità di riproduzione",
+  "playbackSpeedHint": "Il tono resta quello originale. Il timer di spegnimento conta il tempo reale, non quello del brano."
 }

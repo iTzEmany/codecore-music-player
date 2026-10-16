@@ -1854,4 +1854,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get csvImportSyncChecking => 'Checking the differences…';
+
+  @override
+  String get playbackSpeed => 'Playback speed';
+
+  @override
+  String get playbackSpeedHint =>
+      'The pitch stays the original one. The sleep timer counts real time, not the song\'s.';
 }

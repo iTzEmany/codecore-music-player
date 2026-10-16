@@ -133,4 +133,42 @@ void main() {
     expect(handler.isPlaying, false);
     expect(handler.pauseAtTrackEnd, false);
   });
+
+  group('speed', () {
+    test('goes to the backend and to the published state', () async {
+      await handler.playQueue(ids, 0);
+      await handler.setSpeed(1.5);
+      expect(backend.speed, 1.5);
+      expect(handler.speed, 1.5);
+      expect(handler.playbackState.value.speed, 1.5);
+    });
+
+    test('is kept between 0.5× and 2×', () async {
+      await handler.setSpeed(9);
+      expect(handler.speed, 2.0);
+      await handler.setSpeed(0.1);
+      expect(handler.speed, 0.5);
+    });
+
+    test('the same value again does not bother the backend', () async {
+      await handler.setSpeed(1.25);
+      await handler.setSpeed(1.25);
+      expect(backend.speedCalls, [1.25]);
+    });
+
+    test('survives a track change on a backend that forgets it', () async {
+      backend.forgetSpeedOnLoad = true;
+      await handler.playQueue(ids, 0);
+      await handler.setSpeed(1.5);
+      await handler.skipToNext();
+      await settle();
+      expect(backend.loaded.last, '/m/b.mp3');
+      expect(backend.speed, 1.5, reason: 'reapplied after the new load');
+    });
+
+    test('1× needs no extra call when nothing was changed', () async {
+      await handler.playQueue(ids, 0);
+      expect(backend.speedCalls, isEmpty);
+    });
+  });
 }

@@ -1858,4 +1858,11 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get csvImportSyncChecking => 'Controllo le differenze…';
+
+  @override
+  String get playbackSpeed => 'Velocità di riproduzione';
+
+  @override
+  String get playbackSpeedHint =>
+      'Il tono resta quello originale. Il timer di spegnimento conta il tempo reale, non quello del brano.';
 }
