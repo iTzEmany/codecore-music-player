@@ -41,6 +41,9 @@ class ImportEvent {
   final int importId;
 }
 
+/// A downloaded file this far (ms) from the CSV length is asked about.
+const durationMismatchMs = 10000;
+
 /// Turns the rows of a CSV into a playlist: links what the library already
 /// has, searches the rest, downloads it and puts it at its place.
 class PlaylistImportService {
@@ -56,6 +59,7 @@ class PlaylistImportService {
     required this.pathForVideo,
     required this.applyTags,
     this.forgetSearches,
+    this.trackDurationMs,
     this.youtubeEnabled = true,
     this.searchGap = const Duration(milliseconds: 1500),
     this.pollDelay = const Duration(milliseconds: 400),
@@ -75,6 +79,10 @@ class PlaylistImportService {
   final Future<String?> Function(String videoId) pathForVideo;
   final Future<void> Function(int trackId, ImportRow row) applyTags;
   final bool youtubeEnabled;
+
+  /// Length of the downloaded file as read by the scanner; without it the
+  /// «wrong length» check is skipped.
+  final Future<int?> Function(int trackId)? trackDurationMs;
 
   /// Drops cached search answers; called when a chosen video proved unavailable.
   final void Function(List<String> queries)? forgetSearches;
@@ -434,9 +442,25 @@ class PlaylistImportService {
       AppLog.w('import: could not apply CSV tags to track $trackId', e, st);
     }
     await playlists.placeImported(imp.playlistId, imp.id, it.rowIndex, trackId);
+    // The file stays and the track stays in the playlist; a very different
+    // length just asks the user to confirm it was the right version.
+    final off = await _lengthIsOff(it, trackId);
     await imports.setItem(imp.id, it.rowIndex,
-        status: ImportItemStatus.downloaded, trackId: Value(trackId));
+        status: off ? ImportItemStatus.review : ImportItemStatus.downloaded,
+        trackId: Value(trackId));
   }
+
+  Future<bool> _lengthIsOff(PlaylistImportItem it, int trackId) async {
+    final want = it.durationMs;
+    final read = trackDurationMs;
+    if (want == null || want <= 0 || read == null) return false;
+    final got = await read(trackId);
+    return got != null && got > 0 && (got - want).abs() > durationMismatchMs;
+  }
+
+  /// The user confirms a downloaded file whose length differed from the CSV.
+  Future<void> keepDownloaded(int importId, int rowIndex) =>
+      imports.setItem(importId, rowIndex, status: ImportItemStatus.downloaded);
 
   Future<void> _checkFinished(int importId) async {
     final imp = await imports.get(importId);

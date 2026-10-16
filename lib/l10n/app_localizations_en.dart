@@ -1623,4 +1623,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get searchCacheCleared => 'Cache cleared';
+
+  @override
+  String csvImportLengthOff(String found, String wanted) {
+    return 'Different length: $found instead of $wanted';
+  }
+
+  @override
+  String get csvImportKeep => 'Keep this one';
 }

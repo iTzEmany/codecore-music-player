@@ -868,5 +868,17 @@
         "type": "int"
       }
     }
+  },
+  "csvImportLengthOff": "Andere Länge: {found} statt {wanted}",
+  "csvImportKeep": "Diesen behalten",
+  "@csvImportLengthOff": {
+    "placeholders": {
+      "found": {
+        "type": "String"
+      },
+      "wanted": {
+        "type": "String"
+      }
+    }
   }
 }

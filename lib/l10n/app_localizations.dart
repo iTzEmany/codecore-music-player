@@ -2909,6 +2909,18 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Cache svuotata'**
   String get searchCacheCleared;
+
+  /// No description provided for @csvImportLengthOff.
+  ///
+  /// In it, this message translates to:
+  /// **'Durata diversa: {found} invece di {wanted}'**
+  String csvImportLengthOff(String found, String wanted);
+
+  /// No description provided for @csvImportKeep.
+  ///
+  /// In it, this message translates to:
+  /// **'Tieni questo'**
+  String get csvImportKeep;
 }
 
 class _AppLocalizationsDelegate

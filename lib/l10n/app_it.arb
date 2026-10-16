@@ -1059,5 +1059,17 @@
         "type": "int"
       }
     }
+  },
+  "csvImportLengthOff": "Durata diversa: {found} invece di {wanted}",
+  "csvImportKeep": "Tieni questo",
+  "@csvImportLengthOff": {
+    "placeholders": {
+      "found": {
+        "type": "String"
+      },
+      "wanted": {
+        "type": "String"
+      }
+    }
   }
 }

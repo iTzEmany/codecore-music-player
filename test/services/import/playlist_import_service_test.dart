@@ -113,6 +113,7 @@ void main() {
       enqueue: (r, tag) => queued.add((r, tag)),
       cancelDownloads: (_) => cancelCalls++,
       forgetSearches: forgotten.add,
+      trackDurationMs: (id) async => (await tracks.getById(id))?.durationMs,
       settled: settled.stream,
       trackIdForPath: tracks.idForPath,
       pathForVideo: (_) async => null,
@@ -161,8 +162,12 @@ void main() {
     await db.close();
   });
 
-  Future<void> finish(String tag, String path) async {
-    await addTrack(path, path, 'x', 100);
+  Future<void> finish(String tag, String path, {int? seconds}) async {
+    // By default the file is as long as the CSV says.
+    final ref = parseImportTag(tag)!;
+    final want = (await imports.item(ref.$1, ref.$2))?.durationMs;
+    await addTrack(
+        path, path, 'x', seconds ?? (want == null ? 100 : (want / 1000).round()));
     settled.add(DownloadItem(
         id: 1,
         result: const YtResult(id: 'v', title: 't', channel: 'c', duration: null),
@@ -399,6 +404,48 @@ void main() {
     await idle();
     expect(forgotten, hasLength(1));
     expect(forgotten.single, containsAll(['ISRC0', 'band one', 'Band - One']));
+  });
+
+  group('length check after the download', () {
+    Future<int> startOne() async {
+      yt.songs['one'] = [topic('v1', 'One', 'Band', 200)];
+      final id = await service.start(csv([row(0, 'One', 'Band', 200)]));
+      await idle();
+      return id;
+    }
+
+    test('a 4 s difference is fine', () async {
+      final id = await startOne();
+      await finish(importTag(id, 0), '/m/one.mp3', seconds: 204);
+      expect((await imports.item(id, 0))!.state, ImportItemStatus.downloaded);
+    });
+
+    test('a 40 s difference goes to review, file and playlist entry kept',
+        () async {
+      final id = await startOne();
+      await finish(importTag(id, 0), '/m/one.mp3', seconds: 240);
+      final it = (await imports.item(id, 0))!;
+      expect(it.state, ImportItemStatus.review);
+      expect(it.trackId, isNotNull, reason: 'the downloaded track is linked');
+      final imp = (await imports.get(id))!;
+      expect(await order(imp.playlistId), ['/m/one.mp3']);
+    });
+
+    test('«Tieni questo» confirms it', () async {
+      final id = await startOne();
+      await finish(importTag(id, 0), '/m/one.mp3', seconds: 240);
+      await service.keepDownloaded(id, 0);
+      expect((await imports.item(id, 0))!.state, ImportItemStatus.downloaded);
+    });
+
+    test('a CSV row without a length is never questioned', () async {
+      yt.songs['one'] = [topic('v1', 'One', 'Band', 200)];
+      final r = ImportRow(index: 0, title: 'One', artists: const ['Band']);
+      final id = await service.start(csv([r]));
+      await idle();
+      await finish(importTag(id, 0), '/m/one.mp3', seconds: 999);
+      expect((await imports.item(id, 0))!.state, ImportItemStatus.downloaded);
+    });
   });
 
   test('tag parsing', () {

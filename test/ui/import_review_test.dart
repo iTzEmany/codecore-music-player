@@ -1,4 +1,5 @@
 import 'package:codecore/core/import_row.dart';
+import 'package:codecore/data/db/app_database.dart' show TracksCompanion;
 import 'package:codecore/data/repositories/import_repository.dart';
 import 'package:codecore/data/repositories/playlist_repository.dart';
 import 'package:codecore/providers/activity_providers.dart';
@@ -88,6 +89,30 @@ void main() {
     final left = await tester.runAsync(
         () => ImportRepository(h.db).item(iid, 2));
     expect(left!.state, ImportItemStatus.skipped);
+    await h.dispose(tester);
+  });
+
+  testWidgets('a downloaded file of the wrong length can be kept', (tester) async {
+    tester.view.physicalSize = const Size(600, 1600);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final h = await Harness.create(tester, tracks: 1);
+    final (_, iid) = await seed(tester, h);
+    await tester.runAsync(() async {
+      final t = await h.db.select(h.db.tracks).getSingle();
+      await h.db.update(h.db.tracks).write(
+          const TracksCompanion(durationMs: Value(238000)));
+      await ImportRepository(h.db).setItem(iid, 3,
+          status: ImportItemStatus.review, trackId: Value(t.id));
+    });
+    await h.pump(tester, ImportReviewScreen(importId: iid));
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text('Durata diversa: 3:58 invece di 3:20'), findsOneWidget);
+    await tester.tap(find.text('Tieni questo'));
+    await tester.pump(const Duration(milliseconds: 300));
+    final kept = await tester.runAsync(() => ImportRepository(h.db).item(iid, 3));
+    expect(kept!.state, ImportItemStatus.downloaded);
     await h.dispose(tester);
   });
 

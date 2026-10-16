@@ -34,6 +34,10 @@ final cachedYoutubeProvider = Provider<CachedYoutubeService>((ref) =>
 final searchCacheCountProvider = FutureProvider.autoDispose<int>(
     (ref) => ref.watch(searchCacheProvider).count());
 
+/// A track downloaded by an import, for the length check in «Rivedi».
+final importedTrackProvider = StreamProvider.family<Track?, int>(
+    (ref, id) => ref.watch(trackRepositoryProvider).watchById(id));
+
 final playlistImportServiceProvider = Provider<PlaylistImportService>((ref) {
   final cached = ref.watch(cachedYoutubeProvider);
   final downloads = ref.read(downloadsProvider.notifier);
@@ -48,6 +52,7 @@ final playlistImportServiceProvider = Provider<PlaylistImportService>((ref) {
     cancelDownloads: downloads.cancelWhere,
     settled: downloads.settled,
     trackIdForPath: tracks.idForPath,
+    trackDurationMs: (id) async => (await tracks.getById(id))?.durationMs,
     pathForVideo: (id) async =>
         (await ref.read(downloadIndexProvider.future)).pathFor(id),
     applyTags: (trackId, row) async {

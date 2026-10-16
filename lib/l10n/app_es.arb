@@ -868,5 +868,17 @@
         "type": "int"
       }
     }
+  },
+  "csvImportLengthOff": "Duración distinta: {found} en lugar de {wanted}",
+  "csvImportKeep": "Quedarme con este",
+  "@csvImportLengthOff": {
+    "placeholders": {
+      "found": {
+        "type": "String"
+      },
+      "wanted": {
+        "type": "String"
+      }
+    }
   }
 }

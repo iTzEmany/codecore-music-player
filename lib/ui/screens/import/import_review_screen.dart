@@ -43,6 +43,25 @@ class ImportReviewScreen extends ConsumerWidget {
       ),
     );
 
+    Widget lengthNote(PlaylistImportItem it) => Consumer(
+      builder: (context, ref, _) {
+        final t = ref.watch(importedTrackProvider(it.trackId!)).value;
+        if (t == null) return const SizedBox.shrink();
+        return ListTile(
+          dense: true,
+          leading: Icon(Icons.warning_amber_rounded, color: cc.error),
+          title: Text(l.csvImportLengthOff(
+            formatDuration(t.durationMs),
+            formatDuration(it.durationMs ?? 0),
+          )),
+          trailing: TextButton(
+            onPressed: () => svc.keepDownloaded(importId, it.rowIndex),
+            child: Text(l.csvImportKeep),
+          ),
+        );
+      },
+    );
+
     Widget actions(PlaylistImportItem it) => Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8),
       child: Row(
@@ -116,6 +135,7 @@ class ImportReviewScreen extends ConsumerWidget {
                 if (review.isNotEmpty) header(l.csvImportToReview),
                 for (final it in review) ...[
                   wanted(it),
+                  if (it.trackId != null) lengthNote(it),
                   for (final c in decodeCandidates(it.candidates))
                     candidate(it, c),
                   actions(it),
