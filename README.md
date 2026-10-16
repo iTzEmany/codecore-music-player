@@ -56,6 +56,12 @@ senza il file la build release usa la chiave di debug.
 - **yt-dlp (desktop):** l'app usa quello scaricato da lei (`Aggiorna`) prima di quello nel PATH; se è più vecchio di `2025.11.12` mostra un avviso.
 - Le ricerche dell'importazione da CSV sono ricordate 30 giorni (**Svuota cache ricerche**); un file di durata molto diversa dal CSV finisce in «Da verificare».
 
+## Formati accettati dall'importazione
+CSV di **Exportify** (Spotify), **TuneMyMusic**, **Soundiiz**, **Last.fm** o qualunque CSV con una colonna titolo e una artista, e playlist **M3U/M3U8** e **XSPF** (VLC, Poweramp…). Le voci locali si cercano prima nella libreria (per percorso, anche se la cartella è cambiata). Nell'anteprima: **solo collega** (nessun download), **rivedi prima di scaricare**, cartella dedicata, file numerati, copertine, blocchi da 100 per file grandi. Soglie di abbinamento in Impostazioni → Avanzate. «Esporta esito» in «Rivedi» salva un CSV con il motivo di ogni riga non risolta.
+
+## Sincronizzare una playlist
+Importando di nuovo un file aggiornato nella stessa playlist si sceglie **Sincronizza**: i brani nuovi vengono importati, quelli spariti dal file escono dalla playlist (restano in libreria e su disco), l'ordine segue il file e i brani aggiunti a mano restano al loro posto accanto al brano che li precedeva.
+
 ## Limiti noti
 - Jam: massimo 5 partecipanti; la sincronia è misurata sulla posizione del player (scarto tipico 10–30 ms, non acustico), con Bluetooth serve la compensazione manuale della latenza; nessun controllo da notifica di sistema/MPRIS; la richiesta Jam in background Android passa dalla notifica «Accetta/Rifiuta».
 - Niente crossfade/gapless nativo, niente equalizzatore, niente scrittura dei tag nei file.

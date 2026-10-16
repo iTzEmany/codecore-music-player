@@ -50,3 +50,10 @@ Per ogni rischio: **sintomo** → **cosa fare**. Se scatta un fallback che cambi
 | R28 | Più download insieme → più 403/429 | Righe «con errori» o importazione in pausa | Predefinito 2 (massimo 3); ricerche sempre una alla volta; ritento a scalare con jitter; `rateLimited` mette in pausa; abbassare «Download contemporanei» a 1 |
 | R29 | Formato «originale» non leggibile da tag reader o player | Durata 0 o brano che non parte | Spento di default (MP3); se manca m4a si ottiene opus/webm (estensioni già scansionate); riattivare MP3 e riscaricare |
 | R30 | Cache delle ricerche con risultati vecchi (video rimosso) | Si propone un video non più disponibile | Scadenza 30 giorni; un download `unavailable` cancella le voci della riga; «Svuota cache ricerche» nelle Impostazioni |
+
+## Importazione 2 (fase 15)
+| # | Rischio | Sintomo | Piano B |
+|---|---|---|---|
+| R31 | Un servizio cambia le colonne del suo CSV | «Formato non riconosciuto» o titolo/artista vuoti | Colonne per sinonimi in `csv_profiles.dart` (aggiungere i nuovi nomi); basta un CSV con una colonna titolo e una artista |
+| R32 | «Sincronizza» toglie brani che si voleva tenere | La playlist perde brani dopo un aggiornamento del file | L'anteprima mostra quanti ne toglie; si toglie **solo dalla playlist** (file e libreria restano): si riaggiungono dalla libreria; i brani aggiunti a mano non si toccano |
+| R33 | M3U/XSPF con codifiche o percorsi strani | Brani non trovati in libreria o titoli storti | Latin-1 di ripiego per `.m3u`, `Uri.decodeFull`, ricerca per cartelle finali; le righe illeggibili sono contate come «ignorate», mai errore sull'intero file; il file XSPF si legge con un lettore a espressioni regolari (pacchetto `xml` solo se serve) |
