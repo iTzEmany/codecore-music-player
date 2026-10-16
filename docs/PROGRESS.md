@@ -231,7 +231,7 @@ L'agente riparte sempre dal primo task non spuntato.
 - [~] 18.10 Rifinitura, documentazione e prova a mano
 
 ## Fase 19 — Interfaccia: selezione, temi, tablet, lingue, onboarding (`fase-19-interfaccia.md`)
-- [ ] 19.1 `SelectionController` (logica pura + test)
+- [x] 19.1 `SelectionController` (logica pura + test)
 - [ ] 19.2 `TrackRow` selezionabile
 - [ ] 19.3 Barra azioni e azioni di massa
 - [ ] 19.4 Collegare le liste
