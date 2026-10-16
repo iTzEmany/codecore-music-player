@@ -195,13 +195,13 @@ L'agente riparte sempre dal primo task non spuntato.
 - [~] 15.13 Rifinitura, documentazione e prova a mano
 
 ## Fase 16 — CI e test automatici (`fase-16-ci-test.md`)
-- [ ] 16.1 Verifiche preliminari (versione Flutter, test senza rete, pacchetti apt, remote GitHub)
-- [ ] 16.2 Workflow `ci.yml`: analyze e test
-- [ ] 16.3 Build Android e Linux con artefatti
-- [ ] 16.4 Build Windows (`windows-latest`)
-- [ ] 16.5 Test d'integrazione sul telefono: base (scansione)
-- [ ] 16.6 Test d'integrazione: riproduzione, playlist, importazione
-- [ ] 16.7 Golden test delle schermate principali (100 % e 150 %)
+- [x] 16.1 Verifiche preliminari (versione Flutter, test senza rete, pacchetti apt, remote GitHub)
+- [~] 16.2 Workflow `ci.yml`: analyze e test
+- [~] 16.3 Build Android e Linux con artefatti
+- [~] 16.4 Build Windows (`windows-latest`)
+- [ ] 16.5 Test d'integrazione sul telefono: base (scansione) (BLOCCATO: pacchetto `integration_test` da approvare)
+- [ ] 16.6 Test d'integrazione: riproduzione, playlist, importazione (BLOCCATO: pacchetto `integration_test` da approvare)
+- [x] 16.7 Golden test delle schermate principali (100 % e 150 %)
 - [ ] 16.8 Test live notturni e controllo delle dipendenze
 - [ ] 16.9 Profilo prestazioni su 50.000 brani
 - [ ] 16.10 Rifinitura, documentazione e prova a mano
@@ -428,6 +428,10 @@ L'agente riparte sempre dal primo task non spuntato.
 - 15.12: `YoutubeService.searchAlbums` (link `browse/MPREb_…` da `#albums` in modalità flat) e `albumTracks` (pagina dell\'album, fino a 80 tracce); Android: argomento `flat` nel canale `search`. Il motore, con **≥ 3 righe pendenti** dello stesso album (`matchKey`), cerca l\'album una volta per importazione, espande il primo risultato e accetta solo se il nome dell\'album combacia con quello del file; per ogni riga si considerano **solo le tracce con titolo equivalente** (`matchTitleKey`) e solo l\'esito `sure`; altrimenti si ricade sul flusso normale (ISRC → titolo+artista). Un rate limit non viene ricordato (si ripete dopo «Riprendi»). Risultati nella cache delle ricerche (chiavi `albums|…`, `album|<link>`). Provato dal vivo su Linux (`test/live/album_live_test.dart`: 9 tracce di «Volevo essere un duro» con album, artista e durata).
 
 - 15.13: ARB it/en/de/es completi per tutte le stringhe della fase; documenti: 02-architettura, 99-rischi (R31–R33), 03-modello-dati (v5), README («Formati accettati», «Sincronizzare una playlist»). Prestazioni: 5.000 voci M3U lette e cercate in libreria in < 2 s (test). Restano le prove a mano (vedi «Tocca a te»).
+
+- 16.1 (2026-10-16): Flutter **3.47.1** stable (Dart 3.13.1); Java di Gradle = JBR 17 di Android Studio (`java` non è nel PATH); `git remote -v` vuoto (repo GitHub da creare a cura dell'utente). La suite è **ermetica**: 603 test verdi con `HOME` temporaneo e proxy morto (`no_proxy` solo per localhost) — nessun test tocca la rete né file fuori dal repo (l'unico file creato in HOME è la telemetria di Flutter). Firma Android: `build.gradle.kts` ripiega sulla chiave di debug senza `key.properties`; verificato con un **clone pulito** (senza `key.properties`): `flutter build apk --release --split-per-abi` riuscito in 2m41 (arm64 66 MB, armv7 59 MB, x86_64 70 MB). Pacchetti apt per la build Linux: `clang cmake ninja-build pkg-config libgtk-3-dev libmpv-dev mpv libsqlite3-dev zip` (plugin: `media_kit_libs_linux`, `jni`); Windows: `media_kit_libs_windows_audio`, `permission_handler_windows` (scaricano DLL in CMake: serve rete nel runner). Il codice generato (`*.g.dart`, `lib/l10n`) è già allineato: `git diff --exit-code` dopo `build_runner` e `gen-l10n` è pulito.
+- 16.2–16.4: `.github/workflows/ci.yml` (job `check`; `build-android`, `build-linux`, `build-windows` solo su tag `v*` o avvio manuale; `concurrency`, `timeout-minutes`; Flutter fissato a 3.47.1; azioni `checkout@v4`, `flutter-action@v2`, `setup-java@v4`, `cache@v4`, `upload-artifact@v4` con tag maggiore, non SHA). YAML validato con PyYAML; **non provabile in locale** (serve il push su GitHub): `[~]`. Il job Windows lancia anche `flutter test` (percorsi con `\`).
+- 16.7: `test/goldens/screens_golden_test.dart` — 5 schermate (Libreria, Album, Now Playing, Impostazioni, Jam) × telefono/desktop × testo 100 %/150 % = **20 PNG (1,6 MB)**, solo Linux (`Platform.isLinux`), font veri (Figtree/Unbounded dal `FontManifest`), copertine a colore pieno (`coverImageStub`, hook `@visibleForTesting` in `CoverImage`), comparatore tollerante 0,5 % (`TolerantComparator`). Verificato: un cambio di `accent` in `tokens.dart` fa fallire 14 golden su 20 (annullato). Evitata la Home (il saluto dipende dall'ora). **Difetto trovato e corretto:** la riga della barra laterale desktop aveva altezza fissa 56 e andava in overflow di 6 px a testo 150 % (`desktop_sidebar.dart`: ora `minHeight`).
 
 ## Note di deviazione (Fase 12)
 - 12.1 (2026-10-16): CSV vero = `Just_a_mood.csv` (34 brani; intestazioni `Track URI, ISRC, Track Name, Album Name, Artist Name(s), …, Duration (ms)`; **più artisti separati da `;`**). yt-dlp di sistema 2024.04.09 NON legge più YouTube («Please sign in»): provato con yt-dlp 2026.08.19 (binario standalone). `https://music.youtube.com/search?q=…#songs` funziona; in modalità flat dà ~460 voci con solo `id`/`title` (nessuna durata), **senza `--flat-playlist` e con `--playlist-items 1-5`** ogni voce ha `channel`, `artists[]`, `track`, `album`, `duration` in ~5–8 s → si usa quella. `YtResult` guadagna `artists` e `album`.

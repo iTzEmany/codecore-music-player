@@ -121,6 +121,10 @@ class Shot {
       find.byType(MaterialApp),
       matchesGoldenFile('goldens/${size.name}_$name.png'));
 
+  /// A golden under `test/goldens/` (path relative to the test file).
+  Future<void> expectGolden(String path) =>
+      expectLater(find.byType(MaterialApp), matchesGoldenFile(path));
+
   Future<void> dispose() async {
     await tester.pumpWidget(const SizedBox());
     await tester.pump(Duration.zero);

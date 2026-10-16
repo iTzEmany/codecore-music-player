@@ -85,8 +85,9 @@ class DesktopSidebar extends ConsumerWidget {
         message: title,
         child: InkWell(
           onTap: onTap,
-          child: SizedBox(
-            height: 56,
+          // Grows with the text size: two lines at 150 % no longer fit in 56.
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 56),
             child: Row(
               children: [
                 SizedBox(width: collapsed ? 16 : 12),

@@ -16,6 +16,11 @@ final coverFileProvider = Provider.family<File?, String>((ref, key) {
   return null;
 });
 
+/// Golden tests swap the picture for a flat colour: decoding files inside a
+/// fake-async test is slow and never comes out the same twice.
+@visibleForTesting
+Widget Function(String coverKey)? coverImageStub;
+
 class CoverImage extends ConsumerWidget {
   const CoverImage({
     super.key,
@@ -52,13 +57,14 @@ class CoverImage extends ConsumerWidget {
         height: size,
         child: file == null
             ? placeholder
-            : Image.file(
-                file,
-                cacheWidth: px,
-                fit: BoxFit.cover,
-                gaplessPlayback: true,
-                errorBuilder: (_, _, _) => placeholder,
-              ),
+            : coverImageStub?.call(key!) ??
+                Image.file(
+                  file,
+                  cacheWidth: px,
+                  fit: BoxFit.cover,
+                  gaplessPlayback: true,
+                  errorBuilder: (_, _, _) => placeholder,
+                ),
       ),
     );
     if (heroTag != null) image = Hero(tag: heroTag!, child: image);
