@@ -10,6 +10,7 @@ import '../services/covers/cover_store.dart';
 import '../services/scanner/library_scanner.dart';
 import '../services/tags/audio_metadata_tag_reader.dart';
 import '../services/tags/tag_reader.dart';
+import '../services/library/rules/rule_parser.dart';
 import '../services/library/track_editor.dart';
 import 'database_providers.dart';
 import 'online_providers.dart';
@@ -177,10 +178,17 @@ final genreTracksProvider = StreamProvider.family<List<Track>, String>(
   (ref, genre) => ref.watch(libraryQueriesProvider).watchGenreTracks(genre),
 );
 
-/// Tracks matching a search text (title / artist / album).
-final searchTracksProvider = StreamProvider.family<List<Track>, String>(
-  (ref, text) => ref.watch(trackRepositoryProvider).watchTracks(query: text),
-);
+/// Tracks matching a search text: words look in title / artist / album, and
+/// with operators (`artista:x anno:1990..1999 -live`) the rules run in SQL.
+final searchTracksProvider = StreamProvider.family<List<Track>, String>((
+  ref,
+  text,
+) {
+  final repo = ref.watch(trackRepositoryProvider);
+  return hasOperators(text)
+      ? repo.watchByRules(parseRules(text).expr)
+      : repo.watchTracks(query: text);
+});
 
 final topTracksProvider = StreamProvider<List<Track>>(
   (ref) => ref.watch(libraryQueriesProvider).watchTopTracks(),

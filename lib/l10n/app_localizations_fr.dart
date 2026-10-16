@@ -2347,4 +2347,27 @@ class AppLocalizationsFr extends AppLocalizations {
   String statsTopArtistHome(String name) {
     return 'Le plus écouté : $name';
   }
+
+  @override
+  String get ruleChipArtist => 'artist:';
+
+  @override
+  String get ruleChipYear => 'year:';
+
+  @override
+  String get ruleChipGenre => 'genre:';
+
+  @override
+  String get ruleChipTag => 'tag:';
+
+  @override
+  String get ruleChipFavorites => 'favorites';
+
+  @override
+  String ruleWarning(String term) {
+    return 'Je ne comprends pas « $term » : je le cherche comme du texte.';
+  }
+
+  @override
+  String get ruleHelpTooltip => 'Aide de la recherche';
 }

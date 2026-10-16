@@ -2314,4 +2314,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String statsTopArtistHome(String name) {
     return 'Most played: $name';
   }
+
+  @override
+  String get ruleChipArtist => 'artist:';
+
+  @override
+  String get ruleChipYear => 'year:';
+
+  @override
+  String get ruleChipGenre => 'genre:';
+
+  @override
+  String get ruleChipTag => 'tag:';
+
+  @override
+  String get ruleChipFavorites => 'favorites';
+
+  @override
+  String ruleWarning(String term) {
+    return 'I don’t understand “$term”: searching it as text.';
+  }
+
+  @override
+  String get ruleHelpTooltip => 'Search help';
 }

@@ -1,4 +1,5 @@
 import '../../core/text_utils.dart';
+import '../../services/library/rules/rule_parser.dart';
 import '../db/app_database.dart';
 import 'library_queries.dart';
 import 'playlist_repository.dart';
@@ -35,6 +36,10 @@ bool _matches(String? value, String needle) =>
 /// are the SQL matches of the same text. The main result is the artist whose
 /// name starts with the text, otherwise the first album, otherwise the first
 /// track.
+///
+/// When the text uses operators (`artista:x anno:1990..`), [tracks] are the
+/// matches of the rules and the other sections only look at its plain words;
+/// with no plain word they stay empty.
 LibrarySearchResults searchLibrary({
   required String text,
   required List<Track> tracks,
@@ -44,8 +49,16 @@ LibrarySearchResults searchLibrary({
   int trackLimit = 4,
   int sectionLimit = 12,
 }) {
-  final needle = normalize(text.trim());
-  if (needle.isEmpty) return const LibrarySearchResults();
+  final withRules = hasOperators(text);
+  final needle = normalize((withRules ? freeTextOf(text) : text).trim());
+  if (needle.isEmpty) {
+    if (!withRules) return const LibrarySearchResults();
+    return LibrarySearchResults(
+      tracks: tracks.take(trackLimit).toList(),
+      trackTotal: tracks.length,
+      main: tracks.firstOrNull,
+    );
+  }
   final matchedArtists = [
     for (final a in artists)
       if (a.key.isNotEmpty && _matches(a.name, needle)) a,

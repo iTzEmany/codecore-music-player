@@ -3927,6 +3927,48 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Il più ascoltato: {name}'**
   String statsTopArtistHome(String name);
+
+  /// No description provided for @ruleChipArtist.
+  ///
+  /// In it, this message translates to:
+  /// **'artista:'**
+  String get ruleChipArtist;
+
+  /// No description provided for @ruleChipYear.
+  ///
+  /// In it, this message translates to:
+  /// **'anno:'**
+  String get ruleChipYear;
+
+  /// No description provided for @ruleChipGenre.
+  ///
+  /// In it, this message translates to:
+  /// **'genere:'**
+  String get ruleChipGenre;
+
+  /// No description provided for @ruleChipTag.
+  ///
+  /// In it, this message translates to:
+  /// **'tag:'**
+  String get ruleChipTag;
+
+  /// No description provided for @ruleChipFavorites.
+  ///
+  /// In it, this message translates to:
+  /// **'preferiti'**
+  String get ruleChipFavorites;
+
+  /// No description provided for @ruleWarning.
+  ///
+  /// In it, this message translates to:
+  /// **'Non capisco «{term}»: lo cerco come testo.'**
+  String ruleWarning(String term);
+
+  /// No description provided for @ruleHelpTooltip.
+  ///
+  /// In it, this message translates to:
+  /// **'Aiuto sulla ricerca'**
+  String get ruleHelpTooltip;
 }
 
 class _AppLocalizationsDelegate

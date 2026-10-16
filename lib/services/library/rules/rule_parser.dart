@@ -216,6 +216,15 @@ RuleExpr? _fieldTerm(
 /// The canonical text of a tree, the one a saved rule is stored as.
 String formatRules(RuleExpr e) => e.canonical;
 
+/// The plain words of a rule (the ones at the top level, not negated), joined
+/// by a space: what the artist, album and playlist sections of the search
+/// still filter on.
+String freeTextOf(String text) {
+  final e = parseRules(text).expr;
+  final terms = e is RuleAnd ? e.terms : [e];
+  return [for (final t in terms) if (t is RuleText) t.text].join(' ');
+}
+
 /// True when [text] uses at least one operator (a field, a flag, `-`, `OR`)
 /// rather than plain words: the search then runs as rules.
 bool hasOperators(String text) {

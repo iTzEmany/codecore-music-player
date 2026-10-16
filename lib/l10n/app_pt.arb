@@ -1485,5 +1485,19 @@
         "type": "String"
       }
     }
-  }
+  },
+  "ruleChipArtist": "artist:",
+  "ruleChipYear": "year:",
+  "ruleChipGenre": "genre:",
+  "ruleChipTag": "tag:",
+  "ruleChipFavorites": "favorites",
+  "ruleWarning": "Não percebo «{term}»: procuro-o como texto.",
+  "@ruleWarning": {
+    "placeholders": {
+      "term": {
+        "type": "String"
+      }
+    }
+  },
+  "ruleHelpTooltip": "Ajuda da pesquisa"
 }

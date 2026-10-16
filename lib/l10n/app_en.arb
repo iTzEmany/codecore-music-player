@@ -1294,5 +1294,19 @@
         "type": "String"
       }
     }
-  }
+  },
+  "ruleChipArtist": "artist:",
+  "ruleChipYear": "year:",
+  "ruleChipGenre": "genre:",
+  "ruleChipTag": "tag:",
+  "ruleChipFavorites": "favorites",
+  "ruleWarning": "I don’t understand “{term}”: searching it as text.",
+  "@ruleWarning": {
+    "placeholders": {
+      "term": {
+        "type": "String"
+      }
+    }
+  },
+  "ruleHelpTooltip": "Search help"
 }

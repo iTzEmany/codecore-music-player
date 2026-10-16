@@ -19,6 +19,7 @@ import '../../theme/tokens.dart';
 import '../../widgets/artist_avatar.dart';
 import '../../widgets/cover_image.dart';
 import '../../widgets/playlist_cover.dart';
+import '../../../services/library/rules/rule_parser.dart';
 import '../../widgets/section_header.dart';
 import '../../widgets/selection_bar.dart';
 import '../../widgets/track_row.dart';
@@ -94,6 +95,18 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     setState(() => _text = q);
   }
 
+  /// Adds an operator (`artista:`) to the end of the text, ready to be filled.
+  void _insertOperator(String op) {
+    final t = _controller.text;
+    final next = '$t${t.isEmpty || t.endsWith(' ') ? '' : ' '}$op';
+    _controller.value = TextEditingValue(
+      text: next,
+      selection: TextSelection.collapsed(offset: next.length),
+    );
+    ref.read(searchFocusProvider).requestFocus();
+    _onChanged(next);
+  }
+
   void _toYoutube() {
     _remember(_text);
     setState(() {
@@ -154,6 +167,52 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               ),
             ),
           ),
+          if (_mode == _Mode.library) ...[
+            SizedBox(
+              height: 48,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: CcDims.margin,
+                  vertical: 6,
+                ),
+                children: [
+                  for (final label in [
+                    l.ruleChipArtist,
+                    l.ruleChipYear,
+                    l.ruleChipGenre,
+                    l.ruleChipTag,
+                    l.ruleChipFavorites,
+                  ])
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: ActionChip(
+                        label: Text(label),
+                        onPressed: () => _insertOperator(label),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            // What the rule language could not read (it is searched as text).
+            for (final w in parseRules(_text).warnings.where(
+              (w) =>
+                  w.kind != RuleWarningKind.emptyValue &&
+                  w.kind != RuleWarningKind.danglingOr,
+            ).take(1))
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  CcDims.margin,
+                  0,
+                  CcDims.margin,
+                  4,
+                ),
+                child: Text(
+                  l.ruleWarning(w.term),
+                  style: theme.bodyMedium?.copyWith(color: context.cc.textMuted),
+                ),
+              ),
+          ],
           if (kEnableYoutube)
             SizedBox(
               height: 52,

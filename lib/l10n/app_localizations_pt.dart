@@ -2322,4 +2322,27 @@ class AppLocalizationsPt extends AppLocalizations {
   String statsTopArtistHome(String name) {
     return 'O mais ouvido: $name';
   }
+
+  @override
+  String get ruleChipArtist => 'artist:';
+
+  @override
+  String get ruleChipYear => 'year:';
+
+  @override
+  String get ruleChipGenre => 'genre:';
+
+  @override
+  String get ruleChipTag => 'tag:';
+
+  @override
+  String get ruleChipFavorites => 'favorites';
+
+  @override
+  String ruleWarning(String term) {
+    return 'Não percebo «$term»: procuro-o como texto.';
+  }
+
+  @override
+  String get ruleHelpTooltip => 'Ajuda da pesquisa';
 }

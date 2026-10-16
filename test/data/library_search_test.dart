@@ -98,4 +98,70 @@ void main() {
     expect(r.isEmpty, isTrue);
     expect(r.main, isNull);
   });
+
+  group('with operators', () {
+    test('the tracks are the rules\' matches and the other sections need plain words', () {
+      final r = searchLibrary(
+        text: 'artista:queen anno:1970..1979',
+        tracks: [track(1, 'Bohemian Rhapsody'), track(2, 'Somebody to Love')],
+        artists: artists,
+        albums: albums,
+        playlists: playlists,
+      );
+      expect(r.tracks.map((t) => t.title), ['Bohemian Rhapsody', 'Somebody to Love']);
+      expect(r.trackTotal, 2);
+      expect(r.artists, isEmpty, reason: 'no plain word: the artist is not filtered on «artista:queen»');
+      expect(r.albums, isEmpty);
+      expect(r.playlists, isEmpty);
+      expect((r.main! as Track).title, 'Bohemian Rhapsody');
+    });
+
+    test('plain words next to operators still filter the other sections', () {
+      final r = searchLibrary(
+        text: 'queen anno:1975..',
+        tracks: [track(1, 'Bohemian Rhapsody')],
+        artists: artists,
+        albums: albums,
+        playlists: playlists,
+      );
+      expect(r.artists.single.name, 'Queen');
+      expect(r.albums.length, 2);
+      expect(r.tracks, hasLength(1));
+    });
+
+    test('a negation alone is an operator with no plain word', () {
+      final r = searchLibrary(
+        text: '-live',
+        tracks: [track(1, 'Studio')],
+        artists: artists,
+        albums: albums,
+        playlists: playlists,
+      );
+      expect(r.tracks, hasLength(1));
+      expect(r.artists, isEmpty);
+    });
+
+    test('words without operators behave exactly as before', () {
+      final r = searchLibrary(
+        text: 'que',
+        tracks: [track(1, 'Bohemian Rhapsody')],
+        artists: artists,
+        albums: albums,
+        playlists: playlists,
+      );
+      expect((r.main! as ArtistSummary).name, 'Queen');
+    });
+
+    test('an operator with nothing after it is not one yet (typing)', () {
+      final r = searchLibrary(
+        text: 'artista:',
+        tracks: const [],
+        artists: artists,
+        albums: albums,
+        playlists: playlists,
+      );
+      expect(r.isEmpty, isTrue);
+    });
+  });
 }
+
