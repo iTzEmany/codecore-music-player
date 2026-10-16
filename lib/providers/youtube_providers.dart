@@ -12,6 +12,7 @@ import '../data/db/app_database.dart';
 import '../data/repositories/folder_repository.dart';
 import '../services/online/download_index.dart';
 import '../services/online/download_queue.dart';
+import '../services/online/retry_policy.dart';
 import '../services/online/android_yt_dlp_service.dart';
 import '../services/online/yt_dlp_process_service.dart';
 import '../services/online/yt_dlp_version.dart';
@@ -106,6 +107,7 @@ class DownloadsNotifier extends Notifier<List<DownloadItem>> {
     Folder? folder;
     _queue = DownloadQueue(
       maxParallel: ref.read(settingsProvider).downloadParallel,
+      retryPolicy: RetryPolicy(),
       downloader: (r, dir, cancel) => yt.download(r, dir,
           cancel: cancel,
           options: DownloadOptions(

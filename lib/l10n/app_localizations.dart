@@ -2873,6 +2873,12 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'{mb} MB/s'**
   String downloadRateMb(int mb);
+
+  /// No description provided for @activityDownloadRetry.
+  ///
+  /// In it, this message translates to:
+  /// **'Download · {title} · nuovo tentativo tra {seconds} s ({attempt}/{max})'**
+  String activityDownloadRetry(String title, int seconds, int attempt, int max);
 }
 
 class _AppLocalizationsDelegate

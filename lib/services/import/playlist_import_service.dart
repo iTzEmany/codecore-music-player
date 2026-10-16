@@ -88,10 +88,6 @@ class PlaylistImportService {
   bool _disposed = false;
   int _failStreak = 0;
 
-  /// Rows whose download already got its one automatic retry (YouTube often
-  /// answers a transient 403 that a second attempt does not get).
-  final _retried = <String>{};
-
   Stream<ImportEvent> get events => _events.stream;
 
   void dispose() {
@@ -378,12 +374,6 @@ class PlaylistImportService {
         case DownloadStatus.done:
           await _finishDownload(imp, it, item.path);
         case DownloadStatus.failed:
-          final transient = item.error == YtErrorKind.changed ||
-              item.error == YtErrorKind.network;
-          if (transient && _retried.add('$importId:$rowIndex')) {
-            enqueue(item.result, importTag(importId, rowIndex));
-            return;
-          }
           await imports.setItem(importId, rowIndex,
               status: ImportItemStatus.failed);
           if (item.error == YtErrorKind.rateLimited) {
@@ -395,6 +385,7 @@ class PlaylistImportService {
               status: ImportItemStatus.failed);
         case DownloadStatus.queued:
         case DownloadStatus.downloading:
+        case DownloadStatus.waitingRetry:
           return;
       }
       await _checkFinished(importId);

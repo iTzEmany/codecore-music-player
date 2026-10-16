@@ -58,4 +58,27 @@ void main() {
     expect(s.running[2].cancellable, isTrue);
     expect(s.running.first.cancellable, isFalse);
   });
+
+  test('a download waiting to retry is still running and says when', () {
+    final s = buildActivity(
+      scan: const ScanState(),
+      enrich: const EnrichJobState(),
+      downloads: [
+        DownloadItem(
+            id: 1,
+            result: yt('a'),
+            status: DownloadStatus.waitingRetry,
+            attempt: 2,
+            retryDelay: const Duration(seconds: 20)),
+      ],
+      outgoing: const [],
+    );
+    final item = s.running.single;
+    expect(item.kind, ActivityKind.download);
+    expect(item.retryDelaySec, 20);
+    expect(item.done, 2);
+    expect(item.total, 3);
+    expect(item.cancellable, isTrue);
+    expect(s.completed, isEmpty);
+  });
 }

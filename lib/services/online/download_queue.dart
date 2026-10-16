@@ -4,9 +4,19 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 
 import '../../core/app_log.dart';
+import 'retry_policy.dart';
 import 'youtube_service.dart';
 
-enum DownloadStatus { queued, downloading, done, failed, cancelled }
+enum DownloadStatus {
+  queued,
+  downloading,
+
+  /// A transient error: it goes back to [queued] after [DownloadItem.retryDelay].
+  waitingRetry,
+  done,
+  failed,
+  cancelled,
+}
 
 class DownloadItem {
   const DownloadItem({
@@ -17,6 +27,8 @@ class DownloadItem {
     this.error,
     this.path,
     this.tag,
+    this.attempt = 0,
+    this.retryDelay,
   });
 
   final int id;
@@ -29,11 +41,17 @@ class DownloadItem {
   /// Opaque label from whoever queued it (e.g. `import:<id>:<row>`).
   final String? tag;
 
+  /// Automatic retries already scheduled; [retryDelay] is the current wait.
+  final int attempt;
+  final Duration? retryDelay;
+
   DownloadItem copyWith(
           {DownloadStatus? status,
           double? progress,
           YtErrorKind? error,
-          String? path}) =>
+          String? path,
+          int? attempt,
+          Duration? retryDelay}) =>
       DownloadItem(
         id: id,
         result: result,
@@ -42,6 +60,8 @@ class DownloadItem {
         error: error ?? this.error,
         path: path ?? this.path,
         tag: tag,
+        attempt: attempt ?? this.attempt,
+        retryDelay: retryDelay ?? this.retryDelay,
       );
 }
 
@@ -57,6 +77,8 @@ class DownloadQueue {
     required this.onChanged,
     this.onDownloaded,
     this.onSettled,
+    this.retryPolicy,
+    this.wait = _sleep,
     this.uiInterval = const Duration(milliseconds: 200),
   }) : _maxParallel = maxParallel.clamp(1, 3);
 
@@ -65,10 +87,18 @@ class DownloadQueue {
   final void Function(List<DownloadItem> items) onChanged;
   final Future<void> Function(String path)? onDownloaded;
 
-  /// Called once per item when it reaches done, failed or cancelled
-  /// (after [onDownloaded] for the done ones).
+  /// Called once per item when it reaches done, failed or cancelled for good
+  /// (after [onDownloaded] for the done ones); a retry is not a settlement.
   final void Function(DownloadItem item)? onSettled;
   final Duration uiInterval;
+
+  /// Null = a failure is final at once.
+  final RetryPolicy? retryPolicy;
+
+  /// Injectable so tests need no real clock.
+  final Future<void> Function(Duration) wait;
+
+  static Future<void> _sleep(Duration d) => Future<void>.delayed(d);
 
   final List<DownloadItem> _items = [];
   final Map<int, CancelToken> _tokens = {};
@@ -97,7 +127,9 @@ class DownloadQueue {
   void cancel(int id) {
     _tokens[id]?.cancel();
     final i = _items.indexWhere((e) => e.id == id);
-    if (i >= 0 && _items[i].status == DownloadStatus.queued) {
+    if (i >= 0 &&
+        (_items[i].status == DownloadStatus.queued ||
+            _items[i].status == DownloadStatus.waitingRetry)) {
       _items[i] = _items[i].copyWith(status: DownloadStatus.cancelled);
       _emit();
       _settle(id);
@@ -108,6 +140,7 @@ class DownloadQueue {
   void cancelWhere(bool Function(DownloadItem item) test) {
     for (final e in List.of(_items)) {
       final live = e.status == DownloadStatus.queued ||
+          e.status == DownloadStatus.waitingRetry ||
           e.status == DownloadStatus.downloading;
       if (live && test(e)) cancel(e.id);
     }
@@ -128,7 +161,8 @@ class DownloadQueue {
       t.cancel();
     }
     for (var i = 0; i < _items.length; i++) {
-      if (_items[i].status == DownloadStatus.queued) {
+      if (_items[i].status == DownloadStatus.queued ||
+          _items[i].status == DownloadStatus.waitingRetry) {
         _items[i] = _items[i].copyWith(status: DownloadStatus.cancelled);
       }
     }
@@ -165,6 +199,7 @@ class DownloadQueue {
   }
 
   Future<void> _runOne(DownloadItem item) async {
+    var retrying = false;
     final token = CancelToken();
     _tokens[item.id] = token;
     _emit();
@@ -193,16 +228,42 @@ class DownloadQueue {
       }
     } on YtException catch (e, st) {
       AppLog.w('download of ${item.result.id} failed (${e.kind})', e.detail, st);
-      _replace(item.id,
-          (x) => x.copyWith(status: DownloadStatus.failed, error: e.kind));
+      retrying = _failOrRetry(item, e.kind, token);
     } on Object catch (e, st) {
       AppLog.e('download failed', e, st);
-      _replace(item.id,
-          (x) => x.copyWith(status: DownloadStatus.failed, error: YtErrorKind.changed));
+      retrying = _failOrRetry(item, YtErrorKind.changed, token);
     } finally {
       _tokens.remove(item.id);
       _emit();
-      _settle(item.id);
+      if (!retrying) _settle(item.id);
     }
+  }
+
+  /// Marks [item] failed, or schedules another attempt; true when retrying.
+  bool _failOrRetry(DownloadItem item, YtErrorKind kind, CancelToken token) {
+    final retries = _items.firstWhere((e) => e.id == item.id).attempt;
+    final delay = token.isCancelled ? null : retryPolicy?.nextDelay(retries, kind);
+    if (delay == null) {
+      _replace(item.id,
+          (x) => x.copyWith(status: DownloadStatus.failed, error: kind));
+      return false;
+    }
+    _replace(
+        item.id,
+        (x) => x.copyWith(
+            status: DownloadStatus.waitingRetry,
+            error: kind,
+            attempt: retries + 1,
+            retryDelay: delay));
+    unawaited(wait(delay).then((_) {
+      final i = _items.indexWhere((e) => e.id == item.id);
+      if (_disposed || i < 0 || _items[i].status != DownloadStatus.waitingRetry) {
+        return;
+      }
+      _items[i] = _items[i].copyWith(status: DownloadStatus.queued);
+      _emit();
+      _pump();
+    }));
+    return true;
   }
 }

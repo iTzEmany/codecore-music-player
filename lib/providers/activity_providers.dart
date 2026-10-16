@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../services/online/download_queue.dart';
+import '../services/online/retry_policy.dart';
 import '../services/share/offers.dart';
 import 'import_providers.dart';
 import 'library_providers.dart';
@@ -23,6 +24,7 @@ class ActivityItem {
     this.failed = false,
     this.paused = false,
     this.ref,
+    this.retryDelaySec,
   });
 
   final ActivityKind kind;
@@ -39,6 +41,9 @@ class ActivityItem {
 
   /// The download id, the [OutgoingOffer] or the import id, used to cancel.
   final Object? ref;
+
+  /// A download waiting to retry: [done] is the attempt, [total] the maximum.
+  final int? retryDelaySec;
 
   bool get cancellable =>
       running &&
@@ -108,14 +113,18 @@ ActivityState buildActivity({
     );
   }
   for (final d in downloads) {
-    final active =
-        d.status == DownloadStatus.queued ||
-        d.status == DownloadStatus.downloading;
+    final waiting = d.status == DownloadStatus.waitingRetry;
+    final active = d.status == DownloadStatus.queued ||
+        d.status == DownloadStatus.downloading ||
+        waiting;
     final item = ActivityItem(
       kind: ActivityKind.download,
       key: 'dl-${d.id}',
       name: d.result.title,
       progress: d.status == DownloadStatus.downloading ? d.progress : null,
+      done: waiting ? d.attempt : 0,
+      total: waiting ? RetryPolicy().maxRetries : 0,
+      retryDelaySec: waiting ? d.retryDelay?.inSeconds : null,
       running: active,
       failed: d.status == DownloadStatus.failed,
       ref: d.id,

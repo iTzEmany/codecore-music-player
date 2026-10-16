@@ -1588,4 +1588,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String downloadRateMb(int mb) {
     return '$mb MB/s';
   }
+
+  @override
+  String activityDownloadRetry(
+    String title,
+    int seconds,
+    int attempt,
+    int max,
+  ) {
+    return 'Download · $title · retrying in $seconds s ($attempt/$max)';
+  }
 }

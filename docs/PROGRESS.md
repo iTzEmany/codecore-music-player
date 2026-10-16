@@ -170,7 +170,7 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 14.3 Aggiornamento di yt-dlp in-app (desktop)
 - [x] 14.4 Download in parallelo
 - [~] 14.5 Limite di banda
-- [ ] 14.6 Ritento a scalare
+- [x] 14.6 Ritento a scalare
 - [ ] 14.7 Formato: MP3 o originale senza ricodifica
 - [ ] 14.8 Ricerca per ISRC come primo tentativo
 - [ ] 14.9 Cache delle ricerche
@@ -392,6 +392,7 @@ L'agente riparte sempre dal primo task non spuntato.
 - 14.3: `YtDlpUpdater` usa `Dio` direttamente (il `WebClient` limita le risposte a 5 MB, il binario ne pesa 40). Ordine di ricerca del binario in `locateYtDlp()` (`yt_dlp_update_providers.dart`): `<appSupport>/bin` → cartella dell'eseguibile → `/app/bin` → PATH; **ffmpeg** resta cercato solo nel PATH (l'estensione a ffmpeg arriva con la fase 26, quando serve `--ffmpeg-location`). Dopo l'aggiornamento il servizio fa `refresh()` (non si invalida il provider: ricostruirebbe la coda dei download). Pulsante «Aggiorna» nel banner e nel gruppo «Download» delle Impostazioni (`DownloadSettingsTiles`, esteso dai task successivi). Provato dal vivo: `CODECORE_LIVE=1 flutter test test/live/yt_dlp_update_live_test.dart` (scarica 2026.08.19, hash ok, esegue).
 - 14.4: `DownloadQueue(maxParallel)` (1–3, ricalibrabile a caldo; abbassare non ferma i download in corso). `_removeStalePartFiles` diventa `removeStalePartFiles` e gira **una volta** per sessione (future condivisa: i download successivi la aspettano); `resolveDownloadFolder` non pulisce più (lo usano anche condivisione e ricezione). `DownloadIndex.add` ora serializza le scritture di `downloads.json`. Impostazione `downloadParallel` (predefinito 2) nel gruppo «Download» come menu a tendina.
 - 14.5: `YoutubeService.download(..., options: DownloadOptions)` (struttura unica per limite di banda e, da 14.7, formato) invece di un parametro in più; argomenti costruiti da `buildDownloadArgs` (`yt_dlp_args.dart`, testata); Android: argomento `rateLimit` → `--limit-rate <n>K` in `MainActivity.kt`. Impostazione `downloadRateLimitKBps` (0/500/1000/2000) nel gruppo «Download». Resta la prova su telefono a 500 KB/s.
+- 14.6: il ritento vive in `DownloadQueue` (`RetryPolicy` 5/20/60 s ±20 %, solo `network`/`changed`); nuovo stato `DownloadStatus.waitingRetry` (non occupa uno slot) e `DownloadItem.attempt/retryDelay`; `onSettled` solo all'esito definitivo. Tolto `_retried` da `PlaylistImportService`. Centro Attività: «Download · titolo · nuovo tentativo tra N s (k/3)» (mostra l'attesa decisa, senza conto alla rovescia).
 - 14.1 nota: se bestaudio non ha un m4a, `-x` estrae `.opus`; l'estensione `opus` è già tra quelle scansionate.
 - 13.3: `tracks` di `user_data.json` contiene solo i brani con preferito/modifica/testi/ascolti; chi sta solo in una playlist compare nei riferimenti della playlist (niente duplicati). Brano fuori da ogni cartella: `folder` = percorso assoluto del file, `relPath` null. `trackRefFor` è pubblica (serve all'export JSON).
 - 13.4: `LibraryEntryLite` guadagna `path` (opzionale, riempito da `liteEntries`); `TrackResolver` tenta percorso relativo → titolo+artista+durata ±2 s → sha256.

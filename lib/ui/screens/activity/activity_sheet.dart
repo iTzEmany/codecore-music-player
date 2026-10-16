@@ -34,7 +34,10 @@ class ActivitySheet extends ConsumerWidget {
       ActivityKind.scan =>
         a.total > 0 ? l.activityScan(a.done, a.total) : l.activityScanIdle,
       ActivityKind.enrich => l.activityEnrich(a.done, a.total),
-      ActivityKind.download => l.activityDownload(a.name ?? ''),
+      ActivityKind.download => a.retryDelaySec == null
+          ? l.activityDownload(a.name ?? '')
+          : l.activityDownloadRetry(
+              a.name ?? '', a.retryDelaySec!, a.done, a.total),
       ActivityKind.transfer => l.activityTransfer(a.name ?? '', a.total),
       ActivityKind.import =>
         a.paused

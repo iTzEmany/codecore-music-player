@@ -210,7 +210,9 @@ class _ResultRow extends StatelessWidget {
     ].join(' · ');
     final st = item?.status;
     final Widget trailing;
-    if (st == DownloadStatus.queued || st == DownloadStatus.downloading) {
+    if (st == DownloadStatus.queued ||
+        st == DownloadStatus.downloading ||
+        st == DownloadStatus.waitingRetry) {
       trailing = SizedBox(
         width: 24,
         height: 24,

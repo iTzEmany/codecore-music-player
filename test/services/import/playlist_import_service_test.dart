@@ -330,24 +330,19 @@ void main() {
     expect(queued, hasLength(2));
   });
 
-  test('a transient download failure is retried once, then marked failed',
+  test('a download that failed for good marks the row failed (retries live in the queue)',
       () async {
     yt.songs['one'] = [topic('v1', 'One', 'Band', 200)];
     final id = await service.start(csv([row(0, 'One', 'Band', 200)]));
     await idle();
-    DownloadItem fail() => DownloadItem(
+    settled.add(DownloadItem(
         id: 1,
         result: queued.last.$1,
         status: DownloadStatus.failed,
-        error: YtErrorKind.changed,
-        tag: importTag(id, 0));
-    settled.add(fail());
+        error: YtErrorKind.network,
+        tag: importTag(id, 0)));
     await idle();
-    expect(queued, hasLength(2), reason: 'one automatic retry');
-    expect((await imports.item(id, 0))!.state, ImportItemStatus.queued);
-    settled.add(fail());
-    await idle();
-    expect(queued, hasLength(2));
+    expect(queued, hasLength(1), reason: 'the service does not re-enqueue');
     expect((await imports.item(id, 0))!.state, ImportItemStatus.failed);
   });
 
