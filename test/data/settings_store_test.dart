@@ -85,5 +85,13 @@ void main() {
     expect(s.theme, 'chiaro');
     expect(s.accent, 'rosa');
   });
+
+  test('the listening history is on by default and the choice is kept', () async {
+    SharedPreferences.setMockInitialValues({});
+    final store = await SettingsStore.open();
+    expect(store.readSettings().recordHistory, isTrue);
+    await store.writeSettings(const AppSettings(recordHistory: false));
+    expect(store.readSettings().recordHistory, isFalse);
+  });
 }
 

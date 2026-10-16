@@ -2207,4 +2207,43 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get onboardingSendBody =>
       'Pode enviar faixas para outros dispositivos próximos com um PIN, sem passar pela Internet.';
+
+  @override
+  String get historyTitle => 'Histórico';
+
+  @override
+  String get historySubtitle => 'O que ouviu';
+
+  @override
+  String get historyToday => 'Hoje';
+
+  @override
+  String get historyYesterday => 'Ontem';
+
+  @override
+  String get historyEmpty => 'O que ouvir aparecerá aqui.';
+
+  @override
+  String get historyOff =>
+      'O histórico está desligado: ative-o em Definições → Reprodução.';
+
+  @override
+  String get historyClear => 'Limpar histórico';
+
+  @override
+  String get historyClearTitle => 'Limpar o histórico?';
+
+  @override
+  String get historyClearBody =>
+      'Apenas a lista de reproduções é apagada: os contadores, os favoritos e as playlists ficam como estão.';
+
+  @override
+  String get historyCleared => 'Histórico limpo';
+
+  @override
+  String get settingsRecordHistory => 'Guardar o histórico de reprodução';
+
+  @override
+  String get settingsRecordHistoryHint =>
+      'Fica no dispositivo. Desligado, nada mais é adicionado à lista.';
 }

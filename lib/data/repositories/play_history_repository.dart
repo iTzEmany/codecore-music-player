@@ -38,4 +38,56 @@ class PlayHistoryRepository {
     final row = await (_db.selectOnly(_db.plays)..addColumns([c])).getSingle();
     return row.read(c) ?? 0;
   }
+
+  /// The newest [limit] listens (older than [beforePlayedAt] when given), with
+  /// their track, most recent first. Missing tracks are left out.
+  Stream<List<HistoryEntry>> watchHistory({int limit = 200, int? beforePlayedAt}) {
+    final q = _db.select(_db.plays).join([
+      innerJoin(_db.tracks, _db.tracks.id.equalsExp(_db.plays.trackId)),
+    ])
+      ..where(_db.tracks.missing.equals(false) &
+          (beforePlayedAt == null
+              ? const Constant(true)
+              : _db.plays.playedAt.isSmallerThanValue(beforePlayedAt)))
+      ..orderBy([
+        OrderingTerm.desc(_db.plays.playedAt),
+        OrderingTerm.desc(_db.plays.id),
+      ])
+      ..limit(limit);
+    return q.watch().map((rows) => [
+          for (final r in rows)
+            HistoryEntry(r.readTable(_db.plays), r.readTable(_db.tracks)),
+        ]);
+  }
+
+  /// Forgets the history. Only `plays`: play counts, favourites and
+  /// playlists are not touched.
+  Future<int> clear() => _db.delete(_db.plays).go();
 }
+
+/// One listen with the track it was of.
+class HistoryEntry {
+  const HistoryEntry(this.play, this.track);
+
+  final Play play;
+  final Track track;
+
+  DateTime get at => DateTime.fromMillisecondsSinceEpoch(play.playedAt);
+}
+
+/// Day headers (as the date at local midnight) and entries, in the order
+/// given (most recent first): the list the history screen shows.
+List<Object> groupHistoryByDay(List<HistoryEntry> entries) {
+  final out = <Object>[];
+  DateTime? day;
+  for (final e in entries) {
+    final d = DateTime(e.at.year, e.at.month, e.at.day);
+    if (d != day) {
+      out.add(d);
+      day = d;
+    }
+    out.add(e);
+  }
+  return out;
+}
+

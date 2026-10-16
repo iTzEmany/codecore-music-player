@@ -1414,5 +1414,17 @@
   "onboardingShareTitle": "Download, Jam e condivisione",
   "onboardingYoutubeBody": "Puoi scaricare brani da YouTube sul tuo dispositivo, per ascoltarli come il resto della tua musica.",
   "onboardingJamBody": "Con una Jam ascolti la stessa musica insieme a un altro dispositivo sulla stessa rete.",
-  "onboardingSendBody": "Puoi inviare brani ad altri dispositivi vicini, con un PIN, senza passare da Internet."
+  "onboardingSendBody": "Puoi inviare brani ad altri dispositivi vicini, con un PIN, senza passare da Internet.",
+  "historyTitle": "Cronologia",
+  "historySubtitle": "Quello che hai ascoltato",
+  "historyToday": "Oggi",
+  "historyYesterday": "Ieri",
+  "historyEmpty": "Qui comparirà quello che ascolti.",
+  "historyOff": "La cronologia è spenta: attivala in Impostazioni → Riproduzione.",
+  "historyClear": "Cancella cronologia",
+  "historyClearTitle": "Cancellare la cronologia?",
+  "historyClearBody": "Si cancella solo l’elenco degli ascolti: contatori, preferiti e playlist restano come sono.",
+  "historyCleared": "Cronologia cancellata",
+  "settingsRecordHistory": "Registra la cronologia di ascolto",
+  "settingsRecordHistoryHint": "Resta sul dispositivo. Spenta, non si aggiunge nient’altro all’elenco."
 }

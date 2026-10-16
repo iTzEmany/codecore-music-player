@@ -158,6 +158,13 @@ class SettingsScreen extends ConsumerWidget {
                   ),
                 const TransitionSettingsTiles(),
                 SwitchListTile(
+                  title: Text(l.settingsRecordHistory),
+                  subtitle: Text(l.settingsRecordHistoryHint),
+                  value: s.recordHistory,
+                  onChanged: (v) =>
+                      notifier.update((c) => c.copyWith(recordHistory: v)),
+                ),
+                SwitchListTile(
                   title: Text(l.normalizeVolume),
                   subtitle: Text(l.normalizeVolumeHint),
                   value: s.normalizeVolume,

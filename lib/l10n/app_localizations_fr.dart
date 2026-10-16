@@ -2230,4 +2230,43 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get onboardingSendBody =>
       'Vous pouvez envoyer des titres à d’autres appareils proches avec un PIN, sans passer par Internet.';
+
+  @override
+  String get historyTitle => 'Historique';
+
+  @override
+  String get historySubtitle => 'Ce que vous avez écouté';
+
+  @override
+  String get historyToday => 'Aujourd’hui';
+
+  @override
+  String get historyYesterday => 'Hier';
+
+  @override
+  String get historyEmpty => 'Ce que vous écoutez apparaîtra ici.';
+
+  @override
+  String get historyOff =>
+      'L’historique est désactivé : activez-le dans Paramètres → Lecture.';
+
+  @override
+  String get historyClear => 'Effacer l’historique';
+
+  @override
+  String get historyClearTitle => 'Effacer l’historique ?';
+
+  @override
+  String get historyClearBody =>
+      'Seule la liste des écoutes est effacée : les compteurs, les favoris et les playlists restent tels quels.';
+
+  @override
+  String get historyCleared => 'Historique effacé';
+
+  @override
+  String get settingsRecordHistory => 'Enregistrer l’historique d’écoute';
+
+  @override
+  String get settingsRecordHistoryHint =>
+      'Il reste sur l’appareil. Désactivé, plus rien n’est ajouté à la liste.';
 }

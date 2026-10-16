@@ -52,6 +52,7 @@ class TrackRow extends StatefulWidget {
     this.reorderIndex,
     this.selectionMode = false,
     this.selected = false,
+    this.subtitleSuffix,
   });
 
   final Track track;
@@ -62,6 +63,9 @@ class TrackRow extends StatefulWidget {
   /// The list is in selection mode: a tick box replaces the cover or number,
   /// and a picked row ([selected]) is tinted. Same height either way.
   final bool selectionMode, selected;
+
+  /// Appended to the subtitle (the time of a listen in the history).
+  final String? subtitleSuffix;
   final VoidCallback? onMore, onFavorite, onLongPress;
 
   /// Right click on desktop; receives the global pointer position.
@@ -104,6 +108,7 @@ class _TrackRowState extends State<TrackRow> {
     if (resume != null) {
       parts.add(context.l10n.resumeFrom(formatDuration(resume)));
     }
+    if (widget.subtitleSuffix != null) parts.add(widget.subtitleSuffix!);
     return parts.join(' · ');
   }
 
@@ -445,6 +450,7 @@ class LiveTrackRow extends ConsumerWidget {
     this.onMore,
     this.reorderIndex,
     this.selection,
+    this.subtitleSuffix,
   });
 
   final Track track;
@@ -457,6 +463,7 @@ class LiveTrackRow extends ConsumerWidget {
   /// Makes the row pickable together with the others of its list (long press
   /// on a phone, Ctrl or Shift + click on a desktop).
   final RowSelection? selection;
+  final String? subtitleSuffix;
 
   /// Replaces the default actions sheet (e.g. «Rimuovi dalla playlist»).
   final VoidCallback? onMore;
@@ -512,6 +519,7 @@ class LiveTrackRow extends ConsumerWidget {
       onLongPress: longPress,
       selectionMode: active,
       selected: picked,
+      subtitleSuffix: subtitleSuffix,
       onSecondaryTap: (pos) => showTrackContextMenu(context, ref, track, pos),
       onFavorite: () => toggleFavorite(context, ref, track),
       compact: compact,

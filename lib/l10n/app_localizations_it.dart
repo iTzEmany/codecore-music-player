@@ -2204,4 +2204,43 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get onboardingSendBody =>
       'Puoi inviare brani ad altri dispositivi vicini, con un PIN, senza passare da Internet.';
+
+  @override
+  String get historyTitle => 'Cronologia';
+
+  @override
+  String get historySubtitle => 'Quello che hai ascoltato';
+
+  @override
+  String get historyToday => 'Oggi';
+
+  @override
+  String get historyYesterday => 'Ieri';
+
+  @override
+  String get historyEmpty => 'Qui comparirà quello che ascolti.';
+
+  @override
+  String get historyOff =>
+      'La cronologia è spenta: attivala in Impostazioni → Riproduzione.';
+
+  @override
+  String get historyClear => 'Cancella cronologia';
+
+  @override
+  String get historyClearTitle => 'Cancellare la cronologia?';
+
+  @override
+  String get historyClearBody =>
+      'Si cancella solo l’elenco degli ascolti: contatori, preferiti e playlist restano come sono.';
+
+  @override
+  String get historyCleared => 'Cronologia cancellata';
+
+  @override
+  String get settingsRecordHistory => 'Registra la cronologia di ascolto';
+
+  @override
+  String get settingsRecordHistoryHint =>
+      'Resta sul dispositivo. Spenta, non si aggiunge nient’altro all’elenco.';
 }

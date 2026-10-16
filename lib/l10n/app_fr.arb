@@ -1414,5 +1414,17 @@
   "onboardingShareTitle": "Téléchargements, Jam et partage",
   "onboardingYoutubeBody": "Vous pouvez télécharger des titres depuis YouTube sur votre appareil et les écouter comme le reste de votre musique.",
   "onboardingJamBody": "Avec une Jam, vous écoutez la même musique avec un autre appareil du même réseau.",
-  "onboardingSendBody": "Vous pouvez envoyer des titres à d’autres appareils proches avec un PIN, sans passer par Internet."
+  "onboardingSendBody": "Vous pouvez envoyer des titres à d’autres appareils proches avec un PIN, sans passer par Internet.",
+  "historyTitle": "Historique",
+  "historySubtitle": "Ce que vous avez écouté",
+  "historyToday": "Aujourd’hui",
+  "historyYesterday": "Hier",
+  "historyEmpty": "Ce que vous écoutez apparaîtra ici.",
+  "historyOff": "L’historique est désactivé : activez-le dans Paramètres → Lecture.",
+  "historyClear": "Effacer l’historique",
+  "historyClearTitle": "Effacer l’historique ?",
+  "historyClearBody": "Seule la liste des écoutes est effacée : les compteurs, les favoris et les playlists restent tels quels.",
+  "historyCleared": "Historique effacé",
+  "settingsRecordHistory": "Enregistrer l’historique d’écoute",
+  "settingsRecordHistoryHint": "Il reste sur l’appareil. Désactivé, plus rien n’est ajouté à la liste."
 }

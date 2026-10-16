@@ -20,6 +20,7 @@ class CodecoreApp extends ConsumerWidget {
     ref.watch(outputRouteSyncProvider);
     final s = ref.watch(settingsProvider);
     ref.read(audioHandlerProvider)
+      ..recordHistory = s.recordHistory
       ..setNormalize(s.normalizeVolume)
       ..setSpeed(s.playbackSpeed)
       ..setTransition(

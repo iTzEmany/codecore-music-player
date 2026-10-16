@@ -2200,4 +2200,42 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get onboardingSendBody =>
       'You can send tracks to other nearby devices with a PIN, without going through the Internet.';
+
+  @override
+  String get historyTitle => 'History';
+
+  @override
+  String get historySubtitle => 'What you listened to';
+
+  @override
+  String get historyToday => 'Today';
+
+  @override
+  String get historyYesterday => 'Yesterday';
+
+  @override
+  String get historyEmpty => 'What you listen to will show up here.';
+
+  @override
+  String get historyOff => 'History is off: turn it on in Settings → Playback.';
+
+  @override
+  String get historyClear => 'Clear history';
+
+  @override
+  String get historyClearTitle => 'Clear the history?';
+
+  @override
+  String get historyClearBody =>
+      'Only the list of listens is deleted: play counts, favorites and playlists stay as they are.';
+
+  @override
+  String get historyCleared => 'History cleared';
+
+  @override
+  String get settingsRecordHistory => 'Keep a listening history';
+
+  @override
+  String get settingsRecordHistoryHint =>
+      'It stays on the device. When off, nothing more is added to the list.';
 }

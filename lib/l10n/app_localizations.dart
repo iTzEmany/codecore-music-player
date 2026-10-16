@@ -3747,6 +3747,78 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Puoi inviare brani ad altri dispositivi vicini, con un PIN, senza passare da Internet.'**
   String get onboardingSendBody;
+
+  /// No description provided for @historyTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Cronologia'**
+  String get historyTitle;
+
+  /// No description provided for @historySubtitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Quello che hai ascoltato'**
+  String get historySubtitle;
+
+  /// No description provided for @historyToday.
+  ///
+  /// In it, this message translates to:
+  /// **'Oggi'**
+  String get historyToday;
+
+  /// No description provided for @historyYesterday.
+  ///
+  /// In it, this message translates to:
+  /// **'Ieri'**
+  String get historyYesterday;
+
+  /// No description provided for @historyEmpty.
+  ///
+  /// In it, this message translates to:
+  /// **'Qui comparirà quello che ascolti.'**
+  String get historyEmpty;
+
+  /// No description provided for @historyOff.
+  ///
+  /// In it, this message translates to:
+  /// **'La cronologia è spenta: attivala in Impostazioni → Riproduzione.'**
+  String get historyOff;
+
+  /// No description provided for @historyClear.
+  ///
+  /// In it, this message translates to:
+  /// **'Cancella cronologia'**
+  String get historyClear;
+
+  /// No description provided for @historyClearTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Cancellare la cronologia?'**
+  String get historyClearTitle;
+
+  /// No description provided for @historyClearBody.
+  ///
+  /// In it, this message translates to:
+  /// **'Si cancella solo l’elenco degli ascolti: contatori, preferiti e playlist restano come sono.'**
+  String get historyClearBody;
+
+  /// No description provided for @historyCleared.
+  ///
+  /// In it, this message translates to:
+  /// **'Cronologia cancellata'**
+  String get historyCleared;
+
+  /// No description provided for @settingsRecordHistory.
+  ///
+  /// In it, this message translates to:
+  /// **'Registra la cronologia di ascolto'**
+  String get settingsRecordHistory;
+
+  /// No description provided for @settingsRecordHistoryHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Resta sul dispositivo. Spenta, non si aggiunge nient’altro all’elenco.'**
+  String get settingsRecordHistoryHint;
 }
 
 class _AppLocalizationsDelegate

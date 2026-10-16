@@ -1414,5 +1414,17 @@
   "onboardingShareTitle": "Transferências, Jam e partilha",
   "onboardingYoutubeBody": "Pode transferir faixas do YouTube para o seu dispositivo e ouvi-las como o resto da sua música.",
   "onboardingJamBody": "Com uma Jam ouve a mesma música em conjunto com outro dispositivo na mesma rede.",
-  "onboardingSendBody": "Pode enviar faixas para outros dispositivos próximos com um PIN, sem passar pela Internet."
+  "onboardingSendBody": "Pode enviar faixas para outros dispositivos próximos com um PIN, sem passar pela Internet.",
+  "historyTitle": "Histórico",
+  "historySubtitle": "O que ouviu",
+  "historyToday": "Hoje",
+  "historyYesterday": "Ontem",
+  "historyEmpty": "O que ouvir aparecerá aqui.",
+  "historyOff": "O histórico está desligado: ative-o em Definições → Reprodução.",
+  "historyClear": "Limpar histórico",
+  "historyClearTitle": "Limpar o histórico?",
+  "historyClearBody": "Apenas a lista de reproduções é apagada: os contadores, os favoritos e as playlists ficam como estão.",
+  "historyCleared": "Histórico limpo",
+  "settingsRecordHistory": "Guardar o histórico de reprodução",
+  "settingsRecordHistoryHint": "Fica no dispositivo. Desligado, nada mais é adicionado à lista."
 }

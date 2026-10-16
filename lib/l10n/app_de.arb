@@ -1223,5 +1223,17 @@
   "onboardingShareTitle": "Downloads, Jam und Teilen",
   "onboardingYoutubeBody": "Du kannst Titel von YouTube auf dein Gerät laden und wie den Rest deiner Musik hören.",
   "onboardingJamBody": "Mit einer Jam hörst du dieselbe Musik gemeinsam mit einem anderen Gerät im selben Netzwerk.",
-  "onboardingSendBody": "Du kannst Titel mit einer PIN an andere Geräte in der Nähe senden, ohne Umweg über das Internet."
+  "onboardingSendBody": "Du kannst Titel mit einer PIN an andere Geräte in der Nähe senden, ohne Umweg über das Internet.",
+  "historyTitle": "Verlauf",
+  "historySubtitle": "Was du gehört hast",
+  "historyToday": "Heute",
+  "historyYesterday": "Gestern",
+  "historyEmpty": "Hier erscheint, was du hörst.",
+  "historyOff": "Der Verlauf ist aus: Schalte ihn unter Einstellungen → Wiedergabe ein.",
+  "historyClear": "Verlauf löschen",
+  "historyClearTitle": "Verlauf löschen?",
+  "historyClearBody": "Gelöscht wird nur die Liste der Wiedergaben: Zähler, Favoriten und Playlists bleiben unverändert.",
+  "historyCleared": "Verlauf gelöscht",
+  "settingsRecordHistory": "Hörverlauf speichern",
+  "settingsRecordHistoryHint": "Bleibt auf dem Gerät. Wenn aus, wird nichts mehr hinzugefügt."
 }

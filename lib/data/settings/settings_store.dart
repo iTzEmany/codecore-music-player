@@ -39,6 +39,7 @@ class AppSettings {
     this.recentSearches = const [],
     this.ytNoticeSeen = false,
     this.onboardingDone = false,
+    this.recordHistory = true,
     this.downloadParallel = 2,
     this.downloadRateLimitKBps = 0,
     this.downloadOriginal = false,
@@ -57,6 +58,9 @@ class AppSettings {
 
   /// The first-run guide was finished or skipped (never shown again).
   final bool onboardingDone;
+
+  /// Keep the listening history (`plays`); local only.
+  final bool recordHistory;
 
   /// One of the eight accent names (`CcAccent`); unknown ones mean violet.
   final String accent;
@@ -134,6 +138,7 @@ class AppSettings {
     List<String>? recentSearches,
     bool? ytNoticeSeen,
     bool? onboardingDone,
+    bool? recordHistory,
     int? downloadParallel,
     int? downloadRateLimitKBps,
     bool? downloadOriginal,
@@ -166,6 +171,7 @@ class AppSettings {
         recentSearches: recentSearches ?? this.recentSearches,
         ytNoticeSeen: ytNoticeSeen ?? this.ytNoticeSeen,
         onboardingDone: onboardingDone ?? this.onboardingDone,
+        recordHistory: recordHistory ?? this.recordHistory,
         downloadParallel: downloadParallel ?? this.downloadParallel,
         downloadRateLimitKBps:
             downloadRateLimitKBps ?? this.downloadRateLimitKBps,
@@ -228,6 +234,7 @@ class SettingsStore {
         recentSearches: _prefs.getStringList('recentSearches') ?? const [],
         ytNoticeSeen: _prefs.getBool('ytNoticeSeen') ?? false,
         onboardingDone: _prefs.getBool('onboardingDone') ?? false,
+        recordHistory: _prefs.getBool('recordHistory') ?? true,
         downloadParallel:
             (_prefs.getInt('downloadParallel') ?? 2).clamp(1, 3),
         downloadRateLimitKBps: _prefs.getInt('downloadRateLimitKBps') ?? 0,
@@ -282,6 +289,7 @@ class SettingsStore {
     await _prefs.setStringList('recentSearches', s.recentSearches);
     await _prefs.setBool('ytNoticeSeen', s.ytNoticeSeen);
     await _prefs.setBool('onboardingDone', s.onboardingDone);
+    await _prefs.setBool('recordHistory', s.recordHistory);
     await _prefs.setInt('downloadParallel', s.downloadParallel);
     await _prefs.setInt('downloadRateLimitKBps', s.downloadRateLimitKBps);
     await _prefs.setBool('downloadOriginal', s.downloadOriginal);

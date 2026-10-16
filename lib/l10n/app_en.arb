@@ -1223,5 +1223,17 @@
   "onboardingShareTitle": "Downloads, Jam and sharing",
   "onboardingYoutubeBody": "You can download tracks from YouTube to your device and listen to them like the rest of your music.",
   "onboardingJamBody": "With a Jam you listen to the same music together with another device on the same network.",
-  "onboardingSendBody": "You can send tracks to other nearby devices with a PIN, without going through the Internet."
+  "onboardingSendBody": "You can send tracks to other nearby devices with a PIN, without going through the Internet.",
+  "historyTitle": "History",
+  "historySubtitle": "What you listened to",
+  "historyToday": "Today",
+  "historyYesterday": "Yesterday",
+  "historyEmpty": "What you listen to will show up here.",
+  "historyOff": "History is off: turn it on in Settings → Playback.",
+  "historyClear": "Clear history",
+  "historyClearTitle": "Clear the history?",
+  "historyClearBody": "Only the list of listens is deleted: play counts, favorites and playlists stay as they are.",
+  "historyCleared": "History cleared",
+  "settingsRecordHistory": "Keep a listening history",
+  "settingsRecordHistoryHint": "It stays on the device. When off, nothing more is added to the list."
 }

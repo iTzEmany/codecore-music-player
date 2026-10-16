@@ -24,6 +24,7 @@ import 'album_detail_screen.dart';
 import 'all_tracks_screen.dart';
 import 'artist_screen.dart';
 import 'favorites_screen.dart';
+import '../history/history_screen.dart';
 import 'folders_sheet.dart';
 import 'scan_status.dart';
 
@@ -122,10 +123,15 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
           onTap: () => ShellNav.open<void>(context, const FavoritesScreen()),
         ),
         _Pinned(
-          favorites: false,
           title: l.allTracks,
           subtitle: l.tracksCount(trackCount),
           onTap: () => ShellNav.open<void>(context, const AllTracksScreen()),
+        ),
+        _Pinned(
+          icon: Icons.history_rounded,
+          title: l.historyTitle,
+          subtitle: l.historySubtitle,
+          onTap: () => ShellNav.open<void>(context, const HistoryScreen()),
         ),
       ];
       body = settings.libraryGrid
@@ -299,16 +305,27 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
 
 class _Pinned {
   const _Pinned({
-    required this.favorites,
+    this.favorites = false,
+    this.icon = Icons.music_note_rounded,
     required this.title,
     required this.subtitle,
     required this.onTap,
   });
 
+  /// The heart cover of the favourites; otherwise a square with [icon].
   final bool favorites;
+  final IconData icon;
   final String title, subtitle;
   final VoidCallback onTap;
 }
+
+Widget _pinnedCover(_Pinned p, double size, {double? radius}) => p.favorites
+    ? PlaylistCover(
+        size: size,
+        favorites: true,
+        radius: radius ?? CcDims.rList,
+      )
+    : _IconCover(size: size, icon: p.icon);
 
 String _subtitle(BuildContext context, LibraryEntry e) {
   final l = context.l10n;
@@ -399,9 +416,7 @@ class _LibraryList extends StatelessWidget {
         if (i < pinned.length) {
           final p = pinned[i];
           return row(
-            p.favorites
-                ? const PlaylistCover(size: 48, favorites: true)
-                : _AllTracksCover(size: 48),
+            _pinnedCover(p, 48),
             p.title,
             p.subtitle,
             p.onTap,
@@ -419,10 +434,11 @@ class _LibraryList extends StatelessWidget {
   }
 }
 
-class _AllTracksCover extends StatelessWidget {
-  const _AllTracksCover({required this.size});
+class _IconCover extends StatelessWidget {
+  const _IconCover({required this.size, required this.icon});
 
   final double size;
+  final IconData icon;
 
   @override
   Widget build(BuildContext context) {
@@ -434,7 +450,7 @@ class _AllTracksCover extends StatelessWidget {
         color: cc.surface2,
         borderRadius: BorderRadius.circular(CcDims.rList),
       ),
-      child: Icon(Icons.music_note_rounded, color: cc.accentSoft),
+      child: Icon(icon, color: cc.accentSoft),
     );
   }
 }
@@ -503,9 +519,7 @@ class _LibraryGrid extends StatelessWidget {
         if (i < pinned.length) {
           final p = pinned[i];
           return tile(
-            (s) => p.favorites
-                ? PlaylistCover(size: s, favorites: true, radius: CcDims.rGrid)
-                : _AllTracksCover(size: s),
+            (s) => _pinnedCover(p, s, radius: CcDims.rGrid),
             p.title,
             p.subtitle,
             p.onTap,

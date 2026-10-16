@@ -1223,5 +1223,17 @@
   "onboardingShareTitle": "Descargas, Jam y compartir",
   "onboardingYoutubeBody": "Puedes descargar canciones de YouTube en tu dispositivo y escucharlas como el resto de tu música.",
   "onboardingJamBody": "Con una Jam escuchas la misma música junto con otro dispositivo de la misma red.",
-  "onboardingSendBody": "Puedes enviar canciones a otros dispositivos cercanos con un PIN, sin pasar por Internet."
+  "onboardingSendBody": "Puedes enviar canciones a otros dispositivos cercanos con un PIN, sin pasar por Internet.",
+  "historyTitle": "Historial",
+  "historySubtitle": "Lo que has escuchado",
+  "historyToday": "Hoy",
+  "historyYesterday": "Ayer",
+  "historyEmpty": "Aquí aparecerá lo que escuches.",
+  "historyOff": "El historial está desactivado: actívalo en Ajustes → Reproducción.",
+  "historyClear": "Borrar historial",
+  "historyClearTitle": "¿Borrar el historial?",
+  "historyClearBody": "Solo se borra la lista de reproducciones: los contadores, los favoritos y las listas se quedan como están.",
+  "historyCleared": "Historial borrado",
+  "settingsRecordHistory": "Guardar el historial de escucha",
+  "settingsRecordHistoryHint": "Se queda en el dispositivo. Si se apaga, no se añade nada más a la lista."
 }

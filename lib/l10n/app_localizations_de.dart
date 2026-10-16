@@ -2210,4 +2210,43 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get onboardingSendBody =>
       'Du kannst Titel mit einer PIN an andere Geräte in der Nähe senden, ohne Umweg über das Internet.';
+
+  @override
+  String get historyTitle => 'Verlauf';
+
+  @override
+  String get historySubtitle => 'Was du gehört hast';
+
+  @override
+  String get historyToday => 'Heute';
+
+  @override
+  String get historyYesterday => 'Gestern';
+
+  @override
+  String get historyEmpty => 'Hier erscheint, was du hörst.';
+
+  @override
+  String get historyOff =>
+      'Der Verlauf ist aus: Schalte ihn unter Einstellungen → Wiedergabe ein.';
+
+  @override
+  String get historyClear => 'Verlauf löschen';
+
+  @override
+  String get historyClearTitle => 'Verlauf löschen?';
+
+  @override
+  String get historyClearBody =>
+      'Gelöscht wird nur die Liste der Wiedergaben: Zähler, Favoriten und Playlists bleiben unverändert.';
+
+  @override
+  String get historyCleared => 'Verlauf gelöscht';
+
+  @override
+  String get settingsRecordHistory => 'Hörverlauf speichern';
+
+  @override
+  String get settingsRecordHistoryHint =>
+      'Bleibt auf dem Gerät. Wenn aus, wird nichts mehr hinzugefügt.';
 }
