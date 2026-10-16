@@ -82,4 +82,55 @@ void main() {
     await repo.setCover(p, null);
     expect((await repo.watchAll().first).single.coverKey, 'auto-key');
   });
+
+  group('removing several tracks, and the undo', () {
+    Future<List<int>> order(int p) async =>
+        [for (final t in await repo.watchTracks(p).first) t.id];
+
+    test('removeTracks takes them out in one go and renumbers', () async {
+      final p = await repo.create('Mix');
+      await repo.addTracks(p, ids);
+      final before = await repo.removeTracks(p, [ids[0], ids[2]]);
+      expect(before, ids);
+      expect(await order(p), [ids[1]]);
+    });
+
+    test('restoreTracks puts them back at their places', () async {
+      final p = await repo.create('Mix');
+      await repo.addTracks(p, ids);
+      final before = await repo.removeTracks(p, [ids[0], ids[2]]);
+      await repo.restoreTracks(p, before, [ids[0], ids[2]]);
+      expect(await order(p), ids);
+    });
+
+    test('a track added after the removal stays, at the end', () async {
+      final p = await repo.create('Mix');
+      await repo.addTracks(p, [ids[0], ids[1]]);
+      final before = await repo.removeTracks(p, [ids[0]]);
+      await repo.addTracks(p, [ids[2]]);
+      await repo.restoreTracks(p, before, [ids[0]]);
+      expect(await order(p), [ids[0], ids[1], ids[2]]);
+    });
+
+    test('restoring twice, or a track that came back by hand, does not duplicate', () async {
+      final p = await repo.create('Mix');
+      await repo.addTracks(p, ids);
+      final before = await repo.removeTracks(p, [ids[1]]);
+      await repo.addTracks(p, [ids[1]]);
+      await repo.restoreTracks(p, before, [ids[1]]);
+      await repo.restoreTracks(p, before, [ids[1]]);
+      expect(await order(p), ids);
+    });
+
+    test('other playlists are not touched', () async {
+      final a = await repo.create('A');
+      final b = await repo.create('B');
+      await repo.addTracks(a, ids);
+      await repo.addTracks(b, ids);
+      await repo.removeTracks(a, ids);
+      expect(await order(a), isEmpty);
+      expect(await order(b), ids);
+    });
+  });
 }
+

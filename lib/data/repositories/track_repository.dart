@@ -213,6 +213,32 @@ class TrackRepository {
       (_db.update(_db.tracks)..where((t) => t.id.equals(id)))
           .write(TracksCompanion(isFavorite: Value(value)));
 
+  /// Sets the favourite flag of many tracks in one transaction.
+  Future<void> setFavoriteMany(List<int> ids, bool value) async {
+    if (ids.isEmpty) return;
+    await _db.transaction(() async {
+      for (final chunk in _chunks(ids, 500)) {
+        await (_db.update(_db.tracks)..where((t) => t.id.isIn(chunk))).write(
+            TracksCompanion(isFavorite: Value(value)));
+      }
+    });
+  }
+
+  /// Forgets library rows, but only those whose file is gone (`missing`): a
+  /// track that is still there is never touched. Returns how many went.
+  Future<int> deleteMissingTracks(List<int> ids) async {
+    if (ids.isEmpty) return 0;
+    return _db.transaction(() async {
+      var removed = 0;
+      for (final chunk in _chunks(ids, 500)) {
+        removed += await (_db.delete(_db.tracks)
+              ..where((t) => t.id.isIn(chunk) & t.missing.equals(true)))
+            .go();
+      }
+      return removed;
+    });
+  }
+
   Stream<Track?> watchById(int id) =>
       (_db.select(_db.tracks)..where((t) => t.id.equals(id)))
           .watchSingleOrNull();

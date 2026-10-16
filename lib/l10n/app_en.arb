@@ -1046,5 +1046,118 @@
     }
   },
   "crossfadePlainInAlbum": "Don't fade inside an album",
-  "crossfadePlainInAlbumHint": "Inside an album the tracks follow each other without a gap and without overlapping."
+  "crossfadePlainInAlbumHint": "Inside an album the tracks follow each other without a gap and without overlapping.",
+  "selectedRow": "Selected",
+  "selectedCount": "{count, plural, one{1 selected} other{{count} selected}}",
+  "@selectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectAll": "Select all",
+  "exitSelection": "Exit selection",
+  "bulkActions": "Actions",
+  "playNextMany": "{count, plural, one{1 track will play next} other{{count} tracks will play next}}",
+  "@playNextMany": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "addedToQueueMany": "{count, plural, one{1 track added to the queue} other{{count} tracks added to the queue}}",
+  "@addedToQueueMany": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "addedToPlaylistMany": "{count, plural, one{1 track added to “{name}”} other{{count} tracks added to “{name}”}}",
+  "@addedToPlaylistMany": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "addedToPlaylistSkipped": "{added} added to “{name}”, {skipped} already there",
+  "@addedToPlaylistSkipped": {
+    "placeholders": {
+      "added": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "allAlreadyInPlaylist": "They were all in “{name}” already",
+  "@allAlreadyInPlaylist": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "favoritesAdded": "{count, plural, one{1 track added to favorites} other{{count} tracks added to favorites}}",
+  "@favoritesAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "favoritesRemoved": "{count, plural, one{1 track removed from favorites} other{{count} tracks removed from favorites}}",
+  "@favoritesRemoved": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bulkAddToFavorites": "Add to favorites",
+  "bulkRemoveFromFavorites": "Remove from favorites",
+  "removeManyFromPlaylistTitle": "{count, plural, one{Remove 1 track from the playlist?} other{Remove {count} tracks from the playlist?}}",
+  "@removeManyFromPlaylistTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "removeManyFromPlaylistBody": "The files and the library are not touched.",
+  "removedManyFromPlaylist": "{count, plural, one{1 track removed} other{{count} tracks removed}}",
+  "@removedManyFromPlaylist": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "removeManyFromLibraryTitle": "{count, plural, one{Remove 1 track from the library?} other{Remove {count} tracks from the library?}}",
+  "@removeManyFromLibraryTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "removeManyFromLibraryBody": "The files no longer exist: they only disappear from the library (you lose these tracks' favorites and playlist entries).",
+  "removedManyFromLibrary": "{count, plural, one{1 track removed from the library} other{{count} tracks removed from the library}}",
+  "@removedManyFromLibrary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

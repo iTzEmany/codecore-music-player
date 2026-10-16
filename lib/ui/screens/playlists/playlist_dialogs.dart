@@ -91,17 +91,19 @@ final _playlistsWithProvider = FutureProvider.autoDispose
       ]),
     );
 
-/// Bottom sheet to add tracks to an existing or a new playlist.
-Future<void> showAddToPlaylistSheet(
+/// Bottom sheet to add tracks to an existing or a new playlist. Resolves to
+/// true when they were added, false when the sheet was dismissed.
+Future<bool> showAddToPlaylistSheet(
   BuildContext context,
   WidgetRef ref,
   List<Track> tracks,
-) {
-  return showModalBottomSheet<void>(
+) async {
+  final added = await showModalBottomSheet<bool>(
     context: context,
     builder: (sheetContext) =>
         _AddToPlaylistSheet(tracks: tracks, outer: context),
   );
+  return added ?? false;
 }
 
 class _AddToPlaylistSheet extends ConsumerWidget {
@@ -117,14 +119,22 @@ class _AddToPlaylistSheet extends ConsumerWidget {
     String name,
   ) async {
     final repo = ref.read(playlistRepositoryProvider);
-    await repo.addTracks(id, [for (final t in tracks) t.id]);
-    if (sheetContext.mounted) Navigator.of(sheetContext).pop();
+    final added = await repo.addTracks(id, [for (final t in tracks) t.id]);
+    if (sheetContext.mounted) Navigator.of(sheetContext).pop(true);
     if (outer.mounted) {
+      final l = outer.l10n;
+      final skipped = tracks.length - added;
+      // One track keeps the short message; several say how many were new.
+      final text = tracks.length == 1
+          ? l.addedToPlaylist(name)
+          : added == 0
+          ? l.allAlreadyInPlaylist(name)
+          : skipped == 0
+          ? l.addedToPlaylistMany(added, name)
+          : l.addedToPlaylistSkipped(added, skipped, name);
       ScaffoldMessenger.of(outer)
         ..clearSnackBars()
-        ..showSnackBar(
-          SnackBar(content: Text(outer.l10n.addedToPlaylist(name))),
-        );
+        ..showSnackBar(SnackBar(content: Text(text)));
     }
   }
 

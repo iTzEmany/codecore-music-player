@@ -1046,5 +1046,118 @@
     }
   },
   "crossfadePlainInAlbum": "Innerhalb eines Albums nicht überblenden",
-  "crossfadePlainInAlbumHint": "Innerhalb eines Albums folgen die Titel lückenlos aufeinander, ohne sich zu überlagern."
+  "crossfadePlainInAlbumHint": "Innerhalb eines Albums folgen die Titel lückenlos aufeinander, ohne sich zu überlagern.",
+  "selectedRow": "Ausgewählt",
+  "selectedCount": "{count, plural, one{1 ausgewählt} other{{count} ausgewählt}}",
+  "@selectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectAll": "Alle auswählen",
+  "exitSelection": "Auswahl beenden",
+  "bulkActions": "Aktionen",
+  "playNextMany": "{count, plural, one{1 Titel wird als Nächstes gespielt} other{{count} Titel werden als Nächstes gespielt}}",
+  "@playNextMany": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "addedToQueueMany": "{count, plural, one{1 Titel zur Warteschlange hinzugefügt} other{{count} Titel zur Warteschlange hinzugefügt}}",
+  "@addedToQueueMany": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "addedToPlaylistMany": "{count, plural, one{1 Titel zu „{name}“ hinzugefügt} other{{count} Titel zu „{name}“ hinzugefügt}}",
+  "@addedToPlaylistMany": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "addedToPlaylistSkipped": "{added} zu „{name}“ hinzugefügt, {skipped} schon vorhanden",
+  "@addedToPlaylistSkipped": {
+    "placeholders": {
+      "added": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "allAlreadyInPlaylist": "Alle waren schon in „{name}“",
+  "@allAlreadyInPlaylist": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "favoritesAdded": "{count, plural, one{1 Titel zu den Favoriten hinzugefügt} other{{count} Titel zu den Favoriten hinzugefügt}}",
+  "@favoritesAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "favoritesRemoved": "{count, plural, one{1 Titel aus den Favoriten entfernt} other{{count} Titel aus den Favoriten entfernt}}",
+  "@favoritesRemoved": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bulkAddToFavorites": "Zu Favoriten hinzufügen",
+  "bulkRemoveFromFavorites": "Aus Favoriten entfernen",
+  "removeManyFromPlaylistTitle": "{count, plural, one{1 Titel aus der Playlist entfernen?} other{{count} Titel aus der Playlist entfernen?}}",
+  "@removeManyFromPlaylistTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "removeManyFromPlaylistBody": "Die Dateien und die Bibliothek bleiben unberührt.",
+  "removedManyFromPlaylist": "{count, plural, one{1 Titel entfernt} other{{count} Titel entfernt}}",
+  "@removedManyFromPlaylist": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "removeManyFromLibraryTitle": "{count, plural, one{1 Titel aus der Bibliothek entfernen?} other{{count} Titel aus der Bibliothek entfernen?}}",
+  "@removeManyFromLibraryTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "removeManyFromLibraryBody": "Die Dateien existieren nicht mehr: Sie verschwinden nur aus der Bibliothek (Favoriten und Playlist-Einträge dieser Titel gehen verloren).",
+  "removedManyFromLibrary": "{count, plural, one{1 Titel aus der Bibliothek entfernt} other{{count} Titel aus der Bibliothek entfernt}}",
+  "@removedManyFromLibrary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

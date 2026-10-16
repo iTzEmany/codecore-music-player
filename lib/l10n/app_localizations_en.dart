@@ -1937,4 +1937,150 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get crossfadePlainInAlbumHint =>
       'Inside an album the tracks follow each other without a gap and without overlapping.';
+
+  @override
+  String get selectedRow => 'Selected';
+
+  @override
+  String selectedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count selected',
+      one: '1 selected',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get selectAll => 'Select all';
+
+  @override
+  String get exitSelection => 'Exit selection';
+
+  @override
+  String get bulkActions => 'Actions';
+
+  @override
+  String playNextMany(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tracks will play next',
+      one: '1 track will play next',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String addedToQueueMany(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tracks added to the queue',
+      one: '1 track added to the queue',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String addedToPlaylistMany(int count, String name) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tracks added to “$name”',
+      one: '1 track added to “$name”',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String addedToPlaylistSkipped(int added, int skipped, String name) {
+    return '$added added to “$name”, $skipped already there';
+  }
+
+  @override
+  String allAlreadyInPlaylist(String name) {
+    return 'They were all in “$name” already';
+  }
+
+  @override
+  String favoritesAdded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tracks added to favorites',
+      one: '1 track added to favorites',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String favoritesRemoved(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tracks removed from favorites',
+      one: '1 track removed from favorites',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get bulkAddToFavorites => 'Add to favorites';
+
+  @override
+  String get bulkRemoveFromFavorites => 'Remove from favorites';
+
+  @override
+  String removeManyFromPlaylistTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Remove $count tracks from the playlist?',
+      one: 'Remove 1 track from the playlist?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get removeManyFromPlaylistBody =>
+      'The files and the library are not touched.';
+
+  @override
+  String removedManyFromPlaylist(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tracks removed',
+      one: '1 track removed',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String removeManyFromLibraryTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Remove $count tracks from the library?',
+      one: 'Remove 1 track from the library?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get removeManyFromLibraryBody =>
+      'The files no longer exist: they only disappear from the library (you lose these tracks\' favorites and playlist entries).';
+
+  @override
+  String removedManyFromLibrary(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tracks removed from the library',
+      one: '1 track removed from the library',
+    );
+    return '$_temp0';
+  }
 }

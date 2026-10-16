@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/db/app_database.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../providers/player_providers.dart';
+import '../../providers/selection_providers.dart';
 import '../theme/tokens.dart';
 import 'cover_image.dart';
 import 'favorite_actions.dart';
@@ -11,6 +13,7 @@ import 'format_utils.dart';
 import 'now_playing_bars.dart';
 import 'preview_cover.dart';
 import 'track_actions.dart';
+import 'track_row_selection.dart';
 
 enum TrackRowVariant {
   /// Cover, title, «artist · album».
@@ -45,12 +48,18 @@ class TrackRow extends StatefulWidget {
     this.albumArtist,
     this.picked = false,
     this.reorderIndex,
+    this.selectionMode = false,
+    this.selected = false,
   });
 
   final Track track;
   final VoidCallback onTap;
   final TrackRowVariant variant;
   final bool isCurrent, isPlaying, compact, picked;
+
+  /// The list is in selection mode: a tick box replaces the cover or number,
+  /// and a picked row ([selected]) is tinted. Same height either way.
+  final bool selectionMode, selected;
   final VoidCallback? onMore, onFavorite, onLongPress;
 
   /// Right click on desktop; receives the global pointer position.
@@ -99,6 +108,12 @@ class _TrackRowState extends State<TrackRow> {
   Widget _leading(BuildContext context, double cover, {bool bars = true}) {
     final cc = context.cc;
     final t = widget.track;
+    if (widget.selectionMode) {
+      return SelectionBox(
+        selected: widget.selected,
+        size: widget.variant == TrackRowVariant.album ? 32 : cover,
+      );
+    }
     if (widget.variant == TrackRowVariant.album) {
       final n = t.trackNumber;
       return SizedBox(
@@ -334,7 +349,9 @@ class _TrackRowState extends State<TrackRow> {
         children: [
           SizedBox(
             width: 40,
-            child: widget.isCurrent
+            child: widget.selectionMode
+                ? SelectionBox(selected: widget.selected, size: 40)
+                : widget.isCurrent
                 ? Center(
                     child: NowPlayingBars(playing: widget.isPlaying, size: 16),
                   )
@@ -347,7 +364,10 @@ class _TrackRowState extends State<TrackRow> {
           ),
           if (widget.variant != TrackRowVariant.album) ...[
             // The bars already sit in the number column.
-            _leading(context, cover, bars: false),
+            if (widget.selectionMode)
+              CoverImage(coverKey: t.coverKey, size: cover)
+            else
+              _leading(context, cover, bars: false),
             const SizedBox(width: 12),
           ],
           Expanded(flex: 5, child: titleBlock),
@@ -377,24 +397,31 @@ class _TrackRowState extends State<TrackRow> {
       );
     }
 
+    final tint = widget.selected
+        ? cc.accentSoft.withValues(alpha: 0.16)
+        : _hover && wide
+        ? cc.surface2.withValues(alpha: 0.5)
+        : Colors.transparent;
     return MouseRegion(
       onEnter: (_) => setState(() => _hover = true),
       onExit: (_) => setState(() => _hover = false),
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onSecondaryTapDown: widget.onSecondaryTap == null
-            ? null
-            : (d) => widget.onSecondaryTap!(d.globalPosition),
-        child: Material(
-          color: _hover && wide
-              ? cc.surface2.withValues(alpha: 0.5)
-              : Colors.transparent,
-          child: InkWell(
-            onTap: widget.onTap,
-            onLongPress: widget.onLongPress,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: CcDims.margin),
-              child: row,
+      child: Semantics(
+        selected: widget.selectionMode ? widget.selected : null,
+        value: widget.selected ? context.l10n.selectedRow : null,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onSecondaryTapDown: widget.onSecondaryTap == null
+              ? null
+              : (d) => widget.onSecondaryTap!(d.globalPosition),
+          child: Material(
+            color: tint,
+            child: InkWell(
+              onTap: widget.onTap,
+              onLongPress: widget.onLongPress,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: CcDims.margin),
+                child: row,
+              ),
             ),
           ),
         ),
@@ -415,6 +442,7 @@ class LiveTrackRow extends ConsumerWidget {
     this.albumArtist,
     this.onMore,
     this.reorderIndex,
+    this.selection,
   });
 
   final Track track;
@@ -423,6 +451,10 @@ class LiveTrackRow extends ConsumerWidget {
   final bool compact;
   final int? index;
   final String? albumArtist;
+
+  /// Makes the row pickable together with the others of its list (long press
+  /// on a phone, Ctrl or Shift + click on a desktop).
+  final RowSelection? selection;
 
   /// Replaces the default actions sheet (e.g. «Rimuovi dalla playlist»).
   final VoidCallback? onMore;
@@ -435,14 +467,49 @@ class LiveTrackRow extends ConsumerWidget {
     );
     final playing = isCurrent && (ref.watch(isPlayingProvider).value ?? false);
     void actions() => showTrackActions(context, ref, track);
+    final sel = selection;
+    final (active, picked) = sel == null
+        ? (false, false)
+        : ref.watch(
+            selectionProvider(sel.listKey)
+                .select((s) => (s.active, s.contains(track.id))),
+          );
+    void tap() {
+      if (sel == null) return onTap();
+      final keys = HardwareKeyboard.instance;
+      final shift = keys.isShiftPressed;
+      if (!active && !shift && !keys.isControlPressed && !keys.isMetaPressed) {
+        return onTap();
+      }
+      final notifier = ref.read(selectionProvider(sel.listKey).notifier);
+      shift
+          ? notifier.selectRange(sel.visibleIds, track.id)
+          : notifier.toggle(track.id);
+    }
+
+    // A phone picks with a long press; a desktop keeps the menu there.
+    final phone = switch (Theme.of(context).platform) {
+      TargetPlatform.android ||
+      TargetPlatform.iOS ||
+      TargetPlatform.fuchsia => true,
+      _ => false,
+    };
+    void longPress() {
+      if (sel == null || !phone) return actions();
+      HapticFeedback.selectionClick();
+      ref.read(selectionProvider(sel.listKey).notifier).toggle(track.id);
+    }
+
     final row = TrackRow(
       track: track,
       variant: variant,
       isCurrent: isCurrent,
       isPlaying: playing,
-      onTap: onTap,
+      onTap: tap,
       onMore: onMore ?? actions,
-      onLongPress: actions,
+      onLongPress: longPress,
+      selectionMode: active,
+      selected: picked,
       onSecondaryTap: (pos) => showTrackContextMenu(context, ref, track, pos),
       onFavorite: () => toggleFavorite(context, ref, track),
       compact: compact,
@@ -451,7 +518,9 @@ class LiveTrackRow extends ConsumerWidget {
       reorderIndex: reorderIndex,
     );
     // Queue and pick rows have their own gestures.
-    if (variant == TrackRowVariant.queue || variant == TrackRowVariant.pick) {
+    if (variant == TrackRowVariant.queue ||
+        variant == TrackRowVariant.pick ||
+        active) {
       return row;
     }
     return Dismissible(

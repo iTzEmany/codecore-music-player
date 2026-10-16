@@ -3443,6 +3443,126 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Dentro un album i brani si susseguono senza pause, senza sovrapporsi.'**
   String get crossfadePlainInAlbumHint;
+
+  /// No description provided for @selectedRow.
+  ///
+  /// In it, this message translates to:
+  /// **'Selezionato'**
+  String get selectedRow;
+
+  /// No description provided for @selectedCount.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, one{1 selezionato} other{{count} selezionati}}'**
+  String selectedCount(int count);
+
+  /// No description provided for @selectAll.
+  ///
+  /// In it, this message translates to:
+  /// **'Seleziona tutto'**
+  String get selectAll;
+
+  /// No description provided for @exitSelection.
+  ///
+  /// In it, this message translates to:
+  /// **'Esci dalla selezione'**
+  String get exitSelection;
+
+  /// No description provided for @bulkActions.
+  ///
+  /// In it, this message translates to:
+  /// **'Azioni'**
+  String get bulkActions;
+
+  /// No description provided for @playNextMany.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, one{1 brano verrà riprodotto dopo} other{{count} brani verranno riprodotti dopo}}'**
+  String playNextMany(int count);
+
+  /// No description provided for @addedToQueueMany.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, one{1 brano aggiunto in coda} other{{count} brani aggiunti in coda}}'**
+  String addedToQueueMany(int count);
+
+  /// No description provided for @addedToPlaylistMany.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, one{1 brano aggiunto a «{name}»} other{{count} brani aggiunti a «{name}»}}'**
+  String addedToPlaylistMany(int count, String name);
+
+  /// No description provided for @addedToPlaylistSkipped.
+  ///
+  /// In it, this message translates to:
+  /// **'{added} aggiunti a «{name}», {skipped} già presenti'**
+  String addedToPlaylistSkipped(int added, int skipped, String name);
+
+  /// No description provided for @allAlreadyInPlaylist.
+  ///
+  /// In it, this message translates to:
+  /// **'Erano già tutti in «{name}»'**
+  String allAlreadyInPlaylist(String name);
+
+  /// No description provided for @favoritesAdded.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, one{1 brano nei preferiti} other{{count} brani nei preferiti}}'**
+  String favoritesAdded(int count);
+
+  /// No description provided for @favoritesRemoved.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, one{1 brano tolto dai preferiti} other{{count} brani tolti dai preferiti}}'**
+  String favoritesRemoved(int count);
+
+  /// No description provided for @bulkAddToFavorites.
+  ///
+  /// In it, this message translates to:
+  /// **'Aggiungi ai preferiti'**
+  String get bulkAddToFavorites;
+
+  /// No description provided for @bulkRemoveFromFavorites.
+  ///
+  /// In it, this message translates to:
+  /// **'Togli dai preferiti'**
+  String get bulkRemoveFromFavorites;
+
+  /// No description provided for @removeManyFromPlaylistTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, one{Rimuovere 1 brano dalla playlist?} other{Rimuovere {count} brani dalla playlist?}}'**
+  String removeManyFromPlaylistTitle(int count);
+
+  /// No description provided for @removeManyFromPlaylistBody.
+  ///
+  /// In it, this message translates to:
+  /// **'I file e la libreria non vengono toccati.'**
+  String get removeManyFromPlaylistBody;
+
+  /// No description provided for @removedManyFromPlaylist.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, one{1 brano rimosso} other{{count} brani rimossi}}'**
+  String removedManyFromPlaylist(int count);
+
+  /// No description provided for @removeManyFromLibraryTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, one{Togliere 1 brano dalla libreria?} other{Togliere {count} brani dalla libreria?}}'**
+  String removeManyFromLibraryTitle(int count);
+
+  /// No description provided for @removeManyFromLibraryBody.
+  ///
+  /// In it, this message translates to:
+  /// **'I file non esistono più: spariscono solo dalla libreria (perdi preferiti e playlist di questi brani).'**
+  String get removeManyFromLibraryBody;
+
+  /// No description provided for @removedManyFromLibrary.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, one{1 brano tolto dalla libreria} other{{count} brani tolti dalla libreria}}'**
+  String removedManyFromLibrary(int count);
 }
 
 class _AppLocalizationsDelegate

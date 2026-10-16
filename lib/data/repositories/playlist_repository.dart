@@ -165,6 +165,53 @@ class PlaylistRepository {
         await _renumber(playlistId);
       });
 
+  /// Takes [trackIds] out of a playlist (one transaction). Returns the order
+  /// the playlist had, to give to [restoreTracks] for an undo.
+  Future<List<int>> removeTracks(int playlistId, List<int> trackIds) =>
+      _db.transaction(() async {
+        final before = await (_db.select(_db.playlistTracks)
+              ..where((t) => t.playlistId.equals(playlistId))
+              ..orderBy([(t) => OrderingTerm.asc(t.position)]))
+            .get();
+        await (_db.delete(_db.playlistTracks)
+              ..where((t) =>
+                  t.playlistId.equals(playlistId) & t.trackId.isIn(trackIds)))
+            .go();
+        await _renumber(playlistId);
+        return [for (final r in before) r.trackId];
+      });
+
+  /// Puts back [removed] where [orderBefore] (from [removeTracks]) had them;
+  /// tracks added in the meantime stay, after the others.
+  Future<void> restoreTracks(
+      int playlistId, List<int> orderBefore, List<int> removed) {
+    return _db.transaction(() async {
+      final current = [
+        for (final r in await (_db.select(_db.playlistTracks)
+              ..where((t) => t.playlistId.equals(playlistId))
+              ..orderBy([(t) => OrderingTerm.asc(t.position)]))
+            .get())
+          r.trackId,
+      ];
+      final have = current.toSet();
+      var next = current.length;
+      for (final id in removed) {
+        if (have.add(id)) {
+          await _db.into(_db.playlistTracks).insert(
+              PlaylistTracksCompanion.insert(
+                  playlistId: playlistId, trackId: id, position: next++));
+        }
+      }
+      final known = orderBefore.toSet();
+      await _writeOrder(playlistId, [
+        for (final id in orderBefore)
+          if (have.contains(id)) id,
+        for (final id in current)
+          if (!known.contains(id)) id,
+      ]);
+    });
+  }
+
   /// Indices refer to the displayed order; `newIndex` is the final position.
   Future<void> reorder(int playlistId, int oldIndex, int newIndex) =>
       _db.transaction(() async {

@@ -65,4 +65,24 @@ void main() {
     expect((await repo.getByIds(ids)).map((t) => t.id), ids);
     expect(await repo.countAll(), 2);
   });
+
+  test('setFavoriteMany flips a whole batch and nothing else', () async {
+    await repo.upsertBatch([row('/a', 'a'), row('/b', 'b'), row('/c', 'c')]);
+    final ids = (await db.select(db.tracks).get()).map((t) => t.id).toList();
+    await repo.setFavoriteMany([ids[0], ids[1]], true);
+    expect((await repo.getByIds(ids)).map((t) => t.isFavorite), [true, true, false]);
+    await repo.setFavoriteMany([ids[1]], false);
+    expect((await repo.getByIds(ids)).map((t) => t.isFavorite), [true, false, false]);
+    await repo.setFavoriteMany(const [], true); // nothing to do
+  });
+
+  test('deleteMissingTracks removes only the tracks whose file is gone', () async {
+    await repo.upsertBatch([row('/a', 'a'), row('/b', 'b'), row('/c', 'c')]);
+    final ids = (await db.select(db.tracks).get()).map((t) => t.id).toList();
+    await repo.markMissing({'/a', '/b'}, true);
+    expect(await repo.deleteMissingTracks(ids), 2, reason: 'c is still there');
+    expect((await db.select(db.tracks).get()).map((t) => t.title), ['c']);
+    expect(await repo.deleteMissingTracks(const []), 0);
+  });
 }
+
