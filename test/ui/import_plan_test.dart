@@ -1,7 +1,6 @@
 import 'package:codecore/core/import_row.dart';
 import 'package:codecore/data/repositories/import_repository.dart';
 import 'package:codecore/data/repositories/playlist_repository.dart';
-import 'package:codecore/providers/import_providers.dart';
 import 'package:codecore/providers/youtube_providers.dart';
 import 'package:codecore/services/online/download_index.dart';
 import 'package:codecore/ui/screens/import/import_plan_screen.dart';

@@ -1,5 +1,6 @@
 import 'package:codecore/core/import_row.dart';
-import 'package:codecore/data/db/app_database.dart' show TracksCompanion;
+import 'package:codecore/data/db/app_database.dart'
+    show PlaylistImport, PlaylistImportItem, TracksCompanion;
 import 'package:codecore/data/repositories/import_repository.dart';
 import 'package:codecore/data/repositories/playlist_repository.dart';
 import 'package:codecore/providers/activity_providers.dart';
@@ -90,6 +91,33 @@ void main() {
         () => ImportRepository(h.db).item(iid, 2));
     expect(left!.state, ImportItemStatus.skipped);
     await h.dispose(tester);
+  });
+
+  test('progress counts planned rows apart and ignores removed ones', () {
+    final imp = PlaylistImport(
+        id: 1,
+        playlistId: 1,
+        sourceName: 'Mood',
+        createdAt: 0,
+        status: 1,
+        sourceKind: 'exportify',
+        numberFiles: false,
+        linkOnly: false,
+        planFirst: true,
+        fetchCovers: false);
+    PlaylistImportItem item(int i, ImportItemStatus s) => PlaylistImportItem(
+        importId: 1, rowIndex: i, title: 't$i', artists: 'a', status: s.index);
+    final p = ImportProgress.from(imp, [
+      item(0, ImportItemStatus.downloaded),
+      item(1, ImportItemStatus.linked),
+      item(2, ImportItemStatus.planned),
+      item(3, ImportItemStatus.planned),
+      item(4, ImportItemStatus.removed),
+      item(5, ImportItemStatus.pending),
+    ]);
+    expect(p.planned, 2);
+    expect(p.total, 5, reason: 'the removed row is not part of the import');
+    expect(p.done, 4);
   });
 
   testWidgets('a downloaded file of the wrong length can be kept', (tester) async {

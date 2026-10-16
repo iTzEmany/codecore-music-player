@@ -134,11 +134,11 @@ class ImportProgress {
         case ImportItemStatus.failed:
           missing++;
           done++;
-        case ImportItemStatus.downloaded:
-        case ImportItemStatus.linked:
         case ImportItemStatus.planned:
           planned++;
           done++;
+        case ImportItemStatus.downloaded:
+        case ImportItemStatus.linked:
         case ImportItemStatus.skipped:
           done++;
       }
