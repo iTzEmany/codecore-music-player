@@ -212,9 +212,15 @@ Altri formati (TuneMyMusic, Soundiiz, M3U), lettura diretta dei link Spotify, fo
 | Import lunghissimo interrotto | Stato su DB riga per riga, Riprendi dal primo «da cercare» |
 
 ## Definition of Done
-- [ ] Il pulsante di importazione dice chiaramente che il CSV si crea su **exportify.net**, con istruzioni e «Copia indirizzo»
-- [ ] Playlist creata con il nome del CSV e l'ordine del CSV; brani già in libreria collegati, non riscaricati
-- [ ] Brani scaricati con titolo/artista/album del CSV; nessun file riscritto
-- [ ] «Da verificare» e «Non trovati» risolvibili a mano; Pausa/Riprendi/Annulla funzionanti; sopravvive al riavvio
-- [ ] Test: parser CSV, lettore Exportify, matcher (≥ 12 casi), migrazione v4, posizionamento, servizio con finti
-- [ ] `flutter analyze` pulito, `flutter test` verde, `docs/PROGRESS.md` aggiornato
+- [x] Il pulsante di importazione dice chiaramente che il CSV si crea su **exportify.net**, con istruzioni e «Copia indirizzo»
+- [x] Playlist creata con il nome del CSV e l'ordine del CSV; brani già in libreria collegati, non riscaricati
+- [x] Brani scaricati con titolo/artista/album del CSV; nessun file riscritto
+- [x] «Da verificare» e «Non trovati» risolvibili a mano; Pausa/Riprendi/Annulla funzionanti; sopravvive al riavvio
+- [x] Test: parser CSV, lettore Exportify, matcher (≥ 12 casi), migrazione v4, posizionamento, servizio con finti
+- [x] `flutter analyze` pulito, `flutter test` verde, `docs/PROGRESS.md` aggiornato
+
+## Come è andata (2026-10-16)
+Fatta e provata dal vivo su PC (Linux) e telefono (Mi A3): vedi `docs/PROGRESS.md` (note «Fase 12»). Deviazioni principali:
+pulsante nel menu «+» (Libreria e barra laterale) e nel FAB di `PlaylistsScreen`; artisti salvati con `;`;
+«Cerca a mano» è un foglio dentro «Rivedi»; `LibraryIndex` tollera ±5 s; un ritento automatico per download falliti
+con errore transitorio. Da provare a mano: la scelta del file su Linux (selettore di sistema/portal).
