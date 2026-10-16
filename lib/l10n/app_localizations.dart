@@ -2663,6 +2663,42 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Annulla importazione'**
   String get csvImportCancelGo;
+
+  /// No description provided for @exportLog.
+  ///
+  /// In it, this message translates to:
+  /// **'Esporta log'**
+  String get exportLog;
+
+  /// No description provided for @exportLogHint.
+  ///
+  /// In it, this message translates to:
+  /// **'File di testo senza percorsi personali, indirizzi di rete né PIN'**
+  String get exportLogHint;
+
+  /// No description provided for @exportLogDebugOnly.
+  ///
+  /// In it, this message translates to:
+  /// **'Disponibile solo nella versione installata (in debug il log non viene scritto su file)'**
+  String get exportLogDebugOnly;
+
+  /// No description provided for @exportLogNone.
+  ///
+  /// In it, this message translates to:
+  /// **'Non c\'è ancora nessun log da esportare'**
+  String get exportLogNone;
+
+  /// No description provided for @exportLogSaved.
+  ///
+  /// In it, this message translates to:
+  /// **'Log salvato'**
+  String get exportLogSaved;
+
+  /// No description provided for @exportLogFailed.
+  ///
+  /// In it, this message translates to:
+  /// **'Impossibile salvare il log'**
+  String get exportLogFailed;
 }
 
 class _AppLocalizationsDelegate

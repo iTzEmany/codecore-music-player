@@ -1469,4 +1469,24 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get csvImportCancelGo => 'Cancelar importación';
+
+  @override
+  String get exportLog => 'Exportar registro';
+
+  @override
+  String get exportLogHint =>
+      'Archivo de texto sin rutas personales, direcciones de red ni PIN';
+
+  @override
+  String get exportLogDebugOnly =>
+      'Solo en la versión instalada (en depuración el registro no se escribe en un archivo)';
+
+  @override
+  String get exportLogNone => 'Todavía no hay ningún registro para exportar';
+
+  @override
+  String get exportLogSaved => 'Registro guardado';
+
+  @override
+  String get exportLogFailed => 'No se pudo guardar el registro';
 }

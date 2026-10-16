@@ -762,5 +762,11 @@
     }
   },
   "csvImportDownload": "Descargar",
-  "csvImportCancelGo": "Cancelar importación"
+  "csvImportCancelGo": "Cancelar importación",
+  "exportLog": "Exportar registro",
+  "exportLogHint": "Archivo de texto sin rutas personales, direcciones de red ni PIN",
+  "exportLogDebugOnly": "Solo en la versión instalada (en depuración el registro no se escribe en un archivo)",
+  "exportLogNone": "Todavía no hay ningún registro para exportar",
+  "exportLogSaved": "Registro guardado",
+  "exportLogFailed": "No se pudo guardar el registro"
 }

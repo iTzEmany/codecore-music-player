@@ -762,5 +762,11 @@
     }
   },
   "csvImportDownload": "Herunterladen",
-  "csvImportCancelGo": "Import abbrechen"
+  "csvImportCancelGo": "Import abbrechen",
+  "exportLog": "Protokoll exportieren",
+  "exportLogHint": "Textdatei ohne persönliche Pfade, Netzwerkadressen oder PINs",
+  "exportLogDebugOnly": "Nur in der installierten Version (im Debug-Modus wird das Protokoll nicht in eine Datei geschrieben)",
+  "exportLogNone": "Es gibt noch kein Protokoll zum Exportieren",
+  "exportLogSaved": "Protokoll gespeichert",
+  "exportLogFailed": "Protokoll konnte nicht gespeichert werden"
 }

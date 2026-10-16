@@ -762,5 +762,11 @@
     }
   },
   "csvImportDownload": "Download",
-  "csvImportCancelGo": "Cancel import"
+  "csvImportCancelGo": "Cancel import",
+  "exportLog": "Export log",
+  "exportLogHint": "Text file without personal paths, network addresses or PINs",
+  "exportLogDebugOnly": "Only in the installed version (debug builds don't write the log to a file)",
+  "exportLogNone": "There is no log to export yet",
+  "exportLogSaved": "Log saved",
+  "exportLogFailed": "Couldn't save the log"
 }

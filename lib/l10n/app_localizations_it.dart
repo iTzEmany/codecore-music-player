@@ -1468,4 +1468,24 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get csvImportCancelGo => 'Annulla importazione';
+
+  @override
+  String get exportLog => 'Esporta log';
+
+  @override
+  String get exportLogHint =>
+      'File di testo senza percorsi personali, indirizzi di rete né PIN';
+
+  @override
+  String get exportLogDebugOnly =>
+      'Disponibile solo nella versione installata (in debug il log non viene scritto su file)';
+
+  @override
+  String get exportLogNone => 'Non c\'è ancora nessun log da esportare';
+
+  @override
+  String get exportLogSaved => 'Log salvato';
+
+  @override
+  String get exportLogFailed => 'Impossibile salvare il log';
 }

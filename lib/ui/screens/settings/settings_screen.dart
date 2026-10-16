@@ -21,6 +21,7 @@ import '../share/share_screen.dart';
 import '../../../services/migration/python_db_importer.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/tokens.dart';
+import 'log_export_tile.dart';
 import 'missing_tracks_screen.dart';
 import 'theme_swatch.dart';
 
@@ -244,6 +245,7 @@ class SettingsScreen extends ConsumerWidget {
                   title: Text(l.licenses),
                   onTap: () => showLicensePage(context: context),
                 ),
+                const LogExportTile(),
               ],
             ),
           ],

@@ -1470,4 +1470,24 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get csvImportCancelGo => 'Import abbrechen';
+
+  @override
+  String get exportLog => 'Protokoll exportieren';
+
+  @override
+  String get exportLogHint =>
+      'Textdatei ohne persönliche Pfade, Netzwerkadressen oder PINs';
+
+  @override
+  String get exportLogDebugOnly =>
+      'Nur in der installierten Version (im Debug-Modus wird das Protokoll nicht in eine Datei geschrieben)';
+
+  @override
+  String get exportLogNone => 'Es gibt noch kein Protokoll zum Exportieren';
+
+  @override
+  String get exportLogSaved => 'Protokoll gespeichert';
+
+  @override
+  String get exportLogFailed => 'Protokoll konnte nicht gespeichert werden';
 }

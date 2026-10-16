@@ -161,7 +161,7 @@ L'agente riparte sempre dal primo task non spuntato.
 - [ ] 13.8 Sezione «Backup» nelle Impostazioni
 - [x] 13.9 Esportazione delle playlist: M3U8, CSV, JSON (+ test)
 - [ ] 13.10 Interfaccia di esportazione
-- [ ] 13.11 «Esporta log» senza dati personali
+- [x] 13.11 «Esporta log» senza dati personali
 - [ ] 13.12 Rifinitura, documentazione e prova a mano
 
 ## Fase 14 — Download robusti (`fase-14-download-robusti.md`)

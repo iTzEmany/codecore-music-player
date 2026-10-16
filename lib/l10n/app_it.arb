@@ -953,5 +953,11 @@
     }
   },
   "csvImportDownload": "Scarica",
-  "csvImportCancelGo": "Annulla importazione"
+  "csvImportCancelGo": "Annulla importazione",
+  "exportLog": "Esporta log",
+  "exportLogHint": "File di testo senza percorsi personali, indirizzi di rete né PIN",
+  "exportLogDebugOnly": "Disponibile solo nella versione installata (in debug il log non viene scritto su file)",
+  "exportLogNone": "Non c'è ancora nessun log da esportare",
+  "exportLogSaved": "Log salvato",
+  "exportLogFailed": "Impossibile salvare il log"
 }
