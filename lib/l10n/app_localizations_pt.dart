@@ -2345,4 +2345,86 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get ruleHelpTooltip => 'Ajuda da pesquisa';
+
+  @override
+  String get smartPlaylistNew => 'Nova playlist inteligente';
+
+  @override
+  String get smartPlaylistEdit => 'Editar playlist inteligente';
+
+  @override
+  String get smartPlaylistLabel => 'Playlist inteligente';
+
+  @override
+  String smartSubtitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Playlist inteligente · $count faixas',
+      one: 'Playlist inteligente · 1 faixa',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get smartName => 'Nome';
+
+  @override
+  String get smartNameRequired => 'Escreva um nome';
+
+  @override
+  String get smartRules => 'Regras';
+
+  @override
+  String get smartRulesHint => 'artist:\"pink floyd\" -live year:1970..1979';
+
+  @override
+  String get smartNoRules => 'Sem regras, a playlist contém toda a biblioteca.';
+
+  @override
+  String get smartSortBy => 'Ordenar por';
+
+  @override
+  String get smartSortMostPlayed => 'Mais ouvidas';
+
+  @override
+  String get smartSortRandom => 'Aleatório';
+
+  @override
+  String get smartLimit => 'Limite de faixas (opcional)';
+
+  @override
+  String get smartTemplates => 'Modelos';
+
+  @override
+  String get smartTplNever => 'Nunca ouvidas';
+
+  @override
+  String get smartTplRecent => 'Adicionadas recentemente';
+
+  @override
+  String get smartTplTop => 'As mais ouvidas';
+
+  @override
+  String get smartTpl90s => 'Anos 90';
+
+  @override
+  String get smartConvert => 'Converter em playlist normal';
+
+  @override
+  String smartConverted(String name) {
+    return 'Criada a playlist «$name» com a lista atual';
+  }
+
+  @override
+  String smartDeleteTitle(String name) {
+    return 'Eliminar «$name»?';
+  }
+
+  @override
+  String get smartDeleteBody =>
+      'Apenas a regra é eliminada: as faixas ficam onde estão.';
+
+  @override
+  String get smartAutoNote => 'A lista atualiza-se sozinha.';
 }

@@ -1499,5 +1499,49 @@
       }
     }
   },
-  "ruleHelpTooltip": "Aiuto sulla ricerca"
+  "ruleHelpTooltip": "Aiuto sulla ricerca",
+  "smartPlaylistNew": "Nuova playlist intelligente",
+  "smartPlaylistEdit": "Modifica playlist intelligente",
+  "smartPlaylistLabel": "Playlist intelligente",
+  "smartSubtitle": "{count, plural, one{Playlist intelligente · 1 brano} other{Playlist intelligente · {count} brani}}",
+  "@smartSubtitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "smartName": "Nome",
+  "smartNameRequired": "Scrivi un nome",
+  "smartRules": "Regole",
+  "smartRulesHint": "artista:\"pink floyd\" -live anno:1970..1979",
+  "smartNoRules": "Senza regole la playlist contiene tutta la libreria.",
+  "smartSortBy": "Ordina per",
+  "smartSortMostPlayed": "Più ascoltati",
+  "smartSortRandom": "A caso",
+  "smartLimit": "Limite di brani (facoltativo)",
+  "smartTemplates": "Modelli",
+  "smartTplNever": "Mai ascoltati",
+  "smartTplRecent": "Aggiunti di recente",
+  "smartTplTop": "I più ascoltati",
+  "smartTpl90s": "Anni ’90",
+  "smartConvert": "Converti in playlist normale",
+  "smartConverted": "Creata la playlist «{name}» con l’elenco attuale",
+  "@smartConverted": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smartDeleteTitle": "Eliminare «{name}»?",
+  "@smartDeleteTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smartDeleteBody": "Si elimina solo la regola: i brani restano dove sono.",
+  "smartAutoNote": "L’elenco si aggiorna da solo."
 }

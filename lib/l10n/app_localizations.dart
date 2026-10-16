@@ -3969,6 +3969,144 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Aiuto sulla ricerca'**
   String get ruleHelpTooltip;
+
+  /// No description provided for @smartPlaylistNew.
+  ///
+  /// In it, this message translates to:
+  /// **'Nuova playlist intelligente'**
+  String get smartPlaylistNew;
+
+  /// No description provided for @smartPlaylistEdit.
+  ///
+  /// In it, this message translates to:
+  /// **'Modifica playlist intelligente'**
+  String get smartPlaylistEdit;
+
+  /// No description provided for @smartPlaylistLabel.
+  ///
+  /// In it, this message translates to:
+  /// **'Playlist intelligente'**
+  String get smartPlaylistLabel;
+
+  /// No description provided for @smartSubtitle.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, one{Playlist intelligente · 1 brano} other{Playlist intelligente · {count} brani}}'**
+  String smartSubtitle(int count);
+
+  /// No description provided for @smartName.
+  ///
+  /// In it, this message translates to:
+  /// **'Nome'**
+  String get smartName;
+
+  /// No description provided for @smartNameRequired.
+  ///
+  /// In it, this message translates to:
+  /// **'Scrivi un nome'**
+  String get smartNameRequired;
+
+  /// No description provided for @smartRules.
+  ///
+  /// In it, this message translates to:
+  /// **'Regole'**
+  String get smartRules;
+
+  /// No description provided for @smartRulesHint.
+  ///
+  /// In it, this message translates to:
+  /// **'artista:\"pink floyd\" -live anno:1970..1979'**
+  String get smartRulesHint;
+
+  /// No description provided for @smartNoRules.
+  ///
+  /// In it, this message translates to:
+  /// **'Senza regole la playlist contiene tutta la libreria.'**
+  String get smartNoRules;
+
+  /// No description provided for @smartSortBy.
+  ///
+  /// In it, this message translates to:
+  /// **'Ordina per'**
+  String get smartSortBy;
+
+  /// No description provided for @smartSortMostPlayed.
+  ///
+  /// In it, this message translates to:
+  /// **'Più ascoltati'**
+  String get smartSortMostPlayed;
+
+  /// No description provided for @smartSortRandom.
+  ///
+  /// In it, this message translates to:
+  /// **'A caso'**
+  String get smartSortRandom;
+
+  /// No description provided for @smartLimit.
+  ///
+  /// In it, this message translates to:
+  /// **'Limite di brani (facoltativo)'**
+  String get smartLimit;
+
+  /// No description provided for @smartTemplates.
+  ///
+  /// In it, this message translates to:
+  /// **'Modelli'**
+  String get smartTemplates;
+
+  /// No description provided for @smartTplNever.
+  ///
+  /// In it, this message translates to:
+  /// **'Mai ascoltati'**
+  String get smartTplNever;
+
+  /// No description provided for @smartTplRecent.
+  ///
+  /// In it, this message translates to:
+  /// **'Aggiunti di recente'**
+  String get smartTplRecent;
+
+  /// No description provided for @smartTplTop.
+  ///
+  /// In it, this message translates to:
+  /// **'I più ascoltati'**
+  String get smartTplTop;
+
+  /// No description provided for @smartTpl90s.
+  ///
+  /// In it, this message translates to:
+  /// **'Anni ’90'**
+  String get smartTpl90s;
+
+  /// No description provided for @smartConvert.
+  ///
+  /// In it, this message translates to:
+  /// **'Converti in playlist normale'**
+  String get smartConvert;
+
+  /// No description provided for @smartConverted.
+  ///
+  /// In it, this message translates to:
+  /// **'Creata la playlist «{name}» con l’elenco attuale'**
+  String smartConverted(String name);
+
+  /// No description provided for @smartDeleteTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Eliminare «{name}»?'**
+  String smartDeleteTitle(String name);
+
+  /// No description provided for @smartDeleteBody.
+  ///
+  /// In it, this message translates to:
+  /// **'Si elimina solo la regola: i brani restano dove sono.'**
+  String get smartDeleteBody;
+
+  /// No description provided for @smartAutoNote.
+  ///
+  /// In it, this message translates to:
+  /// **'L’elenco si aggiorna da solo.'**
+  String get smartAutoNote;
 }
 
 class _AppLocalizationsDelegate

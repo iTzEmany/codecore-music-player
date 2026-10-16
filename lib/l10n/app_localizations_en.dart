@@ -2337,4 +2337,87 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ruleHelpTooltip => 'Search help';
+
+  @override
+  String get smartPlaylistNew => 'New smart playlist';
+
+  @override
+  String get smartPlaylistEdit => 'Edit smart playlist';
+
+  @override
+  String get smartPlaylistLabel => 'Smart playlist';
+
+  @override
+  String smartSubtitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Smart playlist · $count tracks',
+      one: 'Smart playlist · 1 track',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get smartName => 'Name';
+
+  @override
+  String get smartNameRequired => 'Enter a name';
+
+  @override
+  String get smartRules => 'Rules';
+
+  @override
+  String get smartRulesHint => 'artist:\"pink floyd\" -live year:1970..1979';
+
+  @override
+  String get smartNoRules =>
+      'With no rules the playlist holds the whole library.';
+
+  @override
+  String get smartSortBy => 'Sort by';
+
+  @override
+  String get smartSortMostPlayed => 'Most played';
+
+  @override
+  String get smartSortRandom => 'Random';
+
+  @override
+  String get smartLimit => 'Track limit (optional)';
+
+  @override
+  String get smartTemplates => 'Templates';
+
+  @override
+  String get smartTplNever => 'Never played';
+
+  @override
+  String get smartTplRecent => 'Recently added';
+
+  @override
+  String get smartTplTop => 'Most played';
+
+  @override
+  String get smartTpl90s => 'The ’90s';
+
+  @override
+  String get smartConvert => 'Convert to a normal playlist';
+
+  @override
+  String smartConverted(String name) {
+    return 'Created the playlist “$name” with the current list';
+  }
+
+  @override
+  String smartDeleteTitle(String name) {
+    return 'Delete “$name”?';
+  }
+
+  @override
+  String get smartDeleteBody =>
+      'Only the rule is deleted: the tracks stay where they are.';
+
+  @override
+  String get smartAutoNote => 'The list updates by itself.';
 }

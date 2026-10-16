@@ -2370,4 +2370,88 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get ruleHelpTooltip => 'Aide de la recherche';
+
+  @override
+  String get smartPlaylistNew => 'Nouvelle playlist intelligente';
+
+  @override
+  String get smartPlaylistEdit => 'Modifier la playlist intelligente';
+
+  @override
+  String get smartPlaylistLabel => 'Playlist intelligente';
+
+  @override
+  String smartSubtitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Playlist intelligente · $count titres',
+      one: 'Playlist intelligente · 1 titre',
+      zero: 'Playlist intelligente · 0 titre',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get smartName => 'Nom';
+
+  @override
+  String get smartNameRequired => 'Saisissez un nom';
+
+  @override
+  String get smartRules => 'Règles';
+
+  @override
+  String get smartRulesHint => 'artist:\"pink floyd\" -live year:1970..1979';
+
+  @override
+  String get smartNoRules =>
+      'Sans règles, la playlist contient toute la bibliothèque.';
+
+  @override
+  String get smartSortBy => 'Trier par';
+
+  @override
+  String get smartSortMostPlayed => 'Les plus écoutés';
+
+  @override
+  String get smartSortRandom => 'Aléatoire';
+
+  @override
+  String get smartLimit => 'Limite de titres (facultatif)';
+
+  @override
+  String get smartTemplates => 'Modèles';
+
+  @override
+  String get smartTplNever => 'Jamais écoutés';
+
+  @override
+  String get smartTplRecent => 'Ajoutés récemment';
+
+  @override
+  String get smartTplTop => 'Les plus écoutés';
+
+  @override
+  String get smartTpl90s => 'Les années 90';
+
+  @override
+  String get smartConvert => 'Convertir en playlist normale';
+
+  @override
+  String smartConverted(String name) {
+    return 'Playlist « $name » créée avec la liste actuelle';
+  }
+
+  @override
+  String smartDeleteTitle(String name) {
+    return 'Supprimer « $name » ?';
+  }
+
+  @override
+  String get smartDeleteBody =>
+      'Seule la règle est supprimée : les titres restent où ils sont.';
+
+  @override
+  String get smartAutoNote => 'La liste se met à jour toute seule.';
 }

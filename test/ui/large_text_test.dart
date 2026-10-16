@@ -1,5 +1,8 @@
 import 'package:codecore/data/repositories/library_queries.dart';
+import 'package:codecore/ui/screens/history/history_screen.dart';
 import 'package:codecore/ui/screens/home/home_screen.dart';
+import 'package:codecore/ui/screens/smart/smart_playlist_editor.dart';
+import 'package:codecore/ui/screens/stats/stats_screen.dart';
 import 'package:codecore/ui/screens/library/album_detail_screen.dart';
 import 'package:codecore/ui/screens/library/all_tracks_screen.dart';
 import 'package:codecore/ui/screens/library/artist_screen.dart';
@@ -48,6 +51,9 @@ void main() {
             key: 'artist', name: 'Artist', trackCount: 2, albumCount: 2)),
     'favourites': const FavoritesScreen(),
     'queue': Scaffold(body: _Queue()),
+    'history': const HistoryScreen(),
+    'stats': const StatsScreen(),
+    'smart editor': const SmartPlaylistEditor(),
   };
   // German and French are the languages with the longest texts.
   for (final lang in ['it', 'fr', 'de', 'pt']) {

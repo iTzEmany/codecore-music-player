@@ -9,6 +9,7 @@ import '../screens/import/import_flow.dart';
 import '../screens/library/favorites_screen.dart';
 import '../screens/playlists/playlist_detail_screen.dart';
 import '../screens/playlists/playlist_dialogs.dart';
+import '../screens/smart/smart_playlist_editor.dart';
 import '../theme/tokens.dart';
 import '../widgets/playlist_cover.dart';
 import '../widgets/track_drag.dart';
@@ -184,12 +185,21 @@ class DesktopSidebar extends ConsumerWidget {
                     startCsvImport(context, ref);
                     return;
                   }
+                  if (v == 'smart') {
+                    ShellNav.openInLibrary(
+                      context,
+                      ref,
+                      const SmartPlaylistEditor(),
+                    );
+                    return;
+                  }
                   final name = await askPlaylistName(context);
                   if (name == null) return;
                   await ref.read(playlistRepositoryProvider).create(name);
                 },
                 itemBuilder: (_) => [
                   PopupMenuItem(value: 'new', child: Text(l.newPlaylist)),
+                  PopupMenuItem(value: 'smart', child: Text(l.smartPlaylistNew)),
                   PopupMenuItem(value: 'csv', child: Text(l.csvImportMenu)),
                 ],
               ),

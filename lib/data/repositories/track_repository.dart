@@ -141,7 +141,10 @@ class TrackRepository {
 
   /// The `ORDER BY` of [sort] in SQL (the same orders as [watchTracks]), or a
   /// shuffle that stays the same for a given [randomSeed].
-  static String _orderSql(SortOption sort, int? randomSeed) {
+  static String _orderSql(SortOption sort, int? randomSeed, {bool mostPlayed = false}) {
+    if (mostPlayed) {
+      return 'play_count DESC, COALESCE(last_played_at, 0) DESC, title COLLATE NOCASE';
+    }
     if (randomSeed != null) {
       // Not linear in the id (a seed would only rotate the order).
       final s = randomSeed.abs() % 1000003;
@@ -165,15 +168,16 @@ class TrackRepository {
     SortOption sort,
     int? limit,
     int? randomSeed,
-    int nowMs,
-  ) {
+    int nowMs, {
+    bool mostPlayed = false,
+  }) {
     final q = toSql(rules, nowMs: nowMs);
     final vars = [...q.vars];
     final lim = limit == null ? '' : ' LIMIT ?';
     if (limit != null) vars.add(Variable<int>(limit));
     return (
       sql: 'SELECT * FROM tracks WHERE ${q.where} '
-          'ORDER BY ${_orderSql(sort, randomSeed)}$lim',
+          'ORDER BY ${_orderSql(sort, randomSeed, mostPlayed: mostPlayed)}$lim',
       vars: vars,
     );
   }
@@ -188,10 +192,12 @@ class TrackRepository {
     SortOption sort = SortOption.defaultOrder,
     int? limit,
     int? randomSeed,
+    bool mostPlayed = false,
     DateTime? now,
   }) {
     final q = _byRules(rules, sort, limit, randomSeed,
-        (now ?? DateTime.now()).millisecondsSinceEpoch);
+        (now ?? DateTime.now()).millisecondsSinceEpoch,
+        mostPlayed: mostPlayed);
     return _db
         .customSelect(q.sql, variables: q.vars, readsFrom: _ruleTables)
         .watch()

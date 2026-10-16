@@ -2342,4 +2342,87 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get ruleHelpTooltip => 'Aiuto sulla ricerca';
+
+  @override
+  String get smartPlaylistNew => 'Nuova playlist intelligente';
+
+  @override
+  String get smartPlaylistEdit => 'Modifica playlist intelligente';
+
+  @override
+  String get smartPlaylistLabel => 'Playlist intelligente';
+
+  @override
+  String smartSubtitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Playlist intelligente · $count brani',
+      one: 'Playlist intelligente · 1 brano',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get smartName => 'Nome';
+
+  @override
+  String get smartNameRequired => 'Scrivi un nome';
+
+  @override
+  String get smartRules => 'Regole';
+
+  @override
+  String get smartRulesHint => 'artista:\"pink floyd\" -live anno:1970..1979';
+
+  @override
+  String get smartNoRules =>
+      'Senza regole la playlist contiene tutta la libreria.';
+
+  @override
+  String get smartSortBy => 'Ordina per';
+
+  @override
+  String get smartSortMostPlayed => 'Più ascoltati';
+
+  @override
+  String get smartSortRandom => 'A caso';
+
+  @override
+  String get smartLimit => 'Limite di brani (facoltativo)';
+
+  @override
+  String get smartTemplates => 'Modelli';
+
+  @override
+  String get smartTplNever => 'Mai ascoltati';
+
+  @override
+  String get smartTplRecent => 'Aggiunti di recente';
+
+  @override
+  String get smartTplTop => 'I più ascoltati';
+
+  @override
+  String get smartTpl90s => 'Anni ’90';
+
+  @override
+  String get smartConvert => 'Converti in playlist normale';
+
+  @override
+  String smartConverted(String name) {
+    return 'Creata la playlist «$name» con l’elenco attuale';
+  }
+
+  @override
+  String smartDeleteTitle(String name) {
+    return 'Eliminare «$name»?';
+  }
+
+  @override
+  String get smartDeleteBody =>
+      'Si elimina solo la regola: i brani restano dove sono.';
+
+  @override
+  String get smartAutoNote => 'L’elenco si aggiorna da solo.';
 }

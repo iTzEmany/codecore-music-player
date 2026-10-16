@@ -2346,4 +2346,87 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get ruleHelpTooltip => 'Ayuda de la búsqueda';
+
+  @override
+  String get smartPlaylistNew => 'Nueva lista inteligente';
+
+  @override
+  String get smartPlaylistEdit => 'Editar lista inteligente';
+
+  @override
+  String get smartPlaylistLabel => 'Lista inteligente';
+
+  @override
+  String smartSubtitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Lista inteligente · $count canciones',
+      one: 'Lista inteligente · 1 canción',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get smartName => 'Nombre';
+
+  @override
+  String get smartNameRequired => 'Escribe un nombre';
+
+  @override
+  String get smartRules => 'Reglas';
+
+  @override
+  String get smartRulesHint => 'artist:\"pink floyd\" -live year:1970..1979';
+
+  @override
+  String get smartNoRules =>
+      'Sin reglas, la lista contiene toda la biblioteca.';
+
+  @override
+  String get smartSortBy => 'Ordenar por';
+
+  @override
+  String get smartSortMostPlayed => 'Más escuchadas';
+
+  @override
+  String get smartSortRandom => 'Al azar';
+
+  @override
+  String get smartLimit => 'Límite de canciones (opcional)';
+
+  @override
+  String get smartTemplates => 'Plantillas';
+
+  @override
+  String get smartTplNever => 'Nunca escuchadas';
+
+  @override
+  String get smartTplRecent => 'Añadidas recientemente';
+
+  @override
+  String get smartTplTop => 'Las más escuchadas';
+
+  @override
+  String get smartTpl90s => 'Los años 90';
+
+  @override
+  String get smartConvert => 'Convertir en lista normal';
+
+  @override
+  String smartConverted(String name) {
+    return 'Creada la lista «$name» con la lista actual';
+  }
+
+  @override
+  String smartDeleteTitle(String name) {
+    return '¿Eliminar «$name»?';
+  }
+
+  @override
+  String get smartDeleteBody =>
+      'Solo se elimina la regla: las canciones se quedan donde están.';
+
+  @override
+  String get smartAutoNote => 'La lista se actualiza sola.';
 }

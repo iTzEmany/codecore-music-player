@@ -17,6 +17,7 @@ const _sameAsItalian = {
   'proposedValue', 'settingsAbout', 'settingsOnline', 'settingsTheme',
   'sharePin', 'sortAlbum', 'sortArtist', 'textLarge', 'tracksAndDuration',
   'youtube', 'ytDlpVersion', 'statsHoursMinutes', 'statsFirstValue', 'ruleChipTag',
+  'smartName', 'smartPlaylistLabel',
 };
 
 Map<String, dynamic> _arb(String lang) =>

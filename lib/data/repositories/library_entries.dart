@@ -1,3 +1,4 @@
+import '../db/app_database.dart';
 import 'library_queries.dart';
 import 'playlist_repository.dart';
 
@@ -21,6 +22,7 @@ class LibraryEntry {
     this.album,
     this.artistSummary,
     this.playlist,
+    this.smart,
   });
 
   final LibraryKind kind;
@@ -43,6 +45,9 @@ class LibraryEntry {
   final AlbumSummary? album;
   final ArtistSummary? artistSummary;
   final PlaylistSummary? playlist;
+
+  /// Set for a smart playlist (its [kind] is `playlist` too).
+  final SmartPlaylist? smart;
 }
 
 String _sortKey(LibraryEntry e) => (e.title ?? '').toLowerCase();
@@ -53,6 +58,7 @@ List<LibraryEntry> buildLibraryEntries({
   required List<PlaylistSummary> playlists,
   required List<AlbumSummary> albums,
   required List<ArtistSummary> artists,
+  List<SmartPlaylist> smart = const [],
   LibraryKind? kind,
   LibrarySort sort = LibrarySort.recent,
 }) {
@@ -68,6 +74,16 @@ List<LibraryEntry> buildLibraryEntries({
           lastPlayedAt: p.lastPlayedAt,
           addedAt: p.addedAt,
           playlist: p,
+        ),
+    if (kind == null || kind == LibraryKind.playlist)
+      for (final s in smart)
+        LibraryEntry(
+          kind: LibraryKind.playlist,
+          id: 'smart:${s.id}',
+          title: s.name,
+          count: 0,
+          addedAt: s.createdAt,
+          smart: s,
         ),
     if (kind == null || kind == LibraryKind.album)
       for (final a in albums)

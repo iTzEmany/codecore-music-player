@@ -8,6 +8,7 @@ import '../../../providers/database_providers.dart';
 import '../../../providers/library_providers.dart';
 import '../../../providers/nav_providers.dart';
 import '../../../providers/settings_providers.dart';
+import '../../../providers/smart_playlist_providers.dart';
 import '../../shell/shell_nav.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/activity_button.dart';
@@ -16,6 +17,7 @@ import '../../widgets/cover_image.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_state.dart';
 import '../../widgets/playlist_cover.dart';
+import '../../widgets/smart_cover.dart';
 import '../devices/devices_sheet.dart';
 import '../import/import_flow.dart';
 import '../playlists/playlist_detail_screen.dart';
@@ -25,6 +27,8 @@ import 'all_tracks_screen.dart';
 import 'artist_screen.dart';
 import 'favorites_screen.dart';
 import '../history/history_screen.dart';
+import '../smart/smart_playlist_editor.dart';
+import '../smart/smart_playlist_screen.dart';
 import '../stats/stats_screen.dart';
 import 'folders_sheet.dart';
 import 'scan_status.dart';
@@ -47,6 +51,9 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
 
   void _open(LibraryEntry e) {
     final Widget page = switch (e.kind) {
+      LibraryKind.playlist when e.smart != null => SmartPlaylistScreen(
+        id: e.smart!.id,
+      ),
       LibraryKind.playlist => PlaylistDetailScreen(
         playlist: e.playlist!.playlist,
       ),
@@ -65,6 +72,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
       orElse: () => LibrarySort.recent,
     );
     final playlists = ref.watch(playlistsProvider);
+    final smart = ref.watch(smartPlaylistsProvider).value ?? const [];
     final albums = ref.watch(albumsProvider);
     final artists = ref.watch(artistsProvider);
     final folders = ref.watch(foldersProvider).value;
@@ -113,6 +121,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
         playlists: playlists.value!,
         albums: albums.value!,
         artists: artists.value!,
+        smart: smart,
         kind: _kind,
         sort: sort,
       );
@@ -187,6 +196,13 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
                       startCsvImport(context, ref);
                       return;
                     }
+                    if (v == 'smart') {
+                      await ShellNav.open<bool>(
+                        context,
+                        const SmartPlaylistEditor(),
+                      );
+                      return;
+                    }
                     final name = await askPlaylistName(context);
                     if (name == null) return;
                     await ref.read(playlistRepositoryProvider).create(name);
@@ -195,6 +211,10 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
                     PopupMenuItem(
                       value: 'new',
                       child: Text(l.newPlaylist),
+                    ),
+                    PopupMenuItem(
+                      value: 'smart',
+                      child: Text(l.smartPlaylistNew),
                     ),
                     PopupMenuItem(
                       value: 'csv',
@@ -337,6 +357,7 @@ Widget _pinnedCover(_Pinned p, double size, {double? radius}) => p.favorites
 String _subtitle(BuildContext context, LibraryEntry e) {
   final l = context.l10n;
   return switch (e.kind) {
+    LibraryKind.playlist when e.smart != null => l.smartPlaylistLabel,
     LibraryKind.playlist => l.playlistCountLabel(e.count),
     LibraryKind.album =>
       '${l.kindAlbum} · ${e.variousArtists ? l.variousArtists : (e.artist ?? l.unknownArtist)}',
@@ -351,6 +372,7 @@ String _title(BuildContext context, LibraryEntry e) =>
         : context.l10n.unknownAlbum);
 
 Widget _cover(LibraryEntry e, double size) => switch (e.kind) {
+  LibraryKind.playlist when e.smart != null => SmartCover(size: size),
   LibraryKind.artist => ArtistAvatar(
     name: e.title,
     size: size,

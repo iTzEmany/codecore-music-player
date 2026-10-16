@@ -1308,5 +1308,49 @@
       }
     }
   },
-  "ruleHelpTooltip": "Hilfe zur Suche"
+  "ruleHelpTooltip": "Hilfe zur Suche",
+  "smartPlaylistNew": "Neue intelligente Playlist",
+  "smartPlaylistEdit": "Intelligente Playlist bearbeiten",
+  "smartPlaylistLabel": "Intelligente Playlist",
+  "smartSubtitle": "{count, plural, one{Intelligente Playlist · 1 Titel} other{Intelligente Playlist · {count} Titel}}",
+  "@smartSubtitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "smartName": "Name",
+  "smartNameRequired": "Gib einen Namen ein",
+  "smartRules": "Regeln",
+  "smartRulesHint": "artist:\"pink floyd\" -live year:1970..1979",
+  "smartNoRules": "Ohne Regeln enthält die Playlist die ganze Bibliothek.",
+  "smartSortBy": "Sortieren nach",
+  "smartSortMostPlayed": "Meistgespielt",
+  "smartSortRandom": "Zufällig",
+  "smartLimit": "Titellimit (optional)",
+  "smartTemplates": "Vorlagen",
+  "smartTplNever": "Nie gespielt",
+  "smartTplRecent": "Kürzlich hinzugefügt",
+  "smartTplTop": "Meistgespielte",
+  "smartTpl90s": "Die 90er",
+  "smartConvert": "In normale Playlist umwandeln",
+  "smartConverted": "Playlist „{name}“ mit der aktuellen Liste erstellt",
+  "@smartConverted": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smartDeleteTitle": "„{name}“ löschen?",
+  "@smartDeleteTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smartDeleteBody": "Gelöscht wird nur die Regel: Die Titel bleiben, wo sie sind.",
+  "smartAutoNote": "Die Liste aktualisiert sich von selbst."
 }
