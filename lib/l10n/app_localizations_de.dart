@@ -1729,4 +1729,17 @@ class AppLocalizationsDe extends AppLocalizations {
   String csvImportBigWarning(int n) {
     return '$n Titel zum Laden: das dauert Stunden. In Blöcken, einer nach dem anderen, bleibt die Reihenfolge richtig und du kannst zwischen den Blöcken anhalten.';
   }
+
+  @override
+  String get etaLessThanMinute => 'unter 1 Min.';
+
+  @override
+  String etaMinutes(int minutes) {
+    return 'etwa $minutes Min.';
+  }
+
+  @override
+  String etaHours(int hours, int minutes) {
+    return 'etwa $hours Std. $minutes Min.';
+  }
 }

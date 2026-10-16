@@ -1,3 +1,5 @@
+import '../../l10n/app_localizations.dart';
+
 import '../../data/db/app_database.dart';
 
 String formatDuration(int ms) {
@@ -29,4 +31,12 @@ String qualityLabel(Track t) {
     return parts.isEmpty ? fmt : '$fmt • ${parts.join(' / ')}';
   }
   return t.bitrateKbps == null ? fmt : '$fmt • ${t.bitrateKbps} kbps';
+}
+
+/// «circa 18 min», «circa 2 h 10 min», «meno di 1 min».
+String etaLabel(AppLocalizations l, Duration d) {
+  final minutes = (d.inSeconds / 60).round();
+  if (minutes < 1) return l.etaLessThanMinute;
+  if (minutes >= 60) return l.etaHours(minutes ~/ 60, minutes % 60);
+  return l.etaMinutes(minutes);
 }

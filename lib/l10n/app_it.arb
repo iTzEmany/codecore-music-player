@@ -1130,5 +1130,25 @@
         "type": "int"
       }
     }
+  },
+  "etaLessThanMinute": "meno di 1 min",
+  "etaMinutes": "circa {minutes} min",
+  "etaHours": "circa {hours} h {minutes} min",
+  "@etaMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "@etaHours": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
   }
 }

@@ -939,5 +939,25 @@
         "type": "int"
       }
     }
+  },
+  "etaLessThanMinute": "under 1 min",
+  "etaMinutes": "about {minutes} min",
+  "etaHours": "about {hours} h {minutes} min",
+  "@etaMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "@etaHours": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
   }
 }

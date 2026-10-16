@@ -5,6 +5,7 @@ import '../../../l10n/l10n_ext.dart';
 import '../../../providers/import_providers.dart';
 import '../../shell/shell_nav.dart';
 import '../../theme/tokens.dart';
+import '../../widgets/format_utils.dart';
 import 'import_plan_screen.dart';
 import 'import_review_screen.dart';
 
@@ -29,7 +30,8 @@ class ImportBanner extends ConsumerWidget {
         ? l.csvImportBannerPlanned(p.planned)
         : p.paused
         ? l.csvImportBannerPaused(p.done, p.total, p.review, p.missing)
-        : l.csvImportBanner(p.done, p.total, p.review, p.missing);
+        : l.csvImportBanner(p.done, p.total, p.review, p.missing) +
+              (p.eta == null ? '' : ' · ${etaLabel(l, p.eta!)}');
     final svc = ref.read(playlistImportServiceProvider);
     return Container(
       margin: const EdgeInsets.fromLTRB(CcDims.margin, 8, CcDims.margin, 8),

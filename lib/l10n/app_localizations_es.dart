@@ -1727,4 +1727,17 @@ class AppLocalizationsEs extends AppLocalizations {
   String csvImportBigWarning(int n) {
     return '$n canciones por descargar: tardará horas. En bloques, uno tras otro, el orden de la lista se mantiene y puedes parar entre bloques.';
   }
+
+  @override
+  String get etaLessThanMinute => 'menos de 1 min';
+
+  @override
+  String etaMinutes(int minutes) {
+    return 'unos $minutes min';
+  }
+
+  @override
+  String etaHours(int hours, int minutes) {
+    return 'unas $hours h $minutes min';
+  }
 }

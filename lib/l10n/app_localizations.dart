@@ -3047,6 +3047,24 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Sono {n} brani da scaricare: ci vorranno ore. A blocchi, uno dopo l\'altro, l\'ordine della playlist resta giusto e puoi fermarti tra un blocco e l\'altro.'**
   String csvImportBigWarning(int n);
+
+  /// No description provided for @etaLessThanMinute.
+  ///
+  /// In it, this message translates to:
+  /// **'meno di 1 min'**
+  String get etaLessThanMinute;
+
+  /// No description provided for @etaMinutes.
+  ///
+  /// In it, this message translates to:
+  /// **'circa {minutes} min'**
+  String etaMinutes(int minutes);
+
+  /// No description provided for @etaHours.
+  ///
+  /// In it, this message translates to:
+  /// **'circa {hours} h {minutes} min'**
+  String etaHours(int hours, int minutes);
 }
 
 class _AppLocalizationsDelegate

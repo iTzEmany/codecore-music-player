@@ -117,12 +117,14 @@ class ImportProgress {
     required this.missing,
     required this.paused,
     this.planned = 0,
+    this.eta,
   });
 
   factory ImportProgress.from(
     PlaylistImport imp,
-    List<PlaylistImportItem> items,
-  ) {
+    List<PlaylistImportItem> items, {
+    Duration? Function(int rowsLeft)? etaFor,
+  }) {
     var done = 0, review = 0, missing = 0, planned = 0;
     // Rows a sync took out of the source are no longer part of the import.
     final live = [
@@ -161,12 +163,16 @@ class ImportProgress {
       missing: missing,
       paused: imp.state == ImportStatus.paused,
       planned: planned,
+      eta: imp.state == ImportStatus.running ? etaFor?.call(live.length - done) : null,
     );
   }
 
   final int id, playlistId, total, done, review, missing, planned;
   final String name;
   final bool paused;
+
+  /// Time left at the current pace; null while unknown or paused.
+  final Duration? eta;
 
   double? get fraction => total == 0 ? null : done / total;
 }
@@ -179,6 +185,8 @@ final importProgressProvider = Provider<List<ImportProgress>>((ref) {
       ImportProgress.from(
         i,
         ref.watch(importItemsProvider(i.id)).value ?? const [],
+        etaFor: (left) =>
+            ref.read(playlistImportServiceProvider).etaFor(i.id, left),
       ),
   ];
 });
@@ -191,5 +199,7 @@ final playlistImportProgressProvider =
       return ImportProgress.from(
         imp,
         ref.watch(importItemsProvider(imp.id)).value ?? const [],
+        etaFor: (left) =>
+            ref.read(playlistImportServiceProvider).etaFor(imp.id, left),
       );
     });

@@ -10,6 +10,7 @@ import '../../../providers/youtube_providers.dart';
 import '../../../services/share/offers.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/confirm.dart';
+import '../../widgets/format_utils.dart';
 import '../../widgets/yt_dlp_outdated_banner.dart';
 
 /// Everything that runs in the background, with Cancel where it exists.
@@ -42,7 +43,8 @@ class ActivitySheet extends ConsumerWidget {
       ActivityKind.import =>
         a.paused
             ? l.activityImportPaused(a.name ?? '', a.done, a.total)
-            : l.activityImport(a.name ?? '', a.done, a.total),
+            : l.activityImport(a.name ?? '', a.done, a.total) +
+                  (a.eta == null ? '' : ' · ${etaLabel(l, a.eta!)}'),
     };
 
     Future<void> cancelImport(ActivityItem a) async {

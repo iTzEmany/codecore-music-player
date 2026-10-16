@@ -11,6 +11,7 @@ import '../online/download_queue.dart';
 import '../online/youtube_service.dart';
 import 'exportify_reader.dart';
 import 'import_candidate.dart';
+import 'eta_estimator.dart';
 import 'import_options.dart';
 import 'playlist_paths.dart';
 import 'track_matcher.dart';
@@ -162,14 +163,22 @@ class PlaylistImportService {
       }
       previous = id;
     }
+    _eta(first!).start();
     if (rows.isEmpty) {
-      await imports.setStatus(first!, ImportStatus.finished);
+      await imports.setStatus(first, ImportStatus.finished);
       _emit(ImportEvent(ImportEventKind.completed, first));
     } else {
       _kick();
     }
-    return first!;
+    return first;
   }
+
+  final _etas = <int, EtaEstimator>{};
+
+  EtaEstimator _eta(int importId) => _etas.putIfAbsent(importId, EtaEstimator.new);
+
+  /// Time left for [left] more rows of an import; null until it has a pace.
+  Duration? etaFor(int importId, int left) => _etas[importId]?.remaining(left);
 
   /// Import -> the block that starts when it finishes (lost on restart: the
   /// blocks are then paused, and resumed by hand like any paused import).
@@ -218,6 +227,7 @@ class PlaylistImportService {
     final imp = await imports.get(importId);
     if (imp?.state == ImportStatus.running) {
       await imports.setStatus(importId, ImportStatus.paused);
+      _etas[importId]?.pause();
     }
   }
 
@@ -225,6 +235,7 @@ class PlaylistImportService {
     final imp = await imports.get(importId);
     if (imp == null || imp.state != ImportStatus.paused) return;
     await imports.setStatus(importId, ImportStatus.running);
+    _eta(importId).start();
     _kick();
   }
 
@@ -339,6 +350,7 @@ class PlaylistImportService {
       _failStreak = 0;
       switch (decision.kind) {
         case MatchKind.sure when imp?.planFirst ?? false:
+          _eta(importId).rowDone();
           await imports.setItem(importId, row.index,
               status: ImportItemStatus.planned,
               videoId: Value(decision.best!.result.id),
@@ -348,12 +360,14 @@ class PlaylistImportService {
           await _queueDownload(row, importId, decision.best!.result,
               score: decision.best!.score);
         case MatchKind.review:
+          _eta(importId).rowDone();
           await imports.setItem(importId, row.index,
               status: ImportItemStatus.review,
               candidates: Value(encodeCandidates(decision.top)),
               score: Value(decision.best!.score),
               note: const Value(ImportNote.lowScore));
         case MatchKind.notFound:
+          _eta(importId).rowDone();
           await imports.setItem(importId, row.index,
               status: ImportItemStatus.notFound,
               note: const Value(ImportNote.noResults));
@@ -399,6 +413,7 @@ class PlaylistImportService {
       n++;
     }
     await imports.setStatus(importId, ImportStatus.running);
+    _eta(importId).start();
     _kick();
     return n;
   }
@@ -464,11 +479,13 @@ class PlaylistImportService {
     }
     if (stop != null) {
       await imports.setStatus(importId, ImportStatus.paused);
+      _etas[importId]?.pause();
       _emit(ImportEvent(stop, importId));
     }
   }
 
   Future<void> _link(int importId, ImportRow row, int trackId) async {
+    _eta(importId).rowDone(linked: true);
     await imports.setItem(importId, row.index,
         status: ImportItemStatus.linked, trackId: Value(trackId));
     final imp = await imports.get(importId);
@@ -518,8 +535,10 @@ class PlaylistImportService {
       if (imp.state == ImportStatus.cancelled) return;
       switch (item.status) {
         case DownloadStatus.done:
+          _eta(importId).rowDone();
           await _finishDownload(imp, it, item.path);
         case DownloadStatus.failed:
+          _eta(importId).rowDone();
           if (item.error == YtErrorKind.unavailable) {
             forgetSearches?.call(searchQueries(it.toRow()));
           }
@@ -527,6 +546,7 @@ class PlaylistImportService {
               status: ImportItemStatus.failed);
           if (item.error == YtErrorKind.rateLimited) {
             await imports.setStatus(importId, ImportStatus.paused);
+            _etas[importId]?.pause();
             _emit(ImportEvent(ImportEventKind.rateLimited, importId));
           }
         case DownloadStatus.cancelled:
@@ -590,6 +610,7 @@ class PlaylistImportService {
     }
     if ((c[ImportItemStatus.planned] ?? 0) > 0) {
       await imports.setStatus(importId, ImportStatus.paused);
+      _etas[importId]?.pause();
       _emit(ImportEvent(ImportEventKind.planned, importId));
       return true;
     }

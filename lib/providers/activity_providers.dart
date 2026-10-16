@@ -25,6 +25,7 @@ class ActivityItem {
     this.paused = false,
     this.ref,
     this.retryDelaySec,
+    this.eta,
   });
 
   final ActivityKind kind;
@@ -44,6 +45,9 @@ class ActivityItem {
 
   /// A download waiting to retry: [done] is the attempt, [total] the maximum.
   final int? retryDelaySec;
+
+  /// An import's estimated time left (null = unknown).
+  final Duration? eta;
 
   bool get cancellable =>
       running &&
@@ -108,6 +112,7 @@ ActivityState buildActivity({
         total: i.total,
         progress: i.fraction,
         paused: i.paused,
+        eta: i.eta,
         ref: i.id,
       ),
     );
