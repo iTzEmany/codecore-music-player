@@ -1019,5 +1019,17 @@
       }
     }
   },
-  "previewTrack": "Vista previa de 20 s"
+  "previewTrack": "Vista previa de 20 s",
+  "equalizer": "Ecualizador",
+  "eqOutputSpeaker": "Altavoz",
+  "eqOutputHeadphones": "Auriculares",
+  "eqHint": "Cada salida recuerda su curva: cambia sola al conectar auriculares.",
+  "eqPresetFlat": "Plano",
+  "eqPresetBass": "Graves",
+  "eqPresetVoice": "Voz",
+  "eqPresetTreble": "Agudos",
+  "eqPresetCustom": "Personalizado",
+  "eqReset": "Restablecer",
+  "eqWaiting": "Las bandas aparecen cuando empieza la primera canción.",
+  "eqUnavailable": "El ecualizador no está disponible en este dispositivo."
 }

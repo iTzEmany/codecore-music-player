@@ -10,6 +10,7 @@ import '../../../core/app_info.dart';
 import '../../../core/constants.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/database_providers.dart';
+import '../../../providers/equalizer_providers.dart';
 import '../../../providers/library_providers.dart';
 import '../../../providers/online_providers.dart';
 import '../../../providers/settings_providers.dart';
@@ -17,6 +18,7 @@ import '../../widgets/confirm.dart';
 import '../../widgets/cover_image.dart';
 import '../library/folders_sheet.dart';
 import '../../../providers/share_providers.dart';
+import '../../shell/shell_nav.dart';
 import '../playlists/playlist_dialogs.dart';
 import '../share/share_screen.dart';
 import '../../../services/migration/python_db_importer.dart';
@@ -24,6 +26,7 @@ import '../../theme/app_theme.dart';
 import '../../theme/tokens.dart';
 import 'advanced_section.dart';
 import 'download_settings_tiles.dart';
+import 'equalizer_screen.dart';
 import 'log_export_tile.dart';
 import 'missing_tracks_screen.dart';
 import 'theme_swatch.dart';
@@ -125,6 +128,13 @@ class SettingsScreen extends ConsumerWidget {
             _Group(
               title: l.settingsPlayback,
               children: [
+                if (ref.watch(equalizerProvider) != null)
+                  ListTile(
+                    leading: const Icon(Icons.equalizer_rounded),
+                    title: Text(l.equalizer),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => ShellNav.open<void>(context, const EqualizerScreen()),
+                  ),
                 SwitchListTile(
                   title: Text(l.normalizeVolume),
                   subtitle: Text(l.normalizeVolumeHint),

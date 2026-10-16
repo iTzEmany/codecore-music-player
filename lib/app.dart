@@ -16,6 +16,7 @@ class CodecoreApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     ref.watch(shareAutoStartProvider);
     ref.watch(equalizerApplierProvider);
+    ref.watch(outputRouteSyncProvider);
     final s = ref.watch(settingsProvider);
     ref.read(audioHandlerProvider)
       ..setNormalize(s.normalizeVolume)

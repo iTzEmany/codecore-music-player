@@ -10,11 +10,13 @@ import '../../core/platform.dart';
 import '../../data/db/app_database.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../providers/database_providers.dart';
+import '../../providers/equalizer_providers.dart';
 import '../../providers/jam_providers.dart';
 import '../../providers/player_providers.dart';
 import '../../providers/preview_providers.dart';
 import '../screens/playlists/playlist_dialogs.dart';
 import '../screens/enrich_preview_dialog.dart';
+import '../screens/settings/equalizer_screen.dart';
 import '../screens/devices/devices_sheet.dart';
 import '../screens/track_edit_dialog.dart';
 import '../screens/library/album_detail_screen.dart';
@@ -146,6 +148,12 @@ List<TrackActionGroup> trackActions(
       ),
     ]),
     TrackActionGroup(l.groupOther, [
+      // From Now Playing's ⋯ (the playing track's menu), where the equalizer is.
+      if (ref.read(equalizerProvider) != null &&
+          ref.read(currentTrackProvider).value?.id == track.id)
+        TrackAction(Icons.equalizer_rounded, l.equalizer, () async {
+          ShellNav.open<void>(outer, const EqualizerScreen());
+        }),
       TrackAction(
         Icons.devices_rounded,
         l.shareMenu,

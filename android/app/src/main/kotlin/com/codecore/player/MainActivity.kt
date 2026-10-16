@@ -1,5 +1,9 @@
 package com.codecore.player
 
+import android.media.AudioDeviceCallback
+import android.media.AudioDeviceInfo
+import android.media.AudioManager
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import com.ryanheise.audioservice.AudioServiceActivity
@@ -38,6 +42,19 @@ class MainActivity : AudioServiceActivity() {
         super.configureFlutterEngine(flutterEngine)
         channel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "codecore/ytdlp")
         channel.setMethodCallHandler { call, result -> handle(call, result) }
+
+        // Where the sound goes (headphones or speaker): the equalizer keeps a
+        // curve for each.
+        val audio = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "codecore/audio")
+        audio.setMethodCallHandler { call, result ->
+            if (call.method == "outputRoute") result.success(currentOutputRoute())
+            else result.notImplemented()
+        }
+        val audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
+        audioManager.registerAudioDeviceCallback(object : AudioDeviceCallback() {
+            override fun onAudioDevicesAdded(added: Array<out AudioDeviceInfo>) = pushRoute(audio)
+            override fun onAudioDevicesRemoved(removed: Array<out AudioDeviceInfo>) = pushRoute(audio)
+        }, main)
 
         val share = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "codecore/share")
         ShareBridge.channel = share
@@ -86,6 +103,25 @@ class MainActivity : AudioServiceActivity() {
                 else -> result.notImplemented()
             }
         }
+    }
+
+    private fun pushRoute(audio: MethodChannel) {
+        audio.invokeMethod("outputRoute", currentOutputRoute())
+    }
+
+    /** `headphones` when wired, Bluetooth or USB headphones are connected, else `speaker`. */
+    private fun currentOutputRoute(): String {
+        val am = getSystemService(AUDIO_SERVICE) as AudioManager
+        val types = mutableSetOf(
+            AudioDeviceInfo.TYPE_WIRED_HEADPHONES,
+            AudioDeviceInfo.TYPE_WIRED_HEADSET,
+            AudioDeviceInfo.TYPE_BLUETOOTH_A2DP,
+            AudioDeviceInfo.TYPE_BLUETOOTH_SCO,
+            AudioDeviceInfo.TYPE_USB_HEADSET,
+        )
+        if (Build.VERSION.SDK_INT >= 31) types.add(AudioDeviceInfo.TYPE_BLE_HEADSET)
+        val headphones = am.getDevices(AudioManager.GET_DEVICES_OUTPUTS).any { it.type in types }
+        return if (headphones) "headphones" else "speaker"
     }
 
     @Synchronized

@@ -1879,4 +1879,43 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get previewTrack => '20-s-Vorschau';
+
+  @override
+  String get equalizer => 'Equalizer';
+
+  @override
+  String get eqOutputSpeaker => 'Lautsprecher';
+
+  @override
+  String get eqOutputHeadphones => 'Kopfhörer';
+
+  @override
+  String get eqHint =>
+      'Jeder Ausgang merkt sich seine Kurve: sie wechselt von selbst, wenn du Kopfhörer anschließt.';
+
+  @override
+  String get eqPresetFlat => 'Flach';
+
+  @override
+  String get eqPresetBass => 'Bass';
+
+  @override
+  String get eqPresetVoice => 'Stimme';
+
+  @override
+  String get eqPresetTreble => 'Höhen';
+
+  @override
+  String get eqPresetCustom => 'Eigene';
+
+  @override
+  String get eqReset => 'Zurücksetzen';
+
+  @override
+  String get eqWaiting =>
+      'Die Bänder erscheinen, sobald der erste Titel läuft.';
+
+  @override
+  String get eqUnavailable =>
+      'Der Equalizer ist auf diesem Gerät nicht verfügbar.';
 }

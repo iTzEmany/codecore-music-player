@@ -15,23 +15,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../support/fake_backend.dart';
-
-class FakeEq implements Equalizer {
-  FakeEq({Completer<EqBands>? ready})
-      : _ready = ready ?? (Completer<EqBands>()..complete(_five));
-  static const _five = EqBands(
-      centerHz: [60, 230, 910, 3600, 14000], minDb: -15, maxDb: 15);
-  final Completer<EqBands> _ready;
-  final enabledCalls = <bool>[];
-  final gainCalls = <List<double>>[];
-
-  @override
-  Future<EqBands> bands() => _ready.future;
-  @override
-  Future<void> setEnabled(bool enabled) async => enabledCalls.add(enabled);
-  @override
-  Future<void> setGains(List<double> gainsDb) async => gainCalls.add(gainsDb);
-}
+import '../support/fake_equalizer.dart';
 
 Future<void> settle() => Future<void>.delayed(const Duration(milliseconds: 30));
 
@@ -121,7 +105,7 @@ void main() {
         eqEnabled: true, eqSpeaker: const EqProfile(preset: EqPreset.bass)));
     await settle();
     expect(eq.gainCalls, isEmpty);
-    ready.complete(FakeEq._five);
+    ready.complete(FakeEq.five);
     await settle();
     expect(eq.gainCalls.last.first, greaterThan(4));
     expect(eq.enabledCalls.last, isTrue);

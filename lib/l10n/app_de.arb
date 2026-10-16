@@ -1019,5 +1019,17 @@
       }
     }
   },
-  "previewTrack": "20-s-Vorschau"
+  "previewTrack": "20-s-Vorschau",
+  "equalizer": "Equalizer",
+  "eqOutputSpeaker": "Lautsprecher",
+  "eqOutputHeadphones": "Kopfhörer",
+  "eqHint": "Jeder Ausgang merkt sich seine Kurve: sie wechselt von selbst, wenn du Kopfhörer anschließt.",
+  "eqPresetFlat": "Flach",
+  "eqPresetBass": "Bass",
+  "eqPresetVoice": "Stimme",
+  "eqPresetTreble": "Höhen",
+  "eqPresetCustom": "Eigene",
+  "eqReset": "Zurücksetzen",
+  "eqWaiting": "Die Bänder erscheinen, sobald der erste Titel läuft.",
+  "eqUnavailable": "Der Equalizer ist auf diesem Gerät nicht verfügbar."
 }

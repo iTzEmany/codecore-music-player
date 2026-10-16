@@ -3323,6 +3323,78 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Anteprima 20 s'**
   String get previewTrack;
+
+  /// No description provided for @equalizer.
+  ///
+  /// In it, this message translates to:
+  /// **'Equalizzatore'**
+  String get equalizer;
+
+  /// No description provided for @eqOutputSpeaker.
+  ///
+  /// In it, this message translates to:
+  /// **'Altoparlante'**
+  String get eqOutputSpeaker;
+
+  /// No description provided for @eqOutputHeadphones.
+  ///
+  /// In it, this message translates to:
+  /// **'Cuffie'**
+  String get eqOutputHeadphones;
+
+  /// No description provided for @eqHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Ogni uscita ricorda la sua curva: cambia da sola quando colleghi le cuffie.'**
+  String get eqHint;
+
+  /// No description provided for @eqPresetFlat.
+  ///
+  /// In it, this message translates to:
+  /// **'Piatto'**
+  String get eqPresetFlat;
+
+  /// No description provided for @eqPresetBass.
+  ///
+  /// In it, this message translates to:
+  /// **'Bassi'**
+  String get eqPresetBass;
+
+  /// No description provided for @eqPresetVoice.
+  ///
+  /// In it, this message translates to:
+  /// **'Voce'**
+  String get eqPresetVoice;
+
+  /// No description provided for @eqPresetTreble.
+  ///
+  /// In it, this message translates to:
+  /// **'Acuti'**
+  String get eqPresetTreble;
+
+  /// No description provided for @eqPresetCustom.
+  ///
+  /// In it, this message translates to:
+  /// **'Personalizzato'**
+  String get eqPresetCustom;
+
+  /// No description provided for @eqReset.
+  ///
+  /// In it, this message translates to:
+  /// **'Reimposta'**
+  String get eqReset;
+
+  /// No description provided for @eqWaiting.
+  ///
+  /// In it, this message translates to:
+  /// **'Le bande compaiono quando parte il primo brano.'**
+  String get eqWaiting;
+
+  /// No description provided for @eqUnavailable.
+  ///
+  /// In it, this message translates to:
+  /// **'L\'equalizzatore non è disponibile su questo dispositivo.'**
+  String get eqUnavailable;
 }
 
 class _AppLocalizationsDelegate

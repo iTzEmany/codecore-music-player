@@ -1019,5 +1019,17 @@
       }
     }
   },
-  "previewTrack": "20 s preview"
+  "previewTrack": "20 s preview",
+  "equalizer": "Equalizer",
+  "eqOutputSpeaker": "Speaker",
+  "eqOutputHeadphones": "Headphones",
+  "eqHint": "Each output remembers its own curve: it switches by itself when you plug in headphones.",
+  "eqPresetFlat": "Flat",
+  "eqPresetBass": "Bass",
+  "eqPresetVoice": "Voice",
+  "eqPresetTreble": "Treble",
+  "eqPresetCustom": "Custom",
+  "eqReset": "Reset",
+  "eqWaiting": "The bands appear once the first song starts.",
+  "eqUnavailable": "The equalizer is not available on this device."
 }

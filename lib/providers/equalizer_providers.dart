@@ -3,8 +3,10 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/app_log.dart';
+import '../core/platform.dart';
 import '../data/settings/settings_store.dart';
 import '../services/audio/equalizer.dart';
+import '../services/audio/output_route.dart';
 import 'player_providers.dart';
 import 'settings_providers.dart';
 
@@ -68,4 +70,14 @@ final equalizerApplierProvider = Provider<void>((ref) {
       (_, _) => unawaited(apply()));
   ref.listen(outputRouteProvider, (_, _) => unawaited(apply()));
   unawaited(apply());
+});
+
+/// Android only: follows the output (headphones or speaker) into
+/// [outputRouteProvider]. Watched once, from the app root.
+final outputRouteSyncProvider = Provider<void>((ref) {
+  if (!isAndroid) return;
+  final channel = watchOutputRoute((headphones) => ref
+      .read(outputRouteProvider.notifier)
+      .set(headphones ? OutputRoute.headphones : OutputRoute.speaker));
+  ref.onDispose(() => channel.setMethodCallHandler(null));
 });

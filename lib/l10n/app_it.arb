@@ -1210,5 +1210,17 @@
       }
     }
   },
-  "previewTrack": "Anteprima 20 s"
+  "previewTrack": "Anteprima 20 s",
+  "equalizer": "Equalizzatore",
+  "eqOutputSpeaker": "Altoparlante",
+  "eqOutputHeadphones": "Cuffie",
+  "eqHint": "Ogni uscita ricorda la sua curva: cambia da sola quando colleghi le cuffie.",
+  "eqPresetFlat": "Piatto",
+  "eqPresetBass": "Bassi",
+  "eqPresetVoice": "Voce",
+  "eqPresetTreble": "Acuti",
+  "eqPresetCustom": "Personalizzato",
+  "eqReset": "Reimposta",
+  "eqWaiting": "Le bande compaiono quando parte il primo brano.",
+  "eqUnavailable": "L'equalizzatore non è disponibile su questo dispositivo."
 }
