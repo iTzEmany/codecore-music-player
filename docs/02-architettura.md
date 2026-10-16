@@ -85,7 +85,7 @@ Scritture con debounce 400 ms, mai in un handler di slider a ogni tick.
 - Tag **solo in lettura** (`audio_metadata_reader`, puro Dart, nessun Rust). Le modifiche dell'utente vivono nel DB.
 - Identità brano = `id` intero DB + `path` univoco. Hash SHA-256 calcolato **solo** su richiesta (condivisione).
 - Album raggruppati con `albumKey` (vedi `03-modello-dati.md`), non per solo nome.
-- Niente gapless/crossfade/"bit-perfect" nella v1: coda gestita a mano. Gapless in fase 7.
+- Niente "bit-perfect"/uscita esclusiva. Gapless e crossfade dalla fase 18, **dietro un'impostazione** (predefinito «Normale»); la coda resta gestita da `PlayQueue`.
 - Niente traduzione automatica nella v1 (era un endpoint Google non ufficiale). Eventuale ML Kit solo Android, più avanti.
 - Niente server web, niente protocollo MSTP: la fase 6 è un semplice scambio HTTP con PIN.
 
@@ -162,3 +162,13 @@ Scritture con debounce 400 ms, mai in un handler di slider a ogni tick.
 - **Anteprima:** `PreviewPlayer` è un secondo `AudioBackend` (come quello della Jam): 20 s da un terzo del brano con rampe di volume; `previewProvider` mette in pausa il lettore principale solo se suonava e lo riprende dopo. Coda e conteggi non si toccano.
 - **Equalizzatore:** interfaccia `Equalizer` (`bands()`, `setEnabled`, `setGains`) esposta da `AudioBackend.equalizer` (null dove non esiste). Preset in `presetGains` (10 bande di riferimento interpolate sul logaritmo della frequenza, tagliate ai limiti del dispositivo). Due profili (`eqSpeaker`, `eqHeadphones`); `outputRouteSyncProvider` legge l'uscita dal canale `codecore/audio` e `equalizerApplierProvider` applica la curva giusta.
 - **Controlli di sistema per la Jam:** `RemoteTransport` (stato + play/pausa/avanti/seek). `JamTransport` lo ricava da `JamState`; `CodecoreAudioHandler.attachRemote` lo collega a notifica e schermata di blocco: finché è attaccato i tasti vanno alla Jam e mai al lettore locale. `JamController` lo attacca in `_begin` e lo stacca in `_teardown`.
+
+## Gapless e crossfade (fase 18)
+- **Principio:** `PlayQueue` è l'unica autorità sull'ordine. Il backend riceve solo una **finestra di due brani** (corrente + successivo, `GaplessCapable.setNext`) e avvisa con `advanced` quando è passato al successivo; non decide mai cosa suonare.
+- `PlayQueue.peekNext()` dice quale brano seguirà (anche a fine giro in shuffle, fissando l'ordine in anticipo) e `revision` cresce a ogni modifica. `NextWindow` li usa per tenere allineato il backend e non fa nulla se non è cambiato niente.
+- `CodecoreAudioHandler.setTransition(mode, …)` (`TransitionMode`: normale · senza pause · dissolvenza). Al passaggio automatico (`_onAdvanced`) aggiorna brano, conteggio ascolti, ReplayGain e notifica **senza ricaricare**; se la coda non è più quella annunciata, carica il brano giusto nel modo normale. Un brano con segnalibro o fuori libreria non entra nella finestra (passaggio normale).
+- **Senza pause:** `JustAudioBackend` tiene nella playlist `[corrente, successivo]` e toglie il finito. Su desktop mpv fa il resto (`prefetch-playlist` non serve: misurato, 0 ms).
+- **Dissolvenza:** `CrossfadeEngine` (due backend alternati, creati alla prima dissolvenza) è il backend del lettore principale: in Normale e Senza pause è un passante. Il secondo lettore prepara il brano a volume 0; a `durata − durata_dissolvenza × velocità` parte la rampa a potenza costante in 20 passi; **a metà** i ruoli si scambiano e `advanced` esce. Brani corti (< 2 × durata) e brani dello stesso album (opzione) passano alla finestra gapless.
+- **Jam:** invariata (backend e sincronia propri); nessun sorgente di `lib/services/jam/` conosce la finestra (test).
+- **Differenza desktop/Android in Normale:** su desktop mpv segnala la fine quando il decoder arriva a EOF, prima che l'audio nel buffer sia uscito: il caricamento del successivo ne scarta ~0,2 s (misurato). «Senza pause» lo evita.
+

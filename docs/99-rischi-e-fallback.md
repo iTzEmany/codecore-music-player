@@ -18,7 +18,7 @@ Per ogni rischio: **sintomo** → **cosa fare**. Se scatta un fallback che cambi
 | R12 | Lingua/ARB: chiavi mancanti | `null` in UI | `flutter gen-l10n` fallisce se manca una chiave nel template: tenere `app_it.arb` come template e allineare le altre. |
 
 ## Limiti accettati nella v1
-- Niente crossfade, niente "bit-perfect/esclusivo", niente equalizzatore (Android: eventuale in fase 7).
+- Niente "bit-perfect/esclusivo". Crossfade/gapless (fase 18) e equalizzatore Android (fase 17) sono opzionali.
 - Niente traduzione automatica di testi/curiosità.
 - Niente Android Auto.
 - Niente scrittura dei tag nei file.
@@ -72,4 +72,11 @@ Per ogni rischio: **sintomo** → **cosa fare**. Se scatta un fallback che cambi
 | R38 | `AndroidEqualizer` non disponibile o con bande strane su alcuni telefoni | Voce Equalizzatore assente o curva poco fedele | `equalizer == null` → voce nascosta; i preset sono interpolati sulle bande reali; errori loggati, riproduzione invariata |
 | R39 | Pacchetto MPRIS/SMTC abbandonato o incompatibile con `audio_service` | Niente tasti multimediali di sistema su desktop | Dietro un'interfaccia dedicata; fase 17.7/17.8 ferme in attesa di approvazione dei pacchetti; il resto non dipende |
 | R40 | Due notifiche (Jam e `audio_service`) o notifica che resta dopo la Jam | Notifica con il brano sbagliato | Un solo trasporto attivo, staccato in `_teardown`; test dell'handler con trasporto finto; prova con Jam terminata da host e ospite |
+
+## Gapless e crossfade (fase 18)
+| # | Rischio | Sintomo | Piano B |
+|---|---|---|---|
+| R41 | La finestra del backend si disallinea dalla coda (brano ripetuto o saltato), o il brano successivo è un file danneggiato | Un brano saltato o ripetuto al passaggio, errore di riproduzione al confine | `PlayQueue` unica autorità, `revision` per ricalcolare, `_onAdvanced` ricarica nel modo normale se la coda non è più quella annunciata; l'impostazione torna su «Normale» (che è il predefinito). Un file illeggibile ma presente non si vede prima del passaggio |
+| R42 | mpv o ExoPlayer non sono davvero gapless con certi formati o telefoni | Buco o «clic» al confine | Misurato su Linux (0 ms; mp3 −11 ms per il taglio dell'inizio). `scripts/gap_probe.py` e `test/live/gapless_live_test.dart` rifanno la misura; su Android/Windows prova a orecchio; «Normale» resta disponibile |
+| R43 | Regressioni nella Jam o nel timer di spegnimento | Jam fuori sincronia, timer «fine brano» che non ferma | Nessuna modifica ai file della Jam (`git diff` vuoto) e test che lo impediscono (`test/jam/jam_transition_test.dart`); `pauseAtTrackEnd` svuota la finestra e impedisce la dissolvenza |
 

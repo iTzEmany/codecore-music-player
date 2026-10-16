@@ -67,6 +67,7 @@ senza il file la build release usa la chiave di debug.
 - **Riprendi da qui:** i brani lunghi (≥ 20 min: podcast, audiolibri, DJ set) ripartono da dove li hai lasciati.
 - **Anteprima di 20 s:** tieni premuta la copertina (desktop: menu del brano).
 - **Equalizzatore** (Android): preset e curva propria, con profili separati per cuffie e altoparlante.
+- **Passaggio tra i brani** (Impostazioni → Riproduzione): *Normale*, *Senza pause* (album dal vivo, classica) o *Dissolvenza* da 2 a 12 s, con l'opzione di non sfumare dentro un album.
 - **Jam:** notifica e schermata di blocco mostrano il brano della Jam, con pausa/play e, per l'host, «avanti».
 
 ## Formati accettati dall'importazione
@@ -77,7 +78,7 @@ Importando di nuovo un file aggiornato nella stessa playlist si sceglie **Sincro
 
 ## Limiti noti
 - Jam: massimo 5 partecipanti; la sincronia è misurata sulla posizione del player (scarto tipico 10–30 ms, non acustico), con Bluetooth serve la compensazione manuale della latenza; nessun controllo da notifica di sistema/MPRIS; la richiesta Jam in background Android passa dalla notifica «Accetta/Rifiuta».
-- Niente crossfade/gapless nativo, niente scrittura dei tag nei file; l'equalizzatore c'è solo su Android.
+- Niente scrittura dei tag nei file; l'equalizzatore c'è solo su Android. Gapless e crossfade non valgono nella Jam.
 - Controlli multimediali di sistema (MPRIS / SMTC) non implementati; i tasti multimediali funzionano a finestra attiva.
 - Condivisione LAN in HTTP in chiaro (protetta da PIN, solo per reti domestiche).
 - Lo scanner QR non è incluso: inserire IP:porta e PIN o incollare il link del QR.

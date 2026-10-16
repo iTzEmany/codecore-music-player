@@ -74,7 +74,7 @@ L'agente riparte sempre dal primo task non spuntato.
 
 ## Fase 7 — Rifinitura (`fase-7-rifinitura.md`)
 - [x] 7.1 Import dal vecchio DB Python
-- [ ] 7.2 Gapless
+- [x] 7.2 Gapless (rimandato qui e fatto nella fase 18)
 - [x] 7.3 ReplayGain
 - [~] 7.4 Controlli multimediali desktop
 - [~] 7.5 Prestazioni
@@ -228,7 +228,7 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 18.7 Impostazioni e interfaccia
 - [~] 18.8 Non regressione della Jam e del lettore normale
 - [~] 18.9 Misura del gap e del crossfade
-- [ ] 18.10 Rifinitura, documentazione e prova a mano
+- [~] 18.10 Rifinitura, documentazione e prova a mano
 
 ## Fase 19 — Interfaccia: selezione, temi, tablet, lingue, onboarding (`fase-19-interfaccia.md`)
 - [ ] 19.1 `SelectionController` (logica pura + test)
@@ -467,6 +467,8 @@ L'agente riparte sempre dal primo task non spuntato.
 
 - 18.8: `test/jam/jam_transition_test.dart`: il `JamOutput` non chiama mai `setNext` neanche su un backend che potrebbe; nessun sorgente di `lib/services/jam/` nomina `GaplessCapable`/`CrossfadeEngine`/`NextWindow`/`setNext(`; con gapless o crossfade attivi, avviare una Jam mette in pausa il lettore locale e poi i comandi vanno solo alla Jam (nessun caricamento né finestra locale). `git diff master -- lib/services/jam` è **vuoto**; tutta `test/jam/` (103 test) verde. **Manca** il test d'integrazione sui file di `test/fixtures/gapless/` (serve `integration_test`, non approvato): lo sostituisce il test dal vivo di 18.9.
 - 18.9 (Linux, 2026-10-16): `test/live/gapless_live_test.dart` (`CODECORE_LIVE=1`, PipeWire) fa suonare **il vero `JustAudioBackend`** (just_audio → media_kit → libmpv) con la sua finestra a due brani e registra il monitor dell'uscita: scarto dei click ai confini **flac 0,0 / 0,0 ms**, **mp3 −10,8 / −10,8 ms**, **mp3→flac→mp3 −0,3 / −10,8 ms** (tutti sotto i 20 ms; i −10,8 ms sono il taglio dell'inizio dei file mp3 di mpv, non un buco). **Scoperta sul modo Normale:** caricando il brano dopo il `completed` come fa l'handler il confine misura **−216 ms**: mpv segnala la fine quando il decoder arriva a EOF, ma l'audio ancora nel buffer di uscita (~0,2 s) viene scartato dal caricamento del brano successivo, cioè **su desktop gli ultimi ~0,2 s di ogni brano si perdono nel passaggio automatico**. È un comportamento di oggi e non cambia (Normale deve restare identico); «Senza pause» lo evita. Proposta per dopo: far partire il brano successivo solo dopo lo svuotamento del buffer anche in Normale (o consigliare «Senza pause» su desktop). **Non misurati qui:** Android (ExoPlayer), Windows, e la dissolvenza a orecchio (due toni coerenti in fase non danno una misura pulita dell'equal-power): «Tocca a te».
+
+- 18.10: ARB già in parità (it/en/de/es, aggiunte in 18.7). `docs/02-architettura.md` («Gapless e crossfade»; tolto «Niente gapless/crossfade nella v1»), `docs/03-modello-dati.md` (3 impostazioni), `docs/99` (R41–R43 e «Limiti accettati»), README; 7.2 segnato fatto. Prova di una settimana con «Senza pause» in «Tocca a te».
 
 ## Note di deviazione (Fase 12)
 - 12.1 (2026-10-16): CSV vero = `Just_a_mood.csv` (34 brani; intestazioni `Track URI, ISRC, Track Name, Album Name, Artist Name(s), …, Duration (ms)`; **più artisti separati da `;`**). yt-dlp di sistema 2024.04.09 NON legge più YouTube («Please sign in»): provato con yt-dlp 2026.08.19 (binario standalone). `https://music.youtube.com/search?q=…#songs` funziona; in modalità flat dà ~460 voci con solo `id`/`title` (nessuna durata), **senza `--flat-playlist` e con `--playlist-items 1-5`** ogni voce ha `channel`, `artists[]`, `track`, `album`, `duration` in ~5–8 s → si usa quella. `YtResult` guadagna `artists` e `album`.
