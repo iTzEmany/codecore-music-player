@@ -132,19 +132,36 @@ class LibraryQueries {
         .map((rows) => rows.map(_album).toList());
   }
 
+  /// Artists grouped by lower-cased name. The cover is the one most present
+  /// among the artist's tracks, found in a single pass (a per-artist subquery
+  /// scanned the whole table once per artist: 5 s at 50 000 tracks).
   Stream<List<ArtistSummary>> watchArtists() {
     return _db
         .customSelect(
-          "SELECT lower(trim(COALESCE(artist, ''))) AS k, MIN(artist) AS name, "
-          'COUNT(*) AS track_count, COUNT(DISTINCT album_key) AS album_count, '
-          'MAX(last_played_at) AS last_played, MAX(added_at) AS added, '
-          '(SELECT t2.cover_key FROM tracks t2 WHERE t2.missing = 0 '
-          'AND t2.cover_key IS NOT NULL '
-          "AND lower(trim(COALESCE(t2.artist, ''))) = "
-          "lower(trim(COALESCE(tracks.artist, ''))) "
-          'GROUP BY t2.cover_key ORDER BY COUNT(*) DESC, t2.cover_key LIMIT 1) '
-          'AS cover_key '
-          'FROM tracks WHERE missing = 0 GROUP BY k ORDER BY k COLLATE NOCASE',
+          '''
+WITH cov AS (
+  SELECT lower(trim(COALESCE(artist, ''))) AS k, cover_key, COUNT(*) AS n
+  FROM tracks WHERE missing = 0 AND cover_key IS NOT NULL GROUP BY k, cover_key
+),
+best AS (
+  SELECT k, cover_key FROM (
+    SELECT k, cover_key,
+      ROW_NUMBER() OVER (PARTITION BY k ORDER BY n DESC, cover_key) AS rn
+    FROM cov
+  ) WHERE rn = 1
+)
+SELECT g.k AS k, g.name AS name, g.track_count AS track_count,
+  g.album_count AS album_count, g.last_played AS last_played,
+  g.added AS added, best.cover_key AS cover_key
+FROM (
+  SELECT lower(trim(COALESCE(artist, ''))) AS k, MIN(artist) AS name,
+    COUNT(*) AS track_count, COUNT(DISTINCT album_key) AS album_count,
+    MAX(last_played_at) AS last_played, MAX(added_at) AS added
+  FROM tracks WHERE missing = 0 GROUP BY k
+) g
+LEFT JOIN best ON best.k = g.k
+ORDER BY g.k COLLATE NOCASE
+''',
           readsFrom: {_db.tracks},
         )
         .watch()
