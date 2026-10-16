@@ -182,7 +182,7 @@ L'agente riparte sempre dal primo task non spuntato.
 ## Fase 15 — Importazione 2 (`fase-15-importazione-2.md`)
 - [~] 15.1 Verifiche preliminari (file veri dei formati, album su YouTube Music, iTunes per ISRC)
 - [x] 15.2 Schema v5 per le importazioni
-- [ ] 15.3 Interfaccia comune dei lettori
+- [x] 15.3 Interfaccia comune dei lettori
 - [ ] 15.4 Lettori CSV: TuneMyMusic, Soundiiz, Last.fm, generico
 - [ ] 15.5 Lettori M3U/M3U8 e XSPF
 - [ ] 15.6 Anteprima degli abbinamenti e «solo collega»
@@ -406,6 +406,8 @@ L'agente riparte sempre dal primo task non spuntato.
 - 13.4: `LibraryEntryLite` guadagna `path` (opzionale, riempito da `liteEntries`); `TrackResolver` tenta percorso relativo → titolo+artista+durata ±2 s → sha256.
 
 - 15.2: migrazione v4→v5 con `else if (from < 5)` (chi arriva da <4 crea le tabelle già con le colonne v5). `ImportRow.location` anticipato qui perché lo scrive il repository; `ImportItemStatus` + `planned`(8), `removed`(9); `setItem(note:)`. `ImportProgress` non conta le righe `removed`.
+
+- 15.3: `ImportedPlaylist` (con `kind`) in `imported_playlist.dart`; `ExportifyPlaylist` resta come `typedef`. `playlist_reader.dart`: registro `playlistReaders` per estensione (oggi `csv`; 15.5 aggiunge `m3u`, `m3u8`, `xspf`), `readPlaylistFile`, `…InIsolate`, `decodePlaylistBytes` (UTF-8 → Latin-1 per `.m3u`). Foglio d'importazione: «Importa una playlist», istruzioni Exportify per prime, riga «Accetta anche…»; `checkCsvSize` vale per qualunque file (5 MB). Chiave ARB `csvImportNotExportify` riscritta come «formato non riconosciuto».
 
 ## Note di deviazione (Fase 12)
 - 12.1 (2026-10-16): CSV vero = `Just_a_mood.csv` (34 brani; intestazioni `Track URI, ISRC, Track Name, Album Name, Artist Name(s), …, Duration (ms)`; **più artisti separati da `;`**). yt-dlp di sistema 2024.04.09 NON legge più YouTube («Please sign in»): provato con yt-dlp 2026.08.19 (binario standalone). `https://music.youtube.com/search?q=…#songs` funziona; in modalità flat dà ~460 voci con solo `id`/`title` (nessuna durata), **senza `--flat-playlist` e con `--playlist-items 1-5`** ogni voce ha `channel`, `artists[]`, `track`, `album`, `duration` in ~5–8 s → si usa quella. `YtResult` guadagna `artists` e `album`.

@@ -606,7 +606,7 @@
     }
   },
   "csvImportMenu": "Importar desde Exportify (CSV)",
-  "csvImportIntroTitle": "Importar una lista de Spotify",
+  "csvImportIntroTitle": "Importar una lista",
   "csvImportIntroSource": "El archivo CSV se crea gratis en el sitio Exportify — exportify.net (no hace falta ninguna app).",
   "csvImportStep1": "Abre https://exportify.net en el navegador (también desde el móvil).",
   "csvImportStep2": "Toca «Get Started» e inicia sesión con tu cuenta de Spotify.",
@@ -616,8 +616,8 @@
   "csvImportNoteOffline": "Solo se enlazarán las canciones que ya están en tu biblioteca.",
   "csvImportCopy": "Copiar dirección",
   "csvImportCopied": "Dirección copiada",
-  "csvImportPick": "Elegir archivo CSV",
-  "csvImportNotExportify": "Este archivo no parece un CSV de Exportify. Comprueba que exportaste la lista desde exportify.net.",
+  "csvImportPick": "Elegir archivo",
+  "csvImportNotExportify": "Formato no reconocido. Elige un CSV (Exportify, TuneMyMusic, Soundiiz, Last.fm) o una lista M3U/M3U8/XSPF.",
   "csvImportReadFailed": "No se pudo leer el archivo.",
   "csvImportPreviewTitle": "Importar lista",
   "csvImportName": "Nombre de la lista",
@@ -881,5 +881,6 @@
       }
     }
   },
-  "csvImportTooBig": "El archivo es demasiado grande para una lista (máximo 5 MB y 10.000 canciones)"
+  "csvImportTooBig": "El archivo es demasiado grande para una lista (máximo 5 MB y 10.000 canciones)",
+  "csvImportAlsoAccepts": "También se aceptan: TuneMyMusic, Soundiiz, Last.fm (CSV), M3U/M3U8, XSPF."
 }

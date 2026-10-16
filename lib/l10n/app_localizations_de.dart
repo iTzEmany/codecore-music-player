@@ -1304,7 +1304,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get csvImportMenu => 'Aus Exportify importieren (CSV)';
 
   @override
-  String get csvImportIntroTitle => 'Spotify-Playlist importieren';
+  String get csvImportIntroTitle => 'Playlist importieren';
 
   @override
   String get csvImportIntroSource =>
@@ -1341,11 +1341,11 @@ class AppLocalizationsDe extends AppLocalizations {
   String get csvImportCopied => 'Adresse kopiert';
 
   @override
-  String get csvImportPick => 'CSV-Datei wählen';
+  String get csvImportPick => 'Datei wählen';
 
   @override
   String get csvImportNotExportify =>
-      'Diese Datei sieht nicht wie ein Exportify-CSV aus. Prüfe, ob du die Playlist von exportify.net exportiert hast.';
+      'Format nicht erkannt. Wähle ein CSV (Exportify, TuneMyMusic, Soundiiz, Last.fm) oder eine M3U/M3U8/XSPF-Playlist.';
 
   @override
   String get csvImportReadFailed => 'Die Datei konnte nicht gelesen werden.';
@@ -1642,4 +1642,8 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get csvImportTooBig =>
       'Die Datei ist zu groß für eine Playlist (höchstens 5 MB und 10.000 Titel)';
+
+  @override
+  String get csvImportAlsoAccepts =>
+      'Auch akzeptiert: TuneMyMusic, Soundiiz, Last.fm (CSV), M3U/M3U8, XSPF.';
 }

@@ -31,11 +31,11 @@ void main() {
     final h = await Harness.create(tester);
     await h.pump(tester, const Scaffold(body: ImportIntroSheet()));
 
-    expect(find.text('Importa una playlist di Spotify'), findsOneWidget);
+    expect(find.text('Importa una playlist'), findsOneWidget);
     expect(find.textContaining('Exportify — exportify.net'), findsOneWidget);
     expect(find.textContaining('https://exportify.net nel browser'),
         findsOneWidget);
-    expect(find.text('Scegli file CSV'), findsOneWidget);
+    expect(find.text('Scegli file'), findsOneWidget);
 
     await tester.tap(find.text('Copia indirizzo'));
     await tester.pump();

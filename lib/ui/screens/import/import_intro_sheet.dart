@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
@@ -10,7 +9,9 @@ import '../../../core/app_log.dart';
 import '../../../core/constants.dart';
 import '../../../core/platform.dart';
 import '../../../l10n/l10n_ext.dart';
-import '../../../services/import/exportify_reader.dart';
+import '../../../services/import/exportify_reader.dart' show CsvTooLargeException, checkCsvSize;
+import '../../../services/import/imported_playlist.dart';
+import '../../../services/import/playlist_reader.dart';
 import '../../theme/tokens.dart';
 
 const exportifyAddress = 'https://exportify.net';
@@ -20,8 +21,8 @@ const exportifyAddress = 'https://exportify.net';
 class ImportIntroSheet extends StatefulWidget {
   const ImportIntroSheet({super.key});
 
-  static Future<ExportifyPlaylist?> show(BuildContext context) =>
-      showModalBottomSheet<ExportifyPlaylist>(
+  static Future<ImportedPlaylist?> show(BuildContext context) =>
+      showModalBottomSheet<ImportedPlaylist>(
         context: context,
         isScrollControlled: true,
         useRootNavigator: true,
@@ -61,18 +62,18 @@ class _ImportIntroSheetState extends State<ImportIntroSheet> {
         dialogTitle: l.csvImportPick,
         initialDirectory: await _startDir(),
         type: isAndroid ? FileType.any : FileType.custom,
-        allowedExtensions: isAndroid ? null : const ['csv'],
+        allowedExtensions: isAndroid ? null : supportedPlaylistExtensions,
       );
       final path = files.isEmpty ? null : files.first.path;
       if (path == null) {
         if (files.isNotEmpty) error = l.csvImportReadFailed;
       } else {
         checkCsvSize(await File(path).length());
-        final text = utf8.decode(
+        final text = decodePlaylistBytes(
+          files.first.name,
           await File(path).readAsBytes(),
-          allowMalformed: true,
         );
-        final csv = await readExportifyInIsolate(files.first.name, text);
+        final csv = await readPlaylistFileInIsolate(files.first.name, text);
         if (!mounted) return;
         Navigator.of(context).pop(csv);
         return;
@@ -163,6 +164,9 @@ class _ImportIntroSheetState extends State<ImportIntroSheet> {
                 ),
               ],
             ),
+            const SizedBox(height: 8),
+            Text(l.csvImportAlsoAccepts,
+                style: theme.bodySmall?.copyWith(color: cc.textMuted)),
             const SizedBox(height: 8),
             Text(
               kEnableYoutube ? l.csvImportNote : l.csvImportNoteOffline,

@@ -111,7 +111,7 @@ class PlaylistImportService {
   /// Creates the playlist (or reuses [intoPlaylistId]) and starts the import.
   /// Rows already imported into that playlist are left out.
   Future<int> start(
-    ExportifyPlaylist csv, {
+    ImportedPlaylist csv, {
     String? name,
     int? intoPlaylistId,
   }) async {
@@ -122,7 +122,10 @@ class PlaylistImportService {
       rows = await _withoutAlreadyImported(intoPlaylistId, rows);
     }
     final id = await imports.create(
-        playlistId: playlistId, sourceName: label, rows: rows);
+        playlistId: playlistId,
+        sourceName: label,
+        rows: rows,
+        sourceKind: csv.kind);
     if (rows.isEmpty) {
       await imports.setStatus(id, ImportStatus.finished);
       _emit(ImportEvent(ImportEventKind.completed, id));

@@ -2391,7 +2391,7 @@ abstract class AppLocalizations {
   /// No description provided for @csvImportIntroTitle.
   ///
   /// In it, this message translates to:
-  /// **'Importa una playlist di Spotify'**
+  /// **'Importa una playlist'**
   String get csvImportIntroTitle;
 
   /// No description provided for @csvImportIntroSource.
@@ -2451,13 +2451,13 @@ abstract class AppLocalizations {
   /// No description provided for @csvImportPick.
   ///
   /// In it, this message translates to:
-  /// **'Scegli file CSV'**
+  /// **'Scegli file'**
   String get csvImportPick;
 
   /// No description provided for @csvImportNotExportify.
   ///
   /// In it, this message translates to:
-  /// **'Questo file non sembra un CSV di Exportify. Controlla di aver esportato la playlist da exportify.net.'**
+  /// **'Formato non riconosciuto. Scegli un CSV (Exportify, TuneMyMusic, Soundiiz, Last.fm) o una playlist M3U/M3U8/XSPF.'**
   String get csvImportNotExportify;
 
   /// No description provided for @csvImportReadFailed.
@@ -2927,6 +2927,12 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Il file è troppo grande per essere una playlist (massimo 5 MB e 10.000 brani)'**
   String get csvImportTooBig;
+
+  /// No description provided for @csvImportAlsoAccepts.
+  ///
+  /// In it, this message translates to:
+  /// **'Accetta anche: TuneMyMusic, Soundiiz, Last.fm (CSV), M3U/M3U8, XSPF.'**
+  String get csvImportAlsoAccepts;
 }
 
 class _AppLocalizationsDelegate

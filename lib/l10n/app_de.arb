@@ -606,7 +606,7 @@
     }
   },
   "csvImportMenu": "Aus Exportify importieren (CSV)",
-  "csvImportIntroTitle": "Spotify-Playlist importieren",
+  "csvImportIntroTitle": "Playlist importieren",
   "csvImportIntroSource": "Die CSV-Datei erstellst du kostenlos auf der Website Exportify — exportify.net (keine App nötig).",
   "csvImportStep1": "Öffne https://exportify.net im Browser (auch am Handy).",
   "csvImportStep2": "Tippe auf „Get Started“ und melde dich mit deinem Spotify-Konto an.",
@@ -616,8 +616,8 @@
   "csvImportNoteOffline": "Es werden nur Titel verknüpft, die bereits in deiner Bibliothek sind.",
   "csvImportCopy": "Adresse kopieren",
   "csvImportCopied": "Adresse kopiert",
-  "csvImportPick": "CSV-Datei wählen",
-  "csvImportNotExportify": "Diese Datei sieht nicht wie ein Exportify-CSV aus. Prüfe, ob du die Playlist von exportify.net exportiert hast.",
+  "csvImportPick": "Datei wählen",
+  "csvImportNotExportify": "Format nicht erkannt. Wähle ein CSV (Exportify, TuneMyMusic, Soundiiz, Last.fm) oder eine M3U/M3U8/XSPF-Playlist.",
   "csvImportReadFailed": "Die Datei konnte nicht gelesen werden.",
   "csvImportPreviewTitle": "Playlist importieren",
   "csvImportName": "Name der Playlist",
@@ -881,5 +881,6 @@
       }
     }
   },
-  "csvImportTooBig": "Die Datei ist zu groß für eine Playlist (höchstens 5 MB und 10.000 Titel)"
+  "csvImportTooBig": "Die Datei ist zu groß für eine Playlist (höchstens 5 MB und 10.000 Titel)",
+  "csvImportAlsoAccepts": "Auch akzeptiert: TuneMyMusic, Soundiiz, Last.fm (CSV), M3U/M3U8, XSPF."
 }

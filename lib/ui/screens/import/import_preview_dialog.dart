@@ -24,7 +24,7 @@ class ImportPreviewDialog extends StatefulWidget {
     required this.existing,
   });
 
-  final ExportifyPlaylist csv;
+  final ImportedPlaylist csv;
   final int known;
   final Map<int, String> existing;
 

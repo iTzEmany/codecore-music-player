@@ -1,9 +1,9 @@
 import 'dart:isolate';
 
-import '../../core/import_row.dart';
 import 'csv_parser.dart';
+import 'imported_playlist.dart';
 
-export '../../core/import_row.dart';
+export 'imported_playlist.dart';
 
 /// A playlist CSV is a few hundred KB; anything near these limits is not one.
 const kMaxCsvBytes = 5 * 1024 * 1024;
@@ -20,19 +20,8 @@ void checkCsvSize(int bytes) {
   }
 }
 
-class ExportifyPlaylist {
-  const ExportifyPlaylist({
-    required this.name,
-    required this.rows,
-    this.skipped = 0,
-  });
-
-  final String name;
-  final List<ImportRow> rows;
-
-  /// Rows left out: no title, podcast episodes, local files.
-  final int skipped;
-}
+/// Kept for the callers and tests written when Exportify was the only source.
+typedef ExportifyPlaylist = ImportedPlaylist;
 
 const _titleHeaders = ['track name', 'name', 'title'];
 const _artistHeaders = ['artist name(s)', 'artist name', 'artists', 'artist'];
@@ -63,7 +52,7 @@ String playlistNameFromFile(String fileName) {
 }
 
 /// Throws [FormatException] when [text] does not look like an Exportify file.
-ExportifyPlaylist readExportify(String fileName, String text) {
+ImportedPlaylist readExportify(String fileName, String text) {
   final table = parseCsv(text);
   if (table.isEmpty) {
     throw const FormatException('not an Exportify file: empty');
@@ -107,7 +96,7 @@ ExportifyPlaylist readExportify(String fileName, String text) {
       spotifyUri: uri,
     ));
   }
-  return ExportifyPlaylist(
+  return ImportedPlaylist(
     name: playlistNameFromFile(fileName),
     rows: rows,
     skipped: skipped,
@@ -115,5 +104,5 @@ ExportifyPlaylist readExportify(String fileName, String text) {
 }
 
 /// Same as [readExportify], off the UI thread (a CSV can have thousands of rows).
-Future<ExportifyPlaylist> readExportifyInIsolate(String fileName, String text) =>
+Future<ImportedPlaylist> readExportifyInIsolate(String fileName, String text) =>
     Isolate.run(() => readExportify(fileName, text));
