@@ -21,10 +21,12 @@ class FakeYoutube implements YoutubeService {
   final Map<String, List<YtResult>> plain = {};
   YtException? failWith;
   int searches = 0;
+  final queries = <String>[];
 
   @override
   Future<List<YtResult>> searchSongs(String query, {int limit = 5}) async {
     searches++;
+    queries.add('songs:$query');
     if (failWith != null) throw failWith!;
     return songs.entries
         .firstWhere((e) => query.contains(e.key),
@@ -35,6 +37,7 @@ class FakeYoutube implements YoutubeService {
   @override
   Future<List<YtResult>> search(String query) async {
     searches++;
+    queries.add('plain:$query');
     if (failWith != null) throw failWith!;
     return plain.entries
         .firstWhere((e) => query.contains(e.key),
@@ -344,6 +347,40 @@ void main() {
     await idle();
     expect(queued, hasLength(1), reason: 'the service does not re-enqueue');
     expect((await imports.item(id, 0))!.state, ImportItemStatus.failed);
+  });
+
+  group('ISRC first', () {
+    test('a sure match by ISRC needs a single search', () async {
+      yt.songs['ISRC0'] = [topic('v1', 'One', 'Band', 200)];
+      final id = await service.start(csv([row(0, 'One', 'Band', 200)]));
+      await idle();
+      expect(yt.queries, ['songs:ISRC0']);
+      expect((await imports.item(id, 0))!.state, ImportItemStatus.queued);
+      expect(queued.single.$1.id, 'v1');
+    });
+
+    test('a doubtful ISRC result falls back to title and artist', () async {
+      // Right video but a different length: only «review» by ISRC.
+      yt.songs['ISRC0'] = [topic('wrong', 'One', 'Band', 215)];
+      yt.songs['band one'] = [topic('v1', 'One', 'Band', 200)];
+      final id = await service.start(csv([row(0, 'One', 'Band', 200)]));
+      await idle();
+      expect(yt.queries.first, 'songs:ISRC0');
+      expect(yt.queries[1], contains('band one'));
+      expect(queued.single.$1.id, 'v1',
+          reason: 'the ISRC result must not be reused');
+      expect((await imports.item(id, 0))!.state, ImportItemStatus.queued);
+    });
+
+    test('a row without ISRC searches as before', () async {
+      yt.songs['band one'] = [topic('v1', 'One', 'Band', 200)];
+      final r = ImportRow(
+          index: 0, title: 'One', artists: const ['Band'], durationMs: 200000);
+      await service.start(csv([r]));
+      await idle();
+      expect(yt.queries, hasLength(1));
+      expect(yt.queries.single, contains('band one'));
+    });
   });
 
   test('tag parsing', () {

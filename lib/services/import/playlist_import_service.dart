@@ -279,6 +279,16 @@ class PlaylistImportService {
   }
 
   Future<MatchDecision> _find(ImportRow row) async {
+    // The ISRC identifies the recording: when it lands on a sure match we are
+    // done. Otherwise those results are dropped, so a wrong code cannot lift
+    // a candidate's score, and the usual title + artist search follows.
+    final isrc = row.isrc;
+    if (isrc != null && isrc.isNotEmpty) {
+      final byIsrc = await youtube.searchSongs(isrc, limit: 3);
+      final d = decide(row, byIsrc);
+      if (d.kind == MatchKind.sure) return d;
+      await Future<void>.delayed(searchGap);
+    }
     final query = '${matchKey(row.primaryArtist)} ${matchTitleKey(row.title)}'.trim();
     final songs = await youtube.searchSongs(query, limit: 5);
     var decision = decide(row, songs);
