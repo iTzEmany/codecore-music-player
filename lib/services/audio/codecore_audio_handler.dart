@@ -9,6 +9,7 @@ import '../../data/repositories/track_repository.dart';
 import 'audio_backend.dart';
 import 'equalizer.dart';
 import 'play_queue.dart';
+import 'remote_transport.dart';
 import 'resume_point.dart';
 
 enum PlaybackFailureReason { fileMissing, unplayable, notInLibrary }
@@ -52,6 +53,8 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   int _loadToken = 0;
   int _consecutiveErrors = 0;
   bool _playCounted = false;
+  RemoteTransport? _remote;
+  StreamSubscription<RemoteStatus>? _remoteSub;
   Duration _lastResumeSave = Duration.zero;
   bool _handlingCompleted = false;
 
@@ -246,6 +249,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   }
 
   void _publish(AudioProcessingState processing) {
+    if (_remote != null) return; // the Jam owns the notification
     final playing = _state == BackendState.playing;
     playbackState.add(PlaybackState(
       processingState: processing,
@@ -282,6 +286,8 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
 
   @override
   Future<void> play() async {
+    final remote = _remote;
+    if (remote != null) return remote.play();
     if (_queue.currentId == null) return;
     if (_current == null ||
         _state == BackendState.idle ||
@@ -293,15 +299,19 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   }
 
   @override
-  Future<void> pause() => _backend.pause();
+  Future<void> pause() => _remote?.pause() ?? _backend.pause();
 
   @override
   Future<void> stop() async {
+    final remote = _remote;
+    if (remote != null) return remote.pause(); // ending the Jam is its own button
     await _goIdle();
   }
 
   @override
   Future<void> seek(Duration position) async {
+    final remote = _remote;
+    if (remote != null) return remote.seek(position);
     _position = position;
     await _backend.seek(position);
     _publish(playbackState.value.processingState);
@@ -309,6 +319,8 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
 
   @override
   Future<void> skipToNext() async {
+    final remote = _remote;
+    if (remote != null) return remote.next();
     if (_queue.currentId == null) return;
     final next = _queue.next();
     if (next == null) {
@@ -320,6 +332,11 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
 
   @override
   Future<void> skipToPrevious() async {
+    final remote = _remote;
+    if (remote != null) {
+      await remote.seek(Duration.zero); // a Jam has no «previous»
+      return;
+    }
     if (_queue.currentId == null) return;
     if (_position > const Duration(seconds: 3)) {
       await seek(Duration.zero);
@@ -407,6 +424,51 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   Future<void> _applyVolume() => _backend
       .setVolume((_baseVolume * (_normalize ? _gainFactor : 1.0)).clamp(0, 1));
 
+  /// Hands the system controls to [transport] (a Jam) until it is detached
+  /// with null. The local queue and backend are not touched meanwhile.
+  void attachRemote(RemoteTransport? transport) {
+    _remoteSub?.cancel();
+    _remoteSub = null;
+    _remote = transport;
+    if (transport == null) {
+      // Back to what the local player says.
+      final t = _current;
+      mediaItem.add(t == null ? null : _toMediaItem(t));
+      _publish(_publishedProcessing);
+      return;
+    }
+    _showRemote(transport.status);
+    _remoteSub = transport.changes.listen(_showRemote);
+  }
+
+  void _showRemote(RemoteStatus s) {
+    mediaItem.add(s.hasItem
+        ? MediaItem(
+            id: 'jam',
+            title: s.title!,
+            artist: s.artist,
+            album: s.album,
+            duration: s.duration,
+          )
+        : null);
+    playbackState.add(PlaybackState(
+      processingState:
+          s.hasItem ? AudioProcessingState.ready : AudioProcessingState.idle,
+      playing: s.playing,
+      controls: [
+        s.playing ? MediaControl.pause : MediaControl.play,
+        if (s.canSkip) MediaControl.skipToNext,
+      ],
+      androidCompactActionIndices: s.canSkip ? const [0, 1] : const [0],
+      systemActions: const {MediaAction.seek},
+      updatePosition: s.position,
+      speed: 1,
+    ));
+  }
+
+  AudioProcessingState get _publishedProcessing =>
+      playbackState.value.processingState;
+
   /// Stores where the current track is (only if it is long enough to matter).
   void _saveResume() {
     final t = _current;
@@ -433,6 +495,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   }
 
   Future<void> dispose() async {
+    await _remoteSub?.cancel();
     for (final s in _subs) {
       await s.cancel();
     }

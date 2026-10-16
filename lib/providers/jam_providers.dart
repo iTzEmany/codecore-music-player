@@ -17,6 +17,7 @@ import '../services/jam/jam_guest.dart';
 import '../services/jam/jam_host.dart';
 import '../services/jam/jam_models.dart';
 import '../services/jam/jam_output.dart';
+import '../services/jam/jam_transport.dart';
 import '../services/share/discovery.dart';
 import 'database_providers.dart';
 import 'player_providers.dart';
@@ -110,6 +111,8 @@ class JamController extends Notifier<JamUiState> {
   JamOutput? _output;
   JamCache? _cache;
   JamClock? _clock;
+  JamTransport? _transport;
+  CodecoreAudioHandler? _attachedTo;
   StreamSubscription<void>? _hostSub, _guestSub, _lostSub;
   StreamSubscription<JamRequest>? _reqSub;
   Timer? _alive;
@@ -269,6 +272,15 @@ class JamController extends Notifier<JamUiState> {
           }
           ..onItemFailed = _onItemFailed;
     _host?.resolveFile = _localFile;
+    // The notification and the lock screen now speak for the Jam.
+    final handler = ref.read(audioHandlerProvider);
+    _attachedTo = handler;
+    final transport = _transport = JamTransport(
+      send: send,
+      canSkip: role == JamRole.host,
+      nowMs: () => _clock?.jamNowMs() ?? DateTime.now().millisecondsSinceEpoch,
+    );
+    handler.attachRemote(transport);
     state = state.copyWith(phase: JamPhase.active, role: role, jam: s);
     if (role == JamRole.host) {
       // A guest that vanished (crash, Wi-Fi off) must not keep the Jam open.
@@ -309,6 +321,7 @@ class JamController extends Notifier<JamUiState> {
   void _onState(JamState s) {
     if (state.phase != JamPhase.active) return;
     state = state.copyWith(jam: s);
+    _transport?.update(s);
     if (s.ended) {
       unawaited(_finish());
       return;
@@ -476,6 +489,11 @@ class JamController extends Notifier<JamUiState> {
     _hostSub = _guestSub = _lostSub = null;
     _clock?.stop();
     _clock = null;
+    // Give the system controls back to the local player.
+    _attachedTo?.attachRemote(null);
+    _attachedTo = null;
+    await _transport?.dispose();
+    _transport = null;
     await _output?.dispose();
     _output = null;
     await _cache?.clear();
