@@ -1049,5 +1049,15 @@
     }
   },
   "downloadOriginal": "Qualità originale (senza ricodifica)",
-  "downloadOriginalHint": "Tiene l'audio di YouTube com'è (M4A/Opus): nessuna perdita, file più piccoli. Spento: MP3 256 kbps"
+  "downloadOriginalHint": "Tiene l'audio di YouTube com'è (M4A/Opus): nessuna perdita, file più piccoli. Spento: MP3 256 kbps",
+  "searchCacheClear": "Svuota cache ricerche",
+  "searchCacheCount": "{count, plural, =0{Vuota} one{1 ricerca salvata} other{{count} ricerche salvate}}",
+  "searchCacheCleared": "Cache svuotata",
+  "@searchCacheCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

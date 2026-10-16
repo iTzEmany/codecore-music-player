@@ -858,5 +858,15 @@
     }
   },
   "downloadOriginal": "Originalqualität (ohne Neukodierung)",
-  "downloadOriginalHint": "Behält das Audio von YouTube unverändert (M4A/Opus): kein zusätzlicher Verlust, kleinere Dateien. Aus: MP3 256 kbps"
+  "downloadOriginalHint": "Behält das Audio von YouTube unverändert (M4A/Opus): kein zusätzlicher Verlust, kleinere Dateien. Aus: MP3 256 kbps",
+  "searchCacheClear": "Suchcache leeren",
+  "searchCacheCount": "{count, plural, =0{Leer} one{1 gespeicherte Suche} other{{count} gespeicherte Suchen}}",
+  "searchCacheCleared": "Cache geleert",
+  "@searchCacheCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

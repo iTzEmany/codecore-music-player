@@ -84,6 +84,7 @@ void main() {
   late List<ImportEvent> events;
   late PlaylistImportService service;
   var cancelCalls = 0;
+  final forgotten = <List<String>>[];
   var enabled = true;
   var maxInFlight = 3;
 
@@ -111,6 +112,7 @@ void main() {
       youtube: yt,
       enqueue: (r, tag) => queued.add((r, tag)),
       cancelDownloads: (_) => cancelCalls++,
+      forgetSearches: forgotten.add,
       settled: settled.stream,
       trackIdForPath: tracks.idForPath,
       pathForVideo: (_) async => null,
@@ -148,6 +150,7 @@ void main() {
     tagged = [];
     events = [];
     cancelCalls = 0;
+    forgotten.clear();
     enabled = true;
     maxInFlight = 3;
     service = build();
@@ -381,6 +384,21 @@ void main() {
       expect(yt.queries, hasLength(1));
       expect(yt.queries.single, contains('band one'));
     });
+  });
+
+  test('an unavailable video makes the row forget its cached searches', () async {
+    yt.songs['one'] = [topic('v1', 'One', 'Band', 200)];
+    final id = await service.start(csv([row(0, 'One', 'Band', 200)]));
+    await idle();
+    settled.add(DownloadItem(
+        id: 1,
+        result: queued.last.$1,
+        status: DownloadStatus.failed,
+        error: YtErrorKind.unavailable,
+        tag: importTag(id, 0)));
+    await idle();
+    expect(forgotten, hasLength(1));
+    expect(forgotten.single, containsAll(['ISRC0', 'band one', 'Band - One']));
   });
 
   test('tag parsing', () {

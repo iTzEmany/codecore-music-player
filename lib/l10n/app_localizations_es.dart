@@ -1610,4 +1610,22 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get downloadOriginalHint =>
       'Conserva el audio de YouTube tal cual (M4A/Opus): sin pérdida extra, archivos más pequeños. Desactivado: MP3 256 kbps';
+
+  @override
+  String get searchCacheClear => 'Vaciar caché de búsquedas';
+
+  @override
+  String searchCacheCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count búsquedas guardadas',
+      one: '1 búsqueda guardada',
+      zero: 'Vacía',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get searchCacheCleared => 'Caché vaciada';
 }

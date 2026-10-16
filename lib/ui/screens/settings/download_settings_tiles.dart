@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/platform.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../l10n/l10n_ext.dart';
+import '../../../providers/import_providers.dart';
 import '../../../providers/settings_providers.dart';
 import '../../../providers/youtube_providers.dart';
 import '../../../providers/yt_dlp_update_providers.dart';
@@ -51,6 +52,7 @@ class DownloadSettingsTiles extends ConsumerWidget {
               .read(settingsProvider.notifier)
               .update((c) => c.copyWith(downloadOriginal: v)),
         ),
+        const _SearchCacheTile(),
         ListTile(
           leading: const Icon(Icons.speed),
           title: Text(l.downloadRateLimit),
@@ -80,6 +82,28 @@ String _rateLabel(AppLocalizations l, int kb) => kb == 0
     : kb >= 1000
         ? l.downloadRateMb(kb ~/ 1000)
         : l.downloadRateKb(kb);
+
+class _SearchCacheTile extends ConsumerWidget {
+  const _SearchCacheTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    final n = ref.watch(searchCacheCountProvider).value ?? 0;
+    return ListTile(
+      leading: const Icon(Icons.manage_search),
+      title: Text(l.searchCacheClear),
+      subtitle: Text(l.searchCacheCount(n)),
+      enabled: n > 0,
+      onTap: () async {
+        final messenger = ScaffoldMessenger.of(context);
+        await ref.read(searchCacheProvider).clear();
+        ref.invalidate(searchCacheCountProvider);
+        messenger.showSnackBar(SnackBar(content: Text(l.searchCacheCleared)));
+      },
+    );
+  }
+}
 
 class _YtDlpTile extends ConsumerWidget {
   const _YtDlpTile();

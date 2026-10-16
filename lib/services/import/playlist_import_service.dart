@@ -55,6 +55,7 @@ class PlaylistImportService {
     required this.trackIdForPath,
     required this.pathForVideo,
     required this.applyTags,
+    this.forgetSearches,
     this.youtubeEnabled = true,
     this.searchGap = const Duration(milliseconds: 1500),
     this.pollDelay = const Duration(milliseconds: 400),
@@ -74,6 +75,9 @@ class PlaylistImportService {
   final Future<String?> Function(String videoId) pathForVideo;
   final Future<void> Function(int trackId, ImportRow row) applyTags;
   final bool youtubeEnabled;
+
+  /// Drops cached search answers; called when a chosen video proved unavailable.
+  final void Function(List<String> queries)? forgetSearches;
 
   /// Pause between two YouTube searches (be gentle: 429 is the main risk).
   final Duration searchGap;
@@ -278,6 +282,13 @@ class PlaylistImportService {
     await Future<void>.delayed(searchGap);
   }
 
+  /// The three searches made for [row]: ISRC, `artist title`, `artist - title`.
+  static List<String> searchQueries(ImportRow row) => [
+        row.isrc ?? '',
+        '${matchKey(row.primaryArtist)} ${matchTitleKey(row.title)}'.trim(),
+        '${row.primaryArtist} - ${row.title}',
+      ];
+
   Future<MatchDecision> _find(ImportRow row) async {
     // The ISRC identifies the recording: when it lands on a sure match we are
     // done. Otherwise those results are dropped, so a wrong code cannot lift
@@ -289,12 +300,13 @@ class PlaylistImportService {
       if (d.kind == MatchKind.sure) return d;
       await Future<void>.delayed(searchGap);
     }
-    final query = '${matchKey(row.primaryArtist)} ${matchTitleKey(row.title)}'.trim();
+    final queries = searchQueries(row);
+    final query = queries[1];
     final songs = await youtube.searchSongs(query, limit: 5);
     var decision = decide(row, songs);
     if (decision.kind == MatchKind.sure) return decision;
     await Future<void>.delayed(searchGap);
-    final plain = await youtube.search('${row.primaryArtist} - ${row.title}');
+    final plain = await youtube.search(queries[2]);
     final seen = {for (final s in songs) s.id};
     decision = decide(row, [
       ...songs,
@@ -384,6 +396,9 @@ class PlaylistImportService {
         case DownloadStatus.done:
           await _finishDownload(imp, it, item.path);
         case DownloadStatus.failed:
+          if (item.error == YtErrorKind.unavailable) {
+            forgetSearches?.call(searchQueries(it.toRow()));
+          }
           await imports.setItem(importId, rowIndex,
               status: ImportItemStatus.failed);
           if (item.error == YtErrorKind.rateLimited) {

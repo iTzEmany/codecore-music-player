@@ -1,24 +1,49 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dart:async';
+import 'dart:io';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:path/path.dart' as p;
+
+import '../core/paths.dart';
 import '../data/repositories/import_repository.dart';
 import '../core/constants.dart';
 import '../data/db/app_database.dart';
 import '../services/import/playlist_import_service.dart';
 import '../services/library/track_editor.dart';
+import '../services/online/cached_youtube_service.dart';
+import '../services/online/search_cache.dart';
 import 'database_providers.dart';
 import 'library_providers.dart';
 import 'youtube_providers.dart';
 
 /// Single import engine. Created at app start by the shell, which also turns
 /// "running" imports left by the last session into "paused".
+/// Disk cache of search answers; only the CSV import reads it.
+final searchCacheProvider = Provider<SearchCache>((ref) {
+  final cache = SearchCache(
+      file: () async => File(p.join(await appSupportDir(), 'search_cache.json')));
+  ref.onDispose(() => unawaited(cache.flush()));
+  return cache;
+});
+
+final cachedYoutubeProvider = Provider<CachedYoutubeService>((ref) =>
+    CachedYoutubeService(
+        ref.watch(youtubeServiceProvider), ref.watch(searchCacheProvider)));
+
+/// Number of cached searches, for the settings.
+final searchCacheCountProvider = FutureProvider.autoDispose<int>(
+    (ref) => ref.watch(searchCacheProvider).count());
+
 final playlistImportServiceProvider = Provider<PlaylistImportService>((ref) {
+  final cached = ref.watch(cachedYoutubeProvider);
   final downloads = ref.read(downloadsProvider.notifier);
   final tracks = ref.watch(trackRepositoryProvider);
   final service = PlaylistImportService(
     imports: ref.watch(importRepositoryProvider),
     playlists: ref.watch(playlistRepositoryProvider),
     loadLibrary: tracks.liteEntries,
-    youtube: ref.watch(youtubeServiceProvider),
+    youtube: cached,
+    forgetSearches: (queries) => unawaited(cached.forget(queries)),
     enqueue: (r, tag) => downloads.add(r, tag: tag),
     cancelDownloads: downloads.cancelWhere,
     settled: downloads.settled,

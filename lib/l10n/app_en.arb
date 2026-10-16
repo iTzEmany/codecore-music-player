@@ -858,5 +858,15 @@
     }
   },
   "downloadOriginal": "Original quality (no re-encoding)",
-  "downloadOriginalHint": "Keeps YouTube's audio as served (M4A/Opus): no extra loss, smaller files. Off: MP3 256 kbps"
+  "downloadOriginalHint": "Keeps YouTube's audio as served (M4A/Opus): no extra loss, smaller files. Off: MP3 256 kbps",
+  "searchCacheClear": "Clear search cache",
+  "searchCacheCount": "{count, plural, =0{Empty} one{1 saved search} other{{count} saved searches}}",
+  "searchCacheCleared": "Cache cleared",
+  "@searchCacheCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

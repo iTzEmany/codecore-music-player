@@ -2891,6 +2891,24 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Tiene l\'audio di YouTube com\'è (M4A/Opus): nessuna perdita, file più piccoli. Spento: MP3 256 kbps'**
   String get downloadOriginalHint;
+
+  /// No description provided for @searchCacheClear.
+  ///
+  /// In it, this message translates to:
+  /// **'Svuota cache ricerche'**
+  String get searchCacheClear;
+
+  /// No description provided for @searchCacheCount.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, =0{Vuota} one{1 ricerca salvata} other{{count} ricerche salvate}}'**
+  String searchCacheCount(int count);
+
+  /// No description provided for @searchCacheCleared.
+  ///
+  /// In it, this message translates to:
+  /// **'Cache svuotata'**
+  String get searchCacheCleared;
 }
 
 class _AppLocalizationsDelegate

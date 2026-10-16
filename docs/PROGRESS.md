@@ -173,7 +173,7 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 14.6 Ritento a scalare
 - [~] 14.7 Formato: MP3 o originale senza ricodifica
 - [x] 14.8 Ricerca per ISRC come primo tentativo
-- [ ] 14.9 Cache delle ricerche
+- [x] 14.9 Cache delle ricerche
 - [ ] 14.10 Controllo della durata a fine download
 - [ ] 14.11 Validazioni: CSV troppo grandi e ricerche bloccate
 - [ ] 14.12 (Opzionale) Impronta audio con Chromaprint — chiedere all'utente
@@ -395,6 +395,7 @@ L'agente riparte sempre dal primo task non spuntato.
 - 14.6: il ritento vive in `DownloadQueue` (`RetryPolicy` 5/20/60 s ±20 %, solo `network`/`changed`); nuovo stato `DownloadStatus.waitingRetry` (non occupa uno slot) e `DownloadItem.attempt/retryDelay`; `onSettled` solo all'esito definitivo. Tolto `_retried` da `PlaylistImportService`. Centro Attività: «Download · titolo · nuovo tentativo tra N s (k/3)» (mostra l'attesa decisa, senza conto alla rovescia).
 - 14.7: `DownloadOptions.format` (`mp3`|`original`); `buildDownloadArgs(hasFfmpeg, options)`; con `original` e ffmpeg: `-f bestaudio[ext=m4a]/bestaudio/best -x` senza `--audio-format` (ffmpeg rimuxa); il nome file riserva `.m4a` ma `anyDownloadExtensionExists` evita sovrascritture contro mp3/m4a/opus/webm. Android: `convert=false` (stessa selezione, nessuna conversione). Impostazione `downloadOriginal` (predefinita **spenta** = MP3) nel gruppo «Download». Provato dal vivo su Linux (`CODECORE_LIVE=1 flutter test test/live/original_format_live_test.dart`): file .m4a letto dal tag reader, secondo download con nome diverso. Resta la prova su telefono (ExoPlayer).
 - 14.8: `_find` cerca prima `searchSongs(isrc, limit: 3)` e accetta solo `sure`; altrimenti scarta quei risultati e prosegue con titolo+artista; pausa di `searchGap` anche dopo la ricerca per ISRC (nei tempi stimati, ogni riga con ISRC costa quindi una ricerca in più quando l'ISRC non è sicuro).
+- 14.9: `SearchCache` (JSON in `<appSupport>/search_cache.json`, 30 giorni, 2.000 voci LRU, scrittura con debounce, file illeggibile → vuota) + `CachedYoutubeService` solo per il motore d'importazione; le risposte vuote **non** si salvano; un download `unavailable` fa dimenticare le ricerche della riga (`forgetSearches`). Impostazioni → Download → «Svuota cache ricerche (N)».
 - 14.1 nota: se bestaudio non ha un m4a, `-x` estrae `.opus`; l'estensione `opus` è già tra quelle scansionate.
 - 13.3: `tracks` di `user_data.json` contiene solo i brani con preferito/modifica/testi/ascolti; chi sta solo in una playlist compare nei riferimenti della playlist (niente duplicati). Brano fuori da ogni cartella: `folder` = percorso assoluto del file, `relPath` null. `trackRefFor` è pubblica (serve all'export JSON).
 - 13.4: `LibraryEntryLite` guadagna `path` (opzionale, riempito da `liteEntries`); `TrackResolver` tenta percorso relativo → titolo+artista+durata ±2 s → sha256.
