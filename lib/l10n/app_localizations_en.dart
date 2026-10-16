@@ -2420,4 +2420,82 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get smartAutoNote => 'The list updates by itself.';
+
+  @override
+  String get tagsTitle => 'Tags';
+
+  @override
+  String get tagsSubtitle => 'Your own tags';
+
+  @override
+  String tagsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tags',
+      one: '1 tag',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get tagsEllipsis => 'Tags…';
+
+  @override
+  String get tagNew => 'New tag';
+
+  @override
+  String get tagRename => 'Rename tag';
+
+  @override
+  String get tagColor => 'Color';
+
+  @override
+  String get tagNoColor => 'No color';
+
+  @override
+  String get tagNameTaken => 'A tag with this name already exists';
+
+  @override
+  String tagDeleteTitle(String name) {
+    return 'Delete the tag “$name”?';
+  }
+
+  @override
+  String get tagDeleteBody =>
+      'Only the tag is removed from the tracks: they stay in the library.';
+
+  @override
+  String get tagsEmpty => 'No tags yet: create one from a track’s menu.';
+
+  @override
+  String get tagAddToSelection => 'Add a tag…';
+
+  @override
+  String get tagRemoveFromSelection => 'Remove a tag…';
+
+  @override
+  String tagAssigned(int count, String name) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tracks tagged “$name”',
+      one: '1 track tagged “$name”',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String tagUnassigned(int count, String name) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '“$name” removed from $count tracks',
+      one: '“$name” removed from 1 track',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get tagNoneToRemove => 'The chosen tracks have no tags.';
 }

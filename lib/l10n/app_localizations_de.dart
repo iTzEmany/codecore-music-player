@@ -2431,4 +2431,83 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get smartAutoNote => 'Die Liste aktualisiert sich von selbst.';
+
+  @override
+  String get tagsTitle => 'Labels';
+
+  @override
+  String get tagsSubtitle => 'Deine eigenen Labels';
+
+  @override
+  String tagsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Labels',
+      one: '1 Label',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get tagsEllipsis => 'Labels …';
+
+  @override
+  String get tagNew => 'Neues Label';
+
+  @override
+  String get tagRename => 'Label umbenennen';
+
+  @override
+  String get tagColor => 'Farbe';
+
+  @override
+  String get tagNoColor => 'Keine Farbe';
+
+  @override
+  String get tagNameTaken => 'Ein Label mit diesem Namen gibt es schon';
+
+  @override
+  String tagDeleteTitle(String name) {
+    return 'Das Label „$name“ löschen?';
+  }
+
+  @override
+  String get tagDeleteBody =>
+      'Nur das Label wird von den Titeln entfernt: Sie bleiben in der Bibliothek.';
+
+  @override
+  String get tagsEmpty =>
+      'Noch keine Labels: Lege eines im Menü eines Titels an.';
+
+  @override
+  String get tagAddToSelection => 'Label hinzufügen …';
+
+  @override
+  String get tagRemoveFromSelection => 'Label entfernen …';
+
+  @override
+  String tagAssigned(int count, String name) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Titel mit „$name“ versehen',
+      one: '1 Titel mit „$name“ versehen',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String tagUnassigned(int count, String name) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '„$name“ von $count Titeln entfernt',
+      one: '„$name“ von 1 Titel entfernt',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get tagNoneToRemove => 'Die gewählten Titel haben keine Labels.';
 }

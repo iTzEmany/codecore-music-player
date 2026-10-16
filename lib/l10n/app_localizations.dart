@@ -4107,6 +4107,108 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'L’elenco si aggiorna da solo.'**
   String get smartAutoNote;
+
+  /// No description provided for @tagsTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Etichette'**
+  String get tagsTitle;
+
+  /// No description provided for @tagsSubtitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Le tue etichette'**
+  String get tagsSubtitle;
+
+  /// No description provided for @tagsCount.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, one{1 etichetta} other{{count} etichette}}'**
+  String tagsCount(int count);
+
+  /// No description provided for @tagsEllipsis.
+  ///
+  /// In it, this message translates to:
+  /// **'Etichette…'**
+  String get tagsEllipsis;
+
+  /// No description provided for @tagNew.
+  ///
+  /// In it, this message translates to:
+  /// **'Nuova etichetta'**
+  String get tagNew;
+
+  /// No description provided for @tagRename.
+  ///
+  /// In it, this message translates to:
+  /// **'Rinomina etichetta'**
+  String get tagRename;
+
+  /// No description provided for @tagColor.
+  ///
+  /// In it, this message translates to:
+  /// **'Colore'**
+  String get tagColor;
+
+  /// No description provided for @tagNoColor.
+  ///
+  /// In it, this message translates to:
+  /// **'Nessun colore'**
+  String get tagNoColor;
+
+  /// No description provided for @tagNameTaken.
+  ///
+  /// In it, this message translates to:
+  /// **'Esiste già un’etichetta con questo nome'**
+  String get tagNameTaken;
+
+  /// No description provided for @tagDeleteTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Eliminare l’etichetta «{name}»?'**
+  String tagDeleteTitle(String name);
+
+  /// No description provided for @tagDeleteBody.
+  ///
+  /// In it, this message translates to:
+  /// **'Si toglie solo l’etichetta dai brani: i brani restano nella libreria.'**
+  String get tagDeleteBody;
+
+  /// No description provided for @tagsEmpty.
+  ///
+  /// In it, this message translates to:
+  /// **'Nessuna etichetta: creane una dal menu di un brano.'**
+  String get tagsEmpty;
+
+  /// No description provided for @tagAddToSelection.
+  ///
+  /// In it, this message translates to:
+  /// **'Aggiungi etichetta…'**
+  String get tagAddToSelection;
+
+  /// No description provided for @tagRemoveFromSelection.
+  ///
+  /// In it, this message translates to:
+  /// **'Togli etichetta…'**
+  String get tagRemoveFromSelection;
+
+  /// No description provided for @tagAssigned.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, one{1 brano etichettato «{name}»} other{{count} brani etichettati «{name}»}}'**
+  String tagAssigned(int count, String name);
+
+  /// No description provided for @tagUnassigned.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, one{«{name}» tolta da 1 brano} other{«{name}» tolta da {count} brani}}'**
+  String tagUnassigned(int count, String name);
+
+  /// No description provided for @tagNoneToRemove.
+  ///
+  /// In it, this message translates to:
+  /// **'I brani scelti non hanno etichette.'**
+  String get tagNoneToRemove;
 }
 
 class _AppLocalizationsDelegate

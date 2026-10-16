@@ -1543,5 +1543,56 @@
     }
   },
   "smartDeleteBody": "Apenas a regra é eliminada: as faixas ficam onde estão.",
-  "smartAutoNote": "A lista atualiza-se sozinha."
+  "smartAutoNote": "A lista atualiza-se sozinha.",
+  "tagsTitle": "Etiquetas",
+  "tagsSubtitle": "As suas etiquetas",
+  "tagsCount": "{count, plural, one{1 etiqueta} other{{count} etiquetas}}",
+  "@tagsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tagsEllipsis": "Etiquetas…",
+  "tagNew": "Nova etiqueta",
+  "tagRename": "Mudar o nome da etiqueta",
+  "tagColor": "Cor",
+  "tagNoColor": "Sem cor",
+  "tagNameTaken": "Já existe uma etiqueta com este nome",
+  "tagDeleteTitle": "Eliminar a etiqueta «{name}»?",
+  "@tagDeleteTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "tagDeleteBody": "Apenas a etiqueta é retirada das faixas: continuam na biblioteca.",
+  "tagsEmpty": "Ainda não há etiquetas: crie uma no menu de uma faixa.",
+  "tagAddToSelection": "Adicionar etiqueta…",
+  "tagRemoveFromSelection": "Retirar etiqueta…",
+  "tagAssigned": "{count, plural, one{1 faixa etiquetada «{name}»} other{{count} faixas etiquetadas «{name}»}}",
+  "@tagAssigned": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "tagUnassigned": "{count, plural, one{«{name}» retirada de 1 faixa} other{«{name}» retirada de {count} faixas}}",
+  "@tagUnassigned": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "tagNoneToRemove": "As faixas escolhidas não têm etiquetas."
 }

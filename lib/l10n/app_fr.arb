@@ -1543,5 +1543,56 @@
     }
   },
   "smartDeleteBody": "Seule la règle est supprimée : les titres restent où ils sont.",
-  "smartAutoNote": "La liste se met à jour toute seule."
+  "smartAutoNote": "La liste se met à jour toute seule.",
+  "tagsTitle": "Étiquettes",
+  "tagsSubtitle": "Vos propres étiquettes",
+  "tagsCount": "{count, plural, =0{0 étiquette} one{1 étiquette} other{{count} étiquettes}}",
+  "@tagsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tagsEllipsis": "Étiquettes…",
+  "tagNew": "Nouvelle étiquette",
+  "tagRename": "Renommer l’étiquette",
+  "tagColor": "Couleur",
+  "tagNoColor": "Aucune couleur",
+  "tagNameTaken": "Une étiquette porte déjà ce nom",
+  "tagDeleteTitle": "Supprimer l’étiquette « {name} » ?",
+  "@tagDeleteTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "tagDeleteBody": "Seule l’étiquette est retirée des titres : ils restent dans la bibliothèque.",
+  "tagsEmpty": "Pas encore d’étiquettes : créez-en une depuis le menu d’un titre.",
+  "tagAddToSelection": "Ajouter une étiquette…",
+  "tagRemoveFromSelection": "Retirer une étiquette…",
+  "tagAssigned": "{count, plural, =0{0 titre étiqueté « {name} »} one{1 titre étiqueté « {name} »} other{{count} titres étiquetés « {name} »}}",
+  "@tagAssigned": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "tagUnassigned": "{count, plural, =0{« {name} » retirée de 0 titre} one{« {name} » retirée de 1 titre} other{« {name} » retirée de {count} titres}}",
+  "@tagUnassigned": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "tagNoneToRemove": "Les titres choisis n’ont pas d’étiquettes."
 }

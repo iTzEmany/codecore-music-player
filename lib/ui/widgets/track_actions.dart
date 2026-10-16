@@ -15,6 +15,7 @@ import '../../providers/jam_providers.dart';
 import '../../providers/player_providers.dart';
 import '../../providers/preview_providers.dart';
 import '../screens/playlists/playlist_dialogs.dart';
+import '../screens/tags/tags_sheet.dart';
 import '../screens/enrich_preview_dialog.dart';
 import '../screens/settings/equalizer_screen.dart';
 import '../screens/devices/devices_sheet.dart';
@@ -124,6 +125,11 @@ List<TrackActionGroup> trackActions(
         Icons.playlist_add_rounded,
         l.addToPlaylist,
         () async => showAddToPlaylistSheet(outer, ref, [track]),
+      ),
+      TrackAction(
+        Icons.label_outline_rounded,
+        l.tagsEllipsis,
+        () async => showTagsSheet(outer, ref, [track]),
       ),
     ]),
     TrackActionGroup(l.groupGoTo, [

@@ -1352,5 +1352,56 @@
     }
   },
   "smartDeleteBody": "Gelöscht wird nur die Regel: Die Titel bleiben, wo sie sind.",
-  "smartAutoNote": "Die Liste aktualisiert sich von selbst."
+  "smartAutoNote": "Die Liste aktualisiert sich von selbst.",
+  "tagsTitle": "Labels",
+  "tagsSubtitle": "Deine eigenen Labels",
+  "tagsCount": "{count, plural, one{1 Label} other{{count} Labels}}",
+  "@tagsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tagsEllipsis": "Labels …",
+  "tagNew": "Neues Label",
+  "tagRename": "Label umbenennen",
+  "tagColor": "Farbe",
+  "tagNoColor": "Keine Farbe",
+  "tagNameTaken": "Ein Label mit diesem Namen gibt es schon",
+  "tagDeleteTitle": "Das Label „{name}“ löschen?",
+  "@tagDeleteTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "tagDeleteBody": "Nur das Label wird von den Titeln entfernt: Sie bleiben in der Bibliothek.",
+  "tagsEmpty": "Noch keine Labels: Lege eines im Menü eines Titels an.",
+  "tagAddToSelection": "Label hinzufügen …",
+  "tagRemoveFromSelection": "Label entfernen …",
+  "tagAssigned": "{count, plural, one{1 Titel mit „{name}“ versehen} other{{count} Titel mit „{name}“ versehen}}",
+  "@tagAssigned": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "tagUnassigned": "{count, plural, one{„{name}“ von 1 Titel entfernt} other{„{name}“ von {count} Titeln entfernt}}",
+  "@tagUnassigned": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "tagNoneToRemove": "Die gewählten Titel haben keine Labels."
 }

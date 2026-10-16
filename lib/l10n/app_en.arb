@@ -1352,5 +1352,56 @@
     }
   },
   "smartDeleteBody": "Only the rule is deleted: the tracks stay where they are.",
-  "smartAutoNote": "The list updates by itself."
+  "smartAutoNote": "The list updates by itself.",
+  "tagsTitle": "Tags",
+  "tagsSubtitle": "Your own tags",
+  "tagsCount": "{count, plural, one{1 tag} other{{count} tags}}",
+  "@tagsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tagsEllipsis": "Tags…",
+  "tagNew": "New tag",
+  "tagRename": "Rename tag",
+  "tagColor": "Color",
+  "tagNoColor": "No color",
+  "tagNameTaken": "A tag with this name already exists",
+  "tagDeleteTitle": "Delete the tag “{name}”?",
+  "@tagDeleteTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "tagDeleteBody": "Only the tag is removed from the tracks: they stay in the library.",
+  "tagsEmpty": "No tags yet: create one from a track’s menu.",
+  "tagAddToSelection": "Add a tag…",
+  "tagRemoveFromSelection": "Remove a tag…",
+  "tagAssigned": "{count, plural, one{1 track tagged “{name}”} other{{count} tracks tagged “{name}”}}",
+  "@tagAssigned": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "tagUnassigned": "{count, plural, one{“{name}” removed from 1 track} other{“{name}” removed from {count} tracks}}",
+  "@tagUnassigned": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "tagNoneToRemove": "The chosen tracks have no tags."
 }

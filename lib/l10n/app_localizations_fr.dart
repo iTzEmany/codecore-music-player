@@ -2454,4 +2454,86 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get smartAutoNote => 'La liste se met à jour toute seule.';
+
+  @override
+  String get tagsTitle => 'Étiquettes';
+
+  @override
+  String get tagsSubtitle => 'Vos propres étiquettes';
+
+  @override
+  String tagsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count étiquettes',
+      one: '1 étiquette',
+      zero: '0 étiquette',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get tagsEllipsis => 'Étiquettes…';
+
+  @override
+  String get tagNew => 'Nouvelle étiquette';
+
+  @override
+  String get tagRename => 'Renommer l’étiquette';
+
+  @override
+  String get tagColor => 'Couleur';
+
+  @override
+  String get tagNoColor => 'Aucune couleur';
+
+  @override
+  String get tagNameTaken => 'Une étiquette porte déjà ce nom';
+
+  @override
+  String tagDeleteTitle(String name) {
+    return 'Supprimer l’étiquette « $name » ?';
+  }
+
+  @override
+  String get tagDeleteBody =>
+      'Seule l’étiquette est retirée des titres : ils restent dans la bibliothèque.';
+
+  @override
+  String get tagsEmpty =>
+      'Pas encore d’étiquettes : créez-en une depuis le menu d’un titre.';
+
+  @override
+  String get tagAddToSelection => 'Ajouter une étiquette…';
+
+  @override
+  String get tagRemoveFromSelection => 'Retirer une étiquette…';
+
+  @override
+  String tagAssigned(int count, String name) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count titres étiquetés « $name »',
+      one: '1 titre étiqueté « $name »',
+      zero: '0 titre étiqueté « $name »',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String tagUnassigned(int count, String name) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '« $name » retirée de $count titres',
+      one: '« $name » retirée de 1 titre',
+      zero: '« $name » retirée de 0 titre',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get tagNoneToRemove => 'Les titres choisis n’ont pas d’étiquettes.';
 }

@@ -2425,4 +2425,82 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get smartAutoNote => 'L’elenco si aggiorna da solo.';
+
+  @override
+  String get tagsTitle => 'Etichette';
+
+  @override
+  String get tagsSubtitle => 'Le tue etichette';
+
+  @override
+  String tagsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count etichette',
+      one: '1 etichetta',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get tagsEllipsis => 'Etichette…';
+
+  @override
+  String get tagNew => 'Nuova etichetta';
+
+  @override
+  String get tagRename => 'Rinomina etichetta';
+
+  @override
+  String get tagColor => 'Colore';
+
+  @override
+  String get tagNoColor => 'Nessun colore';
+
+  @override
+  String get tagNameTaken => 'Esiste già un’etichetta con questo nome';
+
+  @override
+  String tagDeleteTitle(String name) {
+    return 'Eliminare l’etichetta «$name»?';
+  }
+
+  @override
+  String get tagDeleteBody =>
+      'Si toglie solo l’etichetta dai brani: i brani restano nella libreria.';
+
+  @override
+  String get tagsEmpty => 'Nessuna etichetta: creane una dal menu di un brano.';
+
+  @override
+  String get tagAddToSelection => 'Aggiungi etichetta…';
+
+  @override
+  String get tagRemoveFromSelection => 'Togli etichetta…';
+
+  @override
+  String tagAssigned(int count, String name) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count brani etichettati «$name»',
+      one: '1 brano etichettato «$name»',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String tagUnassigned(int count, String name) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '«$name» tolta da $count brani',
+      one: '«$name» tolta da 1 brano',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get tagNoneToRemove => 'I brani scelti non hanno etichette.';
 }

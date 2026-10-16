@@ -9,6 +9,7 @@ import '../../../providers/library_providers.dart';
 import '../../../providers/nav_providers.dart';
 import '../../../providers/settings_providers.dart';
 import '../../../providers/smart_playlist_providers.dart';
+import '../../../providers/tag_providers.dart';
 import '../../shell/shell_nav.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/activity_button.dart';
@@ -30,6 +31,7 @@ import '../history/history_screen.dart';
 import '../smart/smart_playlist_editor.dart';
 import '../smart/smart_playlist_screen.dart';
 import '../stats/stats_screen.dart';
+import '../tags/tags_screen.dart';
 import 'folders_sheet.dart';
 import 'scan_status.dart';
 
@@ -82,6 +84,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
     final trackCount = ref.watch(
       tracksProvider(false).select((t) => t.value?.length ?? 0),
     );
+    final tagCount = ref.watch(tagsProvider.select((t) => t.value?.length ?? 0));
     final theme = Theme.of(context).textTheme;
     final denied = ref.watch(permissionDeniedProvider);
 
@@ -142,6 +145,12 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
           title: l.historyTitle,
           subtitle: l.historySubtitle,
           onTap: () => ShellNav.open<void>(context, const HistoryScreen()),
+        ),
+        _Pinned(
+          icon: Icons.label_outline_rounded,
+          title: l.tagsTitle,
+          subtitle: l.tagsCount(tagCount),
+          onTap: () => ShellNav.open<void>(context, const TagsScreen()),
         ),
         _Pinned(
           icon: Icons.bar_chart_rounded,

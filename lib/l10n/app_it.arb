@@ -1543,5 +1543,56 @@
     }
   },
   "smartDeleteBody": "Si elimina solo la regola: i brani restano dove sono.",
-  "smartAutoNote": "L’elenco si aggiorna da solo."
+  "smartAutoNote": "L’elenco si aggiorna da solo.",
+  "tagsTitle": "Etichette",
+  "tagsSubtitle": "Le tue etichette",
+  "tagsCount": "{count, plural, one{1 etichetta} other{{count} etichette}}",
+  "@tagsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tagsEllipsis": "Etichette…",
+  "tagNew": "Nuova etichetta",
+  "tagRename": "Rinomina etichetta",
+  "tagColor": "Colore",
+  "tagNoColor": "Nessun colore",
+  "tagNameTaken": "Esiste già un’etichetta con questo nome",
+  "tagDeleteTitle": "Eliminare l’etichetta «{name}»?",
+  "@tagDeleteTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "tagDeleteBody": "Si toglie solo l’etichetta dai brani: i brani restano nella libreria.",
+  "tagsEmpty": "Nessuna etichetta: creane una dal menu di un brano.",
+  "tagAddToSelection": "Aggiungi etichetta…",
+  "tagRemoveFromSelection": "Togli etichetta…",
+  "tagAssigned": "{count, plural, one{1 brano etichettato «{name}»} other{{count} brani etichettati «{name}»}}",
+  "@tagAssigned": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "tagUnassigned": "{count, plural, one{«{name}» tolta da 1 brano} other{«{name}» tolta da {count} brani}}",
+  "@tagUnassigned": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "tagNoneToRemove": "I brani scelti non hanno etichette."
 }

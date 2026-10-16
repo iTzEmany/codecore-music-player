@@ -5,6 +5,7 @@ import '../data/repositories/folder_repository.dart';
 import '../data/repositories/import_repository.dart';
 import '../data/repositories/play_history_repository.dart';
 import '../data/repositories/smart_playlist_repository.dart';
+import '../data/repositories/tag_repository.dart';
 import '../data/repositories/playlist_repository.dart';
 import '../data/repositories/track_repository.dart';
 
@@ -13,6 +14,10 @@ final databaseProvider = Provider<AppDatabase>((ref) {
   ref.onDispose(db.close);
   return db;
 });
+
+final tagRepositoryProvider = Provider<TagRepository>(
+  (ref) => TagRepository(ref.watch(databaseProvider)),
+);
 
 final smartPlaylistRepositoryProvider = Provider<SmartPlaylistRepository>(
   (ref) => SmartPlaylistRepository(

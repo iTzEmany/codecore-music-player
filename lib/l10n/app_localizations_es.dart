@@ -2429,4 +2429,83 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get smartAutoNote => 'La lista se actualiza sola.';
+
+  @override
+  String get tagsTitle => 'Etiquetas';
+
+  @override
+  String get tagsSubtitle => 'Tus propias etiquetas';
+
+  @override
+  String tagsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count etiquetas',
+      one: '1 etiqueta',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get tagsEllipsis => 'Etiquetas…';
+
+  @override
+  String get tagNew => 'Nueva etiqueta';
+
+  @override
+  String get tagRename => 'Renombrar etiqueta';
+
+  @override
+  String get tagColor => 'Color';
+
+  @override
+  String get tagNoColor => 'Sin color';
+
+  @override
+  String get tagNameTaken => 'Ya existe una etiqueta con ese nombre';
+
+  @override
+  String tagDeleteTitle(String name) {
+    return '¿Eliminar la etiqueta «$name»?';
+  }
+
+  @override
+  String get tagDeleteBody =>
+      'Solo se quita la etiqueta de las canciones: siguen en la biblioteca.';
+
+  @override
+  String get tagsEmpty =>
+      'Aún no hay etiquetas: crea una desde el menú de una canción.';
+
+  @override
+  String get tagAddToSelection => 'Añadir etiqueta…';
+
+  @override
+  String get tagRemoveFromSelection => 'Quitar etiqueta…';
+
+  @override
+  String tagAssigned(int count, String name) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count canciones etiquetadas «$name»',
+      one: '1 canción etiquetada «$name»',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String tagUnassigned(int count, String name) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '«$name» quitada de $count canciones',
+      one: '«$name» quitada de 1 canción',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get tagNoneToRemove => 'Las canciones elegidas no tienen etiquetas.';
 }

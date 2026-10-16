@@ -1352,5 +1352,56 @@
     }
   },
   "smartDeleteBody": "Solo se elimina la regla: las canciones se quedan donde están.",
-  "smartAutoNote": "La lista se actualiza sola."
+  "smartAutoNote": "La lista se actualiza sola.",
+  "tagsTitle": "Etiquetas",
+  "tagsSubtitle": "Tus propias etiquetas",
+  "tagsCount": "{count, plural, one{1 etiqueta} other{{count} etiquetas}}",
+  "@tagsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tagsEllipsis": "Etiquetas…",
+  "tagNew": "Nueva etiqueta",
+  "tagRename": "Renombrar etiqueta",
+  "tagColor": "Color",
+  "tagNoColor": "Sin color",
+  "tagNameTaken": "Ya existe una etiqueta con ese nombre",
+  "tagDeleteTitle": "¿Eliminar la etiqueta «{name}»?",
+  "@tagDeleteTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "tagDeleteBody": "Solo se quita la etiqueta de las canciones: siguen en la biblioteca.",
+  "tagsEmpty": "Aún no hay etiquetas: crea una desde el menú de una canción.",
+  "tagAddToSelection": "Añadir etiqueta…",
+  "tagRemoveFromSelection": "Quitar etiqueta…",
+  "tagAssigned": "{count, plural, one{1 canción etiquetada «{name}»} other{{count} canciones etiquetadas «{name}»}}",
+  "@tagAssigned": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "tagUnassigned": "{count, plural, one{«{name}» quitada de 1 canción} other{«{name}» quitada de {count} canciones}}",
+  "@tagUnassigned": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "tagNoneToRemove": "Las canciones elegidas no tienen etiquetas."
 }

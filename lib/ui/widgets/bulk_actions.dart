@@ -7,6 +7,7 @@ import '../../providers/database_providers.dart';
 import '../../providers/jam_providers.dart';
 import '../../providers/player_providers.dart';
 import '../screens/playlists/playlist_dialogs.dart';
+import '../screens/tags/tags_sheet.dart';
 import 'confirm.dart';
 import 'track_actions.dart';
 
@@ -137,6 +138,12 @@ List<TrackActionGroup> bulkActions(
       ),
       TrackAction(Icons.playlist_add_rounded, l.addToPlaylist, () async {
         if (await showAddToPlaylistSheet(outer, ref, tracks)) done();
+      }),
+      TrackAction(Icons.label_outline_rounded, l.tagAddToSelection, () async {
+        await pickTagFor(outer, ref, tracks, remove: false, done: done);
+      }),
+      TrackAction(Icons.label_off_outlined, l.tagRemoveFromSelection, () async {
+        await pickTagFor(outer, ref, tracks, remove: true, done: done);
       }),
       if (ctx.playlistId != null)
         TrackAction(
