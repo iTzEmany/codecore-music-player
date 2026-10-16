@@ -738,7 +738,7 @@
     }
   },
   "csvImportFailing": "Demasiados errores seguidos: importación en pausa",
-  "csvImportReviewTitle": "Revisar importación",
+  "csvImportReviewTitle": "Revisar",
   "csvImportToReview": "Por revisar",
   "csvImportNotFound": "No encontradas",
   "csvImportErrors": "Con errores",

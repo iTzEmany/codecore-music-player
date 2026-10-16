@@ -50,14 +50,15 @@ class LibraryIndex {
 
   final Map<String, List<LibraryEntryLite>> _byKey = {};
 
-  /// Same title and artist; when both lengths are known they must be within 3 s.
+  /// Same title and artist; when both lengths are known they must be within
+  /// 5 s (the same recording is often a few seconds apart between services).
   LibraryEntryLite? find(ImportRow r) {
     final c = _byKey['${matchTitleKey(r.title)}|${_artistKey(r.primaryArtist)}'];
     if (c == null) return null;
     final want = r.durationMs;
     for (final t in c) {
       if (want == null || want <= 0 || t.durationMs <= 0) return t;
-      if ((t.durationMs - want).abs() <= 3000) return t;
+      if ((t.durationMs - want).abs() <= 5000) return t;
     }
     return null;
   }

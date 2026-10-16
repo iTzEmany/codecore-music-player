@@ -5,6 +5,7 @@ import '../../l10n/l10n_ext.dart';
 import '../../providers/database_providers.dart';
 import '../../providers/library_providers.dart';
 import '../../providers/nav_providers.dart';
+import '../screens/import/import_flow.dart';
 import '../screens/library/favorites_screen.dart';
 import '../screens/playlists/playlist_detail_screen.dart';
 import '../screens/playlists/playlist_dialogs.dart';
@@ -147,14 +148,22 @@ class DesktopSidebar extends ConsumerWidget {
               l.yourLibrary,
               index == NavTab.library.index,
               () => select(NavTab.library),
-              trailing: IconButton(
+              trailing: PopupMenuButton<String>(
                 tooltip: l.newPlaylist,
                 icon: const Icon(Icons.add_rounded),
-                onPressed: () async {
+                onSelected: (v) async {
+                  if (v == 'csv') {
+                    startCsvImport(context, ref);
+                    return;
+                  }
                   final name = await askPlaylistName(context);
                   if (name == null) return;
                   await ref.read(playlistRepositoryProvider).create(name);
                 },
+                itemBuilder: (_) => [
+                  PopupMenuItem(value: 'new', child: Text(l.newPlaylist)),
+                  PopupMenuItem(value: 'csv', child: Text(l.csvImportMenu)),
+                ],
               ),
             ),
             Expanded(

@@ -150,7 +150,14 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
             padding: const EdgeInsets.fromLTRB(CcDims.margin, 12, 4, 0),
             child: Row(
               children: [
-                Expanded(child: Text(l.navLibrary, style: theme.headlineSmall)),
+                Expanded(
+                  child: Text(
+                    l.navLibrary,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.headlineSmall,
+                  ),
+                ),
                 const ActivityButton(),
                 IconButton(
                   tooltip: l.navSearch,
@@ -159,26 +166,33 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
                       .read(navIndexProvider.notifier)
                       .set(NavTab.search.index),
                 ),
-                IconButton(
+                PopupMenuButton<String>(
                   tooltip: l.newPlaylist,
                   icon: const Icon(Icons.add_rounded),
-                  onPressed: () async {
+                  onSelected: (v) async {
+                    if (v == 'csv') {
+                      startCsvImport(context, ref);
+                      return;
+                    }
                     final name = await askPlaylistName(context);
                     if (name == null) return;
                     await ref.read(playlistRepositoryProvider).create(name);
                   },
-                ),
-                IconButton(
-                  tooltip: l.csvImportMenu,
-                  icon: const Icon(Icons.upload_file_rounded),
-                  onPressed: () => startCsvImport(context, ref),
+                  itemBuilder: (_) => [
+                    PopupMenuItem(
+                      value: 'new',
+                      child: Text(l.newPlaylist),
+                    ),
+                    PopupMenuItem(
+                      value: 'csv',
+                      child: Text(l.csvImportMenu),
+                    ),
+                  ],
                 ),
                 PopupMenuButton<String>(
                   tooltip: l.moreActions,
                   onSelected: (v) {
                     switch (v) {
-                      case 'csv':
-                        startCsvImport(context, ref);
                       case 'folders':
                         showModalBottomSheet<void>(
                           context: context,
@@ -191,7 +205,6 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
                     }
                   },
                   itemBuilder: (_) => [
-                    PopupMenuItem(value: 'csv', child: Text(l.csvImportMenu)),
                     PopupMenuItem(value: 'folders', child: Text(l.folders)),
                     PopupMenuItem(value: 'scan', child: Text(l.refreshLibrary)),
                     PopupMenuItem(value: 'share', child: Text(l.shareTitle)),

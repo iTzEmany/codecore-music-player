@@ -40,6 +40,8 @@ lib/
     online/wikipedia_client.dart
     online/enrichment_service.dart
     online/youtube_service.dart
+    import/csv_parser.dart, exportify_reader.dart, track_matcher.dart,
+           import_candidate.dart, playlist_import_service.dart            # (fase 12)
     share/lan_server.dart, lan_client.dart, offers.dart, discovery.dart  # (fase 6)
     jam/jam_state.dart, jam_host.dart, jam_guest.dart, jam_output.dart, jam_cache.dart  # (fase 8)
   providers/                      # provider Riverpod (database, settings, player, library, ...)
@@ -122,3 +124,15 @@ Scritture con debounce 400 ms, mai in un handler di slider a ogni tick.
   barra desktop; `ShareScreen` resta per il collegamento manuale.
 - **Test visivi:** `test_shots/` (fuori da `flutter test`), `scripts/shots.sh`; prova su telefono con
   `flutter build apk --debug --build-number=5000` + `adb install -r` (vedi nota in `docs/PROGRESS.md`, 11.5).
+
+## Importazione da CSV (fase 12)
+- **Flusso:** `ImportIntroSheet` (istruzioni, sito **exportify.net**) → `readExportify` (isolate) → `ImportPreviewDialog`
+  → `PlaylistImportService.start` → per riga: libreria (`LibraryIndex`, nessuna rete) → YouTube Music
+  (`YoutubeService.searchSongs`, `yt-dlp --playlist-items 1-5`) → ricerca YouTube normale → `decide` (punteggio:
+  durata 45 %, titolo 35 %, artista 20 %, bonus «- Topic») → `sure` scarica / `review` salva 3 candidati / `notFound`.
+- **Stato su DB** (schema v4: `playlist_imports`, `playlist_import_items`): sopravvive alla chiusura; all'avvio
+  `recoverAfterRestart` mette «in pausa» le importazioni in corso (nessuna rete senza azione dell'utente).
+- **Download:** `DownloadQueue` con `tag` `import:<id>:<riga>`; `DownloadsNotifier.settled` avvisa il motore, che
+  applica i tag del CSV (`TrackEditor.save`, `userEdited`) e inserisce il brano nella posizione del CSV
+  (`PlaylistRepository.placeImported`). Al più 3 download in coda per importazione, 1,5 s tra due ricerche; 429 → pausa.
+- **UI:** `ImportBanner` nella pagina playlist, `ImportReviewScreen` (+ `ImportManualSearchSheet`), riga nel Centro Attività.

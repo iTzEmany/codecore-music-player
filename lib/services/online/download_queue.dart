@@ -183,7 +183,8 @@ class DownloadQueue {
             (e) => e.copyWith(status: DownloadStatus.done, progress: 1, path: path));
         await onDownloaded?.call(path);
       }
-    } on YtException catch (e) {
+    } on YtException catch (e, st) {
+      AppLog.w('download of ${item.result.id} failed (${e.kind})', e.detail, st);
       _replace(item.id,
           (x) => x.copyWith(status: DownloadStatus.failed, error: e.kind));
     } on Object catch (e, st) {

@@ -738,7 +738,7 @@
     }
   },
   "csvImportFailing": "Too many errors in a row: import paused",
-  "csvImportReviewTitle": "Review import",
+  "csvImportReviewTitle": "Review",
   "csvImportToReview": "To review",
   "csvImportNotFound": "Not found",
   "csvImportErrors": "With errors",

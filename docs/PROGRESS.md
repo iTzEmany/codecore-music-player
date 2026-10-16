@@ -145,7 +145,7 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 12.5 Tabelle dell'importazione (schema v4)
 - [x] 12.6 Posizione nella playlist secondo il CSV
 - [x] 12.7 Coda di download con tag
-- [~] 12.8 `PlaylistImportService`
+- [x] 12.8 `PlaylistImportService`
 - [x] 12.9 Pulsante «Importa da Exportify» e anteprima
 - [x] 12.10 Avanzamento, «Da verificare» e «Non trovati»
 - [ ] 12.11 Rifinitura e prova a mano
@@ -223,3 +223,6 @@ L'agente riparte sempre dal primo task non spuntato.
 - 12.8: `loadLibrary` carica solo id/titolo/artista/durata (`TrackRepository.liteEntries`); throttle di 3 download in coda per importazione; 3 errori di ricerca di fila → pausa (`failing`). Artista nei tag = «A, B», `albumArtist` = primo artista (un album Spotify resta unito). Brani con `videoId` già in `downloads.json` si collegano senza riscaricare.
 - 12.9: il pulsante sta nell'intestazione della Libreria (icona + voce del menu ⋮ «Importa da Exportify (CSV)») e nel FAB di `PlaylistsScreen`; il foglio d'istruzioni nomina **exportify.net** con «Copia indirizzo» (niente `url_launcher`). Anteprima: conteggi calcolati prima del dialogo (`import_flow.dart`), il dialogo è puro. Su Android il selettore file mostra tutti i file (filtro MIME `csv` inaffidabile).
 - 12.10: «Cerca a mano» è un foglio nella schermata di revisione (ricerca YouTube normale), non un salto alla scheda Cerca. Importazioni concluse non restano in «Completate»: esito in snackbar + banner nella playlist finché ci sono righe da risolvere.
+- Prova dal vivo PC (2026-10-16, yt-dlp 2026.08.19 standalone in PATH, ffmpeg di sistema): `test/live/import_live_test.dart` — le 34 righe di `Just_a_mood.csv` risolte tutte con punteggio 1,00 al primo giro su YouTube Music, durate entro ±1 s; `test/live/import_e2e_test.dart` — 3 righe cercate, scaricate (mp3), scansionate, taggate dal CSV (`userEdited`) e messe in playlist nell'ordine del CSV. Sono test a pagamento di rete: si lanciano con `CODECORE_LIVE=1 YTDLP=<percorso> flutter test test/live/…`.
+- Prova su telefono (Mi A3, APK debug 5000): importazione di 5 righe: foglio con exportify.net, selettore di sistema, anteprima («5 brani · 0 già in libreria · 5 da scaricare»), Centro Attività con Pausa/Annulla, banner nella playlist, schermata «Rivedi», «Riprova tutti» (la riga fallita al primo giro — probabile 403 transitorio — è andata al secondo). Dopo la prova: `LibraryIndex.find` accetta ±5 s (Blowin' in the Wind: 168,8 s su Spotify, 165,5 s su YouTube → prima ±3 s la mancava) e il motore ritenta **una volta** un download fallito per errore transitorio (`changed`/`network`).
+- Linux (2026-10-16): `flutter build linux` riuscito; app avviata con HOME isolato e `GDK_BACKEND=x11`, pilotata con xdotool e `xwd`: menu «+» della barra laterale con «Importa da Exportify (CSV)», foglio d'istruzioni, banner «Importazione in pausa: 15/34…» con Riprendi/Rivedi, schermata di revisione, «Cerca a mano» con risultati reali. NON pilotabile: il selettore file (portal GNOME, finestra Wayland nativa) → la scelta del file su Linux va provata a mano.

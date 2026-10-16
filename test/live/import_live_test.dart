@@ -34,6 +34,7 @@ void main() {
       trackIdForPath: tracks.idForPath,
       pathForVideo: (_) async => null,
       applyTags: (_, _) async {},
+      maxInFlight: 1000, // nothing settles here: do not throttle
     );
     final text = File('test/fixtures/Just_a_mood.csv').readAsStringSync();
     final limit = int.tryParse(Platform.environment['ROWS'] ?? '') ?? 999;

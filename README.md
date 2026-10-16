@@ -24,6 +24,10 @@ Italiano, English, Deutsch, Español.
   curiosità da Wikipedia, ricerca e download da YouTube con yt-dlp.
 - **Condivisione LAN** telefono ↔ PC senza server esterni: scoperta automatica dei dispositivi, richiesta con accettazione (anche da notifica su Android, anche in background), collegamento manuale con PIN e QR.
 - **Jam sulla rete locale**: coda condivisa tra fino a 5 dispositivi (anche un ospite può accettare nuovi arrivati), ognuno aggiunge brani dalla propria libreria (streaming dal proprietario, precarico del successivo), uscita audio selezionabile; l'ospite non può cambiare brano. Più dispositivi possono suonare **insieme, sincronizzati** (orologio condiviso e correzione della deriva). Schermata Condivisione → «Avvia Jam con …». Piano in [`docs/fase-8-jam.md`](docs/fase-8-jam.md).
+- **Importa playlist di Spotify da CSV**: scarica il file da **exportify.net** (accedi con Spotify ed esporta la
+  playlist), poi in Libreria tocca «+» → «Importa da Exportify (CSV)». I brani già in libreria vengono collegati, gli
+  altri cercati su YouTube Music e scaricati, nello stesso ordine; i dubbi finiscono in «Rivedi». Serve `yt-dlp`
+  recente (≥ 2025.11, `pip install -U yt-dlp`).
 - **Import** di preferiti, testi e playlist dalla vecchia app Python (Impostazioni → «Importa dalla vecchia app»).
 
 ## Installare

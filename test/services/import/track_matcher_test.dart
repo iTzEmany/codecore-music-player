@@ -199,6 +199,11 @@ void main() {
       expect(lib.find(row('Let It Be', ['The Beatles'], ms: 300000)), isNull);
     });
 
+    test('a few seconds of difference between services still matches', () {
+      expect(lib.find(row('Let It Be', ['The Beatles'], ms: 247500))?.id, 1);
+      expect(lib.find(row('Let It Be', ['The Beatles'], ms: 249500)), isNull);
+    });
+
     test('unknown library duration still matches', () {
       expect(lib.find(row('Mother', ['Pink Floyd'], ms: 334880))?.id, 3);
     });

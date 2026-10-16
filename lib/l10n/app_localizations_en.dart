@@ -1429,7 +1429,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get csvImportFailing => 'Too many errors in a row: import paused';
 
   @override
-  String get csvImportReviewTitle => 'Review import';
+  String get csvImportReviewTitle => 'Review';
 
   @override
   String get csvImportToReview => 'To review';

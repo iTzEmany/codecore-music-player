@@ -929,7 +929,7 @@
     }
   },
   "csvImportFailing": "Troppi errori di fila: importazione in pausa",
-  "csvImportReviewTitle": "Rivedi importazione",
+  "csvImportReviewTitle": "Rivedi",
   "csvImportToReview": "Da verificare",
   "csvImportNotFound": "Non trovati",
   "csvImportErrors": "Con errori",

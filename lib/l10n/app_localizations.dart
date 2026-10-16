@@ -2595,7 +2595,7 @@ abstract class AppLocalizations {
   /// No description provided for @csvImportReviewTitle.
   ///
   /// In it, this message translates to:
-  /// **'Rivedi importazione'**
+  /// **'Rivedi'**
   String get csvImportReviewTitle;
 
   /// No description provided for @csvImportToReview.

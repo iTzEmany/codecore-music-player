@@ -1432,7 +1432,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get csvImportFailing => 'Troppi errori di fila: importazione in pausa';
 
   @override
-  String get csvImportReviewTitle => 'Rivedi importazione';
+  String get csvImportReviewTitle => 'Rivedi';
 
   @override
   String get csvImportToReview => 'Da verificare';

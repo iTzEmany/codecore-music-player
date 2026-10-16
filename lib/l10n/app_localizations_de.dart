@@ -1434,7 +1434,7 @@ class AppLocalizationsDe extends AppLocalizations {
       'Zu viele Fehler hintereinander: Import pausiert';
 
   @override
-  String get csvImportReviewTitle => 'Import prüfen';
+  String get csvImportReviewTitle => 'Prüfen';
 
   @override
   String get csvImportToReview => 'Zu prüfen';

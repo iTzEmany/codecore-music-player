@@ -1433,7 +1433,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'Demasiados errores seguidos: importación en pausa';
 
   @override
-  String get csvImportReviewTitle => 'Revisar importación';
+  String get csvImportReviewTitle => 'Revisar';
 
   @override
   String get csvImportToReview => 'Por revisar';
