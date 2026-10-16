@@ -67,6 +67,7 @@ class _ImportIntroSheetState extends State<ImportIntroSheet> {
       if (path == null) {
         if (files.isNotEmpty) error = l.csvImportReadFailed;
       } else {
+        checkCsvSize(await File(path).length());
         final text = utf8.decode(
           await File(path).readAsBytes(),
           allowMalformed: true,
@@ -76,6 +77,9 @@ class _ImportIntroSheetState extends State<ImportIntroSheet> {
         Navigator.of(context).pop(csv);
         return;
       }
+    } on CsvTooLargeException catch (e, st) {
+      AppLog.w('CSV too large', e, st);
+      error = l.csvImportTooBig;
     } on FormatException catch (e, st) {
       AppLog.w('not an Exportify file', e, st);
       error = l.csvImportNotExportify;

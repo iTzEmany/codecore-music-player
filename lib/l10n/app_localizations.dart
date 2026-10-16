@@ -2921,6 +2921,12 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Tieni questo'**
   String get csvImportKeep;
+
+  /// No description provided for @csvImportTooBig.
+  ///
+  /// In it, this message translates to:
+  /// **'Il file è troppo grande per essere una playlist (massimo 5 MB e 10.000 brani)'**
+  String get csvImportTooBig;
 }
 
 class _AppLocalizationsDelegate

@@ -880,5 +880,6 @@
         "type": "String"
       }
     }
-  }
+  },
+  "csvImportTooBig": "Die Datei ist zu groß für eine Playlist (höchstens 5 MB und 10.000 Titel)"
 }

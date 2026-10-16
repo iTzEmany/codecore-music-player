@@ -86,7 +86,14 @@ YtException ytExceptionFromStderr(String err) {
 class YtDlpProcessService implements YoutubeService {
   /// [locate] picks the binary to run (first call only); without it, and
   /// without [executable], `yt-dlp` is taken from the PATH.
-  YtDlpProcessService({this.executable, this.locate});
+  YtDlpProcessService({
+    this.executable,
+    this.locate,
+    this.searchTimeout = const Duration(seconds: 45),
+  });
+
+  /// A search that takes longer is killed and reported as a network error.
+  final Duration searchTimeout;
 
   final String? executable;
   final Future<String?> Function()? locate;
@@ -151,6 +158,21 @@ class YtDlpProcessService implements YoutubeService {
     return e;
   }
 
+  /// Runs a search to the end or kills it after [searchTimeout].
+  Future<({int code, String out, String err})> _runSearch(
+      List<String> args) async {
+    final proc = await Process.start(await _exe, args);
+    final out = proc.stdout.transform(utf8.decoder).join();
+    final err = proc.stderr.transform(utf8.decoder).join();
+    try {
+      final code = await proc.exitCode.timeout(searchTimeout);
+      return (code: code, out: await out, err: await err);
+    } on TimeoutException {
+      proc.kill(ProcessSignal.sigkill);
+      throw const YtException(YtErrorKind.network, 'search timed out');
+    }
+  }
+
   Future<void> _ensureTool() async {
     if (!await _exists(await _exe)) {
       throw const YtException(YtErrorKind.toolMissing, 'yt-dlp');
@@ -169,11 +191,10 @@ class YtDlpProcessService implements YoutubeService {
       if (isUrl) '--no-playlist' else '--flat-playlist',
       isUrl ? q : 'ytsearch10:$q',
     ];
-    final r = await Process.run(await _exe, args,
-        stdoutEncoding: utf8, stderrEncoding: utf8);
-    if (r.exitCode != 0) throw await _explain(r.stderr);
+    final r = await _runSearch(args);
+    if (r.code != 0) throw await _explain(r.err);
     try {
-      return parseYtDlpJson('${r.stdout}');
+      return parseYtDlpJson(r.out);
     } on FormatException catch (e, st) {
       AppLog.w('yt-dlp search output not JSON', e, st);
       throw const YtException(YtErrorKind.changed, 'bad output');
@@ -185,21 +206,17 @@ class YtDlpProcessService implements YoutubeService {
     final q = query.trim();
     if (q.isEmpty) return const [];
     await _ensureTool();
-    final r = await Process.run(
-        await _exe,
-        [
-          '-J',
-          '--no-warnings',
-          '--playlist-items',
-          '1-$limit',
-          ...await _jsArgs(),
-          youtubeMusicSearchUri(q).toString(),
-        ],
-        stdoutEncoding: utf8,
-        stderrEncoding: utf8);
-    if (r.exitCode != 0) throw await _explain(r.stderr);
+    final r = await _runSearch([
+      '-J',
+      '--no-warnings',
+      '--playlist-items',
+      '1-$limit',
+      ...await _jsArgs(),
+      youtubeMusicSearchUri(q).toString(),
+    ]);
+    if (r.code != 0) throw await _explain(r.err);
     try {
-      return parseYtDlpJson('${r.stdout}');
+      return parseYtDlpJson(r.out);
     } on FormatException catch (e, st) {
       AppLog.w('yt-dlp music search output not JSON', e, st);
       throw const YtException(YtErrorKind.changed, 'bad output');

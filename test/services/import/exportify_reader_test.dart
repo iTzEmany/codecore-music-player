@@ -61,4 +61,33 @@ void main() {
     final p = await readExportifyInIsolate('Just_a_mood.csv', text);
     expect(p.rows, hasLength(34));
   });
+
+  group('size limits', () {
+    test('too many rows', () {
+      final b = StringBuffer('Track Name,Artist Name(s)\n');
+      for (var i = 0; i < kMaxCsvRows + 1; i++) {
+        b.writeln('t$i,a');
+      }
+      expect(() => readExportify('big.csv', b.toString()),
+          throwsA(isA<CsvTooLargeException>()));
+    });
+
+    test('exactly the maximum number of rows is accepted', () {
+      final b = StringBuffer('Track Name,Artist Name(s)\n');
+      for (var i = 0; i < kMaxCsvRows; i++) {
+        b.writeln('t$i,a');
+      }
+      expect(readExportify('ok.csv', b.toString()).rows, hasLength(kMaxCsvRows));
+    });
+
+    test('file size is checked before reading', () {
+      expect(() => checkCsvSize(kMaxCsvBytes + 1),
+          throwsA(isA<CsvTooLargeException>()));
+      checkCsvSize(kMaxCsvBytes);
+    });
+
+    test('a too-large CSV is still a FormatException for old callers', () {
+      expect(() => checkCsvSize(kMaxCsvBytes + 1), throwsFormatException);
+    });
+  });
 }

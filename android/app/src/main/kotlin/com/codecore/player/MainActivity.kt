@@ -127,7 +127,9 @@ class MainActivity : AudioServiceActivity() {
                 } else {
                     req.addOption(if (isUrl) "--no-playlist" else "--flat-playlist")
                 }
-                YoutubeDL.getInstance().execute(req).out
+                val processId = call.argument<String>("processId")
+                if (processId != null) YoutubeDL.getInstance().execute(req, processId).out
+                else YoutubeDL.getInstance().execute(req).out
             }
             "download" -> run(result) {
                 ensureInit()

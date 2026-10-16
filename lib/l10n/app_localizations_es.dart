@@ -1636,4 +1636,8 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get csvImportKeep => 'Quedarme con este';
+
+  @override
+  String get csvImportTooBig =>
+      'El archivo es demasiado grande para una lista (máximo 5 MB y 10.000 canciones)';
 }

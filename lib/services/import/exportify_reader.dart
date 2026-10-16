@@ -5,6 +5,21 @@ import 'csv_parser.dart';
 
 export '../../core/import_row.dart';
 
+/// A playlist CSV is a few hundred KB; anything near these limits is not one.
+const kMaxCsvBytes = 5 * 1024 * 1024;
+const kMaxCsvRows = 10000;
+
+class CsvTooLargeException extends FormatException {
+  const CsvTooLargeException(super.message);
+}
+
+/// Throws [CsvTooLargeException] before the file is read into memory.
+void checkCsvSize(int bytes) {
+  if (bytes > kMaxCsvBytes) {
+    throw CsvTooLargeException('CSV of $bytes bytes exceeds $kMaxCsvBytes');
+  }
+}
+
 class ExportifyPlaylist {
   const ExportifyPlaylist({
     required this.name,
@@ -52,6 +67,9 @@ ExportifyPlaylist readExportify(String fileName, String text) {
   final table = parseCsv(text);
   if (table.isEmpty) {
     throw const FormatException('not an Exportify file: empty');
+  }
+  if (table.length - 1 > kMaxCsvRows) {
+    throw CsvTooLargeException('CSV with ${table.length - 1} rows');
   }
   final header = [for (final h in table.first) h.trim().toLowerCase()];
   final titleCol = _col(header, _titleHeaders);

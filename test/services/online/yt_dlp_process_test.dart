@@ -104,6 +104,26 @@ void main() {
               .having((e) => e.kind, 'kind', YtErrorKind.unavailable)));
     });
 
+    test('a search that hangs is killed after the timeout', () async {
+      final pidFile = File('${dir.path}/pid');
+      final f = File('${dir.path}/slow-yt-dlp')
+        ..writeAsStringSync('#!/bin/sh\n'
+            'if [ "\$1" = "--version" ]; then echo 2026.08.19; exit 0; fi\n'
+            'echo \$\$ > ${pidFile.path}\n'
+            'exec sleep 30\n');
+      Process.runSync('chmod', ['+x', f.path]);
+      final svc = YtDlpProcessService(
+          executable: f.path, searchTimeout: const Duration(milliseconds: 400));
+      await expectLater(
+          svc.searchSongs('x'),
+          throwsA(isA<YtException>()
+              .having((e) => e.kind, 'kind', YtErrorKind.network)));
+      final pid = int.parse(pidFile.readAsStringSync().trim());
+      await Future<void>.delayed(const Duration(milliseconds: 200));
+      expect(Process.runSync('kill', ['-0', '$pid']).exitCode, isNot(0),
+          reason: 'the process must be gone');
+    });
+
     test('a missing tool has no version', () async {
       final svc = YtDlpProcessService(executable: '${dir.path}/nope');
       expect(await svc.toolVersion(), isNull);

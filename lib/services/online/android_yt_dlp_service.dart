@@ -17,6 +17,9 @@ class AndroidYtDlpService implements YoutubeService {
   }
 
   static const _channel = MethodChannel('codecore/ytdlp');
+
+  /// A search that takes longer is cancelled and reported as a network error.
+  static const searchTimeout = Duration(seconds: 45);
   final _progress = <String, StreamController<DownloadProgress>>{};
   int _counter = 0;
 
@@ -29,33 +32,39 @@ class AndroidYtDlpService implements YoutubeService {
     return null;
   }
 
-  @override
-  Future<List<YtResult>> search(String query) async {
-    final q = query.trim();
-    if (q.isEmpty) return const [];
+  /// Calls the `search` method with a process id so that a search that hangs
+  /// can be killed on the Kotlin side after [searchTimeout].
+  Future<List<YtResult>> _search(Map<String, Object?> args) async {
+    final processId = 'sr-${_counter++}';
     try {
-      final raw = await _channel.invokeMethod<String>(
-          'search', {'query': q, 'isUrl': isYoutubeUrl(q)});
+      final raw = await _channel
+          .invokeMethod<String>('search', {...args, 'processId': processId})
+          .timeout(searchTimeout);
       return parseYtDlpJson(raw ?? '{}');
+    } on TimeoutException {
+      await _channel.invokeMethod<void>('cancel', {'processId': processId});
+      throw const YtException(YtErrorKind.network, 'search timed out');
     } on PlatformException catch (e) {
       throw ytExceptionFromStderr(e.message ?? '');
     }
   }
 
   @override
+  Future<List<YtResult>> search(String query) async {
+    final q = query.trim();
+    if (q.isEmpty) return const [];
+    return _search({'query': q, 'isUrl': isYoutubeUrl(q)});
+  }
+
+  @override
   Future<List<YtResult>> searchSongs(String query, {int limit = 5}) async {
     final q = query.trim();
     if (q.isEmpty) return const [];
-    try {
-      final raw = await _channel.invokeMethod<String>('search', {
-        'query': youtubeMusicSearchUri(q).toString(),
-        'isUrl': true,
-        'items': limit,
-      });
-      return parseYtDlpJson(raw ?? '{}');
-    } on PlatformException catch (e) {
-      throw ytExceptionFromStderr(e.message ?? '');
-    }
+    return _search({
+      'query': youtubeMusicSearchUri(q).toString(),
+      'isUrl': true,
+      'items': limit,
+    });
   }
 
   @override
