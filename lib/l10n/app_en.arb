@@ -993,5 +993,19 @@
   "importNoteLinkOnly": "Link only: not searched",
   "importNoteYoutubeOff": "Downloads are off",
   "importNoteDownloadFailed": "Download failed",
-  "importNoteLengthOff": "Length differs from the file"
+  "importNoteLengthOff": "Length differs from the file",
+  "importNoteUnchanged": "Already in the playlist",
+  "csvImportSync": "Sync",
+  "csvImportSyncCounts": "+{added} new · −{removed} removed from the playlist (files stay)",
+  "csvImportSyncChecking": "Checking the differences…",
+  "@csvImportSyncCounts": {
+    "placeholders": {
+      "added": {
+        "type": "int"
+      },
+      "removed": {
+        "type": "int"
+      }
+    }
+  }
 }

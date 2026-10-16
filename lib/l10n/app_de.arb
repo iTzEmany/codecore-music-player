@@ -993,5 +993,19 @@
   "importNoteLinkOnly": "Nur verknüpfen: nicht gesucht",
   "importNoteYoutubeOff": "Downloads sind aus",
   "importNoteDownloadFailed": "Download fehlgeschlagen",
-  "importNoteLengthOff": "Länge weicht von der Datei ab"
+  "importNoteLengthOff": "Länge weicht von der Datei ab",
+  "importNoteUnchanged": "Schon in der Playlist",
+  "csvImportSync": "Synchronisieren",
+  "csvImportSyncCounts": "+{added} neu · −{removed} aus der Playlist entfernt (Dateien bleiben)",
+  "csvImportSyncChecking": "Unterschiede werden geprüft…",
+  "@csvImportSyncCounts": {
+    "placeholders": {
+      "added": {
+        "type": "int"
+      },
+      "removed": {
+        "type": "int"
+      }
+    }
+  }
 }

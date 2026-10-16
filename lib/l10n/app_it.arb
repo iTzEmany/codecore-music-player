@@ -1184,5 +1184,19 @@
   "importNoteLinkOnly": "Solo collegamento: non cercato",
   "importNoteYoutubeOff": "Download disattivato",
   "importNoteDownloadFailed": "Download non riuscito",
-  "importNoteLengthOff": "Durata diversa dal file"
+  "importNoteLengthOff": "Durata diversa dal file",
+  "importNoteUnchanged": "Già nella playlist",
+  "csvImportSync": "Sincronizza",
+  "csvImportSyncCounts": "+{added} nuovi · −{removed} rimossi dalla playlist (i file restano)",
+  "csvImportSyncChecking": "Controllo le differenze…",
+  "@csvImportSyncCounts": {
+    "placeholders": {
+      "added": {
+        "type": "int"
+      },
+      "removed": {
+        "type": "int"
+      }
+    }
+  }
 }

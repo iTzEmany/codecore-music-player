@@ -23,5 +23,6 @@ String importNoteLabel(AppLocalizations l, String code) => switch (code) {
       ImportNote.youtubeOff => l.importNoteYoutubeOff,
       ImportNote.downloadFailed => l.importNoteDownloadFailed,
       ImportNote.lengthOff => l.importNoteLengthOff,
+      ImportNote.unchanged => l.importNoteUnchanged,
       _ => code,
     };

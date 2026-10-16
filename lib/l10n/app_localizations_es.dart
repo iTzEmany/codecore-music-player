@@ -1845,4 +1845,18 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get importNoteLengthOff => 'Duración distinta de la del archivo';
+
+  @override
+  String get importNoteUnchanged => 'Ya está en la lista';
+
+  @override
+  String get csvImportSync => 'Sincronizar';
+
+  @override
+  String csvImportSyncCounts(int added, int removed) {
+    return '+$added nuevas · −$removed quitadas de la lista (los archivos se quedan)';
+  }
+
+  @override
+  String get csvImportSyncChecking => 'Comprobando las diferencias…';
 }

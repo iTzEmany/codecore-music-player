@@ -3269,6 +3269,30 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Durata diversa dal file'**
   String get importNoteLengthOff;
+
+  /// No description provided for @importNoteUnchanged.
+  ///
+  /// In it, this message translates to:
+  /// **'Già nella playlist'**
+  String get importNoteUnchanged;
+
+  /// No description provided for @csvImportSync.
+  ///
+  /// In it, this message translates to:
+  /// **'Sincronizza'**
+  String get csvImportSync;
+
+  /// No description provided for @csvImportSyncCounts.
+  ///
+  /// In it, this message translates to:
+  /// **'+{added} nuovi · −{removed} rimossi dalla playlist (i file restano)'**
+  String csvImportSyncCounts(int added, int removed);
+
+  /// No description provided for @csvImportSyncChecking.
+  ///
+  /// In it, this message translates to:
+  /// **'Controllo le differenze…'**
+  String get csvImportSyncChecking;
 }
 
 class _AppLocalizationsDelegate

@@ -1840,4 +1840,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get importNoteLengthOff => 'Length differs from the file';
+
+  @override
+  String get importNoteUnchanged => 'Already in the playlist';
+
+  @override
+  String get csvImportSync => 'Sync';
+
+  @override
+  String csvImportSyncCounts(int added, int removed) {
+    return '+$added new · −$removed removed from the playlist (files stay)';
+  }
+
+  @override
+  String get csvImportSyncChecking => 'Checking the differences…';
 }

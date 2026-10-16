@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../data/db/app_database.dart' show PlaylistImportItem;
 import '../../data/repositories/import_repository.dart';
+import '../../services/import/import_options.dart' show ImportNote;
 import '../../l10n/l10n_ext.dart';
 import '../../providers/database_providers.dart';
 import '../../providers/import_providers.dart';
@@ -31,15 +33,19 @@ class _State extends ConsumerState<ImportEventListener> {
     SnackBarAction? action;
     switch (e.kind) {
       case ImportEventKind.completed:
-        final c = await ref.read(importRepositoryProvider).counts(e.importId);
-        final added =
-            (c[ImportItemStatus.downloaded] ?? 0) +
-            (c[ImportItemStatus.linked] ?? 0);
+        final items = await ref.read(importRepositoryProvider).items(e.importId);
+        int count(bool Function(PlaylistImportItem) test) =>
+            items.where(test).length;
+        // Rows a sync found already in the playlist are not «added».
         text = l.csvImportDone(
-          added,
-          c[ImportItemStatus.review] ?? 0,
-          (c[ImportItemStatus.notFound] ?? 0) +
-              (c[ImportItemStatus.failed] ?? 0),
+          count((i) =>
+              (i.state == ImportItemStatus.downloaded ||
+                  i.state == ImportItemStatus.linked) &&
+              i.note != ImportNote.unchanged),
+          count((i) => i.state == ImportItemStatus.review),
+          count((i) =>
+              i.state == ImportItemStatus.notFound ||
+              i.state == ImportItemStatus.failed),
         );
       case ImportEventKind.planned:
         text = l.csvImportPlanned;

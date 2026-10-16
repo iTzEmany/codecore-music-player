@@ -11,6 +11,7 @@ import '../online/download_queue.dart';
 import '../online/youtube_service.dart';
 import 'exportify_reader.dart';
 import 'import_candidate.dart';
+import 'import_diff.dart';
 import 'eta_estimator.dart';
 import 'import_options.dart';
 import 'playlist_paths.dart';
@@ -187,6 +188,78 @@ class PlaylistImportService {
   /// Import -> the block that starts when it finishes (lost on restart: the
   /// blocks are then paused, and resumed by hand like any paused import).
   final _nextBlock = <int, int>{};
+
+  // ---- sync ---------------------------------------------------------------
+
+  /// The tracks of [playlistId] that an earlier import put there, one item per
+  /// track (the latest import wins), in their old row order.
+  Future<List<PlaylistImportItem>> _trackedItems(int playlistId) async {
+    final inPlaylist =
+        (await playlists.watchTracks(playlistId).first).map((t) => t.id).toSet();
+    final all = await imports.forPlaylist(playlistId)
+      ..sort((a, b) => a.id.compareTo(b.id));
+    final latest = <int, PlaylistImportItem>{};
+    for (final imp in all) {
+      for (final it in await imports.items(imp.id)) {
+        final t = it.trackId;
+        if (t != null && inPlaylist.contains(t) && it.state != ImportItemStatus.removed) {
+          latest[t] = it;
+        }
+      }
+    }
+    return latest.values.toList()
+      ..sort((a, b) => a.rowIndex.compareTo(b.rowIndex));
+  }
+
+  /// What a sync of [csv] into [playlistId] would add and take out.
+  Future<ImportDiff> previewSync(ImportedPlaylist csv, int playlistId) async =>
+      diffImport(await _trackedItems(playlistId), _withAbsoluteLocations(csv));
+
+  /// Makes [playlistId] follow [csv]: new rows are imported, rows that left the
+  /// file leave the playlist (their files and library entries stay), and the
+  /// order is the file's. Tracks added by hand are kept. Returns the new import.
+  Future<int> sync(
+    ImportedPlaylist csv,
+    int playlistId, {
+    ImportOptions options = const ImportOptions(),
+  }) async {
+    final rows = _withAbsoluteLocations(csv);
+    final diff = diffImport(await _trackedItems(playlistId), rows);
+    for (final gone in diff.removed) {
+      await playlists.removeTrack(playlistId, gone.trackId!);
+      await imports.setItem(gone.importId, gone.rowIndex,
+          status: ImportItemStatus.removed);
+    }
+    final label = await playlists.nameOf(playlistId) ?? csv.name;
+    // The new import holds the whole file: the rows kept from before are
+    // already linked, so a new row lands next to its neighbours in the file.
+    final id = await imports.create(
+        playlistId: playlistId,
+        sourceName: label,
+        rows: rows,
+        sourceKind: csv.kind,
+        folderPath: options.folderPath,
+        numberFiles: options.numberFiles,
+        linkOnly: options.linkOnly,
+        planFirst: options.planFirst,
+        fetchCovers: options.fetchCovers);
+    for (final k in diff.kept) {
+      await imports.setItem(id, k.fresh.index,
+          status: ImportItemStatus.linked,
+          trackId: Value(k.old.trackId),
+          note: const Value(ImportNote.unchanged));
+    }
+    await playlists.reorderBy(
+        playlistId, {for (final k in diff.kept) k.old.trackId!: k.fresh.index});
+    _eta(id).start();
+    if (diff.added.isEmpty) {
+      await imports.setStatus(id, ImportStatus.finished);
+      _emit(ImportEvent(ImportEventKind.completed, id));
+    } else {
+      _kick();
+    }
+    return id;
+  }
 
   /// Relative entries of a playlist file are saved relative to its folder, so
   /// resuming later does not depend on where the file was.

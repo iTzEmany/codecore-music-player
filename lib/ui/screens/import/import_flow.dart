@@ -24,18 +24,23 @@ Future<void> startCsvImport(BuildContext context, WidgetRef ref) async {
       csv: csv,
       known: known,
       existing: {for (final p in lists) p.playlist.id: p.playlist.name},
+      syncPreview: (id) =>
+          ref.read(playlistImportServiceProvider).previewSync(csv, id),
     ),
   );
   if (choice == null || !context.mounted) return;
   final messenger = ScaffoldMessenger.of(context);
   final started = context.l10n.csvImportStarted;
-  await ref
-      .read(playlistImportServiceProvider)
-      .start(csv,
-          name: choice.name,
-          intoPlaylistId: choice.intoPlaylistId,
-          options: choice.options,
-          blockSize: choice.blockSize);
+  final svc = ref.read(playlistImportServiceProvider);
+  if (choice.sync && choice.intoPlaylistId != null) {
+    await svc.sync(csv, choice.intoPlaylistId!, options: choice.options);
+  } else {
+    await svc.start(csv,
+        name: choice.name,
+        intoPlaylistId: choice.intoPlaylistId,
+        options: choice.options,
+        blockSize: choice.blockSize);
+  }
   messenger
     ..clearSnackBars()
     ..showSnackBar(SnackBar(content: Text(started)));

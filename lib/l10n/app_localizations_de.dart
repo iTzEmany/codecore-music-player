@@ -1847,4 +1847,18 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get importNoteLengthOff => 'Länge weicht von der Datei ab';
+
+  @override
+  String get importNoteUnchanged => 'Schon in der Playlist';
+
+  @override
+  String get csvImportSync => 'Synchronisieren';
+
+  @override
+  String csvImportSyncCounts(int added, int removed) {
+    return '+$added neu · −$removed aus der Playlist entfernt (Dateien bleiben)';
+  }
+
+  @override
+  String get csvImportSyncChecking => 'Unterschiede werden geprüft…';
 }

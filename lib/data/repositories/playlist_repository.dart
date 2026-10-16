@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 
+import '../../core/playlist_order.dart';
 import '../db/app_database.dart';
 
 class PlaylistSummary {
@@ -177,6 +178,24 @@ class PlaylistRepository {
         ids.insert(newIndex.clamp(0, ids.length), moved);
         await _writeOrder(playlistId, ids);
       });
+
+  /// Puts the tracks of [newIndexByTrack] in the order of their new index;
+  /// the others keep their place next to the track before them
+  /// (see `reorderForSync`).
+  Future<void> reorderBy(int playlistId, Map<int, int> newIndexByTrack) =>
+      _db.transaction(() async {
+        final rows = await (_db.select(_db.playlistTracks)
+              ..where((t) => t.playlistId.equals(playlistId))
+              ..orderBy([(t) => OrderingTerm.asc(t.position)]))
+            .get();
+        final ids = rows.map((r) => r.trackId).toList();
+        await _writeOrder(playlistId, reorderForSync(ids, newIndexByTrack));
+      });
+
+  Future<String?> nameOf(int playlistId) async => (await (_db.select(_db.playlists)
+            ..where((p) => p.id.equals(playlistId)))
+          .getSingleOrNull())
+      ?.name;
 
   Future<void> _renumber(int playlistId) async {
     final rows = await (_db.select(_db.playlistTracks)

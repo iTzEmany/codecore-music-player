@@ -1844,4 +1844,18 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get importNoteLengthOff => 'Durata diversa dal file';
+
+  @override
+  String get importNoteUnchanged => 'Già nella playlist';
+
+  @override
+  String get csvImportSync => 'Sincronizza';
+
+  @override
+  String csvImportSyncCounts(int added, int removed) {
+    return '+$added nuovi · −$removed rimossi dalla playlist (i file restano)';
+  }
+
+  @override
+  String get csvImportSyncChecking => 'Controllo le differenze…';
 }

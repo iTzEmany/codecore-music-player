@@ -993,5 +993,19 @@
   "importNoteLinkOnly": "Solo enlazar: no se buscó",
   "importNoteYoutubeOff": "Descargas desactivadas",
   "importNoteDownloadFailed": "Error al descargar",
-  "importNoteLengthOff": "Duración distinta de la del archivo"
+  "importNoteLengthOff": "Duración distinta de la del archivo",
+  "importNoteUnchanged": "Ya está en la lista",
+  "csvImportSync": "Sincronizar",
+  "csvImportSyncCounts": "+{added} nuevas · −{removed} quitadas de la lista (los archivos se quedan)",
+  "csvImportSyncChecking": "Comprobando las diferencias…",
+  "@csvImportSyncCounts": {
+    "placeholders": {
+      "added": {
+        "type": "int"
+      },
+      "removed": {
+        "type": "int"
+      }
+    }
+  }
 }

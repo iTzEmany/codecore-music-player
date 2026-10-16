@@ -34,6 +34,9 @@ abstract final class ImportNote {
   static const youtubeOff = 'youtube_off';
   static const downloadFailed = 'download_failed';
   static const lengthOff = 'length_off';
+
+  /// A row a sync found already in the playlist: nothing was done for it.
+  static const unchanged = 'unchanged';
 }
 
 /// File name (no extension) of a row: `Artist - Title`, or with its position

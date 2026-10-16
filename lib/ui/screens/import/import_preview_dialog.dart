@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/constants.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../services/import/exportify_reader.dart';
+import '../../../services/import/import_diff.dart' show ImportDiff;
 import '../../../services/import/import_options.dart';
 import '../../theme/tokens.dart';
 
@@ -12,7 +13,10 @@ const importBlockSize = 100;
 
 class ImportChoice {
   const ImportChoice(this.name, this.intoPlaylistId,
-      [this.options = const ImportOptions(), this.blockSize]);
+      [this.options = const ImportOptions(), this.blockSize, this.sync = false]);
+
+  /// Make the existing playlist follow the file (adds and removes).
+  final bool sync;
 
   final String name;
   final ImportOptions options;
@@ -32,7 +36,12 @@ class ImportPreviewDialog extends StatefulWidget {
     required this.csv,
     required this.known,
     required this.existing,
+    this.syncPreview,
   });
+
+  /// What a sync of the file into an existing playlist would change; without
+  /// it the «Sincronizza» choice is not offered.
+  final Future<ImportDiff> Function(int playlistId)? syncPreview;
 
   final ImportedPlaylist csv;
   final int known;
@@ -42,11 +51,24 @@ class ImportPreviewDialog extends StatefulWidget {
   State<ImportPreviewDialog> createState() => _State();
 }
 
+enum _Existing { addNew, sync, create }
+
 class _State extends State<ImportPreviewDialog> {
   late final TextEditingController _name = TextEditingController(
     text: widget.csv.name,
   );
-  bool _update = true;
+  _Existing _existing = _Existing.addNew;
+  Future<ImportDiff>? _diff;
+  int? _diffOf;
+
+  /// One query per playlist, not one per rebuild.
+  Future<ImportDiff> _diffFor(int playlistId) {
+    if (_diffOf != playlistId) {
+      _diffOf = playlistId;
+      _diff = widget.syncPreview!(playlistId);
+    }
+    return _diff!;
+  }
   bool _linkOnly = false;
   late bool _blocks = (widget.csv.rows.length - widget.known) > bigImportRows;
   bool _planFirst = false;
@@ -162,19 +184,34 @@ class _State extends State<ImportPreviewDialog> {
             if (same != null) ...[
               const SizedBox(height: 16),
               Text(l.csvImportExists, style: theme.titleSmall),
-              RadioGroup<bool>(
-                groupValue: _update,
-                onChanged: (v) => setState(() => _update = v ?? true),
+              RadioGroup<_Existing>(
+                groupValue: _existing,
+                onChanged: (v) =>
+                    setState(() => _existing = v ?? _Existing.addNew),
                 child: Column(
                   children: [
-                    RadioListTile<bool>(
+                    RadioListTile<_Existing>(
                       contentPadding: EdgeInsets.zero,
-                      value: true,
+                      value: _Existing.addNew,
                       title: Text(l.csvImportUpdate),
                     ),
-                    RadioListTile<bool>(
+                    if (widget.syncPreview != null)
+                      RadioListTile<_Existing>(
+                        contentPadding: EdgeInsets.zero,
+                        value: _Existing.sync,
+                        title: Text(l.csvImportSync),
+                        subtitle: FutureBuilder<ImportDiff>(
+                          key: ValueKey(same),
+                          future: _diffFor(same),
+                          builder: (context, snap) => Text(snap.hasData
+                              ? l.csvImportSyncCounts(
+                                  snap.data!.added.length, snap.data!.removed.length)
+                              : l.csvImportSyncChecking),
+                        ),
+                      ),
+                    RadioListTile<_Existing>(
                       contentPadding: EdgeInsets.zero,
-                      value: false,
+                      value: _Existing.create,
                       title: Text(l.csvImportNew),
                     ),
                   ],
@@ -196,7 +233,7 @@ class _State extends State<ImportPreviewDialog> {
                   context,
                   ImportChoice(
                     _name.text.trim(),
-                    same != null && _update ? same : null,
+                    same != null && _existing != _Existing.create ? same : null,
                     ImportOptions(
                       linkOnly: _linkOnly,
                       planFirst: _planFirst && !_linkOnly,
@@ -209,6 +246,7 @@ class _State extends State<ImportPreviewDialog> {
                     todo > bigImportRows && _blocks && !_linkOnly
                         ? importBlockSize
                         : null,
+                    same != null && _existing == _Existing.sync,
                   ),
                 ),
           child: Text(l.csvImportGo),

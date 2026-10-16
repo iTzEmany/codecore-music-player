@@ -740,6 +740,97 @@ void main() {
     });
   });
 
+  group('sync from a refreshed file', () {
+    late int pid;
+
+    /// The ISRC belongs to the song, not to its row.
+    ImportRow song(int i, String title) => ImportRow(
+        index: i,
+        title: title,
+        artists: const ['Band'],
+        durationMs: 200000,
+        isrc: 'I-$title');
+
+    /// A..E in the library, imported (all linked), plus a track X added by hand
+    /// right after B.
+    Future<void> setUpPlaylist() async {
+      for (final t in ['A', 'B', 'C', 'D', 'E']) {
+        await addTrack('/m/$t.mp3', t, 'Band', 200);
+      }
+      final first = await service.start(csv([
+        for (var i = 0; i < 5; i++) song(i, 'ABCDE'[i]),
+      ]));
+      await idle();
+      pid = (await imports.get(first))!.playlistId;
+      final x = await addTrack('/m/X.mp3', 'X', 'Other', 100);
+      await playlists.addTracks(pid, [x]);
+      await playlists.reorder(pid, 5, 2);
+      expect(await order(pid), ['A', 'B', 'X', 'C', 'D', 'E']);
+    }
+
+    test('adds the new, removes the gone, follows the new order, keeps the hand-made',
+        () async {
+      await setUpPlaylist();
+      yt.songs['band f'] = [topic('vf', 'F', 'Band', 200)];
+      final fresh = csv([
+        song(0, 'C'),
+        song(1, 'A'),
+        song(2, 'F'),
+        song(3, 'E'),
+      ]);
+      final diff = await service.previewSync(fresh, pid);
+      expect(diff.added.map((r) => r.title), ['F']);
+      expect(diff.removed.map((o) => o.title), ['B', 'D']);
+
+      final id = await service.sync(fresh, pid);
+      await idle();
+      expect(queued.single.$1.id, 'vf', reason: 'only the new row is searched');
+      await finish(importTag(id, 2), '/m/F.mp3');
+      expect(await order(pid), ['C', 'A', 'X', '/m/F.mp3', 'E']);
+      expect((await imports.get(id))!.state, ImportStatus.finished);
+    });
+
+    test('removed songs leave only the playlist, never the library', () async {
+      await setUpPlaylist();
+      final id = await service.sync(
+          csv([song(0, 'A'), song(1, 'C')]), pid);
+      await idle();
+      expect(await order(pid), ['A', 'X', 'C']);
+      expect(await tracks.countAll(), 6, reason: 'B, D and E are still in the library');
+      final old = await imports.forPlaylist(pid);
+      final oldItems = await imports.items(old.first.id);
+      expect(oldItems.where((i) => i.state == ImportItemStatus.removed),
+          hasLength(3), reason: 'B, D, E are marked «removed from the source»');
+      expect((await imports.get(id))!.state, ImportStatus.finished);
+    });
+
+    test('the same file again changes nothing', () async {
+      await setUpPlaylist();
+      final before = await order(pid);
+      final id = await service.sync(
+          csv([for (var i = 0; i < 5; i++) song(i, 'ABCDE'[i])]), pid);
+      await idle();
+      expect(await order(pid), before);
+      expect(queued, isEmpty);
+      final items = await imports.items(id);
+      expect(items.every((i) => i.note == ImportNote.unchanged), isTrue);
+      expect((await imports.get(id))!.state, ImportStatus.finished);
+    });
+
+    test('a second sync works from the first one', () async {
+      await setUpPlaylist();
+      await service.sync(
+          csv([song(0, 'B'), song(1, 'A')]), pid);
+      await idle();
+      // X was after B and goes with it.
+      expect(await order(pid), ['B', 'X', 'A']);
+      final diff = await service.previewSync(
+          csv([song(0, 'A')]), pid);
+      expect(diff.removed.map((o) => o.title), ['B']);
+      expect(diff.kept, hasLength(1));
+    });
+  });
+
   test('tag parsing', () {
     expect(parseImportTag('import:3:12'), (3, 12));
     expect(parseImportTag('other'), isNull);

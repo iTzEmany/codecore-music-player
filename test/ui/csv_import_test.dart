@@ -1,6 +1,8 @@
 import 'dart:io';
 
+import 'package:codecore/data/db/app_database.dart' show PlaylistImportItem;
 import 'package:codecore/services/import/exportify_reader.dart';
+import 'package:codecore/services/import/import_diff.dart' show ImportDiff;
 import 'package:codecore/ui/screens/import/import_intro_sheet.dart';
 import 'package:codecore/ui/screens/import/import_preview_dialog.dart';
 import 'package:flutter/material.dart';
@@ -186,6 +188,60 @@ void main() {
     await tester.tap(find.text('Importa'));
     await tester.pumpAndSettle();
     expect(picked!.blockSize, isNull);
+    await h.dispose(tester);
+  });
+
+  testWidgets('same-name playlist can be synced, with the counts of the changes',
+      (tester) async {
+    tester.view.physicalSize = const Size(600, 2000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final h = await Harness.create(tester);
+    final calls = <int>[];
+    ImportChoice? picked;
+    await h.pump(
+        tester,
+        Builder(
+            builder: (context) => Scaffold(
+                body: TextButton(
+                    onPressed: () async => picked = await showDialog<ImportChoice>(
+                        context: context,
+                        builder: (_) => ImportPreviewDialog(
+                              csv: fixture(),
+                              known: 0,
+                              existing: const {7: 'just a mood'},
+                              syncPreview: (id) async {
+                                calls.add(id);
+                                return ImportDiff(
+                                  added: [
+                                    for (var i = 0; i < 3; i++)
+                                      ImportRow(index: i, title: 'n$i', artists: const ['A']),
+                                  ],
+                                  removed: [
+                                    PlaylistImportItem(
+                                        importId: 1,
+                                        rowIndex: 0,
+                                        title: 'gone',
+                                        artists: 'A',
+                                        status: 2),
+                                  ],
+                                );
+                              },
+                            )),
+                    child: const Text('open')))));
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Sincronizza'), findsOneWidget);
+    expect(find.text('+3 nuovi · −1 rimossi dalla playlist (i file restano)'),
+        findsOneWidget);
+    expect(calls, [7], reason: 'asked once for that playlist');
+    await tester.tap(find.text('Sincronizza'));
+    await tester.pump();
+    await tester.tap(find.text('Importa'));
+    await tester.pumpAndSettle();
+    expect(picked!.sync, isTrue);
+    expect(picked!.intoPlaylistId, 7);
     await h.dispose(tester);
   });
 }
