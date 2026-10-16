@@ -1873,4 +1873,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get restartFromBeginning => 'Ricomincia dall’inizio';
+
+  @override
+  String get previewTrack => 'Anteprima 20 s';
 }

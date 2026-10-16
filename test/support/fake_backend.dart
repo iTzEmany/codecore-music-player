@@ -50,6 +50,7 @@ class FakeBackend implements AudioBackend {
 
   @override
   Future<void> stop() async {
+    stopCalls++;
     playing = false;
     stateC.add(BackendState.idle);
   }
@@ -59,8 +60,12 @@ class FakeBackend implements AudioBackend {
     seeks.add(position);
     positionValue = position;
   }
+  final volumes = <double>[];
+  bool disposed = false;
+  int stopCalls = 0;
+
   @override
-  Future<void> setVolume(double volume) async {}
+  Future<void> setVolume(double volume) async => volumes.add(volume);
 
   double speed = 1.0;
 
@@ -79,5 +84,5 @@ class FakeBackend implements AudioBackend {
   @override
   Duration get positionNow => positionValue;
   @override
-  Future<void> dispose() async {}
+  Future<void> dispose() async => disposed = true;
 }

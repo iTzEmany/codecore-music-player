@@ -1,11 +1,16 @@
 import 'package:codecore/data/repositories/track_repository.dart';
+import 'package:codecore/providers/preview_providers.dart';
+import 'package:codecore/ui/widgets/cover_image.dart';
 import 'package:codecore/ui/screens/library/album_detail_screen.dart';
 import 'package:codecore/ui/screens/now_playing/queue_sheet.dart';
 import 'package:codecore/ui/shell/app_shell.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/app_harness.dart';
+import '../support/fake_backend.dart';
 
 Future<void> _settle(WidgetTester tester) async {
   await tester.runAsync(
@@ -83,6 +88,70 @@ void main() {
     await _settle(tester);
     expect(find.text('Ricomincia dall’inizio'), findsNothing);
     expect(find.textContaining('riprendi da'), findsNothing);
+    await h.dispose(tester);
+  });
+
+  testWidgets('holding a cover previews that track on its own player',
+      (tester) async {
+    _phone(tester);
+    final h = await Harness.create(tester, tracks: 3);
+    final previews = <FakeBackend>[];
+    await h.pump(tester, const AppShell(), extraOverrides: [
+      previewBackendFactoryProvider.overrideWithValue(() {
+        final b = FakeBackend();
+        previews.add(b);
+        return b;
+      }),
+    ]);
+    await tester.tap(find.text('Libreria'));
+    await _settle(tester);
+    await tester.tap(find.text('Tutti i brani'));
+    await _settle(tester);
+
+    final cover = find.byType(CoverImage).first;
+    final gesture = await tester.startGesture(tester.getCenter(cover));
+    await tester.pump(const Duration(milliseconds: 700));
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
+    await tester.pump();
+    expect(previews, hasLength(1), reason: 'the hold started a preview');
+    expect(previews.single.loaded, hasLength(1));
+    expect(find.text('Riproduci dopo'), findsNothing,
+        reason: 'the track menu belongs to the rest of the row');
+    await gesture.up();
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 100)));
+    await tester.pump();
+    expect(previews.single.disposed, isTrue, reason: 'letting go ends it');
+    expect(h.handler.currentTrack, isNull, reason: 'nothing was queued');
+    await h.dispose(tester);
+  });
+
+  testWidgets('on desktop a click or Esc ends a preview started from the menu',
+      (tester) async {
+    tester.view.physicalSize = const Size(1280, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final h = await Harness.create(tester, tracks: 3);
+    await h.pump(tester, const AppShell(), extraOverrides: [
+      previewBackendFactoryProvider.overrideWithValue(FakeBackend.new),
+    ]);
+    final container = ProviderScope.containerOf(tester.element(find.byType(AppShell)));
+    final track = (await tester.runAsync(() => h.db.select(h.db.tracks).get()))!.first;
+
+    await tester.runAsync(() => container.read(previewProvider.notifier).start(track));
+    await tester.pump();
+    expect(container.read(previewProvider).active, isTrue);
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 100)));
+    await tester.pump();
+    expect(container.read(previewProvider).active, isFalse, reason: 'Esc');
+
+    await tester.runAsync(() => container.read(previewProvider.notifier).start(track));
+    await tester.pump();
+    expect(container.read(previewProvider).active, isTrue);
+    await tester.tapAt(const Offset(700, 400));
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 100)));
+    await tester.pump();
+    expect(container.read(previewProvider).active, isFalse, reason: 'a click');
     await h.dispose(tester);
   });
 

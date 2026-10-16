@@ -9,6 +9,7 @@ import 'cover_image.dart';
 import 'favorite_actions.dart';
 import 'format_utils.dart';
 import 'now_playing_bars.dart';
+import 'preview_cover.dart';
 import 'track_actions.dart';
 
 enum TrackRowVariant {
@@ -112,7 +113,11 @@ class _TrackRowState extends State<TrackRow> {
         ),
       );
     }
-    final image = CoverImage(coverKey: t.coverKey, size: cover);
+    final plain = CoverImage(coverKey: t.coverKey, size: cover);
+    // Hold the cover for a 20 s preview (not in selection lists).
+    final image = widget.variant == TrackRowVariant.pick
+        ? plain
+        : PreviewCover(track: t, size: cover, child: plain);
     if (!widget.isCurrent || !bars) return image;
     return Stack(
       alignment: Alignment.center,

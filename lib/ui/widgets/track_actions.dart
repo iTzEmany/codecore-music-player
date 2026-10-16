@@ -12,6 +12,7 @@ import '../../l10n/l10n_ext.dart';
 import '../../providers/database_providers.dart';
 import '../../providers/jam_providers.dart';
 import '../../providers/player_providers.dart';
+import '../../providers/preview_providers.dart';
 import '../screens/playlists/playlist_dialogs.dart';
 import '../screens/enrich_preview_dialog.dart';
 import '../screens/devices/devices_sheet.dart';
@@ -85,6 +86,10 @@ List<TrackActionGroup> trackActions(
 
   return [
     TrackActionGroup(l.groupQueue, [
+      if (isDesktop)
+        TrackAction(Icons.hearing_rounded, l.previewTrack, () async {
+          await ref.read(previewProvider.notifier).start(track);
+        }),
       if (track.resumePositionMs != null)
         TrackAction(Icons.restart_alt_rounded, l.restartFromBeginning, () async {
           // The bookmark goes first: the player reads it when it loads the track.

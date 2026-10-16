@@ -1018,5 +1018,6 @@
         "type": "String"
       }
     }
-  }
+  },
+  "previewTrack": "Vista previa de 20 s"
 }

@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/platform.dart';
 import '../../providers/nav_providers.dart';
 import '../../providers/player_providers.dart';
+import '../../providers/preview_providers.dart';
 import '../../providers/ui_providers.dart';
 import '../../providers/youtube_providers.dart' show ytDlpStatusProvider;
 import '../../services/audio/codecore_audio_handler.dart';
@@ -63,6 +64,11 @@ class AppShell extends ConsumerWidget {
         WidgetsBinding.instance.addPostFrameCallback(
           (_) => ref.read(searchFocusProvider).requestFocus(),
         );
+      },
+      // Ends a 20 s preview started from the menu.
+      const SingleActivator(LogicalKeyboardKey.escape): () {
+        final preview = ref.read(previewProvider);
+        if (preview.active) ref.read(previewProvider.notifier).stop();
       },
       const SingleActivator(LogicalKeyboardKey.arrowUp, control: true): () =>
           guarded(() => bump(0.05)),
@@ -210,7 +216,16 @@ class AppShell extends ConsumerWidget {
     if (isDesktop) {
       content = CallbackShortcuts(
         bindings: _shortcuts(ref),
-        child: Focus(autofocus: true, child: content),
+        // Any click ends a preview started from the menu.
+        child: Listener(
+          behavior: HitTestBehavior.translucent,
+          onPointerDown: (_) {
+            if (ref.read(previewProvider).active) {
+              ref.read(previewProvider.notifier).stop();
+            }
+          },
+          child: Focus(autofocus: true, child: content),
+        ),
       );
     }
     return content;

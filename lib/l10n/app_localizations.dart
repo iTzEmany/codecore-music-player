@@ -3317,6 +3317,12 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Ricomincia dall’inizio'**
   String get restartFromBeginning;
+
+  /// No description provided for @previewTrack.
+  ///
+  /// In it, this message translates to:
+  /// **'Anteprima 20 s'**
+  String get previewTrack;
 }
 
 class _AppLocalizationsDelegate
