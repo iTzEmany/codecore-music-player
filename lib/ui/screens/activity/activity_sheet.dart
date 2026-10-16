@@ -3,11 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/activity_providers.dart';
+import '../../../providers/import_providers.dart';
 import '../../../providers/online_providers.dart';
 import '../../../providers/share_hub.dart';
 import '../../../providers/youtube_providers.dart';
 import '../../../services/share/offers.dart';
 import '../../theme/tokens.dart';
+import '../../widgets/confirm.dart';
 
 /// Everything that runs in the background, with Cancel where it exists.
 class ActivitySheet extends ConsumerWidget {
@@ -33,7 +35,22 @@ class ActivitySheet extends ConsumerWidget {
       ActivityKind.enrich => l.activityEnrich(a.done, a.total),
       ActivityKind.download => l.activityDownload(a.name ?? ''),
       ActivityKind.transfer => l.activityTransfer(a.name ?? '', a.total),
+      ActivityKind.import =>
+        a.paused
+            ? l.activityImportPaused(a.name ?? '', a.done, a.total)
+            : l.activityImport(a.name ?? '', a.done, a.total),
     };
+
+    Future<void> cancelImport(ActivityItem a) async {
+      final ok = await showConfirm(
+        context,
+        title: l.csvImportCancelTitle,
+        body: l.csvImportCancelBody,
+        confirmLabel: l.csvImportCancelGo,
+        destructive: true,
+      );
+      if (ok) await ref.read(playlistImportServiceProvider).cancel(a.ref! as int);
+    }
 
     void cancel(ActivityItem a) {
       switch (a.kind) {
@@ -50,6 +67,8 @@ class ActivitySheet extends ConsumerWidget {
                 o,
                 hub.peers.where((p) => p.id == o.toId).firstOrNull,
               );
+        case ActivityKind.import:
+          cancelImport(a);
         case ActivityKind.scan:
           break;
       }
@@ -85,6 +104,18 @@ class ActivitySheet extends ConsumerWidget {
               ],
             ),
           ),
+          if (a.kind == ActivityKind.import && a.running)
+            IconButton(
+              tooltip: a.paused ? l.csvImportResume : l.csvImportPause,
+              icon: Icon(
+                a.paused ? Icons.play_arrow_rounded : Icons.pause_rounded,
+              ),
+              onPressed: () {
+                final svc = ref.read(playlistImportServiceProvider);
+                final id = a.ref! as int;
+                a.paused ? svc.resume(id) : svc.pause(id);
+              },
+            ),
           if (a.cancellable)
             IconButton(
               tooltip: l.cancel,

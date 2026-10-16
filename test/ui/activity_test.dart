@@ -56,4 +56,27 @@ void main() {
     expect(tester.takeException(), isNull);
     await h.dispose(tester);
   });
+
+  testWidgets('a paused CSV import shows its progress and a resume button',
+      (tester) async {
+    final h = await pump(
+        tester,
+        const ActivityState([
+          ActivityItem(
+              kind: ActivityKind.import,
+              key: 'imp-1',
+              name: 'Mood',
+              done: 3,
+              total: 10,
+              progress: 0.3,
+              paused: true,
+              ref: 1),
+        ], []));
+    await tester.tap(find.byType(ActivityButton));
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.text('Importazione «Mood» · in pausa · 3/10'), findsOneWidget);
+    expect(find.byTooltip('Riprendi'), findsOneWidget);
+    expect(find.byTooltip('Annulla'), findsOneWidget);
+    await h.dispose(tester);
+  });
 }

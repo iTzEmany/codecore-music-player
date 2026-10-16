@@ -5,6 +5,7 @@ import '../../../l10n/l10n_ext.dart';
 import '../../../providers/database_providers.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/cover_image.dart';
+import '../import/import_flow.dart';
 import 'playlist_detail_screen.dart';
 import 'playlist_dialogs.dart';
 import '../../widgets/error_state.dart';
@@ -18,14 +19,28 @@ class PlaylistsScreen extends ConsumerWidget {
     final lists = ref.watch(playlistsProvider);
     return Scaffold(
       backgroundColor: Colors.transparent,
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          final name = await askPlaylistName(context);
-          if (name == null) return;
-          await ref.read(playlistRepositoryProvider).create(name);
-        },
-        icon: const Icon(Icons.add),
-        label: Text(l.newPlaylist),
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          FloatingActionButton.extended(
+            heroTag: 'csv-import',
+            onPressed: () => startCsvImport(context, ref),
+            icon: const Icon(Icons.upload_file_rounded),
+            label: Text(l.csvImportMenu),
+          ),
+          const SizedBox(height: 12),
+          FloatingActionButton.extended(
+            heroTag: 'new-playlist',
+            onPressed: () async {
+              final name = await askPlaylistName(context);
+              if (name == null) return;
+              await ref.read(playlistRepositoryProvider).create(name);
+            },
+            icon: const Icon(Icons.add),
+            label: Text(l.newPlaylist),
+          ),
+        ],
       ),
       body: lists.when(
         loading: () => const Center(child: CircularProgressIndicator()),

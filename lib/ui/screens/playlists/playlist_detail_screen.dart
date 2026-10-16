@@ -19,6 +19,7 @@ import '../../widgets/confirm.dart';
 import '../../widgets/playlist_cover.dart';
 import '../../widgets/track_actions.dart';
 import '../../widgets/track_row.dart';
+import '../import/import_banner.dart';
 import '../library/album_detail_screen.dart' show tracksAndMinutes;
 import 'add_tracks_screen.dart';
 import 'playlist_dialogs.dart';
@@ -286,7 +287,10 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
           PopupMenuItem(value: 'delete', child: Text(l.delete)),
         ],
       ),
-      slivers: [list],
+      slivers: [
+        SliverToBoxAdapter(child: ImportBanner(playlistId: id)),
+        list,
+      ],
     );
   }
 }

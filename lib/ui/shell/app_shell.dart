@@ -16,6 +16,7 @@ import '../screens/search/search_screen.dart';
 import '../screens/home/home_screen.dart';
 import '../../l10n/l10n_ext.dart';
 import '../widgets/enrich_result_listener.dart';
+import '../widgets/import_event_listener.dart';
 import '../widgets/mini_player.dart';
 import 'bottom_bar.dart';
 import 'desktop_player_bar.dart';
@@ -152,6 +153,7 @@ class AppShell extends ConsumerWidget {
                         children: [
                           Expanded(child: body),
                           const EnrichResultListener(),
+                          const ImportEventListener(),
                         ],
                       ),
                     ),
@@ -172,6 +174,7 @@ class AppShell extends ConsumerWidget {
             children: [
               Expanded(child: body),
               const EnrichResultListener(),
+              const ImportEventListener(),
             ],
           ),
         ),

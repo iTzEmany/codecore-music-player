@@ -21,3 +21,18 @@ class ImportRow {
   String get primaryArtist => artists.isEmpty ? '' : artists.first;
   String get artistLine => artists.join(', ');
 }
+
+/// Library track as seen by the importer: loaded once, not once per row.
+class LibraryEntryLite {
+  const LibraryEntryLite({
+    required this.id,
+    required this.title,
+    required this.artist,
+    required this.durationMs,
+  });
+
+  final int id;
+  final String title;
+  final String? artist;
+  final int durationMs;
+}

@@ -15,6 +15,7 @@ class YtResult {
     this.thumbnailUrl,
     this.artists = const [],
     this.album,
+    this.downloadName,
   });
 
   final String id, title, channel;
@@ -24,6 +25,10 @@ class YtResult {
   /// Credited artists and album: only present on YouTube Music results.
   final List<String> artists;
   final String? album;
+
+  /// File base name to use instead of the one derived from title and channel
+  /// (CSV imports name files after the Spotify title and artist).
+  final String? downloadName;
 }
 
 class DownloadProgress {
@@ -62,6 +67,10 @@ bool isYoutubeUrl(String input) {
 
 /// `<artist> - <title>` sanitised; used as base name for downloads.
 String downloadBaseName(YtResult r) {
+  final fixed = r.downloadName;
+  if (fixed != null && sanitizeFileName(fixed) != 'track') {
+    return sanitizeFileName(fixed);
+  }
   final c = cleanSearchQuery(r.title, r.channel);
   final raw = c.artist.isEmpty ? c.title : '${c.artist} - ${c.title}';
   return sanitizeFileName(raw);

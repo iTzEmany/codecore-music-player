@@ -1,4 +1,4 @@
-import 'package:codecore/services/import/exportify_reader.dart';
+import 'package:codecore/core/import_row.dart';
 import 'package:codecore/services/import/track_matcher.dart';
 import 'package:codecore/services/online/youtube_service.dart';
 import 'package:flutter_test/flutter_test.dart';

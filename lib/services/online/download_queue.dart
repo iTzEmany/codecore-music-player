@@ -16,6 +16,7 @@ class DownloadItem {
     this.progress = 0,
     this.error,
     this.path,
+    this.tag,
   });
 
   final int id;
@@ -24,6 +25,9 @@ class DownloadItem {
   final double progress;
   final YtErrorKind? error;
   final String? path;
+
+  /// Opaque label from whoever queued it (e.g. `import:<id>:<row>`).
+  final String? tag;
 
   DownloadItem copyWith(
           {DownloadStatus? status,
@@ -37,6 +41,7 @@ class DownloadItem {
         progress: progress ?? this.progress,
         error: error ?? this.error,
         path: path ?? this.path,
+        tag: tag,
       );
 }
 
@@ -50,6 +55,7 @@ class DownloadQueue {
     required this.outDir,
     required this.onChanged,
     this.onDownloaded,
+    this.onSettled,
     this.uiInterval = const Duration(milliseconds: 200),
   });
 
@@ -57,6 +63,10 @@ class DownloadQueue {
   final Future<Directory?> Function() outDir;
   final void Function(List<DownloadItem> items) onChanged;
   final Future<void> Function(String path)? onDownloaded;
+
+  /// Called once per item when it reaches done, failed or cancelled
+  /// (after [onDownloaded] for the done ones).
+  final void Function(DownloadItem item)? onSettled;
   final Duration uiInterval;
 
   final List<DownloadItem> _items = [];
@@ -67,8 +77,8 @@ class DownloadQueue {
 
   List<DownloadItem> get items => List.unmodifiable(_items);
 
-  void add(YtResult r) {
-    _items.add(DownloadItem(id: _nextId++, result: r));
+  void add(YtResult r, {String? tag}) {
+    _items.add(DownloadItem(id: _nextId++, result: r, tag: tag));
     _emit();
     unawaited(_pump());
   }
@@ -79,6 +89,16 @@ class DownloadQueue {
     if (i >= 0 && _items[i].status == DownloadStatus.queued) {
       _items[i] = _items[i].copyWith(status: DownloadStatus.cancelled);
       _emit();
+      _settle(id);
+    }
+  }
+
+  /// Cancels every queued or running item for which [test] is true.
+  void cancelWhere(bool Function(DownloadItem item) test) {
+    for (final e in List.of(_items)) {
+      final live = e.status == DownloadStatus.queued ||
+          e.status == DownloadStatus.downloading;
+      if (live && test(e)) cancel(e.id);
     }
   }
 
@@ -105,6 +125,12 @@ class DownloadQueue {
 
   void _emit() {
     if (!_disposed) onChanged(items);
+  }
+
+  void _settle(int id) {
+    if (_disposed) return;
+    final i = _items.indexWhere((e) => e.id == id);
+    if (i >= 0) onSettled?.call(_items[i]);
   }
 
   void _replace(int id, DownloadItem Function(DownloadItem) f) {
@@ -167,6 +193,7 @@ class DownloadQueue {
     } finally {
       _tokens.remove(item.id);
       _emit();
+      _settle(item.id);
     }
   }
 }

@@ -2381,6 +2381,288 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'{n} brani non trovati verranno tolti dalla libreria. I file non vengono toccati; perdi preferiti e playlist di questi brani.'**
   String confirmRemoveAllBody(int n);
+
+  /// No description provided for @csvImportMenu.
+  ///
+  /// In it, this message translates to:
+  /// **'Importa da Exportify (CSV)'**
+  String get csvImportMenu;
+
+  /// No description provided for @csvImportIntroTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Importa una playlist di Spotify'**
+  String get csvImportIntroTitle;
+
+  /// No description provided for @csvImportIntroSource.
+  ///
+  /// In it, this message translates to:
+  /// **'Il file CSV si crea gratis dal sito Exportify — exportify.net (non serve nessuna app).'**
+  String get csvImportIntroSource;
+
+  /// No description provided for @csvImportStep1.
+  ///
+  /// In it, this message translates to:
+  /// **'Apri https://exportify.net nel browser (anche dal telefono).'**
+  String get csvImportStep1;
+
+  /// No description provided for @csvImportStep2.
+  ///
+  /// In it, this message translates to:
+  /// **'Tocca «Get Started» e accedi con il tuo account Spotify.'**
+  String get csvImportStep2;
+
+  /// No description provided for @csvImportStep3.
+  ///
+  /// In it, this message translates to:
+  /// **'Accanto alla playlist che vuoi tocca «Export»: si scarica un file .csv col nome della playlist.'**
+  String get csvImportStep3;
+
+  /// No description provided for @csvImportStep4.
+  ///
+  /// In it, this message translates to:
+  /// **'Torna qui e tocca «Scegli file CSV».'**
+  String get csvImportStep4;
+
+  /// No description provided for @csvImportNote.
+  ///
+  /// In it, this message translates to:
+  /// **'Codecore cerca i brani nella tua libreria e scarica gli altri da YouTube Music.'**
+  String get csvImportNote;
+
+  /// No description provided for @csvImportNoteOffline.
+  ///
+  /// In it, this message translates to:
+  /// **'Verranno collegati solo i brani già presenti nella tua libreria.'**
+  String get csvImportNoteOffline;
+
+  /// No description provided for @csvImportCopy.
+  ///
+  /// In it, this message translates to:
+  /// **'Copia indirizzo'**
+  String get csvImportCopy;
+
+  /// No description provided for @csvImportCopied.
+  ///
+  /// In it, this message translates to:
+  /// **'Indirizzo copiato'**
+  String get csvImportCopied;
+
+  /// No description provided for @csvImportPick.
+  ///
+  /// In it, this message translates to:
+  /// **'Scegli file CSV'**
+  String get csvImportPick;
+
+  /// No description provided for @csvImportNotExportify.
+  ///
+  /// In it, this message translates to:
+  /// **'Questo file non sembra un CSV di Exportify. Controlla di aver esportato la playlist da exportify.net.'**
+  String get csvImportNotExportify;
+
+  /// No description provided for @csvImportReadFailed.
+  ///
+  /// In it, this message translates to:
+  /// **'Impossibile leggere il file.'**
+  String get csvImportReadFailed;
+
+  /// No description provided for @csvImportPreviewTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Importa playlist'**
+  String get csvImportPreviewTitle;
+
+  /// No description provided for @csvImportName.
+  ///
+  /// In it, this message translates to:
+  /// **'Nome della playlist'**
+  String get csvImportName;
+
+  /// No description provided for @csvImportSummary.
+  ///
+  /// In it, this message translates to:
+  /// **'{total} brani · {known} già in libreria · {todo} da scaricare'**
+  String csvImportSummary(int total, int known, int todo);
+
+  /// No description provided for @csvImportSkipped.
+  ///
+  /// In it, this message translates to:
+  /// **'{n} righe ignorate (podcast o file locali)'**
+  String csvImportSkipped(int n);
+
+  /// No description provided for @csvImportEstimate.
+  ///
+  /// In it, this message translates to:
+  /// **'Tempo stimato: circa {minutes} min'**
+  String csvImportEstimate(int minutes);
+
+  /// No description provided for @csvImportExists.
+  ///
+  /// In it, this message translates to:
+  /// **'Esiste già una playlist con questo nome'**
+  String get csvImportExists;
+
+  /// No description provided for @csvImportUpdate.
+  ///
+  /// In it, this message translates to:
+  /// **'Aggiorna quella esistente (aggiunge solo i brani nuovi)'**
+  String get csvImportUpdate;
+
+  /// No description provided for @csvImportNew.
+  ///
+  /// In it, this message translates to:
+  /// **'Crea una nuova playlist'**
+  String get csvImportNew;
+
+  /// No description provided for @csvImportGo.
+  ///
+  /// In it, this message translates to:
+  /// **'Importa'**
+  String get csvImportGo;
+
+  /// No description provided for @csvImportStarted.
+  ///
+  /// In it, this message translates to:
+  /// **'Importazione avviata: la segui nel Centro Attività'**
+  String get csvImportStarted;
+
+  /// No description provided for @activityImport.
+  ///
+  /// In it, this message translates to:
+  /// **'Importazione «{name}» · {done}/{total}'**
+  String activityImport(String name, int done, int total);
+
+  /// No description provided for @activityImportPaused.
+  ///
+  /// In it, this message translates to:
+  /// **'Importazione «{name}» · in pausa · {done}/{total}'**
+  String activityImportPaused(String name, int done, int total);
+
+  /// No description provided for @csvImportBanner.
+  ///
+  /// In it, this message translates to:
+  /// **'Importazione: {done}/{total} · {review} da verificare · {missing} non trovati'**
+  String csvImportBanner(int done, int total, int review, int missing);
+
+  /// No description provided for @csvImportBannerPaused.
+  ///
+  /// In it, this message translates to:
+  /// **'Importazione in pausa: {done}/{total} · {review} da verificare · {missing} non trovati'**
+  String csvImportBannerPaused(int done, int total, int review, int missing);
+
+  /// No description provided for @csvImportReview.
+  ///
+  /// In it, this message translates to:
+  /// **'Rivedi'**
+  String get csvImportReview;
+
+  /// No description provided for @csvImportResume.
+  ///
+  /// In it, this message translates to:
+  /// **'Riprendi'**
+  String get csvImportResume;
+
+  /// No description provided for @csvImportPause.
+  ///
+  /// In it, this message translates to:
+  /// **'Pausa'**
+  String get csvImportPause;
+
+  /// No description provided for @csvImportCancelTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Annullare l\'importazione?'**
+  String get csvImportCancelTitle;
+
+  /// No description provided for @csvImportCancelBody.
+  ///
+  /// In it, this message translates to:
+  /// **'I brani già scaricati restano nella playlist.'**
+  String get csvImportCancelBody;
+
+  /// No description provided for @csvImportDone.
+  ///
+  /// In it, this message translates to:
+  /// **'Importazione completata: {added} aggiunti, {review} da verificare, {missing} non trovati'**
+  String csvImportDone(int added, int review, int missing);
+
+  /// No description provided for @csvImportFailing.
+  ///
+  /// In it, this message translates to:
+  /// **'Troppi errori di fila: importazione in pausa'**
+  String get csvImportFailing;
+
+  /// No description provided for @csvImportReviewTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Rivedi importazione'**
+  String get csvImportReviewTitle;
+
+  /// No description provided for @csvImportToReview.
+  ///
+  /// In it, this message translates to:
+  /// **'Da verificare'**
+  String get csvImportToReview;
+
+  /// No description provided for @csvImportNotFound.
+  ///
+  /// In it, this message translates to:
+  /// **'Non trovati'**
+  String get csvImportNotFound;
+
+  /// No description provided for @csvImportErrors.
+  ///
+  /// In it, this message translates to:
+  /// **'Con errori'**
+  String get csvImportErrors;
+
+  /// No description provided for @csvImportRetryAll.
+  ///
+  /// In it, this message translates to:
+  /// **'Riprova tutti'**
+  String get csvImportRetryAll;
+
+  /// No description provided for @csvImportSkip.
+  ///
+  /// In it, this message translates to:
+  /// **'Salta'**
+  String get csvImportSkip;
+
+  /// No description provided for @csvImportManual.
+  ///
+  /// In it, this message translates to:
+  /// **'Cerca a mano'**
+  String get csvImportManual;
+
+  /// No description provided for @csvImportNothing.
+  ///
+  /// In it, this message translates to:
+  /// **'Niente da rivedere.'**
+  String get csvImportNothing;
+
+  /// No description provided for @csvImportSearch.
+  ///
+  /// In it, this message translates to:
+  /// **'Cerca'**
+  String get csvImportSearch;
+
+  /// No description provided for @csvImportWanted.
+  ///
+  /// In it, this message translates to:
+  /// **'Cercato: {title} · {artist} · {duration}'**
+  String csvImportWanted(String title, String artist, String duration);
+
+  /// No description provided for @csvImportDownload.
+  ///
+  /// In it, this message translates to:
+  /// **'Scarica'**
+  String get csvImportDownload;
+
+  /// No description provided for @csvImportCancelGo.
+  ///
+  /// In it, this message translates to:
+  /// **'Annulla importazione'**
+  String get csvImportCancelGo;
 }
 
 class _AppLocalizationsDelegate

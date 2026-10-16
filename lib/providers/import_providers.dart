@@ -1,0 +1,146 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../data/repositories/import_repository.dart';
+import '../core/constants.dart';
+import '../data/db/app_database.dart';
+import '../services/import/playlist_import_service.dart';
+import '../services/library/track_editor.dart';
+import 'database_providers.dart';
+import 'library_providers.dart';
+import 'youtube_providers.dart';
+
+/// Single import engine. Created at app start by the shell, which also turns
+/// "running" imports left by the last session into "paused".
+final playlistImportServiceProvider = Provider<PlaylistImportService>((ref) {
+  final downloads = ref.read(downloadsProvider.notifier);
+  final tracks = ref.watch(trackRepositoryProvider);
+  final service = PlaylistImportService(
+    imports: ref.watch(importRepositoryProvider),
+    playlists: ref.watch(playlistRepositoryProvider),
+    loadLibrary: tracks.liteEntries,
+    youtube: ref.watch(youtubeServiceProvider),
+    enqueue: (r, tag) => downloads.add(r, tag: tag),
+    cancelDownloads: downloads.cancelWhere,
+    settled: downloads.settled,
+    trackIdForPath: tracks.idForPath,
+    pathForVideo: (id) async =>
+        (await ref.read(downloadIndexProvider.future)).pathFor(id),
+    applyTags: (trackId, row) async {
+      final t = await tracks.getById(trackId);
+      if (t == null) return;
+      // The CSV tags are cleaner than the video title; grouping albums by the
+      // first artist keeps a Spotify album in one piece.
+      await ref.read(trackEditorProvider).save(
+            t,
+            TrackEdit(
+              title: row.title,
+              artist: row.artistLine,
+              album: row.album,
+              albumArtist: row.primaryArtist,
+              year: t.year,
+              trackNumber: t.trackNumber,
+              genre: t.genre,
+            ),
+          );
+    },
+    youtubeEnabled: kEnableYoutube,
+  );
+  ref.onDispose(service.dispose);
+  return service;
+});
+
+final importEventsProvider = StreamProvider<ImportEvent>(
+  (ref) => ref.watch(playlistImportServiceProvider).events,
+);
+
+/// Imports still running or paused (Activity Center, playlist banner).
+final unfinishedImportsProvider = StreamProvider<List<PlaylistImport>>(
+  (ref) => ref.watch(importRepositoryProvider).watchUnfinished(),
+);
+
+/// Latest import attached to a playlist, in any state.
+final playlistImportProvider =
+    StreamProvider.family<PlaylistImport?, int>((ref, playlistId) =>
+        ref.watch(importRepositoryProvider).watchForPlaylist(playlistId));
+
+final importItemsProvider =
+    StreamProvider.family<List<PlaylistImportItem>, int>((ref, importId) =>
+        ref.watch(importRepositoryProvider).watchItems(importId));
+
+/// What the Activity centre and the playlist banner show for one import.
+class ImportProgress {
+  const ImportProgress({
+    required this.id,
+    required this.playlistId,
+    required this.name,
+    required this.total,
+    required this.done,
+    required this.review,
+    required this.missing,
+    required this.paused,
+  });
+
+  factory ImportProgress.from(
+    PlaylistImport imp,
+    List<PlaylistImportItem> items,
+  ) {
+    var done = 0, review = 0, missing = 0;
+    for (final i in items) {
+      switch (i.state) {
+        case ImportItemStatus.pending:
+        case ImportItemStatus.queued:
+          break;
+        case ImportItemStatus.review:
+          review++;
+          done++;
+        case ImportItemStatus.notFound:
+        case ImportItemStatus.failed:
+          missing++;
+          done++;
+        case ImportItemStatus.downloaded:
+        case ImportItemStatus.linked:
+        case ImportItemStatus.skipped:
+          done++;
+      }
+    }
+    return ImportProgress(
+      id: imp.id,
+      playlistId: imp.playlistId,
+      name: imp.sourceName,
+      total: items.length,
+      done: done,
+      review: review,
+      missing: missing,
+      paused: imp.state == ImportStatus.paused,
+    );
+  }
+
+  final int id, playlistId, total, done, review, missing;
+  final String name;
+  final bool paused;
+
+  double? get fraction => total == 0 ? null : done / total;
+}
+
+/// Imports still to finish, with counters (Activity centre).
+final importProgressProvider = Provider<List<ImportProgress>>((ref) {
+  final imports = ref.watch(unfinishedImportsProvider).value ?? const [];
+  return [
+    for (final i in imports)
+      ImportProgress.from(
+        i,
+        ref.watch(importItemsProvider(i.id)).value ?? const [],
+      ),
+  ];
+});
+
+/// Counters of the latest import of a playlist (null = none).
+final playlistImportProgressProvider =
+    Provider.family<ImportProgress?, int>((ref, playlistId) {
+      final imp = ref.watch(playlistImportProvider(playlistId)).value;
+      if (imp == null || imp.state == ImportStatus.cancelled) return null;
+      return ImportProgress.from(
+        imp,
+        ref.watch(importItemsProvider(imp.id)).value ?? const [],
+      );
+    });

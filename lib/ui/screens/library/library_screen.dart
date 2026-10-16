@@ -17,6 +17,7 @@ import '../../widgets/empty_state.dart';
 import '../../widgets/error_state.dart';
 import '../../widgets/playlist_cover.dart';
 import '../devices/devices_sheet.dart';
+import '../import/import_flow.dart';
 import '../playlists/playlist_detail_screen.dart';
 import '../playlists/playlist_dialogs.dart';
 import 'album_detail_screen.dart';
@@ -167,10 +168,17 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
                     await ref.read(playlistRepositoryProvider).create(name);
                   },
                 ),
+                IconButton(
+                  tooltip: l.csvImportMenu,
+                  icon: const Icon(Icons.upload_file_rounded),
+                  onPressed: () => startCsvImport(context, ref),
+                ),
                 PopupMenuButton<String>(
                   tooltip: l.moreActions,
                   onSelected: (v) {
                     switch (v) {
+                      case 'csv':
+                        startCsvImport(context, ref);
                       case 'folders':
                         showModalBottomSheet<void>(
                           context: context,
@@ -183,6 +191,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
                     }
                   },
                   itemBuilder: (_) => [
+                    PopupMenuItem(value: 'csv', child: Text(l.csvImportMenu)),
                     PopupMenuItem(value: 'folders', child: Text(l.folders)),
                     PopupMenuItem(value: 'scan', child: Text(l.refreshLibrary)),
                     PopupMenuItem(value: 'share', child: Text(l.shareTitle)),

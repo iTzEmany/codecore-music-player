@@ -604,5 +604,163 @@
         "type": "int"
       }
     }
-  }
+  },
+  "csvImportMenu": "Aus Exportify importieren (CSV)",
+  "csvImportIntroTitle": "Spotify-Playlist importieren",
+  "csvImportIntroSource": "Die CSV-Datei erstellst du kostenlos auf der Website Exportify — exportify.net (keine App nötig).",
+  "csvImportStep1": "Öffne https://exportify.net im Browser (auch am Handy).",
+  "csvImportStep2": "Tippe auf „Get Started“ und melde dich mit deinem Spotify-Konto an.",
+  "csvImportStep3": "Tippe neben der gewünschten Playlist auf „Export“: eine .csv-Datei mit dem Namen der Playlist wird heruntergeladen.",
+  "csvImportStep4": "Komm hierher zurück und tippe auf „CSV-Datei wählen“.",
+  "csvImportNote": "Codecore sucht die Titel in deiner Bibliothek und lädt die übrigen von YouTube Music.",
+  "csvImportNoteOffline": "Es werden nur Titel verknüpft, die bereits in deiner Bibliothek sind.",
+  "csvImportCopy": "Adresse kopieren",
+  "csvImportCopied": "Adresse kopiert",
+  "csvImportPick": "CSV-Datei wählen",
+  "csvImportNotExportify": "Diese Datei sieht nicht wie ein Exportify-CSV aus. Prüfe, ob du die Playlist von exportify.net exportiert hast.",
+  "csvImportReadFailed": "Die Datei konnte nicht gelesen werden.",
+  "csvImportPreviewTitle": "Playlist importieren",
+  "csvImportName": "Name der Playlist",
+  "csvImportSummary": "{total} Titel · {known} schon in der Bibliothek · {todo} herunterzuladen",
+  "@csvImportSummary": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "known": {
+        "type": "int"
+      },
+      "todo": {
+        "type": "int"
+      }
+    }
+  },
+  "csvImportSkipped": "{n} Zeilen ignoriert (Podcasts oder lokale Dateien)",
+  "@csvImportSkipped": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "csvImportEstimate": "Geschätzte Dauer: etwa {minutes} Min.",
+  "@csvImportEstimate": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "csvImportExists": "Eine Playlist mit diesem Namen existiert bereits",
+  "csvImportUpdate": "Bestehende aktualisieren (nur neue Titel)",
+  "csvImportNew": "Neue Playlist anlegen",
+  "csvImportGo": "Importieren",
+  "csvImportStarted": "Import gestartet: im Aktivitätscenter verfolgen",
+  "activityImport": "Import „{name}“ · {done}/{total}",
+  "@activityImport": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "activityImportPaused": "Import „{name}“ · pausiert · {done}/{total}",
+  "@activityImportPaused": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "csvImportBanner": "Import: {done}/{total} · {review} zu prüfen · {missing} nicht gefunden",
+  "@csvImportBanner": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "review": {
+        "type": "int"
+      },
+      "missing": {
+        "type": "int"
+      }
+    }
+  },
+  "csvImportBannerPaused": "Import pausiert: {done}/{total} · {review} zu prüfen · {missing} nicht gefunden",
+  "@csvImportBannerPaused": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "review": {
+        "type": "int"
+      },
+      "missing": {
+        "type": "int"
+      }
+    }
+  },
+  "csvImportReview": "Prüfen",
+  "csvImportResume": "Fortsetzen",
+  "csvImportPause": "Pausieren",
+  "csvImportCancelTitle": "Import abbrechen?",
+  "csvImportCancelBody": "Bereits geladene Titel bleiben in der Playlist.",
+  "csvImportDone": "Import abgeschlossen: {added} hinzugefügt, {review} zu prüfen, {missing} nicht gefunden",
+  "@csvImportDone": {
+    "placeholders": {
+      "added": {
+        "type": "int"
+      },
+      "review": {
+        "type": "int"
+      },
+      "missing": {
+        "type": "int"
+      }
+    }
+  },
+  "csvImportFailing": "Zu viele Fehler hintereinander: Import pausiert",
+  "csvImportReviewTitle": "Import prüfen",
+  "csvImportToReview": "Zu prüfen",
+  "csvImportNotFound": "Nicht gefunden",
+  "csvImportErrors": "Mit Fehlern",
+  "csvImportRetryAll": "Alle wiederholen",
+  "csvImportSkip": "Überspringen",
+  "csvImportManual": "Manuell suchen",
+  "csvImportNothing": "Nichts zu prüfen.",
+  "csvImportSearch": "Suchen",
+  "csvImportWanted": "Gesucht: {title} · {artist} · {duration}",
+  "@csvImportWanted": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "artist": {
+        "type": "String"
+      },
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "csvImportDownload": "Herunterladen",
+  "csvImportCancelGo": "Import abbrechen"
 }

@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 
+import '../../core/import_row.dart';
 import '../db/app_database.dart';
 
 enum SortOption { defaultOrder, title, artist, album, year, addedAt, duration }
@@ -172,6 +173,29 @@ class TrackRepository {
   Future<void> resetCovers() => _db.update(_db.tracks).write(
       const TracksCompanion(
           hasCover: Value(false), coverKey: Value(null), mtimeMs: Value(0)));
+
+  /// Id, title, artist and length of every available track, for matching an
+  /// imported playlist against the library without loading whole rows.
+  Future<List<LibraryEntryLite>> liteEntries() async {
+    final q = _db.selectOnly(_db.tracks)
+      ..addColumns([
+        _db.tracks.id,
+        _db.tracks.title,
+        _db.tracks.artist,
+        _db.tracks.durationMs,
+      ])
+      ..where(_db.tracks.missing.equals(false));
+    final rows = await q.get();
+    return [
+      for (final r in rows)
+        LibraryEntryLite(
+          id: r.read(_db.tracks.id)!,
+          title: r.read(_db.tracks.title) ?? '',
+          artist: r.read(_db.tracks.artist),
+          durationMs: r.read(_db.tracks.durationMs) ?? 0,
+        ),
+    ];
+  }
 
   Future<int?> idForPath(String path) async {
     final t = await (_db.select(_db.tracks)..where((r) => r.path.equals(path)))

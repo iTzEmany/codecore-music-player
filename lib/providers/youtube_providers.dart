@@ -77,6 +77,11 @@ Future<(Directory, Folder)?> _resolveDownloadFolder(
 
 class DownloadsNotifier extends Notifier<List<DownloadItem>> {
   late final DownloadQueue _queue;
+  final _settled = StreamController<DownloadItem>.broadcast();
+
+  /// Every item that finished (done, failed or cancelled), after the file was
+  /// scanned into the library.
+  Stream<DownloadItem> get settled => _settled.stream;
 
   @override
   List<DownloadItem> build() {
@@ -92,6 +97,9 @@ class DownloadsNotifier extends Notifier<List<DownloadItem>> {
         return res?.$1;
       },
       onChanged: (items) => state = items,
+      onSettled: (item) {
+        if (!_settled.isClosed) _settled.add(item);
+      },
       onDownloaded: (path) async {
         final f = folder;
         if (f == null) return;
@@ -106,7 +114,10 @@ class DownloadsNotifier extends Notifier<List<DownloadItem>> {
         await _autoEnrich(path);
       },
     );
-    ref.onDispose(_queue.dispose);
+    ref.onDispose(() {
+      _queue.dispose();
+      _settled.close();
+    });
     return const [];
   }
 
@@ -128,8 +139,10 @@ class DownloadsNotifier extends Notifier<List<DownloadItem>> {
     }
   }
 
-  void add(YtResult r) => _queue.add(r);
+  void add(YtResult r, {String? tag}) => _queue.add(r, tag: tag);
   void cancel(int id) => _queue.cancel(id);
+  void cancelWhere(bool Function(DownloadItem item) test) =>
+      _queue.cancelWhere(test);
   void clearFinished() => _queue.clearFinished();
 }
 

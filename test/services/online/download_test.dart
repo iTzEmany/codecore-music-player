@@ -93,4 +93,42 @@ void main() {
     expect(q.items.single.status, DownloadStatus.failed);
     expect(q.items.single.error, YtErrorKind.unavailable);
   });
+
+  test('tag reaches onSettled for done, failed and cancelled items', () async {
+    final settled = <String>[];
+    final q = DownloadQueue(
+      downloader: (res, dir, cancel) async* {
+        if (res.id == 'bad') throw const YtException(YtErrorKind.network);
+        if (res.id == 'slow') {
+          while (!cancel.isCancelled) {
+            await Future<void>.delayed(const Duration(milliseconds: 5));
+          }
+          return;
+        }
+        yield DownloadProgress(received: 1, total: 1, path: '/o/${res.id}');
+      },
+      outDir: () async => Directory.systemTemp,
+      onChanged: (_) {},
+      onSettled: (i) => settled.add('${i.tag}:${i.status.name}'),
+    );
+    q.add(r('ok'), tag: 'import:1:0');
+    q.add(r('bad'), tag: 'import:1:1');
+    q.add(r('slow'), tag: 'import:1:2');
+    q.add(r('queued'), tag: 'other');
+    await Future<void>.delayed(const Duration(milliseconds: 100));
+    q.cancelWhere((i) => i.tag != null && i.tag!.startsWith('import:1:'));
+    await Future<void>.delayed(const Duration(milliseconds: 100));
+    expect(settled, containsAll(['import:1:0:done', 'import:1:1:failed', 'import:1:2:cancelled']));
+    expect(settled.where((s) => s.startsWith('other')), ['other:done']);
+  });
+
+  test('downloadName replaces the name derived from the video title', () {
+    const res = YtResult(
+        id: '1',
+        title: 'Queen - Bohemian Rhapsody (Official Video)',
+        channel: 'Queen',
+        duration: null,
+        downloadName: 'Queen - Bohemian Rhapsody: 2011 Remaster');
+    expect(downloadBaseName(res), 'Queen - Bohemian Rhapsody 2011 Remaster');
+  });
 }

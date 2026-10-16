@@ -1,7 +1,7 @@
+import '../../core/import_row.dart';
 import '../../core/text_utils.dart';
 import '../online/query_cleaner.dart';
 import '../online/youtube_service.dart';
-import 'exportify_reader.dart';
 
 final _remasterTail = RegExp(
     r'\s+[-–]\s+(\d{4}\s+)?(digital\s+)?remaster(ed)?\b.*$',
@@ -36,21 +36,6 @@ String matchTitleKey(String title) => matchKey(title
     .replaceAll(_editTail, ''));
 
 String _artistKey(String artist) => matchKey(extractPrimaryArtist(artist));
-
-/// Library track as seen by the importer: loaded once, not once per row.
-class LibraryEntryLite {
-  const LibraryEntryLite({
-    required this.id,
-    required this.title,
-    required this.artist,
-    required this.durationMs,
-  });
-
-  final int id;
-  final String title;
-  final String? artist;
-  final int durationMs;
-}
 
 /// `title|primary artist` -> library tracks; [find] is O(1) per row.
 class LibraryIndex {

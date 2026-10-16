@@ -144,10 +144,10 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 12.4 Ricerca su YouTube Music nel `YoutubeService`
 - [x] 12.5 Tabelle dell'importazione (schema v4)
 - [x] 12.6 Posizione nella playlist secondo il CSV
-- [ ] 12.7 Coda di download con tag
-- [ ] 12.8 `PlaylistImportService`
-- [ ] 12.9 Pulsante «Importa da Exportify» e anteprima
-- [ ] 12.10 Avanzamento, «Da verificare» e «Non trovati»
+- [x] 12.7 Coda di download con tag
+- [~] 12.8 `PlaylistImportService`
+- [x] 12.9 Pulsante «Importa da Exportify» e anteprima
+- [x] 12.10 Avanzamento, «Da verificare» e «Non trovati»
 - [ ] 12.11 Rifinitura e prova a mano
 
 ## Note di deviazione
@@ -219,3 +219,7 @@ L'agente riparte sempre dal primo task non spuntato.
 - 12.4 (2026-10-16): `searchSongs` usa `-J --playlist-items 1-N` (non flat) sull'URL YouTube Music; Android: `items` nel canale `search` (nessun parametro `target`). Nuovo errore `rateLimited` (HTTP 429 / «not a bot») distinto da `unavailable`; chiave ARB `ytErrRateLimited` in it/en/de/es.
 - 12.5 (2026-10-16): gli artisti di una riga si salvano separati da `;` (separatore del CSV, quindi mai dentro un nome) invece di « · ». Nessun indice extra (PK `import_id,row_index` basta). `ImportRow` sta in `lib/core/import_row.dart` per non far dipendere `data` da `services`.
 - 12.6: `placeImported` inserisce prima del primo brano **già presente** che viene da una riga successiva; se non c'è, in coda (un brano aggiunto a mano resta dov'è, ma i brani importati dopo di lui vanno in fondo).
+- 12.7: `YtResult.downloadName` (nome file fisso) invece di un parametro in più su `download`; `DownloadQueue` guadagna `tag`, `onSettled`, `cancelWhere`; `DownloadsNotifier.settled` è lo stream che ascolta il motore.
+- 12.8: `loadLibrary` carica solo id/titolo/artista/durata (`TrackRepository.liteEntries`); throttle di 3 download in coda per importazione; 3 errori di ricerca di fila → pausa (`failing`). Artista nei tag = «A, B», `albumArtist` = primo artista (un album Spotify resta unito). Brani con `videoId` già in `downloads.json` si collegano senza riscaricare.
+- 12.9: il pulsante sta nell'intestazione della Libreria (icona + voce del menu ⋮ «Importa da Exportify (CSV)») e nel FAB di `PlaylistsScreen`; il foglio d'istruzioni nomina **exportify.net** con «Copia indirizzo» (niente `url_launcher`). Anteprima: conteggi calcolati prima del dialogo (`import_flow.dart`), il dialogo è puro. Su Android il selettore file mostra tutti i file (filtro MIME `csv` inaffidabile).
+- 12.10: «Cerca a mano» è un foglio nella schermata di revisione (ricerca YouTube normale), non un salto alla scheda Cerca. Importazioni concluse non restano in «Completate»: esito in snackbar + banner nella playlist finché ci sono righe da risolvere.

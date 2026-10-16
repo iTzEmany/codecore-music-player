@@ -25,9 +25,12 @@ class DownloadIndex {
     }
   }
 
-  bool contains(String videoId) {
+  bool contains(String videoId) => pathFor(videoId) != null;
+
+  /// Where the video was downloaded, if the file is still there.
+  String? pathFor(String videoId) {
     final path = _map[videoId];
-    return path != null && File(path).existsSync();
+    return path != null && File(path).existsSync() ? path : null;
   }
 
   Future<void> add(String videoId, String path) async {

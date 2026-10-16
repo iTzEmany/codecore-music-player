@@ -2,12 +2,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../services/online/download_queue.dart';
 import '../services/share/offers.dart';
+import 'import_providers.dart';
 import 'library_providers.dart';
 import 'online_providers.dart';
 import 'share_hub.dart';
 import 'youtube_providers.dart';
 
-enum ActivityKind { scan, enrich, download, transfer }
+enum ActivityKind { scan, enrich, download, transfer, import }
 
 /// One line of the Activity centre. [progress] is 0..1, null = indeterminate.
 class ActivityItem {
@@ -20,6 +21,7 @@ class ActivityItem {
     this.progress,
     this.running = true,
     this.failed = false,
+    this.paused = false,
     this.ref,
   });
 
@@ -32,13 +34,17 @@ class ActivityItem {
   final double? progress;
   final bool running, failed;
 
-  /// The download id or the [OutgoingOffer], used to cancel.
+  /// A CSV import waiting for the user (still listed among the running ones).
+  final bool paused;
+
+  /// The download id, the [OutgoingOffer] or the import id, used to cancel.
   final Object? ref;
 
   bool get cancellable =>
       running &&
       (kind == ActivityKind.download ||
           kind == ActivityKind.transfer ||
+          kind == ActivityKind.import ||
           kind == ActivityKind.enrich);
 }
 
@@ -56,6 +62,7 @@ ActivityState buildActivity({
   required EnrichJobState enrich,
   required List<DownloadItem> downloads,
   required List<OutgoingOffer> outgoing,
+  List<ImportProgress> imports = const [],
 }) {
   final running = <ActivityItem>[];
   final completed = <ActivityItem>[];
@@ -83,6 +90,20 @@ ActivityState buildActivity({
         done: p?.done ?? 0,
         total: p?.total ?? 0,
         progress: (p == null || p.total == 0) ? null : p.done / p.total,
+      ),
+    );
+  }
+  for (final i in imports) {
+    running.add(
+      ActivityItem(
+        kind: ActivityKind.import,
+        key: 'imp-${i.id}',
+        name: i.name,
+        done: i.done,
+        total: i.total,
+        progress: i.fraction,
+        paused: i.paused,
+        ref: i.id,
       ),
     );
   }
@@ -139,6 +160,7 @@ final activityProvider = Provider<ActivityState>((ref) {
     enrich: ref.watch(enrichJobProvider),
     downloads: ref.watch(downloadsProvider),
     outgoing: ref.watch(shareHubProvider.select((h) => h.outgoing)),
+    imports: ref.watch(importProgressProvider),
   );
   final hidden = ref.watch(dismissedActivityProvider);
   if (hidden.isEmpty) return s;

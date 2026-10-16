@@ -1299,4 +1299,174 @@ class AppLocalizationsEs extends AppLocalizations {
   String confirmRemoveAllBody(int n) {
     return 'Se quitarán $n canciones no encontradas de la biblioteca. Los archivos no se tocan; pierdes favoritos y listas de estas canciones.';
   }
+
+  @override
+  String get csvImportMenu => 'Importar desde Exportify (CSV)';
+
+  @override
+  String get csvImportIntroTitle => 'Importar una lista de Spotify';
+
+  @override
+  String get csvImportIntroSource =>
+      'El archivo CSV se crea gratis en el sitio Exportify — exportify.net (no hace falta ninguna app).';
+
+  @override
+  String get csvImportStep1 =>
+      'Abre https://exportify.net en el navegador (también desde el móvil).';
+
+  @override
+  String get csvImportStep2 =>
+      'Toca «Get Started» e inicia sesión con tu cuenta de Spotify.';
+
+  @override
+  String get csvImportStep3 =>
+      'Junto a la lista que quieras toca «Export»: se descarga un archivo .csv con el nombre de la lista.';
+
+  @override
+  String get csvImportStep4 => 'Vuelve aquí y toca «Elegir archivo CSV».';
+
+  @override
+  String get csvImportNote =>
+      'Codecore busca las canciones en tu biblioteca y descarga las demás de YouTube Music.';
+
+  @override
+  String get csvImportNoteOffline =>
+      'Solo se enlazarán las canciones que ya están en tu biblioteca.';
+
+  @override
+  String get csvImportCopy => 'Copiar dirección';
+
+  @override
+  String get csvImportCopied => 'Dirección copiada';
+
+  @override
+  String get csvImportPick => 'Elegir archivo CSV';
+
+  @override
+  String get csvImportNotExportify =>
+      'Este archivo no parece un CSV de Exportify. Comprueba que exportaste la lista desde exportify.net.';
+
+  @override
+  String get csvImportReadFailed => 'No se pudo leer el archivo.';
+
+  @override
+  String get csvImportPreviewTitle => 'Importar lista';
+
+  @override
+  String get csvImportName => 'Nombre de la lista';
+
+  @override
+  String csvImportSummary(int total, int known, int todo) {
+    return '$total canciones · $known ya en la biblioteca · $todo por descargar';
+  }
+
+  @override
+  String csvImportSkipped(int n) {
+    return '$n filas ignoradas (podcasts o archivos locales)';
+  }
+
+  @override
+  String csvImportEstimate(int minutes) {
+    return 'Tiempo estimado: unos $minutes min';
+  }
+
+  @override
+  String get csvImportExists => 'Ya existe una lista con este nombre';
+
+  @override
+  String get csvImportUpdate =>
+      'Actualizar la existente (solo añade las nuevas)';
+
+  @override
+  String get csvImportNew => 'Crear una lista nueva';
+
+  @override
+  String get csvImportGo => 'Importar';
+
+  @override
+  String get csvImportStarted =>
+      'Importación iniciada: síguela en el Centro de actividad';
+
+  @override
+  String activityImport(String name, int done, int total) {
+    return 'Importación «$name» · $done/$total';
+  }
+
+  @override
+  String activityImportPaused(String name, int done, int total) {
+    return 'Importación «$name» · en pausa · $done/$total';
+  }
+
+  @override
+  String csvImportBanner(int done, int total, int review, int missing) {
+    return 'Importación: $done/$total · $review por revisar · $missing no encontradas';
+  }
+
+  @override
+  String csvImportBannerPaused(int done, int total, int review, int missing) {
+    return 'Importación en pausa: $done/$total · $review por revisar · $missing no encontradas';
+  }
+
+  @override
+  String get csvImportReview => 'Revisar';
+
+  @override
+  String get csvImportResume => 'Reanudar';
+
+  @override
+  String get csvImportPause => 'Pausar';
+
+  @override
+  String get csvImportCancelTitle => '¿Cancelar la importación?';
+
+  @override
+  String get csvImportCancelBody =>
+      'Las canciones ya descargadas se quedan en la lista.';
+
+  @override
+  String csvImportDone(int added, int review, int missing) {
+    return 'Importación terminada: $added añadidas, $review por revisar, $missing no encontradas';
+  }
+
+  @override
+  String get csvImportFailing =>
+      'Demasiados errores seguidos: importación en pausa';
+
+  @override
+  String get csvImportReviewTitle => 'Revisar importación';
+
+  @override
+  String get csvImportToReview => 'Por revisar';
+
+  @override
+  String get csvImportNotFound => 'No encontradas';
+
+  @override
+  String get csvImportErrors => 'Con errores';
+
+  @override
+  String get csvImportRetryAll => 'Reintentar todas';
+
+  @override
+  String get csvImportSkip => 'Omitir';
+
+  @override
+  String get csvImportManual => 'Buscar a mano';
+
+  @override
+  String get csvImportNothing => 'Nada que revisar.';
+
+  @override
+  String get csvImportSearch => 'Buscar';
+
+  @override
+  String csvImportWanted(String title, String artist, String duration) {
+    return 'Buscada: $title · $artist · $duration';
+  }
+
+  @override
+  String get csvImportDownload => 'Descargar';
+
+  @override
+  String get csvImportCancelGo => 'Cancelar importación';
 }
