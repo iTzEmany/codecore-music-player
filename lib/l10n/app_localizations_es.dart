@@ -1866,4 +1866,12 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get playbackSpeedHint =>
       'El tono se mantiene. El temporizador de apagado cuenta tiempo real, no el de la canción.';
+
+  @override
+  String resumeFrom(String time) {
+    return 'continuar en $time';
+  }
+
+  @override
+  String get restartFromBeginning => 'Empezar desde el principio';
 }

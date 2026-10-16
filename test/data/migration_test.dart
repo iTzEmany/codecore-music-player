@@ -112,4 +112,30 @@ void main() {
           'plan_first', 'fetch_covers']));
     await db.close();
   });
+
+  test('v5 database gets tracks.resume_position_ms and keeps its tracks', () async {
+    final dir = Directory.systemTemp.createTempSync('mig6');
+    addTearDown(() => dir.deleteSync(recursive: true));
+    final file = File(p.join(dir.path, 'v5.db'));
+    final db = AppDatabase(NativeDatabase(file, setup: (raw) {
+      if (raw.userVersion == 0) {
+        raw.execute('CREATE TABLE tracks (id INTEGER PRIMARY KEY AUTOINCREMENT, '
+            'path TEXT NOT NULL, title TEXT NOT NULL, album_key TEXT NOT NULL, '
+            'format TEXT NOT NULL, size_bytes INTEGER NOT NULL, mtime_ms INTEGER '
+            'NOT NULL, added_at INTEGER NOT NULL, replay_gain_db REAL)');
+        raw.execute("INSERT INTO tracks (path, title, album_key, format, size_bytes, "
+            "mtime_ms, added_at) VALUES ('/a.mp3', 'Old', 'k', 'mp3', 1, 1, 1)");
+        raw.userVersion = 5;
+      }
+    }));
+    final t = (await db
+            .customSelect('SELECT title, resume_position_ms FROM tracks')
+            .get())
+        .single;
+    expect(t.read<String>('title'), 'Old');
+    expect(t.read<int?>('resume_position_ms'), isNull);
+    final cols = await db.customSelect('PRAGMA table_info(tracks)').get();
+    expect(cols.map((c) => c.read<String>('name')), contains('resume_position_ms'));
+    await db.close();
+  });
 }

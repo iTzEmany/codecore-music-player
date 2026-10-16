@@ -1865,4 +1865,12 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get playbackSpeedHint =>
       'Il tono resta quello originale. Il timer di spegnimento conta il tempo reale, non quello del brano.';
+
+  @override
+  String resumeFrom(String time) {
+    return 'riprendi da $time';
+  }
+
+  @override
+  String get restartFromBeginning => 'Ricomincia dall’inizio';
 }

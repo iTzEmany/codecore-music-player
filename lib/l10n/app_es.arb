@@ -1009,5 +1009,14 @@
     }
   },
   "playbackSpeed": "Velocidad de reproducción",
-  "playbackSpeedHint": "El tono se mantiene. El temporizador de apagado cuenta tiempo real, no el de la canción."
+  "playbackSpeedHint": "El tono se mantiene. El temporizador de apagado cuenta tiempo real, no el de la canción.",
+  "resumeFrom": "continuar en {time}",
+  "restartFromBeginning": "Empezar desde el principio",
+  "@resumeFrom": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  }
 }

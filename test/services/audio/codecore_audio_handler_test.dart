@@ -171,4 +171,96 @@ void main() {
       expect(backend.speedCalls, isEmpty);
     });
   });
+
+  group('«riprendi da qui»', () {
+    late int longId, shortId;
+    const hour = 60 * 60 * 1000;
+
+    Future<int?> saved(int id) async => (await repo.getById(id))!.resumePositionMs;
+    Future<void> at(Duration p) async {
+      backend.posC.add(p);
+      await settle();
+    }
+
+    setUp(() async {
+      longId = await db.into(db.tracks).insert(TracksCompanion.insert(
+            path: '/m/book.mp3',
+            title: 'Book',
+            albumKey: 'k',
+            format: 'mp3',
+            sizeBytes: 1,
+            mtimeMs: 1,
+            addedAt: 1,
+            durationMs: const Value(hour),
+          ));
+      shortId = ids.first;
+    });
+
+    test('saves while playing, at most every 15 seconds', () async {
+      await handler.playQueue([longId], 0);
+      await at(const Duration(seconds: 40));
+      expect(await saved(longId), 40000);
+      await at(const Duration(seconds: 50)); // only 10 s later
+      expect(await saved(longId), 40000);
+      await at(const Duration(seconds: 56));
+      expect(await saved(longId), 56000);
+    });
+
+    test('pausing saves the exact place', () async {
+      await handler.playQueue([longId], 0);
+      await at(const Duration(minutes: 12, seconds: 3));
+      await handler.pause();
+      await settle();
+      expect(await saved(longId), const Duration(minutes: 12, seconds: 3).inMilliseconds);
+    });
+
+    test('next time it starts 5 seconds before the saved point', () async {
+      await repo.setResumePosition(longId, 600000);
+      await handler.playQueue([longId], 0);
+      await settle();
+      expect(backend.seeks.last, const Duration(minutes: 9, seconds: 55));
+    });
+
+    test('an explicit position (restoring the last session) wins', () async {
+      await repo.setResumePosition(longId, 600000);
+      await handler.restore([longId], 0, const Duration(minutes: 3));
+      await settle();
+      expect(backend.seeks.last, const Duration(minutes: 3));
+    });
+
+    test('leaving the track for another one keeps its place', () async {
+      await handler.playQueue([longId, shortId], 0);
+      await at(const Duration(minutes: 20));
+      await handler.skipToNext();
+      await settle();
+      expect(await saved(longId), const Duration(minutes: 20).inMilliseconds);
+    });
+
+    test('finishing the track clears the bookmark', () async {
+      await repo.setResumePosition(longId, 600000);
+      await handler.playQueue([longId, shortId], 0);
+      await at(const Duration(minutes: 59, seconds: 50));
+      backend.stateC.add(BackendState.completed);
+      await settle();
+      expect(await saved(longId), isNull);
+    });
+
+    test('the last 30 seconds clear it too', () async {
+      await handler.playQueue([longId], 0);
+      await at(const Duration(minutes: 30));
+      expect(await saved(longId), isNotNull);
+      await at(const Duration(minutes: 59, seconds: 45));
+      await handler.pause();
+      await settle();
+      expect(await saved(longId), isNull);
+    });
+
+    test('short tracks are never bookmarked', () async {
+      await handler.playQueue([shortId], 0);
+      await at(const Duration(seconds: 60));
+      await handler.pause();
+      await settle();
+      expect(await saved(shortId), isNull);
+    });
+  });
 }

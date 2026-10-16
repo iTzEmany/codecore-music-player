@@ -3305,6 +3305,18 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Il tono resta quello originale. Il timer di spegnimento conta il tempo reale, non quello del brano.'**
   String get playbackSpeedHint;
+
+  /// No description provided for @resumeFrom.
+  ///
+  /// In it, this message translates to:
+  /// **'riprendi da {time}'**
+  String resumeFrom(String time);
+
+  /// No description provided for @restartFromBeginning.
+  ///
+  /// In it, this message translates to:
+  /// **'Ricomincia dall’inizio'**
+  String get restartFromBeginning;
 }
 
 class _AppLocalizationsDelegate

@@ -1,3 +1,4 @@
+import 'package:codecore/data/repositories/track_repository.dart';
 import 'package:codecore/ui/screens/library/album_detail_screen.dart';
 import 'package:codecore/ui/screens/now_playing/queue_sheet.dart';
 import 'package:codecore/ui/shell/app_shell.dart';
@@ -40,6 +41,48 @@ void main() {
     await _settle(tester);
     expect(find.byType(AlbumDetailScreen), findsOneWidget);
     expect(find.text('Libreria'), findsWidgets); // bottom bar still there
+    await h.dispose(tester);
+  });
+
+  testWidgets('a track with a bookmark says where it resumes and offers a restart',
+      (tester) async {
+    _phone(tester);
+    final h = await Harness.create(tester, tracks: 3);
+    final rows = await tester.runAsync(() => h.db.select(h.db.tracks).get());
+    final marked = rows!.firstWhere((t) => t.title == 'Song 1');
+    await tester.runAsync(() => TrackRepository(h.db)
+        .setResumePosition(marked.id, const Duration(minutes: 42, seconds: 10).inMilliseconds));
+    await h.pump(tester, const AppShell());
+    await tester.tap(find.text('Libreria'));
+    await _settle(tester);
+    await tester.tap(find.text('Tutti i brani'));
+    await _settle(tester);
+
+    expect(find.textContaining('riprendi da 42:10'), findsOneWidget);
+    await tester.longPress(find.text('Song 1').first);
+    await _settle(tester);
+    expect(find.text('Ricomincia dall’inizio'), findsOneWidget);
+    await tester.tap(find.text('Ricomincia dall’inizio'));
+    await _settle(tester);
+    final after = await tester
+        .runAsync(() => TrackRepository(h.db).getById(marked.id));
+    expect(after!.resumePositionMs, isNull, reason: 'the bookmark is cleared');
+    expect(h.handler.currentTrack?.id, marked.id, reason: 'and it plays from the start');
+    await h.dispose(tester);
+  });
+
+  testWidgets('a track without a bookmark has no restart entry', (tester) async {
+    _phone(tester);
+    final h = await Harness.create(tester, tracks: 3);
+    await h.pump(tester, const AppShell());
+    await tester.tap(find.text('Libreria'));
+    await _settle(tester);
+    await tester.tap(find.text('Tutti i brani'));
+    await _settle(tester);
+    await tester.longPress(find.text('Song 1').first);
+    await _settle(tester);
+    expect(find.text('Ricomincia dall’inizio'), findsNothing);
+    expect(find.textContaining('riprendi da'), findsNothing);
     await h.dispose(tester);
   });
 

@@ -1868,4 +1868,12 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get playbackSpeedHint =>
       'Die Tonhöhe bleibt original. Der Einschlaf-Timer zählt echte Zeit, nicht die des Titels.';
+
+  @override
+  String resumeFrom(String time) {
+    return 'weiter bei $time';
+  }
+
+  @override
+  String get restartFromBeginning => 'Von vorn beginnen';
 }

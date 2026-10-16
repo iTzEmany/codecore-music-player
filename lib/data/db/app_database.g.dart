@@ -377,6 +377,17 @@ class $TracksTable extends Tracks with TableInfo<$TracksTable, Track> {
     type: DriftSqlType.double,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _resumePositionMsMeta = const VerificationMeta(
+    'resumePositionMs',
+  );
+  @override
+  late final GeneratedColumn<int> resumePositionMs = GeneratedColumn<int>(
+    'resume_position_ms',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _lastPlayedAtMeta = const VerificationMeta(
     'lastPlayedAt',
   );
@@ -423,6 +434,7 @@ class $TracksTable extends Tracks with TableInfo<$TracksTable, Track> {
     addedAt,
     playCount,
     replayGainDb,
+    resumePositionMs,
     lastPlayedAt,
   ];
   @override
@@ -673,6 +685,15 @@ class $TracksTable extends Tracks with TableInfo<$TracksTable, Track> {
         ),
       );
     }
+    if (data.containsKey('resume_position_ms')) {
+      context.handle(
+        _resumePositionMsMeta,
+        resumePositionMs.isAcceptableOrUnknown(
+          data['resume_position_ms']!,
+          _resumePositionMsMeta,
+        ),
+      );
+    }
     if (data.containsKey('last_played_at')) {
       context.handle(
         _lastPlayedAtMeta,
@@ -823,6 +844,10 @@ class $TracksTable extends Tracks with TableInfo<$TracksTable, Track> {
         DriftSqlType.double,
         data['${effectivePrefix}replay_gain_db'],
       ),
+      resumePositionMs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}resume_position_ms'],
+      ),
       lastPlayedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}last_played_at'],
@@ -870,6 +895,9 @@ class Track extends DataClass implements Insertable<Track> {
   final int addedAt;
   final int playCount;
   final double? replayGainDb;
+
+  /// «Riprendi da qui»: where a long track (≥ 20 min) was left; null = none.
+  final int? resumePositionMs;
   final int? lastPlayedAt;
   const Track({
     required this.id,
@@ -905,6 +933,7 @@ class Track extends DataClass implements Insertable<Track> {
     required this.addedAt,
     required this.playCount,
     this.replayGainDb,
+    this.resumePositionMs,
     this.lastPlayedAt,
   });
   @override
@@ -978,6 +1007,9 @@ class Track extends DataClass implements Insertable<Track> {
     map['play_count'] = Variable<int>(playCount);
     if (!nullToAbsent || replayGainDb != null) {
       map['replay_gain_db'] = Variable<double>(replayGainDb);
+    }
+    if (!nullToAbsent || resumePositionMs != null) {
+      map['resume_position_ms'] = Variable<int>(resumePositionMs);
     }
     if (!nullToAbsent || lastPlayedAt != null) {
       map['last_played_at'] = Variable<int>(lastPlayedAt);
@@ -1054,6 +1086,9 @@ class Track extends DataClass implements Insertable<Track> {
       replayGainDb: replayGainDb == null && nullToAbsent
           ? const Value.absent()
           : Value(replayGainDb),
+      resumePositionMs: resumePositionMs == null && nullToAbsent
+          ? const Value.absent()
+          : Value(resumePositionMs),
       lastPlayedAt: lastPlayedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(lastPlayedAt),
@@ -1099,6 +1134,7 @@ class Track extends DataClass implements Insertable<Track> {
       addedAt: serializer.fromJson<int>(json['addedAt']),
       playCount: serializer.fromJson<int>(json['playCount']),
       replayGainDb: serializer.fromJson<double?>(json['replayGainDb']),
+      resumePositionMs: serializer.fromJson<int?>(json['resumePositionMs']),
       lastPlayedAt: serializer.fromJson<int?>(json['lastPlayedAt']),
     );
   }
@@ -1139,6 +1175,7 @@ class Track extends DataClass implements Insertable<Track> {
       'addedAt': serializer.toJson<int>(addedAt),
       'playCount': serializer.toJson<int>(playCount),
       'replayGainDb': serializer.toJson<double?>(replayGainDb),
+      'resumePositionMs': serializer.toJson<int?>(resumePositionMs),
       'lastPlayedAt': serializer.toJson<int?>(lastPlayedAt),
     };
   }
@@ -1177,6 +1214,7 @@ class Track extends DataClass implements Insertable<Track> {
     int? addedAt,
     int? playCount,
     Value<double?> replayGainDb = const Value.absent(),
+    Value<int?> resumePositionMs = const Value.absent(),
     Value<int?> lastPlayedAt = const Value.absent(),
   }) => Track(
     id: id ?? this.id,
@@ -1212,6 +1250,9 @@ class Track extends DataClass implements Insertable<Track> {
     addedAt: addedAt ?? this.addedAt,
     playCount: playCount ?? this.playCount,
     replayGainDb: replayGainDb.present ? replayGainDb.value : this.replayGainDb,
+    resumePositionMs: resumePositionMs.present
+        ? resumePositionMs.value
+        : this.resumePositionMs,
     lastPlayedAt: lastPlayedAt.present ? lastPlayedAt.value : this.lastPlayedAt,
   );
   Track copyWithCompanion(TracksCompanion data) {
@@ -1275,6 +1316,9 @@ class Track extends DataClass implements Insertable<Track> {
       replayGainDb: data.replayGainDb.present
           ? data.replayGainDb.value
           : this.replayGainDb,
+      resumePositionMs: data.resumePositionMs.present
+          ? data.resumePositionMs.value
+          : this.resumePositionMs,
       lastPlayedAt: data.lastPlayedAt.present
           ? data.lastPlayedAt.value
           : this.lastPlayedAt,
@@ -1317,6 +1361,7 @@ class Track extends DataClass implements Insertable<Track> {
           ..write('addedAt: $addedAt, ')
           ..write('playCount: $playCount, ')
           ..write('replayGainDb: $replayGainDb, ')
+          ..write('resumePositionMs: $resumePositionMs, ')
           ..write('lastPlayedAt: $lastPlayedAt')
           ..write(')'))
         .toString();
@@ -1357,6 +1402,7 @@ class Track extends DataClass implements Insertable<Track> {
     addedAt,
     playCount,
     replayGainDb,
+    resumePositionMs,
     lastPlayedAt,
   ]);
   @override
@@ -1396,6 +1442,7 @@ class Track extends DataClass implements Insertable<Track> {
           other.addedAt == this.addedAt &&
           other.playCount == this.playCount &&
           other.replayGainDb == this.replayGainDb &&
+          other.resumePositionMs == this.resumePositionMs &&
           other.lastPlayedAt == this.lastPlayedAt);
 }
 
@@ -1433,6 +1480,7 @@ class TracksCompanion extends UpdateCompanion<Track> {
   final Value<int> addedAt;
   final Value<int> playCount;
   final Value<double?> replayGainDb;
+  final Value<int?> resumePositionMs;
   final Value<int?> lastPlayedAt;
   const TracksCompanion({
     this.id = const Value.absent(),
@@ -1468,6 +1516,7 @@ class TracksCompanion extends UpdateCompanion<Track> {
     this.addedAt = const Value.absent(),
     this.playCount = const Value.absent(),
     this.replayGainDb = const Value.absent(),
+    this.resumePositionMs = const Value.absent(),
     this.lastPlayedAt = const Value.absent(),
   });
   TracksCompanion.insert({
@@ -1504,6 +1553,7 @@ class TracksCompanion extends UpdateCompanion<Track> {
     required int addedAt,
     this.playCount = const Value.absent(),
     this.replayGainDb = const Value.absent(),
+    this.resumePositionMs = const Value.absent(),
     this.lastPlayedAt = const Value.absent(),
   }) : path = Value(path),
        title = Value(title),
@@ -1546,6 +1596,7 @@ class TracksCompanion extends UpdateCompanion<Track> {
     Expression<int>? addedAt,
     Expression<int>? playCount,
     Expression<double>? replayGainDb,
+    Expression<int>? resumePositionMs,
     Expression<int>? lastPlayedAt,
   }) {
     return RawValuesInsertable({
@@ -1582,6 +1633,7 @@ class TracksCompanion extends UpdateCompanion<Track> {
       if (addedAt != null) 'added_at': addedAt,
       if (playCount != null) 'play_count': playCount,
       if (replayGainDb != null) 'replay_gain_db': replayGainDb,
+      if (resumePositionMs != null) 'resume_position_ms': resumePositionMs,
       if (lastPlayedAt != null) 'last_played_at': lastPlayedAt,
     });
   }
@@ -1620,6 +1672,7 @@ class TracksCompanion extends UpdateCompanion<Track> {
     Value<int>? addedAt,
     Value<int>? playCount,
     Value<double?>? replayGainDb,
+    Value<int?>? resumePositionMs,
     Value<int?>? lastPlayedAt,
   }) {
     return TracksCompanion(
@@ -1656,6 +1709,7 @@ class TracksCompanion extends UpdateCompanion<Track> {
       addedAt: addedAt ?? this.addedAt,
       playCount: playCount ?? this.playCount,
       replayGainDb: replayGainDb ?? this.replayGainDb,
+      resumePositionMs: resumePositionMs ?? this.resumePositionMs,
       lastPlayedAt: lastPlayedAt ?? this.lastPlayedAt,
     );
   }
@@ -1762,6 +1816,9 @@ class TracksCompanion extends UpdateCompanion<Track> {
     if (replayGainDb.present) {
       map['replay_gain_db'] = Variable<double>(replayGainDb.value);
     }
+    if (resumePositionMs.present) {
+      map['resume_position_ms'] = Variable<int>(resumePositionMs.value);
+    }
     if (lastPlayedAt.present) {
       map['last_played_at'] = Variable<int>(lastPlayedAt.value);
     }
@@ -1804,6 +1861,7 @@ class TracksCompanion extends UpdateCompanion<Track> {
           ..write('addedAt: $addedAt, ')
           ..write('playCount: $playCount, ')
           ..write('replayGainDb: $replayGainDb, ')
+          ..write('resumePositionMs: $resumePositionMs, ')
           ..write('lastPlayedAt: $lastPlayedAt')
           ..write(')'))
         .toString();
@@ -4310,6 +4368,7 @@ typedef $$TracksTableCreateCompanionBuilder = TracksCompanion Function({
   required int addedAt,
   Value<int> playCount,
   Value<double?> replayGainDb,
+  Value<int?> resumePositionMs,
   Value<int?> lastPlayedAt,
 });
 typedef $$TracksTableUpdateCompanionBuilder = TracksCompanion Function({
@@ -4346,6 +4405,7 @@ typedef $$TracksTableUpdateCompanionBuilder = TracksCompanion Function({
   Value<int> addedAt,
   Value<int> playCount,
   Value<double?> replayGainDb,
+  Value<int?> resumePositionMs,
   Value<int?> lastPlayedAt,
 });
 
@@ -4567,6 +4627,11 @@ class $$TracksTableFilterComposer
 
   ColumnFilters<double> get replayGainDb => $composableBuilder(
     column: $table.replayGainDb,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get resumePositionMs => $composableBuilder(
+    column: $table.resumePositionMs,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -4800,6 +4865,11 @@ class $$TracksTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get resumePositionMs => $composableBuilder(
+    column: $table.resumePositionMs,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get lastPlayedAt => $composableBuilder(
     column: $table.lastPlayedAt,
     builder: (column) => ColumnOrderings(column),
@@ -4940,6 +5010,11 @@ class $$TracksTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<int> get resumePositionMs => $composableBuilder(
+    column: $table.resumePositionMs,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<int> get lastPlayedAt => $composableBuilder(
     column: $table.lastPlayedAt,
     builder: (column) => column,
@@ -5061,6 +5136,7 @@ class $$TracksTableTableManager
                 Value<int> addedAt = const Value.absent(),
                 Value<int> playCount = const Value.absent(),
                 Value<double?> replayGainDb = const Value.absent(),
+                Value<int?> resumePositionMs = const Value.absent(),
                 Value<int?> lastPlayedAt = const Value.absent(),
               }) => TracksCompanion(
                 id: id,
@@ -5096,6 +5172,7 @@ class $$TracksTableTableManager
                 addedAt: addedAt,
                 playCount: playCount,
                 replayGainDb: replayGainDb,
+                resumePositionMs: resumePositionMs,
                 lastPlayedAt: lastPlayedAt,
               ),
           createCompanionCallback:
@@ -5133,6 +5210,7 @@ class $$TracksTableTableManager
                 required int addedAt,
                 Value<int> playCount = const Value.absent(),
                 Value<double?> replayGainDb = const Value.absent(),
+                Value<int?> resumePositionMs = const Value.absent(),
                 Value<int?> lastPlayedAt = const Value.absent(),
               }) => TracksCompanion.insert(
                 id: id,
@@ -5168,6 +5246,7 @@ class $$TracksTableTableManager
                 addedAt: addedAt,
                 playCount: playCount,
                 replayGainDb: replayGainDb,
+                resumePositionMs: resumePositionMs,
                 lastPlayedAt: lastPlayedAt,
               ),
           withReferenceMapper: (p0) => p0

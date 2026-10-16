@@ -1009,5 +1009,14 @@
     }
   },
   "playbackSpeed": "Wiedergabegeschwindigkeit",
-  "playbackSpeedHint": "Die Tonhöhe bleibt original. Der Einschlaf-Timer zählt echte Zeit, nicht die des Titels."
+  "playbackSpeedHint": "Die Tonhöhe bleibt original. Der Einschlaf-Timer zählt echte Zeit, nicht die des Titels.",
+  "resumeFrom": "weiter bei {time}",
+  "restartFromBeginning": "Von vorn beginnen",
+  "@resumeFrom": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  }
 }

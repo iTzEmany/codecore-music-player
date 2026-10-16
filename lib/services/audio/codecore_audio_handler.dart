@@ -8,6 +8,7 @@ import '../../data/db/app_database.dart';
 import '../../data/repositories/track_repository.dart';
 import 'audio_backend.dart';
 import 'play_queue.dart';
+import 'resume_point.dart';
 
 enum PlaybackFailureReason { fileMissing, unplayable, notInLibrary }
 
@@ -50,6 +51,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   int _loadToken = 0;
   int _consecutiveErrors = 0;
   bool _playCounted = false;
+  Duration _lastResumeSave = Duration.zero;
   bool _handlingCompleted = false;
 
   /// Sleep timer "end of track": the next track is loaded but not started.
@@ -104,6 +106,13 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
       await _failAndSkip(PlaybackFailureReason.notInLibrary, null, token);
       return;
     }
+    // The track we are leaving keeps its place (long tracks only).
+    _saveResume();
+    _lastResumeSave = Duration.zero;
+    // An explicit position (restoring a session) wins over the bookmark.
+    final start = (startAt != null && startAt > Duration.zero)
+        ? startAt
+        : resumeStartFor(track.resumePositionMs);
     _playCounted = false;
     _gainFactor = gainFactor(track.replayGainDb);
     if (_normalize) unawaited(_applyVolume());
@@ -118,8 +127,8 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
       if (token != _loadToken) return;
       // Some backends forget the rate when a new file is loaded.
       if (_speed != 1.0) await _backend.setSpeed(_speed);
-      if (startAt != null && startAt > Duration.zero) {
-        await _backend.seek(startAt);
+      if (start != null && start > Duration.zero) {
+        await _backend.seek(start);
       }
       _consecutiveErrors = 0;
       if (play) await _backend.play();
@@ -152,6 +161,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   }
 
   Future<void> _goIdle() async {
+    _saveResume();
     _loadToken++;
     await _backend.stop();
     _current = null;
@@ -174,7 +184,9 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   }
 
   void _onBackendState(BackendState s) {
+    final wasPlaying = _state == BackendState.playing;
     _state = s;
+    if (wasPlaying && s == BackendState.paused) _saveResume();
     if (s == BackendState.completed) {
       unawaited(_onCompleted());
       return;
@@ -191,6 +203,11 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     if (_handlingCompleted) return;
     _handlingCompleted = true;
     try {
+      final finished = _current;
+      if (finished != null &&
+          (finished.resumePositionMs != null || _savedResume[finished.id] != null)) {
+        unawaited(_writeResume(finished, null));
+      }
       final next = _queue.next(auto: true);
       final stay = pauseAtTrackEnd;
       pauseAtTrackEnd = false;
@@ -207,6 +224,12 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   void _onPosition(Duration p) {
     _position = p;
     final track = _current;
+    if (track != null &&
+        _state == BackendState.playing &&
+        (p - _lastResumeSave).abs() >= kResumeSaveEvery) {
+      _lastResumeSave = p;
+      _saveResume();
+    }
     if (_playCounted || track == null || _state != BackendState.playing) return;
     final total = _duration;
     final half = total != null && total > Duration.zero && p * 2 >= total;
@@ -379,6 +402,31 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
 
   Future<void> _applyVolume() => _backend
       .setVolume((_baseVolume * (_normalize ? _gainFactor : 1.0)).clamp(0, 1));
+
+  /// Stores where the current track is (only if it is long enough to matter).
+  void _saveResume() {
+    final t = _current;
+    if (t == null) return;
+    final length = t.durationMs > 0 ? t.durationMs : (_duration?.inMilliseconds ?? 0);
+    final ms = resumePointFor(_position, length);
+    if (ms == null && t.resumePositionMs == null && _savedResume[t.id] == null) {
+      return;
+    }
+    if (_savedResume.containsKey(t.id) && _savedResume[t.id] == ms) return;
+    unawaited(_writeResume(t, ms));
+  }
+
+  /// Last bookmark written per track in this session (avoids repeat writes).
+  final _savedResume = <int, int?>{};
+
+  Future<void> _writeResume(Track t, int? ms) async {
+    _savedResume[t.id] = ms;
+    try {
+      await _tracks.setResumePosition(t.id, ms);
+    } on Object catch (e, st) {
+      AppLog.w('could not save the resume position of "${t.title}"', e, st);
+    }
+  }
 
   Future<void> dispose() async {
     for (final s in _subs) {

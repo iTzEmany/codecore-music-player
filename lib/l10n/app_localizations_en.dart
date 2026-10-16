@@ -1861,4 +1861,12 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get playbackSpeedHint =>
       'The pitch stays the original one. The sleep timer counts real time, not the song\'s.';
+
+  @override
+  String resumeFrom(String time) {
+    return 'resume at $time';
+  }
+
+  @override
+  String get restartFromBeginning => 'Start from the beginning';
 }

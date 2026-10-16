@@ -1009,5 +1009,14 @@
     }
   },
   "playbackSpeed": "Playback speed",
-  "playbackSpeedHint": "The pitch stays the original one. The sleep timer counts real time, not the song's."
+  "playbackSpeedHint": "The pitch stays the original one. The sleep timer counts real time, not the song's.",
+  "resumeFrom": "resume at {time}",
+  "restartFromBeginning": "Start from the beginning",
+  "@resumeFrom": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  }
 }

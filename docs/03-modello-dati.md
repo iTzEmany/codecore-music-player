@@ -41,6 +41,7 @@ in `onUpgrade` (mai distruttiva). Esporta lo schema con `drift_dev schema dump` 
 | `addedAt` | int | epoch ms |
 | `playCount` | int | default 0 |
 | `lastPlayedAt` | int? | |
+| `resumePositionMs` | int? | «riprendi da qui»: dove si è lasciato un brano ≥ 20 min (schema v6) |
 
 Indici: `albumKey`, `artist`, `isFavorite`, `(missing)`, `title COLLATE NOCASE`.
 

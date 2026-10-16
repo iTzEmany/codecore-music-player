@@ -160,6 +160,11 @@ class TrackRepository {
     );
   }
 
+  /// Where a long track was left (see `resumePointFor`); null clears it.
+  Future<void> setResumePosition(int id, int? ms) =>
+      (_db.update(_db.tracks)..where((t) => t.id.equals(id)))
+          .write(TracksCompanion(resumePositionMs: Value(ms)));
+
   Stream<List<Track>> watchMissing() =>
       (_db.select(_db.tracks)
             ..where((t) => t.missing.equals(true))

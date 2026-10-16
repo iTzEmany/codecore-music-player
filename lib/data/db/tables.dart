@@ -39,6 +39,9 @@ class Tracks extends Table {
   IntColumn get addedAt => integer()();
   IntColumn get playCount => integer().withDefault(const Constant(0))();
   RealColumn get replayGainDb => real().nullable()();
+
+  /// «Riprendi da qui»: where a long track (≥ 20 min) was left; null = none.
+  IntColumn get resumePositionMs => integer().nullable()();
   IntColumn get lastPlayedAt => integer().nullable()();
 }
 

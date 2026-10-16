@@ -88,6 +88,10 @@ class _TrackRowState extends State<TrackRow> {
         if (t.artist != null) parts.add(t.artist!);
         if (!albumColumn && t.album != null) parts.add(t.album!);
     }
+    final resume = t.resumePositionMs;
+    if (resume != null) {
+      parts.add(context.l10n.resumeFrom(formatDuration(resume)));
+    }
     return parts.join(' · ');
   }
 

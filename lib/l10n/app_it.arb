@@ -1200,5 +1200,14 @@
     }
   },
   "playbackSpeed": "Velocità di riproduzione",
-  "playbackSpeedHint": "Il tono resta quello originale. Il timer di spegnimento conta il tempo reale, non quello del brano."
+  "playbackSpeedHint": "Il tono resta quello originale. Il timer di spegnimento conta il tempo reale, non quello del brano.",
+  "resumeFrom": "riprendi da {time}",
+  "restartFromBeginning": "Ricomincia dall’inizio",
+  "@resumeFrom": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  }
 }

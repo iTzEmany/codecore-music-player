@@ -9,6 +9,7 @@ import '../../core/app_log.dart';
 import '../../core/platform.dart';
 import '../../data/db/app_database.dart';
 import '../../l10n/l10n_ext.dart';
+import '../../providers/database_providers.dart';
 import '../../providers/jam_providers.dart';
 import '../../providers/player_providers.dart';
 import '../screens/playlists/playlist_dialogs.dart';
@@ -84,6 +85,12 @@ List<TrackActionGroup> trackActions(
 
   return [
     TrackActionGroup(l.groupQueue, [
+      if (track.resumePositionMs != null)
+        TrackAction(Icons.restart_alt_rounded, l.restartFromBeginning, () async {
+          // The bookmark goes first: the player reads it when it loads the track.
+          await ref.read(trackRepositoryProvider).setResumePosition(track.id, null);
+          await ctrl.playFromList([track], 0);
+        }),
       TrackAction(Icons.playlist_play_rounded, l.playNext, () async {
         ctrl.playNext(track.id);
         snack(l.playNextDone);
