@@ -119,4 +119,19 @@ void main() {
     expect(r.title, 'Song');
     expect(r.hasCover, true);
   });
+
+  test('coverForAlbum saves the album cover once and then leaves it alone',
+      () async {
+    final t = await add('/a.mp3', 'Song');
+    expect(await svc.coverForAlbum(t, 'New Album', 'Band'), isTrue);
+    expect((await repo.getById(t.id))!.hasCover, isTrue);
+    expect(await svc.coverForAlbum(t, 'New Album', 'Band'), isFalse,
+        reason: 'the album already has its cover');
+  });
+
+  test('coverForAlbum finds nothing for an unknown artist', () async {
+    final t = await add('/b.mp3', 'Song');
+    expect(await svc.coverForAlbum(t, 'New Album', 'Somebody Else'), isFalse);
+    expect((await repo.getById(t.id))!.hasCover, isFalse);
+  });
 }

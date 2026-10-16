@@ -1749,4 +1749,95 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get csvImportNumberFilesHint =>
       '07 - Artist - Title: the folder plays in the right order even outside Codecore';
+
+  @override
+  String get csvImportFetchCovers => 'Look up covers';
+
+  @override
+  String get csvImportFetchCoversHint =>
+      'After each download, looks the album cover up on iTunes (album and artist from the file)';
+
+  @override
+  String get csvImportExport => 'Export result';
+
+  @override
+  String get csvImportExported => 'Result saved';
+
+  @override
+  String get csvOutHeaderRow => 'Row';
+
+  @override
+  String get csvOutHeaderTitle => 'Title';
+
+  @override
+  String get csvOutHeaderArtists => 'Artists';
+
+  @override
+  String get csvOutHeaderAlbum => 'Album';
+
+  @override
+  String get csvOutHeaderDuration => 'Duration (ms)';
+
+  @override
+  String get csvOutHeaderIsrc => 'ISRC';
+
+  @override
+  String get csvOutHeaderStatus => 'Result';
+
+  @override
+  String get csvOutHeaderNote => 'Reason';
+
+  @override
+  String get csvOutHeaderVideo => 'Chosen video';
+
+  @override
+  String get csvOutHeaderScore => 'Score';
+
+  @override
+  String get importStatusPending => 'To search';
+
+  @override
+  String get importStatusQueued => 'Queued';
+
+  @override
+  String get importStatusDownloaded => 'Downloaded';
+
+  @override
+  String get importStatusLinked => 'Already in library';
+
+  @override
+  String get importStatusReview => 'To review';
+
+  @override
+  String get importStatusNotFound => 'Not found';
+
+  @override
+  String get importStatusFailed => 'Error';
+
+  @override
+  String get importStatusSkipped => 'Skipped';
+
+  @override
+  String get importStatusPlanned => 'Planned';
+
+  @override
+  String get importStatusRemoved => 'Removed from the source';
+
+  @override
+  String get importNoteNoResults => 'No results';
+
+  @override
+  String get importNoteLowScore => 'Match not sure enough';
+
+  @override
+  String get importNoteLinkOnly => 'Link only: not searched';
+
+  @override
+  String get importNoteYoutubeOff => 'Downloads are off';
+
+  @override
+  String get importNoteDownloadFailed => 'Download failed';
+
+  @override
+  String get importNoteLengthOff => 'Length differs from the file';
 }

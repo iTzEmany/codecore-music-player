@@ -52,6 +52,7 @@ class _State extends State<ImportPreviewDialog> {
   bool _planFirst = false;
   bool _ownFolder = false;
   bool _numberFiles = false;
+  bool _fetchCovers = false;
 
   @override
   void dispose() {
@@ -144,6 +145,13 @@ class _State extends State<ImportPreviewDialog> {
                 ),
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
+                  title: Text(l.csvImportFetchCovers),
+                  subtitle: Text(l.csvImportFetchCoversHint),
+                  value: _fetchCovers,
+                  onChanged: (v) => setState(() => _fetchCovers = v),
+                ),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
                   title: Text(l.csvImportNumberFiles),
                   subtitle: Text(l.csvImportNumberFilesHint),
                   value: _numberFiles,
@@ -196,6 +204,7 @@ class _State extends State<ImportPreviewDialog> {
                           ? _name.text.trim()
                           : null,
                       numberFiles: _numberFiles && !_linkOnly,
+                      fetchCovers: _fetchCovers && !_linkOnly,
                     ),
                     todo > bigImportRows && _blocks && !_linkOnly
                         ? importBlockSize

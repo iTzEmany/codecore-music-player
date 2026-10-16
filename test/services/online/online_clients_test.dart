@@ -37,6 +37,44 @@ Map<String, Object?> song(String t, String a, {String? album}) => {
 
 void main() {
   group('iTunes', () {
+    Map<String, Object?> album(String name, String artist) => {
+          'collectionName': name,
+          'artistName': artist,
+          'artworkUrl100': 'https://x/100x100bb.jpg',
+        };
+
+    test('album search: right album and artist, noise ignored, big artwork',
+        () async {
+      final web = FakeWeb((_, q) {
+        expect(q['entity'], 'album');
+        expect(q['term'], 'Lucio Corsi Volevo essere un duro');
+        return {
+          'results': [
+            album('Altro disco', 'Lucio Corsi'),
+            album('Volevo essere un duro (Deluxe Edition)', 'Lucio Corsi'),
+          ]
+        };
+      });
+      final a = await ItunesClient(web)
+          .searchAlbum('Volevo essere un duro', 'Lucio Corsi');
+      expect(a!.name, 'Volevo essere un duro (Deluxe Edition)');
+      expect(a.artworkUrl, 'https://x/600x600bb.jpg');
+    });
+
+    test('album search: another artist\'s album of the same name is refused',
+        () async {
+      final web = FakeWeb((_, _) => {
+            'results': [album('Greatest Hits', 'Somebody Else')]
+          });
+      expect(await ItunesClient(web).searchAlbum('Greatest Hits', 'Queen'), isNull);
+    });
+
+    test('album search: no album name means no call result', () async {
+      final web = FakeWeb((_, _) => {'results': []});
+      expect(await ItunesClient(web).searchAlbum('  ', 'Queen'), isNull);
+      expect(web.calls, isEmpty);
+    });
+
     test('exact match', () async {
       final web = FakeWeb((_, _) => {
             'results': [song('Car Radio', 'twenty one pilots')]

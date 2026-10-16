@@ -192,6 +192,18 @@ class EnrichmentService {
     return true;
   }
 
+  /// The cover of the album named in a playlist file, looked up by album and
+  /// artist. Does nothing when the album already has one; true when saved.
+  Future<bool> coverForAlbum(Track t, String album, String artist,
+      {CancelToken? cancel}) async {
+    if (covers.fileFor(CoverStore.coverKeyFor(t.albumKey)) != null) return false;
+    await _limiter.wait();
+    final found = await itunes.searchAlbum(album, artist, cancel: cancel);
+    final url = found?.artworkUrl;
+    if (url == null) return false;
+    return _applyCover(t.id, t.albumKey, url, false, cancel);
+  }
+
   String _dirOf(String path) => p.dirname(path);
 
   /// Fills only empty fields; never touches title/artist.

@@ -65,6 +65,7 @@ class PlaylistImportService {
     required this.applyTags,
     this.forgetSearches,
     this.trackDurationMs,
+    this.fetchCover,
     this.thresholds,
     this.youtubeEnabled = true,
     this.searchGap = const Duration(milliseconds: 1500),
@@ -89,6 +90,9 @@ class PlaylistImportService {
   /// Length of the downloaded file as read by the scanner; without it the
   /// «wrong length» check is skipped.
   final Future<int?> Function(int trackId)? trackDurationMs;
+
+  /// Looks the album cover up after a download (only for imports that asked).
+  final Future<void> Function(int trackId, ImportRow row)? fetchCover;
 
   /// Cut-offs read at each search, so a change in the settings applies at once.
   final MatchThresholds Function()? thresholds;
@@ -545,11 +549,12 @@ class PlaylistImportService {
           await _finishDownload(imp, it, item.path);
         case DownloadStatus.failed:
           _eta(importId).rowDone();
+          await imports.setItem(importId, rowIndex,
+              status: ImportItemStatus.failed,
+              note: const Value(ImportNote.downloadFailed));
           if (item.error == YtErrorKind.unavailable) {
             forgetSearches?.call(searchQueries(it.toRow()));
           }
-          await imports.setItem(importId, rowIndex,
-              status: ImportItemStatus.failed);
           if (item.error == YtErrorKind.rateLimited) {
             await imports.setStatus(importId, ImportStatus.paused);
             _etas[importId]?.pause();
@@ -589,7 +594,17 @@ class PlaylistImportService {
     final off = await _lengthIsOff(it, trackId);
     await imports.setItem(imp.id, it.rowIndex,
         status: off ? ImportItemStatus.review : ImportItemStatus.downloaded,
-        trackId: Value(trackId));
+        trackId: Value(trackId),
+        note: off ? const Value(ImportNote.lengthOff) : const Value.absent());
+    final row = it.toRow();
+    if (imp.fetchCovers && fetchCover != null && row.album != null) {
+      try {
+        await fetchCover!(trackId, row);
+      } on Object catch (e, st) {
+        // A missing cover must never fail the import.
+        AppLog.w('import: cover lookup failed for "${row.title}"', e, st);
+      }
+    }
   }
 
   Future<bool> _lengthIsOff(PlaylistImportItem it, int trackId) async {

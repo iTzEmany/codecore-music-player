@@ -1753,4 +1753,95 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get csvImportNumberFilesHint =>
       '07 - Artista - Titolo: la cartella si ascolta nell\'ordine giusto anche fuori da Codecore';
+
+  @override
+  String get csvImportFetchCovers => 'Cerca le copertine';
+
+  @override
+  String get csvImportFetchCoversHint =>
+      'Dopo ogni download cerca la copertina dell\'album su iTunes (album e artista del file)';
+
+  @override
+  String get csvImportExport => 'Esporta esito';
+
+  @override
+  String get csvImportExported => 'Esito salvato';
+
+  @override
+  String get csvOutHeaderRow => 'Riga';
+
+  @override
+  String get csvOutHeaderTitle => 'Titolo';
+
+  @override
+  String get csvOutHeaderArtists => 'Artisti';
+
+  @override
+  String get csvOutHeaderAlbum => 'Album';
+
+  @override
+  String get csvOutHeaderDuration => 'Durata (ms)';
+
+  @override
+  String get csvOutHeaderIsrc => 'ISRC';
+
+  @override
+  String get csvOutHeaderStatus => 'Esito';
+
+  @override
+  String get csvOutHeaderNote => 'Motivo';
+
+  @override
+  String get csvOutHeaderVideo => 'Video scelto';
+
+  @override
+  String get csvOutHeaderScore => 'Punteggio';
+
+  @override
+  String get importStatusPending => 'Da cercare';
+
+  @override
+  String get importStatusQueued => 'In coda';
+
+  @override
+  String get importStatusDownloaded => 'Scaricato';
+
+  @override
+  String get importStatusLinked => 'Già in libreria';
+
+  @override
+  String get importStatusReview => 'Da verificare';
+
+  @override
+  String get importStatusNotFound => 'Non trovato';
+
+  @override
+  String get importStatusFailed => 'Errore';
+
+  @override
+  String get importStatusSkipped => 'Saltato';
+
+  @override
+  String get importStatusPlanned => 'Pianificato';
+
+  @override
+  String get importStatusRemoved => 'Rimosso dalla sorgente';
+
+  @override
+  String get importNoteNoResults => 'Nessun risultato';
+
+  @override
+  String get importNoteLowScore => 'Abbinamento poco sicuro';
+
+  @override
+  String get importNoteLinkOnly => 'Solo collegamento: non cercato';
+
+  @override
+  String get importNoteYoutubeOff => 'Download disattivato';
+
+  @override
+  String get importNoteDownloadFailed => 'Download non riuscito';
+
+  @override
+  String get importNoteLengthOff => 'Durata diversa dal file';
 }

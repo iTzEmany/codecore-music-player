@@ -19,6 +19,13 @@ class ItunesMatch {
   final int? year, trackNumber;
 }
 
+class ItunesAlbum {
+  const ItunesAlbum({required this.name, required this.artist, this.artworkUrl});
+
+  final String name, artist;
+  final String? artworkUrl;
+}
+
 final _albumNoise = RegExp(
     r'\s*[\(\[][^\)\]]*(deluxe|bonus|remastered|expanded|anniversary)[^\)\]]*[\)\]]',
     caseSensitive: false);
@@ -60,6 +67,45 @@ class ItunesClient {
       if (best != null) return best;
     }
     return null;
+  }
+
+  /// The album an `Album Name` + artist of a playlist file points to. The
+  /// artist must match: a cover of the wrong record is worse than none.
+  Future<ItunesAlbum?> searchAlbum(String album, String artist,
+      {CancelToken? cancel}) async {
+    final wantAlbum = _lc(album.replaceAll(_albumNoise, ''));
+    final wantArtist = _lc(extractPrimaryArtist(artist));
+    if (wantAlbum.isEmpty) return null;
+    final data = await _web.getJson(_endpoint,
+        query: {
+          'term': '$artist $album'.trim(),
+          'media': 'music',
+          'entity': 'album',
+          'limit': '6',
+        },
+        cancel: cancel);
+    final results = data is Map ? data['results'] : null;
+    if (results is! List) return null;
+    ItunesAlbum? best;
+    var bestScore = 0;
+    for (final r in results) {
+      if (r is! Map) continue;
+      final name = _lc('${r['collectionName'] ?? ''}'.replaceAll(_albumNoise, ''));
+      final by = _lc('${r['artistName'] ?? ''}');
+      final albumScore = _score(name, wantAlbum, 12, 7);
+      final artistScore = wantArtist.isEmpty ? 5 : _score(by, wantArtist, 10, 5);
+      if (albumScore == 0 || artistScore == 0) continue;
+      final art = r['artworkUrl100'] as String?;
+      if (albumScore + artistScore > bestScore && art != null) {
+        bestScore = albumScore + artistScore;
+        best = ItunesAlbum(
+          name: '${r['collectionName']}',
+          artist: '${r['artistName']}',
+          artworkUrl: art.replaceFirst('100x100bb', '600x600bb'),
+        );
+      }
+    }
+    return best;
   }
 
   ItunesMatch? _pickBest(List<dynamic> results, String title, String artist) {

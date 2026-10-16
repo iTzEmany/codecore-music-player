@@ -15,6 +15,7 @@ import '../services/online/cached_youtube_service.dart';
 import '../services/online/search_cache.dart';
 import 'database_providers.dart';
 import 'library_providers.dart';
+import 'online_providers.dart';
 import 'settings_providers.dart';
 import 'youtube_providers.dart';
 
@@ -61,6 +62,13 @@ final playlistImportServiceProvider = Provider<PlaylistImportService>((ref) {
     settled: downloads.settled,
     trackIdForPath: tracks.idForPath,
     trackDurationMs: (id) async => (await tracks.getById(id))?.durationMs,
+    fetchCover: (trackId, row) async {
+      final t = await tracks.getById(trackId);
+      if (t == null) return;
+      await ref
+          .read(enrichmentServiceProvider)
+          .coverForAlbum(t, row.album!, row.primaryArtist);
+    },
     pathForVideo: (id) async =>
         (await ref.read(downloadIndexProvider.future)).pathFor(id),
     applyTags: (trackId, row) async {

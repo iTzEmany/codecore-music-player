@@ -1756,4 +1756,95 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get csvImportNumberFilesHint =>
       '07 - Interpret - Titel: der Ordner spielt auch außerhalb von Codecore in der richtigen Reihenfolge';
+
+  @override
+  String get csvImportFetchCovers => 'Cover suchen';
+
+  @override
+  String get csvImportFetchCoversHint =>
+      'Sucht nach jedem Download das Albumcover bei iTunes (Album und Interpret aus der Datei)';
+
+  @override
+  String get csvImportExport => 'Ergebnis exportieren';
+
+  @override
+  String get csvImportExported => 'Ergebnis gespeichert';
+
+  @override
+  String get csvOutHeaderRow => 'Zeile';
+
+  @override
+  String get csvOutHeaderTitle => 'Titel';
+
+  @override
+  String get csvOutHeaderArtists => 'Interpreten';
+
+  @override
+  String get csvOutHeaderAlbum => 'Album';
+
+  @override
+  String get csvOutHeaderDuration => 'Dauer (ms)';
+
+  @override
+  String get csvOutHeaderIsrc => 'ISRC';
+
+  @override
+  String get csvOutHeaderStatus => 'Ergebnis';
+
+  @override
+  String get csvOutHeaderNote => 'Grund';
+
+  @override
+  String get csvOutHeaderVideo => 'Gewähltes Video';
+
+  @override
+  String get csvOutHeaderScore => 'Punktzahl';
+
+  @override
+  String get importStatusPending => 'Zu suchen';
+
+  @override
+  String get importStatusQueued => 'In Warteschlange';
+
+  @override
+  String get importStatusDownloaded => 'Geladen';
+
+  @override
+  String get importStatusLinked => 'Schon in der Bibliothek';
+
+  @override
+  String get importStatusReview => 'Zu prüfen';
+
+  @override
+  String get importStatusNotFound => 'Nicht gefunden';
+
+  @override
+  String get importStatusFailed => 'Fehler';
+
+  @override
+  String get importStatusSkipped => 'Übersprungen';
+
+  @override
+  String get importStatusPlanned => 'Geplant';
+
+  @override
+  String get importStatusRemoved => 'Aus der Quelle entfernt';
+
+  @override
+  String get importNoteNoResults => 'Keine Ergebnisse';
+
+  @override
+  String get importNoteLowScore => 'Treffer nicht sicher genug';
+
+  @override
+  String get importNoteLinkOnly => 'Nur verknüpfen: nicht gesucht';
+
+  @override
+  String get importNoteYoutubeOff => 'Downloads sind aus';
+
+  @override
+  String get importNoteDownloadFailed => 'Download fehlgeschlagen';
+
+  @override
+  String get importNoteLengthOff => 'Länge weicht von der Datei ab';
 }

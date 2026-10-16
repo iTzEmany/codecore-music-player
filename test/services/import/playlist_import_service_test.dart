@@ -86,6 +86,8 @@ void main() {
   late List<ImportEvent> events;
   late PlaylistImportService service;
   var cancelCalls = 0;
+  final coverCalls = <String>[];
+  var coverFails = false;
   final forgotten = <List<String>>[];
   var enabled = true;
   var maxInFlight = 3;
@@ -120,6 +122,10 @@ void main() {
       trackIdForPath: tracks.idForPath,
       pathForVideo: (_) async => null,
       applyTags: (id, r) async => tagged.add('$id:${r.title}'),
+      fetchCover: (id, row) async {
+        coverCalls.add('$id:${row.album}');
+        if (coverFails) throw StateError('iTunes down');
+      },
       youtubeEnabled: enabled,
       searchGap: Duration.zero,
       pollDelay: const Duration(milliseconds: 5),
@@ -153,6 +159,8 @@ void main() {
     tagged = [];
     events = [];
     cancelCalls = 0;
+    coverCalls.clear();
+    coverFails = false;
     forgotten.clear();
     enabled = true;
     maxInFlight = 3;
@@ -653,6 +661,82 @@ void main() {
       expect(await imports.maxRowIndexForPlaylist(
               (await imports.get(first))!.playlistId),
           119);
+    });
+  });
+
+  group('covers and notes', () {
+    ImportRow withAlbum(int i, String album) => ImportRow(
+        index: i,
+        title: 'One',
+        artists: const ['Band'],
+        album: album,
+        durationMs: 200000,
+        isrc: 'ISRC$i');
+
+    test('«Cerca le copertine» looks the album cover up after the download',
+        () async {
+      yt.songs['one'] = [topic('v1', 'One', 'Band', 200)];
+      final id = await service.start(csv([withAlbum(0, 'Mood')]),
+          options: const ImportOptions(fetchCovers: true));
+      await idle();
+      await finish(importTag(id, 0), '/m/one.mp3');
+      expect(coverCalls, hasLength(1));
+      expect(coverCalls.single, endsWith(':Mood'));
+      expect((await imports.item(id, 0))!.state, ImportItemStatus.downloaded);
+    });
+
+    test('with the option off no cover is requested', () async {
+      yt.songs['one'] = [topic('v1', 'One', 'Band', 200)];
+      final id = await service.start(csv([withAlbum(0, 'Mood')]));
+      await idle();
+      await finish(importTag(id, 0), '/m/one.mp3');
+      expect(coverCalls, isEmpty);
+    });
+
+    test('a row without an album asks for nothing', () async {
+      yt.songs['one'] = [topic('v1', 'One', 'Band', 200)];
+      final id = await service.start(csv([row(0, 'One', 'Band', 200)]),
+          options: const ImportOptions(fetchCovers: true));
+      await idle();
+      await finish(importTag(id, 0), '/m/one.mp3');
+      expect(coverCalls, isEmpty);
+    });
+
+    test('a failing cover lookup never fails the import', () async {
+      coverFails = true;
+      yt.songs['one'] = [topic('v1', 'One', 'Band', 200)];
+      final id = await service.start(csv([withAlbum(0, 'Mood')]),
+          options: const ImportOptions(fetchCovers: true));
+      await idle();
+      await finish(importTag(id, 0), '/m/one.mp3');
+      expect((await imports.item(id, 0))!.state, ImportItemStatus.downloaded);
+      expect((await imports.get(id))!.state, ImportStatus.finished);
+    });
+
+    test('rows that did not make it say why', () async {
+      yt.songs['one'] = [topic('v1', 'Another', 'Other', 90)];
+      final id = await service.start(csv([
+        row(0, 'One', 'Band', 200),
+        row(1, 'Gone', 'Band', 200),
+      ]));
+      await idle();
+      expect((await imports.item(id, 0))!.note, isIn([ImportNote.noResults, ImportNote.lowScore]));
+      settled.add(DownloadItem(
+          id: 1,
+          result: const YtResult(id: 'x', title: 't', channel: 'c', duration: null),
+          status: DownloadStatus.failed,
+          error: YtErrorKind.network,
+          tag: importTag(id, 1)));
+      await idle();
+      expect((await imports.item(id, 1))!.note, ImportNote.downloadFailed);
+    });
+
+    test('a wrong-length download is noted', () async {
+      yt.songs['one'] = [topic('v1', 'One', 'Band', 200)];
+      final id = await service.start(csv([row(0, 'One', 'Band', 200)]));
+      await idle();
+      await finish(importTag(id, 0), '/m/one.mp3', seconds: 300);
+      expect((await imports.item(id, 0))!.note, ImportNote.lengthOff);
     });
   });
 

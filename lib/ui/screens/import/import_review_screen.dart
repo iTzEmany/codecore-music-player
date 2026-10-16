@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -5,10 +8,13 @@ import '../../../data/db/app_database.dart';
 import '../../../data/repositories/import_repository.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/import_providers.dart';
+import '../../../services/export/save_file.dart';
 import '../../../services/import/import_candidate.dart';
+import '../../../services/import/import_outcome.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/format_utils.dart';
+import 'import_labels.dart';
 import 'import_manual_search_sheet.dart';
 
 /// Rows of an import that need the user: unsure matches (with candidates),
@@ -33,15 +39,50 @@ class ImportReviewScreen extends ConsumerWidget {
 
     Widget wanted(PlaylistImportItem it) => Padding(
       padding: const EdgeInsets.fromLTRB(CcDims.margin, 12, CcDims.margin, 4),
-      child: Text(
-        l.csvImportWanted(
-          it.title,
-          it.artistList.join(', '),
-          formatDuration(it.durationMs ?? 0),
-        ),
-        style: theme.titleSmall,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l.csvImportWanted(
+              it.title,
+              it.artistList.join(', '),
+              formatDuration(it.durationMs ?? 0),
+            ),
+            style: theme.titleSmall,
+          ),
+          if (it.note != null)
+            Text(importNoteLabel(l, it.note!),
+                style: theme.bodySmall?.copyWith(color: cc.textMuted)),
+        ],
       ),
     );
+
+    Future<void> exportOutcome() async {
+      final messenger = ScaffoldMessenger.of(context);
+      final csv = importOutcomeCsv(
+        items,
+        status: (s) => importStatusLabel(l, s),
+        note: (c) => importNoteLabel(l, c),
+        header: [
+          l.csvOutHeaderRow,
+          l.csvOutHeaderTitle,
+          l.csvOutHeaderArtists,
+          l.csvOutHeaderAlbum,
+          l.csvOutHeaderDuration,
+          l.csvOutHeaderIsrc,
+          l.csvOutHeaderStatus,
+          l.csvOutHeaderNote,
+          l.csvOutHeaderVideo,
+          l.csvOutHeaderScore,
+        ],
+      );
+      final saved = await saveBytes(
+          'import-result.csv', Uint8List.fromList(utf8.encode('\uFEFF$csv')),
+          mimeType: 'text/csv');
+      if (saved) {
+        messenger.showSnackBar(SnackBar(content: Text(l.csvImportExported)));
+      }
+    }
 
     Widget lengthNote(PlaylistImportItem it) => Consumer(
       builder: (context, ref, _) {
@@ -118,6 +159,11 @@ class ImportReviewScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(l.csvImportReviewTitle),
         actions: [
+          IconButton(
+            tooltip: l.csvImportExport,
+            icon: const Icon(Icons.download_outlined),
+            onPressed: items.isEmpty ? null : exportOutcome,
+          ),
           if (missing.isNotEmpty || failed.isNotEmpty)
             TextButton(
               onPressed: () => svc.retry(importId),

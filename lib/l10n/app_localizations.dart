@@ -3089,6 +3089,186 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'07 - Artista - Titolo: la cartella si ascolta nell\'ordine giusto anche fuori da Codecore'**
   String get csvImportNumberFilesHint;
+
+  /// No description provided for @csvImportFetchCovers.
+  ///
+  /// In it, this message translates to:
+  /// **'Cerca le copertine'**
+  String get csvImportFetchCovers;
+
+  /// No description provided for @csvImportFetchCoversHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Dopo ogni download cerca la copertina dell\'album su iTunes (album e artista del file)'**
+  String get csvImportFetchCoversHint;
+
+  /// No description provided for @csvImportExport.
+  ///
+  /// In it, this message translates to:
+  /// **'Esporta esito'**
+  String get csvImportExport;
+
+  /// No description provided for @csvImportExported.
+  ///
+  /// In it, this message translates to:
+  /// **'Esito salvato'**
+  String get csvImportExported;
+
+  /// No description provided for @csvOutHeaderRow.
+  ///
+  /// In it, this message translates to:
+  /// **'Riga'**
+  String get csvOutHeaderRow;
+
+  /// No description provided for @csvOutHeaderTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Titolo'**
+  String get csvOutHeaderTitle;
+
+  /// No description provided for @csvOutHeaderArtists.
+  ///
+  /// In it, this message translates to:
+  /// **'Artisti'**
+  String get csvOutHeaderArtists;
+
+  /// No description provided for @csvOutHeaderAlbum.
+  ///
+  /// In it, this message translates to:
+  /// **'Album'**
+  String get csvOutHeaderAlbum;
+
+  /// No description provided for @csvOutHeaderDuration.
+  ///
+  /// In it, this message translates to:
+  /// **'Durata (ms)'**
+  String get csvOutHeaderDuration;
+
+  /// No description provided for @csvOutHeaderIsrc.
+  ///
+  /// In it, this message translates to:
+  /// **'ISRC'**
+  String get csvOutHeaderIsrc;
+
+  /// No description provided for @csvOutHeaderStatus.
+  ///
+  /// In it, this message translates to:
+  /// **'Esito'**
+  String get csvOutHeaderStatus;
+
+  /// No description provided for @csvOutHeaderNote.
+  ///
+  /// In it, this message translates to:
+  /// **'Motivo'**
+  String get csvOutHeaderNote;
+
+  /// No description provided for @csvOutHeaderVideo.
+  ///
+  /// In it, this message translates to:
+  /// **'Video scelto'**
+  String get csvOutHeaderVideo;
+
+  /// No description provided for @csvOutHeaderScore.
+  ///
+  /// In it, this message translates to:
+  /// **'Punteggio'**
+  String get csvOutHeaderScore;
+
+  /// No description provided for @importStatusPending.
+  ///
+  /// In it, this message translates to:
+  /// **'Da cercare'**
+  String get importStatusPending;
+
+  /// No description provided for @importStatusQueued.
+  ///
+  /// In it, this message translates to:
+  /// **'In coda'**
+  String get importStatusQueued;
+
+  /// No description provided for @importStatusDownloaded.
+  ///
+  /// In it, this message translates to:
+  /// **'Scaricato'**
+  String get importStatusDownloaded;
+
+  /// No description provided for @importStatusLinked.
+  ///
+  /// In it, this message translates to:
+  /// **'Già in libreria'**
+  String get importStatusLinked;
+
+  /// No description provided for @importStatusReview.
+  ///
+  /// In it, this message translates to:
+  /// **'Da verificare'**
+  String get importStatusReview;
+
+  /// No description provided for @importStatusNotFound.
+  ///
+  /// In it, this message translates to:
+  /// **'Non trovato'**
+  String get importStatusNotFound;
+
+  /// No description provided for @importStatusFailed.
+  ///
+  /// In it, this message translates to:
+  /// **'Errore'**
+  String get importStatusFailed;
+
+  /// No description provided for @importStatusSkipped.
+  ///
+  /// In it, this message translates to:
+  /// **'Saltato'**
+  String get importStatusSkipped;
+
+  /// No description provided for @importStatusPlanned.
+  ///
+  /// In it, this message translates to:
+  /// **'Pianificato'**
+  String get importStatusPlanned;
+
+  /// No description provided for @importStatusRemoved.
+  ///
+  /// In it, this message translates to:
+  /// **'Rimosso dalla sorgente'**
+  String get importStatusRemoved;
+
+  /// No description provided for @importNoteNoResults.
+  ///
+  /// In it, this message translates to:
+  /// **'Nessun risultato'**
+  String get importNoteNoResults;
+
+  /// No description provided for @importNoteLowScore.
+  ///
+  /// In it, this message translates to:
+  /// **'Abbinamento poco sicuro'**
+  String get importNoteLowScore;
+
+  /// No description provided for @importNoteLinkOnly.
+  ///
+  /// In it, this message translates to:
+  /// **'Solo collegamento: non cercato'**
+  String get importNoteLinkOnly;
+
+  /// No description provided for @importNoteYoutubeOff.
+  ///
+  /// In it, this message translates to:
+  /// **'Download disattivato'**
+  String get importNoteYoutubeOff;
+
+  /// No description provided for @importNoteDownloadFailed.
+  ///
+  /// In it, this message translates to:
+  /// **'Download non riuscito'**
+  String get importNoteDownloadFailed;
+
+  /// No description provided for @importNoteLengthOff.
+  ///
+  /// In it, this message translates to:
+  /// **'Durata diversa dal file'**
+  String get importNoteLengthOff;
 }
 
 class _AppLocalizationsDelegate
