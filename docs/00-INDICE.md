@@ -69,7 +69,7 @@ Un task deve stare in una sola sessione breve; se è troppo grande, spezzalo e a
 Avvia Claude Code dentro `codecore_flutter/` e digita:
 | Comando | Effetto |
 |---|---|
-| `/obiettivo` | Esegue il piano dalla Fase 0 alla Fase 5 da solo, fino a fine o blocco |
+| `/obiettivo` | Esegue tutte le fasi rimaste, una dietro l'altra, fino alla fine o a un blocco (i task con pacchetti non approvati restano bloccati e si va avanti) |
 | `/obiettivo fase 2` | Solo quella fase |
 | `/obiettivo stato` | Riassunto: task fatti, prossimo, «Tocca a te» |
 | `/obiettivo pausa` | Si ferma subito (puoi anche premere Esc e scrivere «stop») |

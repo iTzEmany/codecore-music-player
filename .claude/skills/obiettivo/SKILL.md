@@ -13,7 +13,7 @@ Interpretazione:
 - `stato` → `scripts/obiettivo.sh stato`, riassumi in 5 righe e fermati.
 - `pausa` → `scripts/obiettivo.sh chiudi PAUSA "richiesta dell'utente"`, di' a che punto sei (3 righe) e fermati.
 - `riprendi` o `riprendi <file>` → `scripts/obiettivo.sh riprendi [file]`, rileggi il file stampato e `docs/PROGRESS.md`, vai al **passo 2**.
-- **vuoto** → obiettivo = «completa il piano di `docs/PROGRESS.md` dalla Fase 0 alla Fase 5, nell'ordine, partendo dal primo task `[ ]`». Fase 6 e 7 solo se richieste esplicitamente.
+- **vuoto** → obiettivo = «completa **tutto** il piano di `docs/PROGRESS.md`, una fase dietro l'altra nell'ordine del file (oggi fino alla Fase 26), partendo dal primo task `[ ]`». A fine fase si passa subito alla successiva (§4), senza fermarsi.
 - `fase N` / `fino alla fase N` / testo libero → obiettivo = quanto scritto, limitato a quel perimetro.
 
 ## Regole fisse (non si discutono durante l'obiettivo)
@@ -21,7 +21,7 @@ Interpretazione:
 2. **La memoria sei tu fuori dal contesto**: il file dell'obiettivo (`scripts/obiettivo.sh file`) e `docs/PROGRESS.md`. Dopo una compattazione del contesto la prima cosa è rileggerli.
 3. **Niente programmi in primo piano che restano in attesa** (mai `flutter run` in primo piano, mai finestre desktop). Verifica = `flutter analyze` + `flutter test` + (quando serve) `flutter build`. Per ogni schermata nuova scrivi almeno **un widget test** di fumo (`testWidgets`: si costruisce senza eccezioni, mostra gli elementi chiave). Unica eccezione ammessa: la **prova su telefono** del §6.1, quando un documento di fase la chiede.
 4. **Comandi lunghi sempre con stima**, in background, via `scripts/sorveglia.sh <stima> <log> -- <comando>` (a 2× diagnosi, a 3× viene fermato). Stime: `flutter pub get` 2m · `dart run build_runner build --delete-conflicting-outputs` 4m · `flutter analyze` 2m · `flutter test` 4m · `flutter build apk --debug` 20m la prima volta, 8m dopo · `flutter build linux` 10m · `flutter create` 3m. Mai `sleep` in ciclo.
-5. **Lavora solo dentro `codecore_flutter/`.** La vecchia app in `../codecore/` è solo da leggere. La guardia (`.claude/hooks/guard.sh`) nega sudo, push, comandi git distruttivi e scritture fuori progetto: se nega, **leggi il motivo e segui l'alternativa**, non aggirare.
+5. **Lavora solo dentro la cartella del progetto** (la radice del repo git). La vecchia app in `../codecore/` è solo da leggere. La guardia (`.claude/hooks/guard.sh`) nega sudo, push, comandi git distruttivi e scritture fuori progetto: se nega, **leggi il motivo e segui l'alternativa**, non aggirare.
 6. L'hook Stop ti rimanda al lavoro finché lo stato è `IN CORSO`. Per fermarti davvero: `scripts/obiettivo.sh chiudi FATTO|BLOCCATO|PAUSA "<motivo>"`.
 7. **Se l'utente ti scrive durante l'obiettivo**: rispondi brevemente. Se chiede di fermarti, cambiare rotta o dice «stop/pausa» → `chiudi PAUSA` subito. Se è solo una domanda, rispondi e riprendi il lavoro.
 8. Regole di codice e di qualità: `docs/01-regole-di-lavoro.md` (valgono tutte).
@@ -54,7 +54,8 @@ Quando tutti i task della fase sono `[x]`/`[~]`: verifica la sua «Definition of
 ## 5. Decisioni
 1. Cerca la risposta nei documenti `docs/01…04`, poi nella fase corrente.
 2. Se manca: scegli l'opzione più semplice e reversibile, e scrivila **subito** in FILE («Decisioni prese in autonomia») e nelle «Note di deviazione» di `docs/PROGRESS.md`.
-3. Non cambiare lo stack né lo schema dati già definiti: se un pacchetto non funziona, applica il piano B di `docs/99-rischi-e-fallback.md`; se non basta, segna il task bloccato.
+3. **Pacchetti «da approvare»** (riga «Pacchetti nuovi» delle Decisioni di fase): non chiedere. Se il pacchetto è già in `pubspec.yaml` o elencato in «Pacchetti approvati» in fondo a `docs/PROGRESS.md`, procedi. Altrimenti segna il task `[ ] (BLOCCATO: pacchetto <nome> da approvare)`, scrivi in «Tocca a te» «approva `<nome>` aggiungendolo a "Pacchetti approvati" in PROGRESS, poi `/obiettivo riprendi`» e prosegui con i task (e le fasi) che non ne dipendono. Stesso trattamento per i punti «fermati e chiedi» dei documenti di fase.
+4. Non cambiare lo stack né lo schema dati già definiti: se un pacchetto non funziona, applica il piano B di `docs/99-rischi-e-fallback.md`; se non basta, segna il task bloccato.
 
 ## 6. Quando serve l'utente o ti blocchi
 - Tutto ciò che è solo suo va in «Tocca a te» con **comandi da incollare** e dispositivo. Non blocca gli altri task.
