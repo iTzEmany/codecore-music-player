@@ -44,7 +44,7 @@ Future<void> main() async {
   final covers = CoverStore(Directory(await coversDir()));
   final errors = StreamController<PlaybackFailure>.broadcast();
   CodecoreAudioHandler build() => CodecoreAudioHandler(
-        JustAudioBackend(),
+        JustAudioBackend(withEqualizer: true),
         PlayQueue(),
         tracks,
         onError: errors.add,

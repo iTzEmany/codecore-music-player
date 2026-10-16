@@ -7,6 +7,7 @@ import '../../core/app_log.dart';
 import '../../data/db/app_database.dart';
 import '../../data/repositories/track_repository.dart';
 import 'audio_backend.dart';
+import 'equalizer.dart';
 import 'play_queue.dart';
 import 'resume_point.dart';
 
@@ -65,6 +66,9 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   double _baseVolume = 1.0;
   bool _normalize = false;
   double _gainFactor = 1.0;
+
+  /// The main player's equalizer, or null where there is none.
+  Equalizer? get equalizer => _backend.equalizer;
 
   Track? get currentTrack => _current;
   Stream<Track?> get currentTrackStream => _trackController.stream;

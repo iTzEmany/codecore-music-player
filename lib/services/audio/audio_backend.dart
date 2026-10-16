@@ -1,3 +1,5 @@
+import 'equalizer.dart';
+
 enum BackendState { idle, loading, ready, playing, paused, completed, error }
 
 class BackendException implements Exception {
@@ -28,6 +30,10 @@ abstract class AudioBackend {
 
   /// Playback rate (1.0 = normal), used by the Jam to absorb small drifts.
   Future<void> setSpeed(double speed);
+
+  /// The equalizer of this backend, or null where there is none (desktop, the
+  /// Jam's player, previews).
+  Equalizer? get equalizer;
 
   /// Current position read on demand (not from the throttled stream).
   Duration get positionNow;

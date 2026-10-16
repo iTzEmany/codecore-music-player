@@ -2,7 +2,21 @@ import 'dart:math';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../services/audio/equalizer.dart';
 import '../../services/audio/play_queue.dart';
+
+/// The equalizer curve chosen for one kind of output (speaker or headphones).
+class EqProfile {
+  const EqProfile({this.preset = EqPreset.flat, this.custom = const []});
+
+  final EqPreset preset;
+
+  /// The user's own gains in dB, one per band (used when [preset] is custom).
+  final List<double> custom;
+
+  EqProfile copyWith({EqPreset? preset, List<double>? custom}) =>
+      EqProfile(preset: preset ?? this.preset, custom: custom ?? this.custom);
+}
 
 class AppSettings {
   const AppSettings({
@@ -28,6 +42,9 @@ class AppSettings {
     this.importSureThreshold = 0.80,
     this.importReviewThreshold = 0.55,
     this.playbackSpeed = 1.0,
+    this.eqEnabled = false,
+    this.eqSpeaker = const EqProfile(),
+    this.eqHeadphones = const EqProfile(),
   });
 
   final String theme;
@@ -69,6 +86,10 @@ class AppSettings {
   /// Playback speed (0.5–2.0), the same for every track; tone is preserved.
   final double playbackSpeed;
 
+  /// Equalizer on/off (Android) and its curve for each kind of output.
+  final bool eqEnabled;
+  final EqProfile eqSpeaker, eqHeadphones;
+
   /// Shown to the device on the other side of a LAN share; null = hostname.
   final String? deviceName;
 
@@ -98,6 +119,9 @@ class AppSettings {
     double? importSureThreshold,
     double? importReviewThreshold,
     double? playbackSpeed,
+    bool? eqEnabled,
+    EqProfile? eqSpeaker,
+    EqProfile? eqHeadphones,
   }) =>
       AppSettings(
         theme: theme ?? this.theme,
@@ -124,6 +148,9 @@ class AppSettings {
         importReviewThreshold:
             importReviewThreshold ?? this.importReviewThreshold,
         playbackSpeed: playbackSpeed ?? this.playbackSpeed,
+        eqEnabled: eqEnabled ?? this.eqEnabled,
+        eqSpeaker: eqSpeaker ?? this.eqSpeaker,
+        eqHeadphones: eqHeadphones ?? this.eqHeadphones,
       );
 }
 
@@ -177,7 +204,27 @@ class SettingsStore {
         importReviewThreshold: _prefs.getDouble('importReviewThreshold') ?? 0.55,
         playbackSpeed:
             (_prefs.getDouble('playbackSpeed') ?? 1.0).clamp(0.5, 2.0),
+        eqEnabled: _prefs.getBool('eqEnabled') ?? false,
+        eqSpeaker: _readEq('speaker'),
+        eqHeadphones: _readEq('headphones'),
       );
+
+  EqProfile _readEq(String profile) => EqProfile(
+        preset: EqPreset.values.firstWhere(
+          (p) => p.name == _prefs.getString('eqPreset.$profile'),
+          orElse: () => EqPreset.flat,
+        ),
+        custom: [
+          for (final g in _prefs.getStringList('eqGains.$profile') ?? const [])
+            ?double.tryParse(g),
+        ],
+      );
+
+  Future<void> _writeEq(String profile, EqProfile p) async {
+    await _prefs.setString('eqPreset.$profile', p.preset.name);
+    await _prefs.setStringList(
+        'eqGains.$profile', [for (final g in p.custom) '$g']);
+  }
 
   Future<void> writeSettings(AppSettings s) async {
     await _prefs.setString('theme', s.theme);
@@ -201,6 +248,9 @@ class SettingsStore {
     await _prefs.setDouble('importSureThreshold', s.importSureThreshold);
     await _prefs.setDouble('importReviewThreshold', s.importReviewThreshold);
     await _prefs.setDouble('playbackSpeed', s.playbackSpeed);
+    await _prefs.setBool('eqEnabled', s.eqEnabled);
+    await _writeEq('speaker', s.eqSpeaker);
+    await _writeEq('headphones', s.eqHeadphones);
     final dn = s.deviceName;
     if (dn == null || dn.isEmpty) {
       await _prefs.remove('deviceName');

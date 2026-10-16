@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:codecore/services/audio/audio_backend.dart';
+import 'package:codecore/services/audio/equalizer.dart';
 
 class FakeBackend implements AudioBackend {
   final stateC = StreamController<BackendState>.broadcast();
@@ -80,6 +81,10 @@ class FakeBackend implements AudioBackend {
     speedCalls.add(s);
     speed = s;
   }
+
+  /// A fake equalizer can be put here by tests that need one.
+  @override
+  Equalizer? equalizer;
 
   @override
   Duration get positionNow => positionValue;

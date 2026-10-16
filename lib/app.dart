@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'l10n/app_localizations.dart';
+import 'providers/equalizer_providers.dart';
 import 'providers/player_providers.dart';
 import 'providers/settings_providers.dart';
 import 'providers/share_hub.dart';
@@ -14,6 +15,7 @@ class CodecoreApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     ref.watch(shareAutoStartProvider);
+    ref.watch(equalizerApplierProvider);
     final s = ref.watch(settingsProvider);
     ref.read(audioHandlerProvider)
       ..setNormalize(s.normalizeVolume)
