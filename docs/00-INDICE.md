@@ -66,7 +66,7 @@ Ogni task ha: **ID**, **File** da creare/modificare, **Passi** numerati, **Verif
 Un task deve stare in una sola sessione breve; se è troppo grande, spezzalo e annota in PROGRESS.
 
 ## Modalità autonoma (`/obiettivo`)
-Avvia Claude Code dentro `codecore_flutter/` e digita:
+Avvia Claude Code nella radice del progetto (`codecore-music-player/`) e digita:
 | Comando | Effetto |
 |---|---|
 | `/obiettivo` | Esegue tutte le fasi rimaste, una dietro l'altra, fino alla fine o a un blocco (i task con pacchetti non approvati restano bloccati e si va avanti) |
@@ -76,6 +76,6 @@ Avvia Claude Code dentro `codecore_flutter/` e digita:
 | `/obiettivo riprendi` | Riparte dal primo task non spuntato |
 
 Cosa fa: un task alla volta → `flutter analyze` + `flutter test` (+ build) → spunta `PROGRESS.md` → commit
-locale di checkpoint (repo git dedicato in `codecore_flutter/`, nessun push). Le cose che solo tu puoi fare
+locale di checkpoint (repo git del progetto, nessun push). Le cose che solo tu puoi fare
 (sudo, telefono, ascolto) finiscono in «Tocca a te» nel file `.claude/obiettivi/*.md` senza fermare il resto.
 Ripartenza da checkpoint: `git log --oneline`, poi `git checkout <commit>` o `git stash list` per i task bloccati.

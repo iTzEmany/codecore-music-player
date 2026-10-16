@@ -10,7 +10,7 @@ settimana senza che nessuno se ne ricordi.
 l'utente**: l'agente prepara i file e verifica in locale quello che può (sintassi YAML, comandi), poi lascia in
 «Tocca a te» la creazione del repository GitHub e il primo push.
 
-> Nota: oggi `git remote -v` punta a una cartella su chiavetta USB (`/media/…/codecore_flutter`), non a GitHub.
+> Nota: dal 2026-10-16 il repo non ha nessun remote (il vecchio `origin` sulla chiavetta USB è stato rimosso).
 > Serve un repository GitHub (privato va benissimo) aggiunto come secondo remote (`github`).
 
 ## Decisioni

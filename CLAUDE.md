@@ -37,8 +37,8 @@ flutter build linux / windows   # windows solo da una macchina Windows
   quanto scritto nei documenti, leggi il suo sorgente in `~/.pub-cache` e adatta.
 - Nessun `catch (_) {}` muto: logga con `AppLog`.
 - Nessun lavoro pesante (I/O, DB lungo, rete) nel thread UI.
-- Non toccare file fuori da `codecore_flutter/`. Mai modificare la vecchia app Python.
+- Non toccare file fuori dalla cartella del progetto (la radice del repo, `codecore-music-player/`). Mai modificare la vecchia app Python.
 
 ## Modalità autonoma
 `/obiettivo` (skill in `.claude/skills/obiettivo/`) esegue il piano da solo, task dopo task, con test locali e
-commit di checkpoint. Vedi `docs/00-INDICE.md`. Avvia Claude Code **dentro `codecore_flutter/`**.
+commit di checkpoint. Vedi `docs/00-INDICE.md`. Avvia Claude Code **nella radice del progetto** (`codecore-music-player/`).
