@@ -399,9 +399,17 @@ class _Right extends ConsumerWidget {
           ),
           onPressed: volCtl.toggleMute,
         ),
-        SizedBox(
-          width: 120,
-          child: Slider(value: vol, onChanged: volCtl.set),
+        // The slider takes what the four buttons leave (up to 120 px): a
+        // narrow window gives it little, or none.
+        Flexible(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 120),
+            child: LayoutBuilder(
+              builder: (_, c) => c.maxWidth < 56
+                  ? const SizedBox.shrink()
+                  : Slider(value: vol, onChanged: volCtl.set),
+            ),
+          ),
         ),
       ],
     );

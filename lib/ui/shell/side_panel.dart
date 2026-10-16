@@ -57,7 +57,9 @@ class _SidePanelViewState extends ConsumerState<SidePanelView> {
       SidePanel.none => const SizedBox.shrink(),
     };
     return SizedBox(
-      width: CcDims.sidePanelWidth,
+      width: MediaQuery.sizeOf(context).width >= CcDims.xlBreakpoint
+          ? CcDims.sidePanelWidthXl
+          : CcDims.sidePanelWidth,
       child: Material(
         color: cc.surface1,
         child: Column(

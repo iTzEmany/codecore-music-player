@@ -62,7 +62,11 @@ void main() {
     expect(find.byType(DesktopPlayerBar), findsOneWidget);
     expect(find.text('La tua libreria'), findsOneWidget);
     expect(find.text('Preferiti'), findsWidgets);
-    // The queue opens in the right-hand panel.
+    // From 1200 px the queue opens by itself in the right-hand panel; its
+    // button closes it and opens it again.
+    expect(find.byType(SidePanelView), findsOneWidget);
+    await tester.tap(find.byIcon(Icons.queue_music_rounded).last);
+    await _settle(tester);
     expect(find.byType(SidePanelView), findsNothing);
     await tester.tap(find.byIcon(Icons.queue_music_rounded).last);
     await _settle(tester);

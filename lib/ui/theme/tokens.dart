@@ -116,6 +116,11 @@ abstract final class CcDims {
   static const sidebarCollapsedWidth = 72.0;
   static const sidePanelWidth = 320.0;
   static const wideBreakpoint = 840.0;
+
+  /// Tablets, unfolded foldables and wide windows: the right panel opens by
+  /// itself and is wider, and grids and shelves hold more.
+  static const xlBreakpoint = 1200.0;
+  static const sidePanelWidthXl = 360.0;
 }
 
 /// Animation durations (zero with «Riduci animazioni», see [ccDuration]).

@@ -255,7 +255,9 @@ class HomeScreen extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(horizontal: CcDims.margin),
             child: LayoutBuilder(
               builder: (_, c) {
-                final colW = (c.maxWidth - 8) / 2;
+                // Three columns of «Riprendi» tiles once there is room.
+                final cols = c.maxWidth >= 900 ? 3 : 2;
+                final colW = (c.maxWidth - 8 * (cols - 1)) / cols;
                 return Wrap(
                   spacing: 8,
                   runSpacing: 8,

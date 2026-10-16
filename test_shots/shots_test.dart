@@ -9,6 +9,7 @@ import 'package:codecore/ui/screens/library/all_tracks_screen.dart';
 import 'package:codecore/ui/shell/app_shell.dart';
 import 'package:codecore/ui/theme/app_theme.dart';
 import 'package:codecore/ui/widgets/track_row.dart';
+import 'package:flutter/painting.dart' show Size;
 import 'package:flutter_test/flutter_test.dart';
 
 import 'support/shot_harness.dart';
@@ -124,6 +125,21 @@ void main() {
             await s.settle();
             await s.expectShot('all_tracks_selection_dark');
           }));
+
+      // Widths of docs/fase-19 §19.7: the sidebar folds at 1000, the queue
+      // opens by itself from 1200.
+      if (size == ShotSize.desktop) {
+        for (final w in [840.0, 1000.0, 1200.0, 1600.0]) {
+          testWidgets('wide_${w.round()}',
+              (tester) => withShot(tester, size, (s) async {
+                    tester.view.physicalSize = Size(w, w < 1200 ? 800 : 900);
+                    await tester.runAsync(
+                        () => s.h.handler.playQueue(s.seed.trackIds, 3));
+                    await s.show(const AppShell());
+                    await s.expectShot('shell_wide_${w.round()}');
+                  }));
+        }
+      }
 
       testWidgets('jam', (tester) => withShot(tester, size, (s) async {
             await s.show(const JamScreen(),

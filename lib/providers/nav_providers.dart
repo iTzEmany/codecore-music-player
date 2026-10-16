@@ -30,10 +30,25 @@ class SidePanelNotifier extends Notifier<SidePanel> {
   @override
   SidePanel build() => SidePanel.none;
 
-  /// Tapping the open panel's button again closes it.
-  void toggle(SidePanel p) => state = state == p ? SidePanel.none : p;
+  /// Once the user has opened or closed a panel by hand, none opens by itself.
+  bool chosen = false;
 
-  void close() => state = SidePanel.none;
+  /// Tapping the open panel's button again closes it.
+  void toggle(SidePanel p) {
+    chosen = true;
+    state = state == p ? SidePanel.none : p;
+  }
+
+  void close() {
+    chosen = true;
+    state = SidePanel.none;
+  }
+
+  /// The wide layout opens the queue by itself, unless the user decided.
+  void autoOpen() {
+    if (chosen || state != SidePanel.none) return;
+    state = SidePanel.queue;
+  }
 }
 
 final sidePanelProvider = NotifierProvider<SidePanelNotifier, SidePanel>(

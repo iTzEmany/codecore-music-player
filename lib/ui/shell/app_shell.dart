@@ -1,3 +1,5 @@
+import 'dart:ui' show DisplayFeatureType;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -17,6 +19,7 @@ import '../screens/jam/jam_request_dialog.dart';
 import '../screens/search/search_screen.dart';
 import '../screens/home/home_screen.dart';
 import '../../l10n/l10n_ext.dart';
+import '../theme/tokens.dart';
 import '../widgets/enrich_result_listener.dart';
 import '../widgets/import_event_listener.dart';
 import '../widgets/mini_player.dart';
@@ -148,31 +151,61 @@ class AppShell extends ConsumerWidget {
     );
     Widget content;
     if (wide) {
+      final width = MediaQuery.sizeOf(context).width;
       final panel = ref.watch(sidePanelProvider);
-      final collapsed = MediaQuery.sizeOf(context).width < 1000;
+      final collapsed = width < 1000;
+      // Wide windows show the queue from the first track on, until the user
+      // closes it (or picks another panel).
+      if (width >= CcDims.xlBreakpoint &&
+          panel == SidePanel.none &&
+          !ref.read(sidePanelProvider.notifier).chosen &&
+          ref.watch(currentTrackProvider.select((t) => t.value != null))) {
+        WidgetsBinding.instance.addPostFrameCallback(
+          (_) => ref.read(sidePanelProvider.notifier).autoOpen(),
+        );
+      }
+      // A vertical hinge must not cut the sidebar: the content starts after it.
+      final hinge = MediaQuery.displayFeaturesOf(context)
+          .where(
+            (f) =>
+                (f.type == DisplayFeatureType.hinge ||
+                    f.type == DisplayFeatureType.fold) &&
+                f.bounds.height >= MediaQuery.sizeOf(context).height * 0.9 &&
+                f.bounds.width < width / 3,
+          )
+          .firstOrNull;
+      final sidebarWidth = collapsed
+          ? CcDims.sidebarCollapsedWidth
+          : CcDims.sidebarWidth;
+      final inset = hinge != null && hinge.bounds.left < sidebarWidth
+          ? hinge.bounds.right
+          : 0.0;
       content = Scaffold(
         body: SafeArea(
-          child: Column(
-            children: [
-              Expanded(
-                child: Row(
-                  children: [
-                    DesktopSidebar(collapsed: collapsed),
-                    Expanded(
-                      child: Column(
-                        children: [
-                          Expanded(child: body),
-                          const EnrichResultListener(),
-                          const ImportEventListener(),
-                        ],
+          child: Padding(
+            padding: EdgeInsets.only(left: inset),
+            child: Column(
+              children: [
+                Expanded(
+                  child: Row(
+                    children: [
+                      DesktopSidebar(collapsed: collapsed),
+                      Expanded(
+                        child: Column(
+                          children: [
+                            Expanded(child: body),
+                            const EnrichResultListener(),
+                            const ImportEventListener(),
+                          ],
+                        ),
                       ),
-                    ),
-                    if (panel != SidePanel.none) SidePanelView(panel: panel),
-                  ],
+                      if (panel != SidePanel.none) SidePanelView(panel: panel),
+                    ],
+                  ),
                 ),
-              ),
-              const DesktopPlayerBar(),
-            ],
+                const DesktopPlayerBar(),
+              ],
+            ),
           ),
         ),
       );
