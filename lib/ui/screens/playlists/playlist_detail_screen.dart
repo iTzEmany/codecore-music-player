@@ -10,15 +10,19 @@ import '../../../providers/database_providers.dart';
 import '../../../providers/library_providers.dart';
 import '../../../providers/player_providers.dart';
 import '../../../services/covers/cover_store.dart';
+import '../../../providers/selection_providers.dart';
 import '../../../providers/settings_providers.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/collection_header.dart';
 import '../../shell/shell_nav.dart';
+import '../../widgets/bulk_actions.dart';
 import '../../widgets/confirm.dart';
 import '../../widgets/playlist_cover.dart';
 import '../../widgets/track_actions.dart';
+import '../../widgets/selection_bar.dart';
 import '../../widgets/track_row.dart';
+import '../../widgets/track_row_selection.dart';
 import '../import/import_banner.dart';
 import '../library/album_detail_screen.dart' show tracksAndMinutes;
 import 'add_tracks_screen.dart';
@@ -93,6 +97,11 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
     final coverKeys = playlistCoverKeys(custom, tracks.map((t) => t.coverKey));
     final durationMs = tracks.fold<int>(0, (a, t) => a + t.durationMs);
     final extent = trackRowExtentOf(context, compact);
+    final key = 'playlist:$id';
+    final selection = RowSelection(
+      listKey: key,
+      visibleIds: [for (final t in tracks) t.id],
+    );
 
     Future<void> remove(Track t, int i) async {
       await repo.removeTrack(id, t.id);
@@ -214,6 +223,7 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
             child: LiveTrackRow(
               track: t,
               compact: compact,
+              selection: selection,
               onMore: () => rowMenu(t, i),
               onTap: () => ctrl.playFromList(tracks, i, context: playCtx),
             ),
@@ -222,80 +232,96 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
       );
     }
 
-    return CollectionScaffold(
-      title: _name,
-      name: _name,
-      coverKey: coverKeys.firstOrNull,
-      cover: (s) =>
-          PlaylistCover(size: s, coverKeys: coverKeys, radius: CcDims.rGrid),
-      meta:
-          '${l.kindPlaylist} · ${tracksAndMinutes(context, tracks.length, durationMs)}',
-      onPlay: tracks.isEmpty
-          ? null
-          : () => ctrl.playFromList(tracks, 0, context: playCtx),
-      onShuffle: tracks.isEmpty
-          ? null
-          : () async {
-              await ctrl.setShuffle(true);
-              await ctrl.playFromList(tracks, 0, context: playCtx);
-            },
-      menu: PopupMenuButton<String>(
-        tooltip: l.moreActions,
-        icon: const Icon(Icons.more_horiz_rounded),
-        onSelected: (v) async {
-          switch (v) {
-            case 'edit':
-              setState(() => _editing = !_editing);
-            case 'add':
-              ShellNav.open<void>(context, AddTracksScreen(playlistId: id));
-            case 'cover':
-              await _pickCover(id);
-            case 'clear':
-              await repo.setCover(id, null);
-            case 'export':
-              await exportPlaylistFlow(context, ref,
-                  playlist: widget.playlist, name: _name, tracks: tracks);
-            case 'rename':
-              final n = await askPlaylistName(
-                context,
-                initial: _name,
-                confirmLabel: l.save,
-                title: l.renamePlaylist,
-              );
-              if (n == null) return;
-              await repo.rename(id, n);
-              if (mounted) setState(() => _name = n);
-            case 'delete':
-              final ok = await showConfirm(
-                context,
-                title: l.confirmDeletePlaylistTitle,
-                body: l.confirmDeletePlaylistBody(_name),
-                confirmLabel: l.delete,
-                destructive: true,
-              );
-              if (!ok) return;
-              await repo.delete(id);
-              if (context.mounted) Navigator.of(context).pop();
-          }
-        },
-        itemBuilder: (_) => [
-          PopupMenuItem(
-            value: 'edit',
-            child: Text(_editing ? l.finishEditing : l.editOrder),
-          ),
-          PopupMenuItem(value: 'add', child: Text(l.addSongs)),
-          PopupMenuItem(value: 'cover', child: Text(l.playlistChangeCover)),
-          if (custom != null)
-            PopupMenuItem(value: 'clear', child: Text(l.playlistRemoveCover)),
-          PopupMenuItem(value: 'export', child: Text(l.exportPlaylist)),
-          PopupMenuItem(value: 'rename', child: Text(l.rename)),
-          PopupMenuItem(value: 'delete', child: Text(l.delete)),
+    return SelectionScope(
+      listKey: key,
+      visibleIds: selection.visibleIds,
+      child: CollectionScaffold(
+        selectionBar: SelectionBarSlot(
+          listKey: key,
+          tracks: tracks,
+          bulk: BulkContext(playlistId: id),
+        ),
+        title: _name,
+        name: _name,
+        coverKey: coverKeys.firstOrNull,
+        cover: (s) =>
+            PlaylistCover(size: s, coverKeys: coverKeys, radius: CcDims.rGrid),
+        meta:
+            '${l.kindPlaylist} · ${tracksAndMinutes(context, tracks.length, durationMs)}',
+        onPlay: tracks.isEmpty
+            ? null
+            : () => ctrl.playFromList(tracks, 0, context: playCtx),
+        onShuffle: tracks.isEmpty
+            ? null
+            : () async {
+                await ctrl.setShuffle(true);
+                await ctrl.playFromList(tracks, 0, context: playCtx);
+              },
+        menu: PopupMenuButton<String>(
+          tooltip: l.moreActions,
+          icon: const Icon(Icons.more_horiz_rounded),
+          onSelected: (v) async {
+            switch (v) {
+              case 'edit':
+                // Reordering and picking do not mix.
+                ref.read(selectionProvider(key).notifier).clear();
+                setState(() => _editing = !_editing);
+              case 'add':
+                ShellNav.open<void>(context, AddTracksScreen(playlistId: id));
+              case 'cover':
+                await _pickCover(id);
+              case 'clear':
+                await repo.setCover(id, null);
+              case 'export':
+                await exportPlaylistFlow(
+                  context,
+                  ref,
+                  playlist: widget.playlist,
+                  name: _name,
+                  tracks: tracks,
+                );
+              case 'rename':
+                final n = await askPlaylistName(
+                  context,
+                  initial: _name,
+                  confirmLabel: l.save,
+                  title: l.renamePlaylist,
+                );
+                if (n == null) return;
+                await repo.rename(id, n);
+                if (mounted) setState(() => _name = n);
+              case 'delete':
+                final ok = await showConfirm(
+                  context,
+                  title: l.confirmDeletePlaylistTitle,
+                  body: l.confirmDeletePlaylistBody(_name),
+                  confirmLabel: l.delete,
+                  destructive: true,
+                );
+                if (!ok) return;
+                await repo.delete(id);
+                if (context.mounted) Navigator.of(context).pop();
+            }
+          },
+          itemBuilder: (_) => [
+            PopupMenuItem(
+              value: 'edit',
+              child: Text(_editing ? l.finishEditing : l.editOrder),
+            ),
+            PopupMenuItem(value: 'add', child: Text(l.addSongs)),
+            PopupMenuItem(value: 'cover', child: Text(l.playlistChangeCover)),
+            if (custom != null)
+              PopupMenuItem(value: 'clear', child: Text(l.playlistRemoveCover)),
+            PopupMenuItem(value: 'export', child: Text(l.exportPlaylist)),
+            PopupMenuItem(value: 'rename', child: Text(l.rename)),
+            PopupMenuItem(value: 'delete', child: Text(l.delete)),
+          ],
+        ),
+        slivers: [
+          SliverToBoxAdapter(child: ImportBanner(playlistId: id)),
+          list,
         ],
       ),
-      slivers: [
-        SliverToBoxAdapter(child: ImportBanner(playlistId: id)),
-        list,
-      ],
     );
   }
 }

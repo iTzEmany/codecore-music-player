@@ -8,7 +8,9 @@ import '../../../providers/player_providers.dart';
 import '../../../providers/settings_providers.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/play_buttons.dart';
+import '../../widgets/selection_bar.dart';
 import '../../widgets/track_row.dart';
+import '../../widgets/track_row_selection.dart';
 
 /// Tracks of one genre.
 class GenreScreen extends ConsumerWidget {
@@ -24,38 +26,52 @@ class GenreScreen extends ConsumerWidget {
     final ctrl = ref.read(playerControllerProvider);
     final compact = ref.watch(settingsProvider).compactMode;
     final ctx = PlayContext(PlayContextKind.playlist, genre);
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(genre),
-        actions: [
-          ShuffleButton(
-            onPressed: tracks.isEmpty
-                ? null
-                : () async {
-                    await ctrl.setShuffle(true);
-                    await ctrl.playFromList(tracks, 0, context: ctx);
-                  },
-          ),
-          PlayCircleButton(
-            size: 40,
-            onPressed: tracks.isEmpty
-                ? null
-                : () => ctrl.playFromList(tracks, 0, context: ctx),
-          ),
-          const SizedBox(width: 8),
-        ],
-      ),
-      body: tracks.isEmpty
-          ? Center(child: Text(l.noResults))
-          : ListView.builder(
-              itemExtent: trackRowExtentOf(context, compact),
-              itemCount: tracks.length,
-              itemBuilder: (_, i) => LiveTrackRow(
-                track: tracks[i],
-                compact: compact,
-                onTap: () => ctrl.playFromList(tracks, i, context: ctx),
+    final key = 'genre:$genre';
+    final selection = RowSelection(
+      listKey: key,
+      visibleIds: [for (final t in tracks) t.id],
+    );
+    return SelectionScope(
+      listKey: key,
+      visibleIds: selection.visibleIds,
+      child: Scaffold(
+        appBar: SelectableAppBar(
+          listKey: key,
+          tracks: tracks,
+          normal: AppBar(
+            title: Text(genre),
+            actions: [
+              ShuffleButton(
+                onPressed: tracks.isEmpty
+                    ? null
+                    : () async {
+                        await ctrl.setShuffle(true);
+                        await ctrl.playFromList(tracks, 0, context: ctx);
+                      },
               ),
-            ),
+              PlayCircleButton(
+                size: 40,
+                onPressed: tracks.isEmpty
+                    ? null
+                    : () => ctrl.playFromList(tracks, 0, context: ctx),
+              ),
+              const SizedBox(width: 8),
+            ],
+          ),
+        ),
+        body: tracks.isEmpty
+            ? Center(child: Text(l.noResults))
+            : ListView.builder(
+                itemExtent: trackRowExtentOf(context, compact),
+                itemCount: tracks.length,
+                itemBuilder: (_, i) => LiveTrackRow(
+                  track: tracks[i],
+                  compact: compact,
+                  selection: selection,
+                  onTap: () => ctrl.playFromList(tracks, i, context: ctx),
+                ),
+              ),
+      ),
     );
   }
 }

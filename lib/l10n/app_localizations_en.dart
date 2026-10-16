@@ -2083,4 +2083,24 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String ytDownloadsStarted(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count downloads started',
+      one: '1 download started',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String ytDownloadsSkipped(int started, int skipped) {
+    return '$started downloads started, $skipped already in the library or in progress';
+  }
+
+  @override
+  String get ytNothingToDownload =>
+      'They are all in the library or in progress already';
 }

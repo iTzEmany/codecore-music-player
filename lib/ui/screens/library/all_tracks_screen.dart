@@ -15,7 +15,9 @@ import '../../widgets/alpha_scroller.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_state.dart';
 import '../../widgets/play_buttons.dart';
+import '../../widgets/selection_bar.dart';
 import '../../widgets/track_row.dart';
+import '../../widgets/track_row_selection.dart';
 import 'scan_status.dart';
 
 String _sortLabel(BuildContext context, SortOption o) {
@@ -40,6 +42,7 @@ class AllTracksScreen extends ConsumerStatefulWidget {
 }
 
 class _AllTracksScreenState extends ConsumerState<AllTracksScreen> {
+  static const _selectionKey = 'all';
   final _controller = TextEditingController();
   final _scroll = ScrollController();
   Timer? _debounce;
@@ -77,6 +80,10 @@ class _AllTracksScreenState extends ConsumerState<AllTracksScreen> {
     PlayerController ctrl,
     PlayContext ctx,
   ) {
+    final selection = RowSelection(
+      listKey: _selectionKey,
+      visibleIds: [for (final t in list) t.id],
+    );
     final extent = trackRowExtentOf(context, compact);
     final view = ListView.builder(
       controller: _scroll,
@@ -85,6 +92,7 @@ class _AllTracksScreenState extends ConsumerState<AllTracksScreen> {
       itemBuilder: (_, i) => LiveTrackRow(
         track: list[i],
         compact: compact,
+        selection: selection,
         onTap: () => ctrl.playFromList(list, i, context: ctx),
       ),
     );
@@ -116,109 +124,118 @@ class _AllTracksScreenState extends ConsumerState<AllTracksScreen> {
           ? PlayContextKind.library
           : PlayContextKind.search,
     );
-    return Scaffold(
-      appBar: AppBar(title: Text(l.allTracks)),
-      body: Column(
-        children: [
-          const ScanStatus(),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              CcDims.margin,
-              4,
-              CcDims.margin,
-              8,
-            ),
-            child: TextField(
-              controller: _controller,
-              onChanged: _onChanged,
-              decoration: InputDecoration(
-                hintText: l.searchHint,
-                prefixIcon: const Icon(Icons.search_rounded),
+    final shown = tracks.value ?? const <Track>[];
+    return SelectionScope(
+      listKey: _selectionKey,
+      visibleIds: [for (final t in shown) t.id],
+      child: Scaffold(
+        appBar: SelectableAppBar(
+          listKey: _selectionKey,
+          tracks: shown,
+          normal: AppBar(title: Text(l.allTracks)),
+        ),
+        body: Column(
+          children: [
+            const ScanStatus(),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                CcDims.margin,
+                4,
+                CcDims.margin,
+                8,
+              ),
+              child: TextField(
+                controller: _controller,
+                onChanged: _onChanged,
+                decoration: InputDecoration(
+                  hintText: l.searchHint,
+                  prefixIcon: const Icon(Icons.search_rounded),
+                ),
               ),
             ),
-          ),
-          SizedBox(
-            height: 48,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: CcDims.margin),
-              children: [
-                for (final o in const [
-                  SortOption.defaultOrder,
-                  SortOption.title,
-                  SortOption.artist,
-                  SortOption.addedAt,
-                ])
-                  Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: ChoiceChip(
-                      label: Text(_sortLabel(context, o)),
-                      selected: query.sort == o,
-                      onSelected: (_) =>
-                          _query.update((q) => q.copyWith(sort: o)),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: tracks.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, st) => loadErrorState(
-                context,
-                e,
-                st,
-                onRetry: () => ref.invalidate(tracksProvider(false)),
-              ),
-              data: (list) {
-                if (list.isEmpty) {
-                  return EmptyState(
-                    icon: query.text.isEmpty
-                        ? Icons.music_off
-                        : Icons.search_off,
-                    message: query.text.isEmpty ? l.noTracks : l.noResults,
-                  );
-                }
-                return Column(
-                  children: [
+            SizedBox(
+              height: 48,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: CcDims.margin),
+                children: [
+                  for (final o in const [
+                    SortOption.defaultOrder,
+                    SortOption.title,
+                    SortOption.artist,
+                    SortOption.addedAt,
+                  ])
                     Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: CcDims.margin,
-                        vertical: 4,
+                      padding: const EdgeInsets.only(right: 8),
+                      child: ChoiceChip(
+                        label: Text(_sortLabel(context, o)),
+                        selected: query.sort == o,
+                        onSelected: (_) =>
+                            _query.update((q) => q.copyWith(sort: o)),
                       ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              l.tracksCount(list.length),
-                              style: theme.bodyMedium?.copyWith(
-                                color: cc.textMuted,
+                    ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: tracks.when(
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (e, st) => loadErrorState(
+                  context,
+                  e,
+                  st,
+                  onRetry: () => ref.invalidate(tracksProvider(false)),
+                ),
+                data: (list) {
+                  if (list.isEmpty) {
+                    return EmptyState(
+                      icon: query.text.isEmpty
+                          ? Icons.music_off
+                          : Icons.search_off,
+                      message: query.text.isEmpty ? l.noTracks : l.noResults,
+                    );
+                  }
+                  return Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: CcDims.margin,
+                          vertical: 4,
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                l.tracksCount(list.length),
+                                style: theme.bodyMedium?.copyWith(
+                                  color: cc.textMuted,
+                                ),
                               ),
                             ),
-                          ),
-                          ShuffleButton(
-                            onPressed: () async {
-                              await ctrl.setShuffle(true);
-                              await ctrl.playFromList(list, 0, context: ctx);
-                            },
-                          ),
-                          PlayCircleButton(
-                            size: 44,
-                            onPressed: () =>
-                                ctrl.playFromList(list, 0, context: ctx),
-                          ),
-                        ],
+                            ShuffleButton(
+                              onPressed: () async {
+                                await ctrl.setShuffle(true);
+                                await ctrl.playFromList(list, 0, context: ctx);
+                              },
+                            ),
+                            PlayCircleButton(
+                              size: 44,
+                              onPressed: () =>
+                                  ctrl.playFromList(list, 0, context: ctx),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    Expanded(
-                      child: _list(list, query.sort, compact, ctrl, ctx),
-                    ),
-                  ],
-                );
-              },
+                      Expanded(
+                        child: _list(list, query.sort, compact, ctrl, ctx),
+                      ),
+                    ],
+                  );
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

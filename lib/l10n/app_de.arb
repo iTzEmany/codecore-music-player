@@ -1159,5 +1159,25 @@
         "type": "int"
       }
     }
-  }
+  },
+  "ytDownloadsStarted": "{count, plural, one{1 Download gestartet} other{{count} Downloads gestartet}}",
+  "@ytDownloadsStarted": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ytDownloadsSkipped": "{started} Downloads gestartet, {skipped} bereits in der Bibliothek oder in Arbeit",
+  "@ytDownloadsSkipped": {
+    "placeholders": {
+      "started": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      }
+    }
+  },
+  "ytNothingToDownload": "Alle sind schon in der Bibliothek oder in Arbeit"
 }

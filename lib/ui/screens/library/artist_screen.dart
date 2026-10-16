@@ -15,7 +15,9 @@ import '../../widgets/artist_avatar.dart';
 import '../../widgets/collection_header.dart';
 import '../../widgets/error_state.dart';
 import '../../widgets/section_header.dart';
+import '../../widgets/selection_bar.dart';
 import '../../widgets/track_row.dart';
+import '../../widgets/track_row_selection.dart';
 import 'album_detail_screen.dart';
 
 /// An artist: Play / Shuffle over all their tracks, the five most played and
@@ -48,70 +50,84 @@ class ArtistDetailScreen extends ConsumerWidget {
       l.albumsCount(albumList.length),
       l.tracksCount(list.length),
     );
-    return CollectionScaffold(
-      title: name,
-      name: name,
-      coverKey: coverKey,
-      cover: (s) => ArtistAvatar(
-        name: artist.name,
-        size: s.clamp(0.0, 160.0),
+    // The rows shown here are the most played ones.
+    final key = 'artist:${artist.key}';
+    final selection = RowSelection(
+      listKey: key,
+      visibleIds: [for (final t in top) t.id],
+    );
+    return SelectionScope(
+      listKey: key,
+      visibleIds: selection.visibleIds,
+      child: CollectionScaffold(
+        selectionBar: SelectionBarSlot(listKey: key, tracks: top),
+        title: name,
+        name: name,
         coverKey: coverKey,
+        cover: (s) => ArtistAvatar(
+          name: artist.name,
+          size: s.clamp(0.0, 160.0),
+          coverKey: coverKey,
+        ),
+        meta: meta,
+        onPlay: list.isEmpty
+            ? null
+            : () => ctrl.playFromList(list, 0, context: playCtx),
+        onShuffle: list.isEmpty
+            ? null
+            : () async {
+                await ctrl.setShuffle(true);
+                await ctrl.playFromList(list, 0, context: playCtx);
+              },
+        slivers: [
+          if (tracks.hasError || albums.hasError)
+            SliverToBoxAdapter(
+              child: SizedBox(
+                height: 240,
+                child: loadErrorState(
+                  context,
+                  tracks.error ?? albums.error!,
+                  StackTrace.current,
+                  onRetry: () {
+                    ref.invalidate(artistTracksProvider(artist.key));
+                    ref.invalidate(artistAlbumsProvider(artist.key));
+                  },
+                ),
+              ),
+            ),
+          if (top.isNotEmpty) ...[
+            SliverToBoxAdapter(child: SectionHeader(l.mostPlayed)),
+            SliverList.builder(
+              itemCount: top.length,
+              itemBuilder: (_, i) => SizedBox(
+                height: extent,
+                child: LiveTrackRow(
+                  track: top[i],
+                  compact: compact,
+                  selection: selection,
+                  onTap: () => ctrl.playFromList(top, i, context: playCtx),
+                ),
+              ),
+            ),
+          ],
+          if (albumList.isNotEmpty) ...[
+            SliverToBoxAdapter(child: SectionHeader(l.albumsSection)),
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: CcDims.margin - 8,
+              ),
+              sliver: SliverToBoxAdapter(
+                child: AlbumGrid(
+                  albums: albumList,
+                  shrinkWrap: true,
+                  onOpen: (a) =>
+                      ShellNav.open<void>(context, AlbumDetailScreen(album: a)),
+                ),
+              ),
+            ),
+          ],
+        ],
       ),
-      meta: meta,
-      onPlay: list.isEmpty
-          ? null
-          : () => ctrl.playFromList(list, 0, context: playCtx),
-      onShuffle: list.isEmpty
-          ? null
-          : () async {
-              await ctrl.setShuffle(true);
-              await ctrl.playFromList(list, 0, context: playCtx);
-            },
-      slivers: [
-        if (tracks.hasError || albums.hasError)
-          SliverToBoxAdapter(
-            child: SizedBox(
-              height: 240,
-              child: loadErrorState(
-                context,
-                tracks.error ?? albums.error!,
-                StackTrace.current,
-                onRetry: () {
-                  ref.invalidate(artistTracksProvider(artist.key));
-                  ref.invalidate(artistAlbumsProvider(artist.key));
-                },
-              ),
-            ),
-          ),
-        if (top.isNotEmpty) ...[
-          SliverToBoxAdapter(child: SectionHeader(l.mostPlayed)),
-          SliverList.builder(
-            itemCount: top.length,
-            itemBuilder: (_, i) => SizedBox(
-              height: extent,
-              child: LiveTrackRow(
-                track: top[i],
-                compact: compact,
-                onTap: () => ctrl.playFromList(top, i, context: playCtx),
-              ),
-            ),
-          ),
-        ],
-        if (albumList.isNotEmpty) ...[
-          SliverToBoxAdapter(child: SectionHeader(l.albumsSection)),
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: CcDims.margin - 8),
-            sliver: SliverToBoxAdapter(
-              child: AlbumGrid(
-                albums: albumList,
-                shrinkWrap: true,
-                onOpen: (a) =>
-                    ShellNav.open<void>(context, AlbumDetailScreen(album: a)),
-              ),
-            ),
-          ),
-        ],
-      ],
     );
   }
 }

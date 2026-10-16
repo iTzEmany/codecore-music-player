@@ -4,6 +4,7 @@ import 'package:codecore/ui/widgets/cover_image.dart';
 import 'package:codecore/ui/screens/library/album_detail_screen.dart';
 import 'package:codecore/ui/screens/now_playing/queue_sheet.dart';
 import 'package:codecore/ui/shell/app_shell.dart';
+import 'package:codecore/ui/widgets/track_row.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -19,6 +20,16 @@ Future<void> _settle(WidgetTester tester) async {
   await tester.pump(const Duration(milliseconds: 300));
 }
 
+/// The ⋯ of a row (a long press now starts a selection).
+Future<void> _openMenu(WidgetTester tester, String title) => tester.tap(
+      find
+          .descendant(
+            of: find.widgetWithText(TrackRow, title).first,
+            matching: find.byTooltip('Altre opzioni'),
+          )
+          .first,
+    );
+
 void _phone(WidgetTester tester) {
   tester.view.physicalSize = const Size(400, 900);
   tester.view.devicePixelRatio = 1;
@@ -26,7 +37,7 @@ void _phone(WidgetTester tester) {
 }
 
 void main() {
-  testWidgets('long press → menu groups → «Vai all\'album» opens the album',
+  testWidgets('⋯ → menu groups → «Vai all\'album» opens the album',
       (tester) async {
     _phone(tester);
     final h = await Harness.create(tester, tracks: 3);
@@ -35,7 +46,7 @@ void main() {
     await _settle(tester);
     await tester.tap(find.text('Tutti i brani'));
     await _settle(tester);
-    await tester.longPress(find.text('Song 1').first);
+    await _openMenu(tester, 'Song 1');
     await _settle(tester);
     // Grouped menu under the track header.
     expect(find.text('Riproduci dopo'), findsOneWidget);
@@ -64,7 +75,7 @@ void main() {
     await _settle(tester);
 
     expect(find.textContaining('riprendi da 42:10'), findsOneWidget);
-    await tester.longPress(find.text('Song 1').first);
+    await _openMenu(tester, 'Song 1');
     await _settle(tester);
     expect(find.text('Ricomincia dall’inizio'), findsOneWidget);
     await tester.tap(find.text('Ricomincia dall’inizio'));
@@ -84,7 +95,7 @@ void main() {
     await _settle(tester);
     await tester.tap(find.text('Tutti i brani'));
     await _settle(tester);
-    await tester.longPress(find.text('Song 1').first);
+    await _openMenu(tester, 'Song 1');
     await _settle(tester);
     expect(find.text('Ricomincia dall’inizio'), findsNothing);
     expect(find.textContaining('riprendi da'), findsNothing);

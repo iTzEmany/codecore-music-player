@@ -3563,6 +3563,24 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'{count, plural, one{1 brano tolto dalla libreria} other{{count} brani tolti dalla libreria}}'**
   String removedManyFromLibrary(int count);
+
+  /// No description provided for @ytDownloadsStarted.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, one{1 download avviato} other{{count} download avviati}}'**
+  String ytDownloadsStarted(int count);
+
+  /// No description provided for @ytDownloadsSkipped.
+  ///
+  /// In it, this message translates to:
+  /// **'{started} download avviati, {skipped} già in libreria o in corso'**
+  String ytDownloadsSkipped(int started, int skipped);
+
+  /// No description provided for @ytNothingToDownload.
+  ///
+  /// In it, this message translates to:
+  /// **'Sono già tutti in libreria o in corso'**
+  String get ytNothingToDownload;
 }
 
 class _AppLocalizationsDelegate

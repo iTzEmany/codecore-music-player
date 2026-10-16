@@ -18,6 +18,7 @@ class SelectionBar extends ConsumerWidget implements PreferredSizeWidget {
     required this.listKey,
     required this.tracks,
     this.bulk = const BulkContext(),
+    this.belowStatusBar = true,
   });
 
   final String listKey;
@@ -26,13 +27,15 @@ class SelectionBar extends ConsumerWidget implements PreferredSizeWidget {
   final List<Track> tracks;
   final BulkContext bulk;
 
+  /// False when the bar is not at the very top of the screen.
+  final bool belowStatusBar;
+
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
-    final cc = context.cc;
     final selection = ref.watch(selectionProvider(listKey));
     final notifier = ref.read(selectionProvider(listKey).notifier);
     final picked = [
@@ -55,9 +58,68 @@ class SelectionBar extends ConsumerWidget implements PreferredSizeWidget {
               a.icon == Icons.favorite_border_rounded)
             a,
     ];
+    return SelectionBarFrame(
+      count: selection.count,
+      belowStatusBar: belowStatusBar,
+      onClose: notifier.clear,
+      onSelectAll: () => notifier.selectAll([for (final t in tracks) t.id]),
+      actions: [
+        for (final a in quick)
+          IconButton(
+            tooltip: a.label,
+            icon: Icon(a.icon),
+            onPressed: picked.isEmpty ? null : a.run,
+          ),
+        PopupMenuButton<TrackAction>(
+          tooltip: l.bulkActions,
+          enabled: picked.isNotEmpty,
+          icon: const Icon(Icons.more_vert_rounded),
+          onSelected: (a) => a.run(),
+          itemBuilder: (_) => [
+            for (var g = 0; g < groups.length; g++) ...[
+              if (g > 0) const PopupMenuDivider(),
+              for (final a in groups[g].actions)
+                PopupMenuItem<TrackAction>(
+                  value: a,
+                  child: Row(
+                    children: [
+                      Icon(a.icon, size: 20),
+                      const SizedBox(width: 12),
+                      Flexible(child: Text(a.label)),
+                    ],
+                  ),
+                ),
+            ],
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+/// The bar itself: ✕, «N selezionati», select all, then [actions].
+class SelectionBarFrame extends StatelessWidget {
+  const SelectionBarFrame({
+    super.key,
+    required this.count,
+    required this.onClose,
+    required this.onSelectAll,
+    required this.actions,
+    this.belowStatusBar = true,
+  });
+
+  final int count;
+  final VoidCallback onClose, onSelectAll;
+  final List<Widget> actions;
+  final bool belowStatusBar;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
     return Material(
-      color: cc.surface2,
+      color: context.cc.surface2,
       child: SafeArea(
+        top: belowStatusBar,
         bottom: false,
         child: SizedBox(
           height: kToolbarHeight,
@@ -66,11 +128,11 @@ class SelectionBar extends ConsumerWidget implements PreferredSizeWidget {
               IconButton(
                 tooltip: l.exitSelection,
                 icon: const Icon(Icons.close_rounded),
-                onPressed: notifier.clear,
+                onPressed: onClose,
               ),
               Expanded(
                 child: Text(
-                  l.selectedCount(selection.count),
+                  l.selectedCount(count),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: Theme.of(context).textTheme.titleMedium,
@@ -79,42 +141,75 @@ class SelectionBar extends ConsumerWidget implements PreferredSizeWidget {
               IconButton(
                 tooltip: l.selectAll,
                 icon: const Icon(Icons.select_all_rounded),
-                onPressed: () =>
-                    notifier.selectAll([for (final t in tracks) t.id]),
+                onPressed: onSelectAll,
               ),
-              for (final a in quick)
-                IconButton(
-                  tooltip: a.label,
-                  icon: Icon(a.icon),
-                  onPressed: picked.isEmpty ? null : a.run,
-                ),
-              PopupMenuButton<TrackAction>(
-                tooltip: l.bulkActions,
-                enabled: picked.isNotEmpty,
-                icon: const Icon(Icons.more_vert_rounded),
-                onSelected: (a) => a.run(),
-                itemBuilder: (_) => [
-                  for (var g = 0; g < groups.length; g++) ...[
-                    if (g > 0) const PopupMenuDivider(),
-                    for (final a in groups[g].actions)
-                      PopupMenuItem<TrackAction>(
-                        value: a,
-                        child: Row(
-                          children: [
-                            Icon(a.icon, size: 20),
-                            const SizedBox(width: 12),
-                            Flexible(child: Text(a.label)),
-                          ],
-                        ),
-                      ),
-                  ],
-                ],
-              ),
+              ...actions,
             ],
           ),
         ),
       ),
     );
+  }
+}
+
+/// The [SelectionBar] while something is picked, nothing otherwise: for pages
+/// that lay the bar over their own header.
+class SelectionBarSlot extends ConsumerWidget {
+  const SelectionBarSlot({
+    super.key,
+    required this.listKey,
+    required this.tracks,
+    this.bulk = const BulkContext(),
+    this.belowStatusBar = true,
+  });
+
+  final String listKey;
+  final List<Track> tracks;
+  final BulkContext bulk;
+  final bool belowStatusBar;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final active = ref.watch(
+      selectionProvider(listKey).select((s) => s.active),
+    );
+    return active
+        ? SelectionBar(
+            listKey: listKey,
+            tracks: tracks,
+            bulk: bulk,
+            belowStatusBar: belowStatusBar,
+          )
+        : const SizedBox.shrink();
+  }
+}
+
+/// An app bar that turns into the [SelectionBar] while tracks are picked.
+class SelectableAppBar extends ConsumerWidget implements PreferredSizeWidget {
+  const SelectableAppBar({
+    super.key,
+    required this.listKey,
+    required this.tracks,
+    required this.normal,
+    this.bulk = const BulkContext(),
+  });
+
+  final String listKey;
+  final List<Track> tracks;
+  final PreferredSizeWidget normal;
+  final BulkContext bulk;
+
+  @override
+  Size get preferredSize => normal.preferredSize;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final active = ref.watch(
+      selectionProvider(listKey).select((s) => s.active),
+    );
+    return active
+        ? SelectionBar(listKey: listKey, tracks: tracks, bulk: bulk)
+        : normal;
   }
 }
 
@@ -174,7 +269,8 @@ class _SelectionScopeState extends ConsumerState<SelectionScope> {
   @override
   void didUpdateWidget(SelectionScope old) {
     super.didUpdateWidget(old);
-    if (old.visibleIds != widget.visibleIds) {
+    if (old.visibleIds != widget.visibleIds &&
+        ref.read(selectionProvider(widget.listKey)).active) {
       final visible = widget.visibleIds.toSet();
       // Not while building: the selection is watched by the rows.
       WidgetsBinding.instance.addPostFrameCallback((_) {

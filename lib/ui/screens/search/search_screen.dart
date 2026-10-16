@@ -20,7 +20,9 @@ import '../../widgets/artist_avatar.dart';
 import '../../widgets/cover_image.dart';
 import '../../widgets/playlist_cover.dart';
 import '../../widgets/section_header.dart';
+import '../../widgets/selection_bar.dart';
 import '../../widgets/track_row.dart';
+import '../../widgets/track_row_selection.dart';
 import '../library/album_detail_screen.dart';
 import '../library/artist_screen.dart';
 import '../playlists/playlist_detail_screen.dart';
@@ -306,6 +308,11 @@ class _LibraryResults extends ConsumerWidget {
     final ctrl = ref.read(playerControllerProvider);
     final compact = ref.watch(settingsProvider).compactMode;
     final extent = trackRowExtentOf(context, compact);
+    const key = 'search';
+    final selection = RowSelection(
+      listKey: key,
+      visibleIds: [for (final t in res.tracks) t.id],
+    );
 
     void openArtist(ArtistSummary a) =>
         ShellNav.open<void>(context, ArtistDetailScreen(artist: a));
@@ -422,7 +429,7 @@ class _LibraryResults extends ConsumerWidget {
       ),
     );
 
-    return ListView(
+    final results = ListView(
       children: [
         if (res.isEmpty)
           Padding(
@@ -443,6 +450,7 @@ class _LibraryResults extends ConsumerWidget {
                 child: LiveTrackRow(
                   track: res.tracks[i],
                   compact: compact,
+                  selection: selection,
                   onTap: () => ctrl.playFromList(
                     tracks,
                     i,
@@ -589,6 +597,20 @@ class _LibraryResults extends ConsumerWidget {
           ),
       ],
     );
+    return SelectionScope(
+      listKey: key,
+      visibleIds: selection.visibleIds,
+      child: Column(
+        children: [
+          SelectionBarSlot(
+            listKey: key,
+            tracks: res.tracks,
+            belowStatusBar: false,
+          ),
+          Expanded(child: results),
+        ],
+      ),
+    );
   }
 }
 
@@ -605,18 +627,32 @@ class SearchTracksScreen extends ConsumerWidget {
         ref.watch(searchTracksProvider(text)).value ?? const <Track>[];
     final ctrl = ref.read(playerControllerProvider);
     final compact = ref.watch(settingsProvider).compactMode;
-    return Scaffold(
-      appBar: AppBar(title: Text(l.tracks)),
-      body: ListView.builder(
-        itemExtent: trackRowExtentOf(context, compact),
-        itemCount: tracks.length,
-        itemBuilder: (_, i) => LiveTrackRow(
-          track: tracks[i],
-          compact: compact,
-          onTap: () => ctrl.playFromList(
-            tracks,
-            i,
-            context: const PlayContext(PlayContextKind.search),
+    const key = 'search-all';
+    final selection = RowSelection(
+      listKey: key,
+      visibleIds: [for (final t in tracks) t.id],
+    );
+    return SelectionScope(
+      listKey: key,
+      visibleIds: selection.visibleIds,
+      child: Scaffold(
+        appBar: SelectableAppBar(
+          listKey: key,
+          tracks: tracks,
+          normal: AppBar(title: Text(l.tracks)),
+        ),
+        body: ListView.builder(
+          itemExtent: trackRowExtentOf(context, compact),
+          itemCount: tracks.length,
+          itemBuilder: (_, i) => LiveTrackRow(
+            track: tracks[i],
+            compact: compact,
+            selection: selection,
+            onTap: () => ctrl.playFromList(
+              tracks,
+              i,
+              context: const PlayContext(PlayContextKind.search),
+            ),
           ),
         ),
       ),

@@ -2088,4 +2088,23 @@ class AppLocalizationsIt extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String ytDownloadsStarted(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count download avviati',
+      one: '1 download avviato',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String ytDownloadsSkipped(int started, int skipped) {
+    return '$started download avviati, $skipped già in libreria o in corso';
+  }
+
+  @override
+  String get ytNothingToDownload => 'Sono già tutti in libreria o in corso';
 }

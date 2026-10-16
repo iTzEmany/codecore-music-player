@@ -22,6 +22,7 @@ class CollectionScaffold extends StatefulWidget {
     this.onPlay,
     this.onShuffle,
     this.barActions = const [],
+    this.selectionBar,
   });
 
   /// Shown in the pinned bar once the big name has scrolled away.
@@ -41,6 +42,9 @@ class CollectionScaffold extends StatefulWidget {
   final Widget? menu;
   final VoidCallback? onPlay, onShuffle;
   final List<Widget> barActions;
+
+  /// Laid over the pinned bar while tracks are picked (a `SelectionBarSlot`).
+  final Widget? selectionBar;
 
   @override
   State<CollectionScaffold> createState() => _CollectionScaffoldState();
@@ -111,64 +115,76 @@ class _CollectionScaffoldState extends State<CollectionScaffold> {
     );
     return Scaffold(
       backgroundColor: cc.bg,
-      body: CoverBackdrop(
-        coverKey: widget.coverKey,
-        child: CustomScrollView(
-          controller: _scroll,
-          slivers: [
-            SliverAppBar(
-              pinned: true,
-              backgroundColor: _showTitle ? cc.surface1 : Colors.transparent,
-              surfaceTintColor: Colors.transparent,
-              elevation: 0,
-              title: AnimatedOpacity(
-                duration: ccDuration(context, CcMotion.press),
-                opacity: _showTitle ? 1 : 0,
-                child: Text(
-                  widget.title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              actions: widget.barActions,
-            ),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  CcDims.margin,
-                  8,
-                  CcDims.margin,
-                  12,
-                ),
-                child: wide
-                    ? Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          widget.cover(coverSize),
-                          const SizedBox(width: 24),
-                          Expanded(child: info),
-                        ],
-                      )
-                    : Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Center(child: widget.cover(coverSize)),
-                          const SizedBox(height: 16),
-                          info,
-                        ],
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: CoverBackdrop(
+              coverKey: widget.coverKey,
+              child: CustomScrollView(
+                controller: _scroll,
+                slivers: [
+                  SliverAppBar(
+                    pinned: true,
+                    backgroundColor: _showTitle
+                        ? cc.surface1
+                        : Colors.transparent,
+                    surfaceTintColor: Colors.transparent,
+                    elevation: 0,
+                    title: AnimatedOpacity(
+                      duration: ccDuration(context, CcMotion.press),
+                      opacity: _showTitle ? 1 : 0,
+                      child: Text(
+                        widget.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
+                    ),
+                    actions: widget.barActions,
+                  ),
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        CcDims.margin,
+                        8,
+                        CcDims.margin,
+                        12,
+                      ),
+                      child: wide
+                          ? Row(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                widget.cover(coverSize),
+                                const SizedBox(width: 24),
+                                Expanded(child: info),
+                              ],
+                            )
+                          : Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Center(child: widget.cover(coverSize)),
+                                const SizedBox(height: 16),
+                                info,
+                              ],
+                            ),
+                    ),
+                  ),
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: CcDims.margin,
+                      ),
+                      child: actions,
+                    ),
+                  ),
+                  ...widget.slivers,
+                  const SliverToBoxAdapter(child: SizedBox(height: 24)),
+                ],
               ),
             ),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: CcDims.margin),
-                child: actions,
-              ),
-            ),
-            ...widget.slivers,
-            const SliverToBoxAdapter(child: SizedBox(height: 24)),
-          ],
-        ),
+          ),
+          if (widget.selectionBar != null)
+            Positioned(top: 0, left: 0, right: 0, child: widget.selectionBar!),
+        ],
       ),
     );
   }
