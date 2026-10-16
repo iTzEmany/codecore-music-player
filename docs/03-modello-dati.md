@@ -57,6 +57,14 @@ Indice su `trackId`.
 
 > Un brano non può comparire due volte nella stessa playlist (scelta voluta, come nella versione Python).
 
+## Importazione da CSV (schema v4, fase 12)
+| Tabella | Colonne | Note |
+|---|---|---|
+| `playlist_imports` | `id`, `playlist_id` → playlists (cascade), `source_name`, `created_at`, `status` | `status`: 0 in corso · 1 in pausa · 2 finita · 3 annullata |
+| `playlist_import_items` | PK (`import_id` cascade, `row_index`), `title`, `artists` (separati da `;`), `album?`, `duration_ms?`, `isrc?`, `status`, `video_id?`, `candidates?` (JSON), `track_id?` → tracks (set null), `score?` | `status`: 0 da cercare · 1 in coda · 2 scaricato · 3 collegato · 4 da verificare · 5 non trovato · 6 errore · 7 saltato |
+Allo avvio le importazioni «in corso» diventano «in pausa» e le righe «in coda» tornano «da cercare»:
+niente rete senza un'azione dell'utente. Cancellare la playlist cancella l'importazione.
+
 ## `albumKey` (chiave di raggruppamento album)
 Calcolata in `text_utils.dart`, **sempre** con questa funzione:
 ```

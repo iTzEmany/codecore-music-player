@@ -31,4 +31,30 @@ void main() {
     expect(cols.map((c) => c.read<String>('name')), contains('replay_gain_db'));
     await db.close();
   });
+
+  test('v3 database gets the import tables and keeps its data', () async {
+    final dir = Directory.systemTemp.createTempSync('mig4');
+    addTearDown(() => dir.deleteSync(recursive: true));
+    final file = File(p.join(dir.path, 'v3.db'));
+    final db = AppDatabase(NativeDatabase(file, setup: (raw) {
+      if (raw.userVersion == 0) {
+        raw.execute('CREATE TABLE playlists (id INTEGER PRIMARY KEY '
+            'AUTOINCREMENT, name TEXT NOT NULL, created_at INTEGER NOT NULL, '
+            'cover_key TEXT)');
+        raw.execute("INSERT INTO playlists (name, created_at) VALUES ('Mine', 1)");
+        raw.execute('CREATE TABLE tracks (id INTEGER PRIMARY KEY AUTOINCREMENT, '
+            'path TEXT NOT NULL, replay_gain_db REAL)');
+        raw.userVersion = 3;
+      }
+    }));
+    final rows = await db.select(db.playlists).get();
+    expect(rows.single.name, 'Mine');
+    final tables = await db
+        .customSelect("SELECT name FROM sqlite_master WHERE type = 'table'")
+        .get();
+    final names = tables.map((t) => t.read<String>('name'));
+    expect(names, containsAll(['playlist_imports', 'playlist_import_items']));
+    expect(await db.select(db.playlistImports).get(), isEmpty);
+    await db.close();
+  });
 }

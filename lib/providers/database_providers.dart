@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/db/app_database.dart';
 import '../data/repositories/folder_repository.dart';
+import '../data/repositories/import_repository.dart';
 import '../data/repositories/playlist_repository.dart';
 import '../data/repositories/track_repository.dart';
 
@@ -21,6 +22,10 @@ final folderRepositoryProvider = Provider<FolderRepository>(
 
 final playlistRepositoryProvider = Provider<PlaylistRepository>(
   (ref) => PlaylistRepository(ref.watch(databaseProvider)),
+);
+
+final importRepositoryProvider = Provider<ImportRepository>(
+  (ref) => ImportRepository(ref.watch(databaseProvider)),
 );
 
 final playlistsProvider = StreamProvider<List<PlaylistSummary>>(

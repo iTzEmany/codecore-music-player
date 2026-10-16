@@ -122,6 +122,39 @@ class PlaylistRepository {
     });
   }
 
+  /// Adds [trackId] of CSV row [rowIndex] of import [importId] right before the
+  /// first track already in the playlist that came from a later row, else at
+  /// the end. Manually added or reordered tracks keep their place. Returns
+  /// false when the track was already in the playlist.
+  Future<bool> placeImported(
+      int playlistId, int importId, int rowIndex, int trackId) {
+    return _db.transaction(() async {
+      final rows = await (_db.select(_db.playlistTracks)
+            ..where((t) => t.playlistId.equals(playlistId))
+            ..orderBy([(t) => OrderingTerm.asc(t.position)]))
+          .get();
+      final ids = rows.map((r) => r.trackId).toList();
+      if (ids.contains(trackId)) return false;
+      final fromRow = {
+        for (final i in await (_db.select(_db.playlistImportItems)
+              ..where((i) =>
+                  i.importId.equals(importId) & i.trackId.isNotNull()))
+            .get())
+          i.trackId!: i.rowIndex,
+      };
+      var at = ids.indexWhere((id) {
+        final r = fromRow[id];
+        return r != null && r > rowIndex;
+      });
+      if (at < 0) at = ids.length;
+      await _db.into(_db.playlistTracks).insert(PlaylistTracksCompanion.insert(
+          playlistId: playlistId, trackId: trackId, position: ids.length));
+      ids.insert(at, trackId);
+      await _writeOrder(playlistId, ids);
+      return true;
+    });
+  }
+
   Future<void> removeTrack(int playlistId, int trackId) =>
       _db.transaction(() async {
         await (_db.delete(_db.playlistTracks)
