@@ -177,7 +177,7 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 14.10 Controllo della durata a fine download
 - [x] 14.11 Validazioni: CSV troppo grandi e ricerche bloccate
 - [ ] 14.12 (Opzionale) Impronta audio con Chromaprint — chiedere all'utente (NON FATTO: richiede la tua approvazione e una chiave AcoustID inserita da te; vedi «Tocca a te»)
-- [ ] 14.13 Rifinitura, documentazione e prova a mano
+- [~] 14.13 Rifinitura, documentazione e prova a mano
 
 ## Fase 15 — Importazione 2 (`fase-15-importazione-2.md`)
 - [ ] 15.1 Verifiche preliminari (file veri dei formati, album su YouTube Music, iTunes per ISRC)
@@ -398,6 +398,8 @@ L'agente riparte sempre dal primo task non spuntato.
 - 14.9: `SearchCache` (JSON in `<appSupport>/search_cache.json`, 30 giorni, 2.000 voci LRU, scrittura con debounce, file illeggibile → vuota) + `CachedYoutubeService` solo per il motore d'importazione; le risposte vuote **non** si salvano; un download `unavailable` fa dimenticare le ricerche della riga (`forgetSearches`). Impostazioni → Download → «Svuota cache ricerche (N)».
 - 14.10: scarto > 10 s (`durationMismatchMs`) → riga `review` **con `trackId`** (non si usa `candidates`): in «Rivedi» compare «Durata diversa: 3:58 invece di 3:20» con «Tieni questo» (`keepDownloaded`) oltre a «Cerca a mano»/«Salta». Il brano resta nella playlist e il file non si tocca. Il conteggio finale «aggiunti» non include queste righe (sono «da verificare»).
 - 14.11: `checkCsvSize` (5 MB, prima di leggere il file) e 10.000 righe → `CsvTooLargeException` (sottoclasse di `FormatException`) con messaggio dedicato nel foglio. Ricerche desktop: `Process.start` + timeout 45 s (`searchTimeout`) + `sigkill` → `YtErrorKind.network`; Android: `processId` anche per `search` e `cancel` al timeout lato Dart (la parte Kotlin sarà compilata con la build APK di fine fase).
+- 14.13: `flutter build apk --debug --build-number=5000` riuscito (Kotlin: `version`, `rateLimit`, `processId` nelle ricerche); APK installato con `adb install -r` sul Mi A3.
+- 14.13 (2026-10-16): misura dal vivo su PC con 3 righe di `Just_a_mood.csv` (`CC_PARALLEL`): **44 s con 1 download, 37 s con 2** (campione piccolo, dominato dalle ricerche da 1,5 s). ARB it/en/de/es completi per tutte le stringhe della fase. Documenti: 02-architettura, 99-rischi (R27–R30, aggiornati R19 e R21), 03-modello-dati, README.
 - 14.1 nota: se bestaudio non ha un m4a, `-x` estrae `.opus`; l'estensione `opus` è già tra quelle scansionate.
 - 13.3: `tracks` di `user_data.json` contiene solo i brani con preferito/modifica/testi/ascolti; chi sta solo in una playlist compare nei riferimenti della playlist (niente duplicati). Brano fuori da ogni cartella: `folder` = percorso assoluto del file, `relPath` null. `trackRefFor` è pubblica (serve all'export JSON).
 - 13.4: `LibraryEntryLite` guadagna `path` (opzionale, riempito da `liteEntries`); `TrackResolver` tenta percorso relativo → titolo+artista+durata ±2 s → sha256.

@@ -1,6 +1,6 @@
 // Opt-in, real network + yt-dlp + ffmpeg: imports 3 rows of the CSV all the way
 // (search, download, scan, tags, playlist order) with the production providers.
-//   CODECORE_LIVE=1 YTDLP=/path/to/yt-dlp flutter test test/live/import_e2e_test.dart
+//   CODECORE_LIVE=1 YTDLP=/path/to/yt-dlp [CC_PARALLEL=1|2|3] flutter test test/live/import_e2e_test.dart
 import 'dart:io';
 
 import 'package:codecore/data/db/app_database.dart';
@@ -26,7 +26,10 @@ void main() {
   final live = Platform.environment['CODECORE_LIVE'] == '1';
 
   test('3 real rows: found, downloaded, tagged and ordered', () async {
-    SharedPreferences.setMockInitialValues({});
+    final parallel = int.tryParse(Platform.environment['CC_PARALLEL'] ?? '');
+    SharedPreferences.setMockInitialValues(
+        {if (parallel != null) 'downloadParallel': parallel});
+    final clock = Stopwatch()..start();
     final store = await SettingsStore.open();
     final tmp = Directory.systemTemp.createTempSync('cc_e2e');
     final music = Directory(p.join(tmp.path, 'Music'))..createSync();
@@ -71,6 +74,7 @@ void main() {
       out.writeln('${it.rowIndex} ${it.state.name} ${it.title} -> '
           'track ${it.trackId} video ${it.videoId} score ${it.score}');
     }
+    out.writeln('elapsed: ${clock.elapsed.inSeconds} s (parallel ${store.readSettings().downloadParallel})');
     final files = music.listSync().map((e) => p.basename(e.path)).toList();
     out.writeln('files: $files');
     final tracks = await db.select(db.tracks).get();

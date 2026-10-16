@@ -114,5 +114,8 @@ File scomparsi: `missing = true` **solo se la cartella radice è raggiungibile**
 | `volume` | double | 1.0 | |
 | `shuffle` | bool | false | |
 | `repeat` | string | `off` | `off`, `all`, `one` |
+| `downloadParallel` | int | 2 | 1–3 (fase 14) |
+| `downloadRateLimitKBps` | int | 0 | 0 = nessun limite (fase 14) |
+| `downloadOriginal` | bool | false | audio originale senza ricodifica (fase 14) |
 
 Le vecchie impostazioni finte (crossfade, gapless, normalizzazione, "bit-perfect WASAPI", autoplay) **non** vengono portate.

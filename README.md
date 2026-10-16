@@ -50,13 +50,19 @@ Firma Android: crea `android/key.properties` (non versionato) con `storeFile`, `
 senza il file la build release usa la chiave di debug.
 
 
+## Download (Impostazioni → Download)
+- **Download contemporanei** 1–3 (predefinito 2), **limite di velocità** e **qualità originale** (M4A/Opus senza ricodifica; spenta = MP3 256 kbps).
+- Un errore di rete o un 403 passeggero viene ritentato da solo (dopo 5, 20 e 60 secondi); un limite di YouTube (429) mette in pausa.
+- **yt-dlp (desktop):** l'app usa quello scaricato da lei (`Aggiorna`) prima di quello nel PATH; se è più vecchio di `2025.11.12` mostra un avviso.
+- Le ricerche dell'importazione da CSV sono ricordate 30 giorni (**Svuota cache ricerche**); un file di durata molto diversa dal CSV finisce in «Da verificare».
+
 ## Limiti noti
 - Jam: massimo 5 partecipanti; la sincronia è misurata sulla posizione del player (scarto tipico 10–30 ms, non acustico), con Bluetooth serve la compensazione manuale della latenza; nessun controllo da notifica di sistema/MPRIS; la richiesta Jam in background Android passa dalla notifica «Accetta/Rifiuta».
 - Niente crossfade/gapless nativo, niente equalizzatore, niente scrittura dei tag nei file.
 - Controlli multimediali di sistema (MPRIS / SMTC) non implementati; i tasti multimediali funzionano a finestra attiva.
 - Condivisione LAN in HTTP in chiaro (protetta da PIN, solo per reti domestiche).
 - Lo scanner QR non è incluso: inserire IP:porta e PIN o incollare il link del QR.
-- yt-dlp cambia spesso: su Android viene aggiornato a ogni avvio; su desktop va aggiornato a mano.
+- yt-dlp cambia spesso: su Android viene aggiornato a ogni avvio; su desktop l'app avvisa se è troppo vecchio e lo aggiorna con «Aggiorna» (Impostazioni → Download).
 
 ## Note legali
 Il download da YouTube può violare i termini del servizio e il diritto d'autore: la funzione è pensata per uso strettamente

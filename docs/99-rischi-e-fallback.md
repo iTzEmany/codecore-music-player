@@ -37,9 +37,16 @@ Per ogni rischio: **sintomo** → **cosa fare**. Se scatta un fallback che cambi
 ## Importazione da CSV (fase 12)
 | # | Rischio | Sintomo | Piano B |
 |---|---|---|---|
-| R19 | `yt-dlp` di sistema troppo vecchio (< 2025.11: niente `--js-runtimes`, «Please sign in») | ricerca/download falliscono con «YouTube ha cambiato qualcosa» | `pip install -U yt-dlp` (o il binario standalone dalle release di yt-dlp) e mettilo nel PATH; su Android si aggiorna da solo |
+| R19 | `yt-dlp` di sistema troppo vecchio (< 2025.11: niente `--js-runtimes`, «Please sign in») | ricerca/download falliscono con «YouTube ha cambiato qualcosa» | Desktop: Impostazioni → Download → **Aggiorna** (fase 14: binario ufficiale con controllo SHA-256, il vecchio resta `.old`); in alternativa `pip install -U yt-dlp`. Su Android si aggiorna da solo |
 | R20 | YouTube risponde 429 / «Sign in to confirm you're not a bot» a molte ricerche di fila | importazione in pausa con avviso «YouTube ha chiesto di rallentare» | Una ricerca alla volta con 1,5 s di pausa; aspettare qualche minuto e «Riprendi» |
-| R21 | 403 transitorio sul flusso audio | un brano «con errori» in mezzo a un'importazione | Un ritento automatico per riga; poi «Riprova tutti» nella schermata «Rivedi» |
+| R21 | 403 transitorio sul flusso audio | un brano «con errori» in mezzo a un'importazione | Ritento a scalare nella coda dei download (5/20/60 s, solo errori transitori, fase 14); poi «Riprova tutti» nella schermata «Rivedi» |
 | R22 | Exportify cambia nome o ordine delle colonne | «Questo file non sembra un CSV di Exportify» | Le colonne si riconoscono dall'intestazione (`Track Name`, `Artist Name(s)`, `Duration (ms)`…); aggiungere i nuovi nomi in `exportify_reader.dart` |
 | R23 | Brano sbagliato scelto con sicurezza (versione live, cover, durata diversa) | nella playlist suona un'altra versione | Soglia 0,80 e durata come criterio principale; i casi dubbi vanno in «Da verificare»; «Cerca a mano» per correggere |
 
+## Download robusti (fase 14)
+| # | Rischio | Sintomo | Piano B |
+|---|---|---|---|
+| R27 | Binario yt-dlp scaricato compromesso o troncato | yt-dlp non parte o fa altro | Solo HTTPS da GitHub, SHA-256 contro `SHA2-256SUMS` della stessa release, rinomina atomica, il precedente resta come `yt-dlp.old` (rinominalo per tornare indietro) |
+| R28 | Più download insieme → più 403/429 | Righe «con errori» o importazione in pausa | Predefinito 2 (massimo 3); ricerche sempre una alla volta; ritento a scalare con jitter; `rateLimited` mette in pausa; abbassare «Download contemporanei» a 1 |
+| R29 | Formato «originale» non leggibile da tag reader o player | Durata 0 o brano che non parte | Spento di default (MP3); se manca m4a si ottiene opus/webm (estensioni già scansionate); riattivare MP3 e riscaricare |
+| R30 | Cache delle ricerche con risultati vecchi (video rimosso) | Si propone un video non più disponibile | Scadenza 30 giorni; un download `unavailable` cancella le voci della riga; «Svuota cache ricerche» nelle Impostazioni |

@@ -136,3 +136,9 @@ Scritture con debounce 400 ms, mai in un handler di slider a ogni tick.
   applica i tag del CSV (`TrackEditor.save`, `userEdited`) e inserisce il brano nella posizione del CSV
   (`PlaylistRepository.placeImported`). Al più 3 download in coda per importazione, 1,5 s tra due ricerche; 429 → pausa.
 - **UI:** `ImportBanner` nella pagina playlist, `ImportReviewScreen` (+ `ImportManualSearchSheet`), riga nel Centro Attività.
+
+## Download (fase 14)
+- **Coda:** `DownloadQueue(maxParallel 1–3, retryPolicy)` esegue in ordine di arrivo; un errore transitorio (`network`/`changed`) mette l'elemento in `waitingRetry` (non occupa lo slot) e lo riaccoda dopo 5/20/60 s ±20 % (`RetryPolicy`); `onSettled` arriva solo all'esito definitivo. I `.part` orfani si cancellano **una volta** per sessione (`removeStalePartFiles`).
+- **Opzioni:** `DownloadOptions(rateLimitKBps, format)` lette dalle impostazioni a ogni download; `buildDownloadArgs` (`yt_dlp_args.dart`) costruisce la riga di comando desktop, Android riceve `rateLimit`/`convert` dal canale `codecore/ytdlp`.
+- **yt-dlp desktop:** `locateYtDlp()` (`<appSupport>/bin` → accanto all'eseguibile → `/app/bin` → PATH); `YtDlpUpdater` scarica e verifica; `ytDlpStatusProvider` + `YtDlpOutdatedBanner` avvisano se < `kMinYtDlpVersion`. Un errore su un yt-dlp vecchio diventa `YtErrorKind.toolOutdated`.
+- **Importazione:** ricerca per ISRC prima (solo se «sicuro»), `CachedYoutubeService` + `SearchCache` (`search_cache.json`), controllo della durata a fine download (scarto > 10 s → «da verificare» con «Tieni questo»), limiti di 5 MB / 10.000 righe sul CSV, timeout di 45 s sulle ricerche (il processo viene terminato).
