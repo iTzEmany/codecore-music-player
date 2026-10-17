@@ -11,6 +11,7 @@ import 'audio_backend.dart';
 import 'crossfade_engine.dart';
 import 'equalizer.dart';
 import 'next_window.dart';
+import 'media_browse_tree.dart';
 import 'play_queue.dart';
 import 'remote_transport.dart';
 import 'resume_point.dart';
@@ -136,6 +137,52 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     _consecutiveErrors = 0;
     _queueController.add(null);
     await _loadCurrent(play: true);
+  }
+
+  /// What Android Auto and other media browsers see (set at start-up).
+  MediaBrowseTree? browse;
+
+  @override
+  Future<List<MediaItem>> getChildren(String parentMediaId,
+      [Map<String, dynamic>? options]) async {
+    try {
+      return await browse?.children(parentMediaId) ?? const [];
+    } on Object catch (e, st) {
+      AppLog.w('browse $parentMediaId failed', e, st);
+      return const [];
+    }
+  }
+
+  @override
+  Future<MediaItem?> getMediaItem(String mediaId) async {
+    try {
+      return await browse?.item(mediaId);
+    } on Object catch (e, st) {
+      AppLog.w('browse item $mediaId failed', e, st);
+      return null;
+    }
+  }
+
+  @override
+  Future<List<MediaItem>> search(String query,
+      [Map<String, dynamic>? extras]) async {
+    try {
+      return await browse?.search(query) ?? const [];
+    } on Object catch (e, st) {
+      AppLog.w('browse search failed', e, st);
+      return const [];
+    }
+  }
+
+  @override
+  Future<void> playFromMediaId(String mediaId,
+      [Map<String, dynamic>? extras]) async {
+    try {
+      final r = await browse?.resolve(mediaId);
+      if (r != null) await playQueue(r.ids, r.index);
+    } on Object catch (e, st) {
+      AppLog.w('play from $mediaId failed', e, st);
+    }
   }
 
   /// Loads the queue paused, at [position] (used to resume after a restart).

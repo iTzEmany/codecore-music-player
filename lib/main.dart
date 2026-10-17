@@ -1,7 +1,4 @@
 import 'dart:async';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'services/android/widget_bridge.dart';
-import 'services/android/widget_sync.dart';
 import 'dart:io';
 
 import 'package:audio_service/audio_service.dart';
@@ -10,13 +7,16 @@ import 'package:flutter/foundation.dart' show LicenseEntryWithLineBreaks, Licens
 import 'package:flutter/services.dart' show MethodChannel, rootBundle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio_media_kit/just_audio_media_kit.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app.dart';
 import 'core/app_log.dart';
 import 'core/paths.dart';
 import 'core/platform.dart';
 import 'data/db/app_database.dart';
+import 'data/repositories/library_queries.dart';
 import 'data/repositories/play_history_repository.dart';
+import 'data/repositories/playlist_repository.dart';
 import 'data/repositories/podcast_repository.dart';
 import 'data/repositories/track_repository.dart';
 import 'data/settings/settings_store.dart';
@@ -28,8 +28,11 @@ import 'providers/share_providers.dart';
 import 'services/audio/codecore_audio_handler.dart';
 import 'services/audio/crossfade_engine.dart';
 import 'services/audio/just_audio_backend.dart';
+import 'services/audio/media_browse_tree.dart';
 import 'services/audio/play_queue.dart';
 import 'services/audio/playback_persistence.dart';
+import 'services/android/widget_bridge.dart';
+import 'services/android/widget_sync.dart';
 import 'services/covers/cover_store.dart';
 
 Future<void> main() async {
@@ -84,6 +87,17 @@ Future<void> main() async {
     AppLog.w('restore playback failed', e, st);
   }
   persistence.start();
+
+  handler.browse = MediaBrowseTree(
+    DbBrowseSource(TrackRepository(db), LibraryQueries(db), PlaylistRepository(db)),
+    labels: BrowseLabels.forLanguage(settingsStore.readSettings().language),
+    coverUri: (k) => covers.fileFor(k)?.uri,
+  );
+  // A browser that connected before Dart was up got an empty list.
+  if (Platform.isAndroid) {
+    // ignore: deprecated_member_use
+    unawaited(AudioServiceBackground.notifyChildrenChanged(MediaBrowseTree.root));
+  }
 
   // Home-screen widget and quick tile (Android): fed from here, not from the
   // UI, because the player outlives the activity.
