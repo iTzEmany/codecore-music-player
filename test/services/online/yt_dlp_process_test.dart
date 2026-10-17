@@ -137,6 +137,30 @@ void main() {
               .having((e) => e.kind, 'kind', YtErrorKind.unavailable)));
     });
 
+    test('the SoundCloud search asks for a flat scsearch, drops the previews and trims to the limit', () async {
+      final argsFile = File('${dir.path}/args');
+      final json = File('test/fixtures/scsearch_flat.json').absolute.path;
+      final f = File('${dir.path}/sc-yt-dlp')
+        ..writeAsStringSync('#!/bin/sh\n'
+            'if [ "\$1" = "--version" ]; then echo 2026.08.19; exit 0; fi\n'
+            'echo "\$@" > ${argsFile.path}\n'
+            'cat $json\n');
+      Process.runSync('chmod', ['+x', f.path]);
+      final svc = YtDlpProcessService(executable: f.path);
+
+      final res = await svc.searchSoundCloud('daft punk one more time', limit: 3);
+
+      expect(argsFile.readAsStringSync().trim(),
+          '-J --no-warnings --flat-playlist scsearch8:daft punk one more time');
+      expect(res, hasLength(3));
+      expect(res.every((r) => r.source == MediaSource.soundcloud && r.duration! > const Duration(seconds: 31)), isTrue);
+    });
+
+    test('a blank SoundCloud query does not start a process', () async {
+      final svc = YtDlpProcessService(executable: '/nonexistent/yt-dlp');
+      expect(await svc.searchSoundCloud('   '), isEmpty);
+    });
+
     test('a search that hangs is killed after the timeout', () async {
       final pidFile = File('${dir.path}/pid');
       final f = File('${dir.path}/slow-yt-dlp')

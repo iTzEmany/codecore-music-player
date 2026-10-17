@@ -55,6 +55,8 @@ class _FakeYoutube implements YoutubeService {
   @override
   Future<List<YtResult>> searchSongs(String query, {int limit = 5}) async => const [];
   @override
+  Future<List<YtResult>> searchSoundCloud(String query, {int limit = 5}) async => const [];
+  @override
   Future<List<YtResult>> searchAlbums(String query, {int limit = 3}) async => const [];
   @override
   Future<List<YtResult>> albumTracks(String albumLink) async => const [];

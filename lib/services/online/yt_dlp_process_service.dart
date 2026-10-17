@@ -14,7 +14,39 @@ import 'youtube_service.dart';
 List<YtResult> parseYtDlpJson(String raw) {
   final data = jsonDecode(raw);
   if (data is! Map) return const [];
+  return _results(data['entries'] is List ? data['entries'] as List : [data]);
+}
+
+/// SoundCloud serves a 30 s excerpt of many commercial tracks next to (or
+/// instead of) the full one: those are not downloads anyone wants.
+const soundCloudPreviewMaxSeconds = 31;
+
+bool _isSoundCloudPreview(Map e) {
+  final d = e['duration'];
+  if (d is num && d <= soundCloudPreviewMaxSeconds) return true;
+  // Full metadata lists the formats; excerpts only have `*_preview` ones.
+  final formats = e['formats'];
+  if (formats is List && formats.isNotEmpty) {
+    return formats.every((f) => f is Map && '${f['format_id']}'.contains('preview'));
+  }
+  return false;
+}
+
+/// Parses `yt-dlp -J scsearchN:...` (flat or complete) and drops the previews.
+List<YtResult> parseSoundCloudJson(String raw) {
+  final data = jsonDecode(raw);
+  if (data is! Map) return const [];
   final entries = data['entries'] is List ? data['entries'] as List : [data];
+  final full = [
+    for (final e in entries)
+      if (e is Map && !_isSoundCloudPreview(e)) e,
+  ];
+  final dropped = entries.whereType<Map>().length - full.length;
+  if (dropped > 0) AppLog.d('soundcloud: $dropped previews left out');
+  return _results(full);
+}
+
+List<YtResult> _results(List entries) {
   final out = <YtResult>[];
   for (final e in entries) {
     if (e is! Map) continue;
@@ -108,6 +140,7 @@ YtException ytExceptionFromStderr(String err) {
       t.contains('video unavailable') ||
       t.contains('not available') ||
       t.contains('sign in') ||
+      t.contains('drm protected') ||
       t.contains('age-restricted')) {
     return YtException(YtErrorKind.unavailable, err);
   }
@@ -228,6 +261,29 @@ class YtDlpProcessService implements YoutubeService {
       return parseYtDlpJson(r.out);
     } on FormatException catch (e, st) {
       AppLog.w('yt-dlp search output not JSON', e, st);
+      throw const YtException(YtErrorKind.changed, 'bad output');
+    }
+  }
+
+  @override
+  Future<List<YtResult>> searchSoundCloud(String query, {int limit = 5}) async {
+    final q = query.trim();
+    if (q.isEmpty) return const [];
+    await _ensureTool();
+    // A flat listing: with full metadata one DRM-protected track makes
+    // yt-dlp fail, and on Android that loses the whole answer. Asking for a
+    // few more than [limit] makes up for the previews that are dropped.
+    final r = await _runSearch([
+      '-J',
+      '--no-warnings',
+      '--flat-playlist',
+      'scsearch${soundCloudFetchCount(limit)}:$q',
+    ]);
+    if (r.code != 0) throw await _explain(r.err);
+    try {
+      return parseSoundCloudJson(r.out).take(limit).toList();
+    } on FormatException catch (e, st) {
+      AppLog.w('yt-dlp soundcloud output not JSON', e, st);
       throw const YtException(YtErrorKind.changed, 'bad output');
     }
   }

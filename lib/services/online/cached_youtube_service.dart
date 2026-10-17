@@ -36,6 +36,16 @@ class CachedYoutubeService implements YoutubeService {
   }
 
   @override
+  Future<List<YtResult>> searchSoundCloud(String query, {int limit = 5}) async {
+    final key = 'sc|${_norm(query)}|$limit';
+    final hit = await cache.get(key);
+    if (hit != null) return hit;
+    final res = await inner.searchSoundCloud(query, limit: limit);
+    await cache.put(key, res);
+    return res;
+  }
+
+  @override
   Future<List<YtResult>> searchAlbums(String query, {int limit = 3}) async {
     final key = 'albums|${_norm(query)}|$limit';
     final hit = await cache.get(key);
@@ -60,7 +70,10 @@ class CachedYoutubeService implements YoutubeService {
   Future<void> forget(Iterable<String> queries) {
     final wanted = {for (final q in queries) _norm(q)};
     return cache.removeWhere((key) => wanted
-        .any((q) => key.startsWith('songs|$q|') || key == 'plain|$q'));
+        .any((q) =>
+            key.startsWith('songs|$q|') ||
+            key.startsWith('sc|$q|') ||
+            key == 'plain|$q'));
   }
 
   @override

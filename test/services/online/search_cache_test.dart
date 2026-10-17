@@ -36,6 +36,10 @@ class Counting implements YoutubeService {
       const Stream.empty();
 
   @override
+  Future<List<YtResult>> searchSoundCloud(String query, {int limit = 5}) async =>
+      const [];
+
+  @override
   Future<List<YtResult>> searchAlbums(String query, {int limit = 3}) async {
     albumSearches++;
     return [yr('https://music.youtube.com/browse/MPREb_$query')];
