@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_nothing">Keine Wiedergabe</string>
+    <string name="widget_play">Wiedergabe</string>
+    <string name="widget_pause">Pause</string>
+    <string name="widget_previous">Zurück</string>
+    <string name="widget_next">Weiter</string>
+    <string name="widget_description">Codecore vom Startbildschirm steuern</string>
+    <string name="tile_label">Codecore</string>
+</resources>

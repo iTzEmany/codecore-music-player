@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="@drawable/widget_background">
+    <ImageView android:id="@+id/cover" android:layout_width="match_parent" android:layout_height="match_parent"
+        android:scaleType="centerCrop" android:contentDescription="@null"/>
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_gravity="bottom" android:background="#CC07050C"
+        android:gravity="center_vertical" android:orientation="horizontal" android:padding="8dp">
+        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+            android:layout_weight="1" android:orientation="vertical">
+            <TextView android:id="@+id/title" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:maxLines="1" android:ellipsize="end" android:textColor="#F4F0FA" android:textSize="13sp" android:textStyle="bold"/>
+            <TextView android:id="@+id/artist" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:maxLines="1" android:ellipsize="end" android:textColor="#B9B0CC" android:textSize="11sp"/>
+        </LinearLayout>
+        <ImageButton android:id="@+id/play_pause" android:layout_width="48dp" android:layout_height="48dp"
+            android:background="@null" android:src="@drawable/ic_widget_play" android:contentDescription="@string/widget_play"/>
+    </LinearLayout>
+</FrameLayout>
