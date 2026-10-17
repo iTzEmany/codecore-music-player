@@ -1414,5 +1414,162 @@
   "ruleHelpOr": "rock OR jazz — OR (capitals) between two terms: one is enough",
   "ruleHelpFlags": "favorites, never-played — only favorites, or tracks never played; plays>10 for the most played",
   "ruleHelpOthers": "tag:live, format:flac — one of your tags, or the file format (the whole name, any case)",
-  "ruleHelpSmart": "The same rules make smart playlists (Library → + → New smart playlist)."
+  "ruleHelpSmart": "The same rules make smart playlists (Library → + → New smart playlist).",
+  "cleanupSection": "Library cleanup",
+  "duplicatesTitle": "Duplicates",
+  "duplicatesTileHint": "The same song in several copies or qualities",
+  "duplicatesIntro": "Looks for the same song in several copies: the same file in two folders, or the same song in two qualities. You see a preview before anything is merged. Favourites, playlists, listens, lyrics and labels move to the track you keep; the others are only hidden, and you can bring them back from “Hidden tracks”. No file is deleted without a double confirmation.",
+  "duplicatesSearch": "Find duplicates",
+  "duplicatesSearchAgain": "Search again",
+  "duplicatesReading": "Reading the library…",
+  "duplicatesHashing": "Checking files: {done} of {total}",
+  "@duplicatesHashing": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicatesGrouping": "Comparing tracks…",
+  "duplicatesFailed": "The search failed. Try again.",
+  "duplicatesNone": "No duplicates found",
+  "duplicatesSummary": "{groups, plural, one{1 group} other{{groups} groups}} · {hidden, plural, one{1 track to hide} other{{hidden} tracks to hide}}",
+  "@duplicatesSummary": {
+    "placeholders": {
+      "groups": {
+        "type": "int"
+      },
+      "hidden": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicatesExactBadge": "Identical",
+  "duplicatesProbableBadge": "Probable",
+  "duplicatesKeepLabel": "Keep",
+  "duplicatesPickKeep": "Tap a track to keep it",
+  "duplicatesMerge": "Merge",
+  "duplicatesNotDuplicates": "Not duplicates",
+  "duplicatesMergeAllExact": "Merge all identical ({count})",
+  "@duplicatesMergeAllExact": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicatesMergeAllTitle": "Merge all identical ones?",
+  "duplicatesMergeAllBody": "{groups, plural, one{1 group} other{{groups} groups}}, {hidden, plural, one{1 track hidden} other{{hidden} tracks hidden}}. Favourites, playlists, listens and lyrics move to the tracks that stay.",
+  "@duplicatesMergeAllBody": {
+    "placeholders": {
+      "groups": {
+        "type": "int"
+      },
+      "hidden": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicatesMerged": "Merged: {count, plural, one{1 track hidden} other{{count} tracks hidden}}",
+  "@duplicatesMerged": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicatesDeleteFiles": "Also delete the files ({count}, {size})",
+  "@duplicatesDeleteFiles": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "duplicatesDeleteListTitle": "Delete these files?",
+  "duplicatesDeleteListBody": "They will be erased from the device and cannot be recovered. The tracks you keep stay where they are.",
+  "duplicatesDeleteContinue": "Continue",
+  "duplicatesDeleteFinalTitle": "{count, plural, one{Permanently delete 1 file?} other{Permanently delete {count} files?}}",
+  "@duplicatesDeleteFinalTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicatesDeleteFinalBody": "Space freed: {size}. This cannot be undone.",
+  "@duplicatesDeleteFinalBody": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "duplicatesDeleteGo": "Delete permanently",
+  "duplicatesDeleteDoneTitle": "Done",
+  "duplicatesDeleteDone": "{count, plural, one{1 file deleted} other{{count} files deleted}} ({size}).",
+  "@duplicatesDeleteDone": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "duplicatesDeleteFailed": "{count, plural, one{1 file not deleted:} other{{count} files not deleted:}}",
+  "@duplicatesDeleteFailed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicatesDeleteSkipped": "{count, plural, one{1 file left alone: it is the same file as the kept track.} other{{count} files left alone: they are the same file as the kept track.}}",
+  "@duplicatesDeleteSkipped": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicatesDeleteAndroidHint": "On Android only files in folders the app can access can be deleted.",
+  "activityCleanup": "Finding duplicates: {done} of {total}",
+  "@activityCleanup": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "hiddenTracksTitle": "Hidden tracks",
+  "hiddenTracksCount": "Hidden tracks ({count})",
+  "@hiddenTracksCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hiddenTracksEmpty": "No hidden tracks",
+  "hiddenTracksHint": "Merged duplicates do not appear in the library. “Restore” puts them back.",
+  "hiddenRestore": "Restore",
+  "hiddenRestored": "{count, plural, one{1 track restored} other{{count} tracks restored}}",
+  "@hiddenRestored": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

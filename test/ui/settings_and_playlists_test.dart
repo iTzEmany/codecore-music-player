@@ -10,7 +10,7 @@ import '../support/app_harness.dart';
 void main() {
   testWidgets('settings builds and theme choice is persisted in state',
       (tester) async {
-    tester.view.physicalSize = const Size(500, 1600);
+    tester.view.physicalSize = const Size(500, 2000);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     final h = await Harness.create(tester);
@@ -23,6 +23,26 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
     expect(h.store.readSettings().theme, 'oled');
+    await h.dispose(tester);
+  });
+
+  testWidgets('settings has «Pulizia libreria»: duplicates open their screen, hidden tracks are counted',
+      (tester) async {
+    tester.view.physicalSize = const Size(500, 2400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final h = await Harness.create(tester, tracks: 2);
+    await tester.runAsync(() => h.db.customUpdate("UPDATE tracks SET ignored = 1 WHERE title = 'Song 0'"));
+    await h.pump(tester, const Scaffold(body: SettingsScreen()));
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 100)));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('Pulizia libreria'), findsOneWidget);
+    expect(find.text('Brani nascosti (1)'), findsOneWidget);
+
+    await tester.ensureVisible(find.text('Duplicati'));
+    await tester.tap(find.text('Duplicati'));
+    await tester.pumpAndSettle();
+    expect(find.text('Cerca duplicati'), findsOneWidget);
     await h.dispose(tester);
   });
 

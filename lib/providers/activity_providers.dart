@@ -3,13 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/online/download_queue.dart';
 import '../services/online/retry_policy.dart';
 import '../services/share/offers.dart';
+import 'duplicate_providers.dart';
 import 'import_providers.dart';
 import 'library_providers.dart';
 import 'online_providers.dart';
 import 'share_hub.dart';
 import 'youtube_providers.dart';
 
-enum ActivityKind { scan, enrich, download, transfer, import }
+enum ActivityKind { scan, enrich, download, transfer, import, cleanup }
 
 /// One line of the Activity centre. [progress] is 0..1, null = indeterminate.
 class ActivityItem {
@@ -54,7 +55,15 @@ class ActivityItem {
       (kind == ActivityKind.download ||
           kind == ActivityKind.transfer ||
           kind == ActivityKind.import ||
+          kind == ActivityKind.cleanup ||
           kind == ActivityKind.enrich);
+}
+
+/// The duplicate search, while it reads files.
+class CleanupProgress {
+  const CleanupProgress(this.done, this.total);
+
+  final int done, total;
 }
 
 class ActivityState {
@@ -72,6 +81,7 @@ ActivityState buildActivity({
   required List<DownloadItem> downloads,
   required List<OutgoingOffer> outgoing,
   List<ImportProgress> imports = const [],
+  CleanupProgress? cleanup,
 }) {
   final running = <ActivityItem>[];
   final completed = <ActivityItem>[];
@@ -99,6 +109,18 @@ ActivityState buildActivity({
         done: p?.done ?? 0,
         total: p?.total ?? 0,
         progress: (p == null || p.total == 0) ? null : p.done / p.total,
+      ),
+    );
+  }
+  if (cleanup != null) {
+    running.add(
+      ActivityItem(
+        kind: ActivityKind.cleanup,
+        key: 'cleanup',
+        name: null,
+        done: cleanup.done,
+        total: cleanup.total,
+        progress: cleanup.total == 0 ? null : cleanup.done / cleanup.total,
       ),
     );
   }
@@ -175,6 +197,11 @@ final activityProvider = Provider<ActivityState>((ref) {
     downloads: ref.watch(downloadsProvider),
     outgoing: ref.watch(shareHubProvider.select((h) => h.outgoing)),
     imports: ref.watch(importProgressProvider),
+    cleanup: ref.watch(
+      duplicateSearchProvider.select(
+        (d) => d.running ? CleanupProgress(d.done, d.total) : null,
+      ),
+    ),
   );
   final hidden = ref.watch(dismissedActivityProvider);
   if (hidden.isEmpty) return s;

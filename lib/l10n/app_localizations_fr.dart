@@ -2579,4 +2579,221 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get ruleHelpSmart =>
       'Les mêmes règles servent aux playlists intelligentes (Bibliothèque → + → Nouvelle playlist intelligente).';
+
+  @override
+  String get cleanupSection => 'Nettoyage de la bibliothèque';
+
+  @override
+  String get duplicatesTitle => 'Doublons';
+
+  @override
+  String get duplicatesTileHint =>
+      'Le même morceau en plusieurs copies ou qualités';
+
+  @override
+  String get duplicatesIntro =>
+      'Cherche le même morceau en plusieurs copies : le même fichier dans deux dossiers ou le même morceau en deux qualités. Un aperçu s’affiche avant toute fusion. Favoris, playlists, écoutes, paroles et étiquettes passent au morceau conservé ; les autres sont seulement masqués et se rétablissent depuis « Morceaux masqués ». Aucun fichier n’est supprimé sans une double confirmation.';
+
+  @override
+  String get duplicatesSearch => 'Chercher les doublons';
+
+  @override
+  String get duplicatesSearchAgain => 'Chercher à nouveau';
+
+  @override
+  String get duplicatesReading => 'Lecture de la bibliothèque…';
+
+  @override
+  String duplicatesHashing(int done, int total) {
+    return 'Vérification des fichiers : $done sur $total';
+  }
+
+  @override
+  String get duplicatesGrouping => 'Comparaison des morceaux…';
+
+  @override
+  String get duplicatesFailed => 'La recherche a échoué. Réessaie.';
+
+  @override
+  String get duplicatesNone => 'Aucun doublon trouvé';
+
+  @override
+  String duplicatesSummary(int groups, int hidden) {
+    String _temp0 = intl.Intl.pluralLogic(
+      groups,
+      locale: localeName,
+      other: '$groups groupes',
+      one: '1 groupe',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      hidden,
+      locale: localeName,
+      other: '$hidden morceaux à masquer',
+      one: '1 morceau à masquer',
+    );
+    return '$_temp0 · $_temp1';
+  }
+
+  @override
+  String get duplicatesExactBadge => 'Identiques';
+
+  @override
+  String get duplicatesProbableBadge => 'Probables';
+
+  @override
+  String get duplicatesKeepLabel => 'À garder';
+
+  @override
+  String get duplicatesPickKeep => 'Touche un morceau pour le garder';
+
+  @override
+  String get duplicatesMerge => 'Fusionner';
+
+  @override
+  String get duplicatesNotDuplicates => 'Pas des doublons';
+
+  @override
+  String duplicatesMergeAllExact(int count) {
+    return 'Fusionner tous les identiques ($count)';
+  }
+
+  @override
+  String get duplicatesMergeAllTitle => 'Fusionner tous les identiques ?';
+
+  @override
+  String duplicatesMergeAllBody(int groups, int hidden) {
+    String _temp0 = intl.Intl.pluralLogic(
+      groups,
+      locale: localeName,
+      other: '$groups groupes',
+      one: '1 groupe',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      hidden,
+      locale: localeName,
+      other: '$hidden morceaux masqués',
+      one: '1 morceau masqué',
+    );
+    return '$_temp0, $_temp1. Favoris, playlists, écoutes et paroles passent aux morceaux conservés.';
+  }
+
+  @override
+  String duplicatesMerged(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count morceaux masqués',
+      one: '1 morceau masqué',
+    );
+    return 'Fusionné : $_temp0';
+  }
+
+  @override
+  String duplicatesDeleteFiles(int count, String size) {
+    return 'Supprimer aussi les fichiers ($count, $size)';
+  }
+
+  @override
+  String get duplicatesDeleteListTitle => 'Supprimer ces fichiers ?';
+
+  @override
+  String get duplicatesDeleteListBody =>
+      'Ils seront effacés de l’appareil et ne pourront pas être récupérés. Les morceaux conservés restent où ils sont.';
+
+  @override
+  String get duplicatesDeleteContinue => 'Continuer';
+
+  @override
+  String duplicatesDeleteFinalTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Supprimer définitivement $count fichiers ?',
+      one: 'Supprimer définitivement 1 fichier ?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String duplicatesDeleteFinalBody(String size) {
+    return 'Espace libéré : $size. Cette action est irréversible.';
+  }
+
+  @override
+  String get duplicatesDeleteGo => 'Supprimer définitivement';
+
+  @override
+  String get duplicatesDeleteDoneTitle => 'Terminé';
+
+  @override
+  String duplicatesDeleteDone(int count, String size) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count fichiers supprimés',
+      one: '1 fichier supprimé',
+    );
+    return '$_temp0 ($size).';
+  }
+
+  @override
+  String duplicatesDeleteFailed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count fichiers non supprimés :',
+      one: '1 fichier non supprimé :',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String duplicatesDeleteSkipped(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count fichiers laissés tels quels : c’est le même fichier que le morceau conservé.',
+      one: '1 fichier laissé tel quel : c’est le même fichier que le morceau conservé.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get duplicatesDeleteAndroidHint =>
+      'Sur Android, seuls les fichiers des dossiers accessibles à l’appli peuvent être supprimés.';
+
+  @override
+  String activityCleanup(int done, int total) {
+    return 'Recherche de doublons : $done sur $total';
+  }
+
+  @override
+  String get hiddenTracksTitle => 'Morceaux masqués';
+
+  @override
+  String hiddenTracksCount(int count) {
+    return 'Morceaux masqués ($count)';
+  }
+
+  @override
+  String get hiddenTracksEmpty => 'Aucun morceau masqué';
+
+  @override
+  String get hiddenTracksHint =>
+      'Les doublons fusionnés n’apparaissent pas dans la bibliothèque. « Rétablir » les remet en place.';
+
+  @override
+  String get hiddenRestore => 'Rétablir';
+
+  @override
+  String hiddenRestored(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count morceaux rétablis',
+      one: '1 morceau rétabli',
+    );
+    return '$_temp0';
+  }
 }

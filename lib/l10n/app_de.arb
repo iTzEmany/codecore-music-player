@@ -1414,5 +1414,162 @@
   "ruleHelpOr": "rock OR jazz — OR (Großbuchstaben) zwischen zwei Begriffen: Einer genügt",
   "ruleHelpFlags": "favorites, never-played — nur Favoriten oder nie gespielte Titel; plays>10 für die meistgespielten",
   "ruleHelpOthers": "tag:live, format:flac — eines deiner Labels oder das Dateiformat (ganzer Name, Groß-/Kleinschreibung egal)",
-  "ruleHelpSmart": "Dieselben Regeln gelten für intelligente Playlists (Bibliothek → + → Neue intelligente Playlist)."
+  "ruleHelpSmart": "Dieselben Regeln gelten für intelligente Playlists (Bibliothek → + → Neue intelligente Playlist).",
+  "cleanupSection": "Mediathek aufräumen",
+  "duplicatesTitle": "Duplikate",
+  "duplicatesTileHint": "Derselbe Titel in mehreren Kopien oder Qualitäten",
+  "duplicatesIntro": "Sucht denselben Titel in mehreren Kopien: dieselbe Datei in zwei Ordnern oder denselben Titel in zwei Qualitäten. Vor dem Zusammenführen siehst du eine Vorschau. Favoriten, Playlists, Wiedergaben, Texte und Labels gehen auf den Titel über, den du behältst; die anderen werden nur ausgeblendet und lassen sich unter „Ausgeblendete Titel“ wiederherstellen. Keine Datei wird ohne doppelte Bestätigung gelöscht.",
+  "duplicatesSearch": "Duplikate suchen",
+  "duplicatesSearchAgain": "Erneut suchen",
+  "duplicatesReading": "Mediathek wird gelesen …",
+  "duplicatesHashing": "Dateien werden geprüft: {done} von {total}",
+  "@duplicatesHashing": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicatesGrouping": "Titel werden verglichen …",
+  "duplicatesFailed": "Die Suche ist fehlgeschlagen. Versuche es erneut.",
+  "duplicatesNone": "Keine Duplikate gefunden",
+  "duplicatesSummary": "{groups, plural, one{1 Gruppe} other{{groups} Gruppen}} · {hidden, plural, one{1 Titel auszublenden} other{{hidden} Titel auszublenden}}",
+  "@duplicatesSummary": {
+    "placeholders": {
+      "groups": {
+        "type": "int"
+      },
+      "hidden": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicatesExactBadge": "Identisch",
+  "duplicatesProbableBadge": "Wahrscheinlich",
+  "duplicatesKeepLabel": "Behalten",
+  "duplicatesPickKeep": "Tippe auf einen Titel, um ihn zu behalten",
+  "duplicatesMerge": "Zusammenführen",
+  "duplicatesNotDuplicates": "Keine Duplikate",
+  "duplicatesMergeAllExact": "Alle identischen zusammenführen ({count})",
+  "@duplicatesMergeAllExact": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicatesMergeAllTitle": "Alle identischen zusammenführen?",
+  "duplicatesMergeAllBody": "{groups, plural, one{1 Gruppe} other{{groups} Gruppen}}, {hidden, plural, one{1 Titel ausgeblendet} other{{hidden} Titel ausgeblendet}}. Favoriten, Playlists, Wiedergaben und Texte gehen auf die Titel über, die bleiben.",
+  "@duplicatesMergeAllBody": {
+    "placeholders": {
+      "groups": {
+        "type": "int"
+      },
+      "hidden": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicatesMerged": "Zusammengeführt: {count, plural, one{1 Titel ausgeblendet} other{{count} Titel ausgeblendet}}",
+  "@duplicatesMerged": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicatesDeleteFiles": "Auch die Dateien löschen ({count}, {size})",
+  "@duplicatesDeleteFiles": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "duplicatesDeleteListTitle": "Diese Dateien löschen?",
+  "duplicatesDeleteListBody": "Sie werden vom Gerät gelöscht und lassen sich nicht wiederherstellen. Die Titel, die du behältst, bleiben, wo sie sind.",
+  "duplicatesDeleteContinue": "Weiter",
+  "duplicatesDeleteFinalTitle": "{count, plural, one{1 Datei endgültig löschen?} other{{count} Dateien endgültig löschen?}}",
+  "@duplicatesDeleteFinalTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicatesDeleteFinalBody": "Freigegebener Speicher: {size}. Das lässt sich nicht rückgängig machen.",
+  "@duplicatesDeleteFinalBody": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "duplicatesDeleteGo": "Endgültig löschen",
+  "duplicatesDeleteDoneTitle": "Fertig",
+  "duplicatesDeleteDone": "{count, plural, one{1 Datei gelöscht} other{{count} Dateien gelöscht}} ({size}).",
+  "@duplicatesDeleteDone": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "duplicatesDeleteFailed": "{count, plural, one{1 Datei nicht gelöscht:} other{{count} Dateien nicht gelöscht:}}",
+  "@duplicatesDeleteFailed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicatesDeleteSkipped": "{count, plural, one{1 Datei unberührt: Es ist dieselbe Datei wie der behaltene Titel.} other{{count} Dateien unberührt: Es ist dieselbe Datei wie der behaltene Titel.}}",
+  "@duplicatesDeleteSkipped": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicatesDeleteAndroidHint": "Unter Android lassen sich nur Dateien in Ordnern löschen, auf die die App Zugriff hat.",
+  "activityCleanup": "Duplikatsuche: {done} von {total}",
+  "@activityCleanup": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "hiddenTracksTitle": "Ausgeblendete Titel",
+  "hiddenTracksCount": "Ausgeblendete Titel ({count})",
+  "@hiddenTracksCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hiddenTracksEmpty": "Keine ausgeblendeten Titel",
+  "hiddenTracksHint": "Zusammengeführte Duplikate erscheinen nicht in der Mediathek. „Wiederherstellen“ bringt sie zurück.",
+  "hiddenRestore": "Wiederherstellen",
+  "hiddenRestored": "{count, plural, one{1 Titel wiederhergestellt} other{{count} Titel wiederhergestellt}}",
+  "@hiddenRestored": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/activity_providers.dart';
+import '../../../providers/duplicate_providers.dart';
 import '../../../providers/import_providers.dart';
 import '../../../providers/online_providers.dart';
 import '../../../providers/share_hub.dart';
@@ -40,6 +41,7 @@ class ActivitySheet extends ConsumerWidget {
           : l.activityDownloadRetry(
               a.name ?? '', a.retryDelaySec!, a.done, a.total),
       ActivityKind.transfer => l.activityTransfer(a.name ?? '', a.total),
+      ActivityKind.cleanup => l.activityCleanup(a.done, a.total),
       ActivityKind.import =>
         a.paused
             ? l.activityImportPaused(a.name ?? '', a.done, a.total)
@@ -73,6 +75,8 @@ class ActivitySheet extends ConsumerWidget {
                 o,
                 hub.peers.where((p) => p.id == o.toId).firstOrNull,
               );
+        case ActivityKind.cleanup:
+          ref.read(duplicateSearchProvider.notifier).cancel();
         case ActivityKind.import:
           cancelImport(a);
         case ActivityKind.scan:

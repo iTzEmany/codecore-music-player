@@ -3,6 +3,16 @@ import '../../l10n/app_localizations.dart';
 
 import '../../data/db/app_database.dart';
 
+/// «512 B», «842 KB», «12.4 MB», «1.2 GB» (decimal point; the unit is universal).
+String formatBytes(int bytes) {
+  if (bytes < 1024) return '$bytes B';
+  if (bytes < 1024 * 1024) return '${(bytes / 1024).round()} KB';
+  if (bytes < 1024 * 1024 * 1024) {
+    return '${(bytes / 1048576).toStringAsFixed(1)} MB';
+  }
+  return '${(bytes / 1073741824).toStringAsFixed(1)} GB';
+}
+
 String formatDuration(int ms) {
   if (ms <= 0) return '0:00';
   final total = ms ~/ 1000;

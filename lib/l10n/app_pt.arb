@@ -1605,5 +1605,162 @@
   "ruleHelpOr": "rock OR jazz — OR (em maiúsculas) entre dois termos: basta um",
   "ruleHelpFlags": "favorites, never-played — só os favoritos, ou as faixas nunca ouvidas; plays>10 para as mais ouvidas",
   "ruleHelpOthers": "tag:live, format:flac — uma das suas etiquetas, ou o formato do ficheiro (nome inteiro, sem distinguir maiúsculas)",
-  "ruleHelpSmart": "As mesmas regras servem para as playlists inteligentes (Biblioteca → + → Nova playlist inteligente)."
+  "ruleHelpSmart": "As mesmas regras servem para as playlists inteligentes (Biblioteca → + → Nova playlist inteligente).",
+  "cleanupSection": "Limpeza da biblioteca",
+  "duplicatesTitle": "Duplicados",
+  "duplicatesTileHint": "A mesma música em várias cópias ou qualidades",
+  "duplicatesIntro": "Procura a mesma música em várias cópias: o mesmo ficheiro em duas pastas ou a mesma música em duas qualidades. Antes de unir vês uma pré-visualização. Favoritos, playlists, reproduções, letras e etiquetas passam para a música que manténs; as outras ficam apenas ocultas e restauras em «Músicas ocultas». Nenhum ficheiro é apagado sem dupla confirmação.",
+  "duplicatesSearch": "Procurar duplicados",
+  "duplicatesSearchAgain": "Procurar de novo",
+  "duplicatesReading": "A ler a biblioteca…",
+  "duplicatesHashing": "A verificar ficheiros: {done} de {total}",
+  "@duplicatesHashing": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicatesGrouping": "A comparar músicas…",
+  "duplicatesFailed": "A pesquisa falhou. Tenta de novo.",
+  "duplicatesNone": "Nenhum duplicado encontrado",
+  "duplicatesSummary": "{groups, plural, one{1 grupo} other{{groups} grupos}} · {hidden, plural, one{1 música a ocultar} other{{hidden} músicas a ocultar}}",
+  "@duplicatesSummary": {
+    "placeholders": {
+      "groups": {
+        "type": "int"
+      },
+      "hidden": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicatesExactBadge": "Idênticos",
+  "duplicatesProbableBadge": "Prováveis",
+  "duplicatesKeepLabel": "Manter",
+  "duplicatesPickKeep": "Toca numa música para a manter",
+  "duplicatesMerge": "Unir",
+  "duplicatesNotDuplicates": "Não são duplicados",
+  "duplicatesMergeAllExact": "Unir todos os idênticos ({count})",
+  "@duplicatesMergeAllExact": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicatesMergeAllTitle": "Unir todos os idênticos?",
+  "duplicatesMergeAllBody": "{groups, plural, one{1 grupo} other{{groups} grupos}}, {hidden, plural, one{1 música oculta} other{{hidden} músicas ocultas}}. Favoritos, playlists, reproduções e letras passam para as músicas que ficam.",
+  "@duplicatesMergeAllBody": {
+    "placeholders": {
+      "groups": {
+        "type": "int"
+      },
+      "hidden": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicatesMerged": "Unido: {count, plural, one{1 música oculta} other{{count} músicas ocultas}}",
+  "@duplicatesMerged": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicatesDeleteFiles": "Apagar também os ficheiros ({count}, {size})",
+  "@duplicatesDeleteFiles": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "duplicatesDeleteListTitle": "Apagar estes ficheiros?",
+  "duplicatesDeleteListBody": "Serão apagados do dispositivo e não se podem recuperar. As músicas que manténs ficam onde estão.",
+  "duplicatesDeleteContinue": "Continuar",
+  "duplicatesDeleteFinalTitle": "{count, plural, one{Apagar definitivamente 1 ficheiro?} other{Apagar definitivamente {count} ficheiros?}}",
+  "@duplicatesDeleteFinalTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicatesDeleteFinalBody": "Espaço libertado: {size}. Esta ação não se pode anular.",
+  "@duplicatesDeleteFinalBody": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "duplicatesDeleteGo": "Apagar definitivamente",
+  "duplicatesDeleteDoneTitle": "Concluído",
+  "duplicatesDeleteDone": "{count, plural, one{1 ficheiro apagado} other{{count} ficheiros apagados}} ({size}).",
+  "@duplicatesDeleteDone": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "duplicatesDeleteFailed": "{count, plural, one{1 ficheiro não apagado:} other{{count} ficheiros não apagados:}}",
+  "@duplicatesDeleteFailed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicatesDeleteSkipped": "{count, plural, one{1 ficheiro intocado: é o mesmo ficheiro da música mantida.} other{{count} ficheiros intocados: são o mesmo ficheiro da música mantida.}}",
+  "@duplicatesDeleteSkipped": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicatesDeleteAndroidHint": "No Android só se podem apagar ficheiros das pastas a que a app tem acesso.",
+  "activityCleanup": "A procurar duplicados: {done} de {total}",
+  "@activityCleanup": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "hiddenTracksTitle": "Músicas ocultas",
+  "hiddenTracksCount": "Músicas ocultas ({count})",
+  "@hiddenTracksCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hiddenTracksEmpty": "Nenhuma música oculta",
+  "hiddenTracksHint": "Os duplicados unidos não aparecem na biblioteca. «Restaurar» volta a pô-los no lugar.",
+  "hiddenRestore": "Restaurar",
+  "hiddenRestored": "{count, plural, one{1 música restaurada} other{{count} músicas restauradas}}",
+  "@hiddenRestored": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

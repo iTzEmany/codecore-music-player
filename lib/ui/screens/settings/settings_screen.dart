@@ -25,6 +25,7 @@ import '../../../services/migration/python_db_importer.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/tokens.dart';
 import 'accent_picker.dart';
+import 'cleanup_tiles.dart';
 import 'advanced_section.dart';
 import 'download_settings_tiles.dart';
 import 'equalizer_screen.dart';
@@ -216,6 +217,10 @@ class SettingsScreen extends ConsumerWidget {
                     ),
                   ),
               ],
+            ),
+            _Group(
+              title: l.cleanupSection,
+              children: cleanupTiles(context, ref),
             ),
             _Group(
               title: l.settingsLocalNetwork,

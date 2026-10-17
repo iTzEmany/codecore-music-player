@@ -322,6 +322,13 @@ class SettingsStore {
     return id;
   }
 
+  /// Duplicate groups the user marked «not duplicates» (`DuplicateGroup.key`).
+  Set<String> readNotDuplicates() =>
+      (_prefs.getStringList('notDuplicates') ?? const []).toSet();
+
+  Future<void> writeNotDuplicates(Set<String> keys) =>
+      _prefs.setStringList('notDuplicates', keys.toList()..sort());
+
   SavedPlayback readPlayback() {
     final ids = (_prefs.getStringList('lastQueueIds') ?? const [])
         .map(int.tryParse)

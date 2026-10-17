@@ -2553,4 +2553,222 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get ruleHelpSmart =>
       'Dieselben Regeln gelten für intelligente Playlists (Bibliothek → + → Neue intelligente Playlist).';
+
+  @override
+  String get cleanupSection => 'Mediathek aufräumen';
+
+  @override
+  String get duplicatesTitle => 'Duplikate';
+
+  @override
+  String get duplicatesTileHint =>
+      'Derselbe Titel in mehreren Kopien oder Qualitäten';
+
+  @override
+  String get duplicatesIntro =>
+      'Sucht denselben Titel in mehreren Kopien: dieselbe Datei in zwei Ordnern oder denselben Titel in zwei Qualitäten. Vor dem Zusammenführen siehst du eine Vorschau. Favoriten, Playlists, Wiedergaben, Texte und Labels gehen auf den Titel über, den du behältst; die anderen werden nur ausgeblendet und lassen sich unter „Ausgeblendete Titel“ wiederherstellen. Keine Datei wird ohne doppelte Bestätigung gelöscht.';
+
+  @override
+  String get duplicatesSearch => 'Duplikate suchen';
+
+  @override
+  String get duplicatesSearchAgain => 'Erneut suchen';
+
+  @override
+  String get duplicatesReading => 'Mediathek wird gelesen …';
+
+  @override
+  String duplicatesHashing(int done, int total) {
+    return 'Dateien werden geprüft: $done von $total';
+  }
+
+  @override
+  String get duplicatesGrouping => 'Titel werden verglichen …';
+
+  @override
+  String get duplicatesFailed =>
+      'Die Suche ist fehlgeschlagen. Versuche es erneut.';
+
+  @override
+  String get duplicatesNone => 'Keine Duplikate gefunden';
+
+  @override
+  String duplicatesSummary(int groups, int hidden) {
+    String _temp0 = intl.Intl.pluralLogic(
+      groups,
+      locale: localeName,
+      other: '$groups Gruppen',
+      one: '1 Gruppe',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      hidden,
+      locale: localeName,
+      other: '$hidden Titel auszublenden',
+      one: '1 Titel auszublenden',
+    );
+    return '$_temp0 · $_temp1';
+  }
+
+  @override
+  String get duplicatesExactBadge => 'Identisch';
+
+  @override
+  String get duplicatesProbableBadge => 'Wahrscheinlich';
+
+  @override
+  String get duplicatesKeepLabel => 'Behalten';
+
+  @override
+  String get duplicatesPickKeep => 'Tippe auf einen Titel, um ihn zu behalten';
+
+  @override
+  String get duplicatesMerge => 'Zusammenführen';
+
+  @override
+  String get duplicatesNotDuplicates => 'Keine Duplikate';
+
+  @override
+  String duplicatesMergeAllExact(int count) {
+    return 'Alle identischen zusammenführen ($count)';
+  }
+
+  @override
+  String get duplicatesMergeAllTitle => 'Alle identischen zusammenführen?';
+
+  @override
+  String duplicatesMergeAllBody(int groups, int hidden) {
+    String _temp0 = intl.Intl.pluralLogic(
+      groups,
+      locale: localeName,
+      other: '$groups Gruppen',
+      one: '1 Gruppe',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      hidden,
+      locale: localeName,
+      other: '$hidden Titel ausgeblendet',
+      one: '1 Titel ausgeblendet',
+    );
+    return '$_temp0, $_temp1. Favoriten, Playlists, Wiedergaben und Texte gehen auf die Titel über, die bleiben.';
+  }
+
+  @override
+  String duplicatesMerged(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Titel ausgeblendet',
+      one: '1 Titel ausgeblendet',
+    );
+    return 'Zusammengeführt: $_temp0';
+  }
+
+  @override
+  String duplicatesDeleteFiles(int count, String size) {
+    return 'Auch die Dateien löschen ($count, $size)';
+  }
+
+  @override
+  String get duplicatesDeleteListTitle => 'Diese Dateien löschen?';
+
+  @override
+  String get duplicatesDeleteListBody =>
+      'Sie werden vom Gerät gelöscht und lassen sich nicht wiederherstellen. Die Titel, die du behältst, bleiben, wo sie sind.';
+
+  @override
+  String get duplicatesDeleteContinue => 'Weiter';
+
+  @override
+  String duplicatesDeleteFinalTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Dateien endgültig löschen?',
+      one: '1 Datei endgültig löschen?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String duplicatesDeleteFinalBody(String size) {
+    return 'Freigegebener Speicher: $size. Das lässt sich nicht rückgängig machen.';
+  }
+
+  @override
+  String get duplicatesDeleteGo => 'Endgültig löschen';
+
+  @override
+  String get duplicatesDeleteDoneTitle => 'Fertig';
+
+  @override
+  String duplicatesDeleteDone(int count, String size) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Dateien gelöscht',
+      one: '1 Datei gelöscht',
+    );
+    return '$_temp0 ($size).';
+  }
+
+  @override
+  String duplicatesDeleteFailed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Dateien nicht gelöscht:',
+      one: '1 Datei nicht gelöscht:',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String duplicatesDeleteSkipped(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count Dateien unberührt: Es ist dieselbe Datei wie der behaltene Titel.',
+      one: '1 Datei unberührt: Es ist dieselbe Datei wie der behaltene Titel.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get duplicatesDeleteAndroidHint =>
+      'Unter Android lassen sich nur Dateien in Ordnern löschen, auf die die App Zugriff hat.';
+
+  @override
+  String activityCleanup(int done, int total) {
+    return 'Duplikatsuche: $done von $total';
+  }
+
+  @override
+  String get hiddenTracksTitle => 'Ausgeblendete Titel';
+
+  @override
+  String hiddenTracksCount(int count) {
+    return 'Ausgeblendete Titel ($count)';
+  }
+
+  @override
+  String get hiddenTracksEmpty => 'Keine ausgeblendeten Titel';
+
+  @override
+  String get hiddenTracksHint =>
+      'Zusammengeführte Duplikate erscheinen nicht in der Mediathek. „Wiederherstellen“ bringt sie zurück.';
+
+  @override
+  String get hiddenRestore => 'Wiederherstellen';
+
+  @override
+  String hiddenRestored(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Titel wiederhergestellt',
+      one: '1 Titel wiederhergestellt',
+    );
+    return '$_temp0';
+  }
 }

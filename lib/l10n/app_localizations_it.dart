@@ -2546,4 +2546,219 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get ruleHelpSmart =>
       'Le stesse regole servono per le playlist intelligenti (Libreria → + → Nuova playlist intelligente).';
+
+  @override
+  String get cleanupSection => 'Pulizia libreria';
+
+  @override
+  String get duplicatesTitle => 'Duplicati';
+
+  @override
+  String get duplicatesTileHint => 'Lo stesso brano in più copie o qualità';
+
+  @override
+  String get duplicatesIntro =>
+      'Cerca lo stesso brano in più copie: lo stesso file in due cartelle o lo stesso brano in due qualità. Prima di unire vedi un’anteprima. Preferiti, playlist, ascolti, testi ed etichette passano al brano che tieni; gli altri vengono solo nascosti e li ripristini da «Brani nascosti». Nessun file viene cancellato senza una doppia conferma.';
+
+  @override
+  String get duplicatesSearch => 'Cerca duplicati';
+
+  @override
+  String get duplicatesSearchAgain => 'Cerca di nuovo';
+
+  @override
+  String get duplicatesReading => 'Leggo la libreria…';
+
+  @override
+  String duplicatesHashing(int done, int total) {
+    return 'Controllo i file: $done di $total';
+  }
+
+  @override
+  String get duplicatesGrouping => 'Confronto i brani…';
+
+  @override
+  String get duplicatesFailed => 'La ricerca non è riuscita. Riprova.';
+
+  @override
+  String get duplicatesNone => 'Nessun duplicato trovato';
+
+  @override
+  String duplicatesSummary(int groups, int hidden) {
+    String _temp0 = intl.Intl.pluralLogic(
+      groups,
+      locale: localeName,
+      other: '$groups gruppi',
+      one: '1 gruppo',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      hidden,
+      locale: localeName,
+      other: '$hidden brani da nascondere',
+      one: '1 brano da nascondere',
+    );
+    return '$_temp0 · $_temp1';
+  }
+
+  @override
+  String get duplicatesExactBadge => 'Identici';
+
+  @override
+  String get duplicatesProbableBadge => 'Probabili';
+
+  @override
+  String get duplicatesKeepLabel => 'Da tenere';
+
+  @override
+  String get duplicatesPickKeep => 'Tocca un brano per tenerlo';
+
+  @override
+  String get duplicatesMerge => 'Unisci';
+
+  @override
+  String get duplicatesNotDuplicates => 'Non sono duplicati';
+
+  @override
+  String duplicatesMergeAllExact(int count) {
+    return 'Unisci tutti gli identici ($count)';
+  }
+
+  @override
+  String get duplicatesMergeAllTitle => 'Unire tutti gli identici?';
+
+  @override
+  String duplicatesMergeAllBody(int groups, int hidden) {
+    String _temp0 = intl.Intl.pluralLogic(
+      groups,
+      locale: localeName,
+      other: '$groups gruppi',
+      one: '1 gruppo',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      hidden,
+      locale: localeName,
+      other: '$hidden brani nascosti',
+      one: '1 brano nascosto',
+    );
+    return '$_temp0, $_temp1. Preferiti, playlist, ascolti e testi passano ai brani che restano.';
+  }
+
+  @override
+  String duplicatesMerged(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count brani nascosti',
+      one: '1 brano nascosto',
+    );
+    return 'Unito: $_temp0';
+  }
+
+  @override
+  String duplicatesDeleteFiles(int count, String size) {
+    return 'Elimina anche i file ($count, $size)';
+  }
+
+  @override
+  String get duplicatesDeleteListTitle => 'Eliminare questi file?';
+
+  @override
+  String get duplicatesDeleteListBody =>
+      'Verranno cancellati dal dispositivo e non si possono recuperare. I brani che tieni restano dove sono.';
+
+  @override
+  String get duplicatesDeleteContinue => 'Continua';
+
+  @override
+  String duplicatesDeleteFinalTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Eliminare definitivamente $count file?',
+      one: 'Eliminare definitivamente 1 file?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String duplicatesDeleteFinalBody(String size) {
+    return 'Spazio liberato: $size. Questa azione non si può annullare.';
+  }
+
+  @override
+  String get duplicatesDeleteGo => 'Elimina definitivamente';
+
+  @override
+  String get duplicatesDeleteDoneTitle => 'Fatto';
+
+  @override
+  String duplicatesDeleteDone(int count, String size) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count file eliminati',
+      one: '1 file eliminato',
+    );
+    return '$_temp0 ($size).';
+  }
+
+  @override
+  String duplicatesDeleteFailed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count file non eliminati:',
+      one: '1 file non eliminato:',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String duplicatesDeleteSkipped(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count file non toccati: sono lo stesso file del brano tenuto.',
+      one: '1 file non toccato: è lo stesso file del brano tenuto.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get duplicatesDeleteAndroidHint =>
+      'Su Android si possono eliminare solo i file nelle cartelle a cui l’app ha accesso.';
+
+  @override
+  String activityCleanup(int done, int total) {
+    return 'Ricerca duplicati: $done di $total';
+  }
+
+  @override
+  String get hiddenTracksTitle => 'Brani nascosti';
+
+  @override
+  String hiddenTracksCount(int count) {
+    return 'Brani nascosti ($count)';
+  }
+
+  @override
+  String get hiddenTracksEmpty => 'Nessun brano nascosto';
+
+  @override
+  String get hiddenTracksHint =>
+      'I doppioni uniti non compaiono in libreria. «Ripristina» li rimette al loro posto.';
+
+  @override
+  String get hiddenRestore => 'Ripristina';
+
+  @override
+  String hiddenRestored(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count brani ripristinati',
+      one: '1 brano ripristinato',
+    );
+    return '$_temp0';
+  }
 }

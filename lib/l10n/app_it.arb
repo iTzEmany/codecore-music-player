@@ -1605,5 +1605,162 @@
   "ruleHelpOr": "rock OR jazz — OR (maiuscolo) tra due termini: ne basta uno",
   "ruleHelpFlags": "preferiti, mai-ascoltati — solo i preferiti, o i brani mai ascoltati; ascolti>10 per quelli più ascoltati",
   "ruleHelpOthers": "tag:live, formato:flac — un’etichetta tua, o il formato del file (nome intero, senza maiuscole)",
-  "ruleHelpSmart": "Le stesse regole servono per le playlist intelligenti (Libreria → + → Nuova playlist intelligente)."
+  "ruleHelpSmart": "Le stesse regole servono per le playlist intelligenti (Libreria → + → Nuova playlist intelligente).",
+  "cleanupSection": "Pulizia libreria",
+  "duplicatesTitle": "Duplicati",
+  "duplicatesTileHint": "Lo stesso brano in più copie o qualità",
+  "duplicatesIntro": "Cerca lo stesso brano in più copie: lo stesso file in due cartelle o lo stesso brano in due qualità. Prima di unire vedi un’anteprima. Preferiti, playlist, ascolti, testi ed etichette passano al brano che tieni; gli altri vengono solo nascosti e li ripristini da «Brani nascosti». Nessun file viene cancellato senza una doppia conferma.",
+  "duplicatesSearch": "Cerca duplicati",
+  "duplicatesSearchAgain": "Cerca di nuovo",
+  "duplicatesReading": "Leggo la libreria…",
+  "duplicatesHashing": "Controllo i file: {done} di {total}",
+  "@duplicatesHashing": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicatesGrouping": "Confronto i brani…",
+  "duplicatesFailed": "La ricerca non è riuscita. Riprova.",
+  "duplicatesNone": "Nessun duplicato trovato",
+  "duplicatesSummary": "{groups, plural, one{1 gruppo} other{{groups} gruppi}} · {hidden, plural, one{1 brano da nascondere} other{{hidden} brani da nascondere}}",
+  "@duplicatesSummary": {
+    "placeholders": {
+      "groups": {
+        "type": "int"
+      },
+      "hidden": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicatesExactBadge": "Identici",
+  "duplicatesProbableBadge": "Probabili",
+  "duplicatesKeepLabel": "Da tenere",
+  "duplicatesPickKeep": "Tocca un brano per tenerlo",
+  "duplicatesMerge": "Unisci",
+  "duplicatesNotDuplicates": "Non sono duplicati",
+  "duplicatesMergeAllExact": "Unisci tutti gli identici ({count})",
+  "@duplicatesMergeAllExact": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicatesMergeAllTitle": "Unire tutti gli identici?",
+  "duplicatesMergeAllBody": "{groups, plural, one{1 gruppo} other{{groups} gruppi}}, {hidden, plural, one{1 brano nascosto} other{{hidden} brani nascosti}}. Preferiti, playlist, ascolti e testi passano ai brani che restano.",
+  "@duplicatesMergeAllBody": {
+    "placeholders": {
+      "groups": {
+        "type": "int"
+      },
+      "hidden": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicatesMerged": "Unito: {count, plural, one{1 brano nascosto} other{{count} brani nascosti}}",
+  "@duplicatesMerged": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicatesDeleteFiles": "Elimina anche i file ({count}, {size})",
+  "@duplicatesDeleteFiles": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "duplicatesDeleteListTitle": "Eliminare questi file?",
+  "duplicatesDeleteListBody": "Verranno cancellati dal dispositivo e non si possono recuperare. I brani che tieni restano dove sono.",
+  "duplicatesDeleteContinue": "Continua",
+  "duplicatesDeleteFinalTitle": "{count, plural, one{Eliminare definitivamente 1 file?} other{Eliminare definitivamente {count} file?}}",
+  "@duplicatesDeleteFinalTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicatesDeleteFinalBody": "Spazio liberato: {size}. Questa azione non si può annullare.",
+  "@duplicatesDeleteFinalBody": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "duplicatesDeleteGo": "Elimina definitivamente",
+  "duplicatesDeleteDoneTitle": "Fatto",
+  "duplicatesDeleteDone": "{count, plural, one{1 file eliminato} other{{count} file eliminati}} ({size}).",
+  "@duplicatesDeleteDone": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "duplicatesDeleteFailed": "{count, plural, one{1 file non eliminato:} other{{count} file non eliminati:}}",
+  "@duplicatesDeleteFailed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicatesDeleteSkipped": "{count, plural, one{1 file non toccato: è lo stesso file del brano tenuto.} other{{count} file non toccati: sono lo stesso file del brano tenuto.}}",
+  "@duplicatesDeleteSkipped": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicatesDeleteAndroidHint": "Su Android si possono eliminare solo i file nelle cartelle a cui l’app ha accesso.",
+  "activityCleanup": "Ricerca duplicati: {done} di {total}",
+  "@activityCleanup": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "hiddenTracksTitle": "Brani nascosti",
+  "hiddenTracksCount": "Brani nascosti ({count})",
+  "@hiddenTracksCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hiddenTracksEmpty": "Nessun brano nascosto",
+  "hiddenTracksHint": "I doppioni uniti non compaiono in libreria. «Ripristina» li rimette al loro posto.",
+  "hiddenRestore": "Ripristina",
+  "hiddenRestored": "{count, plural, one{1 brano ripristinato} other{{count} brani ripristinati}}",
+  "@hiddenRestored": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

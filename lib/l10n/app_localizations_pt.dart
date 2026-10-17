@@ -2549,4 +2549,221 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get ruleHelpSmart =>
       'As mesmas regras servem para as playlists inteligentes (Biblioteca → + → Nova playlist inteligente).';
+
+  @override
+  String get cleanupSection => 'Limpeza da biblioteca';
+
+  @override
+  String get duplicatesTitle => 'Duplicados';
+
+  @override
+  String get duplicatesTileHint =>
+      'A mesma música em várias cópias ou qualidades';
+
+  @override
+  String get duplicatesIntro =>
+      'Procura a mesma música em várias cópias: o mesmo ficheiro em duas pastas ou a mesma música em duas qualidades. Antes de unir vês uma pré-visualização. Favoritos, playlists, reproduções, letras e etiquetas passam para a música que manténs; as outras ficam apenas ocultas e restauras em «Músicas ocultas». Nenhum ficheiro é apagado sem dupla confirmação.';
+
+  @override
+  String get duplicatesSearch => 'Procurar duplicados';
+
+  @override
+  String get duplicatesSearchAgain => 'Procurar de novo';
+
+  @override
+  String get duplicatesReading => 'A ler a biblioteca…';
+
+  @override
+  String duplicatesHashing(int done, int total) {
+    return 'A verificar ficheiros: $done de $total';
+  }
+
+  @override
+  String get duplicatesGrouping => 'A comparar músicas…';
+
+  @override
+  String get duplicatesFailed => 'A pesquisa falhou. Tenta de novo.';
+
+  @override
+  String get duplicatesNone => 'Nenhum duplicado encontrado';
+
+  @override
+  String duplicatesSummary(int groups, int hidden) {
+    String _temp0 = intl.Intl.pluralLogic(
+      groups,
+      locale: localeName,
+      other: '$groups grupos',
+      one: '1 grupo',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      hidden,
+      locale: localeName,
+      other: '$hidden músicas a ocultar',
+      one: '1 música a ocultar',
+    );
+    return '$_temp0 · $_temp1';
+  }
+
+  @override
+  String get duplicatesExactBadge => 'Idênticos';
+
+  @override
+  String get duplicatesProbableBadge => 'Prováveis';
+
+  @override
+  String get duplicatesKeepLabel => 'Manter';
+
+  @override
+  String get duplicatesPickKeep => 'Toca numa música para a manter';
+
+  @override
+  String get duplicatesMerge => 'Unir';
+
+  @override
+  String get duplicatesNotDuplicates => 'Não são duplicados';
+
+  @override
+  String duplicatesMergeAllExact(int count) {
+    return 'Unir todos os idênticos ($count)';
+  }
+
+  @override
+  String get duplicatesMergeAllTitle => 'Unir todos os idênticos?';
+
+  @override
+  String duplicatesMergeAllBody(int groups, int hidden) {
+    String _temp0 = intl.Intl.pluralLogic(
+      groups,
+      locale: localeName,
+      other: '$groups grupos',
+      one: '1 grupo',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      hidden,
+      locale: localeName,
+      other: '$hidden músicas ocultas',
+      one: '1 música oculta',
+    );
+    return '$_temp0, $_temp1. Favoritos, playlists, reproduções e letras passam para as músicas que ficam.';
+  }
+
+  @override
+  String duplicatesMerged(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count músicas ocultas',
+      one: '1 música oculta',
+    );
+    return 'Unido: $_temp0';
+  }
+
+  @override
+  String duplicatesDeleteFiles(int count, String size) {
+    return 'Apagar também os ficheiros ($count, $size)';
+  }
+
+  @override
+  String get duplicatesDeleteListTitle => 'Apagar estes ficheiros?';
+
+  @override
+  String get duplicatesDeleteListBody =>
+      'Serão apagados do dispositivo e não se podem recuperar. As músicas que manténs ficam onde estão.';
+
+  @override
+  String get duplicatesDeleteContinue => 'Continuar';
+
+  @override
+  String duplicatesDeleteFinalTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Apagar definitivamente $count ficheiros?',
+      one: 'Apagar definitivamente 1 ficheiro?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String duplicatesDeleteFinalBody(String size) {
+    return 'Espaço libertado: $size. Esta ação não se pode anular.';
+  }
+
+  @override
+  String get duplicatesDeleteGo => 'Apagar definitivamente';
+
+  @override
+  String get duplicatesDeleteDoneTitle => 'Concluído';
+
+  @override
+  String duplicatesDeleteDone(int count, String size) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ficheiros apagados',
+      one: '1 ficheiro apagado',
+    );
+    return '$_temp0 ($size).';
+  }
+
+  @override
+  String duplicatesDeleteFailed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ficheiros não apagados:',
+      one: '1 ficheiro não apagado:',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String duplicatesDeleteSkipped(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count ficheiros intocados: são o mesmo ficheiro da música mantida.',
+      one: '1 ficheiro intocado: é o mesmo ficheiro da música mantida.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get duplicatesDeleteAndroidHint =>
+      'No Android só se podem apagar ficheiros das pastas a que a app tem acesso.';
+
+  @override
+  String activityCleanup(int done, int total) {
+    return 'A procurar duplicados: $done de $total';
+  }
+
+  @override
+  String get hiddenTracksTitle => 'Músicas ocultas';
+
+  @override
+  String hiddenTracksCount(int count) {
+    return 'Músicas ocultas ($count)';
+  }
+
+  @override
+  String get hiddenTracksEmpty => 'Nenhuma música oculta';
+
+  @override
+  String get hiddenTracksHint =>
+      'Os duplicados unidos não aparecem na biblioteca. «Restaurar» volta a pô-los no lugar.';
+
+  @override
+  String get hiddenRestore => 'Restaurar';
+
+  @override
+  String hiddenRestored(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count músicas restauradas',
+      one: '1 música restaurada',
+    );
+    return '$_temp0';
+  }
 }

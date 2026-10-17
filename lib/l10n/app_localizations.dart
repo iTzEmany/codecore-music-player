@@ -4275,6 +4275,252 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Le stesse regole servono per le playlist intelligenti (Libreria → + → Nuova playlist intelligente).'**
   String get ruleHelpSmart;
+
+  /// No description provided for @cleanupSection.
+  ///
+  /// In it, this message translates to:
+  /// **'Pulizia libreria'**
+  String get cleanupSection;
+
+  /// No description provided for @duplicatesTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Duplicati'**
+  String get duplicatesTitle;
+
+  /// No description provided for @duplicatesTileHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Lo stesso brano in più copie o qualità'**
+  String get duplicatesTileHint;
+
+  /// No description provided for @duplicatesIntro.
+  ///
+  /// In it, this message translates to:
+  /// **'Cerca lo stesso brano in più copie: lo stesso file in due cartelle o lo stesso brano in due qualità. Prima di unire vedi un’anteprima. Preferiti, playlist, ascolti, testi ed etichette passano al brano che tieni; gli altri vengono solo nascosti e li ripristini da «Brani nascosti». Nessun file viene cancellato senza una doppia conferma.'**
+  String get duplicatesIntro;
+
+  /// No description provided for @duplicatesSearch.
+  ///
+  /// In it, this message translates to:
+  /// **'Cerca duplicati'**
+  String get duplicatesSearch;
+
+  /// No description provided for @duplicatesSearchAgain.
+  ///
+  /// In it, this message translates to:
+  /// **'Cerca di nuovo'**
+  String get duplicatesSearchAgain;
+
+  /// No description provided for @duplicatesReading.
+  ///
+  /// In it, this message translates to:
+  /// **'Leggo la libreria…'**
+  String get duplicatesReading;
+
+  /// No description provided for @duplicatesHashing.
+  ///
+  /// In it, this message translates to:
+  /// **'Controllo i file: {done} di {total}'**
+  String duplicatesHashing(int done, int total);
+
+  /// No description provided for @duplicatesGrouping.
+  ///
+  /// In it, this message translates to:
+  /// **'Confronto i brani…'**
+  String get duplicatesGrouping;
+
+  /// No description provided for @duplicatesFailed.
+  ///
+  /// In it, this message translates to:
+  /// **'La ricerca non è riuscita. Riprova.'**
+  String get duplicatesFailed;
+
+  /// No description provided for @duplicatesNone.
+  ///
+  /// In it, this message translates to:
+  /// **'Nessun duplicato trovato'**
+  String get duplicatesNone;
+
+  /// No description provided for @duplicatesSummary.
+  ///
+  /// In it, this message translates to:
+  /// **'{groups, plural, one{1 gruppo} other{{groups} gruppi}} · {hidden, plural, one{1 brano da nascondere} other{{hidden} brani da nascondere}}'**
+  String duplicatesSummary(int groups, int hidden);
+
+  /// No description provided for @duplicatesExactBadge.
+  ///
+  /// In it, this message translates to:
+  /// **'Identici'**
+  String get duplicatesExactBadge;
+
+  /// No description provided for @duplicatesProbableBadge.
+  ///
+  /// In it, this message translates to:
+  /// **'Probabili'**
+  String get duplicatesProbableBadge;
+
+  /// No description provided for @duplicatesKeepLabel.
+  ///
+  /// In it, this message translates to:
+  /// **'Da tenere'**
+  String get duplicatesKeepLabel;
+
+  /// No description provided for @duplicatesPickKeep.
+  ///
+  /// In it, this message translates to:
+  /// **'Tocca un brano per tenerlo'**
+  String get duplicatesPickKeep;
+
+  /// No description provided for @duplicatesMerge.
+  ///
+  /// In it, this message translates to:
+  /// **'Unisci'**
+  String get duplicatesMerge;
+
+  /// No description provided for @duplicatesNotDuplicates.
+  ///
+  /// In it, this message translates to:
+  /// **'Non sono duplicati'**
+  String get duplicatesNotDuplicates;
+
+  /// No description provided for @duplicatesMergeAllExact.
+  ///
+  /// In it, this message translates to:
+  /// **'Unisci tutti gli identici ({count})'**
+  String duplicatesMergeAllExact(int count);
+
+  /// No description provided for @duplicatesMergeAllTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Unire tutti gli identici?'**
+  String get duplicatesMergeAllTitle;
+
+  /// No description provided for @duplicatesMergeAllBody.
+  ///
+  /// In it, this message translates to:
+  /// **'{groups, plural, one{1 gruppo} other{{groups} gruppi}}, {hidden, plural, one{1 brano nascosto} other{{hidden} brani nascosti}}. Preferiti, playlist, ascolti e testi passano ai brani che restano.'**
+  String duplicatesMergeAllBody(int groups, int hidden);
+
+  /// No description provided for @duplicatesMerged.
+  ///
+  /// In it, this message translates to:
+  /// **'Unito: {count, plural, one{1 brano nascosto} other{{count} brani nascosti}}'**
+  String duplicatesMerged(int count);
+
+  /// No description provided for @duplicatesDeleteFiles.
+  ///
+  /// In it, this message translates to:
+  /// **'Elimina anche i file ({count}, {size})'**
+  String duplicatesDeleteFiles(int count, String size);
+
+  /// No description provided for @duplicatesDeleteListTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Eliminare questi file?'**
+  String get duplicatesDeleteListTitle;
+
+  /// No description provided for @duplicatesDeleteListBody.
+  ///
+  /// In it, this message translates to:
+  /// **'Verranno cancellati dal dispositivo e non si possono recuperare. I brani che tieni restano dove sono.'**
+  String get duplicatesDeleteListBody;
+
+  /// No description provided for @duplicatesDeleteContinue.
+  ///
+  /// In it, this message translates to:
+  /// **'Continua'**
+  String get duplicatesDeleteContinue;
+
+  /// No description provided for @duplicatesDeleteFinalTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, one{Eliminare definitivamente 1 file?} other{Eliminare definitivamente {count} file?}}'**
+  String duplicatesDeleteFinalTitle(int count);
+
+  /// No description provided for @duplicatesDeleteFinalBody.
+  ///
+  /// In it, this message translates to:
+  /// **'Spazio liberato: {size}. Questa azione non si può annullare.'**
+  String duplicatesDeleteFinalBody(String size);
+
+  /// No description provided for @duplicatesDeleteGo.
+  ///
+  /// In it, this message translates to:
+  /// **'Elimina definitivamente'**
+  String get duplicatesDeleteGo;
+
+  /// No description provided for @duplicatesDeleteDoneTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Fatto'**
+  String get duplicatesDeleteDoneTitle;
+
+  /// No description provided for @duplicatesDeleteDone.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, one{1 file eliminato} other{{count} file eliminati}} ({size}).'**
+  String duplicatesDeleteDone(int count, String size);
+
+  /// No description provided for @duplicatesDeleteFailed.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, one{1 file non eliminato:} other{{count} file non eliminati:}}'**
+  String duplicatesDeleteFailed(int count);
+
+  /// No description provided for @duplicatesDeleteSkipped.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, one{1 file non toccato: è lo stesso file del brano tenuto.} other{{count} file non toccati: sono lo stesso file del brano tenuto.}}'**
+  String duplicatesDeleteSkipped(int count);
+
+  /// No description provided for @duplicatesDeleteAndroidHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Su Android si possono eliminare solo i file nelle cartelle a cui l’app ha accesso.'**
+  String get duplicatesDeleteAndroidHint;
+
+  /// No description provided for @activityCleanup.
+  ///
+  /// In it, this message translates to:
+  /// **'Ricerca duplicati: {done} di {total}'**
+  String activityCleanup(int done, int total);
+
+  /// No description provided for @hiddenTracksTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Brani nascosti'**
+  String get hiddenTracksTitle;
+
+  /// No description provided for @hiddenTracksCount.
+  ///
+  /// In it, this message translates to:
+  /// **'Brani nascosti ({count})'**
+  String hiddenTracksCount(int count);
+
+  /// No description provided for @hiddenTracksEmpty.
+  ///
+  /// In it, this message translates to:
+  /// **'Nessun brano nascosto'**
+  String get hiddenTracksEmpty;
+
+  /// No description provided for @hiddenTracksHint.
+  ///
+  /// In it, this message translates to:
+  /// **'I doppioni uniti non compaiono in libreria. «Ripristina» li rimette al loro posto.'**
+  String get hiddenTracksHint;
+
+  /// No description provided for @hiddenRestore.
+  ///
+  /// In it, this message translates to:
+  /// **'Ripristina'**
+  String get hiddenRestore;
+
+  /// No description provided for @hiddenRestored.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, one{1 brano ripristinato} other{{count} brani ripristinati}}'**
+  String hiddenRestored(int count);
 }
 
 class _AppLocalizationsDelegate

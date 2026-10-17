@@ -1605,5 +1605,162 @@
   "ruleHelpOr": "rock OR jazz — OR (en majuscules) entre deux termes : un seul suffit",
   "ruleHelpFlags": "favorites, never-played — seulement les favoris, ou les titres jamais écoutés ; plays>10 pour les plus écoutés",
   "ruleHelpOthers": "tag:live, format:flac — une de vos étiquettes, ou le format du fichier (nom entier, sans tenir compte de la casse)",
-  "ruleHelpSmart": "Les mêmes règles servent aux playlists intelligentes (Bibliothèque → + → Nouvelle playlist intelligente)."
+  "ruleHelpSmart": "Les mêmes règles servent aux playlists intelligentes (Bibliothèque → + → Nouvelle playlist intelligente).",
+  "cleanupSection": "Nettoyage de la bibliothèque",
+  "duplicatesTitle": "Doublons",
+  "duplicatesTileHint": "Le même morceau en plusieurs copies ou qualités",
+  "duplicatesIntro": "Cherche le même morceau en plusieurs copies : le même fichier dans deux dossiers ou le même morceau en deux qualités. Un aperçu s’affiche avant toute fusion. Favoris, playlists, écoutes, paroles et étiquettes passent au morceau conservé ; les autres sont seulement masqués et se rétablissent depuis « Morceaux masqués ». Aucun fichier n’est supprimé sans une double confirmation.",
+  "duplicatesSearch": "Chercher les doublons",
+  "duplicatesSearchAgain": "Chercher à nouveau",
+  "duplicatesReading": "Lecture de la bibliothèque…",
+  "duplicatesHashing": "Vérification des fichiers : {done} sur {total}",
+  "@duplicatesHashing": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicatesGrouping": "Comparaison des morceaux…",
+  "duplicatesFailed": "La recherche a échoué. Réessaie.",
+  "duplicatesNone": "Aucun doublon trouvé",
+  "duplicatesSummary": "{groups, plural, one{1 groupe} other{{groups} groupes}} · {hidden, plural, one{1 morceau à masquer} other{{hidden} morceaux à masquer}}",
+  "@duplicatesSummary": {
+    "placeholders": {
+      "groups": {
+        "type": "int"
+      },
+      "hidden": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicatesExactBadge": "Identiques",
+  "duplicatesProbableBadge": "Probables",
+  "duplicatesKeepLabel": "À garder",
+  "duplicatesPickKeep": "Touche un morceau pour le garder",
+  "duplicatesMerge": "Fusionner",
+  "duplicatesNotDuplicates": "Pas des doublons",
+  "duplicatesMergeAllExact": "Fusionner tous les identiques ({count})",
+  "@duplicatesMergeAllExact": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicatesMergeAllTitle": "Fusionner tous les identiques ?",
+  "duplicatesMergeAllBody": "{groups, plural, one{1 groupe} other{{groups} groupes}}, {hidden, plural, one{1 morceau masqué} other{{hidden} morceaux masqués}}. Favoris, playlists, écoutes et paroles passent aux morceaux conservés.",
+  "@duplicatesMergeAllBody": {
+    "placeholders": {
+      "groups": {
+        "type": "int"
+      },
+      "hidden": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicatesMerged": "Fusionné : {count, plural, one{1 morceau masqué} other{{count} morceaux masqués}}",
+  "@duplicatesMerged": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicatesDeleteFiles": "Supprimer aussi les fichiers ({count}, {size})",
+  "@duplicatesDeleteFiles": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "duplicatesDeleteListTitle": "Supprimer ces fichiers ?",
+  "duplicatesDeleteListBody": "Ils seront effacés de l’appareil et ne pourront pas être récupérés. Les morceaux conservés restent où ils sont.",
+  "duplicatesDeleteContinue": "Continuer",
+  "duplicatesDeleteFinalTitle": "{count, plural, one{Supprimer définitivement 1 fichier ?} other{Supprimer définitivement {count} fichiers ?}}",
+  "@duplicatesDeleteFinalTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicatesDeleteFinalBody": "Espace libéré : {size}. Cette action est irréversible.",
+  "@duplicatesDeleteFinalBody": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "duplicatesDeleteGo": "Supprimer définitivement",
+  "duplicatesDeleteDoneTitle": "Terminé",
+  "duplicatesDeleteDone": "{count, plural, one{1 fichier supprimé} other{{count} fichiers supprimés}} ({size}).",
+  "@duplicatesDeleteDone": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "duplicatesDeleteFailed": "{count, plural, one{1 fichier non supprimé :} other{{count} fichiers non supprimés :}}",
+  "@duplicatesDeleteFailed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicatesDeleteSkipped": "{count, plural, one{1 fichier laissé tel quel : c’est le même fichier que le morceau conservé.} other{{count} fichiers laissés tels quels : c’est le même fichier que le morceau conservé.}}",
+  "@duplicatesDeleteSkipped": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicatesDeleteAndroidHint": "Sur Android, seuls les fichiers des dossiers accessibles à l’appli peuvent être supprimés.",
+  "activityCleanup": "Recherche de doublons : {done} sur {total}",
+  "@activityCleanup": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "hiddenTracksTitle": "Morceaux masqués",
+  "hiddenTracksCount": "Morceaux masqués ({count})",
+  "@hiddenTracksCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hiddenTracksEmpty": "Aucun morceau masqué",
+  "hiddenTracksHint": "Les doublons fusionnés n’apparaissent pas dans la bibliothèque. « Rétablir » les remet en place.",
+  "hiddenRestore": "Rétablir",
+  "hiddenRestored": "{count, plural, one{1 morceau rétabli} other{{count} morceaux rétablis}}",
+  "@hiddenRestored": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

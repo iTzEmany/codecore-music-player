@@ -79,4 +79,24 @@ void main() {
     expect(find.byTooltip('Annulla'), findsOneWidget);
     await h.dispose(tester);
   });
+
+  testWidgets('the duplicate search is a line with progress and a cancel button',
+      (tester) async {
+    final h = await pump(
+        tester,
+        const ActivityState([
+          ActivityItem(
+              kind: ActivityKind.cleanup,
+              key: 'cleanup',
+              name: null,
+              done: 4,
+              total: 12,
+              progress: 1 / 3),
+        ], []));
+    await tester.tap(find.byType(ActivityButton));
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.text('Ricerca duplicati: 4 di 12'), findsOneWidget);
+    expect(find.byTooltip('Annulla'), findsOneWidget);
+    await h.dispose(tester);
+  });
 }

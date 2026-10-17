@@ -2551,4 +2551,222 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get ruleHelpSmart =>
       'Las mismas reglas sirven para las listas inteligentes (Biblioteca → + → Nueva lista inteligente).';
+
+  @override
+  String get cleanupSection => 'Limpieza de la biblioteca';
+
+  @override
+  String get duplicatesTitle => 'Duplicados';
+
+  @override
+  String get duplicatesTileHint =>
+      'La misma canción en varias copias o calidades';
+
+  @override
+  String get duplicatesIntro =>
+      'Busca la misma canción en varias copias: el mismo archivo en dos carpetas o la misma canción en dos calidades. Antes de unir ves una vista previa. Favoritos, listas, reproducciones, letras y etiquetas pasan a la canción que conservas; las demás solo se ocultan y puedes recuperarlas desde «Canciones ocultas». Ningún archivo se borra sin una doble confirmación.';
+
+  @override
+  String get duplicatesSearch => 'Buscar duplicados';
+
+  @override
+  String get duplicatesSearchAgain => 'Buscar de nuevo';
+
+  @override
+  String get duplicatesReading => 'Leyendo la biblioteca…';
+
+  @override
+  String duplicatesHashing(int done, int total) {
+    return 'Comprobando archivos: $done de $total';
+  }
+
+  @override
+  String get duplicatesGrouping => 'Comparando canciones…';
+
+  @override
+  String get duplicatesFailed => 'La búsqueda ha fallado. Inténtalo de nuevo.';
+
+  @override
+  String get duplicatesNone => 'No se han encontrado duplicados';
+
+  @override
+  String duplicatesSummary(int groups, int hidden) {
+    String _temp0 = intl.Intl.pluralLogic(
+      groups,
+      locale: localeName,
+      other: '$groups grupos',
+      one: '1 grupo',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      hidden,
+      locale: localeName,
+      other: '$hidden canciones por ocultar',
+      one: '1 canción por ocultar',
+    );
+    return '$_temp0 · $_temp1';
+  }
+
+  @override
+  String get duplicatesExactBadge => 'Idénticos';
+
+  @override
+  String get duplicatesProbableBadge => 'Probables';
+
+  @override
+  String get duplicatesKeepLabel => 'Conservar';
+
+  @override
+  String get duplicatesPickKeep => 'Toca una canción para conservarla';
+
+  @override
+  String get duplicatesMerge => 'Unir';
+
+  @override
+  String get duplicatesNotDuplicates => 'No son duplicados';
+
+  @override
+  String duplicatesMergeAllExact(int count) {
+    return 'Unir todos los idénticos ($count)';
+  }
+
+  @override
+  String get duplicatesMergeAllTitle => '¿Unir todos los idénticos?';
+
+  @override
+  String duplicatesMergeAllBody(int groups, int hidden) {
+    String _temp0 = intl.Intl.pluralLogic(
+      groups,
+      locale: localeName,
+      other: '$groups grupos',
+      one: '1 grupo',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      hidden,
+      locale: localeName,
+      other: '$hidden canciones ocultas',
+      one: '1 canción oculta',
+    );
+    return '$_temp0, $_temp1. Favoritos, listas, reproducciones y letras pasan a las canciones que se quedan.';
+  }
+
+  @override
+  String duplicatesMerged(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count canciones ocultas',
+      one: '1 canción oculta',
+    );
+    return 'Unido: $_temp0';
+  }
+
+  @override
+  String duplicatesDeleteFiles(int count, String size) {
+    return 'Eliminar también los archivos ($count, $size)';
+  }
+
+  @override
+  String get duplicatesDeleteListTitle => '¿Eliminar estos archivos?';
+
+  @override
+  String get duplicatesDeleteListBody =>
+      'Se borrarán del dispositivo y no se pueden recuperar. Las canciones que conservas se quedan donde están.';
+
+  @override
+  String get duplicatesDeleteContinue => 'Continuar';
+
+  @override
+  String duplicatesDeleteFinalTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '¿Eliminar definitivamente $count archivos?',
+      one: '¿Eliminar definitivamente 1 archivo?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String duplicatesDeleteFinalBody(String size) {
+    return 'Espacio liberado: $size. Esta acción no se puede deshacer.';
+  }
+
+  @override
+  String get duplicatesDeleteGo => 'Eliminar definitivamente';
+
+  @override
+  String get duplicatesDeleteDoneTitle => 'Hecho';
+
+  @override
+  String duplicatesDeleteDone(int count, String size) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count archivos eliminados',
+      one: '1 archivo eliminado',
+    );
+    return '$_temp0 ($size).';
+  }
+
+  @override
+  String duplicatesDeleteFailed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count archivos no eliminados:',
+      one: '1 archivo no eliminado:',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String duplicatesDeleteSkipped(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count archivos sin tocar: son el mismo archivo que la canción conservada.',
+      one:
+          '1 archivo sin tocar: es el mismo archivo que la canción conservada.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get duplicatesDeleteAndroidHint =>
+      'En Android solo se pueden eliminar archivos de las carpetas a las que la app tiene acceso.';
+
+  @override
+  String activityCleanup(int done, int total) {
+    return 'Buscando duplicados: $done de $total';
+  }
+
+  @override
+  String get hiddenTracksTitle => 'Canciones ocultas';
+
+  @override
+  String hiddenTracksCount(int count) {
+    return 'Canciones ocultas ($count)';
+  }
+
+  @override
+  String get hiddenTracksEmpty => 'No hay canciones ocultas';
+
+  @override
+  String get hiddenTracksHint =>
+      'Los duplicados unidos no aparecen en la biblioteca. «Restaurar» los devuelve a su sitio.';
+
+  @override
+  String get hiddenRestore => 'Restaurar';
+
+  @override
+  String hiddenRestored(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count canciones restauradas',
+      one: '1 canción restaurada',
+    );
+    return '$_temp0';
+  }
 }

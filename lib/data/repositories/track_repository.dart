@@ -284,7 +284,7 @@ class TrackRepository {
 
   Stream<List<Track>> watchMissing() =>
       (_db.select(_db.tracks)
-            ..where((t) => t.missing.equals(true))
+            ..where((t) => t.missing.equals(true) & t.ignored.equals(false))
             ..orderBy([(t) => OrderingTerm.asc(t.path)]))
           .watch();
 
