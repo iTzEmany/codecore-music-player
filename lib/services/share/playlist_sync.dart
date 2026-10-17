@@ -1,0 +1,204 @@
+import '../backup/user_data.dart';
+
+/// A playlist as the other device describes it: portable track references and
+/// the `updated_at` that decides who is newer.
+class RemotePlaylist {
+  const RemotePlaylist({
+    required this.uuid,
+    required this.name,
+    required this.createdAt,
+    required this.updatedAt,
+    this.items = const [],
+  });
+
+  final String uuid, name;
+  final int createdAt, updatedAt;
+  final List<TrackRef> items;
+
+  Map<String, Object?> toJson() => {
+        'uuid': uuid,
+        'name': name,
+        'createdAt': createdAt,
+        'updatedAt': updatedAt,
+        'items': [for (final i in items) i.toJson()],
+      };
+
+  factory RemotePlaylist.fromJson(Map<String, dynamic> j) => RemotePlaylist(
+        uuid: j['uuid'] as String? ?? '',
+        name: j['name'] as String? ?? '',
+        createdAt: (j['createdAt'] as num?)?.toInt() ?? 0,
+        updatedAt: (j['updatedAt'] as num?)?.toInt() ?? 0,
+        items: [
+          for (final i in (j['items'] as List? ?? const []))
+            TrackRef.fromJson(i as Map<String, dynamic>),
+        ],
+      );
+}
+
+/// A playlist of this device; [trackIds] are local ids in playlist order.
+class LocalPlaylist {
+  const LocalPlaylist({
+    required this.id,
+    required this.uuid,
+    required this.name,
+    required this.updatedAt,
+    this.trackIds = const [],
+  });
+
+  final int id;
+  final String uuid, name;
+  final int updatedAt;
+  final List<int> trackIds;
+}
+
+enum SyncAction {
+  /// Not on this device yet: it is created.
+  add,
+
+  /// The other device changed it more recently: it is replaced.
+  replace,
+
+  /// This device changed it more recently: left alone (the other one takes it).
+  keep,
+
+  /// Nothing to do.
+  same,
+}
+
+class SyncEntry {
+  const SyncEntry({
+    required this.action,
+    required this.remote,
+    this.local,
+    this.trackIds = const [],
+    this.missing = const [],
+    this.removed = 0,
+    this.renamed = false,
+    this.reordered = false,
+  });
+
+  final SyncAction action;
+  final RemotePlaylist remote;
+  final LocalPlaylist? local;
+
+  /// Local ids the playlist ends up with, in order (for [SyncAction.add] and
+  /// [SyncAction.replace]).
+  final List<int> trackIds;
+
+  /// References with no track on this device.
+  final List<TrackRef> missing;
+
+  /// Local tracks the replacement drops from an existing playlist.
+  final int removed;
+
+  /// [SyncAction.replace]: the name changes.
+  final bool renamed;
+
+  /// [SyncAction.replace]: the same tracks, in another order.
+  final bool reordered;
+
+  /// Entries that write something.
+  bool get writes => action == SyncAction.add || action == SyncAction.replace;
+}
+
+class SyncPlan {
+  const SyncPlan(this.entries);
+
+  final List<SyncEntry> entries;
+
+  Iterable<SyncEntry> _of(SyncAction a) => entries.where((e) => e.action == a);
+
+  List<SyncEntry> get toAdd => _of(SyncAction.add).toList();
+  List<SyncEntry> get toReplace => _of(SyncAction.replace).toList();
+  List<SyncEntry> get toWrite => entries.where((e) => e.writes).toList();
+  int get keptCount => _of(SyncAction.keep).length;
+  int get sameCount => _of(SyncAction.same).length;
+
+  /// Tracks of the other device's playlists (the ones not kept) that this
+  /// device does not have, each listed once.
+  List<TrackRef> get missing {
+    final seen = <String>{};
+    return [
+      for (final e in entries)
+        if (e.action != SyncAction.keep)
+          for (final t in e.missing)
+            if (seen.add('${t.folder}|${t.relPath}|${t.title}|${t.artist}')) t,
+    ];
+  }
+
+  bool get isEmpty => toWrite.isEmpty;
+}
+
+/// Decides, playlist by playlist (matched by `uuid`), what a sync does. The
+/// most recent change wins; nothing is ever deleted because the other device
+/// does not have a playlist. [resolve] finds the local track of a reference
+/// (the same matching as a backup restore) or null.
+SyncPlan planSync(
+  List<LocalPlaylist> local,
+  List<RemotePlaylist> remote,
+  int? Function(TrackRef) resolve,
+) {
+  final byUuid = {for (final l in local) l.uuid: l};
+  final seen = <String>{};
+  final entries = <SyncEntry>[];
+  for (final r in remote) {
+    if (r.uuid.isEmpty || !seen.add(r.uuid)) continue;
+    final l = byUuid[r.uuid];
+    final resolved = <int>[];
+    final missing = <TrackRef>[];
+    for (final ref in r.items) {
+      final id = resolve(ref);
+      if (id == null) {
+        missing.add(ref);
+      } else if (!resolved.contains(id)) {
+        resolved.add(id);
+      }
+    }
+    if (l == null) {
+      entries.add(SyncEntry(
+          action: SyncAction.add,
+          remote: r,
+          trackIds: resolved,
+          missing: missing));
+      continue;
+    }
+    if (r.updatedAt < l.updatedAt) {
+      entries.add(SyncEntry(action: SyncAction.keep, remote: r, local: l));
+      continue;
+    }
+    final renamed = r.name != l.name;
+    final sameSet = _sameSet(resolved, l.trackIds);
+    final reordered = sameSet && !_sameOrder(resolved, l.trackIds);
+    final changes = renamed || !sameSet || reordered;
+    // Equal stamps with different content cannot happen between two honest
+    // devices; if it does, leave the local one alone rather than guess.
+    if (r.updatedAt == l.updatedAt || !changes) {
+      entries.add(SyncEntry(
+          action: SyncAction.same, remote: r, local: l, missing: missing));
+      continue;
+    }
+    final localSet = l.trackIds.toSet();
+    entries.add(SyncEntry(
+      action: SyncAction.replace,
+      remote: r,
+      local: l,
+      trackIds: resolved,
+      missing: missing,
+      removed: localSet.difference(resolved.toSet()).length,
+      renamed: renamed,
+      reordered: reordered,
+    ));
+  }
+  return SyncPlan(entries);
+}
+
+bool _sameSet(List<int> a, List<int> b) =>
+    a.length == b.length && a.toSet().containsAll(b);
+
+bool _sameOrder(List<int> a, List<int> b) {
+  if (a.length != b.length) return false;
+  for (var i = 0; i < a.length; i++) {
+    if (a[i] != b[i]) return false;
+  }
+  return true;
+}
