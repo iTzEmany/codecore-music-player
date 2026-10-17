@@ -21,7 +21,7 @@ class DuplicateRepository {
         .customSelect(
           'SELECT id, path, title, artist, duration_ms, format, size_bytes, '
           'bitrate_kbps, sample_rate_hz, bit_depth, has_cover, user_edited, '
-          'added_at, sha256 FROM tracks WHERE missing = 0 AND ignored = 0',
+          'added_at, sha256 FROM tracks WHERE missing = 0 AND ignored = 0 AND kind = 0',
           readsFrom: {_db.tracks},
         )
         .get();

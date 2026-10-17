@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 
+import '../../core/app_log.dart';
 import '../../core/playlist_order.dart';
 import '../db/app_database.dart';
 
@@ -98,14 +99,25 @@ class PlaylistRepository {
     ])
       ..where(_db.playlistTracks.playlistId.equals(playlistId) &
           _db.tracks.missing.equals(false) &
-          _db.tracks.ignored.equals(false))
+          _db.tracks.ignored.equals(false) &
+          _db.tracks.kind.equals(0))
       ..orderBy([OrderingTerm.asc(_db.playlistTracks.position)]);
     return q.watch().map((rows) => [for (final r in rows) r.readTable(_db.tracks)]);
   }
 
-  /// Returns how many tracks were actually added (duplicates are ignored).
+  /// Returns how many tracks were actually added (duplicates are ignored, and
+  /// so are podcast episodes: a playlist holds music).
   Future<int> addTracks(int playlistId, List<int> trackIds) {
     return _db.transaction(() async {
+      final episodes = (await (_db.selectOnly(_db.tracks)
+                ..addColumns([_db.tracks.id])
+                ..where(_db.tracks.id.isIn(trackIds) & _db.tracks.kind.equals(1)))
+              .map((r) => r.read(_db.tracks.id)!)
+              .get())
+          .toSet();
+      if (episodes.isNotEmpty) {
+        AppLog.i('playlist: ${episodes.length} podcast episodes not added');
+      }
       final existing = await (_db.select(_db.playlistTracks)
             ..where((t) => t.playlistId.equals(playlistId)))
           .get();
@@ -115,7 +127,7 @@ class PlaylistRepository {
           : existing.map((e) => e.position).reduce((a, b) => a > b ? a : b) + 1;
       var added = 0;
       for (final id in trackIds) {
-        if (!have.add(id)) continue;
+        if (episodes.contains(id) || !have.add(id)) continue;
         await _db.into(_db.playlistTracks).insert(PlaylistTracksCompanion.insert(
             playlistId: playlistId, trackId: id, position: next++));
         added++;

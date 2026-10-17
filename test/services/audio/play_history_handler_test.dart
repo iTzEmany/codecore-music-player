@@ -163,4 +163,20 @@ void main() {
     await settle();
     expect(handler.currentTrack!.title, 'b');
   });
+
+  test('a podcast episode leaves no trace in the history, however long it plays', () async {
+    final epId = await db.into(db.tracks).insert(TracksCompanion.insert(
+        path: '/app/podcasts/1/e.mp3', title: 'Episode', albumKey: 'k2', format: 'mp3',
+        sizeBytes: 1, mtimeMs: 1, addedAt: 1, durationMs: const Value(2000000),
+        kind: const Value(1)));
+    await handler.playQueue([epId], 0);
+    await play(0, 60);
+    await settle();
+    expect(await plays(), isEmpty);
+    // The next music track still counts.
+    await handler.playQueue(ids, 0);
+    await play(0, 40);
+    await settle();
+    expect((await plays()).single.trackId, ids[0]);
+  });
 }

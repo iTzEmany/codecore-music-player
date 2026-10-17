@@ -102,7 +102,9 @@ class TrackRepository {
     final q = _db.select(_db.tracks)
       ..where((t) {
         Expression<bool> cond =
-            t.missing.equals(false) & t.ignored.equals(false);
+            t.missing.equals(false) &
+            t.ignored.equals(false) &
+            t.kind.equals(0);
         if (favoritesOnly) cond = cond & t.isFavorite.equals(true);
         final text = query.trim();
         if (text.isNotEmpty) {
@@ -247,7 +249,8 @@ class TrackRepository {
                 ..where((t) =>
                     t.albumKey.equals(key) &
                     t.missing.equals(false) &
-                    t.ignored.equals(false))
+                    t.ignored.equals(false) &
+                    t.kind.equals(0))
                 ..orderBy([
                   (t) => OrderingTerm.asc(t.discNumber),
                   (t) => OrderingTerm.asc(t.trackNumber),
@@ -323,7 +326,7 @@ class TrackRepository {
     final rows = await _db
         .customSelect(
           'SELECT id, title, artist, duration_ms, path FROM tracks '
-          'WHERE missing = 0 AND ignored = 0',
+          'WHERE missing = 0 AND ignored = 0 AND kind = 0',
           readsFrom: {_db.tracks},
         )
         .get();
@@ -379,9 +382,13 @@ class TrackRepository {
       (_db.select(_db.tracks)..where((t) => t.id.equals(id)))
           .watchSingleOrNull();
 
+  /// How many music tracks there are (podcast episodes are not counted).
   Future<int> countAll() async {
     final c = _db.tracks.id.count();
-    final row = await (_db.selectOnly(_db.tracks)..addColumns([c])).getSingle();
+    final row = await (_db.selectOnly(_db.tracks)
+          ..addColumns([c])
+          ..where(_db.tracks.kind.equals(0)))
+        .getSingle();
     return row.read(c) ?? 0;
   }
 

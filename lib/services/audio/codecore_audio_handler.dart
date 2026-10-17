@@ -374,7 +374,8 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   /// The track just counted as played: opens its row in the history.
   void _beginListen(Track track) {
     final repo = history;
-    if (repo == null || !recordHistory) return;
+    // Podcast episodes are not music: they stay out of the history and the recap.
+    if (repo == null || !recordHistory || track.kind != 0) return;
     _flushedMs = _playedMs;
     _playRow = repo
         .start(

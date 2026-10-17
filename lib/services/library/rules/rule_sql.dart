@@ -13,12 +13,12 @@ String likeContains(String s) => '%${s.replaceAll(r'\', r'\\').replaceAll('%', r
 /// `Variable`s carry it.
 typedef RuleSql = ({String where, List<Variable> vars});
 
-/// Turns [e] into SQL on the `tracks` table. Missing and hidden tracks are
-/// always left out. [nowMs] is the moment «added <30g» counts back from.
+/// Turns [e] into SQL on the `tracks` table. Missing and hidden tracks and
+/// podcast episodes are always left out. [nowMs] is the moment «added <30g» counts back from.
 RuleSql toSql(RuleExpr e, {required int nowMs}) {
   final vars = <Variable>[];
   final sql = _expr(e, nowMs, vars);
-  return (where: 'missing = 0 AND ignored = 0 AND ($sql)', vars: vars);
+  return (where: 'missing = 0 AND ignored = 0 AND kind = 0 AND ($sql)', vars: vars);
 }
 
 // Every leaf is wrapped so that a NULL column reads as «no» instead of

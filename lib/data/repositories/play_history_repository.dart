@@ -47,6 +47,7 @@ class PlayHistoryRepository {
     ])
       ..where(_db.tracks.missing.equals(false) &
           _db.tracks.ignored.equals(false) &
+          _db.tracks.kind.equals(0) &
           (beforePlayedAt == null
               ? const Constant(true)
               : _db.plays.playedAt.isSmallerThanValue(beforePlayedAt)))
