@@ -238,6 +238,25 @@ class TrackRepository {
       (_db.select(_db.tracks)..where((t) => t.id.equals(id)))
           .getSingleOrNull();
 
+  /// The visible tracks of the albums [keys], album by album, in album order.
+  Future<List<Track>> tracksOfAlbums(Iterable<String> keys) =>
+      _db.transaction(() async {
+        final out = <Track>[];
+        for (final key in keys) {
+          out.addAll(await (_db.select(_db.tracks)
+                ..where((t) =>
+                    t.albumKey.equals(key) &
+                    t.missing.equals(false) &
+                    t.ignored.equals(false))
+                ..orderBy([
+                  (t) => OrderingTerm.asc(t.discNumber),
+                  (t) => OrderingTerm.asc(t.trackNumber),
+                ]))
+              .get());
+        }
+        return out;
+      });
+
   Future<List<Track>> getByIds(List<int> ids) async {
     if (ids.isEmpty) return const [];
     final rows = await (_db.select(_db.tracks)..where((t) => t.id.isIn(ids)))

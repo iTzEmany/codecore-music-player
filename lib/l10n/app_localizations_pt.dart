@@ -2766,4 +2766,72 @@ class AppLocalizationsPt extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get albumMergeWith => 'Unir com…';
+
+  @override
+  String get albumMergeTitle => 'Unir álbuns';
+
+  @override
+  String albumMergeIntro(String name) {
+    return 'Escolhe os álbuns a unir a «$name». As músicas passam para um só álbum com o título e o artista que indicares; a capa continua a de «$name».';
+  }
+
+  @override
+  String get albumMergeSearch => 'Procurar um álbum';
+
+  @override
+  String get albumMergeNone => 'Não há outros álbuns';
+
+  @override
+  String get albumFieldTitle => 'Título do álbum';
+
+  @override
+  String get albumFieldArtist => 'Artista do álbum';
+
+  @override
+  String get albumMergeAction => 'Unir álbuns';
+
+  @override
+  String albumMerged(int count, String name) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count álbuns unidos em «$name»',
+      one: '1 álbum unido em «$name»',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get moveToAlbum => 'Mover para um álbum novo…';
+
+  @override
+  String get moveToAlbumTitle => 'Mover para um álbum';
+
+  @override
+  String moveToAlbumBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count músicas irão',
+      one: '1 música irá',
+    );
+    return '$_temp0 para o álbum indicado. Se já existir, juntam-se a ele.';
+  }
+
+  @override
+  String get moveToAlbumGo => 'Mover';
+
+  @override
+  String movedToAlbum(int count, String name) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count músicas movidas para «$name»',
+      one: '1 música movida para «$name»',
+    );
+    return '$_temp0';
+  }
 }

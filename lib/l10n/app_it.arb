@@ -1762,5 +1762,53 @@
         "type": "int"
       }
     }
+  },
+  "albumMergeWith": "Unisci con…",
+  "albumMergeTitle": "Unisci album",
+  "albumMergeIntro": "Scegli gli album da unire a «{name}». I brani passano a un solo album con il titolo e l’artista che indichi; la copertina resta quella di «{name}».",
+  "@albumMergeIntro": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "albumMergeSearch": "Cerca un album",
+  "albumMergeNone": "Non ci sono altri album",
+  "albumFieldTitle": "Titolo dell’album",
+  "albumFieldArtist": "Artista dell’album",
+  "albumMergeAction": "Unisci album",
+  "albumMerged": "{count, plural, one{1 album unito in «{name}»} other{{count} album uniti in «{name}»}}",
+  "@albumMerged": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "moveToAlbum": "Sposta in un nuovo album…",
+  "moveToAlbumTitle": "Sposta in un album",
+  "moveToAlbumBody": "{count, plural, one{1 brano andrà} other{{count} brani andranno}} nell’album indicato. Se esiste già, si uniranno ad esso.",
+  "@moveToAlbumBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "moveToAlbumGo": "Sposta",
+  "movedToAlbum": "{count, plural, one{1 brano spostato in «{name}»} other{{count} brani spostati in «{name}»}}",
+  "@movedToAlbum": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
   }
 }

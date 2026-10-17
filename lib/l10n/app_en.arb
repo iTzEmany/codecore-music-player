@@ -1571,5 +1571,53 @@
         "type": "int"
       }
     }
+  },
+  "albumMergeWith": "Merge with…",
+  "albumMergeTitle": "Merge albums",
+  "albumMergeIntro": "Pick the albums to merge into “{name}”. The tracks move to one album with the title and artist you give; the cover stays the one of “{name}”.",
+  "@albumMergeIntro": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "albumMergeSearch": "Search an album",
+  "albumMergeNone": "There are no other albums",
+  "albumFieldTitle": "Album title",
+  "albumFieldArtist": "Album artist",
+  "albumMergeAction": "Merge albums",
+  "albumMerged": "{count, plural, one{1 album merged into “{name}”} other{{count} albums merged into “{name}”}}",
+  "@albumMerged": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "moveToAlbum": "Move to a new album…",
+  "moveToAlbumTitle": "Move to an album",
+  "moveToAlbumBody": "{count, plural, one{1 track will go} other{{count} tracks will go}} to the album you name. If it already exists, they join it.",
+  "@moveToAlbumBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "moveToAlbumGo": "Move",
+  "movedToAlbum": "{count, plural, one{1 track moved to “{name}”} other{{count} tracks moved to “{name}”}}",
+  "@movedToAlbum": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
   }
 }

@@ -1571,5 +1571,53 @@
         "type": "int"
       }
     }
+  },
+  "albumMergeWith": "Zusammenführen mit …",
+  "albumMergeTitle": "Alben zusammenführen",
+  "albumMergeIntro": "Wähle die Alben, die mit „{name}“ zusammengeführt werden. Die Titel wandern in ein einziges Album mit dem angegebenen Titel und Interpreten; das Cover bleibt das von „{name}“.",
+  "@albumMergeIntro": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "albumMergeSearch": "Album suchen",
+  "albumMergeNone": "Es gibt keine anderen Alben",
+  "albumFieldTitle": "Albumtitel",
+  "albumFieldArtist": "Albuminterpret",
+  "albumMergeAction": "Alben zusammenführen",
+  "albumMerged": "{count, plural, one{1 Album mit „{name}“ zusammengeführt} other{{count} Alben mit „{name}“ zusammengeführt}}",
+  "@albumMerged": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "moveToAlbum": "In ein neues Album verschieben …",
+  "moveToAlbumTitle": "In ein Album verschieben",
+  "moveToAlbumBody": "{count, plural, one{1 Titel wandert} other{{count} Titel wandern}} in das angegebene Album. Existiert es schon, werden sie dort eingeordnet.",
+  "@moveToAlbumBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "moveToAlbumGo": "Verschieben",
+  "movedToAlbum": "{count, plural, one{1 Titel nach „{name}“ verschoben} other{{count} Titel nach „{name}“ verschoben}}",
+  "@movedToAlbum": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
   }
 }

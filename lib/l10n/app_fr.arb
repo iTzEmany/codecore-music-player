@@ -1762,5 +1762,53 @@
         "type": "int"
       }
     }
+  },
+  "albumMergeWith": "Fusionner avec…",
+  "albumMergeTitle": "Fusionner des albums",
+  "albumMergeIntro": "Choisis les albums à fusionner avec « {name} ». Les morceaux passent dans un seul album, avec le titre et l’artiste indiqués ; la pochette reste celle de « {name} ».",
+  "@albumMergeIntro": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "albumMergeSearch": "Chercher un album",
+  "albumMergeNone": "Il n’y a pas d’autres albums",
+  "albumFieldTitle": "Titre de l’album",
+  "albumFieldArtist": "Artiste de l’album",
+  "albumMergeAction": "Fusionner les albums",
+  "albumMerged": "{count, plural, one{1 album fusionné dans « {name} »} other{{count} albums fusionnés dans « {name} »}}",
+  "@albumMerged": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "moveToAlbum": "Déplacer vers un nouvel album…",
+  "moveToAlbumTitle": "Déplacer vers un album",
+  "moveToAlbumBody": "{count, plural, one{1 morceau ira} other{{count} morceaux iront}} dans l’album indiqué. S’il existe déjà, ils le rejoindront.",
+  "@moveToAlbumBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "moveToAlbumGo": "Déplacer",
+  "movedToAlbum": "{count, plural, one{1 morceau déplacé vers « {name} »} other{{count} morceaux déplacés vers « {name} »}}",
+  "@movedToAlbum": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
   }
 }

@@ -58,6 +58,59 @@ class TrackEditor {
     );
   }
 
+  /// Puts [tracks] in the album [album] by [albumArtist] (merging with it if
+  /// it exists, creating it if not) in one transaction. Like [save] it marks
+  /// them as edited and never touches a file. With [cover] the tracks take
+  /// that cover, so a merged album shows the one of the album chosen as main.
+  /// Returns what each track was before, for [restoreMany].
+  Future<List<Track>> saveMany(
+    List<Track> tracks, {
+    required String album,
+    required String albumArtist,
+    ({bool hasCover, String? coverKey})? cover,
+  }) async {
+    final al = _blankToNull(album);
+    final aa = _blankToNull(albumArtist);
+    await _db.transaction(() async {
+      for (final t in tracks) {
+        await (_db.update(_db.tracks)..where((r) => r.id.equals(t.id))).write(
+          TracksCompanion(
+            album: Value(al),
+            albumArtist: Value(aa),
+            albumKey: Value(
+              computeAlbumKey(
+                albumArtist: aa,
+                artist: t.artist,
+                album: al,
+                directory: p.dirname(t.path),
+              ),
+            ),
+            userEdited: const Value(true),
+            hasCover: cover == null ? const Value.absent() : Value(cover.hasCover),
+            coverKey: cover == null ? const Value.absent() : Value(cover.coverKey),
+          ),
+        );
+      }
+    });
+    return tracks;
+  }
+
+  /// Undoes [saveMany]: [before] are the tracks as it returned them.
+  Future<void> restoreMany(List<Track> before) => _db.transaction(() async {
+    for (final t in before) {
+      await (_db.update(_db.tracks)..where((r) => r.id.equals(t.id))).write(
+        TracksCompanion(
+          album: Value(t.album),
+          albumArtist: Value(t.albumArtist),
+          albumKey: Value(t.albumKey),
+          userEdited: Value(t.userEdited),
+          hasCover: Value(t.hasCover),
+          coverKey: Value(t.coverKey),
+        ),
+      );
+    }
+  });
+
   Future<void> restoreFromFile(Track track) async {
     final t = await _tags.read(track.path, withCover: false);
     final dir = p.dirname(track.path);

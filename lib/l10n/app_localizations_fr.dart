@@ -2796,4 +2796,72 @@ class AppLocalizationsFr extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get albumMergeWith => 'Fusionner avec…';
+
+  @override
+  String get albumMergeTitle => 'Fusionner des albums';
+
+  @override
+  String albumMergeIntro(String name) {
+    return 'Choisis les albums à fusionner avec « $name ». Les morceaux passent dans un seul album, avec le titre et l’artiste indiqués ; la pochette reste celle de « $name ».';
+  }
+
+  @override
+  String get albumMergeSearch => 'Chercher un album';
+
+  @override
+  String get albumMergeNone => 'Il n’y a pas d’autres albums';
+
+  @override
+  String get albumFieldTitle => 'Titre de l’album';
+
+  @override
+  String get albumFieldArtist => 'Artiste de l’album';
+
+  @override
+  String get albumMergeAction => 'Fusionner les albums';
+
+  @override
+  String albumMerged(int count, String name) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count albums fusionnés dans « $name »',
+      one: '1 album fusionné dans « $name »',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get moveToAlbum => 'Déplacer vers un nouvel album…';
+
+  @override
+  String get moveToAlbumTitle => 'Déplacer vers un album';
+
+  @override
+  String moveToAlbumBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count morceaux iront',
+      one: '1 morceau ira',
+    );
+    return '$_temp0 dans l’album indiqué. S’il existe déjà, ils le rejoindront.';
+  }
+
+  @override
+  String get moveToAlbumGo => 'Déplacer';
+
+  @override
+  String movedToAlbum(int count, String name) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count morceaux déplacés vers « $name »',
+      one: '1 morceau déplacé vers « $name »',
+    );
+    return '$_temp0';
+  }
 }

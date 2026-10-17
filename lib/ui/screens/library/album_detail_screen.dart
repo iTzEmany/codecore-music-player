@@ -18,6 +18,7 @@ import '../../widgets/selection_bar.dart';
 import '../../widgets/track_row.dart';
 import '../../widgets/track_row_selection.dart';
 import '../devices/devices_sheet.dart';
+import '../cleanup/album_merge_dialog.dart';
 import '../playlists/playlist_dialogs.dart';
 import 'artist_screen.dart';
 
@@ -139,6 +140,11 @@ class AlbumDetailScreen extends ConsumerWidget {
                   for (final t in list) t.id,
                 ]);
                 if (!ok) snack(l.enrichBusy);
+              case 'merge':
+                // The album this page shows is gone once merged: leave it.
+                showAlbumMergeDialog(context, ref, album).then((merged) {
+                  if (merged && context.mounted) Navigator.of(context).maybePop();
+                });
             }
           },
           itemBuilder: (_) => [
@@ -146,6 +152,7 @@ class AlbumDetailScreen extends ConsumerWidget {
             PopupMenuItem(value: 'playlist', child: Text(l.addToPlaylist)),
             PopupMenuItem(value: 'share', child: Text(l.shareMenu)),
             PopupMenuItem(value: 'enrich', child: Text(l.enrichAlbum)),
+            PopupMenuItem(value: 'merge', child: Text(l.albumMergeWith)),
           ],
         ),
         slivers: [

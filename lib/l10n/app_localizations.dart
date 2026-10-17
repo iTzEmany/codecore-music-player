@@ -4521,6 +4521,90 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'{count, plural, one{1 brano ripristinato} other{{count} brani ripristinati}}'**
   String hiddenRestored(int count);
+
+  /// No description provided for @albumMergeWith.
+  ///
+  /// In it, this message translates to:
+  /// **'Unisci con…'**
+  String get albumMergeWith;
+
+  /// No description provided for @albumMergeTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Unisci album'**
+  String get albumMergeTitle;
+
+  /// No description provided for @albumMergeIntro.
+  ///
+  /// In it, this message translates to:
+  /// **'Scegli gli album da unire a «{name}». I brani passano a un solo album con il titolo e l’artista che indichi; la copertina resta quella di «{name}».'**
+  String albumMergeIntro(String name);
+
+  /// No description provided for @albumMergeSearch.
+  ///
+  /// In it, this message translates to:
+  /// **'Cerca un album'**
+  String get albumMergeSearch;
+
+  /// No description provided for @albumMergeNone.
+  ///
+  /// In it, this message translates to:
+  /// **'Non ci sono altri album'**
+  String get albumMergeNone;
+
+  /// No description provided for @albumFieldTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Titolo dell’album'**
+  String get albumFieldTitle;
+
+  /// No description provided for @albumFieldArtist.
+  ///
+  /// In it, this message translates to:
+  /// **'Artista dell’album'**
+  String get albumFieldArtist;
+
+  /// No description provided for @albumMergeAction.
+  ///
+  /// In it, this message translates to:
+  /// **'Unisci album'**
+  String get albumMergeAction;
+
+  /// No description provided for @albumMerged.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, one{1 album unito in «{name}»} other{{count} album uniti in «{name}»}}'**
+  String albumMerged(int count, String name);
+
+  /// No description provided for @moveToAlbum.
+  ///
+  /// In it, this message translates to:
+  /// **'Sposta in un nuovo album…'**
+  String get moveToAlbum;
+
+  /// No description provided for @moveToAlbumTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Sposta in un album'**
+  String get moveToAlbumTitle;
+
+  /// No description provided for @moveToAlbumBody.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, one{1 brano andrà} other{{count} brani andranno}} nell’album indicato. Se esiste già, si uniranno ad esso.'**
+  String moveToAlbumBody(int count);
+
+  /// No description provided for @moveToAlbumGo.
+  ///
+  /// In it, this message translates to:
+  /// **'Sposta'**
+  String get moveToAlbumGo;
+
+  /// No description provided for @movedToAlbum.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, one{1 brano spostato in «{name}»} other{{count} brani spostati in «{name}»}}'**
+  String movedToAlbum(int count, String name);
 }
 
 class _AppLocalizationsDelegate

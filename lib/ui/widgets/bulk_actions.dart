@@ -6,6 +6,7 @@ import '../../l10n/l10n_ext.dart';
 import '../../providers/database_providers.dart';
 import '../../providers/jam_providers.dart';
 import '../../providers/player_providers.dart';
+import '../screens/cleanup/move_to_album_dialog.dart';
 import '../screens/playlists/playlist_dialogs.dart';
 import '../screens/tags/tags_sheet.dart';
 import 'confirm.dart';
@@ -144,6 +145,9 @@ List<TrackActionGroup> bulkActions(
       }),
       TrackAction(Icons.label_off_outlined, l.tagRemoveFromSelection, () async {
         await pickTagFor(outer, ref, tracks, remove: true, done: done);
+      }),
+      TrackAction(Icons.album_outlined, l.moveToAlbum, () async {
+        if (await showMoveToAlbumDialog(outer, ref, tracks)) done();
       }),
       if (ctx.playlistId != null)
         TrackAction(

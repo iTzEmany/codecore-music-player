@@ -2758,4 +2758,72 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get albumMergeWith => 'Merge with…';
+
+  @override
+  String get albumMergeTitle => 'Merge albums';
+
+  @override
+  String albumMergeIntro(String name) {
+    return 'Pick the albums to merge into “$name”. The tracks move to one album with the title and artist you give; the cover stays the one of “$name”.';
+  }
+
+  @override
+  String get albumMergeSearch => 'Search an album';
+
+  @override
+  String get albumMergeNone => 'There are no other albums';
+
+  @override
+  String get albumFieldTitle => 'Album title';
+
+  @override
+  String get albumFieldArtist => 'Album artist';
+
+  @override
+  String get albumMergeAction => 'Merge albums';
+
+  @override
+  String albumMerged(int count, String name) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count albums merged into “$name”',
+      one: '1 album merged into “$name”',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get moveToAlbum => 'Move to a new album…';
+
+  @override
+  String get moveToAlbumTitle => 'Move to an album';
+
+  @override
+  String moveToAlbumBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tracks will go',
+      one: '1 track will go',
+    );
+    return '$_temp0 to the album you name. If it already exists, they join it.';
+  }
+
+  @override
+  String get moveToAlbumGo => 'Move';
+
+  @override
+  String movedToAlbum(int count, String name) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tracks moved to “$name”',
+      one: '1 track moved to “$name”',
+    );
+    return '$_temp0';
+  }
 }
