@@ -128,6 +128,6 @@ Per ogni rischio: **sintomo** → **cosa fare**. Se scatta un fallback che cambi
 | # | Rischio | Sintomo | Piano B |
 |---|---|---|---|
 | R63 | Tasto multimediale a freddo non riavvia la riproduzione | Widget, tile, cuffie o auto a app chiusa: nessun suono | **Confermato** (25.1): `audio_service` scarta il tasto se Dart non è ancora collegato. Widget e tile usano `MediaKeys.pressSurely`: premono, aspettano `widget.readyAt` scritto da Dart dopo il ripristino della coda e ripremono (suona dopo ~3 s, provato sul Mi A3). Cuffie Bluetooth a app chiusa: resta il limite di `audio_service` |
-| R64 | Android Auto non mostra l'app (installata fuori dal Play Store) | Nessuna icona in auto | DHU o auto con «Origini sconosciute» nelle impostazioni sviluppatore di Android Auto; descrittore `automotive_app_desc` presente. **Non provato** |
+| R64 | Android Auto non mostra l'app (installata fuori dal Play Store) | Nessuna icona in auto | DHU o auto con «Origini sconosciute» nelle impostazioni sviluppatore di Android Auto; descrittore `automotive_app_desc` presente; a freddo la prima lista può essere vuota (basta riaprire). **Non provato** |
 | R65 | Widget non aggiornato o batteria consumata | Titolo vecchio, consumo | Una scrittura solo a ogni cambio di brano/stato (`WidgetSync`, mai sulla posizione); nessun `updatePeriodMillis`; l'`Application` ascolta le preferenze e ridisegna. Dart scrive su `shared_preferences` perché il motore avviato senza attività non ha i canali di `MainActivity` |
 

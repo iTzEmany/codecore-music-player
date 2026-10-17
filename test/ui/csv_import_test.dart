@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:codecore/core/constants.dart';
 import 'package:codecore/data/db/app_database.dart' show PlaylistImportItem;
 import 'package:codecore/services/import/exportify_reader.dart';
 import 'package:codecore/services/import/import_diff.dart' show ImportDiff;
@@ -13,6 +14,9 @@ import '../support/app_harness.dart';
 
 ExportifyPlaylist fixture() => readExportify('Just_a_mood.csv',
     File('test/fixtures/Just_a_mood.csv').readAsStringSync());
+
+/// These screens are about downloading; without YouTube they are not there.
+const _noYoutube = !kEnableYoutube;
 
 void main() {
   testWidgets('intro sheet says where the CSV comes from and copies the address',
@@ -63,7 +67,7 @@ void main() {
     expect(find.textContaining('Tempo stimato'), findsOneWidget);
     expect(find.text('Esiste già una playlist con questo nome'), findsNothing);
     await h.dispose(tester);
-  });
+  }, skip: _noYoutube);
 
   testWidgets('same-name playlist offers update or new and returns the choice',
       (tester) async {
@@ -148,7 +152,7 @@ void main() {
     expect(picked!.options.linkOnly, isTrue);
     expect(picked!.options.planFirst, isFalse);
     await h.dispose(tester);
-  });
+  }, skip: _noYoutube);
 
   testWidgets('a big file suggests blocks of 100 and shows the time in hours',
       (tester) async {
@@ -189,7 +193,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(picked!.blockSize, isNull);
     await h.dispose(tester);
-  });
+  }, skip: _noYoutube);
 
   testWidgets('same-name playlist can be synced, with the counts of the changes',
       (tester) async {

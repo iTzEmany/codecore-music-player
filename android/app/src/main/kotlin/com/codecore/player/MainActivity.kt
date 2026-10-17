@@ -7,25 +7,12 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import com.ryanheise.audioservice.AudioServiceActivity
-import com.yausername.ffmpeg.FFmpeg
-import com.yausername.youtubedl_android.YoutubeDL
-import com.yausername.youtubedl_android.YoutubeDLRequest
 import io.flutter.embedding.engine.FlutterEngine
-import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
-import java.io.File
-import java.util.concurrent.Executors
 
-/**
- * Hosts yt-dlp (embedded Python + QuickJS) for the YouTube feature. No backend:
- * everything runs inside the app process tree.
- */
+/** The single activity: hosts the platform channels the Dart side uses. */
 class MainActivity : AudioServiceActivity() {
-    private val executor = Executors.newCachedThreadPool()
     private val main = Handler(Looper.getMainLooper())
-    private lateinit var channel: MethodChannel
-    private var initialized = false
-    private var updateTried = false
 
     override fun onResume() {
         super.onResume()
@@ -40,8 +27,8 @@ class MainActivity : AudioServiceActivity() {
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
-        channel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "codecore/ytdlp")
-        channel.setMethodCallHandler { call, result -> handle(call, result) }
+        // yt-dlp lives in the `full` flavor only (see YtDlpChannel).
+        YtDlpChannel(applicationContext).register(flutterEngine.dartExecutor.binaryMessenger)
 
         // Where the sound goes (headphones or speaker): the equalizer keeps a
         // curve for each.
@@ -133,110 +120,5 @@ class MainActivity : AudioServiceActivity() {
         if (Build.VERSION.SDK_INT >= 31) types.add(AudioDeviceInfo.TYPE_BLE_HEADSET)
         val headphones = am.getDevices(AudioManager.GET_DEVICES_OUTPUTS).any { it.type in types }
         return if (headphones) "headphones" else "speaker"
-    }
-
-    @Synchronized
-    private fun ensureInit() {
-        if (initialized) return
-        YoutubeDL.getInstance().init(applicationContext)
-        FFmpeg.getInstance().init(applicationContext)
-        initialized = true
-    }
-
-    /** Best effort: YouTube changes often, so pull the latest stable yt-dlp once per run. */
-    @Synchronized
-    private fun updateOnce() {
-        if (updateTried) return
-        updateTried = true
-        try {
-            YoutubeDL.getInstance().updateYoutubeDL(
-                applicationContext, YoutubeDL.UpdateChannel.STABLE
-            )
-        } catch (e: Exception) {
-            android.util.Log.w("codecore", "yt-dlp update failed: ${e.message}")
-        }
-    }
-
-    private fun handle(call: MethodCall, result: MethodChannel.Result) {
-        when (call.method) {
-            "search" -> run(result) {
-                ensureInit()
-                updateOnce()
-                val query = call.argument<String>("query")!!
-                val isUrl = call.argument<Boolean>("isUrl") ?: false
-                // `items` = a search page with full metadata for the first N results.
-                val items = call.argument<Int>("items")
-                val req = YoutubeDLRequest(if (isUrl) query else "ytsearch10:$query")
-                req.addOption("-J")
-                req.addOption("--no-warnings")
-                val flat = call.argument<Boolean>("flat") ?: false
-                if (items != null) {
-                    req.addOption("--playlist-items", "1-$items")
-                    if (flat) req.addOption("--flat-playlist")
-                } else {
-                    req.addOption(if (isUrl) "--no-playlist" else "--flat-playlist")
-                }
-                val processId = call.argument<String>("processId")
-                if (processId != null) YoutubeDL.getInstance().execute(req, processId).out
-                else YoutubeDL.getInstance().execute(req).out
-            }
-            "download" -> run(result) {
-                ensureInit()
-                val id = call.argument<String>("id")!!
-                val stem = call.argument<String>("stem")!!
-                val convert = call.argument<Boolean>("convert") ?: true
-                val processId = call.argument<String>("processId")!!
-                // `url` is sent by every caller; the id alone stays for older ones.
-                val url = call.argument<String>("url") ?: "https://www.youtube.com/watch?v=$id"
-                val req = YoutubeDLRequest(url)
-                req.addOption("--no-playlist")
-                req.addOption("--no-warnings")
-                req.addOption("--no-part")
-                req.addOption("-f", if (convert) "bestaudio/best" else "bestaudio[ext=m4a]/bestaudio/best")
-                if (convert) {
-                    req.addOption("-x")
-                    req.addOption("--audio-format", "mp3")
-                    req.addOption("--audio-quality", "256K")
-                }
-                val rate = call.argument<Int>("rateLimit")
-                if (rate != null && rate > 0) req.addOption("--limit-rate", "${rate}K")
-                req.addOption("-o", "$stem.%(ext)s")
-                YoutubeDL.getInstance().execute(req, processId) { progress, _, line ->
-                    main.post {
-                        channel.invokeMethod(
-                            "progress",
-                            mapOf("processId" to processId, "percent" to progress.toDouble(), "line" to line)
-                        )
-                    }
-                }
-                val dir = File(stem).parentFile
-                val base = File(stem).name
-                dir?.listFiles()
-                    ?.firstOrNull { it.name.startsWith("$base.") && !it.name.endsWith(".part") }
-                    ?.absolutePath
-                    ?: throw IllegalStateException("output file not found")
-            }
-            "version" -> run(result) {
-                ensureInit()
-                YoutubeDL.getInstance().version(applicationContext)
-            }
-            "cancel" -> {
-                val processId = call.argument<String>("processId")
-                if (processId != null) YoutubeDL.getInstance().destroyProcessById(processId)
-                result.success(null)
-            }
-            else -> result.notImplemented()
-        }
-    }
-
-    private fun run(result: MethodChannel.Result, block: () -> Any?) {
-        executor.execute {
-            try {
-                val value = block()
-                main.post { result.success(value) }
-            } catch (e: Throwable) {
-                main.post { result.error("YTDLP", e.message ?: e.toString(), null) }
-            }
-        }
     }
 }

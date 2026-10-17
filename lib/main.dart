@@ -93,12 +93,6 @@ Future<void> main() async {
     labels: BrowseLabels.forLanguage(settingsStore.readSettings().language),
     coverUri: (k) => covers.fileFor(k)?.uri,
   );
-  // A browser that connected before Dart was up got an empty list.
-  if (Platform.isAndroid) {
-    // ignore: deprecated_member_use
-    unawaited(AudioServiceBackground.notifyChildrenChanged(MediaBrowseTree.root));
-  }
-
   // Home-screen widget and quick tile (Android): fed from here, not from the
   // UI, because the player outlives the activity.
   if (Platform.isAndroid) {

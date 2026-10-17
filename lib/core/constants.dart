@@ -1,2 +1,4 @@
 /// Single switch for the YouTube download feature (docs/fase-5, parte B).
-const bool kEnableYoutube = true;
+/// `--dart-define=CODECORE_YOUTUBE=false` builds without it (the `lite`
+/// Android build also leaves yt-dlp out of the APK).
+const bool kEnableYoutube = bool.fromEnvironment('CODECORE_YOUTUBE', defaultValue: true);

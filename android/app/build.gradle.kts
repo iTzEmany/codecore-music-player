@@ -6,6 +6,10 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+// `CODECORE_LITE=1` builds the flavor without yt-dlp (no Python/ffmpeg inside,
+// no YouTube); pair it with `--dart-define=CODECORE_YOUTUBE=false`.
+val lite = System.getenv("CODECORE_LITE") == "1"
+
 val keyProps = Properties().apply {
     val f = rootProject.file("key.properties")
     if (f.exists()) f.inputStream().use { load(it) }
@@ -42,6 +46,8 @@ android {
         }
     }
 
+    sourceSets["main"].java.srcDir(if (lite) "src/lite/kotlin" else "src/full/kotlin")
+
     packaging {
         jniLibs {
             // yt-dlp's Python and QuickJS are executed from the native lib dir.
@@ -62,6 +68,9 @@ android {
 
     buildTypes {
         release {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             // Personal keystore when android/key.properties exists (git-ignored).
@@ -82,8 +91,10 @@ kotlin {
 
 dependencies {
     // yt-dlp + Python + QuickJS (JS challenge solver) embedded in the app.
-    implementation("io.github.junkfood02.youtubedl-android:library:0.18.1")
-    implementation("io.github.junkfood02.youtubedl-android:ffmpeg:0.18.1")
+    if (!lite) {
+        implementation("io.github.junkfood02.youtubedl-android:library:0.18.1")
+        implementation("io.github.junkfood02.youtubedl-android:ffmpeg:0.18.1")
+    }
 }
 
 flutter {
