@@ -1403,5 +1403,16 @@
       }
     }
   },
-  "tagNoneToRemove": "Die gewählten Titel haben keine Labels."
+  "tagNoneToRemove": "Die gewählten Titel haben keine Labels.",
+  "ruleHelpTitle": "Suchen mit Operatoren",
+  "ruleHelpIntro": "Tippe Wörter wie gewohnt oder füge Operatoren hinzu: Alle müssen zugleich gelten.",
+  "ruleHelpArtist": "artist:\"pink floyd\" — Titel eines Künstlers (ein Teil des Namens genügt); ebenso album:, genre:, folder:",
+  "ruleHelpYear": "year:1990..1999 — ein Bereich (auch offen: year:..1980, year:2000..); year>1990, year<=1985",
+  "ruleHelpDuration": "duration>5m — Länge (m Minuten, s Sekunden): duration<90s, duration:2m..4m",
+  "ruleHelpAdded": "added<30g — vor weniger als 30 Tagen hinzugefügt (g Tage, sett Wochen, mesi Monate): added>6mesi",
+  "ruleHelpNot": "-live — das Minuszeichen schließt aus: -artist:floyd, -\"live at\"",
+  "ruleHelpOr": "rock OR jazz — OR (Großbuchstaben) zwischen zwei Begriffen: Einer genügt",
+  "ruleHelpFlags": "favorites, never-played — nur Favoriten oder nie gespielte Titel; plays>10 für die meistgespielten",
+  "ruleHelpOthers": "tag:live, format:flac — eines deiner Labels oder das Dateiformat (ganzer Name, Groß-/Kleinschreibung egal)",
+  "ruleHelpSmart": "Dieselben Regeln gelten für intelligente Playlists (Bibliothek → + → Neue intelligente Playlist)."
 }

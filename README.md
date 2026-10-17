@@ -69,6 +69,12 @@ senza il file la build release usa la chiave di debug.
 - **Lingue:** italiano, inglese, tedesco, spagnolo, francese e portoghese.
 - Al primo avvio una guida in 4 pagine (saltabile) spiega cartelle, funzioni online, download, Jam e condivisione.
 
+## Libreria intelligente (fase 20)
+- **Cronologia e statistiche:** Libreria → Cronologia (per giorno, con l'ora) e Statistiche (mese o anno: tempo ascoltato, grafico, ora preferita, brani/artisti/album più ascoltati); la Home mostra «Il tuo mese» da 10 ascolti. Tutto resta sul dispositivo; si può spegnere in Impostazioni → Riproduzione.
+- **Ricerca con operatori** (il «?» accanto a Cerca spiega tutto): `artista:"pink floyd" -live anno:1970..1979`, `durata>5m`, `aggiunto<30g`, `tag:live`, `preferiti`, `mai-ascoltati`, `rock OR jazz`.
+- **Playlist intelligenti:** Libreria → + → Nuova playlist intelligente: le stesse regole, l'elenco si aggiorna da solo (ordine, limite, modelli pronti); si può convertire in playlist normale.
+- **Etichette tue:** dal menu di un brano o dalla selezione multipla; Libreria → Etichette.
+
 ## Riproduzione (fase 17)
 - **Velocità** 0,5×–2× senza cambiare il tono (chip «1×» in Now Playing).
 - **Riprendi da qui:** i brani lunghi (≥ 20 min: podcast, audiolibri, DJ set) ripartono da dove li hai lasciati.

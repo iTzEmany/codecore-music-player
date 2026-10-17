@@ -5558,7 +5558,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   );
   late final Index playsTrack = Index(
     'plays_track',
-    'CREATE INDEX plays_track ON plays (track_id)',
+    'CREATE INDEX plays_track ON plays (track_id, played_at, ms_played)',
   );
   late final Index playsAt = Index(
     'plays_at',

@@ -2498,4 +2498,47 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tagNoneToRemove => 'The chosen tracks have no tags.';
+
+  @override
+  String get ruleHelpTitle => 'Searching with operators';
+
+  @override
+  String get ruleHelpIntro =>
+      'Type words as usual, or add operators: all of them must hold together.';
+
+  @override
+  String get ruleHelpArtist =>
+      'artist:\"pink floyd\" — tracks by an artist (part of the name is enough); the same with album:, genre:, folder:';
+
+  @override
+  String get ruleHelpYear =>
+      'year:1990..1999 — a range (open too: year:..1980, year:2000..); year>1990, year<=1985';
+
+  @override
+  String get ruleHelpDuration =>
+      'duration>5m — length (m minutes, s seconds): duration<90s, duration:2m..4m';
+
+  @override
+  String get ruleHelpAdded =>
+      'added<30g — added less than 30 days ago (g days, sett weeks, mesi months): added>6mesi';
+
+  @override
+  String get ruleHelpNot =>
+      '-live — the minus sign excludes: -artist:floyd, -\"live at\"';
+
+  @override
+  String get ruleHelpOr =>
+      'rock OR jazz — OR (capitals) between two terms: one is enough';
+
+  @override
+  String get ruleHelpFlags =>
+      'favorites, never-played — only favorites, or tracks never played; plays>10 for the most played';
+
+  @override
+  String get ruleHelpOthers =>
+      'tag:live, format:flac — one of your tags, or the file format (the whole name, any case)';
+
+  @override
+  String get ruleHelpSmart =>
+      'The same rules make smart playlists (Library → + → New smart playlist).';
 }

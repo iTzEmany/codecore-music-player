@@ -2506,4 +2506,47 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get tagNoneToRemove => 'As faixas escolhidas não têm etiquetas.';
+
+  @override
+  String get ruleHelpTitle => 'Pesquisar com operadores';
+
+  @override
+  String get ruleHelpIntro =>
+      'Escreva palavras como de costume, ou junte operadores: todos têm de se verificar em conjunto.';
+
+  @override
+  String get ruleHelpArtist =>
+      'artist:\"pink floyd\" — faixas de um artista (basta parte do nome); o mesmo com album:, genre:, folder:';
+
+  @override
+  String get ruleHelpYear =>
+      'year:1990..1999 — um intervalo (também aberto: year:..1980, year:2000..); year>1990, year<=1985';
+
+  @override
+  String get ruleHelpDuration =>
+      'duration>5m — duração (m minutos, s segundos): duration<90s, duration:2m..4m';
+
+  @override
+  String get ruleHelpAdded =>
+      'added<30g — adicionadas há menos de 30 dias (g dias, sett semanas, mesi meses): added>6mesi';
+
+  @override
+  String get ruleHelpNot =>
+      '-live — o sinal de menos exclui: -artist:floyd, -\"live at\"';
+
+  @override
+  String get ruleHelpOr =>
+      'rock OR jazz — OR (em maiúsculas) entre dois termos: basta um';
+
+  @override
+  String get ruleHelpFlags =>
+      'favorites, never-played — só os favoritos, ou as faixas nunca ouvidas; plays>10 para as mais ouvidas';
+
+  @override
+  String get ruleHelpOthers =>
+      'tag:live, format:flac — uma das suas etiquetas, ou o formato do ficheiro (nome inteiro, sem distinguir maiúsculas)';
+
+  @override
+  String get ruleHelpSmart =>
+      'As mesmas regras servem para as playlists inteligentes (Biblioteca → + → Nova playlist inteligente).';
 }

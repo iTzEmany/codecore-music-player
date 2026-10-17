@@ -21,6 +21,7 @@ import '../../widgets/cover_image.dart';
 import '../../widgets/playlist_cover.dart';
 import '../../../services/library/rules/rule_parser.dart';
 import '../../widgets/section_header.dart';
+import 'rules_help_sheet.dart';
 import '../../widgets/selection_bar.dart';
 import '../../widgets/track_row.dart';
 import '../../widgets/track_row_selection.dart';
@@ -138,9 +139,16 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               CcDims.margin,
               8,
             ),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(l.navSearch, style: theme.headlineSmall),
+            child: Row(
+              children: [
+                Expanded(child: Text(l.navSearch, style: theme.headlineSmall)),
+                if (_mode == _Mode.library)
+                  IconButton(
+                    tooltip: l.ruleHelpTooltip,
+                    icon: const Icon(Icons.help_outline_rounded),
+                    onPressed: () => showRulesHelp(context),
+                  ),
+              ],
             ),
           ),
           Padding(

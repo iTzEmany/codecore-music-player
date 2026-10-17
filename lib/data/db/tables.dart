@@ -142,7 +142,8 @@ class PlaylistImportItems extends Table {
 
 /// One listen: a track that played past the «counts as played» threshold.
 /// The history starts empty (nothing is invented from `play_count`).
-@TableIndex(name: 'plays_track', columns: {#trackId})
+// Covering: a recap can group a year of listens by track from the index alone.
+@TableIndex(name: 'plays_track', columns: {#trackId, #playedAt, #msPlayed})
 @TableIndex(name: 'plays_at', columns: {#playedAt})
 class Plays extends Table {
   IntColumn get id => integer().autoIncrement()();

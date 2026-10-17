@@ -101,4 +101,15 @@ void main() {
     expect(find.textContaining('Non capisco'), findsNothing, reason: 'still typing: no complaint');
     await h.dispose(tester);
   });
+
+  testWidgets('the «?» opens the guide to the operators', (tester) async {
+    await open(tester);
+    await tester.tap(find.byTooltip('Aiuto sulla ricerca'));
+    await _settle(tester);
+    expect(find.text('Cercare con gli operatori'), findsOneWidget);
+    expect(find.textContaining('anno:1990..1999'), findsOneWidget);
+    expect(find.textContaining('rock OR jazz'), findsOneWidget);
+    await h.dispose(tester);
+  });
 }
+

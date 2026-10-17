@@ -87,3 +87,10 @@ Per ogni rischio: **sintomo** → **cosa fare**. Se scatta un fallback che cambi
 | R45 | Tema chiaro con contrasto insufficiente (copertine chiare, accento giallo) | Testo o icone poco leggibili al sole | Palette chiusa di 8 accenti (scuri nel chiaro), test AA su ogni combinazione (24), `heroTint` chiaro ≥ 7:1; si torna a «Notte viola» da Impostazioni → Aspetto |
 | — | Azione di massa sbagliata | Si tolgono 300 brani da una playlist | Conferma col numero, «Annulla» nello snackbar (ripristina le posizioni), niente tocco ai file, backup della fase 13 |
 
+## Libreria intelligente (fase 20)
+| # | Rischio | Sintomo | Piano B |
+|---|---|---|---|
+| R46 | `plays` cresce senza limite (anni di ascolti) | Database grande, recap lento | Indici su `played_at` e coprente su `(track_id, played_at, ms_played)`; query aggregate in SQL (misurato: ricapitolo annuale di 100 000 ascolti ~260 ms, mensile ~60 ms); «Cancella cronologia» e interruttore «Registra la cronologia» in Impostazioni; il backup (fase 13) la include |
+| R47 | Regole tradotte male in SQL o testo dell'utente iniettato | Risultati sbagliati o query che si rompe mentre si digita | Solo `Variable` (test con `'; DROP TABLE…`, `%`, `_`, `\`); oracolo in Dart sui 28 brani del test; il parser non lancia mai e un termine invalido è testo libero con avviso |
+| R48 | Playlist intelligenti o ricerche con molti risultati lente su librerie grandi | Lista che impiega più di mezzo secondo | Misurato su 20 000 brani: ricerche selettive 5–15 ms; con risultati enormi (`-live` = 18 000 brani) il costo è quello di elencarli (~300 ms). Le playlist hanno il limite facoltativo; la ricerca mostra 4 brani e «Mostra tutti» |
+

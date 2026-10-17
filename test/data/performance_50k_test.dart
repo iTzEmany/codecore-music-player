@@ -47,7 +47,9 @@ Future<int> _ms(Future<Object?> Function() f) async {
 }
 
 void main() {
-  final margin = Platform.environment['CI'] == 'true' ? 2 : 1;
+  // ×2 by default: the suite runs these next to a hundred other test files, so
+  // the clock includes the neighbours. CODECORE_PERF_MARGIN=1 for a quiet run.
+  final margin = int.tryParse(Platform.environment['CODECORE_PERF_MARGIN'] ?? '') ?? 2;
 
   group('50 000 tracks in memory', () {
     late AppDatabase db;

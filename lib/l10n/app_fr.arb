@@ -1594,5 +1594,16 @@
       }
     }
   },
-  "tagNoneToRemove": "Les titres choisis n’ont pas d’étiquettes."
+  "tagNoneToRemove": "Les titres choisis n’ont pas d’étiquettes.",
+  "ruleHelpTitle": "Rechercher avec des opérateurs",
+  "ruleHelpIntro": "Saisissez des mots comme d’habitude, ou ajoutez des opérateurs : tous doivent être vrais ensemble.",
+  "ruleHelpArtist": "artist:\"pink floyd\" — titres d’un artiste (une partie du nom suffit) ; de même avec album:, genre:, folder:",
+  "ruleHelpYear": "year:1990..1999 — une plage (aussi ouverte : year:..1980, year:2000..) ; year>1990, year<=1985",
+  "ruleHelpDuration": "duration>5m — durée (m minutes, s secondes) : duration<90s, duration:2m..4m",
+  "ruleHelpAdded": "added<30g — ajoutés il y a moins de 30 jours (g jours, sett semaines, mesi mois) : added>6mesi",
+  "ruleHelpNot": "-live — le signe moins exclut : -artist:floyd, -\"live at\"",
+  "ruleHelpOr": "rock OR jazz — OR (en majuscules) entre deux termes : un seul suffit",
+  "ruleHelpFlags": "favorites, never-played — seulement les favoris, ou les titres jamais écoutés ; plays>10 pour les plus écoutés",
+  "ruleHelpOthers": "tag:live, format:flac — une de vos étiquettes, ou le format du fichier (nom entier, sans tenir compte de la casse)",
+  "ruleHelpSmart": "Les mêmes règles servent aux playlists intelligentes (Bibliothèque → + → Nouvelle playlist intelligente)."
 }

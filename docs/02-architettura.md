@@ -180,3 +180,10 @@ Scritture con debounce 400 ms, mai in un handler di slider a ogni tick.
 - **Lingue:** it (template), en, de, es, fr, pt (europeo); `test/l10n/arb_test.dart` controlla chiavi, segnaposto e stringhe rimaste in italiano.
 - **Onboarding:** `OnboardingGate` davanti ad `AppShell`; solo con libreria e cartelle vuote e `onboardingDone` falso.
 
+## Libreria intelligente (fase 20)
+- **Un solo linguaggio di regole** per la ricerca e per le playlist intelligenti, in `lib/services/library/rules/`: `rule_ast.dart` (albero sigillato con forma canonica), `rule_parser.dart` (`parseRules` **non lancia mai**: un termine incomprensibile diventa testo libero + avviso; `hasOperators`, `freeTextOf`), `rule_sql.dart` (`toSql`: AST → `WHERE` con **soli `Variable`**, ogni foglia in `COALESCE(…,0)` così la negazione tiene i valori assenti), `rule_rewrite.dart` (rinomina di un'etichetta dentro le regole salvate). `TrackRepository.watchByRules`/`tracksByRules`/`countByRules` le eseguono (`readsFrom: tracks, track_tags, user_tags`).
+- **Ricerca:** con operatori i brani vengono dalle regole e le altre sezioni filtrano solo le parole semplici; senza operatori nulla cambia. Chip di suggerimento, avvisi e foglio «?» in Cerca.
+- **Cronologia:** `CodecoreAudioHandler` cronometra l'ascolto (somma dei passi di posizione in `playing`) e scrive `plays` tramite `PlayHistoryRepository` alla stessa soglia di `registerPlay`; chiude la riga a ogni pausa, ogni 30 s, al cambio brano e alla chiusura. `StatsQueries` calcola ricapitoli per mese/anno in SQL (una passata per brano, barre con una somma per intervallo, ore del giorno raggruppate per ora) e li ricalcola quando `plays` cambia.
+- **Playlist intelligenti:** `SmartPlaylistRepository` (ordini `SmartSort`, «a caso» stabile per sessione); pagina in sola lettura; si possono convertire in playlist normale (copia dell'elenco).
+- **Etichette:** `TagRepository` (assegnazione in massa in una transazione, rinomina che aggiorna le regole); foglio con caselle a tre stati, azioni in massa, Libreria → Etichette.
+

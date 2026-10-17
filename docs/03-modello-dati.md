@@ -58,6 +58,19 @@ Indice su `trackId`.
 
 > Un brano non può comparire due volte nella stessa playlist (scelta voluta, come nella versione Python).
 
+## Libreria intelligente (schema v7, fase 20)
+La cronologia, le playlist intelligenti e le etichette sono **dati dell'utente**: nessuna funzione li cancella da sola.
+
+### `plays`
+`id` int PK · `trackId` int (CASCADE sul brano) · `playedAt` int (epoch ms) · `msPlayed` int default 0 (tempo **realmente suonato**: i salti di posizione non contano, a 2× conta metà) · `context` int? (`PlayContextKind.index`) · `contextName` text?
+Indici: `plays_at(playedAt)` e `plays_track(trackId, playedAt, msPlayed)` — il secondo è **coprente**: un ricapitolo annuale raggruppa per brano leggendo solo l'indice. La cronologia parte vuota (`playCount`/`lastPlayedAt` restano per la Home). La Jam non scrive qui.
+
+### `smart_playlists`
+`id` int PK · `name` text · `rules` text (nel linguaggio di ricerca, salvato in forma canonica) · `sort` text? (nome di `SmartSort`; null = predefinito) · `limitCount` int? · `createdAt` int. Nessuna riga in `playlist_tracks`: l'elenco si calcola dal vivo.
+
+### `user_tags` e `track_tags`
+`user_tags`: `id` int PK · `name` text UNIQUE **COLLATE NOCASE** · `color` int? (indice di uno degli 8 accenti). `track_tags`: `trackId` + `tagId`, PK insieme, CASCADE su entrambi (togliere un brano o un'etichetta toglie solo i collegamenti).
+
 ## Importazione da CSV (schema v4, fase 12)
 | Tabella | Colonne | Note |
 |---|---|---|
@@ -107,6 +120,7 @@ File scomparsi: `missing = true` **solo se la cartella radice è raggiungibile**
 | `theme` | string | `notte` | `notte`, `oled`, `chiaro` (`light` = `chiaro`; i nomi ritirati `carbon`, `navy` → `notte`) |
 | `accent` | string | `viola` | `viola`, `blu`, `acqua`, `verde`, `ambra`, `arancio`, `rosa`, `rosso` (fase 19; valore ignoto = `viola`) |
 | `onboardingDone` | bool | false | la guida al primo avvio è finita o saltata (fase 19) |
+| `recordHistory` | bool | true | registra la cronologia di ascolto (`plays`), solo locale (fase 20) |
 | `fontScale` | double | 1.0 | 0.9, 1.0, 1.15 |
 | `compactMode` | bool | false | |
 | `reducedMotion` | bool | false | |
