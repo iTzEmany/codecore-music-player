@@ -1,4 +1,7 @@
 import 'dart:async';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'services/android/widget_bridge.dart';
+import 'services/android/widget_sync.dart';
 import 'dart:io';
 
 import 'package:audio_service/audio_service.dart';
@@ -81,6 +84,21 @@ Future<void> main() async {
     AppLog.w('restore playback failed', e, st);
   }
   persistence.start();
+
+  // Home-screen widget and quick tile (Android): fed from here, not from the
+  // UI, because the player outlives the activity.
+  if (Platform.isAndroid) {
+    final bridge = PrefsWidgetBridge(await SharedPreferences.getInstance());
+    WidgetSync(
+      tracks: handler.currentTrackStream,
+      playing: handler.playbackState.map((s) => s.playing).distinct(),
+      bridge: bridge,
+      coverPath: (t) => t.coverKey == null ? null : covers.fileFor(t.coverKey!)?.path,
+      initialTrack: handler.currentTrack,
+      initialPlaying: handler.playbackState.value.playing,
+    );
+    await bridge.markReady();
+  }
 
   var systemName = Platform.localHostname;
   if (Platform.isAndroid) {
