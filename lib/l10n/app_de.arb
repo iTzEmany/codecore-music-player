@@ -1881,5 +1881,10 @@
       }
     }
   },
-  "trustedRevokeBody": "Um wieder ohne PIN zu senden, müsst ihr euch neu koppeln."
+  "trustedRevokeBody": "Um wieder ohne PIN zu senden, müsst ihr euch neu koppeln.",
+  "carMode": "Automodus",
+  "carExit": "Beenden",
+  "carKeepAwake": "Bildschirm anlassen",
+  "carPlaylists": "Playlists",
+  "carNothing": "Keine Wiedergabe"
 }

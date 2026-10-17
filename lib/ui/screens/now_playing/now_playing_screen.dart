@@ -1,4 +1,6 @@
+import '../../../core/platform.dart';
 import 'package:flutter/material.dart';
+import '../car/car_mode_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/db/app_database.dart';
@@ -250,6 +252,14 @@ class _Player extends ConsumerWidget {
                       ],
                     ),
                   ),
+                  if (!isDesktop)
+                    IconButton(
+                      tooltip: l.carMode,
+                      icon: const Icon(Icons.directions_car_outlined),
+                      onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute<void>(builder: (_) => const CarModeScreen()),
+                      ),
+                    ),
                   IconButton(
                     tooltip: l.moreActions,
                     icon: const Icon(Icons.more_horiz_rounded),

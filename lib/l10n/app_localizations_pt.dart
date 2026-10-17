@@ -3208,4 +3208,19 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get trustedRevokeBody =>
       'Para enviar de novo sem PIN terão de emparelhar outra vez.';
+
+  @override
+  String get carMode => 'Modo carro';
+
+  @override
+  String get carExit => 'Sair';
+
+  @override
+  String get carKeepAwake => 'Ecrã sempre ligado';
+
+  @override
+  String get carPlaylists => 'Playlists';
+
+  @override
+  String get carNothing => 'Nada a tocar';
 }

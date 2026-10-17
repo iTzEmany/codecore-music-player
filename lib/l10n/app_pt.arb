@@ -2072,5 +2072,10 @@
       }
     }
   },
-  "trustedRevokeBody": "Para enviar de novo sem PIN terão de emparelhar outra vez."
+  "trustedRevokeBody": "Para enviar de novo sem PIN terão de emparelhar outra vez.",
+  "carMode": "Modo carro",
+  "carExit": "Sair",
+  "carKeepAwake": "Ecrã sempre ligado",
+  "carPlaylists": "Playlists",
+  "carNothing": "Nada a tocar"
 }

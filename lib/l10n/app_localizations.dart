@@ -5067,6 +5067,36 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Per inviare di nuovo senza PIN dovrete abbinarvi ancora.'**
   String get trustedRevokeBody;
+
+  /// No description provided for @carMode.
+  ///
+  /// In it, this message translates to:
+  /// **'Modalità in auto'**
+  String get carMode;
+
+  /// No description provided for @carExit.
+  ///
+  /// In it, this message translates to:
+  /// **'Esci'**
+  String get carExit;
+
+  /// No description provided for @carKeepAwake.
+  ///
+  /// In it, this message translates to:
+  /// **'Schermo sempre acceso'**
+  String get carKeepAwake;
+
+  /// No description provided for @carPlaylists.
+  ///
+  /// In it, this message translates to:
+  /// **'Playlist'**
+  String get carPlaylists;
+
+  /// No description provided for @carNothing.
+  ///
+  /// In it, this message translates to:
+  /// **'Niente in riproduzione'**
+  String get carNothing;
 }
 
 class _AppLocalizationsDelegate

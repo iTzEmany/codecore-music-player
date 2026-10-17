@@ -124,3 +124,10 @@ Per ogni rischio: **sintomo** → **cosa fare**. Se scatta un fallback che cambi
 | R61 | ExoPlayer/mpv non leggono HTTPS autofirmato | La Jam non parte | La Jam resta su HTTP con token (dichiarato), su un socket separato; verificato in 24.1 |
 | R62 | Sync che sovrascrive una playlist curata | Una playlist ordinata a mano cambia da sola | «Ultima modifica vince» solo con **anteprima e conferma** (`showSyncPreview`); la versione più recente **qui** non viene toccata; nessuna cancellazione propagata; applicazione in **una transazione** (`PlaylistSyncRepository.apply`); `updated_at` dell'altro dispositivo copiato, niente rimbalzi |
 
+## Android esteso (fase 25)
+| # | Rischio | Sintomo | Piano B |
+|---|---|---|---|
+| R63 | Tasto multimediale a freddo non riavvia la riproduzione | Widget, tile, cuffie o auto a app chiusa: nessun suono | **Confermato** (25.1): `audio_service` scarta il tasto se Dart non è ancora collegato. Widget e tile usano `MediaKeys.pressSurely`: premono, aspettano `widget.readyAt` scritto da Dart dopo il ripristino della coda e ripremono (suona dopo ~3 s, provato sul Mi A3). Cuffie Bluetooth a app chiusa: resta il limite di `audio_service` |
+| R64 | Android Auto non mostra l'app (installata fuori dal Play Store) | Nessuna icona in auto | DHU o auto con «Origini sconosciute» nelle impostazioni sviluppatore di Android Auto; descrittore `automotive_app_desc` presente. **Non provato** |
+| R65 | Widget non aggiornato o batteria consumata | Titolo vecchio, consumo | Una scrittura solo a ogni cambio di brano/stato (`WidgetSync`, mai sulla posizione); nessun `updatePeriodMillis`; l'`Application` ascolta le preferenze e ridisegna. Dart scrive su `shared_preferences` perché il motore avviato senza attività non ha i canali di `MainActivity` |
+

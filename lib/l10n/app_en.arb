@@ -1881,5 +1881,10 @@
       }
     }
   },
-  "trustedRevokeBody": "To send without a PIN again you will have to pair again."
+  "trustedRevokeBody": "To send without a PIN again you will have to pair again.",
+  "carMode": "Car mode",
+  "carExit": "Exit",
+  "carKeepAwake": "Keep screen on",
+  "carPlaylists": "Playlists",
+  "carNothing": "Nothing playing"
 }

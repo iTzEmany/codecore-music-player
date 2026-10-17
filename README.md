@@ -95,6 +95,11 @@ senza il file la build release usa la chiave di debug.
 - Impostazioni → «Rete locale» → **Dispositivi fidati**: per ogni dispositivo abbinato si vede l'impronta, si può attivare «Accetta automaticamente» e **revocare** (con conferma). Il gruppo compare solo quando c'è almeno un abbinato.
 - Le playlist hanno un'identità (`uuid`) e una data di ultima modifica; il confronto tra due dispositivi (la più recente vince, con anteprima e conferma, mai cancellazioni) è pronto e provato nei test. **L'abbinamento con PIN/QR, l'HTTPS con impronta e il pulsante «Sincronizza playlist» non ci sono ancora**: aspettano l'approvazione dei pacchetti dei certificati e dello scanner (vedi `docs/PROGRESS.md`). La Jam resta su HTTP con token.
 
+## Widget, tile, Android Auto (fase 25, Android)
+- **Widget** «In riproduzione» 4×1 e 2×2 per la home (copertina, titolo, ⏮ ⏯ ⏭) e **tile** play/pausa nelle impostazioni rapide: anche con l'app chiusa (il primo tocco la riavvia e fa partire il brano dopo ~3 s).
+- **Android Auto**: Preferiti · Playlist · Album · Più ascoltati · Ultimi aggiunti, ricerca e avvio dei brani (da provare su Desktop Head Unit o in auto). **Wear OS**: i controlli multimediali di sistema dell'orologio.
+- **Modalità in auto**: dal menu di Now Playing, pulsanti grandi e playlist a portata di dito; lo schermo resta acceso solo se lo chiedi.
+
 ## Riproduzione (fase 17)
 - **Velocità** 0,5×–2× senza cambiare il tono (chip «1×» in Now Playing).
 - **Riprendi da qui:** i brani lunghi (≥ 20 min: podcast, audiolibri, DJ set) ripartono da dove li hai lasciati.

@@ -3241,4 +3241,19 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get trustedRevokeBody =>
       'Pour envoyer de nouveau sans PIN, il faudra vous associer à nouveau.';
+
+  @override
+  String get carMode => 'Mode voiture';
+
+  @override
+  String get carExit => 'Quitter';
+
+  @override
+  String get carKeepAwake => 'Écran toujours allumé';
+
+  @override
+  String get carPlaylists => 'Playlists';
+
+  @override
+  String get carNothing => 'Rien en lecture';
 }

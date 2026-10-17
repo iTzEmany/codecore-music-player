@@ -2072,5 +2072,10 @@
       }
     }
   },
-  "trustedRevokeBody": "Pour envoyer de nouveau sans PIN, il faudra vous associer à nouveau."
+  "trustedRevokeBody": "Pour envoyer de nouveau sans PIN, il faudra vous associer à nouveau.",
+  "carMode": "Mode voiture",
+  "carExit": "Quitter",
+  "carKeepAwake": "Écran toujours allumé",
+  "carPlaylists": "Playlists",
+  "carNothing": "Rien en lecture"
 }

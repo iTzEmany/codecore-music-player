@@ -56,6 +56,17 @@ class MainActivity : AudioServiceActivity() {
             override fun onAudioDevicesRemoved(removed: Array<out AudioDeviceInfo>) = pushRoute(audio)
         }, main)
 
+        // Car mode: keep the screen on while it is open.
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "codecore/screen")
+            .setMethodCallHandler { call, result ->
+                if (call.method == "keepOn") {
+                    val on = call.arguments as? Boolean ?: false
+                    if (on) window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                    else window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                    result.success(null)
+                } else result.notImplemented()
+            }
+
         val share = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "codecore/share")
         ShareBridge.channel = share
         share.setMethodCallHandler { call, result ->
