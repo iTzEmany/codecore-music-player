@@ -215,3 +215,8 @@ Scritture con debounce 400 ms, mai in un handler di slider a ogni tick.
 - **Wear OS**: nessun codice; i controlli di sistema per la sessione del telefono (da verificare a mano).
 - **Modalità in auto** (`lib/ui/screens/car/`): schermata a mano dal menu di Now Playing (solo mobile), pulsanti ≥ 96 dp, Preferito, foglio con Preferiti + 5 playlist recenti, «schermo sempre acceso» opzionale via canale `codecore/screen` (`FLAG_KEEP_SCREEN_ON`).
 
+## Distribuzione (fase 26)
+- **Linux**: `scripts/package-linux.sh [--deb]` da `flutter build linux --release`; `.desktop` condiviso in `packaging/linux/`, `control.in` per il .deb (`/opt/codecore`, `/usr/bin/codecore`). AppImage/Flatpak/Inno Setup non ci sono ancora (strumenti da approvare).
+- **Android**: release con minify + shrink (`proguard-rules.pro`); **variante `lite`** = `CODECORE_LITE=1` (Gradle toglie `youtubedl-android` e usa `src/lite/kotlin`, il canale `codecore/ytdlp` è in `YtDlpChannel` solo in `src/full/kotlin`) + `--dart-define=CODECORE_YOUTUBE=false` (`kEnableYoutube`).
+- **Aggiornamenti**: `update_checker.dart` (`compareVersions`, `UpdateChecker` su `releases/latest` di GitHub), solo su richiesta o con «Controlla all'avvio» (spento, al più 1 al giorno); nascosto finché `kReleaseRepo` è vuoto. Nessun download/installazione automatici.
+

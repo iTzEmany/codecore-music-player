@@ -131,3 +131,11 @@ Per ogni rischio: **sintomo** → **cosa fare**. Se scatta un fallback che cambi
 | R64 | Android Auto non mostra l'app (installata fuori dal Play Store) | Nessuna icona in auto | DHU o auto con «Origini sconosciute» nelle impostazioni sviluppatore di Android Auto; descrittore `automotive_app_desc` presente; a freddo la prima lista può essere vuota (basta riaprire). **Non provato** |
 | R65 | Widget non aggiornato o batteria consumata | Titolo vecchio, consumo | Una scrittura solo a ogni cambio di brano/stato (`WidgetSync`, mai sulla posizione); nessun `updatePeriodMillis`; l'`Application` ascolta le preferenze e ridisegna. Dart scrive su `shared_preferences` perché il motore avviato senza attività non ha i canali di `MainActivity` |
 
+## Distribuzione (fase 26)
+| # | Rischio | Sintomo | Piano B |
+|---|---|---|---|
+| R66 | Licenza della build ffmpeg incompatibile o non chiara | Installer Windows non distribuibile | Non ancora affrontato (26.1/26.4 aspettano l'approvazione degli strumenti): solo build con licenza verificata e testo incluso; altrimenti ffmpeg non incluso e conversione MP3 disattivata su Windows |
+| R67 | Flatpak senza yt-dlp/ffmpeg funzionanti (sandbox) | Download assenti nel Flatpak | Binari dentro `/app/bin`; altrimenti Flatpak senza download, dichiarato. Non ancora costruito |
+| R68 | Keystore esposto o perso | APK non aggiornabili | Solo nei *secrets* della CI, mai stampato; `android/key.properties` e `*.jks` sono in `.gitignore`; backup offline |
+| R69 | R8/ProGuard rompe plugin con riflessione | Crash della release | Regole in `android/app/proguard-rules.pro`; la release `full` x86_64 è stata avviata su emulatore senza crash; resta da provare yt-dlp in release. Piano B: `isMinifyEnabled = false` (costa pochi MB: il codice pesa 2,8 MB) |
+

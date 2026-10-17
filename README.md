@@ -36,6 +36,9 @@ Italiano, English, Deutsch, Español.
 - **Linux**: `flutter build linux --release`, poi eseguire `build/linux/x64/release/bundle/codecore`.
   Servono `libmpv` (`sudo apt install libmpv-dev mpv`). Per YouTube: `yt-dlp` e `ffmpeg` nel PATH (`pip install -U yt-dlp`)
   e un runtime JavaScript (`node`, `deno` o `quickjs`).
+- **Linux, pacchetto .deb**: `flutter build linux --release && scripts/package-linux.sh --deb` produce `build/codecore_<versione>_amd64.deb` (dipende da `libmpv2`); lo zip resta in `build/codecore-linux-x64.zip`. AppImage, Flatpak e l'installer Windows aspettano l'approvazione degli strumenti di build (vedi `docs/PROGRESS.md`, fase 26).
+- **Android più leggero**: `flutter build apk --release --split-per-abi` (arm64 ≈ 67 MB) oppure la variante senza YouTube: `CODECORE_LITE=1 flutter build apk --release --split-per-abi --dart-define=CODECORE_YOUTUBE=false` (arm64 ≈ 13 MB).
+- **Guida**: [`docs/guida/`](docs/guida/README.md).
 - **Windows**: su una macchina Windows con Visual Studio 2022 (C++): `flutter build windows --release`
   e zippare `build\windows\x64\runner\Release\`. Per YouTube servono `yt-dlp.exe` e `ffmpeg.exe` nel PATH.
 

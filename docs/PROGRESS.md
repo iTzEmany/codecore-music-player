@@ -311,16 +311,16 @@ L'agente riparte sempre dal primo task non spuntato.
 - [~] 25.9 Rifinitura, documentazione e prova a mano
 
 ## Fase 26 — Distribuzione (`fase-26-distribuzione.md`)
-- [ ] 26.1 Verifiche preliminari (strumenti di packaging, licenza ffmpeg, dimensioni attuali)
-- [ ] 26.2 AppImage e .deb
-- [ ] 26.3 Flatpak
-- [ ] 26.4 Installer Windows (Inno Setup)
+- [ ] 26.1 Verifiche preliminari (BLOCCATO: strumenti di build `linuxdeploy`/`appimagetool`/`flatpak-builder`/Inno Setup da approvare; le dimensioni sono in 26.5)
+- [ ] 26.2 AppImage e .deb (PARZIALE: .deb fatto e verificato; BLOCCATO: AppImage e CI `release.yml` da approvare)
+- [ ] 26.3 Flatpak (BLOCCATO: `flatpak-builder` da approvare)
+- [ ] 26.4 Installer Windows (Inno Setup) (BLOCCATO: Inno Setup e scelta/licenza di ffmpeg da approvare; serve una macchina Windows per provarlo)
 - [~] 26.5 APK più leggero e flavor `lite` (firma/CI e prova di `full` arm64 sul telefono in «Tocca a te»)
 - [x] 26.6 Avviso di aggiornamento
-- [ ] 26.7 Valutazione F-Droid
-- [ ] 26.8 Build di prova macOS / iOS
-- [ ] 26.9 Guida utente
-- [ ] 26.10 Rifinitura, documentazione e prova a mano
+- [ ] 26.7 Valutazione F-Droid (BLOCCATO: `fdroidserver` in un container da approvare; vedi nota)
+- [ ] 26.8 Build di prova macOS / iOS (BLOCCATO: `flutter create --platforms=macos,ios` aggiunge cartelle: il documento dice di chiedere)
+- [~] 26.9 Guida utente (testo e controllo dei link fatti; mancano le immagini)
+- [~] 26.10 Rifinitura, documentazione e prova a mano (versione 1.2.0 impostata, documenti fatti; tag `v1.2.0` e release dalla CI toccano a te)
 
 ## Note di deviazione
 <!-- una riga per deviazione: data — task — cosa è cambiato e perché -->
@@ -540,6 +540,9 @@ L'agente riparte sempre dal primo task non spuntato.
 - 25.8: `CarModeScreen` (`lib/ui/screens/car/`): `CoverBackdrop`, copertina, titolo/artista grandi (titolo fino a 2 righe), ⏮ ⏯ ⏭ da **96 dp**, ♥, «schermo sempre acceso» (canale Kotlin `codecore/screen` con `FLAG_KEEP_SCREEN_ON`, spento all'uscita), «Esci» grande e foglio «Playlist» con Preferiti + le 5 playlist con attività più recente (`recentPlaylists`: ascoltata o creata; le vuote no). In orizzontale cover a sinistra e comandi a destra. Voce nel menu di Now Playing solo su mobile. Stringhe `car*` in 6 lingue. 5 test (vuota, brano a testo ×1 e ×1,5 senza overflow con i tre pulsanti ≥ 96 dp e avanti che cambia brano, foglio, ordinamento). **Scostamento**: niente scatti dorati (golden) a 100 %/150 %: li sostituisce il test di overflow a ×1,5.
 - 25.9: docs (`02`, `99` R63–R65 con R63 confermato dalla prova, README), stringhe Android it/en/de/es nel 25.3.
 - 26.5 (2026-10-17): **dimensioni** (arm64, release): `full` **67,0 MB** (armeabi-v7a 60,1), debug 255,6 MB; `lite` **13,4 MB** (v7a 13,2). Dentro `full` dominano `libffmpeg.zip.so` 35,6 MB e `libpython.zip.so` 14,3 MB (youtubedl-android), `libflutter` 11,7, `libapp` 11,6; il codice (dex) pesa 2,8 MB, quindi minify/shrink valgono poco ma sono attivi come da documento. **Scostamenti dal doc**: niente `productFlavors` di Gradle (obbligherebbero `--flavor` ovunque, CI e build di sviluppo comprese): il flavor `lite` è la variabile d'ambiente **`CODECORE_LITE=1`** (toglie le dipendenze `youtubedl-android` e usa il sorgente `src/lite/kotlin`, invece di `src/full/kotlin`) abbinata a `--dart-define=CODECORE_YOUTUBE=false`; `kEnableYoutube` legge ora `bool.fromEnvironment('CODECORE_YOUTUBE', defaultValue: true)`. Il codice del canale `codecore/ytdlp` è passato da `MainActivity.kt` a `YtDlpChannel` (versione vera in `full`, vuota in `lite`). `isMinifyEnabled`/`isShrinkResources` in release con `android/app/proguard-rules.pro` (Jackson/youtubedl-android, audio_service, le nostre classi). **Prova**: release `full` x86_64 su emulatore Android 36.1: parte e mostra la guida iniziale, nessun crash (la prova ha anche scoperto un'eccezione non gestita in `main.dart`, tolta). Sul Mi A3 **non installabile**: la release è firmata con una chiave diversa da quella del debug installato (`INSTALL_FAILED_UPDATE_INCOMPATIBLE`) e non ho toccato l'app (niente disinstallazioni). Suite con `--dart-define=CODECORE_YOUTUBE=false`: 3 test di `csv_import_test` (anteprima di scarico) ora saltati in `lite`, il resto verde. **Non fatto** (richiede CI/segreti): APK firmati dai *secrets* per `full`/`lite` per ABI, in `release.yml`.
+- 26.2 (parziale): `packaging/linux/codecore.desktop` (segnaposto `@EXEC@`, condiviso da zip e .deb) e `deb/control.in`; `scripts/package-linux.sh --deb` costruisce `build/codecore_<versione>_amd64.deb` con `dpkg-deb` (`/opt/codecore/`, collegamento `/usr/bin/codecore`, `Depends: libmpv2 | libmpv1, libgtk-3-0, libsqlite3-0`, versione da `pubspec.yaml`). Provato qui: bundle Linux release costruito, .deb 34 MB (zip 44 MB), `dpkg-deb --info` e `--contents` corretti. **Non installato** (serve `sudo`): prova a mano.
+- 26.7 (valutazione a tavolino, non eseguita in un container): il flavor `full` **non** è accettabile per F-Droid (binari precompilati ffmpeg/Python di `youtubedl-android`, scarica yt-dlp da internet, funzione YouTube = anti-feature «NonFreeNet»/contenuti); il flavor `lite` (13 MB) non ha questi blocchi nel codice nostro, ma restano da verificare le dipendenze transitive dei plugin (binari Rust/`media_kit` libs, `metadata_god` non usato) e la build riproducibile con `fdroid build`. Esito provvisorio: **forse fattibile con `lite`, non verificato**.
+- 26.9: `docs/guida/` con indice e 9 pagine (libreria, player, playlist, importazione, download, condivisione, backup, podcast, impostazioni); `scripts/check_docs_links.py` controlla i link relativi e che le immagini in `img/` siano < 300 KB (esito: ok). **Immagini non generate**: servono scatti dell'app (`scripts/shots.sh`).
 - 26.6: `compareVersions` (puro: `v` iniziale, parti mancanti, `+build` ignorato, pre-release < release e ordine tra pre-release), `UpdateChecker(web, repo, current).check()` → `UpdateResult` (`newer`/`upToDate`/`rateLimited`/`failed` + `UpdateInfo{version, url, notes}`) sull'endpoint `releases/latest`; 403/429 → «riprova più tardi», **nessun ritento**; senza repository nessuna richiesta. **`kReleaseRepo` è vuoto** (`origin` è ancora locale): finché è vuoto le voci sono **nascoste** (come dice il documento). Impostazioni → Info: «Controlla aggiornamenti» (finestra con esito, note e indirizzo selezionabile + «Copia indirizzo», niente `url_launcher`) e interruttore «Controlla all'avvio» (**spento** di serie, al più una volta al giorno: `lastUpdateCheckDay`; un errore è silenzioso; avviso come snackbar di 8 s). **Scostamento**: le due impostazioni sono chiavi proprie in `SettingsStore` (`checkUpdatesOnStart`, `lastUpdateCheckDay`) e non campi di `AppSettings`, come `trustedDevices`. 10 test del confronto/controllo + 5 di interfaccia e avvio. **Per attivarla**: mettere `owner/nome` in `kReleaseRepo` quando il repository GitHub esiste.
 
 ## Note di deviazione (Fase 12)
