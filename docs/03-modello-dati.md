@@ -37,7 +37,8 @@ in `onUpgrade` (mai distruttiva). Esporta lo schema con `drift_dev schema dump` 
 | `enrichStatus` | int | 0 mai tentato, 1 trovato, 2 non trovato |
 | `userEdited` | bool | default false: se true l'arricchimento **non** sovrascrive titolo/artista/album |
 | `missing` | bool | default false: file non trovato all'ultima scansione |
-| `sha256` | text? | calcolato solo su richiesta |
+| `ignored` | bool | default false (schema v8): doppione unito e **nascosto** dalla pulizia. Sparisce da brani, album, artisti, generi, ricerca, playlist, cronologia e abbinamenti. A differenza di `missing`, la scansione **non lo riattiva**: solo «Brani nascosti → Ripristina» |
+| `sha256` | text? | calcolato solo su richiesta (fase 21): per i brani con la **stessa dimensione** di un altro, a flusso in un isolate; azzerato dalla scansione se dimensione o data del file cambiano |
 | `addedAt` | int | epoch ms |
 | `playCount` | int | default 0 |
 | `lastPlayedAt` | int? | |
@@ -70,6 +71,9 @@ Indici: `plays_at(playedAt)` e `plays_track(trackId, playedAt, msPlayed)` — il
 
 ### `user_tags` e `track_tags`
 `user_tags`: `id` int PK · `name` text UNIQUE **COLLATE NOCASE** · `color` int? (indice di uno degli 8 accenti). `track_tags`: `trackId` + `tagId`, PK insieme, CASCADE su entrambi (togliere un brano o un'etichetta toglie solo i collegamenti).
+
+## Pulizia della libreria (schema v8, fase 21)
+Nessuna tabella nuova: una colonna, `tracks.ignored` (vedi sopra). Unire due doppioni (`DuplicateRepository.merge`, una transazione) sposta sul brano tenuto: preferito (se uno lo era), `playCount` (somma), `lastPlayedAt` (massimo), testi/curiosità/copertina/modifiche dell'utente (solo dove il tenuto non ha i suoi), la sua posizione nelle playlist (il primo del gruppo cede il posto, nessun doppione), `plays`, `track_tags` e `playlist_import_items.track_id`; poi nasconde gli altri. **Nessuna riga di `tracks` viene cancellata** dall'unione (servono a «Ripristina»); si cancellano solo, dopo doppia conferma, i file scelti dall'utente e le loro righe. Le coppie «Non sono duplicati» stanno in `SettingsStore` (`notDuplicates`, chiavi dei gruppi), non nel DB.
 
 ## Importazione da CSV (schema v4, fase 12)
 | Tabella | Colonne | Note |

@@ -75,6 +75,11 @@ senza il file la build release usa la chiave di debug.
 - **Playlist intelligenti:** Libreria → + → Nuova playlist intelligente: le stesse regole, l'elenco si aggiorna da solo (ordine, limite, modelli pronti); si può convertire in playlist normale.
 - **Etichette tue:** dal menu di un brano o dalla selezione multipla; Libreria → Etichette.
 
+## Pulizia libreria (fase 21)
+- **Duplicati:** Impostazioni → Pulizia libreria → Duplicati. Trova lo stesso file in più cartelle («Identici», confronto per SHA-256 solo dei file della stessa dimensione) e lo stesso brano in più qualità («Probabili»: stesso titolo e artista, durata entro 2 s). Ogni gruppo mostra i percorsi, il formato e la dimensione, con il brano proposto (lossless, poi bitrate più alto); preferiti, playlist, ascolti, testi ed etichette passano a quello che tieni e gli altri vengono solo nascosti («Brani nascosti», dove si ripristinano). «Elimina anche i file» chiede due conferme con l'elenco dei percorsi.
+- **Album a mano:** menu ⋯ di un album → «Unisci con…»; dalla selezione di brani → «Sposta in un nuovo album…». Con «Annulla» nello snackbar; i file non si toccano.
+- **Tag nei file:** *non ancora*. Scrivere i tag modificati dentro i file è pronto da verificare (`metadata_god`) ma aspetta la tua approvazione (vedi `docs/PROGRESS.md`, «Tocca a te»).
+
 ## Riproduzione (fase 17)
 - **Velocità** 0,5×–2× senza cambiare il tono (chip «1×» in Now Playing).
 - **Riprendi da qui:** i brani lunghi (≥ 20 min: podcast, audiolibri, DJ set) ripartono da dove li hai lasciati.
