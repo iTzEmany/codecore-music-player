@@ -1,6 +1,7 @@
 import 'package:codecore/data/settings/settings_store.dart';
 import 'package:codecore/services/audio/audio_backend.dart' show TransitionMode;
 import 'package:codecore/services/audio/play_queue.dart';
+import 'package:codecore/services/online/youtube_service.dart' show SearchSource;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -92,6 +93,33 @@ void main() {
     expect(store.readSettings().recordHistory, isTrue);
     await store.writeSettings(const AppSettings(recordHistory: false));
     expect(store.readSettings().recordHistory, isFalse);
+  });
+
+  test('online sources: YouTube and no SoundCloud fallback by default; both are remembered', () async {
+    SharedPreferences.setMockInitialValues({});
+    final store = await SettingsStore.open();
+    expect(store.readSettings().searchSource, SearchSource.youtube);
+    expect(store.readSettings().importSoundCloud, isFalse);
+
+    await store.writeSettings(store.readSettings().copyWith(
+        searchSource: SearchSource.soundcloud, importSoundCloud: true));
+    final again = store.readSettings();
+    expect(again.searchSource, SearchSource.soundcloud);
+    expect(again.importSoundCloud, isTrue);
+  });
+
+  test('an unknown stored source falls back to YouTube', () async {
+    SharedPreferences.setMockInitialValues({'searchSource': 'bandcamp'});
+    final store = await SettingsStore.open();
+    expect(store.readSettings().searchSource, SearchSource.youtube);
+  });
+
+  test('the groups the user said are not duplicates are remembered', () async {
+    SharedPreferences.setMockInitialValues({});
+    final store = await SettingsStore.open();
+    expect(store.readNotDuplicates(), isEmpty);
+    await store.writeNotDuplicates({'3,4', '1,2'});
+    expect(store.readNotDuplicates(), {'1,2', '3,4'});
   });
 }
 

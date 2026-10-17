@@ -69,8 +69,9 @@ final playlistImportServiceProvider = Provider<PlaylistImportService>((ref) {
           .read(enrichmentServiceProvider)
           .coverForAlbum(t, row.album!, row.primaryArtist);
     },
-    pathForVideo: (id) async =>
-        (await ref.read(downloadIndexProvider.future)).pathFor(id),
+    pathForVideo: (v) async =>
+        (await ref.read(downloadIndexProvider.future)).pathFor(v.id, source: v.source),
+    soundCloudFallback: () => ref.read(settingsProvider).importSoundCloud,
     applyTags: (trackId, row) async {
       final t = await tracks.getById(trackId);
       if (t == null) return;

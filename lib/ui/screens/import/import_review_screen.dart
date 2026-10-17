@@ -10,6 +10,7 @@ import '../../../l10n/l10n_ext.dart';
 import '../../../providers/import_providers.dart';
 import '../../../services/export/save_file.dart';
 import '../../../services/import/import_candidate.dart';
+import '../../../services/online/youtube_service.dart';
 import '../../../services/import/import_outcome.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/empty_state.dart';
@@ -137,6 +138,7 @@ class ImportReviewScreen extends ConsumerWidget {
         dense: true,
         title: Text(c.title, maxLines: 1, overflow: TextOverflow.ellipsis),
         subtitle: Text(
+          '${c.source == MediaSource.soundcloud ? '${l.searchSourceSoundcloud} · ' : ''}'
           '${c.channel} · ${formatDuration((c.durationSec ?? 0) * 1000)}'
           '${diff == null ? '' : ' (${diff >= 0 ? '+' : ''}$diff s)'}',
           maxLines: 1,

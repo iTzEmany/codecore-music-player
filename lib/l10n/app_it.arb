@@ -242,7 +242,7 @@
   "ytErrNetwork": "Rete non disponibile",
   "ytErrChanged": "YouTube ha cambiato qualcosa: aggiorna l’app o il pacchetto",
   "ytNoFolder": "Aggiungi prima una cartella musicale",
-  "ytLegal": "Solo per uso personale. Rispetta i diritti d’autore e i termini di YouTube.",
+  "ytLegal": "Solo per uso personale. Rispetta i diritti d’autore e i termini di YouTube e SoundCloud.",
   "useDefaultFolder": "Usa la cartella Musica del dispositivo",
   "ytErrToolMissing": "yt-dlp non trovato: installalo (pip install -U yt-dlp) e riprova",
   "ytErrRateLimited": "YouTube ha chiesto di rallentare: riprova tra qualche minuto",
@@ -1810,5 +1810,11 @@
         "type": "String"
       }
     }
-  }
+  },
+  "searchSourceYoutube": "YouTube",
+  "searchSourceYoutubeMusic": "YouTube Music",
+  "searchSourceSoundcloud": "SoundCloud",
+  "importSoundCloud": "Cerca anche su SoundCloud se un brano non si trova",
+  "importSoundCloudHint": "Solo per le righe di un’importazione che YouTube non trova: una ricerca in più per riga. Spento di serie.",
+  "ytHintSoundcloud": "Cerca su SoundCloud"
 }

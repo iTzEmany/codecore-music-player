@@ -242,7 +242,7 @@
   "ytErrNetwork": "Rede indisponível",
   "ytErrChanged": "O YouTube mudou alguma coisa: atualize a app ou o pacote",
   "ytNoFolder": "Adicione primeiro uma pasta de música",
-  "ytLegal": "Apenas para uso pessoal. Respeite os direitos de autor e os termos do YouTube.",
+  "ytLegal": "Apenas para uso pessoal. Respeite os direitos de autor e os termos do YouTube e do SoundCloud.",
   "useDefaultFolder": "Usar a pasta Música do dispositivo",
   "ytErrToolMissing": "yt-dlp não encontrado: instale-o (pip install -U yt-dlp) e tente novamente",
   "ytErrRateLimited": "O YouTube pediu para abrandar: tente novamente dentro de alguns minutos",
@@ -1810,5 +1810,11 @@
         "type": "String"
       }
     }
-  }
+  },
+  "searchSourceYoutube": "YouTube",
+  "searchSourceYoutubeMusic": "YouTube Music",
+  "searchSourceSoundcloud": "SoundCloud",
+  "importSoundCloud": "Procurar também no SoundCloud se uma música não for encontrada",
+  "importSoundCloudHint": "Apenas para as linhas de uma importação que o YouTube não encontra: uma pesquisa a mais por linha. Desligado por defeito.",
+  "ytHintSoundcloud": "Procurar no SoundCloud"
 }

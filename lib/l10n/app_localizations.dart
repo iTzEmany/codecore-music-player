@@ -1069,7 +1069,7 @@ abstract class AppLocalizations {
   /// No description provided for @ytLegal.
   ///
   /// In it, this message translates to:
-  /// **'Solo per uso personale. Rispetta i diritti d’autore e i termini di YouTube.'**
+  /// **'Solo per uso personale. Rispetta i diritti d’autore e i termini di YouTube e SoundCloud.'**
   String get ytLegal;
 
   /// No description provided for @useDefaultFolder.
@@ -4605,6 +4605,42 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'{count, plural, one{1 brano spostato in «{name}»} other{{count} brani spostati in «{name}»}}'**
   String movedToAlbum(int count, String name);
+
+  /// No description provided for @searchSourceYoutube.
+  ///
+  /// In it, this message translates to:
+  /// **'YouTube'**
+  String get searchSourceYoutube;
+
+  /// No description provided for @searchSourceYoutubeMusic.
+  ///
+  /// In it, this message translates to:
+  /// **'YouTube Music'**
+  String get searchSourceYoutubeMusic;
+
+  /// No description provided for @searchSourceSoundcloud.
+  ///
+  /// In it, this message translates to:
+  /// **'SoundCloud'**
+  String get searchSourceSoundcloud;
+
+  /// No description provided for @importSoundCloud.
+  ///
+  /// In it, this message translates to:
+  /// **'Cerca anche su SoundCloud se un brano non si trova'**
+  String get importSoundCloud;
+
+  /// No description provided for @importSoundCloudHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Solo per le righe di un’importazione che YouTube non trova: una ricerca in più per riga. Spento di serie.'**
+  String get importSoundCloudHint;
+
+  /// No description provided for @ytHintSoundcloud.
+  ///
+  /// In it, this message translates to:
+  /// **'Cerca su SoundCloud'**
+  String get ytHintSoundcloud;
 }
 
 class _AppLocalizationsDelegate

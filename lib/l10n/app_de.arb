@@ -160,7 +160,7 @@
   "ytErrNetwork": "Netzwerk nicht verfügbar",
   "ytErrChanged": "YouTube hat etwas geändert: App oder Paket aktualisieren",
   "ytNoFolder": "Füge zuerst einen Musikordner hinzu",
-  "ytLegal": "Nur für den persönlichen Gebrauch. Urheberrecht und YouTube-Bedingungen beachten.",
+  "ytLegal": "Nur für den persönlichen Gebrauch. Urheberrecht sowie die Bedingungen von YouTube und SoundCloud beachten.",
   "useDefaultFolder": "Musikordner des Geräts verwenden",
   "ytErrToolMissing": "yt-dlp nicht gefunden: installieren (pip install -U yt-dlp) und erneut versuchen",
   "ytErrRateLimited": "YouTube verlangt eine Pause: versuche es in einigen Minuten erneut",
@@ -1619,5 +1619,11 @@
         "type": "String"
       }
     }
-  }
+  },
+  "searchSourceYoutube": "YouTube",
+  "searchSourceYoutubeMusic": "YouTube Music",
+  "searchSourceSoundcloud": "SoundCloud",
+  "importSoundCloud": "Auch auf SoundCloud suchen, wenn ein Titel nicht gefunden wird",
+  "importSoundCloudHint": "Nur für Zeilen eines Imports, die YouTube nicht findet: eine zusätzliche Suche pro Zeile. Standardmäßig aus.",
+  "ytHintSoundcloud": "SoundCloud durchsuchen"
 }

@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../services/audio/audio_backend.dart' show TransitionMode;
 import '../../services/audio/equalizer.dart';
 import '../../services/audio/play_queue.dart';
+import '../../services/online/youtube_service.dart' show SearchSource;
 
 /// The equalizer curve chosen for one kind of output (speaker or headphones).
 class EqProfile {
@@ -52,6 +53,8 @@ class AppSettings {
     this.transition = TransitionMode.normal,
     this.crossfadeSeconds = 6,
     this.crossfadePlainInAlbum = true,
+    this.searchSource = SearchSource.youtube,
+    this.importSoundCloud = false,
   });
 
   final String theme;
@@ -113,6 +116,12 @@ class AppSettings {
   /// Inside an album the tracks follow each other plainly, with no fade.
   final bool crossfadePlainInAlbum;
 
+  /// Where the online search of the Search page looks.
+  final SearchSource searchSource;
+
+  /// CSV import: try SoundCloud for the rows YouTube did not find.
+  final bool importSoundCloud;
+
   /// Shown to the device on the other side of a LAN share; null = hostname.
   final String? deviceName;
 
@@ -151,6 +160,8 @@ class AppSettings {
     TransitionMode? transition,
     int? crossfadeSeconds,
     bool? crossfadePlainInAlbum,
+    SearchSource? searchSource,
+    bool? importSoundCloud,
   }) =>
       AppSettings(
         theme: theme ?? this.theme,
@@ -187,6 +198,8 @@ class AppSettings {
         crossfadeSeconds: crossfadeSeconds ?? this.crossfadeSeconds,
         crossfadePlainInAlbum:
             crossfadePlainInAlbum ?? this.crossfadePlainInAlbum,
+        searchSource: searchSource ?? this.searchSource,
+        importSoundCloud: importSoundCloud ?? this.importSoundCloud,
       );
 }
 
@@ -252,6 +265,11 @@ class SettingsStore {
         ),
         crossfadeSeconds: (_prefs.getInt('crossfadeSeconds') ?? 6).clamp(2, 12),
         crossfadePlainInAlbum: _prefs.getBool('crossfadePlainInAlbum') ?? true,
+        searchSource: SearchSource.values.firstWhere(
+          (m) => m.name == _prefs.getString('searchSource'),
+          orElse: () => SearchSource.youtube,
+        ),
+        importSoundCloud: _prefs.getBool('importSoundCloud') ?? false,
       );
 
   EqProfile _readEq(String profile) => EqProfile(
@@ -302,6 +320,8 @@ class SettingsStore {
     await _prefs.setString('transition', s.transition.name);
     await _prefs.setInt('crossfadeSeconds', s.crossfadeSeconds);
     await _prefs.setBool('crossfadePlainInAlbum', s.crossfadePlainInAlbum);
+    await _prefs.setString('searchSource', s.searchSource.name);
+    await _prefs.setBool('importSoundCloud', s.importSoundCloud);
     final dn = s.deviceName;
     if (dn == null || dn.isEmpty) {
       await _prefs.remove('deviceName');

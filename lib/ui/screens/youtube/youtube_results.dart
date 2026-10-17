@@ -73,7 +73,12 @@ class _YoutubeResultsState extends ConsumerState<YoutubeResults> {
       _error = null;
     });
     try {
-      final res = await ref.read(youtubeServiceProvider).search(q);
+      final service = ref.read(youtubeServiceProvider);
+      final res = switch (ref.read(settingsProvider).searchSource) {
+        SearchSource.youtube => await service.search(q),
+        SearchSource.youtubeMusic => await service.searchSongs(q, limit: 10),
+        SearchSource.soundcloud => await service.searchSoundCloud(q, limit: 10),
+      };
       if (!mounted || id != _requestId) return;
       // Picks refer to rows of the old results.
       ref.read(selectionProvider(_selectionKey).notifier).clear();
@@ -87,6 +92,13 @@ class _YoutubeResultsState extends ConsumerState<YoutubeResults> {
     } finally {
       if (mounted && id == _requestId) setState(() => _searching = false);
     }
+  }
+
+  void _pickSource(SearchSource s) {
+    if (ref.read(settingsProvider).searchSource == s) return;
+    ref.read(settingsProvider.notifier).update((c) => c.copyWith(searchSource: s));
+    // The same words on another source: ask again when there is something to ask.
+    if (_searched && widget.query.trim().isNotEmpty) _search();
   }
 
   /// Starts a download for each picked result that is not already in the
@@ -136,6 +148,7 @@ class _YoutubeResultsState extends ConsumerState<YoutubeResults> {
     final l = context.l10n;
     final cc = context.cc;
     final seen = ref.watch(settingsProvider.select((s) => s.ytNoticeSeen));
+    final source = ref.watch(settingsProvider.select((s) => s.searchSource));
     final picked = ref.watch(selectionProvider(_selectionKey));
     final downloads = ref.watch(downloadsProvider);
     final index = ref.watch(downloadIndexProvider).value;
@@ -166,6 +179,25 @@ class _YoutubeResultsState extends ConsumerState<YoutubeResults> {
               ],
             ),
           const YtDlpOutdatedBanner(),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(CcDims.margin, 4, CcDims.margin, 0),
+            child: Wrap(
+              spacing: 8,
+              children: [
+                for (final s in SearchSource.values)
+                  ChoiceChip(
+                    key: ValueKey('source-${s.name}'),
+                    label: Text(switch (s) {
+                      SearchSource.youtube => l.searchSourceYoutube,
+                      SearchSource.youtubeMusic => l.searchSourceYoutubeMusic,
+                      SearchSource.soundcloud => l.searchSourceSoundcloud,
+                    }),
+                    selected: source == s,
+                    onSelected: (_) => _pickSource(s),
+                  ),
+              ],
+            ),
+          ),
           if (!seen)
             Padding(
               padding: const EdgeInsets.fromLTRB(
@@ -383,11 +415,26 @@ class _ResultRow extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: theme.bodyLarge,
                       ),
-                      Text(
-                        meta,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.bodyMedium,
+                      Row(
+                        children: [
+                          Icon(
+                            result.source == MediaSource.soundcloud
+                                ? Icons.cloud_rounded
+                                : Icons.smart_display_rounded,
+                            key: ValueKey('from-${result.source.name}'),
+                            size: 14,
+                            color: cc.textMuted,
+                          ),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              meta,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.bodyMedium,
+                            ),
+                          ),
+                        ],
                       ),
                       if (inLibrary)
                         Text(

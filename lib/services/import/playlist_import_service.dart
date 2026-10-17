@@ -66,6 +66,7 @@ class PlaylistImportService {
     required this.applyTags,
     this.forgetSearches,
     this.trackDurationMs,
+    this.soundCloudFallback,
     this.fetchCover,
     this.thresholds,
     this.youtubeEnabled = true,
@@ -84,7 +85,7 @@ class PlaylistImportService {
   final void Function(bool Function(DownloadItem item) test) cancelDownloads;
   final Stream<DownloadItem> settled;
   final Future<int?> Function(String path) trackIdForPath;
-  final Future<String?> Function(String videoId) pathForVideo;
+  final Future<String?> Function(YtResult video) pathForVideo;
   final Future<void> Function(int trackId, ImportRow row) applyTags;
   final bool youtubeEnabled;
 
@@ -99,6 +100,9 @@ class PlaylistImportService {
   final MatchThresholds Function()? thresholds;
 
   MatchThresholds get _cutoffs => thresholds?.call() ?? const MatchThresholds();
+
+  /// Asked at each search: SoundCloud is only tried while the user wants it.
+  final bool Function()? soundCloudFallback;
 
   /// Drops cached search answers; called when a chosen video proved unavailable.
   final void Function(List<String> queries)? forgetSearches;
@@ -591,7 +595,14 @@ class PlaylistImportService {
             if (seen.add(p.id)) p,
         ],
         thresholds: _cutoffs);
-    return decision;
+    if (decision.kind != MatchKind.notFound || !(soundCloudFallback?.call() ?? false)) {
+      return decision;
+    }
+    // Last resort, and only for what nothing else found: one SoundCloud search.
+    await Future<void>.delayed(searchGap);
+    final sc = await youtube.searchSoundCloud(queries[1], limit: 5);
+    final fromSc = decide(row, sc, thresholds: _cutoffs);
+    return fromSc.kind == MatchKind.notFound ? decision : fromSc;
   }
 
   Future<void> _onSearchError(
@@ -635,7 +646,7 @@ class PlaylistImportService {
 
   Future<void> _queueDownload(ImportRow row, int importId, YtResult r,
       {double? score}) async {
-    final existing = await pathForVideo(r.id);
+    final existing = await pathForVideo(r);
     if (existing != null) {
       final id = await trackIdForPath(existing);
       if (id != null) {
@@ -661,6 +672,8 @@ class PlaylistImportService {
         thumbnailUrl: r.thumbnailUrl,
         artists: r.artists,
         album: r.album,
+        source: r.source,
+        webpageUrl: r.webpageUrl,
         downloadName: importDownloadName(row,
             number: imp?.numberFiles ?? false, total: total),
         subdir: imp?.folderPath,

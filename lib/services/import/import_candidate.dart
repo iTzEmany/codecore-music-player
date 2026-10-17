@@ -12,12 +12,16 @@ class ImportCandidate {
     this.durationSec,
     this.thumbnailUrl,
     this.score = 0,
+    this.source = MediaSource.youtube,
+    this.webpageUrl,
   });
 
   final String id, title, channel;
   final int? durationSec;
   final String? thumbnailUrl;
   final double score;
+  final MediaSource source;
+  final String? webpageUrl;
 
   factory ImportCandidate.fromScored(ScoredCandidate s) => ImportCandidate(
         id: s.result.id,
@@ -26,6 +30,8 @@ class ImportCandidate {
         durationSec: s.result.duration?.inSeconds,
         thumbnailUrl: s.result.thumbnailUrl,
         score: s.score,
+        source: s.result.source,
+        webpageUrl: s.result.webpageUrl,
       );
 
   Map<String, Object?> toJson() => {
@@ -35,6 +41,9 @@ class ImportCandidate {
         'durationSec': durationSec,
         'thumb': thumbnailUrl,
         'score': score,
+        // Only for what is not YouTube: older rows stay as they were.
+        if (source != MediaSource.youtube) 'src': source.name,
+        if (webpageUrl != null) 'url': webpageUrl,
       };
 
   static ImportCandidate? fromJson(Object? j) {
@@ -48,6 +57,11 @@ class ImportCandidate {
       durationSec: (j['durationSec'] as num?)?.round(),
       thumbnailUrl: j['thumb'] as String?,
       score: (j['score'] as num?)?.toDouble() ?? 0,
+      source: MediaSource.values.firstWhere(
+        (m) => m.name == j['src'],
+        orElse: () => MediaSource.youtube,
+      ),
+      webpageUrl: j['url'] as String?,
     );
   }
 
@@ -58,6 +72,8 @@ class ImportCandidate {
         duration: durationSec == null ? null : Duration(seconds: durationSec!),
         thumbnailUrl: thumbnailUrl,
         downloadName: downloadName,
+        source: source,
+        webpageUrl: webpageUrl,
       );
 }
 

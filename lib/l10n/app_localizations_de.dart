@@ -528,7 +528,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get ytLegal =>
-      'Nur für den persönlichen Gebrauch. Urheberrecht und YouTube-Bedingungen beachten.';
+      'Nur für den persönlichen Gebrauch. Urheberrecht sowie die Bedingungen von YouTube und SoundCloud beachten.';
 
   @override
   String get useDefaultFolder => 'Musikordner des Geräts verwenden';
@@ -2839,4 +2839,24 @@ class AppLocalizationsDe extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get searchSourceYoutube => 'YouTube';
+
+  @override
+  String get searchSourceYoutubeMusic => 'YouTube Music';
+
+  @override
+  String get searchSourceSoundcloud => 'SoundCloud';
+
+  @override
+  String get importSoundCloud =>
+      'Auch auf SoundCloud suchen, wenn ein Titel nicht gefunden wird';
+
+  @override
+  String get importSoundCloudHint =>
+      'Nur für Zeilen eines Imports, die YouTube nicht findet: eine zusätzliche Suche pro Zeile. Standardmäßig aus.';
+
+  @override
+  String get ytHintSoundcloud => 'SoundCloud durchsuchen';
 }

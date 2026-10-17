@@ -9,6 +9,9 @@ import 'query_cleaner.dart';
 /// Where a result comes from. Both are searched and downloaded with yt-dlp.
 enum MediaSource { youtube, soundcloud }
 
+/// What the online search of the Search page looks in (the user's choice).
+enum SearchSource { youtube, youtubeMusic, soundcloud }
+
 class YtResult {
   const YtResult({
     required this.id,

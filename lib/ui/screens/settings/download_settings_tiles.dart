@@ -52,6 +52,15 @@ class DownloadSettingsTiles extends ConsumerWidget {
               .read(settingsProvider.notifier)
               .update((c) => c.copyWith(downloadOriginal: v)),
         ),
+        SwitchListTile(
+          secondary: const Icon(Icons.cloud_outlined),
+          title: Text(l.importSoundCloud),
+          subtitle: Text(l.importSoundCloudHint),
+          value: ref.watch(settingsProvider.select((s) => s.importSoundCloud)),
+          onChanged: (v) => ref
+              .read(settingsProvider.notifier)
+              .update((c) => c.copyWith(importSoundCloud: v)),
+        ),
         const _SearchCacheTile(),
         ListTile(
           leading: const Icon(Icons.speed),

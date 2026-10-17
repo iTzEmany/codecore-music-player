@@ -7,6 +7,7 @@ import '../../../l10n/l10n_ext.dart';
 import '../../../providers/import_providers.dart';
 import '../../../providers/youtube_providers.dart';
 import '../../../services/import/import_candidate.dart';
+import '../../../services/online/youtube_service.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/format_utils.dart';
@@ -43,9 +44,11 @@ class ImportPlanScreen extends ConsumerWidget {
       }
 
       String line(ImportCandidate c) =>
+          '${c.source == MediaSource.soundcloud ? '${l.searchSourceSoundcloud} · ' : ''}'
           '${c.channel} · ${formatDuration((c.durationSec ?? 0) * 1000)}'
           '${diffOf(c)} · ${(c.score * 100).round()}%';
-      final alreadyHere = chosen != null && known?.pathFor(chosen.id) != null;
+      final alreadyHere = chosen != null &&
+          known?.pathFor(chosen.id, source: chosen.source) != null;
       return ExpansionTile(
         title: Text(
           '${it.title} · ${it.artistList.join(', ')}',
@@ -81,7 +84,7 @@ class ImportPlanScreen extends ConsumerWidget {
                     value: c.id,
                     title: Text(c.title, maxLines: 1, overflow: TextOverflow.ellipsis),
                     subtitle: Text(
-                      '${line(c)}${known?.pathFor(c.id) != null ? ' · ${l.csvImportPlanKnown}' : ''}',
+                      '${line(c)}${known?.pathFor(c.id, source: c.source) != null ? ' · ${l.csvImportPlanKnown}' : ''}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
