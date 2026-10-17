@@ -4,8 +4,11 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 
 import '../../core/app_log.dart';
+import 'youtube_service.dart';
 
-/// Small `downloads.json`: video id -> absolute file path.
+/// Small `downloads.json`: `<source>:<id>` -> absolute file path. Entries
+/// written before sources existed have the bare YouTube video id as key and
+/// still count as `youtube:<id>`.
 class DownloadIndex {
   DownloadIndex(this._file);
 
@@ -25,19 +28,22 @@ class DownloadIndex {
     }
   }
 
-  bool contains(String videoId) => pathFor(videoId) != null;
+  bool contains(String id, {MediaSource source = MediaSource.youtube}) =>
+      pathFor(id, source: source) != null;
 
   /// Where the video was downloaded, if the file is still there.
-  String? pathFor(String videoId) {
-    final path = _map[videoId];
+  String? pathFor(String id, {MediaSource source = MediaSource.youtube}) {
+    final path = _map[downloadIndexKey(source, id)] ??
+        (source == MediaSource.youtube ? _map[id] : null);
     return path != null && File(path).existsSync() ? path : null;
   }
 
   Future<void> _lastWrite = Future.value();
 
   /// Writes are chained: parallel downloads must not interleave in the file.
-  Future<void> add(String videoId, String path) {
-    _map[videoId] = path;
+  Future<void> add(String id, String path,
+      {MediaSource source = MediaSource.youtube}) {
+    _map[downloadIndexKey(source, id)] = path;
     return _lastWrite = _lastWrite.then((_) async {
       try {
         await _file.parent.create(recursive: true);

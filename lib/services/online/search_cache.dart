@@ -134,6 +134,8 @@ class _Entry {
               'thumb': r.thumbnailUrl,
               'artists': r.artists,
               'album': r.album,
+              if (r.source != MediaSource.youtube) 'src': r.source.name,
+              if (r.webpageUrl != null) 'url': r.webpageUrl,
             },
         ],
       };
@@ -157,6 +159,11 @@ class _Entry {
             '$a',
         ],
         album: x['album'] as String?,
+        source: MediaSource.values.firstWhere(
+          (m) => m.name == x['src'],
+          orElse: () => MediaSource.youtube,
+        ),
+        webpageUrl: x['url'] as String?,
       ));
     }
     return _Entry(s, u, results);

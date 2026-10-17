@@ -6,6 +6,9 @@ import 'package:path/path.dart' as p;
 import '../../core/text_utils.dart';
 import 'query_cleaner.dart';
 
+/// Where a result comes from. Both are searched and downloaded with yt-dlp.
+enum MediaSource { youtube, soundcloud }
+
 class YtResult {
   const YtResult({
     required this.id,
@@ -17,6 +20,8 @@ class YtResult {
     this.album,
     this.downloadName,
     this.subdir,
+    this.source = MediaSource.youtube,
+    this.webpageUrl,
   });
 
   final String id, title, channel;
@@ -33,7 +38,21 @@ class YtResult {
 
   /// Sub-folder of the download folder to save into (a playlist's own folder).
   final String? subdir;
+
+  final MediaSource source;
+
+  /// The page to download from. Only kept for sources whose id alone is no
+  /// address (SoundCloud); a YouTube result is addressed by [id].
+  final String? webpageUrl;
+
+  /// What is handed to yt-dlp to download this result.
+  String get downloadUrl => webpageUrl ?? 'https://www.youtube.com/watch?v=$id';
+
+  /// Key in `downloads.json`: `youtube:<id>`, `soundcloud:<id>`.
+  String get indexKey => downloadIndexKey(source, id);
 }
+
+String downloadIndexKey(MediaSource source, String id) => '${source.name}:$id';
 
 /// `mp3` = convert to MP3 256 kbps; `original` = keep the audio as served.
 enum DownloadFormat { mp3, original }

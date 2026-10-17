@@ -21,6 +21,12 @@ List<YtResult> parseYtDlpJson(String raw) {
     final id = e['id'] as String?;
     final title = e['title'] as String?;
     if (id == null || title == null) continue;
+    final source = _sourceOf(e);
+    final page = e['webpage_url'];
+    // Without a page a SoundCloud track has no address to download from.
+    if (source != MediaSource.youtube && (page is! String || page.isEmpty)) {
+      continue;
+    }
     String? thumb = e['thumbnail'] as String?;
     final thumbs = e['thumbnails'];
     if (thumb == null && thumbs is List && thumbs.isNotEmpty) {
@@ -42,9 +48,18 @@ List<YtResult> parseYtDlpJson(String raw) {
       thumbnailUrl: thumb,
       artists: artists,
       album: e['album'] as String?,
+      source: source,
+      webpageUrl: source == MediaSource.youtube ? null : page as String,
     ));
   }
   return out;
+}
+
+/// `extractor_key` (full metadata) or `ie_key` (flat listing) says where an
+/// entry comes from; anything that is not SoundCloud is treated as YouTube.
+MediaSource _sourceOf(Map e) {
+  final key = '${e['extractor_key'] ?? e['ie_key'] ?? ''}'.toLowerCase();
+  return key.startsWith('soundcloud') ? MediaSource.soundcloud : MediaSource.youtube;
 }
 
 /// Album page links from a flat YouTube Music album search.
@@ -297,7 +312,7 @@ class YtDlpProcessService implements YoutubeService {
         (f) => anyDownloadExtensionExists(f, (x) => File(x).existsSync()));
     final stem = p.withoutExtension(target);
     final args = buildDownloadArgs(
-      id: r.id,
+      url: r.downloadUrl,
       stem: stem,
       hasFfmpeg: hasFfmpeg,
       options: options,

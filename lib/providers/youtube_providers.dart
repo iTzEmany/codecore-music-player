@@ -141,7 +141,7 @@ class DownloadsNotifier extends Notifier<List<DownloadItem>> {
         final item = _queue.items.where((e) => e.path == path).firstOrNull;
         if (item != null) {
           final idx = await ref.read(downloadIndexProvider.future);
-          await idx.add(item.result.id, path);
+          await idx.add(item.result.id, path, source: item.result.source);
         }
         await _autoEnrich(path);
       },

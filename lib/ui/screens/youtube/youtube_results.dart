@@ -107,7 +107,8 @@ class _YoutubeResultsState extends ConsumerState<YoutubeResults> {
       for (var i = 0; i < _results.length; i++) i,
     ])) {
       final r = _results[i];
-      if ((index?.contains(r.id) ?? false) || busy.contains(r.id)) {
+      if ((index?.contains(r.id, source: r.source) ?? false) ||
+          busy.contains(r.id)) {
         skipped++;
         continue;
       }
@@ -238,7 +239,8 @@ class _YoutubeResultsState extends ConsumerState<YoutubeResults> {
                     itemCount: _results.length,
                     itemBuilder: (_, i) {
                       final r = _results[i];
-                      final inLibrary = index?.contains(r.id) ?? false;
+                      final inLibrary =
+                          index?.contains(r.id, source: r.source) ?? false;
                       final item = downloads
                           .where((d) => d.result.id == r.id)
                           .lastOrNull;

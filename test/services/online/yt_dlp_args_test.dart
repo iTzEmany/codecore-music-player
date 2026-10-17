@@ -7,7 +7,7 @@ List<String> args({
   bool hasFfmpeg = true,
 }) =>
     buildDownloadArgs(
-        id: 'abc',
+        url: 'https://www.youtube.com/watch?v=abc',
         stem: '/d/Song',
         hasFfmpeg: hasFfmpeg,
         options: options,
@@ -65,5 +65,16 @@ void main() {
     final taken = {'/d/Song.opus'};
     expect(anyDownloadExtensionExists('/d/Song.m4a', taken.contains), isTrue);
     expect(anyDownloadExtensionExists('/d/Other.m4a', taken.contains), isFalse);
+  });
+
+  test('a SoundCloud page is passed to yt-dlp as it is', () {
+    final a = buildDownloadArgs(
+      url: 'https://soundcloud.com/artist/track',
+      stem: '/d/Song',
+      hasFfmpeg: true,
+      options: const DownloadOptions(),
+    );
+    expect(a.last, 'https://soundcloud.com/artist/track');
+    expect(a, contains('--no-playlist'));
   });
 }

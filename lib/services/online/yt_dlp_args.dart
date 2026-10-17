@@ -4,10 +4,10 @@ import 'youtube_service.dart';
 /// YouTube serves: m4a when there is one, else opus in webm).
 const downloadExtensions = ['mp3', 'm4a', 'opus', 'webm'];
 
-/// Command-line for downloading one video with the desktop `yt-dlp`.
+/// Command-line for downloading one video or track ([url]) with the desktop `yt-dlp`.
 /// [jsArgs] are the `--js-runtimes` flags found on this machine.
 List<String> buildDownloadArgs({
-  required String id,
+  required String url,
   required String stem,
   required bool hasFfmpeg,
   required DownloadOptions options,
@@ -33,7 +33,7 @@ List<String> buildDownloadArgs({
     if (mp3) ...['-x', '--audio-format', 'mp3', '--audio-quality', '256K'],
     '-o',
     '$stem.%(ext)s',
-    'https://www.youtube.com/watch?v=$id',
+    url,
   ];
 }
 

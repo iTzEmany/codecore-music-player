@@ -104,6 +104,7 @@ class AndroidYtDlpService implements YoutubeService {
     }));
     final done = _channel.invokeMethod<String>('download', {
       'id': r.id,
+      'url': r.downloadUrl,
       'stem': stem,
       'convert': mp3,
       'processId': processId,

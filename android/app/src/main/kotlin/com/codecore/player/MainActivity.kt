@@ -175,7 +175,9 @@ class MainActivity : AudioServiceActivity() {
                 val stem = call.argument<String>("stem")!!
                 val convert = call.argument<Boolean>("convert") ?: true
                 val processId = call.argument<String>("processId")!!
-                val req = YoutubeDLRequest("https://www.youtube.com/watch?v=$id")
+                // `url` is sent by every caller; the id alone stays for older ones.
+                val url = call.argument<String>("url") ?: "https://www.youtube.com/watch?v=$id"
+                val req = YoutubeDLRequest(url)
                 req.addOption("--no-playlist")
                 req.addOption("--no-warnings")
                 req.addOption("--no-part")
