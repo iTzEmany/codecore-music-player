@@ -1,0 +1,180 @@
+{
+ "_type": "playlist",
+ "extractor_key": "SoundcloudSearch",
+ "id": "daft punk one more time",
+ "title": "daft punk one more time",
+ "entries": [
+  {
+   "id": "254112129",
+   "title": "One More Time",
+   "uploader": "Daft Punk",
+   "uploader_id": "203812859",
+   "duration": 30.0,
+   "webpage_url": "https://soundcloud.com/daftpunkofficialmusic/one-more-time",
+   "extractor_key": "Soundcloud",
+   "ext": "mp3",
+   "acodec": "mp3",
+   "abr": 128,
+   "protocol": "http",
+   "license": "all-rights-reserved",
+   "track": "One More Time",
+   "artist": "Daft Punk",
+   "genre": "Electronic",
+   "thumbnail": "https://i1.sndcdn.com/artworks-3lTqnRTNPmVt-0-original.jpg",
+   "_has_drm": null,
+   "format_id": "http_mp3_1_0_preview",
+   "upload_date": "20160322",
+   "timestamp": 1458650817,
+   "original_url": "https://api.soundcloud.com/tracks/soundcloud%3Atracks%3A254112129",
+   "formats": [
+    {
+     "format_id": "hls_mp3_1_0_preview",
+     "protocol": "m3u8_native",
+     "ext": "mp3",
+     "abr": 128,
+     "acodec": "mp3",
+     "preference": -10,
+     "format_note": null
+    },
+    {
+     "format_id": "http_mp3_1_0_preview",
+     "protocol": "http",
+     "ext": "mp3",
+     "abr": 128,
+     "acodec": "mp3",
+     "preference": -10,
+     "format_note": null
+    }
+   ]
+  },
+  {
+   "id": "199428706",
+   "title": "One More Time",
+   "uploader": "Daft Punk",
+   "uploader_id": "146816038",
+   "duration": 322.606,
+   "webpage_url": "https://soundcloud.com/daft-punk-id/daft-punk-one-more-time",
+   "extractor_key": "Soundcloud",
+   "ext": "m4a",
+   "acodec": "mp4a.40.2",
+   "abr": 160,
+   "protocol": "m3u8_native",
+   "license": "all-rights-reserved",
+   "track": "One More Time",
+   "genre": "DaftPunk",
+   "thumbnail": "https://i1.sndcdn.com/avatars-000139637419-zpe8sj-original.jpg",
+   "_has_drm": null,
+   "format_id": "hls_aac_160k",
+   "upload_date": "20150406",
+   "timestamp": 1428279025,
+   "original_url": "https://api.soundcloud.com/tracks/soundcloud%3Atracks%3A199428706",
+   "formats": [
+    {
+     "format_id": "hls_aac_96k",
+     "protocol": "m3u8_native",
+     "ext": "m4a",
+     "abr": 96,
+     "acodec": "mp4a.40.2",
+     "preference": null,
+     "format_note": null
+    },
+    {
+     "format_id": "hls_aac_160k",
+     "protocol": "m3u8_native",
+     "ext": "m4a",
+     "abr": 160,
+     "acodec": "mp4a.40.2",
+     "preference": null,
+     "format_note": null
+    }
+   ]
+  },
+  null,
+  {
+   "id": "254111872",
+   "title": "One More Time (Radio Edit)",
+   "uploader": "Daft Punk",
+   "uploader_id": "203812859",
+   "duration": 30.0,
+   "webpage_url": "https://soundcloud.com/daftpunkofficialmusic/one-more-time-short-radio-edit",
+   "extractor_key": "Soundcloud",
+   "ext": "mp3",
+   "acodec": "mp3",
+   "abr": 128,
+   "protocol": "http",
+   "license": "all-rights-reserved",
+   "track": "One More Time (Radio Edit)",
+   "artist": "Daft Punk",
+   "genre": "Electronic",
+   "thumbnail": "https://i1.sndcdn.com/artworks-blmgMVuN2vY7-0-original.jpg",
+   "_has_drm": null,
+   "format_id": "http_mp3_1_0_preview",
+   "upload_date": "20160322",
+   "timestamp": 1458650798,
+   "original_url": "https://api.soundcloud.com/tracks/soundcloud%3Atracks%3A254111872",
+   "formats": [
+    {
+     "format_id": "hls_mp3_1_0_preview",
+     "protocol": "m3u8_native",
+     "ext": "mp3",
+     "abr": 128,
+     "acodec": "mp3",
+     "preference": -10,
+     "format_note": null
+    },
+    {
+     "format_id": "http_mp3_1_0_preview",
+     "protocol": "http",
+     "ext": "mp3",
+     "abr": 128,
+     "acodec": "mp3",
+     "preference": -10,
+     "format_note": null
+    }
+   ]
+  },
+  {
+   "id": "2158904142",
+   "title": "Daft Punk - One More Time (Valmer Edit) [HZRX]",
+   "uploader": "HOUZ",
+   "uploader_id": "336522996",
+   "duration": 313.767,
+   "webpage_url": "https://soundcloud.com/houzmusicblog/daft-punk-one-more-time-valmer-edit-hzrx",
+   "extractor_key": "Soundcloud",
+   "ext": "m4a",
+   "acodec": "mp4a.40.2",
+   "abr": 160,
+   "protocol": "m3u8_native",
+   "license": "cc-by-nc-sa",
+   "track": "Daft Punk - One More Time (Valmer Edit) [HZRX]",
+   "artist": "HOUZ",
+   "genre": "House",
+   "thumbnail": "https://i1.sndcdn.com/artworks-ls0oyesxJnnERp1r-TRNE3A-original.jpg",
+   "_has_drm": null,
+   "format_id": "hls_aac_160k",
+   "upload_date": "20250825",
+   "timestamp": 1756120341,
+   "original_url": "https://api.soundcloud.com/tracks/soundcloud%3Atracks%3A2158904142",
+   "formats": [
+    {
+     "format_id": "hls_aac_96k",
+     "protocol": "m3u8_native",
+     "ext": "m4a",
+     "abr": 96,
+     "acodec": "mp4a.40.2",
+     "preference": null,
+     "format_note": null
+    },
+    {
+     "format_id": "hls_aac_160k",
+     "protocol": "m3u8_native",
+     "ext": "m4a",
+     "abr": 160,
+     "acodec": "mp4a.40.2",
+     "preference": null,
+     "format_note": null
+    }
+   ]
+  }
+ ]
+}

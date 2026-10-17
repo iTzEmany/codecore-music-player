@@ -1,0 +1,90 @@
+{
+ "_type": "playlist",
+ "extractor_key": "YoutubeTab",
+ "id": "PLzH6n4zXuckpHPMGkHuMoBDQuav3lq5U0",
+ "title": "Nick Hawes on Computerphile",
+ "uploader": "Computerphile",
+ "channel": "Computerphile",
+ "webpage_url": "https://www.youtube.com/playlist?list=PLzH6n4zXuckpHPMGkHuMoBDQuav3lq5U0",
+ "playlist_count": 5,
+ "entries": [
+  {
+   "_type": "url",
+   "ie_key": "Youtube",
+   "id": "844U9T_SOrA",
+   "title": "Reinforcement Learning - Computerphile",
+   "duration": 906,
+   "channel": "Computerphile",
+   "uploader": "Computerphile",
+   "url": "https://www.youtube.com/watch?v=844U9T_SOrA",
+   "availability": null,
+   "live_status": null,
+   "view_count": 68000
+  },
+  {
+   "_type": "url",
+   "ie_key": "Youtube",
+   "id": "BEFY7IHs0HM",
+   "title": "Monte Carlo Tree Search - Computerphile",
+   "duration": 1975,
+   "channel": "Computerphile",
+   "uploader": "Computerphile",
+   "url": "https://www.youtube.com/watch?v=BEFY7IHs0HM",
+   "availability": null,
+   "live_status": null,
+   "view_count": 88000
+  },
+  {
+   "_type": "url",
+   "ie_key": "Youtube",
+   "id": "dZ0SQrr4g8g",
+   "title": "Solve Markov Decision Processes with the Value Iteration Algorithm - Computerphile",
+   "duration": 2282,
+   "channel": "Computerphile",
+   "uploader": "Computerphile",
+   "url": "https://www.youtube.com/watch?v=dZ0SQrr4g8g",
+   "availability": null,
+   "live_status": null,
+   "view_count": 75000
+  },
+  {
+   "_type": "url",
+   "ie_key": "Youtube",
+   "id": "2iF9PRriA7w",
+   "title": "Markov Decision Processes - Computerphile",
+   "duration": 1062,
+   "channel": "Computerphile",
+   "uploader": "Computerphile",
+   "url": "https://www.youtube.com/watch?v=2iF9PRriA7w",
+   "availability": null,
+   "live_status": null,
+   "view_count": 253000
+  },
+  {
+   "_type": "url",
+   "ie_key": "Youtube",
+   "id": "cQhsblLVjEo",
+   "title": "Automating Boston Dynamics Spot Robot - Computerphile",
+   "duration": 882,
+   "channel": "Computerphile",
+   "uploader": "Computerphile",
+   "url": "https://www.youtube.com/watch?v=cQhsblLVjEo",
+   "availability": null,
+   "live_status": null,
+   "view_count": 98000
+  },
+  {
+   "_type": "url",
+   "ie_key": "Youtube",
+   "id": "XXXXXXXXXXX",
+   "title": "[Private video]",
+   "duration": null,
+   "channel": null,
+   "uploader": null,
+   "url": "https://www.youtube.com/watch?v=XXXXXXXXXXX",
+   "availability": null,
+   "live_status": null,
+   "view_count": null
+  }
+ ]
+}
