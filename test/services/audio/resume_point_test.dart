@@ -31,6 +31,38 @@ void main() {
     });
   });
 
+  group('resumePointFor for a podcast episode', () {
+    const episode = 30 * 60 * 1000;
+    const short = 8 * 60 * 1000;
+
+    test('remembered whatever its length, from the first 10 seconds on', () {
+      expect(resumePointFor(const Duration(minutes: 3), short, episode: true), 180000);
+      expect(resumePointFor(const Duration(seconds: 9), short, episode: true), isNull);
+      expect(resumePointFor(const Duration(seconds: 10), short, episode: true), 10000);
+      // The same short track as music is never bookmarked.
+      expect(resumePointFor(const Duration(minutes: 3), short), isNull);
+    });
+
+    test('from 95 % on it is heard, not a place to come back to', () {
+      expect(resumePointFor(Duration(milliseconds: (episode * 0.94).round()), episode, episode: true), isNotNull);
+      expect(resumePointFor(Duration(milliseconds: (episode * 0.95).round()), episode, episode: true), isNull);
+      expect(resumePointFor(Duration(milliseconds: episode), episode, episode: true), isNull);
+    });
+
+    test('unknown length: nothing', () {
+      expect(resumePointFor(const Duration(minutes: 3), 0, episode: true), isNull);
+    });
+  });
+
+  group('episodeHeard', () {
+    test('exactly at 95 %', () {
+      expect(episodeHeard(const Duration(seconds: 94), 100000), isFalse);
+      expect(episodeHeard(const Duration(seconds: 95), 100000), isTrue);
+      expect(episodeHeard(const Duration(seconds: 100), 100000), isTrue);
+      expect(episodeHeard(const Duration(seconds: 5), 0), isFalse);
+    });
+  });
+
   group('resumeStartFor', () {
     test('starts 5 seconds before the saved point', () {
       expect(resumeStartFor(600000), const Duration(minutes: 9, seconds: 55));

@@ -12,10 +12,28 @@ const kResumeRewind = Duration(seconds: 5);
 /// While playing, the position is saved at most this often.
 const kResumeSaveEvery = Duration(seconds: 15);
 
+/// A podcast episode is always worth remembering the place of, whatever its
+/// length: only the first seconds are not.
+const kEpisodeEdge = Duration(seconds: 10);
+
+/// From this part of its length on, an episode counts as heard.
+const kEpisodeHeardAt = 0.95;
+
+/// An episode at [position] of [durationMs] has been listened to (practically)
+/// to the end.
+bool episodeHeard(Duration position, int durationMs) =>
+    durationMs > 0 && position.inMilliseconds >= durationMs * kEpisodeHeardAt;
+
 /// The position to store for a track of [durationMs] at [position]; null means
 /// «no bookmark» (short track, still at the start, or practically finished).
-int? resumePointFor(Duration position, int durationMs) {
+/// For a podcast [episode] there is no length threshold, and the end is the
+/// moment it counts as heard.
+int? resumePointFor(Duration position, int durationMs, {bool episode = false}) {
   if (durationMs <= 0) return null;
+  if (episode) {
+    if (position < kEpisodeEdge || episodeHeard(position, durationMs)) return null;
+    return position.inMilliseconds;
+  }
   final duration = Duration(milliseconds: durationMs);
   if (duration < kResumeThreshold) return null;
   if (position < kResumeEdge || position > duration - kResumeEdge) return null;

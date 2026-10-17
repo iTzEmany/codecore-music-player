@@ -32,6 +32,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     required this.onError,
     this.coverPathFor,
     this.history,
+    this.onEpisodeHeard,
   })  : _backend = backend,
         _window = backend is GaplessCapable
             ? NextWindow(_queue, _tracks, backend as GaplessCapable)
@@ -51,6 +52,11 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
 
   final AudioBackend _backend;
   final PlayHistoryRepository? history;
+
+  /// Told once per session when a podcast episode (track kind 1) has been
+  /// listened to from 95 % on, or to its end. The handler knows nothing else
+  /// about podcasts.
+  final void Function(int trackId)? onEpisodeHeard;
   final NextWindow? _window;
   final PlayQueue _queue;
   final TrackRepository _tracks;
@@ -281,6 +287,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   /// A track played to its end has no place to come back to.
   void _forgetBookmarkOfFinished() {
     final finished = _current;
+    if (finished != null && finished.kind == 1) _markHeard(finished);
     if (finished != null &&
         (finished.resumePositionMs != null || _savedResume[finished.id] != null)) {
       unawaited(_writeResume(finished, null));
@@ -686,12 +693,25 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     final t = _current;
     if (t == null) return;
     final length = t.durationMs > 0 ? t.durationMs : (_duration?.inMilliseconds ?? 0);
-    final ms = resumePointFor(_position, length);
+    final episode = t.kind == 1;
+    if (episode && episodeHeard(_position, length)) _markHeard(t);
+    final ms = resumePointFor(_position, length, episode: episode);
     if (ms == null && t.resumePositionMs == null && _savedResume[t.id] == null) {
       return;
     }
     if (_savedResume.containsKey(t.id) && _savedResume[t.id] == ms) return;
     unawaited(_writeResume(t, ms));
+  }
+
+  final _heard = <int>{};
+
+  void _markHeard(Track episode) {
+    if (!_heard.add(episode.id)) return;
+    try {
+      onEpisodeHeard?.call(episode.id);
+    } on Object catch (e, st) {
+      AppLog.w('could not mark "${episode.title}" as heard', e, st);
+    }
   }
 
   /// Last bookmark written per track in this session (avoids repeat writes).
