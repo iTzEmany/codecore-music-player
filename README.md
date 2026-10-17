@@ -86,6 +86,11 @@ senza il file la build release usa la chiave di debug.
 - **Playlist e canali YouTube:** incolla l'indirizzo in Cerca → foglio con i video (tutti spuntati), un nome e «Scarica in una playlist»; i brani arrivano nell'ordine della playlist, con pausa, ripresa e annulla.
 - **Traduzione dei testi:** non ancora (aspetta l'approvazione di un pacchetto, vedi `docs/PROGRESS.md`).
 
+## Podcast (fase 23)
+- **Libreria → Podcast:** iscriviti incollando l'indirizzo del feed RSS o cercando per nome (elenco pubblico di iTunes); la pagina del podcast elenca gli episodi dal più recente. **Niente aggiornamenti o download da soli**: «Aggiorna» (o aprire un podcast controllato più di 6 ore fa) e «Scarica» partono solo da te.
+- Gli episodi scaricati si ascoltano con lo stesso player (coda, notifica, velocità, ripresa dal punto lasciato); da 95 % in poi sono «ascoltati». Non compaiono mai in Tutti i brani, Home, ricerca, playlist o statistiche. Per ogni podcast si può attivare «Elimina gli episodi ascoltati» dopo 1, 7 o 30 giorni (spento di serie; tocca solo i file dell'app).
+- **Non ancora:** la lettura dei feed aspetta l'approvazione del pacchetto `xml` (vedi `docs/PROGRESS.md`, «Tocca a te»): finché manca, l'app lo dice quando provi a iscriverti.
+
 ## Riproduzione (fase 17)
 - **Velocità** 0,5×–2× senza cambiare il tono (chip «1×» in Now Playing).
 - **Riprendi da qui:** i brani lunghi (≥ 20 min: podcast, audiolibri, DJ set) ripartono da dove li hai lasciati.

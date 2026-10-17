@@ -109,3 +109,10 @@ Per ogni rischio: **sintomo** → **cosa fare**. Se scatta un fallback che cambi
 | R54 | Playlist/canali enormi o con video privati/rimossi | Attesa lunga, elenco incompleto | `--flat-playlist` (250 voci in ~13 s), limite di 500 con avviso «Mostro i primi 500», avviso oltre 200 video con stima, privati/rimossi contati e non elencati, righe non scaricabili in errore e il resto continua |
 | R55 | ML Kit pesante o lingua non supportata | APK più grande, modelli da scaricare | **Non ancora**: 22.7 in attesa di approvazione. Previsto: modelli solo su richiesta (~30 MB), voce assente su desktop |
 
+## Podcast (fase 23)
+| # | Rischio | Sintomo | Piano B |
+|---|---|---|---|
+| R56 | Feed malformati o enormi (HTML al posto dell'XML, 20 MB) | Errore all'iscrizione, app lenta | Letto a flusso con limite di **20 MB** (`tooLarge`), solo http/https, un testo non RSS dà «Questo indirizzo non è un feed di podcast» (`notFeed`), nulla viene salvato a metà. **Il lettore RSS non esiste ancora** (23.2 in attesa del pacchetto `xml`): finché manca ogni iscrizione dice «lettura dei feed non ancora disponibile» (`parserMissing`) |
+| R57 | Gli episodi «sporcano» la libreria musicale | Un podcast in «Tutti i brani», nei più ascoltati, nelle playlist, nelle statistiche | `tracks.kind` filtrato in **tutte** le query musicali (test `podcast_exclusion_test.dart`: stesso titolo e artista di un brano, 9 ascolti), `addTracks` li rifiuta, niente cronologia, cartella fuori dalla scansione |
+| R58 | La pulizia cancella file sbagliati | Un file musicale sparisce | Spenta di serie; solo episodi `kind = 1` con percorso **dentro** `<appSupportDir>/podcasts/` (`p.isWithin`, controllato due volte), mai quello in riproduzione o in coda; «annulla iscrizione» chiede conferma col numero di file e cancella solo dentro la cartella |
+
