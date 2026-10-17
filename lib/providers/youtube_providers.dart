@@ -23,6 +23,14 @@ import 'online_providers.dart';
 import 'yt_dlp_update_providers.dart' show locateYtDlp;
 import 'settings_providers.dart';
 
+/// The videos of a pasted playlist or channel address, read once per address.
+final playlistListingProvider =
+    FutureProvider.autoDispose.family<PlaylistListing, String>(
+  (ref, url) => ref.read(youtubeServiceProvider).listPlaylist(url),
+  // A failure is shown with its own «Riprova»: no silent retries behind a spinner.
+  retry: (_, _) => null,
+);
+
 final youtubeServiceProvider = Provider<YoutubeService>((ref) {
   final YoutubeService s = isAndroid
       ? AndroidYtDlpService()

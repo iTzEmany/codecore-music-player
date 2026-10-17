@@ -61,3 +61,31 @@ String sanitizeFileName(String name) {
   s = s.replaceAll(RegExp(r'[. ]+$'), '');
   return s.isEmpty ? 'track' : s;
 }
+
+final _entity = RegExp(r'&(#x[0-9a-fA-F]+|#\d+|amp|lt|gt|quot|apos);');
+
+/// Decodes the HTML entities some yt-dlp listings leave in titles
+/// (`Tom &amp; Jerry`). Anything that is not one of them stays as it is.
+String htmlUnescape(String s) {
+  if (!s.contains('&')) return s;
+  return s.replaceAllMapped(_entity, (m) {
+    final e = m[1]!;
+    switch (e) {
+      case 'amp':
+        return '&';
+      case 'lt':
+        return '<';
+      case 'gt':
+        return '>';
+      case 'quot':
+        return '"';
+      case 'apos':
+        return "'";
+    }
+    final code = e.startsWith('#x')
+        ? int.tryParse(e.substring(2), radix: 16)
+        : int.tryParse(e.substring(1));
+    if (code == null || code <= 0 || code > 0x10FFFF) return m[0]!;
+    return String.fromCharCode(code);
+  });
+}

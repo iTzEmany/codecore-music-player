@@ -101,6 +101,36 @@ class YtException implements Exception {
   String toString() => 'YtException($kind, $detail)';
 }
 
+/// A playlist or a channel's videos, as listed (no per-video lookups).
+class PlaylistListing {
+  const PlaylistListing({
+    required this.title,
+    required this.entries,
+    this.owner,
+    this.unavailable = 0,
+    this.truncated = false,
+  });
+
+  const PlaylistListing.empty()
+      : title = '',
+        owner = null,
+        entries = const [],
+        unavailable = 0,
+        truncated = false;
+
+  final String title;
+
+  /// The channel it belongs to, when known.
+  final String? owner;
+  final List<YtResult> entries;
+
+  /// Private or deleted videos that were listed but cannot be played.
+  final int unavailable;
+
+  /// More than the limit asked for exist.
+  final bool truncated;
+}
+
 /// How many SoundCloud results to ask for to end up with [limit] full tracks
 /// once the previews are dropped.
 int soundCloudFetchCount(int limit) => limit + 5;
@@ -158,6 +188,12 @@ abstract class YoutubeService {
   /// The tracks of an album page found by [searchAlbums], in album order, with
   /// artists, album name and length filled in.
   Future<List<YtResult>> albumTracks(String albumLink);
+
+  /// The videos of a YouTube playlist or channel ([url] is a playlist page or
+  /// a channel's Videos tab, see `listingUrl`), at most [limit], in the order
+  /// YouTube gives them. Empty by default: only the real services list.
+  Future<PlaylistListing> listPlaylist(String url, {int limit = 500}) async =>
+      const PlaylistListing.empty();
 
   /// Full-length SoundCloud tracks matching [query], best first (the 30 s
   /// previews are left out). Empty by default: only the real services search it.

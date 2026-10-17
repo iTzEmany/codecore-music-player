@@ -41,6 +41,10 @@ class _Sources implements YoutubeService {
   }
 
   @override
+  Future<PlaylistListing> listPlaylist(String url, {int limit = 500}) async =>
+      const PlaylistListing.empty();
+
+  @override
   Future<List<YtResult>> searchSoundCloud(String query, {int limit = 5}) async {
     calls.add('soundcloud:$query:$limit');
     return [_r('s1', 'From SoundCloud', source: MediaSource.soundcloud)];

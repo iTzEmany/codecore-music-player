@@ -36,6 +36,10 @@ class CachedYoutubeService implements YoutubeService {
   }
 
   @override
+  Future<PlaylistListing> listPlaylist(String url, {int limit = 500}) =>
+      inner.listPlaylist(url, limit: limit);
+
+  @override
   Future<List<YtResult>> searchSoundCloud(String query, {int limit = 5}) async {
     final key = 'sc|${_norm(query)}|$limit';
     final hit = await cache.get(key);

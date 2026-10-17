@@ -6,6 +6,7 @@ import 'package:dio/dio.dart';
 import 'package:path/path.dart' as p;
 
 import '../../core/app_log.dart';
+import '../../core/text_utils.dart';
 import 'yt_dlp_args.dart';
 import 'yt_dlp_version.dart';
 import 'youtube_service.dart';
@@ -15,6 +16,39 @@ List<YtResult> parseYtDlpJson(String raw) {
   final data = jsonDecode(raw);
   if (data is! Map) return const [];
   return _results(data['entries'] is List ? data['entries'] as List : [data]);
+}
+
+const _unavailableTitles = {'[private video]', '[deleted video]'};
+final _tabSuffix = RegExp(r'\s+-\s+(Videos|Video|Vídeos|Vidéos)$');
+
+/// Parses `yt-dlp -J --flat-playlist` of a playlist page or a channel's Videos
+/// tab. Private and deleted videos are counted, not listed; a video without a
+/// channel of its own gets the playlist's, so its «Artist - Title» can be read.
+PlaylistListing parsePlaylistListing(String raw, {int limit = 500}) {
+  final data = jsonDecode(raw);
+  if (data is! Map) return const PlaylistListing.empty();
+  final owner = '${data['channel'] ?? data['uploader'] ?? ''}'.trim();
+  final entries = data['entries'] is List ? data['entries'] as List : const [];
+  var unavailable = 0;
+  final playable = <Map>[];
+  for (final entry in entries) {
+    if (entry is! Map) continue;
+    if (_unavailableTitles.contains('${entry['title']}'.toLowerCase())) {
+      unavailable++;
+      continue;
+    }
+    playable.add(owner.isNotEmpty && entry['channel'] == null && entry['uploader'] == null
+        ? {...entry, 'channel': owner}
+        : entry);
+  }
+  final title = htmlUnescape('${data['title'] ?? ''}').replaceFirst(_tabSuffix, '').trim();
+  return PlaylistListing(
+    title: title,
+    owner: owner.isEmpty ? null : htmlUnescape(owner),
+    entries: _results(playable),
+    unavailable: unavailable,
+    truncated: entries.length >= limit,
+  );
 }
 
 /// SoundCloud serves a 30 s excerpt of many commercial tracks next to (or
@@ -51,8 +85,9 @@ List<YtResult> _results(List entries) {
   for (final e in entries) {
     if (e is! Map) continue;
     final id = e['id'] as String?;
-    final title = e['title'] as String?;
-    if (id == null || title == null) continue;
+    final rawTitle = e['title'] as String?;
+    if (id == null || rawTitle == null) continue;
+    final title = htmlUnescape(rawTitle);
     final source = _sourceOf(e);
     final page = e['webpage_url'];
     // Without a page a SoundCloud track has no address to download from.
@@ -73,9 +108,9 @@ List<YtResult> _results(List entries) {
     out.add(YtResult(
       id: id,
       title: title,
-      channel: (e['channel'] ??
+      channel: htmlUnescape((e['channel'] ??
           e['uploader'] ??
-          (artists.isEmpty ? '' : artists.first)) as String,
+          (artists.isEmpty ? '' : artists.first)) as String),
       duration: d is num ? Duration(seconds: d.round()) : null,
       thumbnailUrl: thumb,
       artists: artists,
@@ -224,12 +259,12 @@ class YtDlpProcessService implements YoutubeService {
 
   /// Runs a search to the end or kills it after [searchTimeout].
   Future<({int code, String out, String err})> _runSearch(
-      List<String> args) async {
+      List<String> args, {Duration? timeout}) async {
     final proc = await Process.start(await _exe, args);
     final out = proc.stdout.transform(utf8.decoder).join();
     final err = proc.stderr.transform(utf8.decoder).join();
     try {
-      final code = await proc.exitCode.timeout(searchTimeout);
+      final code = await proc.exitCode.timeout(timeout ?? searchTimeout);
       return (code: code, out: await out, err: await err);
     } on TimeoutException {
       proc.kill(ProcessSignal.sigkill);
@@ -261,6 +296,27 @@ class YtDlpProcessService implements YoutubeService {
       return parseYtDlpJson(r.out);
     } on FormatException catch (e, st) {
       AppLog.w('yt-dlp search output not JSON', e, st);
+      throw const YtException(YtErrorKind.changed, 'bad output');
+    }
+  }
+
+  @override
+  Future<PlaylistListing> listPlaylist(String url, {int limit = 500}) async {
+    await _ensureTool();
+    // Listing 500 videos takes about 25 s, more than a search: a longer timeout.
+    final r = await _runSearch([
+      '-J',
+      '--no-warnings',
+      '--flat-playlist',
+      '--playlist-items',
+      '1-$limit',
+      url,
+    ], timeout: const Duration(seconds: 120));
+    if (r.code != 0) throw await _explain(r.err);
+    try {
+      return parsePlaylistListing(r.out, limit: limit);
+    } on FormatException catch (e, st) {
+      AppLog.w('yt-dlp playlist output not JSON', e, st);
       throw const YtException(YtErrorKind.changed, 'bad output');
     }
   }

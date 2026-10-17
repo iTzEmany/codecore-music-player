@@ -35,13 +35,16 @@ class AndroidYtDlpService implements YoutubeService {
   /// Calls the `search` method with a process id so that a search that hangs
   /// can be killed on the Kotlin side after [searchTimeout].
   Future<List<YtResult>> _search(Map<String, Object?> args,
-      {List<YtResult> Function(String raw) parse = parseYtDlpJson}) async {
+          {List<YtResult> Function(String raw) parse = parseYtDlpJson}) async =>
+      parse(await _call(args));
+
+  Future<String> _call(Map<String, Object?> args, {Duration? timeout}) async {
     final processId = 'sr-${_counter++}';
     try {
       final raw = await _channel
           .invokeMethod<String>('search', {...args, 'processId': processId})
-          .timeout(searchTimeout);
-      return parse(raw ?? '{}');
+          .timeout(timeout ?? searchTimeout);
+      return raw ?? '{}';
     } on TimeoutException {
       await _channel.invokeMethod<void>('cancel', {'processId': processId});
       throw const YtException(YtErrorKind.network, 'search timed out');
@@ -55,6 +58,22 @@ class AndroidYtDlpService implements YoutubeService {
     final q = query.trim();
     if (q.isEmpty) return const [];
     return _search({'query': q, 'isUrl': isYoutubeUrl(q)});
+  }
+
+  @override
+  Future<PlaylistListing> listPlaylist(String url, {int limit = 500}) async {
+    final raw = await _call({
+      'query': url,
+      'isUrl': true,
+      'items': limit,
+      'flat': true,
+    }, timeout: const Duration(seconds: 120));
+    try {
+      return parsePlaylistListing(raw, limit: limit);
+    } on FormatException catch (e, st) {
+      AppLog.w('yt-dlp playlist output not JSON', e, st);
+      throw const YtException(YtErrorKind.changed, 'bad output');
+    }
   }
 
   @override

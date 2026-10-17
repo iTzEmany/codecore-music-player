@@ -156,6 +156,32 @@ void main() {
       expect(res.every((r) => r.source == MediaSource.soundcloud && r.duration! > const Duration(seconds: 31)), isTrue);
     });
 
+    test('a playlist is listed flat, up to the limit, and parsed', () async {
+      final argsFile = File('${dir.path}/pl-args');
+      final json = File('test/fixtures/yt_playlist_flat.json').absolute.path;
+      final f = File('${dir.path}/pl-yt-dlp')
+        ..writeAsStringSync('#!/bin/sh\n'
+            'if [ "\$1" = "--version" ]; then echo 2026.08.19; exit 0; fi\n'
+            'echo "\$@" > ${argsFile.path}\n'
+            'cat $json\n');
+      Process.runSync('chmod', ['+x', f.path]);
+      final svc = YtDlpProcessService(executable: f.path);
+
+      final l = await svc.listPlaylist('https://www.youtube.com/playlist?list=PLx', limit: 300);
+
+      expect(argsFile.readAsStringSync().trim(),
+          '-J --no-warnings --flat-playlist --playlist-items 1-300 https://www.youtube.com/playlist?list=PLx');
+      expect(l.entries, hasLength(5));
+      expect(l.unavailable, 1);
+    });
+
+    test('a playlist that cannot be read says why', () async {
+      final svc = YtDlpProcessService(executable: fake('2026.08.19'));
+      expect(
+          svc.listPlaylist('https://www.youtube.com/playlist?list=PLx'),
+          throwsA(isA<YtException>().having((e) => e.kind, 'kind', YtErrorKind.unavailable)));
+    });
+
     test('a blank SoundCloud query does not start a process', () async {
       final svc = YtDlpProcessService(executable: '/nonexistent/yt-dlp');
       expect(await svc.searchSoundCloud('   '), isEmpty);

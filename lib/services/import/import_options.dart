@@ -43,7 +43,7 @@ abstract final class ImportNote {
 /// `007 - Artist - Title` so a folder plays in playlist order in any player.
 /// [total] fixes the width of the number (at least two digits).
 String importDownloadName(ImportRow row, {required bool number, required int total}) {
-  final base = '${row.artistLine} - ${row.title}';
+  final base = row.artists.isEmpty ? row.title : '${row.artistLine} - ${row.title}';
   if (!number) return base;
   final width = total.toString().length < 2 ? 2 : total.toString().length;
   return '${(row.index + 1).toString().padLeft(width, '0')} - $base';

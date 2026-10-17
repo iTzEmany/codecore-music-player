@@ -2849,4 +2849,61 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get ytHintSoundcloud => 'Cerca su SoundCloud';
+
+  @override
+  String get playlistSourceTitle => 'Playlist o canale YouTube';
+
+  @override
+  String get playlistSourceLoading => 'Leggo l’elenco dei video…';
+
+  @override
+  String get playlistSourceName => 'Nome della playlist';
+
+  @override
+  String playlistSourceCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count video',
+      one: '1 video',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String playlistSourceUnavailable(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count video non disponibili (privati o rimossi)',
+      one: '1 video non disponibile (privato o rimosso)',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String playlistSourceTruncated(int count) {
+    return 'Mostro i primi $count video.';
+  }
+
+  @override
+  String playlistSourceLong(int count, String time) {
+    return 'Sono $count video: ci vorrà $time.';
+  }
+
+  @override
+  String get playlistSourceNone => 'Nessuno';
+
+  @override
+  String get playlistSourceEmpty => 'Non ci sono video da scaricare qui.';
+
+  @override
+  String playlistSourceGo(int count) {
+    return 'Scarica in una playlist ($count)';
+  }
+
+  @override
+  String playlistSourceStarted(String name) {
+    return 'Download avviati nella playlist «$name»';
+  }
 }

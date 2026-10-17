@@ -53,6 +53,8 @@ class ImportRepository {
     bool linkOnly = false,
     bool planFirst = false,
     bool fetchCovers = false,
+    Map<int, ({String videoId, String candidates, double score})> presets =
+        const {},
   }) {
     return _db.transaction(() async {
       final id = await _db.into(_db.playlistImports).insert(
@@ -78,6 +80,9 @@ class ImportRepository {
               durationMs: Value(r.durationMs),
               isrc: Value(r.isrc),
               location: Value(r.location),
+              videoId: Value(presets[r.index]?.videoId),
+              candidates: Value(presets[r.index]?.candidates),
+              score: Value(presets[r.index]?.score),
             ),
         ]);
       });

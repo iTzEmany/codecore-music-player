@@ -4641,6 +4641,72 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Cerca su SoundCloud'**
   String get ytHintSoundcloud;
+
+  /// No description provided for @playlistSourceTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Playlist o canale YouTube'**
+  String get playlistSourceTitle;
+
+  /// No description provided for @playlistSourceLoading.
+  ///
+  /// In it, this message translates to:
+  /// **'Leggo l’elenco dei video…'**
+  String get playlistSourceLoading;
+
+  /// No description provided for @playlistSourceName.
+  ///
+  /// In it, this message translates to:
+  /// **'Nome della playlist'**
+  String get playlistSourceName;
+
+  /// No description provided for @playlistSourceCount.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, one{1 video} other{{count} video}}'**
+  String playlistSourceCount(int count);
+
+  /// No description provided for @playlistSourceUnavailable.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, one{1 video non disponibile (privato o rimosso)} other{{count} video non disponibili (privati o rimossi)}}'**
+  String playlistSourceUnavailable(int count);
+
+  /// No description provided for @playlistSourceTruncated.
+  ///
+  /// In it, this message translates to:
+  /// **'Mostro i primi {count} video.'**
+  String playlistSourceTruncated(int count);
+
+  /// No description provided for @playlistSourceLong.
+  ///
+  /// In it, this message translates to:
+  /// **'Sono {count} video: ci vorrà {time}.'**
+  String playlistSourceLong(int count, String time);
+
+  /// No description provided for @playlistSourceNone.
+  ///
+  /// In it, this message translates to:
+  /// **'Nessuno'**
+  String get playlistSourceNone;
+
+  /// No description provided for @playlistSourceEmpty.
+  ///
+  /// In it, this message translates to:
+  /// **'Non ci sono video da scaricare qui.'**
+  String get playlistSourceEmpty;
+
+  /// No description provided for @playlistSourceGo.
+  ///
+  /// In it, this message translates to:
+  /// **'Scarica in una playlist ({count})'**
+  String playlistSourceGo(int count);
+
+  /// No description provided for @playlistSourceStarted.
+  ///
+  /// In it, this message translates to:
+  /// **'Download avviati nella playlist «{name}»'**
+  String playlistSourceStarted(String name);
 }
 
 class _AppLocalizationsDelegate

@@ -7,6 +7,7 @@ import '../../../providers/settings_providers.dart';
 import '../../../providers/youtube_providers.dart';
 import '../../../services/online/download_queue.dart';
 import '../../../services/online/youtube_service.dart';
+import '../../../services/online/youtube_urls.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/activity_button.dart';
 import '../../widgets/empty_state.dart';
@@ -14,6 +15,7 @@ import '../../widgets/format_utils.dart';
 import '../../widgets/selection_bar.dart';
 import '../../widgets/track_row_selection.dart';
 import '../../widgets/yt_dlp_outdated_banner.dart';
+import 'playlist_source_sheet.dart';
 
 String ytErrorText(BuildContext context, YtErrorKind k) {
   final l = context.l10n;
@@ -67,6 +69,15 @@ class _YoutubeResultsState extends ConsumerState<YoutubeResults> {
   Future<void> _search() async {
     final q = widget.query.trim();
     if (q.isEmpty) return;
+    // A playlist or channel address is not a search: it opens its video list.
+    final listing = listingUrl(q);
+    if (listing != null) {
+      // After the frame: a sheet cannot be opened while the page is building.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) PlaylistSourceSheet.show(context, listing);
+      });
+      return;
+    }
     final id = ++_requestId;
     setState(() {
       _searching = true;

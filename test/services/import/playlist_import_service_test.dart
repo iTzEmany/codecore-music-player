@@ -51,6 +51,10 @@ class FakeYoutube implements YoutubeService {
   }
 
   @override
+  Future<PlaylistListing> listPlaylist(String url, {int limit = 500}) async =>
+      const PlaylistListing.empty();
+
+  @override
   Future<List<YtResult>> searchSoundCloud(String query, {int limit = 5}) async {
     scSearches++;
     queries.add('sc:$query');
@@ -375,6 +379,95 @@ void main() {
     await service.resume(id);
     await idle();
     expect(queued.single.$2, importTag(id, 0));
+  });
+
+  group('a pasted YouTube playlist (startFromResults)', () {
+    YtResult video(String id, String title, String channel, int seconds) => YtResult(
+          id: id,
+          title: title,
+          channel: channel,
+          duration: Duration(seconds: seconds),
+        );
+
+    test('every video is downloaded as listed, in order, with no search at all', () async {
+      final id = await service.startFromResults('My mix', [
+        video('a1', 'Daft Punk - One More Time', 'Daft Punk', 320),
+        video('b2', 'Some Talk - Computerphile', 'Computerphile', 900),
+        video('c3', 'Third', 'Chan', 100),
+      ]);
+      await idle();
+
+      expect(yt.searches, 0, reason: 'nothing is searched: the videos are known');
+      expect(yt.albumSearches, 0);
+      expect(queued.map((q) => q.$2), [importTag(id, 0), importTag(id, 1), importTag(id, 2)]);
+      expect(queued.map((q) => q.$1.id), ['a1', 'b2', 'c3']);
+      expect(queued.first.$1.downloadUrl, 'https://www.youtube.com/watch?v=a1');
+      expect(queued.first.$1.downloadName, 'Daft Punk - One More Time', reason: 'the title read as «Artist - Title»');
+      final imp = (await imports.get(id))!;
+      expect(imp.sourceName, 'My mix');
+      expect(imp.sourceKind, 'youtube');
+      expect((await imports.item(id, 2))!.state, ImportItemStatus.queued);
+    });
+
+    test('they land in the playlist in the listed order whatever finishes first', () async {
+      final id = await service.startFromResults('Order', [
+        video('a1', 'First', 'Chan', 100),
+        video('b2', 'Second', 'Chan', 100),
+      ]);
+      await idle();
+      await finish(importTag(id, 1), '/m/second.mp3');
+      await finish(importTag(id, 0), '/m/first.mp3');
+      final imp = (await imports.get(id))!;
+      expect(imp.state, ImportStatus.finished);
+      expect(await order(imp.playlistId), ['/m/first.mp3', '/m/second.mp3']);
+    });
+
+    test('a video already in the library is linked, not downloaded again', () async {
+      await addTrack('/m/one.mp3', 'One More Time', 'Daft Punk', 320);
+      final id = await service.startFromResults('Mix', [
+        video('a1', 'Daft Punk - One More Time', 'Daft Punk', 320),
+        video('b2', 'Other', 'Chan', 100),
+      ]);
+      await idle();
+      expect(queued.map((q) => q.$1.id), ['b2']);
+      expect((await imports.item(id, 0))!.state, ImportItemStatus.linked);
+    });
+
+    test('cancel drops what is waiting, like any import', () async {
+      maxInFlight = 1;
+      service.dispose();
+      service = build();
+      final id = await service.startFromResults('Mix', [
+        video('a1', 'First', 'Chan', 100),
+        video('b2', 'Second', 'Chan', 100),
+      ]);
+      await idle();
+      expect(queued, hasLength(1), reason: 'only one in flight');
+      await service.cancel(id);
+      await idle();
+      expect(cancelCalls, 1);
+      expect((await imports.get(id))!.state, ImportStatus.cancelled);
+    });
+
+    test('an empty list finishes at once and an unnamed one is called YouTube', () async {
+      final id = await service.startFromResults('  ', const []);
+      expect((await imports.get(id))!.state, ImportStatus.finished);
+      expect((await imports.get(id))!.sourceName, 'YouTube');
+    });
+
+    test('rowFromResult: channel as artist when the title does not say, credited artists first', () {
+      final plain = PlaylistImportService.rowFromResult(3, video('x', 'Just A Title', 'Some Channel', 60));
+      expect(plain.title, 'Just A Title');
+      expect(plain.artists, ['Some Channel']);
+      expect(plain.index, 3);
+      final topicChannel = PlaylistImportService.rowFromResult(0, video('x', 'Song', 'Band - Topic', 60));
+      expect(topicChannel.artists, ['Band']);
+      final credited = PlaylistImportService.rowFromResult(
+          0, const YtResult(id: 'x', title: 'Song', channel: 'c', duration: null, artists: ['A', 'B']));
+      expect(credited.artists, ['A', 'B']);
+      final none = PlaylistImportService.rowFromResult(0, video('x', 'Song', '', 60));
+      expect(none.artists, isEmpty);
+    });
   });
 
   test('cancel stops searching and drops queued downloads', () async {

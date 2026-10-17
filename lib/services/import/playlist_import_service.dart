@@ -8,6 +8,7 @@ import '../../data/db/app_database.dart';
 import '../../data/repositories/import_repository.dart';
 import '../../data/repositories/playlist_repository.dart';
 import '../online/download_queue.dart';
+import '../online/query_cleaner.dart';
 import '../online/youtube_service.dart';
 import 'exportify_reader.dart';
 import 'import_candidate.dart';
@@ -180,6 +181,60 @@ class PlaylistImportService {
       _kick();
     }
     return first;
+  }
+
+  /// Starts a playlist from videos that are already known (a pasted YouTube
+  /// playlist or channel): nothing is searched, each row downloads the video
+  /// it came from, in the order given, with the usual pause, resume and cancel.
+  /// Videos already in the library are linked, not downloaded again.
+  Future<int> startFromResults(
+    String name,
+    List<YtResult> results, {
+    ImportOptions options = const ImportOptions(),
+  }) async {
+    final label = name.trim().isEmpty ? 'YouTube' : name.trim();
+    final playlistId = await playlists.create(label);
+    final rows = [for (var i = 0; i < results.length; i++) rowFromResult(i, results[i])];
+    final id = await imports.create(
+      playlistId: playlistId,
+      sourceName: label,
+      rows: rows,
+      sourceKind: 'youtube',
+      folderPath: options.folderPath,
+      numberFiles: options.numberFiles,
+      linkOnly: options.linkOnly,
+      fetchCovers: options.fetchCovers,
+      presets: {
+        for (var i = 0; i < results.length; i++)
+          i: (
+            videoId: results[i].id,
+            candidates: encodeCandidates([ScoredCandidate(results[i], 1)]),
+            score: 1.0,
+          ),
+      },
+    );
+    _eta(id).start();
+    if (rows.isEmpty) {
+      await imports.setStatus(id, ImportStatus.finished);
+      _emit(ImportEvent(ImportEventKind.completed, id));
+    } else {
+      _kick();
+    }
+    return id;
+  }
+
+  /// The row a listed video stands for: its title read as «Artist - Title»,
+  /// with the channel as the artist when the title does not say.
+  static ImportRow rowFromResult(int index, YtResult r) {
+    final c = cleanSearchQuery(r.title, r.channel);
+    final artist = r.artists.isNotEmpty ? r.artists : [if (c.artist.isNotEmpty) c.artist];
+    return ImportRow(
+      index: index,
+      title: c.title.isEmpty ? r.title : c.title,
+      artists: artist,
+      durationMs: r.duration?.inMilliseconds,
+      album: r.album,
+    );
   }
 
   final _etas = <int, EtaEstimator>{};

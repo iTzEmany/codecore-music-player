@@ -1625,5 +1625,61 @@
   "searchSourceSoundcloud": "SoundCloud",
   "importSoundCloud": "Also search SoundCloud when a track is not found",
   "importSoundCloudHint": "Only for the rows of an import that YouTube cannot find: one extra search per row. Off by default.",
-  "ytHintSoundcloud": "Search SoundCloud"
+  "ytHintSoundcloud": "Search SoundCloud",
+  "playlistSourceTitle": "YouTube playlist or channel",
+  "playlistSourceLoading": "Reading the list of videos…",
+  "playlistSourceName": "Playlist name",
+  "playlistSourceCount": "{count, plural, one{1 video} other{{count} videos}}",
+  "@playlistSourceCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "playlistSourceUnavailable": "{count, plural, one{1 video unavailable (private or removed)} other{{count} videos unavailable (private or removed)}}",
+  "@playlistSourceUnavailable": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "playlistSourceTruncated": "Showing the first {count} videos.",
+  "@playlistSourceTruncated": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "playlistSourceLong": "That is {count} videos: it will take {time}.",
+  "@playlistSourceLong": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "playlistSourceNone": "None",
+  "playlistSourceEmpty": "There are no videos to download here.",
+  "playlistSourceGo": "Download into a playlist ({count})",
+  "@playlistSourceGo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "playlistSourceStarted": "Downloads started in the playlist “{name}”",
+  "@playlistSourceStarted": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  }
 }
