@@ -16,6 +16,8 @@ part 'app_database.g.dart';
   SmartPlaylists,
   UserTags,
   TrackTags,
+  Podcasts,
+  PodcastEpisodes,
 ])
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.e);
@@ -23,7 +25,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.production() : super(driftDatabase(name: 'codecore'));
 
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -56,6 +58,15 @@ class AppDatabase extends _$AppDatabase {
             await m.createTable(trackTags);
           }
           if (from < 8) await m.addColumn(tracks, tracks.ignored);
+          if (from < 9) {
+            // Podcasts: one column on tracks, two new tables; nothing existing
+            // is touched and every existing track stays music (kind 0).
+            await m.addColumn(tracks, tracks.kind);
+            await m.createIndex(tracksKind);
+            await m.createTable(podcasts);
+            await m.createTable(podcastEpisodes);
+            await m.createIndex(podcastEpisodesPodcast);
+          }
         },
         beforeOpen: (details) async {
           await customStatement('PRAGMA foreign_keys = ON');

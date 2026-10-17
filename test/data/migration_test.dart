@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:codecore/data/db/app_database.dart';
+import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
@@ -195,6 +196,69 @@ void main() {
     expect(t.read<String>('title'), 'Old');
     expect(t.read<int>('play_count'), 7, reason: 'the old counter is untouched');
     expect(t.read<int>('ignored'), 0, reason: 'nothing is hidden by the upgrade');
+    await db.close();
+  });
+
+  test('v8 database gets tracks.kind (0 for every track) and the podcast tables, and keeps its data', () async {
+    final dir = Directory.systemTemp.createTempSync('mig9');
+    addTearDown(() => dir.deleteSync(recursive: true));
+    final file = File(p.join(dir.path, 'v8.db'));
+    final db = AppDatabase(NativeDatabase(file, setup: (raw) {
+      if (raw.userVersion == 0) {
+        raw.execute('CREATE TABLE tracks (id INTEGER PRIMARY KEY AUTOINCREMENT, '
+            'path TEXT NOT NULL, title TEXT NOT NULL, album_key TEXT NOT NULL, '
+            'format TEXT NOT NULL, size_bytes INTEGER NOT NULL, mtime_ms INTEGER '
+            'NOT NULL, added_at INTEGER NOT NULL, play_count INTEGER NOT NULL '
+            'DEFAULT 0, missing INTEGER NOT NULL DEFAULT 0, ignored INTEGER NOT NULL DEFAULT 0)');
+        raw.execute("INSERT INTO tracks (path, title, album_key, format, size_bytes, "
+            "mtime_ms, added_at, play_count) VALUES ('/a.mp3', 'Old', 'k', 'mp3', 1, 1, 1, 7)");
+        raw.execute("INSERT INTO tracks (path, title, album_key, format, size_bytes, "
+            "mtime_ms, added_at, ignored) VALUES ('/b.mp3', 'Hidden', 'k', 'mp3', 1, 1, 1, 1)");
+        raw.userVersion = 8;
+      }
+    }));
+    final rows = await db.customSelect('SELECT title, play_count, ignored, kind FROM tracks ORDER BY id').get();
+    expect(rows.map((r) => r.read<int>('kind')), [0, 0], reason: 'every old track is music');
+    expect(rows.first.read<int>('play_count'), 7, reason: 'the old counter is untouched');
+    expect(rows.last.read<int>('ignored'), 1, reason: 'a hidden track stays hidden');
+    expect(await db.select(db.podcasts).get(), isEmpty);
+    expect(await db.select(db.podcastEpisodes).get(), isEmpty);
+    final names = (await db
+            .customSelect("SELECT name FROM sqlite_master WHERE type IN ('table', 'index')")
+            .get())
+        .map((r) => r.read<String>('name'));
+    expect(names, containsAll(['podcasts', 'podcast_episodes', 'tracks_kind', 'podcast_episodes_podcast']));
+    await db.close();
+  });
+
+  test('podcast rows: a feed address is unique, an episode is unique per podcast, deleting a podcast takes its episodes and a track link goes null', () async {
+    final db = AppDatabase(NativeDatabase.memory());
+    final pid = await db.into(db.podcasts).insert(PodcastsCompanion.insert(feedUrl: 'https://x/feed', title: 'P', addedAt: 1));
+    await expectLater(
+      db.into(db.podcasts).insert(PodcastsCompanion.insert(feedUrl: 'https://x/feed', title: 'Other', addedAt: 2)),
+      throwsA(anything),
+    );
+    final trackId = await db.into(db.tracks).insert(TracksCompanion.insert(
+        path: '/p/e1.mp3', title: 'E1', albumKey: 'k', format: 'mp3', sizeBytes: 1, mtimeMs: 1, addedAt: 1,
+        kind: const Value(1)));
+    await db.into(db.podcastEpisodes).insert(PodcastEpisodesCompanion.insert(
+        podcastId: pid, guid: 'g1', title: 'E1', audioUrl: 'https://x/e1.mp3', trackId: Value(trackId)));
+    await expectLater(
+      db.into(db.podcastEpisodes).insert(PodcastEpisodesCompanion.insert(
+          podcastId: pid, guid: 'g1', title: 'dup', audioUrl: 'https://x/e1b.mp3')),
+      throwsA(anything),
+    );
+    // The same guid in another podcast is fine.
+    final other = await db.into(db.podcasts).insert(PodcastsCompanion.insert(feedUrl: 'https://y/feed', title: 'Q', addedAt: 1));
+    await db.into(db.podcastEpisodes).insert(PodcastEpisodesCompanion.insert(
+        podcastId: other, guid: 'g1', title: 'E1', audioUrl: 'https://y/e1.mp3'));
+
+    await (db.delete(db.tracks)..where((t) => t.id.equals(trackId))).go();
+    final ep = await (db.select(db.podcastEpisodes)..where((e) => e.podcastId.equals(pid))).getSingle();
+    expect(ep.trackId, isNull, reason: 'the episode stays listed as not downloaded');
+
+    await (db.delete(db.podcasts)..where((p) => p.id.equals(pid))).go();
+    expect((await db.select(db.podcastEpisodes).get()).map((e) => e.podcastId), [other]);
     await db.close();
   });
 

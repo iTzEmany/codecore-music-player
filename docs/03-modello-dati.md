@@ -38,6 +38,7 @@ in `onUpgrade` (mai distruttiva). Esporta lo schema con `drift_dev schema dump` 
 | `userEdited` | bool | default false: se true l'arricchimento **non** sovrascrive titolo/artista/album |
 | `missing` | bool | default false: file non trovato all'ultima scansione |
 | `ignored` | bool | default false (schema v8): doppione unito e **nascosto** dalla pulizia. Sparisce da brani, album, artisti, generi, ricerca, playlist, cronologia e abbinamenti. A differenza di `missing`, la scansione **non lo riattiva**: solo «Brani nascosti → Ripristina» |
+| `kind` | int | default 0 (schema v9): **0 musica · 1 episodio di podcast scaricato**. Ogni vista musicale (brani, album, artisti, generi, ricerca, Home, playlist, abbinamenti) filtra `kind = 0`; gli episodi non compaiono mai in libreria. Indice `tracks_kind` |
 | `sha256` | text? | calcolato solo su richiesta (fase 21): per i brani con la **stessa dimensione** di un altro, a flusso in un isolate; azzerato dalla scansione se dimensione o data del file cambiano |
 | `addedAt` | int | epoch ms |
 | `playCount` | int | default 0 |
@@ -74,6 +75,16 @@ Indici: `plays_at(playedAt)` e `plays_track(trackId, playedAt, msPlayed)` — il
 
 ## Pulizia della libreria (schema v8, fase 21)
 Nessuna tabella nuova: una colonna, `tracks.ignored` (vedi sopra). Unire due doppioni (`DuplicateRepository.merge`, una transazione) sposta sul brano tenuto: preferito (se uno lo era), `playCount` (somma), `lastPlayedAt` (massimo), testi/curiosità/copertina/modifiche dell'utente (solo dove il tenuto non ha i suoi), la sua posizione nelle playlist (il primo del gruppo cede il posto, nessun doppione), `plays`, `track_tags` e `playlist_import_items.track_id`; poi nasconde gli altri. **Nessuna riga di `tracks` viene cancellata** dall'unione (servono a «Ripristina»); si cancellano solo, dopo doppia conferma, i file scelti dall'utente e le loro righe. Le coppie «Non sono duplicati» stanno in `SettingsStore` (`notDuplicates`, chiavi dei gruppi), non nel DB.
+
+## Podcast (schema v9, fase 23)
+Una colonna su `tracks` (`kind`, vedi sopra) e due tabelle; la migrazione non cancella nulla e ogni brano esistente resta musica (`kind = 0`).
+
+### `podcasts`
+`id` int PK · `feedUrl` text **UNIQUE** · `title` text · `author` text? · `imageUrl` text? (da dove viene la copertina) · `coverKey` text? (nome del file nella cartella delle copertine) · `language` text? · `lastCheckedAt` int? (epoch ms dell'ultimo aggiornamento riuscito; null = mai) · `autoDeleteDays` int? (cancella gli episodi ascoltati dopo N giorni; null = mai) · `addedAt` int.
+
+### `podcast_episodes`
+`id` int PK · `podcastId` int (**CASCADE**: togliere un podcast toglie i suoi episodi) · `guid` text (o l'`enclosure@url` se il feed non ne ha) · `title` text · `publishedAt` int? · `durationMs` int? · `audioUrl` text · `mimeType` text? · `sizeBytes` int? · `description` text? (testo semplice) · `trackId` int? (**SET NULL** verso `tracks`: se la riga del brano sparisce l'episodio resta in elenco come «non scaricato») · `played` bool default false · `playedAt` int?. **UNIQUE (`podcastId`, `guid`)**: un aggiornamento non duplica mai un episodio. Indice `(podcastId, publishedAt)` per l'elenco in ordine di data.
+Un episodio **scaricato** ha una riga in `tracks` con `kind = 1`, `folderId = null` e il file in `<appSupportDir>/podcasts/<podcastId>/`, cartella che non è in `folders` e quindi la scansione non vede.
 
 ## Importazione da CSV (schema v4, fase 12)
 | Tabella | Colonne | Note |

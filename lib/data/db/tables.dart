@@ -3,6 +3,7 @@ import 'package:drift/drift.dart';
 @TableIndex(name: 'tracks_album_key', columns: {#albumKey})
 @TableIndex(name: 'tracks_artist', columns: {#artist})
 @TableIndex(name: 'tracks_favorite', columns: {#isFavorite})
+@TableIndex(name: 'tracks_kind', columns: {#kind})
 @TableIndex(name: 'tracks_missing', columns: {#missing})
 @TableIndex(name: 'tracks_title', columns: {#title})
 class Tracks extends Table {
@@ -39,6 +40,10 @@ class Tracks extends Table {
   /// Hidden by the user (a duplicate that was merged away). Unlike `missing`
   /// the scanner never clears it; «Brani nascosti» does.
   BoolColumn get ignored => boolean().withDefault(const Constant(false))();
+
+  /// 0 music · 1 a downloaded podcast episode. Every music view filters
+  /// `kind = 0`: episodes never show up in the library.
+  IntColumn get kind => integer().withDefault(const Constant(0))();
   TextColumn get sha256 => text().nullable()();
   IntColumn get addedAt => integer()();
   IntColumn get playCount => integer().withDefault(const Constant(0))();
@@ -198,3 +203,51 @@ class TrackTags extends Table {
   Set<Column> get primaryKey => {trackId, tagId};
 }
 
+/// A podcast the user subscribed to by its RSS address.
+class Podcasts extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get feedUrl => text().unique()();
+  TextColumn get title => text()();
+  TextColumn get author => text().nullable()();
+
+  /// Where the cover comes from (the feed's image).
+  TextColumn get imageUrl => text().nullable()();
+
+  /// File name inside the covers folder, once downloaded.
+  TextColumn get coverKey => text().nullable()();
+  TextColumn get language => text().nullable()();
+
+  /// Epoch ms of the last successful refresh; null = never.
+  IntColumn get lastCheckedAt => integer().nullable()();
+
+  /// Delete played episodes after this many days; null = never.
+  IntColumn get autoDeleteDays => integer().nullable()();
+  IntColumn get addedAt => integer()();
+}
+
+/// One episode of a feed. Downloaded ones also have a `tracks` row (kind 1),
+/// linked by [trackId]; the others are only listed.
+@TableIndex(name: 'podcast_episodes_podcast', columns: {#podcastId, #publishedAt})
+class PodcastEpisodes extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get podcastId =>
+      integer().references(Podcasts, #id, onDelete: KeyAction.cascade)();
+  TextColumn get guid => text()();
+  TextColumn get title => text()();
+  IntColumn get publishedAt => integer().nullable()();
+  IntColumn get durationMs => integer().nullable()();
+  TextColumn get audioUrl => text()();
+  TextColumn get mimeType => text().nullable()();
+  IntColumn get sizeBytes => integer().nullable()();
+  TextColumn get description => text().nullable()();
+  IntColumn get trackId => integer()
+      .nullable()
+      .references(Tracks, #id, onDelete: KeyAction.setNull)();
+  BoolColumn get played => boolean().withDefault(const Constant(false))();
+  IntColumn get playedAt => integer().nullable()();
+
+  @override
+  List<Set<Column>> get uniqueKeys => [
+        {podcastId, guid},
+      ];
+}

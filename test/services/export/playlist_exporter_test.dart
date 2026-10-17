@@ -25,7 +25,7 @@ Track t(int id, String path, String title, String? artist, int ms,
       enrichStatus: 0,
       userEdited: false,
       missing: false,
-      ignored: false,
+      ignored: false, kind: 0,
       addedAt: 1,
       playCount: 0,
     );
