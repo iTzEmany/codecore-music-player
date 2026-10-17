@@ -8,6 +8,7 @@ import '../core/app_log.dart';
 import '../data/db/app_database.dart';
 import '../services/share/lan_client.dart';
 import '../services/share/lan_server.dart';
+import '../services/share/trusted_devices.dart';
 import 'database_providers.dart';
 import 'library_providers.dart';
 import 'settings_providers.dart';
@@ -112,3 +113,29 @@ class ShareController {
 final shareControllerProvider = Provider<ShareController>(
   (ref) => ShareController(ref),
 );
+
+
+/// The devices the user paired with, saved on every change.
+class TrustedDevicesNotifier extends Notifier<TrustedDevices> {
+  @override
+  TrustedDevices build() =>
+      TrustedDevices.decode(ref.read(settingsStoreProvider).readTrustedDevicesRaw());
+
+  void _set(TrustedDevices next) {
+    state = next;
+    ref.read(settingsStoreProvider).writeTrustedDevicesRaw(next.encode()).catchError(
+      (Object e, StackTrace st) {
+        AppLog.w('could not save the trusted devices', e, st);
+      },
+    );
+  }
+
+  void add(TrustedDevice device) => _set(state.add(device));
+
+  void revoke(String id) => _set(state.revoke(id));
+
+  void setAutoAccept(String id, bool value) => _set(state.setAutoAccept(id, value));
+}
+
+final trustedDevicesProvider =
+    NotifierProvider<TrustedDevicesNotifier, TrustedDevices>(TrustedDevicesNotifier.new);

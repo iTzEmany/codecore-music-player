@@ -342,6 +342,12 @@ class SettingsStore {
     return id;
   }
 
+  /// The paired devices, as written by `TrustedDevices.encode`.
+  String? readTrustedDevicesRaw() => _prefs.getString('trustedDevices');
+
+  Future<void> writeTrustedDevicesRaw(String raw) =>
+      _prefs.setString('trustedDevices', raw);
+
   /// Duplicate groups the user marked «not duplicates» (`DuplicateGroup.key`).
   Set<String> readNotDuplicates() =>
       (_prefs.getStringList('notDuplicates') ?? const []).toSet();
