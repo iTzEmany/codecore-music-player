@@ -1,5 +1,8 @@
 import 'package:drift/drift.dart';
 
+import '../../core/clock.dart';
+import '../../core/uuid.dart';
+
 @TableIndex(name: 'tracks_album_key', columns: {#albumKey})
 @TableIndex(name: 'tracks_artist', columns: {#artist})
 @TableIndex(name: 'tracks_favorite', columns: {#isFavorite})
@@ -61,10 +64,20 @@ class Folders extends Table {
   TextColumn get label => text().nullable()();
 }
 
+@TableIndex(name: 'playlists_uuid', columns: {#uuid}, unique: true)
 class Playlists extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get name => text()();
   IntColumn get createdAt => integer()();
+
+  /// Identity of the playlist across devices (schema v10): the same on every
+  /// device it is synced to. Nullable only because the migration adds the
+  /// column before filling it; every new row gets one.
+  TextColumn get uuid => text().nullable().clientDefault(newUuid)();
+
+  /// Epoch ms of the last change to its name, cover, tracks or order: «last
+  /// change wins» when playlists are synced.
+  IntColumn get updatedAt => integer().withDefault(const Constant(0)).clientDefault(nowMs)();
 
   /// File name inside the covers folder; null = use the first track's cover.
   TextColumn get coverKey => text().nullable()();

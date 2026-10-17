@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 
+import '../../core/clock.dart';
 import '../../services/library/duplicate_finder.dart';
 import '../db/app_database.dart';
 
@@ -195,6 +196,9 @@ class DuplicateRepository {
                   t.trackId.equals(order[i])))
             .write(PlaylistTracksCompanion(position: Value(i)));
       }
+      // The playlist changed: a sync must see it.
+      await (_db.update(_db.playlists)..where((p) => p.id.equals(playlistId)))
+          .write(PlaylistsCompanion(updatedAt: Value(nowMs())));
     }
   }
 

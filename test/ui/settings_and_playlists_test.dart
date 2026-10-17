@@ -65,7 +65,7 @@ void main() {
     final id = (await tester.runAsync(
         () => h.db.into(h.db.playlists).insert(PlaylistsCompanion.insert(
             name: 'Rock', createdAt: 1))))!;
-    final pl = Playlist(id: id, name: 'Rock', createdAt: 1);
+    final pl = Playlist(id: id, name: 'Rock', createdAt: 1, updatedAt: 1);
     await h.pump(tester, PlaylistDetailScreen(playlist: pl));
     await tester.tap(find.byType(PopupMenuButton<String>));
     await tester.pumpAndSettle();

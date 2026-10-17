@@ -1,6 +1,8 @@
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 
+import '../../core/clock.dart';
+import '../../core/uuid.dart';
 import 'tables.dart';
 
 part 'app_database.g.dart';
@@ -25,7 +27,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.production() : super(driftDatabase(name: 'codecore'));
 
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 10;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -66,6 +68,20 @@ class AppDatabase extends _$AppDatabase {
             await m.createTable(podcasts);
             await m.createTable(podcastEpisodes);
             await m.createIndex(podcastEpisodesPodcast);
+          }
+          if (from < 10) {
+            // Playlists get an identity that survives a sync, and a change
+            // time (the creation time until the first change).
+            await m.addColumn(playlists, playlists.uuid);
+            await m.addColumn(playlists, playlists.updatedAt);
+            await customStatement('UPDATE playlists SET updated_at = created_at');
+            for (final row in await customSelect('SELECT id FROM playlists').get()) {
+              await customStatement(
+                'UPDATE playlists SET uuid = ? WHERE id = ?',
+                [newUuid(), row.read<int>('id')],
+              );
+            }
+            await m.createIndex(playlistsUuid);
           }
         },
         beforeOpen: (details) async {

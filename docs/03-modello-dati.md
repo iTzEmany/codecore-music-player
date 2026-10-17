@@ -51,7 +51,7 @@ Indici: `albumKey`, `artist`, `isFavorite`, `(missing)`, `title COLLATE NOCASE`.
 `id` int PK · `path` text UNIQUE · `addedAt` int · `label` text?
 
 ### `playlists`
-`id` int PK · `name` text · `createdAt` int
+`id` int PK · `name` text · `createdAt` int · `coverKey` text? · `uuid` text (**schema v10**: identità della playlist tra dispositivi, v4 casuale, **indice unico** `playlists_uuid`; nullable solo perché la migrazione aggiunge la colonna prima di riempirla, ogni riga nuova ne riceve una) · `updatedAt` int (**schema v10**: epoch ms dell'ultima modifica di nome, copertina, brani o ordine; parte da `createdAt`; è quello che confronta «vince l'ultima modifica» nella sincronizzazione). Ogni scrittura di `PlaylistRepository` (e l'unione dei doppioni) lo aggiorna nella stessa transazione.
 
 ### `playlist_tracks`
 `playlistId` int · `trackId` int · `position` int · PK(`playlistId`,`trackId`) ·
@@ -135,6 +135,8 @@ File scomparsi: `missing = true` **solo se la cartella radice è raggiungibile**
 | `theme` | string | `notte` | `notte`, `oled`, `chiaro` (`light` = `chiaro`; i nomi ritirati `carbon`, `navy` → `notte`) |
 | `accent` | string | `viola` | `viola`, `blu`, `acqua`, `verde`, `ambra`, `arancio`, `rosa`, `rosso` (fase 19; valore ignoto = `viola`) |
 | `onboardingDone` | bool | false | la guida al primo avvio è finita o saltata (fase 19) |
+| `trustedDevices` | string (JSON) | assente | dispositivi abbinati (fase 24): lista di `{id, name, fingerprint, pairedAt, autoAccept}`; un dato illeggibile dà una lista vuota, mai fiducia a caso |
+| `notDuplicates` | list<string> | `[]` | gruppi di brani che l'utente ha detto «non sono duplicati» (fase 21) |
 | `recordHistory` | bool | true | registra la cronologia di ascolto (`plays`), solo locale (fase 20) |
 | `fontScale` | double | 1.0 | 0.9, 1.0, 1.15 |
 | `compactMode` | bool | false | |

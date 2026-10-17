@@ -18,7 +18,7 @@ AlbumSummary album(String t, {int? played, int added = 0}) => AlbumSummary(
     );
 
 PlaylistSummary list(int id, String name, {int? played, int added = 0}) =>
-    PlaylistSummary(Playlist(id: id, name: name, createdAt: 0), 2, null,
+    PlaylistSummary(Playlist(id: id, name: name, createdAt: 0, updatedAt: 0), 2, null,
         played, added);
 
 ArtistSummary artist(String n, {int? played, int added = 0}) => ArtistSummary(

@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 
 import '../../core/app_log.dart';
+import '../../core/clock.dart';
 import '../../core/playlist_order.dart';
 import '../db/app_database.dart';
 
@@ -27,18 +28,24 @@ class PlaylistRepository {
 
   final AppDatabase _db;
 
+  /// Every new playlist gets its own `uuid` and `updatedAt` (column defaults).
   Future<int> create(String name) => _db.into(_db.playlists).insert(
       PlaylistsCompanion.insert(
-          name: name.trim(),
-          createdAt: DateTime.now().millisecondsSinceEpoch));
+          name: name.trim(), createdAt: nowMs()));
 
+  /// Every change below also stamps `updated_at`: it is what «last change
+  /// wins» compares when playlists are synced between devices.
   Future<void> rename(int id, String name) =>
-      (_db.update(_db.playlists)..where((p) => p.id.equals(id)))
-          .write(PlaylistsCompanion(name: Value(name.trim())));
+      (_db.update(_db.playlists)..where((p) => p.id.equals(id))).write(
+          PlaylistsCompanion(name: Value(name.trim()), updatedAt: Value(nowMs())));
 
   Future<void> setCover(int id, String? coverKey) =>
-      (_db.update(_db.playlists)..where((p) => p.id.equals(id)))
-          .write(PlaylistsCompanion(coverKey: Value(coverKey)));
+      (_db.update(_db.playlists)..where((p) => p.id.equals(id))).write(
+          PlaylistsCompanion(coverKey: Value(coverKey), updatedAt: Value(nowMs())));
+
+  Future<void> _touch(int playlistId) =>
+      (_db.update(_db.playlists)..where((p) => p.id.equals(playlistId)))
+          .write(PlaylistsCompanion(updatedAt: Value(nowMs())));
 
   Future<void> delete(int id) =>
       (_db.delete(_db.playlists)..where((p) => p.id.equals(id))).go();
@@ -62,7 +69,8 @@ class PlaylistRepository {
   Stream<List<PlaylistSummary>> watchAll() {
     return _db
         .customSelect(
-          'SELECT p.id, p.name, p.created_at, p.cover_key AS custom_cover, '
+          'SELECT p.id, p.name, p.created_at, p.uuid, p.updated_at, '
+          'p.cover_key AS custom_cover, '
           '(SELECT t.cover_key FROM playlist_tracks x JOIN tracks t ON t.id = x.track_id '
           'WHERE x.playlist_id = p.id AND t.cover_key IS NOT NULL '
           'ORDER BY x.position LIMIT 1) AS auto_cover, '
@@ -83,6 +91,8 @@ class PlaylistRepository {
                     id: r.read<int>('id'),
                     name: r.read<String>('name'),
                     createdAt: r.read<int>('created_at'),
+                    uuid: r.read<String?>('uuid'),
+                    updatedAt: r.read<int>('updated_at'),
                     coverKey: r.read<String?>('custom_cover'),
                   ),
                   r.read<int>('n'),
@@ -132,6 +142,7 @@ class PlaylistRepository {
             playlistId: playlistId, trackId: id, position: next++));
         added++;
       }
+      if (added > 0) await _touch(playlistId);
       return added;
     });
   }
@@ -265,6 +276,7 @@ class PlaylistRepository {
     await _writeOrder(playlistId, rows.map((r) => r.trackId).toList());
   }
 
+  /// Every change of the tracks or their order ends here (or in [addTracks]).
   Future<void> _writeOrder(int playlistId, List<int> ids) async {
     for (var i = 0; i < ids.length; i++) {
       await (_db.update(_db.playlistTracks)
@@ -272,5 +284,6 @@ class PlaylistRepository {
                 t.playlistId.equals(playlistId) & t.trackId.equals(ids[i])))
           .write(PlaylistTracksCompanion(position: Value(i)));
     }
+    await _touch(playlistId);
   }
 }

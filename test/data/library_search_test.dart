@@ -40,7 +40,7 @@ void main() {
   final artists = [artist('Queen'), artist('Mina'), artist('Blue Öyster')];
   final albums = [album('A Night At The Opera', 'Queen'), album('Queenie', 'X')];
   final playlists = [
-    PlaylistSummary(Playlist(id: 1, name: 'Queen e amici', createdAt: 0), 3)
+    PlaylistSummary(Playlist(id: 1, name: 'Queen e amici', createdAt: 0, updatedAt: 0), 3)
   ];
 
   test('artist whose name starts with the text is the main result', () {

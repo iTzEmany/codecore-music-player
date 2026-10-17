@@ -120,6 +120,8 @@ void main() {
     final file = File(p.join(dir.path, 'v5.db'));
     final db = AppDatabase(NativeDatabase(file, setup: (raw) {
       if (raw.userVersion == 0) {
+        raw.execute('CREATE TABLE playlists (id INTEGER PRIMARY KEY AUTOINCREMENT, '
+            'name TEXT NOT NULL, created_at INTEGER NOT NULL, cover_key TEXT)');
         raw.execute('CREATE TABLE tracks (id INTEGER PRIMARY KEY AUTOINCREMENT, '
             'path TEXT NOT NULL, title TEXT NOT NULL, album_key TEXT NOT NULL, '
             'format TEXT NOT NULL, size_bytes INTEGER NOT NULL, mtime_ms INTEGER '
@@ -146,6 +148,8 @@ void main() {
     final file = File(p.join(dir.path, 'v6.db'));
     final db = AppDatabase(NativeDatabase(file, setup: (raw) {
       if (raw.userVersion == 0) {
+        raw.execute('CREATE TABLE playlists (id INTEGER PRIMARY KEY AUTOINCREMENT, '
+            'name TEXT NOT NULL, created_at INTEGER NOT NULL, cover_key TEXT)');
         raw.execute('CREATE TABLE tracks (id INTEGER PRIMARY KEY AUTOINCREMENT, '
             'path TEXT NOT NULL, title TEXT NOT NULL, album_key TEXT NOT NULL, '
             'format TEXT NOT NULL, size_bytes INTEGER NOT NULL, mtime_ms INTEGER '
@@ -182,6 +186,8 @@ void main() {
     final file = File(p.join(dir.path, 'v7.db'));
     final db = AppDatabase(NativeDatabase(file, setup: (raw) {
       if (raw.userVersion == 0) {
+        raw.execute('CREATE TABLE playlists (id INTEGER PRIMARY KEY AUTOINCREMENT, '
+            'name TEXT NOT NULL, created_at INTEGER NOT NULL, cover_key TEXT)');
         raw.execute('CREATE TABLE tracks (id INTEGER PRIMARY KEY AUTOINCREMENT, '
             'path TEXT NOT NULL, title TEXT NOT NULL, album_key TEXT NOT NULL, '
             'format TEXT NOT NULL, size_bytes INTEGER NOT NULL, mtime_ms INTEGER '
@@ -205,6 +211,8 @@ void main() {
     final file = File(p.join(dir.path, 'v8.db'));
     final db = AppDatabase(NativeDatabase(file, setup: (raw) {
       if (raw.userVersion == 0) {
+        raw.execute('CREATE TABLE playlists (id INTEGER PRIMARY KEY AUTOINCREMENT, '
+            'name TEXT NOT NULL, created_at INTEGER NOT NULL, cover_key TEXT)');
         raw.execute('CREATE TABLE tracks (id INTEGER PRIMARY KEY AUTOINCREMENT, '
             'path TEXT NOT NULL, title TEXT NOT NULL, album_key TEXT NOT NULL, '
             'format TEXT NOT NULL, size_bytes INTEGER NOT NULL, mtime_ms INTEGER '

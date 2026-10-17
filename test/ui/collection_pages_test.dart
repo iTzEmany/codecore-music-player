@@ -82,7 +82,7 @@ void main() {
     await h.pump(
         tester,
         PlaylistDetailScreen(
-            playlist: Playlist(id: id!, name: 'Notte', createdAt: 0)));
+            playlist: Playlist(id: id!, name: 'Notte', createdAt: 0, updatedAt: 0)));
     await _settle(tester);
     expect(find.text('Notte'), findsWidgets);
     expect(find.text('Song 0'), findsOneWidget);
