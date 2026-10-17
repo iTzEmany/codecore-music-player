@@ -2906,4 +2906,179 @@ class AppLocalizationsIt extends AppLocalizations {
   String playlistSourceStarted(String name) {
     return 'Download avviati nella playlist «$name»';
   }
+
+  @override
+  String get podcastsTitle => 'Podcast';
+
+  @override
+  String podcastsSubtitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count podcast',
+      one: '1 podcast',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get podcastsNotice => 'I podcast si aggiornano solo quando lo chiedi.';
+
+  @override
+  String get podcastsEmpty => 'Non sei iscritto a nessun podcast.';
+
+  @override
+  String get podcastAdd => 'Aggiungi podcast';
+
+  @override
+  String get podcastRefreshAll => 'Aggiorna tutti';
+
+  @override
+  String get podcastRefresh => 'Aggiorna';
+
+  @override
+  String podcastRefreshed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count episodi nuovi',
+      one: '1 episodio nuovo',
+      zero: 'Nessun episodio nuovo',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String podcastRefreshFailed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count podcast non aggiornati',
+      one: '1 podcast non aggiornato',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get podcastFeedUrl => 'URL del feed';
+
+  @override
+  String get podcastSubscribe => 'Iscriviti';
+
+  @override
+  String get podcastSearchHint => 'Cerca un podcast per nome';
+
+  @override
+  String get podcastSearchNone => 'Nessun podcast trovato';
+
+  @override
+  String podcastSubscribed(String name) {
+    return 'Iscritto a «$name»';
+  }
+
+  @override
+  String podcastEpisodesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count episodi',
+      one: '1 episodio',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String podcastToListen(int count) {
+    return '$count da ascoltare';
+  }
+
+  @override
+  String get podcastNoEpisodes => 'Nessun episodio.';
+
+  @override
+  String get podcastStateDownloaded => 'Scaricato';
+
+  @override
+  String podcastStateDownloading(int percent) {
+    return 'Scarico… $percent%';
+  }
+
+  @override
+  String get podcastStateHeard => 'Ascoltato';
+
+  @override
+  String podcastStateRemaining(String time) {
+    return 'Mancano $time';
+  }
+
+  @override
+  String get podcastMarkHeard => 'Segna come ascoltato';
+
+  @override
+  String get podcastMarkNotHeard => 'Segna come da ascoltare';
+
+  @override
+  String get podcastDeleteFile => 'Elimina il file';
+
+  @override
+  String get podcastAutoDelete => 'Elimina gli episodi ascoltati';
+
+  @override
+  String get podcastAutoDeleteNever => 'Mai';
+
+  @override
+  String podcastAutoDeleteAfter(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'Dopo $days giorni',
+      one: 'Dopo 1 giorno',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get podcastUnsubscribe => 'Annulla l’iscrizione';
+
+  @override
+  String get podcastUnsubscribeTitle => 'Annullare l’iscrizione?';
+
+  @override
+  String podcastUnsubscribeBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count episodi scaricati',
+      one: '1 episodio scaricato',
+    );
+    return 'Il podcast e $_temp0 verranno eliminati dal dispositivo.';
+  }
+
+  @override
+  String podcastLastChecked(String when) {
+    return 'Aggiornato $when';
+  }
+
+  @override
+  String get podcastNeverChecked => 'Mai aggiornato';
+
+  @override
+  String get podcastErrInvalidUrl =>
+      'Questo non sembra un indirizzo web valido.';
+
+  @override
+  String get podcastErrTooLarge => 'Il feed è troppo grande.';
+
+  @override
+  String get podcastErrNetwork => 'Non riesco a raggiungere il server.';
+
+  @override
+  String get podcastErrNotFeed => 'Questo indirizzo non è un feed di podcast.';
+
+  @override
+  String get podcastErrParserMissing =>
+      'La lettura dei feed non è ancora disponibile in questa versione.';
+
+  @override
+  String get podcastErrUnsupportedFormat => 'Formato audio non supportato.';
 }

@@ -1872,5 +1872,120 @@
         "type": "String"
       }
     }
-  }
+  },
+  "podcastsTitle": "Podcasts",
+  "podcastsSubtitle": "{count, plural, one{1 podcast} other{{count} podcasts}}",
+  "@podcastsSubtitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "podcastsNotice": "Os podcasts só se atualizam quando o pedes.",
+  "podcastsEmpty": "Não estás subscrito a nenhum podcast.",
+  "podcastAdd": "Adicionar um podcast",
+  "podcastRefreshAll": "Atualizar todos",
+  "podcastRefresh": "Atualizar",
+  "podcastRefreshed": "{count, plural, =0{Nenhum episódio novo} one{1 episódio novo} other{{count} episódios novos}}",
+  "@podcastRefreshed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "podcastRefreshFailed": "{count, plural, one{1 podcast por atualizar} other{{count} podcasts por atualizar}}",
+  "@podcastRefreshFailed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "podcastFeedUrl": "Endereço do feed",
+  "podcastSubscribe": "Subscrever",
+  "podcastSearchHint": "Procura um podcast pelo nome",
+  "podcastSearchNone": "Nenhum podcast encontrado",
+  "podcastSubscribed": "Subscrito a «{name}»",
+  "@podcastSubscribed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "podcastEpisodesCount": "{count, plural, one{1 episódio} other{{count} episódios}}",
+  "@podcastEpisodesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "podcastToListen": "{count} por ouvir",
+  "@podcastToListen": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "podcastNoEpisodes": "Nenhum episódio.",
+  "podcastStateDownloaded": "Descarregado",
+  "podcastStateDownloading": "A descarregar… {percent}%",
+  "@podcastStateDownloading": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "podcastStateHeard": "Ouvido",
+  "podcastStateRemaining": "Faltam {time}",
+  "@podcastStateRemaining": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "podcastMarkHeard": "Marcar como ouvido",
+  "podcastMarkNotHeard": "Marcar como não ouvido",
+  "podcastDeleteFile": "Apagar o ficheiro",
+  "podcastAutoDelete": "Apagar os episódios ouvidos",
+  "podcastAutoDeleteNever": "Nunca",
+  "podcastAutoDeleteAfter": "{days, plural, one{Após 1 dia} other{Após {days} dias}}",
+  "@podcastAutoDeleteAfter": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "podcastUnsubscribe": "Cancelar a subscrição",
+  "podcastUnsubscribeTitle": "Cancelar a subscrição?",
+  "podcastUnsubscribeBody": "O podcast e {count, plural, one{1 episódio descarregado} other{{count} episódios descarregados}} serão apagados do dispositivo.",
+  "@podcastUnsubscribeBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "podcastLastChecked": "Atualizado {when}",
+  "@podcastLastChecked": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "podcastNeverChecked": "Nunca atualizado",
+  "podcastErrInvalidUrl": "Isso não parece um endereço web válido.",
+  "podcastErrTooLarge": "O feed é demasiado grande.",
+  "podcastErrNetwork": "Não consigo alcançar o servidor.",
+  "podcastErrNotFeed": "Esse endereço não é um feed de podcast.",
+  "podcastErrParserMissing": "A leitura de feeds ainda não está disponível nesta versão.",
+  "podcastErrUnsupportedFormat": "Formato de áudio não suportado."
 }

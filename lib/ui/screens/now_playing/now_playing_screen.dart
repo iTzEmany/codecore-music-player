@@ -27,7 +27,8 @@ String? playContextName(AppLocalizations l, PlayContext? c) {
   return switch (c.kind) {
     PlayContextKind.album ||
     PlayContextKind.artist ||
-    PlayContextKind.playlist => c.name,
+    PlayContextKind.playlist ||
+    PlayContextKind.podcast => c.name,
     PlayContextKind.favorites => l.navFavorites,
     PlayContextKind.library => l.allTracks,
     PlayContextKind.search => l.playContextSearch,

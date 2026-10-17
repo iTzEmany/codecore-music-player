@@ -4707,6 +4707,234 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Download avviati nella playlist «{name}»'**
   String playlistSourceStarted(String name);
+
+  /// No description provided for @podcastsTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Podcast'**
+  String get podcastsTitle;
+
+  /// No description provided for @podcastsSubtitle.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, one{1 podcast} other{{count} podcast}}'**
+  String podcastsSubtitle(int count);
+
+  /// No description provided for @podcastsNotice.
+  ///
+  /// In it, this message translates to:
+  /// **'I podcast si aggiornano solo quando lo chiedi.'**
+  String get podcastsNotice;
+
+  /// No description provided for @podcastsEmpty.
+  ///
+  /// In it, this message translates to:
+  /// **'Non sei iscritto a nessun podcast.'**
+  String get podcastsEmpty;
+
+  /// No description provided for @podcastAdd.
+  ///
+  /// In it, this message translates to:
+  /// **'Aggiungi podcast'**
+  String get podcastAdd;
+
+  /// No description provided for @podcastRefreshAll.
+  ///
+  /// In it, this message translates to:
+  /// **'Aggiorna tutti'**
+  String get podcastRefreshAll;
+
+  /// No description provided for @podcastRefresh.
+  ///
+  /// In it, this message translates to:
+  /// **'Aggiorna'**
+  String get podcastRefresh;
+
+  /// No description provided for @podcastRefreshed.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, =0{Nessun episodio nuovo} one{1 episodio nuovo} other{{count} episodi nuovi}}'**
+  String podcastRefreshed(int count);
+
+  /// No description provided for @podcastRefreshFailed.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, one{1 podcast non aggiornato} other{{count} podcast non aggiornati}}'**
+  String podcastRefreshFailed(int count);
+
+  /// No description provided for @podcastFeedUrl.
+  ///
+  /// In it, this message translates to:
+  /// **'URL del feed'**
+  String get podcastFeedUrl;
+
+  /// No description provided for @podcastSubscribe.
+  ///
+  /// In it, this message translates to:
+  /// **'Iscriviti'**
+  String get podcastSubscribe;
+
+  /// No description provided for @podcastSearchHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Cerca un podcast per nome'**
+  String get podcastSearchHint;
+
+  /// No description provided for @podcastSearchNone.
+  ///
+  /// In it, this message translates to:
+  /// **'Nessun podcast trovato'**
+  String get podcastSearchNone;
+
+  /// No description provided for @podcastSubscribed.
+  ///
+  /// In it, this message translates to:
+  /// **'Iscritto a «{name}»'**
+  String podcastSubscribed(String name);
+
+  /// No description provided for @podcastEpisodesCount.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, one{1 episodio} other{{count} episodi}}'**
+  String podcastEpisodesCount(int count);
+
+  /// No description provided for @podcastToListen.
+  ///
+  /// In it, this message translates to:
+  /// **'{count} da ascoltare'**
+  String podcastToListen(int count);
+
+  /// No description provided for @podcastNoEpisodes.
+  ///
+  /// In it, this message translates to:
+  /// **'Nessun episodio.'**
+  String get podcastNoEpisodes;
+
+  /// No description provided for @podcastStateDownloaded.
+  ///
+  /// In it, this message translates to:
+  /// **'Scaricato'**
+  String get podcastStateDownloaded;
+
+  /// No description provided for @podcastStateDownloading.
+  ///
+  /// In it, this message translates to:
+  /// **'Scarico… {percent}%'**
+  String podcastStateDownloading(int percent);
+
+  /// No description provided for @podcastStateHeard.
+  ///
+  /// In it, this message translates to:
+  /// **'Ascoltato'**
+  String get podcastStateHeard;
+
+  /// No description provided for @podcastStateRemaining.
+  ///
+  /// In it, this message translates to:
+  /// **'Mancano {time}'**
+  String podcastStateRemaining(String time);
+
+  /// No description provided for @podcastMarkHeard.
+  ///
+  /// In it, this message translates to:
+  /// **'Segna come ascoltato'**
+  String get podcastMarkHeard;
+
+  /// No description provided for @podcastMarkNotHeard.
+  ///
+  /// In it, this message translates to:
+  /// **'Segna come da ascoltare'**
+  String get podcastMarkNotHeard;
+
+  /// No description provided for @podcastDeleteFile.
+  ///
+  /// In it, this message translates to:
+  /// **'Elimina il file'**
+  String get podcastDeleteFile;
+
+  /// No description provided for @podcastAutoDelete.
+  ///
+  /// In it, this message translates to:
+  /// **'Elimina gli episodi ascoltati'**
+  String get podcastAutoDelete;
+
+  /// No description provided for @podcastAutoDeleteNever.
+  ///
+  /// In it, this message translates to:
+  /// **'Mai'**
+  String get podcastAutoDeleteNever;
+
+  /// No description provided for @podcastAutoDeleteAfter.
+  ///
+  /// In it, this message translates to:
+  /// **'{days, plural, one{Dopo 1 giorno} other{Dopo {days} giorni}}'**
+  String podcastAutoDeleteAfter(int days);
+
+  /// No description provided for @podcastUnsubscribe.
+  ///
+  /// In it, this message translates to:
+  /// **'Annulla l’iscrizione'**
+  String get podcastUnsubscribe;
+
+  /// No description provided for @podcastUnsubscribeTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Annullare l’iscrizione?'**
+  String get podcastUnsubscribeTitle;
+
+  /// No description provided for @podcastUnsubscribeBody.
+  ///
+  /// In it, this message translates to:
+  /// **'Il podcast e {count, plural, one{1 episodio scaricato} other{{count} episodi scaricati}} verranno eliminati dal dispositivo.'**
+  String podcastUnsubscribeBody(int count);
+
+  /// No description provided for @podcastLastChecked.
+  ///
+  /// In it, this message translates to:
+  /// **'Aggiornato {when}'**
+  String podcastLastChecked(String when);
+
+  /// No description provided for @podcastNeverChecked.
+  ///
+  /// In it, this message translates to:
+  /// **'Mai aggiornato'**
+  String get podcastNeverChecked;
+
+  /// No description provided for @podcastErrInvalidUrl.
+  ///
+  /// In it, this message translates to:
+  /// **'Questo non sembra un indirizzo web valido.'**
+  String get podcastErrInvalidUrl;
+
+  /// No description provided for @podcastErrTooLarge.
+  ///
+  /// In it, this message translates to:
+  /// **'Il feed è troppo grande.'**
+  String get podcastErrTooLarge;
+
+  /// No description provided for @podcastErrNetwork.
+  ///
+  /// In it, this message translates to:
+  /// **'Non riesco a raggiungere il server.'**
+  String get podcastErrNetwork;
+
+  /// No description provided for @podcastErrNotFeed.
+  ///
+  /// In it, this message translates to:
+  /// **'Questo indirizzo non è un feed di podcast.'**
+  String get podcastErrNotFeed;
+
+  /// No description provided for @podcastErrParserMissing.
+  ///
+  /// In it, this message translates to:
+  /// **'La lettura dei feed non è ancora disponibile in questa versione.'**
+  String get podcastErrParserMissing;
+
+  /// No description provided for @podcastErrUnsupportedFormat.
+  ///
+  /// In it, this message translates to:
+  /// **'Formato audio non supportato.'**
+  String get podcastErrUnsupportedFormat;
 }
 
 class _AppLocalizationsDelegate

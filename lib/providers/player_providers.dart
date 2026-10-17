@@ -27,7 +27,7 @@ final playerErrorsProvider = Provider<Stream<PlaybackFailure>>(
 );
 
 /// Where the current queue came from, shown as «In riproduzione da».
-enum PlayContextKind { album, artist, playlist, favorites, library, search }
+enum PlayContextKind { album, artist, playlist, favorites, library, search, podcast }
 
 class PlayContext {
   const PlayContext(this.kind, [this.name]);

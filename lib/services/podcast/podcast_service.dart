@@ -1,3 +1,7 @@
+import 'dart:io';
+
+import 'package:path/path.dart' as p;
+
 import '../../core/app_log.dart';
 import '../../data/repositories/podcast_repository.dart';
 import '../online/http_client.dart';
@@ -33,6 +37,7 @@ class PodcastService {
     required this.parse,
     required this.web,
     this.saveCover,
+    this.podcastsDir,
     RateLimiter? searchLimiter,
     DateTime Function()? now,
   })  : _now = now ?? DateTime.now,
@@ -45,6 +50,8 @@ class PodcastService {
 
   /// Downloads and stores the cover at [imageUrl]; returns its cover key.
   final Future<String?> Function(int podcastId, String imageUrl)? saveCover;
+  /// `<appSupportDir>/podcasts`: the only place files are deleted from.
+  final String? podcastsDir;
   final RateLimiter _limiter;
   final DateTime Function() _now;
 
@@ -112,6 +119,33 @@ class PodcastService {
     } on Object catch (e, st) {
       // A missing cover must never fail a subscription.
       AppLog.w('podcast cover failed: $imageUrl', e, st);
+    }
+  }
+
+  /// Removes the podcast and the downloaded episodes: their library rows, and
+  /// their files, but only those inside [podcastsDir] (when given).
+  Future<void> unsubscribe(int podcastId) async {
+    final paths = await repo.unsubscribe(podcastId);
+    final root = podcastsDir;
+    for (final path in paths) {
+      if (root == null || !p.isWithin(root, path)) {
+        AppLog.w('unsubscribe: not deleting a file outside the podcast folder: $path');
+        continue;
+      }
+      try {
+        final f = File(path);
+        if (await f.exists()) await f.delete();
+      } on FileSystemException catch (e, st) {
+        AppLog.w('could not delete $path', e, st);
+      }
+    }
+    final dir = root == null ? null : Directory(p.join(root, '$podcastId'));
+    try {
+      if (dir != null && await dir.exists() && (await dir.list().isEmpty)) {
+        await dir.delete();
+      }
+    } on FileSystemException catch (e, st) {
+      AppLog.w('could not remove ${dir?.path}', e, st);
     }
   }
 

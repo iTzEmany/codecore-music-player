@@ -10,10 +10,12 @@ import '../services/covers/cover_store.dart';
 import '../services/online/http_client.dart';
 import '../services/podcast/episode_downloader.dart';
 import '../services/podcast/feed_fetcher.dart';
+import '../services/podcast/podcast_cleanup.dart';
 import '../services/podcast/podcast_models.dart';
 import '../services/podcast/podcast_service.dart';
 import 'database_providers.dart';
 import 'library_providers.dart';
+import 'player_providers.dart';
 
 final podcastRepositoryProvider = Provider<PodcastRepository>(
   (ref) => PodcastRepository(ref.watch(databaseProvider)),
@@ -24,12 +26,15 @@ String podcastAlbumKey(int podcastId) => podcastAlbumKeyOf(podcastId);
 
 final podcastServiceProvider = Provider<PodcastService>((ref) {
   final web = DioWebClient();
+  // The folder is known a moment after start-up; until then nothing is deleted.
+  final dir = ref.watch(podcastsDirProvider).value;
   final covers = ref.watch(coverStoreProvider);
   return PodcastService(
     repo: ref.watch(podcastRepositoryProvider),
     fetch: dioFeedFetcher(),
     parse: unavailableFeedParser,
     web: web,
+    podcastsDir: dir,
     saveCover: (id, url) async {
       final bytes = await web.getBytes(url, maxBytes: CoverStore.maxBytes);
       if (bytes == null) return null;
@@ -184,3 +189,22 @@ final podcastDownloadsProvider =
     NotifierProvider<PodcastDownloadsNotifier, List<EpisodeDownload>>(
   PodcastDownloadsNotifier.new,
 );
+
+/// Run when the Podcast section opens: leftovers of interrupted downloads go,
+/// then the episodes heard longer ago than each podcast allows. Returns how
+/// many episode files were deleted.
+final podcastMaintenanceProvider = FutureProvider.autoDispose<int>((ref) async {
+  final downloader = await ref.watch(episodeDownloaderProvider.future);
+  final base = await ref.watch(podcastsDirProvider.future);
+  final handler = ref.read(audioHandlerProvider);
+  await downloader.removeOrphanParts();
+  return PodcastCleanup(
+    repo: ref.read(podcastRepositoryProvider),
+    downloader: downloader,
+    baseDir: base,
+    inUse: () => {
+      ...handler.queueIds,
+      ?handler.currentTrack?.id,
+    },
+  ).run();
+});
