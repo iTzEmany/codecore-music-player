@@ -225,6 +225,25 @@ class PodcastRepository {
         playedAt: Value(played ? now : null),
       ));
 
+  /// Links an episode to its downloaded track (null = no longer downloaded).
+  Future<void> setTrackId(int episodeId, int? trackId) =>
+      (_db.update(_db.podcastEpisodes)..where((e) => e.id.equals(episodeId)))
+          .write(PodcastEpisodesCompanion(trackId: Value(trackId)));
+
+  /// Every episode that has a downloaded track, with that track.
+  Future<List<EpisodeRow>> downloadedEpisodes({int? podcastId}) async {
+    final q = _db.select(_db.podcastEpisodes).join([
+      innerJoin(_db.tracks, _db.tracks.id.equalsExp(_db.podcastEpisodes.trackId)),
+    ]);
+    if (podcastId != null) {
+      q.where(_db.podcastEpisodes.podcastId.equals(podcastId));
+    }
+    return [
+      for (final r in await q.get())
+        EpisodeRow(r.readTable(_db.podcastEpisodes), r.readTable(_db.tracks)),
+    ];
+  }
+
   Future<void> setAutoDeleteDays(int podcastId, int? days) =>
       (_db.update(_db.podcasts)..where((p) => p.id.equals(podcastId)))
           .write(PodcastsCompanion(autoDeleteDays: Value(days)));

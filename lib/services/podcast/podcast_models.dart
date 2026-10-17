@@ -74,6 +74,9 @@ enum PodcastErrorKind {
 
   /// The feed reader is not available in this build.
   parserMissing,
+
+  /// The episode is in a format the player does not handle.
+  unsupportedFormat,
 }
 
 class PodcastException implements Exception {

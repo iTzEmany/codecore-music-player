@@ -6,6 +6,7 @@ import '../../../providers/activity_providers.dart';
 import '../../../providers/duplicate_providers.dart';
 import '../../../providers/import_providers.dart';
 import '../../../providers/online_providers.dart';
+import '../../../providers/podcast_providers.dart';
 import '../../../providers/share_hub.dart';
 import '../../../providers/youtube_providers.dart';
 import '../../../services/share/offers.dart';
@@ -65,7 +66,12 @@ class ActivitySheet extends ConsumerWidget {
         case ActivityKind.enrich:
           ref.read(enrichJobProvider.notifier).cancel();
         case ActivityKind.download:
-          ref.read(downloadsProvider.notifier).cancel(a.ref! as int);
+          final r = a.ref;
+          if (r is PodcastDownloadRef) {
+            ref.read(podcastDownloadsProvider.notifier).cancel(r.episodeId);
+          } else {
+            ref.read(downloadsProvider.notifier).cancel(r! as int);
+          }
         case ActivityKind.transfer:
           final o = a.ref! as OutgoingOffer;
           final hub = ref.read(shareHubProvider);
@@ -177,6 +183,7 @@ class ActivitySheet extends ConsumerWidget {
                     TextButton(
                       onPressed: () {
                         ref.read(downloadsProvider.notifier).clearFinished();
+                        ref.read(podcastDownloadsProvider.notifier).clearFinished();
                         ref.read(dismissedActivityProvider.notifier).dismiss([
                           for (final c in state.completed) c.key,
                         ]);

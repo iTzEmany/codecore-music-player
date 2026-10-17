@@ -7,6 +7,7 @@ import 'duplicate_providers.dart';
 import 'import_providers.dart';
 import 'library_providers.dart';
 import 'online_providers.dart';
+import 'podcast_providers.dart';
 import 'share_hub.dart';
 import 'youtube_providers.dart';
 
@@ -82,6 +83,7 @@ ActivityState buildActivity({
   required List<OutgoingOffer> outgoing,
   List<ImportProgress> imports = const [],
   CleanupProgress? cleanup,
+  List<EpisodeDownload> episodes = const [],
 }) {
   final running = <ActivityItem>[];
   final completed = <ActivityItem>[];
@@ -158,6 +160,18 @@ ActivityState buildActivity({
     );
     (active ? running : completed).add(item);
   }
+  for (final e in episodes) {
+    final item = ActivityItem(
+      kind: ActivityKind.download,
+      key: 'pod-${e.episodeId}-${e.serial}',
+      name: e.title,
+      progress: e.status == EpisodeDownloadStatus.downloading ? e.progress : null,
+      running: e.active,
+      failed: e.status == EpisodeDownloadStatus.failed,
+      ref: PodcastDownloadRef(e.episodeId),
+    );
+    (e.active ? running : completed).add(item);
+  }
   for (final o in outgoing) {
     final item = ActivityItem(
       kind: ActivityKind.transfer,
@@ -197,6 +211,7 @@ final activityProvider = Provider<ActivityState>((ref) {
     downloads: ref.watch(downloadsProvider),
     outgoing: ref.watch(shareHubProvider.select((h) => h.outgoing)),
     imports: ref.watch(importProgressProvider),
+    episodes: ref.watch(podcastDownloadsProvider),
     cleanup: ref.watch(
       duplicateSearchProvider.select(
         (d) => d.running ? CleanupProgress(d.done, d.total) : null,
