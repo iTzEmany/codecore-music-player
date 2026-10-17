@@ -1886,5 +1886,30 @@
   "carExit": "Exit",
   "carKeepAwake": "Keep screen on",
   "carPlaylists": "Playlists",
-  "carNothing": "Nothing playing"
+  "carNothing": "Nothing playing",
+  "updateCheck": "Check for updates",
+  "updateCheckHint": "Asks GitHub for the latest version, only when you ask.",
+  "updateOnStart": "Check at start-up",
+  "updateOnStartHint": "At most once a day. Downloads and installs nothing.",
+  "updateChecking": "Checking…",
+  "updateAvailable": "Version {version} is available",
+  "@updateAvailable": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "updateUpToDate": "You have the latest version ({version})",
+  "@updateUpToDate": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "updateRateLimited": "GitHub asks you to wait: try again later.",
+  "updateFailed": "I can’t read the latest version. Check your connection.",
+  "updateCopyLink": "Copy address",
+  "updateLinkCopied": "Address copied"
 }

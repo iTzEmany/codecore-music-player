@@ -2077,5 +2077,30 @@
   "carExit": "Sair",
   "carKeepAwake": "Ecrã sempre ligado",
   "carPlaylists": "Playlists",
-  "carNothing": "Nada a tocar"
+  "carNothing": "Nada a tocar",
+  "updateCheck": "Procurar atualizações",
+  "updateCheckHint": "Pergunta ao GitHub a última versão, só quando pedes.",
+  "updateOnStart": "Verificar ao iniciar",
+  "updateOnStartHint": "No máximo uma vez por dia. Não descarrega nem instala nada.",
+  "updateChecking": "A verificar…",
+  "updateAvailable": "Está disponível a versão {version}",
+  "@updateAvailable": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "updateUpToDate": "Tens a última versão ({version})",
+  "@updateUpToDate": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "updateRateLimited": "O GitHub pede para esperar: tenta mais tarde.",
+  "updateFailed": "Não consigo ler a última versão. Verifica a ligação.",
+  "updateCopyLink": "Copiar endereço",
+  "updateLinkCopied": "Endereço copiado"
 }

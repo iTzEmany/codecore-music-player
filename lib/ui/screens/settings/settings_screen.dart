@@ -34,6 +34,7 @@ import 'missing_tracks_screen.dart';
 import 'theme_swatch.dart';
 import 'transition_settings_tiles.dart';
 import 'trusted_devices_tiles.dart';
+import 'update_tiles.dart';
 
 const _languages = {
   'it': 'Italiano',
@@ -303,6 +304,7 @@ class SettingsScreen extends ConsumerWidget {
                   title: Text(l.licenses),
                   onTap: () => showLicensePage(context: context),
                 ),
+                ...updateTiles(context, ref),
                 const LogExportTile(),
               ],
             ),

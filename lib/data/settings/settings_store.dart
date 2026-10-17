@@ -348,6 +348,16 @@ class SettingsStore {
   Future<void> writeTrustedDevicesRaw(String raw) =>
       _prefs.setString('trustedDevices', raw);
 
+  /// «Controlla all'avvio» for new versions: off unless the user turns it on.
+  bool readCheckUpdatesOnStart() => _prefs.getBool('checkUpdatesOnStart') ?? false;
+
+  Future<void> writeCheckUpdatesOnStart(bool on) => _prefs.setBool('checkUpdatesOnStart', on);
+
+  /// Day (days since the epoch) of the last check made at start-up.
+  int readLastUpdateCheckDay() => _prefs.getInt('lastUpdateCheckDay') ?? 0;
+
+  Future<void> writeLastUpdateCheckDay(int day) => _prefs.setInt('lastUpdateCheckDay', day);
+
   /// Duplicate groups the user marked «not duplicates» (`DuplicateGroup.key`).
   Set<String> readNotDuplicates() =>
       (_prefs.getStringList('notDuplicates') ?? const []).toSet();

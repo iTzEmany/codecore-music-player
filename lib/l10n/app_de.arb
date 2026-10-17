@@ -1886,5 +1886,30 @@
   "carExit": "Beenden",
   "carKeepAwake": "Bildschirm anlassen",
   "carPlaylists": "Playlists",
-  "carNothing": "Keine Wiedergabe"
+  "carNothing": "Keine Wiedergabe",
+  "updateCheck": "Nach Updates suchen",
+  "updateCheckHint": "Fragt GitHub nach der neuesten Version, nur auf Anfrage.",
+  "updateOnStart": "Beim Start prüfen",
+  "updateOnStartHint": "Höchstens einmal am Tag. Lädt nichts herunter und installiert nichts.",
+  "updateChecking": "Prüfe…",
+  "updateAvailable": "Version {version} ist verfügbar",
+  "@updateAvailable": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "updateUpToDate": "Du hast die neueste Version ({version})",
+  "@updateUpToDate": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "updateRateLimited": "GitHub bittet um Geduld: versuche es später erneut.",
+  "updateFailed": "Die neueste Version lässt sich nicht lesen. Prüfe die Verbindung.",
+  "updateCopyLink": "Adresse kopieren",
+  "updateLinkCopied": "Adresse kopiert"
 }

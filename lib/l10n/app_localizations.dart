@@ -5097,6 +5097,72 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Niente in riproduzione'**
   String get carNothing;
+
+  /// No description provided for @updateCheck.
+  ///
+  /// In it, this message translates to:
+  /// **'Controlla aggiornamenti'**
+  String get updateCheck;
+
+  /// No description provided for @updateCheckHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Chiede a GitHub l’ultima versione, solo quando lo chiedi.'**
+  String get updateCheckHint;
+
+  /// No description provided for @updateOnStart.
+  ///
+  /// In it, this message translates to:
+  /// **'Controlla all’avvio'**
+  String get updateOnStart;
+
+  /// No description provided for @updateOnStartHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Al più una volta al giorno. Non scarica né installa niente.'**
+  String get updateOnStartHint;
+
+  /// No description provided for @updateChecking.
+  ///
+  /// In it, this message translates to:
+  /// **'Controllo in corso…'**
+  String get updateChecking;
+
+  /// No description provided for @updateAvailable.
+  ///
+  /// In it, this message translates to:
+  /// **'Disponibile la versione {version}'**
+  String updateAvailable(String version);
+
+  /// No description provided for @updateUpToDate.
+  ///
+  /// In it, this message translates to:
+  /// **'Hai l’ultima versione ({version})'**
+  String updateUpToDate(String version);
+
+  /// No description provided for @updateRateLimited.
+  ///
+  /// In it, this message translates to:
+  /// **'GitHub chiede di aspettare: riprova più tardi.'**
+  String get updateRateLimited;
+
+  /// No description provided for @updateFailed.
+  ///
+  /// In it, this message translates to:
+  /// **'Non riesco a leggere l’ultima versione. Controlla la connessione.'**
+  String get updateFailed;
+
+  /// No description provided for @updateCopyLink.
+  ///
+  /// In it, this message translates to:
+  /// **'Copia indirizzo'**
+  String get updateCopyLink;
+
+  /// No description provided for @updateLinkCopied.
+  ///
+  /// In it, this message translates to:
+  /// **'Indirizzo copiato'**
+  String get updateLinkCopied;
 }
 
 class _AppLocalizationsDelegate

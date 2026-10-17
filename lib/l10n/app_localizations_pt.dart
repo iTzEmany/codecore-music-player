@@ -3223,4 +3223,45 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get carNothing => 'Nada a tocar';
+
+  @override
+  String get updateCheck => 'Procurar atualizações';
+
+  @override
+  String get updateCheckHint =>
+      'Pergunta ao GitHub a última versão, só quando pedes.';
+
+  @override
+  String get updateOnStart => 'Verificar ao iniciar';
+
+  @override
+  String get updateOnStartHint =>
+      'No máximo uma vez por dia. Não descarrega nem instala nada.';
+
+  @override
+  String get updateChecking => 'A verificar…';
+
+  @override
+  String updateAvailable(String version) {
+    return 'Está disponível a versão $version';
+  }
+
+  @override
+  String updateUpToDate(String version) {
+    return 'Tens a última versão ($version)';
+  }
+
+  @override
+  String get updateRateLimited =>
+      'O GitHub pede para esperar: tenta mais tarde.';
+
+  @override
+  String get updateFailed =>
+      'Não consigo ler a última versão. Verifica a ligação.';
+
+  @override
+  String get updateCopyLink => 'Copiar endereço';
+
+  @override
+  String get updateLinkCopied => 'Endereço copiado';
 }

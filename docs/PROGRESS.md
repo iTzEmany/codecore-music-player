@@ -316,7 +316,7 @@ L'agente riparte sempre dal primo task non spuntato.
 - [ ] 26.3 Flatpak
 - [ ] 26.4 Installer Windows (Inno Setup)
 - [ ] 26.5 APK più leggero e flavor `lite`
-- [ ] 26.6 Avviso di aggiornamento
+- [x] 26.6 Avviso di aggiornamento
 - [ ] 26.7 Valutazione F-Droid
 - [ ] 26.8 Build di prova macOS / iOS
 - [ ] 26.9 Guida utente
@@ -539,6 +539,7 @@ L'agente riparte sempre dal primo task non spuntato.
 - 25.7: nessun codice; `_toMediaItem` pubblica già `artUri` e il gestore le azioni. Prova con orologio in «Tocca a te».
 - 25.8: `CarModeScreen` (`lib/ui/screens/car/`): `CoverBackdrop`, copertina, titolo/artista grandi (titolo fino a 2 righe), ⏮ ⏯ ⏭ da **96 dp**, ♥, «schermo sempre acceso» (canale Kotlin `codecore/screen` con `FLAG_KEEP_SCREEN_ON`, spento all'uscita), «Esci» grande e foglio «Playlist» con Preferiti + le 5 playlist con attività più recente (`recentPlaylists`: ascoltata o creata; le vuote no). In orizzontale cover a sinistra e comandi a destra. Voce nel menu di Now Playing solo su mobile. Stringhe `car*` in 6 lingue. 5 test (vuota, brano a testo ×1 e ×1,5 senza overflow con i tre pulsanti ≥ 96 dp e avanti che cambia brano, foglio, ordinamento). **Scostamento**: niente scatti dorati (golden) a 100 %/150 %: li sostituisce il test di overflow a ×1,5.
 - 25.9: docs (`02`, `99` R63–R65 con R63 confermato dalla prova, README), stringhe Android it/en/de/es nel 25.3.
+- 26.6: `compareVersions` (puro: `v` iniziale, parti mancanti, `+build` ignorato, pre-release < release e ordine tra pre-release), `UpdateChecker(web, repo, current).check()` → `UpdateResult` (`newer`/`upToDate`/`rateLimited`/`failed` + `UpdateInfo{version, url, notes}`) sull'endpoint `releases/latest`; 403/429 → «riprova più tardi», **nessun ritento**; senza repository nessuna richiesta. **`kReleaseRepo` è vuoto** (`origin` è ancora locale): finché è vuoto le voci sono **nascoste** (come dice il documento). Impostazioni → Info: «Controlla aggiornamenti» (finestra con esito, note e indirizzo selezionabile + «Copia indirizzo», niente `url_launcher`) e interruttore «Controlla all'avvio» (**spento** di serie, al più una volta al giorno: `lastUpdateCheckDay`; un errore è silenzioso; avviso come snackbar di 8 s). **Scostamento**: le due impostazioni sono chiavi proprie in `SettingsStore` (`checkUpdatesOnStart`, `lastUpdateCheckDay`) e non campi di `AppSettings`, come `trustedDevices`. 10 test del confronto/controllo + 5 di interfaccia e avvio. **Per attivarla**: mettere `owner/nome` in `kReleaseRepo` quando il repository GitHub esiste.
 
 ## Note di deviazione (Fase 12)
 - 12.1 (2026-10-16): CSV vero = `Just_a_mood.csv` (34 brani; intestazioni `Track URI, ISRC, Track Name, Album Name, Artist Name(s), …, Duration (ms)`; **più artisti separati da `;`**). yt-dlp di sistema 2024.04.09 NON legge più YouTube («Please sign in»): provato con yt-dlp 2026.08.19 (binario standalone). `https://music.youtube.com/search?q=…#songs` funziona; in modalità flat dà ~460 voci con solo `id`/`title` (nessuna durata), **senza `--flat-playlist` e con `--playlist-items 1-5`** ogni voce ha `channel`, `artists[]`, `track`, `album`, `duration` in ~5–8 s → si usa quella. `YtResult` guadagna `artists` e `album`.

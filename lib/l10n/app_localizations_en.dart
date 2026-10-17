@@ -3216,4 +3216,44 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get carNothing => 'Nothing playing';
+
+  @override
+  String get updateCheck => 'Check for updates';
+
+  @override
+  String get updateCheckHint =>
+      'Asks GitHub for the latest version, only when you ask.';
+
+  @override
+  String get updateOnStart => 'Check at start-up';
+
+  @override
+  String get updateOnStartHint =>
+      'At most once a day. Downloads and installs nothing.';
+
+  @override
+  String get updateChecking => 'Checking…';
+
+  @override
+  String updateAvailable(String version) {
+    return 'Version $version is available';
+  }
+
+  @override
+  String updateUpToDate(String version) {
+    return 'You have the latest version ($version)';
+  }
+
+  @override
+  String get updateRateLimited => 'GitHub asks you to wait: try again later.';
+
+  @override
+  String get updateFailed =>
+      'I can’t read the latest version. Check your connection.';
+
+  @override
+  String get updateCopyLink => 'Copy address';
+
+  @override
+  String get updateLinkCopied => 'Address copied';
 }
