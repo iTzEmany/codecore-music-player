@@ -4935,6 +4935,138 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Formato audio non supportato.'**
   String get podcastErrUnsupportedFormat;
+
+  /// No description provided for @syncTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Sincronizza playlist'**
+  String get syncTitle;
+
+  /// No description provided for @syncAdded.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, one{1 nuova} other{{count} nuove}}'**
+  String syncAdded(int count);
+
+  /// No description provided for @syncUpdated.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, one{1 aggiornata} other{{count} aggiornate}}'**
+  String syncUpdated(int count);
+
+  /// No description provided for @syncMissing.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, one{1 brano mancante} other{{count} brani mancanti}}'**
+  String syncMissing(int count);
+
+  /// No description provided for @syncUpToDate.
+  ///
+  /// In it, this message translates to:
+  /// **'Le playlist sono già allineate'**
+  String get syncUpToDate;
+
+  /// No description provided for @syncKept.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, one{1 playlist è più recente qui e resta com’è} other{{count} playlist sono più recenti qui e restano come sono}}'**
+  String syncKept(int count);
+
+  /// No description provided for @syncReplaceNote.
+  ///
+  /// In it, this message translates to:
+  /// **'Le playlist aggiornate sostituiscono quelle di questo dispositivo.'**
+  String get syncReplaceNote;
+
+  /// No description provided for @syncTagNew.
+  ///
+  /// In it, this message translates to:
+  /// **'Nuova'**
+  String get syncTagNew;
+
+  /// No description provided for @syncTagUpdated.
+  ///
+  /// In it, this message translates to:
+  /// **'Aggiornata'**
+  String get syncTagUpdated;
+
+  /// No description provided for @syncDetailRenamed.
+  ///
+  /// In it, this message translates to:
+  /// **'rinominata'**
+  String get syncDetailRenamed;
+
+  /// No description provided for @syncDetailReordered.
+  ///
+  /// In it, this message translates to:
+  /// **'riordinata'**
+  String get syncDetailReordered;
+
+  /// No description provided for @syncDetailRemoved.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, one{1 brano tolto} other{{count} brani tolti}}'**
+  String syncDetailRemoved(int count);
+
+  /// No description provided for @syncAskMissing.
+  ///
+  /// In it, this message translates to:
+  /// **'Chiedi i brani mancanti'**
+  String get syncAskMissing;
+
+  /// No description provided for @syncApplied.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, one{1 playlist sincronizzata} other{{count} playlist sincronizzate}}'**
+  String syncApplied(int count);
+
+  /// No description provided for @trustedSection.
+  ///
+  /// In it, this message translates to:
+  /// **'Dispositivi fidati'**
+  String get trustedSection;
+
+  /// No description provided for @trustedFingerprint.
+  ///
+  /// In it, this message translates to:
+  /// **'Impronta {fingerprint}'**
+  String trustedFingerprint(String fingerprint);
+
+  /// No description provided for @trustedPairedOn.
+  ///
+  /// In it, this message translates to:
+  /// **'Abbinato il {date}'**
+  String trustedPairedOn(String date);
+
+  /// No description provided for @trustedAutoAccept.
+  ///
+  /// In it, this message translates to:
+  /// **'Accetta automaticamente'**
+  String get trustedAutoAccept;
+
+  /// No description provided for @trustedAutoAcceptHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Ricevi i brani da questo dispositivo senza chiedere.'**
+  String get trustedAutoAcceptHint;
+
+  /// No description provided for @trustedRevoke.
+  ///
+  /// In it, this message translates to:
+  /// **'Revoca'**
+  String get trustedRevoke;
+
+  /// No description provided for @trustedRevokeTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Revocare «{name}»?'**
+  String trustedRevokeTitle(String name);
+
+  /// No description provided for @trustedRevokeBody.
+  ///
+  /// In it, this message translates to:
+  /// **'Per inviare di nuovo senza PIN dovrete abbinarvi ancora.'**
+  String get trustedRevokeBody;
 }
 
 class _AppLocalizationsDelegate

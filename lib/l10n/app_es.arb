@@ -1796,5 +1796,90 @@
   "podcastErrNetwork": "No se puede llegar al servidor.",
   "podcastErrNotFeed": "Esa dirección no es un feed de podcast.",
   "podcastErrParserMissing": "La lectura de feeds aún no está disponible en esta versión.",
-  "podcastErrUnsupportedFormat": "Formato de audio no compatible."
+  "podcastErrUnsupportedFormat": "Formato de audio no compatible.",
+  "syncTitle": "Sincronizar listas",
+  "syncAdded": "{count, plural, one{1 nueva} other{{count} nuevas}}",
+  "@syncAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syncUpdated": "{count, plural, one{1 actualizada} other{{count} actualizadas}}",
+  "@syncUpdated": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syncMissing": "{count, plural, one{1 canción que falta} other{{count} canciones que faltan}}",
+  "@syncMissing": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syncUpToDate": "Las listas ya están sincronizadas",
+  "syncKept": "{count, plural, one{1 lista es más reciente aquí y se queda como está} other{{count} listas son más recientes aquí y se quedan como están}}",
+  "@syncKept": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syncReplaceNote": "Las listas actualizadas sustituyen a las de este dispositivo.",
+  "syncTagNew": "Nueva",
+  "syncTagUpdated": "Actualizada",
+  "syncDetailRenamed": "renombrada",
+  "syncDetailReordered": "reordenada",
+  "syncDetailRemoved": "{count, plural, one{1 canción quitada} other{{count} canciones quitadas}}",
+  "@syncDetailRemoved": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syncAskMissing": "Pedir las canciones que faltan",
+  "syncApplied": "{count, plural, one{1 lista sincronizada} other{{count} listas sincronizadas}}",
+  "@syncApplied": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "trustedSection": "Dispositivos de confianza",
+  "trustedFingerprint": "Huella {fingerprint}",
+  "@trustedFingerprint": {
+    "placeholders": {
+      "fingerprint": {
+        "type": "String"
+      }
+    }
+  },
+  "trustedPairedOn": "Emparejado el {date}",
+  "@trustedPairedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "trustedAutoAccept": "Aceptar automáticamente",
+  "trustedAutoAcceptHint": "Recibe canciones de este dispositivo sin preguntar.",
+  "trustedRevoke": "Revocar",
+  "trustedRevokeTitle": "¿Revocar «{name}»?",
+  "@trustedRevokeTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "trustedRevokeBody": "Para enviar de nuevo sin PIN tendréis que emparejaros otra vez."
 }

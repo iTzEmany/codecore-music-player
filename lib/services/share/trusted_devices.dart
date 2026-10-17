@@ -62,6 +62,16 @@ class TrustedDevice {
 String normalizeFingerprint(String fp) =>
     fp.toUpperCase().replaceAll(RegExp(r'[^0-9A-F]'), '');
 
+/// [fp] as the user reads it aloud: upper-case, in groups of four digits, cut
+/// after [groups] groups (`A1F3-09BC-77D2-4E10`).
+String formatFingerprint(String fp, {int groups = 4}) {
+  final hex = normalizeFingerprint(fp);
+  final end = hex.length < groups * 4 ? hex.length : groups * 4;
+  return [
+    for (var i = 0; i < end; i += 4) hex.substring(i, i + 4 > end ? end : i + 4),
+  ].join('-');
+}
+
 /// The devices the user trusts. Immutable: every change returns a new list.
 class TrustedDevices {
   TrustedDevices([Iterable<TrustedDevice> devices = const []])

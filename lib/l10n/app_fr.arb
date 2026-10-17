@@ -1987,5 +1987,90 @@
   "podcastErrNetwork": "Impossible de joindre le serveur.",
   "podcastErrNotFeed": "Cette adresse n’est pas un flux de podcast.",
   "podcastErrParserMissing": "La lecture des flux n’est pas encore disponible dans cette version.",
-  "podcastErrUnsupportedFormat": "Format audio non pris en charge."
+  "podcastErrUnsupportedFormat": "Format audio non pris en charge.",
+  "syncTitle": "Synchroniser les playlists",
+  "syncAdded": "{count, plural, one{1 nouvelle} other{{count} nouvelles}}",
+  "@syncAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syncUpdated": "{count, plural, one{1 mise à jour} other{{count} mises à jour}}",
+  "@syncUpdated": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syncMissing": "{count, plural, one{1 titre manquant} other{{count} titres manquants}}",
+  "@syncMissing": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syncUpToDate": "Les playlists sont déjà synchronisées",
+  "syncKept": "{count, plural, one{1 playlist est plus récente ici et reste telle quelle} other{{count} playlists sont plus récentes ici et restent telles quelles}}",
+  "@syncKept": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syncReplaceNote": "Les playlists mises à jour remplacent celles de cet appareil.",
+  "syncTagNew": "Nouvelle",
+  "syncTagUpdated": "Mise à jour",
+  "syncDetailRenamed": "renommée",
+  "syncDetailReordered": "réordonnée",
+  "syncDetailRemoved": "{count, plural, one{1 titre retiré} other{{count} titres retirés}}",
+  "@syncDetailRemoved": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syncAskMissing": "Demander les titres manquants",
+  "syncApplied": "{count, plural, one{1 playlist synchronisée} other{{count} playlists synchronisées}}",
+  "@syncApplied": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "trustedSection": "Appareils de confiance",
+  "trustedFingerprint": "Empreinte {fingerprint}",
+  "@trustedFingerprint": {
+    "placeholders": {
+      "fingerprint": {
+        "type": "String"
+      }
+    }
+  },
+  "trustedPairedOn": "Associé le {date}",
+  "@trustedPairedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "trustedAutoAccept": "Accepter automatiquement",
+  "trustedAutoAcceptHint": "Recevoir les titres de cet appareil sans demander.",
+  "trustedRevoke": "Révoquer",
+  "trustedRevokeTitle": "Révoquer « {name} » ?",
+  "@trustedRevokeTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "trustedRevokeBody": "Pour envoyer de nouveau sans PIN, il faudra vous associer à nouveau."
 }

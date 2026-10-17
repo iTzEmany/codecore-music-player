@@ -1796,5 +1796,90 @@
   "podcastErrNetwork": "Der Server ist nicht erreichbar.",
   "podcastErrNotFeed": "Diese Adresse ist kein Podcast-Feed.",
   "podcastErrParserMissing": "Das Lesen von Feeds ist in dieser Version noch nicht verfügbar.",
-  "podcastErrUnsupportedFormat": "Nicht unterstütztes Audioformat."
+  "podcastErrUnsupportedFormat": "Nicht unterstütztes Audioformat.",
+  "syncTitle": "Playlists abgleichen",
+  "syncAdded": "{count, plural, one{1 neue} other{{count} neue}}",
+  "@syncAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syncUpdated": "{count, plural, one{1 aktualisiert} other{{count} aktualisiert}}",
+  "@syncUpdated": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syncMissing": "{count, plural, one{1 Titel fehlt} other{{count} Titel fehlen}}",
+  "@syncMissing": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syncUpToDate": "Die Playlists sind bereits abgeglichen",
+  "syncKept": "{count, plural, one{1 Playlist ist hier neuer und bleibt unverändert} other{{count} Playlists sind hier neuer und bleiben unverändert}}",
+  "@syncKept": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syncReplaceNote": "Aktualisierte Playlists ersetzen die auf diesem Gerät.",
+  "syncTagNew": "Neu",
+  "syncTagUpdated": "Aktualisiert",
+  "syncDetailRenamed": "umbenannt",
+  "syncDetailReordered": "neu sortiert",
+  "syncDetailRemoved": "{count, plural, one{1 Titel entfernt} other{{count} Titel entfernt}}",
+  "@syncDetailRemoved": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syncAskMissing": "Fehlende Titel anfordern",
+  "syncApplied": "{count, plural, one{1 Playlist abgeglichen} other{{count} Playlists abgeglichen}}",
+  "@syncApplied": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "trustedSection": "Vertrauenswürdige Geräte",
+  "trustedFingerprint": "Fingerabdruck {fingerprint}",
+  "@trustedFingerprint": {
+    "placeholders": {
+      "fingerprint": {
+        "type": "String"
+      }
+    }
+  },
+  "trustedPairedOn": "Gekoppelt am {date}",
+  "@trustedPairedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "trustedAutoAccept": "Automatisch annehmen",
+  "trustedAutoAcceptHint": "Titel von diesem Gerät ohne Nachfrage empfangen.",
+  "trustedRevoke": "Widerrufen",
+  "trustedRevokeTitle": "„{name}“ widerrufen?",
+  "@trustedRevokeTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "trustedRevokeBody": "Um wieder ohne PIN zu senden, müsst ihr euch neu koppeln."
 }

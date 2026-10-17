@@ -116,3 +116,11 @@ Per ogni rischio: **sintomo** → **cosa fare**. Se scatta un fallback che cambi
 | R57 | Gli episodi «sporcano» la libreria musicale | Un podcast in «Tutti i brani», nei più ascoltati, nelle playlist, nelle statistiche | `tracks.kind` filtrato in **tutte** le query musicali (test `podcast_exclusion_test.dart`: stesso titolo e artista di un brano, 9 ascolti), `addTracks` li rifiuta, niente cronologia, cartella fuori dalla scansione |
 | R58 | La pulizia cancella file sbagliati | Un file musicale sparisce | Spenta di serie; solo episodi `kind = 1` con percorso **dentro** `<appSupportDir>/podcasts/` (`p.isWithin`, controllato due volte), mai quello in riproduzione o in coda; «annulla iscrizione» chiede conferma col numero di file e cancella solo dentro la cartella |
 
+## Dispositivi fidati e sync (fase 24)
+| # | Rischio | Sintomo | Piano B |
+|---|---|---|---|
+| R59 | Generazione dei certificati lenta o non disponibile su una piattaforma | Avvio lento, errore al primo abbinamento | Verifica in 24.1 (EC prime256v1 con `basic_utils`, puro Dart, generato una volta in un isolate); ripiego: HTTP + PIN come oggi. **Non ancora**: 24.2 in attesa del pacchetto |
+| R60 | Identità persa (reinstallazione, file corrotto) → fidati rotti | Un dispositivo già abbinato non viene più riconosciuto | `TrustedDevices.matches` accetta solo l'impronta salvata: stesso id con un'altra impronta **non** è fidato (messaggio «identità cambiata: riabbina»); revoca semplice; lista illeggibile → vuota e loggata, mai fiducia a caso |
+| R61 | ExoPlayer/mpv non leggono HTTPS autofirmato | La Jam non parte | La Jam resta su HTTP con token (dichiarato), su un socket separato; verificato in 24.1 |
+| R62 | Sync che sovrascrive una playlist curata | Una playlist ordinata a mano cambia da sola | «Ultima modifica vince» solo con **anteprima e conferma** (`showSyncPreview`); la versione più recente **qui** non viene toccata; nessuna cancellazione propagata; applicazione in **una transazione** (`PlaylistSyncRepository.apply`); `updated_at` dell'altro dispositivo copiato, niente rimbalzi |
+

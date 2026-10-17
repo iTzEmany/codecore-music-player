@@ -3089,4 +3089,127 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get podcastErrUnsupportedFormat => 'Formato de audio no compatible.';
+
+  @override
+  String get syncTitle => 'Sincronizar listas';
+
+  @override
+  String syncAdded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count nuevas',
+      one: '1 nueva',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String syncUpdated(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count actualizadas',
+      one: '1 actualizada',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String syncMissing(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count canciones que faltan',
+      one: '1 canción que falta',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get syncUpToDate => 'Las listas ya están sincronizadas';
+
+  @override
+  String syncKept(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count listas son más recientes aquí y se quedan como están',
+      one: '1 lista es más reciente aquí y se queda como está',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get syncReplaceNote =>
+      'Las listas actualizadas sustituyen a las de este dispositivo.';
+
+  @override
+  String get syncTagNew => 'Nueva';
+
+  @override
+  String get syncTagUpdated => 'Actualizada';
+
+  @override
+  String get syncDetailRenamed => 'renombrada';
+
+  @override
+  String get syncDetailReordered => 'reordenada';
+
+  @override
+  String syncDetailRemoved(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count canciones quitadas',
+      one: '1 canción quitada',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get syncAskMissing => 'Pedir las canciones que faltan';
+
+  @override
+  String syncApplied(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count listas sincronizadas',
+      one: '1 lista sincronizada',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get trustedSection => 'Dispositivos de confianza';
+
+  @override
+  String trustedFingerprint(String fingerprint) {
+    return 'Huella $fingerprint';
+  }
+
+  @override
+  String trustedPairedOn(String date) {
+    return 'Emparejado el $date';
+  }
+
+  @override
+  String get trustedAutoAccept => 'Aceptar automáticamente';
+
+  @override
+  String get trustedAutoAcceptHint =>
+      'Recibe canciones de este dispositivo sin preguntar.';
+
+  @override
+  String get trustedRevoke => 'Revocar';
+
+  @override
+  String trustedRevokeTitle(String name) {
+    return '¿Revocar «$name»?';
+  }
+
+  @override
+  String get trustedRevokeBody =>
+      'Para enviar de nuevo sin PIN tendréis que emparejaros otra vez.';
 }

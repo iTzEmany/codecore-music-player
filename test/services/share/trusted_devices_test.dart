@@ -109,4 +109,12 @@ void main() {
       expect(c.read(trustedDevicesProvider).isEmpty, isTrue);
     });
   });
+
+  test('formatFingerprint groups by four, upper-case, and cuts after N groups', () {
+    const fp = 'a1f309bc77d24e10ffee0011';
+    expect(formatFingerprint(fp), 'A1F3-09BC-77D2-4E10');
+    expect(formatFingerprint(fp, groups: 2), 'A1F3-09BC');
+    expect(formatFingerprint('A1:F3:09'), 'A1F3-09', reason: 'a short tail is its own group');
+    expect(formatFingerprint(''), '');
+  });
 }

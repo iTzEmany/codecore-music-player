@@ -1796,5 +1796,90 @@
   "podcastErrNetwork": "Could not reach the server.",
   "podcastErrNotFeed": "That address is not a podcast feed.",
   "podcastErrParserMissing": "Reading feeds is not available in this version yet.",
-  "podcastErrUnsupportedFormat": "Unsupported audio format."
+  "podcastErrUnsupportedFormat": "Unsupported audio format.",
+  "syncTitle": "Sync playlists",
+  "syncAdded": "{count, plural, one{1 new} other{{count} new}}",
+  "@syncAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syncUpdated": "{count, plural, one{1 updated} other{{count} updated}}",
+  "@syncUpdated": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syncMissing": "{count, plural, one{1 track missing} other{{count} tracks missing}}",
+  "@syncMissing": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syncUpToDate": "Playlists are already in sync",
+  "syncKept": "{count, plural, one{1 playlist is newer here and stays as it is} other{{count} playlists are newer here and stay as they are}}",
+  "@syncKept": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syncReplaceNote": "Updated playlists replace the ones on this device.",
+  "syncTagNew": "New",
+  "syncTagUpdated": "Updated",
+  "syncDetailRenamed": "renamed",
+  "syncDetailReordered": "reordered",
+  "syncDetailRemoved": "{count, plural, one{1 track removed} other{{count} tracks removed}}",
+  "@syncDetailRemoved": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syncAskMissing": "Ask for the missing tracks",
+  "syncApplied": "{count, plural, one{1 playlist synced} other{{count} playlists synced}}",
+  "@syncApplied": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "trustedSection": "Trusted devices",
+  "trustedFingerprint": "Fingerprint {fingerprint}",
+  "@trustedFingerprint": {
+    "placeholders": {
+      "fingerprint": {
+        "type": "String"
+      }
+    }
+  },
+  "trustedPairedOn": "Paired on {date}",
+  "@trustedPairedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "trustedAutoAccept": "Accept automatically",
+  "trustedAutoAcceptHint": "Receive tracks from this device without asking.",
+  "trustedRevoke": "Revoke",
+  "trustedRevokeTitle": "Revoke “{name}”?",
+  "@trustedRevokeTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "trustedRevokeBody": "To send without a PIN again you will have to pair again."
 }

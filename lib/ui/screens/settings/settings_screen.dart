@@ -33,6 +33,7 @@ import 'log_export_tile.dart';
 import 'missing_tracks_screen.dart';
 import 'theme_swatch.dart';
 import 'transition_settings_tiles.dart';
+import 'trusted_devices_tiles.dart';
 
 const _languages = {
   'it': 'Italiano',
@@ -256,6 +257,7 @@ class SettingsScreen extends ConsumerWidget {
                 ),
               ],
             ),
+            ..._trustedGroup(context, ref),
             _Group(
               title: l.settingsOnline,
               children: [
@@ -432,6 +434,13 @@ class SettingsScreen extends ConsumerWidget {
 }
 
 /// A titled group of settings on a rounded surface.
+/// «Dispositivi fidati»: only once something is paired.
+List<Widget> _trustedGroup(BuildContext context, WidgetRef ref) {
+  final tiles = trustedDevicesTiles(context, ref);
+  if (tiles.isEmpty) return const [];
+  return [_Group(title: context.l10n.trustedSection, children: tiles)];
+}
+
 class _Group extends StatelessWidget {
   const _Group({required this.title, required this.children});
 
