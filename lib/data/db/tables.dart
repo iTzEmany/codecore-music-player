@@ -35,6 +35,10 @@ class Tracks extends Table {
   IntColumn get enrichStatus => integer().withDefault(const Constant(0))();
   BoolColumn get userEdited => boolean().withDefault(const Constant(false))();
   BoolColumn get missing => boolean().withDefault(const Constant(false))();
+
+  /// Hidden by the user (a duplicate that was merged away). Unlike `missing`
+  /// the scanner never clears it; «Brani nascosti» does.
+  BoolColumn get ignored => boolean().withDefault(const Constant(false))();
   TextColumn get sha256 => text().nullable()();
   IntColumn get addedAt => integer()();
   IntColumn get playCount => integer().withDefault(const Constant(0))();

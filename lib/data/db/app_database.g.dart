@@ -334,6 +334,21 @@ class $TracksTable extends Tracks with TableInfo<$TracksTable, Track> {
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _ignoredMeta = const VerificationMeta(
+    'ignored',
+  );
+  @override
+  late final GeneratedColumn<bool> ignored = GeneratedColumn<bool>(
+    'ignored',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("ignored" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   static const VerificationMeta _sha256Meta = const VerificationMeta('sha256');
   @override
   late final GeneratedColumn<String> sha256 = GeneratedColumn<String>(
@@ -430,6 +445,7 @@ class $TracksTable extends Tracks with TableInfo<$TracksTable, Track> {
     enrichStatus,
     userEdited,
     missing,
+    ignored,
     sha256,
     addedAt,
     playCount,
@@ -656,6 +672,12 @@ class $TracksTable extends Tracks with TableInfo<$TracksTable, Track> {
         missing.isAcceptableOrUnknown(data['missing']!, _missingMeta),
       );
     }
+    if (data.containsKey('ignored')) {
+      context.handle(
+        _ignoredMeta,
+        ignored.isAcceptableOrUnknown(data['ignored']!, _ignoredMeta),
+      );
+    }
     if (data.containsKey('sha256')) {
       context.handle(
         _sha256Meta,
@@ -828,6 +850,10 @@ class $TracksTable extends Tracks with TableInfo<$TracksTable, Track> {
         DriftSqlType.bool,
         data['${effectivePrefix}missing'],
       )!,
+      ignored: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}ignored'],
+      )!,
       sha256: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}sha256'],
@@ -891,6 +917,10 @@ class Track extends DataClass implements Insertable<Track> {
   final int enrichStatus;
   final bool userEdited;
   final bool missing;
+
+  /// Hidden by the user (a duplicate that was merged away). Unlike `missing`
+  /// the scanner never clears it; «Brani nascosti» does.
+  final bool ignored;
   final String? sha256;
   final int addedAt;
   final int playCount;
@@ -929,6 +959,7 @@ class Track extends DataClass implements Insertable<Track> {
     required this.enrichStatus,
     required this.userEdited,
     required this.missing,
+    required this.ignored,
     this.sha256,
     required this.addedAt,
     required this.playCount,
@@ -1000,6 +1031,7 @@ class Track extends DataClass implements Insertable<Track> {
     map['enrich_status'] = Variable<int>(enrichStatus);
     map['user_edited'] = Variable<bool>(userEdited);
     map['missing'] = Variable<bool>(missing);
+    map['ignored'] = Variable<bool>(ignored);
     if (!nullToAbsent || sha256 != null) {
       map['sha256'] = Variable<String>(sha256);
     }
@@ -1078,6 +1110,7 @@ class Track extends DataClass implements Insertable<Track> {
       enrichStatus: Value(enrichStatus),
       userEdited: Value(userEdited),
       missing: Value(missing),
+      ignored: Value(ignored),
       sha256: sha256 == null && nullToAbsent
           ? const Value.absent()
           : Value(sha256),
@@ -1130,6 +1163,7 @@ class Track extends DataClass implements Insertable<Track> {
       enrichStatus: serializer.fromJson<int>(json['enrichStatus']),
       userEdited: serializer.fromJson<bool>(json['userEdited']),
       missing: serializer.fromJson<bool>(json['missing']),
+      ignored: serializer.fromJson<bool>(json['ignored']),
       sha256: serializer.fromJson<String?>(json['sha256']),
       addedAt: serializer.fromJson<int>(json['addedAt']),
       playCount: serializer.fromJson<int>(json['playCount']),
@@ -1171,6 +1205,7 @@ class Track extends DataClass implements Insertable<Track> {
       'enrichStatus': serializer.toJson<int>(enrichStatus),
       'userEdited': serializer.toJson<bool>(userEdited),
       'missing': serializer.toJson<bool>(missing),
+      'ignored': serializer.toJson<bool>(ignored),
       'sha256': serializer.toJson<String?>(sha256),
       'addedAt': serializer.toJson<int>(addedAt),
       'playCount': serializer.toJson<int>(playCount),
@@ -1210,6 +1245,7 @@ class Track extends DataClass implements Insertable<Track> {
     int? enrichStatus,
     bool? userEdited,
     bool? missing,
+    bool? ignored,
     Value<String?> sha256 = const Value.absent(),
     int? addedAt,
     int? playCount,
@@ -1246,6 +1282,7 @@ class Track extends DataClass implements Insertable<Track> {
     enrichStatus: enrichStatus ?? this.enrichStatus,
     userEdited: userEdited ?? this.userEdited,
     missing: missing ?? this.missing,
+    ignored: ignored ?? this.ignored,
     sha256: sha256.present ? sha256.value : this.sha256,
     addedAt: addedAt ?? this.addedAt,
     playCount: playCount ?? this.playCount,
@@ -1310,6 +1347,7 @@ class Track extends DataClass implements Insertable<Track> {
           ? data.userEdited.value
           : this.userEdited,
       missing: data.missing.present ? data.missing.value : this.missing,
+      ignored: data.ignored.present ? data.ignored.value : this.ignored,
       sha256: data.sha256.present ? data.sha256.value : this.sha256,
       addedAt: data.addedAt.present ? data.addedAt.value : this.addedAt,
       playCount: data.playCount.present ? data.playCount.value : this.playCount,
@@ -1357,6 +1395,7 @@ class Track extends DataClass implements Insertable<Track> {
           ..write('enrichStatus: $enrichStatus, ')
           ..write('userEdited: $userEdited, ')
           ..write('missing: $missing, ')
+          ..write('ignored: $ignored, ')
           ..write('sha256: $sha256, ')
           ..write('addedAt: $addedAt, ')
           ..write('playCount: $playCount, ')
@@ -1398,6 +1437,7 @@ class Track extends DataClass implements Insertable<Track> {
     enrichStatus,
     userEdited,
     missing,
+    ignored,
     sha256,
     addedAt,
     playCount,
@@ -1438,6 +1478,7 @@ class Track extends DataClass implements Insertable<Track> {
           other.enrichStatus == this.enrichStatus &&
           other.userEdited == this.userEdited &&
           other.missing == this.missing &&
+          other.ignored == this.ignored &&
           other.sha256 == this.sha256 &&
           other.addedAt == this.addedAt &&
           other.playCount == this.playCount &&
@@ -1476,6 +1517,7 @@ class TracksCompanion extends UpdateCompanion<Track> {
   final Value<int> enrichStatus;
   final Value<bool> userEdited;
   final Value<bool> missing;
+  final Value<bool> ignored;
   final Value<String?> sha256;
   final Value<int> addedAt;
   final Value<int> playCount;
@@ -1512,6 +1554,7 @@ class TracksCompanion extends UpdateCompanion<Track> {
     this.enrichStatus = const Value.absent(),
     this.userEdited = const Value.absent(),
     this.missing = const Value.absent(),
+    this.ignored = const Value.absent(),
     this.sha256 = const Value.absent(),
     this.addedAt = const Value.absent(),
     this.playCount = const Value.absent(),
@@ -1549,6 +1592,7 @@ class TracksCompanion extends UpdateCompanion<Track> {
     this.enrichStatus = const Value.absent(),
     this.userEdited = const Value.absent(),
     this.missing = const Value.absent(),
+    this.ignored = const Value.absent(),
     this.sha256 = const Value.absent(),
     required int addedAt,
     this.playCount = const Value.absent(),
@@ -1592,6 +1636,7 @@ class TracksCompanion extends UpdateCompanion<Track> {
     Expression<int>? enrichStatus,
     Expression<bool>? userEdited,
     Expression<bool>? missing,
+    Expression<bool>? ignored,
     Expression<String>? sha256,
     Expression<int>? addedAt,
     Expression<int>? playCount,
@@ -1629,6 +1674,7 @@ class TracksCompanion extends UpdateCompanion<Track> {
       if (enrichStatus != null) 'enrich_status': enrichStatus,
       if (userEdited != null) 'user_edited': userEdited,
       if (missing != null) 'missing': missing,
+      if (ignored != null) 'ignored': ignored,
       if (sha256 != null) 'sha256': sha256,
       if (addedAt != null) 'added_at': addedAt,
       if (playCount != null) 'play_count': playCount,
@@ -1668,6 +1714,7 @@ class TracksCompanion extends UpdateCompanion<Track> {
     Value<int>? enrichStatus,
     Value<bool>? userEdited,
     Value<bool>? missing,
+    Value<bool>? ignored,
     Value<String?>? sha256,
     Value<int>? addedAt,
     Value<int>? playCount,
@@ -1705,6 +1752,7 @@ class TracksCompanion extends UpdateCompanion<Track> {
       enrichStatus: enrichStatus ?? this.enrichStatus,
       userEdited: userEdited ?? this.userEdited,
       missing: missing ?? this.missing,
+      ignored: ignored ?? this.ignored,
       sha256: sha256 ?? this.sha256,
       addedAt: addedAt ?? this.addedAt,
       playCount: playCount ?? this.playCount,
@@ -1804,6 +1852,9 @@ class TracksCompanion extends UpdateCompanion<Track> {
     if (missing.present) {
       map['missing'] = Variable<bool>(missing.value);
     }
+    if (ignored.present) {
+      map['ignored'] = Variable<bool>(ignored.value);
+    }
     if (sha256.present) {
       map['sha256'] = Variable<String>(sha256.value);
     }
@@ -1857,6 +1908,7 @@ class TracksCompanion extends UpdateCompanion<Track> {
           ..write('enrichStatus: $enrichStatus, ')
           ..write('userEdited: $userEdited, ')
           ..write('missing: $missing, ')
+          ..write('ignored: $ignored, ')
           ..write('sha256: $sha256, ')
           ..write('addedAt: $addedAt, ')
           ..write('playCount: $playCount, ')
@@ -5679,6 +5731,7 @@ typedef $$TracksTableCreateCompanionBuilder = TracksCompanion Function({
   Value<int> enrichStatus,
   Value<bool> userEdited,
   Value<bool> missing,
+  Value<bool> ignored,
   Value<String?> sha256,
   required int addedAt,
   Value<int> playCount,
@@ -5716,6 +5769,7 @@ typedef $$TracksTableUpdateCompanionBuilder = TracksCompanion Function({
   Value<int> enrichStatus,
   Value<bool> userEdited,
   Value<bool> missing,
+  Value<bool> ignored,
   Value<String?> sha256,
   Value<int> addedAt,
   Value<int> playCount,
@@ -5959,6 +6013,11 @@ class $$TracksTableFilterComposer
 
   ColumnFilters<bool> get missing => $composableBuilder(
     column: $table.missing,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get ignored => $composableBuilder(
+    column: $table.ignored,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -6247,6 +6306,11 @@ class $$TracksTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get ignored => $composableBuilder(
+    column: $table.ignored,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get sha256 => $composableBuilder(
     column: $table.sha256,
     builder: (column) => ColumnOrderings(column),
@@ -6397,6 +6461,9 @@ class $$TracksTableAnnotationComposer
 
   GeneratedColumn<bool> get missing =>
       $composableBuilder(column: $table.missing, builder: (column) => column);
+
+  GeneratedColumn<bool> get ignored =>
+      $composableBuilder(column: $table.ignored, builder: (column) => column);
 
   GeneratedColumn<String> get sha256 =>
       $composableBuilder(column: $table.sha256, builder: (column) => column);
@@ -6586,6 +6653,7 @@ class $$TracksTableTableManager
                 Value<int> enrichStatus = const Value.absent(),
                 Value<bool> userEdited = const Value.absent(),
                 Value<bool> missing = const Value.absent(),
+                Value<bool> ignored = const Value.absent(),
                 Value<String?> sha256 = const Value.absent(),
                 Value<int> addedAt = const Value.absent(),
                 Value<int> playCount = const Value.absent(),
@@ -6622,6 +6690,7 @@ class $$TracksTableTableManager
                 enrichStatus: enrichStatus,
                 userEdited: userEdited,
                 missing: missing,
+                ignored: ignored,
                 sha256: sha256,
                 addedAt: addedAt,
                 playCount: playCount,
@@ -6660,6 +6729,7 @@ class $$TracksTableTableManager
                 Value<int> enrichStatus = const Value.absent(),
                 Value<bool> userEdited = const Value.absent(),
                 Value<bool> missing = const Value.absent(),
+                Value<bool> ignored = const Value.absent(),
                 Value<String?> sha256 = const Value.absent(),
                 required int addedAt,
                 Value<int> playCount = const Value.absent(),
@@ -6696,6 +6766,7 @@ class $$TracksTableTableManager
                 enrichStatus: enrichStatus,
                 userEdited: userEdited,
                 missing: missing,
+                ignored: ignored,
                 sha256: sha256,
                 addedAt: addedAt,
                 playCount: playCount,

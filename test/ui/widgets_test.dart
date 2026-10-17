@@ -40,6 +40,7 @@ Track _track({
       enrichStatus: 0,
       userEdited: false,
       missing: false,
+      ignored: false,
       addedAt: 0,
       playCount: 0,
     );

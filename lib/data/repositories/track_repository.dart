@@ -97,7 +97,8 @@ class TrackRepository {
   }) {
     final q = _db.select(_db.tracks)
       ..where((t) {
-        Expression<bool> cond = t.missing.equals(false);
+        Expression<bool> cond =
+            t.missing.equals(false) & t.ignored.equals(false);
         if (favoritesOnly) cond = cond & t.isFavorite.equals(true);
         final text = query.trim();
         if (text.isNotEmpty) {
@@ -257,6 +258,26 @@ class TrackRepository {
       (_db.update(_db.tracks)..where((t) => t.id.equals(id)))
           .write(TracksCompanion(resumePositionMs: Value(ms)));
 
+  /// Hides or shows tracks (the duplicates a merge leaves behind). The
+  /// scanner never touches the flag, so a hidden file stays hidden.
+  Future<void> setIgnored(Set<int> ids, bool value) async {
+    if (ids.isEmpty) return;
+    await _db.transaction(() async {
+      for (final chunk in _chunks(ids.toList(), 500)) {
+        await (_db.update(_db.tracks)..where((t) => t.id.isIn(chunk)))
+            .write(TracksCompanion(ignored: Value(value)));
+      }
+    });
+  }
+
+  Stream<List<Track>> watchIgnored() =>
+      (_db.select(_db.tracks)
+            ..where((t) => t.ignored.equals(true))
+            ..orderBy([
+              (t) => OrderingTerm(expression: t.title.collate(Collate.noCase)),
+            ]))
+          .watch();
+
   Stream<List<Track>> watchMissing() =>
       (_db.select(_db.tracks)
             ..where((t) => t.missing.equals(true))
@@ -279,7 +300,7 @@ class TrackRepository {
     final rows = await _db
         .customSelect(
           'SELECT id, title, artist, duration_ms, path FROM tracks '
-          'WHERE missing = 0',
+          'WHERE missing = 0 AND ignored = 0',
           readsFrom: {_db.tracks},
         )
         .get();

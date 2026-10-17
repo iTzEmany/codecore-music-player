@@ -229,7 +229,7 @@ void main() {
     expect(q.where.contains("a'b"), isFalse);
     expect(q.where.contains('floyd'), isFalse);
     expect(RegExp(r'\?').allMatches(q.where).length, q.vars.length);
-    expect(q.where, startsWith('missing = 0 AND ('));
+    expect(q.where, startsWith('missing = 0 AND ignored = 0 AND ('));
   });
 
   test('the stream follows the data: a track that becomes a favourite appears', () async {

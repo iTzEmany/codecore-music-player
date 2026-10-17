@@ -17,6 +17,7 @@ Track track(int id, String title) => Track(
       playCount: 0,
       isFavorite: false,
       missing: false,
+      ignored: false,
       enrichStatus: 0,
       hasCover: false,
       userEdited: false,

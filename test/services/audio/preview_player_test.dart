@@ -19,6 +19,7 @@ Track track(int id, {int durationMs = 90000}) => Track(
       enrichStatus: 0,
       userEdited: false,
       missing: false,
+      ignored: false,
       addedAt: 1,
       playCount: 0,
     );

@@ -175,6 +175,29 @@ void main() {
     await db.close();
   });
 
+  test('v7 database gets tracks.ignored, false for every existing track', () async {
+    final dir = Directory.systemTemp.createTempSync('mig8');
+    addTearDown(() => dir.deleteSync(recursive: true));
+    final file = File(p.join(dir.path, 'v7.db'));
+    final db = AppDatabase(NativeDatabase(file, setup: (raw) {
+      if (raw.userVersion == 0) {
+        raw.execute('CREATE TABLE tracks (id INTEGER PRIMARY KEY AUTOINCREMENT, '
+            'path TEXT NOT NULL, title TEXT NOT NULL, album_key TEXT NOT NULL, '
+            'format TEXT NOT NULL, size_bytes INTEGER NOT NULL, mtime_ms INTEGER '
+            'NOT NULL, added_at INTEGER NOT NULL, play_count INTEGER NOT NULL '
+            'DEFAULT 0, missing INTEGER NOT NULL DEFAULT 0)');
+        raw.execute("INSERT INTO tracks (path, title, album_key, format, size_bytes, "
+            "mtime_ms, added_at, play_count) VALUES ('/a.mp3', 'Old', 'k', 'mp3', 1, 1, 1, 7)");
+        raw.userVersion = 7;
+      }
+    }));
+    final t = (await db.customSelect('SELECT title, play_count, ignored FROM tracks').get()).single;
+    expect(t.read<String>('title'), 'Old');
+    expect(t.read<int>('play_count'), 7, reason: 'the old counter is untouched');
+    expect(t.read<int>('ignored'), 0, reason: 'nothing is hidden by the upgrade');
+    await db.close();
+  });
+
   test('a fresh install has the v7 tables and indexes too', () async {
     final db = AppDatabase(NativeDatabase.memory());
     final names = (await db

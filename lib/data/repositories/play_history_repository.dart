@@ -40,12 +40,13 @@ class PlayHistoryRepository {
   }
 
   /// The newest [limit] listens (older than [beforePlayedAt] when given), with
-  /// their track, most recent first. Missing tracks are left out.
+  /// their track, most recent first. Missing and hidden tracks are left out.
   Stream<List<HistoryEntry>> watchHistory({int limit = 200, int? beforePlayedAt}) {
     final q = _db.select(_db.plays).join([
       innerJoin(_db.tracks, _db.tracks.id.equalsExp(_db.plays.trackId)),
     ])
       ..where(_db.tracks.missing.equals(false) &
+          _db.tracks.ignored.equals(false) &
           (beforePlayedAt == null
               ? const Constant(true)
               : _db.plays.playedAt.isSmallerThanValue(beforePlayedAt)))

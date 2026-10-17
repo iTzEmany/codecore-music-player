@@ -97,7 +97,8 @@ class PlaylistRepository {
       innerJoin(_db.tracks, _db.tracks.id.equalsExp(_db.playlistTracks.trackId)),
     ])
       ..where(_db.playlistTracks.playlistId.equals(playlistId) &
-          _db.tracks.missing.equals(false))
+          _db.tracks.missing.equals(false) &
+          _db.tracks.ignored.equals(false))
       ..orderBy([OrderingTerm.asc(_db.playlistTracks.position)]);
     return q.watch().map((rows) => [for (final r in rows) r.readTable(_db.tracks)]);
   }
