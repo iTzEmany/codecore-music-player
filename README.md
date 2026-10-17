@@ -21,7 +21,7 @@ Italiano, English, Deutsch, Español.
   notifica e tasti cuffie su Android, scorciatoie da tastiera su desktop, timer di spegnimento con fade-out.
 - **Preferiti, playlist** (copertina personalizzabile, riordino), modifica info (solo nel DB), temi (Notte viola, Nero puro, Chiaro) con 8 colori d'accento.
 - **Online (solo su azione tua o opzioni attive)**: info e copertine da iTunes, testi sincronizzati da LRCLIB,
-  curiosità da Wikipedia, ricerca e download da YouTube con yt-dlp.
+  curiosità da Wikipedia, ricerca e download da YouTube, YouTube Music e SoundCloud con yt-dlp.
 - **Condivisione LAN** telefono ↔ PC senza server esterni: scoperta automatica dei dispositivi, richiesta con accettazione (anche da notifica su Android, anche in background), collegamento manuale con PIN e QR.
 - **Jam sulla rete locale**: coda condivisa tra fino a 5 dispositivi (anche un ospite può accettare nuovi arrivati), ognuno aggiunge brani dalla propria libreria (streaming dal proprietario, precarico del successivo), uscita audio selezionabile; l'ospite non può cambiare brano. Più dispositivi possono suonare **insieme, sincronizzati** (orologio condiviso e correzione della deriva). Schermata Condivisione → «Avvia Jam con …». Piano in [`docs/fase-8-jam.md`](docs/fase-8-jam.md).
 - **Importa playlist di Spotify da CSV**: scarica il file da **exportify.net** (accedi con Spotify ed esporta la
@@ -80,6 +80,12 @@ senza il file la build release usa la chiave di debug.
 - **Album a mano:** menu ⋯ di un album → «Unisci con…»; dalla selezione di brani → «Sposta in un nuovo album…». Con «Annulla» nello snackbar; i file non si toccano.
 - **Tag nei file:** *non ancora*. Scrivere i tag modificati dentro i file è pronto da verificare (`metadata_god`) ma aspetta la tua approvazione (vedi `docs/PROGRESS.md`, «Tocca a te»).
 
+## Nuove fonti (fase 22)
+- **Cerca online:** tre chip sopra i risultati — **YouTube · YouTube Music · SoundCloud** (si ricorda la scelta). SoundCloud mostra solo brani interi: le anteprime da 30 s e i brani con DRM non si scaricano.
+- **Importazione:** Impostazioni → Download → «Cerca anche su SoundCloud se un brano non si trova» (spento di serie): una ricerca in più per le righe che YouTube non trova.
+- **Playlist e canali YouTube:** incolla l'indirizzo in Cerca → foglio con i video (tutti spuntati), un nome e «Scarica in una playlist»; i brani arrivano nell'ordine della playlist, con pausa, ripresa e annulla.
+- **Traduzione dei testi:** non ancora (aspetta l'approvazione di un pacchetto, vedi `docs/PROGRESS.md`).
+
 ## Riproduzione (fase 17)
 - **Velocità** 0,5×–2× senza cambiare il tono (chip «1×» in Now Playing).
 - **Riprendi da qui:** i brani lunghi (≥ 20 min: podcast, audiolibri, DJ set) ripartono da dove li hai lasciati.
@@ -103,7 +109,7 @@ Importando di nuovo un file aggiornato nella stessa playlist si sceglie **Sincro
 - yt-dlp cambia spesso: su Android viene aggiornato a ogni avvio; su desktop l'app avvisa se è troppo vecchio e lo aggiorna con «Aggiorna» (Impostazioni → Download).
 
 ## Note legali
-Il download da YouTube può violare i termini del servizio e il diritto d'autore: la funzione è pensata per uso strettamente
+Il download da YouTube e da SoundCloud può violare i termini del servizio e il diritto d'autore: la funzione è pensata per uso strettamente
 personale e si disattiva con `kEnableYoutube = false` in `lib/core/constants.dart`. Testi e metadati provengono da servizi
 terzi (LRCLIB, iTunes Search API, Wikipedia — CC BY-SA) e restano di proprietà dei rispettivi titolari.
 La libreria `youtubedl-android` usata su Android è sotto licenza GPL-3.0.

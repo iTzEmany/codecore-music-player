@@ -101,3 +101,11 @@ Per ogni rischio: **sintomo** → **cosa fare**. Se scatta un fallback che cambi
 | R50 | Scrittura dei tag che rovina il file o perde copertina/ReplayGain | File che non si apre, copertina sparita | **Non ancora implementata** (21.7–21.9 in attesa di approvazione). Verificato in 21.1: `metadata_god` (lofty) conserva audio, copertina e tag sconosciuti, `audiotags` li perde (scartato). Resta il piano: copia, riscrittura, rilettura e confronto, backup, `rename` atomico, opzione spenta di serie |
 | R51 | Il pacchetto Rust non compila su una piattaforma | Build Android che fallisce | **Successo su Linux**; su Android `metadata_god` 1.1.0 fallisce con Gradle 9 (cargokit usa `project.exec`, `compileSdk` 33): serve una copia locale con `docs/patches/metadata_god-gradle9.patch`. Windows da provare in CI. Senza il pacchetto la voce non compare |
 | R52 | Eliminazione dei file negata (Android, disco esterno) o sbagliata | «Non eliminato», o un file sparisce per errore | Solo dopo due conferme, con l’elenco dei percorsi; mai il file tenuto, mai un collegamento che porta ad esso; errori raccolti con il motivo del sistema e mostrati; i brani non eliminati restano nascosti e ripristinabili |
+
+## Nuove fonti (fase 22)
+| # | Rischio | Sintomo | Piano B |
+|---|---|---|---|
+| R53 | SoundCloud dà solo anteprime da 30 s o brani con DRM | Risultati inutilizzabili o errore «DRM protected» | Misurato in 22.1: i brani completi esistono senza login, i commerciali sono spesso anteprime o DRM. Le anteprime si scartano (durata ≤ 31 s, formati `*_preview`), un brano DRM compare ma fallisce con un errore per riga (`unavailable`); l'elenco è flat così un DRM non rompe la ricerca su Android; il ripiego nell'importazione è spento di serie |
+| R54 | Playlist/canali enormi o con video privati/rimossi | Attesa lunga, elenco incompleto | `--flat-playlist` (250 voci in ~13 s), limite di 500 con avviso «Mostro i primi 500», avviso oltre 200 video con stima, privati/rimossi contati e non elencati, righe non scaricabili in errore e il resto continua |
+| R55 | ML Kit pesante o lingua non supportata | APK più grande, modelli da scaricare | **Non ancora**: 22.7 in attesa di approvazione. Previsto: modelli solo su richiesta (~30 MB), voce assente su desktop |
+

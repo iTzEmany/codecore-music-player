@@ -187,3 +187,10 @@ Scritture con debounce 400 ms, mai in un handler di slider a ogni tick.
 - **Playlist intelligenti:** `SmartPlaylistRepository` (ordini `SmartSort`, «a caso» stabile per sessione); pagina in sola lettura; si possono convertire in playlist normale (copia dell'elenco).
 - **Etichette:** `TagRepository` (assegnazione in massa in una transazione, rinomina che aggiorna le regole); foglio con caselle a tre stati, azioni in massa, Libreria → Etichette.
 
+## Nuove fonti (fase 22)
+- **Fonti**: `MediaSource { youtube, soundcloud }` su `YtResult` (con `webpageUrl`, `downloadUrl`, `indexKey`); `SearchSource { youtube, youtubeMusic, soundcloud }` è la scelta dell'utente in Cerca (`AppSettings.searchSource`). Tutto passa da yt-dlp (desktop: processo; Android: canale `codecore/ytdlp`), nessun endpoint non ufficiale.
+- **SoundCloud**: `searchSoundCloud` usa un elenco **flat** (`scsearch<N>`) perché su Android una sola voce DRM farebbe fallire l'intera chiamata; le anteprime da 30 s si scartano per durata (≤ 31 s) o per formati `*_preview`. Il download usa la **pagina** (`webpage_url`), non l'id; per YouTube resta `watch?v=<id>`. `downloads.json` ha chiavi `<fonte>:<id>` (le vecchie senza prefisso valgono come `youtube:`).
+- **Punteggio**: `scoreCandidate` guarda `c.source` (niente «- Topic»/VEVO su SoundCloud, bonus per l'uploader, penalità per bootleg/edit/flip…). Il ripiego SoundCloud dell'importazione è un'opzione spenta di serie, una sola ricerca per riga ancora «non trovata».
+- **Playlist e canali**: `youtube_urls.dart` (classificazione e `listingUrl`), `YoutubeService.listPlaylist` → `PlaylistListing`, `PlaylistImportService.startFromResults` (righe già decise, niente ricerca, stesso motore e stesse pause/ripresa/annulla di una CSV). I provider che falliscono vanno gestiti con `retry` esplicito: Riverpod 3 ritenta da solo.
+- **Traduzione dei testi** (22.7): **non ancora**, in attesa dell'approvazione di `google_mlkit_translation` (solo Android, on-device); dietro un'interfaccia `LyricsTranslator` prevista dal documento di fase.
+
