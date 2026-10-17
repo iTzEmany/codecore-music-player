@@ -1,3 +1,4 @@
+import '../../core/audio_format.dart';
 import '../../l10n/app_localizations.dart';
 
 import '../../data/db/app_database.dart';
@@ -13,12 +14,10 @@ String formatDuration(int ms) {
   return '$m:$ss';
 }
 
-const _lossless = {'flac', 'wav', 'aiff', 'aif', 'alac'};
-
 /// Quality text per docs/04 §8; never invents missing values.
 String qualityLabel(Track t) {
   final fmt = t.format.toUpperCase();
-  if (_lossless.contains(t.format.toLowerCase())) {
+  if (isLosslessFormat(t.format)) {
     final parts = <String>[];
     if (t.bitDepth != null) parts.add('${t.bitDepth} bit');
     if (t.sampleRateHz != null) {

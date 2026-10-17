@@ -27,6 +27,9 @@ class TrackRepository {
           continue;
         }
         final keepText = existing.userEdited;
+        // A hash of the old bytes says nothing about the new ones.
+        final changed = existing.sizeBytes != row.sizeBytes.value ||
+            existing.mtimeMs != row.mtimeMs.value;
         await (_db.update(_db.tracks)..where((t) => t.id.equals(existing.id)))
             .write(TracksCompanion(
           folderId: row.folderId,
@@ -51,6 +54,7 @@ class TrackRepository {
           coverKey: row.coverKey,
           replayGainDb: row.replayGainDb,
           missing: const Value(false),
+          sha256: changed ? const Value(null) : const Value.absent(),
         ));
       }
     });
