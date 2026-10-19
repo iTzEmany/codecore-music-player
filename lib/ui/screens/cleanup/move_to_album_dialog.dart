@@ -4,7 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/db/app_database.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/library_providers.dart';
+import '../../../services/tags/tag_writer.dart';
 import '../../widgets/confirm.dart';
+import '../../widgets/tag_write_ui.dart';
 
 /// «Sposta in un nuovo album…» for a selection of tracks: asks the album's
 /// title and artist (the common ones are suggested) and moves them there; a
@@ -23,11 +25,17 @@ Future<bool> showMoveToAlbumDialog(
   );
   if (res == null || !context.mounted) return false;
   final editor = ref.read(trackEditorProvider);
+  final messenger = ScaffoldMessenger.of(context);
   final before = await editor.saveMany(
     tracks,
     album: res.$1,
     albumArtist: res.$2,
   );
+  final outcome = await editor.writeToFiles(
+    tracks,
+    (_) => TagChanges(album: res.$1, albumArtist: res.$2),
+  );
+  showTagFileOutcome(messenger, l, outcome);
   if (context.mounted) {
     showUndoSnack(
       context,
@@ -97,6 +105,7 @@ class _MoveDialogState extends State<_MoveDialog> {
               decoration: InputDecoration(labelText: l.albumFieldArtist),
               onChanged: (_) => setState(() {}),
             ),
+            const AlsoInFileTile(),
           ],
         ),
       ),

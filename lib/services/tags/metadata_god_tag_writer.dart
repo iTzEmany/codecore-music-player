@@ -9,7 +9,8 @@ class MetadataGodTagWriter implements TagWriter {
   MetadataGodTagWriter();
 
   static const _formats = {'mp3', 'flac', 'm4a', 'ogg'};
-  Future<void>? _init;
+  // Process-wide: the Rust library refuses to be initialised twice.
+  static Future<void>? _init;
 
   @override
   bool supports(String format) => _formats.contains(format.toLowerCase());

@@ -3351,4 +3351,121 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get exportAllPlaylists => 'Exportar todas las listas';
+
+  @override
+  String get writeTagsToFiles => 'Escribir los cambios en los archivos';
+
+  @override
+  String get writeTagsToFilesHint =>
+      'El título, artista, álbum, año, género y pista editados aquí se escriben también en archivos MP3, FLAC, M4A y OGG. Se conserva el original de cada archivo. Desactivado de serie.';
+
+  @override
+  String get writeTagsWarnTitle => '¿Escribir los cambios en los archivos?';
+
+  @override
+  String get writeTagsWarnBody =>
+      'Al guardar un cambio, las etiquetas se reescriben también en el archivo de música (MP3, FLAC, M4A, OGG). Se trabaja sobre una copia, se comprueba el resultado y el archivo se sustituye solo si todo coincide; antes el original se guarda en «Copias de etiquetas» (las últimas 200 o 2 GB). La carátula, las letras y el ReplayGain no se tocan. Antes de activarlo conviene hacer una copia de seguridad de la biblioteca (Ajustes → Copia de seguridad).';
+
+  @override
+  String get writeTagsEnable => 'Activar';
+
+  @override
+  String get tagsAlsoInFile => 'Escribir también en el archivo';
+
+  @override
+  String tagsNoWriteUnsupported(String format) {
+    return 'Formato no modificable ($format): solo cambia la biblioteca';
+  }
+
+  @override
+  String get tagsNoWriteReadOnly =>
+      'Archivo de solo lectura: solo cambia la biblioteca';
+
+  @override
+  String get tagsNoWriteMissing =>
+      'Archivo no encontrado: solo cambia la biblioteca';
+
+  @override
+  String tagsFileWriteFailed(int count, String reason) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count archivos no se modificaron',
+      one: '1 archivo no se modificó',
+    );
+    return 'Guardado en la biblioteca, pero $_temp0: $reason';
+  }
+
+  @override
+  String get tagReasonUnsupported => 'formato no admitido';
+
+  @override
+  String get tagReasonNotFound => 'archivo no encontrado';
+
+  @override
+  String get tagReasonReadOnly => 'archivo de solo lectura';
+
+  @override
+  String get tagReasonVerifyFailed =>
+      'falló la comprobación tras escribir, el archivo quedó como estaba';
+
+  @override
+  String get tagReasonWriteFailed =>
+      'falló la escritura, el archivo quedó como estaba';
+
+  @override
+  String get tagReasonBackupFailed =>
+      'no se pudo copiar el original, el archivo quedó como estaba';
+
+  @override
+  String get tagReasonIoError => 'error de disco o de permisos';
+
+  @override
+  String get tagBackupsTitle => 'Copias de etiquetas';
+
+  @override
+  String tagBackupsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Copias de etiquetas ($count)',
+      one: 'Copias de etiquetas (1)',
+      zero: 'Copias de etiquetas',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get tagBackupsHint =>
+      'El original de cada archivo reescrito, antes del cambio. Se guardan los últimos 200 o 2 GB.';
+
+  @override
+  String get tagBackupsEmpty =>
+      'Sin copias: aún no se ha reescrito ningún archivo.';
+
+  @override
+  String get tagBackupRestore => 'Restaurar original';
+
+  @override
+  String tagBackupRestoreBody(String name) {
+    return 'El archivo «$name» vuelve a como estaba antes del cambio. La biblioteca conserva los cambios hechos en la app.';
+  }
+
+  @override
+  String get tagBackupRestored => 'Original restaurado';
+
+  @override
+  String tagBackupRestoreFailed(String reason) {
+    return 'No se pudo restaurar: $reason';
+  }
+
+  @override
+  String get tagBackupDelete => 'Eliminar copia';
+
+  @override
+  String get tagBackupDeleteBody =>
+      'Ya no podrás devolver el archivo a como estaba antes del cambio.';
+
+  @override
+  String get tagBackupDeleted => 'Copia eliminada';
 }

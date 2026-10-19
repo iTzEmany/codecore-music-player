@@ -1966,5 +1966,71 @@
   "restoreNotFound": "Canciones no encontradas",
   "restoreCopyList": "Copiar lista",
   "restoreFailed": "La restauración ha fallado",
-  "exportAllPlaylists": "Exportar todas las listas"
+  "exportAllPlaylists": "Exportar todas las listas",
+  "writeTagsToFiles": "Escribir los cambios en los archivos",
+  "writeTagsToFilesHint": "El título, artista, álbum, año, género y pista editados aquí se escriben también en archivos MP3, FLAC, M4A y OGG. Se conserva el original de cada archivo. Desactivado de serie.",
+  "writeTagsWarnTitle": "¿Escribir los cambios en los archivos?",
+  "writeTagsWarnBody": "Al guardar un cambio, las etiquetas se reescriben también en el archivo de música (MP3, FLAC, M4A, OGG). Se trabaja sobre una copia, se comprueba el resultado y el archivo se sustituye solo si todo coincide; antes el original se guarda en «Copias de etiquetas» (las últimas 200 o 2 GB). La carátula, las letras y el ReplayGain no se tocan. Antes de activarlo conviene hacer una copia de seguridad de la biblioteca (Ajustes → Copia de seguridad).",
+  "writeTagsEnable": "Activar",
+  "tagsAlsoInFile": "Escribir también en el archivo",
+  "tagsNoWriteUnsupported": "Formato no modificable ({format}): solo cambia la biblioteca",
+  "@tagsNoWriteUnsupported": {
+    "placeholders": {
+      "format": {
+        "type": "String"
+      }
+    }
+  },
+  "tagsNoWriteReadOnly": "Archivo de solo lectura: solo cambia la biblioteca",
+  "tagsNoWriteMissing": "Archivo no encontrado: solo cambia la biblioteca",
+  "tagsFileWriteFailed": "Guardado en la biblioteca, pero {count, plural, one{1 archivo no se modificó} other{{count} archivos no se modificaron}}: {reason}",
+  "@tagsFileWriteFailed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "tagReasonUnsupported": "formato no admitido",
+  "tagReasonNotFound": "archivo no encontrado",
+  "tagReasonReadOnly": "archivo de solo lectura",
+  "tagReasonVerifyFailed": "falló la comprobación tras escribir, el archivo quedó como estaba",
+  "tagReasonWriteFailed": "falló la escritura, el archivo quedó como estaba",
+  "tagReasonBackupFailed": "no se pudo copiar el original, el archivo quedó como estaba",
+  "tagReasonIoError": "error de disco o de permisos",
+  "tagBackupsTitle": "Copias de etiquetas",
+  "tagBackupsCount": "{count, plural, =0{Copias de etiquetas} one{Copias de etiquetas (1)} other{Copias de etiquetas ({count})}}",
+  "@tagBackupsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tagBackupsHint": "El original de cada archivo reescrito, antes del cambio. Se guardan los últimos 200 o 2 GB.",
+  "tagBackupsEmpty": "Sin copias: aún no se ha reescrito ningún archivo.",
+  "tagBackupRestore": "Restaurar original",
+  "tagBackupRestoreBody": "El archivo «{name}» vuelve a como estaba antes del cambio. La biblioteca conserva los cambios hechos en la app.",
+  "@tagBackupRestoreBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "tagBackupRestored": "Original restaurado",
+  "tagBackupRestoreFailed": "No se pudo restaurar: {reason}",
+  "@tagBackupRestoreFailed": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "tagBackupDelete": "Eliminar copia",
+  "tagBackupDeleteBody": "Ya no podrás devolver el archivo a como estaba antes del cambio.",
+  "tagBackupDeleted": "Copia eliminada"
 }

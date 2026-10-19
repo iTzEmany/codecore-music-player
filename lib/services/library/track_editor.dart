@@ -4,6 +4,8 @@ import 'package:path/path.dart' as p;
 import '../../core/text_utils.dart';
 import '../../data/db/app_database.dart';
 import '../tags/tag_reader.dart';
+import '../tags/tag_writer.dart';
+import 'track_file_sync.dart';
 
 class TrackEdit {
   const TrackEdit({
@@ -19,6 +21,18 @@ class TrackEdit {
   final String title;
   final String? artist, album, albumArtist, genre;
   final int? year, trackNumber;
+
+  /// What goes into the file: blank fields are left alone there (the tag
+  /// library cannot erase one).
+  TagChanges toChanges() => TagChanges(
+    title: _blankToNull(title),
+    artist: _blankToNull(artist),
+    album: _blankToNull(album),
+    albumArtist: _blankToNull(albumArtist),
+    year: year,
+    genre: _blankToNull(genre),
+    trackNumber: trackNumber,
+  );
 }
 
 String? _blankToNull(String? s) {
@@ -26,12 +40,34 @@ String? _blankToNull(String? s) {
   return (t == null || t.isEmpty) ? null : t;
 }
 
-/// Edits live only in the DB; the audio files are never rewritten.
+/// Edits live in the DB, which stays the source of truth. The files are
+/// rewritten only by [writeToFiles], and only when [fileWritesEnabled] says
+/// the user wants it (setting on and «also in the file» ticked).
 class TrackEditor {
-  TrackEditor(this._db, this._tags);
+  TrackEditor(
+    this._db,
+    this._tags, {
+    this.files,
+    bool Function()? fileWritesEnabled,
+  }) : _enabled = fileWritesEnabled ?? (() => false);
 
   final AppDatabase _db;
   final TagReader _tags;
+  final TrackFileSync? files;
+  final bool Function() _enabled;
+
+  /// Writes [changes] of each track into its file; never throws, and does
+  /// nothing at all (no writer call) when file writes are off.
+  Future<TagFileOutcome> writeToFiles(
+    List<Track> tracks,
+    TagChanges Function(Track) changes,
+  ) async {
+    final files = this.files;
+    if (files == null || !_enabled() || tracks.isEmpty) {
+      return TagFileOutcome.none;
+    }
+    return files.write(tracks, changes);
+  }
 
   Future<void> save(Track track, TrackEdit e) async {
     final artist = _blankToNull(e.artist);

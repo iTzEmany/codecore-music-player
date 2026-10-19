@@ -3340,4 +3340,118 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get exportAllPlaylists => 'Export all playlists';
+
+  @override
+  String get writeTagsToFiles => 'Write edits into the files';
+
+  @override
+  String get writeTagsToFilesHint =>
+      'Title, artist, album, year, genre and track edited here are also written into MP3, FLAC, M4A and OGG files. The original of every file is kept. Off by default.';
+
+  @override
+  String get writeTagsWarnTitle => 'Write edits into the files?';
+
+  @override
+  String get writeTagsWarnBody =>
+      'When you save an edit, the tags are rewritten in the music file too (MP3, FLAC, M4A, OGG). The work is done on a copy, the result is checked, and the file is replaced only if everything matches; the original is saved first in “Tag backups” (the last 200 or 2 GB). Cover, lyrics and ReplayGain are not touched. Before turning this on, make a library backup (Settings → Backup).';
+
+  @override
+  String get writeTagsEnable => 'Turn on';
+
+  @override
+  String get tagsAlsoInFile => 'Also write to the file';
+
+  @override
+  String tagsNoWriteUnsupported(String format) {
+    return 'This format cannot be edited ($format): only the library changes';
+  }
+
+  @override
+  String get tagsNoWriteReadOnly => 'Read-only file: only the library changes';
+
+  @override
+  String get tagsNoWriteMissing => 'File not found: only the library changes';
+
+  @override
+  String tagsFileWriteFailed(int count, String reason) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count files were not changed',
+      one: '1 file was not changed',
+    );
+    return 'Saved in the library, but $_temp0: $reason';
+  }
+
+  @override
+  String get tagReasonUnsupported => 'unsupported format';
+
+  @override
+  String get tagReasonNotFound => 'file not found';
+
+  @override
+  String get tagReasonReadOnly => 'read-only file';
+
+  @override
+  String get tagReasonVerifyFailed =>
+      'the check after writing failed, the file was left as it was';
+
+  @override
+  String get tagReasonWriteFailed =>
+      'writing failed, the file was left as it was';
+
+  @override
+  String get tagReasonBackupFailed =>
+      'could not back up the original, the file was left as it was';
+
+  @override
+  String get tagReasonIoError => 'disk or permission error';
+
+  @override
+  String get tagBackupsTitle => 'Tag backups';
+
+  @override
+  String tagBackupsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Tag backups ($count)',
+      one: 'Tag backups (1)',
+      zero: 'Tag backups',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get tagBackupsHint =>
+      'The original of every rewritten file, as it was before the edit. The last 200 or 2 GB are kept.';
+
+  @override
+  String get tagBackupsEmpty => 'No backups: no file has been rewritten yet.';
+
+  @override
+  String get tagBackupRestore => 'Restore original';
+
+  @override
+  String tagBackupRestoreBody(String name) {
+    return 'The file “$name” goes back to how it was before the edit. The library keeps the edits made in the app.';
+  }
+
+  @override
+  String get tagBackupRestored => 'Original restored';
+
+  @override
+  String tagBackupRestoreFailed(String reason) {
+    return 'Restore failed: $reason';
+  }
+
+  @override
+  String get tagBackupDelete => 'Delete backup';
+
+  @override
+  String get tagBackupDeleteBody =>
+      'You will no longer be able to bring the file back to how it was before the edit.';
+
+  @override
+  String get tagBackupDeleted => 'Backup deleted';
 }

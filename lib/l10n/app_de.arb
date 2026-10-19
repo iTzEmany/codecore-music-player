@@ -1966,5 +1966,71 @@
   "restoreNotFound": "Nicht gefundene Titel",
   "restoreCopyList": "Liste kopieren",
   "restoreFailed": "Wiederherstellung fehlgeschlagen",
-  "exportAllPlaylists": "Alle Playlists exportieren"
+  "exportAllPlaylists": "Alle Playlists exportieren",
+  "writeTagsToFiles": "Änderungen in die Dateien schreiben",
+  "writeTagsToFilesHint": "Hier geänderte Titel, Interpret, Album, Jahr, Genre und Titelnummer werden auch in MP3-, FLAC-, M4A- und OGG-Dateien geschrieben. Das Original jeder Datei bleibt erhalten. Standardmäßig aus.",
+  "writeTagsWarnTitle": "Änderungen in die Dateien schreiben?",
+  "writeTagsWarnBody": "Beim Speichern einer Änderung werden die Tags auch in die Musikdatei geschrieben (MP3, FLAC, M4A, OGG). Es wird auf einer Kopie gearbeitet, das Ergebnis geprüft und die Datei nur ersetzt, wenn alles stimmt; vorher wird das Original unter „Tag-Backups“ gesichert (die letzten 200 oder 2 GB). Cover, Liedtexte und ReplayGain bleiben unberührt. Vor dem Aktivieren sollten Sie ein Bibliotheks-Backup erstellen (Einstellungen → Backup).",
+  "writeTagsEnable": "Aktivieren",
+  "tagsAlsoInFile": "Auch in die Datei schreiben",
+  "tagsNoWriteUnsupported": "Dieses Format ist nicht beschreibbar ({format}): nur die Bibliothek ändert sich",
+  "@tagsNoWriteUnsupported": {
+    "placeholders": {
+      "format": {
+        "type": "String"
+      }
+    }
+  },
+  "tagsNoWriteReadOnly": "Schreibgeschützte Datei: nur die Bibliothek ändert sich",
+  "tagsNoWriteMissing": "Datei nicht gefunden: nur die Bibliothek ändert sich",
+  "tagsFileWriteFailed": "In der Bibliothek gespeichert, aber {count, plural, one{1 Datei wurde nicht geändert} other{{count} Dateien wurden nicht geändert}}: {reason}",
+  "@tagsFileWriteFailed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "tagReasonUnsupported": "Format nicht unterstützt",
+  "tagReasonNotFound": "Datei nicht gefunden",
+  "tagReasonReadOnly": "schreibgeschützte Datei",
+  "tagReasonVerifyFailed": "die Prüfung nach dem Schreiben ist fehlgeschlagen, die Datei blieb unverändert",
+  "tagReasonWriteFailed": "Schreiben fehlgeschlagen, die Datei blieb unverändert",
+  "tagReasonBackupFailed": "Sicherung des Originals fehlgeschlagen, die Datei blieb unverändert",
+  "tagReasonIoError": "Festplatten- oder Berechtigungsfehler",
+  "tagBackupsTitle": "Tag-Backups",
+  "tagBackupsCount": "{count, plural, =0{Tag-Backups} one{Tag-Backups (1)} other{Tag-Backups ({count})}}",
+  "@tagBackupsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tagBackupsHint": "Das Original jeder umgeschriebenen Datei vor der Änderung. Die letzten 200 oder 2 GB bleiben erhalten.",
+  "tagBackupsEmpty": "Keine Backups: Es wurde noch keine Datei umgeschrieben.",
+  "tagBackupRestore": "Original wiederherstellen",
+  "tagBackupRestoreBody": "Die Datei „{name}“ wird auf den Stand vor der Änderung zurückgesetzt. Die Bibliothek behält die in der App vorgenommenen Änderungen.",
+  "@tagBackupRestoreBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "tagBackupRestored": "Original wiederhergestellt",
+  "tagBackupRestoreFailed": "Wiederherstellung fehlgeschlagen: {reason}",
+  "@tagBackupRestoreFailed": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "tagBackupDelete": "Backup löschen",
+  "tagBackupDeleteBody": "Sie können die Datei dann nicht mehr auf den Stand vor der Änderung zurücksetzen.",
+  "tagBackupDeleted": "Backup gelöscht"
 }

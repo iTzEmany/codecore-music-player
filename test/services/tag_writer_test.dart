@@ -62,6 +62,32 @@ class _Writer implements TagWriter {
 String _hash(String path) => sha256.convert(File(path).readAsBytesSync()).toString();
 
 void main() {
+  group('tagMismatch tolerates only the reader quirks', () {
+    const before = TagInfo(title: 'Old', artist: 'Me', album: 'Alb');
+
+    test('mp3: the album artist comes back as the artist', () {
+      const after = TagInfo(title: 'Old', artist: 'Fab', album: 'Alb');
+      expect(
+        tagMismatch(before, after, const TagChanges(albumArtist: 'Fab'), format: 'mp3'),
+        isNull,
+      );
+    });
+
+    test('flac: an unreadable year is accepted, a wrong title is not', () {
+      const after = TagInfo(title: 'Old', artist: 'Me', album: 'Alb');
+      expect(tagMismatch(before, after, const TagChanges(year: 1999), format: 'flac'), isNull);
+      expect(tagMismatch(before, after, const TagChanges(year: 1999), format: 'mp3'), contains('year'));
+      expect(tagMismatch(before, after, const TagChanges(title: 'New'), format: 'flac'), contains('title'));
+    });
+
+    test('an untouched artist that changed is caught; a lost cover too', () {
+      const moved = TagInfo(title: 'Old', artist: 'Other', album: 'Alb');
+      expect(tagMismatch(before, moved, const TagChanges(title: 'Old')), contains('artist'));
+      const withCover = TagInfo(title: 'Old', artist: 'Me', album: 'Alb', coverBytes: [1, 2]);
+      expect(tagMismatch(withCover, before, const TagChanges(title: 'Old')), contains('cover'));
+    });
+  });
+
   late Directory root;
   late String song;
   late Directory work, backupDir;

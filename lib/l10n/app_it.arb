@@ -2157,5 +2157,71 @@
   "restoreNotFound": "Brani non trovati",
   "restoreCopyList": "Copia elenco",
   "restoreFailed": "Ripristino non riuscito",
-  "exportAllPlaylists": "Esporta tutte le playlist"
+  "exportAllPlaylists": "Esporta tutte le playlist",
+  "writeTagsToFiles": "Scrivi le modifiche nei file",
+  "writeTagsToFilesHint": "Titolo, artista, album, anno, genere e traccia modificati qui vengono scritti anche in MP3, FLAC, M4A e OGG. Di ogni file si conserva l’originale. Spenta di default.",
+  "writeTagsWarnTitle": "Scrivere le modifiche nei file?",
+  "writeTagsWarnBody": "Salvando una modifica, i tag vengono riscritti anche nel file musicale (MP3, FLAC, M4A, OGG). Si lavora su una copia, si controlla il risultato e il file viene sostituito solo se tutto torna; prima l’originale è salvato in «Backup dei tag» (gli ultimi 200 o 2 GB). Copertina, testi e ReplayGain non vengono toccati. Prima di attivare conviene fare un backup della libreria (Impostazioni → Backup).",
+  "writeTagsEnable": "Attiva",
+  "tagsAlsoInFile": "Scrivi anche nel file",
+  "tagsNoWriteUnsupported": "Formato non modificabile ({format}): cambia solo la libreria",
+  "@tagsNoWriteUnsupported": {
+    "placeholders": {
+      "format": {
+        "type": "String"
+      }
+    }
+  },
+  "tagsNoWriteReadOnly": "File in sola lettura: cambia solo la libreria",
+  "tagsNoWriteMissing": "File non trovato: cambia solo la libreria",
+  "tagsFileWriteFailed": "Salvato nella libreria, ma {count, plural, one{1 file non è stato modificato} other{{count} file non sono stati modificati}}: {reason}",
+  "@tagsFileWriteFailed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "tagReasonUnsupported": "formato non supportato",
+  "tagReasonNotFound": "file non trovato",
+  "tagReasonReadOnly": "file in sola lettura",
+  "tagReasonVerifyFailed": "il controllo dopo la scrittura è fallito, il file è rimasto com’era",
+  "tagReasonWriteFailed": "scrittura non riuscita, il file è rimasto com’era",
+  "tagReasonBackupFailed": "backup dell’originale non riuscito, il file è rimasto com’era",
+  "tagReasonIoError": "errore del disco o dei permessi",
+  "tagBackupsTitle": "Backup dei tag",
+  "tagBackupsCount": "{count, plural, =0{Backup dei tag} one{Backup dei tag (1)} other{Backup dei tag ({count})}}",
+  "@tagBackupsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tagBackupsHint": "L’originale di ogni file riscritto, prima della modifica. Si tengono gli ultimi 200 o 2 GB.",
+  "tagBackupsEmpty": "Nessun backup: i file non sono ancora stati riscritti.",
+  "tagBackupRestore": "Ripristina originale",
+  "tagBackupRestoreBody": "Il file «{name}» torna com’era prima della modifica. La libreria tiene le modifiche fatte nell’app.",
+  "@tagBackupRestoreBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "tagBackupRestored": "Originale ripristinato",
+  "tagBackupRestoreFailed": "Ripristino non riuscito: {reason}",
+  "@tagBackupRestoreFailed": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "tagBackupDelete": "Elimina backup",
+  "tagBackupDeleteBody": "Non potrai più riportare il file a com’era prima della modifica.",
+  "tagBackupDeleted": "Backup eliminato"
 }

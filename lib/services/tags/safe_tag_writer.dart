@@ -69,7 +69,7 @@ class SafeTagWriter {
       await File(path).copy(tmp.path);
       await writer.write(tmp.path, changes);
       final after = await reader.read(tmp.path);
-      final problem = tagMismatch(before, after, changes);
+      final problem = tagMismatch(before, after, changes, format: formatOf(path));
       if (problem != null) {
         throw TagWriteException(TagWriteReason.verifyFailed, problem);
       }
@@ -94,28 +94,46 @@ class SafeTagWriter {
 
 /// What differs between the tags read from the copy and what we wrote (and
 /// what must not have changed), or null when all is as expected.
-String? tagMismatch(TagInfo before, TagInfo after, TagChanges c) {
+///
+/// The reader is not a perfect mirror of the file, so it is forgiving where
+/// it is known to be: for MP3 it reports TPE2 (album artist) as the artist,
+/// so a written artist or album artist may come back as either; and FLAC
+/// years (`YEAR` comment) are not read at all. The files themselves were
+/// checked with ffprobe (see the real-file test).
+String? tagMismatch(
+  TagInfo before,
+  TagInfo after,
+  TagChanges c, {
+  String format = '',
+}) {
   String? bad(String name, Object? want, Object? got) =>
       want == got ? null : '$name: "$got" instead of "$want"';
+  final artists = {after.artist, after.albumArtist};
+  String? inArtists(String name, String? want) =>
+      want == null || artists.contains(want.trim())
+      ? null
+      : '$name: "$want" not found in ${artists.nonNulls.toList()}';
+  final yearUnreadable = format == 'flac' && after.year == null;
   final checks = <String?>[
     if (c.title != null) bad('title', c.title!.trim(), after.title),
-    if (c.artist != null) bad('artist', c.artist!.trim(), after.artist),
+    inArtists('artist', c.artist),
+    inArtists('albumArtist', c.albumArtist),
     if (c.album != null) bad('album', c.album!.trim(), after.album),
-    if (c.albumArtist != null)
-      bad('albumArtist', c.albumArtist!.trim(), after.albumArtist),
-    if (c.year != null) bad('year', c.year, after.year),
+    if (c.year != null && !yearUnreadable) bad('year', c.year, after.year),
     if (c.trackNumber != null) bad('track', c.trackNumber, after.trackNumber),
-    if (c.genre != null && (after.genre == null || !c.genre!.contains(after.genre!)))
+    if (c.genre != null &&
+        (after.genre == null || !c.genre!.contains(after.genre!)))
       'genre: "${after.genre}" instead of "${c.genre}"',
     // The audio and the cover must come out as they went in.
     bad('cover', before.coverBytes?.length, after.coverBytes?.length),
-    if (before.durationMs != null && after.durationMs != null)
-      (before.durationMs! - after.durationMs!).abs() > 100
-          ? 'duration changed'
-          : null,
+    if (before.durationMs != null &&
+        after.durationMs != null &&
+        (before.durationMs! - after.durationMs!).abs() > 100)
+      'duration changed',
     if (c.title == null) bad('title', before.title, after.title),
-    if (c.artist == null) bad('artist', before.artist, after.artist),
     if (c.album == null) bad('album', before.album, after.album),
+    if (c.artist == null && c.albumArtist == null)
+      bad('artist', before.artist, after.artist),
   ];
   return checks.nonNulls.firstOrNull;
 }
