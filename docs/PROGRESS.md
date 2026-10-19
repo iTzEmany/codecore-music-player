@@ -292,9 +292,9 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 24.2 Identità del dispositivo
 - [x] 24.3 Elenco dei dispositivi fidati
 - [x] 24.4 HTTPS su `OfferNode` (Jam esclusa)
-- [~] 24.5 Abbinamento con PIN (prova a mano tra due dispositivi)
+- [x] 24.5 Abbinamento con PIN (provato dal vivo PC ↔ Mi A3: PIN, impronte, conferma, badge «fidato» su entrambi)
 - [~] 24.6 Offerte dai fidati (prova a mano)
-- [~] 24.7 Scanner QR (Android) (prova con la fotocamera vera in «Tocca a te»)
+- [x] 24.7 Scanner QR (Android) (provato dal vivo sul Mi A3 contro il PC: legge il QR, si collega, elenca i brani)
 - [x] 24.8 Schema v10: playlist con `uuid` e `updated_at`
 - [~] 24.9 Sincronizzazione delle playlist (rotte, client, anteprima e avvio dalla scheda del fidato fatti; prova a mano tra due dispositivi)
 - [~] 24.10 Rifinitura, documentazione e prova a mano (impronta propria e sezione fidati fatte; prova a mano tra due dispositivi)
