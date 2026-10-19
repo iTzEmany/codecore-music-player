@@ -135,7 +135,7 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 11.16 Centro Attività
 - [x] 11.17 Impostazioni, Condivisione, dialoghi
 - [x] 11.18 Rifinitura e controlli finali
-- [ ] 11.19 Prova a mano (utente)
+- [~] 11.19 Prova a mano (fatta da Claude via adb/xdotool il 2026-10-19: navigazione, gesti, Now Playing, YouTube, clic destro e pannello destro, Jam PC ↔ Mi A3; mancano leggibilità al sole e Jam con il secondo telefono, che era su un'altra rete)
 
 ## Fase 12 — Import playlist da CSV (`fase-12-import-csv.md`)
 - [x] 12.1 Verifiche preliminari (YouTube Music con yt-dlp, CSV vero di Exportify)
