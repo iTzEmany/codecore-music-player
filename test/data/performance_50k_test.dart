@@ -11,6 +11,8 @@ import 'package:path/path.dart' as p;
 /// Synthetic 50 000-track library (2 000 albums, 800 artists, a dozen genres):
 /// the queries behind the main screens stay interactive. Budgets are the ones
 /// of docs/fase-16-ci-test.md; on a shared CI runner they get a ×2 margin.
+/// It also covers the 20 000-track budgets of phase 7.5 (the same queries on
+/// fewer rows), which had their own test before.
 const _tracks = 50000;
 
 /// Album a = i % 2000 belongs to artist a % 800: 2 000 albums, 800 artists.
@@ -51,29 +53,30 @@ void main() {
   // the clock includes the neighbours. CODECORE_PERF_MARGIN=1 for a quiet run.
   final margin = int.tryParse(Platform.environment['CODECORE_PERF_MARGIN'] ?? '') ?? 2;
 
+  // Filled once, used by both tests.
+  late AppDatabase db;
+  setUpAll(() async {
+    db = AppDatabase(NativeDatabase.memory());
+    await _fill(db);
+  });
+  tearDownAll(() => db.close());
+
   group('50 000 tracks in memory', () {
-    late AppDatabase db;
-    late TrackRepository repo;
-
-    setUpAll(() async {
-      db = AppDatabase(NativeDatabase.memory());
-      repo = TrackRepository(db);
-      await _fill(db);
-    });
-    tearDownAll(() => db.close());
-
     test('the screens\' queries stay inside their budgets', () async {
-      expect(await repo.countAll(), _tracks);
+      final repo = TrackRepository(db);
+      final count = await db.customSelect('SELECT COUNT(*) AS n FROM tracks').getSingle();
+      expect(count.read<int>('n'), _tracks);
       final q = LibraryQueries(db);
       final search = await _ms(() => repo.watchTracks(query: 'song 4999').first);
       final albums = await _ms(() => q.watchAlbums().first);
       final artists = await _ms(() => q.watchArtists().first);
       final firstPage = await _ms(() => repo.watchTracks().first);
+      final sorted = await _ms(() => repo.watchTracks(sort: SortOption.artist).first);
       final lite = await _ms(() => repo.liteEntries());
       final genres = await _ms(() => q.watchGenres().first);
       // ignore: avoid_print
       print('perf50k ms: search=$search albums=$albums artists=$artists '
-          'allTracks=$firstPage liteEntries=$lite genres=$genres');
+          'allTracks=$firstPage byArtist=$sorted liteEntries=$lite genres=$genres');
       expect(search, lessThan(80 * margin), reason: 'text search');
       expect(albums, lessThan(150 * margin), reason: 'albums');
       expect(artists, lessThan(150 * margin), reason: 'artists');
@@ -81,6 +84,7 @@ void main() {
       // the whole list (no paging): ~850 ms at 50 000 rows, all in row mapping,
       // so no index helps. Proposal in PROGRESS: page the list in a later phase.
       expect(firstPage, lessThan(1500 * margin), reason: 'all tracks (whole list)');
+      expect(sorted, lessThan(1500 * margin), reason: 'all tracks sorted by artist');
       expect(lite, lessThan(400 * margin), reason: 'liteEntries (import)');
       expect(genres, lessThan(150 * margin), reason: 'genres');
     });
@@ -90,15 +94,15 @@ void main() {
     final dir = Directory.systemTemp.createTempSync('perf50k');
     addTearDown(() => dir.deleteSync(recursive: true));
     final file = File(p.join(dir.path, 'codecore.sqlite'));
-    final seed = AppDatabase(NativeDatabase(file));
-    await _fill(seed);
-    await seed.close();
+    // The file is a copy of the library above, written in one go: filling it
+    // on disk took most of this test's time and is not what is measured.
+    await db.customStatement('VACUUM INTO ?', [file.path]);
 
     final sw = Stopwatch()..start();
-    final db = AppDatabase(NativeDatabase(file));
-    addTearDown(db.close);
-    final top = await LibraryQueries(db).watchTopTracks().first;
-    final albums = await LibraryQueries(db).watchAlbums().first;
+    final opened = AppDatabase(NativeDatabase(file));
+    addTearDown(opened.close);
+    final top = await LibraryQueries(opened).watchTopTracks().first;
+    final albums = await LibraryQueries(opened).watchAlbums().first;
     final startup = sw.elapsedMilliseconds;
     // ignore: avoid_print
     print('perf50k ms: open + first Home queries = $startup '

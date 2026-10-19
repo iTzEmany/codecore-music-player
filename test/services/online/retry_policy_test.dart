@@ -123,6 +123,9 @@ void main() {
       expect(calls, 2);
       expect(waits, isEmpty);
       expect(settled, containsAll(['r:failed', 'u:failed']));
+      expect(q.items.map((i) => i.error),
+          [YtErrorKind.rateLimited, YtErrorKind.unavailable],
+          reason: 'each item keeps its own error');
     });
 
     test('while waiting the item is waitingRetry and frees its slot', () async {

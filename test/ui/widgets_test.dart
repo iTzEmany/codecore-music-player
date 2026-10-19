@@ -52,7 +52,7 @@ Future<void> _pump(WidgetTester tester, Widget child, {double width = 400}) {
   return tester.pumpWidget(ProviderScope(
     overrides: const [],
     child: MaterialApp(
-      theme: buildTheme(AppThemeId.notte, false),
+      theme: buildThemeFromColors(CcColors.notte, false),
       locale: const Locale('it'),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,

@@ -5,11 +5,6 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   const visible = [10, 20, 30, 40, 50];
 
-  test('starts empty and inactive', () {
-    expect(Selection.empty.active, isFalse);
-    expect(Selection.empty.count, 0);
-  });
-
   test('toggle adds, removes, and leaves nothing active when empty', () {
     var s = Selection.empty.toggle(20);
     expect(s.active, isTrue);
@@ -17,26 +12,11 @@ void main() {
     expect(s.anchor, 20);
     s = s.toggle(40);
     expect(s.ids, {20, 40});
+    expect(s.count, 2);
     expect(s.anchor, 40);
     s = s.toggle(20).toggle(40);
     expect(s.active, isFalse);
     expect(s.anchor, isNull);
-  });
-
-  test('a range runs forwards from the anchor, in the order shown', () {
-    final s = Selection.empty.toggle(20).selectRange(visible, 40);
-    expect(s.ids, {20, 30, 40});
-    expect(s.anchor, 20, reason: 'the anchor stays for the next range');
-  });
-
-  test('a range runs backwards too', () {
-    final s = Selection.empty.toggle(40).selectRange(visible, 10);
-    expect(s.ids, {10, 20, 30, 40});
-  });
-
-  test('a range keeps what was already picked', () {
-    final s = Selection.empty.toggle(50).toggle(10).selectRange(visible, 30);
-    expect(s.ids, {50, 10, 20, 30});
   });
 
   test('a range without an anchor, or from one that is no longer shown, is a toggle', () {
@@ -79,6 +59,7 @@ void main() {
   test('a range adds its tracks in the direction of the gesture', () {
     final down = Selection.empty.toggle(20).selectRange(visible, 40);
     expect(down.orderedIds, [20, 30, 40]);
+    expect(down.anchor, 20, reason: 'the anchor stays for the next range');
     final up = Selection.empty.toggle(40).selectRange(visible, 10);
     expect(up.orderedIds, [40, 30, 20, 10]);
     final mixed = Selection.empty.toggle(50).toggle(30).selectRange(visible, 10);
@@ -89,12 +70,6 @@ void main() {
     expect(Selection.empty.selectAll(visible).orderedIds, visible);
     final s = Selection.empty.toggle(40).toggle(10).toggle(30).retainWhere({10, 30, 50});
     expect(s.orderedIds, [10, 30]);
-  });
-
-  test('the ids come back in the order of the list, not of the clicks', () {
-    final s = Selection.empty.toggle(40).toggle(10).toggle(30);
-    expect(s.inOrderOf(visible), [10, 30, 40]);
-    expect(s.inOrderOf(const [30, 99]), [30]);
   });
 
   test('each list keeps its own selection, and it is forgotten when unused', () {

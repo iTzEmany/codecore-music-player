@@ -142,17 +142,6 @@ void main() {
       expect(r.artists, isEmpty);
     });
 
-    test('words without operators behave exactly as before', () {
-      final r = searchLibrary(
-        text: 'que',
-        tracks: [track(1, 'Bohemian Rhapsody')],
-        artists: artists,
-        albums: albums,
-        playlists: playlists,
-      );
-      expect((r.main! as ArtistSummary).name, 'Queen');
-    });
-
     test('an operator with nothing after it is not one yet (typing)', () {
       final r = searchLibrary(
         text: 'artista:',

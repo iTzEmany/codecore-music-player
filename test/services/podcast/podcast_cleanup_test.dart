@@ -156,8 +156,4 @@ void main() {
     expect(File(path).existsSync(), isTrue);
     expect(await tracks.getById(trackId), isNotNull);
   });
-
-  test('nothing to do on an empty library', () async {
-    expect(await build().run(), 0);
-  });
 }

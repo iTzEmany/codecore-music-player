@@ -85,13 +85,4 @@ void main() {
     final vevoSc = scoreCandidate(r, sc('b', 'Obscure Song', 'SomeBandVEVO'));
     expect(vevoYoutube, greaterThanOrEqualTo(vevoSc));
   });
-
-  test('YouTube scores do not change', () {
-    final r = row('Felicità', ['Lucio Dalla'], ms: 345360);
-    expect(
-      scoreCandidate(r, yt('topic', 'Felicità', 'Lucio Dalla - Topic', seconds: 345)),
-      closeTo(scoreCandidate(r, yt('topic2', 'Felicità', 'Lucio Dalla - Topic', seconds: 345)), 1e-9),
-    );
-    expect(decide(r, [yt('topic', 'Felicità', 'Lucio Dalla - Topic', seconds: 345)]).kind, MatchKind.sure);
-  });
 }

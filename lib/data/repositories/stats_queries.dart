@@ -89,7 +89,6 @@ class PeriodStats {
   final DateTime? firstAt;
 
   bool get isEmpty => plays == 0;
-  int get playedMinutes => (playedMs / 60000).round();
 }
 
 /// Aggregates over the listening history (`plays`), all in SQL. Artists and

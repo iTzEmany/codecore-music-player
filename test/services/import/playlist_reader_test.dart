@@ -1,19 +1,10 @@
 import 'dart:typed_data';
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:codecore/services/import/playlist_reader.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('a CSV goes to the Exportify reader and keeps its kind', () {
-    final text = File('test/fixtures/Just_a_mood.csv').readAsStringSync();
-    final p = readPlaylistFile('Just_a_mood.csv', text);
-    expect(p.kind, 'exportify');
-    expect(p.name, 'Just a mood');
-    expect(p.rows, hasLength(34));
-  });
-
   test('the extension is case-insensitive and ignores folders', () {
     const csv = 'Track Name,Artist Name(s)\nA,B\n';
     expect(readPlaylistFile('/x/y/LIST.CSV', csv).rows, hasLength(1));
@@ -26,10 +17,6 @@ void main() {
         throwsA(isA<FormatException>().having(
             (e) => e.message, 'message', allOf(contains('txt'), contains('csv')))));
     expect(() => readPlaylistFile('noextension', 'x'), throwsFormatException);
-  });
-
-  test('a CSV that is not a playlist is still refused', () {
-    expect(() => readPlaylistFile('x.csv', 'a,b\n1,2\n'), throwsFormatException);
   });
 
   test('decoding: UTF-8, then Latin-1 for old .m3u, lenient for the rest', () {

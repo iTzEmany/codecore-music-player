@@ -68,12 +68,6 @@ class Selection {
     if (kept.isEmpty) return empty;
     return Selection(ids: kept, anchor: kept.contains(anchor) ? anchor : null);
   }
-
-  /// [ids] in the order of [visibleIds] (the order of the list, not of the
-  /// picks); picked tracks that are not shown any more are left out. Only for
-  /// what really wants the list order: actions use [orderedIds].
-  List<int> inOrderOf(List<int> visibleIds) =>
-      [for (final id in visibleIds) if (ids.contains(id)) id];
 }
 
 class SelectionNotifier extends Notifier<Selection> {

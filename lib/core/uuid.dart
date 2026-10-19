@@ -1,8 +1,8 @@
 import 'dart:math';
 
 /// A random (version 4) UUID, `xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx`.
-String newUuid([Random? random]) {
-  final r = random ?? Random.secure();
+String newUuid() {
+  final r = Random.secure();
   final b = List<int>.generate(16, (_) => r.nextInt(256));
   b[6] = (b[6] & 0x0f) | 0x40; // version 4
   b[8] = (b[8] & 0x3f) | 0x80; // variant 10xx

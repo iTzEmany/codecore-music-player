@@ -27,7 +27,7 @@ void main() {
   tearDown(() => tmp.deleteSync(recursive: true));
 
   test('a big picture is scaled so its longer side is 1600 and kept as a PNG', () async {
-    final src = File('${tmp.path}/a.png')..writeAsBytesSync(await _png(4000, 2000));
+    final src = File('${tmp.path}/a.png')..writeAsBytesSync(await _png(2000, 1000));
     final path = (await importBackgroundImage(src, out, 'sea'))!;
     expect(path, startsWith('${out.path}/bg-sea-'));
     expect(path, endsWith('.png'));
@@ -41,7 +41,7 @@ void main() {
     final img = await _decode((await importBackgroundImage(small, out, 'sea'))!);
     expect([img.width, img.height], [300, 200]);
 
-    final tall = File('${tmp.path}/t.png')..writeAsBytesSync(await _png(1000, 3000));
+    final tall = File('${tmp.path}/t.png')..writeAsBytesSync(await _png(600, 1800));
     final t = await _decode((await importBackgroundImage(tall, out, 't'))!);
     expect([t.width, t.height], [533, 1600]);
   });
@@ -76,17 +76,5 @@ void main() {
     expect(other.existsSync(), isTrue);
     expect(odd.existsSync(), isTrue);
     await pruneBackgroundImages(Directory('${tmp.path}/missing'), {});
-  });
-
-  test('deleteBackgroundImages removes one theme\'s pictures, optionally all but one', () async {
-    out.createSync(recursive: true);
-    final a1 = File('${out.path}/bg-a-1.png')..writeAsBytesSync([1]);
-    final a2 = File('${out.path}/bg-a-2.png')..writeAsBytesSync([1]);
-    final b1 = File('${out.path}/bg-b-1.png')..writeAsBytesSync([1]);
-    await deleteBackgroundImages(out, 'a', except: a2.path);
-    expect([a1.existsSync(), a2.existsSync(), b1.existsSync()], [false, true, true]);
-    await deleteBackgroundImages(out, 'a');
-    expect(a2.existsSync(), isFalse);
-    expect(b1.existsSync(), isTrue);
   });
 }

@@ -131,7 +131,9 @@ void main() {
     await h.dispose(tester);
   });
 
-  for (final w in [840.0, 900.0, 1000.0, 1100.0]) {
+  // The narrowest window of each sidebar width: 840 (collapsed sidebar, the
+  // narrowest bar) and 1000 (full sidebar, the narrowest content).
+  for (final w in [840.0, 1000.0]) {
     testWidgets('the player bar fits at ${w.round()} px (the volume slider gives way)', (tester) async {
       _size(tester, w, 800);
       final h = await Harness.create(tester, tracks: 4);

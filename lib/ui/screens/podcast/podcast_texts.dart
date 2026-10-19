@@ -7,6 +7,5 @@ String podcastErrorText(AppLocalizations l, PodcastErrorKind kind) => switch (ki
   PodcastErrorKind.tooLarge => l.podcastErrTooLarge,
   PodcastErrorKind.network => l.podcastErrNetwork,
   PodcastErrorKind.notFeed => l.podcastErrNotFeed,
-  PodcastErrorKind.parserMissing => l.podcastErrParserMissing,
   PodcastErrorKind.unsupportedFormat => l.podcastErrUnsupportedFormat,
 };

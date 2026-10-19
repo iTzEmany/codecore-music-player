@@ -28,8 +28,9 @@ class SimDevice {
 }
 
 void main() {
-  for (final seed in [1, 2, 3, 4, 5]) {
-    test('four outputs stay together (seed $seed)', () async {
+  // One behaviour, five random set-ups (skews, speed errors, jitter).
+  test('four outputs stay together', () async {
+    for (final seed in [1, 2, 3, 4, 5]) {
       final rng = Random(seed);
       const hostSkew = 987654; // the host's clock is far from everyone's
       var trueNow = 5000000;
@@ -96,7 +97,7 @@ void main() {
           if (spread > worst) worst = spread;
         }
       }
-      expect(worst, lessThan(80), reason: 'worst spread $worst ms');
-    });
-  }
+      expect(worst, lessThan(80), reason: 'seed $seed: worst spread $worst ms');
+    }
+  });
 }

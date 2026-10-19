@@ -87,7 +87,7 @@ class Shot {
       overrides: [...overrides, ...extra],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        theme: buildTheme(theme, false, accent: accent),
+        theme: buildThemeFromColors(buildPalette(theme, accent), false),
         locale: const Locale('it'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,

@@ -12,7 +12,8 @@ import 'package:codecore/providers/import_providers.dart';
 import 'package:codecore/providers/library_providers.dart';
 import 'package:codecore/providers/settings_providers.dart';
 import 'package:codecore/providers/youtube_providers.dart';
-import 'package:codecore/services/import/exportify_reader.dart';
+import 'package:codecore/services/import/csv_profiles.dart';
+import 'package:codecore/services/import/imported_playlist.dart';
 import 'package:codecore/services/online/download_index.dart';
 import 'package:codecore/services/online/yt_dlp_process_service.dart';
 import 'package:drift/native.dart';
@@ -51,7 +52,7 @@ void main() {
       tmp.deleteSync(recursive: true);
     });
 
-    final csv = readExportify('E2E_mood.csv',
+    final csv = readCsvPlaylist('E2E_mood.csv',
         File('test/fixtures/Just_a_mood.csv').readAsStringSync());
     const wanted = {'Sigarette', "Blowin' in the Wind", "Rockin' Robin"};
     final rows = [
@@ -61,7 +62,7 @@ void main() {
     expect(rows, hasLength(3));
 
     final svc = container.read(playlistImportServiceProvider);
-    final id = await svc.start(ExportifyPlaylist(name: csv.name, rows: rows));
+    final id = await svc.start(ImportedPlaylist(name: csv.name, rows: rows));
     final imports = container.read(importRepositoryProvider);
     for (var i = 0; i < 720; i++) {
       await Future<void>.delayed(const Duration(milliseconds: 500));

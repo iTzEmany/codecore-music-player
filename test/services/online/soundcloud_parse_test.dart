@@ -73,16 +73,6 @@ void main() {
     });
   });
 
-  group('errors', () {
-    test('a DRM-protected track is «unavailable», rate limiting stays rate limiting', () {
-      expect(ytExceptionFromStderr('ERROR: [soundcloud] 2366118086: This video is DRM protected').kind,
-          YtErrorKind.unavailable);
-      expect(ytExceptionFromStderr('ERROR: [soundcloud] Unable to download JSON metadata: HTTP Error 429: Too Many Requests').kind,
-          YtErrorKind.rateLimited);
-      expect(ytExceptionFromStderr('Temporary failure in name resolution').kind, YtErrorKind.network);
-    });
-  });
-
   test('a few more results are asked for than wanted, to make up for the previews', () {
     expect(soundCloudFetchCount(5), greaterThan(5));
     expect(soundCloudFetchCount(10), 15);

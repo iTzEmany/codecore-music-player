@@ -21,13 +21,6 @@ void main() {
     expect(DeviceIdentity.fingerprintOfDer(DeviceIdentity.derFromPem(a.certPem)), a.fingerprint);
   });
 
-  test('two devices have different identities', () async {
-    final other = Directory.systemTemp.createTempSync('ident2');
-    addTearDown(() => other.deleteSync(recursive: true));
-    expect((await DeviceIdentity.loadOrCreate(dir)).fingerprint,
-        isNot((await DeviceIdentity.loadOrCreate(other)).fingerprint));
-  });
-
   test('a damaged file gives a new identity and says so', () async {
     final old = await DeviceIdentity.loadOrCreate(dir);
     File(p.join(dir.path, 'identity', 'key.pem')).writeAsStringSync('garbage');
@@ -37,11 +30,12 @@ void main() {
     expect((await DeviceIdentity.loadOrCreate(dir)).regenerated, isFalse, reason: 'the new pair is now the stored one');
   });
 
-  test('a certificate with another device\'s key is rejected as a pair', () async {
+  test('two devices have different identities; a certificate with another device\'s key is rejected as a pair', () async {
     final other = Directory.systemTemp.createTempSync('ident3');
     addTearDown(() => other.deleteSync(recursive: true));
     final a = await DeviceIdentity.loadOrCreate(dir);
     final b = await DeviceIdentity.loadOrCreate(other);
+    expect(b.fingerprint, isNot(a.fingerprint));
     File(p.join(dir.path, 'identity', 'key.pem')).writeAsStringSync(b.keyPem);
     final r = await DeviceIdentity.loadOrCreate(dir);
     expect(r.regenerated, isTrue);

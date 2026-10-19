@@ -1,7 +1,7 @@
 import 'package:codecore/data/repositories/import_repository.dart';
 import 'package:codecore/data/repositories/track_repository.dart';
 import 'package:codecore/providers/database_providers.dart';
-import 'package:codecore/services/import/exportify_reader.dart';
+import 'package:codecore/services/import/imported_playlist.dart';
 import 'package:codecore/services/import/playlist_import_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
@@ -39,7 +39,7 @@ void main() {
     final order = ['Tone C', 'Tone A', 'Tone D'];
     final all = (await tester.runAsync(() => tracks.liteEntries()))!;
     final byTitle = {for (final t in all) t.title.toLowerCase(): t};
-    final csv = ExportifyPlaylist(name: 'Da CSV', rows: [
+    final csv = ImportedPlaylist(name: 'Da CSV', rows: [
       for (var i = 0; i < order.length; i++)
         ImportRow(
             index: i,

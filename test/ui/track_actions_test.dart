@@ -53,6 +53,9 @@ void main() {
     expect(find.text('Riproduci dopo'), findsOneWidget);
     expect(find.text('Vai all’album'), findsOneWidget);
     expect(find.text('Vai all’artista'), findsOneWidget);
+    // No bookmark: no restart entry and no «riprendi da».
+    expect(find.text('Ricomincia dall’inizio'), findsNothing);
+    expect(find.textContaining('riprendi da'), findsNothing);
     await tester.tap(find.text('Vai all’album'));
     await _settle(tester);
     await _settle(tester);
@@ -85,21 +88,6 @@ void main() {
         .runAsync(() => TrackRepository(h.db).getById(marked.id));
     expect(after!.resumePositionMs, isNull, reason: 'the bookmark is cleared');
     expect(h.handler.currentTrack?.id, marked.id, reason: 'and it plays from the start');
-    await h.dispose(tester);
-  });
-
-  testWidgets('a track without a bookmark has no restart entry', (tester) async {
-    _phone(tester);
-    final h = await Harness.create(tester, tracks: 3);
-    await h.pump(tester, const AppShell());
-    await tester.tap(find.text('Libreria'));
-    await _settle(tester);
-    await tester.tap(find.text('Tutti i brani'));
-    await _settle(tester);
-    await _openMenu(tester, 'Song 1');
-    await _settle(tester);
-    expect(find.text('Ricomincia dall’inizio'), findsNothing);
-    expect(find.textContaining('riprendi da'), findsNothing);
     await h.dispose(tester);
   });
 

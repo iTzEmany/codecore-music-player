@@ -96,7 +96,7 @@ void main() {
   test('searching with operators stays under budget', () async {
     // Selective searches (a few hundred matches at most): the budget of the
     // document. Broad ones return thousands of rows, which cost what listing
-    // that many tracks costs (see performance_test.dart), so they get more.
+    // that many tracks costs (see performance_50k_test.dart), so they get more.
     final selective = {
       'artist+years+negation': 'artista:"artist 7" anno:1990..1999 -live',
       'free text + flag': 'song 19 preferiti',
@@ -110,7 +110,7 @@ void main() {
     final times = <String, int>{};
     for (final e in {...selective, ...broad}.entries) {
       final rules = parseRules(e.value).expr;
-      times[e.key] = await _ms(() => repo.tracksByRules(rules));
+      times[e.key] = await _ms(() => repo.watchByRules(rules).first);
     }
     final count = await _ms(() => repo.countByRules(parseRules('genere:rock').expr));
     // ignore: avoid_print

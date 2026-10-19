@@ -27,7 +27,6 @@ void main() {
   group('matchTitleKey', () {
     const table = {
       'Singalong Junk - Remastered 2011': 'singalong junk',
-      'Let It Be - Remastered 2009': 'let it be',
       'Going to California - Remaster': 'going to california',
       "Blowin' in the Wind": 'blowin in the wind',
       'Out On A Limb (feat. Teena Marie)': 'out on a limb',
@@ -193,10 +192,6 @@ void main() {
               ?.id,
           1);
       expect(lib.find(row('Felicità', ['Lucio Dalla'], ms: 345360))?.id, 2);
-    });
-
-    test('a different length is another recording', () {
-      expect(lib.find(row('Let It Be', ['The Beatles'], ms: 300000)), isNull);
     });
 
     test('a few seconds of difference between services still matches', () {

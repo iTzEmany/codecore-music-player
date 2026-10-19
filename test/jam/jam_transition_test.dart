@@ -16,7 +16,7 @@ import '../support/fake_backend.dart';
 
 /// Gapless and crossfade (phase 18) belong to the local player: the Jam keeps
 /// its single backend and its own sync, whatever the transition setting is.
-Future<void> settle() => Future<void>.delayed(const Duration(milliseconds: 20));
+Future<void> settle() => pumpEventQueue();
 
 class _Remote implements RemoteTransport {
   final calls = <String>[];
@@ -79,55 +79,55 @@ void main() {
     }
   });
 
-  for (final mode in [TransitionMode.gapless, TransitionMode.crossfade]) {
-    test('with $mode, a Jam pauses the local player and then owns the controls', () async {
-      final db = AppDatabase(NativeDatabase.memory());
-      addTearDown(db.close);
-      final players = <FakeBackend>[];
-      final handler = CodecoreAudioHandler(
-        CrossfadeEngine(() {
-          final f = FakeBackend();
-          players.add(f);
-          return f;
-        }),
-        PlayQueue(),
-        TrackRepository(db),
-        onError: (_) {},
-      );
-      addTearDown(handler.dispose);
-      for (final n in ['a', 'b']) {
-        await db.into(db.tracks).insert(TracksCompanion.insert(
-              path: '/m/$n.mp3',
-              title: n,
-              albumKey: 'k',
-              format: 'mp3',
-              sizeBytes: 1,
-              mtimeMs: 1,
-              addedAt: 1,
-            ));
-      }
-      final ids = (await db.select(db.tracks).get()).map((t) => t.id).toList();
-      await handler.playQueue(ids, 0);
-      await handler.setTransition(mode);
-      await settle();
-      expect(players[0].playing, isTrue);
+  // With remote controls attached the handler never reaches its window, so the
+  // crossfade (the mode with the most local machinery) stands for gapless too.
+  test('with the crossfade on, a Jam pauses the local player and then owns the controls', () async {
+    final db = AppDatabase(NativeDatabase.memory());
+    addTearDown(db.close);
+    final players = <FakeBackend>[];
+    final handler = CodecoreAudioHandler(
+      CrossfadeEngine(() {
+        final f = FakeBackend();
+        players.add(f);
+        return f;
+      }),
+      PlayQueue(),
+      TrackRepository(db),
+      onError: (_) {},
+    );
+    addTearDown(handler.dispose);
+    for (final n in ['a', 'b']) {
+      await db.into(db.tracks).insert(TracksCompanion.insert(
+            path: '/m/$n.mp3',
+            title: n,
+            albumKey: 'k',
+            format: 'mp3',
+            sizeBytes: 1,
+            mtimeMs: 1,
+            addedAt: 1,
+          ));
+    }
+    final ids = (await db.select(db.tracks).get()).map((t) => t.id).toList();
+    await handler.playQueue(ids, 0);
+    await handler.setTransition(TransitionMode.crossfade);
+    await settle();
+    expect(players[0].playing, isTrue);
 
-      // What JamController._begin does:
-      await handler.pause();
-      expect(players[0].playing, isFalse);
-      final remote = _Remote();
-      handler.attachRemote(remote);
-      final loads = players.fold<int>(0, (n, p) => n + p.loaded.length);
-      final nexts = players.fold<int>(0, (n, p) => n + p.nextCalls.length);
+    // What JamController._begin does:
+    await handler.pause();
+    expect(players[0].playing, isFalse);
+    final remote = _Remote();
+    handler.attachRemote(remote);
+    final loads = players.fold<int>(0, (n, p) => n + p.loaded.length);
+    final nexts = players.fold<int>(0, (n, p) => n + p.nextCalls.length);
 
-      await handler.play();
-      await handler.skipToNext();
-      await settle();
-      expect(remote.calls, ['play', 'next']);
-      expect(players.fold<int>(0, (n, p) => n + p.loaded.length), loads);
-      expect(players.fold<int>(0, (n, p) => n + p.nextCalls.length), nexts,
-          reason: 'the local window is left alone while the Jam plays');
-      expect(players[0].playing, isFalse);
-    });
-  }
+    await handler.play();
+    await handler.skipToNext();
+    await settle();
+    expect(remote.calls, ['play', 'next']);
+    expect(players.fold<int>(0, (n, p) => n + p.loaded.length), loads);
+    expect(players.fold<int>(0, (n, p) => n + p.nextCalls.length), nexts,
+        reason: 'the local window is left alone while the Jam plays');
+    expect(players[0].playing, isFalse);
+  });
 }

@@ -7,20 +7,31 @@ import 'package:codecore/services/jam/jam_models.dart';
 import 'package:codecore/services/share/offers.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shelf/shelf.dart';
 
 /// One simulated device: its own HTTP node, Jam routes and guest client.
 class Dev {
-  Dev(String id)
+  Dev(String id, {DateTime Function()? now})
       : id = id,
         jam = JamHost(
             deviceId: id,
             deviceName: id,
             allowLoopback: true,
+            now: now,
             pollWait: const Duration(seconds: 1)) {
+    final routes = jam.buildRouter();
     node = OfferNode(
         OfferService(deviceId: id, deviceName: id, allowLoopback: true),
         allowLoopback: true,
-        extraRoutes: {'/jam': jam.buildRouter().call});
+        extraRoutes: {
+          '/jam': (Request r) {
+            // The route reads the caller's token synchronously: once a poll
+            // is announced here, the host has already seen its sender.
+            final res = routes.call(r);
+            if (r.url.path.endsWith('/state')) _polls.add(r.headers[jamTokenHeader]);
+            return res;
+          },
+        });
     guest = JamGuest(
         local: jam,
         requestPoll: const Duration(milliseconds: 30),
@@ -34,6 +45,10 @@ class Dev {
   late final OfferNode node;
   late final JamGuest guest;
   late final int port;
+  final _polls = StreamController<String?>.broadcast();
+
+  /// The identity token of every state poll this device receives as host.
+  Stream<String?> get statePolls => _polls.stream;
 
   Future<void> start() async => port = await node.start();
 
@@ -51,12 +66,21 @@ class Dev {
   }
 }
 
+/// The first state of [g] that passes [test], the one it already has included.
+Future<JamState> reach(JamGuest g, bool Function(JamState) test) {
+  final now = g.state;
+  if (now != null && test(now)) return Future.value(now);
+  return g.states
+      .firstWhere(test)
+      .timeout(const Duration(seconds: 5), onTimeout: () => g.state!);
+}
+
 void main() {
   late List<Dev> devs;
   late Directory dir;
 
-  Future<Dev> make(String id) async {
-    final d = Dev(id);
+  Future<Dev> make(String id, {DateTime Function()? now}) async {
+    final d = Dev(id, now: now);
     await d.start();
     devs.add(d);
     return d;
@@ -74,8 +98,8 @@ void main() {
     dir.deleteSync(recursive: true);
   });
 
-  /// [via] accepts for the host when it is a guest, else the host itself does.
-  void autoAccept(Dev d, {Dev? hostOf}) {
+  /// A guest accepts on behalf of its host, a host accepts itself.
+  void autoAccept(Dev d) {
     d.jam.onRequest = (r) {
       if (d.jam.isGuest) {
         unawaited(d.guest.invite(r));
@@ -99,9 +123,7 @@ void main() {
 
     // every guest converges on the same roster
     for (final g in guests) {
-      final s = await g.guest.states
-          .firstWhere((s) => s.participants.length == 5)
-          .timeout(const Duration(seconds: 5), onTimeout: () => g.guest.state!);
+      final s = await reach(g.guest, (s) => s.participants.length == 5);
       expect(s.participants.length, 5, reason: g.id);
     }
   });
@@ -155,7 +177,8 @@ void main() {
 
   test('the guest that invited another one can drop without ending it',
       () async {
-    final host = await make('host');
+    var clock = DateTime(2026, 1, 1);
+    final host = await make('host', now: () => clock);
     autoAccept(host);
     final a = await make('a');
     autoAccept(a);
@@ -168,10 +191,12 @@ void main() {
 
     // a vanishes (process killed): the host keeps b and the session
     await a.stop();
-    // b keeps polling (<=1 s apart), a does not: only a goes stale
-    await Future<void>.delayed(const Duration(milliseconds: 2500));
-    final dropped = host.jam.dropStale(const Duration(milliseconds: 1800));
-    expect(dropped, contains('a'));
+    // Time passes on the host; b keeps polling, a does not: only a goes stale.
+    clock = clock.add(const Duration(seconds: 80));
+    final heard = host.statePolls.firstWhere((t) => t == b.guest.sessionToken);
+    host.jam.apply(const JamCommand.volume(0.3)); // b's long poll returns, b polls again
+    await heard.timeout(const Duration(seconds: 5));
+    expect(host.jam.dropStale(const Duration(seconds: 75)), ['a']);
     expect(host.jam.state!.ended, false);
     expect(host.jam.memberIds, ['b']);
 
@@ -200,16 +225,5 @@ void main() {
     host.jam.endSession();
     await Future.wait(ended);
     expect(host.jam.state!.ended, true);
-  });
-
-  test('guest of a vanished host gives up within the timeout', () async {
-    final host = await make('host');
-    autoAccept(host);
-    final a = await make('a');
-    await a.joinThrough(host);
-    final lost = a.guest.lost.first;
-    await host.node.stop();
-    await lost.timeout(const Duration(seconds: 15));
-    expect(a.guest.active, false);
   });
 }

@@ -32,14 +32,6 @@ class CcPageTransitionsBuilder extends PageTransitionsBuilder {
   }
 }
 
-/// Text size is applied app-wide through MediaQuery's text scaler (see app.dart):
-/// scaling the TextTheme directly asserts on styles without a font size.
-ThemeData buildTheme(
-  AppThemeId id,
-  bool compact, {
-  CcAccent accent = CcAccent.viola,
-}) => buildThemeFromColors(buildPalette(id, accent), compact);
-
 /// The theme the `theme` setting names: a built-in one with its accent, or one
 /// of the user's own (`custom:<id>`); one that no longer exists is Notte.
 CcColors resolveColors(String theme, String accent, CustomThemes customs) {
@@ -49,6 +41,9 @@ CcColors resolveColors(String theme, String accent, CustomThemes customs) {
       buildPalette(appThemeIdFromName(theme), accentFromName(accent));
 }
 
+/// Text size is applied app-wide through MediaQuery's text scaler (see app.dart):
+/// scaling the TextTheme directly asserts on styles without a font size.
+///
 /// [pageBackdrop]: pages and the app bar are see-through, so the gradient or
 /// picture behind them shows (see `AppBackground`).
 ThemeData buildThemeFromColors(CcColors c, bool compact, {bool pageBackdrop = false}) {

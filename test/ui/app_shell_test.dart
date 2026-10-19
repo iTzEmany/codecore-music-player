@@ -1,3 +1,4 @@
+import 'package:codecore/providers/nav_providers.dart';
 import 'package:codecore/ui/shell/app_shell.dart';
 import 'package:codecore/ui/shell/desktop_player_bar.dart';
 import 'package:codecore/ui/shell/desktop_sidebar.dart';
@@ -5,6 +6,7 @@ import 'package:codecore/ui/shell/side_panel.dart';
 import 'package:codecore/ui/widgets/mini_player.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/app_harness.dart';
@@ -75,24 +77,6 @@ void main() {
     await h.dispose(tester);
   });
 
-  testWidgets('tracks listed in Library; tap plays and shows mini player',
-      (tester) async {
-    _phone(tester);
-    final h = await Harness.create(tester, tracks: 3);
-    await h.pump(tester, const AppShell());
-    await tester.tap(find.text('Libreria'));
-    await _settle(tester);
-    await tester.tap(find.text('Tutti i brani'));
-    await _settle(tester);
-    expect(find.text('Song 0'), findsWidgets);
-    await tester.tap(find.text('Song 1').first);
-    await _settle(tester);
-    expect(h.handler.currentTrack?.title, 'Song 1');
-    expect(find.byType(MiniPlayer), findsOneWidget);
-    expect(find.byIcon(Icons.devices_rounded), findsOneWidget);
-    await h.dispose(tester);
-  });
-
   testWidgets('opening an album keeps mini-player and bar; back closes it',
       (tester) async {
     _phone(tester);
@@ -118,19 +102,23 @@ void main() {
     await h.dispose(tester);
   });
 
-  testWidgets('mini-player: favourite, devices sheet, no nearby devices',
-      (tester) async {
+  testWidgets(
+      'tracks listed in Library; tap plays and shows the mini-player: '
+      'favourite, devices sheet, no nearby devices', (tester) async {
     _phone(tester);
-    final h = await Harness.create(tester, tracks: 2);
+    final h = await Harness.create(tester, tracks: 3);
     await h.pump(tester, const AppShell());
     await tester.tap(find.text('Libreria'));
     await _settle(tester);
     await tester.tap(find.text('Tutti i brani'));
     await _settle(tester);
-    await tester.tap(find.text('Song 0').first);
+    expect(find.text('Song 0'), findsWidgets);
+    await tester.tap(find.text('Song 1').first);
     await _settle(tester);
+    expect(h.handler.currentTrack?.title, 'Song 1');
     expect(find.byType(MiniPlayer), findsOneWidget);
     expect(find.byIcon(Icons.favorite_border_rounded), findsWidgets);
+    expect(find.byIcon(Icons.devices_rounded), findsOneWidget);
     await tester.tap(find.byIcon(Icons.devices_rounded));
     await _settle(tester);
     expect(find.text('Dispositivi'), findsWidgets);
@@ -151,6 +139,9 @@ void main() {
     await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
     await tester.pump(const Duration(milliseconds: 300));
     expect(tester.takeException(), isNull);
+    final container =
+        ProviderScope.containerOf(tester.element(find.byType(AppShell)));
+    expect(container.read(navIndexProvider), NavTab.search.index);
     await h.dispose(tester);
   });
 }

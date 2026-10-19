@@ -1,4 +1,5 @@
-import 'package:codecore/services/import/exportify_reader.dart';
+import 'package:codecore/core/import_row.dart';
+import 'package:codecore/services/import/playlist_reader.dart';
 import 'package:codecore/services/import/track_matcher.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -11,7 +12,7 @@ void main() {
           '"Album ${i % 300}","Artist ${i % 800};Guest $i",${180000 + i}');
     }
     final sw = Stopwatch()..start();
-    final csv = await readExportifyInIsolate('big.csv', b.toString());
+    final csv = await readPlaylistFileInIsolate('big.csv', b.toString());
     final parsed = sw.elapsedMilliseconds;
     final index = LibraryIndex([
       for (var i = 0; i < 20000; i++)

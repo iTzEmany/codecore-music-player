@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../support/app_harness.dart';
 
 void main() {
-  testWidgets('settings builds and theme choice is persisted in state',
+  testWidgets('settings builds (with a Backup group) and theme choice is persisted in state',
       (tester) async {
     tester.view.physicalSize = const Size(500, 3400);
     tester.view.devicePixelRatio = 1;
@@ -18,6 +18,8 @@ void main() {
     expect(find.text('Aspetto'), findsOneWidget);
     expect(find.text('Italiano'), findsOneWidget);
     expect(find.text('Arricchimento automatico'), findsOneWidget);
+    expect(find.text('Crea backup'), findsOneWidget);
+    expect(find.text('Ripristina da backup'), findsWidgets);
     expect(find.text('Notte viola'), findsOneWidget);
     await tester.tap(find.text('Nero puro'));
     await tester.pump();

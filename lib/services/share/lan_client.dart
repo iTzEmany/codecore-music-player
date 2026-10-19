@@ -222,33 +222,6 @@ class LanClient {
     }
   }
 
-  /// The same `/hello` over HTTPS: what the certificate really is, checked
-  /// against [pin] when there is one.
-  Future<RemoteInfo> helloSecure(String host, int tlsPort, {String? pin}) async {
-    String? seen;
-    final dio = Dio(_dio.options.copyWith());
-    dio.httpClientAdapter = IOHttpClientAdapter(
-      createHttpClient: () => HttpClient()
-        ..badCertificateCallback = (cert, h, p) {
-          seen = DeviceIdentity.fingerprintOfDer(cert.der);
-          return pin == null || seen == pin;
-        },
-    );
-    try {
-      final r = await dio.get<Object?>('https://$host:$tlsPort/hello');
-      final data = r.data;
-      if (r.statusCode != 200 || data is! Map || data['app'] != 'codecore') {
-        throw const LanException(LanError.notCodecore);
-      }
-      return RemoteInfo('${data['name'] ?? host}', tlsPort: tlsPort, fingerprint: seen);
-    } on DioException catch (e) {
-      if (pin != null && _isCertificateRefusal(e)) {
-        throw const LanException(LanError.identityChanged);
-      }
-      throw const LanException(LanError.unreachable);
-    }
-  }
-
   Future<List<RemoteTrack>> manifest(String host, int port, String pin,
       {CancelToken? cancel}) async {
     try {

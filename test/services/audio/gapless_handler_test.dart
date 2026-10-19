@@ -14,7 +14,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/fake_backend.dart';
 
-Future<void> settle() => Future<void>.delayed(const Duration(milliseconds: 30));
+/// Lets every pending async step run, without waiting on the wall clock.
+Future<void> settle() => pumpEventQueue();
 
 void main() {
   late AppDatabase db;

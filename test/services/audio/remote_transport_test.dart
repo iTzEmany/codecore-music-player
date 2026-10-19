@@ -40,7 +40,8 @@ class FakeRemote implements RemoteTransport {
       calls.add('seek ${position.inSeconds}');
 }
 
-Future<void> settle() => Future<void>.delayed(const Duration(milliseconds: 20));
+/// Lets every pending async step run, without waiting on the wall clock.
+Future<void> settle() => pumpEventQueue();
 
 void main() {
   late AppDatabase db;

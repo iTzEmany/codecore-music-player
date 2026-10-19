@@ -2,7 +2,8 @@ import 'dart:io';
 
 import 'package:codecore/core/constants.dart';
 import 'package:codecore/data/db/app_database.dart' show PlaylistImportItem;
-import 'package:codecore/services/import/exportify_reader.dart';
+import 'package:codecore/services/import/csv_profiles.dart';
+import 'package:codecore/services/import/imported_playlist.dart';
 import 'package:codecore/services/import/import_diff.dart' show ImportDiff;
 import 'package:codecore/ui/screens/import/import_intro_sheet.dart';
 import 'package:codecore/ui/screens/import/import_preview_dialog.dart';
@@ -12,7 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../support/app_harness.dart';
 
-ExportifyPlaylist fixture() => readExportify('Just_a_mood.csv',
+ImportedPlaylist fixture() => readCsvPlaylist('Just_a_mood.csv',
     File('test/fixtures/Just_a_mood.csv').readAsStringSync());
 
 /// These screens are about downloading; without YouTube they are not there.

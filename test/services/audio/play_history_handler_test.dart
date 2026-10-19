@@ -10,7 +10,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/fake_backend.dart';
 
-Future<void> settle() => Future<void>.delayed(const Duration(milliseconds: 40));
+/// Lets every pending async step run, without waiting on the wall clock.
+Future<void> settle() => pumpEventQueue();
 
 class _BrokenHistory extends PlayHistoryRepository {
   _BrokenHistory(super.db);

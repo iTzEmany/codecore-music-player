@@ -922,6 +922,12 @@ abstract class AppLocalizations {
   /// **'Un arricchimento è già in corso'**
   String get enrichBusy;
 
+  /// No description provided for @enrichNothingToDo.
+  ///
+  /// In it, this message translates to:
+  /// **'Niente da arricchire: ai brani non manca nulla'**
+  String get enrichNothingToDo;
+
   /// No description provided for @serviceUnavailable.
   ///
   /// In it, this message translates to:
@@ -5337,12 +5343,6 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Questo indirizzo non è un feed di podcast.'**
   String get podcastErrNotFeed;
-
-  /// No description provided for @podcastErrParserMissing.
-  ///
-  /// In it, this message translates to:
-  /// **'La lettura dei feed non è ancora disponibile in questa versione.'**
-  String get podcastErrParserMissing;
 
   /// No description provided for @podcastErrUnsupportedFormat.
   ///

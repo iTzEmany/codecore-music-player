@@ -58,6 +58,29 @@ class BatchProgress {
   final bool finished, rateLimited, cancelled;
 }
 
+/// Whether a batch run still has something to ask the online services for
+/// [t]. A track whose requested fields are all filled is not looked up again
+/// (every run used to ask iTunes again for every track already enriched), and
+/// one for which nothing was ever found (status 2) waits until the user asks
+/// for it explicitly.
+bool needsEnrichment(
+  Track t, {
+  bool metadata = true,
+  bool lyrics = true,
+  bool curiosities = false,
+}) {
+  if (t.enrichStatus == 2) return false;
+  final meta = metadata &&
+      (t.album == null ||
+          t.year == null ||
+          t.genre == null ||
+          t.trackNumber == null ||
+          !t.hasCover);
+  final words = lyrics && t.lyricsPlain == null && t.lyricsSynced == null;
+  final trivia = curiosities && t.curiosities == null;
+  return meta || words || trivia;
+}
+
 class EnrichmentService {
   EnrichmentService({
     required this.db,
@@ -224,7 +247,11 @@ class EnrichmentService {
       }
       final t = await tracks.getById(id);
       done++;
-      if (t == null || t.enrichStatus == 2) {
+      if (t == null ||
+          !needsEnrichment(t,
+              metadata: includeMetadata,
+              lyrics: includeLyrics,
+              curiosities: includeCuriosities)) {
         yield BatchProgress(
             done: done, total: ids.length, updated: updated, notFound: notFound);
         continue;

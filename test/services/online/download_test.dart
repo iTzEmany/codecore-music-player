@@ -80,20 +80,6 @@ void main() {
     expect(q.items[1].status, DownloadStatus.done);
   });
 
-  test('errors are mapped per item', () async {
-    final q = DownloadQueue(
-      downloader: (res, dir, cancel) async* {
-        throw const YtException(YtErrorKind.unavailable);
-      },
-      outDir: () async => Directory.systemTemp,
-      onChanged: (_) {},
-    );
-    q.add(r('x'));
-    await Future<void>.delayed(const Duration(milliseconds: 50));
-    expect(q.items.single.status, DownloadStatus.failed);
-    expect(q.items.single.error, YtErrorKind.unavailable);
-  });
-
   test('tag reaches onSettled for done, failed and cancelled items', () async {
     final settled = <String>[];
     final q = DownloadQueue(

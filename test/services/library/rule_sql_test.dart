@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/data/repositories/track_repository.dart';
 import 'package:codecore/services/library/rules/rule_parser.dart';
@@ -76,7 +78,7 @@ void main() {
 
   /// Ids of the tracks the rules select, as a set.
   Future<Set<int>> run(String rules, {DateTime? at}) async =>
-      {for (final t in await repo.tracksByRules(parseRules(rules).expr, now: at ?? now)) t.id};
+      {for (final t in await repo.watchByRules(parseRules(rules).expr, now: at ?? now).first) t.id};
 
   Set<int> expected(bool Function(_T) test) =>
       {for (final t in data) if (!t.missing && test(t)) t.id};
@@ -199,20 +201,20 @@ void main() {
       final got = await run(evil);
       expect(got.length, lessThan(data.length - 1), reason: evil);
     }
-    expect(await repo.countAll(), data.length, reason: 'every track is still there');
+    expect(await db.select(db.tracks).get(), hasLength(data.length), reason: 'every track is still there');
   });
 
   test('order, limit and a shuffle that holds for a seed', () async {
     final rules = parseRules('preferiti').expr;
-    final byTitleOrder = await repo.tracksByRules(rules, sort: SortOption.title);
+    final byTitleOrder = await repo.watchByRules(rules, sort: SortOption.title).first;
     final titles = byTitleOrder.map((t) => t.title.toLowerCase()).toList();
     expect(titles, [...titles]..sort());
-    final newest = await repo.tracksByRules(rules, sort: SortOption.addedAt, limit: 3);
+    final newest = await repo.watchByRules(rules, sort: SortOption.addedAt, limit: 3).first;
     expect(newest, hasLength(3));
     expect(newest.map((t) => t.addedAt), [...newest.map((t) => t.addedAt)]..sort((a, b) => b.compareTo(a)));
-    final a = await repo.tracksByRules(rules, randomSeed: 7);
-    final b = await repo.tracksByRules(rules, randomSeed: 7);
-    final c = await repo.tracksByRules(rules, randomSeed: 8);
+    final a = await repo.watchByRules(rules, randomSeed: 7).first;
+    final b = await repo.watchByRules(rules, randomSeed: 7).first;
+    final c = await repo.watchByRules(rules, randomSeed: 8).first;
     expect(a.map((t) => t.id), b.map((t) => t.id), reason: 'same seed, same order');
     expect(a.map((t) => t.id), isNot(c.map((t) => t.id)));
     expect(a.map((t) => t.id).toSet(), byTitleOrder.map((t) => t.id).toSet());
@@ -232,27 +234,16 @@ void main() {
     expect(q.where, startsWith('missing = 0 AND ignored = 0 AND kind = 0 AND ('));
   });
 
-  test('the stream follows the data: a track that becomes a favourite appears', () async {
-    final stream = repo.watchByRules(parseRules('preferiti artista:nina').expr, now: now);
-    final seen = <int>[];
-    final sub = stream.listen((l) => seen.add(l.length));
-    await Future<void>.delayed(const Duration(milliseconds: 60));
-    final nina = data.firstWhere((t) => t.artist == 'Nina Simone' && !t.fav);
-    await repo.setFavorite(nina.id, true);
-    await Future<void>.delayed(const Duration(milliseconds: 60));
-    await sub.cancel();
-    expect(seen.last, seen.first + 1);
-  });
-
   test('a rule on tags updates when a tag is assigned', () async {
+    // A change to `tracks` is covered by the smart playlist test; this one is
+    // about the tag tables being watched too.
     final tag = await db.into(db.userTags).insert(UserTagsCompanion.insert(name: 'Mood'));
-    final stream = repo.watchByRules(parseRules('tag:mood').expr, now: now);
-    final seen = <int>[];
-    final sub = stream.listen((l) => seen.add(l.length));
-    await Future<void>.delayed(const Duration(milliseconds: 60));
+    final counts = StreamIterator(repo.watchByRules(parseRules('tag:mood').expr, now: now).map((l) => l.length));
+    addTearDown(counts.cancel);
+    expect(await counts.moveNext(), isTrue);
+    expect(counts.current, 0);
     await db.into(db.trackTags).insert(TrackTagsCompanion.insert(trackId: data[3].id, tagId: tag));
-    await Future<void>.delayed(const Duration(milliseconds: 60));
-    await sub.cancel();
-    expect(seen, [0, 1]);
+    expect(await counts.moveNext(), isTrue);
+    expect(counts.current, 1);
   });
 }

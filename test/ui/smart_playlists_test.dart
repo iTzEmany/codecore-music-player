@@ -12,10 +12,12 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../support/app_harness.dart';
 
+/// One turn of the real event loop (not real time) lets drift finish what a
+/// `runAsync` write started; everything else runs on the test clock.
 Future<void> _settle(WidgetTester tester) async {
-  await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 150)));
+  await tester.runAsync(() => Future<void>.delayed(Duration.zero));
   await tester.pump(const Duration(milliseconds: 300));
-  await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 100)));
+  await tester.runAsync(() => Future<void>.delayed(Duration.zero));
   await tester.pump(const Duration(milliseconds: 300));
 }
 
@@ -156,15 +158,12 @@ void main() {
     testWidgets('a live count under the rules, and the parser\'s remarks', (tester) async {
       await open(tester, (_) => const SmartPlaylistEditor());
       await tester.enterText(find.widgetWithText(TextField, 'Regole'), 'album:"Album 1"');
-      await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 400)));
       await _settle(tester);
       expect(find.text('2 brani'), findsOneWidget);
       await tester.enterText(find.widgetWithText(TextField, 'Regole'), 'colore:rosso');
-      await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 400)));
       await _settle(tester);
       expect(find.textContaining('Non capisco «colore:rosso»'), findsOneWidget);
       await tester.enterText(find.widgetWithText(TextField, 'Regole'), '');
-      await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 400)));
       await _settle(tester);
       expect(find.text('Senza regole la playlist contiene tutta la libreria.'), findsOneWidget);
       expect(find.text('4 brani'), findsOneWidget);

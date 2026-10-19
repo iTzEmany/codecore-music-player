@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/data/repositories/duplicate_repository.dart';
 import 'package:codecore/data/repositories/playlist_repository.dart';
@@ -7,24 +5,21 @@ import 'package:codecore/data/repositories/track_repository.dart';
 import 'package:drift/drift.dart' show Value, Variable;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:path/path.dart' as p;
 
 void main() {
   final v4 = RegExp(r'^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$');
 
   group('migration v9 → v10', () {
     test('every existing playlist gets its own uuid and keeps its data, updated_at starts as created_at', () async {
-      final dir = Directory.systemTemp.createTempSync('mig10');
-      addTearDown(() => dir.deleteSync(recursive: true));
-      final db = AppDatabase(NativeDatabase(File(p.join(dir.path, 'v9.db')), setup: (raw) {
-        if (raw.userVersion == 0) {
-          raw.execute('CREATE TABLE playlists (id INTEGER PRIMARY KEY AUTOINCREMENT, '
-              'name TEXT NOT NULL, created_at INTEGER NOT NULL, cover_key TEXT)');
-          raw.execute("INSERT INTO playlists (name, created_at, cover_key) VALUES ('Rock', 111, 'c1')");
-          raw.execute("INSERT INTO playlists (name, created_at, cover_key) VALUES ('Jazz', 222, NULL)");
-          raw.execute("INSERT INTO playlists (name, created_at) VALUES ('Mix', 333)");
-          raw.userVersion = 9;
-        }
+      // A v9 database fabricated in memory before drift reads its version (on
+      // a file, each schema statement cost a disk sync: seconds on a busy disk).
+      final db = AppDatabase(NativeDatabase.memory(setup: (raw) {
+        raw.execute('CREATE TABLE playlists (id INTEGER PRIMARY KEY AUTOINCREMENT, '
+            'name TEXT NOT NULL, created_at INTEGER NOT NULL, cover_key TEXT)');
+        raw.execute("INSERT INTO playlists (name, created_at, cover_key) VALUES ('Rock', 111, 'c1')");
+        raw.execute("INSERT INTO playlists (name, created_at, cover_key) VALUES ('Jazz', 222, NULL)");
+        raw.execute("INSERT INTO playlists (name, created_at) VALUES ('Mix', 333)");
+        raw.userVersion = 9;
       }));
       addTearDown(db.close);
 

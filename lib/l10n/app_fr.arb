@@ -218,6 +218,7 @@
     }
   },
   "enrichBusy": "Un enrichissement est déjà en cours",
+  "enrichNothingToDo": "Rien à compléter : il ne manque rien aux morceaux",
   "serviceUnavailable": "Service indisponible, réessayez plus tard",
   "lyrics": "Paroles",
   "searchLyrics": "Rechercher les paroles",
@@ -2055,7 +2056,6 @@
   "podcastErrTooLarge": "Le flux est trop volumineux.",
   "podcastErrNetwork": "Impossible de joindre le serveur.",
   "podcastErrNotFeed": "Cette adresse n’est pas un flux de podcast.",
-  "podcastErrParserMissing": "La lecture des flux n’est pas encore disponible dans cette version.",
   "podcastErrUnsupportedFormat": "Format audio non pris en charge.",
   "syncTitle": "Synchroniser les playlists",
   "syncAdded": "{count, plural, one{1 nouvelle} other{{count} nouvelles}}",

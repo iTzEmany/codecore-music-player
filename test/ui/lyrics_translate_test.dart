@@ -1,4 +1,5 @@
 import 'package:codecore/data/db/app_database.dart';
+import 'package:codecore/l10n/app_localizations.dart';
 import 'package:codecore/providers/translation_providers.dart';
 import 'package:codecore/services/online/lyrics_translator.dart';
 import 'package:codecore/ui/screens/lyrics/lyrics_screen.dart';
@@ -83,9 +84,10 @@ void main() {
       );
     });
 
-    test('supported language list has the six app languages', () {
-      for (final c in ['it', 'en', 'de', 'es', 'fr', 'pt']) {
-        expect(translationLanguages, contains(c));
+    test('every app language can be translated to', () {
+      // The translate flow looks the app's language up with `!`.
+      for (final l in AppLocalizations.supportedLocales) {
+        expect(translationLanguages, contains(l.languageCode));
       }
     });
   });

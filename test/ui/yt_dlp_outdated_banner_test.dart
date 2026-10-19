@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../support/app_harness.dart';
 
 void main() {
-  Future<void> show(WidgetTester tester, String? version) async {
+  Future<void> show(WidgetTester tester, String version) async {
     final h = await Harness.create(tester);
     await h.pump(
       tester,
@@ -28,13 +28,10 @@ void main() {
         findsOneWidget);
   });
 
-  testWidgets('a recent or unknown yt-dlp shows nothing', (tester) async {
+  // Which versions count as old (unreadable ones do not) is in
+  // test/services/online/yt_dlp_version_test.dart.
+  testWidgets('a recent yt-dlp shows nothing', (tester) async {
     await show(tester, '2026.08.19');
-    expect(find.textContaining('troppo vecchio'), findsNothing);
-  });
-
-  testWidgets('an unreadable version is not reported as old', (tester) async {
-    await show(tester, null);
     expect(find.textContaining('troppo vecchio'), findsNothing);
   });
 

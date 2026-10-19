@@ -72,9 +72,6 @@ enum PodcastErrorKind {
   /// It arrived but is not an RSS feed.
   notFeed,
 
-  /// The feed reader is not available in this build.
-  parserMissing,
-
   /// The episode is in a format the player does not handle.
   unsupportedFormat,
 }

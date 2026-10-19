@@ -55,10 +55,12 @@ void main() {
     'stats': const StatsScreen(),
     'smart editor': const SmartPlaylistEditor(),
   };
-  // German and French are the languages with the longest texts.
-  for (final lang in ['it', 'fr', 'de', 'pt']) {
+  // German and French are the languages with the longest texts; Italian and
+  // Portuguese still have the longest version of many strings.
+  const langs = ['it', 'fr', 'de', 'pt'];
   for (final e in screens.entries) {
-    testWidgets('${e.key} has no overflow at 150% text ($lang)', (tester) async {
+    testWidgets('${e.key} has no overflow at 150% text (${langs.join(', ')})',
+        (tester) async {
       tester.view.physicalSize = const Size(400, 800);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);
@@ -66,23 +68,28 @@ void main() {
       final rows = await tester.runAsync(() => h.db.select(h.db.tracks).get());
       await tester.runAsync(
           () => h.handler.playQueue(rows!.map((t) => t.id).toList(), 0));
-      await h.pump(
-        tester,
-        MediaQuery(
-          data: MediaQueryData(
-              size: const Size(400, 800),
-              textScaler: const TextScaler.linear(1.5)),
-          child: e.value,
-        ),
-        locale: Locale(lang),
-      );
-      await tester.runAsync(
-          () => Future<void>.delayed(const Duration(milliseconds: 150)));
-      await tester.pump(const Duration(milliseconds: 300));
-      await tester.pump(const Duration(milliseconds: 300));
-      expect(tester.takeException(), isNull);
+      for (final lang in langs) {
+        // The language is switched in place: the screen keeps what it loaded
+        // and lays every text out again (the same texts as a fresh mount).
+        await h.pump(
+          tester,
+          MediaQuery(
+            data: MediaQueryData(
+                size: const Size(400, 800),
+                textScaler: const TextScaler.linear(1.5)),
+            child: e.value,
+          ),
+          locale: Locale(lang),
+        );
+        if (lang == langs.first) {
+          await tester.runAsync(
+              () => Future<void>.delayed(const Duration(milliseconds: 150)));
+        }
+        await tester.pump(const Duration(milliseconds: 300));
+        await tester.pump(const Duration(milliseconds: 300));
+        expect(tester.takeException(), isNull, reason: lang);
+      }
       await h.dispose(tester);
     });
-  }
   }
 }

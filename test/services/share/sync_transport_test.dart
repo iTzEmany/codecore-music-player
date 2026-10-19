@@ -11,18 +11,22 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
 
 void main() {
-  late Directory tmp;
   late DeviceIdentity idA, idB, idC;
   late OfferNode nodeB;
   late Set<String> trusted;
   late List<(String, TrackRequest)> wanted;
 
-  setUp(() async {
-    tmp = Directory.systemTemp.createTempSync('sync');
-    Future<DeviceIdentity> make(String n) => DeviceIdentity.loadOrCreate(Directory(p.join(tmp.path, n))..createSync());
+  // Making a key pair is the slow part: once for the whole file.
+  setUpAll(() async {
+    final dir = Directory.systemTemp.createTempSync('sync-ids');
+    addTearDown(() => dir.deleteSync(recursive: true));
+    Future<DeviceIdentity> make(String n) => DeviceIdentity.loadOrCreate(Directory(p.join(dir.path, n)));
     idA = await make('a');
     idB = await make('b');
     idC = await make('c');
+  });
+
+  setUp(() async {
     trusted = {idA.fingerprint};
     wanted = [];
     nodeB = OfferNode(OfferService(deviceId: 'b', deviceName: 'B', allowLoopback: true),
@@ -42,10 +46,7 @@ void main() {
         });
     await nodeB.start();
   });
-  tearDown(() async {
-    await nodeB.stop();
-    tmp.deleteSync(recursive: true);
-  });
+  tearDown(() => nodeB.stop());
 
   SyncClient client(DeviceIdentity id) => SyncClient(LanClient(identity: id));
 

@@ -112,7 +112,7 @@ void main() {
     await repo.delete(live);
     expect(await repo.watchAll().first, isEmpty);
     expect(await db.select(db.trackTags).get(), isEmpty);
-    expect(await TrackRepository(db).countAll(), 6, reason: 'every track is still there');
+    expect(await db.select(db.tracks).get(), hasLength(6), reason: 'every track is still there');
     expect((await smart.get(a))!.rules, 'tag:live', reason: 'the rule is user data too');
   });
 

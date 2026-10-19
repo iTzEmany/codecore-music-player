@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:codecore/data/db/app_database.dart';
-import 'package:codecore/data/repositories/library_queries.dart';
 import 'package:codecore/data/repositories/podcast_repository.dart';
 import 'package:codecore/data/repositories/track_repository.dart';
 import 'package:codecore/services/podcast/episode_downloader.dart';
@@ -138,13 +137,6 @@ void main() {
     expect(File('${t.path}.part').existsSync(), isFalse);
     expect((await repo.episodeById(episodeId))!.trackId, trackId);
     expect(progress.last, (3000, 3000));
-  });
-
-  test('the new track is not music: it is in no library list', () async {
-    await build().download(episodeId);
-    expect(await tracks.watchTracks().first, isEmpty);
-    expect(await LibraryQueries(db).watchAlbums().first, isEmpty);
-    expect(await tracks.liteEntries(), isEmpty);
   });
 
   test('unreadable tags do not stop it: the feed\'s length stands in', () async {

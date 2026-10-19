@@ -82,10 +82,21 @@ void main() {
   });
   tearDown(() => dir.deleteSync(recursive: true));
 
-  test('hit, miss, and the entry survives a restart', () async {
+  test('hit, miss, and the entry survives a restart with its source and page',
+      () async {
     final c = make();
     expect(await c.get('k'), isNull);
-    await c.put('k', [yr('a'), yr('b')]);
+    await c.put('k', [
+      yr('a'),
+      const YtResult(
+        id: 'b',
+        title: 'B',
+        channel: 'c',
+        duration: null,
+        source: MediaSource.soundcloud,
+        webpageUrl: 'https://soundcloud.com/c/b',
+      ),
+    ]);
     expect((await c.get('k'))!.map((r) => r.id), ['a', 'b']);
     await c.flush();
     final again = make();
@@ -93,6 +104,10 @@ void main() {
     expect(back.first.album, 'Alb');
     expect(back.first.duration, const Duration(seconds: 200));
     expect(back.first.artists, ['A']);
+    expect(back.first.source, MediaSource.youtube);
+    expect(back.first.webpageUrl, isNull);
+    expect(back[1].source, MediaSource.soundcloud);
+    expect(back[1].downloadUrl, 'https://soundcloud.com/c/b');
   });
 
   test('entries expire after the time to live', () async {

@@ -151,21 +151,19 @@ void main() {
     });
   });
 
-  group('proposeKeeper', () {
+  group('the version proposed to keep', () {
+    int keeper(List<DupEntry> group) => findDuplicates(group).single.proposed.id;
+
     test('lossless beats a higher-bitrate lossy file', () {
-      final k = proposeKeeper([
-        entry(1, 'S', 'B', bitrate: 320),
-        entry(2, 'S', 'B', format: 'flac', bitrate: 700),
-      ]);
-      expect(k.id, 2);
+      expect(keeper([entry(1, 'S', 'B', bitrate: 320), entry(2, 'S', 'B', format: 'flac', bitrate: null)]), 2);
     });
 
     test('then bitrate, then edited, then cover, then the oldest', () {
-      expect(proposeKeeper([entry(1, 'S', 'B', bitrate: 128), entry(2, 'S', 'B', bitrate: 256)]).id, 2);
-      expect(proposeKeeper([entry(1, 'S', 'B'), entry(2, 'S', 'B', edited: true)]).id, 2);
-      expect(proposeKeeper([entry(1, 'S', 'B'), entry(2, 'S', 'B', cover: true)]).id, 2);
-      expect(proposeKeeper([entry(1, 'S', 'B', added: 20), entry(2, 'S', 'B', added: 10)]).id, 2);
-      expect(proposeKeeper([entry(5, 'S', 'B'), entry(4, 'S', 'B')]).id, 4);
+      expect(keeper([entry(1, 'S', 'B', bitrate: 128), entry(2, 'S', 'B', bitrate: 256)]), 2);
+      expect(keeper([entry(1, 'S', 'B'), entry(2, 'S', 'B', edited: true)]), 2);
+      expect(keeper([entry(1, 'S', 'B'), entry(2, 'S', 'B', cover: true)]), 2);
+      expect(keeper([entry(1, 'S', 'B', added: 20), entry(2, 'S', 'B', added: 10)]), 2);
+      expect(keeper([entry(5, 'S', 'B'), entry(4, 'S', 'B')]), 4);
     });
   });
 

@@ -27,12 +27,6 @@ void main() {
     expect(s.repeat, PlayRepeat.all);
   });
 
-  test('default theme is notte', () async {
-    SharedPreferences.setMockInitialValues({});
-    final store = await SettingsStore.open();
-    expect(store.readSettings().theme, 'notte');
-  });
-
   test('import thresholds default to 0.80 / 0.55 and round trip', () async {
     SharedPreferences.setMockInitialValues({});
     final store = await SettingsStore.open();
@@ -77,9 +71,10 @@ void main() {
     expect((await SettingsStore.open()).readSettings().transition, TransitionMode.normal);
   });
 
-  test('the accent defaults to violet and the light theme name is kept', () async {
+  test('theme notte and accent violet by default; the light theme name is kept', () async {
     SharedPreferences.setMockInitialValues({});
     final store = await SettingsStore.open();
+    expect(store.readSettings().theme, 'notte');
     expect(store.readSettings().accent, 'viola');
     await store.writeSettings(const AppSettings(theme: 'chiaro', accent: 'rosa'));
     final s = store.readSettings();

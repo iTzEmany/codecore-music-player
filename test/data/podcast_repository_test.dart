@@ -172,10 +172,8 @@ void main() {
 
     final t = await trackFor('/app/podcasts/1/a.mp3');
     await (db.update(db.podcastEpisodes)..where((x) => x.id.equals(e.id))).write(PodcastEpisodesCompanion(trackId: Value(t)));
-    expect((await repo.episodeForTrack(t))!.id, e.id);
     await repo.markPlayedByTrack(t, true, now: 999);
     expect((await repo.episodeById(e.id))!.playedAt, 999);
-    expect(await repo.episodeForTrack(123456), isNull);
   });
 
   test('settings: cleaning days, last check, cover', () async {

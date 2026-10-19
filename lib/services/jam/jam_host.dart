@@ -100,9 +100,6 @@ class JamHost {
   String? get sessionId => _sid;
   String? get fileToken => _fileToken;
 
-  /// Identity token of a guest (tests).
-  String? tokenOf(String memberId) => _members[memberId]?.token;
-
   /// Ids of the guests currently in the session.
   List<String> get memberIds => _members.keys.toList();
 

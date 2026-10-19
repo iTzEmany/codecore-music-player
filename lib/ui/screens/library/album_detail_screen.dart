@@ -6,6 +6,7 @@ import '../../../data/repositories/library_queries.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/library_providers.dart';
 import '../../../providers/online_providers.dart';
+import '../../../services/online/enrichment_service.dart' show needsEnrichment;
 import '../../../providers/player_providers.dart';
 import '../../../providers/settings_providers.dart';
 import '../../shell/shell_nav.dart';
@@ -136,10 +137,15 @@ class AlbumDetailScreen extends ConsumerWidget {
                   trackIds: [for (final t in list) t.id],
                 );
               case 'enrich':
-                final ok = ref.read(enrichJobProvider.notifier).start([
-                  for (final t in list) t.id,
-                ]);
-                if (!ok) snack(l.enrichBusy);
+                final todo = [
+                  for (final t in list)
+                    if (needsEnrichment(t)) t.id,
+                ];
+                if (todo.isEmpty) {
+                  snack(l.enrichNothingToDo);
+                } else if (!ref.read(enrichJobProvider.notifier).start(todo)) {
+                  snack(l.enrichBusy);
+                }
               case 'merge':
                 // The album this page shows is gone once merged: leave it.
                 showAlbumMergeDialog(context, ref, album).then((merged) {

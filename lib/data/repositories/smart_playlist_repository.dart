@@ -112,9 +112,6 @@ class SmartPlaylistRepository {
             SmartSort.fromName(p.sort) == SmartSort.random ? randomSeed : null,
       );
 
-  Future<List<Track>> tracksOf(SmartPlaylist p, {int randomSeed = 1}) =>
-      watchTracks(p, randomSeed: randomSeed).first;
-
   /// How many tracks [rules] select (the editor's live preview).
   Future<int> count(String rules) =>
       _tracks.countByRules(parseRules(rules).expr);

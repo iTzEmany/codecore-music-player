@@ -131,7 +131,7 @@ void main() {
     await h.dispose(tester);
   });
 
-  testWidgets('album: rows pick inside the disc list and keep the album order', (tester) async {
+  testWidgets('album: a long press on a row of the disc list starts a selection', (tester) async {
     _phone(tester);
     final h = await Harness.create(tester, tracks: 4);
     final albums = (await tester.runAsync(() => LibraryQueries(h.db).watchAlbums().first))!;
@@ -143,7 +143,7 @@ void main() {
     await h.dispose(tester);
   });
 
-  testWidgets('a playlist: picking offers «Rimuovi dalla playlist»; editing the order leaves the selection', (tester) async {
+  testWidgets('a playlist: picking offers «Rimuovi dalla playlist»', (tester) async {
     _phone(tester);
     final h = await Harness.create(tester, tracks: 3);
     final all = (await tester.runAsync(() => h.db.select(h.db.tracks).get()))!;

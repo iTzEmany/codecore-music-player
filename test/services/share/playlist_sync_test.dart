@@ -59,7 +59,7 @@ void main() {
   test('the same stamp is the same playlist, even if the lists differ', () {
     final plan = planSync(
       [_local('u1', 'Road', 20, [1, 2])],
-      [_remote('u1', 'Road', 20, ['a', 'b'])],
+      [_remote('u1', 'Road', 20, ['a', 'c'])],
       _resolve,
     );
     expect(plan.entries.single.action, SyncAction.same);
@@ -118,14 +118,15 @@ void main() {
     expect(e.trackIds, [3, 1, 2]);
   });
 
-  test('a newer stamp that changes nothing is not offered as a change', () {
+  test('a newer stamp that changes nothing here is "same", not a change, but still lists the missing tracks', () {
     final plan = planSync(
       [_local('u1', 'Road', 10, [1, 2])],
-      [_remote('u1', 'Road', 20, ['a', 'b'])],
+      [_remote('u1', 'Road', 20, ['a', 'x', 'b'])],
       _resolve,
     );
     expect(plan.entries.single.action, SyncAction.same);
     expect(plan.isEmpty, isTrue);
+    expect(plan.missing.map((t) => t.title), ['x']);
   });
 
   test('both sides changed different playlists: each side wins its own', () {
@@ -153,23 +154,5 @@ void main() {
     expect(plan.entries, hasLength(1));
     expect(plan.entries.single.remote.name, 'Road');
     expect(plan.entries.single.trackIds, [1, 2]);
-  });
-
-  test('a newer version with only missing tracks is "same" but still lists them', () {
-    final plan = planSync(
-      [_local('u1', 'Road', 10, [1])],
-      [_remote('u1', 'Road', 20, ['a', 'x'])],
-      _resolve,
-    );
-    expect(plan.entries.single.action, SyncAction.same);
-    expect(plan.missing.map((t) => t.title), ['x']);
-  });
-
-  test('RemotePlaylist survives the JSON round trip', () {
-    final r = _remote('u1', 'Road', 20, ['a', 'b']);
-    final back = RemotePlaylist.fromJson(r.toJson());
-    expect(back.uuid, 'u1');
-    expect(back.updatedAt, 20);
-    expect(back.items.map((t) => t.title), ['a', 'b']);
   });
 }

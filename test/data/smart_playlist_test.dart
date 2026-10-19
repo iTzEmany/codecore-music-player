@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/data/repositories/smart_playlist_repository.dart';
 import 'package:codecore/data/repositories/track_repository.dart';
@@ -33,6 +35,10 @@ void main() {
   });
   tearDown(() => db.close());
 
+  /// The tracks of the smart playlist [id], as its screen gets them.
+  Future<List<Track>> tracksOf(int id, {int randomSeed = 1}) async =>
+      repo.watchTracks((await repo.get(id))!, randomSeed: randomSeed).first;
+
   test('create keeps the name, the rules in canonical form, the order and the limit', () async {
     final id = await repo.create(
         name: '  Anni 70  ', rules: 'year:1970..1979 ARTIST:floyd', sort: SmartSort.title, limit: 20);
@@ -67,36 +73,35 @@ void main() {
     final id = await repo.create(name: 'A', rules: '');
     await repo.delete(id);
     expect(await repo.get(id), isNull);
-    expect(await tracks.countAll(), 5);
+    expect(await db.select(db.tracks).get(), hasLength(5));
   });
 
   test('the tracks are the rules\' matches, in the saved order, up to the limit', () async {
     final id = await repo.create(name: 'Floyd', rules: 'artista:floyd', sort: SmartSort.title);
-    expect((await repo.tracksOf((await repo.get(id))!)).map((t) => t.title), ['Charlie', 'Delta']);
+    expect((await tracksOf(id)).map((t) => t.title), ['Charlie', 'Delta']);
     await repo.update(id, sort: SmartSort.year);
-    expect((await repo.tracksOf((await repo.get(id))!)).map((t) => t.title), ['Delta', 'Charlie'], reason: 'newest year first');
+    expect((await tracksOf(id)).map((t) => t.title), ['Delta', 'Charlie'], reason: 'newest year first');
     await repo.update(id, limit: 1);
-    expect(await repo.tracksOf((await repo.get(id))!), hasLength(1));
+    expect(await tracksOf(id), hasLength(1));
   });
 
   test('most played, recently added', () async {
     final top = await repo.create(name: 'Top', rules: 'ascolti>0', sort: SmartSort.mostPlayed);
-    expect((await repo.tracksOf((await repo.get(top))!)).map((t) => t.title), ['Bravo', 'Delta', 'Alpha']);
+    expect((await tracksOf(top)).map((t) => t.title), ['Bravo', 'Delta', 'Alpha']);
     final recent = await repo.create(name: 'New', rules: '', sort: SmartSort.addedAt, limit: 2);
-    expect((await repo.tracksOf((await repo.get(recent))!)).map((t) => t.title), ['Echo', 'Delta']);
+    expect((await tracksOf(recent)).map((t) => t.title), ['Echo', 'Delta']);
   });
 
   test('never played', () async {
     final id = await repo.create(name: 'Never', rules: 'mai-ascoltati', sort: SmartSort.title);
-    expect((await repo.tracksOf((await repo.get(id))!)).map((t) => t.title), ['Charlie', 'Echo']);
+    expect((await tracksOf(id)).map((t) => t.title), ['Charlie', 'Echo']);
   });
 
   test('a random order holds for a seed and changes with another', () async {
     final id = await repo.create(name: 'Any', rules: '', sort: SmartSort.random);
-    final p = (await repo.get(id))!;
-    final a = (await repo.tracksOf(p, randomSeed: 3)).map((t) => t.id).toList();
-    final b = (await repo.tracksOf(p, randomSeed: 3)).map((t) => t.id).toList();
-    final c = (await repo.tracksOf(p, randomSeed: 99)).map((t) => t.id).toList();
+    final a = (await tracksOf(id, randomSeed: 3)).map((t) => t.id).toList();
+    final b = (await tracksOf(id, randomSeed: 3)).map((t) => t.id).toList();
+    final c = (await tracksOf(id, randomSeed: 99)).map((t) => t.id).toList();
     expect(a, b);
     expect(a.toSet(), ids.toSet());
     expect(a, isNot(c));
@@ -104,16 +109,19 @@ void main() {
 
   test('the list changes by itself: a track that becomes a favourite joins', () async {
     final id = await repo.create(name: 'Fav', rules: 'preferiti', sort: SmartSort.title);
-    final seen = <List<String>>[];
-    final sub = repo.watchTracks((await repo.get(id))!).listen((l) => seen.add([for (final t in l) t.title]));
-    await Future<void>.delayed(const Duration(milliseconds: 60));
-    await tracks.setFavorite(ids[1], true); // Bravo
-    await Future<void>.delayed(const Duration(milliseconds: 60));
+    // Each list is awaited before the next change: no sleeping, no timing.
+    final lists = StreamIterator(repo.watchTracks((await repo.get(id))!).map((l) => [for (final t in l) t.title]));
+    addTearDown(lists.cancel);
+    Future<List<String>> next() async {
+      expect(await lists.moveNext(), isTrue);
+      return lists.current;
+    }
+
+    expect(await next(), ['Alpha', 'Delta']);
+    await tracks.setFavorite(ids[1], true); // Bravo joins
+    expect(await next(), ['Alpha', 'Bravo', 'Delta']);
     await tracks.setFavorite(ids[0], false); // Alpha leaves
-    await Future<void>.delayed(const Duration(milliseconds: 60));
-    await sub.cancel();
-    expect(seen.first, ['Alpha', 'Delta']);
-    expect(seen.last, ['Bravo', 'Delta']);
+    expect(await next(), ['Bravo', 'Delta']);
   });
 
   test('count tells how many tracks some rules select', () async {

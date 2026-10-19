@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:codecore/core/uuid.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -14,11 +12,5 @@ void main() {
 
   test('a thousand of them are all different', () {
     expect({for (var i = 0; i < 1000; i++) newUuid()}, hasLength(1000));
-  });
-
-  test('with a seeded random it is repeatable (so tests can rely on it)', () {
-    expect(newUuid(Random(7)), newUuid(Random(7)));
-    expect(newUuid(Random(7)), isNot(newUuid(Random(8))));
-    expect(newUuid(Random(7)), matches(v4));
   });
 }

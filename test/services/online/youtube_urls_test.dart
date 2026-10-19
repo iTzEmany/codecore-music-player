@@ -14,17 +14,12 @@ void main() {
       'https://youtube.com/playlist?list=PLabc123&si=xyz': (YoutubeLinkKind.playlist, playlist),
       'https://m.youtube.com/playlist?list=PLabc123': (YoutubeLinkKind.playlist, playlist),
       'https://www.youtube.com/watch?v=VID&list=PLabc123': (YoutubeLinkKind.playlist, playlist),
-      'https://www.youtube.com/watch?v=VID&list=PLabc123&index=4': (YoutubeLinkKind.playlist, playlist),
       'https://youtu.be/VID?list=PLabc123': (YoutubeLinkKind.playlist, playlist),
       'https://music.youtube.com/playlist?list=OLAK5uy_abc': (
         YoutubeLinkKind.playlist,
         'https://www.youtube.com/playlist?list=OLAK5uy_abc',
       ),
       'https://www.youtube.com/@Computerphile': (
-        YoutubeLinkKind.channel,
-        'https://www.youtube.com/@Computerphile/videos',
-      ),
-      'https://www.youtube.com/@Computerphile/videos': (
         YoutubeLinkKind.channel,
         'https://www.youtube.com/@Computerphile/videos',
       ),
@@ -36,6 +31,10 @@ void main() {
         YoutubeLinkKind.channel,
         'https://www.youtube.com/channel/UC9-y-6csu5WGm29I7JiwpnA/videos',
       ),
+      '  https://www.youtube.com/@x  ': (
+        YoutubeLinkKind.channel,
+        'https://www.youtube.com/@x/videos',
+      ), // pasted with spaces
       'https://www.youtube.com/c/Computerphile': (
         YoutubeLinkKind.channel,
         'https://www.youtube.com/c/Computerphile/videos',
@@ -55,7 +54,6 @@ void main() {
       'https://music.youtube.com/watch?v=VID': (YoutubeLinkKind.other, null),
       'https://www.youtube.com/': (YoutubeLinkKind.other, null),
       'https://www.youtube.com/@': (YoutubeLinkKind.other, null),
-      'https://soundcloud.com/artist/sets/mix': (YoutubeLinkKind.other, null),
       'https://evil.example/playlist?list=PLabc': (YoutubeLinkKind.other, null),
       'daft punk': (YoutubeLinkKind.other, null),
       '': (YoutubeLinkKind.other, null),
@@ -67,13 +65,6 @@ void main() {
         expect(listingUrl(e.key), e.value.$2);
       });
     }
-
-    test('the two shortcuts agree', () {
-      expect(isYoutubePlaylistUrl('https://www.youtube.com/playlist?list=PLabc'), isTrue);
-      expect(isYoutubePlaylistUrl('https://www.youtube.com/@x'), isFalse);
-      expect(isYoutubeChannelUrl('https://www.youtube.com/@x'), isTrue);
-      expect(isYoutubeChannelUrl('  https://www.youtube.com/@x  '), isTrue, reason: 'pasted with spaces');
-    });
   });
 
   group('htmlUnescape', () {

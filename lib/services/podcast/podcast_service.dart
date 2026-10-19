@@ -7,11 +7,6 @@ import '../../data/repositories/podcast_repository.dart';
 import '../online/http_client.dart';
 import 'podcast_models.dart';
 
-/// Used until the RSS reader is wired in (it needs the `xml` package): every
-/// attempt to read a feed says so instead of pretending.
-Future<PodcastFeed> unavailableFeedParser(String xml) =>
-    Future.error(const PodcastException(PodcastErrorKind.parserMissing));
-
 /// A podcast is worth refreshing when it was last checked this long ago.
 const staleAfter = Duration(hours: 6);
 

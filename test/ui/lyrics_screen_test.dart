@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../support/app_harness.dart';
 
 void main() {
-  testWidgets('plain lyrics and stored trivia are shown', (tester) async {
+  testWidgets('plain lyrics are shown with copy; the stored trivia is not (it lives in Now Playing)', (tester) async {
     tester.view.physicalSize = const Size(500, 1000);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);

@@ -13,19 +13,22 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   late Directory dir;
-  late int schema;
+  const schema = kSchemaVersion;
 
-  setUp(() {
-    dir = Directory.systemTemp.createTempSync('rs');
-    final probe = AppDatabase(NativeDatabase.memory());
-    schema = probe.schemaVersion;
-    probe.close();
-  });
+  setUp(() => dir = Directory.systemTemp.createTempSync('rs'));
   tearDown(() => dir.deleteSync(recursive: true));
 
-  /// A real backup of a database with [titles] as tracks.
-  Future<File> makeBackup(List<String> titles, {String deviceId = 'dev-A', List<String> folders = const ['/nowhere']}) async {
-    final db = AppDatabase(NativeDatabase(File(p.join(dir.path, 'src-${titles.length}.sqlite'))));
+  // Every database starts in memory: creating the schema on disk costs a sync
+  // per statement, which took tens of seconds on a busy disk. `VACUUM INTO`
+  // (what the backup itself uses) writes a file in one go when one is needed.
+
+  /// A real backup of a database with [titles] as tracks and [folders] as
+  /// music folders.
+  Future<File> makeBackup(List<String> titles, {String deviceId = 'dev-A', List<String> folders = const []}) async {
+    final db = AppDatabase(NativeDatabase.memory());
+    for (final f in folders) {
+      await db.into(db.folders).insert(FoldersCompanion.insert(path: f, addedAt: 1));
+    }
     for (final t in titles) {
       await db.into(db.tracks).insert(TracksCompanion.insert(
           path: '/m/$t.mp3', title: t, albumKey: 'k', format: 'mp3', sizeBytes: 1, mtimeMs: 1, addedAt: 1));
@@ -45,7 +48,7 @@ void main() {
 
   group('inspectBackup', () {
     test('reads the manifest; same device by id, or by folders that all exist', () async {
-      final zip = await makeBackup(['a', 'b'], folders: const ['/nowhere']);
+      final zip = await makeBackup(['a', 'b']);
       var plan = await inspectBackup(zip, deviceId: 'dev-A', schemaVersion: schema);
       expect(plan.sameDevice, isTrue);
       expect(plan.trackCount, 2);
@@ -53,6 +56,12 @@ void main() {
 
       plan = await inspectBackup(zip, deviceId: 'dev-B', schemaVersion: schema, folderExists: (_) => true);
       expect(plan.sameDevice, isFalse, reason: 'this backup has no folders (none in its DB)');
+
+      final withFolders = await makeBackup(['a'], folders: const ['/music', '/more']);
+      plan = await inspectBackup(withFolders, deviceId: 'dev-B', schemaVersion: schema, folderExists: (_) => true);
+      expect(plan.sameDevice, isTrue, reason: 'every folder of the backup exists here');
+      plan = await inspectBackup(withFolders, deviceId: 'dev-B', schemaVersion: schema, folderExists: (f) => f == '/music');
+      expect(plan.sameDevice, isFalse, reason: 'one folder is missing');
     });
 
     test('a newer schema or an unknown format is refused; a non-backup too', () async {
@@ -86,9 +95,10 @@ void main() {
       File(p.join(covers.path, 'both.jpg')).writeAsBytesSync([5]);
       SharedPreferences.setMockInitialValues({'theme': 'light', 'deviceId': 'this-device'});
       prefs = await SharedPreferences.getInstance();
-      final db = AppDatabase(NativeDatabase(dbFile));
+      final db = AppDatabase(NativeDatabase.memory());
       await db.into(db.tracks).insert(TracksCompanion.insert(
           path: '/m/old.mp3', title: 'old', albumKey: 'k', format: 'mp3', sizeBytes: 1, mtimeMs: 1, addedAt: 1));
+      await db.customStatement('VACUUM INTO ?', [dbFile.path]);
       await db.close();
     });
 
@@ -148,7 +158,7 @@ void main() {
   });
 
   test('mergeBackup merges the user data and copies covers without overwriting', () async {
-    final src = AppDatabase(NativeDatabase(File(p.join(dir.path, 'm-src.sqlite'))));
+    final src = AppDatabase(NativeDatabase.memory());
     await src.into(src.tracks).insert(TracksCompanion.insert(
         path: '/m/x.mp3', title: 'x', albumKey: 'k', format: 'mp3', sizeBytes: 1, mtimeMs: 1, addedAt: 1,
         isFavorite: const Value(true)));

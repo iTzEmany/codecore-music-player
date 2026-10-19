@@ -211,21 +211,6 @@ class TrackRepository {
         .map((rows) => [for (final r in rows) _db.tracks.map(r.data)]);
   }
 
-  Future<List<Track>> tracksByRules(
-    RuleExpr rules, {
-    SortOption sort = SortOption.defaultOrder,
-    int? limit,
-    int? randomSeed,
-    DateTime? now,
-  }) async {
-    final q = _byRules(rules, sort, limit, randomSeed,
-        (now ?? DateTime.now()).millisecondsSinceEpoch);
-    final rows = await _db
-        .customSelect(q.sql, variables: q.vars, readsFrom: _ruleTables)
-        .get();
-    return [for (final r in rows) _db.tracks.map(r.data)];
-  }
-
   /// How many tracks match (for the «37 brani» of the editor).
   Future<int> countByRules(RuleExpr rules, {DateTime? now}) async {
     final q = toSql(rules, nowMs: (now ?? DateTime.now()).millisecondsSinceEpoch);

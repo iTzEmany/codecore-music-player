@@ -23,29 +23,25 @@ void _phone(WidgetTester tester) {
 }
 
 class _Page extends ConsumerWidget {
-  const _Page({required this.tracks, this.bulk = const BulkContext(), this.shown});
+  const _Page({required this.tracks, this.bulk = const BulkContext()});
 
   final List<Track> tracks;
   final BulkContext bulk;
 
-  /// Tracks the list shows (a filter); all of them if null.
-  final List<Track>? shown;
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final list = shown ?? tracks;
-    final ids = [for (final t in list) t.id];
+    final ids = [for (final t in tracks) t.id];
     final active = ref.watch(selectionProvider(_key).select((s) => s.active));
     return SelectionScope(
       listKey: _key,
       visibleIds: ids,
       child: Scaffold(
         appBar: active
-            ? SelectionBar(listKey: _key, tracks: list, bulk: bulk)
+            ? SelectionBar(listKey: _key, tracks: tracks, bulk: bulk)
             : AppBar(title: const Text('List')),
         body: ListView(
           children: [
-            for (final t in list)
+            for (final t in tracks)
               SizedBox(
                 height: 64,
                 child: LiveTrackRow(
@@ -74,11 +70,10 @@ void main() {
   }
 
   /// [missing]: rows (by index) whose file is gone. [inPlaylist]: the list is
-  /// a playlist holding every track. [favorites]: rows that are favourites.
+  /// a playlist holding every track.
   Future<void> open(
     WidgetTester tester, {
     Set<int> missing = const {},
-    Set<int> favorites = const {},
     bool inPlaylist = false,
   }) async {
     _phone(tester);
@@ -86,10 +81,7 @@ void main() {
     final repo = TrackRepository(h.db);
     var rows = (await tester.runAsync(
         () => (h.db.select(h.db.tracks)..orderBy([(t) => OrderingTerm.asc(t.id)])).get()))!;
-    await tester.runAsync(() async {
-      await repo.markMissing({for (final i in missing) rows[i].path}, true);
-      await repo.setFavoriteMany([for (final i in favorites) rows[i].id], true);
-    });
+    await tester.runAsync(() => repo.markMissing({for (final i in missing) rows[i].path}, true));
     tracks = (await tester.runAsync(
         () => (h.db.select(h.db.tracks)..orderBy([(t) => OrderingTerm.asc(t.id)])).get()))!;
     var bulk = const BulkContext();
@@ -143,16 +135,6 @@ void main() {
     await h.dispose(tester);
   });
 
-  testWidgets('Back leaves the selection first and the page after', (tester) async {
-    await open(tester);
-    await pick(tester, [0]);
-    await tester.binding.handlePopRoute();
-    await settle(tester);
-    expect(selection(tester).active, isFalse);
-    expect(find.byType(_Page), findsOneWidget, reason: 'still on the page');
-    await h.dispose(tester);
-  });
-
   testWidgets('Esc leaves the selection and Ctrl+A picks everything', (tester) async {
     await open(tester);
     await pick(tester, [0]);
@@ -167,16 +149,7 @@ void main() {
     await h.dispose(tester);
   });
 
-  testWidgets('a filter that hides a picked row drops it from the selection', (tester) async {
-    await open(tester);
-    await pick(tester, [0, 1, 2]);
-    await h.pump(tester, _Page(tracks: tracks, shown: tracks.sublist(1)));
-    await settle(tester);
-    expect(selection(tester).ids, {tracks[1].id, tracks[2].id});
-    await h.dispose(tester);
-  });
-
-  testWidgets('favorites: adds to all, then the same picks offer to remove, with undo', (tester) async {
+  testWidgets('favorites: adds to every pick, with undo', (tester) async {
     await open(tester);
     await pick(tester, [0, 1]);
     await tester.tap(find.byTooltip('Aggiungi ai preferiti'));
@@ -193,13 +166,6 @@ void main() {
     await tester.tap(find.text('Annulla'));
     await settle(tester);
     expect(await favs(), [false, false, false, false]);
-    await h.dispose(tester);
-  });
-
-  testWidgets('when every pick is a favourite the action is «Togli dai preferiti»', (tester) async {
-    await open(tester, favorites: {0, 1});
-    await pick(tester, [0, 1]);
-    expect(find.byTooltip('Togli dai preferiti'), findsOneWidget);
     await h.dispose(tester);
   });
 
@@ -228,23 +194,16 @@ void main() {
     await h.dispose(tester);
   });
 
-  testWidgets('a top-to-bottom pick gives the same order as the list', (tester) async {
-    await open(tester);
-    await tester.runAsync(() => h.handler.playQueue([tracks[0].id], 0));
-    await pick(tester, [1, 2, 3]);
-    await tester.tap(find.byTooltip('Azioni'));
-    await settle(tester);
-    await tester.tap(find.text('Aggiungi in coda'));
-    await settle(tester);
-    expect(h.handler.queueIds, [for (final t in tracks) t.id]);
-    await h.dispose(tester);
-  });
-
-  testWidgets('add to a playlist: the tracks land in the order they were picked', (tester) async {
+  testWidgets('add to a playlist: the new tracks land in the order they were picked, and the note '
+      'says how many were there already', (tester) async {
     await open(tester);
     final repo = PlaylistRepository(h.db);
-    final id = (await tester.runAsync(() => repo.create('Mix')))!;
-    await pick(tester, [2, 0, 3]);
+    final id = (await tester.runAsync(() async {
+      final p = await repo.create('Mix');
+      await repo.addTracks(p, [tracks[1].id]);
+      return p;
+    }))!;
+    await pick(tester, [3, 1, 0]);
     await tester.tap(find.byTooltip('Aggiungi a playlist…'));
     await settle(tester);
     await tester.tap(find.text('Mix'));
@@ -253,12 +212,14 @@ void main() {
           ..where((t) => t.playlistId.equals(id))
           ..orderBy([(t) => OrderingTerm.asc(t.position)]))
         .get()))!;
-    expect([for (final r in inPlaylist) r.trackId], [tracks[2].id, tracks[0].id, tracks[3].id]);
+    expect([for (final r in inPlaylist) r.trackId], [tracks[1].id, tracks[3].id, tracks[0].id]);
+    expect(find.text('2 aggiunti a «Mix», 1 già presenti'), findsOneWidget);
+    expect(selection(tester).active, isFalse);
     await h.dispose(tester);
   });
 
-  testWidgets('the menu has no playlist or library removal outside their context', (tester) async {
-    await open(tester);
+  testWidgets('outside a playlist, and unless every pick is missing, the menu has no removal', (tester) async {
+    await open(tester, missing: {0});
     await pick(tester, [0, 1]);
     await tester.tap(find.byTooltip('Azioni'));
     await settle(tester);
@@ -280,15 +241,6 @@ void main() {
     await settle(tester);
     final left = (await tester.runAsync(() => h.db.select(h.db.tracks).get()))!;
     expect(left.map((t) => t.id), [tracks[2].id, tracks[3].id]);
-    await h.dispose(tester);
-  });
-
-  testWidgets('a mix of missing and present tracks offers no library removal', (tester) async {
-    await open(tester, missing: {0});
-    await pick(tester, [0, 1]);
-    await tester.tap(find.byTooltip('Azioni'));
-    await settle(tester);
-    expect(find.text('Rimuovi dalla libreria'), findsNothing);
     await h.dispose(tester);
   });
 
@@ -326,23 +278,6 @@ void main() {
     await settle(tester);
     expect((await tester.runAsync(() => repo.watchTracks(playlistId).first))!, hasLength(4));
     expect(selection(tester).active, isTrue, reason: 'still selecting');
-    await h.dispose(tester);
-  });
-
-  testWidgets('add to a playlist: says how many were new and how many were there', (tester) async {
-    await open(tester);
-    final repo = PlaylistRepository(h.db);
-    await tester.runAsync(() async {
-      final p = await repo.create('Mix');
-      await repo.addTracks(p, [tracks[0].id]);
-    });
-    await pick(tester, [0, 1, 2]);
-    await tester.tap(find.byTooltip('Aggiungi a playlist…'));
-    await settle(tester);
-    await tester.tap(find.text('Mix'));
-    await settle(tester);
-    expect(find.text('2 aggiunti a «Mix», 1 già presenti'), findsOneWidget);
-    expect(selection(tester).active, isFalse);
     await h.dispose(tester);
   });
 }

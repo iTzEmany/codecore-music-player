@@ -453,6 +453,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enrichBusy => 'An enrichment is already running';
 
   @override
+  String get enrichNothingToDo =>
+      'Nothing to enrich: no track is missing anything';
+
+  @override
   String get serviceUnavailable => 'Service unavailable, try again later';
 
   @override
@@ -3283,10 +3287,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get podcastErrNotFeed => 'That address is not a podcast feed.';
-
-  @override
-  String get podcastErrParserMissing =>
-      'Reading feeds is not available in this version yet.';
 
   @override
   String get podcastErrUnsupportedFormat => 'Unsupported audio format.';

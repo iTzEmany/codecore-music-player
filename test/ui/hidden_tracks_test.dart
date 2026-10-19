@@ -28,15 +28,9 @@ void main() {
       (await tester.runAsync(() => h.db.customSelect('SELECT COUNT(*) AS n FROM tracks WHERE ignored = 1').getSingle()))!
           .data['n']! as int;
 
-  testWidgets('nothing hidden: the empty message', (tester) async {
-    await open(tester, hidden: 0);
-    expect(find.text('Brani nascosti'), findsOneWidget);
-    expect(find.text('Nessun brano nascosto'), findsOneWidget);
-    await h.dispose(tester);
-  });
-
   testWidgets('the hidden tracks are listed with the explanation, the visible one is not', (tester) async {
     await open(tester, hidden: 2);
+    expect(find.text('Brani nascosti'), findsOneWidget);
     expect(find.text('Song 0'), findsOneWidget);
     expect(find.text('Song 1'), findsOneWidget);
     expect(find.text('Song 2'), findsNothing);
@@ -53,7 +47,7 @@ void main() {
     await h.dispose(tester);
   });
 
-  testWidgets('long press picks, select all and «Ripristina» restore several at once', (tester) async {
+  testWidgets('long press picks, select all and «Ripristina» restore several at once; then the empty message', (tester) async {
     await open(tester, hidden: 3);
     await tester.longPress(find.text('Song 0'));
     await _settle(tester);

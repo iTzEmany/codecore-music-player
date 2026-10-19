@@ -42,7 +42,7 @@ Future<(int, int)> seed(WidgetTester tester, Harness h) async {
 }
 
 void main() {
-  test('progress counters and activity aggregation', () {
+  test('progress counters and activity aggregation, with the estimate', () {
     const imp = ImportProgress(
         id: 3,
         playlistId: 1,
@@ -51,7 +51,8 @@ void main() {
         done: 4,
         review: 1,
         missing: 2,
-        paused: true);
+        paused: true,
+        eta: Duration(minutes: 18));
     expect(imp.fraction, 0.4);
     final s = buildActivity(
       scan: const ScanState(),
@@ -65,6 +66,7 @@ void main() {
     expect(a.paused, isTrue);
     expect(a.cancellable, isTrue);
     expect(a.ref, 3);
+    expect(a.eta, const Duration(minutes: 18), reason: 'the estimate is carried');
   });
 
   testWidgets('review screen lists candidates and not-found rows; skip works',

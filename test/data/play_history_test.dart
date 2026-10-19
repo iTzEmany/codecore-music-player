@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/data/repositories/play_history_repository.dart';
 import 'package:codecore/data/repositories/track_repository.dart';
@@ -85,13 +87,14 @@ void main() {
     });
 
     test('the stream follows new listens', () async {
-      final seen = <int>[];
-      final sub = repo.watchHistory().listen((l) => seen.add(l.length));
-      await Future<void>.delayed(const Duration(milliseconds: 50));
+      // Each list is awaited before the next change: no sleeping, no timing.
+      final lengths = StreamIterator(repo.watchHistory().map((l) => l.length));
+      addTearDown(lengths.cancel);
+      expect(await lengths.moveNext(), isTrue);
+      expect(lengths.current, 0);
       await repo.start(ids[0], 1000);
-      await Future<void>.delayed(const Duration(milliseconds: 50));
-      await sub.cancel();
-      expect(seen.last, 1);
+      expect(await lengths.moveNext(), isTrue);
+      expect(lengths.current, 1);
     });
 
     test('clear forgets the listens but not the play counts', () async {

@@ -56,14 +56,13 @@ void main() {
     expect(u, isEmpty);
   });
 
-  test('missing excluded, getByIds keeps order, count', () async {
+  test('missing excluded, getByIds keeps order', () async {
     await repo.upsertBatch([row('/a.mp3', 'A'), row('/b.mp3', 'B')]);
     await repo.markMissing({'/b.mp3'}, true);
     expect((await repo.watchTracks().first).length, 1);
     final all = await db.select(db.tracks).get();
     final ids = all.map((t) => t.id).toList().reversed.toList();
     expect((await repo.getByIds(ids)).map((t) => t.id), ids);
-    expect(await repo.countAll(), 2);
   });
 
   test('setFavoriteMany flips a whole batch and nothing else', () async {

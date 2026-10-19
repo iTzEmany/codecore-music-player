@@ -218,6 +218,7 @@
     }
   },
   "enrichBusy": "Un arricchimento è già in corso",
+  "enrichNothingToDo": "Niente da arricchire: ai brani non manca nulla",
   "serviceUnavailable": "Servizio non disponibile, riprova più tardi",
   "lyrics": "Testo",
   "searchLyrics": "Cerca testo",
@@ -2069,7 +2070,6 @@
   "podcastErrTooLarge": "Il feed è troppo grande.",
   "podcastErrNetwork": "Non riesco a raggiungere il server.",
   "podcastErrNotFeed": "Questo indirizzo non è un feed di podcast.",
-  "podcastErrParserMissing": "La lettura dei feed non è ancora disponibile in questa versione.",
   "podcastErrUnsupportedFormat": "Formato audio non supportato.",
   "syncTitle": "Sincronizza playlist",
   "syncAdded": "{count, plural, one{1 nuova} other{{count} nuove}}",

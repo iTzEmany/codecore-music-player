@@ -144,14 +144,6 @@ void main() {
       );
       expect(await repo.all(), isEmpty);
     });
-
-    test('without a feed reader the error says so', () async {
-      final svc = PodcastService(repo: repo, fetch: (u) async => '<rss/>', parse: unavailableFeedParser, web: web);
-      await expectLater(
-        svc.subscribeFromUrl('https://x.org/feed'),
-        throwsA(isA<PodcastException>().having((e) => e.kind, 'kind', PodcastErrorKind.parserMissing)),
-      );
-    });
   });
 
   group('refreshing', () {

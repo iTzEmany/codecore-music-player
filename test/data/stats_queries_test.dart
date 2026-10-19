@@ -47,7 +47,6 @@ void main() {
     expect(s.plays, 3);
     expect(s.distinctTracks, 2);
     expect(s.playedMs, 390000);
-    expect(s.playedMinutes, 7);
     expect(s.isEmpty, isFalse);
   });
 

@@ -17,11 +17,15 @@ double contrast(Color a, Color b) {
 }
 
 void main() {
+  // Every built-in theme with every accent, through the same path as the app
+  // (palette, then the theme built from it).
   for (final id in AppThemeId.values) {
     for (final accent in CcAccent.values) {
       final name = '${id.name} + ${accent.name}';
-      test('$name: token pairs meet WCAG AA', () {
-        final c = buildTheme(id, false, accent: accent).extension<CcColors>()!;
+      test('$name: token pairs and scheme text colours meet WCAG AA', () {
+        final theme = buildThemeFromColors(buildPalette(id, accent), false);
+        final c = theme.extension<CcColors>()!;
+        final s = theme.colorScheme;
         final pairs = {
           'text/bg': (c.text, c.bg, 4.5),
           'text/surface1': (c.text, c.surface1, 4.5),
@@ -38,6 +42,11 @@ void main() {
           'accentSoft/bg': (c.accentSoft, c.bg, 4.5),
           'error/bg': (c.error, c.bg, 4.5),
           'text/heroBase': (c.text, c.heroBase, 7.0),
+          // What Material widgets draw with.
+          'scheme onSurface/surface': (s.onSurface, s.surface, 4.5),
+          'scheme onSurfaceVariant/surfaceContainerHigh':
+              (s.onSurfaceVariant, s.surfaceContainerHigh, 4.5),
+          'scheme onPrimary/primary': (s.onPrimary, s.primary, 4.5),
         };
         for (final e in pairs.entries) {
           expect(
@@ -47,21 +56,15 @@ void main() {
           );
         }
       });
-
-      test('$name: scheme text colours stay readable', () {
-        final s = buildTheme(id, false, accent: accent).colorScheme;
-        expect(contrast(s.onSurface, s.surface), greaterThanOrEqualTo(4.5));
-        expect(contrast(s.onSurfaceVariant, s.surfaceContainerHigh),
-            greaterThanOrEqualTo(4.5));
-        expect(contrast(s.onPrimary, s.primary), greaterThanOrEqualTo(4.5));
-      });
     }
   }
 
   test('the light theme is light and the others are dark', () {
-    expect(buildTheme(AppThemeId.chiaro, false).brightness, Brightness.light);
-    expect(buildTheme(AppThemeId.notte, false).brightness, Brightness.dark);
-    expect(buildTheme(AppThemeId.oled, false).brightness, Brightness.dark);
+    Brightness of(AppThemeId id) =>
+        buildThemeFromColors(buildPalette(id, CcAccent.viola), false).brightness;
+    expect(of(AppThemeId.chiaro), Brightness.light);
+    expect(of(AppThemeId.notte), Brightness.dark);
+    expect(of(AppThemeId.oled), Brightness.dark);
     expect(buildPalette(AppThemeId.chiaro, CcAccent.blu).isLight, isTrue);
   });
 

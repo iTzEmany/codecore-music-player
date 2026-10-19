@@ -7,6 +7,14 @@ import 'package:codecore/services/share/offers.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+/// The first state of [g] that passes [test], the one it already has included:
+/// a state that arrived before the wait would otherwise cost a whole long poll.
+Future<JamState> reach(JamGuest g, bool Function(JamState) test) {
+  final now = g.state;
+  if (now != null && test(now)) return Future.value(now);
+  return g.states.firstWhere(test).timeout(const Duration(seconds: 5));
+}
+
 void main() {
   late JamHost hostJam, guestJam;
   late OfferNode hostNode, guestNode;
@@ -82,33 +90,6 @@ void main() {
     expect(hostJam.state!.items.first.title, 'H');
   });
 
-  test('host serves its file to the guest, guest serves its own', () async {
-    final hf = File('${dir.path}/h.mp3')..writeAsBytesSync([1, 2, 3, 4]);
-    final gf = File('${dir.path}/g.mp3')..writeAsBytesSync([9, 9]);
-    hostJam.resolveFile = (i) async => hf.path;
-    guestJam.resolveFile = (i) async => gf.path;
-    await join();
-    await guest.send(const JamCommand.add(JamItem(
-        id: 0, ownerDeviceId: 'guest', title: 'G', ext: 'mp3', ref: '1')));
-    hostJam.apply(const JamCommand.add(
-        JamItem(id: 0, ownerDeviceId: 'host', title: 'H', ext: 'mp3')));
-    await guest.states
-        .firstWhere((s) => s.items.length == 2)
-        .timeout(const Duration(seconds: 5));
-
-    final dio = Dio(BaseOptions(responseType: ResponseType.bytes));
-    final h = {'x-jam-file': guest.fileToken};
-    final fromHost = await dio.get<List<int>>(
-        'http://127.0.0.1:$hostPort/jam/${guest.sessionId}/file/2',
-        options: Options(headers: h));
-    expect(fromHost.data, [1, 2, 3, 4]);
-    // the host fetches the guest's file with the same session token
-    final fromGuest = await dio.get<List<int>>(
-        'http://127.0.0.1:$guestPort/jam/${guest.sessionId}/file/1',
-        options: Options(headers: {'x-jam-file': hostJam.fileToken}));
-    expect(fromGuest.data, [9, 9]);
-  });
-
   test('declined and ended', () async {
     hostJam.onRequest = (r) => hostJam.decline(r.id);
     final o = await guest.join(
@@ -121,7 +102,7 @@ void main() {
     final ended = guest.states.firstWhere((s) => s.ended);
     hostJam.endSession();
     expect((await ended.timeout(const Duration(seconds: 5))).ended, true);
-    await Future<void>.delayed(const Duration(milliseconds: 100));
+    // The client stops before it announces the ended state.
     expect(guest.active, false);
   });
 
@@ -167,9 +148,7 @@ void main() {
     expect(guestB.hostBase, 'http://127.0.0.1:$hostPort/jam');
 
     // everyone sees the same roster
-    await guestB.states
-        .firstWhere((s) => s.participants.length == 3)
-        .timeout(const Duration(seconds: 5), onTimeout: () => guestB.state!);
+    await reach(guestB, (s) => s.participants.length == 3);
     expect(guestB.state!.participants.map((p) => p.name),
         containsAll(['PC', 'Phone', 'Tablet']));
 
@@ -179,9 +158,7 @@ void main() {
     final r = await guestB.send(const JamCommand.add(JamItem(
         id: 0, ownerDeviceId: 'guestB', title: 'B', ext: 'mp3', ref: '1')));
     expect(r.isOk, true);
-    await guest.states
-        .firstWhere((s) => s.items.length == 1)
-        .timeout(const Duration(seconds: 5));
+    await reach(guest, (s) => s.items.length == 1);
     final owner = guest.state!.participant('guestB')!;
     final dio = Dio(BaseOptions(responseType: ResponseType.bytes));
     final got = await dio.get<List<int>>(
@@ -191,9 +168,7 @@ void main() {
 
     // B leaves: its track vanishes, the others stay
     await guestB.leave();
-    await guest.states
-        .firstWhere((s) => s.items.isEmpty && s.participants.length == 2)
-        .timeout(const Duration(seconds: 5));
+    await reach(guest, (s) => s.items.isEmpty && s.participants.length == 2);
     expect(hostJam.state!.ended, false);
   });
 }

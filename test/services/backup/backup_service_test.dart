@@ -17,7 +17,9 @@ void main() {
 
   setUp(() async {
     dir = Directory.systemTemp.createTempSync('bk');
-    db = AppDatabase(NativeDatabase(File(p.join(dir.path, 'live.sqlite'))));
+    // In memory: `VACUUM INTO` copies it the same way, and a file database
+    // would cost a disk sync per schema statement in every setUp.
+    db = AppDatabase(NativeDatabase.memory());
     SharedPreferences.setMockInitialValues({
       'theme': 'oled', 'compactMode': true, 'playbackSpeed': 1.25, 'volume': 3,
       'notDuplicates': ['a', 'b'], 'deviceId': 'dev-1', 'deviceName': 'Telefono', 'trustedDevices': '[]',
@@ -83,7 +85,9 @@ void main() {
 
   test('the copied database opens with the same counts; temporary files are gone', () async {
     final out = p.join(dir.path, 'out.zip');
-    await service().createBackup(out);
+    final tmp = Directory(p.join(dir.path, 'tmp'))..createSync();
+    await IOOverrides.runZoned(() => service().createBackup(out), getSystemTempDirectory: () => tmp);
+    expect(tmp.listSync(), isEmpty, reason: 'the work folder is removed');
     final zip = ZipDecoder().decodeBytes(File(out).readAsBytesSync());
     final copy = File(p.join(dir.path, 'copy.sqlite'))..writeAsBytesSync(zip.findFile('codecore.sqlite')!.content as List<int>);
     final db2 = AppDatabase(NativeDatabase(copy));

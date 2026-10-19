@@ -41,7 +41,7 @@ void main() {
     await _settle(tester);
   }
 
-  testWidgets('three days of listens: day headers, each listen with its time', (tester) async {
+  testWidgets('three days of listens: day headers, each listen with its time, newest first', (tester) async {
     await open(tester);
     expect(find.text('Cronologia'), findsOneWidget);
     expect(find.text('Oggi'), findsOneWidget);
@@ -51,11 +51,8 @@ void main() {
     expect(find.text('Song 1'), findsOneWidget);
     expect(find.text('Song 2'), findsOneWidget);
     expect(find.textContaining('00:05'), findsOneWidget);
-    await h.dispose(tester);
-  });
 
-  testWidgets('newest first: today above yesterday above the older day', (tester) async {
-    await open(tester);
+    // Today above yesterday above the older day.
     final today = tester.getTopLeft(find.text('Oggi')).dy;
     final yesterday = tester.getTopLeft(find.text('Ieri')).dy;
     expect(today, lessThan(yesterday));

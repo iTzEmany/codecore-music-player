@@ -18,6 +18,46 @@ void main() {
     });
   });
 
+  group('Exportify', () {
+    test('real file: name, kind, count and first rows', () {
+      final p = readCsvPlaylist('Just_a_mood.csv', fixture('Just_a_mood.csv'));
+      expect(p.name, 'Just a mood');
+      expect(p.kind, 'exportify');
+      expect(p.rows, hasLength(34));
+      expect(p.skipped, 0);
+      final r = p.rows.first;
+      expect(r.index, 0);
+      expect(r.title, 'Singalong Junk - Remastered 2011');
+      expect(r.artists, ['Paul McCartney']);
+      expect(r.album, 'McCartney (Archive Collection)');
+      expect(r.durationMs, 156280);
+      expect(r.isrc, 'GBCCS1000114');
+      expect(r.spotifyUri, 'spotify:track:4Fr1MF0N2VAh9niAYGf9wE');
+      expect(p.rows[3].title, 'Sigarette');
+      expect(p.rows[3].artists, ['Lucio Corsi']);
+    });
+
+    test('columns are found by header, in any order', () {
+      const csv = 'Duration (ms),Artist Name(s),Track Name,Track URI\n'
+          '1000,Someone,Song,spotify:track:abc\n';
+      final p = readCsvPlaylist('a/b/My_List.CSV', csv);
+      expect(p.name, 'My List');
+      expect(p.rows.single.title, 'Song');
+      expect(p.rows.single.durationMs, 1000);
+    });
+
+    test('podcast episodes, local files and untitled rows are skipped', () {
+      const csv = 'Track URI,Track Name,Artist Name(s),Duration (ms)\n'
+          'spotify:track:1,A,X,1\n'
+          'spotify:episode:2,Pod,Y,1\n'
+          'spotify:local:3,Mine,Z,1\n'
+          'spotify:track:4,,X,1\n';
+      final p = readCsvPlaylist('l.csv', csv);
+      expect(p.rows.map((r) => r.title), ['A']);
+      expect(p.skipped, 3);
+    });
+  });
+
   group('TuneMyMusic (synthetic fixture)', () {
     final p = readCsvPlaylist('whatever.csv', fixture('synthetic_tunemymusic.csv'));
 
@@ -43,23 +83,17 @@ void main() {
       expect(p.kind, 'soundiiz');
       expect(p.rows.map((r) => r.durationMs), [187000, 334000, 180000]);
     });
-
-    test('indexes are consecutive', () {
-      expect([for (final r in p.rows) r.index], [0, 1, 2]);
-    });
   });
 
   group('Last.fm (synthetic fixture)', () {
     final p = readCsvPlaylist('scrobbles.csv', fixture('synthetic_lastfm.csv'));
 
-    test('repeated songs are kept once, in order of first appearance', () {
+    test('repeated songs are kept once (in any letter case), in order of first '
+        'appearance, with consecutive indexes', () {
       expect(p.kind, 'lastfm');
+      // The fixture has «Sigarette» twice and «Imagine» / «imagine».
       expect(p.rows.map((r) => r.title), ['Sigarette', 'Imagine', 'Wish You Were Here']);
       expect([for (final r in p.rows) r.index], [0, 1, 2]);
-    });
-
-    test('the same song in another letter case is the same song', () {
-      expect(p.rows.where((r) => r.title.toLowerCase() == 'imagine'), hasLength(1));
     });
 
     test('with no playlist column the file name names the playlist', () {
@@ -100,18 +134,36 @@ void main() {
     test('several artists separated by ;', () {
       final p = readCsvPlaylist('x.csv', 'Title,Artist\nA,"X; Y & Z"\n');
       expect(p.rows.single.artists, ['X', 'Y & Z']);
+      expect(p.rows.single.primaryArtist, 'X');
     });
 
-    test('no title or no artist column is refused', () {
+    test('an empty file, or no title or no artist column, is refused', () {
+      expect(() => readCsvPlaylist('x.csv', ''), throwsFormatException);
       expect(() => readCsvPlaylist('x.csv', 'a,b\n1,2\n'), throwsFormatException);
       expect(() => readCsvPlaylist('x.csv', 'Title,Year\nA,1999\n'),
           throwsFormatException);
     });
+  });
 
-    test('rows without a title are counted as skipped', () {
-      final p = readCsvPlaylist('x.csv', 'Title,Artist\n,B\nA,B\n');
-      expect(p.rows, hasLength(1));
-      expect(p.skipped, 1);
+  group('size limits', () {
+    String rows(int n) {
+      final b = StringBuffer('Track Name,Artist Name(s)\n');
+      for (var i = 0; i < n; i++) {
+        b.writeln('t$i,a');
+      }
+      return b.toString();
+    }
+
+    test('exactly the maximum number of rows is accepted, one more is not', () {
+      expect(readCsvPlaylist('ok.csv', rows(kMaxCsvRows)).rows, hasLength(kMaxCsvRows));
+      expect(() => readCsvPlaylist('big.csv', rows(kMaxCsvRows + 1)),
+          throwsA(isA<CsvTooLargeException>()));
+    });
+
+    test('file size is checked before reading', () {
+      expect(() => checkCsvSize(kMaxCsvBytes + 1),
+          throwsA(isA<CsvTooLargeException>()));
+      checkCsvSize(kMaxCsvBytes);
     });
   });
 }

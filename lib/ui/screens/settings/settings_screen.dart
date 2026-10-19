@@ -13,6 +13,7 @@ import '../../../providers/database_providers.dart';
 import '../../../providers/equalizer_providers.dart';
 import '../../../providers/library_providers.dart';
 import '../../../providers/online_providers.dart';
+import '../../../services/online/enrichment_service.dart' show needsEnrichment;
 import '../../../providers/settings_providers.dart';
 import '../../widgets/confirm.dart';
 import '../../widgets/cover_image.dart';
@@ -343,11 +344,19 @@ class SettingsScreen extends ConsumerWidget {
 
   Future<void> _enrichLibrary(BuildContext context, WidgetRef ref) async {
     final l = context.l10n;
+    // Only what still has something missing: the estimate is honest and
+    // tracks already complete are not asked about again.
     final ids = (await ref.read(tracksProvider(false).future))
-        .where((t) => t.enrichStatus != 2)
+        .where((t) => needsEnrichment(t))
         .map((t) => t.id)
         .toList();
     if (!context.mounted) return;
+    if (ids.isEmpty) {
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(SnackBar(content: Text(l.enrichNothingToDo)));
+      return;
+    }
     final minutes = (ids.length * 3 / 60).ceil();
     final ok = await showDialog<bool>(
       context: context,

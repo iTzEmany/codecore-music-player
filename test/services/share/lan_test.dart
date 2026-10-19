@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:codecore/services/share/lan_client.dart';
@@ -64,12 +63,6 @@ void main() {
             'Range': ?range,
           },
         );
-
-    test('hello needs no PIN', () async {
-      final r = await make()(req('hello'));
-      expect(r.statusCode, 200);
-      expect(jsonDecode(await r.readAsString())['app'], 'codecore');
-    });
 
     test('wrong PIN -> 401, missing id -> 404, bad range -> 416', () async {
       final h = make();

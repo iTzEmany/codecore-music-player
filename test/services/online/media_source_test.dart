@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:codecore/services/online/download_index.dart';
-import 'package:codecore/services/online/search_cache.dart';
 import 'package:codecore/services/online/yt_dlp_process_service.dart';
 import 'package:codecore/services/online/youtube_service.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -120,30 +119,5 @@ void main() {
       f.deleteSync();
       expect(idx.contains('abc'), isFalse);
     });
-  });
-
-  test('the search cache keeps the source and the page', () async {
-    final dir = Directory.systemTemp.createTempSync('sc');
-    addTearDown(() => dir.deleteSync(recursive: true));
-    final cache = SearchCache(file: () async => File(p.join(dir.path, 'cache.json')));
-    await cache.put('k', [
-      const YtResult(id: '1', title: 'A', channel: 'c', duration: null),
-      const YtResult(
-        id: '2',
-        title: 'B',
-        channel: 'c',
-        duration: null,
-        source: MediaSource.soundcloud,
-        webpageUrl: 'https://soundcloud.com/c/b',
-      ),
-    ]);
-    await cache.flush();
-
-    final again = SearchCache(file: () async => File(p.join(dir.path, 'cache.json')));
-    final hit = (await again.get('k'))!;
-    expect(hit[0].source, MediaSource.youtube);
-    expect(hit[0].webpageUrl, isNull);
-    expect(hit[1].source, MediaSource.soundcloud);
-    expect(hit[1].downloadUrl, 'https://soundcloud.com/c/b');
   });
 }

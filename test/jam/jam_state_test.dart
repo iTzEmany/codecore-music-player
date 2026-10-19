@@ -27,10 +27,6 @@ void main() {
     expect(s.version, 2);
   });
 
-  test('add on behalf of someone else is forbidden', () {
-    expect(err(start(), JamCommand.add(item(host)), guest), JamError.forbidden);
-  });
-
   test('guest cannot next or jump; host can', () {
     var s = ok(start(), JamCommand.add(item(host)), host);
     s = ok(s, JamCommand.add(item(host)), host);

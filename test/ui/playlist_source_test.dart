@@ -125,18 +125,6 @@ void main() {
     await h.dispose(tester);
   });
 
-  testWidgets('a channel address lists its Videos tab', (tester) async {
-    await open(tester, query: 'https://www.youtube.com/@Chan');
-    expect(yt.listed, ['https://www.youtube.com/@Chan/videos']);
-    await h.dispose(tester);
-  });
-
-  testWidgets('a watch link with a list opens the playlist page, a plain video does not', (tester) async {
-    await open(tester, query: 'https://www.youtube.com/watch?v=VID&list=PLabc');
-    expect(yt.listed, [url]);
-    await h.dispose(tester);
-  });
-
   testWidgets('plain words are a normal search, no list is read', (tester) async {
     await open(tester, query: 'daft punk');
     expect(yt.listed, isEmpty);

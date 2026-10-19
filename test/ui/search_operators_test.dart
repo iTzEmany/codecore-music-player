@@ -5,10 +5,12 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../support/app_harness.dart';
 
+/// One turn of the real event loop (not real time) lets drift finish what a
+/// `runAsync` write started; everything else runs on the test clock.
 Future<void> _settle(WidgetTester tester) async {
-  await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 150)));
+  await tester.runAsync(() => Future<void>.delayed(Duration.zero));
   await tester.pump(const Duration(milliseconds: 400));
-  await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 150)));
+  await tester.runAsync(() => Future<void>.delayed(Duration.zero));
   await tester.pump(const Duration(milliseconds: 400));
 }
 
@@ -37,8 +39,7 @@ void main() {
 
   Future<void> type(WidgetTester tester, String text) async {
     await tester.enterText(find.byType(TextField), text);
-    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 400)));
-    await _settle(tester);
+    await _settle(tester); // the 250 ms debounce runs on the test clock
   }
 
   testWidgets('anno:1990..1999 shows only the tracks of those years', (tester) async {
@@ -56,14 +57,6 @@ void main() {
     await type(tester, 'song -"song 2"');
     expect(_row('Song 2'), findsNothing);
     expect(_row('Song 1'), findsOneWidget);
-    await h.dispose(tester);
-  });
-
-  testWidgets('plain words search as before', (tester) async {
-    await open(tester);
-    await type(tester, 'song 3');
-    expect(_row('Song 3'), findsOneWidget);
-    expect(_row('Song 1'), findsNothing);
     await h.dispose(tester);
   });
 

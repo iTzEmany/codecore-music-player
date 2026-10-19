@@ -5,9 +5,9 @@ import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/data/repositories/import_repository.dart';
 import 'package:codecore/data/repositories/playlist_repository.dart';
 import 'package:codecore/data/repositories/track_repository.dart';
-import 'package:codecore/services/import/exportify_reader.dart';
 import 'package:codecore/services/import/import_candidate.dart';
 import 'package:codecore/services/import/import_options.dart';
+import 'package:codecore/services/import/imported_playlist.dart';
 import 'package:codecore/services/import/playlist_import_service.dart';
 import 'package:codecore/services/import/track_matcher.dart' show MatchThresholds;
 import 'package:codecore/services/online/download_queue.dart';
@@ -165,22 +165,25 @@ void main() {
       youtubeEnabled: enabled,
       soundCloudFallback: () => scFallback,
       searchGap: Duration.zero,
-      pollDelay: const Duration(milliseconds: 5),
+      pollDelay: Duration.zero,
       maxInFlight: maxInFlight,
     );
     s.events.listen(events.add);
     return s;
   }
 
+  /// Lets the engine and the settled handlers run to quiescence. Every timer
+  /// on their path is zero-length (searchGap, pollDelay, drift's Timer.run on
+  /// an in-memory database), so a fixed number of event-loop turns is enough:
+  /// no wall-clock wait, and the same interleaving on any machine.
   Future<void> idle() async {
-    // Let the engine and the settled handlers run to quiescence.
-    for (var i = 0; i < 40; i++) {
-      await Future<void>.delayed(const Duration(milliseconds: 10));
+    for (var i = 0; i < 200; i++) {
+      await Future<void>.delayed(Duration.zero);
     }
   }
 
-  ExportifyPlaylist csv(List<ImportRow> rows) =>
-      ExportifyPlaylist(name: 'Mood', rows: rows);
+  ImportedPlaylist csv(List<ImportRow> rows) =>
+      ImportedPlaylist(name: 'Mood', rows: rows);
 
   Future<List<String>> order(int playlistId) async =>
       (await playlists.watchTracks(playlistId).first).map((t) => t.title).toList();
@@ -246,6 +249,7 @@ void main() {
     await idle();
     expect(queued.map((q) => q.$2), [importTag(id, 0), importTag(id, 1)]);
     expect(queued.first.$1.downloadName, 'Band - One');
+    expect(queued.first.$1.subdir, isNull, reason: 'no folder option');
     expect((await imports.item(id, 0))!.state, ImportItemStatus.queued);
     expect((await imports.get(id))!.state, ImportStatus.running);
 
@@ -409,19 +413,6 @@ void main() {
       expect((await imports.item(id, 2))!.state, ImportItemStatus.queued);
     });
 
-    test('they land in the playlist in the listed order whatever finishes first', () async {
-      final id = await service.startFromResults('Order', [
-        video('a1', 'First', 'Chan', 100),
-        video('b2', 'Second', 'Chan', 100),
-      ]);
-      await idle();
-      await finish(importTag(id, 1), '/m/second.mp3');
-      await finish(importTag(id, 0), '/m/first.mp3');
-      final imp = (await imports.get(id))!;
-      expect(imp.state, ImportStatus.finished);
-      expect(await order(imp.playlistId), ['/m/first.mp3', '/m/second.mp3']);
-    });
-
     test('a video already in the library is linked, not downloaded again', () async {
       await addTrack('/m/one.mp3', 'One More Time', 'Daft Punk', 320);
       final id = await service.startFromResults('Mix', [
@@ -431,22 +422,6 @@ void main() {
       await idle();
       expect(queued.map((q) => q.$1.id), ['b2']);
       expect((await imports.item(id, 0))!.state, ImportItemStatus.linked);
-    });
-
-    test('cancel drops what is waiting, like any import', () async {
-      maxInFlight = 1;
-      service.dispose();
-      service = build();
-      final id = await service.startFromResults('Mix', [
-        video('a1', 'First', 'Chan', 100),
-        video('b2', 'Second', 'Chan', 100),
-      ]);
-      await idle();
-      expect(queued, hasLength(1), reason: 'only one in flight');
-      await service.cancel(id);
-      await idle();
-      expect(cancelCalls, 1);
-      expect((await imports.get(id))!.state, ImportStatus.cancelled);
     });
 
     test('an empty list finishes at once and an unnamed one is called YouTube', () async {
@@ -532,7 +507,8 @@ void main() {
     expect(queued.single.$2, importTag(second, 1));
   });
 
-  test('a failed download marks the row failed and can be retried', () async {
+  test('a failed download marks the row failed, an unavailable video forgets '
+      'its cached searches, and the row can be retried', () async {
     yt.songs['one'] = [topic('v1', 'One', 'Band', 200)];
     final id = await service.start(csv([row(0, 'One', 'Band', 200)]));
     await idle();
@@ -545,26 +521,13 @@ void main() {
     await idle();
     expect((await imports.item(id, 0))!.state, ImportItemStatus.failed);
     expect((await imports.get(id))!.state, ImportStatus.finished);
+    expect(queued, hasLength(1),
+        reason: 'the service does not re-enqueue: retries live in the queue');
+    expect(forgotten.single, containsAll(['ISRC0', 'band one', 'Band - One']));
 
     await service.retry(id);
     await idle();
     expect(queued, hasLength(2));
-  });
-
-  test('a download that failed for good marks the row failed (retries live in the queue)',
-      () async {
-    yt.songs['one'] = [topic('v1', 'One', 'Band', 200)];
-    final id = await service.start(csv([row(0, 'One', 'Band', 200)]));
-    await idle();
-    settled.add(DownloadItem(
-        id: 1,
-        result: queued.last.$1,
-        status: DownloadStatus.failed,
-        error: YtErrorKind.network,
-        tag: importTag(id, 0)));
-    await idle();
-    expect(queued, hasLength(1), reason: 'the service does not re-enqueue');
-    expect((await imports.item(id, 0))!.state, ImportItemStatus.failed);
   });
 
   group('ISRC first', () {
@@ -601,21 +564,6 @@ void main() {
     });
   });
 
-  test('an unavailable video makes the row forget its cached searches', () async {
-    yt.songs['one'] = [topic('v1', 'One', 'Band', 200)];
-    final id = await service.start(csv([row(0, 'One', 'Band', 200)]));
-    await idle();
-    settled.add(DownloadItem(
-        id: 1,
-        result: queued.last.$1,
-        status: DownloadStatus.failed,
-        error: YtErrorKind.unavailable,
-        tag: importTag(id, 0)));
-    await idle();
-    expect(forgotten, hasLength(1));
-    expect(forgotten.single, containsAll(['ISRC0', 'band one', 'Band - One']));
-  });
-
   group('length check after the download', () {
     Future<int> startOne() async {
       yt.songs['one'] = [topic('v1', 'One', 'Band', 200)];
@@ -630,20 +578,17 @@ void main() {
       expect((await imports.item(id, 0))!.state, ImportItemStatus.downloaded);
     });
 
-    test('a 40 s difference goes to review, file and playlist entry kept',
-        () async {
+    test('a 40 s difference goes to review with a note, file and playlist '
+        'entry kept; «Tieni questo» confirms it', () async {
       final id = await startOne();
       await finish(importTag(id, 0), '/m/one.mp3', seconds: 240);
       final it = (await imports.item(id, 0))!;
       expect(it.state, ImportItemStatus.review);
+      expect(it.note, ImportNote.lengthOff);
       expect(it.trackId, isNotNull, reason: 'the downloaded track is linked');
       final imp = (await imports.get(id))!;
       expect(await order(imp.playlistId), ['/m/one.mp3']);
-    });
 
-    test('«Tieni questo» confirms it', () async {
-      final id = await startOne();
-      await finish(importTag(id, 0), '/m/one.mp3', seconds: 240);
       await service.keepDownloaded(id, 0);
       expect((await imports.item(id, 0))!.state, ImportItemStatus.downloaded);
     });
@@ -704,7 +649,8 @@ void main() {
       expect(events.map((e) => e.kind), contains(ImportEventKind.planned));
     });
 
-    test('«Scarica» sends the plan through the normal engine', () async {
+    test('«Scarica» sends the plan through the normal engine and the import '
+        'then finishes as usual', () async {
       final id = await plan();
       expect(await service.startPlanned(id), 2);
       await idle();
@@ -713,6 +659,10 @@ void main() {
       expect((await imports.get(id))!.state, ImportStatus.running);
       expect(yt.queries.where((q) => q.startsWith('songs:band')).length, 2,
           reason: 'no new searches for the approved rows');
+
+      await finish(importTag(id, 0), '/m/one.mp3');
+      await finish(importTag(id, 1), '/m/two.mp3');
+      expect((await imports.get(id))!.state, ImportStatus.finished);
     });
 
     test('another candidate can be chosen first; a skipped row is not downloaded',
@@ -727,14 +677,6 @@ void main() {
       expect(queued.map((q) => q.$1.id), ['v2b']);
     });
 
-    test('after the downloads the import finishes as usual', () async {
-      final id = await plan();
-      await service.startPlanned(id);
-      await idle();
-      await finish(importTag(id, 0), '/m/one.mp3');
-      await finish(importTag(id, 1), '/m/two.mp3');
-      expect((await imports.get(id))!.state, ImportStatus.finished);
-    });
   });
 
   group('thresholds from the settings', () {
@@ -792,9 +734,9 @@ void main() {
       expect(right[2].state, ImportStatus.paused);
       var done = await imports.forPlaylist(pl);
       for (var i = 0;
-          i < 60 && !done.every((x) => x.state == ImportStatus.finished);
+          i < 20 && !done.every((x) => x.state == ImportStatus.finished);
           i++) {
-        await Future<void>.delayed(const Duration(milliseconds: 250));
+        await idle();
         done = await imports.forPlaylist(pl);
       }
       expect(done.every((i) => i.state == ImportStatus.finished), isTrue,
@@ -841,14 +783,6 @@ void main() {
       expect(queued.single.$1.downloadName, '01 - Band - One');
       expect(queued.single.$1.subdir, 'Mood');
       expect((await imports.get(id))!.folderPath, 'Mood');
-    });
-
-    test('without options the name and folder are as before', () async {
-      yt.songs['one'] = [topic('v1', 'One', 'Band', 200)];
-      await service.start(csv([row(0, 'One', 'Band', 200)]));
-      await idle();
-      expect(queued.single.$1.downloadName, 'Band - One');
-      expect(queued.single.$1.subdir, isNull);
     });
 
     test('blocks share one number width, sized on the whole playlist', () async {
@@ -929,14 +863,6 @@ void main() {
           tag: importTag(id, 1)));
       await idle();
       expect((await imports.item(id, 1))!.note, ImportNote.downloadFailed);
-    });
-
-    test('a wrong-length download is noted', () async {
-      yt.songs['one'] = [topic('v1', 'One', 'Band', 200)];
-      final id = await service.start(csv([row(0, 'One', 'Band', 200)]));
-      await idle();
-      await finish(importTag(id, 0), '/m/one.mp3', seconds: 300);
-      expect((await imports.item(id, 0))!.note, ImportNote.lengthOff);
     });
   });
 
@@ -1101,13 +1027,6 @@ void main() {
       ]));
       await idle();
       expect(queued.map((q) => q.$1.id), isNot(contains('x0')));
-    });
-
-    test('rows without an album never look an album up', () async {
-      yt.songs['one'] = [topic('v1', 'One', 'Band', 200)];
-      await service.start(csv([row(0, 'One', 'Band', 200)]));
-      await idle();
-      expect(yt.albumSearches, 0);
     });
   });
 

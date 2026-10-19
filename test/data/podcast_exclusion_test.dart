@@ -68,12 +68,11 @@ void main() {
     expect((await queries.watchGenreTracks('Podcast').first), isEmpty);
     expect((await queries.watchTopTracks().first).map((t) => t.id), [songId], reason: 'its 9 plays do not make it a favourite song');
     expect((await tracks.liteEntries()).map((e) => e.id), [songId], reason: 'an import never links to an episode');
-    expect(await tracks.countAll(), 1);
   });
 
   test('rule searches and smart playlists do not see it either', () async {
     final all = parseRules('song').expr;
-    expect((await tracks.tracksByRules(all)).map((t) => t.id), [songId]);
+    expect((await tracks.watchByRules(all).first).map((t) => t.id), [songId]);
     expect(await tracks.countByRules(all), 1);
     expect((await tracks.watchByRules(parseRules('genere:podcast').expr).first), isEmpty);
   });

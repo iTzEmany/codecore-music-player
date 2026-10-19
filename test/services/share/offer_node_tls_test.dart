@@ -17,10 +17,16 @@ void main() {
   late OfferNode senderNode, receiverNode, oldNode;
   late OfferService old;
 
+  // Making a key pair is the slow part: once for the whole file.
+  setUpAll(() async {
+    final dir = Directory.systemTemp.createTempSync('tls-ids');
+    addTearDown(() => dir.deleteSync(recursive: true));
+    idA = await DeviceIdentity.loadOrCreate(Directory(p.join(dir.path, 'a')));
+    idB = await DeviceIdentity.loadOrCreate(Directory(p.join(dir.path, 'b')));
+  });
+
   setUp(() async {
     tmp = Directory.systemTemp.createTempSync('tls');
-    idA = await DeviceIdentity.loadOrCreate(Directory(p.join(tmp.path, 'a'))..createSync());
-    idB = await DeviceIdentity.loadOrCreate(Directory(p.join(tmp.path, 'b'))..createSync());
     sender = OfferService(deviceId: 'a', deviceName: 'Sender', allowLoopback: true);
     receiver = OfferService(deviceId: 'b', deviceName: 'Receiver', allowLoopback: true);
     old = OfferService(deviceId: 'o', deviceName: 'Old phone', allowLoopback: true);
@@ -64,16 +70,6 @@ void main() {
     final v2 = await c.hello('127.0.0.1', oldNode.port!);
     expect(v2.tlsPort, isNull);
     expect(oldNode.tlsPort, isNull);
-  });
-
-  test('over HTTPS: the right fingerprint is accepted, a wrong one refused, no pin = unverified but works', () async {
-    final c = LanClient();
-    expect((await c.helloSecure('127.0.0.1', receiverNode.tlsPort!, pin: idB.fingerprint)).fingerprint, idB.fingerprint);
-    expect((await c.helloSecure('127.0.0.1', receiverNode.tlsPort!)).name, 'Receiver');
-    await expectLater(
-      c.helloSecure('127.0.0.1', receiverNode.tlsPort!, pin: idA.fingerprint),
-      throwsA(isA<LanException>().having((e) => e.error, 'error', LanError.identityChanged)),
-    );
   });
 
   test('an offer over HTTPS arrives, carries the sender\'s HTTPS port, and a wrong pin refuses it', () async {

@@ -78,20 +78,9 @@ void main() {
     });
   }
 
-  testWidgets('jam request dialog', (tester) async {
-    final h = await Harness.create(tester);
-    final req = JamRequest(
-        id: 'r', fromId: 'x', fromName: 'Telefono', fromHost: '10.0.0.2',
-        fromPort: 1, token: 'tttttttt', receivedAt: DateTime.now());
-    await h.pump(tester, JamRequestDialog(request: req));
-    expect(find.text('Telefono vuole avviare una Jam'), findsOneWidget);
-    expect(find.text('Accetta'), findsOneWidget);
-    expect(find.text('Rifiuta'), findsOneWidget);
-    await h.dispose(tester);
-  });
-
-  testWidgets('request dialog closes by itself when the requester cancels',
-      (tester) async {
+  testWidgets(
+      'request dialog offers accept and decline, and closes by itself when '
+      'the requester cancels', (tester) async {
     final h = await Harness.create(tester);
     final req = JamRequest(
         id: 'r', fromId: 'x', fromName: 'Telefono', fromHost: '10.0.0.2',
@@ -109,6 +98,8 @@ void main() {
     await tester.tap(find.text('apri'));
     await tester.pump(const Duration(milliseconds: 400));
     expect(find.text('Telefono vuole avviare una Jam'), findsOneWidget);
+    expect(find.text('Accetta'), findsOneWidget);
+    expect(find.text('Rifiuta'), findsOneWidget);
     req.status = JamRequestStatus.cancelled;
     await tester.pump(const Duration(milliseconds: 1200));
     await tester.pump(const Duration(milliseconds: 400));

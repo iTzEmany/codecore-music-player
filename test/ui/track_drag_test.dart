@@ -121,7 +121,7 @@ void main() {
     await h.dispose(tester);
   });
 
-  testWidgets('a plain click on a row still plays it and a tiny move is not a drag', (tester) async {
+  testWidgets('a plain click on a row still plays it, it is not a drag', (tester) async {
     await open(tester);
     await tester.tap(find.text('Song 1'));
     await _settle(tester);

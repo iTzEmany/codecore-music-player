@@ -30,15 +30,13 @@ class _Ok implements HttpClientAdapter {
 
 void main() {
   group('the documented tiers', () {
-    test('the budgets stay under what Wikimedia allows (10 and 200 a minute)', () {
-      expect(kWikimediaAnonymousPerMinute, lessThan(10));
-      expect(kWikimediaIdentifiedPerMinute, lessThan(200));
-    });
-
-    test('without a contact the app is anonymous and says so in a plain User-Agent', () {
+    test('without a contact the app is anonymous, says so in a plain User-Agent '
+        'and stays under the 10 a minute allowed (200 once identified)', () {
       expect(apiIdentified, isFalse);
       expect(apiUserAgent, 'Codecore/1.0 (uso personale)');
       expect(wikimediaLimiter().perMinute, kWikimediaAnonymousPerMinute);
+      expect(kWikimediaAnonymousPerMinute, lessThan(10));
+      expect(kWikimediaIdentifiedPerMinute, lessThan(200));
     });
 
     test('the Wikimedia hosts share one limit; others are not counted', () {

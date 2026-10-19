@@ -7,7 +7,8 @@ import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/data/repositories/import_repository.dart';
 import 'package:codecore/data/repositories/playlist_repository.dart';
 import 'package:codecore/data/repositories/track_repository.dart';
-import 'package:codecore/services/import/exportify_reader.dart';
+import 'package:codecore/services/import/csv_profiles.dart';
+import 'package:codecore/services/import/imported_playlist.dart';
 import 'package:codecore/services/import/import_candidate.dart';
 import 'package:codecore/services/import/playlist_import_service.dart';
 import 'package:codecore/services/online/yt_dlp_process_service.dart';
@@ -38,8 +39,8 @@ void main() {
     );
     final text = File('test/fixtures/Just_a_mood.csv').readAsStringSync();
     final limit = int.tryParse(Platform.environment['ROWS'] ?? '') ?? 999;
-    final csv = readExportify('Just_a_mood.csv', text);
-    final id = await service.start(ExportifyPlaylist(
+    final csv = readCsvPlaylist('Just_a_mood.csv', text);
+    final id = await service.start(ImportedPlaylist(
         name: csv.name, rows: csv.rows.take(limit).toList()));
     for (var i = 0; i < 1200; i++) {
       await Future<void>.delayed(const Duration(milliseconds: 500));

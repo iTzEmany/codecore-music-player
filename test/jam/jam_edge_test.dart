@@ -48,15 +48,6 @@ void main() {
       expect(s.currentIndex, 0);
     });
 
-    test('host removes the current last item: index falls back', () {
-      var s = ok(s0(), JamCommand.add(it(host)), host);
-      s = ok(s, JamCommand.add(it(host)), host);
-      s = ok(s, const JamCommand.jump(2), host);
-      s = ok(s, const JamCommand.remove(2), host);
-      expect(s.currentIndex, 0);
-      expect(s.current!.id, 1);
-    });
-
     test('moving the current item keeps it current', () {
       var s = s0();
       for (var i = 0; i < 4; i++) {
@@ -207,8 +198,11 @@ void main() {
 
     test('wrong session id / token on every host route', () async {
       await call('POST', 'request', body: req());
-      h.accept(h.requests.keys.single);
-      final sid = h.sessionId!, tok = h.tokenOf('g')!;
+      final id = h.requests.keys.single;
+      h.accept(id);
+      final answer = await call('GET', 'request/$id', headers: {'x-token': 'token-1234'});
+      final sid = h.sessionId!;
+      final tok = (jsonDecode(await answer.readAsString()) as Map)['token'] as String;
       final good = {'x-jam-token': tok};
       expect((await call('GET', 'nope/state', headers: good)).statusCode, 401);
       expect((await call('POST', 'nope/cmd', body: {'cmd': 'play'}, headers: good)).statusCode, 401);
@@ -281,15 +275,19 @@ void leaveTests() {
     Future<Response> call(String m, String p, {Object? body, Map<String, String>? hd}) =>
         Future.sync(() => handler(Request(m, Uri.parse('http://x/$p'),
             body: body == null ? null : jsonEncode(body), headers: hd)));
-    Future<void> join(String id) async {
+    /// Joins like a guest and returns its identity token.
+    Future<String> join(String id) async {
       h.requests.clear();
       await call('POST', 'request', body: {
         'fromId': id, 'fromName': id, 'port': 4000, 'token': 'token-$id-1234'
       });
-      h.accept(h.requests.keys.single);
+      final rid = h.requests.keys.single;
+      h.accept(rid);
+      final answer = await call('GET', 'request/$rid', hd: {'x-token': 'token-$id-1234'});
+      return (jsonDecode(await answer.readAsString()) as Map)['token'] as String;
     }
 
-    await join('a');
+    final tokenA = await join('a');
     await join('b');
     expect(h.memberIds, ['a', 'b']);
     expect(h.state!.participants.map((p) => p.id), ['host', 'a', 'b']);
@@ -300,7 +298,7 @@ void leaveTests() {
 
     final sid = h.sessionId!;
     expect((await call('POST', '$sid/leave')).statusCode, 401);
-    expect((await call('POST', '$sid/leave', hd: {'x-jam-token': h.tokenOf('a')!})).statusCode, 200);
+    expect((await call('POST', '$sid/leave', hd: {'x-jam-token': tokenA})).statusCode, 200);
     // a's items are gone, output falls back to the host, the session lives
     expect(h.memberIds, ['b']);
     expect(h.state!.items.map((i) => i.title), ['B']);

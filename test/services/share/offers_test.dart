@@ -126,8 +126,6 @@ void main() {
 
     setUp(() async {
       tmp = Directory.systemTemp.createTempSync('offer');
-      sender = OfferService(deviceId: 'a', deviceName: 'Sender');
-      receiver = OfferService(deviceId: 'b', deviceName: 'Receiver');
       // Loopback is only allowed explicitly, in tests.
       sender = OfferService(
           deviceId: 'a', deviceName: 'Sender', allowLoopback: true);
@@ -215,7 +213,16 @@ void main() {
     });
   });
 
-  test('two devices discover each other and ignore themselves', () async {
+  /// Polls [done] every few ms, failing after 5 s (no fixed sleep).
+  Future<void> until(bool Function() done) async {
+    final end = DateTime.now().add(const Duration(seconds: 5));
+    while (!done()) {
+      if (DateTime.now().isAfter(end)) fail('condition not met within 5 s');
+      await Future<void>.delayed(const Duration(milliseconds: 5));
+    }
+  }
+
+  test('two devices discover each other; their own id, no magic and junk are ignored', () async {
     final a = LanDiscovery(
       deviceId: 'a',
       deviceName: 'Alpha',
@@ -237,31 +244,43 @@ void main() {
       await b.dispose();
     });
     await a.start(1111);
+    // Queued on a's socket before b's first beacon, so a reads them first.
+    final s = await RawDatagramSocket.bind(InternetAddress.loopbackIPv4, 0);
+    addTearDown(s.close);
+    for (final junk in [
+      '{"m":"CODECORE/1","id":"a","name":"Me","port":9}', // its own id
+      '{"m":"nope","id":"y","name":"Y","port":9}', // no magic
+      'not json',
+    ]) {
+      s.send(utf8.encode(junk), InternetAddress.loopbackIPv4, 45901);
+    }
     await b.start(2222);
-    await Future<void>.delayed(const Duration(milliseconds: 600));
+    await until(() => a.current.isNotEmpty && b.current.isNotEmpty);
     expect(a.current.map((p) => p.id), ['b']);
     expect(a.current.single.port, 2222);
     expect(b.current.map((p) => p.name), ['Alpha']);
   });
 
-  test('beacons from public addresses or without the magic are ignored', () async {
-    final a = LanDiscovery(
-      deviceId: 'a',
-      deviceName: 'Alpha',
-      port: 45903,
-      interval: const Duration(milliseconds: 100),
-      allowLoopback: false, // loopback counts as non-local here
-      targets: const [],
-    );
-    addTearDown(a.dispose);
-    await a.start(1);
+  test('beacons from outside the local network are ignored', () async {
+    // The same beacon goes to a device that refuses loopback (non-local here)
+    // and to one that accepts it: once the second has it, the first has had
+    // the same time to read it.
+    final strict = LanDiscovery(
+        deviceId: 'a', deviceName: 'Alpha', port: 45903, targets: const []);
+    final open = LanDiscovery(
+        deviceId: 'b', deviceName: 'Beta', port: 45904, allowLoopback: true, targets: const []);
+    addTearDown(() async {
+      await strict.dispose();
+      await open.dispose();
+    });
+    await strict.start(1);
+    await open.start(1);
     final s = await RawDatagramSocket.bind(InternetAddress.loopbackIPv4, 0);
     addTearDown(s.close);
-    s.send(utf8.encode('{"m":"CODECORE/1","id":"x","name":"X","port":9}'),
-        InternetAddress.loopbackIPv4, 45903);
-    s.send(utf8.encode('{"m":"nope","id":"y","name":"Y","port":9}'),
-        InternetAddress.loopbackIPv4, 45903);
-    await Future<void>.delayed(const Duration(milliseconds: 300));
-    expect(a.current, isEmpty);
+    final beacon = utf8.encode('{"m":"CODECORE/1","id":"x","name":"X","port":9}');
+    s.send(beacon, InternetAddress.loopbackIPv4, 45903);
+    s.send(beacon, InternetAddress.loopbackIPv4, 45904);
+    await until(() => open.current.isNotEmpty);
+    expect(strict.current, isEmpty);
   });
 }

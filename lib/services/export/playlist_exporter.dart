@@ -33,7 +33,7 @@ const exportifyHeader = [
   'ISRC',
 ];
 
-/// Same column names Exportify uses, so `readExportify` reads it back.
+/// Same column names Exportify uses, so the CSV import (`readCsvPlaylist`) reads it back.
 String toExportifyCsv(List<Track> tracks, Map<int, String> isrcByTrack) =>
     writeCsv([
       exportifyHeader,

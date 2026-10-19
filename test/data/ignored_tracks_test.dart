@@ -108,7 +108,6 @@ void main() {
     await tracks.setIgnored({hiddenId}, true);
     final all = parseRules('queen').expr;
 
-    expect((await tracks.tracksByRules(all)).map((t) => t.id), [keepId]);
     expect(await tracks.countByRules(all), 1);
     expect((await tracks.watchByRules(all).first).map((t) => t.id), [keepId]);
   });

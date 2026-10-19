@@ -9,7 +9,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
 
 void main() {
-  late Directory tmp;
   late DeviceIdentity idA, idB;
   late OfferNode nodeB;
   late PairingServer server;
@@ -17,11 +16,16 @@ void main() {
   late List<PairRequest> shown, paired;
   var clock = DateTime(2026, 10, 19, 12);
 
+  // Making a key pair is the slow part: once for the whole file.
+  setUpAll(() async {
+    final dir = Directory.systemTemp.createTempSync('pair-ids');
+    addTearDown(() => dir.deleteSync(recursive: true));
+    idA = await DeviceIdentity.loadOrCreate(Directory(p.join(dir.path, 'a')));
+    idB = await DeviceIdentity.loadOrCreate(Directory(p.join(dir.path, 'b')));
+  });
+
   setUp(() async {
     clock = DateTime(2026, 10, 19, 12);
-    tmp = Directory.systemTemp.createTempSync('pair');
-    idA = await DeviceIdentity.loadOrCreate(Directory(p.join(tmp.path, 'a'))..createSync());
-    idB = await DeviceIdentity.loadOrCreate(Directory(p.join(tmp.path, 'b'))..createSync());
     shown = [];
     paired = [];
     server = PairingServer(ownFingerprint: idB.fingerprint, ownId: 'dev-b', ownName: 'PC di B', now: () => clock)
@@ -32,10 +36,7 @@ void main() {
     await nodeB.start();
     client = PairingClient(LanClient(identity: idA), idA, pollEvery: const Duration(milliseconds: 20));
   });
-  tearDown(() async {
-    await nodeB.stop();
-    tmp.deleteSync(recursive: true);
-  });
+  tearDown(() => nodeB.stop());
 
   Future<PairedPeer> run(Future<String?> Function(String, int?) askPin) =>
       client.pair('127.0.0.1', nodeB.tlsPort!, ownId: 'dev-a', ownName: 'Telefono di A', askPin: askPin);

@@ -206,10 +206,6 @@ class PodcastRepository {
         ..where((e) => e.id.equals(id)))
       .getSingleOrNull();
 
-  Future<PodcastEpisode?> episodeForTrack(int trackId) =>
-      (_db.select(_db.podcastEpisodes)..where((e) => e.trackId.equals(trackId)))
-          .getSingleOrNull();
-
   Future<void> markPlayed(int episodeId, bool played, {required int now}) =>
       (_db.update(_db.podcastEpisodes)..where((e) => e.id.equals(episodeId)))
           .write(PodcastEpisodesCompanion(

@@ -27,9 +27,23 @@ void main() {
     expect(parseProgressLine('[download] 10%'), isNull);
   });
 
-  test('stderr mapping', () {
+  test('stderr mapping: rate limiting is told apart from unavailable videos',
+      () {
     expect(ytExceptionFromStderr('ERROR: Video unavailable').kind,
         YtErrorKind.unavailable);
+    expect(
+        ytExceptionFromStderr(
+                'ERROR: [soundcloud] 2366118086: This video is DRM protected')
+            .kind,
+        YtErrorKind.unavailable);
+    expect(ytExceptionFromStderr('Sign in to confirm your age').kind,
+        YtErrorKind.unavailable);
+    expect(ytExceptionFromStderr('HTTP Error 429: Too Many Requests').kind,
+        YtErrorKind.rateLimited);
+    expect(
+        ytExceptionFromStderr(
+                "ERROR: Sign in to confirm you're not a bot").kind,
+        YtErrorKind.rateLimited);
     expect(ytExceptionFromStderr('Temporary failure in name resolution').kind,
         YtErrorKind.network);
     expect(ytExceptionFromStderr('HTTP Error 403').kind, YtErrorKind.changed);
@@ -52,17 +66,6 @@ void main() {
         '{"id":"a","title":"T","artists":["A","B"],"duration":10}');
     expect(r.single.channel, 'A');
     expect(r.single.artists, ['A', 'B']);
-  });
-
-  test('rate limiting is told apart from unavailable videos', () {
-    expect(ytExceptionFromStderr('HTTP Error 429: Too Many Requests').kind,
-        YtErrorKind.rateLimited);
-    expect(
-        ytExceptionFromStderr(
-                "ERROR: Sign in to confirm you're not a bot").kind,
-        YtErrorKind.rateLimited);
-    expect(ytExceptionFromStderr('Sign in to confirm your age').kind,
-        YtErrorKind.unavailable);
   });
 
   test('YouTube Music search URL is encoded and filtered on songs', () {
@@ -202,9 +205,12 @@ void main() {
           throwsA(isA<YtException>()
               .having((e) => e.kind, 'kind', YtErrorKind.network)));
       final pid = int.parse(pidFile.readAsStringSync().trim());
-      await Future<void>.delayed(const Duration(milliseconds: 200));
-      expect(Process.runSync('kill', ['-0', '$pid']).exitCode, isNot(0),
-          reason: 'the process must be gone');
+      // Killed at once; give the OS a moment to reap it, without a fixed wait.
+      bool alive() => Process.runSync('kill', ['-0', '$pid']).exitCode == 0;
+      for (var i = 0; i < 100 && alive(); i++) {
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+      }
+      expect(alive(), isFalse, reason: 'the process must be gone');
     });
 
     test('a missing tool has no version', () async {

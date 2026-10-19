@@ -36,7 +36,6 @@ class _Tiles extends ConsumerWidget {
 
 void main() {
   late Harness h;
-  late Directory root;
 
   Future<void> open(
     WidgetTester tester,
@@ -53,8 +52,6 @@ void main() {
         const AppSettings(writeTagsToFiles: true),
       );
     }
-    root = Directory.systemTemp.createTempSync('tagui');
-    addTearDown(() => root.deleteSync(recursive: true));
     await h.pump(tester, child, extraOverrides: extra);
     await _settle(tester);
   }

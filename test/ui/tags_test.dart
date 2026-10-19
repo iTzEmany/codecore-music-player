@@ -9,10 +9,12 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../support/app_harness.dart';
 
+/// One turn of the real event loop (not real time) lets drift finish what a
+/// `runAsync` write started; everything else runs on the test clock.
 Future<void> _settle(WidgetTester tester) async {
-  await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 150)));
+  await tester.runAsync(() => Future<void>.delayed(Duration.zero));
   await tester.pump(const Duration(milliseconds: 300));
-  await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 100)));
+  await tester.runAsync(() => Future<void>.delayed(Duration.zero));
   await tester.pump(const Duration(milliseconds: 300));
 }
 

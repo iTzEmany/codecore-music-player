@@ -63,12 +63,6 @@ YoutubeLinkKind classifyYoutubeUrl(String input) {
   return YoutubeLinkKind.other;
 }
 
-bool isYoutubePlaylistUrl(String input) =>
-    classifyYoutubeUrl(input) == YoutubeLinkKind.playlist;
-
-bool isYoutubeChannelUrl(String input) =>
-    classifyYoutubeUrl(input) == YoutubeLinkKind.channel;
-
 /// The address to hand to `yt-dlp --flat-playlist`: a playlist by its id (a
 /// `watch?v=…&list=…` link becomes the playlist page), a channel by its
 /// Videos tab. Null when [input] is neither.

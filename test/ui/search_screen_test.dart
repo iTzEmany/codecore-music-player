@@ -1,5 +1,6 @@
 import 'package:codecore/core/constants.dart';
 import 'package:codecore/ui/screens/search/search_screen.dart';
+import 'package:codecore/ui/widgets/track_row.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -30,6 +31,11 @@ void main() {
     await _settle(tester);
     expect(find.text('Risultato principale'), findsOneWidget);
     expect(find.text('Brani'), findsOneWidget);
+    // Plain words still search as text (no operator involved).
+    Finder row(String title) =>
+        find.descendant(of: find.byType(TrackRow), matching: find.text(title));
+    expect(row('Song 1'), findsOneWidget);
+    expect(row('Song 0'), findsNothing);
     // Typing did not switch to YouTube mode.
     expect(find.text('Cerca un brano o incolla un link'), findsNothing);
     expect(tester.takeException(), isNull);

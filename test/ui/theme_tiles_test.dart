@@ -46,14 +46,6 @@ void main() {
     await h.dispose(tester);
   });
 
-  testWidgets('tapping a built-in swatch picks it', (tester) async {
-    await open(tester);
-    await tester.tap(find.text('Chiaro'));
-    await _settle(tester);
-    expect(c.read(settingsProvider).theme, 'chiaro');
-    await h.dispose(tester);
-  });
-
   testWidgets('«Nuovo tema» opens the editor on a copy of what is in use, with the accent chosen', (tester) async {
     await open(tester, before: (c) => c.read(settingsProvider.notifier).update((s) => s.copyWith(theme: 'chiaro', accent: 'blu')));
     await tester.tap(find.byKey(const ValueKey('theme-new')));

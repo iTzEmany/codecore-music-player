@@ -1,25 +1,10 @@
 import 'package:codecore/services/share/offers.dart';
 import 'package:codecore/ui/screens/share/incoming_offer_dialog.dart';
-import 'package:codecore/ui/screens/share/share_screen.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/app_harness.dart';
 
 void main() {
-  testWidgets('share screen lists the nearby section and manual option',
-      (tester) async {
-    tester.view.physicalSize = const Size(500, 1000);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.reset);
-    final h = await Harness.create(tester, tracks: 2);
-    await h.pump(tester, const ShareScreen());
-    await tester.pump(const Duration(milliseconds: 300));
-    expect(find.text('Dispositivi vicini'), findsOneWidget);
-    expect(find.text('Collegamento manuale (IP e PIN)'), findsOneWidget);
-    await h.dispose(tester);
-  });
-
   testWidgets('incoming offer dialog offers accept and decline',
       (tester) async {
     final h = await Harness.create(tester);

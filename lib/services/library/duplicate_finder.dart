@@ -73,9 +73,6 @@ int compareKeeper(DupEntry a, DupEntry b) {
   return byAge != 0 ? byAge : a.id.compareTo(b.id);
 }
 
-DupEntry proposeKeeper(Iterable<DupEntry> group) =>
-    (group.toList()..sort(compareKeeper)).first;
-
 /// Tracks whose file size equals another track's and that were never hashed:
 /// the only ones worth reading from disk (equal bytes mean equal size).
 List<DupEntry> hashCandidates(List<DupEntry> lib) {

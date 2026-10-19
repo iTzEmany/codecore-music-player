@@ -123,8 +123,4 @@ class TagRepository {
         }
         return removed;
       });
-
-  Stream<List<UserTag>> watchTags() => (_db.select(_db.userTags)
-        ..orderBy([(t) => OrderingTerm(expression: t.name.lower())]))
-      .watch();
 }
