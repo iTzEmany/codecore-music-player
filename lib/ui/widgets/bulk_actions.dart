@@ -21,7 +21,7 @@ class BulkContext {
 }
 
 /// The actions for many tracks at once, in the same model as the single-track
-/// menu. [tracks] must be in the order of the list, not of the clicks; [done]
+/// menu. [tracks] must be in the order of the picks (not of the list); [done]
 /// leaves the selection after an action that went through.
 ///
 /// None of them touches a file: «remove» only ever means rows of the library
@@ -109,8 +109,8 @@ List<TrackActionGroup> bulkActions(
         done();
       }),
       TrackAction(Icons.playlist_play_rounded, l.playNext, () async {
-        // Each one goes right after the playing track: reversed, so the list
-        // order is the play order.
+        // Each one goes right after the playing track: reversed, so the order
+        // of the picks is the play order.
         for (final t in tracks.reversed) {
           ctrl.playNext(t.id);
         }

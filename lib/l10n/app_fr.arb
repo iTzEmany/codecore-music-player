@@ -1239,6 +1239,7 @@
   "crossfadePlainInAlbum": "Pas de fondu dans un même album",
   "crossfadePlainInAlbumHint": "Dans un album, les titres s’enchaînent sans pause et sans chevauchement.",
   "selectedRow": "Sélectionné",
+  "selectedRowAt": "Sélectionné, numéro {position}",
   "selectedCount": "{count, plural, =0{0 sélectionné} one{1 sélectionné} other{{count} sélectionnés}}",
   "@selectedCount": {
     "placeholders": {

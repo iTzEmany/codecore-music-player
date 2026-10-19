@@ -2,6 +2,7 @@ import 'dart:ui' show Tristate;
 
 import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/providers/selection_providers.dart';
+import 'package:codecore/ui/theme/tokens.dart';
 import 'package:codecore/ui/widgets/cover_image.dart';
 import 'package:codecore/ui/widgets/track_row.dart';
 import 'package:codecore/ui/widgets/track_row_selection.dart';
@@ -108,9 +109,53 @@ void main() {
     expect(tester.widget<SelectionBox>(find.byType(SelectionBox).at(0)).selected, isFalse);
     final node = tester.getSemantics(find.byType(TrackRow).at(1));
     expect(node.flagsCollection.isSelected, Tristate.isTrue);
-    expect(node.value, 'Selezionato');
+    expect(node.value, 'Selezionato, numero 1');
     semantics.dispose();
     await h.dispose(tester);
+  });
+
+  testWidgets('picked rows show their place in the order of the picks', (tester) async {
+    final h = await build(tester);
+    await tester.longPress(find.text('Song 3'));
+    await settle(tester);
+    await tester.tap(find.text('Song 1'));
+    await settle(tester);
+    await tester.tap(find.text('Song 2'));
+    await settle(tester);
+    int? at(int row) => tester.widget<SelectionBox>(find.byType(SelectionBox).at(row)).position;
+    expect([at(0), at(1), at(2), at(3)], [null, 2, 3, 1]);
+    expect(find.text('1'), findsOneWidget);
+
+    await tester.tap(find.text('Song 3')); // drop the first pick: the others move up
+    await settle(tester);
+    expect([at(0), at(1), at(2), at(3)], [null, 1, 2, null]);
+
+    await tester.tap(find.text('Song 3')); // pick it again: it goes last
+    await settle(tester);
+    expect([at(0), at(1), at(2), at(3)], [null, 1, 2, 3]);
+    await h.dispose(tester);
+  });
+
+  testWidgets('a number above 99 is shown as 99+ and does not overflow', (tester) async {
+    tester.view.physicalSize = const Size(400, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(extensions: const [CcColors.notte]),
+      home: const Scaffold(
+        body: Row(children: [
+          SelectionBox(selected: true, size: 40, position: 7),
+          SelectionBox(selected: true, size: 40, position: 120),
+          SelectionBox(selected: true, size: 40),
+          SelectionBox(selected: false, size: 40, position: 3),
+        ]),
+      ),
+    ));
+    expect(find.text('7'), findsOneWidget);
+    expect(find.text('99+'), findsOneWidget);
+    expect(find.byIcon(Icons.check_rounded), findsOneWidget, reason: 'no position: the tick');
+    expect(find.text('3'), findsNothing, reason: 'not picked: empty box');
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('no «add to queue» swipe while selecting', (tester) async {

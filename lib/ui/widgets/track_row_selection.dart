@@ -14,11 +14,19 @@ class RowSelection {
 
 /// The tick box that takes the place of the cover (or number) of a row in
 /// selection mode. Same size as what it replaces, so the row keeps its height.
+/// A picked row shows its place in the order of the picks ([position], 1-based)
+/// instead of a tick when it is known.
 class SelectionBox extends StatelessWidget {
-  const SelectionBox({super.key, required this.selected, required this.size});
+  const SelectionBox({
+    super.key,
+    required this.selected,
+    required this.size,
+    this.position,
+  });
 
   final bool selected;
   final double size;
+  final int? position;
 
   @override
   Widget build(BuildContext context) {
@@ -34,15 +42,33 @@ class SelectionBox extends StatelessWidget {
           height: box,
           decoration: BoxDecoration(
             color: selected ? cc.accent : Colors.transparent,
-            borderRadius: BorderRadius.circular(CcDims.rList + 2),
+            borderRadius: BorderRadius.circular(
+              selected && position != null ? box / 2 : CcDims.rList + 2,
+            ),
             border: Border.all(
               color: selected ? cc.accent : cc.textMuted,
               width: 2,
             ),
           ),
-          child: selected
+          child: !selected
+              ? null
+              : position == null
               ? Icon(Icons.check_rounded, size: box - 6, color: cc.onAccent)
-              : null,
+              : Padding(
+                  padding: const EdgeInsets.all(2),
+                  // FittedBox: a big number or a large system font shrinks
+                  // instead of overflowing the circle.
+                  child: FittedBox(
+                    child: Text(
+                      position! > 99 ? '99+' : '$position',
+                      style: TextStyle(
+                        color: cc.onAccent,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                ),
         ),
       ),
     );

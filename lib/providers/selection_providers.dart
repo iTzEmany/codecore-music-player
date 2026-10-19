@@ -1,12 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// The tracks picked in one list, and the one the next range starts from.
-/// Immutable: every change returns a new value.
+/// The tracks picked in one list, in the order they were picked, and the one
+/// the next range starts from. Immutable: every change returns a new value.
 class Selection {
   const Selection({this.ids = const {}, this.anchor});
 
   static const empty = Selection();
 
+  /// Insertion-ordered (Dart's default `Set`): the order of the picks, which is
+  /// the order queue, playlist and the other bulk actions use.
   final Set<int> ids;
 
   /// The last track picked by hand; Shift+click extends the selection to it.
@@ -16,24 +18,38 @@ class Selection {
   int get count => ids.length;
   bool contains(int id) => ids.contains(id);
 
+  /// The picked ids, first pick first.
+  List<int> get orderedIds => ids.toList(growable: false);
+
+  /// 0-based place of [id] in the order of the picks, -1 when it is not picked.
+  int positionOf(int id) {
+    if (!ids.contains(id)) return -1;
+    var i = 0;
+    for (final x in ids) {
+      if (x == id) return i;
+      i++;
+    }
+    return -1;
+  }
+
   Selection toggle(int id) {
     final next = {...ids};
     if (!next.remove(id)) next.add(id);
     return next.isEmpty ? empty : Selection(ids: next, anchor: id);
   }
 
-  /// Adds every track between the anchor and [id], in the order they are
-  /// shown ([visibleIds]). Without a usable anchor it is a plain [toggle].
+  /// Adds every track between the anchor and [id] ([visibleIds] is the list as
+  /// shown), in the direction of the gesture: downwards from the anchor, or
+  /// upwards when [id] is above it. Without a usable anchor it is a plain
+  /// [toggle].
   Selection selectRange(List<int> visibleIds, int id) {
     final from = anchor == null ? -1 : visibleIds.indexOf(anchor!);
     final to = visibleIds.indexOf(id);
     if (from < 0 || to < 0) return toggle(id);
-    final lo = from < to ? from : to;
-    final hi = from < to ? to : from;
-    return Selection(
-      ids: {...ids, ...visibleIds.sublist(lo, hi + 1)},
-      anchor: anchor,
-    );
+    final span = from <= to
+        ? visibleIds.sublist(from, to + 1)
+        : visibleIds.sublist(to, from + 1).reversed.toList();
+    return Selection(ids: {...ids, ...span}, anchor: anchor);
   }
 
   Selection selectAll(List<int> visibleIds) => visibleIds.isEmpty
@@ -54,7 +70,8 @@ class Selection {
   }
 
   /// [ids] in the order of [visibleIds] (the order of the list, not of the
-  /// clicks); picked tracks that are not shown any more are left out.
+  /// picks); picked tracks that are not shown any more are left out. Only for
+  /// what really wants the list order: actions use [orderedIds].
   List<int> inOrderOf(List<int> visibleIds) =>
       [for (final id in visibleIds) if (ids.contains(id)) id];
 }

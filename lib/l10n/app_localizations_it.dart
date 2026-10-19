@@ -1947,6 +1947,11 @@ class AppLocalizationsIt extends AppLocalizations {
   String get selectedRow => 'Selezionato';
 
   @override
+  String selectedRowAt(int position) {
+    return 'Selezionato, numero $position';
+  }
+
+  @override
   String selectedCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

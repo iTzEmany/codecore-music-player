@@ -64,6 +64,33 @@ void main() {
         reason: 'the anchor 20 is gone');
   });
 
+  test('the picks keep the order they were made in; un-picking keeps the others in place', () {
+    var s = Selection.empty.toggle(30).toggle(10).toggle(20);
+    expect(s.orderedIds, [30, 10, 20]);
+    expect(s.positionOf(10), 1);
+    expect(s.positionOf(99), -1);
+    s = s.toggle(10);
+    expect(s.orderedIds, [30, 20]);
+    expect(s.positionOf(20), 1, reason: 'the ones after a removed pick move up');
+    s = s.toggle(10);
+    expect(s.orderedIds, [30, 20, 10], reason: 'picked again: goes last');
+  });
+
+  test('a range adds its tracks in the direction of the gesture', () {
+    final down = Selection.empty.toggle(20).selectRange(visible, 40);
+    expect(down.orderedIds, [20, 30, 40]);
+    final up = Selection.empty.toggle(40).selectRange(visible, 10);
+    expect(up.orderedIds, [40, 30, 20, 10]);
+    final mixed = Selection.empty.toggle(50).toggle(30).selectRange(visible, 10);
+    expect(mixed.orderedIds, [50, 30, 20, 10], reason: 'already picked ones keep their place');
+  });
+
+  test('select all is in the order of the list; a filter keeps the order of the rest', () {
+    expect(Selection.empty.selectAll(visible).orderedIds, visible);
+    final s = Selection.empty.toggle(40).toggle(10).toggle(30).retainWhere({10, 30, 50});
+    expect(s.orderedIds, [10, 30]);
+  });
+
   test('the ids come back in the order of the list, not of the clicks', () {
     final s = Selection.empty.toggle(40).toggle(10).toggle(30);
     expect(s.inOrderOf(visible), [10, 30, 40]);

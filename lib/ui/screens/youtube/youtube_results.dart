@@ -126,9 +126,9 @@ class _YoutubeResultsState extends ConsumerState<YoutubeResults> {
           d.result.id,
     };
     var started = 0, skipped = 0;
-    for (final i in picked.inOrderOf([
-      for (var i = 0; i < _results.length; i++) i,
-    ])) {
+    // In the order the results were picked: that is the order of the queue.
+    for (final i in picked.orderedIds) {
+      if (i >= _results.length) continue;
       final r = _results[i];
       if ((index?.contains(r.id, source: r.source) ?? false) ||
           busy.contains(r.id)) {
@@ -296,6 +296,9 @@ class _YoutubeResultsState extends ConsumerState<YoutubeResults> {
                         item: item,
                         selecting: selecting,
                         selected: picked.contains(i),
+                        position: picked.contains(i)
+                            ? picked.positionOf(i) + 1
+                            : null,
                         onTap: selecting ? () => notifier.toggle(i) : null,
                         onLongPress: () => notifier.toggle(i),
                         onDownload: () =>
@@ -318,6 +321,7 @@ class _ResultRow extends StatelessWidget {
     required this.onDownload,
     this.selecting = false,
     this.selected = false,
+    this.position,
     this.onTap,
     this.onLongPress,
   });
@@ -329,6 +333,9 @@ class _ResultRow extends StatelessWidget {
 
   /// While picking, a tick box leads the row and a tap picks or drops it.
   final bool selecting, selected;
+
+  /// Place in the order of the picks (1-based) of a picked row.
+  final int? position;
   final VoidCallback? onTap, onLongPress;
 
   @override
@@ -371,7 +378,9 @@ class _ResultRow extends StatelessWidget {
     }
     return Semantics(
       selected: selecting ? selected : null,
-      value: selected ? l.selectedRow : null,
+      value: selected
+          ? (position == null ? l.selectedRow : l.selectedRowAt(position!))
+          : null,
       child: Material(
         color: selected
             ? cc.accentSoft.withValues(alpha: 0.16)
@@ -386,7 +395,11 @@ class _ResultRow extends StatelessWidget {
                 if (selecting)
                   Padding(
                     padding: const EdgeInsets.only(left: 4),
-                    child: SelectionBox(selected: selected, size: 40),
+                    child: SelectionBox(
+                      selected: selected,
+                      position: position,
+                      size: 40,
+                    ),
                   )
                 else
                   const SizedBox(width: CcDims.margin),

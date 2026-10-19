@@ -3454,6 +3454,12 @@ abstract class AppLocalizations {
   /// **'Selezionato'**
   String get selectedRow;
 
+  /// No description provided for @selectedRowAt.
+  ///
+  /// In it, this message translates to:
+  /// **'Selezionato, numero {position}'**
+  String selectedRowAt(int position);
+
   /// No description provided for @selectedCount.
   ///
   /// In it, this message translates to:

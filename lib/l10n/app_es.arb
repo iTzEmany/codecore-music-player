@@ -1048,6 +1048,7 @@
   "crossfadePlainInAlbum": "No fundir dentro de un álbum",
   "crossfadePlainInAlbumHint": "Dentro de un álbum las canciones se suceden sin pausas y sin solaparse.",
   "selectedRow": "Seleccionado",
+  "selectedRowAt": "Seleccionado, número {position}",
   "selectedCount": "{count, plural, one{1 seleccionada} other{{count} seleccionadas}}",
   "@selectedCount": {
     "placeholders": {

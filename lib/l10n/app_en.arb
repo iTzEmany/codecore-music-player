@@ -1048,6 +1048,7 @@
   "crossfadePlainInAlbum": "Don't fade inside an album",
   "crossfadePlainInAlbumHint": "Inside an album the tracks follow each other without a gap and without overlapping.",
   "selectedRow": "Selected",
+  "selectedRowAt": "Selected, number {position}",
   "selectedCount": "{count, plural, one{1 selected} other{{count} selected}}",
   "@selectedCount": {
     "placeholders": {

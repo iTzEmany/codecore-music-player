@@ -323,10 +323,10 @@ L'agente riparte sempre dal primo task non spuntato.
 - [~] 26.10 Rifinitura, documentazione e prova a mano (versione 1.2.0 impostata, documenti fatti; tag `v1.2.0` e release dalla CI toccano a te)
 
 ## Fase 27 — Selezione ordinata e tema libero (`fase-27-selezione-ordinata-e-tema-libero.md`)
-**Solo piano (2026-10-19), nessun codice scritto.** Richieste dell'utente: ordine di selezione rispettato da coda/playlist, tema con ogni colore personalizzabile.
-- [ ] 27.1 Selezione: modello ordinato e test (puro)
-- [ ] 27.2 Selezione: consumatori (barra, azioni di gruppo, trascinamento, download YouTube, invio, playlist)
-- [ ] 27.3 Selezione: numeri sulle righe
+**Piano 2026-10-19; parte A (selezione) in corso.** Richieste dell'utente: ordine di selezione rispettato da coda/playlist, tema con ogni colore personalizzabile.
+- [x] 27.1 Selezione: modello ordinato e test (puro)
+- [x] 27.2 Selezione: consumatori (barra, azioni di gruppo, trascinamento, download YouTube, invio, playlist)
+- [x] 27.3 Selezione: numeri sulle righe
 - [ ] 27.4 Selezione: prova a mano sul telefono
 - [ ] 27.5 Tema: modello `CustomTheme` e derivazione dei colori (puro)
 - [ ] 27.6 Tema: salvataggio, scelta, backup

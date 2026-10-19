@@ -1048,6 +1048,7 @@
   "crossfadePlainInAlbum": "Innerhalb eines Albums nicht überblenden",
   "crossfadePlainInAlbumHint": "Innerhalb eines Albums folgen die Titel lückenlos aufeinander, ohne sich zu überlagern.",
   "selectedRow": "Ausgewählt",
+  "selectedRowAt": "Ausgewählt, Nummer {position}",
   "selectedCount": "{count, plural, one{1 ausgewählt} other{{count} ausgewählt}}",
   "@selectedCount": {
     "placeholders": {

@@ -38,9 +38,12 @@ class SelectionBar extends ConsumerWidget implements PreferredSizeWidget {
     final l = context.l10n;
     final selection = ref.watch(selectionProvider(listKey));
     final notifier = ref.read(selectionProvider(listKey).notifier);
+    // In the order of the picks, not of the list; a pick the list no longer
+    // shows (a filter) is left out.
+    final byId = {for (final t in tracks) t.id: t};
     final picked = [
-      for (final t in tracks)
-        if (selection.contains(t.id)) t,
+      for (final id in selection.orderedIds)
+        if (byId[id] != null) byId[id]!,
     ];
     final groups = bulkActions(
       context,

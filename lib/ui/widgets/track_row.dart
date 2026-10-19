@@ -52,6 +52,7 @@ class TrackRow extends StatefulWidget {
     this.reorderIndex,
     this.selectionMode = false,
     this.selected = false,
+    this.selectedPosition,
     this.subtitleSuffix,
   });
 
@@ -63,6 +64,9 @@ class TrackRow extends StatefulWidget {
   /// The list is in selection mode: a tick box replaces the cover or number,
   /// and a picked row ([selected]) is tinted. Same height either way.
   final bool selectionMode, selected;
+
+  /// Place of a picked row in the order of the picks (1-based).
+  final int? selectedPosition;
 
   /// Appended to the subtitle (the time of a listen in the history).
   final String? subtitleSuffix;
@@ -118,6 +122,7 @@ class _TrackRowState extends State<TrackRow> {
     if (widget.selectionMode) {
       return SelectionBox(
         selected: widget.selected,
+        position: widget.selectedPosition,
         size: widget.variant == TrackRowVariant.album ? 32 : cover,
       );
     }
@@ -357,7 +362,11 @@ class _TrackRowState extends State<TrackRow> {
           SizedBox(
             width: 40,
             child: widget.selectionMode
-                ? SelectionBox(selected: widget.selected, size: 40)
+                ? SelectionBox(
+                    selected: widget.selected,
+                    position: widget.selectedPosition,
+                    size: 40,
+                  )
                 : widget.isCurrent
                 ? Center(
                     child: NowPlayingBars(playing: widget.isPlaying, size: 16),
@@ -414,7 +423,11 @@ class _TrackRowState extends State<TrackRow> {
       onExit: (_) => setState(() => _hover = false),
       child: Semantics(
         selected: widget.selectionMode ? widget.selected : null,
-        value: widget.selected ? context.l10n.selectedRow : null,
+        value: widget.selected
+            ? (widget.selectedPosition == null
+                  ? context.l10n.selectedRow
+                  : context.l10n.selectedRowAt(widget.selectedPosition!))
+            : null,
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onSecondaryTapDown: widget.onSecondaryTap == null
@@ -477,12 +490,13 @@ class LiveTrackRow extends ConsumerWidget {
     final playing = isCurrent && (ref.watch(isPlayingProvider).value ?? false);
     void actions() => showTrackActions(context, ref, track);
     final sel = selection;
-    final (active, picked) = sel == null
-        ? (false, false)
+    final (active, position) = sel == null
+        ? (false, -1)
         : ref.watch(
             selectionProvider(sel.listKey)
-                .select((s) => (s.active, s.contains(track.id))),
+                .select((s) => (s.active, s.positionOf(track.id))),
           );
+    final picked = position >= 0;
     void tap() {
       if (sel == null) return onTap();
       final keys = HardwareKeyboard.instance;
@@ -519,6 +533,7 @@ class LiveTrackRow extends ConsumerWidget {
       onLongPress: longPress,
       selectionMode: active,
       selected: picked,
+      selectedPosition: picked ? position + 1 : null,
       subtitleSuffix: subtitleSuffix,
       onSecondaryTap: (pos) => showTrackContextMenu(context, ref, track, pos),
       onFavorite: () => toggleFavorite(context, ref, track),
@@ -528,13 +543,14 @@ class LiveTrackRow extends ConsumerWidget {
       reorderIndex: reorderIndex,
     );
     // On a desktop a row can be dragged onto a playlist of the sidebar: the
-    // whole selection when the row is part of it, otherwise just this track.
+    // whole selection (in the order of the picks) when the row is part of it,
+    // otherwise just this track.
     Widget draggable(Widget child) {
       if (sel == null || !isDesktop) return child;
       List<int> ids() {
         final s = ref.read(selectionProvider(sel.listKey));
         return s.active && s.contains(track.id)
-            ? s.inOrderOf(sel.visibleIds)
+            ? s.orderedIds
             : [track.id];
       }
 

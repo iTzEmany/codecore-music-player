@@ -203,7 +203,7 @@ void main() {
     await h.dispose(tester);
   });
 
-  testWidgets('«Riproduci dopo» keeps the order of the list, not of the taps', (tester) async {
+  testWidgets('«Riproduci dopo» follows the order of the taps, not of the list', (tester) async {
     await open(tester);
     await tester.runAsync(() => h.handler.playQueue([tracks[0].id], 0));
     await pick(tester, [3, 1]); // tapped 3 first, then 1
@@ -211,12 +211,12 @@ void main() {
     await settle(tester);
     await tester.tap(find.text('Riproduci dopo'));
     await settle(tester);
-    expect(h.handler.queueIds, [tracks[0].id, tracks[1].id, tracks[3].id]);
+    expect(h.handler.queueIds, [tracks[0].id, tracks[3].id, tracks[1].id]);
     expect(find.text('2 brani verranno riprodotti dopo'), findsOneWidget);
     await h.dispose(tester);
   });
 
-  testWidgets('«Aggiungi in coda» also follows the list order', (tester) async {
+  testWidgets('«Aggiungi in coda» also follows the order of the taps', (tester) async {
     await open(tester);
     await tester.runAsync(() => h.handler.playQueue([tracks[0].id], 0));
     await pick(tester, [3, 1, 2]);
@@ -224,7 +224,36 @@ void main() {
     await settle(tester);
     await tester.tap(find.text('Aggiungi in coda'));
     await settle(tester);
-    expect(h.handler.queueIds, [tracks[0].id, tracks[1].id, tracks[2].id, tracks[3].id]);
+    expect(h.handler.queueIds, [tracks[0].id, tracks[3].id, tracks[1].id, tracks[2].id]);
+    await h.dispose(tester);
+  });
+
+  testWidgets('a top-to-bottom pick gives the same order as the list', (tester) async {
+    await open(tester);
+    await tester.runAsync(() => h.handler.playQueue([tracks[0].id], 0));
+    await pick(tester, [1, 2, 3]);
+    await tester.tap(find.byTooltip('Azioni'));
+    await settle(tester);
+    await tester.tap(find.text('Aggiungi in coda'));
+    await settle(tester);
+    expect(h.handler.queueIds, [for (final t in tracks) t.id]);
+    await h.dispose(tester);
+  });
+
+  testWidgets('add to a playlist: the tracks land in the order they were picked', (tester) async {
+    await open(tester);
+    final repo = PlaylistRepository(h.db);
+    final id = (await tester.runAsync(() => repo.create('Mix')))!;
+    await pick(tester, [2, 0, 3]);
+    await tester.tap(find.byTooltip('Aggiungi a playlist…'));
+    await settle(tester);
+    await tester.tap(find.text('Mix'));
+    await settle(tester);
+    final inPlaylist = (await tester.runAsync(() => (h.db.select(h.db.playlistTracks)
+          ..where((t) => t.playlistId.equals(id))
+          ..orderBy([(t) => OrderingTerm.asc(t.position)]))
+        .get()))!;
+    expect([for (final r in inPlaylist) r.trackId], [tracks[2].id, tracks[0].id, tracks[3].id]);
     await h.dispose(tester);
   });
 

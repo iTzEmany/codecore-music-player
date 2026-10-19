@@ -73,7 +73,7 @@ void main() {
     await h.dispose(tester);
   });
 
-  testWidgets('dragging a picked row takes the whole selection, in list order', (tester) async {
+  testWidgets('dragging a picked row takes the whole selection, in the order of the picks', (tester) async {
     await open(tester);
     await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
     await tester.tap(find.text('Song 3'));
@@ -82,7 +82,7 @@ void main() {
     await _settle(tester);
     expect(find.text('2 selezionati'), findsOneWidget);
     await _drag(tester, find.text('Song 3'), find.text('Mix'));
-    expect(await inMix(tester), [tracks[1].id, tracks[3].id]);
+    expect(await inMix(tester), [tracks[3].id, tracks[1].id]);
     expect(find.text('2 brani aggiunti a «Mix»'), findsOneWidget);
     await h.dispose(tester);
   });
