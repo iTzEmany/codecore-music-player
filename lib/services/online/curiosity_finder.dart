@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 
 import '../../core/app_log.dart';
+import '../import/track_matcher.dart';
 import 'http_client.dart';
 import 'musicbrainz_client.dart';
 import 'query_cleaner.dart';
@@ -35,7 +36,10 @@ class CuriosityFinder {
     Object? songError, artistError;
     Curiosity? song, art;
     try {
-      song = await _byLinks(ids.song, langs, cancel) ?? await wikipedia.findSong(title, artist, lang, cancel: cancel);
+      // A page named by MusicBrainz is trusted only if it speaks of the song.
+      final key = matchKey(coreTitle(title.split(RegExp(r'\s+[-–—]\s+')).first));
+      song = await _byLinks(ids.song, langs, cancel, mustMention: key) ??
+          await wikipedia.findSong(title, artist, lang, cancel: cancel);
     } on DioException catch (e) {
       if (CancelToken.isCancel(e)) rethrow;
       songError = e;
@@ -91,13 +95,23 @@ class CuriosityFinder {
   }
 
   /// The first of [titles] (per language, in order of preference) that reads.
-  Future<Curiosity?> _byLinks(Map<String, String>? titles, List<String> langs, CancelToken? cancel) async {
+  Future<Curiosity?> _byLinks(Map<String, String>? titles, List<String> langs, CancelToken? cancel,
+      {String? mustMention}) async {
     if (titles == null) return null;
     for (final l in langs) {
       final t = titles[l];
       if (t == null) continue;
       final c = await wikipedia.exact(l, t, cancel: cancel);
-      if (c != null) return c;
+      if (c == null) continue;
+      // The title or the lead has to name it: a wrong link is worse than none.
+      if (mustMention != null && mustMention.isNotEmpty) {
+        final text = matchKey('$t ${c.text.substring(0, c.text.length.clamp(0, 600))}');
+        if (!text.contains(mustMention)) {
+          AppLog.i('page "$t" does not mention the song: left out');
+          continue;
+        }
+      }
+      return c;
     }
     return null;
   }

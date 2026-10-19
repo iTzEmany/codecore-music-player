@@ -105,6 +105,18 @@ void main() {
     expect(w.calls.where((c) => c.contains('generator') || c.contains('gsrsearch')), isEmpty, reason: 'no word search was needed');
   });
 
+  test('a page MusicBrainz links that does not speak of the song is not used', () async {
+    final w = _World(
+      mbRecordings: [_rec('r1', 'Felicità', 'Lucio Dalla', 'a1')],
+      work: 'w1',
+      songQ: 'Q1',
+      sitelinks: {'Q1': {'it': 'Chissà se stai dormendo'}},
+      pages: {'it:Chissà se stai dormendo': 'Chissà se stai dormendo è un brano di un altro autore,$_long'},
+    );
+    final r = await _finder(w).find('Felicità', 'Lucio Dalla', 'it');
+    expect(r.song, isNull);
+  });
+
   test('MusicBrainz down: the names are used, as before', () async {
     final w = _World(mb: false, pages: {
       'it:Steely Dan': 'Gli Steely Dan sono un gruppo musicale,$_long',
