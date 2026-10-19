@@ -3344,4 +3344,96 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get shareErrIdentity =>
       'This device’s identity has changed: remove it from the trusted ones and pair again.';
+
+  @override
+  String get incomingTrustedTag => 'Trusted device';
+
+  @override
+  String incomingTrustedTitle(String name) {
+    return '$name (trusted)';
+  }
+
+  @override
+  String get pairAction => 'Pair';
+
+  @override
+  String get trustedBadge => 'Trusted';
+
+  @override
+  String pairPinTitle(String name) {
+    return 'Pairing with $name';
+  }
+
+  @override
+  String pairPinHint(String name) {
+    return 'Type the 6-digit PIN shown on $name.';
+  }
+
+  @override
+  String pairPinWrong(int count) {
+    return 'Wrong PIN. Attempts left: $count.';
+  }
+
+  @override
+  String pairFingerprint(String fingerprint) {
+    return 'Fingerprint: $fingerprint';
+  }
+
+  @override
+  String get pairCompare =>
+      'Check that the fingerprint is the same on the other screen.';
+
+  @override
+  String pairRequestTitle(String name) {
+    return '$name wants to pair';
+  }
+
+  @override
+  String get pairRequestBody =>
+      'Type this PIN on the other device, then tap Confirm.';
+
+  @override
+  String get pairConfirm => 'Confirm';
+
+  @override
+  String get pairWaiting => 'Waiting for the confirmation on the other device…';
+
+  @override
+  String pairDone(String name) {
+    return 'Paired with $name';
+  }
+
+  @override
+  String get pairBlocked => 'Too many wrong attempts: try again later.';
+
+  @override
+  String get pairRejected => 'Pairing refused.';
+
+  @override
+  String get pairExpired => 'The request expired: try again.';
+
+  @override
+  String get pairFailed => 'Pairing failed.';
+
+  @override
+  String get syncDevice => 'Sync playlists';
+
+  @override
+  String get syncUnreachable =>
+      'The device is not visible on the local network.';
+
+  @override
+  String get syncFailed => 'Sync failed.';
+
+  @override
+  String syncAsked(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Request sent: $count tracks on their way',
+      one: 'Request sent: 1 track on its way',
+      zero: 'None of the tracks is on the other device',
+    );
+    return '$_temp0';
+  }
 }

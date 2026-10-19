@@ -2158,5 +2158,83 @@
   "restoreCopyList": "Copiar lista",
   "restoreFailed": "Falha no restauro",
   "exportAllPlaylists": "Exportar todas as playlists",
-  "shareErrIdentity": "A identidade deste dispositivo mudou: remove-o dos de confiança e emparelha de novo."
+  "shareErrIdentity": "A identidade deste dispositivo mudou: remove-o dos de confiança e emparelha de novo.",
+  "incomingTrustedTag": "Dispositivo de confiança",
+  "incomingTrustedTitle": "{name} (de confiança)",
+  "@incomingTrustedTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pairAction": "Emparelhar",
+  "trustedBadge": "De confiança",
+  "pairPinTitle": "Emparelhar com {name}",
+  "@pairPinTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pairPinHint": "Escreve o PIN de 6 dígitos mostrado em {name}.",
+  "@pairPinHint": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pairPinWrong": "PIN errado. Tentativas restantes: {count}.",
+  "@pairPinWrong": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pairFingerprint": "Impressão digital: {fingerprint}",
+  "@pairFingerprint": {
+    "placeholders": {
+      "fingerprint": {
+        "type": "String"
+      }
+    }
+  },
+  "pairCompare": "Confirma que a impressão digital é a mesma no outro ecrã.",
+  "pairRequestTitle": "{name} quer emparelhar",
+  "@pairRequestTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pairRequestBody": "Escreve este PIN no outro dispositivo e toca em Confirmar.",
+  "pairConfirm": "Confirmar",
+  "pairWaiting": "À espera da confirmação no outro dispositivo…",
+  "pairDone": "Emparelhado com {name}",
+  "@pairDone": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pairBlocked": "Demasiadas tentativas erradas: tenta mais tarde.",
+  "pairRejected": "Emparelhamento recusado.",
+  "pairExpired": "O pedido expirou: tenta de novo.",
+  "pairFailed": "Falha no emparelhamento.",
+  "syncDevice": "Sincronizar playlists",
+  "syncUnreachable": "O dispositivo não está visível na rede local.",
+  "syncFailed": "Falha na sincronização.",
+  "syncAsked": "{count, plural, =0{Nenhuma das faixas está no outro dispositivo} one{Pedido enviado: 1 faixa a caminho} other{Pedido enviado: {count} faixas a caminho}}",
+  "@syncAsked": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

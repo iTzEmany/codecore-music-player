@@ -1967,5 +1967,83 @@
   "restoreCopyList": "Copy list",
   "restoreFailed": "Restore failed",
   "exportAllPlaylists": "Export all playlists",
-  "shareErrIdentity": "This device’s identity has changed: remove it from the trusted ones and pair again."
+  "shareErrIdentity": "This device’s identity has changed: remove it from the trusted ones and pair again.",
+  "incomingTrustedTag": "Trusted device",
+  "incomingTrustedTitle": "{name} (trusted)",
+  "@incomingTrustedTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pairAction": "Pair",
+  "trustedBadge": "Trusted",
+  "pairPinTitle": "Pairing with {name}",
+  "@pairPinTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pairPinHint": "Type the 6-digit PIN shown on {name}.",
+  "@pairPinHint": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pairPinWrong": "Wrong PIN. Attempts left: {count}.",
+  "@pairPinWrong": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pairFingerprint": "Fingerprint: {fingerprint}",
+  "@pairFingerprint": {
+    "placeholders": {
+      "fingerprint": {
+        "type": "String"
+      }
+    }
+  },
+  "pairCompare": "Check that the fingerprint is the same on the other screen.",
+  "pairRequestTitle": "{name} wants to pair",
+  "@pairRequestTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pairRequestBody": "Type this PIN on the other device, then tap Confirm.",
+  "pairConfirm": "Confirm",
+  "pairWaiting": "Waiting for the confirmation on the other device…",
+  "pairDone": "Paired with {name}",
+  "@pairDone": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pairBlocked": "Too many wrong attempts: try again later.",
+  "pairRejected": "Pairing refused.",
+  "pairExpired": "The request expired: try again.",
+  "pairFailed": "Pairing failed.",
+  "syncDevice": "Sync playlists",
+  "syncUnreachable": "The device is not visible on the local network.",
+  "syncFailed": "Sync failed.",
+  "syncAsked": "{count, plural, =0{None of the tracks is on the other device} one{Request sent: 1 track on its way} other{Request sent: {count} tracks on their way}}",
+  "@syncAsked": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

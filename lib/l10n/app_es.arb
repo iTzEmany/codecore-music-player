@@ -1967,5 +1967,83 @@
   "restoreCopyList": "Copiar lista",
   "restoreFailed": "La restauración ha fallado",
   "exportAllPlaylists": "Exportar todas las listas",
-  "shareErrIdentity": "La identidad de este dispositivo ha cambiado: quítalo de los de confianza y empareja de nuevo."
+  "shareErrIdentity": "La identidad de este dispositivo ha cambiado: quítalo de los de confianza y empareja de nuevo.",
+  "incomingTrustedTag": "Dispositivo de confianza",
+  "incomingTrustedTitle": "{name} (de confianza)",
+  "@incomingTrustedTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pairAction": "Emparejar",
+  "trustedBadge": "De confianza",
+  "pairPinTitle": "Emparejar con {name}",
+  "@pairPinTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pairPinHint": "Escribe el PIN de 6 cifras que aparece en {name}.",
+  "@pairPinHint": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pairPinWrong": "PIN incorrecto. Intentos restantes: {count}.",
+  "@pairPinWrong": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pairFingerprint": "Huella: {fingerprint}",
+  "@pairFingerprint": {
+    "placeholders": {
+      "fingerprint": {
+        "type": "String"
+      }
+    }
+  },
+  "pairCompare": "Comprueba que la huella sea la misma en la otra pantalla.",
+  "pairRequestTitle": "{name} quiere emparejarse",
+  "@pairRequestTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pairRequestBody": "Escribe este PIN en el otro dispositivo y toca Confirmar.",
+  "pairConfirm": "Confirmar",
+  "pairWaiting": "Esperando la confirmación en el otro dispositivo…",
+  "pairDone": "Emparejado con {name}",
+  "@pairDone": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pairBlocked": "Demasiados intentos fallidos: inténtalo más tarde.",
+  "pairRejected": "Emparejamiento rechazado.",
+  "pairExpired": "La solicitud caducó: inténtalo de nuevo.",
+  "pairFailed": "El emparejamiento ha fallado.",
+  "syncDevice": "Sincronizar listas",
+  "syncUnreachable": "El dispositivo no está visible en la red local.",
+  "syncFailed": "La sincronización ha fallado.",
+  "syncAsked": "{count, plural, =0{Ninguna de las canciones está en el otro dispositivo} one{Solicitud enviada: 1 canción en camino} other{Solicitud enviada: {count} canciones en camino}}",
+  "@syncAsked": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

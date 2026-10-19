@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/share_providers.dart';
 import '../../../services/share/trusted_devices.dart';
+import '../share/sync_flow.dart';
 
 /// One expandable entry per paired device: its fingerprint, «accept
 /// automatically» and «revoke». Empty while nothing is paired, so the
@@ -58,6 +59,11 @@ class _DeviceTile extends ConsumerWidget {
           value: device.autoAccept,
           onChanged: (v) =>
               ref.read(trustedDevicesProvider.notifier).setAutoAccept(device.id, v),
+        ),
+        ListTile(
+          leading: const Icon(Icons.sync_rounded),
+          title: Text(l.syncDevice),
+          onTap: () => syncFlow(context, ref, device),
         ),
         ListTile(
           leading: const Icon(Icons.link_off),

@@ -9,6 +9,7 @@ import 'package:shelf_router/shelf_router.dart';
 import '../../core/app_log.dart';
 import '../../core/text_utils.dart';
 import 'lan_server.dart';
+import 'offer_node.dart' show callerFingerprint;
 
 export 'offer_node.dart' show OfferNode, callerFingerprint, kCallerKey;
 
@@ -108,6 +109,7 @@ class IncomingOffer {
     required this.fromHost,
     required this.fromPort,
     this.fromTlsPort,
+    this.callerFingerprint,
     required this.token,
     required this.items,
     DateTime? receivedAt,
@@ -118,6 +120,13 @@ class IncomingOffer {
 
   /// HTTPS port of the sender, when it has one: answers go there.
   final int? fromTlsPort;
+
+  /// The certificate fingerprint that signed the request (null if it was not
+  /// signed): who the sender really is, whatever it calls itself.
+  final String? callerFingerprint;
+
+  /// Set by the hub: the signer is a paired device with the id it claims.
+  bool trusted = false;
   final List<OfferItem> items;
   final DateTime receivedAt;
   OfferStatus status = OfferStatus.pending;
@@ -322,6 +331,7 @@ class OfferService {
         fromHost: ip,
         fromPort: port,
         fromTlsPort: tlsPort,
+        callerFingerprint: callerFingerprint(r),
         token: token,
         items: items,
         receivedAt: _now(),

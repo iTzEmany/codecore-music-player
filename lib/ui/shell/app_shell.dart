@@ -1,5 +1,6 @@
 import 'dart:ui' show DisplayFeatureType;
 
+import '../screens/share/pairing_dialogs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -106,6 +107,15 @@ class AppShell extends ConsumerWidget {
       showDialog<void>(
         context: context,
         builder: (_) => IncomingOfferDialog(offer: o),
+      );
+    });
+    ref.listen(pairRequestsProvider, (_, next) {
+      final r = next.value;
+      if (r == null) return;
+      showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => PairRequestDialog(request: r),
       );
     });
     ref.listen(jamRequestsProvider, (_, next) {

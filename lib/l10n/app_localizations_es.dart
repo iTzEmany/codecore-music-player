@@ -3355,4 +3355,97 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get shareErrIdentity =>
       'La identidad de este dispositivo ha cambiado: quítalo de los de confianza y empareja de nuevo.';
+
+  @override
+  String get incomingTrustedTag => 'Dispositivo de confianza';
+
+  @override
+  String incomingTrustedTitle(String name) {
+    return '$name (de confianza)';
+  }
+
+  @override
+  String get pairAction => 'Emparejar';
+
+  @override
+  String get trustedBadge => 'De confianza';
+
+  @override
+  String pairPinTitle(String name) {
+    return 'Emparejar con $name';
+  }
+
+  @override
+  String pairPinHint(String name) {
+    return 'Escribe el PIN de 6 cifras que aparece en $name.';
+  }
+
+  @override
+  String pairPinWrong(int count) {
+    return 'PIN incorrecto. Intentos restantes: $count.';
+  }
+
+  @override
+  String pairFingerprint(String fingerprint) {
+    return 'Huella: $fingerprint';
+  }
+
+  @override
+  String get pairCompare =>
+      'Comprueba que la huella sea la misma en la otra pantalla.';
+
+  @override
+  String pairRequestTitle(String name) {
+    return '$name quiere emparejarse';
+  }
+
+  @override
+  String get pairRequestBody =>
+      'Escribe este PIN en el otro dispositivo y toca Confirmar.';
+
+  @override
+  String get pairConfirm => 'Confirmar';
+
+  @override
+  String get pairWaiting => 'Esperando la confirmación en el otro dispositivo…';
+
+  @override
+  String pairDone(String name) {
+    return 'Emparejado con $name';
+  }
+
+  @override
+  String get pairBlocked =>
+      'Demasiados intentos fallidos: inténtalo más tarde.';
+
+  @override
+  String get pairRejected => 'Emparejamiento rechazado.';
+
+  @override
+  String get pairExpired => 'La solicitud caducó: inténtalo de nuevo.';
+
+  @override
+  String get pairFailed => 'El emparejamiento ha fallado.';
+
+  @override
+  String get syncDevice => 'Sincronizar listas';
+
+  @override
+  String get syncUnreachable =>
+      'El dispositivo no está visible en la red local.';
+
+  @override
+  String get syncFailed => 'La sincronización ha fallado.';
+
+  @override
+  String syncAsked(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Solicitud enviada: $count canciones en camino',
+      one: 'Solicitud enviada: 1 canción en camino',
+      zero: 'Ninguna de las canciones está en el otro dispositivo',
+    );
+    return '$_temp0';
+  }
 }

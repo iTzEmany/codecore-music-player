@@ -18,7 +18,7 @@ class IncomingOfferDialog extends ConsumerWidget {
     final mb = (offer.totalBytes / 1048576).toStringAsFixed(1);
     final shown = offer.items.take(5).toList();
     return AlertDialog(
-      title: Text(l.incomingTitle(offer.fromName)),
+      title: Text(offer.trusted ? l.incomingTrustedTitle(offer.fromName) : l.incomingTitle(offer.fromName)),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,

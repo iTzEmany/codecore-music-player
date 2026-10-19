@@ -1967,5 +1967,83 @@
   "restoreCopyList": "Liste kopieren",
   "restoreFailed": "Wiederherstellung fehlgeschlagen",
   "exportAllPlaylists": "Alle Playlists exportieren",
-  "shareErrIdentity": "Die Identität dieses Geräts hat sich geändert: aus den vertrauenswürdigen entfernen und neu koppeln."
+  "shareErrIdentity": "Die Identität dieses Geräts hat sich geändert: aus den vertrauenswürdigen entfernen und neu koppeln.",
+  "incomingTrustedTag": "Vertrauenswürdiges Gerät",
+  "incomingTrustedTitle": "{name} (vertrauenswürdig)",
+  "@incomingTrustedTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pairAction": "Koppeln",
+  "trustedBadge": "Vertrauenswürdig",
+  "pairPinTitle": "Koppeln mit {name}",
+  "@pairPinTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pairPinHint": "Gib die 6-stellige PIN ein, die auf {name} angezeigt wird.",
+  "@pairPinHint": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pairPinWrong": "Falsche PIN. Verbleibende Versuche: {count}.",
+  "@pairPinWrong": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pairFingerprint": "Fingerabdruck: {fingerprint}",
+  "@pairFingerprint": {
+    "placeholders": {
+      "fingerprint": {
+        "type": "String"
+      }
+    }
+  },
+  "pairCompare": "Prüfe, dass der Fingerabdruck auf dem anderen Bildschirm derselbe ist.",
+  "pairRequestTitle": "{name} möchte sich koppeln",
+  "@pairRequestTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pairRequestBody": "Gib diese PIN auf dem anderen Gerät ein und tippe dann auf Bestätigen.",
+  "pairConfirm": "Bestätigen",
+  "pairWaiting": "Warte auf die Bestätigung auf dem anderen Gerät…",
+  "pairDone": "Mit {name} gekoppelt",
+  "@pairDone": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pairBlocked": "Zu viele falsche Versuche: versuche es später erneut.",
+  "pairRejected": "Kopplung abgelehnt.",
+  "pairExpired": "Die Anfrage ist abgelaufen: versuche es erneut.",
+  "pairFailed": "Kopplung fehlgeschlagen.",
+  "syncDevice": "Playlists abgleichen",
+  "syncUnreachable": "Das Gerät ist im lokalen Netzwerk nicht sichtbar.",
+  "syncFailed": "Abgleich fehlgeschlagen.",
+  "syncAsked": "{count, plural, =0{Keiner der Titel ist auf dem anderen Gerät} one{Anfrage gesendet: 1 Titel unterwegs} other{Anfrage gesendet: {count} Titel unterwegs}}",
+  "@syncAsked": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

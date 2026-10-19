@@ -2158,5 +2158,83 @@
   "restoreCopyList": "Copier la liste",
   "restoreFailed": "Échec de la restauration",
   "exportAllPlaylists": "Exporter toutes les playlists",
-  "shareErrIdentity": "L’identité de cet appareil a changé : retire-le des appareils de confiance et associe-le à nouveau."
+  "shareErrIdentity": "L’identité de cet appareil a changé : retire-le des appareils de confiance et associe-le à nouveau.",
+  "incomingTrustedTag": "Appareil de confiance",
+  "incomingTrustedTitle": "{name} (de confiance)",
+  "@incomingTrustedTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pairAction": "Associer",
+  "trustedBadge": "De confiance",
+  "pairPinTitle": "Association avec {name}",
+  "@pairPinTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pairPinHint": "Saisis le code PIN à 6 chiffres affiché sur {name}.",
+  "@pairPinHint": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pairPinWrong": "Code PIN incorrect. Essais restants : {count}.",
+  "@pairPinWrong": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pairFingerprint": "Empreinte : {fingerprint}",
+  "@pairFingerprint": {
+    "placeholders": {
+      "fingerprint": {
+        "type": "String"
+      }
+    }
+  },
+  "pairCompare": "Vérifie que l’empreinte est la même sur l’autre écran.",
+  "pairRequestTitle": "{name} veut s’associer",
+  "@pairRequestTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pairRequestBody": "Saisis ce code PIN sur l’autre appareil, puis touche Confirmer.",
+  "pairConfirm": "Confirmer",
+  "pairWaiting": "En attente de la confirmation sur l’autre appareil…",
+  "pairDone": "Associé avec {name}",
+  "@pairDone": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pairBlocked": "Trop d’essais incorrects : réessaie plus tard.",
+  "pairRejected": "Association refusée.",
+  "pairExpired": "La demande a expiré : réessaie.",
+  "pairFailed": "Échec de l’association.",
+  "syncDevice": "Synchroniser les playlists",
+  "syncUnreachable": "L’appareil n’est pas visible sur le réseau local.",
+  "syncFailed": "Échec de la synchronisation.",
+  "syncAsked": "{count, plural, =0{Aucun des titres n’est sur l’autre appareil} one{Demande envoyée : 1 titre en route} other{Demande envoyée : {count} titres en route}}",
+  "@syncAsked": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

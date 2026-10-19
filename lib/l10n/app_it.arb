@@ -2158,5 +2158,83 @@
   "restoreCopyList": "Copia elenco",
   "restoreFailed": "Ripristino non riuscito",
   "exportAllPlaylists": "Esporta tutte le playlist",
-  "shareErrIdentity": "L’identità di questo dispositivo è cambiata: toglilo dai fidati e abbinalo di nuovo."
+  "shareErrIdentity": "L’identità di questo dispositivo è cambiata: toglilo dai fidati e abbinalo di nuovo.",
+  "incomingTrustedTag": "Dispositivo fidato",
+  "incomingTrustedTitle": "{name} (fidato)",
+  "@incomingTrustedTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pairAction": "Abbina",
+  "trustedBadge": "Fidato",
+  "pairPinTitle": "Abbinamento con {name}",
+  "@pairPinTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pairPinHint": "Scrivi il PIN di 6 cifre mostrato su {name}.",
+  "@pairPinHint": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pairPinWrong": "PIN sbagliato. Tentativi rimasti: {count}.",
+  "@pairPinWrong": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pairFingerprint": "Impronta: {fingerprint}",
+  "@pairFingerprint": {
+    "placeholders": {
+      "fingerprint": {
+        "type": "String"
+      }
+    }
+  },
+  "pairCompare": "Controlla che l’impronta sia la stessa sull’altro schermo.",
+  "pairRequestTitle": "{name} vuole abbinarsi",
+  "@pairRequestTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pairRequestBody": "Scrivi questo PIN sull’altro dispositivo, poi tocca Conferma.",
+  "pairConfirm": "Conferma",
+  "pairWaiting": "In attesa della conferma sull’altro dispositivo…",
+  "pairDone": "Abbinato con {name}",
+  "@pairDone": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pairBlocked": "Troppi tentativi sbagliati: riprova più tardi.",
+  "pairRejected": "Abbinamento rifiutato.",
+  "pairExpired": "Richiesta scaduta: riprova.",
+  "pairFailed": "Abbinamento non riuscito.",
+  "syncDevice": "Sincronizza playlist",
+  "syncUnreachable": "Il dispositivo non è visibile sulla rete locale.",
+  "syncFailed": "Sincronizzazione non riuscita.",
+  "syncAsked": "{count, plural, =0{Nessuno dei brani è sull’altro dispositivo} one{Richiesta inviata: 1 brano in arrivo} other{Richiesta inviata: {count} brani in arrivo}}",
+  "@syncAsked": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

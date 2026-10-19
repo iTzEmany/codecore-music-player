@@ -106,10 +106,18 @@ class LanClient {
     return dio;
   }
 
-  /// A signed JSON POST over HTTPS that also reports which certificate the
-  /// server showed. Used by pairing, where the first call has no pin yet.
+  /// A signed JSON request over HTTPS that also reports which certificate the
+  /// server showed. Used by pairing, where the first call has no pin yet, and
+  /// by the sync.
   Future<SecureReply> securePost(String host, int tlsPort, String path, Map<String, Object?> body,
-      {String? pin}) async {
+          {String? pin}) =>
+      _secureCall('POST', host, tlsPort, path, body: body, pin: pin);
+
+  Future<SecureReply> secureGet(String host, int tlsPort, String path, {String? pin}) =>
+      _secureCall('GET', host, tlsPort, path, pin: pin);
+
+  Future<SecureReply> _secureCall(String method, String host, int tlsPort, String path,
+      {Map<String, Object?>? body, String? pin}) async {
     String? seen;
     final dio = Dio(_dio.options.copyWith());
     dio.httpClientAdapter = IOHttpClientAdapter(
@@ -119,14 +127,15 @@ class LanClient {
           return pin == null || seen == pin;
         },
     );
-    final text = jsonEncode(body);
+    final text = body == null ? null : jsonEncode(body);
     final id = identity;
     try {
-      final r = await dio.post<Object?>('https://$host:$tlsPort$path',
+      final r = await dio.request<Object?>('https://$host:$tlsPort$path',
           data: text,
           options: Options(
-            contentType: 'application/json',
-            headers: {if (id != null) ...signRequest(id, 'POST', path, utf8.encode(text))},
+            method: method,
+            contentType: text == null ? null : 'application/json',
+            headers: {if (id != null) ...signRequest(id, method, path, text == null ? const [] : utf8.encode(text))},
           ));
       final data = r.data;
       return SecureReply(r.statusCode ?? 0, data is Map<String, dynamic> ? data : null, seen);

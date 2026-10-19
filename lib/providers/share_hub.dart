@@ -5,16 +5,24 @@ import 'dart:ui' show Locale;
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
+import 'package:shelf/shelf.dart' show Handler;
 import 'package:permission_handler/permission_handler.dart';
 
 import '../core/app_log.dart';
 import '../data/db/app_database.dart';
+import '../data/repositories/playlist_sync_repository.dart';
 import '../services/jam/jam_host.dart';
 import '../services/share/device_identity.dart';
 import '../services/share/discovery.dart';
 import '../services/share/lan_client.dart';
 import '../l10n/app_localizations.dart';
 import '../services/share/offers.dart';
+import '../services/share/pairing.dart';
+import '../services/share/pairing_client.dart';
+import '../services/share/sync_client.dart';
+import '../services/share/sync_routes.dart';
+import '../services/share/playlist_sync.dart';
+import '../services/share/trusted_devices.dart';
 import '../services/share/share_notifier.dart';
 import '../core/paths.dart';
 import '../core/platform.dart';
@@ -60,6 +68,9 @@ class ShareHubState {
 /// is still open, so the sender can leave the screen.
 class ShareHubNotifier extends Notifier<ShareHubState> {
   OfferService? _service;
+  DeviceIdentity? _identity;
+  PairingServer? _pairing;
+  final _pairRequests = StreamController<PairRequest>.broadcast();
   OfferNode? _node;
   JamHost? _jam;
   LanDiscovery? _discovery;
@@ -76,6 +87,9 @@ class ShareHubNotifier extends Notifier<ShareHubState> {
 
   /// New pending offers (the shell turns them into a dialog).
   Stream<IncomingOffer> get newIncoming => _newIncoming.stream;
+
+  /// Someone asked to pair: show the PIN and their fingerprint (see `acceptPairing`).
+  Stream<PairRequest> get pairRequests => _pairRequests.stream;
 
   /// New Jam requests (dialog in the foreground, notification otherwise).
   Stream<JamRequest> get newJamRequests => _newJamRequests.stream;
@@ -210,7 +224,7 @@ class ShareHubNotifier extends Notifier<ShareHubState> {
     _notified.add(o.offerId);
     _platform.showOffer(
       offerId: o.offerId,
-      title: l.incomingTitle(o.fromName),
+      title: o.trusted ? l.incomingTrustedTitle(o.fromName) : l.incomingTitle(o.fromName),
       body: l.incomingBody(o.items.length, mb),
       accept: l.accept,
       decline: l.decline,
@@ -274,7 +288,15 @@ class ShareHubNotifier extends Notifier<ShareHubState> {
               deviceName: ref.read(deviceNameProvider),
             )
             ..onIncoming = (o) {
+              final fp = o.callerFingerprint;
+              final trusted = ref.read(trustedDevicesProvider);
+              o.trusted = fp != null && trusted.matches(o.fromId, fp);
               _publish();
+              // A trusted device with «accept automatically» needs no question.
+              if (o.trusted && trusted.byId(o.fromId)!.autoAccept) {
+                unawaited(accept(o));
+                return;
+              }
               _surfaceIncoming(o);
             };
       final jam = JamHost(
@@ -293,10 +315,12 @@ class ShareHubNotifier extends Notifier<ShareHubState> {
         AppLog.w('no device identity: plain HTTP only', e, st);
       }
       ref.read(lanClientProvider).identity = identity;
+      _identity = identity;
       final node = OfferNode(
         service,
         extraRoutes: {'/jam': jam.buildRouter().call},
         identity: identity,
+        secureRoutes: identity == null ? const {} : _secureRoutes(identity, service),
       );
       final port = await node.start();
       final discovery = LanDiscovery(
@@ -550,6 +574,126 @@ class ShareHubNotifier extends Notifier<ShareHubState> {
     s.outgoing.removeWhere((_, o) => !o.open);
     _publish();
   }
+
+  // ---- pairing and playlist sync (HTTPS only) ------------------------------
+  Map<String, Handler> _secureRoutes(DeviceIdentity identity, OfferService service) {
+    final pairing = PairingServer(
+      ownFingerprint: identity.fingerprint,
+      ownId: service.deviceId,
+      ownName: service.deviceName,
+    )
+      ..onRequest = _pairRequests.add
+      ..onPaired = (r) => ref.read(trustedDevicesProvider.notifier).add(TrustedDevice(
+            id: r.deviceId,
+            name: r.name,
+            fingerprint: r.fingerprint,
+            pairedAt: DateTime.now().millisecondsSinceEpoch,
+          ));
+    _pairing = pairing;
+    final sync = PlaylistSyncRepository(ref.read(databaseProvider));
+    return {
+      '/pair': pairing.buildRouter().call,
+      '/sync': buildSyncRouter(
+        export: sync.export,
+        isTrusted: (fp) => ref.read(trustedDevicesProvider).byFingerprint(fp) != null,
+        onWant: _offerWanted,
+      ).call,
+    };
+  }
+
+  /// The person here accepted (or refused) a pairing whose PIN was proven.
+  bool acceptPairing(PairRequest r) => _pairing?.accept(r.id) ?? false;
+
+  void rejectPairing(PairRequest r) => _pairing?.reject(r.id);
+
+  /// Our own fingerprint, for the pairing screens.
+  String? get ownFingerprint => _identity?.fingerprint;
+
+  Peer? _peerOf(String deviceId) {
+    for (final p in state.peers) {
+      if (p.id == deviceId) return p;
+    }
+    return null;
+  }
+
+  /// Pairs with [peer] (PIN typed here, shown there). Saves it as trusted.
+  Future<PairedPeer> pairWith(
+    Peer peer,
+    Future<String?> Function(String peerFingerprint, int? attemptsLeft) askPin,
+  ) async {
+    await _ensureRunning();
+    final identity = _identity, tls = peer.tlsPort, service = _service;
+    if (identity == null || tls == null || service == null) throw const PairingException(PairingError.failed);
+    final paired = await PairingClient(ref.read(lanClientProvider), identity).pair(
+      peer.host,
+      tls,
+      ownId: service.deviceId,
+      ownName: service.deviceName,
+      askPin: askPin,
+    );
+    ref.read(trustedDevicesProvider.notifier).add(TrustedDevice(
+          id: paired.id,
+          name: paired.name,
+          fingerprint: paired.fingerprint,
+          pairedAt: DateTime.now().millisecondsSinceEpoch,
+        ));
+    return paired;
+  }
+
+  /// Reads the playlists of the trusted [device] and plans what a sync does.
+  Future<SyncPlan> planPlaylistSync(TrustedDevice device) async {
+    await _ensureRunning();
+    final peer = _peerOf(device.id);
+    if (peer?.tlsPort == null) throw const SyncException(SyncError.unreachable);
+    final db = ref.read(databaseProvider);
+    final repo = PlaylistSyncRepository(db);
+    final remote = await SyncClient(ref.read(lanClientProvider))
+        .playlists(peer!.host, peer.tlsPort!, pin: device.fingerprint);
+    final resolver = await repo.resolver(caseInsensitive: Platform.isWindows);
+    return planSync(await repo.local(), remote, resolver.resolve);
+  }
+
+  Future<void> applyPlaylistSync(SyncPlan plan) => PlaylistSyncRepository(ref.read(databaseProvider)).apply(plan);
+
+  /// «Chiedi i brani mancanti»: the other device offers us the tracks of [plan]
+  /// that it has. Returns how many it found.
+  Future<int> askMissingTracks(TrustedDevice device, SyncPlan plan) async {
+    final peer = _peerOf(device.id);
+    final node = _node;
+    if (peer?.tlsPort == null || node?.port == null) throw const SyncException(SyncError.unreachable);
+    final refs = plan.missing.take(kMaxWantedTracks).toList();
+    if (refs.isEmpty) return 0;
+    return SyncClient(ref.read(lanClientProvider)).want(
+      peer!.host,
+      peer.tlsPort!,
+      refs,
+      pin: device.fingerprint,
+      port: node!.port!,
+      tlsPortHere: node.tlsPort,
+    );
+  }
+
+  /// A trusted device asked for these tracks: find them here and offer them back.
+  Future<int> _offerWanted(String host, String fingerprint, TrackRequest request) async {
+    final device = ref.read(trustedDevicesProvider).byFingerprint(fingerprint);
+    if (device == null) return 0;
+    final resolver = await PlaylistSyncRepository(ref.read(databaseProvider)).resolver();
+    final ids = <int>{
+      for (final t in request.refs) ?resolver.resolve(t),
+    }.toList();
+    if (ids.isEmpty) return 0;
+    final tracks = await ref.read(trackRepositoryProvider).getByIds(ids);
+    final to = Peer(
+      id: device.id,
+      name: device.name,
+      host: host,
+      port: request.port,
+      tlsPort: request.tlsPort,
+      platform: 'other',
+    );
+    final ok = await sendOffer(to, tracks);
+    return ok ? tracks.length : 0;
+  }
 }
 
 final shareHubProvider = NotifierProvider<ShareHubNotifier, ShareHubState>(
@@ -557,6 +701,10 @@ final shareHubProvider = NotifierProvider<ShareHubNotifier, ShareHubState>(
 );
 
 /// New pending offers, for the app-wide accept/decline dialog.
+final pairRequestsProvider = StreamProvider<PairRequest>(
+  (ref) => ref.watch(shareHubProvider.notifier).pairRequests,
+);
+
 final shareOffersProvider = StreamProvider<IncomingOffer>(
   (ref) => ref.watch(shareHubProvider.notifier).newIncoming,
 );

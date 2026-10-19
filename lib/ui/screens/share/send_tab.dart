@@ -15,6 +15,7 @@ import '../jam/jam_screen.dart';
 import '../../../providers/jam_providers.dart';
 import '../devices/peer_card.dart';
 import 'offer_status_label.dart';
+import 'pairing_dialogs.dart';
 import 'track_picker_screen.dart';
 
 class SendTab extends ConsumerStatefulWidget {
@@ -172,6 +173,10 @@ class _SendTabState extends ConsumerState<SendTab> {
             peer: peer,
             onSend: () => _sendTo(peer),
             onJam: () => _startJam(peer),
+            trusted: ref.watch(trustedDevicesProvider).byId(peer.id) != null,
+            onPair: peer.tlsPort != null && ref.watch(trustedDevicesProvider).byId(peer.id) == null
+                ? () => pairFlow(context, ref, peer)
+                : null,
           ),
         if (hub.peers.isEmpty && hub.active)
           Text(l.noDevicesHint, style: Theme.of(context).textTheme.bodySmall),

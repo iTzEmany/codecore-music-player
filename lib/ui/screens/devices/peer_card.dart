@@ -11,10 +11,16 @@ class PeerCard extends StatelessWidget {
     required this.peer,
     required this.onJam,
     required this.onSend,
+    this.onPair,
+    this.trusted = false,
   });
 
   final Peer peer;
   final VoidCallback onJam, onSend;
+
+  /// Shown when the peer can be paired and is not yet.
+  final VoidCallback? onPair;
+  final bool trusted;
 
   static IconData platformIcon(String p) => switch (p) {
     'android' => Icons.smartphone_rounded,
@@ -45,12 +51,23 @@ class PeerCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      peer.name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.bodyLarge,
-                    ),
+                    Row(children: [
+                      Flexible(
+                        child: Text(
+                          peer.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.bodyLarge,
+                        ),
+                      ),
+                      if (trusted) ...[
+                        const SizedBox(width: 6),
+                        Tooltip(
+                          message: l.trustedBadge,
+                          child: Icon(Icons.verified_user_outlined, size: 16, color: cc.accent),
+                        ),
+                      ],
+                    ]),
                     Text(
                       peer.host,
                       maxLines: 1,
@@ -66,6 +83,10 @@ class PeerCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
+              if (onPair != null) ...[
+                TextButton(onPressed: onPair, child: Text(l.pairAction)),
+                const SizedBox(width: 8),
+              ],
               OutlinedButton(
                 onPressed: onJam,
                 style: OutlinedButton.styleFrom(

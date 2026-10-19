@@ -3348,4 +3348,96 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get shareErrIdentity =>
       'L’identità di questo dispositivo è cambiata: toglilo dai fidati e abbinalo di nuovo.';
+
+  @override
+  String get incomingTrustedTag => 'Dispositivo fidato';
+
+  @override
+  String incomingTrustedTitle(String name) {
+    return '$name (fidato)';
+  }
+
+  @override
+  String get pairAction => 'Abbina';
+
+  @override
+  String get trustedBadge => 'Fidato';
+
+  @override
+  String pairPinTitle(String name) {
+    return 'Abbinamento con $name';
+  }
+
+  @override
+  String pairPinHint(String name) {
+    return 'Scrivi il PIN di 6 cifre mostrato su $name.';
+  }
+
+  @override
+  String pairPinWrong(int count) {
+    return 'PIN sbagliato. Tentativi rimasti: $count.';
+  }
+
+  @override
+  String pairFingerprint(String fingerprint) {
+    return 'Impronta: $fingerprint';
+  }
+
+  @override
+  String get pairCompare =>
+      'Controlla che l’impronta sia la stessa sull’altro schermo.';
+
+  @override
+  String pairRequestTitle(String name) {
+    return '$name vuole abbinarsi';
+  }
+
+  @override
+  String get pairRequestBody =>
+      'Scrivi questo PIN sull’altro dispositivo, poi tocca Conferma.';
+
+  @override
+  String get pairConfirm => 'Conferma';
+
+  @override
+  String get pairWaiting => 'In attesa della conferma sull’altro dispositivo…';
+
+  @override
+  String pairDone(String name) {
+    return 'Abbinato con $name';
+  }
+
+  @override
+  String get pairBlocked => 'Troppi tentativi sbagliati: riprova più tardi.';
+
+  @override
+  String get pairRejected => 'Abbinamento rifiutato.';
+
+  @override
+  String get pairExpired => 'Richiesta scaduta: riprova.';
+
+  @override
+  String get pairFailed => 'Abbinamento non riuscito.';
+
+  @override
+  String get syncDevice => 'Sincronizza playlist';
+
+  @override
+  String get syncUnreachable =>
+      'Il dispositivo non è visibile sulla rete locale.';
+
+  @override
+  String get syncFailed => 'Sincronizzazione non riuscita.';
+
+  @override
+  String syncAsked(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Richiesta inviata: $count brani in arrivo',
+      one: 'Richiesta inviata: 1 brano in arrivo',
+      zero: 'Nessuno dei brani è sull’altro dispositivo',
+    );
+    return '$_temp0';
+  }
 }

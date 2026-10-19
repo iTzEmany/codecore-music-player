@@ -3360,4 +3360,97 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get shareErrIdentity =>
       'Die Identität dieses Geräts hat sich geändert: aus den vertrauenswürdigen entfernen und neu koppeln.';
+
+  @override
+  String get incomingTrustedTag => 'Vertrauenswürdiges Gerät';
+
+  @override
+  String incomingTrustedTitle(String name) {
+    return '$name (vertrauenswürdig)';
+  }
+
+  @override
+  String get pairAction => 'Koppeln';
+
+  @override
+  String get trustedBadge => 'Vertrauenswürdig';
+
+  @override
+  String pairPinTitle(String name) {
+    return 'Koppeln mit $name';
+  }
+
+  @override
+  String pairPinHint(String name) {
+    return 'Gib die 6-stellige PIN ein, die auf $name angezeigt wird.';
+  }
+
+  @override
+  String pairPinWrong(int count) {
+    return 'Falsche PIN. Verbleibende Versuche: $count.';
+  }
+
+  @override
+  String pairFingerprint(String fingerprint) {
+    return 'Fingerabdruck: $fingerprint';
+  }
+
+  @override
+  String get pairCompare =>
+      'Prüfe, dass der Fingerabdruck auf dem anderen Bildschirm derselbe ist.';
+
+  @override
+  String pairRequestTitle(String name) {
+    return '$name möchte sich koppeln';
+  }
+
+  @override
+  String get pairRequestBody =>
+      'Gib diese PIN auf dem anderen Gerät ein und tippe dann auf Bestätigen.';
+
+  @override
+  String get pairConfirm => 'Bestätigen';
+
+  @override
+  String get pairWaiting => 'Warte auf die Bestätigung auf dem anderen Gerät…';
+
+  @override
+  String pairDone(String name) {
+    return 'Mit $name gekoppelt';
+  }
+
+  @override
+  String get pairBlocked =>
+      'Zu viele falsche Versuche: versuche es später erneut.';
+
+  @override
+  String get pairRejected => 'Kopplung abgelehnt.';
+
+  @override
+  String get pairExpired => 'Die Anfrage ist abgelaufen: versuche es erneut.';
+
+  @override
+  String get pairFailed => 'Kopplung fehlgeschlagen.';
+
+  @override
+  String get syncDevice => 'Playlists abgleichen';
+
+  @override
+  String get syncUnreachable =>
+      'Das Gerät ist im lokalen Netzwerk nicht sichtbar.';
+
+  @override
+  String get syncFailed => 'Abgleich fehlgeschlagen.';
+
+  @override
+  String syncAsked(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Anfrage gesendet: $count Titel unterwegs',
+      one: 'Anfrage gesendet: 1 Titel unterwegs',
+      zero: 'Keiner der Titel ist auf dem anderen Gerät',
+    );
+    return '$_temp0';
+  }
 }

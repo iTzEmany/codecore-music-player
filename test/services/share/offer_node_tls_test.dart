@@ -122,4 +122,16 @@ void main() {
     final other = signRequest(idA, 'GET', '/other', const []);
     expect(await get('$https/whoami', headers: other), 'nobody');
   });
+
+  test('an offer knows who really signed it: the fingerprint over HTTPS, nothing over plain HTTP', () async {
+    final signed = sender.createOutgoing(toId: 'b', toName: 'Receiver', entries: [entry()]);
+    await LanClient(identity: idA).sendOffer('127.0.0.1', receiverNode.port!,
+        sender.offerPayload(signed, senderNode.port!), tlsPort: receiverNode.tlsPort);
+    expect(receiver.incoming[signed.offerId]!.callerFingerprint, idA.fingerprint);
+
+    final plain = sender.createOutgoing(toId: 'b', toName: 'Receiver', entries: [entry()]);
+    await LanClient(identity: idA).sendOffer('127.0.0.1', receiverNode.port!, sender.offerPayload(plain, senderNode.port!));
+    expect(receiver.incoming[plain.offerId]!.callerFingerprint, isNull, reason: 'a claim of «I am a» proves nothing');
+    expect(receiver.incoming[plain.offerId]!.trusted, isFalse);
+  });
 }

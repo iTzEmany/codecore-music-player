@@ -5312,6 +5312,138 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'L’identità di questo dispositivo è cambiata: toglilo dai fidati e abbinalo di nuovo.'**
   String get shareErrIdentity;
+
+  /// No description provided for @incomingTrustedTag.
+  ///
+  /// In it, this message translates to:
+  /// **'Dispositivo fidato'**
+  String get incomingTrustedTag;
+
+  /// No description provided for @incomingTrustedTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'{name} (fidato)'**
+  String incomingTrustedTitle(String name);
+
+  /// No description provided for @pairAction.
+  ///
+  /// In it, this message translates to:
+  /// **'Abbina'**
+  String get pairAction;
+
+  /// No description provided for @trustedBadge.
+  ///
+  /// In it, this message translates to:
+  /// **'Fidato'**
+  String get trustedBadge;
+
+  /// No description provided for @pairPinTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Abbinamento con {name}'**
+  String pairPinTitle(String name);
+
+  /// No description provided for @pairPinHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Scrivi il PIN di 6 cifre mostrato su {name}.'**
+  String pairPinHint(String name);
+
+  /// No description provided for @pairPinWrong.
+  ///
+  /// In it, this message translates to:
+  /// **'PIN sbagliato. Tentativi rimasti: {count}.'**
+  String pairPinWrong(int count);
+
+  /// No description provided for @pairFingerprint.
+  ///
+  /// In it, this message translates to:
+  /// **'Impronta: {fingerprint}'**
+  String pairFingerprint(String fingerprint);
+
+  /// No description provided for @pairCompare.
+  ///
+  /// In it, this message translates to:
+  /// **'Controlla che l’impronta sia la stessa sull’altro schermo.'**
+  String get pairCompare;
+
+  /// No description provided for @pairRequestTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'{name} vuole abbinarsi'**
+  String pairRequestTitle(String name);
+
+  /// No description provided for @pairRequestBody.
+  ///
+  /// In it, this message translates to:
+  /// **'Scrivi questo PIN sull’altro dispositivo, poi tocca Conferma.'**
+  String get pairRequestBody;
+
+  /// No description provided for @pairConfirm.
+  ///
+  /// In it, this message translates to:
+  /// **'Conferma'**
+  String get pairConfirm;
+
+  /// No description provided for @pairWaiting.
+  ///
+  /// In it, this message translates to:
+  /// **'In attesa della conferma sull’altro dispositivo…'**
+  String get pairWaiting;
+
+  /// No description provided for @pairDone.
+  ///
+  /// In it, this message translates to:
+  /// **'Abbinato con {name}'**
+  String pairDone(String name);
+
+  /// No description provided for @pairBlocked.
+  ///
+  /// In it, this message translates to:
+  /// **'Troppi tentativi sbagliati: riprova più tardi.'**
+  String get pairBlocked;
+
+  /// No description provided for @pairRejected.
+  ///
+  /// In it, this message translates to:
+  /// **'Abbinamento rifiutato.'**
+  String get pairRejected;
+
+  /// No description provided for @pairExpired.
+  ///
+  /// In it, this message translates to:
+  /// **'Richiesta scaduta: riprova.'**
+  String get pairExpired;
+
+  /// No description provided for @pairFailed.
+  ///
+  /// In it, this message translates to:
+  /// **'Abbinamento non riuscito.'**
+  String get pairFailed;
+
+  /// No description provided for @syncDevice.
+  ///
+  /// In it, this message translates to:
+  /// **'Sincronizza playlist'**
+  String get syncDevice;
+
+  /// No description provided for @syncUnreachable.
+  ///
+  /// In it, this message translates to:
+  /// **'Il dispositivo non è visibile sulla rete locale.'**
+  String get syncUnreachable;
+
+  /// No description provided for @syncFailed.
+  ///
+  /// In it, this message translates to:
+  /// **'Sincronizzazione non riuscita.'**
+  String get syncFailed;
+
+  /// No description provided for @syncAsked.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, =0{Nessuno dei brani è sull’altro dispositivo} one{Richiesta inviata: 1 brano in arrivo} other{Richiesta inviata: {count} brani in arrivo}}'**
+  String syncAsked(int count);
 }
 
 class _AppLocalizationsDelegate
