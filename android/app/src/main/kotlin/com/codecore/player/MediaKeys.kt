@@ -1,6 +1,8 @@
 package com.codecore.player
 
+import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
 import android.media.AudioManager
 import android.os.Handler
 import android.os.Looper
@@ -18,6 +20,22 @@ object MediaKeys {
     private const val POLL_MS = 250L
     private const val SETTLE_MS = 500L
 
+    /**
+     * With no media session known to the system (after an install or after a
+     * long time) `dispatchMediaKeyEvent` has nobody to deliver to. The
+     * `audio_service` receiver is addressed directly: it starts the service,
+     * which is where the Dart player comes up.
+     */
+    private fun pressViaReceiver(ctx: Context, keyCode: Int) {
+        for (action in intArrayOf(KeyEvent.ACTION_DOWN, KeyEvent.ACTION_UP)) {
+            ctx.sendBroadcast(
+                Intent(Intent.ACTION_MEDIA_BUTTON)
+                    .setComponent(ComponentName(ctx, "com.ryanheise.audioservice.MediaButtonReceiver"))
+                    .putExtra(Intent.EXTRA_KEY_EVENT, KeyEvent(action, keyCode)),
+            )
+        }
+    }
+
     fun press(ctx: Context, keyCode: Int) {
         val audio = ctx.getSystemService(Context.AUDIO_SERVICE) as AudioManager
         audio.dispatchMediaKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, keyCode))
@@ -28,7 +46,8 @@ object MediaKeys {
     fun pressSurely(ctx: Context, keyCode: Int, done: () -> Unit) {
         val app = ctx.applicationContext
         val wasReady = WidgetStore.playerReady(app)
-        press(app, keyCode)
+        android.util.Log.i("codecore", "media key $keyCode, player ready: $wasReady")
+        if (wasReady) press(app, keyCode) else pressViaReceiver(app, keyCode)
         if (wasReady) {
             done()
             return

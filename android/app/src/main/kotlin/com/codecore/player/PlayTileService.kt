@@ -9,6 +9,7 @@ class PlayTileService : TileService() {
     override fun onStartListening() = render()
 
     override fun onClick() {
+        android.util.Log.i("codecore", "tile: click")
         MediaKeys.pressSurely(this, KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE) {}
     }
 
