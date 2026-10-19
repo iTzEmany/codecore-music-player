@@ -3529,4 +3529,121 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get ownFingerprintHint =>
       'Vergleiche ihn beim Koppeln mit dem auf dem anderen Bildschirm.';
+
+  @override
+  String get writeTagsToFiles => 'Änderungen in die Dateien schreiben';
+
+  @override
+  String get writeTagsToFilesHint =>
+      'Hier geänderte Titel, Interpret, Album, Jahr, Genre und Titelnummer werden auch in MP3-, FLAC-, M4A- und OGG-Dateien geschrieben. Das Original jeder Datei bleibt erhalten. Standardmäßig aus.';
+
+  @override
+  String get writeTagsWarnTitle => 'Änderungen in die Dateien schreiben?';
+
+  @override
+  String get writeTagsWarnBody =>
+      'Beim Speichern einer Änderung werden die Tags auch in die Musikdatei geschrieben (MP3, FLAC, M4A, OGG). Es wird auf einer Kopie gearbeitet, das Ergebnis geprüft und die Datei nur ersetzt, wenn alles stimmt; vorher wird das Original unter „Tag-Backups“ gesichert (die letzten 200 oder 2 GB). Cover, Liedtexte und ReplayGain bleiben unberührt. Vor dem Aktivieren sollten Sie ein Bibliotheks-Backup erstellen (Einstellungen → Backup).';
+
+  @override
+  String get writeTagsEnable => 'Aktivieren';
+
+  @override
+  String get tagsAlsoInFile => 'Auch in die Datei schreiben';
+
+  @override
+  String tagsNoWriteUnsupported(String format) {
+    return 'Dieses Format ist nicht beschreibbar ($format): nur die Bibliothek ändert sich';
+  }
+
+  @override
+  String get tagsNoWriteReadOnly =>
+      'Schreibgeschützte Datei: nur die Bibliothek ändert sich';
+
+  @override
+  String get tagsNoWriteMissing =>
+      'Datei nicht gefunden: nur die Bibliothek ändert sich';
+
+  @override
+  String tagsFileWriteFailed(int count, String reason) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Dateien wurden nicht geändert',
+      one: '1 Datei wurde nicht geändert',
+    );
+    return 'In der Bibliothek gespeichert, aber $_temp0: $reason';
+  }
+
+  @override
+  String get tagReasonUnsupported => 'Format nicht unterstützt';
+
+  @override
+  String get tagReasonNotFound => 'Datei nicht gefunden';
+
+  @override
+  String get tagReasonReadOnly => 'schreibgeschützte Datei';
+
+  @override
+  String get tagReasonVerifyFailed =>
+      'die Prüfung nach dem Schreiben ist fehlgeschlagen, die Datei blieb unverändert';
+
+  @override
+  String get tagReasonWriteFailed =>
+      'Schreiben fehlgeschlagen, die Datei blieb unverändert';
+
+  @override
+  String get tagReasonBackupFailed =>
+      'Sicherung des Originals fehlgeschlagen, die Datei blieb unverändert';
+
+  @override
+  String get tagReasonIoError => 'Festplatten- oder Berechtigungsfehler';
+
+  @override
+  String get tagBackupsTitle => 'Tag-Backups';
+
+  @override
+  String tagBackupsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Tag-Backups ($count)',
+      one: 'Tag-Backups (1)',
+      zero: 'Tag-Backups',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get tagBackupsHint =>
+      'Das Original jeder umgeschriebenen Datei vor der Änderung. Die letzten 200 oder 2 GB bleiben erhalten.';
+
+  @override
+  String get tagBackupsEmpty =>
+      'Keine Backups: Es wurde noch keine Datei umgeschrieben.';
+
+  @override
+  String get tagBackupRestore => 'Original wiederherstellen';
+
+  @override
+  String tagBackupRestoreBody(String name) {
+    return 'Die Datei „$name“ wird auf den Stand vor der Änderung zurückgesetzt. Die Bibliothek behält die in der App vorgenommenen Änderungen.';
+  }
+
+  @override
+  String get tagBackupRestored => 'Original wiederhergestellt';
+
+  @override
+  String tagBackupRestoreFailed(String reason) {
+    return 'Wiederherstellung fehlgeschlagen: $reason';
+  }
+
+  @override
+  String get tagBackupDelete => 'Backup löschen';
+
+  @override
+  String get tagBackupDeleteBody =>
+      'Sie können die Datei dann nicht mehr auf den Stand vor der Änderung zurücksetzen.';
+
+  @override
+  String get tagBackupDeleted => 'Backup gelöscht';
 }

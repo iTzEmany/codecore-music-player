@@ -3555,4 +3555,122 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get ownFingerprintHint =>
       'Compare-la avec celle de l’autre écran lors de l’association.';
+
+  @override
+  String get writeTagsToFiles => 'Écrire les modifications dans les fichiers';
+
+  @override
+  String get writeTagsToFilesHint =>
+      'Le titre, l’artiste, l’album, l’année, le genre et la piste modifiés ici sont aussi écrits dans les fichiers MP3, FLAC, M4A et OGG. L’original de chaque fichier est conservé. Désactivé par défaut.';
+
+  @override
+  String get writeTagsWarnTitle =>
+      'Écrire les modifications dans les fichiers ?';
+
+  @override
+  String get writeTagsWarnBody =>
+      'À l’enregistrement d’une modification, les tags sont aussi réécrits dans le fichier musical (MP3, FLAC, M4A, OGG). On travaille sur une copie, on vérifie le résultat et le fichier n’est remplacé que si tout concorde ; l’original est d’abord sauvegardé dans « Sauvegardes des tags » (les 200 derniers ou 2 Go). La pochette, les paroles et le ReplayGain ne sont pas touchés. Avant d’activer, faites une sauvegarde de la bibliothèque (Réglages → Sauvegarde).';
+
+  @override
+  String get writeTagsEnable => 'Activer';
+
+  @override
+  String get tagsAlsoInFile => 'Écrire aussi dans le fichier';
+
+  @override
+  String tagsNoWriteUnsupported(String format) {
+    return 'Format non modifiable ($format) : seule la bibliothèque change';
+  }
+
+  @override
+  String get tagsNoWriteReadOnly =>
+      'Fichier en lecture seule : seule la bibliothèque change';
+
+  @override
+  String get tagsNoWriteMissing =>
+      'Fichier introuvable : seule la bibliothèque change';
+
+  @override
+  String tagsFileWriteFailed(int count, String reason) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count fichiers n’ont pas été modifiés',
+      one: '1 fichier n’a pas été modifié',
+    );
+    return 'Enregistré dans la bibliothèque, mais $_temp0 : $reason';
+  }
+
+  @override
+  String get tagReasonUnsupported => 'format non pris en charge';
+
+  @override
+  String get tagReasonNotFound => 'fichier introuvable';
+
+  @override
+  String get tagReasonReadOnly => 'fichier en lecture seule';
+
+  @override
+  String get tagReasonVerifyFailed =>
+      'la vérification après l’écriture a échoué, le fichier est resté tel quel';
+
+  @override
+  String get tagReasonWriteFailed =>
+      'l’écriture a échoué, le fichier est resté tel quel';
+
+  @override
+  String get tagReasonBackupFailed =>
+      'la sauvegarde de l’original a échoué, le fichier est resté tel quel';
+
+  @override
+  String get tagReasonIoError => 'erreur de disque ou de droits';
+
+  @override
+  String get tagBackupsTitle => 'Sauvegardes des tags';
+
+  @override
+  String tagBackupsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Sauvegardes des tags ($count)',
+      one: 'Sauvegardes des tags (1)',
+      zero: 'Sauvegardes des tags',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get tagBackupsHint =>
+      'L’original de chaque fichier réécrit, avant la modification. Les 200 derniers ou 2 Go sont conservés.';
+
+  @override
+  String get tagBackupsEmpty =>
+      'Aucune sauvegarde : aucun fichier n’a encore été réécrit.';
+
+  @override
+  String get tagBackupRestore => 'Restaurer l’original';
+
+  @override
+  String tagBackupRestoreBody(String name) {
+    return 'Le fichier « $name » revient tel qu’il était avant la modification. La bibliothèque garde les modifications faites dans l’appli.';
+  }
+
+  @override
+  String get tagBackupRestored => 'Original restauré';
+
+  @override
+  String tagBackupRestoreFailed(String reason) {
+    return 'Échec de la restauration : $reason';
+  }
+
+  @override
+  String get tagBackupDelete => 'Supprimer la sauvegarde';
+
+  @override
+  String get tagBackupDeleteBody =>
+      'Vous ne pourrez plus remettre le fichier tel qu’il était avant la modification.';
+
+  @override
+  String get tagBackupDeleted => 'Sauvegarde supprimée';
 }

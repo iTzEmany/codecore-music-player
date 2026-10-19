@@ -2285,5 +2285,71 @@
   "scanCameraDenied": "L’autorisation de la caméra est nécessaire pour lire le code.",
   "scanOpenSettings": "Ouvrir les réglages",
   "ownFingerprint": "Empreinte de cet appareil",
-  "ownFingerprintHint": "Compare-la avec celle de l’autre écran lors de l’association."
+  "ownFingerprintHint": "Compare-la avec celle de l’autre écran lors de l’association.",
+  "writeTagsToFiles": "Écrire les modifications dans les fichiers",
+  "writeTagsToFilesHint": "Le titre, l’artiste, l’album, l’année, le genre et la piste modifiés ici sont aussi écrits dans les fichiers MP3, FLAC, M4A et OGG. L’original de chaque fichier est conservé. Désactivé par défaut.",
+  "writeTagsWarnTitle": "Écrire les modifications dans les fichiers ?",
+  "writeTagsWarnBody": "À l’enregistrement d’une modification, les tags sont aussi réécrits dans le fichier musical (MP3, FLAC, M4A, OGG). On travaille sur une copie, on vérifie le résultat et le fichier n’est remplacé que si tout concorde ; l’original est d’abord sauvegardé dans « Sauvegardes des tags » (les 200 derniers ou 2 Go). La pochette, les paroles et le ReplayGain ne sont pas touchés. Avant d’activer, faites une sauvegarde de la bibliothèque (Réglages → Sauvegarde).",
+  "writeTagsEnable": "Activer",
+  "tagsAlsoInFile": "Écrire aussi dans le fichier",
+  "tagsNoWriteUnsupported": "Format non modifiable ({format}) : seule la bibliothèque change",
+  "@tagsNoWriteUnsupported": {
+    "placeholders": {
+      "format": {
+        "type": "String"
+      }
+    }
+  },
+  "tagsNoWriteReadOnly": "Fichier en lecture seule : seule la bibliothèque change",
+  "tagsNoWriteMissing": "Fichier introuvable : seule la bibliothèque change",
+  "tagsFileWriteFailed": "Enregistré dans la bibliothèque, mais {count, plural, one{1 fichier n’a pas été modifié} other{{count} fichiers n’ont pas été modifiés}} : {reason}",
+  "@tagsFileWriteFailed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "tagReasonUnsupported": "format non pris en charge",
+  "tagReasonNotFound": "fichier introuvable",
+  "tagReasonReadOnly": "fichier en lecture seule",
+  "tagReasonVerifyFailed": "la vérification après l’écriture a échoué, le fichier est resté tel quel",
+  "tagReasonWriteFailed": "l’écriture a échoué, le fichier est resté tel quel",
+  "tagReasonBackupFailed": "la sauvegarde de l’original a échoué, le fichier est resté tel quel",
+  "tagReasonIoError": "erreur de disque ou de droits",
+  "tagBackupsTitle": "Sauvegardes des tags",
+  "tagBackupsCount": "{count, plural, =0{Sauvegardes des tags} one{Sauvegardes des tags (1)} other{Sauvegardes des tags ({count})}}",
+  "@tagBackupsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tagBackupsHint": "L’original de chaque fichier réécrit, avant la modification. Les 200 derniers ou 2 Go sont conservés.",
+  "tagBackupsEmpty": "Aucune sauvegarde : aucun fichier n’a encore été réécrit.",
+  "tagBackupRestore": "Restaurer l’original",
+  "tagBackupRestoreBody": "Le fichier « {name} » revient tel qu’il était avant la modification. La bibliothèque garde les modifications faites dans l’appli.",
+  "@tagBackupRestoreBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "tagBackupRestored": "Original restauré",
+  "tagBackupRestoreFailed": "Échec de la restauration : {reason}",
+  "@tagBackupRestoreFailed": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "tagBackupDelete": "Supprimer la sauvegarde",
+  "tagBackupDeleteBody": "Vous ne pourrez plus remettre le fichier tel qu’il était avant la modification.",
+  "tagBackupDeleted": "Sauvegarde supprimée"
 }

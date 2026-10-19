@@ -5570,6 +5570,174 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Si confronta con quella mostrata sull’altro schermo quando ci si abbina.'**
   String get ownFingerprintHint;
+
+  /// No description provided for @writeTagsToFiles.
+  ///
+  /// In it, this message translates to:
+  /// **'Scrivi le modifiche nei file'**
+  String get writeTagsToFiles;
+
+  /// No description provided for @writeTagsToFilesHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Titolo, artista, album, anno, genere e traccia modificati qui vengono scritti anche in MP3, FLAC, M4A e OGG. Di ogni file si conserva l’originale. Spenta di default.'**
+  String get writeTagsToFilesHint;
+
+  /// No description provided for @writeTagsWarnTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Scrivere le modifiche nei file?'**
+  String get writeTagsWarnTitle;
+
+  /// No description provided for @writeTagsWarnBody.
+  ///
+  /// In it, this message translates to:
+  /// **'Salvando una modifica, i tag vengono riscritti anche nel file musicale (MP3, FLAC, M4A, OGG). Si lavora su una copia, si controlla il risultato e il file viene sostituito solo se tutto torna; prima l’originale è salvato in «Backup dei tag» (gli ultimi 200 o 2 GB). Copertina, testi e ReplayGain non vengono toccati. Prima di attivare conviene fare un backup della libreria (Impostazioni → Backup).'**
+  String get writeTagsWarnBody;
+
+  /// No description provided for @writeTagsEnable.
+  ///
+  /// In it, this message translates to:
+  /// **'Attiva'**
+  String get writeTagsEnable;
+
+  /// No description provided for @tagsAlsoInFile.
+  ///
+  /// In it, this message translates to:
+  /// **'Scrivi anche nel file'**
+  String get tagsAlsoInFile;
+
+  /// No description provided for @tagsNoWriteUnsupported.
+  ///
+  /// In it, this message translates to:
+  /// **'Formato non modificabile ({format}): cambia solo la libreria'**
+  String tagsNoWriteUnsupported(String format);
+
+  /// No description provided for @tagsNoWriteReadOnly.
+  ///
+  /// In it, this message translates to:
+  /// **'File in sola lettura: cambia solo la libreria'**
+  String get tagsNoWriteReadOnly;
+
+  /// No description provided for @tagsNoWriteMissing.
+  ///
+  /// In it, this message translates to:
+  /// **'File non trovato: cambia solo la libreria'**
+  String get tagsNoWriteMissing;
+
+  /// No description provided for @tagsFileWriteFailed.
+  ///
+  /// In it, this message translates to:
+  /// **'Salvato nella libreria, ma {count, plural, one{1 file non è stato modificato} other{{count} file non sono stati modificati}}: {reason}'**
+  String tagsFileWriteFailed(int count, String reason);
+
+  /// No description provided for @tagReasonUnsupported.
+  ///
+  /// In it, this message translates to:
+  /// **'formato non supportato'**
+  String get tagReasonUnsupported;
+
+  /// No description provided for @tagReasonNotFound.
+  ///
+  /// In it, this message translates to:
+  /// **'file non trovato'**
+  String get tagReasonNotFound;
+
+  /// No description provided for @tagReasonReadOnly.
+  ///
+  /// In it, this message translates to:
+  /// **'file in sola lettura'**
+  String get tagReasonReadOnly;
+
+  /// No description provided for @tagReasonVerifyFailed.
+  ///
+  /// In it, this message translates to:
+  /// **'il controllo dopo la scrittura è fallito, il file è rimasto com’era'**
+  String get tagReasonVerifyFailed;
+
+  /// No description provided for @tagReasonWriteFailed.
+  ///
+  /// In it, this message translates to:
+  /// **'scrittura non riuscita, il file è rimasto com’era'**
+  String get tagReasonWriteFailed;
+
+  /// No description provided for @tagReasonBackupFailed.
+  ///
+  /// In it, this message translates to:
+  /// **'backup dell’originale non riuscito, il file è rimasto com’era'**
+  String get tagReasonBackupFailed;
+
+  /// No description provided for @tagReasonIoError.
+  ///
+  /// In it, this message translates to:
+  /// **'errore del disco o dei permessi'**
+  String get tagReasonIoError;
+
+  /// No description provided for @tagBackupsTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Backup dei tag'**
+  String get tagBackupsTitle;
+
+  /// No description provided for @tagBackupsCount.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, =0{Backup dei tag} one{Backup dei tag (1)} other{Backup dei tag ({count})}}'**
+  String tagBackupsCount(int count);
+
+  /// No description provided for @tagBackupsHint.
+  ///
+  /// In it, this message translates to:
+  /// **'L’originale di ogni file riscritto, prima della modifica. Si tengono gli ultimi 200 o 2 GB.'**
+  String get tagBackupsHint;
+
+  /// No description provided for @tagBackupsEmpty.
+  ///
+  /// In it, this message translates to:
+  /// **'Nessun backup: i file non sono ancora stati riscritti.'**
+  String get tagBackupsEmpty;
+
+  /// No description provided for @tagBackupRestore.
+  ///
+  /// In it, this message translates to:
+  /// **'Ripristina originale'**
+  String get tagBackupRestore;
+
+  /// No description provided for @tagBackupRestoreBody.
+  ///
+  /// In it, this message translates to:
+  /// **'Il file «{name}» torna com’era prima della modifica. La libreria tiene le modifiche fatte nell’app.'**
+  String tagBackupRestoreBody(String name);
+
+  /// No description provided for @tagBackupRestored.
+  ///
+  /// In it, this message translates to:
+  /// **'Originale ripristinato'**
+  String get tagBackupRestored;
+
+  /// No description provided for @tagBackupRestoreFailed.
+  ///
+  /// In it, this message translates to:
+  /// **'Ripristino non riuscito: {reason}'**
+  String tagBackupRestoreFailed(String reason);
+
+  /// No description provided for @tagBackupDelete.
+  ///
+  /// In it, this message translates to:
+  /// **'Elimina backup'**
+  String get tagBackupDelete;
+
+  /// No description provided for @tagBackupDeleteBody.
+  ///
+  /// In it, this message translates to:
+  /// **'Non potrai più riportare il file a com’era prima della modifica.'**
+  String get tagBackupDeleteBody;
+
+  /// No description provided for @tagBackupDeleted.
+  ///
+  /// In it, this message translates to:
+  /// **'Backup eliminato'**
+  String get tagBackupDeleted;
 }
 
 class _AppLocalizationsDelegate

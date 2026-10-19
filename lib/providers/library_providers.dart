@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:path/path.dart' as p;
 
 import '../core/app_log.dart';
 import '../data/db/app_database.dart';
@@ -9,9 +10,15 @@ import '../data/repositories/track_repository.dart';
 import '../services/covers/cover_store.dart';
 import '../services/scanner/library_scanner.dart';
 import '../services/tags/audio_metadata_tag_reader.dart';
+import '../services/tags/metadata_god_tag_writer.dart';
+import '../services/tags/safe_tag_writer.dart';
+import '../services/tags/tag_backups.dart';
 import '../services/tags/tag_reader.dart';
+import '../services/tags/tag_writer.dart';
 import '../services/library/rules/rule_parser.dart';
 import '../services/library/track_editor.dart';
+import '../services/library/track_file_sync.dart';
+import '../core/paths.dart';
 import 'database_providers.dart';
 import 'online_providers.dart';
 import 'settings_providers.dart';
@@ -202,10 +209,35 @@ final artistAlbumsProvider = StreamProvider.family<List<AlbumSummary>, String>(
   (ref, key) => ref.watch(libraryQueriesProvider).watchArtistAlbums(key),
 );
 
-final trackEditorProvider = Provider<TrackEditor>(
-  (ref) =>
-      TrackEditor(ref.watch(databaseProvider), ref.watch(tagReaderProvider)),
+/// The only door to writing tags into files; tests override it.
+final tagWriterProvider = Provider<TagWriter>((ref) => MetadataGodTagWriter());
+
+final tagBackupStoreProvider = FutureProvider<TagBackupStore>(
+  (ref) async =>
+      TagBackupStore(Directory(p.join(await appSupportDir(), 'tag_backups'))),
 );
+
+final safeTagWriterProvider = FutureProvider<SafeTagWriter>((ref) async {
+  return SafeTagWriter(
+    writer: ref.watch(tagWriterProvider),
+    reader: ref.watch(tagReaderProvider),
+    workDir: Directory(p.join(await appSupportDir(), 'tagwork')),
+    backups: await ref.watch(tagBackupStoreProvider.future),
+  );
+});
+
+final trackEditorProvider = Provider<TrackEditor>((ref) {
+  final db = ref.watch(databaseProvider);
+  return TrackEditor(
+    db,
+    ref.watch(tagReaderProvider),
+    files: TrackFileSync(db, () => ref.read(safeTagWriterProvider.future)),
+    fileWritesEnabled: () {
+      final s = ref.read(settingsProvider);
+      return s.writeTagsToFiles && s.tagsAlsoInFile;
+    },
+  );
+});
 
 final missingTracksProvider = StreamProvider<List<Track>>(
   (ref) => ref.watch(trackRepositoryProvider).watchMissing(),

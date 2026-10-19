@@ -2285,5 +2285,71 @@
   "scanCameraDenied": "É preciso a permissão da câmara para ler o código.",
   "scanOpenSettings": "Abrir definições",
   "ownFingerprint": "Impressão digital deste dispositivo",
-  "ownFingerprintHint": "Compara-a com a do outro ecrã ao emparelhar."
+  "ownFingerprintHint": "Compara-a com a do outro ecrã ao emparelhar.",
+  "writeTagsToFiles": "Gravar as alterações nos ficheiros",
+  "writeTagsToFilesHint": "O título, artista, álbum, ano, género e faixa editados aqui são também gravados nos ficheiros MP3, FLAC, M4A e OGG. O original de cada ficheiro é guardado. Desligado por defeito.",
+  "writeTagsWarnTitle": "Gravar as alterações nos ficheiros?",
+  "writeTagsWarnBody": "Ao guardar uma alteração, as etiquetas são também reescritas no ficheiro de música (MP3, FLAC, M4A, OGG). Trabalha-se sobre uma cópia, verifica-se o resultado e o ficheiro só é substituído se tudo coincidir; antes, o original é guardado em «Cópias das etiquetas» (as últimas 200 ou 2 GB). A capa, as letras e o ReplayGain não são tocados. Antes de ativar, convém fazer uma cópia de segurança da biblioteca (Definições → Cópia de segurança).",
+  "writeTagsEnable": "Ativar",
+  "tagsAlsoInFile": "Gravar também no ficheiro",
+  "tagsNoWriteUnsupported": "Formato não editável ({format}): só a biblioteca muda",
+  "@tagsNoWriteUnsupported": {
+    "placeholders": {
+      "format": {
+        "type": "String"
+      }
+    }
+  },
+  "tagsNoWriteReadOnly": "Ficheiro só de leitura: só a biblioteca muda",
+  "tagsNoWriteMissing": "Ficheiro não encontrado: só a biblioteca muda",
+  "tagsFileWriteFailed": "Guardado na biblioteca, mas {count, plural, one{1 ficheiro não foi alterado} other{{count} ficheiros não foram alterados}}: {reason}",
+  "@tagsFileWriteFailed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "tagReasonUnsupported": "formato não suportado",
+  "tagReasonNotFound": "ficheiro não encontrado",
+  "tagReasonReadOnly": "ficheiro só de leitura",
+  "tagReasonVerifyFailed": "a verificação após a gravação falhou, o ficheiro ficou como estava",
+  "tagReasonWriteFailed": "a gravação falhou, o ficheiro ficou como estava",
+  "tagReasonBackupFailed": "não foi possível guardar o original, o ficheiro ficou como estava",
+  "tagReasonIoError": "erro de disco ou de permissões",
+  "tagBackupsTitle": "Cópias das etiquetas",
+  "tagBackupsCount": "{count, plural, =0{Cópias das etiquetas} one{Cópias das etiquetas (1)} other{Cópias das etiquetas ({count})}}",
+  "@tagBackupsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tagBackupsHint": "O original de cada ficheiro reescrito, antes da alteração. Guardam-se os últimos 200 ou 2 GB.",
+  "tagBackupsEmpty": "Sem cópias: ainda nenhum ficheiro foi reescrito.",
+  "tagBackupRestore": "Restaurar original",
+  "tagBackupRestoreBody": "O ficheiro «{name}» volta a ficar como estava antes da alteração. A biblioteca mantém as alterações feitas na app.",
+  "@tagBackupRestoreBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "tagBackupRestored": "Original restaurado",
+  "tagBackupRestoreFailed": "Não foi possível restaurar: {reason}",
+  "@tagBackupRestoreFailed": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "tagBackupDelete": "Eliminar cópia",
+  "tagBackupDeleteBody": "Já não poderá devolver o ficheiro ao estado anterior à alteração.",
+  "tagBackupDeleted": "Cópia eliminada"
 }

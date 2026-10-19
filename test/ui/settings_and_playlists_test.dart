@@ -10,7 +10,7 @@ import '../support/app_harness.dart';
 void main() {
   testWidgets('settings builds and theme choice is persisted in state',
       (tester) async {
-    tester.view.physicalSize = const Size(500, 2000);
+    tester.view.physicalSize = const Size(500, 3400);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     final h = await Harness.create(tester);

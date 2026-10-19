@@ -1,0 +1,16 @@
+Second patch of the local copy third_party/metadata_god (apply after metadata_god-gradle9.patch).
+The generated Dart code is from flutter_rust_bridge 2.11.1 and the Rust crate pins "=2.11.1", but the
+package asks for "^2.11.1": pub then picks 2.13.0 and the runtime refuses to start
+("codegen version (2.11.1) should be the same as runtime version (2.13.0)"). Pinning the exact version fixes it.
+
+--- a/pubspec.yaml
++++ b/pubspec.yaml
+@@ -11,7 +11,7 @@
+ dependencies:
+   flutter:
+     sdk: flutter
+   ffi: ^2.1.4
+-  flutter_rust_bridge: ^2.11.1
++  flutter_rust_bridge: 2.11.1
+   uuid: ^4.5.1
+   meta: ^1.16.0

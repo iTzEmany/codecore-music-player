@@ -6,8 +6,10 @@ import '../../../data/repositories/library_queries.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/database_providers.dart';
 import '../../../providers/library_providers.dart';
+import '../../../services/tags/tag_writer.dart';
 import '../../widgets/confirm.dart';
 import '../../widgets/cover_image.dart';
+import '../../widgets/tag_write_ui.dart';
 
 /// «Unisci con…» on an album: pick the albums to fold into [main], name the
 /// result (title and artist), and every track goes to that one album with the
@@ -24,6 +26,7 @@ Future<bool> showAlbumMergeDialog(
   );
   if (done == null || !context.mounted) return false;
   final l = context.l10n;
+  final messenger = ScaffoldMessenger.of(context);
   final editor = ref.read(trackEditorProvider);
   final tracks = await ref.read(trackRepositoryProvider).tracksOfAlbums([
     main.albumKey,
@@ -37,6 +40,11 @@ Future<bool> showAlbumMergeDialog(
         ? null
         : (hasCover: true, coverKey: main.coverKey),
   );
+  final outcome = await editor.writeToFiles(
+    tracks,
+    (_) => TagChanges(album: done.title, albumArtist: done.artist),
+  );
+  showTagFileOutcome(messenger, l, outcome);
   if (context.mounted) {
     showUndoSnack(
       context,
@@ -117,7 +125,7 @@ class _AlbumMergeDialogState extends ConsumerState<_AlbumMergeDialog> {
               decoration: InputDecoration(labelText: l.albumFieldArtist),
               onChanged: (_) => setState(() {}),
             ),
-            const SizedBox(height: 8),
+            const AlsoInFileTile(),
             TextField(
               key: const ValueKey('merge-search'),
               controller: _search,

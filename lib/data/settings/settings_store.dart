@@ -55,6 +55,8 @@ class AppSettings {
     this.crossfadePlainInAlbum = true,
     this.searchSource = SearchSource.youtube,
     this.importSoundCloud = false,
+    this.writeTagsToFiles = false,
+    this.tagsAlsoInFile = true,
   });
 
   final String theme;
@@ -122,6 +124,13 @@ class AppSettings {
   /// CSV import: try SoundCloud for the rows YouTube did not find.
   final bool importSoundCloud;
 
+  /// Edits of title, artist, album… are also written into the music files
+  /// (through `SafeTagWriter`, with a backup). Off by default.
+  final bool writeTagsToFiles;
+
+  /// With [writeTagsToFiles] on: the last answer to «also in the file?».
+  final bool tagsAlsoInFile;
+
   /// Shown to the device on the other side of a LAN share; null = hostname.
   final String? deviceName;
 
@@ -162,6 +171,8 @@ class AppSettings {
     bool? crossfadePlainInAlbum,
     SearchSource? searchSource,
     bool? importSoundCloud,
+    bool? writeTagsToFiles,
+    bool? tagsAlsoInFile,
   }) =>
       AppSettings(
         theme: theme ?? this.theme,
@@ -200,6 +211,8 @@ class AppSettings {
             crossfadePlainInAlbum ?? this.crossfadePlainInAlbum,
         searchSource: searchSource ?? this.searchSource,
         importSoundCloud: importSoundCloud ?? this.importSoundCloud,
+        writeTagsToFiles: writeTagsToFiles ?? this.writeTagsToFiles,
+        tagsAlsoInFile: tagsAlsoInFile ?? this.tagsAlsoInFile,
       );
 }
 
@@ -270,6 +283,8 @@ class SettingsStore {
           orElse: () => SearchSource.youtube,
         ),
         importSoundCloud: _prefs.getBool('importSoundCloud') ?? false,
+        writeTagsToFiles: _prefs.getBool('writeTagsToFiles') ?? false,
+        tagsAlsoInFile: _prefs.getBool('tagsAlsoInFile') ?? true,
       );
 
   EqProfile _readEq(String profile) => EqProfile(
@@ -322,6 +337,8 @@ class SettingsStore {
     await _prefs.setBool('crossfadePlainInAlbum', s.crossfadePlainInAlbum);
     await _prefs.setString('searchSource', s.searchSource.name);
     await _prefs.setBool('importSoundCloud', s.importSoundCloud);
+    await _prefs.setBool('writeTagsToFiles', s.writeTagsToFiles);
+    await _prefs.setBool('tagsAlsoInFile', s.tagsAlsoInFile);
     final dn = s.deviceName;
     if (dn == null || dn.isEmpty) {
       await _prefs.remove('deviceName');

@@ -5,8 +5,9 @@ import '../../../l10n/l10n_ext.dart';
 import '../../../providers/duplicate_providers.dart';
 import '../cleanup/duplicates_screen.dart';
 import '../cleanup/hidden_tracks_screen.dart';
+import 'tag_write_tiles.dart';
 
-/// The «Pulizia libreria» entries of Settings: duplicates and hidden tracks.
+/// The «Pulizia libreria» entries of Settings: duplicates, hidden tracks and writing tags into files.
 List<Widget> cleanupTiles(BuildContext context, WidgetRef ref) {
   final l = context.l10n;
   final hidden = ref.watch(hiddenTracksProvider).value?.length ?? 0;
@@ -27,5 +28,6 @@ List<Widget> cleanupTiles(BuildContext context, WidgetRef ref) {
       ),
       onTap: () => open(const HiddenTracksScreen()),
     ),
+    ...tagWriteTiles(context, ref),
   ];
 }

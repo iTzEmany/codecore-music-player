@@ -29,6 +29,10 @@ lib/
   services/
     tags/tag_reader.dart                  # interfaccia + TagInfo
     tags/audio_metadata_tag_reader.dart   # implementazione con audio_metadata_reader
+    tags/tag_writer.dart                  # TagWriter + TagChanges + TagWriteException (solo con opt-in)
+    tags/metadata_god_tag_writer.dart     # implementazione con metadata_god (Rust/lofty)
+    tags/safe_tag_writer.dart             # copia → scrittura → rilettura → backup → rename atomico
+    tags/tag_backups.dart                 # TagBackupStore (ultimi 200 / 2 GB), installFile
     scanner/library_scanner.dart
     covers/cover_store.dart               # salva/trova copertine su disco
     audio/play_queue.dart                 # logica pura di coda/shuffle/repeat
@@ -82,7 +86,10 @@ Scritture con debounce 400 ms, mai in un handler di slider a ogni tick.
 | Scelta cartella | `file_picker.getDirectoryPath()` | idem |
 
 ## Decisioni già prese (non rimetterle in discussione)
-- Tag **solo in lettura** (`audio_metadata_reader`, puro Dart, nessun Rust). Le modifiche dell'utente vivono nel DB.
+- Tag **in lettura** con `audio_metadata_reader` (puro Dart). Le modifiche dell'utente vivono nel DB, che resta la fonte di verità;
+  **solo con l'opzione `writeTagsToFiles`** (spenta di default, Fase 21) vengono scritte anche nei file da `metadata_god`
+  (Rust) dietro `TagWriter`, **sempre** tramite `SafeTagWriter`: copia di lavoro, rilettura e confronto, backup dell'originale
+  in `tag_backups/`, `rename` atomico. `metadata_god` è una copia locale in `third_party/metadata_god/` (patch Gradle 9).
 - Identità brano = `id` intero DB + `path` univoco. Hash SHA-256 calcolato **solo** su richiesta (condivisione).
 - Album raggruppati con `albumKey` (vedi `03-modello-dati.md`), non per solo nome.
 - Niente "bit-perfect"/uscita esclusiva. Gapless e crossfade dalla fase 18, **dietro un'impostazione** (predefinito «Normale»); la coda resta gestita da `PlayQueue`.

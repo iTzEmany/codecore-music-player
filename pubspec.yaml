@@ -66,6 +66,9 @@ dependencies:
   basic_utils: ^5.8.2
   google_mlkit_translation: ^0.15.1
   mobile_scanner: ^7.4.2
+  # Local copy: 1.1.0 does not build on Android with Gradle 9 (docs/patches).
+  metadata_god:
+    path: third_party/metadata_god
 
 dev_dependencies:
   flutter_test:
