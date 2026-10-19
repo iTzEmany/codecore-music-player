@@ -2157,5 +2157,6 @@
   "restoreNotFound": "Brani non trovati",
   "restoreCopyList": "Copia elenco",
   "restoreFailed": "Ripristino non riuscito",
-  "exportAllPlaylists": "Esporta tutte le playlist"
+  "exportAllPlaylists": "Esporta tutte le playlist",
+  "shareErrIdentity": "L’identità di questo dispositivo è cambiata: toglilo dai fidati e abbinalo di nuovo."
 }

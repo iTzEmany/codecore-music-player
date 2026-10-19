@@ -3351,4 +3351,8 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get exportAllPlaylists => 'Exportar todas las listas';
+
+  @override
+  String get shareErrIdentity =>
+      'La identidad de este dispositivo ha cambiado: quítalo de los de confianza y empareja de nuevo.';
 }

@@ -1966,5 +1966,6 @@
   "restoreNotFound": "Nicht gefundene Titel",
   "restoreCopyList": "Liste kopieren",
   "restoreFailed": "Wiederherstellung fehlgeschlagen",
-  "exportAllPlaylists": "Alle Playlists exportieren"
+  "exportAllPlaylists": "Alle Playlists exportieren",
+  "shareErrIdentity": "Die Identität dieses Geräts hat sich geändert: aus den vertrauenswürdigen entfernen und neu koppeln."
 }

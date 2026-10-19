@@ -2157,5 +2157,6 @@
   "restoreNotFound": "Faixas não encontradas",
   "restoreCopyList": "Copiar lista",
   "restoreFailed": "Falha no restauro",
-  "exportAllPlaylists": "Exportar todas as playlists"
+  "exportAllPlaylists": "Exportar todas as playlists",
+  "shareErrIdentity": "A identidade deste dispositivo mudou: remove-o dos de confiança e emparelha de novo."
 }

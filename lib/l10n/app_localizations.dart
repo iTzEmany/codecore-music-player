@@ -5306,6 +5306,12 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Esporta tutte le playlist'**
   String get exportAllPlaylists;
+
+  /// No description provided for @shareErrIdentity.
+  ///
+  /// In it, this message translates to:
+  /// **'L’identità di questo dispositivo è cambiata: toglilo dai fidati e abbinalo di nuovo.'**
+  String get shareErrIdentity;
 }
 
 class _AppLocalizationsDelegate

@@ -10,11 +10,13 @@ import 'package:permission_handler/permission_handler.dart';
 import '../core/app_log.dart';
 import '../data/db/app_database.dart';
 import '../services/jam/jam_host.dart';
+import '../services/share/device_identity.dart';
 import '../services/share/discovery.dart';
 import '../services/share/lan_client.dart';
 import '../l10n/app_localizations.dart';
 import '../services/share/offers.dart';
 import '../services/share/share_notifier.dart';
+import '../core/paths.dart';
 import '../core/platform.dart';
 import 'database_providers.dart';
 import 'library_providers.dart';
@@ -279,16 +281,29 @@ class ShareHubNotifier extends Notifier<ShareHubState> {
         deviceId: service.deviceId,
         deviceName: service.deviceName,
       )..onRequest = _surfaceJamRequest;
+      // HTTPS needs the device identity; without it (it could not be made) the
+      // hub runs plain HTTP as before (R59).
+      DeviceIdentity? identity;
+      try {
+        identity = await DeviceIdentity.loadOrCreate(Directory(await appSupportDir()));
+        if (identity.regenerated) {
+          AppLog.w('device identity was remade: paired devices must pair again');
+        }
+      } on Object catch (e, st) {
+        AppLog.w('no device identity: plain HTTP only', e, st);
+      }
+      ref.read(lanClientProvider).identity = identity;
       final node = OfferNode(
         service,
         extraRoutes: {'/jam': jam.buildRouter().call},
+        identity: identity,
       );
       final port = await node.start();
       final discovery = LanDiscovery(
         deviceId: service.deviceId,
         deviceName: service.deviceName,
       );
-      await discovery.start(port);
+      await discovery.start(port, tlsPort: node.tlsPort);
       if (!ref.mounted) {
         await discovery.dispose();
         await node.stop();
@@ -368,6 +383,9 @@ class ShareHubNotifier extends Notifier<ShareHubState> {
     _service = null;
   }
 
+  /// The fingerprint saved for a paired device, null if [id] is not paired.
+  String? _pinOf(String id) => ref.read(trustedDevicesProvider).byId(id)?.fingerprint;
+
   // ---- sending -------------------------------------------------------------
 
   /// Sends an offer (metadata only) to [peer]. Returns false if delivery fails.
@@ -389,7 +407,9 @@ class ShareHubNotifier extends Notifier<ShareHubState> {
           .sendOffer(
             peer.host,
             peer.port,
-            service.offerPayload(offer, node.port!),
+            service.offerPayload(offer, node.port!, tlsPort: node.tlsPort),
+            tlsPort: peer.tlsPort,
+            pin: _pinOf(peer.id),
           );
       _publish();
       return true;
@@ -415,6 +435,8 @@ class ShareHubNotifier extends Notifier<ShareHubState> {
               offer.offerId,
               'cancel',
               offer.token,
+              tlsPort: peer.tlsPort,
+              pin: _pinOf(peer.id),
             );
       } on LanException {
         // The receiver may be gone; the offer is closed on our side anyway.
@@ -430,7 +452,8 @@ class ShareHubNotifier extends Notifier<ShareHubState> {
     try {
       await ref
           .read(lanClientProvider)
-          .offerAction(o.fromHost, o.fromPort, o.offerId, 'decline', o.token);
+          .offerAction(o.fromHost, o.fromPort, o.offerId, 'decline', o.token,
+              tlsPort: o.fromTlsPort, pin: _pinOf(o.fromId));
     } on LanException catch (e) {
       AppLog.w('decline not delivered: $e');
     }
@@ -446,6 +469,8 @@ class ShareHubNotifier extends Notifier<ShareHubState> {
         o.offerId,
         'accept',
         o.token,
+        tlsPort: o.fromTlsPort,
+        pin: _pinOf(o.fromId),
       );
     } on LanException catch (e) {
       AppLog.w('offer accept failed: $e');
@@ -499,6 +524,8 @@ class ShareHubNotifier extends Notifier<ShareHubState> {
           o.offerId,
           'done',
           o.token,
+          tlsPort: o.fromTlsPort,
+          pin: _pinOf(o.fromId),
         );
       } on LanException {
         // Informational only.

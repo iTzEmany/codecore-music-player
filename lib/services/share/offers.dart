@@ -4,12 +4,13 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:shelf/shelf.dart';
-import 'package:shelf/shelf_io.dart' as io;
 import 'package:shelf_router/shelf_router.dart';
 
 import '../../core/app_log.dart';
 import '../../core/text_utils.dart';
 import 'lan_server.dart';
+
+export 'offer_node.dart' show OfferNode, callerFingerprint, kCallerKey;
 
 const _audioExts = {
   'mp3', 'flac', 'wav', 'ogg', 'oga', 'opus', 'm4a', 'aac', 'aiff', 'aif',
@@ -106,6 +107,7 @@ class IncomingOffer {
     required this.fromName,
     required this.fromHost,
     required this.fromPort,
+    this.fromTlsPort,
     required this.token,
     required this.items,
     DateTime? receivedAt,
@@ -113,6 +115,9 @@ class IncomingOffer {
 
   final String offerId, fromId, fromName, fromHost, token;
   final int fromPort;
+
+  /// HTTPS port of the sender, when it has one: answers go there.
+  final int? fromTlsPort;
   final List<OfferItem> items;
   final DateTime receivedAt;
   OfferStatus status = OfferStatus.pending;
@@ -212,11 +217,12 @@ class OfferService {
     return offer;
   }
 
-  Map<String, Object?> offerPayload(OutgoingOffer o, int port) => {
+  Map<String, Object?> offerPayload(OutgoingOffer o, int port, {int? tlsPort}) => {
         'offerId': o.offerId,
         'fromId': deviceId,
         'fromName': deviceName,
         'port': port,
+        'tlsPort': ?tlsPort,
         'token': o.token,
         'items': [
           for (final e in o.entries.values)
@@ -277,6 +283,8 @@ class OfferService {
       final offerId = body['offerId'], fromId = body['fromId'];
       final fromName = body['fromName'], port = body['port'];
       final token = body['token'], rawItems = body['items'];
+      final tlsRaw = body['tlsPort'];
+      final tlsPort = tlsRaw is int && tlsRaw > 0 && tlsRaw < 65536 ? tlsRaw : null;
       if (offerId is! String ||
           fromId is! String ||
           fromName is! String ||
@@ -313,6 +321,7 @@ class OfferService {
         // Where to pull from: the observed address, not a claimed one.
         fromHost: ip,
         fromPort: port,
+        fromTlsPort: tlsPort,
         token: token,
         items: items,
         receivedAt: _now(),
@@ -414,55 +423,3 @@ class OfferService {
 
 /// The HTTP endpoint of this device while discovery/receiving is on.
 /// Bound to all interfaces; every route refuses non-local peers.
-class OfferNode {
-  OfferNode(this.service,
-      {this.allowLoopback = false, this.extraRoutes = const {}});
-
-  final OfferService service;
-
-  /// Extra routers mounted by prefix (e.g. `/jam`), behind the same filter.
-  final Map<String, Handler> extraRoutes;
-  final bool allowLoopback;
-  HttpServer? _server;
-
-  bool get running => _server != null;
-  int? get port => _server?.port;
-
-  Future<int> start() async {
-    if (_server != null) return _server!.port;
-    final root = Router();
-    root.get('/hello', (Request r) => Response.ok(
-          jsonEncode({
-            'app': 'codecore',
-            'id': service.deviceId,
-            'name': service.deviceName,
-            'v': 2,
-          }),
-          headers: {'content-type': 'application/json'},
-        ));
-    root.mount('/offer', service.buildRouter().call);
-    extraRoutes.forEach(root.mount);
-    final handler = const Pipeline()
-        .addMiddleware(_localOnly(allowLoopback))
-        .addHandler(root.call);
-    _server = await io.serve(handler, InternetAddress.anyIPv4, 0);
-    AppLog.i('offers: listening on ${_server!.port}');
-    return _server!.port;
-  }
-
-  Future<void> stop() async {
-    final s = _server;
-    _server = null;
-    await s?.close(force: true);
-  }
-
-  static Middleware _localOnly(bool allowLoopback) => (inner) => (r) {
-        final info = r.context['shelf.io.connection_info'];
-        final ip =
-            info is HttpConnectionInfo ? info.remoteAddress.address : null;
-        if (ip == null || !isLocalNetworkAddress(ip, allowLoopback: allowLoopback)) {
-          return Response.forbidden('local network only');
-        }
-        return inner(r);
-      };
-}

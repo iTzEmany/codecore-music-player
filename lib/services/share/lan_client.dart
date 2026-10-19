@@ -3,16 +3,23 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:dio/io.dart';
 import 'package:path/path.dart' as p;
 
 import '../../core/text_utils.dart';
 import '../online/youtube_service.dart' show DownloadProgress, uniquePath;
+import 'device_identity.dart';
 import 'offers.dart' show OfferItem;
+import 'request_signing.dart';
 
 class RemoteInfo {
-  const RemoteInfo(this.name);
+  const RemoteInfo(this.name, {this.tlsPort, this.fingerprint});
 
   final String name;
+
+  /// Set when the device answers over HTTPS too (version 3).
+  final int? tlsPort;
+  final String? fingerprint;
 }
 
 class RemoteTrack {
@@ -47,7 +54,7 @@ class RemoteTrack {
       artist == null || artist!.isEmpty ? title : '$artist - $title');
 }
 
-enum LanError { unreachable, wrongPin, blocked, notCodecore, failed }
+enum LanError { unreachable, wrongPin, blocked, notCodecore, failed, identityChanged }
 
 class LanException implements Exception {
   const LanException(this.error);
@@ -58,8 +65,22 @@ class LanException implements Exception {
   String toString() => 'LanException($error)';
 }
 
+/// The handshake failed because the certificate was not the pinned one.
+bool _isCertificateRefusal(DioException e) =>
+    e.type == DioExceptionType.badCertificate || e.error is HandshakeException || e.error is TlsException;
+
+/// The answer to a [LanClient.securePost], with the certificate the server
+/// really presented.
+class SecureReply {
+  const SecureReply(this.status, this.json, this.seenFingerprint);
+
+  final int status;
+  final Map<String, dynamic>? json;
+  final String? seenFingerprint;
+}
+
 class LanClient {
-  LanClient({Dio? dio})
+  LanClient({Dio? dio, this.identity})
       : _dio = dio ??
             Dio(BaseOptions(
               connectTimeout: const Duration(seconds: 8),
@@ -68,6 +89,85 @@ class LanClient {
             ));
 
   final Dio _dio;
+
+  /// Signs the requests sent over HTTPS (so the receiver knows who calls). Set
+  /// once the identity has been loaded.
+  DeviceIdentity? identity;
+
+  /// A client for HTTPS: the certificate is accepted if it hashes to [pin]; with
+  /// no pin (a device not paired) any is accepted, the call is «unverified».
+  Dio _secureDio(String? pin) {
+    final dio = Dio(_dio.options.copyWith());
+    dio.httpClientAdapter = IOHttpClientAdapter(
+      createHttpClient: () => HttpClient()
+        ..badCertificateCallback = (cert, host, port) =>
+            pin == null || DeviceIdentity.fingerprintOfDer(cert.der) == pin,
+    );
+    return dio;
+  }
+
+  /// A signed JSON POST over HTTPS that also reports which certificate the
+  /// server showed. Used by pairing, where the first call has no pin yet.
+  Future<SecureReply> securePost(String host, int tlsPort, String path, Map<String, Object?> body,
+      {String? pin}) async {
+    String? seen;
+    final dio = Dio(_dio.options.copyWith());
+    dio.httpClientAdapter = IOHttpClientAdapter(
+      createHttpClient: () => HttpClient()
+        ..badCertificateCallback = (cert, h, p) {
+          seen = DeviceIdentity.fingerprintOfDer(cert.der);
+          return pin == null || seen == pin;
+        },
+    );
+    final text = jsonEncode(body);
+    final id = identity;
+    try {
+      final r = await dio.post<Object?>('https://$host:$tlsPort$path',
+          data: text,
+          options: Options(
+            contentType: 'application/json',
+            headers: {if (id != null) ...signRequest(id, 'POST', path, utf8.encode(text))},
+          ));
+      final data = r.data;
+      return SecureReply(r.statusCode ?? 0, data is Map<String, dynamic> ? data : null, seen);
+    } on DioException catch (e) {
+      if (pin != null && _isCertificateRefusal(e)) throw const LanException(LanError.identityChanged);
+      throw const LanException(LanError.unreachable);
+    } finally {
+      dio.close(force: true);
+    }
+  }
+
+  /// `https` when the peer has a [tlsPort], else the plain `http` it always had.
+  Future<Response<Object?>> _post(
+    String host,
+    int port,
+    int? tlsPort,
+    String? pin,
+    String path,
+    String? body, {
+    Map<String, String> headers = const {},
+  }) async {
+    final secure = tlsPort != null;
+    final dio = secure ? _secureDio(pin) : _dio;
+    final bytes = body == null ? const <int>[] : utf8.encode(body);
+    final id = identity;
+    try {
+      return await dio.post<Object?>(
+        '${secure ? 'https' : 'http'}://$host:${secure ? tlsPort : port}$path',
+        data: body,
+        options: Options(
+          contentType: body == null ? null : 'application/json',
+          headers: {...headers, if (secure && id != null) ...signRequest(id, 'POST', path, bytes)},
+        ),
+      );
+    } on DioException catch (e) {
+      if (secure && pin != null && _isCertificateRefusal(e)) {
+        throw const LanException(LanError.identityChanged);
+      }
+      throw const LanException(LanError.unreachable);
+    }
+  }
 
   /// Accepts `host:port`, optionally with a `http://` prefix.
   static ({String host, int port})? parseAddress(String input) {
@@ -101,9 +201,41 @@ class LanClient {
       if (r.statusCode != 200 || data is! Map || data['app'] != 'codecore') {
         throw const LanException(LanError.notCodecore);
       }
-      return RemoteInfo('${data['name'] ?? host}');
+      final tls = data['tlsPort'];
+      return RemoteInfo(
+        '${data['name'] ?? host}',
+        tlsPort: tls is int && tls > 0 && tls < 65536 ? tls : null,
+        fingerprint: data['fingerprint'] is String ? data['fingerprint'] as String : null,
+      );
     } on DioException catch (e) {
       if (CancelToken.isCancel(e)) rethrow;
+      throw const LanException(LanError.unreachable);
+    }
+  }
+
+  /// The same `/hello` over HTTPS: what the certificate really is, checked
+  /// against [pin] when there is one.
+  Future<RemoteInfo> helloSecure(String host, int tlsPort, {String? pin}) async {
+    String? seen;
+    final dio = Dio(_dio.options.copyWith());
+    dio.httpClientAdapter = IOHttpClientAdapter(
+      createHttpClient: () => HttpClient()
+        ..badCertificateCallback = (cert, h, p) {
+          seen = DeviceIdentity.fingerprintOfDer(cert.der);
+          return pin == null || seen == pin;
+        },
+    );
+    try {
+      final r = await dio.get<Object?>('https://$host:$tlsPort/hello');
+      final data = r.data;
+      if (r.statusCode != 200 || data is! Map || data['app'] != 'codecore') {
+        throw const LanException(LanError.notCodecore);
+      }
+      return RemoteInfo('${data['name'] ?? host}', tlsPort: tlsPort, fingerprint: seen);
+    } on DioException catch (e) {
+      if (pin != null && _isCertificateRefusal(e)) {
+        throw const LanException(LanError.identityChanged);
+      }
       throw const LanException(LanError.unreachable);
     }
   }
@@ -167,32 +299,24 @@ class LanClient {
       );
 
   /// Delivers an offer (metadata only) to a receiver; it stays pending there.
-  Future<void> sendOffer(
-      String host, int port, Map<String, Object?> payload) async {
-    try {
-      final r = await _dio.post<Object?>('http://$host:$port/offer/',
-          data: jsonEncode(payload),
-          options: Options(contentType: 'application/json'));
-      if (r.statusCode == 202) return;
-      if (r.statusCode == 429) throw const LanException(LanError.blocked);
-      throw const LanException(LanError.failed);
-    } on DioException {
-      throw const LanException(LanError.unreachable);
-    }
+  /// Over HTTPS (signed) when the peer has a [tlsPort]; [pin] is the
+  /// fingerprint saved for it, if it is paired.
+  Future<void> sendOffer(String host, int port, Map<String, Object?> payload,
+      {int? tlsPort, String? pin}) async {
+    final r = await _post(host, port, tlsPort, pin, '/offer/', jsonEncode(payload));
+    if (r.statusCode == 202) return;
+    if (r.statusCode == 429) throw const LanException(LanError.blocked);
+    throw const LanException(LanError.failed);
   }
 
   /// `accept`, `decline` or `done` towards the sender; `cancel` towards the
   /// receiver. All authenticated by the offer token.
   Future<void> offerAction(String host, int port, String offerId,
-      String action, String token) async {
-    try {
-      final r = await _dio.post<Object?>(
-          'http://$host:$port/offer/$offerId/$action',
-          options: Options(headers: {'X-Token': token}));
-      if (r.statusCode != 200) throw const LanException(LanError.failed);
-    } on DioException {
-      throw const LanException(LanError.unreachable);
-    }
+      String action, String token,
+      {int? tlsPort, String? pin}) async {
+    final r = await _post(host, port, tlsPort, pin, '/offer/$offerId/$action', null,
+        headers: {'X-Token': token});
+    if (r.statusCode != 200) throw const LanException(LanError.failed);
   }
 
   Stream<DownloadProgress> _fetch({

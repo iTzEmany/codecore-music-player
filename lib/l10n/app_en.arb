@@ -1966,5 +1966,6 @@
   "restoreNotFound": "Tracks not found",
   "restoreCopyList": "Copy list",
   "restoreFailed": "Restore failed",
-  "exportAllPlaylists": "Export all playlists"
+  "exportAllPlaylists": "Export all playlists",
+  "shareErrIdentity": "This device’s identity has changed: remove it from the trusted ones and pair again."
 }

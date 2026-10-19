@@ -1966,5 +1966,6 @@
   "restoreNotFound": "Canciones no encontradas",
   "restoreCopyList": "Copiar lista",
   "restoreFailed": "La restauración ha fallado",
-  "exportAllPlaylists": "Exportar todas las listas"
+  "exportAllPlaylists": "Exportar todas las listas",
+  "shareErrIdentity": "La identidad de este dispositivo ha cambiado: quítalo de los de confianza y empareja de nuevo."
 }

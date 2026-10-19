@@ -2157,5 +2157,6 @@
   "restoreNotFound": "Titres introuvables",
   "restoreCopyList": "Copier la liste",
   "restoreFailed": "Échec de la restauration",
-  "exportAllPlaylists": "Exporter toutes les playlists"
+  "exportAllPlaylists": "Exporter toutes les playlists",
+  "shareErrIdentity": "L’identité de cet appareil a changé : retire-le des appareils de confiance et associe-le à nouveau."
 }

@@ -16,12 +16,16 @@ class Peer {
     required this.host,
     required this.port,
     required this.platform,
+    this.tlsPort,
   });
 
   final String id, name, host, platform;
 
-  /// HTTP port of the peer's offer endpoint.
+  /// HTTP port of the peer's offer endpoint (also what a v2 device speaks).
   final int port;
+
+  /// HTTPS port of the same endpoint; null for a device without identity (v2).
+  final int? tlsPort;
 }
 
 /// Announces this device and lists the Codecore devices on the same network
@@ -47,6 +51,7 @@ class LanDiscovery {
   RawDatagramSocket? _socket;
   Timer? _beat;
   int _httpPort = 0;
+  int? _tlsPort;
   final _peers = <String, ({Peer peer, DateTime seen})>{};
   final _controller = StreamController<List<Peer>>.broadcast();
 
@@ -62,8 +67,9 @@ class LanDiscovery {
               ? 'linux'
               : 'other';
 
-  Future<void> start(int httpPort) async {
+  Future<void> start(int httpPort, {int? tlsPort}) async {
     await stop();
+    _tlsPort = tlsPort;
     _httpPort = httpPort;
     // SO_REUSEPORT is unsupported by Dart on Android and Windows.
     final reusePort = Platform.isLinux || Platform.isMacOS;
@@ -126,6 +132,9 @@ class LanDiscovery {
           name: name.length > 60 ? name.substring(0, 60) : name,
           host: src,
           port: port,
+          tlsPort: j['tlsPort'] is int && (j['tlsPort'] as int) > 0 && (j['tlsPort'] as int) < 65536
+              ? j['tlsPort'] as int
+              : null,
           platform: j['p'] is String ? j['p'] as String : 'other',
         ),
         seen: DateTime.now(),
@@ -178,6 +187,7 @@ class LanDiscovery {
       'id': deviceId,
       'name': deviceName,
       'port': _httpPort,
+      'tlsPort': ?_tlsPort,
       'p': platformName,
     }));
     for (final t in await _targets()) {

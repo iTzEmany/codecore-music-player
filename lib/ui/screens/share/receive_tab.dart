@@ -53,6 +53,7 @@ class _ReceiveTabState extends ConsumerState<ReceiveTab> {
       LanError.blocked => l.shareErrBlocked,
       LanError.notCodecore => l.shareErrNotCodecore,
       LanError.failed => l.shareErrFailed,
+      LanError.identityChanged => l.shareErrIdentity,
     };
   }
 
