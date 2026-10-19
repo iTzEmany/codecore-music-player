@@ -328,9 +328,9 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 27.2 Selezione: consumatori (barra, azioni di gruppo, trascinamento, download YouTube, invio, playlist)
 - [x] 27.3 Selezione: numeri sulle righe
 - [x] 27.4 Selezione: prova a mano sul telefono (Mi A3, 2026-10-19: tre brani toccati in ordine sparso mostrano 1, 2, 3 sul cerchietto; «Aggiungi in coda» li mette in fondo alla coda nell'ordine dei tocchi, non della lista)
-- [ ] 27.5 Tema: modello `CustomTheme` e derivazione dei colori (puro)
-- [ ] 27.6 Tema: salvataggio, scelta, backup
-- [ ] 27.7 Tema: selettore colore
+- [x] 27.5 Tema: modello `CustomTheme` e derivazione dei colori (puro)
+- [x] 27.6 Tema: salvataggio, scelta, backup
+- [x] 27.7 Tema: selettore colore
 - [ ] 27.8 Tema: editor con anteprima viva e controllo del contrasto
 - [ ] 27.9 Tema: elenco e gestione (nuovo, duplica, rinomina, elimina, esporta/importa)
 - [ ] 27.10 Tema: sfondo (tinta unita, sfumatura, immagine)

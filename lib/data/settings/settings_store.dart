@@ -365,6 +365,11 @@ class SettingsStore {
   Future<void> writeTrustedDevicesRaw(String raw) =>
       _prefs.setString('trustedDevices', raw);
 
+  /// The user's own themes, as written by `CustomThemes.encode`.
+  String? readCustomThemesRaw() => _prefs.getString('customThemes');
+
+  Future<void> writeCustomThemesRaw(String raw) => _prefs.setString('customThemes', raw);
+
   /// «Controlla all'avvio» for new versions: off unless the user turns it on.
   bool readCheckUpdatesOnStart() => _prefs.getBool('checkUpdatesOnStart') ?? false;
 

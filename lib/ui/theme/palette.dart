@@ -58,35 +58,42 @@ CcColors buildPalette(AppThemeId theme, CcAccent accent) {
   if (accent == CcAccent.viola) return base;
   final isLight = base.isLight;
   final color = (isLight ? _light : _dark)[accent]!;
-  final hsl = HSLColor.fromColor(color);
-  // Dark: a pale tint of the accent. Light: a touch deeper than the accent.
-  final soft = isLight
-      ? Color.lerp(color, Colors.black, 0.2)!
-      : Color.lerp(color, Colors.white, 0.56)!;
-  // Text on the accent: white or near-black, whichever reads better.
-  const ink = Color(0xFF12081F);
-  final onAccent = _contrast(Colors.white, color) >= _contrast(ink, color)
-      ? Colors.white
-      : ink;
-  // The colour behind a cover with no tint: very dark or very light.
-  final hero = isLight
-      ? hsl.withSaturation(0.6).withLightness(0.88).toColor()
-      : _darkHero(hsl);
   return CcColors(
     bg: base.bg,
     surface1: base.surface1,
     surface2: base.surface2,
     surface3: base.surface3,
     accent: color,
-    accentSoft: soft,
-    onAccent: onAccent,
+    accentSoft: accentSoftFor(color, isLight),
+    onAccent: onAccentFor(color),
     text: base.text,
     textMuted: base.textMuted,
     textFaint: base.textFaint,
-    heroBase: hero,
+    heroBase: heroFor(color, isLight),
     error: base.error,
     isLight: isLight,
   );
+}
+
+/// Dark: a pale tint of the accent. Light: a touch deeper than the accent.
+Color accentSoftFor(Color accent, bool isLight) => isLight
+    ? Color.lerp(accent, Colors.black, 0.2)!
+    : Color.lerp(accent, Colors.white, 0.56)!;
+
+/// Text on the accent: white or near-black, whichever reads better.
+Color onAccentFor(Color accent) {
+  const ink = Color(0xFF12081F);
+  return contrastRatio(Colors.white, accent) >= contrastRatio(ink, accent)
+      ? Colors.white
+      : ink;
+}
+
+/// The colour behind a cover with no tint: very dark or very light.
+Color heroFor(Color accent, bool isLight) {
+  final hsl = HSLColor.fromColor(accent);
+  return isLight
+      ? hsl.withSaturation(0.6).withLightness(0.88).toColor()
+      : _darkHero(hsl);
 }
 
 Color _darkHero(HSLColor hsl) {
@@ -99,7 +106,8 @@ Color _darkHero(HSLColor hsl) {
   return out;
 }
 
-double _contrast(Color a, Color b) {
+/// WCAG contrast ratio, 1 (none) to 21 (black on white).
+double contrastRatio(Color a, Color b) {
   final l1 = a.computeLuminance(), l2 = b.computeLuminance();
   return (l1 > l2 ? l1 + 0.05 : l2 + 0.05) / (l1 > l2 ? l2 + 0.05 : l1 + 0.05);
 }

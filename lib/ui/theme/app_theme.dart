@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
+import 'custom_theme.dart';
 import 'palette.dart';
 import 'tokens.dart';
 
+export 'custom_theme.dart';
 export 'palette.dart';
 
 /// The same fade-and-rise page transition on every platform; none at all
@@ -35,8 +37,18 @@ ThemeData buildTheme(
   AppThemeId id,
   bool compact, {
   CcAccent accent = CcAccent.viola,
-}) {
-  final c = buildPalette(id, accent);
+}) => buildThemeFromColors(buildPalette(id, accent), compact);
+
+/// The theme the `theme` setting names: a built-in one with its accent, or one
+/// of the user's own (`custom:<id>`); one that no longer exists is Notte.
+CcColors resolveColors(String theme, String accent, CustomThemes customs) {
+  final id = customThemeIdOf(theme);
+  final custom = id == null ? null : customs.byId(id);
+  return custom?.resolve() ??
+      buildPalette(appThemeIdFromName(theme), accentFromName(accent));
+}
+
+ThemeData buildThemeFromColors(CcColors c, bool compact) {
   final brightness = c.isLight ? Brightness.light : Brightness.dark;
   final scheme = ColorScheme(
     brightness: brightness,

@@ -6,6 +6,7 @@ import 'providers/equalizer_providers.dart';
 import 'providers/player_providers.dart';
 import 'providers/settings_providers.dart';
 import 'providers/share_hub.dart';
+import 'providers/theme_providers.dart';
 import 'providers/update_providers.dart';
 import 'l10n/l10n_ext.dart';
 import 'ui/screens/onboarding/onboarding_gate.dart';
@@ -45,11 +46,7 @@ class CodecoreApp extends ConsumerWidget {
       title: 'Codecore',
       scaffoldMessengerKey: _messengerKey,
       debugShowCheckedModeBanner: false,
-      theme: buildTheme(
-        appThemeIdFromName(s.theme),
-        s.compactMode,
-        accent: accentFromName(s.accent),
-      ),
+      theme: buildThemeFromColors(ref.watch(themeColorsProvider), s.compactMode),
       locale: Locale(s.language),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,

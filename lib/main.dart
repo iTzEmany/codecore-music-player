@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show LicenseEntryWithLineBreaks, LicenseRegistry;
-import 'package:flutter/services.dart' show MethodChannel, rootBundle;
+import 'package:flutter/services.dart' show DeviceOrientation, MethodChannel, SystemChrome, rootBundle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio_media_kit/just_audio_media_kit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -41,6 +41,14 @@ import 'services/covers/cover_store.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   AppLog.i('avvio');
+  // A phone stays upright however it is turned (the manifest says the same, so
+  // there is no turn at start-up either); desktops are not touched.
+  if (Platform.isAndroid) {
+    await SystemChrome.setPreferredOrientations(const [
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+  }
   LicenseRegistry.addLicense(() async* {
     for (final f in const ['Figtree', 'Unbounded']) {
       yield LicenseEntryWithLineBreaks(
