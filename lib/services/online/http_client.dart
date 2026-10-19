@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 
 import '../../core/app_log.dart';
+import 'request_budget.dart';
 
 /// Thrown on HTTP 403/429 so batches can stop and warn the user.
 class RateLimitedException implements Exception {
@@ -27,8 +28,9 @@ abstract class WebClient {
 }
 
 class DioWebClient implements WebClient {
-  DioWebClient([Dio? dio, Future<void> Function(Duration)? pause])
+  DioWebClient([Dio? dio, Future<void> Function(Duration)? pause, WindowLimiter? wikimedia])
       : _pause = pause ?? Future<void>.delayed,
+        _wikimedia = wikimedia ?? wikimediaLimiter(),
         _dio = dio ??
             Dio(BaseOptions(
               connectTimeout: const Duration(seconds: 8),
@@ -37,10 +39,14 @@ class DioWebClient implements WebClient {
               validateStatus: (_) => true,
             ));
 
-  static const userAgent = 'Codecore/1.0 (uso personale)';
+  /// What the services are told we are (see `apiUserAgent`).
+  static String get userAgent => apiUserAgent;
 
   final Dio _dio;
   final Future<void> Function(Duration) _pause;
+
+  /// Wikimedia's limit is shared by all its sites, so one budget serves them all.
+  final WindowLimiter _wikimedia;
 
   /// A 429 that names a short wait («retry-after») is waited out, twice at
   /// most; a longer one, or a 403, is reported at once.
@@ -61,6 +67,7 @@ class DioWebClient implements WebClient {
       {Map<String, String>? query, CancelToken? cancel}) async {
     try {
       for (var attempt = 0;; attempt++) {
+        if (isWikimediaHost(Uri.tryParse(url)?.host ?? '')) await _wikimedia.acquire();
         final res = await _dio.get<Object?>(url,
             queryParameters: query,
             cancelToken: cancel,
