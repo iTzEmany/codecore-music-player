@@ -564,3 +564,12 @@ L'agente riparte sempre dal primo task non spuntato.
 
 ## Pacchetti approvati
 <!-- un pacchetto per riga: nome — fase — data. /obiettivo usa questi senza chiedere; gli altri «da approvare» bloccano solo il loro task. -->
+archive — fase 13 — 2026-10-19
+integration_test — fase 16 — 2026-10-19
+audio_service_mpris — fase 17 (in alternativa `dbus`) — 2026-10-19
+smtc_windows — fase 17 — 2026-10-19
+metadata_god — fase 21 — 2026-10-19
+google_mlkit_translation — fase 22 — 2026-10-19
+xml — fase 23 — 2026-10-19
+basic_utils — fase 24 (in alternativa `pointycastle`) — 2026-10-19
+mobile_scanner — fase 24 — 2026-10-19
