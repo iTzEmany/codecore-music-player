@@ -63,6 +63,9 @@ dependencies:
   dbus: ^0.8.0
   smtc_windows: ^1.1.0
   xml: ^7.1.0
+  # Local copy: 1.1.0 does not build on Android with Gradle 9 (docs/patches).
+  metadata_god:
+    path: third_party/metadata_god
 
 dev_dependencies:
   flutter_test:
