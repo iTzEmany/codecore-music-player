@@ -14,7 +14,10 @@ class TrackResolver {
   }) {
     for (final t in library) {
       final rel = relPathById[t.id];
-      if (rel != null) (_byRelPath[_pathKey(rel)] ??= []).add(t.id);
+      if (rel != null) {
+        (_byRelPath[_pathKey(rel)] ??= []).add(t.id);
+        (_byFileName[_pathKey(rel.split('/').last)] ??= []).add(t);
+      }
       final sha = sha256ById[t.id];
       if (sha != null) (_bySha[sha] ??= []).add(t.id);
       (_byTitle['${matchTitleKey(t.title)}|${_artistKey(t.artist)}'] ??= [])
@@ -25,6 +28,7 @@ class TrackResolver {
   /// Windows paths ignore case; set when the backup or this device is Windows.
   final bool caseInsensitive;
   final Map<String, List<int>> _byRelPath = {};
+  final Map<String, List<LibraryEntryLite>> _byFileName = {};
   final Map<String, List<int>> _bySha = {};
   final Map<String, List<LibraryEntryLite>> _byTitle = {};
 
@@ -46,7 +50,27 @@ class TrackResolver {
     if (byMeta != null) return byMeta;
 
     final sha = r.sha256 == null ? null : _bySha[r.sha256!];
-    return sha != null && sha.length == 1 ? sha.single : null;
+    if (sha != null && sha.length == 1) return sha.single;
+
+    return _byFileNameOnly(r);
+  }
+
+  /// A file received from another device has no tags, so its title is the
+  /// file name and the metadata of the sender does not match; the name and a
+  /// close duration still identify it. Ambiguous names resolve to null.
+  int? _byFileNameOnly(TrackRef r) {
+    final rel = r.relPath;
+    if (rel == null) return null;
+    final c = _byFileName[_pathKey(rel.replaceAll(r'\', '/').split('/').last)];
+    if (c == null) return null;
+    final close = [
+      for (final t in c)
+        if (r.durationMs <= 0 ||
+            t.durationMs <= 0 ||
+            (t.durationMs - r.durationMs).abs() <= durationToleranceMs)
+          t.id,
+    ];
+    return close.length == 1 ? close.single : null;
   }
 
   int? _byMetadata(TrackRef r) {

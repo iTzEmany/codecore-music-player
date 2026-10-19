@@ -67,6 +67,17 @@ void main() {
     expect(plan.isEmpty, isTrue);
   });
 
+  test('tracks that were missing and have arrived are added at the same stamp', () {
+    final plan = planSync(
+      [_local('u1', 'Road', 20, [1])],
+      [_remote('u1', 'Road', 20, ['a', 'b', 'c'])],
+      _resolve,
+    );
+    expect(plan.entries.single.action, SyncAction.replace);
+    expect(plan.entries.single.trackIds, [1, 2, 3]);
+    expect(plan.entries.single.removed, 0);
+  });
+
   test('tracks this device lacks are listed as missing, once, and skipped', () {
     final plan = planSync(
       [_local('u1', 'Road', 10, [1])],

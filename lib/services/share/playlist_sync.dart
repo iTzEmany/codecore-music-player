@@ -171,8 +171,12 @@ SyncPlan planSync(
     final reordered = sameSet && !_sameOrder(resolved, l.trackIds);
     final changes = renamed || !sameSet || reordered;
     // Equal stamps with different content cannot happen between two honest
-    // devices; if it does, leave the local one alone rather than guess.
-    if (r.updatedAt == l.updatedAt || !changes) {
+    // devices, except for tracks that were missing at the last sync and have
+    // arrived since: then the playlist only grows. Anything else is left alone.
+    final arrived = r.updatedAt == l.updatedAt &&
+        resolved.length > l.trackIds.length &&
+        l.trackIds.every(resolved.contains);
+    if ((r.updatedAt == l.updatedAt && !arrived) || !changes) {
       entries.add(SyncEntry(
           action: SyncAction.same, remote: r, local: l, missing: missing));
       continue;

@@ -34,6 +34,20 @@ void main() {
     expect(strict.resolve(ref), isNull);
   });
 
+  test('a received file without tags matches by file name', () {
+    final r = TrackResolver([
+      lib(1, 'Band - One', null, 180500),
+      lib(2, 'Band - Two', null, 200000),
+    ], {1: 'Ricevuti/Band - One.mp3', 2: 'Ricevuti/Band - Two.mp3'});
+    const ref = TrackRef(
+        relPath: 'Band - One.mp3', title: 'One', artist: 'Band', durationMs: 180000);
+    expect(r.resolve(ref), 1);
+    expect(
+        r.resolve(const TrackRef(
+            relPath: 'Band - One.mp3', title: 'One', durationMs: 90000)),
+        isNull);
+  });
+
   test('title and artist when the path does not match', () {
     final r = TrackResolver(entries, {});
     expect(
