@@ -1969,7 +1969,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get curiositySong => 'Sur le morceau';
 
   @override
-  String get curiosityArtist => 'Sur l\'artiste';
+  String get curiosityArtist => 'Sur l’artiste';
 
   @override
   String get showMore => 'Tout afficher';
@@ -1979,6 +1979,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get curiosityNoSong => 'Aucune page sur ce morceau';
+
+  @override
+  String get curiosityNoArtist => 'Aucune page sur l’artiste';
 
   @override
   String get themeNew => 'Nouveau thème';
@@ -2054,7 +2057,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get themeImported => 'Thème importé';
 
   @override
-  String get themeImportFailed => 'Le fichier n\'est pas un thème valide';
+  String get themeImportFailed => 'Le fichier n’est pas un thème valide';
 
   @override
   String get themeDeleted => 'Thème supprimé';
@@ -2081,7 +2084,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get tokenAccentSoft => 'Accent doux';
 
   @override
-  String get tokenOnAccent => 'Texte sur l\'accent';
+  String get tokenOnAccent => 'Texte sur l’accent';
 
   @override
   String get tokenText => 'Texte';
@@ -2123,10 +2126,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get contrastMutedSurface => 'Texte secondaire sur surface';
 
   @override
-  String get contrastOnAccent => 'Texte sur l\'accent';
+  String get contrastOnAccent => 'Texte sur l’accent';
 
   @override
-  String get contrastAccentBg => 'Accent sur l\'arrière-plan';
+  String get contrastAccentBg => 'Accent sur l’arrière-plan';
 
   @override
   String get themeBackground => 'Arrière-plan des pages';
@@ -2150,7 +2153,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get bgPickImage => 'Choisir une image…';
 
   @override
-  String get bgRemoveImage => 'Retirer l\'image';
+  String get bgRemoveImage => 'Retirer l’image';
 
   @override
   String get bgDim => 'Assombrissement';
@@ -2162,7 +2165,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get bgCoverBackdrop => 'Lecture : teinte de la pochette';
 
   @override
-  String get bgImageFailed => 'Impossible d\'utiliser l\'image';
+  String get bgImageFailed => 'Impossible d’utiliser l’image';
 
   @override
   String themeCopyName(String name) {

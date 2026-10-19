@@ -15,6 +15,15 @@ final _numbering = RegExp(r'^\d{1,3}[\s._-]+');
 final _noiseGroup = RegExp(
     r'[\(\[\{][^\)\]\}]*(official|video|audio|remaster|hd|4k|hq|lyric|visualizer|clip|deluxe|bonus)[^\)\]\}]*[\)\]\}]',
     caseSensitive: false);
+/// «- Remastered 2011», «- 2009 Remaster», «- Remaster»: a tail that says
+/// nothing about which song it is.
+final _remasterTail = RegExp(
+    r'\s*[-–—]\s*(?:\d{4}\s+)?remaster(?:ed)?(?:\s+(?:version|edition))?(?:\s+\d{4})?\s*$',
+    caseSensitive: false);
+
+/// «Song (2)»: the copy number a file manager adds to a duplicate.
+final _copyNumber = RegExp(r'\s*\(\d{1,2}\)\s*$');
+
 final _noisePhrase = RegExp(
     r'\b(official video|official audio|lyric video|4k remaster|remastered)\b',
     caseSensitive: false);
@@ -41,6 +50,7 @@ CleanQuery cleanSearchQuery(String rawTitle, String rawArtist) {
   var title = rawTitle.trim().replaceFirst(_ext, '');
   title = title.replaceFirst(_prefix, '');
   title = title.replaceFirst(_numbering, '');
+  title = title.replaceFirst(_copyNumber, '').replaceFirst(_remasterTail, '');
   final genericArtist = _isGenericArtist(rawArtist);
   var artist = rawArtist.trim();
 
@@ -56,6 +66,19 @@ CleanQuery cleanSearchQuery(String rawTitle, String rawArtist) {
       if (genericArtist) {
         artist = a;
         title = b;
+        // «Fueled By Ramen and twenty one pilots - twenty one pilots Stressed
+        // Out»: when the title repeats one side of an «and», that side is the
+        // artist and the other is a label or a guest.
+        for (final side in a.split(RegExp(r'\s+(?:and|&)\s+', caseSensitive: false)).reversed) {
+          final sideTrim = side.trim();
+          if (sideTrim.isNotEmpty &&
+              sideTrim != a &&
+              b.toLowerCase().startsWith('${sideTrim.toLowerCase()} ')) {
+            artist = sideTrim;
+            title = b.substring(sideTrim.length).trim();
+            break;
+          }
+        }
       } else if (normalize(a) == normalize(artist.replaceFirst(_artistSuffix, ''))) {
         title = b;
       }

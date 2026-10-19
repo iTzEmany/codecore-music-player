@@ -237,26 +237,97 @@ void main() {
       expect(c.text, startsWith('Real Song is a song'));
     });
 
-    test('a title with a tail is found without it', () async {
+    test('a title with a tail is tried whole and without the tail, in one request', () async {
+      final web = FakeWeb((u, q) => {
+            'query': {
+              'pages': {'1': {'title': 'Real Song', 'index': 1, 'extract': about}}
+            }
+          });
+      final c = await WikipediaClient(web).findSong('Real Song - Remastered 2011', 'Band', 'en');
+      expect(c!.source.toString(), 'https://en.wikipedia.org/wiki/Real_Song');
+      expect(web.calls, hasLength(1));
+      expect(web.calls.single, contains('Real Song - Remastered 2011'));
+      expect(web.calls.single, contains('Real Song (Band song)'));
+    });
+
+    test('a version group like (Radio Edit) is dropped to find the song\'s page', () async {
       final web = FakeWeb((u, q) {
-        final tail = (q['gsrsearch'] ?? '').contains('Real Song - Remastered');
+        final whole = (q['gsrsearch'] ?? '').contains('Radio Edit');
         return {
           'query': {
-            'pages': tail
-                ? {}
-                : {'1': {'title': 'Real Song', 'index': 1, 'extract': about}}
+            'pages': whole ? {} : {'1': {'title': 'Real Song', 'index': 1, 'extract': about}}
           }
         };
       });
-      final c = await WikipediaClient(web).findSong('Real Song - Remastered 2011', 'Band', 'en');
+      final c = await WikipediaClient(web).findSong('Real Song (Radio Edit)', 'Band', 'en');
       expect(c!.source.toString(), 'https://en.wikipedia.org/wiki/Real_Song');
-      expect(web.calls, hasLength(2), reason: 'the whole title first, then without the tail');
     });
 
-    test('the search uses OR groups, never an AND of many words', () async {
-      final w = web(hits: ['Band']);
+    test('when no exact title exists the words are searched, with OR groups, never an AND of many words', () async {
+      final w = FakeWeb((u, q) => {'query': <String, Object?>{}});
       await WikipediaClient(w).findArtist('Band', 'it');
-      expect(w.calls.first, contains('OR'));
+      final searches = w.calls.where((c) => c.contains('generator')).toList();
+      expect(searches, isNotEmpty, reason: 'the fallback ran');
+      expect(searches.first, contains('OR'));
+    });
+
+    test('a page is found by its exact title even when a search would not rank it', () async {
+      final web = FakeWeb((u, q) {
+        if (q.containsKey('titles')) {
+          return {
+            'query': {
+              'pages': {
+                '5': {'title': 'Band', 'extract': bio},
+                '-1': {'title': 'Band (cantante)', 'missing': ''},
+              }
+            }
+          };
+        }
+        fail('no search was needed');
+      });
+      final c = await WikipediaClient(web).findArtist('Band', 'it');
+      expect(c!.source.toString(), 'https://it.wikipedia.org/wiki/Band');
+      expect(web.calls, hasLength(1));
+    });
+
+    test('a lower-case name is tried with capitals, and a redirect is followed', () async {
+      final web = FakeWeb((u, q) {
+        expect(q['titles'], contains('Bob Dylan'));
+        return {
+          'query': {
+            'redirects': [{'from': 'Dylan', 'to': 'Bob Dylan'}],
+            'pages': {
+              '1': {'title': 'Bob Dylan', 'extract': 'Bob Dylan è un cantautore e musicista statunitense, autore di molte canzoni. ' * 2},
+            }
+          }
+        };
+      });
+      final c = await WikipediaClient(web).findArtist('bob dylan', 'it');
+      expect(c!.source.toString(), 'https://it.wikipedia.org/wiki/Bob_Dylan');
+    });
+
+    test('the most specific title wins: «Title (Band song)» before a plain «Title»', () async {
+      final web = FakeWeb((u, q) => {
+            'query': {
+              'pages': {
+                '1': {'title': 'Real Song', 'extract': 'Real Song is a song from long ago that many have recorded, and Band too. ' * 2},
+                '2': {'title': 'Real Song (Band song)', 'extract': about},
+              }
+            }
+          });
+      final c = await WikipediaClient(web).findSong('Real Song', 'Band', 'en');
+      expect(c!.source.toString(), 'https://en.wikipedia.org/wiki/Real_Song_(Band_song)');
+    });
+
+    test('an artist page that is not about music (a namesake) is refused', () async {
+      final web = FakeWeb((u, q) => {
+            'query': {
+              'pages': {
+                '1': {'title': 'Rio', 'extract': 'Rio is a Swiss village in the canton of Bern, with a church and a river. ' * 2},
+              }
+            }
+          });
+      expect(await WikipediaClient(web).findArtist('Rio', 'en'), isNull);
     });
 
     test('with only the artist page the song has nothing, never the artist text', () async {

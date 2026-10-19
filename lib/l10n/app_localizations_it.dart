@@ -1967,6 +1967,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get curiosityNoSong => 'Nessuna pagina dedicata a questo brano';
 
   @override
+  String get curiosityNoArtist => 'Nessuna pagina sull\'artista';
+
+  @override
   String get themeNew => 'Nuovo tema';
 
   @override

@@ -12,6 +12,7 @@ import '../../../providers/player_providers.dart';
 import '../../../providers/settings_providers.dart';
 import '../../../providers/translation_providers.dart';
 import '../../../services/online/http_client.dart';
+import '../../../services/online/wikipedia_client.dart' show Curiosity;
 import '../../../services/online/lrc_parser.dart';
 import '../../../services/online/lyrics_translator.dart';
 import '../../../services/online/query_cleaner.dart';
@@ -159,30 +160,62 @@ class InfoCard extends ConsumerStatefulWidget {
 class _InfoCardState extends ConsumerState<InfoCard> {
   bool _loading = false;
 
+  /// What the last search could not do, per part: true = Wikipedia refused (too
+  /// many requests), so «nothing found» would be a lie.
+  bool _searched = false, _songLimited = false, _artistLimited = false;
+
   Future<void> _fetch() async {
     final l = context.l10n;
     final messenger = ScaffoldMessenger.of(context);
     final t = widget.track;
-    setState(() => _loading = true);
-    String? error;
+    setState(() {
+      _loading = true;
+      _songLimited = _artistLimited = false;
+    });
+    final c = cleanSearchQuery(t.title, t.artist ?? '');
+    final lang = ref.read(settingsProvider).language;
+    final wiki = ref.read(wikipediaClientProvider);
+    final db = ref.read(databaseProvider);
+    var limited = false, failed = false;
+
+    // The two parts are independent: one failing must not lose the other.
+    Curiosity? song, artist;
+    var songDone = false;
     try {
-      final c = cleanSearchQuery(t.title, t.artist ?? '');
-      final lang = ref.read(settingsProvider).language;
-      final wiki = ref.read(wikipediaClientProvider);
-      final db = ref.read(databaseProvider);
-      // One after the other: Wikipedia answers a burst with HTTP 429.
-      final song = await wiki.findSong(c.title, c.artist, lang);
-      final artist = c.artist.isEmpty ? null : await wiki.findArtist(c.artist, lang);
-      if (song == null && artist == null) {
-        error = l.noResults;
+      song = await wiki.findSong(c.title, c.artist, lang);
+      songDone = true;
+    } on RateLimitedException catch (e) {
+      AppLog.w('curiosity (song) refused', e);
+      limited = true;
+      _songLimited = true;
+    } on Object catch (e, st) {
+      AppLog.w('curiosity (song) lookup failed', e, st);
+      failed = true;
+    }
+    // One after the other: Wikipedia answers a burst with HTTP 429.
+    if (c.artist.isNotEmpty) {
+      try {
+        artist = await wiki.findArtist(c.artist, lang);
+      } on RateLimitedException catch (e) {
+        AppLog.w('curiosity (artist) refused', e);
+        limited = true;
+        _artistLimited = true;
+      } on Object catch (e, st) {
+        AppLog.w('curiosity (artist) lookup failed', e, st);
+        failed = true;
       }
+    }
+    try {
       // A new search replaces what was saved before, also with nothing: an
-      // older version could have saved the artist's page as the song's.
-      await (db.update(db.tracks)..where((r) => r.id.equals(t.id))).write(
-        TracksCompanion(
-          curiosities: Value(song == null ? null : '${song.text}\n${song.source}'),
-        ),
-      );
+      // older version could have saved the artist's page as the song's. A part
+      // that could not be asked is left as it was.
+      if (songDone) {
+        await (db.update(db.tracks)..where((r) => r.id.equals(t.id))).write(
+          TracksCompanion(
+            curiosities: Value(song == null ? null : '${song.text}\n${song.source}'),
+          ),
+        );
+      }
       if (artist != null) {
         await ref.read(artistInfoRepositoryProvider).save(
               c.artist,
@@ -191,19 +224,22 @@ class _InfoCardState extends ConsumerState<InfoCard> {
               lang: artist.lang,
             );
       }
-    } on RateLimitedException catch (e) {
-      AppLog.w('curiosity lookup refused', e);
-      error = l.serviceUnavailable;
     } on Object catch (e, st) {
-      AppLog.w('curiosity lookup failed', e, st);
-      error = l.serviceUnavailable;
+      AppLog.w('could not save the curiosities', e, st);
+      failed = true;
     }
     if (!mounted) return;
-    setState(() => _loading = false);
-    if (error != null) {
+    setState(() {
+      _loading = false;
+      _searched = true;
+    });
+    final nothing = song == null && artist == null;
+    if (limited || failed || nothing) {
       messenger
         ..clearSnackBars()
-        ..showSnackBar(SnackBar(content: Text(error)));
+        ..showSnackBar(SnackBar(
+          content: Text(limited || failed ? l.serviceUnavailable : l.noResults),
+        ));
     }
   }
 
@@ -220,7 +256,7 @@ class _InfoCardState extends ConsumerState<InfoCard> {
       height: 20,
       child: CircularProgressIndicator(strokeWidth: 2),
     );
-    if (raw == null && artistInfo == null) {
+    if (raw == null && artistInfo == null && !_searched) {
       return _Card(
         title: l.fieldCuriosity,
         child: Align(
@@ -234,6 +270,7 @@ class _InfoCardState extends ConsumerState<InfoCard> {
         ),
       );
     }
+    final muted = Theme.of(context).textTheme.bodyMedium?.copyWith(color: cc.textMuted);
     final idx = raw?.lastIndexOf('\n') ?? -1;
     return _Card(
       title: l.fieldCuriosity,
@@ -249,21 +286,28 @@ class _InfoCardState extends ConsumerState<InfoCard> {
             )
           else
             Text(
-              l.curiosityNoSong,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyMedium
-                  ?.copyWith(color: cc.textMuted),
+              _songLimited ? l.serviceUnavailable : l.curiosityNoSong,
+              key: const ValueKey('curiosity-no-song'),
+              style: muted,
             ),
-          if (artistInfo != null) ...[
-            const SizedBox(height: 16),
+          const SizedBox(height: 16),
+          if (artistInfo != null)
             _CuriosityText(
               heading: l.curiosityArtist,
               text: artistInfo.body,
               url: artistInfo.sourceUrl,
               lang: artistInfo.lang,
+            )
+          else
+            Text(
+              cleaned.artist.isEmpty
+                  ? l.unknownArtist
+                  : _artistLimited
+                  ? l.serviceUnavailable
+                  : l.curiosityNoArtist,
+              key: const ValueKey('curiosity-no-artist'),
+              style: muted,
             ),
-          ],
           const SizedBox(height: 4),
           Align(
             alignment: Alignment.centerLeft,

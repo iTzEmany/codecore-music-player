@@ -3490,6 +3490,12 @@ abstract class AppLocalizations {
   /// **'Nessuna pagina dedicata a questo brano'**
   String get curiosityNoSong;
 
+  /// No description provided for @curiosityNoArtist.
+  ///
+  /// In it, this message translates to:
+  /// **'Nessuna pagina sull\'artista'**
+  String get curiosityNoArtist;
+
   /// No description provided for @themeNew.
   ///
   /// In it, this message translates to:

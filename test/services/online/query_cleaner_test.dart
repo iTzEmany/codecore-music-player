@@ -37,4 +37,29 @@ void main() {
     expect(coreTitle('Song (feat. X)'), 'Song (feat. X)');
     expect(coreTitle('Heathens (MTV Unplugged) [Live]'), 'Heathens');
   });
+
+  group('what a file name adds to a title', () {
+    test('a copy number like (2) is dropped', () {
+      final c = cleanSearchQuery('Dire Straits - Fade To Black (2)', '');
+      expect([c.title, c.artist], ['Fade To Black', 'Dire Straits']);
+    });
+
+    test('a «Remastered 2011» tail goes away whole, not leaving «- 2011»', () {
+      for (final t in ['Imagine - Remastered 2010', 'Imagine - 2010 Remaster', 'Imagine - Remaster', 'Imagine - Remastered Version']) {
+        expect(cleanSearchQuery(t, 'John Lennon').title, 'Imagine', reason: t);
+      }
+      expect(cleanSearchQuery('Forever Young - Slow Version', 'Bob Dylan').title, 'Forever Young - Slow Version',
+          reason: 'a version that names the song stays');
+    });
+
+    test('«Label and Artist - Artist Title» takes the artist the title repeats', () {
+      final c = cleanSearchQuery('Fueled By Ramen and twenty one pilots - twenty one pilots Stressed Out', '');
+      expect([c.title, c.artist], ['Stressed Out', 'twenty one pilots']);
+    });
+
+    test('«A and B - Title» without a repeated side is left as it is', () {
+      final c = cleanSearchQuery('Simon and Garfunkel - The Sound of Silence', '');
+      expect([c.title, c.artist], ['The Sound of Silence', 'Simon and Garfunkel']);
+    });
+  });
 }

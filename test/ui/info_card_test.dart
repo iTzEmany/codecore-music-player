@@ -1,6 +1,10 @@
 import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/data/repositories/artist_info_repository.dart';
+import 'package:codecore/providers/online_providers.dart';
 import 'package:codecore/providers/translation_providers.dart';
+import 'package:codecore/services/online/http_client.dart';
+import 'package:codecore/services/online/wikipedia_client.dart';
+import 'package:dio/dio.dart' show CancelToken;
 import 'package:codecore/ui/screens/now_playing/now_playing_cards.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
@@ -172,4 +176,88 @@ void main() {
     expect(wikiLangOf(null), isNull);
     expect(wikiLangOf('not a url'), isNull);
   });
+
+  group('a search that does not find everything says what is missing', () {
+    /// Wikipedia as a script: the search words tell the song from the artist.
+    WikipediaClient wiki({bool song = true, bool artist = true, bool artistLimited = false}) {
+      final long = 'Una pagina abbastanza lunga da contare come introduzione, con Band e Real Song dentro. ' * 2;
+      return WikipediaClient(_Web((q) {
+        final isArtist = q.contains('cantante') || q.contains('singer');
+        if (isArtist) {
+          if (artistLimited) throw const RateLimitedException(429);
+          return artist ? {'1': {'title': 'Band', 'index': 1, 'extract': long}} : <String, Object?>{};
+        }
+        return song ? {'1': {'title': 'Real Song', 'index': 1, 'extract': long}} : <String, Object?>{};
+      }));
+    }
+
+    Future<(Harness, Track)> run(WidgetTester tester, WikipediaClient client) async {
+      tester.view.physicalSize = const Size(400, 1400);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final h = await Harness.create(tester, tracks: 1);
+      await tester.runAsync(() => (h.db.update(h.db.tracks)).write(const TracksCompanion(title: Value('Real Song'), artist: Value('Band'))));
+      final track = (await tester.runAsync(() => h.db.select(h.db.tracks).getSingle()))!;
+      await h.pump(
+        tester,
+        // Like the app: the card is fed by the live row of the track.
+        Scaffold(
+          body: SingleChildScrollView(
+            child: StreamBuilder<Track>(
+              stream: h.db.select(h.db.tracks).watchSingle(),
+              initialData: track,
+              builder: (_, snap) => InfoCard(track: snap.data!),
+            ),
+          ),
+        ),
+        extraOverrides: [wikipediaClientProvider.overrideWithValue(client)],
+      );
+      await _settle(tester);
+      await tester.tap(find.text('Cerca curiosità'));
+      await _settle(tester);
+      return (h, track);
+    }
+
+    testWidgets('nothing found: both parts say so, instead of an empty card', (tester) async {
+      final (h, _) = await run(tester, wiki(song: false, artist: false));
+      expect(find.byKey(const ValueKey('curiosity-no-song')), findsOneWidget);
+      expect(find.byKey(const ValueKey('curiosity-no-artist')), findsOneWidget);
+      expect(find.text("Nessuna pagina sull'artista"), findsOneWidget);
+      expect(find.text('Cerca curiosità'), findsNothing);
+      await h.dispose(tester);
+    });
+
+    testWidgets('the song found, the artist not: the artist part says it is missing', (tester) async {
+      final (h, _) = await run(tester, wiki(artist: false));
+      expect(find.text('Sul brano'), findsOneWidget);
+      expect(find.text("Nessuna pagina sull'artista"), findsOneWidget);
+      await h.dispose(tester);
+    });
+
+    testWidgets('the artist refused by Wikipedia does not lose the song, and does not say «not found»', (tester) async {
+      final (h, track) = await run(tester, wiki(artistLimited: true));
+      expect(find.text('Sul brano'), findsOneWidget, reason: 'the song was found and kept');
+      final saved = (await tester.runAsync(() => h.db.select(h.db.tracks).getSingle()))!;
+      expect(saved.curiosities, isNotNull);
+      expect(saved.id, track.id);
+      expect(find.text("Nessuna pagina sull'artista"), findsNothing);
+      expect(find.text('Servizio non disponibile, riprova più tardi'), findsWidgets);
+      await h.dispose(tester);
+    });
+  });
+}
+
+/// A web client that answers the Wikipedia search with the pages [pages] returns
+/// for the words searched, or throws what it throws.
+class _Web implements WebClient {
+  _Web(this.pages);
+
+  final Object Function(String search) pages;
+
+  @override
+  Future<Object?> getJson(String url, {Map<String, String>? query, CancelToken? cancel}) async =>
+      {'query': {'pages': pages(query?['gsrsearch'] ?? '')}};
+
+  @override
+  Future<List<int>?> getBytes(String url, {int maxBytes = 0, CancelToken? cancel}) async => null;
 }
