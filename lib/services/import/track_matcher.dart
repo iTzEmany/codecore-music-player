@@ -23,10 +23,17 @@ final _editTail = RegExp(
     caseSensitive: false);
 final _nonWord = RegExp(r'[^\p{L}\p{N}]+', unicode: true);
 
+/// Apostrophe-like marks that Unicode files as letters (the Hawaiian ʻokina of
+/// «Kamakawiwoʻole», the modifier apostrophe ʼ): they count as punctuation,
+/// like the plain ' they stand for.
+final _letterApostrophes = RegExp('[\u02B9-\u02BF]');
+
 /// Lower-case, no accents, no punctuation. Used to compare two spellings of
 /// the same name.
-String matchKey(String s) =>
-    normalize(s.replaceAll('&', ' and ')).replaceAll(_nonWord, ' ').trim();
+String matchKey(String s) => normalize(s.replaceAll('&', ' and '))
+    .replaceAll(_letterApostrophes, ' ')
+    .replaceAll(_nonWord, ' ')
+    .trim();
 
 /// [matchKey] of a title without the qualifiers that do not change the
 /// recording (remaster year, feat., radio edit). `live`, `remix`... are kept.

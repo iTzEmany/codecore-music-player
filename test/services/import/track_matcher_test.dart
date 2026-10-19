@@ -255,4 +255,10 @@ void main() {
       expect(hi.review, closeTo(0.93, 1e-9));
     });
   });
+
+  test('matchKey: an ʻokina or a modifier apostrophe is the same as a plain one', () {
+    expect(matchKey("Israel Kamakawiwoʻole"), matchKey("Israel Kamakawiwo'ole"));
+    expect(matchKey('Hawaiʻi'), matchKey("Hawai'i"));
+    expect(matchKey('rockʼnʼroll'), matchKey("rock'n'roll"));
+  });
 }

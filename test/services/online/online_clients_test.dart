@@ -373,6 +373,39 @@ void main() {
       expect(await WikipediaClient(page(named)).findSong('Real Song', 'Band', 'en'), isNotNull);
     });
 
+    test('a page about another song that only quotes this one is not taken', () async {
+      final web = FakeWeb((u, q) => {
+            'query': {
+              'pages': {
+                '1': {
+                  'title': 'Chissà se stai dormendo',
+                  'index': 1,
+                  'extract': 'Chissà se stai dormendo è un singolo di Jovanotti del 1992. '
+                      "L'intro del brano è un omaggio al brano Felicità di Lucio Dalla.",
+                },
+              }
+            }
+          });
+      expect(await WikipediaClient(web).findSong('Felicità', 'Lucio Dalla', 'it'), isNull);
+    });
+
+    test('a page named otherwise is taken when the song opens it and the artist is named', () async {
+      final web = FakeWeb((u, q) => {
+            'query': {
+              'pages': {
+                '1': {
+                  'title': 'Junk (canzone)',
+                  'index': 1,
+                  'extract': 'Singalong Junk è la versione strumentale di Junk, un brano di Paul McCartney del 1970, '
+                      'pubblicato nel suo primo album.',
+                },
+              }
+            }
+          });
+      final c = await WikipediaClient(web).findSong('Singalong Junk', 'Paul McCartney', 'it');
+      expect(c!.source.toString(), 'https://it.wikipedia.org/wiki/Junk_(canzone)');
+    });
+
     test('a page on another subject is not taken for the song', () async {
       final c = await WikipediaClient(web(hits: ['Other Thing']))
           .findSong('Real Song', 'Band', 'en');

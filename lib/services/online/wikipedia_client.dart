@@ -59,8 +59,12 @@ class WikipediaClient {
         // being about music is all that can be asked.
         return by.isNotEmpty ? lead.contains(by) : _musicWords.hasMatch(lead);
       }
-      // Named differently: the lead must name both the song and the artist.
-      return by.isNotEmpty && keys.any(lead.contains) && lead.contains(by);
+      // Named differently: the song must be what the page is about, so its name
+      // opens the lead («Junk è un brano…»), and the artist must be named. A
+      // page that only quotes it («…omaggio al brano Felicità di Lucio Dalla»
+      // in another song's page) is not the song.
+      final opening = lead.substring(0, lead.length.clamp(0, 80));
+      return by.isNotEmpty && keys.any(opening.contains) && lead.contains(by);
     }
 
     List<String> titlesFor(String l) {
