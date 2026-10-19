@@ -49,29 +49,9 @@ Future<void> runTranslateFlow(
     messenger.showSnackBar(SnackBar(content: Text(l.translateSameLanguage)));
     return;
   }
-  final nav = Navigator.of(context, rootNavigator: true);
   var ok = true;
   try {
-    for (final lang in [from, target]) {
-      if (await translator.isModelReady(lang)) continue;
-      if (!context.mounted) return;
-      final go = await _confirmDownload(context, lang);
-      if (go != true || !context.mounted) return;
-      _progress(context, l.translateDownloading(translationLanguages[lang]!));
-      try {
-        await translator.downloadModel(lang);
-      } on Object catch (e, st) {
-        AppLog.e('translation model download failed', e, st);
-        ok = false;
-      }
-      if (nav.canPop()) nav.pop();
-      if (!ok) {
-        messenger.showSnackBar(
-          SnackBar(content: Text(l.translateDownloadFailed)),
-        );
-        return;
-      }
-    }
+    if (!await ensureTranslationModels(context, translator, [from, target])) return;
     ok = await ref
         .read(lyricsTranslationProvider.notifier)
         .translate(
@@ -88,6 +68,38 @@ Future<void> runTranslateFlow(
   if (!ok) {
     messenger.showSnackBar(SnackBar(content: Text(l.translateFailed)));
   }
+}
+
+/// Makes sure the models of [langs] are on the phone, asking before each
+/// download. False when the user declined or a download failed (already said).
+Future<bool> ensureTranslationModels(
+  BuildContext context,
+  LyricsTranslator translator,
+  List<String> langs,
+) async {
+  final l = context.l10n;
+  final messenger = ScaffoldMessenger.of(context);
+  final nav = Navigator.of(context, rootNavigator: true);
+  for (final lang in langs) {
+    if (await translator.isModelReady(lang)) continue;
+    if (!context.mounted) return false;
+    final go = await _confirmDownload(context, lang);
+    if (go != true || !context.mounted) return false;
+    _progress(context, l.translateDownloading(translationLanguages[lang]!));
+    var ok = true;
+    try {
+      await translator.downloadModel(lang);
+    } on Object catch (e, st) {
+      AppLog.e('translation model download failed', e, st);
+      ok = false;
+    }
+    if (nav.canPop()) nav.pop();
+    if (!ok) {
+      messenger.showSnackBar(SnackBar(content: Text(l.translateDownloadFailed)));
+      return false;
+    }
+  }
+  return true;
 }
 
 Future<bool?> _confirmDownload(BuildContext context, String lang) {

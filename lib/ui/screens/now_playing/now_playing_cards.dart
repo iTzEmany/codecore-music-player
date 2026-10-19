@@ -10,12 +10,15 @@ import '../../../providers/database_providers.dart';
 import '../../../providers/online_providers.dart';
 import '../../../providers/player_providers.dart';
 import '../../../providers/settings_providers.dart';
+import '../../../providers/translation_providers.dart';
 import '../../../services/online/http_client.dart';
 import '../../../services/online/lrc_parser.dart';
+import '../../../services/online/lyrics_translator.dart';
 import '../../../services/online/query_cleaner.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/cover_image.dart';
 import '../lyrics/lyrics_screen.dart';
+import '../lyrics/lyrics_translate_flow.dart';
 import 'queue_sheet.dart';
 
 class _Card extends StatelessWidget {
@@ -242,6 +245,7 @@ class _InfoCardState extends ConsumerState<InfoCard> {
               heading: l.curiositySong,
               text: idx > 0 ? raw.substring(0, idx) : raw,
               url: idx > 0 ? raw.substring(idx + 1) : null,
+              lang: wikiLangOf(idx > 0 ? raw.substring(idx + 1) : null),
             )
           else
             Text(
@@ -257,6 +261,7 @@ class _InfoCardState extends ConsumerState<InfoCard> {
               heading: l.curiosityArtist,
               text: artistInfo.body,
               url: artistInfo.sourceUrl,
+              lang: artistInfo.lang,
             ),
           ],
           const SizedBox(height: 4),
@@ -272,21 +277,74 @@ class _InfoCardState extends ConsumerState<InfoCard> {
   }
 }
 
+/// `it` for `https://it.wikipedia.org/wiki/…`; null when it cannot be told.
+String? wikiLangOf(String? url) {
+  final host = url == null ? null : Uri.tryParse(url.trim())?.host;
+  final m = host == null ? null : RegExp(r'^([a-z-]+)\.wikipedia\.org$').firstMatch(host);
+  return m?.group(1);
+}
+
 /// One block of trivia: a heading, the text (a few lines, all of it on a tap or
-/// on «Mostra tutto») and where it comes from.
-class _CuriosityText extends StatefulWidget {
-  const _CuriosityText({required this.heading, required this.text, this.url});
+/// on «Mostra tutto») and where it comes from. When it is in another language
+/// than the app's and the phone can translate, «Traduci» shows it translated.
+class _CuriosityText extends ConsumerStatefulWidget {
+  const _CuriosityText({
+    required this.heading,
+    required this.text,
+    this.url,
+    this.lang,
+  });
 
   final String heading, text;
   final String? url;
 
+  /// Language of [text] (Wikipedia's code), if known.
+  final String? lang;
+
   @override
-  State<_CuriosityText> createState() => _CuriosityTextState();
+  ConsumerState<_CuriosityText> createState() => _CuriosityTextState();
 }
 
-class _CuriosityTextState extends State<_CuriosityText> {
+class _CuriosityTextState extends ConsumerState<_CuriosityText> {
   static const _collapsedLines = 5;
   bool _open = false;
+  bool _busy = false;
+  String? _translated;
+
+  @override
+  void didUpdateWidget(_CuriosityText old) {
+    super.didUpdateWidget(old);
+    if (old.text != widget.text) _translated = null; // a new search brought other text
+  }
+
+  Future<void> _translate(String from, String to) async {
+    final translator = ref.read(lyricsTranslatorProvider);
+    if (translator == null) return;
+    final l = context.l10n;
+    final messenger = ScaffoldMessenger.of(context);
+    setState(() => _busy = true);
+    var ok = false;
+    try {
+      if (!await ensureTranslationModels(context, translator, [from, to])) {
+        if (mounted) setState(() => _busy = false);
+        return;
+      }
+      // Paragraphs one by one: the model keeps the sense of each.
+      final parts = widget.text.split('\n');
+      final out = await translateKeepingLayout(translator, parts, from: from, to: to);
+      if (mounted) setState(() => _translated = out.join('\n'));
+      ok = true;
+    } on Object catch (e, st) {
+      AppLog.e('curiosity translation failed', e, st);
+    }
+    if (!mounted) return;
+    setState(() => _busy = false);
+    if (!ok) {
+      messenger
+        ..clearSnackBars()
+        ..showSnackBar(SnackBar(content: Text(l.translateFailed)));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -294,6 +352,14 @@ class _CuriosityTextState extends State<_CuriosityText> {
     final cc = context.cc;
     final theme = Theme.of(context).textTheme;
     final style = theme.bodyLarge;
+    final appLang = ref.watch(settingsProvider).language;
+    final from = widget.lang;
+    final canTranslate = ref.watch(lyricsTranslatorProvider) != null &&
+        from != null &&
+        from != appLang &&
+        translationLanguages.containsKey(from) &&
+        translationLanguages.containsKey(appLang);
+    final shown = _translated ?? widget.text;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -306,7 +372,7 @@ class _CuriosityTextState extends State<_CuriosityText> {
           builder: (context, box) {
             // Is the text longer than the collapsed height? Then it can grow.
             final painter = TextPainter(
-              text: TextSpan(text: widget.text, style: style),
+              text: TextSpan(text: shown, style: style),
               maxLines: _collapsedLines,
               textDirection: Directionality.of(context),
             )..layout(maxWidth: box.maxWidth);
@@ -321,18 +387,45 @@ class _CuriosityTextState extends State<_CuriosityText> {
                     duration: const Duration(milliseconds: 200),
                     alignment: Alignment.topCenter,
                     child: Text(
-                      widget.text,
+                      shown,
                       maxLines: _open ? null : _collapsedLines,
                       overflow: _open ? TextOverflow.visible : TextOverflow.ellipsis,
                       style: style,
                     ),
                   ),
                 ),
-                if (longer)
-                  TextButton(
-                    onPressed: () => setState(() => _open = !_open),
-                    child: Text(_open ? l.showLess : l.showMore),
-                  ),
+                Wrap(
+                  children: [
+                    if (longer)
+                      TextButton(
+                        onPressed: () => setState(() => _open = !_open),
+                        child: Text(_open ? l.showLess : l.showMore),
+                      ),
+                    if (canTranslate)
+                      _busy
+                          ? const Padding(
+                              padding: EdgeInsets.all(12),
+                              child: SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              ),
+                            )
+                          : TextButton.icon(
+                              key: const ValueKey('curiosity-translate'),
+                              onPressed: _translated == null
+                                  ? () => _translate(from, appLang)
+                                  : () => setState(() => _translated = null),
+                              icon: Icon(
+                                _translated == null ? Icons.translate_rounded : Icons.undo_rounded,
+                                size: 18,
+                              ),
+                              label: Text(
+                                _translated == null ? l.translateLyrics : l.translateRemove,
+                              ),
+                            ),
+                  ],
+                ),
               ],
             );
           },
