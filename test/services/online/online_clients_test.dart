@@ -191,31 +191,97 @@ void main() {
     });
   });
 
-  test('Wikipedia skips short and disambiguation pages', () async {
+  test('Wikipedia skips short and disambiguation pages, in one request', () async {
     final long = 'A song by the band. ' * 10;
-    final web = FakeWeb((u, q) {
-      if (q['list'] == 'search') {
-        return {
+    final web = FakeWeb((u, q) => {
           'query': {
-            'search': [
-              {'title': 'Short'},
-              {'title': 'Real Song'}
-            ]
+            'pages': {
+              '1': {'title': 'Short', 'index': 1, 'extract': 'tiny'},
+              '2': {'title': 'Real Song', 'index': 2, 'extract': long},
+            }
           }
-        };
-      }
-      final title = q['titles'];
-      return {
-        'query': {
-          'pages': {
-            '1': {'extract': title == 'Short' ? 'tiny' : long}
-          }
-        }
-      };
-    });
+        });
     final c = await WikipediaClient(web).find('Real Song', 'Band', 'en');
     expect(c!.source.toString(), 'https://en.wikipedia.org/wiki/Real_Song');
-    expect(c.text.length, lessThanOrEqualTo(1000));
+    expect(c.text.length, lessThanOrEqualTo(1500));
+    expect(web.calls, hasLength(1), reason: 'search and intros come together');
+  });
+
+  group('Wikipedia: song and artist are told apart', () {
+    final bio = 'Band are a rock group formed in London in 1970. ' * 4;
+    final about = 'Real Song is a song by the band Band, released in 1975. ' * 4;
+    final elsewhere = 'A completely different subject that is long enough to count. ' * 4;
+
+    /// Pages come in a map, not in ranking order: `index` says the rank.
+    FakeWeb web({required List<String> hits}) => FakeWeb((u, q) => {
+          'query': {
+            'pages': {
+              for (var i = hits.length - 1; i >= 0; i--)
+                '${i + 10}': {
+                  'title': hits[i],
+                  'index': i + 1,
+                  'extract': hits[i] == 'Band'
+                      ? bio
+                      : hits[i] == 'Other Thing'
+                          ? elsewhere
+                          : about,
+                },
+            }
+          }
+        });
+
+    test('the song page wins even when the artist page ranks first', () async {
+      final c = await WikipediaClient(web(hits: ['Band', 'Real Song (Band song)']))
+          .findSong('Real Song', 'Band', 'en');
+      expect(c!.source.toString(), 'https://en.wikipedia.org/wiki/Real_Song_(Band_song)');
+      expect(c.text, startsWith('Real Song is a song'));
+    });
+
+    test('a title with a tail is found without it', () async {
+      final web = FakeWeb((u, q) {
+        final tail = (q['gsrsearch'] ?? '').contains('Real Song - Remastered');
+        return {
+          'query': {
+            'pages': tail
+                ? {}
+                : {'1': {'title': 'Real Song', 'index': 1, 'extract': about}}
+          }
+        };
+      });
+      final c = await WikipediaClient(web).findSong('Real Song - Remastered 2011', 'Band', 'en');
+      expect(c!.source.toString(), 'https://en.wikipedia.org/wiki/Real_Song');
+      expect(web.calls, hasLength(2), reason: 'the whole title first, then without the tail');
+    });
+
+    test('the search uses OR groups, never an AND of many words', () async {
+      final w = web(hits: ['Band']);
+      await WikipediaClient(w).findArtist('Band', 'it');
+      expect(w.calls.first, contains('OR'));
+    });
+
+    test('with only the artist page the song has nothing, never the artist text', () async {
+      final c = await WikipediaClient(web(hits: ['Band'])).findSong('Real Song', 'Band', 'en');
+      expect(c, isNull);
+    });
+
+    test('a page on another subject is not taken for the song', () async {
+      final c = await WikipediaClient(web(hits: ['Other Thing']))
+          .findSong('Real Song', 'Band', 'en');
+      expect(c, isNull);
+    });
+
+    test('the artist page is the one named like the artist', () async {
+      final c = await WikipediaClient(web(hits: ['Real Song (Band song)', 'Band']))
+          .findArtist('Band feat. Someone', 'en');
+      expect(c!.source.toString(), 'https://en.wikipedia.org/wiki/Band');
+      expect(c.text, startsWith('Band are a rock group'));
+    });
+
+    test('an artist with no page of their own gets nothing', () async {
+      final c = await WikipediaClient(web(hits: ['Band (disambiguation)', 'Real Song (Band song)']))
+          .findArtist('Nobody', 'en');
+      expect(c, isNull);
+    });
   });
 
   test('decodeJsonBody handles text/javascript payloads', () {

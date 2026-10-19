@@ -1247,6 +1247,11 @@
       }
     }
   },
+  "curiositySong": "Sul brano",
+  "curiosityArtist": "Sull'artista",
+  "showMore": "Mostra tutto",
+  "showLess": "Mostra meno",
+  "curiosityNoSong": "Nessuna pagina dedicata a questo brano",
   "selectedCount": "{count, plural, one{1 selezionato} other{{count} selezionati}}",
   "@selectedCount": {
     "placeholders": {

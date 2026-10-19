@@ -141,7 +141,9 @@ class _SyncedLines extends ConsumerWidget {
   }
 }
 
-/// Wikipedia trivia saved on the track; fetched only on an explicit tap.
+/// Wikipedia trivia about the song and about the artist, fetched only on an
+/// explicit tap. The song's lives on the track, the artist's is shared by all
+/// the tracks of that artist.
 class InfoCard extends ConsumerStatefulWidget {
   const InfoCard({super.key, required this.track});
 
@@ -162,18 +164,30 @@ class _InfoCardState extends ConsumerState<InfoCard> {
     String? error;
     try {
       final c = cleanSearchQuery(t.title, t.artist ?? '');
-      final found = await ref
-          .read(wikipediaClientProvider)
-          .find(c.title, c.artist, ref.read(settingsProvider).language);
-      if (found == null) {
+      final lang = ref.read(settingsProvider).language;
+      final wiki = ref.read(wikipediaClientProvider);
+      final db = ref.read(databaseProvider);
+      // One after the other: Wikipedia answers a burst with HTTP 429.
+      final song = await wiki.findSong(c.title, c.artist, lang);
+      final artist = c.artist.isEmpty ? null : await wiki.findArtist(c.artist, lang);
+      if (song == null && artist == null) {
         error = l.noResults;
-      } else {
-        final db = ref.read(databaseProvider);
+      }
+      if (song != null) {
         await (db.update(db.tracks)..where((r) => r.id.equals(t.id))).write(
-          TracksCompanion(curiosities: Value('${found.text}\n${found.source}')),
+          TracksCompanion(curiosities: Value('${song.text}\n${song.source}')),
         );
       }
-    } on RateLimitedException {
+      if (artist != null) {
+        await ref.read(artistInfoRepositoryProvider).save(
+              c.artist,
+              body: artist.text,
+              source: artist.source,
+              lang: artist.lang,
+            );
+      }
+    } on RateLimitedException catch (e) {
+      AppLog.w('curiosity lookup refused', e);
       error = l.serviceUnavailable;
     } on Object catch (e, st) {
       AppLog.w('curiosity lookup failed', e, st);
@@ -192,19 +206,22 @@ class _InfoCardState extends ConsumerState<InfoCard> {
   Widget build(BuildContext context) {
     final l = context.l10n;
     final cc = context.cc;
-    final theme = Theme.of(context).textTheme;
-    final raw = widget.track.curiosities;
-    if (raw == null) {
+    final t = widget.track;
+    final cleaned = cleanSearchQuery(t.title, t.artist ?? '');
+    final artistInfo = ref.watch(artistInfoProvider(cleaned.artist)).value;
+    final raw = t.curiosities;
+    final spinner = const SizedBox(
+      width: 20,
+      height: 20,
+      child: CircularProgressIndicator(strokeWidth: 2),
+    );
+    if (raw == null && artistInfo == null) {
       return _Card(
-        title: l.trackInfo,
+        title: l.fieldCuriosity,
         child: Align(
           alignment: Alignment.centerLeft,
           child: _loading
-              ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
+              ? spinner
               : OutlinedButton(
                   onPressed: _fetch,
                   child: Text(l.searchCuriosity),
@@ -212,44 +229,134 @@ class _InfoCardState extends ConsumerState<InfoCard> {
         ),
       );
     }
-    final idx = raw.lastIndexOf('\n');
-    final text = idx > 0 ? raw.substring(0, idx) : raw;
-    final url = idx > 0 ? raw.substring(idx + 1) : null;
+    final idx = raw?.lastIndexOf('\n') ?? -1;
     return _Card(
-      title: l.trackInfo,
+      title: l.fieldCuriosity,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            text,
-            maxLines: 6,
-            overflow: TextOverflow.ellipsis,
-            style: theme.bodyLarge,
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  l.sourceWikipedia,
-                  style: theme.labelSmall?.copyWith(color: cc.textMuted),
-                ),
-              ),
-              if (url != null)
-                TextButton(
-                  onPressed: () async {
-                    final messenger = ScaffoldMessenger.of(context);
-                    await Clipboard.setData(ClipboardData(text: url));
-                    messenger
-                      ..clearSnackBars()
-                      ..showSnackBar(SnackBar(content: Text(l.copied)));
-                  },
-                  child: Text(l.copyLink),
-                ),
-            ],
+          if (raw != null)
+            _CuriosityText(
+              heading: l.curiositySong,
+              text: idx > 0 ? raw.substring(0, idx) : raw,
+              url: idx > 0 ? raw.substring(idx + 1) : null,
+            )
+          else
+            Text(
+              l.curiosityNoSong,
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.copyWith(color: cc.textMuted),
+            ),
+          if (artistInfo != null) ...[
+            const SizedBox(height: 16),
+            _CuriosityText(
+              heading: l.curiosityArtist,
+              text: artistInfo.body,
+              url: artistInfo.sourceUrl,
+            ),
+          ],
+          const SizedBox(height: 4),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: _loading
+                ? Padding(padding: const EdgeInsets.all(8), child: spinner)
+                : TextButton(onPressed: _fetch, child: Text(l.retry)),
           ),
         ],
       ),
+    );
+  }
+}
+
+/// One block of trivia: a heading, the text (a few lines, all of it on a tap or
+/// on «Mostra tutto») and where it comes from.
+class _CuriosityText extends StatefulWidget {
+  const _CuriosityText({required this.heading, required this.text, this.url});
+
+  final String heading, text;
+  final String? url;
+
+  @override
+  State<_CuriosityText> createState() => _CuriosityTextState();
+}
+
+class _CuriosityTextState extends State<_CuriosityText> {
+  static const _collapsedLines = 5;
+  bool _open = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final cc = context.cc;
+    final theme = Theme.of(context).textTheme;
+    final style = theme.bodyLarge;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          widget.heading,
+          style: theme.labelLarge?.copyWith(color: cc.accentSoft),
+        ),
+        const SizedBox(height: 4),
+        LayoutBuilder(
+          builder: (context, box) {
+            // Is the text longer than the collapsed height? Then it can grow.
+            final painter = TextPainter(
+              text: TextSpan(text: widget.text, style: style),
+              maxLines: _collapsedLines,
+              textDirection: Directionality.of(context),
+            )..layout(maxWidth: box.maxWidth);
+            final longer = painter.didExceedMaxLines;
+            painter.dispose();
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                InkWell(
+                  onTap: longer ? () => setState(() => _open = !_open) : null,
+                  child: AnimatedSize(
+                    duration: const Duration(milliseconds: 200),
+                    alignment: Alignment.topCenter,
+                    child: Text(
+                      widget.text,
+                      maxLines: _open ? null : _collapsedLines,
+                      overflow: _open ? TextOverflow.visible : TextOverflow.ellipsis,
+                      style: style,
+                    ),
+                  ),
+                ),
+                if (longer)
+                  TextButton(
+                    onPressed: () => setState(() => _open = !_open),
+                    child: Text(_open ? l.showLess : l.showMore),
+                  ),
+              ],
+            );
+          },
+        ),
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                l.sourceWikipedia,
+                style: theme.labelSmall?.copyWith(color: cc.textMuted),
+              ),
+            ),
+            if (widget.url != null)
+              TextButton(
+                onPressed: () async {
+                  final messenger = ScaffoldMessenger.of(context);
+                  await Clipboard.setData(ClipboardData(text: widget.url!));
+                  messenger
+                    ..clearSnackBars()
+                    ..showSnackBar(SnackBar(content: Text(l.copied)));
+                },
+                child: Text(l.copyLink),
+              ),
+          ],
+        ),
+      ],
     );
   }
 }

@@ -1049,6 +1049,11 @@
   "crossfadePlainInAlbumHint": "Innerhalb eines Albums folgen die Titel lückenlos aufeinander, ohne sich zu überlagern.",
   "selectedRow": "Ausgewählt",
   "selectedRowAt": "Ausgewählt, Nummer {position}",
+  "curiositySong": "Zum Lied",
+  "curiosityArtist": "Zum Künstler",
+  "showMore": "Mehr anzeigen",
+  "showLess": "Weniger anzeigen",
+  "curiosityNoSong": "Keine Seite zu diesem Lied",
   "selectedCount": "{count, plural, one{1 ausgewählt} other{{count} ausgewählt}}",
   "@selectedCount": {
     "placeholders": {

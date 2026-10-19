@@ -3460,6 +3460,36 @@ abstract class AppLocalizations {
   /// **'Selezionato, numero {position}'**
   String selectedRowAt(int position);
 
+  /// No description provided for @curiositySong.
+  ///
+  /// In it, this message translates to:
+  /// **'Sul brano'**
+  String get curiositySong;
+
+  /// No description provided for @curiosityArtist.
+  ///
+  /// In it, this message translates to:
+  /// **'Sull\'artista'**
+  String get curiosityArtist;
+
+  /// No description provided for @showMore.
+  ///
+  /// In it, this message translates to:
+  /// **'Mostra tutto'**
+  String get showMore;
+
+  /// No description provided for @showLess.
+  ///
+  /// In it, this message translates to:
+  /// **'Mostra meno'**
+  String get showLess;
+
+  /// No description provided for @curiosityNoSong.
+  ///
+  /// In it, this message translates to:
+  /// **'Nessuna pagina dedicata a questo brano'**
+  String get curiosityNoSong;
+
   /// No description provided for @selectedCount.
   ///
   /// In it, this message translates to:

@@ -299,5 +299,24 @@ void main() {
     expect(await db.select(db.userTags).get(), hasLength(1), reason: 'the label stays');
     await db.close();
   });
-}
 
+  test('a v10 database gets the artist_infos table and keeps its tracks', () async {
+    final dir = Directory.systemTemp.createTempSync('mig11');
+    addTearDown(() => dir.deleteSync(recursive: true));
+    final file = File(p.join(dir.path, 'v10.db'));
+    // A current database is made, then put back to version 10 without the table.
+    final first = AppDatabase(NativeDatabase(file));
+    await first.customSelect('SELECT 1').get();
+    await first.customStatement('DROP TABLE artist_infos');
+    await first.customStatement('PRAGMA user_version = 10');
+    await first.close();
+
+    final db = AppDatabase(NativeDatabase(file));
+    final tables = await db
+        .customSelect("SELECT name FROM sqlite_master WHERE type = 'table'")
+        .get();
+    expect(tables.map((r) => r.read<String>('name')), contains('artist_infos'));
+    expect(await db.select(db.artistInfos).get(), isEmpty);
+    await db.close();
+  });
+}

@@ -1049,6 +1049,11 @@
   "crossfadePlainInAlbumHint": "Inside an album the tracks follow each other without a gap and without overlapping.",
   "selectedRow": "Selected",
   "selectedRowAt": "Selected, number {position}",
+  "curiositySong": "About the song",
+  "curiosityArtist": "About the artist",
+  "showMore": "Show more",
+  "showLess": "Show less",
+  "curiosityNoSong": "No page about this song",
   "selectedCount": "{count, plural, one{1 selected} other{{count} selected}}",
   "@selectedCount": {
     "placeholders": {

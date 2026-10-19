@@ -7107,6 +7107,370 @@ class PodcastEpisodesCompanion extends UpdateCompanion<PodcastEpisode> {
   }
 }
 
+class $ArtistInfosTable extends ArtistInfos
+    with TableInfo<$ArtistInfosTable, ArtistInfo> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ArtistInfosTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _artistKeyMeta = const VerificationMeta(
+    'artistKey',
+  );
+  @override
+  late final GeneratedColumn<String> artistKey = GeneratedColumn<String>(
+    'artist_key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _bodyMeta = const VerificationMeta('body');
+  @override
+  late final GeneratedColumn<String> body = GeneratedColumn<String>(
+    'body',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sourceUrlMeta = const VerificationMeta(
+    'sourceUrl',
+  );
+  @override
+  late final GeneratedColumn<String> sourceUrl = GeneratedColumn<String>(
+    'source_url',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _langMeta = const VerificationMeta('lang');
+  @override
+  late final GeneratedColumn<String> lang = GeneratedColumn<String>(
+    'lang',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _fetchedAtMeta = const VerificationMeta(
+    'fetchedAt',
+  );
+  @override
+  late final GeneratedColumn<int> fetchedAt = GeneratedColumn<int>(
+    'fetched_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    artistKey,
+    body,
+    sourceUrl,
+    lang,
+    fetchedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'artist_infos';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ArtistInfo> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('artist_key')) {
+      context.handle(
+        _artistKeyMeta,
+        artistKey.isAcceptableOrUnknown(data['artist_key']!, _artistKeyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_artistKeyMeta);
+    }
+    if (data.containsKey('body')) {
+      context.handle(
+        _bodyMeta,
+        body.isAcceptableOrUnknown(data['body']!, _bodyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_bodyMeta);
+    }
+    if (data.containsKey('source_url')) {
+      context.handle(
+        _sourceUrlMeta,
+        sourceUrl.isAcceptableOrUnknown(data['source_url']!, _sourceUrlMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sourceUrlMeta);
+    }
+    if (data.containsKey('lang')) {
+      context.handle(
+        _langMeta,
+        lang.isAcceptableOrUnknown(data['lang']!, _langMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_langMeta);
+    }
+    if (data.containsKey('fetched_at')) {
+      context.handle(
+        _fetchedAtMeta,
+        fetchedAt.isAcceptableOrUnknown(data['fetched_at']!, _fetchedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_fetchedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {artistKey};
+  @override
+  ArtistInfo map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ArtistInfo(
+      artistKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}artist_key'],
+      )!,
+      body: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}body'],
+      )!,
+      sourceUrl: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source_url'],
+      )!,
+      lang: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}lang'],
+      )!,
+      fetchedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}fetched_at'],
+      )!,
+    );
+  }
+
+  @override
+  $ArtistInfosTable createAlias(String alias) {
+    return $ArtistInfosTable(attachedDatabase, alias);
+  }
+}
+
+class ArtistInfo extends DataClass implements Insertable<ArtistInfo> {
+  /// `matchKey` of the main artist's name.
+  final String artistKey;
+  final String body;
+  final String sourceUrl;
+  final String lang;
+  final int fetchedAt;
+  const ArtistInfo({
+    required this.artistKey,
+    required this.body,
+    required this.sourceUrl,
+    required this.lang,
+    required this.fetchedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['artist_key'] = Variable<String>(artistKey);
+    map['body'] = Variable<String>(body);
+    map['source_url'] = Variable<String>(sourceUrl);
+    map['lang'] = Variable<String>(lang);
+    map['fetched_at'] = Variable<int>(fetchedAt);
+    return map;
+  }
+
+  ArtistInfosCompanion toCompanion(bool nullToAbsent) {
+    return ArtistInfosCompanion(
+      artistKey: Value(artistKey),
+      body: Value(body),
+      sourceUrl: Value(sourceUrl),
+      lang: Value(lang),
+      fetchedAt: Value(fetchedAt),
+    );
+  }
+
+  factory ArtistInfo.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ArtistInfo(
+      artistKey: serializer.fromJson<String>(json['artistKey']),
+      body: serializer.fromJson<String>(json['body']),
+      sourceUrl: serializer.fromJson<String>(json['sourceUrl']),
+      lang: serializer.fromJson<String>(json['lang']),
+      fetchedAt: serializer.fromJson<int>(json['fetchedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'artistKey': serializer.toJson<String>(artistKey),
+      'body': serializer.toJson<String>(body),
+      'sourceUrl': serializer.toJson<String>(sourceUrl),
+      'lang': serializer.toJson<String>(lang),
+      'fetchedAt': serializer.toJson<int>(fetchedAt),
+    };
+  }
+
+  ArtistInfo copyWith({
+    String? artistKey,
+    String? body,
+    String? sourceUrl,
+    String? lang,
+    int? fetchedAt,
+  }) => ArtistInfo(
+    artistKey: artistKey ?? this.artistKey,
+    body: body ?? this.body,
+    sourceUrl: sourceUrl ?? this.sourceUrl,
+    lang: lang ?? this.lang,
+    fetchedAt: fetchedAt ?? this.fetchedAt,
+  );
+  ArtistInfo copyWithCompanion(ArtistInfosCompanion data) {
+    return ArtistInfo(
+      artistKey: data.artistKey.present ? data.artistKey.value : this.artistKey,
+      body: data.body.present ? data.body.value : this.body,
+      sourceUrl: data.sourceUrl.present ? data.sourceUrl.value : this.sourceUrl,
+      lang: data.lang.present ? data.lang.value : this.lang,
+      fetchedAt: data.fetchedAt.present ? data.fetchedAt.value : this.fetchedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ArtistInfo(')
+          ..write('artistKey: $artistKey, ')
+          ..write('body: $body, ')
+          ..write('sourceUrl: $sourceUrl, ')
+          ..write('lang: $lang, ')
+          ..write('fetchedAt: $fetchedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(artistKey, body, sourceUrl, lang, fetchedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ArtistInfo &&
+          other.artistKey == this.artistKey &&
+          other.body == this.body &&
+          other.sourceUrl == this.sourceUrl &&
+          other.lang == this.lang &&
+          other.fetchedAt == this.fetchedAt);
+}
+
+class ArtistInfosCompanion extends UpdateCompanion<ArtistInfo> {
+  final Value<String> artistKey;
+  final Value<String> body;
+  final Value<String> sourceUrl;
+  final Value<String> lang;
+  final Value<int> fetchedAt;
+  final Value<int> rowid;
+  const ArtistInfosCompanion({
+    this.artistKey = const Value.absent(),
+    this.body = const Value.absent(),
+    this.sourceUrl = const Value.absent(),
+    this.lang = const Value.absent(),
+    this.fetchedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ArtistInfosCompanion.insert({
+    required String artistKey,
+    required String body,
+    required String sourceUrl,
+    required String lang,
+    required int fetchedAt,
+    this.rowid = const Value.absent(),
+  }) : artistKey = Value(artistKey),
+       body = Value(body),
+       sourceUrl = Value(sourceUrl),
+       lang = Value(lang),
+       fetchedAt = Value(fetchedAt);
+  static Insertable<ArtistInfo> custom({
+    Expression<String>? artistKey,
+    Expression<String>? body,
+    Expression<String>? sourceUrl,
+    Expression<String>? lang,
+    Expression<int>? fetchedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (artistKey != null) 'artist_key': artistKey,
+      if (body != null) 'body': body,
+      if (sourceUrl != null) 'source_url': sourceUrl,
+      if (lang != null) 'lang': lang,
+      if (fetchedAt != null) 'fetched_at': fetchedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ArtistInfosCompanion copyWith({
+    Value<String>? artistKey,
+    Value<String>? body,
+    Value<String>? sourceUrl,
+    Value<String>? lang,
+    Value<int>? fetchedAt,
+    Value<int>? rowid,
+  }) {
+    return ArtistInfosCompanion(
+      artistKey: artistKey ?? this.artistKey,
+      body: body ?? this.body,
+      sourceUrl: sourceUrl ?? this.sourceUrl,
+      lang: lang ?? this.lang,
+      fetchedAt: fetchedAt ?? this.fetchedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (artistKey.present) {
+      map['artist_key'] = Variable<String>(artistKey.value);
+    }
+    if (body.present) {
+      map['body'] = Variable<String>(body.value);
+    }
+    if (sourceUrl.present) {
+      map['source_url'] = Variable<String>(sourceUrl.value);
+    }
+    if (lang.present) {
+      map['lang'] = Variable<String>(lang.value);
+    }
+    if (fetchedAt.present) {
+      map['fetched_at'] = Variable<int>(fetchedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ArtistInfosCompanion(')
+          ..write('artistKey: $artistKey, ')
+          ..write('body: $body, ')
+          ..write('sourceUrl: $sourceUrl, ')
+          ..write('lang: $lang, ')
+          ..write('fetchedAt: $fetchedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -7127,6 +7491,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $PodcastEpisodesTable podcastEpisodes = $PodcastEpisodesTable(
     this,
   );
+  late final $ArtistInfosTable artistInfos = $ArtistInfosTable(this);
   late final Index tracksAlbumKey = Index(
     'tracks_album_key',
     'CREATE INDEX tracks_album_key ON tracks (album_key)',
@@ -7188,6 +7553,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     trackTags,
     podcasts,
     podcastEpisodes,
+    artistInfos,
     tracksAlbumKey,
     tracksArtist,
     tracksFavorite,
@@ -12778,6 +13144,215 @@ typedef $$PodcastEpisodesTableProcessedTableManager =
       PodcastEpisode,
       PrefetchHooks Function({bool podcastId, bool trackId})
     >;
+typedef $$ArtistInfosTableCreateCompanionBuilder =
+    ArtistInfosCompanion Function({
+      required String artistKey,
+      required String body,
+      required String sourceUrl,
+      required String lang,
+      required int fetchedAt,
+      Value<int> rowid,
+    });
+typedef $$ArtistInfosTableUpdateCompanionBuilder =
+    ArtistInfosCompanion Function({
+      Value<String> artistKey,
+      Value<String> body,
+      Value<String> sourceUrl,
+      Value<String> lang,
+      Value<int> fetchedAt,
+      Value<int> rowid,
+    });
+
+class $$ArtistInfosTableFilterComposer
+    extends Composer<_$AppDatabase, $ArtistInfosTable> {
+  $$ArtistInfosTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get artistKey => $composableBuilder(
+    column: $table.artistKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get body => $composableBuilder(
+    column: $table.body,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sourceUrl => $composableBuilder(
+    column: $table.sourceUrl,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get lang => $composableBuilder(
+    column: $table.lang,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get fetchedAt => $composableBuilder(
+    column: $table.fetchedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ArtistInfosTableOrderingComposer
+    extends Composer<_$AppDatabase, $ArtistInfosTable> {
+  $$ArtistInfosTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get artistKey => $composableBuilder(
+    column: $table.artistKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get body => $composableBuilder(
+    column: $table.body,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sourceUrl => $composableBuilder(
+    column: $table.sourceUrl,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get lang => $composableBuilder(
+    column: $table.lang,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get fetchedAt => $composableBuilder(
+    column: $table.fetchedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ArtistInfosTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ArtistInfosTable> {
+  $$ArtistInfosTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get artistKey =>
+      $composableBuilder(column: $table.artistKey, builder: (column) => column);
+
+  GeneratedColumn<String> get body =>
+      $composableBuilder(column: $table.body, builder: (column) => column);
+
+  GeneratedColumn<String> get sourceUrl =>
+      $composableBuilder(column: $table.sourceUrl, builder: (column) => column);
+
+  GeneratedColumn<String> get lang =>
+      $composableBuilder(column: $table.lang, builder: (column) => column);
+
+  GeneratedColumn<int> get fetchedAt =>
+      $composableBuilder(column: $table.fetchedAt, builder: (column) => column);
+}
+
+class $$ArtistInfosTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ArtistInfosTable,
+          ArtistInfo,
+          $$ArtistInfosTableFilterComposer,
+          $$ArtistInfosTableOrderingComposer,
+          $$ArtistInfosTableAnnotationComposer,
+          $$ArtistInfosTableCreateCompanionBuilder,
+          $$ArtistInfosTableUpdateCompanionBuilder,
+          (
+            ArtistInfo,
+            BaseReferences<_$AppDatabase, $ArtistInfosTable, ArtistInfo>,
+          ),
+          ArtistInfo,
+          PrefetchHooks Function()
+        > {
+  $$ArtistInfosTableTableManager(_$AppDatabase db, $ArtistInfosTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ArtistInfosTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ArtistInfosTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ArtistInfosTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> artistKey = const Value.absent(),
+                Value<String> body = const Value.absent(),
+                Value<String> sourceUrl = const Value.absent(),
+                Value<String> lang = const Value.absent(),
+                Value<int> fetchedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ArtistInfosCompanion(
+                artistKey: artistKey,
+                body: body,
+                sourceUrl: sourceUrl,
+                lang: lang,
+                fetchedAt: fetchedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String artistKey,
+                required String body,
+                required String sourceUrl,
+                required String lang,
+                required int fetchedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => ArtistInfosCompanion.insert(
+                artistKey: artistKey,
+                body: body,
+                sourceUrl: sourceUrl,
+                lang: lang,
+                fetchedAt: fetchedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$ArtistInfosTable, ArtistInfo>(table),
+                  BaseReferences<_$AppDatabase, $ArtistInfosTable, ArtistInfo>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ArtistInfosTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ArtistInfosTable,
+      ArtistInfo,
+      $$ArtistInfosTableFilterComposer,
+      $$ArtistInfosTableOrderingComposer,
+      $$ArtistInfosTableAnnotationComposer,
+      $$ArtistInfosTableCreateCompanionBuilder,
+      $$ArtistInfosTableUpdateCompanionBuilder,
+      (
+        ArtistInfo,
+        BaseReferences<_$AppDatabase, $ArtistInfosTable, ArtistInfo>,
+      ),
+      ArtistInfo,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -12806,4 +13381,6 @@ class $AppDatabaseManager {
       $$PodcastsTableTableManager(_db, _db.podcasts);
   $$PodcastEpisodesTableTableManager get podcastEpisodes =>
       $$PodcastEpisodesTableTableManager(_db, _db.podcastEpisodes);
+  $$ArtistInfosTableTableManager get artistInfos =>
+      $$ArtistInfosTableTableManager(_db, _db.artistInfos);
 }

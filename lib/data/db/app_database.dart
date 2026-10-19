@@ -8,7 +8,7 @@ import 'tables.dart';
 part 'app_database.g.dart';
 
 /// Bump with every migration step below.
-const kSchemaVersion = 10;
+const kSchemaVersion = 11;
 
 @DriftDatabase(tables: [
   Tracks,
@@ -23,6 +23,7 @@ const kSchemaVersion = 10;
   TrackTags,
   Podcasts,
   PodcastEpisodes,
+  ArtistInfos,
 ])
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.e);
@@ -86,6 +87,7 @@ class AppDatabase extends _$AppDatabase {
             }
             await m.createIndex(playlistsUuid);
           }
+          if (from < 11) await m.createTable(artistInfos);
         },
         beforeOpen: (details) async {
           await customStatement('PRAGMA foreign_keys = ON');

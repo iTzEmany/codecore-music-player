@@ -1966,6 +1966,21 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get curiositySong => 'Sur le morceau';
+
+  @override
+  String get curiosityArtist => 'Sur l\'artiste';
+
+  @override
+  String get showMore => 'Tout afficher';
+
+  @override
+  String get showLess => 'Afficher moins';
+
+  @override
+  String get curiosityNoSong => 'Aucune page sur ce morceau';
+
+  @override
   String selectedCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

@@ -33,7 +33,7 @@ in `onUpgrade` (mai distruttiva). Esporta lo schema con `drift_dev schema dump` 
 | `isFavorite` | bool | default false |
 | `lyricsPlain` | text? | |
 | `lyricsSynced` | text? | testo LRC grezzo |
-| `curiosities` | text? | estratto Wikipedia |
+| `curiosities` | text? | curiosità **sul brano** (pagina Wikipedia del brano, mai quella dell'artista): testo, a capo, indirizzo della pagina |
 | `enrichStatus` | int | 0 mai tentato, 1 trovato, 2 non trovato |
 | `userEdited` | bool | default false: se true l'arricchimento **non** sovrascrive titolo/artista/album |
 | `missing` | bool | default false: file non trovato all'ultima scansione |
@@ -85,6 +85,9 @@ Una colonna su `tracks` (`kind`, vedi sopra) e due tabelle; la migrazione non ca
 ### `podcast_episodes`
 `id` int PK · `podcastId` int (**CASCADE**: togliere un podcast toglie i suoi episodi) · `guid` text (o l'`enclosure@url` se il feed non ne ha) · `title` text · `publishedAt` int? · `durationMs` int? · `audioUrl` text · `mimeType` text? · `sizeBytes` int? · `description` text? (testo semplice) · `trackId` int? (**SET NULL** verso `tracks`: se la riga del brano sparisce l'episodio resta in elenco come «non scaricato») · `played` bool default false · `playedAt` int?. **UNIQUE (`podcastId`, `guid`)**: un aggiornamento non duplica mai un episodio. Indice `(podcastId, publishedAt)` per l'elenco in ordine di data.
 Un episodio **scaricato** ha una riga in `tracks` con `kind = 1`, `folderId = null` e il file in `<appSupportDir>/podcasts/<podcastId>/`, cartella che non è in `folders` e quindi la scansione non vede.
+
+## Curiosità sull'artista (schema v11)
+`artist_infos`: `artistKey` text **PK** (`matchKey` dell'artista principale: «Queen feat. X» e «queen» sono lo stesso) · `body` text · `sourceUrl` text · `lang` text · `fetchedAt` int (epoch ms). Una riga per artista, non per brano: tutti i brani dello stesso artista la mostrano senza altre richieste. È una cache: non entra nei dati utente portabili del backup (il file `.sqlite` del backup però la contiene).
 
 ## Importazione da CSV (schema v4, fase 12)
 | Tabella | Colonne | Note |

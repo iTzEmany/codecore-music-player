@@ -1240,6 +1240,11 @@
   "crossfadePlainInAlbumHint": "Dentro de um álbum as faixas seguem-se sem pausas e sem se sobreporem.",
   "selectedRow": "Selecionado",
   "selectedRowAt": "Selecionado, número {position}",
+  "curiositySong": "Sobre a música",
+  "curiosityArtist": "Sobre o artista",
+  "showMore": "Mostrar mais",
+  "showLess": "Mostrar menos",
+  "curiosityNoSong": "Nenhuma página sobre esta música",
   "selectedCount": "{count, plural, one{1 selecionado} other{{count} selecionados}}",
   "@selectedCount": {
     "placeholders": {

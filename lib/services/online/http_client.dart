@@ -27,8 +27,9 @@ abstract class WebClient {
 }
 
 class DioWebClient implements WebClient {
-  DioWebClient([Dio? dio])
-      : _dio = dio ??
+  DioWebClient([Dio? dio, Future<void> Function(Duration)? pause])
+      : _pause = pause ?? Future<void>.delayed,
+        _dio = dio ??
             Dio(BaseOptions(
               connectTimeout: const Duration(seconds: 8),
               receiveTimeout: const Duration(seconds: 15),
@@ -39,22 +40,43 @@ class DioWebClient implements WebClient {
   static const userAgent = 'Codecore/1.0 (uso personale)';
 
   final Dio _dio;
+  final Future<void> Function(Duration) _pause;
 
-  void _checkRateLimit(int? code) {
-    if (code == 403 || code == 429) throw RateLimitedException(code!);
+  /// A 429 that names a short wait («retry-after») is waited out, twice at
+  /// most; a longer one, or a 403, is reported at once.
+  static const _maxRetries = 2;
+  static const _maxWait = Duration(seconds: 10);
+
+  void _checkRateLimit(int? code, [String? url, String? retryAfter, Object? body]) {
+    if (code == 403 || code == 429) {
+      final text = '$body';
+      AppLog.w('HTTP $code from ${Uri.tryParse(url ?? '')?.host} (retry-after: $retryAfter): '
+          '${text.length > 160 ? text.substring(0, 160) : text}');
+      throw RateLimitedException(code!);
+    }
   }
 
   @override
   Future<Object?> getJson(String url,
       {Map<String, String>? query, CancelToken? cancel}) async {
     try {
-      final res = await _dio.get<Object?>(url,
-          queryParameters: query,
-          cancelToken: cancel,
-          options: Options(responseType: ResponseType.json));
-      _checkRateLimit(res.statusCode);
-      if (res.statusCode != 200) return null;
-      return decodeJsonBody(res.data);
+      for (var attempt = 0;; attempt++) {
+        final res = await _dio.get<Object?>(url,
+            queryParameters: query,
+            cancelToken: cancel,
+            options: Options(responseType: ResponseType.json));
+        final wait = res.statusCode == 429
+            ? Duration(seconds: int.tryParse(res.headers.value('retry-after') ?? '') ?? 2)
+            : null;
+        if (wait != null && wait <= _maxWait && attempt < _maxRetries) {
+          AppLog.i('HTTP 429 from ${Uri.tryParse(url)?.host}: waiting ${wait.inSeconds} s');
+          await _pause(wait);
+          continue;
+        }
+        _checkRateLimit(res.statusCode, url, res.headers.value('retry-after'), res.data);
+        if (res.statusCode != 200) return null;
+        return decodeJsonBody(res.data);
+      }
     } on DioException catch (e, st) {
       if (CancelToken.isCancel(e)) rethrow;
       AppLog.w('GET failed: $url', e, st);

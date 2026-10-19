@@ -264,3 +264,17 @@ class PodcastEpisodes extends Table {
         {podcastId, guid},
       ];
 }
+
+/// What Wikipedia says about an artist, kept once per artist (not per track)
+/// so every track of theirs shows it without asking again.
+class ArtistInfos extends Table {
+  /// `matchKey` of the main artist's name.
+  TextColumn get artistKey => text()();
+  TextColumn get body => text()();
+  TextColumn get sourceUrl => text()();
+  TextColumn get lang => text()();
+  IntColumn get fetchedAt => integer()();
+
+  @override
+  Set<Column> get primaryKey => {artistKey};
+}
