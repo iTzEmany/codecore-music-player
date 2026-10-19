@@ -303,7 +303,7 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 25.1 Verifiche preliminari (audio_service browsing, tasto multimediale a freddo, DHU, home_widget) (DHU non installato: in «Tocca a te»)
 - [x] 25.2 Ponte dati verso il widget (lato Dart)
 - [x] 25.3 Widget Android (lato Kotlin) (provato sul Mi A3: aggiunto alla home, copertina/titolo/artista, ⏯ da freddo e da caldo)
-- [~] 25.4 Tile rapida
+- [x] 25.4 Tile rapida (provata sul Mi A3 dopo averla riaggiunta: ▶ ⇄ pausa)
 - [x] 25.5 Albero di navigazione (`MediaBrowseTree`, + test)
 - [~] 25.6 Android Auto
 - [~] 25.7 Wear OS (verifica) (nessun codice: prova a mano in «Tocca a te»)
