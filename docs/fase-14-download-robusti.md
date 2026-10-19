@@ -136,7 +136,8 @@ zero chiamate di rete.
 **Test:** lettore con 10.001 righe sintetiche → errore; ricerca con un `yt-dlp` finto che dorme (script in
 `test/support/`, solo Linux, `skip` altrove) → timeout e processo terminato.
 
-### 14.12 — (Opzionale) Impronta audio con Chromaprint
+### 14.12 — ~~(Opzionale) Impronta audio con Chromaprint~~ — SCARTATO
+**Scartato il 2026-10-19 su richiesta dell'utente: niente chiave API personale (AcoustID). Non va implementato.**
 **Punto di stop: chiedi all'utente prima di iniziare.** Senza un servizio esterno l'impronta non dice «quale brano è»:
 serve AcoustID, che richiede una **chiave API** (vietata nel codice, regola 9). Proposta da far approvare:
 1. Solo desktop, solo se `fpcalc` è nel PATH; chiave AcoustID **inserita dall'utente** nelle Impostazioni, opzione

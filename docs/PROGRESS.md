@@ -176,7 +176,7 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 14.9 Cache delle ricerche
 - [x] 14.10 Controllo della durata a fine download
 - [x] 14.11 Validazioni: CSV troppo grandi e ricerche bloccate
-- [ ] 14.12 (Opzionale) Impronta audio con Chromaprint — chiedere all'utente (NON FATTO: richiede la tua approvazione e una chiave AcoustID inserita da te; vedi «Tocca a te»)
+- [x] 14.12 ~~Impronta audio con Chromaprint~~ (SCARTATO il 2026-10-19 su richiesta dell'utente: niente chiave API personale)
 - [~] 14.13 Rifinitura, documentazione e prova a mano
 
 ## Fase 15 — Importazione 2 (`fase-15-importazione-2.md`)
