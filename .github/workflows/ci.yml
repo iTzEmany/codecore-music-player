@@ -101,9 +101,28 @@ jobs:
           path: build/codecore-linux-x64.zip
           if-no-files-found: error
 
+  # The suite on Windows at every push: paths with \ instead of /, file
+  # locking, line endings. It waits for the Linux run so a red build does not
+  # spend Windows minutes (they count double on a private repository).
+  test-windows:
+    name: Test (Windows)
+    needs: check
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      # Golden tests, the POSIX-shell ones and the symlink one skip themselves here.
+      - run: flutter test --reporter expanded
+
   build-windows:
     name: Windows
-    needs: check
+    needs: test-windows
     if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
     runs-on: windows-latest
     timeout-minutes: 45
@@ -116,9 +135,6 @@ jobs:
           cache: true
       - run: flutter config --enable-windows-desktop
       - run: flutter pub get
-      # Paths with \ instead of /, never tried before: the suite runs here too.
-      # Golden tests skip themselves on Windows.
-      - run: flutter test --reporter expanded
       - run: flutter build windows --release
       - name: Zip the bundle
         shell: pwsh
