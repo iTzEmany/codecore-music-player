@@ -246,11 +246,11 @@ class _YoutubeResultsState extends ConsumerState<YoutubeResults> {
                     icon: const Icon(Icons.info_outline_rounded),
                     onPressed: () => showDialog<void>(
                       context: context,
-                      builder: (_) => AlertDialog(
+                      builder: (dialogContext) => AlertDialog(
                         content: Text(l.ytLegal),
                         actions: [
                           TextButton(
-                            onPressed: () => Navigator.of(context).pop(),
+                            onPressed: () => Navigator.of(dialogContext).pop(),
                             child: Text(l.close),
                           ),
                         ],

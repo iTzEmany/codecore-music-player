@@ -116,6 +116,37 @@ void main() {
     await h.dispose(tester);
   });
 
+  testWidgets('closing the legal notice dialog leaves the search screen in place', (tester) async {
+    // Like the Cerca tab: the screen lives in a nested Navigator, the dialog in the root one.
+    tester.view.physicalSize = const Size(400, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    h = await Harness.create(tester);
+    await h.pump(
+      tester,
+      Scaffold(
+        body: Navigator(
+          onGenerateRoute: (_) => MaterialPageRoute<void>(
+            builder: (_) => const YoutubeResults(query: 'daft punk', submitted: 1),
+          ),
+        ),
+      ),
+      extraOverrides: [youtubeServiceProvider.overrideWithValue(_Sources())],
+    );
+    await _settle(tester);
+    await tester.tap(find.byType(TextButton)); // "got it" on the first-time notice
+    await _settle(tester);
+    await tester.tap(find.byIcon(Icons.info_outline_rounded));
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.byType(AlertDialog), findsOneWidget);
+
+    await tester.tap(find.descendant(of: find.byType(AlertDialog), matching: find.byType(TextButton)));
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.byType(AlertDialog), findsNothing);
+    expect(find.byType(YoutubeResults), findsOneWidget, reason: 'only the dialog is closed');
+    await h.dispose(tester);
+  });
+
   testWidgets('tapping the source already chosen does not search again', (tester) async {
     await open(tester);
     await tester.tap(find.byKey(const ValueKey('source-youtube')));

@@ -49,6 +49,7 @@ class AndroidYtDlpService implements YoutubeService {
       await _channel.invokeMethod<void>('cancel', {'processId': processId});
       throw const YtException(YtErrorKind.network, 'search timed out');
     } on PlatformException catch (e) {
+      AppLog.w('yt-dlp search failed: ${e.message}');
       throw ytExceptionFromStderr(e.message ?? '');
     }
   }
