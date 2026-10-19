@@ -15,7 +15,7 @@ Italiano, English, Deutsch, Español.
 - Temi: **Notte viola** (predefinito) e **Nero puro**.
 
 ## Funzioni
-- **Libreria**: scansione incrementale di cartelle, tag letti (mai riscritti), copertine, brani / album / artisti,
+- **Libreria**: scansione incrementale di cartelle, tag letti (riscritti solo se lo chiedi), copertine, brani / album / artisti,
   ricerca e ordinamenti, brani mancanti gestiti senza perdere preferiti e playlist.
 - **Riproduzione**: coda separata dalla lista, shuffle senza ripetizioni, repeat off/all/one, ripresa all'avvio,
   notifica e tasti cuffie su Android, scorciatoie da tastiera su desktop, timer di spegnimento con fade-out.
@@ -81,7 +81,7 @@ senza il file la build release usa la chiave di debug.
 ## Pulizia libreria (fase 21)
 - **Duplicati:** Impostazioni → Pulizia libreria → Duplicati. Trova lo stesso file in più cartelle («Identici», confronto per SHA-256 solo dei file della stessa dimensione) e lo stesso brano in più qualità («Probabili»: stesso titolo e artista, durata entro 2 s). Ogni gruppo mostra i percorsi, il formato e la dimensione, con il brano proposto (lossless, poi bitrate più alto); preferiti, playlist, ascolti, testi ed etichette passano a quello che tieni e gli altri vengono solo nascosti («Brani nascosti», dove si ripristinano). «Elimina anche i file» chiede due conferme con l'elenco dei percorsi.
 - **Album a mano:** menu ⋯ di un album → «Unisci con…»; dalla selezione di brani → «Sposta in un nuovo album…». Con «Annulla» nello snackbar; i file non si toccano.
-- **Tag nei file:** *non ancora*. Scrivere i tag modificati dentro i file è pronto da verificare (`metadata_god`) ma aspetta la tua approvazione (vedi `docs/PROGRESS.md`, «Tocca a te»).
+- **Tag nei file (facoltativo):** Impostazioni → Pulizia libreria → «Scrivi le modifiche nei file» (spenta di default, con avviso). Quando salvi «Modifica info» o unisci/sposti album, spuntando «Scrivi anche nel file» titolo, artista, album, album artist, anno, genere e traccia vengono scritti anche in MP3, FLAC, M4A e OGG. Si lavora su una copia, si rilegge e si confronta, l'originale va in «Backup dei tag» (ultimi 200 o 2 GB, «Ripristina originale») e solo allora il file viene sostituito; copertina e ReplayGain restano. Un campo svuotato nell'app resta com'era nel file. La libreria resta la fonte principale e si aggiorna comunque, anche se il file non può essere scritto (sola lettura, formato non supportato).
 
 ## Nuove fonti (fase 22)
 - **Cerca online:** tre chip sopra i risultati — **YouTube · YouTube Music · SoundCloud** (si ricorda la scelta). SoundCloud mostra solo brani interi: le anteprime da 30 s e i brani con DRM non si scaricano.
@@ -122,7 +122,7 @@ Importando di nuovo un file aggiornato nella stessa playlist si sceglie **Sincro
 
 ## Limiti noti
 - Jam: massimo 5 partecipanti; la sincronia è misurata sulla posizione del player (scarto tipico 10–30 ms, non acustico), con Bluetooth serve la compensazione manuale della latenza; nessun controllo da notifica di sistema/MPRIS; la richiesta Jam in background Android passa dalla notifica «Accetta/Rifiuta».
-- Niente scrittura dei tag nei file; l'equalizzatore c'è solo su Android. Gapless e crossfade non valgono nella Jam.
+- La scrittura dei tag nei file è facoltativa (vedi «Tag nei file») e non cancella i campi; l'equalizzatore c'è solo su Android. Gapless e crossfade non valgono nella Jam.
 - Controlli multimediali di sistema (MPRIS / SMTC) non implementati; i tasti multimediali funzionano a finestra attiva.
 - Condivisione LAN in HTTP in chiaro (protetta da PIN, solo per reti domestiche).
 - Lo scanner QR non è incluso: inserire IP:porta e PIN o incollare il link del QR.

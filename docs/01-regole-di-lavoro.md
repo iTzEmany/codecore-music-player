@@ -46,8 +46,9 @@ Scritte per un agente che lavora a task piccoli e precisi. Seguile alla lettera.
 - La **coda di riproduzione è separata dalla lista visualizzata**: la UI passa uno *snapshot*
   della lista al player; cambiare filtro/ordinamento non tocca la coda.
 - La UI non parla mai direttamente con SQLite né con il pacchetto audio: solo via repository / `PlayerController`.
-- Il DB è l'unica fonte di verità per modifiche dell'utente (titolo, preferiti, testi). **Non** si
-  riscrivono i tag nei file (evita corruzioni e divergenze).
+- Il DB è la fonte di verità per le modifiche dell'utente (titolo, preferiti, testi). I tag nei file si
+  scrivono **solo** con l'opzione `writeTagsToFiles` (spenta di default), attraverso `SafeTagWriter`
+  (copia, verifica, backup, `rename` atomico), mai direttamente dal `TagWriter`.
 - Non si cancellano mai righe utente (preferiti/playlist/testi) automaticamente: file assenti → `missing = true`.
 
 ## 7. Test (obbligatori per la logica pura)
@@ -70,7 +71,8 @@ La UI non ha test obbligatori: basta `flutter analyze` + avvio manuale descritto
 - Niente server in ascolto, salvo la fase 6 (e solo mentre la schermata di condivisione è aperta, con PIN).
 
 ## 10. Cosa NON fare
-- Non riscrivere i tag nei file, non cancellare file musicali dell'utente.
+- Non riscrivere i tag in-place; non cancellare file musicali dell'utente senza doppia conferma
+  esplicita (unica via: pulizia duplicati, Fase 21).
 - Non usare `dart:html`, WebView, o plugin non supportati su Linux/Windows/Android.
 - Non copiare codice Python riga per riga: porta la **logica** da `04-specifiche-da-python.md`.
 - Non creare documentazione extra non richiesta.
