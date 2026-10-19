@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Codecore
+Comment=Lettore musicale personale
+Exec=codecore
+Icon=com.codecore.player
+Categories=AudioVideo;Audio;Player;
+Terminal=false

@@ -1,0 +1,5 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item><shape android:shape="rectangle"><solid android:color="#120E1C"/><corners android:radius="16dp"/></shape></item>
+    <item android:drawable="@drawable/ic_widget_cover" android:left="16dp" android:width="40dp" android:height="40dp" android:gravity="start|center_vertical"/>
+    <item android:drawable="@drawable/ic_widget_play" android:right="16dp" android:width="40dp" android:height="40dp" android:gravity="end|center_vertical"/>
+</layer-list>

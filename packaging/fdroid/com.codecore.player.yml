@@ -1,0 +1,35 @@
+# Draft F-Droid recipe for the `lite` build. NOT submitted: see docs/PROGRESS.md (26.7)
+# for why it would not be accepted as it is.
+Categories:
+  - Multimedia
+License: Unlicense   # placeholder: the project has no public licence yet
+SourceCode: https://github.com/OWNER/codecore
+IssueTracker: https://github.com/OWNER/codecore/issues
+AutoName: Codecore
+Description: |-
+  Personal music player: local library, playlists, CSV import, Jam on the local
+  network. This is the build without the YouTube/yt-dlp downloader.
+AntiFeatures:
+  NonFreeDep:
+    en: Google ML Kit (lyrics translation, QR scanner) are proprietary libraries.
+RepoType: git
+Repo: https://github.com/OWNER/codecore.git
+Builds:
+  - versionName: 1.2.0
+    versionCode: 3
+    commit: v1.2.0
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@3.47.1
+    rm:
+      - ios
+      - macos
+      - windows
+      - linux
+    build:
+      - export CODECORE_LITE=1
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter packages pub get
+      - $$flutter$$/bin/flutter build apk --release --dart-define=CODECORE_YOUTUBE=false
+AutoUpdateMode: Version
+UpdateCheckMode: Tags

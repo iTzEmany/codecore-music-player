@@ -1,0 +1,67 @@
+app-id: com.codecore.player
+runtime: org.freedesktop.Platform
+runtime-version: '24.08'
+sdk: org.freedesktop.Sdk
+command: codecore
+finish-args:
+  - --share=network        # downloads, local-network share and Jam (UDP discovery included)
+  - --share=ipc
+  - --socket=pulseaudio
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --device=dri
+  - --filesystem=xdg-music
+  - --filesystem=xdg-download
+  - --talk-name=org.freedesktop.Notifications
+  - --own-name=org.mpris.MediaPlayer2.codecore   # media keys and the desktop's player widget
+modules:
+  - name: libmpv
+    buildsystem: meson
+    config-opts:
+      - -Dlibmpv=true
+      - -Dcplayer=false
+      - -Dlua=disabled
+    sources:
+      - type: archive
+        url: https://github.com/mpv-player/mpv/archive/refs/tags/v0.38.0.tar.gz
+        sha256: 86d9ef40b6058732f67b46d0bbda24a074fae860b3eaae05bab3145041303066
+    # ffmpeg comes from the runtime extension below.
+
+  - name: yt-dlp
+    buildsystem: simple
+    build-commands:
+      - install -Dm755 yt-dlp /app/bin/yt-dlp
+    sources:
+      - type: file
+        url: https://github.com/yt-dlp/yt-dlp/releases/download/2026.08.19/yt-dlp_linux
+        dest-filename: yt-dlp
+        sha256: 58162f9bfdc27458ea47bfcb311cf47028f17d8154a8bf7d689861d46399230a
+
+  - name: codecore
+    buildsystem: simple
+    build-commands:
+      - mkdir -p /app/codecore /app/bin /app/share/applications /app/share/metainfo /app/share/icons/hicolor/512x512/apps
+      - cp -r bundle/* /app/codecore/
+      - ln -s /app/codecore/codecore /app/bin/codecore
+      - install -Dm644 com.codecore.player.desktop /app/share/applications/com.codecore.player.desktop
+      - install -Dm644 com.codecore.player.metainfo.xml /app/share/metainfo/com.codecore.player.metainfo.xml
+      - install -Dm644 icon.png /app/share/icons/hicolor/512x512/apps/com.codecore.player.png
+    sources:
+      # The release bundle built by the workflow (flutter build linux --release).
+      - type: dir
+        path: ../../build/linux/x64/release
+        dest: .
+      - type: file
+        path: com.codecore.player.desktop
+      - type: file
+        path: com.codecore.player.metainfo.xml
+      - type: file
+        path: ../../assets/icon/icon.png
+
+add-extensions:
+  org.freedesktop.Platform.ffmpeg-full:
+    directory: lib/ffmpeg
+    add-ld-path: .
+    version: '24.08'
+    autodownload: true
+    autodelete: false
