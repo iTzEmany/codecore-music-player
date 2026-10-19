@@ -8,6 +8,7 @@ import '../../../providers/database_providers.dart';
 import '../../../providers/online_providers.dart';
 import '../../../providers/player_providers.dart';
 import '../../../providers/settings_providers.dart';
+import '../../../providers/translation_providers.dart';
 import '../../../services/online/http_client.dart';
 import '../../../services/online/lrc_parser.dart';
 import '../../../services/online/lrclib_client.dart';
@@ -123,6 +124,8 @@ class _LyricsViewState extends ConsumerState<LyricsView> {
       if (p != null) _onPosition(p);
     });
     _ensureParsed(track.lyricsSynced);
+    final tr = ref.watch(lyricsTranslationProvider);
+    final translated = tr != null && tr.trackId == track.id ? tr : null;
 
     if (_lines.isNotEmpty) {
       final ctrl = ref.read(playerControllerProvider);
@@ -147,12 +150,28 @@ class _LyricsViewState extends ConsumerState<LyricsView> {
                     opacity: _index < 0
                         ? 0.55
                         : (i == _index ? 1.0 : (i < _index ? 0.55 : 0.35)),
-                    child: Text(
-                      _lines[i].text.isEmpty ? '♪' : _lines[i].text,
-                      style: theme.titleLarge?.copyWith(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w700,
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _lines[i].text.isEmpty ? '♪' : _lines[i].text,
+                          style: theme.titleLarge?.copyWith(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        if (translated != null &&
+                            translated.synced &&
+                            i < translated.lines.length &&
+                            translated.lines[i] != _lines[i].text)
+                          Text(
+                            translated.lines[i],
+                            key: ValueKey('translated-$i'),
+                            style: theme.titleMedium?.copyWith(
+                              color: cc.textMuted,
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                 ),
@@ -165,12 +184,28 @@ class _LyricsViewState extends ConsumerState<LyricsView> {
     if (plain != null) {
       return SingleChildScrollView(
         padding: const EdgeInsets.all(CcDims.margin),
-        child: SelectableText(
-          plain,
-          style: theme.bodyLarge?.copyWith(
-            fontSize: 20,
-            fontWeight: FontWeight.w500,
-          ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SelectableText(
+              plain,
+              style: theme.bodyLarge?.copyWith(
+                fontSize: 20,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            if (translated != null && !translated.synced) ...[
+              const Divider(height: 32),
+              SelectableText(
+                translated.lines.join('\n'),
+                key: const ValueKey('translated-plain'),
+                style: theme.bodyLarge?.copyWith(
+                  fontSize: 18,
+                  color: cc.textMuted,
+                ),
+              ),
+            ],
+          ],
         ),
       );
     }

@@ -3436,4 +3436,58 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get translateLyrics => 'Translate';
+
+  @override
+  String get translateLyricsFrom => 'Lyrics language';
+
+  @override
+  String get translateLyricsHint =>
+      'Translated on the phone, no text is sent over the network.';
+
+  @override
+  String get translateRemove => 'Show original only';
+
+  @override
+  String translateDownloadTitle(String language) {
+    return 'Download the $language model?';
+  }
+
+  @override
+  String translateDownloadBody(int mb) {
+    return 'About $mb MB per language, better on Wi-Fi. It is downloaded once and then works offline too.';
+  }
+
+  @override
+  String get translateDownload => 'Download';
+
+  @override
+  String translateDownloading(String language) {
+    return 'Downloading the $language model…';
+  }
+
+  @override
+  String get translateDownloadFailed =>
+      'Model not downloaded. Check the connection and the free space.';
+
+  @override
+  String get translateFailed => 'Translation failed.';
+
+  @override
+  String get translateSameLanguage =>
+      'The lyrics are already in this language.';
+
+  @override
+  String get translationModels => 'Translation models';
+
+  @override
+  String get translationModelsNone =>
+      'No model downloaded. They are downloaded from the lyrics screen, with “Translate”.';
+
+  @override
+  String translationModelDelete(String language) {
+    return 'Delete the $language model';
+  }
 }

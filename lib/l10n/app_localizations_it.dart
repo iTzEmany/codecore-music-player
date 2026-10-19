@@ -3440,4 +3440,57 @@ class AppLocalizationsIt extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get translateLyrics => 'Traduci';
+
+  @override
+  String get translateLyricsFrom => 'Lingua del testo';
+
+  @override
+  String get translateLyricsHint =>
+      'Traduzione sul telefono, nessun testo viene inviato in rete.';
+
+  @override
+  String get translateRemove => 'Mostra solo l\'originale';
+
+  @override
+  String translateDownloadTitle(String language) {
+    return 'Scaricare il modello $language?';
+  }
+
+  @override
+  String translateDownloadBody(int mb) {
+    return 'Servono circa $mb MB per ogni lingua, meglio con il Wi-Fi. Si scarica una volta sola e poi funziona anche offline.';
+  }
+
+  @override
+  String get translateDownload => 'Scarica';
+
+  @override
+  String translateDownloading(String language) {
+    return 'Scarico il modello $language…';
+  }
+
+  @override
+  String get translateDownloadFailed =>
+      'Modello non scaricato. Controlla la connessione e lo spazio.';
+
+  @override
+  String get translateFailed => 'Traduzione non riuscita.';
+
+  @override
+  String get translateSameLanguage => 'Il testo è già in questa lingua.';
+
+  @override
+  String get translationModels => 'Modelli di traduzione';
+
+  @override
+  String get translationModelsNone =>
+      'Nessun modello scaricato. Si scaricano dalla schermata dei testi, con «Traduci».';
+
+  @override
+  String translationModelDelete(String language) {
+    return 'Elimina il modello $language';
+  }
 }

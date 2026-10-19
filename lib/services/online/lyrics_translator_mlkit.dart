@@ -1,0 +1,67 @@
+import 'package:google_mlkit_translation/google_mlkit_translation.dart';
+
+import '../../core/app_log.dart';
+import 'lyrics_translator.dart';
+
+/// ML Kit implementation (Android only). Models are fetched only when the user
+/// asks, on any network (the dialog already warns about the size).
+class MlKitLyricsTranslator implements LyricsTranslator {
+  final _manager = OnDeviceTranslatorModelManager();
+  OnDeviceTranslator? _current;
+  String? _currentKey;
+
+  @override
+  Future<bool> isModelReady(String lang) => _manager.isModelDownloaded(lang);
+
+  @override
+  Future<void> downloadModel(String lang) async {
+    final ok = await _manager.downloadModel(lang, isWifiRequired: false);
+    if (!ok) throw StateError('model $lang not downloaded');
+  }
+
+  @override
+  Future<void> deleteModel(String lang) async {
+    await _manager.deleteModel(lang);
+  }
+
+  @override
+  Future<List<String>> translateLines(
+    List<String> lines, {
+    required String from,
+    required String to,
+  }) async {
+    final t = await _translator(from, to);
+    final out = <String>[];
+    for (final line in lines) {
+      out.add(await t.translateText(line));
+    }
+    return out;
+  }
+
+  Future<OnDeviceTranslator> _translator(String from, String to) async {
+    final key = '$from>$to';
+    final cur = _current;
+    if (cur != null && _currentKey == key) return cur;
+    await close();
+    final src = TranslateLanguage.values.firstWhere((l) => l.bcpCode == from);
+    final dst = TranslateLanguage.values.firstWhere((l) => l.bcpCode == to);
+    _currentKey = key;
+    return _current = OnDeviceTranslator(
+      sourceLanguage: src,
+      targetLanguage: dst,
+    );
+  }
+
+  @override
+  Future<void> close() async {
+    final cur = _current;
+    _current = null;
+    _currentKey = null;
+    if (cur == null) return;
+    try {
+      await cur.close();
+    } on Object catch (e, st) {
+      AppLog.w('translator close failed', e, st);
+    }
+  }
+}

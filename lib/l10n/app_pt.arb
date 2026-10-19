@@ -2236,5 +2236,47 @@
         "type": "int"
       }
     }
+  },
+  "translateLyrics": "Traduzir",
+  "translateLyricsFrom": "Idioma da letra",
+  "translateLyricsHint": "Traduzido no telefone, nenhum texto é enviado pela rede.",
+  "translateRemove": "Mostrar só o original",
+  "translateDownloadTitle": "Baixar o modelo {language}?",
+  "@translateDownloadTitle": {
+    "placeholders": {
+      "language": {
+        "type": "String"
+      }
+    }
+  },
+  "translateDownloadBody": "Cerca de {mb} MB por idioma, melhor com Wi-Fi. É baixado uma só vez e depois funciona também offline.",
+  "@translateDownloadBody": {
+    "placeholders": {
+      "mb": {
+        "type": "int"
+      }
+    }
+  },
+  "translateDownload": "Baixar",
+  "translateDownloading": "Baixando o modelo {language}…",
+  "@translateDownloading": {
+    "placeholders": {
+      "language": {
+        "type": "String"
+      }
+    }
+  },
+  "translateDownloadFailed": "Modelo não baixado. Verifique a conexão e o espaço.",
+  "translateFailed": "A tradução falhou.",
+  "translateSameLanguage": "A letra já está neste idioma.",
+  "translationModels": "Modelos de tradução",
+  "translationModelsNone": "Nenhum modelo baixado. Eles são baixados na tela das letras, com «Traduzir».",
+  "translationModelDelete": "Excluir o modelo {language}",
+  "@translationModelDelete": {
+    "placeholders": {
+      "language": {
+        "type": "String"
+      }
+    }
   }
 }

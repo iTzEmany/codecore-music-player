@@ -107,7 +107,7 @@ Per ogni rischio: **sintomo** → **cosa fare**. Se scatta un fallback che cambi
 |---|---|---|---|
 | R53 | SoundCloud dà solo anteprime da 30 s o brani con DRM | Risultati inutilizzabili o errore «DRM protected» | Misurato in 22.1: i brani completi esistono senza login, i commerciali sono spesso anteprime o DRM. Le anteprime si scartano (durata ≤ 31 s, formati `*_preview`), un brano DRM compare ma fallisce con un errore per riga (`unavailable`); l'elenco è flat così un DRM non rompe la ricerca su Android; il ripiego nell'importazione è spento di serie |
 | R54 | Playlist/canali enormi o con video privati/rimossi | Attesa lunga, elenco incompleto | `--flat-playlist` (250 voci in ~13 s), limite di 500 con avviso «Mostro i primi 500», avviso oltre 200 video con stima, privati/rimossi contati e non elencati, righe non scaricabili in errore e il resto continua |
-| R55 | ML Kit pesante o lingua non supportata | APK più grande, modelli da scaricare | **Non ancora**: 22.7 in attesa di approvazione. Previsto: modelli solo su richiesta (~30 MB), voce assente su desktop |
+| R55 | ML Kit pesante o lingua non supportata | APK più grande, modelli da scaricare | Modelli scaricati **solo su richiesta** (dialogo con ~30 MB, mai in automatico), eliminabili da Impostazioni → «Modelli di traduzione»; il traduttore è `null` fuori da Android, quindi nessuna voce su desktop; 20 lingue in elenco (le sei dell'app comprese), una lingua fuori elenco non si può scegliere; se il download o la traduzione falliscono, un avviso e il testo originale resta. Peso dell'APK: da misurare sul telefono |
 
 ## Podcast (fase 23)
 | # | Rischio | Sintomo | Piano B |

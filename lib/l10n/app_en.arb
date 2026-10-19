@@ -2045,5 +2045,47 @@
         "type": "int"
       }
     }
+  },
+  "translateLyrics": "Translate",
+  "translateLyricsFrom": "Lyrics language",
+  "translateLyricsHint": "Translated on the phone, no text is sent over the network.",
+  "translateRemove": "Show original only",
+  "translateDownloadTitle": "Download the {language} model?",
+  "@translateDownloadTitle": {
+    "placeholders": {
+      "language": {
+        "type": "String"
+      }
+    }
+  },
+  "translateDownloadBody": "About {mb} MB per language, better on Wi-Fi. It is downloaded once and then works offline too.",
+  "@translateDownloadBody": {
+    "placeholders": {
+      "mb": {
+        "type": "int"
+      }
+    }
+  },
+  "translateDownload": "Download",
+  "translateDownloading": "Downloading the {language} model…",
+  "@translateDownloading": {
+    "placeholders": {
+      "language": {
+        "type": "String"
+      }
+    }
+  },
+  "translateDownloadFailed": "Model not downloaded. Check the connection and the free space.",
+  "translateFailed": "Translation failed.",
+  "translateSameLanguage": "The lyrics are already in this language.",
+  "translationModels": "Translation models",
+  "translationModelsNone": "No model downloaded. They are downloaded from the lyrics screen, with “Translate”.",
+  "translationModelDelete": "Delete the {language} model",
+  "@translationModelDelete": {
+    "placeholders": {
+      "language": {
+        "type": "String"
+      }
+    }
   }
 }

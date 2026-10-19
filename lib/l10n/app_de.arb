@@ -2045,5 +2045,47 @@
         "type": "int"
       }
     }
+  },
+  "translateLyrics": "Übersetzen",
+  "translateLyricsFrom": "Sprache des Textes",
+  "translateLyricsHint": "Wird auf dem Telefon übersetzt, es wird kein Text über das Netzwerk gesendet.",
+  "translateRemove": "Nur das Original zeigen",
+  "translateDownloadTitle": "Modell {language} herunterladen?",
+  "@translateDownloadTitle": {
+    "placeholders": {
+      "language": {
+        "type": "String"
+      }
+    }
+  },
+  "translateDownloadBody": "Etwa {mb} MB pro Sprache, am besten über WLAN. Der Download erfolgt nur einmal, danach geht es auch offline.",
+  "@translateDownloadBody": {
+    "placeholders": {
+      "mb": {
+        "type": "int"
+      }
+    }
+  },
+  "translateDownload": "Herunterladen",
+  "translateDownloading": "Modell {language} wird geladen…",
+  "@translateDownloading": {
+    "placeholders": {
+      "language": {
+        "type": "String"
+      }
+    }
+  },
+  "translateDownloadFailed": "Modell nicht geladen. Prüfe Verbindung und Speicherplatz.",
+  "translateFailed": "Übersetzung fehlgeschlagen.",
+  "translateSameLanguage": "Der Text ist bereits in dieser Sprache.",
+  "translationModels": "Übersetzungsmodelle",
+  "translationModelsNone": "Kein Modell geladen. Sie werden im Textbildschirm über „Übersetzen“ geladen.",
+  "translationModelDelete": "Modell {language} löschen",
+  "@translationModelDelete": {
+    "placeholders": {
+      "language": {
+        "type": "String"
+      }
+    }
   }
 }
