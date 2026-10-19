@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import '../core/app_log.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -110,7 +111,10 @@ class PlayerController {
   void _requestNotificationPermissionOnce() {
     if (_askedNotifications || !isAndroid) return;
     _askedNotifications = true;
-    unawaited(Permission.notification.request());
+    // No activity (the player was started by a widget or a key): no dialog.
+    unawaited(Permission.notification.request().then<void>((_) {}, onError: (Object e) {
+      AppLog.d('notification permission not asked', e);
+    }));
   }
 }
 

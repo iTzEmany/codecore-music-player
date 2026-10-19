@@ -60,9 +60,13 @@ dependencies:
   network_info_plus: ^8.2.2
   sqlite3: ^3.7.1
   archive: ^4.5.2
+  dbus: ^0.8.0
+  smtc_windows: ^1.1.0
 
 dev_dependencies:
   flutter_test:
+    sdk: flutter
+  integration_test:
     sdk: flutter
 
   # The "flutter_lints" package below contains a set of recommended lints to

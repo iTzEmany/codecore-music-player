@@ -151,7 +151,13 @@ class ShareHubNotifier extends Notifier<ShareHubState> {
   Future<void> _applyReceiveSetting(bool on) async {
     if (!ref.mounted) return;
     if (on) {
-      if (isAndroid) await Permission.notification.request();
+      if (isAndroid) {
+        try {
+          await Permission.notification.request();
+        } on Object catch (e) {
+          AppLog.d('notification permission not asked', e); // no activity yet
+        }
+      }
       await _ensureRunning();
       final l = _l10n;
       await _platform.startService(

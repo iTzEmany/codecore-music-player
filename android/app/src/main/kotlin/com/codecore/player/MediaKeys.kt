@@ -12,7 +12,9 @@ import android.view.KeyEvent
  * dead the key is pressed once to start it and again when it reports ready.
  */
 object MediaKeys {
-    private const val GIVE_UP_MS = 9000L
+    /** The broadcast must be finished by ~10 s; waiting for Dart may take longer (debug builds). */
+    private const val FINISH_MS = 8000L
+    private const val GIVE_UP_MS = 40000L
     private const val POLL_MS = 250L
     private const val SETTLE_MS = 500L
 
@@ -33,12 +35,24 @@ object MediaKeys {
         }
         val main = Handler(Looper.getMainLooper())
         val started = System.currentTimeMillis()
+        var finished = false
+        fun finish() {
+            if (!finished) {
+                finished = true
+                done()
+            }
+        }
         fun poll() {
+            val waited = System.currentTimeMillis() - started
             when {
-                WidgetStore.playerReady(app) ->
-                    main.postDelayed({ press(app, keyCode); done() }, SETTLE_MS)
-                System.currentTimeMillis() - started > GIVE_UP_MS -> done()
-                else -> main.postDelayed(::poll, POLL_MS)
+                WidgetStore.playerReady(app) -> {
+                    main.postDelayed({ press(app, keyCode); finish() }, SETTLE_MS)
+                }
+                waited > GIVE_UP_MS -> finish()
+                else -> {
+                    if (waited > FINISH_MS) finish() // the process lives on: keep waiting
+                    main.postDelayed(::poll, POLL_MS)
+                }
             }
         }
         main.postDelayed(::poll, POLL_MS)

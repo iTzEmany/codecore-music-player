@@ -29,6 +29,7 @@ import 'services/audio/codecore_audio_handler.dart';
 import 'services/audio/crossfade_engine.dart';
 import 'services/audio/just_audio_backend.dart';
 import 'services/audio/media_browse_tree.dart';
+import 'services/audio/mpris_controls.dart';
 import 'services/audio/play_queue.dart';
 import 'services/audio/playback_persistence.dart';
 import 'services/android/widget_bridge.dart';
@@ -92,6 +93,10 @@ Future<void> main() async {
   } else {
     handler = build();
   }
+
+  // Linux: the track and the media keys in the desktop (MPRIS). A failure is
+  // logged and the app runs without.
+  if (Platform.isLinux) unawaited(MprisControls().attach(handler));
 
   final settingsStore = await SettingsStore.open();
   final persistence = PlaybackPersistence(handler, settingsStore);
