@@ -18,6 +18,7 @@ import '../../widgets/confirm.dart';
 import '../../widgets/cover_image.dart';
 import '../library/folders_sheet.dart';
 import '../../../providers/share_providers.dart';
+import '../../../providers/translation_providers.dart';
 import '../../shell/shell_nav.dart';
 import '../playlists/playlist_dialogs.dart';
 import '../share/share_screen.dart';
@@ -35,6 +36,7 @@ import 'missing_tracks_screen.dart';
 import 'theme_swatch.dart';
 import 'transition_settings_tiles.dart';
 import 'trusted_devices_tiles.dart';
+import 'translation_models_tiles.dart';
 import 'update_tiles.dart';
 
 const _languages = {
@@ -293,6 +295,11 @@ class SettingsScreen extends ConsumerWidget {
               title: l.backupSection,
               children: backupTiles(context, ref),
             ),
+            if (ref.watch(lyricsTranslatorProvider) != null)
+              _Group(
+                title: l.translationModels,
+                children: const [TranslationModelsTiles()],
+              ),
             _Group(
               title: l.settingsAdvanced,
               children: const [AdvancedSettingsTiles()],

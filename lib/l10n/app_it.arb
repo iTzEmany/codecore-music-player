@@ -2157,5 +2157,47 @@
   "restoreNotFound": "Brani non trovati",
   "restoreCopyList": "Copia elenco",
   "restoreFailed": "Ripristino non riuscito",
-  "exportAllPlaylists": "Esporta tutte le playlist"
+  "exportAllPlaylists": "Esporta tutte le playlist",
+  "translateLyrics": "Traduci",
+  "translateLyricsFrom": "Lingua del testo",
+  "translateLyricsHint": "Traduzione sul telefono, nessun testo viene inviato in rete.",
+  "translateRemove": "Mostra solo l'originale",
+  "translateDownloadTitle": "Scaricare il modello {language}?",
+  "@translateDownloadTitle": {
+    "placeholders": {
+      "language": {
+        "type": "String"
+      }
+    }
+  },
+  "translateDownloadBody": "Servono circa {mb} MB per ogni lingua, meglio con il Wi-Fi. Si scarica una volta sola e poi funziona anche offline.",
+  "@translateDownloadBody": {
+    "placeholders": {
+      "mb": {
+        "type": "int"
+      }
+    }
+  },
+  "translateDownload": "Scarica",
+  "translateDownloading": "Scarico il modello {language}…",
+  "@translateDownloading": {
+    "placeholders": {
+      "language": {
+        "type": "String"
+      }
+    }
+  },
+  "translateDownloadFailed": "Modello non scaricato. Controlla la connessione e lo spazio.",
+  "translateFailed": "Traduzione non riuscita.",
+  "translateSameLanguage": "Il testo è già in questa lingua.",
+  "translationModels": "Modelli di traduzione",
+  "translationModelsNone": "Nessun modello scaricato. Si scaricano dalla schermata dei testi, con «Traduci».",
+  "translationModelDelete": "Elimina il modello {language}",
+  "@translationModelDelete": {
+    "placeholders": {
+      "language": {
+        "type": "String"
+      }
+    }
+  }
 }

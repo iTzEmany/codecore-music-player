@@ -5306,6 +5306,90 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Esporta tutte le playlist'**
   String get exportAllPlaylists;
+
+  /// No description provided for @translateLyrics.
+  ///
+  /// In it, this message translates to:
+  /// **'Traduci'**
+  String get translateLyrics;
+
+  /// No description provided for @translateLyricsFrom.
+  ///
+  /// In it, this message translates to:
+  /// **'Lingua del testo'**
+  String get translateLyricsFrom;
+
+  /// No description provided for @translateLyricsHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Traduzione sul telefono, nessun testo viene inviato in rete.'**
+  String get translateLyricsHint;
+
+  /// No description provided for @translateRemove.
+  ///
+  /// In it, this message translates to:
+  /// **'Mostra solo l\'originale'**
+  String get translateRemove;
+
+  /// No description provided for @translateDownloadTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Scaricare il modello {language}?'**
+  String translateDownloadTitle(String language);
+
+  /// No description provided for @translateDownloadBody.
+  ///
+  /// In it, this message translates to:
+  /// **'Servono circa {mb} MB per ogni lingua, meglio con il Wi-Fi. Si scarica una volta sola e poi funziona anche offline.'**
+  String translateDownloadBody(int mb);
+
+  /// No description provided for @translateDownload.
+  ///
+  /// In it, this message translates to:
+  /// **'Scarica'**
+  String get translateDownload;
+
+  /// No description provided for @translateDownloading.
+  ///
+  /// In it, this message translates to:
+  /// **'Scarico il modello {language}…'**
+  String translateDownloading(String language);
+
+  /// No description provided for @translateDownloadFailed.
+  ///
+  /// In it, this message translates to:
+  /// **'Modello non scaricato. Controlla la connessione e lo spazio.'**
+  String get translateDownloadFailed;
+
+  /// No description provided for @translateFailed.
+  ///
+  /// In it, this message translates to:
+  /// **'Traduzione non riuscita.'**
+  String get translateFailed;
+
+  /// No description provided for @translateSameLanguage.
+  ///
+  /// In it, this message translates to:
+  /// **'Il testo è già in questa lingua.'**
+  String get translateSameLanguage;
+
+  /// No description provided for @translationModels.
+  ///
+  /// In it, this message translates to:
+  /// **'Modelli di traduzione'**
+  String get translationModels;
+
+  /// No description provided for @translationModelsNone.
+  ///
+  /// In it, this message translates to:
+  /// **'Nessun modello scaricato. Si scaricano dalla schermata dei testi, con «Traduci».'**
+  String get translationModelsNone;
+
+  /// No description provided for @translationModelDelete.
+  ///
+  /// In it, this message translates to:
+  /// **'Elimina il modello {language}'**
+  String translationModelDelete(String language);
 }
 
 class _AppLocalizationsDelegate

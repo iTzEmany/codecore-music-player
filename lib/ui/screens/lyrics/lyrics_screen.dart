@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../data/db/app_database.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/player_providers.dart';
+import '../../../providers/translation_providers.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/cover_backdrop.dart';
 import '../../widgets/cover_image.dart';
+import 'lyrics_translate_flow.dart';
 import 'lyrics_view.dart';
 
 /// Lyrics page: tinted backdrop, cover + title in the header, copy action.
@@ -67,6 +70,8 @@ class LyricsScreen extends ConsumerWidget {
           ],
         ),
         actions: [
+          if (plain != null && ref.watch(lyricsTranslatorProvider) != null)
+            _TranslateButton(track: track),
           if (plain != null)
             IconButton(
               tooltip: l.copy,
@@ -86,6 +91,31 @@ class LyricsScreen extends ConsumerWidget {
         coverKey: track.coverKey,
         child: LyricsView(track: track),
       ),
+    );
+  }
+}
+
+/// «Traduci» (Android only): opens the flow, or removes an active translation.
+class _TranslateButton extends ConsumerWidget {
+  const _TranslateButton({required this.track});
+
+  final Track track;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    final active = ref.watch(
+      lyricsTranslationProvider.select((t) => t?.trackId == track.id),
+    );
+    return IconButton(
+      tooltip: active ? l.translateRemove : l.translateLyrics,
+      icon: Icon(
+        active ? Icons.translate_rounded : Icons.g_translate_rounded,
+        color: active ? Theme.of(context).colorScheme.primary : null,
+      ),
+      onPressed: () => active
+          ? ref.read(lyricsTranslationProvider.notifier).clear()
+          : runTranslateFlow(context, ref, track),
     );
   }
 }

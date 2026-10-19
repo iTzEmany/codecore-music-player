@@ -3381,4 +3381,58 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get exportAllPlaylists => 'Exporter toutes les playlists';
+
+  @override
+  String get translateLyrics => 'Traduire';
+
+  @override
+  String get translateLyricsFrom => 'Langue des paroles';
+
+  @override
+  String get translateLyricsHint =>
+      'Traduit sur le téléphone, aucun texte n’est envoyé sur le réseau.';
+
+  @override
+  String get translateRemove => 'Afficher seulement l’original';
+
+  @override
+  String translateDownloadTitle(String language) {
+    return 'Télécharger le modèle $language ?';
+  }
+
+  @override
+  String translateDownloadBody(int mb) {
+    return 'Environ $mb Mo par langue, de préférence en Wi-Fi. Il se télécharge une seule fois, puis fonctionne aussi hors ligne.';
+  }
+
+  @override
+  String get translateDownload => 'Télécharger';
+
+  @override
+  String translateDownloading(String language) {
+    return 'Téléchargement du modèle $language…';
+  }
+
+  @override
+  String get translateDownloadFailed =>
+      'Modèle non téléchargé. Vérifie la connexion et l’espace libre.';
+
+  @override
+  String get translateFailed => 'La traduction a échoué.';
+
+  @override
+  String get translateSameLanguage =>
+      'Les paroles sont déjà dans cette langue.';
+
+  @override
+  String get translationModels => 'Modèles de traduction';
+
+  @override
+  String get translationModelsNone =>
+      'Aucun modèle téléchargé. Ils se téléchargent depuis l’écran des paroles, avec « Traduire ».';
+
+  @override
+  String translationModelDelete(String language) {
+    return 'Supprimer le modèle $language';
+  }
 }

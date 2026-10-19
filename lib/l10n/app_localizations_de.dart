@@ -3356,4 +3356,57 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get exportAllPlaylists => 'Alle Playlists exportieren';
+
+  @override
+  String get translateLyrics => 'Übersetzen';
+
+  @override
+  String get translateLyricsFrom => 'Sprache des Textes';
+
+  @override
+  String get translateLyricsHint =>
+      'Wird auf dem Telefon übersetzt, es wird kein Text über das Netzwerk gesendet.';
+
+  @override
+  String get translateRemove => 'Nur das Original zeigen';
+
+  @override
+  String translateDownloadTitle(String language) {
+    return 'Modell $language herunterladen?';
+  }
+
+  @override
+  String translateDownloadBody(int mb) {
+    return 'Etwa $mb MB pro Sprache, am besten über WLAN. Der Download erfolgt nur einmal, danach geht es auch offline.';
+  }
+
+  @override
+  String get translateDownload => 'Herunterladen';
+
+  @override
+  String translateDownloading(String language) {
+    return 'Modell $language wird geladen…';
+  }
+
+  @override
+  String get translateDownloadFailed =>
+      'Modell nicht geladen. Prüfe Verbindung und Speicherplatz.';
+
+  @override
+  String get translateFailed => 'Übersetzung fehlgeschlagen.';
+
+  @override
+  String get translateSameLanguage => 'Der Text ist bereits in dieser Sprache.';
+
+  @override
+  String get translationModels => 'Übersetzungsmodelle';
+
+  @override
+  String get translationModelsNone =>
+      'Kein Modell geladen. Sie werden im Textbildschirm über „Übersetzen“ geladen.';
+
+  @override
+  String translationModelDelete(String language) {
+    return 'Modell $language löschen';
+  }
 }
