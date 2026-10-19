@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart' show CancelToken;
+import '../services/podcast/rss_parser.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 
@@ -32,7 +33,7 @@ final podcastServiceProvider = Provider<PodcastService>((ref) {
   return PodcastService(
     repo: ref.watch(podcastRepositoryProvider),
     fetch: dioFeedFetcher(),
-    parse: unavailableFeedParser,
+    parse: parseFeed,
     web: web,
     podcastsDir: dir,
     saveCover: (id, url) async {
