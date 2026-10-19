@@ -21,7 +21,7 @@ jobs:
     timeout-minutes: 40
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
@@ -45,11 +45,13 @@ jobs:
           CODECORE_LIVE: '1'
         run: |
           export YTDLP="$PWD/yt-dlp"
-          flutter test test/live/ --reporter json > live.jsonl
+          # The curiosity survey is left out: Wikimedia allows 10 requests a
+          # minute to an anonymous client, and runner addresses are shared.
+          flutter test $(ls test/live/*_test.dart | grep -v curiosity_survey) --reporter json > live.jsonl
       - name: Summary
         if: always()
         run: python3 scripts/live_summary.py live.jsonl >> "$GITHUB_STEP_SUMMARY"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: live-log

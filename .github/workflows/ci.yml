@@ -7,6 +7,11 @@ on:
   pull_request:
     branches: [master]
   workflow_dispatch:
+    inputs:
+      integration:
+        description: Run the integration tests on an Android emulator (about 30 min)
+        type: boolean
+        default: false
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -15,6 +20,9 @@ concurrency:
 env:
   # Same version as the development machine (flutter --version).
   FLUTTER_VERSION: '3.47.1'
+  # Shared runners are slower than the development PC: the performance tests
+  # keep their budgets but allow this many times more (default 2).
+  CODECORE_PERF_MARGIN: '4'
 
 jobs:
   check:
@@ -22,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
@@ -37,69 +45,19 @@ jobs:
         run: |
           flutter gen-l10n
           git diff --exit-code -- lib/l10n
+      - name: Documentation links
+        run: python3 scripts/check_docs_links.py
+      # Covers lib, test, test/live, test_shots and integration_test.
       - run: flutter analyze
+      # Opt-in live tests skip themselves (they need CODECORE_LIVE=1).
       - run: flutter test --reporter expanded
-
-  build-android:
-    name: APK
-    needs: check
-    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
-    timeout-minutes: 45
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      # A golden that differs leaves its images here: download them to see why.
+      - uses: actions/upload-artifact@v7
+        if: failure()
         with:
-          distribution: temurin
-          java-version: '17'
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-          channel: stable
-          cache: true
-      - uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: gradle-${{ runner.os }}-${{ hashFiles('android/**/*.gradle*', 'android/gradle/wrapper/gradle-wrapper.properties') }}
-          restore-keys: gradle-${{ runner.os }}-
-      - run: flutter pub get
-      # No keystore on GitHub: android/app/build.gradle.kts falls back to the
-      # debug key when android/key.properties is missing.
-      - run: flutter build apk --release --split-per-abi
-      - uses: actions/upload-artifact@v4
-        with:
-          name: codecore-android
-          path: build/app/outputs/flutter-apk/*.apk
-          if-no-files-found: error
-
-  build-linux:
-    name: Linux
-    needs: check
-    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v4
-      - name: System packages
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev libmpv-dev mpv libsqlite3-dev zip
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-          channel: stable
-          cache: true
-      - run: flutter config --enable-linux-desktop
-      - run: flutter pub get
-      - run: flutter build linux --release
-      - run: scripts/package-linux.sh
-      - uses: actions/upload-artifact@v4
-        with:
-          name: codecore-linux-x64
-          path: build/codecore-linux-x64.zip
-          if-no-files-found: error
+          name: golden-failures
+          path: test/goldens/failures/
+          if-no-files-found: ignore
 
   # The suite on Windows at every push: paths with \ instead of /, file
   # locking, line endings. It waits for the Linux run so a red build does not
@@ -110,7 +68,7 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
@@ -118,7 +76,89 @@ jobs:
           cache: true
       - run: flutter pub get
       # Golden tests, the POSIX-shell ones and the symlink one skip themselves here.
+      # sqlite3 brings its own native library through its build hook.
       - run: flutter test --reporter expanded
+
+  # metadata_god (tag writing) and smtc_windows are Rust crates built by
+  # cargokit: the hosted runners already have rustup, cargokit adds the targets.
+  build-android:
+    name: APK (full and lite)
+    needs: check
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - uses: actions/cache@v6
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: android-${{ runner.os }}-${{ hashFiles('android/**/*.gradle*', 'android/gradle/wrapper/gradle-wrapper.properties', 'third_party/metadata_god/**/Cargo.lock') }}
+          restore-keys: android-${{ runner.os }}-
+      - run: flutter pub get
+      # No keystore on GitHub: android/app/build.gradle.kts falls back to the
+      # debug key when android/key.properties is missing.
+      - name: Full (with yt-dlp)
+        run: |
+          flutter build apk --release --split-per-abi
+          mkdir -p out
+          for f in build/app/outputs/flutter-apk/app-*-release.apk; do
+            cp "$f" "out/codecore-full-$(basename "$f" | sed 's/^app-//')"
+          done
+      - name: Lite (no downloads)
+        env:
+          CODECORE_LITE: '1'
+        run: |
+          flutter build apk --release --split-per-abi --dart-define=CODECORE_YOUTUBE=false
+          for f in build/app/outputs/flutter-apk/app-*-release.apk; do
+            cp "$f" "out/codecore-lite-$(basename "$f" | sed 's/^app-//')"
+          done
+      - uses: actions/upload-artifact@v7
+        with:
+          name: codecore-android
+          path: out/*.apk
+          if-no-files-found: error
+
+  build-linux:
+    name: Linux (zip and .deb)
+    needs: check
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v7
+      - name: System packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev libmpv-dev mpv libsqlite3-dev zip dpkg-dev
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - run: flutter config --enable-linux-desktop
+      - run: flutter pub get
+      - run: flutter build linux --release
+      - run: scripts/package-linux.sh --deb
+      - uses: actions/upload-artifact@v7
+        with:
+          name: codecore-linux-x64
+          path: |
+            build/codecore-linux-x64.zip
+            build/codecore_*_amd64.deb
+          if-no-files-found: error
 
   build-windows:
     name: Windows
@@ -127,7 +167,7 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
@@ -139,11 +179,45 @@ jobs:
       - name: Zip the bundle
         shell: pwsh
         run: Compress-Archive -Path build\windows\x64\runner\Release\* -DestinationPath codecore-windows-x64.zip
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: codecore-windows-x64
           path: codecore-windows-x64.zip
           if-no-files-found: error
+
+  # The four integration tests (integration_test/, the same as
+  # scripts/integration.sh) on an emulator: only when asked, they are slow.
+  # Never on a phone with real data: same package name.
+  integration-android:
+    name: Integration (Android emulator)
+    needs: check
+    if: github.event_name == 'workflow_dispatch' && inputs.integration
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - name: Hardware acceleration for the emulator
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - run: flutter pub get
+      - uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          target: google_apis
+          disable-animations: true
+          script: scripts/integration.sh emulator-5554
 
   # macOS and iOS: only a trial build, run by hand. No release, no signing.
   build-apple:
@@ -153,7 +227,7 @@ jobs:
     timeout-minutes: 60
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
@@ -163,4 +237,3 @@ jobs:
       - run: flutter pub get
       - run: flutter build macos --debug
       - run: flutter build ios --debug --no-codesign
-
