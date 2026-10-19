@@ -173,11 +173,13 @@ class _InfoCardState extends ConsumerState<InfoCard> {
       if (song == null && artist == null) {
         error = l.noResults;
       }
-      if (song != null) {
-        await (db.update(db.tracks)..where((r) => r.id.equals(t.id))).write(
-          TracksCompanion(curiosities: Value('${song.text}\n${song.source}')),
-        );
-      }
+      // A new search replaces what was saved before, also with nothing: an
+      // older version could have saved the artist's page as the song's.
+      await (db.update(db.tracks)..where((r) => r.id.equals(t.id))).write(
+        TracksCompanion(
+          curiosities: Value(song == null ? null : '${song.text}\n${song.source}'),
+        ),
+      );
       if (artist != null) {
         await ref.read(artistInfoRepositoryProvider).save(
               c.artist,

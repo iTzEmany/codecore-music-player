@@ -12,6 +12,12 @@ class Curiosity {
   final String lang;
 }
 
+/// Words, in the languages of the app, that an article about a song, single or
+/// album uses about itself (compared on `matchKey` text: lower case, no accents).
+final _musicWords = RegExp(
+  r'\b(song|single|album|band|canzone|brano|singolo|gruppo|chanson|cancion|lied|musica|music|musique)\b',
+);
+
 class WikipediaClient {
   WikipediaClient(this._web);
 
@@ -39,9 +45,14 @@ class WikipediaClient {
           (page, extract) {
             final pageName = matchKey(_withoutQualifier(page));
             if (pageName == by && pageName != song) return false; // the artist's page
-            if (pageName == song) return true;
+            final head = matchKey(extract.substring(0, extract.length.clamp(0, 600)));
+            // The same name as the song: it has to be about music too (a page
+            // «Fade to Black» can be about a film term), i.e. name the artist or
+            // call itself a song, single, album…
+            if (pageName == song) {
+              return (by.isNotEmpty && head.contains(by)) || _musicWords.hasMatch(head);
+            }
             // Named differently: the lead must name both the song and the artist.
-            final head = matchKey(extract.substring(0, extract.length.clamp(0, 400)));
             return by.isNotEmpty && head.contains(song) && head.contains(by);
           },
         );

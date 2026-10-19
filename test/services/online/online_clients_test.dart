@@ -264,6 +264,28 @@ void main() {
       expect(c, isNull);
     });
 
+    test('a page with the song\'s name that is not about music is not the song', () async {
+      final film = 'Fade to Black is a technical term from cinema meaning a gradual darkening of the picture. ' * 2;
+      final web = FakeWeb((u, q) => {
+            'query': {
+              'pages': {'1': {'title': 'Fade to Black', 'index': 1, 'extract': film}}
+            }
+          });
+      expect(await WikipediaClient(web).findSong('Fade to Black', 'Dire Straits', 'en'), isNull);
+    });
+
+    test('a page with the song\'s name that is a song, or names the artist, is accepted', () async {
+      FakeWeb page(String extract) => FakeWeb((u, q) => {
+            'query': {
+              'pages': {'1': {'title': 'Real Song', 'index': 1, 'extract': extract}}
+            }
+          });
+      final song = 'Real Song is a song recorded in the studio and released as a single in 1975. ' * 2;
+      expect(await WikipediaClient(page(song)).findSong('Real Song', 'Nobody', 'en'), isNotNull);
+      final named = 'Real Song was written in 1975 and recorded by Band in London over two weeks. ' * 2;
+      expect(await WikipediaClient(page(named)).findSong('Real Song', 'Band', 'en'), isNotNull);
+    });
+
     test('a page on another subject is not taken for the song', () async {
       final c = await WikipediaClient(web(hits: ['Other Thing']))
           .findSong('Real Song', 'Band', 'en');
