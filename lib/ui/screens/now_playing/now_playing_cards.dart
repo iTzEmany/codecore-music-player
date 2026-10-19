@@ -12,7 +12,6 @@ import '../../../providers/player_providers.dart';
 import '../../../providers/settings_providers.dart';
 import '../../../providers/translation_providers.dart';
 import '../../../services/online/http_client.dart';
-import '../../../services/online/wikipedia_client.dart' show Curiosity;
 import '../../../services/online/lrc_parser.dart';
 import '../../../services/online/lyrics_translator.dart';
 import '../../../services/online/query_cleaner.dart';
@@ -174,34 +173,22 @@ class _InfoCardState extends ConsumerState<InfoCard> {
     });
     final c = cleanSearchQuery(t.title, t.artist ?? '');
     final lang = ref.read(settingsProvider).language;
-    final wiki = ref.read(wikipediaClientProvider);
     final db = ref.read(databaseProvider);
     var limited = false, failed = false;
 
-    // The two parts are independent: one failing must not lose the other.
-    Curiosity? song, artist;
-    var songDone = false;
-    try {
-      song = await wiki.findSong(c.title, c.artist, lang);
-      songDone = true;
-    } on RateLimitedException catch (e) {
-      AppLog.w('curiosity (song) refused', e);
-      limited = true;
-      _songLimited = true;
-    } on Object catch (e, st) {
-      AppLog.w('curiosity (song) lookup failed', e, st);
-      failed = true;
-    }
-    // One after the other: Wikipedia answers a burst with HTTP 429.
-    if (c.artist.isNotEmpty) {
-      try {
-        artist = await wiki.findArtist(c.artist, lang);
-      } on RateLimitedException catch (e) {
-        AppLog.w('curiosity (artist) refused', e);
+    // Identity first (MusicBrainz → Wikidata → the exact pages), the names
+    // after; each part reports on its own, so one failing does not lose the other.
+    final found = await ref.read(curiosityFinderProvider).find(c.title, c.artist, lang);
+    final song = found.song, artist = found.artist;
+    final songDone = found.songError == null;
+    for (final (err, isSong) in [(found.songError, true), (found.artistError, false)]) {
+      if (err == null) continue;
+      if (err is RateLimitedException) {
+        AppLog.w('curiosity refused', err);
         limited = true;
-        _artistLimited = true;
-      } on Object catch (e, st) {
-        AppLog.w('curiosity (artist) lookup failed', e, st);
+        isSong ? _songLimited = true : _artistLimited = true;
+      } else {
+        AppLog.w('curiosity lookup failed', err);
         failed = true;
       }
     }

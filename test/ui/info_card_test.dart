@@ -2,7 +2,9 @@ import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/data/repositories/artist_info_repository.dart';
 import 'package:codecore/providers/online_providers.dart';
 import 'package:codecore/providers/translation_providers.dart';
+import 'package:codecore/services/online/curiosity_finder.dart';
 import 'package:codecore/services/online/http_client.dart';
+import 'package:codecore/services/online/musicbrainz_client.dart';
 import 'package:codecore/services/online/wikipedia_client.dart';
 import 'package:dio/dio.dart' show CancelToken;
 import 'package:codecore/ui/screens/now_playing/now_playing_cards.dart';
@@ -210,7 +212,14 @@ void main() {
             ),
           ),
         ),
-        extraOverrides: [wikipediaClientProvider.overrideWithValue(client)],
+        extraOverrides: [
+          // MusicBrainz and Wikidata say nothing here: only the names are used.
+          curiosityFinderProvider.overrideWithValue(CuriosityFinder(
+            wikipedia: client,
+            musicBrainz: MusicBrainzClient(_Silent(), pause: (_) async {}),
+            wikidata: WikidataClient(_Silent()),
+          )),
+        ],
       );
       await _settle(tester);
       await tester.tap(find.text('Cerca curiosità'));
@@ -257,6 +266,15 @@ class _Web implements WebClient {
   @override
   Future<Object?> getJson(String url, {Map<String, String>? query, CancelToken? cancel}) async =>
       {'query': {'pages': pages(query?['gsrsearch'] ?? '')}};
+
+  @override
+  Future<List<int>?> getBytes(String url, {int maxBytes = 0, CancelToken? cancel}) async => null;
+}
+
+/// A web client that has no answer for anything (the service is down).
+class _Silent implements WebClient {
+  @override
+  Future<Object?> getJson(String url, {Map<String, String>? query, CancelToken? cancel}) async => null;
 
   @override
   Future<List<int>?> getBytes(String url, {int maxBytes = 0, CancelToken? cancel}) async => null;

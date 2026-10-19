@@ -5,6 +5,8 @@ import '../services/online/enrichment_service.dart';
 import '../services/online/http_client.dart';
 import '../services/online/itunes_client.dart';
 import '../services/online/lrclib_client.dart';
+import '../services/online/curiosity_finder.dart';
+import '../services/online/musicbrainz_client.dart';
 import '../services/online/wikipedia_client.dart';
 import 'database_providers.dart';
 import 'library_providers.dart';
@@ -29,6 +31,16 @@ final lrclibClientProvider = Provider(
 );
 final wikipediaClientProvider = Provider(
   (ref) => WikipediaClient(ref.watch(webClientProvider)),
+);
+final musicBrainzClientProvider = Provider(
+  (ref) => MusicBrainzClient(ref.watch(webClientProvider)),
+);
+final curiosityFinderProvider = Provider(
+  (ref) => CuriosityFinder(
+    wikipedia: ref.watch(wikipediaClientProvider),
+    musicBrainz: ref.watch(musicBrainzClientProvider),
+    wikidata: WikidataClient(ref.watch(webClientProvider)),
+  ),
 );
 
 final enrichmentServiceProvider = Provider<EnrichmentService>((ref) {

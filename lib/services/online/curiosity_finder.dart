@@ -1,0 +1,104 @@
+import 'package:dio/dio.dart';
+
+import '../../core/app_log.dart';
+import 'http_client.dart';
+import 'musicbrainz_client.dart';
+import 'query_cleaner.dart';
+import 'wikipedia_client.dart';
+
+/// What was found about a song and about its artist. A part that could not be
+/// asked says why in [songError] / [artistError] (usually a
+/// [RateLimitedException]); a part simply not found has neither.
+class CuriosityPair {
+  const CuriosityPair({this.song, this.artist, this.songError, this.artistError});
+
+  final Curiosity? song, artist;
+  final Object? songError, artistError;
+}
+
+/// Finds the Wikipedia pages of a song and of its artist. First by identity:
+/// MusicBrainz says which song and artist the title is, Wikidata gives the
+/// titles of their pages, and those exact pages are read. When that leads
+/// nowhere (service down, song unknown to MusicBrainz, no page linked) it falls
+/// back to guessing the page from the names (`WikipediaClient`).
+class CuriosityFinder {
+  CuriosityFinder({required this.wikipedia, required this.musicBrainz, required this.wikidata});
+
+  final WikipediaClient wikipedia;
+  final MusicBrainzClient musicBrainz;
+  final WikidataClient wikidata;
+
+  Future<CuriosityPair> find(String title, String artist, String lang, {CancelToken? cancel}) async {
+    final langs = lang == 'en' ? ['en'] : [lang, 'en'];
+    final ids = await _identify(title, artist, langs, cancel);
+
+    Object? songError, artistError;
+    Curiosity? song, art;
+    try {
+      song = await _byLinks(ids.song, langs, cancel) ?? await wikipedia.findSong(title, artist, lang, cancel: cancel);
+    } on DioException catch (e) {
+      if (CancelToken.isCancel(e)) rethrow;
+      songError = e;
+    } on Object catch (e) {
+      songError = e;
+    }
+    if (artist.isNotEmpty) {
+      try {
+        art = await _byLinks(ids.artist, langs, cancel) ?? await wikipedia.findArtist(artist, lang, cancel: cancel);
+      } on DioException catch (e) {
+        if (CancelToken.isCancel(e)) rethrow;
+        artistError = e;
+      } on Object catch (e) {
+        artistError = e;
+      }
+    }
+    return CuriosityPair(song: song, artist: art, songError: songError, artistError: artistError);
+  }
+
+  /// The page titles MusicBrainz and Wikidata name for the song and the
+  /// artist; empty maps when they cannot say. Never throws: it is a shortcut.
+  Future<({Map<String, String>? song, Map<String, String>? artist})> _identify(
+    String title,
+    String artist,
+    List<String> langs,
+    CancelToken? cancel,
+  ) async {
+    try {
+      String? songQ, artistQ;
+      final main = extractPrimaryArtist(artist);
+      if (main.isNotEmpty) {
+        final recs = await musicBrainz.recordings(title, main, cancel: cancel);
+        if (recs.isNotEmpty) {
+          artistQ = await musicBrainz.artistWikidata(recs.first.artistId, cancel: cancel);
+          for (final r in recs.take(2)) {
+            songQ = await musicBrainz.songWikidata(r.id, cancel: cancel);
+            if (songQ != null) break;
+          }
+        } else {
+          final a = await musicBrainz.artist(main, cancel: cancel);
+          if (a != null) artistQ = await musicBrainz.artistWikidata(a.id, cancel: cancel);
+        }
+      }
+      final wanted = [?songQ, ?artistQ];
+      if (wanted.isEmpty) return (song: null, artist: null);
+      final links = await wikidata.sitelinks(wanted, langs, cancel: cancel);
+      return (song: songQ == null ? null : links[songQ], artist: artistQ == null ? null : links[artistQ]);
+    } on Object catch (e, st) {
+      if (e is DioException && CancelToken.isCancel(e)) rethrow;
+      AppLog.w('musicbrainz lookup failed, falling back to names', e, st);
+      return (song: null, artist: null);
+    }
+  }
+
+  /// The first of [titles] (per language, in order of preference) that reads.
+  Future<Curiosity?> _byLinks(Map<String, String>? titles, List<String> langs, CancelToken? cancel) async {
+    if (titles == null) return null;
+    for (final l in langs) {
+      final t = titles[l];
+      if (t == null) continue;
+      final c = await wikipedia.exact(l, t, cancel: cancel);
+      if (c != null) return c;
+    }
+    return null;
+  }
+}

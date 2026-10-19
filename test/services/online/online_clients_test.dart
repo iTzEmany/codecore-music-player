@@ -345,6 +345,22 @@ void main() {
       expect(await WikipediaClient(web).findSong('Fade to Black', 'Dire Straits', 'en'), isNull);
     });
 
+    test('a song of the same name by another artist is not taken', () async {
+      final web = FakeWeb((u, q) => {
+            'query': {
+              'pages': {
+                '1': {
+                  'title': 'Fade to Black (Metallica song)',
+                  'index': 1,
+                  'extract': 'Fade to Black is a song by American heavy metal band Metallica, released in 1984. ' * 2,
+                },
+              }
+            }
+          });
+      expect(await WikipediaClient(web).findSong('Fade To Black', 'Dire Straits', 'en'), isNull);
+      expect(await WikipediaClient(web).findSong('Fade To Black', 'Metallica', 'en'), isNotNull);
+    });
+
     test('a page with the song\'s name that is a song, or names the artist, is accepted', () async {
       FakeWeb page(String extract) => FakeWeb((u, q) => {
             'query': {
@@ -352,7 +368,7 @@ void main() {
             }
           });
       final song = 'Real Song is a song recorded in the studio and released as a single in 1975. ' * 2;
-      expect(await WikipediaClient(page(song)).findSong('Real Song', 'Nobody', 'en'), isNotNull);
+      expect(await WikipediaClient(page(song)).findSong('Real Song', '', 'en'), isNotNull, reason: 'no artist known: a song page is enough');
       final named = 'Real Song was written in 1975 and recorded by Band in London over two weeks. ' * 2;
       expect(await WikipediaClient(page(named)).findSong('Real Song', 'Band', 'en'), isNotNull);
     });

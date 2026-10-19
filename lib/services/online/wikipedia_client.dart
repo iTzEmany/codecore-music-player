@@ -54,7 +54,10 @@ class WikipediaClient {
       // «Fade to Black» can be about a film term), i.e. name the artist or
       // call itself a song, single, album…
       if (keys.contains(pageName)) {
-        return (by.isNotEmpty && lead.contains(by)) || _musicWords.hasMatch(lead);
+        // With an artist known, the page has to name them: «Fade to Black
+        // (Metallica song)» is a song too, but not Dire Straits'. Without one,
+        // being about music is all that can be asked.
+        return by.isNotEmpty ? lead.contains(by) : _musicWords.hasMatch(lead);
       }
       // Named differently: the lead must name both the song and the artist.
       return by.isNotEmpty && keys.any(lead.contains) && lead.contains(by);
@@ -123,6 +126,11 @@ class WikipediaClient {
       accept: (page, extract) => matchKey(_withoutQualifier(page)) == key && _musicWords.hasMatch(_music(extract)),
     );
   }
+
+  /// The page with exactly this [title] in [lang] (redirects followed), whatever
+  /// it is about: for a title that Wikidata has already vouched for.
+  Future<Curiosity?> exact(String lang, String title, {CancelToken? cancel}) =>
+      _byTitles(lang, [title], (_, _) => true, cancel);
 
   /// Kept for the callers that want the song's article.
   Future<Curiosity?> find(String title, String artist, String lang,
