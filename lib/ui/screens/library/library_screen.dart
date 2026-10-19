@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../playlists/export_dialog.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -253,12 +254,15 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
                         scanWithPermission(ref);
                       case 'share':
                         DevicesSheet.show(context);
+                      case 'exportAll':
+                        exportAllPlaylistsFlow(context, ref);
                     }
                   },
                   itemBuilder: (_) => [
                     PopupMenuItem(value: 'folders', child: Text(l.folders)),
                     PopupMenuItem(value: 'scan', child: Text(l.refreshLibrary)),
                     PopupMenuItem(value: 'share', child: Text(l.shareTitle)),
+                    PopupMenuItem(value: 'exportAll', child: Text(l.exportAllPlaylists)),
                   ],
                 ),
               ],

@@ -94,6 +94,10 @@ senza il file la build release usa la chiave di debug.
 - Gli episodi scaricati si ascoltano con lo stesso player (coda, notifica, velocità, ripresa dal punto lasciato); da 95 % in poi sono «ascoltati». Non compaiono mai in Tutti i brani, Home, ricerca, playlist o statistiche. Per ogni podcast si può attivare «Elimina gli episodi ascoltati» dopo 1, 7 o 30 giorni (spento di serie; tocca solo i file dell'app).
 - **Non ancora:** la lettura dei feed aspetta l'approvazione del pacchetto `xml` (vedi `docs/PROGRESS.md`, «Tocca a te»): finché manca, l'app lo dice quando provi a iscriverti.
 
+## Backup e ripristino (fase 13)
+- Impostazioni → **Backup**: «Crea backup» salva uno zip con playlist, preferiti, testi, modifiche, impostazioni, database e copertine (**non** la musica, **non** l'identità del dispositivo). «Ripristina da backup» chiede se **sostituire tutto** (solo per un backup di questo dispositivo: al riavvio, con copia di sicurezza `.before-restore`) o **unire** a questa libreria (preferiti, playlist, testi e modifiche sui brani riconosciuti; l'elenco dei non trovati è copiabile; non cancella niente).
+- **Esportare una playlist**: menu della playlist → «Esporta…» (M3U8, CSV Exportify, JSON); Libreria → ⋮ → «Esporta tutte le playlist» (zip).
+
 ## Dispositivi fidati e sincronia (fase 24, in parte)
 - Impostazioni → «Rete locale» → **Dispositivi fidati**: per ogni dispositivo abbinato si vede l'impronta, si può attivare «Accetta automaticamente» e **revocare** (con conferma). Il gruppo compare solo quando c'è almeno un abbinato.
 - Le playlist hanno un'identità (`uuid`) e una data di ultima modifica; il confronto tra due dispositivi (la più recente vince, con anteprima e conferma, mai cancellazioni) è pronto e provato nei test. **L'abbinamento con PIN/QR, l'HTTPS con impronta e il pulsante «Sincronizza playlist» non ci sono ancora**: aspettano l'approvazione dei pacchetti dei certificati e dello scanner (vedi `docs/PROGRESS.md`). La Jam resta su HTTP con token.

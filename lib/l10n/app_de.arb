@@ -1911,5 +1911,60 @@
   "updateRateLimited": "GitHub bittet um Geduld: versuche es später erneut.",
   "updateFailed": "Die neueste Version lässt sich nicht lesen. Prüfe die Verbindung.",
   "updateCopyLink": "Adresse kopieren",
-  "updateLinkCopied": "Adresse kopiert"
+  "updateLinkCopied": "Adresse kopiert",
+  "backupSection": "Backup",
+  "backupCreate": "Backup erstellen",
+  "backupCreateHint": "Playlists, Favoriten, Texte und Änderungen in einer Zip-Datei. Ohne Musik.",
+  "backupRestore": "Aus Backup wiederherstellen",
+  "backupRestoreHint": "Diese Bibliothek ersetzen oder Daten eines anderen Geräts zusammenführen.",
+  "backupCreating": "Backup wird erstellt…",
+  "backupSaved": "Backup gespeichert",
+  "backupFailed": "Backup fehlgeschlagen",
+  "restoreTitle": "Aus Backup wiederherstellen",
+  "restoreInfo": "Vom {date} · App {version} · {tracks} Titel · {playlists} Playlists",
+  "@restoreInfo": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "version": {
+        "type": "String"
+      },
+      "tracks": {
+        "type": "int"
+      },
+      "playlists": {
+        "type": "int"
+      }
+    }
+  },
+  "restoreReplace": "Alles ersetzen (gleiches Gerät)",
+  "restoreMerge": "Mit dieser Bibliothek zusammenführen",
+  "restoreMergeHint": "Fügt Favoriten, Playlists, Texte und Änderungen zu gefundenen Titeln hinzu. Löscht nichts.",
+  "restoreReplaceConfirmTitle": "Gesamte Bibliothek ersetzen?",
+  "restoreReplaceConfirmBody": "Beim nächsten Start werden die Daten dieser App durch die des Backups ersetzt. Die aktuellen bleiben als Sicherheitskopie neben der Datenbank.",
+  "restoreReplaceGo": "Ersetzen",
+  "restoreNotBackup": "Diese Datei ist kein lesbares Codecore-Backup.",
+  "restoreRestartNeeded": "Bereit: App schließen und neu öffnen, um die Wiederherstellung abzuschließen.",
+  "restoreMergeDone": "Zusammengeführt: {recognized} Titel erkannt, {missing} nicht gefunden, {playlists} Playlists erstellt, {favorites} Favoriten hinzugefügt.",
+  "@restoreMergeDone": {
+    "placeholders": {
+      "recognized": {
+        "type": "int"
+      },
+      "missing": {
+        "type": "int"
+      },
+      "playlists": {
+        "type": "int"
+      },
+      "favorites": {
+        "type": "int"
+      }
+    }
+  },
+  "restoreNotFound": "Nicht gefundene Titel",
+  "restoreCopyList": "Liste kopieren",
+  "restoreFailed": "Wiederherstellung fehlgeschlagen",
+  "exportAllPlaylists": "Alle Playlists exportieren"
 }

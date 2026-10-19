@@ -5163,6 +5163,149 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Indirizzo copiato'**
   String get updateLinkCopied;
+
+  /// No description provided for @backupSection.
+  ///
+  /// In it, this message translates to:
+  /// **'Backup'**
+  String get backupSection;
+
+  /// No description provided for @backupCreate.
+  ///
+  /// In it, this message translates to:
+  /// **'Crea backup'**
+  String get backupCreate;
+
+  /// No description provided for @backupCreateHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Playlist, preferiti, testi e modifiche in un file zip. La musica non c’è.'**
+  String get backupCreateHint;
+
+  /// No description provided for @backupRestore.
+  ///
+  /// In it, this message translates to:
+  /// **'Ripristina da backup'**
+  String get backupRestore;
+
+  /// No description provided for @backupRestoreHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Sostituisci questa libreria o unisci i dati di un altro dispositivo.'**
+  String get backupRestoreHint;
+
+  /// No description provided for @backupCreating.
+  ///
+  /// In it, this message translates to:
+  /// **'Creo il backup…'**
+  String get backupCreating;
+
+  /// No description provided for @backupSaved.
+  ///
+  /// In it, this message translates to:
+  /// **'Backup salvato'**
+  String get backupSaved;
+
+  /// No description provided for @backupFailed.
+  ///
+  /// In it, this message translates to:
+  /// **'Backup non riuscito'**
+  String get backupFailed;
+
+  /// No description provided for @restoreTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Ripristina da backup'**
+  String get restoreTitle;
+
+  /// No description provided for @restoreInfo.
+  ///
+  /// In it, this message translates to:
+  /// **'Del {date} · app {version} · {tracks} brani · {playlists} playlist'**
+  String restoreInfo(String date, String version, int tracks, int playlists);
+
+  /// No description provided for @restoreReplace.
+  ///
+  /// In it, this message translates to:
+  /// **'Sostituisci tutto (stesso dispositivo)'**
+  String get restoreReplace;
+
+  /// No description provided for @restoreMerge.
+  ///
+  /// In it, this message translates to:
+  /// **'Unisci a questa libreria'**
+  String get restoreMerge;
+
+  /// No description provided for @restoreMergeHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Aggiunge preferiti, playlist, testi e modifiche ai brani che trova. Non cancella niente.'**
+  String get restoreMergeHint;
+
+  /// No description provided for @restoreReplaceConfirmTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Sostituire tutta la libreria?'**
+  String get restoreReplaceConfirmTitle;
+
+  /// No description provided for @restoreReplaceConfirmBody.
+  ///
+  /// In it, this message translates to:
+  /// **'Al prossimo avvio i dati di questa app diventano quelli del backup. Quelli attuali restano in una copia di sicurezza accanto al database.'**
+  String get restoreReplaceConfirmBody;
+
+  /// No description provided for @restoreReplaceGo.
+  ///
+  /// In it, this message translates to:
+  /// **'Sostituisci'**
+  String get restoreReplaceGo;
+
+  /// No description provided for @restoreNotBackup.
+  ///
+  /// In it, this message translates to:
+  /// **'Questo file non è un backup di Codecore che posso leggere.'**
+  String get restoreNotBackup;
+
+  /// No description provided for @restoreRestartNeeded.
+  ///
+  /// In it, this message translates to:
+  /// **'Pronto: chiudi l’app e riaprila per completare il ripristino.'**
+  String get restoreRestartNeeded;
+
+  /// No description provided for @restoreMergeDone.
+  ///
+  /// In it, this message translates to:
+  /// **'Unione fatta: {recognized} brani riconosciuti, {missing} non trovati, {playlists} playlist create, {favorites} preferiti aggiunti.'**
+  String restoreMergeDone(
+    int recognized,
+    int missing,
+    int playlists,
+    int favorites,
+  );
+
+  /// No description provided for @restoreNotFound.
+  ///
+  /// In it, this message translates to:
+  /// **'Brani non trovati'**
+  String get restoreNotFound;
+
+  /// No description provided for @restoreCopyList.
+  ///
+  /// In it, this message translates to:
+  /// **'Copia elenco'**
+  String get restoreCopyList;
+
+  /// No description provided for @restoreFailed.
+  ///
+  /// In it, this message translates to:
+  /// **'Ripristino non riuscito'**
+  String get restoreFailed;
+
+  /// No description provided for @exportAllPlaylists.
+  ///
+  /// In it, this message translates to:
+  /// **'Esporta tutte le playlist'**
+  String get exportAllPlaylists;
 }
 
 class _AppLocalizationsDelegate

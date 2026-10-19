@@ -1911,5 +1911,60 @@
   "updateRateLimited": "GitHub asks you to wait: try again later.",
   "updateFailed": "I can’t read the latest version. Check your connection.",
   "updateCopyLink": "Copy address",
-  "updateLinkCopied": "Address copied"
+  "updateLinkCopied": "Address copied",
+  "backupSection": "Backup",
+  "backupCreate": "Create backup",
+  "backupCreateHint": "Playlists, favourites, lyrics and edits in a zip file. No music inside.",
+  "backupRestore": "Restore from backup",
+  "backupRestoreHint": "Replace this library or merge the data of another device.",
+  "backupCreating": "Creating the backup…",
+  "backupSaved": "Backup saved",
+  "backupFailed": "Backup failed",
+  "restoreTitle": "Restore from backup",
+  "restoreInfo": "From {date} · app {version} · {tracks} tracks · {playlists} playlists",
+  "@restoreInfo": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "version": {
+        "type": "String"
+      },
+      "tracks": {
+        "type": "int"
+      },
+      "playlists": {
+        "type": "int"
+      }
+    }
+  },
+  "restoreReplace": "Replace everything (same device)",
+  "restoreMerge": "Merge into this library",
+  "restoreMergeHint": "Adds favourites, playlists, lyrics and edits to the tracks it finds. Deletes nothing.",
+  "restoreReplaceConfirmTitle": "Replace the whole library?",
+  "restoreReplaceConfirmBody": "At the next start this app’s data becomes the backup’s. The current data stays in a safety copy next to the database.",
+  "restoreReplaceGo": "Replace",
+  "restoreNotBackup": "This file is not a Codecore backup I can read.",
+  "restoreRestartNeeded": "Ready: close the app and open it again to finish the restore.",
+  "restoreMergeDone": "Merge done: {recognized} tracks recognised, {missing} not found, {playlists} playlists created, {favorites} favourites added.",
+  "@restoreMergeDone": {
+    "placeholders": {
+      "recognized": {
+        "type": "int"
+      },
+      "missing": {
+        "type": "int"
+      },
+      "playlists": {
+        "type": "int"
+      },
+      "favorites": {
+        "type": "int"
+      }
+    }
+  },
+  "restoreNotFound": "Tracks not found",
+  "restoreCopyList": "Copy list",
+  "restoreFailed": "Restore failed",
+  "exportAllPlaylists": "Export all playlists"
 }

@@ -7,6 +7,9 @@ import 'tables.dart';
 
 part 'app_database.g.dart';
 
+/// Bump with every migration step below.
+const kSchemaVersion = 10;
+
 @DriftDatabase(tables: [
   Tracks,
   Folders,
@@ -27,7 +30,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.production() : super(driftDatabase(name: 'codecore'));
 
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => kSchemaVersion;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(

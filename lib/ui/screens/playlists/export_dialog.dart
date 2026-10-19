@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
+import 'package:archive/archive.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -117,6 +119,47 @@ Future<void> exportPlaylistFlow(
     if (saved) messenger.showSnackBar(SnackBar(content: Text(l.exportSaved)));
   } on Object catch (e, st) {
     AppLog.e('export playlist failed', e, st);
+    messenger.showSnackBar(SnackBar(content: Text(l.exportFailed)));
+  }
+}
+
+/// «Esporta tutte le playlist»: one file per playlist in the chosen format,
+/// all in a zip.
+Future<void> exportAllPlaylistsFlow(BuildContext context, WidgetRef ref) async {
+  final l = context.l10n;
+  final messenger = ScaffoldMessenger.of(context);
+  final choice = await showDialog<_ExportChoice>(context: context, builder: (_) => const ExportDialog());
+  if (choice == null) return;
+  try {
+    final db = ref.read(databaseProvider);
+    final folders = {for (final f in await db.select(db.folders).get()) f.id: f.path};
+    final repo = ref.read(playlistRepositoryProvider);
+    final archive = Archive();
+    final used = <String>{};
+    for (final p in await db.select(db.playlists).get()) {
+      final tracks = await repo.watchTracks(p.id).first;
+      final text = renderPlaylist(
+        choice.format,
+        name: p.name,
+        createdAt: p.createdAt,
+        coverKey: p.coverKey,
+        tracks: tracks,
+        isrcByTrack: await ref.read(importRepositoryProvider).isrcByTrack(p.id),
+        folders: folders,
+        relativePaths: choice.relative,
+      );
+      var file = exportFileName(p.name, choice.format);
+      for (var n = 2; !used.add(file); n++) {
+        file = exportFileName('${p.name} $n', choice.format);
+      }
+      archive.addFile(ArchiveFile.bytes(file, utf8.encode(text)));
+    }
+    final stamp = DateTime.now().toIso8601String().substring(0, 10);
+    final saved = await saveBytes('codecore-playlists-$stamp.zip', Uint8List.fromList(ZipEncoder().encode(archive)),
+        mimeType: 'application/zip');
+    if (saved) messenger.showSnackBar(SnackBar(content: Text(l.exportSaved)));
+  } on Object catch (e, st) {
+    AppLog.e('export all playlists failed', e, st);
     messenger.showSnackBar(SnackBar(content: Text(l.exportFailed)));
   }
 }

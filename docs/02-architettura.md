@@ -220,3 +220,8 @@ Scritture con debounce 400 ms, mai in un handler di slider a ogni tick.
 - **Android**: release con minify + shrink (`proguard-rules.pro`); **variante `lite`** = `CODECORE_LITE=1` (Gradle toglie `youtubedl-android` e usa `src/lite/kotlin`, il canale `codecore/ytdlp` è in `YtDlpChannel` solo in `src/full/kotlin`) + `--dart-define=CODECORE_YOUTUBE=false` (`kEnableYoutube`).
 - **Aggiornamenti**: `update_checker.dart` (`compareVersions`, `UpdateChecker` su `releases/latest` di GitHub), solo su richiesta o con «Controlla all'avvio» (spento, al più 1 al giorno); nascosto finché `kReleaseRepo` è vuoto. Nessun download/installazione automatici.
 
+## Backup, ripristino ed export (fase 13)
+- `lib/services/backup/`: `user_data.dart` (formato portabile), `track_resolver.dart`, `backup_service.dart` (zip: `manifest.json`, `settings.json` senza `deviceId`/`deviceName`/`trustedDevices`, `user_data.json`, `codecore.sqlite` da `VACUUM INTO`, `covers/`, `downloads.json`; compressione in un isolate), `restore_service.dart` (`inspectBackup`, `stageFullRestore`, `applyPendingRestore`, `mergeBackup`); l'unione è in `data/repositories/backup_merge.dart`.
+- **Sostituzione**: `stageFullRestore` estrae solo le tre cose attese (nessun nome esterno a `staging`); `main.dart` chiama `applyPendingRestore` **prima** di aprire il DB. **Unione**: `mergeUserData` in una transazione, nessuna cancellazione.
+- `lib/services/export/`: M3U8/CSV/JSON per playlist e «Esporta tutte» (zip). UI: Impostazioni → Backup (`backup_section.dart`, `restore_dialog.dart`).
+

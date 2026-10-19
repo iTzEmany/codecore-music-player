@@ -139,3 +139,10 @@ Per ogni rischio: **sintomo** → **cosa fare**. Se scatta un fallback che cambi
 | R68 | Keystore esposto o perso | APK non aggiornabili | Solo nei *secrets* della CI, mai stampato; `android/key.properties` e `*.jks` sono in `.gitignore`; backup offline |
 | R69 | R8/ProGuard rompe plugin con riflessione | Crash della release | Regole in `android/app/proguard-rules.pro`; la release `full` x86_64 è stata avviata su emulatore senza crash; resta da provare yt-dlp in release. Piano B: `isMinifyEnabled = false` (costa pochi MB: il codice pesa 2,8 MB) |
 
+## Backup e ripristino (fase 13)
+| # | Rischio | Sintomo | Piano B |
+|---|---|---|---|
+| R24 | Ripristino che corrompe o perde il DB | Libreria vuota dopo il riavvio | Staging in `<appSupport>/restore/` con marcatore `ready` scritto per ultimo; al riavvio il DB nuovo è controllato (`PRAGMA quick_check`) **prima** di toccare quello attuale, che diventa `codecore.sqlite.before-restore` (mai cancellato); qualunque errore lascia il DB com'era (testato con staging danneggiato) |
+| R25 | Brani riconosciuti male su un altro dispositivo | Preferiti/playlist sul brano sbagliato | Percorso relativo → titolo+artista+durata ±2 s → hash; parità → «non trovato», con elenco copiabile; l'unione non cancella niente |
+| R26 | Backup troppo grande per `saveFile` su Android (tutto in memoria) | Errore o app lenta salvando | Lo zip contiene copertine (già compresse, `store`) ma non musica; 20.000 brani + 2.000 copertine = 60 MB in 1,7 s. Se la libreria vera supera ~150 MB: piano B zip in una cartella dell'app con percorso mostrato (non ancora necessario) |
+

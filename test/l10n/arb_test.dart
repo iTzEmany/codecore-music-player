@@ -8,7 +8,7 @@ const _langs = ['en', 'de', 'es', 'fr', 'pt'];
 /// Strings that may read the same as the Italian: names, formats, units and
 /// words that are the same in the other languages.
 const _sameAsItalian = {
-  'accentRosa', 'accentVerde', 'activityDownload', 'albumMeta', 'appName',
+  'accentRosa', 'backupSection', 'accentVerde', 'activityDownload', 'albumMeta', 'appName',
   'artistMeta', 'csvImportPause', 'csvOutHeaderAlbum', 'csvOutHeaderIsrc',
   'csvOutHeaderNote', 'detailFormat', 'devicesJamShort', 'discN',
   'downloadRateKb', 'downloadRateMb', 'durationMinutes', 'exportFormatJson',

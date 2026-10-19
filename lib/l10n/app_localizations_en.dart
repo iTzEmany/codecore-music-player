@@ -3256,4 +3256,88 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get updateLinkCopied => 'Address copied';
+
+  @override
+  String get backupSection => 'Backup';
+
+  @override
+  String get backupCreate => 'Create backup';
+
+  @override
+  String get backupCreateHint =>
+      'Playlists, favourites, lyrics and edits in a zip file. No music inside.';
+
+  @override
+  String get backupRestore => 'Restore from backup';
+
+  @override
+  String get backupRestoreHint =>
+      'Replace this library or merge the data of another device.';
+
+  @override
+  String get backupCreating => 'Creating the backup…';
+
+  @override
+  String get backupSaved => 'Backup saved';
+
+  @override
+  String get backupFailed => 'Backup failed';
+
+  @override
+  String get restoreTitle => 'Restore from backup';
+
+  @override
+  String restoreInfo(String date, String version, int tracks, int playlists) {
+    return 'From $date · app $version · $tracks tracks · $playlists playlists';
+  }
+
+  @override
+  String get restoreReplace => 'Replace everything (same device)';
+
+  @override
+  String get restoreMerge => 'Merge into this library';
+
+  @override
+  String get restoreMergeHint =>
+      'Adds favourites, playlists, lyrics and edits to the tracks it finds. Deletes nothing.';
+
+  @override
+  String get restoreReplaceConfirmTitle => 'Replace the whole library?';
+
+  @override
+  String get restoreReplaceConfirmBody =>
+      'At the next start this app’s data becomes the backup’s. The current data stays in a safety copy next to the database.';
+
+  @override
+  String get restoreReplaceGo => 'Replace';
+
+  @override
+  String get restoreNotBackup =>
+      'This file is not a Codecore backup I can read.';
+
+  @override
+  String get restoreRestartNeeded =>
+      'Ready: close the app and open it again to finish the restore.';
+
+  @override
+  String restoreMergeDone(
+    int recognized,
+    int missing,
+    int playlists,
+    int favorites,
+  ) {
+    return 'Merge done: $recognized tracks recognised, $missing not found, $playlists playlists created, $favorites favourites added.';
+  }
+
+  @override
+  String get restoreNotFound => 'Tracks not found';
+
+  @override
+  String get restoreCopyList => 'Copy list';
+
+  @override
+  String get restoreFailed => 'Restore failed';
+
+  @override
+  String get exportAllPlaylists => 'Export all playlists';
 }

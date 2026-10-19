@@ -27,6 +27,7 @@ import '../../theme/tokens.dart';
 import 'accent_picker.dart';
 import 'cleanup_tiles.dart';
 import 'advanced_section.dart';
+import 'backup_section.dart';
 import 'download_settings_tiles.dart';
 import 'equalizer_screen.dart';
 import 'log_export_tile.dart';
@@ -288,6 +289,10 @@ class SettingsScreen extends ConsumerWidget {
                 title: l.settingsDownloads,
                 children: const [DownloadSettingsTiles()],
               ),
+            _Group(
+              title: l.backupSection,
+              children: backupTiles(context, ref),
+            ),
             _Group(
               title: l.settingsAdvanced,
               children: const [AdvancedSettingsTiles()],

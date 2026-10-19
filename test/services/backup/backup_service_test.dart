@@ -1,0 +1,106 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:archive/archive_io.dart';
+import 'package:codecore/data/db/app_database.dart';
+import 'package:codecore/services/backup/backup_service.dart';
+import 'package:drift/drift.dart' show Value;
+import 'package:drift/native.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:path/path.dart' as p;
+import 'package:shared_preferences/shared_preferences.dart';
+
+void main() {
+  late Directory dir;
+  late AppDatabase db;
+  late SharedPreferences prefs;
+
+  setUp(() async {
+    dir = Directory.systemTemp.createTempSync('bk');
+    db = AppDatabase(NativeDatabase(File(p.join(dir.path, 'live.sqlite'))));
+    SharedPreferences.setMockInitialValues({
+      'theme': 'oled', 'compactMode': true, 'playbackSpeed': 1.25, 'volume': 3,
+      'notDuplicates': ['a', 'b'], 'deviceId': 'dev-1', 'deviceName': 'Telefono', 'trustedDevices': '[]',
+    });
+    prefs = await SharedPreferences.getInstance();
+    final folder = await db.into(db.folders).insert(FoldersCompanion.insert(path: '/music', addedAt: 1));
+    for (var i = 0; i < 3; i++) {
+      await db.into(db.tracks).insert(TracksCompanion.insert(
+          path: '/music/$i.mp3', title: 'T$i', albumKey: 'k', format: 'mp3', sizeBytes: 1, mtimeMs: 1, addedAt: 1,
+          folderId: Value(folder), isFavorite: Value(i == 0)));
+    }
+    final pl = await db.into(db.playlists).insert(PlaylistsCompanion.insert(name: 'Mix', createdAt: 1));
+    await db.into(db.playlistTracks).insert(PlaylistTracksCompanion.insert(playlistId: pl, trackId: 1, position: 0));
+  });
+  tearDown(() async {
+    await db.close();
+    dir.deleteSync(recursive: true);
+  });
+
+  BackupService service({File? downloads}) {
+    final covers = Directory(p.join(dir.path, 'covers'))..createSync();
+    File(p.join(covers.path, 'a.jpg')).writeAsBytesSync(List.filled(500, 7));
+    File(p.join(covers.path, 'b.bin')).writeAsBytesSync(List.filled(500, 0));
+    return BackupService(
+      db: db, prefs: prefs, coversDir: covers,
+      downloadsFile: downloads ?? File(p.join(dir.path, 'downloads.json')),
+      deviceId: 'dev-1', platform: 'linux', now: () => DateTime(2026, 10, 19, 12),
+    );
+  }
+
+  test('the file name carries the date', () {
+    expect(BackupService.fileName(DateTime(2026, 3, 7)), 'codecore-backup-2026-03-07.zip');
+  });
+
+  test('the zip holds manifest, settings, user data, database, covers and downloads', () async {
+    final dl = File(p.join(dir.path, 'downloads.json'))..writeAsStringSync('{"youtube:x":"/a.mp3"}');
+    final out = p.join(dir.path, 'out.zip');
+    final s = await service(downloads: dl).createBackup(out);
+    expect(s.tracks, 3);
+    expect(s.playlists, 1);
+    expect(s.covers, 2);
+    expect(s.bytes, File(out).lengthSync());
+
+    final zip = ZipDecoder().decodeBytes(File(out).readAsBytesSync());
+    expect(zip.files.map((f) => f.name).toSet(),
+        {'manifest.json', 'settings.json', 'user_data.json', 'codecore.sqlite', 'downloads.json', 'covers/a.jpg', 'covers/b.bin'});
+    String text(String n) => utf8.decode(zip.findFile(n)!.content as List<int>);
+    final manifest = jsonDecode(text('manifest.json')) as Map;
+    expect(manifest['backupFormat'], 1);
+    expect(manifest['schemaVersion'], db.schemaVersion);
+    expect(manifest['deviceId'], 'dev-1');
+    expect(manifest['folders'], ['/music']);
+
+    final settings = jsonDecode(text('settings.json')) as Map;
+    expect(settings.containsKey('deviceId'), isFalse);
+    expect(settings.containsKey('deviceName'), isFalse);
+    expect(settings.containsKey('trustedDevices'), isFalse, reason: 'bound to this device');
+    expect(settings['compactMode'], {'t': 'bool', 'v': true});
+    expect(settings['playbackSpeed'], {'t': 'double', 'v': 1.25});
+    expect(settings['notDuplicates'], {'t': 'list', 'v': ['a', 'b']});
+    expect(jsonDecode(text('user_data.json'))['format'], 1);
+  });
+
+  test('the copied database opens with the same counts; temporary files are gone', () async {
+    final out = p.join(dir.path, 'out.zip');
+    await service().createBackup(out);
+    final zip = ZipDecoder().decodeBytes(File(out).readAsBytesSync());
+    final copy = File(p.join(dir.path, 'copy.sqlite'))..writeAsBytesSync(zip.findFile('codecore.sqlite')!.content as List<int>);
+    final db2 = AppDatabase(NativeDatabase(copy));
+    addTearDown(db2.close);
+    expect((await db2.select(db2.tracks).get()).length, 3);
+    expect((await db2.select(db2.playlists).get()).single.name, 'Mix');
+  });
+
+  test('settings survive a round trip, without the device-bound keys', () async {
+    final json = jsonDecode(jsonEncode(settingsToJson(prefs))) as Map<String, dynamic>;
+    SharedPreferences.setMockInitialValues({'deviceId': 'other'});
+    final fresh = await SharedPreferences.getInstance();
+    await applySettingsJson(fresh, {...json, 'deviceId': {'t': 'string', 'v': 'hacked'}});
+    expect(fresh.getString('theme'), 'oled');
+    expect(fresh.getBool('compactMode'), isTrue);
+    expect(fresh.getDouble('playbackSpeed'), 1.25);
+    expect(fresh.getStringList('notDuplicates'), ['a', 'b']);
+    expect(fresh.getString('deviceId'), 'other');
+  });
+}

@@ -3297,4 +3297,88 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get updateLinkCopied => 'Adresse copiée';
+
+  @override
+  String get backupSection => 'Sauvegarde';
+
+  @override
+  String get backupCreate => 'Créer une sauvegarde';
+
+  @override
+  String get backupCreateHint =>
+      'Playlists, favoris, paroles et modifications dans un zip. Sans musique.';
+
+  @override
+  String get backupRestore => 'Restaurer une sauvegarde';
+
+  @override
+  String get backupRestoreHint =>
+      'Remplacer cette bibliothèque ou fusionner les données d’un autre appareil.';
+
+  @override
+  String get backupCreating => 'Création de la sauvegarde…';
+
+  @override
+  String get backupSaved => 'Sauvegarde enregistrée';
+
+  @override
+  String get backupFailed => 'Échec de la sauvegarde';
+
+  @override
+  String get restoreTitle => 'Restaurer une sauvegarde';
+
+  @override
+  String restoreInfo(String date, String version, int tracks, int playlists) {
+    return 'Du $date · app $version · $tracks titres · $playlists playlists';
+  }
+
+  @override
+  String get restoreReplace => 'Tout remplacer (même appareil)';
+
+  @override
+  String get restoreMerge => 'Fusionner avec cette bibliothèque';
+
+  @override
+  String get restoreMergeHint =>
+      'Ajoute favoris, playlists, paroles et modifications aux titres trouvés. Ne supprime rien.';
+
+  @override
+  String get restoreReplaceConfirmTitle => 'Remplacer toute la bibliothèque ?';
+
+  @override
+  String get restoreReplaceConfirmBody =>
+      'Au prochain démarrage, les données de l’app deviennent celles de la sauvegarde. Les actuelles restent dans une copie de sécurité à côté de la base.';
+
+  @override
+  String get restoreReplaceGo => 'Remplacer';
+
+  @override
+  String get restoreNotBackup =>
+      'Ce fichier n’est pas une sauvegarde Codecore lisible.';
+
+  @override
+  String get restoreRestartNeeded =>
+      'Prêt : ferme l’app et rouvre-la pour terminer la restauration.';
+
+  @override
+  String restoreMergeDone(
+    int recognized,
+    int missing,
+    int playlists,
+    int favorites,
+  ) {
+    return 'Fusion faite : $recognized titres reconnus, $missing introuvables, $playlists playlists créées, $favorites favoris ajoutés.';
+  }
+
+  @override
+  String get restoreNotFound => 'Titres introuvables';
+
+  @override
+  String get restoreCopyList => 'Copier la liste';
+
+  @override
+  String get restoreFailed => 'Échec de la restauration';
+
+  @override
+  String get exportAllPlaylists => 'Exporter toutes les playlists';
 }

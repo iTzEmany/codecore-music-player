@@ -33,6 +33,7 @@ import 'services/audio/play_queue.dart';
 import 'services/audio/playback_persistence.dart';
 import 'services/android/widget_bridge.dart';
 import 'services/android/widget_sync.dart';
+import 'services/backup/restore_service.dart';
 import 'services/covers/cover_store.dart';
 
 Future<void> main() async {
@@ -46,6 +47,19 @@ Future<void> main() async {
   });
   if (Platform.isLinux || Platform.isWindows) {
     JustAudioMediaKit.ensureInitialized();
+  }
+
+  // A restore chosen in the last run replaces the database before it is opened.
+  try {
+    await applyPendingRestore(
+      dbFile: await databaseFile(),
+      staging: await restoreStagingDir(),
+      prefs: await SharedPreferences.getInstance(),
+      coversDir: Directory(await coversDir()),
+      schemaVersion: kSchemaVersion,
+    );
+  } on Object catch (e, st) {
+    AppLog.e('pending restore could not run', e, st);
   }
 
   final db = AppDatabase.production();

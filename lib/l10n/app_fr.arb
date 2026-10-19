@@ -2102,5 +2102,60 @@
   "updateRateLimited": "GitHub demande d’attendre : réessaie plus tard.",
   "updateFailed": "Impossible de lire la dernière version. Vérifie la connexion.",
   "updateCopyLink": "Copier l’adresse",
-  "updateLinkCopied": "Adresse copiée"
+  "updateLinkCopied": "Adresse copiée",
+  "backupSection": "Sauvegarde",
+  "backupCreate": "Créer une sauvegarde",
+  "backupCreateHint": "Playlists, favoris, paroles et modifications dans un zip. Sans musique.",
+  "backupRestore": "Restaurer une sauvegarde",
+  "backupRestoreHint": "Remplacer cette bibliothèque ou fusionner les données d’un autre appareil.",
+  "backupCreating": "Création de la sauvegarde…",
+  "backupSaved": "Sauvegarde enregistrée",
+  "backupFailed": "Échec de la sauvegarde",
+  "restoreTitle": "Restaurer une sauvegarde",
+  "restoreInfo": "Du {date} · app {version} · {tracks} titres · {playlists} playlists",
+  "@restoreInfo": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "version": {
+        "type": "String"
+      },
+      "tracks": {
+        "type": "int"
+      },
+      "playlists": {
+        "type": "int"
+      }
+    }
+  },
+  "restoreReplace": "Tout remplacer (même appareil)",
+  "restoreMerge": "Fusionner avec cette bibliothèque",
+  "restoreMergeHint": "Ajoute favoris, playlists, paroles et modifications aux titres trouvés. Ne supprime rien.",
+  "restoreReplaceConfirmTitle": "Remplacer toute la bibliothèque ?",
+  "restoreReplaceConfirmBody": "Au prochain démarrage, les données de l’app deviennent celles de la sauvegarde. Les actuelles restent dans une copie de sécurité à côté de la base.",
+  "restoreReplaceGo": "Remplacer",
+  "restoreNotBackup": "Ce fichier n’est pas une sauvegarde Codecore lisible.",
+  "restoreRestartNeeded": "Prêt : ferme l’app et rouvre-la pour terminer la restauration.",
+  "restoreMergeDone": "Fusion faite : {recognized} titres reconnus, {missing} introuvables, {playlists} playlists créées, {favorites} favoris ajoutés.",
+  "@restoreMergeDone": {
+    "placeholders": {
+      "recognized": {
+        "type": "int"
+      },
+      "missing": {
+        "type": "int"
+      },
+      "playlists": {
+        "type": "int"
+      },
+      "favorites": {
+        "type": "int"
+      }
+    }
+  },
+  "restoreNotFound": "Titres introuvables",
+  "restoreCopyList": "Copier la liste",
+  "restoreFailed": "Échec de la restauration",
+  "exportAllPlaylists": "Exporter toutes les playlists"
 }

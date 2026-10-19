@@ -14,3 +14,10 @@ Future<String> coversDir() async {
   await dir.create(recursive: true);
   return dir.path;
 }
+
+/// The database file `driftDatabase(name: 'codecore')` opens.
+Future<File> databaseFile() async =>
+    File(p.join((await getApplicationDocumentsDirectory()).path, 'codecore.sqlite'));
+
+/// Where a backup waits to replace the database at the next start.
+Future<Directory> restoreStagingDir() async => Directory(p.join(await appSupportDir(), 'restore'));

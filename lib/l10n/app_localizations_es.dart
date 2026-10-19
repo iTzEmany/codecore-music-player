@@ -3267,4 +3267,88 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get updateLinkCopied => 'Dirección copiada';
+
+  @override
+  String get backupSection => 'Copia de seguridad';
+
+  @override
+  String get backupCreate => 'Crear copia';
+
+  @override
+  String get backupCreateHint =>
+      'Listas, favoritos, letras y ediciones en un zip. Sin música.';
+
+  @override
+  String get backupRestore => 'Restaurar desde copia';
+
+  @override
+  String get backupRestoreHint =>
+      'Sustituye esta biblioteca o une los datos de otro dispositivo.';
+
+  @override
+  String get backupCreating => 'Creando la copia…';
+
+  @override
+  String get backupSaved => 'Copia guardada';
+
+  @override
+  String get backupFailed => 'La copia ha fallado';
+
+  @override
+  String get restoreTitle => 'Restaurar desde copia';
+
+  @override
+  String restoreInfo(String date, String version, int tracks, int playlists) {
+    return 'Del $date · app $version · $tracks canciones · $playlists listas';
+  }
+
+  @override
+  String get restoreReplace => 'Sustituir todo (mismo dispositivo)';
+
+  @override
+  String get restoreMerge => 'Unir a esta biblioteca';
+
+  @override
+  String get restoreMergeHint =>
+      'Añade favoritos, listas, letras y ediciones a las canciones que encuentra. No borra nada.';
+
+  @override
+  String get restoreReplaceConfirmTitle => '¿Sustituir toda la biblioteca?';
+
+  @override
+  String get restoreReplaceConfirmBody =>
+      'En el próximo inicio los datos de esta app serán los de la copia. Los actuales quedan en una copia de seguridad junto a la base de datos.';
+
+  @override
+  String get restoreReplaceGo => 'Sustituir';
+
+  @override
+  String get restoreNotBackup =>
+      'Este archivo no es una copia de Codecore que pueda leer.';
+
+  @override
+  String get restoreRestartNeeded =>
+      'Listo: cierra la app y ábrela de nuevo para terminar la restauración.';
+
+  @override
+  String restoreMergeDone(
+    int recognized,
+    int missing,
+    int playlists,
+    int favorites,
+  ) {
+    return 'Unión hecha: $recognized canciones reconocidas, $missing no encontradas, $playlists listas creadas, $favorites favoritos añadidos.';
+  }
+
+  @override
+  String get restoreNotFound => 'Canciones no encontradas';
+
+  @override
+  String get restoreCopyList => 'Copiar lista';
+
+  @override
+  String get restoreFailed => 'La restauración ha fallado';
+
+  @override
+  String get exportAllPlaylists => 'Exportar todas las listas';
 }

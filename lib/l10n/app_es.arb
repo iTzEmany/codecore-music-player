@@ -1911,5 +1911,60 @@
   "updateRateLimited": "GitHub pide esperar: inténtalo más tarde.",
   "updateFailed": "No puedo leer la última versión. Revisa la conexión.",
   "updateCopyLink": "Copiar dirección",
-  "updateLinkCopied": "Dirección copiada"
+  "updateLinkCopied": "Dirección copiada",
+  "backupSection": "Copia de seguridad",
+  "backupCreate": "Crear copia",
+  "backupCreateHint": "Listas, favoritos, letras y ediciones en un zip. Sin música.",
+  "backupRestore": "Restaurar desde copia",
+  "backupRestoreHint": "Sustituye esta biblioteca o une los datos de otro dispositivo.",
+  "backupCreating": "Creando la copia…",
+  "backupSaved": "Copia guardada",
+  "backupFailed": "La copia ha fallado",
+  "restoreTitle": "Restaurar desde copia",
+  "restoreInfo": "Del {date} · app {version} · {tracks} canciones · {playlists} listas",
+  "@restoreInfo": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "version": {
+        "type": "String"
+      },
+      "tracks": {
+        "type": "int"
+      },
+      "playlists": {
+        "type": "int"
+      }
+    }
+  },
+  "restoreReplace": "Sustituir todo (mismo dispositivo)",
+  "restoreMerge": "Unir a esta biblioteca",
+  "restoreMergeHint": "Añade favoritos, listas, letras y ediciones a las canciones que encuentra. No borra nada.",
+  "restoreReplaceConfirmTitle": "¿Sustituir toda la biblioteca?",
+  "restoreReplaceConfirmBody": "En el próximo inicio los datos de esta app serán los de la copia. Los actuales quedan en una copia de seguridad junto a la base de datos.",
+  "restoreReplaceGo": "Sustituir",
+  "restoreNotBackup": "Este archivo no es una copia de Codecore que pueda leer.",
+  "restoreRestartNeeded": "Listo: cierra la app y ábrela de nuevo para terminar la restauración.",
+  "restoreMergeDone": "Unión hecha: {recognized} canciones reconocidas, {missing} no encontradas, {playlists} listas creadas, {favorites} favoritos añadidos.",
+  "@restoreMergeDone": {
+    "placeholders": {
+      "recognized": {
+        "type": "int"
+      },
+      "missing": {
+        "type": "int"
+      },
+      "playlists": {
+        "type": "int"
+      },
+      "favorites": {
+        "type": "int"
+      }
+    }
+  },
+  "restoreNotFound": "Canciones no encontradas",
+  "restoreCopyList": "Copiar lista",
+  "restoreFailed": "La restauración ha fallado",
+  "exportAllPlaylists": "Exportar todas las listas"
 }
