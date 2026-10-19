@@ -5,6 +5,7 @@ import 'palette.dart';
 import 'tokens.dart';
 
 export 'custom_theme.dart';
+export 'theme_background.dart';
 export 'palette.dart';
 
 /// The same fade-and-rise page transition on every platform; none at all
@@ -48,7 +49,9 @@ CcColors resolveColors(String theme, String accent, CustomThemes customs) {
       buildPalette(appThemeIdFromName(theme), accentFromName(accent));
 }
 
-ThemeData buildThemeFromColors(CcColors c, bool compact) {
+/// [pageBackdrop]: pages and the app bar are see-through, so the gradient or
+/// picture behind them shows (see `AppBackground`).
+ThemeData buildThemeFromColors(CcColors c, bool compact, {bool pageBackdrop = false}) {
   final brightness = c.isLight ? Brightness.light : Brightness.dark;
   final scheme = ColorScheme(
     brightness: brightness,
@@ -93,7 +96,7 @@ ThemeData buildThemeFromColors(CcColors c, bool compact) {
     fontFamily: 'Figtree',
     textTheme: text,
     primaryTextTheme: text,
-    scaffoldBackgroundColor: c.bg,
+    scaffoldBackgroundColor: pageBackdrop ? Colors.transparent : c.bg,
     canvasColor: c.bg,
     dividerColor: c.surface3,
     focusColor: c.accent.withValues(alpha: 0.24),
@@ -108,7 +111,7 @@ ThemeData buildThemeFromColors(CcColors c, bool compact) {
     visualDensity: compact ? VisualDensity.compact : VisualDensity.standard,
     extensions: [c],
     appBarTheme: AppBarTheme(
-      backgroundColor: c.bg,
+      backgroundColor: pageBackdrop ? Colors.transparent : c.bg,
       foregroundColor: c.text,
       elevation: 0,
       scrolledUnderElevation: 0,

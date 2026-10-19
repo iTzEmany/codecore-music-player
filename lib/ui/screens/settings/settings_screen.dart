@@ -23,9 +23,8 @@ import '../../shell/shell_nav.dart';
 import '../playlists/playlist_dialogs.dart';
 import '../share/share_screen.dart';
 import '../../../services/migration/python_db_importer.dart';
-import '../../theme/app_theme.dart';
 import '../../theme/tokens.dart';
-import 'accent_picker.dart';
+import 'theme_tiles.dart';
 import 'cleanup_tiles.dart';
 import 'advanced_section.dart';
 import 'backup_section.dart';
@@ -33,7 +32,6 @@ import 'download_settings_tiles.dart';
 import 'equalizer_screen.dart';
 import 'log_export_tile.dart';
 import 'missing_tracks_screen.dart';
-import 'theme_swatch.dart';
 import 'transition_settings_tiles.dart';
 import 'trusted_devices_tiles.dart';
 import 'translation_models_tiles.dart';
@@ -58,7 +56,6 @@ class SettingsScreen extends ConsumerWidget {
     final notifier = ref.read(settingsProvider.notifier);
     final folders = ref.watch(foldersProvider).value ?? const [];
     final missing = ref.watch(missingTracksProvider).value ?? const [];
-    final accent = accentFromName(s.accent);
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 760),
@@ -68,47 +65,7 @@ class SettingsScreen extends ConsumerWidget {
             _Group(
               title: l.settingsAppearance,
               children: [
-                ListTile(
-                  title: Text(l.settingsTheme),
-                  subtitle: Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Wrap(
-                      runSpacing: 8,
-                      children: [
-                        for (final (id, label, colors) in [
-                          for (final (t, name) in [
-                            (AppThemeId.notte, l.themeNotte),
-                            (AppThemeId.oled, l.themeOled),
-                            (AppThemeId.chiaro, l.themeChiaro),
-                          ])
-                            (t.name, name, buildPalette(t, accent)),
-                        ])
-                          Padding(
-                            padding: const EdgeInsets.only(right: 12),
-                            child: ThemeSwatch(
-                              label: label,
-                              colors: colors,
-                              selected: appThemeIdFromName(s.theme).name == id,
-                              onTap: () =>
-                                  notifier.update((c) => c.copyWith(theme: id)),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
-                ListTile(
-                  title: Text(l.settingsAccent),
-                  subtitle: Padding(
-                    padding: const EdgeInsets.only(top: 12),
-                    child: AccentPicker(
-                      theme: appThemeIdFromName(s.theme),
-                      selected: accent,
-                      onSelected: (a) =>
-                          notifier.update((c) => c.copyWith(accent: a.name)),
-                    ),
-                  ),
-                ),
+                const ThemeTiles(),
                 ListTile(
                   title: Text(l.settingsTextSize),
                   subtitle: Padding(

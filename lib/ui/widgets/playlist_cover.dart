@@ -48,7 +48,7 @@ class PlaylistCover extends StatelessWidget {
           child: Icon(
             Icons.favorite_rounded,
             size: size * 0.45,
-            color: Colors.white,
+            color: cc.onAccent,
           ),
         ),
       );

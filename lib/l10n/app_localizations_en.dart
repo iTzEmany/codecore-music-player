@@ -1962,6 +1962,195 @@ class AppLocalizationsEn extends AppLocalizations {
   String get curiosityNoSong => 'No page about this song';
 
   @override
+  String get themeNew => 'New theme';
+
+  @override
+  String get themeEdit => 'Edit';
+
+  @override
+  String get themeDuplicate => 'Duplicate';
+
+  @override
+  String get themeDelete => 'Delete';
+
+  @override
+  String get themeExport => 'Export';
+
+  @override
+  String get themeImport => 'Import theme';
+
+  @override
+  String get themeName => 'Theme name';
+
+  @override
+  String get themeBase => 'Start from';
+
+  @override
+  String get themeModeSimple => 'Simple';
+
+  @override
+  String get themeModeAdvanced => 'Advanced';
+
+  @override
+  String get themeSave => 'Save';
+
+  @override
+  String get themeEditorTitle => 'Custom theme';
+
+  @override
+  String get themeDiscardTitle => 'Discard the changes?';
+
+  @override
+  String get themeDiscardBody =>
+      'The changes to this theme have not been saved.';
+
+  @override
+  String get themeDiscard => 'Discard';
+
+  @override
+  String get themePreview => 'Preview';
+
+  @override
+  String get themeResetColor => 'Reset the colour';
+
+  @override
+  String get themeContrastTitle => 'Legibility';
+
+  @override
+  String get themeContrastLow => 'Hard to read';
+
+  @override
+  String get themeContrastOk => 'Readable';
+
+  @override
+  String get themeFix => 'Fix';
+
+  @override
+  String get themeSaved => 'Theme saved';
+
+  @override
+  String get themeLimit => 'You already have 20 themes: delete one';
+
+  @override
+  String get themeImported => 'Theme imported';
+
+  @override
+  String get themeImportFailed => 'The file is not a valid theme';
+
+  @override
+  String get themeDeleted => 'Theme deleted';
+
+  @override
+  String get themeMine => 'My themes';
+
+  @override
+  String get tokenBg => 'Background';
+
+  @override
+  String get tokenSurface1 => 'Surface 1';
+
+  @override
+  String get tokenSurface2 => 'Surface 2';
+
+  @override
+  String get tokenSurface3 => 'Surface 3';
+
+  @override
+  String get tokenAccent => 'Accent';
+
+  @override
+  String get tokenAccentSoft => 'Soft accent';
+
+  @override
+  String get tokenOnAccent => 'Text on accent';
+
+  @override
+  String get tokenText => 'Text';
+
+  @override
+  String get tokenTextMuted => 'Secondary text';
+
+  @override
+  String get tokenTextFaint => 'Faint text';
+
+  @override
+  String get tokenHero => 'Player backdrop';
+
+  @override
+  String get tokenError => 'Error';
+
+  @override
+  String get pickerHue => 'Hue';
+
+  @override
+  String get pickerSv => 'Saturation and brightness';
+
+  @override
+  String get pickerAlpha => 'Transparency';
+
+  @override
+  String get pickerHex => 'Colour code';
+
+  @override
+  String get pickerInvalid => 'Invalid code';
+
+  @override
+  String get pickerRecent => 'Recently used';
+
+  @override
+  String get contrastTextBg => 'Text on background';
+
+  @override
+  String get contrastMutedSurface => 'Secondary text on surface';
+
+  @override
+  String get contrastOnAccent => 'Text on accent';
+
+  @override
+  String get contrastAccentBg => 'Accent on background';
+
+  @override
+  String get themeBackground => 'Page background';
+
+  @override
+  String get bgSolid => 'Solid colour';
+
+  @override
+  String get bgGradient => 'Gradient';
+
+  @override
+  String get bgImage => 'Picture';
+
+  @override
+  String get bgGradientEnd => 'End colour';
+
+  @override
+  String get bgAngle => 'Direction';
+
+  @override
+  String get bgPickImage => 'Choose a picture…';
+
+  @override
+  String get bgRemoveImage => 'Remove the picture';
+
+  @override
+  String get bgDim => 'Darkening';
+
+  @override
+  String get bgBlur => 'Blur';
+
+  @override
+  String get bgCoverBackdrop => 'Now playing: tint of the cover';
+
+  @override
+  String get bgImageFailed => 'The picture could not be used';
+
+  @override
+  String themeCopyName(String name) {
+    return '$name (copy)';
+  }
+
+  @override
   String selectedCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

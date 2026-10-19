@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../providers/theme_providers.dart';
 import '../theme/cover_tint.dart';
 import '../theme/tokens.dart';
 
@@ -14,6 +15,9 @@ class CoverBackdrop extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cc = context.cc;
+    // The theme's own background (gradient or picture) instead of the tint.
+    final bg = ref.watch(themeBackgroundProvider);
+    if (bg.isCustom && !bg.coverBackdrop) return child;
     final tint = resolvedHeroTint(context, ref, coverKey);
     return Stack(
       children: [

@@ -10,12 +10,16 @@ class ThemeSwatch extends StatelessWidget {
     required this.colors,
     required this.selected,
     required this.onTap,
+    this.mark,
   });
 
   final String label;
   final CcColors colors;
   final bool selected;
   final VoidCallback onTap;
+
+  /// An icon in place of the accent dot («new theme»).
+  final IconData? mark;
 
   @override
   Widget build(BuildContext context) {
@@ -44,14 +48,16 @@ class ThemeSwatch extends StatelessWidget {
                   ),
                 ),
                 alignment: Alignment.center,
-                child: Container(
-                  width: 20,
-                  height: 20,
-                  decoration: BoxDecoration(
-                    color: colors.accent,
-                    shape: BoxShape.circle,
-                  ),
-                ),
+                child: mark != null
+                    ? Icon(mark, color: colors.accent)
+                    : Container(
+                        width: 20,
+                        height: 20,
+                        decoration: BoxDecoration(
+                          color: colors.accent,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
               ),
               const SizedBox(height: 6),
               Text(

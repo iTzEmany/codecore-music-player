@@ -3490,6 +3490,378 @@ abstract class AppLocalizations {
   /// **'Nessuna pagina dedicata a questo brano'**
   String get curiosityNoSong;
 
+  /// No description provided for @themeNew.
+  ///
+  /// In it, this message translates to:
+  /// **'Nuovo tema'**
+  String get themeNew;
+
+  /// No description provided for @themeEdit.
+  ///
+  /// In it, this message translates to:
+  /// **'Modifica'**
+  String get themeEdit;
+
+  /// No description provided for @themeDuplicate.
+  ///
+  /// In it, this message translates to:
+  /// **'Duplica'**
+  String get themeDuplicate;
+
+  /// No description provided for @themeDelete.
+  ///
+  /// In it, this message translates to:
+  /// **'Elimina'**
+  String get themeDelete;
+
+  /// No description provided for @themeExport.
+  ///
+  /// In it, this message translates to:
+  /// **'Esporta'**
+  String get themeExport;
+
+  /// No description provided for @themeImport.
+  ///
+  /// In it, this message translates to:
+  /// **'Importa tema'**
+  String get themeImport;
+
+  /// No description provided for @themeName.
+  ///
+  /// In it, this message translates to:
+  /// **'Nome del tema'**
+  String get themeName;
+
+  /// No description provided for @themeBase.
+  ///
+  /// In it, this message translates to:
+  /// **'Parti da'**
+  String get themeBase;
+
+  /// No description provided for @themeModeSimple.
+  ///
+  /// In it, this message translates to:
+  /// **'Semplice'**
+  String get themeModeSimple;
+
+  /// No description provided for @themeModeAdvanced.
+  ///
+  /// In it, this message translates to:
+  /// **'Avanzata'**
+  String get themeModeAdvanced;
+
+  /// No description provided for @themeSave.
+  ///
+  /// In it, this message translates to:
+  /// **'Salva'**
+  String get themeSave;
+
+  /// No description provided for @themeEditorTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Tema personalizzato'**
+  String get themeEditorTitle;
+
+  /// No description provided for @themeDiscardTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Scartare le modifiche?'**
+  String get themeDiscardTitle;
+
+  /// No description provided for @themeDiscardBody.
+  ///
+  /// In it, this message translates to:
+  /// **'Le modifiche a questo tema non sono state salvate.'**
+  String get themeDiscardBody;
+
+  /// No description provided for @themeDiscard.
+  ///
+  /// In it, this message translates to:
+  /// **'Scarta'**
+  String get themeDiscard;
+
+  /// No description provided for @themePreview.
+  ///
+  /// In it, this message translates to:
+  /// **'Anteprima'**
+  String get themePreview;
+
+  /// No description provided for @themeResetColor.
+  ///
+  /// In it, this message translates to:
+  /// **'Ripristina il colore'**
+  String get themeResetColor;
+
+  /// No description provided for @themeContrastTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Leggibilità'**
+  String get themeContrastTitle;
+
+  /// No description provided for @themeContrastLow.
+  ///
+  /// In it, this message translates to:
+  /// **'Poco leggibile'**
+  String get themeContrastLow;
+
+  /// No description provided for @themeContrastOk.
+  ///
+  /// In it, this message translates to:
+  /// **'Leggibile'**
+  String get themeContrastOk;
+
+  /// No description provided for @themeFix.
+  ///
+  /// In it, this message translates to:
+  /// **'Correggi'**
+  String get themeFix;
+
+  /// No description provided for @themeSaved.
+  ///
+  /// In it, this message translates to:
+  /// **'Tema salvato'**
+  String get themeSaved;
+
+  /// No description provided for @themeLimit.
+  ///
+  /// In it, this message translates to:
+  /// **'Hai già 20 temi: eliminane uno'**
+  String get themeLimit;
+
+  /// No description provided for @themeImported.
+  ///
+  /// In it, this message translates to:
+  /// **'Tema importato'**
+  String get themeImported;
+
+  /// No description provided for @themeImportFailed.
+  ///
+  /// In it, this message translates to:
+  /// **'Il file non è un tema valido'**
+  String get themeImportFailed;
+
+  /// No description provided for @themeDeleted.
+  ///
+  /// In it, this message translates to:
+  /// **'Tema eliminato'**
+  String get themeDeleted;
+
+  /// No description provided for @themeMine.
+  ///
+  /// In it, this message translates to:
+  /// **'I miei temi'**
+  String get themeMine;
+
+  /// No description provided for @tokenBg.
+  ///
+  /// In it, this message translates to:
+  /// **'Sfondo'**
+  String get tokenBg;
+
+  /// No description provided for @tokenSurface1.
+  ///
+  /// In it, this message translates to:
+  /// **'Superficie 1'**
+  String get tokenSurface1;
+
+  /// No description provided for @tokenSurface2.
+  ///
+  /// In it, this message translates to:
+  /// **'Superficie 2'**
+  String get tokenSurface2;
+
+  /// No description provided for @tokenSurface3.
+  ///
+  /// In it, this message translates to:
+  /// **'Superficie 3'**
+  String get tokenSurface3;
+
+  /// No description provided for @tokenAccent.
+  ///
+  /// In it, this message translates to:
+  /// **'Accento'**
+  String get tokenAccent;
+
+  /// No description provided for @tokenAccentSoft.
+  ///
+  /// In it, this message translates to:
+  /// **'Accento chiaro'**
+  String get tokenAccentSoft;
+
+  /// No description provided for @tokenOnAccent.
+  ///
+  /// In it, this message translates to:
+  /// **'Testo sull\'accento'**
+  String get tokenOnAccent;
+
+  /// No description provided for @tokenText.
+  ///
+  /// In it, this message translates to:
+  /// **'Testo'**
+  String get tokenText;
+
+  /// No description provided for @tokenTextMuted.
+  ///
+  /// In it, this message translates to:
+  /// **'Testo secondario'**
+  String get tokenTextMuted;
+
+  /// No description provided for @tokenTextFaint.
+  ///
+  /// In it, this message translates to:
+  /// **'Testo tenue'**
+  String get tokenTextFaint;
+
+  /// No description provided for @tokenHero.
+  ///
+  /// In it, this message translates to:
+  /// **'Sfondo del lettore'**
+  String get tokenHero;
+
+  /// No description provided for @tokenError.
+  ///
+  /// In it, this message translates to:
+  /// **'Errore'**
+  String get tokenError;
+
+  /// No description provided for @pickerHue.
+  ///
+  /// In it, this message translates to:
+  /// **'Tonalità'**
+  String get pickerHue;
+
+  /// No description provided for @pickerSv.
+  ///
+  /// In it, this message translates to:
+  /// **'Saturazione e luminosità'**
+  String get pickerSv;
+
+  /// No description provided for @pickerAlpha.
+  ///
+  /// In it, this message translates to:
+  /// **'Trasparenza'**
+  String get pickerAlpha;
+
+  /// No description provided for @pickerHex.
+  ///
+  /// In it, this message translates to:
+  /// **'Codice colore'**
+  String get pickerHex;
+
+  /// No description provided for @pickerInvalid.
+  ///
+  /// In it, this message translates to:
+  /// **'Codice non valido'**
+  String get pickerInvalid;
+
+  /// No description provided for @pickerRecent.
+  ///
+  /// In it, this message translates to:
+  /// **'Usati di recente'**
+  String get pickerRecent;
+
+  /// No description provided for @contrastTextBg.
+  ///
+  /// In it, this message translates to:
+  /// **'Testo su sfondo'**
+  String get contrastTextBg;
+
+  /// No description provided for @contrastMutedSurface.
+  ///
+  /// In it, this message translates to:
+  /// **'Testo secondario su superficie'**
+  String get contrastMutedSurface;
+
+  /// No description provided for @contrastOnAccent.
+  ///
+  /// In it, this message translates to:
+  /// **'Testo sull\'accento'**
+  String get contrastOnAccent;
+
+  /// No description provided for @contrastAccentBg.
+  ///
+  /// In it, this message translates to:
+  /// **'Accento su sfondo'**
+  String get contrastAccentBg;
+
+  /// No description provided for @themeBackground.
+  ///
+  /// In it, this message translates to:
+  /// **'Sfondo delle pagine'**
+  String get themeBackground;
+
+  /// No description provided for @bgSolid.
+  ///
+  /// In it, this message translates to:
+  /// **'Tinta unita'**
+  String get bgSolid;
+
+  /// No description provided for @bgGradient.
+  ///
+  /// In it, this message translates to:
+  /// **'Sfumatura'**
+  String get bgGradient;
+
+  /// No description provided for @bgImage.
+  ///
+  /// In it, this message translates to:
+  /// **'Immagine'**
+  String get bgImage;
+
+  /// No description provided for @bgGradientEnd.
+  ///
+  /// In it, this message translates to:
+  /// **'Colore finale'**
+  String get bgGradientEnd;
+
+  /// No description provided for @bgAngle.
+  ///
+  /// In it, this message translates to:
+  /// **'Direzione'**
+  String get bgAngle;
+
+  /// No description provided for @bgPickImage.
+  ///
+  /// In it, this message translates to:
+  /// **'Scegli immagine…'**
+  String get bgPickImage;
+
+  /// No description provided for @bgRemoveImage.
+  ///
+  /// In it, this message translates to:
+  /// **'Rimuovi immagine'**
+  String get bgRemoveImage;
+
+  /// No description provided for @bgDim.
+  ///
+  /// In it, this message translates to:
+  /// **'Oscuramento'**
+  String get bgDim;
+
+  /// No description provided for @bgBlur.
+  ///
+  /// In it, this message translates to:
+  /// **'Sfocatura'**
+  String get bgBlur;
+
+  /// No description provided for @bgCoverBackdrop.
+  ///
+  /// In it, this message translates to:
+  /// **'In riproduzione: tinta della copertina'**
+  String get bgCoverBackdrop;
+
+  /// No description provided for @bgImageFailed.
+  ///
+  /// In it, this message translates to:
+  /// **'Impossibile usare l\'immagine'**
+  String get bgImageFailed;
+
+  /// No description provided for @themeCopyName.
+  ///
+  /// In it, this message translates to:
+  /// **'{name} (copia)'**
+  String themeCopyName(String name);
+
   /// No description provided for @selectedCount.
   ///
   /// In it, this message translates to:

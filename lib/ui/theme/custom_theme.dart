@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart' show immutable;
+import 'package:flutter/foundation.dart' show immutable, mapEquals;
 import 'package:flutter/painting.dart';
 
 import 'palette.dart';
@@ -169,6 +169,32 @@ class CustomTheme {
     overrides: overrides ?? this.overrides,
     background: background ?? this.background,
   );
+
+  /// The same theme under another id (a copy, or an import).
+  CustomTheme withId(String newId) => CustomTheme(
+    id: newId,
+    name: name,
+    base: base,
+    overrides: overrides,
+    background: background,
+  );
+
+  /// What goes into a file for another device: a picture lives in this
+  /// device's own folder, so it is left out.
+  CustomTheme forExport() => copyWith(background: background.copyWith(clearImage: true));
+
+  @override
+  bool operator ==(Object other) =>
+      other is CustomTheme &&
+      other.id == id &&
+      other.name == name &&
+      other.base == base &&
+      mapEquals(other.overrides, overrides) &&
+      other.background == background;
+
+  @override
+  int get hashCode =>
+      Object.hash(id, name, base, Object.hashAllUnordered(overrides.entries.map((e) => Object.hash(e.key, e.value))), background);
 
   CustomTheme withColor(CcToken t, Color c) =>
       copyWith(overrides: {...overrides, t: _opaque(c)});

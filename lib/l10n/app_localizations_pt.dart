@@ -1969,6 +1969,194 @@ class AppLocalizationsPt extends AppLocalizations {
   String get curiosityNoSong => 'Nenhuma página sobre esta música';
 
   @override
+  String get themeNew => 'Novo tema';
+
+  @override
+  String get themeEdit => 'Editar';
+
+  @override
+  String get themeDuplicate => 'Duplicar';
+
+  @override
+  String get themeDelete => 'Excluir';
+
+  @override
+  String get themeExport => 'Exportar';
+
+  @override
+  String get themeImport => 'Importar tema';
+
+  @override
+  String get themeName => 'Nome do tema';
+
+  @override
+  String get themeBase => 'Começar de';
+
+  @override
+  String get themeModeSimple => 'Simples';
+
+  @override
+  String get themeModeAdvanced => 'Avançado';
+
+  @override
+  String get themeSave => 'Salvar';
+
+  @override
+  String get themeEditorTitle => 'Tema personalizado';
+
+  @override
+  String get themeDiscardTitle => 'Descartar as alterações?';
+
+  @override
+  String get themeDiscardBody => 'As alterações deste tema não foram salvas.';
+
+  @override
+  String get themeDiscard => 'Descartar';
+
+  @override
+  String get themePreview => 'Pré-visualização';
+
+  @override
+  String get themeResetColor => 'Restaurar a cor';
+
+  @override
+  String get themeContrastTitle => 'Legibilidade';
+
+  @override
+  String get themeContrastLow => 'Pouco legível';
+
+  @override
+  String get themeContrastOk => 'Legível';
+
+  @override
+  String get themeFix => 'Corrigir';
+
+  @override
+  String get themeSaved => 'Tema salvo';
+
+  @override
+  String get themeLimit => 'Você já tem 20 temas: exclua um';
+
+  @override
+  String get themeImported => 'Tema importado';
+
+  @override
+  String get themeImportFailed => 'O arquivo não é um tema válido';
+
+  @override
+  String get themeDeleted => 'Tema excluído';
+
+  @override
+  String get themeMine => 'Meus temas';
+
+  @override
+  String get tokenBg => 'Fundo';
+
+  @override
+  String get tokenSurface1 => 'Superfície 1';
+
+  @override
+  String get tokenSurface2 => 'Superfície 2';
+
+  @override
+  String get tokenSurface3 => 'Superfície 3';
+
+  @override
+  String get tokenAccent => 'Destaque';
+
+  @override
+  String get tokenAccentSoft => 'Destaque suave';
+
+  @override
+  String get tokenOnAccent => 'Texto sobre o destaque';
+
+  @override
+  String get tokenText => 'Texto';
+
+  @override
+  String get tokenTextMuted => 'Texto secundário';
+
+  @override
+  String get tokenTextFaint => 'Texto suave';
+
+  @override
+  String get tokenHero => 'Fundo do player';
+
+  @override
+  String get tokenError => 'Erro';
+
+  @override
+  String get pickerHue => 'Matiz';
+
+  @override
+  String get pickerSv => 'Saturação e brilho';
+
+  @override
+  String get pickerAlpha => 'Transparência';
+
+  @override
+  String get pickerHex => 'Código de cor';
+
+  @override
+  String get pickerInvalid => 'Código inválido';
+
+  @override
+  String get pickerRecent => 'Usadas recentemente';
+
+  @override
+  String get contrastTextBg => 'Texto sobre o fundo';
+
+  @override
+  String get contrastMutedSurface => 'Texto secundário sobre superfície';
+
+  @override
+  String get contrastOnAccent => 'Texto sobre o destaque';
+
+  @override
+  String get contrastAccentBg => 'Destaque sobre o fundo';
+
+  @override
+  String get themeBackground => 'Fundo das páginas';
+
+  @override
+  String get bgSolid => 'Cor sólida';
+
+  @override
+  String get bgGradient => 'Gradiente';
+
+  @override
+  String get bgImage => 'Imagem';
+
+  @override
+  String get bgGradientEnd => 'Cor final';
+
+  @override
+  String get bgAngle => 'Direção';
+
+  @override
+  String get bgPickImage => 'Escolher imagem…';
+
+  @override
+  String get bgRemoveImage => 'Remover a imagem';
+
+  @override
+  String get bgDim => 'Escurecimento';
+
+  @override
+  String get bgBlur => 'Desfoque';
+
+  @override
+  String get bgCoverBackdrop => 'Tocando: tom da capa';
+
+  @override
+  String get bgImageFailed => 'Não foi possível usar a imagem';
+
+  @override
+  String themeCopyName(String name) {
+    return '$name (cópia)';
+  }
+
+  @override
   String selectedCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

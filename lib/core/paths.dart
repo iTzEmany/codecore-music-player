@@ -21,3 +21,7 @@ Future<File> databaseFile() async =>
 
 /// Where a backup waits to replace the database at the next start.
 Future<Directory> restoreStagingDir() async => Directory(p.join(await appSupportDir(), 'restore'));
+
+/// `<appSupportDir>/theme`: the pictures chosen as a theme background.
+Future<Directory> themeDir() async =>
+    Directory(p.join(await appSupportDir(), 'theme'));

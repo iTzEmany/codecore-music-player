@@ -1,0 +1,425 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../l10n/app_localizations.dart';
+import '../../../l10n/l10n_ext.dart';
+import '../../../providers/settings_providers.dart';
+import '../../../providers/theme_providers.dart';
+import '../../theme/app_theme.dart';
+import '../../theme/tokens.dart';
+import '../../widgets/color_picker.dart';
+import '../../widgets/confirm.dart';
+import 'theme_background_editor.dart';
+import 'theme_labels.dart';
+
+/// The tokens a simple theme asks for; the rest follow from them.
+const _simpleTokens = [CcToken.bg, CcToken.accent, CcToken.text];
+
+/// One pair of colours that has to be readable together.
+class ContrastCheck {
+  const ContrastCheck(this.label, this.fg, this.bg, this.min, this.fix);
+
+  final String label;
+  final Color fg, bg;
+  final double min;
+
+  /// The token to move so the pair reads, and the value it should take.
+  final (CcToken, Color) Function() fix;
+
+  double get ratio => contrastRatio(fg, bg);
+  bool get ok => ratio >= min;
+}
+
+List<ContrastCheck> contrastChecks(AppLocalizations l, CcColors c) => [
+  ContrastCheck(l.contrastTextBg, c.text, c.bg, 4.5,
+      () => (CcToken.text, ensureContrast(c.text, c.bg))),
+  ContrastCheck(l.contrastMutedSurface, c.textMuted, c.surface1, 4.5,
+      () => (CcToken.textMuted, ensureContrast(c.textMuted, c.surface1))),
+  ContrastCheck(l.contrastOnAccent, c.onAccent, c.accent, 4.5,
+      () => (CcToken.onAccent, ensureContrast(c.onAccent, c.accent))),
+  ContrastCheck(l.contrastAccentBg, c.accent, c.bg, 3,
+      () => (CcToken.accent, ensureContrast(c.accent, c.bg, min: 3))),
+];
+
+/// Makes or changes one of the user's themes. Nothing is applied until «Salva».
+class ThemeEditorScreen extends ConsumerStatefulWidget {
+  const ThemeEditorScreen({super.key, required this.initial});
+
+  final CustomTheme initial;
+
+  @override
+  ConsumerState<ThemeEditorScreen> createState() => _ThemeEditorScreenState();
+}
+
+class _ThemeEditorScreenState extends ConsumerState<ThemeEditorScreen> {
+  late CustomTheme _t = widget.initial;
+  late final _name = TextEditingController(text: widget.initial.name);
+  bool _advanced = false;
+  bool _saved = false;
+  CcToken? _open;
+  final _recent = <Color>[];
+
+  bool get _dirty => _t.copyWith(name: _name.text.trim()) != widget.initial;
+
+  @override
+  void dispose() {
+    _name.dispose();
+    super.dispose();
+  }
+
+  void _set(CustomTheme next) => setState(() => _t = next);
+
+  void _pick(CcToken token, Color c) => _set(_t.withColor(token, c));
+
+  /// The colour of the row being closed becomes one of the «recent» ones (not
+  /// every step of a drag or of typing a code).
+  void _commitOpen() {
+    final t = _open;
+    final c = t == null ? null : _t.overrides[t];
+    if (c == null) return;
+    _recent
+      ..remove(c)
+      ..insert(0, c);
+    if (_recent.length > 8) _recent.removeLast();
+  }
+
+  Future<bool> _confirmDiscard() async {
+    if (!_dirty) return true;
+    final l = context.l10n;
+    return showConfirm(
+      context,
+      title: l.themeDiscardTitle,
+      body: l.themeDiscardBody,
+      confirmLabel: l.themeDiscard,
+      destructive: true,
+    );
+  }
+
+  void _save() {
+    final l = context.l10n;
+    _commitOpen();
+    final name = _name.text.trim();
+    final theme = _t.copyWith(name: name.isEmpty ? l.themeEditorTitle : name);
+    final ok = ref.read(customThemesProvider.notifier).put(theme);
+    final messenger = ScaffoldMessenger.of(context);
+    if (!ok) {
+      messenger
+        ..clearSnackBars()
+        ..showSnackBar(SnackBar(content: Text(l.themeLimit)));
+      return;
+    }
+    _saved = true;
+    ref
+        .read(settingsProvider.notifier)
+        .update((s) => s.copyWith(theme: customThemeSettingValue(theme.id)));
+    messenger
+      ..clearSnackBars()
+      ..showSnackBar(SnackBar(content: Text(l.themeSaved)));
+    Navigator.of(context).pop();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final cc = context.cc;
+    final colors = _t.resolve();
+    final tokens = _advanced ? CcToken.values : _simpleTokens;
+    final checks = contrastChecks(l, colors);
+    final text = Theme.of(context).textTheme;
+    return PopScope(
+      canPop: _saved || !_dirty,
+      onPopInvokedWithResult: (didPop, _) async {
+        if (didPop) return;
+        final nav = Navigator.of(context);
+        if (await _confirmDiscard()) nav.pop();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(l.themeEditorTitle),
+          actions: [
+            TextButton(onPressed: _save, child: Text(l.themeSave)),
+            const SizedBox(width: 8),
+          ],
+        ),
+        body: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 760),
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(CcDims.margin, 8, CcDims.margin, 32),
+              children: [
+                TextField(
+                  controller: _name,
+                  maxLength: 40,
+                  onChanged: (_) => setState(() {}),
+                  decoration: InputDecoration(labelText: l.themeName),
+                ),
+                const SizedBox(height: 8),
+                Text(l.themePreview, style: text.titleSmall),
+                const SizedBox(height: 8),
+                ThemePreview(colors: colors, background: _t.background),
+                const SizedBox(height: 16),
+                Text(l.themeBase, style: text.titleSmall),
+                const SizedBox(height: 8),
+                SegmentedButton<AppThemeId>(
+                  showSelectedIcon: false,
+                  segments: [
+                    ButtonSegment(value: AppThemeId.notte, label: Text(l.themeNotte)),
+                    ButtonSegment(value: AppThemeId.oled, label: Text(l.themeOled)),
+                    ButtonSegment(value: AppThemeId.chiaro, label: Text(l.themeChiaro)),
+                  ],
+                  selected: {_t.base},
+                  onSelectionChanged: (v) => _set(_t.copyWith(base: v.first)),
+                ),
+                const SizedBox(height: 16),
+                SegmentedButton<bool>(
+                  showSelectedIcon: false,
+                  segments: [
+                    ButtonSegment(value: false, label: Text(l.themeModeSimple)),
+                    ButtonSegment(value: true, label: Text(l.themeModeAdvanced)),
+                  ],
+                  selected: {_advanced},
+                  onSelectionChanged: (v) => setState(() {
+                    _commitOpen();
+                    _advanced = v.first;
+                    _open = null;
+                  }),
+                ),
+                const SizedBox(height: 8),
+                for (final t in tokens)
+                  _TokenRow(
+                    key: ValueKey('token-${t.name}'),
+                    label: tokenLabel(l, t),
+                    color: tokenColor(colors, t),
+                    set: _t.overrides.containsKey(t),
+                    open: _open == t,
+                    recent: _recent,
+                    onToggle: () => setState(() {
+                      _commitOpen();
+                      _open = _open == t ? null : t;
+                    }),
+                    onChanged: (c) => _pick(t, c),
+                    onReset: () => _set(_t.withoutColor(t)),
+                  ),
+                const SizedBox(height: 16),
+                Text(l.themeContrastTitle, style: text.titleSmall),
+                for (final c in checks)
+                  ListTile(
+                    key: ValueKey('contrast-${c.label}'),
+                    dense: true,
+                    contentPadding: EdgeInsets.zero,
+                    leading: Icon(
+                      c.ok ? Icons.check_circle_outline_rounded : Icons.warning_amber_rounded,
+                      color: c.ok ? cc.accentSoft : cc.error,
+                    ),
+                    title: Text(c.label),
+                    subtitle: Text(
+                      '${c.ratio.toStringAsFixed(1)}:1 · ${c.ok ? l.themeContrastOk : l.themeContrastLow}',
+                    ),
+                    trailing: c.ok
+                        ? null
+                        : TextButton(
+                            onPressed: () {
+                              final (token, color) = c.fix();
+                              _set(_t.withColor(token, color));
+                            },
+                            child: Text(l.themeFix),
+                          ),
+                  ),
+                const SizedBox(height: 16),
+                ThemeBackgroundEditor(
+                  themeId: _t.id,
+                  colors: colors,
+                  background: _t.background,
+                  recent: _recent,
+                  onChanged: (b) => _set(_t.copyWith(background: b)),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// A colour of the theme: its swatch and code; a tap opens the picker below.
+class _TokenRow extends StatelessWidget {
+  const _TokenRow({
+    super.key,
+    required this.label,
+    required this.color,
+    required this.set,
+    required this.open,
+    required this.recent,
+    required this.onToggle,
+    required this.onChanged,
+    required this.onReset,
+  });
+
+  final String label;
+  final Color color;
+  final bool set, open;
+  final List<Color> recent;
+  final VoidCallback onToggle, onReset;
+  final ValueChanged<Color> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final cc = context.cc;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ListTile(
+          contentPadding: EdgeInsets.zero,
+          onTap: onToggle,
+          leading: Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: color,
+              shape: BoxShape.circle,
+              border: Border.all(color: cc.textFaint),
+            ),
+          ),
+          title: Text(label),
+          subtitle: Text(colorToHex(color)),
+          trailing: set
+              ? IconButton(
+                  tooltip: l.themeResetColor,
+                  icon: const Icon(Icons.restart_alt_rounded),
+                  onPressed: onReset,
+                )
+              : Icon(open ? Icons.expand_less_rounded : Icons.expand_more_rounded),
+        ),
+        AnimatedSize(
+          duration: ccDuration(context, CcMotion.sheet),
+          alignment: Alignment.topCenter,
+          child: open
+              ? Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: CcColorPicker(
+                    color: color,
+                    onChanged: onChanged,
+                    recent: recent,
+                    labels: pickerLabels(l),
+                  ),
+                )
+              : const SizedBox(width: double.infinity),
+        ),
+      ],
+    );
+  }
+}
+
+/// A few real widgets in the theme being made, so the colours can be judged
+/// together before they are saved.
+class ThemePreview extends StatelessWidget {
+  const ThemePreview({super.key, required this.colors, required this.background});
+
+  final CcColors colors;
+  final ThemeBackground background;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final data = buildThemeFromColors(colors, false);
+    return Theme(
+      data: data,
+      child: Builder(
+        builder: (context) {
+          final text = Theme.of(context).textTheme;
+          return ClipRRect(
+            borderRadius: BorderRadius.circular(CcDims.rCard),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: colors.bg,
+                gradient: themeGradient(colors, background),
+                border: Border.all(color: colors.surface3),
+                borderRadius: BorderRadius.circular(CcDims.rCard),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(l.tokenText, style: text.titleMedium),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: colors.surface3,
+                            borderRadius: BorderRadius.circular(CcDims.rList),
+                          ),
+                          child: Icon(Icons.music_note_rounded, color: colors.accent),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(l.tokenText, style: text.bodyLarge),
+                              Text(l.tokenTextMuted, style: text.bodyMedium),
+                              Text(l.tokenTextFaint,
+                                  style: text.bodySmall?.copyWith(color: colors.textFaint)),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: colors.surface1,
+                        borderRadius: BorderRadius.circular(CcDims.rCard),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(child: Text(l.tokenSurface1, style: text.bodyMedium)),
+                          Switch(value: true, onChanged: (_) {}),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: colors.surface2,
+                        borderRadius: BorderRadius.circular(CcDims.rCard),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(child: Text(l.tokenSurface2, style: text.bodyMedium)),
+                          Text(l.tokenError, style: TextStyle(color: colors.error)),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        FilledButton(onPressed: () {}, child: Text(l.tokenOnAccent)),
+                        OutlinedButton(onPressed: () {}, child: Text(l.tokenAccent)),
+                        Chip(
+                          label: Text(l.tokenAccentSoft),
+                          backgroundColor: colors.surface3,
+                          labelStyle: TextStyle(color: colors.accentSoft),
+                          side: BorderSide.none,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}

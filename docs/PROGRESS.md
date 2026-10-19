@@ -323,7 +323,7 @@ L'agente riparte sempre dal primo task non spuntato.
 - [~] 26.10 Rifinitura, documentazione e prova a mano (versione 1.2.0 impostata, documenti fatti; tag `v1.2.0` e release dalla CI toccano a te)
 
 ## Fase 27 — Selezione ordinata e tema libero (`fase-27-selezione-ordinata-e-tema-libero.md`)
-**Piano 2026-10-19; parte A (selezione) fatta, parte B (tema) da fare.** Richieste dell'utente: ordine di selezione rispettato da coda/playlist, tema con ogni colore personalizzabile.
+**Fase fatta (2026-10-19).** Richieste dell'utente: ordine di selezione rispettato da coda/playlist, tema con ogni colore personalizzabile.
 - [x] 27.1 Selezione: modello ordinato e test (puro)
 - [x] 27.2 Selezione: consumatori (barra, azioni di gruppo, trascinamento, download YouTube, invio, playlist)
 - [x] 27.3 Selezione: numeri sulle righe
@@ -331,12 +331,13 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 27.5 Tema: modello `CustomTheme` e derivazione dei colori (puro)
 - [x] 27.6 Tema: salvataggio, scelta, backup
 - [x] 27.7 Tema: selettore colore
-- [ ] 27.8 Tema: editor con anteprima viva e controllo del contrasto
-- [ ] 27.9 Tema: elenco e gestione (nuovo, duplica, rinomina, elimina, esporta/importa)
-- [ ] 27.10 Tema: sfondo (tinta unita, sfumatura, immagine)
-- [ ] 27.11 Tema: pulizia dei colori fuori dai token e test di regressione
-- [ ] 27.12 Rifinitura, documentazione e prova a mano
+- [x] 27.8 Tema: editor con anteprima viva e controllo del contrasto
+- [x] 27.9 Tema: elenco e gestione (nuovo, duplica, rinomina, elimina, esporta/importa)
+- [x] 27.10 Tema: sfondo (tinta unita, sfumatura, immagine)
+- [x] 27.11 Tema: pulizia dei colori fuori dai token e test di regressione
+- [x] 27.12 Rifinitura, documentazione e prova a mano (Mi A3: editor, selettore, «Correggi», sfumatura e foto di sfondo su tutta l'app, ripristino del tema; non provati: esportazione su file, leggibilità al sole, desktop)
 
+- 27.* (2026-10-19): **Tema libero.** Scelte rispetto al piano: (a) una sola `ThemeBackground` per tema, con `isCustom` che decide se serve il livello `AppBackground`; (b) il selettore colore è fatto in casa (`color_picker.dart`, scritto da un sotto-agente, nessun pacchetto nuovo) con le etichette passate dal chiamante; (c) «Correggi» sposta la luminosità di un colore finché la coppia raggiunge 4,5:1 (3:1 per accento su sfondo); (d) `Colors.white` della copertina «Preferiti» è diventato `cc.onAccent`; il QR resta bianco e il selettore dipinge i suoi gradienti (unici due file consentiti dal test `no_stray_colors_test`); (e) schermo sempre verticale su Android (`screenOrientation="portrait"` nel manifest + `setPreferredOrientations`), richiesta dell'utente: **anche la modalità Auto/«auto» non ruota più**. Prova sul Mi A3: la tastiera (DPAD) ha scelto `plcover.jpg` invece di `bg_test.png` nel selettore di sistema; la foto è stata importata (600×600) e mostrata come sfondo di tutte le pagine; ripristinato il tema originale («Nero puro», accento arancio) ed eliminate le immagini di prova.
 ## Note di deviazione
 <!-- una riga per deviazione: data — task — cosa è cambiato e perché -->
 

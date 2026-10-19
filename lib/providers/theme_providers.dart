@@ -57,3 +57,10 @@ final themeColorsProvider = Provider<CcColors>((ref) {
   final s = ref.watch(settingsProvider);
   return resolveColors(s.theme, s.accent, ref.watch(customThemesProvider));
 });
+
+/// The background of the theme in use (plain when it is not one of the user's).
+final themeBackgroundProvider = Provider<ThemeBackground>((ref) {
+  final id = customThemeIdOf(ref.watch(settingsProvider).theme);
+  if (id == null) return const ThemeBackground();
+  return ref.watch(customThemesProvider).byId(id)?.background ?? const ThemeBackground();
+});

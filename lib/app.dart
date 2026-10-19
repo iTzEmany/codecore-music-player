@@ -33,6 +33,8 @@ class CodecoreApp extends ConsumerWidget {
       ));
     });
     final s = ref.watch(settingsProvider);
+    final themeColors = ref.watch(themeColorsProvider);
+    final themeBackground = ref.watch(themeBackgroundProvider);
     ref.read(audioHandlerProvider)
       ..recordHistory = s.recordHistory
       ..setNormalize(s.normalizeVolume)
@@ -46,7 +48,11 @@ class CodecoreApp extends ConsumerWidget {
       title: 'Codecore',
       scaffoldMessengerKey: _messengerKey,
       debugShowCheckedModeBanner: false,
-      theme: buildThemeFromColors(ref.watch(themeColorsProvider), s.compactMode),
+      theme: buildThemeFromColors(
+        themeColors,
+        s.compactMode,
+        pageBackdrop: themeBackground.isCustom,
+      ),
       locale: Locale(s.language),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
@@ -55,7 +61,11 @@ class CodecoreApp extends ConsumerWidget {
           disableAnimations: s.reducedMotion,
           textScaler: TextScaler.linear(s.fontScale),
         ),
-        child: child ?? const SizedBox.shrink(),
+        child: AppBackground(
+          colors: themeColors,
+          background: themeBackground,
+          child: child ?? const SizedBox.shrink(),
+        ),
       ),
       home: const OnboardingGate(child: AppShell()),
     );
