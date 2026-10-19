@@ -3496,4 +3496,27 @@ class AppLocalizationsPt extends AppLocalizations {
   String translationModelDelete(String language) {
     return 'Excluir o modelo $language';
   }
+
+  @override
+  String get scanCode => 'Ler código';
+
+  @override
+  String get scanTitle => 'Aponta ao código QR';
+
+  @override
+  String get scanNotCodecore => 'Este código não é do Codecore.';
+
+  @override
+  String get scanCameraDenied =>
+      'É preciso a permissão da câmara para ler o código.';
+
+  @override
+  String get scanOpenSettings => 'Abrir definições';
+
+  @override
+  String get ownFingerprint => 'Impressão digital deste dispositivo';
+
+  @override
+  String get ownFingerprintHint =>
+      'Compara-a com a do outro ecrã ao emparelhar.';
 }

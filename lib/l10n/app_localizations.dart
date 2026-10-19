@@ -5528,6 +5528,48 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Elimina il modello {language}'**
   String translationModelDelete(String language);
+
+  /// No description provided for @scanCode.
+  ///
+  /// In it, this message translates to:
+  /// **'Scansiona codice'**
+  String get scanCode;
+
+  /// No description provided for @scanTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Inquadra il codice QR'**
+  String get scanTitle;
+
+  /// No description provided for @scanNotCodecore.
+  ///
+  /// In it, this message translates to:
+  /// **'Questo codice non è di Codecore.'**
+  String get scanNotCodecore;
+
+  /// No description provided for @scanCameraDenied.
+  ///
+  /// In it, this message translates to:
+  /// **'Serve il permesso della fotocamera per leggere il codice.'**
+  String get scanCameraDenied;
+
+  /// No description provided for @scanOpenSettings.
+  ///
+  /// In it, this message translates to:
+  /// **'Apri impostazioni'**
+  String get scanOpenSettings;
+
+  /// No description provided for @ownFingerprint.
+  ///
+  /// In it, this message translates to:
+  /// **'Impronta di questo dispositivo'**
+  String get ownFingerprint;
+
+  /// No description provided for @ownFingerprintHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Si confronta con quella mostrata sull’altro schermo quando ci si abbina.'**
+  String get ownFingerprintHint;
 }
 
 class _AppLocalizationsDelegate

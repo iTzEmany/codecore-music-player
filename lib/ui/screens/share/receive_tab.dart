@@ -13,7 +13,9 @@ import '../../../providers/share_providers.dart';
 import '../../../providers/youtube_providers.dart';
 import '../../../services/share/lan_client.dart';
 import '../../../providers/share_hub.dart';
+import '../../../core/platform.dart';
 import 'incoming_offer_tile.dart';
+import 'qr_scan_screen.dart';
 
 class ReceiveTab extends ConsumerStatefulWidget {
   const ReceiveTab({super.key});
@@ -55,6 +57,14 @@ class _ReceiveTabState extends ConsumerState<ReceiveTab> {
       LanError.failed => l.shareErrFailed,
       LanError.identityChanged => l.shareErrIdentity,
     };
+  }
+
+  Future<void> _scan() async {
+    final link = await scanShareLink(context);
+    if (link == null || !mounted) return;
+    _address.text = '${link.host}:${link.port}';
+    _pin.text = link.pin;
+    await _connect();
   }
 
   Future<void> _connect() async {
@@ -190,6 +200,15 @@ class _ReceiveTabState extends ConsumerState<ReceiveTab> {
           border: const OutlineInputBorder(),
         ),
       ),
+      if (isAndroid)
+        Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: OutlinedButton.icon(
+            onPressed: _busy ? null : _scan,
+            icon: const Icon(Icons.qr_code_scanner_rounded),
+            label: Text(l.scanCode),
+          ),
+        ),
       FilledButton(
         onPressed: _busy ? null : _connect,
         child: Text(l.shareConnect),

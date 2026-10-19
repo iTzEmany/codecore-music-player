@@ -3506,4 +3506,27 @@ class AppLocalizationsDe extends AppLocalizations {
   String translationModelDelete(String language) {
     return 'Modell $language löschen';
   }
+
+  @override
+  String get scanCode => 'Code scannen';
+
+  @override
+  String get scanTitle => 'QR-Code anvisieren';
+
+  @override
+  String get scanNotCodecore => 'Dieser Code ist nicht von Codecore.';
+
+  @override
+  String get scanCameraDenied =>
+      'Zum Lesen des Codes wird die Kameraberechtigung benötigt.';
+
+  @override
+  String get scanOpenSettings => 'Einstellungen öffnen';
+
+  @override
+  String get ownFingerprint => 'Fingerabdruck dieses Geräts';
+
+  @override
+  String get ownFingerprintHint =>
+      'Vergleiche ihn beim Koppeln mit dem auf dem anderen Bildschirm.';
 }

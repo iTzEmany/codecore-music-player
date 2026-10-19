@@ -2087,5 +2087,12 @@
         "type": "String"
       }
     }
-  }
+  },
+  "scanCode": "Escanear código",
+  "scanTitle": "Apunta al código QR",
+  "scanNotCodecore": "Este código no es de Codecore.",
+  "scanCameraDenied": "Hace falta el permiso de la cámara para leer el código.",
+  "scanOpenSettings": "Abrir ajustes",
+  "ownFingerprint": "Huella de este dispositivo",
+  "ownFingerprintHint": "Compárala con la que aparece en la otra pantalla al emparejar."
 }

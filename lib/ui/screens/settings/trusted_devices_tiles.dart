@@ -74,3 +74,15 @@ class _DeviceTile extends ConsumerWidget {
     );
   }
 }
+
+/// «Impronta di questo dispositivo»: what to compare when pairing.
+Widget ownFingerprintTile(BuildContext context, WidgetRef ref) {
+  final l = context.l10n;
+  final fp = ref.watch(ownIdentityProvider).value?.fingerprint;
+  return ListTile(
+    leading: const Icon(Icons.fingerprint_rounded),
+    title: Text(l.ownFingerprint),
+    subtitle: Text(fp == null ? l.ownFingerprintHint : '${formatFingerprint(fp, groups: 8)}\n${l.ownFingerprintHint}'),
+    isThreeLine: fp != null,
+  );
+}

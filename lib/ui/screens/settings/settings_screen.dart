@@ -247,6 +247,7 @@ class SettingsScreen extends ConsumerWidget {
                   onChanged: (v) =>
                       notifier.update((c) => c.copyWith(receiveFromLan: v)),
                 ),
+                ownFingerprintTile(context, ref),
                 ListTile(
                   leading: const Icon(Icons.badge_outlined),
                   title: Text(l.shareDeviceName),

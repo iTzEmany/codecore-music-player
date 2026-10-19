@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import '../services/share/device_identity.dart';
+import '../core/paths.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:network_info_plus/network_info_plus.dart';
 import 'package:path/path.dart' as p;
@@ -139,3 +141,13 @@ class TrustedDevicesNotifier extends Notifier<TrustedDevices> {
 
 final trustedDevicesProvider =
     NotifierProvider<TrustedDevicesNotifier, TrustedDevices>(TrustedDevicesNotifier.new);
+
+/// This device's identity (made on first use); null if it could not be made.
+final ownIdentityProvider = FutureProvider<DeviceIdentity?>((ref) async {
+  try {
+    return await DeviceIdentity.loadOrCreate(Directory(await appSupportDir()));
+  } on Object catch (e, st) {
+    AppLog.w('no device identity', e, st);
+    return null;
+  }
+}, retry: (_, _) => null);

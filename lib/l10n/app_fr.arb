@@ -2278,5 +2278,12 @@
         "type": "String"
       }
     }
-  }
+  },
+  "scanCode": "Scanner le code",
+  "scanTitle": "Vise le code QR",
+  "scanNotCodecore": "Ce code n’est pas de Codecore.",
+  "scanCameraDenied": "L’autorisation de la caméra est nécessaire pour lire le code.",
+  "scanOpenSettings": "Ouvrir les réglages",
+  "ownFingerprint": "Empreinte de cet appareil",
+  "ownFingerprintHint": "Compare-la avec celle de l’autre écran lors de l’association."
 }

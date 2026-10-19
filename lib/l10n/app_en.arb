@@ -2087,5 +2087,12 @@
         "type": "String"
       }
     }
-  }
+  },
+  "scanCode": "Scan code",
+  "scanTitle": "Point at the QR code",
+  "scanNotCodecore": "This code is not from Codecore.",
+  "scanCameraDenied": "The camera permission is needed to read the code.",
+  "scanOpenSettings": "Open settings",
+  "ownFingerprint": "This device’s fingerprint",
+  "ownFingerprintHint": "Compare it with the one shown on the other screen when pairing."
 }
