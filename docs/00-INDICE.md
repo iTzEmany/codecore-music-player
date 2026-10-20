@@ -44,6 +44,7 @@ un'unica codebase Flutter per Android, Windows e Linux. Uso personale, niente co
 | 25 | `fase-25-android-esteso.md` | Widget, tile rapida, Android Auto, Wear OS, modalità in auto |
 | 26 | `fase-26-distribuzione.md` | Pacchetti Linux, installer Windows, APK più piccolo, avviso aggiornamenti, F-Droid, macOS/iOS, guida utente |
 | 27 | `fase-27-selezione-ordinata-e-tema-libero.md` | Selezione multipla nell'ordine dei tocchi (con numeri) e tema totalmente personalizzabile (colori, sfondo, immagine) |
+| 28 | `fase-28-prestazioni-e-fluidita.md` | Zero lag sul Mi A3 con 3000 brani, microanimazioni, ricerca online diretta (< 1,5 s), ascolto in streaming prima di scaricare, copertine leggere |
 
 Dopo la **Fase 3** l'app è già usabile come lettore. Le fasi 5 e 6 sono indipendenti tra loro. La fase 8 (Jam) richiede la 6.
 
