@@ -17,6 +17,7 @@ import '../../widgets/selection_bar.dart';
 import '../../widgets/track_row_selection.dart';
 import '../../widgets/yt_dlp_outdated_banner.dart';
 import 'playlist_source_sheet.dart';
+import '../../widgets/net_thumbnail.dart';
 
 String ytErrorText(BuildContext context, YtErrorKind k) {
   final l = context.l10n;
@@ -408,29 +409,11 @@ class _ResultRow extends StatelessWidget {
                   )
                 else
                   const SizedBox(width: CcDims.margin),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(CcDims.rList),
-                  child: SizedBox(
-                    width: 80,
-                    height: 45,
-                    child: result.thumbnailUrl == null
-                        ? ColoredBox(
-                            color: cc.surface3,
-                            child: Icon(Icons.music_video, color: cc.textMuted),
-                          )
-                        : Image.network(
-                            result.thumbnailUrl!,
-                            cacheWidth: 160,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, _, _) => ColoredBox(
-                              color: cc.surface3,
-                              child: Icon(
-                                Icons.music_video,
-                                color: cc.textMuted,
-                              ),
-                            ),
-                          ),
-                  ),
+                NetThumbnail(
+                  url: result.thumbnailUrl,
+                  width: 80,
+                  height: 45,
+                  icon: Icons.music_video,
                 ),
                 const SizedBox(width: 12),
                 Expanded(

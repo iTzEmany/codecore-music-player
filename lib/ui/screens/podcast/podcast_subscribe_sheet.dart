@@ -6,6 +6,7 @@ import '../../../providers/podcast_providers.dart';
 import '../../../services/podcast/podcast_models.dart';
 import '../../theme/tokens.dart';
 import 'podcast_texts.dart';
+import '../../widgets/net_thumbnail.dart';
 
 /// «Aggiungi podcast»: paste a feed address, or search the public directory by
 /// name and pick a result. Nothing is fetched until the user asks.
@@ -165,26 +166,11 @@ class _PodcastSubscribeSheetState extends ConsumerState<PodcastSubscribeSheet> {
             ListTile(
               key: ValueKey('hit-${h.feedUrl}'),
               contentPadding: EdgeInsets.zero,
-              leading: ClipRRect(
-                borderRadius: BorderRadius.circular(CcDims.rList),
-                child: SizedBox(
-                  width: 48,
-                  height: 48,
-                  child: h.artworkUrl == null
-                      ? ColoredBox(
-                          color: cc.surface3,
-                          child: Icon(Icons.podcasts_rounded, color: cc.textMuted),
-                        )
-                      : Image.network(
-                          h.artworkUrl!,
-                          cacheWidth: 96,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, _, _) => ColoredBox(
-                            color: cc.surface3,
-                            child: Icon(Icons.podcasts_rounded, color: cc.textMuted),
-                          ),
-                        ),
-                ),
+              leading: NetThumbnail(
+                url: h.artworkUrl,
+                width: 48,
+                height: 48,
+                icon: Icons.podcasts_rounded,
               ),
               title: Text(h.name, maxLines: 1, overflow: TextOverflow.ellipsis),
               subtitle: Text(

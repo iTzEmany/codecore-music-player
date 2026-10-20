@@ -154,10 +154,6 @@ Duration? parseClock(String text) {
   );
 }
 
-/// The smallest picture YouTube keeps for every video (320×180, ~15 KB): the
-/// results show it at 80×45.
-String smallVideoThumbnail(String id) => 'https://i.ytimg.com/vi/$id/mqdefault.jpg';
-
 void _ensureKnown(Map data, String container) {
   final contents = data['contents'];
   if (contents is! Map || !contents.containsKey(container)) {

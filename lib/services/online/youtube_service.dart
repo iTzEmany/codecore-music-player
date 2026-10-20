@@ -57,6 +57,25 @@ class YtResult {
 
 String downloadIndexKey(MediaSource source, String id) => '${source.name}:$id';
 
+/// The smallest picture YouTube keeps for every video (320×180, ~15 KB): the
+/// results show it at 80×45.
+String smallVideoThumbnail(String id) => 'https://i.ytimg.com/vi/$id/mqdefault.jpg';
+
+/// From a yt-dlp list of pictures (`{url, width}`), the smallest at least
+/// [minWidth] px wide; the widest one when none is that big, null when none
+/// has a width.
+String? smallestThumbnail(Object? thumbnails, {int minWidth = 160}) {
+  if (thumbnails is! List) return null;
+  ({String url, int width})? best, widest;
+  for (final t in thumbnails) {
+    if (t is! Map || t['url'] is! String || t['width'] is! num) continue;
+    final c = (url: t['url'] as String, width: (t['width'] as num).toInt());
+    if (widest == null || c.width > widest.width) widest = c;
+    if (c.width >= minWidth && (best == null || c.width < best.width)) best = c;
+  }
+  return (best ?? widest)?.url;
+}
+
 /// What a download is saved as, best quality first. [original] and [m4a]
 /// keep the audio as served; the MP3s are re-encoded for players that need them.
 enum DownloadFormat { original, m4a, mp3High, mp3Low }

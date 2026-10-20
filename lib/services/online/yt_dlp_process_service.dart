@@ -94,7 +94,11 @@ List<YtResult> _results(List entries) {
     if (source != MediaSource.youtube && (page is! String || page.isEmpty)) {
       continue;
     }
-    String? thumb = e['thumbnail'] as String?;
+    // The smallest picture that fills a result row, not the biggest yt-dlp
+    // lists first (1280×720 for a video, the original artwork on SoundCloud).
+    String? thumb = source == MediaSource.youtube
+        ? smallVideoThumbnail(id)
+        : smallestThumbnail(e['thumbnails']) ?? e['thumbnail'] as String?;
     final thumbs = e['thumbnails'];
     if (thumb == null && thumbs is List && thumbs.isNotEmpty) {
       final last = thumbs.last;

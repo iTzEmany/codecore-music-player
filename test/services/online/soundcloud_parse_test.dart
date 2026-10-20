@@ -27,7 +27,7 @@ void main() {
       final r = res.firstWhere((x) => x.id == '2158904142');
       expect(r.channel, 'HOUZ');
       expect(r.downloadUrl, startsWith('https://soundcloud.com/'));
-      expect(r.thumbnailUrl, isNotNull);
+      expect(r.thumbnailUrl, endsWith('-large.jpg'), reason: 'the only picture listed here');
     });
 
     test('31 s is still a preview, 32 s is not', () {

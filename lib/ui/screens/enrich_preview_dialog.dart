@@ -9,6 +9,7 @@ import '../../l10n/l10n_ext.dart';
 import '../../providers/online_providers.dart';
 import '../../services/online/enrichment_service.dart';
 import '../../services/online/http_client.dart';
+import '../widgets/net_thumbnail.dart';
 
 Future<void> showEnrichPreview(BuildContext context, Track track) {
   return showDialog<void>(
@@ -172,15 +173,12 @@ class _State extends ConsumerState<_EnrichPreviewDialog> {
                       subtitle: r.field == EnrichField.cover
                           ? Align(
                               alignment: Alignment.centerLeft,
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(8),
-                                child: Image.network(
-                                  r.proposed!,
-                                  width: 72,
-                                  height: 72,
-                                  errorBuilder: (_, _, _) =>
-                                      const Icon(Icons.image_not_supported),
-                                ),
+                              child: NetThumbnail(
+                                url: r.proposed,
+                                width: 72,
+                                height: 72,
+                                radius: 8,
+                                icon: Icons.image_outlined,
                               ),
                             )
                           : (_locked(r)

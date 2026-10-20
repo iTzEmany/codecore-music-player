@@ -13,7 +13,22 @@ void main() {
     expect(r.single.id, 'abc');
     expect(r.single.channel, 'Band');
     expect(r.single.duration, const Duration(seconds: 200));
-    expect(r.single.thumbnailUrl, 'https://t/2.jpg');
+    expect(r.single.thumbnailUrl, 'https://i.ytimg.com/vi/abc/mqdefault.jpg',
+        reason: 'the small 320×180 picture, not the biggest listed');
+  });
+
+  test('the smallest listed picture that still fills a row', () {
+    final list = [
+      {'url': 'mini', 'width': 16},
+      {'url': 'large', 'width': 100},
+      {'url': 't300', 'width': 300},
+      {'url': 't500', 'width': 500},
+      {'url': 'original'},
+    ];
+    expect(smallestThumbnail(list), 't300');
+    expect(smallestThumbnail(list.take(2).toList()), 'large', reason: 'none big enough: the widest');
+    expect(smallestThumbnail([{'url': 'x'}]), isNull);
+    expect(smallestThumbnail(null), isNull);
   });
 
   test('parses a single video JSON', () {
