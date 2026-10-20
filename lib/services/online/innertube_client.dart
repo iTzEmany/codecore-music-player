@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 
 import '../../core/text_utils.dart';
+import 'request_budget.dart';
 import 'youtube_service.dart';
 
 /// The answer of a direct search was not what this client knows how to read
@@ -27,16 +28,12 @@ class InnerTubeClient {
       : _dio = dio ??
             Dio(BaseOptions(
               connectTimeout: const Duration(seconds: 8),
-              receiveTimeout: const Duration(seconds: 10),
+              receiveTimeout: const Duration(seconds: 15),
               validateStatus: (_) => true,
             ));
 
   final Dio _dio;
 
-  /// What the web pages send; yt-dlp and NewPipe send the same.
-  static const _browserAgent =
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
-      '(KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36';
   static const webVersion = '2.20250101.00.00';
   static const musicVersion = '1.20250101.01.00';
 
@@ -71,7 +68,7 @@ class InnerTubeClient {
         options: Options(
           responseType: ResponseType.json,
           headers: {
-            'User-Agent': _browserAgent,
+            'User-Agent': apiUserAgent,
             'Origin': origin,
             Headers.contentTypeHeader: Headers.jsonContentType,
           },
