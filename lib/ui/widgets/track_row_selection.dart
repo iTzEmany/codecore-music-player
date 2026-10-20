@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/tokens.dart';
+import 'motion.dart';
 
 /// What a list tells its rows so they can be picked together: the key of its
 /// selection (see `selectionProvider`) and the ids as they are shown, which
@@ -50,25 +51,36 @@ class SelectionBox extends StatelessWidget {
               width: 2,
             ),
           ),
-          child: !selected
-              ? null
-              : position == null
-              ? Icon(Icons.check_rounded, size: box - 6, color: cc.onAccent)
-              : Padding(
-                  padding: const EdgeInsets.all(2),
-                  // FittedBox: a big number or a large system font shrinks
-                  // instead of overflowing the circle.
-                  child: FittedBox(
-                    child: Text(
-                      position! > 99 ? '99+' : '$position',
-                      style: TextStyle(
-                        color: cc.onAccent,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 13,
+          child: AnimatedSwitcher(
+            duration: ccDuration(context, Motion.enter),
+            switchInCurve: Motion.curve,
+            transitionBuilder: popIn,
+            child: !selected
+                ? const SizedBox.shrink()
+                : position == null
+                ? Icon(
+                    Icons.check_rounded,
+                    key: const ValueKey('tick'),
+                    size: box - 6,
+                    color: cc.onAccent,
+                  )
+                : Padding(
+                    key: ValueKey(position),
+                    padding: const EdgeInsets.all(2),
+                    // FittedBox: a big number or a large system font shrinks
+                    // instead of overflowing the circle.
+                    child: FittedBox(
+                      child: Text(
+                        position! > 99 ? '99+' : '$position',
+                        style: TextStyle(
+                          color: cc.onAccent,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 13,
+                        ),
                       ),
                     ),
                   ),
-                ),
+          ),
         ),
       ),
     );

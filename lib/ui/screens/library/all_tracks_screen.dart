@@ -19,6 +19,7 @@ import '../../widgets/selection_bar.dart';
 import '../../widgets/track_row.dart';
 import '../../widgets/track_row_selection.dart';
 import 'scan_status.dart';
+import '../../widgets/motion.dart';
 
 String _sortLabel(BuildContext context, SortOption o) {
   final l = context.l10n;
@@ -85,15 +86,20 @@ class _AllTracksScreenState extends ConsumerState<AllTracksScreen> {
       visibleIds: [for (final t in list) t.id],
     );
     final extent = trackRowExtentOf(context, compact);
-    final view = ListView.builder(
-      controller: _scroll,
-      itemExtent: extent,
-      itemCount: list.length,
-      itemBuilder: (_, i) => LiveTrackRow(
-        track: list[i],
-        compact: compact,
-        selection: selection,
-        onTap: () => ctrl.playFromList(list, i, context: ctx),
+    final view = EntranceScope(
+      child: ListView.builder(
+        controller: _scroll,
+        itemExtent: extent,
+        itemCount: list.length,
+        itemBuilder: (_, i) => EnterOnce(
+          index: i,
+          child: LiveTrackRow(
+            track: list[i],
+            compact: compact,
+            selection: selection,
+            onTap: () => ctrl.playFromList(list, i, context: ctx),
+          ),
+        ),
       ),
     );
     // The A–Z strip only makes sense when the order is alphabetical.

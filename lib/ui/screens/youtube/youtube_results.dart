@@ -20,6 +20,7 @@ import '../../widgets/yt_dlp_outdated_banner.dart';
 import 'listen_bar.dart';
 import 'playlist_source_sheet.dart';
 import '../../widgets/net_thumbnail.dart';
+import '../../widgets/motion.dart';
 
 String ytErrorText(BuildContext context, YtErrorKind k) {
   final l = context.l10n;
@@ -300,7 +301,10 @@ class _YoutubeResultsState extends ConsumerState<YoutubeResults> {
                     icon: Icons.smart_display,
                     message: _searched ? l.ytNoResults : l.ytSearchPrompt,
                   )
-                : ListView.builder(
+                : EntranceScope(
+                    // A new search is a new list: its rows come in again.
+                    key: ValueKey(_requestId),
+                    child: ListView.builder(
                     itemExtent: 72,
                     itemCount: _results.length,
                     itemBuilder: (_, i) {
@@ -313,7 +317,7 @@ class _YoutubeResultsState extends ConsumerState<YoutubeResults> {
                       final notifier = ref.read(
                         selectionProvider(_selectionKey).notifier,
                       );
-                      return _ResultRow(
+                      return EnterOnce(index: i, child: _ResultRow(
                         result: r,
                         inLibrary: inLibrary,
                         item: item,
@@ -327,8 +331,9 @@ class _YoutubeResultsState extends ConsumerState<YoutubeResults> {
                         onDownload: () =>
                             ref.read(downloadsProvider.notifier).add(r),
                         listen: selecting ? null : ListenButton(result: r),
-                      );
+                      ));
                     },
+                  ),
                   ),
           ),
           const ListenBar(),

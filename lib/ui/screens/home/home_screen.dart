@@ -25,6 +25,7 @@ import '../library/folders_sheet.dart';
 import '../playlists/playlist_detail_screen.dart';
 import '../settings/settings_screen.dart';
 import '../stats/stats_screen.dart';
+import '../../widgets/motion.dart';
 
 String _greeting(AppLocalizations l, int hour) =>
     switch (greetingForHour(hour)) {
@@ -127,7 +128,7 @@ class HomeScreen extends ConsumerWidget {
       sort: LibrarySort.recent,
     ).where((e) => e.lastPlayedAt != null).take(5).toList();
 
-    Widget tile(Widget cover, String title, VoidCallback onTap) => Material(
+    Widget tile(Widget cover, String title, VoidCallback onTap) => PressScale(child: Material(
       color: cc.surface1,
       borderRadius: BorderRadius.circular(6),
       clipBehavior: Clip.antiAlias,
@@ -153,7 +154,7 @@ class HomeScreen extends ConsumerWidget {
           ],
         ),
       ),
-    );
+    ));
 
     final tiles = <Widget>[
       tile(
@@ -205,7 +206,7 @@ class HomeScreen extends ConsumerWidget {
       String title,
       String subtitle,
       VoidCallback tap,
-    ) => InkWell(
+    ) => PressScale(child: InkWell(
       onTap: tap,
       borderRadius: BorderRadius.circular(CcDims.rGrid),
       child: Padding(
@@ -233,7 +234,7 @@ class HomeScreen extends ConsumerWidget {
           ),
         ),
       ),
-    );
+    ));
 
     List<Widget> albumCards(List<AlbumSummary> list) => [
       for (final a in list)

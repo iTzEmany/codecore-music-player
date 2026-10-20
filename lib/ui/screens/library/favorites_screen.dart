@@ -15,6 +15,7 @@ import '../../widgets/selection_bar.dart';
 import '../../widgets/track_row.dart';
 import '../../widgets/track_row_selection.dart';
 import 'album_detail_screen.dart' show tracksAndMinutes;
+import '../../widgets/motion.dart';
 
 /// The favourites as a collection page (pinned in the Library).
 class FavoritesScreen extends ConsumerWidget {
@@ -113,15 +114,20 @@ class FavoritesScreen extends ConsumerWidget {
               ),
             )
           else
-            SliverList.builder(
-              itemCount: list.length,
-              itemBuilder: (_, i) => SizedBox(
-                height: extent,
-                child: LiveTrackRow(
-                  track: list[i],
-                  compact: compact,
-                  selection: selection,
-                  onTap: () => ctrl.playFromList(list, i, context: playCtx),
+            EntranceScope(
+              child: SliverList.builder(
+                itemCount: list.length,
+                itemBuilder: (_, i) => SizedBox(
+                  height: extent,
+                  child: EnterOnce(
+                    index: i,
+                    child: LiveTrackRow(
+                      track: list[i],
+                      compact: compact,
+                      selection: selection,
+                      onTap: () => ctrl.playFromList(list, i, context: playCtx),
+                    ),
+                  ),
                 ),
               ),
             ),

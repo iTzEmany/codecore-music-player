@@ -28,6 +28,7 @@ import 'bottom_bar.dart';
 import 'desktop_player_bar.dart';
 import 'desktop_sidebar.dart';
 import 'side_panel.dart';
+import '../widgets/motion.dart';
 
 const _wideBreakpoint = 840.0;
 
@@ -151,13 +152,16 @@ class AppShell extends ConsumerWidget {
       key: keys[i],
       onGenerateRoute: (_) => MaterialPageRoute<void>(builder: (_) => root),
     );
-    final body = IndexedStack(
+    final body = TabFade(
       index: index,
-      children: [
-        tab(NavTab.home.index, const HomeScreen()),
-        tab(NavTab.search.index, const SearchScreen()),
-        tab(NavTab.library.index, const LibraryScreen()),
-      ],
+      child: IndexedStack(
+        index: index,
+        children: [
+          tab(NavTab.home.index, const HomeScreen()),
+          tab(NavTab.search.index, const SearchScreen()),
+          tab(NavTab.library.index, const LibraryScreen()),
+        ],
+      ),
     );
     Widget content;
     if (wide) {

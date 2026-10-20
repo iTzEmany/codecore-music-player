@@ -37,6 +37,7 @@ import '../stats/stats_screen.dart';
 import '../tags/tags_screen.dart';
 import 'folders_sheet.dart';
 import 'scan_status.dart';
+import '../../widgets/motion.dart';
 
 /// Playlists, albums and artists in one place, with Favourites and
 /// «Tutti i brani» pinned on top.
@@ -526,7 +527,7 @@ class _LibraryGrid extends StatelessWidget {
       String subtitle,
       VoidCallback tap,
     ) {
-      return InkWell(
+      return PressScale(child: InkWell(
         onTap: tap,
         borderRadius: BorderRadius.circular(CcDims.rGrid),
         child: Padding(
@@ -556,7 +557,7 @@ class _LibraryGrid extends StatelessWidget {
             ],
           ),
         ),
-      );
+      ));
     }
 
     return GridView.builder(

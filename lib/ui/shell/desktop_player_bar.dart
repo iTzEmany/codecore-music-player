@@ -21,6 +21,7 @@ import '../widgets/format_utils.dart';
 import '../widgets/mini_player.dart' show kPlayerCoverHero;
 import '../widgets/play_buttons.dart';
 import 'shell_nav.dart';
+import '../widgets/motion.dart';
 
 /// The 80 px player of the desktop layout (replaces the mini-player).
 class DesktopPlayerBar extends ConsumerWidget {
@@ -134,10 +135,8 @@ class _TrackInfo extends ConsumerWidget {
         IconButton(
           tooltip: track.isFavorite ? l.removeFromFavorites : l.favorite,
           onPressed: () => toggleFavorite(context, ref, track),
-          icon: Icon(
-            track.isFavorite
-                ? Icons.favorite_rounded
-                : Icons.favorite_border_rounded,
+          icon: HeartIcon(
+            favorite: track.isFavorite,
             color: track.isFavorite ? cc.accent : cc.textMuted,
           ),
         ),

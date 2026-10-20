@@ -28,6 +28,7 @@ import '../library/album_detail_screen.dart' show tracksAndMinutes;
 import 'add_tracks_screen.dart';
 import 'export_dialog.dart';
 import 'playlist_dialogs.dart';
+import '../../widgets/motion.dart';
 
 class PlaylistDetailScreen extends ConsumerStatefulWidget {
   const PlaylistDetailScreen({super.key, required this.playlist});
@@ -213,21 +214,26 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
         },
       );
     } else {
-      list = SliverList.builder(
-        itemCount: tracks.length,
-        itemBuilder: (_, i) {
-          final t = tracks[i];
-          return SizedBox(
-            height: extent,
-            child: LiveTrackRow(
-              track: t,
-              compact: compact,
-              selection: selection,
-              onMore: () => rowMenu(t, i),
-              onTap: () => ctrl.playFromList(tracks, i, context: playCtx),
-            ),
-          );
-        },
+      list = EntranceScope(
+        child: SliverList.builder(
+          itemCount: tracks.length,
+          itemBuilder: (_, i) {
+            final t = tracks[i];
+            return SizedBox(
+              height: extent,
+              child: EnterOnce(
+                index: i,
+                child: LiveTrackRow(
+                  track: t,
+                  compact: compact,
+                  selection: selection,
+                  onMore: () => rowMenu(t, i),
+                  onTap: () => ctrl.playFromList(tracks, i, context: playCtx),
+                ),
+              ),
+            );
+          },
+        ),
       );
     }
 

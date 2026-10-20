@@ -22,6 +22,7 @@ import '../devices/devices_sheet.dart';
 import '../cleanup/album_merge_dialog.dart';
 import '../playlists/playlist_dialogs.dart';
 import 'artist_screen.dart';
+import '../../widgets/motion.dart';
 
 /// «12 brani, 48 min».
 String tracksAndMinutes(BuildContext context, int tracks, int durationMs) {
@@ -176,7 +177,8 @@ class AlbumDetailScreen extends ConsumerWidget {
               ),
             )
           else
-            SliverList.builder(
+            EntranceScope(
+              child: SliverList.builder(
               itemCount: items.length,
               itemBuilder: (_, i) {
                 final it = items[i];
@@ -185,17 +187,21 @@ class AlbumDetailScreen extends ConsumerWidget {
                 final at = position[t.id] ?? 0;
                 return SizedBox(
                   height: extent,
-                  child: LiveTrackRow(
-                    track: t,
-                    compact: compact,
-                    variant: TrackRowVariant.album,
-                    albumArtist: album.artist,
-                    index: at + 1,
-                    selection: selection,
-                    onTap: () => ctrl.playFromList(list, at, context: playCtx),
+                  child: EnterOnce(
+                    index: i,
+                    child: LiveTrackRow(
+                      track: t,
+                      compact: compact,
+                      variant: TrackRowVariant.album,
+                      albumArtist: album.artist,
+                      index: at + 1,
+                      selection: selection,
+                      onTap: () => ctrl.playFromList(list, at, context: playCtx),
+                    ),
                   ),
                 );
               },
+            ),
             ),
         ],
       ),

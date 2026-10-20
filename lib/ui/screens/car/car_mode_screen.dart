@@ -9,6 +9,7 @@ import '../../widgets/cover_backdrop.dart';
 import '../../widgets/cover_image.dart';
 import '../../widgets/favorite_actions.dart';
 import 'car_playlists_sheet.dart';
+import '../../widgets/motion.dart';
 
 /// Big-button player for the car: cover, title, ⏮ ⏯ ⏭, favourite, a short
 /// playlist list. Opened by hand from Now Playing; nothing starts it.
@@ -103,8 +104,7 @@ class _CarModeScreenState extends ConsumerState<CarModeScreen> {
             tooltip: track.isFavorite ? l.removeFromFavorites : l.favorite,
             iconSize: 36,
             onPressed: () => toggleFavorite(context, ref, track),
-            icon: Icon(track.isFavorite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-                color: track.isFavorite ? cc.accent : cc.text),
+            icon: HeartIcon(favorite: track.isFavorite, color: track.isFavorite ? cc.accent : cc.text),
           ),
         IconButton(
           tooltip: l.carPlaylists,

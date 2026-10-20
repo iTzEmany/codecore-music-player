@@ -16,6 +16,7 @@ import 'preview_cover.dart';
 import 'track_actions.dart';
 import 'track_drag.dart';
 import 'track_row_selection.dart';
+import 'motion.dart';
 
 enum TrackRowVariant {
   /// Cover, title, «artist · album».
@@ -198,10 +199,8 @@ class _TrackRowState extends State<TrackRow> {
                   tooltip: fav ? l.removeFromFavorites : l.favorite,
                   onPressed: widget.onFavorite,
                   visualDensity: VisualDensity.compact,
-                  icon: Icon(
-                    fav
-                        ? Icons.favorite_rounded
-                        : Icons.favorite_border_rounded,
+                  icon: HeartIcon(
+                    favorite: fav,
                     size: 18,
                     color: fav ? cc.accent : cc.textMuted,
                   ),

@@ -12,6 +12,7 @@ import '../theme/cover_tint.dart';
 import '../theme/tokens.dart';
 import 'cover_image.dart';
 import 'favorite_actions.dart';
+import 'motion.dart';
 
 /// Shared-element tag of the cover between mini-player and Now Playing.
 const kPlayerCoverHero = 'player-cover';
@@ -209,9 +210,8 @@ class _MiniPlayerState extends ConsumerState<MiniPlayer>
               ),
               if (!inJam && track != null)
                 _MiniButton(
-                  icon: track.isFavorite
-                      ? Icons.favorite_rounded
-                      : Icons.favorite_border_rounded,
+                  icon: Icons.favorite_rounded,
+                  iconWidget: HeartIcon(favorite: track.isFavorite),
                   color: track.isFavorite ? cc.accent : null,
                   tooltip: track.isFavorite
                       ? l.removeFromFavorites
@@ -247,22 +247,24 @@ class _MiniPlayerState extends ConsumerState<MiniPlayer>
       ),
     );
 
-    return Padding(
-      padding: const EdgeInsets.all(CcDims.miniPlayerMargin),
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: inJam ? _openJam : _openNowPlaying,
-        onHorizontalDragStart: inJam ? null : (_) => _settle.stop(),
-        onHorizontalDragUpdate: inJam
-            ? null
-            : (d) => setState(() => _dx += d.delta.dx),
-        onHorizontalDragEnd: inJam ? null : (d) => _onDragEnd(d, width, ctrl),
-        onVerticalDragEnd: (d) {
-          if ((d.primaryVelocity ?? 0) < -300) {
-            inJam ? _openJam() : _openNowPlaying();
-          }
-        },
-        child: Transform.translate(offset: Offset(_dx, 0), child: card),
+    return RiseIn(
+      child: Padding(
+        padding: const EdgeInsets.all(CcDims.miniPlayerMargin),
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: inJam ? _openJam : _openNowPlaying,
+          onHorizontalDragStart: inJam ? null : (_) => _settle.stop(),
+          onHorizontalDragUpdate: inJam
+              ? null
+              : (d) => setState(() => _dx += d.delta.dx),
+          onHorizontalDragEnd: inJam ? null : (d) => _onDragEnd(d, width, ctrl),
+          onVerticalDragEnd: (d) {
+            if ((d.primaryVelocity ?? 0) < -300) {
+              inJam ? _openJam() : _openNowPlaying();
+            }
+          },
+          child: Transform.translate(offset: Offset(_dx, 0), child: card),
+        ),
       ),
     );
   }
@@ -275,9 +277,13 @@ class _MiniButton extends StatelessWidget {
     required this.onPressed,
     this.color,
     this.size = 22,
+    this.iconWidget,
   });
 
   final IconData icon;
+
+  /// In place of [icon] (the heart that beats).
+  final Widget? iconWidget;
   final String tooltip;
   final VoidCallback onPressed;
   final Color? color;
@@ -290,7 +296,7 @@ class _MiniButton extends StatelessWidget {
     iconSize: size,
     color: color ?? context.cc.textMuted,
     visualDensity: VisualDensity.compact,
-    icon: Icon(icon),
+    icon: iconWidget ?? Icon(icon),
   );
 }
 

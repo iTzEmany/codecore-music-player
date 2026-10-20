@@ -43,3 +43,18 @@ aperti: con le righe intere sono ~30 MB di testo copiati a ogni brano scaricato 
 | 28.2 | Stesso elenco con il database in un isolate a parte, come nell'app | 88 ms → **14 ms** a ogni aggiornamento | PC |
 | 28.2 | 50 000 brani: ricerca / album / artisti / tutti i brani / per artista | 32 / 83 / 71 / 832 / 805 → 34 / 79 / 68 / 820 / 785 ms (invariati) | PC |
 | 28.3 | Decodificare una copertina per una riga di elenco (132 px): JPEG 1200 px / JPEG 3000 px / PNG 3000 px → miniatura 320 px | 8,6 / 50 / 138 ms → **2,9 ms** | PC |
+| 28.2–28.9 | Mi A3, stesso giro del «prima» (tag `perf-prima` → commit delle microanimazioni) | | |
+| | Scansione di 3000 brani | 17,1 → **13,2 s** (35,2 s finché la scansione aspettava le miniature: ora vanno in coda) | Mi A3 |
+| | Avvio a freddo (mediana di 5) · da `main` al primo frame | 2521 → **2319 ms** · 681 → **619 ms** | Mi A3 |
+| | Memoria (PSS) | 231 → **212 MB** | Mi A3 |
+| | «Tutti i brani»: build p90/p99 · oltre 16,7 ms | 5,8/13,6 → 5,3/11,7 ms · 2,3 → 2,5 % | Mi A3 |
+| | «Album»: build p90/p99 · oltre 16,7 ms | 5,7/14,8 → **3,5/5,1** ms · 1,0 → 0,9 % | Mi A3 |
+| | Ricerca «notte»: oltre 16,7 ms | 4,5 → 5,3 % (un frame di ~80 ms quando i risultati compaiono la prima volta; la normalizzazione a ogni tasto, 3 ms → 0,5 ms sul PC, non era la causa) | Mi A3 |
+
+### Dove va l'avvio (Mi A3)
+Su ~2,3 s di avvio a freddo, ~1,7 s passano prima di `main` (processo Android, motore Flutter, plugin) e
+~250 ms nella **prima chiamata qualsiasi verso Android** (le cartelle dell'app), che aspetta che l'attività sia
+pronta: tolto l'`await` dell'orientamento, l'attesa si è spostata sulla chiamata successiva. Il resto di `main`
+(servizio audio, impostazioni, widget) fa ~200 ms. L'obiettivo di 2 s non è raggiunto sul Mi A3: la parte nostra
+è ~0,6 s.
+

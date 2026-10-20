@@ -18,6 +18,7 @@ import '../../widgets/track_actions.dart';
 import '../library/artist_screen.dart';
 import 'now_playing_cards.dart';
 import 'now_playing_controls.dart';
+import '../../widgets/motion.dart';
 
 const _wideBreakpoint = 900.0;
 const _closeDistance = 120.0;
@@ -322,10 +323,8 @@ class _Player extends ConsumerWidget {
               IconButton(
                 tooltip: track.isFavorite ? l.removeFromFavorites : l.favorite,
                 onPressed: () => toggleFavorite(context, ref, track),
-                icon: Icon(
-                  track.isFavorite
-                      ? Icons.favorite_rounded
-                      : Icons.favorite_border_rounded,
+                icon: HeartIcon(
+                  favorite: track.isFavorite,
                   color: track.isFavorite ? cc.accent : cc.text,
                 ),
               ),
