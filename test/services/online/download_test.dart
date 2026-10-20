@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:path/path.dart' as p;
 import 'package:codecore/services/online/download_queue.dart';
 import 'package:codecore/services/online/youtube_service.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -10,9 +11,9 @@ YtResult r(String id, {String title = 'Song', String channel = 'Band'}) =>
 
 void main() {
   test('uniquePath adds numeric suffixes without overwriting', () {
-    final taken = {'/d/a.m4a', '/d/a (2).m4a'};
-    expect(uniquePath('/d', 'a', 'm4a', taken.contains), '/d/a (3).m4a');
-    expect(uniquePath('/d', 'b', 'm4a', taken.contains), '/d/b.m4a');
+    final taken = {p.join('/d', 'a.m4a'), p.join('/d', 'a (2).m4a')};
+    expect(uniquePath('/d', 'a', 'm4a', taken.contains), p.join('/d', 'a (3).m4a'));
+    expect(uniquePath('/d', 'b', 'm4a', taken.contains), p.join('/d', 'b.m4a'));
   });
 
   test('downloadBaseName sanitises', () {
@@ -230,6 +231,6 @@ void main() {
         id: 'a', title: 't', channel: 'c', duration: null, subdir: 'Road/Trip: 2026'));
     q.add(const YtResult(id: 'b', title: 't', channel: 'c', duration: null));
     await Future<void>.delayed(const Duration(milliseconds: 100));
-    expect(seen, ['${root.path}/RoadTrip 2026', root.path]);
+    expect(seen, [p.join(root.path, 'RoadTrip 2026'), root.path]);
   });
 }

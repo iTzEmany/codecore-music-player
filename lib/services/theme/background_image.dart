@@ -67,7 +67,7 @@ Future<void> deleteBackgroundImages(Directory dir, String themeId, {String? exce
   if (!await dir.exists()) return;
   final prefix = 'bg-$themeId-';
   await for (final f in dir.list()) {
-    if (f is! File || f.path == except) continue;
+    if (f is! File || (except != null && p.equals(f.path, except))) continue;
     final name = p.basename(f.path);
     if (!name.startsWith(prefix) || !name.endsWith('.png')) continue;
     try {
@@ -82,8 +82,11 @@ Future<void> deleteBackgroundImages(Directory dir, String themeId, {String? exce
 /// themes that were deleted or changed).
 Future<void> pruneBackgroundImages(Directory dir, Set<String> keep) async {
   if (!await dir.exists()) return;
+  // Compared normalised: a stored path may be spelt with / where the folder
+  // listing says \ (Windows), and it must still be kept.
+  final kept = {for (final k in keep) p.normalize(p.absolute(k))};
   await for (final f in dir.list()) {
-    if (f is! File || keep.contains(f.path)) continue;
+    if (f is! File || kept.contains(p.normalize(p.absolute(f.path)))) continue;
     final name = p.basename(f.path);
     if (!name.startsWith('bg-') || !name.endsWith('.png')) continue;
     try {

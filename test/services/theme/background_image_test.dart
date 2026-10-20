@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:path/path.dart' as p;
 import 'package:codecore/services/theme/background_image.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -29,7 +30,7 @@ void main() {
   test('a big picture is scaled so its longer side is 1600 and kept as a PNG', () async {
     final src = File('${tmp.path}/a.png')..writeAsBytesSync(await _png(2000, 1000));
     final path = (await importBackgroundImage(src, out, 'sea'))!;
-    expect(path, startsWith('${out.path}/bg-sea-'));
+    expect(path, startsWith(p.join(out.path, 'bg-sea-')));
     expect(path, endsWith('.png'));
     final img = await _decode(path);
     expect(img.width, 1600);

@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:path/path.dart' as p;
 import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/services/backup/user_data.dart';
 import 'package:codecore/services/export/playlist_exporter.dart';
@@ -94,7 +95,7 @@ void renderTests() {
 
   group('renderPlaylist', () {
     test('common directory and relative M3U8', () {
-      expect(commonDirectory(tracks), '/music/a');
+      expect(commonDirectory(tracks), p.join('/music', 'a'));
       final m = renderPlaylist(ExportFormat.m3u8,
           name: 'Mix', createdAt: 1, tracks: tracks, relativePaths: true);
       expect(m, contains('\nx/one.mp3\n'));
