@@ -387,16 +387,25 @@ class _ResultRow extends StatelessWidget {
     if (st == DownloadStatus.queued ||
         st == DownloadStatus.downloading ||
         st == DownloadStatus.waitingRetry) {
+      // As wide as a button: «Ascolta» keeps its place on every row.
       trailing = SizedBox(
-        width: 24,
-        height: 24,
-        child: CircularProgressIndicator(
-          strokeWidth: 2.5,
-          value: st == DownloadStatus.downloading ? item!.progress : null,
+        width: 48,
+        child: Center(
+          child: SizedBox(
+            width: 24,
+            height: 24,
+            child: CircularProgressIndicator(
+              strokeWidth: 2.5,
+              value: st == DownloadStatus.downloading ? item!.progress : null,
+            ),
+          ),
         ),
       );
     } else if (st == DownloadStatus.done || inLibrary) {
-      trailing = Icon(Icons.check_circle_rounded, color: cc.accentSoft);
+      trailing = SizedBox(
+        width: 48,
+        child: Center(child: Icon(Icons.check_circle_rounded, color: cc.accentSoft)),
+      );
     } else if (st == DownloadStatus.failed) {
       trailing = IconButton(
         tooltip: l.retry,

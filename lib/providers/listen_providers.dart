@@ -100,9 +100,11 @@ class ListenNotifier extends Notifier<ListenState> {
       await handler.pause();
     }
     state = ListenState(result: r, phase: ListenPhase.resolving);
+    final watch = Stopwatch()..start();
     try {
       final uri = await resolve(r);
       if (token != _token) return;
+      final resolved = watch.elapsedMilliseconds;
       final backend = ref.read(listenBackendFactoryProvider)();
       _backend = backend;
       _subs
@@ -119,6 +121,8 @@ class ListenNotifier extends Notifier<ListenState> {
       if (token != _token) return;
       await backend.play();
       state = state.copyWith(phase: ListenPhase.playing, duration: r.duration);
+      AppLog.i('listen ${r.source.name}: address in $resolved ms, '
+          'playing after ${watch.elapsedMilliseconds} ms');
     } on YtException catch (e) {
       AppLog.w('listen: no stream for ${r.indexKey}', e);
       if (token == _token) await _end(error: e.kind);

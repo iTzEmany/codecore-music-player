@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart' show visibleForTesting;
+
 import '../../core/app_log.dart';
 import 'audio_backend.dart';
 import 'equalizer.dart';
@@ -46,7 +48,7 @@ class CrossfadeEngine implements AudioBackend, GaplessCapable {
   late _Side _main;
   _Side? _other;
   final _subs = <StreamSubscription<Object?>>[];
-  final _mirror = _MirrorEqualizer();
+  final _mirror = MirrorEqualizer();
 
   final _stateC = StreamController<BackendState>.broadcast();
   final _positionC = StreamController<Duration>.broadcast();
@@ -370,7 +372,8 @@ class CrossfadeEngine implements AudioBackend, GaplessCapable {
 
 /// One equalizer for two players: every setting goes to both, and to the
 /// second one when it is created later.
-class _MirrorEqualizer implements Equalizer {
+@visibleForTesting
+class MirrorEqualizer implements Equalizer {
   final _targets = <Equalizer>[];
   bool? _enabled;
   List<double>? _gains;
@@ -390,7 +393,9 @@ class _MirrorEqualizer implements Equalizer {
   @override
   Future<void> setEnabled(bool enabled) async {
     _enabled = enabled;
-    for (final t in _targets) {
+    // A copy: the second player may join while this waits, and gets the
+    // setting from add().
+    for (final t in List.of(_targets)) {
       await t.setEnabled(enabled);
     }
   }
@@ -398,7 +403,7 @@ class _MirrorEqualizer implements Equalizer {
   @override
   Future<void> setGains(List<double> gainsDb) async {
     _gains = gainsDb;
-    for (final t in _targets) {
+    for (final t in List.of(_targets)) {
       await t.setGains(gainsDb);
     }
   }

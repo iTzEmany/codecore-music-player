@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:codecore/services/audio/crossfade_engine.dart';
+import 'package:codecore/services/audio/equalizer.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/fake_backend.dart';
@@ -345,4 +346,37 @@ void main() {
     await at(95);
     expect(ticks.timers, isEmpty);
   });
+
+  test('the second player joining while the curve is being set gets it too, without an error', () async {
+    final mirror = MirrorEqualizer();
+    final first = _SlowEq()..hold = Completer<void>();
+    final second = _SlowEq();
+    mirror.add(first);
+    final setting = mirror.setGains(const [1, 2, 3, 4, 5]);
+    mirror.add(second); // while the first one is still busy
+    first.hold!.complete();
+    await setting;
+    await mirror.setEnabled(true);
+    expect(second.gains, [const [1.0, 2.0, 3.0, 4.0, 5.0]], reason: 'from add(), once');
+    expect(first.enabled, [true]);
+    expect(second.enabled, [true]);
+  });
+}
+
+class _SlowEq implements Equalizer {
+  final gains = <List<double>>[];
+  final enabled = <bool>[];
+  Completer<void>? hold;
+
+  @override
+  Future<EqBands> bands() async => const EqBands(centerHz: [60, 230, 910, 3600, 14000], minDb: -15, maxDb: 15);
+
+  @override
+  Future<void> setGains(List<double> gainsDb) async {
+    gains.add(gainsDb);
+    await hold?.future;
+  }
+
+  @override
+  Future<void> setEnabled(bool on) async => enabled.add(on);
 }
