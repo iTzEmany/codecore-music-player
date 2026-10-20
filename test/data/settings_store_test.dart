@@ -1,7 +1,8 @@
 import 'package:codecore/data/settings/settings_store.dart';
 import 'package:codecore/services/audio/audio_backend.dart' show TransitionMode;
 import 'package:codecore/services/audio/play_queue.dart';
-import 'package:codecore/services/online/youtube_service.dart' show SearchSource;
+import 'package:codecore/services/online/youtube_service.dart'
+    show DownloadFormat, SearchSource;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -107,6 +108,19 @@ void main() {
     SharedPreferences.setMockInitialValues({'searchSource': 'bandcamp'});
     final store = await SettingsStore.open();
     expect(store.readSettings().searchSource, SearchSource.youtube);
+  });
+
+  test('downloads are M4A by default, also for those who had the old MP3 default; a choice is remembered',
+      () async {
+    SharedPreferences.setMockInitialValues({'downloadOriginal': false});
+    final store = await SettingsStore.open();
+    expect(store.readSettings().downloadFormat, DownloadFormat.m4a);
+
+    await store.writeSettings(
+        store.readSettings().copyWith(downloadFormat: DownloadFormat.mp3High));
+    expect(store.readSettings().downloadFormat, DownloadFormat.mp3High);
+    final prefs = await SharedPreferences.getInstance();
+    expect(prefs.containsKey('downloadOriginal'), isFalse, reason: 'the old switch is gone');
   });
 
   test('the groups the user said are not duplicates are remembered', () async {

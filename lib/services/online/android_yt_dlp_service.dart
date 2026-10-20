@@ -123,11 +123,12 @@ class AndroidYtDlpService implements YoutubeService {
       {CancelToken? cancel,
       DownloadOptions options = const DownloadOptions()}) async* {
     await outDir.create(recursive: true);
-    final mp3 = options.format == DownloadFormat.mp3;
+    // yt-dlp in the app always comes with ffmpeg.
+    final choice = downloadChoice(options.format, hasFfmpeg: true);
     final target = uniquePath(
         outDir.path,
         downloadBaseName(r),
-        mp3 ? 'mp3' : 'm4a',
+        reservedExtension(hasFfmpeg: true, options: options),
         (f) => anyDownloadExtensionExists(f, (x) => File(x).existsSync()));
     final stem = p.withoutExtension(target);
     final processId = 'dl-${_counter++}';
@@ -140,7 +141,9 @@ class AndroidYtDlpService implements YoutubeService {
       'id': r.id,
       'url': r.downloadUrl,
       'stem': stem,
-      'convert': mp3,
+      'selector': choice.selector,
+      'audioFormat': choice.audioFormat,
+      'audioQuality': choice.quality,
       'processId': processId,
       'rateLimit': options.rateLimitKBps,
     }).then<String?>((path) => path).catchError((Object e) {

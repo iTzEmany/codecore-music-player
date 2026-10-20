@@ -156,7 +156,7 @@ File scomparsi: `missing = true` **solo se la cartella radice è raggiungibile**
 | `repeat` | string | `off` | `off`, `all`, `one` |
 | `downloadParallel` | int | 2 | 1–3 (fase 14) |
 | `downloadRateLimitKBps` | int | 0 | 0 = nessun limite (fase 14) |
-| `downloadOriginal` | bool | false | audio originale senza ricodifica (fase 14) |
+| `downloadFormat` | string | `m4a` | `original` (audio così com'è, di solito Opus), `m4a` (AAC di YouTube senza ricodifica), `mp3High` (320 kbps), `mp3Low` (192 kbps); sostituisce `downloadOriginal` della fase 14 (2026-10-20) |
 | `playbackSpeed` | double | 1.0 | 0.5–2.0, globale (fase 17) |
 | `eqEnabled` | bool | false | equalizzatore acceso (fase 17) |
 | `eqPreset.speaker`, `eqPreset.headphones` | string | `flat` | nome del preset (`custom` = guadagni propri) |

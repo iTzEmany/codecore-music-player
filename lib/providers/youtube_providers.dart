@@ -132,9 +132,7 @@ class DownloadsNotifier extends Notifier<List<DownloadItem>> {
             cancel: cancel,
             options: DownloadOptions(
               rateLimitKBps: s.downloadRateLimitKBps,
-              format: s.downloadOriginal
-                  ? DownloadFormat.original
-                  : DownloadFormat.mp3,
+              format: s.downloadFormat,
             ));
       },
       outDir: () async {

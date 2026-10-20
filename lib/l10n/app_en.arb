@@ -858,8 +858,15 @@
       }
     }
   },
-  "downloadOriginal": "Original quality (no re-encoding)",
-  "downloadOriginalHint": "Keeps YouTube's audio as served (M4A/Opus): no extra loss, smaller files. Off: MP3 256 kbps",
+  "downloadFormat": "Download format",
+  "downloadFormatOriginal": "Original (best quality)",
+  "downloadFormatOriginalHint": "YouTube's audio with no re-encoding, usually Opus ~160 kbps. Not every player or car stereo reads it.",
+  "downloadFormatM4a": "M4A (recommended)",
+  "downloadFormatM4aHint": "Almost as good as the original, no re-encoding: fast, light (~1 MB/min), plays everywhere.",
+  "downloadFormatMp3High": "MP3 320 kbps",
+  "downloadFormatMp3HighHint": "Plays on anything. Re-encoded: slight loss, big files (~2.4 MB/min), slower download.",
+  "downloadFormatMp3Low": "MP3 192 kbps (lowest quality)",
+  "downloadFormatMp3LowHint": "Plays on anything, half the space of MP3 320 (~1.4 MB/min), but the lowest quality.",
   "searchCacheClear": "Clear search cache",
   "searchCacheCount": "{count, plural, =0{Empty} one{1 saved search} other{{count} saved searches}}",
   "searchCacheCleared": "Cache cleared",

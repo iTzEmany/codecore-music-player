@@ -57,12 +57,13 @@ class YtResult {
 
 String downloadIndexKey(MediaSource source, String id) => '${source.name}:$id';
 
-/// `mp3` = convert to MP3 256 kbps; `original` = keep the audio as served.
-enum DownloadFormat { mp3, original }
+/// What a download is saved as, best quality first. [original] and [m4a]
+/// keep the audio as served; the MP3s are re-encoded for players that need them.
+enum DownloadFormat { original, m4a, mp3High, mp3Low }
 
 /// How a download is run; read from the settings when it starts.
 class DownloadOptions {
-  const DownloadOptions({this.rateLimitKBps, this.format = DownloadFormat.mp3});
+  const DownloadOptions({this.rateLimitKBps, this.format = DownloadFormat.m4a});
 
   /// `--limit-rate` in KB/s; null or 0 = unlimited.
   final int? rateLimitKBps;

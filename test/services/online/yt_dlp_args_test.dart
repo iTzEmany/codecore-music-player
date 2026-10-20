@@ -14,13 +14,13 @@ List<String> args({
         jsArgs: ['--js-runtimes', 'node']);
 
 void main() {
-  test('default: MP3 256k, no rate limit', () {
+  test('default: M4A, YouTube\'s AAC stream first, no rate limit', () {
     final a = args();
     expect(
         a,
         containsAllInOrder([
-          '-f', 'bestaudio/best', '-x', '--audio-format', 'mp3',
-          '--audio-quality', '256K',
+          '-f', 'bestaudio[ext=m4a]/bestaudio/best', '-x', '--audio-format', 'm4a',
+          '--audio-quality', '192K',
         ]));
     expect(a, isNot(contains('--limit-rate')));
     expect(a, containsAllInOrder(['--js-runtimes', 'node']));
@@ -36,9 +36,19 @@ void main() {
     expect(args(), isNot(contains('--limit-rate')));
   });
 
-  test('original format: prefer m4a, extract without --audio-format', () {
+  test('MP3 320 and 192: the best audio converted at that rate', () {
+    for (final (f, q) in [(DownloadFormat.mp3High, '320K'), (DownloadFormat.mp3Low, '192K')]) {
+      expect(
+          args(options: DownloadOptions(format: f)),
+          containsAllInOrder([
+            '-f', 'bestaudio/best', '-x', '--audio-format', 'mp3', '--audio-quality', q,
+          ]));
+    }
+  });
+
+  test('original: the best audio taken out of the video, never re-encoded', () {
     final a = args(options: const DownloadOptions(format: DownloadFormat.original));
-    expect(a, containsAllInOrder(['-f', 'bestaudio[ext=m4a]/bestaudio/best', '-x']));
+    expect(a, containsAllInOrder(['-f', 'bestaudio/best', '-x']));
     expect(a, isNot(contains('--audio-format')));
     expect(a, isNot(contains('--audio-quality')));
   });
@@ -52,13 +62,22 @@ void main() {
   });
 
   test('reserved extension follows what will be produced', () {
-    expect(reservedExtension(hasFfmpeg: true, options: const DownloadOptions()), 'mp3');
+    expect(reservedExtension(hasFfmpeg: true, options: const DownloadOptions()), 'm4a');
+    expect(
+        reservedExtension(
+            hasFfmpeg: true,
+            options: const DownloadOptions(format: DownloadFormat.mp3Low)),
+        'mp3');
     expect(
         reservedExtension(
             hasFfmpeg: true,
             options: const DownloadOptions(format: DownloadFormat.original)),
+        'opus');
+    expect(
+        reservedExtension(
+            hasFfmpeg: false,
+            options: const DownloadOptions(format: DownloadFormat.mp3High)),
         'm4a');
-    expect(reservedExtension(hasFfmpeg: false, options: const DownloadOptions()), 'm4a');
   });
 
   test('a name taken by any container is not reused', () {

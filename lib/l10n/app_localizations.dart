@@ -2890,17 +2890,59 @@ abstract class AppLocalizations {
   /// **'Download · {title} · nuovo tentativo tra {seconds} s ({attempt}/{max})'**
   String activityDownloadRetry(String title, int seconds, int attempt, int max);
 
-  /// No description provided for @downloadOriginal.
+  /// No description provided for @downloadFormat.
   ///
   /// In it, this message translates to:
-  /// **'Qualità originale (senza ricodifica)'**
-  String get downloadOriginal;
+  /// **'Formato dei download'**
+  String get downloadFormat;
 
-  /// No description provided for @downloadOriginalHint.
+  /// No description provided for @downloadFormatOriginal.
   ///
   /// In it, this message translates to:
-  /// **'Tiene l\'audio di YouTube com\'è (M4A/Opus): nessuna perdita, file più piccoli. Spento: MP3 256 kbps'**
-  String get downloadOriginalHint;
+  /// **'Originale (qualità massima)'**
+  String get downloadFormatOriginal;
+
+  /// No description provided for @downloadFormatOriginalHint.
+  ///
+  /// In it, this message translates to:
+  /// **'L\'audio di YouTube senza ricodifica, di solito Opus ~160 kbps. Non tutti i lettori e le autoradio lo leggono.'**
+  String get downloadFormatOriginalHint;
+
+  /// No description provided for @downloadFormatM4a.
+  ///
+  /// In it, this message translates to:
+  /// **'M4A (consigliato)'**
+  String get downloadFormatM4a;
+
+  /// No description provided for @downloadFormatM4aHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Quasi come l\'originale, senza ricodifica: veloce, leggero (~1 MB/min), si legge ovunque.'**
+  String get downloadFormatM4aHint;
+
+  /// No description provided for @downloadFormatMp3High.
+  ///
+  /// In it, this message translates to:
+  /// **'MP3 320 kbps'**
+  String get downloadFormatMp3High;
+
+  /// No description provided for @downloadFormatMp3HighHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Compatibile con tutto. Ricodificato: lieve perdita, file grandi (~2,4 MB/min), download più lento.'**
+  String get downloadFormatMp3HighHint;
+
+  /// No description provided for @downloadFormatMp3Low.
+  ///
+  /// In it, this message translates to:
+  /// **'MP3 192 kbps (qualità minima)'**
+  String get downloadFormatMp3Low;
+
+  /// No description provided for @downloadFormatMp3LowHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Compatibile con tutto, metà spazio dell\'MP3 320 (~1,4 MB/min), ma la qualità più bassa.'**
+  String get downloadFormatMp3LowHint;
 
   /// No description provided for @searchCacheClear.
   ///

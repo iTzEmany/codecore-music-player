@@ -858,8 +858,15 @@
       }
     }
   },
-  "downloadOriginal": "Originalqualität (ohne Neukodierung)",
-  "downloadOriginalHint": "Behält das Audio von YouTube unverändert (M4A/Opus): kein zusätzlicher Verlust, kleinere Dateien. Aus: MP3 256 kbps",
+  "downloadFormat": "Download-Format",
+  "downloadFormatOriginal": "Original (beste Qualität)",
+  "downloadFormatOriginalHint": "Das Audio von YouTube ohne Neukodierung, meist Opus ~160 kbps. Nicht jeder Player und jedes Autoradio spielt es ab.",
+  "downloadFormatM4a": "M4A (empfohlen)",
+  "downloadFormatM4aHint": "Fast wie das Original, ohne Neukodierung: schnell, klein (~1 MB/min), läuft überall.",
+  "downloadFormatMp3High": "MP3 320 kbps",
+  "downloadFormatMp3HighHint": "Läuft auf allem. Neu kodiert: leichter Verlust, große Dateien (~2,4 MB/min), langsamerer Download.",
+  "downloadFormatMp3Low": "MP3 192 kbps (niedrigste Qualität)",
+  "downloadFormatMp3LowHint": "Läuft auf allem, halb so groß wie MP3 320 (~1,4 MB/min), aber die niedrigste Qualität.",
   "searchCacheClear": "Suchcache leeren",
   "searchCacheCount": "{count, plural, =0{Leer} one{1 gespeicherte Suche} other{{count} gespeicherte Suchen}}",
   "searchCacheCleared": "Cache geleert",

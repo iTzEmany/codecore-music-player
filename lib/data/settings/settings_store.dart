@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../services/audio/audio_backend.dart' show TransitionMode;
 import '../../services/audio/equalizer.dart';
 import '../../services/audio/play_queue.dart';
-import '../../services/online/youtube_service.dart' show SearchSource;
+import '../../services/online/youtube_service.dart' show DownloadFormat, SearchSource;
 
 /// The equalizer curve chosen for one kind of output (speaker or headphones).
 class EqProfile {
@@ -43,7 +43,7 @@ class AppSettings {
     this.recordHistory = true,
     this.downloadParallel = 2,
     this.downloadRateLimitKBps = 0,
-    this.downloadOriginal = false,
+    this.downloadFormat = DownloadFormat.m4a,
     this.importSureThreshold = 0.80,
     this.importReviewThreshold = 0.55,
     this.playbackSpeed = 1.0,
@@ -97,8 +97,8 @@ class AppSettings {
   /// Download speed cap in KB/s; 0 = none.
   final int downloadRateLimitKBps;
 
-  /// Keep the downloaded audio as served instead of converting to MP3.
-  final bool downloadOriginal;
+  /// M4A keeps YouTube's AAC as served; MP3 converts for players that need it.
+  final DownloadFormat downloadFormat;
 
   /// CSV import: score from which a match is downloaded without asking, and
   /// from which it is at least proposed (advanced settings).
@@ -159,7 +159,7 @@ class AppSettings {
     bool? recordHistory,
     int? downloadParallel,
     int? downloadRateLimitKBps,
-    bool? downloadOriginal,
+    DownloadFormat? downloadFormat,
     double? importSureThreshold,
     double? importReviewThreshold,
     double? playbackSpeed,
@@ -197,7 +197,7 @@ class AppSettings {
         downloadParallel: downloadParallel ?? this.downloadParallel,
         downloadRateLimitKBps:
             downloadRateLimitKBps ?? this.downloadRateLimitKBps,
-        downloadOriginal: downloadOriginal ?? this.downloadOriginal,
+        downloadFormat: downloadFormat ?? this.downloadFormat,
         importSureThreshold: importSureThreshold ?? this.importSureThreshold,
         importReviewThreshold:
             importReviewThreshold ?? this.importReviewThreshold,
@@ -264,7 +264,12 @@ class SettingsStore {
         downloadParallel:
             (_prefs.getInt('downloadParallel') ?? 2).clamp(1, 3),
         downloadRateLimitKBps: _prefs.getInt('downloadRateLimitKBps') ?? 0,
-        downloadOriginal: _prefs.getBool('downloadOriginal') ?? false,
+        // The old «downloadOriginal» switch is not read: MP3 was only ever the
+        // default, so everyone moves to M4A.
+        downloadFormat: DownloadFormat.values.firstWhere(
+          (f) => f.name == _prefs.getString('downloadFormat'),
+          orElse: () => DownloadFormat.m4a,
+        ),
         importSureThreshold: _prefs.getDouble('importSureThreshold') ?? 0.80,
         importReviewThreshold: _prefs.getDouble('importReviewThreshold') ?? 0.55,
         playbackSpeed:
@@ -325,7 +330,8 @@ class SettingsStore {
     await _prefs.setBool('recordHistory', s.recordHistory);
     await _prefs.setInt('downloadParallel', s.downloadParallel);
     await _prefs.setInt('downloadRateLimitKBps', s.downloadRateLimitKBps);
-    await _prefs.setBool('downloadOriginal', s.downloadOriginal);
+    await _prefs.setString('downloadFormat', s.downloadFormat.name);
+    await _prefs.remove('downloadOriginal');
     await _prefs.setDouble('importSureThreshold', s.importSureThreshold);
     await _prefs.setDouble('importReviewThreshold', s.importReviewThreshold);
     await _prefs.setDouble('playbackSpeed', s.playbackSpeed);

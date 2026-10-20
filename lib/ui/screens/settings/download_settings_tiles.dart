@@ -8,7 +8,67 @@ import '../../../providers/import_providers.dart';
 import '../../../providers/settings_providers.dart';
 import '../../../providers/youtube_providers.dart';
 import '../../../providers/yt_dlp_update_providers.dart';
+import '../../../services/online/youtube_service.dart' show DownloadFormat;
 import '../../widgets/yt_dlp_update_button.dart';
+
+String downloadFormatLabel(AppLocalizations l, DownloadFormat f) => switch (f) {
+      DownloadFormat.original => l.downloadFormatOriginal,
+      DownloadFormat.m4a => l.downloadFormatM4a,
+      DownloadFormat.mp3High => l.downloadFormatMp3High,
+      DownloadFormat.mp3Low => l.downloadFormatMp3Low,
+    };
+
+String downloadFormatHint(AppLocalizations l, DownloadFormat f) => switch (f) {
+      DownloadFormat.original => l.downloadFormatOriginalHint,
+      DownloadFormat.m4a => l.downloadFormatM4aHint,
+      DownloadFormat.mp3High => l.downloadFormatMp3HighHint,
+      DownloadFormat.mp3Low => l.downloadFormatMp3LowHint,
+    };
+
+/// The formats from best to lowest quality, each with what it is good for.
+Future<void> _pickFormat(
+    BuildContext context, WidgetRef ref, DownloadFormat current) async {
+  final picked = await showDialog<DownloadFormat>(
+    context: context,
+    builder: (dialogContext) {
+      final l = dialogContext.l10n;
+      return AlertDialog(
+        title: Text(l.downloadFormat),
+        contentPadding: const EdgeInsets.symmetric(vertical: 12),
+        content: SizedBox(
+          width: 420,
+          child: SingleChildScrollView(
+            child: RadioGroup<DownloadFormat>(
+              groupValue: current,
+              onChanged: (v) => Navigator.pop(dialogContext, v),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (final f in DownloadFormat.values)
+                    RadioListTile<DownloadFormat>(
+                      value: f,
+                      title: Text(downloadFormatLabel(l, f)),
+                      subtitle: Text(downloadFormatHint(l, f)),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(l.cancel),
+          ),
+        ],
+      );
+    },
+  );
+  if (picked == null || picked == current) return;
+  ref
+      .read(settingsProvider.notifier)
+      .update((c) => c.copyWith(downloadFormat: picked));
+}
 
 /// Rows of the «Download» group in the settings.
 class DownloadSettingsTiles extends ConsumerWidget {
@@ -18,8 +78,8 @@ class DownloadSettingsTiles extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
     final n = ref.watch(settingsProvider.select((s) => s.downloadParallel));
-    final original =
-        ref.watch(settingsProvider.select((s) => s.downloadOriginal));
+    final format =
+        ref.watch(settingsProvider.select((s) => s.downloadFormat));
     final rate =
         ref.watch(settingsProvider.select((s) => s.downloadRateLimitKBps));
     return Column(
@@ -43,14 +103,12 @@ class DownloadSettingsTiles extends ConsumerWidget {
                     .update((c) => c.copyWith(downloadParallel: v)),
           ),
         ),
-        SwitchListTile(
-          secondary: const Icon(Icons.high_quality_outlined),
-          title: Text(l.downloadOriginal),
-          subtitle: Text(l.downloadOriginalHint),
-          value: original,
-          onChanged: (v) => ref
-              .read(settingsProvider.notifier)
-              .update((c) => c.copyWith(downloadOriginal: v)),
+        ListTile(
+          leading: const Icon(Icons.high_quality_outlined),
+          title: Text(l.downloadFormat),
+          subtitle: Text(downloadFormatLabel(l, format)),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => _pickFormat(context, ref, format),
         ),
         SwitchListTile(
           secondary: const Icon(Icons.cloud_outlined),

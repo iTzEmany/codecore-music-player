@@ -77,7 +77,6 @@ class YtDlpChannel(private val applicationContext: Context) {
                 ensureInit()
                 val id = call.argument<String>("id")!!
                 val stem = call.argument<String>("stem")!!
-                val convert = call.argument<Boolean>("convert") ?: true
                 val processId = call.argument<String>("processId")!!
                 // `url` is sent by every caller; the id alone stays for older ones.
                 val url = call.argument<String>("url") ?: "https://www.youtube.com/watch?v=$id"
@@ -85,11 +84,14 @@ class YtDlpChannel(private val applicationContext: Context) {
                 req.addOption("--no-playlist")
                 req.addOption("--no-warnings")
                 req.addOption("--no-part")
-                req.addOption("-f", if (convert) "bestaudio/best" else "bestaudio[ext=m4a]/bestaudio/best")
-                if (convert) {
-                    req.addOption("-x")
-                    req.addOption("--audio-format", "mp3")
-                    req.addOption("--audio-quality", "256K")
+                // Stream and conversion are chosen on the Dart side (downloadChoice);
+                // no audioFormat = the codec as served, only taken out of the video container.
+                req.addOption("-f", call.argument<String>("selector") ?: "bestaudio[ext=m4a]/bestaudio/best")
+                req.addOption("-x")
+                val audioFormat = call.argument<String>("audioFormat")
+                if (audioFormat != null) {
+                    req.addOption("--audio-format", audioFormat)
+                    req.addOption("--audio-quality", call.argument<String>("audioQuality") ?: "192K")
                 }
                 val rate = call.argument<Int>("rateLimit")
                 if (rate != null && rate > 0) req.addOption("--limit-rate", "${rate}K")

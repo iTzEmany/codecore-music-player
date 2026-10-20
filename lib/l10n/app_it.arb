@@ -1049,8 +1049,15 @@
       }
     }
   },
-  "downloadOriginal": "Qualità originale (senza ricodifica)",
-  "downloadOriginalHint": "Tiene l'audio di YouTube com'è (M4A/Opus): nessuna perdita, file più piccoli. Spento: MP3 256 kbps",
+  "downloadFormat": "Formato dei download",
+  "downloadFormatOriginal": "Originale (qualità massima)",
+  "downloadFormatOriginalHint": "L'audio di YouTube senza ricodifica, di solito Opus ~160 kbps. Non tutti i lettori e le autoradio lo leggono.",
+  "downloadFormatM4a": "M4A (consigliato)",
+  "downloadFormatM4aHint": "Quasi come l'originale, senza ricodifica: veloce, leggero (~1 MB/min), si legge ovunque.",
+  "downloadFormatMp3High": "MP3 320 kbps",
+  "downloadFormatMp3HighHint": "Compatibile con tutto. Ricodificato: lieve perdita, file grandi (~2,4 MB/min), download più lento.",
+  "downloadFormatMp3Low": "MP3 192 kbps (qualità minima)",
+  "downloadFormatMp3LowHint": "Compatibile con tutto, metà spazio dell'MP3 320 (~1,4 MB/min), ma la qualità più bassa.",
   "searchCacheClear": "Svuota cache ricerche",
   "searchCacheCount": "{count, plural, =0{Vuota} one{1 ricerca salvata} other{{count} ricerche salvate}}",
   "searchCacheCleared": "Cache svuotata",

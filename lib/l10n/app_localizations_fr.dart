@@ -1618,11 +1618,35 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get downloadOriginal => 'Qualité d’origine (sans réencodage)';
+  String get downloadFormat => 'Format des téléchargements';
 
   @override
-  String get downloadOriginalHint =>
-      'Conserve l’audio de YouTube tel quel (M4A/Opus) : aucune perte, fichiers plus petits. Désactivé : MP3 256 kbps';
+  String get downloadFormatOriginal => 'Original (meilleure qualité)';
+
+  @override
+  String get downloadFormatOriginalHint =>
+      'L’audio de YouTube sans réencodage, souvent Opus ~160 kbps. Tous les lecteurs et autoradios ne le lisent pas.';
+
+  @override
+  String get downloadFormatM4a => 'M4A (recommandé)';
+
+  @override
+  String get downloadFormatM4aHint =>
+      'Presque comme l’original, sans réencodage : rapide, léger (~1 Mo/min), se lit partout.';
+
+  @override
+  String get downloadFormatMp3High => 'MP3 320 kbps';
+
+  @override
+  String get downloadFormatMp3HighHint =>
+      'Se lit partout. Réencodé : légère perte, gros fichiers (~2,4 Mo/min), téléchargement plus lent.';
+
+  @override
+  String get downloadFormatMp3Low => 'MP3 192 kbps (qualité minimale)';
+
+  @override
+  String get downloadFormatMp3LowHint =>
+      'Se lit partout, moitié moins lourd que le MP3 320 (~1,4 Mo/min), mais la qualité la plus basse.';
 
   @override
   String get searchCacheClear => 'Vider le cache des recherches';
