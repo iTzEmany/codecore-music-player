@@ -32,6 +32,12 @@ const kPerfBuild = bool.fromEnvironment('CODECORE_PERF');
 class PerfProbe {
   PerfProbe._(this._out);
 
+  static final _marks = <String, int>{};
+
+  /// Notes how far `main` has got (perf build only: call it under
+  /// `if (kPerfBuild)`), written with the first frame.
+  static void mark(String step, Stopwatch sinceMain) => _marks[step] = sinceMain.elapsedMilliseconds;
+
   final File _out;
   final _frames = <FrameSample>[];
   Timer? _idle;
@@ -51,8 +57,10 @@ class PerfProbe {
     final dir = Directory(p.join(external ?? await appSupportDir(), 'perf'));
     await dir.create(recursive: true);
     final probe = PerfProbe._(File(p.join(dir.path, 'events.jsonl')));
-    unawaited(WidgetsBinding.instance.waitUntilFirstFrameRasterized.then(
-        (_) => probe._log({'event': 'firstFrame', 'ms': sinceMain.elapsedMilliseconds})));
+    unawaited(WidgetsBinding.instance.waitUntilFirstFrameRasterized.then((_) {
+      probe._log({'event': 'firstFrame', 'ms': sinceMain.elapsedMilliseconds});
+      probe._log({'event': 'startup', ..._marks});
+    }));
     SchedulerBinding.instance.addTimingsCallback(probe._onTimings);
     if (external != null) unawaited(probe._prepareLibrary(db, covers, external));
   }

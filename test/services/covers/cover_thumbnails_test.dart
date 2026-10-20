@@ -61,17 +61,22 @@ void main() {
     final events = <({String key, CoverFiles files})>[];
     final sub = CoverStore.changes.listen(events.add);
     final key = (await store.saveFromBytes('a|b', _big, 'image/jpeg'))!;
+    expect(made, 0, reason: 'the save does not wait for the thumbnail');
+    await store.thumbnailsDone;
     await Future<void>.delayed(Duration.zero);
     await sub.cancel();
     final thumb = File(p.join(store.dir.path, CoverStore.thumbName(key)));
     expect(thumb.readAsBytesSync(), [7, 7]);
-    expect(events.single.key, key);
-    expect(events.single.files.thumb, thumb.path);
+    expect(events.map((e) => e.key), [key, key]);
+    expect([for (final e in events) e.files.thumb], [null, thumb.path],
+        reason: 'the original at once, the thumbnail when made');
 
     await store.saveFromBytes('small', [1, 2, 3], 'image/jpeg');
+    await store.thumbnailsDone;
     expect(made, 1, reason: 'a small cover decodes fast: no thumbnail');
 
     await store.saveFromBytes('a|b', _big, 'image/jpeg', overwrite: true);
+    await store.thumbnailsDone;
     expect(made, 2, reason: 'a replaced cover gets a new thumbnail');
   });
 
@@ -105,6 +110,7 @@ void main() {
 
     final store = CoverStore(dir, thumbnails: (b) async => Uint8List.fromList([1]));
     final second = (await store.saveFromBytes('two', _big, 'image/jpeg'))!;
+    await store.thumbnailsDone;
     await Future<void>.delayed(Duration.zero);
     expect(container.read(coverFileProvider(second))!.path, endsWith('$second.jpg'));
     expect(container.read(coverThumbProvider(second))!.path, endsWith('${second}_t.png'));

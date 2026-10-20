@@ -138,6 +138,7 @@ def main():
     ap.add_argument('device')
     ap.add_argument('--label', default=time.strftime('%Y%m%d-%H%M'))
     ap.add_argument('--no-build', action='store_true')
+    ap.add_argument('--apk', help='an APK already built (e.g. from an older commit) instead of building')
     ap.add_argument('--no-push', action='store_true', help='keep the perf app data (library already scanned)')
     ap.add_argument('--runs', type=int, default=5, help='cold starts')
     ap.add_argument('--playback', action='store_true', help='also «In riproduzione» (plays silent tracks)')
@@ -147,7 +148,12 @@ def main():
     if not args.no_push and not os.path.isdir(lib):
         sys.exit('manca la libreria di prova: scripts/perf_library.py')
 
-    apk = os.path.join(ROOT, 'build/app/outputs/flutter-apk/app-profile.apk') if args.no_build else build()
+    if args.apk:
+        apk = os.path.abspath(args.apk)
+    elif args.no_build:
+        apk = os.path.join(ROOT, 'build/app/outputs/flutter-apk/app-profile.apk')
+    else:
+        apk = build()
     print(dev.adb('install', '-r', apk).strip().splitlines()[-1])
     model = dev.sh('getprop ro.product.model').strip()
     dev.sh('input keyevent KEYCODE_WAKEUP')

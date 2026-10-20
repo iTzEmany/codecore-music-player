@@ -32,6 +32,11 @@ class CoverStore {
 
   static String thumbName(String coverKey) => '${coverKey}_t.png';
 
+  Future<void> _thumbs = Future.value();
+
+  /// Completes when the thumbnails asked for so far are made.
+  Future<void> get thumbnailsDone => _thumbs;
+
   static const maxBytes = 4 * 1024 * 1024;
   static const _folderNames = {'cover', 'folder', 'front', 'album'};
   static const _folderExts = {'.jpg', '.jpeg', '.png'};
@@ -62,10 +67,13 @@ class CoverStore {
       await tmp.writeAsBytes(bytes, flush: true);
       final original = p.join(dir.path, '$key.$ext');
       await tmp.rename(original);
-      final thumb = bytes.length >= thumbMinBytes
-          ? await _writeThumb(key, Uint8List.fromList(bytes))
-          : null;
-      _changes.add((key: key, files: (original: original, thumb: thumb)));
+      _changes.add((key: key, files: (original: original, thumb: null)));
+      // Made after the save returns, one at a time: a scan of hundreds of
+      // albums does not wait for them. Only the key waits in line; the
+      // picture is read again when its turn comes.
+      if (thumbnails != null && bytes.length >= thumbMinBytes) {
+        _thumbs = _thumbs.then((_) => ensureThumb(key));
+      }
       return key;
     } on Object catch (e, st) {
       AppLog.e('cover save failed for $albumKey', e, st);
@@ -97,7 +105,7 @@ class CoverStore {
       if (thumb == null) return false;
       _changes.add((key: key, files: (original: original.path, thumb: thumb)));
       return true;
-    } on FileSystemException catch (e, st) {
+    } on Object catch (e, st) {
       AppLog.w('thumbnail of $key not written', e, st);
       return false;
     }

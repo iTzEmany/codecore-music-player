@@ -25,8 +25,10 @@ String stripDiacritics(String s) {
   return out.toString();
 }
 
+final _spaces = RegExp(r'\s+');
+
 String normalize(String s) =>
-    stripDiacritics(s).toLowerCase().trim().replaceAll(RegExp(r'\s+'), ' ');
+    stripDiacritics(s).toLowerCase().trim().replaceAll(_spaces, ' ');
 
 const _unknownAlbums = {'album sconosciuto', 'unknown', 'unknown album'};
 
