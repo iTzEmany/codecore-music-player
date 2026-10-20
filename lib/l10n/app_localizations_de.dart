@@ -491,6 +491,12 @@ class AppLocalizationsDe extends AppLocalizations {
   String get ytDownload => 'Herunterladen';
 
   @override
+  String get listenAction => 'Anhören';
+
+  @override
+  String get listenResolving => 'Wird vorbereitet…';
+
+  @override
   String get ytAlreadyInLibrary => 'Bereits in der Bibliothek';
 
   @override

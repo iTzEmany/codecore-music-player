@@ -192,6 +192,28 @@ String uniquePath(String dir, String base, String ext, bool Function(String) exi
   return candidate;
 }
 
+/// The stream picked for a listen: YouTube's m4a when there is one (the same
+/// audio as a download in M4A), else the best audio.
+const streamFormat = 'bestaudio[ext=m4a]/bestaudio/best';
+
+/// Plays a result without downloading it: the direct address of its audio
+/// (`yt-dlp -g`). The address expires after some hours and works only from
+/// the network that asked for it, so it is asked for at each listen.
+abstract interface class StreamSource {
+  Future<Uri> streamUrl(YtResult r);
+}
+
+/// The first web address printed by `yt-dlp -g`; null when there is none.
+Uri? parseStreamUrl(String out) {
+  for (final line in out.split('\n')) {
+    final uri = Uri.tryParse(line.trim());
+    if (uri != null && (uri.scheme == 'https' || uri.scheme == 'http') && uri.host.isNotEmpty) {
+      return uri;
+    }
+  }
+  return null;
+}
+
 /// Search + download backend. Desktop runs the `yt-dlp` executable; Android
 /// calls yt-dlp embedded in the app through a platform channel.
 abstract class YoutubeService {

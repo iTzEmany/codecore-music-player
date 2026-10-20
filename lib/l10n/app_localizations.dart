@@ -994,6 +994,18 @@ abstract class AppLocalizations {
   /// **'Scarica'**
   String get ytDownload;
 
+  /// No description provided for @listenAction.
+  ///
+  /// In it, this message translates to:
+  /// **'Ascolta'**
+  String get listenAction;
+
+  /// No description provided for @listenResolving.
+  ///
+  /// In it, this message translates to:
+  /// **'Preparo l\'ascolto…'**
+  String get listenResolving;
+
   /// No description provided for @ytAlreadyInLibrary.
   ///
   /// In it, this message translates to:

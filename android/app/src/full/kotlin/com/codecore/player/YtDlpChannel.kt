@@ -73,6 +73,19 @@ class YtDlpChannel(private val applicationContext: Context) {
                 if (processId != null) YoutubeDL.getInstance().execute(req, processId).out
                 else YoutubeDL.getInstance().execute(req).out
             }
+            // The direct address of a result's audio, for listening without
+            // downloading (`yt-dlp -g`).
+            "streamUrl" -> run(result) {
+                ensureInit()
+                val req = YoutubeDLRequest(call.argument<String>("url")!!)
+                req.addOption("-g")
+                req.addOption("--no-warnings")
+                req.addOption("--no-playlist")
+                req.addOption("-f", call.argument<String>("format") ?: "bestaudio/best")
+                val processId = call.argument<String>("processId")
+                if (processId != null) YoutubeDL.getInstance().execute(req, processId).out
+                else YoutubeDL.getInstance().execute(req).out
+            }
             "download" -> run(result) {
                 ensureInit()
                 val id = call.argument<String>("id")!!

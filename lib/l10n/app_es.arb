@@ -148,6 +148,8 @@
   "youtube": "YouTube",
   "ytHint": "Busca o pega un enlace",
   "ytDownload": "Descargar",
+  "listenAction": "Escuchar",
+  "listenResolving": "Preparando…",
   "ytAlreadyInLibrary": "Ya en la biblioteca",
   "ytNoResults": "Sin resultados",
   "ytQueued": "En cola",

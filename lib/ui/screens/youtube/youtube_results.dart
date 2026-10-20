@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/app_log.dart';
 import '../../../l10n/l10n_ext.dart';
+import '../../../providers/listen_providers.dart';
 import '../../../providers/selection_providers.dart';
 import '../../../providers/settings_providers.dart';
 import '../../../providers/youtube_providers.dart';
@@ -16,6 +17,7 @@ import '../../widgets/format_utils.dart';
 import '../../widgets/selection_bar.dart';
 import '../../widgets/track_row_selection.dart';
 import '../../widgets/yt_dlp_outdated_banner.dart';
+import 'listen_bar.dart';
 import 'playlist_source_sheet.dart';
 import '../../widgets/net_thumbnail.dart';
 
@@ -55,10 +57,19 @@ class _YoutubeResultsState extends ConsumerState<YoutubeResults> {
   bool _searched = false;
   YtErrorKind? _error;
   int _requestId = 0;
+  late final ListenNotifier _listen;
+
+  /// A listen has no player of its own outside the results: it ends with them.
+  @override
+  void dispose() {
+    if (_listen.isActive) _listen.stop();
+    super.dispose();
+  }
 
   @override
   void initState() {
     super.initState();
+    _listen = ref.read(listenProvider.notifier);
     if (widget.submitted > 0) _search();
   }
 
@@ -164,6 +175,12 @@ class _YoutubeResultsState extends ConsumerState<YoutubeResults> {
   Widget build(BuildContext context) {
     final l = context.l10n;
     final cc = context.cc;
+    ref.listen(listenProvider.select((s) => s.error), (_, error) {
+      if (error == null) return;
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(SnackBar(content: Text(ytErrorText(context, error))));
+    });
     final seen = ref.watch(settingsProvider.select((s) => s.ytNoticeSeen));
     final source = ref.watch(settingsProvider.select((s) => s.searchSource));
     final picked = ref.watch(selectionProvider(_selectionKey));
@@ -309,10 +326,12 @@ class _YoutubeResultsState extends ConsumerState<YoutubeResults> {
                         onLongPress: () => notifier.toggle(i),
                         onDownload: () =>
                             ref.read(downloadsProvider.notifier).add(r),
+                        listen: selecting ? null : ListenButton(result: r),
                       );
                     },
                   ),
           ),
+          const ListenBar(),
         ],
       ),
     );
@@ -325,6 +344,7 @@ class _ResultRow extends StatelessWidget {
     required this.inLibrary,
     required this.item,
     required this.onDownload,
+    this.listen,
     this.selecting = false,
     this.selected = false,
     this.position,
@@ -336,6 +356,9 @@ class _ResultRow extends StatelessWidget {
   final bool inLibrary;
   final DownloadItem? item;
   final VoidCallback onDownload;
+
+  /// «Ascolta» (hidden while picking).
+  final Widget? listen;
 
   /// While picking, a tick box leads the row and a tap picks or drops it.
   final bool selecting, selected;
@@ -458,6 +481,7 @@ class _ResultRow extends StatelessWidget {
                     ],
                   ),
                 ),
+                ?listen,
                 trailing,
                 const SizedBox(width: 8),
               ],

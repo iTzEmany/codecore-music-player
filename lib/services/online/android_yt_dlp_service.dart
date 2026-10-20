@@ -11,7 +11,7 @@ import 'yt_dlp_process_service.dart';
 import 'youtube_service.dart';
 
 /// yt-dlp embedded in the Android app (see MainActivity.kt).
-class AndroidYtDlpService implements YoutubeService {
+class AndroidYtDlpService implements YoutubeService, StreamSource {
   AndroidYtDlpService() {
     _channel.setMethodCallHandler(_onCall);
   }
@@ -38,11 +38,12 @@ class AndroidYtDlpService implements YoutubeService {
           {List<YtResult> Function(String raw) parse = parseYtDlpJson}) async =>
       parse(await _call(args));
 
-  Future<String> _call(Map<String, Object?> args, {Duration? timeout}) async {
+  Future<String> _call(Map<String, Object?> args,
+      {Duration? timeout, String method = 'search'}) async {
     final processId = 'sr-${_counter++}';
     try {
       final raw = await _channel
-          .invokeMethod<String>('search', {...args, 'processId': processId})
+          .invokeMethod<String>(method, {...args, 'processId': processId})
           .timeout(timeout ?? searchTimeout);
       return raw ?? '{}';
     } on TimeoutException {
@@ -59,6 +60,14 @@ class AndroidYtDlpService implements YoutubeService {
     final q = query.trim();
     if (q.isEmpty) return const [];
     return _search({'query': q, 'isUrl': isYoutubeUrl(q)});
+  }
+
+  @override
+  Future<Uri> streamUrl(YtResult r) async {
+    final out = await _call(
+        {'url': r.downloadUrl, 'format': streamFormat}, method: 'streamUrl');
+    return parseStreamUrl(out) ??
+        (throw const YtException(YtErrorKind.changed, 'no stream address'));
   }
 
   @override

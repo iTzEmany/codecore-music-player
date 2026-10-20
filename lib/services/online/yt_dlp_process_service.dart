@@ -186,7 +186,7 @@ YtException ytExceptionFromStderr(String err) {
   return YtException(YtErrorKind.changed, err);
 }
 
-class YtDlpProcessService implements YoutubeService {
+class YtDlpProcessService implements YoutubeService, StreamSource {
   /// [locate] picks the binary to run (first call only); without it, and
   /// without [executable], `yt-dlp` is taken from the PATH.
   YtDlpProcessService({
@@ -368,6 +368,23 @@ class YtDlpProcessService implements YoutubeService {
       AppLog.w('yt-dlp music search output not JSON', e, st);
       throw const YtException(YtErrorKind.changed, 'bad output');
     }
+  }
+
+  @override
+  Future<Uri> streamUrl(YtResult r) async {
+    await _ensureTool();
+    final res = await _runSearch([
+      '-g',
+      '--no-warnings',
+      '--no-playlist',
+      '-f',
+      streamFormat,
+      ...await _jsArgs(),
+      r.downloadUrl,
+    ]);
+    if (res.code != 0) throw await _explain(res.err);
+    return parseStreamUrl(res.out) ??
+        (throw const YtException(YtErrorKind.changed, 'no stream address'));
   }
 
   @override
