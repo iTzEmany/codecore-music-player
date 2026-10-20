@@ -60,7 +60,7 @@ class YtDlpUpdateNotifier extends Notifier<YtDlpUpdateState> {
         onProgress: (f) => state =
             YtDlpUpdateState(YtDlpUpdatePhase.working, progress: f),
       );
-      final service = ref.read(youtubeServiceProvider);
+      final service = ref.read(ytDlpServiceProvider);
       if (service is YtDlpProcessService) service.refresh();
       ref.invalidate(ytDlpStatusProvider);
       state = YtDlpUpdateState(YtDlpUpdatePhase.done, tag: tag);

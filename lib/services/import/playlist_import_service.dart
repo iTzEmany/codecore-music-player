@@ -482,9 +482,12 @@ class PlaylistImportService {
       return;
     }
     try {
-      // Songs from one album are looked up on the album page: one search for
-      // all of them. Only a sure match counts; the rest goes the usual way.
-      final decision = await _fromAlbum(importId, row) ?? await _find(row);
+      // A sure match by ISRC comes first: it is one quick request. Songs from
+      // one album are then looked up on the album page, one search for all of
+      // them; only a sure match counts there, the rest goes the usual way.
+      final decision = await _byIsrc(row) ??
+          await _fromAlbum(importId, row) ??
+          await _find(row);
       _failStreak = 0;
       switch (decision.kind) {
         case MatchKind.sure when imp?.planFirst ?? false:
@@ -623,17 +626,19 @@ class PlaylistImportService {
         '${row.primaryArtist} - ${row.title}',
       ];
 
-  Future<MatchDecision> _find(ImportRow row) async {
-    // The ISRC identifies the recording: when it lands on a sure match we are
-    // done. Otherwise those results are dropped, so a wrong code cannot lift
-    // a candidate's score, and the usual title + artist search follows.
+  /// The ISRC identifies the recording: a sure match ends the search. Any
+  /// other answer is dropped, so a wrong code cannot lift a candidate's score.
+  Future<MatchDecision?> _byIsrc(ImportRow row) async {
     final isrc = row.isrc;
-    if (isrc != null && isrc.isNotEmpty) {
-      final byIsrc = await youtube.searchSongs(isrc, limit: 3);
-      final d = decide(row, byIsrc, thresholds: _cutoffs);
-      if (d.kind == MatchKind.sure) return d;
-      await Future<void>.delayed(searchGap);
-    }
+    if (isrc == null || isrc.isEmpty) return null;
+    final d = decide(row, await youtube.searchSongs(isrc, limit: 3),
+        thresholds: _cutoffs);
+    if (d.kind == MatchKind.sure) return d;
+    await Future<void>.delayed(searchGap);
+    return null;
+  }
+
+  Future<MatchDecision> _find(ImportRow row) async {
     final queries = searchQueries(row);
     final query = queries[1];
     final songs = await youtube.searchSongs(query, limit: 5);

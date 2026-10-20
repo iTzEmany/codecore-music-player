@@ -10,8 +10,10 @@ import '../core/paths.dart';
 import '../core/platform.dart';
 import '../data/db/app_database.dart';
 import '../data/repositories/folder_repository.dart';
+import '../services/online/direct_search_service.dart';
 import '../services/online/download_index.dart';
 import '../services/online/download_queue.dart';
+import '../services/online/innertube_client.dart';
 import '../services/online/retry_policy.dart';
 import '../services/online/android_yt_dlp_service.dart';
 import '../services/online/yt_dlp_process_service.dart';
@@ -31,11 +33,19 @@ final playlistListingProvider =
   retry: (_, _) => null,
 );
 
-final youtubeServiceProvider = Provider<YoutubeService>((ref) {
+/// yt-dlp: the desktop executable or the copy embedded in the Android app.
+final ytDlpServiceProvider = Provider<YoutubeService>((ref) {
   final YoutubeService s = isAndroid
       ? AndroidYtDlpService()
       : YtDlpProcessService(locate: locateYtDlp);
   ref.onDispose(s.close);
+  return s;
+});
+
+/// Searches with one direct request, everything else with yt-dlp.
+final youtubeServiceProvider = Provider<YoutubeService>((ref) {
+  final s = DirectSearchService(ref.watch(ytDlpServiceProvider), InnerTubeClient());
+  ref.onDispose(s.client.close);
   return s;
 });
 

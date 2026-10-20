@@ -138,6 +138,7 @@ Per ogni rischio: **sintomo** → **cosa fare**. Se scatta un fallback che cambi
 | R67 | Flatpak senza yt-dlp/ffmpeg funzionanti (sandbox) | Download assenti nel Flatpak | Binari dentro `/app/bin`; altrimenti Flatpak senza download, dichiarato. Non ancora costruito |
 | R68 | Keystore esposto o perso | APK non aggiornabili | Solo nei *secrets* della CI, mai stampato; `android/key.properties` e `*.jks` sono in `.gitignore`; backup offline |
 | R69 | R8/ProGuard rompe plugin con riflessione | Crash della release | Regole in `android/app/proguard-rules.pro`; la release `full` x86_64 è stata avviata su emulatore senza crash; resta da provare yt-dlp in release. Piano B: `isMinifyEnabled = false` (costa pochi MB: il codice pesa 2,8 MB) |
+| R70 | La ricerca diretta (InnerTube, API interna di YouTube non documentata) cambia formato o rifiuta | Ricerche YouTube/YouTube Music lente come prima (≈ 3–14 s), riga «direct … search unreadable» nel log | **Ripiego automatico** su yt-dlp per la stessa ricerca e per i 10 minuti successivi (`DirectSearchService`); 429 e assenza di rete si segnalano senza ripiego. Aggiornare le fixture in `test/fixtures/innertube/` e, se serve, `clientVersion`/filtri in `innertube_client.dart`; il test dal vivo `test/live/innertube_live_test.dart` (nightly) se ne accorge per primo |
 
 ## Backup e ripristino (fase 13)
 | # | Rischio | Sintomo | Piano B |

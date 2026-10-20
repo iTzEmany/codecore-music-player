@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/app_log.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/selection_providers.dart';
 import '../../../providers/settings_providers.dart';
@@ -85,11 +86,15 @@ class _YoutubeResultsState extends ConsumerState<YoutubeResults> {
     });
     try {
       final service = ref.read(youtubeServiceProvider);
-      final res = switch (ref.read(settingsProvider).searchSource) {
+      final source = ref.read(settingsProvider).searchSource;
+      final watch = Stopwatch()..start();
+      final res = switch (source) {
         SearchSource.youtube => await service.search(q),
         SearchSource.youtubeMusic => await service.searchSongs(q, limit: 10),
         SearchSource.soundcloud => await service.searchSoundCloud(q, limit: 10),
       };
+      AppLog.i('search ${source.name}: ${res.length} results in '
+          '${watch.elapsedMilliseconds} ms');
       if (!mounted || id != _requestId) return;
       // Picks refer to rows of the old results.
       ref.read(selectionProvider(_selectionKey).notifier).clear();

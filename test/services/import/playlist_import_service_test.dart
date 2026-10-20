@@ -991,6 +991,31 @@ void main() {
       expect((await imports.item(id, 2))!.state, ImportItemStatus.queued);
     });
 
+    test('a sure match by ISRC comes before the album page', () async {
+      for (var i = 0; i < 3; i++) {
+        yt.songs['ISRC$i'] = [topic('i$i', 'Song $i', 'Band', 200)];
+      }
+      yt.albums['mood'] = [
+        for (var i = 0; i < 3; i++) albumTrack('a$i', 'Song $i', 'Mood'),
+      ];
+      maxInFlight = 10;
+      service = build();
+      await service.start(csv([
+        for (var i = 0; i < 3; i++)
+          ImportRow(
+              index: i,
+              title: 'Song $i',
+              artists: const ['Band'],
+              album: 'Mood',
+              durationMs: 200000,
+              isrc: 'ISRC$i'),
+      ]));
+      await idle();
+      expect(yt.albumSearches, 0);
+      expect(yt.queries, ['songs:ISRC0', 'songs:ISRC1', 'songs:ISRC2']);
+      expect(queued.map((q) => q.$1.id), ['i0', 'i1', 'i2']);
+    });
+
     test('fewer than 3 songs in the album: the usual single searches', () async {
       yt.albums['mood'] = [albumTrack('a0', 'Song 0', 'Mood')];
       yt.songs['song'] = [topic('s', 'Song 0', 'Band', 200)];

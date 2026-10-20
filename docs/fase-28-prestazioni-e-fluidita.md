@@ -26,7 +26,7 @@ scaricarlo.
 |---|---|
 | Misura | Build `--profile` sul Mi A3; `adb shell dumpsys gfxinfo <pkg> framestats` durante scorrimenti scriptati; `am start -W` per l'avvio a freddo; `dumpsys meminfo`. Libreria di prova da 3000 brani in una **cartella separata** (file brevi generati), mai mescolata ai dati veri senza conferma. Traccia ripetibile anche su emulatore (`integration_test` + `traceAction`) nel job manuale della CI |
 | Obiettivi | Scorrimento elenchi e griglie: 90° percentile ≤ 16 ms per frame, < 2 % di frame persi; avvio a freddo < 2 s con 3000 brani; ricerca nella libreria < 100 ms; ricerca online: primi risultati < 1,5 s |
-| Ricerca online | **Client InnerTube in Dart** (con `dio`) per YouTube e YouTube Music: una richiesta. yt-dlp resta per i download, le playlist e i canali, SoundCloud e come **ripiego automatico** se la richiesta diretta fallisce o cambia formato (nuovo rischio R5-bis in `99-rischi`). Risultati in cache come oggi |
+| Ricerca online | **Client InnerTube in Dart** (con `dio`) per YouTube e YouTube Music: una richiesta. yt-dlp resta per i download, le playlist e i canali, SoundCloud e come **ripiego automatico** se la richiesta diretta fallisce o cambia formato (rischio R70 in `99-rischi`). Risultati in cache come oggi |
 | Miniature | La più piccola adatta (`mqdefault` 320×180, ~15 KB), comparsa in dissolvenza su un segnaposto; si caricano già solo le righe visibili |
 | Streaming | «Ascolta» su un risultato: indirizzo diretto via yt-dlp, riprodotto da `just_audio` (ExoPlayer su Android, mpv su desktop) nel lettore d'anteprima della fase 17 o in coda come brano «remoto». Mentre suona si salva in una **cache su disco** (tetto 200 MB, eliminata dopo 7 giorni); «Scarica» riusa il file in cache se il formato scelto è l'originale, altrimenti scarica di nuovo. L'indirizzo si chiede al momento dell'ascolto (scade) |
 | Elenchi | Proiezione leggera per elenchi e griglie (id, titolo, artista, album, durata, copertina, preferito, flag): testi e curiosità si leggono solo nella scheda del brano e in «In riproduzione» |
@@ -70,7 +70,7 @@ sul Mi A3 dopo ciascuna; test: con «Riduci animazioni» la durata è zero.
 
 **28.10 — Misura finale.** Stesso giro di 28.1, tabella prima/dopo, obiettivi rispettati o motivati.
 
-**28.11 — Rifinitura, documentazione e prova a mano.** `02-architettura.md`, `99-rischi` (R5-bis InnerTube), guida.
+**28.11 — Rifinitura, documentazione e prova a mano.** `02-architettura.md`, `99-rischi` (R70 InnerTube), guida.
 
 ## Rischi
 - **InnerTube** è un'API interna non documentata: può cambiare senza preavviso. Mitigazione: ripiego automatico
