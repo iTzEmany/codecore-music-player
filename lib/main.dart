@@ -11,6 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app.dart';
 import 'core/app_log.dart';
+import 'core/memory_budget.dart';
 import 'core/paths.dart';
 import 'core/platform.dart';
 import 'data/db/app_database.dart';
@@ -37,6 +38,7 @@ import 'services/android/widget_bridge.dart';
 import 'services/android/widget_sync.dart';
 import 'services/backup/restore_service.dart';
 import 'services/covers/cover_store.dart';
+import 'services/covers/cover_thumbnails.dart';
 import 'services/perf/perf_probe.dart';
 
 Future<void> main() async {
@@ -76,7 +78,15 @@ Future<void> main() async {
 
   final db = AppDatabase.production();
   final tracks = TrackRepository(db);
-  final covers = CoverStore(Directory(await coversDir()));
+  final covers = CoverStore(Directory(await coversDir()), thumbnails: encodeCoverThumbnail);
+  if (Platform.isAndroid) {
+    try {
+      final total = memTotalKb(await File('/proc/meminfo').readAsString());
+      PaintingBinding.instance.imageCache.maximumSizeBytes = imageCacheBytes(total);
+    } on FileSystemException catch (e) {
+      AppLog.d('meminfo unreadable', e);
+    }
+  }
   final errors = StreamController<PlaybackFailure>.broadcast();
   CodecoreAudioHandler build() => CodecoreAudioHandler(
         CrossfadeEngine(() => JustAudioBackend(withEqualizer: true)),
@@ -167,4 +177,9 @@ Future<void> main() async {
   if (kPerfBuild) {
     unawaited(PerfProbe.start(db: db, covers: covers, sinceMain: sinceMain));
   }
+  // Thumbnails of the covers saved before there were any: after start-up.
+  unawaited(WidgetsBinding.instance.waitUntilFirstFrameRasterized.then((_) async {
+    await Future<void>.delayed(const Duration(seconds: 5));
+    await covers.fillMissingThumbnails();
+  }));
 }

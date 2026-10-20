@@ -402,7 +402,7 @@ class SettingsScreen extends ConsumerWidget {
         }
       }
       await ref.read(trackRepositoryProvider).resetCovers();
-      ref.invalidate(coverFileProvider);
+      ref.invalidate(coverIndexProvider);
     } on Object catch (e, st) {
       AppLog.e('clear covers failed', e, st);
     }

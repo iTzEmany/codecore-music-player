@@ -2,18 +2,42 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:path/path.dart' as p;
 
 import '../../providers/library_providers.dart';
+import '../../services/covers/cover_store.dart';
+import '../../services/covers/cover_thumbnails.dart';
 import '../theme/tokens.dart';
 
-/// Resolves a cover file once per key (no repeated disk checks while scrolling).
-final coverFileProvider = Provider.family<File?, String>((ref, key) {
-  final dir = ref.watch(coversDirProvider);
-  for (final ext in const ['jpg', 'png']) {
-    final f = File('${dir.path}/$key.$ext');
-    if (f.existsSync()) return f;
+/// The covers folder as the UI knows it: listed once, then kept up to date by
+/// [CoverStore.changes], so scrolling never touches the disk.
+class CoverIndexNotifier extends Notifier<Map<String, CoverFiles>> {
+  @override
+  Map<String, CoverFiles> build() {
+    final store = ref.watch(coverStoreProvider);
+    final sub = CoverStore.changes.listen((c) {
+      final original = c.files.original;
+      if (original == null || !p.equals(p.dirname(original), store.dir.path)) return;
+      state = {...state, c.key: c.files};
+    });
+    ref.onDispose(sub.cancel);
+    return store.listAll();
   }
-  return null;
+}
+
+final coverIndexProvider =
+    NotifierProvider<CoverIndexNotifier, Map<String, CoverFiles>>(CoverIndexNotifier.new);
+
+/// The original cover of [key] (Now Playing, big sizes).
+final coverFileProvider = Provider.family<File?, String>((ref, key) {
+  final path = ref.watch(coverIndexProvider.select((m) => m[key]?.original));
+  return path == null ? null : File(path);
+});
+
+/// The thumbnail of [key], or the original while there is none.
+final coverThumbProvider = Provider.family<File?, String>((ref, key) {
+  final path = ref.watch(coverIndexProvider.select((m) => m[key]?.thumb ?? m[key]?.original));
+  return path == null ? null : File(path);
 });
 
 /// Golden tests swap the picture for a flat colour: decoding files inside a
@@ -48,8 +72,10 @@ class CoverImage extends ConsumerWidget {
       ),
     );
     final key = coverKey;
-    final file = key == null ? null : ref.watch(coverFileProvider(key));
     final px = (size * MediaQuery.devicePixelRatioOf(context)).round();
+    final file = key == null
+        ? null
+        : ref.watch(px <= coverThumbSide ? coverThumbProvider(key) : coverFileProvider(key));
     Widget image = ClipRRect(
       borderRadius: BorderRadius.circular(radius),
       child: SizedBox(

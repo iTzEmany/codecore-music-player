@@ -37,4 +37,4 @@ aperti: con le righe intere sono ~30 MB di testo copiati a ogni brano scaricato 
 | 28.2 | «Tutti i brani», 3000 brani arricchiti: testo nelle righe | 29,7 MB → **0,4 MB** | PC |
 | 28.2 | Stesso elenco con il database in un isolate a parte, come nell'app | 88 ms → **14 ms** a ogni aggiornamento | PC |
 | 28.2 | 50 000 brani: ricerca / album / artisti / tutti i brani / per artista | 32 / 83 / 71 / 832 / 805 → 34 / 79 / 68 / 820 / 785 ms (invariati) | PC |
-
+| 28.3 | Decodificare una copertina per una riga di elenco (132 px): JPEG 1200 px / JPEG 3000 px / PNG 3000 px → miniatura 320 px | 8,6 / 50 / 138 ms → **2,9 ms** | PC |

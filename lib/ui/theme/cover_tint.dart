@@ -69,7 +69,8 @@ final coverTintProvider = FutureProvider.family<Color?, String>((
   coverKey,
 ) async {
   ref.keepAlive();
-  final file = ref.watch(coverFileProvider(coverKey));
+  // 24 px are enough: the thumbnail is read, not the original.
+  final file = ref.watch(coverThumbProvider(coverKey));
   if (file == null) return null;
   try {
     final bytes = await file.readAsBytes();

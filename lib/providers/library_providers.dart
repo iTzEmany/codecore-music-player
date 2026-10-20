@@ -8,6 +8,7 @@ import '../data/db/app_database.dart';
 import '../data/repositories/library_queries.dart';
 import '../data/repositories/track_repository.dart';
 import '../services/covers/cover_store.dart';
+import '../services/covers/cover_thumbnails.dart';
 import '../services/scanner/library_scanner.dart';
 import '../services/tags/audio_metadata_tag_reader.dart';
 import '../services/tags/metadata_god_tag_writer.dart';
@@ -34,7 +35,7 @@ final coversDirProvider = Provider<Directory>(
 
 final coverStoreProvider = Provider<CoverStore>((ref) {
   final dir = ref.watch(coversDirProvider);
-  return CoverStore(dir);
+  return CoverStore(dir, thumbnails: encodeCoverThumbnail);
 });
 
 final libraryScannerProvider = Provider<LibraryScanner>(
