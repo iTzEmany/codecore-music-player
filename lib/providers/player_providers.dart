@@ -170,9 +170,9 @@ final durationProvider = StreamProvider<Duration?>(
 final queueProvider = StreamProvider<List<Track>>((ref) async* {
   final h = ref.watch(audioHandlerProvider);
   final repo = ref.watch(trackRepositoryProvider);
-  yield await repo.getByIds(h.queueIds);
+  yield await repo.getByIdsLight(h.queueIds);
   await for (final _ in h.queueChanges) {
-    yield await repo.getByIds(h.queueIds);
+    yield await repo.getByIdsLight(h.queueIds);
   }
 });
 

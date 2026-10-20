@@ -4,6 +4,7 @@ import '../../core/app_log.dart';
 import '../../core/clock.dart';
 import '../../core/playlist_order.dart';
 import '../db/app_database.dart';
+import 'light_tracks.dart';
 
 class PlaylistSummary {
   const PlaylistSummary(this.playlist, this.trackCount,
@@ -103,16 +104,20 @@ class PlaylistRepository {
             ]);
   }
 
+  /// The playlist's tracks in order, as list rows (see [lightTrackColumns]).
   Stream<List<Track>> watchTracks(int playlistId) {
-    final q = _db.select(_db.playlistTracks).join([
-      innerJoin(_db.tracks, _db.tracks.id.equalsExp(_db.playlistTracks.trackId)),
-    ])
-      ..where(_db.playlistTracks.playlistId.equals(playlistId) &
-          _db.tracks.missing.equals(false) &
-          _db.tracks.ignored.equals(false) &
-          _db.tracks.kind.equals(0))
-      ..orderBy([OrderingTerm.asc(_db.playlistTracks.position)]);
-    return q.watch().map((rows) => [for (final r in rows) r.readTable(_db.tracks)]);
+    final entries = _db.playlistTracks.actualTableName;
+    return _db
+        .customSelect(
+          'SELECT ${lightTrackColumns(_db, alias: 't')} FROM $entries e '
+          'JOIN tracks t ON t.id = e.track_id '
+          'WHERE e.playlist_id = ? AND t.missing = 0 AND t.ignored = 0 AND t.kind = 0 '
+          'ORDER BY e.position',
+          variables: [Variable<int>(playlistId)],
+          readsFrom: {_db.playlistTracks, _db.tracks},
+        )
+        .watch()
+        .map((rows) => [for (final r in rows) _db.tracks.map(r.data)]);
   }
 
   /// Returns how many tracks were actually added (duplicates are ignored, and

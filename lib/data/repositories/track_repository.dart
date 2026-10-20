@@ -4,6 +4,7 @@ import '../../core/import_row.dart';
 import '../../services/library/rules/rule_ast.dart';
 import '../../services/library/rules/rule_sql.dart';
 import '../db/app_database.dart';
+import 'light_tracks.dart';
 
 enum SortOption { defaultOrder, title, artist, album, year, addedAt, duration }
 
@@ -117,7 +118,7 @@ class TrackRepository {
         return cond;
       })
       ..orderBy(_orderFor(sort));
-    return q.watch();
+    return lightSelect(_db, q).watch();
   }
 
   List<OrderingTerm Function($TracksTable)> _orderFor(SortOption sort) {
@@ -183,7 +184,7 @@ class TrackRepository {
     final lim = limit == null ? '' : ' LIMIT ?';
     if (limit != null) vars.add(Variable<int>(limit));
     return (
-      sql: 'SELECT * FROM tracks WHERE ${q.where} '
+      sql: 'SELECT ${lightTrackColumns(_db)} FROM tracks WHERE ${q.where} '
           'ORDER BY ${_orderSql(sort, randomSeed, mostPlayed: mostPlayed)}$lim',
       vars: vars,
     );
@@ -244,6 +245,14 @@ class TrackRepository {
         }
         return out;
       });
+
+  /// [getByIds] as list rows (without the long texts): for the play queue.
+  Future<List<Track>> getByIdsLight(List<int> ids) async {
+    if (ids.isEmpty) return const [];
+    final rows = await lightSelect(_db, _db.select(_db.tracks)..where((t) => t.id.isIn(ids))).get();
+    final byId = {for (final r in rows) r.id: r};
+    return [for (final id in ids) if (byId[id] != null) byId[id]!];
+  }
 
   Future<List<Track>> getByIds(List<int> ids) async {
     if (ids.isEmpty) return const [];

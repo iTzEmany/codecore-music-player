@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 
 import '../db/app_database.dart';
+import 'light_tracks.dart';
 
 enum AlbumSort { title, artist, year }
 
@@ -184,7 +185,7 @@ ORDER BY g.k COLLATE NOCASE
   Stream<List<Track>> watchArtistTracks(String artistKey) {
     return _db
         .customSelect(
-          'SELECT * FROM tracks WHERE missing = 0 AND ignored = 0 AND kind = 0 '
+          'SELECT ${lightTrackColumns(_db)} FROM tracks WHERE missing = 0 AND ignored = 0 AND kind = 0 '
           "AND lower(trim(COALESCE(artist, ''))) = ? "
           'ORDER BY album COLLATE NOCASE, disc_number, track_number, '
           'title COLLATE NOCASE',
@@ -199,7 +200,7 @@ ORDER BY g.k COLLATE NOCASE
   Stream<List<Track>> watchTopTracks({int limit = 10}) {
     return _db
         .customSelect(
-          'SELECT * FROM tracks WHERE missing = 0 AND ignored = 0 AND kind = 0 AND play_count > 0 '
+          'SELECT ${lightTrackColumns(_db)} FROM tracks WHERE missing = 0 AND ignored = 0 AND kind = 0 AND play_count > 0 '
           'ORDER BY play_count DESC, last_played_at DESC, title COLLATE NOCASE '
           'LIMIT ?',
           variables: [Variable<int>(limit)],
@@ -228,7 +229,7 @@ ORDER BY g.k COLLATE NOCASE
   Stream<List<Track>> watchGenreTracks(String genre) {
     return _db
         .customSelect(
-          'SELECT * FROM tracks WHERE missing = 0 AND ignored = 0 AND kind = 0 '
+          'SELECT ${lightTrackColumns(_db)} FROM tracks WHERE missing = 0 AND ignored = 0 AND kind = 0 '
           'AND lower(trim(genre)) = lower(trim(?)) '
           'ORDER BY artist COLLATE NOCASE, album COLLATE NOCASE, '
           'disc_number, track_number, title COLLATE NOCASE',
@@ -240,7 +241,7 @@ ORDER BY g.k COLLATE NOCASE
   }
 
   Stream<List<Track>> watchAlbumTracks(String albumKey) {
-    return (_db.select(_db.tracks)
+    return lightSelect(_db, _db.select(_db.tracks)
           ..where((t) => t.albumKey.equals(albumKey) &
               t.missing.equals(false) &
               t.ignored.equals(false) &

@@ -66,5 +66,33 @@ void main() {
         '${mb.toStringAsFixed(1)} MB of text in the rows');
     expect(rows, hasLength(_tracks));
     expect(ms, lessThan(400 * margin));
+    // 28.2: the lists leave the long texts in the database (29.7 MB before).
+    expect(mb, lessThan(1.5), reason: 'only the list columns are read');
+  });
+
+  test('in a background isolate, as in the app: list rows against whole rows', () async {
+    final dir = await Directory.systemTemp.createTemp('cc_lists');
+    final db = AppDatabase(NativeDatabase.createInBackground(File('${dir.path}/l.sqlite')));
+    addTearDown(() async {
+      await db.close();
+      await dir.delete(recursive: true);
+    });
+    await db.batch((b) => b.insertAll(db.tracks, [for (var i = 0; i < _tracks; i++) _row(i)]));
+    final repo = TrackRepository(db);
+    Future<double> avg(Future<Object?> Function() f) async {
+      await f();
+      final sw = Stopwatch()..start();
+      for (var i = 0; i < 5; i++) {
+        await f();
+      }
+      return sw.elapsedMilliseconds / 5;
+    }
+
+    final whole = await avg(() => db.select(db.tracks).get());
+    final list = await avg(() => repo.watchTracks().first);
+    // ignore: avoid_print
+    print('lists3k isolate: whole rows=${whole.toStringAsFixed(1)} ms, '
+        'list rows=${list.toStringAsFixed(1)} ms');
+    expect(list, lessThan(whole), reason: 'the texts no longer cross the isolate');
   });
 }

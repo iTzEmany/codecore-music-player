@@ -30,3 +30,11 @@ cioè **16,7 ms** a frame.
 
 Ogni scrittura nella tabella dei brani (un download, un arricchimento) fa ripartire le query degli elenchi
 aperti: con le righe intere sono ~30 MB di testo copiati a ogni brano scaricato durante un'importazione.
+
+## Dopo, task per task
+| Task | Cosa | Prima → dopo | Dove |
+|---|---|---|---|
+| 28.2 | «Tutti i brani», 3000 brani arricchiti: testo nelle righe | 29,7 MB → **0,4 MB** | PC |
+| 28.2 | Stesso elenco con il database in un isolate a parte, come nell'app | 88 ms → **14 ms** a ogni aggiornamento | PC |
+| 28.2 | 50 000 brani: ricerca / album / artisti / tutti i brani / per artista | 32 / 83 / 71 / 832 / 805 → 34 / 79 / 68 / 820 / 785 ms (invariati) | PC |
+
