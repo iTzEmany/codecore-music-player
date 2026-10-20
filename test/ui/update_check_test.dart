@@ -4,6 +4,7 @@ import 'package:codecore/providers/settings_providers.dart';
 import 'package:codecore/providers/update_providers.dart';
 import 'package:codecore/services/online/http_client.dart';
 import 'package:codecore/ui/screens/settings/settings_screen.dart';
+import 'package:codecore/providers/startup_providers.dart';
 import 'package:dio/dio.dart' show CancelToken;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -73,6 +74,8 @@ void main() {
         settingsStoreProvider.overrideWithValue(store),
         releaseRepoProvider.overrideWithValue('me/codecore'),
         webClientProvider.overrideWithValue(web),
+        // The check waits for the app to be on screen: already so here.
+        startupSettledProvider.overrideWith((ref) async {}),
       ]);
       addTearDown(c.dispose);
       return c;

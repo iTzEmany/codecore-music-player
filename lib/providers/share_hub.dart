@@ -31,6 +31,7 @@ import 'library_providers.dart';
 import 'settings_providers.dart';
 import 'share_providers.dart';
 import 'youtube_providers.dart';
+import 'startup_providers.dart';
 
 class ShareHubState {
   const ShareHubState({
@@ -156,8 +157,14 @@ class ShareHubNotifier extends Notifier<ShareHubState> {
       settingsProvider.select((s) => s.receiveFromLan),
       (_, on) => _applyReceiveSetting(on),
     );
+    // Not at launch: the server, the discovery and the Android service start
+    // once the app is on screen, if the setting is still on by then.
     if (ref.read(settingsProvider).receiveFromLan) {
-      scheduleMicrotask(() => _applyReceiveSetting(true));
+      ref.read(startupSettledProvider.future).then((_) {
+        if (ref.mounted && ref.read(settingsProvider).receiveFromLan) {
+          unawaited(_applyReceiveSetting(true));
+        }
+      });
     }
     return const ShareHubState();
   }

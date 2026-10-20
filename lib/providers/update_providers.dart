@@ -5,6 +5,7 @@ import '../core/app_log.dart';
 import '../services/online/update_checker.dart';
 import 'online_providers.dart';
 import 'settings_providers.dart';
+import 'startup_providers.dart';
 
 /// The repository to ask; overridden in tests.
 final releaseRepoProvider = Provider<String>((ref) => kReleaseRepo);
@@ -39,6 +40,7 @@ final updateOnStartProvider = FutureProvider<UpdateInfo?>(
   (ref) async {
     final checker = ref.watch(updateCheckerProvider);
     if (checker == null || !ref.read(checkUpdatesOnStartProvider)) return null;
+    await ref.watch(startupSettledProvider.future);
     final store = ref.read(settingsStoreProvider);
     final today = _epochDay(DateTime.now());
     if (store.readLastUpdateCheckDay() == today) return null;

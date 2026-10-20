@@ -124,12 +124,6 @@ Future<void> main() async {
   final settingsStore = await SettingsStore.open();
   if (kPerfBuild) await PerfProbe.prepareSettings(settingsStore);
   final persistence = PlaybackPersistence(handler, settingsStore);
-  try {
-    await persistence.restore();
-  } on Object catch (e, st) {
-    AppLog.w('restore playback failed', e, st);
-  }
-  persistence.start();
 
   handler.browse = MediaBrowseTree(
     DbBrowseSource(TrackRepository(db), LibraryQueries(db), PlaylistRepository(db)),
@@ -174,6 +168,16 @@ Future<void> main() async {
     ],
     child: const CodecoreApp(),
   ));
+  // The last queue comes back right after the first frame, not before it:
+  // preparing the current song in the player is not needed to draw the app.
+  unawaited(() async {
+    try {
+      await persistence.restore();
+    } on Object catch (e, st) {
+      AppLog.w('restore playback failed', e, st);
+    }
+    persistence.start();
+  }());
   if (kPerfBuild) {
     unawaited(PerfProbe.start(db: db, covers: covers, sinceMain: sinceMain));
   }
