@@ -37,7 +37,7 @@ scaricarlo.
 | Pacchetti nuovi | Nessuno (`dio`, `just_audio`, `drift` già presenti) |
 
 ## Task
-**28.1 — Misura di partenza.** Libreria di prova da 3000 brani (script in `scripts/`, cartella separata), build
+**28.1 — Misura di partenza** (strumenti e risultati in [fase-28-misure.md](fase-28-misure.md)). Libreria di prova da 3000 brani (script in `scripts/`, cartella separata), build
 profile sul Mi A3, scorrimenti scriptati via adb su «Tutti i brani», «Album», ricerca, «In riproduzione»; tabella
 dei tempi in `docs/` (frame, avvio, memoria). Stesso giro registrato come traccia `integration_test` per l'emulatore.
 

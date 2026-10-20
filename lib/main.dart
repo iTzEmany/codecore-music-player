@@ -37,8 +37,10 @@ import 'services/android/widget_bridge.dart';
 import 'services/android/widget_sync.dart';
 import 'services/backup/restore_service.dart';
 import 'services/covers/cover_store.dart';
+import 'services/perf/perf_probe.dart';
 
 Future<void> main() async {
+  final sinceMain = Stopwatch()..start();
   WidgetsFlutterBinding.ensureInitialized();
   AppLog.i('avvio');
   // A phone stays upright however it is turned (the manifest says the same, so
@@ -110,6 +112,7 @@ Future<void> main() async {
   if (Platform.isWindows) unawaited(SmtcControls().attach(handler));
 
   final settingsStore = await SettingsStore.open();
+  if (kPerfBuild) await PerfProbe.prepareSettings(settingsStore);
   final persistence = PlaybackPersistence(handler, settingsStore);
   try {
     await persistence.restore();
@@ -161,4 +164,7 @@ Future<void> main() async {
     ],
     child: const CodecoreApp(),
   ));
+  if (kPerfBuild) {
+    unawaited(PerfProbe.start(db: db, covers: covers, sinceMain: sinceMain));
+  }
 }

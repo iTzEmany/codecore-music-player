@@ -11,7 +11,7 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE"/>
     <application
-        android:label="Codecore"
+        android:label="${appLabel}"
         android:usesCleartextTraffic="true"
         android:extractNativeLibs="true"
         android:name=".CodecoreApp"

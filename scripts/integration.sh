@@ -7,7 +7,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 device="${1:?uso: scripts/integration.sh <id-dispositivo>}"
-for t in app_flow playback playlist import; do
+for t in app_flow playback playlist import perf; do
   echo "== $t"
   flutter test "integration_test/${t}_test.dart" -d "$device"
 done
