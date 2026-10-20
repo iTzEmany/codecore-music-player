@@ -44,7 +44,10 @@ class _ThemeTilesState extends ConsumerState<ThemeTiles> {
     try {
       final keep = {
         for (final t in ref.read(customThemesProvider).items)
-          if (t.background.imagePath != null) t.background.imagePath!,
+          if (t.background.imagePath case final path?) ...[
+            path,
+            if (t.background.blur.round() > 0) blurredVariantPath(path, t.background.blur),
+          ],
       };
       await pruneBackgroundImages(await themeDir(), keep);
     } on Object catch (e, st) {

@@ -1,9 +1,9 @@
 import 'dart:io';
 import 'dart:math' as math;
-import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
 
+import '../../services/theme/background_image.dart';
 import 'custom_theme.dart';
 import 'tokens.dart';
 
@@ -22,67 +22,97 @@ LinearGradient? themeGradient(CcColors c, ThemeBackground b) {
   );
 }
 
+/// Makes (once) the blurred copy of a background picture; swapped in tests.
+typedef BackgroundBlurrer = Future<String?> Function(String path, double blur);
+
 /// Behind every page: the gradient or the picture of the theme in use. Pages
-/// are see-through while one is active (see `buildThemeFromColors`).
-class AppBackground extends StatelessWidget {
+/// are see-through while one is active (see `buildThemeFromColors`). A blurred
+/// picture is drawn from its blurred copy: nothing is filtered on screen.
+class AppBackground extends StatefulWidget {
   const AppBackground({
     super.key,
     required this.colors,
     required this.background,
     required this.child,
+    this.blurrer = blurredBackground,
   });
 
   final CcColors colors;
   final ThemeBackground background;
   final Widget child;
+  final BackgroundBlurrer blurrer;
+
+  @override
+  State<AppBackground> createState() => _AppBackgroundState();
+}
+
+class _AppBackgroundState extends State<AppBackground> {
+  /// The blurred copy on screen; the last one stays while the next is made
+  /// (dragging the slider), the plain colour before the first.
+  String? _blurred;
+  int _request = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _resolve();
+  }
+
+  @override
+  void didUpdateWidget(AppBackground old) {
+    super.didUpdateWidget(old);
+    final b = widget.background, o = old.background;
+    if (b.imagePath != o.imagePath || b.blur.round() != o.blur.round()) _resolve();
+  }
+
+  void _resolve() {
+    final path = widget.background.imagePath;
+    final blur = widget.background.blur.round();
+    final id = ++_request;
+    if (path == null || blur <= 0) {
+      _blurred = null;
+      return;
+    }
+    widget.blurrer(path, blur.toDouble()).then((out) {
+      if (mounted && id == _request) setState(() => _blurred = out);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    if (!background.isCustom) return child;
+    if (!widget.background.isCustom) return widget.child;
     return Stack(
       fit: StackFit.expand,
       children: [
-        Positioned.fill(child: ColoredBox(color: colors.bg)),
+        Positioned.fill(child: ColoredBox(color: widget.colors.bg)),
         Positioned.fill(child: _layer(context)),
-        child,
+        widget.child,
       ],
     );
   }
 
   Widget _layer(BuildContext context) {
-    final gradient = themeGradient(colors, background);
+    final background = widget.background;
+    final gradient = themeGradient(widget.colors, background);
     if (gradient != null) {
       return DecoratedBox(decoration: BoxDecoration(gradient: gradient));
     }
-    final path = background.imagePath;
+    final path = background.blur.round() > 0 ? _blurred : background.imagePath;
     if (path == null) return const SizedBox.shrink();
-    // A file that is gone or damaged leaves the plain colour behind.
-    Widget image = Image.file(
-      File(path),
-      fit: BoxFit.cover,
-      gaplessPlayback: true,
-      filterQuality: FilterQuality.medium,
-      errorBuilder: (_, _, _) => const SizedBox.shrink(),
-    );
-    if (background.blur > 0) {
-      image = ImageFiltered(
-        imageFilter: ImageFilter.blur(
-          sigmaX: background.blur,
-          sigmaY: background.blur,
-          tileMode: TileMode.clamp,
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        // A file that is gone or damaged leaves the plain colour behind.
+        Image.file(
+          File(path),
+          fit: BoxFit.cover,
+          gaplessPlayback: true,
+          filterQuality: FilterQuality.medium,
+          errorBuilder: (_, _, _) => const SizedBox.shrink(),
         ),
-        child: image,
-      );
-    }
-    return ClipRect(
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          image,
-          if (background.dim > 0)
-            ColoredBox(color: Colors.black.withValues(alpha: background.dim)),
-        ],
-      ),
+        if (background.dim > 0)
+          ColoredBox(color: Colors.black.withValues(alpha: background.dim)),
+      ],
     );
   }
 }

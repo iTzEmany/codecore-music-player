@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
@@ -58,6 +59,60 @@ Future<Uint8List?> _scaledPng(Uint8List bytes) async {
     codec?.dispose();
     descriptor?.dispose();
     buffer.dispose();
+  }
+}
+
+/// A blurred picture is kept at most this long: the blur hides the detail.
+const kMaxBlurredSide = 800;
+
+/// Where the copy of [path] blurred by [blur] is kept: next to it, with the
+/// same `bg-<id>-` name, so the tidying of the theme pictures covers it too.
+String blurredVariantPath(String path, double blur) =>
+    '${p.withoutExtension(path)}-blur${blur.round()}.png';
+
+/// [path] blurred by [blur], made once and then read from disk: on screen the
+/// picture is drawn as it is, with no filter to compute at every frame.
+/// [blur] keeps the meaning it had on screen (logical pixels on a phone about
+/// 900 tall). Null when [path] cannot be read.
+Future<String?> blurredBackground(String path, double blur) async {
+  final out = blurredVariantPath(path, blur);
+  if (await File(out).exists()) return out;
+  ui.ImmutableBuffer? buffer;
+  ui.ImageDescriptor? descriptor;
+  ui.Codec? codec;
+  ui.Image? image, blurred;
+  try {
+    buffer = await ui.ImmutableBuffer.fromUint8List(await File(path).readAsBytes());
+    descriptor = await ui.ImageDescriptor.encoded(buffer);
+    final longer = math.max(descriptor.width, descriptor.height);
+    final scale = longer > kMaxBlurredSide ? kMaxBlurredSide / longer : 1.0;
+    final w = (descriptor.width * scale).round(), h = (descriptor.height * scale).round();
+    codec = await descriptor.instantiateCodec(targetWidth: w, targetHeight: h);
+    image = (await codec.getNextFrame()).image;
+    final sigma = blur * math.max(w, h) / 900;
+    final recorder = ui.PictureRecorder();
+    ui.Canvas(recorder).drawImage(
+      image,
+      ui.Offset.zero,
+      ui.Paint()
+        ..imageFilter = ui.ImageFilter.blur(sigmaX: sigma, sigmaY: sigma, tileMode: ui.TileMode.clamp),
+    );
+    blurred = await recorder.endRecording().toImage(w, h);
+    final png = await blurred.toByteData(format: ui.ImageByteFormat.png);
+    if (png == null) return null;
+    final tmp = File('$out.tmp');
+    await tmp.writeAsBytes(png.buffer.asUint8List(), flush: true);
+    await tmp.rename(out);
+    return out;
+  } on Object catch (e, st) {
+    AppLog.w('background not blurred: $path', e, st);
+    return null;
+  } finally {
+    blurred?.dispose();
+    image?.dispose();
+    codec?.dispose();
+    descriptor?.dispose();
+    buffer?.dispose();
   }
 }
 

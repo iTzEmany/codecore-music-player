@@ -91,14 +91,29 @@ void main() {
       final img = await rec.endRecording().toImage(20, 20);
       file.writeAsBytesSync((await img.toByteData(format: ui.ImageByteFormat.png))!.buffer.asUint8List());
     });
-    await tester.pumpWidget(_host(AppBackground(
-      colors: colors,
-      background: ThemeBackground(kind: ThemeBackgroundKind.image, imagePath: file.path, dim: 0.4, blur: 3),
-      child: const SizedBox(key: marker),
-    )));
+    final asked = <(String, double)>[];
+    Widget app(double blur) => _host(AppBackground(
+          colors: colors,
+          background: ThemeBackground(kind: ThemeBackgroundKind.image, imagePath: file.path, dim: 0.4, blur: blur),
+          blurrer: (path, b) async {
+            asked.add((path, b));
+            return '${dir.path}/blurred-${b.round()}.png';
+          },
+          child: const SizedBox(key: marker),
+        ));
+    await tester.pumpWidget(app(3));
     await tester.pump(const Duration(milliseconds: 100));
-    expect(find.byType(Image), findsOneWidget);
-    expect(find.byType(ImageFiltered), findsOneWidget);
+    Image shown() => tester.widget<Image>(find.byType(Image));
+    expect((shown().image as FileImage).file.path, endsWith('blurred-3.png'), reason: 'the blurred copy');
+    expect(find.byType(ImageFiltered), findsNothing, reason: 'nothing is filtered on screen');
+    expect(asked, [(file.path, 3.0)]);
+
+    await tester.pumpWidget(app(3.2));
+    await tester.pump();
+    expect(asked, hasLength(1), reason: 'the same rounded blur is not made again');
+    await tester.pumpWidget(app(0));
+    await tester.pump();
+    expect((shown().image as FileImage).file.path, file.path, reason: 'no blur: the picture itself');
     expect(tester.takeException(), isNull);
   });
 

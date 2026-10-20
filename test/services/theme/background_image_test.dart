@@ -78,4 +78,21 @@ void main() {
     expect(odd.existsSync(), isTrue);
     await pruneBackgroundImages(Directory('${tmp.path}/missing'), {});
   });
+
+  test('a blurred copy is made once, at most 800 px, next to the picture', () async {
+    final src = File('${tmp.path}/a.png')..writeAsBytesSync(await _png(2000, 1000));
+    final path = (await importBackgroundImage(src, out, 'sea'))!;
+    final blurred = (await blurredBackground(path, 8))!;
+    expect(blurred, blurredVariantPath(path, 8));
+    expect(p.basename(blurred), startsWith('bg-sea-'), reason: 'tidied with the theme pictures');
+    final img = await _decode(blurred);
+    expect([img.width, img.height], [800, 400]);
+    final made = File(blurred).lastModifiedSync();
+    expect(await blurredBackground(path, 8.2), blurred, reason: 'same rounded blur: read, not made');
+    expect(File(blurred).lastModifiedSync(), made);
+    expect(await blurredBackground('${tmp.path}/none.png', 8), isNull);
+
+    await deleteBackgroundImages(out, 'sea');
+    expect(File(blurred).existsSync(), isFalse, reason: 'removed with its theme');
+  });
 }
