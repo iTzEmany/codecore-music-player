@@ -9,6 +9,11 @@ import 'offers.dart';
 const discoveryMagic = 'CODECORE/1';
 const discoveryPort = 45671;
 
+/// Retries (2 ms apart) for a send that would block: none for a target that
+/// already blocked on the previous beat, so a network that never delivers
+/// broadcasts costs nothing per beat.
+int sendRetries(bool blockedBefore) => blockedBefore ? 0 : 50;
+
 class Peer {
   const Peer({
     required this.id,
@@ -50,6 +55,8 @@ class LanDiscovery {
 
   RawDatagramSocket? _socket;
   Timer? _beat;
+  // Targets whose last send would block; logged once, no retry loop.
+  final _blocked = <String>{};
   int _httpPort = 0;
   int? _tlsPort;
   final _peers = <String, ({Peer peer, DateTime seen})>{};
@@ -193,15 +200,20 @@ class LanDiscovery {
     for (final t in await _targets()) {
       try {
         // send() returns 0 when it would block (on Windows only one datagram
-        // can be in flight per socket): retry briefly instead of dropping it.
+        // can be in flight per socket): retry briefly while the target is
+        // known to work, but only try once if it has been blocking.
+        final key = '${t.address.address}:${t.port}';
+        final blocked = _blocked.contains(key);
         var sent = s.send(data, t.address, t.port);
-        for (var i = 0; sent == 0 && i < 50; i++) {
+        for (var i = 0; sent == 0 && i < sendRetries(blocked); i++) {
           await Future<void>.delayed(const Duration(milliseconds: 2));
           if (_socket != s) return;
           sent = s.send(data, t.address, t.port);
         }
-        if (sent == 0) {
+        if (sent == 0 && _blocked.add(key)) {
           AppLog.d('discovery: send to ${t.address.address} would block');
+        } else if (sent != 0 && _blocked.remove(key)) {
+          AppLog.d('discovery: send to ${t.address.address} recovered');
         }
       } on SocketException catch (e) {
         AppLog.d('discovery: send failed to ${t.address.address}', e);
