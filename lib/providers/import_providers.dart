@@ -88,7 +88,7 @@ final playlistImportServiceProvider = Provider<PlaylistImportService>((ref) {
               album: row.album,
               albumArtist: row.primaryArtist,
               year: t.year,
-              trackNumber: t.trackNumber,
+              trackNumber: row.trackNumber ?? t.trackNumber,
               genre: t.genre,
             ),
           );

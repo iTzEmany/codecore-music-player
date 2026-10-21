@@ -27,6 +27,7 @@ import '../../widgets/track_row.dart';
 import '../../widgets/track_row_selection.dart';
 import '../library/album_detail_screen.dart';
 import '../library/artist_screen.dart';
+import '../online/artist_picker_sheet.dart';
 import '../playlists/playlist_detail_screen.dart';
 import '../youtube/youtube_results.dart';
 import 'genre_screen.dart';
@@ -543,7 +544,7 @@ class _LibraryResults extends ConsumerWidget {
           if (res.artists.isNotEmpty) ...[
             SectionHeader(l.artists),
             SizedBox(
-              height: 124,
+              height: 148,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(
@@ -573,6 +574,22 @@ class _LibraryResults extends ConsumerWidget {
                               overflow: TextOverflow.ellipsis,
                               style: theme.bodyMedium?.copyWith(color: cc.text),
                             ),
+                            if (kEnableYoutube && a.name != null)
+                              InkWell(
+                                key: ValueKey('ytm-${a.key}'),
+                                borderRadius: BorderRadius.circular(CcDims.rList),
+                                onTap: () => openYtmArtist(context, ref, a.name!,
+                                    open: (page) => ShellNav.open<void>(context, page)),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 2),
+                                  child: Text(
+                                    l.ytmOnYoutubeMusic,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: theme.labelSmall?.copyWith(color: cc.accentSoft),
+                                  ),
+                                ),
+                              ),
                           ],
                         ),
                       ),

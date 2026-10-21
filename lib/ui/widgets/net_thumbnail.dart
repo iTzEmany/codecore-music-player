@@ -13,11 +13,15 @@ class NetThumbnail extends StatelessWidget {
     required this.height,
     required this.icon,
     this.radius = CcDims.rList,
+    this.circle = false,
   });
 
   final String? url;
   final double width, height, radius;
   final IconData icon;
+
+  /// A round picture (artists); [radius] is then ignored.
+  final bool circle;
 
   static const fade = Duration(milliseconds: 180);
 
@@ -30,7 +34,7 @@ class NetThumbnail extends StatelessWidget {
     );
     final u = url;
     return ClipRRect(
-      borderRadius: BorderRadius.circular(radius),
+      borderRadius: BorderRadius.circular(circle ? (width < height ? width : height) / 2 : radius),
       child: SizedBox(
         width: width,
         height: height,

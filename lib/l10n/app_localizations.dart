@@ -6698,6 +6698,144 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Non disponibile'**
   String get memoryUnavailable;
+
+  /// No description provided for @ytmArtistWithAudience.
+  ///
+  /// In it, this message translates to:
+  /// **'Artista · {audience}'**
+  String ytmArtistWithAudience(String audience);
+
+  /// No description provided for @ytmOffline.
+  ///
+  /// In it, this message translates to:
+  /// **'Non in linea · dati del {date}'**
+  String ytmOffline(String date);
+
+  /// No description provided for @ytmArtistNotFound.
+  ///
+  /// In it, this message translates to:
+  /// **'Artista non trovato'**
+  String get ytmArtistNotFound;
+
+  /// No description provided for @ytmPageUnreadable.
+  ///
+  /// In it, this message translates to:
+  /// **'La pagina non si legge (YouTube ha cambiato qualcosa)'**
+  String get ytmPageUnreadable;
+
+  /// No description provided for @ytmArtistUnreadable.
+  ///
+  /// In it, this message translates to:
+  /// **'La pagina dell\'artista non si legge (YouTube ha cambiato qualcosa)'**
+  String get ytmArtistUnreadable;
+
+  /// No description provided for @ytmSearchSongsOf.
+  ///
+  /// In it, this message translates to:
+  /// **'Cerca i brani di {name}'**
+  String ytmSearchSongsOf(String name);
+
+  /// No description provided for @ytmInYourLibrary.
+  ///
+  /// In it, this message translates to:
+  /// **'Nella tua libreria'**
+  String get ytmInYourLibrary;
+
+  /// No description provided for @ytmSeeAll.
+  ///
+  /// In it, this message translates to:
+  /// **'Vedi tutti'**
+  String get ytmSeeAll;
+
+  /// No description provided for @ytmShowAll.
+  ///
+  /// In it, this message translates to:
+  /// **'Mostra tutto'**
+  String get ytmShowAll;
+
+  /// No description provided for @ytmAbout.
+  ///
+  /// In it, this message translates to:
+  /// **'Informazioni'**
+  String get ytmAbout;
+
+  /// No description provided for @ytmMore.
+  ///
+  /// In it, this message translates to:
+  /// **'Altro'**
+  String get ytmMore;
+
+  /// No description provided for @ytmLess.
+  ///
+  /// In it, this message translates to:
+  /// **'Meno'**
+  String get ytmLess;
+
+  /// No description provided for @ytmDownloadAlbum.
+  ///
+  /// In it, this message translates to:
+  /// **'Scarica album'**
+  String get ytmDownloadAlbum;
+
+  /// No description provided for @ytmDownloadAlbumTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Scaricare «{album}»?'**
+  String ytmDownloadAlbumTitle(String album);
+
+  /// No description provided for @ytmAlbumConfirmBody.
+  ///
+  /// In it, this message translates to:
+  /// **'{tracks, plural, one{1 brano} other{{tracks} brani}} · {duration} · circa {size}'**
+  String ytmAlbumConfirmBody(int tracks, String duration, String size);
+
+  /// No description provided for @ytmAlbumConfirmOwned.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, one{1 brano è già in libreria e verrà collegato} other{{count} brani sono già in libreria e verranno collegati}}'**
+  String ytmAlbumConfirmOwned(int count);
+
+  /// No description provided for @ytmAlbumStarted.
+  ///
+  /// In it, this message translates to:
+  /// **'Importazione «{name}» avviata'**
+  String ytmAlbumStarted(String name);
+
+  /// No description provided for @ytmShowImport.
+  ///
+  /// In it, this message translates to:
+  /// **'Mostra'**
+  String get ytmShowImport;
+
+  /// No description provided for @ytmOnYoutubeMusic.
+  ///
+  /// In it, this message translates to:
+  /// **'Su YouTube Music'**
+  String get ytmOnYoutubeMusic;
+
+  /// No description provided for @ytmArtistOnYoutubeMusic.
+  ///
+  /// In it, this message translates to:
+  /// **'Artista su YouTube Music'**
+  String get ytmArtistOnYoutubeMusic;
+
+  /// No description provided for @ytmSearchingArtist.
+  ///
+  /// In it, this message translates to:
+  /// **'Cerco su YouTube Music…'**
+  String get ytmSearchingArtist;
+
+  /// No description provided for @ytmPickArtist.
+  ///
+  /// In it, this message translates to:
+  /// **'Quale artista?'**
+  String get ytmPickArtist;
+
+  /// No description provided for @ytmArtistNone.
+  ///
+  /// In it, this message translates to:
+  /// **'Nessun artista trovato su YouTube Music'**
+  String get ytmArtistNone;
 }
 
 class _AppLocalizationsDelegate

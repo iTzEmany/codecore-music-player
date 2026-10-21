@@ -81,8 +81,11 @@ class PlaylistRepository {
           '(SELECT MAX(t.added_at) FROM playlist_tracks x JOIN tracks t '
           'ON t.id = x.track_id WHERE x.playlist_id = p.id) AS added '
           'FROM playlists p LEFT JOIN playlist_tracks pt ON pt.playlist_id = p.id '
+          // The technical playlist of «Scarica album» (see ytmAlbumSourceKind).
+          "WHERE NOT EXISTS (SELECT 1 FROM playlist_imports i "
+          "WHERE i.playlist_id = p.id AND i.source_kind = 'ytm-album') "
           'GROUP BY p.id ORDER BY p.name COLLATE NOCASE',
-          readsFrom: {_db.playlists, _db.playlistTracks, _db.tracks},
+          readsFrom: {_db.playlists, _db.playlistTracks, _db.tracks, _db.playlistImports},
         )
         .watch()
         .map((rows) => [

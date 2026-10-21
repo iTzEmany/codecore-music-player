@@ -39,6 +39,16 @@ void main() {
     expect(all.single.trackCount, 3);
   });
 
+  test('the technical playlist of «Scarica album» is not listed', () async {
+    final shown = await repo.create('Mix');
+    final hidden = await repo.create('Album — Band');
+    for (final (playlist, kind) in [(shown, 'youtube'), (hidden, 'ytm-album')]) {
+      await db.into(db.playlistImports).insert(PlaylistImportsCompanion.insert(
+          playlistId: playlist, sourceName: 'x', createdAt: 1, sourceKind: Value(kind)));
+    }
+    expect((await repo.watchAll().first).map((p) => p.playlist.name), ['Mix']);
+  });
+
   test('reorder is stable and removal renumbers', () async {
     final p = await repo.create('Mix');
     await repo.addTracks(p, ids);

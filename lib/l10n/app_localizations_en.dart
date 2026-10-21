@@ -4209,4 +4209,101 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get memoryUnavailable => 'Not available';
+
+  @override
+  String ytmArtistWithAudience(String audience) {
+    return 'Artist · $audience';
+  }
+
+  @override
+  String ytmOffline(String date) {
+    return 'Offline · data from $date';
+  }
+
+  @override
+  String get ytmArtistNotFound => 'Artist not found';
+
+  @override
+  String get ytmPageUnreadable =>
+      'The page cannot be read (YouTube changed something)';
+
+  @override
+  String get ytmArtistUnreadable =>
+      'The artist page cannot be read (YouTube changed something)';
+
+  @override
+  String ytmSearchSongsOf(String name) {
+    return 'Search songs by $name';
+  }
+
+  @override
+  String get ytmInYourLibrary => 'In your library';
+
+  @override
+  String get ytmSeeAll => 'See all';
+
+  @override
+  String get ytmShowAll => 'Show all';
+
+  @override
+  String get ytmAbout => 'About';
+
+  @override
+  String get ytmMore => 'More';
+
+  @override
+  String get ytmLess => 'Less';
+
+  @override
+  String get ytmDownloadAlbum => 'Download album';
+
+  @override
+  String ytmDownloadAlbumTitle(String album) {
+    return 'Download “$album”?';
+  }
+
+  @override
+  String ytmAlbumConfirmBody(int tracks, String duration, String size) {
+    String _temp0 = intl.Intl.pluralLogic(
+      tracks,
+      locale: localeName,
+      other: '$tracks songs',
+      one: '1 song',
+    );
+    return '$_temp0 · $duration · about $size';
+  }
+
+  @override
+  String ytmAlbumConfirmOwned(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count songs are already in your library and will be linked',
+      one: '1 song is already in your library and will be linked',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String ytmAlbumStarted(String name) {
+    return 'Import “$name” started';
+  }
+
+  @override
+  String get ytmShowImport => 'Show';
+
+  @override
+  String get ytmOnYoutubeMusic => 'On YouTube Music';
+
+  @override
+  String get ytmArtistOnYoutubeMusic => 'Artist on YouTube Music';
+
+  @override
+  String get ytmSearchingArtist => 'Searching YouTube Music…';
+
+  @override
+  String get ytmPickArtist => 'Which artist?';
+
+  @override
+  String get ytmArtistNone => 'No artist found on YouTube Music';
 }

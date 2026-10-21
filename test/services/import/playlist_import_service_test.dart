@@ -138,6 +138,7 @@ void main() {
   late StreamController<DownloadItem> settled;
   late List<(YtResult, String)> queued;
   late List<String> tagged;
+  late List<int?> trackNumbers;
   late List<int> enriched;
   late List<ImportSteps> stepsDuringTags;
   late List<ImportEvent> events;
@@ -184,6 +185,7 @@ void main() {
       pathForVideo: (_) async => null,
       applyTags: (id, r) async {
         tagged.add('$id:${r.title}');
+        trackNumbers.add(r.trackNumber);
         stepsDuringTags.add(service.currentSteps);
       },
       enrichLater: enriched.add,
@@ -236,6 +238,7 @@ void main() {
     settled = StreamController<DownloadItem>.broadcast();
     queued = [];
     tagged = [];
+    trackNumbers = [];
     enriched = [];
     stepsDuringTags = [];
     events = [];
@@ -558,6 +561,27 @@ void main() {
       await idle();
       expect(queued.map((q) => q.$1.id), ['b2']);
       expect((await imports.item(id, 0))!.state, ImportItemStatus.linked);
+    });
+
+    test('an album import numbers the songs by their place in the album; a plain one does not', () async {
+      final album = await service.startFromResults(
+        'Album — Band',
+        [video('a1', 'Second to download', 'Band', 100), video('b2', 'Other', 'Band', 100)],
+        sourceKind: ytmAlbumSourceKind,
+      );
+      await idle();
+      expect((await imports.get(album))!.sourceKind, ytmAlbumSourceKind);
+      // The second row finishes first: its number is still its place, 2.
+      await finish(queued[1].$2, '/m/b.mp3');
+      await finish(queued[0].$2, '/m/a.mp3');
+      expect(trackNumbers, [2, 1]);
+
+      trackNumbers.clear();
+      queued.clear();
+      await service.startFromResults('Mix', [video('c3', 'Third', 'Chan', 100)]);
+      await idle();
+      await finish(queued.single.$2, '/m/c.mp3');
+      expect(trackNumbers, [null]);
     });
 
     test('an empty list finishes at once and an unnamed one is called YouTube', () async {

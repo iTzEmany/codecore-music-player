@@ -2594,5 +2594,83 @@
   },
   "memoryClearFailed": "Não foi possível limpar o cache",
   "memoryTools": "Limpeza",
-  "memoryUnavailable": "Indisponível"
+  "memoryUnavailable": "Indisponível",
+  "ytmArtistWithAudience": "Artista · {audience}",
+  "@ytmArtistWithAudience": {
+    "placeholders": {
+      "audience": {
+        "type": "String"
+      }
+    }
+  },
+  "ytmOffline": "Offline · dados de {date}",
+  "@ytmOffline": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "ytmArtistNotFound": "Artista não encontrado",
+  "ytmPageUnreadable": "Não é possível ler a página (o YouTube mudou algo)",
+  "ytmArtistUnreadable": "Não é possível ler a página do artista (o YouTube mudou algo)",
+  "ytmSearchSongsOf": "Buscar músicas de {name}",
+  "@ytmSearchSongsOf": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "ytmInYourLibrary": "Na sua biblioteca",
+  "ytmSeeAll": "Ver tudo",
+  "ytmShowAll": "Mostrar tudo",
+  "ytmAbout": "Sobre",
+  "ytmMore": "Mais",
+  "ytmLess": "Menos",
+  "ytmDownloadAlbum": "Baixar álbum",
+  "ytmDownloadAlbumTitle": "Baixar “{album}”?",
+  "@ytmDownloadAlbumTitle": {
+    "placeholders": {
+      "album": {
+        "type": "String"
+      }
+    }
+  },
+  "ytmAlbumConfirmBody": "{tracks, plural, one{1 faixa} other{{tracks} faixas}} · {duration} · cerca de {size}",
+  "@ytmAlbumConfirmBody": {
+    "placeholders": {
+      "tracks": {
+        "type": "int"
+      },
+      "duration": {
+        "type": "String"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "ytmAlbumConfirmOwned": "{count, plural, one{1 faixa já está na biblioteca e será vinculada} other{{count} faixas já estão na biblioteca e serão vinculadas}}",
+  "@ytmAlbumConfirmOwned": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ytmAlbumStarted": "Importação “{name}” iniciada",
+  "@ytmAlbumStarted": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "ytmShowImport": "Mostrar",
+  "ytmOnYoutubeMusic": "No YouTube Music",
+  "ytmArtistOnYoutubeMusic": "Artista no YouTube Music",
+  "ytmSearchingArtist": "Buscando no YouTube Music…",
+  "ytmPickArtist": "Qual artista?",
+  "ytmArtistNone": "Nenhum artista encontrado no YouTube Music"
 }

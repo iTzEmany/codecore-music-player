@@ -62,6 +62,9 @@ class ListenNotifier extends Notifier<ListenState> {
   int _token = 0;
   bool _resumeMain = false;
 
+  /// Online pages (results, artist, album…) that are open and share the listen.
+  int _pages = 0;
+
   @override
   ListenState build() {
     // Music started from the library ends the listen (and is not paused again).
@@ -76,6 +79,18 @@ class ListenNotifier extends Notifier<ListenState> {
   }
 
   bool get isActive => state.active;
+
+  /// An online page opened: the listen outlives each page but the last.
+  void attach() => _pages++;
+
+  /// An online page closed; the last one to close ends the listen.
+  void detach() {
+    if (_pages > 0) _pages--;
+    if (_pages == 0 && state.active) unawaited(stop());
+  }
+
+  /// Pages currently attached (for tests).
+  int get attachedPages => _pages;
 
   /// Plays [r]; on the one already playing it pauses or resumes it.
   Future<void> toggle(YtResult r) async {

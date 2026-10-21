@@ -21,6 +21,11 @@ import 'track_matcher.dart';
 
 const _tagPrefix = 'import:';
 
+/// `playlist_imports.source_kind` of «Scarica album»: the import needs a
+/// playlist, which is kept out of the playlist lists (the album is in the
+/// library's Albums).
+const ytmAlbumSourceKind = 'ytm-album';
+
 String importTag(int importId, int rowIndex) => '$_tagPrefix$importId:$rowIndex';
 
 /// `(importId, rowIndex)` of a download tag made by [importTag], else null.
@@ -286,6 +291,7 @@ class PlaylistImportService {
     String name,
     List<YtResult> results, {
     ImportOptions options = const ImportOptions(),
+    String sourceKind = 'youtube',
   }) async {
     final label = name.trim().isEmpty ? 'YouTube' : name.trim();
     final playlistId = await playlists.create(label);
@@ -294,7 +300,7 @@ class PlaylistImportService {
       playlistId: playlistId,
       sourceName: label,
       rows: rows,
-      sourceKind: 'youtube',
+      sourceKind: sourceKind,
       folderPath: options.folderPath,
       numberFiles: options.numberFiles,
       linkOnly: options.linkOnly,
@@ -981,7 +987,12 @@ class PlaylistImportService {
   /// The CSV tags, the place in the playlist, the length check and the cover.
   Future<void> _tagAndPlace(PlaylistImport imp, PlaylistImportItem it, int trackId) async {
     try {
-      await applyTags(trackId, it.toRow());
+      // The rows of an album import are in the album's order: that is the track number.
+      await applyTags(
+          trackId,
+          imp.sourceKind == ytmAlbumSourceKind
+              ? it.toRow().withTrackNumber(it.rowIndex + 1)
+              : it.toRow());
     } on Object catch (e, st) {
       AppLog.w('import: could not apply CSV tags to track $trackId', e, st);
     }

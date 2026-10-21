@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 
 import '../../core/app_log.dart';
+import '../../core/constants.dart';
 import '../../core/platform.dart';
 import '../../data/db/app_database.dart';
 import '../../l10n/l10n_ext.dart';
@@ -22,6 +23,7 @@ import '../screens/devices/devices_sheet.dart';
 import '../screens/track_edit_dialog.dart';
 import '../screens/library/album_detail_screen.dart';
 import '../screens/library/artist_screen.dart';
+import '../screens/online/artist_picker_sheet.dart';
 import '../shell/shell_nav.dart';
 import '../../data/repositories/library_queries.dart';
 import '../../providers/library_providers.dart';
@@ -88,6 +90,9 @@ List<TrackActionGroup> trackActions(
     );
   }
 
+  Future<void> artistOnYoutubeMusic() => openYtmArtist(outer, ref, track.artist!.trim(),
+      open: (page) => ShellNav.openInLibrary(outer, ref, page));
+
   return [
     TrackActionGroup(l.groupQueue, [
       if (isDesktop)
@@ -140,6 +145,12 @@ List<TrackActionGroup> trackActions(
           Icons.person_outline_rounded,
           l.goToArtist,
           () async => goToArtist(),
+        ),
+      if (kEnableYoutube && (track.artist ?? '').trim().isNotEmpty)
+        TrackAction(
+          Icons.smart_display_rounded,
+          l.ytmArtistOnYoutubeMusic,
+          artistOnYoutubeMusic,
         ),
     ]),
     TrackActionGroup(l.groupEdit, [

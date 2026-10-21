@@ -10,7 +10,7 @@ const _langs = ['en', 'de', 'es', 'fr', 'pt'];
 const _sameAsItalian = {
   'tokenSurface1', 'tokenSurface2', 'tokenSurface3', 'themeCopyName',
   'accentRosa', 'backupSection', 'accentVerde', 'activityDownload', 'albumMeta', 'appName',
-  'artistMeta', 'csvImportPause', 'csvOutHeaderAlbum', 'csvOutHeaderIsrc',
+  'artistMeta', 'ytmArtistWithAudience', 'csvImportPause', 'csvOutHeaderAlbum', 'csvOutHeaderIsrc',
   'csvOutHeaderNote', 'detailFormat', 'devicesJamShort', 'discN',
   'downloadRateKb', 'downloadRateMb', 'durationMinutes', 'exportFormatJson',
   'fieldAlbum', 'fieldArtist', 'jamHostTag', 'jamOutputOther', 'jamTitle',

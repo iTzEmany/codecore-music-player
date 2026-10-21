@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -7,19 +9,21 @@ import '../../../providers/listen_providers.dart';
 import '../../../providers/selection_providers.dart';
 import '../../../providers/settings_providers.dart';
 import '../../../providers/youtube_providers.dart';
-import '../../../services/online/download_queue.dart';
+import '../../../providers/ytm_catalog_providers.dart';
+import '../../../services/online/ytm_artist.dart';
 import '../../../services/online/youtube_service.dart';
 import '../../../services/online/youtube_urls.dart';
+import '../../shell/shell_nav.dart';
 import '../../theme/tokens.dart';
+import '../online/artist_card.dart';
+import '../online/artist_page_screen.dart';
+import '../online/online_song_row.dart';
 import '../../widgets/activity_button.dart';
 import '../../widgets/empty_state.dart';
-import '../../widgets/format_utils.dart';
 import '../../widgets/selection_bar.dart';
-import '../../widgets/track_row_selection.dart';
 import '../../widgets/yt_dlp_outdated_banner.dart';
 import 'listen_bar.dart';
 import 'playlist_source_sheet.dart';
-import '../../widgets/net_thumbnail.dart';
 import '../../widgets/motion.dart';
 
 String ytErrorText(BuildContext context, YtErrorKind k) {
@@ -60,17 +64,21 @@ class _YoutubeResultsState extends ConsumerState<YoutubeResults> {
   int _requestId = 0;
   late final ListenNotifier _listen;
 
-  /// A listen has no player of its own outside the results: it ends with them.
+  /// The artist behind the top result of the search, when it is one.
+  YtmArtistRef? _artist;
+
+  /// A listen has no player of its own outside the online pages: it ends with
+  /// the last of them (these results, an artist page opened from them…).
   @override
   void dispose() {
-    if (_listen.isActive) _listen.stop();
+    _listen.detach();
     super.dispose();
   }
 
   @override
   void initState() {
     super.initState();
-    _listen = ref.read(listenProvider.notifier);
+    _listen = ref.read(listenProvider.notifier)..attach();
     if (widget.submitted > 0) _search();
   }
 
@@ -96,10 +104,13 @@ class _YoutubeResultsState extends ConsumerState<YoutubeResults> {
     setState(() {
       _searching = true;
       _error = null;
+      _artist = null;
     });
     try {
       final service = ref.read(youtubeServiceProvider);
       final source = ref.read(settingsProvider).searchSource;
+      // In parallel, never in the way of the results.
+      if (source != SearchSource.soundcloud) unawaited(_loadArtistCard(q, id));
       final watch = Stopwatch()..start();
       final res = switch (source) {
         SearchSource.youtube => await service.search(q),
@@ -123,6 +134,23 @@ class _YoutubeResultsState extends ConsumerState<YoutubeResults> {
     }
   }
 
+  /// The artist card: only when YouTube Music's top result is an artist; a
+  /// failure is logged, never shown. A late answer to an old search is dropped.
+  Future<void> _loadArtistCard(String q, int id) async {
+    try {
+      final artist = await ref
+          .read(ytmCatalogProvider)
+          .topArtist(q, ref.read(ytmLanguageProvider));
+      if (!mounted || id != _requestId) return;
+      setState(() => _artist = artist);
+    } on Object catch (e) {
+      AppLog.w('artist card: not available ($e)');
+    }
+  }
+
+  void _openArtist(YtmArtistRef artist) =>
+      ShellNav.open<void>(context, ArtistPageScreen(artist: artist));
+
   void _pickSource(SearchSource s) {
     if (ref.read(settingsProvider).searchSource == s) return;
     ref.read(settingsProvider.notifier).update((c) => c.copyWith(searchSource: s));
@@ -133,43 +161,12 @@ class _YoutubeResultsState extends ConsumerState<YoutubeResults> {
   /// Starts a download for each picked result that is not already in the
   /// library or on its way.
   void _downloadSelection() {
-    final l = context.l10n;
     final picked = ref.read(selectionProvider(_selectionKey));
-    final index = ref.read(downloadIndexProvider).value;
-    final busy = {
-      for (final d in ref.read(downloadsProvider))
-        if (d.status == DownloadStatus.queued ||
-            d.status == DownloadStatus.downloading ||
-            d.status == DownloadStatus.waitingRetry)
-          d.result.id,
-    };
-    var started = 0, skipped = 0;
-    // In the order the results were picked: that is the order of the queue.
-    for (final i in picked.orderedIds) {
-      if (i >= _results.length) continue;
-      final r = _results[i];
-      if ((index?.contains(r.id, source: r.source) ?? false) ||
-          busy.contains(r.id)) {
-        skipped++;
-        continue;
-      }
-      ref.read(downloadsProvider.notifier).add(r);
-      started++;
-    }
+    startOnlineDownloads(context, ref, [
+      for (final i in picked.orderedIds)
+        if (i < _results.length) _results[i],
+    ]);
     ref.read(selectionProvider(_selectionKey).notifier).clear();
-    ScaffoldMessenger.of(context)
-      ..clearSnackBars()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(
-            started == 0
-                ? l.ytNothingToDownload
-                : skipped == 0
-                ? l.ytDownloadsStarted(started)
-                : l.ytDownloadsSkipped(started, skipped),
-          ),
-        ),
-      );
   }
 
   @override
@@ -296,7 +293,7 @@ class _YoutubeResultsState extends ConsumerState<YoutubeResults> {
               ),
             ),
           Expanded(
-            child: _results.isEmpty
+            child: _results.isEmpty && _artist == null
                 ? EmptyState(
                     icon: Icons.smart_display,
                     message: _searched ? l.ytNoResults : l.ytSearchPrompt,
@@ -305,203 +302,60 @@ class _YoutubeResultsState extends ConsumerState<YoutubeResults> {
                     // A new search is a new list: its rows come in again.
                     key: ValueKey(_requestId),
                     child: ListView.builder(
-                    itemExtent: 72,
-                    itemCount: _results.length,
-                    itemBuilder: (_, i) {
-                      final r = _results[i];
-                      final inLibrary =
-                          index?.contains(r.id, source: r.source) ?? false;
-                      final item = downloads
-                          .where((d) => d.result.id == r.id)
-                          .lastOrNull;
-                      final notifier = ref.read(
-                        selectionProvider(_selectionKey).notifier,
-                      );
-                      return EnterOnce(index: i, child: _ResultRow(
-                        result: r,
-                        inLibrary: inLibrary,
-                        item: item,
-                        selecting: selecting,
-                        selected: picked.contains(i),
-                        position: picked.contains(i)
-                            ? picked.positionOf(i) + 1
-                            : null,
-                        onTap: selecting ? () => notifier.toggle(i) : null,
-                        onLongPress: () => notifier.toggle(i),
-                        onDownload: () =>
-                            ref.read(downloadsProvider.notifier).add(r),
-                        listen: selecting ? null : ListenButton(result: r),
-                      ));
-                    },
-                  ),
+                      itemCount: _results.length + (_artist == null ? 0 : 1),
+                      itemBuilder: (_, k) {
+                        final artist = _artist;
+                        if (artist != null && k == 0) {
+                          return EnterOnce(
+                            index: 0,
+                            child: ArtistCard(
+                              artist: artist,
+                              onTap: () => _openArtist(artist),
+                            ),
+                          );
+                        }
+                        final i = artist == null ? k : k - 1;
+                        final r = _results[i];
+                        final inLibrary =
+                            index?.contains(r.id, source: r.source) ?? false;
+                        final item = downloads
+                            .where((d) => d.result.id == r.id)
+                            .lastOrNull;
+                        final notifier = ref.read(
+                          selectionProvider(_selectionKey).notifier,
+                        );
+                        final who = r.artistIds.indexWhere((id) => id.isNotEmpty);
+                        return EnterOnce(
+                          index: k,
+                          child: SizedBox(
+                            height: 72,
+                            child: OnlineSongRow(
+                              result: r,
+                              inLibrary: inLibrary,
+                              item: item,
+                              selecting: selecting,
+                              selected: picked.contains(i),
+                              position: picked.contains(i)
+                                  ? picked.positionOf(i) + 1
+                                  : null,
+                              onTap: selecting ? () => notifier.toggle(i) : null,
+                              onLongPress: () => notifier.toggle(i),
+                              onDownload: () =>
+                                  ref.read(downloadsProvider.notifier).add(r),
+                              listen: selecting ? null : ListenButton(result: r),
+                              onArtistTap: who < 0 || who >= r.artists.length
+                                  ? null
+                                  : () => _openArtist(YtmArtistRef(
+                                      id: r.artistIds[who], name: r.artists[who])),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
                   ),
           ),
           const ListenBar(),
         ],
-      ),
-    );
-  }
-}
-
-class _ResultRow extends StatelessWidget {
-  const _ResultRow({
-    required this.result,
-    required this.inLibrary,
-    required this.item,
-    required this.onDownload,
-    this.listen,
-    this.selecting = false,
-    this.selected = false,
-    this.position,
-    this.onTap,
-    this.onLongPress,
-  });
-
-  final YtResult result;
-  final bool inLibrary;
-  final DownloadItem? item;
-  final VoidCallback onDownload;
-
-  /// «Ascolta» (hidden while picking).
-  final Widget? listen;
-
-  /// While picking, a tick box leads the row and a tap picks or drops it.
-  final bool selecting, selected;
-
-  /// Place in the order of the picks (1-based) of a picked row.
-  final int? position;
-  final VoidCallback? onTap, onLongPress;
-
-  @override
-  Widget build(BuildContext context) {
-    final l = context.l10n;
-    final cc = context.cc;
-    final theme = Theme.of(context).textTheme;
-    final meta = [
-      result.channel,
-      if (result.duration != null)
-        formatDuration(result.duration!.inMilliseconds),
-    ].join(' · ');
-    final st = item?.status;
-    final Widget trailing;
-    if (st == DownloadStatus.queued ||
-        st == DownloadStatus.downloading ||
-        st == DownloadStatus.waitingRetry) {
-      // As wide as a button: «Ascolta» keeps its place on every row.
-      trailing = SizedBox(
-        width: 48,
-        child: Center(
-          child: SizedBox(
-            width: 24,
-            height: 24,
-            child: CircularProgressIndicator(
-              strokeWidth: 2.5,
-              value: st == DownloadStatus.downloading ? item!.progress : null,
-            ),
-          ),
-        ),
-      );
-    } else if (st == DownloadStatus.done || inLibrary) {
-      trailing = SizedBox(
-        width: 48,
-        child: Center(child: Icon(Icons.check_circle_rounded, color: cc.accentSoft)),
-      );
-    } else if (st == DownloadStatus.failed) {
-      trailing = IconButton(
-        tooltip: l.retry,
-        icon: Icon(Icons.warning_amber_rounded, color: cc.error),
-        onPressed: onDownload,
-      );
-    } else {
-      trailing = IconButton(
-        tooltip: l.ytDownload,
-        icon: const Icon(Icons.download_rounded),
-        onPressed: onDownload,
-      );
-    }
-    return Semantics(
-      selected: selecting ? selected : null,
-      value: selected
-          ? (position == null ? l.selectedRow : l.selectedRowAt(position!))
-          : null,
-      child: Material(
-        color: selected
-            ? cc.accentSoft.withValues(alpha: 0.16)
-            : Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          onLongPress: onLongPress,
-          child: SizedBox(
-            height: 72,
-            child: Row(
-              children: [
-                if (selecting)
-                  Padding(
-                    padding: const EdgeInsets.only(left: 4),
-                    child: SelectionBox(
-                      selected: selected,
-                      position: position,
-                      size: 40,
-                    ),
-                  )
-                else
-                  const SizedBox(width: CcDims.margin),
-                NetThumbnail(
-                  url: result.thumbnailUrl,
-                  width: 80,
-                  height: 45,
-                  icon: Icons.music_video,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        result.title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.bodyLarge,
-                      ),
-                      Row(
-                        children: [
-                          Icon(
-                            result.source == MediaSource.soundcloud
-                                ? Icons.cloud_rounded
-                                : Icons.smart_display_rounded,
-                            key: ValueKey('from-${result.source.name}'),
-                            size: 14,
-                            color: cc.textMuted,
-                          ),
-                          const SizedBox(width: 4),
-                          Expanded(
-                            child: Text(
-                              meta,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: theme.bodyMedium,
-                            ),
-                          ),
-                        ],
-                      ),
-                      if (inLibrary)
-                        Text(
-                          l.ytAlreadyInLibrary,
-                          style: theme.labelSmall?.copyWith(
-                            color: cc.accentSoft,
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-                ?listen,
-                trailing,
-                const SizedBox(width: 8),
-              ],
-            ),
-          ),
-        ),
       ),
     );
   }

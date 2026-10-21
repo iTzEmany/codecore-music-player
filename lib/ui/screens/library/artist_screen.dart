@@ -7,6 +7,7 @@ import '../../../l10n/l10n_ext.dart';
 import '../../../providers/library_providers.dart';
 import '../../../providers/player_providers.dart';
 import '../../../providers/settings_providers.dart';
+import '../../../core/constants.dart';
 import '../../shell/shell_nav.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/tokens.dart';
@@ -18,6 +19,7 @@ import '../../widgets/section_header.dart';
 import '../../widgets/selection_bar.dart';
 import '../../widgets/track_row.dart';
 import '../../widgets/track_row_selection.dart';
+import '../online/artist_picker_sheet.dart';
 import 'album_detail_screen.dart';
 
 /// An artist: Play / Shuffle over all their tracks, the five most played and
@@ -70,6 +72,15 @@ class ArtistDetailScreen extends ConsumerWidget {
           coverKey: coverKey,
         ),
         meta: meta,
+        menu: kEnableYoutube && artist.name != null
+            ? IconButton(
+                key: const ValueKey('artist-on-ytm'),
+                tooltip: l.ytmOnYoutubeMusic,
+                onPressed: () => openYtmArtist(context, ref, artist.name!,
+                    open: (page) => ShellNav.open<void>(context, page)),
+                icon: const Icon(Icons.smart_display_rounded),
+              )
+            : null,
         onPlay: list.isEmpty
             ? null
             : () => ctrl.playFromList(list, 0, context: playCtx),

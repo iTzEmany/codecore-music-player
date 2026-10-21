@@ -9,6 +9,7 @@ class ImportRow {
     this.isrc,
     this.spotifyUri,
     this.location,
+    this.trackNumber,
   });
 
   final int index;
@@ -22,6 +23,9 @@ class ImportRow {
   /// Path or URL of a local M3U/XSPF entry, tried against the library first.
   final String? location;
 
+  /// Place on the record, set for the rows of an online album import only.
+  final int? trackNumber;
+
   ImportRow withLocation(String? location) => ImportRow(
         index: index,
         title: title,
@@ -31,6 +35,19 @@ class ImportRow {
         isrc: isrc,
         spotifyUri: spotifyUri,
         location: location,
+        trackNumber: trackNumber,
+      );
+
+  ImportRow withTrackNumber(int? n) => ImportRow(
+        index: index,
+        title: title,
+        artists: artists,
+        album: album,
+        durationMs: durationMs,
+        isrc: isrc,
+        spotifyUri: spotifyUri,
+        location: location,
+        trackNumber: n,
       );
 
   String get primaryArtist => artists.isEmpty ? '' : artists.first;

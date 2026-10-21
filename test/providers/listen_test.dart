@@ -132,6 +132,29 @@ void main() {
     expect(handler.isPlaying, isTrue);
   });
 
+  test('the listen goes on while any online page is open and ends with the last', () async {
+    await handler.playQueue(ids, 0);
+    listen()
+      ..attach()
+      ..attach();
+    await listen().start(_song);
+    await pumpEventQueue();
+    expect(c.read(listenProvider).active, isTrue);
+
+    listen().detach();
+    await pumpEventQueue();
+    expect(c.read(listenProvider).active, isTrue, reason: 'one page is still open');
+    expect(listen().attachedPages, 1);
+
+    listen().detach();
+    await pumpEventQueue();
+    expect(c.read(listenProvider).active, isFalse);
+    expect(handler.isPlaying, isTrue, reason: 'the music of before comes back');
+
+    listen().detach(); // a stray extra one never goes below zero
+    expect(listen().attachedPages, 0);
+  });
+
   test('yt-dlp -g: the first web address', () {
     expect(parseStreamUrl('WARNING: x\nhttps://rr3.googlevideo.com/videoplayback?a=1\n').toString(),
         'https://rr3.googlevideo.com/videoplayback?a=1');
