@@ -38,6 +38,18 @@ class DownloadIndex {
     return path != null && File(path).existsSync() ? path : null;
   }
 
+  /// The YouTube video id [path] was downloaded from. Memory only (no disk
+  /// access), so it also answers for files that are gone.
+  String? idForPath(String path) {
+    for (final e in _map.entries) {
+      if (e.value != path) continue;
+      final k = e.key;
+      if (k.startsWith('youtube:')) return k.substring('youtube:'.length);
+      if (!k.contains(':')) return k;
+    }
+    return null;
+  }
+
   Future<void> _lastWrite = Future.value();
 
   /// Writes are chained: parallel downloads must not interleave in the file.

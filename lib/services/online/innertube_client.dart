@@ -6,6 +6,7 @@ import '../../core/app_log.dart';
 import '../../core/text_utils.dart';
 import 'innertube_json.dart';
 import 'request_budget.dart';
+import 'ytm_radio_parser.dart';
 import 'youtube_service.dart';
 
 /// The answer of a direct search was not what this client knows how to read
@@ -133,6 +134,29 @@ class InnerTubeClient {
         parse,
         mask,
         isEmpty,
+        cancel,
+      );
+
+  /// The YouTube Music radio of the song [videoId] (the id of the song, not
+  /// of a video clip: a clip's radio has no songs), or its next page when
+  /// [continuation] is given. Same errors and same full re-ask as the pages.
+  Future<RadioPage> radio(String videoId,
+          {String? continuation, CancelToken? cancel}) =>
+      _musicPage(
+        'next',
+        continuation != null
+            ? {'continuation': continuation}
+            : {
+                'videoId': videoId,
+                'playlistId': 'RDAMVM$videoId',
+                'params': 'wAEB',
+                'isAudioOnly': true,
+                'enablePersistentPlaylistPanel': true,
+              },
+        'en',
+        continuation != null ? parseRadioContinuation : parseRadio,
+        continuation != null ? radioContinuationMask : radioMask,
+        (RadioPage page) => page.items.isEmpty,
         cancel,
       );
 

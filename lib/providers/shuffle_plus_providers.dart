@@ -1,0 +1,150 @@
+import 'dart:async';
+import 'dart:io';
+
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:path/path.dart' as p;
+
+import '../core/paths.dart';
+import '../services/audio/codecore_audio_handler.dart';
+import '../services/import/track_matcher.dart';
+import '../services/online/ytm_radio_service.dart';
+import '../services/shuffle_plus/seed_index.dart';
+import '../services/shuffle_plus/seed_resolver.dart';
+import '../services/shuffle_plus/shuffle_host.dart';
+import '../services/shuffle_plus/shuffle_plus_controller.dart';
+import '../services/shuffle_plus/suggestion_log.dart';
+import 'database_providers.dart';
+import 'jam_providers.dart';
+import 'player_providers.dart';
+import 'youtube_providers.dart';
+
+/// The user's Shuffle+ choices. Off until the settings (31.12) drive it.
+class ShufflePlusConfigNotifier extends Notifier<ShufflePlusConfig> {
+  @override
+  ShufflePlusConfig build() => const ShufflePlusConfig();
+
+  void set(ShufflePlusConfig c) => state = c;
+}
+
+final shufflePlusConfigProvider =
+    NotifierProvider<ShufflePlusConfigNotifier, ShufflePlusConfig>(
+        ShufflePlusConfigNotifier.new);
+
+/// Whether the connection is metered (mobile data). Desktop: never. 31.12
+/// overrides it with the Android `codecore/net` channel.
+final shufflePlusMeteredProvider = Provider<Future<bool> Function()>(
+  (ref) => () async => false,
+);
+
+/// `suggestions.json`: what was suggested and how it ended.
+final suggestionLogProvider = Provider<SuggestionLog>((ref) {
+  final log = SuggestionLog(
+      file: () async => File(p.join(await appSupportDir(), 'suggestions.json')));
+  ref.onDispose(() => unawaited(log.flush()));
+  return log;
+});
+
+final seedIndexProvider = Provider<SeedIndex>((ref) {
+  final index = SeedIndex(
+      file: () async => File(p.join(await appSupportDir(), 'seed_ids.json')));
+  ref.onDispose(() => unawaited(index.flush()));
+  return index;
+});
+
+final ytmRadioServiceProvider = Provider<YtmRadioService>((ref) => YtmRadioService(
+      ref.watch(innerTubeClientProvider),
+      ref.watch(ytDlpServiceProvider),
+    ));
+
+/// The handler seen by the engine.
+class HandlerShuffleHost implements ShuffleHost {
+  HandlerShuffleHost(this._h);
+
+  final CodecoreAudioHandler _h;
+
+  @override
+  List<int> get queueIds => _h.queueIds;
+  @override
+  int get currentIndex => _h.currentIndex;
+  @override
+  List<int>? get sourceIds => _h.sourceIds;
+  @override
+  bool get shuffleEnabled => _h.shuffleEnabled;
+  @override
+  bool get isPlaying => _h.isPlaying;
+
+  @override
+  Stream<void> get changes {
+    final c = StreamController<void>.broadcast();
+    final subs = <StreamSubscription<Object?>>[];
+    c.onListen = () {
+      subs
+        ..add(_h.queueChanges.listen((_) => c.add(null)))
+        ..add(_h.currentTrackStream.listen((_) => c.add(null)))
+        ..add(_h.playbackState
+            .map((s) => (s.playing, s.shuffleMode))
+            .distinct()
+            .listen((_) => c.add(null)));
+    };
+    c.onCancel = () {
+      for (final s in subs) {
+        unawaited(s.cancel());
+      }
+    };
+    return c.stream;
+  }
+
+  @override
+  Stream<Duration> get positionStream => _h.positionStream;
+  @override
+  Stream<Duration?> get durationStream => _h.durationStream;
+
+  @override
+  Stream<PlaybackFailure> get failures => _failures;
+  Stream<PlaybackFailure> _failures = const Stream.empty();
+
+  /// Failures come from the handler's `onError`, which `main` routes to
+  /// [playerErrorsProvider].
+  void listenFailures(Stream<PlaybackFailure> s) => _failures = s;
+
+  @override
+  void insertAt(int index, int id) => _h.insertAt(index, id);
+  @override
+  Future<void> removeQueueId(int id) => _h.removeQueueId(id);
+}
+
+/// The Shuffle+ engine, started the first time it is read (the shell reads it
+/// in 31.12). Null when the player has no online registry (tests).
+final shufflePlusProvider = FutureProvider<ShufflePlusController?>((ref) async {
+  final handler = ref.watch(audioHandlerProvider);
+  final online = handler.online;
+  if (online == null) return null;
+  final downloads = await ref.watch(downloadIndexProvider.future);
+  final tracks = ref.watch(trackRepositoryProvider);
+  final host = HandlerShuffleHost(handler)
+    ..listenFailures(ref.watch(playerErrorsProvider));
+  final controller = ShufflePlusController(
+    host: host,
+    online: online,
+    log: ref.watch(suggestionLogProvider),
+    resolver: SeedResolver(
+      downloads: downloads,
+      index: ref.watch(seedIndexProvider),
+      searchSongs: (q) => ref.read(youtubeServiceProvider).searchSongs(q),
+    ),
+    radio: ref.watch(ytmRadioServiceProvider),
+    config: () => ref.read(shufflePlusConfigProvider),
+    jamActive: () => ref.read(jamProvider).active,
+    isMetered: () => ref.read(shufflePlusMeteredProvider)(),
+    toolAvailable: () async =>
+        (await ref.read(ytDlpStatusProvider.future)).version != null,
+    loadTracks: tracks.getByIdsLight,
+    loadLibrary: () async => LibraryIndex(await tracks.liteEntries()),
+    hasDownload: downloads.contains,
+  );
+  ref.listen(shufflePlusConfigProvider, (_, _) => controller.poke());
+  ref.listen(jamProvider, (_, _) => controller.poke());
+  ref.onDispose(controller.dispose);
+  controller.start();
+  return controller;
+});

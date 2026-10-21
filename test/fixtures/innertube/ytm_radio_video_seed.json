@@ -1,0 +1,564 @@
+{
+ "contents": {
+  "singleColumnMusicWatchNextResultsRenderer": {
+   "tabbedRenderer": {
+    "watchNextTabbedResultsRenderer": {
+     "tabs": [
+      {
+       "tabRenderer": {
+        "content": {
+         "musicQueueRenderer": {
+          "content": {
+           "playlistPanelRenderer": {
+            "contents": [
+             {
+              "playlistPanelVideoRenderer": {
+               "title": {
+                "runs": [
+                 {
+                  "text": "Pink Floyd - Wish You Were Here (Official Video)"
+                 }
+                ]
+               },
+               "longBylineText": {
+                "runs": [
+                 {
+                  "text": "Pink Floyd",
+                  "navigationEndpoint": {
+                   "browseEndpoint": {
+                    "browseId": "UCY2qt3dw2TQJxvBrDiYGHdQ",
+                    "browseEndpointContextSupportedConfigs": {
+                     "browseEndpointContextMusicConfig": {
+                      "pageType": "MUSIC_PAGE_TYPE_USER_CHANNEL"
+                     }
+                    }
+                   }
+                  }
+                 },
+                 {
+                  "text": " • "
+                 },
+                 {
+                  "text": "16M views"
+                 },
+                 {
+                  "text": " • "
+                 },
+                 {
+                  "text": "199K likes"
+                 }
+                ]
+               },
+               "thumbnail": {
+                "thumbnails": []
+               },
+               "lengthText": {
+                "runs": [
+                 {
+                  "text": "5:40"
+                 }
+                ]
+               },
+               "selected": true,
+               "videoId": "K6qj09OHvjw"
+              }
+             },
+             {
+              "playlistPanelVideoRenderer": {
+               "title": {
+                "runs": [
+                 {
+                  "text": "Breathe"
+                 }
+                ]
+               },
+               "longBylineText": {
+                "runs": [
+                 {
+                  "text": "PINK FLOYD",
+                  "navigationEndpoint": {
+                   "browseEndpoint": {
+                    "browseId": "UCO6LS_5W7vqG9mALDNzSFug",
+                    "browseEndpointContextSupportedConfigs": {
+                     "browseEndpointContextMusicConfig": {
+                      "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+                     }
+                    }
+                   }
+                  }
+                 },
+                 {
+                  "text": " • "
+                 },
+                 {
+                  "text": "13M views"
+                 },
+                 {
+                  "text": " • "
+                 },
+                 {
+                  "text": "114K likes"
+                 }
+                ]
+               },
+               "thumbnail": {
+                "thumbnails": []
+               },
+               "lengthText": {
+                "runs": [
+                 {
+                  "text": "2:47"
+                 }
+                ]
+               },
+               "selected": false,
+               "videoId": "jcz0YxYl6Ac"
+              }
+             },
+             {
+              "playlistPanelVideoRenderer": {
+               "title": {
+                "runs": [
+                 {
+                  "text": "Stairway To Heaven - Remaster (Visualizer)"
+                 }
+                ]
+               },
+               "longBylineText": {
+                "runs": [
+                 {
+                  "text": "Led Zeppelin",
+                  "navigationEndpoint": {
+                   "browseEndpoint": {
+                    "browseId": "UCYtap7ujIPaxTS2iCDoMi3g",
+                    "browseEndpointContextSupportedConfigs": {
+                     "browseEndpointContextMusicConfig": {
+                      "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+                     }
+                    }
+                   }
+                  }
+                 },
+                 {
+                  "text": " • "
+                 },
+                 {
+                  "text": "193M views"
+                 },
+                 {
+                  "text": " • "
+                 },
+                 {
+                  "text": "1.5M likes"
+                 }
+                ]
+               },
+               "thumbnail": {
+                "thumbnails": []
+               },
+               "lengthText": {
+                "runs": [
+                 {
+                  "text": "8:03"
+                 }
+                ]
+               },
+               "selected": false,
+               "videoId": "QkF3oxziUI4"
+              }
+             },
+             {
+              "playlistPanelVideoRenderer": {
+               "title": {
+                "runs": [
+                 {
+                  "text": "The Passenger"
+                 }
+                ]
+               },
+               "longBylineText": {
+                "runs": [
+                 {
+                  "text": "Iggy Pop",
+                  "navigationEndpoint": {
+                   "browseEndpoint": {
+                    "browseId": "UCN2OwEXNYJFzgHvR7912Btg",
+                    "browseEndpointContextSupportedConfigs": {
+                     "browseEndpointContextMusicConfig": {
+                      "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+                     }
+                    }
+                   }
+                  }
+                 },
+                 {
+                  "text": " • "
+                 },
+                 {
+                  "text": "126M views"
+                 },
+                 {
+                  "text": " • "
+                 },
+                 {
+                  "text": "673K likes"
+                 }
+                ]
+               },
+               "thumbnail": {
+                "thumbnails": []
+               },
+               "lengthText": {
+                "runs": [
+                 {
+                  "text": "4:45"
+                 }
+                ]
+               },
+               "selected": false,
+               "videoId": "-fWw7FE9tTo"
+              }
+             },
+             {
+              "playlistPanelVideoRenderer": {
+               "title": {
+                "runs": [
+                 {
+                  "text": "The Beatles - Let It Be (Official Music Video)"
+                 }
+                ]
+               },
+               "longBylineText": {
+                "runs": [
+                 {
+                  "text": "The Beatles",
+                  "navigationEndpoint": {
+                   "browseEndpoint": {
+                    "browseId": "UC2XdaAVUannpujzv32jcouQ",
+                    "browseEndpointContextSupportedConfigs": {
+                     "browseEndpointContextMusicConfig": {
+                      "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+                     }
+                    }
+                   }
+                  }
+                 },
+                 {
+                  "text": " • "
+                 },
+                 {
+                  "text": "132M views"
+                 },
+                 {
+                  "text": " • "
+                 },
+                 {
+                  "text": "692K likes"
+                 }
+                ]
+               },
+               "thumbnail": {
+                "thumbnails": []
+               },
+               "lengthText": {
+                "runs": [
+                 {
+                  "text": "4:03"
+                 }
+                ]
+               },
+               "selected": false,
+               "videoId": "CGj85pVzRJs"
+              }
+             },
+             {
+              "playlistPanelVideoRenderer": {
+               "title": {
+                "runs": [
+                 {
+                  "text": "Another Brick in the Wall, Pt. 2"
+                 }
+                ]
+               },
+               "longBylineText": {
+                "runs": [
+                 {
+                  "text": "PINK FLOYD",
+                  "navigationEndpoint": {
+                   "browseEndpoint": {
+                    "browseId": "UCO6LS_5W7vqG9mALDNzSFug",
+                    "browseEndpointContextSupportedConfigs": {
+                     "browseEndpointContextMusicConfig": {
+                      "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+                     }
+                    }
+                   }
+                  }
+                 },
+                 {
+                  "text": " • "
+                 },
+                 {
+                  "text": "69M views"
+                 },
+                 {
+                  "text": " • "
+                 },
+                 {
+                  "text": "708K likes"
+                 }
+                ]
+               },
+               "thumbnail": {
+                "thumbnails": []
+               },
+               "lengthText": {
+                "runs": [
+                 {
+                  "text": "3:19"
+                 }
+                ]
+               },
+               "selected": false,
+               "videoId": "HrxX9TBj2zY"
+              }
+             },
+             {
+              "playlistPanelVideoRenderer": {
+               "title": {
+                "runs": [
+                 {
+                  "text": "Heroes"
+                 }
+                ]
+               },
+               "longBylineText": {
+                "runs": [
+                 {
+                  "text": "David Bowie",
+                  "navigationEndpoint": {
+                   "browseEndpoint": {
+                    "browseId": "UCvY1eVE6lTebXsdFbbXUtkQ",
+                    "browseEndpointContextSupportedConfigs": {
+                     "browseEndpointContextMusicConfig": {
+                      "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+                     }
+                    }
+                   }
+                  }
+                 },
+                 {
+                  "text": " • "
+                 },
+                 {
+                  "text": "60M views"
+                 },
+                 {
+                  "text": " • "
+                 },
+                 {
+                  "text": "595K likes"
+                 }
+                ]
+               },
+               "thumbnail": {
+                "thumbnails": []
+               },
+               "lengthText": {
+                "runs": [
+                 {
+                  "text": "3:29"
+                 }
+                ]
+               },
+               "selected": false,
+               "videoId": "lXgkuM2NhYI"
+              }
+             },
+             {
+              "playlistPanelVideoRenderer": {
+               "title": {
+                "runs": [
+                 {
+                  "text": "Golden Brown"
+                 }
+                ]
+               },
+               "longBylineText": {
+                "runs": [
+                 {
+                  "text": "The Stranglers",
+                  "navigationEndpoint": {
+                   "browseEndpoint": {
+                    "browseId": "UCc-wWdxvOaNCJDbl2Gr1ThA",
+                    "browseEndpointContextSupportedConfigs": {
+                     "browseEndpointContextMusicConfig": {
+                      "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+                     }
+                    }
+                   }
+                  }
+                 },
+                 {
+                  "text": " • "
+                 },
+                 {
+                  "text": "33M views"
+                 },
+                 {
+                  "text": " • "
+                 },
+                 {
+                  "text": "487K likes"
+                 }
+                ]
+               },
+               "thumbnail": {
+                "thumbnails": []
+               },
+               "lengthText": {
+                "runs": [
+                 {
+                  "text": "3:27"
+                 }
+                ]
+               },
+               "selected": false,
+               "videoId": "7KIHvuMl4Kk"
+              }
+             },
+             {
+              "playlistPanelVideoRenderer": {
+               "title": {
+                "runs": [
+                 {
+                  "text": "Blowin' in the Wind (Official Audio)"
+                 }
+                ]
+               },
+               "longBylineText": {
+                "runs": [
+                 {
+                  "text": "Bob Dylan",
+                  "navigationEndpoint": {
+                   "browseEndpoint": {
+                    "browseId": "UCBqkojCXby4zGkWX86FEY7Q",
+                    "browseEndpointContextSupportedConfigs": {
+                     "browseEndpointContextMusicConfig": {
+                      "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+                     }
+                    }
+                   }
+                  }
+                 },
+                 {
+                  "text": " • "
+                 },
+                 {
+                  "text": "30M views"
+                 },
+                 {
+                  "text": " • "
+                 },
+                 {
+                  "text": "330K likes"
+                 }
+                ]
+               },
+               "thumbnail": {
+                "thumbnails": []
+               },
+               "lengthText": {
+                "runs": [
+                 {
+                  "text": "2:51"
+                 }
+                ]
+               },
+               "selected": false,
+               "videoId": "MMFj8uDubsE"
+              }
+             },
+             {
+              "playlistPanelVideoRenderer": {
+               "title": {
+                "runs": [
+                 {
+                  "text": "Time (2023 Remaster)"
+                 }
+                ]
+               },
+               "longBylineText": {
+                "runs": [
+                 {
+                  "text": "PINK FLOYD",
+                  "navigationEndpoint": {
+                   "browseEndpoint": {
+                    "browseId": "UCO6LS_5W7vqG9mALDNzSFug",
+                    "browseEndpointContextSupportedConfigs": {
+                     "browseEndpointContextMusicConfig": {
+                      "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+                     }
+                    }
+                   }
+                  }
+                 },
+                 {
+                  "text": " • "
+                 },
+                 {
+                  "text": "15M views"
+                 },
+                 {
+                  "text": " • "
+                 },
+                 {
+                  "text": "133K likes"
+                 }
+                ]
+               },
+               "thumbnail": {
+                "thumbnails": []
+               },
+               "lengthText": {
+                "runs": [
+                 {
+                  "text": "7:06"
+                 }
+                ]
+               },
+               "selected": false,
+               "videoId": "yl-Ms_ek-kE"
+              }
+             }
+            ],
+            "continuations": [
+             {
+              "nextRadioContinuationData": {
+               "continuation": "CDISPhILdDM2NU11a3RZUXMiEVJEQU1WTUs2cWowOU9Idmp3MgR3QUVCODHQAQH6ARBENjI1QUI0MDI5NEQzODFEGAo%3D"
+              }
+             }
+            ]
+           }
+          }
+         }
+        }
+       }
+      },
+      {
+       "tabRenderer": {}
+      },
+      {
+       "tabRenderer": {
+        "content": {}
+       }
+      },
+      {
+       "tabRenderer": {}
+      }
+     ]
+    }
+   }
+  }
+ }
+}

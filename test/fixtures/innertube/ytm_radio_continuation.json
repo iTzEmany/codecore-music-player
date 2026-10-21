@@ -1,0 +1,1185 @@
+{
+ "continuationContents": {
+  "playlistPanelContinuation": {
+   "contents": [
+    {
+     "playlistPanelVideoRenderer": {
+      "title": {
+       "runs": [
+        {
+         "text": "Shine On You Crazy Diamond (Pts. 1-5)"
+        }
+       ]
+      },
+      "longBylineText": {
+       "runs": [
+        {
+         "text": "Pink Floyd",
+         "navigationEndpoint": {
+          "browseEndpoint": {
+           "browseId": "UCO6LS_5W7vqG9mALDNzSFug",
+           "browseEndpointContextSupportedConfigs": {
+            "browseEndpointContextMusicConfig": {
+             "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+            }
+           }
+          }
+         }
+        },
+        {
+         "text": " • "
+        },
+        {
+         "text": "Wish You Were Here",
+         "navigationEndpoint": {
+          "browseEndpoint": {
+           "browseId": "MPREb_pYj3YFxjhPp",
+           "browseEndpointContextSupportedConfigs": {
+            "browseEndpointContextMusicConfig": {
+             "pageType": "MUSIC_PAGE_TYPE_ALBUM"
+            }
+           }
+          }
+         }
+        },
+        {
+         "text": " • "
+        },
+        {
+         "text": "1975"
+        }
+       ]
+      },
+      "thumbnail": {
+       "thumbnails": [
+        {
+         "url": "https://yt3.googleusercontent.com/k1P0nFYMJ4yLC3yUumEY021eI7zDr67r2DWOVvUVFowraXukUHHhf4TUOfVgGtnKx6YlJpnpEaskcmLE=w60-h60-l90-rj",
+         "width": 60,
+         "height": 60
+        },
+        {
+         "url": "https://yt3.googleusercontent.com/k1P0nFYMJ4yLC3yUumEY021eI7zDr67r2DWOVvUVFowraXukUHHhf4TUOfVgGtnKx6YlJpnpEaskcmLE=w226-h226-l90-rj",
+         "width": 226,
+         "height": 226
+        },
+        {
+         "url": "https://yt3.googleusercontent.com/k1P0nFYMJ4yLC3yUumEY021eI7zDr67r2DWOVvUVFowraXukUHHhf4TUOfVgGtnKx6YlJpnpEaskcmLE=w544-h544-l90-rj",
+         "width": 544,
+         "height": 544
+        }
+       ]
+      },
+      "lengthText": {
+       "runs": [
+        {
+         "text": "13:32"
+        }
+       ]
+      },
+      "selected": false,
+      "videoId": "Tu7oq3VNgpY"
+     }
+    },
+    {
+     "playlistPanelVideoRenderer": {
+      "title": {
+       "runs": [
+        {
+         "text": "Little Wing"
+        }
+       ]
+      },
+      "longBylineText": {
+       "runs": [
+        {
+         "text": "The Jimi Hendrix Experience",
+         "navigationEndpoint": {
+          "browseEndpoint": {
+           "browseId": "UC5NwXf8hOgZgInaYiOCZmUg",
+           "browseEndpointContextSupportedConfigs": {
+            "browseEndpointContextMusicConfig": {
+             "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+            }
+           }
+          }
+         }
+        },
+        {
+         "text": " • "
+        },
+        {
+         "text": "Axis: Bold As Love",
+         "navigationEndpoint": {
+          "browseEndpoint": {
+           "browseId": "MPREb_87dAc8h6pwW",
+           "browseEndpointContextSupportedConfigs": {
+            "browseEndpointContextMusicConfig": {
+             "pageType": "MUSIC_PAGE_TYPE_ALBUM"
+            }
+           }
+          }
+         }
+        },
+        {
+         "text": " • "
+        },
+        {
+         "text": "1967"
+        }
+       ]
+      },
+      "thumbnail": {
+       "thumbnails": [
+        {
+         "url": "https://yt3.googleusercontent.com/Lo50kntrtDrijY1IZJpUMQEtKAYsthZhnX2khRGn63lyoc2FRlwiPd9t0G8Kr9kbQrXcUi9rcQpJi5yw=w60-h60-l90-rj",
+         "width": 60,
+         "height": 60
+        },
+        {
+         "url": "https://yt3.googleusercontent.com/Lo50kntrtDrijY1IZJpUMQEtKAYsthZhnX2khRGn63lyoc2FRlwiPd9t0G8Kr9kbQrXcUi9rcQpJi5yw=w226-h226-l90-rj",
+         "width": 226,
+         "height": 226
+        },
+        {
+         "url": "https://yt3.googleusercontent.com/Lo50kntrtDrijY1IZJpUMQEtKAYsthZhnX2khRGn63lyoc2FRlwiPd9t0G8Kr9kbQrXcUi9rcQpJi5yw=w544-h544-l90-rj",
+         "width": 544,
+         "height": 544
+        }
+       ]
+      },
+      "lengthText": {
+       "runs": [
+        {
+         "text": "2:26"
+        }
+       ]
+      },
+      "selected": false,
+      "videoId": "j1gfAStPNlU"
+     }
+    },
+    {
+     "playlistPanelVideoRenderer": {
+      "title": {
+       "runs": [
+        {
+         "text": "Knockin' On Heaven's Door"
+        }
+       ]
+      },
+      "longBylineText": {
+       "runs": [
+        {
+         "text": "Bob Dylan",
+         "navigationEndpoint": {
+          "browseEndpoint": {
+           "browseId": "UCBqkojCXby4zGkWX86FEY7Q",
+           "browseEndpointContextSupportedConfigs": {
+            "browseEndpointContextMusicConfig": {
+             "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+            }
+           }
+          }
+         }
+        },
+        {
+         "text": " • "
+        },
+        {
+         "text": "Pat Garrett & Billy The Kid (Soundtrack From The Motion Picture)",
+         "navigationEndpoint": {
+          "browseEndpoint": {
+           "browseId": "MPREb_tz2XpcDEm1S",
+           "browseEndpointContextSupportedConfigs": {
+            "browseEndpointContextMusicConfig": {
+             "pageType": "MUSIC_PAGE_TYPE_ALBUM"
+            }
+           }
+          }
+         }
+        },
+        {
+         "text": " • "
+        },
+        {
+         "text": "1973"
+        }
+       ]
+      },
+      "thumbnail": {
+       "thumbnails": [
+        {
+         "url": "https://yt3.googleusercontent.com/Aojtc1oQ6mnKVK4yLSY7g6xQxRt7c8HDx6lTuPNl3lr6kguFN36ocymZ6SADwNyNXWEP9zSpQTyT7CE=w60-h60-l90-rj",
+         "width": 60,
+         "height": 60
+        },
+        {
+         "url": "https://yt3.googleusercontent.com/Aojtc1oQ6mnKVK4yLSY7g6xQxRt7c8HDx6lTuPNl3lr6kguFN36ocymZ6SADwNyNXWEP9zSpQTyT7CE=w226-h226-l90-rj",
+         "width": 226,
+         "height": 226
+        },
+        {
+         "url": "https://yt3.googleusercontent.com/Aojtc1oQ6mnKVK4yLSY7g6xQxRt7c8HDx6lTuPNl3lr6kguFN36ocymZ6SADwNyNXWEP9zSpQTyT7CE=w544-h544-l90-rj",
+         "width": 544,
+         "height": 544
+        }
+       ]
+      },
+      "lengthText": {
+       "runs": [
+        {
+         "text": "2:30"
+        }
+       ]
+      },
+      "selected": false,
+      "videoId": "z4R5crZylQ0"
+     }
+    },
+    {
+     "playlistPanelVideoRenderer": {
+      "title": {
+       "runs": [
+        {
+         "text": "Shape Of My Heart"
+        }
+       ]
+      },
+      "longBylineText": {
+       "runs": [
+        {
+         "text": "Sting",
+         "navigationEndpoint": {
+          "browseEndpoint": {
+           "browseId": "UCHhKCdsmx9t-PSqlSfa-VKA",
+           "browseEndpointContextSupportedConfigs": {
+            "browseEndpointContextMusicConfig": {
+             "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+            }
+           }
+          }
+         }
+        },
+        {
+         "text": " • "
+        },
+        {
+         "text": "Ten Summoner's Tales (Expanded Edition)",
+         "navigationEndpoint": {
+          "browseEndpoint": {
+           "browseId": "MPREb_j1B7Ao9O2aT",
+           "browseEndpointContextSupportedConfigs": {
+            "browseEndpointContextMusicConfig": {
+             "pageType": "MUSIC_PAGE_TYPE_ALBUM"
+            }
+           }
+          }
+         }
+        },
+        {
+         "text": " • "
+        },
+        {
+         "text": "1993"
+        }
+       ]
+      },
+      "thumbnail": {
+       "thumbnails": [
+        {
+         "url": "https://yt3.googleusercontent.com/cuTbR0z7-7GHd6er2pFIdHERNWRJcEx04XTauul9_x2weYsGYRZFTdGDbX_bPd3_ayke47xYRsjC-6EF=w60-h60-l90-rj",
+         "width": 60,
+         "height": 60
+        },
+        {
+         "url": "https://yt3.googleusercontent.com/cuTbR0z7-7GHd6er2pFIdHERNWRJcEx04XTauul9_x2weYsGYRZFTdGDbX_bPd3_ayke47xYRsjC-6EF=w226-h226-l90-rj",
+         "width": 226,
+         "height": 226
+        },
+        {
+         "url": "https://yt3.googleusercontent.com/cuTbR0z7-7GHd6er2pFIdHERNWRJcEx04XTauul9_x2weYsGYRZFTdGDbX_bPd3_ayke47xYRsjC-6EF=w544-h544-l90-rj",
+         "width": 544,
+         "height": 544
+        }
+       ]
+      },
+      "lengthText": {
+       "runs": [
+        {
+         "text": "4:40"
+        }
+       ]
+      },
+      "selected": false,
+      "videoId": "RVfGFmBFgoc"
+     }
+    },
+    {
+     "playlistPanelVideoRenderer": {
+      "title": {
+       "runs": [
+        {
+         "text": "Brain Damage"
+        }
+       ]
+      },
+      "longBylineText": {
+       "runs": [
+        {
+         "text": "Pink Floyd",
+         "navigationEndpoint": {
+          "browseEndpoint": {
+           "browseId": "UCO6LS_5W7vqG9mALDNzSFug",
+           "browseEndpointContextSupportedConfigs": {
+            "browseEndpointContextMusicConfig": {
+             "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+            }
+           }
+          }
+         }
+        },
+        {
+         "text": " • "
+        },
+        {
+         "text": "The Dark Side of the Moon",
+         "navigationEndpoint": {
+          "browseEndpoint": {
+           "browseId": "MPREb_nHbCAGX6uUL",
+           "browseEndpointContextSupportedConfigs": {
+            "browseEndpointContextMusicConfig": {
+             "pageType": "MUSIC_PAGE_TYPE_ALBUM"
+            }
+           }
+          }
+         }
+        },
+        {
+         "text": " • "
+        },
+        {
+         "text": "1973"
+        }
+       ]
+      },
+      "thumbnail": {
+       "thumbnails": [
+        {
+         "url": "https://yt3.googleusercontent.com/lfiVQfNhs8F77ZOE_OyAftPDGXNY8WfkIVg67gNVxaJHLef7QIXsm7CAcaT4o3AyyLTaQeqWguKel0g=w60-h60-l90-rj",
+         "width": 60,
+         "height": 60
+        },
+        {
+         "url": "https://yt3.googleusercontent.com/lfiVQfNhs8F77ZOE_OyAftPDGXNY8WfkIVg67gNVxaJHLef7QIXsm7CAcaT4o3AyyLTaQeqWguKel0g=w226-h226-l90-rj",
+         "width": 226,
+         "height": 226
+        },
+        {
+         "url": "https://yt3.googleusercontent.com/lfiVQfNhs8F77ZOE_OyAftPDGXNY8WfkIVg67gNVxaJHLef7QIXsm7CAcaT4o3AyyLTaQeqWguKel0g=w544-h544-l90-rj",
+         "width": 544,
+         "height": 544
+        }
+       ]
+      },
+      "lengthText": {
+       "runs": [
+        {
+         "text": "3:47"
+        }
+       ]
+      },
+      "selected": false,
+      "videoId": "Rly0qaXeSPg"
+     }
+    },
+    {
+     "playlistPanelVideoRenderer": {
+      "title": {
+       "runs": [
+        {
+         "text": "Brothers In Arms (Remastered 1996)"
+        }
+       ]
+      },
+      "longBylineText": {
+       "runs": [
+        {
+         "text": "Dire Straits",
+         "navigationEndpoint": {
+          "browseEndpoint": {
+           "browseId": "UCA37MBUzQgLbUHoUQgl-p0g",
+           "browseEndpointContextSupportedConfigs": {
+            "browseEndpointContextMusicConfig": {
+             "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+            }
+           }
+          }
+         }
+        },
+        {
+         "text": " • "
+        },
+        {
+         "text": "Brothers In Arms (Remastered 1996)",
+         "navigationEndpoint": {
+          "browseEndpoint": {
+           "browseId": "MPREb_z9khROXWkDD",
+           "browseEndpointContextSupportedConfigs": {
+            "browseEndpointContextMusicConfig": {
+             "pageType": "MUSIC_PAGE_TYPE_ALBUM"
+            }
+           }
+          }
+         }
+        },
+        {
+         "text": " • "
+        },
+        {
+         "text": "1985"
+        }
+       ]
+      },
+      "thumbnail": {
+       "thumbnails": [
+        {
+         "url": "https://yt3.googleusercontent.com/cOgYOUj1j9XKepZablxEqNAOHRH-PBSCthL7mFD2K-lC0-ZcU4KKkCNsBUIB2UOEM3NJAdewRMovJbM=w60-h60-l90-rj",
+         "width": 60,
+         "height": 60
+        },
+        {
+         "url": "https://yt3.googleusercontent.com/cOgYOUj1j9XKepZablxEqNAOHRH-PBSCthL7mFD2K-lC0-ZcU4KKkCNsBUIB2UOEM3NJAdewRMovJbM=w226-h226-l90-rj",
+         "width": 226,
+         "height": 226
+        },
+        {
+         "url": "https://yt3.googleusercontent.com/cOgYOUj1j9XKepZablxEqNAOHRH-PBSCthL7mFD2K-lC0-ZcU4KKkCNsBUIB2UOEM3NJAdewRMovJbM=w544-h544-l90-rj",
+         "width": 544,
+         "height": 544
+        }
+       ]
+      },
+      "lengthText": {
+       "runs": [
+        {
+         "text": "7:01"
+        }
+       ]
+      },
+      "selected": false,
+      "videoId": "9ykZc5E6UEE"
+     }
+    },
+    {
+     "playlistPanelVideoRenderer": {
+      "title": {
+       "runs": [
+        {
+         "text": "The House of the Rising Sun"
+        }
+       ]
+      },
+      "longBylineText": {
+       "runs": [
+        {
+         "text": "The Animals",
+         "navigationEndpoint": {
+          "browseEndpoint": {
+           "browseId": "UCcFlzgDVSL9dMUo66cEyWJQ",
+           "browseEndpointContextSupportedConfigs": {
+            "browseEndpointContextMusicConfig": {
+             "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+            }
+           }
+          }
+         }
+        },
+        {
+         "text": " • "
+        },
+        {
+         "text": "Rock 'n' Roll Teenager 1964",
+         "navigationEndpoint": {
+          "browseEndpoint": {
+           "browseId": "MPREb_BI9YLwIThxo",
+           "browseEndpointContextSupportedConfigs": {
+            "browseEndpointContextMusicConfig": {
+             "pageType": "MUSIC_PAGE_TYPE_ALBUM"
+            }
+           }
+          }
+         }
+        },
+        {
+         "text": " • "
+        },
+        {
+         "text": "2014"
+        }
+       ]
+      },
+      "thumbnail": {
+       "thumbnails": [
+        {
+         "url": "https://yt3.googleusercontent.com/2d07RW5xNNcoKT2P_hxtNHYnNvB3pFsDmjDKssnwv6H62VjKA0rRzXUNW56_f_OdEZLRxPK42Xc0MzRR-w=w60-h60-l90-rj",
+         "width": 60,
+         "height": 60
+        },
+        {
+         "url": "https://yt3.googleusercontent.com/2d07RW5xNNcoKT2P_hxtNHYnNvB3pFsDmjDKssnwv6H62VjKA0rRzXUNW56_f_OdEZLRxPK42Xc0MzRR-w=w226-h226-l90-rj",
+         "width": 226,
+         "height": 226
+        },
+        {
+         "url": "https://yt3.googleusercontent.com/2d07RW5xNNcoKT2P_hxtNHYnNvB3pFsDmjDKssnwv6H62VjKA0rRzXUNW56_f_OdEZLRxPK42Xc0MzRR-w=w544-h544-l90-rj",
+         "width": 544,
+         "height": 544
+        }
+       ]
+      },
+      "lengthText": {
+       "runs": [
+        {
+         "text": "4:28"
+        }
+       ]
+      },
+      "selected": false,
+      "videoId": "PqW4GCmQSt4"
+     }
+    },
+    {
+     "playlistPanelVideoRenderer": {
+      "title": {
+       "runs": [
+        {
+         "text": "Starman"
+        }
+       ]
+      },
+      "longBylineText": {
+       "runs": [
+        {
+         "text": "David Bowie",
+         "navigationEndpoint": {
+          "browseEndpoint": {
+           "browseId": "UCvY1eVE6lTebXsdFbbXUtkQ",
+           "browseEndpointContextSupportedConfigs": {
+            "browseEndpointContextMusicConfig": {
+             "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+            }
+           }
+          }
+         }
+        },
+        {
+         "text": " • "
+        },
+        {
+         "text": "The Rise and Fall of Ziggy Stardust and the Spiders from Mars",
+         "navigationEndpoint": {
+          "browseEndpoint": {
+           "browseId": "MPREb_NXCr0YMPIpQ",
+           "browseEndpointContextSupportedConfigs": {
+            "browseEndpointContextMusicConfig": {
+             "pageType": "MUSIC_PAGE_TYPE_ALBUM"
+            }
+           }
+          }
+         }
+        },
+        {
+         "text": " • "
+        },
+        {
+         "text": "1972"
+        }
+       ]
+      },
+      "thumbnail": {
+       "thumbnails": [
+        {
+         "url": "https://yt3.googleusercontent.com/ldn2zd7THwOFCPWJkEc1IM7mL1HcaR6IEF9oUHc90VvkJYu7CHIsRpLg2ajQugWCB_hmsDcXMS4N4XMU=w60-h60-l90-rj",
+         "width": 60,
+         "height": 60
+        },
+        {
+         "url": "https://yt3.googleusercontent.com/ldn2zd7THwOFCPWJkEc1IM7mL1HcaR6IEF9oUHc90VvkJYu7CHIsRpLg2ajQugWCB_hmsDcXMS4N4XMU=w226-h226-l90-rj",
+         "width": 226,
+         "height": 226
+        },
+        {
+         "url": "https://yt3.googleusercontent.com/ldn2zd7THwOFCPWJkEc1IM7mL1HcaR6IEF9oUHc90VvkJYu7CHIsRpLg2ajQugWCB_hmsDcXMS4N4XMU=w544-h544-l90-rj",
+         "width": 544,
+         "height": 544
+        }
+       ]
+      },
+      "lengthText": {
+       "runs": [
+        {
+         "text": "4:15"
+        }
+       ]
+      },
+      "selected": false,
+      "videoId": "aBKEt3MhNMM"
+     }
+    },
+    {
+     "playlistPanelVideoRenderer": {
+      "title": {
+       "runs": [
+        {
+         "text": "Breathe (In the Air)"
+        }
+       ]
+      },
+      "longBylineText": {
+       "runs": [
+        {
+         "text": "Pink Floyd",
+         "navigationEndpoint": {
+          "browseEndpoint": {
+           "browseId": "UCO6LS_5W7vqG9mALDNzSFug",
+           "browseEndpointContextSupportedConfigs": {
+            "browseEndpointContextMusicConfig": {
+             "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+            }
+           }
+          }
+         }
+        },
+        {
+         "text": " • "
+        },
+        {
+         "text": "The Dark Side of the Moon",
+         "navigationEndpoint": {
+          "browseEndpoint": {
+           "browseId": "MPREb_nHbCAGX6uUL",
+           "browseEndpointContextSupportedConfigs": {
+            "browseEndpointContextMusicConfig": {
+             "pageType": "MUSIC_PAGE_TYPE_ALBUM"
+            }
+           }
+          }
+         }
+        },
+        {
+         "text": " • "
+        },
+        {
+         "text": "1973"
+        }
+       ]
+      },
+      "thumbnail": {
+       "thumbnails": [
+        {
+         "url": "https://yt3.googleusercontent.com/lfiVQfNhs8F77ZOE_OyAftPDGXNY8WfkIVg67gNVxaJHLef7QIXsm7CAcaT4o3AyyLTaQeqWguKel0g=w60-h60-l90-rj",
+         "width": 60,
+         "height": 60
+        },
+        {
+         "url": "https://yt3.googleusercontent.com/lfiVQfNhs8F77ZOE_OyAftPDGXNY8WfkIVg67gNVxaJHLef7QIXsm7CAcaT4o3AyyLTaQeqWguKel0g=w226-h226-l90-rj",
+         "width": 226,
+         "height": 226
+        },
+        {
+         "url": "https://yt3.googleusercontent.com/lfiVQfNhs8F77ZOE_OyAftPDGXNY8WfkIVg67gNVxaJHLef7QIXsm7CAcaT4o3AyyLTaQeqWguKel0g=w544-h544-l90-rj",
+         "width": 544,
+         "height": 544
+        }
+       ]
+      },
+      "lengthText": {
+       "runs": [
+        {
+         "text": "2:50"
+        }
+       ]
+      },
+      "selected": false,
+      "videoId": "_396y7Vk9NA"
+     }
+    },
+    {
+     "playlistPanelVideoRenderer": {
+      "title": {
+       "runs": [
+        {
+         "text": "Heart of Gold (2009 Remaster)"
+        }
+       ]
+      },
+      "longBylineText": {
+       "runs": [
+        {
+         "text": "Neil Young",
+         "navigationEndpoint": {
+          "browseEndpoint": {
+           "browseId": "UC6JhadLTf6g6f-ZdeEaAqBQ",
+           "browseEndpointContextSupportedConfigs": {
+            "browseEndpointContextMusicConfig": {
+             "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+            }
+           }
+          }
+         }
+        },
+        {
+         "text": " • "
+        },
+        {
+         "text": "Harvest (2009 Remaster)",
+         "navigationEndpoint": {
+          "browseEndpoint": {
+           "browseId": "MPREb_KmYrZvSr21k",
+           "browseEndpointContextSupportedConfigs": {
+            "browseEndpointContextMusicConfig": {
+             "pageType": "MUSIC_PAGE_TYPE_ALBUM"
+            }
+           }
+          }
+         }
+        },
+        {
+         "text": " • "
+        },
+        {
+         "text": "1972"
+        }
+       ]
+      },
+      "thumbnail": {
+       "thumbnails": [
+        {
+         "url": "https://yt3.googleusercontent.com/vEaImfx03AWJ0_0TvbttvJyPorV39OzeLdRySMxLNdFa80QBfsgQPh2wgLbIV0PvDwbMaqLHwPMv89Q=w60-h60-l90-rj",
+         "width": 60,
+         "height": 60
+        },
+        {
+         "url": "https://yt3.googleusercontent.com/vEaImfx03AWJ0_0TvbttvJyPorV39OzeLdRySMxLNdFa80QBfsgQPh2wgLbIV0PvDwbMaqLHwPMv89Q=w226-h226-l90-rj",
+         "width": 226,
+         "height": 226
+        },
+        {
+         "url": "https://yt3.googleusercontent.com/vEaImfx03AWJ0_0TvbttvJyPorV39OzeLdRySMxLNdFa80QBfsgQPh2wgLbIV0PvDwbMaqLHwPMv89Q=w544-h544-l90-rj",
+         "width": 544,
+         "height": 544
+        }
+       ]
+      },
+      "lengthText": {
+       "runs": [
+        {
+         "text": "3:08"
+        }
+       ]
+      },
+      "selected": false,
+      "videoId": "X3IA6pIVank"
+     }
+    },
+    {
+     "playlistPanelVideoRenderer": {
+      "title": {
+       "runs": [
+        {
+         "text": "Gimme Shelter"
+        }
+       ]
+      },
+      "longBylineText": {
+       "runs": [
+        {
+         "text": "The Rolling Stones",
+         "navigationEndpoint": {
+          "browseEndpoint": {
+           "browseId": "UCNYhhkQqeFLUc-YEDcLpSYQ",
+           "browseEndpointContextSupportedConfigs": {
+            "browseEndpointContextMusicConfig": {
+             "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+            }
+           }
+          }
+         }
+        },
+        {
+         "text": " • "
+        },
+        {
+         "text": "Let It Bleed",
+         "navigationEndpoint": {
+          "browseEndpoint": {
+           "browseId": "MPREb_kha2P1MrZxA",
+           "browseEndpointContextSupportedConfigs": {
+            "browseEndpointContextMusicConfig": {
+             "pageType": "MUSIC_PAGE_TYPE_ALBUM"
+            }
+           }
+          }
+         }
+        },
+        {
+         "text": " • "
+        },
+        {
+         "text": "1969"
+        }
+       ]
+      },
+      "thumbnail": {
+       "thumbnails": [
+        {
+         "url": "https://yt3.googleusercontent.com/UgiyhZaKEOvKq-KJC3_FpLvLrs4Ww_a6rbEwT1eIhiSzNMRXWXU74rnhUMlETXCFwka7DyUonVeUa3o=w60-h60-s-l90-rj",
+         "width": 60,
+         "height": 60
+        },
+        {
+         "url": "https://yt3.googleusercontent.com/UgiyhZaKEOvKq-KJC3_FpLvLrs4Ww_a6rbEwT1eIhiSzNMRXWXU74rnhUMlETXCFwka7DyUonVeUa3o=w226-h226-s-l90-rj",
+         "width": 226,
+         "height": 226
+        },
+        {
+         "url": "https://yt3.googleusercontent.com/UgiyhZaKEOvKq-KJC3_FpLvLrs4Ww_a6rbEwT1eIhiSzNMRXWXU74rnhUMlETXCFwka7DyUonVeUa3o=w544-h544-s-l90-rj",
+         "width": 544,
+         "height": 544
+        }
+       ]
+      },
+      "lengthText": {
+       "runs": [
+        {
+         "text": "4:31"
+        }
+       ]
+      },
+      "selected": false,
+      "videoId": "EJRdDhnTRoo"
+     }
+    },
+    {
+     "playlistPanelVideoRenderer": {
+      "title": {
+       "runs": [
+        {
+         "text": "Friday I'm In Love"
+        }
+       ]
+      },
+      "longBylineText": {
+       "runs": [
+        {
+         "text": "The Cure",
+         "navigationEndpoint": {
+          "browseEndpoint": {
+           "browseId": "UCKuG9-MGolUuWbEcoz5qijw",
+           "browseEndpointContextSupportedConfigs": {
+            "browseEndpointContextMusicConfig": {
+             "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+            }
+           }
+          }
+         }
+        },
+        {
+         "text": " • "
+        },
+        {
+         "text": "Wish",
+         "navigationEndpoint": {
+          "browseEndpoint": {
+           "browseId": "MPREb_TB8DPOJrHFl",
+           "browseEndpointContextSupportedConfigs": {
+            "browseEndpointContextMusicConfig": {
+             "pageType": "MUSIC_PAGE_TYPE_ALBUM"
+            }
+           }
+          }
+         }
+        },
+        {
+         "text": " • "
+        },
+        {
+         "text": "1992"
+        }
+       ]
+      },
+      "thumbnail": {
+       "thumbnails": [
+        {
+         "url": "https://yt3.googleusercontent.com/OK0Po1w-qs-125i0MhGl0MrTQP6G8WLM8eQTYCMUhIp4aQb505TT1hnHHbphbRd-rEF6tUo-WZgljpY=w60-h60-s-l90-rj",
+         "width": 60,
+         "height": 60
+        },
+        {
+         "url": "https://yt3.googleusercontent.com/OK0Po1w-qs-125i0MhGl0MrTQP6G8WLM8eQTYCMUhIp4aQb505TT1hnHHbphbRd-rEF6tUo-WZgljpY=w226-h226-s-l90-rj",
+         "width": 226,
+         "height": 226
+        },
+        {
+         "url": "https://yt3.googleusercontent.com/OK0Po1w-qs-125i0MhGl0MrTQP6G8WLM8eQTYCMUhIp4aQb505TT1hnHHbphbRd-rEF6tUo-WZgljpY=w544-h544-s-l90-rj",
+         "width": 544,
+         "height": 544
+        }
+       ]
+      },
+      "lengthText": {
+       "runs": [
+        {
+         "text": "3:36"
+        }
+       ]
+      },
+      "selected": false,
+      "videoId": "_1RYVmLFaK8"
+     }
+    },
+    {
+     "playlistPanelVideoRenderer": {
+      "title": {
+       "runs": [
+        {
+         "text": "Comfortably Numb"
+        }
+       ]
+      },
+      "longBylineText": {
+       "runs": [
+        {
+         "text": "Pink Floyd",
+         "navigationEndpoint": {
+          "browseEndpoint": {
+           "browseId": "UCO6LS_5W7vqG9mALDNzSFug",
+           "browseEndpointContextSupportedConfigs": {
+            "browseEndpointContextMusicConfig": {
+             "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+            }
+           }
+          }
+         }
+        },
+        {
+         "text": " • "
+        },
+        {
+         "text": "The Wall",
+         "navigationEndpoint": {
+          "browseEndpoint": {
+           "browseId": "MPREb_tc3z4MYeOpY",
+           "browseEndpointContextSupportedConfigs": {
+            "browseEndpointContextMusicConfig": {
+             "pageType": "MUSIC_PAGE_TYPE_ALBUM"
+            }
+           }
+          }
+         }
+        },
+        {
+         "text": " • "
+        },
+        {
+         "text": "1979"
+        }
+       ]
+      },
+      "thumbnail": {
+       "thumbnails": [
+        {
+         "url": "https://yt3.googleusercontent.com/ghryivwB6kZQnSKXVbpM50OoTIZn7kBm4526S3sAb4FK6gHCD-IDWLOXktQh2b-daknR8KHCjC1F2VcR=w60-h60-l90-rj",
+         "width": 60,
+         "height": 60
+        },
+        {
+         "url": "https://yt3.googleusercontent.com/ghryivwB6kZQnSKXVbpM50OoTIZn7kBm4526S3sAb4FK6gHCD-IDWLOXktQh2b-daknR8KHCjC1F2VcR=w226-h226-l90-rj",
+         "width": 226,
+         "height": 226
+        },
+        {
+         "url": "https://yt3.googleusercontent.com/ghryivwB6kZQnSKXVbpM50OoTIZn7kBm4526S3sAb4FK6gHCD-IDWLOXktQh2b-daknR8KHCjC1F2VcR=w544-h544-l90-rj",
+         "width": 544,
+         "height": 544
+        }
+       ]
+      },
+      "lengthText": {
+       "runs": [
+        {
+         "text": "6:23"
+        }
+       ]
+      },
+      "selected": false,
+      "videoId": "4FLjT5V5Hog"
+     }
+    },
+    {
+     "playlistPanelVideoRenderer": {
+      "title": {
+       "runs": [
+        {
+         "text": "Stairway to Heaven (Remaster)"
+        }
+       ]
+      },
+      "longBylineText": {
+       "runs": [
+        {
+         "text": "Led Zeppelin",
+         "navigationEndpoint": {
+          "browseEndpoint": {
+           "browseId": "UCYtap7ujIPaxTS2iCDoMi3g",
+           "browseEndpointContextSupportedConfigs": {
+            "browseEndpointContextMusicConfig": {
+             "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+            }
+           }
+          }
+         }
+        },
+        {
+         "text": " • "
+        },
+        {
+         "text": "Led Zeppelin IV (Deluxe Edition)",
+         "navigationEndpoint": {
+          "browseEndpoint": {
+           "browseId": "MPREb_Eth3FgRUF5Y",
+           "browseEndpointContextSupportedConfigs": {
+            "browseEndpointContextMusicConfig": {
+             "pageType": "MUSIC_PAGE_TYPE_ALBUM"
+            }
+           }
+          }
+         }
+        },
+        {
+         "text": " • "
+        },
+        {
+         "text": "1971"
+        }
+       ]
+      },
+      "thumbnail": {
+       "thumbnails": [
+        {
+         "url": "https://yt3.googleusercontent.com/SXiO2cCS-20hkxVgr-VGx-IT9xchv4wSRvEPnXgWpOko-YNYtdBsll3pKoxfGgAtaZKxRjIsrXFb3JRH=w60-h60-l90-rj",
+         "width": 60,
+         "height": 60
+        },
+        {
+         "url": "https://yt3.googleusercontent.com/SXiO2cCS-20hkxVgr-VGx-IT9xchv4wSRvEPnXgWpOko-YNYtdBsll3pKoxfGgAtaZKxRjIsrXFb3JRH=w226-h226-l90-rj",
+         "width": 226,
+         "height": 226
+        },
+        {
+         "url": "https://yt3.googleusercontent.com/SXiO2cCS-20hkxVgr-VGx-IT9xchv4wSRvEPnXgWpOko-YNYtdBsll3pKoxfGgAtaZKxRjIsrXFb3JRH=w544-h544-l90-rj",
+         "width": 544,
+         "height": 544
+        }
+       ]
+      },
+      "lengthText": {
+       "runs": [
+        {
+         "text": "8:03"
+        }
+       ]
+      },
+      "selected": false,
+      "videoId": "iXQUu5Dti4g"
+     }
+    },
+    {
+     "playlistPanelVideoRenderer": {
+      "title": {
+       "runs": [
+        {
+         "text": "Everybody Hurts"
+        }
+       ]
+      },
+      "longBylineText": {
+       "runs": [
+        {
+         "text": "R.E.M.",
+         "navigationEndpoint": {
+          "browseEndpoint": {
+           "browseId": "UCZQMYjqm_j5mBVTfPcCy3FA",
+           "browseEndpointContextSupportedConfigs": {
+            "browseEndpointContextMusicConfig": {
+             "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+            }
+           }
+          }
+         }
+        },
+        {
+         "text": " • "
+        },
+        {
+         "text": "Automatic For The People",
+         "navigationEndpoint": {
+          "browseEndpoint": {
+           "browseId": "MPREb_nfDvvM0Ley3",
+           "browseEndpointContextSupportedConfigs": {
+            "browseEndpointContextMusicConfig": {
+             "pageType": "MUSIC_PAGE_TYPE_ALBUM"
+            }
+           }
+          }
+         }
+        },
+        {
+         "text": " • "
+        },
+        {
+         "text": "1992"
+        }
+       ]
+      },
+      "thumbnail": {
+       "thumbnails": [
+        {
+         "url": "https://yt3.googleusercontent.com/-mqJ3j-plKJV3msFM1TK2FEJxvenm59rL4MWbHPkd3J9MIgL-90Z6CsJIC9rnbge6wuANx6CcFrNffig=w60-h60-l90-rj",
+         "width": 60,
+         "height": 60
+        },
+        {
+         "url": "https://yt3.googleusercontent.com/-mqJ3j-plKJV3msFM1TK2FEJxvenm59rL4MWbHPkd3J9MIgL-90Z6CsJIC9rnbge6wuANx6CcFrNffig=w226-h226-l90-rj",
+         "width": 226,
+         "height": 226
+        },
+        {
+         "url": "https://yt3.googleusercontent.com/-mqJ3j-plKJV3msFM1TK2FEJxvenm59rL4MWbHPkd3J9MIgL-90Z6CsJIC9rnbge6wuANx6CcFrNffig=w544-h544-l90-rj",
+         "width": 544,
+         "height": 544
+        }
+       ]
+      },
+      "lengthText": {
+       "runs": [
+        {
+         "text": "5:21"
+        }
+       ]
+      },
+      "selected": false,
+      "videoId": "tKRznjaIIyw"
+     }
+    }
+   ],
+   "continuations": [
+    {
+     "nextRadioContinuationData": {
+      "continuation": "CDISPhILRk5mS2FBYWR1cE0iEVJEQU1WTW83TWxDX1FybW1jMgR3QUVCODHQAQH6ARBENjI1QUI0MDI5NEQzODFEGAo%3D"
+     }
+    }
+   ]
+  }
+ }
+}

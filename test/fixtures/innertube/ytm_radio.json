@@ -1,0 +1,1317 @@
+{
+ "contents": {
+  "singleColumnMusicWatchNextResultsRenderer": {
+   "tabbedRenderer": {
+    "watchNextTabbedResultsRenderer": {
+     "tabs": [
+      {
+       "tabRenderer": {
+        "content": {
+         "musicQueueRenderer": {
+          "content": {
+           "playlistPanelRenderer": {
+            "contents": [
+             {
+              "playlistPanelVideoRenderer": {
+               "title": {
+                "runs": [
+                 {
+                  "text": "Mother"
+                 }
+                ]
+               },
+               "longBylineText": {
+                "runs": [
+                 {
+                  "text": "Pink Floyd",
+                  "navigationEndpoint": {
+                   "browseEndpoint": {
+                    "browseId": "UCO6LS_5W7vqG9mALDNzSFug",
+                    "browseEndpointContextSupportedConfigs": {
+                     "browseEndpointContextMusicConfig": {
+                      "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+                     }
+                    }
+                   }
+                  }
+                 },
+                 {
+                  "text": " • "
+                 },
+                 {
+                  "text": "The Wall",
+                  "navigationEndpoint": {
+                   "browseEndpoint": {
+                    "browseId": "MPREb_tc3z4MYeOpY",
+                    "browseEndpointContextSupportedConfigs": {
+                     "browseEndpointContextMusicConfig": {
+                      "pageType": "MUSIC_PAGE_TYPE_ALBUM"
+                     }
+                    }
+                   }
+                  }
+                 },
+                 {
+                  "text": " • "
+                 },
+                 {
+                  "text": "1979"
+                 }
+                ]
+               },
+               "thumbnail": {
+                "thumbnails": [
+                 {
+                  "url": "https://yt3.googleusercontent.com/ghryivwB6kZQnSKXVbpM50OoTIZn7kBm4526S3sAb4FK6gHCD-IDWLOXktQh2b-daknR8KHCjC1F2VcR=w60-h60-l90-rj",
+                  "width": 60,
+                  "height": 60
+                 },
+                 {
+                  "url": "https://yt3.googleusercontent.com/ghryivwB6kZQnSKXVbpM50OoTIZn7kBm4526S3sAb4FK6gHCD-IDWLOXktQh2b-daknR8KHCjC1F2VcR=w226-h226-l90-rj",
+                  "width": 226,
+                  "height": 226
+                 },
+                 {
+                  "url": "https://yt3.googleusercontent.com/ghryivwB6kZQnSKXVbpM50OoTIZn7kBm4526S3sAb4FK6gHCD-IDWLOXktQh2b-daknR8KHCjC1F2VcR=w544-h544-l90-rj",
+                  "width": 544,
+                  "height": 544
+                 }
+                ]
+               },
+               "lengthText": {
+                "runs": [
+                 {
+                  "text": "5:35"
+                 }
+                ]
+               },
+               "selected": true,
+               "videoId": "o7MlC_Qrmmc"
+              }
+             },
+             {
+              "playlistPanelVideoRenderer": {
+               "title": {
+                "runs": [
+                 {
+                  "text": "Goodbye Blue Sky"
+                 }
+                ]
+               },
+               "longBylineText": {
+                "runs": [
+                 {
+                  "text": "Pink Floyd",
+                  "navigationEndpoint": {
+                   "browseEndpoint": {
+                    "browseId": "UCO6LS_5W7vqG9mALDNzSFug",
+                    "browseEndpointContextSupportedConfigs": {
+                     "browseEndpointContextMusicConfig": {
+                      "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+                     }
+                    }
+                   }
+                  }
+                 },
+                 {
+                  "text": " • "
+                 },
+                 {
+                  "text": "The Wall",
+                  "navigationEndpoint": {
+                   "browseEndpoint": {
+                    "browseId": "MPREb_tc3z4MYeOpY",
+                    "browseEndpointContextSupportedConfigs": {
+                     "browseEndpointContextMusicConfig": {
+                      "pageType": "MUSIC_PAGE_TYPE_ALBUM"
+                     }
+                    }
+                   }
+                  }
+                 },
+                 {
+                  "text": " • "
+                 },
+                 {
+                  "text": "1979"
+                 }
+                ]
+               },
+               "thumbnail": {
+                "thumbnails": [
+                 {
+                  "url": "https://yt3.googleusercontent.com/ghryivwB6kZQnSKXVbpM50OoTIZn7kBm4526S3sAb4FK6gHCD-IDWLOXktQh2b-daknR8KHCjC1F2VcR=w60-h60-l90-rj",
+                  "width": 60,
+                  "height": 60
+                 },
+                 {
+                  "url": "https://yt3.googleusercontent.com/ghryivwB6kZQnSKXVbpM50OoTIZn7kBm4526S3sAb4FK6gHCD-IDWLOXktQh2b-daknR8KHCjC1F2VcR=w226-h226-l90-rj",
+                  "width": 226,
+                  "height": 226
+                 },
+                 {
+                  "url": "https://yt3.googleusercontent.com/ghryivwB6kZQnSKXVbpM50OoTIZn7kBm4526S3sAb4FK6gHCD-IDWLOXktQh2b-daknR8KHCjC1F2VcR=w544-h544-l90-rj",
+                  "width": 544,
+                  "height": 544
+                 }
+                ]
+               },
+               "lengthText": {
+                "runs": [
+                 {
+                  "text": "2:48"
+                 }
+                ]
+               },
+               "selected": false,
+               "videoId": "OArru5OkVKE"
+              }
+             },
+             {
+              "playlistPanelVideoRenderer": {
+               "title": {
+                "runs": [
+                 {
+                  "text": "Knockin' On Heaven's Door"
+                 }
+                ]
+               },
+               "longBylineText": {
+                "runs": [
+                 {
+                  "text": "Bob Dylan",
+                  "navigationEndpoint": {
+                   "browseEndpoint": {
+                    "browseId": "UCBqkojCXby4zGkWX86FEY7Q",
+                    "browseEndpointContextSupportedConfigs": {
+                     "browseEndpointContextMusicConfig": {
+                      "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+                     }
+                    }
+                   }
+                  }
+                 },
+                 {
+                  "text": " • "
+                 },
+                 {
+                  "text": "Pat Garrett & Billy The Kid (Soundtrack From The Motion Picture)",
+                  "navigationEndpoint": {
+                   "browseEndpoint": {
+                    "browseId": "MPREb_tz2XpcDEm1S",
+                    "browseEndpointContextSupportedConfigs": {
+                     "browseEndpointContextMusicConfig": {
+                      "pageType": "MUSIC_PAGE_TYPE_ALBUM"
+                     }
+                    }
+                   }
+                  }
+                 },
+                 {
+                  "text": " • "
+                 },
+                 {
+                  "text": "1973"
+                 }
+                ]
+               },
+               "thumbnail": {
+                "thumbnails": [
+                 {
+                  "url": "https://yt3.googleusercontent.com/Aojtc1oQ6mnKVK4yLSY7g6xQxRt7c8HDx6lTuPNl3lr6kguFN36ocymZ6SADwNyNXWEP9zSpQTyT7CE=w60-h60-l90-rj",
+                  "width": 60,
+                  "height": 60
+                 },
+                 {
+                  "url": "https://yt3.googleusercontent.com/Aojtc1oQ6mnKVK4yLSY7g6xQxRt7c8HDx6lTuPNl3lr6kguFN36ocymZ6SADwNyNXWEP9zSpQTyT7CE=w226-h226-l90-rj",
+                  "width": 226,
+                  "height": 226
+                 },
+                 {
+                  "url": "https://yt3.googleusercontent.com/Aojtc1oQ6mnKVK4yLSY7g6xQxRt7c8HDx6lTuPNl3lr6kguFN36ocymZ6SADwNyNXWEP9zSpQTyT7CE=w544-h544-l90-rj",
+                  "width": 544,
+                  "height": 544
+                 }
+                ]
+               },
+               "lengthText": {
+                "runs": [
+                 {
+                  "text": "2:30"
+                 }
+                ]
+               },
+               "selected": false,
+               "videoId": "z4R5crZylQ0"
+              }
+             },
+             {
+              "playlistPanelVideoRenderer": {
+               "title": {
+                "runs": [
+                 {
+                  "text": "Brothers In Arms (Remastered 1996)"
+                 }
+                ]
+               },
+               "longBylineText": {
+                "runs": [
+                 {
+                  "text": "Dire Straits",
+                  "navigationEndpoint": {
+                   "browseEndpoint": {
+                    "browseId": "UCA37MBUzQgLbUHoUQgl-p0g",
+                    "browseEndpointContextSupportedConfigs": {
+                     "browseEndpointContextMusicConfig": {
+                      "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+                     }
+                    }
+                   }
+                  }
+                 },
+                 {
+                  "text": " • "
+                 },
+                 {
+                  "text": "Brothers In Arms (Remastered 1996)",
+                  "navigationEndpoint": {
+                   "browseEndpoint": {
+                    "browseId": "MPREb_z9khROXWkDD",
+                    "browseEndpointContextSupportedConfigs": {
+                     "browseEndpointContextMusicConfig": {
+                      "pageType": "MUSIC_PAGE_TYPE_ALBUM"
+                     }
+                    }
+                   }
+                  }
+                 },
+                 {
+                  "text": " • "
+                 },
+                 {
+                  "text": "1985"
+                 }
+                ]
+               },
+               "thumbnail": {
+                "thumbnails": [
+                 {
+                  "url": "https://yt3.googleusercontent.com/cOgYOUj1j9XKepZablxEqNAOHRH-PBSCthL7mFD2K-lC0-ZcU4KKkCNsBUIB2UOEM3NJAdewRMovJbM=w60-h60-l90-rj",
+                  "width": 60,
+                  "height": 60
+                 },
+                 {
+                  "url": "https://yt3.googleusercontent.com/cOgYOUj1j9XKepZablxEqNAOHRH-PBSCthL7mFD2K-lC0-ZcU4KKkCNsBUIB2UOEM3NJAdewRMovJbM=w226-h226-l90-rj",
+                  "width": 226,
+                  "height": 226
+                 },
+                 {
+                  "url": "https://yt3.googleusercontent.com/cOgYOUj1j9XKepZablxEqNAOHRH-PBSCthL7mFD2K-lC0-ZcU4KKkCNsBUIB2UOEM3NJAdewRMovJbM=w544-h544-l90-rj",
+                  "width": 544,
+                  "height": 544
+                 }
+                ]
+               },
+               "lengthText": {
+                "runs": [
+                 {
+                  "text": "7:01"
+                 }
+                ]
+               },
+               "selected": false,
+               "videoId": "9ykZc5E6UEE"
+              }
+             },
+             {
+              "playlistPanelVideoRenderer": {
+               "title": {
+                "runs": [
+                 {
+                  "text": "Shape Of My Heart"
+                 }
+                ]
+               },
+               "longBylineText": {
+                "runs": [
+                 {
+                  "text": "Sting",
+                  "navigationEndpoint": {
+                   "browseEndpoint": {
+                    "browseId": "UCHhKCdsmx9t-PSqlSfa-VKA",
+                    "browseEndpointContextSupportedConfigs": {
+                     "browseEndpointContextMusicConfig": {
+                      "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+                     }
+                    }
+                   }
+                  }
+                 },
+                 {
+                  "text": " • "
+                 },
+                 {
+                  "text": "Ten Summoner's Tales (Expanded Edition)",
+                  "navigationEndpoint": {
+                   "browseEndpoint": {
+                    "browseId": "MPREb_j1B7Ao9O2aT",
+                    "browseEndpointContextSupportedConfigs": {
+                     "browseEndpointContextMusicConfig": {
+                      "pageType": "MUSIC_PAGE_TYPE_ALBUM"
+                     }
+                    }
+                   }
+                  }
+                 },
+                 {
+                  "text": " • "
+                 },
+                 {
+                  "text": "1993"
+                 }
+                ]
+               },
+               "thumbnail": {
+                "thumbnails": [
+                 {
+                  "url": "https://yt3.googleusercontent.com/cuTbR0z7-7GHd6er2pFIdHERNWRJcEx04XTauul9_x2weYsGYRZFTdGDbX_bPd3_ayke47xYRsjC-6EF=w60-h60-l90-rj",
+                  "width": 60,
+                  "height": 60
+                 },
+                 {
+                  "url": "https://yt3.googleusercontent.com/cuTbR0z7-7GHd6er2pFIdHERNWRJcEx04XTauul9_x2weYsGYRZFTdGDbX_bPd3_ayke47xYRsjC-6EF=w226-h226-l90-rj",
+                  "width": 226,
+                  "height": 226
+                 },
+                 {
+                  "url": "https://yt3.googleusercontent.com/cuTbR0z7-7GHd6er2pFIdHERNWRJcEx04XTauul9_x2weYsGYRZFTdGDbX_bPd3_ayke47xYRsjC-6EF=w544-h544-l90-rj",
+                  "width": 544,
+                  "height": 544
+                 }
+                ]
+               },
+               "lengthText": {
+                "runs": [
+                 {
+                  "text": "4:40"
+                 }
+                ]
+               },
+               "selected": false,
+               "videoId": "RVfGFmBFgoc"
+              }
+             },
+             {
+              "playlistPanelVideoRenderer": {
+               "title": {
+                "runs": [
+                 {
+                  "text": "Wish You Were Here"
+                 }
+                ]
+               },
+               "longBylineText": {
+                "runs": [
+                 {
+                  "text": "Pink Floyd",
+                  "navigationEndpoint": {
+                   "browseEndpoint": {
+                    "browseId": "UCO6LS_5W7vqG9mALDNzSFug",
+                    "browseEndpointContextSupportedConfigs": {
+                     "browseEndpointContextMusicConfig": {
+                      "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+                     }
+                    }
+                   }
+                  }
+                 },
+                 {
+                  "text": " • "
+                 },
+                 {
+                  "text": "Wish You Were Here",
+                  "navigationEndpoint": {
+                   "browseEndpoint": {
+                    "browseId": "MPREb_pYj3YFxjhPp",
+                    "browseEndpointContextSupportedConfigs": {
+                     "browseEndpointContextMusicConfig": {
+                      "pageType": "MUSIC_PAGE_TYPE_ALBUM"
+                     }
+                    }
+                   }
+                  }
+                 },
+                 {
+                  "text": " • "
+                 },
+                 {
+                  "text": "1975"
+                 }
+                ]
+               },
+               "thumbnail": {
+                "thumbnails": [
+                 {
+                  "url": "https://yt3.googleusercontent.com/k1P0nFYMJ4yLC3yUumEY021eI7zDr67r2DWOVvUVFowraXukUHHhf4TUOfVgGtnKx6YlJpnpEaskcmLE=w60-h60-l90-rj",
+                  "width": 60,
+                  "height": 60
+                 },
+                 {
+                  "url": "https://yt3.googleusercontent.com/k1P0nFYMJ4yLC3yUumEY021eI7zDr67r2DWOVvUVFowraXukUHHhf4TUOfVgGtnKx6YlJpnpEaskcmLE=w226-h226-l90-rj",
+                  "width": 226,
+                  "height": 226
+                 },
+                 {
+                  "url": "https://yt3.googleusercontent.com/k1P0nFYMJ4yLC3yUumEY021eI7zDr67r2DWOVvUVFowraXukUHHhf4TUOfVgGtnKx6YlJpnpEaskcmLE=w544-h544-l90-rj",
+                  "width": 544,
+                  "height": 544
+                 }
+                ]
+               },
+               "lengthText": {
+                "runs": [
+                 {
+                  "text": "5:35"
+                 }
+                ]
+               },
+               "selected": false,
+               "videoId": "4K6cvc27_CE"
+              }
+             },
+             {
+              "playlistPanelVideoRenderer": {
+               "title": {
+                "runs": [
+                 {
+                  "text": "The Sound of Silence (Acoustic Version)"
+                 }
+                ]
+               },
+               "longBylineText": {
+                "runs": [
+                 {
+                  "text": "Simon & Garfunkel",
+                  "navigationEndpoint": {
+                   "browseEndpoint": {
+                    "browseId": "UCOovQ5kcvRFGh4ix6Q1SsKA",
+                    "browseEndpointContextSupportedConfigs": {
+                     "browseEndpointContextMusicConfig": {
+                      "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+                     }
+                    }
+                   }
+                  }
+                 },
+                 {
+                  "text": " • "
+                 },
+                 {
+                  "text": "Wednesday Morning, 3 A.M.",
+                  "navigationEndpoint": {
+                   "browseEndpoint": {
+                    "browseId": "MPREb_DVz1MKPfMQl",
+                    "browseEndpointContextSupportedConfigs": {
+                     "browseEndpointContextMusicConfig": {
+                      "pageType": "MUSIC_PAGE_TYPE_ALBUM"
+                     }
+                    }
+                   }
+                  }
+                 },
+                 {
+                  "text": " • "
+                 },
+                 {
+                  "text": "1964"
+                 }
+                ]
+               },
+               "thumbnail": {
+                "thumbnails": [
+                 {
+                  "url": "https://yt3.googleusercontent.com/XG2Dc1T1t6UbMXRN0YoNBESnSTISFpnNl9e_bYCI3a7OwkFISftWsr48yqx-2TcthFPyyUQGoBzHgNw=w60-h60-l90-rj",
+                  "width": 60,
+                  "height": 60
+                 },
+                 {
+                  "url": "https://yt3.googleusercontent.com/XG2Dc1T1t6UbMXRN0YoNBESnSTISFpnNl9e_bYCI3a7OwkFISftWsr48yqx-2TcthFPyyUQGoBzHgNw=w226-h226-l90-rj",
+                  "width": 226,
+                  "height": 226
+                 },
+                 {
+                  "url": "https://yt3.googleusercontent.com/XG2Dc1T1t6UbMXRN0YoNBESnSTISFpnNl9e_bYCI3a7OwkFISftWsr48yqx-2TcthFPyyUQGoBzHgNw=w544-h544-l90-rj",
+                  "width": 544,
+                  "height": 544
+                 }
+                ]
+               },
+               "lengthText": {
+                "runs": [
+                 {
+                  "text": "3:06"
+                 }
+                ]
+               },
+               "selected": false,
+               "videoId": "-eqJGVl0Pr0"
+              }
+             },
+             {
+              "playlistPanelVideoRenderer": {
+               "title": {
+                "runs": [
+                 {
+                  "text": "Stairway to Heaven (Remaster)"
+                 }
+                ]
+               },
+               "longBylineText": {
+                "runs": [
+                 {
+                  "text": "Led Zeppelin",
+                  "navigationEndpoint": {
+                   "browseEndpoint": {
+                    "browseId": "UCYtap7ujIPaxTS2iCDoMi3g",
+                    "browseEndpointContextSupportedConfigs": {
+                     "browseEndpointContextMusicConfig": {
+                      "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+                     }
+                    }
+                   }
+                  }
+                 },
+                 {
+                  "text": " • "
+                 },
+                 {
+                  "text": "Led Zeppelin IV (Deluxe Edition)",
+                  "navigationEndpoint": {
+                   "browseEndpoint": {
+                    "browseId": "MPREb_Eth3FgRUF5Y",
+                    "browseEndpointContextSupportedConfigs": {
+                     "browseEndpointContextMusicConfig": {
+                      "pageType": "MUSIC_PAGE_TYPE_ALBUM"
+                     }
+                    }
+                   }
+                  }
+                 },
+                 {
+                  "text": " • "
+                 },
+                 {
+                  "text": "1971"
+                 }
+                ]
+               },
+               "thumbnail": {
+                "thumbnails": [
+                 {
+                  "url": "https://yt3.googleusercontent.com/SXiO2cCS-20hkxVgr-VGx-IT9xchv4wSRvEPnXgWpOko-YNYtdBsll3pKoxfGgAtaZKxRjIsrXFb3JRH=w60-h60-l90-rj",
+                  "width": 60,
+                  "height": 60
+                 },
+                 {
+                  "url": "https://yt3.googleusercontent.com/SXiO2cCS-20hkxVgr-VGx-IT9xchv4wSRvEPnXgWpOko-YNYtdBsll3pKoxfGgAtaZKxRjIsrXFb3JRH=w226-h226-l90-rj",
+                  "width": 226,
+                  "height": 226
+                 },
+                 {
+                  "url": "https://yt3.googleusercontent.com/SXiO2cCS-20hkxVgr-VGx-IT9xchv4wSRvEPnXgWpOko-YNYtdBsll3pKoxfGgAtaZKxRjIsrXFb3JRH=w544-h544-l90-rj",
+                  "width": 544,
+                  "height": 544
+                 }
+                ]
+               },
+               "lengthText": {
+                "runs": [
+                 {
+                  "text": "8:03"
+                 }
+                ]
+               },
+               "selected": false,
+               "videoId": "iXQUu5Dti4g"
+              }
+             },
+             {
+              "playlistPanelVideoRenderer": {
+               "title": {
+                "runs": [
+                 {
+                  "text": "Have You Ever Seen The Rain"
+                 }
+                ]
+               },
+               "longBylineText": {
+                "runs": [
+                 {
+                  "text": "Creedence Clearwater Revival",
+                  "navigationEndpoint": {
+                   "browseEndpoint": {
+                    "browseId": "UCRbMcMQeSFVvsyEuOn7uAKQ",
+                    "browseEndpointContextSupportedConfigs": {
+                     "browseEndpointContextMusicConfig": {
+                      "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+                     }
+                    }
+                   }
+                  }
+                 },
+                 {
+                  "text": " • "
+                 },
+                 {
+                  "text": "Pendulum (Expanded Edition)",
+                  "navigationEndpoint": {
+                   "browseEndpoint": {
+                    "browseId": "MPREb_nS6o97nQWi4",
+                    "browseEndpointContextSupportedConfigs": {
+                     "browseEndpointContextMusicConfig": {
+                      "pageType": "MUSIC_PAGE_TYPE_ALBUM"
+                     }
+                    }
+                   }
+                  }
+                 },
+                 {
+                  "text": " • "
+                 },
+                 {
+                  "text": "1970"
+                 }
+                ]
+               },
+               "thumbnail": {
+                "thumbnails": [
+                 {
+                  "url": "https://yt3.googleusercontent.com/8idZ5vqqC-UO_uSN9VZch3q2sNTEsWkP9JPYEbAPLuIO26Iv2fEXfwK5Ls9x8Cu7ntwSeHqo0JS_hsWe=w60-h60-l90-rj",
+                  "width": 60,
+                  "height": 60
+                 },
+                 {
+                  "url": "https://yt3.googleusercontent.com/8idZ5vqqC-UO_uSN9VZch3q2sNTEsWkP9JPYEbAPLuIO26Iv2fEXfwK5Ls9x8Cu7ntwSeHqo0JS_hsWe=w226-h226-l90-rj",
+                  "width": 226,
+                  "height": 226
+                 },
+                 {
+                  "url": "https://yt3.googleusercontent.com/8idZ5vqqC-UO_uSN9VZch3q2sNTEsWkP9JPYEbAPLuIO26Iv2fEXfwK5Ls9x8Cu7ntwSeHqo0JS_hsWe=w544-h544-l90-rj",
+                  "width": 544,
+                  "height": 544
+                 }
+                ]
+               },
+               "lengthText": {
+                "runs": [
+                 {
+                  "text": "2:41"
+                 }
+                ]
+               },
+               "selected": false,
+               "videoId": "Xwy-3aI435o"
+              }
+             },
+             {
+              "playlistPanelVideoRenderer": {
+               "title": {
+                "runs": [
+                 {
+                  "text": "Comfortably Numb"
+                 }
+                ]
+               },
+               "longBylineText": {
+                "runs": [
+                 {
+                  "text": "Pink Floyd",
+                  "navigationEndpoint": {
+                   "browseEndpoint": {
+                    "browseId": "UCO6LS_5W7vqG9mALDNzSFug",
+                    "browseEndpointContextSupportedConfigs": {
+                     "browseEndpointContextMusicConfig": {
+                      "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+                     }
+                    }
+                   }
+                  }
+                 },
+                 {
+                  "text": " • "
+                 },
+                 {
+                  "text": "The Wall",
+                  "navigationEndpoint": {
+                   "browseEndpoint": {
+                    "browseId": "MPREb_tc3z4MYeOpY",
+                    "browseEndpointContextSupportedConfigs": {
+                     "browseEndpointContextMusicConfig": {
+                      "pageType": "MUSIC_PAGE_TYPE_ALBUM"
+                     }
+                    }
+                   }
+                  }
+                 },
+                 {
+                  "text": " • "
+                 },
+                 {
+                  "text": "1979"
+                 }
+                ]
+               },
+               "thumbnail": {
+                "thumbnails": [
+                 {
+                  "url": "https://yt3.googleusercontent.com/ghryivwB6kZQnSKXVbpM50OoTIZn7kBm4526S3sAb4FK6gHCD-IDWLOXktQh2b-daknR8KHCjC1F2VcR=w60-h60-l90-rj",
+                  "width": 60,
+                  "height": 60
+                 },
+                 {
+                  "url": "https://yt3.googleusercontent.com/ghryivwB6kZQnSKXVbpM50OoTIZn7kBm4526S3sAb4FK6gHCD-IDWLOXktQh2b-daknR8KHCjC1F2VcR=w226-h226-l90-rj",
+                  "width": 226,
+                  "height": 226
+                 },
+                 {
+                  "url": "https://yt3.googleusercontent.com/ghryivwB6kZQnSKXVbpM50OoTIZn7kBm4526S3sAb4FK6gHCD-IDWLOXktQh2b-daknR8KHCjC1F2VcR=w544-h544-l90-rj",
+                  "width": 544,
+                  "height": 544
+                 }
+                ]
+               },
+               "lengthText": {
+                "runs": [
+                 {
+                  "text": "6:23"
+                 }
+                ]
+               },
+               "selected": false,
+               "videoId": "4FLjT5V5Hog"
+              }
+             },
+             {
+              "playlistPanelVideoRenderer": {
+               "title": {
+                "runs": [
+                 {
+                  "text": "Heart of Gold (2009 Remaster)"
+                 }
+                ]
+               },
+               "longBylineText": {
+                "runs": [
+                 {
+                  "text": "Neil Young",
+                  "navigationEndpoint": {
+                   "browseEndpoint": {
+                    "browseId": "UC6JhadLTf6g6f-ZdeEaAqBQ",
+                    "browseEndpointContextSupportedConfigs": {
+                     "browseEndpointContextMusicConfig": {
+                      "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+                     }
+                    }
+                   }
+                  }
+                 },
+                 {
+                  "text": " • "
+                 },
+                 {
+                  "text": "Harvest (2009 Remaster)",
+                  "navigationEndpoint": {
+                   "browseEndpoint": {
+                    "browseId": "MPREb_KmYrZvSr21k",
+                    "browseEndpointContextSupportedConfigs": {
+                     "browseEndpointContextMusicConfig": {
+                      "pageType": "MUSIC_PAGE_TYPE_ALBUM"
+                     }
+                    }
+                   }
+                  }
+                 },
+                 {
+                  "text": " • "
+                 },
+                 {
+                  "text": "1972"
+                 }
+                ]
+               },
+               "thumbnail": {
+                "thumbnails": [
+                 {
+                  "url": "https://yt3.googleusercontent.com/vEaImfx03AWJ0_0TvbttvJyPorV39OzeLdRySMxLNdFa80QBfsgQPh2wgLbIV0PvDwbMaqLHwPMv89Q=w60-h60-l90-rj",
+                  "width": 60,
+                  "height": 60
+                 },
+                 {
+                  "url": "https://yt3.googleusercontent.com/vEaImfx03AWJ0_0TvbttvJyPorV39OzeLdRySMxLNdFa80QBfsgQPh2wgLbIV0PvDwbMaqLHwPMv89Q=w226-h226-l90-rj",
+                  "width": 226,
+                  "height": 226
+                 },
+                 {
+                  "url": "https://yt3.googleusercontent.com/vEaImfx03AWJ0_0TvbttvJyPorV39OzeLdRySMxLNdFa80QBfsgQPh2wgLbIV0PvDwbMaqLHwPMv89Q=w544-h544-l90-rj",
+                  "width": 544,
+                  "height": 544
+                 }
+                ]
+               },
+               "lengthText": {
+                "runs": [
+                 {
+                  "text": "3:08"
+                 }
+                ]
+               },
+               "selected": false,
+               "videoId": "X3IA6pIVank"
+              }
+             },
+             {
+              "playlistPanelVideoRenderer": {
+               "title": {
+                "runs": [
+                 {
+                  "text": "Drive"
+                 }
+                ]
+               },
+               "longBylineText": {
+                "runs": [
+                 {
+                  "text": "R.E.M.",
+                  "navigationEndpoint": {
+                   "browseEndpoint": {
+                    "browseId": "UCZQMYjqm_j5mBVTfPcCy3FA",
+                    "browseEndpointContextSupportedConfigs": {
+                     "browseEndpointContextMusicConfig": {
+                      "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+                     }
+                    }
+                   }
+                  }
+                 },
+                 {
+                  "text": " • "
+                 },
+                 {
+                  "text": "Automatic For The People",
+                  "navigationEndpoint": {
+                   "browseEndpoint": {
+                    "browseId": "MPREb_nfDvvM0Ley3",
+                    "browseEndpointContextSupportedConfigs": {
+                     "browseEndpointContextMusicConfig": {
+                      "pageType": "MUSIC_PAGE_TYPE_ALBUM"
+                     }
+                    }
+                   }
+                  }
+                 },
+                 {
+                  "text": " • "
+                 },
+                 {
+                  "text": "1992"
+                 }
+                ]
+               },
+               "thumbnail": {
+                "thumbnails": [
+                 {
+                  "url": "https://yt3.googleusercontent.com/-mqJ3j-plKJV3msFM1TK2FEJxvenm59rL4MWbHPkd3J9MIgL-90Z6CsJIC9rnbge6wuANx6CcFrNffig=w60-h60-l90-rj",
+                  "width": 60,
+                  "height": 60
+                 },
+                 {
+                  "url": "https://yt3.googleusercontent.com/-mqJ3j-plKJV3msFM1TK2FEJxvenm59rL4MWbHPkd3J9MIgL-90Z6CsJIC9rnbge6wuANx6CcFrNffig=w226-h226-l90-rj",
+                  "width": 226,
+                  "height": 226
+                 },
+                 {
+                  "url": "https://yt3.googleusercontent.com/-mqJ3j-plKJV3msFM1TK2FEJxvenm59rL4MWbHPkd3J9MIgL-90Z6CsJIC9rnbge6wuANx6CcFrNffig=w544-h544-l90-rj",
+                  "width": 544,
+                  "height": 544
+                 }
+                ]
+               },
+               "lengthText": {
+                "runs": [
+                 {
+                  "text": "4:32"
+                 }
+                ]
+               },
+               "selected": false,
+               "videoId": "JEaxLGNm7PQ"
+              }
+             },
+             {
+              "playlistPanelVideoRenderer": {
+               "title": {
+                "runs": [
+                 {
+                  "text": "Nothing Else Matters (Radio Edit)"
+                 }
+                ]
+               },
+               "longBylineText": {
+                "runs": [
+                 {
+                  "text": "Metallica",
+                  "navigationEndpoint": {
+                   "browseEndpoint": {
+                    "browseId": "UCGexNm_Kw4rdQjLxmpb2EKw",
+                    "browseEndpointContextSupportedConfigs": {
+                     "browseEndpointContextMusicConfig": {
+                      "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+                     }
+                    }
+                   }
+                  }
+                 },
+                 {
+                  "text": " • "
+                 },
+                 {
+                  "text": "Metallica (Remastered Deluxe Box Set)",
+                  "navigationEndpoint": {
+                   "browseEndpoint": {
+                    "browseId": "MPREb_SLr8AHQ9KX6",
+                    "browseEndpointContextSupportedConfigs": {
+                     "browseEndpointContextMusicConfig": {
+                      "pageType": "MUSIC_PAGE_TYPE_ALBUM"
+                     }
+                    }
+                   }
+                  }
+                 },
+                 {
+                  "text": " • "
+                 },
+                 {
+                  "text": "1991"
+                 }
+                ]
+               },
+               "thumbnail": {
+                "thumbnails": [
+                 {
+                  "url": "https://yt3.googleusercontent.com/Jb7OPNVlEkvzbnosK4_s4rpJGArJ001QoD3uD4TM3YgKryO6IjrE5CMnsfHFuO2-BoY97VmRmTr7d81P=w60-h60-l90-rj",
+                  "width": 60,
+                  "height": 60
+                 },
+                 {
+                  "url": "https://yt3.googleusercontent.com/Jb7OPNVlEkvzbnosK4_s4rpJGArJ001QoD3uD4TM3YgKryO6IjrE5CMnsfHFuO2-BoY97VmRmTr7d81P=w226-h226-l90-rj",
+                  "width": 226,
+                  "height": 226
+                 },
+                 {
+                  "url": "https://yt3.googleusercontent.com/Jb7OPNVlEkvzbnosK4_s4rpJGArJ001QoD3uD4TM3YgKryO6IjrE5CMnsfHFuO2-BoY97VmRmTr7d81P=w544-h544-l90-rj",
+                  "width": 544,
+                  "height": 544
+                 }
+                ]
+               },
+               "lengthText": {
+                "runs": [
+                 {
+                  "text": "5:01"
+                 }
+                ]
+               },
+               "selected": false,
+               "videoId": "FiyG2Mh80tI"
+              }
+             },
+             {
+              "playlistPanelVideoRenderer": {
+               "title": {
+                "runs": [
+                 {
+                  "text": "Coming Back to Life"
+                 }
+                ]
+               },
+               "longBylineText": {
+                "runs": [
+                 {
+                  "text": "Pink Floyd",
+                  "navigationEndpoint": {
+                   "browseEndpoint": {
+                    "browseId": "UCO6LS_5W7vqG9mALDNzSFug",
+                    "browseEndpointContextSupportedConfigs": {
+                     "browseEndpointContextMusicConfig": {
+                      "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+                     }
+                    }
+                   }
+                  }
+                 },
+                 {
+                  "text": " • "
+                 },
+                 {
+                  "text": "The Division Bell",
+                  "navigationEndpoint": {
+                   "browseEndpoint": {
+                    "browseId": "MPREb_r1lsywhbfjF",
+                    "browseEndpointContextSupportedConfigs": {
+                     "browseEndpointContextMusicConfig": {
+                      "pageType": "MUSIC_PAGE_TYPE_ALBUM"
+                     }
+                    }
+                   }
+                  }
+                 },
+                 {
+                  "text": " • "
+                 },
+                 {
+                  "text": "1994"
+                 }
+                ]
+               },
+               "thumbnail": {
+                "thumbnails": [
+                 {
+                  "url": "https://yt3.googleusercontent.com/3YZgJ8R9YXzECv3QtGh9YKeXQ02mBnaDbmTPNAw3VAl4pwmPogHh3SD89SMHD3aaJMdVsbX58hGK-fI=w60-h60-l90-rj",
+                  "width": 60,
+                  "height": 60
+                 },
+                 {
+                  "url": "https://yt3.googleusercontent.com/3YZgJ8R9YXzECv3QtGh9YKeXQ02mBnaDbmTPNAw3VAl4pwmPogHh3SD89SMHD3aaJMdVsbX58hGK-fI=w226-h226-l90-rj",
+                  "width": 226,
+                  "height": 226
+                 },
+                 {
+                  "url": "https://yt3.googleusercontent.com/3YZgJ8R9YXzECv3QtGh9YKeXQ02mBnaDbmTPNAw3VAl4pwmPogHh3SD89SMHD3aaJMdVsbX58hGK-fI=w544-h544-l90-rj",
+                  "width": 544,
+                  "height": 544
+                 }
+                ]
+               },
+               "lengthText": {
+                "runs": [
+                 {
+                  "text": "6:20"
+                 }
+                ]
+               },
+               "selected": false,
+               "videoId": "2sHZ4ny_SxU"
+              }
+             },
+             {
+              "playlistPanelVideoRenderer": {
+               "title": {
+                "runs": [
+                 {
+                  "text": "House of the Rising Sun"
+                 }
+                ]
+               },
+               "longBylineText": {
+                "runs": [
+                 {
+                  "text": "The Animals",
+                  "navigationEndpoint": {
+                   "browseEndpoint": {
+                    "browseId": "UCcFlzgDVSL9dMUo66cEyWJQ",
+                    "browseEndpointContextSupportedConfigs": {
+                     "browseEndpointContextMusicConfig": {
+                      "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+                     }
+                    }
+                   }
+                  }
+                 },
+                 {
+                  "text": " • "
+                 },
+                 {
+                  "text": "Most of the Animals",
+                  "navigationEndpoint": {
+                   "browseEndpoint": {
+                    "browseId": "MPREb_S9pVVzjodrY",
+                    "browseEndpointContextSupportedConfigs": {
+                     "browseEndpointContextMusicConfig": {
+                      "pageType": "MUSIC_PAGE_TYPE_ALBUM"
+                     }
+                    }
+                   }
+                  }
+                 },
+                 {
+                  "text": " • "
+                 },
+                 {
+                  "text": "1966"
+                 }
+                ]
+               },
+               "thumbnail": {
+                "thumbnails": [
+                 {
+                  "url": "https://yt3.googleusercontent.com/_P1hfeJJhKzodIhCEqHLbWknTQ6qxtVpXLWVqzRdQiEyN12jEh2FvzUJ8F6U08ehWAICAjVfi-1RAHgh=w60-h60-l90-rj",
+                  "width": 60,
+                  "height": 60
+                 },
+                 {
+                  "url": "https://yt3.googleusercontent.com/_P1hfeJJhKzodIhCEqHLbWknTQ6qxtVpXLWVqzRdQiEyN12jEh2FvzUJ8F6U08ehWAICAjVfi-1RAHgh=w226-h226-l90-rj",
+                  "width": 226,
+                  "height": 226
+                 },
+                 {
+                  "url": "https://yt3.googleusercontent.com/_P1hfeJJhKzodIhCEqHLbWknTQ6qxtVpXLWVqzRdQiEyN12jEh2FvzUJ8F6U08ehWAICAjVfi-1RAHgh=w544-h544-l90-rj",
+                  "width": 544,
+                  "height": 544
+                 }
+                ]
+               },
+               "lengthText": {
+                "runs": [
+                 {
+                  "text": "4:30"
+                 }
+                ]
+               },
+               "selected": false,
+               "videoId": "VixdIglCZXk"
+              }
+             }
+            ],
+            "continuations": [
+             {
+              "nextRadioContinuationData": {
+               "continuation": "CDISPhILNXd0aDlCU2NtR1kiEVJEQU1WTW83TWxDX1FybW1jMgR3QUVCODHQAQH6ARBENjI1QUI0MDI5NEQzODFEGAo%3D"
+              }
+             }
+            ]
+           }
+          },
+          "subHeaderChipCloud": {
+           "chipCloudRenderer": {
+            "chips": [
+             {
+              "chipCloudChipRenderer": {
+               "text": {
+                "runs": [
+                 {
+                  "text": "All"
+                 }
+                ]
+               },
+               "navigationEndpoint": {
+                "queueUpdateCommand": {
+                 "queueUpdateSection": "QUEUE_UPDATE_SECTION_QUEUE",
+                 "fetchContentsCommand": {
+                  "watchEndpoint": {
+                   "playlistId": "RDAMVMo7MlC_Qrmmc",
+                   "params": "ggUMRWdBWUFRJTNEJTNE",
+                   "playerParams": "0gcJCWoAt9Zurpe2"
+                  }
+                 },
+                 "dedupeAgainstLocalQueue": true,
+                 "syncMode": "QUEUE_UPDATE_SYNC_MODE_DEDUPE_AGAINST_LOCAL"
+                }
+               }
+              }
+             },
+             {
+              "chipCloudChipRenderer": {
+               "text": {
+                "runs": [
+                 {
+                  "text": "Popular"
+                 }
+                ]
+               },
+               "navigationEndpoint": {
+                "queueUpdateCommand": {
+                 "queueUpdateSection": "QUEUE_UPDATE_SECTION_QUEUE",
+                 "fetchContentsCommand": {
+                  "watchEndpoint": {
+                   "playlistId": "RDATpYvo7MlC_Qrmmc",
+                   "params": "ggU4Q2hKU1JFRlVjRmwyYnpkTmJFTmZVWEp0YldNWUN5SU5DZ2RRYjNCMWJHRnlHZ0psYmclM0QlM0Q%3D"
+                  }
+                 },
+                 "dedupeAgainstLocalQueue": true,
+                 "syncMode": "QUEUE_UPDATE_SYNC_MODE_DEDUPE_AGAINST_LOCAL"
+                }
+               }
+              }
+             },
+             {
+              "chipCloudChipRenderer": {
+               "text": {
+                "runs": [
+                 {
+                  "text": "Discover"
+                 }
+                ]
+               },
+               "navigationEndpoint": {
+                "queueUpdateCommand": {
+                 "queueUpdateSection": "QUEUE_UPDATE_SECTION_QUEUE",
+                 "fetchContentsCommand": {
+                  "watchEndpoint": {
+                   "playlistId": "RDATiXvo7MlC_Qrmmc",
+                   "params": "ggU2Q2hKU1JFRlVhVmgyYnpkTmJFTmZVWEp0YldNWUN5SU9DZ2hFYVhOamIzWmxjaG9DWlc0JTNE"
+                  }
+                 },
+                 "dedupeAgainstLocalQueue": true,
+                 "syncMode": "QUEUE_UPDATE_SYNC_MODE_DEDUPE_AGAINST_LOCAL"
+                }
+               }
+              }
+             },
+             {
+              "chipCloudChipRenderer": {
+               "text": {
+                "runs": [
+                 {
+                  "text": "Deep cuts"
+                 }
+                ]
+               },
+               "navigationEndpoint": {
+                "queueUpdateCommand": {
+                 "queueUpdateSection": "QUEUE_UPDATE_SECTION_QUEUE",
+                 "fetchContentsCommand": {
+                  "watchEndpoint": {
+                   "playlistId": "RDATpXvo7MlC_Qrmmc",
+                   "params": "ggU0Q2hKU1JFRlVjRmgyYnpkTmJFTmZVWEp0YldNWUN5SVBDZ2xFWldWd0lHTjFkSE1hQW1WdQ%3D%3D"
+                  }
+                 },
+                 "dedupeAgainstLocalQueue": true,
+                 "syncMode": "QUEUE_UPDATE_SYNC_MODE_DEDUPE_AGAINST_LOCAL"
+                }
+               }
+              }
+             }
+            ]
+           }
+          }
+         }
+        }
+       }
+      },
+      {
+       "tabRenderer": {}
+      },
+      {
+       "tabRenderer": {
+        "content": {}
+       }
+      },
+      {
+       "tabRenderer": {}
+      }
+     ]
+    }
+   }
+  }
+ }
+}
