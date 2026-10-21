@@ -25,6 +25,14 @@ class SleepTimerNotifier extends Notifier<SleepTimerState> {
   @override
   SleepTimerState build() {
     ref.onDispose(_cancelTimers);
+    // «End of track» is over once the handler has stopped at it.
+    final sub = ref
+        .read(audioHandlerProvider)
+        .pausedAtTrackEnd
+        .listen((_) {
+      if (state.atTrackEnd) state = const SleepTimerState();
+    });
+    ref.onDispose(sub.cancel);
     return const SleepTimerState();
   }
 

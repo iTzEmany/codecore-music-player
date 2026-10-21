@@ -176,6 +176,19 @@ void main() {
     expect(handler.pauseAtTrackEnd, isFalse);
   });
 
+  test('the backend joined just as the timer was set: stops at the new track',
+      () async {
+    await startGapless();
+    handler.pauseAtTrackEnd = true;
+    final done = handler.pausedAtTrackEnd.first;
+    backend.advance(); // before the window edit could take the next track away
+    await settle();
+    await done;
+    expect(handler.currentTrack!.title, 'b');
+    expect(backend.playing, isFalse);
+    expect(handler.pauseAtTrackEnd, isFalse);
+  });
+
   test('turning the timer off puts the next track back', () async {
     await startGapless();
     handler.pauseAtTrackEnd = true;

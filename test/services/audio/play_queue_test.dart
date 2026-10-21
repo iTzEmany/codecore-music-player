@@ -144,6 +144,35 @@ void main() {
     expect(q.next(), 1);
   });
 
+  group('shuffle shows the queue in the order it plays', () {
+    test('items is the play order and next() walks it', () {
+      final q = make(List.generate(12, (i) => i), start: 3)..shuffle = true;
+      final listed = q.items;
+      expect(listed[q.currentIndex], 3);
+      for (var i = q.currentIndex + 1; i < listed.length; i++) {
+        expect(q.next(), listed[i], reason: 'next is what the queue shows next');
+      }
+      expect(q.items, listed, reason: 'walking does not reshuffle');
+    });
+
+    test('shuffle off puts the natural order back, additions included', () {
+      final q = make([1, 2, 3, 4, 5], start: 1)..shuffle = true;
+      q.insertNext(99);
+      q.append(7);
+      q.next(); // 99
+      q.shuffle = false;
+      expect(q.currentId, 99);
+      expect(q.items, [1, 2, 99, 3, 4, 5, 7]);
+    });
+
+    test('a restored session plays in the saved order even with shuffle on', () {
+      final q = PlayQueue(random: Random(1))..shuffle = true;
+      q.setItems([5, 3, 9, 1], startIndex: 1, alreadyShuffled: true);
+      expect(q.items, [5, 3, 9, 1]);
+      expect(q.next(), 9);
+    });
+  });
+
   group('peekNext / revision', () {
     test(
       'peekNext announces what next(auto: true) delivers, over random use',

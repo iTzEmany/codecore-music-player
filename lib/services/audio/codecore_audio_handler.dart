@@ -100,6 +100,11 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
 
   bool _pauseAtTrackEnd = false;
 
+  /// Fires when [pauseAtTrackEnd] has been honoured (or playback ended with
+  /// it on), so the sleep timer can clear its state.
+  Stream<void> get pausedAtTrackEnd => _pausedAtTrackEnd.stream;
+  final _pausedAtTrackEnd = StreamController<void>.broadcast();
+
   TransitionMode _transition = TransitionMode.normal;
   TransitionMode get transition => _transition;
 
@@ -193,7 +198,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   /// Loads the queue paused, at [position] (used to resume after a restart).
   Future<void> restore(List<int> ids, int index, Duration position) async {
     _source = List.of(ids);
-    _queue.setItems(ids, startIndex: index);
+    _queue.setItems(ids, startIndex: index, alreadyShuffled: true);
     _queueController.add(null);
     await _loadCurrent(play: false, startAt: position);
   }
@@ -230,7 +235,12 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
         await _backend.seek(start);
       }
       _consecutiveErrors = 0;
-      if (play) await _backend.play();
+      // A backend that was playing keeps playing a newly loaded file.
+      if (play) {
+        await _backend.play();
+      } else {
+        await _backend.pause();
+      }
       unawaited(_refreshWindow());
     } on BackendException catch (e) {
       if (token != _loadToken) return;
@@ -332,6 +342,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
       } else {
         await _loadCurrent(play: !stay);
       }
+      if (stay) _pausedAtTrackEnd.add(null);
     } finally {
       _handlingCompleted = false;
     }
@@ -353,18 +364,28 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     final prepared = _window?.consume();
     _forgetBookmarkOfFinished();
     final id = _queue.next(auto: true);
+    // The sleep timer was set too late to stop the backend from moving on by
+    // itself: the next track has started, so stop it at its very beginning.
+    final stay = _pauseAtTrackEnd;
+    _pauseAtTrackEnd = false;
     if (prepared == null || id != prepared.id) {
       // The queue changed after the window was set: play what the queue says.
       if (id == null) {
         await _goIdle();
       } else {
-        await _loadCurrent(play: true);
+        await _loadCurrent(play: !stay);
       }
+      if (stay) _pausedAtTrackEnd.add(null);
       return;
     }
     _consecutiveErrors = 0;
     _lastResumeSave = Duration.zero;
     _enterTrack(prepared);
+    if (stay) {
+      await _backend.pause();
+      await _backend.seek(Duration.zero);
+      _pausedAtTrackEnd.add(null);
+    }
     _publish(AudioProcessingState.ready);
     await _refreshWindow();
   }
@@ -841,6 +862,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     }
     await _trackController.close();
     await _queueController.close();
+    await _pausedAtTrackEnd.close();
     await _backend.dispose();
   }
 }

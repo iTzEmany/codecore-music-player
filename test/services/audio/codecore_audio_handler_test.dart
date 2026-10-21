@@ -1,5 +1,6 @@
 import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/data/repositories/track_repository.dart';
+import 'package:audio_service/audio_service.dart';
 import 'package:codecore/services/audio/audio_backend.dart';
 import 'package:codecore/services/audio/codecore_audio_handler.dart';
 import 'package:codecore/services/audio/play_queue.dart';
@@ -177,6 +178,60 @@ void main() {
     expect(handler.currentTrack!.title, 'b');
     expect(handler.isPlaying, false);
     expect(handler.pauseAtTrackEnd, false);
+  });
+
+  test('pauseAtTrackEnd pauses even when the backend keeps playing new files',
+      () async {
+    backend.playingSurvivesLoad = true;
+    await handler.playQueue(ids, 0);
+    await settle();
+    handler.pauseAtTrackEnd = true;
+    final done = handler.pausedAtTrackEnd.first;
+    backend.stateC.add(BackendState.completed);
+    await settle();
+    await done;
+    expect(handler.currentTrack!.title, 'b');
+    expect(backend.playing, false);
+    expect(handler.isPlaying, false);
+  });
+
+  test('pauseAtTrackEnd on the last track ends playback and says so', () async {
+    await handler.playQueue(ids, 2);
+    await settle();
+    handler.pauseAtTrackEnd = true;
+    final done = handler.pausedAtTrackEnd.first;
+    backend.stateC.add(BackendState.completed);
+    await settle();
+    await done;
+    expect(handler.currentTrack, isNull);
+  });
+
+  test('skipToNext plays the track the queue shows next, order untouched',
+      () async {
+    final more = <int>[
+      for (var i = 0; i < 12; i++)
+        await db.into(db.tracks).insert(TracksCompanion.insert(
+              path: '/m/x$i.mp3',
+              title: 'x$i',
+              albumKey: 'k',
+              format: 'mp3',
+              sizeBytes: 1,
+              mtimeMs: 1,
+              addedAt: 1,
+              durationMs: const Value(100000),
+            )),
+    ];
+    await handler.setShuffleMode(AudioServiceShuffleMode.all);
+    await handler.playQueue(more, 2);
+    await settle();
+    final shown = handler.queueIds;
+    for (var i = 1; i <= 3; i++) {
+      await handler.skipToNext();
+      await settle();
+      expect(handler.currentTrack!.id, shown[handler.currentIndex]);
+      expect(handler.currentIndex, i);
+      expect(handler.queueIds, shown, reason: 'not reshuffled');
+    }
   });
 
   group('speed', () {

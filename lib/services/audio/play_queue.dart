@@ -4,16 +4,20 @@ enum PlayRepeat { off, all, one }
 
 /// The queue as it was, to put it back (the undo of «Svuota»).
 class QueueState {
-  const QueueState._(this._items, this._order, this._pos, this._history);
+  const QueueState._(
+      this._items, this._keys, this._natural, this._pos, this._history);
 
-  final List<int> _items, _order, _history;
+  final List<int> _items, _keys, _history;
+  final List<int>? _natural;
   final int _pos;
 
-  int? get currentId => _pos < 0 ? null : _items[_order[_pos]];
+  int? get currentId => _pos < 0 ? null : _items[_pos];
 }
 
-/// Pure queue logic. Items are track ids in their natural order; `_order`
-/// maps play position -> natural index (identity unless shuffled).
+/// Pure queue logic. [items] is always the order the tracks will play in:
+/// turning shuffle on reorders what follows the current track, so the queue a
+/// screen lists is the one «next» walks (headset buttons included). Every entry
+/// has a key, so shuffle off can put the natural order back.
 class PlayQueue {
   PlayQueue({Random? random}) : _random = random ?? Random();
 
@@ -21,15 +25,17 @@ class PlayQueue {
 
   final Random _random;
   final List<int> _items = [];
-  List<int> _order = [];
-  final List<int> _history = []; // natural indices, most recent last
+  final List<int> _keys = []; // one per item, never reused
+  List<int>? _natural; // keys in the order before shuffling; null if unknown
+  final List<int> _history = []; // keys, most recent last
+  int _serial = 0;
   int _pos = -1;
   bool _shuffle = false;
   PlayRepeat _repeat = PlayRepeat.off;
   int _revision = 0;
 
-  /// The shuffled order the next wrap-around will use, fixed in advance by
-  /// [peekNext] so that [next] lands on the very track that was announced.
+  /// The order of the next wrap-around (indices into [items]), fixed in
+  /// advance by [peekNext] so that [next] lands on the very track announced.
   List<int>? _pendingOrder;
 
   PlayRepeat get repeat => _repeat;
@@ -49,57 +55,96 @@ class PlayQueue {
   }
 
   List<int> get items => List.unmodifiable(_items);
-  int get currentIndex => _pos < 0 ? -1 : _order[_pos];
-  int? get currentId => _pos < 0 ? null : _items[_order[_pos]];
+  int get currentIndex => _pos;
+  int? get currentId => _pos < 0 ? null : _items[_pos];
   bool get isEmpty => _items.isEmpty;
   bool get shuffle => _shuffle;
 
-  /// Ids in the order they will be played.
-  List<int> get playOrder => [for (final i in _order) _items[i]];
+  /// Ids in the order they will be played (the same as [items]).
+  List<int> get playOrder => items;
+
+  int _newKey() => _serial++;
 
   set shuffle(bool value) {
     if (value == _shuffle) return;
     _shuffle = value;
-    final current = currentIndex;
-    _rebuildOrder(current);
+    if (_items.isNotEmpty) {
+      if (value) {
+        _natural = List.of(_keys);
+        _applyOrder(_shuffledFrom(_pos));
+        _pos = 0;
+      } else {
+        _restoreNaturalOrder();
+      }
+    }
     _changed();
   }
 
-  void setItems(List<int> trackIds, {int startIndex = 0}) {
-    _items
-      ..clear()
-      ..addAll(trackIds);
-    _history.clear();
-    _changed();
-    if (_items.isEmpty) {
-      _order = [];
-      _pos = -1;
-      return;
-    }
-    final start = startIndex.clamp(0, _items.length - 1);
-    _rebuildOrder(start);
-  }
-
-  void _rebuildOrder(int firstIndex) {
-    if (_items.isEmpty) {
-      _order = [];
-      _pos = -1;
-      return;
-    }
-    final idx = firstIndex < 0 ? 0 : firstIndex;
-    if (!_shuffle) {
-      _order = List.generate(_items.length, (i) => i);
-      _pos = idx;
-      return;
-    }
-    final full = firstIndex < 0;
+  /// Current first, then every other index in random order.
+  List<int> _shuffledFrom(int first) {
     final rest = [
       for (var i = 0; i < _items.length; i++)
-        if (full || i != idx) i,
+        if (i != first) i,
     ];
     _shuffleInPlace(rest);
-    _order = full ? rest : [idx, ...rest];
-    _pos = 0;
+    return [first, ...rest];
+  }
+
+  void _restoreNaturalOrder() {
+    final natural = _natural;
+    _natural = null;
+    if (natural == null) return;
+    final current = _keys[_pos];
+    final at = {for (var i = 0; i < _keys.length; i++) _keys[i]: i};
+    final perm = [
+      for (final k in natural)
+        if (at.containsKey(k)) at.remove(k)!,
+      ...at.values, // defensive: keys the natural list does not know
+    ];
+    _applyOrder(perm);
+    _pos = _keys.indexOf(current);
+  }
+
+  /// New position `i` takes the entry now at `perm[i]`.
+  void _applyOrder(List<int> perm) {
+    final items = [for (final i in perm) _items[i]];
+    final keys = [for (final i in perm) _keys[i]];
+    _items
+      ..clear()
+      ..addAll(items);
+    _keys
+      ..clear()
+      ..addAll(keys);
+  }
+
+  /// [alreadyShuffled]: [trackIds] is an order to play as it is (a restored
+  /// session), even with shuffle on.
+  void setItems(List<int> trackIds,
+      {int startIndex = 0, bool alreadyShuffled = false}) {
+    _history.clear();
+    _changed();
+    _load(trackIds, trackIds.isEmpty ? 0 : startIndex.clamp(0, trackIds.length - 1),
+        shuffleNow: _shuffle && !alreadyShuffled);
+  }
+
+  void _load(List<int> ids, int start, {required bool shuffleNow}) {
+    _items
+      ..clear()
+      ..addAll(ids);
+    _keys
+      ..clear()
+      ..addAll(List.generate(ids.length, (_) => _newKey()));
+    _natural = null;
+    if (_items.isEmpty) {
+      _pos = -1;
+      return;
+    }
+    _pos = start;
+    if (shuffleNow) {
+      _natural = List.of(_keys);
+      _applyOrder(_shuffledFrom(start));
+      _pos = 0;
+    }
   }
 
   void _shuffleInPlace(List<int> list) {
@@ -116,7 +161,7 @@ class PlayQueue {
   List<int> _newLapOrder() {
     final order = List<int>.generate(_items.length, (i) => i);
     _shuffleInPlace(order);
-    if (order.length > 1 && order[0] == currentIndex) {
+    if (order.length > 1 && order[0] == _pos) {
       final swap = order[1];
       order[1] = order[0];
       order[0] = swap;
@@ -124,14 +169,14 @@ class PlayQueue {
     return order;
   }
 
-  void _pushHistory(int naturalIndex) {
-    _history.add(naturalIndex);
+  void _pushHistory() {
+    _history.add(_keys[_pos]);
     if (_history.length > _maxHistory) _history.removeAt(0);
   }
 
   /// Whether [next] would land on a track (not past the end).
   bool get hasNext =>
-      _pos >= 0 && (_pos + 1 < _order.length || repeat != PlayRepeat.off);
+      _pos >= 0 && (_pos + 1 < _items.length || repeat != PlayRepeat.off);
 
   /// The id [next] would return with the same [auto], without changing the
   /// queue, the history or the revision. At the end of a shuffled lap with
@@ -139,9 +184,9 @@ class PlayQueue {
   int? peekNext({bool auto = true}) {
     if (_pos < 0) return null;
     if (auto && repeat == PlayRepeat.one) return currentId;
-    if (_pos + 1 < _order.length) return _items[_order[_pos + 1]];
+    if (_pos + 1 < _items.length) return _items[_pos + 1];
     if (repeat == PlayRepeat.off) return null;
-    if (!_shuffle) return _items[_order[0]];
+    if (!_shuffle) return _items[0];
     return _items[(_pendingOrder ??= _newLapOrder())[0]];
   }
 
@@ -149,17 +194,15 @@ class PlayQueue {
   int? next({bool auto = false}) {
     if (_pos < 0) return null;
     if (auto && repeat == PlayRepeat.one) return currentId;
-    if (_pos + 1 < _order.length) {
-      _pushHistory(currentIndex);
+    if (_pos + 1 < _items.length) {
+      _pushHistory();
       _pos++;
       _changed();
       return currentId;
     }
     if (repeat == PlayRepeat.off) return null;
-    _pushHistory(currentIndex);
-    if (_shuffle) {
-      _order = _pendingOrder ?? _newLapOrder();
-    }
+    _pushHistory();
+    if (_shuffle) _applyOrder(_pendingOrder ?? _newLapOrder());
     _pos = 0;
     _changed();
     return currentId;
@@ -170,23 +213,22 @@ class PlayQueue {
     if (_pos < 0) return null;
     _changed();
     if (_history.isNotEmpty) {
-      final idx = _history.removeLast();
-      final p = _order.indexOf(idx);
+      final p = _keys.indexOf(_history.removeLast());
       if (p >= 0) _pos = p;
       return currentId;
     }
     if (_pos > 0) {
       _pos--;
     } else if (repeat == PlayRepeat.all) {
-      _pos = _order.length - 1;
+      _pos = _items.length - 1;
     }
     return currentId;
   }
 
   void jumpTo(int index) {
     if (index < 0 || index >= _items.length) return;
-    if (_pos >= 0 && currentIndex != index) _pushHistory(currentIndex);
-    _pos = _order.indexOf(index);
+    if (_pos >= 0 && _pos != index) _pushHistory();
+    _pos = index;
     _changed();
   }
 
@@ -195,56 +237,31 @@ class PlayQueue {
   bool removeAt(int index) {
     if (index < 0 || index >= _items.length) return false;
     _changed();
-    final removedPos = _order.indexOf(index);
-    final wasCurrent = removedPos == _pos;
+    final wasCurrent = index == _pos;
+    final key = _keys[index];
     _items.removeAt(index);
-    _order = [
-      for (final i in _order)
-        if (i != index) i > index ? i - 1 : i,
-    ];
-    _history
-      ..removeWhere((i) => i == index)
-      ..replaceRange(0, _history.length, [
-        for (final i in _history) i > index ? i - 1 : i,
-      ]);
+    _keys.removeAt(index);
+    _natural?.remove(key);
+    _history.removeWhere((k) => k == key);
     if (_items.isEmpty) {
       _pos = -1;
-    } else if (removedPos < _pos) {
+    } else if (index < _pos) {
       _pos--;
-    } else if (_pos >= _order.length) {
-      _pos = _order.length - 1;
+    } else if (_pos >= _items.length) {
+      _pos = _items.length - 1;
     }
     return wasCurrent;
   }
 
-  /// Moves an item in natural order, keeping the current track playing.
+  /// Moves an item, keeping the current track playing.
   void move(int from, int to) {
     if (from < 0 || from >= _items.length || to < 0 || to >= _items.length) return;
     if (from == to) return;
     _changed();
-    final currentNatural = currentIndex;
-    final ids = List<int>.from(_items);
-    final moved = ids.removeAt(from);
-    ids.insert(to, moved);
-    int remap(int i) {
-      if (i == from) return to;
-      if (from < to && i > from && i <= to) return i - 1;
-      if (from > to && i >= to && i < from) return i + 1;
-      return i;
-    }
-
-    _items
-      ..clear()
-      ..addAll(ids);
-    for (var h = 0; h < _history.length; h++) {
-      _history[h] = remap(_history[h]);
-    }
-    if (_shuffle) {
-      _order = [for (final i in _order) remap(i)];
-    } else {
-      _order = List.generate(_items.length, (i) => i);
-    }
-    if (currentNatural >= 0) _pos = _order.indexOf(remap(currentNatural));
+    final currentKey = _pos >= 0 ? _keys[_pos] : null;
+    _items.insert(to, _items.removeAt(from));
+    _keys.insert(to, _keys.removeAt(from));
+    if (currentKey != null) _pos = _keys.indexOf(currentKey);
   }
 
   /// What follows the current track, built again from [source] (the list
@@ -258,31 +275,22 @@ class PlayQueue {
     final from = source ?? const <int>[];
     final at = from.indexOf(current);
     final List<int> ids;
-    var pos = 0;
+    var start = 0;
     if (from.isEmpty) {
       ids = [current];
-    } else if (_shuffle) {
-      final rest = [...from];
-      if (at >= 0) rest.removeAt(at);
-      _shuffleInPlace(rest);
-      ids = [current, ...rest];
     } else if (at >= 0) {
       ids = [...from];
-      pos = at;
+      start = at;
     } else {
       ids = [current, ...from];
     }
-    _items
-      ..clear()
-      ..addAll(ids);
-    _order = List.generate(_items.length, (i) => i);
-    _pos = pos;
     _history.clear();
     _changed();
+    _load(ids, start, shuffleNow: _shuffle);
   }
 
-  QueueState saveState() =>
-      QueueState._(List.of(_items), List.of(_order), _pos, List.of(_history));
+  QueueState saveState() => QueueState._(List.of(_items), List.of(_keys),
+      _natural == null ? null : List.of(_natural!), _pos, List.of(_history));
 
   /// Puts [state] back, only while the same track plays; false otherwise.
   bool restoreState(QueueState state) {
@@ -290,7 +298,10 @@ class PlayQueue {
     _items
       ..clear()
       ..addAll(state._items);
-    _order = List.of(state._order);
+    _keys
+      ..clear()
+      ..addAll(state._keys);
+    _natural = state._natural == null ? null : List.of(state._natural!);
     _pos = state._pos;
     _history
       ..clear()
@@ -305,13 +316,13 @@ class PlayQueue {
       return;
     }
     _changed();
-    final at = currentIndex + 1;
-    _items.insert(at, trackId);
-    _order = [for (final i in _order) i >= at ? i + 1 : i];
-    for (var h = 0; h < _history.length; h++) {
-      if (_history[h] >= at) _history[h]++;
+    final key = _newKey();
+    final natural = _natural;
+    if (natural != null) {
+      natural.insert(natural.indexOf(_keys[_pos]) + 1, key);
     }
-    _order.insert(_pos + 1, at);
+    _items.insert(_pos + 1, trackId);
+    _keys.insert(_pos + 1, key);
   }
 
   void append(int trackId) {
@@ -320,7 +331,9 @@ class PlayQueue {
       return;
     }
     _changed();
+    final key = _newKey();
+    _natural?.add(key);
     _items.add(trackId);
-    _order.add(_items.length - 1);
+    _keys.add(key);
   }
 }

@@ -27,7 +27,7 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 2.1 PlayQueue (+ test)
 - [x] 2.2 AudioBackend / JustAudioBackend
 - [x] 2.3 CodecoreAudioHandler (+ test)
-- [~] 2.4 Inizializzazione per piattaforma
+- [~] 2.4 Inizializzazione per piattaforma (cuffie JBL, utente, 2026-10-21: play/pausa e «indietro» giusti; «avanti» corretto il 21/10, da riprovare con le cuffie vere)
 - [x] 2.5 Provider di stato e controller
 - [~] 2.6 Persistenza e checklist manuale
 
@@ -79,7 +79,7 @@ L'agente riparte sempre dal primo task non spuntato.
 - [~] 7.4 Controlli multimediali desktop
 - [x] 7.5 Prestazioni (misure sul Mi A3 nella fase 28, 28.10)
 - [x] 7.6 Accessibilità
-- [~] 7.7 Timer di spegnimento
+- [x] 7.7 Timer di spegnimento («Fine brano» corretto e provato sul Mi A3 il 21/10 in Normale, Senza pause e Dissolvenza)
 - [x] 7.8 Icona e nome app
 - [~] 7.9 Build di rilascio
 - [x] 7.10 Documentazione finale
@@ -92,7 +92,7 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 8.5 Uscita audio selezionabile e controllo remoto
 - [x] 8.6 Precarico e resilienza (cache temporanea)
 - [x] 8.7 Interfaccia (pulsante Jam, coda condivisa, uscita, termina)
-- [~] 8.8 Background Android e rifinitura
+- [x] 8.8 Background Android e rifinitura (Jam provata dall'utente, utente, 2026-10-21)
 - [x] 8.9 Documentazione
 
 ## Fase 9 — Jam con più di 2 dispositivi (`fase-9-jam-multi.md`)
@@ -210,12 +210,12 @@ L'agente riparte sempre dal primo task non spuntato.
 - [~] 17.1 Verifiche preliminari (tono con la velocità, equalizzatore, MPRIS/SMTC, Jam e audio_service)
 - [x] 17.2 Velocità di riproduzione
 - [x] 17.3 Segnalibro «riprendi da qui» (schema v6)
-- [~] 17.4 Anteprima di 20 secondi
+- [x] 17.4 Anteprima di 20 secondi (utente, 2026-10-21: funziona)
 - [x] 17.5 Equalizzatore: motore
 - [~] 17.6 Equalizzatore: interfaccia e profilo per uscita
 - [~] 17.7 MPRIS su Linux (`playerctl` e tasti multimediali: prova a mano)
 - [~] 17.8 SMTC su Windows (codice e mappatura verificati; la build Windows in CI e la prova su un PC Windows toccano a te)
-- [~] 17.9 Controlli della Jam nella notifica e nella schermata di blocco
+- [x] 17.9 Controlli della Jam nella notifica e nella schermata di blocco (utente, 2026-10-21: «la jam pure»)
 - [~] 17.10 Rifinitura, documentazione e prova a mano
 
 ## Fase 18 — Gapless e crossfade (`fase-18-gapless-crossfade.md`)
@@ -236,7 +236,7 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 19.3 Barra azioni e azioni di massa
 - [~] 19.4 Collegare le liste
 - [x] 19.5 Trascinare brani sulle playlist (desktop)
-- [~] 19.6 Tema chiaro e colore d'accento
+- [x] 19.6 Tema chiaro e colore d'accento (utente, 2026-10-21: i temi funzionano)
 - [x] 19.7 Layout ≥ 1200 px
 - [x] 19.8 Lingue francese e portoghese
 - [~] 19.9 Onboarding al primo avvio
@@ -272,7 +272,7 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 22.3 Ricerca SoundCloud e filtro anteprime
 - [x] 22.4 Punteggio per fonte
 - [x] 22.5 Selettore di fonte in Cerca e ripiego nell'importazione
-- [~] 22.6 Playlist e canali YouTube come sorgente
+- [x] 22.6 Playlist e canali YouTube come sorgente (utente, 2026-10-21: link di playlist e di canale in Cerca trovano tutti i brani)
 - [~] 22.7 Traduzione dei testi on-device (solo Android) (fatto e testato con traduttore finto; la prova sul telefono è in «Tocca a te»)
 - [~] 22.8 Rifinitura, documentazione e prova a mano (la parte traduzione attende 22.7)
 
@@ -306,9 +306,9 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 25.4 Tile rapida (provata sul Mi A3 dopo averla riaggiunta: ▶ ⇄ pausa)
 - [x] 25.5 Albero di navigazione (`MediaBrowseTree`, + test)
 - [~] 25.6 Android Auto
-- [~] 25.7 Wear OS (verifica) (nessun codice: prova a mano in «Tocca a te»)
+- [~] 25.7 Wear OS (verifica) (nessun codice; l'utente non ha uno smartwatch: non provabile per ora)
 - [x] 25.8 Modalità in auto nell'app
-- [~] 25.9 Rifinitura, documentazione e prova a mano
+- [x] 25.9 Rifinitura, documentazione e prova a mano (utente, 2026-10-21: modalità in auto e widget funzionano; 25.6 e 25.7 a parte)
 
 ## Fase 26 — Distribuzione (`fase-26-distribuzione.md`)
 - [x] 26.1 Verifiche preliminari (strumenti di packaging, licenza ffmpeg, dimensioni attuali)
@@ -375,6 +375,7 @@ Piano del 2026-10-20. Richieste dell'utente: nessun rallentamento sul Mi A3 con 
 - «Svuota» la coda (2026-10-21, segnalazione dell'utente: «se svuoto la coda deve rigenerarsi in ordine diverso o con canzoni diverse, dipende dalla playlist; ora se svuoto e salto compare "Nessun brano in riproduzione"»): il player ricorda la **lista da cui è partito l'ascolto** (`_source`: playlist, album, ricerca…; dopo un riavvio la coda ripristinata) e «Svuota» ricrea subito ciò che segue (`PlayQueue.rebuildUpcoming`): senza casuale la lista dal brano attuale in poi, con casuale un nuovo mescolamento di tutta la lista **scritto nell'ordine della coda** (così la Coda mostra ciò che suonerà); le aggiunte a mano spariscono; senza lista (coda nata da «Riproduci dopo») si svuota come prima. Annulla rimette la coda di prima finché suona lo stesso brano. Messaggio «Coda ricreata dalla lista in ascolto».
 - Import fermo di notte (2026-10-21, segnalazione dell'utente: «durante la notte mi si è nuovamente interrotto l'import»): il processo era vivo (exit-info: nessuna morte fra le 03:36 e le 16:06), Wi‑Fi collegato tutta la notte; il blocco 11/23 è andato in pausa alle 04:02 sulla **pagina dell'album «Stefano Rosso»** (31 righe dello stesso album): `albumTracks` chiedeva a yt-dlp i dati completi di ogni brano (`-J` senza `--flat-playlist`, una richiesta per brano) → 64 s sul PC per 24 brani, oltre i 45 s di `searchTimeout` → «search timed out» = `network` → pausa; a ogni «Riprendi» di nuovo lì (alle 16:05 anche un LOW_MEMORY durante quella lettura). **Correzioni**: pagina album **flat** (4,5 s; `parseYtAlbumPage`: album dal titolo «Album - …», artista dal canale «… - Topic»), Android e desktop; una pagina album non letta non ferma più nulla (ricerca brano per brano; solo il 429 risale); errori di rete e 429 nelle ricerche → **attesa e nuovo tentativo** sulla stessa riga (`networkBackoff` 30 s…10 min, `rateLimitBackoff` 15/30/60 min, poi pausa come prima), anche il 429 di un download rimette la riga in coda dopo l'attesa; la notifica dice «YouTube chiede una pausa: riprendo alle 04:32» / «Rete assente: riprovo alle …»; una pausa da errore lascia una notifica col motivo; una riga che va in errore imprevisto diventa «non riuscita» invece di fermare il motore; corsa «Riprendi» mentre il ciclo stava finendo (`_again`); `AppLog` scrive il file anche nelle build di debug (`files/codecore.log`, non sotto `flutter test`).
 - Prove a mano, repository e CI (2026-10-21, utente: «ascolta nella ricerca funziona»; le microanimazioni per ora non si possono provare perché durante l'importazione l'app sul Motorola è lenta e a scatti): 28.6 confermato, 28.11 resta `[~]`. Repository GitHub reso **pubblico** dopo un controllo della cronologia (nessuna chiave o password, solo i `secrets.*` di `release.yml`; fixture audio sintetiche; resta visibile l'email dell'autore dei commit). `kReleaseRepo` = `iTzEmany/codecore-music-player`; il controllo legge `/releases` e prende la prima né bozza né pre-release: senza release risponde «aggiornato» (con `/releases/latest` il 404 diventava «non riuscito»). CI rossa dal 20/10 sera solo su Windows: `RawDatagramSocket.send` restituisce 0 se un invio è ancora in corso (su Windows uno per socket) e il test mandava due beacon di fila; ora si ritenta, anche in `LanDiscovery._send()`, dove su Windows si perdevano i broadcast diretti dopo il primo. Rivisti i «Tocca a te»: fatte 5.9–5.11, 7.5, 16.2, 24.6; superate 1.8, 3.4, 6.3.
+- Cuffie e timer (2026-10-21, segnalazione dell'utente con le JBL: «avanti» non passa al brano successivo in coda ma a uno a caso della playlist; «Fine brano» non fa nulla). **«Avanti»:** il percorso era giusto (tasti multimediali, doppio clic, ⏭ dell'app finiscono tutti in `skipToNext`, che segue l'ordine casuale), ma la Coda mostrava l'ordine naturale (scelta 11.14): ora `PlayQueue.items` è l'ordine di ascolto, la Coda mostra quello che suonerà e disattivare la casuale rimette l'ordine della playlist (chiavi per voce). Provato sul Mi A3 con `KEYCODE_MEDIA_NEXT` e `media_session dispatch next`: suona il brano che la Coda mostra, senza rimescolare. **Timer:** `_loadCurrent(play: false)` non metteva in pausa (just_audio resta in riproduzione caricando un file nuovo), il chip «Fine brano» non si spegneva mai e il passaggio senza pause/dissolvenza ignorava il segnale; ora si ferma all'inizio del brano seguente e il timer si azzera (provato sul Mi A3 nei tre modi). Limite: dopo un riavvio con la casuale attiva, disattivarla non rimette l'ordine della playlist (si salva solo l'ordine di ascolto).
 - «Elimina dal dispositivo» (2026-10-21, richiesta dell'utente: «eliminare una canzone… non dico rimuoverla da una playlist ma proprio eliminarla»): voce nel menu del brano e nella selezione multipla, solo per la musica (gli episodi hanno la loro pulizia). Dopo la conferma `TrackDeleter` toglie i brani dalla coda e dalla lista di partenza (su Windows un file aperto dal player non si cancella), cancella i file e solo per quelli spariti (o già mancanti) cancella la riga: playlist, preferiti, cronologia ed etichette se ne vanno con le cascate; un file che non si cancella lascia il brano com'è. Android 11+: i file non creati dall'app (`EPERM`) passano tutti insieme a `MediaStore.createDeleteRequest`, un solo dialogo di sistema (canale `codecore/media`, `MediaDeleteBridge.kt`); Android ≤ 10 senza ripiego (R72, R73 per Windows). Lo stesso ripiego, in un solo dialogo, ora vale per «Duplicati → elimina i file». Le righe d'importazione del brano restano «scaricato» con `track_id` nullo: riprendere l'importazione non lo riscarica, «Sincronizza da CSV» sì. **Provato sul Motorola (Android 15, APK 6030)** con un file messo da `adb push` (proprietario `com.android.shell`): `File.delete` risponde ENOENT, non EPERM, e la query per `_data` dell'app non lo trova; quindi ogni errore con il file ancora presente passa al ripiego e l'URI arriva da `MediaScannerConnection.scanFile`. Dialogo di sistema confermato dall'utente: file e riga spariti; se Android rifiuta, «Android non ha permesso di eliminare il file».
 
 ## Note di deviazione

@@ -11,6 +11,10 @@ class FakeBackend implements AudioBackend, GaplessCapable {
   final failing = <String>{};
   bool playing = false;
 
+  /// Like just_audio: a player that was playing goes on playing a file loaded
+  /// after it, until it is told to pause.
+  bool playingSurvivesLoad = false;
+
   @override
   Stream<BackendState> get state => stateC.stream;
   @override
@@ -49,7 +53,9 @@ class FakeBackend implements AudioBackend, GaplessCapable {
     nextPath = null;
     loaded.add(filePath);
     if (forgetSpeedOnLoad) speed = 1.0;
-    stateC.add(BackendState.paused);
+    stateC.add(playing && playingSurvivesLoad
+        ? BackendState.playing
+        : BackendState.paused);
   }
 
   final loadedUris = <({Uri uri, Map<String, String> headers})>[];
