@@ -8,6 +8,7 @@ import 'package:permission_handler/permission_handler.dart';
 import '../core/platform.dart';
 import '../data/db/app_database.dart';
 import '../services/audio/codecore_audio_handler.dart';
+import '../services/audio/online_entries.dart';
 import '../services/audio/play_queue.dart';
 import '../services/audio/playback_persistence.dart';
 import 'database_providers.dart';
@@ -17,6 +18,11 @@ import 'settings_providers.dart';
 /// registered with `AudioService.init`).
 final audioHandlerProvider = Provider<CodecoreAudioHandler>(
   (ref) => throw UnimplementedError('audioHandlerProvider not overridden'),
+);
+
+/// The streamed entries of the queue (negative ids); null where there are none.
+final onlineEntriesProvider = Provider<OnlineEntries?>(
+  (ref) => ref.watch(audioHandlerProvider).online,
 );
 
 final playbackPersistenceProvider = Provider<PlaybackPersistence?>(

@@ -22,6 +22,7 @@ import 'data/repositories/podcast_repository.dart';
 import 'data/repositories/track_repository.dart';
 import 'data/settings/settings_store.dart';
 import 'providers/database_providers.dart';
+import 'providers/youtube_providers.dart' show createYtDlpService, ytDlpServiceProvider;
 import 'providers/library_providers.dart';
 import 'providers/player_providers.dart';
 import 'providers/settings_providers.dart';
@@ -30,6 +31,9 @@ import 'services/audio/codecore_audio_handler.dart';
 import 'services/audio/crossfade_engine.dart';
 import 'services/audio/just_audio_backend.dart';
 import 'services/audio/media_browse_tree.dart';
+import 'services/audio/online_entries.dart';
+import 'services/audio/stream_address_cache.dart';
+import 'services/online/youtube_service.dart' show StreamSource;
 import 'services/audio/mpris_controls.dart';
 import 'services/audio/smtc_controls.dart';
 import 'services/audio/play_queue.dart';
@@ -93,11 +97,19 @@ Future<void> main() async {
     }());
   }
   final errors = StreamController<PlaybackFailure>.broadcast();
+  // The one yt-dlp service of the app: the UI (through the provider) and the
+  // player (direct addresses of online entries) share it.
+  final ytDlp = createYtDlpService();
+  final onlineEntries = OnlineEntries();
+  final addresses = StreamAddressCache(
+      (r) => (ytDlp as StreamSource).streamUrl(r));
   CodecoreAudioHandler build() => CodecoreAudioHandler(
         CrossfadeEngine(() => JustAudioBackend(withEqualizer: true)),
         PlayQueue(),
         tracks,
         onError: errors.add,
+        online: onlineEntries,
+        addresses: addresses,
         history: PlayHistoryRepository(db),
         onEpisodeHeard: (id) => unawaited(PodcastRepository(db)
             .markPlayedByTrack(id, true, now: DateTime.now().millisecondsSinceEpoch)),
@@ -173,6 +185,7 @@ Future<void> main() async {
       databaseProvider.overrideWithValue(db),
       settingsStoreProvider.overrideWithValue(settingsStore),
       audioHandlerProvider.overrideWithValue(handler),
+      ytDlpServiceProvider.overrideWithValue(ytDlp),
       playbackPersistenceProvider.overrideWithValue(persistence),
       playerErrorsProvider.overrideWithValue(errors.stream),
       coversDirProvider.overrideWithValue(covers.dir),

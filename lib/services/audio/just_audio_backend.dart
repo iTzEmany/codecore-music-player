@@ -139,7 +139,8 @@ class JustAudioBackend implements AudioBackend, GaplessCapable {
       await _player.setAudioSource(AudioSource.uri(uri, headers: headers));
     } on Object catch (e, st) {
       AppLog.w('stream load failed: ${uri.host}', e, st);
-      throw BackendException('unplayable stream: $e');
+      throw BackendException('unplayable stream: $e',
+          expired: RegExp(r'\b(403|410)\b').hasMatch('$e'));
     }
   }
 

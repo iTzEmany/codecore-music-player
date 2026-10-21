@@ -8,15 +8,19 @@ import '../../data/db/app_database.dart';
 import '../../data/repositories/play_history_repository.dart';
 import '../../data/repositories/track_repository.dart';
 import 'audio_backend.dart';
+import '../online/google_thumb.dart';
+import '../online/youtube_service.dart';
 import 'crossfade_engine.dart';
 import 'equalizer.dart';
 import 'next_window.dart';
+import 'online_entries.dart';
 import 'media_browse_tree.dart';
 import 'play_queue.dart';
 import 'remote_transport.dart';
 import 'resume_point.dart';
+import 'stream_address_cache.dart';
 
-enum PlaybackFailureReason { fileMissing, unplayable, notInLibrary }
+enum PlaybackFailureReason { fileMissing, unplayable, notInLibrary, onlineUnavailable }
 
 class PlaybackFailure {
   const PlaybackFailure(this.title, this.reason);
@@ -34,6 +38,8 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     this.coverPathFor,
     this.history,
     this.onEpisodeHeard,
+    this.online,
+    this.addresses,
   })  : _backend = backend,
         _window = backend is GaplessCapable
             ? NextWindow(_queue, _tracks, backend as GaplessCapable)
@@ -58,6 +64,12 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   /// listened to from 95 % on, or to its end. The handler knows nothing else
   /// about podcasts.
   final void Function(int trackId)? onEpisodeHeard;
+
+  /// Streamed (not owned) entries of the queue, which have negative ids, and
+  /// where their direct addresses come from. Both null: the queue holds only
+  /// library tracks.
+  final OnlineEntries? online;
+  final StreamAddressCache? addresses;
   final NextWindow? _window;
   final PlayQueue _queue;
   final TrackRepository _tracks;
@@ -159,6 +171,9 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   /// results…): «Svuota» builds what follows again from it.
   List<int>? _source;
 
+  /// The list playback was started from, if any.
+  List<int>? get sourceIds => _source == null ? null : List.unmodifiable(_source!);
+
   Future<void> playQueue(List<int> ids, int index) async {
     _source = List.of(ids);
     _queue.setItems(ids, startIndex: index);
@@ -228,7 +243,9 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
       await _goIdle();
       return;
     }
-    final track = await _tracks.getById(id);
+    final isOnline = isOnlineId(id);
+    final entry = isOnline ? online?.entryOf(id) : null;
+    final track = isOnline ? online?.trackOf(id) : await _tracks.getById(id);
     if (token != _loadToken) return;
     if (track == null) {
       await _failAndSkip(PlaybackFailureReason.notInLibrary, null, token);
@@ -241,11 +258,15 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     // An explicit position (restoring a session) wins over the bookmark.
     final start = (startAt != null && startAt > Duration.zero)
         ? startAt
-        : resumeStartFor(track.resumePositionMs);
+        : (isOnline ? null : resumeStartFor(track.resumePositionMs));
     _enterTrack(track);
     _publish(AudioProcessingState.loading);
     try {
-      await _backend.load(track.path);
+      if (entry != null) {
+        await _loadStream(entry.result);
+      } else {
+        await _backend.load(track.path);
+      }
       if (token != _loadToken) return;
       // Some backends forget the rate when a new file is loaded.
       if (_speed != 1.0) await _backend.setSpeed(_speed);
@@ -264,11 +285,38 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
       if (token != _loadToken) return;
       AppLog.w('load failed: ${e.message}');
       await _failAndSkip(
-          e.fileMissing
-              ? PlaybackFailureReason.fileMissing
-              : PlaybackFailureReason.unplayable,
+          isOnline
+              ? PlaybackFailureReason.onlineUnavailable
+              : e.fileMissing
+                  ? PlaybackFailureReason.fileMissing
+                  : PlaybackFailureReason.unplayable,
           track,
           token);
+    }
+  }
+
+  /// Loads an online entry from its direct address. An address that answers
+  /// 403 / has expired is dropped and asked for once more; any other failure
+  /// (including the resolver's) ends as a [BackendException].
+  Future<void> _loadStream(YtResult r) async {
+    final cache = addresses;
+    if (cache == null) throw const BackendException('no stream resolver');
+    for (var attempt = 0;; attempt++) {
+      final Uri uri;
+      try {
+        uri = await cache.address(r);
+      } on Object catch (e, st) {
+        AppLog.w('no stream address for ${r.id}', e, st);
+        throw BackendException('no stream address: $e');
+      }
+      try {
+        await _backend.loadUri(uri);
+        return;
+      } on BackendException catch (e) {
+        if (!e.expired || attempt > 0) rethrow;
+        AppLog.d('stream address of ${r.id} expired, asking again');
+        cache.invalidate(r);
+      }
     }
   }
 
@@ -331,6 +379,19 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   }
 
   MediaItem _toMediaItem(Track t) {
+    final entry = isOnlineId(t.id) ? online?.entryOf(t.id) : null;
+    if (entry != null) {
+      final thumb = entry.result.thumbnailUrl;
+      return MediaItem(
+        id: 'online:${entry.result.id}',
+        title: t.title,
+        artist: t.artist,
+        album: t.album,
+        duration: _duration,
+        artUri: thumb == null ? null : Uri.tryParse(googleThumbAt(thumb, 544)),
+        extras: const {'online': true},
+      );
+    }
     final cover = coverPathFor?.call(t);
     return MediaItem(
       id: '${t.id}',
@@ -383,9 +444,9 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   /// A track played to its end has no place to come back to.
   void _forgetBookmarkOfFinished() {
     final finished = _current;
-    if (finished != null && finished.kind == 1) _markHeard(finished);
-    if (finished != null &&
-        (finished.resumePositionMs != null || _savedResume[finished.id] != null)) {
+    if (finished == null || isOnlineId(finished.id)) return;
+    if (finished.kind == 1) _markHeard(finished);
+    if (finished.resumePositionMs != null || _savedResume[finished.id] != null) {
       unawaited(_writeResume(finished, null));
     }
   }
@@ -428,11 +489,22 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   Future<void> _refreshWindow() async {
     final window = _window;
     final current = _current;
-    if (window == null || current == null) return;
+    if (current == null) return;
+    // The address of an online entry takes seconds: ask while the one before
+    // it plays.
+    final next = _queue.peekNext();
+    if (next != null && isOnlineId(next)) {
+      final r = online?.entryOf(next)?.result;
+      if (r != null) addresses?.prefetch(r);
+    }
+    if (window == null) return;
     try {
       await window.refresh(
         current,
-        enabled: _transition != TransitionMode.normal && !_pauseAtTrackEnd,
+        // Into and out of an online entry the change is a plain new load.
+        enabled: _transition != TransitionMode.normal &&
+            !_pauseAtTrackEnd &&
+            !isOnlineId(current.id),
         volumeFor: _volumeFor,
         overlap: (a, b) =>
             _transition == TransitionMode.crossfade &&
@@ -538,6 +610,8 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
       _saveResume();
     }
     if (_playCounted || track == null || _state != BackendState.playing) return;
+    // Online entries are not in the database: no play count, no history.
+    if (isOnlineId(track.id)) return;
     final total = _duration;
     final half = total != null && total > Duration.zero && p * 2 >= total;
     if (half || p >= const Duration(seconds: 30)) {
@@ -690,6 +764,27 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     }
     // The gapless window may hold the next track open as well.
     await _refreshWindow();
+  }
+
+  /// Puts the online (or library) entry [id] at [index] of the play order;
+  /// the current track keeps playing.
+  void insertAt(int index, int id) {
+    if (_queue.isEmpty) _source = null;
+    _queue.insertAt(index, id);
+    _queueController.add(null);
+    unawaited(_refreshWindow());
+  }
+
+  /// Takes the first occurrence of [id] out of the queue (not out of
+  /// [sourceIds]); when it was the playing one the next is loaded.
+  Future<void> removeQueueId(int id) async {
+    final wasCurrent = _queue.removeId(id);
+    _queueController.add(null);
+    if (wasCurrent) {
+      await _loadCurrent(play: _state == BackendState.playing);
+    } else {
+      unawaited(_refreshWindow());
+    }
   }
 
   void moveInQueue(int from, int to) {
@@ -852,7 +947,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   /// Stores where the current track is (only if it is long enough to matter).
   void _saveResume() {
     final t = _current;
-    if (t == null) return;
+    if (t == null || isOnlineId(t.id)) return;
     final length = t.durationMs > 0 ? t.durationMs : (_duration?.inMilliseconds ?? 0);
     final episode = t.kind == 1;
     if (episode && episodeHeard(_position, length)) _markHeard(t);

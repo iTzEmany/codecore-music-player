@@ -36,10 +36,12 @@ final playlistListingProvider =
 );
 
 /// yt-dlp: the desktop executable or the copy embedded in the Android app.
+YoutubeService createYtDlpService() => isAndroid
+    ? AndroidYtDlpService()
+    : YtDlpProcessService(locate: locateYtDlp);
+
 final ytDlpServiceProvider = Provider<YoutubeService>((ref) {
-  final YoutubeService s = isAndroid
-      ? AndroidYtDlpService()
-      : YtDlpProcessService(locate: locateYtDlp);
+  final s = createYtDlpService();
   ref.onDispose(s.close);
   return s;
 });

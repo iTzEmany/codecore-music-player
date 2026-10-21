@@ -58,10 +58,15 @@ class FakeBackend implements AudioBackend, GaplessCapable {
         : BackendState.paused);
   }
 
+  /// Addresses that answer «expired» once (an HTTP 403), then work.
+  final expiring = <String>{};
   final loadedUris = <({Uri uri, Map<String, String> headers})>[];
 
   @override
   Future<void> loadUri(Uri uri, {Map<String, String> headers = const {}}) async {
+    if (expiring.remove(uri.toString())) {
+      throw const BackendException('403', expired: true);
+    }
     if (failing.contains(uri.toString())) {
       throw const BackendException('unreachable');
     }

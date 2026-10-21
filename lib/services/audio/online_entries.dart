@@ -43,6 +43,9 @@ class OnlineEntries {
 
   OnlineEntry? operator [](int id) => _entries[id];
 
+  /// Same as `[]`, readable after a `?.` or `?` in an expression.
+  OnlineEntry? entryOf(int id) => _entries[id];
+
   void forget(int id) => _entries.remove(id);
 
   /// A synthetic track for screens, notification and MPRIS. Never stored.
