@@ -407,7 +407,7 @@ Richiesta (2026-10-21): «una sorta di "shuffle+" che ogni tanto mi piazza una c
 - [x] 31.2 Coda: inserire e togliere voci in un punto
 - [x] 31.3 Voci online: registro e brano sintetico
 - [x] 31.4 Indirizzi dello streaming con scadenza
-- [ ] 31.5 Il lettore suona le voci online
+- [x] 31.5 Il lettore suona le voci online (1575c13; messaggio d'errore dedicato in 31.6)
 - [ ] 31.6 Coda a schermo, brano corrente, salvataggio e azioni
 - [ ] 31.7 Semi: dal brano della libreria all'id di YouTube Music
 - [ ] 31.8 Radio di YouTube Music (client e parser)
