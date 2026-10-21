@@ -1,0 +1,59 @@
+import 'dart:io';
+
+import 'package:codecore/services/online/catalog_cache.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+void main() {
+  late Directory dir;
+  late File file;
+  var clock = DateTime(2026, 10, 1);
+
+  CatalogCache make({int max = 60}) => CatalogCache(
+      file: () async => file, max: max, now: () => clock, writeDelay: Duration.zero);
+
+  setUp(() {
+    dir = Directory.systemTemp.createTempSync('cc_catalog');
+    file = File('${dir.path}/catalog_cache.json');
+    clock = DateTime(2026, 10, 1);
+  });
+  tearDown(() => dir.deleteSync(recursive: true));
+
+  test('a page is fresh for its kind\'s time, then expired but still there', () async {
+    final c = make();
+    await c.put(CatalogKind.artist, 'a', {'n': 1});
+    await c.put(CatalogKind.album, 'b', {'n': 2});
+    clock = clock.add(const Duration(days: 3));
+    final artist = (await c.get(CatalogKind.artist, 'a'))!;
+    expect(artist.expired, isTrue, reason: 'artists last 2 days');
+    expect(artist.json, {'n': 1}, reason: 'the old copy is kept for offline use');
+    expect((await c.get(CatalogKind.album, 'b'))!.expired, isFalse, reason: 'albums last 14 days');
+    expect(await c.get(CatalogKind.album, 'a'), isNull, reason: 'the kind is part of the key');
+  });
+
+  test('beyond the limit the least recently used page goes', () async {
+    final c = make(max: 2);
+    for (final k in ['a', 'b']) {
+      clock = clock.add(const Duration(minutes: 1));
+      await c.put(CatalogKind.album, k, k);
+    }
+    clock = clock.add(const Duration(minutes: 1));
+    await c.get(CatalogKind.album, 'a');
+    clock = clock.add(const Duration(minutes: 1));
+    await c.put(CatalogKind.album, 'c', 'c');
+    expect(await c.get(CatalogKind.album, 'b'), isNull);
+    expect(await c.get(CatalogKind.album, 'a'), isNotNull);
+    expect(await c.get(CatalogKind.album, 'c'), isNotNull);
+  });
+
+  test('pages survive a restart, sizeBytes counts them and clear empties the file', () async {
+    final c = make();
+    expect(await c.sizeBytes(), 0);
+    await c.put(CatalogKind.songs, 'k', ['x']);
+    expect(await c.sizeBytes(), greaterThan(0));
+    final again = make();
+    expect((await again.get(CatalogKind.songs, 'k'))!.json, ['x']);
+    await again.clear();
+    expect(await make().count(), 0);
+    expect(await again.sizeBytes(), lessThan(5));
+  });
+}

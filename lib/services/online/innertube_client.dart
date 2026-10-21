@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 
 import '../../core/app_log.dart';
 import '../../core/text_utils.dart';
+import 'innertube_json.dart';
 import 'request_budget.dart';
 import 'youtube_service.dart';
 
@@ -17,6 +18,17 @@ class InnerTubeChanged implements Exception {
 
   @override
   String toString() => 'InnerTubeChanged($detail)';
+}
+
+/// A `browse` answer that is a known «nothing here»: the artist id does not
+/// exist (no content and no header), as opposed to [InnerTubeChanged].
+class ArtistNotFound implements Exception {
+  const ArtistNotFound(this.id);
+
+  final String id;
+
+  @override
+  String toString() => 'ArtistNotFound($id)';
 }
 
 /// The search endpoint of YouTube's own pages (InnerTube, the same one yt-dlp
@@ -80,12 +92,85 @@ class InnerTubeClient {
     return parse(await post(null));
   }
 
+  /// A YouTube Music `browse` page (artist, album, list) read with [parse].
+  /// Same plan as the searches: with [mask] first, in full when the masked
+  /// answer is empty ([isEmpty]) or [parse] does not know it ([InnerTubeChanged],
+  /// [ArtistNotFound]: a mask whose fields were renamed drops everything).
+  Future<T> browseMusic<T>(
+    String browseId,
+    T Function(Map data) parse, {
+    String? params,
+    String hl = 'en',
+    String? mask,
+    bool Function(T value)? isEmpty,
+    CancelToken? cancel,
+  }) =>
+      _musicPage(
+        'browse',
+        {'browseId': browseId, 'params': ?params},
+        hl,
+        parse,
+        mask,
+        isEmpty,
+        cancel,
+      );
+
+  /// A YouTube Music `search` (top result card, artists) read with [parse];
+  /// [params] is the filter, none for the mixed list. Masked like [browseMusic].
+  Future<T> searchMusic<T>(
+    String query,
+    T Function(Map data) parse, {
+    String? params,
+    String hl = 'en',
+    String? mask,
+    bool Function(T value)? isEmpty,
+    CancelToken? cancel,
+  }) =>
+      _musicPage(
+        'search',
+        {'query': query, 'params': ?params},
+        hl,
+        parse,
+        mask,
+        isEmpty,
+        cancel,
+      );
+
+  Future<T> _musicPage<T>(
+    String endpoint,
+    Map<String, Object?> body,
+    String hl,
+    T Function(Map data) parse,
+    String? mask,
+    bool Function(T value)? isEmpty,
+    CancelToken? cancel,
+  ) async {
+    Future<Map> post(String? m) => _send('https://music.youtube.com', endpoint,
+        'WEB_REMIX', musicVersion, hl, body, cancel, mask: m);
+    if (mask != null) {
+      try {
+        final value = parse(await post(mask));
+        if (isEmpty == null || !isEmpty(value)) return value;
+      } on InnerTubeChanged catch (e) {
+        AppLog.d('masked $endpoint not readable, asking in full: $e');
+      } on ArtistNotFound catch (e) {
+        AppLog.d('masked $endpoint found nothing, asking in full: $e');
+      }
+    }
+    return parse(await post(null));
+  }
+
   Future<Map> _post(String origin, String client, String version, String query,
-      String params, CancelToken? cancel, {String? mask}) async {
+          String params, CancelToken? cancel, {String? mask}) =>
+      _send(origin, 'search', client, version, 'en',
+          {'query': query, 'params': params}, cancel, mask: mask);
+
+  Future<Map> _send(String origin, String endpoint, String client, String version,
+      String hl, Map<String, Object?> body, CancelToken? cancel, {String? mask}) async {
     final Response<Object?> res;
     try {
       res = await _dio.post<Object?>(
-        '$origin/youtubei/v1/search',
+        '$origin/youtubei/v1/$endpoint',
         queryParameters: const {'prettyPrint': 'false'},
         cancelToken: cancel,
         options: Options(
@@ -100,10 +185,9 @@ class InnerTubeClient {
         data: {
           // No region: YouTube takes it from the address, as for yt-dlp.
           'context': {
-            'client': {'clientName': client, 'clientVersion': version, 'hl': 'en'},
+            'client': {'clientName': client, 'clientVersion': version, 'hl': hl},
           },
-          'query': query,
-          'params': params,
+          ...body,
         },
       );
     } on DioException catch (e) {
@@ -131,53 +215,6 @@ class InnerTubeClient {
   void close() => _dio.close();
 }
 
-/// Every map stored under [key] anywhere in [node], in document order.
-List<Map> _collect(Object? node, String key) {
-  final out = <Map>[];
-  void walk(Object? n) {
-    if (n is Map) {
-      for (final e in n.entries) {
-        if (e.key == key && e.value is Map) {
-          out.add(e.value as Map);
-        } else {
-          walk(e.value);
-        }
-      }
-    } else if (n is List) {
-      n.forEach(walk);
-    }
-  }
-
-  walk(node);
-  return out;
-}
-
-/// `{"runs": [{"text": …}]}` or `{"simpleText": …}` as plain text.
-String _text(Object? node) {
-  if (node is! Map) return '';
-  final simple = node['simpleText'];
-  if (simple is String) return simple;
-  final runs = node['runs'];
-  if (runs is! List) return '';
-  return [
-    for (final r in runs)
-      if (r is Map && r['text'] is String) r['text'] as String,
-  ].join();
-}
-
-final _clock = RegExp(r'^(?:(\d+):)?(\d{1,2}):(\d{2})$');
-
-/// `3:45`, `1:02:03` → a [Duration]; anything else → null.
-Duration? parseClock(String text) {
-  final m = _clock.firstMatch(text.trim());
-  if (m == null) return null;
-  return Duration(
-    hours: int.parse(m.group(1) ?? '0'),
-    minutes: int.parse(m.group(2)!),
-    seconds: int.parse(m.group(3)!),
-  );
-}
-
 void _ensureKnown(Map data, String container) {
   final contents = data['contents'];
   if (contents is! Map || !contents.containsKey(container)) {
@@ -190,19 +227,19 @@ void _ensureKnown(Map data, String container) {
 List<YtResult> parseVideoSearch(Map data, {int limit = 10}) {
   _ensureKnown(data, 'twoColumnSearchResultsRenderer');
   final out = <YtResult>[];
-  for (final v in _collect(data['contents'], 'videoRenderer')) {
+  for (final v in collectRenderers(data['contents'], 'videoRenderer')) {
     final id = v['videoId'];
-    final title = _text(v['title']);
+    final title = runsText(v['title']);
     if (id is! String || id.isEmpty || title.isEmpty) continue;
-    final channel = _text(v['ownerText']).isNotEmpty
-        ? _text(v['ownerText'])
-        : _text(v['longBylineText']);
+    final channel = runsText(v['ownerText']).isNotEmpty
+        ? runsText(v['ownerText'])
+        : runsText(v['longBylineText']);
     out.add(YtResult(
       id: id,
       title: htmlUnescape(title),
       channel: htmlUnescape(channel),
       // Live streams have no length.
-      duration: parseClock(_text(v['lengthText'])),
+      duration: parseClock(runsText(v['lengthText'])),
       thumbnailUrl: smallVideoThumbnail(id),
     ));
     if (out.length >= limit) break;
@@ -210,32 +247,19 @@ List<YtResult> parseVideoSearch(Map data, {int limit = 10}) {
   return out;
 }
 
-String? _pageType(Map run) {
-  final endpoint = run['navigationEndpoint'];
-  if (endpoint is! Map) return null;
-  final browse = endpoint['browseEndpoint'];
-  if (browse is! Map) return null;
-  final configs = browse['browseEndpointContextSupportedConfigs'];
-  if (configs is! Map) return null;
-  final music = configs['browseEndpointContextMusicConfig'];
-  return music is Map ? music['pageType'] as String? : null;
-}
-
-const _artistJoiners = {',', '&', 'and', 'e', 'y', 'et', 'und', 'x'};
-
 /// Reads a YouTube Music «Songs» search answer: title in the first column;
 /// `artists • album • length` in the second.
 List<YtResult> parseSongSearch(Map data, {int limit = 5}) {
   _ensureKnown(data, 'tabbedSearchResultsRenderer');
   final out = <YtResult>[];
-  for (final item in _collect(data['contents'], 'musicResponsiveListItemRenderer')) {
+  for (final item in collectRenderers(data['contents'], 'musicResponsiveListItemRenderer')) {
     final columns = [
       for (final c in item['flexColumns'] is List ? item['flexColumns'] as List : const [])
         if (c is Map && c['musicResponsiveListItemFlexColumnRenderer'] is Map)
           (c['musicResponsiveListItemFlexColumnRenderer'] as Map)['text'],
     ];
     if (columns.length < 2) continue;
-    final title = _text(columns[0]);
+    final title = runsText(columns[0]);
     final id = _songId(item, columns[0]);
     if (id == null || title.isEmpty) continue;
     // Split the second column on « • » into groups of runs.
@@ -250,21 +274,24 @@ List<YtResult> parseSongSearch(Map data, {int limit = 5}) {
       }
     }
     final artists = <String>[];
-    String? album;
+    final artistIds = <String>[];
+    String? album, albumId;
     Duration? duration;
     for (final (i, g) in groups.indexed) {
       final joined = g.map((r) => r['text'] as String).join().trim();
-      final linked = g.where((r) => _pageType(r) == 'MUSIC_PAGE_TYPE_ARTIST');
-      final albumRun = g.where((r) => _pageType(r) == 'MUSIC_PAGE_TYPE_ALBUM');
+      final linked = g.where((r) => pageTypeOf(r) == 'MUSIC_PAGE_TYPE_ARTIST');
+      final albumRun = g.where((r) => pageTypeOf(r) == 'MUSIC_PAGE_TYPE_ALBUM');
       if (albumRun.isNotEmpty) {
         album = (albumRun.first['text'] as String).trim();
+        albumId = browseIdOf(albumRun.first);
       } else if (linked.isNotEmpty || (i == 0 && parseClock(joined) == null)) {
         // The first group is the artists even when they have no page.
-        artists.addAll([
-          for (final r in g)
-            if (!_artistJoiners.contains((r['text'] as String).trim().toLowerCase()))
-              (r['text'] as String).trim(),
-        ].where((a) => a.isNotEmpty));
+        for (final r in g) {
+          final name = (r['text'] as String).trim();
+          if (name.isEmpty || artistJoiners.contains(name.toLowerCase())) continue;
+          artists.add(name);
+          artistIds.add(pageTypeOf(r) == 'MUSIC_PAGE_TYPE_ARTIST' ? browseIdOf(r) ?? '' : '');
+        }
       } else {
         duration ??= parseClock(joined);
       }
@@ -275,9 +302,11 @@ List<YtResult> parseSongSearch(Map data, {int limit = 5}) {
       // The uploader is not in the answer: the first credited artist stands in.
       channel: artists.isEmpty ? '' : htmlUnescape(artists.first),
       duration: duration,
-      thumbnailUrl: _squareThumbnail(item) ?? smallVideoThumbnail(id),
+      thumbnailUrl: pickThumbnail(item['thumbnail']) ?? smallVideoThumbnail(id),
       artists: [for (final a in artists) htmlUnescape(a)],
       album: album == null ? null : htmlUnescape(album),
+      artistIds: artistIds,
+      albumId: albumId,
     ));
     if (out.length >= limit) break;
   }
@@ -295,19 +324,4 @@ String? _songId(Map item, Object? titleColumn) {
     if (watch is Map && watch['videoId'] is String) return watch['videoId'] as String;
   }
   return null;
-}
-
-/// The album cover the list shows, at 120×120 when offered.
-String? _squareThumbnail(Map item) {
-  final thumbs = _collect(item['thumbnail'], 'thumbnail');
-  final list = thumbs.isEmpty ? null : thumbs.first['thumbnails'];
-  if (list is! List) return null;
-  String? best;
-  for (final t in list) {
-    if (t is! Map || t['url'] is! String) continue;
-    best = t['url'] as String;
-    final w = t['width'];
-    if (w is num && w >= 120) break;
-  }
-  return best;
 }

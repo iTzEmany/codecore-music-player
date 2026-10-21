@@ -24,6 +24,7 @@ import 'database_providers.dart';
 import 'library_providers.dart';
 import 'online_providers.dart';
 import 'yt_dlp_update_providers.dart' show locateYtDlp;
+import 'ytm_catalog_providers.dart' show ytmCatalogProvider;
 import 'settings_providers.dart';
 
 /// The videos of a pasted playlist or channel address, read once per address.
@@ -44,9 +45,18 @@ final ytDlpServiceProvider = Provider<YoutubeService>((ref) {
 });
 
 /// Searches with one direct request, everything else with yt-dlp.
+final innerTubeClientProvider = Provider<InnerTubeClient>((ref) {
+  final c = InnerTubeClient();
+  ref.onDispose(c.close);
+  return c;
+});
+
 final youtubeServiceProvider = Provider<YoutubeService>((ref) {
-  final s = DirectSearchService(ref.watch(ytDlpServiceProvider), InnerTubeClient());
-  ref.onDispose(s.client.close);
+  final s = DirectSearchService(
+    ref.watch(ytDlpServiceProvider),
+    ref.watch(innerTubeClientProvider),
+    catalog: ref.watch(ytmCatalogProvider),
+  );
   return s;
 });
 

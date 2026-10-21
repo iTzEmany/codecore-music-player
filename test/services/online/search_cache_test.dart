@@ -110,6 +110,36 @@ void main() {
     expect(back[1].downloadUrl, 'https://soundcloud.com/c/b');
   });
 
+  test('artist and album page ids are kept, and an old entry without them reads empty',
+      () async {
+    final c = make();
+    await c.put('k', [
+      const YtResult(
+        id: 'a',
+        title: 'A',
+        channel: 'c',
+        duration: null,
+        artists: ['X', 'Y'],
+        artistIds: ['UC1', ''],
+        albumId: 'MPREb_1',
+      ),
+    ]);
+    await c.flush();
+    final reopened = make();
+    final back = (await reopened.get('k'))!.single;
+    await reopened.flush();
+    expect(back.artistIds, ['UC1', '']);
+    expect(back.albumId, 'MPREb_1');
+
+    file.writeAsStringSync(
+        '{"old":{"s":${clock.millisecondsSinceEpoch},"u":${clock.millisecondsSinceEpoch},'
+        '"r":[{"id":"o","title":"O","artists":["Z"]}]}}');
+    final old = (await make().get('old'))!.single;
+    expect(old.artistIds, isEmpty);
+    expect(old.artistIdAt(0), '');
+    expect(old.albumId, isNull);
+  });
+
   test('entries expire after the time to live', () async {
     final c = make(ttl: const Duration(days: 30));
     await c.put('k', [yr('a')]);

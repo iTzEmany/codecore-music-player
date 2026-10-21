@@ -278,3 +278,9 @@ YouTube (nessun account), cache su disco dello streaming (R71), correzione del v
 - [ ] Rete solo con opzione attiva, «Solo su Wi‑Fi», limiti e pausa su 429; Jam e rete assente → casuale normale
 - [ ] Test: coda (`insertAt`/`removeId`), registro e sintetico, indirizzi, lettore, coda a schermo e salvataggio, semi, radio, bacino e registro, piano d'inserimento e controller, aggiunte a playlist
 - [ ] `flutter analyze` pulito, `flutter test` verde, `docs/PROGRESS.md` aggiornato
+
+## Risposte dell'utente (2026-10-22: «ok» alle proposte)
+- I suggeriti restano fuori da cronologia e statistiche finché non vengono scaricati o aggiunti a una playlist.
+- Pulsante casuale **a tre stati**: spento → casuale → Shuffle+ (quindi Shuffle+ solo con la casuale).
+- Predefiniti: **1 suggerito ogni 4 brani**, **«Solo su Wi‑Fi» acceso**.
+- Un brano già suggerito non torna per **30 giorni**.

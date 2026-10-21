@@ -21,6 +21,8 @@ class YtResult {
     this.thumbnailUrl,
     this.artists = const [],
     this.album,
+    this.artistIds = const [],
+    this.albumId,
     this.downloadName,
     this.subdir,
     this.source = MediaSource.youtube,
@@ -34,6 +36,14 @@ class YtResult {
   /// Credited artists and album: only present on YouTube Music results.
   final List<String> artists;
   final String? album;
+
+  /// YouTube Music page ids, aligned with [artists] (`''` where an artist has
+  /// no page) and of the album: they open the artist and album pages.
+  final List<String> artistIds;
+  final String? albumId;
+
+  /// Page id of the artist at [i], `''` when it has none (or the list is short).
+  String artistIdAt(int i) => i >= 0 && i < artistIds.length ? artistIds[i] : '';
 
   /// File base name to use instead of the one derived from title and channel
   /// (CSV imports name files after the Spotify title and artist).

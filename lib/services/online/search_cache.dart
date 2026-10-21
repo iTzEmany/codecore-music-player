@@ -124,48 +124,57 @@ class _Entry {
   Map<String, Object?> toJson() => {
         's': storedAt,
         'u': usedAt,
-        'r': [
-          for (final r in results)
-            {
-              'id': r.id,
-              'title': r.title,
-              'channel': r.channel,
-              'ms': r.duration?.inMilliseconds,
-              'thumb': r.thumbnailUrl,
-              'artists': r.artists,
-              'album': r.album,
-              if (r.source != MediaSource.youtube) 'src': r.source.name,
-              if (r.webpageUrl != null) 'url': r.webpageUrl,
-            },
-        ],
+        'r': [for (final r in results) ytResultToJson(r)],
       };
 
   static _Entry? fromJson(Object? j) {
     if (j is! Map) return null;
     final s = j['s'], u = j['u'], r = j['r'];
     if (s is! int || u is! int || r is! List) return null;
-    final results = <YtResult>[];
-    for (final x in r) {
-      if (x is! Map || x['id'] is! String || x['title'] is! String) continue;
-      final ms = x['ms'];
-      results.add(YtResult(
-        id: x['id'] as String,
-        title: x['title'] as String,
-        channel: '${x['channel'] ?? ''}',
-        duration: ms is int ? Duration(milliseconds: ms) : null,
-        thumbnailUrl: x['thumb'] as String?,
-        artists: [
-          for (final a in (x['artists'] is List ? x['artists'] as List : const []))
-            '$a',
-        ],
-        album: x['album'] as String?,
-        source: MediaSource.values.firstWhere(
-          (m) => m.name == x['src'],
-          orElse: () => MediaSource.youtube,
-        ),
-        webpageUrl: x['url'] as String?,
-      ));
-    }
+    final results = <YtResult>[
+      for (final x in r) ?ytResultFromJson(x),
+    ];
     return _Entry(s, u, results);
   }
+}
+
+/// A result as the disk caches store it (short keys, defaults left out).
+Map<String, Object?> ytResultToJson(YtResult r) => {
+      'id': r.id,
+      'title': r.title,
+      'channel': r.channel,
+      'ms': r.duration?.inMilliseconds,
+      'thumb': r.thumbnailUrl,
+      'artists': r.artists,
+      'album': r.album,
+      if (r.artistIds.any((i) => i.isNotEmpty)) 'aids': r.artistIds,
+      if (r.albumId != null) 'alb': r.albumId,
+      if (r.source != MediaSource.youtube) 'src': r.source.name,
+      if (r.webpageUrl != null) 'url': r.webpageUrl,
+    };
+
+/// Inverse of [ytResultToJson]; null for an entry that is not a result.
+YtResult? ytResultFromJson(Object? x) {
+  if (x is! Map || x['id'] is! String || x['title'] is! String) return null;
+  final ms = x['ms'];
+  return YtResult(
+    id: x['id'] as String,
+    title: x['title'] as String,
+    channel: '${x['channel'] ?? ''}',
+    duration: ms is int ? Duration(milliseconds: ms) : null,
+    thumbnailUrl: x['thumb'] as String?,
+    artists: [
+      for (final a in (x['artists'] is List ? x['artists'] as List : const [])) '$a',
+    ],
+    album: x['album'] as String?,
+    artistIds: [
+      for (final a in (x['aids'] is List ? x['aids'] as List : const [])) '$a',
+    ],
+    albumId: x['alb'] as String?,
+    source: MediaSource.values.firstWhere(
+      (m) => m.name == x['src'],
+      orElse: () => MediaSource.youtube,
+    ),
+    webpageUrl: x['url'] as String?,
+  );
 }

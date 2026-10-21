@@ -269,3 +269,9 @@ canali YouTube non musicali, scaricare l'intera discografia, testi dalla pagina 
 - [ ] Cache con copia fuori linea; errori distinti (non trovato, formato cambiato, rete)
 - [ ] Test: parser (card, artisti, artista en/it/sparsa/assente, album, liste), catalogo e cache, ascolto condiviso, sovrapposizione con la libreria, scelta dell'artista, piano dell'album
 - [ ] `flutter analyze` pulito, `flutter test` verde, `docs/PROGRESS.md` aggiornato
+
+## Risposte dell'utente (2026-10-22: «ok» alle proposte)
+- «Scarica album» **non** crea una playlist (l'album compare in Libreria → Album; niente cambio di schema).
+- Titoli delle sezioni e biografia nella lingua dell'app, come li dà YouTube.
+- La card artista compare anche con la fonte YouTube (richiesta separata a YouTube Music).
+- **Niente sezione «Video»** nella pagina artista: solo musica.

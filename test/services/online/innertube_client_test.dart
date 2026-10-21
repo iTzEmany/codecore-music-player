@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:codecore/services/online/direct_search_service.dart';
 import 'package:codecore/services/online/innertube_client.dart';
+import 'package:codecore/services/online/innertube_json.dart';
 import 'package:codecore/services/online/youtube_service.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -115,6 +116,8 @@ void main() {
       expect(mother.artists, ['Pink Floyd']);
       expect(mother.channel, 'Pink Floyd');
       expect(mother.album, 'The Wall');
+      expect(mother.artistIds, ['UCO6LS_5W7vqG9mALDNzSFug']);
+      expect(mother.albumId, 'MPREb_tc3z4MYeOpY');
       expect(mother.duration, const Duration(minutes: 5, seconds: 35));
       expect(mother.thumbnailUrl, contains('w120-h120'));
       final pinkMatter = res[1];
@@ -167,6 +170,7 @@ void main() {
         }
       });
       expect(res.single.artists, ['Uno', 'Due', 'Tre']);
+      expect(res.single.artistIds, ['', '', ''], reason: 'aligned, empty without a page');
       expect(res.single.album, isNull);
       expect(res.single.duration, const Duration(hours: 1, minutes: 2, seconds: 3));
       expect(res.single.thumbnailUrl, smallVideoThumbnail('abc'),
