@@ -52,6 +52,8 @@ class LyricsTranslationNotifier extends Notifier<LyricsTranslation?> {
         to: to,
       );
       state = LyricsTranslation(trackId: trackId, synced: synced, lines: out);
+      // A translation can have fetched a model: the settings list re-reads.
+      ref.invalidate(translationModelsProvider);
       return true;
     } on Object catch (e, st) {
       AppLog.e('lyrics translation failed', e, st);

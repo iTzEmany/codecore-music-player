@@ -92,4 +92,25 @@ void main() {
     expect(jam.existsSync(), isTrue);
     expect(r.jamSkipped, isTrue);
   });
+
+  test('clearing the caches also empties the file picker copies', () async {
+    final copy = put('cache/file_picker/123/backup.zip', 40);
+    final other = put('cache/other/keep.bin', 5);
+    final cleaner = CacheCleaner(
+      jamDir: Directory(p.join(root.path, 'jam_cache')),
+      themeDir: Directory(p.join(root.path, 'theme')),
+      searchCacheFile: File(p.join(root.path, 'search_cache.json')),
+      clearSearchCache: () async {},
+      catalogCacheFile: File(p.join(root.path, 'catalog_cache.json')),
+      clearCatalogCache: () async {},
+      clearImageMemory: () {},
+      imageMemoryBytes: () => 0,
+      jamActive: () => false,
+      pickerTempDir: Directory(p.join(root.path, 'cache/file_picker')),
+    );
+    final r = await cleaner.clear();
+    expect(copy.existsSync(), isFalse);
+    expect(other.existsSync(), isTrue);
+    expect(r.freedBytes, 40);
+  });
 }

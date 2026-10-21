@@ -28,6 +28,9 @@ class ReviewScreen extends ConsumerStatefulWidget {
 class _ReviewScreenState extends ConsumerState<ReviewScreen> {
   static const _key = 'review';
 
+  /// Left inset of the reasons line: under the title, past the cover.
+  static const _reasonsInset = 72.0;
+
   /// null = «Tutti».
   ReviewReason? _filter;
 
@@ -199,17 +202,44 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
                         Expanded(
                           child: ListView.builder(
                             itemCount: tracks.length,
-                            itemExtent: extent,
-                            itemBuilder: (_, i) => LiveTrackRow(
-                              track: tracks[i],
-                              compact: compact,
-                              selection: selection,
-                              subtitleSuffix: [
-                                for (final r in reasons[tracks[i].id]!)
-                                  _label(r),
-                              ].join(' · '),
-                              onTap: () => _rowMenu(tracks[i]),
-                              onMore: () => _rowMenu(tracks[i]),
+                            itemBuilder: (_, i) => Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                SizedBox(
+                                  height: extent,
+                                  child: LiveTrackRow(
+                                    track: tracks[i],
+                                    compact: compact,
+                                    selection: selection,
+                                    onTap: () => _rowMenu(tracks[i]),
+                                    onMore: () => _rowMenu(tracks[i]),
+                                  ),
+                                ),
+                                // The reasons get their own (up to two) lines
+                                // so a phone does not cut them with «…».
+                                Padding(
+                                  padding: const EdgeInsets.fromLTRB(
+                                    _reasonsInset,
+                                    0,
+                                    CcDims.margin,
+                                    6,
+                                  ),
+                                  child: Align(
+                                    alignment: AlignmentDirectional.centerStart,
+                                    child: Text(
+                                      [
+                                        for (final r in reasons[tracks[i].id]!)
+                                          _label(r),
+                                      ].join(' · '),
+                                      key: ValueKey('review-reasons-${tracks[i].id}'),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: Theme.of(context).textTheme.bodySmall
+                                          ?.copyWith(color: context.cc.textMuted),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ),

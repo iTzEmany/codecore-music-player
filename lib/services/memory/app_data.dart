@@ -93,24 +93,23 @@ Future<List<AppDataItem>> measureAppData(
   final covers = directorySize(paths.covers.path);
   final tags = directorySize(paths.tagBackups.path);
   final jam = directorySize(paths.jam.path);
-  final blur = directorySize(
-    paths.theme.path,
-    namePattern: blurredCopyPattern,
-  );
+  final blur = directorySize(paths.theme.path, namePattern: blurredCopyPattern);
   return [
-    AppDataItem(
-      AppDataKind.covers,
-      await covers,
-      detailBytes: await thumbs,
-    ),
+    AppDataItem(AppDataKind.covers, await covers, detailBytes: await thumbs),
     AppDataItem(AppDataKind.database, await _filesSize(paths.databaseFiles)),
     AppDataItem(
       AppDataKind.imageMemory,
       imageMemoryBytes ?? PaintingBinding.instance.imageCache.currentSizeBytes,
     ),
     AppDataItem(AppDataKind.jamCache, await jam),
-    AppDataItem(AppDataKind.searchCache, await fileSize(paths.searchCache.path)),
-    AppDataItem(AppDataKind.catalogCache, await fileSize(paths.catalogCache.path)),
+    AppDataItem(
+      AppDataKind.searchCache,
+      await fileSize(paths.searchCache.path),
+    ),
+    AppDataItem(
+      AppDataKind.catalogCache,
+      await fileSize(paths.catalogCache.path),
+    ),
     AppDataItem(AppDataKind.blurCopies, await blur),
     AppDataItem(AppDataKind.tagBackups, await tags),
     AppDataItem(AppDataKind.log, await _filesSize(paths.logFiles)),
@@ -141,6 +140,7 @@ class CacheCleaner {
     required this.clearImageMemory,
     required this.imageMemoryBytes,
     required this.jamActive,
+    this.pickerTempDir,
   });
 
   final Directory jamDir, themeDir;
@@ -149,6 +149,10 @@ class CacheCleaner {
   final void Function() clearImageMemory;
   final int Function() imageMemoryBytes;
   final bool Function() jamActive;
+
+  /// Where the file picker copies the files it hands over (backups, CSVs…):
+  /// `<cache dir>/file_picker`. Only copies, safe to delete.
+  final Directory? pickerTempDir;
 
   Future<CacheClearResult> clear() async {
     var freed = 0;
@@ -168,6 +172,11 @@ class CacheCleaner {
     final catalogBefore = await fileSize(catalogCacheFile.path);
     await clearCatalogCache();
     freed += math.max(0, catalogBefore - await fileSize(catalogCacheFile.path));
+    final picker = pickerTempDir;
+    if (picker != null) {
+      freed += await directorySize(picker.path);
+      await _deleteTree(picker);
+    }
     freed += imageMemoryBytes();
     clearImageMemory();
     return CacheClearResult(freedBytes: freed, jamSkipped: skipJam);

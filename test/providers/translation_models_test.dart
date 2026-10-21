@@ -53,4 +53,17 @@ void main() {
     await c.read(translationModelsProvider.notifier).delete('it');
     expect(c.read(translationModelsProvider).value, ['en', 'it']);
   });
+
+  test('a translation refreshes the models list', () async {
+    final t = _Translator({'en'});
+    final c = _container(t);
+    c.listen(translationModelsProvider, (_, _) {});
+    expect(await c.read(translationModelsProvider.future), ['en']);
+    t.ready.add('it'); // the platform fetched a model while translating
+    final ok = await c
+        .read(lyricsTranslationProvider.notifier)
+        .translate(trackId: 1, synced: false, lines: ['a'], from: 'en', to: 'it');
+    expect(ok, isTrue);
+    expect(await c.read(translationModelsProvider.future), ['en', 'it']);
+  });
 }

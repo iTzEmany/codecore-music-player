@@ -4,6 +4,9 @@ import '../../../l10n/l10n_ext.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/format_utils.dart';
 
+/// Width (at normal text size) of the size label column of a [WeightRow].
+const sizeColumnWidth = 76.0;
+
 /// A row of a «Memoria» list: name, what it holds, how much space it takes,
 /// and a thin bar of its share ([fraction] 0–1, null = no bar).
 class WeightRow extends StatelessWidget {
@@ -74,9 +77,15 @@ class WeightRow extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12),
-            Text(
-              formatBytes(bytes),
-              style: theme.titleSmall?.copyWith(color: cc.text),
+            // A fixed column, so every bar in the list has the same track.
+            SizedBox(
+              width: MediaQuery.textScalerOf(context).scale(sizeColumnWidth),
+              child: Text(
+                formatBytes(bytes),
+                maxLines: 1,
+                textAlign: TextAlign.end,
+                style: theme.titleSmall?.copyWith(color: cc.text),
+              ),
             ),
           ],
         ),
@@ -175,9 +184,8 @@ class DeviceBar extends StatelessWidget {
                   const SizedBox(width: 6),
                   Text(
                     '$name ${formatBytes(bytes)}',
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodySmall?.copyWith(color: cc.textMuted),
+                    style: Theme.of(context).textTheme.bodySmall
+                        ?.copyWith(color: cc.textMuted),
                   ),
                 ],
               ),

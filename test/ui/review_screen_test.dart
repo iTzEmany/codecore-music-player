@@ -37,11 +37,17 @@ void main() {
       expect(find.text('Song 0'), findsOneWidget);
       expect(find.text('Song 1'), findsOneWidget);
       expect(find.text('Song 2'), findsNothing);
+      // The reasons sit on their own line, not appended to the subtitle.
+      final reasons = tester.widget<Text>(
+        find.byWidgetPredicate((w) => w.key.toString().contains('review-reasons-')).first,
+      );
+      expect(reasons.data, contains('Nessun risultato'));
+      expect(reasons.maxLines, 2);
 
-      await tester.tap(find.text('Senza testo'));
+      await tester.tap(find.widgetWithText(ChoiceChip, 'Senza testo'));
       await _settle(tester);
       expect(find.text('Song 0'), findsOneWidget);
-      await tester.tap(find.text('Nessun risultato'));
+      await tester.tap(find.widgetWithText(ChoiceChip, 'Nessun risultato'));
       await _settle(tester);
       expect(find.text('Song 0'), findsOneWidget);
       expect(find.text('Song 1'), findsNothing);

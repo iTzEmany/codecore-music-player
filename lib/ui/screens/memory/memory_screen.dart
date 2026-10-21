@@ -22,6 +22,7 @@ import '../library/favorites_screen.dart';
 import '../playlists/playlist_detail_screen.dart';
 import '../settings/missing_tracks_screen.dart';
 import '../stats/stats_screen.dart' show formatListened;
+import 'folder_labels.dart';
 import 'memory_app_data.dart';
 import 'memory_widgets.dart';
 import 'never_played_screen.dart';
@@ -61,14 +62,18 @@ class _MemoryScreenState extends ConsumerState<MemoryScreen> {
     });
     if (selected) _opened = true;
     final header = Padding(
-      padding: const EdgeInsets.fromLTRB(CcDims.margin, 12, CcDims.margin, 4),
-      child: Align(
-        alignment: AlignmentDirectional.centerStart,
-        child: Text(
-          l.navMemory,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: Theme.of(context).textTheme.headlineSmall,
+      // Same frame as the Library header (whose row is 48 high).
+      padding: const EdgeInsets.fromLTRB(CcDims.margin, 12, 4, 0),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 48),
+        child: Align(
+          alignment: AlignmentDirectional.centerStart,
+          child: Text(
+            l.navMemory,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
         ),
       ),
     );
@@ -130,7 +135,9 @@ class _MemoryList extends ConsumerWidget {
           context,
           context.l10n.memoryByFolder,
           b.folders,
-          name: (g) => g.path == null ? context.l10n.memoryNoFolder : g.name,
+          name: (g) => g.path == null
+              ? context.l10n.memoryNoFolder
+              : folderLabels(b.folders)[g.path] ?? g.name,
           subtitle: (g) {
             final n = context.l10n.tracksCount(g.totals.trackCount);
             return g.path == null ? n : '$n · ${g.path}';
@@ -233,10 +240,8 @@ class _MemoryList extends ConsumerWidget {
           subtitle: a.album.variousArtists ? l.variousArtists : a.album.artist,
           bytes: a.sizeBytes,
           fraction: shareOf(a.sizeBytes, maxAlbum),
-          onTap: () => ShellNav.open<void>(
-            context,
-            AlbumDetailScreen(album: a.album),
-          ),
+          onTap: () =>
+              ShellNav.open<void>(context, AlbumDetailScreen(album: a.album)),
         ),
     ];
   }

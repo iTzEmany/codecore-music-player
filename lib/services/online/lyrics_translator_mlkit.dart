@@ -23,6 +23,11 @@ class MlKitLyricsTranslator implements LyricsTranslator {
   Future<void> deleteModel(String lang) async {
     // A translator that is open keeps its models in use.
     await close();
+    // The plugin calls RemoteModelManager.deleteDownloadedModel on the
+    // TranslateRemoteModel of [lang], which is the right call. ML Kit only
+    // unregisters the model and removes its files lazily (its own cleanup
+    // job, under no_backup/com.google.mlkit.translate.models), so the files
+    // can stay for a while and a translation can still work meanwhile.
     final ok = await _manager.deleteModel(lang);
     if (!ok) throw StateError('model $lang not deleted');
   }

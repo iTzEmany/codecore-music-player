@@ -3,7 +3,9 @@ import 'dart:io';
 import 'package:flutter/painting.dart' show PaintingBinding;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 
+import '../core/app_log.dart';
 import '../core/paths.dart';
 import '../data/db/app_database.dart';
 import '../data/repositories/memory_queries.dart';
@@ -67,6 +69,19 @@ final musicDiskSpaceProvider = FutureProvider.autoDispose<DiskSpace?>((
   return diskSpaceOf(folder?.path ?? await appSupportDir());
 });
 
+/// The file picker's copy folder inside the cache dir; null where there is
+/// no temp dir to ask.
+Future<Directory?> pickerTempDirectory() async {
+  try {
+    return Directory(
+      p.join((await getTemporaryDirectory()).path, 'file_picker'),
+    );
+  } on Object catch (e, st) {
+    AppLog.w('temp dir unavailable', e, st);
+    return null;
+  }
+}
+
 class MemoryActions {
   MemoryActions(this._ref);
 
@@ -87,6 +102,7 @@ class MemoryActions {
         ..clearLiveImages(),
       imageMemoryBytes: () =>
           PaintingBinding.instance.imageCache.currentSizeBytes,
+      pickerTempDir: await pickerTempDirectory(),
       jamActive: () {
         final phase = _ref.read(jamProvider).phase;
         return phase == JamPhase.requesting || phase == JamPhase.active;
