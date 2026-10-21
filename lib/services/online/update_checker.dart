@@ -61,7 +61,8 @@ class UpdateResult {
 
   final UpdateStatus status;
 
-  /// The latest release (also when [status] is [UpdateStatus.upToDate]).
+  /// The latest release (also when [status] is [UpdateStatus.upToDate], unless
+  /// the repository has no published release yet).
   final UpdateInfo? info;
 }
 
@@ -77,8 +78,19 @@ class UpdateChecker {
   Future<UpdateResult> check() async {
     if (repo.isEmpty) return const UpdateResult(UpdateStatus.failed);
     try {
-      final json = await _web.getJson('https://api.github.com/repos/$repo/releases/latest');
-      if (json is! Map) return const UpdateResult(UpdateStatus.failed);
+      // /releases/latest answers 404 while nothing is published, which the
+      // client reads as a failure: list the releases and pick the first one.
+      final list = await _web.getJson('https://api.github.com/repos/$repo/releases?per_page=10');
+      if (list is! List) return const UpdateResult(UpdateStatus.failed);
+      Map? json;
+      for (final e in list) {
+        if (e is Map && e['draft'] != true && e['prerelease'] != true) {
+          json = e;
+          break;
+        }
+      }
+      // No published release yet: nothing newer than this one.
+      if (json == null) return const UpdateResult(UpdateStatus.upToDate);
       final tag = json['tag_name'];
       if (tag is! String || tag.isEmpty) return const UpdateResult(UpdateStatus.failed);
       final info = UpdateInfo(

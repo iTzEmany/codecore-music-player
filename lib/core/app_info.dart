@@ -2,8 +2,8 @@
 const kAppVersion = '1.2.0';
 
 /// `owner/name` of the GitHub repository whose releases «Controlla
-/// aggiornamenti» reads. Empty = the feature is hidden (no repository yet).
-const kReleaseRepo = '';
+/// aggiornamenti» reads. Empty = the feature is hidden.
+const kReleaseRepo = 'iTzEmany/codecore-music-player';
 
 /// How to reach whoever runs this app: an e-mail, a web address or a wiki user
 /// name. Sent in the `User-Agent` of every request to the online services,

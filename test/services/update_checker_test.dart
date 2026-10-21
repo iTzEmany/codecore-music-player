@@ -48,28 +48,48 @@ void main() {
         UpdateChecker(_Web(a), repo: repo, current: '1.1.0');
 
     test('a newer release: version without v, page and notes', () async {
-      final r = await checker(() => {'tag_name': 'v1.2.0', 'html_url': 'https://github.com/me/codecore/releases/tag/v1.2.0', 'body': ' Novità\n- uno '}).check();
+      final r = await checker(() => [{'tag_name': 'v1.2.0', 'html_url': 'https://github.com/me/codecore/releases/tag/v1.2.0', 'body': ' Novità\n- uno '}]).check();
       expect(r.status, UpdateStatus.newer);
       expect(r.info!.version, '1.2.0');
       expect(r.info!.url, endsWith('v1.2.0'));
       expect(r.info!.notes, 'Novità\n- uno');
     });
     test('the same version: up to date, still tells which', () async {
-      final r = await checker(() => {'tag_name': 'v1.1.0'}).check();
+      final r = await checker(() => [{'tag_name': 'v1.1.0'}]).check();
       expect(r.status, UpdateStatus.upToDate);
       expect(r.info!.version, '1.1.0');
       expect(r.info!.url, 'https://github.com/me/codecore/releases');
     });
     test('an older release is up to date too', () async {
-      expect((await checker(() => {'tag_name': '1.0.0'}).check()).status, UpdateStatus.upToDate);
+      expect((await checker(() => [{'tag_name': '1.0.0'}]).check()).status, UpdateStatus.upToDate);
     });
     test('no answer, wrong shape or no repository: failed, no request without a repository', () async {
       expect((await checker(() => null).check()).status, UpdateStatus.failed);
-      expect((await checker(() => ['x']).check()).status, UpdateStatus.failed);
-      expect((await checker(() => {'tag_name': ''}).check()).status, UpdateStatus.failed);
-      final web = _Web(() => {'tag_name': 'v9'});
+      expect((await checker(() => {'tag_name': 'v2'}).check()).status, UpdateStatus.failed);
+      expect((await checker(() => [{'tag_name': ''}]).check()).status, UpdateStatus.failed);
+      final web = _Web(() => [{'tag_name': 'v9'}]);
       expect((await UpdateChecker(web, repo: '', current: '1.0.0').check()).status, UpdateStatus.failed);
       expect(web.urls, isEmpty);
+    });
+    test('no releases yet, or only drafts and pre-releases: up to date, no info', () async {
+      for (final answer in <List<Object?>>[
+        [],
+        [{'tag_name': 'v9.0.0', 'draft': true}, {'tag_name': 'v8.0.0', 'prerelease': true}],
+      ]) {
+        final r = await checker(() => answer).check();
+        expect(r.status, UpdateStatus.upToDate);
+        expect(r.info, isNull);
+      }
+    });
+    test('skips drafts and pre-releases and takes the first published one', () async {
+      final r = await checker(() => [
+            {'tag_name': 'v3.0.0', 'draft': true},
+            {'tag_name': 'v2.0.0-rc.1', 'prerelease': true},
+            {'tag_name': 'v1.5.0'},
+            {'tag_name': 'v1.4.0'},
+          ]).check();
+      expect(r.status, UpdateStatus.newer);
+      expect(r.info!.version, '1.5.0');
     });
     test('GitHub 403/429 is reported as rate limited, once', () async {
       final web = _Web(() => throw const RateLimitedException(403));
@@ -77,10 +97,10 @@ void main() {
       expect(r.status, UpdateStatus.rateLimited);
       expect(web.urls, hasLength(1));
     });
-    test('asks the releases/latest endpoint of the repository', () async {
-      final web = _Web(() => {'tag_name': 'v1.1.0'});
+    test('asks the releases endpoint of the repository', () async {
+      final web = _Web(() => [{'tag_name': 'v1.1.0'}]);
       await UpdateChecker(web, repo: 'me/codecore', current: '1.1.0').check();
-      expect(web.urls.single, 'https://api.github.com/repos/me/codecore/releases/latest');
+      expect(web.urls.single, 'https://api.github.com/repos/me/codecore/releases?per_page=10');
     });
   });
 }
