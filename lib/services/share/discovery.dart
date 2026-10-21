@@ -192,7 +192,17 @@ class LanDiscovery {
     }));
     for (final t in await _targets()) {
       try {
-        s.send(data, t.address, t.port);
+        // send() returns 0 when it would block (on Windows only one datagram
+        // can be in flight per socket): retry briefly instead of dropping it.
+        var sent = s.send(data, t.address, t.port);
+        for (var i = 0; sent == 0 && i < 50; i++) {
+          await Future<void>.delayed(const Duration(milliseconds: 2));
+          if (_socket != s) return;
+          sent = s.send(data, t.address, t.port);
+        }
+        if (sent == 0) {
+          AppLog.d('discovery: send to ${t.address.address} would block');
+        }
       } on SocketException catch (e) {
         AppLog.d('discovery: send failed to ${t.address.address}', e);
       }

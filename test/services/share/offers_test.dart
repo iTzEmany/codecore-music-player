@@ -27,6 +27,16 @@ Map<String, Object?> offerBody({
           ],
     };
 
+/// Sends one loopback datagram, retrying while `send` returns 0 (would block:
+/// on Windows a second send right after the first is otherwise dropped).
+Future<void> sendDatagram(RawDatagramSocket s, List<int> data, int port) async {
+  for (var i = 0; i < 100; i++) {
+    if (s.send(data, InternetAddress.loopbackIPv4, port) > 0) return;
+    await Future<void>.delayed(const Duration(milliseconds: 5));
+  }
+  fail('datagram to port $port could not be sent');
+}
+
 void main() {
   group('isLocalNetworkAddress', () {
     test('private yes, public no', () {
@@ -252,7 +262,7 @@ void main() {
       '{"m":"nope","id":"y","name":"Y","port":9}', // no magic
       'not json',
     ]) {
-      s.send(utf8.encode(junk), InternetAddress.loopbackIPv4, 45901);
+      await sendDatagram(s, utf8.encode(junk), 45901);
     }
     await b.start(2222);
     await until(() => a.current.isNotEmpty && b.current.isNotEmpty);
@@ -278,8 +288,8 @@ void main() {
     final s = await RawDatagramSocket.bind(InternetAddress.loopbackIPv4, 0);
     addTearDown(s.close);
     final beacon = utf8.encode('{"m":"CODECORE/1","id":"x","name":"X","port":9}');
-    s.send(beacon, InternetAddress.loopbackIPv4, 45903);
-    s.send(beacon, InternetAddress.loopbackIPv4, 45904);
+    await sendDatagram(s, beacon, 45903);
+    await sendDatagram(s, beacon, 45904);
     await until(() => open.current.isNotEmpty);
     expect(strict.current, isEmpty);
   });
