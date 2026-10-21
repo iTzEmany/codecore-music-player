@@ -45,6 +45,8 @@ un'unica codebase Flutter per Android, Windows e Linux. Uso personale, niente co
 | 26 | `fase-26-distribuzione.md` | Pacchetti Linux, installer Windows, APK più piccolo, avviso aggiornamenti, F-Droid, macOS/iOS, guida utente |
 | 27 | `fase-27-selezione-ordinata-e-tema-libero.md` | Selezione multipla nell'ordine dei tocchi (con numeri) e tema totalmente personalizzabile (colori, sfondo, immagine) |
 | 28 | `fase-28-prestazioni-e-fluidita.md` | Zero lag sul Mi A3 con 3000 brani, microanimazioni, ricerca online diretta (< 1,5 s), ascolto in streaming prima di scaricare, copertine leggere |
+| 30 | `fase-30-pagina-artista.md` | Card dell'artista nei risultati online e pagina artista «come Spotify» (i tuoi brani, più ascoltati, album e singoli, video, simili), pagina album con «Scarica album» |
+| 31 | `fase-31-shuffle-plus.md` | «Shuffle+»: in casuale, ogni N brani uno che non hai, simile alla playlist (radio di YouTube Music), in streaming, da scaricare o aggiungere a una playlist |
 
 Dopo la **Fase 3** l'app è già usabile come lettore. Le fasi 5 e 6 sono indipendenti tra loro. La fase 8 (Jam) richiede la 6.
 

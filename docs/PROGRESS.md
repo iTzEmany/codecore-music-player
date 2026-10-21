@@ -382,8 +382,41 @@ Piano del 2026-10-20. Richieste dell'utente: nessun rallentamento sul Mi A3 con 
 ## Fase 29 — «Da revisionare» e «Memoria» (richiesta dell'utente, 2026-10-21)
 Richiesta: «una sezione nella libreria dove ci sono le canzoni da revisionare, che l'arricchimento automatico non trova» e «una quarta sezione, magari "memory", che mi indica il peso di ogni playlist, spazio totale occupato e altre informazioni più specifiche e utili». Scelte dell'utente: «Memoria» come **quarta scheda** in basso (e voce della barra laterale su desktop); in «Da revisionare» sia i brani senza risultati sia quelli incompleti (testo, copertina, album/anno/genere), con filtri e azioni.
 - [x] 29.1 «Da revisionare» in Libreria (query, pagina con filtri, «Riprova» col lavoro di arricchimento esistente, «Va bene così» salvato nelle impostazioni, 9 test)
-- [ ] 29.2 Scheda «Memoria» (spazio totale e libero, peso di ogni playlist, formati, cartelle, brani più pesanti, mai ascoltati, dati dell'app e cache, test)
+- [x] 29.2 Scheda «Memoria» (quarta scheda e voce della barra laterale; spazio musica e libero, playlist e Preferiti per peso, formati, cartelle, più pesanti, mai ascoltati, dati dell'app e «Svuota cache»; 11 test; golden della barra aggiornati; da vedere sul telefono in 29.3)
 - [ ] 29.3 Prova sul Mi A3 e su Linux, documentazione
+
+## Fase 30 — Pagina artista nella ricerca (`fase-30-pagina-artista.md`)
+Richiesta (2026-10-21): «è possibile fare in modo che cercando un artista, mi appaia la possibilità di cliccare sull'icona dell'artista che appare e farmi vedere le sue top canzoni, i suoi album e altro ancora?» («più come Spotify»). Scelte concordate: card con la foto in cima ai risultati online (solo se il risultato principale di YouTube Music è un artista), pagina con i tuoi brani di quell'artista, brani più ascoltati, album e singoli, video, artisti simili e biografia; «Ascolta» e «Scarica» su ogni brano; pagina album con «Scarica album» (tramite l'importazione); richieste dirette InnerTube (≈ 0,5 s) con cache e copia fuori linea; nomi degli artisti toccabili nei risultati; «Su YouTube Music» dalla libreria.
+- [ ] 30.1 Verifiche preliminari e fixture (esiti dal PC già nel documento)
+- [ ] 30.2 Aiuti JSON condivisi e risultati YouTube Music con id di artista e album
+- [ ] 30.3 Parser della card, della ricerca artisti e della pagina artista
+- [ ] 30.4 Parser della pagina album, di «tutti i brani» e della discografia
+- [ ] 30.5 Client, servizio del catalogo e cache (album diretto anche per l'importazione)
+- [ ] 30.6 «Ascolta» condiviso fra le pagine online
+- [ ] 30.7 Card dell'artista e nomi toccabili nei risultati
+- [ ] 30.8 Pagina dell'artista
+- [ ] 30.9 Pagina album online e «Scarica album»
+- [ ] 30.10 «Tutti i brani» e discografia
+- [ ] 30.11 Ingressi dalla libreria («Su YouTube Music»)
+- [ ] 30.12 Test dal vivo, documentazione e prova a mano
+
+## Fase 31 — «Shuffle+» (`fase-31-shuffle-plus.md`)
+Richiesta (2026-10-21): «una sorta di "shuffle+" che ogni tanto mi piazza una canzone che non ho, che ha un genere diverso in base alla playlist, come ad esempio nella sezione "canzoni rock" nella coda mi piazza ogni tot una canzone rock che non ho, idem per il blues o tutti gli altri generi.» Scelte concordate: semi dalla lista in ascolto → radio di YouTube Music (`next` con `RDAMVM<videoId>`) → via i brani già in libreria e già suggeriti → ogni N brani (predefinito 1 ogni 4) un suggerito in coda, suonato in streaming dal lettore principale e segnato «Suggerito», con «Scarica» e «Aggiungi a playlist»; non conta in cronologia e statistiche; «Solo su Wi‑Fi»; senza rete casuale normale; sospeso durante la Jam; i suggeriti non si salvano al riavvio.
+- [ ] 31.1 Verifiche preliminari (esiti dal PC già nel documento; restano telefoni e fixture)
+- [ ] 31.2 Coda: inserire e togliere voci in un punto
+- [ ] 31.3 Voci online: registro e brano sintetico
+- [ ] 31.4 Indirizzi dello streaming con scadenza
+- [ ] 31.5 Il lettore suona le voci online
+- [ ] 31.6 Coda a schermo, brano corrente, salvataggio e azioni
+- [ ] 31.7 Semi: dal brano della libreria all'id di YouTube Music
+- [ ] 31.8 Radio di YouTube Music (client e parser)
+- [ ] 31.9 Bacino dei suggerimenti e registro
+- [ ] 31.10 Motore Shuffle+
+- [ ] 31.11 Interfaccia dei suggeriti
+- [ ] 31.12 Impostazioni, rete a consumo e pulsante a tre stati
+- [ ] 31.13 «Suggeriti di recente»
+- [ ] 31.14 (Facoltativo) Senza pause e dissolvenza anche per i suggeriti
+- [ ] 31.15 Test dal vivo, documentazione e prova a mano
 
 ## Note di deviazione
 <!-- una riga per deviazione: data — task — cosa è cambiato e perché -->
