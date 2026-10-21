@@ -393,12 +393,12 @@ Richiesta (2026-10-21): «è possibile fare in modo che cercando un artista, mi 
 - [x] 30.3 Parser della card, della ricerca artisti e della pagina artista (e4981ec)
 - [x] 30.4 Parser della pagina album, di «tutti i brani» e della discografia (e4981ec)
 - [x] 30.5 Client, servizio del catalogo e cache (album diretto anche per l'importazione) (e4981ec)
-- [ ] 30.6 «Ascolta» condiviso fra le pagine online
-- [ ] 30.7 Card dell'artista e nomi toccabili nei risultati
-- [ ] 30.8 Pagina dell'artista
-- [ ] 30.9 Pagina album online e «Scarica album»
-- [ ] 30.10 «Tutti i brani» e discografia
-- [ ] 30.11 Ingressi dalla libreria («Su YouTube Music»)
+- [x] 30.6 «Ascolta» condiviso fra le pagine online (8fd9244)
+- [x] 30.7 Card dell'artista e nomi toccabili nei risultati (8fd9244)
+- [x] 30.8 Pagina dell'artista (8fd9244)
+- [x] 30.9 Pagina album online e «Scarica album» (8fd9244)
+- [x] 30.10 «Tutti i brani» e discografia (8fd9244)
+- [x] 30.11 Ingressi dalla libreria («Su YouTube Music») (8fd9244)
 - [ ] 30.12 Test dal vivo, documentazione e prova a mano
 
 ## Fase 31 — «Shuffle+» (`fase-31-shuffle-plus.md`)
