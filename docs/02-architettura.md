@@ -234,3 +234,13 @@ Scritture con debounce 400 ms, mai in un handler di slider a ogni tick.
 - **Sostituzione**: `stageFullRestore` estrae solo le tre cose attese (nessun nome esterno a `staging`); `main.dart` chiama `applyPendingRestore` **prima** di aprire il DB. **Unione**: `mergeUserData` in una transazione, nessuna cancellazione.
 - `lib/services/export/`: M3U8/CSV/JSON per playlist e «Esporta tutte» (zip). UI: Impostazioni → Backup (`backup_section.dart`, `restore_dialog.dart`).
 
+
+## Prestazioni e fluidità (fase 28)
+- **Ricerca online diretta**: `innertube_client.dart` (una richiesta POST all'API interna di YouTube e YouTube Music, con `X-Goog-FieldMask` per avere solo i campi letti; risposta vuota o illeggibile → di nuovo senza maschera) dietro `DirectSearchService`, che passa a yt-dlp tutto il resto e, se la risposta non si legge, anche la ricerca per 10 minuti (R70). `youtubeServiceProvider` = diretto, `ytDlpServiceProvider` = yt-dlp.
+- **Elenchi leggeri**: `light_tracks.dart` — le query degli elenchi leggono tutte le colonne tranne testi, testi sincronizzati e curiosità, che nella riga valgono `''` (ci sono) o null (non ci sono); `lightSelect` riusa il SQL di una `select(tracks)` tipizzata. La riga intera solo da `getById`, `getByIds` e `watchById` (scheda, «In riproduzione», testi, backup, duplicati, condivisione).
+- **Copertine**: miniatura PNG di 320 px (`<chiave>_t.png`) fatta in coda dopo ogni salvataggio e, per quelle vecchie, 5 s dopo il primo frame (`fillMissingThumbnails`); l'interfaccia legge un indice in memoria (`coverIndexProvider`: una lettura della cartella, poi gli eventi `CoverStore.changes`) e usa la miniatura sotto i 320 px. Cache delle immagini a 48 MB sui telefoni con ≤ 4,5 GB.
+- **Ascolta**: `listenProvider` su un player suo (`AudioBackend.loadUri`), indirizzo da yt-dlp `-g` a ogni ascolto (`StreamSource`), nessuna cache su disco (R71).
+- **Sfondo sfocato**: copia già sfocata (`blurredBackground`, ≤ 800 px) invece di un filtro a schermo.
+- **Avvio**: dopo il primo frame la coda salvata, la ricezione LAN e il controllo aggiornamenti (`startupSettledProvider`), le miniature mancanti.
+- **Microanimazioni**: `lib/ui/widgets/motion.dart` (`PressScale`, `EnterOnce`/`EntranceScope`, `TabFade`, `RiseIn`, `HeartIcon`, `popIn`); solo opacità e trasformazioni, `RepaintBoundary`, ferme con «Riduci animazioni».
+- **Misure**: app separata `com.codecore.player.perf` (`CODECORE_PERF=1` + `--dart-define=CODECORE_PERF=true`) con `PerfProbe` (frame, primo frame, passi di `main`, scansione); `scripts/perf_library.py` e `scripts/perf_device.py`; risultati in `docs/fase-28-misure.md`.

@@ -5,6 +5,7 @@ Cerca su YouTube, YouTube Music o SoundCloud e scarica l'audio nella tua libreri
 ## Come si fa
 1. Cerca → sezione online; scegli la fonte con i chip.
 2. Tieni premuto per selezionare più risultati e scarica; incollando l'indirizzo di una playlist o di un canale si apre il foglio con l'elenco.
+   Le **cuffie** su un risultato lo fanno ascoltare senza scaricarlo: sotto i risultati compare una barra con pausa, «Scarica» e chiudi; la musica che stava suonando si ferma e riparte alla fine. Il primo suono può arrivare dopo qualche secondo (sui telefoni più vecchi anche 10).
 3. I download stanno nel Centro Attività; si possono annullare.
 4. Impostazioni → Download: formato, limite di velocità, cartella. Formati, dal migliore al peggiore: **Originale** (l'audio di YouTube senza ricodifica, di solito Opus: qualità massima, ma non tutti i lettori lo leggono), **M4A** (predefinito: quasi come l'originale, senza ricodifica, veloce e compatibile), **MP3 320** e **MP3 192** kbps (si leggono ovunque, ma sono ricodificati: lieve perdita, file più grandi, download più lenti).
 

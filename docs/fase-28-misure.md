@@ -58,3 +58,28 @@ pronta: tolto l'`await` dell'orientamento, l'attesa si è spostata sulla chiamat
 (servizio audio, impostazioni, widget) fa ~200 ms. L'obiettivo di 2 s non è raggiunto sul Mi A3: la parte nostra
 è ~0,6 s.
 
+## Misura finale (28.10, 2026-10-21, Mi A3, build profile, stesso giro del «prima»)
+| Cosa | Prima | Dopo |
+|---|---|---|
+| Scansione di 3000 brani | 17,1 s | **14,0 s** |
+| Avvio a freddo (mediana di 5) | 2521 ms | **2348 ms** |
+| Da `main` al primo frame | 681 ms | **630 ms** |
+| Memoria (PSS) | 231 MB | **187 MB** |
+| «Tutti i brani»: build p90/p99 · raster p90/p99 · oltre 16,7 ms | 5,8/13,6 · 10,4/18,6 · 2,3 % | 5,4/11,2 · 10,1/15,1 · **0,3 %** |
+| «Album»: build p90/p99 · raster p90/p99 · oltre 16,7 ms | 5,7/14,8 · 8,2/13,2 · 1,0 % | 3,4/6,2 · 8,3/15,0 · **0,9 %** |
+| Ricerca «notte»: build p99 · oltre 16,7 ms | 32,5 ms · 4,5 % | 40,1 ms · **2,3 %** |
+| Ricerca online YouTube / YouTube Music (Wi‑Fi, build debug) | yt-dlp: 6–7 s / 14 s e oltre | **1,7–2,0 s / 1,6–2,2 s** |
+| «Ascolta» YouTube: primo suono | — | ~12 s (indirizzo da yt-dlp in 9,6 s) |
+
+### Obiettivi
+| Obiettivo | Esito |
+|---|---|
+| Scorrimento di elenchi e griglie: p90 ≤ 16 ms, < 2 % di frame persi | **Rispettato** (p90 ≤ 10 ms su UI e raster; 0,3 % e 0,9 %) |
+| Avvio a freddo < 2 s con 3000 brani | **Non rispettato: 2,35 s.** ~1,7 s passano prima di `main` (processo, motore Flutter, plugin) e ~250 ms nella prima chiamata verso Android, che aspetta l'attività; la parte dell'app è ~0,6 s. Ridurlo ancora vorrebbe dire mostrare una schermata finta prima dei dati, che non è più veloce davvero |
+| Ricerca nella libreria < 100 ms | **Rispettato** (query di 50 000 brani 34 ms sul PC; il filtro di artisti e album 0,5 ms a tasto; sul Mi A3 il frame più lento della scrittura 40 ms) |
+| Ricerca online: primi risultati < 1,5 s | **Rispettato sul Motorola** (1,0–1,3 s), **non sul Mi A3** (1,6–2,2 s): la sola stretta di mano TLS con youtube.com misurata con `curl` dal Mi A3 costa 1,1–2,6 s; la risposta, con la maschera dei campi, pesa 2 KB compressa (28 KB prima) |
+
+### Aperti
+- «Ascolta» di SoundCloud sul Mi A3: timeout di ExoPlayer sul CDN HLS (R71); ricerca SoundCloud via yt-dlp 36 s sul Mi A3.
+- Un frame di 40–80 ms quando i risultati della ricerca nella libreria compaiono la prima volta (da guardare con il profilo di Flutter).
+
