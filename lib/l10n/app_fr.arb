@@ -2451,5 +2451,53 @@
   },
   "tagBackupDelete": "Supprimer la sauvegarde",
   "tagBackupDeleteBody": "Vous ne pourrez plus remettre le fichier tel qu’il était avant la modification.",
-  "tagBackupDeleted": "Sauvegarde supprimée"
+  "tagBackupDeleted": "Sauvegarde supprimée",
+  "deleteFromDevice": "Supprimer de l’appareil",
+  "deleteTrackTitle": "Supprimer « {title} » ?",
+  "@deleteTrackTitle": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteTrackBody": "Le fichier est supprimé de l’appareil et le titre disparaît de la bibliothèque, des playlists, des favoris et de l’historique. Cette action est irréversible.",
+  "deleteTracksTitle": "{count, plural, =0{Supprimer 0 titre ?} one{Supprimer 1 titre ?} other{Supprimer {count} titres ?}}",
+  "@deleteTracksTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteTracksBody": "Les fichiers sont supprimés de l’appareil et les titres disparaissent de la bibliothèque, des playlists, des favoris et de l’historique. Cette action est irréversible.",
+  "deleteConfirm": "Supprimer",
+  "trackDeleted": "Titre supprimé",
+  "trackDeleteFailed": "Impossible de supprimer le fichier : {reason}",
+  "@trackDeleteFailed": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "tracksDeleted": "{count, plural, =0{0 titre supprimé} one{1 titre supprimé} other{{count} titres supprimés}}",
+  "@tracksDeleted": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tracksDeletedSome": "{count, plural, =0{0 titre supprimé} one{1 titre supprimé} other{{count} titres supprimés}} · {failed} non supprimés",
+  "@tracksDeletedSome": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
+    }
+  }
 }

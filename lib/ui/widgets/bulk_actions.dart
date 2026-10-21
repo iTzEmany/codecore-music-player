@@ -10,6 +10,7 @@ import '../screens/cleanup/move_to_album_dialog.dart';
 import '../screens/playlists/playlist_dialogs.dart';
 import '../screens/tags/tags_sheet.dart';
 import 'confirm.dart';
+import 'delete_tracks.dart';
 import 'track_actions.dart';
 
 /// Where a selection lives: decides which actions make sense.
@@ -24,8 +25,8 @@ class BulkContext {
 /// menu. [tracks] must be in the order of the picks (not of the list); [done]
 /// leaves the selection after an action that went through.
 ///
-/// None of them touches a file: «remove» only ever means rows of the library
-/// or of a playlist.
+/// Only «Elimina dal dispositivo» touches a file (after a confirmation);
+/// «remove» otherwise means rows of the library or of a playlist.
 List<TrackActionGroup> bulkActions(
   BuildContext outer,
   WidgetRef ref,
@@ -102,6 +103,15 @@ List<TrackActionGroup> bulkActions(
     done();
   }
 
+  final music = [
+    for (final t in tracks)
+      if (t.kind == 0) t,
+  ];
+
+  Future<void> deleteFromDevice() async {
+    if (await confirmAndDeleteTracks(outer, ref, music)) done();
+  }
+
   return [
     TrackActionGroup(l.groupQueue, [
       TrackAction(Icons.play_arrow_rounded, l.play, () async {
@@ -156,15 +166,22 @@ List<TrackActionGroup> bulkActions(
           () => removeFromPlaylist(ctx.playlistId!),
         ),
     ]),
-    // Only for tracks whose file is gone: the library row has nothing left to
-    // point to. Music that still exists is never removable from here.
-    if (allMissing)
+    if (allMissing || music.isNotEmpty)
       TrackActionGroup(l.groupOther, [
-        TrackAction(
-          Icons.delete_outline_rounded,
-          l.removeFromLibrary,
-          removeFromLibrary,
-        ),
+        // Only for tracks whose file is gone: the library row has nothing left
+        // to point to. Music that still exists is never removable from here.
+        if (allMissing)
+          TrackAction(
+            Icons.delete_outline_rounded,
+            l.removeFromLibrary,
+            removeFromLibrary,
+          ),
+        if (music.isNotEmpty)
+          TrackAction(
+            Icons.delete_forever_rounded,
+            l.deleteFromDevice,
+            deleteFromDevice,
+          ),
       ]),
   ];
 }

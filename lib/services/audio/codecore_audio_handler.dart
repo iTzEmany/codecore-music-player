@@ -610,6 +610,35 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     }
   }
 
+  /// Takes every occurrence of [ids] out of the queue and out of the list
+  /// playback started from (so «Svuota» never builds them again), for tracks
+  /// about to be deleted from disk. When the playing one is among them the
+  /// next one is loaded, keeping play/pause (or playback stops with an empty
+  /// queue). Completes once the player has let go of the files: on Windows a
+  /// file that is open cannot be deleted.
+  Future<void> removeTracks(Set<int> ids) async {
+    if (ids.isEmpty) return;
+    _source = _source?.where((id) => !ids.contains(id)).toList();
+    final items = _queue.items;
+    final currentGone = _current != null && ids.contains(_current!.id);
+    final playing = _state == BackendState.playing;
+    var removed = false;
+    // From the end, so the natural indices still to visit do not shift.
+    for (var i = items.length - 1; i >= 0; i--) {
+      if (!ids.contains(items[i])) continue;
+      _queue.removeAt(i);
+      removed = true;
+    }
+    if (_queue.isEmpty) _source = null;
+    if (!removed && !currentGone) return;
+    _queueController.add(null);
+    if (currentGone) {
+      await _loadCurrent(play: playing);
+    }
+    // The gapless window may hold the next track open as well.
+    await _refreshWindow();
+  }
+
   void moveInQueue(int from, int to) {
     _queue.move(from, to);
     _queueController.add(null);

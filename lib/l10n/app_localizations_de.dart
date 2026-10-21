@@ -3989,4 +3989,64 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get tagBackupDeleted => 'Backup gelöscht';
+
+  @override
+  String get deleteFromDevice => 'Vom Gerät löschen';
+
+  @override
+  String deleteTrackTitle(String title) {
+    return '„$title“ löschen?';
+  }
+
+  @override
+  String get deleteTrackBody =>
+      'Die Datei wird vom Gerät gelöscht und der Titel verschwindet aus Bibliothek, Playlists, Favoriten und Verlauf. Das lässt sich nicht rückgängig machen.';
+
+  @override
+  String deleteTracksTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Titel löschen?',
+      one: '1 Titel löschen?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get deleteTracksBody =>
+      'Die Dateien werden vom Gerät gelöscht und die Titel verschwinden aus Bibliothek, Playlists, Favoriten und Verlauf. Das lässt sich nicht rückgängig machen.';
+
+  @override
+  String get deleteConfirm => 'Löschen';
+
+  @override
+  String get trackDeleted => 'Titel gelöscht';
+
+  @override
+  String trackDeleteFailed(String reason) {
+    return 'Die Datei konnte nicht gelöscht werden: $reason';
+  }
+
+  @override
+  String tracksDeleted(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Titel gelöscht',
+      one: '1 Titel gelöscht',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String tracksDeletedSome(int count, int failed) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Titel gelöscht',
+      one: '1 Titel gelöscht',
+    );
+    return '$_temp0 · $failed nicht gelöscht';
+  }
 }

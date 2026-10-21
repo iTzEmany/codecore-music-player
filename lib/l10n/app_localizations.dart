@@ -6338,6 +6338,66 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Backup eliminato'**
   String get tagBackupDeleted;
+
+  /// No description provided for @deleteFromDevice.
+  ///
+  /// In it, this message translates to:
+  /// **'Elimina dal dispositivo'**
+  String get deleteFromDevice;
+
+  /// No description provided for @deleteTrackTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Eliminare «{title}»?'**
+  String deleteTrackTitle(String title);
+
+  /// No description provided for @deleteTrackBody.
+  ///
+  /// In it, this message translates to:
+  /// **'Il file viene cancellato dal dispositivo e il brano sparisce dalla libreria, dalle playlist, dai preferiti e dalla cronologia. Non si può annullare.'**
+  String get deleteTrackBody;
+
+  /// No description provided for @deleteTracksTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, one{Eliminare 1 brano?} other{Eliminare {count} brani?}}'**
+  String deleteTracksTitle(int count);
+
+  /// No description provided for @deleteTracksBody.
+  ///
+  /// In it, this message translates to:
+  /// **'I file vengono cancellati dal dispositivo e i brani spariscono dalla libreria, dalle playlist, dai preferiti e dalla cronologia. Non si può annullare.'**
+  String get deleteTracksBody;
+
+  /// No description provided for @deleteConfirm.
+  ///
+  /// In it, this message translates to:
+  /// **'Elimina'**
+  String get deleteConfirm;
+
+  /// No description provided for @trackDeleted.
+  ///
+  /// In it, this message translates to:
+  /// **'Brano eliminato'**
+  String get trackDeleted;
+
+  /// No description provided for @trackDeleteFailed.
+  ///
+  /// In it, this message translates to:
+  /// **'Impossibile eliminare il file: {reason}'**
+  String trackDeleteFailed(String reason);
+
+  /// No description provided for @tracksDeleted.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, one{1 brano eliminato} other{{count} brani eliminati}}'**
+  String tracksDeleted(int count);
+
+  /// No description provided for @tracksDeletedSome.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, one{1 brano eliminato} other{{count} brani eliminati}} · {failed} non eliminati'**
+  String tracksDeletedSome(int count, int failed);
 }
 
 class _AppLocalizationsDelegate

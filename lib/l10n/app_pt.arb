@@ -2451,5 +2451,53 @@
   },
   "tagBackupDelete": "Eliminar cópia",
   "tagBackupDeleteBody": "Já não poderá devolver o ficheiro ao estado anterior à alteração.",
-  "tagBackupDeleted": "Cópia eliminada"
+  "tagBackupDeleted": "Cópia eliminada",
+  "deleteFromDevice": "Eliminar do dispositivo",
+  "deleteTrackTitle": "Eliminar «{title}»?",
+  "@deleteTrackTitle": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteTrackBody": "O ficheiro é apagado do dispositivo e a faixa desaparece da biblioteca, das playlists, dos favoritos e do histórico. Não é possível anular.",
+  "deleteTracksTitle": "{count, plural, one{Eliminar 1 faixa?} other{Eliminar {count} faixas?}}",
+  "@deleteTracksTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteTracksBody": "Os ficheiros são apagados do dispositivo e as faixas desaparecem da biblioteca, das playlists, dos favoritos e do histórico. Não é possível anular.",
+  "deleteConfirm": "Eliminar",
+  "trackDeleted": "Faixa eliminada",
+  "trackDeleteFailed": "Não foi possível eliminar o ficheiro: {reason}",
+  "@trackDeleteFailed": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "tracksDeleted": "{count, plural, one{1 faixa eliminada} other{{count} faixas eliminadas}}",
+  "@tracksDeleted": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tracksDeletedSome": "{count, plural, one{1 faixa eliminada} other{{count} faixas eliminadas}} · {failed} não eliminadas",
+  "@tracksDeletedSome": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
+    }
+  }
 }

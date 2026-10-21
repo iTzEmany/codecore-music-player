@@ -79,6 +79,7 @@ class PlayerController {
   Future<void> seek(Duration position) => _handler.seek(position);
   Future<void> jumpToQueueIndex(int index) => _handler.skipToQueueItem(index);
   Future<void> removeFromQueue(int index) => _handler.removeFromQueue(index);
+  Future<void> removeTracks(Set<int> ids) => _handler.removeTracks(ids);
   void reorderQueue(int from, int to) {
     _handler.moveInQueue(from, to);
   }

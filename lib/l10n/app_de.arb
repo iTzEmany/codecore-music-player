@@ -2260,5 +2260,53 @@
   },
   "tagBackupDelete": "Backup löschen",
   "tagBackupDeleteBody": "Sie können die Datei dann nicht mehr auf den Stand vor der Änderung zurücksetzen.",
-  "tagBackupDeleted": "Backup gelöscht"
+  "tagBackupDeleted": "Backup gelöscht",
+  "deleteFromDevice": "Vom Gerät löschen",
+  "deleteTrackTitle": "„{title}“ löschen?",
+  "@deleteTrackTitle": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteTrackBody": "Die Datei wird vom Gerät gelöscht und der Titel verschwindet aus Bibliothek, Playlists, Favoriten und Verlauf. Das lässt sich nicht rückgängig machen.",
+  "deleteTracksTitle": "{count, plural, one{1 Titel löschen?} other{{count} Titel löschen?}}",
+  "@deleteTracksTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteTracksBody": "Die Dateien werden vom Gerät gelöscht und die Titel verschwinden aus Bibliothek, Playlists, Favoriten und Verlauf. Das lässt sich nicht rückgängig machen.",
+  "deleteConfirm": "Löschen",
+  "trackDeleted": "Titel gelöscht",
+  "trackDeleteFailed": "Die Datei konnte nicht gelöscht werden: {reason}",
+  "@trackDeleteFailed": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "tracksDeleted": "{count, plural, one{1 Titel gelöscht} other{{count} Titel gelöscht}}",
+  "@tracksDeleted": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tracksDeletedSome": "{count, plural, one{1 Titel gelöscht} other{{count} Titel gelöscht}} · {failed} nicht gelöscht",
+  "@tracksDeletedSome": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
+    }
+  }
 }

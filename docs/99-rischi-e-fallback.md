@@ -148,3 +148,9 @@ Per ogni rischio: **sintomo** → **cosa fare**. Se scatta un fallback che cambi
 | R25 | Brani riconosciuti male su un altro dispositivo | Preferiti/playlist sul brano sbagliato | Percorso relativo → titolo+artista+durata ±2 s → hash; parità → «non trovato», con elenco copiabile; l'unione non cancella niente |
 | R26 | Backup troppo grande per `saveFile` su Android (tutto in memoria) | Errore o app lenta salvando | Lo zip contiene copertine (già compresse, `store`) ma non musica; 20.000 brani + 2.000 copertine = 60 MB in 1,7 s. Se la libreria vera supera ~150 MB: piano B zip in una cartella dell'app con percorso mostrato (non ancora necessario) |
 
+## Elimina dal dispositivo
+| # | Rischio | Sintomo | Piano B |
+|---|---|---|---|
+| R72 | Android: un file non creato dall'app non si cancella con `File.delete` (Android 11+) e sotto Android 11 non c'è nemmeno `createDeleteRequest` | «Impossibile eliminare il file: Operation not permitted»; il brano resta in libreria | Da Android 11: **un** dialogo di sistema per tutta la selezione (`MediaDeleteBridge`), poi si ricontrolla il disco e si tolgono solo le righe dei file spariti; il file non cancellato resta in libreria e il motivo è mostrato. **Android 10 e precedenti: nessun ripiego** (minSdk 24): il brano resta; va tolto dal gestore file. Il dialogo di sistema è un secondo passaggio dopo la conferma dell'app. **Non provato su un telefono** |
+| R73 | Windows: un file aperto dal player non si cancella | Rifiuto «in uso» sul brano che suona o è già preparato in gapless | La coda lascia andare i brani (`removeTracks` aspetta il ricaricamento e il rinnovo della finestra gapless) prima di cancellare; se un file resta bloccato è un fallimento normale: riga intatta e motivo mostrato |
+

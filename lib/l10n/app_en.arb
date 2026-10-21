@@ -2260,5 +2260,53 @@
   },
   "tagBackupDelete": "Delete backup",
   "tagBackupDeleteBody": "You will no longer be able to bring the file back to how it was before the edit.",
-  "tagBackupDeleted": "Backup deleted"
+  "tagBackupDeleted": "Backup deleted",
+  "deleteFromDevice": "Delete from device",
+  "deleteTrackTitle": "Delete “{title}”?",
+  "@deleteTrackTitle": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteTrackBody": "The file is deleted from the device and the track disappears from the library, playlists, favourites and history. This cannot be undone.",
+  "deleteTracksTitle": "{count, plural, one{Delete 1 track?} other{Delete {count} tracks?}}",
+  "@deleteTracksTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteTracksBody": "The files are deleted from the device and the tracks disappear from the library, playlists, favourites and history. This cannot be undone.",
+  "deleteConfirm": "Delete",
+  "trackDeleted": "Track deleted",
+  "trackDeleteFailed": "Could not delete the file: {reason}",
+  "@trackDeleteFailed": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "tracksDeleted": "{count, plural, one{1 track deleted} other{{count} tracks deleted}}",
+  "@tracksDeleted": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tracksDeletedSome": "{count, plural, one{1 track deleted} other{{count} tracks deleted}} · {failed} not deleted",
+  "@tracksDeletedSome": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
+    }
+  }
 }

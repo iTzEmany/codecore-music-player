@@ -89,6 +89,31 @@ void main() {
     expect(handler.queueIds, ids, reason: 'another track plays: no undo');
   });
 
+  test('removeTracks drops every occurrence, also from the list «Svuota» uses', () async {
+    await handler.playQueue(ids, 0);
+    await settle();
+    handler.addToQueue(ids[1]);
+
+    await handler.removeTracks({ids[1]});
+
+    expect(handler.queueIds, [ids[0], ids[2]]);
+    expect(handler.currentTrack!.title, 'a');
+    handler.rebuildUpcoming();
+    expect(handler.queueIds, [ids[0], ids[2]], reason: 'b is not rebuilt');
+  });
+
+  test('removeTracks of the playing track loads the next one and keeps playing', () async {
+    await handler.playQueue(ids, 1);
+    await settle();
+
+    await handler.removeTracks({ids[1]});
+    await settle();
+
+    expect(handler.queueIds, [ids[0], ids[2]]);
+    expect(backend.loaded.last, '/m/c.mp3');
+    expect(handler.isPlaying, true);
+  });
+
   test('load error reports and skips to next', () async {
     backend.failing.add('/m/b.mp3');
     await handler.playQueue(ids, 1);

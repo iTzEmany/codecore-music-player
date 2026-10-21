@@ -372,6 +372,21 @@ class TrackRepository {
     });
   }
 
+  /// Deletes library rows whatever their state (the caller has already made
+  /// sure the files are gone). Playlist entries, history and tags go with them
+  /// (cascade). Returns how many rows went.
+  Future<int> deleteTracks(List<int> ids) async {
+    if (ids.isEmpty) return 0;
+    return _db.transaction(() async {
+      var removed = 0;
+      for (final chunk in _chunks(ids, 500)) {
+        removed +=
+            await (_db.delete(_db.tracks)..where((t) => t.id.isIn(chunk))).go();
+      }
+      return removed;
+    });
+  }
+
   Stream<Track?> watchById(int id) =>
       (_db.select(_db.tracks)..where((t) => t.id.equals(id)))
           .watchSingleOrNull();

@@ -27,6 +27,7 @@ import '../../data/repositories/library_queries.dart';
 import '../../providers/library_providers.dart';
 import '../theme/tokens.dart';
 import 'cover_image.dart';
+import 'delete_tracks.dart';
 import 'favorite_actions.dart';
 import 'format_utils.dart';
 import 'quality_tag.dart';
@@ -176,6 +177,16 @@ List<TrackActionGroup> trackActions(
           Icons.folder_open_rounded,
           l.showInFolder,
           () async => revealInFolder(track.path),
+        ),
+      // The file itself, not just a list: music only (episodes have their own
+      // cleanup).
+      if (track.kind == 0)
+        TrackAction(
+          Icons.delete_forever_rounded,
+          l.deleteFromDevice,
+          () async {
+            await confirmAndDeleteTracks(outer, ref, [track]);
+          },
         ),
     ]),
   ];

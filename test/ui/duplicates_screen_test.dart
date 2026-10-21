@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:codecore/providers/duplicate_providers.dart';
 import 'package:codecore/services/library/duplicate_cleanup.dart';
 import 'package:codecore/services/library/duplicate_finder.dart';
+import 'package:codecore/services/library/track_deleter.dart';
 import 'package:codecore/ui/screens/cleanup/duplicates_screen.dart';
 import 'package:drift/drift.dart' show Variable;
 import 'package:flutter/material.dart';
@@ -32,7 +33,7 @@ void main() {
   late List<String> paths;
 
   /// Three tracks as real 1-byte files; Song 0 and Song 1 get the same hash.
-  Future<void> open(WidgetTester tester, {FileHasherFn? fakeHasher, FileDeleter? deleter}) async {
+  Future<void> open(WidgetTester tester, {FileHasherFn? fakeHasher, FileDeleter? deleter, PlatformDeleter? platform}) async {
     tester.view.physicalSize = const Size(400, 900);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -51,6 +52,7 @@ void main() {
     await h.pump(tester, const DuplicatesScreen(), extraOverrides: [
       duplicateHasherProvider.overrideWithValue(useHasher),
       duplicateDeleterProvider.overrideWithValue(deleter),
+      duplicatePlatformDeleterProvider.overrideWithValue(platform),
       duplicateGrouperProvider.overrideWithValue((lib, hashes) async => findDuplicates(lib, hashes: hashes)),
     ]);
   }
@@ -222,6 +224,40 @@ void main() {
     final rows = await tester.runAsync(() => h.db.customSelect('SELECT COUNT(*) AS n FROM tracks').getSingle());
     expect(rows!.data['n'], 3, reason: 'nothing was forgotten');
     expect(paths.where((f) => File(f).existsSync()), hasLength(3));
+    await h.dispose(tester);
+  });
+
+  testWidgets('refused files go to the platform deleter in one call; rows go only for files that are gone', (tester) async {
+    final calls = <List<String>>[];
+    await open(
+      tester,
+      deleter: (path) async =>
+          throw FileSystemException('denied', path, const OSError('Operation not permitted', 1)),
+      platform: (list) async {
+        calls.add(list);
+        for (final f in list) {
+          File(f).deleteSync();
+        }
+        return list;
+      },
+    );
+    final container = ProviderScope.containerOf(tester.element(find.byType(DuplicatesScreen)));
+    await tester.tap(find.text('Cerca duplicati'));
+    await _settle(tester);
+    await tester.tap(find.text('Unisci'));
+    await _settle(tester);
+    final dropped = container.read(duplicateSearchProvider).merged.single.dropped.single.path;
+
+    final r = await tester.runAsync(() => container.read(duplicateSearchProvider.notifier).deleteMergedFiles());
+
+    expect(calls, [
+      [dropped],
+    ]);
+    expect(r!.deleted.map((e) => e.path), [dropped]);
+    expect(r.failed, isEmpty);
+    final rows = await tester.runAsync(() => h.db.customSelect('SELECT path FROM tracks').get());
+    expect(rows!.map((x) => x.data['path']), isNot(contains(dropped)));
+    expect(rows, hasLength(2));
     await h.dispose(tester);
   });
 

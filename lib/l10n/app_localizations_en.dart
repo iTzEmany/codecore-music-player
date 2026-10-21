@@ -3969,4 +3969,64 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tagBackupDeleted => 'Backup deleted';
+
+  @override
+  String get deleteFromDevice => 'Delete from device';
+
+  @override
+  String deleteTrackTitle(String title) {
+    return 'Delete “$title”?';
+  }
+
+  @override
+  String get deleteTrackBody =>
+      'The file is deleted from the device and the track disappears from the library, playlists, favourites and history. This cannot be undone.';
+
+  @override
+  String deleteTracksTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Delete $count tracks?',
+      one: 'Delete 1 track?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get deleteTracksBody =>
+      'The files are deleted from the device and the tracks disappear from the library, playlists, favourites and history. This cannot be undone.';
+
+  @override
+  String get deleteConfirm => 'Delete';
+
+  @override
+  String get trackDeleted => 'Track deleted';
+
+  @override
+  String trackDeleteFailed(String reason) {
+    return 'Could not delete the file: $reason';
+  }
+
+  @override
+  String tracksDeleted(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tracks deleted',
+      one: '1 track deleted',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String tracksDeletedSome(int count, int failed) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tracks deleted',
+      one: '1 track deleted',
+    );
+    return '$_temp0 · $failed not deleted';
+  }
 }

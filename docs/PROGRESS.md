@@ -21,7 +21,7 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 1.5 Copertine
 - [x] 1.6 Provider
 - [~] 1.7 Permessi Android e cartella predefinita
-- [~] 1.8 Schermata di debug
+- [x] 1.8 Schermata di debug (superato: rimossa in 3.10)
 
 ## Fase 2 — Player (`fase-2-player.md`)
 - [x] 2.1 PlayQueue (+ test)
@@ -35,7 +35,7 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 3.1 Tema
 - [x] 3.2 Shell adattiva
 - [x] 3.3 Widget riusabili
-- [~] 3.4 Tab Brani
+- [x] 3.4 Tab Brani (superato: sostituita da «Tutti i brani», 11.10, in uso ogni giorno)
 - [x] 3.5 Tab Album + dettaglio
 - [x] 3.6 Tab Artisti
 - [x] 3.7 Mini-player
@@ -62,14 +62,14 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 5.6 EnrichmentService (+ test)
 - [x] 5.7 UI arricchimento
 - [x] 5.8 Schermata testi
-- [~] 5.9 YoutubeService
-- [~] 5.10 Coda di download
-- [~] 5.11 Schermata YouTube
+- [x] 5.9 YoutubeService (in uso ogni giorno: ricerca, download e importazioni sui telefoni)
+- [x] 5.10 Coda di download (importazioni vere sul Mi A3 e sul Motorola)
+- [x] 5.11 Schermata YouTube (ora Cerca: «Ascolta» confermato dall'utente il 2026-10-21; download in uso con le importazioni)
 
 ## Fase 6 — Condivisione LAN, opzionale (`fase-6-condivisione-lan.md`)
 - [x] 6.1 Server
 - [x] 6.2 Client
-- [~] 6.3 UI
+- [x] 6.3 UI (superato: interfaccia rifatta in 11.17, invio e richiesta provati dal vivo in 24.6)
 - [x] 6.4 Integrazione
 
 ## Fase 7 — Rifinitura (`fase-7-rifinitura.md`)
@@ -77,7 +77,7 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 7.2 Gapless (rimandato qui e fatto nella fase 18)
 - [x] 7.3 ReplayGain
 - [~] 7.4 Controlli multimediali desktop
-- [~] 7.5 Prestazioni
+- [x] 7.5 Prestazioni (misure sul Mi A3 nella fase 28, 28.10)
 - [x] 7.6 Accessibilità
 - [~] 7.7 Timer di spegnimento
 - [x] 7.8 Icona e nome app
@@ -196,13 +196,13 @@ L'agente riparte sempre dal primo task non spuntato.
 
 ## Fase 16 — CI e test automatici (`fase-16-ci-test.md`)
 - [x] 16.1 Verifiche preliminari (versione Flutter, test senza rete, pacchetti apt, remote GitHub)
-- [~] 16.2 Workflow `ci.yml`: analyze e test
+- [x] 16.2 Workflow `ci.yml`: analyze e test (verde su GitHub, Linux e Windows, il 2026-10-20)
 - [~] 16.3 Build Android e Linux con artefatti
 - [~] 16.4 Build Windows (`windows-latest`)
 - [x] 16.5 Test d'integrazione sul telefono: base (scansione) (provato su emulatore Android 36; su Linux serve una finestra: in «Tocca a te»)
 - [x] 16.6 Test d'integrazione: riproduzione, playlist, importazione
 - [x] 16.7 Golden test delle schermate principali (100 % e 150 %)
-- [~] 16.8 Test live notturni e controllo delle dipendenze
+- [~] 16.8 Test live notturni e controllo delle dipendenze (notturno verde su GitHub il 20 e 21/10; `deps.yml` parte il lunedì, mai partito)
 - [x] 16.9 Profilo prestazioni su 50.000 brani
 - [~] 16.10 Rifinitura, documentazione e prova a mano
 
@@ -293,7 +293,7 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 24.3 Elenco dei dispositivi fidati
 - [x] 24.4 HTTPS su `OfferNode` (Jam esclusa)
 - [x] 24.5 Abbinamento con PIN (provato dal vivo PC ↔ Mi A3: PIN, impronte, conferma, badge «fidato» su entrambi)
-- [~] 24.6 Offerte dai fidati (prova a mano)
+- [x] 24.6 Offerte dai fidati (provate dal vivo: «Chiedi i brani mancanti» e «Invia»)
 - [x] 24.7 Scanner QR (Android) (provato dal vivo sul Mi A3 contro il PC: legge il QR, si collega, elenca i brani)
 - [x] 24.8 Schema v10: playlist con `uuid` e `updated_at`
 - [~] 24.9 Sincronizzazione delle playlist (rotte, client, anteprima e avvio dalla scheda del fidato fatti; prova a mano tra due dispositivi)
@@ -374,6 +374,8 @@ Piano del 2026-10-20. Richieste dell'utente: nessun rallentamento sul Mi A3 con 
 - Importazione in background e Centro Attività (2026-10-21, richiesta dell'utente sul Motorola edge 40, Android 15: «ad app chiusa l'importazione non continua», notifica sempre attiva, niente blocchi, una lista di brani con la fase di ognuno, un «Registro» al posto dei salvati): **cause**: senza servizio in primo piano Android congela il processo in background (il DB mostrava ~270 brani in 20 min, poi più nulla); dopo il riavvio la catena dei blocchi, tenuta solo in memoria, si fermava al blocco successivo. **Fatto**: `ImportService` (FGS `specialUse` + wake/Wi‑Fi lock) con notifica «Importazione «Nome»» · «N di M · circa …» e «Pausa»; catena ricavata dal DB e comandi sulla catena intera; `ImportDetailScreen` (tutte le righe, fase: in coda / in ricerca / download % / arricchimento / scaricato / da verificare…, filtri); riga dell'Attività = nome + scaricati/totali; `Registro`. Poi, su segnalazione («ogni canzone fa comparire una barra "Arricchimento 0/0"»): l'arricchimento automatico dopo ogni download non usa più il lavoro a lotti (che mostrava la riga e lo snackbar «0 aggiornati…» e ne scartava uno se un altro girava) ma `QuietEnricher`, e per l'import parte dopo i tag del CSV; «Download -1 %» (youtubedl-android dà -1 finché non sa la dimensione) → «Download…». Prova sul Motorola (APK debug 6024): riga «Liked Songs 495/2245», dettaglio con fasi e filtri, Registro con i download e l'ora, **app in background: 505 → 524 brani in 90 s** con la notifica aggiornata e `ImportService` in primo piano.
 - «Svuota» la coda (2026-10-21, segnalazione dell'utente: «se svuoto la coda deve rigenerarsi in ordine diverso o con canzoni diverse, dipende dalla playlist; ora se svuoto e salto compare "Nessun brano in riproduzione"»): il player ricorda la **lista da cui è partito l'ascolto** (`_source`: playlist, album, ricerca…; dopo un riavvio la coda ripristinata) e «Svuota» ricrea subito ciò che segue (`PlayQueue.rebuildUpcoming`): senza casuale la lista dal brano attuale in poi, con casuale un nuovo mescolamento di tutta la lista **scritto nell'ordine della coda** (così la Coda mostra ciò che suonerà); le aggiunte a mano spariscono; senza lista (coda nata da «Riproduci dopo») si svuota come prima. Annulla rimette la coda di prima finché suona lo stesso brano. Messaggio «Coda ricreata dalla lista in ascolto».
 - Import fermo di notte (2026-10-21, segnalazione dell'utente: «durante la notte mi si è nuovamente interrotto l'import»): il processo era vivo (exit-info: nessuna morte fra le 03:36 e le 16:06), Wi‑Fi collegato tutta la notte; il blocco 11/23 è andato in pausa alle 04:02 sulla **pagina dell'album «Stefano Rosso»** (31 righe dello stesso album): `albumTracks` chiedeva a yt-dlp i dati completi di ogni brano (`-J` senza `--flat-playlist`, una richiesta per brano) → 64 s sul PC per 24 brani, oltre i 45 s di `searchTimeout` → «search timed out» = `network` → pausa; a ogni «Riprendi» di nuovo lì (alle 16:05 anche un LOW_MEMORY durante quella lettura). **Correzioni**: pagina album **flat** (4,5 s; `parseYtAlbumPage`: album dal titolo «Album - …», artista dal canale «… - Topic»), Android e desktop; una pagina album non letta non ferma più nulla (ricerca brano per brano; solo il 429 risale); errori di rete e 429 nelle ricerche → **attesa e nuovo tentativo** sulla stessa riga (`networkBackoff` 30 s…10 min, `rateLimitBackoff` 15/30/60 min, poi pausa come prima), anche il 429 di un download rimette la riga in coda dopo l'attesa; la notifica dice «YouTube chiede una pausa: riprendo alle 04:32» / «Rete assente: riprovo alle …»; una pausa da errore lascia una notifica col motivo; una riga che va in errore imprevisto diventa «non riuscita» invece di fermare il motore; corsa «Riprendi» mentre il ciclo stava finendo (`_again`); `AppLog` scrive il file anche nelle build di debug (`files/codecore.log`, non sotto `flutter test`).
+- Prove a mano, repository e CI (2026-10-21, utente: «ascolta nella ricerca funziona»; le microanimazioni per ora non si possono provare perché durante l'importazione l'app sul Motorola è lenta e a scatti): 28.6 confermato, 28.11 resta `[~]`. Repository GitHub reso **pubblico** dopo un controllo della cronologia (nessuna chiave o password, solo i `secrets.*` di `release.yml`; fixture audio sintetiche; resta visibile l'email dell'autore dei commit). `kReleaseRepo` = `iTzEmany/codecore-music-player`; il controllo legge `/releases` e prende la prima né bozza né pre-release: senza release risponde «aggiornato» (con `/releases/latest` il 404 diventava «non riuscito»). CI rossa dal 20/10 sera solo su Windows: `RawDatagramSocket.send` restituisce 0 se un invio è ancora in corso (su Windows uno per socket) e il test mandava due beacon di fila; ora si ritenta, anche in `LanDiscovery._send()`, dove su Windows si perdevano i broadcast diretti dopo il primo. Rivisti i «Tocca a te»: fatte 5.9–5.11, 7.5, 16.2, 24.6; superate 1.8, 3.4, 6.3.
+- «Elimina dal dispositivo» (2026-10-21, richiesta dell'utente: «eliminare una canzone… non dico rimuoverla da una playlist ma proprio eliminarla»): voce nel menu del brano e nella selezione multipla, solo per la musica (gli episodi hanno la loro pulizia). Dopo la conferma `TrackDeleter` toglie i brani dalla coda e dalla lista di partenza (su Windows un file aperto dal player non si cancella), cancella i file e solo per quelli spariti (o già mancanti) cancella la riga: playlist, preferiti, cronologia ed etichette se ne vanno con le cascate; un file che non si cancella lascia il brano com'è. Android 11+: i file non creati dall'app (`EPERM`) passano tutti insieme a `MediaStore.createDeleteRequest`, un solo dialogo di sistema (canale `codecore/media`, `MediaDeleteBridge.kt`); Android ≤ 10 senza ripiego (R72, R73 per Windows). Lo stesso ripiego, in un solo dialogo, ora vale per «Duplicati → elimina i file». Le righe d'importazione del brano restano «scaricato» con `track_id` nullo: riprendere l'importazione non lo riscarica, «Sincronizza da CSV» sì.
 
 ## Note di deviazione
 <!-- una riga per deviazione: data — task — cosa è cambiato e perché -->

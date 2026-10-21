@@ -2541,5 +2541,53 @@
   },
   "tagBackupDelete": "Elimina backup",
   "tagBackupDeleteBody": "Non potrai più riportare il file a com’era prima della modifica.",
-  "tagBackupDeleted": "Backup eliminato"
+  "tagBackupDeleted": "Backup eliminato",
+  "deleteFromDevice": "Elimina dal dispositivo",
+  "deleteTrackTitle": "Eliminare «{title}»?",
+  "@deleteTrackTitle": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteTrackBody": "Il file viene cancellato dal dispositivo e il brano sparisce dalla libreria, dalle playlist, dai preferiti e dalla cronologia. Non si può annullare.",
+  "deleteTracksTitle": "{count, plural, one{Eliminare 1 brano?} other{Eliminare {count} brani?}}",
+  "@deleteTracksTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteTracksBody": "I file vengono cancellati dal dispositivo e i brani spariscono dalla libreria, dalle playlist, dai preferiti e dalla cronologia. Non si può annullare.",
+  "deleteConfirm": "Elimina",
+  "trackDeleted": "Brano eliminato",
+  "trackDeleteFailed": "Impossibile eliminare il file: {reason}",
+  "@trackDeleteFailed": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "tracksDeleted": "{count, plural, one{1 brano eliminato} other{{count} brani eliminati}}",
+  "@tracksDeleted": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tracksDeletedSome": "{count, plural, one{1 brano eliminato} other{{count} brani eliminati}} · {failed} non eliminati",
+  "@tracksDeletedSome": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
+    }
+  }
 }

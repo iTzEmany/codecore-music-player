@@ -3977,4 +3977,64 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get tagBackupDeleted => 'Cópia eliminada';
+
+  @override
+  String get deleteFromDevice => 'Eliminar do dispositivo';
+
+  @override
+  String deleteTrackTitle(String title) {
+    return 'Eliminar «$title»?';
+  }
+
+  @override
+  String get deleteTrackBody =>
+      'O ficheiro é apagado do dispositivo e a faixa desaparece da biblioteca, das playlists, dos favoritos e do histórico. Não é possível anular.';
+
+  @override
+  String deleteTracksTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Eliminar $count faixas?',
+      one: 'Eliminar 1 faixa?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get deleteTracksBody =>
+      'Os ficheiros são apagados do dispositivo e as faixas desaparecem da biblioteca, das playlists, dos favoritos e do histórico. Não é possível anular.';
+
+  @override
+  String get deleteConfirm => 'Eliminar';
+
+  @override
+  String get trackDeleted => 'Faixa eliminada';
+
+  @override
+  String trackDeleteFailed(String reason) {
+    return 'Não foi possível eliminar o ficheiro: $reason';
+  }
+
+  @override
+  String tracksDeleted(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count faixas eliminadas',
+      one: '1 faixa eliminada',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String tracksDeletedSome(int count, int failed) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count faixas eliminadas',
+      one: '1 faixa eliminada',
+    );
+    return '$_temp0 · $failed não eliminadas';
+  }
 }

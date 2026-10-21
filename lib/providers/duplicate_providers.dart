@@ -1,13 +1,17 @@
+import 'dart:io';
 import 'dart:isolate';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/app_log.dart';
+import '../core/platform.dart';
 import '../data/db/app_database.dart';
 import '../data/repositories/duplicate_repository.dart';
+import '../services/android/media_deleter.dart';
 import '../services/library/duplicate_cleanup.dart';
 import '../services/library/duplicate_finder.dart';
 import '../services/library/file_hasher.dart';
+import '../services/library/track_deleter.dart';
 import 'database_providers.dart';
 import 'settings_providers.dart';
 
@@ -20,6 +24,12 @@ final duplicateHasherProvider = Provider<FileHasher>((ref) => sha256OfFile);
 
 /// Deletes one file; null = the real `File.delete`. Tests replace it.
 final duplicateDeleterProvider = Provider<FileDeleter?>((ref) => null);
+
+/// For the files `File.delete` was refused (Android 11+: not created by the
+/// app): one system dialog for all of them. Null where there is none.
+final duplicatePlatformDeleterProvider = Provider<PlatformDeleter?>(
+  (ref) => isAndroid ? deleteWithSystemDialog : null,
+);
 
 typedef DuplicateGrouper =
     Future<List<DuplicateGroup>> Function(
@@ -193,6 +203,20 @@ class DuplicateSearchNotifier extends Notifier<DuplicateSearchState> {
       deleted.addAll(r.deleted);
       failed.addAll(r.failed);
       skipped.addAll(r.skipped);
+    }
+    final platform = ref.read(duplicatePlatformDeleterProvider);
+    if (platform != null && failed.isNotEmpty) {
+      try {
+        await platform([for (final d in failed.keys) d.path]);
+      } on Object catch (e, st) {
+        AppLog.w('platform delete of duplicates failed', e, st);
+      }
+      for (final d in failed.keys.toList()) {
+        if (!await File(d.path).exists()) {
+          failed.remove(d);
+          deleted.add(d);
+        }
+      }
     }
     final tracks = ref.read(trackRepositoryProvider);
     for (final d in deleted) {

@@ -30,6 +30,7 @@ class MainActivity : AudioServiceActivity() {
         // yt-dlp lives in the `full` flavor only (see YtDlpChannel).
         YtDlpChannel(applicationContext).register(flutterEngine.dartExecutor.binaryMessenger)
         ImportBridge.register(flutterEngine.dartExecutor.binaryMessenger, applicationContext)
+        MediaDeleteBridge.register(flutterEngine.dartExecutor.binaryMessenger, this)
 
         // Where the sound goes (headphones or speaker): the equalizer keeps a
         // curve for each.
@@ -102,6 +103,13 @@ class MainActivity : AudioServiceActivity() {
                 else -> result.notImplemented()
             }
         }
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: android.content.Intent?) {
+        if (MediaDeleteBridge.onActivityResult(requestCode)) return
+        @Suppress("DEPRECATION")
+        super.onActivityResult(requestCode, resultCode, data)
     }
 
     private fun pushRoute(audio: MethodChannel) {
