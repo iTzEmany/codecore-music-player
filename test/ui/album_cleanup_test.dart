@@ -15,7 +15,7 @@ void main() {
   late Harness h;
 
   /// Four tracks: Song 0 and 2 in «Album 0», Song 1 and 3 in «Album 1».
-  Future<void> open(WidgetTester tester) async {
+  Future<void> open(WidgetTester tester, {int summaryCount = 2, int summaryMs = 370000}) async {
     tester.view.physicalSize = const Size(500, 1000);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -26,14 +26,14 @@ void main() {
     });
     await h.pump(
       tester,
-      const AlbumDetailScreen(
+      AlbumDetailScreen(
         album: AlbumSummary(
           albumKey: 'artist|album 0',
           title: 'Album 0',
           artist: 'Artist',
           variousArtists: false,
-          trackCount: 2,
-          durationMs: 370000,
+          trackCount: summaryCount,
+          durationMs: summaryMs,
           year: null,
           coverKey: 'cov0',
         ),
@@ -55,6 +55,14 @@ void main() {
       await _settle(tester);
     }
   }
+
+  testWidgets('the header counts the rows listed, not the stale summary', (tester) async {
+    await open(tester, summaryCount: 3, summaryMs: 555000);
+    await _settle(tester);
+    expect(find.textContaining('2 brani'), findsOneWidget);
+    expect(find.textContaining('3 brani'), findsNothing);
+    await h.dispose(tester);
+  });
 
   testWidgets('«Unisci con…» folds another album in: one key, the main cover, and undo', (tester) async {
     await open(tester);

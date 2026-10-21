@@ -1139,6 +1139,26 @@ void main() {
       expect(diff.removed.map((o) => o.title), ['B']);
       expect(diff.kept, hasLength(1));
     });
+
+    test('a row «not found» last time is not new: the preview and the sync leave it',
+        () async {
+      await setUpPlaylist();
+      final five = [for (var i = 0; i < 5; i++) song(i, 'ABCDE'[i])];
+      await service.sync(csv([...five, song(5, 'Z')]), pid);
+      await idle();
+      queued.clear();
+      yt.songs['band f'] = [topic('vf', 'F', 'Band', 200)];
+      final again = csv([...five, song(5, 'Z'), song(6, 'F')]);
+
+      final diff = await service.previewSync(again, pid);
+      expect(diff.added.map((r) => r.title), ['F'], reason: 'only F is really new');
+      expect(diff.parked.map((k) => k.fresh.title), ['Z']);
+
+      final id = await service.sync(again, pid);
+      await idle();
+      expect(queued.map((q) => q.$1.id), ['vf'], reason: 'Z is not searched again');
+      expect((await imports.item(id, 5))!.state, ImportItemStatus.notFound);
+    });
   });
 
   group('whole albums', () {

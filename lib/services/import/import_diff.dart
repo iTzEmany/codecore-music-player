@@ -11,6 +11,7 @@ class ImportDiff {
     this.added = const [],
     this.removed = const [],
     this.kept = const [],
+    this.parked = const [],
   });
 
   /// Rows of the new file that match nothing already in the playlist.
@@ -21,6 +22,10 @@ class ImportDiff {
 
   /// Rows that are still there, with the old item (and so the track) they match.
   final List<({PlaylistImportItem old, ImportRow fresh})> kept;
+
+  /// Rows that an earlier import left «not found» or «skipped»: not new, and
+  /// a sync leaves them as they were («Riprova» on the import searches again).
+  final List<({PlaylistImportItem old, ImportRow fresh})> parked;
 }
 
 String _titleArtistKey(String title, String primaryArtist) =>
@@ -29,7 +34,11 @@ String _titleArtistKey(String title, String primaryArtist) =>
 /// Matches [fresh] rows to the [old] items of a playlist, one to one: first by
 /// ISRC, then by title and main artist (so a new ISRC for the same song, as
 /// when a service re-releases it, still counts as the same song).
-ImportDiff diffImport(List<PlaylistImportItem> old, List<ImportRow> fresh) {
+ImportDiff diffImport(
+  List<PlaylistImportItem> old,
+  List<ImportRow> fresh, {
+  List<PlaylistImportItem> parked = const [],
+}) {
   final freeOld = List.of(old);
   final matched = <int, PlaylistImportItem>{};
 
@@ -51,8 +60,27 @@ ImportDiff diffImport(List<PlaylistImportItem> old, List<ImportRow> fresh) {
         (o) => _titleArtistKey(o.title, o.toRow().primaryArtist) == key);
     if (hit != null) matched[r.index] = hit;
   }
+  // Whatever is still unmatched may be a row parked by an earlier import.
+  final freeParked = List.of(parked);
+  final parkedHit = <int, PlaylistImportItem>{};
+  for (final r in fresh) {
+    if (matched.containsKey(r.index)) continue;
+    final isrc = r.isrc;
+    final key = _titleArtistKey(r.title, r.primaryArtist);
+    final i = freeParked.indexWhere((o) =>
+        (isrc != null && isrc.isNotEmpty && o.isrc == isrc) ||
+        _titleArtistKey(o.title, o.toRow().primaryArtist) == key);
+    if (i >= 0) parkedHit[r.index] = freeParked.removeAt(i);
+  }
   return ImportDiff(
-    added: [for (final r in fresh) if (!matched.containsKey(r.index)) r],
+    added: [
+      for (final r in fresh)
+        if (!matched.containsKey(r.index) && !parkedHit.containsKey(r.index)) r,
+    ],
+    parked: [
+      for (final r in fresh)
+        if (parkedHit.containsKey(r.index)) (old: parkedHit[r.index]!, fresh: r),
+    ],
     removed: freeOld,
     kept: [
       for (final r in fresh)

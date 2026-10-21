@@ -58,7 +58,15 @@ class AlbumDetailScreen extends ConsumerWidget {
 
     final meta = [
       if (album.year != null) '${album.year}',
-      tracksAndMinutes(context, album.trackCount, album.durationMs),
+      // Follow the rows once loaded: the summary is a snapshot (a track moved
+      // away or edited changes the album under this page).
+      tracksAndMinutes(
+        context,
+        tracks.hasValue ? list.length : album.trackCount,
+        tracks.hasValue
+            ? list.fold<int>(0, (sum, t) => sum + t.durationMs)
+            : album.durationMs,
+      ),
     ].join(' · ');
 
     final discs = {for (final t in list) t.discNumber ?? 1};

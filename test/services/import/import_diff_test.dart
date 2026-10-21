@@ -19,6 +19,20 @@ ImportRow fresh(int i, String title, String artist, {String? isrc}) =>
 
 void main() {
   group('diffImport', () {
+    test('a row parked by an earlier import (same ISRC or title) is not added',
+        () {
+      PlaylistImportItem lost(int i, String title, {String? isrc}) =>
+          PlaylistImportItem(
+              importId: 1, rowIndex: i, title: title, artists: 'Band', isrc: isrc, status: 5);
+      final d = diffImport([], [
+        fresh(0, 'Lost', 'Band', isrc: 'L1'),
+        fresh(1, 'Gone', 'Band'),
+        fresh(2, 'New', 'Band'),
+      ], parked: [lost(0, 'Other title', isrc: 'L1'), lost(1, 'Gone')]);
+      expect(d.added.map((r) => r.title), ['New']);
+      expect(d.parked.map((k) => k.fresh.title), ['Lost', 'Gone']);
+    });
+
     test('added, removed and kept, with the new index of the kept ones', () {
       final d = diffImport([
         old(0, 'One', 'Band', isrc: 'I1'),

@@ -365,9 +365,33 @@ class PlaylistImportService {
       ..sort((a, b) => a.rowIndex.compareTo(b.rowIndex));
   }
 
+  /// Rows of earlier imports of [playlistId] that ended «not found» or
+  /// «skipped» (the latest import wins): a sync does not count them as new.
+  Future<List<PlaylistImportItem>> _parkedItems(int playlistId) async {
+    final all = await imports.forPlaylist(playlistId)
+      ..sort((a, b) => a.id.compareTo(b.id));
+    final latest = <String, PlaylistImportItem>{};
+    for (final imp in all) {
+      for (final it in await imports.items(imp.id)) {
+        final key = '${matchTitleKey(it.title)}|${matchKey(it.toRow().primaryArtist)}';
+        if (it.state == ImportItemStatus.notFound ||
+            it.state == ImportItemStatus.skipped) {
+          latest[key] = it;
+        } else {
+          latest.remove(key);
+        }
+      }
+    }
+    return latest.values.toList();
+  }
+
+  Future<ImportDiff> _diffFor(ImportedPlaylist csv, int playlistId) async =>
+      diffImport(await _trackedItems(playlistId), _withAbsoluteLocations(csv),
+          parked: await _parkedItems(playlistId));
+
   /// What a sync of [csv] into [playlistId] would add and take out.
-  Future<ImportDiff> previewSync(ImportedPlaylist csv, int playlistId) async =>
-      diffImport(await _trackedItems(playlistId), _withAbsoluteLocations(csv));
+  Future<ImportDiff> previewSync(ImportedPlaylist csv, int playlistId) =>
+      _diffFor(csv, playlistId);
 
   /// Makes [playlistId] follow [csv]: new rows are imported, rows that left the
   /// file leave the playlist (their files and library entries stay), and the
@@ -378,7 +402,7 @@ class PlaylistImportService {
     ImportOptions options = const ImportOptions(),
   }) async {
     final rows = _withAbsoluteLocations(csv);
-    final diff = diffImport(await _trackedItems(playlistId), rows);
+    final diff = await _diffFor(csv, playlistId);
     for (final gone in diff.removed) {
       await playlists.removeTrack(playlistId, gone.trackId!);
       await imports.setItem(gone.importId, gone.rowIndex,
@@ -402,6 +426,14 @@ class PlaylistImportService {
           status: ImportItemStatus.linked,
           trackId: Value(k.old.trackId),
           note: const Value(ImportNote.unchanged));
+    }
+    for (final k in diff.parked) {
+      await imports.setItem(id, k.fresh.index,
+          status: k.old.state,
+          videoId: Value(k.old.videoId),
+          candidates: Value(k.old.candidates),
+          score: Value(k.old.score),
+          note: Value(k.old.note));
     }
     await playlists.reorderBy(
         playlistId, {for (final k in diff.kept) k.old.trackId!: k.fresh.index});

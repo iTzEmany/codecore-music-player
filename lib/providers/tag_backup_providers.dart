@@ -5,10 +5,14 @@ import '../services/tags/tag_backups.dart';
 import '../services/tags/tag_writer.dart';
 import 'library_providers.dart';
 
-/// The saved originals, newest first. Invalidate after a restore or delete.
-final tagBackupsProvider = FutureProvider.autoDispose<List<TagBackup>>(
-  (ref) async => (await ref.watch(tagBackupStoreProvider.future)).list(),
-);
+/// The saved originals, newest first. Follows the store: a new or deleted
+/// backup refreshes it.
+final tagBackupsProvider = FutureProvider.autoDispose<List<TagBackup>>((ref) async {
+  final store = await ref.watch(tagBackupStoreProvider.future);
+  final sub = store.changes.listen((_) => ref.invalidateSelf());
+  ref.onDispose(sub.cancel);
+  return store.list();
+});
 
 /// Why the file at the path cannot be rewritten (null = it can).
 final tagWritableProvider = FutureProvider.autoDispose

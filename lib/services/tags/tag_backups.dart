@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -70,6 +71,15 @@ class TagBackupStore {
   final Directory dir;
   final int maxCount, maxBytes;
 
+  final _changes = StreamController<void>.broadcast();
+
+  /// Fires after a backup is added or deleted, so lists can refresh.
+  Stream<void> get changes => _changes.stream;
+
+  void _notify() {
+    if (!_changes.isClosed) _changes.add(null);
+  }
+
   File _data(String id) => File(p.join(dir.path, '$id.bak'));
   File _meta(String id) => File(p.join(dir.path, '$id.json'));
 
@@ -92,6 +102,7 @@ class TagBackupStore {
         'size': size,
       }));
       await prune(keep: id);
+      _notify();
       return b;
     } on FileSystemException catch (e, st) {
       AppLog.e('tag backup failed: $originalPath', e, st);
@@ -127,6 +138,7 @@ class TagBackupStore {
     for (final f in [_data(b.id), _meta(b.id)]) {
       if (await f.exists()) await f.delete();
     }
+    _notify();
   }
 
   /// Puts the saved original back where it came from.
