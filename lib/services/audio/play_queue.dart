@@ -325,6 +325,35 @@ class PlayQueue {
     _keys.insert(_pos + 1, key);
   }
 
+  /// Puts [id] at [index] of the play order (past the end = at the end). The
+  /// current track keeps playing. With the natural order saved, the new key
+  /// goes right after the key of the entry now before it, so shuffle off keeps
+  /// the entry where the listener saw it.
+  void insertAt(int index, int id) {
+    if (_items.isEmpty) {
+      setItems([id]);
+      return;
+    }
+    _changed();
+    final at = index.clamp(0, _items.length);
+    final key = _newKey();
+    final natural = _natural;
+    if (natural != null) {
+      final before = at == 0 ? -1 : natural.indexOf(_keys[at - 1]);
+      natural.insert(before + 1, key);
+    }
+    _items.insert(at, id);
+    _keys.insert(at, key);
+    if (at <= _pos) _pos++;
+  }
+
+  /// Removes the first occurrence of [id], as [removeAt]; true when it was the
+  /// current track. False (and no change) when [id] is not in the queue.
+  bool removeId(int id) {
+    final i = _items.indexOf(id);
+    return i < 0 ? false : removeAt(i);
+  }
+
   void append(int trackId) {
     if (_items.isEmpty) {
       setItems([trackId]);

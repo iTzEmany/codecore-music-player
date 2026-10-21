@@ -355,4 +355,68 @@ void main() {
       expect(q.restoreState(saved), isFalse, reason: 'another track plays now');
     });
   });
+
+  group('insertAt / removeId', () {
+    test('before, at and after the current track: the current one stays', () {
+      for (final at in [0, 1, 2, 3, 99]) {
+        final q = make([1, 2, 3], start: 1);
+        q.insertAt(at, 9);
+        expect(q.currentId, 2, reason: 'insertAt($at)');
+        expect(q.items[at.clamp(0, 3)], 9);
+        expect(q.items.length, 4);
+      }
+    });
+
+    test(
+      'shuffle off after an insert keeps the entry and the current track',
+      () {
+        final q = make([1, 2, 3, 4, 5], start: 2)..shuffle = true;
+        final before = q.items[1];
+        q.insertAt(2, 9);
+        expect(q.items[2], 9);
+        final current = q.currentId;
+        q.shuffle = false;
+        expect(q.items, containsAll([1, 2, 3, 4, 5, 9]));
+        expect(q.items.length, 6);
+        expect(q.currentId, current);
+        // Right after the entry that preceded it in the shuffled order.
+        expect(q.items.indexOf(9), q.items.indexOf(before) + 1);
+      },
+    );
+
+    test('inserting at the start with shuffle off puts it first', () {
+      final q = make([1, 2, 3])..shuffle = true;
+      q.insertAt(0, 9);
+      q.shuffle = false;
+      expect(q.items.first, 9);
+    });
+
+    test('removeId drops the first occurrence and reports the current one', () {
+      final q = make([1, 2, 3, 2], start: 1);
+      expect(q.removeId(2), isTrue);
+      expect(q.items, [1, 3, 2]);
+      expect(q.currentId, 3);
+      expect(q.removeId(42), isFalse);
+      expect(q.items, [1, 3, 2]);
+    });
+
+    test('history and previous skip the removed entry', () {
+      final q = make([1, 2, 3]);
+      q.next();
+      q.next();
+      expect(q.currentId, 3);
+      q.removeId(2);
+      expect(q.previous(), 1);
+    });
+
+    test('revision grows', () {
+      final q = make([1, 2]);
+      var r = q.revision;
+      q.insertAt(1, 9);
+      expect(q.revision, greaterThan(r));
+      r = q.revision;
+      q.removeId(9);
+      expect(q.revision, greaterThan(r));
+    });
+  });
 }

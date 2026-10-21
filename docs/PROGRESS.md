@@ -404,9 +404,9 @@ Richiesta (2026-10-21): «è possibile fare in modo che cercando un artista, mi 
 ## Fase 31 — «Shuffle+» (`fase-31-shuffle-plus.md`)
 Richiesta (2026-10-21): «una sorta di "shuffle+" che ogni tanto mi piazza una canzone che non ho, che ha un genere diverso in base alla playlist, come ad esempio nella sezione "canzoni rock" nella coda mi piazza ogni tot una canzone rock che non ho, idem per il blues o tutti gli altri generi.» Scelte concordate: semi dalla lista in ascolto → radio di YouTube Music (`next` con `RDAMVM<videoId>`) → via i brani già in libreria e già suggeriti → ogni N brani (predefinito 1 ogni 4) un suggerito in coda, suonato in streaming dal lettore principale e segnato «Suggerito», con «Scarica» e «Aggiungi a playlist»; non conta in cronologia e statistiche; «Solo su Wi‑Fi»; senza rete casuale normale; sospeso durante la Jam; i suggeriti non si salvano al riavvio.
 - [ ] 31.1 Verifiche preliminari (esiti dal PC già nel documento; restano telefoni e fixture)
-- [ ] 31.2 Coda: inserire e togliere voci in un punto
-- [ ] 31.3 Voci online: registro e brano sintetico
-- [ ] 31.4 Indirizzi dello streaming con scadenza
+- [x] 31.2 Coda: inserire e togliere voci in un punto
+- [x] 31.3 Voci online: registro e brano sintetico
+- [x] 31.4 Indirizzi dello streaming con scadenza
 - [ ] 31.5 Il lettore suona le voci online
 - [ ] 31.6 Coda a schermo, brano corrente, salvataggio e azioni
 - [ ] 31.7 Semi: dal brano della libreria all'id di YouTube Music
