@@ -6621,6 +6621,12 @@ abstract class AppLocalizations {
   /// **'Cache delle ricerche'**
   String get memorySearchCache;
 
+  /// No description provided for @memoryCatalogCache.
+  ///
+  /// In it, this message translates to:
+  /// **'Catalogo online'**
+  String get memoryCatalogCache;
+
   /// No description provided for @memoryBlurCopies.
   ///
   /// In it, this message translates to:

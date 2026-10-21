@@ -4174,6 +4174,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get memorySearchCache => 'Cache de buscas';
 
   @override
+  String get memoryCatalogCache => 'Catálogo online';
+
+  @override
   String get memoryBlurCopies => 'Fundos desfocados';
 
   @override

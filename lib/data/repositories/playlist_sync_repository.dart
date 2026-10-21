@@ -6,6 +6,7 @@ import '../../services/backup/track_resolver.dart';
 import '../../services/share/playlist_sync.dart';
 import '../db/app_database.dart';
 import 'backup_queries.dart' show trackRefFor;
+import 'hidden_playlists.dart';
 
 /// Reads the playlists in the shapes [planSync] needs, and writes a plan.
 class PlaylistSyncRepository {
@@ -26,7 +27,7 @@ class PlaylistSyncRepository {
 
   Future<List<LocalPlaylist>> local() async {
     final ids = await _trackIdsByPlaylist();
-    final rows = await _db.select(_db.playlists).get();
+    final rows = await _db.visiblePlaylists();
     return [
       for (final p in rows)
         if (p.uuid != null)
@@ -51,7 +52,7 @@ class PlaylistSyncRepository {
       };
       final ids = await _trackIdsByPlaylist();
       return [
-        for (final p in await _db.select(_db.playlists).get())
+        for (final p in await _db.visiblePlaylists())
           if (p.uuid != null)
             RemotePlaylist(
               uuid: p.uuid!,

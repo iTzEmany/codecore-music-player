@@ -4,6 +4,7 @@ import '../../core/app_log.dart';
 import '../../core/clock.dart';
 import '../../core/playlist_order.dart';
 import '../db/app_database.dart';
+import 'hidden_playlists.dart';
 import 'light_tracks.dart';
 
 class PlaylistSummary {
@@ -82,8 +83,7 @@ class PlaylistRepository {
           'ON t.id = x.track_id WHERE x.playlist_id = p.id) AS added '
           'FROM playlists p LEFT JOIN playlist_tracks pt ON pt.playlist_id = p.id '
           // The technical playlist of «Scarica album» (see ytmAlbumSourceKind).
-          "WHERE NOT EXISTS (SELECT 1 FROM playlist_imports i "
-          "WHERE i.playlist_id = p.id AND i.source_kind = 'ytm-album') "
+          'WHERE ${visiblePlaylistSql('p')} '
           'GROUP BY p.id ORDER BY p.name COLLATE NOCASE',
           readsFrom: {_db.playlists, _db.playlistTracks, _db.tracks, _db.playlistImports},
         )

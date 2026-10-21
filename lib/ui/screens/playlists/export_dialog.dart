@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/app_log.dart';
 import '../../../data/db/app_database.dart';
+import '../../../data/repositories/hidden_playlists.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/database_providers.dart';
@@ -171,7 +172,7 @@ Future<Archive> buildPlaylistsArchive(
     archive.addFile(ArchiveFile.bytes(file, utf8.encode(text)));
   }
 
-  for (final p in await db.select(db.playlists).get()) {
+  for (final p in await db.visiblePlaylists()) {
     add(
       p.name,
       p.createdAt,

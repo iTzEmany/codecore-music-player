@@ -16,6 +16,7 @@ enum AppDataKind {
   imageMemory,
   jamCache,
   searchCache,
+  catalogCache,
   blurCopies,
   tagBackups,
   log,
@@ -29,6 +30,7 @@ const clearableKinds = {
   AppDataKind.imageMemory,
   AppDataKind.jamCache,
   AppDataKind.searchCache,
+  AppDataKind.catalogCache,
   AppDataKind.blurCopies,
 };
 
@@ -51,11 +53,12 @@ class AppDataPaths {
     required this.theme,
     required this.tagBackups,
     required this.searchCache,
+    required this.catalogCache,
     required this.log,
   });
 
   final Directory covers, jam, theme, tagBackups;
-  final File database, searchCache, log;
+  final File database, searchCache, catalogCache, log;
 
   /// SQLite keeps its journal beside the database file.
   List<String> get databaseFiles => [
@@ -107,6 +110,7 @@ Future<List<AppDataItem>> measureAppData(
     ),
     AppDataItem(AppDataKind.jamCache, await jam),
     AppDataItem(AppDataKind.searchCache, await fileSize(paths.searchCache.path)),
+    AppDataItem(AppDataKind.catalogCache, await fileSize(paths.catalogCache.path)),
     AppDataItem(AppDataKind.blurCopies, await blur),
     AppDataItem(AppDataKind.tagBackups, await tags),
     AppDataItem(AppDataKind.log, await _filesSize(paths.logFiles)),
@@ -124,7 +128,7 @@ class CacheClearResult {
 }
 
 /// «Svuota cache»: empties the [clearableKinds] and nothing else. The
-/// search cache and the image cache are owned by other objects, so their own
+/// search and catalog caches and the image cache are owned by other objects, so their own
 /// clear methods are passed in.
 class CacheCleaner {
   CacheCleaner({
@@ -132,14 +136,16 @@ class CacheCleaner {
     required this.themeDir,
     required this.searchCacheFile,
     required this.clearSearchCache,
+    required this.catalogCacheFile,
+    required this.clearCatalogCache,
     required this.clearImageMemory,
     required this.imageMemoryBytes,
     required this.jamActive,
   });
 
   final Directory jamDir, themeDir;
-  final File searchCacheFile;
-  final Future<void> Function() clearSearchCache;
+  final File searchCacheFile, catalogCacheFile;
+  final Future<void> Function() clearSearchCache, clearCatalogCache;
   final void Function() clearImageMemory;
   final int Function() imageMemoryBytes;
   final bool Function() jamActive;
@@ -159,6 +165,9 @@ class CacheCleaner {
     final searchBefore = await fileSize(searchCacheFile.path);
     await clearSearchCache();
     freed += math.max(0, searchBefore - await fileSize(searchCacheFile.path));
+    final catalogBefore = await fileSize(catalogCacheFile.path);
+    await clearCatalogCache();
+    freed += math.max(0, catalogBefore - await fileSize(catalogCacheFile.path));
     freed += imageMemoryBytes();
     clearImageMemory();
     return CacheClearResult(freedBytes: freed, jamSkipped: skipJam);

@@ -4187,6 +4187,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get memorySearchCache => 'Such-Cache';
 
   @override
+  String get memoryCatalogCache => 'Online-Katalog';
+
+  @override
   String get memoryBlurCopies => 'Unscharfe Hintergründe';
 
   @override

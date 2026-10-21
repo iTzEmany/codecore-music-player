@@ -2377,6 +2377,7 @@
   "memoryImageMemory": "Bilder im Arbeitsspeicher",
   "memoryJamCache": "Jam-Cache",
   "memorySearchCache": "Such-Cache",
+  "memoryCatalogCache": "Online-Katalog",
   "memoryBlurCopies": "Unscharfe Hintergründe",
   "memoryTagBackups": "Tag-Sicherungen",
   "memoryLog": "Protokoll",

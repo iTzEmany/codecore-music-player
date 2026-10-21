@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:path/path.dart' as p;
 
 import '../db/app_database.dart';
+import 'hidden_playlists.dart';
 import 'library_queries.dart';
 import 'light_tracks.dart';
 
@@ -158,7 +159,7 @@ class MemoryQueries {
   /// Every playlist (empty ones too) plus Preferiti, the biggest first. A
   /// track in two playlists counts in both.
   Future<List<SizeGroup>> byPlaylist() async {
-    final lists = {for (final pl in await _db.select(_db.playlists).get()) pl.id: pl};
+    final lists = {for (final pl in await _db.visiblePlaylists()) pl.id: pl};
     final rows = await _db
         .customSelect(
           'SELECT pt.playlist_id AS pid, '

@@ -4217,6 +4217,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get memorySearchCache => 'Cache des recherches';
 
   @override
+  String get memoryCatalogCache => 'Catalogue en ligne';
+
+  @override
   String get memoryBlurCopies => 'Arrière-plans floutés';
 
   @override

@@ -4180,6 +4180,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get memorySearchCache => 'Caché de búsquedas';
 
   @override
+  String get memoryCatalogCache => 'Catálogo en línea';
+
+  @override
   String get memoryBlurCopies => 'Fondos desenfocados';
 
   @override

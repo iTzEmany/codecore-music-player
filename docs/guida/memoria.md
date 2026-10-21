@@ -9,11 +9,11 @@ Quanto spazio occupa la tua musica e cosa conserva l'app, in una sola pagina. È
 4. **Per cartella**: peso di ognuna delle cartelle musicali scelte nelle impostazioni.
 5. **I più pesanti**: i 10 brani (tocca per il menu del brano) e i 10 album (tocca per aprirlo) che occupano di più.
 6. **Mai ascoltati**: quanta musica non è mai stata riprodotta. Tocca per l'elenco: tieni premuto un brano per selezionarne più d'uno e usa «Elimina dal dispositivo» per liberare spazio (chiede conferma).
-7. **Dati dell'app**: copertine (e anteprime), database, immagini in memoria, cache Jam, cache delle ricerche, sfondi sfocati, backup dei tag, registro ed episodi dei podcast.
+7. **Dati dell'app**: copertine (e anteprime), database, immagini in memoria, cache Jam, cache delle ricerche, catalogo online (pagine di artisti e album), sfondi sfocati, backup dei tag, registro ed episodi dei podcast.
 8. **Pulizia**: scorciatoie a «Duplicati» e «Brani non trovati».
 
 ## Svuota cache
-Il pulsante sotto «Dati dell'app» elimina solo copie che l'app ricrea da sola (immagini in memoria, cache Jam, ricerche, sfondi sfocati) e dice quanto spazio ha liberato. Copertine, database e backup non si toccano. La cache Jam resta se una Jam è in corso.
+Il pulsante sotto «Dati dell'app» elimina solo copie che l'app ricrea da sola (immagini in memoria, cache Jam, ricerche, catalogo online, sfondi sfocati; il catalogo fuori linea va perso) e dice quanto spazio ha liberato. Copertine, database e backup non si toccano. La cache Jam resta se una Jam è in corso.
 
 ## Aggiornamento
 I numeri si rileggono ogni volta che apri la scheda e trascinando la pagina verso il basso.

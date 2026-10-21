@@ -44,6 +44,7 @@ void main() {
     final bg = put('support/theme/bg-t1-1.png', 20);
     final blur = put('support/theme/bg-t1-1-blur20.png', 10);
     final search = put('support/search_cache.json', 8);
+    final catalog = put('support/catalog_cache.json', 12);
     var searchCleared = false, imagesCleared = false;
     final cleaner = CacheCleaner(
       jamDir: Directory(p.join(root.path, 'support/jam_cache')),
@@ -53,6 +54,8 @@ void main() {
         searchCleared = true;
         search.writeAsStringSync('{}');
       },
+      catalogCacheFile: catalog,
+      clearCatalogCache: () async => catalog.writeAsStringSync('{}'),
       clearImageMemory: () => imagesCleared = true,
       imageMemoryBytes: () => 7,
       jamActive: () => false,
@@ -64,7 +67,7 @@ void main() {
     for (final keep in [cover, db, backup, bg]) {
       expect(keep.existsSync(), isTrue, reason: keep.path);
     }
-    expect(r.freedBytes, 100 + 10 + 6 + 7);
+    expect(r.freedBytes, 100 + 10 + 6 + 10 + 7);
     expect(r.jamSkipped, isFalse);
     expect(clearableKinds, isNot(contains(AppDataKind.covers)));
     expect(clearableKinds, isNot(contains(AppDataKind.database)));
@@ -79,6 +82,8 @@ void main() {
       themeDir: Directory(p.join(root.path, 'theme')),
       searchCacheFile: search,
       clearSearchCache: () async {},
+      catalogCacheFile: File(p.join(root.path, 'catalog_cache.json')),
+      clearCatalogCache: () async {},
       clearImageMemory: () {},
       imageMemoryBytes: () => 0,
       jamActive: () => true,

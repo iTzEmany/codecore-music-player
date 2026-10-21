@@ -5,6 +5,7 @@ import 'package:path/path.dart' as p;
 
 import '../../core/app_log.dart';
 import '../../data/db/app_database.dart';
+import '../../data/repositories/hidden_playlists.dart' show ytmAlbumSourceKind;
 import '../../data/repositories/import_repository.dart';
 import '../../data/repositories/playlist_repository.dart';
 import '../online/download_queue.dart';
@@ -19,12 +20,10 @@ import 'import_options.dart';
 import 'playlist_paths.dart';
 import 'track_matcher.dart';
 
+export '../../data/repositories/hidden_playlists.dart' show ytmAlbumSourceKind;
+
 const _tagPrefix = 'import:';
 
-/// `playlist_imports.source_kind` of «Scarica album»: the import needs a
-/// playlist, which is kept out of the playlist lists (the album is in the
-/// library's Albums).
-const ytmAlbumSourceKind = 'ytm-album';
 
 String importTag(int importId, int rowIndex) => '$_tagPrefix$importId:$rowIndex';
 

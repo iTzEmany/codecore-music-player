@@ -3,6 +3,7 @@ import 'package:path/path.dart' as p;
 
 import '../../services/backup/user_data.dart';
 import '../db/app_database.dart';
+import 'hidden_playlists.dart';
 
 /// Reads everything the user created into the portable format, in one
 /// read transaction and without a query per row.
@@ -45,7 +46,7 @@ Future<UserData> collectUserData(AppDatabase db) {
       ));
     }
 
-    final playlists = await db.select(db.playlists).get();
+    final playlists = await db.visiblePlaylists();
     final links = await (db.select(db.playlistTracks)
           ..orderBy([(l) => OrderingTerm.asc(l.position)]))
         .get();
@@ -84,6 +85,7 @@ Future<UserData> collectUserData(AppDatabase db) {
     }
     final imports = [
       for (final i in await db.select(db.playlistImports).get())
+        if (i.sourceKind != ytmAlbumSourceKind)
         ImportData(
           playlistName: names[i.playlistId] ?? '',
           sourceName: i.sourceName,

@@ -2377,6 +2377,7 @@
   "memoryImageMemory": "Images in memory",
   "memoryJamCache": "Jam cache",
   "memorySearchCache": "Search cache",
+  "memoryCatalogCache": "Online catalog",
   "memoryBlurCopies": "Blurred backgrounds",
   "memoryTagBackups": "Tag backups",
   "memoryLog": "Log",

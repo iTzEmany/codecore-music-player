@@ -2568,6 +2568,7 @@
   "memoryImageMemory": "Imagens na memória",
   "memoryJamCache": "Cache do Jam",
   "memorySearchCache": "Cache de buscas",
+  "memoryCatalogCache": "Catálogo online",
   "memoryBlurCopies": "Fundos desfocados",
   "memoryTagBackups": "Backups das tags",
   "memoryLog": "Registro de log",

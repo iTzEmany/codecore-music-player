@@ -11,6 +11,7 @@ import '../services/memory/app_data.dart';
 import '../services/memory/disk_space.dart';
 import 'database_providers.dart';
 import 'import_providers.dart' show searchCacheProvider;
+import 'ytm_catalog_providers.dart' show catalogCacheProvider;
 import 'jam_providers.dart';
 import 'library_providers.dart';
 
@@ -43,6 +44,7 @@ final appDataPathsProvider = FutureProvider<AppDataPaths>((ref) async {
     theme: await themeDir(),
     tagBackups: Directory(p.join(support, 'tag_backups')),
     searchCache: File(p.join(support, 'search_cache.json')),
+    catalogCache: File(p.join(support, 'catalog_cache.json')),
     log: File(p.join(support, 'codecore.log')),
   );
 });
@@ -78,6 +80,8 @@ class MemoryActions {
       themeDir: paths.theme,
       searchCacheFile: paths.searchCache,
       clearSearchCache: _ref.read(searchCacheProvider).clear,
+      catalogCacheFile: paths.catalogCache,
+      clearCatalogCache: _ref.read(catalogCacheProvider).clear,
       clearImageMemory: () => PaintingBinding.instance.imageCache
         ..clear()
         ..clearLiveImages(),
