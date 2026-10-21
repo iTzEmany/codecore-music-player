@@ -540,6 +540,7 @@
   "queueNext": "A continuación",
   "queueClear": "Vaciar",
   "queueCleared": "Cola vaciada",
+  "queueRebuilt": "Cola recreada a partir de la lista en reproducción",
   "jamOutputsAndSync": "Salidas y sincronía",
   "jamHostTag": "anfitrión",
   "jamWaitingEmpty": "No hay ninguna Jam en curso",

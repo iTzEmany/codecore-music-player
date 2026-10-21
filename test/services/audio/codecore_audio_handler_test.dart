@@ -70,6 +70,25 @@ void main() {
     expect(backend.loaded.where((p) => p == '/m/c.mp3').length, 1);
   });
 
+  test('after «Svuota» the next track comes from the list played, not «nothing»', () async {
+    await handler.playQueue(ids, 0);
+    await settle();
+    handler.addToQueue(ids[2]);
+    // The old «Svuota»: everything after the current track removed.
+    while (handler.queueIds.length > 1) {
+      await handler.removeFromQueue(1);
+    }
+    expect(handler.hasNext, isFalse);
+    final before = handler.rebuildUpcoming();
+    expect(before, isNotNull);
+    expect(handler.queueIds, ids, reason: 'the list again, the extra gone');
+    await handler.skipToNext();
+    await settle();
+    expect(handler.currentTrack!.title, 'b');
+    handler.restoreQueue(before!);
+    expect(handler.queueIds, ids, reason: 'another track plays: no undo');
+  });
+
   test('load error reports and skips to next', () async {
     backend.failing.add('/m/b.mp3');
     await handler.playQueue(ids, 1);

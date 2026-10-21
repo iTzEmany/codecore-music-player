@@ -540,6 +540,7 @@
   "queueNext": "Als Nächstes",
   "queueClear": "Leeren",
   "queueCleared": "Warteschlange geleert",
+  "queueRebuilt": "Warteschlange aus der laufenden Liste neu erstellt",
   "jamOutputsAndSync": "Ausgänge und Sync",
   "jamHostTag": "Host",
   "jamWaitingEmpty": "Keine Jam aktiv",

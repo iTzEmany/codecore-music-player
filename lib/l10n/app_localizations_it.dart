@@ -1248,6 +1248,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get queueCleared => 'Coda svuotata';
 
   @override
+  String get queueRebuilt => 'Coda ricreata dalla lista in ascolto';
+
+  @override
   String get jamOutputsAndSync => 'Uscite e sincronia';
 
   @override

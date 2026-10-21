@@ -731,6 +731,7 @@
   "queueNext": "À suivre",
   "queueClear": "Vider",
   "queueCleared": "File d’attente vidée",
+  "queueRebuilt": "File d’attente recréée depuis la liste en lecture",
   "jamOutputsAndSync": "Sorties et synchro",
   "jamHostTag": "hôte",
   "jamWaitingEmpty": "Aucune Jam en cours",

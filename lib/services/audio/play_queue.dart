@@ -2,6 +2,16 @@ import 'dart:math';
 
 enum PlayRepeat { off, all, one }
 
+/// The queue as it was, to put it back (the undo of «Svuota»).
+class QueueState {
+  const QueueState._(this._items, this._order, this._pos, this._history);
+
+  final List<int> _items, _order, _history;
+  final int _pos;
+
+  int? get currentId => _pos < 0 ? null : _items[_order[_pos]];
+}
+
 /// Pure queue logic. Items are track ids in their natural order; `_order`
 /// maps play position -> natural index (identity unless shuffled).
 class PlayQueue {
@@ -235,6 +245,58 @@ class PlayQueue {
       _order = List.generate(_items.length, (i) => i);
     }
     if (currentNatural >= 0) _pos = _order.indexOf(remap(currentNatural));
+  }
+
+  /// What follows the current track, built again from [source] (the list
+  /// playback started from): in order from the current track on or, with
+  /// shuffle, a fresh shuffle of the whole list, kept in the queue's own order
+  /// so the queue shows what will play. Without [source] it is just dropped.
+  /// The current track stays; the history goes (it pointed into old items).
+  void rebuildUpcoming(List<int>? source) {
+    final current = currentId;
+    if (current == null) return;
+    final from = source ?? const <int>[];
+    final at = from.indexOf(current);
+    final List<int> ids;
+    var pos = 0;
+    if (from.isEmpty) {
+      ids = [current];
+    } else if (_shuffle) {
+      final rest = [...from];
+      if (at >= 0) rest.removeAt(at);
+      _shuffleInPlace(rest);
+      ids = [current, ...rest];
+    } else if (at >= 0) {
+      ids = [...from];
+      pos = at;
+    } else {
+      ids = [current, ...from];
+    }
+    _items
+      ..clear()
+      ..addAll(ids);
+    _order = List.generate(_items.length, (i) => i);
+    _pos = pos;
+    _history.clear();
+    _changed();
+  }
+
+  QueueState saveState() =>
+      QueueState._(List.of(_items), List.of(_order), _pos, List.of(_history));
+
+  /// Puts [state] back, only while the same track plays; false otherwise.
+  bool restoreState(QueueState state) {
+    if (state.currentId == null || state.currentId != currentId) return false;
+    _items
+      ..clear()
+      ..addAll(state._items);
+    _order = List.of(state._order);
+    _pos = state._pos;
+    _history
+      ..clear()
+      ..addAll(state._history);
+    _changed();
+    return true;
   }
 
   void insertNext(int trackId) {

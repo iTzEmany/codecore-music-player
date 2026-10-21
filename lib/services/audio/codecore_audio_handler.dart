@@ -132,7 +132,12 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   bool get shuffleEnabled => _queue.shuffle;
   PlayRepeat get repeatMode => _queue.repeat;
 
+  /// The list playback was started from (a playlist, an album, the search
+  /// results…): «Svuota» builds what follows again from it.
+  List<int>? _source;
+
   Future<void> playQueue(List<int> ids, int index) async {
+    _source = List.of(ids);
     _queue.setItems(ids, startIndex: index);
     _consecutiveErrors = 0;
     _queueController.add(null);
@@ -187,6 +192,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
 
   /// Loads the queue paused, at [position] (used to resume after a restart).
   Future<void> restore(List<int> ids, int index, Duration position) async {
+    _source = List.of(ids);
     _queue.setItems(ids, startIndex: index);
     _queueController.add(null);
     await _loadCurrent(play: false, startAt: position);
@@ -610,13 +616,38 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     unawaited(_refreshWindow());
   }
 
+  /// «Svuota»: what follows the current track is dropped and, when playback
+  /// started from a list, built again from it ([PlayQueue.rebuildUpcoming]).
+  /// Returns the queue as it was, for an undo; null with nothing playing.
+  QueueState? rebuildUpcoming() {
+    if (_queue.currentId == null) return null;
+    final before = _queue.saveState();
+    _queue.rebuildUpcoming(_source);
+    _queueController.add(null);
+    unawaited(_refreshWindow());
+    return before;
+  }
+
+  /// Whether [rebuildUpcoming] has a list to build from.
+  bool get hasSource => _source?.isNotEmpty ?? false;
+
+  /// Undoes [rebuildUpcoming] while the same track still plays.
+  void restoreQueue(QueueState state) {
+    if (!_queue.restoreState(state)) return;
+    _queueController.add(null);
+    unawaited(_refreshWindow());
+  }
+
   void playNext(int trackId) {
+    // A queue started from nothing has no list behind it.
+    if (_queue.isEmpty) _source = null;
     _queue.insertNext(trackId);
     _queueController.add(null);
     unawaited(_refreshWindow());
   }
 
   void addToQueue(int trackId) {
+    if (_queue.isEmpty) _source = null;
     _queue.append(trackId);
     _queueController.add(null);
     unawaited(_refreshWindow());

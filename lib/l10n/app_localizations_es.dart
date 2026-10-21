@@ -1248,6 +1248,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get queueCleared => 'Cola vaciada';
 
   @override
+  String get queueRebuilt =>
+      'Cola recreada a partir de la lista en reproducción';
+
+  @override
   String get jamOutputsAndSync => 'Salidas y sincronía';
 
   @override

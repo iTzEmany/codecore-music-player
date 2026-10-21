@@ -176,6 +176,16 @@ void main() {
     expect(find.text('Song 0'), findsNothing); // already played
     expect(find.text('Song 1'), findsOneWidget);
     expect(find.text('Song 3'), findsOneWidget);
+
+    // «Svuota» drops the extra song and builds the list again after Song 1.
+    h.handler.addToQueue(rows!.first.id);
+    await _settle(tester);
+    await tester.tap(find.text('Svuota'));
+    await _settle(tester);
+    expect(find.text('Coda ricreata dalla lista in ascolto'), findsOneWidget);
+    expect(find.text('Song 0'), findsNothing);
+    expect(find.text('Song 3'), findsOneWidget);
+    expect(h.handler.hasNext, isTrue);
     await h.dispose(tester);
   });
 }

@@ -83,6 +83,11 @@ class PlayerController {
     _handler.moveInQueue(from, to);
   }
 
+  /// «Svuota»: see [CodecoreAudioHandler.rebuildUpcoming].
+  QueueState? rebuildUpcoming() => _handler.rebuildUpcoming();
+  bool get hasQueueSource => _handler.hasSource;
+  void restoreQueue(QueueState state) => _handler.restoreQueue(state);
+
   void playNext(int trackId) => _handler.playNext(trackId);
   void addToQueue(int trackId) => _handler.addToQueue(trackId);
 

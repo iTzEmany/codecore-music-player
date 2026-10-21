@@ -1248,6 +1248,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get queueCleared => 'Fila limpa';
 
   @override
+  String get queueRebuilt => 'Fila recriada a partir da lista em reprodução';
+
+  @override
   String get jamOutputsAndSync => 'Saídas e sincronização';
 
   @override

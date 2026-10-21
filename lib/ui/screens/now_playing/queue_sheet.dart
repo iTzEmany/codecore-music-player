@@ -59,17 +59,14 @@ class QueueSheet extends ConsumerWidget {
         'q-${t.id}-${seen[t.id] = (seen[t.id] ?? -1) + 1}',
     ];
 
-    Future<void> clearNext() async {
-      final removed = [...upcoming];
-      for (var i = 0; i < removed.length; i++) {
-        await ctrl.removeFromQueue(first);
-      }
-      if (!context.mounted) return;
-      showUndoSnack(context, l.queueCleared, () {
-        for (final t in removed) {
-          ctrl.addToQueue(t.id);
-        }
-      });
+    // What follows is built again from the playlist (album, …) playing:
+    // in order from here, or a new shuffle.
+    void clearNext() {
+      final rebuilt = ctrl.hasQueueSource;
+      final before = ctrl.rebuildUpcoming();
+      if (before == null) return;
+      showUndoSnack(context, rebuilt ? l.queueRebuilt : l.queueCleared,
+          () => ctrl.restoreQueue(before));
     }
 
     return Column(

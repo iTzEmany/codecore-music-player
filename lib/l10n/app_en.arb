@@ -540,6 +540,7 @@
   "queueNext": "Next up",
   "queueClear": "Clear",
   "queueCleared": "Queue cleared",
+  "queueRebuilt": "Queue rebuilt from what is playing",
   "jamOutputsAndSync": "Outputs and sync",
   "jamHostTag": "host",
   "jamWaitingEmpty": "No Jam in progress",

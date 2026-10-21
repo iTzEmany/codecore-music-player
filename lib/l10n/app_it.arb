@@ -731,6 +731,7 @@
   "queueNext": "Prossimi",
   "queueClear": "Svuota",
   "queueCleared": "Coda svuotata",
+  "queueRebuilt": "Coda ricreata dalla lista in ascolto",
   "jamOutputsAndSync": "Uscite e sincronia",
   "jamHostTag": "host",
   "jamWaitingEmpty": "Nessuna Jam in corso",

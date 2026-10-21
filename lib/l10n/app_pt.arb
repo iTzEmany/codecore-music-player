@@ -731,6 +731,7 @@
   "queueNext": "A seguir",
   "queueClear": "Limpar",
   "queueCleared": "Fila limpa",
+  "queueRebuilt": "Fila recriada a partir da lista em reprodução",
   "jamOutputsAndSync": "Saídas e sincronização",
   "jamHostTag": "anfitrião",
   "jamWaitingEmpty": "Nenhuma Jam em curso",

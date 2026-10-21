@@ -1255,6 +1255,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get queueCleared => 'File d’attente vidée';
 
   @override
+  String get queueRebuilt =>
+      'File d’attente recréée depuis la liste en lecture';
+
+  @override
   String get jamOutputsAndSync => 'Sorties et synchro';
 
   @override

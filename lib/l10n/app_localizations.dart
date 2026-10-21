@@ -2302,6 +2302,12 @@ abstract class AppLocalizations {
   /// **'Coda svuotata'**
   String get queueCleared;
 
+  /// No description provided for @queueRebuilt.
+  ///
+  /// In it, this message translates to:
+  /// **'Coda ricreata dalla lista in ascolto'**
+  String get queueRebuilt;
+
   /// No description provided for @jamOutputsAndSync.
   ///
   /// In it, this message translates to:

@@ -280,4 +280,50 @@ void main() {
       expect(q.revision, r);
     });
   });
+
+  group('«Svuota» builds what follows again from the list playback came from', () {
+    const source = [1, 2, 3, 4, 5];
+
+    test('in order: from the current track on, manual additions gone', () {
+      final q = make(source, start: 1)
+        ..append(99)
+        ..insertNext(98);
+      q.rebuildUpcoming(source);
+      expect(q.currentId, 2);
+      expect(q.items, source);
+      expect([q.next(), q.next(), q.next(), q.next()], [3, 4, 5, null]);
+    });
+
+    test('shuffle: a new order of the whole list, shown as it will play', () {
+      final q = make(List.generate(20, (i) => i), start: 2)..shuffle = true;
+      final source = List.generate(20, (i) => i);
+      final before = q.playOrder;
+      q.rebuildUpcoming(source);
+      expect(q.currentId, 2);
+      expect(q.items, q.playOrder, reason: 'the queue lists what will play');
+      expect(q.items.first, 2);
+      expect(q.items.toSet(), source.toSet());
+      expect(q.items, hasLength(20));
+      expect(q.items, isNot(before), reason: 'a new shuffle');
+    });
+
+    test('a current track outside the list plays first, then the list', () {
+      final q = make([42]);
+      q.rebuildUpcoming(source);
+      expect(q.items, [42, ...source]);
+      expect(q.currentId, 42);
+    });
+
+    test('no list: just dropped; undo puts everything back', () {
+      final q = make([7, 8, 9]);
+      final saved = q.saveState();
+      q.rebuildUpcoming(null);
+      expect(q.items, [7]);
+      expect(q.hasNext, isFalse);
+      expect(q.restoreState(saved), isTrue);
+      expect(q.items, [7, 8, 9]);
+      expect(q.next(), 8);
+      expect(q.restoreState(saved), isFalse, reason: 'another track plays now');
+    });
+  });
 }

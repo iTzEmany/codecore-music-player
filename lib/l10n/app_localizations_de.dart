@@ -1248,6 +1248,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get queueCleared => 'Warteschlange geleert';
 
   @override
+  String get queueRebuilt =>
+      'Warteschlange aus der laufenden Liste neu erstellt';
+
+  @override
   String get jamOutputsAndSync => 'Ausgänge und Sync';
 
   @override

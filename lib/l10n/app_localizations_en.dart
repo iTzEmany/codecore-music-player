@@ -1245,6 +1245,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get queueCleared => 'Queue cleared';
 
   @override
+  String get queueRebuilt => 'Queue rebuilt from what is playing';
+
+  @override
   String get jamOutputsAndSync => 'Outputs and sync';
 
   @override
