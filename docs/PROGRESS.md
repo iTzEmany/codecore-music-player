@@ -399,7 +399,7 @@ Richiesta (2026-10-21): «è possibile fare in modo che cercando un artista, mi 
 - [x] 30.9 Pagina album online e «Scarica album» (8fd9244)
 - [x] 30.10 «Tutti i brani» e discografia (8fd9244)
 - [x] 30.11 Ingressi dalla libreria («Su YouTube Music») (8fd9244)
-- [ ] 30.12 Test dal vivo, documentazione e prova a mano
+- [~] 30.12 Test dal vivo, documentazione e prova a mano (46fcb9f: playlist degli album nascoste, catalogo in Memoria, test dal vivo 4/4, documenti; prova sul Mi A3 da fare)
 
 ## Fase 31 — «Shuffle+» (`fase-31-shuffle-plus.md`)
 Richiesta (2026-10-21): «una sorta di "shuffle+" che ogni tanto mi piazza una canzone che non ho, che ha un genere diverso in base alla playlist, come ad esempio nella sezione "canzoni rock" nella coda mi piazza ogni tot una canzone rock che non ho, idem per il blues o tutti gli altri generi.» Scelte concordate: semi dalla lista in ascolto → radio di YouTube Music (`next` con `RDAMVM<videoId>`) → via i brani già in libreria e già suggeriti → ogni N brani (predefinito 1 ogni 4) un suggerito in coda, suonato in streaming dal lettore principale e segnato «Suggerito», con «Scarica» e «Aggiungi a playlist»; non conta in cronologia e statistiche; «Solo su Wi‑Fi»; senza rete casuale normale; sospeso durante la Jam; i suggeriti non si salvano al riavvio.
