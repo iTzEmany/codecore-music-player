@@ -3,6 +3,23 @@ import 'dart:async';
 import '../../core/app_log.dart';
 import '../../data/settings/settings_store.dart';
 import 'codecore_audio_handler.dart';
+import 'online_entries.dart';
+
+/// The queue as saved: online entries do not survive a restart, so they are
+/// dropped. [index] points to the current library track, or, when the current
+/// one is online, to the library track that followed it.
+({List<int> ids, int index}) savedQueue(List<int> ids, int index) {
+  final kept = [
+    for (final id in ids)
+      if (!isOnlineId(id)) id,
+  ];
+  if (kept.isEmpty) return (ids: kept, index: 0);
+  var at = 0;
+  for (var i = 0; i < ids.length && i < index; i++) {
+    if (!isOnlineId(ids[i])) at++;
+  }
+  return (ids: kept, index: at.clamp(0, kept.length - 1));
+}
 
 /// Debounced (2 s) save of queue/position/volume so playback can resume.
 class PlaybackPersistence {
@@ -50,9 +67,11 @@ class PlaybackPersistence {
 
   Future<void> flush() async {
     try {
+      final q = savedQueue(
+          _handler.queueIds, _handler.currentIndex < 0 ? 0 : _handler.currentIndex);
       await _store.writePlayback(SavedPlayback(
-        queueIds: _handler.queueIds,
-        index: _handler.currentIndex < 0 ? 0 : _handler.currentIndex,
+        queueIds: q.ids,
+        index: q.index,
         positionMs: _position.inMilliseconds,
         volume: _volume,
         shuffle: _handler.shuffleEnabled,

@@ -15,6 +15,7 @@ import '../../providers/equalizer_providers.dart';
 import '../../providers/jam_providers.dart';
 import '../../providers/player_providers.dart';
 import '../../providers/preview_providers.dart';
+import '../../services/audio/online_entries.dart';
 import '../screens/playlists/playlist_dialogs.dart';
 import '../screens/tags/tags_sheet.dart';
 import '../screens/enrich_preview_dialog.dart';
@@ -50,6 +51,12 @@ class TrackActionGroup {
   final List<TrackAction> actions;
 }
 
+/// Streamed (online) entries are not library rows: no favourites, tags,
+/// playlists by id, edit, lyrics, share, details of a file or deletion. The
+/// actions they do have (download, add to playlist, dislike, remove from the
+/// queue) arrive with 31.11.
+List<TrackActionGroup> onlineTrackActions() => const [];
+
 /// The single model of the track actions, used by the bottom sheet (mobile:
 /// long press, ⋮) and by the pointer menu (desktop: right click).
 /// [outer] is the context the effects (snackbars, pages) are tied to.
@@ -58,6 +65,7 @@ List<TrackActionGroup> trackActions(
   WidgetRef ref,
   Track track,
 ) {
+  if (isOnlineId(track.id)) return onlineTrackActions();
   final l = outer.l10n;
   final ctrl = ref.read(playerControllerProvider);
   void snack(String text) {

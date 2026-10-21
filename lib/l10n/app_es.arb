@@ -119,6 +119,7 @@
   "reasonFileMissing": "archivo no encontrado",
   "reasonUnplayable": "archivo no reproducible",
   "reasonNotInLibrary": "canción no está en la biblioteca",
+  "reasonOnlineUnavailable": "canción en línea no disponible",
   "searchWeb": "Buscar info en la web",
   "enrichPreviewTitle": "Vista previa de información",
   "currentValue": "Actual",

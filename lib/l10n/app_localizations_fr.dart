@@ -400,6 +400,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get reasonNotInLibrary => 'titre absent de la bibliothèque';
 
   @override
+  String get reasonOnlineUnavailable => 'titre en ligne non disponible';
+
+  @override
   String get searchWeb => 'Rechercher des infos sur le web';
 
   @override

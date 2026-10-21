@@ -12,6 +12,7 @@ import '../services/audio/online_entries.dart';
 import '../services/audio/play_queue.dart';
 import '../services/audio/playback_persistence.dart';
 import 'database_providers.dart';
+import 'queue_tracks.dart';
 import 'settings_providers.dart';
 
 /// Overridden in `main` once the handler has been created (and, on Android,
@@ -182,9 +183,10 @@ final durationProvider = StreamProvider<Duration?>(
 final queueProvider = StreamProvider<List<Track>>((ref) async* {
   final h = ref.watch(audioHandlerProvider);
   final repo = ref.watch(trackRepositoryProvider);
-  yield await repo.getByIdsLight(h.queueIds);
+  final online = ref.watch(onlineEntriesProvider);
+  yield await queueTracks(h.queueIds, repo, online);
   await for (final _ in h.queueChanges) {
-    yield await repo.getByIdsLight(h.queueIds);
+    yield await queueTracks(h.queueIds, repo, online);
   }
 });
 
@@ -228,5 +230,7 @@ final playerFailuresProvider = StreamProvider<PlaybackFailure>(
 final liveCurrentTrackProvider = StreamProvider<Track?>((ref) {
   final id = ref.watch(currentTrackProvider.select((t) => t.value?.id));
   if (id == null) return Stream.value(null);
+  // Streamed entries are not rows: the registry's synthetic track.
+  if (isOnlineId(id)) return Stream.value(ref.watch(onlineEntriesProvider)?.trackOf(id));
   return ref.watch(trackRepositoryProvider).watchById(id);
 });

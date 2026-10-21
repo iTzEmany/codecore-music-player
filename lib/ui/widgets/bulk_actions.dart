@@ -6,6 +6,7 @@ import '../../l10n/l10n_ext.dart';
 import '../../providers/database_providers.dart';
 import '../../providers/jam_providers.dart';
 import '../../providers/player_providers.dart';
+import '../../services/audio/online_entries.dart';
 import '../screens/cleanup/move_to_album_dialog.dart';
 import '../screens/playlists/playlist_dialogs.dart';
 import '../screens/tags/tags_sheet.dart';
@@ -30,10 +31,16 @@ class BulkContext {
 List<TrackActionGroup> bulkActions(
   BuildContext outer,
   WidgetRef ref,
-  List<Track> tracks,
+  List<Track> picked,
   BulkContext ctx, {
   required VoidCallback done,
 }) {
+  // Streamed entries are not library rows: the group actions skip them.
+  final tracks = [
+    for (final t in picked)
+      if (!isOnlineId(t.id)) t,
+  ];
+  if (tracks.isEmpty) return const [];
   final l = outer.l10n;
   final ctrl = ref.read(playerControllerProvider);
   final n = tracks.length;

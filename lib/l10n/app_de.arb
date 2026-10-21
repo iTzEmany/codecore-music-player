@@ -119,6 +119,7 @@
   "reasonFileMissing": "Datei nicht gefunden",
   "reasonUnplayable": "Datei nicht abspielbar",
   "reasonNotInLibrary": "Titel nicht in der Bibliothek",
+  "reasonOnlineUnavailable": "Online-Titel nicht verfügbar",
   "searchWeb": "Infos im Web suchen",
   "enrichPreviewTitle": "Vorschau der Informationen",
   "currentValue": "Aktuell",

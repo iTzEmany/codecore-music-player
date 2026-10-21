@@ -396,6 +396,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get reasonNotInLibrary => 'brano non presente in libreria';
 
   @override
+  String get reasonOnlineUnavailable => 'brano online non disponibile';
+
+  @override
   String get searchWeb => 'Cerca info sul web';
 
   @override

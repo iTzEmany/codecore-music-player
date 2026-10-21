@@ -171,6 +171,7 @@
   "reasonFileMissing": "ficheiro não encontrado",
   "reasonUnplayable": "ficheiro não reproduzível",
   "reasonNotInLibrary": "faixa não presente na biblioteca",
+  "reasonOnlineUnavailable": "faixa online não disponível",
   "searchWeb": "Pesquisar info na web",
   "enrichPreviewTitle": "Pré-visualização das informações",
   "currentValue": "Atual",

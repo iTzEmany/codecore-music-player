@@ -397,6 +397,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get reasonNotInLibrary => 'faixa não presente na biblioteca';
 
   @override
+  String get reasonOnlineUnavailable => 'faixa online não disponível';
+
+  @override
   String get searchWeb => 'Pesquisar info na web';
 
   @override

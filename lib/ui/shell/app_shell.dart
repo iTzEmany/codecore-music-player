@@ -94,8 +94,7 @@ class AppShell extends ConsumerWidget {
         PlaybackFailureReason.fileMissing => l.reasonFileMissing,
         PlaybackFailureReason.unplayable => l.reasonUnplayable,
         PlaybackFailureReason.notInLibrary => l.reasonNotInLibrary,
-        // TODO(31.5): own message (ARB) pending; reuses the generic one.
-        PlaybackFailureReason.onlineUnavailable => l.reasonUnplayable,
+        PlaybackFailureReason.onlineUnavailable => l.reasonOnlineUnavailable,
       };
       ScaffoldMessenger.of(context)
         ..clearSnackBars()

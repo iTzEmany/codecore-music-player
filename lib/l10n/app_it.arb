@@ -171,6 +171,7 @@
   "reasonFileMissing": "file non trovato",
   "reasonUnplayable": "file non riproducibile",
   "reasonNotInLibrary": "brano non presente in libreria",
+  "reasonOnlineUnavailable": "brano online non disponibile",
   "searchWeb": "Cerca info sul web",
   "enrichPreviewTitle": "Anteprima informazioni",
   "currentValue": "Attuale",

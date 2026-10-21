@@ -820,6 +820,12 @@ abstract class AppLocalizations {
   /// **'brano non presente in libreria'**
   String get reasonNotInLibrary;
 
+  /// No description provided for @reasonOnlineUnavailable.
+  ///
+  /// In it, this message translates to:
+  /// **'brano online non disponibile'**
+  String get reasonOnlineUnavailable;
+
   /// No description provided for @searchWeb.
   ///
   /// In it, this message translates to:

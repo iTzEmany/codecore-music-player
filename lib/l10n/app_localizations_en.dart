@@ -396,6 +396,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reasonNotInLibrary => 'track not in library';
 
   @override
+  String get reasonOnlineUnavailable => 'online track not available';
+
+  @override
   String get searchWeb => 'Search info online';
 
   @override
