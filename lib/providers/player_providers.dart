@@ -186,7 +186,14 @@ class VolumeNotifier extends Notifier<double> {
   double _beforeMute = 1.0;
 
   @override
-  double build() => ref.read(settingsStoreProvider).readPlayback().volume;
+  double build() {
+    final sub = ref
+        .read(audioHandlerProvider)
+        .volumeRequests
+        .listen((v) => set(v.clamp(0.0, 1.0)));
+    ref.onDispose(sub.cancel);
+    return ref.read(settingsStoreProvider).readPlayback().volume;
+  }
 
   void set(double v) {
     state = v;

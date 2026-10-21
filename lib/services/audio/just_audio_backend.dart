@@ -120,6 +120,10 @@ class JustAudioBackend implements AudioBackend, GaplessCapable {
     _resetWindow();
     try {
       await _player.setFilePath(filePath);
+    } on PlayerInterruptedException catch (e) {
+      // A newer load replaced this one: expected when skipping quickly.
+      AppLog.d('load interrupted: $filePath (${e.message})');
+      throw BackendException('load interrupted: ${e.message}');
     } on Object catch (e, st) {
       AppLog.w('load failed: $filePath', e, st);
       throw BackendException('unplayable file: $e');

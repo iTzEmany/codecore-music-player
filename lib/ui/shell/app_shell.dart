@@ -27,6 +27,7 @@ import '../widgets/mini_player.dart';
 import 'bottom_bar.dart';
 import 'desktop_player_bar.dart';
 import 'desktop_sidebar.dart';
+import 'shell_keys.dart';
 import 'side_panel.dart';
 import '../widgets/motion.dart';
 
@@ -35,25 +36,24 @@ const _wideBreakpoint = 840.0;
 class AppShell extends ConsumerWidget {
   const AppShell({super.key});
 
-  bool _typing() {
-    final ctx = FocusManager.instance.primaryFocus?.context;
-    if (ctx == null) return false;
-    return ctx.widget is EditableText ||
-        ctx.findAncestorWidgetOfExactType<EditableText>() != null;
-  }
+  static const _space = SingleActivator(LogicalKeyboardKey.space);
+  static const _volUp = SingleActivator(
+    LogicalKeyboardKey.arrowUp,
+    control: true,
+  );
+  static const _volDown = SingleActivator(
+    LogicalKeyboardKey.arrowDown,
+    control: true,
+  );
 
   Map<ShortcutActivator, VoidCallback> _shortcuts(WidgetRef ref) {
     final ctrl = ref.read(playerControllerProvider);
     final vol = ref.read(volumeProvider.notifier);
-    void guarded(VoidCallback f) {
-      if (!_typing()) f();
-    }
 
     void bump(double d) =>
         vol.set((ref.read(volumeProvider) + d).clamp(0.0, 1.0));
     return {
-      const SingleActivator(LogicalKeyboardKey.space): () =>
-          guarded(ctrl.togglePlayPause),
+      _space: ctrl.togglePlayPause,
       const SingleActivator(LogicalKeyboardKey.arrowRight, control: true):
           ctrl.next,
       const SingleActivator(LogicalKeyboardKey.arrowLeft, control: true):
@@ -75,10 +75,8 @@ class AppShell extends ConsumerWidget {
         final preview = ref.read(previewProvider);
         if (preview.active) ref.read(previewProvider.notifier).stop();
       },
-      const SingleActivator(LogicalKeyboardKey.arrowUp, control: true): () =>
-          guarded(() => bump(0.05)),
-      const SingleActivator(LogicalKeyboardKey.arrowDown, control: true): () =>
-          guarded(() => bump(-0.05)),
+      _volUp: () => bump(0.05),
+      _volDown: () => bump(-0.05),
     };
   }
 
@@ -261,8 +259,9 @@ class AppShell extends ConsumerWidget {
       child: content,
     );
     if (isDesktop) {
-      content = CallbackShortcuts(
+      content = ShellKeys(
         bindings: _shortcuts(ref),
+        textOnly: const {_space, _volUp, _volDown},
         // Any click ends a preview started from the menu.
         child: Listener(
           behavior: HitTestBehavior.translucent,
@@ -271,7 +270,7 @@ class AppShell extends ConsumerWidget {
               ref.read(previewProvider.notifier).stop();
             }
           },
-          child: Focus(autofocus: true, child: content),
+          child: content,
         ),
       );
     }

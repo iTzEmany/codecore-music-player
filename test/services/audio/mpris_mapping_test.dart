@@ -1,4 +1,5 @@
 import 'package:codecore/services/audio/mpris_mapping.dart';
+import 'package:codecore/services/audio/play_queue.dart';
 import 'package:dbus/dbus.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -39,5 +40,13 @@ void main() {
     expect(mprisSeekTarget(current: Duration.zero, length: len, positionMicros: 40000000, trackId: here, currentTrackId: here), const Duration(seconds: 40));
     expect(mprisSeekTarget(current: Duration.zero, length: len, positionMicros: 40000000, trackId: mprisTrackId('2'), currentTrackId: here), isNull);
     expect(mprisSeekTarget(current: Duration.zero, length: len), isNull);
+  });
+
+  test('loop status maps both ways; unknown values are refused', () {
+    for (final r in PlayRepeat.values) {
+      expect(mprisRepeatFromLoop(mprisLoopStatus(r)), r);
+    }
+    expect(mprisLoopStatus(PlayRepeat.all), 'Playlist');
+    expect(mprisRepeatFromLoop('Forever'), isNull);
   });
 }

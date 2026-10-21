@@ -144,4 +144,28 @@ void main() {
     expect(container.read(navIndexProvider), NavTab.search.index);
     await h.dispose(tester);
   });
+
+  testWidgets('sidebar «La tua libreria» closes a page left open in that tab',
+      (tester) async {
+    tester.view.physicalSize = const Size(1280, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final h = await Harness.create(tester);
+    await h.pump(tester, const AppShell());
+    await tester.tap(find.text('La tua libreria'));
+    await _settle(tester);
+    await tester.tap(find.descendant(
+        of: find.byType(DesktopSidebar), matching: find.text('Preferiti')));
+    await _settle(tester);
+    expect(find.text('Nessun preferito ancora'), findsOneWidget);
+    await tester.tap(find.text('Home').first);
+    await _settle(tester);
+    await tester.tap(find.text('La tua libreria'));
+    await _settle(tester);
+    await _settle(tester);
+    await _settle(tester);
+    expect(find.text('Nessun preferito ancora'), findsNothing);
+    expect(find.text('Aggiungi la tua cartella musicale'), findsWidgets);
+    await h.dispose(tester);
+  });
 }

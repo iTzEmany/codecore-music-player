@@ -70,6 +70,18 @@ void main() {
     await player.callMethod('org.mpris.MediaPlayer2.Player', 'Next', [], replySignature: DBusSignature(''));
     await _until(() async => handler.currentTrack?.title, 'Song 1');
     expect(handler.currentTrack!.title, 'Song 1');
+    // Volume, Shuffle and LoopStatus are read/write.
+    const pl = 'org.mpris.MediaPlayer2.Player';
+    await player.setProperty(pl, 'Volume', DBusDouble(0.4));
+    await _until(() async => handler.volume, 0.4);
+    expect(handler.volume, 0.4);
+    expect((await prop('Volume') as DBusDouble).value, 0.4);
+    await player.setProperty(pl, 'Shuffle', const DBusBoolean(true));
+    await _until(() async => handler.shuffleEnabled, true);
+    expect((await prop('Shuffle') as DBusBoolean).value, isTrue);
+    await player.setProperty(pl, 'LoopStatus', const DBusString('Track'));
+    await _until(() async => handler.repeatMode, PlayRepeat.one);
+    expect((await prop('LoopStatus') as DBusString).value, 'Track');
     expect((await player.getProperty('org.mpris.MediaPlayer2', 'Identity') as DBusString).value, 'Codecore');
   }, skip: _hasBus ? false : 'no D-Bus session bus');
 }

@@ -118,6 +118,24 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   double get speed => _speed;
 
   double _baseVolume = 1.0;
+  double get volume => _baseVolume;
+  final _volumeController = StreamController<double>.broadcast();
+  final _volumeRequests = StreamController<double>.broadcast();
+
+  /// Every change of the base volume (slider, sleep-timer fade, MPRIS).
+  Stream<double> get volumeStream => _volumeController.stream;
+
+  /// Volume asked from outside the app (MPRIS): the UI owner applies it so
+  /// the slider and the saved setting follow.
+  Stream<double> get volumeRequests => _volumeRequests.stream;
+
+  void requestVolume(double v) {
+    if (_volumeRequests.hasListener) {
+      _volumeRequests.add(v);
+    } else {
+      unawaited(setVolume(v));
+    }
+  }
   bool _normalize = false;
   double _gainFactor = 1.0;
 
@@ -740,6 +758,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
 
   Future<void> setVolume(double v) {
     _baseVolume = v.clamp(0, 1).toDouble();
+    _volumeController.add(_baseVolume);
     _volumeChangedForWindow();
     return _applyVolume();
   }

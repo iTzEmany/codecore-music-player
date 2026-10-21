@@ -1,5 +1,7 @@
 import 'package:dbus/dbus.dart';
 
+import 'play_queue.dart';
+
 /// The MPRIS `PlaybackStatus` of the player.
 String mprisStatus({required bool hasTrack, required bool playing}) =>
     !hasTrack ? 'Stopped' : (playing ? 'Playing' : 'Paused');
@@ -51,3 +53,18 @@ Duration? mprisSeekTarget({
   if (length != null && length > Duration.zero && target > length) return null; // past the end: ignored
   return target;
 }
+
+/// MPRIS `LoopStatus` for the handler's repeat mode.
+String mprisLoopStatus(PlayRepeat r) => switch (r) {
+  PlayRepeat.off => 'None',
+  PlayRepeat.one => 'Track',
+  PlayRepeat.all => 'Playlist',
+};
+
+/// The repeat mode a client asked for; null for an unknown value.
+PlayRepeat? mprisRepeatFromLoop(String v) => switch (v) {
+  'None' => PlayRepeat.off,
+  'Track' => PlayRepeat.one,
+  'Playlist' => PlayRepeat.all,
+  _ => null,
+};

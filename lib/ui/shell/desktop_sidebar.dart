@@ -33,11 +33,12 @@ class DesktopSidebar extends ConsumerWidget {
       tracksProvider(true).select((t) => t.value?.length ?? 0),
     );
     void select(NavTab t) {
-      if (index == t.index) {
+      // The library entry is a destination, not a tab restore: a page left
+      // open in that tab must not hide the library itself.
+      if (index == t.index || t == NavTab.library) {
         keys[t.index].currentState?.popUntil((r) => r.isFirst);
-      } else {
-        ref.read(navIndexProvider.notifier).set(t.index);
       }
+      if (index != t.index) ref.read(navIndexProvider.notifier).set(t.index);
     }
 
     Widget item(

@@ -6,6 +6,7 @@ import 'package:dbus/dbus.dart';
 import '../../core/app_log.dart';
 import 'codecore_audio_handler.dart';
 import 'mpris_mapping.dart';
+import 'play_queue.dart';
 import 'system_media_controls.dart';
 
 const _root = 'org.mpris.MediaPlayer2';
@@ -29,7 +30,8 @@ class MprisControls implements SystemMediaControls {
       _subs
         ..add(handler.mediaItem.listen(obj.onMediaItem))
         ..add(handler.playbackState.listen(obj.onPlaybackState))
-        ..add(handler.positionStream.listen(obj.onPosition));
+        ..add(handler.positionStream.listen(obj.onPosition))
+        ..add(handler.volumeStream.listen(obj.onVolume));
       AppLog.i('mpris: on the session bus');
     } on Object catch (e, st) {
       // No session bus (a container, SSH): the app runs without system controls.
@@ -58,6 +60,8 @@ class _Object extends DBusObject {
   bool _hasTrack = false;
   Duration _position = Duration.zero;
   double _rate = 1;
+  bool _shuffle = false;
+  String _loop = 'None';
 
   Map<String, DBusValue> get _metadata => mprisMetadata(
         mediaId: _item?.id,
@@ -89,6 +93,22 @@ class _Object extends DBusObject {
         'Rate': DBusDouble(_rate),
       }));
     }
+    final shuffle = s.shuffleMode != AudioServiceShuffleMode.none;
+    final loop = mprisLoopStatus(_h.repeatMode);
+    if (shuffle != _shuffle || loop != _loop) {
+      _shuffle = shuffle;
+      _loop = loop;
+      unawaited(emitPropertiesChanged(_player, changedProperties: {
+        'Shuffle': DBusBoolean(_shuffle),
+        'LoopStatus': DBusString(_loop),
+      }));
+    }
+  }
+
+  void onVolume(double v) {
+    unawaited(emitPropertiesChanged(_player, changedProperties: {
+      'Volume': DBusDouble(v),
+    }));
   }
 
   void onPosition(Duration p) {
@@ -121,11 +141,13 @@ class _Object extends DBusObject {
         ], properties: [
           for (final (n, t) in [
             ('PlaybackStatus', 's'), ('Metadata', 'a{sv}'), ('Position', 'x'), ('Rate', 'd'),
-            ('MinimumRate', 'd'), ('MaximumRate', 'd'), ('Volume', 'd'),
+            ('MinimumRate', 'd'), ('MaximumRate', 'd'),
             ('CanGoNext', 'b'), ('CanGoPrevious', 'b'), ('CanPlay', 'b'), ('CanPause', 'b'),
             ('CanSeek', 'b'), ('CanControl', 'b'),
           ])
             DBusIntrospectProperty(n, DBusSignature(t), access: DBusPropertyAccess.read),
+          for (final (n, t) in [('Volume', 'd'), ('Shuffle', 'b'), ('LoopStatus', 's')])
+            DBusIntrospectProperty(n, DBusSignature(t), access: DBusPropertyAccess.readwrite),
         ]),
       ];
 
@@ -148,7 +170,9 @@ class _Object extends DBusObject {
         'Rate' => DBusDouble(_rate),
         'MinimumRate' => const DBusDouble(0.5),
         'MaximumRate' => const DBusDouble(2),
-        'Volume' => const DBusDouble(1),
+        'Volume' => DBusDouble(_h.volume),
+        'Shuffle' => DBusBoolean(_h.shuffleEnabled),
+        'LoopStatus' => DBusString(mprisLoopStatus(_h.repeatMode)),
         'CanGoNext' => DBusBoolean(_hasTrack && _h.hasNext),
         'CanGoPrevious' || 'CanPlay' || 'CanPause' || 'CanSeek' => DBusBoolean(_hasTrack),
         'CanControl' => const DBusBoolean(true),
@@ -165,11 +189,35 @@ class _Object extends DBusObject {
   }
 
   @override
+  Future<DBusMethodResponse> setProperty(String interface, String name, DBusValue value) async {
+    if (interface != _player) return DBusMethodErrorResponse.unknownProperty();
+    switch ((name, value)) {
+      case ('Volume', DBusDouble(:final value)):
+        _h.requestVolume(value.isNaN ? 0 : value.clamp(0.0, 1.0));
+      case ('Shuffle', DBusBoolean(:final value)):
+        await _h.setShuffleMode(value ? AudioServiceShuffleMode.all : AudioServiceShuffleMode.none);
+      case ('LoopStatus', DBusString(:final value)):
+        final r = mprisRepeatFromLoop(value);
+        if (r == null) return DBusMethodErrorResponse.invalidArgs();
+        await _h.setRepeatMode(switch (r) {
+          PlayRepeat.off => AudioServiceRepeatMode.none,
+          PlayRepeat.one => AudioServiceRepeatMode.one,
+          PlayRepeat.all => AudioServiceRepeatMode.all,
+        });
+      case ('Volume' || 'Shuffle' || 'LoopStatus', _):
+        return DBusMethodErrorResponse.invalidArgs();
+      default:
+        return DBusMethodErrorResponse.propertyReadOnly();
+    }
+    return DBusMethodSuccessResponse();
+  }
+
+  @override
   Future<DBusMethodResponse> getAllProperties(String interface) async {
     const names = {
       _root: ['CanQuit', 'CanRaise', 'HasTrackList', 'Identity', 'DesktopEntry'],
       _player: [
-        'PlaybackStatus', 'Metadata', 'Position', 'Rate', 'MinimumRate', 'MaximumRate', 'Volume',
+        'PlaybackStatus', 'Metadata', 'Position', 'Rate', 'MinimumRate', 'MaximumRate', 'Volume', 'Shuffle', 'LoopStatus',
         'CanGoNext', 'CanGoPrevious', 'CanPlay', 'CanPause', 'CanSeek', 'CanControl',
       ],
     };
