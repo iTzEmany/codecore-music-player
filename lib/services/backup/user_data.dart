@@ -131,12 +131,16 @@ class PlaylistData {
     required this.name,
     required this.createdAt,
     this.coverKey,
+    this.uuid,
     this.items = const [],
   });
 
   final String name;
   final int createdAt;
   final String? coverKey;
+
+  /// Stable identity of the playlist (absent in older backups).
+  final String? uuid;
 
   /// In playlist order.
   final List<TrackRef> items;
@@ -145,6 +149,7 @@ class PlaylistData {
         'name': name,
         'createdAt': createdAt,
         'coverKey': coverKey,
+        'uuid': uuid,
         'items': [for (final i in items) i.toJson()],
       });
 
@@ -152,6 +157,7 @@ class PlaylistData {
         name: j['name'] as String? ?? '',
         createdAt: (j['createdAt'] as num?)?.toInt() ?? 0,
         coverKey: j['coverKey'] as String?,
+        uuid: j['uuid'] as String?,
         items: [
           for (final i in (j['items'] as List? ?? const []))
             TrackRef.fromJson(i as Map<String, dynamic>),

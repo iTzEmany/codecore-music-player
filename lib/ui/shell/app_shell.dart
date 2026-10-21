@@ -252,11 +252,13 @@ class AppShell extends ConsumerWidget {
     // Android back: nested navigator first, then Home, then leave the app.
     content = PopScope(
       canPop: false,
-      onPopInvokedWithResult: (didPop, _) {
+      onPopInvokedWithResult: (didPop, _) async {
         if (didPop) return;
         final nav = keys[index].currentState;
-        if (nav != null && nav.canPop()) {
-          nav.pop();
+        // maybePop (not pop) so a page's own PopScope, e.g. a selection that
+        // Back must end first, is consulted.
+        if (nav != null && await nav.maybePop()) {
+          return;
         } else if (index != 0) {
           ref.read(navIndexProvider.notifier).set(0);
         } else {

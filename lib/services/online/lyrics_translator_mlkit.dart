@@ -21,7 +21,10 @@ class MlKitLyricsTranslator implements LyricsTranslator {
 
   @override
   Future<void> deleteModel(String lang) async {
-    await _manager.deleteModel(lang);
+    // A translator that is open keeps its models in use.
+    await close();
+    final ok = await _manager.deleteModel(lang);
+    if (!ok) throw StateError('model $lang not deleted');
   }
 
   @override

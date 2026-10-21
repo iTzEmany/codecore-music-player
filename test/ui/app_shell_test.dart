@@ -1,11 +1,13 @@
 import 'package:codecore/providers/memory_providers.dart';
 import 'package:codecore/providers/nav_providers.dart';
 import 'package:codecore/services/memory/app_data.dart';
+import 'package:codecore/ui/screens/library/all_tracks_screen.dart';
 import 'package:codecore/ui/shell/app_shell.dart';
 import 'package:codecore/ui/shell/desktop_player_bar.dart';
 import 'package:codecore/ui/shell/desktop_sidebar.dart';
 import 'package:codecore/ui/shell/side_panel.dart';
 import 'package:codecore/ui/widgets/mini_player.dart';
+import 'package:codecore/ui/widgets/selection_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -169,6 +171,52 @@ void main() {
     expect(find.text('Rendi visibile questo dispositivo'), findsOneWidget);
     expect(find.text('Collegamento manuale (IP e PIN)'), findsOneWidget);
     expect(tester.takeException(), isNull);
+    await h.dispose(tester);
+  });
+
+  testWidgets('system back in selection mode ends the selection and keeps the page',
+      (tester) async {
+    _phone(tester);
+    final h = await Harness.create(tester, tracks: 3);
+    await h.pump(tester, const AppShell());
+    await tester.tap(find.text('Libreria'));
+    await _settle(tester);
+    await tester.tap(find.text('Tutti i brani'));
+    await _settle(tester);
+    await tester.longPress(find.text('Song 0').first);
+    await _settle(tester);
+    expect(find.byType(SelectionBar), findsOneWidget);
+    await tester.binding.handlePopRoute();
+    await _settle(tester);
+    expect(find.byType(SelectionBar), findsNothing);
+    expect(find.byType(AllTracksScreen), findsOneWidget); // still on the page
+    // A second back leaves the page.
+    await tester.binding.handlePopRoute();
+    await _settle(tester);
+    await tester.pump(const Duration(seconds: 2));
+    expect(find.byType(AllTracksScreen), findsNothing);
+    await h.dispose(tester);
+  });
+
+  testWidgets('the mini-player label is title and artist, with no progress value', (tester) async {
+    _phone(tester);
+    final handle = tester.ensureSemantics();
+    final h = await Harness.create(tester, tracks: 3);
+    await h.pump(tester, const AppShell());
+    await tester.tap(find.text('Libreria'));
+    await _settle(tester);
+    await tester.tap(find.text('Tutti i brani'));
+    await _settle(tester);
+    await tester.tap(find.text('Song 1').first);
+    await _settle(tester);
+    h.backend.posC.add(const Duration(seconds: 30));
+    h.backend.durC.add(const Duration(seconds: 60));
+    await _settle(tester);
+    final node = tester.getSemantics(
+        find.descendant(of: find.byType(MiniPlayer), matching: find.text('Song 1')));
+    expect(node.label, startsWith('Song 1'));
+    expect(node.value, isEmpty, reason: 'the progress bar value would lead the spoken label');
+    handle.dispose();
     await h.dispose(tester);
   });
 

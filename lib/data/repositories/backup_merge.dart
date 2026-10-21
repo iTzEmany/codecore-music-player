@@ -27,8 +27,9 @@ bool _blank(String? s) => s == null || s.trim().isEmpty;
 /// Merges [data] into this library in one transaction and deletes nothing:
 /// a favourite is added (never removed), a hand edit applies only to a track
 /// the user has not edited here, lyrics fill only empty fields, plays keep the
-/// highest count and the latest date. Playlists are created, never merged: an
-/// existing name gets «(ripristinata)». Imports are not merged (they depend
+/// highest count and the latest date. A playlist already here (same uuid, or same
+/// name and tracks) gets the missing tracks appended; another one with a taken
+/// name is created as «(ripristinata)». Imports are not merged (they depend
 /// on the other device's downloads).
 Future<MergeReport> mergeUserData(AppDatabase db, UserData data, TrackResolver resolver) {
   final report = MergeReport();
@@ -75,27 +76,72 @@ Future<MergeReport> mergeUserData(AppDatabase db, UserData data, TrackResolver r
       await (db.update(db.tracks)..where((r) => r.id.equals(id))).write(upd);
     }
 
-    final names = {for (final p in await db.select(db.playlists).get()) p.name};
+    final local = await db.select(db.playlists).get();
+    final names = {for (final p in local) p.name};
+    final uuids = {for (final p in local) if (p.uuid != null) p.uuid!};
+    final byUuid = {for (final p in local) if (p.uuid != null) p.uuid!: p};
+    final links = await db.select(db.playlistTracks).get();
+    final tracksOf = <int, List<PlaylistTrack>>{};
+    for (final l in links) {
+      (tracksOf[l.playlistId] ??= []).add(l);
+    }
     for (final pl in data.playlists) {
+      final ids = <int>[];
+      final seen = <int>{};
+      for (final ref in pl.items) {
+        final id = resolver.resolve(ref);
+        if (id == null) {
+          report.playlistItemsSkipped++;
+        } else if (seen.add(id)) {
+          ids.add(id);
+        }
+      }
+
+      // Same playlist = same uuid; without a uuid, same name and same tracks.
+      Playlist? same = pl.uuid == null ? null : byUuid[pl.uuid];
+      if (same == null && pl.uuid == null) {
+        for (final c in local) {
+          final have = {for (final l in tracksOf[c.id] ?? const <PlaylistTrack>[]) l.trackId};
+          if (c.name == pl.name && have.length == seen.length && have.containsAll(seen)) {
+            same = c;
+            break;
+          }
+        }
+      }
+      if (same != null) {
+        final existing = tracksOf[same.id] ?? const <PlaylistTrack>[];
+        final have = {for (final l in existing) l.trackId};
+        var position = existing.fold<int>(-1, (m, l) => l.position > m ? l.position : m) + 1;
+        for (final id in ids) {
+          if (have.add(id)) {
+            await db.into(db.playlistTracks).insert(
+                PlaylistTracksCompanion.insert(playlistId: same.id, trackId: id, position: position++));
+          }
+        }
+        continue;
+      }
+
       var name = pl.name;
+      var renamed = false;
       if (names.contains(name)) {
+        renamed = true;
         name = '${pl.name} (ripristinata)';
         for (var n = 2; names.contains(name); n++) {
           name = '${pl.name} (ripristinata $n)';
         }
       }
       names.add(name);
-      final playlistId = await db.into(db.playlists).insert(
-          PlaylistsCompanion.insert(name: name, createdAt: pl.createdAt, coverKey: Value(pl.coverKey)));
-      final seen = <int>{};
+      // A copy keeps the backup's uuid only when it is free, so the next merge
+      // of the same backup recognises it instead of copying again.
+      final keepUuid = !renamed && pl.uuid != null && !uuids.contains(pl.uuid);
+      final playlistId = await db.into(db.playlists).insert(PlaylistsCompanion.insert(
+          name: name,
+          createdAt: pl.createdAt,
+          coverKey: Value(pl.coverKey),
+          uuid: keepUuid ? Value(pl.uuid) : const Value.absent()));
+      if (keepUuid) uuids.add(pl.uuid!);
       var position = 0;
-      for (final ref in pl.items) {
-        final id = resolver.resolve(ref);
-        if (id == null) {
-          report.playlistItemsSkipped++;
-          continue;
-        }
-        if (!seen.add(id)) continue;
+      for (final id in ids) {
         await db.into(db.playlistTracks).insert(
             PlaylistTracksCompanion.insert(playlistId: playlistId, trackId: id, position: position++));
       }

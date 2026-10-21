@@ -59,6 +59,18 @@ void main() {
     expect(await saved(songId), isNull);
   });
 
+  test('an episode takes the length the player measures; a song keeps its own', () async {
+    await handler.playQueue([episodeId], 0);
+    backend.durC.add(const Duration(minutes: 11));
+    await settle();
+    expect((await repo.getById(episodeId))!.durationMs, const Duration(minutes: 11).inMilliseconds);
+
+    await handler.playQueue([songId], 0);
+    backend.durC.add(const Duration(minutes: 3));
+    await settle();
+    expect((await repo.getById(songId))!.durationMs, ten);
+  });
+
   test('pausing keeps the exact place, and the next play starts 5 seconds earlier', () async {
     await handler.playQueue([episodeId], 0);
     await at(const Duration(minutes: 4, seconds: 20));

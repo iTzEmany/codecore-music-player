@@ -237,11 +237,12 @@ class _MiniPlayerState extends ConsumerState<MiniPlayer>
             ],
           ),
           if (!inJam)
+            // Decorative: its percentage would lead the merged label of the card.
             const Positioned(
               left: 0,
               right: 0,
               bottom: 0,
-              child: _MiniProgress(),
+              child: ExcludeSemantics(child: _MiniProgress()),
             ),
         ],
       ),

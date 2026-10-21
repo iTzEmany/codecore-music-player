@@ -41,7 +41,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     _subs
       ..add(_backend.state.listen(_onBackendState))
       ..add(_backend.position.listen(_onPosition))
-      ..add(_backend.duration.listen((d) => _duration = d));
+      ..add(_backend.duration.listen(_onBackendDuration));
     if (backend is GaplessCapable) {
       _subs.add((backend as GaplessCapable)
           .advanced
@@ -270,6 +270,20 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
           track,
           token);
     }
+  }
+
+  /// A podcast file's tags or the feed often carry a wrong length: once the
+  /// player knows the real one, the library row takes it.
+  void _onBackendDuration(Duration? d) {
+    _duration = d;
+    final t = _current;
+    if (d == null || t == null || t.kind != 1) return;
+    final ms = d.inMilliseconds;
+    if (ms <= 0 || (ms - t.durationMs).abs() < 2000) return;
+    _current = t.copyWith(durationMs: ms);
+    _tracks.setDurationMs(t.id, ms).catchError((Object e, StackTrace st) {
+      AppLog.w('could not save the length of "${t.title}"', e, st);
+    });
   }
 
   /// Makes [track] the current one (state, gain, notification).

@@ -2,7 +2,7 @@ import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/data/repositories/backup_merge.dart';
 import 'package:codecore/data/repositories/playlist_sync_repository.dart';
 import 'package:codecore/services/backup/user_data.dart';
-import 'package:drift/drift.dart' show Value;
+import 'package:drift/drift.dart' show OrderingTerm, Value;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -73,6 +73,40 @@ void main() {
     // The original playlist is untouched.
     expect((await (db.select(db.playlistTracks)..where((t) => t.playlistId.equals(id))).get()), hasLength(1));
     expect(restored.uuid, isNot((await (db.select(db.playlists)..where((p) => p.id.equals(id))).getSingle()).uuid));
+  });
+
+  test('merging a playlist already here (same uuid) appends only the missing tracks, no copy', () async {
+    final id = await db.into(db.playlists).insert(PlaylistsCompanion.insert(name: 'Mix', createdAt: 1));
+    final uuid = (await (db.select(db.playlists)..where((p) => p.id.equals(id))).getSingle()).uuid;
+    await db.into(db.playlistTracks).insert(PlaylistTracksCompanion.insert(playlistId: id, trackId: 1, position: 0));
+    final r = await merge(UserData(createdAt: 1, playlists: [
+      PlaylistData(name: 'Renamed', uuid: uuid, createdAt: 1, items: [ref('a'), ref('b')]),
+    ]));
+    expect(r.playlistsCreated, 0);
+    expect(await db.select(db.playlists).get(), hasLength(1));
+    final items = await (db.select(db.playlistTracks)..orderBy([(t) => OrderingTerm.asc(t.position)])).get();
+    expect(items.map((i) => i.trackId), [1, 2]);
+  });
+
+  test('without a uuid, same name and same tracks is the same playlist; merging twice never doubles', () async {
+    final id = await db.into(db.playlists).insert(PlaylistsCompanion.insert(name: 'Mix', createdAt: 1));
+    await db.into(db.playlistTracks).insert(PlaylistTracksCompanion.insert(playlistId: id, trackId: 1, position: 0));
+    final d = UserData(createdAt: 1, playlists: [PlaylistData(name: 'Mix', createdAt: 1, items: [ref('a')])]);
+    await merge(d);
+    await merge(d);
+    expect(await db.select(db.playlists).get(), hasLength(1));
+    expect(await db.select(db.playlistTracks).get(), hasLength(1));
+  });
+
+  test('a new playlist keeps the backup uuid, so a second merge does not copy it', () async {
+    final d = UserData(createdAt: 1, playlists: [
+      PlaylistData(name: 'Nuova', uuid: 'u-1', createdAt: 1, items: [ref('a')]),
+    ]);
+    await merge(d);
+    await merge(d);
+    final all = await db.select(db.playlists).get();
+    expect(all.map((p) => (p.name, p.uuid)), [('Nuova', 'u-1')]);
+    expect(await db.select(db.playlistTracks).get(), hasLength(1));
   });
 
   test('a track the library lacks is listed as not found, and nothing is deleted', () async {

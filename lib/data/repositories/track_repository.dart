@@ -278,6 +278,11 @@ class TrackRepository {
       (_db.update(_db.tracks)..where((t) => t.id.equals(id)))
           .write(TracksCompanion(resumePositionMs: Value(ms)));
 
+  /// The length the player measured (an episode's tags or feed can be wrong).
+  Future<void> setDurationMs(int id, int ms) =>
+      (_db.update(_db.tracks)..where((t) => t.id.equals(id)))
+          .write(TracksCompanion(durationMs: Value(ms)));
+
   /// Hides or shows tracks (the duplicates a merge leaves behind). The
   /// scanner never touches the flag, so a hidden file stays hidden.
   Future<void> setIgnored(Set<int> ids, bool value) async {

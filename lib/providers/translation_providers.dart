@@ -66,3 +66,50 @@ final lyricsTranslationProvider =
     NotifierProvider<LyricsTranslationNotifier, LyricsTranslation?>(
       LyricsTranslationNotifier.new,
     );
+
+/// The languages whose model is on the phone, for Settings → translation
+/// models. Re-read each time the page opens.
+class TranslationModelsNotifier extends AsyncNotifier<List<String>> {
+  @override
+  Future<List<String>> build() => _ready();
+
+  Future<List<String>> _ready() async {
+    final translator = ref.read(lyricsTranslatorProvider);
+    if (translator == null) return const [];
+    final found = <String>[];
+    try {
+      for (final lang in translationLanguages.keys) {
+        if (await translator.isModelReady(lang)) found.add(lang);
+      }
+    } on Object catch (e, st) {
+      AppLog.e('translation models listing failed', e, st);
+    }
+    return found;
+  }
+
+  /// Deletes [lang]'s model and refreshes the list. The platform can still
+  /// report a just-deleted model as present for a moment, so a delete that
+  /// succeeded is trusted over that answer.
+  Future<void> delete(String lang) async {
+    try {
+      await ref.read(lyricsTranslatorProvider)?.deleteModel(lang);
+    } on Object catch (e, st) {
+      AppLog.e('translation model delete failed', e, st);
+      state = AsyncData(await _ready());
+      return;
+    }
+    state = AsyncData([
+      for (final l in state.value ?? const <String>[])
+        if (l != lang) l,
+    ]);
+    state = AsyncData([
+      for (final l in await _ready())
+        if (l != lang) l,
+    ]);
+  }
+}
+
+final translationModelsProvider =
+    AsyncNotifierProvider.autoDispose<TranslationModelsNotifier, List<String>>(
+      TranslationModelsNotifier.new,
+    );

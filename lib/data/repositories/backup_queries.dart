@@ -60,6 +60,7 @@ Future<UserData> collectUserData(AppDatabase db) {
           name: pl.name,
           createdAt: pl.createdAt,
           coverKey: pl.coverKey,
+          uuid: pl.uuid,
           items: itemsByPlaylist[pl.id] ?? const [],
         ),
     ];

@@ -107,7 +107,12 @@ class YtDlpChannel(private val applicationContext: Context) {
                     req.addOption("--audio-quality", call.argument<String>("audioQuality") ?: "192K")
                 }
                 val rate = call.argument<Int>("rateLimit")
-                if (rate != null && rate > 0) req.addOption("--limit-rate", "${rate}K")
+                if (rate != null && rate > 0) {
+                    req.addOption("--limit-rate", "${rate}K")
+                    // yt-dlp hands plain `m3u8` streams to ffmpeg, which ignores --limit-rate:
+                    // force the native HLS downloader so the limit really applies.
+                    req.addOption("--downloader", "m3u8:native")
+                }
                 req.addOption("-o", "$stem.%(ext)s")
                 YoutubeDL.getInstance().execute(req, processId) { progress, _, line ->
                     main.post {
