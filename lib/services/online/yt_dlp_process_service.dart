@@ -149,6 +149,37 @@ List<YtResult> parseYtAlbumLinks(String raw) {
   ];
 }
 
+final _albumPagePrefix = RegExp(r'^(Album|EP|Single)\s+-\s+');
+final _topicSuffix = RegExp(r'\s+-\s+Topic$');
+
+/// The tracks of a YouTube Music album page read with `--flat-playlist`: one
+/// request for the whole page instead of one per track (a 24-track album took
+/// 64 s in full, 4.5 s flat). Flat entries carry no album nor artists: the
+/// album is the page title («Album - Name», «EP - …», «Single - …») and the
+/// artist the «Artist - Topic» channel.
+List<YtResult> parseYtAlbumPage(String raw) {
+  final data = jsonDecode(raw);
+  if (data is! Map) return const [];
+  final album = htmlUnescape('${data['title'] ?? ''}').replaceFirst(_albumPagePrefix, '').trim();
+  final entries = data['entries'] is List ? data['entries'] as List : const [];
+  return [
+    for (final r in _results(entries))
+      YtResult(
+        id: r.id,
+        title: r.title,
+        channel: r.channel,
+        duration: r.duration,
+        thumbnailUrl: r.thumbnailUrl,
+        artists: r.artists.isNotEmpty || !_topicSuffix.hasMatch(r.channel)
+            ? r.artists
+            : [r.channel.replaceFirst(_topicSuffix, '')],
+        album: r.album ?? (album.isEmpty ? null : album),
+        source: r.source,
+        webpageUrl: r.webpageUrl,
+      ),
+  ];
+}
+
 /// Parses a line produced by our `--progress-template`:
 /// `PROG <downloaded> <total> <estimate>` ("NA" when unknown).
 DownloadProgress? parseProgressLine(String line) {
@@ -416,6 +447,7 @@ class YtDlpProcessService implements YoutubeService, StreamSource {
     final r = await _runSearch([
       '-J',
       '--no-warnings',
+      '--flat-playlist',
       '--playlist-items',
       '1-80',
       ...await _jsArgs(),
@@ -423,7 +455,7 @@ class YtDlpProcessService implements YoutubeService, StreamSource {
     ]);
     if (r.code != 0) throw await _explain(r.err);
     try {
-      return parseYtDlpJson(r.out);
+      return parseYtAlbumPage(r.out);
     } on FormatException catch (e, st) {
       AppLog.w('yt-dlp album page output not JSON', e, st);
       throw const YtException(YtErrorKind.changed, 'bad output');

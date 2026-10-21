@@ -62,6 +62,7 @@ class _ImportDetailScreenState extends ConsumerState<ImportDetailScreen> {
     final steps = ref.watch(importStepsProvider).value ?? const {};
     final enriching = ref.watch(enrichingTracksProvider).value ?? const {};
     final downloads = ref.watch(importDownloadsProvider);
+    final wait = ref.watch(importWaitProvider).value;
     final rows = [
       for (final i in items)
         if (i.state != ImportItemStatus.removed)
@@ -111,6 +112,14 @@ class _ImportDetailScreenState extends ConsumerState<ImportDetailScreen> {
                         (p.eta == null ? '' : ' · ${etaLabel(l, p.eta!)}'),
                     style: theme.bodyMedium?.copyWith(color: cc.textMuted),
                   ),
+                  if (wait != null && !p.paused)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Text(
+                        importWaitLabel(l, wait),
+                        style: theme.bodyMedium?.copyWith(color: cc.accentSoft),
+                      ),
+                    ),
                 ],
               ),
             ),

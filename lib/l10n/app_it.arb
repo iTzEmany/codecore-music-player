@@ -845,6 +845,30 @@
       }
     }
   },
+  "importWaitRateLimited": "YouTube chiede una pausa: riprendo alle {time}",
+  "@importWaitRateLimited": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "importWaitNetwork": "Rete assente: riprovo alle {time}",
+  "@importWaitNetwork": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "importPausedTitle": "Importazione «{name}» in pausa",
+  "@importPausedTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "downloadsNotificationTitle": "Download in corso",
   "downloadsNotificationText": "{count, plural, =1{1 brano} other{{count} brani}}",
   "@downloadsNotificationText": {

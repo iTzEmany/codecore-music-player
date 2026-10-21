@@ -1360,6 +1360,21 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String importWaitRateLimited(String time) {
+    return 'YouTube asked for a break: resuming at $time';
+  }
+
+  @override
+  String importWaitNetwork(String time) {
+    return 'No network: trying again at $time';
+  }
+
+  @override
+  String importPausedTitle(String name) {
+    return 'Import “$name” paused';
+  }
+
+  @override
   String get downloadsNotificationTitle => 'Downloading';
 
   @override

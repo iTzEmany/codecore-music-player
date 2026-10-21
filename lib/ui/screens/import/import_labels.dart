@@ -2,6 +2,7 @@ import '../../../data/repositories/import_repository.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../services/import/import_options.dart';
 import '../../../services/import/import_row_phase.dart';
+import '../../../services/import/playlist_import_service.dart';
 import '../../../services/online/download_queue.dart';
 
 /// Text for the codes kept in the database.
@@ -49,3 +50,23 @@ String rowPhaseLabel(AppLocalizations l, RowPhase p, DownloadItem? download) => 
       RowPhase.removed => l.importStatusRemoved,
     };
 
+/// Why the engine waits, and until when («riprendo alle 04:32»). The time is
+/// written by hand: the notification is made also before the app's date
+/// formats are loaded.
+String importWaitLabel(AppLocalizations l, ImportWait w) {
+  String two(int n) => n.toString().padLeft(2, '0');
+  final time = '${two(w.until.hour)}:${two(w.until.minute)}';
+  return w.reason == ImportEventKind.rateLimited
+      ? l.importWaitRateLimited(time)
+      : l.importWaitNetwork(time);
+}
+
+/// Why an import stopped by itself (null for the events that are no stop).
+String? importStopText(AppLocalizations l, ImportEventKind k) => switch (k) {
+      ImportEventKind.rateLimited => l.ytErrRateLimited,
+      ImportEventKind.network => l.ytErrNetwork,
+      ImportEventKind.toolMissing => l.ytErrToolMissing,
+      ImportEventKind.toolOutdated => l.ytErrToolOutdated,
+      ImportEventKind.failing => l.csvImportFailing,
+      ImportEventKind.completed || ImportEventKind.planned => null,
+    };

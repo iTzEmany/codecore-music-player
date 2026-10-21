@@ -26,6 +26,24 @@ class FakeYoutube implements YoutubeService {
   final Map<String, List<YtResult>> soundcloud = {};
   int albumSearches = 0, albumPages = 0, scSearches = 0;
   YtException? failWith;
+
+  /// With [failWith]: how many calls fail before the answers come back
+  /// (null = all of them).
+  int? failTimes;
+
+  /// Album pages that cannot be read.
+  YtException? albumPageFails;
+
+  void _maybeFail() {
+    final f = failWith;
+    if (f == null) return;
+    final left = failTimes;
+    if (left != null) {
+      if (left == 0) return;
+      failTimes = left - 1;
+    }
+    throw f;
+  }
   int searches = 0;
   final queries = <String>[];
 
@@ -33,7 +51,7 @@ class FakeYoutube implements YoutubeService {
   Future<List<YtResult>> searchSongs(String query, {int limit = 5}) async {
     searches++;
     queries.add('songs:$query');
-    if (failWith != null) throw failWith!;
+    _maybeFail();
     return songs.entries
         .firstWhere((e) => query.contains(e.key),
             orElse: () => const MapEntry('', []))
@@ -44,7 +62,7 @@ class FakeYoutube implements YoutubeService {
   Future<List<YtResult>> search(String query) async {
     searches++;
     queries.add('plain:$query');
-    if (failWith != null) throw failWith!;
+    _maybeFail();
     return plain.entries
         .firstWhere((e) => query.contains(e.key),
             orElse: () => const MapEntry('', []))
@@ -69,7 +87,7 @@ class FakeYoutube implements YoutubeService {
   Future<List<YtResult>> searchAlbums(String query, {int limit = 3}) async {
     albumSearches++;
     queries.add('albums:$query');
-    if (failWith != null) throw failWith!;
+    _maybeFail();
     return [
       for (final k in albums.keys)
         if (query.toLowerCase().contains(k))
@@ -80,6 +98,7 @@ class FakeYoutube implements YoutubeService {
   @override
   Future<List<YtResult>> albumTracks(String albumLink) async {
     albumPages++;
+    if (albumPageFails != null) throw albumPageFails!;
     return albums[albumLink.substring(5)] ?? const [];
   }
 
@@ -130,6 +149,9 @@ void main() {
   var enabled = true;
   var scFallback = false;
   var maxInFlight = 3;
+  // No wait by default: a network error or a rate limit pauses at once.
+  var backoff = <Duration>[];
+  late List<ImportWait?> waits;
 
   Future<int> addTrack(String path, String title, String artist, int seconds) async {
     await tracks.upsertBatch([
@@ -174,9 +196,19 @@ void main() {
       searchGap: Duration.zero,
       pollDelay: Duration.zero,
       maxInFlight: maxInFlight,
+      networkBackoff: backoff,
+      rateLimitBackoff: backoff,
     );
     s.events.listen(events.add);
+    s.waits.listen(waits.add);
     return s;
+  }
+
+  /// A service with the settings changed in the test (the one from setUp
+  /// would also answer the same downloads).
+  void rebuild() {
+    service.dispose();
+    service = build();
   }
 
   /// Lets the engine and the settled handlers run to quiescence. Every timer
@@ -214,6 +246,8 @@ void main() {
     enabled = true;
     scFallback = false;
     maxInFlight = 3;
+    backoff = [];
+    waits = [];
     service = build();
   });
   tearDown(() async {
@@ -391,7 +425,88 @@ void main() {
     });
   });
 
-  test('rate limiting pauses the import; resume continues', () async {
+  group('a night alone: errors wait and try again', () {
+    test('a network error waits and searches the same row again', () async {
+      backoff = [Duration.zero, Duration.zero];
+      rebuild();
+      yt
+        ..failWith = const YtException(YtErrorKind.network)
+        ..failTimes = 2
+        ..songs['one'] = [topic('v1', 'One', 'Band', 200)];
+      final id = await service.start(csv([row(0, 'One', 'Band', 200)]));
+      await idle();
+      expect(queued.single.$2, importTag(id, 0));
+      expect(events, isEmpty, reason: 'no pause');
+      expect(waits.whereType<ImportWait>().map((w) => w.reason),
+          [ImportEventKind.network, ImportEventKind.network]);
+      expect(service.currentWait, isNull);
+    });
+
+    test('when the waits run out the import pauses, the row still to do', () async {
+      backoff = [Duration.zero, Duration.zero];
+      rebuild();
+      yt.failWith = const YtException(YtErrorKind.network);
+      final id = await service.start(csv([row(0, 'One', 'Band', 200)]));
+      await idle();
+      expect((await imports.get(id))!.state, ImportStatus.paused);
+      expect((await imports.item(id, 0))!.state, ImportItemStatus.pending);
+      expect(events.single.kind, ImportEventKind.network);
+      expect(yt.searches, greaterThanOrEqualTo(3));
+    });
+
+    test('YouTube asks to slow down: wait, then go on', () async {
+      backoff = [Duration.zero];
+      rebuild();
+      yt
+        ..failWith = const YtException(YtErrorKind.rateLimited)
+        ..failTimes = 1
+        ..songs['one'] = [topic('v1', 'One', 'Band', 200)];
+      await service.start(csv([row(0, 'One', 'Band', 200)]));
+      await idle();
+      expect(queued, hasLength(1));
+      expect(events, isEmpty);
+      expect(waits.whereType<ImportWait>().single.reason, ImportEventKind.rateLimited);
+    });
+
+    test('a download refused for too many requests is done again after the wait', () async {
+      backoff = [Duration.zero];
+      rebuild();
+      yt.songs['one'] = [topic('v1', 'One', 'Band', 200)];
+      final id = await service.start(csv([row(0, 'One', 'Band', 200)]));
+      await idle();
+      settled.add(DownloadItem(
+          id: 1,
+          result: queued.single.$1,
+          status: DownloadStatus.failed,
+          error: YtErrorKind.rateLimited,
+          tag: importTag(id, 0)));
+      await idle();
+      expect(queued, hasLength(2), reason: 'queued again');
+      expect((await imports.item(id, 0))!.state, ImportItemStatus.queued);
+      expect((await imports.get(id))!.state, ImportStatus.running);
+      expect(events, isEmpty);
+    });
+
+    test('pause and resume during a long wait try again at once', () async {
+      backoff = [const Duration(hours: 1)];
+      rebuild();
+      yt
+        ..failWith = const YtException(YtErrorKind.network)
+        ..failTimes = 1
+        ..songs['one'] = [topic('v1', 'One', 'Band', 200)];
+      final id = await service.start(csv([row(0, 'One', 'Band', 200)]));
+      await idle();
+      expect(service.currentWait?.reason, ImportEventKind.network);
+      expect(queued, isEmpty);
+      await service.pause(id);
+      await service.resume(id);
+      await idle();
+      expect(queued.single.$2, importTag(id, 0));
+    });
+  });
+
+  test('rate limiting pauses the import when there is no wait left; resume continues',
+      () async {
     yt.failWith = const YtException(YtErrorKind.rateLimited);
     final id = await service.start(csv([row(0, 'One', 'Band', 200)]));
     await idle();
@@ -1058,6 +1173,27 @@ void main() {
       expect(yt.queries.where((q) => !q.startsWith('albums:')), isEmpty);
       expect(queued.map((q) => q.$1.id), ['a0', 'a1', 'a2', 'a3']);
       expect((await imports.item(id, 2))!.state, ImportItemStatus.queued);
+    });
+
+    test('an album page that cannot be read (too slow, gone) pauses nothing: '
+        'each song is searched on its own', () async {
+      yt.albums['mood'] = [
+        for (var i = 0; i < 4; i++) albumTrack('a$i', 'Song $i', 'Mood'),
+      ];
+      yt.albumPageFails = const YtException(YtErrorKind.network, 'search timed out');
+      for (var i = 0; i < 4; i++) {
+        yt.songs['song $i'] = [topic('s$i', 'Song $i', 'Band', 200)];
+      }
+      maxInFlight = 10;
+      rebuild();
+      final id = await service.start(csv([
+        for (var i = 0; i < 4; i++) inAlbum(i, 'Song $i', 'Mood'),
+      ]));
+      await idle();
+      expect(events.map((e) => e.kind), isEmpty);
+      expect((await imports.get(id))!.state, ImportStatus.running);
+      expect(queued.map((q) => q.$1.id), ['s0', 's1', 's2', 's3']);
+      expect(yt.albumPages, 1, reason: 'the album is not asked again for every song');
     });
 
     test('a sure match by ISRC comes before the album page', () async {

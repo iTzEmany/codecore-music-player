@@ -2476,6 +2476,24 @@ abstract class AppLocalizations {
   /// **'In pausa · {done} di {total}'**
   String importNotificationPaused(int done, int total);
 
+  /// No description provided for @importWaitRateLimited.
+  ///
+  /// In it, this message translates to:
+  /// **'YouTube chiede una pausa: riprendo alle {time}'**
+  String importWaitRateLimited(String time);
+
+  /// No description provided for @importWaitNetwork.
+  ///
+  /// In it, this message translates to:
+  /// **'Rete assente: riprovo alle {time}'**
+  String importWaitNetwork(String time);
+
+  /// No description provided for @importPausedTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Importazione «{name}» in pausa'**
+  String importPausedTitle(String name);
+
   /// No description provided for @downloadsNotificationTitle.
   ///
   /// In it, this message translates to:

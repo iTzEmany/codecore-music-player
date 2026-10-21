@@ -5,6 +5,7 @@ import 'package:codecore/providers/import_notification_providers.dart';
 import 'package:codecore/providers/import_providers.dart';
 import 'package:codecore/services/online/download_queue.dart';
 import 'package:codecore/services/online/youtube_service.dart';
+import 'package:codecore/services/import/playlist_import_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 ImportProgress _imp({bool paused = false, int done = 349, int total = 2253}) => ImportProgress(
@@ -31,6 +32,19 @@ void main() {
     expect(w.title, 'Importazione «Liked Songs»');
     expect(w.text, startsWith('347 di 2253 · '));
     expect((w.done, w.total, w.pause), (349, 2253, 'Pausa'));
+  });
+
+  test('while the engine waits the notification says until when, not the time left', () {
+    final w = backgroundWork(l,
+        imports: [_imp()],
+        downloads: const [],
+        wait: (reason: ImportEventKind.rateLimited, until: DateTime(2026, 10, 21, 4, 32)))!;
+    expect(w.text, '347 di 2253 · YouTube chiede una pausa: riprendo alle 04:32');
+    final n = backgroundWork(l,
+        imports: [_imp()],
+        downloads: const [],
+        wait: (reason: ImportEventKind.network, until: DateTime(2026, 10, 21, 4, 5)))!;
+    expect(n.text, endsWith('Rete assente: riprovo alle 04:05'));
   });
 
   test('no import running: the downloads keep the app alive; nothing left: no notification', () {

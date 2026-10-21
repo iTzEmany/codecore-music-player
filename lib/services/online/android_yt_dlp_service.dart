@@ -125,8 +125,10 @@ class AndroidYtDlpService implements YoutubeService, StreamSource {
   }
 
   @override
-  Future<List<YtResult>> albumTracks(String albumLink) =>
-      _search({'query': albumLink, 'isUrl': true, 'items': 80});
+  /// Flat: one request for the page, not one per track (see [parseYtAlbumPage]).
+  Future<List<YtResult>> albumTracks(String albumLink) => _search(
+      {'query': albumLink, 'isUrl': true, 'items': 80, 'flat': true},
+      parse: parseYtAlbumPage);
 
   @override
   Stream<DownloadProgress> download(YtResult r, Directory outDir,

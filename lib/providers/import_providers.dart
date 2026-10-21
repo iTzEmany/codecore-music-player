@@ -250,6 +250,13 @@ final playlistImportProgressProvider =
       );
     });
 
+/// What the import engine waits for before it tries again (null = nothing).
+final importWaitProvider = StreamProvider<ImportWait?>((ref) async* {
+  final service = ref.watch(playlistImportServiceProvider);
+  yield service.currentWait;
+  yield* service.waits;
+});
+
 /// The rows the import engine is searching or enriching right now.
 final importStepsProvider = StreamProvider<ImportSteps>((ref) async* {
   final service = ref.watch(playlistImportServiceProvider);

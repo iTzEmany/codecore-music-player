@@ -8,8 +8,10 @@ import 'package:permission_handler/permission_handler.dart';
 import '../core/app_log.dart';
 import '../core/platform.dart';
 import '../l10n/app_localizations.dart';
+import '../services/import/import_chain.dart';
 import '../services/import/playlist_import_service.dart';
 import '../services/online/download_queue.dart';
+import '../ui/screens/import/import_labels.dart';
 import '../ui/widgets/format_utils.dart';
 import 'database_providers.dart';
 import 'import_providers.dart';
@@ -20,11 +22,13 @@ import 'youtube_providers.dart';
 typedef BackgroundWork = ({String title, String text, int done, int total, String? pause});
 
 /// The import that runs (counted as a whole), else the downloads waiting or
-/// running; null when there is nothing to keep the app alive for.
+/// running; null when there is nothing to keep the app alive for. While the
+/// engine [wait]s (rate limit, no network) the notification says until when.
 BackgroundWork? backgroundWork(
   AppLocalizations l, {
   required List<ImportProgress> imports,
   required List<DownloadItem> downloads,
+  ImportWait? wait,
 }) {
   final running = imports.where((i) => !i.paused && i.done < i.total).firstOrNull;
   if (running != null) {
@@ -32,7 +36,11 @@ BackgroundWork? backgroundWork(
     return (
       title: l.logImport(running.name),
       text: l.importNotificationText(running.saved, running.total) +
-          (eta == null ? '' : ' · ${etaLabel(l, eta)}'),
+          (wait != null
+              ? ' · ${importWaitLabel(l, wait)}'
+              : eta == null
+                  ? ''
+                  : ' · ${etaLabel(l, eta)}'),
       done: running.done,
       total: running.total,
       pause: l.csvImportPause,
@@ -69,7 +77,9 @@ final importNotificationProvider = Provider<void>((ref) {
   Future<void> send() async {
     timer = null;
     final work = backgroundWork(l10n(),
-        imports: ref.read(importProgressProvider), downloads: ref.read(downloadsProvider));
+        imports: ref.read(importProgressProvider),
+        downloads: ref.read(downloadsProvider),
+        wait: ref.read(importWaitProvider).value);
     if (work == shown) return;
     shown = work;
     try {
@@ -98,9 +108,17 @@ final importNotificationProvider = Provider<void>((ref) {
 
   ref.listen(importProgressProvider, (_, _) => schedule());
   ref.listen(downloadsProvider, (_, _) => schedule());
+  ref.listen(importWaitProvider, (_, _) => schedule());
   ref.listen<AsyncValue<ImportEvent>>(importEventsProvider, (_, e) {
     final event = e.value;
-    if (event?.kind == ImportEventKind.completed) unawaited(_finished(ref, l10n(), event!.importId));
+    if (event == null) return;
+    if (event.kind == ImportEventKind.completed) {
+      unawaited(_finished(ref, l10n(), event.importId));
+    } else {
+      // Stopped by itself: say so, the ongoing notification goes away.
+      final why = importStopText(l10n(), event.kind);
+      if (why != null) unawaited(_paused(ref, l10n(), event.importId, why));
+    }
   });
   _channel.setMethodCallHandler((call) async {
     if (call.method != 'pause') return;
@@ -114,6 +132,18 @@ final importNotificationProvider = Provider<void>((ref) {
     _channel.setMethodCallHandler(null);
   });
 });
+
+Future<void> _paused(Ref ref, AppLocalizations l, int importId, String why) async {
+  try {
+    final imp = await ref.read(importRepositoryProvider).get(importId);
+    await _channel.invokeMethod<void>('finished', {
+      'title': l.importPausedTitle(imp == null ? '' : importLabel(imp.sourceName)),
+      'text': why,
+    });
+  } on Object catch (e, st) {
+    AppLog.w('import pause notice not shown', e, st);
+  }
+}
 
 Future<void> _finished(Ref ref, AppLocalizations l, int importId) async {
   try {

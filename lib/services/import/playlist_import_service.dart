@@ -56,6 +56,10 @@ enum ImportStepKind { searching, enriching }
 /// The rows in a step, by (import id, row index).
 typedef ImportSteps = Map<(int, int), ImportStepKind>;
 
+/// The engine waits before it tries again: YouTube asked to slow down
+/// ([ImportEventKind.rateLimited]) or the network is gone ([ImportEventKind.network]).
+typedef ImportWait = ({ImportEventKind reason, DateTime until});
+
 /// A downloaded file this far (ms) from the CSV length is asked about.
 const durationMismatchMs = 10000;
 
@@ -83,6 +87,19 @@ class PlaylistImportService {
     this.searchGap = const Duration(milliseconds: 1500),
     this.pollDelay = const Duration(milliseconds: 400),
     this.maxInFlight = 3,
+    this.networkBackoff = const [
+      Duration(seconds: 30),
+      Duration(minutes: 1),
+      Duration(minutes: 2),
+      Duration(minutes: 5),
+      Duration(minutes: 10),
+      Duration(minutes: 10),
+    ],
+    this.rateLimitBackoff = const [
+      Duration(minutes: 15),
+      Duration(minutes: 30),
+      Duration(minutes: 60),
+    ],
   }) {
     _sub = settled.listen((i) => unawaited(_onSettled(i)));
   }
@@ -128,9 +145,15 @@ class PlaylistImportService {
   /// Downloads of one import allowed to wait in the queue at the same time.
   final int maxInFlight;
 
+  /// Waits before trying again after a network error or a rate limit, one
+  /// after the other while the failures go on; past the last the import
+  /// pauses (an import left alone at night must not stop at the first error).
+  final List<Duration> networkBackoff, rateLimitBackoff;
+
   final _events = StreamController<ImportEvent>.broadcast();
   late final StreamSubscription<DownloadItem> _sub;
   bool _looping = false;
+  bool _again = false;
   bool _disposed = false;
   int _failStreak = 0;
 
@@ -151,11 +174,54 @@ class PlaylistImportService {
     if (!_stepChanges.isClosed) _stepChanges.add(currentSteps);
   }
 
+  final _waitChanges = StreamController<ImportWait?>.broadcast();
+  ImportWait? _wait;
+  int _retries = 0;
+  Completer<void>? _wake;
+
+  /// What the engine waits for before it tries again (null = not waiting).
+  ImportWait? get currentWait => _wait;
+  Stream<ImportWait?> get waits => _waitChanges.stream;
+
+  void _setWait(ImportWait? wait) {
+    _wait = wait;
+    if (!_waitChanges.isClosed) _waitChanges.add(wait);
+  }
+
+  /// Starts the next wait for [reason]; false when the waits are used up.
+  bool _waitBeforeRetry(ImportEventKind reason) {
+    final steps = reason == ImportEventKind.rateLimited ? rateLimitBackoff : networkBackoff;
+    if (_retries >= steps.length) {
+      _retries = 0;
+      return false;
+    }
+    final d = steps[_retries++];
+    AppLog.i('import: waiting ${d.inSeconds} s (${reason.name}), try $_retries/${steps.length}');
+    _setWait((reason: reason, until: DateTime.now().add(d)));
+    return true;
+  }
+
+  Future<void> _sleepUntil(DateTime until) async {
+    final d = until.difference(DateTime.now());
+    if (d <= Duration.zero) return;
+    final wake = _wake = Completer<void>();
+    await Future.any([Future<void>.delayed(d), wake.future]);
+    _wake = null;
+  }
+
+  /// Ends a wait at once (the user resumed, paused or cancelled).
+  void _wakeUp() {
+    final w = _wake;
+    if (w != null && !w.isCompleted) w.complete();
+  }
+
   void dispose() {
     _disposed = true;
+    _wakeUp();
     _sub.cancel();
     _events.close();
     _stepChanges.close();
+    _waitChanges.close();
   }
 
   /// Creates the playlist (or reuses [intoPlaylistId]) and starts the import.
@@ -394,6 +460,7 @@ class PlaylistImportService {
       await imports.setStatus(importId, ImportStatus.paused);
       _etas[importId]?.pause();
     }
+    _wakeUp();
   }
 
   Future<void> resume(int importId) async {
@@ -401,6 +468,9 @@ class PlaylistImportService {
     if (imp == null || imp.state != ImportStatus.paused) return;
     await imports.setStatus(importId, ImportStatus.running);
     _eta(importId).start();
+    // «Riprendi» during a wait means «try now».
+    _retries = 0;
+    _wakeUp();
     _kick();
   }
 
@@ -410,6 +480,7 @@ class PlaylistImportService {
     _nextBlock.remove(importId);
     await imports.setStatus(importId, ImportStatus.cancelled);
     cancelDownloads((i) => parseImportTag(i.tag)?.$1 == importId);
+    _wakeUp();
   }
 
   /// "Retry all": rows not found or failed are searched again.
@@ -442,7 +513,14 @@ class PlaylistImportService {
   // ---- engine -------------------------------------------------------------
 
   void _kick() {
-    if (!_looping && !_disposed) unawaited(_loop());
+    if (_disposed) return;
+    // A loop about to end may have read the imports before this change: it
+    // goes round once more instead of leaving a resumed import waiting.
+    if (_looping) {
+      _again = true;
+      return;
+    }
+    unawaited(_loop());
   }
 
   Future<void> _loop() async {
@@ -451,6 +529,12 @@ class PlaylistImportService {
     try {
       final library = LibraryIndex(await loadLibrary());
       while (!_disposed) {
+        final wait = _wait;
+        if (wait != null) {
+          await _sleepUntil(wait.until);
+          _setWait(null);
+          continue;
+        }
         final running = await _runningImports();
         if (running.isEmpty) break;
         var worked = false, waiting = false;
@@ -466,7 +550,13 @@ class PlaylistImportService {
             waiting = true;
             continue;
           }
-          await _process(imp.id, item, library);
+          try {
+            await _process(imp.id, item, library);
+          } on Object catch (e, st) {
+            // One row that goes wrong must not stop the whole import.
+            AppLog.e('import: row ${item.rowIndex} of ${imp.id} failed', e, st);
+            await imports.setItem(imp.id, item.rowIndex, status: ImportItemStatus.failed);
+          }
           worked = true;
           break;
         }
@@ -480,6 +570,10 @@ class PlaylistImportService {
       AppLog.e('import loop crashed', e, st);
     } finally {
       _looping = false;
+      if (_again) {
+        _again = false;
+        _kick();
+      }
     }
   }
 
@@ -525,6 +619,7 @@ class PlaylistImportService {
         _setStep(importId, row.index, null);
       }
       _failStreak = 0;
+      _retries = 0;
       switch (decision.kind) {
         case MatchKind.sure when imp?.planFirst ?? false:
           _eta(importId).rowDone();
@@ -585,9 +680,15 @@ class PlaylistImportService {
     final id = '$importId|$key';
     final tracks = await (_albumTracks[id] ??= _loadAlbum(row).catchError(
       (Object e) {
-        // A rate limit must be retried after «Riprendi», not remembered.
-        _albumTracks.remove(id);
-        throw e;
+        // A rate limit must be retried after the wait, not remembered.
+        if (e is YtException && e.kind == YtErrorKind.rateLimited) {
+          _albumTracks.remove(id);
+          throw e;
+        }
+        // The album page is only a shortcut: without it each song is looked
+        // up on its own (a page that took too long used to pause the import).
+        AppLog.w('import: album page for "${row.album}" not read', e);
+        return const <YtResult>[];
       },
     ));
     // On an album page the song is the one with the same title; a similar
@@ -705,9 +806,12 @@ class PlaylistImportService {
       int importId, ImportRow row, YtException e) async {
     ImportEventKind? stop;
     switch (e.kind) {
+      // The row stays to do: the engine waits and searches it again.
       case YtErrorKind.rateLimited:
+        if (_waitBeforeRetry(ImportEventKind.rateLimited)) return;
         stop = ImportEventKind.rateLimited;
       case YtErrorKind.network:
+        if (_waitBeforeRetry(ImportEventKind.network)) return;
         stop = ImportEventKind.network;
       case YtErrorKind.toolMissing:
         stop = ImportEventKind.toolMissing;
@@ -789,8 +893,14 @@ class PlaylistImportService {
       if (imp.state == ImportStatus.cancelled) return;
       switch (item.status) {
         case DownloadStatus.done:
+          _retries = 0;
           _eta(importId).rowDone();
           await _finishDownload(imp, it, item.path);
+        case DownloadStatus.failed
+            when item.error == YtErrorKind.rateLimited &&
+                _waitBeforeRetry(ImportEventKind.rateLimited):
+          // YouTube asked to slow down: the song is done again after the wait.
+          await imports.setItem(importId, rowIndex, status: ImportItemStatus.pending);
         case DownloadStatus.failed:
           _eta(importId).rowDone();
           await imports.setItem(importId, rowIndex,

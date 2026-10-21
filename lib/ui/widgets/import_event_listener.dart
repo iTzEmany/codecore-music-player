@@ -8,6 +8,7 @@ import '../../l10n/l10n_ext.dart';
 import '../../providers/database_providers.dart';
 import '../../providers/import_providers.dart';
 import '../../services/import/playlist_import_service.dart';
+import '../screens/import/import_labels.dart';
 
 /// Starts the import engine at app launch (running imports of the last
 /// session become paused) and reports its events as snackbars.
@@ -54,23 +55,21 @@ class _State extends ConsumerState<ImportEventListener> {
       case ImportEventKind.planned:
         text = l.csvImportPlanned;
       case ImportEventKind.rateLimited:
-        text = l.ytErrRateLimited;
+        text = importStopText(l, e.kind)!;
         action = SnackBarAction(
           label: l.csvImportResume,
           onPressed: () => svc.resume(e.importId),
         );
       case ImportEventKind.network:
-        text = l.ytErrNetwork;
+        text = importStopText(l, e.kind)!;
         action = SnackBarAction(
           label: l.csvImportResume,
           onPressed: () => svc.resume(e.importId),
         );
       case ImportEventKind.toolMissing:
-        text = l.ytErrToolMissing;
       case ImportEventKind.toolOutdated:
-        text = l.ytErrToolOutdated;
       case ImportEventKind.failing:
-        text = l.csvImportFailing;
+        text = importStopText(l, e.kind)!;
     }
     if (!mounted) return;
     messenger
