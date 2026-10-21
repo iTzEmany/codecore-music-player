@@ -2616,5 +2616,73 @@
         "type": "int"
       }
     }
-  }
+  },
+  "navMemory": "Memoria",
+  "memorySummary": "Riepilogo",
+  "memoryMusicLabel": "Musica",
+  "memoryOtherLabel": "Altro",
+  "memoryFreeLabel": "Libero",
+  "memoryDeviceLine": "{free} liberi su {total}",
+  "@memoryDeviceLine": {
+    "placeholders": {
+      "free": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "memoryPlaylists": "Playlist",
+  "memoryPlaylistsNote": "Un brano presente in più playlist conta in ognuna: la somma può superare il totale.",
+  "memoryByFormat": "Per formato",
+  "memoryByFolder": "Per cartella",
+  "memoryNoFolder": "Fuori dalle cartelle",
+  "memoryHeaviest": "I più pesanti",
+  "memoryHeaviestTracks": "Brani",
+  "memoryHeaviestAlbums": "Album",
+  "memoryNeverPlayed": "Mai ascoltati",
+  "memoryNeverPlayedHint": "Brani senza nemmeno un ascolto. Selezionane alcuni per eliminarli dal dispositivo.",
+  "memoryNeverPlayedNone": "Hai ascoltato tutta la musica",
+  "memoryAppData": "Dati dell'app",
+  "memoryCovers": "Copertine",
+  "memoryCoversThumbs": "di cui anteprime {size}",
+  "@memoryCoversThumbs": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "memoryDatabase": "Database",
+  "memoryImageMemory": "Immagini in memoria",
+  "memoryJamCache": "Cache Jam",
+  "memorySearchCache": "Cache delle ricerche",
+  "memoryBlurCopies": "Sfondi sfocati",
+  "memoryTagBackups": "Backup dei tag",
+  "memoryLog": "Registro",
+  "memoryPodcasts": "Episodi dei podcast",
+  "memoryClearCache": "Svuota cache",
+  "memoryClearTitle": "Svuotare la cache?",
+  "memoryClearBody": "Elimina solo copie che l'app ricrea da sola: immagini in memoria, cache Jam, ricerche e sfondi sfocati. Copertine, database e backup restano dove sono.",
+  "memoryClearConfirm": "Svuota",
+  "memoryCleared": "Liberati {size}",
+  "@memoryCleared": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "memoryClearedJamKept": "Liberati {size}. La cache Jam è in uso e non è stata toccata",
+  "@memoryClearedJamKept": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "memoryClearFailed": "Impossibile svuotare la cache",
+  "memoryTools": "Pulizia",
+  "memoryUnavailable": "Non disponibile"
 }

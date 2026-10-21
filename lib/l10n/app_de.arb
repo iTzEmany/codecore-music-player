@@ -2335,5 +2335,73 @@
         "type": "int"
       }
     }
-  }
+  },
+  "navMemory": "Speicher",
+  "memorySummary": "Übersicht",
+  "memoryMusicLabel": "Musik",
+  "memoryOtherLabel": "Sonstiges",
+  "memoryFreeLabel": "Frei",
+  "memoryDeviceLine": "{free} frei von {total}",
+  "@memoryDeviceLine": {
+    "placeholders": {
+      "free": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "memoryPlaylists": "Playlists",
+  "memoryPlaylistsNote": "Ein Titel in mehreren Playlists zählt in jeder davon, die Summe kann daher die Gesamtgröße übersteigen.",
+  "memoryByFormat": "Nach Format",
+  "memoryByFolder": "Nach Ordner",
+  "memoryNoFolder": "Außerhalb der Ordner",
+  "memoryHeaviest": "Die größten",
+  "memoryHeaviestTracks": "Titel",
+  "memoryHeaviestAlbums": "Alben",
+  "memoryNeverPlayed": "Nie gespielt",
+  "memoryNeverPlayedHint": "Titel, die nie abgespielt wurden. Wähle welche aus, um sie vom Gerät zu löschen.",
+  "memoryNeverPlayedNone": "Du hast alle Musik gehört",
+  "memoryAppData": "App-Daten",
+  "memoryCovers": "Cover",
+  "memoryCoversThumbs": "davon Vorschaubilder {size}",
+  "@memoryCoversThumbs": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "memoryDatabase": "Datenbank",
+  "memoryImageMemory": "Bilder im Arbeitsspeicher",
+  "memoryJamCache": "Jam-Cache",
+  "memorySearchCache": "Such-Cache",
+  "memoryBlurCopies": "Unscharfe Hintergründe",
+  "memoryTagBackups": "Tag-Sicherungen",
+  "memoryLog": "Protokoll",
+  "memoryPodcasts": "Podcast-Folgen",
+  "memoryClearCache": "Cache leeren",
+  "memoryClearTitle": "Cache leeren?",
+  "memoryClearBody": "Entfernt nur Kopien, die die App selbst neu erstellt: Bilder im Arbeitsspeicher, Jam-Cache, Suchen und unscharfe Hintergründe. Cover, Datenbank und Sicherungen bleiben erhalten.",
+  "memoryClearConfirm": "Leeren",
+  "memoryCleared": "{size} freigegeben",
+  "@memoryCleared": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "memoryClearedJamKept": "{size} freigegeben. Der Jam-Cache wird gerade benutzt und blieb unberührt",
+  "@memoryClearedJamKept": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "memoryClearFailed": "Cache konnte nicht geleert werden",
+  "memoryTools": "Aufräumen",
+  "memoryUnavailable": "Nicht verfügbar"
 }

@@ -6476,6 +6476,228 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'{count, plural, one{1 brano tolto dall\'elenco} other{{count} brani tolti dall\'elenco}}'**
   String reviewDismissed(int count);
+
+  /// No description provided for @navMemory.
+  ///
+  /// In it, this message translates to:
+  /// **'Memoria'**
+  String get navMemory;
+
+  /// No description provided for @memorySummary.
+  ///
+  /// In it, this message translates to:
+  /// **'Riepilogo'**
+  String get memorySummary;
+
+  /// No description provided for @memoryMusicLabel.
+  ///
+  /// In it, this message translates to:
+  /// **'Musica'**
+  String get memoryMusicLabel;
+
+  /// No description provided for @memoryOtherLabel.
+  ///
+  /// In it, this message translates to:
+  /// **'Altro'**
+  String get memoryOtherLabel;
+
+  /// No description provided for @memoryFreeLabel.
+  ///
+  /// In it, this message translates to:
+  /// **'Libero'**
+  String get memoryFreeLabel;
+
+  /// No description provided for @memoryDeviceLine.
+  ///
+  /// In it, this message translates to:
+  /// **'{free} liberi su {total}'**
+  String memoryDeviceLine(String free, String total);
+
+  /// No description provided for @memoryPlaylists.
+  ///
+  /// In it, this message translates to:
+  /// **'Playlist'**
+  String get memoryPlaylists;
+
+  /// No description provided for @memoryPlaylistsNote.
+  ///
+  /// In it, this message translates to:
+  /// **'Un brano presente in più playlist conta in ognuna: la somma può superare il totale.'**
+  String get memoryPlaylistsNote;
+
+  /// No description provided for @memoryByFormat.
+  ///
+  /// In it, this message translates to:
+  /// **'Per formato'**
+  String get memoryByFormat;
+
+  /// No description provided for @memoryByFolder.
+  ///
+  /// In it, this message translates to:
+  /// **'Per cartella'**
+  String get memoryByFolder;
+
+  /// No description provided for @memoryNoFolder.
+  ///
+  /// In it, this message translates to:
+  /// **'Fuori dalle cartelle'**
+  String get memoryNoFolder;
+
+  /// No description provided for @memoryHeaviest.
+  ///
+  /// In it, this message translates to:
+  /// **'I più pesanti'**
+  String get memoryHeaviest;
+
+  /// No description provided for @memoryHeaviestTracks.
+  ///
+  /// In it, this message translates to:
+  /// **'Brani'**
+  String get memoryHeaviestTracks;
+
+  /// No description provided for @memoryHeaviestAlbums.
+  ///
+  /// In it, this message translates to:
+  /// **'Album'**
+  String get memoryHeaviestAlbums;
+
+  /// No description provided for @memoryNeverPlayed.
+  ///
+  /// In it, this message translates to:
+  /// **'Mai ascoltati'**
+  String get memoryNeverPlayed;
+
+  /// No description provided for @memoryNeverPlayedHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Brani senza nemmeno un ascolto. Selezionane alcuni per eliminarli dal dispositivo.'**
+  String get memoryNeverPlayedHint;
+
+  /// No description provided for @memoryNeverPlayedNone.
+  ///
+  /// In it, this message translates to:
+  /// **'Hai ascoltato tutta la musica'**
+  String get memoryNeverPlayedNone;
+
+  /// No description provided for @memoryAppData.
+  ///
+  /// In it, this message translates to:
+  /// **'Dati dell\'app'**
+  String get memoryAppData;
+
+  /// No description provided for @memoryCovers.
+  ///
+  /// In it, this message translates to:
+  /// **'Copertine'**
+  String get memoryCovers;
+
+  /// No description provided for @memoryCoversThumbs.
+  ///
+  /// In it, this message translates to:
+  /// **'di cui anteprime {size}'**
+  String memoryCoversThumbs(String size);
+
+  /// No description provided for @memoryDatabase.
+  ///
+  /// In it, this message translates to:
+  /// **'Database'**
+  String get memoryDatabase;
+
+  /// No description provided for @memoryImageMemory.
+  ///
+  /// In it, this message translates to:
+  /// **'Immagini in memoria'**
+  String get memoryImageMemory;
+
+  /// No description provided for @memoryJamCache.
+  ///
+  /// In it, this message translates to:
+  /// **'Cache Jam'**
+  String get memoryJamCache;
+
+  /// No description provided for @memorySearchCache.
+  ///
+  /// In it, this message translates to:
+  /// **'Cache delle ricerche'**
+  String get memorySearchCache;
+
+  /// No description provided for @memoryBlurCopies.
+  ///
+  /// In it, this message translates to:
+  /// **'Sfondi sfocati'**
+  String get memoryBlurCopies;
+
+  /// No description provided for @memoryTagBackups.
+  ///
+  /// In it, this message translates to:
+  /// **'Backup dei tag'**
+  String get memoryTagBackups;
+
+  /// No description provided for @memoryLog.
+  ///
+  /// In it, this message translates to:
+  /// **'Registro'**
+  String get memoryLog;
+
+  /// No description provided for @memoryPodcasts.
+  ///
+  /// In it, this message translates to:
+  /// **'Episodi dei podcast'**
+  String get memoryPodcasts;
+
+  /// No description provided for @memoryClearCache.
+  ///
+  /// In it, this message translates to:
+  /// **'Svuota cache'**
+  String get memoryClearCache;
+
+  /// No description provided for @memoryClearTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Svuotare la cache?'**
+  String get memoryClearTitle;
+
+  /// No description provided for @memoryClearBody.
+  ///
+  /// In it, this message translates to:
+  /// **'Elimina solo copie che l\'app ricrea da sola: immagini in memoria, cache Jam, ricerche e sfondi sfocati. Copertine, database e backup restano dove sono.'**
+  String get memoryClearBody;
+
+  /// No description provided for @memoryClearConfirm.
+  ///
+  /// In it, this message translates to:
+  /// **'Svuota'**
+  String get memoryClearConfirm;
+
+  /// No description provided for @memoryCleared.
+  ///
+  /// In it, this message translates to:
+  /// **'Liberati {size}'**
+  String memoryCleared(String size);
+
+  /// No description provided for @memoryClearedJamKept.
+  ///
+  /// In it, this message translates to:
+  /// **'Liberati {size}. La cache Jam è in uso e non è stata toccata'**
+  String memoryClearedJamKept(String size);
+
+  /// No description provided for @memoryClearFailed.
+  ///
+  /// In it, this message translates to:
+  /// **'Impossibile svuotare la cache'**
+  String get memoryClearFailed;
+
+  /// No description provided for @memoryTools.
+  ///
+  /// In it, this message translates to:
+  /// **'Pulizia'**
+  String get memoryTools;
+
+  /// No description provided for @memoryUnavailable.
+  ///
+  /// In it, this message translates to:
+  /// **'Non disponibile'**
+  String get memoryUnavailable;
 }
 
 class _AppLocalizationsDelegate

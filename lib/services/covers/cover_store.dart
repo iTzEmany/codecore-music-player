@@ -32,6 +32,9 @@ class CoverStore {
 
   static String thumbName(String coverKey) => '${coverKey}_t.png';
 
+  /// File names [thumbName] makes (for measuring the thumbnails on their own).
+  static const thumbNamePattern = r'_t\.png$';
+
   Future<void> _thumbs = Future.value();
 
   /// Completes when the thumbnails asked for so far are made.

@@ -151,3 +151,21 @@ Future<void> pruneBackgroundImages(Directory dir, Set<String> keep) async {
     }
   }
 }
+
+/// Names of the blurred copies made by [blurredBackground]: `bg-<id>-….-blur<n>.png`.
+const blurredCopyPattern = r'^bg-.*-blur\d+\.png$';
+
+/// Removes only the blurred copies in [dir]; the pictures themselves stay and
+/// the copies are made again the next time a theme needs them.
+Future<void> deleteBlurredCopies(Directory dir) async {
+  if (!await dir.exists()) return;
+  final copy = RegExp(blurredCopyPattern);
+  await for (final f in dir.list()) {
+    if (f is! File || !copy.hasMatch(p.basename(f.path))) continue;
+    try {
+      await f.delete();
+    } on FileSystemException catch (e) {
+      AppLog.w('could not remove ${f.path}', e);
+    }
+  }
+}

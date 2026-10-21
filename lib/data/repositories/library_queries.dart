@@ -66,7 +66,8 @@ class ArtistSummary {
   final int addedAt;
 }
 
-const _albumSelect = '''
+/// The columns an [AlbumSummary] is built from (add `WHERE ... GROUP BY album_key`).
+const albumSelectSql = '''
 SELECT album_key,
   MIN(album) AS album,
   MAX(album_artist) AS album_artist,
@@ -78,32 +79,36 @@ SELECT album_key,
   MIN(cover_key) AS cover_key,
   MAX(last_played_at) AS last_played,
   MAX(added_at) AS added,
-  SUM(play_count) AS plays
+  SUM(play_count) AS plays,
+  SUM(size_bytes) AS size_bytes
 FROM tracks
 ''';
+
+/// One row of [albumSelectSql] as an [AlbumSummary].
+AlbumSummary albumSummaryFromRow(QueryRow r) {
+  final albumArtist = r.read<String?>('album_artist');
+  final count = r.read<int>('artist_count');
+  return AlbumSummary(
+    albumKey: r.read<String>('album_key'),
+    title: r.read<String?>('album'),
+    artist: albumArtist ?? r.read<String?>('artist'),
+    variousArtists: albumArtist == null && count > 1,
+    trackCount: r.read<int>('track_count'),
+    durationMs: r.read<int?>('duration_ms') ?? 0,
+    year: r.read<int?>('year'),
+    coverKey: r.read<String?>('cover_key'),
+    lastPlayedAt: r.read<int?>('last_played'),
+    addedAt: r.read<int?>('added') ?? 0,
+    playCount: r.read<int?>('plays') ?? 0,
+  );
+}
 
 class LibraryQueries {
   LibraryQueries(this._db);
 
   final AppDatabase _db;
 
-  AlbumSummary _album(QueryRow r) {
-    final albumArtist = r.read<String?>('album_artist');
-    final count = r.read<int>('artist_count');
-    return AlbumSummary(
-      albumKey: r.read<String>('album_key'),
-      title: r.read<String?>('album'),
-      artist: albumArtist ?? r.read<String?>('artist'),
-      variousArtists: albumArtist == null && count > 1,
-      trackCount: r.read<int>('track_count'),
-      durationMs: r.read<int?>('duration_ms') ?? 0,
-      year: r.read<int?>('year'),
-      coverKey: r.read<String?>('cover_key'),
-      lastPlayedAt: r.read<int?>('last_played'),
-      addedAt: r.read<int?>('added') ?? 0,
-      playCount: r.read<int?>('plays') ?? 0,
-    );
-  }
+  AlbumSummary _album(QueryRow r) => albumSummaryFromRow(r);
 
   Stream<List<AlbumSummary>> watchAlbums({AlbumSort sort = AlbumSort.title}) {
     final order = switch (sort) {
@@ -113,7 +118,7 @@ class LibraryQueries {
     };
     return _db
         .customSelect(
-          '$_albumSelect WHERE missing = 0 AND ignored = 0 AND kind = 0 GROUP BY album_key ORDER BY $order',
+          '$albumSelectSql WHERE missing = 0 AND ignored = 0 AND kind = 0 GROUP BY album_key ORDER BY $order',
           readsFrom: {_db.tracks},
         )
         .watch()
@@ -123,7 +128,7 @@ class LibraryQueries {
   Stream<List<AlbumSummary>> watchArtistAlbums(String artistKey) {
     return _db
         .customSelect(
-          '$_albumSelect WHERE missing = 0 AND ignored = 0 AND kind = 0 AND album_key IN ('
+          '$albumSelectSql WHERE missing = 0 AND ignored = 0 AND kind = 0 AND album_key IN ('
           "SELECT album_key FROM tracks WHERE missing = 0 AND ignored = 0 AND kind = 0 AND lower(trim(COALESCE(artist, ''))) = ?) "
           'GROUP BY album_key ORDER BY year DESC, album COLLATE NOCASE',
           variables: [Variable<String>(artistKey)],

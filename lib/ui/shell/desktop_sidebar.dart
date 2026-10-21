@@ -16,7 +16,7 @@ import '../widgets/track_drag.dart';
 import 'shell_nav.dart';
 
 /// Left column of the desktop layout: Home, Search, the library with the
-/// pinned Favourites and every playlist. Icons only when narrow.
+/// pinned Favourites and every playlist, then Memoria. Icons only when narrow.
 class DesktopSidebar extends ConsumerWidget {
   const DesktopSidebar({super.key, required this.collapsed});
 
@@ -240,6 +240,16 @@ class DesktopSidebar extends ConsumerWidget {
                 ],
               ),
             ),
+            const Divider(height: 1),
+            item(
+              index == NavTab.memory.index
+                  ? Icons.storage_rounded
+                  : Icons.storage_outlined,
+              l.navMemory,
+              index == NavTab.memory.index,
+              () => select(NavTab.memory),
+            ),
+            const SizedBox(height: 4),
           ],
         ),
       ),

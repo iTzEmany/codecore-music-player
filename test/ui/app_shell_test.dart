@@ -1,4 +1,6 @@
+import 'package:codecore/providers/memory_providers.dart';
 import 'package:codecore/providers/nav_providers.dart';
+import 'package:codecore/services/memory/app_data.dart';
 import 'package:codecore/ui/shell/app_shell.dart';
 import 'package:codecore/ui/shell/desktop_player_bar.dart';
 import 'package:codecore/ui/shell/desktop_sidebar.dart';
@@ -25,7 +27,7 @@ Future<void> _settle(WidgetTester tester) async {
 }
 
 void main() {
-  testWidgets('narrow: three labelled tabs, home first', (tester) async {
+  testWidgets('narrow: four labelled tabs, home first', (tester) async {
     _phone(tester);
     final h = await Harness.create(tester);
     await h.pump(tester, const AppShell());
@@ -33,7 +35,49 @@ void main() {
     expect(find.text('Home'), findsWidgets);
     expect(find.text('Cerca'), findsWidgets);
     expect(find.text('Libreria'), findsWidgets);
+    expect(find.text('Memoria'), findsWidgets);
     expect(find.byIcon(Icons.settings_outlined), findsOneWidget);
+    await h.dispose(tester);
+  });
+
+  final memoryOverrides = [
+    appDataUsageProvider.overrideWith(
+      (_) async => [const AppDataItem(AppDataKind.covers, 2048, detailBytes: 512)],
+    ),
+    musicDiskSpaceProvider.overrideWith((_) async => null),
+  ];
+
+  testWidgets('Memoria tab opens the storage page', (tester) async {
+    _phone(tester);
+    final h = await Harness.create(tester, tracks: 3);
+    await h.pump(tester, const AppShell(), extraOverrides: memoryOverrides);
+    // Nothing is measured until the tab is shown.
+    expect(find.text('Riepilogo'), findsNothing);
+    await tester.tap(find.text('Memoria'));
+    await _settle(tester);
+    expect(find.text('Riepilogo'), findsOneWidget);
+    expect(find.text('3 B'), findsWidgets);
+    expect(find.text('MP3'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Copertine'),
+      400,
+      scrollable: find.byType(Scrollable).last,
+    );
+    expect(find.text('Copertine'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await h.dispose(tester);
+  });
+
+  testWidgets('sidebar has a Memoria entry that opens the same page', (tester) async {
+    tester.view.physicalSize = const Size(1280, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final h = await Harness.create(tester);
+    await h.pump(tester, const AppShell(), extraOverrides: memoryOverrides);
+    await tester.tap(find.descendant(
+        of: find.byType(DesktopSidebar), matching: find.text('Memoria')));
+    await _settle(tester);
+    expect(find.text('Riepilogo'), findsOneWidget);
     await h.dispose(tester);
   });
 

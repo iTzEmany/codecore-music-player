@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-enum NavTab { home, search, library }
+enum NavTab { home, search, library, memory }
 
 class NavIndexNotifier extends Notifier<int> {
   @override

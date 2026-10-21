@@ -9,7 +9,7 @@ class BottomBarItem {
   final String label;
 }
 
-/// Three always-labelled destinations, no selection pill.
+/// Always-labelled destinations, no selection pill.
 class BottomBar extends StatelessWidget {
   const BottomBar({
     super.key,

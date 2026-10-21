@@ -4100,4 +4100,126 @@ class AppLocalizationsEs extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get navMemory => 'Almacenamiento';
+
+  @override
+  String get memorySummary => 'Resumen';
+
+  @override
+  String get memoryMusicLabel => 'Música';
+
+  @override
+  String get memoryOtherLabel => 'Otros';
+
+  @override
+  String get memoryFreeLabel => 'Libre';
+
+  @override
+  String memoryDeviceLine(String free, String total) {
+    return '$free libres de $total';
+  }
+
+  @override
+  String get memoryPlaylists => 'Listas';
+
+  @override
+  String get memoryPlaylistsNote =>
+      'Una canción en varias listas cuenta en cada una, así que la suma puede superar el total.';
+
+  @override
+  String get memoryByFormat => 'Por formato';
+
+  @override
+  String get memoryByFolder => 'Por carpeta';
+
+  @override
+  String get memoryNoFolder => 'Fuera de las carpetas';
+
+  @override
+  String get memoryHeaviest => 'Los más pesados';
+
+  @override
+  String get memoryHeaviestTracks => 'Canciones';
+
+  @override
+  String get memoryHeaviestAlbums => 'Álbumes';
+
+  @override
+  String get memoryNeverPlayed => 'Nunca escuchadas';
+
+  @override
+  String get memoryNeverPlayedHint =>
+      'Canciones sin una sola reproducción. Selecciona algunas para borrarlas del dispositivo.';
+
+  @override
+  String get memoryNeverPlayedNone => 'Has escuchado toda tu música';
+
+  @override
+  String get memoryAppData => 'Datos de la app';
+
+  @override
+  String get memoryCovers => 'Carátulas';
+
+  @override
+  String memoryCoversThumbs(String size) {
+    return 'de las cuales miniaturas $size';
+  }
+
+  @override
+  String get memoryDatabase => 'Base de datos';
+
+  @override
+  String get memoryImageMemory => 'Imágenes en memoria';
+
+  @override
+  String get memoryJamCache => 'Caché de Jam';
+
+  @override
+  String get memorySearchCache => 'Caché de búsquedas';
+
+  @override
+  String get memoryBlurCopies => 'Fondos desenfocados';
+
+  @override
+  String get memoryTagBackups => 'Copias de etiquetas';
+
+  @override
+  String get memoryLog => 'Archivo de registro';
+
+  @override
+  String get memoryPodcasts => 'Episodios de podcast';
+
+  @override
+  String get memoryClearCache => 'Vaciar caché';
+
+  @override
+  String get memoryClearTitle => '¿Vaciar la caché?';
+
+  @override
+  String get memoryClearBody =>
+      'Solo borra copias que la app vuelve a crear sola: imágenes en memoria, caché de Jam, búsquedas y fondos desenfocados. Las carátulas, la base de datos y las copias de seguridad no se tocan.';
+
+  @override
+  String get memoryClearConfirm => 'Vaciar';
+
+  @override
+  String memoryCleared(String size) {
+    return '$size liberados';
+  }
+
+  @override
+  String memoryClearedJamKept(String size) {
+    return '$size liberados. La caché de Jam está en uso y no se ha tocado';
+  }
+
+  @override
+  String get memoryClearFailed => 'No se pudo vaciar la caché';
+
+  @override
+  String get memoryTools => 'Limpieza';
+
+  @override
+  String get memoryUnavailable => 'No disponible';
 }

@@ -11,6 +11,7 @@ Una pagina per funzione. Le immagini si generano con `scripts/shots.sh` (tema «
 - [Backup e ripristino](backup.md) — Esporta ciò che hai creato (preferiti, playlist, modifiche, testi) e riportalo su un altro dispositivo.
 - [Podcast](podcast.md) — Iscriviti a un feed, scarica gli episodi e ascoltali con la ripresa automatica.
 - [Colori e sfondo](colori-e-sfondo.md) — Fai il tuo tema: ogni colore, sfumatura o foto di sfondo, controllo della leggibilità.
+- [Memoria](memoria.md) — Quanto spazio occupa la musica, per playlist, formato e cartella, cosa non hai mai ascoltato e cosa tiene l'app.
 - [Impostazioni](impostazioni.md) — Tema, lingua, riproduzione, download, rete locale, pulizia e informazioni.
 
 Release e installatori: vedi la pagina delle release del repository.

@@ -2335,5 +2335,73 @@
         "type": "int"
       }
     }
-  }
+  },
+  "navMemory": "Storage",
+  "memorySummary": "Summary",
+  "memoryMusicLabel": "Music",
+  "memoryOtherLabel": "Other",
+  "memoryFreeLabel": "Free",
+  "memoryDeviceLine": "{free} free of {total}",
+  "@memoryDeviceLine": {
+    "placeholders": {
+      "free": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "memoryPlaylists": "Playlists",
+  "memoryPlaylistsNote": "A track in several playlists counts in each one, so the sum can exceed the total.",
+  "memoryByFormat": "By format",
+  "memoryByFolder": "By folder",
+  "memoryNoFolder": "Outside the folders",
+  "memoryHeaviest": "Heaviest",
+  "memoryHeaviestTracks": "Tracks",
+  "memoryHeaviestAlbums": "Albums",
+  "memoryNeverPlayed": "Never played",
+  "memoryNeverPlayedHint": "Tracks that were never played. Select some to delete them from the device.",
+  "memoryNeverPlayedNone": "You have played all your music",
+  "memoryAppData": "App data",
+  "memoryCovers": "Covers",
+  "memoryCoversThumbs": "of which thumbnails {size}",
+  "@memoryCoversThumbs": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "memoryDatabase": "Database",
+  "memoryImageMemory": "Images in memory",
+  "memoryJamCache": "Jam cache",
+  "memorySearchCache": "Search cache",
+  "memoryBlurCopies": "Blurred backgrounds",
+  "memoryTagBackups": "Tag backups",
+  "memoryLog": "Log",
+  "memoryPodcasts": "Podcast episodes",
+  "memoryClearCache": "Clear cache",
+  "memoryClearTitle": "Clear the cache?",
+  "memoryClearBody": "Only removes copies the app makes again by itself: images in memory, Jam cache, searches and blurred backgrounds. Covers, the database and backups stay where they are.",
+  "memoryClearConfirm": "Clear",
+  "memoryCleared": "{size} freed",
+  "@memoryCleared": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "memoryClearedJamKept": "{size} freed. The Jam cache is in use and was left alone",
+  "@memoryClearedJamKept": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "memoryClearFailed": "Could not clear the cache",
+  "memoryTools": "Cleanup",
+  "memoryUnavailable": "Not available"
 }

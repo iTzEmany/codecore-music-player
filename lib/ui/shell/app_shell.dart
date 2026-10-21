@@ -13,6 +13,7 @@ import '../../providers/ui_providers.dart';
 import '../../providers/youtube_providers.dart' show ytDlpStatusProvider;
 import '../../services/audio/codecore_audio_handler.dart';
 import '../screens/library/library_screen.dart';
+import '../screens/memory/memory_screen.dart';
 import '../screens/share/incoming_offer_dialog.dart';
 import '../../providers/jam_providers.dart';
 import '../../providers/share_hub.dart';
@@ -145,6 +146,11 @@ class AppShell extends ConsumerWidget {
         Icons.library_music_rounded,
         l.navLibrary,
       ),
+      BottomBarItem(
+        Icons.storage_outlined,
+        Icons.storage_rounded,
+        l.navMemory,
+      ),
     ];
     Widget tab(int i, Widget root) => Navigator(
       key: keys[i],
@@ -158,6 +164,7 @@ class AppShell extends ConsumerWidget {
           tab(NavTab.home.index, const HomeScreen()),
           tab(NavTab.search.index, const SearchScreen()),
           tab(NavTab.library.index, const LibraryScreen()),
+          tab(NavTab.memory.index, const MemoryScreen()),
         ],
       ),
     );
