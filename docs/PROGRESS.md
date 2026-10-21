@@ -234,7 +234,7 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 19.1 `SelectionController` (logica pura + test)
 - [x] 19.2 `TrackRow` selezionabile
 - [x] 19.3 Barra azioni e azioni di massa
-- [~] 19.4 Collegare le liste
+- [x] 19.4 Collegare le liste (Mi A3, 22/10: Indietro chiude prima la selezione (69a89bf))
 - [x] 19.5 Trascinare brani sulle playlist (desktop)
 - [x] 19.6 Tema chiaro e colore d'accento (utente, 2026-10-21: i temi funzionano)
 - [x] 19.7 Layout ≥ 1200 px
@@ -384,7 +384,7 @@ Piano del 2026-10-20. Richieste dell'utente: nessun rallentamento sul Mi A3 con 
 Richiesta: «una sezione nella libreria dove ci sono le canzoni da revisionare, che l'arricchimento automatico non trova» e «una quarta sezione, magari "memory", che mi indica il peso di ogni playlist, spazio totale occupato e altre informazioni più specifiche e utili». Scelte dell'utente: «Memoria» come **quarta scheda** in basso (e voce della barra laterale su desktop); in «Da revisionare» sia i brani senza risultati sia quelli incompleti (testo, copertina, album/anno/genere), con filtri e azioni.
 - [x] 29.1 «Da revisionare» in Libreria (query, pagina con filtri, «Riprova» col lavoro di arricchimento esistente, «Va bene così» salvato nelle impostazioni, 9 test)
 - [x] 29.2 Scheda «Memoria» (quarta scheda e voce della barra laterale; spazio musica e libero, playlist e Preferiti per peso, formati, cartelle, più pesanti, mai ascoltati, dati dell'app e «Svuota cache»; 11 test; golden della barra aggiornati; da vedere sul telefono in 29.3)
-- [ ] 29.3 Prova sul Mi A3 e su Linux, documentazione
+- [~] 29.3 Prova sul Mi A3 e su Linux, documentazione (Mi A3, 22/10, APK 6034: conteggi di «Da revisionare» e «Memoria» uguali al DB, filtri, «Va bene così», «Riprova», spazio libero = df, «Svuota cache» tocca solo le cache; ritocchi grafici di «Memoria» in corso; Linux non provato)
 
 ## Fase 30 — Pagina artista nella ricerca (`fase-30-pagina-artista.md`)
 Richiesta (2026-10-21): «è possibile fare in modo che cercando un artista, mi appaia la possibilità di cliccare sull'icona dell'artista che appare e farmi vedere le sue top canzoni, i suoi album e altro ancora?» («più come Spotify»). Scelte concordate: card con la foto in cima ai risultati online (solo se il risultato principale di YouTube Music è un artista), pagina con i tuoi brani di quell'artista, brani più ascoltati, album e singoli, video, artisti simili e biografia; «Ascolta» e «Scarica» su ogni brano; pagina album con «Scarica album» (tramite l'importazione); richieste dirette InnerTube (≈ 0,5 s) con cache e copia fuori linea; nomi degli artisti toccabili nei risultati; «Su YouTube Music» dalla libreria.
@@ -408,11 +408,11 @@ Richiesta (2026-10-21): «una sorta di "shuffle+" che ogni tanto mi piazza una c
 - [x] 31.3 Voci online: registro e brano sintetico
 - [x] 31.4 Indirizzi dello streaming con scadenza
 - [x] 31.5 Il lettore suona le voci online (1575c13; messaggio d'errore dedicato in 31.6)
-- [ ] 31.6 Coda a schermo, brano corrente, salvataggio e azioni
-- [ ] 31.7 Semi: dal brano della libreria all'id di YouTube Music
-- [ ] 31.8 Radio di YouTube Music (client e parser)
-- [ ] 31.9 Bacino dei suggerimenti e registro
-- [ ] 31.10 Motore Shuffle+
+- [x] 31.6 Coda a schermo, brano corrente, salvataggio e azioni (a229b24)
+- [x] 31.7 Semi: dal brano della libreria all'id di YouTube Music (be08a78)
+- [x] 31.8 Radio di YouTube Music (client e parser) (be08a78)
+- [x] 31.9 Bacino dei suggerimenti e registro (be08a78)
+- [x] 31.10 Motore Shuffle+ (be08a78)
 - [ ] 31.11 Interfaccia dei suggeriti
 - [ ] 31.12 Impostazioni, rete a consumo e pulsante a tre stati
 - [ ] 31.13 «Suggeriti di recente»
