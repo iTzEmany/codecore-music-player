@@ -10,6 +10,7 @@ import '../core/paths.dart';
 import '../core/platform.dart';
 import '../data/db/app_database.dart';
 import '../data/repositories/folder_repository.dart';
+import '../services/import/playlist_import_service.dart' show parseImportTag;
 import '../services/online/direct_search_service.dart';
 import '../services/online/download_index.dart';
 import '../services/online/download_queue.dart';
@@ -159,7 +160,8 @@ class DownloadsNotifier extends Notifier<List<DownloadItem>> {
           final idx = await ref.read(downloadIndexProvider.future);
           await idx.add(item.result.id, path, source: item.result.source);
         }
-        await _autoEnrich(path);
+        // An import enriches its songs itself, after putting the CSV tags on.
+        if (parseImportTag(item?.tag) == null) await _autoEnrich(path);
       },
     );
     ref.listen(settingsProvider.select((s) => s.downloadParallel),
@@ -172,18 +174,9 @@ class DownloadsNotifier extends Notifier<List<DownloadItem>> {
   }
 
   Future<void> _autoEnrich(String path) async {
-    final s = ref.read(settingsProvider);
-    if (!s.autoEnrich && !s.autoLyrics) return;
     try {
       final id = await ref.read(trackRepositoryProvider).idForPath(path);
-      if (id == null) return;
-      ref
-          .read(enrichJobProvider.notifier)
-          .start(
-            [id],
-            includeLyrics: s.autoLyrics,
-            includeMetadata: s.autoEnrich,
-          );
+      if (id != null) ref.read(downloadEnricherProvider).add(id);
     } on Object catch (e, st) {
       AppLog.w('auto enrich after download failed', e, st);
     }

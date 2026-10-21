@@ -46,6 +46,13 @@
                 android:value="Receive music files offered by nearby devices on the local network" />
         </service>
         <receiver android:name=".ShareActionReceiver" android:exported="false" />
+        <service android:name=".ImportService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Import a playlist the user chose: search and download its songs while the app is in the background" />
+        </service>
+        <receiver android:name=".ImportActionReceiver" android:exported="false" />
         <receiver android:name=".NowPlayingWidget4x1" android:exported="true"
             android:label="@string/tile_label">
             <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>

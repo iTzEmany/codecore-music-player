@@ -51,13 +51,13 @@ void main() {
     expect(find.text('Scansione · 1240/3400'), findsOneWidget);
     expect(find.text('Download · Una canzone'), findsOneWidget);
     expect(find.text('Arricchimento · 2/8'), findsOneWidget);
-    expect(find.text('Completate'), findsOneWidget);
-    expect(find.text('Pulisci'), findsOneWidget);
+    expect(find.text('Finita'), findsNothing, reason: 'what ended goes to the Registro');
+    expect(find.text('Registro'), findsOneWidget);
     expect(tester.takeException(), isNull);
     await h.dispose(tester);
   });
 
-  testWidgets('a paused CSV import shows its progress and a resume button',
+  testWidgets('a paused CSV import: its name, the songs saved and a resume button',
       (tester) async {
     final h = await pump(
         tester,
@@ -74,7 +74,8 @@ void main() {
         ], []));
     await tester.tap(find.byType(ActivityButton));
     await tester.pump(const Duration(milliseconds: 400));
-    expect(find.text('Importazione «Mood» · in pausa · 3/10'), findsOneWidget);
+    expect(find.text('Mood'), findsOneWidget);
+    expect(find.text('3/10'), findsOneWidget);
     expect(find.byTooltip('Riprendi'), findsOneWidget);
     expect(find.byTooltip('Annulla'), findsOneWidget);
     await h.dispose(tester);

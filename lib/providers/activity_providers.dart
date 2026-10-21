@@ -10,6 +10,7 @@ import 'online_providers.dart';
 import 'podcast_providers.dart';
 import 'share_hub.dart';
 import 'youtube_providers.dart';
+import '../services/import/playlist_import_service.dart';
 
 enum ActivityKind { scan, enrich, download, transfer, import, cleanup }
 
@@ -132,7 +133,8 @@ ActivityState buildActivity({
         kind: ActivityKind.import,
         key: 'imp-${i.id}',
         name: i.name,
-        done: i.done,
+        // Songs saved so far; the bar follows every row handled.
+        done: i.saved,
         total: i.total,
         progress: i.fraction,
         paused: i.paused,
@@ -146,6 +148,8 @@ ActivityState buildActivity({
     final active = d.status == DownloadStatus.queued ||
         d.status == DownloadStatus.downloading ||
         waiting;
+    // The songs of an import are followed in the import's own screen.
+    if (active && parseImportTag(d.tag) != null) continue;
     final item = ActivityItem(
       kind: ActivityKind.download,
       key: 'dl-${d.id}',
@@ -191,21 +195,8 @@ ActivityState buildActivity({
   return ActivityState(running, completed);
 }
 
-/// Keys of the completed entries the user cleared with «Pulisci».
-class DismissedActivityNotifier extends Notifier<Set<String>> {
-  @override
-  Set<String> build() => const {};
-
-  void dismiss(Iterable<String> keys) => state = {...state, ...keys};
-}
-
-final dismissedActivityProvider =
-    NotifierProvider<DismissedActivityNotifier, Set<String>>(
-      DismissedActivityNotifier.new,
-    );
-
 final activityProvider = Provider<ActivityState>((ref) {
-  final s = buildActivity(
+  return buildActivity(
     scan: ref.watch(scanStateProvider),
     enrich: ref.watch(enrichJobProvider),
     downloads: ref.watch(downloadsProvider),
@@ -218,10 +209,4 @@ final activityProvider = Provider<ActivityState>((ref) {
       ),
     ),
   );
-  final hidden = ref.watch(dismissedActivityProvider);
-  if (hidden.isEmpty) return s;
-  return ActivityState(s.running, [
-    for (final c in s.completed)
-      if (!hidden.contains(c.key)) c,
-  ]);
 });

@@ -8,6 +8,7 @@ import 'package:codecore/data/repositories/track_repository.dart';
 import 'package:codecore/services/import/import_candidate.dart';
 import 'package:codecore/services/import/import_options.dart';
 import 'package:codecore/services/import/imported_playlist.dart';
+import 'package:codecore/services/import/import_chain.dart';
 import 'package:codecore/services/import/playlist_import_service.dart';
 import 'package:codecore/services/import/track_matcher.dart' show MatchThresholds;
 import 'package:codecore/services/online/download_queue.dart';
@@ -118,6 +119,8 @@ void main() {
   late StreamController<DownloadItem> settled;
   late List<(YtResult, String)> queued;
   late List<String> tagged;
+  late List<int> enriched;
+  late List<ImportSteps> stepsDuringTags;
   late List<ImportEvent> events;
   late PlaylistImportService service;
   var cancelCalls = 0;
@@ -157,7 +160,11 @@ void main() {
       settled: settled.stream,
       trackIdForPath: tracks.idForPath,
       pathForVideo: (_) async => null,
-      applyTags: (id, r) async => tagged.add('$id:${r.title}'),
+      applyTags: (id, r) async {
+        tagged.add('$id:${r.title}');
+        stepsDuringTags.add(service.currentSteps);
+      },
+      enrichLater: enriched.add,
       fetchCover: (id, row) async {
         coverCalls.add('$id:${row.album}');
         if (coverFails) throw StateError('iTunes down');
@@ -197,6 +204,8 @@ void main() {
     settled = StreamController<DownloadItem>.broadcast();
     queued = [];
     tagged = [];
+    enriched = [];
+    stepsDuringTags = [];
     events = [];
     cancelCalls = 0;
     coverCalls.clear();
@@ -262,6 +271,18 @@ void main() {
     expect(tagged, hasLength(2));
     expect((await imports.item(id, 0))!.state, ImportItemStatus.downloaded);
     expect(events.last.kind, ImportEventKind.completed);
+  });
+
+  test('a saved song is «enriching» while it gets the CSV tags, then goes to '
+      'the background enrichment', () async {
+    yt.songs['one'] = [topic('v1', 'One', 'Band', 200)];
+    final id = await service.start(csv([row(0, 'One', 'Band', 200)]));
+    await idle();
+    expect(service.currentSteps, isEmpty, reason: 'the search is over');
+    await finish(importTag(id, 0), '/m/one.mp3');
+    expect(stepsDuringTags.single, {(id, 0): ImportStepKind.enriching});
+    expect(service.currentSteps, isEmpty);
+    expect(enriched, [(await imports.item(id, 0))!.trackId]);
   });
 
   test('an unsure match waits for the user with its candidates', () async {
@@ -750,6 +771,54 @@ void main() {
       final all = await imports.forPlaylist((await imports.get(first))!.playlistId);
       expect(all, hasLength(1));
       expect(all.single.sourceName, 'Mood');
+    });
+
+    test('after a restart the blocks still follow one another (nothing in memory)', () async {
+      final first = await service.start(
+          csv([for (var i = 0; i < 30; i++) row(i, 'Song $i', 'Band', 200)]),
+          options: const ImportOptions(linkOnly: true),
+          blockSize: 10);
+      await service.pause(first);
+      service.dispose();
+      service = build(); // a new process: the chain is read from the blocks
+      final pl = (await imports.get(first))!.playlistId;
+      await service.resumeChain(first);
+      var all = await imports.forPlaylist(pl);
+      for (var i = 0; i < 30 && !all.every((x) => x.state == ImportStatus.finished); i++) {
+        await idle();
+        all = await imports.forPlaylist(pl);
+      }
+      expect(all.map((i) => i.state), everyElement(ImportStatus.finished));
+    });
+
+    test('the same file imported twice into one playlist makes two imports, not one', () async {
+      final first = await service.start(rows250(),
+          options: const ImportOptions(planFirst: true), blockSize: 100);
+      final pl = (await imports.get(first))!.playlistId;
+      await service.cancelChain(first);
+      final again = await service.start(rows250(),
+          intoPlaylistId: pl, options: const ImportOptions(planFirst: true), blockSize: 100);
+      final chains = groupImportChains(await imports.forPlaylist(pl));
+      expect(chains.map((c) => c.length), [3, 3]);
+      expect((await service.chainOf(again)).first.id, again);
+      expect(chains.first.map((i) => i.state), everyElement(ImportStatus.cancelled),
+          reason: 'the second one does not wake the old blocks');
+    });
+
+    test('pause, resume and cancel act on the whole import, from any block', () async {
+      final first = await service.start(rows250(),
+          options: const ImportOptions(planFirst: true), blockSize: 100);
+      final pl = (await imports.get(first))!.playlistId;
+      final blocks = await imports.forPlaylist(pl);
+      expect((await service.chainOf(blocks[2].id)).map((b) => b.id), blocks.map((b) => b.id));
+      await service.pauseChain(blocks[2].id);
+      expect((await imports.forPlaylist(pl)).map((i) => i.state), everyElement(ImportStatus.paused));
+      await service.resumeChain(blocks[1].id);
+      expect((await imports.get(first))!.state, ImportStatus.running, reason: 'the first one goes on');
+      expect((await imports.get(blocks[1].id))!.state, ImportStatus.paused);
+      await service.cancelChain(blocks[1].id);
+      await idle();
+      expect((await imports.forPlaylist(pl)).map((i) => i.state), everyElement(ImportStatus.cancelled));
     });
 
     test('cancelling a block leaves the next ones waiting, not started', () async {

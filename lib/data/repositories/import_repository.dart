@@ -116,6 +116,13 @@ class ImportRepository {
             ..limit(1))
           .watchSingleOrNull();
 
+  /// Every import of a playlist (any state), oldest first.
+  Stream<List<PlaylistImport>> watchAllForPlaylist(int playlistId) =>
+      (_db.select(_db.playlistImports)
+            ..where((i) => i.playlistId.equals(playlistId))
+            ..orderBy([(i) => OrderingTerm.asc(i.id)]))
+          .watch();
+
   Future<List<PlaylistImport>> forPlaylist(int playlistId) =>
       (_db.select(_db.playlistImports)
             ..where((i) => i.playlistId.equals(playlistId)))

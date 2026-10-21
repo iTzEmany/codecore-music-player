@@ -33,7 +33,11 @@ class _State extends ConsumerState<ImportEventListener> {
     SnackBarAction? action;
     switch (e.kind) {
       case ImportEventKind.completed:
-        final items = await ref.read(importRepositoryProvider).items(e.importId);
+        // Every block of the import, counted together.
+        final items = [
+          for (final b in await svc.chainOf(e.importId))
+            ...await ref.read(importRepositoryProvider).items(b.id),
+        ];
         int count(bool Function(PlaylistImportItem) test) =>
             items.where(test).length;
         // Rows a sync found already in the playlist are not «added».

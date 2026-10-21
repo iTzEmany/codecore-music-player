@@ -1299,6 +1299,88 @@ class AppLocalizationsFr extends AppLocalizations {
   String get activityClear => 'Effacer';
 
   @override
+  String get importPhaseSearching => 'Recherche…';
+
+  @override
+  String importPhaseDownloading(int percent) {
+    return 'Téléchargement $percent %';
+  }
+
+  @override
+  String importPhaseRetry(int seconds) {
+    return 'Nouvel essai dans $seconds s';
+  }
+
+  @override
+  String get importPhaseEnriching => 'Enrichissement…';
+
+  @override
+  String get importPhaseDownloadStart => 'Téléchargement…';
+
+  @override
+  String get importFilterAll => 'Tous';
+
+  @override
+  String get importFilterActive => 'En cours';
+
+  @override
+  String get importFilterProblems => 'À régler';
+
+  @override
+  String get importFilterDone => 'Faits';
+
+  @override
+  String get importRowsNone => 'Aucun titre ici';
+
+  @override
+  String get activityLog => 'Journal';
+
+  @override
+  String activityLogCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count événements',
+      one: '1 événement',
+      zero: 'Vide',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get activityLogEmpty =>
+      'Rien pour l’instant : les téléchargements, imports et envois terminés apparaissent ici.';
+
+  @override
+  String logImport(String name) {
+    return 'Import «$name»';
+  }
+
+  @override
+  String importNotificationText(int done, int total) {
+    return '$done sur $total';
+  }
+
+  @override
+  String importNotificationPaused(int done, int total) {
+    return 'En pause · $done sur $total';
+  }
+
+  @override
+  String get downloadsNotificationTitle => 'Téléchargements en cours';
+
+  @override
+  String downloadsNotificationText(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count titres',
+      one: '1 titre',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String activityRunning(int n) {
     return '$n activités en cours';
   }

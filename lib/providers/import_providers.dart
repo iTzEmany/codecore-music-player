@@ -8,10 +8,12 @@ import '../core/paths.dart';
 import '../data/repositories/import_repository.dart';
 import '../core/constants.dart';
 import '../data/db/app_database.dart';
+import '../services/import/import_chain.dart';
 import '../services/import/playlist_import_service.dart';
 import '../services/import/track_matcher.dart' show MatchThresholds;
 import '../services/library/track_editor.dart';
 import '../services/online/cached_youtube_service.dart';
+import '../services/online/download_queue.dart';
 import '../services/online/search_cache.dart';
 import 'database_providers.dart';
 import 'library_providers.dart';
@@ -69,6 +71,7 @@ final playlistImportServiceProvider = Provider<PlaylistImportService>((ref) {
           .read(enrichmentServiceProvider)
           .coverForAlbum(t, row.album!, row.primaryArtist);
     },
+    enrichLater: (id) => ref.read(downloadEnricherProvider).add(id),
     pathForVideo: (v) async =>
         (await ref.read(downloadIndexProvider.future)).pathFor(v.id, source: v.source),
     soundCloudFallback: () => ref.read(settingsProvider).importSoundCloud,
@@ -122,93 +125,163 @@ class ImportProgress {
     required this.name,
     required this.total,
     required this.done,
+    this.saved = 0,
     required this.review,
     required this.missing,
     required this.paused,
     this.planned = 0,
     this.eta,
+    this.blockIds = const [],
   });
 
   factory ImportProgress.from(
     PlaylistImport imp,
     List<PlaylistImportItem> items, {
     Duration? Function(int rowsLeft)? etaFor,
+  }) =>
+      ImportProgress.chain([imp], (_) => items,
+          etaFor: etaFor == null ? null : (_, left) => etaFor(left));
+
+  /// One import as the user sees it: all its blocks counted together. [id] is
+  /// the block that runs, or else the first one waiting: pause, resume and
+  /// cancel start from it and act on the whole chain.
+  factory ImportProgress.chain(
+    List<PlaylistImport> blocks,
+    List<PlaylistImportItem> Function(int importId) itemsOf, {
+    Duration? Function(int importId, int rowsLeft)? etaFor,
   }) {
-    var done = 0, review = 0, missing = 0, planned = 0;
-    // Rows a sync took out of the source are no longer part of the import.
-    final live = [
-      for (final i in items)
-        if (i.state != ImportItemStatus.removed) i,
-    ];
-    for (final i in live) {
-      switch (i.state) {
-        case ImportItemStatus.pending:
-        case ImportItemStatus.queued:
-        case ImportItemStatus.removed:
-          break;
-        case ImportItemStatus.review:
-          review++;
-          done++;
-        case ImportItemStatus.notFound:
-        case ImportItemStatus.failed:
-          missing++;
-          done++;
-        case ImportItemStatus.planned:
-          planned++;
-          done++;
-        case ImportItemStatus.downloaded:
-        case ImportItemStatus.linked:
-        case ImportItemStatus.skipped:
-          done++;
+    var total = 0, done = 0, saved = 0, review = 0, missing = 0, planned = 0;
+    for (final b in blocks) {
+      for (final i in itemsOf(b.id)) {
+        switch (i.state) {
+          // Rows a sync took out of the source are no longer part of the import.
+          case ImportItemStatus.removed:
+            continue;
+          case ImportItemStatus.pending:
+          case ImportItemStatus.queued:
+            break;
+          case ImportItemStatus.review:
+            review++;
+            done++;
+          case ImportItemStatus.notFound:
+          case ImportItemStatus.failed:
+            missing++;
+            done++;
+          case ImportItemStatus.planned:
+            planned++;
+            done++;
+          case ImportItemStatus.downloaded:
+          case ImportItemStatus.linked:
+            saved++;
+            done++;
+          case ImportItemStatus.skipped:
+            done++;
+        }
+        total++;
       }
     }
+    final running = blocks.where((b) => b.state == ImportStatus.running).firstOrNull;
+    final waiting = blocks.where((b) => b.state == ImportStatus.paused).firstOrNull;
+    final current = running ?? waiting ?? blocks.last;
     return ImportProgress(
-      id: imp.id,
-      playlistId: imp.playlistId,
-      name: imp.sourceName,
-      total: live.length,
+      id: current.id,
+      playlistId: current.playlistId,
+      name: importLabel(current.sourceName),
+      total: total,
       done: done,
+      saved: saved,
       review: review,
       missing: missing,
-      paused: imp.state == ImportStatus.paused,
+      paused: running == null && waiting != null,
       planned: planned,
-      eta: imp.state == ImportStatus.running ? etaFor?.call(live.length - done) : null,
+      eta: running == null ? null : etaFor?.call(running.id, total - done),
+      blockIds: [for (final b in blocks) b.id],
     );
   }
 
   final int id, playlistId, total, done, review, missing, planned;
+
+  /// Songs now in the playlist: downloaded or already in the library.
+  final int saved;
   final String name;
   final bool paused;
 
   /// Time left at the current pace; null while unknown or paused.
   final Duration? eta;
 
+  /// The imports this one is made of (several when imported «a blocchi»).
+  final List<int> blockIds;
+
   double? get fraction => total == 0 ? null : done / total;
 }
 
 /// Imports still to finish, with counters (Activity centre).
 final importProgressProvider = Provider<List<ImportProgress>>((ref) {
-  final imports = ref.watch(unfinishedImportsProvider).value ?? const [];
+  final unfinished = ref.watch(unfinishedImportsProvider).value ?? const [];
   return [
-    for (final i in imports)
-      ImportProgress.from(
-        i,
-        ref.watch(importItemsProvider(i.id)).value ?? const [],
-        etaFor: (left) =>
-            ref.read(playlistImportServiceProvider).etaFor(i.id, left),
+    for (final group in groupImportChains(unfinished))
+      ImportProgress.chain(
+        _wholeChain(ref, group.first),
+        (id) => ref.watch(importItemsProvider(id)).value ?? const [],
+        etaFor: (id, left) => ref.read(playlistImportServiceProvider).etaFor(id, left),
       ),
   ];
 });
+
+/// Every import of a playlist, any state (the finished blocks of a chain too).
+final playlistImportsProvider = StreamProvider.family<List<PlaylistImport>, int>(
+    (ref, playlistId) => ref.watch(importRepositoryProvider).watchAllForPlaylist(playlistId));
+
+/// All the blocks of the chain [one] belongs to, finished ones included.
+List<PlaylistImport> _wholeChain(Ref ref, PlaylistImport one) {
+  final all = ref.watch(playlistImportsProvider(one.playlistId)).value ?? [one];
+  return groupImportChains(all).firstWhere((c) => c.any((i) => i.id == one.id), orElse: () => [one]);
+}
 
 /// Counters of the latest import of a playlist (null = none).
 final playlistImportProgressProvider =
     Provider.family<ImportProgress?, int>((ref, playlistId) {
       final imp = ref.watch(playlistImportProvider(playlistId)).value;
       if (imp == null || imp.state == ImportStatus.cancelled) return null;
-      return ImportProgress.from(
-        imp,
-        ref.watch(importItemsProvider(imp.id)).value ?? const [],
-        etaFor: (left) =>
-            ref.read(playlistImportServiceProvider).etaFor(imp.id, left),
+      return ImportProgress.chain(
+        _wholeChain(ref, imp),
+        (id) => ref.watch(importItemsProvider(id)).value ?? const [],
+        etaFor: (id, left) => ref.read(playlistImportServiceProvider).etaFor(id, left),
       );
+    });
+
+/// The rows the import engine is searching or enriching right now.
+final importStepsProvider = StreamProvider<ImportSteps>((ref) async* {
+  final service = ref.watch(playlistImportServiceProvider);
+  yield service.currentSteps;
+  yield* service.steps;
+});
+
+final importByIdProvider = StreamProvider.family<PlaylistImport?, int>(
+    (ref, importId) => ref.watch(importRepositoryProvider).watch(importId));
+
+/// Every row of the import [importId] belongs to (all its blocks), in the
+/// order of the file; null while loading.
+final importChainItemsProvider = Provider.family<List<PlaylistImportItem>?, int>((ref, importId) {
+  final imp = ref.watch(importByIdProvider(importId)).value;
+  if (imp == null) return null;
+  return [
+    for (final b in _wholeChain(ref, imp)) ...?ref.watch(importItemsProvider(b.id)).value,
+  ];
+});
+
+/// The counters of the whole import [importId] belongs to.
+final importChainProgressProvider = Provider.family<ImportProgress?, int>((ref, importId) {
+  final imp = ref.watch(importByIdProvider(importId)).value;
+  if (imp == null) return null;
+  return ImportProgress.chain(
+    _wholeChain(ref, imp),
+    (id) => ref.watch(importItemsProvider(id)).value ?? const [],
+    etaFor: (id, left) => ref.read(playlistImportServiceProvider).etaFor(id, left),
+  );
+});
+
+/// The downloads of import rows, by `(importId, rowIndex)`.
+final importDownloadsProvider = Provider<Map<(int, int), DownloadItem>>((ref) => {
+      for (final d in ref.watch(downloadsProvider)) ?parseImportTag(d.tag): d,
     });

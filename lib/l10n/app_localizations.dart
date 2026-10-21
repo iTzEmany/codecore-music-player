@@ -2374,6 +2374,114 @@ abstract class AppLocalizations {
   /// **'Pulisci'**
   String get activityClear;
 
+  /// No description provided for @importPhaseSearching.
+  ///
+  /// In it, this message translates to:
+  /// **'In ricerca…'**
+  String get importPhaseSearching;
+
+  /// No description provided for @importPhaseDownloading.
+  ///
+  /// In it, this message translates to:
+  /// **'Download {percent} %'**
+  String importPhaseDownloading(int percent);
+
+  /// No description provided for @importPhaseRetry.
+  ///
+  /// In it, this message translates to:
+  /// **'Nuovo tentativo tra {seconds} s'**
+  String importPhaseRetry(int seconds);
+
+  /// No description provided for @importPhaseEnriching.
+  ///
+  /// In it, this message translates to:
+  /// **'Arricchimento…'**
+  String get importPhaseEnriching;
+
+  /// No description provided for @importPhaseDownloadStart.
+  ///
+  /// In it, this message translates to:
+  /// **'Download…'**
+  String get importPhaseDownloadStart;
+
+  /// No description provided for @importFilterAll.
+  ///
+  /// In it, this message translates to:
+  /// **'Tutti'**
+  String get importFilterAll;
+
+  /// No description provided for @importFilterActive.
+  ///
+  /// In it, this message translates to:
+  /// **'In corso'**
+  String get importFilterActive;
+
+  /// No description provided for @importFilterProblems.
+  ///
+  /// In it, this message translates to:
+  /// **'Da sistemare'**
+  String get importFilterProblems;
+
+  /// No description provided for @importFilterDone.
+  ///
+  /// In it, this message translates to:
+  /// **'Fatti'**
+  String get importFilterDone;
+
+  /// No description provided for @importRowsNone.
+  ///
+  /// In it, this message translates to:
+  /// **'Nessun brano qui'**
+  String get importRowsNone;
+
+  /// No description provided for @activityLog.
+  ///
+  /// In it, this message translates to:
+  /// **'Registro'**
+  String get activityLog;
+
+  /// No description provided for @activityLogCount.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, =0{Vuoto} =1{1 evento} other{{count} eventi}}'**
+  String activityLogCount(int count);
+
+  /// No description provided for @activityLogEmpty.
+  ///
+  /// In it, this message translates to:
+  /// **'Niente da registrare per ora: qui compaiono download, importazioni e invii finiti.'**
+  String get activityLogEmpty;
+
+  /// No description provided for @logImport.
+  ///
+  /// In it, this message translates to:
+  /// **'Importazione «{name}»'**
+  String logImport(String name);
+
+  /// No description provided for @importNotificationText.
+  ///
+  /// In it, this message translates to:
+  /// **'{done} di {total}'**
+  String importNotificationText(int done, int total);
+
+  /// No description provided for @importNotificationPaused.
+  ///
+  /// In it, this message translates to:
+  /// **'In pausa · {done} di {total}'**
+  String importNotificationPaused(int done, int total);
+
+  /// No description provided for @downloadsNotificationTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Download in corso'**
+  String get downloadsNotificationTitle;
+
+  /// No description provided for @downloadsNotificationText.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, =1{1 brano} other{{count} brani}}'**
+  String downloadsNotificationText(int count);
+
   /// No description provided for @activityRunning.
   ///
   /// In it, this message translates to:

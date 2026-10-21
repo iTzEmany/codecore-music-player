@@ -27,7 +27,8 @@ class AndroidYtDlpService implements YoutubeService, StreamSource {
     if (call.method != 'progress') return null;
     final args = call.arguments as Map;
     final c = _progress['${args['processId']}'];
-    final percent = (args['percent'] as num?)?.toDouble() ?? 0;
+    // youtubedl-android says -1 until it knows the size.
+    final percent = ((args['percent'] as num?)?.toDouble() ?? 0).clamp(0, 100);
     c?.add(DownloadProgress(received: percent.round(), total: 100));
     return null;
   }

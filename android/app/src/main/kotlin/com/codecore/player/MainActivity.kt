@@ -29,6 +29,7 @@ class MainActivity : AudioServiceActivity() {
         super.configureFlutterEngine(flutterEngine)
         // yt-dlp lives in the `full` flavor only (see YtDlpChannel).
         YtDlpChannel(applicationContext).register(flutterEngine.dartExecutor.binaryMessenger)
+        ImportBridge.register(flutterEngine.dartExecutor.binaryMessenger, applicationContext)
 
         // Where the sound goes (headphones or speaker): the equalizer keeps a
         // curve for each.

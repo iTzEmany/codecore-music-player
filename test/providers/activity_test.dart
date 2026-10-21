@@ -6,6 +6,7 @@ import 'package:codecore/services/online/enrichment_service.dart';
 import 'package:codecore/services/online/youtube_service.dart';
 import 'package:codecore/services/scanner/library_scanner.dart';
 import 'package:codecore/services/share/offers.dart';
+import 'package:codecore/services/import/playlist_import_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -81,4 +82,21 @@ void main() {
     expect(item.cancellable, isTrue);
     expect(s.completed, isEmpty);
   });
+
+  test('the downloads of an import are followed in its own screen, not here', () {
+    const r = YtResult(id: 'v', title: 'Song', channel: 'Band', duration: null);
+    final s = buildActivity(
+      scan: const ScanState(),
+      enrich: const EnrichJobState(),
+      downloads: [
+        DownloadItem(id: 1, result: r, status: DownloadStatus.downloading, tag: importTag(4, 2)),
+        const DownloadItem(id: 2, result: r, status: DownloadStatus.downloading),
+        DownloadItem(id: 3, result: r, status: DownloadStatus.done, tag: importTag(4, 3)),
+      ],
+      outgoing: const [],
+    );
+    expect(s.running.map((a) => a.key), ['dl-2']);
+    expect(s.completed.map((a) => a.key), ['dl-3'], reason: 'still recorded in the Registro');
+  });
 }
+

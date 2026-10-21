@@ -12,6 +12,7 @@ import '../online/query_cleaner.dart';
 import '../online/youtube_service.dart';
 import 'exportify_reader.dart';
 import 'import_candidate.dart';
+import 'import_chain.dart';
 import 'import_diff.dart';
 import 'eta_estimator.dart';
 import 'import_options.dart';
@@ -48,6 +49,13 @@ class ImportEvent {
   final int importId;
 }
 
+/// What the engine is doing on one row that no status in the database says:
+/// searching it, or putting the playlist's tags and cover on the file.
+enum ImportStepKind { searching, enriching }
+
+/// The rows in a step, by (import id, row index).
+typedef ImportSteps = Map<(int, int), ImportStepKind>;
+
 /// A downloaded file this far (ms) from the CSV length is asked about.
 const durationMismatchMs = 10000;
 
@@ -69,6 +77,7 @@ class PlaylistImportService {
     this.trackDurationMs,
     this.soundCloudFallback,
     this.fetchCover,
+    this.enrichLater,
     this.thresholds,
     this.youtubeEnabled = true,
     this.searchGap = const Duration(milliseconds: 1500),
@@ -97,6 +106,10 @@ class PlaylistImportService {
   /// Looks the album cover up after a download (only for imports that asked).
   final Future<void> Function(int trackId, ImportRow row)? fetchCover;
 
+  /// Hands a saved song over to the background enrichment (lyrics, missing
+  /// tags), once the CSV tags are on it.
+  final void Function(int trackId)? enrichLater;
+
   /// Cut-offs read at each search, so a change in the settings applies at once.
   final MatchThresholds Function()? thresholds;
 
@@ -123,10 +136,26 @@ class PlaylistImportService {
 
   Stream<ImportEvent> get events => _events.stream;
 
+  final _stepChanges = StreamController<ImportSteps>.broadcast();
+  final ImportSteps _steps = {};
+
+  /// The rows being searched or enriched right now (a search and the tags of
+  /// finished downloads go on at the same time).
+  ImportSteps get currentSteps => Map.unmodifiable(_steps);
+  Stream<ImportSteps> get steps => _stepChanges.stream;
+
+  void _setStep(int importId, int rowIndex, ImportStepKind? kind) {
+    final key = (importId, rowIndex);
+    if (kind == null ? _steps.remove(key) == null : _steps[key] == kind) return;
+    if (kind != null) _steps[key] = kind;
+    if (!_stepChanges.isClosed) _stepChanges.add(currentSteps);
+  }
+
   void dispose() {
     _disposed = true;
     _sub.cancel();
     _events.close();
+    _stepChanges.close();
   }
 
   /// Creates the playlist (or reuses [intoPlaylistId]) and starts the import.
@@ -482,12 +511,19 @@ class PlaylistImportService {
       return;
     }
     try {
-      // A sure match by ISRC comes first: it is one quick request. Songs from
-      // one album are then looked up on the album page, one search for all of
-      // them; only a sure match counts there, the rest goes the usual way.
-      final decision = await _byIsrc(row) ??
-          await _fromAlbum(importId, row) ??
-          await _find(row);
+      _setStep(importId, row.index, ImportStepKind.searching);
+      final MatchDecision decision;
+      try {
+        // A sure match by ISRC comes first: it is one quick request. Songs
+        // from one album are then looked up on the album page, one search for
+        // all of them; only a sure match counts there, the rest goes the
+        // usual way.
+        decision = await _byIsrc(row) ??
+            await _fromAlbum(importId, row) ??
+            await _find(row);
+      } finally {
+        _setStep(importId, row.index, null);
+      }
       _failStreak = 0;
       switch (decision.kind) {
         case MatchKind.sure when imp?.planFirst ?? false:
@@ -791,6 +827,17 @@ class PlaylistImportService {
           status: ImportItemStatus.failed);
       return;
     }
+    _setStep(imp.id, it.rowIndex, ImportStepKind.enriching);
+    try {
+      await _tagAndPlace(imp, it, trackId);
+    } finally {
+      _setStep(imp.id, it.rowIndex, null);
+    }
+    enrichLater?.call(trackId);
+  }
+
+  /// The CSV tags, the place in the playlist, the length check and the cover.
+  Future<void> _tagAndPlace(PlaylistImport imp, PlaylistImportItem it, int trackId) async {
     try {
       await applyTags(trackId, it.toRow());
     } on Object catch (e, st) {
@@ -844,10 +891,55 @@ class PlaylistImportService {
       return true;
     }
     await imports.setStatus(importId, ImportStatus.finished);
-    _emit(ImportEvent(ImportEventKind.completed, importId));
-    final next = _nextBlock.remove(importId);
-    if (next != null) await resume(next);
+    // In memory while the app stays open; from the blocks' names after a
+    // restart, so the chain goes on without the user resuming every block.
+    final next = _nextBlock.remove(importId) ?? await _nextBlockOf(importId);
+    if (next != null) {
+      await resume(next);
+    } else {
+      // Once for the whole import, not for every block.
+      _emit(ImportEvent(ImportEventKind.completed, importId));
+    }
     return true;
+  }
+
+  Future<int?> _nextBlockOf(int importId) async {
+    final imp = await imports.get(importId);
+    if (imp == null) return null;
+    return nextBlockAfter(imp, await imports.forPlaylist(imp.playlistId))?.id;
+  }
+
+  /// The blocks [importId] belongs to, in order (just itself when the import
+  /// was made in one piece).
+  Future<List<PlaylistImport>> chainOf(int importId) async {
+    final imp = await imports.get(importId);
+    if (imp == null) return const [];
+    final chains = groupImportChains(await imports.forPlaylist(imp.playlistId));
+    return chains.firstWhere((c) => c.any((i) => i.id == importId), orElse: () => [imp]);
+  }
+
+  /// Pause for the whole import: the block that runs stops, the next ones wait.
+  Future<void> pauseChain(int importId) async {
+    for (final b in await chainOf(importId)) {
+      if (b.state == ImportStatus.running) await pause(b.id);
+    }
+  }
+
+  /// Goes on from the first block not finished; the others follow by themselves.
+  Future<void> resumeChain(int importId) async {
+    for (final b in await chainOf(importId)) {
+      if (b.state == ImportStatus.paused) {
+        await resume(b.id);
+        return;
+      }
+    }
+  }
+
+  /// Cancels every block not finished yet; what was downloaded stays.
+  Future<void> cancelChain(int importId) async {
+    for (final b in await chainOf(importId)) {
+      if (b.state == ImportStatus.running || b.state == ImportStatus.paused) await cancel(b.id);
+    }
   }
 
   void _emit(ImportEvent e) {

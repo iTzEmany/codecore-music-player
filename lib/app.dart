@@ -8,6 +8,8 @@ import 'providers/settings_providers.dart';
 import 'providers/share_hub.dart';
 import 'providers/theme_providers.dart';
 import 'providers/update_providers.dart';
+import 'providers/activity_log_providers.dart';
+import 'providers/import_notification_providers.dart';
 import 'l10n/l10n_ext.dart';
 import 'ui/screens/onboarding/onboarding_gate.dart';
 import 'ui/shell/app_shell.dart';
@@ -21,8 +23,11 @@ class CodecoreApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     ref.watch(shareAutoStartProvider);
+    // Alive from the start, so the Registro has the real times of what ends.
+    ref.listen(activityLogProvider, (_, _) {});
     ref.watch(equalizerApplierProvider);
     ref.watch(outputRouteSyncProvider);
+    ref.watch(importNotificationProvider);
     // A new version, at most once a day and only if the user asked for it.
     ref.listen(updateOnStartProvider, (_, next) {
       final info = next.value;

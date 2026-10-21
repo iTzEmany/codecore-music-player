@@ -7,6 +7,7 @@ import '../services/online/itunes_client.dart';
 import '../services/online/lrclib_client.dart';
 import '../services/online/curiosity_finder.dart';
 import '../services/online/musicbrainz_client.dart';
+import '../services/online/quiet_enricher.dart';
 import '../services/online/wikipedia_client.dart';
 import 'database_providers.dart';
 import 'library_providers.dart';
@@ -122,3 +123,31 @@ class EnrichJobNotifier extends Notifier<EnrichJobState> {
 final enrichJobProvider = NotifierProvider<EnrichJobNotifier, EnrichJobState>(
   EnrichJobNotifier.new,
 );
+
+/// Downloaded songs get their lyrics and missing tags here, one at a time and
+/// without a line in the Activity centre (the batch job is for the user's
+/// own «Arricchisci»).
+final downloadEnricherProvider = Provider<QuietEnricher>((ref) {
+  final enricher = QuietEnricher(
+    enabled: () {
+      final s = ref.read(settingsProvider);
+      return s.autoEnrich || s.autoLyrics;
+    },
+    enrich: (id) {
+      final s = ref.read(settingsProvider);
+      return ref
+          .read(enrichmentServiceProvider)
+          .enrichMany([id], includeLyrics: s.autoLyrics, includeMetadata: s.autoEnrich)
+          .drain<void>();
+    },
+  );
+  ref.onDispose(enricher.dispose);
+  return enricher;
+});
+
+/// The downloaded songs waiting for, or in, that enrichment.
+final enrichingTracksProvider = StreamProvider<Set<int>>((ref) async* {
+  final enricher = ref.watch(downloadEnricherProvider);
+  yield enricher.pending;
+  yield* enricher.changes;
+});

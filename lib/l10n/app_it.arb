@@ -780,6 +780,79 @@
   "activityNone": "Nessuna attività",
   "activityCompleted": "Completate",
   "activityClear": "Pulisci",
+  "importPhaseSearching": "In ricerca…",
+  "importPhaseDownloading": "Download {percent} %",
+  "@importPhaseDownloading": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "importPhaseRetry": "Nuovo tentativo tra {seconds} s",
+  "@importPhaseRetry": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "importPhaseEnriching": "Arricchimento…",
+  "importPhaseDownloadStart": "Download…",
+  "importFilterAll": "Tutti",
+  "importFilterActive": "In corso",
+  "importFilterProblems": "Da sistemare",
+  "importFilterDone": "Fatti",
+  "importRowsNone": "Nessun brano qui",
+  "activityLog": "Registro",
+  "activityLogCount": "{count, plural, =0{Vuoto} =1{1 evento} other{{count} eventi}}",
+  "@activityLogCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "activityLogEmpty": "Niente da registrare per ora: qui compaiono download, importazioni e invii finiti.",
+  "logImport": "Importazione «{name}»",
+  "@logImport": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "importNotificationText": "{done} di {total}",
+  "@importNotificationText": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "importNotificationPaused": "In pausa · {done} di {total}",
+  "@importNotificationPaused": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "downloadsNotificationTitle": "Download in corso",
+  "downloadsNotificationText": "{count, plural, =1{1 brano} other{{count} brani}}",
+  "@downloadsNotificationText": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "activityRunning": "{n} attività in corso",
   "@activityRunning": {
     "placeholders": {
