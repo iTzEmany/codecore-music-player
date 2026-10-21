@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 
+import '../../core/app_log.dart';
 import '../../core/text_utils.dart';
 import 'request_budget.dart';
 import 'youtube_service.dart';
@@ -41,24 +42,46 @@ class InnerTubeClient {
   static const videosFilter = 'EgIQAQ%3D%3D';
   static const songsFilter = 'EgWKAQIIAWoKEAkQBRAKEAMQBA%3D%3D';
 
+  /// Only the fields the parsers read (Google's field mask): a YouTube answer
+  /// shrinks from ~300 KB to ~20 KB, which a slow phone reads much sooner.
+  static const videosMask = 'contents.twoColumnSearchResultsRenderer.primaryContents.sectionListRenderer'
+      '.contents.itemSectionRenderer.contents.videoRenderer(videoId,title,ownerText,lengthText,longBylineText)';
+  static const songsMask = 'contents.tabbedSearchResultsRenderer.tabs.tabRenderer.content.sectionListRenderer'
+      '.contents.musicShelfRenderer.contents.musicResponsiveListItemRenderer(flexColumns,playlistItemData,thumbnail)';
+
   /// Videos for [query], best first, as the YouTube search page lists them.
   Future<List<YtResult>> searchVideos(String query,
-          {int limit = 10, CancelToken? cancel}) async =>
-      parseVideoSearch(
-          await _post('https://www.youtube.com', 'WEB', webVersion, query,
-              videosFilter, cancel),
-          limit: limit);
+          {int limit = 10, CancelToken? cancel}) =>
+      _masked(
+          (mask) => _post('https://www.youtube.com', 'WEB', webVersion, query,
+              videosFilter, cancel, mask: mask),
+          (data) => parseVideoSearch(data, limit: limit),
+          videosMask);
 
   /// YouTube Music «Songs» for [query] with credited artists, album and length.
   Future<List<YtResult>> searchSongs(String query,
-          {int limit = 5, CancelToken? cancel}) async =>
-      parseSongSearch(
-          await _post('https://music.youtube.com', 'WEB_REMIX', musicVersion,
-              query, songsFilter, cancel),
-          limit: limit);
+          {int limit = 5, CancelToken? cancel}) =>
+      _masked(
+          (mask) => _post('https://music.youtube.com', 'WEB_REMIX', musicVersion,
+              query, songsFilter, cancel, mask: mask),
+          (data) => parseSongSearch(data, limit: limit),
+          songsMask);
+
+  /// Asks with the field mask; nothing back (a real «no results», or fields
+  /// that were renamed and so dropped by the mask) is asked again in full.
+  Future<List<YtResult>> _masked(Future<Map> Function(String? mask) post,
+      List<YtResult> Function(Map data) parse, String mask) async {
+    try {
+      final results = parse(await post(mask));
+      if (results.isNotEmpty) return results;
+    } on InnerTubeChanged catch (e) {
+      AppLog.d('masked search not readable, asking in full: $e');
+    }
+    return parse(await post(null));
+  }
 
   Future<Map> _post(String origin, String client, String version, String query,
-      String params, CancelToken? cancel) async {
+      String params, CancelToken? cancel, {String? mask}) async {
     final Response<Object?> res;
     try {
       res = await _dio.post<Object?>(
@@ -70,6 +93,7 @@ class InnerTubeClient {
           headers: {
             'User-Agent': apiUserAgent,
             'Origin': origin,
+            'X-Goog-FieldMask': ?mask,
             Headers.contentTypeHeader: Headers.jsonContentType,
           },
         ),

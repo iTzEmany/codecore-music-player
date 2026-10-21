@@ -193,6 +193,8 @@ void main() {
       final sent = adapter.sent.single;
       expect(sent.method, 'POST');
       expect(sent.uri.toString(), 'https://music.youtube.com/youtubei/v1/search?prettyPrint=false');
+      expect(sent.headers['X-Goog-FieldMask'], InnerTubeClient.songsMask,
+          reason: 'only the fields that are read');
       final body = sent.data as Map;
       expect(body['query'], 'pink floyd mother');
       expect(body['params'], InnerTubeClient.songsFilter);
@@ -224,6 +226,20 @@ void main() {
     });
   });
 
+  test('nothing back with the field mask: asked again in full', () async {
+    var calls = 0;
+    final (masked, maskedAdapter) = _client(() {
+      calls++;
+      return calls == 1
+          ? _json({'contents': {'twoColumnSearchResultsRenderer': {}}})
+          : _json(fixture('yt_search'));
+    });
+    expect((await masked.searchVideos('x')).first.id, 'o7MlC_Qrmmc');
+    expect(maskedAdapter.sent, hasLength(2));
+    expect(maskedAdapter.sent.first.headers['X-Goog-FieldMask'], InnerTubeClient.videosMask);
+    expect(maskedAdapter.sent.last.headers.containsKey('X-Goog-FieldMask'), isFalse);
+  });
+
   group('DirectSearchService', () {
     test('direct answers do not start yt-dlp; addresses still go to yt-dlp', () async {
       final ytDlp = _YtDlp();
@@ -246,16 +262,16 @@ void main() {
           cooldown: const Duration(minutes: 10), now: () => now);
       expect((await svc.searchSongs('a', limit: 3)).single.id, 'dlp');
       expect(ytDlp.calls, ['songs:a']);
-      expect(adapter.sent, hasLength(1));
+      expect(adapter.sent, hasLength(2), reason: 'with the field mask, then in full');
 
       now = now.add(const Duration(minutes: 9));
       await svc.search('b');
       expect(ytDlp.calls, ['songs:a', 'search:b']);
-      expect(adapter.sent, hasLength(1), reason: 'not asked again during the pause');
+      expect(adapter.sent, hasLength(2), reason: 'not asked again during the pause');
 
       now = now.add(const Duration(minutes: 2));
       await svc.searchSongs('c');
-      expect(adapter.sent, hasLength(2), reason: 'tried again after the pause');
+      expect(adapter.sent, hasLength(4), reason: 'tried again after the pause');
       expect(ytDlp.calls.last, 'songs:c');
     });
 
