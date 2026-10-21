@@ -40,7 +40,7 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 3.6 Tab Artisti
 - [x] 3.7 Mini-player
 - [x] 3.8 Now Playing + coda
-- [~] 3.9 Scorciatoie da tastiera
+- [x] 3.9 Scorciatoie da tastiera (Linux, prova di Claude in Xephyr il 2026-10-21: Spazio, Ctrl+→/←, Ctrl+↑/↓, Ctrl+F, tasti multimediali; corretto lo stop dopo la navigazione, b82cec8)
 - [x] 3.10 Rimozione schermata di debug
 
 ## Fase 4 — Funzioni libreria (`fase-4-funzioni-libreria.md`)
@@ -76,7 +76,7 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 7.1 Import dal vecchio DB Python
 - [x] 7.2 Gapless (rimandato qui e fatto nella fase 18)
 - [x] 7.3 ReplayGain
-- [~] 7.4 Controlli multimediali desktop
+- [x] 7.4 Controlli multimediali desktop (Linux, prova di Claude in Xephyr il 2026-10-21: MPRIS su bus privato, tutti i comandi; aggiunti Volume, Shuffle, LoopStatus in b82cec8)
 - [x] 7.5 Prestazioni (misure sul Mi A3 nella fase 28, 28.10)
 - [x] 7.6 Accessibilità
 - [x] 7.7 Timer di spegnimento («Fine brano» corretto e provato sul Mi A3 il 21/10 in Normale, Senza pause e Dissolvenza)
@@ -158,11 +158,11 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 13.5 Creare il backup (+ test)
 - [x] 13.6 Ripristino sullo stesso dispositivo (sostituzione al riavvio)
 - [x] 13.7 Ripristino su un altro dispositivo (unione)
-- [~] 13.8 Sezione «Backup» nelle Impostazioni (prova a mano in «Tocca a te»)
+- [x] 13.8 Sezione «Backup» nelle Impostazioni (prova a mano in «Tocca a te») (Linux, prova di Claude in Xephyr il 2026-10-21: «Crea backup» (zip completo); sul telefono in prova)
 - [x] 13.9 Esportazione delle playlist: M3U8, CSV, JSON (+ test)
-- [~] 13.10 Interfaccia di esportazione («Esporta…» e «Esporta tutte» in zip; prova a mano in «Tocca a te»)
+- [x] 13.10 Interfaccia di esportazione («Esporta…» e «Esporta tutte» in zip; prova a mano in «Tocca a te») (Linux, prova di Claude in Xephyr il 2026-10-21: M3U8/CSV/JSON e «Esporta tutte» (zip; Preferiti aggiunti in a83564a))
 - [x] 13.11 «Esporta log» senza dati personali
-- [~] 13.12 Rifinitura, documentazione e prova a mano
+- [x] 13.12 Rifinitura, documentazione e prova a mano (Linux, prova di Claude in Xephyr il 2026-10-21: backup, export, log senza percorsi personali)
 
 ## Fase 14 — Download robusti (`fase-14-download-robusti.md`)
 - [~] 14.1 Verifiche preliminari (release yt-dlp, --limit-rate, ISRC, formato originale, versione Android)
@@ -213,7 +213,7 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 17.4 Anteprima di 20 secondi (utente, 2026-10-21: funziona)
 - [x] 17.5 Equalizzatore: motore
 - [~] 17.6 Equalizzatore: interfaccia e profilo per uscita
-- [~] 17.7 MPRIS su Linux (`playerctl` e tasti multimediali: prova a mano)
+- [~] 17.7 MPRIS su Linux (`playerctl` e tasti multimediali: prova a mano) (Linux, prova di Claude in Xephyr il 2026-10-21: come 7.4; manca solo `playerctl` sul desktop vero)
 - [~] 17.8 SMTC su Windows (codice e mappatura verificati; la build Windows in CI e la prova su un PC Windows toccano a te)
 - [x] 17.9 Controlli della Jam nella notifica e nella schermata di blocco (utente, 2026-10-21: «la jam pure»)
 - [~] 17.10 Rifinitura, documentazione e prova a mano
@@ -239,7 +239,7 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 19.6 Tema chiaro e colore d'accento (utente, 2026-10-21: i temi funzionano)
 - [x] 19.7 Layout ≥ 1200 px
 - [x] 19.8 Lingue francese e portoghese
-- [~] 19.9 Onboarding al primo avvio
+- [~] 19.9 Onboarding al primo avvio (Linux, prova di Claude in Xephyr il 2026-10-21: quattro pagine, «Inizia» scansiona, non ricompare dopo due riavvii)
 - [~] 19.10 Rifinitura, documentazione e prova a mano
 
 ## Fase 20 — Libreria intelligente (`fase-20-libreria-intelligente.md`)
@@ -262,9 +262,9 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 21.5 Schermata «Duplicati»
 - [x] 21.6 Unire e dividere album a mano
 - [x] 21.7 `TagWriter` (interfaccia e implementazione)
-- [~] 21.8 Opzione «Scrivi le modifiche nei file» (prova a mano su telefono e con un altro lettore in «Tocca a te»)
+- [x] 21.8 Opzione «Scrivi le modifiche nei file» (prova a mano su telefono e con un altro lettore in «Tocca a te») (Linux, prova di Claude in Xephyr il 2026-10-21: mp3/flac/m4a, audio identico (md5 del flusso), ripristino da «Backup dei tag» byte per byte)
 - [x] 21.9 Regole e documenti aggiornati
-- [~] 21.10 Rifinitura, documentazione e prova a mano (prova a mano: vedi la nota di 21.8)
+- [x] 21.10 Rifinitura, documentazione e prova a mano (prova a mano: vedi la nota di 21.8) (Linux, prova di Claude in Xephyr il 2026-10-21: «Unisci tutti gli identici», «Elimina i file» (due conferme), «Sposta in un nuovo album»)
 
 ## Fase 22 — Nuove fonti (`fase-22-nuove-fonti.md`)
 - [x] 22.1 Verifiche preliminari (SoundCloud, playlist/canali, ML Kit) (la parte ML Kit: solo lettura del pacchetto, 22.7 resta bloccato)
