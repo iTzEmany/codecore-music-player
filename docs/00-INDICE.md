@@ -47,6 +47,9 @@ un'unica codebase Flutter per Android, Windows e Linux. Uso personale, niente co
 | 28 | `fase-28-prestazioni-e-fluidita.md` | Zero lag sul Mi A3 con 3000 brani, microanimazioni, ricerca online diretta (< 1,5 s), ascolto in streaming prima di scaricare, copertine leggere |
 | 30 | `fase-30-pagina-artista.md` | Card dell'artista nei risultati online e pagina artista «come Spotify» (i tuoi brani, più ascoltati, album e singoli, video, simili), pagina album con «Scarica album» |
 | 31 | `fase-31-shuffle-plus.md` | «Shuffle+»: in casuale, ogni N brani uno che non hai, simile alla playlist (radio di YouTube Music), in streaming, da scaricare o aggiungere a una playlist |
+| 32 | `fase-32-ricerca-intelligente.md` | Ricerca con due modi (In libreria · Online): online YouTube Music e YouTube insieme, confidenza, stesso brano in una riga, «Altri risultati», intento (artista, album, brano, indirizzo), fonti come filtro; SoundCloud misurato e proposto fuori dalla ricerca |
+| 33 | `fase-33-radio.md` | Radio in diretta da Radio Browser: «Vicino a te» (paese e regione), ricerca, generi, «Le mie radio» salvate (schema v12), ascolto dal lettore principale con titolo in onda, Android Auto |
+| 34 | `fase-34-nuove-uscite.md` | Nuove uscite degli artisti seguiti (e, a scelta, dei più ascoltati): un controllo al giorno, «Nuove uscite» in Home, notifica Android (schema v13) |
 
 Dopo la **Fase 3** l'app è già usabile come lettore. Le fasi 5 e 6 sono indipendenti tra loro. La fase 8 (Jam) richiede la 6.
 

@@ -29,7 +29,7 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 2.3 CodecoreAudioHandler (+ test)
 - [~] 2.4 Inizializzazione per piattaforma (cuffie JBL, utente, 2026-10-21: play/pausa e «indietro» giusti; «avanti» corretto il 21/10, da riprovare con le cuffie vere)
 - [x] 2.5 Provider di stato e controller
-- [~] 2.6 Persistenza e checklist manuale
+- [x] 2.6 Persistenza e checklist manuale (Mi A3, prova di Claude il 2026-10-22: 385 s a schermo spento, comandi da media_session, fine coda pulita)
 
 ## Fase 3 — Interfaccia (`fase-3-interfaccia.md`)
 - [x] 3.1 Tema
@@ -165,13 +165,13 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 13.12 Rifinitura, documentazione e prova a mano (Linux, prova di Claude in Xephyr il 2026-10-21: backup, export, log senza percorsi personali)
 
 ## Fase 14 — Download robusti (`fase-14-download-robusti.md`)
-- [~] 14.1 Verifiche preliminari (release yt-dlp, --limit-rate, ISRC, formato originale, versione Android)
+- [x] 14.1 Verifiche preliminari (release yt-dlp, --limit-rate, ISRC, formato originale, versione Android) (Mi A3, prova di Claude il 2026-10-22: yt-dlp 2026.08.19; .opus e .m4a suonano)
 - [x] 14.2 Versione di yt-dlp e avviso «troppo vecchio»
 - [x] 14.3 Aggiornamento di yt-dlp in-app (desktop)
 - [x] 14.4 Download in parallelo
 - [~] 14.5 Limite di banda
 - [x] 14.6 Ritento a scalare
-- [~] 14.7 Formato: MP3 o originale senza ricodifica
+- [x] 14.7 Formato: MP3 o originale senza ricodifica (Mi A3, prova di Claude il 2026-10-22: «Originale» = .opus, durata giusta, suona)
 - [x] 14.8 Ricerca per ISRC come primo tentativo
 - [x] 14.9 Cache delle ricerche
 - [x] 14.10 Controllo della durata a fine download
@@ -212,7 +212,7 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 17.3 Segnalibro «riprendi da qui» (schema v6)
 - [x] 17.4 Anteprima di 20 secondi (utente, 2026-10-21: funziona)
 - [x] 17.5 Equalizzatore: motore
-- [~] 17.6 Equalizzatore: interfaccia e profilo per uscita
+- [x] 17.6 Equalizzatore: interfaccia e profilo per uscita (Mi A3, prova di Claude il 2026-10-22: «Bassi» senza errori e salvato; l'orecchio resta all'utente)
 - [~] 17.7 MPRIS su Linux (`playerctl` e tasti multimediali: prova a mano) (Linux, prova di Claude in Xephyr il 2026-10-21: come 7.4; manca solo `playerctl` sul desktop vero)
 - [~] 17.8 SMTC su Windows (codice e mappatura verificati; la build Windows in CI e la prova su un PC Windows toccano a te)
 - [x] 17.9 Controlli della Jam nella notifica e nella schermata di blocco (utente, 2026-10-21: «la jam pure»)
@@ -245,14 +245,14 @@ L'agente riparte sempre dal primo task non spuntato.
 ## Fase 20 — Libreria intelligente (`fase-20-libreria-intelligente.md`)
 - [x] 20.1 Tabelle (schema v7)
 - [x] 20.2 Registrare gli ascolti
-- [~] 20.3 Cronologia
+- [x] 20.3 Cronologia (Mi A3, prova di Claude il 2026-10-22: cronologia con gli orari)
 - [x] 20.4 Statistiche e recap
 - [x] 20.5 Linguaggio delle regole: parser e AST
 - [x] 20.6 Dalle regole all'SQL
 - [x] 20.7 Ricerca con operatori
 - [x] 20.8 Playlist intelligenti
 - [x] 20.9 Etichette utente
-- [~] 20.10 Rifinitura, documentazione e prova a mano
+- [x] 20.10 Rifinitura, documentazione e prova a mano (Mi A3, prova di Claude il 2026-10-22: recap, 2 playlist intelligenti e operatori `artista:`/`anno:` uguali alle query sul DB)
 
 ## Fase 21 — Pulizia libreria e tag nei file (`fase-21-pulizia-tag.md`)
 - [x] 21.1 Verifiche preliminari (pacchetto per scrivere i tag)
@@ -273,8 +273,8 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 22.4 Punteggio per fonte
 - [x] 22.5 Selettore di fonte in Cerca e ripiego nell'importazione
 - [x] 22.6 Playlist e canali YouTube come sorgente (utente, 2026-10-21: link di playlist e di canale in Cerca trovano tutti i brani)
-- [~] 22.7 Traduzione dei testi on-device (solo Android) (fatto e testato con traduttore finto; la prova sul telefono è in «Tocca a te»)
-- [~] 22.8 Rifinitura, documentazione e prova a mano (la parte traduzione attende 22.7)
+- [x] 22.7 Traduzione dei testi on-device (solo Android) (fatto e testato con traduttore finto; la prova sul telefono è in «Tocca a te») (Mi A3, prova di Claude il 2026-10-22: traduzione en→it; «elimina modello» corretto in 69a89bf)
+- [x] 22.8 Rifinitura, documentazione e prova a mano (la parte traduzione attende 22.7) (Mi A3, prova di Claude il 2026-10-22: ricerca, «Ascolta» e download completi; prima ricerca in timeout. SoundCloud esce in 32.8)
 
 ## Fase 23 — Podcast (`fase-23-podcast.md`)
 - [x] 23.1 Verifiche preliminari (feed veri, ricerca iTunes podcast, API del pacchetto `xml`) (il tempo di parsing del feed grande va misurato in 23.2)
@@ -285,7 +285,7 @@ L'agente riparte sempre dal primo task non spuntato.
 - [x] 23.6 Download degli episodi
 - [x] 23.7 Ascoltato, posizione e pulizia
 - [x] 23.8 Interfaccia: sezione Podcast
-- [~] 23.9 Rifinitura, documentazione e prova a mano (ora il parser c'è: prova a mano di iscrizione e ascolto)
+- [x] 23.9 Rifinitura, documentazione e prova a mano (ora il parser c'è: prova a mano di iscrizione e ascolto) (Mi A3, prova di Claude il 2026-10-22: iscrizione, download, posizione ripresa dopo il riavvio, «ascoltato»; durata corretta in 69a89bf)
 
 ## Fase 24 — Dispositivi fidati e sync (`fase-24-dispositivi-fidati.md`)
 - [x] 24.1 Verifiche preliminari (certificati, bindSecure, ExoPlayer/mpv su HTTPS, mobile_scanner) (fatte in un progetto di prova fuori da `lib/`; nulla aggiunto a `pubspec.yaml`)
@@ -375,6 +375,7 @@ Piano del 2026-10-20. Richieste dell'utente: nessun rallentamento sul Mi A3 con 
 - «Svuota» la coda (2026-10-21, segnalazione dell'utente: «se svuoto la coda deve rigenerarsi in ordine diverso o con canzoni diverse, dipende dalla playlist; ora se svuoto e salto compare "Nessun brano in riproduzione"»): il player ricorda la **lista da cui è partito l'ascolto** (`_source`: playlist, album, ricerca…; dopo un riavvio la coda ripristinata) e «Svuota» ricrea subito ciò che segue (`PlayQueue.rebuildUpcoming`): senza casuale la lista dal brano attuale in poi, con casuale un nuovo mescolamento di tutta la lista **scritto nell'ordine della coda** (così la Coda mostra ciò che suonerà); le aggiunte a mano spariscono; senza lista (coda nata da «Riproduci dopo») si svuota come prima. Annulla rimette la coda di prima finché suona lo stesso brano. Messaggio «Coda ricreata dalla lista in ascolto».
 - Import fermo di notte (2026-10-21, segnalazione dell'utente: «durante la notte mi si è nuovamente interrotto l'import»): il processo era vivo (exit-info: nessuna morte fra le 03:36 e le 16:06), Wi‑Fi collegato tutta la notte; il blocco 11/23 è andato in pausa alle 04:02 sulla **pagina dell'album «Stefano Rosso»** (31 righe dello stesso album): `albumTracks` chiedeva a yt-dlp i dati completi di ogni brano (`-J` senza `--flat-playlist`, una richiesta per brano) → 64 s sul PC per 24 brani, oltre i 45 s di `searchTimeout` → «search timed out» = `network` → pausa; a ogni «Riprendi» di nuovo lì (alle 16:05 anche un LOW_MEMORY durante quella lettura). **Correzioni**: pagina album **flat** (4,5 s; `parseYtAlbumPage`: album dal titolo «Album - …», artista dal canale «… - Topic»), Android e desktop; una pagina album non letta non ferma più nulla (ricerca brano per brano; solo il 429 risale); errori di rete e 429 nelle ricerche → **attesa e nuovo tentativo** sulla stessa riga (`networkBackoff` 30 s…10 min, `rateLimitBackoff` 15/30/60 min, poi pausa come prima), anche il 429 di un download rimette la riga in coda dopo l'attesa; la notifica dice «YouTube chiede una pausa: riprendo alle 04:32» / «Rete assente: riprovo alle …»; una pausa da errore lascia una notifica col motivo; una riga che va in errore imprevisto diventa «non riuscita» invece di fermare il motore; corsa «Riprendi» mentre il ciclo stava finendo (`_again`); `AppLog` scrive il file anche nelle build di debug (`files/codecore.log`, non sotto `flutter test`).
 - Prove a mano, repository e CI (2026-10-21, utente: «ascolta nella ricerca funziona»; le microanimazioni per ora non si possono provare perché durante l'importazione l'app sul Motorola è lenta e a scatti): 28.6 confermato, 28.11 resta `[~]`. Repository GitHub reso **pubblico** dopo un controllo della cronologia (nessuna chiave o password, solo i `secrets.*` di `release.yml`; fixture audio sintetiche; resta visibile l'email dell'autore dei commit). `kReleaseRepo` = `iTzEmany/codecore-music-player`; il controllo legge `/releases` e prende la prima né bozza né pre-release: senza release risponde «aggiornato» (con `/releases/latest` il 404 diventava «non riuscito»). CI rossa dal 20/10 sera solo su Windows: `RawDatagramSocket.send` restituisce 0 se un invio è ancora in corso (su Windows uno per socket) e il test mandava due beacon di fila; ora si ritenta, anche in `LanDiscovery._send()`, dove su Windows si perdevano i broadcast diretti dopo il primo. Rivisti i «Tocca a te»: fatte 5.9–5.11, 7.5, 16.2, 24.6; superate 1.8, 3.4, 6.3.
+- Prove a mano sul Mi A3 (2026-10-21/22, agente con adb; dettagli nel file dell'obiettivo 2026-10-21-1915): 11 su 13 ✔. Difetti trovati e corretti in 69a89bf: «Ripristina → Unisci» del proprio backup duplicava le playlist (ora uuid nel backup e unione dei brani); limite di velocità senza effetto su Android (ora `--downloader m3u8:native` con un limite: da riprovare); Indietro durante la selezione usciva dalla pagina (`maybePop`); durata degli episodi dal feed (ora quella del player); etichetta accessibile del mini-player con il valore della barra; «elimina modello di traduzione» senza effetto visibile. Importazione: 3 brani nuovi in 86 s (~29 s il primo, 14–24 s i seguenti). «Esporta log» provato solo su Linux (in debug è spento). 13.8 «Crea backup» e 13.10 export ✔ anche sul telefono.
 - Cuffie e timer (2026-10-21, segnalazione dell'utente con le JBL: «avanti» non passa al brano successivo in coda ma a uno a caso della playlist; «Fine brano» non fa nulla). **«Avanti»:** il percorso era giusto (tasti multimediali, doppio clic, ⏭ dell'app finiscono tutti in `skipToNext`, che segue l'ordine casuale), ma la Coda mostrava l'ordine naturale (scelta 11.14): ora `PlayQueue.items` è l'ordine di ascolto, la Coda mostra quello che suonerà e disattivare la casuale rimette l'ordine della playlist (chiavi per voce). Provato sul Mi A3 con `KEYCODE_MEDIA_NEXT` e `media_session dispatch next`: suona il brano che la Coda mostra, senza rimescolare. **Timer:** `_loadCurrent(play: false)` non metteva in pausa (just_audio resta in riproduzione caricando un file nuovo), il chip «Fine brano» non si spegneva mai e il passaggio senza pause/dissolvenza ignorava il segnale; ora si ferma all'inizio del brano seguente e il timer si azzera (provato sul Mi A3 nei tre modi). Limite: dopo un riavvio con la casuale attiva, disattivarla non rimette l'ordine della playlist (si salva solo l'ordine di ascolto).
 - «Elimina dal dispositivo» (2026-10-21, richiesta dell'utente: «eliminare una canzone… non dico rimuoverla da una playlist ma proprio eliminarla»): voce nel menu del brano e nella selezione multipla, solo per la musica (gli episodi hanno la loro pulizia). Dopo la conferma `TrackDeleter` toglie i brani dalla coda e dalla lista di partenza (su Windows un file aperto dal player non si cancella), cancella i file e solo per quelli spariti (o già mancanti) cancella la riga: playlist, preferiti, cronologia ed etichette se ne vanno con le cascate; un file che non si cancella lascia il brano com'è. Android 11+: i file non creati dall'app (`EPERM`) passano tutti insieme a `MediaStore.createDeleteRequest`, un solo dialogo di sistema (canale `codecore/media`, `MediaDeleteBridge.kt`); Android ≤ 10 senza ripiego (R72, R73 per Windows). Lo stesso ripiego, in un solo dialogo, ora vale per «Duplicati → elimina i file». Le righe d'importazione del brano restano «scaricato» con `track_id` nullo: riprendere l'importazione non lo riscarica, «Sincronizza da CSV» sì. **Provato sul Motorola (Android 15, APK 6030)** con un file messo da `adb push` (proprietario `com.android.shell`): `File.delete` risponde ENOENT, non EPERM, e la query per `_data` dell'app non lo trova; quindi ogni errore con il file ancora presente passa al ripiego e l'URI arriva da `MediaScannerConnection.scanFile`. Dialogo di sistema confermato dall'utente: file e riga spariti; se Android rifiuta, «Android non ha permesso di eliminare il file».
 
@@ -387,11 +388,11 @@ Richiesta: «una sezione nella libreria dove ci sono le canzoni da revisionare, 
 
 ## Fase 30 — Pagina artista nella ricerca (`fase-30-pagina-artista.md`)
 Richiesta (2026-10-21): «è possibile fare in modo che cercando un artista, mi appaia la possibilità di cliccare sull'icona dell'artista che appare e farmi vedere le sue top canzoni, i suoi album e altro ancora?» («più come Spotify»). Scelte concordate: card con la foto in cima ai risultati online (solo se il risultato principale di YouTube Music è un artista), pagina con i tuoi brani di quell'artista, brani più ascoltati, album e singoli, video, artisti simili e biografia; «Ascolta» e «Scarica» su ogni brano; pagina album con «Scarica album» (tramite l'importazione); richieste dirette InnerTube (≈ 0,5 s) con cache e copia fuori linea; nomi degli artisti toccabili nei risultati; «Su YouTube Music» dalla libreria.
-- [ ] 30.1 Verifiche preliminari e fixture (esiti dal PC già nel documento)
-- [ ] 30.2 Aiuti JSON condivisi e risultati YouTube Music con id di artista e album
-- [ ] 30.3 Parser della card, della ricerca artisti e della pagina artista
-- [ ] 30.4 Parser della pagina album, di «tutti i brani» e della discografia
-- [ ] 30.5 Client, servizio del catalogo e cache (album diretto anche per l'importazione)
+- [x] 30.1 Verifiche preliminari e fixture (esiti dal PC già nel documento) (e4981ec)
+- [x] 30.2 Aiuti JSON condivisi e risultati YouTube Music con id di artista e album (e4981ec)
+- [x] 30.3 Parser della card, della ricerca artisti e della pagina artista (e4981ec)
+- [x] 30.4 Parser della pagina album, di «tutti i brani» e della discografia (e4981ec)
+- [x] 30.5 Client, servizio del catalogo e cache (album diretto anche per l'importazione) (e4981ec)
 - [ ] 30.6 «Ascolta» condiviso fra le pagine online
 - [ ] 30.7 Card dell'artista e nomi toccabili nei risultati
 - [ ] 30.8 Pagina dell'artista
@@ -417,6 +418,49 @@ Richiesta (2026-10-21): «una sorta di "shuffle+" che ogni tanto mi piazza una c
 - [ ] 31.13 «Suggeriti di recente»
 - [ ] 31.14 (Facoltativo) Senza pause e dissolvenza anche per i suggeriti
 - [ ] 31.15 Test dal vivo, documentazione e prova a mano
+
+## Fase 32 — Ricerca intelligente (`fase-32-ricerca-intelligente.md`)
+Richiesta (2026-10-22): «non voglio stare io a selezionare il filtro della ricerca ma ne voglio una intelligente. L'unica differenza deve esserci tra ricerca locale e ricerca online. La ricerca online deve sì presentare la possibilità di scegliere la fonte, ma di base mi dispone i risultati migliori della ricerca in tutte e 3 le categorie con margine di confidence.» Scelte concordate: due modi (In libreria · Online); online YouTube Music e YouTube in parallelo con la card della fase 30, confidenza dal punteggio dell'importazione senza durata, stesso brano in una riga dalla fonte migliore, sotto soglia in «Altri risultati» (chiuso), intento (artista → card in cima, «titolo artista» → brani, indirizzo → come oggi), chip delle fonti come filtro, ordine stabile con tetto di 1,5 s, cache di 10 minuti, 429 per fonte. SoundCloud misurato (2026-10-22, 54 ricerche: 0 brani in più di YouTube Music e YouTube, 5,4 s di mediana contro 0,46 s): proposta di toglierlo dalla ricerca (32.8 aspetta la risposta).
+- [ ] 32.1 Verifiche preliminari e fixture (esiti dal PC già nel documento; restano fixture e telefoni)
+- [ ] 32.2 Card del risultato principale e intento
+- [ ] 32.3 Confidenza di una ricerca libera
+- [ ] 32.4 Lo stesso brano da più fonti
+- [ ] 32.5 Il motore della ricerca online
+- [ ] 32.6 Cerca: In libreria · Online
+- [ ] 32.7 Rifinitura del punteggio con le ricerche vere
+- [ ] 32.8 SoundCloud fuori dalla ricerca (dopo la risposta dell'utente)
+- [ ] 32.9 (Facoltativo) Link SoundCloud incollato
+- [ ] 32.10 Test dal vivo, documentazione e prova a mano
+
+## Fase 33 — Radio (`fase-33-radio.md`)
+Richiesta (2026-10-22): «l'inserimento della sezione radio per permettermi anche di ascoltare le radio locali e salvarmele». Scelte concordate: Radio Browser (API pubblica senza chiave, server da `all.api.radio-browser.info`, `User-Agent`, `hidebroken`, un clic per ascolto); «Vicino a te» con paese e regione scelti dall'utente (nessun permesso di posizione), ricerca, generi, «Le mie radio» salvate (tabella nuova, schema v12, nel backup); ascolto dal lettore principale (notifica, cuffie, Android Auto) con le voci online della fase 31, avanti/indietro = stazioni; titolo «in onda» ICY dove c'è (Android; desktop solo con la copia modificata di 33.11); niente gapless, dissolvenza, statistiche, Jam; ≈ 1 MB al minuto. Dove sta (Libreria + Home, oppure una quinta scheda): decide l'utente.
+- [ ] 33.1 Verifiche preliminari e fixture (esiti dal PC già nel documento; restano fixture e telefoni)
+- [ ] 33.2 Modello e client di Radio Browser
+- [ ] 33.3 Regioni, doppioni e «Vicino a te»
+- [ ] 33.4 Elenco del paese, cache e voce in Memoria
+- [ ] 33.5 Schema v12, «Le mie radio» e backup
+- [ ] 33.6 La radio nel lettore principale
+- [ ] 33.7 Pagina Radio
+- [ ] 33.8 «In riproduzione», mini-player e notifica per la radio
+- [ ] 33.9 Home e Android Auto
+- [ ] 33.10 Aggiungere un indirizzo a mano
+- [ ] 33.11 (Facoltativo, da approvare) «In onda» anche su desktop
+- [ ] 33.12 Test dal vivo, documentazione e prova a mano
+
+## Fase 34 — Nuove uscite degli artisti (`fase-34-nuove-uscite.md`)
+Richiesta (2026-10-22): «avere aggiornamenti per quanto riguarda le nuove uscite degli artisti». Scelte concordate: artisti seguiti («Segui» sulla pagina artista della fase 30) più, con l'opzione, i più ascoltati; controllo delle loro pagine YouTube Music (parser della fase 30, maschera delle uscite ≈ 6–12 KB) all'apertura dell'app al più una volta al giorno, in serie con pausa su 429; il primo controllo segna tutto come visto; «Nuove uscite» in Home e notifica Android (nessun pacchetto; WorkManager solo come extra da approvare); schema v13.
+- [ ] 34.1 Verifiche preliminari e fixture (esiti dal PC già nel documento; restano fixture e telefono)
+- [ ] 34.2 Confronto delle uscite
+- [ ] 34.3 Schema v13 e repository
+- [ ] 34.4 Artisti più ascoltati in automatico
+- [ ] 34.5 Il giro di controllo
+- [ ] 34.6 Quando parte il giro e impostazioni
+- [ ] 34.7 «Segui» e «Artisti seguiti»
+- [ ] 34.8 «Nuove uscite» in Home e pagina dedicata
+- [ ] 34.9 Notifica Android
+- [ ] 34.10 Artisti seguiti nel backup
+- [ ] 34.11 (Facoltativo, da approvare) Controllo ad app chiusa
+- [ ] 34.12 Test dal vivo, documentazione e prova a mano
 
 ## Note di deviazione
 <!-- una riga per deviazione: data — task — cosa è cambiato e perché -->
