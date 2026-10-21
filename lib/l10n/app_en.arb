@@ -2309,5 +2309,31 @@
       }
     }
   },
-  "trackDeleteRefused": "Android did not allow the file to be deleted"
+  "trackDeleteRefused": "Android did not allow the file to be deleted",
+  "reviewTitle": "To review",
+  "reviewFilterAll": "All",
+  "reviewFilterNothingFound": "Nothing found",
+  "reviewFilterNoLyrics": "No lyrics",
+  "reviewFilterNoCover": "No cover",
+  "reviewFilterMissingData": "Missing data",
+  "reviewEmpty": "Nothing to review: no searched track is missing anything",
+  "reviewHint": "Tracks that automatic enrichment did not find, or left incomplete.",
+  "reviewRetry": "Retry",
+  "reviewDismiss": "Fine as it is",
+  "reviewRetryStarted": "Search started for {count, plural, one{1 track} other{{count} tracks}}",
+  "@reviewRetryStarted": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reviewDismissed": "{count, plural, one{1 track removed from the list} other{{count} tracks removed from the list}}",
+  "@reviewDismissed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

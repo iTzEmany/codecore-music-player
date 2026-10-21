@@ -2500,5 +2500,31 @@
       }
     }
   },
-  "trackDeleteRefused": "Android n’a pas autorisé la suppression du fichier"
+  "trackDeleteRefused": "Android n’a pas autorisé la suppression du fichier",
+  "reviewTitle": "À vérifier",
+  "reviewFilterAll": "Tous",
+  "reviewFilterNothingFound": "Rien trouvé",
+  "reviewFilterNoLyrics": "Sans paroles",
+  "reviewFilterNoCover": "Sans pochette",
+  "reviewFilterMissingData": "Données manquantes",
+  "reviewEmpty": "Rien à vérifier : aucun titre recherché n’a de lacune",
+  "reviewHint": "Titres que l’enrichissement automatique n’a pas trouvés ou a laissés incomplets.",
+  "reviewRetry": "Réessayer",
+  "reviewDismiss": "Très bien comme ça",
+  "reviewRetryStarted": "Recherche lancée pour {count, plural, one{1 titre} other{{count} titres}}",
+  "@reviewRetryStarted": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reviewDismissed": "{count, plural, one{1 titre retiré de la liste} other{{count} titres retirés de la liste}}",
+  "@reviewDismissed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

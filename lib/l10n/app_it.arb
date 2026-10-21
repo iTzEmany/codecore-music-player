@@ -2590,5 +2590,31 @@
       }
     }
   },
-  "trackDeleteRefused": "Android non ha permesso di eliminare il file"
+  "trackDeleteRefused": "Android non ha permesso di eliminare il file",
+  "reviewTitle": "Da revisionare",
+  "reviewFilterAll": "Tutti",
+  "reviewFilterNothingFound": "Nessun risultato",
+  "reviewFilterNoLyrics": "Senza testo",
+  "reviewFilterNoCover": "Senza copertina",
+  "reviewFilterMissingData": "Dati mancanti",
+  "reviewEmpty": "Niente da revisionare: ai brani cercati non manca nulla",
+  "reviewHint": "Brani che l'arricchimento automatico non ha trovato o ha lasciato incompleti.",
+  "reviewRetry": "Riprova",
+  "reviewDismiss": "Va bene così",
+  "reviewRetryStarted": "Ricerca avviata per {count, plural, one{1 brano} other{{count} brani}}",
+  "@reviewRetryStarted": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reviewDismissed": "{count, plural, one{1 brano tolto dall'elenco} other{{count} brani tolti dall'elenco}}",
+  "@reviewDismissed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

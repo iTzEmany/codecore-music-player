@@ -6404,6 +6404,78 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Android non ha permesso di eliminare il file'**
   String get trackDeleteRefused;
+
+  /// No description provided for @reviewTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Da revisionare'**
+  String get reviewTitle;
+
+  /// No description provided for @reviewFilterAll.
+  ///
+  /// In it, this message translates to:
+  /// **'Tutti'**
+  String get reviewFilterAll;
+
+  /// No description provided for @reviewFilterNothingFound.
+  ///
+  /// In it, this message translates to:
+  /// **'Nessun risultato'**
+  String get reviewFilterNothingFound;
+
+  /// No description provided for @reviewFilterNoLyrics.
+  ///
+  /// In it, this message translates to:
+  /// **'Senza testo'**
+  String get reviewFilterNoLyrics;
+
+  /// No description provided for @reviewFilterNoCover.
+  ///
+  /// In it, this message translates to:
+  /// **'Senza copertina'**
+  String get reviewFilterNoCover;
+
+  /// No description provided for @reviewFilterMissingData.
+  ///
+  /// In it, this message translates to:
+  /// **'Dati mancanti'**
+  String get reviewFilterMissingData;
+
+  /// No description provided for @reviewEmpty.
+  ///
+  /// In it, this message translates to:
+  /// **'Niente da revisionare: ai brani cercati non manca nulla'**
+  String get reviewEmpty;
+
+  /// No description provided for @reviewHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Brani che l\'arricchimento automatico non ha trovato o ha lasciato incompleti.'**
+  String get reviewHint;
+
+  /// No description provided for @reviewRetry.
+  ///
+  /// In it, this message translates to:
+  /// **'Riprova'**
+  String get reviewRetry;
+
+  /// No description provided for @reviewDismiss.
+  ///
+  /// In it, this message translates to:
+  /// **'Va bene così'**
+  String get reviewDismiss;
+
+  /// No description provided for @reviewRetryStarted.
+  ///
+  /// In it, this message translates to:
+  /// **'Ricerca avviata per {count, plural, one{1 brano} other{{count} brani}}'**
+  String reviewRetryStarted(int count);
+
+  /// No description provided for @reviewDismissed.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, one{1 brano tolto dall\'elenco} other{{count} brani tolti dall\'elenco}}'**
+  String reviewDismissed(int count);
 }
 
 class _AppLocalizationsDelegate

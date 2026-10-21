@@ -2500,5 +2500,31 @@
       }
     }
   },
-  "trackDeleteRefused": "O Android não permitiu eliminar o ficheiro"
+  "trackDeleteRefused": "O Android não permitiu eliminar o ficheiro",
+  "reviewTitle": "Para rever",
+  "reviewFilterAll": "Todas",
+  "reviewFilterNothingFound": "Nada encontrado",
+  "reviewFilterNoLyrics": "Sem letra",
+  "reviewFilterNoCover": "Sem capa",
+  "reviewFilterMissingData": "Dados em falta",
+  "reviewEmpty": "Nada para rever: às faixas pesquisadas não falta nada",
+  "reviewHint": "Faixas que o enriquecimento automático não encontrou ou deixou incompletas.",
+  "reviewRetry": "Tentar de novo",
+  "reviewDismiss": "Está bom assim",
+  "reviewRetryStarted": "Pesquisa iniciada para {count, plural, one{1 faixa} other{{count} faixas}}",
+  "@reviewRetryStarted": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reviewDismissed": "{count, plural, one{1 faixa retirada da lista} other{{count} faixas retiradas da lista}}",
+  "@reviewDismissed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

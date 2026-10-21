@@ -2309,5 +2309,31 @@
       }
     }
   },
-  "trackDeleteRefused": "Android no permitió eliminar el archivo"
+  "trackDeleteRefused": "Android no permitió eliminar el archivo",
+  "reviewTitle": "Por revisar",
+  "reviewFilterAll": "Todas",
+  "reviewFilterNothingFound": "Sin resultados",
+  "reviewFilterNoLyrics": "Sin letra",
+  "reviewFilterNoCover": "Sin portada",
+  "reviewFilterMissingData": "Datos que faltan",
+  "reviewEmpty": "Nada que revisar: a las canciones buscadas no les falta nada",
+  "reviewHint": "Canciones que el enriquecimiento automático no encontró o dejó incompletas.",
+  "reviewRetry": "Reintentar",
+  "reviewDismiss": "Está bien así",
+  "reviewRetryStarted": "Búsqueda iniciada para {count, plural, one{1 canción} other{{count} canciones}}",
+  "@reviewRetryStarted": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reviewDismissed": "{count, plural, one{1 canción quitada de la lista} other{{count} canciones quitadas de la lista}}",
+  "@reviewDismissed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

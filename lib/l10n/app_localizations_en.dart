@@ -4033,4 +4033,58 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get trackDeleteRefused =>
       'Android did not allow the file to be deleted';
+
+  @override
+  String get reviewTitle => 'To review';
+
+  @override
+  String get reviewFilterAll => 'All';
+
+  @override
+  String get reviewFilterNothingFound => 'Nothing found';
+
+  @override
+  String get reviewFilterNoLyrics => 'No lyrics';
+
+  @override
+  String get reviewFilterNoCover => 'No cover';
+
+  @override
+  String get reviewFilterMissingData => 'Missing data';
+
+  @override
+  String get reviewEmpty =>
+      'Nothing to review: no searched track is missing anything';
+
+  @override
+  String get reviewHint =>
+      'Tracks that automatic enrichment did not find, or left incomplete.';
+
+  @override
+  String get reviewRetry => 'Retry';
+
+  @override
+  String get reviewDismiss => 'Fine as it is';
+
+  @override
+  String reviewRetryStarted(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tracks',
+      one: '1 track',
+    );
+    return 'Search started for $_temp0';
+  }
+
+  @override
+  String reviewDismissed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tracks removed from the list',
+      one: '1 track removed from the list',
+    );
+    return '$_temp0';
+  }
 }

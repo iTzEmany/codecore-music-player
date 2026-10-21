@@ -9,6 +9,7 @@ import '../../../providers/database_providers.dart';
 import '../../../providers/library_providers.dart';
 import '../../../providers/nav_providers.dart';
 import '../../../providers/podcast_providers.dart';
+import '../../../providers/review_providers.dart';
 import '../../../providers/settings_providers.dart';
 import '../../../providers/smart_playlist_providers.dart';
 import '../../../providers/tag_providers.dart';
@@ -36,6 +37,7 @@ import '../smart/smart_playlist_screen.dart';
 import '../stats/stats_screen.dart';
 import '../tags/tags_screen.dart';
 import 'folders_sheet.dart';
+import 'review_screen.dart';
 import 'scan_status.dart';
 import '../../widgets/motion.dart';
 
@@ -90,6 +92,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
     );
     final tagCount = ref.watch(tagsProvider.select((t) => t.value?.length ?? 0));
     final podcastCount = ref.watch(podcastsProvider.select((p) => p.value?.length ?? 0));
+    final reviewCount = ref.watch(reviewCountProvider.select((c) => c.value ?? 0));
     final theme = Theme.of(context).textTheme;
     final denied = ref.watch(permissionDeniedProvider);
 
@@ -169,6 +172,13 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
           subtitle: l.statsSubtitle,
           onTap: () => ShellNav.open<void>(context, const StatsScreen()),
         ),
+        if (reviewCount > 0)
+          _Pinned(
+            icon: Icons.fact_check_outlined,
+            title: l.reviewTitle,
+            subtitle: l.tracksCount(reviewCount),
+            onTap: () => ShellNav.open<void>(context, const ReviewScreen()),
+          ),
       ];
       body = settings.libraryGrid
           ? _LibraryGrid(pinned: pinned, entries: entries, onOpen: _open)

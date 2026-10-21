@@ -2309,5 +2309,31 @@
       }
     }
   },
-  "trackDeleteRefused": "Android hat das Löschen der Datei nicht erlaubt"
+  "trackDeleteRefused": "Android hat das Löschen der Datei nicht erlaubt",
+  "reviewTitle": "Zu prüfen",
+  "reviewFilterAll": "Alle",
+  "reviewFilterNothingFound": "Nichts gefunden",
+  "reviewFilterNoLyrics": "Ohne Songtext",
+  "reviewFilterNoCover": "Ohne Cover",
+  "reviewFilterMissingData": "Fehlende Daten",
+  "reviewEmpty": "Nichts zu prüfen: bei den gesuchten Titeln fehlt nichts",
+  "reviewHint": "Titel, die die automatische Anreicherung nicht gefunden oder unvollständig gelassen hat.",
+  "reviewRetry": "Erneut versuchen",
+  "reviewDismiss": "Passt so",
+  "reviewRetryStarted": "Suche gestartet für {count, plural, one{1 Titel} other{{count} Titel}}",
+  "@reviewRetryStarted": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reviewDismissed": "{count, plural, one{1 Titel aus der Liste entfernt} other{{count} Titel aus der Liste entfernt}}",
+  "@reviewDismissed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

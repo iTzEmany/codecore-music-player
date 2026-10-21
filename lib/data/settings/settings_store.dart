@@ -393,6 +393,17 @@ class SettingsStore {
   Future<void> writeNotDuplicates(Set<String> keys) =>
       _prefs.setStringList('notDuplicates', keys.toList()..sort());
 
+  /// Tracks the user marked «va bene così» in «Da revisionare» (track ids).
+  Set<int> readReviewDismissed() => (_prefs.getStringList('reviewDismissed') ?? const [])
+      .map(int.tryParse)
+      .whereType<int>()
+      .toSet();
+
+  Future<void> writeReviewDismissed(Set<int> ids) => _prefs.setStringList(
+    'reviewDismissed',
+    [for (final i in ids.toList()..sort()) '$i'],
+  );
+
   SavedPlayback readPlayback() {
     final ids = (_prefs.getStringList('lastQueueIds') ?? const [])
         .map(int.tryParse)
