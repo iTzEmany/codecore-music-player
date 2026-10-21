@@ -107,7 +107,7 @@ class MainActivity : AudioServiceActivity() {
 
     @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: android.content.Intent?) {
-        if (MediaDeleteBridge.onActivityResult(requestCode)) return
+        if (MediaDeleteBridge.onActivityResult(requestCode, resultCode)) return
         @Suppress("DEPRECATION")
         super.onActivityResult(requestCode, resultCode, data)
     }

@@ -4043,4 +4043,7 @@ class AppLocalizationsEs extends AppLocalizations {
     );
     return '$_temp0 · $failed sin eliminar';
   }
+
+  @override
+  String get trackDeleteRefused => 'Android no permitió eliminar el archivo';
 }

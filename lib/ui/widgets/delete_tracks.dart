@@ -32,6 +32,8 @@ Future<bool> confirmAndDeleteTracks(
   if (one) {
     text = failed == 0
         ? l.trackDeleted
+        : report.refused.isNotEmpty
+        ? l.trackDeleteRefused
         : l.trackDeleteFailed(report.failed.values.first);
   } else {
     text = failed == 0

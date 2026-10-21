@@ -2308,5 +2308,6 @@
         "type": "int"
       }
     }
-  }
+  },
+  "trackDeleteRefused": "Android no permitió eliminar el archivo"
 }

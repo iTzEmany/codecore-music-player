@@ -114,7 +114,7 @@ void main() {
     expect(await repo.getById(good.id), isNull);
   });
 
-  test('permission failures go to the platform deleter in one call', () async {
+  test('files still there after any failure go to the platform deleter in one call', () async {
     final a = await track('a.mp3');
     final b = await track('b.mp3');
     final c = await track('c.mp3');
@@ -126,10 +126,10 @@ void main() {
           await File(path).delete();
           return;
         }
-        throw FileSystemException(
-          'x',
+        // Android's FUSE answers ENOENT for a file it will not let us delete.
+        throw PathNotFoundException(
           path,
-          const OSError('Operation not permitted', 1),
+          const OSError('No such file or directory', 2),
         );
       },
       platform: (paths) async {
@@ -145,6 +145,7 @@ void main() {
     ]);
     expect(r.deleted.map((x) => x.id), [c.id, a.id]);
     expect(r.failed.keys.map((x) => x.id), [b.id]);
+    expect(r.refused.map((x) => x.id), [b.id], reason: 'refused at the dialog');
     expect(await repo.getById(b.id), isNotNull);
     expect(await rows(), 1);
   });

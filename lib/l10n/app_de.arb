@@ -2308,5 +2308,6 @@
         "type": "int"
       }
     }
-  }
+  },
+  "trackDeleteRefused": "Android hat das Löschen der Datei nicht erlaubt"
 }

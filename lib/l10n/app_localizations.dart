@@ -6398,6 +6398,12 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'{count, plural, one{1 brano eliminato} other{{count} brani eliminati}} · {failed} non eliminati'**
   String tracksDeletedSome(int count, int failed);
+
+  /// No description provided for @trackDeleteRefused.
+  ///
+  /// In it, this message translates to:
+  /// **'Android non ha permesso di eliminare il file'**
+  String get trackDeleteRefused;
 }
 
 class _AppLocalizationsDelegate

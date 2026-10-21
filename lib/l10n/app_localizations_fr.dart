@@ -4079,4 +4079,8 @@ class AppLocalizationsFr extends AppLocalizations {
     );
     return '$_temp0 · $failed non supprimés';
   }
+
+  @override
+  String get trackDeleteRefused =>
+      'Android n’a pas autorisé la suppression du fichier';
 }

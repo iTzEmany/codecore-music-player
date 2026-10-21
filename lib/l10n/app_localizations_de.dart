@@ -4049,4 +4049,8 @@ class AppLocalizationsDe extends AppLocalizations {
     );
     return '$_temp0 · $failed nicht gelöscht';
   }
+
+  @override
+  String get trackDeleteRefused =>
+      'Android hat das Löschen der Datei nicht erlaubt';
 }

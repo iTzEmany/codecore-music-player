@@ -11,20 +11,25 @@ typedef PlatformDeleter = Future<List<String>> Function(List<String> paths);
 
 /// What a «delete from the device» pass did.
 class TrackDeleteReport {
-  const TrackDeleteReport({required this.deleted, required this.failed});
+  const TrackDeleteReport({
+    required this.deleted,
+    required this.failed,
+    this.refused = const {},
+  });
 
   /// File gone (or already gone) and library row removed.
   final List<Track> deleted;
 
   /// File still there, row untouched, with the system's reason.
   final Map<Track, String> failed;
+
+  /// The subset of [failed] that went through the platform deleter and is
+  /// still on disk (dialog refused, or unknown to MediaStore): the OS reason
+  /// would only mislead there.
+  final Set<Track> refused;
 }
 
 Future<void> _deleteFile(String path) => File(path).delete();
-
-/// EPERM / EACCES: on Android 11+ the answer for a file another app created.
-bool isPermissionDenied(Object e) =>
-    e is FileSystemException && const {1, 13}.contains(e.osError?.errorCode);
 
 String failureReason(Object e) =>
     e is FileSystemException ? (e.osError?.message ?? e.message) : '$e';
@@ -62,6 +67,7 @@ class TrackDeleter {
     final gone = <Track>[];
     final failed = <Track, String>{};
     final denied = <Track, String>{};
+    final refused = <Track>{};
     for (final t in list) {
       if (!await File(t.path).exists()) {
         gone.add(t);
@@ -72,7 +78,10 @@ class TrackDeleter {
         gone.add(t);
       } on Object catch (e, st) {
         AppLog.w('delete track failed: ${t.path}', e, st);
-        (platform != null && isPermissionDenied(e) ? denied : failed)[t] =
+        // Android's FUSE may answer ENOENT, EPERM or EACCES for a file it will
+        // not let us delete: whatever the errno, a file still there is offered
+        // to the platform.
+        (platform != null && await File(t.path).exists() ? denied : failed)[t] =
             failureReason(e);
       }
     }
@@ -85,12 +94,13 @@ class TrackDeleter {
       for (final e in denied.entries) {
         if (await File(e.key.path).exists()) {
           failed[e.key] = e.value;
+          refused.add(e.key);
         } else {
           gone.add(e.key);
         }
       }
     }
     await tracks.deleteTracks([for (final t in gone) t.id]);
-    return TrackDeleteReport(deleted: gone, failed: failed);
+    return TrackDeleteReport(deleted: gone, failed: failed, refused: refused);
   }
 }
