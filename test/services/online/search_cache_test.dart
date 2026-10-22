@@ -64,20 +64,32 @@ void main() {
   late File file;
   var clock = DateTime(2026, 10, 1);
 
-  SearchCache make({int max = 2000, Duration ttl = const Duration(days: 30)}) =>
-      SearchCache(
-          file: () async => file,
-          max: max,
-          ttl: ttl,
-          now: () => clock,
-          writeDelay: Duration.zero);
+  final made = <SearchCache>[];
+
+  SearchCache make({int max = 2000, Duration ttl = const Duration(days: 30)}) {
+    final c = SearchCache(
+        file: () async => file,
+        max: max,
+        ttl: ttl,
+        now: () => clock,
+        writeDelay: Duration.zero);
+    made.add(c);
+    return c;
+  }
 
   setUp(() {
     dir = Directory.systemTemp.createTempSync('cc_cache');
     file = File('${dir.path}/search_cache.json');
     clock = DateTime(2026, 10, 1);
   });
-  tearDown(() => dir.deleteSync(recursive: true));
+  tearDown(() async {
+    // A write still running keeps the file open, which Windows cannot delete.
+    for (final c in made) {
+      await c.dispose();
+    }
+    made.clear();
+    dir.deleteSync(recursive: true);
+  });
 
   test('hit, miss, and the entry survives a restart with its source and page',
       () async {

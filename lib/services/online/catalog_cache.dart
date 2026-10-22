@@ -45,6 +45,7 @@ class CatalogCache {
 
   Map<String, _Stored>? _entries;
   Timer? _timer;
+  Future<void> _writing = Future.value();
 
   static String _key(CatalogKind kind, String key) => '${kind.name}:$key';
 
@@ -130,8 +131,20 @@ class CatalogCache {
   }
 
   /// Writes now (also called when the debounce fires).
-  Future<void> flush() async {
+  Future<void> flush() {
     _timer?.cancel();
+    // Serialized: a write never starts before the previous one ends, and
+    // flush() completes only when the file is closed.
+    return _writing = _writing.then((_) => _writeNow());
+  }
+
+  /// Cancels the pending debounce, writes what is left and waits for it.
+  Future<void> dispose() async {
+    await flush();
+    _timer?.cancel();
+  }
+
+  Future<void> _writeNow() async {
     final m = _entries;
     if (m == null) return;
     try {

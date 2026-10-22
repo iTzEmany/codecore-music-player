@@ -71,6 +71,7 @@ class SuggestionLog {
   final List<SuggestionRecord> _records = []; // oldest first
   Future<void>? _loading;
   Timer? _timer;
+  Future<void> _writing = Future.value();
 
   /// Reads the file once; later calls wait for the same read.
   Future<void> load() => _loading ??= _read();
@@ -152,8 +153,20 @@ class SuggestionLog {
     _timer = Timer(writeDelay, () => unawaited(flush()));
   }
 
-  Future<void> flush() async {
+  Future<void> flush() {
     _timer?.cancel();
+    // Serialized: a write never starts before the previous one ends, and
+    // flush() completes only when the file is closed.
+    return _writing = _writing.then((_) => _writeNow());
+  }
+
+  /// Cancels the pending debounce, writes what is left and waits for it.
+  Future<void> dispose() async {
+    await flush();
+    _timer?.cancel();
+  }
+
+  Future<void> _writeNow() async {
     try {
       final f = await file();
       await f.parent.create(recursive: true);

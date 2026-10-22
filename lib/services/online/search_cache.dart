@@ -25,6 +25,7 @@ class SearchCache {
 
   Map<String, _Entry>? _entries;
   Timer? _timer;
+  Future<void> _writing = Future.value();
 
   Future<Map<String, _Entry>> _load() async {
     final cached = _entries;
@@ -99,8 +100,19 @@ class SearchCache {
   }
 
   /// Writes now (also called when the debounce fires).
-  Future<void> flush() async {
+  Future<void> flush() {
     _timer?.cancel();
+    // Serialized: a write never starts before the previous one ends.
+    return _writing = _writing.then((_) => _writeNow());
+  }
+
+  /// Cancels the pending debounce, writes what is left and waits for it.
+  Future<void> dispose() async {
+    await flush();
+    _timer?.cancel();
+  }
+
+  Future<void> _writeNow() async {
     final m = _entries;
     if (m == null) return;
     try {

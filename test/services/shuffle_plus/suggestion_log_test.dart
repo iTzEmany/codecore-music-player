@@ -8,12 +8,18 @@ void main() {
   late Directory dir;
   late DateTime now;
 
-  SuggestionLog open({int max = 500}) => SuggestionLog(
-        file: () async => File(p.join(dir.path, 'suggestions.json')),
-        max: max,
-        now: () => now,
-        writeDelay: Duration.zero,
-      );
+  final opened = <SuggestionLog>[];
+
+  SuggestionLog open({int max = 500}) {
+    final l = SuggestionLog(
+      file: () async => File(p.join(dir.path, 'suggestions.json')),
+      max: max,
+      now: () => now,
+      writeDelay: Duration.zero,
+    );
+    opened.add(l);
+    return l;
+  }
 
   void add(SuggestionLog log, String id) =>
       log.add(videoId: id, title: 'T$id', artist: 'A', seedTitle: 'S');
@@ -21,6 +27,13 @@ void main() {
   setUp(() {
     dir = Directory.systemTemp.createTempSync('sug_log');
     addTearDown(() => dir.deleteSync(recursive: true));
+    // Runs first: a write still running keeps the file open (Windows).
+    addTearDown(() async {
+      for (final l in opened) {
+        await l.dispose();
+      }
+      opened.clear();
+    });
     now = DateTime.utc(2026, 1, 1);
   });
 

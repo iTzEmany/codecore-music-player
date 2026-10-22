@@ -83,6 +83,7 @@ void main() {
   late _Adapter adapter;
   late _YtDlp ytDlp;
   late YtmCatalog catalog;
+  late CatalogCache cache;
   late InnerTubeClient client;
   var clock = DateTime(2026, 10, 1);
 
@@ -93,14 +94,18 @@ void main() {
     clock = DateTime(2026, 10, 1);
     adapter = _Adapter((o) => fixture('ytm_artist_page'));
     ytDlp = _YtDlp();
-    final cache = CatalogCache(
+    cache = CatalogCache(
         file: () async => File('${dir.path}/c.json'),
         now: () => clock,
         writeDelay: Duration.zero);
     client = InnerTubeClient(Dio(BaseOptions(validateStatus: (_) => true))..httpClientAdapter = adapter);
     catalog = YtmCatalog(client, ytDlp, cache, now: () => clock);
   });
-  tearDown(() => dir.deleteSync(recursive: true));
+  tearDown(() async {
+    // A write still running keeps the file open, which Windows cannot delete.
+    await cache.dispose();
+    dir.deleteSync(recursive: true);
+  });
 
   test('the top card of a search is read from the masked answer, one request', () async {
     adapter.respond = (o) => fixture('ytm_top_album_card');

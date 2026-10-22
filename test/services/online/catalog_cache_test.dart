@@ -8,15 +8,28 @@ void main() {
   late File file;
   var clock = DateTime(2026, 10, 1);
 
-  CatalogCache make({int max = 60}) => CatalogCache(
-      file: () async => file, max: max, now: () => clock, writeDelay: Duration.zero);
+  final made = <CatalogCache>[];
+
+  CatalogCache make({int max = 60}) {
+    final c = CatalogCache(
+        file: () async => file, max: max, now: () => clock, writeDelay: Duration.zero);
+    made.add(c);
+    return c;
+  }
 
   setUp(() {
     dir = Directory.systemTemp.createTempSync('cc_catalog');
     file = File('${dir.path}/catalog_cache.json');
     clock = DateTime(2026, 10, 1);
   });
-  tearDown(() => dir.deleteSync(recursive: true));
+  tearDown(() async {
+    // A write still running keeps the file open, which Windows cannot delete.
+    for (final c in made) {
+      await c.dispose();
+    }
+    made.clear();
+    dir.deleteSync(recursive: true);
+  });
 
   test('a page is fresh for its kind\'s time, then expired but still there', () async {
     final c = make();

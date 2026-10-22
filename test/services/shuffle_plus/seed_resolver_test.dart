@@ -69,6 +69,7 @@ void main() {
       now: () => now,
       writeDelay: Duration.zero,
     );
+    addTearDown(() => index.dispose());
     queries = [];
     answer = [song('o7MlC_Qrmmc', 'Mother', 'Pink Floyd', 335)];
   });
