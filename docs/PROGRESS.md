@@ -465,6 +465,16 @@ Richiesta (2026-10-22): «avere aggiornamenti per quanto riguarda le nuove uscit
 
 - Streaming di YouTube sul Mi A3 (notte del 2026-10-22): con yt-dlp 2026.10 i client predefiniti risolvono la sfida JS sul telefono in 50–70 s; `android_vr` ora chiede un PO token (403 da googlevideo, mascherato da ExoPlayer come «(0) Source error»). Ora: indirizzo con gli header di yt-dlp (`-j`), «Source error» = indirizzo scaduto, client veloce `visionos` (misura dal PC: unico che risponde in 2–4 s e si scarica) con ripiego ai predefiniti, Casuale+ mette in coda un suggerito solo con l'indirizzo pronto (c1b1562, f3d806c). Mi A3 (APK 6047): «Ascolta» 8–19 s (60–65 s circa 1 volta su 4, quando il client veloce non risponde entro 20 s), suggeriti suonati senza salti. Da rifinire: tempo del client veloce; verificare che «Ascolta» non lasci file (il test ha toccato per sbaglio «Scarica»).
 
+## Identità «Anello», fase 1 (richiesta dell'utente, 2026-10-22; piano `docs/superpowers/plans/2026-10-22-identita-anello.md`)
+- [x] Anello di avanzamento attorno alla copertina (mini-player, Jam, lettore, barra desktop) (ff3fefa, 4e25b39, 37d5101)
+- [x] Blocco unico in basso con il pallino della scheda; la ricerca nasce dalla barra (79cd6a0, 90bcc01, 972a6d3, 6313a2a, 21c2c42)
+- [x] Nuova Home: «Casuale su tutto», Riprendi, ventaglio (ba68cd7, b0a89eb)
+- [x] Il lettore cresce dal blocco, copertina che gira nell'anello, niente animazioni con «Riduci animazioni» (e9be816, ed09d7b)
+- [x] Simmetria stretta nel lettore e nella barra desktop, velocità mantenuta (317da0f, 732ae95, 1c02a44, 4d72ae7); golden rigenerati (b761d5f, b534c2c)
+- [x] Difetti trovati sul Mi A3: scoperta LAN che moriva senza rete (f5cd805); ▶ a fine dell'ultimo brano svuotava il lettore, ora riparte da capo (cef3f7b)
+- [x] Prova sul Mi A3 (APK debug 6065, 2026-10-22): ▶ a fine coda, copertina che gira con l'anello fermo, pallino sulla scheda giusta. Non misurata la fluidità con una build profile.
+- [ ] Fase 2 (pagine interne: Jam, importazione, Impostazioni) direttamente nel codice, con la regola della simmetria (`docs/superpowers/specs/`)
+
 ## Note di deviazione
 <!-- una riga per deviazione: data — task — cosa è cambiato e perché -->
 
