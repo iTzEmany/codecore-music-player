@@ -46,6 +46,41 @@ void main() {
     await h.dispose(t);
   });
 
+  testWidgets('no track: the dot stays inside the dock mid-hop', (t) async {
+    _phone(t);
+    final h = await Harness.create(t, tracks: 2);
+    await h.pump(t, const AppShell());
+    await _settle(t);
+    await t.tap(_bar('Libreria'));
+    await t.pump();
+    await t.pump(Motion.dot ~/ 2);
+    final dock = t.getRect(find.descendant(
+        of: find.byType(ShellDock), matching: find.byType(Material)).first);
+    final dot = t.getRect(find.byKey(const ValueKey('tab-dot')));
+    expect(dot.top, greaterThanOrEqualTo(dock.top));
+    await t.pump(Motion.dot);
+    await h.dispose(t);
+  });
+
+  testWidgets('reduced motion: the dot is at its tab after one frame',
+      (t) async {
+    _phone(t);
+    t.platformDispatcher.accessibilityFeaturesTestValue =
+        const FakeAccessibilityFeatures(disableAnimations: true);
+    addTearDown(t.platformDispatcher.clearAccessibilityFeaturesTestValue);
+    final h = await Harness.create(t, tracks: 2);
+    await h.pump(t, const AppShell());
+    await _settle(t);
+    await t.tap(_bar('Libreria'));
+    await t.pump();
+    final icon = find.descendant(
+        of: find.ancestor(of: _bar('Libreria'), matching: find.byType(InkWell)),
+        matching: find.byType(Icon));
+    final dot = t.getCenter(find.byKey(const ValueKey('tab-dot')));
+    expect((dot - t.getTopRight(icon)).distance, lessThan(16));
+    await h.dispose(t);
+  });
+
   testWidgets('the selected tab is marked by the dot and in semantics',
       (t) async {
     _phone(t);
@@ -55,7 +90,11 @@ void main() {
     await _settle(t);
     await t.pump(Motion.dot); // the hop is still on its way after _settle
     final tab = find.ancestor(of: _bar('Libreria'), matching: find.byType(InkWell));
-    expect(t.getSemantics(tab.first), isSemantics(isSelected: true, isButton: true));
+    expect(
+      t.getSemantics(tab.first),
+      isSemantics(
+          label: 'Libreria\nLibreria', isSelected: true, isButton: true),
+    );
     final corner = t.getTopRight(
         find.descendant(of: tab, matching: find.byType(Icon)));
     final dot = t.getCenter(find.byKey(const ValueKey('tab-dot')));

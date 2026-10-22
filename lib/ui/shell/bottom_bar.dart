@@ -19,7 +19,9 @@ class BottomBarItem {
 const _iconSize = 24.0;
 const _tabTop = 8.0; // the icon sits at a fixed height, whatever the text scale
 const _dotSize = 6.0;
-const _dotLift = 10.0;
+// Small enough that the apex stays inside the dock's clip when the tabs are
+// its top edge (no track playing).
+const _dotLift = 4.0;
 
 /// One block at the bottom: the mini-player (when something plays) above the
 /// always-labelled tabs, with a dot on the active tab's icon.
@@ -44,7 +46,8 @@ class ShellDock extends ConsumerWidget {
         ref.watch(liveCurrentTrackProvider).value ??
         ref.watch(currentTrackProvider).value;
     final hasPlayer =
-        showPlayer && (track != null || ref.watch(jamProvider).active);
+        showPlayer &&
+        (track != null || ref.watch(jamProvider.select((j) => j.active)));
     const m = CcDims.dockMargin;
     return Padding(
       padding: EdgeInsets.fromLTRB(
@@ -171,13 +174,14 @@ class _TabDotState extends State<_TabDot> with SingleTickerProviderStateMixin {
     vsync: this,
     value: 1,
   );
-  late int _from = widget.index;
+  late double _fromX = _x(widget.index);
 
   @override
   void didUpdateWidget(_TabDot old) {
     super.didUpdateWidget(old);
     if (old.index == widget.index) return;
-    _from = old.index;
+    // Start from where the dot is now, so a quick second tap doesn't jump back.
+    _fromX = _currentX(old.index, old.tabWidth);
     _c.duration = ccDuration(context, Motion.dot);
     _c.forward(from: 0);
   }
@@ -189,7 +193,13 @@ class _TabDotState extends State<_TabDot> with SingleTickerProviderStateMixin {
   }
 
   // Centre of the icon's top-right corner in tab [i].
-  double _x(int i) => (i + 0.5) * widget.tabWidth + _iconSize / 2;
+  double _x(int i, [double? tabWidth]) =>
+      (i + 0.5) * (tabWidth ?? widget.tabWidth) + _iconSize / 2;
+
+  // Where the dot is, heading for tab [to].
+  double _currentX(int to, [double? tabWidth]) =>
+      _fromX +
+      (_x(to, tabWidth) - _fromX) * Curves.easeInOut.transform(_c.value);
 
   @override
   Widget build(BuildContext context) {
@@ -203,7 +213,7 @@ class _TabDotState extends State<_TabDot> with SingleTickerProviderStateMixin {
               animation: _c,
               builder: (context, child) {
                 final t = Curves.easeInOut.transform(_c.value);
-                final x = _x(_from) + (_x(widget.index) - _x(_from)) * t;
+                final x = _currentX(widget.index);
                 final y = _tabTop - math.sin(math.pi * t) * _dotLift;
                 return Transform.translate(
                   offset: Offset(x - _dotSize / 2, y - _dotSize / 2),
