@@ -43,6 +43,34 @@
   "sortDuration": "Duration",
   "tracksCount": "{count, plural, one{1 track} other{{count} tracks}}",
   "albumsCount": "{count, plural, one{1 album} other{{count} albums}}",
+  "minutesWords": "{n, plural, one{1 minute} other{{n} minutes}}",
+  "@minutesWords": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "hoursWords": "{n, plural, one{1 hour} other{{n} hours}}",
+  "@hoursWords": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "hoursAndMinutes": "{hours} {minutes}",
+  "@hoursAndMinutes": {
+    "placeholders": {
+      "hours": {
+        "type": "String"
+      },
+      "minutes": {
+        "type": "String"
+      }
+    }
+  },
+  "collectionNoTracks": "No tracks",
   "missingTracksCount": "Missing tracks ({count})",
   "addedToFavorites": "Added to favorites",
   "removedFromFavorites": "Removed from favorites",
@@ -475,17 +503,6 @@
   },
   "mostPlayed": "Most played",
   "albumsSection": "Albums",
-  "artistMeta": "{albums} · {tracks}",
-  "@artistMeta": {
-    "placeholders": {
-      "albums": {
-        "type": "String"
-      },
-      "tracks": {
-        "type": "String"
-      }
-    }
-  },
   "addAllToQueue": "Add to queue",
   "addedNToQueue": "{n} tracks added to the queue",
   "@addedNToQueue": {
@@ -1399,14 +1416,6 @@
   "smartPlaylistNew": "New smart playlist",
   "smartPlaylistEdit": "Edit smart playlist",
   "smartPlaylistLabel": "Smart playlist",
-  "smartSubtitle": "{count, plural, one{Smart playlist · 1 track} other{Smart playlist · {count} tracks}}",
-  "@smartSubtitle": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "smartName": "Name",
   "smartNameRequired": "Enter a name",
   "smartRules": "Rules",

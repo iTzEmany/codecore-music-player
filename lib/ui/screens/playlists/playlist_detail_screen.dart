@@ -24,7 +24,7 @@ import '../../widgets/selection_bar.dart';
 import '../../widgets/track_row.dart';
 import '../../widgets/track_row_selection.dart';
 import '../import/import_banner.dart';
-import '../library/album_detail_screen.dart' show tracksAndMinutes;
+import '../library/album_detail_screen.dart' show collectionMeta;
 import 'add_tracks_screen.dart';
 import 'export_dialog.dart';
 import 'playlist_dialogs.dart';
@@ -251,8 +251,7 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
         coverKey: coverKeys.firstOrNull,
         cover: (s) =>
             PlaylistCover(size: s, coverKeys: coverKeys, radius: CcDims.rGrid),
-        meta:
-            '${l.kindPlaylist} · ${tracksAndMinutes(context, tracks.length, durationMs)}',
+        meta: collectionMeta(l, tracks: tracks.length, durationMs: durationMs),
         onPlay: tracks.isEmpty
             ? null
             : () => ctrl.playAll(tracks, context: playCtx),

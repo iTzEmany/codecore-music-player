@@ -156,6 +156,36 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
+  String minutesWords(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n minutos',
+      one: '1 minuto',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hoursWords(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n horas',
+      one: '1 hora',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hoursAndMinutes(String hours, String minutes) {
+    return '$hours e $minutes';
+  }
+
+  @override
+  String get collectionNoTracks => 'Nenhuma faixa';
+
+  @override
   String missingTracksCount(int count) {
     return 'Faixas não encontradas ($count)';
   }
@@ -1136,11 +1166,6 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get albumsSection => 'Álbuns';
-
-  @override
-  String artistMeta(String albums, String tracks) {
-    return '$albums · $tracks';
-  }
 
   @override
   String get addAllToQueue => 'Adicionar à fila';
@@ -2718,17 +2743,6 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get smartPlaylistLabel => 'Playlist inteligente';
-
-  @override
-  String smartSubtitle(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'Playlist inteligente · $count faixas',
-      one: 'Playlist inteligente · 1 faixa',
-    );
-    return '$_temp0';
-  }
 
   @override
   String get smartName => 'Nome';

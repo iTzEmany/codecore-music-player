@@ -14,7 +14,7 @@ import '../../widgets/playlist_cover.dart';
 import '../../widgets/selection_bar.dart';
 import '../../widgets/track_row.dart';
 import '../../widgets/track_row_selection.dart';
-import 'album_detail_screen.dart' show tracksAndMinutes;
+import 'album_detail_screen.dart' show collectionMeta;
 import '../../widgets/motion.dart';
 
 /// The favourites as a collection page (pinned in the Library).
@@ -60,8 +60,7 @@ class FavoritesScreen extends ConsumerWidget {
         name: l.navFavorites,
         cover: (s) =>
             PlaylistCover(size: s, favorites: true, radius: CcDims.rGrid),
-        meta:
-            '${l.kindPlaylist} · ${tracksAndMinutes(context, list.length, durationMs)}',
+        meta: collectionMeta(l, tracks: list.length, durationMs: durationMs),
         onPlay: list.isEmpty
             ? null
             : () => ctrl.playAll(list, context: playCtx),

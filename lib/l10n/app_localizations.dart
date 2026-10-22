@@ -364,6 +364,30 @@ abstract class AppLocalizations {
   /// **'{count, plural, one{1 album} other{{count} album}}'**
   String albumsCount(int count);
 
+  /// No description provided for @minutesWords.
+  ///
+  /// In it, this message translates to:
+  /// **'{n, plural, one{1 minuto} other{{n} minuti}}'**
+  String minutesWords(int n);
+
+  /// No description provided for @hoursWords.
+  ///
+  /// In it, this message translates to:
+  /// **'{n, plural, one{1 ora} other{{n} ore}}'**
+  String hoursWords(int n);
+
+  /// No description provided for @hoursAndMinutes.
+  ///
+  /// In it, this message translates to:
+  /// **'{hours} e {minutes}'**
+  String hoursAndMinutes(String hours, String minutes);
+
+  /// No description provided for @collectionNoTracks.
+  ///
+  /// In it, this message translates to:
+  /// **'Nessun brano'**
+  String get collectionNoTracks;
+
   /// No description provided for @missingTracksCount.
   ///
   /// In it, this message translates to:
@@ -2097,12 +2121,6 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Album'**
   String get albumsSection;
-
-  /// No description provided for @artistMeta.
-  ///
-  /// In it, this message translates to:
-  /// **'{albums} · {tracks}'**
-  String artistMeta(String albums, String tracks);
 
   /// No description provided for @addAllToQueue.
   ///
@@ -4593,12 +4611,6 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Playlist intelligente'**
   String get smartPlaylistLabel;
-
-  /// No description provided for @smartSubtitle.
-  ///
-  /// In it, this message translates to:
-  /// **'{count, plural, one{Playlist intelligente · 1 brano} other{Playlist intelligente · {count} brani}}'**
-  String smartSubtitle(int count);
 
   /// No description provided for @smartName.
   ///

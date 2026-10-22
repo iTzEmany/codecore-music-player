@@ -43,6 +43,34 @@
   "sortDuration": "Dauer",
   "tracksCount": "{count, plural, one{1 Titel} other{{count} Titel}}",
   "albumsCount": "{count, plural, one{1 Album} other{{count} Alben}}",
+  "minutesWords": "{n, plural, one{1 Minute} other{{n} Minuten}}",
+  "@minutesWords": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "hoursWords": "{n, plural, one{1 Stunde} other{{n} Stunden}}",
+  "@hoursWords": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "hoursAndMinutes": "{hours} und {minutes}",
+  "@hoursAndMinutes": {
+    "placeholders": {
+      "hours": {
+        "type": "String"
+      },
+      "minutes": {
+        "type": "String"
+      }
+    }
+  },
+  "collectionNoTracks": "Keine Titel",
   "missingTracksCount": "Fehlende Titel ({count})",
   "addedToFavorites": "Zu Favoriten hinzugefügt",
   "removedFromFavorites": "Aus Favoriten entfernt",
@@ -475,17 +503,6 @@
   },
   "mostPlayed": "Meistgespielt",
   "albumsSection": "Alben",
-  "artistMeta": "{albums} · {tracks}",
-  "@artistMeta": {
-    "placeholders": {
-      "albums": {
-        "type": "String"
-      },
-      "tracks": {
-        "type": "String"
-      }
-    }
-  },
   "addAllToQueue": "Zur Warteschlange hinzufügen",
   "addedNToQueue": "{n} Titel zur Warteschlange hinzugefügt",
   "@addedNToQueue": {
@@ -1399,14 +1416,6 @@
   "smartPlaylistNew": "Neue intelligente Playlist",
   "smartPlaylistEdit": "Intelligente Playlist bearbeiten",
   "smartPlaylistLabel": "Intelligente Playlist",
-  "smartSubtitle": "{count, plural, one{Intelligente Playlist · 1 Titel} other{Intelligente Playlist · {count} Titel}}",
-  "@smartSubtitle": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "smartName": "Name",
   "smartNameRequired": "Gib einen Namen ein",
   "smartRules": "Regeln",

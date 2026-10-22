@@ -57,6 +57,34 @@
       }
     }
   },
+  "minutesWords": "{n, plural, one{1 minuto} other{{n} minutos}}",
+  "@minutesWords": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "hoursWords": "{n, plural, one{1 hora} other{{n} horas}}",
+  "@hoursWords": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "hoursAndMinutes": "{hours} e {minutes}",
+  "@hoursAndMinutes": {
+    "placeholders": {
+      "hours": {
+        "type": "String"
+      },
+      "minutes": {
+        "type": "String"
+      }
+    }
+  },
+  "collectionNoTracks": "Nenhuma faixa",
   "missingTracksCount": "Faixas não encontradas ({count})",
   "@missingTracksCount": {
     "placeholders": {
@@ -666,17 +694,6 @@
   },
   "mostPlayed": "Mais ouvidos",
   "albumsSection": "Álbuns",
-  "artistMeta": "{albums} · {tracks}",
-  "@artistMeta": {
-    "placeholders": {
-      "albums": {
-        "type": "String"
-      },
-      "tracks": {
-        "type": "String"
-      }
-    }
-  },
   "addAllToQueue": "Adicionar à fila",
   "addedNToQueue": "{n} faixas adicionadas à fila",
   "@addedNToQueue": {
@@ -1590,14 +1607,6 @@
   "smartPlaylistNew": "Nova playlist inteligente",
   "smartPlaylistEdit": "Editar playlist inteligente",
   "smartPlaylistLabel": "Playlist inteligente",
-  "smartSubtitle": "{count, plural, one{Playlist inteligente · 1 faixa} other{Playlist inteligente · {count} faixas}}",
-  "@smartSubtitle": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "smartName": "Nome",
   "smartNameRequired": "Escreva um nome",
   "smartRules": "Regras",

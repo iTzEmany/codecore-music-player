@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/db/app_database.dart';
 import '../../../l10n/l10n_ext.dart';
+import '../library/album_detail_screen.dart' show collectionMeta;
 import '../../../providers/database_providers.dart';
 import '../../../providers/player_providers.dart';
 import '../../../providers/settings_providers.dart';
@@ -84,7 +85,11 @@ class SmartPlaylistScreen extends ConsumerWidget {
           p.rules.isEmpty ? l.smartNoRules : p.rules,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: cc.textMuted),
         ),
-        meta: l.smartSubtitle(tracks.length),
+        meta: collectionMeta(
+          l,
+          tracks: tracks.length,
+          durationMs: tracks.fold<int>(0, (sum, t) => sum + t.durationMs),
+        ),
         onPlay: tracks.isEmpty
             ? null
             : () => ctrl.playAll(tracks, context: playCtx),

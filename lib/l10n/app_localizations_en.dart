@@ -156,6 +156,36 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String minutesWords(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n minutes',
+      one: '1 minute',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hoursWords(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n hours',
+      one: '1 hour',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hoursAndMinutes(String hours, String minutes) {
+    return '$hours $minutes';
+  }
+
+  @override
+  String get collectionNoTracks => 'No tracks';
+
+  @override
   String missingTracksCount(int count) {
     return 'Missing tracks ($count)';
   }
@@ -1133,11 +1163,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get albumsSection => 'Albums';
-
-  @override
-  String artistMeta(String albums, String tracks) {
-    return '$albums · $tracks';
-  }
 
   @override
   String get addAllToQueue => 'Add to queue';
@@ -2711,17 +2736,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get smartPlaylistLabel => 'Smart playlist';
-
-  @override
-  String smartSubtitle(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'Smart playlist · $count tracks',
-      one: 'Smart playlist · 1 track',
-    );
-    return '$_temp0';
-  }
 
   @override
   String get smartName => 'Name';
