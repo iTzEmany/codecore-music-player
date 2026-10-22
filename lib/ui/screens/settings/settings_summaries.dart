@@ -32,15 +32,18 @@ String settingsSummary(BuildContext context, WidgetRef ref, SettingsPage p) {
       return [theme, accentLabel(l, accentFromName(s.accent)), languageName(s.language)]
           .join(', ');
     case SettingsPage.playback:
+      final t = transitionLabel(l, s.transition);
       return [
-        transitionLabel(l, s.transition),
-        if (s.transition == TransitionMode.crossfade) l.summaryCrossfade(s.crossfadeSeconds),
+        s.transition == TransitionMode.crossfade
+            ? '$t ${l.summaryCrossfade(s.crossfadeSeconds)}'
+            : t,
         if (s.normalizeVolume) l.summaryNormalizeOn,
       ].join(', ');
     case SettingsPage.library:
-      final folders = ref.watch(foldersProvider).value?.length ?? 0;
-      final tracks = ref.watch(tracksProvider(false)).value?.length ?? 0;
-      return l.summaryLibrary(folders, tracks);
+      final folders = ref.watch(foldersProvider).value?.length;
+      final tracks = ref.watch(trackCountProvider).value;
+      // Nothing until both are known: no "0 cartelle, 0 brani" flash.
+      return folders == null || tracks == null ? '' : l.summaryLibrary(folders, tracks);
     case SettingsPage.online:
       return kEnableYoutube
           ? downloadFormatLabel(l, s.downloadFormat)

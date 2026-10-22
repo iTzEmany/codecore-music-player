@@ -438,7 +438,7 @@ Future<void> _enrichLibrary(BuildContext context, WidgetRef ref) async {
   final l = context.l10n;
   // Only what still has something missing: the estimate is honest and
   // tracks already complete are not asked about again.
-  final ids = (await ref.read(tracksProvider(false).future))
+  final ids = (await ref.read(trackRepositoryProvider).watchTracks().first)
       .where((t) => needsEnrichment(t))
       .map((t) => t.id)
       .toList();

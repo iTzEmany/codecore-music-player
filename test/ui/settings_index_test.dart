@@ -1,3 +1,4 @@
+import 'package:codecore/providers/library_providers.dart';
 import 'package:codecore/providers/settings_providers.dart';
 import 'package:codecore/providers/share_providers.dart';
 import 'package:codecore/providers/theme_providers.dart';
@@ -66,6 +67,38 @@ void main() {
     await t.pumpAndSettle();
     expect(find.text('Rete locale'), findsNothing);
     expect(find.text('Dispositivi fidati'), findsNothing);
+    await h.dispose(t);
+  });
+
+  testWidgets('online page keeps enrich and auto tiles', (t) async {
+    _size(t, 400, 1200);
+    final h = await Harness.create(t);
+    await h.pump(t, const Scaffold(body: SettingsScreen(initial: SettingsPage.online)));
+    expect(find.text('Arricchisci tutta la libreria'), findsOneWidget);
+    expect(find.text('Arricchimento automatico'), findsOneWidget);
+    expect(find.text('Testi automatici'), findsOneWidget);
+    await h.dispose(t);
+  });
+
+  testWidgets('backup page keeps create and restore', (t) async {
+    _size(t, 400, 1200);
+    final h = await Harness.create(t);
+    await h.pump(t, const Scaffold(body: SettingsScreen(initial: SettingsPage.backup)));
+    expect(find.text('Crea backup'), findsOneWidget);
+    expect(find.text('Ripristina da backup'), findsOneWidget);
+    await h.dispose(t);
+  });
+
+  testWidgets('library summary counts all tracks, not the search result', (t) async {
+    _size(t, 400, 800);
+    final h = await Harness.create(t, tracks: 3);
+    await h.pump(t, const Scaffold(body: SettingsScreen()));
+    expect(find.textContaining('3 brani'), findsOneWidget);
+    _container(t)
+        .read(trackQueryProvider(false).notifier)
+        .update((q) => q.copyWith(text: 'zzz-no-match'));
+    await t.pumpAndSettle();
+    expect(find.textContaining('3 brani'), findsOneWidget);
     await h.dispose(t);
   });
 
