@@ -7,6 +7,15 @@ import '../../core/app_log.dart';
 import 'audio_backend.dart';
 import 'equalizer.dart';
 
+/// Whether a failed stream load is worth one more address. ExoPlayer hides the
+/// HTTP status of a refused address behind «(0) Source error» (the 403 is only
+/// in logcat), so that message counts too; desktop (mpv) may name the status.
+bool streamLooksExpired(Object e) {
+  final text = '$e';
+  return RegExp(r'\b(403|410)\b').hasMatch(text) ||
+      (e is PlayerException && e.code == 0 && text.contains('Source error'));
+}
+
 class JustAudioBackend implements AudioBackend, GaplessCapable {
   /// [withEqualizer] (Android only) puts an `AndroidEqualizer` in the player's
   /// audio pipeline. Only the main player asks for it.
@@ -152,7 +161,7 @@ class JustAudioBackend implements AudioBackend, GaplessCapable {
     } on Object catch (e, st) {
       AppLog.w('stream load failed: ${uri.host}', e, st);
       throw BackendException('unplayable stream: $e',
-          expired: RegExp(r'\b(403|410)\b').hasMatch('$e'));
+          expired: streamLooksExpired(e));
     }
   }
 

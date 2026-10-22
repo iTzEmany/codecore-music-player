@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -205,7 +206,80 @@ const streamFormat = 'bestaudio[ext=m4a]/bestaudio/best';
 /// (`yt-dlp -g`). The address expires after some hours and works only from
 /// the network that asked for it, so it is asked for at each listen.
 abstract interface class StreamSource {
-  Future<Uri> streamUrl(YtResult r);
+  /// [fast]: try the quick client first (Android only; ignored elsewhere).
+  Future<StreamAddress> streamUrl(YtResult r, {bool fast = true});
+}
+
+/// A direct address plus the HTTP headers the server expects with it (the
+/// client yt-dlp used, e.g. android_vr, is tied to its User-Agent: without
+/// them googlevideo answers 403).
+class StreamAddress {
+  const StreamAddress(this.uri,
+      {this.headers = const {}, this.fast = false});
+  final Uri uri;
+  final Map<String, String> headers;
+
+  /// Resolved by the quick client (the one to blame, and drop, on a 403).
+  final bool fast;
+
+  StreamAddress copyWith({bool? fast}) =>
+      StreamAddress(uri, headers: headers, fast: fast ?? this.fast);
+}
+
+/// Counts the addresses of the quick client that the server refused; after
+/// [limit] of them in a session the quick client is no longer used.
+class FastClientGate {
+  FastClientGate({this.limit = 2});
+  final int limit;
+  int failures = 0;
+  bool get enabled => failures < limit;
+  void failed() => failures++;
+}
+
+/// Headers that must not be forwarded to the player (it manages them itself).
+const _skippedHeaders = {'accept-encoding', 'host', 'range', 'content-length'};
+
+/// The address (and headers) in the output of `yt-dlp -j`; falls back to the
+/// plain address of `-g`. Null when there is none.
+StreamAddress? parseStreamAddress(String out, {bool fast = false}) {
+  for (final line in out.split('\n')) {
+    final t = line.trim();
+    if (!t.startsWith('{')) continue;
+    try {
+      final j = jsonDecode(t);
+      if (j is! Map) continue;
+      var src = j;
+      if (j['url'] is! String && j['requested_formats'] is List) {
+        final f = (j['requested_formats'] as List).whereType<Map>();
+        if (f.isNotEmpty) src = f.first;
+      }
+      final uri = _webUri(src['url']);
+      if (uri == null) continue;
+      final raw = src['http_headers'] ?? j['http_headers'];
+      final headers = <String, String>{};
+      if (raw is Map) {
+        raw.forEach((k, v) {
+          if (v != null && !_skippedHeaders.contains('$k'.toLowerCase())) {
+            headers['$k'] = '$v';
+          }
+        });
+      }
+      return StreamAddress(uri, headers: headers, fast: fast);
+    } on FormatException {
+      continue;
+    }
+  }
+  final uri = parseStreamUrl(out);
+  return uri == null ? null : StreamAddress(uri, fast: fast);
+}
+
+Uri? _webUri(Object? v) {
+  if (v is! String) return null;
+  final uri = Uri.tryParse(v.trim());
+  if (uri != null && (uri.scheme == 'https' || uri.scheme == 'http') && uri.host.isNotEmpty) {
+    return uri;
+  }
+  return null;
 }
 
 /// The first web address printed by `yt-dlp -g`; null when there is none.

@@ -2,6 +2,7 @@ import 'package:audio_service/audio_service.dart';
 import 'package:codecore/ui/theme/tokens.dart';
 import 'package:codecore/providers/settings_providers.dart';
 import 'package:codecore/providers/shuffle_plus_providers.dart';
+import 'package:codecore/ui/screens/settings/shuffle_plus_tiles.dart';
 import 'package:codecore/ui/widgets/play_buttons.dart';
 import 'package:codecore/ui/widgets/shuffle_button.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -87,6 +88,16 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
     await tester.pump(const Duration(milliseconds: 100));
     expect(c.read(settingsProvider).shufflePlus, isFalse);
+    await h.dispose(tester);
+  });
+
+  testWidgets('a long press opens the Shuffle+ sheet (the tooltip does not take it)',
+      (tester) async {
+    final h = await Harness.create(tester, tracks: 2);
+    await h.pump(tester, const Scaffold(body: ShuffleModeButton()));
+    await tester.longPress(find.byType(IconButton));
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.byType(ShufflePlusTiles), findsOneWidget);
     await h.dispose(tester);
   });
 }

@@ -350,10 +350,10 @@ class YtDlpProcessService implements YoutubeService, StreamSource {
   }
 
   @override
-  Future<Uri> streamUrl(YtResult r) async {
+  Future<StreamAddress> streamUrl(YtResult r, {bool fast = true}) async {
     await _ensureTool();
     final res = await _runSearch([
-      '-g',
+      '-j',
       '--no-warnings',
       '--no-playlist',
       '-f',
@@ -362,7 +362,7 @@ class YtDlpProcessService implements YoutubeService, StreamSource {
       r.downloadUrl,
     ]);
     if (res.code != 0) throw await _explain(res.err);
-    return parseStreamUrl(res.out) ??
+    return parseStreamAddress(res.out) ??
         (throw const YtException(YtErrorKind.changed, 'no stream address'));
   }
 

@@ -43,10 +43,17 @@ class ListenState {
 }
 
 /// Where a result is played from (overridden in tests); null without yt-dlp.
-final streamResolverProvider = Provider<Future<Uri> Function(YtResult)?>((ref) {
+final streamResolverProvider =
+    Provider<Future<StreamAddress> Function(YtResult, {bool fast})?>((ref) {
   final s = ref.watch(ytDlpServiceProvider);
-  return s is StreamSource ? (s as StreamSource).streamUrl : null;
+  if (s is! StreamSource) return null;
+  final source = s as StreamSource;
+  return (r, {bool fast = true}) => source.streamUrl(r, fast: fast);
 });
+
+/// Session counter of refused quick-client addresses (shared with the queue's
+/// address cache by main.dart).
+final fastClientGateProvider = Provider<FastClientGate>((ref) => FastClientGate());
 
 /// The player of the listens (overridden in tests).
 final listenBackendFactoryProvider = Provider<AudioBackend Function()>(
@@ -117,7 +124,8 @@ class ListenNotifier extends Notifier<ListenState> {
     state = ListenState(result: r, phase: ListenPhase.resolving);
     final watch = Stopwatch()..start();
     try {
-      final uri = await resolve(r);
+      final gate = ref.read(fastClientGateProvider);
+      var addr = await resolve(r, fast: gate.enabled);
       if (token != _token) return;
       final resolved = watch.elapsedMilliseconds;
       final backend = ref.read(listenBackendFactoryProvider)();
@@ -132,7 +140,17 @@ class ListenNotifier extends Notifier<ListenState> {
         ..add(backend.state.listen((s) {
           if (token == _token && s == BackendState.completed) unawaited(stop());
         }));
-      await backend.loadUri(uri);
+      try {
+        await backend.loadUri(addr.uri, headers: addr.headers);
+      } on BackendException catch (e) {
+        if (!e.expired) rethrow;
+        // The quick client's address was refused: once more, default clients.
+        if (addr.fast) gate.failed();
+        AppLog.w('listen: address refused, asking with the default clients');
+        addr = await resolve(r, fast: false);
+        if (token != _token) return;
+        await backend.loadUri(addr.uri, headers: addr.headers);
+      }
       if (token != _token) return;
       await backend.play();
       state = state.copyWith(phase: ListenPhase.playing, duration: r.duration);

@@ -73,6 +73,13 @@ class OnlineEntries {
 
   OnlineEntry? operator [](int id) => _entries[id];
 
+  /// The ids of the stream entries registered for [r] (one video can be
+  /// suggested, and so registered, more than once).
+  List<int> idsOf(YtResult r) => [
+        for (final e in _entries.values)
+          if (e.result.indexKey == r.indexKey) e.id
+      ];
+
   /// Same as `[]`, readable after a `?.` or `?` in an expression.
   OnlineEntry? entryOf(int id) => _entries[id];
 

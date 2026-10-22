@@ -33,6 +33,7 @@ void main() {
   late List<int> ids;
   late List<PlaybackFailure> failures;
   late List<String> asked;
+  late List<bool> askedFast;
   final prefetched = <String>[];
 
   // Every request answers with a fresh address (far from expiring).
@@ -47,6 +48,7 @@ void main() {
     online = OnlineEntries();
     failures = [];
     asked = [];
+    askedFast = [];
     prefetched.clear();
     for (final n in ['a', 'b']) {
       await db.into(db.tracks).insert(TracksCompanion.insert(
@@ -54,9 +56,11 @@ void main() {
           sizeBytes: 1, mtimeMs: 1, addedAt: 1, durationMs: const Value(200000)));
     }
     ids = (await db.select(db.tracks).get()).map((t) => t.id).toList();
-    final cache = _SpyCache((r) async {
+    final cache = _SpyCache((r, {required fast}) async {
       asked.add(r.id);
-      return addressFor(r.id, asked.length);
+      askedFast.add(fast);
+      return StreamAddress(addressFor(r.id, asked.length),
+          headers: const {'User-Agent': 'vr'}, fast: fast);
     }, prefetched);
     handler = CodecoreAudioHandler(backend, PlayQueue(), TrackRepository(db),
         onError: failures.add,
@@ -85,6 +89,27 @@ void main() {
     expect(asked, ['v1', 'v1']);
     expect(backend.loadedUris.single.uri.path, '/v1/2');
     expect(failures, isEmpty);
+  });
+
+  test('headers reach the backend; a refused quick address is asked again with the default clients', () async {
+    final id = online.register(result('v1'));
+    backend.expiring.add(addressFor('v1', 1).toString());
+    await handler.playQueue([id], 0);
+    expect(askedFast, [true, false]);
+    expect(backend.loadedUris.single.headers, {'User-Agent': 'vr'});
+  });
+
+  test('replaceQueueId swaps a stream entry for a library track in place', () async {
+    final s1 = online.register(result('v1'));
+    final s2 = online.register(result('v2'));
+    await handler.playQueue([ids[0], s1, s2], 0);
+    expect(handler.replaceQueueId(s1, ids[1]), isTrue);
+    expect(handler.queueIds, [ids[0], ids[1], s2]);
+    // The entry now playing keeps streaming.
+    await handler.skipToQueueItem(2);
+    await settle();
+    expect(handler.replaceQueueId(s2, ids[1]), isFalse);
+    expect(handler.replaceQueueId(-99, ids[1]), isFalse);
   });
 
   test('two failures skip to the next track with the online reason', () async {

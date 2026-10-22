@@ -13,14 +13,17 @@ DownloadItem _item(DownloadStatus status, {String? tag, String? path}) =>
 void main() {
   late StreamController<DownloadItem> settled;
   late List<String> added;
+  late List<String> replaced;
 
   setUp(() {
     settled = StreamController<DownloadItem>.broadcast(sync: true);
     added = [];
+    replaced = [];
     PendingPlaylistAdds(
       settled: settled.stream,
       trackIdForPath: (path) async => path == '/m/a.m4a' ? 42 : null,
       addTracks: (pl, ids) async => added.add('$pl:$ids'),
+      replaceStream: (r, id) => replaced.add('${r.id}:$id'),
     );
   });
 
@@ -41,5 +44,22 @@ void main() {
     settled.add(_item(DownloadStatus.done, path: '/m/a.m4a'));
     await pumpEventQueue();
     expect(added, isEmpty);
+  });
+
+  test('any finished download swaps the stream entries of that song for the library track', () async {
+    settled.add(_item(DownloadStatus.done, path: '/m/a.m4a'));
+    await pumpEventQueue();
+    expect(replaced, ['v1:42']);
+    expect(added, isEmpty);
+    settled.add(_item(DownloadStatus.done, tag: addToPlaylistTag(7), path: '/m/a.m4a'));
+    await pumpEventQueue();
+    expect(replaced, ['v1:42', 'v1:42']);
+    expect(added, ['7:[42]']);
+  });
+
+  test('a failed download replaces nothing', () async {
+    settled.add(_item(DownloadStatus.failed, path: '/m/a.m4a'));
+    await pumpEventQueue();
+    expect(replaced, isEmpty);
   });
 }

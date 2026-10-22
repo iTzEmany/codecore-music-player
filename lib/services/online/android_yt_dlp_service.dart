@@ -68,23 +68,25 @@ class AndroidYtDlpService implements YoutubeService, StreamSource {
   }
 
   @override
-  Future<Uri> streamUrl(YtResult r) async {
+  Future<StreamAddress> streamUrl(YtResult r, {bool fast = true}) async {
     // Fast path: the android_vr client needs neither the JS challenge solver
     // nor a PO token (~2 s instead of ~45 s on the phone). If it cannot serve
     // this video (age limit, region...) yt-dlp's default clients take over.
-    try {
-      final fast = await _call(
-          {'url': r.downloadUrl, 'format': streamFormat, 'fast': true},
-          method: 'streamUrl', timeout: fastStreamTimeout);
-      final uri = parseStreamUrl(fast);
-      if (uri != null) return uri;
-    } on YtException catch (e) {
-      AppLog.i('listen: fast client failed (${e.kind}), using default clients');
+    if (fast) {
+      try {
+        final out = await _call(
+            {'url': r.downloadUrl, 'format': streamFormat, 'fast': true},
+            method: 'streamUrl', timeout: fastStreamTimeout);
+        final a = parseStreamAddress(out, fast: true);
+        if (a != null) return a;
+      } on YtException catch (e) {
+        AppLog.i('listen: fast client failed (${e.kind}), using default clients');
+      }
     }
     final out = await _call(
         {'url': r.downloadUrl, 'format': streamFormat},
         method: 'streamUrl', timeout: streamTimeout);
-    return parseStreamUrl(out) ??
+    return parseStreamAddress(out) ??
         (throw const YtException(YtErrorKind.changed, 'no stream address'));
   }
 

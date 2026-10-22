@@ -26,43 +26,53 @@ class ShuffleModeButton extends ConsumerWidget {
     final on = mode != ShuffleMode.off;
     final color = on ? cc.accent : cc.textMuted;
     final icon = Icon(Icons.shuffle_rounded, size: size, color: color);
+    // The tooltip must not react to a long press (manual trigger: hover only):
+    // on touch it would win the gesture and the Shuffle+ sheet never opened.
     return GestureDetector(
       onLongPress: () => showShufflePlusSheet(context),
-      child: IconButton(
-        tooltip: switch (mode) {
+      child: Tooltip(
+        triggerMode: TooltipTriggerMode.manual,
+        message: switch (mode) {
           ShuffleMode.off => l.shuffleModeOff,
           ShuffleMode.shuffle => l.shuffleModeOn,
           ShuffleMode.plus => l.shuffleModePlus,
         },
-        onPressed: ref.read(playerControllerProvider).cycleShuffle,
-        icon: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            mode == ShuffleMode.plus
-                ? Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      icon,
-                      Positioned(
-                        right: -size * 0.25,
-                        top: -size * 0.15,
-                        child: Icon(Icons.add_rounded, key: const ValueKey('shuffle-plus-badge'), size: size * 0.6, color: color),
-                      ),
-                    ],
-                  )
-                : icon,
-            if (dot) ...[
-              const SizedBox(height: 2),
-              Container(
-                width: 4,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: on ? cc.accent : Colors.transparent,
-                  shape: BoxShape.circle,
+        child: IconButton(
+          onPressed: ref.read(playerControllerProvider).cycleShuffle,
+          icon: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              mode == ShuffleMode.plus
+                  ? Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        icon,
+                        Positioned(
+                          right: -size * 0.25,
+                          top: -size * 0.15,
+                          child: Icon(
+                            Icons.add_rounded,
+                            key: const ValueKey('shuffle-plus-badge'),
+                            size: size * 0.6,
+                            color: color,
+                          ),
+                        ),
+                      ],
+                    )
+                  : icon,
+              if (dot) ...[
+                const SizedBox(height: 2),
+                Container(
+                  width: 4,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: on ? cc.accent : Colors.transparent,
+                    shape: BoxShape.circle,
+                  ),
                 ),
-              ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );

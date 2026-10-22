@@ -18,13 +18,22 @@ DateTime? expiryOf(Uri uri) {
 class StreamAddressCache {
   StreamAddressCache(
     this._resolve, {
+    FastClientGate? gate,
     DateTime Function()? now,
     this.margin = const Duration(minutes: 10),
     this.wait = const Duration(seconds: 15),
     this.maxEntries = 20,
-  }) : _now = now ?? DateTime.now;
+  })  : gate = gate ?? FastClientGate(),
+        _now = now ?? DateTime.now;
 
-  final Future<Uri> Function(YtResult) _resolve;
+  /// [fast] says whether the quick client may be used for this request.
+  final Future<StreamAddress> Function(YtResult, {required bool fast}) _resolve;
+
+  /// Session switch of the quick client (see [invalidate]).
+  final FastClientGate gate;
+
+  // Tracks whose quick address was refused: the default clients from now on.
+  final Set<String> _defaultOnly = {};
   final DateTime Function() _now;
 
   /// An address is reused while more than this is left before it expires.
@@ -35,18 +44,18 @@ class StreamAddressCache {
   final int maxEntries;
 
   // Insertion order = age; the oldest goes first past [maxEntries].
-  final LinkedHashMap<String, Uri> _done = LinkedHashMap();
-  final Map<String, Future<Uri>> _pending = {};
+  final LinkedHashMap<String, StreamAddress> _done = LinkedHashMap();
+  final Map<String, Future<StreamAddress>> _pending = {};
 
-  bool _fresh(Uri uri) {
-    final expiry = expiryOf(uri);
+  bool _fresh(StreamAddress a) {
+    final expiry = expiryOf(a.uri);
     return expiry != null && expiry.difference(_now()) > margin;
   }
 
   /// The address for [r]: cached, or the one request already running, or a new
   /// one. Errors of the resolver reach every caller waiting; a timeout throws
   /// [TimeoutException] (the request itself goes on and fills the cache).
-  Future<Uri> address(YtResult r) {
+  Future<StreamAddress> address(YtResult r) {
     final key = r.indexKey;
     final cached = _done[key];
     if (cached != null && _fresh(cached)) return Future.value(cached);
@@ -54,15 +63,16 @@ class StreamAddressCache {
     return request.timeout(wait);
   }
 
-  Future<Uri> _start(YtResult r, String key) {
-    final f = _resolve(r).then((uri) {
+  Future<StreamAddress> _start(YtResult r, String key) {
+    final fast = gate.enabled && !_defaultOnly.contains(key);
+    final f = _resolve(r, fast: fast).then((a) {
       _done
         ..remove(key)
-        ..[key] = uri;
+        ..[key] = a;
       while (_done.length > maxEntries) {
         _done.remove(_done.keys.first);
       }
-      return uri;
+      return a;
     });
     _pending[key] = f;
     // Clear on both outcomes; the error still reaches whoever awaits [f].
@@ -88,6 +98,17 @@ class StreamAddressCache {
     );
   }
 
-  /// Forgets the address of [r] (it answered 403): the next [address] asks again.
-  void invalidate(YtResult r) => _done.remove(r.indexKey);
+  /// Forgets the address of [r] (it answered 403): the next [address] asks
+  /// again. If the refused address came from the quick client, this track
+  /// moves to the default clients and the session counts a failure (the
+  /// quick client is dropped altogether after [FastClientGate.limit]).
+  void invalidate(YtResult r) {
+    final old = _done.remove(r.indexKey);
+    if (old != null && old.fast) {
+      _defaultOnly.add(r.indexKey);
+      gate.failed();
+      AppLog.w('quick-client address of ${r.id} refused '
+          '(${gate.failures}/${gate.limit} this session)');
+    }
+  }
 }

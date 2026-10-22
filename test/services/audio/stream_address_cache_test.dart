@@ -22,15 +22,21 @@ void main() {
     calls = 0;
   });
 
-  StreamAddressCache make(Future<Uri> Function(YtResult) resolve) =>
+  StreamAddressCache makeFast(
+          Future<StreamAddress> Function(YtResult, {required bool fast}) resolve,
+          {FastClientGate? gate}) =>
       StreamAddressCache(
-        (r) {
+        (r, {required fast}) {
           calls++;
-          return resolve(r);
+          return resolve(r, fast: fast);
         },
+        gate: gate,
         now: () => now,
         wait: const Duration(milliseconds: 200),
       );
+
+  StreamAddressCache make(Future<Uri> Function(YtResult) resolve) =>
+      makeFast((r, {required fast}) async => StreamAddress(await resolve(r)));
 
   test('expiryOf reads expire in Unix seconds, null when missing', () {
     expect(
@@ -68,8 +74,8 @@ void main() {
     final b = c.address(r1);
     final u = addr('a', t0.add(const Duration(hours: 6)));
     done.complete(u);
-    expect(await a, u);
-    expect(await b, u);
+    expect((await a).uri, u);
+    expect((await b).uri, u);
     expect(calls, 1);
   });
 
@@ -134,5 +140,61 @@ void main() {
     expect(calls, 21);
     await c.address(r(0)); // the oldest was dropped
     expect(calls, 22);
+  });
+
+  group('quick client', () {
+    final far = t0.add(const Duration(hours: 6));
+    late List<bool> asked;
+    StreamAddressCache quick({FastClientGate? gate}) {
+      asked = [];
+      return makeFast((r, {required fast}) async {
+        asked.add(fast);
+        return StreamAddress(addr(r.id, far),
+            headers: const {'User-Agent': 'vr'}, fast: fast);
+      }, gate: gate);
+    }
+
+    test('carries the headers of the address', () async {
+      final a = await quick().address(r1);
+      expect(a.headers, {'User-Agent': 'vr'});
+    });
+
+    test('a refused quick address is asked again with the default clients',
+        () async {
+      final c = quick();
+      await c.address(r1);
+      c.invalidate(r1);
+      final again = await c.address(r1);
+      expect(asked, [true, false]);
+      expect(again.fast, isFalse);
+      // Another track still starts with the quick client.
+      await c.address(r2);
+      expect(asked.last, isTrue);
+    });
+
+    test('a refused default address does not count against the quick client',
+        () async {
+      final gate = FastClientGate();
+      final c = quick(gate: gate);
+      await c.address(r1);
+      c.invalidate(r1); // quick: 1
+      await c.address(r1);
+      c.invalidate(r1); // default: not counted
+      expect(gate.failures, 1);
+      expect(gate.enabled, isTrue);
+    });
+
+    test('after two refusals the quick client is off for the session',
+        () async {
+      final c = quick();
+      for (final r in [r1, r2]) {
+        await c.address(r);
+        c.invalidate(r);
+      }
+      expect(c.gate.enabled, isFalse);
+      const r3 = YtResult(id: 'c', title: 't', channel: 'c', duration: null);
+      await c.address(r3);
+      expect(asked, [true, true, false]);
+    });
   });
 }

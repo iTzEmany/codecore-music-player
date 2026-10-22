@@ -22,9 +22,12 @@ void main() {
       .setMockMethodCallHandler(channel, null));
 
   test('the fast android_vr client answers: one call, no default clients', () async {
-    answer((a) async => 'https://media.example/fast\n');
-    final uri = await AndroidYtDlpService().streamUrl(video);
-    expect(uri.toString(), 'https://media.example/fast');
+    answer((a) async =>
+        '{"url":"https://media.example/fast","http_headers":{"User-Agent":"vr"}}\n');
+    final a = await AndroidYtDlpService().streamUrl(video);
+    expect(a.uri.toString(), 'https://media.example/fast');
+    expect(a.headers, {'User-Agent': 'vr'});
+    expect(a.fast, isTrue);
     expect(calls.single['fast'], true);
   });
 
@@ -33,8 +36,16 @@ void main() {
       if (a['fast'] == true) throw PlatformException(code: 'YTDLP', message: 'ERROR: Sign in to confirm your age');
       return 'https://media.example/default';
     });
-    final uri = await AndroidYtDlpService().streamUrl(video);
-    expect(uri.toString(), 'https://media.example/default');
+    final a = await AndroidYtDlpService().streamUrl(video);
+    expect(a.uri.toString(), 'https://media.example/default');
+    expect(a.fast, isFalse);
     expect(calls.map((c) => c['fast']), [true, null]);
+  });
+
+  test('fast: false goes straight to the default clients', () async {
+    answer((a) async => 'https://media.example/default\n');
+    final a = await AndroidYtDlpService().streamUrl(video, fast: false);
+    expect(a.fast, isFalse);
+    expect(calls.map((c) => c['fast']), [null]);
   });
 }

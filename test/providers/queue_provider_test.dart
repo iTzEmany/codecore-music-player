@@ -33,7 +33,8 @@ void main() {
       onError: (_) {},
       online: online,
       addresses: StreamAddressCache(
-        (r) async => Uri.parse('https://stream.test/${r.id}'),
+        (r, {required fast}) async =>
+            StreamAddress(Uri.parse('https://stream.test/${r.id}')),
       ),
     );
     ids = [

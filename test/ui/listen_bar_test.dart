@@ -74,7 +74,8 @@ void main() {
         ytmCatalogProvider.overrideWithValue(FakeCatalog((_) async => null)),
         downloadsProvider.overrideWith(() => downloads),
         downloadIndexProvider.overrideWith((ref) async => DownloadIndex(File(p.join(dir.path, 'd.json')))),
-        streamResolverProvider.overrideWithValue((r) async => Uri.parse('https://media.example/${r.id}')),
+        streamResolverProvider.overrideWithValue((r, {bool fast = true}) async =>
+            StreamAddress(Uri.parse('https://media.example/${r.id}'))),
         listenBackendFactoryProvider.overrideWithValue(() {
           final b = FakeBackend();
           players.add(b);
@@ -121,7 +122,7 @@ void main() {
       extraOverrides: [
         downloadIndexProvider.overrideWith((ref) async => DownloadIndex(File(p.join(dir.path, 'd.json')))),
         streamResolverProvider.overrideWithValue(
-            (r) async => throw const YtException(YtErrorKind.network, 'search timed out')),
+            (r, {bool fast = true}) async => throw const YtException(YtErrorKind.network, 'search timed out')),
       ],
     );
     final container = ProviderScope.containerOf(tester.element(find.byType(ListenErrorToaster)));

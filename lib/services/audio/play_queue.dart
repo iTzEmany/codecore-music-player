@@ -354,6 +354,21 @@ class PlayQueue {
     return i < 0 ? false : removeAt(i);
   }
 
+  /// Swaps every entry [oldId] for [newId], keeping its place, key and
+  /// shuffle position. The current entry is left alone (it is already loaded).
+  /// Returns how many entries changed.
+  int replaceId(int oldId, int newId) {
+    var n = 0;
+    for (var i = 0; i < _items.length; i++) {
+      if (_items[i] == oldId && i != _pos) {
+        _items[i] = newId;
+        n++;
+      }
+    }
+    if (n > 0) _changed();
+    return n;
+  }
+
   void append(int trackId) {
     if (_items.isEmpty) {
       setItems([trackId]);

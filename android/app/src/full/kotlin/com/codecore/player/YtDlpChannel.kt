@@ -74,11 +74,12 @@ class YtDlpChannel(private val applicationContext: Context) {
                 else YoutubeDL.getInstance().execute(req).out
             }
             // The direct address of a result's audio, for listening without
-            // downloading (`yt-dlp -g`).
+            // downloading (`yt-dlp -j`: the address AND the http headers the
+            // chosen client needs, which `-g` would drop).
             "streamUrl" -> run(result) {
                 ensureInit()
                 val req = YoutubeDLRequest(call.argument<String>("url")!!)
-                req.addOption("-g")
+                req.addOption("-j")
                 req.addOption("--no-warnings")
                 req.addOption("--no-playlist")
                 // android_vr: direct audio URLs without the JS challenge or a PO token.

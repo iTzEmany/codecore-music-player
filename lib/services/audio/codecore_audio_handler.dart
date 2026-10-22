@@ -493,19 +493,20 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     final cache = addresses;
     if (cache == null) throw const BackendException('no stream resolver');
     for (var attempt = 0;; attempt++) {
-      final Uri uri;
+      final StreamAddress addr;
       try {
-        uri = await cache.address(r);
+        addr = await cache.address(r);
       } on Object catch (e, st) {
         AppLog.w('no stream address for ${r.id}', e, st);
         throw BackendException('no stream address: $e');
       }
       try {
-        await _backend.loadUri(uri);
+        await _backend.loadUri(addr.uri, headers: addr.headers);
         return;
       } on BackendException catch (e) {
         if (!e.expired || attempt > 0) rethrow;
-        AppLog.d('stream address of ${r.id} expired, asking again');
+        AppLog.d('stream address of ${r.id} expired, asking again'
+            '${addr.fast ? ' (default clients)' : ''}');
         cache.invalidate(r);
       }
     }
@@ -1029,6 +1030,16 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     _queue.insertAt(index, id);
     _queueController.add(null);
     unawaited(_refreshWindow());
+  }
+
+  /// Swaps the stream entry [oldId] for the library track [newId] (it was
+  /// downloaded) at the same place of the queue. The entry now playing keeps
+  /// streaming. Returns whether anything changed.
+  bool replaceQueueId(int oldId, int newId) {
+    if (_queue.replaceId(oldId, newId) == 0) return false;
+    _queueController.add(null);
+    unawaited(_refreshWindow());
+    return true;
   }
 
   /// Takes the first occurrence of [id] out of the queue (not out of
