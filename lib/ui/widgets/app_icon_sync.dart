@@ -9,36 +9,56 @@ import '../../providers/settings_providers.dart';
 
 /// Keeps the launcher icon in step with the theme (Android): when the look
 /// changes to one with another icon, asks once, or follows the saved answer.
-class AppIconSync extends ConsumerWidget {
+/// Also checked at start, for a look chosen before the icon could follow it.
+class AppIconSync extends ConsumerStatefulWidget {
   const AppIconSync({super.key, required this.child});
 
   final Widget child;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    if (ref.watch(appIconSupportedProvider)) {
-      ref.listen(appIconVariantProvider, (_, variant) => _onVariant(context, ref, variant));
+  ConsumerState<AppIconSync> createState() => _AppIconSyncState();
+}
+
+class _AppIconSyncState extends ConsumerState<AppIconSync> {
+  @override
+  void initState() {
+    super.initState();
+    if (ref.read(appIconSupportedProvider)) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _onVariant(ref.read(appIconVariantProvider), atStart: true),
+      );
     }
-    return child;
   }
 
-  Future<void> _onVariant(BuildContext context, WidgetRef ref, String variant) async {
+  @override
+  Widget build(BuildContext context) {
+    if (ref.watch(appIconSupportedProvider)) {
+      ref.listen(appIconVariantProvider, (_, variant) => _onVariant(variant));
+    }
+    return widget.child;
+  }
+
+  Future<void> _onVariant(String variant, {bool atStart = false}) async {
     try {
-      await _sync(context, ref, variant);
+      await _sync(variant, atStart);
     } catch (e, st) {
       AppLog.w('launcher icon sync failed', e, st);
     }
   }
 
-  Future<void> _sync(BuildContext context, WidgetRef ref, String variant) async {
+  Future<void> _sync(String variant, bool atStart) async {
+    if (!mounted) return;
     final follow = ref.read(settingsProvider).iconFollow;
     if (follow == IconFollow.off) return;
     final channel = ref.read(appIconChannelProvider);
-    if (follow == IconFollow.on) return channel.setIcon(variant);
     final current = await channel.current();
+    if (!mounted) return;
     // Back to the icon in use: clears any switch asked for earlier.
-    if (current == variant) return channel.setIcon(variant);
-    if (!context.mounted) return;
+    if (current == variant) {
+      if (!atStart) await channel.setIcon(variant);
+      return;
+    }
+    if (follow == IconFollow.on) return channel.setIcon(variant);
     final answer = await showDialog<({bool change, bool remember})>(
       context: context,
       builder: (_) => const _AskDialog(),

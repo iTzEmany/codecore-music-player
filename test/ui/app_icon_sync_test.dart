@@ -25,8 +25,9 @@ Future<(ProviderContainer, _FakeIcon)> _pump(
   WidgetTester tester, {
   IconFollow follow = IconFollow.ask,
   String shown = 'viola_dark',
+  String accent = 'viola',
 }) async {
-  SharedPreferences.setMockInitialValues({'iconFollow': follow.name});
+  SharedPreferences.setMockInitialValues({'iconFollow': follow.name, 'accent': accent});
   final store = await SettingsStore.open();
   final icon = _FakeIcon(shown);
   final container = ProviderContainer(overrides: [
@@ -70,12 +71,23 @@ void main() {
     expect(c.read(settingsProvider).iconFollow, IconFollow.ask);
   });
 
+  testWidgets('a look chosen before the update is offered at start', (tester) async {
+    final (_, icon) = await _pump(tester, accent: 'ambra');
+    await _settle(tester);
+    expect(find.text(title), findsOneWidget);
+    await tester.tap(find.text("Cambia l'icona"));
+    await _settle(tester);
+    expect(icon.asked, ['ambra_dark']);
+  });
+
   testWidgets('does not ask when the icon in use is already the right one', (tester) async {
-    final (c, icon) = await _pump(tester, shown: 'rosso_dark');
-    _accent(c, 'rosso');
+    final (c, icon) = await _pump(tester, shown: 'rosso_dark', accent: 'rosso');
     await _settle(tester);
     expect(find.text(title), findsNothing);
-    expect(icon.asked, ['rosso_dark']);
+    expect(icon.asked, isEmpty);
+    _accent(c, 'rosso', theme: 'oled');
+    await _settle(tester);
+    expect(find.text(title), findsNothing);
   });
 
   testWidgets('"Non chiederlo più" + change: next time it switches without asking', (tester) async {
