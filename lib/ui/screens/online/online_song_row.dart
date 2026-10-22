@@ -160,7 +160,7 @@ class OnlineSongRow extends StatelessWidget {
         : formatDuration(result.duration!.inMilliseconds);
     final artist = result.artists.isEmpty ? '' : result.artists.first;
     final linked = onArtistTap != null && artist.isNotEmpty;
-    final meta = [if (!linked) result.channel, ?length].join(' · ');
+    final meta = [if (!linked) result.channel, ?length].join(', ');
     final st = item?.status;
     final Widget trailing;
     if (st == DownloadStatus.queued ||
@@ -264,10 +264,11 @@ class OnlineSongRow extends StatelessWidget {
                                     )),
                               ),
                             ),
+                          if (meta.isNotEmpty && linked) const SizedBox(width: 8),
                           if (meta.isNotEmpty)
                             Flexible(
                               fit: linked ? FlexFit.loose : FlexFit.tight,
-                              child: Text(linked ? ' · $meta' : meta,
+                              child: Text(meta,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: theme.bodyMedium),

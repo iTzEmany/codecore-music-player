@@ -175,7 +175,7 @@ class ReleaseList extends StatelessWidget {
 
 /// «EP • 2025» as «EP, 2025»; empty when the page gave nothing.
 String releaseLine(String subtitle) =>
-    subtitle.replaceAll(' • ', ', ').replaceAll(' · ', ', ');
+    subtitle.replaceAll(RegExp(r' [\u2022\u00b7] '), ', ');
 
 /// One row: a square cover, the title and a line like «EP, 2025».
 class ReleaseRow extends StatelessWidget {

@@ -51,7 +51,7 @@ class AlbumCard extends StatelessWidget {
                     children: [
                       Text(release.title,
                           maxLines: 1, overflow: TextOverflow.ellipsis, style: theme.titleMedium),
-                      Text(line.join(' · '),
+                      Text(line.join(', '),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: theme.bodyMedium?.copyWith(color: cc.textMuted)),

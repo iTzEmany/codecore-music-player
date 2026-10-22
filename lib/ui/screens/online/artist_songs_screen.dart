@@ -33,7 +33,7 @@ class ArtistSongsScreen extends ConsumerWidget {
     final data = page.value;
     final songs = data?.value ?? const <YtResult>[];
     return OnlinePageFrame(
-      title: '${artist.name} · $title',
+      title: '${artist.name}: $title',
       selectionKey: listKey,
       pickable: songs,
       onRefresh: () async {
