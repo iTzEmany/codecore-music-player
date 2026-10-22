@@ -551,14 +551,6 @@
     }
   },
   "jamIncomingBody": "Ouçam juntos a partir de uma fila partilhada.",
-  "jamIncomingDialog": "{name} quer iniciar uma Jam consigo. A música toca neste dispositivo e ambos podem adicionar faixas.",
-  "@jamIncomingDialog": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
   "jamQueue": "Fila partilhada",
   "jamEmpty": "A fila está vazia. Adicione faixas.",
   "jamAddedBy": "adicionada por {name}",
@@ -596,7 +588,6 @@
   "jamLost": "Ligação perdida",
   "jamGuestCannotSkip": "Só quem iniciou a Jam pode mudar de faixa",
   "jamRemoveForbidden": "Só pode remover as suas faixas",
-  "jamNowPlaying": "A reproduzir",
   "jamNothingPlaying": "Nada a reproduzir",
   "jamWith": "Jam com {name}",
   "@jamWith": {

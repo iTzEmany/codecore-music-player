@@ -73,6 +73,8 @@ void main() {
       expect(find.byTooltip('Brano successivo'),
           host ? findsOneWidget : findsNothing);
       expect(find.text(host ? 'Termina Jam' : 'Esci dalla Jam'), findsOneWidget);
+      // Strict symmetry: Play sits at the screen centre for host and guest.
+      expect(tester.getCenter(find.byTooltip('Pausa')).dx, closeTo(250, 1));
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox());
       await h.dispose(tester);
@@ -145,7 +147,7 @@ void main() {
       ),
     ));
     await tester.pump(const Duration(milliseconds: 100));
-    await tester.tap(find.text('Uscite e sincronia'));
+    await tester.tap(find.byTooltip('Uscite e sincronia'));
     await tester.pump(const Duration(milliseconds: 400));
     expect(find.text('Sincronizzato, scarto 12 ms'), findsOneWidget);
     expect(find.textContaining('Latenza di questa uscita'), findsOneWidget);

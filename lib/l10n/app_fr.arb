@@ -551,14 +551,6 @@
     }
   },
   "jamIncomingBody": "Écoutez ensemble depuis une file d’attente partagée.",
-  "jamIncomingDialog": "{name} souhaite démarrer une Jam avec vous. La musique est lue depuis cet appareil et vous pouvez tous les deux ajouter des titres.",
-  "@jamIncomingDialog": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
   "jamQueue": "File d’attente partagée",
   "jamEmpty": "La file d’attente est vide. Ajoutez des titres.",
   "jamAddedBy": "ajouté par {name}",
@@ -596,7 +588,6 @@
   "jamLost": "Connexion perdue",
   "jamGuestCannotSkip": "Seul l’hôte de la Jam peut changer de titre",
   "jamRemoveForbidden": "Vous ne pouvez retirer que vos propres titres",
-  "jamNowPlaying": "Lecture en cours",
   "jamNothingPlaying": "Rien en cours de lecture",
   "jamWith": "Jam avec {name}",
   "@jamWith": {

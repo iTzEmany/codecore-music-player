@@ -10,9 +10,9 @@ import '../../../services/jam/jam_models.dart';
 import '../share/track_picker_screen.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/tokens.dart';
-import '../../widgets/artist_avatar.dart';
 import '../../widgets/empty_state.dart';
-import '../../widgets/ring_progress.dart' show NowPlayingDot;
+import '../../widgets/ring_progress.dart';
+import 'jam_parts.dart';
 import 'jam_player_card.dart';
 import '../../../providers/database_providers.dart';
 
@@ -121,6 +121,11 @@ class _JamScreenState extends ConsumerState<JamScreen> {
       return n.isEmpty ? s.peerName : n;
     }
 
+    final endLabel = Text(
+      isHost ? l.jamEnd : l.jamLeave,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+    );
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -128,153 +133,106 @@ class _JamScreenState extends ConsumerState<JamScreen> {
             constraints: const BoxConstraints(maxWidth: 720),
             child: Stack(
               children: [
-                Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                        4,
-                        8,
-                        CcDims.margin,
-                        8,
-                      ),
-                      child: Row(
-                        children: [
-                          IconButton(
-                            tooltip: l.back,
-                            icon: const Icon(Icons.arrow_back),
-                            onPressed: () => Navigator.of(context).maybePop(),
-                          ),
-                          Text(l.jamTitle, style: theme.headlineSmall),
-                          Expanded(
-                            child: Align(
-                              alignment: Alignment.centerRight,
-                              child: FilledButton(
-                                onPressed: ctrl.end,
-                                style: isHost
-                                    ? FilledButton.styleFrom(
-                                        backgroundColor: cc.error,
-                                        foregroundColor: cc.bg,
-                                      )
-                                    : null,
-                                child: Text(
-                                  isHost ? l.jamEnd : l.jamLeave,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
+                CustomScrollView(
+                  slivers: [
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                          4,
+                          8,
+                          CcDims.margin,
+                          4,
+                        ),
+                        child: Row(
+                          children: [
+                            IconButton(
+                              tooltip: l.back,
+                              icon: const Icon(Icons.arrow_back),
+                              onPressed: () => Navigator.of(context).maybePop(),
+                            ),
+                            Text(l.jamTitle, style: theme.headlineSmall),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Align(
+                                alignment: Alignment.centerRight,
+                                // Collection-style pill, as the header actions.
+                                child: OutlinedButton(
+                                  onPressed: ctrl.end,
+                                  style: isHost
+                                      ? OutlinedButton.styleFrom(
+                                          foregroundColor: cc.error,
+                                        )
+                                      : null,
+                                  child: endLabel,
                                 ),
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                        CcDims.margin,
-                        0,
-                        CcDims.margin,
-                        12,
-                      ),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: _Participants(
-                          jam: jam,
-                          ownId: ownId,
-                          hostId: jam.hostDeviceId,
+                          ],
                         ),
                       ),
                     ),
-                    JamPlayerCard(state: s),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                        CcDims.margin,
-                        16,
-                        CcDims.margin,
-                        4,
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                          CcDims.margin,
+                          0,
+                          CcDims.margin,
+                          12,
+                        ),
+                        child: JamParticipants(jam: jam),
                       ),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
+                    ),
+                    SliverToBoxAdapter(child: JamPlayerCard(state: s)),
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                          CcDims.margin,
+                          16,
+                          CcDims.margin,
+                          4,
+                        ),
                         child: Text(l.jamQueue, style: theme.titleMedium),
                       ),
                     ),
-                    Expanded(
-                      child: jam.items.isEmpty
-                          ? EmptyState(icon: Icons.queue_music_rounded, message: l.jamEmpty)
-                          : ReorderableListView.builder(
-                              padding: const EdgeInsets.only(bottom: 88),
-                              buildDefaultDragHandles: false,
-                              proxyDecorator: (child, _, anim) =>
-                                  ccDragProxy(context, child, anim),
-                              itemCount: jam.items.length,
-                              onReorderItem: (from, to) {
-                                ctrl.send(
-                                  JamCommand.move(jam.items[from].id, to),
-                                );
-                              },
-                              itemBuilder: (_, i) {
-                                final it = jam.items[i];
-                                final isCurrent = i == jam.currentIndex;
-                                final canRemove =
-                                    isHost ||
-                                    (it.ownerDeviceId == ownId && !isCurrent);
-                                final who = owner(it);
-                                return ListTile(
-                                  key: ValueKey(it.id),
-                                  leading: SizedBox(
-                                    width: 36,
-                                    child: Center(
-                                      child: isCurrent
-                                          ? const NowPlayingDot()
-                                          : _Avatar(name: who, size: 32),
-                                    ),
-                                  ),
-                                  title: Text(
-                                    it.title,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      color: isCurrent ? cc.accent : null,
-                                    ),
-                                  ),
-                                  subtitle: Text(
-                                    [
-                                      if (it.artist != null) it.artist!,
-                                      l.jamAddedBy(who),
-                                      if (!it.available) l.jamUnavailable,
-                                    ].join(', '),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  onTap: isHost
-                                      ? () => ctrl.send(JamCommand.jump(it.id))
-                                      : null,
-                                  // The ✕ only appears where the removal is allowed.
-                                  trailing: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      if (canRemove)
-                                        IconButton(
-                                          tooltip: l.delete,
-                                          icon: const Icon(Icons.close),
-                                          onPressed: () => ctrl.send(
-                                            JamCommand.remove(it.id),
-                                          ),
-                                        ),
-                                      ReorderableDragStartListener(
-                                        index: i,
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(8),
-                                          child: Icon(
-                                            Icons.drag_handle_rounded,
-                                            color: cc.textMuted,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              },
-                            ),
-                    ),
+                    if (jam.items.isEmpty)
+                      SliverFillRemaining(
+                        hasScrollBody: false,
+                        child: EmptyState(
+                          icon: Icons.queue_music_rounded,
+                          message: l.jamEmpty,
+                        ),
+                      )
+                    else
+                      SliverPadding(
+                        padding: const EdgeInsets.only(bottom: 88),
+                        sliver: SliverReorderableList(
+                          proxyDecorator: (child, _, anim) =>
+                              ccDragProxy(context, child, anim),
+                          itemCount: jam.items.length,
+                          onReorderItem: (from, to) {
+                            ctrl.send(JamCommand.move(jam.items[from].id, to));
+                          },
+                          itemBuilder: (_, i) {
+                            final it = jam.items[i];
+                            final isCurrent = i == jam.currentIndex;
+                            return JamQueueRow(
+                              key: ValueKey(it.id),
+                              item: it,
+                              who: owner(it),
+                              isCurrent: isCurrent,
+                              canRemove:
+                                  isHost ||
+                                  (it.ownerDeviceId == ownId && !isCurrent),
+                              index: i,
+                              onTap: isHost
+                                  ? () => ctrl.send(JamCommand.jump(it.id))
+                                  : null,
+                              onRemove: () =>
+                                  ctrl.send(JamCommand.remove(it.id)),
+                            );
+                          },
+                        ),
+                      ),
                   ],
                 ),
                 Positioned(
@@ -292,77 +250,6 @@ class _JamScreenState extends ConsumerState<JamScreen> {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-/// Initials on a tint taken from the name.
-class _Avatar extends StatelessWidget {
-  const _Avatar({required this.name, required this.size});
-
-  final String name;
-  final double size;
-
-  @override
-  Widget build(BuildContext context) {
-    final hue = artistHue(name);
-    final color = HSLColor.fromAHSL(1, hue, 0.45, 0.32).toColor();
-    return Container(
-      width: size,
-      height: size,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-      child: Text(
-        artistMonogram(name),
-        style: TextStyle(
-          fontSize: size * 0.38,
-          fontWeight: FontWeight.w700,
-          color: context.cc.text,
-        ),
-      ),
-    );
-  }
-}
-
-class _Participants extends StatelessWidget {
-  const _Participants({
-    required this.jam,
-    required this.ownId,
-    required this.hostId,
-  });
-
-  final JamState jam;
-  final String ownId, hostId;
-
-  @override
-  Widget build(BuildContext context) {
-    final l = context.l10n;
-    final cc = context.cc;
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: [
-          for (final p in jam.participants)
-            Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: Tooltip(
-                message: p.name,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _Avatar(name: p.name, size: 32),
-                    if (p.id == hostId)
-                      Text(
-                        l.jamHostTag,
-                        style: Theme.of(context).textTheme.labelSmall
-                            ?.copyWith(fontSize: 10, color: cc.textMuted),
-                      ),
-                  ],
-                ),
-              ),
-            ),
-        ],
       ),
     );
   }
@@ -411,7 +298,15 @@ class _PulsingAvatarsState extends State<_PulsingAvatars>
         for (final n in widget.names)
           Transform.scale(
             scale: 1 + 0.12 * _c.value,
-            child: _Avatar(name: n, size: 72),
+            child: RingProgress(
+              size: 96,
+              stroke: 4,
+              live: true,
+              child: JamAvatar(
+                name: n,
+                size: RingProgress.innerSize(96, stroke: 4),
+              ),
+            ),
           ),
       ],
     ),

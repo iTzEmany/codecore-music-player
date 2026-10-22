@@ -367,14 +367,6 @@
     }
   },
   "jamIncomingBody": "Gemeinsam aus einer geteilten Warteschlange hören.",
-  "jamIncomingDialog": "{name} möchte eine Jam mit dir starten. Die Musik läuft auf diesem Gerät und ihr könnt beide Titel hinzufügen.",
-  "@jamIncomingDialog": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
   "jamQueue": "Gemeinsame Warteschlange",
   "jamEmpty": "Die Warteschlange ist leer. Füge Titel hinzu.",
   "jamAddedBy": "hinzugefügt von {name}",
@@ -412,7 +404,6 @@
   "jamLost": "Verbindung verloren",
   "jamGuestCannotSkip": "Nur der Host kann den Titel wechseln",
   "jamRemoveForbidden": "Du kannst nur eigene Titel entfernen",
-  "jamNowPlaying": "Läuft gerade",
   "jamNothingPlaying": "Nichts läuft",
   "jamWith": "Jam mit {name}",
   "@jamWith": {

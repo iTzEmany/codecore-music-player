@@ -575,14 +575,6 @@
     }
   },
   "jamIncomingBody": "Ascoltate insieme da una coda condivisa.",
-  "jamIncomingDialog": "{name} vuole avviare una Jam con te. La musica parte da questo dispositivo e potete aggiungere brani entrambi.",
-  "@jamIncomingDialog": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
   "jamQueue": "Coda condivisa",
   "jamEmpty": "La coda è vuota. Aggiungi dei brani.",
   "jamAddedBy": "aggiunto da {name}",
@@ -620,7 +612,6 @@
   "jamLost": "Connessione persa",
   "jamGuestCannotSkip": "Solo chi ha avviato la Jam può cambiare brano",
   "jamRemoveForbidden": "Puoi rimuovere solo i tuoi brani",
-  "jamNowPlaying": "In riproduzione",
   "jamNothingPlaying": "Niente in riproduzione",
   "jamWith": "Jam con {name}",
   "@jamWith": {

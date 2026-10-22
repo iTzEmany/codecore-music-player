@@ -1011,11 +1011,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get jamIncomingBody => 'Escuchad juntos desde una cola compartida.';
 
   @override
-  String jamIncomingDialog(String name) {
-    return '$name quiere iniciar una Jam contigo. La música suena en este dispositivo y ambos podéis añadir canciones.';
-  }
-
-  @override
   String get jamQueue => 'Cola compartida';
 
   @override
@@ -1068,9 +1063,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get jamRemoveForbidden => 'Solo puedes quitar tus canciones';
-
-  @override
-  String get jamNowPlaying => 'Reproduciendo';
 
   @override
   String get jamNothingPlaying => 'Nada en reproducción';

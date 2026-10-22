@@ -6,10 +6,12 @@ import '../../../providers/jam_providers.dart';
 import '../../../services/jam/jam_models.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/play_buttons.dart';
+import '../../widgets/ring_progress.dart';
 import 'jam_outputs_sheet.dart';
+import 'jam_parts.dart';
 import 'jam_seek_bar.dart';
 
-/// The shared player of the Jam: title, seek with times, play / next.
+/// The shared player of the Jam: cover in a full ring, title, seek, controls.
 class JamPlayerCard extends ConsumerWidget {
   const JamPlayerCard({super.key, required this.state});
 
@@ -23,40 +25,54 @@ class JamPlayerCard extends ConsumerWidget {
     final jam = state.jam!;
     final cur = jam.current;
     final ctrl = ref.read(jamProvider.notifier);
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: CcDims.margin),
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-      decoration: BoxDecoration(
-        color: cc.surface1,
-        borderRadius: BorderRadius.circular(CcDims.rCard),
-      ),
+    final ring = (MediaQuery.sizeOf(context).shortestSide * 0.4).clamp(
+      120.0,
+      240.0,
+    );
+    final inner = RingProgress.innerSize(ring, stroke: 4);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: CcDims.margin),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            cur == null ? l.jamNothingPlaying : l.jamNowPlaying,
-            style: theme.labelSmall?.copyWith(color: cc.textMuted),
+          RingProgress(
+            size: ring,
+            stroke: 4,
+            live: true,
+            child: JamCover(item: cur, size: inner, radius: inner / 2),
           ),
-          if (cur != null) ...[
-            Text(
-              cur.title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.titleLarge,
-            ),
-            Text(
-              cur.artist ?? '',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.bodyMedium,
-            ),
-          ],
+          const SizedBox(height: 12),
+          Text(
+            cur?.title ?? l.jamNothingPlaying,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: theme.titleLarge,
+          ),
+          Text(
+            cur?.artist ?? '',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: theme.bodyMedium?.copyWith(color: cc.textMuted),
+          ),
           JamSeekBar(jam: jam, onSeek: (ms) => ctrl.send(JamCommand.seek(ms))),
+          // Equal side slots: Play stays at the centre for host and guest.
           Row(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Same width as the «next» button: Play sits in the middle.
-              if (state.isHost) const SizedBox(width: 48),
+              Expanded(
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: IconButton(
+                    tooltip: l.jamOutputsAndSync,
+                    icon: Icon(
+                      Icons.speaker_group_outlined,
+                      color: cc.textMuted,
+                    ),
+                    onPressed: () => JamOutputsSheet.show(context),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
               PlayCircleButton(
                 size: 56,
                 playing: jam.playing,
@@ -68,24 +84,23 @@ class JamPlayerCard extends ConsumerWidget {
                             : const JamCommand.play(),
                       ),
               ),
-              if (state.isHost)
-                IconButton(
-                  tooltip: l.nextTrack,
-                  iconSize: 32,
-                  icon: const Icon(Icons.skip_next_rounded),
-                  onPressed: cur == null
-                      ? null
-                      : () => ctrl.send(const JamCommand.next()),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: state.isHost
+                      ? IconButton(
+                          tooltip: l.nextTrack,
+                          iconSize: 32,
+                          icon: const Icon(Icons.skip_next_rounded),
+                          onPressed: cur == null
+                              ? null
+                              : () => ctrl.send(const JamCommand.next()),
+                        )
+                      : null,
                 ),
+              ),
             ],
-          ),
-          Align(
-            alignment: Alignment.centerRight,
-            child: TextButton.icon(
-              onPressed: () => JamOutputsSheet.show(context),
-              icon: const Icon(Icons.speaker_group_outlined, size: 20),
-              label: Text(l.jamOutputsAndSync),
-            ),
           ),
         ],
       ),

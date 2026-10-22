@@ -1016,11 +1016,6 @@ class AppLocalizationsFr extends AppLocalizations {
       'Écoutez ensemble depuis une file d’attente partagée.';
 
   @override
-  String jamIncomingDialog(String name) {
-    return '$name souhaite démarrer une Jam avec vous. La musique est lue depuis cet appareil et vous pouvez tous les deux ajouter des titres.';
-  }
-
-  @override
   String get jamQueue => 'File d’attente partagée';
 
   @override
@@ -1075,9 +1070,6 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get jamRemoveForbidden =>
       'Vous ne pouvez retirer que vos propres titres';
-
-  @override
-  String get jamNowPlaying => 'Lecture en cours';
 
   @override
   String get jamNothingPlaying => 'Rien en cours de lecture';

@@ -1762,12 +1762,6 @@ abstract class AppLocalizations {
   /// **'Ascoltate insieme da una coda condivisa.'**
   String get jamIncomingBody;
 
-  /// No description provided for @jamIncomingDialog.
-  ///
-  /// In it, this message translates to:
-  /// **'{name} vuole avviare una Jam con te. La musica parte da questo dispositivo e potete aggiungere brani entrambi.'**
-  String jamIncomingDialog(String name);
-
   /// No description provided for @jamQueue.
   ///
   /// In it, this message translates to:
@@ -1863,12 +1857,6 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Puoi rimuovere solo i tuoi brani'**
   String get jamRemoveForbidden;
-
-  /// No description provided for @jamNowPlaying.
-  ///
-  /// In it, this message translates to:
-  /// **'In riproduzione'**
-  String get jamNowPlaying;
 
   /// No description provided for @jamNothingPlaying.
   ///

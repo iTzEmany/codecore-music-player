@@ -1012,11 +1012,6 @@ class AppLocalizationsDe extends AppLocalizations {
       'Gemeinsam aus einer geteilten Warteschlange hören.';
 
   @override
-  String jamIncomingDialog(String name) {
-    return '$name möchte eine Jam mit dir starten. Die Musik läuft auf diesem Gerät und ihr könnt beide Titel hinzufügen.';
-  }
-
-  @override
   String get jamQueue => 'Gemeinsame Warteschlange';
 
   @override
@@ -1069,9 +1064,6 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get jamRemoveForbidden => 'Du kannst nur eigene Titel entfernen';
-
-  @override
-  String get jamNowPlaying => 'Läuft gerade';
 
   @override
   String get jamNothingPlaying => 'Nichts läuft';

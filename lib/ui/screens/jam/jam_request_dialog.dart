@@ -50,7 +50,7 @@ class _JamRequestDialogState extends ConsumerState<JamRequestDialog> {
     final ctrl = ref.read(jamProvider.notifier);
     return AlertDialog(
       title: Text(l.jamIncomingTitle(request.fromName)),
-      content: Text(l.jamIncomingDialog(request.fromName)),
+      content: Text(l.jamIncomingBody),
       actions: [
         TextButton(
           onPressed: () {

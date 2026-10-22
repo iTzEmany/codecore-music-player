@@ -367,14 +367,6 @@
     }
   },
   "jamIncomingBody": "Listen together from a shared queue.",
-  "jamIncomingDialog": "{name} wants to start a Jam with you. Music plays from this device and you can both add tracks.",
-  "@jamIncomingDialog": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
   "jamQueue": "Shared queue",
   "jamEmpty": "The queue is empty. Add some tracks.",
   "jamAddedBy": "added by {name}",
@@ -412,7 +404,6 @@
   "jamLost": "Connection lost",
   "jamGuestCannotSkip": "Only the host can change track",
   "jamRemoveForbidden": "You can only remove your own tracks",
-  "jamNowPlaying": "Now playing",
   "jamNothingPlaying": "Nothing playing",
   "jamWith": "Jam with {name}",
   "@jamWith": {

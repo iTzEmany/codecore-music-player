@@ -33,19 +33,22 @@ class PeerCard extends StatelessWidget {
     final cc = context.cc;
     final l = context.l10n;
     final theme = Theme.of(context).textTheme;
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 4),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: cc.surface2,
-        borderRadius: BorderRadius.circular(CcDims.rCard),
-      ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(platformIcon(peer.platform), color: cc.textMuted),
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: cc.surface2,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(platformIcon(peer.platform), color: cc.textMuted),
+              ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(

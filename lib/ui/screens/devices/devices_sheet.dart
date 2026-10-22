@@ -135,15 +135,19 @@ class _DevicesSheetState extends ConsumerState<DevicesSheet> {
               style: theme.labelLarge?.copyWith(color: cc.textMuted),
             ),
             const SizedBox(height: 4),
-            Container(
-              padding: const EdgeInsets.fromLTRB(12, 8, 8, 8),
-              decoration: BoxDecoration(
-                color: cc.surface2,
-                borderRadius: BorderRadius.circular(CcDims.rCard),
-              ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
               child: Row(
                 children: [
-                  Icon(Icons.queue_music_rounded, color: cc.accent),
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: cc.surface2,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(Icons.queue_music_rounded, color: cc.accent),
+                  ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -164,8 +168,21 @@ class _DevicesSheetState extends ConsumerState<DevicesSheet> {
                       ],
                     ),
                   ),
-                  TextButton(onPressed: _openJam, child: Text(l.jamOpen)),
-                  TextButton(
+                  const SizedBox(width: 8),
+                  FilledButton(
+                    onPressed: _openJam,
+                    style: FilledButton.styleFrom(
+                      minimumSize: const Size(0, 36),
+                      padding: const EdgeInsets.symmetric(horizontal: 18),
+                    ),
+                    child: Text(l.jamOpen),
+                  ),
+                  const SizedBox(width: 8),
+                  OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size(0, 36),
+                      padding: const EdgeInsets.symmetric(horizontal: 18),
+                    ),
                     onPressed: () {
                       unawaited(ref.read(jamProvider.notifier).end());
                       Navigator.of(context).pop();

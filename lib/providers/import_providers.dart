@@ -39,8 +39,8 @@ final cachedYoutubeProvider = Provider<CachedYoutubeService>((ref) =>
 final searchCacheCountProvider = FutureProvider.autoDispose<int>(
     (ref) => ref.watch(searchCacheProvider).count());
 
-/// A track downloaded by an import, for the length check in «Rivedi».
-final importedTrackProvider = StreamProvider.family<Track?, int>(
+/// A local track by id: the length check in «Rivedi», the Jam covers.
+final importedTrackProvider = StreamProvider.autoDispose.family<Track?, int>(
     (ref, id) => ref.watch(trackRepositoryProvider).watchById(id));
 
 final playlistImportServiceProvider = Provider<PlaylistImportService>((ref) {

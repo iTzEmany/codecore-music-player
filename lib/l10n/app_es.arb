@@ -367,14 +367,6 @@
     }
   },
   "jamIncomingBody": "Escuchad juntos desde una cola compartida.",
-  "jamIncomingDialog": "{name} quiere iniciar una Jam contigo. La música suena en este dispositivo y ambos podéis añadir canciones.",
-  "@jamIncomingDialog": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
   "jamQueue": "Cola compartida",
   "jamEmpty": "La cola está vacía. Añade canciones.",
   "jamAddedBy": "añadido por {name}",
@@ -412,7 +404,6 @@
   "jamLost": "Conexión perdida",
   "jamGuestCannotSkip": "Solo el anfitrión puede cambiar de canción",
   "jamRemoveForbidden": "Solo puedes quitar tus canciones",
-  "jamNowPlaying": "Reproduciendo",
   "jamNothingPlaying": "Nada en reproducción",
   "jamWith": "Jam con {name}",
   "@jamWith": {

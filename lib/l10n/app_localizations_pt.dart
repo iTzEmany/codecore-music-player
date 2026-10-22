@@ -1012,11 +1012,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String get jamIncomingBody => 'Ouçam juntos a partir de uma fila partilhada.';
 
   @override
-  String jamIncomingDialog(String name) {
-    return '$name quer iniciar uma Jam consigo. A música toca neste dispositivo e ambos podem adicionar faixas.';
-  }
-
-  @override
   String get jamQueue => 'Fila partilhada';
 
   @override
@@ -1069,9 +1064,6 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get jamRemoveForbidden => 'Só pode remover as suas faixas';
-
-  @override
-  String get jamNowPlaying => 'A reproduzir';
 
   @override
   String get jamNothingPlaying => 'Nada a reproduzir';
