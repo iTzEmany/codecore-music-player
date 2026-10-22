@@ -11,6 +11,7 @@ import '../../widgets/cover_image.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_state.dart';
 import '../../widgets/section_header.dart';
+import '../../widgets/segmented_blocks.dart';
 import 'stats_charts.dart';
 
 /// «3 h 20 min», or «45 min» under an hour.
@@ -76,14 +77,21 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
               CcDims.margin,
               0,
             ),
-            child: SegmentedButton<bool>(
-              showSelectedIcon: false,
-              segments: [
-                ButtonSegment(value: false, label: Text(l.statsMonth)),
-                ButtonSegment(value: true, label: Text(l.statsYear)),
+            child: SegmentedBlocks<bool>(
+              items: [
+                BlockItem(
+                  value: false,
+                  icon: Icons.calendar_view_month_rounded,
+                  label: l.statsMonth,
+                ),
+                BlockItem(
+                  value: true,
+                  icon: Icons.date_range_rounded,
+                  label: l.statsYear,
+                ),
               ],
-              selected: {_period.isYear},
-              onSelectionChanged: (v) => _setYear(v.first),
+              selected: _period.isYear,
+              onChanged: _setYear,
             ),
           ),
           Row(
@@ -222,7 +230,7 @@ class _Body extends StatelessWidget {
                               [
                                 if (items[i].artist != null) items[i].artist!,
                                 l.statsPlays(items[i].plays),
-                              ].join(' · '),
+                              ].join(', '),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: theme.bodyMedium,
@@ -259,7 +267,7 @@ class _Body extends StatelessWidget {
             16,
           ),
           child: Text(
-            '${l.statsPlays(stats.plays)} · ${l.statsDistinct(stats.distinctTracks)}',
+            '${l.statsPlays(stats.plays)}, ${l.statsDistinct(stats.distinctTracks)}',
             style: theme.bodyMedium?.copyWith(color: cc.textMuted),
           ),
         ),
@@ -269,7 +277,7 @@ class _Body extends StatelessWidget {
             values: stats.msPerBucket,
             labelOf: label,
             semanticsLabel:
-                '${formatListened(l, stats.playedMs)} · ${l.statsPlays(stats.plays)}',
+                '${formatListened(l, stats.playedMs)}, ${l.statsPlays(stats.plays)}',
           ),
         ),
         const SizedBox(height: 8),

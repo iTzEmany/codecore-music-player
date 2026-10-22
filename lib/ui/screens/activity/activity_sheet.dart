@@ -232,5 +232,5 @@ String activityTitle(AppLocalizations l, ActivityItem a) => switch (a.kind) {
     a.paused
         ? l.activityImportPaused(a.name ?? '', a.done, a.total)
         : l.activityImport(a.name ?? '', a.done, a.total) +
-              (a.eta == null ? '' : ' · ${etaLabel(l, a.eta!)}'),
+              (a.eta == null ? '' : ', ${etaLabel(l, a.eta!)}'),
 };

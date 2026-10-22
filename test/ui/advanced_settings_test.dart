@@ -13,8 +13,8 @@ void main() {
     final h = await Harness.create(tester);
     await h.pump(tester, const Scaffold(body: AdvancedSettingsTiles()));
 
-    expect(find.text('Abbinamento sicuro da · 80%'), findsOneWidget);
-    expect(find.text('Da verificare da · 55%'), findsOneWidget);
+    expect(find.text('Abbinamento sicuro da, 80%'), findsOneWidget);
+    expect(find.text('Da verificare da, 55%'), findsOneWidget);
 
     // Dragging the «review» slider far right is held back by the «sure» one.
     await tester.drag(find.byType(Slider).last, const Offset(600, 0));

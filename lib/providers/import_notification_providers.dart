@@ -37,10 +37,10 @@ BackgroundWork? backgroundWork(
       title: l.logImport(running.name),
       text: l.importNotificationText(running.saved, running.total) +
           (wait != null
-              ? ' · ${importWaitLabel(l, wait)}'
+              ? ', ${importWaitLabel(l, wait)}'
               : eta == null
                   ? ''
-                  : ' · ${etaLabel(l, eta)}'),
+                  : ', ${etaLabel(l, eta)}'),
       done: running.done,
       total: running.total,
       pause: l.csvImportPause,

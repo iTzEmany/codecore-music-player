@@ -9,6 +9,7 @@ import '../../theme/app_theme.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/confirm.dart';
 import '../../widgets/dismiss_background.dart';
+import '../../widgets/empty_state.dart';
 import '../../widgets/section_header.dart';
 import '../../widgets/track_row.dart';
 import 'suggestions_screen.dart';
@@ -117,7 +118,7 @@ class _QueueSheetState extends ConsumerState<QueueSheet> {
     ref.watch(currentTrackProvider.select((t) => t.value?.id));
     final ctrl = ref.read(playerControllerProvider);
     if (queue.isEmpty) {
-      return Center(child: Text(l.emptyQueue));
+      return EmptyState(icon: Icons.queue_music_rounded, message: l.emptyQueue);
     }
     final at = ref.read(audioHandlerProvider).currentIndex;
     final current = at >= 0 && at < queue.length ? queue[at] : null;

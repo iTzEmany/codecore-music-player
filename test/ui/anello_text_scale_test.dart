@@ -1,0 +1,103 @@
+import 'package:codecore/data/repositories/podcast_repository.dart';
+import 'package:codecore/data/repositories/tag_repository.dart';
+import 'package:codecore/providers/jam_providers.dart';
+import 'package:codecore/services/jam/jam_models.dart';
+import 'package:codecore/services/podcast/podcast_models.dart';
+import 'package:codecore/ui/screens/jam/jam_screen.dart';
+import 'package:codecore/ui/screens/library/all_tracks_screen.dart';
+import 'package:codecore/ui/screens/library/review_screen.dart';
+import 'package:codecore/ui/screens/memory/memory_screen.dart';
+import 'package:codecore/ui/screens/now_playing/queue_sheet.dart';
+import 'package:codecore/ui/screens/podcast/podcast_detail_screen.dart';
+import 'package:codecore/ui/screens/podcast/podcasts_screen.dart';
+import 'package:codecore/ui/screens/releases/new_releases_screen.dart';
+import 'package:codecore/ui/screens/settings/settings_screen.dart';
+import 'package:codecore/ui/screens/stats/stats_screen.dart';
+import 'package:codecore/ui/screens/tags/tags_screen.dart';
+import 'package:codecore/ui/theme/tokens.dart';
+import 'package:codecore/ui/widgets/segmented_blocks.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+import '../support/app_harness.dart';
+
+/// Every screen of the redesign at 150 % text, 360x780, in the three themes:
+/// nothing may overflow, and every block label stays inside the screen. Search and the online artist page belong to plan 2.4.
+class _FakeJam extends JamController {
+  @override
+  JamUiState build() => const JamUiState(
+        phase: JamPhase.active,
+        role: JamRole.host,
+        peerName: 'Telefono con un nome molto lungo',
+        peerId: 'peer',
+        jam: JamState(
+          version: 1,
+          items: [
+            JamItem(id: 1, ownerDeviceId: 'host', title: 'Una canzone dal titolo davvero lungo', ext: 'mp3', artist: 'Band', durationMs: 180000),
+          ],
+          currentIndex: 0,
+          playing: true,
+          hostDeviceId: 'host',
+          outputDeviceId: 'host',
+        ),
+      );
+}
+
+void main() {
+  final themes = <String, CcColors>{
+    'Notte viola': CcColors.notte.copyWith(accent: const Color(0xFF9B7BFF)),
+    'OLED ambra': CcColors.oled.copyWith(accent: const Color(0xFFFFB300)),
+    'Chiaro rosa': CcColors.chiaro.copyWith(accent: const Color(0xFFE91E63)),
+  };
+  // Built after seeding: the podcast id and the jam override come from it.
+  final screens = <String, Widget Function(int podcastId)>{
+    'Stats': (_) => const StatsScreen(),
+    'Review': (_) => const ReviewScreen(),
+    'NewReleases': (_) => const NewReleasesScreen(),
+    'Podcasts': (_) => const PodcastsScreen(),
+    'PodcastDetail': (id) => PodcastDetailScreen(podcastId: id),
+    'Memory': (_) => const MemoryScreen(),
+    'TagTracks': (_) => const TagTracksScreen(name: 'Live'),
+    'QueueSheet': (_) => QueueSheet(scrollController: ScrollController()),
+    'Jam': (_) => const JamScreen(),
+    'AllTracks': (_) => const AllTracksScreen(),
+    'Settings': (_) => const SettingsScreen(),
+  };
+  for (final t in themes.entries) {
+    for (final s in screens.entries) {
+      testWidgets('${s.key} at 150 % in ${t.key}', (tester) async {
+        tester.view.physicalSize = const Size(360, 780);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.reset);
+        final h = await Harness.create(tester, tracks: 6);
+        // Real data, so the real layouts are drawn: a tag with tracks, a queue,
+        // a podcast with an author, an active jam. Search and the online artist
+        // page are not here (plan 2.4).
+        final podcastId = (await tester.runAsync(() async {
+          final ids = [for (final r in await h.db.select(h.db.tracks).get()) r.id];
+          final tag = await TagRepository(h.db).create('Live');
+          await TagRepository(h.db).assign(ids, tag);
+          await h.handler.playQueue(ids, 0);
+          return PodcastRepository(h.db).subscribe(
+            'https://x/feed',
+            const PodcastFeed(title: 'Un podcast con un titolo molto lungo', author: 'Autrice Lunga', episodes: []),
+            now: 1,
+          );
+        }))!;
+        await h.pump(tester, Scaffold(body: s.value(podcastId)),
+            textScale: 1.5, colors: t.value, extraOverrides: [jamProvider.overrideWith(_FakeJam.new)]);
+        await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 100)));
+        await tester.pump(const Duration(milliseconds: 400));
+        expect(tester.takeException(), isNull);
+        for (final blocks in find.byWidgetPredicate((w) => w is SegmentedBlocks).evaluate()) {
+          for (final text in find.descendant(of: find.byWidget(blocks.widget), matching: find.byType(Text)).evaluate()) {
+            final r = tester.getRect(find.byWidget(text.widget));
+            expect(r.left, greaterThanOrEqualTo(0));
+            expect(r.right, lessThanOrEqualTo(360), reason: 'a block label leaves the screen');
+          }
+        }
+        await h.dispose(tester);
+      });
+    }
+  }
+}

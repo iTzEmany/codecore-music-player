@@ -28,35 +28,6 @@ const _sameAsItalian = {
   'radioGenreSports', 'reportKindIdea', 'sortAToZ',
 };
 
-/// Strings still carrying « · », « • » or «→». Shrinks to empty by the end of fase 2.6.
-const _separatorPending = {
-  'activityDownload',
-  'activityDownloadRetry',
-  'activityEnrich',
-  'activityImport',
-  'activityImportPaused',
-  'activityScan',
-  'activityTransfer',
-  'albumMeta',
-  'artistMeta',
-  'csvImportBanner',
-  'csvImportBannerPaused',
-  'csvImportSummary',
-  'csvImportWanted',
-  'duplicatesSummary',
-  'historyOff',
-  'importNotificationPaused',
-  'jamPeople',
-  'jamSynced',
-  'playlistCountLabel',
-  'radioOfflineList',
-  'smartSubtitle',
-  'statsFirstValue',
-  'suggestedSimilarTo',
-  'suggestionsRowNote',
-  'ytErrToolOutdated',
-};
-
 Map<String, dynamic> _arb(String lang) =>
     jsonDecode(File('lib/l10n/app_$lang.arb').readAsStringSync())
         as Map<String, dynamic>;
@@ -142,7 +113,6 @@ void main() {
     for (final lang in ['it', ..._langs]) {
       final arb = _arb(lang);
       for (final k in _keys(arb)) {
-        if (_separatorPending.contains(k)) continue;
         final v = arb[k] as String;
         expect(
           v.contains(' · ') || v.contains(' • ') || v.contains('→'),

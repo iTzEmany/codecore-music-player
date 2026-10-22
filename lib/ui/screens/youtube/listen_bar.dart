@@ -150,7 +150,7 @@ class _Bar extends ConsumerWidget {
                                   if (total != null)
                                     '${formatDuration(state.position.inMilliseconds)} / '
                                         '${formatDuration(total.inMilliseconds)}',
-                                ].join(' · '),
+                                ].join(', '),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: theme.bodyMedium,

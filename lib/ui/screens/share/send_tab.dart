@@ -188,7 +188,7 @@ class _SendTabState extends ConsumerState<SendTab> {
               leading: const Icon(Icons.north_east),
               title: Text(o.toName),
               subtitle: Text(
-                '${l.tracksCount(o.entries.length)} · ${offerStatusLabel(l, o.status)}',
+                '${l.tracksCount(o.entries.length)}, ${offerStatusLabel(l, o.status)}',
               ),
               trailing: o.open
                   ? IconButton(

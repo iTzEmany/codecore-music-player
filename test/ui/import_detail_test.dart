@@ -55,16 +55,16 @@ void main() {
     await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 100)));
     await tester.pump();
     expect(find.text('Mood'), findsOneWidget, reason: 'the import, not the block');
-    expect(find.text('Band · Scaricato'), findsOneWidget);
-    expect(find.text('Band · Non trovato'), findsOneWidget);
-    expect(find.text('Band · Download 45 %'), findsOneWidget);
-    expect(find.text('Band · In ricerca…'), findsOneWidget);
-    expect(find.text('In corso · 2'), findsOneWidget);
-    expect(find.text('Da sistemare · 1'), findsOneWidget);
+    expect(find.text('Band, Scaricato'), findsOneWidget);
+    expect(find.text('Band, Non trovato'), findsOneWidget);
+    expect(find.text('Band, Download 45 %'), findsOneWidget);
+    expect(find.text('Band, In ricerca…'), findsOneWidget);
+    expect(find.text('In corso (2)'), findsOneWidget);
+    expect(find.text('Da sistemare (1)'), findsOneWidget);
 
-    await tester.ensureVisible(find.text('Da sistemare · 1'));
+    await tester.ensureVisible(find.text('Da sistemare (1)'));
     await tester.pump(const Duration(milliseconds: 300));
-    await tester.tap(find.text('Da sistemare · 1'));
+    await tester.tap(find.text('Da sistemare (1)'));
     await tester.pump();
     expect(find.text('Due'), findsOneWidget);
     expect(find.text('Uno'), findsNothing);

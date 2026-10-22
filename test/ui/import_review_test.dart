@@ -80,11 +80,11 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
 
     expect(find.text('Da verificare'), findsOneWidget);
-    expect(find.text('Cercato: Song 1 · Band · 3:20'), findsOneWidget);
+    expect(find.text('Cercato: Song 1, Band, 3:20'), findsOneWidget);
     expect(find.text('Song 1 (Live)'), findsOneWidget);
-    expect(find.textContaining('Other · 3:21 (+1 s)'), findsOneWidget);
+    expect(find.textContaining('Other, 3:21 (+1 s)'), findsOneWidget);
     expect(find.text('Non trovati'), findsOneWidget);
-    expect(find.text('Cercato: Song 2 · Band · 3:20'), findsOneWidget);
+    expect(find.text('Cercato: Song 2, Band, 3:20'), findsOneWidget);
     expect(find.text('Riprova tutti'), findsOneWidget);
 
     await tester.tap(find.text('Salta').last);
@@ -156,7 +156,7 @@ void main() {
     await h.pump(tester, Scaffold(body: ImportBanner(playlistId: pid)));
     await tester.pump(const Duration(milliseconds: 300));
 
-    expect(find.text('Importazione in pausa: 3/4 · 1 da verificare · 1 non trovati'),
+    expect(find.text('Importazione in pausa: 3 di 4, 1 da verificare, 1 non trovati'),
         findsOneWidget);
     expect(find.text('Riprendi'), findsOneWidget);
     expect(find.text('Rivedi'), findsOneWidget);

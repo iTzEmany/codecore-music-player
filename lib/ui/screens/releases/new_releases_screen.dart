@@ -26,6 +26,12 @@ class NewReleasesScreen extends ConsumerStatefulWidget {
 }
 
 class _NewReleasesScreenState extends ConsumerState<NewReleasesScreen> {
+  static const _maxArtistChips = 8;
+  bool _allArtists = false;
+
+  Iterable<MapEntry<String, String>> _artistsShown(Map<String, String> artists) =>
+      _allArtists ? artists.entries : artists.entries.take(_maxArtistChips);
+
   String? _artistId;
 
   String _time(DateTime t) =>
@@ -156,24 +162,30 @@ class _NewReleasesScreenState extends ConsumerState<NewReleasesScreen> {
                 ShellNav.open<void>(context, const FollowedArtistsScreen()),
           ),
           if (artists.length > 1)
-            SizedBox(
-              height: 48,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: CcDims.margin),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(CcDims.margin, 4, CcDims.margin, 8),
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 8,
                 children: [
                   _chip(
                     l.releasesAllArtists,
                     _artistId == null,
                     () => setState(() => _artistId = null),
                   ),
-                  for (final e in artists.entries)
+                  for (final e in _artistsShown(artists))
                     _chip(
                       e.value,
                       _artistId == e.key,
                       () => setState(
                         () => _artistId = _artistId == e.key ? null : e.key,
                       ),
+                    ),
+                  if (!_allArtists && artists.length > _maxArtistChips)
+                    ActionChip(
+                      key: const ValueKey('artist-chips-more'),
+                      label: Text(l.showMore),
+                      onPressed: () => setState(() => _allArtists = true),
                     ),
                 ],
               ),
@@ -193,13 +205,10 @@ class _NewReleasesScreenState extends ConsumerState<NewReleasesScreen> {
     );
   }
 
-  Widget _chip(String label, bool selected, VoidCallback onTap) => Padding(
-    padding: const EdgeInsets.only(right: 8),
-    child: ChoiceChip(
-      label: Text(label),
-      selected: selected,
-      onSelected: (_) => onTap(),
-    ),
+  Widget _chip(String label, bool selected, VoidCallback onTap) => ChoiceChip(
+    label: Text(label),
+    selected: selected,
+    onSelected: (_) => onTap(),
   );
 }
 
@@ -214,7 +223,7 @@ class _ReleaseRow extends ConsumerWidget {
     final cc = context.cc;
     final r = release.release;
     final more = release.variants > 0
-        ? ' · ${l.releaseVariants(release.variants)}'
+        ? ', ${l.releaseVariants(release.variants)}'
         : '';
     return ListTile(
       key: ValueKey('release-row-${r.browseId}'),
@@ -226,7 +235,7 @@ class _ReleaseRow extends ConsumerWidget {
       ),
       title: Text(r.title, maxLines: 1, overflow: TextOverflow.ellipsis),
       subtitle: Text(
-        '${release.artistName} · ${releaseKindLabel(l, r)}$more',
+        '${release.artistName}, ${releaseKindLabel(l, r)}$more',
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
       ),

@@ -51,7 +51,7 @@ String streamLinkErrorText(AppLocalizations l, StreamLinkError e) => switch (e) 
 String radioQualityLine(RadioStation s) => [
       if (s.codec.isNotEmpty && s.codec.toUpperCase() != 'UNKNOWN') s.codec.toUpperCase(),
       if (s.bitrate > 0) '${s.bitrate} kbps',
-    ].join(' · ');
+    ].join(', ');
 
 /// Megabytes used in an hour of listening at [bitrate] kbps (0 = unknown).
 int radioMbPerHour(int bitrate) => bitrate <= 0 ? 0 : (bitrate * 3600 / 8 / 1024).round();

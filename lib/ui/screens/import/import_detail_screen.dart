@@ -109,7 +109,7 @@ class _ImportDetailScreenState extends ConsumerState<ImportDetailScreen> {
                     (p.paused
                             ? l.csvImportBannerPaused(p.done, p.total, p.review, p.missing)
                             : l.csvImportBanner(p.done, p.total, p.review, p.missing)) +
-                        (p.eta == null ? '' : ' · ${etaLabel(l, p.eta!)}'),
+                        (p.eta == null ? '' : ', ${etaLabel(l, p.eta!)}'),
                     style: theme.bodyMedium?.copyWith(color: cc.textMuted),
                   ),
                   if (wait != null && !p.paused)
@@ -123,11 +123,11 @@ class _ImportDetailScreenState extends ConsumerState<ImportDetailScreen> {
                 ],
               ),
             ),
-          SizedBox(
-            height: 48,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: CcDims.margin),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: CcDims.margin),
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
               children: [
                 for (final (f, label, n) in [
                   (_Filter.all, l.importFilterAll, rows.length),
@@ -135,13 +135,10 @@ class _ImportDetailScreenState extends ConsumerState<ImportDetailScreen> {
                   (_Filter.problems, l.importFilterProblems, count((p) => p.problem)),
                   (_Filter.done, l.importFilterDone, count((p) => p.settled)),
                 ])
-                  Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: ChoiceChip(
-                      label: Text('$label · $n'),
-                      selected: _filter == f,
-                      onSelected: (_) => setState(() => _filter = f),
-                    ),
+                  ChoiceChip(
+                    label: Text('$label ($n)'),
+                    selected: _filter == f,
+                    onSelected: (_) => setState(() => _filter = f),
                   ),
               ],
             ),
@@ -223,7 +220,7 @@ class _SongRow extends StatelessWidget {
                 children: [
                   Text(item.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: theme.bodyLarge),
                   Text(
-                    '${item.artistList.join(', ')} · ${rowPhaseLabel(l, phase, download)}',
+                    '${item.artistList.join(', ')}, ${rowPhaseLabel(l, phase, download)}',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: theme.bodyMedium?.copyWith(color: phase.active || phase.problem ? color : null),

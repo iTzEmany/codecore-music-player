@@ -374,7 +374,7 @@ String _subtitle(BuildContext context, LibraryEntry e) {
     LibraryKind.playlist when e.smart != null => l.smartPlaylistLabel,
     LibraryKind.playlist => l.playlistCountLabel(e.count),
     LibraryKind.album =>
-      '${l.kindAlbum} · ${e.variousArtists ? l.variousArtists : (e.artist ?? l.unknownArtist)}',
+      '${l.kindAlbum}, ${e.variousArtists ? l.variousArtists : (e.artist ?? l.unknownArtist)}',
     LibraryKind.artist => l.kindArtist,
   };
 }

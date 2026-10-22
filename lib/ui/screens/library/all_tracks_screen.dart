@@ -15,6 +15,7 @@ import '../../widgets/alpha_scroller.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_state.dart';
 import '../../widgets/play_buttons.dart';
+import '../../widgets/segmented_blocks.dart';
 import '../../widgets/shuffle_button.dart';
 import '../../widgets/selection_bar.dart';
 import '../../widgets/track_row.dart';
@@ -160,28 +161,29 @@ class _AllTracksScreenState extends ConsumerState<AllTracksScreen> {
                 ),
               ),
             ),
-            SizedBox(
-              height: 48,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: CcDims.margin),
-                children: [
-                  for (final o in const [
-                    SortOption.defaultOrder,
-                    SortOption.title,
-                    SortOption.artist,
-                    SortOption.addedAt,
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                CcDims.margin,
+                0,
+                CcDims.margin,
+                8,
+              ),
+              child: SegmentedBlocks<SortOption>(
+                items: [
+                  for (final (o, icon) in const [
+                    (SortOption.defaultOrder, Icons.format_list_numbered_rounded),
+                    (SortOption.title, Icons.sort_by_alpha_rounded),
+                    (SortOption.artist, Icons.person_rounded),
+                    (SortOption.addedAt, Icons.schedule_rounded),
                   ])
-                    Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: ChoiceChip(
-                        label: Text(_sortLabel(context, o)),
-                        selected: query.sort == o,
-                        onSelected: (_) =>
-                            _query.update((q) => q.copyWith(sort: o)),
-                      ),
+                    BlockItem(
+                      value: o,
+                      icon: icon,
+                      label: _sortLabel(context, o),
                     ),
                 ],
+                selected: query.sort,
+                onChanged: (o) => _query.update((q) => q.copyWith(sort: o)),
               ),
             ),
             Expanded(

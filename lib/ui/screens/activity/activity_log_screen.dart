@@ -70,7 +70,7 @@ class ActivityLogScreen extends ConsumerWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                   subtitle: Text(
-                    '${time.format(e.at)} · ${_outcome(l, e)}',
+                    '${time.format(e.at)}, ${_outcome(l, e)}',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: theme.bodyMedium?.copyWith(color: e.failed ? cc.error : null),

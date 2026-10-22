@@ -425,7 +425,7 @@
   "jamUnavailable": "No disponible",
   "jamPlaying": "La Jam está activa",
   "jamOpen": "Abrir Jam",
-  "jamSynced": "Sincronizado · desvío {ms} ms",
+  "jamSynced": "Sincronizado, desvío {ms} ms",
   "@jamSynced": {
     "placeholders": {
       "ms": {
@@ -469,7 +469,7 @@
   "navSearch": "Buscar",
   "devicesTitle": "Dispositivos",
   "devicesJamActive": "Jam activa",
-  "jamPeople": "Jam · {n} personas",
+  "jamPeople": "Jam, {n} personas",
   "@jamPeople": {
     "placeholders": {
       "n": {
@@ -501,7 +501,7 @@
   "moreActions": "Más acciones",
   "sleepChipEnd": "fin de la canción",
   "yourLibrary": "Tu biblioteca",
-  "playlistCountLabel": "{n, plural, one{Lista · 1 canción} other{Lista · {n} canciones}}",
+  "playlistCountLabel": "{n, plural, one{Lista de 1 canción} other{Lista de {n} canciones}}",
   "@playlistCountLabel": {
     "placeholders": {
       "n": {
@@ -526,7 +526,7 @@
       }
     }
   },
-  "albumMeta": "Álbum · {details}",
+  "albumMeta": "Álbum, {details}",
   "@albumMeta": {
     "placeholders": {
       "details": {
@@ -613,7 +613,7 @@
   "jamHostTag": "anfitrión",
   "jamWaitingEmpty": "No hay ninguna Jam en curso",
   "activityTitle": "Actividad",
-  "activityScan": "Escaneo · {done}/{total}",
+  "activityScan": "Escaneo: {done} de {total}",
   "@activityScan": {
     "placeholders": {
       "done": {
@@ -625,7 +625,7 @@
     }
   },
   "activityScanIdle": "Escaneando",
-  "activityEnrich": "Enriquecimiento · {done}/{total}",
+  "activityEnrich": "Enriquecimiento: {done} de {total}",
   "@activityEnrich": {
     "placeholders": {
       "done": {
@@ -636,7 +636,7 @@
       }
     }
   },
-  "activityDownload": "Descarga · {title}",
+  "activityDownload": "Descarga, {title}",
   "@activityDownload": {
     "placeholders": {
       "title": {
@@ -644,7 +644,7 @@
       }
     }
   },
-  "activityTransfer": "Envío a {name} · {n} canciones",
+  "activityTransfer": "Envío a {name}, {n} canciones",
   "@activityTransfer": {
     "placeholders": {
       "name": {
@@ -673,7 +673,7 @@
   "activityLogEmpty": "Nada todavía: aquí aparecen descargas, importaciones y envíos terminados.",
   "logImport": "Importación «{name}»",
   "importNotificationText": "{done} de {total}",
-  "importNotificationPaused": "En pausa · {done} de {total}",
+  "importNotificationPaused": "En pausa, {done} de {total}",
   "importWaitRateLimited": "YouTube pide una pausa: sigo a las {time}",
   "importWaitNetwork": "Sin red: reintento a las {time}",
   "importPausedTitle": "Importación «{name}» en pausa",
@@ -714,7 +714,7 @@
   "csvImportReadFailed": "No se pudo leer el archivo.",
   "csvImportPreviewTitle": "Importar lista",
   "csvImportName": "Nombre de la lista",
-  "csvImportSummary": "{total} canciones · {known} ya en la biblioteca · {todo} por descargar",
+  "csvImportSummary": "{total} canciones, {known} ya en la biblioteca, {todo} por descargar",
   "@csvImportSummary": {
     "placeholders": {
       "total": {
@@ -749,7 +749,7 @@
   "csvImportNew": "Crear una lista nueva",
   "csvImportGo": "Importar",
   "csvImportStarted": "Importación iniciada: síguela en el Centro de actividad",
-  "activityImport": "Importación «{name}» · {done}/{total}",
+  "activityImport": "Importación «{name}»: {done} de {total}",
   "@activityImport": {
     "placeholders": {
       "name": {
@@ -763,7 +763,7 @@
       }
     }
   },
-  "activityImportPaused": "Importación «{name}» · en pausa · {done}/{total}",
+  "activityImportPaused": "Importación «{name}»: en pausa, {done} de {total}",
   "@activityImportPaused": {
     "placeholders": {
       "name": {
@@ -777,7 +777,7 @@
       }
     }
   },
-  "csvImportBanner": "Importación: {done}/{total} · {review} por revisar · {missing} no encontradas",
+  "csvImportBanner": "Importación: {done} de {total}, {review} por revisar, {missing} no encontradas",
   "@csvImportBanner": {
     "placeholders": {
       "done": {
@@ -794,7 +794,7 @@
       }
     }
   },
-  "csvImportBannerPaused": "Importación en pausa: {done}/{total} · {review} por revisar · {missing} no encontradas",
+  "csvImportBannerPaused": "Importación en pausa: {done} de {total}, {review} por revisar, {missing} no encontradas",
   "@csvImportBannerPaused": {
     "placeholders": {
       "done": {
@@ -840,7 +840,7 @@
   "csvImportManual": "Buscar a mano",
   "csvImportNothing": "Nada que revisar.",
   "csvImportSearch": "Buscar",
-  "csvImportWanted": "Buscada: {title} · {artist} · {duration}",
+  "csvImportWanted": "Buscada: {title}, {artist}, {duration}",
   "@csvImportWanted": {
     "placeholders": {
       "title": {
@@ -933,7 +933,7 @@
       }
     }
   },
-  "activityDownloadRetry": "Descarga · {title} · nuevo intento en {seconds} s ({attempt}/{max})",
+  "activityDownloadRetry": "Descarga, {title}, nuevo intento en {seconds} s ({attempt}/{max})",
   "@activityDownloadRetry": {
     "placeholders": {
       "title": {
@@ -1444,7 +1444,7 @@
   "statsTopAlbums": "Álbumes más escuchados",
   "statsFavouriteHour": "Hora favorita",
   "statsFirstListen": "Primera reproducción",
-  "statsFirstValue": "{title} · {date}",
+  "statsFirstValue": "{title}, {date}",
   "@statsFirstValue": {
     "placeholders": {
       "title": {
@@ -1572,7 +1572,7 @@
   "duplicatesGrouping": "Comparando canciones…",
   "duplicatesFailed": "La búsqueda ha fallado. Inténtalo de nuevo.",
   "duplicatesNone": "No se han encontrado duplicados",
-  "duplicatesSummary": "{groups, plural, one{1 grupo} other{{groups} grupos}} · {hidden, plural, one{1 canción por ocultar} other{{hidden} canciones por ocultar}}",
+  "duplicatesSummary": "{groups, plural, one{1 grupo} other{{groups} grupos}}, {hidden, plural, one{1 canción por ocultar} other{{hidden} canciones por ocultar}}",
   "@duplicatesSummary": {
     "placeholders": {
       "groups": {
@@ -2459,7 +2459,7 @@
   "ytmPickArtist": "¿Qué artista?",
   "ytmArtistNone": "No se encontró ningún artista en YouTube Music",
   "suggestedBadge": "Sugerido",
-  "suggestedSimilarTo": "Sugerido · parecido a «{seed}»",
+  "suggestedSimilarTo": "Sugerido: parecido a «{seed}»",
   "suggestionDownloadStarted": "Descarga iniciada",
   "suggestionAddWhenDownloaded": "Lo descargo y lo añado a «{name}»",
   "suggestionDislike": "No me gusta",
@@ -2487,7 +2487,7 @@
   "suggestionsRecentEmpty": "Aún no hay sugerencias. Aparecen aquí cuando usas Aleatorio+.",
   "suggestionsClear": "Vaciar historial",
   "suggestionsClearBody": "Olvida las sugerencias y los «No me gusta»: podrán volver.",
-  "suggestionsRowNote": "parecido a «{seed}» · {outcome}",
+  "suggestionsRowNote": "parecido a «{seed}», {outcome}",
   "@suggestionsRowNote": {
     "placeholders": {
       "seed": {
@@ -2529,7 +2529,7 @@
   "radioRegionHint": "Las emisoras cercanas salen del país y la región que elijas: la app no usa tu ubicación.",
   "radioCountryChip": "País: {country}",
   "radioChooseCountry": "Elige el país",
-  "radioOfflineList": "Sin conexión · lista del {date}",
+  "radioOfflineList": "Sin conexión, lista del {date}",
   "radioLoadFailed": "No se pudieron cargar las emisoras",
   "radioNoResults": "No se encontró ninguna emisora",
   "radioResults": "Resultados",

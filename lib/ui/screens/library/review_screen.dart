@@ -163,23 +163,20 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
             : AppBar(title: Text(l.reviewTitle)),
         body: Column(
           children: [
-            SizedBox(
-              height: 48,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: CcDims.margin),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(CcDims.margin, 4, CcDims.margin, 8),
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 8,
                 children: [
                   for (final r in <ReviewReason?>[null, ...ReviewReason.values])
-                    Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: ChoiceChip(
-                        label: Text(_label(r)),
-                        selected: _filter == r,
-                        onSelected: (_) {
-                          notifier.clear();
-                          setState(() => _filter = r);
-                        },
-                      ),
+                    ChoiceChip(
+                      label: Text(_label(r)),
+                      selected: _filter == r,
+                      onSelected: (_) {
+                        notifier.clear();
+                        setState(() => _filter = r);
+                      },
                     ),
                 ],
               ),
@@ -231,7 +228,7 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
                                       [
                                         for (final r in reasons[tracks[i].id]!)
                                           _label(r),
-                                      ].join(' · '),
+                                      ].join(', '),
                                       key: ValueKey('review-reasons-${tracks[i].id}'),
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,

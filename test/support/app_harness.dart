@@ -67,13 +67,18 @@ class Harness {
 
   Future<void> pump(WidgetTester tester, Widget child,
       {List<Override> extraOverrides = const [],
-      Locale locale = const Locale('it')}) async {
+      Locale locale = const Locale('it'),
+      double textScale = 1,
+      CcColors colors = CcColors.notte}) async {
     await tester.pumpWidget(
         ProviderScope(
         overrides: [...overrides, ...extraOverrides],
         child: MaterialApp(
-          theme: buildThemeFromColors(CcColors.notte, false),
+          theme: buildThemeFromColors(colors, false),
           locale: locale,
+          builder: (c, w) => MediaQuery(
+              data: MediaQuery.of(c).copyWith(textScaler: TextScaler.linear(textScale)),
+              child: w!),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           home: child,

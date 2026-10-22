@@ -5,10 +5,10 @@ void main() {
   test('a publisher format with ~ keeps the first two fields', () {
     expect(
       cleanIcyTitle('HUGEL & DAVID GUETTA ft. X~SHINE~Twenty One~2026~', 'Radio 105'),
-      'HUGEL & DAVID GUETTA ft. X · SHINE',
+      'HUGEL & DAVID GUETTA ft. X, SHINE',
     );
     expect(cleanIcyTitle("Don't Let Me Down~The Beatles~~1969~", 'Virgin'),
-        "Don't Let Me Down · The Beatles");
+        "Don't Let Me Down, The Beatles");
   });
 
   test('empty or equal to the station name is nothing', () {

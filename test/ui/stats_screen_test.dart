@@ -3,6 +3,7 @@ import 'package:codecore/data/repositories/play_history_repository.dart';
 import 'package:codecore/ui/screens/home/home_screen.dart';
 import 'package:codecore/ui/screens/stats/stats_charts.dart';
 import 'package:codecore/ui/screens/stats/stats_screen.dart';
+import 'package:codecore/ui/widgets/segmented_blocks.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -83,6 +84,18 @@ void main() {
     expect(find.text('2026'), findsOneWidget);
     expect(find.text('1 h 13 min'), findsOneWidget);
     expect(find.textContaining('4 ascolti'), findsWidgets);
+    await h.dispose(tester);
+  });
+
+  testWidgets('stats blocks switch period and the arrows keep working', (tester) async {
+    await open(tester);
+    expect(find.byType(SegmentedButton<bool>), findsNothing);
+    expect(find.byType(SegmentedBlocks<bool>), findsOneWidget);
+    await tester.tap(find.text('Anno'));
+    await _settle(tester);
+    await tester.tap(find.byTooltip('Periodo precedente'));
+    await _settle(tester);
+    expect(find.text('2025'), findsOneWidget);
     await h.dispose(tester);
   });
 

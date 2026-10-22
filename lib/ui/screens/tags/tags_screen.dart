@@ -10,10 +10,11 @@ import '../../../providers/tag_providers.dart';
 import '../../shell/shell_nav.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/empty_state.dart';
-import '../../widgets/play_buttons.dart';
+import '../../widgets/collection_header.dart';
 import '../../widgets/selection_bar.dart';
 import '../../widgets/track_row.dart';
 import '../../widgets/track_row_selection.dart';
+import '../library/album_detail_screen.dart' show collectionMeta;
 import 'tags_sheet.dart';
 
 /// The user's tags with how many tracks each one has; a tap opens its tracks.
@@ -80,36 +81,37 @@ class TagTracksScreen extends ConsumerWidget {
       visibleIds: [for (final t in tracks) t.id],
     );
     final ctx = PlayContext(PlayContextKind.playlist, name);
+    final l = context.l10n;
+    final durationMs = tracks.fold<int>(0, (a, t) => a + t.durationMs);
     return SelectionScope(
       listKey: key,
       visibleIds: selection.visibleIds,
-      child: Scaffold(
-        appBar: SelectableAppBar(
-          listKey: key,
-          tracks: tracks,
-          normal: AppBar(
-            title: Text(name),
-            actions: [
-              PlayCircleButton(
-                size: 40,
-                onPressed: tracks.isEmpty
-                    ? null
-                    : () => ctrl.playAll(tracks, context: ctx),
+      child: CollectionScaffold(
+        selectionBar: SelectionBarSlot(listKey: key, tracks: tracks),
+        title: name,
+        name: name,
+        meta: collectionMeta(l, tracks: tracks.length, durationMs: durationMs),
+        onPlay: tracks.isEmpty ? null : () => ctrl.playAll(tracks, context: ctx),
+        onShuffle: tracks.isEmpty ? null : ctrl.toggleShuffle,
+        slivers: [
+          if (tracks.isEmpty)
+            SliverToBoxAdapter(
+              child: EmptyState(icon: Icons.sell_outlined, message: l.collectionNoTracks),
+            )
+          else
+            SliverList.builder(
+              itemCount: tracks.length,
+              itemBuilder: (_, i) => SizedBox(
+                height: trackRowExtentOf(context, compact),
+                child: LiveTrackRow(
+                  track: tracks[i],
+                  compact: compact,
+                  selection: selection,
+                  onTap: () => ctrl.playFromList(tracks, i, context: ctx),
+                ),
               ),
-              const SizedBox(width: 8),
-            ],
-          ),
-        ),
-        body: ListView.builder(
-          itemExtent: trackRowExtentOf(context, compact),
-          itemCount: tracks.length,
-          itemBuilder: (_, i) => LiveTrackRow(
-            track: tracks[i],
-            compact: compact,
-            selection: selection,
-            onTap: () => ctrl.playFromList(tracks, i, context: ctx),
-          ),
-        ),
+            ),
+        ],
       ),
     );
   }

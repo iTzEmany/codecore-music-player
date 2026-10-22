@@ -44,21 +44,21 @@ class ImportPlanScreen extends ConsumerWidget {
       }
 
       String line(ImportCandidate c) =>
-          '${c.source == MediaSource.soundcloud ? '${l.searchSourceSoundcloud} · ' : ''}'
-          '${c.channel} · ${formatDuration((c.durationSec ?? 0) * 1000)}'
-          '${diffOf(c)} · ${(c.score * 100).round()}%';
+          '${c.source == MediaSource.soundcloud ? '${l.searchSourceSoundcloud}, ' : ''}'
+          '${c.channel}, ${formatDuration((c.durationSec ?? 0) * 1000)}'
+          '${diffOf(c)}, ${(c.score * 100).round()}%';
       final alreadyHere = chosen != null &&
           known?.pathFor(chosen.id, source: chosen.source) != null;
       return ExpansionTile(
         title: Text(
-          '${it.title} · ${it.artistList.join(', ')}',
+          '${it.title}, ${it.artistList.join(', ')}',
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
         subtitle: chosen == null
             ? null
             : Text(
-                '${line(chosen)}${alreadyHere ? ' · ${l.csvImportPlanKnown}' : ''}',
+                '${line(chosen)}${alreadyHere ? ', ${l.csvImportPlanKnown}' : ''}',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
@@ -84,7 +84,7 @@ class ImportPlanScreen extends ConsumerWidget {
                     value: c.id,
                     title: Text(c.title, maxLines: 1, overflow: TextOverflow.ellipsis),
                     subtitle: Text(
-                      '${line(c)}${known?.pathFor(c.id, source: c.source) != null ? ' · ${l.csvImportPlanKnown}' : ''}',
+                      '${line(c)}${known?.pathFor(c.id, source: c.source) != null ? ', ${l.csvImportPlanKnown}' : ''}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),

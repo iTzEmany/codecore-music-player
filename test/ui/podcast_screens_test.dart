@@ -173,7 +173,7 @@ void main() {
       final alpha = tester.getTopLeft(find.text('Alpha show')).dy;
       final beta = tester.getTopLeft(find.text('beta show')).dy;
       expect(alpha, lessThan(beta));
-      expect(find.text('Ann · 2 episodi · 1 da ascoltare'), findsOneWidget);
+      expect(find.text('Ann, 2 episodi, 1 da ascoltare'), findsOneWidget);
       expect(find.text('1 episodio'), findsOneWidget, reason: 'the other has no author and nothing to hear');
       await h.dispose(tester);
     });

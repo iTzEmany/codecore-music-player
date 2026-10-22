@@ -11,6 +11,7 @@ import '../share/track_picker_screen.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/artist_avatar.dart';
+import '../../widgets/empty_state.dart';
 import '../../widgets/ring_progress.dart' show NowPlayingDot;
 import 'jam_player_card.dart';
 import '../../../providers/database_providers.dart';
@@ -106,7 +107,7 @@ class _JamScreenState extends ConsumerState<JamScreen> {
     if (!s.active || jam == null) {
       return Scaffold(
         appBar: AppBar(title: Text(l.jamTitle)),
-        body: Center(child: Text(l.jamWaitingEmpty)),
+        body: EmptyState(icon: Icons.group_outlined, message: l.jamWaitingEmpty),
       );
     }
     final ownId = ref.read(shareHubProvider.notifier).deviceId ?? '';
@@ -197,7 +198,7 @@ class _JamScreenState extends ConsumerState<JamScreen> {
                     ),
                     Expanded(
                       child: jam.items.isEmpty
-                          ? Center(child: Text(l.jamEmpty))
+                          ? EmptyState(icon: Icons.queue_music_rounded, message: l.jamEmpty)
                           : ReorderableListView.builder(
                               padding: const EdgeInsets.only(bottom: 88),
                               buildDefaultDragHandles: false,
@@ -239,7 +240,7 @@ class _JamScreenState extends ConsumerState<JamScreen> {
                                       if (it.artist != null) it.artist!,
                                       l.jamAddedBy(who),
                                       if (!it.available) l.jamUnavailable,
-                                    ].join(' · '),
+                                    ].join(', '),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),

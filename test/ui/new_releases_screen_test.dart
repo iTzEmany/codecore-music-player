@@ -77,6 +77,11 @@ void main() {
     });
     expect(find.text('Volevo'), findsOneWidget);
     expect(find.text('Will of the People'), findsOneWidget);
+    expect(
+      find.ancestor(of: find.widgetWithText(ChoiceChip, 'Muse'), matching: find.byType(Wrap)),
+      findsOneWidget,
+      reason: 'artist chips wrap instead of scrolling',
+    );
     await tester.tap(find.widgetWithText(ChoiceChip, 'Muse'));
     await _settle(tester);
     expect(find.text('Volevo'), findsNothing);
@@ -124,6 +129,22 @@ void main() {
     await _settle(tester);
     expect(find.byType(FollowedArtistsScreen), findsOneWidget);
     expect(find.text('Muse'), findsOneWidget);
+    await close(tester);
+  });
+
+  testWidgets('many artists: 8 chips and «Mostra tutti» reveals the rest', (tester) async {
+    await open(tester, seed: () async {
+      for (var i = 0; i < 10; i++) {
+        await seedNewRelease(h.db, YtmArtistRef(id: 'UC$i', name: 'Artist $i'), 'MPREb_$i', 'Album $i');
+      }
+    });
+    int chips() => find.byType(ChoiceChip).evaluate().length;
+    expect(chips(), 9, reason: '«Tutti» and the first 8 artists');
+    await tester.ensureVisible(find.text('Mostra tutto'));
+    await tester.tap(find.text('Mostra tutto'));
+    await _settle(tester);
+    expect(chips(), 11);
+    expect(find.text('Mostra tutto'), findsNothing);
     await close(tester);
   });
 }

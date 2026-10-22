@@ -41,7 +41,7 @@ class RadioStationRow extends ConsumerWidget {
     final line = [
       if (station.state.isNotEmpty) station.state,
       radioQualityLine(station),
-    ].where((e) => e.isNotEmpty).join(' · ');
+    ].where((e) => e.isNotEmpty).join(', ');
     return SizedBox(
       height: kRadioRowHeight,
       child: InkWell(
@@ -62,7 +62,7 @@ class RadioStationRow extends ConsumerWidget {
                     Text(station.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: theme.bodyLarge),
                     if (line.isNotEmpty || unreachable)
                       Text(
-                        [if (unreachable) l.radioNotResponding, line].where((e) => e.isNotEmpty).join(' · '),
+                        [if (unreachable) l.radioNotResponding, line].where((e) => e.isNotEmpty).join(', '),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: theme.bodySmall?.copyWith(color: unreachable ? cc.error : cc.textMuted),

@@ -37,9 +37,9 @@ String qualityLabel(Track t) {
           : khz.toStringAsFixed(1);
       parts.add('$text kHz');
     }
-    return parts.isEmpty ? fmt : '$fmt • ${parts.join(' / ')}';
+    return parts.isEmpty ? fmt : '$fmt, ${parts.join(' / ')}';
   }
-  return t.bitrateKbps == null ? fmt : '$fmt • ${t.bitrateKbps} kbps';
+  return t.bitrateKbps == null ? fmt : '$fmt, ${t.bitrateKbps} kbps';
 }
 
 /// «circa 18 min», «circa 2 h 10 min», «meno di 1 min».
