@@ -162,17 +162,20 @@ class _AllTracksScreenState extends ConsumerState<AllTracksScreen> {
                     l.allTracks,
                     style: wide ? theme.displaySmall : theme.headlineSmall,
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    l.tracksAndDuration(
-                      l.tracksCount(shown.length),
-                      durationWords(
-                        l,
-                        shown.fold<int>(0, (sum, t) => sum + t.durationMs),
+                  // No «0 brani» while loading or on error.
+                  if (tracks.hasValue) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      l.tracksAndDuration(
+                        l.tracksCount(shown.length),
+                        durationWords(
+                          l,
+                          shown.fold<int>(0, (sum, t) => sum + t.durationMs),
+                        ),
                       ),
+                      style: theme.bodyMedium?.copyWith(color: cc.textMuted),
                     ),
-                    style: theme.bodyMedium?.copyWith(color: cc.textMuted),
-                  ),
+                  ],
                   if (shown.isNotEmpty) ...[
                     const SizedBox(height: 16),
                     Wrap(
