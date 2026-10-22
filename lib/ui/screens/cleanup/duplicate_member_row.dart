@@ -60,7 +60,7 @@ class DuplicateMemberRow extends ConsumerWidget {
     if (e.sampleRateHz != null) '${(e.sampleRateHz! / 1000).toStringAsFixed(1)} kHz',
     formatBytes(e.sizeBytes),
     formatDuration(e.durationMs),
-  ].join(' · ');
+  ].join(', ');
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

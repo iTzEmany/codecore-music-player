@@ -140,7 +140,7 @@ class _MemoryList extends ConsumerWidget {
               : folderLabels(b.folders)[g.path] ?? g.name,
           subtitle: (g) {
             final n = context.l10n.tracksCount(g.totals.trackCount);
-            return g.path == null ? n : '$n · ${g.path}';
+            return g.path == null ? n : '$n, ${g.path}';
           },
         ),
         ..._heaviest(context, b),

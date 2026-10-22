@@ -224,7 +224,7 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
                                       [
                                         for (final r in reasons[tracks[i].id]!)
                                           _label(r),
-                                      ].join(' · '),
+                                      ].join(', '),
                                       key: ValueKey('review-reasons-${tracks[i].id}'),
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,

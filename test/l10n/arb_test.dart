@@ -28,35 +28,10 @@ const _sameAsItalian = {
   'radioGenreSports', 'reportKindIdea', 'sortAToZ',
 };
 
-/// Strings still carrying « · », « • » or «→». Shrinks to empty by the end of fase 2.6.
+// Rewritten by plan 2.4; delete this set once it is merged.
 const _separatorPending = {
-  'activityDownload',
-  'activityDownloadRetry',
-  'activityEnrich',
-  'activityImport',
-  'activityImportPaused',
-  'activityScan',
-  'activityTransfer',
-  'albumMeta',
-  'artistMeta',
-  'csvImportBanner',
-  'csvImportBannerPaused',
-  'csvImportSummary',
-  'csvImportWanted',
-  'duplicatesSummary',
-  'historyOff',
-  'importNotificationPaused',
-  'jamPeople',
-  'jamSynced',
-  'playlistCountLabel',
-  'radioOfflineList',
   'releaseAlbumYear',
   'releaseSingleYear',
-  'smartSubtitle',
-  'statsFirstValue',
-  'suggestedSimilarTo',
-  'suggestionsRowNote',
-  'ytErrToolOutdated',
   'ytmArtistWithAudience',
   'ytmOffline',
 };

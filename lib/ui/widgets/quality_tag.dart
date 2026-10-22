@@ -17,7 +17,7 @@ class QualityTag extends StatelessWidget {
   Widget build(BuildContext context) {
     final cc = context.cc;
     final text = isHiRes(track)
-        ? 'Hi-Res · ${qualityLabel(track)}'
+        ? 'Hi-Res, ${qualityLabel(track)}'
         : qualityLabel(track);
     return DecoratedBox(
       decoration: BoxDecoration(

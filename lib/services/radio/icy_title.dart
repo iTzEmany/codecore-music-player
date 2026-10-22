@@ -11,7 +11,7 @@ String? cleanIcyTitle(String? raw, String stationName) {
       for (final f in text.split('~'))
         if (f.trim().isNotEmpty) f.trim(),
     ];
-    text = fields.take(2).join(' · ');
+    text = fields.take(2).join(', ');
   }
   if (text.isEmpty) return null;
   if (text.toLowerCase() == stationName.trim().toLowerCase()) return null;

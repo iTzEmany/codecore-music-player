@@ -42,7 +42,7 @@ class TechInfo {
       '- Versione: $appVersion (build $buildNumber, $flavor)\n'
       '- Sistema: $platform $osVersion\n'
       '- Dispositivo: $deviceModel\n'
-      '- Transizioni: $transition · Casuale+: ${shufflePlus ? 'sì' : 'no'} · Lingua: $language';
+      '- Transizioni: $transition, Casuale+: ${shufflePlus ? 'sì' : 'no'}, Lingua: $language';
 
   /// Exactly what the preview shows and the body carries.
   String render({int? maxLogLines}) {

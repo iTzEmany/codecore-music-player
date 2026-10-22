@@ -207,7 +207,7 @@ class _ReleaseRow extends ConsumerWidget {
     final cc = context.cc;
     final r = release.release;
     final more = release.variants > 0
-        ? ' · ${l.releaseVariants(release.variants)}'
+        ? ', ${l.releaseVariants(release.variants)}'
         : '';
     return ListTile(
       key: ValueKey('release-row-${r.browseId}'),
@@ -219,7 +219,7 @@ class _ReleaseRow extends ConsumerWidget {
       ),
       title: Text(r.title, maxLines: 1, overflow: TextOverflow.ellipsis),
       subtitle: Text(
-        '${release.artistName} · ${releaseKindLabel(l, r)}$more',
+        '${release.artistName}, ${releaseKindLabel(l, r)}$more',
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
       ),

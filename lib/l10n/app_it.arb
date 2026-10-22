@@ -633,7 +633,7 @@
   "jamUnavailable": "Non disponibile",
   "jamPlaying": "La Jam è attiva",
   "jamOpen": "Apri la Jam",
-  "jamSynced": "Sincronizzato · scarto {ms} ms",
+  "jamSynced": "Sincronizzato, scarto {ms} ms",
   "@jamSynced": {
     "placeholders": {
       "ms": {
@@ -677,7 +677,7 @@
   "navSearch": "Cerca",
   "devicesTitle": "Dispositivi",
   "devicesJamActive": "Jam attiva",
-  "jamPeople": "Jam · {n} persone",
+  "jamPeople": "Jam, {n} persone",
   "@jamPeople": {
     "placeholders": {
       "n": {
@@ -709,7 +709,7 @@
   "moreActions": "Altre azioni",
   "sleepChipEnd": "fine brano",
   "yourLibrary": "La tua libreria",
-  "playlistCountLabel": "{n, plural, one{Playlist · 1 brano} other{Playlist · {n} brani}}",
+  "playlistCountLabel": "{n, plural, one{Playlist di 1 brano} other{Playlist di {n} brani}}",
   "@playlistCountLabel": {
     "placeholders": {
       "n": {
@@ -734,7 +734,7 @@
       }
     }
   },
-  "albumMeta": "Album · {details}",
+  "albumMeta": "Album, {details}",
   "@albumMeta": {
     "placeholders": {
       "details": {
@@ -869,7 +869,7 @@
   "jamHostTag": "host",
   "jamWaitingEmpty": "Nessuna Jam in corso",
   "activityTitle": "Attività",
-  "activityScan": "Scansione · {done}/{total}",
+  "activityScan": "Scansione: {done} di {total}",
   "@activityScan": {
     "placeholders": {
       "done": {
@@ -881,7 +881,7 @@
     }
   },
   "activityScanIdle": "Scansione in corso",
-  "activityEnrich": "Arricchimento · {done}/{total}",
+  "activityEnrich": "Arricchimento: {done} di {total}",
   "@activityEnrich": {
     "placeholders": {
       "done": {
@@ -892,7 +892,7 @@
       }
     }
   },
-  "activityDownload": "Download · {title}",
+  "activityDownload": "Download, {title}",
   "@activityDownload": {
     "placeholders": {
       "title": {
@@ -900,7 +900,7 @@
       }
     }
   },
-  "activityTransfer": "Invio a {name} · {n} brani",
+  "activityTransfer": "Invio a {name}, {n} brani",
   "@activityTransfer": {
     "placeholders": {
       "name": {
@@ -967,7 +967,7 @@
       }
     }
   },
-  "importNotificationPaused": "In pausa · {done} di {total}",
+  "importNotificationPaused": "In pausa, {done} di {total}",
   "@importNotificationPaused": {
     "placeholders": {
       "done": {
@@ -1046,7 +1046,7 @@
   "csvImportReadFailed": "Impossibile leggere il file.",
   "csvImportPreviewTitle": "Importa playlist",
   "csvImportName": "Nome della playlist",
-  "csvImportSummary": "{total} brani · {known} già in libreria · {todo} da scaricare",
+  "csvImportSummary": "{total} brani, {known} già in libreria, {todo} da scaricare",
   "@csvImportSummary": {
     "placeholders": {
       "total": {
@@ -1081,7 +1081,7 @@
   "csvImportNew": "Crea una nuova playlist",
   "csvImportGo": "Importa",
   "csvImportStarted": "Importazione avviata: la segui nel Centro Attività",
-  "activityImport": "Importazione «{name}» · {done}/{total}",
+  "activityImport": "Importazione «{name}»: {done} di {total}",
   "@activityImport": {
     "placeholders": {
       "name": {
@@ -1095,7 +1095,7 @@
       }
     }
   },
-  "activityImportPaused": "Importazione «{name}» · in pausa · {done}/{total}",
+  "activityImportPaused": "Importazione «{name}»: in pausa, {done} di {total}",
   "@activityImportPaused": {
     "placeholders": {
       "name": {
@@ -1109,7 +1109,7 @@
       }
     }
   },
-  "csvImportBanner": "Importazione: {done}/{total} · {review} da verificare · {missing} non trovati",
+  "csvImportBanner": "Importazione: {done} di {total}, {review} da verificare, {missing} non trovati",
   "@csvImportBanner": {
     "placeholders": {
       "done": {
@@ -1126,7 +1126,7 @@
       }
     }
   },
-  "csvImportBannerPaused": "Importazione in pausa: {done}/{total} · {review} da verificare · {missing} non trovati",
+  "csvImportBannerPaused": "Importazione in pausa: {done} di {total}, {review} da verificare, {missing} non trovati",
   "@csvImportBannerPaused": {
     "placeholders": {
       "done": {
@@ -1172,7 +1172,7 @@
   "csvImportManual": "Cerca a mano",
   "csvImportNothing": "Niente da rivedere.",
   "csvImportSearch": "Cerca",
-  "csvImportWanted": "Cercato: {title} · {artist} · {duration}",
+  "csvImportWanted": "Cercato: {title}, {artist}, {duration}",
   "@csvImportWanted": {
     "placeholders": {
       "title": {
@@ -1265,7 +1265,7 @@
       }
     }
   },
-  "activityDownloadRetry": "Download · {title} · nuovo tentativo tra {seconds} s ({attempt}/{max})",
+  "activityDownloadRetry": "Download, {title}, nuovo tentativo tra {seconds} s ({attempt}/{max})",
   "@activityDownloadRetry": {
     "placeholders": {
       "title": {
@@ -1790,7 +1790,7 @@
   "statsTopAlbums": "Album più ascoltati",
   "statsFavouriteHour": "Ora preferita",
   "statsFirstListen": "Primo ascolto",
-  "statsFirstValue": "{title} · {date}",
+  "statsFirstValue": "{title}, {date}",
   "@statsFirstValue": {
     "placeholders": {
       "title": {
@@ -1918,7 +1918,7 @@
   "duplicatesGrouping": "Confronto i brani…",
   "duplicatesFailed": "La ricerca non è riuscita. Riprova.",
   "duplicatesNone": "Nessun duplicato trovato",
-  "duplicatesSummary": "{groups, plural, one{1 gruppo} other{{groups} gruppi}} · {hidden, plural, one{1 brano da nascondere} other{{hidden} brani da nascondere}}",
+  "duplicatesSummary": "{groups, plural, one{1 gruppo} other{{groups} gruppi}}, {hidden, plural, one{1 brano da nascondere} other{{hidden} brani da nascondere}}",
   "@duplicatesSummary": {
     "placeholders": {
       "groups": {
@@ -2862,7 +2862,7 @@
   "ytmPickArtist": "Quale artista?",
   "ytmArtistNone": "Nessun artista trovato su YouTube Music",
   "suggestedBadge": "Suggerito",
-  "suggestedSimilarTo": "Suggerito · simile a «{seed}»",
+  "suggestedSimilarTo": "Suggerito: simile a «{seed}»",
   "@suggestedSimilarTo": {
     "placeholders": {
       "seed": {
@@ -2911,7 +2911,7 @@
   "suggestionsRecentEmpty": "Nessun suggerito per ora. Compaiono qui quando usi Casuale+.",
   "suggestionsClear": "Svuota registro",
   "suggestionsClearBody": "Dimentica i suggeriti e i «Non mi piace»: potranno tornare.",
-  "suggestionsRowNote": "simile a «{seed}» · {outcome}",
+  "suggestionsRowNote": "simile a «{seed}», {outcome}",
   "@suggestionsRowNote": {
     "placeholders": {
       "seed": {
@@ -3015,7 +3015,7 @@
     }
   },
   "radioChooseCountry": "Scegli il paese",
-  "radioOfflineList": "Non in linea · elenco del {date}",
+  "radioOfflineList": "Non in linea, elenco del {date}",
   "@radioOfflineList": {
     "placeholders": {
       "date": {

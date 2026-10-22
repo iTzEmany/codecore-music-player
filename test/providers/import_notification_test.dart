@@ -30,7 +30,7 @@ void main() {
   test('a running import: the songs saved, with the time left and «Pausa»', () {
     final w = backgroundWork(l, imports: [_imp()], downloads: const [])!;
     expect(w.title, 'Importazione «Liked Songs»');
-    expect(w.text, startsWith('347 di 2253 · '));
+    expect(w.text, startsWith('347 di 2253, '));
     expect((w.done, w.total, w.pause), (349, 2253, 'Pausa'));
   });
 
@@ -39,7 +39,7 @@ void main() {
         imports: [_imp()],
         downloads: const [],
         wait: (reason: ImportEventKind.rateLimited, until: DateTime(2026, 10, 21, 4, 32)))!;
-    expect(w.text, '347 di 2253 · YouTube chiede una pausa: riprendo alle 04:32');
+    expect(w.text, '347 di 2253, YouTube chiede una pausa: riprendo alle 04:32');
     final n = backgroundWork(l,
         imports: [_imp()],
         downloads: const [],

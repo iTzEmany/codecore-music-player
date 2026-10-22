@@ -166,7 +166,7 @@ class SmartRow extends ConsumerWidget {
         children: [
           Flexible(child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: small)),
           if (row.hasVideo && !selecting) ...[
-            Text(' · ', style: small),
+            Text(', ', style: small),
             Flexible(
               child: Tooltip(
                 message: l.onlineListenVideo,

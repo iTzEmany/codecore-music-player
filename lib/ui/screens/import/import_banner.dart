@@ -31,7 +31,7 @@ class ImportBanner extends ConsumerWidget {
         : p.paused
         ? l.csvImportBannerPaused(p.done, p.total, p.review, p.missing)
         : l.csvImportBanner(p.done, p.total, p.review, p.missing) +
-              (p.eta == null ? '' : ' · ${etaLabel(l, p.eta!)}');
+              (p.eta == null ? '' : ', ${etaLabel(l, p.eta!)}');
     final svc = ref.read(playlistImportServiceProvider);
     return Container(
       margin: const EdgeInsets.fromLTRB(CcDims.margin, 8, CcDims.margin, 8),

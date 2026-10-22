@@ -213,7 +213,7 @@ class _ThemeEditorScreenState extends ConsumerState<ThemeEditorScreen> {
                     ),
                     title: Text(c.label),
                     subtitle: Text(
-                      '${c.ratio.toStringAsFixed(1)}:1 · ${c.ok ? l.themeContrastOk : l.themeContrastLow}',
+                      '${c.ratio.toStringAsFixed(1)}:1, ${c.ok ? l.themeContrastOk : l.themeContrastLow}',
                     ),
                     trailing: c.ok
                         ? null

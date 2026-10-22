@@ -181,9 +181,17 @@ class _SourceDialogState extends State<_SourceDialog> {
             onChanged: (v) => setState(() => _from = v ?? _from),
           ),
           const SizedBox(height: 12),
-          Text(
-            '→ ${translationLanguages[widget.target] ?? widget.target}',
-            style: Theme.of(context).textTheme.bodyMedium,
+          Row(
+            children: [
+              const Icon(Icons.arrow_forward_rounded, size: 18),
+              const SizedBox(width: 8),
+              Flexible(
+                child: Text(
+                  translationLanguages[widget.target] ?? widget.target,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 8),
           Text(

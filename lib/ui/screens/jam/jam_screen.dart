@@ -239,7 +239,7 @@ class _JamScreenState extends ConsumerState<JamScreen> {
                                       if (it.artist != null) it.artist!,
                                       l.jamAddedBy(who),
                                       if (!it.available) l.jamUnavailable,
-                                    ].join(' · '),
+                                    ].join(', '),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),

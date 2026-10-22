@@ -230,7 +230,7 @@ class _Body extends StatelessWidget {
                               [
                                 if (items[i].artist != null) items[i].artist!,
                                 l.statsPlays(items[i].plays),
-                              ].join(' · '),
+                              ].join(', '),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: theme.bodyMedium,
@@ -267,7 +267,7 @@ class _Body extends StatelessWidget {
             16,
           ),
           child: Text(
-            '${l.statsPlays(stats.plays)} · ${l.statsDistinct(stats.distinctTracks)}',
+            '${l.statsPlays(stats.plays)}, ${l.statsDistinct(stats.distinctTracks)}',
             style: theme.bodyMedium?.copyWith(color: cc.textMuted),
           ),
         ),
@@ -277,7 +277,7 @@ class _Body extends StatelessWidget {
             values: stats.msPerBucket,
             labelOf: label,
             semanticsLabel:
-                '${formatListened(l, stats.playedMs)} · ${l.statsPlays(stats.plays)}',
+                '${formatListened(l, stats.playedMs)}, ${l.statsPlays(stats.plays)}',
           ),
         ),
         const SizedBox(height: 8),

@@ -301,7 +301,7 @@ class _EpisodeTile extends ConsumerWidget {
                       ?date,
                       if (e.durationMs != null) formatDuration(e.durationMs!),
                       if (status.isNotEmpty) status,
-                    ].join(' · '),
+                    ].join(', '),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: theme.bodySmall?.copyWith(color: cc.textMuted),

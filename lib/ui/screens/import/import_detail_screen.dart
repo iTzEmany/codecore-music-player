@@ -109,7 +109,7 @@ class _ImportDetailScreenState extends ConsumerState<ImportDetailScreen> {
                     (p.paused
                             ? l.csvImportBannerPaused(p.done, p.total, p.review, p.missing)
                             : l.csvImportBanner(p.done, p.total, p.review, p.missing)) +
-                        (p.eta == null ? '' : ' · ${etaLabel(l, p.eta!)}'),
+                        (p.eta == null ? '' : ', ${etaLabel(l, p.eta!)}'),
                     style: theme.bodyMedium?.copyWith(color: cc.textMuted),
                   ),
                   if (wait != null && !p.paused)
@@ -216,7 +216,7 @@ class _SongRow extends StatelessWidget {
                 children: [
                   Text(item.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: theme.bodyLarge),
                   Text(
-                    '${item.artistList.join(', ')} · ${rowPhaseLabel(l, phase, download)}',
+                    '${item.artistList.join(', ')}, ${rowPhaseLabel(l, phase, download)}',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: theme.bodyMedium?.copyWith(color: phase.active || phase.problem ? color : null),

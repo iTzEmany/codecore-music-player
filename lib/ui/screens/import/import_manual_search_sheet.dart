@@ -134,7 +134,7 @@ class _State extends ConsumerState<ImportManualSearchSheet> {
                         overflow: TextOverflow.ellipsis,
                       ),
                       subtitle: Text(
-                        '${r.channel} · '
+                        '${r.channel}, '
                         '${formatDuration(r.duration?.inMilliseconds ?? 0)}',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,

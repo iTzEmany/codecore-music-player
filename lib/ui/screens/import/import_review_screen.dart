@@ -138,8 +138,8 @@ class ImportReviewScreen extends ConsumerWidget {
         dense: true,
         title: Text(c.title, maxLines: 1, overflow: TextOverflow.ellipsis),
         subtitle: Text(
-          '${c.source == MediaSource.soundcloud ? '${l.searchSourceSoundcloud} · ' : ''}'
-          '${c.channel} · ${formatDuration((c.durationSec ?? 0) * 1000)}'
+          '${c.source == MediaSource.soundcloud ? '${l.searchSourceSoundcloud}, ' : ''}'
+          '${c.channel}, ${formatDuration((c.durationSec ?? 0) * 1000)}'
           '${diff == null ? '' : ' (${diff >= 0 ? '+' : ''}$diff s)'}',
           maxLines: 1,
           overflow: TextOverflow.ellipsis,

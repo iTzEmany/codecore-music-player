@@ -1091,7 +1091,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String jamSynced(int ms) {
-    return 'Sincronizzato · scarto $ms ms';
+    return 'Sincronizzato, scarto $ms ms';
   }
 
   @override
@@ -1170,7 +1170,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String jamPeople(int n) {
-    return 'Jam · $n persone';
+    return 'Jam, $n persone';
   }
 
   @override
@@ -1232,8 +1232,8 @@ class AppLocalizationsIt extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       n,
       locale: localeName,
-      other: 'Playlist · $n brani',
-      one: 'Playlist · 1 brano',
+      other: 'Playlist di $n brani',
+      one: 'Playlist di 1 brano',
     );
     return '$_temp0';
   }
@@ -1272,7 +1272,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String albumMeta(String details) {
-    return 'Album · $details';
+    return 'Album, $details';
   }
 
   @override
@@ -1455,7 +1455,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String activityScan(int done, int total) {
-    return 'Scansione · $done/$total';
+    return 'Scansione: $done di $total';
   }
 
   @override
@@ -1463,17 +1463,17 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String activityEnrich(int done, int total) {
-    return 'Arricchimento · $done/$total';
+    return 'Arricchimento: $done di $total';
   }
 
   @override
   String activityDownload(String title) {
-    return 'Download · $title';
+    return 'Download, $title';
   }
 
   @override
   String activityTransfer(String name, int n) {
-    return 'Invio a $name · $n brani';
+    return 'Invio a $name, $n brani';
   }
 
   @override
@@ -1550,7 +1550,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String importNotificationPaused(int done, int total) {
-    return 'In pausa · $done di $total';
+    return 'In pausa, $done di $total';
   }
 
   @override
@@ -1658,7 +1658,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String csvImportSummary(int total, int known, int todo) {
-    return '$total brani · $known già in libreria · $todo da scaricare';
+    return '$total brani, $known già in libreria, $todo da scaricare';
   }
 
   @override
@@ -1690,22 +1690,22 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String activityImport(String name, int done, int total) {
-    return 'Importazione «$name» · $done/$total';
+    return 'Importazione «$name»: $done di $total';
   }
 
   @override
   String activityImportPaused(String name, int done, int total) {
-    return 'Importazione «$name» · in pausa · $done/$total';
+    return 'Importazione «$name»: in pausa, $done di $total';
   }
 
   @override
   String csvImportBanner(int done, int total, int review, int missing) {
-    return 'Importazione: $done/$total · $review da verificare · $missing non trovati';
+    return 'Importazione: $done di $total, $review da verificare, $missing non trovati';
   }
 
   @override
   String csvImportBannerPaused(int done, int total, int review, int missing) {
-    return 'Importazione in pausa: $done/$total · $review da verificare · $missing non trovati';
+    return 'Importazione in pausa: $done di $total, $review da verificare, $missing non trovati';
   }
 
   @override
@@ -1761,7 +1761,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String csvImportWanted(String title, String artist, String duration) {
-    return 'Cercato: $title · $artist · $duration';
+    return 'Cercato: $title, $artist, $duration';
   }
 
   @override
@@ -1902,7 +1902,7 @@ class AppLocalizationsIt extends AppLocalizations {
     int attempt,
     int max,
   ) {
-    return 'Download · $title · nuovo tentativo tra $seconds s ($attempt/$max)';
+    return 'Download, $title, nuovo tentativo tra $seconds s ($attempt/$max)';
   }
 
   @override
@@ -2846,7 +2846,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String statsFirstValue(String title, String date) {
-    return '$title · $date';
+    return '$title, $date';
   }
 
   @override
@@ -3057,7 +3057,7 @@ class AppLocalizationsIt extends AppLocalizations {
       other: '$hidden brani da nascondere',
       one: '1 brano da nascondere',
     );
-    return '$_temp0 · $_temp1';
+    return '$_temp0, $_temp1';
   }
 
   @override
@@ -4423,7 +4423,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String suggestedSimilarTo(String seed) {
-    return 'Suggerito · simile a «$seed»';
+    return 'Suggerito: simile a «$seed»';
   }
 
   @override
@@ -4523,7 +4523,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String suggestionsRowNote(String seed, String outcome) {
-    return 'simile a «$seed» · $outcome';
+    return 'simile a «$seed», $outcome';
   }
 
   @override
@@ -4645,7 +4645,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String radioOfflineList(String date) {
-    return 'Non in linea · elenco del $date';
+    return 'Non in linea, elenco del $date';
   }
 
   @override

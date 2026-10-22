@@ -33,7 +33,7 @@ class _PodcastsScreenState extends ConsumerState<PodcastsScreen> {
     setState(() => _refreshing = false);
     final text = report.failed.isEmpty
         ? l.podcastRefreshed(report.totalAdded)
-        : '${l.podcastRefreshed(report.totalAdded)} · '
+        : '${l.podcastRefreshed(report.totalAdded)}, '
               '${l.podcastRefreshFailed(report.failed.length)}: '
               '${podcastErrorText(l, report.failed.values.first.kind)}';
     ScaffoldMessenger.of(context)
@@ -121,13 +121,13 @@ class _PodcastTile extends StatelessWidget {
     final line = [
       l.podcastEpisodesCount(summary.episodeCount),
       if (summary.toListen > 0) l.podcastToListen(summary.toListen),
-    ].join(' · ');
+    ].join(', ');
     return ListTile(
       key: ValueKey('podcast-${p.id}'),
       leading: CoverImage(coverKey: p.coverKey, size: 48),
       title: Text(p.title, maxLines: 1, overflow: TextOverflow.ellipsis),
       subtitle: Text(
-        [if (p.author != null) p.author!, line].join(' · '),
+        [if (p.author != null) p.author!, line].join(', '),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       ),

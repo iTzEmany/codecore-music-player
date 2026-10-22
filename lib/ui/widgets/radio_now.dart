@@ -49,7 +49,7 @@ class NpLiveRow extends StatelessWidget {
           Text(l.radioLive, style: Theme.of(context).textTheme.labelLarge?.copyWith(color: cc.text)),
           if (quality.isNotEmpty) ...[
             const SizedBox(width: 8),
-            Text('· $quality', style: Theme.of(context).textTheme.labelMedium?.copyWith(color: cc.textMuted)),
+            Text(quality, style: Theme.of(context).textTheme.labelMedium?.copyWith(color: cc.textMuted)),
           ],
         ],
       ),

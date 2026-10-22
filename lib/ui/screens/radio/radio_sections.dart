@@ -164,7 +164,7 @@ class NearYouSection extends ConsumerWidget {
     );
     if (region == null) return SliverMainAxisGroup(slivers: [header]);
     final near = ref.watch(nearYouProvider);
-    final name = '${l.radioNearYou} · ${region.label}';
+    final name = '${l.radioNearYou}, ${region.label}';
     return SliverMainAxisGroup(slivers: [
       header,
       ..._withStale(context, near.value, <Widget>[

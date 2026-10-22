@@ -28,7 +28,7 @@ class AdvancedSettingsTiles extends ConsumerWidget {
     Widget slider(String title, String hint, double value,
             ValueChanged<double> onChanged) =>
         ListTile(
-          title: Text('$title · ${(value * 100).round()}%'),
+          title: Text('$title, ${(value * 100).round()}%'),
           subtitle: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

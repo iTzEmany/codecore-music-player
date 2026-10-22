@@ -1903,7 +1903,7 @@ abstract class AppLocalizations {
   /// No description provided for @jamSynced.
   ///
   /// In it, this message translates to:
-  /// **'Sincronizzato · scarto {ms} ms'**
+  /// **'Sincronizzato, scarto {ms} ms'**
   String jamSynced(int ms);
 
   /// No description provided for @jamSyncing.
@@ -2041,7 +2041,7 @@ abstract class AppLocalizations {
   /// No description provided for @jamPeople.
   ///
   /// In it, this message translates to:
-  /// **'Jam · {n} persone'**
+  /// **'Jam, {n} persone'**
   String jamPeople(int n);
 
   /// No description provided for @devicesVisibleTitle.
@@ -2149,7 +2149,7 @@ abstract class AppLocalizations {
   /// No description provided for @playlistCountLabel.
   ///
   /// In it, this message translates to:
-  /// **'{n, plural, one{Playlist · 1 brano} other{Playlist · {n} brani}}'**
+  /// **'{n, plural, one{Playlist di 1 brano} other{Playlist di {n} brani}}'**
   String playlistCountLabel(int n);
 
   /// No description provided for @sortRecent.
@@ -2215,7 +2215,7 @@ abstract class AppLocalizations {
   /// No description provided for @albumMeta.
   ///
   /// In it, this message translates to:
-  /// **'Album · {details}'**
+  /// **'Album, {details}'**
   String albumMeta(String details);
 
   /// No description provided for @durationMinutes.
@@ -2515,7 +2515,7 @@ abstract class AppLocalizations {
   /// No description provided for @activityScan.
   ///
   /// In it, this message translates to:
-  /// **'Scansione · {done}/{total}'**
+  /// **'Scansione: {done} di {total}'**
   String activityScan(int done, int total);
 
   /// No description provided for @activityScanIdle.
@@ -2527,19 +2527,19 @@ abstract class AppLocalizations {
   /// No description provided for @activityEnrich.
   ///
   /// In it, this message translates to:
-  /// **'Arricchimento · {done}/{total}'**
+  /// **'Arricchimento: {done} di {total}'**
   String activityEnrich(int done, int total);
 
   /// No description provided for @activityDownload.
   ///
   /// In it, this message translates to:
-  /// **'Download · {title}'**
+  /// **'Download, {title}'**
   String activityDownload(String title);
 
   /// No description provided for @activityTransfer.
   ///
   /// In it, this message translates to:
-  /// **'Invio a {name} · {n} brani'**
+  /// **'Invio a {name}, {n} brani'**
   String activityTransfer(String name, int n);
 
   /// No description provided for @activityNone.
@@ -2653,7 +2653,7 @@ abstract class AppLocalizations {
   /// No description provided for @importNotificationPaused.
   ///
   /// In it, this message translates to:
-  /// **'In pausa · {done} di {total}'**
+  /// **'In pausa, {done} di {total}'**
   String importNotificationPaused(int done, int total);
 
   /// No description provided for @importWaitRateLimited.
@@ -2815,7 +2815,7 @@ abstract class AppLocalizations {
   /// No description provided for @csvImportSummary.
   ///
   /// In it, this message translates to:
-  /// **'{total} brani · {known} già in libreria · {todo} da scaricare'**
+  /// **'{total} brani, {known} già in libreria, {todo} da scaricare'**
   String csvImportSummary(int total, int known, int todo);
 
   /// No description provided for @csvImportSkipped.
@@ -2863,25 +2863,25 @@ abstract class AppLocalizations {
   /// No description provided for @activityImport.
   ///
   /// In it, this message translates to:
-  /// **'Importazione «{name}» · {done}/{total}'**
+  /// **'Importazione «{name}»: {done} di {total}'**
   String activityImport(String name, int done, int total);
 
   /// No description provided for @activityImportPaused.
   ///
   /// In it, this message translates to:
-  /// **'Importazione «{name}» · in pausa · {done}/{total}'**
+  /// **'Importazione «{name}»: in pausa, {done} di {total}'**
   String activityImportPaused(String name, int done, int total);
 
   /// No description provided for @csvImportBanner.
   ///
   /// In it, this message translates to:
-  /// **'Importazione: {done}/{total} · {review} da verificare · {missing} non trovati'**
+  /// **'Importazione: {done} di {total}, {review} da verificare, {missing} non trovati'**
   String csvImportBanner(int done, int total, int review, int missing);
 
   /// No description provided for @csvImportBannerPaused.
   ///
   /// In it, this message translates to:
-  /// **'Importazione in pausa: {done}/{total} · {review} da verificare · {missing} non trovati'**
+  /// **'Importazione in pausa: {done} di {total}, {review} da verificare, {missing} non trovati'**
   String csvImportBannerPaused(int done, int total, int review, int missing);
 
   /// No description provided for @csvImportReview.
@@ -2983,7 +2983,7 @@ abstract class AppLocalizations {
   /// No description provided for @csvImportWanted.
   ///
   /// In it, this message translates to:
-  /// **'Cercato: {title} · {artist} · {duration}'**
+  /// **'Cercato: {title}, {artist}, {duration}'**
   String csvImportWanted(String title, String artist, String duration);
 
   /// No description provided for @csvImportDownload.
@@ -3211,7 +3211,7 @@ abstract class AppLocalizations {
   /// No description provided for @activityDownloadRetry.
   ///
   /// In it, this message translates to:
-  /// **'Download · {title} · nuovo tentativo tra {seconds} s ({attempt}/{max})'**
+  /// **'Download, {title}, nuovo tentativo tra {seconds} s ({attempt}/{max})'**
   String activityDownloadRetry(String title, int seconds, int attempt, int max);
 
   /// No description provided for @downloadFormat.
@@ -4699,7 +4699,7 @@ abstract class AppLocalizations {
   /// No description provided for @statsFirstValue.
   ///
   /// In it, this message translates to:
-  /// **'{title} · {date}'**
+  /// **'{title}, {date}'**
   String statsFirstValue(String title, String date);
 
   /// No description provided for @statsYourMonth.
@@ -5017,7 +5017,7 @@ abstract class AppLocalizations {
   /// No description provided for @duplicatesSummary.
   ///
   /// In it, this message translates to:
-  /// **'{groups, plural, one{1 gruppo} other{{groups} gruppi}} · {hidden, plural, one{1 brano da nascondere} other{{hidden} brani da nascondere}}'**
+  /// **'{groups, plural, one{1 gruppo} other{{groups} gruppi}}, {hidden, plural, one{1 brano da nascondere} other{{hidden} brani da nascondere}}'**
   String duplicatesSummary(int groups, int hidden);
 
   /// No description provided for @duplicatesExactBadge.
@@ -6900,7 +6900,7 @@ abstract class AppLocalizations {
   /// No description provided for @suggestedSimilarTo.
   ///
   /// In it, this message translates to:
-  /// **'Suggerito · simile a «{seed}»'**
+  /// **'Suggerito: simile a «{seed}»'**
   String suggestedSimilarTo(String seed);
 
   /// No description provided for @suggestionDownloadStarted.
@@ -7068,7 +7068,7 @@ abstract class AppLocalizations {
   /// No description provided for @suggestionsRowNote.
   ///
   /// In it, this message translates to:
-  /// **'simile a «{seed}» · {outcome}'**
+  /// **'simile a «{seed}», {outcome}'**
   String suggestionsRowNote(String seed, String outcome);
 
   /// No description provided for @suggestionOutcomeQueued.
@@ -7260,7 +7260,7 @@ abstract class AppLocalizations {
   /// No description provided for @radioOfflineList.
   ///
   /// In it, this message translates to:
-  /// **'Non in linea · elenco del {date}'**
+  /// **'Non in linea, elenco del {date}'**
   String radioOfflineList(String date);
 
   /// No description provided for @radioLoadFailed.

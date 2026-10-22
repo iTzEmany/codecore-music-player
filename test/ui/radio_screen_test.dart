@@ -97,13 +97,13 @@ void main() {
     expect(y('Generi'), lessThan(y('Le più ascoltate')));
     expect(find.text('Lombardia'), findsOneWidget);
     expect(find.text('Radio Vicina Uno'), findsOneWidget);
-    expect(find.text('Lombardia · MP3 · 128 kbps'), findsWidgets);
+    expect(find.text('Lombardia, MP3, 128 kbps'), findsWidgets);
     await h.dispose(tester);
   });
 
   testWidgets('a list read from the old copy says when it is from', (tester) async {
     await open(tester, stale: true);
-    expect(find.textContaining('Non in linea · elenco del'), findsOneWidget);
+    expect(find.textContaining('Non in linea, elenco del'), findsOneWidget);
     await h.dispose(tester);
   });
 

@@ -43,11 +43,11 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
 
     expect(find.text('Abbinamenti'), findsOneWidget);
-    expect(find.textContaining('Song 0 · Band'), findsOneWidget);
+    expect(find.textContaining('Song 0, Band'), findsOneWidget);
     expect(find.textContaining('Band - Topic'), findsOneWidget);
     expect(find.text('Scarica 1 brano'), findsOneWidget);
 
-    await tester.tap(find.textContaining('Song 0 · Band'));
+    await tester.tap(find.textContaining('Song 0, Band'));
     await tester.pumpAndSettle();
     expect(find.text('Song 0 (Live)'), findsOneWidget);
     expect(find.textContaining('+60 s'), findsOneWidget);

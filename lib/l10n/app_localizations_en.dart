@@ -1090,7 +1090,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String jamSynced(int ms) {
-    return 'In sync · offset $ms ms';
+    return 'In sync, offset $ms ms';
   }
 
   @override
@@ -1168,7 +1168,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String jamPeople(int n) {
-    return 'Jam · $n people';
+    return 'Jam, $n people';
   }
 
   @override
@@ -1230,8 +1230,8 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       n,
       locale: localeName,
-      other: 'Playlist · $n tracks',
-      one: 'Playlist · 1 track',
+      other: 'Playlist with $n tracks',
+      one: 'Playlist with 1 track',
     );
     return '$_temp0';
   }
@@ -1270,7 +1270,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String albumMeta(String details) {
-    return 'Album · $details';
+    return 'Album, $details';
   }
 
   @override
@@ -1453,7 +1453,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String activityScan(int done, int total) {
-    return 'Scanning · $done/$total';
+    return 'Scanning: $done of $total';
   }
 
   @override
@@ -1461,17 +1461,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String activityEnrich(int done, int total) {
-    return 'Enriching · $done/$total';
+    return 'Enriching: $done of $total';
   }
 
   @override
   String activityDownload(String title) {
-    return 'Download · $title';
+    return 'Download, $title';
   }
 
   @override
   String activityTransfer(String name, int n) {
-    return 'Sending to $name · $n tracks';
+    return 'Sending to $name, $n tracks';
   }
 
   @override
@@ -1548,7 +1548,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String importNotificationPaused(int done, int total) {
-    return 'Paused · $done of $total';
+    return 'Paused, $done of $total';
   }
 
   @override
@@ -1656,7 +1656,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String csvImportSummary(int total, int known, int todo) {
-    return '$total tracks · $known already in library · $todo to download';
+    return '$total tracks, $known already in library, $todo to download';
   }
 
   @override
@@ -1688,22 +1688,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String activityImport(String name, int done, int total) {
-    return 'Import “$name” · $done/$total';
+    return 'Import “$name”: $done of $total';
   }
 
   @override
   String activityImportPaused(String name, int done, int total) {
-    return 'Import “$name” · paused · $done/$total';
+    return 'Import “$name”: paused, $done of $total';
   }
 
   @override
   String csvImportBanner(int done, int total, int review, int missing) {
-    return 'Import: $done/$total · $review to review · $missing not found';
+    return 'Import: $done of $total, $review to review, $missing not found';
   }
 
   @override
   String csvImportBannerPaused(int done, int total, int review, int missing) {
-    return 'Import paused: $done/$total · $review to review · $missing not found';
+    return 'Import paused: $done of $total, $review to review, $missing not found';
   }
 
   @override
@@ -1759,7 +1759,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String csvImportWanted(String title, String artist, String duration) {
-    return 'Wanted: $title · $artist · $duration';
+    return 'Wanted: $title, $artist, $duration';
   }
 
   @override
@@ -1898,7 +1898,7 @@ class AppLocalizationsEn extends AppLocalizations {
     int attempt,
     int max,
   ) {
-    return 'Download · $title · retrying in $seconds s ($attempt/$max)';
+    return 'Download, $title, retrying in $seconds s ($attempt/$max)';
   }
 
   @override
@@ -2842,7 +2842,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String statsFirstValue(String title, String date) {
-    return '$title · $date';
+    return '$title, $date';
   }
 
   @override
@@ -3054,7 +3054,7 @@ class AppLocalizationsEn extends AppLocalizations {
       other: '$hidden tracks to hide',
       one: '1 track to hide',
     );
-    return '$_temp0 · $_temp1';
+    return '$_temp0, $_temp1';
   }
 
   @override
@@ -4419,7 +4419,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String suggestedSimilarTo(String seed) {
-    return 'Suggested · similar to “$seed”';
+    return 'Suggested: similar to “$seed”';
   }
 
   @override
@@ -4517,7 +4517,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String suggestionsRowNote(String seed, String outcome) {
-    return 'similar to «$seed» · $outcome';
+    return 'similar to «$seed», $outcome';
   }
 
   @override
@@ -4639,7 +4639,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String radioOfflineList(String date) {
-    return 'Offline · list from $date';
+    return 'Offline, list from $date';
   }
 
   @override
