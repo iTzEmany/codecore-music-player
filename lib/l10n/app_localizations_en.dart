@@ -331,6 +331,69 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsOnline => 'Online';
 
   @override
+  String get settingsPageAppearance => 'Appearance and language';
+
+  @override
+  String get settingsPagePlayback => 'Playback';
+
+  @override
+  String get settingsPageLibrary => 'Library';
+
+  @override
+  String get settingsPageOnline => 'Online and downloads';
+
+  @override
+  String get settingsPageNetwork => 'Network and devices';
+
+  @override
+  String get settingsPageBackup => 'Backup';
+
+  @override
+  String get settingsPageAdvanced => 'Advanced and about';
+
+  @override
+  String summaryLibrary(int folders, int tracks) {
+    String _temp0 = intl.Intl.pluralLogic(
+      folders,
+      locale: localeName,
+      other: '$folders folders',
+      one: '1 folder',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      tracks,
+      locale: localeName,
+      other: '$tracks tracks',
+      one: '1 track',
+    );
+    return '$_temp0, $_temp1';
+  }
+
+  @override
+  String summaryTrusted(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count trusted devices',
+      one: '1 trusted device',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get summaryNormalizeOn => 'normalization on';
+
+  @override
+  String get summaryBackup => 'Export and restore the library';
+
+  @override
+  String summaryCrossfade(int seconds) {
+    return '$seconds s';
+  }
+
+  @override
+  String get openPlaybackSettings => 'Open Playback';
+
+  @override
   String get autoEnrich => 'Automatic enrichment';
 
   @override
@@ -1674,7 +1737,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ytErrToolOutdated =>
-      'yt-dlp is too old: update it (Settings → Downloads → Update) and try again';
+      'yt-dlp is too old: update it (Settings, Online and downloads, Update) and try again';
 
   @override
   String ytDlpOutdatedBanner(String version) {
@@ -2605,7 +2668,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get historyEmpty => 'What you listen to will show up here.';
 
   @override
-  String get historyOff => 'History is off: turn it on in Settings → Playback.';
+  String get historyOff => 'History is off: turn it on in Settings, Playback.';
 
   @override
   String get historyClear => 'Clear history';

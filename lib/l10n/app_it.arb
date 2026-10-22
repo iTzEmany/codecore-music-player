@@ -128,6 +128,43 @@
   "clearCoverCache": "Svuota cache copertine",
   "coverCacheCleared": "Cache copertine svuotata",
   "settingsOnline": "Online",
+  "settingsPageAppearance": "Aspetto e lingua",
+  "settingsPagePlayback": "Riproduzione",
+  "settingsPageLibrary": "Libreria",
+  "settingsPageOnline": "Online e download",
+  "settingsPageNetwork": "Rete e dispositivi",
+  "settingsPageBackup": "Backup",
+  "settingsPageAdvanced": "Avanzate e info",
+  "summaryLibrary": "{folders, plural, =1{1 cartella} other{{folders} cartelle}}, {tracks, plural, =1{1 brano} other{{tracks} brani}}",
+  "@summaryLibrary": {
+    "placeholders": {
+      "folders": {
+        "type": "int"
+      },
+      "tracks": {
+        "type": "int"
+      }
+    }
+  },
+  "summaryTrusted": "{count, plural, =1{1 dispositivo fidato} other{{count} dispositivi fidati}}",
+  "@summaryTrusted": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "summaryNormalizeOn": "normalizzazione accesa",
+  "summaryBackup": "Esporta e ripristina la libreria",
+  "summaryCrossfade": "{seconds} s",
+  "@summaryCrossfade": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "openPlaybackSettings": "Apri Riproduzione",
   "autoEnrich": "Arricchimento automatico",
   "autoEnrichHint": "Cerca metadati e copertine online per i brani nuovi",
   "autoLyrics": "Testi automatici",
@@ -1119,7 +1156,7 @@
   "exportSaved": "Playlist esportata",
   "exportEmpty": "La playlist è vuota",
   "exportFailed": "Impossibile esportare la playlist",
-  "ytErrToolOutdated": "yt-dlp è troppo vecchio: aggiornalo (Impostazioni → Download → Aggiorna) e riprova",
+  "ytErrToolOutdated": "yt-dlp è troppo vecchio: aggiornalo (Impostazioni, Online e download, Aggiorna) e riprova",
   "ytDlpOutdatedBanner": "yt-dlp {version} è troppo vecchio: i download potrebbero non funzionare",
   "@ytDlpOutdatedBanner": {
     "placeholders": {
@@ -1658,7 +1695,7 @@
   "historyToday": "Oggi",
   "historyYesterday": "Ieri",
   "historyEmpty": "Qui comparirà quello che ascolti.",
-  "historyOff": "La cronologia è spenta: attivala in Impostazioni → Riproduzione.",
+  "historyOff": "La cronologia è spenta: attivala in Impostazioni, Riproduzione.",
   "historyClear": "Cancella cronologia",
   "historyClearTitle": "Cancellare la cronologia?",
   "historyClearBody": "Si cancella solo l’elenco degli ascolti: contatori, preferiti e playlist restano come sono.",

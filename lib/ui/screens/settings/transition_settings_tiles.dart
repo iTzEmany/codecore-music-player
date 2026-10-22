@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/settings_providers.dart';
 import '../../../services/audio/audio_backend.dart' show TransitionMode;
+
+String transitionLabel(AppLocalizations l, TransitionMode m) => switch (m) {
+      TransitionMode.normal => l.transitionNormal,
+      TransitionMode.gapless => l.transitionGapless,
+      TransitionMode.crossfade => l.transitionCrossfade,
+    };
 
 /// «Passaggio tra i brani»: normal, gapless or crossfade, and its options.
 class TransitionSettingsTiles extends ConsumerWidget {
@@ -14,11 +21,6 @@ class TransitionSettingsTiles extends ConsumerWidget {
     final l = context.l10n;
     final s = ref.watch(settingsProvider);
     final notifier = ref.read(settingsProvider.notifier);
-    String label(TransitionMode m) => switch (m) {
-          TransitionMode.normal => l.transitionNormal,
-          TransitionMode.gapless => l.transitionGapless,
-          TransitionMode.crossfade => l.transitionCrossfade,
-        };
     return Column(
       children: [
         ListTile(
@@ -34,7 +36,7 @@ class TransitionSettingsTiles extends ConsumerWidget {
             children: [
               for (final m in TransitionMode.values)
                 ChoiceChip(
-                  label: Text(label(m)),
+                  label: Text(transitionLabel(l, m)),
                   selected: s.transition == m,
                   onSelected: (_) =>
                       notifier.update((c) => c.copyWith(transition: m)),

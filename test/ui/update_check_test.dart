@@ -37,7 +37,7 @@ void main() {
   testWidgets('no release repository: the update entries are hidden', (tester) async {
     _tall(tester);
     final h = await Harness.create(tester);
-    await h.pump(tester, const Scaffold(body: SettingsScreen()),
+    await h.pump(tester, const Scaffold(body: SettingsScreen(initial: SettingsPage.advanced)),
         extraOverrides: [releaseRepoProvider.overrideWithValue('')]);
     expect(find.text('Controlla aggiornamenti'), findsNothing);
     await h.dispose(tester);
@@ -47,7 +47,7 @@ void main() {
     _tall(tester);
     final h = await Harness.create(tester);
     final web = _Web('v9.0.0');
-    await h.pump(tester, const Scaffold(body: SettingsScreen()), extraOverrides: [
+    await h.pump(tester, const Scaffold(body: SettingsScreen(initial: SettingsPage.advanced)), extraOverrides: [
       releaseRepoProvider.overrideWithValue('me/codecore'),
       webClientProvider.overrideWithValue(web),
     ]);

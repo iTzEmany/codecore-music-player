@@ -15,8 +15,8 @@ void main() {
   testWidgets('no paired device: the section is not shown', (tester) async {
     _tall(tester);
     final h = await Harness.create(tester);
-    await h.pump(tester, const Scaffold(body: SettingsScreen()));
-    expect(find.text('Rete locale'), findsOneWidget);
+    await h.pump(tester, const Scaffold(body: SettingsScreen(initial: SettingsPage.network)));
+    expect(find.text('Rete locale'), findsNothing, reason: 'one group: no title');
     expect(find.text('Dispositivi fidati'), findsNothing);
     await h.dispose(tester);
   });
@@ -29,7 +29,7 @@ void main() {
           id: 'pc', name: 'PC di Marco', fingerprint: 'a1f309bc77d24e10ffee0011', pairedAt: 1700000000000),
     ]);
     await tester.runAsync(() => h.store.writeTrustedDevicesRaw(devices.encode()));
-    await h.pump(tester, const Scaffold(body: SettingsScreen()));
+    await h.pump(tester, const Scaffold(body: SettingsScreen(initial: SettingsPage.network)));
 
     expect(find.text('Dispositivi fidati'), findsOneWidget);
     expect(find.text('PC di Marco'), findsOneWidget);
