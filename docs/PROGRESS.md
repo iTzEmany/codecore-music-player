@@ -465,15 +465,15 @@ Richiesta (2026-10-22): «avere aggiornamenti per quanto riguarda le nuove uscit
 
 ## Fase 35 — Secondo parere da YouTube Music (`fase-35-secondo-parere-ytm.md`)
 Richiesta (2026-10-22): «Secondo parere automatico: applica solo se YouTube Music conferma», solo in «Da revisionare» e su «Riprova»; poi genere da MusicBrainz, testo dalla scheda «Testo» di YouTube Music, curiosità senza chiave (descrizione dell'artista su YouTube Music, note del master su Discogs). Si corregge «Riprova» che faceva sparire i brani non raggiunti.
-- [ ] 35.1 Fixture
-- [ ] 35.2 Conferma e scrittura
-- [ ] 35.3 «Riprova» con `force`
-- [ ] 35.4 Quando parte, controllati e raffreddamento
-- [ ] 35.5 Genere da MusicBrainz
-- [ ] 35.6 Testo dalla scheda «Testo»
-- [ ] 35.7 Interfaccia e ARB
-- [ ] 35.8 Curiosità: YouTube Music e Discogs
-- [ ] 35.9 Prova dal vivo e documentazione
+- [x] 35.1 Fixture (6b0e2c5)
+- [x] 35.2 Conferma e scrittura (64760b0, 9ceaf76)
+- [x] 35.3 «Riprova» con `force` (64760b0)
+- [x] 35.4 Quando parte, controllati e raffreddamento (64760b0, 9ceaf76)
+- [x] 35.5 Genere da MusicBrainz (64760b0, 9ceaf76)
+- [x] 35.6 Testo dalla scheda «Testo» (64760b0)
+- [x] 35.7 Interfaccia e ARB (d54078e, 5113559); registro del secondo parere in Attività, chiesto dall'utente (1651402, 2d2e319)
+- [x] 35.8 Curiosità: YouTube Music e Discogs (2afbe81, 5113559)
+- [x] 35.9 Prova dal vivo e documentazione: Motorola (APK 6061, 2026-10-22), «Da revisionare» con brani veri: 17 brani confermati da YouTube Music; scritti copertina (9), testo (5), anno e numero di traccia (1), 4 confermati senza nulla da scrivere. Nessun errore di rete né limite raggiunto nel registro.
 
 - Streaming di YouTube sul Mi A3 (notte del 2026-10-22): con yt-dlp 2026.10 i client predefiniti risolvono la sfida JS sul telefono in 50–70 s; `android_vr` ora chiede un PO token (403 da googlevideo, mascherato da ExoPlayer come «(0) Source error»). Ora: indirizzo con gli header di yt-dlp (`-j`), «Source error» = indirizzo scaduto, client veloce `visionos` (misura dal PC: unico che risponde in 2–4 s e si scarica) con ripiego ai predefiniti, Casuale+ mette in coda un suggerito solo con l'indirizzo pronto (c1b1562, f3d806c). Mi A3 (APK 6047): «Ascolta» 8–19 s (60–65 s circa 1 volta su 4, quando il client veloce non risponde entro 20 s), suggeriti suonati senza salti. Da rifinire: tempo del client veloce; verificare che «Ascolta» non lasci file (il test ha toccato per sbaglio «Scarica»).
 
