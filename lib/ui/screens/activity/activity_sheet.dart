@@ -10,6 +10,7 @@ import '../../../providers/duplicate_providers.dart';
 import '../../../providers/import_providers.dart';
 import '../../../providers/online_providers.dart';
 import '../../../providers/podcast_providers.dart';
+import '../../../providers/second_opinion_providers.dart';
 import '../../../providers/share_hub.dart';
 import '../../../providers/youtube_providers.dart';
 import '../../../services/share/offers.dart';
@@ -19,6 +20,7 @@ import '../../widgets/confirm.dart';
 import '../../widgets/format_utils.dart';
 import '../../widgets/yt_dlp_outdated_banner.dart';
 import '../import/import_detail_screen.dart';
+import '../library/second_opinion_log_screen.dart';
 import 'activity_log_screen.dart';
 
 /// Everything that runs in the background, with Cancel where it exists.
@@ -82,6 +84,8 @@ class ActivitySheet extends ConsumerWidget {
               );
         case ActivityKind.cleanup:
           ref.read(duplicateSearchProvider.notifier).cancel();
+        case ActivityKind.secondOpinion:
+          ref.read(secondOpinionJobProvider.notifier).cancel();
         case ActivityKind.import:
           cancelImport(a);
         case ActivityKind.scan:
@@ -91,10 +95,12 @@ class ActivitySheet extends ConsumerWidget {
     }
 
     Widget row(ActivityItem a) => InkWell(
-      // An import opens the list of its songs.
-      onTap: a.kind == ActivityKind.import
-          ? () => open(ImportDetailScreen(importId: a.ref! as int))
-          : null,
+      // An import opens the list of its songs, the second opinion its log.
+      onTap: switch (a.kind) {
+        ActivityKind.import => () => open(ImportDetailScreen(importId: a.ref! as int)),
+        ActivityKind.secondOpinion => () => open(const SecondOpinionLogScreen()),
+        _ => null,
+      },
       child: Padding(
         padding: const EdgeInsets.symmetric(
           horizontal: CcDims.margin,
@@ -228,6 +234,7 @@ String activityTitle(AppLocalizations l, ActivityItem a) => switch (a.kind) {
   ActivityKind.transfer => l.activityTransfer(a.name ?? '', a.total),
   ActivityKind.cleanup => l.activityCleanup(a.done, a.total),
   ActivityKind.releases => l.activityReleases,
+  ActivityKind.secondOpinion => l.activitySecondOpinion(a.done, a.total),
   ActivityKind.import =>
     a.paused
         ? l.activityImportPaused(a.name ?? '', a.done, a.total)

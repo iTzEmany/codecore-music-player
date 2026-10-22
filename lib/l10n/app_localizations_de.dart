@@ -4233,6 +4233,36 @@ class AppLocalizationsDe extends AppLocalizations {
       'YouTube Music hat um langsamere Anfragen gebeten: die übrigen Titel werden später geprüft';
 
   @override
+  String activitySecondOpinion(int done, int total) {
+    return 'Zweite Meinung: $done von $total';
+  }
+
+  @override
+  String get secondOpinionLogTitle => 'Zweite Meinung';
+
+  @override
+  String get secondOpinionLogEmpty => 'Noch keine Titel geprüft';
+
+  @override
+  String get secondOpinionConfirmed => 'Von YouTube Music bestätigt';
+
+  @override
+  String secondOpinionConfirmedFields(String fields) {
+    return 'Von YouTube Music bestätigt: $fields';
+  }
+
+  @override
+  String get secondOpinionNotConfirmed => 'Nicht bestätigt';
+
+  @override
+  String get secondOpinionNetwork =>
+      'Netzwerk nicht verfügbar, später erneut versuchen';
+
+  @override
+  String get secondOpinionThrottled =>
+      'YouTube Music hat um Verlangsamung gebeten';
+
+  @override
   String get sourceYoutubeMusic => 'Quelle: YouTube Music';
 
   @override

@@ -5,6 +5,7 @@ import 'package:codecore/providers/database_providers.dart';
 import 'package:codecore/providers/second_opinion_providers.dart';
 import 'package:codecore/providers/settings_providers.dart';
 import 'package:codecore/providers/smart_search_providers.dart';
+import 'package:codecore/services/online/enrichment_service.dart' show EnrichField;
 import 'package:codecore/services/online/query_match.dart';
 import 'package:codecore/services/online/second_opinion.dart';
 import 'package:dio/dio.dart' show CancelToken;
@@ -24,7 +25,9 @@ class _Fake implements SecondOpinion {
   @override
   Future<SecondOpinionOutcome> check(Track track, {CancelToken? cancel}) async {
     asked.add(track.id);
-    return SecondOpinionOutcome(script[(asked.length - 1) % script.length]);
+    final kind = script[(asked.length - 1) % script.length];
+    return SecondOpinionOutcome(kind,
+        written: kind == SecondOpinionKind.confirmed ? {EnrichField.genre} : const {});
   }
 
   @override
@@ -100,5 +103,17 @@ void main() {
     c.read(sourceCooldownProvider).trip(MediaKind.ytmSong);
     await c.read(secondOpinionJobProvider.notifier).run(ids);
     expect(fake.asked, isEmpty);
+  });
+
+  test('every checked track leaves a line with its outcome, newest first', () async {
+    await setUpWith([SecondOpinionKind.confirmed, SecondOpinionKind.notConfirmed]);
+    final ids = await add(2);
+    await c.read(secondOpinionJobProvider.notifier).run(ids);
+    final log = c.read(secondOpinionJobProvider).log;
+    expect(log.map((e) => e.trackId), [ids[1], ids[0]]);
+    expect(log.map((e) => e.title), ['T1', 'T0']);
+    expect(log[1].kind, SecondOpinionKind.confirmed);
+    expect(log[1].written, {EnrichField.genre});
+    expect(log[0].kind, SecondOpinionKind.notConfirmed);
   });
 }

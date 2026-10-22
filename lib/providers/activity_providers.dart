@@ -9,11 +9,12 @@ import 'library_providers.dart';
 import 'online_providers.dart';
 import 'podcast_providers.dart';
 import 'releases_providers.dart' show manualReleaseCheckProvider;
+import 'second_opinion_providers.dart';
 import 'share_hub.dart';
 import 'youtube_providers.dart';
 import '../services/import/playlist_import_service.dart';
 
-enum ActivityKind { scan, enrich, download, transfer, import, cleanup, releases }
+enum ActivityKind { scan, enrich, download, transfer, import, cleanup, releases, secondOpinion }
 
 /// One line of the Activity centre. [progress] is 0..1, null = indeterminate.
 class ActivityItem {
@@ -59,6 +60,7 @@ class ActivityItem {
           kind == ActivityKind.transfer ||
           kind == ActivityKind.import ||
           kind == ActivityKind.cleanup ||
+          kind == ActivityKind.secondOpinion ||
           kind == ActivityKind.enrich);
 }
 
@@ -87,6 +89,7 @@ ActivityState buildActivity({
   CleanupProgress? cleanup,
   List<EpisodeDownload> episodes = const [],
   bool releases = false,
+  CleanupProgress? secondOpinion,
 }) {
   final running = <ActivityItem>[];
   final completed = <ActivityItem>[];
@@ -126,6 +129,18 @@ ActivityState buildActivity({
         done: cleanup.done,
         total: cleanup.total,
         progress: cleanup.total == 0 ? null : cleanup.done / cleanup.total,
+      ),
+    );
+  }
+  if (secondOpinion != null) {
+    running.add(
+      ActivityItem(
+        kind: ActivityKind.secondOpinion,
+        key: 'secondOpinion',
+        name: null,
+        done: secondOpinion.done,
+        total: secondOpinion.total,
+        progress: secondOpinion.total == 0 ? null : secondOpinion.done / secondOpinion.total,
       ),
     );
   }
@@ -210,6 +225,11 @@ final activityProvider = Provider<ActivityState>((ref) {
     imports: ref.watch(importProgressProvider),
     episodes: ref.watch(podcastDownloadsProvider),
     releases: ref.watch(manualReleaseCheckProvider),
+    secondOpinion: ref.watch(
+      secondOpinionJobProvider.select(
+        (j) => j.running ? CleanupProgress(j.done, j.total) : null,
+      ),
+    ),
     cleanup: ref.watch(
       duplicateSearchProvider.select(
         (d) => d.running ? CleanupProgress(d.done, d.total) : null,

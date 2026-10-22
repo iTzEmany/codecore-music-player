@@ -4213,6 +4213,34 @@ class AppLocalizationsEn extends AppLocalizations {
       'YouTube Music asked to slow down: the remaining songs will be checked later';
 
   @override
+  String activitySecondOpinion(int done, int total) {
+    return 'Second opinion: $done of $total';
+  }
+
+  @override
+  String get secondOpinionLogTitle => 'Second opinion';
+
+  @override
+  String get secondOpinionLogEmpty => 'No tracks checked yet';
+
+  @override
+  String get secondOpinionConfirmed => 'Confirmed by YouTube Music';
+
+  @override
+  String secondOpinionConfirmedFields(String fields) {
+    return 'Confirmed by YouTube Music: $fields';
+  }
+
+  @override
+  String get secondOpinionNotConfirmed => 'Not confirmed';
+
+  @override
+  String get secondOpinionNetwork => 'Network unavailable, to retry';
+
+  @override
+  String get secondOpinionThrottled => 'YouTube Music asked to slow down';
+
+  @override
   String get sourceYoutubeMusic => 'Source: YouTube Music';
 
   @override

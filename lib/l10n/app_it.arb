@@ -2734,6 +2734,31 @@
     }
   },
   "reviewSecondOpinionThrottled": "YouTube Music ha chiesto di rallentare: i brani rimasti si controlleranno più tardi",
+  "activitySecondOpinion": "Secondo parere: {done} di {total}",
+  "@activitySecondOpinion": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "secondOpinionLogTitle": "Secondo parere",
+  "secondOpinionLogEmpty": "Nessun brano controllato",
+  "secondOpinionConfirmed": "Confermato da YouTube Music",
+  "secondOpinionConfirmedFields": "Confermato da YouTube Music: {fields}",
+  "@secondOpinionConfirmedFields": {
+    "placeholders": {
+      "fields": {
+        "type": "String"
+      }
+    }
+  },
+  "secondOpinionNotConfirmed": "Non confermato",
+  "secondOpinionNetwork": "Rete non disponibile, da riprovare",
+  "secondOpinionThrottled": "YouTube Music ha chiesto di rallentare",
   "sourceYoutubeMusic": "Fonte: YouTube Music",
   "curiositySourceDiscogs": "Dall'album, da Discogs",
   "navMemory": "Memoria",

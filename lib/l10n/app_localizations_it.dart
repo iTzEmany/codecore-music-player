@@ -4217,6 +4217,34 @@ class AppLocalizationsIt extends AppLocalizations {
       'YouTube Music ha chiesto di rallentare: i brani rimasti si controlleranno più tardi';
 
   @override
+  String activitySecondOpinion(int done, int total) {
+    return 'Secondo parere: $done di $total';
+  }
+
+  @override
+  String get secondOpinionLogTitle => 'Secondo parere';
+
+  @override
+  String get secondOpinionLogEmpty => 'Nessun brano controllato';
+
+  @override
+  String get secondOpinionConfirmed => 'Confermato da YouTube Music';
+
+  @override
+  String secondOpinionConfirmedFields(String fields) {
+    return 'Confermato da YouTube Music: $fields';
+  }
+
+  @override
+  String get secondOpinionNotConfirmed => 'Non confermato';
+
+  @override
+  String get secondOpinionNetwork => 'Rete non disponibile, da riprovare';
+
+  @override
+  String get secondOpinionThrottled => 'YouTube Music ha chiesto di rallentare';
+
+  @override
   String get sourceYoutubeMusic => 'Fonte: YouTube Music';
 
   @override

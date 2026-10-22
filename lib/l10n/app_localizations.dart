@@ -6543,6 +6543,54 @@ abstract class AppLocalizations {
   /// **'YouTube Music ha chiesto di rallentare: i brani rimasti si controlleranno più tardi'**
   String get reviewSecondOpinionThrottled;
 
+  /// No description provided for @activitySecondOpinion.
+  ///
+  /// In it, this message translates to:
+  /// **'Secondo parere: {done} di {total}'**
+  String activitySecondOpinion(int done, int total);
+
+  /// No description provided for @secondOpinionLogTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Secondo parere'**
+  String get secondOpinionLogTitle;
+
+  /// No description provided for @secondOpinionLogEmpty.
+  ///
+  /// In it, this message translates to:
+  /// **'Nessun brano controllato'**
+  String get secondOpinionLogEmpty;
+
+  /// No description provided for @secondOpinionConfirmed.
+  ///
+  /// In it, this message translates to:
+  /// **'Confermato da YouTube Music'**
+  String get secondOpinionConfirmed;
+
+  /// No description provided for @secondOpinionConfirmedFields.
+  ///
+  /// In it, this message translates to:
+  /// **'Confermato da YouTube Music: {fields}'**
+  String secondOpinionConfirmedFields(String fields);
+
+  /// No description provided for @secondOpinionNotConfirmed.
+  ///
+  /// In it, this message translates to:
+  /// **'Non confermato'**
+  String get secondOpinionNotConfirmed;
+
+  /// No description provided for @secondOpinionNetwork.
+  ///
+  /// In it, this message translates to:
+  /// **'Rete non disponibile, da riprovare'**
+  String get secondOpinionNetwork;
+
+  /// No description provided for @secondOpinionThrottled.
+  ///
+  /// In it, this message translates to:
+  /// **'YouTube Music ha chiesto di rallentare'**
+  String get secondOpinionThrottled;
+
   /// No description provided for @sourceYoutubeMusic.
   ///
   /// In it, this message translates to:

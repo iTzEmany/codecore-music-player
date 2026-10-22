@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/app_log.dart';
 import '../data/repositories/review_queries.dart';
+import '../services/online/enrichment_service.dart' show EnrichField;
 import '../services/online/query_match.dart';
 import '../services/online/second_opinion.dart';
 import 'database_providers.dart';
@@ -38,6 +39,27 @@ class ReviewCheckedNotifier extends Notifier<Set<int>> {
 final reviewCheckedProvider =
     NotifierProvider<ReviewCheckedNotifier, Set<int>>(ReviewCheckedNotifier.new);
 
+/// One checked track of the second-opinion job, with how it went.
+class SecondOpinionLine {
+  const SecondOpinionLine({
+    required this.trackId,
+    required this.title,
+    required this.artist,
+    required this.at,
+    required this.kind,
+    this.written = const {},
+  });
+
+  final int trackId;
+  final String title;
+  final String? artist;
+  final DateTime at;
+  final SecondOpinionKind kind;
+
+  /// The fields that got filled in.
+  final Set<EnrichField> written;
+}
+
 /// Progress of the second-opinion job. It stays filled after the job ends
 /// (`running` false), so the UI can tell the end of a run that changed
 /// something: `running` going true → false with `updated > 0`.
@@ -48,6 +70,7 @@ class SecondOpinionState {
     this.total = 0,
     this.updated = 0,
     this.throttled = false,
+    this.log = const [],
   });
 
   final bool running;
@@ -60,9 +83,14 @@ class SecondOpinionState {
 
   /// A «too many requests» answer stopped the run (the rest stays unchecked).
   final bool throttled;
+
+  /// The tracks checked in this session, newest first (at most
+  /// [SecondOpinionNotifier.logLimit]); it survives the end of a run.
+  final List<SecondOpinionLine> log;
 }
 
 class SecondOpinionNotifier extends Notifier<SecondOpinionState> {
+  static const logLimit = 2000;
   CancelToken? _cancel;
 
   @override
@@ -82,8 +110,14 @@ class SecondOpinionNotifier extends Notifier<SecondOpinionState> {
     final service = ref.read(secondOpinionProvider);
     final token = _cancel = CancelToken();
     var done = 0, updated = 0, throttled = false;
+    var log = state.log;
     void emit({bool running = true}) => state = SecondOpinionState(
-        running: running, done: done, total: todo.length, updated: updated, throttled: throttled);
+        running: running,
+        done: done,
+        total: todo.length,
+        updated: updated,
+        throttled: throttled,
+        log: log);
     emit();
     try {
       for (final id in todo) {
@@ -92,6 +126,17 @@ class SecondOpinionNotifier extends Notifier<SecondOpinionState> {
         if (t != null && (!force || reviewReasons(t).isNotEmpty)) {
           final out = await service.check(t, cancel: token);
           if (out.written.isNotEmpty) updated++;
+          log = [
+            SecondOpinionLine(
+                trackId: id,
+                title: t.title,
+                artist: t.artist,
+                at: DateTime.now(),
+                kind: out.kind,
+                written: out.written),
+            ...log,
+          ];
+          if (log.length > logLimit) log = log.sublist(0, logLimit);
           // Not marked on networkError or throttled: no real answer came, so
           // it is worth another try.
           if (out.kind == SecondOpinionKind.notConfirmed || out.kind == SecondOpinionKind.confirmed) {

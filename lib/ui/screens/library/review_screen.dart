@@ -16,6 +16,8 @@ import '../../widgets/selection_bar.dart';
 import '../../widgets/track_row.dart';
 import '../../widgets/track_row_selection.dart';
 import '../enrich_preview_dialog.dart';
+import '../../shell/shell_nav.dart';
+import 'second_opinion_log_screen.dart';
 import '../track_edit_dialog.dart';
 
 /// Library → «Da revisionare»: the songs online enrichment found nothing for,
@@ -179,7 +181,17 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
                   ],
                 ),
               )
-            : AppBar(title: Text(l.reviewTitle)),
+            : AppBar(
+                title: Text(l.reviewTitle),
+                actions: [
+                  if (job.log.isNotEmpty && !job.running)
+                    TextButton(
+                      key: const ValueKey('review-second-opinion-log'),
+                      onPressed: () => ShellNav.open<void>(context, const SecondOpinionLogScreen()),
+                      child: Text(l.activityLog),
+                    ),
+                ],
+              ),
         body: Column(
           children: [
             if (job.running)
@@ -189,10 +201,13 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
                   key: const ValueKey('review-second-opinion'),
                   children: [
                     Expanded(
-                      child: Text(
-                        l.reviewSecondOpinionProgress(job.done, job.total),
-                        style: Theme.of(context).textTheme.bodyMedium
-                            ?.copyWith(color: context.cc.textMuted),
+                      child: InkWell(
+                        onTap: () => ShellNav.open<void>(context, const SecondOpinionLogScreen()),
+                        child: Text(
+                          l.reviewSecondOpinionProgress(job.done, job.total),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(color: context.cc.textMuted),
+                        ),
                       ),
                     ),
                     TextButton(

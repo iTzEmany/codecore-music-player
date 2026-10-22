@@ -8,6 +8,7 @@ import 'activity_providers.dart';
 import 'database_providers.dart';
 import 'import_providers.dart';
 import 'podcast_providers.dart';
+import 'second_opinion_providers.dart';
 import 'youtube_providers.dart';
 
 /// One line of the Registro: something that ended, and when.
@@ -41,6 +42,23 @@ class ActivityLogNotifier extends Notifier<List<LogEntry>> {
     ref.listen<AsyncValue<ImportEvent>>(importEventsProvider, (_, e) {
       final event = e.value;
       if (event != null) unawaited(_recordImport(event));
+    });
+    ref.listen<SecondOpinionState>(secondOpinionJobProvider, (prev, s) {
+      if (prev == null || !prev.running || s.running) return;
+      _add([
+        LogEntry(
+          at: DateTime.now(),
+          item: ActivityItem(
+            kind: ActivityKind.secondOpinion,
+            key: 'secondOpinion-${DateTime.now().microsecondsSinceEpoch}',
+            name: null,
+            done: s.done,
+            total: s.total,
+            running: false,
+            failed: s.throttled,
+          ),
+        ),
+      ]);
     });
     return const [];
   }

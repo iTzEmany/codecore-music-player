@@ -9,6 +9,8 @@ import '../../../providers/activity_providers.dart';
 import '../../../services/import/playlist_import_service.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/empty_state.dart';
+import '../library/second_opinion_log_screen.dart';
+import '../../shell/shell_nav.dart';
 import 'activity_sheet.dart';
 
 /// What ended in the background (downloads, transfers, imports), newest
@@ -31,6 +33,7 @@ class ActivityLogScreen extends ConsumerWidget {
     if (e.failed) return Icons.error_outline_rounded;
     return switch (e.item?.kind) {
       ActivityKind.transfer => Icons.send_rounded,
+      ActivityKind.secondOpinion => Icons.fact_check_outlined,
       null => Icons.playlist_add_check_rounded,
       _ => Icons.download_done_rounded,
     };
@@ -63,6 +66,9 @@ class ActivityLogScreen extends ConsumerWidget {
                 final e = entries[i];
                 final item = e.item;
                 return ListTile(
+                  onTap: item?.kind == ActivityKind.secondOpinion
+                      ? () => ShellNav.open<void>(context, const SecondOpinionLogScreen())
+                      : null,
                   leading: Icon(_icon(e), color: e.failed ? cc.error : cc.accentSoft),
                   title: Text(
                     item != null ? activityTitle(l, item) : l.logImport(e.importName ?? ''),
