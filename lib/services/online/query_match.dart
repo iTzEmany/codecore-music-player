@@ -17,6 +17,9 @@ const _scoreRange = 0.55;
 
 /// Versions the phrase may ask for; a result without it is a different recording.
 const _askedVersionPenalty = 0.7;
+/// Studio leftovers: a different recording unless the phrase asks for it.
+const _alternateTakes = ['take', 'demo', 'alternate', 'outtake', 'rehearsal'];
+const _alternateTakePenalty = 0.8;
 const _tooShort = Duration(seconds: 60);
 const _tooLong = Duration(minutes: 20);
 const _shortPenalty = 0.5;
@@ -24,6 +27,10 @@ const _longPenalty = 0.5;
 const _otherArtistPenalty = 0.8;
 const _rankBonus = [0.05, 0.03];
 const _cardSongBonus = 0.10;
+
+/// The artist is in the phrase but none of the words asked for as title is in
+/// the result: it is another song of theirs.
+const _noTitleWordPenalty = 0.6;
 
 /// Phrases that ask for a long recording: no penalty for a result over 20 min.
 const _longAsks = ['mix', 'set', 'live', 'concerto', 'full album'];
@@ -45,22 +52,39 @@ class ScoredResult {
   ScoredResult withConfidence(double c) => ScoredResult(result, c, source, position);
 }
 
-/// The names [r] credits (artists, the one in «Artist - Title», the channel
-/// without «- Topic»/VEVO/Official) that are in the phrase, longest first.
-String? _recognizedArtist(String queryKey, YtResult r) {
+/// The name [r] credits (artists, the one in «Artist - Title», the channel
+/// without «- Topic»/VEVO/Official) that is in the phrase, longest first:
+/// [name] as credited, [typed] as it stands in the phrase.
+typedef _Recognized = ({String name, String typed});
+
+_Recognized? _recognizedArtist(String queryKey, YtResult r) {
   final clean = cleanSearchQuery(r.title, r.channel);
   final names = <String>{
     ...r.artists,
     clean.artist,
     matchKey(r.channel).replaceFirst(_channelNoise, '').trim(),
   };
-  String? best;
+  _Recognized? best;
   for (final n in names) {
     final key = matchKey(n);
-    if (key.length < 2 || !hasPhrase(queryKey, key)) continue;
-    if (best == null || key.length > best.length) best = key;
+    if (key.length < 2) continue;
+    final typed = hasPhrase(queryKey, key) ? key : _typedStartOf(queryKey, key);
+    if (typed == null) continue;
+    if (best == null || typed.length > best.typed.length) best = (name: key, typed: typed);
   }
   return best;
+}
+
+/// People drop the tail of a band name («jimi hendrix» for «The Jimi Hendrix
+/// Experience»): the words of the phrase that start the name (without «the»),
+/// at least two of them.
+String? _typedStartOf(String queryKey, String name) {
+  final words = (name.startsWith('the ') ? name.substring(4) : name).split(' ');
+  for (var n = words.length - 1; n >= 2; n--) {
+    final start = words.take(n).join(' ');
+    if (hasPhrase(queryKey, start)) return start;
+  }
+  return null;
 }
 
 String _without(String queryKey, String phrase) {
@@ -82,18 +106,26 @@ double queryConfidence(String query, YtResult r,
   final artist = _recognizedArtist(queryKey, r);
   // With only the artist in the phrase the title cannot tell results apart:
   // every song of theirs fits, and the version words are not compared.
-  final rest = artist == null ? queryKey : _without(queryKey, artist);
+  final rest = artist == null ? queryKey : _without(queryKey, artist.typed);
   final row = ImportRow(
     index: 0,
     title: rest.isEmpty ? r.title : rest,
-    artists: artist == null ? const [] : [artist],
+    artists: artist == null ? const [] : [artist.name],
   );
   var c = (scoreCandidate(row, r) - _neutralDuration) / _scoreRange;
 
   final gotTitle = matchTitleKey(r.title);
   final gotWords = gotTitle.split(' ').toSet();
+  if (artist != null &&
+      rest.isNotEmpty &&
+      !rest.split(' ').any(gotWords.contains)) {
+    c *= _noTitleWordPenalty;
+  }
   if (otherVersions.any((w) => hasPhrase(queryKey, w) && !hasPhrase(gotTitle, w))) {
     c *= _askedVersionPenalty;
+  }
+  if (_alternateTakes.any((w) => !hasPhrase(queryKey, w) && hasPhrase(gotTitle, w))) {
+    c *= _alternateTakePenalty;
   }
   final length = r.duration;
   if (length != null && length < _tooShort) c *= _shortPenalty;
