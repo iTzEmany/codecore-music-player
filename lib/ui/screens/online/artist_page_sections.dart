@@ -4,6 +4,7 @@ import '../../../l10n/l10n_ext.dart';
 import '../../../services/online/google_thumb.dart';
 import '../../../services/online/ytm_artist.dart';
 import '../../theme/tokens.dart';
+import '../../widgets/collection_header.dart';
 import '../../widgets/net_thumbnail.dart';
 import '../../widgets/section_header.dart';
 
@@ -30,34 +31,18 @@ class ArtistHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cc = context.cc;
-    final theme = Theme.of(context).textTheme;
     final text = audience ?? artist.audience;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(CcDims.margin, 0, CcDims.margin, 8),
-      child: Column(
-        children: [
-          NetThumbnail(
-            url: thumbAt(context, artist.thumbnailUrl, 140),
-            width: 140,
-            height: 140,
-            icon: Icons.person_rounded,
-            circle: true,
-          ),
-          const SizedBox(height: 12),
-          Text(artist.name,
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: theme.displaySmall),
-          if (text != null && text.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: Text(text, style: theme.bodyMedium?.copyWith(color: cc.textMuted)),
-            ),
-          if (action != null) Padding(padding: const EdgeInsets.only(top: 12), child: action),
-        ],
+    return CollectionHeader(
+      cover: (s) => NetThumbnail(
+        url: thumbAt(context, artist.thumbnailUrl, s.round().toDouble()),
+        width: s,
+        height: s,
+        icon: Icons.person_rounded,
+        circle: true,
       ),
+      name: artist.name,
+      meta: text == null || text.isEmpty ? null : text,
+      actions: [?action],
     );
   }
 }

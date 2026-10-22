@@ -60,7 +60,7 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('download-album')));
     await _settle(tester);
     expect(find.text('Scaricare «The Wall»?'), findsOneWidget);
-    expect(find.textContaining('3 brani · 8 min'), findsOneWidget);
+    expect(find.textContaining('3 brani, 8 min'), findsOneWidget);
     await tester.tap(find.text('Annulla'));
     await _settle(tester);
     expect(find.text('Scaricare «The Wall»?'), findsNothing);

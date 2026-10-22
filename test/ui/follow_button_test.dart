@@ -3,6 +3,7 @@ import 'package:codecore/data/repositories/follow_repository.dart';
 import 'package:codecore/services/online/ytm_artist.dart';
 import 'package:codecore/ui/screens/releases/follow_button.dart';
 import 'package:codecore/ui/screens/releases/followed_artists_screen.dart';
+import 'package:codecore/ui/theme/tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -60,6 +61,18 @@ void main() {
       await close(tester);
     },
   );
+
+  testWidgets('following state is outlined with the accent', (tester) async {
+    await open(tester, const Scaffold(body: FollowButton(artist: _queen)));
+    await tester.tap(find.byKey(const ValueKey('follow-button')));
+    await _settle(tester);
+    final b = tester.widget<OutlinedButton>(
+      find.byKey(const ValueKey('following-button')),
+    );
+    final fg = b.style!.foregroundColor!.resolve({});
+    expect(fg, tester.element(find.byType(OutlinedButton)).cc.accent);
+    await close(tester);
+  });
 
   testWidgets('stopping asks first; confirming takes the artist off the list', (
     tester,

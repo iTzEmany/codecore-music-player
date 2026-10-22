@@ -72,55 +72,11 @@ class _CollectionScaffoldState extends State<CollectionScaffold> {
   @override
   Widget build(BuildContext context) {
     final cc = context.cc;
-    final theme = Theme.of(context).textTheme;
-    final scale = MediaQuery.textScalerOf(context).scale(1);
-    final width = MediaQuery.sizeOf(context).width;
-    final wide = width >= CcDims.wideBreakpoint;
-    final stacked = !wide && (width / scale < 300 || width < 360);
-    final coverSize = wide ? 200.0 : 128.0;
-    final info = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          widget.name,
-          key: const ValueKey('collection-name'),
-          maxLines: 3,
-          overflow: TextOverflow.ellipsis,
-          style: wide ? theme.displaySmall : theme.headlineSmall,
-        ),
-        if (widget.subtitle != null) ...[
-          const SizedBox(height: 6),
-          DefaultTextStyle.merge(
-            style: theme.bodyLarge?.copyWith(color: cc.textMuted),
-            child: widget.subtitle!,
-          ),
-        ],
-        if (widget.meta != null) ...[
-          const SizedBox(height: 4),
-          Text(
-            widget.meta!,
-            style: theme.bodyMedium?.copyWith(color: cc.textMuted),
-          ),
-        ],
-      ],
-    );
-    final coverBox = widget.cover == null
-        ? null
-        : KeyedSubtree(
-            key: const ValueKey('collection-cover'),
-            child: widget.cover!(coverSize),
-          );
-    final actions = Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      children: [
-        if (widget.onPlay != null) PlayPill(onPressed: widget.onPlay),
-        if (widget.onShuffle != null) ShufflePill(onPressed: widget.onShuffle),
-        ?widget.menu,
-      ],
-    );
+    final actions = [
+      if (widget.onPlay != null) PlayPill(onPressed: widget.onPlay),
+      if (widget.onShuffle != null) ShufflePill(onPressed: widget.onShuffle),
+      ?widget.menu,
+    ];
     return Scaffold(
       backgroundColor: cc.bg,
       body: Stack(
@@ -146,43 +102,12 @@ class _CollectionScaffoldState extends State<CollectionScaffold> {
                   actions: widget.barActions,
                 ),
                 SliverToBoxAdapter(
-                  child: Align(
-                    alignment: Alignment.topLeft,
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxWidth: wide ? 960 : double.infinity,
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(
-                          CcDims.margin,
-                          8,
-                          CcDims.margin,
-                          12,
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (coverBox == null)
-                              info
-                            else if (stacked) ...[
-                              coverBox,
-                              const SizedBox(height: 16),
-                              info,
-                            ] else
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  coverBox,
-                                  SizedBox(width: wide ? 24 : 16),
-                                  Expanded(child: info),
-                                ],
-                              ),
-                            const SizedBox(height: 16),
-                            actions,
-                          ],
-                        ),
-                      ),
-                    ),
+                  child: CollectionHeader(
+                    cover: widget.cover,
+                    name: widget.name,
+                    subtitle: widget.subtitle,
+                    meta: widget.meta,
+                    actions: actions,
                   ),
                 ),
                 ...widget.slivers,
@@ -193,6 +118,112 @@ class _CollectionScaffoldState extends State<CollectionScaffold> {
           if (widget.selectionBar != null)
             Positioned(top: 0, left: 0, right: 0, child: widget.selectionBar!),
         ],
+      ),
+    );
+  }
+}
+
+/// Cover at the left of name and meta (above them when the text is large),
+/// then the actions in a wrapping row. Shared by the local and online pages.
+class CollectionHeader extends StatelessWidget {
+  const CollectionHeader({
+    super.key,
+    this.cover,
+    required this.name,
+    this.subtitle,
+    this.meta,
+    this.actions = const [],
+  });
+
+  /// Builds the cover at the given size; null lays out the text only.
+  final Widget Function(double size)? cover;
+  final String name;
+
+  /// A line under the name (e.g. the artist link).
+  final Widget? subtitle;
+  final String? meta;
+  final List<Widget> actions;
+
+  @override
+  Widget build(BuildContext context) {
+    final cc = context.cc;
+    final theme = Theme.of(context).textTheme;
+    final scale = MediaQuery.textScalerOf(context).scale(1);
+    final width = MediaQuery.sizeOf(context).width;
+    final wide = width >= CcDims.wideBreakpoint;
+    final stacked = !wide && (width / scale < 300 || width < 360);
+    final coverSize = wide ? 200.0 : 128.0;
+    final info = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          name,
+          key: const ValueKey('collection-name'),
+          maxLines: 3,
+          overflow: TextOverflow.ellipsis,
+          style: wide ? theme.displaySmall : theme.headlineSmall,
+        ),
+        if (subtitle != null) ...[
+          const SizedBox(height: 6),
+          DefaultTextStyle.merge(
+            style: theme.bodyLarge?.copyWith(color: cc.textMuted),
+            child: subtitle!,
+          ),
+        ],
+        if (meta != null) ...[
+          const SizedBox(height: 4),
+          Text(meta!, style: theme.bodyMedium?.copyWith(color: cc.textMuted)),
+        ],
+      ],
+    );
+    final coverBox = cover == null
+        ? null
+        : KeyedSubtree(
+            key: const ValueKey('collection-cover'),
+            child: cover!(coverSize),
+          );
+    return Align(
+      alignment: Alignment.topLeft,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: wide ? 960 : double.infinity),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            CcDims.margin,
+            8,
+            CcDims.margin,
+            12,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (coverBox == null)
+                info
+              else if (stacked) ...[
+                coverBox,
+                const SizedBox(height: 16),
+                info,
+              ] else
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    coverBox,
+                    SizedBox(width: wide ? 24 : 16),
+                    Expanded(child: info),
+                  ],
+                ),
+              if (actions.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: actions,
+                ),
+              ],
+            ],
+          ),
+        ),
       ),
     );
   }
