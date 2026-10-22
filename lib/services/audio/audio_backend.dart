@@ -30,6 +30,10 @@ abstract class AudioBackend {
 
   /// Streams from [uri] (Jam: another device on the LAN). Same errors as [load].
   Future<void> loadUri(Uri uri, {Map<String, String> headers = const {}});
+
+  /// The «now playing» text of a live stream (ICY), null where the stream or
+  /// the platform gives none.
+  Stream<String?> get streamTitle;
   Future<void> play();
   Future<void> pause();
   Future<void> stop();

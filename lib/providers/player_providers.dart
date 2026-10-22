@@ -10,6 +10,7 @@ import '../data/db/app_database.dart';
 import '../services/audio/codecore_audio_handler.dart';
 import '../services/audio/online_entries.dart';
 import '../services/audio/play_queue.dart';
+import '../services/radio/radio_station.dart';
 import '../services/audio/playback_persistence.dart';
 import 'database_providers.dart';
 import 'queue_tracks.dart';
@@ -35,7 +36,7 @@ final playerErrorsProvider = Provider<Stream<PlaybackFailure>>(
 );
 
 /// Where the current queue came from, shown as «In riproduzione da».
-enum PlayContextKind { album, artist, playlist, favorites, library, search, podcast }
+enum PlayContextKind { album, artist, playlist, favorites, library, search, podcast, radio }
 
 class PlayContext {
   const PlayContext(this.kind, [this.name]);
@@ -87,6 +88,21 @@ class PlayerController {
     _handler.setPlayContext(context?.kind.index, context?.name);
     _requestNotificationPermissionOnce();
     await _handler.playQueue([for (final t in snapshot) t.id], index);
+  }
+
+  /// Plays a list of radio stations from [index]; next and previous move
+  /// between them. Radio leaves no history and no statistics.
+  Future<void> playStations(
+    List<RadioStation> stations,
+    int index, {
+    PlayContext? context,
+  }) async {
+    if (stations.isEmpty) return;
+    final ctx = context ?? const PlayContext(PlayContextKind.radio);
+    onContext?.call(ctx);
+    _handler.setPlayContext(null, null);
+    _requestNotificationPermissionOnce();
+    await _handler.playStations(stations, index);
   }
 
   Future<void> togglePlayPause() => _handler.togglePlayPause();

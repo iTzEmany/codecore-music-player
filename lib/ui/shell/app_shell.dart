@@ -98,6 +98,8 @@ class AppShell extends ConsumerWidget {
         PlaybackFailureReason.unplayable => l.reasonUnplayable,
         PlaybackFailureReason.notInLibrary => l.reasonNotInLibrary,
         PlaybackFailureReason.onlineUnavailable => l.reasonOnlineUnavailable,
+        // TODO(33.8): own string «La radio non risponde» once the ARB is free.
+        PlaybackFailureReason.radioUnavailable => l.reasonOnlineUnavailable,
       };
       ScaffoldMessenger.of(context)
         ..clearSnackBars()

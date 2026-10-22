@@ -12,6 +12,8 @@ import '../online/google_thumb.dart';
 import '../online/youtube_service.dart';
 import 'crossfade_engine.dart';
 import 'equalizer.dart';
+import '../radio/icy_title.dart';
+import '../radio/radio_station.dart';
 import 'next_window.dart';
 import 'online_entries.dart';
 import 'media_browse_tree.dart';
@@ -20,7 +22,13 @@ import 'remote_transport.dart';
 import 'resume_point.dart';
 import 'stream_address_cache.dart';
 
-enum PlaybackFailureReason { fileMissing, unplayable, notInLibrary, onlineUnavailable }
+enum PlaybackFailureReason {
+  fileMissing,
+  unplayable,
+  notInLibrary,
+  onlineUnavailable,
+  radioUnavailable,
+}
 
 class PlaybackFailure {
   const PlaybackFailure(this.title, this.reason);
@@ -40,14 +48,18 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     this.onEpisodeHeard,
     this.online,
     this.addresses,
-  })  : _backend = backend,
+    this.onRadioStart,
+    DateTime Function()? clock,
+  })  : _clock = clock ?? DateTime.now,
+        _backend = backend,
         _window = backend is GaplessCapable
             ? NextWindow(_queue, _tracks, backend as GaplessCapable)
             : null {
     _subs
       ..add(_backend.state.listen(_onBackendState))
       ..add(_backend.position.listen(_onPosition))
-      ..add(_backend.duration.listen(_onBackendDuration));
+      ..add(_backend.duration.listen(_onBackendDuration))
+      ..add(_backend.streamTitle.listen(_onStreamTitle));
     if (backend is GaplessCapable) {
       _subs.add((backend as GaplessCapable)
           .advanced
@@ -56,6 +68,17 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   }
 
   static const maxConsecutiveErrors = 3;
+
+  /// Waits before the 1st, 2nd and 3rd new attempt when a radio stream drops.
+  static const radioRetryDelays = [
+    Duration(seconds: 2),
+    Duration(seconds: 5),
+    Duration(seconds: 15),
+  ];
+
+  /// A radio paused for longer has lost its stream: resuming connects again.
+  static const radioResumeAfter = Duration(seconds: 30);
+  static const _radioSteadyAfter = Duration(seconds: 10);
 
   final AudioBackend _backend;
   final PlayHistoryRepository? history;
@@ -70,6 +93,12 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   /// library tracks.
   final OnlineEntries? online;
   final StreamAddressCache? addresses;
+
+  /// Told (without waiting) each time a radio station starts, not on a
+  /// reconnection: the click Radio Browser asks for, the «last played» of a
+  /// saved station.
+  final void Function(RadioStation station)? onRadioStart;
+  final DateTime Function() _clock;
   final NextWindow? _window;
   final PlayQueue _queue;
   final TrackRepository _tracks;
@@ -102,6 +131,31 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   Duration? _lastTick;
   Duration _lastResumeSave = Duration.zero;
   bool _handlingCompleted = false;
+
+  // Live radio: the cleaned «now playing» text, the new attempts after a drop
+  // and when the stream was left paused.
+  String? _onAir;
+  final _onAirController = StreamController<String?>.broadcast();
+  int _radioRetries = 0;
+  bool _radioBusy = false;
+  bool _radioStale = false;
+  Timer? _retryTimer;
+  Timer? _steadyTimer;
+  DateTime? _radioPausedAt;
+  ({bool shuffle, PlayRepeat repeat})? _beforeRadio;
+
+  /// The station playing now, if the current entry is a radio.
+  RadioEntry? get _radioNow {
+    final id = _current?.id;
+    return id == null || !isOnlineId(id) ? null : online?.radioOf(id);
+  }
+
+  /// Whether the current entry is a live radio (no length, no seeking).
+  bool get isRadio => _radioNow != null;
+
+  /// What the station says is on air, or null.
+  String? get onAir => _onAir;
+  Stream<String?> get onAirStream => _onAirController.stream;
 
   /// Sleep timer "end of track": the next track is loaded but not started.
   bool get pauseAtTrackEnd => _pauseAtTrackEnd;
@@ -175,11 +229,37 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   List<int>? get sourceIds => _source == null ? null : List.unmodifiable(_source!);
 
   Future<void> playQueue(List<int> ids, int index) async {
+    _leaveRadioMode();
     _source = List.of(ids);
     _queue.setItems(ids, startIndex: index);
     _consecutiveErrors = 0;
     _queueController.add(null);
     await _loadCurrent(play: true);
+  }
+
+  /// Plays [stations] from [index]: the queue is that list, so next and
+  /// previous move between stations. Shuffle and repeat are set aside until
+  /// something else is played.
+  Future<void> playStations(List<RadioStation> stations, int index) async {
+    final registry = online;
+    if (registry == null || stations.isEmpty) return;
+    final ids = [for (final s in stations) registry.registerRadio(s)];
+    _beforeRadio ??= (shuffle: _queue.shuffle, repeat: _queue.repeat);
+    _queue.shuffle = false;
+    _queue.repeat = PlayRepeat.off;
+    _source = List.of(ids);
+    _queue.setItems(ids, startIndex: index);
+    _consecutiveErrors = 0;
+    _queueController.add(null);
+    await _loadCurrent(play: true);
+  }
+
+  void _leaveRadioMode() {
+    final before = _beforeRadio;
+    if (before == null) return;
+    _beforeRadio = null;
+    _queue.shuffle = before.shuffle;
+    _queue.repeat = before.repeat;
   }
 
   /// What Android Auto and other media browsers see (set at start-up).
@@ -230,6 +310,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
 
   /// Loads the queue paused, at [position] (used to resume after a restart).
   Future<void> restore(List<int> ids, int index, Duration position) async {
+    _leaveRadioMode();
     _source = List.of(ids);
     _queue.setItems(ids, startIndex: index, alreadyShuffled: true);
     _queueController.add(null);
@@ -238,6 +319,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
 
   Future<void> _loadCurrent({required bool play, Duration? startAt}) async {
     final token = ++_loadToken;
+    _cancelRadioTimers();
     final id = _queue.currentId;
     if (id == null) {
       await _goIdle();
@@ -245,6 +327,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     }
     final isOnline = isOnlineId(id);
     final entry = isOnline ? online?.entryOf(id) : null;
+    final radio = isOnline ? online?.radioOf(id) : null;
     final track = isOnline ? online?.trackOf(id) : await _tracks.getById(id);
     if (token != _loadToken) return;
     if (track == null) {
@@ -262,14 +345,24 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     _enterTrack(track);
     _publish(AudioProcessingState.loading);
     try {
-      if (entry != null) {
+      if (radio != null) {
+        _radioBusy = true;
+        if (play) _notifyRadioStart(radio.station);
+        await _backend.loadUri(_streamUri(radio.station));
+      } else if (entry != null) {
         await _loadStream(entry.result);
       } else {
         await _backend.load(track.path);
       }
       if (token != _loadToken) return;
-      // Some backends forget the rate when a new file is loaded.
-      if (_speed != 1.0) await _backend.setSpeed(_speed);
+      // Some backends forget the rate when a new file is loaded. A live
+      // stream cannot be sped up: it plays at 1× until a track comes.
+      if (radio != null) {
+        _radioBusy = false;
+        if (_speed != 1.0) await _backend.setSpeed(1.0);
+      } else if (_speed != 1.0) {
+        await _backend.setSpeed(_speed);
+      }
       if (start != null && start > Duration.zero) {
         await _backend.seek(start);
       }
@@ -284,6 +377,12 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     } on BackendException catch (e) {
       if (token != _loadToken) return;
       AppLog.w('load failed: ${e.message}');
+      if (radio != null) {
+        _radioBusy = false;
+        _radioRetries = 0;
+        _scheduleRadioRetry(radio, token);
+        return;
+      }
       await _failAndSkip(
           isOnline
               ? PlaybackFailureReason.onlineUnavailable
@@ -293,6 +392,93 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
           track,
           token);
     }
+  }
+
+  Uri _streamUri(RadioStation s) {
+    final uri = Uri.tryParse(s.streamUrl);
+    if (uri == null || !uri.hasScheme) {
+      throw const BackendException('bad stream address');
+    }
+    return uri;
+  }
+
+  void _notifyRadioStart(RadioStation station) {
+    try {
+      onRadioStart?.call(station);
+    } on Object catch (e, st) {
+      AppLog.w('radio start hook failed', e, st);
+    }
+  }
+
+  void _cancelRadioTimers() {
+    _retryTimer?.cancel();
+    _retryTimer = null;
+    _steadyTimer?.cancel();
+    _steadyTimer = null;
+    _radioBusy = false;
+  }
+
+  /// The stream dropped or could not be opened: tries again after 2, 5 and
+  /// 15 seconds, then gives up. It never jumps to another station.
+  void _scheduleRadioRetry(RadioEntry radio, int token) {
+    if (_radioRetries >= radioRetryDelays.length) {
+      _radioRetries = 0;
+      onError(PlaybackFailure(radio.station.name, PlaybackFailureReason.radioUnavailable));
+      unawaited(_goIdle());
+      return;
+    }
+    final delay = radioRetryDelays[_radioRetries++];
+    AppLog.w('radio "${radio.station.name}" down, new attempt in ${delay.inSeconds}s');
+    _publish(AudioProcessingState.loading);
+    _retryTimer?.cancel();
+    _retryTimer = Timer(delay, () {
+      if (token != _loadToken) return;
+      unawaited(_reconnectRadio(radio, token));
+    });
+  }
+
+  Future<void> _reconnectRadio(RadioEntry radio, int token) async {
+    _radioBusy = true;
+    _publish(AudioProcessingState.loading);
+    try {
+      await _backend.loadUri(_streamUri(radio.station));
+      if (token != _loadToken) return;
+      _radioBusy = false;
+      _radioStale = false;
+      _radioPausedAt = null;
+      await _backend.play();
+    } on BackendException catch (e) {
+      if (token != _loadToken) return;
+      AppLog.w('radio reconnection failed: ${e.message}');
+      _radioBusy = false;
+      _scheduleRadioRetry(radio, token);
+    }
+  }
+
+  /// A drop seen while playing; while paused it is only remembered, and the
+  /// next play connects again.
+  void _onRadioDrop(RadioEntry radio, bool wasLive) {
+    if (_radioBusy || (_retryTimer?.isActive ?? false)) return;
+    if (!wasLive) {
+      _radioStale = true;
+      return;
+    }
+    _radioRetries = 0;
+    _scheduleRadioRetry(radio, _loadToken);
+  }
+
+  void _onStreamTitle(String? raw) {
+    final radio = _radioNow;
+    if (radio == null) return;
+    _setOnAir(cleanIcyTitle(raw, radio.station.name));
+  }
+
+  void _setOnAir(String? value) {
+    if (value == _onAir) return;
+    _onAir = value;
+    _onAirController.add(value);
+    final t = _current;
+    if (t != null && _remote == null) mediaItem.add(_toMediaItem(t));
   }
 
   /// Loads an online entry from its direct address. An address that answers
@@ -323,6 +509,10 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   /// A podcast file's tags or the feed often carry a wrong length: once the
   /// player knows the real one, the library row takes it.
   void _onBackendDuration(Duration? d) {
+    if (isRadio) {
+      _duration = null; // a live stream has no length
+      return;
+    }
     _duration = d;
     final t = _current;
     if (d == null || t == null || t.kind != 1) return;
@@ -345,6 +535,10 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     _position = Duration.zero;
     _duration = track.durationMs > 0 ? Duration(milliseconds: track.durationMs) : null;
     _current = track;
+    if (_onAir != null) {
+      _onAir = null;
+      _onAirController.add(null);
+    }
     _trackController.add(track);
     mediaItem.add(_toMediaItem(track));
   }
@@ -366,12 +560,20 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   }
 
   Future<void> _goIdle() async {
+    _cancelRadioTimers();
+    _radioRetries = 0;
+    _radioStale = false;
+    _radioPausedAt = null;
     _endListen();
     _saveResume();
     _window?.clear();
     _loadToken++;
     await _backend.stop();
     _current = null;
+    if (_onAir != null) {
+      _onAir = null;
+      _onAirController.add(null);
+    }
     _position = Duration.zero;
     _trackController.add(null);
     mediaItem.add(null);
@@ -379,6 +581,17 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   }
 
   MediaItem _toMediaItem(Track t) {
+    final radio = isOnlineId(t.id) ? online?.radioOf(t.id) : null;
+    if (radio != null) {
+      final icon = radio.station.faviconUrl;
+      return MediaItem(
+        id: 'radio:${radio.station.id}',
+        title: _onAir ?? radio.station.name,
+        artist: _onAir == null ? null : radio.station.name,
+        artUri: icon.isEmpty ? null : Uri.tryParse(icon),
+        extras: const {'online': true, 'radio': true},
+      );
+    }
     final entry = isOnlineId(t.id) ? online?.entryOf(t.id) : null;
     if (entry != null) {
       final thumb = entry.result.thumbnailUrl;
@@ -405,7 +618,25 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
 
   void _onBackendState(BackendState s) {
     final wasPlaying = _state == BackendState.playing;
+    final wasLive = wasPlaying || _state == BackendState.loading;
     _state = s;
+    final radio = _radioNow;
+    if (radio != null) {
+      if (wasPlaying && s == BackendState.paused) _radioPausedAt = _clock();
+      _steadyTimer?.cancel();
+      if (s == BackendState.playing) {
+        // A stream that holds for a while has earned a fresh set of attempts.
+        _steadyTimer = Timer(_radioSteadyAfter, () => _radioRetries = 0);
+      }
+      if (s == BackendState.completed || s == BackendState.error) {
+        _onRadioDrop(radio, wasLive);
+        return;
+      }
+    } else if (s == BackendState.error) {
+      // A player error nobody asked about: the load that caused it reports it.
+      AppLog.w('player reported an error');
+      return;
+    }
     if (wasPlaying && s == BackendState.paused) {
       _saveResume();
       _flushListen();
@@ -626,6 +857,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   void _publish(AudioProcessingState processing) {
     if (_remote != null) return; // the Jam owns the notification
     final playing = _state == BackendState.playing;
+    final live = isRadio;
     playbackState.add(PlaybackState(
       processingState: processing,
       playing: playing,
@@ -635,9 +867,9 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
         MediaControl.skipToNext,
       ],
       androidCompactActionIndices: const [0, 1, 2],
-      systemActions: const {MediaAction.seek},
+      systemActions: live ? const {} : const {MediaAction.seek},
       updatePosition: _position,
-      speed: _speed,
+      speed: live ? 1.0 : _speed,
       queueIndex: _queue.currentIndex < 0 ? null : _queue.currentIndex,
       shuffleMode: _queue.shuffle
           ? AudioServiceShuffleMode.all
@@ -670,7 +902,20 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
       await _loadCurrent(play: true);
       return;
     }
+    final radio = _radioNow;
+    if (radio != null && _radioWentStale()) {
+      _radioRetries = 0;
+      _cancelRadioTimers();
+      await _reconnectRadio(radio, ++_loadToken);
+      return;
+    }
     await _backend.play();
+  }
+
+  bool _radioWentStale() {
+    if (_radioStale) return true;
+    final since = _radioPausedAt;
+    return since != null && _clock().difference(since) > radioResumeAfter;
   }
 
   @override
@@ -687,6 +932,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   Future<void> seek(Duration position) async {
     final remote = _remote;
     if (remote != null) return remote.seek(position);
+    if (isRadio) return; // live: nothing to seek in
     _position = position;
     await _backend.seek(position);
     _publish(playbackState.value.processingState);
@@ -697,7 +943,12 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     final remote = _remote;
     if (remote != null) return remote.next();
     if (_queue.currentId == null) return;
-    final next = _queue.next();
+    var next = _queue.next();
+    // Past the last station the list starts again.
+    if (next == null && isRadio && _queue.items.length > 1) {
+      _queue.jumpTo(0);
+      next = _queue.currentId;
+    }
     if (next == null) {
       await _goIdle();
       return;
@@ -713,7 +964,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
       return;
     }
     if (_queue.currentId == null) return;
-    if (_position > const Duration(seconds: 3)) {
+    if (!isRadio && _position > const Duration(seconds: 3)) {
       await seek(Duration.zero);
       return;
     }
@@ -832,6 +1083,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
 
   @override
   Future<void> setShuffleMode(AudioServiceShuffleMode shuffleMode) async {
+    if (isRadio) return; // a list of stations is never shuffled
     _queue.shuffle = shuffleMode != AudioServiceShuffleMode.none;
     _queueController.add(null);
     unawaited(_refreshWindow());
@@ -840,6 +1092,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
 
   @override
   Future<void> setRepeatMode(AudioServiceRepeatMode repeatMode) async {
+    if (isRadio) return;
     _queue.repeat = switch (repeatMode) {
       AudioServiceRepeatMode.none => PlayRepeat.off,
       AudioServiceRepeatMode.one => PlayRepeat.one,
@@ -861,7 +1114,8 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     final v = value.clamp(minSpeed, maxSpeed).toDouble();
     if (v == _speed) return;
     _speed = v;
-    await _backend.setSpeed(v);
+    // A live stream stays at 1×; the rate comes back with the next track.
+    if (!isRadio) await _backend.setSpeed(v);
     _publish(playbackState.value.processingState);
   }
 
@@ -904,6 +1158,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   void attachRemote(RemoteTransport? transport) {
     _remoteSub?.cancel();
     _remoteSub = null;
+    if (transport != null && isRadio) _stopRadioForJam();
     _remote = transport;
     if (transport == null) {
       // Back to what the local player says.
@@ -914,6 +1169,17 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     }
     _showRemote(transport.status);
     _remoteSub = transport.changes.listen(_showRemote);
+  }
+
+  /// A Jam starting stops the radio, like it stops local music.
+  void _stopRadioForJam() {
+    _cancelRadioTimers();
+    _radioRetries = 0;
+    _loadToken++;
+    unawaited(_backend.stop());
+    _current = null;
+    _onAir = null;
+    _trackController.add(null);
   }
 
   void _showRemote(RemoteStatus s) {
@@ -983,6 +1249,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   }
 
   Future<void> dispose() async {
+    _cancelRadioTimers();
     _endListen();
     await _remoteSub?.cancel();
     for (final s in _subs) {
@@ -991,6 +1258,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     await _trackController.close();
     await _queueController.close();
     await _pausedAtTrackEnd.close();
+    await _onAirController.close();
     await _backend.dispose();
   }
 }

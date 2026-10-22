@@ -19,12 +19,15 @@ import 'data/repositories/library_queries.dart';
 import 'data/repositories/play_history_repository.dart';
 import 'data/repositories/playlist_repository.dart';
 import 'data/repositories/podcast_repository.dart';
+import 'data/repositories/radio_repository.dart';
+import 'services/radio/radio_browser_client.dart';
 import 'data/repositories/track_repository.dart';
 import 'data/settings/settings_store.dart';
 import 'providers/database_providers.dart';
 import 'providers/youtube_providers.dart' show createYtDlpService, ytDlpServiceProvider;
 import 'providers/library_providers.dart';
 import 'providers/player_providers.dart';
+import 'providers/radio_providers.dart' show radioClientProvider;
 import 'providers/settings_providers.dart';
 import 'providers/share_providers.dart';
 import 'services/audio/codecore_audio_handler.dart';
@@ -103,6 +106,9 @@ Future<void> main() async {
   final onlineEntries = OnlineEntries();
   final addresses = StreamAddressCache(
       (r) => (ytDlp as StreamSource).streamUrl(r));
+  // Shared with the Radio page, so the chosen server is remembered once.
+  final radioClient = RadioBrowserClient.standard();
+  final radioRepo = RadioRepository(db);
   CodecoreAudioHandler build() => CodecoreAudioHandler(
         CrossfadeEngine(() => JustAudioBackend(withEqualizer: true)),
         PlayQueue(),
@@ -110,6 +116,17 @@ Future<void> main() async {
         onError: errors.add,
         online: onlineEntries,
         addresses: addresses,
+        onRadioStart: (station) {
+          // The courtesy click for Radio Browser's own stations only.
+          if (!station.id.startsWith('manual:')) {
+            unawaited(radioClient.click(station.id).catchError((Object e, StackTrace st) {
+              AppLog.w('radio click failed', e, st);
+            }));
+          }
+          unawaited(radioRepo.touchPlayed(station.id).catchError((Object e, StackTrace st) {
+            AppLog.w('radio last-played failed', e, st);
+          }));
+        },
         history: PlayHistoryRepository(db),
         onEpisodeHeard: (id) => unawaited(PodcastRepository(db)
             .markPlayedByTrack(id, true, now: DateTime.now().millisecondsSinceEpoch)),
@@ -185,6 +202,7 @@ Future<void> main() async {
       databaseProvider.overrideWithValue(db),
       settingsStoreProvider.overrideWithValue(settingsStore),
       audioHandlerProvider.overrideWithValue(handler),
+      radioClientProvider.overrideWithValue(radioClient),
       ytDlpServiceProvider.overrideWithValue(ytDlp),
       playbackPersistenceProvider.overrideWithValue(persistence),
       playerErrorsProvider.overrideWithValue(errors.stream),

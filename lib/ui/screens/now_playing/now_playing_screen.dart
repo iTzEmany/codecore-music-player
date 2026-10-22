@@ -36,7 +36,8 @@ String? playContextName(AppLocalizations l, PlayContext? c) {
     PlayContextKind.album ||
     PlayContextKind.artist ||
     PlayContextKind.playlist ||
-    PlayContextKind.podcast => c.name,
+    PlayContextKind.podcast ||
+    PlayContextKind.radio => c.name,
     PlayContextKind.favorites => l.navFavorites,
     PlayContextKind.library => l.allTracks,
     PlayContextKind.search => l.playContextSearch,

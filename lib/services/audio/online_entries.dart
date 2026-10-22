@@ -1,4 +1,5 @@
 import '../../data/db/app_database.dart';
+import '../radio/radio_station.dart';
 import '../online/youtube_service.dart';
 
 /// Online entries in the queue have negative ids; library tracks are > 0.
@@ -21,6 +22,15 @@ class OnlineEntry {
   final DateTime addedAt;
 }
 
+/// One radio station in the queue: a live stream, with no length.
+class RadioEntry {
+  const RadioEntry({required this.id, required this.station, required this.addedAt});
+
+  final int id;
+  final RadioStation station;
+  final DateTime addedAt;
+}
+
 /// In-memory registry of the online entries of this session. Never written to
 /// the database; ids are never reused, even after [forget].
 class OnlineEntries {
@@ -28,6 +38,8 @@ class OnlineEntries {
 
   final DateTime Function() _now;
   final Map<int, OnlineEntry> _entries = {};
+  final Map<int, RadioEntry> _radios = {};
+  final Map<String, int> _radioIds = {};
   int _last = 0;
 
   int register(YtResult result, {String? seedTitle}) {
@@ -41,15 +53,39 @@ class OnlineEntries {
     return id;
   }
 
+  /// Registers [station] and returns its id; the same station keeps its id
+  /// for the session, so a queue built twice from one list stays the same.
+  int registerRadio(RadioStation station) {
+    final known = _radioIds[station.id];
+    if (known != null) {
+      _radios[known] = RadioEntry(id: known, station: station, addedAt: _radios[known]!.addedAt);
+      return known;
+    }
+    final id = --_last;
+    _radioIds[station.id] = id;
+    _radios[id] = RadioEntry(id: id, station: station, addedAt: _now());
+    return id;
+  }
+
+  bool isRadioId(int id) => _radios.containsKey(id);
+
+  RadioEntry? radioOf(int id) => _radios[id];
+
   OnlineEntry? operator [](int id) => _entries[id];
 
   /// Same as `[]`, readable after a `?.` or `?` in an expression.
   OnlineEntry? entryOf(int id) => _entries[id];
 
-  void forget(int id) => _entries.remove(id);
+  void forget(int id) {
+    _entries.remove(id);
+    final radio = _radios.remove(id);
+    if (radio != null) _radioIds.remove(radio.station.id);
+  }
 
   /// A synthetic track for screens, notification and MPRIS. Never stored.
   Track? trackOf(int id) {
+    final radio = _radios[id];
+    if (radio != null) return _radioTrack(radio);
     final e = _entries[id];
     if (e == null) return null;
     final r = e.result;
@@ -76,4 +112,27 @@ class OnlineEntries {
       playCount: 0,
     );
   }
+
+  Track _radioTrack(RadioEntry e) => Track(
+        id: e.id,
+        path: 'online:radio:${e.station.id}',
+        title: e.station.name,
+        artist: '',
+        album: '',
+        albumKey: '',
+        durationMs: 0,
+        format: 'online',
+        sizeBytes: 0,
+        mtimeMs: 0,
+        hasCover: false,
+        coverKey: null,
+        isFavorite: false,
+        enrichStatus: 0,
+        userEdited: false,
+        missing: false,
+        ignored: false,
+        kind: 0,
+        addedAt: e.addedAt.millisecondsSinceEpoch,
+        playCount: 0,
+      );
 }

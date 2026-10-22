@@ -47,16 +47,28 @@ class JustAudioBackend implements AudioBackend, GaplessCapable {
   Stream<Duration?> get duration => _player.durationStream;
 
   @override
-  Stream<BackendState> get state => _player.playerStateStream.map(
-    (s) => switch (s.processingState) {
-      ProcessingState.idle => BackendState.idle,
-      ProcessingState.loading ||
-      ProcessingState.buffering => BackendState.loading,
-      ProcessingState.ready =>
-        s.playing ? BackendState.playing : BackendState.paused,
-      ProcessingState.completed => BackendState.completed,
-    },
-  );
+  Stream<BackendState> get state => _player.playerStateStream
+      .map(
+        (s) => switch (s.processingState) {
+          ProcessingState.idle => BackendState.idle,
+          ProcessingState.loading ||
+          ProcessingState.buffering => BackendState.loading,
+          ProcessingState.ready =>
+            s.playing ? BackendState.playing : BackendState.paused,
+          ProcessingState.completed => BackendState.completed,
+        },
+      )
+      // A stream that breaks while playing arrives as an error event.
+      .transform(StreamTransformer<BackendState, BackendState>.fromHandlers(
+        handleError: (e, st, sink) {
+          AppLog.w('player error', e, st);
+          sink.add(BackendState.error);
+        },
+      ));
+
+  @override
+  Stream<String?> get streamTitle =>
+      _player.icyMetadataStream.map((m) => m?.info?.title);
 
   @override
   Stream<void> get advanced => _advanced.stream;

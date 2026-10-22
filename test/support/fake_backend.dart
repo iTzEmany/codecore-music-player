@@ -7,6 +7,7 @@ class FakeBackend implements AudioBackend, GaplessCapable {
   final stateC = StreamController<BackendState>.broadcast();
   final posC = StreamController<Duration>.broadcast();
   final durC = StreamController<Duration?>.broadcast();
+  final titleC = StreamController<String?>.broadcast();
   final loaded = <String>[];
   final failing = <String>{};
   bool playing = false;
@@ -21,6 +22,8 @@ class FakeBackend implements AudioBackend, GaplessCapable {
   Stream<Duration> get position => posC.stream;
   @override
   Stream<Duration?> get duration => durC.stream;
+  @override
+  Stream<String?> get streamTitle => titleC.stream;
 
   /// What was prepared to follow the current track (null: nothing).
   String? nextPath;

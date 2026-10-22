@@ -53,6 +53,7 @@ class CrossfadeEngine implements AudioBackend, GaplessCapable {
   final _stateC = StreamController<BackendState>.broadcast();
   final _positionC = StreamController<Duration>.broadcast();
   final _durationC = StreamController<Duration?>.broadcast();
+  final _titleC = StreamController<String?>.broadcast();
   final _advancedC = StreamController<void>.broadcast();
 
   /// Length of the overlap; null means tracks never overlap.
@@ -88,6 +89,9 @@ class CrossfadeEngine implements AudioBackend, GaplessCapable {
       ..add(b.duration.listen((d) {
         side.duration = d;
         if (isMain()) _durationC.add(d);
+      }))
+      ..add(b.streamTitle.listen((t) {
+        if (isMain()) _titleC.add(t);
       }));
     if (b is GaplessCapable) {
       _subs.add((b as GaplessCapable).advanced.listen((_) {
@@ -103,6 +107,8 @@ class CrossfadeEngine implements AudioBackend, GaplessCapable {
   Stream<Duration> get position => _positionC.stream;
   @override
   Stream<Duration?> get duration => _durationC.stream;
+  @override
+  Stream<String?> get streamTitle => _titleC.stream;
   @override
   Stream<void> get advanced => _advancedC.stream;
   @override
@@ -366,6 +372,7 @@ class CrossfadeEngine implements AudioBackend, GaplessCapable {
     await _stateC.close();
     await _positionC.close();
     await _durationC.close();
+    await _titleC.close();
     await _advancedC.close();
   }
 }
