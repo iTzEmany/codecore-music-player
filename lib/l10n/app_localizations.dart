@@ -388,6 +388,30 @@ abstract class AppLocalizations {
   /// **'{count, plural, one{1 artista} other{{count} artisti}}'**
   String artistsCount(int count);
 
+  /// No description provided for @minutesWords.
+  ///
+  /// In it, this message translates to:
+  /// **'{n, plural, one{1 minuto} other{{n} minuti}}'**
+  String minutesWords(int n);
+
+  /// No description provided for @hoursWords.
+  ///
+  /// In it, this message translates to:
+  /// **'{n, plural, one{1 ora} other{{n} ore}}'**
+  String hoursWords(int n);
+
+  /// No description provided for @hoursAndMinutes.
+  ///
+  /// In it, this message translates to:
+  /// **'{hours} e {minutes}'**
+  String hoursAndMinutes(String hours, String minutes);
+
+  /// No description provided for @collectionNoTracks.
+  ///
+  /// In it, this message translates to:
+  /// **'Nessun brano'**
+  String get collectionNoTracks;
+
   /// No description provided for @missingTracksCount.
   ///
   /// In it, this message translates to:
@@ -412,11 +436,23 @@ abstract class AppLocalizations {
   /// **'Annulla'**
   String get undo;
 
-  /// No description provided for @noFavorites.
+  /// No description provided for @favoritesEmptyTitle.
   ///
   /// In it, this message translates to:
-  /// **'Nessun preferito ancora'**
-  String get noFavorites;
+  /// **'Nessun preferito, per ora'**
+  String get favoritesEmptyTitle;
+
+  /// No description provided for @favoritesEmptyHelp.
+  ///
+  /// In it, this message translates to:
+  /// **'Tocca il cuore su un brano e lo trovi qui.'**
+  String get favoritesEmptyHelp;
+
+  /// No description provided for @openAllTracks.
+  ///
+  /// In it, this message translates to:
+  /// **'Apri tutti i brani'**
+  String get openAllTracks;
 
   /// No description provided for @newPlaylist.
   ///
@@ -2205,12 +2241,6 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Album'**
   String get albumsSection;
-
-  /// No description provided for @artistMeta.
-  ///
-  /// In it, this message translates to:
-  /// **'{albums} · {tracks}'**
-  String artistMeta(String albums, String tracks);
 
   /// No description provided for @addAllToQueue.
   ///
@@ -4701,12 +4731,6 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Playlist intelligente'**
   String get smartPlaylistLabel;
-
-  /// No description provided for @smartSubtitle.
-  ///
-  /// In it, this message translates to:
-  /// **'{count, plural, one{Playlist intelligente · 1 brano} other{Playlist intelligente · {count} brani}}'**
-  String smartSubtitle(int count);
 
   /// No description provided for @smartName.
   ///

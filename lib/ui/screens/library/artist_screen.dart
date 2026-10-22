@@ -49,9 +49,11 @@ class ArtistDetailScreen extends ConsumerWidget {
       ...list.where((t) => t.playCount > 0),
     ]..sort((a, b) => b.playCount.compareTo(a.playCount))).take(5).toList();
     final extent = trackRowExtentOf(context, compact);
-    final meta = l.artistMeta(
-      l.albumsCount(albumList.length),
-      l.tracksCount(list.length),
+    final meta = collectionMeta(
+      l,
+      albums: albumList.length,
+      tracks: list.length,
+      durationMs: list.fold<int>(0, (sum, t) => sum + t.durationMs),
     );
     // The rows shown here are the most played ones.
     final key = 'artist:${artist.key}';
@@ -125,6 +127,7 @@ class ArtistDetailScreen extends ConsumerWidget {
                   track: top[i],
                   compact: compact,
                   selection: selection,
+                  albumAsSubtitle: true,
                   onTap: () => ctrl.playFromList(top, i, context: playCtx),
                 ),
               ),

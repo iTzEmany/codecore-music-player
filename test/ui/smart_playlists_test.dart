@@ -57,7 +57,7 @@ void main() {
       await _settle(tester);
       expect(find.text('Album uno'), findsWidgets);
       expect(find.text('album:"Album 1"'), findsOneWidget);
-      expect(find.text('Playlist intelligente · 2 brani'), findsOneWidget);
+      expect(find.textContaining('2 brani'), findsOneWidget);
       expect(_row('Song 1'), findsOneWidget);
       expect(_row('Song 3'), findsOneWidget);
       expect(_row('Song 0'), findsNothing);

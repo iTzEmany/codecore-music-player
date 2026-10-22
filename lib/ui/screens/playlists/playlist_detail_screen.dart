@@ -19,13 +19,14 @@ import '../../widgets/collection_header.dart';
 import '../../shell/shell_nav.dart';
 import '../../widgets/bulk_actions.dart';
 import '../../widgets/confirm.dart';
+import '../../widgets/empty_state.dart';
 import '../../widgets/playlist_cover.dart';
 import '../../widgets/track_actions.dart';
 import '../../widgets/selection_bar.dart';
 import '../../widgets/track_row.dart';
 import '../../widgets/track_row_selection.dart';
 import '../import/import_banner.dart';
-import '../library/album_detail_screen.dart' show tracksAndMinutes;
+import '../library/album_detail_screen.dart' show collectionMeta;
 import 'add_tracks_screen.dart';
 import 'export_dialog.dart';
 import 'playlist_dialogs.dart';
@@ -81,7 +82,6 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    final cc = context.cc;
     final id = widget.playlist.id;
     final tracks =
         ref.watch(playlistTracksProvider(id)).value ?? const <Track>[];
@@ -143,23 +143,12 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
     final Widget list;
     if (tracks.isEmpty) {
       list = SliverToBoxAdapter(
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: Column(
-            children: [
-              Icon(Icons.queue_music_rounded, size: 56, color: cc.textFaint),
-              const SizedBox(height: 12),
-              Text(l.noTracksInPlaylist, textAlign: TextAlign.center),
-              const SizedBox(height: 16),
-              FilledButton(
-                onPressed: () => ShellNav.open<void>(
-                  context,
-                  AddTracksScreen(playlistId: id),
-                ),
-                child: Text(l.addSongs),
-              ),
-            ],
-          ),
+        child: EmptyState(
+          icon: Icons.queue_music_rounded,
+          message: l.noTracksInPlaylist,
+          actionLabel: l.addSongs,
+          onAction: () =>
+              ShellNav.open<void>(context, AddTracksScreen(playlistId: id)),
         ),
       );
     } else if (_editing) {
@@ -252,8 +241,7 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
         coverKey: coverKeys.firstOrNull,
         cover: (s) =>
             PlaylistCover(size: s, coverKeys: coverKeys, radius: CcDims.rGrid),
-        meta:
-            '${l.kindPlaylist} · ${tracksAndMinutes(context, tracks.length, durationMs)}',
+        meta: collectionMeta(l, tracks: tracks.length, durationMs: durationMs),
         onPlay: tracks.isEmpty
             ? null
             : () => ctrl.playAll(tracks, context: playCtx),

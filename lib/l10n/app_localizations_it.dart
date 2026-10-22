@@ -208,6 +208,36 @@ class AppLocalizationsIt extends AppLocalizations {
   }
 
   @override
+  String minutesWords(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n minuti',
+      one: '1 minuto',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hoursWords(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n ore',
+      one: '1 ora',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hoursAndMinutes(String hours, String minutes) {
+    return '$hours e $minutes';
+  }
+
+  @override
+  String get collectionNoTracks => 'Nessun brano';
+
+  @override
   String missingTracksCount(int count) {
     return 'Brani non trovati ($count)';
   }
@@ -222,7 +252,13 @@ class AppLocalizationsIt extends AppLocalizations {
   String get undo => 'Annulla';
 
   @override
-  String get noFavorites => 'Nessun preferito ancora';
+  String get favoritesEmptyTitle => 'Nessun preferito, per ora';
+
+  @override
+  String get favoritesEmptyHelp => 'Tocca il cuore su un brano e lo trovi qui.';
+
+  @override
+  String get openAllTracks => 'Apri tutti i brani';
 
   @override
   String get newPlaylist => 'Nuova playlist';
@@ -1254,11 +1290,6 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get albumsSection => 'Album';
-
-  @override
-  String artistMeta(String albums, String tracks) {
-    return '$albums · $tracks';
-  }
 
   @override
   String get addAllToQueue => 'Aggiungi in coda';
@@ -2834,17 +2865,6 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get smartPlaylistLabel => 'Playlist intelligente';
-
-  @override
-  String smartSubtitle(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'Playlist intelligente · $count brani',
-      one: 'Playlist intelligente · 1 brano',
-    );
-    return '$_temp0';
-  }
 
   @override
   String get smartName => 'Nome';

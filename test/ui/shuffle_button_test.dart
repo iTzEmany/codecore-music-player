@@ -3,7 +3,6 @@ import 'package:codecore/ui/theme/tokens.dart';
 import 'package:codecore/providers/settings_providers.dart';
 import 'package:codecore/providers/shuffle_plus_providers.dart';
 import 'package:codecore/ui/screens/settings/shuffle_plus_tiles.dart';
-import 'package:codecore/ui/widgets/play_buttons.dart';
 import 'package:codecore/ui/widgets/shuffle_button.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
@@ -12,20 +11,32 @@ import 'package:flutter_test/flutter_test.dart';
 import '../support/app_harness.dart';
 
 void main() {
-  testWidgets('shuffle icon turns amethyst while shuffle is on',
+  testWidgets(
+      'ShufflePill: accent when on, badge with Shuffle+, long press opens the sheet',
       (tester) async {
     final h = await Harness.create(tester, tracks: 2);
-    await h.pump(tester, Scaffold(body: ShuffleButton(onPressed: () {})));
+    await h.pump(tester, Scaffold(body: ShufflePill(onPressed: () {})));
+    final c = ProviderScope.containerOf(tester.element(find.byType(ShufflePill)));
+    c.read(shufflePlusConfigProvider);
     final cc = CcColors.notte;
     Color iconColor() =>
         tester.widget<Icon>(find.byIcon(Icons.shuffle_rounded)).color!;
-    expect(iconColor(), cc.textMuted);
+    expect(iconColor(), isNot(cc.accent));
+    expect(find.byKey(const ValueKey('shuffle-plus-badge')), findsNothing);
 
     await tester.runAsync(
         () => h.handler.setShuffleMode(AudioServiceShuffleMode.all));
     await tester.pump(const Duration(milliseconds: 100));
     await tester.pump(const Duration(milliseconds: 100));
     expect(iconColor(), cc.accent);
+
+    c.read(settingsProvider.notifier).update((s) => s.copyWith(shufflePlus: true));
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.byKey(const ValueKey('shuffle-plus-badge')), findsOneWidget);
+
+    await tester.longPress(find.byType(ShufflePill));
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.byType(ShufflePlusTiles), findsOneWidget);
     await h.dispose(tester);
   });
 

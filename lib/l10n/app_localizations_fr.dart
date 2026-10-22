@@ -211,6 +211,36 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String minutesWords(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n minutes',
+      one: '1 minute',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hoursWords(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n heures',
+      one: '1 heure',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hoursAndMinutes(String hours, String minutes) {
+    return '$hours et $minutes';
+  }
+
+  @override
+  String get collectionNoTracks => 'Aucun titre';
+
+  @override
   String missingTracksCount(int count) {
     return 'Titres introuvables ($count)';
   }
@@ -225,7 +255,14 @@ class AppLocalizationsFr extends AppLocalizations {
   String get undo => 'Annuler';
 
   @override
-  String get noFavorites => 'Aucun favori pour l’instant';
+  String get favoritesEmptyTitle => 'Aucun favori pour l’instant';
+
+  @override
+  String get favoritesEmptyHelp =>
+      'Touchez le cœur sur un titre et il apparaîtra ici.';
+
+  @override
+  String get openAllTracks => 'Ouvrir tous les titres';
 
   @override
   String get newPlaylist => 'Nouvelle playlist';
@@ -1261,11 +1298,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get albumsSection => 'Albums';
-
-  @override
-  String artistMeta(String albums, String tracks) {
-    return '$albums · $tracks';
-  }
 
   @override
   String get addAllToQueue => 'Ajouter à la file d’attente';
@@ -2863,18 +2895,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get smartPlaylistLabel => 'Playlist intelligente';
-
-  @override
-  String smartSubtitle(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'Playlist intelligente · $count titres',
-      one: 'Playlist intelligente · 1 titre',
-      zero: 'Playlist intelligente · 0 titre',
-    );
-    return '$_temp0';
-  }
 
   @override
   String get smartName => 'Nom';

@@ -4,11 +4,13 @@ import 'package:codecore/ui/theme/app_theme.dart';
 import 'package:codecore/ui/theme/tokens.dart';
 import 'dart:io';
 
+import 'package:codecore/ui/widgets/empty_state.dart';
 import 'package:codecore/ui/widgets/artist_avatar.dart';
 import 'package:codecore/ui/widgets/cc_sheet.dart';
 import 'package:codecore/ui/widgets/playlist_cover.dart';
 import 'package:codecore/ui/widgets/quality_tag.dart';
 import 'package:codecore/ui/widgets/segmented_blocks.dart';
+import 'package:codecore/ui/widgets/ring_progress.dart';
 import 'package:codecore/ui/widgets/track_row.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -25,90 +27,156 @@ Track _track({
   int? trackNumber,
   int? bitDepth,
   int? rate,
-}) =>
-    Track(
-      id: 1,
-      path: '/m/a.mp3',
-      title: title,
-      artist: artist,
-      album: album,
-      albumKey: 'k',
-      trackNumber: trackNumber,
-      durationMs: 185000,
-      format: bitDepth == null ? 'mp3' : 'flac',
-      bitDepth: bitDepth,
-      sampleRateHz: rate,
-      sizeBytes: 1,
-      mtimeMs: 1,
-      hasCover: false,
-      isFavorite: fav,
-      enrichStatus: 0,
-      userEdited: false,
-      missing: false,
-      ignored: false, kind: 0,
-      addedAt: 0,
-      playCount: 0,
-    );
+}) => Track(
+  id: 1,
+  path: '/m/a.mp3',
+  title: title,
+  artist: artist,
+  album: album,
+  albumKey: 'k',
+  trackNumber: trackNumber,
+  durationMs: 185000,
+  format: bitDepth == null ? 'mp3' : 'flac',
+  bitDepth: bitDepth,
+  sampleRateHz: rate,
+  sizeBytes: 1,
+  mtimeMs: 1,
+  hasCover: false,
+  isFavorite: fav,
+  enrichStatus: 0,
+  userEdited: false,
+  missing: false,
+  ignored: false,
+  kind: 0,
+  addedAt: 0,
+  playCount: 0,
+);
 
 Future<void> _pump(WidgetTester tester, Widget child, {double width = 400}) {
   tester.view.physicalSize = Size(width, 800);
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
-  return tester.pumpWidget(ProviderScope(
-    overrides: const [],
-    child: MaterialApp(
-      theme: buildThemeFromColors(CcColors.notte, false),
-      locale: const Locale('it'),
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      home: Scaffold(body: child),
+  return tester.pumpWidget(
+    ProviderScope(
+      overrides: const [],
+      child: MaterialApp(
+        theme: buildThemeFromColors(CcColors.notte, false),
+        locale: const Locale('it'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(body: child),
+      ),
     ),
-  ));
+  );
 }
 
 void main() {
-  testWidgets('TrackRow: title, artist · album, heart only if favourite',
-      (tester) async {
-    await _pump(tester,
-        TrackRow(track: _track(fav: true), onTap: () {}, onMore: () {}));
+  testWidgets('TrackRow: title, artist only, heart only if favourite', (
+    tester,
+  ) async {
+    await _pump(
+      tester,
+      TrackRow(track: _track(fav: true), onTap: () {}, onMore: () {}),
+    );
     expect(find.text('Futura'), findsOneWidget);
-    expect(find.text('Lucio Dalla · Dalla'), findsOneWidget);
+    expect(find.text('Lucio Dalla'), findsOneWidget);
+    expect(find.textContaining('·'), findsNothing);
+    expect(find.text('Dalla'), findsNothing);
     expect(find.byIcon(Icons.favorite_rounded), findsOneWidget);
     await _pump(tester, TrackRow(track: _track(), onTap: () {}));
     expect(find.byIcon(Icons.favorite_rounded), findsNothing);
   });
 
-  testWidgets('TrackRow: current shows the bars over the cover',
-      (tester) async {
+  testWidgets('EmptyState: top left, no icon, one filled action', (
+    tester,
+  ) async {
     await _pump(
-        tester, TrackRow(track: _track(), onTap: () {}, isCurrent: true));
-    expect(find.byType(CustomPaint), findsWidgets);
+      tester,
+      EmptyState(
+        icon: Icons.favorite_border_rounded,
+        message: 'Niente qui',
+        help: 'Aiuto',
+        actionLabel: 'A',
+        onAction: () {},
+      ),
+    );
+    expect(find.byIcon(Icons.favorite_border_rounded), findsNothing);
+    expect(find.widgetWithText(FilledButton, 'A'), findsOneWidget);
+    expect(tester.getTopLeft(find.text('Niente qui')).dx, CcDims.margin);
+  });
+
+  testWidgets('dot only on the current row', (tester) async {
+    final sem = tester.ensureSemantics();
+    await _pump(
+      tester,
+      Column(
+        children: [
+          SizedBox(
+            height: 64,
+            child: TrackRow(track: _track(), onTap: () {}),
+          ),
+          SizedBox(
+            height: 64,
+            child: TrackRow(track: _track(), onTap: () {}, isCurrent: true),
+          ),
+          SizedBox(
+            height: 64,
+            child: TrackRow(track: _track(), onTap: () {}),
+          ),
+        ],
+      ),
+    );
+    expect(find.byType(NowPlayingDot), findsOneWidget);
+    expect(find.bySemanticsLabel(RegExp('In riproduzione')), findsOneWidget);
+    sem.dispose();
+  });
+
+  testWidgets('TrackRow: current title takes the accent', (tester) async {
+    await _pump(
+      tester,
+      TrackRow(track: _track(), onTap: () {}, isCurrent: true),
+    );
     final title = tester.widget<Text>(find.text('Futura'));
     expect(title.style?.color, CcColors.notte.accent);
   });
 
-  testWidgets('TrackRow album variant: number instead of cover, artist hidden',
-      (tester) async {
-    await _pump(
+  testWidgets(
+    'TrackRow album variant: number instead of cover, artist hidden',
+    (tester) async {
+      await _pump(
         tester,
         TrackRow(
           track: _track(trackNumber: 7),
           onTap: () {},
           variant: TrackRowVariant.album,
           albumArtist: 'lucio dalla',
-        ));
-    expect(find.text('7'), findsOneWidget);
-    expect(find.text('Lucio Dalla'), findsNothing);
-    expect(find.byIcon(Icons.music_note_rounded), findsNothing);
-  });
+        ),
+      );
+      expect(find.text('7'), findsOneWidget);
+      expect(find.text('Lucio Dalla'), findsNothing);
+      expect(find.byIcon(Icons.music_note_rounded), findsNothing);
+    },
+  );
 
   testWidgets('TrackRow wide: duration and album columns', (tester) async {
     await _pump(
-        tester, TrackRow(track: _track(), onTap: () {}, index: 3),
-        width: 1200);
+      tester,
+      TrackRow(track: _track(), onTap: () {}, index: 3),
+      width: 1200,
+    );
     expect(find.text('3:05'), findsOneWidget);
     expect(find.text('Dalla'), findsOneWidget);
     expect(find.text('3'), findsOneWidget);
+  });
+
+  testWidgets('wide row shows dot and album column', (tester) async {
+    await _pump(
+      tester,
+      TrackRow(track: _track(), onTap: () {}, isCurrent: true),
+      width: 1000,
+    );
+    expect(find.byType(NowPlayingDot), findsOneWidget);
+    expect(find.text('Dalla'), findsOneWidget);
   });
 
   test('artist monogram and hue are deterministic', () {
@@ -125,20 +193,32 @@ void main() {
   test('playlist cover keys: custom wins, then up to 4 distinct', () {
     expect(playlistCoverKeys('c', ['a', 'b']), ['c']);
     expect(playlistCoverKeys(null, [null, 'a', 'a', 'b']), ['a', 'b']);
-    expect(playlistCoverKeys(null, ['a', 'b', 'c', 'd', 'e']),
-        ['a', 'b', 'c', 'd']);
+    expect(playlistCoverKeys(null, ['a', 'b', 'c', 'd', 'e']), [
+      'a',
+      'b',
+      'c',
+      'd',
+    ]);
     expect(playlistCoverKeys(null, <String?>[null]), isEmpty);
   });
 
   testWidgets('PlaylistCover renders 0, 1 and 4 covers', (tester) async {
     final h = await Harness.create(tester);
-    for (final keys in [<String>[], ['a'], ['a', 'b', 'c', 'd']]) {
-      await h.pump(tester,
-          Scaffold(body: PlaylistCover(size: 80, coverKeys: keys)));
+    for (final keys in [
+      <String>[],
+      ['a'],
+      ['a', 'b', 'c', 'd'],
+    ]) {
+      await h.pump(
+        tester,
+        Scaffold(body: PlaylistCover(size: 80, coverKeys: keys)),
+      );
       expect(tester.takeException(), isNull);
     }
-    await h.pump(tester,
-        const Scaffold(body: PlaylistCover(size: 80, favorites: true)));
+    await h.pump(
+      tester,
+      const Scaffold(body: PlaylistCover(size: 80, favorites: true)),
+    );
     expect(find.byIcon(Icons.favorite_rounded), findsOneWidget);
     await h.dispose(tester);
   });

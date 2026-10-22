@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../l10n/l10n_ext.dart';
-import '../../providers/player_providers.dart';
 import '../theme/tokens.dart';
+import 'motion.dart';
 
 /// Filled amethyst circle with the play/pause glyph.
 class PlayCircleButton extends StatelessWidget {
@@ -46,46 +45,18 @@ class PlayCircleButton extends StatelessWidget {
   }
 }
 
-/// Shuffle icon, amethyst with a dot under it while shuffle is on. The state
-/// comes from the player unless [active] overrides it.
-class ShuffleButton extends ConsumerWidget {
-  const ShuffleButton({
-    super.key,
-    required this.onPressed,
-    this.active,
-    this.size = 28,
-  });
+/// «Riproduci» word button of the collection headers.
+class PlayPill extends StatelessWidget {
+  const PlayPill({super.key, required this.onPressed});
 
   final VoidCallback? onPressed;
-  final bool? active;
-  final double size;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final cc = context.cc;
-    final active = this.active ?? (ref.watch(shuffleProvider).value ?? false);
-    return IconButton(
-      tooltip: context.l10n.shuffle,
+  Widget build(BuildContext context) => PressScale(
+    child: FilledButton.icon(
       onPressed: onPressed,
-      icon: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.shuffle_rounded,
-            size: size,
-            color: active ? cc.accent : cc.textMuted,
-          ),
-          const SizedBox(height: 2),
-          Container(
-            width: 4,
-            height: 4,
-            decoration: BoxDecoration(
-              color: active ? cc.accent : Colors.transparent,
-              shape: BoxShape.circle,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+      icon: const Icon(Icons.play_arrow_rounded),
+      label: Text(context.l10n.play),
+    ),
+  );
 }

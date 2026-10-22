@@ -6,6 +6,7 @@ import '../../providers/player_providers.dart';
 import '../../providers/shuffle_plus_providers.dart';
 import '../screens/now_playing/shuffle_plus_sheet.dart';
 import '../theme/tokens.dart';
+import 'motion.dart';
 
 /// The three-state shuffle button of the players: off, shuffle, Shuffle+
 /// (shuffle with a «+»). Tap goes to the next state, long press opens the
@@ -72,6 +73,51 @@ class ShuffleModeButton extends ConsumerWidget {
                 ),
               ],
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// «Casuale» word button of the collection headers: accent while shuffle is
+/// on, with the «+» badge in Shuffle+; long press opens the Shuffle+ sheet.
+class ShufflePill extends ConsumerWidget {
+  const ShufflePill({super.key, required this.onPressed});
+
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final cc = context.cc;
+    final mode = ref.watch(shuffleModeProvider);
+    final color = mode == ShuffleMode.off ? cc.text : cc.accent;
+    return Semantics(
+      toggled: mode != ShuffleMode.off,
+      child: PressScale(
+        child: GestureDetector(
+          onLongPress: () => showShufflePlusSheet(context),
+          child: OutlinedButton.icon(
+            onPressed: onPressed,
+            style: OutlinedButton.styleFrom(foregroundColor: color),
+            icon: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Icon(Icons.shuffle_rounded, color: color),
+                if (mode == ShuffleMode.plus)
+                  Positioned(
+                    right: -6,
+                    top: -4,
+                    child: Icon(
+                      Icons.add_rounded,
+                      key: const ValueKey('shuffle-plus-badge'),
+                      size: 12,
+                      color: color,
+                    ),
+                  ),
+              ],
+            ),
+            label: Text(context.l10n.shuffle),
           ),
         ),
       ),

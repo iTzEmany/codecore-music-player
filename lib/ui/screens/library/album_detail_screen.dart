@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/db/app_database.dart';
 import '../../../data/repositories/library_queries.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/library_providers.dart';
 import '../../../providers/online_providers.dart';
@@ -24,14 +25,31 @@ import '../playlists/playlist_dialogs.dart';
 import 'artist_screen.dart';
 import '../../widgets/motion.dart';
 
-/// «12 brani, 48 min».
-String tracksAndMinutes(BuildContext context, int tracks, int durationMs) {
-  final l = context.l10n;
-  final minutes = durationMs <= 0
-      ? 0
-      : (durationMs / 60000).round().clamp(1, 99999);
-  return l.tracksAndDuration(l.tracksCount(tracks), l.durationMinutes(minutes));
+/// «1 ora e 52 minuti»; never «0 minuti» (under a minute rounds up).
+String durationWords(AppLocalizations l, int ms) {
+  final minutes = ms > 0 ? (ms / 60000).ceil() : 0;
+  if (minutes < 60) return l.minutesWords(minutes);
+  final h = minutes ~/ 60, m = minutes % 60;
+  return m == 0
+      ? l.hoursWords(h)
+      : l.hoursAndMinutes(l.hoursWords(h), l.minutesWords(m));
 }
+
+/// «2004, 12 brani, 48 minuti».
+String collectionMeta(
+  AppLocalizations l, {
+  int? year,
+  required int tracks,
+  required int durationMs,
+  int? albums,
+}) => tracks == 0
+    ? l.collectionNoTracks
+    : [
+        if (albums != null) l.albumsCount(albums),
+        if (year != null) '$year',
+        l.tracksCount(tracks),
+        durationWords(l, durationMs),
+      ].join(', ');
 
 class AlbumDetailScreen extends ConsumerWidget {
   const AlbumDetailScreen({super.key, required this.album});
@@ -56,18 +74,16 @@ class AlbumDetailScreen extends ConsumerWidget {
       ..clearSnackBars()
       ..showSnackBar(SnackBar(content: Text(text)));
 
-    final meta = [
-      if (album.year != null) '${album.year}',
-      // Follow the rows once loaded: the summary is a snapshot (a track moved
-      // away or edited changes the album under this page).
-      tracksAndMinutes(
-        context,
-        tracks.hasValue ? list.length : album.trackCount,
-        tracks.hasValue
-            ? list.fold<int>(0, (sum, t) => sum + t.durationMs)
-            : album.durationMs,
-      ),
-    ].join(' · ');
+    // Follow the rows once loaded: the summary is a snapshot (a track moved
+    // away or edited changes the album under this page).
+    final meta = collectionMeta(
+      l,
+      year: album.year,
+      tracks: tracks.hasValue ? list.length : album.trackCount,
+      durationMs: tracks.hasValue
+          ? list.fold<int>(0, (sum, t) => sum + t.durationMs)
+          : album.durationMs,
+    );
 
     final discs = {for (final t in list) t.discNumber ?? 1};
     final multiDisc = discs.length > 1;
@@ -118,7 +134,7 @@ class AlbumDetailScreen extends ConsumerWidget {
                       ?.copyWith(fontWeight: FontWeight.w700, color: cc.text),
                 ),
               ),
-        meta: '${l.kindAlbum} · $meta',
+        meta: meta,
         onPlay: list.isEmpty
             ? null
             : () => ctrl.playAll(list, context: playCtx),

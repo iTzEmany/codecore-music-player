@@ -11,7 +11,7 @@ const _sameAsItalian = {
   'releaseAlbumYear', 'releaseAlbumPlain', 'settingsPageBackup', 'summaryCrossfade',
   'tokenSurface1', 'tokenSurface2', 'tokenSurface3', 'themeCopyName',
   'accentRosa', 'backupSection', 'accentVerde', 'activityDownload', 'albumMeta', 'appName',
-  'artistMeta', 'ytmArtistWithAudience', 'csvImportPause', 'csvOutHeaderAlbum', 'csvOutHeaderIsrc',
+  'hoursAndMinutes', 'ytmArtistWithAudience', 'csvImportPause', 'csvOutHeaderAlbum', 'csvOutHeaderIsrc',
   'csvOutHeaderNote', 'detailFormat', 'devicesJamShort', 'discN',
   'downloadRateKb', 'downloadRateMb', 'durationMinutes', 'exportFormatJson',
   'fieldAlbum', 'fieldArtist', 'jamHostTag', 'jamOutputOther', 'jamTitle',

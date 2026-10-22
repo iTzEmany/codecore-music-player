@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../l10n/l10n_ext.dart';
 import '../../providers/player_providers.dart';
 import '../theme/tokens.dart';
 
@@ -124,4 +125,21 @@ class RingPainter extends CustomPainter {
       o.arc != arc ||
       o.rest != rest ||
       o.stroke != stroke;
+}
+
+/// The still accent dot of the track that is playing or paused.
+class NowPlayingDot extends StatelessWidget {
+  const NowPlayingDot({super.key, this.size = 8});
+
+  final double size;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    label: context.l10n.nowPlaying,
+    child: Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(color: context.cc.accent, shape: BoxShape.circle),
+    ),
+  );
 }

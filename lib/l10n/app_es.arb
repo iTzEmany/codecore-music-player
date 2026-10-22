@@ -79,11 +79,41 @@
       }
     }
   },
+  "minutesWords": "{n, plural, one{1 minuto} other{{n} minutos}}",
+  "@minutesWords": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "hoursWords": "{n, plural, one{1 hora} other{{n} horas}}",
+  "@hoursWords": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "hoursAndMinutes": "{hours} y {minutes}",
+  "@hoursAndMinutes": {
+    "placeholders": {
+      "hours": {
+        "type": "String"
+      },
+      "minutes": {
+        "type": "String"
+      }
+    }
+  },
+  "collectionNoTracks": "Ninguna canción",
   "missingTracksCount": "Canciones no encontradas ({count})",
   "addedToFavorites": "Añadido a favoritos",
   "removedFromFavorites": "Quitado de favoritos",
   "undo": "Deshacer",
-  "noFavorites": "Aún no hay favoritos",
+  "favoritesEmptyTitle": "Aún no hay favoritos",
+  "favoritesEmptyHelp": "Toca el corazón en una canción y aparecerá aquí.",
+  "openAllTracks": "Abrir todas las canciones",
   "newPlaylist": "Nueva lista",
   "newPlaylistEllipsis": "Nueva lista…",
   "playlistName": "Nombre de la lista",
@@ -525,17 +555,6 @@
   },
   "mostPlayed": "Más escuchadas",
   "albumsSection": "Álbumes",
-  "artistMeta": "{albums} · {tracks}",
-  "@artistMeta": {
-    "placeholders": {
-      "albums": {
-        "type": "String"
-      },
-      "tracks": {
-        "type": "String"
-      }
-    }
-  },
   "addAllToQueue": "Añadir a la cola",
   "addedNToQueue": "{n} canciones añadidas a la cola",
   "@addedNToQueue": {
@@ -1449,14 +1468,6 @@
   "smartPlaylistNew": "Nueva lista inteligente",
   "smartPlaylistEdit": "Editar lista inteligente",
   "smartPlaylistLabel": "Lista inteligente",
-  "smartSubtitle": "{count, plural, one{Lista inteligente · 1 canción} other{Lista inteligente · {count} canciones}}",
-  "@smartSubtitle": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "smartName": "Nombre",
   "smartNameRequired": "Escribe un nombre",
   "smartRules": "Reglas",

@@ -390,14 +390,14 @@ void main() {
     await tester.tap(find.descendant(
         of: find.byType(DesktopSidebar), matching: find.text('Preferiti')));
     await _settle(tester);
-    expect(find.text('Nessun preferito ancora'), findsOneWidget);
+    expect(find.text('Nessun preferito, per ora'), findsOneWidget);
     await tester.tap(find.text('Home').first);
     await _settle(tester);
     await tester.tap(find.text('La tua libreria'));
     await _settle(tester);
     await _settle(tester);
     await _settle(tester);
-    expect(find.text('Nessun preferito ancora'), findsNothing);
+    expect(find.text('Nessun preferito, per ora'), findsNothing);
     expect(find.text('Aggiungi la tua cartella musicale'), findsWidgets);
     await h.dispose(tester);
   });
@@ -624,7 +624,7 @@ void main() {
     await tester.tap(find.descendant(
         of: find.byType(DesktopSidebar), matching: find.text('Preferiti')));
     await _settle(tester);
-    expect(find.text('Nessun preferito ancora'), findsOneWidget);
+    expect(find.text('Nessun preferito, per ora'), findsOneWidget);
     await tester.tap(find.descendant(
         of: find.byType(DesktopSidebar), matching: find.text('Cerca')));
     await _settle(tester);
