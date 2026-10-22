@@ -16,10 +16,10 @@ import '../../../services/online/lrc_parser.dart';
 import '../../../services/online/lyrics_translator.dart';
 import '../../../services/online/query_cleaner.dart';
 import '../../theme/tokens.dart';
-import '../../widgets/cover_image.dart';
 import '../lyrics/lyrics_screen.dart';
 import '../lyrics/lyrics_translate_flow.dart';
 import 'queue_sheet.dart';
+import '../../widgets/track_art.dart';
 
 class _Card extends StatelessWidget {
   const _Card({required this.title, required this.child, this.onTap});
@@ -516,7 +516,7 @@ class UpNextCard extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(vertical: 4),
               child: Row(
                 children: [
-                  CoverImage(coverKey: t.coverKey, size: 40),
+                  TrackArt(track: t, size: 40),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(

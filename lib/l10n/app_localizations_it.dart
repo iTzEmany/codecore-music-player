@@ -4317,4 +4317,93 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get ytmArtistNone => 'Nessun artista trovato su YouTube Music';
+
+  @override
+  String get suggestedBadge => 'Suggerito';
+
+  @override
+  String suggestedSimilarTo(String seed) {
+    return 'Suggerito · simile a «$seed»';
+  }
+
+  @override
+  String get suggestionDownloadStarted => 'Download avviato';
+
+  @override
+  String suggestionAddWhenDownloaded(String name) {
+    return 'Lo scarico e lo aggiungo a «$name»';
+  }
+
+  @override
+  String get suggestionDislike => 'Non mi piace';
+
+  @override
+  String get suggestionDisliked => 'Non te lo suggerirò più';
+
+  @override
+  String get removeFromQueueAction => 'Rimuovi dalla coda';
+
+  @override
+  String get shuffleModeOff => 'Casuale: spenta';
+
+  @override
+  String get shuffleModeOn => 'Casuale: attiva';
+
+  @override
+  String get shuffleModePlus =>
+      'Casuale+: attiva (premi a lungo per le impostazioni)';
+
+  @override
+  String get shufflePlusTitle => 'Casuale+';
+
+  @override
+  String get shufflePlusHint =>
+      'Con la casuale, ogni tanto entra un brano che non hai, simile alla lista in ascolto. Suona in streaming.';
+
+  @override
+  String shufflePlusEvery(int n) {
+    return 'Un suggerito ogni $n brani';
+  }
+
+  @override
+  String get shufflePlusUnmeteredOnly => 'Solo su Wi‑Fi';
+
+  @override
+  String get shufflePlusUnmeteredOnlyHint =>
+      'Niente suggeriti con i dati mobili o su reti a consumo.';
+
+  @override
+  String get shufflePlusData =>
+      'Consumo stimato: circa 15 MB all’ora con un suggerito ogni 4 brani.';
+
+  @override
+  String get shufflePlusActive =>
+      'Attivo: i suggeriti arrivano mentre ascolti.';
+
+  @override
+  String get shufflePlusOff => 'Spento: la casuale resta normale.';
+
+  @override
+  String get shufflePlusBlockJam => 'Non attivo durante una Jam';
+
+  @override
+  String get shufflePlusBlockShort => 'Serve una lista di almeno 5 brani';
+
+  @override
+  String get shufflePlusBlockNoTool => 'yt-dlp non disponibile';
+
+  @override
+  String get shufflePlusBlockMetered => 'In pausa: rete a consumo';
+
+  @override
+  String get shufflePlusBlockStopped =>
+      'Spento fino al riavvio: troppi errori di riproduzione';
+
+  @override
+  String get shufflePlusNoticeRateLimited =>
+      'YouTube chiede di rallentare: i suggeriti sono in pausa per 15 minuti';
+
+  @override
+  String get shufflePlusNoticeTooManyErrors =>
+      'Troppi errori di riproduzione: i suggeriti sono spenti fino al riavvio';
 }

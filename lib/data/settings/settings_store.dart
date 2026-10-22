@@ -57,6 +57,9 @@ class AppSettings {
     this.importSoundCloud = false,
     this.writeTagsToFiles = false,
     this.tagsAlsoInFile = true,
+    this.shufflePlus = false,
+    this.shufflePlusEvery = 4,
+    this.shufflePlusUnmeteredOnly = true,
   });
 
   final String theme;
@@ -118,6 +121,12 @@ class AppSettings {
   /// Inside an album the tracks follow each other plainly, with no fade.
   final bool crossfadePlainInAlbum;
 
+  /// Shuffle+ (phase 31): with shuffle on, a song you do not have every
+  /// [shufflePlusEvery] songs (3–10); [shufflePlusUnmeteredOnly] keeps it off
+  /// mobile data.
+  final bool shufflePlus, shufflePlusUnmeteredOnly;
+  final int shufflePlusEvery;
+
   /// Where the online search of the Search page looks.
   final SearchSource searchSource;
 
@@ -173,6 +182,9 @@ class AppSettings {
     bool? importSoundCloud,
     bool? writeTagsToFiles,
     bool? tagsAlsoInFile,
+    bool? shufflePlus,
+    int? shufflePlusEvery,
+    bool? shufflePlusUnmeteredOnly,
   }) =>
       AppSettings(
         theme: theme ?? this.theme,
@@ -213,6 +225,10 @@ class AppSettings {
         importSoundCloud: importSoundCloud ?? this.importSoundCloud,
         writeTagsToFiles: writeTagsToFiles ?? this.writeTagsToFiles,
         tagsAlsoInFile: tagsAlsoInFile ?? this.tagsAlsoInFile,
+        shufflePlus: shufflePlus ?? this.shufflePlus,
+        shufflePlusEvery: shufflePlusEvery ?? this.shufflePlusEvery,
+        shufflePlusUnmeteredOnly:
+            shufflePlusUnmeteredOnly ?? this.shufflePlusUnmeteredOnly,
       );
 }
 
@@ -290,6 +306,9 @@ class SettingsStore {
         importSoundCloud: _prefs.getBool('importSoundCloud') ?? false,
         writeTagsToFiles: _prefs.getBool('writeTagsToFiles') ?? false,
         tagsAlsoInFile: _prefs.getBool('tagsAlsoInFile') ?? true,
+        shufflePlus: _prefs.getBool('shufflePlus') ?? false,
+        shufflePlusEvery: (_prefs.getInt('shufflePlusEvery') ?? 4).clamp(3, 10),
+        shufflePlusUnmeteredOnly: _prefs.getBool('shufflePlusUnmeteredOnly') ?? true,
       );
 
   EqProfile _readEq(String profile) => EqProfile(
@@ -345,6 +364,9 @@ class SettingsStore {
     await _prefs.setBool('importSoundCloud', s.importSoundCloud);
     await _prefs.setBool('writeTagsToFiles', s.writeTagsToFiles);
     await _prefs.setBool('tagsAlsoInFile', s.tagsAlsoInFile);
+    await _prefs.setBool('shufflePlus', s.shufflePlus);
+    await _prefs.setInt('shufflePlusEvery', s.shufflePlusEvery);
+    await _prefs.setBool('shufflePlusUnmeteredOnly', s.shufflePlusUnmeteredOnly);
     final dn = s.deviceName;
     if (dn == null || dn.isEmpty) {
       await _prefs.remove('deviceName');

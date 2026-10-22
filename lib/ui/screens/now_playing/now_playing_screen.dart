@@ -1,6 +1,9 @@
 import '../../../core/platform.dart';
+
 import 'package:flutter/material.dart';
+
 import '../car/car_mode_screen.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/db/app_database.dart';
@@ -11,7 +14,9 @@ import '../../../providers/player_providers.dart';
 import '../../shell/shell_nav.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/cover_backdrop.dart';
-import '../../widgets/cover_image.dart';
+import '../../widgets/track_art.dart';
+import '../../../services/audio/online_entries.dart';
+import 'suggested_info.dart';
 import '../../widgets/favorite_actions.dart';
 import '../../widgets/mini_player.dart' show kPlayerCoverHero;
 import '../../widgets/track_actions.dart';
@@ -67,6 +72,7 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
         ref.watch(liveCurrentTrackProvider).value ??
         ref.watch(currentTrackProvider).value;
     final cc = context.cc;
+    final online = track != null && isOnlineId(track.id);
     final wide = MediaQuery.sizeOf(context).width >= _wideBreakpoint;
     final reduce = MediaQuery.disableAnimationsOf(context);
     return Scaffold(
@@ -112,10 +118,12 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                                   16,
                                 ),
                                 children: [
-                                  LyricsCard(track: track),
-                                  const SizedBox(height: 12),
-                                  InfoCard(track: track),
-                                  const SizedBox(height: 12),
+                                  if (!online) ...[
+                                    LyricsCard(track: track),
+                                    const SizedBox(height: 12),
+                                    InfoCard(track: track),
+                                    const SizedBox(height: 12),
+                                  ],
                                   const UpNextCard(),
                                 ],
                               ),
@@ -137,10 +145,12 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                             ),
                             sliver: SliverList.list(
                               children: [
-                                LyricsCard(track: track),
-                                const SizedBox(height: 12),
-                                InfoCard(track: track),
-                                const SizedBox(height: 12),
+                                if (!online) ...[
+                                  LyricsCard(track: track),
+                                  const SizedBox(height: 12),
+                                  InfoCard(track: track),
+                                  const SizedBox(height: 12),
+                                ],
                                 const UpNextCard(),
                               ],
                             ),
@@ -208,6 +218,7 @@ class _Player extends ConsumerWidget {
     final theme = Theme.of(context).textTheme;
     final ctx = playContextName(l, ref.watch(playContextProvider));
     final ctrl = ref.read(playerControllerProvider);
+    final online = isOnlineId(track.id);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: CcDims.margin),
       child: Column(
@@ -258,7 +269,9 @@ class _Player extends ConsumerWidget {
                       tooltip: l.carMode,
                       icon: const Icon(Icons.directions_car_outlined),
                       onPressed: () => Navigator.of(context).push(
-                        MaterialPageRoute<void>(builder: (_) => const CarModeScreen()),
+                        MaterialPageRoute<void>(
+                          builder: (_) => const CarModeScreen(),
+                        ),
                       ),
                     ),
                   IconButton(
@@ -282,8 +295,8 @@ class _Player extends ConsumerWidget {
               },
               child: LayoutBuilder(
                 builder: (_, c) => Center(
-                  child: CoverImage(
-                    coverKey: track.coverKey,
+                  child: TrackArt(
+                    track: track,
                     size: (c.biggest.shortestSide).clamp(80.0, 460.0),
                     radius: CcDims.rGrid,
                     heroTag: kPlayerCoverHero,
@@ -306,7 +319,7 @@ class _Player extends ConsumerWidget {
                       style: theme.titleLarge,
                     ),
                     InkWell(
-                      onTap: () => _openArtist(context, ref),
+                      onTap: online ? null : () => _openArtist(context, ref),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 2),
                         child: Text(
@@ -320,16 +333,20 @@ class _Player extends ConsumerWidget {
                   ],
                 ),
               ),
-              IconButton(
-                tooltip: track.isFavorite ? l.removeFromFavorites : l.favorite,
-                onPressed: () => toggleFavorite(context, ref, track),
-                icon: HeartIcon(
-                  favorite: track.isFavorite,
-                  color: track.isFavorite ? cc.accent : cc.text,
+              if (!online)
+                IconButton(
+                  tooltip: track.isFavorite
+                      ? l.removeFromFavorites
+                      : l.favorite,
+                  onPressed: () => toggleFavorite(context, ref, track),
+                  icon: HeartIcon(
+                    favorite: track.isFavorite,
+                    color: track.isFavorite ? cc.accent : cc.text,
+                  ),
                 ),
-              ),
             ],
           ),
+          if (online) SuggestedInfo(track: track),
           NpSeekRow(track: track),
           const SizedBox(height: 8),
           const NpControls(),

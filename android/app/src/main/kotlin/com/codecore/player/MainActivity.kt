@@ -32,6 +32,7 @@ class MainActivity : AudioServiceActivity() {
         ImportBridge.register(flutterEngine.dartExecutor.binaryMessenger, applicationContext)
         MediaDeleteBridge.register(flutterEngine.dartExecutor.binaryMessenger, this)
         StorageBridge.register(flutterEngine.dartExecutor.binaryMessenger)
+        NetworkBridge.register(flutterEngine.dartExecutor.binaryMessenger, applicationContext)
 
         // Where the sound goes (headphones or speaker): the equalizer keeps a
         // curve for each.

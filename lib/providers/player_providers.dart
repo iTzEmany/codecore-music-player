@@ -59,7 +59,17 @@ final playContextProvider = NotifierProvider<PlayContextNotifier, PlayContext?>(
 );
 
 class PlayerController {
-  PlayerController(this._handler, this._persistence, {this.onContext});
+  PlayerController(
+    this._handler,
+    this._persistence, {
+    this.onContext,
+    this.shufflePlus,
+    this.setShufflePlus,
+  });
+
+  /// The Shuffle+ flag of the settings, and a way to change it.
+  final bool Function()? shufflePlus;
+  final void Function(bool)? setShufflePlus;
 
   final CodecoreAudioHandler _handler;
   final void Function(PlayContext?)? onContext;
@@ -110,6 +120,20 @@ class PlayerController {
         : AudioServiceShuffleMode.all,
   );
 
+  /// The shuffle button: off, then shuffle, then Shuffle+, then off again.
+  Future<void> cycleShuffle() async {
+    final plus = shufflePlus?.call() ?? false;
+    if (!_handler.shuffleEnabled) {
+      setShufflePlus?.call(false);
+      await setShuffle(true);
+    } else if (!plus) {
+      setShufflePlus?.call(true);
+    } else {
+      setShufflePlus?.call(false);
+      await setShuffle(false);
+    }
+  }
+
   Future<void> setShuffle(bool on) => _handler.setShuffleMode(
     on ? AudioServiceShuffleMode.all : AudioServiceShuffleMode.none,
   );
@@ -136,6 +160,10 @@ final playerControllerProvider = Provider<PlayerController>(
     ref.watch(audioHandlerProvider),
     ref.watch(playbackPersistenceProvider),
     onContext: (c) => ref.read(playContextProvider.notifier).set(c),
+    shufflePlus: () => ref.read(settingsProvider).shufflePlus,
+    setShufflePlus: (on) => ref
+        .read(settingsProvider.notifier)
+        .update((c) => c.copyWith(shufflePlus: on)),
   ),
 );
 

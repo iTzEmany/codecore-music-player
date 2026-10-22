@@ -130,5 +130,22 @@ void main() {
     await store.writeNotDuplicates({'3,4', '1,2'});
     expect(store.readNotDuplicates(), {'1,2', '3,4'});
   });
-}
 
+  test('Shuffle+ is off, one in 4, Wi‑Fi only by default; its choices are saved and kept within 3–10', () async {
+    SharedPreferences.setMockInitialValues({});
+    final store = await SettingsStore.open();
+    var s = store.readSettings();
+    expect(s.shufflePlus, isFalse);
+    expect(s.shufflePlusEvery, 4);
+    expect(s.shufflePlusUnmeteredOnly, isTrue);
+    await store.writeSettings(
+        s.copyWith(shufflePlus: true, shufflePlusEvery: 7, shufflePlusUnmeteredOnly: false));
+    s = store.readSettings();
+    expect(s.shufflePlus, isTrue);
+    expect(s.shufflePlusEvery, 7);
+    expect(s.shufflePlusUnmeteredOnly, isFalse);
+
+    SharedPreferences.setMockInitialValues({'shufflePlusEvery': 99});
+    expect((await SettingsStore.open()).readSettings().shufflePlusEvery, 10);
+  });
+}

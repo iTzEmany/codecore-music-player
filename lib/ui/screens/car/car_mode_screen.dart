@@ -10,6 +10,7 @@ import '../../widgets/cover_image.dart';
 import '../../widgets/favorite_actions.dart';
 import 'car_playlists_sheet.dart';
 import '../../widgets/motion.dart';
+import '../../widgets/track_art.dart';
 
 /// Big-button player for the car: cover, title, ⏮ ⏯ ⏭, favourite, a short
 /// playlist list. Opened by hand from Now Playing; nothing starts it.
@@ -126,11 +127,17 @@ class _CarModeScreenState extends ConsumerState<CarModeScreen> {
               final wide = c.maxWidth > c.maxHeight * 1.2;
               final cover = LayoutBuilder(
                 builder: (_, cc2) => Center(
-                  child: CoverImage(
-                    coverKey: track?.coverKey,
-                    size: cc2.biggest.shortestSide.clamp(80.0, 420.0),
-                    radius: CcDims.rGrid,
-                  ),
+                  child: track == null
+                      ? CoverImage(
+                          coverKey: null,
+                          size: cc2.biggest.shortestSide.clamp(80.0, 420.0),
+                          radius: CcDims.rGrid,
+                        )
+                      : TrackArt(
+                          track: track,
+                          size: cc2.biggest.shortestSide.clamp(80.0, 420.0),
+                          radius: CcDims.rGrid,
+                        ),
                 ),
               );
               if (wide) {

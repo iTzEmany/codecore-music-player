@@ -2674,5 +2674,51 @@
   "ytmArtistOnYoutubeMusic": "Artista no YouTube Music",
   "ytmSearchingArtist": "Buscando no YouTube Music…",
   "ytmPickArtist": "Qual artista?",
-  "ytmArtistNone": "Nenhum artista encontrado no YouTube Music"
+  "ytmArtistNone": "Nenhum artista encontrado no YouTube Music",
+  "suggestedBadge": "Sugerido",
+  "suggestedSimilarTo": "Sugerido · parecido com «{seed}»",
+  "@suggestedSimilarTo": {
+    "placeholders": {
+      "seed": {
+        "type": "String"
+      }
+    }
+  },
+  "suggestionDownloadStarted": "Transferência iniciada",
+  "suggestionAddWhenDownloaded": "A transferir e a adicionar a «{name}»",
+  "@suggestionAddWhenDownloaded": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "suggestionDislike": "Não gosto",
+  "suggestionDisliked": "Não voltará a ser sugerido",
+  "removeFromQueueAction": "Remover da fila",
+  "shuffleModeOff": "Aleatório: desligado",
+  "shuffleModeOn": "Aleatório: ligado",
+  "shuffleModePlus": "Aleatório+: ligado (prima longamente para definições)",
+  "shufflePlusTitle": "Aleatório+",
+  "shufflePlusHint": "Com o modo aleatório, de vez em quando entra uma faixa que não tem, parecida com a lista em reprodução. Toca em streaming.",
+  "shufflePlusEvery": "Uma sugestão a cada {n} faixas",
+  "@shufflePlusEvery": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "shufflePlusUnmeteredOnly": "Apenas por Wi‑Fi",
+  "shufflePlusUnmeteredOnlyHint": "Sem sugestões com dados móveis ou redes com consumo limitado.",
+  "shufflePlusData": "Consumo estimado: cerca de 15 MB por hora com uma sugestão a cada 4 faixas.",
+  "shufflePlusActive": "Ativo: as sugestões chegam enquanto ouve.",
+  "shufflePlusOff": "Desligado: o aleatório fica normal.",
+  "shufflePlusBlockJam": "Inativo durante uma Jam",
+  "shufflePlusBlockShort": "Precisa de uma lista com pelo menos 5 faixas",
+  "shufflePlusBlockNoTool": "yt-dlp indisponível",
+  "shufflePlusBlockMetered": "Em pausa: rede com consumo limitado",
+  "shufflePlusBlockStopped": "Desligado até reiniciar: demasiados erros de reprodução",
+  "shufflePlusNoticeRateLimited": "O YouTube pede para abrandar: sugestões em pausa durante 15 minutos",
+  "shufflePlusNoticeTooManyErrors": "Demasiados erros de reprodução: sugestões desligadas até reiniciar"
 }

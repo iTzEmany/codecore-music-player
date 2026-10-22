@@ -8,7 +8,6 @@ import 'package:codecore/services/audio/online_entries.dart';
 import 'package:codecore/services/audio/play_queue.dart';
 import 'package:codecore/services/audio/stream_address_cache.dart';
 import 'package:codecore/services/online/youtube_service.dart';
-import 'package:codecore/ui/widgets/track_actions.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -105,9 +104,5 @@ void main() {
     await handler.playQueue([ids[0], onlineId, ids[1]], 0);
     final seed = await jamSeedTracks(handler, TrackRepository(db));
     expect([for (final t in seed) t.title], ['Song a', 'Song b']);
-  });
-
-  test('an online track offers none of the library actions', () {
-    expect(onlineTrackActions(), isEmpty);
   });
 }

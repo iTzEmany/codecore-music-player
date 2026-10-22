@@ -4332,4 +4332,93 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get ytmArtistNone => 'Kein Künstler auf YouTube Music gefunden';
+
+  @override
+  String get suggestedBadge => 'Vorgeschlagen';
+
+  @override
+  String suggestedSimilarTo(String seed) {
+    return 'Vorgeschlagen · ähnlich wie „$seed“';
+  }
+
+  @override
+  String get suggestionDownloadStarted => 'Download gestartet';
+
+  @override
+  String suggestionAddWhenDownloaded(String name) {
+    return 'Wird geladen und zu „$name“ hinzugefügt';
+  }
+
+  @override
+  String get suggestionDislike => 'Gefällt mir nicht';
+
+  @override
+  String get suggestionDisliked => 'Wird nicht mehr vorgeschlagen';
+
+  @override
+  String get removeFromQueueAction => 'Aus der Warteschlange entfernen';
+
+  @override
+  String get shuffleModeOff => 'Zufall: aus';
+
+  @override
+  String get shuffleModeOn => 'Zufall: an';
+
+  @override
+  String get shuffleModePlus => 'Zufall+: an (lange drücken für Einstellungen)';
+
+  @override
+  String get shufflePlusTitle => 'Shuffle+';
+
+  @override
+  String get shufflePlusHint =>
+      'Bei Zufallswiedergabe kommt ab und zu ein Titel hinzu, den du nicht hast und der zur laufenden Liste passt. Er wird gestreamt.';
+
+  @override
+  String shufflePlusEvery(int n) {
+    return 'Ein Vorschlag alle $n Titel';
+  }
+
+  @override
+  String get shufflePlusUnmeteredOnly => 'Nur über WLAN';
+
+  @override
+  String get shufflePlusUnmeteredOnlyHint =>
+      'Keine Vorschläge über mobile Daten oder getaktete Netze.';
+
+  @override
+  String get shufflePlusData =>
+      'Geschätzter Verbrauch: etwa 15 MB pro Stunde bei einem Vorschlag alle 4 Titel.';
+
+  @override
+  String get shufflePlusActive =>
+      'Aktiv: Vorschläge kommen während des Hörens.';
+
+  @override
+  String get shufflePlusOff => 'Aus: Zufall bleibt normal.';
+
+  @override
+  String get shufflePlusBlockJam => 'Während einer Jam nicht aktiv';
+
+  @override
+  String get shufflePlusBlockShort =>
+      'Braucht eine Liste mit mindestens 5 Titeln';
+
+  @override
+  String get shufflePlusBlockNoTool => 'yt-dlp nicht verfügbar';
+
+  @override
+  String get shufflePlusBlockMetered => 'Pausiert: getaktetes Netz';
+
+  @override
+  String get shufflePlusBlockStopped =>
+      'Aus bis zum Neustart: zu viele Wiedergabefehler';
+
+  @override
+  String get shufflePlusNoticeRateLimited =>
+      'YouTube bittet um Verlangsamung: Vorschläge pausieren 15 Minuten';
+
+  @override
+  String get shufflePlusNoticeTooManyErrors =>
+      'Zu viele Wiedergabefehler: Vorschläge sind bis zum Neustart aus';
 }

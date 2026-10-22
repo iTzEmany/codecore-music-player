@@ -17,6 +17,7 @@ import '../../widgets/quality_tag.dart';
 import '../../widgets/speed_button.dart';
 import '../devices/devices_sheet.dart';
 import 'queue_sheet.dart';
+import '../../widgets/shuffle_button.dart';
 
 /// Slider plus «elapsed · quality tag · total» (tap the total for the rest).
 class NpSeekRow extends ConsumerStatefulWidget {
@@ -102,14 +103,13 @@ class NpControls extends ConsumerWidget {
     final l = context.l10n;
     final cc = context.cc;
     final playing = ref.watch(isPlayingProvider).value ?? false;
-    final shuffle = ref.watch(shuffleProvider).value ?? false;
     final repeat = ref.watch(repeatProvider).value ?? PlayRepeat.off;
     final ctrl = ref.read(playerControllerProvider);
     final repeatOn = repeat != PlayRepeat.off;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        ShuffleButton(onPressed: ctrl.toggleShuffle, active: shuffle),
+        const ShuffleModeButton(),
         IconButton(
           tooltip: l.previousTrack,
           iconSize: 36,

@@ -4362,4 +4362,93 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get ytmArtistNone => 'Aucun artiste trouvé sur YouTube Music';
+
+  @override
+  String get suggestedBadge => 'Suggéré';
+
+  @override
+  String suggestedSimilarTo(String seed) {
+    return 'Suggéré · proche de « $seed »';
+  }
+
+  @override
+  String get suggestionDownloadStarted => 'Téléchargement lancé';
+
+  @override
+  String suggestionAddWhenDownloaded(String name) {
+    return 'Je le télécharge et l’ajoute à « $name »';
+  }
+
+  @override
+  String get suggestionDislike => 'Je n’aime pas';
+
+  @override
+  String get suggestionDisliked => 'Il ne sera plus suggéré';
+
+  @override
+  String get removeFromQueueAction => 'Retirer de la file';
+
+  @override
+  String get shuffleModeOff => 'Aléatoire : désactivé';
+
+  @override
+  String get shuffleModeOn => 'Aléatoire : activé';
+
+  @override
+  String get shuffleModePlus =>
+      'Aléatoire+ : activé (appui long pour les réglages)';
+
+  @override
+  String get shufflePlusTitle => 'Aléatoire+';
+
+  @override
+  String get shufflePlusHint =>
+      'En lecture aléatoire, un titre que vous n’avez pas, proche de la liste en cours, s’ajoute de temps en temps. Il est lu en streaming.';
+
+  @override
+  String shufflePlusEvery(int n) {
+    return 'Une suggestion tous les $n titres';
+  }
+
+  @override
+  String get shufflePlusUnmeteredOnly => 'Wi‑Fi uniquement';
+
+  @override
+  String get shufflePlusUnmeteredOnlyHint =>
+      'Aucune suggestion en données mobiles ou sur un réseau limité.';
+
+  @override
+  String get shufflePlusData =>
+      'Consommation estimée : environ 15 Mo par heure avec une suggestion tous les 4 titres.';
+
+  @override
+  String get shufflePlusActive =>
+      'Actif : les suggestions arrivent pendant l’écoute.';
+
+  @override
+  String get shufflePlusOff => 'Désactivé : l’aléatoire reste normal.';
+
+  @override
+  String get shufflePlusBlockJam => 'Inactif pendant une Jam';
+
+  @override
+  String get shufflePlusBlockShort => 'Il faut une liste d’au moins 5 titres';
+
+  @override
+  String get shufflePlusBlockNoTool => 'yt-dlp indisponible';
+
+  @override
+  String get shufflePlusBlockMetered => 'En pause : réseau limité';
+
+  @override
+  String get shufflePlusBlockStopped =>
+      'Désactivé jusqu’au redémarrage : trop d’erreurs de lecture';
+
+  @override
+  String get shufflePlusNoticeRateLimited =>
+      'YouTube demande de ralentir : suggestions en pause pendant 15 minutes';
+
+  @override
+  String get shufflePlusNoticeTooManyErrors =>
+      'Trop d’erreurs de lecture : suggestions désactivées jusqu’au redémarrage';
 }

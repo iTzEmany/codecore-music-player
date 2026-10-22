@@ -28,7 +28,7 @@ class _Web implements WebClient {
 }
 
 void _tall(WidgetTester tester) {
-  tester.view.physicalSize = const Size(500, 3800);
+  tester.view.physicalSize = const Size(500, 4300);
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
 }

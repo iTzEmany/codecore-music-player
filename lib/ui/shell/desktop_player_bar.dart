@@ -15,13 +15,14 @@ import '../screens/library/artist_screen.dart';
 import '../screens/now_playing/now_playing_screen.dart';
 import '../theme/tokens.dart';
 import '../widgets/speed_button.dart';
-import '../widgets/cover_image.dart';
 import '../widgets/favorite_actions.dart';
 import '../widgets/format_utils.dart';
 import '../widgets/mini_player.dart' show kPlayerCoverHero;
 import '../widgets/play_buttons.dart';
 import 'shell_nav.dart';
 import '../widgets/motion.dart';
+import '../widgets/track_art.dart';
+import '../widgets/shuffle_button.dart';
 
 /// The 80 px player of the desktop layout (replaces the mini-player).
 class DesktopPlayerBar extends ConsumerWidget {
@@ -101,8 +102,8 @@ class _TrackInfo extends ConsumerWidget {
             onTap: () => Navigator.of(context, rootNavigator: true).push(
               MaterialPageRoute<void>(builder: (_) => const NowPlayingScreen()),
             ),
-            child: CoverImage(
-              coverKey: track.coverKey,
+            child: TrackArt(
+              track: track,
               size: 56,
               heroTag: kPlayerCoverHero,
             ),
@@ -247,7 +248,6 @@ class _Center extends ConsumerWidget {
     final cc = context.cc;
     final ctrl = ref.read(playerControllerProvider);
     final playing = ref.watch(isPlayingProvider).value ?? false;
-    final shuffle = ref.watch(shuffleProvider).value ?? false;
     final repeat = ref.watch(repeatProvider).value ?? PlayRepeat.off;
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -257,15 +257,7 @@ class _Center extends ConsumerWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              IconButton(
-                tooltip: l.shuffle,
-                iconSize: 20,
-                onPressed: ctrl.toggleShuffle,
-                icon: Icon(
-                  Icons.shuffle_rounded,
-                  color: shuffle ? cc.accent : cc.textMuted,
-                ),
-              ),
+              const ShuffleModeButton(size: 20, dot: false),
               IconButton(
                 tooltip: l.previousTrack,
                 onPressed: hasTrack ? ctrl.previous : null,

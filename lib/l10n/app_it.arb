@@ -2764,5 +2764,51 @@
   "ytmArtistOnYoutubeMusic": "Artista su YouTube Music",
   "ytmSearchingArtist": "Cerco su YouTube Music…",
   "ytmPickArtist": "Quale artista?",
-  "ytmArtistNone": "Nessun artista trovato su YouTube Music"
+  "ytmArtistNone": "Nessun artista trovato su YouTube Music",
+  "suggestedBadge": "Suggerito",
+  "suggestedSimilarTo": "Suggerito · simile a «{seed}»",
+  "@suggestedSimilarTo": {
+    "placeholders": {
+      "seed": {
+        "type": "String"
+      }
+    }
+  },
+  "suggestionDownloadStarted": "Download avviato",
+  "suggestionAddWhenDownloaded": "Lo scarico e lo aggiungo a «{name}»",
+  "@suggestionAddWhenDownloaded": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "suggestionDislike": "Non mi piace",
+  "suggestionDisliked": "Non te lo suggerirò più",
+  "removeFromQueueAction": "Rimuovi dalla coda",
+  "shuffleModeOff": "Casuale: spenta",
+  "shuffleModeOn": "Casuale: attiva",
+  "shuffleModePlus": "Casuale+: attiva (premi a lungo per le impostazioni)",
+  "shufflePlusTitle": "Casuale+",
+  "shufflePlusHint": "Con la casuale, ogni tanto entra un brano che non hai, simile alla lista in ascolto. Suona in streaming.",
+  "shufflePlusEvery": "Un suggerito ogni {n} brani",
+  "@shufflePlusEvery": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "shufflePlusUnmeteredOnly": "Solo su Wi‑Fi",
+  "shufflePlusUnmeteredOnlyHint": "Niente suggeriti con i dati mobili o su reti a consumo.",
+  "shufflePlusData": "Consumo stimato: circa 15 MB all’ora con un suggerito ogni 4 brani.",
+  "shufflePlusActive": "Attivo: i suggeriti arrivano mentre ascolti.",
+  "shufflePlusOff": "Spento: la casuale resta normale.",
+  "shufflePlusBlockJam": "Non attivo durante una Jam",
+  "shufflePlusBlockShort": "Serve una lista di almeno 5 brani",
+  "shufflePlusBlockNoTool": "yt-dlp non disponibile",
+  "shufflePlusBlockMetered": "In pausa: rete a consumo",
+  "shufflePlusBlockStopped": "Spento fino al riavvio: troppi errori di riproduzione",
+  "shufflePlusNoticeRateLimited": "YouTube chiede di rallentare: i suggeriti sono in pausa per 15 minuti",
+  "shufflePlusNoticeTooManyErrors": "Troppi errori di riproduzione: i suggeriti sono spenti fino al riavvio"
 }

@@ -10,9 +10,9 @@ import '../screens/jam/jam_screen.dart';
 import '../screens/now_playing/now_playing_screen.dart';
 import '../theme/cover_tint.dart';
 import '../theme/tokens.dart';
-import 'cover_image.dart';
 import 'favorite_actions.dart';
 import 'motion.dart';
+import 'track_art.dart';
 
 /// Shared-element tag of the cover between mini-player and Now Playing.
 const kPlayerCoverHero = 'player-cover';
@@ -159,8 +159,8 @@ class _MiniPlayerState extends ConsumerState<MiniPlayer>
                   ),
                 )
               else
-                CoverImage(
-                  coverKey: coverKey,
+                TrackArt(
+                  track: track!,
                   size: 40,
                   heroTag: kPlayerCoverHero,
                 ),

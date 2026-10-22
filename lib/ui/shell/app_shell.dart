@@ -8,7 +8,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/platform.dart';
 import '../../providers/nav_providers.dart';
 import '../../providers/player_providers.dart';
+import '../../providers/pending_playlist_adds.dart';
 import '../../providers/preview_providers.dart';
+import '../../providers/shuffle_plus_providers.dart';
+import '../../services/shuffle_plus/shuffle_plus_controller.dart' show ShufflePlusNotice;
 import '../../providers/ui_providers.dart';
 import '../../providers/youtube_providers.dart' show ytDlpStatusProvider;
 import '../../services/audio/codecore_audio_handler.dart';
@@ -101,6 +104,23 @@ class AppShell extends ConsumerWidget {
         ..showSnackBar(
           SnackBar(content: Text(l.playbackError(f.title ?? '', reason))),
         );
+    });
+    // Shuffle+ runs while the shell is up; a suggestion downloaded "into a
+    // playlist" joins it when the file lands.
+    ref.watch(shufflePlusProvider);
+    ref.watch(pendingPlaylistAddsProvider);
+    ref.listen(shufflePlusNoticesProvider, (_, next) {
+      final n = next.value;
+      if (n == null) return;
+      final l = context.l10n;
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(SnackBar(
+          content: Text(switch (n) {
+            ShufflePlusNotice.rateLimited => l.shufflePlusNoticeRateLimited,
+            ShufflePlusNotice.tooManyErrors => l.shufflePlusNoticeTooManyErrors,
+          }),
+        ));
     });
     ref.listen(shareOffersProvider, (_, next) {
       final o = next.value;

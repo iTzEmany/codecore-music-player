@@ -4325,4 +4325,94 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get ytmArtistNone => 'No se encontró ningún artista en YouTube Music';
+
+  @override
+  String get suggestedBadge => 'Sugerido';
+
+  @override
+  String suggestedSimilarTo(String seed) {
+    return 'Sugerido · parecido a «$seed»';
+  }
+
+  @override
+  String get suggestionDownloadStarted => 'Descarga iniciada';
+
+  @override
+  String suggestionAddWhenDownloaded(String name) {
+    return 'Lo descargo y lo añado a «$name»';
+  }
+
+  @override
+  String get suggestionDislike => 'No me gusta';
+
+  @override
+  String get suggestionDisliked => 'No te lo sugeriré más';
+
+  @override
+  String get removeFromQueueAction => 'Quitar de la cola';
+
+  @override
+  String get shuffleModeOff => 'Aleatorio: desactivado';
+
+  @override
+  String get shuffleModeOn => 'Aleatorio: activado';
+
+  @override
+  String get shuffleModePlus =>
+      'Aleatorio+: activado (mantén pulsado para ajustes)';
+
+  @override
+  String get shufflePlusTitle => 'Aleatorio+';
+
+  @override
+  String get shufflePlusHint =>
+      'Con el modo aleatorio, de vez en cuando entra una canción que no tienes, parecida a la lista que suena. Se reproduce en streaming.';
+
+  @override
+  String shufflePlusEvery(int n) {
+    return 'Una sugerencia cada $n canciones';
+  }
+
+  @override
+  String get shufflePlusUnmeteredOnly => 'Solo con Wi‑Fi';
+
+  @override
+  String get shufflePlusUnmeteredOnlyHint =>
+      'Sin sugerencias con datos móviles ni redes de pago por uso.';
+
+  @override
+  String get shufflePlusData =>
+      'Consumo estimado: unos 15 MB por hora con una sugerencia cada 4 canciones.';
+
+  @override
+  String get shufflePlusActive =>
+      'Activo: las sugerencias llegan mientras escuchas.';
+
+  @override
+  String get shufflePlusOff => 'Desactivado: el aleatorio sigue normal.';
+
+  @override
+  String get shufflePlusBlockJam => 'No activo durante una Jam';
+
+  @override
+  String get shufflePlusBlockShort =>
+      'Necesita una lista de al menos 5 canciones';
+
+  @override
+  String get shufflePlusBlockNoTool => 'yt-dlp no disponible';
+
+  @override
+  String get shufflePlusBlockMetered => 'En pausa: red de pago por uso';
+
+  @override
+  String get shufflePlusBlockStopped =>
+      'Apagado hasta reiniciar: demasiados errores de reproducción';
+
+  @override
+  String get shufflePlusNoticeRateLimited =>
+      'YouTube pide ir más despacio: sugerencias en pausa durante 15 minutos';
+
+  @override
+  String get shufflePlusNoticeTooManyErrors =>
+      'Demasiados errores de reproducción: sugerencias apagadas hasta reiniciar';
 }

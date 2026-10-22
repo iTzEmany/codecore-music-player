@@ -11,7 +11,9 @@ import '../theme/tokens.dart';
 import 'cover_image.dart';
 import 'favorite_actions.dart';
 import 'format_utils.dart';
+import '../../services/audio/online_entries.dart';
 import 'now_playing_bars.dart';
+import 'online_queue_row.dart';
 import 'preview_cover.dart';
 import 'track_actions.dart';
 import 'track_drag.dart';
@@ -483,6 +485,9 @@ class LiveTrackRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    if (isOnlineId(track.id)) {
+      return OnlineQueueRow(track: track, onTap: onTap, reorderIndex: reorderIndex);
+    }
     final isCurrent = ref.watch(
       currentTrackProvider.select((t) => t.value?.id == track.id),
     );

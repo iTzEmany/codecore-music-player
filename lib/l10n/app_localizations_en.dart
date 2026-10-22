@@ -4312,4 +4312,91 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ytmArtistNone => 'No artist found on YouTube Music';
+
+  @override
+  String get suggestedBadge => 'Suggested';
+
+  @override
+  String suggestedSimilarTo(String seed) {
+    return 'Suggested · similar to “$seed”';
+  }
+
+  @override
+  String get suggestionDownloadStarted => 'Download started';
+
+  @override
+  String suggestionAddWhenDownloaded(String name) {
+    return 'Downloading it and adding it to “$name”';
+  }
+
+  @override
+  String get suggestionDislike => 'Don’t like it';
+
+  @override
+  String get suggestionDisliked => 'It won’t be suggested again';
+
+  @override
+  String get removeFromQueueAction => 'Remove from queue';
+
+  @override
+  String get shuffleModeOff => 'Shuffle: off';
+
+  @override
+  String get shuffleModeOn => 'Shuffle: on';
+
+  @override
+  String get shuffleModePlus => 'Shuffle+: on (long press for settings)';
+
+  @override
+  String get shufflePlusTitle => 'Shuffle+';
+
+  @override
+  String get shufflePlusHint =>
+      'With shuffle on, now and then a song you don’t have, similar to the list playing, joins the queue. It streams.';
+
+  @override
+  String shufflePlusEvery(int n) {
+    return 'One suggestion every $n songs';
+  }
+
+  @override
+  String get shufflePlusUnmeteredOnly => 'Wi‑Fi only';
+
+  @override
+  String get shufflePlusUnmeteredOnlyHint =>
+      'No suggestions on mobile data or metered networks.';
+
+  @override
+  String get shufflePlusData =>
+      'Estimated use: about 15 MB an hour with one suggestion every 4 songs.';
+
+  @override
+  String get shufflePlusActive => 'On: suggestions arrive while you listen.';
+
+  @override
+  String get shufflePlusOff => 'Off: shuffle stays normal.';
+
+  @override
+  String get shufflePlusBlockJam => 'Not active during a Jam';
+
+  @override
+  String get shufflePlusBlockShort => 'Needs a list of at least 5 songs';
+
+  @override
+  String get shufflePlusBlockNoTool => 'yt-dlp not available';
+
+  @override
+  String get shufflePlusBlockMetered => 'Paused: metered network';
+
+  @override
+  String get shufflePlusBlockStopped =>
+      'Off until restart: too many playback errors';
+
+  @override
+  String get shufflePlusNoticeRateLimited =>
+      'YouTube asks to slow down: suggestions are paused for 15 minutes';
+
+  @override
+  String get shufflePlusNoticeTooManyErrors =>
+      'Too many playback errors: suggestions are off until restart';
 }

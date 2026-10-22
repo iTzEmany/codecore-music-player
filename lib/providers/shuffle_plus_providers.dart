@@ -4,7 +4,9 @@ import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 
+import '../core/network_kind.dart';
 import '../core/paths.dart';
+import '../data/settings/settings_store.dart';
 import '../services/audio/codecore_audio_handler.dart';
 import '../services/import/track_matcher.dart';
 import '../services/online/ytm_radio_service.dart';
@@ -16,12 +18,29 @@ import '../services/shuffle_plus/suggestion_log.dart';
 import 'database_providers.dart';
 import 'jam_providers.dart';
 import 'player_providers.dart';
+import 'settings_providers.dart';
 import 'youtube_providers.dart';
 
-/// The user's Shuffle+ choices. Off until the settings (31.12) drive it.
+/// The user's Shuffle+ choices, read from the settings. [set] is for tests.
 class ShufflePlusConfigNotifier extends Notifier<ShufflePlusConfig> {
   @override
-  ShufflePlusConfig build() => const ShufflePlusConfig();
+  ShufflePlusConfig build() {
+    ref.listen(settingsProvider, (_, s) => state = _of(s));
+    // Shuffle turned off from anywhere (notification, MPRIS, the button)
+    // takes the «+» with it.
+    ref.listen(shuffleProvider, (prev, next) {
+      if (prev?.value == true && next.value == false && ref.read(settingsProvider).shufflePlus) {
+        ref.read(settingsProvider.notifier).update((c) => c.copyWith(shufflePlus: false));
+      }
+    });
+    return _of(ref.read(settingsProvider));
+  }
+
+  static ShufflePlusConfig _of(AppSettings s) => ShufflePlusConfig(
+        enabled: s.shufflePlus,
+        every: s.shufflePlusEvery,
+        unmeteredOnly: s.shufflePlusUnmeteredOnly,
+      );
 
   void set(ShufflePlusConfig c) => state = c;
 }
@@ -30,11 +49,21 @@ final shufflePlusConfigProvider =
     NotifierProvider<ShufflePlusConfigNotifier, ShufflePlusConfig>(
         ShufflePlusConfigNotifier.new);
 
-/// Whether the connection is metered (mobile data). Desktop: never. 31.12
-/// overrides it with the Android `codecore/net` channel.
-final shufflePlusMeteredProvider = Provider<Future<bool> Function()>(
-  (ref) => () async => false,
-);
+/// The Android `codecore/net` channel (desktop: never metered, always online).
+final networkProbeProvider = Provider<NetworkProbe>((ref) {
+  final probe = NetworkProbe()..listen();
+  ref.onDispose(probe.dispose);
+  return probe;
+});
+
+/// Whether Shuffle+ must stay off the network: metered, or no network at all.
+final shufflePlusMeteredProvider = Provider<Future<bool> Function()>((ref) {
+  final probe = ref.watch(networkProbeProvider);
+  return () async {
+    final k = await probe.current();
+    return k.metered || !k.online;
+  };
+});
 
 /// `suggestions.json`: what was suggested and how it ended.
 final suggestionLogProvider = Provider<SuggestionLog>((ref) {
@@ -144,7 +173,66 @@ final shufflePlusProvider = FutureProvider<ShufflePlusController?>((ref) async {
   );
   ref.listen(shufflePlusConfigProvider, (_, _) => controller.poke());
   ref.listen(jamProvider, (_, _) => controller.poke());
+  final net = ref.watch(networkProbeProvider).changes.listen((_) => controller.poke());
+  ref.onDispose(net.cancel);
   ref.onDispose(controller.dispose);
   controller.start();
   return controller;
+});
+
+/// Told to the user once (rate limit, too many errors): the shell shows them.
+final shufflePlusNoticesProvider = StreamProvider<ShufflePlusNotice>((ref) async* {
+  final c = await ref.watch(shufflePlusProvider.future);
+  if (c != null) yield* c.notices;
+});
+
+/// What the three-state shuffle button shows.
+enum ShuffleMode { off, shuffle, plus }
+
+final shuffleModeProvider = Provider<ShuffleMode>((ref) {
+  final on = ref.watch(shuffleProvider).value ?? false;
+  final plus = ref.watch(settingsProvider.select((s) => s.shufflePlus));
+  return !on ? ShuffleMode.off : (plus ? ShuffleMode.plus : ShuffleMode.shuffle);
+});
+
+/// Why Shuffle+ is not suggesting right now (null: it is, or it is off).
+enum ShufflePlusBlock { jam, shortList, noTool, metered, stopped }
+
+/// The first reason in the order the sheet reports them.
+ShufflePlusBlock? shufflePlusBlock({
+  required bool jam,
+  required int? sourceSize,
+  required bool toolAvailable,
+  required bool metered,
+  required bool unmeteredOnly,
+  required bool stopped,
+}) {
+  if (jam) return ShufflePlusBlock.jam;
+  if (stopped) return ShufflePlusBlock.stopped;
+  if (sourceSize == null || sourceSize < ShufflePlusController.minSourceSize) {
+    return ShufflePlusBlock.shortList;
+  }
+  if (!toolAvailable) return ShufflePlusBlock.noTool;
+  if (unmeteredOnly && metered) return ShufflePlusBlock.metered;
+  return null;
+}
+
+/// Read by the Shuffle+ sheet; recomputed when the song, the Jam or the
+/// settings change.
+final shufflePlusBlockProvider = FutureProvider.autoDispose<ShufflePlusBlock?>((ref) async {
+  final cfg = ref.watch(shufflePlusConfigProvider);
+  ref.watch(currentTrackProvider);
+  final jam = ref.watch(jamProvider).active;
+  final handler = ref.watch(audioHandlerProvider);
+  final controller = await ref.watch(shufflePlusProvider.future);
+  final tool = (await ref.watch(ytDlpStatusProvider.future)).version != null;
+  final metered = await ref.read(shufflePlusMeteredProvider)();
+  return shufflePlusBlock(
+    jam: jam,
+    sourceSize: handler.sourceIds?.length,
+    toolAvailable: tool,
+    metered: metered,
+    unmeteredOnly: cfg.unmeteredOnly,
+    stopped: controller?.stoppedForSession ?? false,
+  );
 });

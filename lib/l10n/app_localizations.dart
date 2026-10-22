@@ -6848,6 +6848,156 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Nessun artista trovato su YouTube Music'**
   String get ytmArtistNone;
+
+  /// No description provided for @suggestedBadge.
+  ///
+  /// In it, this message translates to:
+  /// **'Suggerito'**
+  String get suggestedBadge;
+
+  /// No description provided for @suggestedSimilarTo.
+  ///
+  /// In it, this message translates to:
+  /// **'Suggerito · simile a «{seed}»'**
+  String suggestedSimilarTo(String seed);
+
+  /// No description provided for @suggestionDownloadStarted.
+  ///
+  /// In it, this message translates to:
+  /// **'Download avviato'**
+  String get suggestionDownloadStarted;
+
+  /// No description provided for @suggestionAddWhenDownloaded.
+  ///
+  /// In it, this message translates to:
+  /// **'Lo scarico e lo aggiungo a «{name}»'**
+  String suggestionAddWhenDownloaded(String name);
+
+  /// No description provided for @suggestionDislike.
+  ///
+  /// In it, this message translates to:
+  /// **'Non mi piace'**
+  String get suggestionDislike;
+
+  /// No description provided for @suggestionDisliked.
+  ///
+  /// In it, this message translates to:
+  /// **'Non te lo suggerirò più'**
+  String get suggestionDisliked;
+
+  /// No description provided for @removeFromQueueAction.
+  ///
+  /// In it, this message translates to:
+  /// **'Rimuovi dalla coda'**
+  String get removeFromQueueAction;
+
+  /// No description provided for @shuffleModeOff.
+  ///
+  /// In it, this message translates to:
+  /// **'Casuale: spenta'**
+  String get shuffleModeOff;
+
+  /// No description provided for @shuffleModeOn.
+  ///
+  /// In it, this message translates to:
+  /// **'Casuale: attiva'**
+  String get shuffleModeOn;
+
+  /// No description provided for @shuffleModePlus.
+  ///
+  /// In it, this message translates to:
+  /// **'Casuale+: attiva (premi a lungo per le impostazioni)'**
+  String get shuffleModePlus;
+
+  /// No description provided for @shufflePlusTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Casuale+'**
+  String get shufflePlusTitle;
+
+  /// No description provided for @shufflePlusHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Con la casuale, ogni tanto entra un brano che non hai, simile alla lista in ascolto. Suona in streaming.'**
+  String get shufflePlusHint;
+
+  /// No description provided for @shufflePlusEvery.
+  ///
+  /// In it, this message translates to:
+  /// **'Un suggerito ogni {n} brani'**
+  String shufflePlusEvery(int n);
+
+  /// No description provided for @shufflePlusUnmeteredOnly.
+  ///
+  /// In it, this message translates to:
+  /// **'Solo su Wi‑Fi'**
+  String get shufflePlusUnmeteredOnly;
+
+  /// No description provided for @shufflePlusUnmeteredOnlyHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Niente suggeriti con i dati mobili o su reti a consumo.'**
+  String get shufflePlusUnmeteredOnlyHint;
+
+  /// No description provided for @shufflePlusData.
+  ///
+  /// In it, this message translates to:
+  /// **'Consumo stimato: circa 15 MB all’ora con un suggerito ogni 4 brani.'**
+  String get shufflePlusData;
+
+  /// No description provided for @shufflePlusActive.
+  ///
+  /// In it, this message translates to:
+  /// **'Attivo: i suggeriti arrivano mentre ascolti.'**
+  String get shufflePlusActive;
+
+  /// No description provided for @shufflePlusOff.
+  ///
+  /// In it, this message translates to:
+  /// **'Spento: la casuale resta normale.'**
+  String get shufflePlusOff;
+
+  /// No description provided for @shufflePlusBlockJam.
+  ///
+  /// In it, this message translates to:
+  /// **'Non attivo durante una Jam'**
+  String get shufflePlusBlockJam;
+
+  /// No description provided for @shufflePlusBlockShort.
+  ///
+  /// In it, this message translates to:
+  /// **'Serve una lista di almeno 5 brani'**
+  String get shufflePlusBlockShort;
+
+  /// No description provided for @shufflePlusBlockNoTool.
+  ///
+  /// In it, this message translates to:
+  /// **'yt-dlp non disponibile'**
+  String get shufflePlusBlockNoTool;
+
+  /// No description provided for @shufflePlusBlockMetered.
+  ///
+  /// In it, this message translates to:
+  /// **'In pausa: rete a consumo'**
+  String get shufflePlusBlockMetered;
+
+  /// No description provided for @shufflePlusBlockStopped.
+  ///
+  /// In it, this message translates to:
+  /// **'Spento fino al riavvio: troppi errori di riproduzione'**
+  String get shufflePlusBlockStopped;
+
+  /// No description provided for @shufflePlusNoticeRateLimited.
+  ///
+  /// In it, this message translates to:
+  /// **'YouTube chiede di rallentare: i suggeriti sono in pausa per 15 minuti'**
+  String get shufflePlusNoticeRateLimited;
+
+  /// No description provided for @shufflePlusNoticeTooManyErrors.
+  ///
+  /// In it, this message translates to:
+  /// **'Troppi errori di riproduzione: i suggeriti sono spenti fino al riavvio'**
+  String get shufflePlusNoticeTooManyErrors;
 }
 
 class _AppLocalizationsDelegate

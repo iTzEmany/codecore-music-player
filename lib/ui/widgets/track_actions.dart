@@ -16,7 +16,9 @@ import '../../providers/jam_providers.dart';
 import '../../providers/player_providers.dart';
 import '../../providers/preview_providers.dart';
 import '../../services/audio/online_entries.dart';
+import '../../providers/suggestion_actions.dart';
 import '../screens/playlists/playlist_dialogs.dart';
+import '../screens/playlists/playlist_picker.dart';
 import '../screens/tags/tags_sheet.dart';
 import '../screens/enrich_preview_dialog.dart';
 import '../screens/settings/equalizer_screen.dart';
@@ -29,7 +31,7 @@ import '../shell/shell_nav.dart';
 import '../../data/repositories/library_queries.dart';
 import '../../providers/library_providers.dart';
 import '../theme/tokens.dart';
-import 'cover_image.dart';
+import 'track_art.dart';
 import 'delete_tracks.dart';
 import 'favorite_actions.dart';
 import 'format_utils.dart';
@@ -52,10 +54,46 @@ class TrackActionGroup {
 }
 
 /// Streamed (online) entries are not library rows: no favourites, tags,
-/// playlists by id, edit, lyrics, share, details of a file or deletion. The
-/// actions they do have (download, add to playlist, dislike, remove from the
-/// queue) arrive with 31.11.
-List<TrackActionGroup> onlineTrackActions() => const [];
+/// playlists by id, edit, lyrics, share, details of a file or deletion. They
+/// can be downloaded, downloaded into a playlist, disliked or taken out of
+/// the queue.
+List<TrackActionGroup> onlineTrackActions(
+  BuildContext outer,
+  WidgetRef ref,
+  Track track,
+) {
+  final l = outer.l10n;
+  final actions = ref.read(suggestionActionsProvider);
+  void snack(String text) {
+    if (!outer.mounted) return;
+    ScaffoldMessenger.of(outer)
+      ..clearSnackBars()
+      ..showSnackBar(SnackBar(content: Text(text)));
+  }
+
+  return [
+    TrackActionGroup(l.groupCollection, [
+      TrackAction(Icons.download_rounded, l.ytDownload, () async {
+        if (actions.downloadEntry(track.id)) snack(l.suggestionDownloadStarted);
+      }),
+      TrackAction(Icons.playlist_add_rounded, l.addToPlaylist, () async {
+        final picked = await pickPlaylist(outer, ref);
+        if (picked == null) return;
+        if (actions.addToPlaylist(track.id, picked.id)) {
+          snack(l.suggestionAddWhenDownloaded(picked.name));
+        }
+      }),
+    ]),
+    TrackActionGroup(l.groupQueue, [
+      TrackAction(Icons.thumb_down_outlined, l.suggestionDislike, () async {
+        await actions.dislike(track.id);
+        snack(l.suggestionDisliked);
+      }),
+      TrackAction(Icons.remove_circle_outline_rounded, l.removeFromQueueAction,
+          () => actions.remove(track.id)),
+    ]),
+  ];
+}
 
 /// The single model of the track actions, used by the bottom sheet (mobile:
 /// long press, ⋮) and by the pointer menu (desktop: right click).
@@ -65,7 +103,7 @@ List<TrackActionGroup> trackActions(
   WidgetRef ref,
   Track track,
 ) {
-  if (isOnlineId(track.id)) return onlineTrackActions();
+  if (isOnlineId(track.id)) return onlineTrackActions(outer, ref, track);
   final l = outer.l10n;
   final ctrl = ref.read(playerControllerProvider);
   void snack(String text) {
@@ -289,7 +327,7 @@ class _TrackActionsSheet extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
               child: Row(
                 children: [
-                  CoverImage(coverKey: track.coverKey, size: 56),
+                  TrackArt(track: track, size: 56),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(

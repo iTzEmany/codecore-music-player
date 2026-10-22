@@ -37,6 +37,7 @@ import 'transition_settings_tiles.dart';
 import 'trusted_devices_tiles.dart';
 import 'translation_models_tiles.dart';
 import 'update_tiles.dart';
+import 'shuffle_plus_tiles.dart';
 
 const _languages = {
   'it': 'Italiano',
@@ -121,6 +122,7 @@ class SettingsScreen extends ConsumerWidget {
                     onTap: () => ShellNav.open<void>(context, const EqualizerScreen()),
                   ),
                 const TransitionSettingsTiles(),
+                const ShufflePlusTiles(),
                 SwitchListTile(
                   title: Text(l.settingsRecordHistory),
                   subtitle: Text(l.settingsRecordHistoryHint),

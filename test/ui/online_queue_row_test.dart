@@ -1,0 +1,59 @@
+import 'package:codecore/providers/player_providers.dart';
+import 'package:codecore/services/audio/online_entries.dart';
+import 'package:codecore/services/online/youtube_service.dart';
+import 'package:codecore/ui/widgets/online_queue_row.dart';
+import 'package:codecore/ui/widgets/track_row.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+import '../support/app_harness.dart';
+
+void main() {
+  testWidgets('a streamed row says «Suggerito» and its menu has only the online actions',
+      (tester) async {
+    final h = await Harness.create(tester, tracks: 1);
+    final online = OnlineEntries();
+    final id = online.register(
+      const YtResult(
+          id: 'v1', title: 'Streamed', channel: 'Chan', duration: null, artists: ['Ann']),
+      seedTitle: 'Seed',
+    );
+    await h.pump(
+      tester,
+      Scaffold(
+        body: LiveTrackRow(
+          track: online.trackOf(id)!,
+          variant: TrackRowVariant.queue,
+          onTap: () {},
+        ),
+      ),
+      extraOverrides: [onlineEntriesProvider.overrideWithValue(online)],
+    );
+    expect(find.byType(OnlineQueueRow), findsOneWidget);
+    expect(find.text('Suggerito'), findsOneWidget);
+    expect(find.text('Streamed'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Altre opzioni'));
+    await tester.pumpAndSettle();
+    expect(find.text('Scarica'), findsOneWidget);
+    expect(find.text('Aggiungi a playlist…'), findsOneWidget);
+    expect(find.text('Non mi piace'), findsOneWidget);
+    expect(find.text('Rimuovi dalla coda'), findsOneWidget);
+    for (final library in ['Preferito', 'Modifica…', 'Elimina', 'Aggiungi alla coda']) {
+      expect(find.text(library), findsNothing, reason: library);
+    }
+    await h.dispose(tester);
+  });
+
+  testWidgets('a library row has no «Suggerito» marker', (tester) async {
+    final h = await Harness.create(tester, tracks: 1);
+    final track = (await h.db.select(h.db.tracks).get()).single;
+    await h.pump(
+      tester,
+      Scaffold(body: LiveTrackRow(track: track, variant: TrackRowVariant.queue, onTap: () {})),
+    );
+    expect(find.byType(OnlineQueueRow), findsNothing);
+    expect(find.text('Suggerito'), findsNothing);
+    await h.dispose(tester);
+  });
+}

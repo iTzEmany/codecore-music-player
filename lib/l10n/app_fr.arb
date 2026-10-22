@@ -2674,5 +2674,51 @@
   "ytmArtistOnYoutubeMusic": "Artiste sur YouTube Music",
   "ytmSearchingArtist": "Recherche sur YouTube Music…",
   "ytmPickArtist": "Quel artiste ?",
-  "ytmArtistNone": "Aucun artiste trouvé sur YouTube Music"
+  "ytmArtistNone": "Aucun artiste trouvé sur YouTube Music",
+  "suggestedBadge": "Suggéré",
+  "suggestedSimilarTo": "Suggéré · proche de « {seed} »",
+  "@suggestedSimilarTo": {
+    "placeholders": {
+      "seed": {
+        "type": "String"
+      }
+    }
+  },
+  "suggestionDownloadStarted": "Téléchargement lancé",
+  "suggestionAddWhenDownloaded": "Je le télécharge et l’ajoute à « {name} »",
+  "@suggestionAddWhenDownloaded": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "suggestionDislike": "Je n’aime pas",
+  "suggestionDisliked": "Il ne sera plus suggéré",
+  "removeFromQueueAction": "Retirer de la file",
+  "shuffleModeOff": "Aléatoire : désactivé",
+  "shuffleModeOn": "Aléatoire : activé",
+  "shuffleModePlus": "Aléatoire+ : activé (appui long pour les réglages)",
+  "shufflePlusTitle": "Aléatoire+",
+  "shufflePlusHint": "En lecture aléatoire, un titre que vous n’avez pas, proche de la liste en cours, s’ajoute de temps en temps. Il est lu en streaming.",
+  "shufflePlusEvery": "Une suggestion tous les {n} titres",
+  "@shufflePlusEvery": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "shufflePlusUnmeteredOnly": "Wi‑Fi uniquement",
+  "shufflePlusUnmeteredOnlyHint": "Aucune suggestion en données mobiles ou sur un réseau limité.",
+  "shufflePlusData": "Consommation estimée : environ 15 Mo par heure avec une suggestion tous les 4 titres.",
+  "shufflePlusActive": "Actif : les suggestions arrivent pendant l’écoute.",
+  "shufflePlusOff": "Désactivé : l’aléatoire reste normal.",
+  "shufflePlusBlockJam": "Inactif pendant une Jam",
+  "shufflePlusBlockShort": "Il faut une liste d’au moins 5 titres",
+  "shufflePlusBlockNoTool": "yt-dlp indisponible",
+  "shufflePlusBlockMetered": "En pause : réseau limité",
+  "shufflePlusBlockStopped": "Désactivé jusqu’au redémarrage : trop d’erreurs de lecture",
+  "shufflePlusNoticeRateLimited": "YouTube demande de ralentir : suggestions en pause pendant 15 minutes",
+  "shufflePlusNoticeTooManyErrors": "Trop d’erreurs de lecture : suggestions désactivées jusqu’au redémarrage"
 }
