@@ -23,6 +23,15 @@ abstract final class ShellNav {
     nav?.push(MaterialPageRoute<void>(builder: (_) => page));
   }
 
+  /// Same as [openInLibrary] but for the Home tab (a tap on a notification).
+  static void openInHome(BuildContext context, WidgetRef ref, Widget page) {
+    final root = Navigator.of(context, rootNavigator: true);
+    root.popUntil((r) => r.isFirst);
+    ref.read(navIndexProvider.notifier).set(NavTab.home.index);
+    final nav = ref.read(tabNavigatorKeysProvider)[NavTab.home.index].currentState;
+    nav?.push(MaterialPageRoute<void>(builder: (_) => page));
+  }
+
   /// Same as [openInLibrary] but for the Search tab.
   static void showSearch(BuildContext context, WidgetRef ref) {
     final root = Navigator.of(context, rootNavigator: true);

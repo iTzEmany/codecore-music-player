@@ -20,6 +20,7 @@ import '../../widgets/selection_bar.dart';
 import '../../widgets/track_row.dart';
 import '../../widgets/track_row_selection.dart';
 import '../online/artist_picker_sheet.dart';
+import '../releases/follow_button.dart';
 import 'album_detail_screen.dart';
 
 /// An artist: Play / Shuffle over all their tracks, the five most played and
@@ -73,12 +74,23 @@ class ArtistDetailScreen extends ConsumerWidget {
         ),
         meta: meta,
         menu: kEnableYoutube && artist.name != null
-            ? IconButton(
-                key: const ValueKey('artist-on-ytm'),
-                tooltip: l.ytmOnYoutubeMusic,
-                onPressed: () => openYtmArtist(context, ref, artist.name!,
-                    open: (page) => ShellNav.open<void>(context, page)),
-                icon: const Icon(Icons.smart_display_rounded),
+            ? Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    key: const ValueKey('artist-follow-ytm'),
+                    tooltip: l.followOnYtm,
+                    onPressed: () => followFromLibrary(context, ref, artist.name!),
+                    icon: const Icon(Icons.notifications_none_rounded),
+                  ),
+                  IconButton(
+                    key: const ValueKey('artist-on-ytm'),
+                    tooltip: l.ytmOnYoutubeMusic,
+                    onPressed: () => openYtmArtist(context, ref, artist.name!,
+                        open: (page) => ShellNav.open<void>(context, page)),
+                    icon: const Icon(Icons.smart_display_rounded),
+                  ),
+                ],
               )
             : null,
         onPlay: list.isEmpty

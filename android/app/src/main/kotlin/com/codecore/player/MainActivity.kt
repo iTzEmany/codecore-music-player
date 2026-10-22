@@ -20,6 +20,11 @@ class MainActivity : AudioServiceActivity() {
         ShareBridge.channel?.invokeMethod("appResumed", null)
     }
 
+    override fun onNewIntent(intent: android.content.Intent) {
+        super.onNewIntent(intent)
+        NotifyBridge.handleIntent(intent)
+    }
+
     override fun onPause() {
         ShareBridge.foreground = false
         super.onPause()
@@ -33,6 +38,8 @@ class MainActivity : AudioServiceActivity() {
         MediaDeleteBridge.register(flutterEngine.dartExecutor.binaryMessenger, this)
         StorageBridge.register(flutterEngine.dartExecutor.binaryMessenger)
         NetworkBridge.register(flutterEngine.dartExecutor.binaryMessenger, applicationContext)
+        NotifyBridge.register(flutterEngine.dartExecutor.binaryMessenger, applicationContext)
+        NotifyBridge.handleIntent(intent)
 
         // Where the sound goes (headphones or speaker): the equalizer keeps a
         // curve for each.

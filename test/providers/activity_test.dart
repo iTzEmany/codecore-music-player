@@ -98,5 +98,16 @@ void main() {
     expect(s.running.map((a) => a.key), ['dl-2']);
     expect(s.completed.map((a) => a.key), ['dl-3'], reason: 'still recorded in the Registro');
   });
-}
 
+  test('«Controlla ora» is a running line that cannot be cancelled', () {
+    final s = buildActivity(
+      scan: const ScanState(),
+      enrich: const EnrichJobState(),
+      downloads: const [],
+      outgoing: const [],
+      releases: true,
+    );
+    expect(s.running.single.kind, ActivityKind.releases);
+    expect(s.running.single.cancellable, isFalse);
+  });
+}

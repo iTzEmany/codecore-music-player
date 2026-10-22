@@ -7520,6 +7520,312 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Sport'**
   String get radioGenreSports;
+
+  /// No description provided for @newReleasesTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Nuove uscite'**
+  String get newReleasesTitle;
+
+  /// No description provided for @releasesTopArtists.
+  ///
+  /// In it, this message translates to:
+  /// **'Segui in automatico i più ascoltati'**
+  String get releasesTopArtists;
+
+  /// No description provided for @releasesTopArtistsHint.
+  ///
+  /// In it, this message translates to:
+  /// **'I 15 artisti più ascoltati negli ultimi 90 giorni, cercati su YouTube Music.'**
+  String get releasesTopArtistsHint;
+
+  /// No description provided for @releasesNotify.
+  ///
+  /// In it, this message translates to:
+  /// **'Notifiche delle nuove uscite'**
+  String get releasesNotify;
+
+  /// No description provided for @releasesNotifyHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Una al giorno al massimo, solo su Android.'**
+  String get releasesNotifyHint;
+
+  /// No description provided for @releasesUnmetered.
+  ///
+  /// In it, this message translates to:
+  /// **'Controlla solo su Wi‑Fi'**
+  String get releasesUnmetered;
+
+  /// No description provided for @releasesUnmeteredHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Un controllo al giorno pesa circa 0,5 MB.'**
+  String get releasesUnmeteredHint;
+
+  /// No description provided for @releasesTopCardTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Vuoi sapere quando escono brani nuovi dei tuoi artisti più ascoltati?'**
+  String get releasesTopCardTitle;
+
+  /// No description provided for @releasesTopCardYes.
+  ///
+  /// In it, this message translates to:
+  /// **'Attiva'**
+  String get releasesTopCardYes;
+
+  /// No description provided for @releasesTopCardNo.
+  ///
+  /// In it, this message translates to:
+  /// **'No, grazie'**
+  String get releasesTopCardNo;
+
+  /// No description provided for @newReleasesShowAll.
+  ///
+  /// In it, this message translates to:
+  /// **'Mostra tutte'**
+  String get newReleasesShowAll;
+
+  /// No description provided for @releasesCheckNow.
+  ///
+  /// In it, this message translates to:
+  /// **'Controlla ora'**
+  String get releasesCheckNow;
+
+  /// No description provided for @releasesLastCheck.
+  ///
+  /// In it, this message translates to:
+  /// **'Ultimo controllo: {when}'**
+  String releasesLastCheck(String when);
+
+  /// No description provided for @releasesNeverChecked.
+  ///
+  /// In it, this message translates to:
+  /// **'Mai controllato'**
+  String get releasesNeverChecked;
+
+  /// No description provided for @releasesPaused.
+  ///
+  /// In it, this message translates to:
+  /// **'YouTube chiede una pausa: riprovo alle {time}'**
+  String releasesPaused(String time);
+
+  /// No description provided for @releasesChecking.
+  ///
+  /// In it, this message translates to:
+  /// **'Controllo in corso…'**
+  String get releasesChecking;
+
+  /// No description provided for @releasesCheckNone.
+  ///
+  /// In it, this message translates to:
+  /// **'Nessuna nuova uscita'**
+  String get releasesCheckNone;
+
+  /// No description provided for @releasesCheckFound.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, one{1 nuova uscita} other{{count} nuove uscite}}'**
+  String releasesCheckFound(int count);
+
+  /// No description provided for @releasesCantCheck.
+  ///
+  /// In it, this message translates to:
+  /// **'Non posso controllare ora: manca la rete o non segui nessun artista.'**
+  String get releasesCantCheck;
+
+  /// No description provided for @releasesChanged.
+  ///
+  /// In it, this message translates to:
+  /// **'YouTube Music ha cambiato formato: riprovo al prossimo giro.'**
+  String get releasesChanged;
+
+  /// No description provided for @releasesEmpty.
+  ///
+  /// In it, this message translates to:
+  /// **'Nessuna nuova uscita negli ultimi 90 giorni. Apri la pagina di un artista e tocca «Segui».'**
+  String get releasesEmpty;
+
+  /// No description provided for @releasesAllArtists.
+  ///
+  /// In it, this message translates to:
+  /// **'Tutti'**
+  String get releasesAllArtists;
+
+  /// No description provided for @releasesFollowedTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Artisti seguiti ({count})'**
+  String releasesFollowedTitle(int count);
+
+  /// No description provided for @releasesFollowedLibrary.
+  ///
+  /// In it, this message translates to:
+  /// **'Artisti seguiti'**
+  String get releasesFollowedLibrary;
+
+  /// No description provided for @releasesFollowedCount.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, one{1 artista} other{{count} artisti}}'**
+  String releasesFollowedCount(int count);
+
+  /// No description provided for @followedEmpty.
+  ///
+  /// In it, this message translates to:
+  /// **'Non segui ancora nessun artista. Apri la pagina di un artista e tocca «Segui».'**
+  String get followedEmpty;
+
+  /// No description provided for @followAction.
+  ///
+  /// In it, this message translates to:
+  /// **'Segui'**
+  String get followAction;
+
+  /// No description provided for @followingAction.
+  ///
+  /// In it, this message translates to:
+  /// **'Segui già'**
+  String get followingAction;
+
+  /// No description provided for @followStopTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Smettere di seguire {name}?'**
+  String followStopTitle(String name);
+
+  /// No description provided for @followStopBody.
+  ///
+  /// In it, this message translates to:
+  /// **'Non riceverai più le sue nuove uscite.'**
+  String get followStopBody;
+
+  /// No description provided for @followOnYtm.
+  ///
+  /// In it, this message translates to:
+  /// **'Segui su YouTube Music'**
+  String get followOnYtm;
+
+  /// No description provided for @followStop.
+  ///
+  /// In it, this message translates to:
+  /// **'Non seguire più'**
+  String get followStop;
+
+  /// No description provided for @followedNow.
+  ///
+  /// In it, this message translates to:
+  /// **'Ora segui {name}'**
+  String followedNow(String name);
+
+  /// No description provided for @followMute.
+  ///
+  /// In it, this message translates to:
+  /// **'Silenzia notifiche'**
+  String get followMute;
+
+  /// No description provided for @followUnmute.
+  ///
+  /// In it, this message translates to:
+  /// **'Riattiva notifiche'**
+  String get followUnmute;
+
+  /// No description provided for @followedTopListened.
+  ///
+  /// In it, this message translates to:
+  /// **'Più ascoltato'**
+  String get followedTopListened;
+
+  /// No description provided for @followedToConfirm.
+  ///
+  /// In it, this message translates to:
+  /// **'Da confermare'**
+  String get followedToConfirm;
+
+  /// No description provided for @followedNotFound.
+  ///
+  /// In it, this message translates to:
+  /// **'Non trovato'**
+  String get followedNotFound;
+
+  /// No description provided for @followedRetry.
+  ///
+  /// In it, this message translates to:
+  /// **'Riprova'**
+  String get followedRetry;
+
+  /// No description provided for @releaseAlbumYear.
+  ///
+  /// In it, this message translates to:
+  /// **'Album · {year}'**
+  String releaseAlbumYear(String year);
+
+  /// No description provided for @releaseSingleYear.
+  ///
+  /// In it, this message translates to:
+  /// **'Singolo · {year}'**
+  String releaseSingleYear(String year);
+
+  /// No description provided for @releaseAlbumPlain.
+  ///
+  /// In it, this message translates to:
+  /// **'Album'**
+  String get releaseAlbumPlain;
+
+  /// No description provided for @releaseSinglePlain.
+  ///
+  /// In it, this message translates to:
+  /// **'Singolo'**
+  String get releaseSinglePlain;
+
+  /// No description provided for @releaseVariants.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, one{e un’altra versione} other{e altre {count} versioni}}'**
+  String releaseVariants(int count);
+
+  /// No description provided for @releaseNewBadge.
+  ///
+  /// In it, this message translates to:
+  /// **'Nuovo'**
+  String get releaseNewBadge;
+
+  /// No description provided for @activityReleases.
+  ///
+  /// In it, this message translates to:
+  /// **'Controllo nuove uscite'**
+  String get activityReleases;
+
+  /// No description provided for @releaseNotifyOne.
+  ///
+  /// In it, this message translates to:
+  /// **'Nuova uscita: {title} di {artist}'**
+  String releaseNotifyOne(String title, String artist);
+
+  /// No description provided for @releaseNotifyMany1.
+  ///
+  /// In it, this message translates to:
+  /// **'{count} nuove uscite: {a}'**
+  String releaseNotifyMany1(int count, String a);
+
+  /// No description provided for @releaseNotifyMany2.
+  ///
+  /// In it, this message translates to:
+  /// **'{count} nuove uscite: {a} e {b}'**
+  String releaseNotifyMany2(int count, String a, String b);
+
+  /// No description provided for @releaseNotifyManyMore.
+  ///
+  /// In it, this message translates to:
+  /// **'{count} nuove uscite: {a}, {b} e altri {others}'**
+  String releaseNotifyManyMore(int count, String a, String b, int others);
+
+  /// No description provided for @releaseNotifyShow.
+  ///
+  /// In it, this message translates to:
+  /// **'Mostra'**
+  String get releaseNotifyShow;
 }
 
 class _AppLocalizationsDelegate

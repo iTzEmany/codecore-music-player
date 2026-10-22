@@ -2543,5 +2543,175 @@
   "radioGenreSoul": "Soul",
   "radioGenreNews": "Nachrichten",
   "radioGenreTalk": "Talk",
-  "radioGenreSports": "Sport"
+  "radioGenreSports": "Sport",
+  "newReleasesTitle": "Neuerscheinungen",
+  "releasesTopArtists": "Meistgehörte Künstler automatisch folgen",
+  "releasesTopArtistsHint": "Die 15 meistgehörten Künstler der letzten 90 Tage, gesucht auf YouTube Music.",
+  "releasesNotify": "Benachrichtigungen für Neuerscheinungen",
+  "releasesNotifyHint": "Höchstens eine pro Tag, nur auf Android.",
+  "releasesUnmetered": "Nur im WLAN prüfen",
+  "releasesUnmeteredHint": "Eine tägliche Prüfung braucht etwa 0,5 MB.",
+  "releasesTopCardTitle": "Möchtest du wissen, wann deine meistgehörten Künstler neue Musik veröffentlichen?",
+  "releasesTopCardYes": "Aktivieren",
+  "releasesTopCardNo": "Nein, danke",
+  "newReleasesShowAll": "Alle anzeigen",
+  "releasesCheckNow": "Jetzt prüfen",
+  "releasesLastCheck": "Letzte Prüfung: {when}",
+  "@releasesLastCheck": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "releasesNeverChecked": "Noch nie geprüft",
+  "releasesPaused": "YouTube bittet um eine Pause: neuer Versuch um {time}",
+  "@releasesPaused": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "releasesChecking": "Prüfung läuft…",
+  "releasesCheckNone": "Keine Neuerscheinungen",
+  "releasesCheckFound": "{count, plural, one{1 Neuerscheinung} other{{count} Neuerscheinungen}}",
+  "@releasesCheckFound": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "releasesCantCheck": "Prüfung gerade nicht möglich: kein Netz oder keine gefolgten Künstler.",
+  "releasesChanged": "YouTube Music hat sein Format geändert: neuer Versuch bei der nächsten Runde.",
+  "releasesEmpty": "Keine Neuerscheinungen in den letzten 90 Tagen. Öffne die Seite eines Künstlers und tippe auf „Folgen“.",
+  "releasesAllArtists": "Alle",
+  "releasesFollowedTitle": "Gefolgte Künstler ({count})",
+  "@releasesFollowedTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "releasesFollowedLibrary": "Gefolgte Künstler",
+  "releasesFollowedCount": "{count, plural, one{1 Künstler} other{{count} Künstler}}",
+  "@releasesFollowedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "followedEmpty": "Du folgst noch keinem Künstler. Öffne die Seite eines Künstlers und tippe auf „Folgen“.",
+  "followAction": "Folgen",
+  "followingAction": "Gefolgt",
+  "followStopTitle": "{name} nicht mehr folgen?",
+  "@followStopTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "followStopBody": "Neuerscheinungen werden nicht mehr gemeldet.",
+  "followOnYtm": "Auf YouTube Music folgen",
+  "followStop": "Nicht mehr folgen",
+  "followedNow": "Du folgst jetzt {name}",
+  "@followedNow": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "followMute": "Benachrichtigungen stummschalten",
+  "followUnmute": "Benachrichtigungen aktivieren",
+  "followedTopListened": "Meistgehört",
+  "followedToConfirm": "Zu bestätigen",
+  "followedNotFound": "Nicht gefunden",
+  "followedRetry": "Erneut versuchen",
+  "releaseAlbumYear": "Album · {year}",
+  "@releaseAlbumYear": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "releaseSingleYear": "Single · {year}",
+  "@releaseSingleYear": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "releaseAlbumPlain": "Album",
+  "releaseSinglePlain": "Single",
+  "releaseVariants": "{count, plural, one{und 1 weitere Version} other{und {count} weitere Versionen}}",
+  "@releaseVariants": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "releaseNewBadge": "Neu",
+  "activityReleases": "Prüfe Neuerscheinungen",
+  "releaseNotifyOne": "Neuerscheinung: {title} von {artist}",
+  "@releaseNotifyOne": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "artist": {
+        "type": "String"
+      }
+    }
+  },
+  "releaseNotifyMany1": "{count} Neuerscheinungen: {a}",
+  "@releaseNotifyMany1": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "a": {
+        "type": "String"
+      }
+    }
+  },
+  "releaseNotifyMany2": "{count} Neuerscheinungen: {a} und {b}",
+  "@releaseNotifyMany2": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "a": {
+        "type": "String"
+      },
+      "b": {
+        "type": "String"
+      }
+    }
+  },
+  "releaseNotifyManyMore": "{count} Neuerscheinungen: {a}, {b} und {others} weitere",
+  "@releaseNotifyManyMore": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "a": {
+        "type": "String"
+      },
+      "b": {
+        "type": "String"
+      },
+      "others": {
+        "type": "int"
+      }
+    }
+  },
+  "releaseNotifyShow": "Anzeigen"
 }

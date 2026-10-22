@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/app_log.dart';
+import '../../../core/constants.dart';
 import '../../../data/db/app_database.dart' show Track;
 import '../../../data/repositories/library_queries.dart' show ArtistSummary;
 import '../../../l10n/l10n_ext.dart';
@@ -15,6 +16,7 @@ import '../../shell/shell_nav.dart';
 import '../../widgets/section_header.dart';
 import '../../widgets/track_row.dart';
 import '../library/artist_screen.dart';
+import '../releases/follow_button.dart';
 import '../youtube/online_results.dart';
 import 'artist_page_sections.dart';
 import 'artist_songs_screen.dart';
@@ -66,7 +68,11 @@ class ArtistPageScreen extends ConsumerWidget {
     final songs = <YtResult>[];
     final slivers = <Widget>[
       SliverToBoxAdapter(
-        child: ArtistHeader(artist: artist, audience: data?.value.ref.audience),
+        child: ArtistHeader(
+          artist: artist,
+          audience: data?.value.ref.audience,
+          action: kEnableYoutube ? FollowButton(artist: artist) : null,
+        ),
       ),
     ];
     if (data != null) {

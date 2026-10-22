@@ -18,12 +18,15 @@ String? thumbAt(BuildContext context, String? url, double size) => url == null
 /// Photo, name and monthly audience at the top of an artist page. Built from
 /// the reference the page was opened from, so it is there while the page loads.
 class ArtistHeader extends StatelessWidget {
-  const ArtistHeader({super.key, required this.artist, this.audience});
+  const ArtistHeader({super.key, required this.artist, this.audience, this.action});
 
   final YtmArtistRef artist;
 
   /// «25.9M monthly audience» once the page is read.
   final String? audience;
+
+  /// A button under the name («Segui»).
+  final Widget? action;
 
   @override
   Widget build(BuildContext context) {
@@ -52,6 +55,7 @@ class ArtistHeader extends StatelessWidget {
               padding: const EdgeInsets.only(top: 4),
               child: Text(text, style: theme.bodyMedium?.copyWith(color: cc.textMuted)),
             ),
+          if (action != null) Padding(padding: const EdgeInsets.only(top: 12), child: action),
         ],
       ),
     );

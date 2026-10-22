@@ -95,6 +95,20 @@ Una tabella nuova, nessuna esistente toccata.
 ### `radio_stations`
 `stationId` text **PK** (`stationuuid` di Radio Browser, oppure `manual:<uuid>` per un indirizzo scritto a mano) · `name` text · `streamUrl` text · `homepage`, `faviconUrl`, `countryCode`, `state` text default `''` · `tags` text (separati da virgola) · `codec` text · `bitrate` int · `hls` bool · `position` int (l'ordine scelto, 0 = prima) · `addedAt` int · `lastPlayedAt` int? · `lastOkAt` int? (l'ultima rilettura che l'ha trovata funzionante) · `unreachable` bool default false (l'ultima rilettura non l'ha trovata o la dà rotta: «non risponde» nella riga, **la riga non si cancella mai**). Le liste di stazioni di Radio Browser (paese, ricerche) **non** sono nel DB: file `<appSupport>/radio/country_<CC>.json`, una cache. Entra nei dati utente portabili del backup (`user_data.json`, campo `radios`).
 
+## Nuove uscite (schema v13, fase 34)
+Tre tabelle nuove, nessuna esistente toccata (il passaggio v12 → v13 è un `createTable` per ciascuna).
+
+### `followed_artists`
+`ytm_id` text **PK** (`UC…`, il `browseId` della pagina artista di YouTube Music) · `name` text · `thumb_url` text? · `origin` int (0 seguito a mano · 1 automatico, tra i più ascoltati) · `excluded` bool default false (un automatico che l'utente non segue più: la riga resta perché non torni) · `muted` bool default false (campanella: niente notifica, la novità compare in Home) · `followed_at` int · `last_checked_at` int? (nullo = primo controllo ancora da fare: segna tutto come già visto) · `last_error` text? · `checks_failed` int default 0 (giri di fila con «artista non trovato»; ≥ 3 = «Non trovato», non si controlla più finché non si tocca «Riprova»). Entra nei dati utente portabili del backup (`followedArtists`: id, nome, origine, esclusi, silenziati).
+
+### `artist_releases`
+`browse_id` text **PK** (`MPREb_…`) · `artist_id` text → `followed_artists` (cascade) · `title` text · `kind` int (0 album · 1 singolo/EP, dalla sezione) · `year` int? · `thumb_url` text? · `first_seen_at` int · `is_new` bool (finché l'utente non la apre) · `opened_at` int? · `group_key` text (titolo senza parentesi, senza ciò che segue «:» o «+», senza «Deluxe/Edition/Version»: le varianti dello stesso album hanno la stessa chiave). Le uscite **non** vanno nel backup portabile (dopo un'unione il primo giro le segna come viste).
+
+### `artist_lookups`
+`artist_key` text **PK** (`matchKey` dell'artista principale) · `name` text · `status` int (0 un solo artista uguale · 1 nessuno · 2 più d'uno, «Da confermare») · `ytm_id`, `ytm_name`, `thumb_url` text? · `checked_at` int. Memoria di 30 giorni delle ricerche dei più ascoltati, perché non si ripetano.
+
+Impostazioni nuove in `SettingsStore` (fuori da `AppSettings`, quindi non nel backup): `releasesTopArtists` (bool, false) · `releasesNotify` (bool, true) · `releasesUnmeteredOnly` (bool, false) · `releasesTopCardSeen` (bool) · `releasesLastRunAt`, `releasesRetryAt`, `releasesLastNotifiedAt` (int? ms).
+
 ## Importazione da CSV (schema v4, fase 12)
 | Tabella | Colonne | Note |
 |---|---|---|

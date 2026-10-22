@@ -84,6 +84,7 @@ class ActivitySheet extends ConsumerWidget {
         case ActivityKind.import:
           cancelImport(a);
         case ActivityKind.scan:
+        case ActivityKind.releases:
           break;
       }
     }
@@ -225,6 +226,7 @@ String activityTitle(AppLocalizations l, ActivityItem a) => switch (a.kind) {
           ),
   ActivityKind.transfer => l.activityTransfer(a.name ?? '', a.total),
   ActivityKind.cleanup => l.activityCleanup(a.done, a.total),
+  ActivityKind.releases => l.activityReleases,
   ActivityKind.import =>
     a.paused
         ? l.activityImportPaused(a.name ?? '', a.done, a.total)

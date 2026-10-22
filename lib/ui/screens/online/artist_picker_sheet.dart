@@ -14,16 +14,15 @@ import '../youtube/online_results.dart' show ytErrorText;
 import 'artist_page_screen.dart';
 import 'artist_page_sections.dart' show thumbAt;
 
-/// «Su YouTube Music» from the library: looks the artist [name] up among
-/// YouTube Music's artists and calls [open] with the page of the right one. A
-/// single exact name opens by itself; otherwise the first three are offered.
-/// Only ever started by the user's tap.
-Future<void> openYtmArtist(
+/// Looks the artist [name] up among YouTube Music's artists: a single exact
+/// name is the answer, otherwise the first few are offered in a sheet. Null
+/// (after saying why) when nobody was found or chosen. Only ever started by
+/// the user's tap.
+Future<YtmArtistRef?> lookupYtmArtist(
   BuildContext context,
   WidgetRef ref,
-  String name, {
-  required void Function(Widget page) open,
-}) async {
+  String name,
+) async {
   final l = context.l10n;
   final messenger = ScaffoldMessenger.of(context);
   void say(String text) => messenger
@@ -37,29 +36,40 @@ Future<void> openYtmArtist(
         .searchArtists(name, ref.read(ytmLanguageProvider));
   } on Object catch (e) {
     AppLog.w('artist lookup failed ($e)');
-    if (!context.mounted) return;
+    if (!context.mounted) return null;
     say(e is YtException
         ? ytErrorText(context, e.kind)
         : e is InnerTubeChanged
             ? l.ytmPageUnreadable
             : l.loadFailed);
-    return;
+    return null;
   }
   messenger.clearSnackBars();
-  if (!context.mounted) return;
+  if (!context.mounted) return null;
   switch (pickYtmArtist(name, found)) {
     case ExactArtist(:final artist):
-      open(ArtistPageScreen(artist: artist));
+      return artist;
     case ChooseArtist(:final artists):
-      final chosen = await showModalBottomSheet<YtmArtistRef>(
+      return showModalBottomSheet<YtmArtistRef>(
         context: context,
         showDragHandle: true,
         builder: (_) => ArtistPickerSheet(artists: artists),
       );
-      if (chosen != null) open(ArtistPageScreen(artist: chosen));
     case NoArtist():
       say(l.ytmArtistNone);
+      return null;
   }
+}
+
+/// «Su YouTube Music» from the library: opens the page of the artist found.
+Future<void> openYtmArtist(
+  BuildContext context,
+  WidgetRef ref,
+  String name, {
+  required void Function(Widget page) open,
+}) async {
+  final artist = await lookupYtmArtist(context, ref, name);
+  if (artist != null) open(ArtistPageScreen(artist: artist));
 }
 
 /// The few artists to choose from: photo, name and monthly audience.

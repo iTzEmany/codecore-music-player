@@ -38,6 +38,7 @@ import 'trusted_devices_tiles.dart';
 import 'translation_models_tiles.dart';
 import 'update_tiles.dart';
 import 'shuffle_plus_tiles.dart';
+import 'release_settings_tiles.dart';
 
 const _languages = {
   'it': 'Italiano',
@@ -247,6 +248,11 @@ class SettingsScreen extends ConsumerWidget {
                 ),
               ],
             ),
+            if (kEnableYoutube)
+              _Group(
+                title: l.newReleasesTitle,
+                children: const [ReleaseSettingsTiles()],
+              ),
             if (kEnableYoutube)
               _Group(
                 title: l.settingsDownloads,

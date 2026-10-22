@@ -39,6 +39,10 @@ import '../smart/smart_playlist_screen.dart';
 import '../stats/stats_screen.dart';
 import '../tags/tags_screen.dart';
 import 'folders_sheet.dart';
+import '../../../core/constants.dart';
+import '../../../providers/releases_providers.dart'
+    show followedArtistsProvider, releaseOptionsProvider;
+import '../releases/followed_artists_screen.dart';
 import 'review_screen.dart';
 import 'scan_status.dart';
 import '../../widgets/motion.dart';
@@ -95,6 +99,8 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
     final tagCount = ref.watch(tagsProvider.select((t) => t.value?.length ?? 0));
     final podcastCount = ref.watch(podcastsProvider.select((p) => p.value?.length ?? 0));
     final radioCount = ref.watch(savedRadiosProvider.select((r) => r.value?.length ?? 0));
+    final followedCount = ref.watch(followedArtistsProvider.select((v) => v.value?.length ?? 0));
+    final releaseTopArtists = ref.watch(releaseOptionsProvider.select((o) => o.topArtists));
     final reviewCount = ref.watch(reviewCountProvider.select((c) => c.value ?? 0));
     final theme = Theme.of(context).textTheme;
     final denied = ref.watch(permissionDeniedProvider);
@@ -163,6 +169,13 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
           subtitle: l.radioLibrarySubtitle(radioCount),
           onTap: () => ShellNav.open<void>(context, const RadioScreen()),
         ),
+        if (kEnableYoutube && (followedCount > 0 || releaseTopArtists))
+          _Pinned(
+            icon: Icons.notifications_active_outlined,
+            title: l.releasesFollowedLibrary,
+            subtitle: l.releasesFollowedCount(followedCount),
+            onTap: () => ShellNav.open<void>(context, const FollowedArtistsScreen()),
+          ),
         _Pinned(
           icon: Icons.history_rounded,
           title: l.historyTitle,

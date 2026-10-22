@@ -23,6 +23,9 @@ import '../../providers/share_hub.dart';
 import '../screens/jam/jam_request_dialog.dart';
 import '../screens/search/search_screen.dart';
 import '../screens/home/home_screen.dart';
+import '../screens/releases/new_releases_screen.dart';
+import '../../providers/releases_providers.dart' show launchTargetProvider;
+import 'shell_nav.dart';
 import '../../l10n/l10n_ext.dart';
 import '../theme/tokens.dart';
 import '../widgets/enrich_result_listener.dart';
@@ -122,6 +125,15 @@ class AppShell extends ConsumerWidget {
             ShufflePlusNotice.tooManyErrors => l.shufflePlusNoticeTooManyErrors,
           }),
         ));
+    });
+    // A tap on the «Nuove uscite» notification opens that page.
+    ref.listen(launchTargetProvider, (_, next) {
+      if (next.value != 'releases') return;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (context.mounted) {
+          ShellNav.openInHome(context, ref, const NewReleasesScreen());
+        }
+      });
     });
     ref.listen(shareOffersProvider, (_, next) {
       final o = next.value;

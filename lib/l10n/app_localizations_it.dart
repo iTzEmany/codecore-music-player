@@ -4699,4 +4699,210 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get radioGenreSports => 'Sport';
+
+  @override
+  String get newReleasesTitle => 'Nuove uscite';
+
+  @override
+  String get releasesTopArtists => 'Segui in automatico i più ascoltati';
+
+  @override
+  String get releasesTopArtistsHint =>
+      'I 15 artisti più ascoltati negli ultimi 90 giorni, cercati su YouTube Music.';
+
+  @override
+  String get releasesNotify => 'Notifiche delle nuove uscite';
+
+  @override
+  String get releasesNotifyHint => 'Una al giorno al massimo, solo su Android.';
+
+  @override
+  String get releasesUnmetered => 'Controlla solo su Wi‑Fi';
+
+  @override
+  String get releasesUnmeteredHint =>
+      'Un controllo al giorno pesa circa 0,5 MB.';
+
+  @override
+  String get releasesTopCardTitle =>
+      'Vuoi sapere quando escono brani nuovi dei tuoi artisti più ascoltati?';
+
+  @override
+  String get releasesTopCardYes => 'Attiva';
+
+  @override
+  String get releasesTopCardNo => 'No, grazie';
+
+  @override
+  String get newReleasesShowAll => 'Mostra tutte';
+
+  @override
+  String get releasesCheckNow => 'Controlla ora';
+
+  @override
+  String releasesLastCheck(String when) {
+    return 'Ultimo controllo: $when';
+  }
+
+  @override
+  String get releasesNeverChecked => 'Mai controllato';
+
+  @override
+  String releasesPaused(String time) {
+    return 'YouTube chiede una pausa: riprovo alle $time';
+  }
+
+  @override
+  String get releasesChecking => 'Controllo in corso…';
+
+  @override
+  String get releasesCheckNone => 'Nessuna nuova uscita';
+
+  @override
+  String releasesCheckFound(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count nuove uscite',
+      one: '1 nuova uscita',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get releasesCantCheck =>
+      'Non posso controllare ora: manca la rete o non segui nessun artista.';
+
+  @override
+  String get releasesChanged =>
+      'YouTube Music ha cambiato formato: riprovo al prossimo giro.';
+
+  @override
+  String get releasesEmpty =>
+      'Nessuna nuova uscita negli ultimi 90 giorni. Apri la pagina di un artista e tocca «Segui».';
+
+  @override
+  String get releasesAllArtists => 'Tutti';
+
+  @override
+  String releasesFollowedTitle(int count) {
+    return 'Artisti seguiti ($count)';
+  }
+
+  @override
+  String get releasesFollowedLibrary => 'Artisti seguiti';
+
+  @override
+  String releasesFollowedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count artisti',
+      one: '1 artista',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get followedEmpty =>
+      'Non segui ancora nessun artista. Apri la pagina di un artista e tocca «Segui».';
+
+  @override
+  String get followAction => 'Segui';
+
+  @override
+  String get followingAction => 'Segui già';
+
+  @override
+  String followStopTitle(String name) {
+    return 'Smettere di seguire $name?';
+  }
+
+  @override
+  String get followStopBody => 'Non riceverai più le sue nuove uscite.';
+
+  @override
+  String get followOnYtm => 'Segui su YouTube Music';
+
+  @override
+  String get followStop => 'Non seguire più';
+
+  @override
+  String followedNow(String name) {
+    return 'Ora segui $name';
+  }
+
+  @override
+  String get followMute => 'Silenzia notifiche';
+
+  @override
+  String get followUnmute => 'Riattiva notifiche';
+
+  @override
+  String get followedTopListened => 'Più ascoltato';
+
+  @override
+  String get followedToConfirm => 'Da confermare';
+
+  @override
+  String get followedNotFound => 'Non trovato';
+
+  @override
+  String get followedRetry => 'Riprova';
+
+  @override
+  String releaseAlbumYear(String year) {
+    return 'Album · $year';
+  }
+
+  @override
+  String releaseSingleYear(String year) {
+    return 'Singolo · $year';
+  }
+
+  @override
+  String get releaseAlbumPlain => 'Album';
+
+  @override
+  String get releaseSinglePlain => 'Singolo';
+
+  @override
+  String releaseVariants(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'e altre $count versioni',
+      one: 'e un’altra versione',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get releaseNewBadge => 'Nuovo';
+
+  @override
+  String get activityReleases => 'Controllo nuove uscite';
+
+  @override
+  String releaseNotifyOne(String title, String artist) {
+    return 'Nuova uscita: $title di $artist';
+  }
+
+  @override
+  String releaseNotifyMany1(int count, String a) {
+    return '$count nuove uscite: $a';
+  }
+
+  @override
+  String releaseNotifyMany2(int count, String a, String b) {
+    return '$count nuove uscite: $a e $b';
+  }
+
+  @override
+  String releaseNotifyManyMore(int count, String a, String b, int others) {
+    return '$count nuove uscite: $a, $b e altri $others';
+  }
+
+  @override
+  String get releaseNotifyShow => 'Mostra';
 }

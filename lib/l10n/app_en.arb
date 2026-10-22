@@ -2543,5 +2543,175 @@
   "radioGenreSoul": "Soul",
   "radioGenreNews": "News",
   "radioGenreTalk": "Talk",
-  "radioGenreSports": "Sports"
+  "radioGenreSports": "Sports",
+  "newReleasesTitle": "New releases",
+  "releasesTopArtists": "Follow your most listened artists automatically",
+  "releasesTopArtistsHint": "The 15 most played artists of the last 90 days, looked up on YouTube Music.",
+  "releasesNotify": "New release notifications",
+  "releasesNotifyHint": "At most one a day, Android only.",
+  "releasesUnmetered": "Check on Wi‑Fi only",
+  "releasesUnmeteredHint": "A daily check uses about 0.5 MB.",
+  "releasesTopCardTitle": "Want to know when your most listened artists release new music?",
+  "releasesTopCardYes": "Turn on",
+  "releasesTopCardNo": "No thanks",
+  "newReleasesShowAll": "Show all",
+  "releasesCheckNow": "Check now",
+  "releasesLastCheck": "Last check: {when}",
+  "@releasesLastCheck": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "releasesNeverChecked": "Never checked",
+  "releasesPaused": "YouTube asks for a pause: trying again at {time}",
+  "@releasesPaused": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "releasesChecking": "Checking…",
+  "releasesCheckNone": "No new releases",
+  "releasesCheckFound": "{count, plural, one{1 new release} other{{count} new releases}}",
+  "@releasesCheckFound": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "releasesCantCheck": "Can’t check now: no network or no followed artist.",
+  "releasesChanged": "YouTube Music changed its format: trying again next round.",
+  "releasesEmpty": "No new releases in the last 90 days. Open an artist page and tap “Follow”.",
+  "releasesAllArtists": "All",
+  "releasesFollowedTitle": "Followed artists ({count})",
+  "@releasesFollowedTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "releasesFollowedLibrary": "Followed artists",
+  "releasesFollowedCount": "{count, plural, one{1 artist} other{{count} artists}}",
+  "@releasesFollowedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "followedEmpty": "You don’t follow any artist yet. Open an artist page and tap “Follow”.",
+  "followAction": "Follow",
+  "followingAction": "Following",
+  "followStopTitle": "Stop following {name}?",
+  "@followStopTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "followStopBody": "You won’t get its new releases any more.",
+  "followOnYtm": "Follow on YouTube Music",
+  "followStop": "Stop following",
+  "followedNow": "You now follow {name}",
+  "@followedNow": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "followMute": "Mute notifications",
+  "followUnmute": "Unmute notifications",
+  "followedTopListened": "Most listened",
+  "followedToConfirm": "To confirm",
+  "followedNotFound": "Not found",
+  "followedRetry": "Retry",
+  "releaseAlbumYear": "Album · {year}",
+  "@releaseAlbumYear": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "releaseSingleYear": "Single · {year}",
+  "@releaseSingleYear": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "releaseAlbumPlain": "Album",
+  "releaseSinglePlain": "Single",
+  "releaseVariants": "{count, plural, one{and 1 other version} other{and {count} other versions}}",
+  "@releaseVariants": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "releaseNewBadge": "New",
+  "activityReleases": "Checking new releases",
+  "releaseNotifyOne": "New release: {title} by {artist}",
+  "@releaseNotifyOne": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "artist": {
+        "type": "String"
+      }
+    }
+  },
+  "releaseNotifyMany1": "{count} new releases: {a}",
+  "@releaseNotifyMany1": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "a": {
+        "type": "String"
+      }
+    }
+  },
+  "releaseNotifyMany2": "{count} new releases: {a} and {b}",
+  "@releaseNotifyMany2": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "a": {
+        "type": "String"
+      },
+      "b": {
+        "type": "String"
+      }
+    }
+  },
+  "releaseNotifyManyMore": "{count} new releases: {a}, {b} and {others} more",
+  "@releaseNotifyManyMore": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "a": {
+        "type": "String"
+      },
+      "b": {
+        "type": "String"
+      },
+      "others": {
+        "type": "int"
+      }
+    }
+  },
+  "releaseNotifyShow": "Show"
 }

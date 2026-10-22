@@ -24,6 +24,9 @@ import '../library/favorites_screen.dart';
 import '../library/folders_sheet.dart';
 import '../playlists/playlist_detail_screen.dart';
 import 'radio_shelf.dart';
+import '../releases/new_releases_shelf.dart';
+import '../releases/top_artists_card.dart';
+import '../../../core/constants.dart';
 import '../settings/settings_screen.dart';
 import '../stats/stats_screen.dart';
 import '../../widgets/motion.dart';
@@ -287,6 +290,8 @@ class HomeScreen extends ConsumerWidget {
               },
             ),
           ),
+          if (kEnableYoutube) const HomeNewReleasesShelf(),
+          if (kEnableYoutube) const TopArtistsCard(),
           if (month != null && !month.isEmpty)
             Padding(
               padding: const EdgeInsets.fromLTRB(

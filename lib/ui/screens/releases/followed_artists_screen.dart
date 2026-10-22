@@ -1,0 +1,165 @@
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../core/app_log.dart';
+import '../../../data/db/app_database.dart' show ArtistLookup, FollowedArtist;
+import '../../../data/repositories/follow_repository.dart';
+import '../../../l10n/l10n_ext.dart';
+import '../../../providers/releases_providers.dart';
+import '../../../providers/ytm_catalog_providers.dart';
+import '../../../services/online/ytm_artist.dart';
+import '../../theme/tokens.dart';
+import '../../widgets/empty_state.dart';
+import '../../widgets/net_thumbnail.dart';
+import '../online/artist_page_sections.dart' show thumbAt;
+import '../online/artist_picker_sheet.dart' show ArtistPickerSheet;
+import 'follow_button.dart' show followArtist;
+
+/// The artists whose new releases are checked: followed by hand and the most
+/// listened (automatic), each with its bell and «Non seguire più».
+class FollowedArtistsScreen extends ConsumerWidget {
+  const FollowedArtistsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    final followed = ref.watch(followedArtistsProvider);
+    final pending =
+        ref.watch(pendingArtistsProvider).value ?? const <ArtistLookup>[];
+    final rows = followed.value ?? const <FollowedArtist>[];
+    final followedIds = {for (final r in rows) r.ytmId};
+    final toConfirm = [
+      for (final p in pending)
+        if (!followedIds.contains(p.ytmId)) p,
+    ];
+    return Scaffold(
+      appBar: AppBar(title: Text(l.releasesFollowedTitle(rows.length))),
+      body: !followed.hasValue
+          ? const Center(child: CircularProgressIndicator())
+          : rows.isEmpty && toConfirm.isEmpty
+          ? EmptyState(
+              icon: Icons.notifications_none_rounded,
+              message: l.followedEmpty,
+            )
+          : ListView.builder(
+              itemCount: toConfirm.length + rows.length,
+              itemBuilder: (_, i) => i < toConfirm.length
+                  ? _PendingRow(lookup: toConfirm[i])
+                  : _FollowedRow(artist: rows[i - toConfirm.length]),
+            ),
+    );
+  }
+}
+
+class _FollowedRow extends ConsumerWidget {
+  const _FollowedRow({required this.artist});
+
+  final FollowedArtist artist;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    final cc = context.cc;
+    final repo = ref.read(followRepositoryProvider);
+    final subtitle = artist.notFound
+        ? l.followedNotFound
+        : artist.isAuto
+        ? l.followedTopListened
+        : null;
+    return ListTile(
+      key: ValueKey('followed-${artist.ytmId}'),
+      leading: NetThumbnail(
+        url: thumbAt(context, artist.thumbUrl, 48),
+        width: 48,
+        height: 48,
+        icon: Icons.person_rounded,
+        circle: true,
+      ),
+      title: Text(artist.name, maxLines: 1, overflow: TextOverflow.ellipsis),
+      subtitle: subtitle == null
+          ? null
+          : Text(
+              subtitle,
+              style: TextStyle(
+                color: artist.notFound ? cc.error : cc.textMuted,
+              ),
+            ),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (artist.notFound)
+            TextButton(
+              key: ValueKey('retry-${artist.ytmId}'),
+              onPressed: () => repo.retry(artist.ytmId),
+              child: Text(l.followedRetry),
+            ),
+          IconButton(
+            key: ValueKey('mute-${artist.ytmId}'),
+            tooltip: artist.muted ? l.followUnmute : l.followMute,
+            onPressed: () => repo.setMuted(artist.ytmId, !artist.muted),
+            icon: Icon(
+              artist.muted
+                  ? Icons.notifications_off_outlined
+                  : Icons.notifications_none_rounded,
+            ),
+          ),
+          IconButton(
+            key: ValueKey('unfollow-${artist.ytmId}'),
+            tooltip: l.followStop,
+            onPressed: () => repo.unfollow(artist.ytmId),
+            icon: const Icon(Icons.person_remove_outlined),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A most-listened name with several matching artists: the user picks one.
+class _PendingRow extends ConsumerWidget {
+  const _PendingRow({required this.lookup});
+
+  final ArtistLookup lookup;
+
+  Future<void> _pick(BuildContext context, WidgetRef ref) async {
+    final l = context.l10n;
+    final messenger = ScaffoldMessenger.of(context);
+    final List<YtmArtistRef> found;
+    try {
+      found = await ref
+          .read(ytmCatalogProvider)
+          .searchArtists(lookup.name, ref.read(ytmLanguageProvider));
+    } on Object catch (e) {
+      AppLog.w('artist lookup failed ($e)');
+      messenger.showSnackBar(SnackBar(content: Text(l.loadFailed)));
+      return;
+    }
+    if (!context.mounted || found.isEmpty) return;
+    final chosen = await showModalBottomSheet<YtmArtistRef>(
+      context: context,
+      showDragHandle: true,
+      builder: (_) => ArtistPickerSheet(artists: found.take(5).toList()),
+    );
+    if (chosen == null) return;
+    final repo = ref.read(followRepositoryProvider);
+    await repo.saveLookup(lookup.artistKey, lookup.name, artist: chosen);
+    await followArtist(ref, chosen);
+    ref.invalidate(pendingArtistsProvider);
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    final cc = context.cc;
+    return ListTile(
+      key: ValueKey('pending-${lookup.artistKey}'),
+      leading: const CircleAvatar(child: Icon(Icons.help_outline_rounded)),
+      title: Text(lookup.name, maxLines: 1, overflow: TextOverflow.ellipsis),
+      subtitle: Text(l.followedToConfirm, style: TextStyle(color: cc.accent)),
+      trailing: const Icon(Icons.chevron_right_rounded),
+      onTap: () => unawaited(_pick(context, ref)),
+    );
+  }
+}

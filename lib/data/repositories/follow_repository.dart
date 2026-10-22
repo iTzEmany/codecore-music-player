@@ -148,6 +148,14 @@ class FollowRepository {
     };
   }
 
+  /// Most listened names that matched more than one artist, saved less than
+  /// [maxAge] ago: the user still has to pick one («Da confermare»).
+  Future<List<ArtistLookup>> pendingLookups({Duration maxAge = const Duration(days: 30)}) async {
+    final all = await lookups(maxAge: maxAge);
+    return [for (final l in all.values) if (l.status == 2) l]
+      ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+  }
+
   /// Remembers what YouTube Music answered for [key]: [artist] when one exact
   /// artist, null with [ambiguous] false for nobody.
   Future<void> saveLookup(String key, String name,

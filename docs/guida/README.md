@@ -12,6 +12,7 @@ Una pagina per funzione. Le immagini si generano con `scripts/shots.sh` (tema «
 - [Condivisione e Jam](condivisione.md) — Invia brani a un altro dispositivo della stessa rete e ascolta insieme (Jam).
 - [Backup e ripristino](backup.md) — Esporta ciò che hai creato (preferiti, playlist, modifiche, testi) e riportalo su un altro dispositivo.
 - [Radio](radio.md) — Radio in diretta: quelle vicino a te, per genere o per nome; salvale in «Le mie radio».
+- [Nuove uscite](nuove-uscite.md) — Segui gli artisti e scopri quando escono album, singoli o EP, in Home e con una notifica.
 - [Podcast](podcast.md) — Iscriviti a un feed, scarica gli episodi e ascoltali con la ripresa automatica.
 - [Colori e sfondo](colori-e-sfondo.md) — Fai il tuo tema: ogni colore, sfumatura o foto di sfondo, controllo della leggibilità.
 - [Memoria](memoria.md) — Quanto spazio occupa la musica, per playlist, formato e cartella, cosa non hai mai ascoltato e cosa tiene l'app.

@@ -8,11 +8,12 @@ import 'import_providers.dart';
 import 'library_providers.dart';
 import 'online_providers.dart';
 import 'podcast_providers.dart';
+import 'releases_providers.dart' show manualReleaseCheckProvider;
 import 'share_hub.dart';
 import 'youtube_providers.dart';
 import '../services/import/playlist_import_service.dart';
 
-enum ActivityKind { scan, enrich, download, transfer, import, cleanup }
+enum ActivityKind { scan, enrich, download, transfer, import, cleanup, releases }
 
 /// One line of the Activity centre. [progress] is 0..1, null = indeterminate.
 class ActivityItem {
@@ -85,6 +86,7 @@ ActivityState buildActivity({
   List<ImportProgress> imports = const [],
   CleanupProgress? cleanup,
   List<EpisodeDownload> episodes = const [],
+  bool releases = false,
 }) {
   final running = <ActivityItem>[];
   final completed = <ActivityItem>[];
@@ -126,6 +128,10 @@ ActivityState buildActivity({
         progress: cleanup.total == 0 ? null : cleanup.done / cleanup.total,
       ),
     );
+  }
+  if (releases) {
+    running.add(const ActivityItem(
+        kind: ActivityKind.releases, key: 'releases', name: null));
   }
   for (final i in imports) {
     running.add(
@@ -203,6 +209,7 @@ final activityProvider = Provider<ActivityState>((ref) {
     outgoing: ref.watch(shareHubProvider.select((h) => h.outgoing)),
     imports: ref.watch(importProgressProvider),
     episodes: ref.watch(podcastDownloadsProvider),
+    releases: ref.watch(manualReleaseCheckProvider),
     cleanup: ref.watch(
       duplicateSearchProvider.select(
         (d) => d.running ? CleanupProgress(d.done, d.total) : null,
