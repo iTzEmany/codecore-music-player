@@ -473,7 +473,15 @@ Richiesta (2026-10-22): «avere aggiornamenti per quanto riguarda le nuove uscit
 - [x] Simmetria stretta nel lettore e nella barra desktop, velocità mantenuta (317da0f, 732ae95, 1c02a44, 4d72ae7); golden rigenerati (b761d5f, b534c2c)
 - [x] Difetti trovati sul Mi A3: scoperta LAN che moriva senza rete (f5cd805); ▶ a fine dell'ultimo brano svuotava il lettore, ora riparte da capo (cef3f7b)
 - [x] Prova sul Mi A3 (APK debug 6065, 2026-10-22): ▶ a fine coda, copertina che gira con l'anello fermo, pallino sulla scheda giusta. Non misurata la fluidità con una build profile.
-- [ ] Fase 2 (pagine interne: Jam, importazione, Impostazioni) direttamente nel codice, con la regola della simmetria (`docs/superpowers/specs/`)
+- [x] Fase 2 (pagine interne) direttamente nel codice, piani `docs/superpowers/plans/2026-10-22-identita-anello-fase-2-*.md`:
+  - [x] 2.1 raccolte e righe (1f1b1ac)
+  - [x] 2.2 Libreria, filtri a blocchi con icona (f71de4c)
+  - [x] 2.3 fogli (ac95e3c)
+  - [x] 2.4 Cerca e artista online (00308a0)
+  - [x] 2.5 Impostazioni (80a9c6b)
+  - [x] 2.6 il resto delle schermate (360543d), pulizie: separatori, intestazione podcast, matrice 150 % (5fa3528)
+  - [x] 2.7 Memoria come il mockup (65f7560), titoli interi e chip bianco (4943bbf), Tutti i brani da raccolta (579e44e); golden rigenerati (2a492d2)
+- [ ] Prova sul Mi A3 delle schermate della fase 2 (Memoria, Tutti i brani, chip, titoli)
 
 ## Note di deviazione
 <!-- una riga per deviazione: data — task — cosa è cambiato e perché -->
