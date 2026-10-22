@@ -116,6 +116,20 @@ final importItemsProvider =
     StreamProvider.family<List<PlaylistImportItem>, int>((ref, importId) =>
         ref.watch(importRepositoryProvider).watchItems(importId));
 
+/// Rows per state of one import: all the counters need. The notification
+/// keeps them watched for the whole import, in the background too.
+final importCountsProvider =
+    StreamProvider.family<Map<ImportItemStatus, int>, int>((ref, importId) =>
+        ref.watch(importRepositoryProvider).watchCounts(importId));
+
+Map<ImportItemStatus, int> countImportItems(Iterable<PlaylistImportItem> items) {
+  final out = <ImportItemStatus, int>{};
+  for (final i in items) {
+    out[i.state] = (out[i.state] ?? 0) + 1;
+  }
+  return out;
+}
+
 /// What the Activity centre and the playlist banner show for one import.
 class ImportProgress {
   const ImportProgress({
@@ -148,11 +162,20 @@ class ImportProgress {
     List<PlaylistImport> blocks,
     List<PlaylistImportItem> Function(int importId) itemsOf, {
     Duration? Function(int importId, int rowsLeft)? etaFor,
+  }) =>
+      ImportProgress.counted(blocks, (id) => countImportItems(itemsOf(id)),
+          etaFor: etaFor);
+
+  /// [ImportProgress.chain] from the rows per state of each block.
+  factory ImportProgress.counted(
+    List<PlaylistImport> blocks,
+    Map<ImportItemStatus, int> Function(int importId) countsOf, {
+    Duration? Function(int importId, int rowsLeft)? etaFor,
   }) {
     var total = 0, done = 0, saved = 0, review = 0, missing = 0, planned = 0;
     for (final b in blocks) {
-      for (final i in itemsOf(b.id)) {
-        switch (i.state) {
+      for (final MapEntry(key: state, value: n) in countsOf(b.id).entries) {
+        switch (state) {
           // Rows a sync took out of the source are no longer part of the import.
           case ImportItemStatus.removed:
             continue;
@@ -160,23 +183,23 @@ class ImportProgress {
           case ImportItemStatus.queued:
             break;
           case ImportItemStatus.review:
-            review++;
-            done++;
+            review += n;
+            done += n;
           case ImportItemStatus.notFound:
           case ImportItemStatus.failed:
-            missing++;
-            done++;
+            missing += n;
+            done += n;
           case ImportItemStatus.planned:
-            planned++;
-            done++;
+            planned += n;
+            done += n;
           case ImportItemStatus.downloaded:
           case ImportItemStatus.linked:
-            saved++;
-            done++;
+            saved += n;
+            done += n;
           case ImportItemStatus.skipped:
-            done++;
+            done += n;
         }
-        total++;
+        total += n;
       }
     }
     final running = blocks.where((b) => b.state == ImportStatus.running).firstOrNull;
@@ -219,9 +242,9 @@ final importProgressProvider = Provider<List<ImportProgress>>((ref) {
   final unfinished = ref.watch(unfinishedImportsProvider).value ?? const [];
   return [
     for (final group in groupImportChains(unfinished))
-      ImportProgress.chain(
+      ImportProgress.counted(
         _wholeChain(ref, group.first),
-        (id) => ref.watch(importItemsProvider(id)).value ?? const [],
+        (id) => ref.watch(importCountsProvider(id)).value ?? const {},
         etaFor: (id, left) => ref.read(playlistImportServiceProvider).etaFor(id, left),
       ),
   ];
@@ -242,9 +265,9 @@ final playlistImportProgressProvider =
     Provider.family<ImportProgress?, int>((ref, playlistId) {
       final imp = ref.watch(playlistImportProvider(playlistId)).value;
       if (imp == null || imp.state == ImportStatus.cancelled) return null;
-      return ImportProgress.chain(
+      return ImportProgress.counted(
         _wholeChain(ref, imp),
-        (id) => ref.watch(importItemsProvider(id)).value ?? const [],
+        (id) => ref.watch(importCountsProvider(id)).value ?? const {},
         etaFor: (id, left) => ref.read(playlistImportServiceProvider).etaFor(id, left),
       );
     });
@@ -280,9 +303,9 @@ final importChainItemsProvider = Provider.family<List<PlaylistImportItem>?, int>
 final importChainProgressProvider = Provider.family<ImportProgress?, int>((ref, importId) {
   final imp = ref.watch(importByIdProvider(importId)).value;
   if (imp == null) return null;
-  return ImportProgress.chain(
+  return ImportProgress.counted(
     _wholeChain(ref, imp),
-    (id) => ref.watch(importItemsProvider(id)).value ?? const [],
+    (id) => ref.watch(importCountsProvider(id)).value ?? const {},
     etaFor: (id, left) => ref.read(playlistImportServiceProvider).etaFor(id, left),
   );
 });

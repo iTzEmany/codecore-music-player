@@ -69,6 +69,19 @@ void main() {
     expect(c[ImportItemStatus.pending], 1);
   });
 
+  test('watched counts follow the rows', () async {
+    final id = await repo.create(
+        playlistId: playlistId, sourceName: 'x', rows: rows(3));
+    final seen = <Map<ImportItemStatus, int>>[];
+    final sub = repo.watchCounts(id).listen(seen.add);
+    addTearDown(sub.cancel);
+    await pumpEventQueue();
+    await repo.setItem(id, 0, status: ImportItemStatus.downloaded);
+    await pumpEventQueue();
+    expect(seen.first, {ImportItemStatus.pending: 3});
+    expect(seen.last, {ImportItemStatus.pending: 2, ImportItemStatus.downloaded: 1});
+  });
+
   test('restart: running becomes paused, queued goes back to pending', () async {
     final id = await repo.create(
         playlistId: playlistId, sourceName: 'x', rows: rows(2));

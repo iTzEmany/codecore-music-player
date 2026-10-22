@@ -226,14 +226,17 @@ final searchIndexProvider = Provider<AsyncValue<SearchIndex>>((ref) {
   return AsyncData(SearchIndex(list, tags.value ?? const {}));
 });
 
-final _ruleTracksProvider = StreamProvider.family<List<Track>, String>(
+// autoDispose (here and below): one entry per text typed, and an entry left
+// paused would keep its last result, rows of an older read of the library,
+// for the whole session.
+final _ruleTracksProvider = StreamProvider.autoDispose.family<List<Track>, String>(
   (ref, text) => ref.watch(trackRepositoryProvider).watchByRules(parseRules(text).expr),
 );
 
 /// Tracks matching a search: free words look in title, artist, album, genre,
 /// year and tags together, best match first. Typed operators
 /// (`artista:x anno:1990..1999 -live`) still run as rules in SQL, silently.
-final searchTracksProvider = Provider.family<AsyncValue<List<Track>>, SearchQuery>((
+final searchTracksProvider = Provider.autoDispose.family<AsyncValue<List<Track>>, SearchQuery>((
   ref,
   q,
 ) {

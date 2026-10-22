@@ -150,8 +150,8 @@ Future<void> _finished(Ref ref, AppLocalizations l, int importId) async {
     // From the database: the screens' providers may not be listening now.
     final blocks = await ref.read(playlistImportServiceProvider).chainOf(importId);
     final repo = ref.read(importRepositoryProvider);
-    final items = {for (final b in blocks) b.id: await repo.items(b.id)};
-    final p = ImportProgress.chain(blocks, (id) => items[id] ?? const []);
+    final counts = {for (final b in blocks) b.id: await repo.counts(b.id)};
+    final p = ImportProgress.counted(blocks, (id) => counts[id] ?? const {});
     await _channel.invokeMethod<void>('finished', {
       'title': l.logImport(p.name),
       'text': l.csvImportDone(p.done - p.review - p.missing - p.planned, p.review, p.missing),

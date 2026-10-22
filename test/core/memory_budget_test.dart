@@ -7,9 +7,9 @@ void main() {
     expect(memTotalKb('nothing here'), isNull);
   });
 
-  test('4 GB phones get a smaller image cache, the others Flutter\'s default', () {
+  test('4 GB phones get a smaller image cache than the others', () {
     expect(imageCacheBytes(3735288), 48 << 20, reason: 'Mi A3');
-    expect(imageCacheBytes(7800000), 100 << 20, reason: 'Motorola edge 40');
-    expect(imageCacheBytes(null), 100 << 20);
+    expect(imageCacheBytes(7800000), 64 << 20, reason: 'Motorola edge 40');
+    expect(imageCacheBytes(null), 64 << 20);
   });
 }

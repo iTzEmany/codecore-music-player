@@ -1032,6 +1032,10 @@ class PlaylistImportService {
       return true;
     }
     await imports.setStatus(importId, ImportStatus.finished);
+    // The album pages read for this block serve no other: a long import in
+    // blocks would keep every one of them for the session.
+    _albumCounts.remove(importId);
+    _albumTracks.removeWhere((k, _) => k.startsWith('$importId|'));
     // In memory while the app stays open; from the blocks' names after a
     // restart, so the chain goes on without the user resuming every block.
     final next = _nextBlock.remove(importId) ?? await _nextBlockOf(importId);

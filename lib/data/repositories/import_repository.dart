@@ -182,19 +182,27 @@ class ImportRepository {
       (_db.update(_db.playlistImports)..where((i) => i.id.equals(importId)))
           .write(PlaylistImportsCompanion(status: Value(status.index)));
 
+  Selectable<QueryRow> _countsQuery(int importId) => _db.customSelect(
+        'SELECT status, COUNT(*) AS n FROM playlist_import_items '
+        'WHERE import_id = ? GROUP BY status',
+        variables: [Variable<int>(importId)],
+        readsFrom: {_db.playlistImportItems},
+      );
+
+  static Map<ImportItemStatus, int> _toCounts(List<QueryRow> rows) => {
+        for (final r in rows)
+          ImportItemStatus.values[r.read<int>('status')]: r.read<int>('n'),
+      };
+
   /// Rows per [ImportItemStatus] index.
-  Future<Map<ImportItemStatus, int>> counts(int importId) async {
-    final rows = await _db.customSelect(
-      'SELECT status, COUNT(*) AS n FROM playlist_import_items '
-      'WHERE import_id = ? GROUP BY status',
-      variables: [Variable<int>(importId)],
-      readsFrom: {_db.playlistImportItems},
-    ).get();
-    return {
-      for (final r in rows)
-        ImportItemStatus.values[r.read<int>('status')]: r.read<int>('n'),
-    };
-  }
+  Future<Map<ImportItemStatus, int>> counts(int importId) async =>
+      _toCounts(await _countsQuery(importId).get());
+
+  /// [counts], kept up to date. Counters watch this, not [watchItems]: every
+  /// change of any import row reruns every watch on the table, and a long
+  /// import has thousands of rows to copy again each time.
+  Stream<Map<ImportItemStatus, int>> watchCounts(int importId) =>
+      _countsQuery(importId).watch().map(_toCounts);
 
   /// App start: nothing runs by itself; queued downloads were in memory only.
   Future<void> recoverAfterRestart() => _db.transaction(() async {
