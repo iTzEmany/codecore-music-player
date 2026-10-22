@@ -1,0 +1,372 @@
+[
+ {
+  "name": "Lombardia",
+  "country": "Italy",
+  "stationcount": 188
+ },
+ {
+  "name": "Lazio",
+  "country": "Italy",
+  "stationcount": 94
+ },
+ {
+  "name": "Veneto",
+  "country": "Italy",
+  "stationcount": 71
+ },
+ {
+  "name": "Sicilia",
+  "country": "Italy",
+  "stationcount": 41
+ },
+ {
+  "name": "Piemonte",
+  "country": "Italy",
+  "stationcount": 35
+ },
+ {
+  "name": "Campania",
+  "country": "Italy",
+  "stationcount": 34
+ },
+ {
+  "name": "Emilia-Romagna",
+  "country": "Italy",
+  "stationcount": 33
+ },
+ {
+  "name": "Marche",
+  "country": "Italy",
+  "stationcount": 31
+ },
+ {
+  "name": "Puglia",
+  "country": "Italy",
+  "stationcount": 30
+ },
+ {
+  "name": "Toscana",
+  "country": "Italy",
+  "stationcount": 21
+ },
+ {
+  "name": "Calabria",
+  "country": "Italy",
+  "stationcount": 21
+ },
+ {
+  "name": "Milano",
+  "country": "Italy",
+  "stationcount": 20
+ },
+ {
+  "name": "Roma",
+  "country": "Italy",
+  "stationcount": 20
+ },
+ {
+  "name": "Trentino-Alto Adige/Südtirol",
+  "country": "Italy",
+  "stationcount": 18
+ },
+ {
+  "name": "Liguria",
+  "country": "Italy",
+  "stationcount": 17
+ },
+ {
+  "name": "Abruzzo",
+  "country": "Italy",
+  "stationcount": 15
+ },
+ {
+  "name": "Sardegna",
+  "country": "Italy",
+  "stationcount": 14
+ },
+ {
+  "name": "Friuli-Venezia Giulia",
+  "country": "Italy",
+  "stationcount": 11
+ },
+ {
+  "name": "Italy",
+  "country": "Italy",
+  "stationcount": 10
+ },
+ {
+  "name": "Basilicata",
+  "country": "Italy",
+  "stationcount": 9
+ },
+ {
+  "name": "Umbria",
+  "country": "Italy",
+  "stationcount": 7
+ },
+ {
+  "name": "Emilia Romagna",
+  "country": "Italy",
+  "stationcount": 6
+ },
+ {
+  "name": "Bologna",
+  "country": "Italy",
+  "stationcount": 6
+ },
+ {
+  "name": "Lombardy",
+  "country": "Italy",
+  "stationcount": 5
+ },
+ {
+  "name": "italia",
+  "country": "Italy",
+  "stationcount": 4
+ },
+ {
+  "name": "salento, lecce",
+  "country": "Italy",
+  "stationcount": 4
+ },
+ {
+  "name": "Belluno",
+  "country": "Italy",
+  "stationcount": 4
+ },
+ {
+  "name": "Toscana,Firenze,Florence",
+  "country": "Italy",
+  "stationcount": 4
+ },
+ {
+  "name": "Umbria, Italia",
+  "country": "Italy",
+  "stationcount": 3
+ },
+ {
+  "name": "Brescia ",
+  "country": "Italy",
+  "stationcount": 3
+ },
+ {
+  "name": "Torino",
+  "country": "Italy",
+  "stationcount": 3
+ },
+ {
+  "name": "Bolzano",
+  "country": "Italy",
+  "stationcount": 3
+ },
+ {
+  "name": "Lazio, Rome",
+  "country": "Italy",
+  "stationcount": 3
+ },
+ {
+  "name": "RM",
+  "country": "Italy",
+  "stationcount": 2
+ },
+ {
+  "name": "salento",
+  "country": "Italy",
+  "stationcount": 2
+ },
+ {
+  "name": "Valle d'Aosta",
+  "country": "Italy",
+  "stationcount": 2
+ },
+ {
+  "name": "Marano di Napoli",
+  "country": "Italy",
+  "stationcount": 2
+ },
+ {
+  "name": "Milan",
+  "country": "Italy",
+  "stationcount": 2
+ },
+ {
+  "name": "Trentino-Alto Adige",
+  "country": "Italy",
+  "stationcount": 2
+ },
+ {
+  "name": "I Italien",
+  "country": "Italy",
+  "stationcount": 2
+ },
+ {
+  "name": "Molise",
+  "country": "Italy",
+  "stationcount": 2
+ },
+ {
+  "name": "Genoa",
+  "country": "Italy",
+  "stationcount": 2
+ },
+ {
+  "name": "Napoli",
+  "country": "Italy",
+  "stationcount": 2
+ },
+ {
+  "name": "Li",
+  "country": "Italy",
+  "stationcount": 2
+ },
+ {
+  "name": "Sicily",
+  "country": "Italy",
+  "stationcount": 2
+ },
+ {
+  "name": "Pescara, Abruzzo",
+  "country": "Italy",
+  "stationcount": 1
+ },
+ {
+  "name": "bolog",
+  "country": "Italy",
+  "stationcount": 1
+ },
+ {
+  "name": "Bari",
+  "country": "Italy",
+  "stationcount": 1
+ },
+ {
+  "name": " Campania",
+  "country": "Italy",
+  "stationcount": 1
+ },
+ {
+  "name": "Veneto, Albignasego",
+  "country": "Italy",
+  "stationcount": 1
+ },
+ {
+  "name": "Siracusa",
+  "country": "Italy",
+  "stationcount": 1
+ },
+ {
+  "name": "Lombardia/Italy",
+  "country": "Italy",
+  "stationcount": 1
+ },
+ {
+  "name": "Soliera",
+  "country": "Italy",
+  "stationcount": 1
+ },
+ {
+  "name": "IT",
+  "country": "Italy",
+  "stationcount": 1
+ },
+ {
+  "name": "PU",
+  "country": "Italy",
+  "stationcount": 1
+ },
+ {
+  "name": "Carpi",
+  "country": "Italy",
+  "stationcount": 1
+ },
+ {
+  "name": "Vicenza",
+  "country": "Italy",
+  "stationcount": 1
+ },
+ {
+  "name": "web",
+  "country": "Italy",
+  "stationcount": 1
+ },
+ {
+  "name": "Venice",
+  "country": "Italy",
+  "stationcount": 1
+ },
+ {
+  "name": "Verona",
+  "country": "Italy",
+  "stationcount": 1
+ },
+ {
+  "name": "Costa Serina",
+  "country": "Italy",
+  "stationcount": 1
+ },
+ {
+  "name": "Pesaro",
+  "country": "Italy",
+  "stationcount": 1
+ },
+ {
+  "name": "FI",
+  "country": "Italy",
+  "stationcount": 1
+ },
+ {
+  "name": "FVG",
+  "country": "Italy",
+  "stationcount": 1
+ },
+ {
+  "name": "Tirol- Südtirol/Alto Adige/",
+  "country": "Italy",
+  "stationcount": 1
+ },
+ {
+  "name": "CR",
+  "country": "Italy",
+  "stationcount": 1
+ },
+ {
+  "name": "Nettuno",
+  "country": "Italy",
+  "stationcount": 1
+ },
+ {
+  "name": "Milano (MI)",
+  "country": "Italy",
+  "stationcount": 1
+ },
+ {
+  "name": "Erba Como",
+  "country": "Italy",
+  "stationcount": 1
+ },
+ {
+  "name": "Cosenza",
+  "country": "Italy",
+  "stationcount": 1
+ },
+ {
+  "name": "Fe",
+  "country": "Italy",
+  "stationcount": 1
+ },
+ {
+  "name": "Nola - Napoli",
+  "country": "Italy",
+  "stationcount": 1
+ },
+ {
+  "name": "Principato di monaco",
+  "country": "Italy",
+  "stationcount": 1
+ },
+ {
+  "name": "Modena",
+  "country": "Italy",
+  "stationcount": 1
+ }
+]

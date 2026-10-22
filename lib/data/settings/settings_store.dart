@@ -60,6 +60,9 @@ class AppSettings {
     this.shufflePlus = false,
     this.shufflePlusEvery = 4,
     this.shufflePlusUnmeteredOnly = true,
+    this.radioCountry = '',
+    this.radioRegion = '',
+    this.radioOnlyCountry = false,
   });
 
   final String theme;
@@ -127,6 +130,12 @@ class AppSettings {
   final bool shufflePlus, shufflePlusUnmeteredOnly;
   final int shufflePlusEvery;
 
+  /// Radio (phase 33): the country (ISO code; empty = the system's) and the
+  /// region id chosen for «Vicino a te» (empty = still to ask); search only
+  /// inside the country.
+  final String radioCountry, radioRegion;
+  final bool radioOnlyCountry;
+
   /// Where the online search of the Search page looks.
   final SearchSource searchSource;
 
@@ -185,6 +194,9 @@ class AppSettings {
     bool? shufflePlus,
     int? shufflePlusEvery,
     bool? shufflePlusUnmeteredOnly,
+    String? radioCountry,
+    String? radioRegion,
+    bool? radioOnlyCountry,
   }) =>
       AppSettings(
         theme: theme ?? this.theme,
@@ -229,6 +241,9 @@ class AppSettings {
         shufflePlusEvery: shufflePlusEvery ?? this.shufflePlusEvery,
         shufflePlusUnmeteredOnly:
             shufflePlusUnmeteredOnly ?? this.shufflePlusUnmeteredOnly,
+        radioCountry: radioCountry ?? this.radioCountry,
+        radioRegion: radioRegion ?? this.radioRegion,
+        radioOnlyCountry: radioOnlyCountry ?? this.radioOnlyCountry,
       );
 }
 
@@ -309,6 +324,9 @@ class SettingsStore {
         shufflePlus: _prefs.getBool('shufflePlus') ?? false,
         shufflePlusEvery: (_prefs.getInt('shufflePlusEvery') ?? 4).clamp(3, 10),
         shufflePlusUnmeteredOnly: _prefs.getBool('shufflePlusUnmeteredOnly') ?? true,
+        radioCountry: _prefs.getString('radioCountry') ?? '',
+        radioRegion: _prefs.getString('radioRegion') ?? '',
+        radioOnlyCountry: _prefs.getBool('radioOnlyCountry') ?? false,
       );
 
   EqProfile _readEq(String profile) => EqProfile(
@@ -367,6 +385,9 @@ class SettingsStore {
     await _prefs.setBool('shufflePlus', s.shufflePlus);
     await _prefs.setInt('shufflePlusEvery', s.shufflePlusEvery);
     await _prefs.setBool('shufflePlusUnmeteredOnly', s.shufflePlusUnmeteredOnly);
+    await _prefs.setString('radioCountry', s.radioCountry);
+    await _prefs.setString('radioRegion', s.radioRegion);
+    await _prefs.setBool('radioOnlyCountry', s.radioOnlyCountry);
     final dn = s.deviceName;
     if (dn == null || dn.isEmpty) {
       await _prefs.remove('deviceName');

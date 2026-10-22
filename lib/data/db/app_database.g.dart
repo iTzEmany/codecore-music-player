@@ -7471,6 +7471,911 @@ class ArtistInfosCompanion extends UpdateCompanion<ArtistInfo> {
   }
 }
 
+class $RadioStationsTable extends RadioStations
+    with TableInfo<$RadioStationsTable, SavedRadio> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $RadioStationsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _stationIdMeta = const VerificationMeta(
+    'stationId',
+  );
+  @override
+  late final GeneratedColumn<String> stationId = GeneratedColumn<String>(
+    'station_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _streamUrlMeta = const VerificationMeta(
+    'streamUrl',
+  );
+  @override
+  late final GeneratedColumn<String> streamUrl = GeneratedColumn<String>(
+    'stream_url',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _homepageMeta = const VerificationMeta(
+    'homepage',
+  );
+  @override
+  late final GeneratedColumn<String> homepage = GeneratedColumn<String>(
+    'homepage',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _faviconUrlMeta = const VerificationMeta(
+    'faviconUrl',
+  );
+  @override
+  late final GeneratedColumn<String> faviconUrl = GeneratedColumn<String>(
+    'favicon_url',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _countryCodeMeta = const VerificationMeta(
+    'countryCode',
+  );
+  @override
+  late final GeneratedColumn<String> countryCode = GeneratedColumn<String>(
+    'country_code',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _stateMeta = const VerificationMeta('state');
+  @override
+  late final GeneratedColumn<String> state = GeneratedColumn<String>(
+    'state',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _tagsMeta = const VerificationMeta('tags');
+  @override
+  late final GeneratedColumn<String> tags = GeneratedColumn<String>(
+    'tags',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _codecMeta = const VerificationMeta('codec');
+  @override
+  late final GeneratedColumn<String> codec = GeneratedColumn<String>(
+    'codec',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _bitrateMeta = const VerificationMeta(
+    'bitrate',
+  );
+  @override
+  late final GeneratedColumn<int> bitrate = GeneratedColumn<int>(
+    'bitrate',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _hlsMeta = const VerificationMeta('hls');
+  @override
+  late final GeneratedColumn<bool> hls = GeneratedColumn<bool>(
+    'hls',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("hls" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _positionMeta = const VerificationMeta(
+    'position',
+  );
+  @override
+  late final GeneratedColumn<int> position = GeneratedColumn<int>(
+    'position',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _addedAtMeta = const VerificationMeta(
+    'addedAt',
+  );
+  @override
+  late final GeneratedColumn<int> addedAt = GeneratedColumn<int>(
+    'added_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    clientDefault: nowMs,
+  );
+  static const VerificationMeta _lastPlayedAtMeta = const VerificationMeta(
+    'lastPlayedAt',
+  );
+  @override
+  late final GeneratedColumn<int> lastPlayedAt = GeneratedColumn<int>(
+    'last_played_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _lastOkAtMeta = const VerificationMeta(
+    'lastOkAt',
+  );
+  @override
+  late final GeneratedColumn<int> lastOkAt = GeneratedColumn<int>(
+    'last_ok_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _unreachableMeta = const VerificationMeta(
+    'unreachable',
+  );
+  @override
+  late final GeneratedColumn<bool> unreachable = GeneratedColumn<bool>(
+    'unreachable',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("unreachable" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    stationId,
+    name,
+    streamUrl,
+    homepage,
+    faviconUrl,
+    countryCode,
+    state,
+    tags,
+    codec,
+    bitrate,
+    hls,
+    position,
+    addedAt,
+    lastPlayedAt,
+    lastOkAt,
+    unreachable,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'radio_stations';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SavedRadio> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('station_id')) {
+      context.handle(
+        _stationIdMeta,
+        stationId.isAcceptableOrUnknown(data['station_id']!, _stationIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_stationIdMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('stream_url')) {
+      context.handle(
+        _streamUrlMeta,
+        streamUrl.isAcceptableOrUnknown(data['stream_url']!, _streamUrlMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_streamUrlMeta);
+    }
+    if (data.containsKey('homepage')) {
+      context.handle(
+        _homepageMeta,
+        homepage.isAcceptableOrUnknown(data['homepage']!, _homepageMeta),
+      );
+    }
+    if (data.containsKey('favicon_url')) {
+      context.handle(
+        _faviconUrlMeta,
+        faviconUrl.isAcceptableOrUnknown(data['favicon_url']!, _faviconUrlMeta),
+      );
+    }
+    if (data.containsKey('country_code')) {
+      context.handle(
+        _countryCodeMeta,
+        countryCode.isAcceptableOrUnknown(
+          data['country_code']!,
+          _countryCodeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('state')) {
+      context.handle(
+        _stateMeta,
+        state.isAcceptableOrUnknown(data['state']!, _stateMeta),
+      );
+    }
+    if (data.containsKey('tags')) {
+      context.handle(
+        _tagsMeta,
+        tags.isAcceptableOrUnknown(data['tags']!, _tagsMeta),
+      );
+    }
+    if (data.containsKey('codec')) {
+      context.handle(
+        _codecMeta,
+        codec.isAcceptableOrUnknown(data['codec']!, _codecMeta),
+      );
+    }
+    if (data.containsKey('bitrate')) {
+      context.handle(
+        _bitrateMeta,
+        bitrate.isAcceptableOrUnknown(data['bitrate']!, _bitrateMeta),
+      );
+    }
+    if (data.containsKey('hls')) {
+      context.handle(
+        _hlsMeta,
+        hls.isAcceptableOrUnknown(data['hls']!, _hlsMeta),
+      );
+    }
+    if (data.containsKey('position')) {
+      context.handle(
+        _positionMeta,
+        position.isAcceptableOrUnknown(data['position']!, _positionMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_positionMeta);
+    }
+    if (data.containsKey('added_at')) {
+      context.handle(
+        _addedAtMeta,
+        addedAt.isAcceptableOrUnknown(data['added_at']!, _addedAtMeta),
+      );
+    }
+    if (data.containsKey('last_played_at')) {
+      context.handle(
+        _lastPlayedAtMeta,
+        lastPlayedAt.isAcceptableOrUnknown(
+          data['last_played_at']!,
+          _lastPlayedAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('last_ok_at')) {
+      context.handle(
+        _lastOkAtMeta,
+        lastOkAt.isAcceptableOrUnknown(data['last_ok_at']!, _lastOkAtMeta),
+      );
+    }
+    if (data.containsKey('unreachable')) {
+      context.handle(
+        _unreachableMeta,
+        unreachable.isAcceptableOrUnknown(
+          data['unreachable']!,
+          _unreachableMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {stationId};
+  @override
+  SavedRadio map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SavedRadio(
+      stationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}station_id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      streamUrl: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}stream_url'],
+      )!,
+      homepage: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}homepage'],
+      )!,
+      faviconUrl: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}favicon_url'],
+      )!,
+      countryCode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}country_code'],
+      )!,
+      state: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}state'],
+      )!,
+      tags: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}tags'],
+      )!,
+      codec: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}codec'],
+      )!,
+      bitrate: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}bitrate'],
+      )!,
+      hls: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}hls'],
+      )!,
+      position: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}position'],
+      )!,
+      addedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}added_at'],
+      )!,
+      lastPlayedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}last_played_at'],
+      ),
+      lastOkAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}last_ok_at'],
+      ),
+      unreachable: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}unreachable'],
+      )!,
+    );
+  }
+
+  @override
+  $RadioStationsTable createAlias(String alias) {
+    return $RadioStationsTable(attachedDatabase, alias);
+  }
+}
+
+class SavedRadio extends DataClass implements Insertable<SavedRadio> {
+  final String stationId;
+  final String name;
+  final String streamUrl;
+  final String homepage;
+  final String faviconUrl;
+  final String countryCode;
+  final String state;
+
+  /// Comma-separated.
+  final String tags;
+  final String codec;
+  final int bitrate;
+  final bool hls;
+
+  /// The order the user chose (0 = first).
+  final int position;
+  final int addedAt;
+  final int? lastPlayedAt;
+
+  /// The last refresh that found the station working.
+  final int? lastOkAt;
+
+  /// The last refresh did not find the station, or found it broken. Shown as
+  /// «non risponde»; the row is never deleted for it.
+  final bool unreachable;
+  const SavedRadio({
+    required this.stationId,
+    required this.name,
+    required this.streamUrl,
+    required this.homepage,
+    required this.faviconUrl,
+    required this.countryCode,
+    required this.state,
+    required this.tags,
+    required this.codec,
+    required this.bitrate,
+    required this.hls,
+    required this.position,
+    required this.addedAt,
+    this.lastPlayedAt,
+    this.lastOkAt,
+    required this.unreachable,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['station_id'] = Variable<String>(stationId);
+    map['name'] = Variable<String>(name);
+    map['stream_url'] = Variable<String>(streamUrl);
+    map['homepage'] = Variable<String>(homepage);
+    map['favicon_url'] = Variable<String>(faviconUrl);
+    map['country_code'] = Variable<String>(countryCode);
+    map['state'] = Variable<String>(state);
+    map['tags'] = Variable<String>(tags);
+    map['codec'] = Variable<String>(codec);
+    map['bitrate'] = Variable<int>(bitrate);
+    map['hls'] = Variable<bool>(hls);
+    map['position'] = Variable<int>(position);
+    map['added_at'] = Variable<int>(addedAt);
+    if (!nullToAbsent || lastPlayedAt != null) {
+      map['last_played_at'] = Variable<int>(lastPlayedAt);
+    }
+    if (!nullToAbsent || lastOkAt != null) {
+      map['last_ok_at'] = Variable<int>(lastOkAt);
+    }
+    map['unreachable'] = Variable<bool>(unreachable);
+    return map;
+  }
+
+  RadioStationsCompanion toCompanion(bool nullToAbsent) {
+    return RadioStationsCompanion(
+      stationId: Value(stationId),
+      name: Value(name),
+      streamUrl: Value(streamUrl),
+      homepage: Value(homepage),
+      faviconUrl: Value(faviconUrl),
+      countryCode: Value(countryCode),
+      state: Value(state),
+      tags: Value(tags),
+      codec: Value(codec),
+      bitrate: Value(bitrate),
+      hls: Value(hls),
+      position: Value(position),
+      addedAt: Value(addedAt),
+      lastPlayedAt: lastPlayedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastPlayedAt),
+      lastOkAt: lastOkAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastOkAt),
+      unreachable: Value(unreachable),
+    );
+  }
+
+  factory SavedRadio.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SavedRadio(
+      stationId: serializer.fromJson<String>(json['stationId']),
+      name: serializer.fromJson<String>(json['name']),
+      streamUrl: serializer.fromJson<String>(json['streamUrl']),
+      homepage: serializer.fromJson<String>(json['homepage']),
+      faviconUrl: serializer.fromJson<String>(json['faviconUrl']),
+      countryCode: serializer.fromJson<String>(json['countryCode']),
+      state: serializer.fromJson<String>(json['state']),
+      tags: serializer.fromJson<String>(json['tags']),
+      codec: serializer.fromJson<String>(json['codec']),
+      bitrate: serializer.fromJson<int>(json['bitrate']),
+      hls: serializer.fromJson<bool>(json['hls']),
+      position: serializer.fromJson<int>(json['position']),
+      addedAt: serializer.fromJson<int>(json['addedAt']),
+      lastPlayedAt: serializer.fromJson<int?>(json['lastPlayedAt']),
+      lastOkAt: serializer.fromJson<int?>(json['lastOkAt']),
+      unreachable: serializer.fromJson<bool>(json['unreachable']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'stationId': serializer.toJson<String>(stationId),
+      'name': serializer.toJson<String>(name),
+      'streamUrl': serializer.toJson<String>(streamUrl),
+      'homepage': serializer.toJson<String>(homepage),
+      'faviconUrl': serializer.toJson<String>(faviconUrl),
+      'countryCode': serializer.toJson<String>(countryCode),
+      'state': serializer.toJson<String>(state),
+      'tags': serializer.toJson<String>(tags),
+      'codec': serializer.toJson<String>(codec),
+      'bitrate': serializer.toJson<int>(bitrate),
+      'hls': serializer.toJson<bool>(hls),
+      'position': serializer.toJson<int>(position),
+      'addedAt': serializer.toJson<int>(addedAt),
+      'lastPlayedAt': serializer.toJson<int?>(lastPlayedAt),
+      'lastOkAt': serializer.toJson<int?>(lastOkAt),
+      'unreachable': serializer.toJson<bool>(unreachable),
+    };
+  }
+
+  SavedRadio copyWith({
+    String? stationId,
+    String? name,
+    String? streamUrl,
+    String? homepage,
+    String? faviconUrl,
+    String? countryCode,
+    String? state,
+    String? tags,
+    String? codec,
+    int? bitrate,
+    bool? hls,
+    int? position,
+    int? addedAt,
+    Value<int?> lastPlayedAt = const Value.absent(),
+    Value<int?> lastOkAt = const Value.absent(),
+    bool? unreachable,
+  }) => SavedRadio(
+    stationId: stationId ?? this.stationId,
+    name: name ?? this.name,
+    streamUrl: streamUrl ?? this.streamUrl,
+    homepage: homepage ?? this.homepage,
+    faviconUrl: faviconUrl ?? this.faviconUrl,
+    countryCode: countryCode ?? this.countryCode,
+    state: state ?? this.state,
+    tags: tags ?? this.tags,
+    codec: codec ?? this.codec,
+    bitrate: bitrate ?? this.bitrate,
+    hls: hls ?? this.hls,
+    position: position ?? this.position,
+    addedAt: addedAt ?? this.addedAt,
+    lastPlayedAt: lastPlayedAt.present ? lastPlayedAt.value : this.lastPlayedAt,
+    lastOkAt: lastOkAt.present ? lastOkAt.value : this.lastOkAt,
+    unreachable: unreachable ?? this.unreachable,
+  );
+  SavedRadio copyWithCompanion(RadioStationsCompanion data) {
+    return SavedRadio(
+      stationId: data.stationId.present ? data.stationId.value : this.stationId,
+      name: data.name.present ? data.name.value : this.name,
+      streamUrl: data.streamUrl.present ? data.streamUrl.value : this.streamUrl,
+      homepage: data.homepage.present ? data.homepage.value : this.homepage,
+      faviconUrl: data.faviconUrl.present
+          ? data.faviconUrl.value
+          : this.faviconUrl,
+      countryCode: data.countryCode.present
+          ? data.countryCode.value
+          : this.countryCode,
+      state: data.state.present ? data.state.value : this.state,
+      tags: data.tags.present ? data.tags.value : this.tags,
+      codec: data.codec.present ? data.codec.value : this.codec,
+      bitrate: data.bitrate.present ? data.bitrate.value : this.bitrate,
+      hls: data.hls.present ? data.hls.value : this.hls,
+      position: data.position.present ? data.position.value : this.position,
+      addedAt: data.addedAt.present ? data.addedAt.value : this.addedAt,
+      lastPlayedAt: data.lastPlayedAt.present
+          ? data.lastPlayedAt.value
+          : this.lastPlayedAt,
+      lastOkAt: data.lastOkAt.present ? data.lastOkAt.value : this.lastOkAt,
+      unreachable: data.unreachable.present
+          ? data.unreachable.value
+          : this.unreachable,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SavedRadio(')
+          ..write('stationId: $stationId, ')
+          ..write('name: $name, ')
+          ..write('streamUrl: $streamUrl, ')
+          ..write('homepage: $homepage, ')
+          ..write('faviconUrl: $faviconUrl, ')
+          ..write('countryCode: $countryCode, ')
+          ..write('state: $state, ')
+          ..write('tags: $tags, ')
+          ..write('codec: $codec, ')
+          ..write('bitrate: $bitrate, ')
+          ..write('hls: $hls, ')
+          ..write('position: $position, ')
+          ..write('addedAt: $addedAt, ')
+          ..write('lastPlayedAt: $lastPlayedAt, ')
+          ..write('lastOkAt: $lastOkAt, ')
+          ..write('unreachable: $unreachable')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    stationId,
+    name,
+    streamUrl,
+    homepage,
+    faviconUrl,
+    countryCode,
+    state,
+    tags,
+    codec,
+    bitrate,
+    hls,
+    position,
+    addedAt,
+    lastPlayedAt,
+    lastOkAt,
+    unreachable,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SavedRadio &&
+          other.stationId == this.stationId &&
+          other.name == this.name &&
+          other.streamUrl == this.streamUrl &&
+          other.homepage == this.homepage &&
+          other.faviconUrl == this.faviconUrl &&
+          other.countryCode == this.countryCode &&
+          other.state == this.state &&
+          other.tags == this.tags &&
+          other.codec == this.codec &&
+          other.bitrate == this.bitrate &&
+          other.hls == this.hls &&
+          other.position == this.position &&
+          other.addedAt == this.addedAt &&
+          other.lastPlayedAt == this.lastPlayedAt &&
+          other.lastOkAt == this.lastOkAt &&
+          other.unreachable == this.unreachable);
+}
+
+class RadioStationsCompanion extends UpdateCompanion<SavedRadio> {
+  final Value<String> stationId;
+  final Value<String> name;
+  final Value<String> streamUrl;
+  final Value<String> homepage;
+  final Value<String> faviconUrl;
+  final Value<String> countryCode;
+  final Value<String> state;
+  final Value<String> tags;
+  final Value<String> codec;
+  final Value<int> bitrate;
+  final Value<bool> hls;
+  final Value<int> position;
+  final Value<int> addedAt;
+  final Value<int?> lastPlayedAt;
+  final Value<int?> lastOkAt;
+  final Value<bool> unreachable;
+  final Value<int> rowid;
+  const RadioStationsCompanion({
+    this.stationId = const Value.absent(),
+    this.name = const Value.absent(),
+    this.streamUrl = const Value.absent(),
+    this.homepage = const Value.absent(),
+    this.faviconUrl = const Value.absent(),
+    this.countryCode = const Value.absent(),
+    this.state = const Value.absent(),
+    this.tags = const Value.absent(),
+    this.codec = const Value.absent(),
+    this.bitrate = const Value.absent(),
+    this.hls = const Value.absent(),
+    this.position = const Value.absent(),
+    this.addedAt = const Value.absent(),
+    this.lastPlayedAt = const Value.absent(),
+    this.lastOkAt = const Value.absent(),
+    this.unreachable = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  RadioStationsCompanion.insert({
+    required String stationId,
+    required String name,
+    required String streamUrl,
+    this.homepage = const Value.absent(),
+    this.faviconUrl = const Value.absent(),
+    this.countryCode = const Value.absent(),
+    this.state = const Value.absent(),
+    this.tags = const Value.absent(),
+    this.codec = const Value.absent(),
+    this.bitrate = const Value.absent(),
+    this.hls = const Value.absent(),
+    required int position,
+    this.addedAt = const Value.absent(),
+    this.lastPlayedAt = const Value.absent(),
+    this.lastOkAt = const Value.absent(),
+    this.unreachable = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : stationId = Value(stationId),
+       name = Value(name),
+       streamUrl = Value(streamUrl),
+       position = Value(position);
+  static Insertable<SavedRadio> custom({
+    Expression<String>? stationId,
+    Expression<String>? name,
+    Expression<String>? streamUrl,
+    Expression<String>? homepage,
+    Expression<String>? faviconUrl,
+    Expression<String>? countryCode,
+    Expression<String>? state,
+    Expression<String>? tags,
+    Expression<String>? codec,
+    Expression<int>? bitrate,
+    Expression<bool>? hls,
+    Expression<int>? position,
+    Expression<int>? addedAt,
+    Expression<int>? lastPlayedAt,
+    Expression<int>? lastOkAt,
+    Expression<bool>? unreachable,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (stationId != null) 'station_id': stationId,
+      if (name != null) 'name': name,
+      if (streamUrl != null) 'stream_url': streamUrl,
+      if (homepage != null) 'homepage': homepage,
+      if (faviconUrl != null) 'favicon_url': faviconUrl,
+      if (countryCode != null) 'country_code': countryCode,
+      if (state != null) 'state': state,
+      if (tags != null) 'tags': tags,
+      if (codec != null) 'codec': codec,
+      if (bitrate != null) 'bitrate': bitrate,
+      if (hls != null) 'hls': hls,
+      if (position != null) 'position': position,
+      if (addedAt != null) 'added_at': addedAt,
+      if (lastPlayedAt != null) 'last_played_at': lastPlayedAt,
+      if (lastOkAt != null) 'last_ok_at': lastOkAt,
+      if (unreachable != null) 'unreachable': unreachable,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  RadioStationsCompanion copyWith({
+    Value<String>? stationId,
+    Value<String>? name,
+    Value<String>? streamUrl,
+    Value<String>? homepage,
+    Value<String>? faviconUrl,
+    Value<String>? countryCode,
+    Value<String>? state,
+    Value<String>? tags,
+    Value<String>? codec,
+    Value<int>? bitrate,
+    Value<bool>? hls,
+    Value<int>? position,
+    Value<int>? addedAt,
+    Value<int?>? lastPlayedAt,
+    Value<int?>? lastOkAt,
+    Value<bool>? unreachable,
+    Value<int>? rowid,
+  }) {
+    return RadioStationsCompanion(
+      stationId: stationId ?? this.stationId,
+      name: name ?? this.name,
+      streamUrl: streamUrl ?? this.streamUrl,
+      homepage: homepage ?? this.homepage,
+      faviconUrl: faviconUrl ?? this.faviconUrl,
+      countryCode: countryCode ?? this.countryCode,
+      state: state ?? this.state,
+      tags: tags ?? this.tags,
+      codec: codec ?? this.codec,
+      bitrate: bitrate ?? this.bitrate,
+      hls: hls ?? this.hls,
+      position: position ?? this.position,
+      addedAt: addedAt ?? this.addedAt,
+      lastPlayedAt: lastPlayedAt ?? this.lastPlayedAt,
+      lastOkAt: lastOkAt ?? this.lastOkAt,
+      unreachable: unreachable ?? this.unreachable,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (stationId.present) {
+      map['station_id'] = Variable<String>(stationId.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (streamUrl.present) {
+      map['stream_url'] = Variable<String>(streamUrl.value);
+    }
+    if (homepage.present) {
+      map['homepage'] = Variable<String>(homepage.value);
+    }
+    if (faviconUrl.present) {
+      map['favicon_url'] = Variable<String>(faviconUrl.value);
+    }
+    if (countryCode.present) {
+      map['country_code'] = Variable<String>(countryCode.value);
+    }
+    if (state.present) {
+      map['state'] = Variable<String>(state.value);
+    }
+    if (tags.present) {
+      map['tags'] = Variable<String>(tags.value);
+    }
+    if (codec.present) {
+      map['codec'] = Variable<String>(codec.value);
+    }
+    if (bitrate.present) {
+      map['bitrate'] = Variable<int>(bitrate.value);
+    }
+    if (hls.present) {
+      map['hls'] = Variable<bool>(hls.value);
+    }
+    if (position.present) {
+      map['position'] = Variable<int>(position.value);
+    }
+    if (addedAt.present) {
+      map['added_at'] = Variable<int>(addedAt.value);
+    }
+    if (lastPlayedAt.present) {
+      map['last_played_at'] = Variable<int>(lastPlayedAt.value);
+    }
+    if (lastOkAt.present) {
+      map['last_ok_at'] = Variable<int>(lastOkAt.value);
+    }
+    if (unreachable.present) {
+      map['unreachable'] = Variable<bool>(unreachable.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RadioStationsCompanion(')
+          ..write('stationId: $stationId, ')
+          ..write('name: $name, ')
+          ..write('streamUrl: $streamUrl, ')
+          ..write('homepage: $homepage, ')
+          ..write('faviconUrl: $faviconUrl, ')
+          ..write('countryCode: $countryCode, ')
+          ..write('state: $state, ')
+          ..write('tags: $tags, ')
+          ..write('codec: $codec, ')
+          ..write('bitrate: $bitrate, ')
+          ..write('hls: $hls, ')
+          ..write('position: $position, ')
+          ..write('addedAt: $addedAt, ')
+          ..write('lastPlayedAt: $lastPlayedAt, ')
+          ..write('lastOkAt: $lastOkAt, ')
+          ..write('unreachable: $unreachable, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -7492,6 +8397,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     this,
   );
   late final $ArtistInfosTable artistInfos = $ArtistInfosTable(this);
+  late final $RadioStationsTable radioStations = $RadioStationsTable(this);
   late final Index tracksAlbumKey = Index(
     'tracks_album_key',
     'CREATE INDEX tracks_album_key ON tracks (album_key)',
@@ -7554,6 +8460,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     podcasts,
     podcastEpisodes,
     artistInfos,
+    radioStations,
     tracksAlbumKey,
     tracksArtist,
     tracksFavorite,
@@ -13353,6 +14260,432 @@ typedef $$ArtistInfosTableProcessedTableManager =
       ArtistInfo,
       PrefetchHooks Function()
     >;
+typedef $$RadioStationsTableCreateCompanionBuilder =
+    RadioStationsCompanion Function({
+      required String stationId,
+      required String name,
+      required String streamUrl,
+      Value<String> homepage,
+      Value<String> faviconUrl,
+      Value<String> countryCode,
+      Value<String> state,
+      Value<String> tags,
+      Value<String> codec,
+      Value<int> bitrate,
+      Value<bool> hls,
+      required int position,
+      Value<int> addedAt,
+      Value<int?> lastPlayedAt,
+      Value<int?> lastOkAt,
+      Value<bool> unreachable,
+      Value<int> rowid,
+    });
+typedef $$RadioStationsTableUpdateCompanionBuilder =
+    RadioStationsCompanion Function({
+      Value<String> stationId,
+      Value<String> name,
+      Value<String> streamUrl,
+      Value<String> homepage,
+      Value<String> faviconUrl,
+      Value<String> countryCode,
+      Value<String> state,
+      Value<String> tags,
+      Value<String> codec,
+      Value<int> bitrate,
+      Value<bool> hls,
+      Value<int> position,
+      Value<int> addedAt,
+      Value<int?> lastPlayedAt,
+      Value<int?> lastOkAt,
+      Value<bool> unreachable,
+      Value<int> rowid,
+    });
+
+class $$RadioStationsTableFilterComposer
+    extends Composer<_$AppDatabase, $RadioStationsTable> {
+  $$RadioStationsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get stationId => $composableBuilder(
+    column: $table.stationId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get streamUrl => $composableBuilder(
+    column: $table.streamUrl,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get homepage => $composableBuilder(
+    column: $table.homepage,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get faviconUrl => $composableBuilder(
+    column: $table.faviconUrl,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get countryCode => $composableBuilder(
+    column: $table.countryCode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get state => $composableBuilder(
+    column: $table.state,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get tags => $composableBuilder(
+    column: $table.tags,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get codec => $composableBuilder(
+    column: $table.codec,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get bitrate => $composableBuilder(
+    column: $table.bitrate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get hls => $composableBuilder(
+    column: $table.hls,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get position => $composableBuilder(
+    column: $table.position,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get addedAt => $composableBuilder(
+    column: $table.addedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get lastPlayedAt => $composableBuilder(
+    column: $table.lastPlayedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get lastOkAt => $composableBuilder(
+    column: $table.lastOkAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get unreachable => $composableBuilder(
+    column: $table.unreachable,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$RadioStationsTableOrderingComposer
+    extends Composer<_$AppDatabase, $RadioStationsTable> {
+  $$RadioStationsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get stationId => $composableBuilder(
+    column: $table.stationId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get streamUrl => $composableBuilder(
+    column: $table.streamUrl,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get homepage => $composableBuilder(
+    column: $table.homepage,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get faviconUrl => $composableBuilder(
+    column: $table.faviconUrl,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get countryCode => $composableBuilder(
+    column: $table.countryCode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get state => $composableBuilder(
+    column: $table.state,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get tags => $composableBuilder(
+    column: $table.tags,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get codec => $composableBuilder(
+    column: $table.codec,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get bitrate => $composableBuilder(
+    column: $table.bitrate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get hls => $composableBuilder(
+    column: $table.hls,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get position => $composableBuilder(
+    column: $table.position,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get addedAt => $composableBuilder(
+    column: $table.addedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get lastPlayedAt => $composableBuilder(
+    column: $table.lastPlayedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get lastOkAt => $composableBuilder(
+    column: $table.lastOkAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get unreachable => $composableBuilder(
+    column: $table.unreachable,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$RadioStationsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $RadioStationsTable> {
+  $$RadioStationsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get stationId =>
+      $composableBuilder(column: $table.stationId, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get streamUrl =>
+      $composableBuilder(column: $table.streamUrl, builder: (column) => column);
+
+  GeneratedColumn<String> get homepage =>
+      $composableBuilder(column: $table.homepage, builder: (column) => column);
+
+  GeneratedColumn<String> get faviconUrl => $composableBuilder(
+    column: $table.faviconUrl,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get countryCode => $composableBuilder(
+    column: $table.countryCode,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get state =>
+      $composableBuilder(column: $table.state, builder: (column) => column);
+
+  GeneratedColumn<String> get tags =>
+      $composableBuilder(column: $table.tags, builder: (column) => column);
+
+  GeneratedColumn<String> get codec =>
+      $composableBuilder(column: $table.codec, builder: (column) => column);
+
+  GeneratedColumn<int> get bitrate =>
+      $composableBuilder(column: $table.bitrate, builder: (column) => column);
+
+  GeneratedColumn<bool> get hls =>
+      $composableBuilder(column: $table.hls, builder: (column) => column);
+
+  GeneratedColumn<int> get position =>
+      $composableBuilder(column: $table.position, builder: (column) => column);
+
+  GeneratedColumn<int> get addedAt =>
+      $composableBuilder(column: $table.addedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get lastPlayedAt => $composableBuilder(
+    column: $table.lastPlayedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get lastOkAt =>
+      $composableBuilder(column: $table.lastOkAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get unreachable => $composableBuilder(
+    column: $table.unreachable,
+    builder: (column) => column,
+  );
+}
+
+class $$RadioStationsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $RadioStationsTable,
+          SavedRadio,
+          $$RadioStationsTableFilterComposer,
+          $$RadioStationsTableOrderingComposer,
+          $$RadioStationsTableAnnotationComposer,
+          $$RadioStationsTableCreateCompanionBuilder,
+          $$RadioStationsTableUpdateCompanionBuilder,
+          (
+            SavedRadio,
+            BaseReferences<_$AppDatabase, $RadioStationsTable, SavedRadio>,
+          ),
+          SavedRadio,
+          PrefetchHooks Function()
+        > {
+  $$RadioStationsTableTableManager(_$AppDatabase db, $RadioStationsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$RadioStationsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$RadioStationsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$RadioStationsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> stationId = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String> streamUrl = const Value.absent(),
+                Value<String> homepage = const Value.absent(),
+                Value<String> faviconUrl = const Value.absent(),
+                Value<String> countryCode = const Value.absent(),
+                Value<String> state = const Value.absent(),
+                Value<String> tags = const Value.absent(),
+                Value<String> codec = const Value.absent(),
+                Value<int> bitrate = const Value.absent(),
+                Value<bool> hls = const Value.absent(),
+                Value<int> position = const Value.absent(),
+                Value<int> addedAt = const Value.absent(),
+                Value<int?> lastPlayedAt = const Value.absent(),
+                Value<int?> lastOkAt = const Value.absent(),
+                Value<bool> unreachable = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => RadioStationsCompanion(
+                stationId: stationId,
+                name: name,
+                streamUrl: streamUrl,
+                homepage: homepage,
+                faviconUrl: faviconUrl,
+                countryCode: countryCode,
+                state: state,
+                tags: tags,
+                codec: codec,
+                bitrate: bitrate,
+                hls: hls,
+                position: position,
+                addedAt: addedAt,
+                lastPlayedAt: lastPlayedAt,
+                lastOkAt: lastOkAt,
+                unreachable: unreachable,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String stationId,
+                required String name,
+                required String streamUrl,
+                Value<String> homepage = const Value.absent(),
+                Value<String> faviconUrl = const Value.absent(),
+                Value<String> countryCode = const Value.absent(),
+                Value<String> state = const Value.absent(),
+                Value<String> tags = const Value.absent(),
+                Value<String> codec = const Value.absent(),
+                Value<int> bitrate = const Value.absent(),
+                Value<bool> hls = const Value.absent(),
+                required int position,
+                Value<int> addedAt = const Value.absent(),
+                Value<int?> lastPlayedAt = const Value.absent(),
+                Value<int?> lastOkAt = const Value.absent(),
+                Value<bool> unreachable = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => RadioStationsCompanion.insert(
+                stationId: stationId,
+                name: name,
+                streamUrl: streamUrl,
+                homepage: homepage,
+                faviconUrl: faviconUrl,
+                countryCode: countryCode,
+                state: state,
+                tags: tags,
+                codec: codec,
+                bitrate: bitrate,
+                hls: hls,
+                position: position,
+                addedAt: addedAt,
+                lastPlayedAt: lastPlayedAt,
+                lastOkAt: lastOkAt,
+                unreachable: unreachable,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$RadioStationsTable, SavedRadio>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $RadioStationsTable,
+                    SavedRadio
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$RadioStationsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $RadioStationsTable,
+      SavedRadio,
+      $$RadioStationsTableFilterComposer,
+      $$RadioStationsTableOrderingComposer,
+      $$RadioStationsTableAnnotationComposer,
+      $$RadioStationsTableCreateCompanionBuilder,
+      $$RadioStationsTableUpdateCompanionBuilder,
+      (
+        SavedRadio,
+        BaseReferences<_$AppDatabase, $RadioStationsTable, SavedRadio>,
+      ),
+      SavedRadio,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -13383,4 +14716,6 @@ class $AppDatabaseManager {
       $$PodcastEpisodesTableTableManager(_db, _db.podcastEpisodes);
   $$ArtistInfosTableTableManager get artistInfos =>
       $$ArtistInfosTableTableManager(_db, _db.artistInfos);
+  $$RadioStationsTableTableManager get radioStations =>
+      $$RadioStationsTableTableManager(_db, _db.radioStations);
 }

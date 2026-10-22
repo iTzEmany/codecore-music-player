@@ -13,6 +13,7 @@ class MergeReport {
   int favoritesAdded = 0;
   int playlistsCreated = 0;
   int playlistItemsSkipped = 0;
+  int radiosAdded = 0;
 
   /// Titles of the tracks the backup mentions that this library does not have.
   final List<String> notFound = [];
@@ -28,7 +29,9 @@ bool _blank(String? s) => s == null || s.trim().isEmpty;
 /// a favourite is added (never removed), a hand edit applies only to a track
 /// the user has not edited here, lyrics fill only empty fields, plays keep the
 /// highest count and the latest date. A playlist already here (same uuid, or same
-/// name and tracks) gets the missing tracks appended; another one with a taken
+/// name and tracks) gets the missing tracks appended; a saved radio station
+/// already here (same id, or for a hand-typed address the same stream URL) is kept
+/// as it is, the others are added at the end in the backup's order; another one with a taken
 /// name is created as «(ripristinata)». Imports are not merged (they depend
 /// on the other device's downloads).
 Future<MergeReport> mergeUserData(AppDatabase db, UserData data, TrackResolver resolver) {
@@ -147,8 +150,40 @@ Future<MergeReport> mergeUserData(AppDatabase db, UserData data, TrackResolver r
       }
       report.playlistsCreated++;
     }
+    await _mergeRadios(db, data.radios, report);
     return report;
   });
 }
 
 String? _blankToNullTrim(String? s) => _blank(s) ? null : s!.trim();
+
+Future<void> _mergeRadios(AppDatabase db, List<RadioData> radios, MergeReport report) async {
+  if (radios.isEmpty) return;
+  final have = await db.select(db.radioStations).get();
+  final ids = {for (final r in have) r.stationId};
+  final urls = {for (final r in have) r.streamUrl};
+  var position = have.fold<int>(-1, (m, r) => r.position > m ? r.position : m) + 1;
+  for (final r in radios) {
+    if (r.stationId.isEmpty || r.streamUrl.isEmpty) continue;
+    if (ids.contains(r.stationId) || (r.isManual && urls.contains(r.streamUrl))) continue;
+    ids.add(r.stationId);
+    urls.add(r.streamUrl);
+    await db.into(db.radioStations).insert(RadioStationsCompanion.insert(
+          stationId: r.stationId,
+          name: r.name,
+          streamUrl: r.streamUrl,
+          homepage: Value(r.homepage),
+          faviconUrl: Value(r.faviconUrl),
+          countryCode: Value(r.countryCode),
+          state: Value(r.state),
+          tags: Value(r.tags),
+          codec: Value(r.codec),
+          bitrate: Value(r.bitrate),
+          hls: Value(r.hls),
+          position: position++,
+          addedAt: r.addedAt == null ? const Value.absent() : Value(r.addedAt!),
+          lastPlayedAt: Value(r.lastPlayedAt),
+        ));
+    report.radiosAdded++;
+  }
+}

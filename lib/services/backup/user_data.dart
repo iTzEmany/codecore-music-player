@@ -240,12 +240,72 @@ class ImportRowData {
       );
 }
 
+/// A saved radio station («Le mie radio»); the backup lists them in order.
+class RadioData {
+  const RadioData({
+    required this.stationId,
+    required this.name,
+    required this.streamUrl,
+    this.homepage = '',
+    this.faviconUrl = '',
+    this.countryCode = '',
+    this.state = '',
+    this.tags = '',
+    this.codec = '',
+    this.bitrate = 0,
+    this.hls = false,
+    this.addedAt,
+    this.lastPlayedAt,
+  });
+
+  final String stationId, name, streamUrl;
+  final String homepage, faviconUrl, countryCode, state, tags, codec;
+  final int bitrate;
+  final bool hls;
+  final int? addedAt, lastPlayedAt;
+
+  bool get isManual => stationId.startsWith('manual:');
+
+  Map<String, Object?> toJson() => _nonNull({
+        'stationId': stationId,
+        'name': name,
+        'streamUrl': streamUrl,
+        'homepage': homepage.isEmpty ? null : homepage,
+        'faviconUrl': faviconUrl.isEmpty ? null : faviconUrl,
+        'countryCode': countryCode.isEmpty ? null : countryCode,
+        'state': state.isEmpty ? null : state,
+        'tags': tags.isEmpty ? null : tags,
+        'codec': codec.isEmpty ? null : codec,
+        'bitrate': bitrate == 0 ? null : bitrate,
+        'hls': hls ? true : null,
+        'addedAt': addedAt,
+        'lastPlayedAt': lastPlayedAt,
+      });
+
+  factory RadioData.fromJson(Map<String, dynamic> j) => RadioData(
+        stationId: j['stationId'] as String? ?? '',
+        name: j['name'] as String? ?? '',
+        streamUrl: j['streamUrl'] as String? ?? '',
+        homepage: j['homepage'] as String? ?? '',
+        faviconUrl: j['faviconUrl'] as String? ?? '',
+        countryCode: j['countryCode'] as String? ?? '',
+        state: j['state'] as String? ?? '',
+        tags: j['tags'] as String? ?? '',
+        codec: j['codec'] as String? ?? '',
+        bitrate: (j['bitrate'] as num?)?.toInt() ?? 0,
+        hls: j['hls'] as bool? ?? false,
+        addedAt: (j['addedAt'] as num?)?.toInt(),
+        lastPlayedAt: (j['lastPlayedAt'] as num?)?.toInt(),
+      );
+}
+
 class UserData {
   const UserData({
     required this.createdAt,
     this.tracks = const [],
     this.playlists = const [],
     this.imports = const [],
+    this.radios = const [],
   });
 
   final int createdAt;
@@ -253,12 +313,16 @@ class UserData {
   final List<PlaylistData> playlists;
   final List<ImportData> imports;
 
+  /// «Le mie radio» in their order (absent in older backups = none).
+  final List<RadioData> radios;
+
   Map<String, Object?> toJson() => {
         'format': kUserDataFormat,
         'createdAt': createdAt,
         'tracks': [for (final t in tracks) t.toJson()],
         'playlists': [for (final p in playlists) p.toJson()],
         'imports': [for (final i in imports) i.toJson()],
+        if (radios.isNotEmpty) 'radios': [for (final r in radios) r.toJson()],
       };
 
   /// Unknown fields are ignored; a newer `format` is refused.
@@ -280,6 +344,10 @@ class UserData {
       imports: [
         for (final i in (j['imports'] as List? ?? const []))
           ImportData.fromJson(i as Map<String, dynamic>),
+      ],
+      radios: [
+        for (final r in (j['radios'] as List? ?? const []))
+          RadioData.fromJson(r as Map<String, dynamic>),
       ],
     );
   }

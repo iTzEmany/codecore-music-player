@@ -95,11 +95,33 @@ Future<UserData> collectUserData(AppDatabase db) {
         ),
     ];
 
+    final radios = [
+      for (final r in await (db.select(db.radioStations)
+            ..orderBy([(r) => OrderingTerm.asc(r.position), (r) => OrderingTerm.asc(r.addedAt)]))
+          .get())
+        RadioData(
+          stationId: r.stationId,
+          name: r.name,
+          streamUrl: r.streamUrl,
+          homepage: r.homepage,
+          faviconUrl: r.faviconUrl,
+          countryCode: r.countryCode,
+          state: r.state,
+          tags: r.tags,
+          codec: r.codec,
+          bitrate: r.bitrate,
+          hls: r.hls,
+          addedAt: r.addedAt,
+          lastPlayedAt: r.lastPlayedAt,
+        ),
+    ];
+
     return UserData(
       createdAt: DateTime.now().millisecondsSinceEpoch,
       tracks: userData,
       playlists: playlistData,
       imports: imports,
+      radios: radios,
     );
   });
 }

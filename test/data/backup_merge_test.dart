@@ -1,8 +1,11 @@
 import 'package:codecore/data/db/app_database.dart';
+import 'dart:convert';
+
 import 'package:codecore/data/repositories/backup_merge.dart';
+import 'package:codecore/data/repositories/backup_queries.dart';
 import 'package:codecore/data/repositories/playlist_sync_repository.dart';
 import 'package:codecore/services/backup/user_data.dart';
-import 'package:drift/drift.dart' show OrderingTerm, Value;
+import 'package:drift/drift.dart' show OrderingTerm, Value, driftRuntimeOptions;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -117,5 +120,62 @@ void main() {
     ]));
     expect(r.notFound, ['ghost']);
     expect((await db.select(db.tracks).get()).length, before);
+  });
+
+  group('saved radio stations', () {
+    RadioData radio(String id, String name, {String url = 'http://s'}) =>
+        RadioData(stationId: id, name: name, streamUrl: '$url/$id', tags: 'pop,rock', bitrate: 128, hls: id == 'b');
+
+    Future<List<SavedRadio>> saved() => (db.select(db.radioStations)
+          ..orderBy([(r) => OrderingTerm.asc(r.position)]))
+        .get();
+
+    test('export, JSON, merge into an empty database: same stations in the same order', () async {
+      for (final (i, id) in ['c', 'a', 'b'].indexed) {
+        await db.into(db.radioStations).insert(RadioStationsCompanion.insert(
+            stationId: id, name: 'N$id', streamUrl: 'http://s/$id', position: i,
+            tags: const Value('pop,rock'), hls: Value(id == 'b'), lastPlayedAt: const Value(7)));
+      }
+      final exported = await collectUserData(db);
+      final json = jsonDecode(jsonEncode(exported.toJson())) as Map<String, dynamic>;
+      final restored = UserData.fromJson(json);
+      expect([for (final r in restored.radios) r.stationId], ['c', 'a', 'b']);
+
+      driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
+      final other = AppDatabase(NativeDatabase.memory());
+      addTearDown(other.close);
+      final r = await mergeUserData(other, restored, await PlaylistSyncRepository(other).resolver());
+      expect(r.radiosAdded, 3);
+      final rows = await (other.select(other.radioStations)..orderBy([(x) => OrderingTerm.asc(x.position)])).get();
+      expect([for (final x in rows) (x.stationId, x.name, x.streamUrl, x.tags, x.hls, x.lastPlayedAt)], [
+        ('c', 'Nc', 'http://s/c', 'pop,rock', false, 7),
+        ('a', 'Na', 'http://s/a', 'pop,rock', false, 7),
+        ('b', 'Nb', 'http://s/b', 'pop,rock', true, 7),
+      ]);
+    });
+
+    test('merging twice adds nothing; a station already here is untouched; new ones go last', () async {
+      await db.into(db.radioStations).insert(RadioStationsCompanion.insert(
+          stationId: 'a', name: 'Mine', streamUrl: 'http://mine/a', position: 0));
+      final data = UserData(createdAt: 1, radios: [radio('b', 'B'), radio('a', 'Theirs'), radio('c', 'C')]);
+      expect((await merge(data)).radiosAdded, 2);
+      expect((await merge(data)).radiosAdded, 0);
+      final rows = await saved();
+      expect([for (final r in rows) (r.stationId, r.name)], [('a', 'Mine'), ('b', 'B'), ('c', 'C')]);
+    });
+
+    test('a hand-typed address is recognised by its URL even under another id', () async {
+      await db.into(db.radioStations).insert(RadioStationsCompanion.insert(
+          stationId: 'manual:1', name: 'Mine', streamUrl: 'http://s/manual:2', position: 0));
+      final r = await merge(UserData(createdAt: 1, radios: [radio('manual:2', 'Same address')]));
+      expect(r.radiosAdded, 0);
+      expect(await saved(), hasLength(1));
+    });
+
+    test('a user_data.json without radios still reads, and writes none', () {
+      final old = UserData.fromJson({'format': 1, 'createdAt': 5, 'tracks': [], 'playlists': []});
+      expect(old.radios, isEmpty);
+      expect(old.toJson().containsKey('radios'), isFalse);
+    });
   });
 }

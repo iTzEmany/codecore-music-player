@@ -148,4 +148,14 @@ void main() {
     SharedPreferences.setMockInitialValues({'shufflePlusEvery': 99});
     expect((await SettingsStore.open()).readSettings().shufflePlusEvery, 10);
   });
+
+  test('the radio choices default to «ask» and are remembered', () async {
+    SharedPreferences.setMockInitialValues({});
+    final store = await SettingsStore.open();
+    var s = store.readSettings();
+    expect((s.radioCountry, s.radioRegion, s.radioOnlyCountry), ('', '', false));
+    await store.writeSettings(s.copyWith(radioCountry: 'DE', radioRegion: 'Bayern', radioOnlyCountry: true));
+    s = store.readSettings();
+    expect((s.radioCountry, s.radioRegion, s.radioOnlyCountry), ('DE', 'Bayern', true));
+  });
 }

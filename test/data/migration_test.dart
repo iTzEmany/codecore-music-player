@@ -264,4 +264,24 @@ void main() {
     expect((await db.customSelect('SELECT title FROM tracks').getSingle()).read<String>('title'), 'Old');
     await db.close();
   });
+
+  test('a v11 database gets radio_stations and keeps its tracks and playlists', () async {
+    final db = AppDatabase(NativeDatabase.memory(setup: (raw) {
+      raw.execute('CREATE TABLE tracks (id INTEGER PRIMARY KEY AUTOINCREMENT, '
+          'path TEXT NOT NULL, title TEXT NOT NULL)');
+      raw.execute("INSERT INTO tracks (path, title) VALUES ('/a.mp3', 'Old')");
+      raw.execute('CREATE TABLE playlists (id INTEGER PRIMARY KEY AUTOINCREMENT, '
+          'name TEXT NOT NULL, created_at INTEGER NOT NULL, cover_key TEXT, uuid TEXT, updated_at INTEGER)');
+      raw.execute("INSERT INTO playlists (name, created_at, updated_at) VALUES ('Mine', 1, 1)");
+      raw.userVersion = 11;
+    }));
+    expect(await db.select(db.radioStations).get(), isEmpty);
+    await db.into(db.radioStations).insert(RadioStationsCompanion.insert(
+        stationId: 'x', name: 'X', streamUrl: 'http://x', position: 0));
+    final row = await db.select(db.radioStations).getSingle();
+    expect((row.homepage, row.hls, row.unreachable, row.lastPlayedAt), ('', false, false, null));
+    expect((await db.customSelect('SELECT title FROM tracks').getSingle()).read<String>('title'), 'Old');
+    expect((await db.select(db.playlists).getSingle()).name, 'Mine');
+    await db.close();
+  });
 }

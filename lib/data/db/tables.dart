@@ -278,3 +278,38 @@ class ArtistInfos extends Table {
   @override
   Set<Column> get primaryKey => {artistKey};
 }
+
+/// «Le mie radio»: the stations the user saved, with the address they had when
+/// saved, so they play even when Radio Browser is down. [stationId] is the
+/// `stationuuid`, or `manual:<uuid>` for an address typed in by hand.
+@DataClassName('SavedRadio')
+class RadioStations extends Table {
+  TextColumn get stationId => text()();
+  TextColumn get name => text()();
+  TextColumn get streamUrl => text()();
+  TextColumn get homepage => text().withDefault(const Constant(''))();
+  TextColumn get faviconUrl => text().withDefault(const Constant(''))();
+  TextColumn get countryCode => text().withDefault(const Constant(''))();
+  TextColumn get state => text().withDefault(const Constant(''))();
+
+  /// Comma-separated.
+  TextColumn get tags => text().withDefault(const Constant(''))();
+  TextColumn get codec => text().withDefault(const Constant(''))();
+  IntColumn get bitrate => integer().withDefault(const Constant(0))();
+  BoolColumn get hls => boolean().withDefault(const Constant(false))();
+
+  /// The order the user chose (0 = first).
+  IntColumn get position => integer()();
+  IntColumn get addedAt => integer().clientDefault(nowMs)();
+  IntColumn get lastPlayedAt => integer().nullable()();
+
+  /// The last refresh that found the station working.
+  IntColumn get lastOkAt => integer().nullable()();
+
+  /// The last refresh did not find the station, or found it broken. Shown as
+  /// «non risponde»; the row is never deleted for it.
+  BoolColumn get unreachable => boolean().withDefault(const Constant(false))();
+
+  @override
+  Set<Column> get primaryKey => {stationId};
+}
