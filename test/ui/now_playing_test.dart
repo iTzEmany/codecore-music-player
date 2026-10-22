@@ -191,6 +191,16 @@ void main() {
     await h.dispose(tester);
   });
 
+  testWidgets('symmetry: the title mirrors the heart and lines up with the track',
+      (tester) async {
+    final h = await openPlayer(tester);
+    final left = tester.getTopLeft(find.text('Song 0')).dx;
+    expect(400 - tester.getTopRight(find.byType(HeartIcon)).dx, closeTo(left, 1));
+    // Same edge as the elapsed time below the seek bar.
+    expect(tester.getTopLeft(find.text('0:00').first).dx, closeTo(left, 1));
+    await h.dispose(tester);
+  });
+
   testWidgets('desktop volume row shows the percentage', (tester) async {
     final h = await openPlayer(tester);
     ProviderScope.containerOf(tester.element(find.byType(NowPlayingScreen)))

@@ -306,7 +306,8 @@ class _Player extends ConsumerWidget {
                         IconButton(
                           tooltip: l.moreActions,
                           icon: const Icon(Icons.more_horiz_rounded),
-                          onPressed: () => showTrackActions(context, ref, track),
+                          onPressed: () =>
+                              showTrackActions(context, ref, track),
                         ),
                       ],
                     ),
@@ -354,31 +355,40 @@ class _Player extends ConsumerWidget {
           Row(
             children: [
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      texts?.title ?? track.title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.titleLarge,
-                    ),
-                    InkWell(
-                      onTap: online ? null : () => _openArtist(context, ref),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 2),
-                        child: Text(
-                          // «In diretta» is already in the live row below.
-                          texts == null
-                              ? (track.artist ?? l.unknownArtist)
-                              : (onAir == null ? '' : texts.subtitle),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.bodyLarge?.copyWith(color: cc.textMuted),
+                child: Padding(
+                  // The heart's glyph ends at npEdge: the title mirrors it.
+                  padding: EdgeInsetsDirectional.only(
+                    start: npEdge,
+                    end: radio == null && online ? npEdge : 0,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        texts?.title ?? track.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.titleLarge,
+                      ),
+                      InkWell(
+                        onTap: online ? null : () => _openArtist(context, ref),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 2),
+                          child: Text(
+                            // «In diretta» is already in the live row below.
+                            texts == null
+                                ? (track.artist ?? l.unknownArtist)
+                                : (onAir == null ? '' : texts.subtitle),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.bodyLarge?.copyWith(
+                              color: cc.textMuted,
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
               if (radio != null)
@@ -400,7 +410,10 @@ class _Player extends ConsumerWidget {
             NpRadioActions(station: radio, onAir: onAir)
           else if (online)
             SuggestedInfo(track: track),
-          if (radio != null) NpLiveRow(station: radio) else NpSeekRow(track: track),
+          if (radio != null)
+            NpLiveRow(station: radio)
+          else
+            NpSeekRow(track: track),
           const SizedBox(height: 8),
           NpControls(live: radio != null),
           const NpBottomRow(),

@@ -29,6 +29,10 @@ class NpSeekRow extends ConsumerStatefulWidget {
   ConsumerState<NpSeekRow> createState() => _NpSeekRowState();
 }
 
+/// Inset from the page margin shared by the title, the seek track (the slider
+/// overlay radius) and the glyphs of the 48 px icon buttons at the row ends.
+const npEdge = 12.0;
+
 class _NpSeekRowState extends ConsumerState<NpSeekRow> {
   double? _dragging;
   bool _remaining = false;
@@ -61,7 +65,7 @@ class _NpSeekRowState extends ConsumerState<NpSeekRow> {
           },
         ),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.symmetric(horizontal: npEdge),
           child: Row(
             children: [
               Expanded(
@@ -132,30 +136,30 @@ class NpControls extends ConsumerWidget {
           icon: const Icon(Icons.skip_next_rounded),
         ),
         if (!live)
-        IconButton(
-          tooltip: l.repeat,
-          onPressed: ctrl.cycleRepeat,
-          icon: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                repeat == PlayRepeat.one
-                    ? Icons.repeat_one_rounded
-                    : Icons.repeat_rounded,
-                color: repeatOn ? cc.accent : cc.textMuted,
-              ),
-              const SizedBox(height: 2),
-              Container(
-                width: 4,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: repeatOn ? cc.accent : Colors.transparent,
-                  shape: BoxShape.circle,
+          IconButton(
+            tooltip: l.repeat,
+            onPressed: ctrl.cycleRepeat,
+            icon: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  repeat == PlayRepeat.one
+                      ? Icons.repeat_one_rounded
+                      : Icons.repeat_rounded,
+                  color: repeatOn ? cc.accent : cc.textMuted,
                 ),
-              ),
-            ],
+                const SizedBox(height: 2),
+                Container(
+                  width: 4,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: repeatOn ? cc.accent : Colors.transparent,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
       ],
     );
   }
