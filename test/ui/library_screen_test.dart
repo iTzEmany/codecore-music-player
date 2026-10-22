@@ -1,4 +1,10 @@
+import 'package:codecore/data/db/app_database.dart';
+import 'package:codecore/data/repositories/library_entries.dart';
+import 'package:codecore/ui/screens/library/library_screen.dart';
 import 'package:codecore/ui/shell/app_shell.dart';
+import 'package:codecore/ui/theme/tokens.dart';
+import 'package:codecore/ui/widgets/segmented_blocks.dart';
+import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -12,35 +18,110 @@ Future<void> _settle(WidgetTester tester) async {
 }
 
 void main() {
-  testWidgets('library: pinned items, kind chips, grid toggle',
-      (tester) async {
-    tester.view.physicalSize = const Size(400, 1400);
+  Future<Harness> open(WidgetTester tester, {double width = 400, int tracks = 4}) async {
+    tester.view.physicalSize = Size(width, 1400);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
-    final h = await Harness.create(tester, tracks: 4);
-    await h.pump(tester, const AppShell());
-    await tester.tap(find.text('Libreria'));
+    final h = await Harness.create(tester, tracks: tracks);
+    if (width >= 840) {
+      await h.pump(tester, const LibraryScreen());
+    } else {
+      await h.pump(tester, const AppShell());
+      await tester.tap(find.text('Libreria'));
+    }
     await _settle(tester);
-    // Pinned first, then albums and artists mixed.
-    expect(find.text('Preferiti'), findsWidgets);
-    expect(find.text('Tutti i brani'), findsOneWidget);
-    expect(find.text('4 brani'), findsOneWidget);
+    return h;
+  }
+
+  testWidgets('blocks filter the list and the count follows', (t) async {
+    final h = await open(t);
+    expect(find.text('Tutto'), findsOneWidget);
     expect(find.text('Album 0'), findsOneWidget);
-    expect(find.text('Artista'), findsOneWidget);
-    // «Artisti» chip keeps only the artists.
-    await tester.tap(find.widgetWithText(ChoiceChip, 'Artisti'));
-    await _settle(tester);
-    expect(find.text('Album 0'), findsNothing);
-    expect(find.text('Artista'), findsOneWidget);
-    // Tapping it again shows everything; the grid toggle keeps the content.
-    await tester.tap(find.widgetWithText(ChoiceChip, 'Artisti'));
-    await _settle(tester);
+    await t.tap(find.text('Album').first);
+    await _settle(t);
+    expect(find.text('2 album'), findsOneWidget);
+    expect(find.text('Artist'), findsNothing);
+    expect(find.byType(ChoiceChip), findsNothing);
+    await t.tap(find.text('Tutto'));
+    await _settle(t);
     expect(find.text('Album 0'), findsOneWidget);
-    await tester.tap(find.byIcon(Icons.grid_view_rounded));
-    await _settle(tester);
+    await t.tap(find.byIcon(Icons.grid_view_rounded));
+    await _settle(t);
     expect(find.text('Album 0'), findsOneWidget);
     expect(find.byIcon(Icons.view_list_rounded), findsOneWidget);
-    expect(tester.takeException(), isNull);
-    await h.dispose(tester);
+    expect(t.takeException(), isNull);
+    await h.dispose(t);
+  });
+
+  testWidgets('sort menu switches to A–Z', (t) async {
+    final h = await open(t);
+    await t.tap(find.text('Recenti'));
+    await t.pumpAndSettle();
+    await t.tap(find.text('A–Z').last);
+    await t.pumpAndSettle();
+    await _settle(t);
+    expect(find.text('A–Z'), findsOneWidget);
+    await h.dispose(t);
+  });
+
+  testWidgets('shortcuts only in Tutto, in spec order', (t) async {
+    final h = await open(t);
+    final fav = t.getRect(find.text('Preferiti'));
+    final all = t.getRect(find.text('Tutti i brani'));
+    expect(all.left > fav.left || all.top > fav.top, isTrue);
+    await t.tap(find.text('Album').first);
+    await _settle(t);
+    expect(find.text('Preferiti'), findsNothing);
+    await h.dispose(t);
+  });
+
+  testWidgets('zero-count shortcuts disappear except Preferiti and Tutti i brani',
+      (t) async {
+    final h = await open(t);
+    expect(find.text('Preferiti'), findsOneWidget);
+    expect(find.text('Tutti i brani'), findsOneWidget);
+    expect(find.text('Podcast'), findsNothing);
+    expect(find.text('Radio'), findsNothing);
+    await h.dispose(t);
+  });
+
+  testWidgets('A–Z headers follow leadingLetter', (t) async {
+    final h = await open(t, tracks: 0);
+    var i = 0;
+    for (final album in ['Abba', 'Ägypten', '1999', 'Beta']) {
+      await h.db.into(h.db.tracks).insert(TracksCompanion.insert(
+            path: '/m/x${i++}.mp3',
+            title: 'T$i',
+            albumKey: 'a|$album',
+            format: 'mp3',
+            sizeBytes: 1,
+            mtimeMs: 1,
+            addedAt: i,
+            artist: const Value('Zed'),
+            album: Value(album),
+          ));
+    }
+    await _settle(t);
+    expect(find.text('A'), findsNothing);
+    await t.tap(find.text('Recenti'));
+    await t.pumpAndSettle();
+    await t.tap(find.text('A–Z').last);
+    await t.pumpAndSettle();
+    await _settle(t);
+    // Headers only: covers may also show an initial.
+    Finder header(String x) => find.byWidgetPredicate((w) =>
+        w is Text && w.data == x && w.style?.color == CcColors.notte.accentSoft);
+    for (final x in ['A', 'B', '#', 'Z']) {
+      expect(header(x), findsOneWidget, reason: x);
+    }
+    await h.dispose(t);
+  });
+
+  testWidgets('desktop: the block row is at most 960 wide', (t) async {
+    final h = await open(t, width: 1400);
+    final r = t.getRect(find.byType(SegmentedBlocks<LibraryKind?>));
+    expect(r.width, lessThanOrEqualTo(960));
+    expect(r.left, lessThan(300));
+    await h.dispose(t);
   });
 }

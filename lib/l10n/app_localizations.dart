@@ -364,6 +364,30 @@ abstract class AppLocalizations {
   /// **'{count, plural, one{1 album} other{{count} album}}'**
   String albumsCount(int count);
 
+  /// No description provided for @libraryAll.
+  ///
+  /// In it, this message translates to:
+  /// **'Tutto'**
+  String get libraryAll;
+
+  /// No description provided for @libraryItemsCount.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, one{1 elemento} other{{count} elementi}}'**
+  String libraryItemsCount(int count);
+
+  /// No description provided for @playlistsCount.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, one{1 playlist} other{{count} playlist}}'**
+  String playlistsCount(int count);
+
+  /// No description provided for @artistsCount.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, one{1 artista} other{{count} artisti}}'**
+  String artistsCount(int count);
+
   /// No description provided for @missingTracksCount.
   ///
   /// In it, this message translates to:
@@ -2025,6 +2049,12 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Alfabetico'**
   String get sortAlphabetical;
+
+  /// No description provided for @sortAToZ.
+  ///
+  /// In it, this message translates to:
+  /// **'A–Z'**
+  String get sortAToZ;
 
   /// No description provided for @sortAddedRecently.
   ///

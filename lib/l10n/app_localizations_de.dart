@@ -146,11 +146,63 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String albumsCount(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count Alben',
+      other: '$countString Alben',
       one: '1 Album',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get libraryAll => 'Alles';
+
+  @override
+  String libraryItemsCount(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString Einträge',
+      one: '1 Eintrag',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String playlistsCount(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString Playlists',
+      one: '1 Playlist',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String artistsCount(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString Künstler',
+      one: '1 Künstler',
     );
     return '$_temp0';
   }
@@ -1092,6 +1144,9 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get sortAlphabetical => 'Alphabetisch';
+
+  @override
+  String get sortAToZ => 'A–Z';
 
   @override
   String get sortAddedRecently => 'Zuletzt hinzugefügt';

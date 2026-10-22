@@ -43,6 +43,42 @@
   "sortDuration": "Duración",
   "tracksCount": "{count, plural, one{1 canción} other{{count} canciones}}",
   "albumsCount": "{count, plural, one{1 álbum} other{{count} álbumes}}",
+  "@albumsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "libraryAll": "Todo",
+  "libraryItemsCount": "{count, plural, one{1 elemento} other{{count} elementos}}",
+  "@libraryItemsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "playlistsCount": "{count, plural, one{1 lista} other{{count} listas}}",
+  "@playlistsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "artistsCount": "{count, plural, one{1 artista} other{{count} artistas}}",
+  "@artistsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
   "missingTracksCount": "Canciones no encontradas ({count})",
   "addedToFavorites": "Añadido a favoritos",
   "removedFromFavorites": "Quitado de favoritos",
@@ -432,6 +468,7 @@
   },
   "sortRecent": "Recientes",
   "sortAlphabetical": "Alfabético",
+  "sortAToZ": "A–Z",
   "sortAddedRecently": "Añadidos recientemente",
   "viewAsGrid": "Ver como cuadrícula",
   "viewAsList": "Ver como lista",
