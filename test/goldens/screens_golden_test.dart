@@ -11,6 +11,7 @@ import 'package:codecore/providers/nav_providers.dart';
 import 'package:codecore/providers/import_providers.dart' show searchCacheCountProvider;
 import 'package:codecore/providers/youtube_providers.dart';
 import 'package:codecore/services/jam/jam_models.dart';
+import 'package:codecore/ui/screens/home/home_screen.dart' show clockProvider;
 import 'package:codecore/ui/screens/jam/jam_screen.dart';
 import 'package:codecore/ui/screens/library/all_tracks_screen.dart';
 import 'package:codecore/ui/screens/onboarding/onboarding_screen.dart';
@@ -99,7 +100,10 @@ void main() {
                   }
                   await s.h.handler.playQueue(s.seed.trackIds.take(6).toList(), 2);
                 });
-                await s.show(const AppShell());
+                // Taller than the usual phone so the fan clears the dock.
+                tester.view.physicalSize = const Size(360, 1150) * size.dpr;
+                await s.show(const AppShell(),
+                    extra: [clockProvider.overrideWithValue(() => DateTime(2026, 1, 1, 14))]);
                 await s.expectGolden('${tag}_home.png');
               }));
         }

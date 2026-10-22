@@ -15,6 +15,9 @@ import 'home_blocks.dart';
 import 'home_bottom_rows.dart';
 import 'resume_rows.dart';
 
+/// The clock of the greeting; tests override it to be independent of the time of day.
+final clockProvider = Provider<DateTime Function()>((_) => DateTime.now);
+
 String _greeting(AppLocalizations l, int hour) =>
     switch (greetingForHour(hour)) {
       Greeting.morning => l.greetingMorning,
@@ -42,7 +45,7 @@ class HomeScreen extends ConsumerWidget {
         children: [
           Expanded(
             child: Text(
-              _greeting(l, DateTime.now().hour),
+              _greeting(l, ref.read(clockProvider)().hour),
               style: theme.headlineSmall,
             ),
           ),
