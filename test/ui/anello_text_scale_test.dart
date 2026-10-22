@@ -20,6 +20,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/app_harness.dart';
+import '../support/memory_fakes.dart';
 
 /// Every screen of the redesign at 150 % text, 360x780, in the three themes:
 /// nothing may overflow, and every block label stays inside the screen. Search and the online artist page belong to plan 2.4.
@@ -99,5 +100,30 @@ void main() {
         await h.dispose(tester);
       });
     }
+  }
+
+  // The matrix above renders Memoria on an unselected tab (empty). Here it is
+  // shown for real, tall enough that every section is laid out.
+  for (final t in themes.entries) {
+    testWidgets('Memory (shown) at 150 % in ${t.key}', (tester) async {
+      tester.view.physicalSize = const Size(360, 6000);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final h = await Harness.create(tester);
+      await tester.runAsync(() => seedMemory(h.db,
+          playlistName: 'Una playlist con un nome davvero molto molto lungo da non stare in una riga',
+          suffix: ' con un titolo lunghissimo che non entra in una riga'));
+      await h.pump(tester, const MemoryScreen(),
+          textScale: 1.5, colors: t.value, extraOverrides: memoryOverrides(FakeMemoryActions(), memoryDisk));
+      for (var i = 0; i < 5; i++) {
+        await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+      expect(find.text('Svuota cache'), findsOneWidget);
+      expect(find.text('Mai ascoltati'), findsOneWidget);
+      expect(find.text('Strumenti'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      await h.dispose(tester);
+    });
   }
 }

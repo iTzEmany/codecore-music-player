@@ -150,6 +150,7 @@ class _GaugePainter extends CustomPainter {
     if (musicSweep > 0) {
       canvas.drawArc(rect, _start, musicSweep, false, line..color = musicColor);
     }
+    if (musicSweep <= 0) return;
     final a = _start + musicSweep;
     canvas.drawCircle(
       c + Offset(math.cos(a), math.sin(a)) * r,

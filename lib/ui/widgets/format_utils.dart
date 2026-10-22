@@ -10,8 +10,9 @@ import '../../data/db/app_database.dart';
 String formatBytes(int bytes, [String? locale]) {
   String num(double v) => NumberFormat(v >= 99.95 ? '0' : '0.0', locale).format(v);
   if (bytes < 1024) return '$bytes B';
-  if (bytes < 1024 * 1024) return '${(bytes / 1024).round()} KB';
-  if (bytes < 1024 * 1024 * 1024) return '${num(bytes / 1048576)} MB';
+  // The unit is picked after rounding: 1048575 B reads «1,0 MB», not «1024 KB».
+  if ((bytes / 1024).round() < 1024) return '${(bytes / 1024).round()} KB';
+  if (bytes / 1048576 < 1023.95) return '${num(bytes / 1048576)} MB';
   return '${num(bytes / 1073741824)} GB';
 }
 
