@@ -439,7 +439,7 @@ Richiesta (2026-10-22): «l'inserimento della sezione radio per permettermi anch
 - [x] 33.3 Regioni, doppioni e «Vicino a te» (cbfbfea)
 - [x] 33.4 Elenco del paese, cache e voce in Memoria (cbfbfea)
 - [x] 33.5 Schema v12, «Le mie radio» e backup (cbfbfea)
-- [ ] 33.6 La radio nel lettore principale
+- [x] 33.6 La radio nel lettore principale (efa2425)
 - [ ] 33.7 Pagina Radio
 - [ ] 33.8 «In riproduzione», mini-player e notifica per la radio
 - [ ] 33.9 Home e Android Auto
@@ -449,11 +449,11 @@ Richiesta (2026-10-22): «l'inserimento della sezione radio per permettermi anch
 
 ## Fase 34 — Nuove uscite degli artisti (`fase-34-nuove-uscite.md`)
 Richiesta (2026-10-22): «avere aggiornamenti per quanto riguarda le nuove uscite degli artisti». Scelte concordate: artisti seguiti («Segui» sulla pagina artista della fase 30) più, con l'opzione, i più ascoltati; controllo delle loro pagine YouTube Music (parser della fase 30, maschera delle uscite ≈ 6–12 KB) all'apertura dell'app al più una volta al giorno, in serie con pausa su 429; il primo controllo segna tutto come visto; «Nuove uscite» in Home e notifica Android (nessun pacchetto; WorkManager solo come extra da approvare); schema v13.
-- [ ] 34.1 Verifiche preliminari e fixture (esiti dal PC già nel documento; restano fixture e telefono)
-- [ ] 34.2 Confronto delle uscite
-- [ ] 34.3 Schema v13 e repository
-- [ ] 34.4 Artisti più ascoltati in automatico
-- [ ] 34.5 Il giro di controllo
+- [~] 34.1 Verifiche preliminari e fixture (esiti dal PC già nel documento; restano fixture e telefono) (f15a9f5: fixture dal vivo; prove sul Motorola (20 controlli, notifica) da fare)
+- [x] 34.2 Confronto delle uscite (f15a9f5)
+- [x] 34.3 Schema v13 e repository (f15a9f5)
+- [x] 34.4 Artisti più ascoltati in automatico (f15a9f5)
+- [x] 34.5 Il giro di controllo (f15a9f5)
 - [ ] 34.6 Quando parte il giro e impostazioni
 - [ ] 34.7 «Segui» e «Artisti seguiti»
 - [ ] 34.8 «Nuove uscite» in Home e pagina dedicata
