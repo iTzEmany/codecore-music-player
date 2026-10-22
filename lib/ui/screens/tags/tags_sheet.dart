@@ -1,3 +1,4 @@
+import '../../widgets/cc_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -71,7 +72,7 @@ Future<String?> askTagName(BuildContext context, {String? initial, String? title
 Future<void> editTag(BuildContext context, WidgetRef ref, TagSummary s) async {
   final l = context.l10n;
   final repo = ref.read(tagRepositoryProvider);
-  final action = await showModalBottomSheet<String>(
+  final action = await showCcSheet<String>(
     context: context,
     builder: (c) => SafeArea(
       child: Column(
@@ -140,7 +141,7 @@ Future<void> editTag(BuildContext context, WidgetRef ref, TagSummary s) async {
 /// «Etichette…»: check or uncheck tags for [tracks]. With several tracks a tag
 /// that only some of them carry shows a dash; tapping gives it to all.
 Future<void> showTagsSheet(BuildContext context, WidgetRef ref, List<Track> tracks) =>
-    showModalBottomSheet<void>(
+    showCcSheet<void>(
       context: context,
       isScrollControlled: true,
       builder: (_) => _TagsSheet(tracks: tracks),
@@ -267,7 +268,7 @@ Future<void> pickTagFor(
       ..showSnackBar(SnackBar(content: Text(l.tagNoneToRemove)));
     return;
   }
-  final picked = await showModalBottomSheet<UserTag>(
+  final picked = await showCcSheet<UserTag>(
     context: context,
     isScrollControlled: true,
     builder: (c) => SafeArea(

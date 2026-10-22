@@ -1,3 +1,4 @@
+import '../../widgets/cc_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -13,7 +14,7 @@ import '../../widgets/net_thumbnail.dart';
 class PodcastSubscribeSheet extends ConsumerStatefulWidget {
   const PodcastSubscribeSheet({super.key});
 
-  static Future<void> show(BuildContext context) => showModalBottomSheet<void>(
+  static Future<void> show(BuildContext context) => showCcSheet<void>(
     context: context,
     isScrollControlled: true,
     useRootNavigator: true,
@@ -104,7 +105,7 @@ class _PodcastSubscribeSheetState extends ConsumerState<PodcastSubscribeSheet> {
       child: ListView(
         padding: const EdgeInsets.symmetric(horizontal: CcDims.margin),
         children: [
-          Text(l.podcastAdd, style: theme.titleLarge),
+          Text(l.podcastAdd, style: theme.titleMedium),
           const SizedBox(height: 4),
           Text(
             l.podcastsNotice,
@@ -177,7 +178,7 @@ class _PodcastSubscribeSheetState extends ConsumerState<PodcastSubscribeSheet> {
                 [
                   if (h.author != null) h.author!,
                   if (h.episodeCount != null) l.podcastEpisodesCount(h.episodeCount!),
-                ].join(' · '),
+                ].join(', '),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),

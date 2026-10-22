@@ -257,7 +257,7 @@ void main() {
       await _settle(tester);
       expect(find.text('Radiolab'), findsOneWidget);
       expect(find.text('No feed here'), findsNothing);
-      expect(find.textContaining('WNYC Studios · 871 episodi'), findsOneWidget);
+      expect(find.textContaining('WNYC Studios, 871 episodi'), findsOneWidget);
 
       await tester.tap(find.byKey(const ValueKey('hit-https://feeds.simplecast.com/x')));
       await _settle(tester);

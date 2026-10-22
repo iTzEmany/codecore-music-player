@@ -1,3 +1,4 @@
+import '../../widgets/cc_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -72,7 +73,7 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
   void _rowMenu(Track track) {
     final l = context.l10n;
     final page = context;
-    showModalBottomSheet<void>(
+    showCcSheet<void>(
       context: context,
       showDragHandle: true,
       builder: (sheet) {

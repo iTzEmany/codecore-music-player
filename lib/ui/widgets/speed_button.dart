@@ -1,3 +1,4 @@
+import 'cc_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -48,7 +49,7 @@ class SpeedButton extends ConsumerWidget {
 class SpeedSheet extends ConsumerWidget {
   const SpeedSheet({super.key});
 
-  static Future<void> show(BuildContext context) => showModalBottomSheet<void>(
+  static Future<void> show(BuildContext context) => showCcSheet<void>(
         context: context,
         useRootNavigator: true,
         builder: (_) => const SpeedSheet(),

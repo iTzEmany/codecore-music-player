@@ -1,3 +1,4 @@
+import '../../widgets/cc_sheet.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -24,7 +25,7 @@ class DevicesSheet extends ConsumerStatefulWidget {
   final List<int>? trackIds;
 
   static Future<void> show(BuildContext context, {List<int>? trackIds}) =>
-      showModalBottomSheet<void>(
+      showCcSheet<void>(
         context: context,
         isScrollControlled: true,
         useRootNavigator: true,

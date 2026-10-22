@@ -14,7 +14,7 @@ Future<SyncDecision?> showSyncPreview(BuildContext context, SyncPlan plan,
   );
 }
 
-/// «3 new · 2 updated · 14 tracks missing» and the list behind it. Nothing is
+/// «3 new, 2 updated, 14 tracks missing» and the list behind it. Nothing is
 /// written before «Applica».
 class SyncPreviewDialog extends StatelessWidget {
   const SyncPreviewDialog({super.key, required this.plan, this.canAsk = false});
@@ -43,7 +43,7 @@ class SyncPreviewDialog extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(summary.isEmpty ? l.syncUpToDate : summary.join(' · ')),
+              Text(summary.isEmpty ? l.syncUpToDate : summary.join(', ')),
               const SizedBox(height: 8),
               for (final e in plan.toWrite) _EntryTile(entry: e),
               if (plan.toReplace.isNotEmpty) ...[
@@ -100,7 +100,7 @@ class _EntryTile extends StatelessWidget {
       contentPadding: EdgeInsets.zero,
       leading: Icon(isNew ? Icons.playlist_add : Icons.sync),
       title: Text(entry.remote.name, maxLines: 1, overflow: TextOverflow.ellipsis),
-      subtitle: Text(details.join(' · ')),
+      subtitle: Text(details.join(', ')),
     );
   }
 }

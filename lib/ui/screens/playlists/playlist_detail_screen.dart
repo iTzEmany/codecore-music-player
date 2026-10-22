@@ -1,3 +1,4 @@
+import '../../widgets/cc_sheet.dart';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
@@ -112,7 +113,7 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
       });
     }
 
-    void rowMenu(Track t, int i) => showModalBottomSheet<void>(
+    void rowMenu(Track t, int i) => showCcSheet<void>(
       context: context,
       builder: (sheet) => SafeArea(
         child: Column(

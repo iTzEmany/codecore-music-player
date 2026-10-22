@@ -1,3 +1,4 @@
+import '../../widgets/cc_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -13,7 +14,7 @@ import '../../theme/tokens.dart';
 class JamOutputsSheet extends ConsumerWidget {
   const JamOutputsSheet({super.key});
 
-  static Future<void> show(BuildContext context) => showModalBottomSheet<void>(
+  static Future<void> show(BuildContext context) => showCcSheet<void>(
     context: context,
     isScrollControlled: true,
     builder: (_) => const JamOutputsSheet(),

@@ -833,9 +833,9 @@
   "exportLogFailed": "Protokoll konnte nicht gespeichert werden",
   "exportPlaylist": "Exportieren…",
   "exportPlaylistTitle": "Playlist exportieren",
-  "exportFormatM3u8": "M3U8 · für andere Player",
-  "exportFormatCsv": "CSV · wie Exportify",
-  "exportFormatJson": "JSON · Codecore-Format",
+  "exportFormatM3u8": "M3U8, für andere Player",
+  "exportFormatCsv": "CSV, wie Exportify",
+  "exportFormatJson": "JSON, Codecore-Format",
   "exportRelativePaths": "Relative Pfade",
   "exportRelativeHint": "Relativ zum gemeinsamen Ordner aller Titel: Datei dort speichern",
   "exportAction": "Exportieren",
@@ -1065,7 +1065,7 @@
   "importNoteLengthOff": "Länge weicht von der Datei ab",
   "importNoteUnchanged": "Schon in der Playlist",
   "csvImportSync": "Synchronisieren",
-  "csvImportSyncCounts": "+{added} neu · −{removed} aus der Playlist entfernt (Dateien bleiben)",
+  "csvImportSyncCounts": "{added} neu, {removed} aus der Playlist entfernt (Dateien bleiben)",
   "csvImportSyncChecking": "Unterschiede werden geprüft…",
   "@csvImportSyncCounts": {
     "placeholders": {
@@ -2030,7 +2030,7 @@
   "backupSaved": "Backup gespeichert",
   "backupFailed": "Backup fehlgeschlagen",
   "restoreTitle": "Aus Backup wiederherstellen",
-  "restoreInfo": "Vom {date} · App {version} · {tracks} Titel · {playlists} Playlists",
+  "restoreInfo": "Vom {date}, App {version}, {tracks} Titel, {playlists} Playlists",
   "@restoreInfo": {
     "placeholders": {
       "date": {
@@ -2207,7 +2207,7 @@
   "writeTagsToFiles": "Änderungen in die Dateien schreiben",
   "writeTagsToFilesHint": "Hier geänderte Titel, Interpret, Album, Jahr, Genre und Titelnummer werden auch in MP3-, FLAC-, M4A- und OGG-Dateien geschrieben. Das Original jeder Datei bleibt erhalten. Standardmäßig aus.",
   "writeTagsWarnTitle": "Änderungen in die Dateien schreiben?",
-  "writeTagsWarnBody": "Beim Speichern einer Änderung werden die Tags auch in die Musikdatei geschrieben (MP3, FLAC, M4A, OGG). Es wird auf einer Kopie gearbeitet, das Ergebnis geprüft und die Datei nur ersetzt, wenn alles stimmt; vorher wird das Original unter „Tag-Backups“ gesichert (die letzten 200 oder 2 GB). Cover, Liedtexte und ReplayGain bleiben unberührt. Vor dem Aktivieren sollten Sie ein Bibliotheks-Backup erstellen (Einstellungen → Backup).",
+  "writeTagsWarnBody": "Beim Speichern einer Änderung werden die Tags auch in die Musikdatei geschrieben (MP3, FLAC, M4A, OGG). Es wird auf einer Kopie gearbeitet, das Ergebnis geprüft und die Datei nur ersetzt, wenn alles stimmt; vorher wird das Original unter „Tag-Backups“ gesichert (die letzten 200 oder 2 GB). Cover, Liedtexte und ReplayGain bleiben unberührt. Vor dem Aktivieren sollten Sie ein Bibliotheks-Backup erstellen (Einstellungen, Backup).",
   "writeTagsEnable": "Aktivieren",
   "tagsAlsoInFile": "Auch in die Datei schreiben",
   "tagsNoWriteUnsupported": "Dieses Format ist nicht beschreibbar ({format}): nur die Bibliothek ändert sich",
@@ -2307,7 +2307,7 @@
       }
     }
   },
-  "tracksDeletedSome": "{count, plural, one{1 Titel gelöscht} other{{count} Titel gelöscht}} · {failed} nicht gelöscht",
+  "tracksDeletedSome": "{count, plural, one{1 Titel gelöscht} other{{count} Titel gelöscht}}, {failed} nicht gelöscht",
   "@tracksDeletedSome": {
     "placeholders": {
       "count": {
@@ -2428,7 +2428,7 @@
   "ytmLess": "Weniger",
   "ytmDownloadAlbum": "Album herunterladen",
   "ytmDownloadAlbumTitle": "„{album}“ herunterladen?",
-  "ytmAlbumConfirmBody": "{tracks, plural, one{1 Titel} other{{tracks} Titel}} · {duration} · ca. {size}",
+  "ytmAlbumConfirmBody": "{tracks, plural, one{1 Titel} other{{tracks} Titel}}, {duration}, ca. {size}",
   "ytmAlbumConfirmOwned": "{count, plural, one{1 Titel ist schon in der Bibliothek und wird verknüpft} other{{count} Titel sind schon in der Bibliothek und werden verknüpft}}",
   "ytmAlbumStarted": "Import „{name}“ gestartet",
   "ytmShowImport": "Anzeigen",

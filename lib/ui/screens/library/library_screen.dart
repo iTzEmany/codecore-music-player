@@ -1,3 +1,4 @@
+import '../../widgets/cc_sheet.dart';
 import 'package:flutter/material.dart';
 import '../playlists/export_dialog.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -292,7 +293,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
                   onSelected: (v) {
                     switch (v) {
                       case 'folders':
-                        showModalBottomSheet<void>(
+                        showCcSheet<void>(
                           context: context,
                           builder: (_) => const FoldersSheet(),
                         );

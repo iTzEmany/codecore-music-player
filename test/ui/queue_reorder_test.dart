@@ -1,4 +1,5 @@
 import 'package:codecore/ui/screens/now_playing/queue_sheet.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -64,6 +65,31 @@ void main() {
     await _settle(tester);
     expect(tester.takeException(), isNull);
     expect(h.handler.queueIds.length, before.length - 1);
+    await h.dispose(tester);
+  });
+
+  testWidgets('queue sheet still scrolls at 150 % on 360x640', (tester) async {
+    tester.view.physicalSize = const Size(360, 640);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final h = await Harness.create(tester, tracks: 20);
+    final rows = (await tester.runAsync(() => h.db.select(h.db.tracks).get()))!;
+    await tester.runAsync(() => h.handler.playQueue([for (final t in rows) t.id], 0));
+    await h.pump(
+      tester,
+      MediaQuery(
+        data: const MediaQueryData(textScaler: TextScaler.linear(1.5)),
+        child: Consumer(
+          builder: (context, ref, _) =>
+              TextButton(onPressed: () => showQueueSheet(context), child: const Text('open')),
+        ),
+      ),
+    );
+    await tester.tap(find.text('open'));
+    await _settle(tester);
+    await tester.drag(find.byType(Scrollable).last, const Offset(0, -300));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(tester.takeException(), isNull);
     await h.dispose(tester);
   });
 }

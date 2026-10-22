@@ -28,6 +28,39 @@ const _sameAsItalian = {
   'radioGenreSports', 'reportKindIdea', 'sortAToZ',
 };
 
+/// Strings still carrying « · », « • » or «→». Shrinks to empty by the end of fase 2.6.
+const _separatorPending = {
+  'activityDownload',
+  'activityDownloadRetry',
+  'activityEnrich',
+  'activityImport',
+  'activityImportPaused',
+  'activityScan',
+  'activityTransfer',
+  'albumMeta',
+  'artistMeta',
+  'csvImportBanner',
+  'csvImportBannerPaused',
+  'csvImportSummary',
+  'csvImportWanted',
+  'duplicatesSummary',
+  'historyOff',
+  'importNotificationPaused',
+  'jamPeople',
+  'jamSynced',
+  'playlistCountLabel',
+  'radioOfflineList',
+  'releaseAlbumYear',
+  'releaseSingleYear',
+  'smartSubtitle',
+  'statsFirstValue',
+  'suggestedSimilarTo',
+  'suggestionsRowNote',
+  'ytErrToolOutdated',
+  'ytmArtistWithAudience',
+  'ytmOffline',
+};
+
 Map<String, dynamic> _arb(String lang) =>
     jsonDecode(File('lib/l10n/app_$lang.arb').readAsStringSync())
         as Map<String, dynamic>;
@@ -105,6 +138,21 @@ void main() {
       final arb = _arb(lang);
       for (final k in itKeys) {
         expect((arb[k] as String).contains("'"), isFalse, reason: '$lang/$k');
+      }
+    }
+  });
+
+  test('no separator dots or arrows', () {
+    for (final lang in ['it', ..._langs]) {
+      final arb = _arb(lang);
+      for (final k in _keys(arb)) {
+        if (_separatorPending.contains(k)) continue;
+        final v = arb[k] as String;
+        expect(
+          v.contains(' · ') || v.contains(' • ') || v.contains('→'),
+          isFalse,
+          reason: '$lang/$k: $v',
+        );
       }
     }
   });

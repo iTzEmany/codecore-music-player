@@ -1,3 +1,4 @@
+import '../../widgets/cc_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -27,7 +28,7 @@ class ImportManualSearchSheet extends ConsumerStatefulWidget {
     BuildContext context, {
     required int importId,
     required ImportRow row,
-  }) => showModalBottomSheet<void>(
+  }) => showCcSheet<void>(
     context: context,
     isScrollControlled: true,
     useRootNavigator: true,

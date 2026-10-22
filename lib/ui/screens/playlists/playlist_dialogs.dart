@@ -1,3 +1,4 @@
+import '../../widgets/cc_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -114,7 +115,7 @@ Future<bool> showAddToPlaylistSheet(
   WidgetRef ref,
   List<Track> tracks,
 ) async {
-  final added = await showModalBottomSheet<bool>(
+  final added = await showCcSheet<bool>(
     context: context,
     builder: (sheetContext) =>
         _AddToPlaylistSheet(tracks: tracks, outer: context),

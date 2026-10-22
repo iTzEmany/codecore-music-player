@@ -1,3 +1,4 @@
+import '../../widgets/cc_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -24,7 +25,7 @@ import 'activity_log_screen.dart';
 class ActivitySheet extends ConsumerWidget {
   const ActivitySheet({super.key});
 
-  static Future<void> show(BuildContext context) => showModalBottomSheet<void>(
+  static Future<void> show(BuildContext context) => showCcSheet<void>(
     context: context,
     isScrollControlled: true,
     useRootNavigator: true,

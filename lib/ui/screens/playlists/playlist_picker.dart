@@ -1,3 +1,4 @@
+import '../../widgets/cc_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -12,7 +13,7 @@ typedef PickedPlaylist = ({int id, String name});
 /// Asks which playlist to use, without adding anything yet. Null when the
 /// sheet is dismissed.
 Future<PickedPlaylist?> pickPlaylist(BuildContext context, WidgetRef ref) =>
-    showModalBottomSheet<PickedPlaylist>(
+    showCcSheet<PickedPlaylist>(
       context: context,
       builder: (sheet) => SafeArea(
         child: Consumer(

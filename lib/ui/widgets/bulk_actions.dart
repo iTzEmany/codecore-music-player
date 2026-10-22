@@ -188,6 +188,7 @@ List<TrackActionGroup> bulkActions(
             Icons.delete_forever_rounded,
             l.deleteFromDevice,
             deleteFromDevice,
+            destructive: true,
           ),
       ]),
   ];

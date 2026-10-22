@@ -1,3 +1,4 @@
+import '../../widgets/cc_sheet.dart';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -45,7 +46,7 @@ class RadioStationSheet extends ConsumerWidget {
   final RadioStation station;
 
   static Future<void> show(BuildContext context, RadioStation station) =>
-      showModalBottomSheet<void>(
+      showCcSheet<void>(
         context: context,
         isScrollControlled: true,
         useRootNavigator: true,
@@ -87,7 +88,7 @@ class RadioStationSheet extends ConsumerWidget {
         station.name;
     final mb = radioMbPerHour(station.bitrate);
     final facts = [
-      [station.state, station.countryCode].where((e) => e.isNotEmpty).join(' · '),
+      [station.state, station.countryCode].where((e) => e.isNotEmpty).join(', '),
       radioQualityLine(station),
       if (mb > 0) l.radioDataPerHour('$mb'),
       station.tags.take(6).join(', '),
@@ -104,7 +105,7 @@ class RadioStationSheet extends ConsumerWidget {
                 RadioArt(station: station, size: 64),
                 const SizedBox(width: 16),
                 Expanded(
-                  child: Text(shownName, maxLines: 2, overflow: TextOverflow.ellipsis, style: theme.titleLarge),
+                  child: Text(shownName, maxLines: 2, overflow: TextOverflow.ellipsis, style: theme.titleMedium),
                 ),
               ],
             ),

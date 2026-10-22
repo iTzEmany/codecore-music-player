@@ -833,9 +833,9 @@
   "exportLogFailed": "No se pudo guardar el registro",
   "exportPlaylist": "Exportar…",
   "exportPlaylistTitle": "Exportar lista",
-  "exportFormatM3u8": "M3U8 · para otros reproductores",
-  "exportFormatCsv": "CSV · como Exportify",
-  "exportFormatJson": "JSON · formato Codecore",
+  "exportFormatM3u8": "M3U8, para otros reproductores",
+  "exportFormatCsv": "CSV, como Exportify",
+  "exportFormatJson": "JSON, formato Codecore",
   "exportRelativePaths": "Rutas relativas",
   "exportRelativeHint": "Relativas a la carpeta común de las canciones: guarda el archivo allí",
   "exportAction": "Exportar",
@@ -1065,7 +1065,7 @@
   "importNoteLengthOff": "Duración distinta de la del archivo",
   "importNoteUnchanged": "Ya está en la lista",
   "csvImportSync": "Sincronizar",
-  "csvImportSyncCounts": "+{added} nuevas · −{removed} quitadas de la lista (los archivos se quedan)",
+  "csvImportSyncCounts": "{added} nuevas, {removed} quitadas de la lista (los archivos se quedan)",
   "csvImportSyncChecking": "Comprobando las diferencias…",
   "@csvImportSyncCounts": {
     "placeholders": {
@@ -2030,7 +2030,7 @@
   "backupSaved": "Copia guardada",
   "backupFailed": "La copia ha fallado",
   "restoreTitle": "Restaurar desde copia",
-  "restoreInfo": "Del {date} · app {version} · {tracks} canciones · {playlists} listas",
+  "restoreInfo": "Del {date}, app {version}, {tracks} canciones, {playlists} listas",
   "@restoreInfo": {
     "placeholders": {
       "date": {
@@ -2207,7 +2207,7 @@
   "writeTagsToFiles": "Escribir los cambios en los archivos",
   "writeTagsToFilesHint": "El título, artista, álbum, año, género y pista editados aquí se escriben también en archivos MP3, FLAC, M4A y OGG. Se conserva el original de cada archivo. Desactivado de serie.",
   "writeTagsWarnTitle": "¿Escribir los cambios en los archivos?",
-  "writeTagsWarnBody": "Al guardar un cambio, las etiquetas se reescriben también en el archivo de música (MP3, FLAC, M4A, OGG). Se trabaja sobre una copia, se comprueba el resultado y el archivo se sustituye solo si todo coincide; antes el original se guarda en «Copias de etiquetas» (las últimas 200 o 2 GB). La carátula, las letras y el ReplayGain no se tocan. Antes de activarlo conviene hacer una copia de seguridad de la biblioteca (Ajustes → Copia de seguridad).",
+  "writeTagsWarnBody": "Al guardar un cambio, las etiquetas se reescriben también en el archivo de música (MP3, FLAC, M4A, OGG). Se trabaja sobre una copia, se comprueba el resultado y el archivo se sustituye solo si todo coincide; antes el original se guarda en «Copias de etiquetas» (las últimas 200 o 2 GB). La carátula, las letras y el ReplayGain no se tocan. Antes de activarlo conviene hacer una copia de seguridad de la biblioteca (Ajustes, Copia de seguridad).",
   "writeTagsEnable": "Activar",
   "tagsAlsoInFile": "Escribir también en el archivo",
   "tagsNoWriteUnsupported": "Formato no modificable ({format}): solo cambia la biblioteca",
@@ -2307,7 +2307,7 @@
       }
     }
   },
-  "tracksDeletedSome": "{count, plural, one{1 canción eliminada} other{{count} canciones eliminadas}} · {failed} sin eliminar",
+  "tracksDeletedSome": "{count, plural, one{1 canción eliminada} other{{count} canciones eliminadas}}, {failed} sin eliminar",
   "@tracksDeletedSome": {
     "placeholders": {
       "count": {
@@ -2428,7 +2428,7 @@
   "ytmLess": "Menos",
   "ytmDownloadAlbum": "Descargar álbum",
   "ytmDownloadAlbumTitle": "¿Descargar «{album}»?",
-  "ytmAlbumConfirmBody": "{tracks, plural, one{1 canción} other{{tracks} canciones}} · {duration} · unos {size}",
+  "ytmAlbumConfirmBody": "{tracks, plural, one{1 canción} other{{tracks} canciones}}, {duration}, unos {size}",
   "ytmAlbumConfirmOwned": "{count, plural, one{1 canción ya está en la biblioteca y se enlazará} other{{count} canciones ya están en la biblioteca y se enlazarán}}",
   "ytmAlbumStarted": "Importación «{name}» iniciada",
   "ytmShowImport": "Mostrar",

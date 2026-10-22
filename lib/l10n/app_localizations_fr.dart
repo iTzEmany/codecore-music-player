@@ -1713,13 +1713,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get exportPlaylistTitle => 'Exporter la playlist';
 
   @override
-  String get exportFormatM3u8 => 'M3U8 · pour d’autres lecteurs';
+  String get exportFormatM3u8 => 'M3U8, pour d’autres lecteurs';
 
   @override
-  String get exportFormatCsv => 'CSV · comme Exportify';
+  String get exportFormatCsv => 'CSV, comme Exportify';
 
   @override
-  String get exportFormatJson => 'JSON · format Codecore';
+  String get exportFormatJson => 'JSON, format Codecore';
 
   @override
   String get exportRelativePaths => 'Chemins relatifs';
@@ -2098,7 +2098,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String csvImportSyncCounts(int added, int removed) {
-    return '+$added nouveaux · −$removed retirés de la playlist (les fichiers restent)';
+    return '$added nouveaux, $removed retirés de la playlist (les fichiers restent)';
   }
 
   @override
@@ -3692,7 +3692,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String restoreInfo(String date, String version, int tracks, int playlists) {
-    return 'Du $date · app $version · $tracks titres · $playlists playlists';
+    return 'Du $date, app $version, $tracks titres, $playlists playlists';
   }
 
   @override
@@ -3932,7 +3932,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get writeTagsWarnBody =>
-      'À l’enregistrement d’une modification, les tags sont aussi réécrits dans le fichier musical (MP3, FLAC, M4A, OGG). On travaille sur une copie, on vérifie le résultat et le fichier n’est remplacé que si tout concorde ; l’original est d’abord sauvegardé dans « Sauvegardes des tags » (les 200 derniers ou 2 Go). La pochette, les paroles et le ReplayGain ne sont pas touchés. Avant d’activer, faites une sauvegarde de la bibliothèque (Réglages → Sauvegarde).';
+      'À l’enregistrement d’une modification, les tags sont aussi réécrits dans le fichier musical (MP3, FLAC, M4A, OGG). On travaille sur une copie, on vérifie le résultat et le fichier n’est remplacé que si tout concorde ; l’original est d’abord sauvegardé dans « Sauvegardes des tags » (les 200 derniers ou 2 Go). La pochette, les paroles et le ReplayGain ne sont pas touchés. Avant d’activer, faites une sauvegarde de la bibliothèque (Réglages, Sauvegarde).';
 
   @override
   String get writeTagsEnable => 'Activer';
@@ -4097,7 +4097,7 @@ class AppLocalizationsFr extends AppLocalizations {
       one: '1 titre supprimé',
       zero: '0 titre supprimé',
     );
-    return '$_temp0 · $failed non supprimés';
+    return '$_temp0, $failed non supprimés';
   }
 
   @override
@@ -4343,7 +4343,7 @@ class AppLocalizationsFr extends AppLocalizations {
       other: '$tracks titres',
       one: '1 titre',
     );
-    return '$_temp0 · $duration · environ $size';
+    return '$_temp0, $duration, environ $size';
   }
 
   @override

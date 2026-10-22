@@ -45,7 +45,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Sincronizza playlist'), findsOneWidget);
-    expect(find.text('1 nuova · 1 aggiornata · 1 brano mancante'), findsOneWidget);
+    expect(find.text('1 nuova, 1 aggiornata, 1 brano mancante'), findsOneWidget);
     expect(find.text('Road'), findsOneWidget);
     expect(find.text('Gym'), findsOneWidget);
     expect(find.text('Newer here'), findsNothing, reason: 'it stays as it is: only counted');

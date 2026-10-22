@@ -1706,13 +1706,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get exportPlaylistTitle => 'Playlist exportieren';
 
   @override
-  String get exportFormatM3u8 => 'M3U8 · für andere Player';
+  String get exportFormatM3u8 => 'M3U8, für andere Player';
 
   @override
-  String get exportFormatCsv => 'CSV · wie Exportify';
+  String get exportFormatCsv => 'CSV, wie Exportify';
 
   @override
-  String get exportFormatJson => 'JSON · Codecore-Format';
+  String get exportFormatJson => 'JSON, Codecore-Format';
 
   @override
   String get exportRelativePaths => 'Relative Pfade';
@@ -2088,7 +2088,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String csvImportSyncCounts(int added, int removed) {
-    return '+$added neu · −$removed aus der Playlist entfernt (Dateien bleiben)';
+    return '$added neu, $removed aus der Playlist entfernt (Dateien bleiben)';
   }
 
   @override
@@ -3667,7 +3667,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String restoreInfo(String date, String version, int tracks, int playlists) {
-    return 'Vom $date · App $version · $tracks Titel · $playlists Playlists';
+    return 'Vom $date, App $version, $tracks Titel, $playlists Playlists';
   }
 
   @override
@@ -3905,7 +3905,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get writeTagsWarnBody =>
-      'Beim Speichern einer Änderung werden die Tags auch in die Musikdatei geschrieben (MP3, FLAC, M4A, OGG). Es wird auf einer Kopie gearbeitet, das Ergebnis geprüft und die Datei nur ersetzt, wenn alles stimmt; vorher wird das Original unter „Tag-Backups“ gesichert (die letzten 200 oder 2 GB). Cover, Liedtexte und ReplayGain bleiben unberührt. Vor dem Aktivieren sollten Sie ein Bibliotheks-Backup erstellen (Einstellungen → Backup).';
+      'Beim Speichern einer Änderung werden die Tags auch in die Musikdatei geschrieben (MP3, FLAC, M4A, OGG). Es wird auf einer Kopie gearbeitet, das Ergebnis geprüft und die Datei nur ersetzt, wenn alles stimmt; vorher wird das Original unter „Tag-Backups“ gesichert (die letzten 200 oder 2 GB). Cover, Liedtexte und ReplayGain bleiben unberührt. Vor dem Aktivieren sollten Sie ein Bibliotheks-Backup erstellen (Einstellungen, Backup).';
 
   @override
   String get writeTagsEnable => 'Aktivieren';
@@ -4067,7 +4067,7 @@ class AppLocalizationsDe extends AppLocalizations {
       other: '$count Titel gelöscht',
       one: '1 Titel gelöscht',
     );
-    return '$_temp0 · $failed nicht gelöscht';
+    return '$_temp0, $failed nicht gelöscht';
   }
 
   @override
@@ -4313,7 +4313,7 @@ class AppLocalizationsDe extends AppLocalizations {
       other: '$tracks Titel',
       one: '1 Titel',
     );
-    return '$_temp0 · $duration · ca. $size';
+    return '$_temp0, $duration, ca. $size';
   }
 
   @override
