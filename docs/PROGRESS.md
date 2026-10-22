@@ -399,11 +399,11 @@ Richiesta (2026-10-21): «è possibile fare in modo che cercando un artista, mi 
 - [x] 30.9 Pagina album online e «Scarica album» (8fd9244)
 - [x] 30.10 «Tutti i brani» e discografia (8fd9244)
 - [x] 30.11 Ingressi dalla libreria («Su YouTube Music») (8fd9244)
-- [~] 30.12 Test dal vivo, documentazione e prova a mano (46fcb9f: playlist degli album nascoste, catalogo in Memoria, test dal vivo 4/4, documenti; prova sul Mi A3 da fare)
+- [~] 30.12 Test dal vivo, documentazione e prova a mano (46fcb9f: playlist degli album nascoste, catalogo in Memoria, test dal vivo 4/4, documenti; prova sul Mi A3 da fare) Mi A3 22/10: 8/8 ✔; difetti corretti in 150a2e4 («Ascolta» con client android_vr e messaggio d'errore, resti dell'album, offline dalla libreria): da riprovare sul telefono.
 
 ## Fase 31 — «Shuffle+» (`fase-31-shuffle-plus.md`)
 Richiesta (2026-10-21): «una sorta di "shuffle+" che ogni tanto mi piazza una canzone che non ho, che ha un genere diverso in base alla playlist, come ad esempio nella sezione "canzoni rock" nella coda mi piazza ogni tot una canzone rock che non ho, idem per il blues o tutti gli altri generi.» Scelte concordate: semi dalla lista in ascolto → radio di YouTube Music (`next` con `RDAMVM<videoId>`) → via i brani già in libreria e già suggeriti → ogni N brani (predefinito 1 ogni 4) un suggerito in coda, suonato in streaming dal lettore principale e segnato «Suggerito», con «Scarica» e «Aggiungi a playlist»; non conta in cronologia e statistiche; «Solo su Wi‑Fi»; senza rete casuale normale; sospeso durante la Jam; i suggeriti non si salvano al riavvio.
-- [ ] 31.1 Verifiche preliminari (esiti dal PC già nel documento; restano telefoni e fixture)
+- [~] 31.1 Verifiche preliminari (esiti dal PC già nel documento; restano telefoni e fixture) (fixture dal PC fatte (be08a78); misure sui telefoni da fare)
 - [x] 31.2 Coda: inserire e togliere voci in un punto
 - [x] 31.3 Voci online: registro e brano sintetico
 - [x] 31.4 Indirizzi dello streaming con scadenza
@@ -415,9 +415,9 @@ Richiesta (2026-10-21): «una sorta di "shuffle+" che ogni tanto mi piazza una c
 - [x] 31.10 Motore Shuffle+ (be08a78)
 - [x] 31.11 Interfaccia dei suggeriti (d91b331)
 - [x] 31.12 Impostazioni, rete a consumo e pulsante a tre stati (d91b331)
-- [ ] 31.13 «Suggeriti di recente»
-- [ ] 31.14 (Facoltativo) Senza pause e dissolvenza anche per i suggeriti
-- [ ] 31.15 Test dal vivo, documentazione e prova a mano
+- [x] 31.13 «Suggeriti di recente» (ffd3a78)
+- [x] 31.14 ~~(Facoltativo) Senza pause e dissolvenza anche per i suggeriti~~ (FACOLTATIVO, non fatto nella notte del 22/10: i passaggi verso i suggeriti restano normali)
+- [~] 31.15 Test dal vivo, documentazione e prova a mano (ffd3a78: test dal vivo 3/3, documenti; prova di un'ora sui telefoni in «Tocca a te»)
 
 ## Fase 32 — Ricerca intelligente (`fase-32-ricerca-intelligente.md`)
 Richiesta (2026-10-22): «non voglio stare io a selezionare il filtro della ricerca ma ne voglio una intelligente. L'unica differenza deve esserci tra ricerca locale e ricerca online. La ricerca online deve sì presentare la possibilità di scegliere la fonte, ma di base mi dispone i risultati migliori della ricerca in tutte e 3 le categorie con margine di confidence.» Scelte concordate: due modi (In libreria · Online); online YouTube Music e YouTube in parallelo con la card della fase 30, confidenza dal punteggio dell'importazione senza durata, stesso brano in una riga dalla fonte migliore, sotto soglia in «Altri risultati» (chiuso), intento (artista → card in cima, «titolo artista» → brani, indirizzo → come oggi), chip delle fonti come filtro, ordine stabile con tetto di 1,5 s, cache di 10 minuti, 429 per fonte. SoundCloud misurato (2026-10-22, 54 ricerche: 0 brani in più di YouTube Music e YouTube, 5,4 s di mediana contro 0,46 s): proposta di toglierlo dalla ricerca (32.8 aspetta la risposta).
@@ -434,11 +434,11 @@ Richiesta (2026-10-22): «non voglio stare io a selezionare il filtro della rice
 
 ## Fase 33 — Radio (`fase-33-radio.md`)
 Richiesta (2026-10-22): «l'inserimento della sezione radio per permettermi anche di ascoltare le radio locali e salvarmele». Scelte concordate: Radio Browser (API pubblica senza chiave, server da `all.api.radio-browser.info`, `User-Agent`, `hidebroken`, un clic per ascolto); «Vicino a te» con paese e regione scelti dall'utente (nessun permesso di posizione), ricerca, generi, «Le mie radio» salvate (tabella nuova, schema v12, nel backup); ascolto dal lettore principale (notifica, cuffie, Android Auto) con le voci online della fase 31, avanti/indietro = stazioni; titolo «in onda» ICY dove c'è (Android; desktop solo con la copia modificata di 33.11); niente gapless, dissolvenza, statistiche, Jam; ≈ 1 MB al minuto. Dove sta (Libreria + Home, oppure una quinta scheda): decide l'utente.
-- [ ] 33.1 Verifiche preliminari e fixture (esiti dal PC già nel documento; restano fixture e telefoni)
-- [ ] 33.2 Modello e client di Radio Browser
-- [ ] 33.3 Regioni, doppioni e «Vicino a te»
-- [ ] 33.4 Elenco del paese, cache e voce in Memoria
-- [ ] 33.5 Schema v12, «Le mie radio» e backup
+- [~] 33.1 Verifiche preliminari e fixture (esiti dal PC già nel documento; restano fixture e telefoni) (cbfbfea: fixture dal vivo; prove ExoPlayer sui telefoni da fare)
+- [x] 33.2 Modello e client di Radio Browser (cbfbfea)
+- [x] 33.3 Regioni, doppioni e «Vicino a te» (cbfbfea)
+- [x] 33.4 Elenco del paese, cache e voce in Memoria (cbfbfea)
+- [x] 33.5 Schema v12, «Le mie radio» e backup (cbfbfea)
 - [ ] 33.6 La radio nel lettore principale
 - [ ] 33.7 Pagina Radio
 - [ ] 33.8 «In riproduzione», mini-player e notifica per la radio
