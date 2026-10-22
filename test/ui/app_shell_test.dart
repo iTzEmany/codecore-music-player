@@ -321,6 +321,50 @@ void main() {
     await h.dispose(tester);
   });
 
+  testWidgets('Ctrl+F in a narrow window opens the dock field with focus',
+      (t) async {
+    _phone(t);
+    final h = await Harness.create(t, tracks: 2);
+    await h.pump(t, const AppShell());
+    await t.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await t.sendKeyEvent(LogicalKeyboardKey.keyF);
+    await t.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await _settle(t);
+    expect(_dockField(), findsOneWidget);
+    expect(_container(t).read(searchFocusProvider).hasFocus, isTrue);
+    await h.dispose(t);
+  });
+
+  testWidgets('leaving Search by another route closes the dock field',
+      (t) async {
+    _phone(t);
+    final h = await Harness.create(t, tracks: 2);
+    await h.pump(t, const AppShell());
+    await t.tap(_bar('Cerca'));
+    await _settle(t);
+    _container(t).read(navIndexProvider.notifier).set(NavTab.library.index);
+    await _settle(t);
+    expect(_container(t).read(searchBarProvider), isFalse);
+    expect(_bar('Home'), findsOneWidget);
+    await h.dispose(t);
+  });
+
+  testWidgets('reopening Cerca during the fade-out does not throw', (t) async {
+    _phone(t);
+    final h = await Harness.create(t, tracks: 2);
+    await h.pump(t, const AppShell());
+    await t.tap(_bar('Cerca'));
+    await _settle(t);
+    await t.binding.handlePopRoute();
+    await t.pump(const Duration(milliseconds: 100));
+    // The fading field's hint is also «Cerca»: take the tab label.
+    await t.tap(_bar('Cerca').last);
+    await _settle(t);
+    expect(t.takeException(), isNull);
+    expect(_dockField(), findsOneWidget);
+    await h.dispose(t);
+  });
+
   testWidgets('sidebar «La tua libreria» closes a page left open in that tab',
       (tester) async {
     tester.view.physicalSize = const Size(1280, 800);

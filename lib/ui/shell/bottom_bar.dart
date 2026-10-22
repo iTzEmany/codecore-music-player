@@ -85,7 +85,12 @@ class ShellDock extends ConsumerWidget {
           layoutBuilder: (current, previous) => Stack(
             children: [
               for (final p in previous)
-                Positioned(top: 0, left: 0, right: 0, child: p),
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: IgnorePointer(child: p),
+                ),
               ?current,
             ],
           ),

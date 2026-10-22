@@ -71,7 +71,8 @@ class AppShell extends ConsumerWidget {
       const SingleActivator(LogicalKeyboardKey.mediaTrackPrevious):
           ctrl.previous,
       const SingleActivator(LogicalKeyboardKey.keyF, control: true): () {
-        ref.read(navIndexProvider.notifier).set(NavTab.search.index);
+        // Narrow windows have no page field: the dock's one opens (and focuses).
+        ref.read(searchBarProvider.notifier).open();
         WidgetsBinding.instance.addPostFrameCallback(
           (_) => ref.read(searchFocusProvider).requestFocus(),
         );

@@ -45,7 +45,13 @@ final searchSubmitProvider = NotifierProvider<SearchSubmitNotifier, int>(
 /// True while the phone's dock is the Search field.
 class SearchBarNotifier extends Notifier<bool> {
   @override
-  bool build() => false;
+  bool build() {
+    // Any way out of Search (a page opened in Library...) closes the field.
+    ref.listen(navIndexProvider, (_, tab) {
+      if (tab != NavTab.search.index) state = false;
+    });
+    return false;
+  }
 
   // The tab ✕ goes back to; never Search itself.
   int _previous = NavTab.home.index;
@@ -60,11 +66,15 @@ class SearchBarNotifier extends Notifier<bool> {
   }
 
   /// Back: the tabs return, Search stays with its text.
-  void close() => state = false;
+  void close() {
+    ref.read(searchFocusProvider).unfocus();
+    state = false;
+  }
 
   /// ✕: forgets the text and goes back to the previous tab.
   void dismiss() {
     ref.read(searchControllerProvider).clear();
+    ref.read(searchFocusProvider).unfocus();
     state = false;
     ref.read(navIndexProvider.notifier).set(_previous);
   }
