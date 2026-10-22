@@ -1110,9 +1110,9 @@
   "exportLogFailed": "Impossibile salvare il log",
   "exportPlaylist": "Esporta…",
   "exportPlaylistTitle": "Esporta playlist",
-  "exportFormatM3u8": "M3U8 · per altri lettori",
-  "exportFormatCsv": "CSV · come Exportify",
-  "exportFormatJson": "JSON · formato Codecore",
+  "exportFormatM3u8": "M3U8, per altri lettori",
+  "exportFormatCsv": "CSV, come Exportify",
+  "exportFormatJson": "JSON, formato Codecore",
   "exportRelativePaths": "Percorsi relativi",
   "exportRelativeHint": "Rispetto alla cartella comune dei brani: salva il file lì",
   "exportAction": "Esporta",
@@ -1342,7 +1342,7 @@
   "importNoteLengthOff": "Durata diversa dal file",
   "importNoteUnchanged": "Già nella playlist",
   "csvImportSync": "Sincronizza",
-  "csvImportSyncCounts": "+{added} nuovi · −{removed} rimossi dalla playlist (i file restano)",
+  "csvImportSyncCounts": "{added} nuovi, {removed} rimossi dalla playlist (i file restano)",
   "csvImportSyncChecking": "Controllo le differenze…",
   "@csvImportSyncCounts": {
     "placeholders": {
@@ -2321,7 +2321,7 @@
   "backupSaved": "Backup salvato",
   "backupFailed": "Backup non riuscito",
   "restoreTitle": "Ripristina da backup",
-  "restoreInfo": "Del {date} · app {version} · {tracks} brani · {playlists} playlist",
+  "restoreInfo": "Del {date}, app {version}, {tracks} brani, {playlists} playlist",
   "@restoreInfo": {
     "placeholders": {
       "date": {
@@ -2498,7 +2498,7 @@
   "writeTagsToFiles": "Scrivi le modifiche nei file",
   "writeTagsToFilesHint": "Titolo, artista, album, anno, genere e traccia modificati qui vengono scritti anche in MP3, FLAC, M4A e OGG. Di ogni file si conserva l’originale. Spenta di default.",
   "writeTagsWarnTitle": "Scrivere le modifiche nei file?",
-  "writeTagsWarnBody": "Salvando una modifica, i tag vengono riscritti anche nel file musicale (MP3, FLAC, M4A, OGG). Si lavora su una copia, si controlla il risultato e il file viene sostituito solo se tutto torna; prima l’originale è salvato in «Backup dei tag» (gli ultimi 200 o 2 GB). Copertina, testi e ReplayGain non vengono toccati. Prima di attivare conviene fare un backup della libreria (Impostazioni → Backup).",
+  "writeTagsWarnBody": "Salvando una modifica, i tag vengono riscritti anche nel file musicale (MP3, FLAC, M4A, OGG). Si lavora su una copia, si controlla il risultato e il file viene sostituito solo se tutto torna; prima l’originale è salvato in «Backup dei tag» (gli ultimi 200 o 2 GB). Copertina, testi e ReplayGain non vengono toccati. Prima di attivare conviene fare un backup della libreria (Impostazioni, Backup).",
   "writeTagsEnable": "Attiva",
   "tagsAlsoInFile": "Scrivi anche nel file",
   "tagsNoWriteUnsupported": "Formato non modificabile ({format}): cambia solo la libreria",
@@ -2598,7 +2598,7 @@
       }
     }
   },
-  "tracksDeletedSome": "{count, plural, one{1 brano eliminato} other{{count} brani eliminati}} · {failed} non eliminati",
+  "tracksDeletedSome": "{count, plural, one{1 brano eliminato} other{{count} brani eliminati}}, {failed} non eliminati",
   "@tracksDeletedSome": {
     "placeholders": {
       "count": {
@@ -2747,7 +2747,7 @@
       }
     }
   },
-  "ytmAlbumConfirmBody": "{tracks, plural, one{1 brano} other{{tracks} brani}} · {duration} · circa {size}",
+  "ytmAlbumConfirmBody": "{tracks, plural, one{1 brano} other{{tracks} brani}}, {duration}, circa {size}",
   "@ytmAlbumConfirmBody": {
     "placeholders": {
       "tracks": {

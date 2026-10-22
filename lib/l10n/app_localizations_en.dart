@@ -1645,13 +1645,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get exportPlaylistTitle => 'Export playlist';
 
   @override
-  String get exportFormatM3u8 => 'M3U8 · for other players';
+  String get exportFormatM3u8 => 'M3U8, for other players';
 
   @override
-  String get exportFormatCsv => 'CSV · like Exportify';
+  String get exportFormatCsv => 'CSV, like Exportify';
 
   @override
-  String get exportFormatJson => 'JSON · Codecore format';
+  String get exportFormatJson => 'JSON, Codecore format';
 
   @override
   String get exportRelativePaths => 'Relative paths';
@@ -2025,7 +2025,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String csvImportSyncCounts(int added, int removed) {
-    return '+$added new · −$removed removed from the playlist (files stay)';
+    return '$added new, $removed removed from the playlist (files stay)';
   }
 
   @override
@@ -3595,7 +3595,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String restoreInfo(String date, String version, int tracks, int playlists) {
-    return 'From $date · app $version · $tracks tracks · $playlists playlists';
+    return 'From $date, app $version, $tracks tracks, $playlists playlists';
   }
 
   @override
@@ -3833,7 +3833,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get writeTagsWarnBody =>
-      'When you save an edit, the tags are rewritten in the music file too (MP3, FLAC, M4A, OGG). The work is done on a copy, the result is checked, and the file is replaced only if everything matches; the original is saved first in “Tag backups” (the last 200 or 2 GB). Cover, lyrics and ReplayGain are not touched. Before turning this on, make a library backup (Settings → Backup).';
+      'When you save an edit, the tags are rewritten in the music file too (MP3, FLAC, M4A, OGG). The work is done on a copy, the result is checked, and the file is replaced only if everything matches; the original is saved first in “Tag backups” (the last 200 or 2 GB). Cover, lyrics and ReplayGain are not touched. Before turning this on, make a library backup (Settings, Backup).';
 
   @override
   String get writeTagsEnable => 'Turn on';
@@ -3992,7 +3992,7 @@ class AppLocalizationsEn extends AppLocalizations {
       other: '$count tracks deleted',
       one: '1 track deleted',
     );
-    return '$_temp0 · $failed not deleted';
+    return '$_temp0, $failed not deleted';
   }
 
   @override
@@ -4238,7 +4238,7 @@ class AppLocalizationsEn extends AppLocalizations {
       other: '$tracks songs',
       one: '1 song',
     );
-    return '$_temp0 · $duration · about $size';
+    return '$_temp0, $duration, about $size';
   }
 
   @override

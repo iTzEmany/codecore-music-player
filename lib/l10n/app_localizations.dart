@@ -2911,19 +2911,19 @@ abstract class AppLocalizations {
   /// No description provided for @exportFormatM3u8.
   ///
   /// In it, this message translates to:
-  /// **'M3U8 · per altri lettori'**
+  /// **'M3U8, per altri lettori'**
   String get exportFormatM3u8;
 
   /// No description provided for @exportFormatCsv.
   ///
   /// In it, this message translates to:
-  /// **'CSV · come Exportify'**
+  /// **'CSV, come Exportify'**
   String get exportFormatCsv;
 
   /// No description provided for @exportFormatJson.
   ///
   /// In it, this message translates to:
-  /// **'JSON · formato Codecore'**
+  /// **'JSON, formato Codecore'**
   String get exportFormatJson;
 
   /// No description provided for @exportRelativePaths.
@@ -3523,7 +3523,7 @@ abstract class AppLocalizations {
   /// No description provided for @csvImportSyncCounts.
   ///
   /// In it, this message translates to:
-  /// **'+{added} nuovi · −{removed} rimossi dalla playlist (i file restano)'**
+  /// **'{added} nuovi, {removed} rimossi dalla playlist (i file restano)'**
   String csvImportSyncCounts(int added, int removed);
 
   /// No description provided for @csvImportSyncChecking.
@@ -5737,7 +5737,7 @@ abstract class AppLocalizations {
   /// No description provided for @restoreInfo.
   ///
   /// In it, this message translates to:
-  /// **'Del {date} · app {version} · {tracks} brani · {playlists} playlist'**
+  /// **'Del {date}, app {version}, {tracks} brani, {playlists} playlist'**
   String restoreInfo(String date, String version, int tracks, int playlists);
 
   /// No description provided for @restoreReplace.
@@ -6108,7 +6108,7 @@ abstract class AppLocalizations {
   /// No description provided for @writeTagsWarnBody.
   ///
   /// In it, this message translates to:
-  /// **'Salvando una modifica, i tag vengono riscritti anche nel file musicale (MP3, FLAC, M4A, OGG). Si lavora su una copia, si controlla il risultato e il file viene sostituito solo se tutto torna; prima l’originale è salvato in «Backup dei tag» (gli ultimi 200 o 2 GB). Copertina, testi e ReplayGain non vengono toccati. Prima di attivare conviene fare un backup della libreria (Impostazioni → Backup).'**
+  /// **'Salvando una modifica, i tag vengono riscritti anche nel file musicale (MP3, FLAC, M4A, OGG). Si lavora su una copia, si controlla il risultato e il file viene sostituito solo se tutto torna; prima l’originale è salvato in «Backup dei tag» (gli ultimi 200 o 2 GB). Copertina, testi e ReplayGain non vengono toccati. Prima di attivare conviene fare un backup della libreria (Impostazioni, Backup).'**
   String get writeTagsWarnBody;
 
   /// No description provided for @writeTagsEnable.
@@ -6312,7 +6312,7 @@ abstract class AppLocalizations {
   /// No description provided for @tracksDeletedSome.
   ///
   /// In it, this message translates to:
-  /// **'{count, plural, one{1 brano eliminato} other{{count} brani eliminati}} · {failed} non eliminati'**
+  /// **'{count, plural, one{1 brano eliminato} other{{count} brani eliminati}}, {failed} non eliminati'**
   String tracksDeletedSome(int count, int failed);
 
   /// No description provided for @trackDeleteRefused.
@@ -6708,7 +6708,7 @@ abstract class AppLocalizations {
   /// No description provided for @ytmAlbumConfirmBody.
   ///
   /// In it, this message translates to:
-  /// **'{tracks, plural, one{1 brano} other{{tracks} brani}} · {duration} · circa {size}'**
+  /// **'{tracks, plural, one{1 brano} other{{tracks} brani}}, {duration}, circa {size}'**
   String ytmAlbumConfirmBody(int tracks, String duration, String size);
 
   /// No description provided for @ytmAlbumConfirmOwned.

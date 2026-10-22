@@ -1650,13 +1650,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get exportPlaylistTitle => 'Exportar lista';
 
   @override
-  String get exportFormatM3u8 => 'M3U8 · para otros reproductores';
+  String get exportFormatM3u8 => 'M3U8, para otros reproductores';
 
   @override
-  String get exportFormatCsv => 'CSV · como Exportify';
+  String get exportFormatCsv => 'CSV, como Exportify';
 
   @override
-  String get exportFormatJson => 'JSON · formato Codecore';
+  String get exportFormatJson => 'JSON, formato Codecore';
 
   @override
   String get exportRelativePaths => 'Rutas relativas';
@@ -2031,7 +2031,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String csvImportSyncCounts(int added, int removed) {
-    return '+$added nuevas · −$removed quitadas de la lista (los archivos se quedan)';
+    return '$added nuevas, $removed quitadas de la lista (los archivos se quedan)';
   }
 
   @override
@@ -3606,7 +3606,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String restoreInfo(String date, String version, int tracks, int playlists) {
-    return 'Del $date · app $version · $tracks canciones · $playlists listas';
+    return 'Del $date, app $version, $tracks canciones, $playlists listas';
   }
 
   @override
@@ -3844,7 +3844,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get writeTagsWarnBody =>
-      'Al guardar un cambio, las etiquetas se reescriben también en el archivo de música (MP3, FLAC, M4A, OGG). Se trabaja sobre una copia, se comprueba el resultado y el archivo se sustituye solo si todo coincide; antes el original se guarda en «Copias de etiquetas» (las últimas 200 o 2 GB). La carátula, las letras y el ReplayGain no se tocan. Antes de activarlo conviene hacer una copia de seguridad de la biblioteca (Ajustes → Copia de seguridad).';
+      'Al guardar un cambio, las etiquetas se reescriben también en el archivo de música (MP3, FLAC, M4A, OGG). Se trabaja sobre una copia, se comprueba el resultado y el archivo se sustituye solo si todo coincide; antes el original se guarda en «Copias de etiquetas» (las últimas 200 o 2 GB). La carátula, las letras y el ReplayGain no se tocan. Antes de activarlo conviene hacer una copia de seguridad de la biblioteca (Ajustes, Copia de seguridad).';
 
   @override
   String get writeTagsEnable => 'Activar';
@@ -4006,7 +4006,7 @@ class AppLocalizationsEs extends AppLocalizations {
       other: '$count canciones eliminadas',
       one: '1 canción eliminada',
     );
-    return '$_temp0 · $failed sin eliminar';
+    return '$_temp0, $failed sin eliminar';
   }
 
   @override
@@ -4251,7 +4251,7 @@ class AppLocalizationsEs extends AppLocalizations {
       other: '$tracks canciones',
       one: '1 canción',
     );
-    return '$_temp0 · $duration · unos $size';
+    return '$_temp0, $duration, unos $size';
   }
 
   @override

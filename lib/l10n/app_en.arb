@@ -796,9 +796,9 @@
   "exportLogFailed": "Couldn't save the log",
   "exportPlaylist": "Export…",
   "exportPlaylistTitle": "Export playlist",
-  "exportFormatM3u8": "M3U8 · for other players",
-  "exportFormatCsv": "CSV · like Exportify",
-  "exportFormatJson": "JSON · Codecore format",
+  "exportFormatM3u8": "M3U8, for other players",
+  "exportFormatCsv": "CSV, like Exportify",
+  "exportFormatJson": "JSON, Codecore format",
   "exportRelativePaths": "Relative paths",
   "exportRelativeHint": "Relative to the folder shared by all tracks: save the file there",
   "exportAction": "Export",
@@ -1028,7 +1028,7 @@
   "importNoteLengthOff": "Length differs from the file",
   "importNoteUnchanged": "Already in the playlist",
   "csvImportSync": "Sync",
-  "csvImportSyncCounts": "+{added} new · −{removed} removed from the playlist (files stay)",
+  "csvImportSyncCounts": "{added} new, {removed} removed from the playlist (files stay)",
   "csvImportSyncChecking": "Checking the differences…",
   "@csvImportSyncCounts": {
     "placeholders": {
@@ -1993,7 +1993,7 @@
   "backupSaved": "Backup saved",
   "backupFailed": "Backup failed",
   "restoreTitle": "Restore from backup",
-  "restoreInfo": "From {date} · app {version} · {tracks} tracks · {playlists} playlists",
+  "restoreInfo": "From {date}, app {version}, {tracks} tracks, {playlists} playlists",
   "@restoreInfo": {
     "placeholders": {
       "date": {
@@ -2170,7 +2170,7 @@
   "writeTagsToFiles": "Write edits into the files",
   "writeTagsToFilesHint": "Title, artist, album, year, genre and track edited here are also written into MP3, FLAC, M4A and OGG files. The original of every file is kept. Off by default.",
   "writeTagsWarnTitle": "Write edits into the files?",
-  "writeTagsWarnBody": "When you save an edit, the tags are rewritten in the music file too (MP3, FLAC, M4A, OGG). The work is done on a copy, the result is checked, and the file is replaced only if everything matches; the original is saved first in “Tag backups” (the last 200 or 2 GB). Cover, lyrics and ReplayGain are not touched. Before turning this on, make a library backup (Settings → Backup).",
+  "writeTagsWarnBody": "When you save an edit, the tags are rewritten in the music file too (MP3, FLAC, M4A, OGG). The work is done on a copy, the result is checked, and the file is replaced only if everything matches; the original is saved first in “Tag backups” (the last 200 or 2 GB). Cover, lyrics and ReplayGain are not touched. Before turning this on, make a library backup (Settings, Backup).",
   "writeTagsEnable": "Turn on",
   "tagsAlsoInFile": "Also write to the file",
   "tagsNoWriteUnsupported": "This format cannot be edited ({format}): only the library changes",
@@ -2270,7 +2270,7 @@
       }
     }
   },
-  "tracksDeletedSome": "{count, plural, one{1 track deleted} other{{count} tracks deleted}} · {failed} not deleted",
+  "tracksDeletedSome": "{count, plural, one{1 track deleted} other{{count} tracks deleted}}, {failed} not deleted",
   "@tracksDeletedSome": {
     "placeholders": {
       "count": {
@@ -2391,7 +2391,7 @@
   "ytmLess": "Less",
   "ytmDownloadAlbum": "Download album",
   "ytmDownloadAlbumTitle": "Download “{album}”?",
-  "ytmAlbumConfirmBody": "{tracks, plural, one{1 song} other{{tracks} songs}} · {duration} · about {size}",
+  "ytmAlbumConfirmBody": "{tracks, plural, one{1 song} other{{tracks} songs}}, {duration}, about {size}",
   "ytmAlbumConfirmOwned": "{count, plural, one{1 song is already in your library and will be linked} other{{count} songs are already in your library and will be linked}}",
   "ytmAlbumStarted": "Import “{name}” started",
   "ytmShowImport": "Show",

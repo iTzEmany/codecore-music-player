@@ -1648,13 +1648,13 @@ class AppLocalizationsIt extends AppLocalizations {
   String get exportPlaylistTitle => 'Esporta playlist';
 
   @override
-  String get exportFormatM3u8 => 'M3U8 · per altri lettori';
+  String get exportFormatM3u8 => 'M3U8, per altri lettori';
 
   @override
-  String get exportFormatCsv => 'CSV · come Exportify';
+  String get exportFormatCsv => 'CSV, come Exportify';
 
   @override
-  String get exportFormatJson => 'JSON · formato Codecore';
+  String get exportFormatJson => 'JSON, formato Codecore';
 
   @override
   String get exportRelativePaths => 'Percorsi relativi';
@@ -2029,7 +2029,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String csvImportSyncCounts(int added, int removed) {
-    return '+$added nuovi · −$removed rimossi dalla playlist (i file restano)';
+    return '$added nuovi, $removed rimossi dalla playlist (i file restano)';
   }
 
   @override
@@ -3599,7 +3599,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String restoreInfo(String date, String version, int tracks, int playlists) {
-    return 'Del $date · app $version · $tracks brani · $playlists playlist';
+    return 'Del $date, app $version, $tracks brani, $playlists playlist';
   }
 
   @override
@@ -3836,7 +3836,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get writeTagsWarnBody =>
-      'Salvando una modifica, i tag vengono riscritti anche nel file musicale (MP3, FLAC, M4A, OGG). Si lavora su una copia, si controlla il risultato e il file viene sostituito solo se tutto torna; prima l’originale è salvato in «Backup dei tag» (gli ultimi 200 o 2 GB). Copertina, testi e ReplayGain non vengono toccati. Prima di attivare conviene fare un backup della libreria (Impostazioni → Backup).';
+      'Salvando una modifica, i tag vengono riscritti anche nel file musicale (MP3, FLAC, M4A, OGG). Si lavora su una copia, si controlla il risultato e il file viene sostituito solo se tutto torna; prima l’originale è salvato in «Backup dei tag» (gli ultimi 200 o 2 GB). Copertina, testi e ReplayGain non vengono toccati. Prima di attivare conviene fare un backup della libreria (Impostazioni, Backup).';
 
   @override
   String get writeTagsEnable => 'Attiva';
@@ -3997,7 +3997,7 @@ class AppLocalizationsIt extends AppLocalizations {
       other: '$count brani eliminati',
       one: '1 brano eliminato',
     );
-    return '$_temp0 · $failed non eliminati';
+    return '$_temp0, $failed non eliminati';
   }
 
   @override
@@ -4243,7 +4243,7 @@ class AppLocalizationsIt extends AppLocalizations {
       other: '$tracks brani',
       one: '1 brano',
     );
-    return '$_temp0 · $duration · circa $size';
+    return '$_temp0, $duration, circa $size';
   }
 
   @override
