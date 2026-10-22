@@ -369,7 +369,7 @@ class _TrackRowState extends State<TrackRow> {
                   ),
           ),
           if (widget.variant != TrackRowVariant.album) ...[
-            // The dot already sit in the number column.
+            // The dot already sits in the number column.
             if (widget.selectionMode)
               CoverImage(coverKey: t.coverKey, size: cover)
             else

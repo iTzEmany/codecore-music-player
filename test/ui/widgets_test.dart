@@ -101,6 +101,7 @@ void main() {
   });
 
   testWidgets('dot only on the current row', (tester) async {
+    final sem = tester.ensureSemantics();
     await _pump(
       tester,
       Column(
@@ -121,6 +122,8 @@ void main() {
       ),
     );
     expect(find.byType(NowPlayingDot), findsOneWidget);
+    expect(find.bySemanticsLabel(RegExp('In riproduzione')), findsOneWidget);
+    sem.dispose();
   });
 
   testWidgets('TrackRow: current title takes the accent', (tester) async {

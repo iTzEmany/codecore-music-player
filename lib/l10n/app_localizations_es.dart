@@ -200,9 +200,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get undo => 'Deshacer';
 
   @override
-  String get noFavorites => 'Aún no hay favoritos';
-
-  @override
   String get favoritesEmptyTitle => 'Aún no hay favoritos';
 
   @override

@@ -92,30 +92,33 @@ class ShufflePill extends ConsumerWidget {
     final cc = context.cc;
     final mode = ref.watch(shuffleModeProvider);
     final color = mode == ShuffleMode.off ? cc.text : cc.accent;
-    return PressScale(
-      child: GestureDetector(
-        onLongPress: () => showShufflePlusSheet(context),
-        child: OutlinedButton.icon(
-          onPressed: onPressed,
-          style: OutlinedButton.styleFrom(foregroundColor: color),
-          icon: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Icon(Icons.shuffle_rounded, color: color),
-              if (mode == ShuffleMode.plus)
-                Positioned(
-                  right: -6,
-                  top: -4,
-                  child: Icon(
-                    Icons.add_rounded,
-                    key: const ValueKey('shuffle-plus-badge'),
-                    size: 12,
-                    color: color,
+    return Semantics(
+      toggled: mode != ShuffleMode.off,
+      child: PressScale(
+        child: GestureDetector(
+          onLongPress: () => showShufflePlusSheet(context),
+          child: OutlinedButton.icon(
+            onPressed: onPressed,
+            style: OutlinedButton.styleFrom(foregroundColor: color),
+            icon: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Icon(Icons.shuffle_rounded, color: color),
+                if (mode == ShuffleMode.plus)
+                  Positioned(
+                    right: -6,
+                    top: -4,
+                    child: Icon(
+                      Icons.add_rounded,
+                      key: const ValueKey('shuffle-plus-badge'),
+                      size: 12,
+                      color: color,
+                    ),
                   ),
-                ),
-            ],
+              ],
+            ),
+            label: Text(context.l10n.shuffle),
           ),
-          label: Text(context.l10n.shuffle),
         ),
       ),
     );

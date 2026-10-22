@@ -412,12 +412,6 @@ abstract class AppLocalizations {
   /// **'Annulla'**
   String get undo;
 
-  /// No description provided for @noFavorites.
-  ///
-  /// In it, this message translates to:
-  /// **'Nessun preferito ancora'**
-  String get noFavorites;
-
   /// No description provided for @favoritesEmptyTitle.
   ///
   /// In it, this message translates to:

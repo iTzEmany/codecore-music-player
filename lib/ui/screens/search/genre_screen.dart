@@ -7,6 +7,7 @@ import '../../../providers/library_providers.dart';
 import '../../../providers/player_providers.dart';
 import '../../../providers/settings_providers.dart';
 import '../../theme/app_theme.dart';
+import '../../theme/tokens.dart';
 import '../../widgets/play_buttons.dart';
 import '../../widgets/shuffle_button.dart';
 import '../../widgets/selection_bar.dart';
@@ -39,33 +40,44 @@ class GenreScreen extends ConsumerWidget {
         appBar: SelectableAppBar(
           listKey: key,
           tracks: tracks,
-          normal: AppBar(
-            title: Text(genre),
-            actions: [
-              ShufflePill(
-                onPressed: tracks.isEmpty ? null : ctrl.toggleShuffle,
-              ),
-              const SizedBox(width: 8),
-              PlayPill(
-                onPressed: tracks.isEmpty
-                    ? null
-                    : () => ctrl.playAll(tracks, context: ctx),
-              ),
-              const SizedBox(width: 8),
-            ],
-          ),
+          normal: AppBar(title: Text(genre)),
         ),
         body: tracks.isEmpty
             ? Center(child: Text(l.noResults))
-            : ListView.builder(
-                itemExtent: trackRowExtentOf(context, compact),
-                itemCount: tracks.length,
-                itemBuilder: (_, i) => LiveTrackRow(
-                  track: tracks[i],
-                  compact: compact,
-                  selection: selection,
-                  onTap: () => ctrl.playFromList(tracks, i, context: ctx),
-                ),
+            : Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: CcDims.margin,
+                      vertical: 8,
+                    ),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          PlayPill(
+                            onPressed: () => ctrl.playAll(tracks, context: ctx),
+                          ),
+                          ShufflePill(onPressed: ctrl.toggleShuffle),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: ListView.builder(
+                      itemExtent: trackRowExtentOf(context, compact),
+                      itemCount: tracks.length,
+                      itemBuilder: (_, i) => LiveTrackRow(
+                        track: tracks[i],
+                        compact: compact,
+                        selection: selection,
+                        onTap: () => ctrl.playFromList(tracks, i, context: ctx),
+                      ),
+                    ),
+                  ),
+                ],
               ),
       ),
     );

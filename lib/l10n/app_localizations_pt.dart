@@ -200,9 +200,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String get undo => 'Anular';
 
   @override
-  String get noFavorites => 'Ainda sem favoritos';
-
-  @override
   String get favoritesEmptyTitle => 'Ainda não há favoritos';
 
   @override

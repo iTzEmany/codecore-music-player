@@ -203,9 +203,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get undo => 'Annuler';
 
   @override
-  String get noFavorites => 'Aucun favori pour l’instant';
-
-  @override
   String get favoritesEmptyTitle => 'Aucun favori pour l’instant';
 
   @override
