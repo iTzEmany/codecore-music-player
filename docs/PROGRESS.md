@@ -454,13 +454,13 @@ Richiesta (2026-10-22): «avere aggiornamenti per quanto riguarda le nuove uscit
 - [x] 34.3 Schema v13 e repository (f15a9f5)
 - [x] 34.4 Artisti più ascoltati in automatico (f15a9f5)
 - [x] 34.5 Il giro di controllo (f15a9f5)
-- [~] 34.6 Quando parte il giro e impostazioni (7b201cb: controller e impostazioni (logica); interruttori con l'interfaccia)
-- [ ] 34.7 «Segui» e «Artisti seguiti»
-- [ ] 34.8 «Nuove uscite» in Home e pagina dedicata
-- [ ] 34.9 Notifica Android
+- [x] 34.6 Quando parte il giro e impostazioni (7b201cb: controller e impostazioni (logica); interruttori con l'interfaccia) (8a48ee1: interfaccia delle impostazioni)
+- [~] 34.7 «Segui» e «Artisti seguiti» (8a48ee1; prova sul telefono in «Tocca a te»)
+- [~] 34.8 «Nuove uscite» in Home e pagina dedicata (8a48ee1; prova sul telefono in «Tocca a te»)
+- [~] 34.9 Notifica Android (8a48ee1; prova sul telefono in «Tocca a te»)
 - [x] 34.10 Artisti seguiti nel backup (7b201cb)
-- [ ] 34.11 (Facoltativo, da approvare) Controllo ad app chiusa
-- [ ] 34.12 Test dal vivo, documentazione e prova a mano
+- [x] 34.11 ~~(Facoltativo, da approvare) Controllo ad app chiusa~~ (FACOLTATIVO, da approvare (WorkManager): non fatto)
+- [~] 34.12 Test dal vivo, documentazione e prova a mano (8a48ee1: test dal vivo 2/2, documenti; prova sul telefono da fare)
 
 ## Note di deviazione
 <!-- una riga per deviazione: data — task — cosa è cambiato e perché -->
