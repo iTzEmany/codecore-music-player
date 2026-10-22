@@ -172,7 +172,7 @@ void main() {
     );
     expect(find.byType(AlbumCard), findsOneWidget);
     expect(find.text('The Wall'), findsOneWidget);
-    expect(find.text('Album · Pink Floyd · 1979'), findsOneWidget);
+    expect(find.text('Album, Pink Floyd, 1979'), findsOneWidget);
     await h.dispose(tester);
   });
 

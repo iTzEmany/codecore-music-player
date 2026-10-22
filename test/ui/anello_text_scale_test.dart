@@ -1,16 +1,21 @@
 import 'package:codecore/data/repositories/podcast_repository.dart';
 import 'package:codecore/data/repositories/tag_repository.dart';
 import 'package:codecore/providers/jam_providers.dart';
+import 'package:codecore/providers/ytm_catalog_providers.dart';
 import 'package:codecore/services/jam/jam_models.dart';
+import 'package:codecore/services/online/ytm_artist.dart';
+import 'package:codecore/services/online/ytm_catalog.dart';
 import 'package:codecore/services/podcast/podcast_models.dart';
 import 'package:codecore/ui/screens/jam/jam_screen.dart';
 import 'package:codecore/ui/screens/library/all_tracks_screen.dart';
 import 'package:codecore/ui/screens/library/review_screen.dart';
 import 'package:codecore/ui/screens/memory/memory_screen.dart';
 import 'package:codecore/ui/screens/now_playing/queue_sheet.dart';
+import 'package:codecore/ui/screens/online/artist_page_screen.dart';
 import 'package:codecore/ui/screens/podcast/podcast_detail_screen.dart';
 import 'package:codecore/ui/screens/podcast/podcasts_screen.dart';
 import 'package:codecore/ui/screens/releases/new_releases_screen.dart';
+import 'package:codecore/ui/screens/search/search_screen.dart';
 import 'package:codecore/ui/screens/settings/settings_screen.dart';
 import 'package:codecore/ui/screens/stats/stats_screen.dart';
 import 'package:codecore/ui/screens/tags/tags_screen.dart';
@@ -20,10 +25,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/app_harness.dart';
+import '../support/fake_ytm.dart';
 import '../support/memory_fakes.dart';
+import '../support/search_input.dart';
 
 /// Every screen of the redesign at 150 % text, 360x780, in the three themes:
-/// nothing may overflow, and every block label stays inside the screen. Search and the online artist page belong to plan 2.4.
+/// nothing may overflow, and every block label stays inside the screen.
 class _FakeJam extends JamController {
   @override
   JamUiState build() => const JamUiState(
@@ -122,6 +129,58 @@ void main() {
       expect(find.text('Svuota cache'), findsOneWidget);
       expect(find.text('Mai ascoltati'), findsOneWidget);
       expect(find.text('Strumenti'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      await h.dispose(tester);
+    });
+  }
+
+  // Search with results and the online artist page, long names, tall view.
+  const longName = 'Un artista dal nome davvero molto molto lungo da non stare in una riga';
+  final artistPage = YtmArtistPage(
+    ref: const YtmArtistRef(id: 'UCx', name: longName, audience: '25.9M ascoltatori mensili'),
+    description: 'Una band inglese. ' * 20,
+    shelves: [
+      YtmSongShelf('Brani più ascoltati', [ytmSong('s1', 'Una canzone dal titolo lunghissimo che non entra')],
+          allSongs: const YtmBrowseLink('VLOLAK', null)),
+      const YtmReleaseShelf('Album', [
+        YtmRelease(browseId: 'MPREb_1', title: 'Un album dal titolo lunghissimo', subtitle: 'Album • 1979'),
+      ], more: YtmBrowseLink('MPAD', 'p')),
+      const YtmArtistShelf('Ai fan potrebbe anche piacere', [YtmArtistRef(id: 'UC2', name: 'Roger Waters')]),
+    ],
+  );
+  for (final t in themes.entries) {
+    testWidgets('Search results at 150 % in ${t.key}', (tester) async {
+      tester.view.physicalSize = const Size(360, 3000);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final h = await Harness.create(tester, tracks: 4);
+      await h.pump(tester, const SearchScreen(), textScale: 1.5, colors: t.value);
+      typeSearch(tester, 'Song');
+      for (var i = 0; i < 5; i++) {
+        await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 80)));
+        await tester.pump(const Duration(milliseconds: 400));
+      }
+      expect(find.text('Brani'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      await h.dispose(tester);
+    });
+
+    testWidgets('Online artist page at 150 % in ${t.key}', (tester) async {
+      tester.view.physicalSize = const Size(360, 3000);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final h = await Harness.create(tester);
+      await h.pump(tester, ArtistPageScreen(artist: artistPage.ref),
+          textScale: 1.5,
+          colors: t.value,
+          extraOverrides: [
+            artistPageProvider.overrideWith((ref, id) async => CatalogResult(artistPage, DateTime(2026, 10, 22))),
+          ]);
+      for (var i = 0; i < 3; i++) {
+        await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 120)));
+        await tester.pump(const Duration(milliseconds: 300));
+      }
+      expect(find.text('Brani più ascoltati'), findsOneWidget);
       expect(tester.takeException(), isNull);
       await h.dispose(tester);
     });

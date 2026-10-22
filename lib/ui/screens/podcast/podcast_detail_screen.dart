@@ -10,6 +10,7 @@ import '../../../providers/player_providers.dart';
 import '../../../providers/podcast_providers.dart';
 import '../../../services/podcast/podcast_models.dart';
 import '../../theme/tokens.dart';
+import '../../widgets/collection_header.dart';
 import '../../widgets/confirm.dart';
 import '../../widgets/cover_image.dart';
 import '../../widgets/empty_state.dart';
@@ -99,6 +100,14 @@ class _PodcastDetailScreenState extends ConsumerState<PodcastDetailScreen> {
     final running = {for (final d in ref.watch(podcastDownloadsProvider)) d.episodeId: d};
     if (podcast == null) return const Scaffold();
     final downloadedCount = rows.where((r) => r.downloaded).length;
+    final checked = podcast.lastCheckedAt;
+    final when = checked == null
+        ? l.podcastNeverChecked
+        : l.podcastLastChecked(
+            DateFormat.yMMMd(Localizations.localeOf(context).toString())
+                .add_Hm()
+                .format(DateTime.fromMillisecondsSinceEpoch(checked)),
+          );
     return Scaffold(
       appBar: AppBar(
         title: Text(podcast.title, maxLines: 1, overflow: TextOverflow.ellipsis),
@@ -132,7 +141,14 @@ class _PodcastDetailScreenState extends ConsumerState<PodcastDetailScreen> {
       ),
       body: Column(
         children: [
-          _Header(podcast: podcast),
+          CollectionHeader(
+            cover: (size) => CoverImage(coverKey: podcast.coverKey, size: size, radius: CcDims.rGrid),
+            name: podcast.title,
+            subtitle: podcast.author == null ? null : Text(podcast.author!),
+            meta: when,
+            actions: const [SpeedButton()],
+          ),
+          _AutoDelete(podcast: podcast),
           Expanded(
             child: rows.isEmpty
                 ? EmptyState(icon: Icons.podcasts_rounded, message: l.podcastNoEpisodes)
@@ -152,65 +168,34 @@ class _PodcastDetailScreenState extends ConsumerState<PodcastDetailScreen> {
   }
 }
 
-class _Header extends ConsumerWidget {
-  const _Header({required this.podcast});
+/// The auto-delete choice of one podcast.
+class _AutoDelete extends ConsumerWidget {
+  const _AutoDelete({required this.podcast});
 
   final Podcast podcast;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
-    final cc = context.cc;
     final theme = Theme.of(context).textTheme;
-    final locale = Localizations.localeOf(context).toString();
-    final checked = podcast.lastCheckedAt;
-    final when = checked == null
-        ? l.podcastNeverChecked
-        : l.podcastLastChecked(
-            DateFormat.yMMMd(locale).add_Hm().format(DateTime.fromMillisecondsSinceEpoch(checked)),
-          );
     return Padding(
-      padding: const EdgeInsets.fromLTRB(CcDims.margin, 8, CcDims.margin, 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      padding: const EdgeInsets.fromLTRB(CcDims.margin, 0, CcDims.margin, 8),
+      child: Row(
         children: [
-          Row(
-            children: [
-              CoverImage(coverKey: podcast.coverKey, size: 72, radius: CcDims.rGrid),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (podcast.author != null)
-                      Text(podcast.author!, style: theme.titleSmall, maxLines: 1, overflow: TextOverflow.ellipsis),
-                    Text(when, style: theme.bodySmall?.copyWith(color: cc.textMuted)),
-                    const SizedBox(height: 6),
-                    const Align(alignment: Alignment.centerLeft, child: SpeedButton()),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(child: Text(l.podcastAutoDelete, style: theme.bodyMedium)),
-              Flexible(
-                child: DropdownButton<int?>(
-                  isExpanded: true,
-                  key: const ValueKey('auto-delete'),
-                  value: const [null, 1, 7, 30].contains(podcast.autoDeleteDays) ? podcast.autoDeleteDays : null,
-                  underline: const SizedBox.shrink(),
-                  items: [
-                    DropdownMenuItem(value: null, child: Text(l.podcastAutoDeleteNever)),
-                    for (final d in const [1, 7, 30])
-                      DropdownMenuItem(value: d, child: Text(l.podcastAutoDeleteAfter(d))),
-                  ],
-                  onChanged: (d) => ref.read(podcastRepositoryProvider).setAutoDeleteDays(podcast.id, d),
-                ),
-              ),
-            ],
+          Expanded(child: Text(l.podcastAutoDelete, style: theme.bodyMedium)),
+          Flexible(
+            child: DropdownButton<int?>(
+              isExpanded: true,
+              key: const ValueKey('auto-delete'),
+              value: const [null, 1, 7, 30].contains(podcast.autoDeleteDays) ? podcast.autoDeleteDays : null,
+              underline: const SizedBox.shrink(),
+              items: [
+                DropdownMenuItem(value: null, child: Text(l.podcastAutoDeleteNever)),
+                for (final d in const [1, 7, 30])
+                  DropdownMenuItem(value: d, child: Text(l.podcastAutoDeleteAfter(d))),
+              ],
+              onChanged: (d) => ref.read(podcastRepositoryProvider).setAutoDeleteDays(podcast.id, d),
+            ),
           ),
         ],
       ),

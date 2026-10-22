@@ -154,7 +154,7 @@ class _AlbumHeader extends StatelessWidget {
     final title = a?.title ?? release?.title ?? '';
     final kind = a == null
         ? release?.subtitle ?? ''
-        : [a.kindLabel, a.year].whereType<String>().where((s) => s.isNotEmpty).join(' • ');
+        : [a.kindLabel, a.year].whereType<String>().where((s) => s.isNotEmpty).join(', ');
     var total = Duration.zero;
     for (final t in a?.tracks ?? const <YtmAlbumTrack>[]) {
       total += t.result.duration ?? Duration.zero;
@@ -164,7 +164,7 @@ class _AlbumHeader extends StatelessWidget {
         : [
             l.tracksCount(a.tracks.length),
             if (total > Duration.zero) l.durationMinutes(total.inMinutes),
-          ].join(' • ');
+          ].join(', ');
     final artist = a?.artist;
     return Padding(
       padding: const EdgeInsets.fromLTRB(CcDims.margin, 0, CcDims.margin, 8),
