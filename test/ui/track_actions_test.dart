@@ -1,4 +1,8 @@
+import 'package:codecore/data/db/app_database.dart' show Track;
 import 'package:codecore/data/repositories/track_repository.dart';
+import 'package:codecore/ui/theme/tokens.dart';
+import 'package:codecore/ui/widgets/track_actions.dart';
+import 'package:drift/drift.dart' show Value;
 import 'package:codecore/providers/preview_providers.dart';
 import 'package:codecore/ui/widgets/cover_image.dart';
 import 'package:codecore/ui/screens/library/album_detail_screen.dart';
@@ -186,6 +190,66 @@ void main() {
     expect(find.text('Song 0'), findsNothing);
     expect(find.text('Song 3'), findsOneWidget);
     expect(h.handler.hasNext, isTrue);
+    await h.dispose(tester);
+  });
+
+  Future<Harness> openSheet(WidgetTester tester, Track Function(Track) edit,
+      {double scale = 1}) async {
+    tester.view.physicalSize = const Size(360, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final h = await Harness.create(tester, tracks: 1);
+    final t = edit((await tester.runAsync(() => h.db.select(h.db.tracks).get()))!.first);
+    await h.pump(
+      tester,
+      MediaQuery(
+        data: MediaQueryData(textScaler: TextScaler.linear(scale)),
+        child: Consumer(
+          builder: (context, ref, _) => TextButton(
+            onPressed: () => showTrackActions(context, ref, t),
+            child: const Text('open'),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('open'));
+    await _settle(tester);
+    return h;
+  }
+
+  testWidgets('sheet header has title, artist, album on three lines; no dividers',
+      (tester) async {
+    final h = await openSheet(tester, (t) => t);
+    expect(find.textContaining('·'), findsNothing);
+    final a = tester.getRect(find.text('Artist'));
+    final b = tester.getRect(find.text('Album 0'));
+    expect(b.top, greaterThanOrEqualTo(a.bottom));
+    expect(find.byType(Divider), findsNothing);
+    await h.dispose(tester);
+  });
+
+  testWidgets('delete is last and red', (tester) async {
+    final h = await openSheet(tester, (t) => t);
+    final tiles = tester.widgetList<ListTile>(find.byType(ListTile)).toList();
+    expect((tiles.last.title as Text).data, 'Elimina dal dispositivo');
+    expect(tiles.last.textColor, CcColors.notte.error);
+    expect(tiles.where((x) => x.textColor == CcColors.notte.error), hasLength(1));
+    await h.dispose(tester);
+  });
+
+  testWidgets('header lines with missing album and long title', (tester) async {
+    final h = await openSheet(
+        tester, (t) => t.copyWith(title: 'x' * 200, artist: const Value(null), album: const Value(null)),
+        scale: 1.5);
+    expect(tester.takeException(), isNull);
+    expect(find.text('Artista sconosciuto'), findsOneWidget);
+    await h.dispose(tester);
+  });
+
+  testWidgets('online track: no destructive row', (tester) async {
+    final h = await openSheet(tester, (t) => t.copyWith(id: -5));
+    expect(find.byType(ListTile), findsWidgets);
+    expect(tester.widgetList<ListTile>(find.byType(ListTile)).where((x) => x.textColor == CcColors.notte.error), isEmpty);
     await h.dispose(tester);
   });
 }

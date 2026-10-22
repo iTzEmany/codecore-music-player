@@ -1,3 +1,4 @@
+import 'cc_sheet.dart';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -43,8 +44,9 @@ import 'quality_tag.dart';
 
 /// One entry of the track menu.
 class TrackAction {
-  const TrackAction(this.icon, this.label, this.run);
+  const TrackAction(this.icon, this.label, this.run, {this.destructive = false});
 
+  final bool destructive;
   final IconData icon;
   final String label;
   final Future<void> Function() run;
@@ -280,6 +282,7 @@ List<TrackActionGroup> trackActions(
           () async {
             await confirmAndDeleteTracks(outer, ref, [track]);
           },
+          destructive: true,
         ),
     ]),
   ];
@@ -291,7 +294,7 @@ Future<void> showTrackActions(
   Track track,
 ) {
   final groups = trackActions(context, ref, track);
-  return showModalBottomSheet<void>(
+  return showCcSheet<void>(
     context: context,
     isScrollControlled: true,
     builder: (sheet) => _TrackActionsSheet(track: track, groups: groups),
@@ -350,10 +353,6 @@ class _TrackActionsSheet extends StatelessWidget {
     final l = context.l10n;
     final cc = context.cc;
     final theme = Theme.of(context).textTheme;
-    final sub = [
-      if (track.artist != null) track.artist!,
-      if (track.album != null) track.album!,
-    ].join(' · ');
     return SafeArea(
       child: SingleChildScrollView(
         child: Column(
@@ -371,27 +370,36 @@ class _TrackActionsSheet extends StatelessWidget {
                       children: [
                         Text(
                           track.title,
-                          maxLines: 1,
+                          maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: theme.bodyLarge,
+                          style: theme.titleSmall,
                         ),
                         Text(
-                          sub.isEmpty ? l.unknownArtist : sub,
+                          track.artist ?? l.unknownArtist,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: theme.bodyMedium,
                         ),
+                        if (track.album != null && track.album!.isNotEmpty)
+                          Text(
+                            track.album!,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.bodySmall?.copyWith(color: cc.textFaint),
+                          ),
                       ],
                     ),
                   ),
                 ],
               ),
             ),
-            for (final g in groups) ...[
-              Divider(height: 1, color: cc.surface3),
+            for (final (i, g) in groups.indexed) ...[
+              if (i > 0) const SizedBox(height: 8),
               for (final a in g.actions)
                 ListTile(
                   leading: Icon(a.icon),
+                  iconColor: a.destructive ? cc.error : null,
+                  textColor: a.destructive ? cc.error : null,
                   title: Text(a.label),
                   onTap: () {
                     Navigator.of(context).pop();
