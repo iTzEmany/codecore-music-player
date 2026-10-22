@@ -5,15 +5,22 @@ import 'package:flutter/material.dart';
 import '../theme/tokens.dart';
 import 'motion.dart';
 
+const _duration = Duration(milliseconds: 550);
+
 /// Opens a page growing out of [from] (the dock's global rect): a rounded clip
 /// widens to the whole screen while the page fades in over the first 40 %.
-/// With «Riduci animazioni» the page is simply there.
-Route<T> growRoute<T>({required Rect from, required WidgetBuilder builder}) => PageRouteBuilder<T>(
-  transitionDuration: const Duration(milliseconds: 550),
-  reverseTransitionDuration: const Duration(milliseconds: 550),
+/// With [reduceMotion] («Riduci animazioni», read when the route is pushed) the
+/// route takes no time and the page is simply there.
+Route<T> growRoute<T>({
+  required Rect from,
+  required WidgetBuilder builder,
+  bool reduceMotion = false,
+}) => PageRouteBuilder<T>(
+  transitionDuration: reduceMotion ? Duration.zero : _duration,
+  reverseTransitionDuration: reduceMotion ? Duration.zero : _duration,
   pageBuilder: (context, _, _) => builder(context),
   transitionsBuilder: (context, animation, _, child) {
-    if (ccDuration(context, const Duration(milliseconds: 550)) == Duration.zero) {
+    if (ccDuration(context, _duration) == Duration.zero) {
       return child;
     }
     final t = animation.drive(CurveTween(curve: Motion.curve));

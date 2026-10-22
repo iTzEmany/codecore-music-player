@@ -112,13 +112,12 @@ void main() {
     await h.pump(tester, const AppShell());
     await _settle(tester);
     await tester.tap(find.text('Song 0').last);
-    await tester.pump(Duration.zero);
-    await tester.pump(Duration.zero);
+    await tester.pump();
     expect(find.byType(NowPlayingScreen), findsOneWidget);
-    expect(
-        find.descendant(
-            of: find.byType(NowPlayingScreen), matching: find.byType(ClipRRect)),
-        findsNothing);
+    // The grow clip is an ancestor of the page, not a descendant.
+    expect(find.byWidgetPredicate((w) => w is ClipRRect && w.clipper != null), findsNothing);
+    final route = ModalRoute.of(tester.element(find.byType(NowPlayingScreen)))!;
+    expect(route.animation!.status, AnimationStatus.completed, reason: 'the route settled in one frame');
     expect(
         find.descendant(
             of: find.byType(SpinWhilePlaying), matching: find.byType(RotationTransition)),

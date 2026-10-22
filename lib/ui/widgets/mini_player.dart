@@ -95,7 +95,11 @@ class _MiniPlayerState extends ConsumerState<MiniPlayer>
   }
 
   void _openNowPlaying() => Navigator.of(context, rootNavigator: true).push(
-    growRoute<void>(from: _dockRect(), builder: (_) => const NowPlayingScreen()),
+    growRoute<void>(
+      from: _dockRect(),
+      builder: (_) => const NowPlayingScreen(),
+      reduceMotion: MediaQuery.disableAnimationsOf(context),
+    ),
   );
 
   void _openJam() => Navigator.of(

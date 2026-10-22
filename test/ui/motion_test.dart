@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:codecore/ui/widgets/motion.dart';
 import 'package:codecore/providers/player_providers.dart';
 import 'package:flutter/material.dart';
@@ -114,6 +116,31 @@ void main() {
       expect(angle(tester), 0);
       await tester.pump(const Duration(seconds: 3));
       expect(angle(tester), greaterThan(0), reason: 'it goes on turning while playing');
+    });
+
+    testWidgets('pausing keeps the angle', (tester) async {
+      final ctl = StreamController<bool>.broadcast();
+      addTearDown(ctl.close);
+      await tester.pumpWidget(ProviderScope(
+        overrides: [
+          isPlayingProvider.overrideWith((_) async* {
+            yield true;
+            yield* ctl.stream;
+          }),
+        ],
+        child: _app(const SpinWhilePlaying(trackKey: 'a', child: SizedBox(width: 10, height: 10))),
+      ));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 6));
+      final turned = angle(tester);
+      expect(turned, greaterThan(0));
+      ctl.add(false);
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      final paused = angle(tester);
+      await tester.pump(const Duration(seconds: 5));
+      expect(angle(tester), paused);
+      expect(paused, greaterThanOrEqualTo(turned));
     });
 
     testWidgets('paused, it does not turn', (tester) async {

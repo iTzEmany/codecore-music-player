@@ -28,10 +28,13 @@ class RingProgress extends ConsumerWidget {
   final bool live;
   final double stroke;
 
+  /// Side of the circle the cover is clipped to inside a ring of [size].
+  static double innerSize(double size, {double stroke = 3}) => size - 2 * (stroke + 2);
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cc = context.cc;
-    final inner = size - 2 * (stroke + 2);
+    final inner = innerSize(size, stroke: stroke);
     // Own layer: position ticks re-record the ring only, not the cover.
     Widget paint(double? progress) => RepaintBoundary(
       child: CustomPaint(

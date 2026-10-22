@@ -304,8 +304,7 @@ class _Player extends ConsumerWidget {
                 builder: (_, c) {
                   final s = (c.biggest.shortestSide).clamp(80.0, 460.0);
                   const stroke = 4.0;
-                  // The ring clips its child to a circle of this size.
-                  final inner = s - 2 * (stroke + 2);
+                  final inner = RingProgress.innerSize(s, stroke: stroke);
                   return Center(
                     child: RingProgress(
                       size: s,
