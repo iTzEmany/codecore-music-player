@@ -13,6 +13,7 @@ import '../theme/tokens.dart';
 import 'favorite_actions.dart';
 import 'motion.dart';
 import 'radio_now.dart';
+import 'ring_progress.dart';
 import '../../providers/radio_providers.dart' show onAirProvider;
 import 'track_art.dart';
 
@@ -165,10 +166,15 @@ class _MiniPlayerState extends ConsumerState<MiniPlayer>
                   ),
                 )
               else
-                TrackArt(
-                  track: track!,
-                  size: 40,
-                  heroTag: kPlayerCoverHero,
+                RingProgress(
+                  size: 48,
+                  live: radio != null,
+                  child: TrackArt(
+                    track: track!,
+                    size: 40,
+                    radius: 20,
+                    heroTag: kPlayerCoverHero,
+                  ),
                 ),
               const SizedBox(width: 12),
               Expanded(
@@ -244,14 +250,6 @@ class _MiniPlayerState extends ConsumerState<MiniPlayer>
               const SizedBox(width: 4),
             ],
           ),
-          if (!inJam && radio == null)
-            // Decorative: its percentage would lead the merged label of the card.
-            const Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: ExcludeSemantics(child: _MiniProgress()),
-            ),
         ],
       ),
     );
@@ -307,22 +305,4 @@ class _MiniButton extends StatelessWidget {
     visualDensity: VisualDensity.compact,
     icon: iconWidget ?? Icon(icon),
   );
-}
-
-class _MiniProgress extends ConsumerWidget {
-  const _MiniProgress();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final pos = ref.watch(positionProvider).value ?? Duration.zero;
-    final dur = ref.watch(durationProvider).value ?? Duration.zero;
-    final value = dur.inMilliseconds <= 0
-        ? 0.0
-        : (pos.inMilliseconds / dur.inMilliseconds).clamp(0.0, 1.0);
-    return LinearProgressIndicator(
-      value: value,
-      minHeight: 2,
-      backgroundColor: context.cc.text.withValues(alpha: 0.12),
-    );
-  }
 }
