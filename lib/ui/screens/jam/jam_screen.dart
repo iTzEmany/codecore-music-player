@@ -11,7 +11,7 @@ import '../share/track_picker_screen.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/artist_avatar.dart';
-import '../../widgets/now_playing_bars.dart';
+import '../../widgets/ring_progress.dart' show NowPlayingDot;
 import 'jam_player_card.dart';
 import '../../../providers/database_providers.dart';
 
@@ -222,10 +222,7 @@ class _JamScreenState extends ConsumerState<JamScreen> {
                                     width: 36,
                                     child: Center(
                                       child: isCurrent
-                                          ? NowPlayingBars(
-                                              playing: jam.playing,
-                                              size: 20,
-                                            )
+                                          ? const NowPlayingDot()
                                           : _Avatar(name: who, size: 32),
                                     ),
                                   ),

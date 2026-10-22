@@ -12,7 +12,7 @@ import 'cover_image.dart';
 import 'favorite_actions.dart';
 import 'format_utils.dart';
 import '../../services/audio/online_entries.dart';
-import 'now_playing_bars.dart';
+import 'ring_progress.dart' show NowPlayingDot;
 import 'online_queue_row.dart';
 import 'preview_cover.dart';
 import 'track_actions.dart';
@@ -57,6 +57,7 @@ class TrackRow extends StatefulWidget {
     this.selected = false,
     this.selectedPosition,
     this.subtitleSuffix,
+    this.albumAsSubtitle = false,
   });
 
   final Track track;
@@ -73,6 +74,9 @@ class TrackRow extends StatefulWidget {
 
   /// Appended to the subtitle (the time of a listen in the history).
   final String? subtitleSuffix;
+
+  /// The subtitle shows the album instead of the artist (artist page).
+  final bool albumAsSubtitle;
   final VoidCallback? onMore, onFavorite, onLongPress;
 
   /// Right click on desktop; receives the global pointer position.
@@ -94,9 +98,7 @@ class TrackRow extends StatefulWidget {
 class _TrackRowState extends State<TrackRow> {
   bool _hover = false;
 
-  /// [albumColumn]: wide rows show the album in its own column, so the
-  /// subtitle keeps only the artist.
-  String _subtitle(BuildContext context, {bool albumColumn = false}) {
+  String _subtitle(BuildContext context) {
     final t = widget.track;
     final parts = <String>[];
     switch (widget.variant) {
@@ -108,19 +110,18 @@ class _TrackRowState extends State<TrackRow> {
           parts.add(a);
         }
       case _:
-        if (t.artist != null) parts.add(t.artist!);
-        if (!albumColumn && t.album != null) parts.add(t.album!);
+        final main = widget.albumAsSubtitle ? t.album : t.artist;
+        if (main != null) parts.add(main);
     }
     final resume = t.resumePositionMs;
     if (resume != null) {
       parts.add(context.l10n.resumeFrom(formatDuration(resume)));
     }
     if (widget.subtitleSuffix != null) parts.add(widget.subtitleSuffix!);
-    return parts.join(' · ');
+    return parts.join(', ');
   }
 
-  Widget _leading(BuildContext context, double cover, {bool bars = true}) {
-    final cc = context.cc;
+  Widget _leading(BuildContext context, double cover, {bool dot = true}) {
     final t = widget.track;
     if (widget.selectionMode) {
       return SelectionBox(
@@ -135,7 +136,7 @@ class _TrackRowState extends State<TrackRow> {
         width: 32,
         child: Center(
           child: widget.isCurrent
-              ? NowPlayingBars(playing: widget.isPlaying, size: 16)
+              ? const NowPlayingDot()
               : Text(
                   n == null ? '' : '$n',
                   style: Theme.of(context).textTheme.labelSmall,
@@ -148,21 +149,12 @@ class _TrackRowState extends State<TrackRow> {
     final image = widget.variant == TrackRowVariant.pick
         ? plain
         : PreviewCover(track: t, size: cover, child: plain);
-    if (!widget.isCurrent || !bars) return image;
+    if (!widget.isCurrent || !dot) return image;
     return Stack(
-      alignment: Alignment.center,
+      clipBehavior: Clip.none,
       children: [
         image,
-        Container(
-          width: cover,
-          height: cover,
-          decoration: BoxDecoration(
-            color: cc.bg.withValues(alpha: 0.5),
-            borderRadius: BorderRadius.circular(CcDims.rList),
-          ),
-          alignment: Alignment.center,
-          child: NowPlayingBars(playing: widget.isPlaying, size: cover * 0.4),
-        ),
+        const Positioned(top: -3, right: -3, child: NowPlayingDot()),
       ],
     );
   }
@@ -324,10 +316,7 @@ class _TrackRowState extends State<TrackRow> {
     final cc = context.cc;
     final theme = Theme.of(context);
     final t = widget.track;
-    final subtitle = _subtitle(
-      context,
-      albumColumn: wide && widget.variant != TrackRowVariant.pick,
-    );
+    final subtitle = _subtitle(context);
     final cover = widget.compact ? 40.0 : 48.0;
     final titleStyle = theme.textTheme.bodyLarge?.copyWith(
       color: widget.isCurrent ? cc.accent : cc.text,
@@ -370,7 +359,7 @@ class _TrackRowState extends State<TrackRow> {
                   )
                 : widget.isCurrent
                 ? Center(
-                    child: NowPlayingBars(playing: widget.isPlaying, size: 16),
+                    child: const NowPlayingDot(),
                   )
                 : Center(
                     child: Text(
@@ -380,11 +369,11 @@ class _TrackRowState extends State<TrackRow> {
                   ),
           ),
           if (widget.variant != TrackRowVariant.album) ...[
-            // The bars already sit in the number column.
+            // The dot already sit in the number column.
             if (widget.selectionMode)
               CoverImage(coverKey: t.coverKey, size: cover)
             else
-              _leading(context, cover, bars: false),
+              _leading(context, cover, dot: false),
             const SizedBox(width: 12),
           ],
           Expanded(flex: 5, child: titleBlock),
@@ -465,12 +454,14 @@ class LiveTrackRow extends ConsumerWidget {
     this.reorderIndex,
     this.selection,
     this.subtitleSuffix,
+    this.albumAsSubtitle = false,
   });
 
   final Track track;
   final VoidCallback onTap;
   final TrackRowVariant variant;
   final bool compact;
+  final bool albumAsSubtitle;
   final int? index;
   final String? albumArtist;
 
@@ -539,6 +530,7 @@ class LiveTrackRow extends ConsumerWidget {
       selected: picked,
       selectedPosition: picked ? position + 1 : null,
       subtitleSuffix: subtitleSuffix,
+      albumAsSubtitle: albumAsSubtitle,
       onSecondaryTap: (pos) => showTrackContextMenu(context, ref, track, pos),
       onFavorite: () => toggleFavorite(context, ref, track),
       compact: compact,

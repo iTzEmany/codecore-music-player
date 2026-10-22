@@ -5,7 +5,7 @@ import '../../data/db/app_database.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../providers/player_providers.dart';
 import '../theme/tokens.dart';
-import 'now_playing_bars.dart';
+import 'ring_progress.dart' show NowPlayingDot;
 import 'track_actions.dart';
 import 'radio_now.dart';
 import 'track_art.dart';
@@ -53,7 +53,6 @@ class OnlineQueueRow extends ConsumerWidget {
     final theme = Theme.of(context).textTheme;
     final l = context.l10n;
     final isCurrent = ref.watch(currentTrackProvider.select((t) => t.value?.id == track.id));
-    final playing = isCurrent && (ref.watch(isPlayingProvider).value ?? false);
     final i = reorderIndex;
     final radio = radioOfTrack(ref, track);
     return InkWell(
@@ -76,7 +75,7 @@ class OnlineQueueRow extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(CcDims.rList),
                     ),
                     alignment: Alignment.center,
-                    child: NowPlayingBars(playing: playing, size: 19),
+                    child: const NowPlayingDot(),
                   ),
               ],
             ),

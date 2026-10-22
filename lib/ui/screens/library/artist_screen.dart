@@ -127,6 +127,7 @@ class ArtistDetailScreen extends ConsumerWidget {
                   track: top[i],
                   compact: compact,
                   selection: selection,
+                  albumAsSubtitle: true,
                   onTap: () => ctrl.playFromList(top, i, context: playCtx),
                 ),
               ),
