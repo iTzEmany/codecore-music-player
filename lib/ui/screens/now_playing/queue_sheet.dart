@@ -1,6 +1,7 @@
 import '../../widgets/cc_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../widgets/empty_state.dart';
 
 import '../../../data/db/app_database.dart';
 import '../../../l10n/l10n_ext.dart';
@@ -117,7 +118,7 @@ class _QueueSheetState extends ConsumerState<QueueSheet> {
     ref.watch(currentTrackProvider.select((t) => t.value?.id));
     final ctrl = ref.read(playerControllerProvider);
     if (queue.isEmpty) {
-      return Center(child: Text(l.emptyQueue));
+      return EmptyState(icon: Icons.queue_music_rounded, message: l.emptyQueue);
     }
     final at = ref.read(audioHandlerProvider).currentIndex;
     final current = at >= 0 && at < queue.length ? queue[at] : null;

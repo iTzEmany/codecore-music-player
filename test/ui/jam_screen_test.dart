@@ -146,7 +146,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
     await tester.tap(find.text('Uscite e sincronia'));
     await tester.pump(const Duration(milliseconds: 400));
-    expect(find.text('Sincronizzato · scarto 12 ms'), findsOneWidget);
+    expect(find.text('Sincronizzato, scarto 12 ms'), findsOneWidget);
     expect(find.textContaining('Latenza di questa uscita'), findsOneWidget);
     expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox());

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../widgets/empty_state.dart';
 
 import '../../../l10n/app_localizations.dart';
 import '../../../l10n/l10n_ext.dart';
@@ -106,7 +107,7 @@ class _JamScreenState extends ConsumerState<JamScreen> {
     if (!s.active || jam == null) {
       return Scaffold(
         appBar: AppBar(title: Text(l.jamTitle)),
-        body: Center(child: Text(l.jamWaitingEmpty)),
+        body: EmptyState(icon: Icons.group_outlined, message: l.jamWaitingEmpty),
       );
     }
     final ownId = ref.read(shareHubProvider.notifier).deviceId ?? '';
@@ -197,7 +198,7 @@ class _JamScreenState extends ConsumerState<JamScreen> {
                     ),
                     Expanded(
                       child: jam.items.isEmpty
-                          ? Center(child: Text(l.jamEmpty))
+                          ? EmptyState(icon: Icons.queue_music_rounded, message: l.jamEmpty)
                           : ReorderableListView.builder(
                               padding: const EdgeInsets.only(bottom: 88),
                               buildDefaultDragHandles: false,

@@ -86,20 +86,16 @@ class _Intro extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    return Center(
+    return Align(
+      alignment: Alignment.topLeft,
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 520),
           child: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(
-                Icons.library_music_outlined,
-                size: 56,
-                color: context.cc.textFaint,
-              ),
-              const SizedBox(height: 16),
               Text(
                 l.duplicatesIntro,
                 style: Theme.of(context).textTheme.bodyLarge,
