@@ -113,8 +113,12 @@ class ShellDock extends ConsumerWidget {
                   children: [
                     // Hidden tabs hold the dock's height: the page above
                     // keeps its size and its scroll offset.
-                    Visibility.maintain(
+                    // Sized only: no taps, focus or TalkBack on them.
+                    Visibility(
                       visible: false,
+                      maintainSize: true,
+                      maintainAnimation: true,
+                      maintainState: true,
                       child: _Tabs(
                         items: items,
                         selected: selected,

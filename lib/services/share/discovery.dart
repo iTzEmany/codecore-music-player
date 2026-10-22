@@ -83,7 +83,8 @@ class LanDiscovery {
     _beat = Timer.periodic(interval, (t) async {
       if (_socket == null) {
         final s = await _bind();
-        if (_beat != t) return s?.close();
+        // Stopped, or an overlapping tick already bound one.
+        if (_beat != t || _socket != null) return s?.close();
         _socket = s;
       }
       _send();

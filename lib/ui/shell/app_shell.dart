@@ -189,6 +189,11 @@ class AppShell extends ConsumerWidget {
     ];
     Widget tab(int i, Widget root) => Navigator(
       key: keys[i],
+      // A page opened from Search brings the tabs back, so Back pops it.
+      observers: [
+        if (i == NavTab.search.index)
+          _OnPush(ref.read(searchBarProvider.notifier).close),
+      ],
       onGenerateRoute: (_) => MaterialPageRoute<void>(builder: (_) => root),
     );
     final body = TabFade(
@@ -324,5 +329,17 @@ class AppShell extends ConsumerWidget {
       );
     }
     return content;
+  }
+}
+
+class _OnPush extends NavigatorObserver {
+  _OnPush(this.onPush);
+
+  final VoidCallback onPush;
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    // The tab's root route is pushed while the navigator builds.
+    if (previousRoute != null) onPush();
   }
 }

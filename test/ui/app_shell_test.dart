@@ -574,6 +574,26 @@ void main() {
     await h.dispose(t);
   });
 
+  testWidgets('a page opened from Search brings the tabs back', (t) async {
+    _phone(t);
+    final h = await Harness.create(t, tracks: 2);
+    await h.pump(t, const AppShell());
+    await t.tap(_bar('Cerca'));
+    await _settle(t);
+    final c = _container(t);
+    c.read(tabNavigatorKeysProvider)[NavTab.search.index].currentState!.push(
+        MaterialPageRoute<void>(builder: (_) => const Text('Pushed page')));
+    await _settle(t);
+    expect(c.read(searchBarProvider), isFalse);
+    expect(_bar('Home'), findsOneWidget);
+    // Back pops the page, Search stays.
+    await t.binding.handlePopRoute();
+    await _settle(t);
+    expect(find.text('Pushed page'), findsNothing);
+    expect(c.read(navIndexProvider), NavTab.search.index);
+    await h.dispose(t);
+  });
+
   testWidgets('keyboard lifts only the search field', (t) async {
     _phone(t);
     final h = await Harness.create(t, tracks: 2);
