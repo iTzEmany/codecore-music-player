@@ -1,4 +1,5 @@
 import 'package:codecore/ui/screens/now_playing/queue_sheet.dart';
+import 'package:codecore/ui/widgets/empty_state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -90,6 +91,15 @@ void main() {
     await tester.drag(find.byType(Scrollable).last, const Offset(0, -300));
     await tester.pump(const Duration(milliseconds: 300));
     expect(tester.takeException(), isNull);
+    await h.dispose(tester);
+  });
+
+  testWidgets('an empty queue shows the quiet empty state', (tester) async {
+    final h = await Harness.create(tester);
+    await h.pump(tester, Scaffold(body: QueueSheet(scrollController: ScrollController())));
+    await _settle(tester);
+    expect(find.byType(EmptyState), findsOneWidget);
+    expect(find.text('La coda è vuota'), findsOneWidget);
     await h.dispose(tester);
   });
 }

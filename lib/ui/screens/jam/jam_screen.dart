@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../widgets/empty_state.dart';
 
 import '../../../l10n/app_localizations.dart';
 import '../../../l10n/l10n_ext.dart';
@@ -12,6 +11,7 @@ import '../share/track_picker_screen.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/artist_avatar.dart';
+import '../../widgets/empty_state.dart';
 import '../../widgets/ring_progress.dart' show NowPlayingDot;
 import 'jam_player_card.dart';
 import '../../../providers/database_providers.dart';

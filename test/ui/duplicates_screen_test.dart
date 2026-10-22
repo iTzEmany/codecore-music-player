@@ -275,6 +275,14 @@ void main() {
     expect(find.text('Cerca duplicati'), findsOneWidget);
     await h.dispose(tester);
   });
+
+  testWidgets('the explanation has no big icon and sits at the left', (tester) async {
+    await open(tester);
+    expect(find.byWidgetPredicate((w) => w is Icon && w.size == 56), findsNothing);
+    final intro = find.textContaining('Nessun file viene cancellato');
+    expect(tester.getTopLeft(intro).dx, lessThan(40));
+    await h.dispose(tester);
+  });
 }
 
 typedef FileHasherFn = Future<String> Function(String path);

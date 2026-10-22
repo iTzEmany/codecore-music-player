@@ -196,16 +196,19 @@ class _Header extends ConsumerWidget {
           Row(
             children: [
               Expanded(child: Text(l.podcastAutoDelete, style: theme.bodyMedium)),
-              DropdownButton<int?>(
-                key: const ValueKey('auto-delete'),
-                value: const [null, 1, 7, 30].contains(podcast.autoDeleteDays) ? podcast.autoDeleteDays : null,
-                underline: const SizedBox.shrink(),
-                items: [
-                  DropdownMenuItem(value: null, child: Text(l.podcastAutoDeleteNever)),
-                  for (final d in const [1, 7, 30])
-                    DropdownMenuItem(value: d, child: Text(l.podcastAutoDeleteAfter(d))),
-                ],
-                onChanged: (d) => ref.read(podcastRepositoryProvider).setAutoDeleteDays(podcast.id, d),
+              Flexible(
+                child: DropdownButton<int?>(
+                  isExpanded: true,
+                  key: const ValueKey('auto-delete'),
+                  value: const [null, 1, 7, 30].contains(podcast.autoDeleteDays) ? podcast.autoDeleteDays : null,
+                  underline: const SizedBox.shrink(),
+                  items: [
+                    DropdownMenuItem(value: null, child: Text(l.podcastAutoDeleteNever)),
+                    for (final d in const [1, 7, 30])
+                      DropdownMenuItem(value: d, child: Text(l.podcastAutoDeleteAfter(d))),
+                  ],
+                  onChanged: (d) => ref.read(podcastRepositoryProvider).setAutoDeleteDays(podcast.id, d),
+                ),
               ),
             ],
           ),

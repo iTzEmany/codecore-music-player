@@ -26,6 +26,12 @@ class NewReleasesScreen extends ConsumerStatefulWidget {
 }
 
 class _NewReleasesScreenState extends ConsumerState<NewReleasesScreen> {
+  static const _maxArtistChips = 8;
+  bool _allArtists = false;
+
+  Iterable<MapEntry<String, String>> _artistsShown(Map<String, String> artists) =>
+      _allArtists ? artists.entries : artists.entries.take(_maxArtistChips);
+
   String? _artistId;
 
   String _time(DateTime t) =>
@@ -157,14 +163,17 @@ class _NewReleasesScreenState extends ConsumerState<NewReleasesScreen> {
           ),
           if (artists.length > 1)
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: CcDims.margin),
-              child: Wrap(spacing: 8, runSpacing: 8, children: [
+              padding: const EdgeInsets.fromLTRB(CcDims.margin, 4, CcDims.margin, 8),
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
                   _chip(
                     l.releasesAllArtists,
                     _artistId == null,
                     () => setState(() => _artistId = null),
                   ),
-                  for (final e in artists.entries)
+                  for (final e in _artistsShown(artists))
                     _chip(
                       e.value,
                       _artistId == e.key,
@@ -172,7 +181,14 @@ class _NewReleasesScreenState extends ConsumerState<NewReleasesScreen> {
                         () => _artistId = _artistId == e.key ? null : e.key,
                       ),
                     ),
-                ]),
+                  if (!_allArtists && artists.length > _maxArtistChips)
+                    ActionChip(
+                      key: const ValueKey('artist-chips-more'),
+                      label: Text(l.showAll),
+                      onPressed: () => setState(() => _allArtists = true),
+                    ),
+                ],
+              ),
             ),
           if (shown.isEmpty)
             SizedBox(

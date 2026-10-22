@@ -5,6 +5,7 @@ import 'package:codecore/services/jam/jam_host.dart';
 import 'package:codecore/services/jam/jam_models.dart';
 import 'package:codecore/ui/screens/jam/jam_request_dialog.dart';
 import 'package:codecore/ui/screens/jam/jam_screen.dart';
+import 'package:codecore/ui/widgets/empty_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -150,6 +151,26 @@ void main() {
     expect(find.textContaining('Latenza di questa uscita'), findsOneWidget);
     expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox());
+    await h.dispose(tester);
+  });
+
+  testWidgets('a jam without songs and an idle jam use the quiet empty state', (tester) async {
+    tester.view.physicalSize = const Size(500, 1000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final h = await Harness.create(tester);
+    final idle = _FakeJam(const JamUiState());
+    await h.pump(tester, const JamScreen(), extraOverrides: [jamProvider.overrideWith(() => idle)]);
+    expect(find.byType(EmptyState), findsOneWidget);
+    final empty = _FakeJam(JamUiState(
+      phase: JamPhase.active,
+      role: JamRole.host,
+      peerName: 'Telefono',
+      peerId: 'peer',
+      jam: const JamState(version: 1, items: [], currentIndex: -1, playing: false, hostDeviceId: 'host', outputDeviceId: 'host'),
+    ));
+    await h.pump(tester, const JamScreen(), extraOverrides: [jamProvider.overrideWith(() => empty)]);
+    expect(find.byType(EmptyState), findsOneWidget);
     await h.dispose(tester);
   });
 }

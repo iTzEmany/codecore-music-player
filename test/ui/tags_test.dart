@@ -3,6 +3,9 @@ import 'package:codecore/data/repositories/tag_repository.dart';
 import 'package:codecore/ui/screens/library/all_tracks_screen.dart';
 import 'package:codecore/ui/screens/library/library_screen.dart';
 import 'package:codecore/ui/screens/tags/tags_screen.dart';
+import 'package:codecore/ui/widgets/empty_state.dart';
+import 'package:codecore/ui/widgets/play_buttons.dart';
+import 'package:codecore/ui/widgets/shuffle_button.dart';
 import 'package:codecore/ui/widgets/track_row.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -213,6 +216,31 @@ void main() {
     await tester.tap(find.text('Etichette'));
     await _settle(tester);
     expect(find.byType(TagsScreen), findsOneWidget);
+    await h.dispose(tester);
+  });
+
+  testWidgets('a tag page is a collection: name, count, play pills, no round button', (tester) async {
+    await open(tester, const SizedBox());
+    await tagWith(tester, 'Live', [0, 1]);
+    await h.pump(tester, const TagTracksScreen(name: 'Live'));
+    await _settle(tester);
+    expect(find.text('Live'), findsWidgets);
+    expect(find.textContaining('2 brani'), findsOneWidget);
+    expect(find.byType(PlayPill), findsOneWidget);
+    expect(find.byType(ShufflePill), findsOneWidget);
+    expect(find.byType(PlayCircleButton), findsNothing);
+    expect(_row('Song 0'), findsOneWidget);
+    await h.dispose(tester);
+  });
+
+  testWidgets('an empty tag page disables the pills and says so', (tester) async {
+    await open(tester, const SizedBox());
+    await tagWith(tester, 'Vuota', []);
+    await h.pump(tester, const TagTracksScreen(name: 'Vuota'));
+    await _settle(tester);
+    expect(find.byType(EmptyState), findsOneWidget);
+    expect(find.text('Nessun brano'), findsWidgets);
+    expect(find.byType(PlayPill), findsNothing, reason: 'no pills without tracks');
     await h.dispose(tester);
   });
 }

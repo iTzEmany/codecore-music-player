@@ -124,8 +124,11 @@ class _ImportDetailScreenState extends ConsumerState<ImportDetailScreen> {
               ),
             ),
           Padding(
-              padding: const EdgeInsets.symmetric(horizontal: CcDims.margin),
-              child: Wrap(spacing: 8, runSpacing: 8, children: [
+            padding: const EdgeInsets.symmetric(horizontal: CcDims.margin),
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
                 for (final (f, label, n) in [
                   (_Filter.all, l.importFilterAll, rows.length),
                   (_Filter.active, l.importFilterActive, count((p) => p.active)),
@@ -137,8 +140,9 @@ class _ImportDetailScreenState extends ConsumerState<ImportDetailScreen> {
                     selected: _filter == f,
                     onSelected: (_) => setState(() => _filter = f),
                   ),
-              ]),
+              ],
             ),
+          ),
           Expanded(
             child: shown.isEmpty
                 ? Center(child: Text(l.importRowsNone, style: theme.bodyMedium))

@@ -205,17 +205,21 @@ class GenresSection extends StatelessWidget {
         children: [
           SectionHeader(l.radioGenres),
           Padding(
-              padding: const EdgeInsets.symmetric(horizontal: CcDims.margin),
-              child: Wrap(spacing: 8, runSpacing: 8, children: [
-              for (final tag in kRadioGenreTags)
-                ChoiceChip(
-                  key: ValueKey('genre-$tag'),
-                  label: Text(radioGenreLabel(l, tag)),
-                  selected: tag == selected,
-                  onSelected: (_) => onSelect(tag),
-                ),
-            ]),
+            padding: const EdgeInsets.symmetric(horizontal: CcDims.margin),
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final tag in kRadioGenreTags)
+                  ChoiceChip(
+                    key: ValueKey('genre-$tag'),
+                    label: Text(radioGenreLabel(l, tag)),
+                    selected: tag == selected,
+                    onSelected: (_) => onSelect(tag),
+                  ),
+              ],
             ),
+          ),
         ],
       ),
     );

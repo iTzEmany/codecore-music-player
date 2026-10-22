@@ -164,8 +164,11 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
         body: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: CcDims.margin),
-              child: Wrap(spacing: 8, runSpacing: 8, children: [
+              padding: const EdgeInsets.fromLTRB(CcDims.margin, 4, CcDims.margin, 8),
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
                   for (final r in <ReviewReason?>[null, ...ReviewReason.values])
                     ChoiceChip(
                       label: Text(_label(r)),
@@ -175,7 +178,8 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
                         setState(() => _filter = r);
                       },
                     ),
-                ]),
+                ],
+              ),
             ),
             Expanded(
               child: tracks.isEmpty

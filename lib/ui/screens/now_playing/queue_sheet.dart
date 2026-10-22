@@ -1,7 +1,6 @@
 import '../../widgets/cc_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../widgets/empty_state.dart';
 
 import '../../../data/db/app_database.dart';
 import '../../../l10n/l10n_ext.dart';
@@ -10,6 +9,7 @@ import '../../theme/app_theme.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/confirm.dart';
 import '../../widgets/dismiss_background.dart';
+import '../../widgets/empty_state.dart';
 import '../../widgets/section_header.dart';
 import '../../widgets/track_row.dart';
 import 'suggestions_screen.dart';
