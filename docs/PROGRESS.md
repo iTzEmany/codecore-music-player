@@ -462,6 +462,8 @@ Richiesta (2026-10-22): «avere aggiornamenti per quanto riguarda le nuove uscit
 - [x] 34.11 ~~(Facoltativo, da approvare) Controllo ad app chiusa~~ (FACOLTATIVO, da approvare (WorkManager): non fatto)
 - [~] 34.12 Test dal vivo, documentazione e prova a mano (8a48ee1: test dal vivo 2/2, documenti; prova sul telefono da fare)
 
+- Streaming di YouTube sul Mi A3 (notte del 2026-10-22): con yt-dlp 2026.10 i client predefiniti risolvono la sfida JS sul telefono in 50–70 s; `android_vr` ora chiede un PO token (403 da googlevideo, mascherato da ExoPlayer come «(0) Source error»). Ora: indirizzo con gli header di yt-dlp (`-j`), «Source error» = indirizzo scaduto, client veloce `visionos` (misura dal PC: unico che risponde in 2–4 s e si scarica) con ripiego ai predefiniti, Casuale+ mette in coda un suggerito solo con l'indirizzo pronto (c1b1562, f3d806c). Mi A3 (APK 6047): «Ascolta» 8–19 s (60–65 s circa 1 volta su 4, quando il client veloce non risponde entro 20 s), suggeriti suonati senza salti. Da rifinire: tempo del client veloce; verificare che «Ascolta» non lasci file (il test ha toccato per sbaglio «Scarica»).
+
 ## Note di deviazione
 <!-- una riga per deviazione: data — task — cosa è cambiato e perché -->
 
