@@ -924,6 +924,12 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
       await _reconnectRadio(radio, ++_loadToken);
       return;
     }
+    // Paused on the very end (the backend never said «completed»): ▶ would end
+    // the last track again at once and empty the player. Start it over.
+    final total = _duration;
+    if (total != null && _position >= total - const Duration(milliseconds: 500)) {
+      await seek(Duration.zero);
+    }
     await _backend.play();
   }
 

@@ -71,6 +71,18 @@ void main() {
     expect(backend.loaded.where((p) => p == '/m/c.mp3').length, 1);
   });
 
+  test('play on the very end of the last track starts it over', () async {
+    await handler.playQueue(ids, 2);
+    await settle();
+    backend.posC.add(const Duration(milliseconds: 100000));
+    backend.stateC.add(BackendState.paused);
+    await settle();
+    await handler.play();
+    await settle();
+    expect(backend.seeks.last, Duration.zero);
+    expect(handler.currentTrack!.title, 'c');
+  });
+
   test('after «Svuota» the next track comes from the list played, not «nothing»', () async {
     await handler.playQueue(ids, 0);
     await settle();
