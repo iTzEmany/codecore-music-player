@@ -223,7 +223,7 @@ class JamController extends Notifier<JamUiState> {
     final position = ref.read(positionProvider).value ?? Duration.zero;
     await _begin(JamRole.host, host.state ?? s);
     if (seed.isNotEmpty) {
-      final n = await addTracks(seed);
+      final n = await addTracks(seed, inherited: true);
       AppLog.i('jam: $n of ${seed.length} queued tracks added to the Jam');
       // Music that was playing keeps playing, from the same point.
       if (n > 0 && wasPlaying) {
@@ -420,7 +420,7 @@ class JamController extends Notifier<JamUiState> {
   }
 
   /// Adds library tracks, owned by this device, to the shared queue.
-  Future<int> addTracks(List<Track> tracks) async {
+  Future<int> addTracks(List<Track> tracks, {bool inherited = false}) async {
     var added = 0;
     for (final t in tracks) {
       final ext = p.extension(t.path).replaceFirst('.', '').toLowerCase();
@@ -437,6 +437,7 @@ class JamController extends Notifier<JamUiState> {
             ext: ext,
             sizeBytes: t.sizeBytes,
             ref: t.id.toString(),
+            inherited: inherited,
           ),
         ),
       );

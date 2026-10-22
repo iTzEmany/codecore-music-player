@@ -4,8 +4,24 @@ import 'package:flutter_test/flutter_test.dart';
 
 const host = 'host', guest = 'guest';
 
-JamItem item(String owner, {String title = 't', int dur = 100000}) => JamItem(
-    id: 0, ownerDeviceId: owner, title: title, ext: 'mp3', durationMs: dur);
+JamItem item(String owner,
+        {String title = 't', int dur = 100000, bool inherited = false}) =>
+    JamItem(
+        id: 0,
+        ownerDeviceId: owner,
+        title: title,
+        ext: 'mp3',
+        durationMs: dur,
+        inherited: inherited);
+
+/// Host queue: current track 'cur' followed by [n] inherited tracks.
+JamState seeded(int n) {
+  var s = ok(start(), JamCommand.add(item(host, title: 'cur')), host);
+  for (var i = 0; i < n; i++) {
+    s = ok(s, JamCommand.add(item(host, title: 'i$i', inherited: true)), host);
+  }
+  return s;
+}
 
 JamState start() => const JamState(hostDeviceId: host, outputDeviceId: host);
 
@@ -130,5 +146,45 @@ void main() {
         isNull);
     final c = JamCommand.tryParse(JamCommand.add(item(guest)).toJson())!;
     expect(c.type, JamCommandType.add);
+  });
+
+  test('guest add lands right after current, before inherited items', () {
+    final s = ok(seeded(2), JamCommand.add(item(guest, title: 'g')), guest);
+    expect(s.items.map((i) => i.title), ['cur', 'g', 'i0', 'i1']);
+    expect(s.currentIndex, 0);
+  });
+
+  test('second add lands after the first add', () {
+    var s = ok(seeded(2), JamCommand.add(item(guest, title: 'g1')), guest);
+    s = ok(s, JamCommand.add(item(host, title: 'h2')), host);
+    expect(s.items.map((i) => i.title), ['cur', 'g1', 'h2', 'i0', 'i1']);
+  });
+
+  test('full queue: add evicts the last inherited item', () {
+    final s0 = seeded(maxJamItems - 1);
+    expect(s0.items.length, maxJamItems);
+    final s = ok(s0, JamCommand.add(item(guest, title: 'g')), guest);
+    expect(s.items.length, maxJamItems);
+    expect(s.items[1].title, 'g');
+    expect(s.items.last.title, 'i${maxJamItems - 3}');
+  });
+
+  test('full queue without inherited items after current fails', () {
+    var s = start();
+    for (var i = 0; i < maxJamItems; i++) {
+      s = ok(s, JamCommand.add(item(host)), host);
+    }
+    expect(err(s, JamCommand.add(item(guest)), guest), JamError.full);
+  });
+
+  test('guest cannot send an inherited add', () {
+    final s = ok(seeded(1), JamCommand.add(item(guest, title: 'g', inherited: true)), guest);
+    expect(s.items.map((i) => i.title), ['cur', 'g', 'i0']);
+    expect(s.items[1].inherited, false);
+  });
+
+  test('JamItem json keeps inherited', () {
+    expect(JamItem.tryParse(item(host, inherited: true).toJson())!.inherited, true);
+    expect(JamItem.tryParse(item(host).toJson())!.inherited, false);
   });
 }

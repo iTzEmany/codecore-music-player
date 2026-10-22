@@ -59,6 +59,7 @@ L'ospite aggiunge un brano con `cmd add {item metadata, ownerHost, ownerPort}`: 
 `JamItem`, `JamState`, `JamCommand`, `JamPermissions` (chi può cosa). `applyCommand(state, cmd, from)`
 funzione pura: valida permessi (l'ospite non può `next`/`jump`), incrementa `version`, mantiene `currentIndex`
 coerente su `remove`/`move`.
+I brani aggiunti vanno subito dopo quello in riproduzione, prima della coda ereditata dall'host; a coda piena l'ultimo brano ereditato fa posto.
 **Verifica (test):** aggiungi/rimuovi/sposta con indice corrente invariato; ospite rifiutato su `jump`;
 `version` monotona; limite elementi (200) e lunghezze.
 

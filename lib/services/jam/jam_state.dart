@@ -7,7 +7,9 @@ import 'jam_models.dart';
 /// volume and change the output device, but cannot change the current track
 /// (`next`, `jump`, removing the current item) and cannot end the session
 /// for the host's items; each participant removes their own items, the host
-/// removes any.
+/// removes any. An added track goes right after the current one (after earlier
+/// adds, before the host's inherited seed); a full queue drops the last
+/// inherited track instead of refusing.
 JamResult applyCommand(
   JamState s,
   JamCommand cmd, {
@@ -33,11 +35,26 @@ JamResult applyCommand(
   switch (cmd.type) {
     case JamCommandType.add:
       final item = cmd.item!;
-      if (items.length >= maxJamItems) return const JamResult.fail(JamError.full);
       if (item.ownerDeviceId != from) return const JamResult.fail(JamError.forbidden);
-      final added = item.copyWith(id: s.nextItemId);
-      items.add(added);
+      final inherited = isHost && item.inherited;
+      final added = item.copyWith(id: s.nextItemId, inherited: inherited);
       final first = s.currentIndex < 0;
+      if (items.length >= maxJamItems) {
+        final victim = inherited
+            ? -1
+            : items.lastIndexWhere((i) => i.inherited, items.length - 1);
+        if (victim <= s.currentIndex) return const JamResult.fail(JamError.full);
+        items.removeAt(victim);
+      }
+      if (inherited || first) {
+        items.add(added);
+      } else {
+        var p = s.currentIndex + 1;
+        while (p < items.length && !items[p].inherited) {
+          p++;
+        }
+        items.insert(p, added);
+      }
       return commit(s.copyWith(
         items: items,
         nextItemId: s.nextItemId + 1,

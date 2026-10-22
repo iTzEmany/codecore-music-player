@@ -25,6 +25,7 @@ class JamItem {
     this.sizeBytes = 0,
     this.available = true,
     this.ref,
+    this.inherited = false,
   });
 
   /// Assigned by the host; unique within a session.
@@ -42,7 +43,10 @@ class JamItem {
   /// Opaque key meaningful only to the owner (maps to a local file).
   final String? ref;
 
-  JamItem copyWith({int? id, bool? available}) => JamItem(
+  /// Part of the host's seed queue: tracks added later are placed before it.
+  final bool inherited;
+
+  JamItem copyWith({int? id, bool? available, bool? inherited}) => JamItem(
         id: id ?? this.id,
         ownerDeviceId: ownerDeviceId,
         title: title,
@@ -53,6 +57,7 @@ class JamItem {
         sizeBytes: sizeBytes,
         available: available ?? this.available,
         ref: ref,
+        inherited: inherited ?? this.inherited,
       );
 
   Map<String, Object?> toJson() => {
@@ -66,6 +71,7 @@ class JamItem {
         'size': sizeBytes,
         'ok': available,
         if (ref != null) 'ref': ref,
+        if (inherited) 'inh': true,
       };
 
   /// Strict parser: returns null for anything malformed.
@@ -92,6 +98,7 @@ class JamItem {
       sizeBytes: size is int && size >= 0 ? size : 0,
       available: j['ok'] is bool ? j['ok'] as bool : true,
       ref: opt(j['ref']),
+      inherited: j['inh'] == true,
     );
   }
 }
