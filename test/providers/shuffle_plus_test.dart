@@ -267,6 +267,21 @@ void main() {
     expect(adapter.sent, hasLength(1), reason: 'one radio feeds many suggestions');
   });
 
+  test('an online entry the user picked stays in the queue once passed', () async {
+    cfg = const ShufflePlusConfig();
+    final stations = [-101, -102, -103];
+    host.queueIds
+      ..clear()
+      ..addAll(stations);
+    controller.start();
+    await settle();
+    host.finishAndAdvance();
+    await settle();
+    host.finishAndAdvance();
+    await settle();
+    expect(host.queueIds, stations);
+  });
+
   test('a suggestion enters the queue only after its address is ready', () async {
     final gate = Completer<void>();
     prepareHook = (r) async {

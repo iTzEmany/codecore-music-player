@@ -223,8 +223,15 @@ class ShufflePlusController {
     if (cur == _curId) return;
     final prev = _curId;
     _curId = cur;
-    if (prev != null && isOnlineId(prev)) await _finish(prev);
-    if (cur != null) _played = isOnlineId(cur) ? 0 : _played + 1;
+    // Only our own suggestions leave the queue: a radio station or a stream
+    // the user picked stays, so next and previous can come back to it.
+    if (prev != null && _mine.contains(prev)) {
+      await _finish(prev);
+    } else if (prev != null) {
+      _maxPos.remove(prev);
+      _duration.remove(prev);
+    }
+    if (cur != null) _played = _mine.contains(cur) ? 0 : _played + 1;
   }
 
   Future<void> _finish(int id) async {
