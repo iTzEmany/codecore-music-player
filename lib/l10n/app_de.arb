@@ -2696,5 +2696,29 @@
       }
     }
   },
-  "releaseNotifyShow": "Anzeigen"
+  "releaseNotifyShow": "Anzeigen",
+  "reportIssue": "Problem melden",
+  "reportIssueHint": "Öffnet GitHub mit vorausgefülltem Text",
+  "reportKindBug": "Fehler",
+  "reportKindIdea": "Idee",
+  "reportTitleLabel": "Titel",
+  "reportDescLabel": "Beschreibung",
+  "reportDescHelper": "Was ist passiert und wie lässt es sich nachstellen (mindestens {n} Zeichen)",
+  "@reportDescHelper": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "reportAttach": "Technische Informationen anhängen",
+  "reportAttachPreview": "Genau das wird gesendet:",
+  "reportOpen": "Auf GitHub öffnen",
+  "reportCopy": "Text kopieren",
+  "reportCopied": "Text kopiert",
+  "reportGithubNote": "Ein GitHub-Konto ist nötig; ohne Konto den Text kopieren und beliebig weitergeben.",
+  "reportOpenFailed": "Browser konnte nicht geöffnet werden: Der Text wurde kopiert",
+  "reportLogShortened": "Das Protokoll wird gekürzt, damit es in die Adresse passt",
+  "reportNoLog": "Keine aktuellen Warnungen oder Fehler im Protokoll",
+  "reportUnknown": "Unbekannt"
 }

@@ -13,6 +13,7 @@ import io.flutter.plugin.common.MethodChannel
 /** The single activity: hosts the platform channels the Dart side uses. */
 class MainActivity : AudioServiceActivity() {
     private val main = Handler(Looper.getMainLooper())
+    private var deviceCallback: AudioDeviceCallback? = null
 
     override fun onResume() {
         super.onResume()
@@ -39,6 +40,7 @@ class MainActivity : AudioServiceActivity() {
         StorageBridge.register(flutterEngine.dartExecutor.binaryMessenger)
         NetworkBridge.register(flutterEngine.dartExecutor.binaryMessenger, applicationContext)
         NotifyBridge.register(flutterEngine.dartExecutor.binaryMessenger, applicationContext)
+        LinkBridge.register(flutterEngine.dartExecutor.binaryMessenger, applicationContext)
         NotifyBridge.handleIntent(intent)
 
         // Where the sound goes (headphones or speaker): the equalizer keeps a
@@ -49,10 +51,13 @@ class MainActivity : AudioServiceActivity() {
             else result.notImplemented()
         }
         val audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
-        audioManager.registerAudioDeviceCallback(object : AudioDeviceCallback() {
+        deviceCallback?.let { audioManager.unregisterAudioDeviceCallback(it) }
+        val cb = object : AudioDeviceCallback() {
             override fun onAudioDevicesAdded(added: Array<out AudioDeviceInfo>) = pushRoute(audio)
             override fun onAudioDevicesRemoved(removed: Array<out AudioDeviceInfo>) = pushRoute(audio)
-        }, main)
+        }
+        deviceCallback = cb
+        audioManager.registerAudioDeviceCallback(cb, main)
 
         // Car mode: keep the screen on while it is open.
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "codecore/screen")
@@ -112,6 +117,20 @@ class MainActivity : AudioServiceActivity() {
                 else -> result.notImplemented()
             }
         }
+    }
+
+    override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {
+        // Nothing may keep pushing to the engine that is going away.
+        NetworkBridge.unregister()
+        deviceCallback?.let {
+            (getSystemService(AUDIO_SERVICE) as AudioManager).unregisterAudioDeviceCallback(it)
+        }
+        deviceCallback = null
+        ShareBridge.channel = null
+        ImportBridge.channel = null
+        NotifyBridge.detach()
+        MediaDeleteBridge.detach()
+        super.cleanUpFlutterEngine(flutterEngine)
     }
 
     @Deprecated("Deprecated in Java")

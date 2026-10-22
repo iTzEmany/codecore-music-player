@@ -4847,4 +4847,60 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get releaseNotifyShow => 'Mostrar';
+
+  @override
+  String get reportIssue => 'Comunicar um problema';
+
+  @override
+  String get reportIssueHint => 'Abre o GitHub com o texto já preenchido';
+
+  @override
+  String get reportKindBug => 'Defeito';
+
+  @override
+  String get reportKindIdea => 'Ideia';
+
+  @override
+  String get reportTitleLabel => 'Título';
+
+  @override
+  String get reportDescLabel => 'Descrição';
+
+  @override
+  String reportDescHelper(int n) {
+    return 'O que aconteceu e como reproduzir (pelo menos $n caracteres)';
+  }
+
+  @override
+  String get reportAttach => 'Anexar informações técnicas';
+
+  @override
+  String get reportAttachPreview => 'Será enviado exatamente isto:';
+
+  @override
+  String get reportOpen => 'Abrir no GitHub';
+
+  @override
+  String get reportCopy => 'Copiar texto';
+
+  @override
+  String get reportCopied => 'Texto copiado';
+
+  @override
+  String get reportGithubNote =>
+      'É preciso uma conta do GitHub; sem ela, copie o texto e envie como preferir.';
+
+  @override
+  String get reportOpenFailed =>
+      'Não foi possível abrir o navegador: o texto foi copiado';
+
+  @override
+  String get reportLogShortened =>
+      'O registo será encurtado para caber no endereço';
+
+  @override
+  String get reportNoLog => 'Sem avisos nem erros recentes no registo';
+
+  @override
+  String get reportUnknown => 'Desconhecido';
 }

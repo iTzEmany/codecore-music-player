@@ -7724,6 +7724,108 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Mostra'**
   String get releaseNotifyShow;
+
+  /// No description provided for @reportIssue.
+  ///
+  /// In it, this message translates to:
+  /// **'Segnala un problema'**
+  String get reportIssue;
+
+  /// No description provided for @reportIssueHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Apre GitHub con il testo già pronto'**
+  String get reportIssueHint;
+
+  /// No description provided for @reportKindBug.
+  ///
+  /// In it, this message translates to:
+  /// **'Difetto'**
+  String get reportKindBug;
+
+  /// No description provided for @reportKindIdea.
+  ///
+  /// In it, this message translates to:
+  /// **'Idea'**
+  String get reportKindIdea;
+
+  /// No description provided for @reportTitleLabel.
+  ///
+  /// In it, this message translates to:
+  /// **'Titolo'**
+  String get reportTitleLabel;
+
+  /// No description provided for @reportDescLabel.
+  ///
+  /// In it, this message translates to:
+  /// **'Descrizione'**
+  String get reportDescLabel;
+
+  /// No description provided for @reportDescHelper.
+  ///
+  /// In it, this message translates to:
+  /// **'Cosa è successo e come riprodurlo (almeno {n} caratteri)'**
+  String reportDescHelper(int n);
+
+  /// No description provided for @reportAttach.
+  ///
+  /// In it, this message translates to:
+  /// **'Allega informazioni tecniche'**
+  String get reportAttach;
+
+  /// No description provided for @reportAttachPreview.
+  ///
+  /// In it, this message translates to:
+  /// **'Verrà inviato esattamente questo:'**
+  String get reportAttachPreview;
+
+  /// No description provided for @reportOpen.
+  ///
+  /// In it, this message translates to:
+  /// **'Apri su GitHub'**
+  String get reportOpen;
+
+  /// No description provided for @reportCopy.
+  ///
+  /// In it, this message translates to:
+  /// **'Copia testo'**
+  String get reportCopy;
+
+  /// No description provided for @reportCopied.
+  ///
+  /// In it, this message translates to:
+  /// **'Testo copiato'**
+  String get reportCopied;
+
+  /// No description provided for @reportGithubNote.
+  ///
+  /// In it, this message translates to:
+  /// **'Serve un account GitHub; senza, copia il testo e mandalo come preferisci.'**
+  String get reportGithubNote;
+
+  /// No description provided for @reportOpenFailed.
+  ///
+  /// In it, this message translates to:
+  /// **'Impossibile aprire il browser: il testo è stato copiato'**
+  String get reportOpenFailed;
+
+  /// No description provided for @reportLogShortened.
+  ///
+  /// In it, this message translates to:
+  /// **'Il log verrà accorciato per stare nell\'indirizzo'**
+  String get reportLogShortened;
+
+  /// No description provided for @reportNoLog.
+  ///
+  /// In it, this message translates to:
+  /// **'Nessun avviso o errore recente nel log'**
+  String get reportNoLog;
+
+  /// No description provided for @reportUnknown.
+  ///
+  /// In it, this message translates to:
+  /// **'Sconosciuto'**
+  String get reportUnknown;
 }
 
 class _AppLocalizationsDelegate

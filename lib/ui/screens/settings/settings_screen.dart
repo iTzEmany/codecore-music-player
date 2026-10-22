@@ -32,6 +32,7 @@ import 'backup_section.dart';
 import 'download_settings_tiles.dart';
 import 'equalizer_screen.dart';
 import 'log_export_tile.dart';
+import 'report_issue_tile.dart';
 import 'missing_tracks_screen.dart';
 import 'transition_settings_tiles.dart';
 import 'trusted_devices_tiles.dart';
@@ -285,6 +286,7 @@ class SettingsScreen extends ConsumerWidget {
                 ),
                 ...updateTiles(context, ref),
                 const LogExportTile(),
+                const ReportIssueTile(),
               ],
             ),
           ],

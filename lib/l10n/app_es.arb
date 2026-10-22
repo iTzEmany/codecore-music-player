@@ -2696,5 +2696,29 @@
       }
     }
   },
-  "releaseNotifyShow": "Mostrar"
+  "releaseNotifyShow": "Mostrar",
+  "reportIssue": "Informar de un problema",
+  "reportIssueHint": "Abre GitHub con el texto ya preparado",
+  "reportKindBug": "Fallo",
+  "reportKindIdea": "Idea",
+  "reportTitleLabel": "Título",
+  "reportDescLabel": "Descripción",
+  "reportDescHelper": "Qué pasó y cómo reproducirlo (al menos {n} caracteres)",
+  "@reportDescHelper": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "reportAttach": "Adjuntar información técnica",
+  "reportAttachPreview": "Se enviará exactamente esto:",
+  "reportOpen": "Abrir en GitHub",
+  "reportCopy": "Copiar texto",
+  "reportCopied": "Texto copiado",
+  "reportGithubNote": "Hace falta una cuenta de GitHub; sin ella, copia el texto y envíalo como prefieras.",
+  "reportOpenFailed": "No se pudo abrir el navegador: el texto se copió",
+  "reportLogShortened": "El registro se acortará para caber en la dirección",
+  "reportNoLog": "Sin avisos ni errores recientes en el registro",
+  "reportUnknown": "Desconocido"
 }

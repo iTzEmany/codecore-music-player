@@ -10,6 +10,10 @@ Tema, lingua, riproduzione, download, rete locale, pulizia e informazioni.
 4. Pulizia libreria: duplicati e brani nascosti.
 5. Info: versione, licenze, esporta log, e (se configurato) «Controlla aggiornamenti» — **spento** all'avvio di serie.
 
+### Segnala un problema
+In Info → «Segnala un problema»: scegli Difetto o Idea, scrivi titolo e descrizione (almeno 20 caratteri) e premi «Apri su GitHub»: si apre il browser sulla pagina «nuova segnalazione» del repository con il testo già compilato; tu premi solo «Submit». Serve un account GitHub; senza, «Copia testo» copia titolo e descrizione per mandarli come preferisci.
+Con «Allega informazioni tecniche» (acceso di serie) vedi in anteprima esattamente cosa viene aggiunto: versione e build, sistema, modello del dispositivo, qualche impostazione (transizioni, Casuale+, lingua) e le ultime ~20 righe di avviso o errore del log, senza percorsi con il tuo nome, indirizzi di rete, PIN o token. Se l'indirizzo diventa troppo lungo il log viene accorciato e lo dice. Nell'app non c'è nessuna chiave: non parte nulla finché non premi «Invia» su GitHub.
+
 ## Da sapere
 Nessun dato lascia il dispositivo se non lo chiedi tu.
 

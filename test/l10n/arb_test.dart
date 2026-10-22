@@ -25,7 +25,7 @@ const _sameAsItalian = {
   'radioGenreJazz', 'radioGenreBlues', 'radioGenreDance', 'radioGenreHouse',
   'radioGenreHipHop', 'radioGenreLoFi', 'radioGenreChillout', 'radioGenreOldies',
   'radioGenreMetal', 'radioGenreReggae', 'radioGenreLatin', 'radioGenreSoul',
-  'radioGenreSports',
+  'radioGenreSports', 'reportKindIdea',
 };
 
 Map<String, dynamic> _arb(String lang) =>
