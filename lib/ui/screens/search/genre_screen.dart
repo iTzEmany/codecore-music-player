@@ -8,6 +8,7 @@ import '../../../providers/player_providers.dart';
 import '../../../providers/settings_providers.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/play_buttons.dart';
+import '../../widgets/shuffle_button.dart';
 import '../../widgets/selection_bar.dart';
 import '../../widgets/track_row.dart';
 import '../../widgets/track_row_selection.dart';
@@ -41,13 +42,11 @@ class GenreScreen extends ConsumerWidget {
           normal: AppBar(
             title: Text(genre),
             actions: [
-              ShuffleButton(
-                onPressed: tracks.isEmpty
-                    ? null
-                    : ctrl.toggleShuffle,
+              ShufflePill(
+                onPressed: tracks.isEmpty ? null : ctrl.toggleShuffle,
               ),
-              PlayCircleButton(
-                size: 40,
+              const SizedBox(width: 8),
+              PlayPill(
                 onPressed: tracks.isEmpty
                     ? null
                     : () => ctrl.playAll(tracks, context: ctx),

@@ -8,7 +8,6 @@ import 'package:codecore/ui/screens/playlists/playlist_detail_screen.dart';
 import 'package:codecore/l10n/app_localizations.dart';
 import 'package:codecore/ui/theme/tokens.dart';
 import 'package:codecore/ui/widgets/cover_backdrop.dart';
-import 'package:codecore/ui/widgets/play_buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -60,7 +59,8 @@ void main() {
     await _settle(tester);
     expect(find.text('Album 0'), findsWidgets);
     expect(find.text('Artist'), findsOneWidget);
-    expect(find.byType(PlayCircleButton), findsOneWidget);
+    expect(find.widgetWithText(FilledButton, 'Riproduci'), findsOneWidget);
+    expect(find.widgetWithText(OutlinedButton, 'Casuale'), findsOneWidget);
     expect(find.text('Song 0'), findsOneWidget);
     expect(find.textContaining('2019'), findsOneWidget);
     expect(tester.takeException(), isNull);
@@ -123,7 +123,8 @@ void main() {
     await _settle(tester);
     expect(find.text('Artist'), findsWidgets);
     expect(find.textContaining('2 album, 4 brani'), findsOneWidget);
-    expect(find.byType(PlayCircleButton), findsOneWidget);
+    expect(find.widgetWithText(FilledButton, 'Riproduci'), findsOneWidget);
+    expect(find.widgetWithText(OutlinedButton, 'Casuale'), findsOneWidget);
     expect(find.text('Album 0'), findsOneWidget);
     expect(tester.takeException(), isNull);
     await h.dispose(tester);
@@ -146,7 +147,8 @@ void main() {
     await _settle(tester);
     expect(find.text('Notte'), findsWidgets);
     expect(find.text('Song 0'), findsOneWidget);
-    expect(find.byType(PlayCircleButton), findsOneWidget);
+    expect(find.widgetWithText(FilledButton, 'Riproduci'), findsOneWidget);
+    expect(find.widgetWithText(OutlinedButton, 'Casuale'), findsOneWidget);
     await tester.tap(find.byTooltip('Altre azioni'));
     await tester.pump(const Duration(milliseconds: 300));
     await tester.pump(const Duration(milliseconds: 300));
@@ -164,8 +166,23 @@ void main() {
     await _settle(tester);
     expect(find.text('Preferiti'), findsWidgets);
     expect(find.text('Nessun preferito ancora'), findsOneWidget);
-    expect(find.byType(PlayCircleButton), findsOneWidget);
+    expect(find.text('Riproduci'), findsNothing);
     expect(tester.takeException(), isNull);
+    await h.dispose(tester);
+  });
+
+  testWidgets('empty collection hides the pills, keeps the menu', (tester) async {
+    _phone(tester);
+    final h = await Harness.create(tester, tracks: 1);
+    final id = await tester.runAsync(() => PlaylistRepository(h.db).create('Vuota'));
+    await h.pump(
+        tester,
+        PlaylistDetailScreen(
+            playlist: Playlist(id: id!, name: 'Vuota', createdAt: 0, updatedAt: 0)));
+    await _settle(tester);
+    expect(find.text('Riproduci'), findsNothing);
+    expect(find.text('Casuale'), findsNothing);
+    expect(find.byTooltip('Altre azioni'), findsOneWidget);
     await h.dispose(tester);
   });
 }

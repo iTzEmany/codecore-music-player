@@ -15,6 +15,7 @@ import '../../widgets/alpha_scroller.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_state.dart';
 import '../../widgets/play_buttons.dart';
+import '../../widgets/shuffle_button.dart';
 import '../../widgets/selection_bar.dart';
 import '../../widgets/track_row.dart';
 import '../../widgets/track_row_selection.dart';
@@ -208,23 +209,26 @@ class _AllTracksScreenState extends ConsumerState<AllTracksScreen> {
                           horizontal: CcDims.margin,
                           vertical: 4,
                         ),
-                        child: Row(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Expanded(
-                              child: Text(
-                                l.tracksCount(list.length),
-                                style: theme.bodyMedium?.copyWith(
-                                  color: cc.textMuted,
-                                ),
+                            Text(
+                              l.tracksCount(list.length),
+                              style: theme.bodyMedium?.copyWith(
+                                color: cc.textMuted,
                               ),
                             ),
-                            ShuffleButton(
-                              onPressed: ctrl.toggleShuffle,
-                            ),
-                            PlayCircleButton(
-                              size: 44,
-                              onPressed: () =>
-                                  ctrl.playAll(list, context: ctx),
+                            const SizedBox(height: 8),
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: [
+                                PlayPill(
+                                  onPressed: () =>
+                                      ctrl.playAll(list, context: ctx),
+                                ),
+                                ShufflePill(onPressed: ctrl.toggleShuffle),
+                              ],
                             ),
                           ],
                         ),

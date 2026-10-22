@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../l10n/l10n_ext.dart';
 import '../theme/tokens.dart';
 import 'play_buttons.dart';
+import 'shuffle_button.dart';
 
 /// Page of one collection (album, artist, playlist, favourites): a pinned bar
 /// whose title appears while scrolling, the cover at the left of name and meta
@@ -110,14 +111,14 @@ class _CollectionScaffoldState extends State<CollectionScaffold> {
             key: const ValueKey('collection-cover'),
             child: widget.cover!(coverSize),
           );
-    final actions = Row(
+    final actions = Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      crossAxisAlignment: WrapCrossAlignment.center,
       children: [
+        if (widget.onPlay != null) PlayPill(onPressed: widget.onPlay),
+        if (widget.onShuffle != null) ShufflePill(onPressed: widget.onShuffle),
         ?widget.menu,
-        const Spacer(),
-        if (widget.onShuffle != null)
-          ShuffleButton(onPressed: widget.onShuffle),
-        const SizedBox(width: 8),
-        PlayCircleButton(size: 56, onPressed: widget.onPlay),
       ],
     );
     return Scaffold(
