@@ -165,7 +165,7 @@ void main() {
     await h.pump(tester, const FavoritesScreen());
     await _settle(tester);
     expect(find.text('Preferiti'), findsWidgets);
-    expect(find.text('Nessun preferito ancora'), findsOneWidget);
+    expect(find.text('Nessun preferito, per ora'), findsOneWidget);
     expect(find.text('Riproduci'), findsNothing);
     expect(tester.takeException(), isNull);
     await h.dispose(tester);

@@ -203,6 +203,16 @@ class AppLocalizationsPt extends AppLocalizations {
   String get noFavorites => 'Ainda sem favoritos';
 
   @override
+  String get favoritesEmptyTitle => 'Ainda não há favoritos';
+
+  @override
+  String get favoritesEmptyHelp =>
+      'Toque no coração de uma música e ela aparece aqui.';
+
+  @override
+  String get openAllTracks => 'Abrir todas as músicas';
+
+  @override
   String get newPlaylist => 'Nova playlist';
 
   @override

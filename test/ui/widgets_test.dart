@@ -2,6 +2,7 @@ import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/l10n/app_localizations.dart';
 import 'package:codecore/ui/theme/app_theme.dart';
 import 'package:codecore/ui/theme/tokens.dart';
+import 'package:codecore/ui/widgets/empty_state.dart';
 import 'package:codecore/ui/widgets/artist_avatar.dart';
 import 'package:codecore/ui/widgets/playlist_cover.dart';
 import 'package:codecore/ui/widgets/quality_tag.dart';
@@ -79,6 +80,24 @@ void main() {
     expect(find.byIcon(Icons.favorite_rounded), findsOneWidget);
     await _pump(tester, TrackRow(track: _track(), onTap: () {}));
     expect(find.byIcon(Icons.favorite_rounded), findsNothing);
+  });
+
+  testWidgets('EmptyState: top left, no icon, one filled action', (
+    tester,
+  ) async {
+    await _pump(
+      tester,
+      EmptyState(
+        icon: Icons.favorite_border_rounded,
+        message: 'Niente qui',
+        help: 'Aiuto',
+        actionLabel: 'A',
+        onAction: () {},
+      ),
+    );
+    expect(find.byIcon(Icons.favorite_border_rounded), findsNothing);
+    expect(find.widgetWithText(FilledButton, 'A'), findsOneWidget);
+    expect(tester.getTopLeft(find.text('Niente qui')).dx, CcDims.margin);
   });
 
   testWidgets('dot only on the current row', (tester) async {

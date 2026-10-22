@@ -13,27 +13,18 @@ class ErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cc = context.cc;
-    return Center(
+    return Align(
+      alignment: Alignment.topLeft,
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.fromLTRB(CcDims.margin, 24, CcDims.margin, 0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(Icons.error_outline_rounded, size: 48, color: cc.error),
-            const SizedBox(height: 12),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyLarge
-                  ?.copyWith(fontWeight: FontWeight.w500),
-            ),
+            Text(message, style: Theme.of(context).textTheme.titleSmall),
             if (onRetry != null) ...[
               const SizedBox(height: 16),
-              OutlinedButton(
-                onPressed: onRetry,
-                child: Text(context.l10n.retry),
-              ),
+              FilledButton(onPressed: onRetry, child: Text(context.l10n.retry)),
             ],
           ],
         ),

@@ -206,6 +206,16 @@ class AppLocalizationsFr extends AppLocalizations {
   String get noFavorites => 'Aucun favori pour l’instant';
 
   @override
+  String get favoritesEmptyTitle => 'Aucun favori pour l’instant';
+
+  @override
+  String get favoritesEmptyHelp =>
+      'Touchez le cœur sur un titre et il apparaîtra ici.';
+
+  @override
+  String get openAllTracks => 'Ouvrir tous les titres';
+
+  @override
   String get newPlaylist => 'Nouvelle playlist';
 
   @override

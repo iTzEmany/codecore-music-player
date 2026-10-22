@@ -418,6 +418,24 @@ abstract class AppLocalizations {
   /// **'Nessun preferito ancora'**
   String get noFavorites;
 
+  /// No description provided for @favoritesEmptyTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Nessun preferito, per ora'**
+  String get favoritesEmptyTitle;
+
+  /// No description provided for @favoritesEmptyHelp.
+  ///
+  /// In it, this message translates to:
+  /// **'Tocca il cuore su un brano e lo trovi qui.'**
+  String get favoritesEmptyHelp;
+
+  /// No description provided for @openAllTracks.
+  ///
+  /// In it, this message translates to:
+  /// **'Apri tutti i brani'**
+  String get openAllTracks;
+
   /// No description provided for @newPlaylist.
   ///
   /// In it, this message translates to:

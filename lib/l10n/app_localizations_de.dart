@@ -203,6 +203,16 @@ class AppLocalizationsDe extends AppLocalizations {
   String get noFavorites => 'Noch keine Favoriten';
 
   @override
+  String get favoritesEmptyTitle => 'Noch keine Favoriten';
+
+  @override
+  String get favoritesEmptyHelp =>
+      'Tippe auf das Herz bei einem Titel, dann findest du ihn hier.';
+
+  @override
+  String get openAllTracks => 'Alle Titel öffnen';
+
+  @override
   String get newPlaylist => 'Neue Playlist';
 
   @override

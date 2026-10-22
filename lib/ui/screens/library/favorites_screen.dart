@@ -9,12 +9,15 @@ import '../../../providers/settings_providers.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/collection_header.dart';
+import '../../shell/shell_nav.dart';
+import '../../widgets/empty_state.dart';
 import '../../widgets/error_state.dart';
 import '../../widgets/playlist_cover.dart';
 import '../../widgets/selection_bar.dart';
 import '../../widgets/track_row.dart';
 import '../../widgets/track_row_selection.dart';
 import 'album_detail_screen.dart' show collectionMeta;
+import 'all_tracks_screen.dart';
 import '../../widgets/motion.dart';
 
 /// The favourites as a collection page (pinned in the Library).
@@ -37,7 +40,6 @@ class FavoritesScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
-    final cc = context.cc;
     final tracks = ref.watch(tracksProvider(true));
     final query = ref.watch(trackQueryProvider(true));
     final compact = ref.watch(settingsProvider).compactMode;
@@ -64,9 +66,7 @@ class FavoritesScreen extends ConsumerWidget {
         onPlay: list.isEmpty
             ? null
             : () => ctrl.playAll(list, context: playCtx),
-        onShuffle: list.isEmpty
-            ? null
-            : ctrl.toggleShuffle,
+        onShuffle: list.isEmpty ? null : ctrl.toggleShuffle,
         menu: PopupMenuButton<SortOption>(
           tooltip: l.sortBy,
           icon: const Icon(Icons.sort_rounded),
@@ -94,19 +94,13 @@ class FavoritesScreen extends ConsumerWidget {
             )
           else if (tracks.hasValue && list.isEmpty)
             SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.all(32),
-                child: Column(
-                  children: [
-                    Icon(
-                      Icons.favorite_border_rounded,
-                      size: 56,
-                      color: cc.textFaint,
-                    ),
-                    const SizedBox(height: 12),
-                    Text(l.noFavorites, textAlign: TextAlign.center),
-                  ],
-                ),
+              child: EmptyState(
+                icon: Icons.favorite_border_rounded,
+                message: l.favoritesEmptyTitle,
+                help: l.favoritesEmptyHelp,
+                actionLabel: l.openAllTracks,
+                onAction: () =>
+                    ShellNav.open<void>(context, const AllTracksScreen()),
               ),
             )
           else

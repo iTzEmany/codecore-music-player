@@ -18,6 +18,7 @@ import '../../widgets/collection_header.dart';
 import '../../shell/shell_nav.dart';
 import '../../widgets/bulk_actions.dart';
 import '../../widgets/confirm.dart';
+import '../../widgets/empty_state.dart';
 import '../../widgets/playlist_cover.dart';
 import '../../widgets/track_actions.dart';
 import '../../widgets/selection_bar.dart';
@@ -80,7 +81,6 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    final cc = context.cc;
     final id = widget.playlist.id;
     final tracks =
         ref.watch(playlistTracksProvider(id)).value ?? const <Track>[];
@@ -142,23 +142,12 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
     final Widget list;
     if (tracks.isEmpty) {
       list = SliverToBoxAdapter(
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: Column(
-            children: [
-              Icon(Icons.queue_music_rounded, size: 56, color: cc.textFaint),
-              const SizedBox(height: 12),
-              Text(l.noTracksInPlaylist, textAlign: TextAlign.center),
-              const SizedBox(height: 16),
-              FilledButton(
-                onPressed: () => ShellNav.open<void>(
-                  context,
-                  AddTracksScreen(playlistId: id),
-                ),
-                child: Text(l.addSongs),
-              ),
-            ],
-          ),
+        child: EmptyState(
+          icon: Icons.queue_music_rounded,
+          message: l.noTracksInPlaylist,
+          actionLabel: l.addSongs,
+          onAction: () =>
+              ShellNav.open<void>(context, AddTracksScreen(playlistId: id)),
         ),
       );
     } else if (_editing) {
