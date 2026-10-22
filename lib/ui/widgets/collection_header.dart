@@ -157,13 +157,7 @@ class CollectionHeader extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(
-          name,
-          key: const ValueKey('collection-name'),
-          maxLines: 3,
-          overflow: TextOverflow.ellipsis,
-          style: wide ? theme.displaySmall : theme.headlineSmall,
-        ),
+        _FittedName(name, wide ? theme.displaySmall! : theme.headlineSmall!),
         if (subtitle != null) ...[
           const SizedBox(height: 6),
           DefaultTextStyle.merge(
@@ -225,6 +219,46 @@ class CollectionHeader extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// The collection name: when its longest word does not fit the width, the font
+/// shrinks (down to half) so no word is broken in two; past that, it wraps.
+class _FittedName extends StatelessWidget {
+  const _FittedName(this.name, this.style);
+
+  final String name;
+  final TextStyle style;
+
+  @override
+  Widget build(BuildContext context) {
+    final scaler = MediaQuery.textScalerOf(context);
+    final dir = Directionality.of(context);
+    return LayoutBuilder(
+      builder: (context, box) {
+        var longest = 0.0;
+        for (final word in name.split(RegExp(r'\s+'))) {
+          if (word.isEmpty) continue;
+          final p = TextPainter(
+            text: TextSpan(text: word, style: style),
+            textDirection: dir,
+            textScaler: scaler,
+          )..layout();
+          if (p.width > longest) longest = p.width;
+          p.dispose();
+        }
+        final k = longest > box.maxWidth && longest > 0
+            ? (box.maxWidth / longest).clamp(0.5, 1.0)
+            : 1.0;
+        return Text(
+          name,
+          key: const ValueKey('collection-name'),
+          maxLines: 3,
+          overflow: TextOverflow.ellipsis,
+          style: k < 1 ? style.copyWith(fontSize: style.fontSize! * k) : style,
+        );
+      },
     );
   }
 }

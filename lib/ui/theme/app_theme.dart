@@ -192,12 +192,23 @@ ThemeData buildThemeFromColors(CcColors c, bool compact, {bool pageBackdrop = fa
       shape: pill,
       side: BorderSide.none,
       backgroundColor: c.surface2,
-      selectedColor: c.accent,
+      selectedColor: c.text,
       disabledColor: c.surface1,
       labelStyle: text.labelLarge,
-      secondaryLabelStyle: text.labelLarge?.copyWith(color: c.onAccent),
-      checkmarkColor: c.onAccent,
+      secondaryLabelStyle: text.labelLarge?.copyWith(color: c.bg),
+      checkmarkColor: c.bg,
       showCheckmark: false,
+    ),
+    segmentedButtonTheme: SegmentedButtonThemeData(
+      style: ButtonStyle(
+        side: const WidgetStatePropertyAll(BorderSide.none),
+        backgroundColor: WidgetStateProperty.resolveWith(
+          (s) => s.contains(WidgetState.selected) ? c.text : c.surface2,
+        ),
+        foregroundColor: WidgetStateProperty.resolveWith(
+          (s) => s.contains(WidgetState.selected) ? c.bg : c.text,
+        ),
+      ),
     ),
     sliderTheme: SliderThemeData(
       trackHeight: 4,
