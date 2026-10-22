@@ -1,3 +1,4 @@
+import 'package:codecore/providers/second_opinion_providers.dart';
 import 'package:codecore/ui/screens/library/review_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -10,6 +11,20 @@ Future<void> _settle(WidgetTester tester) async {
   );
   await tester.pump(const Duration(milliseconds: 300));
   await tester.pump(const Duration(milliseconds: 300));
+}
+
+/// A job whose state the test sets by hand; it never touches the network.
+class _FakeJob extends SecondOpinionNotifier {
+  int cancelled = 0;
+
+  @override
+  Future<void> run(List<int> ids, {bool force = false}) async {}
+
+  @override
+  void cancel() => cancelled++;
+
+  // ignore: use_setters_to_change_properties
+  void set(SecondOpinionState s) => state = s;
 }
 
 void main() {
@@ -92,4 +107,28 @@ void main() {
       await h.dispose(tester);
     },
   );
+
+  testWidgets('second-opinion row shows the progress and Ferma, goes away at the end with a snackbar', (tester) async {
+    tester.view.physicalSize = const Size(800, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final h = await Harness.create(tester, tracks: 1);
+    final job = _FakeJob();
+    await h.pump(tester, const ReviewScreen(),
+        extraOverrides: [secondOpinionJobProvider.overrideWith(() => job)]);
+    expect(find.byKey(const ValueKey('review-second-opinion')), findsNothing);
+
+    job.set(const SecondOpinionState(running: true, done: 3, total: 12));
+    await tester.pump();
+    expect(find.text('Controllo con YouTube Music, 3 di 12'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('review-second-opinion-stop')));
+    expect(job.cancelled, 1);
+
+    job.set(const SecondOpinionState(done: 12, total: 12, updated: 5));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.byKey(const ValueKey('review-second-opinion')), findsNothing);
+    expect(find.text('Aggiornati 5 brani con YouTube Music'), findsOneWidget);
+    await h.dispose(tester);
+  });
 }

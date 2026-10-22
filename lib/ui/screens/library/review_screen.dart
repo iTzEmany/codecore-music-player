@@ -6,6 +6,7 @@ import '../../../data/db/app_database.dart';
 import '../../../data/repositories/review_queries.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/review_providers.dart';
+import '../../../providers/second_opinion_providers.dart';
 import '../../../providers/selection_providers.dart';
 import '../../../providers/settings_providers.dart';
 import '../../theme/app_theme.dart';
@@ -127,6 +128,13 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
+    // The end of a run: say what it did (nothing when it changed nothing).
+    ref.listen(secondOpinionJobProvider, (prev, next) {
+      if (prev == null || !prev.running || next.running) return;
+      if (next.updated > 0) _snack(l.reviewSecondOpinionDone(next.updated));
+      if (next.throttled) _snack(l.reviewSecondOpinionThrottled);
+    });
+    final job = ref.watch(secondOpinionJobProvider);
     final all = ref.watch(reviewTracksProvider).value ?? const <Track>[];
     final reasons = {for (final t in all) t.id: reviewReasons(t)};
     final tracks = [
@@ -171,6 +179,27 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
             : AppBar(title: Text(l.reviewTitle)),
         body: Column(
           children: [
+            if (job.running)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(CcDims.margin, 0, CcDims.margin, 4),
+                child: Row(
+                  key: const ValueKey('review-second-opinion'),
+                  children: [
+                    Expanded(
+                      child: Text(
+                        l.reviewSecondOpinionProgress(job.done, job.total),
+                        style: Theme.of(context).textTheme.bodyMedium
+                            ?.copyWith(color: context.cc.textMuted),
+                      ),
+                    ),
+                    TextButton(
+                      key: const ValueKey('review-second-opinion-stop'),
+                      onPressed: ref.read(secondOpinionJobProvider.notifier).cancel,
+                      child: Text(l.reviewSecondOpinionStop),
+                    ),
+                  ],
+                ),
+              ),
             Padding(
               padding: const EdgeInsets.fromLTRB(CcDims.margin, 4, CcDims.margin, 8),
               child: Wrap(

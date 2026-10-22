@@ -4197,6 +4197,32 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
+  String reviewSecondOpinionProgress(int done, int total) {
+    return 'Verificação com o YouTube Music, $done de $total';
+  }
+
+  @override
+  String get reviewSecondOpinionStop => 'Parar';
+
+  @override
+  String reviewSecondOpinionDone(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count faixas atualizadas com o YouTube Music',
+      one: '1 faixa atualizada com o YouTube Music',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get reviewSecondOpinionThrottled =>
+      'O YouTube Music pediu para ir mais devagar: as faixas restantes serão verificadas mais tarde';
+
+  @override
+  String get curiositySourceDiscogs => 'Do álbum, via Discogs';
+
+  @override
   String get navMemory => 'Armazenamento';
 
   @override

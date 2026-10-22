@@ -6519,6 +6519,36 @@ abstract class AppLocalizations {
   /// **'{count, plural, one{1 brano tolto dall\'elenco} other{{count} brani tolti dall\'elenco}}'**
   String reviewDismissed(int count);
 
+  /// No description provided for @reviewSecondOpinionProgress.
+  ///
+  /// In it, this message translates to:
+  /// **'Controllo con YouTube Music, {done} di {total}'**
+  String reviewSecondOpinionProgress(int done, int total);
+
+  /// No description provided for @reviewSecondOpinionStop.
+  ///
+  /// In it, this message translates to:
+  /// **'Ferma'**
+  String get reviewSecondOpinionStop;
+
+  /// No description provided for @reviewSecondOpinionDone.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, one{Aggiornato 1 brano con YouTube Music} other{Aggiornati {count} brani con YouTube Music}}'**
+  String reviewSecondOpinionDone(int count);
+
+  /// No description provided for @reviewSecondOpinionThrottled.
+  ///
+  /// In it, this message translates to:
+  /// **'YouTube Music ha chiesto di rallentare: i brani rimasti si controlleranno più tardi'**
+  String get reviewSecondOpinionThrottled;
+
+  /// No description provided for @curiositySourceDiscogs.
+  ///
+  /// In it, this message translates to:
+  /// **'Dall\'album, da Discogs'**
+  String get curiositySourceDiscogs;
+
   /// No description provided for @navMemory.
   ///
   /// In it, this message translates to:

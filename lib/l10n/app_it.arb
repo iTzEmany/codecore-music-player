@@ -2713,6 +2713,28 @@
       }
     }
   },
+  "reviewSecondOpinionProgress": "Controllo con YouTube Music, {done} di {total}",
+  "@reviewSecondOpinionProgress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "reviewSecondOpinionStop": "Ferma",
+  "reviewSecondOpinionDone": "{count, plural, one{Aggiornato 1 brano con YouTube Music} other{Aggiornati {count} brani con YouTube Music}}",
+  "@reviewSecondOpinionDone": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reviewSecondOpinionThrottled": "YouTube Music ha chiesto di rallentare: i brani rimasti si controlleranno più tardi",
+  "curiositySourceDiscogs": "Dall'album, da Discogs",
   "navMemory": "Memoria",
   "memoryMusicLabel": "Musica",
   "memoryOtherLabel": "Altro",

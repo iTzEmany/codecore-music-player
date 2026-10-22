@@ -2368,6 +2368,28 @@
       }
     }
   },
+  "reviewSecondOpinionProgress": "Prüfung mit YouTube Music, {done} von {total}",
+  "@reviewSecondOpinionProgress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "reviewSecondOpinionStop": "Stopp",
+  "reviewSecondOpinionDone": "{count, plural, one{1 Titel mit YouTube Music aktualisiert} other{{count} Titel mit YouTube Music aktualisiert}}",
+  "@reviewSecondOpinionDone": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reviewSecondOpinionThrottled": "YouTube Music hat um langsamere Anfragen gebeten: die übrigen Titel werden später geprüft",
+  "curiositySourceDiscogs": "Vom Album, über Discogs",
   "navMemory": "Speicher",
   "memoryMusicLabel": "Musik",
   "memoryOtherLabel": "Sonstiges",
