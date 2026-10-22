@@ -63,7 +63,7 @@ void main() {
 
     expect(find.text('Importa playlist'), findsOneWidget);
     expect(find.widgetWithText(TextField, 'Just a mood'), findsOneWidget);
-    expect(find.text('34 brani · 1 già in libreria · 33 da scaricare'),
+    expect(find.text('34 brani, 1 già in libreria, 33 da scaricare'),
         findsOneWidget);
     expect(find.textContaining('Tempo stimato'), findsOneWidget);
     expect(find.text('Esiste già una playlist con questo nome'), findsNothing);

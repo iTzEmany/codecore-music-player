@@ -48,9 +48,9 @@ void main() {
     await tester.tap(find.byType(ActivityButton));
     await tester.pump(const Duration(milliseconds: 400));
     expect(find.text('Attività'), findsOneWidget);
-    expect(find.text('Scansione · 1240/3400'), findsOneWidget);
-    expect(find.text('Download · Una canzone'), findsOneWidget);
-    expect(find.text('Arricchimento · 2/8'), findsOneWidget);
+    expect(find.text('Scansione: 1240 di 3400'), findsOneWidget);
+    expect(find.text('Download, Una canzone'), findsOneWidget);
+    expect(find.text('Arricchimento: 2 di 8'), findsOneWidget);
     expect(find.text('Finita'), findsNothing, reason: 'what ended goes to the Registro');
     expect(find.text('Registro'), findsOneWidget);
     expect(tester.takeException(), isNull);

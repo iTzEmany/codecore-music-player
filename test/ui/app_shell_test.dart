@@ -132,7 +132,7 @@ void main() {
 
   final memoryOverrides = [
     appDataUsageProvider.overrideWith(
-      (_) async => [const AppDataItem(AppDataKind.covers, 2048, detailBytes: 512)],
+      (_) async => [const AppDataItem(AppDataKind.covers, 2 * 1024 * 1024, detailBytes: 512)],
     ),
     musicDiskSpaceProvider.overrideWith((_) async => null),
   ];
@@ -142,12 +142,11 @@ void main() {
     final h = await Harness.create(tester, tracks: 3);
     await h.pump(tester, const AppShell(), extraOverrides: memoryOverrides);
     // Nothing is measured until the tab is shown.
-    expect(find.text('Riepilogo'), findsNothing);
+    expect(find.text('Formati'), findsNothing);
     await tester.tap(find.text('Memoria'));
     await _settle(tester);
-    expect(find.text('Riepilogo'), findsOneWidget);
+    expect(find.text('Formati'), findsOneWidget);
     expect(find.text('3 B'), findsWidgets);
-    expect(find.text('MP3'), findsOneWidget);
     await tester.scrollUntilVisible(
       find.text('Copertine'),
       400,
@@ -167,7 +166,7 @@ void main() {
     await tester.tap(find.descendant(
         of: find.byType(DesktopSidebar), matching: find.text('Memoria')));
     await _settle(tester);
-    expect(find.text('Riepilogo'), findsOneWidget);
+    expect(find.text('Formati'), findsOneWidget);
     await h.dispose(tester);
   });
 

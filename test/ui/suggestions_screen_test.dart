@@ -41,8 +41,8 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
 
     expect(find.text('New one'), findsOneWidget);
-    expect(find.text('simile a «Seed B» · In coda'), findsOneWidget);
-    expect(find.text('simile a «Seed A» · Non mi piace'), findsOneWidget);
+    expect(find.text('simile a «Seed B», In coda'), findsOneWidget);
+    expect(find.text('simile a «Seed A», Non mi piace'), findsOneWidget);
     expect(tester.getTopLeft(find.text('New one')).dy,
         lessThan(tester.getTopLeft(find.text('Old one')).dy));
 
