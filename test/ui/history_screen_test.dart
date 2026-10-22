@@ -2,6 +2,7 @@ import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/data/repositories/play_history_repository.dart';
 import 'package:codecore/data/settings/settings_store.dart';
 import 'package:codecore/ui/screens/history/history_screen.dart';
+import 'package:codecore/ui/screens/settings/settings_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -96,6 +97,15 @@ void main() {
 
     await open(tester, withData: false, recordHistory: false);
     expect(find.textContaining('cronologia è spenta'), findsOneWidget);
+    await h.dispose(tester);
+  });
+
+  testWidgets('history off: button opens the playback page', (tester) async {
+    await open(tester, withData: false, recordHistory: false);
+    await tester.tap(find.widgetWithText(FilledButton, 'Apri Riproduzione'));
+    await tester.pumpAndSettle();
+    expect(find.byType(SettingsPageView), findsOneWidget);
+    expect(find.text('Registra la cronologia di ascolto'), findsOneWidget);
     await h.dispose(tester);
   });
 }

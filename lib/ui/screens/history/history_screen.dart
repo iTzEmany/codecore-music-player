@@ -10,10 +10,12 @@ import '../../../providers/player_providers.dart';
 import '../../../providers/settings_providers.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/tokens.dart';
+import '../../shell/shell_nav.dart';
 import '../../widgets/confirm.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_state.dart';
 import '../../widgets/track_row.dart';
+import '../settings/settings_screen.dart';
 
 const _block = 200;
 const _headerExtent = 44.0;
@@ -115,6 +117,16 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
             return EmptyState(
               icon: Icons.history_rounded,
               message: on ? l.historyEmpty : l.historyOff,
+              actionLabel: on ? null : l.openPlaybackSettings,
+              onAction: on
+                  ? null
+                  : () => ShellNav.open<void>(
+                        context,
+                        Scaffold(
+                          appBar: AppBar(title: Text(l.navSettings)),
+                          body: const SettingsScreen(initial: SettingsPage.playback),
+                        ),
+                      ),
             );
           }
           final items = groupHistoryByDay(entries);

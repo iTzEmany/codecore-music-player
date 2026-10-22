@@ -418,6 +418,16 @@ class TrackRepository {
     return row.read(c) ?? 0;
   }
 
+  /// Live [countAll].
+  Stream<int> watchCount() {
+    final c = _db.tracks.id.count();
+    return (_db.selectOnly(_db.tracks)
+          ..addColumns([c])
+          ..where(_db.tracks.kind.equals(0)))
+        .watchSingle()
+        .map((r) => r.read(c) ?? 0);
+  }
+
   static String _escapeLike(String s) => s
       .replaceAll(r'\', r'\\')
       .replaceAll('%', r'\%')

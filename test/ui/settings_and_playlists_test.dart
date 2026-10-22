@@ -14,12 +14,9 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     final h = await Harness.create(tester);
-    await h.pump(tester, const Scaffold(body: SettingsScreen()));
+    await h.pump(tester, const Scaffold(body: SettingsScreen(initial: SettingsPage.appearance)));
     expect(find.text('Aspetto'), findsOneWidget);
     expect(find.text('Italiano'), findsOneWidget);
-    expect(find.text('Arricchimento automatico'), findsOneWidget);
-    expect(find.text('Crea backup'), findsOneWidget);
-    expect(find.text('Ripristina da backup'), findsWidgets);
     expect(find.text('Notte viola'), findsOneWidget);
     await tester.tap(find.text('Nero puro'));
     await tester.pump();
@@ -35,7 +32,7 @@ void main() {
     addTearDown(tester.view.reset);
     final h = await Harness.create(tester, tracks: 2);
     await tester.runAsync(() => h.db.customUpdate("UPDATE tracks SET ignored = 1 WHERE title = 'Song 0'"));
-    await h.pump(tester, const Scaffold(body: SettingsScreen()));
+    await h.pump(tester, const Scaffold(body: SettingsScreen(initial: SettingsPage.library)));
     await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 100)));
     await tester.pump(const Duration(milliseconds: 300));
     expect(find.text('Pulizia libreria'), findsOneWidget);

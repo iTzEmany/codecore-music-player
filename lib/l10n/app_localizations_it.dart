@@ -383,6 +383,69 @@ class AppLocalizationsIt extends AppLocalizations {
   String get settingsOnline => 'Online';
 
   @override
+  String get settingsPageAppearance => 'Aspetto e lingua';
+
+  @override
+  String get settingsPagePlayback => 'Riproduzione';
+
+  @override
+  String get settingsPageLibrary => 'Libreria';
+
+  @override
+  String get settingsPageOnline => 'Online e download';
+
+  @override
+  String get settingsPageNetwork => 'Rete e dispositivi';
+
+  @override
+  String get settingsPageBackup => 'Backup';
+
+  @override
+  String get settingsPageAdvanced => 'Avanzate e info';
+
+  @override
+  String summaryLibrary(int folders, int tracks) {
+    String _temp0 = intl.Intl.pluralLogic(
+      folders,
+      locale: localeName,
+      other: '$folders cartelle',
+      one: '1 cartella',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      tracks,
+      locale: localeName,
+      other: '$tracks brani',
+      one: '1 brano',
+    );
+    return '$_temp0, $_temp1';
+  }
+
+  @override
+  String summaryTrusted(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count dispositivi fidati',
+      one: '1 dispositivo fidato',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get summaryNormalizeOn => 'normalizzazione accesa';
+
+  @override
+  String get summaryBackup => 'Esporta e ripristina la libreria';
+
+  @override
+  String summaryCrossfade(int seconds) {
+    return '$seconds s';
+  }
+
+  @override
+  String get openPlaybackSettings => 'Apri Riproduzione';
+
+  @override
   String get autoEnrich => 'Arricchimento automatico';
 
   @override
@@ -1732,7 +1795,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get ytErrToolOutdated =>
-      'yt-dlp è troppo vecchio: aggiornalo (Impostazioni → Download → Aggiorna) e riprova';
+      'yt-dlp è troppo vecchio: aggiornalo (Impostazioni, Online e download, Aggiorna) e riprova';
 
   @override
   String ytDlpOutdatedBanner(String version) {
@@ -2665,7 +2728,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get historyOff =>
-      'La cronologia è spenta: attivala in Impostazioni → Riproduzione.';
+      'La cronologia è spenta: attivala in Impostazioni, Riproduzione.';
 
   @override
   String get historyClear => 'Cancella cronologia';

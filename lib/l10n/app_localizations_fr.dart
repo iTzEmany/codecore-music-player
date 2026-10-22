@@ -386,6 +386,69 @@ class AppLocalizationsFr extends AppLocalizations {
   String get settingsOnline => 'En ligne';
 
   @override
+  String get settingsPageAppearance => 'Apparence et langue';
+
+  @override
+  String get settingsPagePlayback => 'Lecture';
+
+  @override
+  String get settingsPageLibrary => 'Bibliothèque';
+
+  @override
+  String get settingsPageOnline => 'En ligne et téléchargements';
+
+  @override
+  String get settingsPageNetwork => 'Réseau et appareils';
+
+  @override
+  String get settingsPageBackup => 'Sauvegarde';
+
+  @override
+  String get settingsPageAdvanced => 'Avancé et infos';
+
+  @override
+  String summaryLibrary(int folders, int tracks) {
+    String _temp0 = intl.Intl.pluralLogic(
+      folders,
+      locale: localeName,
+      other: '$folders dossiers',
+      one: '1 dossier',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      tracks,
+      locale: localeName,
+      other: '$tracks titres',
+      one: '1 titre',
+    );
+    return '$_temp0, $_temp1';
+  }
+
+  @override
+  String summaryTrusted(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count appareils de confiance',
+      one: '1 appareil de confiance',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get summaryNormalizeOn => 'normalisation activée';
+
+  @override
+  String get summaryBackup => 'Exporter et restaurer la bibliothèque';
+
+  @override
+  String summaryCrossfade(int seconds) {
+    return '$seconds s';
+  }
+
+  @override
+  String get openPlaybackSettings => 'Ouvrir Lecture';
+
+  @override
   String get autoEnrich => 'Enrichissement automatique';
 
   @override
@@ -1742,7 +1805,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get ytErrToolOutdated =>
-      'yt-dlp est trop ancien : mettez-le à jour (Paramètres → Téléchargements → Mettre à jour) et réessayez';
+      'yt-dlp est trop ancien : mettez-le à jour (Paramètres, En ligne et téléchargements, Mettre à jour) et réessayez';
 
   @override
   String ytDlpOutdatedBanner(String version) {
@@ -2692,7 +2755,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get historyOff =>
-      'L’historique est désactivé : activez-le dans Paramètres → Lecture.';
+      'L’historique est désactivé : activez-le dans Paramètres, Lecture.';
 
   @override
   String get historyClear => 'Effacer l’historique';

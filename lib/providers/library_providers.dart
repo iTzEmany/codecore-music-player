@@ -91,6 +91,11 @@ final tracksProvider = StreamProvider.family<List<Track>, bool>((ref, fav) {
       .watchTracks(query: q.text, sort: q.sort, favoritesOnly: q.favoritesOnly);
 });
 
+/// All music tracks, whatever the Library search says.
+final trackCountProvider = StreamProvider<int>(
+  (ref) => ref.watch(trackRepositoryProvider).watchCount(),
+);
+
 final foldersProvider = StreamProvider<List<Folder>>(
   (ref) => ref.watch(folderRepositoryProvider).watchAll(),
 );

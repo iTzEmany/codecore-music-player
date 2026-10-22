@@ -730,6 +730,84 @@ abstract class AppLocalizations {
   /// **'Online'**
   String get settingsOnline;
 
+  /// No description provided for @settingsPageAppearance.
+  ///
+  /// In it, this message translates to:
+  /// **'Aspetto e lingua'**
+  String get settingsPageAppearance;
+
+  /// No description provided for @settingsPagePlayback.
+  ///
+  /// In it, this message translates to:
+  /// **'Riproduzione'**
+  String get settingsPagePlayback;
+
+  /// No description provided for @settingsPageLibrary.
+  ///
+  /// In it, this message translates to:
+  /// **'Libreria'**
+  String get settingsPageLibrary;
+
+  /// No description provided for @settingsPageOnline.
+  ///
+  /// In it, this message translates to:
+  /// **'Online e download'**
+  String get settingsPageOnline;
+
+  /// No description provided for @settingsPageNetwork.
+  ///
+  /// In it, this message translates to:
+  /// **'Rete e dispositivi'**
+  String get settingsPageNetwork;
+
+  /// No description provided for @settingsPageBackup.
+  ///
+  /// In it, this message translates to:
+  /// **'Backup'**
+  String get settingsPageBackup;
+
+  /// No description provided for @settingsPageAdvanced.
+  ///
+  /// In it, this message translates to:
+  /// **'Avanzate e info'**
+  String get settingsPageAdvanced;
+
+  /// No description provided for @summaryLibrary.
+  ///
+  /// In it, this message translates to:
+  /// **'{folders, plural, =1{1 cartella} other{{folders} cartelle}}, {tracks, plural, =1{1 brano} other{{tracks} brani}}'**
+  String summaryLibrary(int folders, int tracks);
+
+  /// No description provided for @summaryTrusted.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, =1{1 dispositivo fidato} other{{count} dispositivi fidati}}'**
+  String summaryTrusted(int count);
+
+  /// No description provided for @summaryNormalizeOn.
+  ///
+  /// In it, this message translates to:
+  /// **'normalizzazione accesa'**
+  String get summaryNormalizeOn;
+
+  /// No description provided for @summaryBackup.
+  ///
+  /// In it, this message translates to:
+  /// **'Esporta e ripristina la libreria'**
+  String get summaryBackup;
+
+  /// No description provided for @summaryCrossfade.
+  ///
+  /// In it, this message translates to:
+  /// **'{seconds} s'**
+  String summaryCrossfade(int seconds);
+
+  /// No description provided for @openPlaybackSettings.
+  ///
+  /// In it, this message translates to:
+  /// **'Apri Riproduzione'**
+  String get openPlaybackSettings;
+
   /// No description provided for @autoEnrich.
   ///
   /// In it, this message translates to:
@@ -2995,7 +3073,7 @@ abstract class AppLocalizations {
   /// No description provided for @ytErrToolOutdated.
   ///
   /// In it, this message translates to:
-  /// **'yt-dlp è troppo vecchio: aggiornalo (Impostazioni → Download → Aggiorna) e riprova'**
+  /// **'yt-dlp è troppo vecchio: aggiornalo (Impostazioni, Online e download, Aggiorna) e riprova'**
   String get ytErrToolOutdated;
 
   /// No description provided for @ytDlpOutdatedBanner.
@@ -4459,7 +4537,7 @@ abstract class AppLocalizations {
   /// No description provided for @historyOff.
   ///
   /// In it, this message translates to:
-  /// **'La cronologia è spenta: attivala in Impostazioni → Riproduzione.'**
+  /// **'La cronologia è spenta: attivala in Impostazioni, Riproduzione.'**
   String get historyOff;
 
   /// No description provided for @historyClear.
