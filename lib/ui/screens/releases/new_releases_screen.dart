@@ -156,12 +156,9 @@ class _NewReleasesScreenState extends ConsumerState<NewReleasesScreen> {
                 ShellNav.open<void>(context, const FollowedArtistsScreen()),
           ),
           if (artists.length > 1)
-            SizedBox(
-              height: 48,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: CcDims.margin),
-                children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: CcDims.margin),
+              child: Wrap(spacing: 8, runSpacing: 8, children: [
                   _chip(
                     l.releasesAllArtists,
                     _artistId == null,
@@ -175,8 +172,7 @@ class _NewReleasesScreenState extends ConsumerState<NewReleasesScreen> {
                         () => _artistId = _artistId == e.key ? null : e.key,
                       ),
                     ),
-                ],
-              ),
+                ]),
             ),
           if (shown.isEmpty)
             SizedBox(
@@ -193,13 +189,10 @@ class _NewReleasesScreenState extends ConsumerState<NewReleasesScreen> {
     );
   }
 
-  Widget _chip(String label, bool selected, VoidCallback onTap) => Padding(
-    padding: const EdgeInsets.only(right: 8),
-    child: ChoiceChip(
-      label: Text(label),
-      selected: selected,
-      onSelected: (_) => onTap(),
-    ),
+  Widget _chip(String label, bool selected, VoidCallback onTap) => ChoiceChip(
+    label: Text(label),
+    selected: selected,
+    onSelected: (_) => onTap(),
   );
 }
 

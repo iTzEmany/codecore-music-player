@@ -163,26 +163,19 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
             : AppBar(title: Text(l.reviewTitle)),
         body: Column(
           children: [
-            SizedBox(
-              height: 48,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: CcDims.margin),
-                children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: CcDims.margin),
+              child: Wrap(spacing: 8, runSpacing: 8, children: [
                   for (final r in <ReviewReason?>[null, ...ReviewReason.values])
-                    Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: ChoiceChip(
-                        label: Text(_label(r)),
-                        selected: _filter == r,
-                        onSelected: (_) {
-                          notifier.clear();
-                          setState(() => _filter = r);
-                        },
-                      ),
+                    ChoiceChip(
+                      label: Text(_label(r)),
+                      selected: _filter == r,
+                      onSelected: (_) {
+                        notifier.clear();
+                        setState(() => _filter = r);
+                      },
                     ),
-                ],
-              ),
+                ]),
             ),
             Expanded(
               child: tracks.isEmpty

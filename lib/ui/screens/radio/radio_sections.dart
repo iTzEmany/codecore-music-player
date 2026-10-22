@@ -158,7 +158,7 @@ class NearYouSection extends ConsumerWidget {
     final header = SliverToBoxAdapter(
       child: SectionHeader(
         l.radioNearYou,
-        actionLabel: region == null ? l.radioChooseRegion : '${region.label} ▾',
+        actionLabel: region == null ? l.radioChooseRegion : region.label,
         onAction: () => RadioRegionSheet.show(context),
       ),
     );
@@ -204,26 +204,18 @@ class GenresSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SectionHeader(l.radioGenres),
-          SizedBox(
-            height: 44,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
+          Padding(
               padding: const EdgeInsets.symmetric(horizontal: CcDims.margin),
-              itemCount: kRadioGenreTags.length,
-              itemBuilder: (_, i) {
-                final tag = kRadioGenreTags[i];
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: ChoiceChip(
-                    key: ValueKey('genre-$tag'),
-                    label: Text(radioGenreLabel(l, tag)),
-                    selected: tag == selected,
-                    onSelected: (_) => onSelect(tag),
-                  ),
-                );
-              },
+              child: Wrap(spacing: 8, runSpacing: 8, children: [
+              for (final tag in kRadioGenreTags)
+                ChoiceChip(
+                  key: ValueKey('genre-$tag'),
+                  label: Text(radioGenreLabel(l, tag)),
+                  selected: tag == selected,
+                  onSelected: (_) => onSelect(tag),
+                ),
+            ]),
             ),
-          ),
         ],
       ),
     );

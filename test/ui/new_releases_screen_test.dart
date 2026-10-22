@@ -77,6 +77,11 @@ void main() {
     });
     expect(find.text('Volevo'), findsOneWidget);
     expect(find.text('Will of the People'), findsOneWidget);
+    expect(
+      find.ancestor(of: find.widgetWithText(ChoiceChip, 'Muse'), matching: find.byType(Wrap)),
+      findsOneWidget,
+      reason: 'artist chips wrap instead of scrolling',
+    );
     await tester.tap(find.widgetWithText(ChoiceChip, 'Muse'));
     await _settle(tester);
     expect(find.text('Volevo'), findsNothing);

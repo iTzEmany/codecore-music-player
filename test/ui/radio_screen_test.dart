@@ -46,8 +46,9 @@ void main() {
     Future<List<RadioStation>> Function(String)? search,
     Future<List<RadioStation>> Function(String)? genre,
     bool metered = false,
+    double height = 900,
   }) async {
-    tester.view.physicalSize = const Size(420, 900);
+    tester.view.physicalSize = Size(420, height);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     h = await Harness.create(tester, radio: true);
@@ -82,19 +83,19 @@ void main() {
     expect(find.text('Radio Vicina Uno'), findsNothing);
     await tester.tap(find.byKey(const ValueKey('region-lombardia')));
     await _settle(tester);
-    expect(find.text('Lombardia ▾'), findsOneWidget);
+    expect(find.text('Lombardia'), findsOneWidget);
     expect(find.text('Radio Vicina Uno'), findsOneWidget);
     await h.dispose(tester);
   });
 
   testWidgets('with a region: the sections come in order and «Le mie radio» is hidden when empty',
       (tester) async {
-    await open(tester);
+    await open(tester, height: 3000); // the wrapped genres push later sections down
     expect(find.text('Le mie radio'), findsNothing);
     double y(String t) => tester.getTopLeft(find.text(t)).dy;
     expect(y('Vicino a te'), lessThan(y('Generi')));
     expect(y('Generi'), lessThan(y('Le più ascoltate')));
-    expect(find.text('Lombardia ▾'), findsOneWidget);
+    expect(find.text('Lombardia'), findsOneWidget);
     expect(find.text('Radio Vicina Uno'), findsOneWidget);
     expect(find.text('Lombardia · MP3 · 128 kbps'), findsWidgets);
     await h.dispose(tester);
@@ -210,6 +211,11 @@ void main() {
 
   testWidgets('a genre chip lists that genre and can be closed', (tester) async {
     await open(tester);
+    expect(
+      find.ancestor(of: find.byKey(const ValueKey('genre-jazz')), matching: find.byType(Wrap)),
+      findsOneWidget,
+    );
+    expect(find.textContaining('▾'), findsNothing);
     await tester.ensureVisible(find.byKey(const ValueKey('genre-jazz')));
     await tester.pump();
     await tester.tap(find.byKey(const ValueKey('genre-jazz')));
@@ -224,7 +230,7 @@ void main() {
 
   testWidgets('the region sheet changes country and starts the choice again', (tester) async {
     await open(tester);
-    await tester.tap(find.text('Lombardia ▾'));
+    await tester.tap(find.text('Lombardia'));
     await _settle(tester);
     expect(find.byKey(const ValueKey('radio-country')), findsOneWidget);
     expect(find.text('Paese: Italia'), findsOneWidget);
@@ -233,7 +239,7 @@ void main() {
             of: find.byType(RadioRegionSheet), matching: find.byType(Scrollable)));
     await tester.tap(find.byKey(const ValueKey('region-piemonte')));
     await _settle(tester);
-    expect(find.text('Piemonte ▾'), findsOneWidget);
+    expect(find.text('Piemonte'), findsOneWidget);
     await h.dispose(tester);
   });
 }

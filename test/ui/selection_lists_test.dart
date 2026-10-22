@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/data/repositories/library_queries.dart';
+import 'package:codecore/data/repositories/track_repository.dart' show SortOption;
 import 'package:codecore/data/repositories/playlist_repository.dart';
 import 'package:codecore/providers/selection_providers.dart';
 import 'package:codecore/providers/youtube_providers.dart';
@@ -15,6 +16,7 @@ import 'package:codecore/ui/screens/library/favorites_screen.dart';
 import 'package:codecore/ui/screens/playlists/playlist_detail_screen.dart';
 import 'package:codecore/ui/screens/search/search_screen.dart';
 import 'package:codecore/ui/screens/youtube/online_results.dart';
+import 'package:codecore/ui/widgets/segmented_blocks.dart';
 import 'package:dio/dio.dart' show CancelToken;
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
@@ -93,6 +95,21 @@ void main() {
     await _settle(tester);
     expect(find.text('Tutti i brani'), findsOneWidget);
     expect(_sel(tester, AllTracksScreen, 'all').active, isFalse);
+    await h.dispose(tester);
+  });
+
+  testWidgets('all tracks sort is a block row', (tester) async {
+    _phone(tester);
+    final h = await Harness.create(tester, tracks: 4);
+    await h.pump(tester, const AllTracksScreen());
+    await _settle(tester);
+    SegmentedBlocks<SortOption> blocks() =>
+        tester.widget(find.byType(SegmentedBlocks<SortOption>));
+    expect(blocks().items, hasLength(4));
+    expect(blocks().selected, SortOption.defaultOrder);
+    await tester.tap(find.text('Artista'));
+    await _settle(tester);
+    expect(blocks().selected, SortOption.artist);
     await h.dispose(tester);
   });
 

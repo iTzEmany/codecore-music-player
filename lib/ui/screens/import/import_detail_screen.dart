@@ -123,29 +123,22 @@ class _ImportDetailScreenState extends ConsumerState<ImportDetailScreen> {
                 ],
               ),
             ),
-          SizedBox(
-            height: 48,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
+          Padding(
               padding: const EdgeInsets.symmetric(horizontal: CcDims.margin),
-              children: [
+              child: Wrap(spacing: 8, runSpacing: 8, children: [
                 for (final (f, label, n) in [
                   (_Filter.all, l.importFilterAll, rows.length),
                   (_Filter.active, l.importFilterActive, count((p) => p.active)),
                   (_Filter.problems, l.importFilterProblems, count((p) => p.problem)),
                   (_Filter.done, l.importFilterDone, count((p) => p.settled)),
                 ])
-                  Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: ChoiceChip(
-                      label: Text('$label · $n'),
-                      selected: _filter == f,
-                      onSelected: (_) => setState(() => _filter = f),
-                    ),
+                  ChoiceChip(
+                    label: Text('$label ($n)'),
+                    selected: _filter == f,
+                    onSelected: (_) => setState(() => _filter = f),
                   ),
-              ],
+              ]),
             ),
-          ),
           Expanded(
             child: shown.isEmpty
                 ? Center(child: Text(l.importRowsNone, style: theme.bodyMedium))

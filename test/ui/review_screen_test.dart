@@ -13,6 +13,34 @@ Future<void> _settle(WidgetTester tester) async {
 }
 
 void main() {
+  testWidgets('review chips wrap and picking clears the selection', (tester) async {
+    tester.view.physicalSize = const Size(360, 780);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final h = await Harness.create(tester, tracks: 3);
+    await tester.runAsync(
+      () => h.db.customUpdate("UPDATE tracks SET enrich_status = 2 WHERE title = 'Song 0'"),
+    );
+    await h.pump(tester, const ReviewScreen(), textScale: 1.5);
+    await _settle(tester);
+    expect(
+      find.ancestor(of: find.byType(ChoiceChip).first, matching: find.byType(Wrap)),
+      findsOneWidget,
+    );
+    final rows = {
+      for (final e in find.byType(ChoiceChip).evaluate())
+        tester.getTopLeft(find.byWidget(e.widget)).dy,
+    };
+    expect(rows.length, greaterThan(1));
+    await tester.longPress(find.text('Song 0'));
+    await _settle(tester);
+    expect(find.byKey(const ValueKey('review-dismiss')), findsOneWidget);
+    await tester.tap(find.byType(ChoiceChip).at(1));
+    await _settle(tester);
+    expect(find.byKey(const ValueKey('review-dismiss')), findsNothing);
+    await h.dispose(tester);
+  });
+
   testWidgets(
     'filters narrow the list and «Va bene così» removes the picked row',
     (tester) async {
