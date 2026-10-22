@@ -32,13 +32,16 @@ class RingProgress extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cc = context.cc;
     final inner = size - 2 * (stroke + 2);
-    Widget paint(double? progress) => CustomPaint(
-      size: Size.square(size),
-      painter: RingPainter(
-        progress: progress,
-        arc: cc.accent,
-        rest: cc.surface3,
-        stroke: stroke,
+    // Own layer: position ticks re-record the ring only, not the cover.
+    Widget paint(double? progress) => RepaintBoundary(
+      child: CustomPaint(
+        size: Size.square(size),
+        painter: RingPainter(
+          progress: progress,
+          arc: cc.accent,
+          rest: cc.surface3,
+          stroke: stroke,
+        ),
       ),
     );
     return ExcludeSemantics(
@@ -58,7 +61,9 @@ class RingProgress extends ConsumerWidget {
                         ),
                       ),
                     ),
-              ClipOval(child: SizedBox.square(dimension: inner, child: child)),
+              ClipOval(
+                child: SizedBox.square(dimension: inner, child: child),
+              ),
             ],
           ),
         ),
@@ -98,7 +103,9 @@ class RingPainter extends CustomPainter {
     canvas.drawArc(rect, _start, _sweep, false, line..color = rest);
     final p = progress;
     final played = _sweep * (p ?? 1);
-    if (played > 0) canvas.drawArc(rect, _start, played, false, line..color = arc);
+    if (played > 0) {
+      canvas.drawArc(rect, _start, played, false, line..color = arc);
+    }
     if (p == null) return;
     final a = _start + played;
     canvas.drawCircle(
@@ -110,5 +117,8 @@ class RingPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(RingPainter o) =>
-      o.progress != progress || o.arc != arc || o.rest != rest || o.stroke != stroke;
+      o.progress != progress ||
+      o.arc != arc ||
+      o.rest != rest ||
+      o.stroke != stroke;
 }

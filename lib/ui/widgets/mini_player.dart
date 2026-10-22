@@ -148,108 +148,98 @@ class _MiniPlayerState extends ConsumerState<MiniPlayer>
       ),
       clipBehavior: Clip.antiAlias,
       height: CcDims.miniPlayerHeight,
-      child: Stack(
+      child: Row(
         children: [
-          Row(
-            children: [
-              const SizedBox(width: 8),
-              if (inJam)
-                SizedBox(
-                  width: 40,
-                  height: 40,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: cc.surface3,
-                      borderRadius: BorderRadius.circular(CcDims.rList),
-                    ),
-                    child: Icon(Icons.queue_music_rounded, color: cc.accent),
-                  ),
-                )
-              else
-                RingProgress(
-                  size: 48,
-                  live: radio != null,
-                  child: TrackArt(
-                    track: track!,
-                    size: 40,
-                    radius: 20,
-                    heroTag: kPlayerCoverHero,
+          const SizedBox(width: 8),
+          if (inJam)
+            RingProgress(
+              size: 48,
+              live: true,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: cc.surface3,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.queue_music_rounded, color: cc.accent),
+              ),
+            )
+          else
+            RingProgress(
+              size: 48,
+              live: radio != null,
+              child: TrackArt(
+                track: track!,
+                size: 38,
+                radius: 19,
+                heroTag: kPlayerCoverHero,
+              ),
+            ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.titleSmall?.copyWith(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                Row(
                   children: [
-                    Text(
-                      title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.titleSmall?.copyWith(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
+                    if (inJam)
+                      Padding(
+                        padding: const EdgeInsets.only(right: 6),
+                        child: Icon(Icons.circle, size: 8, color: cc.accent),
                       ),
-                    ),
-                    Row(
-                      children: [
-                        if (inJam)
-                          Padding(
-                            padding: const EdgeInsets.only(right: 6),
-                            child: Icon(
-                              Icons.circle,
-                              size: 8,
-                              color: cc.accent,
-                            ),
-                          ),
-                        Expanded(
-                          child: Text(
-                            subtitle,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.bodyMedium,
-                          ),
-                        ),
-                      ],
+                    Expanded(
+                      child: Text(
+                        subtitle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.bodyMedium,
+                      ),
                     ),
                   ],
                 ),
-              ),
-              _MiniButton(
-                icon: Icons.devices_rounded,
-                tooltip: l.devicesTitle,
-                onPressed: () => DevicesSheet.show(context),
-              ),
-              if (radio != null)
-                RadioStarButton(station: radio, compact: true, color: cc.textMuted)
-              else if (!inJam && track != null)
-                _MiniButton(
-                  icon: Icons.favorite_rounded,
-                  iconWidget: HeartIcon(favorite: track.isFavorite),
-                  color: track.isFavorite ? cc.accent : null,
-                  tooltip: track.isFavorite
-                      ? l.removeFromFavorites
-                      : l.favorite,
-                  onPressed: () => toggleFavorite(context, ref, track),
-                ),
-              _MiniButton(
-                icon: playing ? Icons.pause_rounded : Icons.play_arrow_rounded,
-                color: cc.text,
-                size: 28,
-                tooltip: playing ? l.pause : l.play,
-                onPressed: inJam
-                    ? () => ref
-                          .read(jamProvider.notifier)
-                          .send(
-                            playing
-                                ? const JamCommand.pause()
-                                : const JamCommand.play(),
-                          )
-                    : ctrl.togglePlayPause,
-              ),
-              const SizedBox(width: 4),
-            ],
+              ],
+            ),
           ),
+          _MiniButton(
+            icon: Icons.devices_rounded,
+            tooltip: l.devicesTitle,
+            onPressed: () => DevicesSheet.show(context),
+          ),
+          if (radio != null)
+            RadioStarButton(station: radio, compact: true, color: cc.textMuted)
+          else if (!inJam && track != null)
+            _MiniButton(
+              icon: Icons.favorite_rounded,
+              iconWidget: HeartIcon(favorite: track.isFavorite),
+              color: track.isFavorite ? cc.accent : null,
+              tooltip: track.isFavorite ? l.removeFromFavorites : l.favorite,
+              onPressed: () => toggleFavorite(context, ref, track),
+            ),
+          _MiniButton(
+            icon: playing ? Icons.pause_rounded : Icons.play_arrow_rounded,
+            color: cc.text,
+            size: 28,
+            tooltip: playing ? l.pause : l.play,
+            onPressed: inJam
+                ? () => ref
+                      .read(jamProvider.notifier)
+                      .send(
+                        playing
+                            ? const JamCommand.pause()
+                            : const JamCommand.play(),
+                      )
+                : ctrl.togglePlayPause,
+          ),
+          const SizedBox(width: 4),
         ],
       ),
     );
