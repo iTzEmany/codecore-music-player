@@ -49,12 +49,33 @@ class DesktopSidebar extends ConsumerWidget {
       Widget? trailing,
     }) {
       final color = selected ? cc.text : cc.textMuted;
+      // Static accent dot at the icon's top right (a list, not a row of tabs).
+      final glyph = Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Icon(icon, color: color),
+          if (selected)
+            Positioned(
+              top: -1,
+              right: -3,
+              child: Container(
+                key: const Key('sidebar-dot'),
+                width: 6,
+                height: 6,
+                decoration: BoxDecoration(
+                  color: cc.accent,
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ),
+        ],
+      );
       final child = collapsed
-          ? Center(child: Icon(icon, color: color))
+          ? Center(child: glyph)
           : Row(
               children: [
                 const SizedBox(width: 16),
-                Icon(icon, color: color),
+                glyph,
                 const SizedBox(width: 16),
                 Expanded(
                   child: Text(

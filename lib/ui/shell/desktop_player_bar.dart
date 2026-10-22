@@ -23,6 +23,7 @@ import 'shell_nav.dart';
 import '../widgets/motion.dart';
 import '../widgets/track_art.dart';
 import '../widgets/radio_now.dart';
+import '../widgets/ring_progress.dart';
 import '../../services/audio/online_entries.dart' show isOnlineId;
 import '../../providers/radio_providers.dart' show onAirProvider;
 import '../widgets/shuffle_button.dart';
@@ -111,10 +112,15 @@ class _TrackInfo extends ConsumerWidget {
             onTap: () => Navigator.of(context, rootNavigator: true).push(
               MaterialPageRoute<void>(builder: (_) => const NowPlayingScreen()),
             ),
-            child: TrackArt(
-              track: track,
+            child: RingProgress(
               size: 56,
-              heroTag: kPlayerCoverHero,
+              live: radio != null,
+              child: TrackArt(
+                track: track,
+                size: RingProgress.innerSize(56),
+                radius: RingProgress.innerSize(56) / 2,
+                heroTag: kPlayerCoverHero,
+              ),
             ),
           ),
         ),
@@ -176,14 +182,16 @@ class _JamInfo extends StatelessWidget {
       ).push(MaterialPageRoute<void>(builder: (_) => const JamScreen())),
       child: Row(
         children: [
-          Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              color: cc.surface3,
-              borderRadius: BorderRadius.circular(CcDims.rList),
+          RingProgress(
+            size: 56,
+            live: true,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: cc.surface3,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.queue_music_rounded, color: cc.accent),
             ),
-            child: Icon(Icons.queue_music_rounded, color: cc.accent),
           ),
           const SizedBox(width: 12),
           Expanded(

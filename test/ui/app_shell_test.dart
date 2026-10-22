@@ -11,6 +11,7 @@ import 'package:codecore/ui/shell/desktop_sidebar.dart';
 import 'package:codecore/ui/shell/side_panel.dart';
 import 'package:codecore/ui/widgets/mini_player.dart';
 import 'package:codecore/ui/widgets/motion.dart';
+import 'package:codecore/ui/widgets/ring_progress.dart';
 import 'package:codecore/ui/widgets/selection_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -191,6 +192,14 @@ void main() {
     expect(find.byType(DesktopPlayerBar), findsOneWidget);
     expect(find.text('La tua libreria'), findsOneWidget);
     expect(find.text('Preferiti'), findsWidgets);
+    expect(
+      find.descendant(
+        of: find.byType(DesktopPlayerBar),
+        matching: find.byType(RingProgress),
+      ),
+      findsOneWidget,
+    );
+    expect(find.byKey(const Key('sidebar-dot')), findsOneWidget);
     // From 1200 px the queue opens by itself in the right-hand panel; its
     // button closes it and opens it again.
     expect(find.byType(SidePanelView), findsOneWidget);
