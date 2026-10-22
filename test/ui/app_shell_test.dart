@@ -1,3 +1,4 @@
+import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/providers/memory_providers.dart';
 import 'package:codecore/providers/nav_providers.dart';
 import 'package:codecore/providers/ui_providers.dart';
@@ -15,6 +16,7 @@ import 'package:codecore/ui/widgets/quality_tag.dart';
 import 'package:codecore/ui/widgets/ring_progress.dart';
 import 'package:codecore/ui/widgets/speed_button.dart';
 import 'package:codecore/ui/widgets/selection_bar.dart';
+import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -457,6 +459,20 @@ void main() {
       (tester) async {
     _phone(tester);
     final h = await Harness.create(tester, tracks: 40);
+    // Enough albums for the Library list to scroll past one screen.
+    for (var i = 0; i < 30; i++) {
+      await h.db.into(h.db.tracks).insert(TracksCompanion.insert(
+            path: '/m/x$i.mp3',
+            title: 'Extra $i',
+            albumKey: 'other|album $i',
+            format: 'mp3',
+            sizeBytes: 1,
+            mtimeMs: 1,
+            addedAt: 100 + i,
+            artist: const Value('Other'),
+            album: Value('Extra album $i'),
+          ));
+    }
     await h.pump(tester, const AppShell());
     await tester.tap(_bar('Libreria'));
     await _settle(tester);
