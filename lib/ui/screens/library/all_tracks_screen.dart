@@ -20,6 +20,7 @@ import '../../widgets/shuffle_button.dart';
 import '../../widgets/selection_bar.dart';
 import '../../widgets/track_row.dart';
 import '../../widgets/track_row_selection.dart';
+import 'album_detail_screen.dart' show durationWords;
 import 'scan_status.dart';
 import '../../widgets/motion.dart';
 
@@ -36,7 +37,7 @@ String _sortLabel(BuildContext context, SortOption o) {
   };
 }
 
-/// Every track: count, search pill, sort chips, Shuffle and Play.
+/// Every track as a collection: header, Play and Shuffle, search, sort chips.
 class AllTracksScreen extends ConsumerStatefulWidget {
   const AllTracksScreen({super.key});
 
@@ -133,6 +134,7 @@ class _AllTracksScreenState extends ConsumerState<AllTracksScreen> {
           : PlayContextKind.search,
     );
     final shown = tracks.value ?? const <Track>[];
+    final wide = MediaQuery.sizeOf(context).width >= CcDims.wideBreakpoint;
     return SelectionScope(
       listKey: _selectionKey,
       visibleIds: [for (final t in shown) t.id],
@@ -140,11 +142,54 @@ class _AllTracksScreenState extends ConsumerState<AllTracksScreen> {
         appBar: SelectableAppBar(
           listKey: _selectionKey,
           tracks: shown,
-          normal: AppBar(title: Text(l.allTracks)),
+          normal: AppBar(),
         ),
         body: Column(
           children: [
             const ScanStatus(),
+            // Outside the list: AlphaScroller offsets are index * itemExtent.
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                CcDims.margin,
+                8,
+                CcDims.margin,
+                12,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l.allTracks,
+                    style: wide ? theme.displaySmall : theme.headlineSmall,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    l.tracksAndDuration(
+                      l.tracksCount(shown.length),
+                      durationWords(
+                        l,
+                        shown.fold<int>(0, (sum, t) => sum + t.durationMs),
+                      ),
+                    ),
+                    style: theme.bodyMedium?.copyWith(color: cc.textMuted),
+                  ),
+                  if (shown.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        PlayPill(
+                          onPressed: () => ctrl.playAll(shown, context: ctx),
+                        ),
+                        ShufflePill(onPressed: ctrl.toggleShuffle),
+                      ],
+                    ),
+                  ],
+                ],
+              ),
+            ),
             Padding(
               padding: const EdgeInsets.fromLTRB(
                 CcDims.margin,
@@ -204,42 +249,7 @@ class _AllTracksScreenState extends ConsumerState<AllTracksScreen> {
                       message: query.text.isEmpty ? l.noTracks : l.noResults,
                     );
                   }
-                  return Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: CcDims.margin,
-                          vertical: 4,
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              l.tracksCount(list.length),
-                              style: theme.bodyMedium?.copyWith(
-                                color: cc.textMuted,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Wrap(
-                              spacing: 8,
-                              runSpacing: 8,
-                              children: [
-                                PlayPill(
-                                  onPressed: () =>
-                                      ctrl.playAll(list, context: ctx),
-                                ),
-                                ShufflePill(onPressed: ctrl.toggleShuffle),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                      Expanded(
-                        child: _list(list, query.sort, compact, ctrl, ctx),
-                      ),
-                    ],
-                  );
+                  return _list(list, query.sort, compact, ctrl, ctx);
                 },
               ),
             ),

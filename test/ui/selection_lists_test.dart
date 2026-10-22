@@ -16,7 +16,9 @@ import 'package:codecore/ui/screens/library/favorites_screen.dart';
 import 'package:codecore/ui/screens/playlists/playlist_detail_screen.dart';
 import 'package:codecore/ui/screens/search/search_screen.dart';
 import 'package:codecore/ui/screens/youtube/online_results.dart';
+import 'package:codecore/ui/widgets/play_buttons.dart';
 import 'package:codecore/ui/widgets/segmented_blocks.dart';
+import 'package:codecore/ui/widgets/shuffle_button.dart';
 import 'package:dio/dio.dart' show CancelToken;
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
@@ -76,24 +78,39 @@ class _FakeYoutube implements YoutubeService {
 }
 
 void main() {
+  testWidgets('«Tutti i brani»: collection header with title, meta and pills', (tester) async {
+    _phone(tester);
+    final h = await Harness.create(tester, tracks: 4);
+    await h.pump(tester, const AllTracksScreen());
+    await _settle(tester);
+    final title = find.text('Tutti i brani');
+    expect(title, findsOneWidget);
+    expect(find.descendant(of: find.byType(AppBar), matching: title), findsNothing);
+    expect(tester.widget<Text>(title).style, Theme.of(tester.element(title)).textTheme.headlineSmall);
+    final meta = find.text('4 brani, 13 minuti');
+    expect(meta, findsOneWidget);
+    expect(tester.getTopLeft(meta).dx, tester.getTopLeft(title).dx);
+    final wrap = find.ancestor(of: find.byType(PlayPill), matching: find.byType(Wrap));
+    expect(find.descendant(of: wrap.first, matching: find.byType(ShufflePill)), findsOneWidget);
+    expect(tester.getTopLeft(wrap.first).dy, greaterThan(tester.getBottomLeft(meta).dy));
+    await h.dispose(tester);
+  });
+
   testWidgets('«Tutti i brani»: long press picks, the bar replaces the title, Back leaves', (tester) async {
     _phone(tester);
     final h = await Harness.create(tester, tracks: 4);
     await h.pump(tester, const AllTracksScreen());
     await _settle(tester);
-    expect(find.text('Tutti i brani'), findsOneWidget);
-
     await tester.longPress(find.text('Song 1'));
     await _settle(tester);
     expect(find.text('1 selezionato'), findsOneWidget);
-    expect(find.text('Tutti i brani'), findsNothing);
     await tester.tap(find.text('Song 3'));
     await _settle(tester);
     expect(find.text('2 selezionati'), findsOneWidget);
 
     await tester.binding.handlePopRoute();
     await _settle(tester);
-    expect(find.text('Tutti i brani'), findsOneWidget);
+    expect(find.text('1 selezionato'), findsNothing);
     expect(_sel(tester, AllTracksScreen, 'all').active, isFalse);
     await h.dispose(tester);
   });
