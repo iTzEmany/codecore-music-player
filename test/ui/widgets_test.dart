@@ -165,9 +165,10 @@ void main() {
       await tester.tap(find.text('open'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 1));
-      final sheetTop = tester.getTopLeft(find.text('body')).dy;
-      expect(find.text('body'), findsOneWidget);
-      expect(sheetTop, lessThan(800), reason: 'already in place after one frame');
+      final firstTop = tester.getTopLeft(find.text('body')).dy;
+      await tester.pumpAndSettle();
+      expect(firstTop, tester.getTopLeft(find.text('body')).dy,
+          reason: 'already at its final position, no slide');
     });
 
     test('no raw showModalBottomSheet outside cc_sheet and car mode', () {
