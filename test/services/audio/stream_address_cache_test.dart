@@ -184,6 +184,18 @@ void main() {
       expect(gate.enabled, isTrue);
     });
 
+    test('a slow but successful quick answer is not a failure for the gate',
+        () async {
+      final gate = FastClientGate();
+      final c = makeFast((r, {required fast}) async {
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+        return StreamAddress(addr(r.id, far), fast: fast);
+      }, gate: gate);
+      await c.address(r1, timeout: const Duration(seconds: 5));
+      expect(gate.failures, 0);
+      expect(gate.enabled, isTrue);
+    });
+
     test('after two refusals the quick client is off for the session',
         () async {
       final c = quick();

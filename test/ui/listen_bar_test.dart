@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:codecore/providers/listen_providers.dart';
@@ -106,6 +107,46 @@ void main() {
     await _settle(tester);
     expect(find.byKey(const ValueKey('listen-bar')), findsNothing);
     expect(players.single.disposed, isTrue);
+    await h.dispose(tester);
+  });
+
+  testWidgets('the bar buttons keep their positions while resolving, playing and paused', (tester) async {
+    tester.view.physicalSize = const Size(420, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final h = await Harness.create(tester);
+    final dir = Directory.systemTemp.createTempSync('listen');
+    addTearDown(() => dir.deleteSync(recursive: true));
+    final gate = Completer<StreamAddress>();
+    await h.pump(
+      tester,
+      const Scaffold(body: Column(children: [Expanded(child: SizedBox()), ListenBar()])),
+      extraOverrides: [
+        downloadIndexProvider.overrideWith((ref) async => DownloadIndex(File(p.join(dir.path, 'd.json')))),
+        streamResolverProvider.overrideWithValue((r, {bool fast = true}) => gate.future),
+        listenBackendFactoryProvider.overrideWithValue(FakeBackend.new),
+      ],
+    );
+    final container = ProviderScope.containerOf(tester.element(find.byType(ListenBar)));
+    final notifier = container.read(listenProvider.notifier);
+    const video = YtResult(id: 'x', title: 'T', channel: 'C', duration: Duration(minutes: 3));
+    unawaited(notifier.start(video));
+    await _settle(tester);
+    final close = find.byTooltip('Chiudi'), download = find.byTooltip('Scarica');
+    final closeAt = tester.getCenter(close), downloadAt = tester.getCenter(download);
+
+    gate.complete(StreamAddress(Uri.parse('https://media.example/x')));
+    await _settle(tester);
+    expect(find.byTooltip('Pausa'), findsOneWidget);
+    expect(tester.getCenter(close), closeAt);
+    expect(tester.getCenter(download), downloadAt);
+
+    await tester.tap(find.byTooltip('Pausa'));
+    await _settle(tester);
+    expect(find.byTooltip('Riproduci'), findsOneWidget);
+    expect(tester.getCenter(close), closeAt);
+    expect(tester.getCenter(download), downloadAt);
+    await tester.runAsync(notifier.stop);
     await h.dispose(tester);
   });
 

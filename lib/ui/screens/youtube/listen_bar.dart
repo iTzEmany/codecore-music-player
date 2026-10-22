@@ -20,7 +20,8 @@ class ListenButton extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
     final phase = ref.watch(
-        listenProvider.select((s) => s.isOf(result) ? s.phase : ListenPhase.idle));
+      listenProvider.select((s) => s.isOf(result) ? s.phase : ListenPhase.idle),
+    );
     if (phase == ListenPhase.resolving) {
       return SizedBox(
         width: 48,
@@ -28,7 +29,10 @@ class ListenButton extends ConsumerWidget {
           child: SizedBox(
             width: 20,
             height: 20,
-            child: CircularProgressIndicator(strokeWidth: 2.5, semanticsLabel: l.listenResolving),
+            child: CircularProgressIndicator(
+              strokeWidth: 2.5,
+              semanticsLabel: l.listenResolving,
+            ),
           ),
         ),
       );
@@ -63,7 +67,9 @@ class ListenBar extends ConsumerWidget {
         alignment: Alignment.topCenter,
         child: FadeTransition(opacity: a, child: child),
       ),
-      child: !s.active || r == null ? const SizedBox(width: double.infinity) : _Bar(state: s, result: r),
+      child: !s.active || r == null
+          ? const SizedBox(width: double.infinity)
+          : _Bar(state: s, result: r),
     );
   }
 }
@@ -81,16 +87,31 @@ class _Bar extends ConsumerWidget {
     final theme = Theme.of(context).textTheme;
     final notifier = ref.read(listenProvider.notifier);
     final total = state.duration ?? result.duration;
-    final progress = state.phase == ListenPhase.resolving || total == null || total == Duration.zero
+    final progress =
+        state.phase == ListenPhase.resolving ||
+            total == null ||
+            total == Duration.zero
         ? null
-        : (state.position.inMilliseconds / total.inMilliseconds).clamp(0.0, 1.0);
-    final downloading = ref.watch(downloadsProvider.select((d) => d.any((i) =>
-        i.result.indexKey == result.indexKey &&
-        (i.status == DownloadStatus.queued ||
-            i.status == DownloadStatus.downloading ||
-            i.status == DownloadStatus.waitingRetry))));
-    final inLibrary = ref.watch(downloadIndexProvider.select(
-        (i) => i.value?.contains(result.id, source: result.source) ?? false));
+        : (state.position.inMilliseconds / total.inMilliseconds).clamp(
+            0.0,
+            1.0,
+          );
+    final downloading = ref.watch(
+      downloadsProvider.select(
+        (d) => d.any(
+          (i) =>
+              i.result.indexKey == result.indexKey &&
+              (i.status == DownloadStatus.queued ||
+                  i.status == DownloadStatus.downloading ||
+                  i.status == DownloadStatus.waitingRetry),
+        ),
+      ),
+    );
+    final inLibrary = ref.watch(
+      downloadIndexProvider.select(
+        (i) => i.value?.contains(result.id, source: result.source) ?? false,
+      ),
+    );
     return Material(
       key: const ValueKey('listen-bar'),
       color: cc.surface2,
@@ -104,14 +125,23 @@ class _Bar extends ConsumerWidget {
               padding: const EdgeInsets.fromLTRB(CcDims.margin, 4, 4, 4),
               child: Row(
                 children: [
-                  Icon(Icons.headphones_rounded, color: cc.accentSoft, size: 20),
+                  Icon(
+                    Icons.headphones_rounded,
+                    color: cc.accentSoft,
+                    size: 20,
+                  ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(result.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: theme.bodyLarge),
+                        Text(
+                          result.title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.bodyLarge,
+                        ),
                         Text(
                           state.phase == ListenPhase.resolving
                               ? l.listenResolving
@@ -128,19 +158,43 @@ class _Bar extends ConsumerWidget {
                       ],
                     ),
                   ),
-                  if (state.phase != ListenPhase.resolving)
+                  // Fixed slots (48 px each) in every state: the buttons never
+                  // move, so a tap meant for «Chiudi» cannot land on «Scarica».
+                  if (state.phase == ListenPhase.resolving)
+                    const SizedBox(width: 48, height: 48)
+                  else
                     IconButton(
-                      tooltip: state.phase == ListenPhase.playing ? l.pause : l.play,
-                      icon: Icon(state.phase == ListenPhase.playing ? Icons.pause_rounded : Icons.play_arrow_rounded),
-                      onPressed: state.phase == ListenPhase.playing ? notifier.pause : notifier.resume,
+                      tooltip: state.phase == ListenPhase.playing
+                          ? l.pause
+                          : l.play,
+                      icon: Icon(
+                        state.phase == ListenPhase.playing
+                            ? Icons.pause_rounded
+                            : Icons.play_arrow_rounded,
+                      ),
+                      onPressed: state.phase == ListenPhase.playing
+                          ? notifier.pause
+                          : notifier.resume,
                     ),
-                  if (!inLibrary)
+                  if (inLibrary)
+                    const SizedBox(width: 48, height: 48)
+                  else
                     IconButton(
                       tooltip: l.ytDownload,
                       icon: downloading
-                          ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2.5))
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.5,
+                              ),
+                            )
                           : const Icon(Icons.download_rounded),
-                      onPressed: downloading ? null : () => ref.read(downloadsProvider.notifier).add(result),
+                      onPressed: downloading
+                          ? null
+                          : () => ref
+                                .read(downloadsProvider.notifier)
+                                .add(result),
                     ),
                   IconButton(
                     tooltip: l.close,

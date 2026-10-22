@@ -12,7 +12,10 @@ import 'youtube_service.dart';
 
 /// yt-dlp embedded in the Android app (see MainActivity.kt).
 class AndroidYtDlpService implements YoutubeService, StreamSource {
-  AndroidYtDlpService() {
+  AndroidYtDlpService({
+    this.hedgeAfter = defaultHedgeAfter,
+    this.fastTimeout = fastStreamTimeout,
+  }) {
     _channel.setMethodCallHandler(_onCall);
   }
 
@@ -20,10 +23,23 @@ class AndroidYtDlpService implements YoutubeService, StreamSource {
 
   /// A search that takes longer is cancelled and reported as a network error.
   static const searchTimeout = Duration(seconds: 45);
+
   /// Stream resolution with the default clients can run YouTube's JS challenge
   /// on the phone: much slower than a search, so it has its own limit.
   static const streamTimeout = Duration(seconds: 90);
-  static const fastStreamTimeout = Duration(seconds: 20);
+
+  /// Measured on the phone: the fast client answers in 8-19 s, and when it
+  /// misses a 20 s limit the default clients then need ~60 s: waiting longer
+  /// for the fast one is cheaper.
+  static const fastStreamTimeout = Duration(seconds: 35);
+
+  /// If the fast client has not answered after this, the default clients are
+  /// started too (hedged request); the first answer wins, the other is killed.
+  static const defaultHedgeAfter = Duration(seconds: 15);
+  final Duration hedgeAfter;
+
+  /// Limit of the fast client (injectable for tests).
+  final Duration fastTimeout;
   final _progress = <String, StreamController<DownloadProgress>>{};
   int _counter = 0;
 
@@ -39,13 +55,18 @@ class AndroidYtDlpService implements YoutubeService, StreamSource {
 
   /// Calls the `search` method with a process id so that a search that hangs
   /// can be killed on the Kotlin side after [searchTimeout].
-  Future<List<YtResult>> _search(Map<String, Object?> args,
-          {List<YtResult> Function(String raw) parse = parseYtDlpJson}) async =>
-      parse(await _call(args));
+  Future<List<YtResult>> _search(
+    Map<String, Object?> args, {
+    List<YtResult> Function(String raw) parse = parseYtDlpJson,
+  }) async => parse(await _call(args));
 
-  Future<String> _call(Map<String, Object?> args,
-      {Duration? timeout, String method = 'search'}) async {
-    final processId = 'sr-${_counter++}';
+  Future<String> _call(
+    Map<String, Object?> args, {
+    Duration? timeout,
+    String method = 'search',
+    String? processId,
+  }) async {
+    processId ??= 'sr-${_counter++}';
     try {
       final raw = await _channel
           .invokeMethod<String>(method, {...args, 'processId': processId})
@@ -53,7 +74,7 @@ class AndroidYtDlpService implements YoutubeService, StreamSource {
       return raw ?? '{}';
     } on TimeoutException {
       await _channel.invokeMethod<void>('cancel', {'processId': processId});
-      throw const YtException(YtErrorKind.network, 'search timed out');
+      throw const YtException(YtErrorKind.network, 'timed out');
     } on PlatformException catch (e) {
       AppLog.w('yt-dlp search failed: ${e.message}');
       throw ytExceptionFromStderr(e.message ?? '');
@@ -67,27 +88,104 @@ class AndroidYtDlpService implements YoutubeService, StreamSource {
     return _search({'query': q, 'isUrl': isYoutubeUrl(q)});
   }
 
+  Future<void> _kill(String processId) => _channel
+      .invokeMethod<void>('cancel', {'processId': processId})
+      .catchError((Object e) => AppLog.w('yt-dlp cancel failed: $e'));
+
+  Future<StreamAddress?> _stream(
+    YtResult r,
+    String processId, {
+    required bool fast,
+  }) async {
+    final out = await _call(
+      {'url': r.downloadUrl, 'format': streamFormat, if (fast) 'fast': true},
+      method: 'streamUrl',
+      timeout: fast ? fastTimeout : streamTimeout,
+      processId: processId,
+    );
+    return parseStreamAddress(out, fast: fast);
+  }
+
   @override
   Future<StreamAddress> streamUrl(YtResult r, {bool fast = true}) async {
-    // Fast path: the visionos client needs neither the JS challenge solver
-    // nor a PO token (android_vr needs one now) (~2 s instead of ~45 s on the phone). If it cannot serve
-    // this video (age limit, region...) yt-dlp's default clients take over.
-    if (fast) {
-      try {
-        final out = await _call(
-            {'url': r.downloadUrl, 'format': streamFormat, 'fast': true},
-            method: 'streamUrl', timeout: fastStreamTimeout);
-        final a = parseStreamAddress(out, fast: true);
-        if (a != null) return a;
-      } on YtException catch (e) {
-        AppLog.i('listen: fast client failed (${e.kind}), using default clients');
+    final watch = Stopwatch()..start();
+    final fastId = 'st-${_counter++}', defaultId = 'st-${_counter++}';
+    final result = Completer<StreamAddress>();
+    var fastDone = !fast, defaultStarted = false, defaultDone = false;
+    Object? defaultError;
+    Timer? hedge;
+
+    void win(StreamAddress a, String via, {required bool fastWon}) {
+      if (result.isCompleted) return;
+      hedge?.cancel();
+      AppLog.i('listen: address via $via in ${watch.elapsedMilliseconds} ms');
+      result.complete(a);
+      // Kill the other process only if it is still running.
+      if (fastWon && defaultStarted && !defaultDone) unawaited(_kill(defaultId));
+      if (!fastWon && !fastDone) unawaited(_kill(fastId));
+    }
+
+    void startDefault() {
+      if (defaultStarted) return;
+      defaultStarted = true;
+      hedge?.cancel();
+      _stream(r, defaultId, fast: false).then(
+        (a) {
+          defaultDone = true;
+          if (a != null) return win(a, 'default clients', fastWon: false);
+          defaultError = const YtException(
+            YtErrorKind.changed,
+            'no stream address',
+          );
+          if (fastDone && !result.isCompleted) {
+            result.completeError(defaultError!);
+          }
+        },
+        onError: (Object e, StackTrace st) {
+          defaultDone = true;
+          defaultError = e;
+          if (fastDone && !result.isCompleted) result.completeError(e, st);
+        },
+      );
+    }
+
+    if (!fast) {
+      startDefault();
+      return result.future;
+    }
+    // Fast path: the visionos client needs neither the JS challenge solver nor
+    // a PO token. If it cannot serve this video (age limit, region, time
+    // limit...) yt-dlp's default clients take over, already running when the
+    // fast one is merely slow.
+    hedge = Timer(hedgeAfter, () {
+      if (result.isCompleted) return;
+      AppLog.i('listen: fast client slow, starting default clients too');
+      startDefault();
+    });
+    void fastFailed(String why) {
+      fastDone = true;
+      AppLog.i('listen: fast client failed ($why), using default clients');
+      if (result.isCompleted) return;
+      if (defaultDone) {
+        result.completeError(defaultError!);
+      } else {
+        startDefault();
       }
     }
-    final out = await _call(
-        {'url': r.downloadUrl, 'format': streamFormat},
-        method: 'streamUrl', timeout: streamTimeout);
-    return parseStreamAddress(out) ??
-        (throw const YtException(YtErrorKind.changed, 'no stream address'));
+
+    _stream(r, fastId, fast: true).then(
+      (a) {
+        if (a != null) {
+          fastDone = true;
+          return win(a, 'visionos', fastWon: true);
+        }
+        fastFailed('no address');
+      },
+      onError: (Object e, StackTrace st) {
+        fastFailed(e is YtException ? '${e.kind}: ${e.detail}' : '$e');
+      },
+    );
+    return result.future;
   }
 
   @override
@@ -131,45 +229,61 @@ class AndroidYtDlpService implements YoutubeService, StreamSource {
 
   @override
   /// Flat: one request for the page, not one per track (see [parseYtAlbumPage]).
-  Future<List<YtResult>> albumTracks(String albumLink) => _search(
-      {'query': albumLink, 'isUrl': true, 'items': 80, 'flat': true},
-      parse: parseYtAlbumPage);
+  Future<List<YtResult>> albumTracks(String albumLink) => _search({
+    'query': albumLink,
+    'isUrl': true,
+    'items': 80,
+    'flat': true,
+  }, parse: parseYtAlbumPage);
 
   @override
-  Stream<DownloadProgress> download(YtResult r, Directory outDir,
-      {CancelToken? cancel,
-      DownloadOptions options = const DownloadOptions()}) async* {
+  Stream<DownloadProgress> download(
+    YtResult r,
+    Directory outDir, {
+    CancelToken? cancel,
+    DownloadOptions options = const DownloadOptions(),
+  }) async* {
     await outDir.create(recursive: true);
     // yt-dlp in the app always comes with ffmpeg.
     final choice = downloadChoice(options.format, hasFfmpeg: true);
     final target = uniquePath(
-        outDir.path,
-        downloadBaseName(r),
-        reservedExtension(hasFfmpeg: true, options: options),
-        (f) => anyDownloadExtensionExists(f, (x) => File(x).existsSync()));
+      outDir.path,
+      downloadBaseName(r),
+      reservedExtension(hasFfmpeg: true, options: options),
+      (f) => anyDownloadExtensionExists(f, (x) => File(x).existsSync()),
+    );
     final stem = p.withoutExtension(target);
     final processId = 'dl-${_counter++}';
     final controller = StreamController<DownloadProgress>();
     _progress[processId] = controller;
-    unawaited(cancel?.whenCancel.then((_) {
-      _channel.invokeMethod<void>('cancel', {'processId': processId});
-    }));
-    final done = _channel.invokeMethod<String>('download', {
-      'id': r.id,
-      'url': r.downloadUrl,
-      'stem': stem,
-      'selector': choice.selector,
-      'audioFormat': choice.audioFormat,
-      'audioQuality': choice.quality,
-      'processId': processId,
-      'rateLimit': options.rateLimitKBps,
-    }).then<String?>((path) => path).catchError((Object e) {
-      if (cancel?.isCancelled ?? false) return null;
-      final msg = e is PlatformException ? (e.message ?? '') : '$e';
-      throw ytExceptionFromStderr(msg);
-    });
-    unawaited(done.then((_) => controller.close(),
-        onError: (Object _) => controller.close()));
+    unawaited(
+      cancel?.whenCancel.then((_) {
+        _channel.invokeMethod<void>('cancel', {'processId': processId});
+      }),
+    );
+    final done = _channel
+        .invokeMethod<String>('download', {
+          'id': r.id,
+          'url': r.downloadUrl,
+          'stem': stem,
+          'selector': choice.selector,
+          'audioFormat': choice.audioFormat,
+          'audioQuality': choice.quality,
+          'processId': processId,
+          'rateLimit': options.rateLimitKBps,
+        })
+        .then<String?>((path) => path)
+        .catchError((Object e) {
+          if (cancel?.isCancelled ?? false) return null;
+          final msg = e is PlatformException ? (e.message ?? '') : '$e';
+          throw ytExceptionFromStderr(msg);
+        });
+    unawaited(
+      done.then(
+        (_) => controller.close(),
+        onError: (Object _) => controller.close(),
+      ),
+    );
     try {
       await for (final p in controller.stream) {
         yield p;
