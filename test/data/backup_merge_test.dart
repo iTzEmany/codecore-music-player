@@ -1,9 +1,14 @@
 import 'package:codecore/data/db/app_database.dart';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:codecore/data/repositories/backup_merge.dart';
 import 'package:codecore/data/repositories/backup_queries.dart';
+import 'package:codecore/data/repositories/follow_repository.dart';
 import 'package:codecore/data/repositories/playlist_sync_repository.dart';
+import 'package:codecore/data/repositories/release_repository.dart';
+import 'package:codecore/services/online/ytm_artist_parser.dart';
+import 'package:codecore/services/releases/release_checker.dart';
 import 'package:codecore/services/backup/user_data.dart';
 import 'package:drift/drift.dart' show OrderingTerm, Value, driftRuntimeOptions;
 import 'package:drift/native.dart';
@@ -176,6 +181,71 @@ void main() {
       final old = UserData.fromJson({'format': 1, 'createdAt': 5, 'tracks': [], 'playlists': []});
       expect(old.radios, isEmpty);
       expect(old.toJson().containsKey('radios'), isFalse);
+    });
+  });
+
+  group('followed artists', () {
+    Future<List<FollowedArtist>> saved() =>
+        (db.select(db.followedArtists)..orderBy([(a) => OrderingTerm.asc(a.ytmId)])).get();
+
+    test('export, JSON, merge into an empty database: same artists, flags and origin', () async {
+      await db.into(db.followedArtists).insert(FollowedArtistsCompanion.insert(
+          ytmId: 'UC1', name: 'One', thumbUrl: const Value('http://t/1'), muted: const Value(true)));
+      await db.into(db.followedArtists).insert(FollowedArtistsCompanion.insert(
+          ytmId: 'UC2', name: 'Two', origin: const Value(1), excluded: const Value(true),
+          lastCheckedAt: const Value(5)));
+      final json = jsonDecode(jsonEncode((await collectUserData(db)).toJson())) as Map<String, dynamic>;
+
+      driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
+      final other = AppDatabase(NativeDatabase.memory());
+      addTearDown(other.close);
+      final r = await mergeUserData(
+          other, UserData.fromJson(json), await PlaylistSyncRepository(other).resolver());
+      expect(r.followedArtistsAdded, 2);
+      final rows = await (other.select(other.followedArtists)..orderBy([(a) => OrderingTerm.asc(a.ytmId)])).get();
+      expect([for (final a in rows) (a.ytmId, a.name, a.thumbUrl, a.origin, a.excluded, a.muted, a.lastCheckedAt)], [
+        ('UC1', 'One', 'http://t/1', 0, false, true, null),
+        ('UC2', 'Two', null, 1, true, false, null),
+      ]);
+    });
+
+    test('merging by id: no duplicates, local rows stay, a hand follow wins over automatic/excluded', () async {
+      await db.into(db.followedArtists).insert(FollowedArtistsCompanion.insert(
+          ytmId: 'UC1', name: 'Mine', muted: const Value(true)));
+      await db.into(db.followedArtists).insert(FollowedArtistsCompanion.insert(
+          ytmId: 'UC2', name: 'Auto', origin: const Value(1), excluded: const Value(true)));
+      final data = UserData(createdAt: 1, followedArtists: const [
+        FollowedArtistData(ytmId: 'UC1', name: 'Theirs'),
+        FollowedArtistData(ytmId: 'UC2', name: 'Theirs2'),
+        FollowedArtistData(ytmId: 'UC3', name: 'New'),
+        FollowedArtistData(ytmId: 'UC3', name: 'New again'),
+      ]);
+      expect((await merge(data)).followedArtistsAdded, 1);
+      expect((await merge(data)).followedArtistsAdded, 0);
+      final rows = await saved();
+      expect([for (final a in rows) (a.ytmId, a.name, a.origin, a.excluded, a.muted)], [
+        ('UC1', 'Mine', 0, false, true),
+        ('UC2', 'Auto', 0, false, false),
+        ('UC3', 'New', 0, false, false),
+      ]);
+    });
+
+    test('an old backup without followedArtists reads as empty and writes none', () {
+      final old = UserData.fromJson({'format': 1, 'createdAt': 5, 'tracks': [], 'playlists': []});
+      expect(old.followedArtists, isEmpty);
+      expect(old.toJson().containsKey('followedArtists'), isFalse);
+    });
+
+    test('after a merge the first round stores the releases as seen: nothing new', () async {
+      await merge(UserData(createdAt: 1, followedArtists: const [
+        FollowedArtistData(ytmId: 'UC1', name: 'One'),
+      ]));
+      final page = parseArtistPage(
+          jsonDecode(File('test/fixtures/innertube/ytm_artist_releases.json').readAsStringSync()) as Map, 'UC1');
+      final out = await ReleaseChecker((_) async => page, FollowRepository(db), ReleaseRepository(db),
+          now: () => DateTime(2026, 10, 22), wait: (_) async {}).run();
+      expect(out.checked, 1);
+      expect(out.fresh, isEmpty);
     });
   });
 }

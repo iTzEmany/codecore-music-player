@@ -68,8 +68,15 @@ class ReleaseChecker {
   final DateTime Function() _now;
   final Future<void> Function(Duration) _wait;
 
-  Future<CheckOutcome> run({CheckCancel? cancel}) async {
-    final artists = await follows.toCheck(limit: limit);
+  /// With [only] just that artist is checked (the first check after «Segui»).
+  Future<CheckOutcome> run({CheckCancel? cancel, String? only}) async {
+    final List<FollowedArtist> artists;
+    if (only == null) {
+      artists = await follows.toCheck(limit: limit);
+    } else {
+      final a = await follows.get(only);
+      artists = [if (a != null && !a.excluded && !a.notFound) a];
+    }
     final fresh = <FreshRelease>[];
     var checked = 0, failed = 0;
     CheckOutcome stop(CheckStop why, {DateTime? retryAt}) => CheckOutcome(

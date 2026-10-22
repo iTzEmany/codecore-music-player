@@ -299,6 +299,45 @@ class RadioData {
       );
 }
 
+/// A followed artist of «Nuove uscite» (releases are not exported: after a
+/// merge the first check stores them as seen).
+class FollowedArtistData {
+  const FollowedArtistData({
+    required this.ytmId,
+    required this.name,
+    this.thumbUrl,
+    this.origin = 0,
+    this.excluded = false,
+    this.muted = false,
+  });
+
+  /// `UC…` channel id of the YouTube Music artist page.
+  final String ytmId, name;
+  final String? thumbUrl;
+
+  /// 0 followed by hand, 1 followed automatically (most listened).
+  final int origin;
+  final bool excluded, muted;
+
+  Map<String, Object?> toJson() => _nonNull({
+        'ytmId': ytmId,
+        'name': name,
+        'thumbUrl': thumbUrl,
+        'origin': origin == 0 ? null : origin,
+        'excluded': excluded ? true : null,
+        'muted': muted ? true : null,
+      });
+
+  factory FollowedArtistData.fromJson(Map<String, dynamic> j) => FollowedArtistData(
+        ytmId: j['ytmId'] as String? ?? '',
+        name: j['name'] as String? ?? '',
+        thumbUrl: j['thumbUrl'] as String?,
+        origin: (j['origin'] as num?)?.toInt() ?? 0,
+        excluded: j['excluded'] as bool? ?? false,
+        muted: j['muted'] as bool? ?? false,
+      );
+}
+
 class UserData {
   const UserData({
     required this.createdAt,
@@ -306,6 +345,7 @@ class UserData {
     this.playlists = const [],
     this.imports = const [],
     this.radios = const [],
+    this.followedArtists = const [],
   });
 
   final int createdAt;
@@ -316,6 +356,9 @@ class UserData {
   /// «Le mie radio» in their order (absent in older backups = none).
   final List<RadioData> radios;
 
+  /// Artists followed for new releases (absent in older backups = none).
+  final List<FollowedArtistData> followedArtists;
+
   Map<String, Object?> toJson() => {
         'format': kUserDataFormat,
         'createdAt': createdAt,
@@ -323,6 +366,8 @@ class UserData {
         'playlists': [for (final p in playlists) p.toJson()],
         'imports': [for (final i in imports) i.toJson()],
         if (radios.isNotEmpty) 'radios': [for (final r in radios) r.toJson()],
+        if (followedArtists.isNotEmpty)
+          'followedArtists': [for (final a in followedArtists) a.toJson()],
       };
 
   /// Unknown fields are ignored; a newer `format` is refused.
@@ -348,6 +393,10 @@ class UserData {
       radios: [
         for (final r in (j['radios'] as List? ?? const []))
           RadioData.fromJson(r as Map<String, dynamic>),
+      ],
+      followedArtists: [
+        for (final a in (j['followedArtists'] as List? ?? const []))
+          FollowedArtistData.fromJson(a as Map<String, dynamic>),
       ],
     );
   }

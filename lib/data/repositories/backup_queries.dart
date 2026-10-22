@@ -116,12 +116,27 @@ Future<UserData> collectUserData(AppDatabase db) {
         ),
     ];
 
+    final followed = [
+      for (final a in await (db.select(db.followedArtists)
+            ..orderBy([(a) => OrderingTerm.asc(a.name), (a) => OrderingTerm.asc(a.ytmId)]))
+          .get())
+        FollowedArtistData(
+          ytmId: a.ytmId,
+          name: a.name,
+          thumbUrl: a.thumbUrl,
+          origin: a.origin,
+          excluded: a.excluded,
+          muted: a.muted,
+        ),
+    ];
+
     return UserData(
       createdAt: DateTime.now().millisecondsSinceEpoch,
       tracks: userData,
       playlists: playlistData,
       imports: imports,
       radios: radios,
+      followedArtists: followed,
     );
   });
 }

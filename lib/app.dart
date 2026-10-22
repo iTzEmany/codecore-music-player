@@ -12,6 +12,7 @@ import 'providers/activity_log_providers.dart';
 import 'providers/import_notification_providers.dart';
 import 'l10n/l10n_ext.dart';
 import 'ui/screens/onboarding/onboarding_gate.dart';
+import 'providers/releases_providers.dart' show releaseCheckControllerProvider;
 import 'ui/screens/youtube/listen_bar.dart' show ListenErrorToaster;
 import 'ui/shell/app_shell.dart';
 import 'ui/theme/app_theme.dart';
@@ -29,6 +30,8 @@ class CodecoreApp extends ConsumerWidget {
     ref.watch(equalizerApplierProvider);
     ref.watch(outputRouteSyncProvider);
     ref.watch(importNotificationProvider);
+    // Checks for new releases of followed artists (starts once settled).
+    ref.watch(releaseCheckControllerProvider);
     // A new version, at most once a day and only if the user asked for it.
     ref.listen(updateOnStartProvider, (_, next) {
       final info = next.value;

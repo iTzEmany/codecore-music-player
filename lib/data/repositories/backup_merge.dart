@@ -14,6 +14,7 @@ class MergeReport {
   int playlistsCreated = 0;
   int playlistItemsSkipped = 0;
   int radiosAdded = 0;
+  int followedArtistsAdded = 0;
 
   /// Titles of the tracks the backup mentions that this library does not have.
   final List<String> notFound = [];
@@ -32,7 +33,9 @@ bool _blank(String? s) => s == null || s.trim().isEmpty;
 /// name and tracks) gets the missing tracks appended; a saved radio station
 /// already here (same id, or for a hand-typed address the same stream URL) is kept
 /// as it is, the others are added at the end in the backup's order; another one with a taken
-/// name is created as «(ripristinata)». Imports are not merged (they depend
+/// name is created as «(ripristinata)». A followed artist is matched by its YouTube Music id: new ones are
+/// added (never checked, so the first round stores their releases as seen), the ones here stay as they are, except
+/// that an artist followed by hand in the backup becomes followed by hand here too. Imports are not merged (they depend
 /// on the other device's downloads).
 Future<MergeReport> mergeUserData(AppDatabase db, UserData data, TrackResolver resolver) {
   final report = MergeReport();
@@ -151,6 +154,7 @@ Future<MergeReport> mergeUserData(AppDatabase db, UserData data, TrackResolver r
       report.playlistsCreated++;
     }
     await _mergeRadios(db, data.radios, report);
+    await _mergeFollowedArtists(db, data.followedArtists, report);
     return report;
   });
 }
@@ -185,5 +189,32 @@ Future<void> _mergeRadios(AppDatabase db, List<RadioData> radios, MergeReport re
           lastPlayedAt: Value(r.lastPlayedAt),
         ));
     report.radiosAdded++;
+  }
+}
+
+Future<void> _mergeFollowedArtists(
+    AppDatabase db, List<FollowedArtistData> artists, MergeReport report) async {
+  if (artists.isEmpty) return;
+  final have = {for (final a in await db.select(db.followedArtists).get()) a.ytmId: a};
+  final added = <String>{};
+  for (final a in artists) {
+    if (a.ytmId.isEmpty || a.name.isEmpty) continue;
+    final local = have[a.ytmId];
+    if (local == null) {
+      if (added.contains(a.ytmId)) continue;
+      await db.into(db.followedArtists).insert(FollowedArtistsCompanion.insert(
+            ytmId: a.ytmId,
+            name: a.name,
+            thumbUrl: Value(a.thumbUrl),
+            origin: Value(a.origin),
+            excluded: Value(a.excluded),
+            muted: Value(a.muted),
+          ));
+      added.add(a.ytmId);
+      report.followedArtistsAdded++;
+    } else if (a.origin == 0 && !a.excluded && (local.origin != 0 || local.excluded)) {
+      await (db.update(db.followedArtists)..where((r) => r.ytmId.equals(a.ytmId)))
+          .write(const FollowedArtistsCompanion(origin: Value(0), excluded: Value(false)));
+    }
   }
 }
