@@ -14,7 +14,7 @@ Future<void> _settle(WidgetTester tester) async {
 void main() {
   testWidgets('library: pinned items, kind chips, grid toggle',
       (tester) async {
-    tester.view.physicalSize = const Size(400, 800);
+    tester.view.physicalSize = const Size(400, 1400);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     final h = await Harness.create(tester, tracks: 4);

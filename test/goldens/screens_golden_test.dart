@@ -3,7 +3,9 @@
 //   flutter test --update-goldens test/goldens     # after an intended change
 import 'dart:io';
 
+import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/data/repositories/library_queries.dart';
+import 'package:drift/drift.dart' show Value;
 import 'package:codecore/providers/jam_providers.dart';
 import 'package:codecore/providers/nav_providers.dart';
 import 'package:codecore/providers/import_providers.dart' show searchCacheCountProvider;
@@ -82,6 +84,25 @@ void main() {
                   extra: [navIndexProvider.overrideWith(_LibraryTab.new)]);
               await s.expectGolden('${tag}_library.png');
             }));
+
+        if (size == ShotSize.phone && scale == 1.0) {
+          testWidgets('home', (tester) => withShot(tester, size, (s) async {
+                // Two half-played tracks fill «Riprendi»; a playing queue gives
+                // the mini-player (ring around the cover).
+                await tester.runAsync(() async {
+                  for (final (i, id) in s.seed.trackIds.take(2).indexed) {
+                    await (s.h.db.update(s.h.db.tracks)
+                          ..where((t) => t.id.equals(id)))
+                        .write(TracksCompanion(
+                            resumePositionMs: const Value(60000),
+                            lastPlayedAt: Value(1000 + i)));
+                  }
+                  await s.h.handler.playQueue(s.seed.trackIds.take(6).toList(), 2);
+                });
+                await s.show(const AppShell());
+                await s.expectGolden('${tag}_home.png');
+              }));
+        }
 
         testWidgets('album', (tester) => withShot(tester, size, (s) async {
               final rows = await tester.runAsync(() => s.h.db.customSelect(
