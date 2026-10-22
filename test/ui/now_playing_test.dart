@@ -201,5 +201,6 @@ void main() {
     // Mute button and percentage have the same width: the slider is centred.
     expect(tester.getCenter(find.byType(Slider).last).dx, closeTo(200, 1));
     await h.dispose(tester);
-  });
+    // Linux: the desktop theme shrink-wraps the mute button.
+  }, variant: TargetPlatformVariant.only(TargetPlatform.linux));
 }
