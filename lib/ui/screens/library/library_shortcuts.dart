@@ -8,6 +8,7 @@ class LibraryShortcut {
     required this.label,
     required this.icon,
     this.count,
+    this.meta,
     required this.onTap,
     this.keepWhenZero = false,
   });
@@ -15,6 +16,9 @@ class LibraryShortcut {
   final String label;
   final IconData icon;
   final int? count;
+
+  /// A small second line under the label.
+  final String? meta;
   final VoidCallback onTap;
   final bool keepWhenZero;
 }
@@ -34,7 +38,7 @@ class LibraryShortcuts extends StatelessWidget {
     final theme = Theme.of(context).textTheme;
     return Semantics(
       button: true,
-      label: s.count == null ? s.label : '${s.label}, ${s.count}',
+      label: [s.label, if (s.count != null) '${s.count}', if (s.meta != null) s.meta!].join(', '),
       excludeSemantics: true,
       onTap: s.onTap,
       child: PressScale(
@@ -53,11 +57,23 @@ class LibraryShortcuts extends StatelessWidget {
                     Icon(s.icon, size: 22, color: cc.textMuted),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: Text(
-                        s.label,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.labelLarge,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            s.label,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.labelLarge,
+                          ),
+                          if (s.meta != null)
+                            Text(
+                              s.meta!,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.bodySmall?.copyWith(color: cc.textMuted),
+                            ),
+                        ],
                       ),
                     ),
                     if (s.count != null) ...[

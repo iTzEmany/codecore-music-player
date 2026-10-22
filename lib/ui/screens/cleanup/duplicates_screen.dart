@@ -198,7 +198,7 @@ class _Results extends ConsumerWidget {
                       child: Text(
                         l.duplicatesDeleteFiles(
                           files.length,
-                          formatBytes(bytes),
+                          formatBytes(bytes, Localizations.localeOf(context).toString()),
                         ),
                       ),
                     ),

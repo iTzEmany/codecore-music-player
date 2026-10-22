@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../l10n/l10n_ext.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/format_utils.dart';
 
@@ -8,20 +7,22 @@ import '../../widgets/format_utils.dart';
 const sizeColumnWidth = 76.0;
 
 /// A row of a «Memoria» list: name, what it holds, how much space it takes,
-/// and a thin bar of its share ([fraction] 0–1, null = no bar).
+/// and a thin dimmed bar of its share ([fraction] 0–1, null = no bar).
+/// [detail] is a small faint line (a folder path).
 class WeightRow extends StatelessWidget {
   const WeightRow({
     super.key,
     required this.title,
     required this.bytes,
     this.subtitle,
+    this.detail,
     this.leading,
     this.fraction,
     this.onTap,
   });
 
   final String title;
-  final String? subtitle;
+  final String? subtitle, detail;
   final int bytes;
   final Widget? leading;
   final double? fraction;
@@ -59,6 +60,13 @@ class WeightRow extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: theme.bodyMedium?.copyWith(color: cc.textMuted),
                     ),
+                  if (detail != null)
+                    Text(
+                      detail!,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.bodySmall?.copyWith(color: cc.textFaint),
+                    ),
                   if (f != null) ...[
                     const SizedBox(height: 6),
                     ExcludeSemantics(
@@ -66,9 +74,9 @@ class WeightRow extends StatelessWidget {
                         borderRadius: BorderRadius.circular(2),
                         child: LinearProgressIndicator(
                           value: f.clamp(0.0, 1.0),
-                          minHeight: 4,
-                          color: cc.accent,
-                          backgroundColor: cc.surface3,
+                          minHeight: 3,
+                          color: cc.surface3,
+                          backgroundColor: Colors.transparent,
                         ),
                       ),
                     ),
@@ -81,7 +89,7 @@ class WeightRow extends StatelessWidget {
             SizedBox(
               width: MediaQuery.textScalerOf(context).scale(sizeColumnWidth),
               child: Text(
-                formatBytes(bytes),
+                formatBytes(bytes, Localizations.localeOf(context).toString()),
                 maxLines: 1,
                 textAlign: TextAlign.end,
                 style: theme.titleSmall?.copyWith(color: cc.text),
@@ -97,101 +105,20 @@ class WeightRow extends StatelessWidget {
 /// Share of [part] in [whole] for a bar; 0 when there is no whole.
 double shareOf(int part, int whole) => whole <= 0 ? 0 : part / whole;
 
-/// The card at the top: a surface with rounded corners holding [child].
-class MemoryCard extends StatelessWidget {
-  const MemoryCard({super.key, required this.child});
+/// The 44 px icon square that stands for a row without a cover.
+class IconBox extends StatelessWidget {
+  const IconBox(this.icon, {super.key});
 
-  final Widget child;
+  final IconData icon;
 
   @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.fromLTRB(CcDims.margin, 12, CcDims.margin, 0),
-    child: DecoratedBox(
-      decoration: BoxDecoration(
-        color: context.cc.surface1,
-        borderRadius: BorderRadius.circular(CcDims.rCard),
-      ),
-      child: Padding(padding: const EdgeInsets.all(16), child: child),
+  Widget build(BuildContext context) => Container(
+    width: 44,
+    height: 44,
+    decoration: BoxDecoration(
+      color: context.cc.surface2,
+      borderRadius: BorderRadius.circular(CcDims.rList),
     ),
+    child: Icon(icon, size: 22, color: context.cc.textMuted),
   );
-}
-
-/// «musica · altro · libero» as one bar with a legend.
-class DeviceBar extends StatelessWidget {
-  const DeviceBar({
-    super.key,
-    required this.musicBytes,
-    required this.otherBytes,
-    required this.freeBytes,
-  });
-
-  final int musicBytes, otherBytes, freeBytes;
-
-  @override
-  Widget build(BuildContext context) {
-    final l = context.l10n;
-    final cc = context.cc;
-    final total = musicBytes + otherBytes + freeBytes;
-    int flex(int v) => v <= 0 ? 0 : (v * 1000 / total).ceil();
-    final parts = [
-      (l.memoryMusicLabel, musicBytes, cc.accent),
-      (l.memoryOtherLabel, otherBytes, cc.textFaint),
-      (l.memoryFreeLabel, freeBytes, cc.surface3),
-    ];
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Semantics(
-          label: [
-            for (final (name, bytes, _) in parts) '$name ${formatBytes(bytes)}',
-          ].join(', '),
-          child: ExcludeSemantics(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(5),
-              child: SizedBox(
-                height: 10,
-                child: Row(
-                  children: [
-                    for (final (_, bytes, color) in parts)
-                      if (flex(bytes) > 0)
-                        Expanded(
-                          flex: flex(bytes),
-                          child: ColoredBox(color: color),
-                        ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 10),
-        Wrap(
-          spacing: 16,
-          runSpacing: 4,
-          children: [
-            for (final (name, bytes, color) in parts)
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 10,
-                    height: 10,
-                    decoration: BoxDecoration(
-                      color: color,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    '$name ${formatBytes(bytes)}',
-                    style: Theme.of(context).textTheme.bodySmall
-                        ?.copyWith(color: cc.textMuted),
-                  ),
-                ],
-              ),
-          ],
-        ),
-      ],
-    );
-  }
 }

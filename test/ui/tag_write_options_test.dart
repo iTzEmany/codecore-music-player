@@ -150,7 +150,7 @@ void main() {
     );
     expect(find.text('Backup dei tag'), findsOneWidget);
     expect(find.text('song.mp3'), findsOneWidget);
-    expect(find.textContaining('4.0 MB'), findsOneWidget);
+    expect(find.textContaining('4,0 MB'), findsOneWidget);
 
     // Cancel at the confirmation: nothing is restored.
     await tester.tap(find.byType(PopupMenuButton<String>));

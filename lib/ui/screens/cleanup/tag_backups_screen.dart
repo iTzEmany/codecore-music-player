@@ -100,7 +100,7 @@ class TagBackupsScreen extends ConsumerWidget {
                   leading: const Icon(Icons.audio_file_outlined),
                   title: Text(p.basename(b.path), maxLines: 1),
                   subtitle: Text(
-                    '${fmt.format(b.createdAt)}, ${formatBytes(b.sizeBytes)}\n${p.dirname(b.path)}',
+                    '${fmt.format(b.createdAt)}, ${formatBytes(b.sizeBytes, Localizations.localeOf(context).toString())}\n${p.dirname(b.path)}',
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),

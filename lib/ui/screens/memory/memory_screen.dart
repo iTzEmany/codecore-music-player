@@ -5,6 +5,7 @@ import '../../../data/db/app_database.dart';
 import '../../../data/repositories/memory_queries.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../l10n/l10n_ext.dart';
+import '../../../providers/duplicate_providers.dart';
 import '../../../providers/library_providers.dart';
 import '../../../providers/memory_providers.dart';
 import '../../../providers/nav_providers.dart';
@@ -15,15 +16,18 @@ import '../../widgets/error_state.dart';
 import '../../widgets/format_utils.dart';
 import '../../widgets/playlist_cover.dart';
 import '../../widgets/section_header.dart';
+import '../../widgets/segmented_blocks.dart';
 import '../../widgets/track_actions.dart';
 import '../cleanup/duplicates_screen.dart';
 import '../library/album_detail_screen.dart';
 import '../library/favorites_screen.dart';
+import '../library/library_shortcuts.dart';
 import '../playlists/playlist_detail_screen.dart';
 import '../settings/missing_tracks_screen.dart';
 import '../stats/stats_screen.dart' show formatListened;
 import 'folder_labels.dart';
 import 'memory_app_data.dart';
+import 'memory_ring.dart';
 import 'memory_widgets.dart';
 import 'never_played_screen.dart';
 
@@ -96,13 +100,29 @@ class _MemoryScreenState extends ConsumerState<MemoryScreen> {
   }
 }
 
-class _MemoryList extends ConsumerWidget {
+enum _Group { playlists, formats, folders }
+
+enum _Heavy { tracks, albums }
+
+/// How many of the heaviest tracks/albums show before «Mostra tutti».
+const _heavyShown = 5;
+
+class _MemoryList extends ConsumerStatefulWidget {
   const _MemoryList({required this.onRetry});
 
   final VoidCallback onRetry;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_MemoryList> createState() => _MemoryListState();
+}
+
+class _MemoryListState extends ConsumerState<_MemoryList> {
+  _Group _group = _Group.playlists;
+  _Heavy _heavy = _Heavy.tracks;
+  bool _expanded = false;
+
+  @override
+  Widget build(BuildContext context) {
     final totals = ref.watch(memoryTotalsProvider);
     final breakdown = ref.watch(memoryBreakdownProvider);
     final error = totals.error ?? breakdown.error;
@@ -111,187 +131,296 @@ class _MemoryList extends ConsumerWidget {
         context,
         error,
         totals.stackTrace ?? breakdown.stackTrace ?? StackTrace.current,
-        onRetry: onRetry,
+        onRetry: widget.onRetry,
       );
     }
     final t = totals.value, b = breakdown.value;
     if (t == null || b == null) {
       return const Center(child: CircularProgressIndicator());
     }
+    final ring = Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: MemoryRing(
+        musicBytes: t.sizeBytes,
+        disk: ref.watch(musicDiskSpaceProvider).value,
+      ),
+    );
+    final never = _neverPlayed(context, b);
+    final tools = _tools(context);
+    final main = [
+      ..._groups(context, b),
+      ..._heaviest(context, b),
+    ];
+    const pad = EdgeInsets.only(bottom: 32);
+    if (MediaQuery.sizeOf(context).width >= CcDims.wideBreakpoint) {
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 330,
+            child: ListView(
+              padding: pad,
+              children: [ring, ...never, ...tools],
+            ),
+          ),
+          Expanded(
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: pad,
+              children: [...main, const MemoryAppDataSection()],
+            ),
+          ),
+        ],
+      );
+    }
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.only(bottom: 32),
+      padding: pad,
       children: [
-        _SummaryCard(totals: t),
-        ..._playlists(context, b),
-        ..._weights(
-          context,
-          context.l10n.memoryByFormat,
-          b.formats,
-          name: (g) => g.name.toUpperCase(),
-          subtitle: (g) => context.l10n.tracksCount(g.totals.trackCount),
-        ),
-        ..._weights(
-          context,
-          context.l10n.memoryByFolder,
-          b.folders,
-          name: (g) => g.path == null
-              ? context.l10n.memoryNoFolder
-              : folderLabels(b.folders)[g.path] ?? g.name,
-          subtitle: (g) {
-            final n = context.l10n.tracksCount(g.totals.trackCount);
-            return g.path == null ? n : '$n, ${g.path}';
-          },
-        ),
-        ..._heaviest(context, b),
-        ..._neverPlayed(context, b, t),
+        ring,
+        ...main,
+        ...never,
+        ...tools,
         const MemoryAppDataSection(),
-        ..._tools(context, ref),
       ],
     );
   }
 
-  List<Widget> _weights(
-    BuildContext context,
-    String title,
-    List<SizeGroup> groups, {
-    required String Function(SizeGroup) name,
-    required String Function(SizeGroup) subtitle,
-  }) {
-    if (groups.isEmpty) return const [];
-    final max = groups.first.totals.sizeBytes;
-    return [
-      SectionHeader(title),
-      for (final g in groups)
-        WeightRow(
-          title: name(g),
-          subtitle: subtitle(g),
-          bytes: g.totals.sizeBytes,
-          fraction: shareOf(g.totals.sizeBytes, max),
-        ),
-    ];
-  }
+  Widget _blocks<T>(
+    List<BlockItem<T>> items,
+    T selected,
+    ValueChanged<T> onChanged,
+  ) => Padding(
+    padding: const EdgeInsets.fromLTRB(CcDims.margin, 8, CcDims.margin, 8),
+    child: SegmentedBlocks<T>(
+      items: items,
+      selected: selected,
+      onChanged: onChanged,
+    ),
+  );
 
-  List<Widget> _playlists(BuildContext context, MemoryBreakdown b) {
+  List<Widget> _groups(BuildContext context, MemoryBreakdown b) {
     final l = context.l10n;
     final theme = Theme.of(context).textTheme;
-    if (b.playlists.isEmpty) return const [];
-    final max = b.playlists.first.totals.sizeBytes;
+    final groups = switch (_group) {
+      _Group.playlists => b.playlists,
+      _Group.formats => b.formats,
+      _Group.folders => b.folders,
+    };
+    final max = groups.firstOrNull?.totals.sizeBytes ?? 0;
     return [
-      SectionHeader(l.memoryPlaylists),
-      for (final g in b.playlists)
-        WeightRow(
-          leading: PlaylistCover(
-            size: 40,
-            favorites: g.isFavorites,
-            coverKeys: playlistCoverKeys(g.playlist?.coverKey, const []),
+      _blocks<_Group>(
+        [
+          BlockItem(
+            value: _Group.playlists,
+            icon: Icons.queue_music_rounded,
+            label: l.memoryPlaylists,
           ),
-          title: g.isFavorites ? l.navFavorites : g.name,
-          subtitle: _countAndTime(l, g.totals),
-          bytes: g.totals.sizeBytes,
-          fraction: shareOf(g.totals.sizeBytes, max),
-          onTap: () => ShellNav.open<void>(
-            context,
-            g.playlist == null
-                ? const FavoritesScreen()
-                : PlaylistDetailScreen(playlist: g.playlist!),
+          BlockItem(
+            value: _Group.formats,
+            icon: Icons.audio_file_rounded,
+            label: l.memoryByFormat,
           ),
-        ),
-      Padding(
-        padding: const EdgeInsets.fromLTRB(CcDims.margin, 8, CcDims.margin, 0),
-        child: Text(
-          l.memoryPlaylistsNote,
-          style: theme.bodySmall?.copyWith(color: context.cc.textMuted),
-        ),
+          BlockItem(
+            value: _Group.folders,
+            icon: Icons.folder_rounded,
+            label: l.memoryByFolder,
+          ),
+        ],
+        _group,
+        (g) => setState(() => _group = g),
       ),
+      for (final g in groups)
+        switch (_group) {
+          _Group.playlists => WeightRow(
+            leading: PlaylistCover(
+              size: 44,
+              favorites: g.isFavorites,
+              coverKeys: playlistCoverKeys(g.playlist?.coverKey, const []),
+            ),
+            title: g.isFavorites ? l.navFavorites : g.name,
+            subtitle: _countAndTime(l, g.totals),
+            bytes: g.totals.sizeBytes,
+            fraction: shareOf(g.totals.sizeBytes, max),
+            onTap: () => ShellNav.open<void>(
+              context,
+              g.playlist == null
+                  ? const FavoritesScreen()
+                  : PlaylistDetailScreen(playlist: g.playlist!),
+            ),
+          ),
+          _Group.formats => WeightRow(
+            leading: const IconBox(Icons.audio_file_rounded),
+            title: g.name.toUpperCase(),
+            subtitle: l.tracksCount(g.totals.trackCount),
+            bytes: g.totals.sizeBytes,
+            fraction: shareOf(g.totals.sizeBytes, max),
+          ),
+          _Group.folders => WeightRow(
+            leading: const IconBox(Icons.folder_rounded),
+            title: g.path == null
+                ? l.memoryNoFolder
+                : folderLabels(b.folders)[g.path] ?? g.name,
+            subtitle: l.tracksCount(g.totals.trackCount),
+            detail: g.path,
+            bytes: g.totals.sizeBytes,
+            fraction: shareOf(g.totals.sizeBytes, max),
+          ),
+        },
+      if (_group == _Group.playlists && groups.isNotEmpty)
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+            CcDims.margin,
+            8,
+            CcDims.margin,
+            0,
+          ),
+          child: Text(
+            l.memoryPlaylistsNote,
+            style: theme.bodySmall?.copyWith(color: context.cc.textMuted),
+          ),
+        ),
     ];
   }
 
   List<Widget> _heaviest(BuildContext context, MemoryBreakdown b) {
     final l = context.l10n;
     if (b.heaviestTracks.isEmpty) return const [];
-    final theme = Theme.of(context).textTheme;
-    Widget sub(String text) => Padding(
-      padding: const EdgeInsets.fromLTRB(CcDims.margin, 8, CcDims.margin, 0),
-      child: Text(
-        text,
-        style: theme.titleSmall?.copyWith(color: context.cc.textMuted),
-      ),
-    );
-    final maxTrack = b.heaviestTracks.first.sizeBytes;
-    final maxAlbum = b.heaviestAlbums.firstOrNull?.sizeBytes ?? 0;
+    final tracks = _heavy == _Heavy.tracks;
+    final count = tracks ? b.heaviestTracks.length : b.heaviestAlbums.length;
+    final limit = _expanded ? count : _heavyShown;
     return [
-      SectionHeader(l.memoryHeaviest),
-      sub(l.memoryHeaviestTracks),
-      for (final t in b.heaviestTracks)
-        _TrackWeight(
-          title: t.title,
-          subtitle: t.artist,
-          coverKey: t.coverKey,
-          bytes: t.sizeBytes,
-          fraction: shareOf(t.sizeBytes, maxTrack),
-          track: t,
-        ),
-      if (b.heaviestAlbums.isNotEmpty) sub(l.memoryHeaviestAlbums),
-      for (final a in b.heaviestAlbums)
-        WeightRow(
-          leading: CoverImage(coverKey: a.album.coverKey, size: 40),
-          title: a.album.title ?? l.unknownAlbum,
-          subtitle: a.album.variousArtists ? l.variousArtists : a.album.artist,
-          bytes: a.sizeBytes,
-          fraction: shareOf(a.sizeBytes, maxAlbum),
-          onTap: () =>
-              ShellNav.open<void>(context, AlbumDetailScreen(album: a.album)),
-        ),
+      SectionHeader(
+        l.memoryHeaviest,
+        actionLabel: count > limit ? l.memoryShowAll : null,
+        onAction: () => setState(() => _expanded = true),
+      ),
+      _blocks<_Heavy>(
+        [
+          BlockItem(
+            value: _Heavy.tracks,
+            icon: Icons.music_note_rounded,
+            label: l.memoryHeaviestTracks,
+          ),
+          if (b.heaviestAlbums.isNotEmpty)
+            BlockItem(
+              value: _Heavy.albums,
+              icon: Icons.album_rounded,
+              label: l.memoryHeaviestAlbums,
+            ),
+        ],
+        _heavy,
+        (h) => setState(() => _heavy = h),
+      ),
+      if (tracks)
+        for (final t in b.heaviestTracks.take(limit))
+          _TrackWeight(
+            title: t.title,
+            subtitle: t.artist,
+            coverKey: t.coverKey,
+            bytes: t.sizeBytes,
+            fraction: shareOf(t.sizeBytes, b.heaviestTracks.first.sizeBytes),
+            track: t,
+          )
+      else
+        for (final a in b.heaviestAlbums.take(limit))
+          WeightRow(
+            leading: CoverImage(coverKey: a.album.coverKey, size: 44),
+            title: a.album.title ?? l.unknownAlbum,
+            subtitle: a.album.variousArtists
+                ? l.variousArtists
+                : a.album.artist,
+            bytes: a.sizeBytes,
+            fraction: shareOf(a.sizeBytes, b.heaviestAlbums.first.sizeBytes),
+            onTap: () => ShellNav.open<void>(
+              context,
+              AlbumDetailScreen(album: a.album),
+            ),
+          ),
     ];
   }
 
-  List<Widget> _neverPlayed(
-    BuildContext context,
-    MemoryBreakdown b,
-    SizeTotals library,
-  ) {
+  List<Widget> _neverPlayed(BuildContext context, MemoryBreakdown b) {
     final l = context.l10n;
+    final cc = context.cc;
+    final theme = Theme.of(context).textTheme;
     final n = b.neverPlayed;
+    if (n.trackCount == 0) return const [];
+    final meta = l.tracksAndDuration(
+      l.tracksCount(n.trackCount),
+      formatBytes(n.sizeBytes, l.localeName),
+    );
+    const radius = BorderRadius.all(Radius.circular(CcDims.rSheet));
     return [
-      SectionHeader(l.memoryNeverPlayed),
-      WeightRow(
-        leading: Icon(
-          Icons.headphones_rounded,
-          size: 40,
-          color: context.cc.textMuted,
+      Padding(
+        padding: const EdgeInsets.fromLTRB(CcDims.margin, 16, CcDims.margin, 0),
+        child: Material(
+          color: cc.surface1,
+          borderRadius: radius,
+          child: InkWell(
+            borderRadius: radius,
+            onTap: () =>
+                ShellNav.open<void>(context, const NeverPlayedScreen()),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                children: [
+                  Icon(Icons.headphones_rounded, size: 22, color: cc.textMuted),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(l.memoryNeverPlayed, style: theme.labelLarge),
+                        Text(
+                          meta,
+                          style: theme.bodySmall?.copyWith(
+                            color: cc.textMuted,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(Icons.chevron_right_rounded, color: cc.textMuted),
+                ],
+              ),
+            ),
+          ),
         ),
-        title: l.memoryNeverPlayed,
-        subtitle: n.trackCount == 0
-            ? l.memoryNeverPlayedNone
-            : _countAndTime(l, n),
-        bytes: n.sizeBytes,
-        fraction: shareOf(n.sizeBytes, library.sizeBytes),
-        onTap: n.trackCount == 0
-            ? null
-            : () => ShellNav.open<void>(context, const NeverPlayedScreen()),
       ),
     ];
   }
 
-  List<Widget> _tools(BuildContext context, WidgetRef ref) {
+  List<Widget> _tools(BuildContext context) {
     final l = context.l10n;
     final missing = ref.watch(
       missingTracksProvider.select((m) => m.value?.length),
     );
+    // Only a search already done; opening Memoria never starts one.
+    final dup = ref.watch(duplicateSearchProvider);
     return [
       SectionHeader(l.memoryTools),
-      ListTile(
-        leading: const Icon(Icons.content_copy_rounded),
-        title: Text(l.duplicatesTitle),
-        subtitle: Text(l.duplicatesTileHint),
-        onTap: () => ShellNav.open<void>(context, const DuplicatesScreen()),
-      ),
-      ListTile(
-        leading: const Icon(Icons.link_off_rounded),
-        title: Text(l.missingTracksTitle),
-        subtitle: missing == null ? null : Text(l.tracksCount(missing)),
-        onTap: () => ShellNav.open<void>(context, const MissingTracksScreen()),
+      LibraryShortcuts(
+        items: [
+          LibraryShortcut(
+            label: l.duplicatesTitle,
+            icon: Icons.content_copy_rounded,
+            meta: dup.phase == DuplicatePhase.done
+                ? l.memoryDuplicateGroups(dup.groups.length)
+                : null,
+            keepWhenZero: true,
+            onTap: () =>
+                ShellNav.open<void>(context, const DuplicatesScreen()),
+          ),
+          LibraryShortcut(
+            label: l.missingTracksTitle,
+            icon: Icons.link_off_rounded,
+            meta: missing == null ? null : l.tracksCount(missing),
+            keepWhenZero: true,
+            onTap: () =>
+                ShellNav.open<void>(context, const MissingTracksScreen()),
+          ),
+        ],
       ),
     ];
   }
@@ -320,58 +449,11 @@ class _TrackWeight extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => WeightRow(
-    leading: CoverImage(coverKey: coverKey, size: 40),
+    leading: CoverImage(coverKey: coverKey, size: 44),
     title: title,
     subtitle: subtitle,
     bytes: bytes,
     fraction: fraction,
     onTap: () => showTrackActions(context, ref, track),
   );
-}
-
-class _SummaryCard extends ConsumerWidget {
-  const _SummaryCard({required this.totals});
-
-  final SizeTotals totals;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l = context.l10n;
-    final cc = context.cc;
-    final theme = Theme.of(context).textTheme;
-    final disk = ref.watch(musicDiskSpaceProvider).value;
-    return MemoryCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(l.memorySummary, style: theme.titleSmall),
-          const SizedBox(height: 8),
-          Text(formatBytes(totals.sizeBytes), style: theme.headlineMedium),
-          Text(
-            _countAndTime(l, totals),
-            style: theme.bodyMedium?.copyWith(color: cc.textMuted),
-          ),
-          if (disk != null) ...[
-            const SizedBox(height: 16),
-            DeviceBar(
-              musicBytes: totals.sizeBytes,
-              otherBytes: (disk.usedBytes - totals.sizeBytes).clamp(
-                0,
-                disk.totalBytes,
-              ),
-              freeBytes: disk.freeBytes,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              l.memoryDeviceLine(
-                formatBytes(disk.freeBytes),
-                formatBytes(disk.totalBytes),
-              ),
-              style: theme.bodySmall?.copyWith(color: cc.textMuted),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
 }

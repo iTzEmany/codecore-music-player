@@ -6525,12 +6525,6 @@ abstract class AppLocalizations {
   /// **'Memoria'**
   String get navMemory;
 
-  /// No description provided for @memorySummary.
-  ///
-  /// In it, this message translates to:
-  /// **'Riepilogo'**
-  String get memorySummary;
-
   /// No description provided for @memoryMusicLabel.
   ///
   /// In it, this message translates to:
@@ -6570,13 +6564,13 @@ abstract class AppLocalizations {
   /// No description provided for @memoryByFormat.
   ///
   /// In it, this message translates to:
-  /// **'Per formato'**
+  /// **'Formati'**
   String get memoryByFormat;
 
   /// No description provided for @memoryByFolder.
   ///
   /// In it, this message translates to:
-  /// **'Per cartella'**
+  /// **'Cartelle'**
   String get memoryByFolder;
 
   /// No description provided for @memoryNoFolder.
@@ -6642,7 +6636,7 @@ abstract class AppLocalizations {
   /// No description provided for @memoryDatabase.
   ///
   /// In it, this message translates to:
-  /// **'Database'**
+  /// **'Libreria'**
   String get memoryDatabase;
 
   /// No description provided for @memoryImageMemory.
@@ -6699,24 +6693,6 @@ abstract class AppLocalizations {
   /// **'Svuota cache'**
   String get memoryClearCache;
 
-  /// No description provided for @memoryClearTitle.
-  ///
-  /// In it, this message translates to:
-  /// **'Svuotare la cache?'**
-  String get memoryClearTitle;
-
-  /// No description provided for @memoryClearBody.
-  ///
-  /// In it, this message translates to:
-  /// **'Elimina solo copie che l\'app ricrea da sola: immagini in memoria, cache Jam, ricerche e sfondi sfocati. Copertine, database e backup restano dove sono.'**
-  String get memoryClearBody;
-
-  /// No description provided for @memoryClearConfirm.
-  ///
-  /// In it, this message translates to:
-  /// **'Svuota'**
-  String get memoryClearConfirm;
-
   /// No description provided for @memoryCleared.
   ///
   /// In it, this message translates to:
@@ -6735,10 +6711,64 @@ abstract class AppLocalizations {
   /// **'Impossibile svuotare la cache'**
   String get memoryClearFailed;
 
+  /// No description provided for @memoryOfMusic.
+  ///
+  /// In it, this message translates to:
+  /// **'di musica'**
+  String get memoryOfMusic;
+
+  /// No description provided for @memoryShowAll.
+  ///
+  /// In it, this message translates to:
+  /// **'Mostra tutti'**
+  String get memoryShowAll;
+
+  /// No description provided for @memoryCache.
+  ///
+  /// In it, this message translates to:
+  /// **'Cache'**
+  String get memoryCache;
+
+  /// No description provided for @memoryCacheHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Immagini, ricerche, Jam'**
+  String get memoryCacheHint;
+
+  /// No description provided for @memoryDatabaseHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Il database con brani e ascolti'**
+  String get memoryDatabaseHint;
+
+  /// No description provided for @memoryTagBackupsHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Prima di ogni modifica ai file'**
+  String get memoryTagBackupsHint;
+
+  /// No description provided for @memoryTinyNote.
+  ///
+  /// In it, this message translates to:
+  /// **'I dati sotto 1 MB non sono elencati.'**
+  String get memoryTinyNote;
+
+  /// No description provided for @memoryClearHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Libera {size}. Brani, copertine e ascolti restano.'**
+  String memoryClearHint(String size);
+
+  /// No description provided for @memoryDuplicateGroups.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, one{1 gruppo} other{{count} gruppi}}'**
+  String memoryDuplicateGroups(int count);
+
   /// No description provided for @memoryTools.
   ///
   /// In it, this message translates to:
-  /// **'Pulizia'**
+  /// **'Strumenti'**
   String get memoryTools;
 
   /// No description provided for @memoryUnavailable.

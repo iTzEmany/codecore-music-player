@@ -1,16 +1,18 @@
+import 'package:intl/intl.dart';
+
 import '../../core/audio_format.dart';
 import '../../l10n/app_localizations.dart';
 
 import '../../data/db/app_database.dart';
 
-/// «512 B», «842 KB», «12.4 MB», «1.2 GB» (decimal point; the unit is universal).
-String formatBytes(int bytes) {
+/// «512 B», «842 KB», «12,4 MB», «1,5 GB»: the decimal separator follows
+/// [locale]; one decimal digit under 100, none above («128 GB»).
+String formatBytes(int bytes, [String? locale]) {
+  String num(double v) => NumberFormat(v >= 99.95 ? '0' : '0.0', locale).format(v);
   if (bytes < 1024) return '$bytes B';
   if (bytes < 1024 * 1024) return '${(bytes / 1024).round()} KB';
-  if (bytes < 1024 * 1024 * 1024) {
-    return '${(bytes / 1048576).toStringAsFixed(1)} MB';
-  }
-  return '${(bytes / 1073741824).toStringAsFixed(1)} GB';
+  if (bytes < 1024 * 1024 * 1024) return '${num(bytes / 1048576)} MB';
+  return '${num(bytes / 1073741824)} GB';
 }
 
 String formatDuration(int ms) {

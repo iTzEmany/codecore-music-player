@@ -4193,9 +4193,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navMemory => 'Storage';
 
   @override
-  String get memorySummary => 'Summary';
-
-  @override
   String get memoryMusicLabel => 'Music';
 
   @override
@@ -4217,10 +4214,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'A track in several playlists counts in each one, so the sum can exceed the total.';
 
   @override
-  String get memoryByFormat => 'By format';
+  String get memoryByFormat => 'Formats';
 
   @override
-  String get memoryByFolder => 'By folder';
+  String get memoryByFolder => 'Folders';
 
   @override
   String get memoryNoFolder => 'Outside the folders';
@@ -4256,7 +4253,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get memoryDatabase => 'Database';
+  String get memoryDatabase => 'Library';
 
   @override
   String get memoryImageMemory => 'Images in memory';
@@ -4286,16 +4283,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get memoryClearCache => 'Clear cache';
 
   @override
-  String get memoryClearTitle => 'Clear the cache?';
-
-  @override
-  String get memoryClearBody =>
-      'Only removes copies the app makes again by itself: images in memory, Jam cache, searches and blurred backgrounds. Covers, the database and backups stay where they are.';
-
-  @override
-  String get memoryClearConfirm => 'Clear';
-
-  @override
   String memoryCleared(String size) {
     return '$size freed';
   }
@@ -4309,7 +4296,48 @@ class AppLocalizationsEn extends AppLocalizations {
   String get memoryClearFailed => 'Could not clear the cache';
 
   @override
-  String get memoryTools => 'Cleanup';
+  String get memoryOfMusic => 'of music';
+
+  @override
+  String get memoryShowAll => 'Show all';
+
+  @override
+  String get memoryCache => 'Cache';
+
+  @override
+  String get memoryCacheHint => 'Images, searches, Jam';
+
+  @override
+  String get memoryDatabaseHint => 'The database with tracks and plays';
+
+  @override
+  String get memoryTagBackupsHint => 'Before every change to the files';
+
+  @override
+  String get memoryTinyNote => 'Data under 1 MB is not listed.';
+
+  @override
+  String memoryClearHint(String size) {
+    return 'Frees $size. Tracks, covers and plays stay.';
+  }
+
+  @override
+  String memoryDuplicateGroups(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString groups',
+      one: '1 group',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get memoryTools => 'Tools';
 
   @override
   String get memoryUnavailable => 'Not available';

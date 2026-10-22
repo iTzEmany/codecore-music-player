@@ -7,7 +7,6 @@ import '../../../l10n/l10n_ext.dart';
 import '../../../providers/memory_providers.dart';
 import '../../../services/memory/app_data.dart';
 import '../../theme/tokens.dart';
-import '../../widgets/confirm.dart';
 import '../../widgets/format_utils.dart';
 import '../../widgets/section_header.dart';
 import 'memory_widgets.dart';
@@ -27,24 +26,21 @@ String _label(AppLocalizations l, AppDataKind k) => switch (k) {
   AppDataKind.radio => l.memoryRadio,
 };
 
+/// Rows under 1 MB are not listed.
+const _minBytes = 1024 * 1024;
+
 /// «Dati dell'app»: what the app keeps besides the music, and «Svuota cache».
 class MemoryAppDataSection extends ConsumerWidget {
   const MemoryAppDataSection({super.key});
 
   Future<void> _clear(BuildContext context, WidgetRef ref) async {
     final l = context.l10n;
+    final locale = l.localeName;
     final messenger = ScaffoldMessenger.of(context);
-    final ok = await showConfirm(
-      context,
-      title: l.memoryClearTitle,
-      body: l.memoryClearBody,
-      confirmLabel: l.memoryClearConfirm,
-    );
-    if (!ok) return;
     try {
       final r = await ref.read(memoryActionsProvider).clearCaches();
       ref.invalidate(appDataUsageProvider);
-      final size = formatBytes(r.freedBytes);
+      final size = formatBytes(r.freedBytes, locale);
       messenger
         ..clearSnackBars()
         ..showSnackBar(
@@ -62,6 +58,84 @@ class MemoryAppDataSection extends ConsumerWidget {
         ..clearSnackBars()
         ..showSnackBar(SnackBar(content: Text(l.memoryClearFailed)));
     }
+  }
+
+  Widget _rows(
+    BuildContext context,
+    WidgetRef ref,
+    AppLocalizations l,
+    List<AppDataItem> items,
+  ) {
+    final locale = l.localeName;
+    // The caches are one row: they are what «Svuota cache» frees.
+    final cache = items
+        .where((i) => clearableKinds.contains(i.kind))
+        .fold(0, (n, i) => n + i.bytes);
+    final rows = <({String title, String? meta, int bytes})>[
+      for (final i in items)
+        if (!clearableKinds.contains(i.kind))
+          (
+            title: _label(l, i.kind),
+            meta: switch (i.kind) {
+              AppDataKind.covers when i.detailBytes != null =>
+                l.memoryCoversThumbs(formatBytes(i.detailBytes!, locale)),
+              AppDataKind.database => l.memoryDatabaseHint,
+              AppDataKind.tagBackups => l.memoryTagBackupsHint,
+              _ => null,
+            },
+            bytes: i.bytes,
+          ),
+      (title: l.memoryCache, meta: l.memoryCacheHint, bytes: cache),
+    ]..sort((a, b) => b.bytes.compareTo(a.bytes));
+    final shown = [
+      for (final r in rows)
+        if (r.bytes >= _minBytes) r,
+    ];
+    final hidden = rows.any((r) => r.bytes > 0 && r.bytes < _minBytes);
+    final theme = Theme.of(context).textTheme;
+    final muted = theme.bodySmall?.copyWith(color: context.cc.textMuted);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (final r in shown)
+          WeightRow(
+            title: r.title,
+            subtitle: r.meta,
+            bytes: r.bytes,
+            fraction: shareOf(r.bytes, shown.first.bytes),
+          ),
+        if (hidden)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              CcDims.margin,
+              8,
+              CcDims.margin,
+              0,
+            ),
+            child: Text(l.memoryTinyNote, style: muted),
+          ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+            CcDims.margin,
+            16,
+            CcDims.margin,
+            0,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              OutlinedButton(
+                onPressed: cache > 0 ? () => _clear(context, ref) : null,
+                style: OutlinedButton.styleFrom(shape: const StadiumBorder()),
+                child: Text(l.memoryClearCache, maxLines: 1, softWrap: false),
+              ),
+              const SizedBox(height: 8),
+              Text(l.memoryClearHint(formatBytes(cache, locale)), style: muted),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 
   @override
@@ -84,34 +158,7 @@ class MemoryAppDataSection extends ConsumerWidget {
               child: Text(l.memoryUnavailable),
             );
           },
-          data: (items) => Column(
-            children: [
-              for (final i in items)
-                WeightRow(
-                  title: _label(l, i.kind),
-                  subtitle: i.detailBytes == null
-                      ? null
-                      : l.memoryCoversThumbs(formatBytes(i.detailBytes!)),
-                  bytes: i.bytes,
-                ),
-            ],
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(
-            CcDims.margin,
-            12,
-            CcDims.margin,
-            0,
-          ),
-          child: Align(
-            alignment: AlignmentDirectional.centerStart,
-            child: OutlinedButton.icon(
-              onPressed: () => _clear(context, ref),
-              icon: const Icon(Icons.cleaning_services_rounded),
-              label: Text(l.memoryClearCache),
-            ),
-          ),
+          data: (items) => _rows(context, ref, l, items),
         ),
       ],
     );

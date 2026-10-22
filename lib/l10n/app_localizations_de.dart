@@ -4213,9 +4213,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String get navMemory => 'Speicher';
 
   @override
-  String get memorySummary => 'Übersicht';
-
-  @override
   String get memoryMusicLabel => 'Musik';
 
   @override
@@ -4237,10 +4234,10 @@ class AppLocalizationsDe extends AppLocalizations {
       'Ein Titel in mehreren Playlists zählt in jeder davon, die Summe kann daher die Gesamtgröße übersteigen.';
 
   @override
-  String get memoryByFormat => 'Nach Format';
+  String get memoryByFormat => 'Formate';
 
   @override
-  String get memoryByFolder => 'Nach Ordner';
+  String get memoryByFolder => 'Ordner';
 
   @override
   String get memoryNoFolder => 'Außerhalb der Ordner';
@@ -4276,7 +4273,7 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get memoryDatabase => 'Datenbank';
+  String get memoryDatabase => 'Bibliothek';
 
   @override
   String get memoryImageMemory => 'Bilder im Arbeitsspeicher';
@@ -4306,16 +4303,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String get memoryClearCache => 'Cache leeren';
 
   @override
-  String get memoryClearTitle => 'Cache leeren?';
-
-  @override
-  String get memoryClearBody =>
-      'Entfernt nur Kopien, die die App selbst neu erstellt: Bilder im Arbeitsspeicher, Jam-Cache, Suchen und unscharfe Hintergründe. Cover, Datenbank und Sicherungen bleiben erhalten.';
-
-  @override
-  String get memoryClearConfirm => 'Leeren';
-
-  @override
   String memoryCleared(String size) {
     return '$size freigegeben';
   }
@@ -4329,7 +4316,48 @@ class AppLocalizationsDe extends AppLocalizations {
   String get memoryClearFailed => 'Cache konnte nicht geleert werden';
 
   @override
-  String get memoryTools => 'Aufräumen';
+  String get memoryOfMusic => 'Musik';
+
+  @override
+  String get memoryShowAll => 'Alle anzeigen';
+
+  @override
+  String get memoryCache => 'Cache';
+
+  @override
+  String get memoryCacheHint => 'Bilder, Suchen, Jam';
+
+  @override
+  String get memoryDatabaseHint => 'Die Datenbank mit Titeln und Wiedergaben';
+
+  @override
+  String get memoryTagBackupsHint => 'Vor jeder Änderung an den Dateien';
+
+  @override
+  String get memoryTinyNote => 'Daten unter 1 MB werden nicht aufgelistet.';
+
+  @override
+  String memoryClearHint(String size) {
+    return 'Gibt $size frei. Titel, Cover und Wiedergaben bleiben erhalten.';
+  }
+
+  @override
+  String memoryDuplicateGroups(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString Gruppen',
+      one: '1 Gruppe',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get memoryTools => 'Werkzeuge';
 
   @override
   String get memoryUnavailable => 'Nicht verfügbar';

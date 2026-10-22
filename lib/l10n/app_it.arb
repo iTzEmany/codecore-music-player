@@ -2714,7 +2714,6 @@
     }
   },
   "navMemory": "Memoria",
-  "memorySummary": "Riepilogo",
   "memoryMusicLabel": "Musica",
   "memoryOtherLabel": "Altro",
   "memoryFreeLabel": "Libero",
@@ -2731,8 +2730,8 @@
   },
   "memoryPlaylists": "Playlist",
   "memoryPlaylistsNote": "Un brano presente in più playlist conta in ognuna: la somma può superare il totale.",
-  "memoryByFormat": "Per formato",
-  "memoryByFolder": "Per cartella",
+  "memoryByFormat": "Formati",
+  "memoryByFolder": "Cartelle",
   "memoryNoFolder": "Fuori dalle cartelle",
   "memoryHeaviest": "I più pesanti",
   "memoryHeaviestTracks": "Brani",
@@ -2750,7 +2749,7 @@
       }
     }
   },
-  "memoryDatabase": "Database",
+  "memoryDatabase": "Libreria",
   "memoryImageMemory": "Immagini in memoria",
   "memoryJamCache": "Cache Jam",
   "memorySearchCache": "Cache delle ricerche",
@@ -2760,9 +2759,6 @@
   "memoryLog": "Registro",
   "memoryPodcasts": "Episodi dei podcast",
   "memoryClearCache": "Svuota cache",
-  "memoryClearTitle": "Svuotare la cache?",
-  "memoryClearBody": "Elimina solo copie che l'app ricrea da sola: immagini in memoria, cache Jam, ricerche e sfondi sfocati. Copertine, database e backup restano dove sono.",
-  "memoryClearConfirm": "Svuota",
   "memoryCleared": "Liberati {size}",
   "@memoryCleared": {
     "placeholders": {
@@ -2780,7 +2776,31 @@
     }
   },
   "memoryClearFailed": "Impossibile svuotare la cache",
-  "memoryTools": "Pulizia",
+  "memoryOfMusic": "di musica",
+  "memoryShowAll": "Mostra tutti",
+  "memoryCache": "Cache",
+  "memoryCacheHint": "Immagini, ricerche, Jam",
+  "memoryDatabaseHint": "Il database con brani e ascolti",
+  "memoryTagBackupsHint": "Prima di ogni modifica ai file",
+  "memoryTinyNote": "I dati sotto 1 MB non sono elencati.",
+  "memoryClearHint": "Libera {size}. Brani, copertine e ascolti restano.",
+  "@memoryClearHint": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "memoryDuplicateGroups": "{count, plural, one{1 gruppo} other{{count} gruppi}}",
+  "@memoryDuplicateGroups": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "memoryTools": "Strumenti",
   "memoryUnavailable": "Non disponibile",
   "ytmArtistWithAudience": "Artista, {audience}",
   "@ytmArtistWithAudience": {
