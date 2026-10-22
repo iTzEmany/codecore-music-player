@@ -30,6 +30,12 @@ object MediaDeleteBridge {
     private var pending: MethodChannel.Result? = null
     private var pendingPaths: List<String> = emptyList()
 
+    /** The engine is gone: its pending reply can no longer be delivered. */
+    fun detach() {
+        pending = null
+        pendingPaths = emptyList()
+    }
+
     fun register(messenger: BinaryMessenger, activity: Activity) {
         MethodChannel(messenger, "codecore/media").setMethodCallHandler { call, result ->
             if (call.method != "deleteFiles") {

@@ -27,7 +27,7 @@ Future<void> showQueueSheet(BuildContext context) => showModalBottomSheet<void>(
 
 /// «Coda»: the playing track and what comes next (already played tracks are
 /// hidden). Rows reorder with the handle and dismiss with a swipe + undo.
-class QueueSheet extends ConsumerWidget {
+class QueueSheet extends ConsumerStatefulWidget {
   const QueueSheet({
     super.key,
     required this.scrollController,
@@ -40,7 +40,76 @@ class QueueSheet extends ConsumerWidget {
   final bool showTitle;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<QueueSheet> createState() => _QueueSheetState();
+}
+
+/// The part of the queue a list shows: the entries after the current one and
+/// a key per entry (the same track may sit twice, so id + occurrence).
+class _Upcoming {
+  _Upcoming(this.first, this.tracks, this.keys);
+
+  factory _Upcoming.of(List<Track> queue, int at) {
+    final first = at >= 0 && at < queue.length ? at + 1 : 0;
+    final tracks = queue.sublist(first);
+    final seen = <int, int>{};
+    return _Upcoming(first, tracks, [
+      for (final t in tracks) 'q-${t.id}-${seen[t.id] = (seen[t.id] ?? -1) + 1}',
+    ]);
+  }
+
+  final int first;
+  final List<Track> tracks;
+  final List<String> keys;
+}
+
+/// Where the entry [key] must go in [live] so that it sits where the user
+/// dropped it in [dropped] (the order the drag showed), as `(from, to)` queue
+/// indices for a move; null when the entry is gone or already there. Anchors
+/// on the neighbours that still exist, so entries added or removed while the
+/// drag lasted do not shift the drop.
+({int from, int to})? mapDrop({
+  required String key,
+  required List<String> dropped,
+  required List<String> live,
+  required int first,
+}) {
+  final from = live.indexOf(key);
+  if (from < 0) return null;
+  final at = dropped.indexOf(key);
+  final rest = [...live]..removeAt(from);
+  var to = rest.length;
+  final liveSet = rest.toSet();
+  for (var i = at + 1; i < dropped.length; i++) {
+    if (liveSet.contains(dropped[i])) {
+      to = rest.indexOf(dropped[i]);
+      break;
+    }
+  }
+  if (to == rest.length) {
+    // Nothing after it any more: sit right behind the nearest survivor.
+    for (var i = at - 1; i >= 0; i--) {
+      if (liveSet.contains(dropped[i])) {
+        to = rest.indexOf(dropped[i]) + 1;
+        break;
+      }
+    }
+  }
+  if (to == from) return null;
+  return (from: first + from, to: first + to);
+}
+
+class _QueueSheetState extends ConsumerState<QueueSheet> {
+  /// What the list showed when the drag started. While [_dragging] the list
+  /// keeps showing it: the queue may change under the finger (an import, a
+  /// suggestion) and the list must not be rebuilt with other items then.
+  _Upcoming? _dragSnapshot;
+  bool _dragging = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final ref = this.ref;
+    final scrollController = widget.scrollController;
+    final showTitle = widget.showTitle;
     final l = context.l10n;
     final cc = context.cc;
     final queue = ref.watch(queueProvider).value ?? const <Track>[];
@@ -51,14 +120,11 @@ class QueueSheet extends ConsumerWidget {
     }
     final at = ref.read(audioHandlerProvider).currentIndex;
     final current = at >= 0 && at < queue.length ? queue[at] : null;
-    final first = current == null ? 0 : at + 1;
-    final upcoming = queue.sublist(first);
-    // Stable key per entry: the same track may sit twice in the queue.
-    final seen = <int, int>{};
-    final keys = [
-      for (final t in upcoming)
-        'q-${t.id}-${seen[t.id] = (seen[t.id] ?? -1) + 1}',
-    ];
+    final liveUp = _Upcoming.of(queue, at);
+    final shown = _dragging && _dragSnapshot != null ? _dragSnapshot! : liveUp;
+    final first = shown.first;
+    final upcoming = shown.tracks;
+    final keys = shown.keys;
 
     // What follows is built again from the playlist (album, …) playing:
     // in order from here, or a new shuffle.
@@ -121,8 +187,31 @@ class QueueSheet extends ConsumerWidget {
               ],
             ),
             itemCount: upcoming.length,
-            onReorderItem: (from, to) =>
-                ctrl.reorderQueue(first + from, first + to),
+            onReorderStart: (_) => setState(() {
+              _dragSnapshot = liveUp;
+              _dragging = true;
+            }),
+            onReorderEnd: (_) {
+              if (mounted) setState(() => _dragging = false);
+            },
+            onReorderItem: (from, to) {
+              final snap = _dragSnapshot;
+              if (snap == null || from < 0 || from >= snap.keys.length) return;
+              final dropped = [...snap.keys];
+              dropped.insert(to.clamp(0, dropped.length - 1), dropped.removeAt(from));
+              // Map by entry, against the queue as it is now.
+              final liveNow = _Upcoming.of(
+                ref.read(queueProvider).value ?? const <Track>[],
+                ref.read(audioHandlerProvider).currentIndex,
+              );
+              final move = mapDrop(
+                key: snap.keys[from],
+                dropped: dropped,
+                live: liveNow.keys,
+                first: liveNow.first,
+              );
+              if (move != null) ctrl.reorderQueue(move.from, move.to);
+            },
             itemBuilder: (_, i) {
               final t = upcoming[i];
               return Dismissible(
@@ -134,7 +223,8 @@ class QueueSheet extends ConsumerWidget {
                   if (!context.mounted) return;
                   showUndoSnack(context, l.removedFromQueue, () {
                     ctrl.addToQueue(t.id);
-                    ctrl.reorderQueue(queue.length - 1, first + i);
+                    final n = ref.read(queueProvider).value?.length ?? queue.length;
+                    ctrl.reorderQueue(n - 1, first + i);
                   });
                 },
                 child: Material(

@@ -24,6 +24,11 @@ object NotifyBridge {
     @Volatile
     private var pendingTarget: String? = null
 
+    /** The engine is gone: stop pushing to its channel. */
+    fun detach() {
+        channel = null
+    }
+
     fun register(messenger: BinaryMessenger, context: Context) {
         val ch = MethodChannel(messenger, "codecore/notify")
         channel = ch
