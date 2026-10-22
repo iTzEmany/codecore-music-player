@@ -187,14 +187,20 @@ class MusicBrainzClient {
     final rec = await _get('recording/$recordingId', {'inc': 'releases+release-groups'}, cancel);
     final releases = rec?['releases'];
     if (releases is! List) return null;
+    var tried = 0;
+    final seen = <String>{};
     for (final r in releases) {
       final rg = r is Map ? r['release-group'] : null;
       if (rg is! Map || rg['id'] is! String) continue;
-      // Albums only: a single's master would speak of the single.
+      // Plain albums only: a single, compilation or live master speaks of another thing.
       if (rg['primary-type'] != 'Album') continue;
+      final secondary = rg['secondary-types'];
+      if (secondary is List && secondary.isNotEmpty) continue;
+      if (!seen.add(rg['id'] as String)) continue;
+      if (++tried > 3) break;
       final data = await _get('release-group/${rg['id']}', {'inc': 'url-rels'}, cancel);
       final rels = data?['relations'];
-      if (rels is! List) return null;
+      if (rels is! List) continue;
       for (final rel in rels) {
         if (rel is! Map || rel['type'] != 'discogs') continue;
         final url = rel['url'];
@@ -202,7 +208,6 @@ class MusicBrainzClient {
         final m = res is String ? _discogsMaster.firstMatch(res) : null;
         if (m != null) return int.parse(m.group(1)!);
       }
-      return null;
     }
     return null;
   }

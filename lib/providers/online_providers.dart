@@ -7,7 +7,9 @@ import '../services/online/itunes_client.dart';
 import '../services/online/lrclib_client.dart';
 import '../services/online/curiosity_finder.dart';
 import '../services/online/discogs_client.dart';
+import '../core/app_log.dart';
 import '../services/online/musicbrainz_client.dart';
+import '../services/online/youtube_service.dart' show YtException, YtErrorKind;
 import '../services/online/quiet_enricher.dart';
 import '../services/online/wikipedia_client.dart';
 import '../services/online/ytm_artist_resolver.dart';
@@ -45,7 +47,7 @@ final curiosityFinderProvider = Provider(
     musicBrainz: ref.watch(musicBrainzClientProvider),
     wikidata: WikidataClient(ref.watch(webClientProvider)),
     discogs: DiscogsClient(ref.watch(webClientProvider)),
-    ytmArtist: (name, cancel) async {
+    ytmArtist: (name, cancel) => ytmQuiet(() async {
       final catalog = ref.read(ytmCatalogProvider);
       final hl = ref.read(ytmLanguageProvider);
       // Only a certain match: a wrong artist's story is worse than none.
@@ -55,9 +57,21 @@ final curiosityFinderProvider = Provider(
       final text = page.description;
       if (text == null) return null;
       return (text: text, source: Uri.parse('https://music.youtube.com/channel/${pick.artist.id}'), lang: hl);
-    },
+    }),
   ),
 );
+
+/// A YouTube Music fallback must stay quiet: a rate limit is the one thing the
+/// finder understands, everything else is just "nothing found".
+Future<T?> ytmQuiet<T>(Future<T?> Function() body) async {
+  try {
+    return await body();
+  } on YtException catch (e, st) {
+    if (e.kind == YtErrorKind.rateLimited) throw const RateLimitedException(429);
+    AppLog.w('YouTube Music artist fallback failed', e, st);
+    return null;
+  }
+}
 
 final enrichmentServiceProvider = Provider<EnrichmentService>((ref) {
   final web = ref.watch(webClientProvider);

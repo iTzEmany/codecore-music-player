@@ -32,6 +32,7 @@ class _Web implements WebClient {
 MusicBrainzClient _mb(_Web w) => MusicBrainzClient(w, pause: (_) async {});
 
 void main() {
+  _masterTests();
   test('two votes on the recording: its own genre, capitalised', () async {
     final w = _Web(2);
     expect(await _mb(w).genreFor('Viva la Vida', 'Coldplay', 244000), 'Folk Rock');
@@ -47,5 +48,36 @@ void main() {
     await _mb(w).genreFor('Viva la Vida', 'Coldplay', 244000);
     expect(w.asked.any((u) => u.contains('b57c0ec1')), isFalse, reason: 'the 114 s one is far');
     expect(w.asked.any((u) => u.contains('70b12d65')), isTrue);
+  });
+}
+
+class _MasterWeb implements WebClient {
+  @override
+  Future<Object?> getJson(String url, {Map<String, String>? query, CancelToken? cancel}) async {
+    if (url.contains('/recording/')) {
+      return {
+        'releases': [
+          {'release-group': {'id': 'comp', 'primary-type': 'Album', 'secondary-types': ['Compilation']}},
+          {'release-group': {'id': 'album', 'primary-type': 'Album', 'secondary-types': []}},
+        ]
+      };
+    }
+    if (url.endsWith('/release-group/album')) {
+      return {
+        'relations': [
+          {'type': 'discogs', 'url': {'resource': 'https://www.discogs.com/master/4242'}}
+        ]
+      };
+    }
+    throw StateError('compilation must not be asked: $url');
+  }
+
+  @override
+  Future<List<int>?> getBytes(String url, {int maxBytes = 0, CancelToken? cancel}) async => null;
+}
+
+void _masterTests() {
+  test('Discogs master: a compilation listed first is skipped', () async {
+    expect(await MusicBrainzClient(_MasterWeb(), pause: (_) async {}).discogsMasterOf('r1'), 4242);
   });
 }

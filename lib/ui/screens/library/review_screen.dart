@@ -131,8 +131,11 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
     // The end of a run: say what it did (nothing when it changed nothing).
     ref.listen(secondOpinionJobProvider, (prev, next) {
       if (prev == null || !prev.running || next.running) return;
-      if (next.updated > 0) _snack(l.reviewSecondOpinionDone(next.updated));
-      if (next.throttled) _snack(l.reviewSecondOpinionThrottled);
+      final lines = [
+        if (next.updated > 0) l.reviewSecondOpinionDone(next.updated),
+        if (next.throttled) l.reviewSecondOpinionThrottled,
+      ];
+      if (lines.isNotEmpty) _snack(lines.join('\n'));
     });
     final job = ref.watch(secondOpinionJobProvider);
     final all = ref.watch(reviewTracksProvider).value ?? const <Track>[];

@@ -1,3 +1,5 @@
+import 'package:codecore/providers/online_providers.dart' show ytmQuiet;
+import 'package:codecore/services/online/youtube_service.dart' show YtException, YtErrorKind;
 import 'package:codecore/services/online/curiosity_finder.dart';
 import 'package:codecore/services/online/discogs_client.dart';
 import 'package:codecore/services/online/http_client.dart';
@@ -96,6 +98,7 @@ CuriosityFinder _finder(_World w, {List<Duration>? pauses, YtmArtistDescription?
     );
 
 void main() {
+  _ytmQuietTests();
   test('by identity: the exact pages MusicBrainz and Wikidata name, in the app language', () async {
     final w = _World(
       mbRecordings: [_rec('r1', 'Dirty Work', 'Steely Dan', 'a1')],
@@ -283,4 +286,14 @@ class _ArtistsWeb implements WebClient {
 
   @override
   Future<List<int>?> getBytes(String url, {int maxBytes = 0, CancelToken? cancel}) async => null;
+}
+
+void _ytmQuietTests() {
+  test('ytmQuiet: a YouTube failure is quiet, a rate limit is the finder\'s own', () async {
+    expect(await ytmQuiet<int>(() async => throw const YtException(YtErrorKind.network)), isNull);
+    expect(
+      ytmQuiet<int>(() async => throw const YtException(YtErrorKind.rateLimited)),
+      throwsA(isA<RateLimitedException>()),
+    );
+  });
 }
