@@ -171,7 +171,12 @@
   .side .si .ti { position:relative; }
   .side .si.on .ti em { position:absolute; top:-2px; right:-5px; width:7px; height:7px; border-radius:50%; background:var(--acc); }
   .side .lab { font-size:13px; font-weight:700; color:var(--mu); padding:20px 12px 6px; }
-  .side .pl { font-size:14px; padding:8px 12px; color:var(--mu); border-radius:8px; }
+  .side .pl { display:flex; align-items:center; gap:12px; font-size:14px; padding:6px 12px 6px 8px; color:var(--mu); border-radius:10px; }
+  .side .pl .c { width:40px; height:40px; border-radius:8px; flex:none; display:grid; place-items:center; }
+  .side .pl .c.fav { background:var(--acc); color:var(--onacc); }
+  .side .pl span { min-width:0; display:flex; flex-direction:column; }
+  .side .pl span b { font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .side .pl span small { font-size:12px; color:var(--fa); }
   .side .pl.on { color:var(--tx); background:var(--s1); }
   .main { overflow:hidden; padding:16px 32px 0; }
   .main .in { max-width:960px; }
@@ -403,10 +408,11 @@
         <button class="si on"><span class="ti" data-i="lib"></span>Libreria</button>
         <button class="si"><span class="ti" data-i="mem"></span>Memoria</button>
         <div class="lab">Playlist</div>
-        <div class="pl on">Corsa del sabato</div>
-        <div class="pl">Lavoro concentrato</div>
-        <div class="pl">Viaggio in macchina</div>
-        <div class="pl">Domenica mattina</div>
+        <div class="pl"><i class="c fav" data-i="heart" data-s="20"></i><span><b>Preferiti</b><small>214 brani</small></span></div>
+        <div class="pl on"><i class="c g2"></i><span><b>Corsa del sabato</b><small>32 brani</small></span></div>
+        <div class="pl"><i class="c g4"></i><span><b>Lavoro concentrato</b><small>58 brani</small></span></div>
+        <div class="pl"><i class="c g1"></i><span><b>Viaggio in macchina</b><small>41 brani</small></span></div>
+        <div class="pl"><i class="c g6"></i><span><b>Domenica mattina</b><small>19 brani</small></span></div>
       </aside>
       <div class="main"><div class="in">
         <div class="hd">

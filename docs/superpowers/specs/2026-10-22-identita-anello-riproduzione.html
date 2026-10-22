@@ -1,0 +1,743 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Anello, riproduzione</title>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=Unbounded:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* page */
+  :root { --pg:#ECE8F2; --pgtx:#1B1427; --pgmu:#5C5170; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --pg:#17121F; --pgtx:#EDE8F5; --pgmu:#A79DB8; } }
+  :root[data-theme="dark"] { --pg:#17121F; --pgtx:#EDE8F5; --pgmu:#A79DB8; }
+  * { box-sizing:border-box; }
+  html, body { margin:0; }
+  body { background:var(--pg); color:var(--pgtx); font-family:'Figtree',sans-serif; padding:32px 20px 64px; overflow-x:hidden; }
+  .intro { max-width:1136px; margin:0 auto 32px; }
+  .intro h1 { font-family:'Unbounded',sans-serif; font-weight:700; font-size:28px; margin:0 0 8px; }
+  .intro p { margin:0 0 8px; color:var(--pgmu); font-size:15px; line-height:1.5; max-width:720px; }
+  .tools { display:flex; flex-wrap:wrap; gap:16px; margin-top:16px; font-size:14px; align-items:center; }
+  .tools button { font:inherit; font-weight:600; padding:8px 14px; border-radius:999px; border:1px solid var(--pgmu); background:none; color:inherit; cursor:pointer; }
+  .tools label { display:flex; gap:8px; align-items:center; cursor:pointer; }
+
+  /* responsive grid: 3 columns at 1280, 2 at 800, 1 on a phone; nothing is ever cut */
+  .grid { display:grid; grid-template-columns:repeat(auto-fill, 360px); gap:48px 24px; justify-content:center; max-width:1136px; margin:0 auto; }
+  .fig { min-width:0; }
+  .fig h3 { margin:16px 4px 4px; font-size:16px; }
+  .fig p { margin:0 4px; color:var(--pgmu); font-size:14px; line-height:1.5; }
+  @media (max-width:420px) { .grid { grid-template-columns:minmax(0,1fr); } .fk { width:100%; } }
+  .wide { max-width:1136px; margin:56px auto 0; }
+
+  /* app tokens = CcColors */
+  .fk, .dsk { --bg:#07050C; --s1:#120E1C; --s2:#1D1630; --s3:#2A2140; --acc:#A06BFF; --accs:#D9C8FF; --onacc:#12081F;
+        --tx:#F4F0FA; --mu:#A79DB8; --fa:#6E6680; --err:#FF6B81; }
+  .oled { --bg:#000000; }
+  .light { --bg:#FAF8FD; --s1:#F2EEF9; --s2:#E9E3F4; --s3:#DAD1EB; --acc:#6A35D8; --accs:#5B2BBE; --onacc:#FFFFFF;
+        --tx:#1B1427; --mu:#5C5170; --fa:#8C829E; --err:#C8203B; }
+  .a-blu { --acc:#5B9BFF; --accs:#B7D3FF; --onacc:#12081F; }
+  .a-ambra { --acc:#FFC247; --accs:#FFE4AE; --onacc:#12081F; }
+  .light.a-verde { --acc:#1F7A3A; --accs:#19622E; --onacc:#FFFFFF; }
+  .light.a-rosa { --acc:#C0206F; --accs:#9A1A59; --onacc:#FFFFFF; }
+
+  .fk { width:360px; height:760px; max-width:100%; border-radius:40px; overflow:hidden; position:relative; background:var(--bg); color:var(--tx);
+        box-shadow:0 24px 60px rgba(20,10,40,.35); user-select:none; }
+  .fk *, .dsk *, .dnp * { box-sizing:border-box; }
+  .fk button, .dsk button, .dnp button { font:inherit; color:inherit; background:none; border:0; padding:0; cursor:pointer;
+        transition:transform .12s cubic-bezier(.33,1,.68,1), background .18s, color .18s; }
+  .fk button:active, .dsk button:active, .dnp button:active { transform:scale(.97); }
+  .fk button:focus-visible, .dsk button:focus-visible, .dnp button:focus-visible { outline:2px solid var(--acc); outline-offset:2px; border-radius:12px; }
+  .fk svg, .dsk svg, .dnp svg { display:block; }
+  .scroll { position:absolute; inset:0; overflow:hidden; padding-top:26px; }
+  .c { border-radius:12px; flex:none; position:relative; }
+  .g1 { background:linear-gradient(135deg,#FF8A5B,#C2185B); } .g2 { background:linear-gradient(135deg,#3A7BD5,#00D2FF); }
+  .g3 { background:linear-gradient(135deg,#2E2A4F,#A06BFF); } .g4 { background:linear-gradient(135deg,#F7C948,#E07A22); }
+  .g5 { background:linear-gradient(135deg,#1D976C,#93F9B9); } .g6 { background:linear-gradient(135deg,#3d3d48,#9a98a8); }
+
+  .bar { display:flex; align-items:center; gap:4px; height:48px; padding:0 8px; }
+  .bar .sp { flex:1; }
+  .ib { width:40px; height:40px; display:grid; place-items:center; border-radius:50%; color:var(--mu); }
+  .ib:hover { background:var(--s1); }
+  .bar .ttl { font-weight:700; font-size:22px; color:var(--tx); padding-left:4px; }
+
+  /* collection header: left aligned, no tint */
+  .hd { display:flex; gap:16px; padding:8px 16px 0; align-items:flex-end; }
+  .hd .c { width:128px; height:128px; }
+  .hd .round { border-radius:50%; }
+  .hd .tile { background:var(--s2); color:var(--accs); display:grid; place-items:center; }
+  .hd .tx { min-width:0; padding-bottom:2px; }
+  .hd h2 { font-family:'Unbounded',sans-serif; font-weight:600; font-size:24px; line-height:1.15; margin:0 0 6px; overflow-wrap:anywhere; }
+  .hd .sub { font-size:15px; font-weight:600; color:var(--mu); }
+  .hd .meta { font-size:13px; color:var(--mu); margin-top:2px; }
+  .acts { display:flex; align-items:center; gap:8px; padding:16px 16px 8px; flex-wrap:wrap; }
+  .pill { display:inline-flex; align-items:center; gap:6px; height:40px; padding:0 18px 0 14px; border-radius:999px; font-weight:700; font-size:14px; }
+  .pill.fill { background:var(--acc); color:var(--onacc); }
+  .pill.line { box-shadow:inset 0 0 0 1px var(--s3); }
+  .pill.line.on { color:var(--acc); }
+  .acts .ib { margin-left:auto; }
+
+  /* rows */
+  .row { display:flex; align-items:center; gap:12px; height:56px; padding:0 8px 0 16px; }
+  .row:hover { background:var(--s1); }
+  .row .n { width:20px; text-align:center; font-size:13px; color:var(--mu); font-variant-numeric:tabular-nums; display:grid; place-items:center; flex:none; }
+  .row .c { width:44px; height:44px; border-radius:4px; }
+  .row .c.round { border-radius:50%; }
+  .row .t { flex:1; min-width:0; }
+  .row b { display:block; font-weight:600; font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .row small { display:block; font-size:13px; color:var(--mu); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .row .d { font-size:12px; color:var(--fa); font-variant-numeric:tabular-nums; }
+  .row .ib { width:36px; height:36px; }
+  .row.now b { color:var(--acc); }
+  /* the logo dot: the only new place it appears */
+  .dot { width:8px; height:8px; border-radius:50%; background:var(--acc); display:block; }
+  .c > .dot { position:absolute; top:-3px; right:-3px; box-shadow:0 0 0 2px var(--bg); }
+  .disc { font-size:14px; font-weight:700; color:var(--mu); padding:12px 16px 4px; }
+
+  .sh { display:flex; justify-content:space-between; align-items:baseline; padding:20px 16px 8px; font-weight:700; font-size:18px; }
+  .sh a { font-size:14px; font-weight:700; color:var(--accs); text-decoration:none; }
+  .agrid { display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:0 16px; }
+  .agrid .c { aspect-ratio:1; border-radius:8px; }
+  .agrid b { display:block; font-size:14px; margin-top:6px; }
+  .agrid small { color:var(--mu); font-size:12px; }
+
+  /* library */
+  .lhead { display:flex; align-items:center; padding:4px 8px 0 16px; }
+  .lhead h2 { font-family:'Unbounded',sans-serif; font-weight:600; font-size:24px; margin:0; flex:1; }
+  .seg { position:relative; display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; padding:12px 16px 0; }
+  .seg button { position:relative; z-index:1; height:64px; border-radius:16px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
+                font-size:13px; font-weight:600; background:var(--s1); color:var(--tx); }
+  .seg button i { color:var(--mu); }
+  .seg button.on, .seg button.on i { color:var(--bg); background:transparent; }
+  .seg .ind { position:absolute; z-index:0; border-radius:16px; background:var(--tx);
+              transition:left .18s cubic-bezier(.33,1,.68,1), top .18s cubic-bezier(.33,1,.68,1), width .18s cubic-bezier(.33,1,.68,1), height .18s cubic-bezier(.33,1,.68,1); }
+  .count { display:flex; align-items:center; padding:8px 8px 0 16px; font-size:13px; color:var(--mu); }
+  .count .sp { flex:1; }
+  .count .sort { display:flex; align-items:center; gap:4px; height:36px; padding:0 8px; border-radius:999px; color:var(--accs); font-weight:700; font-size:14px; }
+  .chips { display:flex; flex-wrap:wrap; gap:8px; padding:8px 16px 4px; }
+  .chips button { padding:8px 12px; border-radius:14px; background:var(--s1); font-size:13.5px; font-weight:600; }
+  .chips button span { color:var(--mu); font-weight:500; margin-left:4px; }
+  .chips button:hover { background:var(--s2); }
+  .letter { font-weight:700; font-size:14px; color:var(--accs); padding:12px 16px 2px; }
+
+  /* settings */
+  .card { margin:8px 16px; background:var(--s1); border-radius:12px; overflow:hidden; }
+  .card .row { height:auto; min-height:64px; padding:10px 16px; }
+  .card .row .ib { color:var(--mu); width:24px; height:24px; }
+  .foot { padding:8px 20px; font-size:12px; color:var(--fa); }
+
+  /* empty state: quiet, left aligned */
+  .empty { padding:24px 16px 0; }
+  .empty b { display:block; font-size:14px; font-weight:700; }
+  .empty p { margin:4px 0 16px; font-size:13px; color:var(--mu); line-height:1.45; }
+
+  /* sheet */
+  .scrim { position:absolute; inset:0; background:rgba(0,0,0,.5); transition:opacity .25s; z-index:5; }
+  .sheet { position:absolute; left:0; right:0; bottom:0; z-index:6; background:var(--s1); border-radius:16px 16px 0 0; padding:8px 0 20px;
+           transition:transform .25s cubic-bezier(.33,1,.68,1); }
+  .closed .scrim { opacity:0; pointer-events:none; }
+  .closed .sheet { transform:translateY(105%); }
+  .handle { width:32px; height:4px; border-radius:2px; background:var(--s3); margin:0 auto 12px; }
+  .sheet .top { display:flex; gap:12px; align-items:center; padding:0 16px 8px; }
+  .sheet .top .c { width:56px; height:56px; border-radius:8px; }
+  .sheet .top b { display:block; font-size:14px; }
+  .sheet .top small { display:block; font-size:13px; color:var(--mu); }
+  .sheet .top em { display:block; font-style:normal; font-size:12px; color:var(--fa); }
+  .sheet .grp { margin-top:8px; }
+  .sheet .it { display:flex; align-items:center; gap:16px; width:100%; height:48px; padding:0 20px; font-size:15px; font-weight:500; text-align:left; }
+  .sheet .it:hover { background:var(--s2); }
+  .sheet .it i { color:var(--mu); }
+  .sheet .it.danger, .sheet .it.danger i { color:var(--err); }
+
+  /* dock from round 1, for context */
+  .dock { position:absolute; left:10px; right:10px; bottom:10px; background:var(--s2); border-radius:28px; padding:6px 6px 4px; z-index:3; }
+  .mini { display:flex; align-items:center; gap:10px; padding:4px 8px 6px 6px; }
+  .mr { position:relative; width:48px; height:48px; flex:none; }
+  .mr .c { position:absolute; inset:7px; border-radius:50%; }
+  .mini .t { flex:1; min-width:0; }
+  .mini b { display:block; font-size:14px; } .mini small { font-size:12.5px; color:var(--mu); }
+  .tabs { display:flex; }
+  .tabs button { flex:1; display:flex; flex-direction:column; align-items:center; gap:2px; padding:6px 0 4px; font-size:12px; font-weight:600; color:var(--mu); }
+  .tabs .on { color:var(--tx); }
+  .tabs .ti { position:relative; }
+  .tabs .on .ti em { position:absolute; top:-2px; right:-5px; width:7px; height:7px; border-radius:50%; background:var(--acc); }
+
+  /* desktop frame, scaled to fit its column */
+  .dwrap { position:relative; width:100%; overflow:hidden; border-radius:16px; box-shadow:0 24px 60px rgba(20,10,40,.35); }
+  .dsk { position:absolute; top:0; left:0; width:1200px; height:700px; transform-origin:0 0; background:var(--bg); color:var(--tx);
+         display:grid; grid-template-columns:240px 1fr; grid-template-rows:1fr 80px; user-select:none; }
+  .side { padding:20px 12px; display:flex; flex-direction:column; gap:2px; }
+  .side .si { display:flex; align-items:center; gap:14px; height:44px; padding:0 12px; border-radius:12px; font-weight:600; font-size:14px; color:var(--mu); text-align:left; width:100%; }
+  .side .si:hover { background:var(--s1); }
+  .side .si.on { color:var(--tx); }
+  .side .si .ti { position:relative; }
+  .side .si.on .ti em { position:absolute; top:-2px; right:-5px; width:7px; height:7px; border-radius:50%; background:var(--acc); }
+  .side .lab { font-size:13px; font-weight:700; color:var(--mu); padding:20px 12px 6px; }
+  .side .pl { display:flex; align-items:center; gap:12px; font-size:14px; padding:6px 12px 6px 8px; color:var(--mu); border-radius:10px; }
+  .side .pl .c { width:40px; height:40px; border-radius:8px; flex:none; display:grid; place-items:center; }
+  .side .pl .c.fav { background:var(--acc); color:var(--onacc); }
+  .side .pl span { min-width:0; display:flex; flex-direction:column; }
+  .side .pl span b { font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .side .pl span small { font-size:12px; color:var(--fa); }
+  .side .pl.on { color:var(--tx); background:var(--s1); }
+  .main { overflow:hidden; padding:16px 32px 0; }
+  .main .in { max-width:960px; }
+  .dsk .hd { padding:8px 0 0; gap:24px; }
+  .dsk .hd .c { width:200px; height:200px; }
+  .dsk .hd h2 { font-size:30px; font-weight:700; }
+  .dsk .acts { padding:20px 0 12px; flex-wrap:nowrap; }
+  .dsk .acts .ib { margin-left:0; }
+  .dsk .row { padding:0 12px; height:56px; border-radius:8px; }
+  .dsk .row .alb { width:260px; font-size:13px; color:var(--mu); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .dsk .row .hv { opacity:0; color:var(--mu); }
+  .dsk .row:hover .hv { opacity:1; }
+  .pbar { grid-column:1 / 3; background:var(--s1); display:grid; grid-template-columns:1fr auto 1fr; align-items:center; padding:0 20px; }
+  .pbar .lt { display:flex; align-items:center; gap:12px; }
+  .pbar .mr { width:56px; height:56px; } .pbar .mr .c { inset:8px; }
+  .pbar b { display:block; font-size:14px; } .pbar small { font-size:12.5px; color:var(--mu); }
+  .pbar .ctr { display:flex; align-items:center; gap:12px; }
+  .pbar .pp { width:44px; height:44px; border-radius:50%; background:var(--tx); color:var(--bg); display:grid; place-items:center; }
+  .pbar .rt { justify-self:end; font-size:12.5px; color:var(--mu); font-variant-numeric:tabular-nums; }
+
+  /* rows entering: fade and 8 px, 20 ms apart */
+  @keyframes rise { from { opacity:0; transform:translateY(8px); } }
+  .enter .rows > * { animation:rise .18s cubic-bezier(.33,1,.68,1) both; animation-delay:calc(var(--i,0) * 20ms); }
+
+  .rm *, .rm *::before { transition:none !important; animation:none !important; }
+  @media (prefers-reduced-motion: reduce) { *, *::before { transition:none !important; animation:none !important; } }
+
+  /* now playing */
+  .np { position:absolute; inset:0; display:flex; flex-direction:column; padding:26px 0 18px;
+        background:linear-gradient(to bottom, var(--tint), transparent 60%), var(--bg); }
+  .t-g1 { --tint:rgba(194,24,91,.38); } .t-g4 { --tint:rgba(224,122,34,.30); } .t-g5 { --tint:rgba(29,151,108,.22); } .t-g2 { --tint:rgba(58,123,213,.32); }
+  .light .np { --tint:rgba(29,151,108,.16); }
+  .npbar { display:flex; align-items:center; height:56px; padding:0 8px; }
+  .npbar .ctx { flex:1; text-align:center; min-width:0; }
+  .npbar .ctx small { display:block; font-size:11px; color:var(--mu); }
+  .npbar .ctx b { display:block; font-size:13px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .art { flex:1; display:grid; place-items:center; min-height:0; }
+  .rg { position:relative; }
+  .rg > svg { display:block; }
+  .rg .cv { position:absolute; inset:14px; border-radius:50%; }
+  .rg .cv.ic { background:var(--s2); display:grid; place-items:center; color:var(--accs); }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .spin { animation:spin 24s linear infinite; }
+  .spin::after { content:''; position:absolute; left:50%; top:50%; width:18%; height:18%; transform:translate(-50%,-50%); border-radius:50%; background:var(--bg); opacity:.9; }
+  .paused .spin { animation-play-state:paused; }
+  .tt { display:flex; align-items:center; gap:8px; padding:0 16px 0 24px; }
+  .tt .t { flex:1; min-width:0; }
+  .tt b { display:block; font-size:22px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .tt small { display:block; font-size:15px; color:var(--mu); margin-top:2px; }
+  .ib.on { color:var(--acc); }
+  .sug { padding:10px 24px 0; }
+  .sug p { margin:0 0 8px; font-size:13px; color:var(--mu); }
+  .sug .pill { height:34px; font-size:13px; padding:0 14px 0 10px; }
+  .seek { padding:14px 24px 0; }
+  .track { position:relative; height:4px; border-radius:2px; background:var(--s3); }
+  .track i { position:absolute; left:0; top:0; bottom:0; border-radius:2px; background:var(--acc); }
+  .track em { position:absolute; top:50%; width:12px; height:12px; border-radius:50%; background:var(--acc); transform:translate(-50%,-50%); }
+  .times { display:flex; align-items:center; justify-content:space-between; margin-top:8px; font-size:12px; color:var(--mu); font-variant-numeric:tabular-nums; }
+  .q { font-size:11px; font-weight:700; color:var(--accs); background:var(--s2); border-radius:6px; padding:2px 6px; }
+  .live { display:flex; align-items:center; gap:8px; padding:20px 24px 4px; font-size:13px; font-weight:600; color:var(--mu); }
+  .live i { width:8px; height:8px; border-radius:50%; background:var(--acc); }
+  .ctl { display:flex; align-items:center; justify-content:space-between; padding:14px 20px 0; }
+  .ctl.short { justify-content:center; gap:36px; }
+  .ctl .ib { width:48px; height:48px; color:var(--tx); }
+  .ctl .ib.side { color:var(--mu); position:relative; }
+  .ctl .ib.side.on { color:var(--acc); }
+  .ctl .ib.side.on::after { content:''; position:absolute; inset:2px; border-radius:50%; background:var(--acc); opacity:.14; }
+  .ctl .ib.side sup { position:absolute; right:5px; top:4px; font-size:12px; font-weight:800; }
+  .ctl .pp { width:64px; height:64px; border-radius:50%; background:var(--tx); color:var(--bg); display:grid; place-items:center; }
+  .bot { display:flex; align-items:center; justify-content:space-between; padding:16px 16px 0; }
+  .bot button { display:flex; align-items:center; gap:6px; height:36px; padding:0 10px; border-radius:999px; font-size:13px; font-weight:600; color:var(--mu); }
+  .bot button.on { color:var(--acc); }
+  .bot .chip { box-shadow:inset 0 0 0 1px var(--s3); }
+  .bot .chip.on { box-shadow:inset 0 0 0 1px var(--acc); }
+
+  /* cards below the player */
+  .npcards { position:absolute; inset:0; padding-top:26px; overflow:hidden; background:linear-gradient(to bottom, var(--tint), transparent 40%), var(--bg); }
+  .mini2 { display:flex; align-items:center; gap:12px; padding:8px 16px 12px; }
+  .mini2 .c { width:40px; height:40px; border-radius:50%; }
+  .mini2 b { display:block; font-size:14px; } .mini2 small { font-size:12.5px; color:var(--mu); }
+  .mini2 .t { flex:1; min-width:0; }
+  .nc { margin:0 16px 12px; background:var(--s1); border-radius:16px; padding:14px 16px 12px; }
+  .nc h4 { display:flex; align-items:center; margin:0 0 10px; font-size:15px; }
+  .nc h4 span { flex:1; }
+  .nc h4 button { font-size:13px; font-weight:700; color:var(--accs); }
+  .lyr p { margin:0 0 6px; font-size:16px; font-weight:600; color:var(--fa); line-height:1.35; }
+  .lyr p.cur { color:var(--acc); }
+  .seg2 { display:flex; gap:6px; margin-bottom:8px; }
+  .seg2 button { padding:6px 12px; border-radius:999px; font-size:13px; font-weight:600; background:var(--s2); color:var(--mu); }
+  .seg2 button.on { background:var(--tx); color:var(--bg); }
+  .nc .txt { font-size:14px; color:var(--mu); line-height:1.5; margin:0; }
+  .nc .row { padding:0; height:52px; }
+  .nc .row:hover { background:none; }
+  .nc .row .c { width:40px; height:40px; }
+
+  /* queue sheet */
+  .sheet.tall { top:96px; display:flex; flex-direction:column; }
+  .qhd { display:flex; align-items:center; padding:0 8px 4px 20px; }
+  .qhd b { flex:1; font-size:20px; }
+  .qhd .tb { font-size:14px; font-weight:700; color:var(--accs); padding:0 10px; height:36px; }
+  .lab2 { font-size:13px; font-weight:700; color:var(--mu); padding:12px 20px 2px; }
+  .sheet .row { padding:0 8px 0 20px; }
+  .sheet .row .dg { color:var(--fa); }
+
+  /* shuffle+ sheet */
+  .tile { display:flex; gap:16px; align-items:center; padding:12px 20px; }
+  .tile .t { flex:1; min-width:0; }
+  .tile b { display:block; font-size:15px; font-weight:600; }
+  .tile small { display:block; font-size:13px; color:var(--mu); line-height:1.4; margin-top:2px; }
+  .tile.dense { padding:8px 20px; }
+  .tile.dense b { font-size:14px; }
+  .sw { width:44px; height:26px; border-radius:13px; background:var(--s3); position:relative; flex:none; }
+  .sw::after { content:''; position:absolute; top:3px; left:3px; width:20px; height:20px; border-radius:50%; background:var(--mu); transition:transform .18s cubic-bezier(.33,1,.68,1); }
+  .sw.on { background:var(--acc); } .sw.on::after { background:var(--onacc); transform:translateX(18px); }
+  .sl { padding:0 20px 8px; }
+  .sl .track { margin:10px 6px 4px; }
+  .sl .ticks { display:flex; justify-content:space-between; font-size:11px; color:var(--fa); padding:0 2px; }
+  .sheet h5 { margin:0; padding:0 20px 4px; font-size:20px; }
+  .sheet hr { border:0; height:1px; background:var(--s2); margin:6px 0; }
+
+  /* sleep popup */
+  .menu { position:absolute; z-index:6; right:96px; bottom:66px; width:184px; background:var(--s2); border-radius:12px; padding:6px 0; }
+  .menu button { display:block; width:100%; text-align:left; padding:0 16px; height:44px; font-size:14.5px; }
+  .menu button:hover { background:var(--s3); }
+  .menu button.on { color:var(--acc); font-weight:700; }
+  .menu hr { border:0; height:1px; background:var(--s3); margin:4px 0; }
+  .scrim.clear { background:transparent; }
+
+  /* outcome tag in «Suggeriti di recente» */
+  .oc { font-size:12px; font-weight:600; color:var(--mu); white-space:nowrap; }
+  .oc.good { color:var(--acc); }
+
+  /* desktop now playing: covers the window, sidebar included */
+  .dnp { position:absolute; top:0; left:0; width:1200px; height:700px; transform-origin:0 0; color:var(--tx); user-select:none;
+         background:linear-gradient(to bottom, var(--tint), transparent 60%), var(--bg); display:grid; grid-template-columns:1fr 380px; gap:40px; padding:0 40px 0 40px; }
+  .dnp .pl { display:flex; flex-direction:column; align-items:center; padding:12px 0 24px; min-width:0; }
+  .dnp .pl > * { width:100%; max-width:560px; }
+  .dnp .npbar { padding:0; }
+  .dnp .art { display:grid; }
+  .vol { display:flex; align-items:center; gap:12px; padding:14px 24px 0; color:var(--mu); }
+  .vol .track { flex:1; }
+  .dnp .cards { padding:76px 0 24px; overflow:hidden; }
+  .dnp .nc { margin:0 0 16px; }
+</style>
+</head>
+<body class="enter">
+
+<header class="intro">
+  <h1>Anello, riproduzione</h1>
+  <p>La schermata che si apre toccando il blocco in basso. Il disco al centro è la copertina dentro l'anello: l'arco è l'avanzamento del brano e il disco gira piano mentre suona, si ferma in pausa. Sotto, solo quello che serve per comandare la musica, con le parole dove un'icona da sola non basta.</p>
+  <p>Toccate il pulsante di riproduzione per mettere in pausa, il cuore per salvarlo. Con «Riduci animazioni» il disco non gira e l'anello non scorre.</p>
+  <div class="tools">
+    <button type="button" id="replay">Rivedi le entrate</button>
+    <label><input type="checkbox" id="rm"> Riduci animazioni</label>
+  </div>
+</header>
+
+<main class="grid">
+
+  <!-- 1. Standard -->
+  <section class="fig">
+    <div class="fk js-np">
+      <div class="np t-g1">
+        <div class="npbar">
+          <button class="ib" aria-label="Chiudi" data-i="chevdown"></button>
+          <div class="ctx"><small>In riproduzione da</small><b>Preferiti</b></div>
+          <button class="ib" aria-label="Modalità in auto" data-i="car"></button>
+          <button class="ib" aria-label="Altro" data-i="more"></button>
+        </div>
+        <div class="art"><div class="rg" data-big="296|0.48"><i class="cv g1 spin"></i></div></div>
+        <div class="tt"><span class="t"><b>Seven Nation Army</b><small>The White Stripes</small></span><button class="ib js-heart" aria-label="Aggiungi ai Preferiti" data-i="heart"></button></div>
+        <div class="seek"><div class="track"><i style="width:48%"></i><em style="left:48%"></em></div><div class="times"><span>1:51</span><span class="q">FLAC</span><span>3:51</span></div></div>
+        <div class="ctl">
+          <button class="ib side" aria-label="Casuale" data-i="shuffle"></button>
+          <button class="ib" aria-label="Brano precedente" data-i="prev" data-s="36"></button>
+          <button class="pp js-pp" aria-label="Pausa" data-i="pause" data-s="32"></button>
+          <button class="ib" aria-label="Brano successivo" data-i="next2" data-s="36"></button>
+          <button class="ib side" aria-label="Ripeti" data-i="repeat"></button>
+        </div>
+        <div class="bot">
+          <button><i data-i="devices" data-s="20"></i>Dispositivi</button>
+          <button class="chip" aria-label="Timer di spegnimento"><i data-i="timer" data-s="18"></i></button>
+          <button><i data-i="queue" data-s="20"></i>Coda</button>
+        </div>
+      </div>
+    </div>
+    <h3>In riproduzione</h3>
+    <p>Notte viola. In alto da dove arriva il brano, poi il disco grande, titolo e artista con il cuore, la barra del tempo con la qualità al centro, i cinque comandi e sotto Dispositivi, il timer e la Coda. Si chiude trascinando giù o con la freccia; un trascinamento di lato sul disco cambia brano.</p>
+  </section>
+
+  <!-- 2. Cards -->
+  <section class="fig">
+    <div class="fk">
+      <div class="npcards t-g1">
+        <div class="mini2"><i class="c g1"></i><span class="t"><b>Seven Nation Army</b><small>The White Stripes</small></span><button class="ib" aria-label="Pausa" data-i="pause"></button></div>
+        <div class="rows">
+          <div class="nc">
+            <h4><span>Testo</span><button>Traduci</button></h4>
+            <div class="lyr">
+              <p>And I'm talking to myself at night</p>
+              <p class="cur">Because I can't forget</p>
+              <p>Back and forth through my mind</p>
+              <p>Behind a cigarette</p>
+            </div>
+          </div>
+          <div class="nc">
+            <h4><span>Curiosità</span></h4>
+            <div class="seg2"><button class="on">Sul brano</button><button>Sull'artista</button></div>
+            <p class="txt">Il riff che sembra un basso è una chitarra passata in un pedale che la abbassa di un'ottava. Il titolo viene da come Jack White da bambino chiamava l'Esercito della Salvezza.</p>
+          </div>
+          <div class="nc">
+            <h4><span>Prossimi</span><button>Apri coda</button></h4>
+            <div class="row"><span class="c g4"></span><span class="t"><b>Can't Stop</b><small>Red Hot Chili Peppers</small></span><span class="d">4:29</span></div>
+            <div class="row"><span class="c g2"></span><span class="t"><b>Mr. Brightside</b><small>The Killers</small></span><span class="d">3:42</span></div>
+            <div class="row"><span class="c g5"></span><span class="t"><b>Take Me Out</b><small>Franz Ferdinand</small></span><span class="d">3:57</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <h3>Le schede sotto il lettore</h3>
+    <p>Scorrendo in su il lettore si riduce a una riga in alto e arrivano le schede: il testo con la riga cantata nel colore d'accento e «Traduci», le curiosità sul brano o sull'artista, i prossimi tre brani con «Apri coda». Senza testo la scheda dice «Nessun testo disponibile» e offre «Cerca testo».</p>
+  </section>
+
+  <!-- 3. Radio -->
+  <section class="fig">
+    <div class="fk oled a-ambra">
+      <div class="np t-g4">
+        <div class="npbar">
+          <button class="ib" aria-label="Chiudi" data-i="chevdown"></button>
+          <div class="ctx"><small>In riproduzione da</small><b>Le mie radio</b></div>
+          <button class="ib" aria-label="Modalità in auto" data-i="car"></button>
+          <button class="ib" aria-label="Altro" data-i="more"></button>
+        </div>
+        <div class="art"><div class="rg" data-live="296"><i class="cv ic" data-i="radio" data-s="96"></i></div></div>
+        <div class="tt"><span class="t"><b>Radio Capital</b><small>Ora: Bill Withers, Lovely Day</small></span><button class="ib on" aria-label="Togli dalle mie radio" data-i="star"></button></div>
+        <div class="live"><i></i>In diretta</div>
+        <div class="ctl short">
+          <button class="ib" aria-label="Radio precedente" data-i="prev" data-s="36"></button>
+          <button class="pp js-pp" aria-label="Pausa" data-i="pause" data-s="32"></button>
+          <button class="ib" aria-label="Radio successiva" data-i="next2" data-s="36"></button>
+        </div>
+        <div class="bot">
+          <button><i data-i="devices" data-s="20"></i>Dispositivi</button>
+          <button class="chip" aria-label="Timer di spegnimento"><i data-i="timer" data-s="18"></i></button>
+          <button><i data-i="queue" data-s="20"></i>Coda</button>
+        </div>
+      </div>
+    </div>
+    <h3>Radio</h3>
+    <p>OLED con accento ambra. Una diretta non ha fine, quindi l'anello è intero e un tratto lo percorre senza sosta, senza pallino. Al posto del cuore la stella delle mie radio; niente casuale e niente ripeti, solo radio precedente e successiva.</p>
+  </section>
+
+  <!-- 4. Queue sheet -->
+  <section class="fig">
+    <div class="fk">
+      <div class="np t-g1">
+        <div class="npbar"><button class="ib" data-i="chevdown" aria-label="Chiudi"></button><div class="ctx"><small>In riproduzione da</small><b>Preferiti</b></div><button class="ib" data-i="more" aria-label="Altro"></button></div>
+      </div>
+      <div class="scrim"></div>
+      <div class="sheet tall" role="dialog" aria-label="Coda">
+        <div class="handle"></div>
+        <div class="qhd"><b>Coda</b><button class="tb">Svuota</button><button class="ib" aria-label="Altro" data-i="vert"></button></div>
+        <div class="lab2">In riproduzione</div>
+        <div class="row now"><span class="c g1"><i class="dot"></i></span><span class="t"><b>Seven Nation Army</b><small>The White Stripes</small></span></div>
+        <div class="lab2">Prossimi</div>
+        <div class="rows">
+          <div class="row"><span class="c g4"></span><span class="t"><b>Can't Stop</b><small>Red Hot Chili Peppers</small></span><span class="dg" data-i="drag"></span></div>
+          <div class="row"><span class="c g2"></span><span class="t"><b>Mr. Brightside</b><small>The Killers</small></span><span class="dg" data-i="drag"></span></div>
+          <div class="row"><span class="c g5"></span><span class="t"><b>Take Me Out</b><small>Franz Ferdinand</small></span><span class="dg" data-i="drag"></span></div>
+          <div class="row"><span class="c g3"></span><span class="t"><b>Do I Wanna Know?</b><small>Arctic Monkeys</small></span><span class="dg" data-i="drag"></span></div>
+          <div class="row"><span class="c g6"></span><span class="t"><b>Lonely Boy</b><small>The Black Keys</small></span><span class="dg" data-i="drag"></span></div>
+          <div class="row"><span class="c g1"></span><span class="t"><b>Fell in Love with a Girl</b><small>The White Stripes</small></span><span class="dg" data-i="drag"></span></div>
+          <div class="row"><span class="c g4"></span><span class="t"><b>Seven Days</b><small>Craig David</small></span><span class="dg" data-i="drag"></span></div>
+        </div>
+      </div>
+    </div>
+    <h3>Coda</h3>
+    <p>Si apre da «Coda» e sale fino quasi in cima. Il brano in ascolto ha il pallino sulla copertina; i prossimi si spostano tenendo la maniglia e si tolgono con un trascinamento di lato. «Svuota» rimette la lista da cui si ascolta, con «Annulla» nell'avviso. Nel menu, «Suggeriti di recente».</p>
+  </section>
+
+  <!-- 5. Shuffle+ -->
+  <section class="fig">
+    <div class="fk">
+      <div class="np t-g1"><div class="npbar"><button class="ib" data-i="chevdown" aria-label="Chiudi"></button><div class="ctx"><small>In riproduzione da</small><b>Corsa del sabato</b></div><button class="ib" data-i="more" aria-label="Altro"></button></div></div>
+      <div class="scrim"></div>
+      <div class="sheet" role="dialog" aria-label="Casuale+">
+        <div class="handle"></div>
+        <h5>Casuale+</h5>
+        <div class="tile"><span class="t"><b>Casuale+</b><small>Con la casuale, ogni tanto entra un brano che non hai, simile alla lista in ascolto. Suona in streaming.</small></span><button class="sw on js-sw" role="switch" aria-checked="true" aria-label="Casuale+"></button></div>
+        <div class="tile" style="padding-bottom:0"><span class="t"><b>Un suggerito ogni 4 brani</b></span></div>
+        <div class="sl"><div class="track"><i style="width:14.3%"></i><em style="left:14.3%"></em></div><div class="ticks"><span>3</span><span>10</span></div></div>
+        <div class="tile"><span class="t"><b>Solo su Wi‑Fi</b><small>Niente suggeriti con i dati mobili o su reti a consumo.</small></span><button class="sw on js-sw" role="switch" aria-checked="true" aria-label="Solo su Wi‑Fi"></button></div>
+        <div class="tile dense"><i data-i="info" data-s="20" style="color:var(--acc)"></i><span class="t"><b>Attivo: i suggeriti arrivano mentre ascolti.</b><small>Consumo stimato: circa 15 MB all’ora con un suggerito ogni 4 brani.</small></span></div>
+        <hr>
+        <button class="it"><i data-i="history"></i><span style="flex:1">Suggeriti di recente</span><i data-i="chevr"></i></button>
+      </div>
+    </div>
+    <h3>Casuale+</h3>
+    <p>Il pulsante della casuale ha tre stati: spenta, casuale, casuale con il «+». Tenendolo premuto si apre questo foglio. Se qualcosa blocca i suggeriti, la riga di stato lo dice: «In pausa: rete a consumo», «Non attivo durante una Jam», «Serve una lista di almeno 5 brani».</p>
+  </section>
+
+  <!-- 6. Sleep timer -->
+  <section class="fig">
+    <div class="fk">
+      <div class="np t-g1">
+        <div class="npbar"><button class="ib" aria-label="Chiudi" data-i="chevdown"></button><div class="ctx"><small>In riproduzione da</small><b>Preferiti</b></div><button class="ib" aria-label="Modalità in auto" data-i="car"></button><button class="ib" aria-label="Altro" data-i="more"></button></div>
+        <div class="art"><div class="rg" data-big="296|0.62"><i class="cv g1 spin"></i></div></div>
+        <div class="tt"><span class="t"><b>Seven Nation Army</b><small>The White Stripes</small></span><button class="ib on" aria-label="Togli dai Preferiti" data-i="heart"></button></div>
+        <div class="seek"><div class="track"><i style="width:62%"></i><em style="left:62%"></em></div><div class="times"><span>2:23</span><span class="q">FLAC</span><span>3:51</span></div></div>
+        <div class="ctl">
+          <button class="ib side" aria-label="Casuale" data-i="shuffle"></button>
+          <button class="ib" aria-label="Brano precedente" data-i="prev" data-s="36"></button>
+          <button class="pp js-pp" aria-label="Pausa" data-i="pause" data-s="32"></button>
+          <button class="ib" aria-label="Brano successivo" data-i="next2" data-s="36"></button>
+          <button class="ib side" aria-label="Ripeti" data-i="repeat"></button>
+        </div>
+        <div class="bot">
+          <button><i data-i="devices" data-s="20"></i>Dispositivi</button>
+          <button class="chip on" aria-label="Timer di spegnimento"><i data-i="timer" data-s="18"></i>23′</button>
+          <button><i data-i="queue" data-s="20"></i>Coda</button>
+        </div>
+      </div>
+      <div class="scrim clear"></div>
+      <div class="menu" role="menu" aria-label="Timer di spegnimento">
+        <button>15 minuti</button><button class="on">30 minuti</button><button>45 minuti</button><button>60 minuti</button>
+        <button>A fine brano</button><hr><button>Annulla timer</button>
+      </div>
+    </div>
+    <h3>Timer di spegnimento</h3>
+    <p>Il timer è un piccolo bottone tra Dispositivi e Coda. Toccato apre un menu accanto, non un foglio. Quando è attivo il bordo prende il colore d'accento e mostra i minuti che restano, oppure «fine brano».</p>
+  </section>
+
+  <!-- 7. Suggested track -->
+  <section class="fig">
+    <div class="fk a-blu">
+      <div class="np t-g2">
+        <div class="npbar"><button class="ib" aria-label="Chiudi" data-i="chevdown"></button><div class="ctx"><small>In riproduzione da</small><b>Corsa del sabato</b></div><button class="ib" aria-label="Modalità in auto" data-i="car"></button><button class="ib" aria-label="Altro" data-i="more"></button></div>
+        <div class="art"><div class="rg" data-big="272|0.22"><i class="cv g2 spin"></i></div></div>
+        <div class="tt"><span class="t"><b>Dog Days Are Over</b><small>Florence + The Machine</small></span><button class="ib js-heart" aria-label="Aggiungi ai Preferiti" data-i="heart"></button></div>
+        <div class="sug">
+          <p>Suggerito, simile a «Corsa del sabato»</p>
+          <div style="display:flex;gap:8px"><button class="pill line"><i data-i="download" data-s="18"></i>Scarica</button><button class="pill line"><i data-i="pladd" data-s="18"></i>Aggiungi a playlist…</button></div>
+        </div>
+        <div class="seek"><div class="track"><i style="width:22%"></i><em style="left:22%"></em></div><div class="times"><span>0:56</span><span class="q">Streaming</span><span>4:12</span></div></div>
+        <div class="ctl">
+          <button class="ib side on" aria-label="Casuale+" data-i="shuffle"><sup>+</sup></button>
+          <button class="ib" aria-label="Brano precedente" data-i="prev" data-s="36"></button>
+          <button class="pp js-pp" aria-label="Pausa" data-i="pause" data-s="32"></button>
+          <button class="ib" aria-label="Brano successivo" data-i="next2" data-s="36"></button>
+          <button class="ib side" aria-label="Ripeti" data-i="repeat"></button>
+        </div>
+        <div class="bot">
+          <button><i data-i="devices" data-s="20"></i>Dispositivi</button>
+          <button class="chip" aria-label="Timer di spegnimento"><i data-i="timer" data-s="18"></i></button>
+          <button><i data-i="queue" data-s="20"></i>Coda</button>
+        </div>
+      </div>
+    </div>
+    <h3>Un suggerito di Casuale+</h3>
+    <p>Accento blu. Il brano non è nella libreria e suona in streaming: sotto il titolo una riga dice da dove arriva e offre «Scarica» o «Aggiungi a playlist…». La casuale mostra il «+» in accento. Il resto della schermata non cambia.</p>
+  </section>
+
+  <!-- 8. Suggested recently -->
+  <section class="fig">
+    <div class="fk">
+      <div class="scroll">
+        <div class="bar"><button class="ib" aria-label="Indietro" data-i="back"></button><span class="ttl">Suggeriti di recente</span></div>
+        <div class="rows">
+          <div class="row"><span class="c g2"></span><span class="t"><b>Dog Days Are Over</b><small>Simile a «Corsa del sabato»</small></span><span class="oc">In coda</span><button class="ib" aria-label="Altro" data-i="vert"></button></div>
+          <div class="row"><span class="c g5"></span><span class="t"><b>Kids</b><small>Simile a «Corsa del sabato»</small></span><span class="oc good">Scaricato</span><button class="ib" aria-label="Altro" data-i="vert"></button></div>
+          <div class="row"><span class="c g4"></span><span class="t"><b>Electric Feel</b><small>Simile a «Corsa del sabato»</small></span><span class="oc">Ascoltato</span><button class="ib" aria-label="Altro" data-i="vert"></button></div>
+          <div class="row"><span class="c g6"></span><span class="t"><b>Pumped Up Kicks</b><small>Simile a «Preferiti»</small></span><span class="oc">Saltato</span><button class="ib" aria-label="Altro" data-i="vert"></button></div>
+          <div class="row"><span class="c g3"></span><span class="t"><b>Midnight City</b><small>Simile a «Preferiti»</small></span><span class="oc">Ascoltato</span><button class="ib" aria-label="Altro" data-i="vert"></button></div>
+          <div class="row"><span class="c g1"></span><span class="t"><b>Shut Up and Dance</b><small>Simile a «Preferiti»</small></span><span class="oc">Non mi piace</span><button class="ib" aria-label="Altro" data-i="vert"></button></div>
+        </div>
+        <p class="foot">Restano qui 30 giorni e non finiscono nella cronologia.</p>
+      </div>
+    </div>
+    <h3>Suggeriti di recente</h3>
+    <p>Dal foglio di Casuale+ o dal menu della Coda. Ogni riga dice a quale lista somigliava e com'è andata: in coda, ascoltato, saltato, scaricato. «Scaricato» è nel colore d'accento perché è l'unico che ora sta nella libreria.</p>
+  </section>
+
+  <!-- 9. Light, paused -->
+  <section class="fig">
+    <div class="fk light a-verde">
+      <div class="np paused">
+        <div class="npbar"><button class="ib" aria-label="Chiudi" data-i="chevdown"></button><div class="ctx"><small>In riproduzione da</small><b>Rumours</b></div><button class="ib" aria-label="Modalità in auto" data-i="car"></button><button class="ib" aria-label="Altro" data-i="more"></button></div>
+        <div class="art"><div class="rg" data-big="296|0.81"><i class="cv g5 spin"></i></div></div>
+        <div class="tt"><span class="t"><b>Dreams</b><small>Fleetwood Mac</small></span><button class="ib on" aria-label="Togli dai Preferiti" data-i="heart"></button></div>
+        <div class="seek"><div class="track"><i style="width:81%"></i><em style="left:81%"></em></div><div class="times"><span>3:22</span><span class="q">MP3 320</span><span>4:14</span></div></div>
+        <div class="ctl">
+          <button class="ib side on" aria-label="Casuale+" data-i="shuffle"><sup>+</sup></button>
+          <button class="ib" aria-label="Brano precedente" data-i="prev" data-s="36"></button>
+          <button class="pp js-pp" aria-label="Riproduci" data-i="play" data-s="32"></button>
+          <button class="ib" aria-label="Brano successivo" data-i="next2" data-s="36"></button>
+          <button class="ib side on" aria-label="Ripeti un brano" data-i="repeat1"></button>
+        </div>
+        <div class="bot">
+          <button><i data-i="devices" data-s="20"></i>Dispositivi</button>
+          <button class="chip on" aria-label="Timer di spegnimento"><i data-i="timer" data-s="18"></i>23′</button>
+          <button><i data-i="queue" data-s="20"></i>Coda</button>
+        </div>
+      </div>
+    </div>
+    <h3>Chiaro, in pausa</h3>
+    <p>Chiaro con accento verde. In pausa il disco si ferma dov'è, senza tornare a zero. Casuale+ e «ripeti un brano» accesi: l'icona prende l'accento e un cerchio tenue dietro. Il timer mostra i 23 minuti che restano.</p>
+  </section>
+
+</main>
+
+<!-- desktop -->
+<section class="wide fig">
+  <div class="dwrap" id="dwrap">
+    <div class="dnp fk-d t-g1" style="--bg:#07050C;--s1:#120E1C;--s2:#1D1630;--s3:#2A2140;--acc:#A06BFF;--accs:#D9C8FF;--onacc:#12081F;--tx:#F4F0FA;--mu:#A79DB8;--fa:#6E6680">
+      <div class="pl js-np">
+        <div class="npbar">
+          <button class="ib" aria-label="Chiudi" data-i="chevdown"></button>
+          <div class="ctx"><small>In riproduzione da</small><b>Preferiti</b></div>
+          <button class="ib" aria-label="Altro" data-i="more"></button>
+        </div>
+        <div class="art"><div class="rg" data-big="300|0.48"><i class="cv g1 spin"></i></div></div>
+        <div class="tt"><span class="t"><b>Seven Nation Army</b><small>The White Stripes</small></span><button class="ib js-heart" aria-label="Aggiungi ai Preferiti" data-i="heart"></button></div>
+        <div class="seek"><div class="track"><i style="width:48%"></i><em style="left:48%"></em></div><div class="times"><span>1:51</span><span class="q">FLAC</span><span>3:51</span></div></div>
+        <div class="ctl" style="padding:14px 80px 0">
+          <button class="ib side" aria-label="Casuale" data-i="shuffle"></button>
+          <button class="ib" aria-label="Brano precedente" data-i="prev" data-s="36"></button>
+          <button class="pp js-pp" aria-label="Pausa" data-i="pause" data-s="32"></button>
+          <button class="ib" aria-label="Brano successivo" data-i="next2" data-s="36"></button>
+          <button class="ib side" aria-label="Ripeti" data-i="repeat"></button>
+        </div>
+        <div class="vol"><button class="ib" aria-label="Muto" data-i="volume" data-s="20"></button><div class="track"><i style="width:70%"></i><em style="left:70%"></em></div></div>
+        <div class="bot">
+          <button><i data-i="devices" data-s="20"></i>Dispositivi</button>
+          <button class="chip" aria-label="Timer di spegnimento"><i data-i="timer" data-s="18"></i></button>
+          <button><i data-i="queue" data-s="20"></i>Coda</button>
+        </div>
+      </div>
+      <div class="cards">
+        <div class="nc">
+          <h4><span>Testo</span><button>Traduci</button></h4>
+          <div class="lyr">
+            <p>I'm gonna fight 'em off</p>
+            <p>A seven nation army couldn't hold me back</p>
+            <p class="cur">They're gonna rip it off</p>
+            <p>Taking their time right behind my back</p>
+            <p>And I'm talking to myself at night</p>
+          </div>
+        </div>
+        <div class="nc">
+          <h4><span>Curiosità</span></h4>
+          <div class="seg2"><button class="on">Sul brano</button><button>Sull'artista</button></div>
+          <p class="txt">Il riff che sembra un basso è una chitarra passata in un pedale che la abbassa di un'ottava.</p>
+        </div>
+        <div class="nc">
+          <h4><span>Prossimi</span><button>Apri coda</button></h4>
+          <div class="row"><span class="c g4"></span><span class="t"><b>Can't Stop</b><small>Red Hot Chili Peppers</small></span><span class="d">4:29</span></div>
+          <div class="row"><span class="c g2"></span><span class="t"><b>Mr. Brightside</b><small>The Killers</small></span><span class="d">3:42</span></div>
+          <div class="row"><span class="c g5"></span><span class="t"><b>Take Me Out</b><small>Franz Ferdinand</small></span><span class="d">3:57</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <h3>Desktop sopra 900 px</h3>
+  <p>Su Linux e Windows la schermata copre tutta la finestra, barra laterale compresa. Il lettore resta al centro della colonna sinistra, largo al massimo 560 px; il volume con «Muto» sta sopra Dispositivi, Timer e Coda, e il pulsante della modalità in auto non c'è. A destra una colonna di 380 px con Testo, Curiosità e Prossimi sempre visibili.</p>
+</section>
+
+<script>
+const I = {
+  back:'M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z',
+  play:'M8 5.14v13.72a1 1 0 0 0 1.5.86l11-6.86a1 1 0 0 0 0-1.72l-11-6.86A1 1 0 0 0 8 5.14z',
+  pause:'M7 5h3v14H7zM14 5h3v14h-3z',
+  shuffle:'M10.59 9.17 5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z',
+  more:'M6 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm6 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm6 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4z',
+  vert:'M12 4a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm0 6a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm0 6a2 2 0 1 0 0 4 2 2 0 0 0 0-4z',
+  search:'M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z',
+  plus:'M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z',
+  heart:'M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z',
+  grid:'M4 4h7v7H4zm9 0h7v7h-7zM4 13h7v7H4zm9 0h7v7h-7z',
+  apps:'M4 8h4V4H4v4zm6 12h4v-4h-4v4zm-6 0h4v-4H4v4zm0-6h4v-4H4v4zm6 0h4v-4h-4v4zm6-10v4h4V4h-4zm-6 4h4V4h-4v4zm6 6h4v-4h-4v4zm0 6h4v-4h-4v4z',
+  sort:'M3 18h6v-2H3v2zM3 6v2h18V6H3zm0 7h12v-2H3v2z',
+  history:'M13 3a9 9 0 0 0-9 9H1l4 4 4-4H6a7 7 0 1 1 2.05 4.95l-1.42 1.42A9 9 0 1 0 13 3zm-1 5v5l4.25 2.52.77-1.28-3.52-2.09V8H12z',
+  home:'M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z',
+  lib:'M20 2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 5h-3v5.5a2.5 2.5 0 0 1-5 0 2.5 2.5 0 0 1 2.5-2.5c.57 0 1.08.19 1.5.51V5h4v2zM4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6z',
+  mem:'M18 2h-8L4 8v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-6 6h-2V4h2v4zm3 0h-2V4h2v4zm3 0h-2V4h2v4z',
+  palette:'M12 3a9 9 0 0 0 0 18c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8zm-5.5 9a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm3-4a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm3 4a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z',
+  playc:'M10 16.5l6-4.5-6-4.5v9zM12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16z',
+  folder:'M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z',
+  cloud:'M19.35 10.04A7.49 7.49 0 0 0 12 4C9.11 4 6.6 5.64 5.35 8.04A5.994 5.994 0 0 0 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z',
+  devices:'M4 6h18V4H4c-1.1 0-2 .9-2 2v11H0v3h14v-3H4V6zm19 2h-6c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h6c.55 0 1-.45 1-1V9c0-.55-.45-1-1-1zm-1 9h-4v-7h4v7z',
+  backup:'M19.35 10.04A7.49 7.49 0 0 0 12 4C9.11 4 6.6 5.64 5.35 8.04A5.994 5.994 0 0 0 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z',
+  info:'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z',
+  next:'M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z',
+  queue:'M15 6H3v2h12V6zm0 4H3v2h12v-2zM3 16h8v-2H3v2zM17 6v8.18A3 3 0 0 0 16 14a3 3 0 1 0 3 3V8h3V6h-5z',
+  pladd:'M14 10H2v2h12v-2zm0-4H2v2h12V6zm4 8v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zM2 16h8v-2H2v2z',
+  album:'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 14.5a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9zm0-5.5a1 1 0 1 0 0 2 1 1 0 0 0 0-2z',
+  person:'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z',
+  share:'M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11A2.99 2.99 0 0 0 21 5a3 3 0 1 0-5.91.7L8.04 9.81A2.99 2.99 0 0 0 3 12a3 3 0 0 0 5.04 2.19l7.12 4.16c-.05.21-.08.43-.08.65A2.92 2.92 0 1 0 18 16.08z',
+  delete:'M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z',
+  prev:'M6 6h2v12H6zm3.5 6 8.5 6V6z',
+  next2:'M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z',
+  chevdown:'M16.59 8.59 12 13.17 7.41 8.59 6 10l6 6 6-6z',
+  chevr:'M10 6 8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z',
+  repeat:'M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z',
+  repeat1:'M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4zm-4-2V9h-1l-2 1v1h1.5v4H13z',
+  timer:'M15 1H9v2h6V1zm-4 13h2V8h-2v6zm8.03-6.61 1.42-1.42c-.43-.51-.9-.99-1.41-1.41l-1.42 1.42A8.96 8.96 0 0 0 12 4a9 9 0 1 0 9 9c0-2.12-.74-4.07-1.97-5.61zM12 20a7 7 0 1 1 0-14 7 7 0 0 1 0 14z',
+  car:'M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm11 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zM5 11l1.5-4.5h11L19 11H5z',
+  volume:'M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 7.97v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z',
+  star:'M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z',
+  drag:'M20 9H4v2h16V9zM4 15h16v-2H4v2z',
+  download:'M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z',
+  radio:'M3.24 6.15A2 2 0 0 0 2 8v12c0 1.1.89 2 2 2h16a2 2 0 0 0 2-2V8c0-1.11-.89-2-2-2H8.3l8.26-3.34L15.88 1 3.24 6.15zM7 20a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm13-8h-2v-2h-2v2H4V8h16v4z'
+};
+const ic = (n, s = 24) => `<svg viewBox="0 0 24 24" width="${s}" height="${s}" aria-hidden="true"><path fill="currentColor" d="${I[n]}"/></svg>`;
+
+// The open ring of the logo: 40° gap at top right, accent arc, dot at the tip.
+const geo = (size, st) => { const c = size / 2, r = c - st * 1.2, gap = 40, s = -45 + gap / 2;
+  const pt = a => [c + r * Math.cos(a * Math.PI / 180), c + r * Math.sin(a * Math.PI / 180)];
+  const arc = (a0, a1) => { const [x0, y0] = pt(a0), [x1, y1] = pt(a1); return `M${x0} ${y0}A${r} ${r} 0 ${a1 - a0 > 180 ? 1 : 0} 1 ${x1} ${y1}`; };
+  return { s, span: 360 - gap, pt, arc }; };
+function ring(size, prog, st = 4) {
+  const { s, span, pt, arc } = geo(size, st), e = s + span * prog, [dx, dy] = pt(e);
+  return `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" role="img" aria-label="Avanzamento">` +
+    `<path d="${arc(s, s + span)}" stroke="var(--s3)" stroke-width="${st}" fill="none" stroke-linecap="round"/>` +
+    `<path d="${arc(s, e)}" stroke="var(--acc)" stroke-width="${st}" fill="none" stroke-linecap="round"/>` +
+    `<circle cx="${dx}" cy="${dy}" r="${st * 1.1}" fill="var(--acc)"/></svg>`;
+}
+// A live stream: the open track with a short accent dash running along it, no dot.
+function liveRing(size, st = 4) {
+  const { s, span, arc } = geo(size, st);
+  return `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" role="img" aria-label="In diretta">` +
+    `<path d="${arc(s, s + span)}" stroke="var(--s3)" stroke-width="${st}" fill="none" stroke-linecap="round"/>` +
+    `<path class="dash" pathLength="100" d="${arc(s, s + span)}" stroke="var(--acc)" stroke-width="${st}" fill="none" stroke-linecap="round" stroke-dasharray="22 100"/></svg>`;
+}
+document.head.insertAdjacentHTML('beforeend', '<style>@keyframes run{from{stroke-dashoffset:22}to{stroke-dashoffset:-100}} .dash{animation:run 2.4s linear infinite}</style>');
+
+document.querySelectorAll('[data-big]').forEach(el => { const [s, p] = el.dataset.big.split('|'); el.insertAdjacentHTML('afterbegin', ring(+s, +p)); });
+document.querySelectorAll('[data-live]').forEach(el => el.insertAdjacentHTML('afterbegin', liveRing(+el.dataset.live)));
+document.querySelectorAll('[data-i]').forEach(el => el.insertAdjacentHTML('afterbegin', ic(el.dataset.i, +el.dataset.s || 24)));
+
+// Play/pause stops the disc where it is; the heart toggles.
+document.querySelectorAll('.js-pp').forEach(b => b.addEventListener('click', () => {
+  const np = b.closest('.np, .pl'), paused = np.classList.toggle('paused');
+  b.setAttribute('aria-label', paused ? 'Riproduci' : 'Pausa');
+  b.innerHTML = ic(paused ? 'play' : 'pause', 32);
+}));
+document.querySelectorAll('.js-heart').forEach(b => b.addEventListener('click', () => {
+  const on = b.classList.toggle('on'); b.setAttribute('aria-label', on ? 'Togli dai Preferiti' : 'Aggiungi ai Preferiti');
+}));
+document.querySelectorAll('.js-sw').forEach(b => b.addEventListener('click', () => b.setAttribute('aria-checked', b.classList.toggle('on'))));
+
+const stagger = () => document.querySelectorAll('.rows').forEach(rs => [...rs.children].forEach((r, i) => r.style.setProperty('--i', Math.min(i, 12))));
+stagger();
+document.getElementById('replay').addEventListener('click', () => { document.body.classList.remove('enter'); void document.body.offsetWidth; document.body.classList.add('enter'); });
+document.getElementById('rm').addEventListener('change', e => document.body.classList.toggle('rm', e.target.checked));
+
+// Desktop frame: draw at 1200×700, scale down to the column width.
+const dw = document.getElementById('dwrap'), dk = dw.firstElementChild;
+function fit() { const s = Math.min(1, dw.clientWidth / 1200); dk.style.transform = `scale(${s})`; dw.style.height = 700 * s + 'px'; }
+addEventListener('resize', fit);
+document.fonts && document.fonts.ready.then(fit);
+fit();
+</script>
+</body>
+</html>
