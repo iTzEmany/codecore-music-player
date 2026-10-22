@@ -1187,6 +1187,53 @@ class AppLocalizationsDe extends AppLocalizations {
   String get homeRediscover => 'Wiederentdecken';
 
   @override
+  String get homeShuffleAll => 'Alles zufällig';
+
+  @override
+  String homeShuffleAllSub(String tracks, String hours) {
+    return '$tracks, $hours';
+  }
+
+  @override
+  String hoursCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Stunden',
+      one: '1 Stunde',
+      zero: 'weniger als eine Stunde',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get homeAddedLately => 'Neu hinzugefügt';
+
+  @override
+  String homeResumeQueue(int n, int m) {
+    return 'Titel $n von $m';
+  }
+
+  @override
+  String homeResumeQueueFrom(String source, int n, int m) {
+    return '$source: Titel $n von $m';
+  }
+
+  @override
+  String homeMinutesLeft(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Noch $count Minuten',
+      one: 'Noch 1 Minute',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get homeFanOpen => 'Cover anzeigen';
+
+  @override
   String get searchMainResult => 'Bestes Ergebnis';
 
   @override

@@ -42,21 +42,14 @@ void main() {
     await _settle(tester);
   }
 
-  testWidgets('home: no «Le tue radio» row until a station is saved', (tester) async {
-    await open(tester, const HomeScreen());
-    expect(find.text('Le tue radio'), findsNothing);
-    await h.dispose(tester);
-  });
-
-  testWidgets('home: the saved stations are a row and a tap listens with them as the queue',
+  testWidgets('home: the Radio shortcut counts the saved stations and opens the page',
       (tester) async {
     await open(tester, const HomeScreen(), saved: [_a, _b]);
-    expect(find.text('Le tue radio'), findsOneWidget);
-    expect(find.text('Radio Beta'), findsOneWidget);
-    await tester.tap(find.byKey(const ValueKey('home-radio-b')));
-    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 100)));
-    expect(h.handler.isRadio, isTrue);
-    expect(h.backend.loadedUris.single.uri.toString(), 'http://radio.test/b');
+    expect(find.text('Radio'), findsOneWidget);
+    expect(find.text('2'), findsOneWidget);
+    await tester.tap(find.text('Radio'));
+    await _settle(tester);
+    expect(find.byType(RadioScreen), findsOneWidget);
     await h.dispose(tester);
   });
 

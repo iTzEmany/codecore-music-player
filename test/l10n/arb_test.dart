@@ -19,7 +19,7 @@ const _sameAsItalian = {
   'proposedValue', 'settingsAbout', 'settingsOnline', 'settingsTheme',
   'sharePin', 'sortAlbum', 'sortArtist', 'textLarge', 'tracksAndDuration',
   'youtube', 'ytDlpVersion', 'statsHoursMinutes', 'statsFirstValue',
-  'smartName', 'smartPlaylistLabel', 'searchSourceYoutube', 'searchSourceYoutubeMusic',
+  'homeShuffleAllSub', 'smartName', 'smartPlaylistLabel', 'searchSourceYoutube', 'searchSourceYoutubeMusic',
   'searchSourceSoundcloud', 'searchModeOnline', 'onlineSourceVideo', 'downloadFormatMp3High', 'importPhaseDownloading', 'activityLog', 'importPhaseDownloadStart', 'memoryDatabase',
   'radioTitle', 'radioAddName', 'radioOnlyCountry', 'radioGenrePop', 'radioGenreRock',
   'radioGenreJazz', 'radioGenreBlues', 'radioGenreDance', 'radioGenreHouse',

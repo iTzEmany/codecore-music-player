@@ -2188,6 +2188,54 @@ abstract class AppLocalizations {
   /// **'Da riscoprire'**
   String get homeRediscover;
 
+  /// No description provided for @homeShuffleAll.
+  ///
+  /// In it, this message translates to:
+  /// **'Casuale su tutto'**
+  String get homeShuffleAll;
+
+  /// No description provided for @homeShuffleAllSub.
+  ///
+  /// In it, this message translates to:
+  /// **'{tracks}, {hours}'**
+  String homeShuffleAllSub(String tracks, String hours);
+
+  /// No description provided for @hoursCount.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, =0{meno di un’ora} one{1 ora} other{{count} ore}}'**
+  String hoursCount(int count);
+
+  /// No description provided for @homeAddedLately.
+  ///
+  /// In it, this message translates to:
+  /// **'Aggiunti da poco'**
+  String get homeAddedLately;
+
+  /// No description provided for @homeResumeQueue.
+  ///
+  /// In it, this message translates to:
+  /// **'Brano {n} di {m}'**
+  String homeResumeQueue(int n, int m);
+
+  /// No description provided for @homeResumeQueueFrom.
+  ///
+  /// In it, this message translates to:
+  /// **'{source}: brano {n} di {m}'**
+  String homeResumeQueueFrom(String source, int n, int m);
+
+  /// No description provided for @homeMinutesLeft.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, one{Manca 1 minuto} other{Mancano {count} minuti}}'**
+  String homeMinutesLeft(int count);
+
+  /// No description provided for @homeFanOpen.
+  ///
+  /// In it, this message translates to:
+  /// **'Mostra le copertine'**
+  String get homeFanOpen;
+
   /// No description provided for @searchMainResult.
   ///
   /// In it, this message translates to:

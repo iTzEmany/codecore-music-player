@@ -303,6 +303,18 @@ class TrackRepository {
             ]))
           .watch();
 
+  /// Tracks left in the middle, newest first (the Home «Riprendi» rows).
+  Stream<List<Track>> watchResumable({int limit = 3}) =>
+      (_db.select(_db.tracks)
+            ..where((t) =>
+                t.resumePositionMs.isNotNull() &
+                t.missing.equals(false) &
+                t.ignored.equals(false) &
+                t.kind.equals(0))
+            ..orderBy([(t) => OrderingTerm.desc(t.lastPlayedAt)])
+            ..limit(limit))
+          .watch();
+
   Stream<List<Track>> watchMissing() =>
       (_db.select(_db.tracks)
             ..where((t) => t.missing.equals(true) & t.ignored.equals(false))

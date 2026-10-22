@@ -255,6 +255,10 @@ final topTracksProvider = StreamProvider<List<Track>>(
   (ref) => ref.watch(libraryQueriesProvider).watchTopTracks(),
 );
 
+final resumableTracksProvider = StreamProvider.autoDispose<List<Track>>(
+  (ref) => ref.watch(trackRepositoryProvider).watchResumable(),
+);
+
 final artistTracksProvider = StreamProvider.family<List<Track>, String>(
   (ref, key) => ref.watch(libraryQueriesProvider).watchArtistTracks(key),
 );

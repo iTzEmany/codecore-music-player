@@ -698,6 +698,61 @@
   "homeRecentlyAdded": "Aggiunti di recente",
   "homeTopTracks": "I più ascoltati",
   "homeRediscover": "Da riscoprire",
+  "homeShuffleAll": "Casuale su tutto",
+  "homeShuffleAllSub": "{tracks}, {hours}",
+  "@homeShuffleAllSub": {
+    "placeholders": {
+      "tracks": {
+        "type": "String"
+      },
+      "hours": {
+        "type": "String"
+      }
+    }
+  },
+  "hoursCount": "{count, plural, =0{meno di un’ora} one{1 ora} other{{count} ore}}",
+  "@hoursCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeAddedLately": "Aggiunti da poco",
+  "homeResumeQueue": "Brano {n} di {m}",
+  "@homeResumeQueue": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "m": {
+        "type": "int"
+      }
+    }
+  },
+  "homeResumeQueueFrom": "{source}: brano {n} di {m}",
+  "@homeResumeQueueFrom": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      },
+      "n": {
+        "type": "int"
+      },
+      "m": {
+        "type": "int"
+      }
+    }
+  },
+  "homeMinutesLeft": "{count, plural, one{Manca 1 minuto} other{Mancano {count} minuti}}",
+  "@homeMinutesLeft": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeFanOpen": "Mostra le copertine",
   "searchMainResult": "Risultato principale",
   "showAll": "Mostra tutti",
   "recentSearches": "Ricerche recenti",
