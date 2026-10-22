@@ -413,19 +413,19 @@ Richiesta (2026-10-21): «una sorta di "shuffle+" che ogni tanto mi piazza una c
 - [x] 31.8 Radio di YouTube Music (client e parser) (be08a78)
 - [x] 31.9 Bacino dei suggerimenti e registro (be08a78)
 - [x] 31.10 Motore Shuffle+ (be08a78)
-- [ ] 31.11 Interfaccia dei suggeriti
-- [ ] 31.12 Impostazioni, rete a consumo e pulsante a tre stati
+- [x] 31.11 Interfaccia dei suggeriti (d91b331)
+- [x] 31.12 Impostazioni, rete a consumo e pulsante a tre stati (d91b331)
 - [ ] 31.13 «Suggeriti di recente»
 - [ ] 31.14 (Facoltativo) Senza pause e dissolvenza anche per i suggeriti
 - [ ] 31.15 Test dal vivo, documentazione e prova a mano
 
 ## Fase 32 — Ricerca intelligente (`fase-32-ricerca-intelligente.md`)
 Richiesta (2026-10-22): «non voglio stare io a selezionare il filtro della ricerca ma ne voglio una intelligente. L'unica differenza deve esserci tra ricerca locale e ricerca online. La ricerca online deve sì presentare la possibilità di scegliere la fonte, ma di base mi dispone i risultati migliori della ricerca in tutte e 3 le categorie con margine di confidence.» Scelte concordate: due modi (In libreria · Online); online YouTube Music e YouTube in parallelo con la card della fase 30, confidenza dal punteggio dell'importazione senza durata, stesso brano in una riga dalla fonte migliore, sotto soglia in «Altri risultati» (chiuso), intento (artista → card in cima, «titolo artista» → brani, indirizzo → come oggi), chip delle fonti come filtro, ordine stabile con tetto di 1,5 s, cache di 10 minuti, 429 per fonte. SoundCloud misurato (2026-10-22, 54 ricerche: 0 brani in più di YouTube Music e YouTube, 5,4 s di mediana contro 0,46 s): proposta di toglierlo dalla ricerca (32.8 aspetta la risposta).
-- [ ] 32.1 Verifiche preliminari e fixture (esiti dal PC già nel documento; restano fixture e telefoni)
-- [ ] 32.2 Card del risultato principale e intento
-- [ ] 32.3 Confidenza di una ricerca libera
-- [ ] 32.4 Lo stesso brano da più fonti
-- [ ] 32.5 Il motore della ricerca online
+- [~] 32.1 Verifiche preliminari e fixture (esiti dal PC già nel documento; restano fixture e telefoni) (bdff42c; tempi sui telefoni (punto 2) da fare)
+- [x] 32.2 Card del risultato principale e intento (bdff42c)
+- [x] 32.3 Confidenza di una ricerca libera (bdff42c)
+- [x] 32.4 Lo stesso brano da più fonti (bdff42c)
+- [x] 32.5 Il motore della ricerca online (bdff42c)
 - [ ] 32.6 Cerca: In libreria · Online
 - [ ] 32.7 Rifinitura del punteggio con le ricerche vere
 - [ ] 32.8 SoundCloud fuori dalla ricerca (dopo la risposta dell'utente)
