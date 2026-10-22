@@ -40,15 +40,6 @@ void main() {
     expect(r.map((e) => e.title), ['older-loved', 'old-loved']);
   });
 
-  test('recently played skips never-played, latest first', () {
-    final r = recentlyPlayedAlbums([
-      a('b', played: 5),
-      a('never'),
-      a('c', played: 9),
-    ]);
-    expect(r.map((e) => e.title), ['c', 'b']);
-  });
-
   test('recently added orders by addedAt', () {
     final r = recentlyAddedAlbums([a('x', added: 1), a('y', added: 7)], limit: 1);
     expect(r.single.title, 'y');

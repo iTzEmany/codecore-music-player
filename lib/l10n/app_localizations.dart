@@ -2164,18 +2164,6 @@ abstract class AppLocalizations {
   /// **'Riprendi'**
   String get homeResume;
 
-  /// No description provided for @homeRecentlyPlayed.
-  ///
-  /// In it, this message translates to:
-  /// **'Ascoltati di recente'**
-  String get homeRecentlyPlayed;
-
-  /// No description provided for @homeRecentlyAdded.
-  ///
-  /// In it, this message translates to:
-  /// **'Aggiunti di recente'**
-  String get homeRecentlyAdded;
-
   /// No description provided for @homeTopTracks.
   ///
   /// In it, this message translates to:
@@ -4581,12 +4569,6 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Il tuo mese'**
   String get statsYourMonth;
-
-  /// No description provided for @statsTopArtistHome.
-  ///
-  /// In it, this message translates to:
-  /// **'Il più ascoltato: {name}'**
-  String statsTopArtistHome(String name);
 
   /// No description provided for @ruleWarning.
   ///
@@ -7317,12 +7299,6 @@ abstract class AppLocalizations {
   /// **'Trascina per riordinare'**
   String get radioReorder;
 
-  /// No description provided for @homeYourRadios.
-  ///
-  /// In it, this message translates to:
-  /// **'Le tue radio'**
-  String get homeYourRadios;
-
   /// No description provided for @memoryRadio.
   ///
   /// In it, this message translates to:
@@ -7532,12 +7508,6 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'No, grazie'**
   String get releasesTopCardNo;
-
-  /// No description provided for @newReleasesShowAll.
-  ///
-  /// In it, this message translates to:
-  /// **'Mostra tutte'**
-  String get newReleasesShowAll;
 
   /// No description provided for @releasesCheckNow.
   ///

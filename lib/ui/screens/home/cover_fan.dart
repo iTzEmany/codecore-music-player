@@ -65,36 +65,39 @@ class _CoverFanState extends State<CoverFan>
           final w = box.maxWidth;
           final size = math.min(w * 0.42, 168.0);
           final spread = math.min(size, (w - _gap * (n - 1)) / n);
+          // Built once per layout: the animation only moves the Transforms.
+          final covers = [
+            for (var i = 0; i < n; i++) _cover(albums[i], i, size),
+          ];
           return MouseRegion(
             onEnter: (_) => _setOpen(true, hover: true),
             onExit: (_) {
               if (_byHover) _setOpen(false);
             },
-            child: RepaintBoundary(
-              child: AnimatedBuilder(
-                animation: _c,
-                builder: (context, _) {
-                  final t = Motion.curve.transform(_c.value);
-                  final fan = SizedBox(
-                    height: size + 24,
-                    width: w,
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        for (var i = 0; i < n; i++)
-                          _cover(albums[i], i, n, size, spread, t),
-                      ],
-                    ),
-                  );
-                  return _open
-                      ? fan
-                      : Semantics(
-                          button: true,
-                          label: l.homeFanOpen,
-                          excludeSemantics: true,
-                          child: fan,
-                        );
-                },
+            // The same wrapper open or closed, so the covers are never remounted.
+            child: Semantics(
+              button: !_open,
+              label: _open ? null : l.homeFanOpen,
+              excludeSemantics: !_open,
+              onTap: _open ? null : () => _setOpen(true),
+              child: RepaintBoundary(
+                child: AnimatedBuilder(
+                  animation: _c,
+                  builder: (context, _) {
+                    final t = Motion.curve.transform(_c.value);
+                    return SizedBox(
+                      height: size + 24,
+                      width: w,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          for (var i = 0; i < n; i++)
+                            _place(covers[i], i, n, size, spread, t),
+                        ],
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
           );
@@ -103,8 +106,8 @@ class _CoverFanState extends State<CoverFan>
     );
   }
 
-  Widget _cover(
-    AlbumSummary a,
+  Widget _place(
+    Widget cover,
     int i,
     int n,
     double size,
@@ -118,26 +121,20 @@ class _CoverFanState extends State<CoverFan>
     final m = Matrix4.translationValues(dx, 0, 0)
       ..rotateZ(tilt)
       ..scaleByDouble(scale, scale, 1, 1);
-    return Transform(
-      alignment: Alignment.center,
-      transform: m,
-      child: GestureDetector(
-        key: ValueKey('fan-cover-$i'),
-        onTap: () => _open
-            ? ShellNav.open<void>(context, AlbumDetailScreen(album: a))
-            : _setOpen(true),
-        child: Semantics(
-          button: _open,
-          label: _open ? a.title : null,
-          child: CoverImage(
-            coverKey: a.coverKey,
-            size: size,
-            radius: CcDims.rGrid,
-          ),
-        ),
-      ),
-    );
+    return Transform(alignment: Alignment.center, transform: m, child: cover);
   }
+
+  Widget _cover(AlbumSummary a, int i, double size) => GestureDetector(
+    key: ValueKey('fan-cover-$i'),
+    onTap: () => _open
+        ? ShellNav.open<void>(context, AlbumDetailScreen(album: a))
+        : _setOpen(true),
+    child: Semantics(
+      button: _open,
+      label: _open ? a.title : null,
+      child: CoverImage(coverKey: a.coverKey, size: size, radius: CcDims.rGrid),
+    ),
+  );
 
   static double _lerp(double a, double b, double t) => a + (b - a) * t;
 }

@@ -4,18 +4,21 @@ import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-TracksCompanion row(String path, String title,
-        {int mtime = 1, int? folderId}) =>
-    TracksCompanion.insert(
-      path: path,
-      title: title,
-      albumKey: 'k',
-      format: 'mp3',
-      sizeBytes: 10,
-      mtimeMs: mtime,
-      addedAt: 5,
-      folderId: Value(folderId),
-    );
+TracksCompanion row(
+  String path,
+  String title, {
+  int mtime = 1,
+  int? folderId,
+}) => TracksCompanion.insert(
+  path: path,
+  title: title,
+  albumKey: 'k',
+  format: 'mp3',
+  sizeBytes: 10,
+  mtimeMs: mtime,
+  addedAt: 5,
+  folderId: Value(folderId),
+);
 
 void main() {
   late AppDatabase db;
@@ -30,8 +33,9 @@ void main() {
   test('upsert twice keeps one row and preserves favorite', () async {
     await repo.upsertBatch([row('/a.mp3', 'A')]);
     final id = (await db.select(db.tracks).getSingle()).id;
-    await (db.update(db.tracks)..where((t) => t.id.equals(id)))
-        .write(const TracksCompanion(isFavorite: Value(true)));
+    await (db.update(db.tracks)..where((t) => t.id.equals(id))).write(
+      const TracksCompanion(isFavorite: Value(true)),
+    );
     await repo.upsertBatch([row('/a.mp3', 'A2', mtime: 9)]);
     final t = await db.select(db.tracks).getSingle();
     expect(t.title, 'A2');
@@ -42,14 +46,20 @@ void main() {
 
   test('userEdited keeps title', () async {
     await repo.upsertBatch([row('/a.mp3', 'A')]);
-    await db.update(db.tracks).write(const TracksCompanion(
-        userEdited: Value(true), title: Value('Mine')));
+    await db
+        .update(db.tracks)
+        .write(
+          const TracksCompanion(userEdited: Value(true), title: Value('Mine')),
+        );
     await repo.upsertBatch([row('/a.mp3', 'FromFile')]);
     expect((await db.select(db.tracks).getSingle()).title, 'Mine');
   });
 
   test('search treats % literally', () async {
-    await repo.upsertBatch([row('/a.mp3', '100% Pure'), row('/b.mp3', 'Other')]);
+    await repo.upsertBatch([
+      row('/a.mp3', '100% Pure'),
+      row('/b.mp3', 'Other'),
+    ]);
     final r = await repo.watchTracks(query: '%').first;
     expect(r.map((t) => t.title), ['100% Pure']);
     final u = await repo.watchTracks(query: '_').first;
@@ -69,19 +79,62 @@ void main() {
     await repo.upsertBatch([row('/a', 'a'), row('/b', 'b'), row('/c', 'c')]);
     final ids = (await db.select(db.tracks).get()).map((t) => t.id).toList();
     await repo.setFavoriteMany([ids[0], ids[1]], true);
-    expect((await repo.getByIds(ids)).map((t) => t.isFavorite), [true, true, false]);
+    expect((await repo.getByIds(ids)).map((t) => t.isFavorite), [
+      true,
+      true,
+      false,
+    ]);
     await repo.setFavoriteMany([ids[1]], false);
-    expect((await repo.getByIds(ids)).map((t) => t.isFavorite), [true, false, false]);
+    expect((await repo.getByIds(ids)).map((t) => t.isFavorite), [
+      true,
+      false,
+      false,
+    ]);
     await repo.setFavoriteMany(const [], true); // nothing to do
   });
 
-  test('deleteMissingTracks removes only the tracks whose file is gone', () async {
-    await repo.upsertBatch([row('/a', 'a'), row('/b', 'b'), row('/c', 'c')]);
-    final ids = (await db.select(db.tracks).get()).map((t) => t.id).toList();
-    await repo.markMissing({'/a', '/b'}, true);
-    expect(await repo.deleteMissingTracks(ids), 2, reason: 'c is still there');
-    expect((await db.select(db.tracks).get()).map((t) => t.title), ['c']);
-    expect(await repo.deleteMissingTracks(const []), 0);
-  });
-}
+  test(
+    'deleteMissingTracks removes only the tracks whose file is gone',
+    () async {
+      await repo.upsertBatch([row('/a', 'a'), row('/b', 'b'), row('/c', 'c')]);
+      final ids = (await db.select(db.tracks).get()).map((t) => t.id).toList();
+      await repo.markMissing({'/a', '/b'}, true);
+      expect(
+        await repo.deleteMissingTracks(ids),
+        2,
+        reason: 'c is still there',
+      );
+      expect((await db.select(db.tracks).get()).map((t) => t.title), ['c']);
+      expect(await repo.deleteMissingTracks(const []), 0);
+    },
+  );
 
+  test(
+    'watchResumable: only tracks left in the middle, newest first, limited',
+    () async {
+      await repo.upsertBatch([
+        for (var i = 0; i < 4; i++) row('/$i.mp3', 'T$i'),
+      ]);
+      final ids = [for (final t in await db.select(db.tracks).get()) t.id];
+      Future<void> set(
+        int id,
+        int? resume,
+        int? played, {
+        bool missing = false,
+      }) => (db.update(db.tracks)..where((t) => t.id.equals(id))).write(
+        TracksCompanion(
+          resumePositionMs: Value(resume),
+          lastPlayedAt: Value(played),
+          missing: Value(missing),
+        ),
+      );
+      await set(ids[0], 1000, 10);
+      await set(ids[1], 1000, 30);
+      await set(ids[2], null, 50); // finished: no bookmark
+      await set(ids[3], 1000, 40, missing: true);
+      final r = await repo.watchResumable().first;
+      expect(r.map((t) => t.title), ['T1', 'T0']);
+      expect((await repo.watchResumable(limit: 1).first).single.title, 'T1');
+    },
+  );
+}

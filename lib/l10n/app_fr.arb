@@ -694,8 +694,6 @@
   "greetingAfternoon": "Bon après-midi",
   "greetingEvening": "Bonsoir",
   "homeResume": "Reprendre",
-  "homeRecentlyPlayed": "Écoutés récemment",
-  "homeRecentlyAdded": "Ajoutés récemment",
   "homeTopTracks": "Les plus écoutés",
   "homeRediscover": "À redécouvrir",
   "homeShuffleAll": "Tout en aléatoire",
@@ -1581,14 +1579,6 @@
     }
   },
   "statsYourMonth": "Votre mois",
-  "statsTopArtistHome": "Le plus écouté : {name}",
-  "@statsTopArtistHome": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
   "ruleWarning": "Je ne comprends pas « {term} » : je le cherche comme du texte.",
   "@ruleWarning": {
     "placeholders": {
@@ -2777,7 +2767,6 @@
   "radioLinkTooBig": "Le fichier est trop volumineux pour être une liste de stations",
   "radioLinkFetchFailed": "Impossible de télécharger le fichier",
   "radioReorder": "Faites glisser pour réorganiser",
-  "homeYourRadios": "Vos radios",
   "memoryRadio": "Radio (listes de stations)",
   "radioGenrePop": "Pop",
   "radioGenreRock": "Rock",
@@ -2813,7 +2802,6 @@
   "releasesTopCardTitle": "Tu veux savoir quand tes artistes les plus écoutés sortent de nouveaux titres ?",
   "releasesTopCardYes": "Activer",
   "releasesTopCardNo": "Non merci",
-  "newReleasesShowAll": "Tout afficher",
   "releasesCheckNow": "Vérifier maintenant",
   "releasesLastCheck": "Dernière vérification : {when}",
   "@releasesLastCheck": {

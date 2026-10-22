@@ -18,7 +18,7 @@ import '../../widgets/section_header.dart';
 import '../library/album_detail_screen.dart';
 import '../releases/top_artists_card.dart';
 import '../stats/stats_screen.dart';
-import 'resume_rows.dart';
+import 'home_row.dart';
 
 /// Three-line lists at the bottom: the month, top artists, most played and
 /// albums to rediscover. Each shows only when it has something to say.

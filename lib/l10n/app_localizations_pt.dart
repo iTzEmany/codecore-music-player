@@ -1175,12 +1175,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String get homeResume => 'Retomar';
 
   @override
-  String get homeRecentlyPlayed => 'Ouvidos recentemente';
-
-  @override
-  String get homeRecentlyAdded => 'Adicionados recentemente';
-
-  @override
   String get homeTopTracks => 'Os mais ouvidos';
 
   @override
@@ -2710,11 +2704,6 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get statsYourMonth => 'O seu mês';
-
-  @override
-  String statsTopArtistHome(String name) {
-    return 'O mais ouvido: $name';
-  }
 
   @override
   String ruleWarning(String term) {
@@ -4615,9 +4604,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String get radioReorder => 'Arraste para reordenar';
 
   @override
-  String get homeYourRadios => 'As suas rádios';
-
-  @override
   String get memoryRadio => 'Rádio (listas de estações)';
 
   @override
@@ -4724,9 +4710,6 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get releasesTopCardNo => 'Não, obrigado';
-
-  @override
-  String get newReleasesShowAll => 'Mostrar todas';
 
   @override
   String get releasesCheckNow => 'Verificar agora';

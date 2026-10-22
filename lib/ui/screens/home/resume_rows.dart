@@ -20,6 +20,7 @@ import '../library/album_detail_screen.dart';
 import '../now_playing/now_playing_screen.dart' show playContextName;
 import '../playlists/playlist_detail_screen.dart';
 import '../releases/new_releases_screen.dart';
+import 'home_row.dart';
 
 /// One line of «Riprendi».
 sealed class ResumeRow {
@@ -102,7 +103,6 @@ class ResumeList extends ConsumerWidget {
     );
     if (rows.isEmpty) return const SizedBox.shrink();
     final ctrl = ref.read(playerControllerProvider);
-    final playing = ref.watch(isPlayingProvider).value ?? false;
 
     return Column(
       children: [
@@ -115,23 +115,14 @@ class ResumeList extends ConsumerWidget {
                 switch (r) {
                   ReleasesResume() => HomeRow(
                     key: const ValueKey('resume-releases'),
-                    cover: const _IconCover(Icons.new_releases_outlined),
+                    cover: const HomeIconCover(Icons.new_releases_outlined),
                     title: l.newReleasesTitle,
                     onTap: () =>
                         ShellNav.open<void>(context, const NewReleasesScreen()),
                   ),
-                  QueueResume() => HomeRow(
-                    key: const ValueKey('resume-queue'),
-                    cover: CoverImage(
-                      coverKey: r.track.coverKey,
-                      size: 48,
-                      radius: CcDims.rList,
-                    ),
-                    title: r.track.title,
+                  QueueResume() => _QueueRow(
+                    r,
                     subtitle: _queueSubtitle(context, r),
-                    bar: const _PlayingBar(),
-                    // shortcut: a playing row does nothing, open Now Playing if it feels dead.
-                    onTap: playing ? null : ctrl.togglePlayPause,
                   ),
                   TrackResume() => HomeRow(
                     key: ValueKey('resume-track-${r.track.id}'),
@@ -142,7 +133,7 @@ class ResumeList extends ConsumerWidget {
                     ),
                     title: r.track.title,
                     subtitle: l.homeMinutesLeft(_minutesLeft(r.track)),
-                    bar: _Bar(
+                    bar: HomeBar(
                       _fraction(r.track.resumePositionMs, r.track.durationMs),
                     ),
                     onTap: () => ctrl.playFromList([r.track], 0),
@@ -209,111 +200,30 @@ class ResumeList extends ConsumerWidget {
       : (position / duration).clamp(0.0, 1.0);
 }
 
-/// A cover, two lines and an optional bar: the row of Home lists.
-class HomeRow extends StatelessWidget {
-  const HomeRow({
-    super.key,
-    required this.cover,
-    required this.title,
-    required this.onTap,
-    this.subtitle,
-    this.bar,
-  });
+/// Watches play/pause itself so the list above does not rebuild on it.
+class _QueueRow extends ConsumerWidget {
+  const _QueueRow(this.row, {required this.subtitle});
 
-  final Widget cover;
-  final String title;
-  final String? subtitle;
-  final Widget? bar;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context).textTheme;
-    return Semantics(
-      button: true,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(CcDims.rList),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 6),
-          child: Row(
-            children: [
-              cover,
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.bodyLarge,
-                    ),
-                    if (subtitle != null)
-                      Text(
-                        subtitle!,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.bodyMedium,
-                      ),
-                    if (bar != null) ...[const SizedBox(height: 6), bar!],
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _IconCover extends StatelessWidget {
-  const _IconCover(this.icon);
-  final IconData icon;
-
-  @override
-  Widget build(BuildContext context) => Container(
-    width: 48,
-    height: 48,
-    decoration: BoxDecoration(
-      color: context.cc.surface2,
-      borderRadius: BorderRadius.circular(CcDims.rList),
-    ),
-    child: Icon(icon, color: context.cc.accent),
-  );
-}
-
-/// The 2 px progress line under a row.
-class _Bar extends StatelessWidget {
-  const _Bar(this.fraction);
-  final double fraction;
-
-  @override
-  Widget build(BuildContext context) => ClipRRect(
-    borderRadius: BorderRadius.circular(1),
-    child: LinearProgressIndicator(
-      value: fraction,
-      minHeight: 2,
-      color: context.cc.accent,
-      backgroundColor: context.cc.surface3,
-    ),
-  );
-}
-
-/// Only this widget follows the position tick, not the whole list.
-class _PlayingBar extends ConsumerWidget {
-  const _PlayingBar();
+  final QueueResume row;
+  final String subtitle;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final pos = ref.watch(positionProvider).value ?? Duration.zero;
-    final dur = ref.watch(durationProvider).value;
-    return _Bar(
-      dur == null || dur.inMilliseconds <= 0
-          ? 0
-          : (pos.inMilliseconds / dur.inMilliseconds).clamp(0.0, 1.0),
+    final playing = ref.watch(isPlayingProvider).value ?? false;
+    return HomeRow(
+      key: const ValueKey('resume-queue'),
+      cover: CoverImage(
+        coverKey: row.track.coverKey,
+        size: 48,
+        radius: CcDims.rList,
+      ),
+      title: row.track.title,
+      subtitle: subtitle,
+      bar: const HomePlayingBar(),
+      // shortcut: a playing row does nothing, open Now Playing if it feels dead.
+      onTap: playing
+          ? null
+          : ref.read(playerControllerProvider).togglePlayPause,
     );
   }
 }

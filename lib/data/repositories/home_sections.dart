@@ -28,16 +28,6 @@ List<AlbumSummary> rediscoverAlbums(
   return out.take(limit).toList();
 }
 
-/// Albums by latest play, never-played ones left out.
-List<AlbumSummary> recentlyPlayedAlbums(List<AlbumSummary> albums,
-    {int limit = 10}) {
-  final out = [
-    for (final a in albums)
-      if (a.lastPlayedAt != null) a,
-  ]..sort((a, b) => b.lastPlayedAt!.compareTo(a.lastPlayedAt!));
-  return out.take(limit).toList();
-}
-
 /// Albums by latest `addedAt`.
 List<AlbumSummary> recentlyAddedAlbums(List<AlbumSummary> albums,
     {int limit = 10}) {
