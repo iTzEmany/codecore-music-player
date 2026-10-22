@@ -3,6 +3,7 @@ import 'package:codecore/providers/nav_providers.dart';
 import 'package:codecore/services/memory/app_data.dart';
 import 'package:codecore/ui/screens/library/all_tracks_screen.dart';
 import 'package:codecore/ui/shell/app_shell.dart';
+import 'package:codecore/ui/shell/bottom_bar.dart';
 import 'package:codecore/ui/shell/desktop_player_bar.dart';
 import 'package:codecore/ui/shell/desktop_sidebar.dart';
 import 'package:codecore/ui/shell/side_panel.dart';
@@ -27,6 +28,9 @@ Future<void> _settle(WidgetTester tester) async {
   await tester.pump(const Duration(milliseconds: 300));
   await tester.pump(const Duration(milliseconds: 300));
 }
+
+Finder _bar(String label) => find.descendant(
+    of: find.byType(BottomBar), matching: find.text(label));
 
 void main() {
   testWidgets('narrow: four labelled tabs, home first', (tester) async {
@@ -258,6 +262,124 @@ void main() {
     await _settle(tester);
     expect(find.text('Nessun preferito ancora'), findsNothing);
     expect(find.text('Aggiungi la tua cartella musicale'), findsWidgets);
+    await h.dispose(tester);
+  });
+
+  testWidgets('phone: leaving a tab and coming back restores its open page',
+      (tester) async {
+    _phone(tester);
+    final h = await Harness.create(tester, tracks: 4);
+    await h.pump(tester, const AppShell());
+    await tester.tap(_bar('Libreria'));
+    await _settle(tester);
+    await tester.tap(find.text('Tutti i brani'));
+    await _settle(tester);
+    expect(find.byType(AllTracksScreen), findsOneWidget);
+    await tester.tap(_bar('Home'));
+    await _settle(tester);
+    await tester.tap(_bar('Libreria'));
+    await _settle(tester);
+    expect(find.byType(AllTracksScreen), findsOneWidget);
+    // Tapping the already-selected tab goes back to its root.
+    await tester.tap(_bar('Libreria'));
+    await _settle(tester);
+    await _settle(tester);
+    expect(find.byType(AllTracksScreen), findsNothing);
+    await h.dispose(tester);
+  });
+
+  testWidgets('phone: leaving a tab and coming back keeps its scroll offset',
+      (tester) async {
+    _phone(tester);
+    final h = await Harness.create(tester, tracks: 40);
+    await h.pump(tester, const AppShell());
+    await tester.tap(_bar('Libreria'));
+    await _settle(tester);
+    await tester.tap(find.text('Tutti i brani'));
+    await _settle(tester);
+    final list = find.descendant(
+        of: find.byType(AllTracksScreen),
+        matching: find.byWidgetPredicate(
+            (w) => w is Scrollable && w.axis == Axis.vertical));
+    await _settle(tester);
+    await _settle(tester);
+    tester.state<ScrollableState>(list.first).position.jumpTo(600);
+    await tester.pump();
+    double offset() => tester.state<ScrollableState>(list.first).position.pixels;
+    final before = offset();
+    expect(before, greaterThan(0));
+    await tester.tap(_bar('Home'));
+    await _settle(tester);
+    await tester.tap(_bar('Libreria'));
+    await _settle(tester);
+    expect(offset(), before);
+    await h.dispose(tester);
+  });
+
+  testWidgets('phone: a root page keeps its scroll offset across tab switches',
+      (tester) async {
+    _phone(tester);
+    final h = await Harness.create(tester, tracks: 40);
+    await h.pump(tester, const AppShell());
+    await tester.tap(_bar('Libreria'));
+    await _settle(tester);
+    final list = find.byWidgetPredicate(
+        (w) => w is Scrollable && w.axis == Axis.vertical);
+    await tester.drag(list.first, const Offset(0, -500));
+    await _settle(tester);
+    double offset() => tester.state<ScrollableState>(list.first).position.pixels;
+    final before = offset();
+    expect(before, greaterThan(0));
+    await tester.tap(_bar('Cerca'));
+    await _settle(tester);
+    await tester.tap(_bar('Memoria'));
+    await _settle(tester);
+    await tester.tap(_bar('Libreria'));
+    await _settle(tester);
+    expect(offset(), before);
+    await h.dispose(tester);
+  });
+
+  testWidgets('phone: the Search tab keeps its query across tab switches',
+      (tester) async {
+    _phone(tester);
+    final h = await Harness.create(tester, tracks: 4);
+    await h.pump(tester, const AppShell());
+    await tester.tap(_bar('Cerca'));
+    await _settle(tester);
+    await tester.enterText(find.byType(TextField).first, 'Song 2');
+    await _settle(tester);
+    await tester.tap(_bar('Home'));
+    await _settle(tester);
+    await tester.tap(_bar('Cerca'));
+    await _settle(tester);
+    expect(find.text('Song 2'), findsWidgets);
+    await h.dispose(tester);
+  });
+
+  testWidgets('sidebar: leaving a tab keeps the page open in it',
+      (tester) async {
+    tester.view.physicalSize = const Size(1280, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final h = await Harness.create(tester);
+    await h.pump(tester, const AppShell());
+    await tester.tap(find.text('La tua libreria'));
+    await _settle(tester);
+    await tester.tap(find.descendant(
+        of: find.byType(DesktopSidebar), matching: find.text('Preferiti')));
+    await _settle(tester);
+    expect(find.text('Nessun preferito ancora'), findsOneWidget);
+    await tester.tap(find.descendant(
+        of: find.byType(DesktopSidebar), matching: find.text('Cerca')));
+    await _settle(tester);
+    // The Library navigator still holds the page: leaving a tab never pops it.
+    final container =
+        ProviderScope.containerOf(tester.element(find.byType(AppShell)));
+    final nav = container
+        .read(tabNavigatorKeysProvider)[NavTab.library.index]
+        .currentState!;
+    expect(nav.canPop(), isTrue);
     await h.dispose(tester);
   });
 }
