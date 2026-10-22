@@ -64,26 +64,27 @@ class _NpSeekRowState extends ConsumerState<NpSeekRow> {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Row(
             children: [
-              Text(formatDuration(shown.round()), style: style),
               Expanded(
-                child: Center(
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      QualityTag(widget.track),
-                      const SizedBox(width: 8),
-                      const SpeedButton(),
-                    ],
-                  ),
+                child: Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: Text(formatDuration(shown.round()), style: style),
                 ),
               ),
-              InkWell(
-                onTap: () => setState(() => _remaining = !_remaining),
-                child: Text(
-                  _remaining
-                      ? '-${formatDuration((max - shown).round())}'
-                      : formatDuration(max.round()),
-                  style: style,
+              QualityTag(widget.track),
+              const SizedBox(width: 8),
+              const SpeedButton(),
+              Expanded(
+                child: Align(
+                  alignment: AlignmentDirectional.centerEnd,
+                  child: InkWell(
+                    onTap: () => setState(() => _remaining = !_remaining),
+                    child: Text(
+                      _remaining
+                          ? '-${formatDuration((max - shown).round())}'
+                          : formatDuration(max.round()),
+                      style: style,
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -174,36 +175,43 @@ class NpBottomRow extends ConsumerWidget {
         if (isDesktop) const _VolumeRow(),
         Row(
           children: [
-            Flexible(
-              child: TextButton.icon(
-                onPressed: () => DevicesSheet.show(context),
-                icon: Icon(
-                  Icons.devices_rounded,
-                  size: 20,
-                  color: jam ? cc.accent : cc.textMuted,
-                ),
-                label: Text(
-                  jam ? l.devicesJamShort : l.devicesTitle,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(color: jam ? cc.accent : cc.textMuted),
+            // Equal side slots keep the sleep chip at the exact centre.
+            Expanded(
+              child: Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: TextButton.icon(
+                  onPressed: () => DevicesSheet.show(context),
+                  icon: Icon(
+                    Icons.devices_rounded,
+                    size: 20,
+                    color: jam ? cc.accent : cc.textMuted,
+                  ),
+                  label: Text(
+                    jam ? l.devicesJamShort : l.devicesTitle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(color: jam ? cc.accent : cc.textMuted),
+                  ),
                 ),
               ),
             ),
             const _SleepChip(),
-            Flexible(
-              child: TextButton.icon(
-                onPressed: () => showQueueSheet(context),
-                icon: Icon(
-                  Icons.queue_music_rounded,
-                  size: 20,
-                  color: cc.textMuted,
-                ),
-                label: Text(
-                  l.queue,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(color: cc.textMuted),
+            Expanded(
+              child: Align(
+                alignment: AlignmentDirectional.centerEnd,
+                child: TextButton.icon(
+                  onPressed: () => showQueueSheet(context),
+                  icon: Icon(
+                    Icons.queue_music_rounded,
+                    size: 20,
+                    color: cc.textMuted,
+                  ),
+                  label: Text(
+                    l.queue,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(color: cc.textMuted),
+                  ),
                 ),
               ),
             ),
@@ -232,6 +240,18 @@ class _VolumeRow extends ConsumerWidget {
         ),
         Expanded(
           child: Slider(value: v, onChanged: n.set),
+        ),
+        // Same width as the mute button, so the slider is centred.
+        SizedBox(
+          width: 48,
+          child: Text(
+            '${(v * 100).round()}%',
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: context.cc.textMuted,
+              fontFeatures: const [FontFeature.tabularFigures()],
+            ),
+          ),
         ),
       ],
     );
@@ -280,6 +300,7 @@ class _SleepChipState extends ConsumerState<_SleepChip> {
       label = l.sleepChipEnd;
     }
     return PopupMenuButton<int>(
+      key: const Key('np-sleep-chip'),
       tooltip: l.sleepTimer,
       onSelected: (v) {
         switch (v) {

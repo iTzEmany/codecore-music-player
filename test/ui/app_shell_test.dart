@@ -11,7 +11,9 @@ import 'package:codecore/ui/shell/desktop_sidebar.dart';
 import 'package:codecore/ui/shell/side_panel.dart';
 import 'package:codecore/ui/widgets/mini_player.dart';
 import 'package:codecore/ui/widgets/motion.dart';
+import 'package:codecore/ui/widgets/quality_tag.dart';
 import 'package:codecore/ui/widgets/ring_progress.dart';
+import 'package:codecore/ui/widgets/speed_button.dart';
 import 'package:codecore/ui/widgets/selection_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -594,6 +596,25 @@ void main() {
         .read(tabNavigatorKeysProvider)[NavTab.library.index]
         .currentState!;
     expect(nav.canPop(), isTrue);
+    await h.dispose(tester);
+  });
+
+  testWidgets('desktop bar: the seek slider is centred between its slots',
+      (tester) async {
+    tester.view.physicalSize = const Size(1280, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final h = await Harness.create(tester, tracks: 2);
+    final rows = await tester.runAsync(() => h.db.select(h.db.tracks).get());
+    await tester.runAsync(() => h.handler.playQueue([rows!.first.id], 0));
+    await h.pump(tester, const AppShell());
+    await _settle(tester);
+    Finder inBar(Finder f) =>
+        find.descendant(of: find.byType(DesktopPlayerBar), matching: f);
+    final left = tester.getCenter(inBar(find.byType(QualityTag))).dx;
+    final right = tester.getCenter(inBar(find.byType(SpeedButton))).dx;
+    final slider = tester.getCenter(inBar(find.byType(Slider)).first).dx;
+    expect(slider, closeTo((left + right) / 2, 1));
     await h.dispose(tester);
   });
 }

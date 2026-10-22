@@ -14,6 +14,7 @@ import '../screens/jam/jam_screen.dart';
 import '../screens/library/artist_screen.dart';
 import '../screens/now_playing/now_playing_screen.dart';
 import '../theme/tokens.dart';
+import '../widgets/quality_tag.dart';
 import '../widgets/speed_button.dart';
 import '../widgets/favorite_actions.dart';
 import '../widgets/format_utils.dart';
@@ -63,7 +64,7 @@ class DesktopPlayerBar extends ConsumerWidget {
               child: inJam
                   ? const _JamControls()
                   : _Center(
-                      hasTrack: track != null,
+                      track: track,
                       live: track != null && radioOfTrack(ref, track) != null,
                     ),
             ),
@@ -258,9 +259,9 @@ class _JamControls extends ConsumerWidget {
 
 /// Transport buttons and the seek line.
 class _Center extends ConsumerWidget {
-  const _Center({required this.hasTrack, this.live = false});
+  const _Center({required this.track, this.live = false});
 
-  final bool hasTrack;
+  final Track? track;
 
   /// A radio: no shuffle, repeat or seek line, a «In diretta» mark instead.
   final bool live;
@@ -272,6 +273,7 @@ class _Center extends ConsumerWidget {
     final ctrl = ref.read(playerControllerProvider);
     final playing = ref.watch(isPlayingProvider).value ?? false;
     final repeat = ref.watch(repeatProvider).value ?? PlayRepeat.off;
+    final hasTrack = track != null;
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -314,14 +316,16 @@ class _Center extends ConsumerWidget {
         if (live)
           Text(l.radioLive, style: Theme.of(context).textTheme.labelMedium?.copyWith(color: cc.accent))
         else
-          const _BarSeek(),
+          _BarSeek(track: track),
       ],
     );
   }
 }
 
 class _BarSeek extends ConsumerStatefulWidget {
-  const _BarSeek();
+  const _BarSeek({required this.track});
+
+  final Track? track;
 
   @override
   ConsumerState<_BarSeek> createState() => _BarSeekState();
@@ -342,8 +346,14 @@ class _BarSeekState extends ConsumerState<_BarSeek> {
       0.0,
       max <= 0 ? 1.0 : max,
     );
+    // Equal side slots keep the slider centred.
+    Widget slot(Widget? child) => SizedBox(
+      width: 56,
+      child: Center(child: child == null ? null : FittedBox(child: child)),
+    );
     return Row(
       children: [
+        slot(widget.track == null ? null : QualityTag(widget.track!)),
         SizedBox(
           width: 44,
           child: Text(
@@ -372,7 +382,7 @@ class _BarSeekState extends ConsumerState<_BarSeek> {
           width: 44,
           child: Text(formatDuration(max.round()), style: style),
         ),
-        const SpeedButton(),
+        slot(const SpeedButton()),
       ],
     );
   }

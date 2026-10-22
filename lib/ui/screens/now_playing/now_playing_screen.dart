@@ -238,13 +238,20 @@ class _Player extends ConsumerWidget {
               height: 56,
               child: Row(
                 children: [
-                  IconButton(
-                    tooltip: l.back,
-                    icon: const Icon(
-                      Icons.keyboard_arrow_down_rounded,
-                      size: 32,
+                  // Equal side slots (two 48 px buttons) keep the title centred.
+                  SizedBox(
+                    width: 96,
+                    child: Align(
+                      alignment: AlignmentDirectional.centerStart,
+                      child: IconButton(
+                        tooltip: l.back,
+                        icon: const Icon(
+                          Icons.keyboard_arrow_down_rounded,
+                          size: 32,
+                        ),
+                        onPressed: () => Navigator.of(context).maybePop(),
+                      ),
                     ),
-                    onPressed: () => Navigator.of(context).maybePop(),
                   ),
                   Expanded(
                     child: Column(
@@ -252,6 +259,7 @@ class _Player extends ConsumerWidget {
                       children: [
                         Text(
                           ctx == null ? l.nowPlaying : l.playingFrom,
+                          textAlign: TextAlign.center,
                           style: theme.labelSmall?.copyWith(
                             fontSize: 11,
                             color: cc.textMuted,
@@ -260,6 +268,7 @@ class _Player extends ConsumerWidget {
                         if (ctx != null)
                           Text(
                             ctx,
+                            textAlign: TextAlign.center,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: theme.bodyMedium?.copyWith(
@@ -271,20 +280,28 @@ class _Player extends ConsumerWidget {
                       ],
                     ),
                   ),
-                  if (!isDesktop)
-                    IconButton(
-                      tooltip: l.carMode,
-                      icon: const Icon(Icons.directions_car_outlined),
-                      onPressed: () => Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) => const CarModeScreen(),
+                  SizedBox(
+                    width: 96,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        if (!isDesktop)
+                          IconButton(
+                            tooltip: l.carMode,
+                            icon: const Icon(Icons.directions_car_outlined),
+                            onPressed: () => Navigator.of(context).push(
+                              MaterialPageRoute<void>(
+                                builder: (_) => const CarModeScreen(),
+                              ),
+                            ),
+                          ),
+                        IconButton(
+                          tooltip: l.moreActions,
+                          icon: const Icon(Icons.more_horiz_rounded),
+                          onPressed: () => showTrackActions(context, ref, track),
                         ),
-                      ),
+                      ],
                     ),
-                  IconButton(
-                    tooltip: l.moreActions,
-                    icon: const Icon(Icons.more_horiz_rounded),
-                    onPressed: () => showTrackActions(context, ref, track),
                   ),
                 ],
               ),

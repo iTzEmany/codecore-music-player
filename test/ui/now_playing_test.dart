@@ -3,6 +3,7 @@ import 'package:codecore/ui/screens/library/artist_screen.dart';
 import 'package:codecore/ui/screens/now_playing/now_playing_screen.dart';
 import 'package:codecore/ui/shell/app_shell.dart';
 import 'package:codecore/ui/widgets/motion.dart';
+import 'package:codecore/ui/widgets/quality_tag.dart';
 import 'package:codecore/ui/widgets/ring_progress.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -144,6 +145,57 @@ void main() {
     expect(rrect.top, greaterThan(300), reason: 'still near the dock');
     await _settle(tester);
     expect(find.byType(NowPlayingScreen), findsOneWidget);
+    await h.dispose(tester);
+  });
+
+  Future<Harness> openPlayer(WidgetTester tester) async {
+    tester.view.physicalSize = const Size(400, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final h = await Harness.create(tester, tracks: 2);
+    final rows = await tester.runAsync(() => h.db.select(h.db.tracks).get());
+    await tester.runAsync(() => h.handler.playQueue([rows!.first.id], 0));
+    await h.pump(tester, const NowPlayingScreen());
+    return h;
+  }
+
+  testWidgets('symmetry: the top-bar title sits at the screen centre',
+      (tester) async {
+    final h = await openPlayer(tester);
+    expect(tester.getCenter(find.text('In riproduzione')).dx,
+        closeTo(200, 1));
+    await h.dispose(tester);
+  });
+
+  testWidgets('symmetry: the quality tag does not move when the total toggles',
+      (tester) async {
+    final h = await openPlayer(tester);
+    final before = tester.getCenter(find.byType(QualityTag)).dx;
+    // Elapsed and total are both 0:00 here; the total is the last one.
+    await tester.tap(find.text('0:00').last);
+    await tester.pump();
+    expect(find.text('-0:00'), findsOneWidget);
+    expect(tester.getCenter(find.byType(QualityTag)).dx, closeTo(before, 0.5));
+    await h.dispose(tester);
+  });
+
+  testWidgets('symmetry: the sleep chip sits at the centre of the bottom row',
+      (tester) async {
+    final h = await openPlayer(tester);
+    expect(find.text('Dispositivi'), findsOneWidget);
+    expect(find.text('Coda'), findsOneWidget);
+    expect(tester.getCenter(find.byKey(const Key('np-sleep-chip'))).dx,
+        closeTo(200, 1));
+    await h.dispose(tester);
+  });
+
+  testWidgets('desktop volume row shows the percentage', (tester) async {
+    final h = await openPlayer(tester);
+    ProviderScope.containerOf(tester.element(find.byType(NowPlayingScreen)))
+        .read(volumeProvider.notifier)
+        .set(0.7);
+    await tester.pump();
+    expect(find.text('70%'), findsOneWidget);
     await h.dispose(tester);
   });
 }
