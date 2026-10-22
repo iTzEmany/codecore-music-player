@@ -30,7 +30,6 @@ import '../../l10n/l10n_ext.dart';
 import '../theme/tokens.dart';
 import '../widgets/enrich_result_listener.dart';
 import '../widgets/import_event_listener.dart';
-import '../widgets/mini_player.dart';
 import 'bottom_bar.dart';
 import 'desktop_player_bar.dart';
 import 'desktop_sidebar.dart';
@@ -274,12 +273,10 @@ class AppShell extends ConsumerWidget {
             ],
           ),
         ),
-        bottomNavigationBar: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const MiniPlayer(),
-            BottomBar(items: items, selected: index, onSelect: select),
-          ],
+        bottomNavigationBar: ShellDock(
+          items: items,
+          selected: index,
+          onSelect: select,
         ),
       );
     }

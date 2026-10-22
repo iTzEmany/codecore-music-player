@@ -109,7 +109,8 @@ abstract final class CcDims {
   static const margin = 16.0;
 
   static const miniPlayerHeight = 56.0;
-  static const miniPlayerMargin = 8.0;
+  static const dockRadius = 28.0;
+  static const dockMargin = 10.0;
   static const bottomBarHeight = 56.0;
   static const desktopPlayerBarHeight = 80.0;
   static const sidebarWidth = 240.0;

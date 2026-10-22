@@ -1,6 +1,7 @@
 import 'package:codecore/providers/memory_providers.dart';
 import 'package:codecore/providers/nav_providers.dart';
 import 'package:codecore/services/memory/app_data.dart';
+import 'package:codecore/ui/screens/library/album_detail_screen.dart';
 import 'package:codecore/ui/screens/library/all_tracks_screen.dart';
 import 'package:codecore/ui/shell/app_shell.dart';
 import 'package:codecore/ui/shell/bottom_bar.dart';
@@ -8,6 +9,7 @@ import 'package:codecore/ui/shell/desktop_player_bar.dart';
 import 'package:codecore/ui/shell/desktop_sidebar.dart';
 import 'package:codecore/ui/shell/side_panel.dart';
 import 'package:codecore/ui/widgets/mini_player.dart';
+import 'package:codecore/ui/widgets/motion.dart';
 import 'package:codecore/ui/widgets/selection_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -30,9 +32,37 @@ Future<void> _settle(WidgetTester tester) async {
 }
 
 Finder _bar(String label) => find.descendant(
-    of: find.byType(BottomBar), matching: find.text(label));
+    of: find.byType(ShellDock), matching: find.text(label));
 
 void main() {
+  testWidgets('no track: dock holds only the tabs', (t) async {
+    _phone(t);
+    final h = await Harness.create(t, tracks: 2);
+    await h.pump(t, const AppShell());
+    await _settle(t);
+    expect(find.byType(ShellDock), findsOneWidget);
+    expect(find.byType(MiniPlayer), findsNothing);
+    expect(_bar('Home'), findsOneWidget);
+    await h.dispose(t);
+  });
+
+  testWidgets('the selected tab is marked by the dot and in semantics',
+      (t) async {
+    _phone(t);
+    final h = await Harness.create(t, tracks: 2);
+    await h.pump(t, const AppShell());
+    await t.tap(_bar('Libreria'));
+    await _settle(t);
+    await t.pump(Motion.dot); // the hop is still on its way after _settle
+    final tab = find.ancestor(of: _bar('Libreria'), matching: find.byType(InkWell));
+    expect(t.getSemantics(tab.first), isSemantics(isSelected: true, isButton: true));
+    final corner = t.getTopRight(
+        find.descendant(of: tab, matching: find.byType(Icon)));
+    final dot = t.getCenter(find.byKey(const ValueKey('tab-dot')));
+    expect((dot - corner).distance, lessThan(16));
+    await h.dispose(t);
+  });
+
   testWidgets('narrow: four labelled tabs, home first', (tester) async {
     _phone(tester);
     final h = await Harness.create(tester);
@@ -148,7 +178,9 @@ void main() {
     // Android back: the album page goes first, back on the Library.
     await tester.binding.handlePopRoute();
     await _settle(tester);
-    expect(find.text('Album 1'), findsWidgets);
+    await _settle(tester);
+    expect(find.byType(AlbumDetailScreen), findsNothing);
+    expect(find.text('Album 0'), findsWidgets);
     await h.dispose(tester);
   });
 

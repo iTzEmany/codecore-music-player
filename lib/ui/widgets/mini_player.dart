@@ -8,7 +8,6 @@ import '../../services/jam/jam_models.dart';
 import '../screens/devices/devices_sheet.dart';
 import '../screens/jam/jam_screen.dart';
 import '../screens/now_playing/now_playing_screen.dart';
-import '../theme/cover_tint.dart';
 import '../theme/tokens.dart';
 import 'favorite_actions.dart';
 import 'motion.dart';
@@ -24,9 +23,9 @@ const _swipeDistance = 72.0;
 const _swipeVelocity = 700.0;
 const _flingDuration = Duration(milliseconds: 160);
 
-/// The card above the bottom bar: tinted by the cover, swipe sideways to
-/// change track, up or tap to open Now Playing. With a Jam active it shows
-/// the Jam's track and controls.
+/// The row at the top of the dock (the dock gives it background and clip):
+/// swipe sideways to change track, up or tap to open Now Playing. With a Jam
+/// active it shows the Jam's track and controls.
 class MiniPlayer extends ConsumerStatefulWidget {
   const MiniPlayer({super.key});
 
@@ -118,35 +117,20 @@ class _MiniPlayerState extends ConsumerState<MiniPlayer>
     final onAir = radio == null ? null : ref.watch(onAirProvider).value;
     final String title;
     final String subtitle;
-    final String? coverKey;
     final bool playing;
     if (inJam) {
       title = jamItem?.title ?? l.jamNothingPlaying;
       subtitle = l.jamPeople(jam.jam?.participants.length ?? 1);
-      coverKey = null;
       playing = jam.jam?.playing ?? false;
     } else {
       final texts = radio == null ? null : radioTexts(l, radio, onAir);
       final t = track!;
       title = texts?.title ?? t.title;
       subtitle = texts?.subtitle ?? t.artist ?? l.unknownArtist;
-      coverKey = t.coverKey;
       playing = ref.watch(isPlayingProvider).value ?? false;
     }
-    final tint = inJam
-        ? cc.surface1
-        : (coverKey == null
-              ? cc.surface1
-              : resolvedHeroTint(context, ref, coverKey));
-    final reduce = MediaQuery.disableAnimationsOf(context);
 
-    final card = AnimatedContainer(
-      duration: reduce ? Duration.zero : CcMotion.color,
-      decoration: BoxDecoration(
-        color: tint,
-        borderRadius: BorderRadius.circular(CcDims.rCard),
-      ),
-      clipBehavior: Clip.antiAlias,
+    final card = SizedBox(
       height: CcDims.miniPlayerHeight,
       child: Row(
         children: [
@@ -245,23 +229,20 @@ class _MiniPlayerState extends ConsumerState<MiniPlayer>
     );
 
     return RiseIn(
-      child: Padding(
-        padding: const EdgeInsets.all(CcDims.miniPlayerMargin),
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: inJam ? _openJam : _openNowPlaying,
-          onHorizontalDragStart: inJam ? null : (_) => _settle.stop(),
-          onHorizontalDragUpdate: inJam
-              ? null
-              : (d) => setState(() => _dx += d.delta.dx),
-          onHorizontalDragEnd: inJam ? null : (d) => _onDragEnd(d, width, ctrl),
-          onVerticalDragEnd: (d) {
-            if ((d.primaryVelocity ?? 0) < -300) {
-              inJam ? _openJam() : _openNowPlaying();
-            }
-          },
-          child: Transform.translate(offset: Offset(_dx, 0), child: card),
-        ),
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: inJam ? _openJam : _openNowPlaying,
+        onHorizontalDragStart: inJam ? null : (_) => _settle.stop(),
+        onHorizontalDragUpdate: inJam
+            ? null
+            : (d) => setState(() => _dx += d.delta.dx),
+        onHorizontalDragEnd: inJam ? null : (d) => _onDragEnd(d, width, ctrl),
+        onVerticalDragEnd: (d) {
+          if ((d.primaryVelocity ?? 0) < -300) {
+            inJam ? _openJam() : _openNowPlaying();
+          }
+        },
+        child: Transform.translate(offset: Offset(_dx, 0), child: card),
       ),
     );
   }

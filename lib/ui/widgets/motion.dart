@@ -9,6 +9,7 @@ abstract final class Motion {
   static const enter = Duration(milliseconds: 180);
   static const tab = Duration(milliseconds: 160);
   static const pulse = Duration(milliseconds: 220);
+  static const dot = Duration(milliseconds: 420);
   static const curve = Curves.easeOutCubic;
 
   /// Rows that come in one after the other when a list appears.
