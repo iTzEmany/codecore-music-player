@@ -16,23 +16,79 @@ String? _audience(Object? subtitle) {
   return groups.length < 2 ? null : groupText(groups.last);
 }
 
-/// The “top result” card of an unfiltered YouTube Music search, when it is an
-/// artist; null for a song, an album or no card.
-YtmArtistRef? parseTopArtistCard(Map data) {
+/// The “top result” card of an unfiltered YouTube Music search: an artist, an
+/// album, a song of the catalog or any other video. Null when there is none
+/// or it is a kind this app does not open (a playlist, a podcast).
+TopCard? parseTopCard(Map data) {
   final cards = collectRenderers(data['contents'], 'musicCardShelfRenderer');
   if (cards.isEmpty) return null;
   final card = cards.first;
   final onTap = _asRun(card['onTap']);
-  if (pageTypeOf(onTap) != _artistType) return null;
+  final name = htmlUnescape(runsText(card['title']));
+  if (name.isEmpty) return null;
   final id = browseIdOf(onTap);
-  final name = runsText(card['title']);
-  if (id == null || name.isEmpty) return null;
-  return YtmArtistRef(
-    id: id,
-    name: htmlUnescape(name),
-    thumbnailUrl: pickThumbnail(card['thumbnail']),
-    audience: _audience(card['subtitle']),
+  switch (pageTypeOf(onTap)) {
+    case _artistType when id != null:
+      return TopArtist(YtmArtistRef(
+        id: id,
+        name: name,
+        thumbnailUrl: pickThumbnail(card['thumbnail']),
+        audience: _audience(card['subtitle']),
+      ));
+    case _albumType when id != null:
+      return TopAlbum(_cardRelease(card, id, name), _cardArtist(card['subtitle']));
+  }
+  final watch = _watchOf(card['onTap']) ?? _watchOf(_firstRunEndpoint(card['title']));
+  final videoId = watch?['videoId'];
+  if (videoId is! String || videoId.isEmpty) return null;
+  final config = watch!['watchEndpointMusicSupportedConfigs'];
+  final type = config is Map && config['watchEndpointMusicConfig'] is Map
+      ? (config['watchEndpointMusicConfig'] as Map)['musicVideoType']
+      : null;
+  return type == 'MUSIC_VIDEO_TYPE_ATV' ? TopSong(videoId, name) : TopVideo(videoId, name);
+}
+
+/// The artist behind the top result of a search, null when that result is not
+/// an artist (a song, an album) or there is none.
+YtmArtistRef? parseTopArtistCard(Map data) {
+  final card = parseTopCard(data);
+  return card is TopArtist ? card.artist : null;
+}
+
+Map? _watchOf(Object? endpoint) {
+  final watch = endpoint is Map ? endpoint['watchEndpoint'] : null;
+  return watch is Map ? watch : null;
+}
+
+Object? _firstRunEndpoint(Object? title) {
+  final runs = title is Map ? title['runs'] : null;
+  final first = runs is List && runs.isNotEmpty ? runs.first : null;
+  return first is Map ? first['navigationEndpoint'] : null;
+}
+
+/// «Album • Pink Floyd • 1979» → kind and year, the artist being apart.
+YtmRelease _cardRelease(Map card, String id, String title) {
+  final rest = [
+    for (final g in bulletGroups(card['subtitle']))
+      if (!g.any((r) => pageTypeOf(r) == _artistType)) groupText(g),
+  ];
+  return YtmRelease(
+    browseId: id,
+    title: title,
+    subtitle: rest.join(' • '),
+    thumbnailUrl: pickThumbnail(card['thumbnail'], minWidth: 120),
   );
+}
+
+YtmArtistRef? _cardArtist(Object? subtitle) {
+  final runs = subtitle is Map ? subtitle['runs'] : null;
+  for (final r in runs is List ? runs : const []) {
+    final id = browseIdOf(r);
+    if (r is Map && id != null && pageTypeOf(r) == _artistType) {
+      return YtmArtistRef(id: id, name: htmlUnescape('${r['text']}'.trim()));
+    }
+  }
+  return null;
 }
 
 /// The artists of a YouTube Music search filtered on artists, best first.

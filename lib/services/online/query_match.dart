@@ -1,0 +1,137 @@
+import '../../core/import_row.dart';
+import '../import/track_matcher.dart';
+import 'query_cleaner.dart';
+import 'youtube_service.dart';
+import 'ytm_artist.dart';
+
+/// Where a result of the online search comes from.
+enum MediaKind { ytmSong, ytVideo }
+
+/// Results with at least this confidence are the «Migliori risultati».
+const kBestThreshold = 0.55;
+
+/// A free search has no length to compare: [scoreCandidate] gives the neutral
+/// 0.5 × 0.45 for it, which is taken off before stretching to 0..1.
+const _neutralDuration = 0.225;
+const _scoreRange = 0.55;
+
+/// Versions the phrase may ask for; a result without it is a different recording.
+const _askedVersionPenalty = 0.7;
+const _tooShort = Duration(seconds: 60);
+const _tooLong = Duration(minutes: 20);
+const _shortPenalty = 0.5;
+const _longPenalty = 0.5;
+const _otherArtistPenalty = 0.8;
+const _rankBonus = [0.05, 0.03];
+const _cardSongBonus = 0.10;
+
+/// Phrases that ask for a long recording: no penalty for a result over 20 min.
+const _longAsks = ['mix', 'set', 'live', 'concerto', 'full album'];
+
+final _channelNoise = RegExp(r'\s*[-–]?\s*(topic|vevo|official)$');
+
+class ScoredResult {
+  const ScoredResult(this.result, this.confidence, this.source, this.position);
+
+  final YtResult result;
+
+  /// 0..1: how likely it is what the phrase asks for.
+  final double confidence;
+  final MediaKind source;
+
+  /// Place in its source's list, 0 first.
+  final int position;
+
+  ScoredResult withConfidence(double c) => ScoredResult(result, c, source, position);
+}
+
+/// The names [r] credits (artists, the one in «Artist - Title», the channel
+/// without «- Topic»/VEVO/Official) that are in the phrase, longest first.
+String? _recognizedArtist(String queryKey, YtResult r) {
+  final clean = cleanSearchQuery(r.title, r.channel);
+  final names = <String>{
+    ...r.artists,
+    clean.artist,
+    matchKey(r.channel).replaceFirst(_channelNoise, '').trim(),
+  };
+  String? best;
+  for (final n in names) {
+    final key = matchKey(n);
+    if (key.length < 2 || !hasPhrase(queryKey, key)) continue;
+    if (best == null || key.length > best.length) best = key;
+  }
+  return best;
+}
+
+String _without(String queryKey, String phrase) {
+  final words = queryKey.split(' '), drop = phrase.split(' ');
+  for (var i = 0; i + drop.length <= words.length; i++) {
+    if (words.sublist(i, i + drop.length).join(' ') == phrase) {
+      return [...words.sublist(0, i), ...words.sublist(i + drop.length)].join(' ');
+    }
+  }
+  return queryKey;
+}
+
+/// How likely [r] is what [query] asks for, 0..1. [rank] is the place among
+/// the YouTube Music songs (the first two get a small bonus), -1 for a video;
+/// [fromTopCard] marks the song the top card points to.
+double queryConfidence(String query, YtResult r,
+    {int rank = -1, bool fromTopCard = false}) {
+  final queryKey = matchKey(query);
+  final artist = _recognizedArtist(queryKey, r);
+  // With only the artist in the phrase the title cannot tell results apart:
+  // every song of theirs fits, and the version words are not compared.
+  final rest = artist == null ? queryKey : _without(queryKey, artist);
+  final row = ImportRow(
+    index: 0,
+    title: rest.isEmpty ? r.title : rest,
+    artists: artist == null ? const [] : [artist],
+  );
+  var c = (scoreCandidate(row, r) - _neutralDuration) / _scoreRange;
+
+  final gotTitle = matchTitleKey(r.title);
+  final gotWords = gotTitle.split(' ').toSet();
+  if (otherVersions.any((w) => hasPhrase(queryKey, w) && !hasPhrase(gotTitle, w))) {
+    c *= _askedVersionPenalty;
+  }
+  final length = r.duration;
+  if (length != null && length < _tooShort) c *= _shortPenalty;
+  if (rank >= 0 && rank < _rankBonus.length) c += _rankBonus[rank];
+  if (fromTopCard) c += _cardSongBonus;
+  if (artist == null && queryKey.split(' ').any((w) => !gotWords.contains(w))) {
+    c *= _otherArtistPenalty;
+  }
+  return c.clamp(0.0, 1.0).toDouble();
+}
+
+/// Scores every result of both sources. A result over 20 minutes is cut down
+/// when the phrase looks for a song (YouTube Music has one above the
+/// threshold) and does not ask for a mix, a set or a concert.
+List<ScoredResult> scoreAll(
+  String query, {
+  required List<YtResult> songs,
+  required List<YtResult> videos,
+  TopCard? card,
+}) {
+  final cardSong = card is TopSong ? card.videoId : null;
+  final out = <ScoredResult>[
+    for (final (i, r) in songs.indexed)
+      ScoredResult(r,
+          queryConfidence(query, r, rank: i, fromTopCard: r.id == cardSong),
+          MediaKind.ytmSong, i),
+    for (final (i, r) in videos.indexed)
+      ScoredResult(r, queryConfidence(query, r), MediaKind.ytVideo, i),
+  ];
+  final queryKey = matchKey(query);
+  final asksLong = _longAsks.any((w) => hasPhrase(queryKey, w));
+  final looksForSong = out.any(
+      (s) => s.source == MediaKind.ytmSong && s.confidence >= kBestThreshold);
+  if (asksLong || !looksForSong) return out;
+  return [
+    for (final s in out)
+      (s.result.duration ?? Duration.zero) > _tooLong
+          ? s.withConfidence(s.confidence * _longPenalty)
+          : s,
+  ];
+}

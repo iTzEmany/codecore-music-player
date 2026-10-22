@@ -265,3 +265,36 @@ class YtmAlbum {
     );
   }
 }
+
+/// The «top result» card of an unfiltered YouTube Music search.
+sealed class TopCard {
+  const TopCard();
+}
+
+class TopArtist extends TopCard {
+  const TopArtist(this.artist);
+
+  final YtmArtistRef artist;
+}
+
+/// An album; [artist] is the one the card credits, when it links to a page.
+class TopAlbum extends TopCard {
+  const TopAlbum(this.release, this.artist);
+
+  final YtmRelease release;
+  final YtmArtistRef? artist;
+}
+
+/// A song of the catalog (`MUSIC_VIDEO_TYPE_ATV`), not a video clip.
+class TopSong extends TopCard {
+  const TopSong(this.videoId, this.title);
+
+  final String videoId, title;
+}
+
+/// Any other playable card: a music video, a live recording, an upload.
+class TopVideo extends TopCard {
+  const TopVideo(this.videoId, this.title);
+
+  final String videoId, title;
+}

@@ -5,6 +5,7 @@ import 'package:codecore/services/online/catalog_cache.dart';
 import 'package:codecore/services/online/direct_search_service.dart';
 import 'package:codecore/services/online/innertube_client.dart';
 import 'package:codecore/services/online/youtube_service.dart';
+import 'package:codecore/services/online/ytm_artist.dart';
 import 'package:codecore/services/online/ytm_catalog.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -102,6 +103,14 @@ void main() {
     catalog = YtmCatalog(client, ytDlp, cache, now: () => clock);
   });
   tearDown(() => dir.deleteSync(recursive: true));
+
+  test('the top card of a search is read from the masked answer, one request', () async {
+    adapter.respond = (o) => fixture('ytm_top_album_card');
+    final card = await catalog.topCard('the wall', 'en');
+    expect(card, isA<TopAlbum>());
+    expect(adapter.sent, hasLength(1));
+    expect(adapter.sent.single.headers['X-Goog-FieldMask'], contains('musicCardShelfRenderer'));
+  });
 
   test('an empty masked answer is asked again in full, in the language given', () async {
     adapter.respond = (o) => masked(o) ? {} : fixture('ytm_artist_page_it');

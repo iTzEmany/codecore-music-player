@@ -151,8 +151,8 @@ class MatchDecision {
 const sureThreshold = 0.80;
 const reviewThreshold = 0.55;
 
-// Versions that are a different recording; ignored when the CSV title asks for them.
-const _otherVersions = [
+/// Versions that are a different recording; ignored when the CSV title asks for them.
+const otherVersions = [
   'live',
   'cover',
   'karaoke',
@@ -175,7 +175,8 @@ const _otherVersions = [
 // What SoundCloud uploaders add to a title for their own version of a song.
 const _soundCloudVersions = ['bootleg', 'edit', 'flip', 'rework', 'vip', 'refix', 'blend'];
 
-bool _hasPhrase(String key, String phrase) => ' $key '.contains(' $phrase ');
+/// Whether the whole-word [phrase] is in the [matchKey] string [key].
+bool hasPhrase(String key, String phrase) => ' $key '.contains(' $phrase ');
 
 Set<String> _tokens(String key) =>
     key.split(' ').where((w) => w.isNotEmpty).toSet();
@@ -230,7 +231,7 @@ double _bonus(ImportRow r, YtResult c) {
     final artist = matchKey(r.primaryArtist);
     if (uploader == artist) {
       b += 0.04;
-    } else if (soundcloud && artist.isNotEmpty && _hasPhrase(uploader, artist)) {
+    } else if (soundcloud && artist.isNotEmpty && hasPhrase(uploader, artist)) {
       // «Daft Punk Archive», «Daft Punk Music»: probably theirs.
       b += 0.03;
     }
@@ -253,11 +254,11 @@ double scoreCandidate(ImportRow r, YtResult c) {
   final duration = _durationScore(r.durationMs, c.duration);
   var score = 0.45 * duration + 0.35 * title + 0.20 * artist + _bonus(r, c);
   final versions = [
-    ..._otherVersions,
+    ...otherVersions,
     if (c.source == MediaSource.soundcloud) ..._soundCloudVersions,
   ];
   for (final w in versions) {
-    if (_hasPhrase(gotTitle, w) && !_hasPhrase(wantTitle, w)) {
+    if (hasPhrase(gotTitle, w) && !hasPhrase(wantTitle, w)) {
       score *= 0.4;
       break;
     }

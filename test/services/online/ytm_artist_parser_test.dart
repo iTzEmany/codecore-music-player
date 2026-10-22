@@ -13,6 +13,7 @@ Map fixture(String name) =>
 const pinkFloyd = 'UCO6LS_5W7vqG9mALDNzSFug';
 
 void main() {
+  topCardTests();
   test('the card of an artist gives its id, name, photo and audience', () {
     final ref = parseTopArtistCard(fixture('ytm_top_artist_card'))!;
     expect(ref.id, pinkFloyd);
@@ -95,5 +96,30 @@ void main() {
     final again = YtmArtistPage.fromJson(jsonDecode(jsonEncode(page.toJson())))!;
     expect(jsonEncode(again.toJson()), jsonEncode(page.toJson()));
     expect(again.shelves.map((s) => s.runtimeType), page.shelves.map((s) => s.runtimeType));
+  });
+}
+
+void topCardTests() {
+  test('the top card is read as an artist, an album, a song or a video', () {
+    final artist = parseTopCard(fixture('ytm_top_artist_card')) as TopArtist;
+    expect(artist.artist.id, pinkFloyd);
+
+    final album = parseTopCard(fixture('ytm_top_album_card')) as TopAlbum;
+    expect(album.release.browseId, startsWith('MPREb_'));
+    expect(album.release.title, 'The Wall');
+    expect(album.release.subtitle, 'Album • 1979');
+    expect(album.artist?.id, pinkFloyd);
+
+    final song = parseTopCard(fixture('ytm_top_song_card')) as TopSong;
+    expect(song.videoId, 'cfWXEgEEurg');
+
+    final video = parseTopCard(fixture('ytm_top_video_card')) as TopVideo;
+    expect(video.videoId, 'fJ9rUzIMcZQ');
+    expect(video.title, startsWith('Bohemian Rhapsody'));
+  });
+
+  test('no card, no top card', () {
+    expect(parseTopCard(fixture('ytm_empty')), isNull);
+    expect(parseTopArtistCard(fixture('ytm_top_album_card')), isNull);
   });
 }

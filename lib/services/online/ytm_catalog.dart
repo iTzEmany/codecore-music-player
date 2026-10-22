@@ -1,3 +1,5 @@
+import 'package:dio/dio.dart' show CancelToken;
+
 import '../../core/app_log.dart';
 import 'catalog_cache.dart';
 import 'innertube_client.dart';
@@ -65,6 +67,12 @@ class YtmCatalog {
   final YoutubeService ytDlp;
   final CatalogCache cache;
   final DateTime Function() _now;
+
+  /// The top result card of [query] (artist, album, song or video), null when
+  /// there is none. Same request as [topArtist]. Not cached.
+  Future<TopCard?> topCard(String query, String hl, {CancelToken? cancel}) =>
+      client.searchMusic(query, parseTopCard,
+          hl: hl, mask: topCardMask, isEmpty: (r) => r == null, cancel: cancel);
 
   /// The artist behind the top result of [query], null when that result is not
   /// an artist (a song, an album) or there is none. Not cached.
