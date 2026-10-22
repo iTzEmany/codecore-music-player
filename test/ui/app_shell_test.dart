@@ -42,8 +42,10 @@ ProviderContainer _container(WidgetTester t) =>
 Finder _dockField() => find.descendant(
     of: find.byType(ShellDock), matching: find.byType(TextField));
 
-Finder _bar(String label) => find.descendant(
-    of: find.byType(ShellDock), matching: find.text(label));
+// Hit-testable: while searching, hidden tabs hold the dock's height.
+Finder _bar(String label) => find
+    .descendant(of: find.byType(ShellDock), matching: find.text(label))
+    .hitTestable();
 
 void main() {
   testWidgets('no track: dock holds only the tabs', (t) async {
@@ -496,6 +498,18 @@ void main() {
     await h.dispose(tester);
   });
 
+  testWidgets('the dock field keeps the height of the tabs', (t) async {
+    _phone(t);
+    final h = await Harness.create(t, tracks: 2);
+    await h.pump(t, const AppShell());
+    await _settle(t);
+    final tabs = t.getSize(find.byType(ShellDock)).height;
+    await t.tap(_bar('Cerca'));
+    await _settle(t);
+    expect(t.getSize(find.byType(ShellDock)).height, tabs);
+    await h.dispose(t);
+  });
+
   testWidgets('tapping Cerca turns the bar into a focused field', (t) async {
     _phone(t);
     final h = await Harness.create(t, tracks: 2);
@@ -504,7 +518,12 @@ void main() {
     await _settle(t);
     expect(_dockField(), findsOneWidget);
     expect(_bar('Home'), findsNothing);
-    expect(find.byKey(const ValueKey('tab-dot')), findsNothing);
+    expect(
+        find.ancestor(
+            of: find.byKey(const ValueKey('tab-dot')),
+            matching:
+                find.byWidgetPredicate((w) => w is Visibility && !w.visible)),
+        findsOneWidget);
     expect(_container(t).read(searchFocusProvider).hasFocus, isTrue);
     await h.dispose(t);
   });

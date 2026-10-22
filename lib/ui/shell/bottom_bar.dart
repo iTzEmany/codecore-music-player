@@ -107,7 +107,23 @@ class ShellDock extends ConsumerWidget {
             ),
           ),
           child: field
-              ? const _SearchField(key: ValueKey('dock-field'))
+              ? Stack(
+                  key: const ValueKey('dock-field'),
+                  alignment: Alignment.center,
+                  children: [
+                    // Hidden tabs hold the dock's height: the page above
+                    // keeps its size and its scroll offset.
+                    Visibility.maintain(
+                      visible: false,
+                      child: _Tabs(
+                        items: items,
+                        selected: selected,
+                        onSelect: onSelect,
+                      ),
+                    ),
+                    const _SearchField(),
+                  ],
+                )
               : Column(
                   key: const ValueKey('dock-tabs'),
                   mainAxisSize: MainAxisSize.min,
@@ -124,7 +140,7 @@ class ShellDock extends ConsumerWidget {
 
 /// The dock while searching: the shared Search field and a ✕.
 class _SearchField extends ConsumerStatefulWidget {
-  const _SearchField({super.key});
+  const _SearchField();
 
   @override
   ConsumerState<_SearchField> createState() => _SearchFieldState();
@@ -146,7 +162,9 @@ class _SearchFieldState extends ConsumerState<_SearchField> {
     final online = ref.watch(searchOnlineProvider);
     return ConstrainedBox(
       constraints: const BoxConstraints(minHeight: CcDims.bottomBarHeight),
+      // heightFactor: the bottom bar slot is as tall as the screen.
       child: Center(
+        heightFactor: 1,
         child: TextField(
           controller: ref.watch(searchControllerProvider),
           focusNode: ref.watch(searchFocusProvider),
