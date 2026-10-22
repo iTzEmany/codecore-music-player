@@ -75,6 +75,19 @@ void main() {
     await h.dispose(t);
   });
 
+  testWidgets('shortcuts are blocks with the icon left of the label', (t) async {
+    final h = await open(t, width: 360);
+    final icon = t.getRect(find.byIcon(Icons.favorite_rounded));
+    final fav = t.getRect(find.text('Preferiti'));
+    expect(icon.right, lessThanOrEqualTo(fav.left));
+    final favBlock = t.getRect(find.ancestor(
+        of: find.text('Preferiti'), matching: find.byType(InkWell)));
+    final allBlock = t.getRect(find.ancestor(
+        of: find.text('Tutti i brani'), matching: find.byType(InkWell)));
+    expect(allBlock.top, favBlock.top);
+    await h.dispose(t);
+  });
+
   testWidgets('zero-count shortcuts disappear except Preferiti and Tutti i brani',
       (t) async {
     final h = await open(t);

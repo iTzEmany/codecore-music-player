@@ -171,49 +171,58 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
                 items: [
                   LibraryShortcut(
                     label: l.navFavorites,
+                    icon: Icons.favorite_rounded,
                     count: favCount,
                     keepWhenZero: true,
                     onTap: () => open(const FavoritesScreen()),
                   ),
                   LibraryShortcut(
                     label: l.allTracks,
+                    icon: Icons.music_note_rounded,
                     count: trackCount,
                     keepWhenZero: true,
                     onTap: () => open(const AllTracksScreen()),
                   ),
                   LibraryShortcut(
                     label: l.historyTitle,
+                    icon: Icons.history_rounded,
                     onTap: () => open(const HistoryScreen()),
                   ),
                   LibraryShortcut(
                     label: l.podcastsTitle,
+                    icon: Icons.podcasts_rounded,
                     count: podcastCount,
                     onTap: () => open(const PodcastsScreen()),
                   ),
                   LibraryShortcut(
                     label: l.radioTitle,
+                    icon: Icons.radio_rounded,
                     count: radioCount,
                     onTap: () => open(const RadioScreen()),
                   ),
                   if (kEnableYoutube && (followedCount > 0 || releaseTopArtists))
                     LibraryShortcut(
                       label: l.releasesFollowedLibrary,
+                      icon: Icons.how_to_reg_rounded,
                       count: followedCount,
                       keepWhenZero: true,
                       onTap: () => open(const FollowedArtistsScreen()),
                     ),
                   LibraryShortcut(
                     label: l.tagsTitle,
+                    icon: Icons.label_outline_rounded,
                     count: tagCount,
                     onTap: () => open(const TagsScreen()),
                   ),
                   LibraryShortcut(
                     label: l.statsTitle,
+                    icon: Icons.bar_chart_rounded,
                     onTap: () => open(const StatsScreen()),
                   ),
                   if (reviewCount > 0)
                     LibraryShortcut(
                       label: l.reviewTitle,
+                      icon: Icons.fact_check_rounded,
                       count: reviewCount,
                       onTap: () => open(const ReviewScreen()),
                     ),
