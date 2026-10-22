@@ -222,6 +222,9 @@ class NpBottomRow extends ConsumerWidget {
   }
 }
 
+/// Width of both side slots of the volume row (mute button, percentage).
+const _volumeSlot = 48.0;
+
 class _VolumeRow extends ConsumerWidget {
   const _VolumeRow();
 
@@ -231,19 +234,22 @@ class _VolumeRow extends ConsumerWidget {
     final n = ref.read(volumeProvider.notifier);
     return Row(
       children: [
-        IconButton(
-          tooltip: context.l10n.mute,
-          onPressed: n.toggleMute,
-          icon: Icon(
-            v == 0 ? Icons.volume_off_rounded : Icons.volume_up_rounded,
+        // The desktop theme shrink-wraps the button: fix the slot width.
+        SizedBox(
+          width: _volumeSlot,
+          child: IconButton(
+            tooltip: context.l10n.mute,
+            onPressed: n.toggleMute,
+            icon: Icon(
+              v == 0 ? Icons.volume_off_rounded : Icons.volume_up_rounded,
+            ),
           ),
         ),
         Expanded(
           child: Slider(value: v, onChanged: n.set),
         ),
-        // Same width as the mute button, so the slider is centred.
         SizedBox(
-          width: 48,
+          width: _volumeSlot,
           child: Text(
             '${(v * 100).round()}%',
             textAlign: TextAlign.center,

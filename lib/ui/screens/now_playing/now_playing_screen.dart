@@ -48,7 +48,10 @@ String? playContextName(AppLocalizations l, PlayContext? c) {
 }
 
 class NowPlayingScreen extends ConsumerStatefulWidget {
-  const NowPlayingScreen({super.key});
+  const NowPlayingScreen({super.key, this.desktop});
+
+  /// Overrides the platform check for the top bar (tests); null = the platform.
+  final bool? desktop;
 
   @override
   ConsumerState<NowPlayingScreen> createState() => _NowPlayingScreenState();
@@ -93,6 +96,7 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                     builder: (context, c) {
                       final player = _Player(
                         track: track,
+                        desktop: widget.desktop ?? isDesktop,
                         onDragUpdate: (d) => setState(() {
                           _dragging = true;
                           _dy = (_dy + d.delta.dy).clamp(0.0, 600.0);
@@ -195,11 +199,13 @@ class _Empty extends StatelessWidget {
 class _Player extends ConsumerWidget {
   const _Player({
     required this.track,
+    required this.desktop,
     required this.onDragUpdate,
     required this.onDragEnd,
   });
 
   final Track track;
+  final bool desktop;
   final GestureDragUpdateCallback onDragUpdate;
   final GestureDragEndCallback onDragEnd;
 
@@ -260,6 +266,8 @@ class _Player extends ConsumerWidget {
                         Text(
                           ctx == null ? l.nowPlaying : l.playingFrom,
                           textAlign: TextAlign.center,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: theme.labelSmall?.copyWith(
                             fontSize: 11,
                             color: cc.textMuted,
@@ -285,7 +293,7 @@ class _Player extends ConsumerWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        if (!isDesktop)
+                        if (!desktop)
                           IconButton(
                             tooltip: l.carMode,
                             icon: const Icon(Icons.directions_car_outlined),

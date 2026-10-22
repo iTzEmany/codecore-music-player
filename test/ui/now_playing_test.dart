@@ -148,20 +148,22 @@ void main() {
     await h.dispose(tester);
   });
 
-  Future<Harness> openPlayer(WidgetTester tester) async {
+  Future<Harness> openPlayer(WidgetTester tester, {bool? desktop}) async {
     tester.view.physicalSize = const Size(400, 900);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     final h = await Harness.create(tester, tracks: 2);
     final rows = await tester.runAsync(() => h.db.select(h.db.tracks).get());
     await tester.runAsync(() => h.handler.playQueue([rows!.first.id], 0));
-    await h.pump(tester, const NowPlayingScreen());
+    await h.pump(tester, NowPlayingScreen(desktop: desktop));
     return h;
   }
 
   testWidgets('symmetry: the top-bar title sits at the screen centre',
       (tester) async {
-    final h = await openPlayer(tester);
+    // Mobile: car mode + more on the right, back alone on the left.
+    final h = await openPlayer(tester, desktop: false);
+    expect(find.byIcon(Icons.directions_car_outlined), findsOneWidget);
     expect(tester.getCenter(find.text('In riproduzione')).dx,
         closeTo(200, 1));
     await h.dispose(tester);
@@ -196,6 +198,8 @@ void main() {
         .set(0.7);
     await tester.pump();
     expect(find.text('70%'), findsOneWidget);
+    // Mute button and percentage have the same width: the slider is centred.
+    expect(tester.getCenter(find.byType(Slider).last).dx, closeTo(200, 1));
     await h.dispose(tester);
   });
 }
