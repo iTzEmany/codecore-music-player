@@ -253,6 +253,58 @@ void main() {
     await h.dispose(tester);
   });
 
+  testWidgets(
+    'sections are rows: no sideways lists, three similar artists, plain release line',
+    (tester) async {
+      final page = YtmArtistPage(
+        ref: _ref,
+        description: 'Una band inglese. ' * 60,
+        shelves: [
+          const YtmReleaseShelf('Album', [
+            YtmRelease(
+              browseId: 'MPREb_1',
+              title: 'The Wall',
+              subtitle: 'EP • 2025',
+            ),
+            YtmRelease(browseId: 'MPREb_2', title: 'Animals', subtitle: ''),
+          ], more: YtmBrowseLink('MPAD', 'p')),
+          YtmArtistShelf('Simili', [
+            for (var i = 0; i < 5; i++)
+              YtmArtistRef(id: 'UC$i', name: 'Simile $i'),
+          ]),
+        ],
+      );
+      final h = await open(
+        tester,
+        () async => CatalogResult(page, DateTime(2026, 10, 22)),
+      );
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is ListView && w.scrollDirection == Axis.horizontal,
+        ),
+        findsNothing,
+      );
+      expect(find.text('Tutti'), findsOneWidget);
+      expect(find.text('Mostra tutto'), findsNothing);
+      expect(find.byKey(const ValueKey('similar-UC2')), findsOneWidget);
+      expect(find.byKey(const ValueKey('similar-UC3')), findsNothing);
+      expect(find.text('EP, 2025'), findsOneWidget);
+      expect(find.text('EP • 2025'), findsNothing);
+      final text = tester.widget<Text>(
+        find.byKey(const ValueKey('about-text')),
+      );
+      expect(text.maxLines, 4);
+      await tester.ensureVisible(find.byKey(const ValueKey('about-toggle')));
+      await tester.tap(find.byKey(const ValueKey('about-toggle')));
+      await tester.pump();
+      expect(
+        tester.widget<Text>(find.byKey(const ValueKey('about-text'))).maxLines,
+        isNull,
+      );
+      await h.dispose(tester);
+    },
+  );
+
   testWidgets('an old copy is shown with the date it comes from', (
     tester,
   ) async {

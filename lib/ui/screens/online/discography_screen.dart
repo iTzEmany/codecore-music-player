@@ -10,7 +10,7 @@ import 'catalog_error_view.dart';
 import 'online_album_screen.dart';
 import 'online_page_frame.dart';
 
-/// Every release behind a carousel's «Mostra tutto»: a grid of covers.
+/// Every release behind a carousel's «Tutti»: a list of rows.
 class DiscographyScreen extends ConsumerWidget {
   const DiscographyScreen({
     super.key,
@@ -23,14 +23,11 @@ class DiscographyScreen extends ConsumerWidget {
   final String title;
   final YtmBrowseLink link;
 
-  static const _cell = 180.0;
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final key = (browseId: link.browseId, params: link.params);
     final page = ref.watch(discographyProvider(key));
     final data = page.value;
-    final extent = _cell + 8 + MediaQuery.textScalerOf(context).scale(62);
     return OnlinePageFrame(
       title: '${artist.name} · $title',
       onRefresh: () async {
@@ -47,21 +44,13 @@ class DiscographyScreen extends ConsumerWidget {
         if (data != null && data.stale)
           SliverToBoxAdapter(child: OfflineNotice(fetchedAt: data.fetchedAt)),
         if (data != null)
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            sliver: SliverGrid.builder(
-              gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: _cell,
-                mainAxisExtent: extent,
-              ),
-              itemCount: data.value.length,
-              itemBuilder: (_, i) => LayoutBuilder(
-                builder: (_, box) => ReleaseTile(
-                  release: data.value[i],
-                  size: box.maxWidth - 12,
-                  onTap: (r) => ShellNav.open<void>(
-                      context, OnlineAlbumScreen(browseId: r.browseId, release: r)),
-                ),
+          SliverList.builder(
+            itemCount: data.value.length,
+            itemBuilder: (_, i) => ReleaseRow(
+              release: data.value[i],
+              onTap: (r) => ShellNav.open<void>(
+                context,
+                OnlineAlbumScreen(browseId: r.browseId, release: r),
               ),
             ),
           )
