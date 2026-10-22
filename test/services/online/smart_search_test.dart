@@ -78,25 +78,18 @@ void main() {
   late _FakeYoutube youtube;
   late _FakeCatalog catalog;
   late SmartSearch engine;
-  late Completer<void> capReached;
   var clock = DateTime(2026, 10, 22, 12);
-  var delays = 0;
 
   setUp(() {
     sigarette = smartCase('lucio corsi sigarette');
     youtube = _FakeYoutube();
     catalog = _FakeCatalog();
     clock = DateTime(2026, 10, 22, 12);
-    capReached = Completer<void>();
-    delays = 0;
     engine = SmartSearch(
       youtube: youtube,
       catalog: catalog,
       now: () => clock,
-      delay: (_) {
-        delays++;
-        return capReached.future;
-      },
+      cap: const Duration(milliseconds: 50),
     );
   });
 
@@ -153,9 +146,8 @@ void main() {
     await pumpEventQueue();
     await answerCard();
     await answerSongs();
-    expect(delays, 1);
-    capReached.complete();
-    await pumpEventQueue();
+    expect(run.states, hasLength(1), reason: 'still inside the cap');
+    await Future<void>.delayed(const Duration(milliseconds: 80));
 
     expect(run.states, hasLength(2));
     final early = run.states.last;

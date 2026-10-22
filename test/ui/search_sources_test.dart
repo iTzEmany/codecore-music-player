@@ -71,7 +71,6 @@ void main() {
       extraOverrides: [
         youtubeServiceProvider.overrideWithValue(svc),
         ytmCatalogProvider.overrideWithValue(FakeCatalog((_) async => null)),
-        noCapEngine,
       ],
     );
     await _settle(tester);
@@ -157,7 +156,6 @@ void main() {
       extraOverrides: [
         youtubeServiceProvider.overrideWithValue(_Sources()),
         ytmCatalogProvider.overrideWithValue(FakeCatalog((_) async => null)),
-        noCapEngine,
       ],
     );
     await _settle(tester);

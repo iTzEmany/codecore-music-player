@@ -72,7 +72,6 @@ void main() {
       extraOverrides: [
         youtubeServiceProvider.overrideWithValue(_Youtube()),
         ytmCatalogProvider.overrideWithValue(FakeCatalog((_) async => null)),
-        noCapEngine,
         downloadsProvider.overrideWith(() => downloads),
         downloadIndexProvider.overrideWith((ref) async => DownloadIndex(File(p.join(dir.path, 'd.json')))),
         streamResolverProvider.overrideWithValue((r) async => Uri.parse('https://media.example/${r.id}')),

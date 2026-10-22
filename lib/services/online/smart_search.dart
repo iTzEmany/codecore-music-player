@@ -117,10 +117,8 @@ class SmartSearch {
     SourceCooldown? cooldown,
     DateTime Function()? now,
     this.cap = const Duration(milliseconds: 1500),
-    Future<void> Function(Duration)? delay,
   })  : _now = now ?? DateTime.now,
-        cooldown = cooldown ?? SourceCooldown(now: now),
-        _delay = delay ?? Future.delayed;
+        cooldown = cooldown ?? SourceCooldown(now: now);
 
   final YoutubeService youtube;
   final YtmCatalog catalog;
@@ -129,7 +127,6 @@ class SmartSearch {
   /// How long after the first answer the page waits for the others.
   final Duration cap;
   final DateTime Function() _now;
-  final Future<void> Function(Duration) _delay;
   final _cache = <String, _Cached>{};
 
   /// States of the search for [query]: first the waiting one, then the first
@@ -190,10 +187,11 @@ class _Run {
   var _cardAsked = false;
   final _notices = <SearchNotice>[];
   SmartSearchState? _shown;
-  bool _capTimerStarted = false;
+  Timer? _capTimer;
 
   void cancel() {
     _cancelled = true;
+    _capTimer?.cancel();
     _token.cancel('new search');
   }
 
@@ -344,14 +342,14 @@ class _Run {
     final shown = _shown;
     if (shown == null) {
       if (_everythingIn) {
+        _capTimer?.cancel();
         // All failed: `_finish` reports it.
         if (_anyResult) _showFirst(kind);
-      } else if (_anyResult && !_capTimerStarted) {
-        _capTimerStarted = true;
-        unawaited(engine._delay(engine.cap).then((_) {
+      } else if (_anyResult && _capTimer == null) {
+        _capTimer = Timer(engine.cap, () {
           if (_cancelled || _shown != null) return;
           _showFirst(kind);
-        }));
+        });
       }
       return;
     }

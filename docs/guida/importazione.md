@@ -9,6 +9,6 @@ Ricostruisce una playlist di un altro servizio a partire da un file CSV (Exporti
 4. Puoi mettere in pausa, riprendere o annullare l'importazione dal Centro Attività.
 
 ## Da sapere
-Il download da YouTube/SoundCloud vale solo per contenuti che hai il diritto di scaricare.
+Il download da YouTube vale solo per contenuti che hai il diritto di scaricare.
 
 [← Indice](README.md)

@@ -62,7 +62,6 @@ void main() {
       extraOverrides: [
         youtubeServiceProvider.overrideWithValue(_Search()),
         ytmCatalogProvider.overrideWithValue(FakeCatalog(top)),
-        noCapEngine,
         artistPageProvider.overrideWith((ref, id) async {
           asked.add(id);
           return CatalogResult(
@@ -109,7 +108,6 @@ void main() {
       youtubeServiceProvider.overrideWithValue(_Search()),
       ytmCatalogProvider.overrideWithValue(
           FakeCatalog((q) => q == 'pink floyd' ? late.future : Future.value(null))),
-      noCapEngine,
     ];
     Widget page(String q, int n) => Scaffold(body: OnlineResults(query: q, submitted: n));
     await h.pump(tester, page('pink floyd', 1), extraOverrides: overrides);

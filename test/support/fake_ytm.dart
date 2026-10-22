@@ -1,11 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:codecore/providers/smart_search_providers.dart';
-import 'package:codecore/providers/youtube_providers.dart';
-import 'package:codecore/providers/ytm_catalog_providers.dart';
-import 'package:codecore/services/online/smart_search.dart';
-import 'package:flutter_riverpod/misc.dart' show Override;
 
 import 'package:codecore/services/online/catalog_cache.dart';
 import 'package:codecore/services/online/innertube_client.dart';
@@ -65,12 +60,3 @@ YtResult ytmSong(String id, String title,
       artists: [artist],
       artistIds: [artistId],
     );
-
-
-/// The online search engine on the test's own services, whose 1.5 s wait for
-/// the slower source never fires (a real timer would outlive the test).
-final Override noCapEngine = smartSearchEngineProvider.overrideWith((ref) => SmartSearch(
-      youtube: ref.watch(youtubeServiceProvider),
-      catalog: ref.watch(ytmCatalogProvider),
-      delay: (_) => Completer<void>().future,
-    ));

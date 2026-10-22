@@ -106,7 +106,6 @@ void main() {
         youtubeServiceProvider.overrideWithValue(yt),
         playlistImportServiceProvider.overrideWithValue(service),
         ytmCatalogProvider.overrideWithValue(FakeCatalog((_) async => null)),
-        noCapEngine,
       ],
     );
     await _settle(tester);

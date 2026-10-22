@@ -195,7 +195,6 @@ void main() {
       extraOverrides: [
         youtubeServiceProvider.overrideWithValue(_FakeYoutube()),
         ytmCatalogProvider.overrideWithValue(FakeCatalog((_) async => null)),
-        noCapEngine,
         downloadsProvider.overrideWith(() => downloads),
         downloadIndexProvider.overrideWith((ref) async => index),
       ],
