@@ -270,4 +270,45 @@ void main() {
     expect(find.text('Album 0'), findsOneWidget);
     await h.dispose(tester);
   });
+
+  testWidgets(
+    'section screen keeps only the plain words of an operator query',
+    (tester) async {
+      tester.view.physicalSize = const Size(400, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final h = await Harness.create(tester, tracks: 0);
+      await _insertDiscs(h);
+      await h.pump(
+        tester,
+        const SearchSectionScreen(
+          query: SearchQuery('Disc artista:"Band 3"'),
+          kind: SearchSectionKind.albums,
+        ),
+      );
+      await _settle(tester);
+      // The operator is not matched against album names: the plain word rules.
+      for (var i = 0; i < 5; i++) {
+        expect(find.text('Disc $i'), findsOneWidget);
+      }
+      await h.dispose(tester);
+    },
+  );
+
+  testWidgets('section screen with only an operator has no rows', (
+    tester,
+  ) async {
+    final h = await Harness.create(tester, tracks: 0);
+    await _insertDiscs(h);
+    await h.pump(
+      tester,
+      const SearchSectionScreen(
+        query: SearchQuery('artista:"Band 3"'),
+        kind: SearchSectionKind.albums,
+      ),
+    );
+    await _settle(tester);
+    expect(find.byType(EmptyState), findsOneWidget);
+    await h.dispose(tester);
+  });
 }
