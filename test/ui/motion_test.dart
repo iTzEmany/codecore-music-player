@@ -1,5 +1,7 @@
 import 'package:codecore/ui/widgets/motion.dart';
+import 'package:codecore/providers/player_providers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Widget _app(Widget child, {bool reduce = false}) => MaterialApp(
@@ -92,6 +94,38 @@ void main() {
       expect(tester.hasRunningAnimations, isFalse, reason: 'durations are zero');
       expect(_opacity(tester, find.byType(TabFade)), 1);
       expect(_opacity(tester, find.byType(RiseIn)), 1);
+    });
+  });
+
+  group('SpinWhilePlaying', () {
+    Widget spin(Object key, {bool playing = true, bool reduce = false}) => ProviderScope(
+          overrides: [isPlayingProvider.overrideWith((_) => Stream.value(playing))],
+          child: _app(SpinWhilePlaying(trackKey: key, child: const SizedBox(width: 10, height: 10)), reduce: reduce),
+        );
+    final rotation = find.descendant(of: find.byType(SpinWhilePlaying), matching: find.byType(RotationTransition));
+    double angle(WidgetTester t) => t.widget<RotationTransition>(rotation).turns.value;
+
+    testWidgets('the cover spin restarts at 0 on a new track', (tester) async {
+      await tester.pumpWidget(spin('a'));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 5));
+      expect(angle(tester), closeTo(5 / 30, 0.01));
+      await tester.pumpWidget(spin('b'));
+      expect(angle(tester), 0);
+      await tester.pump(const Duration(seconds: 3));
+      expect(angle(tester), greaterThan(0), reason: 'it goes on turning while playing');
+    });
+
+    testWidgets('paused, it does not turn', (tester) async {
+      await tester.pumpWidget(spin('a', playing: false));
+      await tester.pump(const Duration(seconds: 5));
+      expect(angle(tester), 0);
+    });
+
+    testWidgets('reduce motion: no rotation at all', (tester) async {
+      await tester.pumpWidget(spin('a', reduce: true));
+      await tester.pump(const Duration(seconds: 5));
+      expect(rotation, findsNothing);
     });
   });
 }

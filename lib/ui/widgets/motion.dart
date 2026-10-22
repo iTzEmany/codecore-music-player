@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../providers/player_providers.dart';
 
 /// The small movements of phase 28.9. Only opacity and transforms (nothing
 /// that changes a size or a layout), 120–220 ms with an easing out, what moves
@@ -280,4 +283,66 @@ class _RiseInState extends State<RiseIn> with SingleTickerProviderStateMixin {
           child: RepaintBoundary(child: widget.child),
         ),
       );
+}
+
+/// Turns [child] once every 30 s while a song plays; it stops at its angle
+/// when paused and starts again from 0 when [trackKey] changes. Not at all
+/// with «Riduci animazioni».
+class SpinWhilePlaying extends ConsumerStatefulWidget {
+  const SpinWhilePlaying({super.key, required this.trackKey, required this.child});
+
+  final Object trackKey;
+  final Widget child;
+
+  @override
+  ConsumerState<SpinWhilePlaying> createState() => _SpinWhilePlayingState();
+}
+
+class _SpinWhilePlayingState extends ConsumerState<SpinWhilePlaying>
+    with SingleTickerProviderStateMixin {
+  late final _c = AnimationController(vsync: this, duration: const Duration(seconds: 30));
+  late bool _playing = ref.read(isPlayingProvider).value ?? false;
+
+  @override
+  void initState() {
+    super.initState();
+    ref.listenManual(isPlayingProvider, (_, next) {
+      _playing = next.value ?? false;
+      _sync();
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _sync();
+  }
+
+  @override
+  void didUpdateWidget(SpinWhilePlaying old) {
+    super.didUpdateWidget(old);
+    if (old.trackKey != widget.trackKey) {
+      _c.value = 0;
+      _sync();
+    }
+  }
+
+  void _sync() {
+    if (_playing && !MediaQuery.disableAnimationsOf(context)) {
+      if (!_c.isAnimating) _c.repeat();
+    } else {
+      _c.stop();
+    }
+  }
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => MediaQuery.disableAnimationsOf(context)
+      ? widget.child
+      : RotationTransition(turns: _c, child: RepaintBoundary(child: widget.child));
 }

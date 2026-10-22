@@ -8,8 +8,10 @@ import '../../services/jam/jam_models.dart';
 import '../screens/devices/devices_sheet.dart';
 import '../screens/jam/jam_screen.dart';
 import '../screens/now_playing/now_playing_screen.dart';
+import '../shell/bottom_bar.dart' show ShellDock;
 import '../theme/tokens.dart';
 import 'favorite_actions.dart';
+import 'grow_route.dart';
 import 'motion.dart';
 import 'radio_now.dart';
 import 'ring_progress.dart';
@@ -79,17 +81,21 @@ class _MiniPlayerState extends ConsumerState<MiniPlayer>
     await _animateTo(0);
   }
 
+  /// Global rect of the dock this mini-player sits in (its own box if it is
+  /// shown outside one).
+  Rect _dockRect() {
+    RenderBox? box;
+    context.visitAncestorElements((e) {
+      if (e.widget is! ShellDock) return true;
+      box = e.findRenderObject() as RenderBox?;
+      return false;
+    });
+    box ??= context.findRenderObject() as RenderBox;
+    return box!.localToGlobal(Offset.zero) & box!.size;
+  }
+
   void _openNowPlaying() => Navigator.of(context, rootNavigator: true).push(
-    PageRouteBuilder<void>(
-      pageBuilder: (_, _, _) => const NowPlayingScreen(),
-      transitionsBuilder: (_, anim, _, child) => SlideTransition(
-        position: Tween(
-          begin: const Offset(0, 1),
-          end: Offset.zero,
-        ).animate(CurvedAnimation(parent: anim, curve: Curves.easeOut)),
-        child: child,
-      ),
-    ),
+    growRoute<void>(from: _dockRect(), builder: (_) => const NowPlayingScreen()),
   );
 
   void _openJam() => Navigator.of(

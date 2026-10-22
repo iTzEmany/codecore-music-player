@@ -26,6 +26,7 @@ import '../library/artist_screen.dart';
 import 'now_playing_cards.dart';
 import 'now_playing_controls.dart';
 import '../../widgets/motion.dart';
+import '../../widgets/ring_progress.dart';
 
 const _wideBreakpoint = 900.0;
 const _closeDistance = 120.0;
@@ -300,14 +301,28 @@ class _Player extends ConsumerWidget {
                 if (v > 300) ctrl.previous();
               },
               child: LayoutBuilder(
-                builder: (_, c) => Center(
-                  child: TrackArt(
-                    track: track,
-                    size: (c.biggest.shortestSide).clamp(80.0, 460.0),
-                    radius: CcDims.rGrid,
-                    heroTag: kPlayerCoverHero,
-                  ),
-                ),
+                builder: (_, c) {
+                  final s = (c.biggest.shortestSide).clamp(80.0, 460.0);
+                  const stroke = 4.0;
+                  // The ring clips its child to a circle of this size.
+                  final inner = s - 2 * (stroke + 2);
+                  return Center(
+                    child: RingProgress(
+                      size: s,
+                      stroke: stroke,
+                      live: radio != null,
+                      child: SpinWhilePlaying(
+                        trackKey: track.id,
+                        child: TrackArt(
+                          track: track,
+                          size: inner,
+                          radius: inner / 2,
+                          heroTag: kPlayerCoverHero,
+                        ),
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
           ),
