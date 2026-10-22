@@ -173,12 +173,6 @@ class _YoutubeResultsState extends ConsumerState<YoutubeResults> {
   Widget build(BuildContext context) {
     final l = context.l10n;
     final cc = context.cc;
-    ref.listen(listenProvider.select((s) => s.error), (_, error) {
-      if (error == null) return;
-      ScaffoldMessenger.of(context)
-        ..clearSnackBars()
-        ..showSnackBar(SnackBar(content: Text(ytErrorText(context, error))));
-    });
     final seen = ref.watch(settingsProvider.select((s) => s.ytNoticeSeen));
     final source = ref.watch(settingsProvider.select((s) => s.searchSource));
     final picked = ref.watch(selectionProvider(_selectionKey));

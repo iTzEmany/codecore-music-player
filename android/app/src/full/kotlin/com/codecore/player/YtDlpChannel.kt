@@ -81,6 +81,10 @@ class YtDlpChannel(private val applicationContext: Context) {
                 req.addOption("-g")
                 req.addOption("--no-warnings")
                 req.addOption("--no-playlist")
+                // android_vr: direct audio URLs without the JS challenge or a PO token.
+                if (call.argument<Boolean>("fast") == true) {
+                    req.addOption("--extractor-args", "youtube:player_client=android_vr")
+                }
                 req.addOption("-f", call.argument<String>("format") ?: "bestaudio/best")
                 val processId = call.argument<String>("processId")
                 if (processId != null) YoutubeDL.getInstance().execute(req, processId).out

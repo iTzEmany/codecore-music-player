@@ -37,6 +37,17 @@ final _full = YtmArtistPage(
   ],
 );
 
+class _CountingCatalog extends FakeCatalog {
+  _CountingCatalog() : super((q) async => null);
+  final refreshFlags = <bool>[];
+
+  @override
+  Future<CatalogResult<YtmArtistPage>> artist(String id, String hl, {bool refresh = false}) async {
+    refreshFlags.add(refresh);
+    return CatalogResult(_full, DateTime(2026, 10, 22));
+  }
+}
+
 void main() {
   Future<Harness> open(
     WidgetTester tester,
@@ -140,6 +151,27 @@ void main() {
     expect(find.text('Artista non trovato'), findsOneWidget);
     expect(find.byKey(const ValueKey('error-retry')), findsNothing);
     expect(find.byKey(const ValueKey('error-search')), findsNothing);
+    await h.dispose(tester);
+  });
+
+  testWidgets('pulling the page down asks the catalog again with refresh and reloads', (tester) async {
+    tester.view.physicalSize = const Size(600, 1200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final catalog = _CountingCatalog();
+    final h = await Harness.create(tester);
+    await h.pump(
+      tester,
+      ArtistPageScreen(artist: _ref),
+      extraOverrides: [ytmCatalogProvider.overrideWithValue(catalog)],
+    );
+    await _settle(tester);
+    expect(catalog.refreshFlags, [false]);
+
+    await tester.fling(find.text('Brani più ascoltati'), const Offset(0, 400), 1000);
+    await _settle(tester);
+    await _settle(tester);
+    expect(catalog.refreshFlags, [false, true, false], reason: 'refresh, then the provider reads the new copy');
     await h.dispose(tester);
   });
 }

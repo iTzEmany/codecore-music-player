@@ -8,6 +8,7 @@ import '../../../services/online/download_queue.dart';
 import '../../../services/online/youtube_service.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/format_utils.dart';
+import 'youtube_results.dart' show ytErrorText;
 
 /// «Ascolta» on a result row: plays it, then pauses and resumes it.
 class ListenButton extends ConsumerWidget {
@@ -153,5 +154,24 @@ class _Bar extends ConsumerWidget {
         ),
       ),
     );
+  }
+}
+
+/// Tells why an «Ascolta» failed, wherever the user is (results, artist page,
+/// suggestions...): the bar vanishing silently looked like a hang.
+class ListenErrorToaster extends ConsumerWidget {
+  const ListenErrorToaster({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    ref.listen(listenProvider.select((s) => s.error), (_, error) {
+      if (error == null) return;
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(SnackBar(content: Text(ytErrorText(context, error))));
+    });
+    return child;
   }
 }

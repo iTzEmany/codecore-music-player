@@ -2,7 +2,9 @@ import 'dart:io';
 
 import '../../core/app_log.dart';
 import '../../data/db/app_database.dart';
+import '../../data/repositories/hidden_playlists.dart';
 import '../../data/repositories/track_repository.dart';
+import 'package:path/path.dart' as p;
 import 'duplicate_cleanup.dart';
 
 /// Deletes files through the platform (Android's system dialog); returns the
@@ -43,6 +45,7 @@ class TrackDeleter {
     required this.removeFromQueue,
     FileDeleter? deleter,
     this.platform,
+    this.db,
   }) : _deleter = deleter ?? _deleteFile;
 
   final TrackRepository tracks;
@@ -50,6 +53,10 @@ class TrackDeleter {
   /// Takes the tracks out of the queue and lets the player release them.
   final Future<void> Function(Set<int> ids) removeFromQueue;
   final FileDeleter _deleter;
+
+  /// When given, the leftovers of deleted downloads are tidied: empty
+  /// technical album playlists and empty folders inside the library roots.
+  final AppDatabase? db;
 
   /// Only on Android: for the files plain deletion is not allowed to touch.
   final PlatformDeleter? platform;
@@ -101,6 +108,55 @@ class TrackDeleter {
       }
     }
     await tracks.deleteTracks([for (final t in gone) t.id]);
+    await _tidy(gone);
     return TrackDeleteReport(deleted: gone, failed: failed, refused: refused);
+  }
+
+  /// Best effort: a failure here never turns a successful delete into an error.
+  Future<void> _tidy(List<Track> gone) async {
+    final db = this.db;
+    if (db == null || gone.isEmpty) return;
+    try {
+      await _dropEmptyAlbumPlaylists(db);
+      final roots = [for (final f in await db.select(db.folders).get()) p.normalize(f.path)];
+      await _removeEmptyDirs(gone, roots);
+    } on Object catch (e, st) {
+      AppLog.w('tidy after delete failed', e, st);
+    }
+  }
+
+  /// «Scarica album» keeps a hidden playlist per album; with no track left it
+  /// is only clutter (its import rows go with it).
+  Future<void> _dropEmptyAlbumPlaylists(AppDatabase db) async {
+    final ids = await db.customSelect(
+      'SELECT i.playlist_id AS id FROM playlist_imports i '
+      "WHERE i.source_kind = '$ytmAlbumSourceKind' AND NOT EXISTS "
+      '(SELECT 1 FROM playlist_tracks t WHERE t.playlist_id = i.playlist_id)',
+    ).get();
+    for (final row in ids) {
+      final id = row.read<int>('id');
+      await (db.delete(db.playlistImports)..where((i) => i.playlistId.equals(id))).go();
+      await (db.delete(db.playlists)..where((pl) => pl.id.equals(id))).go();
+    }
+  }
+
+  /// Walks up from each deleted file's folder removing folders that are empty,
+  /// strictly inside a library root (a root itself is never removed).
+  Future<void> _removeEmptyDirs(List<Track> gone, List<String> roots) async {
+    final dirs = {for (final t in gone) p.dirname(t.path)};
+    for (var dir in dirs) {
+      dir = p.normalize(dir);
+      while (roots.any((r) => p.isWithin(r, dir))) {
+        final d = Directory(dir);
+        if (!await d.exists() || !(await d.list().isEmpty)) break;
+        try {
+          await d.delete();
+        } on FileSystemException catch (e, st) {
+          AppLog.w('empty folder not removed: $dir', e, st);
+          break;
+        }
+        dir = p.dirname(dir);
+      }
+    }
   }
 }

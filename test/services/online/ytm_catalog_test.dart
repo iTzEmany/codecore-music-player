@@ -165,6 +165,15 @@ void main() {
         throwsA(isA<YtException>().having((e) => e.kind, 'kind', YtErrorKind.network)));
   });
 
+  test('offline: the artist lookup by name finds an artist whose page was opened', () async {
+    final page = await catalog.artist(pinkFloyd, 'en');
+    adapter.offline = true;
+    final found = await catalog.searchArtists(page.value.ref.name.toUpperCase(), 'en');
+    expect(found.single.id, pinkFloyd);
+    await expectLater(catalog.searchArtists('Unknown Band', 'en'),
+        throwsA(isA<YtException>().having((e) => e.kind, 'kind', YtErrorKind.network)));
+  });
+
   test('a rate limit with a saved copy shows the copy', () async {
     await catalog.artist(pinkFloyd, 'en');
     clock = clock.add(const Duration(days: 5));

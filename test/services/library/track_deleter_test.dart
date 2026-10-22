@@ -50,6 +50,7 @@ void main() {
 
   TrackDeleter deleter({FileDeleter? files, PlatformDeleter? platform}) =>
       TrackDeleter(
+        db: db,
         tracks: repo,
         removeFromQueue: (ids) async => queueCalls.add(ids),
         deleter: files,
@@ -158,5 +159,28 @@ void main() {
     expect(r.deleted, isEmpty);
     expect(File(ep.path).existsSync(), isTrue);
     expect(queueCalls, isEmpty);
+  });
+
+  test('deleting a downloaded album drops its empty technical playlist and empty folders, never a root', () async {
+    final root = p.join(dir.path, 'Music');
+    final albumDir = Directory(p.join(root, 'Artist - Album'))..createSync(recursive: true);
+    await db.into(db.folders).insert(FoldersCompanion.insert(path: root, addedAt: 1));
+    final path = p.join(albumDir.path, 'a.mp3');
+    File(path).writeAsBytesSync([1]);
+    final id = await db.into(db.tracks).insert(TracksCompanion.insert(
+        path: path, title: 'a', albumKey: 'k', format: 'mp3', sizeBytes: 1, mtimeMs: 1, addedAt: 1));
+    final lists = PlaylistRepository(db);
+    final tech = await lists.create('Album');
+    await lists.addTracks(tech, [id]);
+    await db.into(db.playlistImports).insert(PlaylistImportsCompanion.insert(
+        playlistId: tech, sourceName: 'Album', createdAt: 1, sourceKind: const Value('ytm-album')));
+    final other = await lists.create('Mine');
+
+    await deleter().deleteTracks([(await repo.getById(id))!]);
+
+    expect(albumDir.existsSync(), isFalse);
+    expect(Directory(root).existsSync(), isTrue, reason: 'a library root stays');
+    expect(await db.select(db.playlistImports).get(), isEmpty);
+    expect((await db.select(db.playlists).get()).map((x) => x.id), [other]);
   });
 }

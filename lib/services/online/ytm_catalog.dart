@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart' show CancelToken;
 
 import '../../core/app_log.dart';
+import '../../core/text_utils.dart';
 import 'catalog_cache.dart';
 import 'innertube_client.dart';
 import 'search_cache.dart' show ytResultFromJson, ytResultToJson;
@@ -81,9 +82,29 @@ class YtmCatalog {
       hl: hl, mask: topCardMask, isEmpty: (r) => r == null);
 
   /// Artists matching [query], best first. Not cached.
-  Future<List<YtmArtistRef>> searchArtists(String query, String hl) =>
-      client.searchMusic(query, parseArtistSearch,
+  /// When the search cannot reach YouTube (offline), an artist whose page was
+  /// opened before is found by name in the cache, so its saved page opens.
+  Future<List<YtmArtistRef>> searchArtists(String query, String hl) async {
+    try {
+      return await client.searchMusic(query, parseArtistSearch,
           params: artistsFilter, hl: hl, mask: artistsMask, isEmpty: (r) => r.isEmpty);
+    } on YtException {
+      final saved = await _cachedArtist(query);
+      if (saved == null) rethrow;
+      AppLog.i('artist lookup offline: "${saved.name}" from the saved pages');
+      return [saved];
+    }
+  }
+
+  Future<YtmArtistRef?> _cachedArtist(String name) async {
+    final want = normalize(name);
+    if (want.isEmpty) return null;
+    for (final json in await cache.allJson(CatalogKind.artist)) {
+      final ref = YtmArtistPage.fromJson(json)?.ref;
+      if (ref != null && normalize(ref.name) == want) return ref;
+    }
+    return null;
+  }
 
   /// [refresh] skips a fresh cached copy (pull to refresh).
   Future<CatalogResult<YtmArtistPage>> artist(String id, String hl,

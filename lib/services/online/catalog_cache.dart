@@ -96,6 +96,15 @@ class CatalogCache {
     _scheduleWrite();
   }
 
+  /// The stored JSON of every page of [kind], without counting as a use.
+  Future<List<Object?>> allJson(CatalogKind kind) async {
+    final prefix = '${kind.name}:';
+    return [
+      for (final e in (await _load()).entries)
+        if (e.key.startsWith(prefix)) e.value.json,
+    ];
+  }
+
   Future<int> count() async => (await _load()).length;
 
   Future<void> clear() async {

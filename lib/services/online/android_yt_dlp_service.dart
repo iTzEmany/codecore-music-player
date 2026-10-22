@@ -20,6 +20,10 @@ class AndroidYtDlpService implements YoutubeService, StreamSource {
 
   /// A search that takes longer is cancelled and reported as a network error.
   static const searchTimeout = Duration(seconds: 45);
+  /// Stream resolution with the default clients can run YouTube's JS challenge
+  /// on the phone: much slower than a search, so it has its own limit.
+  static const streamTimeout = Duration(seconds: 90);
+  static const fastStreamTimeout = Duration(seconds: 20);
   final _progress = <String, StreamController<DownloadProgress>>{};
   int _counter = 0;
 
@@ -65,8 +69,21 @@ class AndroidYtDlpService implements YoutubeService, StreamSource {
 
   @override
   Future<Uri> streamUrl(YtResult r) async {
+    // Fast path: the android_vr client needs neither the JS challenge solver
+    // nor a PO token (~2 s instead of ~45 s on the phone). If it cannot serve
+    // this video (age limit, region...) yt-dlp's default clients take over.
+    try {
+      final fast = await _call(
+          {'url': r.downloadUrl, 'format': streamFormat, 'fast': true},
+          method: 'streamUrl', timeout: fastStreamTimeout);
+      final uri = parseStreamUrl(fast);
+      if (uri != null) return uri;
+    } on YtException catch (e) {
+      AppLog.i('listen: fast client failed (${e.kind}), using default clients');
+    }
     final out = await _call(
-        {'url': r.downloadUrl, 'format': streamFormat}, method: 'streamUrl');
+        {'url': r.downloadUrl, 'format': streamFormat},
+        method: 'streamUrl', timeout: streamTimeout);
     return parseStreamUrl(out) ??
         (throw const YtException(YtErrorKind.changed, 'no stream address'));
   }

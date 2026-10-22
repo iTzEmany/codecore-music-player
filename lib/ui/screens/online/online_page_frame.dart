@@ -9,7 +9,6 @@ import '../../theme/tokens.dart';
 import '../../widgets/activity_button.dart';
 import '../../widgets/selection_bar.dart';
 import '../youtube/listen_bar.dart';
-import '../youtube/youtube_results.dart' show ytErrorText;
 import 'online_song_row.dart';
 
 /// The frame of every online page (artist, album, long song list): a pinned
@@ -67,12 +66,6 @@ class _OnlinePageFrameState extends ConsumerState<OnlinePageFrame> {
   Widget build(BuildContext context) {
     final l = context.l10n;
     final cc = context.cc;
-    ref.listen(listenProvider.select((s) => s.error), (_, error) {
-      if (error == null) return;
-      ScaffoldMessenger.of(context)
-        ..clearSnackBars()
-        ..showSnackBar(SnackBar(content: Text(ytErrorText(context, error))));
-    });
     final key = widget.selectionKey;
     final picked = key == null ? null : ref.watch(selectionProvider(key));
     final scroll = CustomScrollView(
@@ -94,7 +87,11 @@ class _OnlinePageFrameState extends ConsumerState<OnlinePageFrame> {
         Positioned.fill(
           child: widget.onRefresh == null
               ? scroll
-              : RefreshIndicator(onRefresh: widget.onRefresh!, child: scroll),
+              // The spinner starts under the pinned bar, not behind the status bar.
+              : RefreshIndicator(
+                  onRefresh: widget.onRefresh!,
+                  edgeOffset: MediaQuery.paddingOf(context).top + kToolbarHeight,
+                  child: scroll),
         ),
         if (key != null && picked != null && picked.active)
           Positioned(

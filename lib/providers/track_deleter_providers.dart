@@ -11,6 +11,7 @@ final trackDeleterProvider = Provider<TrackDeleter>(
   (ref) => TrackDeleter(
     tracks: ref.watch(trackRepositoryProvider),
     removeFromQueue: ref.read(playerControllerProvider).removeTracks,
+    db: ref.watch(databaseProvider),
     platform: isAndroid ? deleteWithSystemDialog : null,
   ),
 );

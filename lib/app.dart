@@ -12,6 +12,7 @@ import 'providers/activity_log_providers.dart';
 import 'providers/import_notification_providers.dart';
 import 'l10n/l10n_ext.dart';
 import 'ui/screens/onboarding/onboarding_gate.dart';
+import 'ui/screens/youtube/listen_bar.dart' show ListenErrorToaster;
 import 'ui/shell/app_shell.dart';
 import 'ui/theme/app_theme.dart';
 
@@ -69,7 +70,7 @@ class CodecoreApp extends ConsumerWidget {
         child: AppBackground(
           colors: themeColors,
           background: themeBackground,
-          child: child ?? const SizedBox.shrink(),
+          child: ListenErrorToaster(child: child ?? const SizedBox.shrink()),
         ),
       ),
       home: const OnboardingGate(child: AppShell()),

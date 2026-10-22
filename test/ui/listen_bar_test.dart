@@ -5,9 +5,11 @@ import 'package:codecore/providers/youtube_providers.dart';
 import 'package:codecore/services/online/download_index.dart';
 import 'package:codecore/services/online/download_queue.dart';
 import 'package:codecore/services/online/youtube_service.dart';
+import 'package:codecore/ui/screens/youtube/listen_bar.dart';
 import 'package:codecore/ui/screens/youtube/youtube_results.dart';
 import 'package:dio/dio.dart' show CancelToken;
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
 
@@ -102,6 +104,32 @@ void main() {
     await _settle(tester);
     expect(find.byKey(const ValueKey('listen-bar')), findsNothing);
     expect(players.single.disposed, isTrue);
+    await h.dispose(tester);
+  });
+
+  testWidgets('a failed «Ascolta» says why, also away from the results page', (tester) async {
+    tester.view.physicalSize = const Size(420, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final h = await Harness.create(tester);
+    final dir = Directory.systemTemp.createTempSync('listen');
+    addTearDown(() => dir.deleteSync(recursive: true));
+    await h.pump(
+      tester,
+      const Scaffold(body: ListenErrorToaster(child: SizedBox())),
+      extraOverrides: [
+        downloadIndexProvider.overrideWith((ref) async => DownloadIndex(File(p.join(dir.path, 'd.json')))),
+        streamResolverProvider.overrideWithValue(
+            (r) async => throw const YtException(YtErrorKind.network, 'search timed out')),
+      ],
+    );
+    final container = ProviderScope.containerOf(tester.element(find.byType(ListenErrorToaster)));
+    await tester.runAsync(() => container
+        .read(listenProvider.notifier)
+        .start(const YtResult(id: 'x', title: 'T', channel: 'C', duration: Duration(minutes: 3))));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.byType(SnackBar), findsOneWidget);
     await h.dispose(tester);
   });
 }
