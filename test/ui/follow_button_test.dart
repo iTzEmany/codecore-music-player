@@ -91,6 +91,10 @@ void main() {
       find.textContaining('Non segui ancora nessun artista'),
       findsOneWidget,
     );
+    // Reachable with no releases: the page has «Controlla ora».
+    await tester.tap(find.byKey(const ValueKey('open-new-releases')));
+    await _settle(tester);
+    expect(find.byKey(const ValueKey('check-now')), findsOneWidget);
     await close(tester);
   });
 
@@ -117,6 +121,9 @@ void main() {
       expect(find.byTooltip('Riattiva notifiche'), findsOneWidget);
 
       await tester.tap(find.byKey(const ValueKey('unfollow-UCm')));
+      await _settle(tester);
+      expect(find.text('Smettere di seguire Muse?'), findsOneWidget);
+      await tester.tap(find.widgetWithText(FilledButton, 'Non seguire più'));
       await _settle(tester);
       expect(find.text('Muse'), findsNothing);
       final muse = (await rows(tester)).firstWhere((r) => r.ytmId == 'UCm');

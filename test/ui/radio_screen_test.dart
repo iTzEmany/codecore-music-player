@@ -185,7 +185,7 @@ void main() {
     expect(find.text('Risultati'), findsOneWidget);
     expect(find.text('Vicino a te'), findsNothing);
     expect(find.text('Radio Vicina Uno'), findsOneWidget);
-    expect(find.text('Solo Italy'), findsOneWidget);
+    expect(find.text('Solo Italia'), findsOneWidget);
     await h.dispose(tester);
   });
 
@@ -227,7 +227,7 @@ void main() {
     await tester.tap(find.text('Lombardia ▾'));
     await _settle(tester);
     expect(find.byKey(const ValueKey('radio-country')), findsOneWidget);
-    expect(find.text('Paese: Italy'), findsOneWidget);
+    expect(find.text('Paese: Italia'), findsOneWidget);
     await tester.scrollUntilVisible(find.byKey(const ValueKey('region-piemonte')), 100,
         scrollable: find.descendant(
             of: find.byType(RadioRegionSheet), matching: find.byType(Scrollable)));

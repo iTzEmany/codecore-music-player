@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/radio_providers.dart';
 import '../../../providers/settings_providers.dart';
+import '../../../services/radio/country_names.dart';
 import '../../theme/tokens.dart';
 import 'add_station_dialog.dart';
 import 'radio_region_sheet.dart';
@@ -59,13 +60,16 @@ class _RadioScreenState extends ConsumerState<RadioScreen> {
     final searching = _query.length >= 2;
     final onlyCountry = ref.watch(settingsProvider.select((s) => s.radioOnlyCountry));
     final code = ref.watch(radioCountryProvider);
-    final countryName = ref
-            .watch(radioCountriesProvider)
-            .value
-            ?.where((c) => c.code == code)
-            .map((c) => c.name)
-            .firstOrNull ??
-        code;
+    final countryName = countryNameIn(
+        code,
+        Localizations.localeOf(context).languageCode,
+        ref
+                .watch(radioCountriesProvider)
+                .value
+                ?.where((c) => c.code == code)
+                .map((c) => c.name)
+                .firstOrNull ??
+            code);
     final List<Widget> body;
     if (searching) {
       body = [SearchResultsSection(query: _query)];

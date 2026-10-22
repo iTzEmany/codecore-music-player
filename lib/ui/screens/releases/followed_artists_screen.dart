@@ -11,11 +11,14 @@ import '../../../providers/releases_providers.dart';
 import '../../../providers/ytm_catalog_providers.dart';
 import '../../../services/online/ytm_artist.dart';
 import '../../theme/tokens.dart';
+import '../../shell/shell_nav.dart';
+import '../../widgets/confirm.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/net_thumbnail.dart';
 import '../online/artist_page_sections.dart' show thumbAt;
 import '../online/artist_picker_sheet.dart' show ArtistPickerSheet;
 import 'follow_button.dart' show followArtist;
+import 'new_releases_screen.dart';
 
 /// The artists whose new releases are checked: followed by hand and the most
 /// listened (automatic), each with its bell and «Non seguire più».
@@ -35,7 +38,19 @@ class FollowedArtistsScreen extends ConsumerWidget {
         if (!followedIds.contains(p.ytmId)) p,
     ];
     return Scaffold(
-      appBar: AppBar(title: Text(l.releasesFollowedTitle(rows.length))),
+      appBar: AppBar(
+        title: Text(l.releasesFollowedTitle(rows.length)),
+        actions: [
+          // The page is also the way to «Controlla ora» when the shelf is hidden.
+          IconButton(
+            key: const ValueKey('open-new-releases'),
+            tooltip: l.newReleasesTitle,
+            onPressed: () =>
+                ShellNav.open<void>(context, const NewReleasesScreen()),
+            icon: const Icon(Icons.new_releases_outlined),
+          ),
+        ],
+      ),
       body: !followed.hasValue
           ? const Center(child: CircularProgressIndicator())
           : rows.isEmpty && toConfirm.isEmpty
@@ -108,7 +123,16 @@ class _FollowedRow extends ConsumerWidget {
           IconButton(
             key: ValueKey('unfollow-${artist.ytmId}'),
             tooltip: l.followStop,
-            onPressed: () => repo.unfollow(artist.ytmId),
+            onPressed: () async {
+              final ok = await showConfirm(
+                context,
+                title: l.followStopTitle(artist.name),
+                body: l.followStopBody,
+                confirmLabel: l.followStop,
+                destructive: true,
+              );
+              if (ok) await repo.unfollow(artist.ytmId);
+            },
             icon: const Icon(Icons.person_remove_outlined),
           ),
         ],

@@ -157,7 +157,10 @@ class JustAudioBackend implements AudioBackend, GaplessCapable {
     Map<String, String> headers = const {},
   }) async {
     try {
-      await _player.setAudioSource(AudioSource.uri(uri, headers: headers));
+      // An empty (non-null) map would still start just_audio's local proxy,
+      // which breaks HLS: relative segments after a redirect.
+      await _player.setAudioSource(
+          AudioSource.uri(uri, headers: headers.isEmpty ? null : headers));
     } on Object catch (e, st) {
       AppLog.w('stream load failed: ${uri.host}', e, st);
       throw BackendException('unplayable stream: $e',

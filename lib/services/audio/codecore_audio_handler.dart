@@ -153,6 +153,13 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   /// Whether the current entry is a live radio (no length, no seeking).
   bool get isRadio => _radioNow != null;
 
+  /// The station the queue points at, even while nothing is loaded (after an
+  /// error or while switching): navigation must not depend on `_current`.
+  RadioEntry? get _queueRadio {
+    final id = _queue.currentId;
+    return id == null ? null : online?.radioOf(id);
+  }
+
   /// What the station says is on air, or null.
   String? get onAir => _onAir;
   Stream<String?> get onAirStream => _onAirController.stream;
@@ -217,7 +224,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   bool get isPlaying => _state == BackendState.playing;
   List<int> get queueIds => _queue.items;
   int get currentIndex => _queue.currentIndex;
-  bool get hasNext => _queue.hasNext;
+  bool get hasNext => _queue.hasNext || (_queueRadio != null && _queue.items.length > 1);
   bool get shuffleEnabled => _queue.shuffle;
   PlayRepeat get repeatMode => _queue.repeat;
 
@@ -464,6 +471,8 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   /// next play connects again.
   void _onRadioDrop(RadioEntry radio, bool wasLive) {
     if (_radioBusy || (_retryTimer?.isActive ?? false)) return;
+    // A late event of the station we are leaving must not retry it.
+    if (!identical(radio, _queueRadio)) return;
     if (!wasLive) {
       _radioStale = true;
       return;
@@ -951,7 +960,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     if (_queue.currentId == null) return;
     var next = _queue.next();
     // Past the last station the list starts again.
-    if (next == null && isRadio && _queue.items.length > 1) {
+    if (next == null && _queueRadio != null && _queue.items.length > 1) {
       _queue.jumpTo(0);
       next = _queue.currentId;
     }
@@ -970,11 +979,16 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
       return;
     }
     if (_queue.currentId == null) return;
-    if (!isRadio && _position > const Duration(seconds: 3)) {
+    if (_queueRadio != null) {
+      // A live station has no start to go back to: the previous one, wrapping.
+      final n = _queue.items.length;
+      if (n > 1) _queue.jumpTo((_queue.currentIndex - 1 + n) % n);
+    } else if (_position > const Duration(seconds: 3)) {
       await seek(Duration.zero);
       return;
+    } else {
+      _queue.previous();
     }
-    _queue.previous();
     await _loadCurrent(play: true);
   }
 

@@ -42,7 +42,7 @@ void main() {
       (tester) async {
     await play(tester, const NowPlayingScreen());
     expect(find.text('Radio Alfa'), findsOneWidget);
-    expect(find.text('In diretta'), findsWidgets);
+    expect(find.text('In diretta'), findsOneWidget);
     expect(find.textContaining('MP3 · 128 kbps'), findsOneWidget);
     expect(find.byType(NpSeekRow), findsNothing);
     expect(find.byType(NpLiveRow), findsOneWidget);

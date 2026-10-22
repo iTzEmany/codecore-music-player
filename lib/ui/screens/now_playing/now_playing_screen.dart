@@ -329,7 +329,10 @@ class _Player extends ConsumerWidget {
                       child: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 2),
                         child: Text(
-                          texts?.subtitle ?? track.artist ?? l.unknownArtist,
+                          // «In diretta» is already in the live row below.
+                          texts == null
+                              ? (track.artist ?? l.unknownArtist)
+                              : (onAir == null ? '' : texts.subtitle),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: theme.bodyLarge?.copyWith(color: cc.textMuted),

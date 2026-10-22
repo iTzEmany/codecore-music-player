@@ -49,7 +49,7 @@ String streamLinkErrorText(AppLocalizations l, StreamLinkError e) => switch (e) 
 
 /// «MP3 · 128 kbps», whatever is known.
 String radioQualityLine(RadioStation s) => [
-      if (s.codec.isNotEmpty) s.codec.toUpperCase(),
+      if (s.codec.isNotEmpty && s.codec.toUpperCase() != 'UNKNOWN') s.codec.toUpperCase(),
       if (s.bitrate > 0) '${s.bitrate} kbps',
     ].join(' · ');
 

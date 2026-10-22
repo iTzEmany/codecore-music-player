@@ -6,6 +6,7 @@ import '../../../providers/radio_providers.dart';
 import '../../../providers/settings_providers.dart';
 import '../../../services/radio/radio_browser_client.dart';
 import '../../../services/radio/regions.dart';
+import '../../../services/radio/country_names.dart';
 import '../../theme/tokens.dart';
 
 /// Country and region for «Vicino a te». Nothing about the user's position is
@@ -48,7 +49,8 @@ class _RadioRegionSheetState extends ConsumerState<RadioRegionSheet> {
     final theme = Theme.of(context).textTheme;
     final code = ref.watch(radioCountryProvider);
     final countries = ref.watch(radioCountriesProvider);
-    final countryName = countries.value?.where((c) => c.code == code).map((c) => c.name).firstOrNull ?? code;
+    final countryName = countryNameIn(code, Localizations.localeOf(context).languageCode,
+        countries.value?.where((c) => c.code == code).map((c) => c.name).firstOrNull ?? code);
     final selected = ref.watch(settingsProvider.select((s) => s.radioRegion));
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

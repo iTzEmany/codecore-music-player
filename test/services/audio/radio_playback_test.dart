@@ -96,6 +96,18 @@ void main() {
     expect(started, ['b', 'c', 'a', 'c']);
   });
 
+  test('previous goes to the previous station even after minutes, and wraps', () async {
+    await handler.playStations([station('a'), station('b'), station('c')], 1);
+    backend.posC.add(const Duration(seconds: 90));
+    await pumpEventQueue();
+    await handler.skipToPrevious();
+    expect(backend.loadedUris.last.uri.path, '/a');
+    await handler.skipToPrevious(); // first station: the last one, not a restart
+    expect(backend.loadedUris.last.uri.path, '/c');
+    expect(handler.queueIds, hasLength(3));
+    expect(handler.hasNext, isTrue);
+  });
+
   test('a manual station is reported too: the caller skips the click', () async {
     await handler.playStations([station('manual:x')], 0);
     expect(started, ['manual:x']);
@@ -136,6 +148,17 @@ void main() {
     expect(failures.single.title, 'Radio a');
     expect(h.currentTrack, isNull);
     expect(started, ['a']); // retries are not new starts
+  });
+
+  testWidgets('a late drop of the station we are leaving does not retry it', (tester) async {
+    final h = idleHandler();
+    await h.playStations([station('a'), station('b')], 0);
+    final switching = h.playStations([station('b')], 0);
+    backend.stateC.add(BackendState.completed); // still the old stream's event
+    await switching;
+    await tester.pump(const Duration(seconds: 3));
+    expect(backend.loadedUris.map((u) => u.uri.path), ['/a', '/b']);
+    await tester.pump(const Duration(seconds: 11));
   });
 
   testWidgets('a stream that drops while playing reconnects and plays again', (tester) async {
