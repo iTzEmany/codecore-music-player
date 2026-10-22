@@ -124,10 +124,16 @@ class _PodcastTile extends StatelessWidget {
     ].join(', ');
     return ListTile(
       key: ValueKey('podcast-${p.id}'),
-      leading: CoverImage(coverKey: p.coverKey, size: 48),
-      title: Text(p.title, maxLines: 1, overflow: TextOverflow.ellipsis),
+      leading: CoverImage(coverKey: p.coverKey, size: 56, radius: CcDims.rGrid),
+      title: Text(
+        p.title,
+        style: Theme.of(context).textTheme.titleSmall,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
       subtitle: Text(
         [if (p.author != null) p.author!, line].join(', '),
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: context.cc.textMuted),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       ),
