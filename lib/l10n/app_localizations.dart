@@ -6998,6 +6998,72 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Troppi errori di riproduzione: i suggeriti sono spenti fino al riavvio'**
   String get shufflePlusNoticeTooManyErrors;
+
+  /// No description provided for @suggestionsRecentTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Suggeriti di recente'**
+  String get suggestionsRecentTitle;
+
+  /// No description provided for @suggestionsRecentEmpty.
+  ///
+  /// In it, this message translates to:
+  /// **'Nessun suggerito per ora. Compaiono qui quando usi Casuale+.'**
+  String get suggestionsRecentEmpty;
+
+  /// No description provided for @suggestionsClear.
+  ///
+  /// In it, this message translates to:
+  /// **'Svuota registro'**
+  String get suggestionsClear;
+
+  /// No description provided for @suggestionsClearBody.
+  ///
+  /// In it, this message translates to:
+  /// **'Dimentica i suggeriti e i «Non mi piace»: potranno tornare.'**
+  String get suggestionsClearBody;
+
+  /// No description provided for @suggestionsRowNote.
+  ///
+  /// In it, this message translates to:
+  /// **'simile a «{seed}» · {outcome}'**
+  String suggestionsRowNote(String seed, String outcome);
+
+  /// No description provided for @suggestionOutcomeQueued.
+  ///
+  /// In it, this message translates to:
+  /// **'In coda'**
+  String get suggestionOutcomeQueued;
+
+  /// No description provided for @suggestionOutcomeSkipped.
+  ///
+  /// In it, this message translates to:
+  /// **'Saltato'**
+  String get suggestionOutcomeSkipped;
+
+  /// No description provided for @suggestionOutcomeHeard.
+  ///
+  /// In it, this message translates to:
+  /// **'Ascoltato'**
+  String get suggestionOutcomeHeard;
+
+  /// No description provided for @suggestionOutcomeDownloaded.
+  ///
+  /// In it, this message translates to:
+  /// **'Scaricato'**
+  String get suggestionOutcomeDownloaded;
+
+  /// No description provided for @suggestionOutcomeDisliked.
+  ///
+  /// In it, this message translates to:
+  /// **'Non mi piace'**
+  String get suggestionOutcomeDisliked;
+
+  /// No description provided for @memorySuggestions.
+  ///
+  /// In it, this message translates to:
+  /// **'Suggeriti di Casuale+'**
+  String get memorySuggestions;
 }
 
 class _AppLocalizationsDelegate

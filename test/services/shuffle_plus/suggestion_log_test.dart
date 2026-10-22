@@ -68,13 +68,16 @@ void main() {
     expect(log.recent.map((r) => r.videoId), ['x8', 'x7', 'x6', 'x5', 'x0']);
   });
 
-  test('clear empties the file too', () async {
+  test('clear empties the history and the file but keeps «Non mi piace»', () async {
     final log = open();
     await log.load();
     add(log, 'a');
+    add(log, 'b');
+    log.setOutcome('b', SuggestionOutcome.disliked);
     await log.clear();
     final again = open();
     await again.load();
-    expect(again.length, 0);
+    expect(again.recent.map((r) => r.videoId), ['b']);
+    expect(again.disliked('b'), isTrue);
   });
 }

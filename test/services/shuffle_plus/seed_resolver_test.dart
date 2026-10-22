@@ -89,6 +89,14 @@ void main() {
     expect((await reread.get(SeedIndex.keyOf('Mother', 'Pink Floyd')))?.id, 'o7MlC_Qrmmc');
   });
 
+  test('clearing the index forgets every id, in memory and on disk', () async {
+    await index.put('k', 'abc');
+    await index.clear();
+    expect(await index.get('k'), isNull);
+    final reread = SeedIndex(file: () async => File(p.join(dir.path, 'seed_ids.json')));
+    expect(await reread.get('k'), isNull);
+  });
+
   test('«not found» is remembered and tried again after 30 days', () async {
     answer = const [];
     final r = make();

@@ -87,6 +87,12 @@ class SeedIndex {
     _scheduleWrite();
   }
 
+  /// Forgets every id (Memoria > «Svuota cache»).
+  Future<void> clear() async {
+    (await _load()).clear();
+    await flush();
+  }
+
   void _scheduleWrite() {
     _timer?.cancel();
     _timer = Timer(writeDelay, () => unawaited(flush()));

@@ -2810,5 +2810,26 @@
   "shufflePlusBlockMetered": "In pausa: rete a consumo",
   "shufflePlusBlockStopped": "Spento fino al riavvio: troppi errori di riproduzione",
   "shufflePlusNoticeRateLimited": "YouTube chiede di rallentare: i suggeriti sono in pausa per 15 minuti",
-  "shufflePlusNoticeTooManyErrors": "Troppi errori di riproduzione: i suggeriti sono spenti fino al riavvio"
+  "shufflePlusNoticeTooManyErrors": "Troppi errori di riproduzione: i suggeriti sono spenti fino al riavvio",
+  "suggestionsRecentTitle": "Suggeriti di recente",
+  "suggestionsRecentEmpty": "Nessun suggerito per ora. Compaiono qui quando usi Casuale+.",
+  "suggestionsClear": "Svuota registro",
+  "suggestionsClearBody": "Dimentica i suggeriti e i «Non mi piace»: potranno tornare.",
+  "suggestionsRowNote": "simile a «{seed}» · {outcome}",
+  "@suggestionsRowNote": {
+    "placeholders": {
+      "seed": {
+        "type": "String"
+      },
+      "outcome": {
+        "type": "String"
+      }
+    }
+  },
+  "suggestionOutcomeQueued": "In coda",
+  "suggestionOutcomeSkipped": "Saltato",
+  "suggestionOutcomeHeard": "Ascoltato",
+  "suggestionOutcomeDownloaded": "Scaricato",
+  "suggestionOutcomeDisliked": "Non mi piace",
+  "memorySuggestions": "Suggeriti di Casuale+"
 }

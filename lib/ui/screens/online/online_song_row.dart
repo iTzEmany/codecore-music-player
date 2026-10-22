@@ -115,6 +115,7 @@ class OnlineSongRow extends StatelessWidget {
     this.onArtistTap,
     this.square = false,
     this.number,
+    this.note,
   });
 
   final YtResult result;
@@ -140,6 +141,9 @@ class OnlineSongRow extends StatelessWidget {
 
   /// Place on the record, shown in the picture's place.
   final int? number;
+
+  /// A line under the artist (replaces «Già in libreria»).
+  final String? note;
 
   @override
   Widget build(BuildContext context) {
@@ -267,7 +271,12 @@ class OnlineSongRow extends StatelessWidget {
                             ),
                         ],
                       ),
-                      if (inLibrary)
+                      if (note != null)
+                        Text(note!,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.labelSmall?.copyWith(color: cc.textMuted))
+                      else if (inLibrary)
                         Text(l.ytAlreadyInLibrary,
                             style: theme.labelSmall?.copyWith(color: cc.accentSoft)),
                     ],

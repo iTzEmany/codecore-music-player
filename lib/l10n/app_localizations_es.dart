@@ -4415,4 +4415,41 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get shufflePlusNoticeTooManyErrors =>
       'Demasiados errores de reproducción: sugerencias apagadas hasta reiniciar';
+
+  @override
+  String get suggestionsRecentTitle => 'Sugeridos recientes';
+
+  @override
+  String get suggestionsRecentEmpty =>
+      'Aún no hay sugerencias. Aparecen aquí cuando usas Aleatorio+.';
+
+  @override
+  String get suggestionsClear => 'Vaciar historial';
+
+  @override
+  String get suggestionsClearBody =>
+      'Olvida las sugerencias y los «No me gusta»: podrán volver.';
+
+  @override
+  String suggestionsRowNote(String seed, String outcome) {
+    return 'parecido a «$seed» · $outcome';
+  }
+
+  @override
+  String get suggestionOutcomeQueued => 'En la cola';
+
+  @override
+  String get suggestionOutcomeSkipped => 'Saltado';
+
+  @override
+  String get suggestionOutcomeHeard => 'Escuchado';
+
+  @override
+  String get suggestionOutcomeDownloaded => 'Descargado';
+
+  @override
+  String get suggestionOutcomeDisliked => 'No me gusta';
+
+  @override
+  String get memorySuggestions => 'Sugeridos de Aleatorio+';
 }

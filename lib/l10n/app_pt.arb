@@ -2720,5 +2720,26 @@
   "shufflePlusBlockMetered": "Em pausa: rede com consumo limitado",
   "shufflePlusBlockStopped": "Desligado até reiniciar: demasiados erros de reprodução",
   "shufflePlusNoticeRateLimited": "O YouTube pede para abrandar: sugestões em pausa durante 15 minutos",
-  "shufflePlusNoticeTooManyErrors": "Demasiados erros de reprodução: sugestões desligadas até reiniciar"
+  "shufflePlusNoticeTooManyErrors": "Demasiados erros de reprodução: sugestões desligadas até reiniciar",
+  "suggestionsRecentTitle": "Sugeridos recentemente",
+  "suggestionsRecentEmpty": "Ainda não há sugestões. Aparecem aqui quando usas o Aleatório+.",
+  "suggestionsClear": "Limpar histórico",
+  "suggestionsClearBody": "Esquece as sugestões e os «Não gosto»: as músicas podem voltar.",
+  "suggestionsRowNote": "parecido com «{seed}» · {outcome}",
+  "@suggestionsRowNote": {
+    "placeholders": {
+      "seed": {
+        "type": "String"
+      },
+      "outcome": {
+        "type": "String"
+      }
+    }
+  },
+  "suggestionOutcomeQueued": "Na fila",
+  "suggestionOutcomeSkipped": "Ignorado",
+  "suggestionOutcomeHeard": "Ouvido",
+  "suggestionOutcomeDownloaded": "Transferido",
+  "suggestionOutcomeDisliked": "Não gosto",
+  "memorySuggestions": "Sugestões do Aleatório+"
 }

@@ -4399,4 +4399,41 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get shufflePlusNoticeTooManyErrors =>
       'Too many playback errors: suggestions are off until restart';
+
+  @override
+  String get suggestionsRecentTitle => 'Recently suggested';
+
+  @override
+  String get suggestionsRecentEmpty =>
+      'Nothing suggested yet. Songs show up here when you use Shuffle+.';
+
+  @override
+  String get suggestionsClear => 'Clear history';
+
+  @override
+  String get suggestionsClearBody =>
+      'Forgets the suggestions and the «Dislike» marks: songs may come back.';
+
+  @override
+  String suggestionsRowNote(String seed, String outcome) {
+    return 'similar to «$seed» · $outcome';
+  }
+
+  @override
+  String get suggestionOutcomeQueued => 'Queued';
+
+  @override
+  String get suggestionOutcomeSkipped => 'Skipped';
+
+  @override
+  String get suggestionOutcomeHeard => 'Heard';
+
+  @override
+  String get suggestionOutcomeDownloaded => 'Downloaded';
+
+  @override
+  String get suggestionOutcomeDisliked => 'Disliked';
+
+  @override
+  String get memorySuggestions => 'Shuffle+ suggestions';
 }

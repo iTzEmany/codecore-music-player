@@ -74,6 +74,46 @@ void main() {
     expect(clearableKinds, isNot(contains(AppDataKind.tagBackups)));
   });
 
+  test('clearing the caches empties the Shuffle+ files too and counts them', () async {
+    final log = put('support/suggestions.json', 30);
+    final seeds = put('support/seed_ids.json', 12);
+    final cleaner = CacheCleaner(
+      jamDir: Directory(p.join(root.path, 'jam_cache')),
+      themeDir: Directory(p.join(root.path, 'theme')),
+      searchCacheFile: File(p.join(root.path, 'search_cache.json')),
+      clearSearchCache: () async {},
+      catalogCacheFile: File(p.join(root.path, 'catalog_cache.json')),
+      clearCatalogCache: () async {},
+      clearImageMemory: () {},
+      imageMemoryBytes: () => 0,
+      jamActive: () => false,
+      suggestionFiles: [log, seeds],
+      clearSuggestions: () async {
+        log.writeAsStringSync('[]');
+        seeds.writeAsStringSync('{}');
+      },
+    );
+    final r = await cleaner.clear();
+    expect(r.freedBytes, 30 + 12 - 2 - 2);
+    expect(clearableKinds, contains(AppDataKind.suggestions));
+  });
+
+  test('the app data list measures the Shuffle+ files', () async {
+    final paths = AppDataPaths(
+      covers: Directory(p.join(root.path, 'covers')),
+      database: File(p.join(root.path, 'db')),
+      jam: Directory(p.join(root.path, 'jam')),
+      theme: Directory(p.join(root.path, 'theme')),
+      tagBackups: Directory(p.join(root.path, 'tb')),
+      searchCache: File(p.join(root.path, 's')),
+      catalogCache: File(p.join(root.path, 'c')),
+      log: File(p.join(root.path, 'l')),
+      suggestionFiles: [put('suggestions.json', 5), put('seed_ids.json', 7)],
+    );
+    final items = await measureAppData(paths, podcastBytes: 0, imageMemoryBytes: 0);
+    expect(items.firstWhere((i) => i.kind == AppDataKind.suggestions).bytes, 12);
+  });
+
   test('the Jam cache is left alone while a Jam is running', () async {
     final jam = put('jam_cache/1.mp3', 100);
     final search = put('search_cache.json', 2);

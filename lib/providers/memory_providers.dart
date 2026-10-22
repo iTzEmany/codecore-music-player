@@ -16,6 +16,7 @@ import 'import_providers.dart' show searchCacheProvider;
 import 'ytm_catalog_providers.dart' show catalogCacheProvider;
 import 'jam_providers.dart';
 import 'library_providers.dart';
+import 'shuffle_plus_providers.dart' show seedIndexProvider, suggestionLogProvider;
 
 final memoryQueriesProvider = Provider<MemoryQueries>(
   (ref) => MemoryQueries(ref.watch(databaseProvider)),
@@ -48,6 +49,10 @@ final appDataPathsProvider = FutureProvider<AppDataPaths>((ref) async {
     searchCache: File(p.join(support, 'search_cache.json')),
     catalogCache: File(p.join(support, 'catalog_cache.json')),
     log: File(p.join(support, 'codecore.log')),
+    suggestionFiles: [
+      File(p.join(support, 'suggestions.json')),
+      File(p.join(support, 'seed_ids.json')),
+    ],
   );
 });
 
@@ -102,6 +107,11 @@ class MemoryActions {
         ..clearLiveImages(),
       imageMemoryBytes: () =>
           PaintingBinding.instance.imageCache.currentSizeBytes,
+      suggestionFiles: paths.suggestionFiles,
+      clearSuggestions: () async {
+        await _ref.read(suggestionLogProvider).clear();
+        await _ref.read(seedIndexProvider).clear();
+      },
       pickerTempDir: await pickerTempDirectory(),
       jamActive: () {
         final phase = _ref.read(jamProvider).phase;

@@ -4421,4 +4421,41 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get shufflePlusNoticeTooManyErrors =>
       'Zu viele Wiedergabefehler: Vorschläge sind bis zum Neustart aus';
+
+  @override
+  String get suggestionsRecentTitle => 'Zuletzt vorgeschlagen';
+
+  @override
+  String get suggestionsRecentEmpty =>
+      'Noch nichts vorgeschlagen. Titel erscheinen hier, sobald du Shuffle+ nutzt.';
+
+  @override
+  String get suggestionsClear => 'Verlauf leeren';
+
+  @override
+  String get suggestionsClearBody =>
+      'Vergisst die Vorschläge und die „Gefällt mir nicht“-Markierungen: Titel können wiederkommen.';
+
+  @override
+  String suggestionsRowNote(String seed, String outcome) {
+    return 'ähnlich wie „$seed“ · $outcome';
+  }
+
+  @override
+  String get suggestionOutcomeQueued => 'In der Warteschlange';
+
+  @override
+  String get suggestionOutcomeSkipped => 'Übersprungen';
+
+  @override
+  String get suggestionOutcomeHeard => 'Gehört';
+
+  @override
+  String get suggestionOutcomeDownloaded => 'Heruntergeladen';
+
+  @override
+  String get suggestionOutcomeDisliked => 'Gefällt mir nicht';
+
+  @override
+  String get memorySuggestions => 'Shuffle+-Vorschläge';
 }

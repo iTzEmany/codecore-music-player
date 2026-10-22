@@ -2453,5 +2453,26 @@
   "shufflePlusBlockMetered": "En pausa: red de pago por uso",
   "shufflePlusBlockStopped": "Apagado hasta reiniciar: demasiados errores de reproducción",
   "shufflePlusNoticeRateLimited": "YouTube pide ir más despacio: sugerencias en pausa durante 15 minutos",
-  "shufflePlusNoticeTooManyErrors": "Demasiados errores de reproducción: sugerencias apagadas hasta reiniciar"
+  "shufflePlusNoticeTooManyErrors": "Demasiados errores de reproducción: sugerencias apagadas hasta reiniciar",
+  "suggestionsRecentTitle": "Sugeridos recientes",
+  "suggestionsRecentEmpty": "Aún no hay sugerencias. Aparecen aquí cuando usas Aleatorio+.",
+  "suggestionsClear": "Vaciar historial",
+  "suggestionsClearBody": "Olvida las sugerencias y los «No me gusta»: podrán volver.",
+  "suggestionsRowNote": "parecido a «{seed}» · {outcome}",
+  "@suggestionsRowNote": {
+    "placeholders": {
+      "seed": {
+        "type": "String"
+      },
+      "outcome": {
+        "type": "String"
+      }
+    }
+  },
+  "suggestionOutcomeQueued": "En la cola",
+  "suggestionOutcomeSkipped": "Saltado",
+  "suggestionOutcomeHeard": "Escuchado",
+  "suggestionOutcomeDownloaded": "Descargado",
+  "suggestionOutcomeDisliked": "No me gusta",
+  "memorySuggestions": "Sugeridos de Aleatorio+"
 }

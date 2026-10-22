@@ -2453,5 +2453,26 @@
   "shufflePlusBlockMetered": "Paused: metered network",
   "shufflePlusBlockStopped": "Off until restart: too many playback errors",
   "shufflePlusNoticeRateLimited": "YouTube asks to slow down: suggestions are paused for 15 minutes",
-  "shufflePlusNoticeTooManyErrors": "Too many playback errors: suggestions are off until restart"
+  "shufflePlusNoticeTooManyErrors": "Too many playback errors: suggestions are off until restart",
+  "suggestionsRecentTitle": "Recently suggested",
+  "suggestionsRecentEmpty": "Nothing suggested yet. Songs show up here when you use Shuffle+.",
+  "suggestionsClear": "Clear history",
+  "suggestionsClearBody": "Forgets the suggestions and the «Dislike» marks: songs may come back.",
+  "suggestionsRowNote": "similar to «{seed}» · {outcome}",
+  "@suggestionsRowNote": {
+    "placeholders": {
+      "seed": {
+        "type": "String"
+      },
+      "outcome": {
+        "type": "String"
+      }
+    }
+  },
+  "suggestionOutcomeQueued": "Queued",
+  "suggestionOutcomeSkipped": "Skipped",
+  "suggestionOutcomeHeard": "Heard",
+  "suggestionOutcomeDownloaded": "Downloaded",
+  "suggestionOutcomeDisliked": "Disliked",
+  "memorySuggestions": "Shuffle+ suggestions"
 }

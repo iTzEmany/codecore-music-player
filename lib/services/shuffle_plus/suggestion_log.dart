@@ -140,8 +140,10 @@ class SuggestionLog {
     _scheduleWrite();
   }
 
+  /// Forgets the history but keeps «Non mi piace»: those are the user's
+  /// choices, not a cache.
   Future<void> clear() async {
-    _records.clear();
+    _records.removeWhere((r) => r.outcome != SuggestionOutcome.disliked);
     await flush();
   }
 

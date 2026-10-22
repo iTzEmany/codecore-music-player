@@ -4408,4 +4408,41 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get shufflePlusNoticeTooManyErrors =>
       'Demasiados erros de reprodução: sugestões desligadas até reiniciar';
+
+  @override
+  String get suggestionsRecentTitle => 'Sugeridos recentemente';
+
+  @override
+  String get suggestionsRecentEmpty =>
+      'Ainda não há sugestões. Aparecem aqui quando usas o Aleatório+.';
+
+  @override
+  String get suggestionsClear => 'Limpar histórico';
+
+  @override
+  String get suggestionsClearBody =>
+      'Esquece as sugestões e os «Não gosto»: as músicas podem voltar.';
+
+  @override
+  String suggestionsRowNote(String seed, String outcome) {
+    return 'parecido com «$seed» · $outcome';
+  }
+
+  @override
+  String get suggestionOutcomeQueued => 'Na fila';
+
+  @override
+  String get suggestionOutcomeSkipped => 'Ignorado';
+
+  @override
+  String get suggestionOutcomeHeard => 'Ouvido';
+
+  @override
+  String get suggestionOutcomeDownloaded => 'Transferido';
+
+  @override
+  String get suggestionOutcomeDisliked => 'Não gosto';
+
+  @override
+  String get memorySuggestions => 'Sugestões do Aleatório+';
 }

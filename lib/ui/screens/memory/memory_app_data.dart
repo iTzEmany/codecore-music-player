@@ -19,6 +19,7 @@ String _label(AppLocalizations l, AppDataKind k) => switch (k) {
   AppDataKind.jamCache => l.memoryJamCache,
   AppDataKind.searchCache => l.memorySearchCache,
   AppDataKind.catalogCache => l.memoryCatalogCache,
+  AppDataKind.suggestions => l.memorySuggestions,
   AppDataKind.blurCopies => l.memoryBlurCopies,
   AppDataKind.tagBackups => l.memoryTagBackups,
   AppDataKind.log => l.memoryLog,

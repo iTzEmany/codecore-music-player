@@ -10,6 +10,7 @@ import '../../widgets/confirm.dart';
 import '../../widgets/dismiss_background.dart';
 import '../../widgets/section_header.dart';
 import '../../widgets/track_row.dart';
+import 'suggestions_screen.dart';
 
 /// The queue as a draggable modal sheet (Now Playing, desktop bar).
 Future<void> showQueueSheet(BuildContext context) => showModalBottomSheet<void>(
@@ -85,6 +86,15 @@ class QueueSheet extends ConsumerWidget {
               ),
               if (upcoming.isNotEmpty)
                 TextButton(onPressed: clearNext, child: Text(l.queueClear)),
+              PopupMenuButton<void>(
+                tooltip: l.moreOptions,
+                itemBuilder: (_) => [
+                  PopupMenuItem<void>(
+                    onTap: () => openSuggestions(context),
+                    child: Text(l.suggestionsRecentTitle),
+                  ),
+                ],
+              ),
             ],
           ),
         ),

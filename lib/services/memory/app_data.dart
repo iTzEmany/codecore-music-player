@@ -17,6 +17,7 @@ enum AppDataKind {
   jamCache,
   searchCache,
   catalogCache,
+  suggestions,
   blurCopies,
   tagBackups,
   log,
@@ -31,6 +32,7 @@ const clearableKinds = {
   AppDataKind.jamCache,
   AppDataKind.searchCache,
   AppDataKind.catalogCache,
+  AppDataKind.suggestions,
   AppDataKind.blurCopies,
 };
 
@@ -55,10 +57,14 @@ class AppDataPaths {
     required this.searchCache,
     required this.catalogCache,
     required this.log,
+    this.suggestionFiles = const [],
   });
 
   final Directory covers, jam, theme, tagBackups;
   final File database, searchCache, catalogCache, log;
+
+  /// `suggestions.json` and `seed_ids.json` (Shuffle+).
+  final List<File> suggestionFiles;
 
   /// SQLite keeps its journal beside the database file.
   List<String> get databaseFiles => [
@@ -110,6 +116,10 @@ Future<List<AppDataItem>> measureAppData(
       AppDataKind.catalogCache,
       await fileSize(paths.catalogCache.path),
     ),
+    AppDataItem(
+      AppDataKind.suggestions,
+      await _filesSize([for (final f in paths.suggestionFiles) f.path]),
+    ),
     AppDataItem(AppDataKind.blurCopies, await blur),
     AppDataItem(AppDataKind.tagBackups, await tags),
     AppDataItem(AppDataKind.log, await _filesSize(paths.logFiles)),
@@ -141,6 +151,8 @@ class CacheCleaner {
     required this.imageMemoryBytes,
     required this.jamActive,
     this.pickerTempDir,
+    this.suggestionFiles = const [],
+    this.clearSuggestions,
   });
 
   final Directory jamDir, themeDir;
@@ -149,6 +161,10 @@ class CacheCleaner {
   final void Function() clearImageMemory;
   final int Function() imageMemoryBytes;
   final bool Function() jamActive;
+
+  /// Shuffle+ files and the call that empties them (log and seed index).
+  final List<File> suggestionFiles;
+  final Future<void> Function()? clearSuggestions;
 
   /// Where the file picker copies the files it hands over (backups, CSVs…):
   /// `<cache dir>/file_picker`. Only copies, safe to delete.
@@ -172,6 +188,13 @@ class CacheCleaner {
     final catalogBefore = await fileSize(catalogCacheFile.path);
     await clearCatalogCache();
     freed += math.max(0, catalogBefore - await fileSize(catalogCacheFile.path));
+    final clearSuggestions = this.clearSuggestions;
+    if (clearSuggestions != null) {
+      final before = await _filesSize([for (final f in suggestionFiles) f.path]);
+      await clearSuggestions();
+      final after = await _filesSize([for (final f in suggestionFiles) f.path]);
+      freed += math.max(0, before - after);
+    }
     final picker = pickerTempDir;
     if (picker != null) {
       freed += await directorySize(picker.path);

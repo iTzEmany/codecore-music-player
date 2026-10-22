@@ -4,6 +4,7 @@ Una pagina per funzione. Le immagini si generano con `scripts/shots.sh` (tema «
 
 - [Libreria](libreria.md) — Mostra tutta la musica delle cartelle che scegli: brani, album, artisti, generi, playlist e podcast.
 - [Player](player.md) — Riproduzione con coda, ripresa, velocità, equalizzatore (Android), crossfade e testi.
+- [Casuale+](casuale-plus.md) — Con la casuale, ogni tanto un brano che non hai, simile alla lista, in streaming; si può scaricare.
 - [Playlist](playlist.md) — Elenchi di brani tuoi, anche intelligenti (regole) e sincronizzabili tra dispositivi.
 - [Importazione da CSV](importazione.md) — Ricostruisce una playlist di un altro servizio a partire da un file CSV (Exportify).
 - [Download online](download.md) — Cerca su YouTube, YouTube Music o SoundCloud e scarica l'audio nella tua libreria.

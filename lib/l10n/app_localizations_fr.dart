@@ -4451,4 +4451,41 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get shufflePlusNoticeTooManyErrors =>
       'Trop d’erreurs de lecture : suggestions désactivées jusqu’au redémarrage';
+
+  @override
+  String get suggestionsRecentTitle => 'Suggestions récentes';
+
+  @override
+  String get suggestionsRecentEmpty =>
+      'Aucune suggestion pour l’instant. Les titres apparaissent ici quand vous utilisez Aléatoire+.';
+
+  @override
+  String get suggestionsClear => 'Vider l’historique';
+
+  @override
+  String get suggestionsClearBody =>
+      'Oublie les suggestions et les « Je n’aime pas » : les titres pourront revenir.';
+
+  @override
+  String suggestionsRowNote(String seed, String outcome) {
+    return 'proche de « $seed » · $outcome';
+  }
+
+  @override
+  String get suggestionOutcomeQueued => 'Dans la file';
+
+  @override
+  String get suggestionOutcomeSkipped => 'Passé';
+
+  @override
+  String get suggestionOutcomeHeard => 'Écouté';
+
+  @override
+  String get suggestionOutcomeDownloaded => 'Téléchargé';
+
+  @override
+  String get suggestionOutcomeDisliked => 'Je n’aime pas';
+
+  @override
+  String get memorySuggestions => 'Suggestions d’Aléatoire+';
 }

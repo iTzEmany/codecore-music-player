@@ -2720,5 +2720,26 @@
   "shufflePlusBlockMetered": "En pause : réseau limité",
   "shufflePlusBlockStopped": "Désactivé jusqu’au redémarrage : trop d’erreurs de lecture",
   "shufflePlusNoticeRateLimited": "YouTube demande de ralentir : suggestions en pause pendant 15 minutes",
-  "shufflePlusNoticeTooManyErrors": "Trop d’erreurs de lecture : suggestions désactivées jusqu’au redémarrage"
+  "shufflePlusNoticeTooManyErrors": "Trop d’erreurs de lecture : suggestions désactivées jusqu’au redémarrage",
+  "suggestionsRecentTitle": "Suggestions récentes",
+  "suggestionsRecentEmpty": "Aucune suggestion pour l’instant. Les titres apparaissent ici quand vous utilisez Aléatoire+.",
+  "suggestionsClear": "Vider l’historique",
+  "suggestionsClearBody": "Oublie les suggestions et les « Je n’aime pas » : les titres pourront revenir.",
+  "suggestionsRowNote": "proche de « {seed} » · {outcome}",
+  "@suggestionsRowNote": {
+    "placeholders": {
+      "seed": {
+        "type": "String"
+      },
+      "outcome": {
+        "type": "String"
+      }
+    }
+  },
+  "suggestionOutcomeQueued": "Dans la file",
+  "suggestionOutcomeSkipped": "Passé",
+  "suggestionOutcomeHeard": "Écouté",
+  "suggestionOutcomeDownloaded": "Téléchargé",
+  "suggestionOutcomeDisliked": "Je n’aime pas",
+  "memorySuggestions": "Suggestions d’Aléatoire+"
 }

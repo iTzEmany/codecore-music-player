@@ -2453,5 +2453,26 @@
   "shufflePlusBlockMetered": "Pausiert: getaktetes Netz",
   "shufflePlusBlockStopped": "Aus bis zum Neustart: zu viele Wiedergabefehler",
   "shufflePlusNoticeRateLimited": "YouTube bittet um Verlangsamung: Vorschläge pausieren 15 Minuten",
-  "shufflePlusNoticeTooManyErrors": "Zu viele Wiedergabefehler: Vorschläge sind bis zum Neustart aus"
+  "shufflePlusNoticeTooManyErrors": "Zu viele Wiedergabefehler: Vorschläge sind bis zum Neustart aus",
+  "suggestionsRecentTitle": "Zuletzt vorgeschlagen",
+  "suggestionsRecentEmpty": "Noch nichts vorgeschlagen. Titel erscheinen hier, sobald du Shuffle+ nutzt.",
+  "suggestionsClear": "Verlauf leeren",
+  "suggestionsClearBody": "Vergisst die Vorschläge und die „Gefällt mir nicht“-Markierungen: Titel können wiederkommen.",
+  "suggestionsRowNote": "ähnlich wie „{seed}“ · {outcome}",
+  "@suggestionsRowNote": {
+    "placeholders": {
+      "seed": {
+        "type": "String"
+      },
+      "outcome": {
+        "type": "String"
+      }
+    }
+  },
+  "suggestionOutcomeQueued": "In der Warteschlange",
+  "suggestionOutcomeSkipped": "Übersprungen",
+  "suggestionOutcomeHeard": "Gehört",
+  "suggestionOutcomeDownloaded": "Heruntergeladen",
+  "suggestionOutcomeDisliked": "Gefällt mir nicht",
+  "memorySuggestions": "Shuffle+-Vorschläge"
 }
