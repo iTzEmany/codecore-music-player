@@ -87,13 +87,10 @@ class SmartPlaylistScreen extends ConsumerWidget {
         meta: l.smartSubtitle(tracks.length),
         onPlay: tracks.isEmpty
             ? null
-            : () => ctrl.playFromList(tracks, 0, context: playCtx),
+            : () => ctrl.playAll(tracks, context: playCtx),
         onShuffle: tracks.isEmpty
             ? null
-            : () async {
-                await ctrl.setShuffle(true);
-                await ctrl.playFromList(tracks, 0, context: playCtx);
-              },
+            : ctrl.toggleShuffle,
         menu: PopupMenuButton<String>(
           tooltip: l.moreActions,
           icon: const Icon(Icons.more_horiz_rounded),

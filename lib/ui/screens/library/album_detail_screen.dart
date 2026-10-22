@@ -121,13 +121,10 @@ class AlbumDetailScreen extends ConsumerWidget {
         meta: '${l.kindAlbum} · $meta',
         onPlay: list.isEmpty
             ? null
-            : () => ctrl.playFromList(list, 0, context: playCtx),
+            : () => ctrl.playAll(list, context: playCtx),
         onShuffle: list.isEmpty
             ? null
-            : () async {
-                await ctrl.setShuffle(true);
-                await ctrl.playFromList(list, 0, context: playCtx);
-              },
+            : ctrl.toggleShuffle,
         menu: PopupMenuButton<String>(
           tooltip: l.moreActions,
           icon: const Icon(Icons.more_horiz_rounded),

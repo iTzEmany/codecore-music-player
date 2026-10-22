@@ -94,7 +94,7 @@ class TagTracksScreen extends ConsumerWidget {
                 size: 40,
                 onPressed: tracks.isEmpty
                     ? null
-                    : () => ctrl.playFromList(tracks, 0, context: ctx),
+                    : () => ctrl.playAll(tracks, context: ctx),
               ),
               const SizedBox(width: 8),
             ],

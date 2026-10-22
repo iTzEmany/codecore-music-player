@@ -44,16 +44,13 @@ class GenreScreen extends ConsumerWidget {
               ShuffleButton(
                 onPressed: tracks.isEmpty
                     ? null
-                    : () async {
-                        await ctrl.setShuffle(true);
-                        await ctrl.playFromList(tracks, 0, context: ctx);
-                      },
+                    : ctrl.toggleShuffle,
               ),
               PlayCircleButton(
                 size: 40,
                 onPressed: tracks.isEmpty
                     ? null
-                    : () => ctrl.playFromList(tracks, 0, context: ctx),
+                    : () => ctrl.playAll(tracks, context: ctx),
               ),
               const SizedBox(width: 8),
             ],

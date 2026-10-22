@@ -1,0 +1,92 @@
+import 'dart:math';
+
+import 'package:codecore/data/db/app_database.dart';
+import 'package:codecore/data/repositories/track_repository.dart';
+import 'package:codecore/providers/player_providers.dart';
+import 'package:codecore/services/audio/codecore_audio_handler.dart';
+import 'package:codecore/services/audio/play_queue.dart';
+import 'package:drift/drift.dart' show Value;
+import 'package:drift/native.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+import '../support/fake_backend.dart';
+
+/// Always picks the last candidate, so the start track is predictable.
+class _LastPick implements Random {
+  @override
+  int nextInt(int max) => max - 1;
+  @override
+  bool nextBool() => false;
+  @override
+  double nextDouble() => 0;
+}
+
+void main() {
+  late AppDatabase db;
+  late CodecoreAudioHandler handler;
+  late List<Track> tracks;
+  late bool plus;
+  late PlayerController ctrl;
+
+  setUp(() async {
+    db = AppDatabase(NativeDatabase.memory());
+    for (final n in ['a', 'b', 'c']) {
+      await db
+          .into(db.tracks)
+          .insert(
+            TracksCompanion.insert(
+              path: '/m/$n.mp3',
+              title: n,
+              albumKey: 'k',
+              format: 'mp3',
+              sizeBytes: 1,
+              mtimeMs: 1,
+              addedAt: 1,
+              durationMs: const Value(100000),
+            ),
+          );
+    }
+    tracks = await db.select(db.tracks).get();
+    handler = CodecoreAudioHandler(
+      FakeBackend(),
+      PlayQueue(),
+      TrackRepository(db),
+      onError: (_) {},
+    );
+    plus = true;
+    ctrl = PlayerController(
+      handler,
+      null,
+      shufflePlus: () => plus,
+      setShufflePlus: (on) => plus = on,
+      random: _LastPick(),
+    );
+  });
+  tearDown(() async {
+    await handler.dispose();
+    await db.close();
+  });
+
+  test('the list shuffle button only toggles shuffle: no playback, Shuffle+ cleared on off', () async {
+    await ctrl.toggleShuffle();
+    expect(handler.shuffleEnabled, isTrue);
+    expect(handler.isPlaying, isFalse);
+    expect(handler.currentTrack, isNull);
+
+    await ctrl.toggleShuffle();
+    expect(handler.shuffleEnabled, isFalse);
+    expect(handler.isPlaying, isFalse);
+    expect(plus, isFalse);
+  });
+
+  test('playAll starts from a random track with shuffle on, from the first with it off', () async {
+    await ctrl.playAll(tracks);
+    await pumpEventQueue();
+    expect(handler.currentTrack!.id, tracks.first.id);
+
+    await ctrl.toggleShuffle();
+    await ctrl.playAll(tracks);
+    await pumpEventQueue();
+    expect(handler.currentTrack!.id, tracks.last.id);
+  });
+}

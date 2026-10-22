@@ -219,15 +219,12 @@ class _AllTracksScreenState extends ConsumerState<AllTracksScreen> {
                               ),
                             ),
                             ShuffleButton(
-                              onPressed: () async {
-                                await ctrl.setShuffle(true);
-                                await ctrl.playFromList(list, 0, context: ctx);
-                              },
+                              onPressed: ctrl.toggleShuffle,
                             ),
                             PlayCircleButton(
                               size: 44,
                               onPressed: () =>
-                                  ctrl.playFromList(list, 0, context: ctx),
+                                  ctrl.playAll(list, context: ctx),
                             ),
                           ],
                         ),

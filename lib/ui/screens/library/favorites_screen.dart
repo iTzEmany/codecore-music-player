@@ -64,13 +64,10 @@ class FavoritesScreen extends ConsumerWidget {
             '${l.kindPlaylist} · ${tracksAndMinutes(context, list.length, durationMs)}',
         onPlay: list.isEmpty
             ? null
-            : () => ctrl.playFromList(list, 0, context: playCtx),
+            : () => ctrl.playAll(list, context: playCtx),
         onShuffle: list.isEmpty
             ? null
-            : () async {
-                await ctrl.setShuffle(true);
-                await ctrl.playFromList(list, 0, context: playCtx);
-              },
+            : ctrl.toggleShuffle,
         menu: PopupMenuButton<SortOption>(
           tooltip: l.sortBy,
           icon: const Icon(Icons.sort_rounded),

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import '../core/app_log.dart';
 import 'package:audio_service/audio_service.dart';
@@ -66,7 +67,10 @@ class PlayerController {
     this.onContext,
     this.shufflePlus,
     this.setShufflePlus,
-  });
+    Random? random,
+  }) : _random = random ?? Random();
+
+  final Random _random;
 
   /// The Shuffle+ flag of the settings, and a way to change it.
   final bool Function()? shufflePlus;
@@ -89,6 +93,17 @@ class PlayerController {
     _requestNotificationPermissionOnce();
     await _handler.playQueue([for (final t in snapshot) t.id], index);
   }
+
+  /// The list's Play button: from a random track when shuffle is on (the
+  /// queue keeps it first and shuffles the rest), else from the first.
+  Future<void> playAll(List<Track> snapshot, {PlayContext? context}) =>
+      playFromList(
+        snapshot,
+        _handler.shuffleEnabled && snapshot.isNotEmpty
+            ? _random.nextInt(snapshot.length)
+            : 0,
+        context: context,
+      );
 
   /// Plays a list of radio stations from [index]; next and previous move
   /// between them. Radio leaves no history and no statistics.
@@ -131,11 +146,12 @@ class PlayerController {
     return _handler.setVolume(v);
   }
 
-  Future<void> toggleShuffle() => _handler.setShuffleMode(
-    _handler.shuffleEnabled
-        ? AudioServiceShuffleMode.none
-        : AudioServiceShuffleMode.all,
-  );
+  /// The shuffle button of a list: on or off, never starts playback.
+  Future<void> toggleShuffle() {
+    final on = !_handler.shuffleEnabled;
+    if (!on) setShufflePlus?.call(false);
+    return setShuffle(on);
+  }
 
   /// The shuffle button: off, then shuffle, then Shuffle+, then off again.
   Future<void> cycleShuffle() async {
