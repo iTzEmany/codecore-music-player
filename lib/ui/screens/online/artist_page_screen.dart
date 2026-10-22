@@ -140,7 +140,7 @@ class ArtistPageScreen extends ConsumerWidget {
       SliverToBoxAdapter(
         child: SectionHeader(
           l.ytmInYourLibrary,
-          actionLabel: l.ytmSeeAll,
+          actionLabel: l.showAll,
           onAction: () => ShellNav.open<void>(context, ArtistDetailScreen(artist: local)),
         ),
       ),
@@ -165,7 +165,7 @@ class ArtistPageScreen extends ConsumerWidget {
       SliverToBoxAdapter(
         child: SectionHeader(
           shelf.title,
-          actionLabel: link == null ? null : l.ytmShowAll,
+          actionLabel: link == null ? null : l.showAll,
           onAction: link == null
               ? null
               : () => ShellNav.open<void>(

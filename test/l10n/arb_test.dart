@@ -50,15 +50,11 @@ const _separatorPending = {
   'jamSynced',
   'playlistCountLabel',
   'radioOfflineList',
-  'releaseAlbumYear',
-  'releaseSingleYear',
   'smartSubtitle',
   'statsFirstValue',
   'suggestedSimilarTo',
   'suggestionsRowNote',
   'ytErrToolOutdated',
-  'ytmArtistWithAudience',
-  'ytmOffline',
 };
 
 Map<String, dynamic> _arb(String lang) =>

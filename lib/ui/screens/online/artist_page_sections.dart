@@ -157,7 +157,7 @@ class ReleaseCarousel extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SectionHeader(shelf.title,
-            actionLabel: onMore == null ? null : l.ytmShowAll, onAction: onMore),
+            actionLabel: onMore == null ? null : l.showAll, onAction: onMore),
         SizedBox(
           height: height,
           child: ListView.builder(

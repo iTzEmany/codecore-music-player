@@ -9,6 +9,7 @@ import 'package:codecore/ui/screens/youtube/online_results.dart';
 import 'package:codecore/ui/shell/app_shell.dart';
 import 'package:codecore/ui/shell/bottom_bar.dart';
 import 'package:dio/dio.dart' show CancelToken;
+import 'package:codecore/ui/widgets/segmented_blocks.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -82,7 +83,7 @@ void main() {
   }
 
   Future<void> searchOnline(WidgetTester tester, String text) async {
-    await tester.tap(find.widgetWithText(ChoiceChip, 'Online'));
+    await tester.tap(find.text('Online'));
     await _settle(tester);
     typeSearch(tester, text);
     submitSearch(tester);
@@ -91,9 +92,9 @@ void main() {
 
   testWidgets('two modes only: In libreria and Online; no SoundCloud, no source to pick first', (tester) async {
     await open(tester);
-    expect(tester.widget<ChoiceChip>(find.widgetWithText(ChoiceChip, 'In libreria')).selected, isTrue);
-    expect(find.widgetWithText(ChoiceChip, 'Online'), findsOneWidget);
-    await tester.tap(find.widgetWithText(ChoiceChip, 'Online'));
+    expect(tester.widget<SegmentedBlocks<bool>>(find.byType(SegmentedBlocks<bool>)).selected, isFalse);
+    expect(find.text('Online'), findsOneWidget);
+    await tester.tap(find.text('Online'));
     await _settle(tester);
     expect(find.text('SoundCloud'), findsNothing);
     expect(find.text('YouTube Music'), findsNothing, reason: 'the filters come with the results');
@@ -165,7 +166,7 @@ void main() {
     await tester.tap(find.text('Cerca «Song 1» online'));
     await _settle(tester);
     expect(svc.calls, contains('music:Song 1:10'));
-    expect(tester.widget<ChoiceChip>(find.widgetWithText(ChoiceChip, 'Online')).selected, isTrue);
+    expect(tester.widget<SegmentedBlocks<bool>>(find.byType(SegmentedBlocks<bool>)).selected, isTrue);
     await h.dispose(tester);
   });
 

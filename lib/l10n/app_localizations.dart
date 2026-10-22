@@ -2362,16 +2362,10 @@ abstract class AppLocalizations {
   /// **'Mostra le copertine'**
   String get homeFanOpen;
 
-  /// No description provided for @searchMainResult.
-  ///
-  /// In it, this message translates to:
-  /// **'Risultato principale'**
-  String get searchMainResult;
-
   /// No description provided for @showAll.
   ///
   /// In it, this message translates to:
-  /// **'Mostra tutti'**
+  /// **'Tutti'**
   String get showAll;
 
   /// No description provided for @recentSearches.
@@ -6756,13 +6750,13 @@ abstract class AppLocalizations {
   /// No description provided for @ytmArtistWithAudience.
   ///
   /// In it, this message translates to:
-  /// **'Artista · {audience}'**
+  /// **'Artista, {audience}'**
   String ytmArtistWithAudience(String audience);
 
   /// No description provided for @ytmOffline.
   ///
   /// In it, this message translates to:
-  /// **'Non in linea · dati del {date}'**
+  /// **'Non in linea, dati del {date}'**
   String ytmOffline(String date);
 
   /// No description provided for @ytmArtistNotFound.
@@ -6794,18 +6788,6 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Nella tua libreria'**
   String get ytmInYourLibrary;
-
-  /// No description provided for @ytmSeeAll.
-  ///
-  /// In it, this message translates to:
-  /// **'Vedi tutti'**
-  String get ytmSeeAll;
-
-  /// No description provided for @ytmShowAll.
-  ///
-  /// In it, this message translates to:
-  /// **'Mostra tutto'**
-  String get ytmShowAll;
 
   /// No description provided for @ytmAbout.
   ///
@@ -7812,13 +7794,13 @@ abstract class AppLocalizations {
   /// No description provided for @releaseAlbumYear.
   ///
   /// In it, this message translates to:
-  /// **'Album · {year}'**
+  /// **'Album, {year}'**
   String releaseAlbumYear(String year);
 
   /// No description provided for @releaseSingleYear.
   ///
   /// In it, this message translates to:
-  /// **'Singolo · {year}'**
+  /// **'Singolo, {year}'**
   String releaseSingleYear(String year);
 
   /// No description provided for @releaseAlbumPlain.

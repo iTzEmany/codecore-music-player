@@ -34,7 +34,7 @@ void main() {
     );
     await tester.pump(const Duration(milliseconds: 300));
     expect(tester.takeException(), isNull);
-    expect(find.text('Rock'), findsOneWidget);
+    expect(find.byKey(const ValueKey('collection-name')), findsOneWidget);
     expect(find.text('Riproduci'), findsOneWidget);
     expect(find.text('Casuale'), findsOneWidget);
     await h.dispose(tester);

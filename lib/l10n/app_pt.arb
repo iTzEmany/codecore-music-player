@@ -766,8 +766,7 @@
   "homeResumeQueueFrom": "{source}: faixa {n} de {m}",
   "homeMinutesLeft": "{count, plural, one{Falta 1 minuto} other{Faltam {count} minutos}}",
   "homeFanOpen": "Mostrar as capas",
-  "searchMainResult": "Resultado principal",
-  "showAll": "Mostrar todos",
+  "showAll": "Todos",
   "recentSearches": "Pesquisas recentes",
   "genresTitle": "Géneros",
   "downloadsChip": "Transferências ({n})",
@@ -2622,7 +2621,7 @@
   "memoryClearFailed": "Não foi possível limpar o cache",
   "memoryTools": "Limpeza",
   "memoryUnavailable": "Indisponível",
-  "ytmArtistWithAudience": "Artista · {audience}",
+  "ytmArtistWithAudience": "Artista, {audience}",
   "@ytmArtistWithAudience": {
     "placeholders": {
       "audience": {
@@ -2630,7 +2629,7 @@
       }
     }
   },
-  "ytmOffline": "Offline · dados de {date}",
+  "ytmOffline": "Offline, dados de {date}",
   "@ytmOffline": {
     "placeholders": {
       "date": {
@@ -2650,8 +2649,6 @@
     }
   },
   "ytmInYourLibrary": "Na sua biblioteca",
-  "ytmSeeAll": "Ver tudo",
-  "ytmShowAll": "Mostrar tudo",
   "ytmAbout": "Sobre",
   "ytmMore": "Mais",
   "ytmLess": "Menos",
@@ -2933,7 +2930,7 @@
   "followedToConfirm": "A confirmar",
   "followedNotFound": "Não encontrado",
   "followedRetry": "Tentar de novo",
-  "releaseAlbumYear": "Álbum · {year}",
+  "releaseAlbumYear": "Álbum, {year}",
   "@releaseAlbumYear": {
     "placeholders": {
       "year": {
@@ -2941,7 +2938,7 @@
       }
     }
   },
-  "releaseSingleYear": "Single · {year}",
+  "releaseSingleYear": "Single, {year}",
   "@releaseSingleYear": {
     "placeholders": {
       "year": {
