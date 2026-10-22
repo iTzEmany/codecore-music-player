@@ -45,13 +45,12 @@ abstract class NowPlayingWidget(private val layout: Int, private val compact: Bo
             v.setOnClickPendingIntent(R.id.previous, action(ctx, WidgetActionReceiver.ACTION_PREVIOUS, 1))
             v.setOnClickPendingIntent(R.id.next, action(ctx, WidgetActionReceiver.ACTION_NEXT, 3))
         }
-        val open = ctx.packageManager.getLaunchIntentForPackage(ctx.packageName)
-        if (open != null) {
-            v.setOnClickPendingIntent(
-                R.id.cover,
-                PendingIntent.getActivity(ctx, 4, open, PendingIntent.FLAG_IMMUTABLE),
-            )
-        }
+        // Explicit component: the launcher alias in use changes with the icon theme.
+        val open = Intent(ctx, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        v.setOnClickPendingIntent(
+            R.id.cover,
+            PendingIntent.getActivity(ctx, 4, open, PendingIntent.FLAG_IMMUTABLE),
+        )
         return v
     }
 

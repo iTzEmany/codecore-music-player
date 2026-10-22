@@ -2720,5 +2720,12 @@
   "reportOpenFailed": "Couldn't open the browser: the text was copied",
   "reportLogShortened": "The log will be shortened to fit in the address",
   "reportNoLog": "No recent warnings or errors in the log",
-  "reportUnknown": "Unknown"
+  "reportUnknown": "Unknown",
+  "iconAskTitle": "Change the app icon too?",
+  "iconProblems": "The icon changes when you leave the app. Possible problems:\n• the launcher may take a few seconds to update it, or briefly show two icons or none;\n• on some launchers the icon on the Home screen is removed or moved and has to be put back by hand (widgets stay);\n• Home shortcuts made with the old icon may stop working;\n• the app may briefly disappear from recent apps;\n• rarely, Android closes the app and the music stops.\nOn the computer the icon does not change.",
+  "iconChange": "Change the icon",
+  "iconKeep": "Leave it as it is",
+  "iconDontAsk": "Don't ask again",
+  "iconFollowTitle": "Themed icon",
+  "iconFollowSubtitle": "The icon follows the theme and colour when you leave the app"
 }

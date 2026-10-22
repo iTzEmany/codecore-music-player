@@ -15,6 +15,7 @@ import 'ui/screens/onboarding/onboarding_gate.dart';
 import 'providers/releases_providers.dart' show releaseCheckControllerProvider;
 import 'ui/screens/youtube/listen_bar.dart' show ListenErrorToaster;
 import 'ui/shell/app_shell.dart';
+import 'ui/widgets/app_icon_sync.dart';
 import 'ui/theme/app_theme.dart';
 
 final _messengerKey = GlobalKey<ScaffoldMessengerState>();
@@ -76,7 +77,7 @@ class CodecoreApp extends ConsumerWidget {
           child: ListenErrorToaster(child: child ?? const SizedBox.shrink()),
         ),
       ),
-      home: const OnboardingGate(child: AppShell()),
+      home: const AppIconSync(child: OnboardingGate(child: AppShell())),
     );
   }
 }

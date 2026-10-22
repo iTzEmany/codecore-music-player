@@ -20,6 +20,10 @@ class EqProfile {
       EqProfile(preset: preset ?? this.preset, custom: custom ?? this.custom);
 }
 
+/// Whether the launcher icon (Android) follows the theme: not decided yet
+/// (the user is asked at the first change), yes, or no.
+enum IconFollow { ask, on, off }
+
 class AppSettings {
   const AppSettings({
     this.theme = 'notte',
@@ -61,6 +65,7 @@ class AppSettings {
     this.radioCountry = '',
     this.radioRegion = '',
     this.radioOnlyCountry = false,
+    this.iconFollow = IconFollow.ask,
   });
 
   final String theme;
@@ -134,6 +139,9 @@ class AppSettings {
   final String radioCountry, radioRegion;
   final bool radioOnlyCountry;
 
+  /// The launcher icon follows the theme and accent (Android).
+  final IconFollow iconFollow;
+
   /// Edits of title, artist, album… are also written into the music files
   /// (through `SafeTagWriter`, with a backup). Off by default.
   final bool writeTagsToFiles;
@@ -187,6 +195,7 @@ class AppSettings {
     String? radioCountry,
     String? radioRegion,
     bool? radioOnlyCountry,
+    IconFollow? iconFollow,
   }) =>
       AppSettings(
         theme: theme ?? this.theme,
@@ -232,6 +241,7 @@ class AppSettings {
         radioCountry: radioCountry ?? this.radioCountry,
         radioRegion: radioRegion ?? this.radioRegion,
         radioOnlyCountry: radioOnlyCountry ?? this.radioOnlyCountry,
+        iconFollow: iconFollow ?? this.iconFollow,
       );
 }
 
@@ -310,6 +320,10 @@ class SettingsStore {
         radioCountry: _prefs.getString('radioCountry') ?? '',
         radioRegion: _prefs.getString('radioRegion') ?? '',
         radioOnlyCountry: _prefs.getBool('radioOnlyCountry') ?? false,
+        iconFollow: IconFollow.values.firstWhere(
+          (f) => f.name == _prefs.getString('iconFollow'),
+          orElse: () => IconFollow.ask,
+        ),
       );
 
   EqProfile _readEq(String profile) => EqProfile(
@@ -369,6 +383,7 @@ class SettingsStore {
     await _prefs.setString('radioCountry', s.radioCountry);
     await _prefs.setString('radioRegion', s.radioRegion);
     await _prefs.setBool('radioOnlyCountry', s.radioOnlyCountry);
+    await _prefs.setString('iconFollow', s.iconFollow.name);
     final dn = s.deviceName;
     if (dn == null || dn.isEmpty) {
       await _prefs.remove('deviceName');

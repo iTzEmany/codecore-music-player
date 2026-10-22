@@ -4900,4 +4900,27 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get reportUnknown => 'Sconosciuto';
+
+  @override
+  String get iconAskTitle => 'Cambiare anche l\'icona dell\'app?';
+
+  @override
+  String get iconProblems =>
+      'L\'icona cambia quando esci dall\'app. Possibili problemi:\n• il launcher può metterci qualche secondo ad aggiornarla, o mostrare per un attimo due icone o nessuna;\n• su alcuni launcher l\'icona sulla schermata Home viene tolta o spostata e va rimessa a mano (i widget restano);\n• le scorciatoie sulla Home create con la vecchia icona possono smettere di funzionare;\n• l\'app può sparire per un attimo dalle app recenti;\n• raramente Android chiude l\'app e la musica si ferma.\nSul computer l\'icona non cambia.';
+
+  @override
+  String get iconChange => 'Cambia l\'icona';
+
+  @override
+  String get iconKeep => 'Lascia com\'è';
+
+  @override
+  String get iconDontAsk => 'Non chiederlo più';
+
+  @override
+  String get iconFollowTitle => 'Icona a tema';
+
+  @override
+  String get iconFollowSubtitle =>
+      'L\'icona segue tema e colore quando esci dall\'app';
 }

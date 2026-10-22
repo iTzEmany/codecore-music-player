@@ -7826,6 +7826,48 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Sconosciuto'**
   String get reportUnknown;
+
+  /// No description provided for @iconAskTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Cambiare anche l\'icona dell\'app?'**
+  String get iconAskTitle;
+
+  /// No description provided for @iconProblems.
+  ///
+  /// In it, this message translates to:
+  /// **'L\'icona cambia quando esci dall\'app. Possibili problemi:\n• il launcher può metterci qualche secondo ad aggiornarla, o mostrare per un attimo due icone o nessuna;\n• su alcuni launcher l\'icona sulla schermata Home viene tolta o spostata e va rimessa a mano (i widget restano);\n• le scorciatoie sulla Home create con la vecchia icona possono smettere di funzionare;\n• l\'app può sparire per un attimo dalle app recenti;\n• raramente Android chiude l\'app e la musica si ferma.\nSul computer l\'icona non cambia.'**
+  String get iconProblems;
+
+  /// No description provided for @iconChange.
+  ///
+  /// In it, this message translates to:
+  /// **'Cambia l\'icona'**
+  String get iconChange;
+
+  /// No description provided for @iconKeep.
+  ///
+  /// In it, this message translates to:
+  /// **'Lascia com\'è'**
+  String get iconKeep;
+
+  /// No description provided for @iconDontAsk.
+  ///
+  /// In it, this message translates to:
+  /// **'Non chiederlo più'**
+  String get iconDontAsk;
+
+  /// No description provided for @iconFollowTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Icona a tema'**
+  String get iconFollowTitle;
+
+  /// No description provided for @iconFollowSubtitle.
+  ///
+  /// In it, this message translates to:
+  /// **'L\'icona segue tema e colore quando esci dall\'app'**
+  String get iconFollowSubtitle;
 }
 
 class _AppLocalizationsDelegate

@@ -4903,4 +4903,27 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get reportUnknown => 'Desconhecido';
+
+  @override
+  String get iconAskTitle => 'Mudar também o ícone do app?';
+
+  @override
+  String get iconProblems =>
+      'O ícone muda quando você sai do app. Possíveis problemas:\n• o launcher pode levar alguns segundos para atualizá-lo, ou mostrar por um instante dois ícones ou nenhum;\n• em alguns launchers o ícone da tela inicial é removido ou movido e precisa ser recolocado à mão (os widgets ficam);\n• atalhos da tela inicial criados com o ícone antigo podem parar de funcionar;\n• o app pode sumir por um instante dos apps recentes;\n• raramente o Android fecha o app e a música para.\nNo computador o ícone não muda.';
+
+  @override
+  String get iconChange => 'Mudar o ícone';
+
+  @override
+  String get iconKeep => 'Deixar como está';
+
+  @override
+  String get iconDontAsk => 'Não perguntar de novo';
+
+  @override
+  String get iconFollowTitle => 'Ícone do tema';
+
+  @override
+  String get iconFollowSubtitle =>
+      'O ícone acompanha o tema e a cor quando você sai do app';
 }

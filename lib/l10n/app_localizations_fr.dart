@@ -4949,4 +4949,27 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get reportUnknown => 'Inconnu';
+
+  @override
+  String get iconAskTitle => 'Changer aussi l’icône de l’app ?';
+
+  @override
+  String get iconProblems =>
+      'L’icône change quand tu quittes l’app. Problèmes possibles :\n• le launcher peut mettre quelques secondes à la mettre à jour, ou afficher un instant deux icônes ou aucune ;\n• sur certains launchers, l’icône de l’écran d’accueil est retirée ou déplacée et doit être remise à la main (les widgets restent) ;\n• les raccourcis d’accueil créés avec l’ancienne icône peuvent cesser de fonctionner ;\n• l’app peut disparaître un instant des apps récentes ;\n• rarement, Android ferme l’app et la musique s’arrête.\nSur l’ordinateur, l’icône ne change pas.';
+
+  @override
+  String get iconChange => 'Changer l’icône';
+
+  @override
+  String get iconKeep => 'Laisser tel quel';
+
+  @override
+  String get iconDontAsk => 'Ne plus demander';
+
+  @override
+  String get iconFollowTitle => 'Icône assortie au thème';
+
+  @override
+  String get iconFollowSubtitle =>
+      'L’icône suit le thème et la couleur quand tu quittes l’app';
 }

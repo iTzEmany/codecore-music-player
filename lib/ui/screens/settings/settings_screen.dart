@@ -25,6 +25,7 @@ import '../playlists/playlist_dialogs.dart';
 import '../share/share_screen.dart';
 import '../../../services/migration/python_db_importer.dart';
 import '../../theme/tokens.dart';
+import 'icon_follow_tile.dart';
 import 'theme_tiles.dart';
 import 'cleanup_tiles.dart';
 import 'advanced_section.dart';
@@ -70,6 +71,7 @@ class SettingsScreen extends ConsumerWidget {
               title: l.settingsAppearance,
               children: [
                 const ThemeTiles(),
+                const IconFollowTile(),
                 ListTile(
                   title: Text(l.settingsTextSize),
                   subtitle: Padding(

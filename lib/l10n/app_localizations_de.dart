@@ -4917,4 +4917,27 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get reportUnknown => 'Unbekannt';
+
+  @override
+  String get iconAskTitle => 'Auch das App-Symbol ändern?';
+
+  @override
+  String get iconProblems =>
+      'Das Symbol wechselt, wenn du die App verlässt. Mögliche Probleme:\n• der Launcher braucht ein paar Sekunden zum Aktualisieren oder zeigt kurz zwei Symbole oder keines;\n• bei manchen Launchern wird das Symbol auf dem Startbildschirm entfernt oder verschoben und muss von Hand wieder platziert werden (Widgets bleiben);\n• Verknüpfungen auf dem Startbildschirm, die mit dem alten Symbol erstellt wurden, funktionieren eventuell nicht mehr;\n• die App kann kurz aus den zuletzt verwendeten Apps verschwinden;\n• selten beendet Android die App und die Musik stoppt.\nAm Computer ändert sich das Symbol nicht.';
+
+  @override
+  String get iconChange => 'Symbol ändern';
+
+  @override
+  String get iconKeep => 'So lassen';
+
+  @override
+  String get iconDontAsk => 'Nicht mehr fragen';
+
+  @override
+  String get iconFollowTitle => 'Symbol passend zum Thema';
+
+  @override
+  String get iconFollowSubtitle =>
+      'Das Symbol folgt Thema und Farbe, wenn du die App verlässt';
 }

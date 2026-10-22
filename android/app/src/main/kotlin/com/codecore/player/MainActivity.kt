@@ -21,6 +21,12 @@ class MainActivity : AudioServiceActivity() {
         ShareBridge.channel?.invokeMethod("appResumed", null)
     }
 
+    override fun onStop() {
+        super.onStop()
+        // Never while the user looks at the app, nor for a rotation or the like.
+        if (!isChangingConfigurations) IconBridge.apply(applicationContext)
+    }
+
     override fun onNewIntent(intent: android.content.Intent) {
         super.onNewIntent(intent)
         NotifyBridge.handleIntent(intent)
@@ -41,6 +47,7 @@ class MainActivity : AudioServiceActivity() {
         NetworkBridge.register(flutterEngine.dartExecutor.binaryMessenger, applicationContext)
         NotifyBridge.register(flutterEngine.dartExecutor.binaryMessenger, applicationContext)
         LinkBridge.register(flutterEngine.dartExecutor.binaryMessenger, applicationContext)
+        IconBridge.register(flutterEngine.dartExecutor.binaryMessenger, applicationContext)
         NotifyBridge.handleIntent(intent)
 
         // Where the sound goes (headphones or speaker): the equalizer keeps a

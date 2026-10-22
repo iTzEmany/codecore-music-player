@@ -4891,4 +4891,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reportUnknown => 'Unknown';
+
+  @override
+  String get iconAskTitle => 'Change the app icon too?';
+
+  @override
+  String get iconProblems =>
+      'The icon changes when you leave the app. Possible problems:\n• the launcher may take a few seconds to update it, or briefly show two icons or none;\n• on some launchers the icon on the Home screen is removed or moved and has to be put back by hand (widgets stay);\n• Home shortcuts made with the old icon may stop working;\n• the app may briefly disappear from recent apps;\n• rarely, Android closes the app and the music stops.\nOn the computer the icon does not change.';
+
+  @override
+  String get iconChange => 'Change the icon';
+
+  @override
+  String get iconKeep => 'Leave it as it is';
+
+  @override
+  String get iconDontAsk => 'Don\'t ask again';
+
+  @override
+  String get iconFollowTitle => 'Themed icon';
+
+  @override
+  String get iconFollowSubtitle =>
+      'The icon follows the theme and colour when you leave the app';
 }

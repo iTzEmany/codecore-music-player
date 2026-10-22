@@ -2720,5 +2720,12 @@
   "reportOpenFailed": "Browser konnte nicht geöffnet werden: Der Text wurde kopiert",
   "reportLogShortened": "Das Protokoll wird gekürzt, damit es in die Adresse passt",
   "reportNoLog": "Keine aktuellen Warnungen oder Fehler im Protokoll",
-  "reportUnknown": "Unbekannt"
+  "reportUnknown": "Unbekannt",
+  "iconAskTitle": "Auch das App-Symbol ändern?",
+  "iconProblems": "Das Symbol wechselt, wenn du die App verlässt. Mögliche Probleme:\n• der Launcher braucht ein paar Sekunden zum Aktualisieren oder zeigt kurz zwei Symbole oder keines;\n• bei manchen Launchern wird das Symbol auf dem Startbildschirm entfernt oder verschoben und muss von Hand wieder platziert werden (Widgets bleiben);\n• Verknüpfungen auf dem Startbildschirm, die mit dem alten Symbol erstellt wurden, funktionieren eventuell nicht mehr;\n• die App kann kurz aus den zuletzt verwendeten Apps verschwinden;\n• selten beendet Android die App und die Musik stoppt.\nAm Computer ändert sich das Symbol nicht.",
+  "iconChange": "Symbol ändern",
+  "iconKeep": "So lassen",
+  "iconDontAsk": "Nicht mehr fragen",
+  "iconFollowTitle": "Symbol passend zum Thema",
+  "iconFollowSubtitle": "Das Symbol folgt Thema und Farbe, wenn du die App verlässt"
 }
