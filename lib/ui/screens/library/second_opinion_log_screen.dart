@@ -49,7 +49,7 @@ class SecondOpinionLogScreen extends ConsumerWidget {
       body: log.isEmpty
           ? EmptyState(icon: Icons.fact_check_outlined, message: l.secondOpinionLogEmpty)
           : ListView.builder(
-              itemExtent: 64,
+              itemExtent: 84,
               itemCount: log.length,
               itemBuilder: (_, i) {
                 final e = log[i];
@@ -63,7 +63,13 @@ class SecondOpinionLogScreen extends ConsumerWidget {
                     children: [
                       Text(e.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: theme.bodyLarge),
                       Text(
-                        '${artist.isEmpty ? '' : '$artist, '}${time.format(e.at)}, ${_outcome(l, e)}',
+                        '${artist.isEmpty ? '' : '$artist, '}${time.format(e.at)}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.bodyMedium?.copyWith(color: cc.textMuted),
+                      ),
+                      Text(
+                        _outcome(l, e),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: theme.bodyMedium?.copyWith(

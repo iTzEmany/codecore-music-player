@@ -4244,11 +4244,11 @@ class AppLocalizationsDe extends AppLocalizations {
   String get secondOpinionLogEmpty => 'Noch keine Titel geprüft';
 
   @override
-  String get secondOpinionConfirmed => 'Von YouTube Music bestätigt';
+  String get secondOpinionConfirmed => 'Bestätigt, nichts zu ergänzen';
 
   @override
   String secondOpinionConfirmedFields(String fields) {
-    return 'Von YouTube Music bestätigt: $fields';
+    return 'Bestätigt, ergänzt: $fields';
   }
 
   @override

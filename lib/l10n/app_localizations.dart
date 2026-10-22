@@ -6564,13 +6564,13 @@ abstract class AppLocalizations {
   /// No description provided for @secondOpinionConfirmed.
   ///
   /// In it, this message translates to:
-  /// **'Confermato da YouTube Music'**
+  /// **'Confermato, niente da aggiungere'**
   String get secondOpinionConfirmed;
 
   /// No description provided for @secondOpinionConfirmedFields.
   ///
   /// In it, this message translates to:
-  /// **'Confermato da YouTube Music: {fields}'**
+  /// **'Confermato, aggiunto: {fields}'**
   String secondOpinionConfirmedFields(String fields);
 
   /// No description provided for @secondOpinionNotConfirmed.

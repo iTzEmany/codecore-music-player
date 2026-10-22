@@ -2747,8 +2747,8 @@
   },
   "secondOpinionLogTitle": "Secondo parere",
   "secondOpinionLogEmpty": "Nessun brano controllato",
-  "secondOpinionConfirmed": "Confermato da YouTube Music",
-  "secondOpinionConfirmedFields": "Confermato da YouTube Music: {fields}",
+  "secondOpinionConfirmed": "Confermato, niente da aggiungere",
+  "secondOpinionConfirmedFields": "Confermato, aggiunto: {fields}",
   "@secondOpinionConfirmedFields": {
     "placeholders": {
       "fields": {

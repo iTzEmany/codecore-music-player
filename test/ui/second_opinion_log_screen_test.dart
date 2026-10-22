@@ -34,7 +34,7 @@ void main() {
       ),
     ));
     expect(find.text('Uno'), findsOneWidget);
-    expect(find.textContaining('Confermato da YouTube Music: Genere, Testo'), findsOneWidget);
+    expect(find.textContaining('Confermato, aggiunto: Genere, Testo'), findsOneWidget);
     expect(find.text('Due'), findsOneWidget);
     expect(find.textContaining('Non confermato'), findsOneWidget);
   });

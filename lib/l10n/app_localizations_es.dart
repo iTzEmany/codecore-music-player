@@ -4237,11 +4237,11 @@ class AppLocalizationsEs extends AppLocalizations {
   String get secondOpinionLogEmpty => 'Ninguna canción comprobada';
 
   @override
-  String get secondOpinionConfirmed => 'Confirmado por YouTube Music';
+  String get secondOpinionConfirmed => 'Confirmado, nada que añadir';
 
   @override
   String secondOpinionConfirmedFields(String fields) {
-    return 'Confirmado por YouTube Music: $fields';
+    return 'Confirmado, añadido: $fields';
   }
 
   @override
