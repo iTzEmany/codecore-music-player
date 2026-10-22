@@ -13,7 +13,9 @@ void main() {
   late Directory dir;
   setUp(() {
     dir = Directory.systemTemp.createTempSync('sug_screen');
-    addTearDown(() => dir.deleteSync(recursive: true));
+  });
+  tearDown(() {
+    if (dir.existsSync()) dir.deleteSync(recursive: true);
   });
 
   Future<SuggestionLog> logWith(WidgetTester tester, {bool seeded = true}) async {
@@ -26,7 +28,6 @@ void main() {
       log.add(videoId: 'b', title: 'New one', artist: 'Bob', seedTitle: 'Seed B');
       log.setOutcome('a', SuggestionOutcome.disliked);
     });
-    addTearDown(() => log.flush());
     return log;
   }
 
@@ -52,10 +53,13 @@ void main() {
       await tester.pump(const Duration(milliseconds: 100));
       await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
     }
+    await tester.runAsync(() => log.flush());
+    await tester.pump();
     expect(log.length, 1);
     expect(find.text('New one'), findsNothing);
     expect(find.text('Old one'), findsOneWidget); // the dislike stays
     await h.dispose(tester);
+    await tester.runAsync(() => log.dispose());
   });
 
   testWidgets('an empty log says so and has no clear button', (tester) async {
@@ -68,5 +72,6 @@ void main() {
     expect(find.textContaining('Nessun suggerito'), findsOneWidget);
     expect(find.byTooltip('Svuota registro'), findsNothing);
     await h.dispose(tester);
+    await tester.runAsync(() => log.dispose());
   });
 }
