@@ -45,7 +45,11 @@ import '../../../providers/releases_providers.dart'
 import '../releases/followed_artists_screen.dart';
 import 'review_screen.dart';
 import 'scan_status.dart';
+import 'library_shortcuts.dart';
+import 'library_toolbar.dart';
+import '../../widgets/alpha_scroller.dart';
 import '../../widgets/motion.dart';
+import '../../widgets/segmented_blocks.dart';
 
 /// Playlists, albums and artists in one place, with Favourites and
 /// «Tutti i brani» pinned on top.
@@ -77,6 +81,12 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
     ShellNav.open<void>(context, page);
   }
 
+  /// Desktop: header content stays left-aligned within 960 px.
+  static Widget _cap(Widget c) => Align(
+    alignment: Alignment.topLeft,
+    child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 960), child: c),
+  );
+
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
@@ -106,6 +116,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
     final denied = ref.watch(permissionDeniedProvider);
 
     Widget body;
+    var count = l.libraryItemsCount(0);
     final error = playlists.error ?? albums.error ?? artists.error;
     if (denied) {
       body = EmptyState(
@@ -145,76 +156,78 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
         kind: _kind,
         sort: sort,
       );
-      final pinned = [
-        _Pinned(
-          favorites: true,
-          title: l.navFavorites,
-          subtitle: l.playlistCountLabel(favCount),
-          onTap: () => ShellNav.open<void>(context, const FavoritesScreen()),
-        ),
-        _Pinned(
-          title: l.allTracks,
-          subtitle: l.tracksCount(trackCount),
-          onTap: () => ShellNav.open<void>(context, const AllTracksScreen()),
-        ),
-        _Pinned(
-          icon: Icons.podcasts_rounded,
-          title: l.podcastsTitle,
-          subtitle: l.podcastsSubtitle(podcastCount),
-          onTap: () => ShellNav.open<void>(context, const PodcastsScreen()),
-        ),
-        _Pinned(
-          icon: Icons.radio_rounded,
-          title: l.radioTitle,
-          subtitle: l.radioLibrarySubtitle(radioCount),
-          onTap: () => ShellNav.open<void>(context, const RadioScreen()),
-        ),
-        if (kEnableYoutube && (followedCount > 0 || releaseTopArtists))
-          _Pinned(
-            icon: Icons.notifications_active_outlined,
-            title: l.releasesFollowedLibrary,
-            subtitle: l.releasesFollowedCount(followedCount),
-            onTap: () => ShellNav.open<void>(context, const FollowedArtistsScreen()),
-          ),
-        _Pinned(
-          icon: Icons.history_rounded,
-          title: l.historyTitle,
-          subtitle: l.historySubtitle,
-          onTap: () => ShellNav.open<void>(context, const HistoryScreen()),
-        ),
-        _Pinned(
-          icon: Icons.label_outline_rounded,
-          title: l.tagsTitle,
-          subtitle: l.tagsCount(tagCount),
-          onTap: () => ShellNav.open<void>(context, const TagsScreen()),
-        ),
-        _Pinned(
-          icon: Icons.bar_chart_rounded,
-          title: l.statsTitle,
-          subtitle: l.statsSubtitle,
-          onTap: () => ShellNav.open<void>(context, const StatsScreen()),
-        ),
-        if (reviewCount > 0)
-          _Pinned(
-            icon: Icons.fact_check_outlined,
-            title: l.reviewTitle,
-            subtitle: l.tracksCount(reviewCount),
-            onTap: () => ShellNav.open<void>(context, const ReviewScreen()),
-          ),
-      ];
+      count = switch (_kind) {
+        null => l.libraryItemsCount(entries.length),
+        LibraryKind.playlist => l.playlistsCount(entries.length),
+        LibraryKind.album => l.albumsCount(entries.length),
+        LibraryKind.artist => l.artistsCount(entries.length),
+      };
+      void open(Widget w) => ShellNav.open<void>(context, w);
+      final shortcuts = _kind != null
+          ? null
+          : _cap(
+              LibraryShortcuts(
+                items: [
+                  LibraryShortcut(
+                    label: l.navFavorites,
+                    count: favCount,
+                    keepWhenZero: true,
+                    onTap: () => open(const FavoritesScreen()),
+                  ),
+                  LibraryShortcut(
+                    label: l.allTracks,
+                    count: trackCount,
+                    keepWhenZero: true,
+                    onTap: () => open(const AllTracksScreen()),
+                  ),
+                  LibraryShortcut(
+                    label: l.historyTitle,
+                    onTap: () => open(const HistoryScreen()),
+                  ),
+                  LibraryShortcut(
+                    label: l.podcastsTitle,
+                    count: podcastCount,
+                    onTap: () => open(const PodcastsScreen()),
+                  ),
+                  LibraryShortcut(
+                    label: l.radioTitle,
+                    count: radioCount,
+                    onTap: () => open(const RadioScreen()),
+                  ),
+                  if (kEnableYoutube && (followedCount > 0 || releaseTopArtists))
+                    LibraryShortcut(
+                      label: l.releasesFollowedLibrary,
+                      count: followedCount,
+                      keepWhenZero: true,
+                      onTap: () => open(const FollowedArtistsScreen()),
+                    ),
+                  LibraryShortcut(
+                    label: l.tagsTitle,
+                    count: tagCount,
+                    onTap: () => open(const TagsScreen()),
+                  ),
+                  LibraryShortcut(
+                    label: l.statsTitle,
+                    onTap: () => open(const StatsScreen()),
+                  ),
+                  if (reviewCount > 0)
+                    LibraryShortcut(
+                      label: l.reviewTitle,
+                      count: reviewCount,
+                      onTap: () => open(const ReviewScreen()),
+                    ),
+                ],
+              ),
+            );
       body = settings.libraryGrid
-          ? _LibraryGrid(pinned: pinned, entries: entries, onOpen: _open)
-          : _LibraryList(pinned: pinned, entries: entries, onOpen: _open);
+          ? _LibraryGrid(header: shortcuts, entries: entries, onOpen: _open)
+          : _LibraryList(
+              header: shortcuts,
+              entries: entries,
+              onOpen: _open,
+              showLetters: sort == LibrarySort.alpha,
+            );
     }
-
-    Widget chip(String label, bool selected, VoidCallback onTap) => Padding(
-      padding: const EdgeInsets.only(right: 8),
-      child: ChoiceChip(
-        label: Text(label),
-        selected: selected,
-        onSelected: (_) => onTap(),
-      ),
-    );
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -302,80 +315,40 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
             ),
           ),
           const ScanStatus(),
-          SizedBox(
-            height: 48,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: CcDims.margin),
-              children: [
-                chip(
-                  l.navPlaylists,
-                  _kind == LibraryKind.playlist,
-                  () => setState(
-                    () => _kind = _kind == LibraryKind.playlist
-                        ? null
-                        : LibraryKind.playlist,
+          _cap(
+            Padding(
+              padding: const EdgeInsets.fromLTRB(CcDims.margin, 8, CcDims.margin, 0),
+              child: SegmentedBlocks<LibraryKind?>(
+                items: [
+                  BlockItem(value: null, icon: Icons.apps_rounded, label: l.libraryAll),
+                  BlockItem(
+                    value: LibraryKind.playlist,
+                    icon: Icons.queue_music_rounded,
+                    label: l.navPlaylists,
                   ),
-                ),
-                chip(
-                  l.albums,
-                  _kind == LibraryKind.album,
-                  () => setState(
-                    () => _kind = _kind == LibraryKind.album
-                        ? null
-                        : LibraryKind.album,
+                  BlockItem(
+                    value: LibraryKind.album,
+                    icon: Icons.album_rounded,
+                    label: l.albums,
                   ),
-                ),
-                chip(
-                  l.artists,
-                  _kind == LibraryKind.artist,
-                  () => setState(
-                    () => _kind = _kind == LibraryKind.artist
-                        ? null
-                        : LibraryKind.artist,
+                  BlockItem(
+                    value: LibraryKind.artist,
+                    icon: Icons.person_rounded,
+                    label: l.artists,
                   ),
-                ),
-              ],
+                ],
+                selected: _kind,
+                onChanged: (k) => setState(() => _kind = k),
+              ),
             ),
           ),
-          SizedBox(
-            height: 48,
-            child: Row(
-              children: [
-                Expanded(
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.only(left: CcDims.margin),
-                    children: [
-                      chip(
-                        l.sortRecent,
-                        sort == LibrarySort.recent,
-                        () => _setSettings(sort: LibrarySort.recent),
-                      ),
-                      chip(
-                        l.sortAlphabetical,
-                        sort == LibrarySort.alpha,
-                        () => _setSettings(sort: LibrarySort.alpha),
-                      ),
-                      chip(
-                        l.sortAddedRecently,
-                        sort == LibrarySort.added,
-                        () => _setSettings(sort: LibrarySort.added),
-                      ),
-                    ],
-                  ),
-                ),
-                IconButton(
-                  tooltip: settings.libraryGrid ? l.viewAsList : l.viewAsGrid,
-                  icon: Icon(
-                    settings.libraryGrid
-                        ? Icons.view_list_rounded
-                        : Icons.grid_view_rounded,
-                  ),
-                  onPressed: () => _setSettings(grid: !settings.libraryGrid),
-                ),
-                const SizedBox(width: 4),
-              ],
+          _cap(
+            LibraryToolbar(
+              countLabel: count,
+              sort: sort,
+              grid: settings.libraryGrid,
+              onSort: (s) => _setSettings(sort: s),
+              onToggleGrid: () => _setSettings(grid: !settings.libraryGrid),
             ),
           ),
           Expanded(child: body),
@@ -384,30 +357,6 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
     );
   }
 }
-
-class _Pinned {
-  const _Pinned({
-    this.favorites = false,
-    this.icon = Icons.music_note_rounded,
-    required this.title,
-    required this.subtitle,
-    required this.onTap,
-  });
-
-  /// The heart cover of the favourites; otherwise a square with [icon].
-  final bool favorites;
-  final IconData icon;
-  final String title, subtitle;
-  final VoidCallback onTap;
-}
-
-Widget _pinnedCover(_Pinned p, double size, {double? radius}) => p.favorites
-    ? PlaylistCover(
-        size: size,
-        favorites: true,
-        radius: radius ?? CcDims.rList,
-      )
-    : _IconCover(size: size, icon: p.icon);
 
 String _subtitle(BuildContext context, LibraryEntry e) {
   final l = context.l10n;
@@ -446,121 +395,104 @@ Widget _cover(LibraryEntry e, double size) => switch (e.kind) {
 
 class _LibraryList extends StatelessWidget {
   const _LibraryList({
-    required this.pinned,
+    required this.header,
     required this.entries,
     required this.onOpen,
+    required this.showLetters,
   });
 
-  final List<_Pinned> pinned;
+  final Widget? header;
   final List<LibraryEntry> entries;
   final void Function(LibraryEntry) onOpen;
+  final bool showLetters;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context).textTheme;
-    Widget row(Widget cover, String title, String subtitle, VoidCallback tap) =>
-        InkWell(
-          onTap: tap,
-          child: SizedBox(
-            height: 64,
-            child: Row(
+    final cc = context.cc;
+    final textScale = MediaQuery.textScalerOf(context).scale(1);
+    // Entries, with a letter (String) before each change of initial in A-Z.
+    final rows = <Object>[];
+    String? last;
+    for (final e in entries) {
+      if (showLetters) {
+        final letter = leadingLetter(e.title);
+        if (letter != last) rows.add(letter);
+        last = letter;
+      }
+      rows.add(e);
+    }
+    Widget entryRow(LibraryEntry e) => InkWell(
+      onTap: () => onOpen(e),
+      child: Row(
+        children: [
+          const SizedBox(width: CcDims.margin),
+          _cover(e, 48),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(width: CcDims.margin),
-                cover,
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.bodyLarge,
-                      ),
-                      Text(
-                        subtitle,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.bodyMedium,
-                      ),
-                    ],
-                  ),
+                Text(
+                  _title(context, e),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.bodyLarge,
                 ),
-                const SizedBox(width: CcDims.margin),
+                Text(
+                  _subtitle(context, e),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.bodyMedium,
+                ),
               ],
             ),
           ),
-        );
-    return ListView.builder(
-      itemExtent: 64,
-      itemCount: pinned.length + entries.length,
-      itemBuilder: (_, i) {
-        if (i < pinned.length) {
-          final p = pinned[i];
-          return row(
-            _pinnedCover(p, 48),
-            p.title,
-            p.subtitle,
-            p.onTap,
-          );
-        }
-        final e = entries[i - pinned.length];
-        return row(
-          _cover(e, 48),
-          _title(context, e),
-          _subtitle(context, e),
-          () => onOpen(e),
-        );
-      },
-    );
-  }
-}
-
-class _IconCover extends StatelessWidget {
-  const _IconCover({required this.size, required this.icon});
-
-  final double size;
-  final IconData icon;
-
-  @override
-  Widget build(BuildContext context) {
-    final cc = context.cc;
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        color: cc.surface2,
-        borderRadius: BorderRadius.circular(CcDims.rList),
+          const SizedBox(width: CcDims.margin),
+        ],
       ),
-      child: Icon(icon, color: cc.accentSoft),
+    );
+    return CustomScrollView(
+      slivers: [
+        if (header != null) SliverToBoxAdapter(child: header),
+        SliverVariedExtentList.builder(
+          itemCount: rows.length,
+          itemExtentBuilder: (i, _) => rows[i] is String ? 40 * textScale : 64,
+          itemBuilder: (_, i) {
+            final r = rows[i];
+            if (r is LibraryEntry) return entryRow(r);
+            return Padding(
+              padding: const EdgeInsets.fromLTRB(CcDims.margin, 16, CcDims.margin, 4),
+              child: Text(
+                r as String,
+                style: theme.titleSmall?.copyWith(color: cc.accentSoft),
+              ),
+            );
+          },
+        ),
+      ],
     );
   }
 }
 
 class _LibraryGrid extends StatelessWidget {
   const _LibraryGrid({
-    required this.pinned,
+    required this.header,
     required this.entries,
     required this.onOpen,
   });
 
-  final List<_Pinned> pinned;
+  final Widget? header;
   final List<LibraryEntry> entries;
   final void Function(LibraryEntry) onOpen;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context).textTheme;
-    Widget tile(
-      Widget Function(double) cover,
-      String title,
-      String subtitle,
-      VoidCallback tap,
-    ) {
+    Widget tile(LibraryEntry e) {
       return PressScale(child: InkWell(
-        onTap: tap,
+        onTap: () => onOpen(e),
         borderRadius: BorderRadius.circular(CcDims.rGrid),
         child: Padding(
           padding: const EdgeInsets.all(6),
@@ -570,18 +502,18 @@ class _LibraryGrid extends StatelessWidget {
               Expanded(
                 child: LayoutBuilder(
                   builder: (_, c) =>
-                      Center(child: cover(c.biggest.shortestSide)),
+                      Center(child: _cover(e, c.biggest.shortestSide)),
                 ),
               ),
               const SizedBox(height: 6),
               Text(
-                title,
+                _title(context, e),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: theme.bodyLarge,
               ),
               Text(
-                subtitle,
+                _subtitle(context, e),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: theme.bodyMedium,
@@ -592,31 +524,21 @@ class _LibraryGrid extends StatelessWidget {
       ));
     }
 
-    return GridView.builder(
-      padding: const EdgeInsets.all(CcDims.margin - 6),
-      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-        maxCrossAxisExtent: 180,
-        childAspectRatio: 0.8,
-      ),
-      itemCount: pinned.length + entries.length,
-      itemBuilder: (_, i) {
-        if (i < pinned.length) {
-          final p = pinned[i];
-          return tile(
-            (s) => _pinnedCover(p, s, radius: CcDims.rGrid),
-            p.title,
-            p.subtitle,
-            p.onTap,
-          );
-        }
-        final e = entries[i - pinned.length];
-        return tile(
-          (s) => _cover(e, s),
-          _title(context, e),
-          _subtitle(context, e),
-          () => onOpen(e),
-        );
-      },
+    return CustomScrollView(
+      slivers: [
+        if (header != null) SliverToBoxAdapter(child: header),
+        SliverPadding(
+          padding: const EdgeInsets.all(CcDims.margin - 6),
+          sliver: SliverGrid.builder(
+            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: 180,
+              childAspectRatio: 0.8,
+            ),
+            itemCount: entries.length,
+            itemBuilder: (_, i) => tile(entries[i]),
+          ),
+        ),
+      ],
     );
   }
 }

@@ -148,12 +148,64 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String albumsCount(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count albums',
+      other: '$countString albums',
       one: '1 album',
       zero: '0 album',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get libraryAll => 'Tout';
+
+  @override
+  String libraryItemsCount(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString éléments',
+      one: '1 élément',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String playlistsCount(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString playlists',
+      one: '1 playlist',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String artistsCount(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString artistes',
+      one: '1 artiste',
     );
     return '$_temp0';
   }
@@ -1099,6 +1151,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get sortAlphabetical => 'Alphabétique';
+
+  @override
+  String get sortAToZ => 'A–Z';
 
   @override
   String get sortAddedRecently => 'Ajoutés récemment';

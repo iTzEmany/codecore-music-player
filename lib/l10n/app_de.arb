@@ -43,6 +43,42 @@
   "sortDuration": "Dauer",
   "tracksCount": "{count, plural, one{1 Titel} other{{count} Titel}}",
   "albumsCount": "{count, plural, one{1 Album} other{{count} Alben}}",
+  "@albumsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "libraryAll": "Alles",
+  "libraryItemsCount": "{count, plural, one{1 Eintrag} other{{count} Einträge}}",
+  "@libraryItemsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "playlistsCount": "{count, plural, one{1 Playlist} other{{count} Playlists}}",
+  "@playlistsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "artistsCount": "{count, plural, one{1 Künstler} other{{count} Künstler}}",
+  "@artistsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
   "missingTracksCount": "Fehlende Titel ({count})",
   "addedToFavorites": "Zu Favoriten hinzugefügt",
   "removedFromFavorites": "Aus Favoriten entfernt",
@@ -432,6 +468,7 @@
   },
   "sortRecent": "Zuletzt gehört",
   "sortAlphabetical": "Alphabetisch",
+  "sortAToZ": "A–Z",
   "sortAddedRecently": "Zuletzt hinzugefügt",
   "viewAsGrid": "Als Raster anzeigen",
   "viewAsList": "Als Liste anzeigen",

@@ -1,0 +1,87 @@
+import 'package:flutter/material.dart';
+
+import '../../../data/repositories/library_entries.dart';
+import '../../../l10n/l10n_ext.dart';
+import '../../theme/tokens.dart';
+
+/// Under the blocks: the count on the left, the sort menu and the list/grid
+/// toggle on the right.
+class LibraryToolbar extends StatelessWidget {
+  const LibraryToolbar({
+    super.key,
+    required this.countLabel,
+    required this.sort,
+    required this.grid,
+    required this.onSort,
+    required this.onToggleGrid,
+  });
+
+  final String countLabel;
+  final LibrarySort sort;
+  final bool grid;
+  final ValueChanged<LibrarySort> onSort;
+  final VoidCallback onToggleGrid;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final cc = context.cc;
+    final theme = Theme.of(context).textTheme;
+    String name(LibrarySort s) => switch (s) {
+      LibrarySort.recent => l.sortRecent,
+      LibrarySort.alpha => l.sortAToZ,
+      LibrarySort.added => l.sortAddedRecently,
+    };
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(CcDims.margin, 4, 4, 0),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              countLabel,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.bodyMedium,
+            ),
+          ),
+          Flexible(
+            child: PopupMenuButton<LibrarySort>(
+              onSelected: onSort,
+              itemBuilder: (_) => [
+                for (final s in LibrarySort.values)
+                  PopupMenuItem(value: s, child: Text(name(s))),
+              ],
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 10,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        name(sort),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.labelLarge,
+                      ),
+                    ),
+                    Icon(Icons.arrow_drop_down_rounded, color: cc.textMuted),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          IconButton(
+            tooltip: grid ? l.viewAsList : l.viewAsGrid,
+            icon: Icon(
+              grid ? Icons.view_list_rounded : Icons.grid_view_rounded,
+            ),
+            onPressed: onToggleGrid,
+          ),
+        ],
+      ),
+    );
+  }
+}

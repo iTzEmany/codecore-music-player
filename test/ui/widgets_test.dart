@@ -5,8 +5,10 @@ import 'package:codecore/ui/theme/tokens.dart';
 import 'package:codecore/ui/widgets/artist_avatar.dart';
 import 'package:codecore/ui/widgets/playlist_cover.dart';
 import 'package:codecore/ui/widgets/quality_tag.dart';
+import 'package:codecore/ui/widgets/segmented_blocks.dart';
 import 'package:codecore/ui/widgets/track_row.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -136,6 +138,81 @@ void main() {
         const Scaffold(body: PlaylistCover(size: 80, favorites: true)));
     expect(find.byIcon(Icons.favorite_rounded), findsOneWidget);
     await h.dispose(tester);
+  });
+
+  group('SegmentedBlocks', () {
+    Widget blocks(int sel, ValueChanged<int> on) => SegmentedBlocks<int>(
+          items: const [
+            BlockItem(value: 0, icon: Icons.apps_rounded, label: 'Tutto'),
+            BlockItem(value: 1, icon: Icons.queue_music_rounded, label: 'Playlist'),
+            BlockItem(value: 2, icon: Icons.album_rounded, label: 'Album'),
+            BlockItem(value: 3, icon: Icons.person_rounded, label: 'Artisti'),
+          ],
+          selected: sel,
+          onChanged: on,
+        );
+
+    testWidgets('tapping a block selects it', (t) async {
+      int? got;
+      await _pump(t, blocks(0, (v) => got = v));
+      await t.tap(find.text('Album'));
+      expect(got, 2);
+    });
+
+    testWidgets('falls back to 2x2 when the row does not fit', (t) async {
+      t.view.physicalSize = const Size(360, 780);
+      t.view.devicePixelRatio = 1;
+      addTearDown(t.view.reset);
+      await t.pumpWidget(MaterialApp(
+        theme: buildThemeFromColors(CcColors.notte, false),
+        home: MediaQuery(
+          data: const MediaQueryData(
+              size: Size(360, 780), textScaler: TextScaler.linear(1.5)),
+          child: Scaffold(body: blocks(0, (_) {})),
+        ),
+      ));
+      final a = t.getRect(find.text('Tutto'));
+      final c = t.getRect(find.text('Album'));
+      expect(c.top, greaterThan(a.bottom));
+      expect(find.byType(Scrollable), findsNothing);
+      expect(t.takeException(), isNull);
+    });
+
+    testWidgets('reduced motion: no slide', (t) async {
+      Widget app(int sel) => MaterialApp(
+            theme: buildThemeFromColors(CcColors.notte, false),
+            home: MediaQuery(
+              data: const MediaQueryData(
+                  size: Size(400, 800), disableAnimations: true),
+              child: Scaffold(body: blocks(sel, (_) {})),
+            ),
+          );
+      await t.pumpWidget(app(0));
+      await t.pumpWidget(app(2));
+      await t.pump(const Duration(milliseconds: 1));
+      expect(t.widget<AnimatedSlide>(find.byType(AnimatedSlide)).duration,
+          Duration.zero);
+    });
+
+    testWidgets('blocks are focusable and announce selected', (t) async {
+      final h = t.ensureSemantics();
+      await _pump(t, blocks(2, (_) {}));
+      await t.sendKeyEvent(LogicalKeyboardKey.tab);
+      await t.pump();
+      expect(
+          Focus.of(t.element(find.byType(InkWell).first), scopeOk: true)
+              .hasFocus,
+          isTrue);
+      expect(
+          t.getSemantics(find.text('Album')),
+          matchesSemantics(
+              label: 'Album',
+              isButton: true,
+              isSelected: true,
+              hasSelectedState: true,
+              hasTapAction: true));
+      h.dispose();
+    });
   });
 
   test('Hi-Res threshold', () {

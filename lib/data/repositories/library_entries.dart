@@ -1,3 +1,4 @@
+import '../../core/text_utils.dart';
 import '../db/app_database.dart';
 import 'library_queries.dart';
 import 'playlist_repository.dart';
@@ -50,7 +51,12 @@ class LibraryEntry {
   final SmartPlaylist? smart;
 }
 
-String _sortKey(LibraryEntry e) => (e.title ?? '').toLowerCase();
+/// Accent-folded; digits and symbols («#») come before the letters, so each
+/// initial is one contiguous block.
+String _sortKey(LibraryEntry e) {
+  final t = normalize(e.title ?? '');
+  return (RegExp(r'^[a-z]').hasMatch(t) ? 'b' : 'a') + t;
+}
 
 /// Mixes the three collections, filters by [kind] (null = everything) and
 /// orders them. Ties always fall back to the alphabetical order.

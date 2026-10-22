@@ -53,7 +53,36 @@
   "@albumsCount": {
     "placeholders": {
       "count": {
-        "type": "int"
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "libraryAll": "Tout",
+  "libraryItemsCount": "{count, plural, one{1 élément} other{{count} éléments}}",
+  "@libraryItemsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "playlistsCount": "{count, plural, one{1 playlist} other{{count} playlists}}",
+  "@playlistsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "artistsCount": "{count, plural, one{1 artiste} other{{count} artistes}}",
+  "@artistsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
       }
     }
   },
@@ -623,6 +652,7 @@
   },
   "sortRecent": "Récents",
   "sortAlphabetical": "Alphabétique",
+  "sortAToZ": "A–Z",
   "sortAddedRecently": "Ajoutés récemment",
   "viewAsGrid": "Afficher en grille",
   "viewAsList": "Afficher en liste",
