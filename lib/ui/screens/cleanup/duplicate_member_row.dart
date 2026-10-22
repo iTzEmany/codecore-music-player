@@ -53,12 +53,12 @@ class DuplicateMemberRow extends ConsumerWidget {
   final bool keep;
   final VoidCallback onTap;
 
-  String _meta(DupEntry e) => [
+  String _meta(BuildContext context, DupEntry e) => [
     e.format.toUpperCase(),
     if (e.bitrateKbps != null) '${e.bitrateKbps} kbps',
     if (e.bitDepth != null) '${e.bitDepth} bit',
     if (e.sampleRateHz != null) '${(e.sampleRateHz! / 1000).toStringAsFixed(1)} kHz',
-    formatBytes(e.sizeBytes),
+    formatBytes(e.sizeBytes, Localizations.localeOf(context).toString()),
     formatDuration(e.durationMs),
   ].join(', ');
 
@@ -109,7 +109,7 @@ class DuplicateMemberRow extends ConsumerWidget {
                       key: ValueKey('dup-folder-${entry.id}'),
                       style: theme.bodySmall?.copyWith(color: cc.textMuted),
                     ),
-                    Text(_meta(entry), style: muted),
+                    Text(_meta(context, entry), style: muted),
                     if (keep)
                       Text(
                         l.duplicatesKeepLabel,

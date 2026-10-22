@@ -2369,7 +2369,6 @@
     }
   },
   "navMemory": "Storage",
-  "memorySummary": "Summary",
   "memoryMusicLabel": "Music",
   "memoryOtherLabel": "Other",
   "memoryFreeLabel": "Free",
@@ -2386,8 +2385,8 @@
   },
   "memoryPlaylists": "Playlists",
   "memoryPlaylistsNote": "A track in several playlists counts in each one, so the sum can exceed the total.",
-  "memoryByFormat": "By format",
-  "memoryByFolder": "By folder",
+  "memoryByFormat": "Formats",
+  "memoryByFolder": "Folders",
   "memoryNoFolder": "Outside the folders",
   "memoryHeaviest": "Heaviest",
   "memoryHeaviestTracks": "Tracks",
@@ -2405,7 +2404,7 @@
       }
     }
   },
-  "memoryDatabase": "Database",
+  "memoryDatabase": "Library",
   "memoryImageMemory": "Images in memory",
   "memoryJamCache": "Jam cache",
   "memorySearchCache": "Search cache",
@@ -2415,9 +2414,6 @@
   "memoryLog": "Log",
   "memoryPodcasts": "Podcast episodes",
   "memoryClearCache": "Clear cache",
-  "memoryClearTitle": "Clear the cache?",
-  "memoryClearBody": "Only removes copies the app makes again by itself: images in memory, Jam cache, searches and blurred backgrounds. Covers, the database and backups stay where they are.",
-  "memoryClearConfirm": "Clear",
   "memoryCleared": "{size} freed",
   "@memoryCleared": {
     "placeholders": {
@@ -2435,7 +2431,31 @@
     }
   },
   "memoryClearFailed": "Could not clear the cache",
-  "memoryTools": "Cleanup",
+  "memoryOfMusic": "of music",
+  "memoryShowAll": "Show all",
+  "memoryCache": "Cache",
+  "memoryCacheHint": "Images, searches, Jam",
+  "memoryDatabaseHint": "The database with tracks and plays",
+  "memoryTagBackupsHint": "Before every change to the files",
+  "memoryTinyNote": "Data under 1 MB is not listed.",
+  "memoryClearHint": "Frees {size}. Tracks, covers and plays stay.",
+  "@memoryClearHint": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "memoryDuplicateGroups": "{count, plural, one{1 group} other{{count} groups}}",
+  "@memoryDuplicateGroups": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "memoryTools": "Tools",
   "memoryUnavailable": "Not available",
   "ytmArtistWithAudience": "Artist, {audience}",
   "ytmOffline": "Offline, data from {date}",

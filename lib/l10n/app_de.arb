@@ -2369,7 +2369,6 @@
     }
   },
   "navMemory": "Speicher",
-  "memorySummary": "Übersicht",
   "memoryMusicLabel": "Musik",
   "memoryOtherLabel": "Sonstiges",
   "memoryFreeLabel": "Frei",
@@ -2386,8 +2385,8 @@
   },
   "memoryPlaylists": "Playlists",
   "memoryPlaylistsNote": "Ein Titel in mehreren Playlists zählt in jeder davon, die Summe kann daher die Gesamtgröße übersteigen.",
-  "memoryByFormat": "Nach Format",
-  "memoryByFolder": "Nach Ordner",
+  "memoryByFormat": "Formate",
+  "memoryByFolder": "Ordner",
   "memoryNoFolder": "Außerhalb der Ordner",
   "memoryHeaviest": "Die größten",
   "memoryHeaviestTracks": "Titel",
@@ -2405,7 +2404,7 @@
       }
     }
   },
-  "memoryDatabase": "Datenbank",
+  "memoryDatabase": "Bibliothek",
   "memoryImageMemory": "Bilder im Arbeitsspeicher",
   "memoryJamCache": "Jam-Cache",
   "memorySearchCache": "Such-Cache",
@@ -2415,9 +2414,6 @@
   "memoryLog": "Protokoll",
   "memoryPodcasts": "Podcast-Folgen",
   "memoryClearCache": "Cache leeren",
-  "memoryClearTitle": "Cache leeren?",
-  "memoryClearBody": "Entfernt nur Kopien, die die App selbst neu erstellt: Bilder im Arbeitsspeicher, Jam-Cache, Suchen und unscharfe Hintergründe. Cover, Datenbank und Sicherungen bleiben erhalten.",
-  "memoryClearConfirm": "Leeren",
   "memoryCleared": "{size} freigegeben",
   "@memoryCleared": {
     "placeholders": {
@@ -2435,7 +2431,31 @@
     }
   },
   "memoryClearFailed": "Cache konnte nicht geleert werden",
-  "memoryTools": "Aufräumen",
+  "memoryOfMusic": "Musik",
+  "memoryShowAll": "Alle anzeigen",
+  "memoryCache": "Cache",
+  "memoryCacheHint": "Bilder, Suchen, Jam",
+  "memoryDatabaseHint": "Die Datenbank mit Titeln und Wiedergaben",
+  "memoryTagBackupsHint": "Vor jeder Änderung an den Dateien",
+  "memoryTinyNote": "Daten unter 1 MB werden nicht aufgelistet.",
+  "memoryClearHint": "Gibt {size} frei. Titel, Cover und Wiedergaben bleiben erhalten.",
+  "@memoryClearHint": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "memoryDuplicateGroups": "{count, plural, one{1 Gruppe} other{{count} Gruppen}}",
+  "@memoryDuplicateGroups": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "memoryTools": "Werkzeuge",
   "memoryUnavailable": "Nicht verfügbar",
   "ytmArtistWithAudience": "Künstler, {audience}",
   "ytmOffline": "Offline, Daten vom {date}",

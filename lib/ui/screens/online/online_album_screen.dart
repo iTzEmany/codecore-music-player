@@ -43,7 +43,7 @@ class OnlineAlbumScreen extends ConsumerWidget {
     if (plan.tracks.isEmpty) return;
     final body = [
       l.ytmAlbumConfirmBody(plan.tracks.length, l.durationMinutes(plan.duration.inMinutes),
-          formatBytes(plan.estimatedBytes)),
+          formatBytes(plan.estimatedBytes, Localizations.localeOf(context).toString())),
       if (plan.owned > 0) l.ytmAlbumConfirmOwned(plan.owned),
     ].join('\n');
     final ok = await showConfirm(

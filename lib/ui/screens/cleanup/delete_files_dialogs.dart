@@ -77,7 +77,7 @@ Future<DeleteReport?> confirmAndDeleteMerged(
   final sure = await showConfirm(
     context,
     title: l.duplicatesDeleteFinalTitle(files.length),
-    body: l.duplicatesDeleteFinalBody(formatBytes(bytes)),
+    body: l.duplicatesDeleteFinalBody(formatBytes(bytes, Localizations.localeOf(context).toString())),
     confirmLabel: l.duplicatesDeleteGo,
     destructive: true,
   );
@@ -105,7 +105,7 @@ Future<void> _showReport(BuildContext context, DeleteReport r) {
             Text(
               l.duplicatesDeleteDone(
                 r.deleted.length,
-                formatBytes(r.freedBytes),
+                formatBytes(r.freedBytes, ctx.l10n.localeName),
               ),
             ),
             if (r.skipped.isNotEmpty) ...[

@@ -4242,9 +4242,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get navMemory => 'Stockage';
 
   @override
-  String get memorySummary => 'Résumé';
-
-  @override
   String get memoryMusicLabel => 'Musique';
 
   @override
@@ -4266,10 +4263,10 @@ class AppLocalizationsFr extends AppLocalizations {
       'Un titre présent dans plusieurs playlists compte dans chacune : la somme peut dépasser le total.';
 
   @override
-  String get memoryByFormat => 'Par format';
+  String get memoryByFormat => 'Formats';
 
   @override
-  String get memoryByFolder => 'Par dossier';
+  String get memoryByFolder => 'Dossiers';
 
   @override
   String get memoryNoFolder => 'Hors des dossiers';
@@ -4305,7 +4302,7 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get memoryDatabase => 'Base de données';
+  String get memoryDatabase => 'Bibliothèque';
 
   @override
   String get memoryImageMemory => 'Images en mémoire';
@@ -4335,16 +4332,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get memoryClearCache => 'Vider le cache';
 
   @override
-  String get memoryClearTitle => 'Vider le cache ?';
-
-  @override
-  String get memoryClearBody =>
-      'Ne supprime que des copies que l’app recrée toute seule : images en mémoire, cache Jam, recherches et arrière-plans floutés. Les pochettes, la base de données et les sauvegardes restent en place.';
-
-  @override
-  String get memoryClearConfirm => 'Vider';
-
-  @override
   String memoryCleared(String size) {
     return '$size libérés';
   }
@@ -4358,7 +4345,50 @@ class AppLocalizationsFr extends AppLocalizations {
   String get memoryClearFailed => 'Impossible de vider le cache';
 
   @override
-  String get memoryTools => 'Nettoyage';
+  String get memoryOfMusic => 'de musique';
+
+  @override
+  String get memoryShowAll => 'Tout afficher';
+
+  @override
+  String get memoryCache => 'Cache';
+
+  @override
+  String get memoryCacheHint => 'Images, recherches, Jam';
+
+  @override
+  String get memoryDatabaseHint =>
+      'La base de données avec les titres et les écoutes';
+
+  @override
+  String get memoryTagBackupsHint => 'Avant chaque modification des fichiers';
+
+  @override
+  String get memoryTinyNote =>
+      'Les données de moins de 1 Mo ne sont pas listées.';
+
+  @override
+  String memoryClearHint(String size) {
+    return 'Libère $size. Les titres, les pochettes et les écoutes restent.';
+  }
+
+  @override
+  String memoryDuplicateGroups(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString groupes',
+      one: '1 groupe',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get memoryTools => 'Outils';
 
   @override
   String get memoryUnavailable => 'Indisponible';
