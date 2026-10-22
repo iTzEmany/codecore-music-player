@@ -1,0 +1,502 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Anello, Memoria</title>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=Unbounded:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* page */
+  :root { --pg:#ECE8F2; --pgtx:#1B1427; --pgmu:#5C5170; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --pg:#17121F; --pgtx:#EDE8F5; --pgmu:#A79DB8; } }
+  :root[data-theme="dark"] { --pg:#17121F; --pgtx:#EDE8F5; --pgmu:#A79DB8; }
+  * { box-sizing:border-box; }
+  html, body { margin:0; }
+  body { background:var(--pg); color:var(--pgtx); font-family:'Figtree',sans-serif; padding:32px 20px 64px; overflow-x:hidden; }
+  .intro { max-width:1136px; margin:0 auto 32px; }
+  .intro h1 { font-family:'Unbounded',sans-serif; font-weight:700; font-size:28px; margin:0 0 8px; }
+  .intro p { margin:0 0 8px; color:var(--pgmu); font-size:15px; line-height:1.5; max-width:720px; }
+  .tools { display:flex; flex-wrap:wrap; gap:16px; margin-top:16px; font-size:14px; align-items:center; }
+  .tools button { font:inherit; font-weight:600; padding:8px 14px; border-radius:999px; border:1px solid var(--pgmu); background:none; color:inherit; cursor:pointer; }
+  .tools label { display:flex; gap:8px; align-items:center; cursor:pointer; }
+
+  /* responsive grid: 3 columns at 1280, 2 at 800, 1 on a phone; nothing is ever cut */
+  .grid { display:grid; grid-template-columns:repeat(auto-fill, 360px); gap:48px 24px; justify-content:center; max-width:1136px; margin:0 auto; }
+  .fig { min-width:0; }
+  .fig h3 { margin:16px 4px 4px; font-size:16px; }
+  .fig p { margin:0 4px; color:var(--pgmu); font-size:14px; line-height:1.5; }
+  @media (max-width:420px) { .grid { grid-template-columns:minmax(0,1fr); } .fk { width:100%; } }
+  .wide { max-width:1136px; margin:56px auto 0; }
+
+  /* app tokens = CcColors */
+  .fk, .dsk { --bg:#07050C; --s1:#120E1C; --s2:#1D1630; --s3:#2A2140; --acc:#A06BFF; --accs:#D9C8FF; --onacc:#12081F;
+        --tx:#F4F0FA; --mu:#A79DB8; --fa:#6E6680; --err:#FF6B81; }
+  .oled { --bg:#000000; }
+  .light { --bg:#FAF8FD; --s1:#F2EEF9; --s2:#E9E3F4; --s3:#DAD1EB; --acc:#6A35D8; --accs:#5B2BBE; --onacc:#FFFFFF;
+        --tx:#1B1427; --mu:#5C5170; --fa:#8C829E; --err:#C8203B; }
+  .a-blu { --acc:#5B9BFF; --accs:#B7D3FF; --onacc:#12081F; }
+  .a-ambra { --acc:#FFC247; --accs:#FFE4AE; --onacc:#12081F; }
+  .light.a-verde { --acc:#1F7A3A; --accs:#19622E; --onacc:#FFFFFF; }
+  .light.a-rosa { --acc:#C0206F; --accs:#9A1A59; --onacc:#FFFFFF; }
+
+  .fk { width:360px; height:760px; max-width:100%; border-radius:40px; overflow:hidden; position:relative; background:var(--bg); color:var(--tx);
+        box-shadow:0 24px 60px rgba(20,10,40,.35); user-select:none; }
+  .fk *, .dsk * { box-sizing:border-box; }
+  .fk button, .dsk button { font:inherit; color:inherit; background:none; border:0; padding:0; cursor:pointer;
+        transition:transform .12s cubic-bezier(.33,1,.68,1), background .18s, color .18s; }
+  .fk button:active, .dsk button:active { transform:scale(.97); }
+  .fk button:focus-visible, .dsk button:focus-visible { outline:2px solid var(--acc); outline-offset:2px; border-radius:12px; }
+  .fk svg, .dsk svg { display:block; }
+  .scroll { position:absolute; inset:0; overflow:hidden; padding-top:26px; }
+  .c { border-radius:12px; flex:none; position:relative; }
+  .g1 { background:linear-gradient(135deg,#FF8A5B,#C2185B); } .g2 { background:linear-gradient(135deg,#3A7BD5,#00D2FF); }
+  .g3 { background:linear-gradient(135deg,#2E2A4F,#A06BFF); } .g4 { background:linear-gradient(135deg,#F7C948,#E07A22); }
+  .g5 { background:linear-gradient(135deg,#1D976C,#93F9B9); } .g6 { background:linear-gradient(135deg,#3d3d48,#9a98a8); }
+
+  .bar { display:flex; align-items:center; gap:4px; height:48px; padding:0 8px; }
+  .bar .sp { flex:1; }
+  .ib { width:40px; height:40px; display:grid; place-items:center; border-radius:50%; color:var(--mu); }
+  .ib:hover { background:var(--s1); }
+  .bar .ttl { font-weight:700; font-size:22px; color:var(--tx); padding-left:4px; }
+
+  /* collection header: left aligned, no tint */
+  .hd { display:flex; gap:16px; padding:8px 16px 0; align-items:flex-end; }
+  .hd .c { width:128px; height:128px; }
+  .hd .round { border-radius:50%; }
+  .hd .tile { background:var(--s2); color:var(--accs); display:grid; place-items:center; }
+  .hd .tx { min-width:0; padding-bottom:2px; }
+  .hd h2 { font-family:'Unbounded',sans-serif; font-weight:600; font-size:24px; line-height:1.15; margin:0 0 6px; overflow-wrap:anywhere; }
+  .hd .sub { font-size:15px; font-weight:600; color:var(--mu); }
+  .hd .meta { font-size:13px; color:var(--mu); margin-top:2px; }
+  .acts { display:flex; align-items:center; gap:8px; padding:16px 16px 8px; flex-wrap:wrap; }
+  .pill { display:inline-flex; align-items:center; gap:6px; height:40px; padding:0 18px 0 14px; border-radius:999px; font-weight:700; font-size:14px; }
+  .pill.fill { background:var(--acc); color:var(--onacc); }
+  .pill.line { box-shadow:inset 0 0 0 1px var(--s3); }
+  .pill.line.on { color:var(--acc); }
+  .acts .ib { margin-left:auto; }
+
+  /* rows */
+  .row { display:flex; align-items:center; gap:12px; height:56px; padding:0 8px 0 16px; }
+  .row:hover { background:var(--s1); }
+  .row .n { width:20px; text-align:center; font-size:13px; color:var(--mu); font-variant-numeric:tabular-nums; display:grid; place-items:center; flex:none; }
+  .row .c { width:44px; height:44px; border-radius:4px; }
+  .row .c.round { border-radius:50%; }
+  .row .t { flex:1; min-width:0; }
+  .row b { display:block; font-weight:600; font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .row small { display:block; font-size:13px; color:var(--mu); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .row .d { font-size:12px; color:var(--fa); font-variant-numeric:tabular-nums; }
+  .row .ib { width:36px; height:36px; }
+  .row.now b { color:var(--acc); }
+  /* the logo dot: the only new place it appears */
+  .dot { width:8px; height:8px; border-radius:50%; background:var(--acc); display:block; }
+  .c > .dot { position:absolute; top:-3px; right:-3px; box-shadow:0 0 0 2px var(--bg); }
+  .disc { font-size:14px; font-weight:700; color:var(--mu); padding:12px 16px 4px; }
+
+  .sh { display:flex; justify-content:space-between; align-items:baseline; padding:20px 16px 8px; font-weight:700; font-size:18px; }
+  .sh a { font-size:14px; font-weight:700; color:var(--accs); text-decoration:none; }
+  .agrid { display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:0 16px; }
+  .agrid .c { aspect-ratio:1; border-radius:8px; }
+  .agrid b { display:block; font-size:14px; margin-top:6px; }
+  .agrid small { color:var(--mu); font-size:12px; }
+
+  /* library */
+  .lhead { display:flex; align-items:center; padding:4px 8px 0 16px; }
+  .lhead h2 { font-family:'Unbounded',sans-serif; font-weight:600; font-size:24px; margin:0; flex:1; }
+  .seg { position:relative; display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; padding:12px 16px 0; }
+  .seg button { position:relative; z-index:1; height:64px; border-radius:16px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
+                font-size:13px; font-weight:600; background:var(--s1); color:var(--tx); }
+  .seg button i { color:var(--mu); }
+  .seg button.on, .seg button.on i { color:var(--bg); background:transparent; }
+  .seg .ind { position:absolute; z-index:0; border-radius:16px; background:var(--tx);
+              transition:left .18s cubic-bezier(.33,1,.68,1), top .18s cubic-bezier(.33,1,.68,1), width .18s cubic-bezier(.33,1,.68,1), height .18s cubic-bezier(.33,1,.68,1); }
+  .count { display:flex; align-items:center; padding:8px 8px 0 16px; font-size:13px; color:var(--mu); }
+  .count .sp { flex:1; }
+  .count .sort { display:flex; align-items:center; gap:4px; height:36px; padding:0 8px; border-radius:999px; color:var(--accs); font-weight:700; font-size:14px; }
+  .chips { display:flex; flex-wrap:wrap; gap:8px; padding:8px 16px 4px; }
+  .chips button { padding:8px 12px; border-radius:14px; background:var(--s1); font-size:13.5px; font-weight:600; }
+  .chips button span { color:var(--mu); font-weight:500; margin-left:4px; }
+  .chips button:hover { background:var(--s2); }
+  .letter { font-weight:700; font-size:14px; color:var(--accs); padding:12px 16px 2px; }
+
+  /* settings */
+  .card { margin:8px 16px; background:var(--s1); border-radius:12px; overflow:hidden; }
+  .card .row { height:auto; min-height:64px; padding:10px 16px; }
+  .card .row .ib { color:var(--mu); width:24px; height:24px; }
+  .foot { padding:8px 20px; font-size:12px; color:var(--fa); }
+
+  /* empty state: quiet, left aligned */
+  .empty { padding:24px 16px 0; }
+  .empty b { display:block; font-size:14px; font-weight:700; }
+  .empty p { margin:4px 0 16px; font-size:13px; color:var(--mu); line-height:1.45; }
+
+  /* sheet */
+  .scrim { position:absolute; inset:0; background:rgba(0,0,0,.5); transition:opacity .25s; z-index:5; }
+  .sheet { position:absolute; left:0; right:0; bottom:0; z-index:6; background:var(--s1); border-radius:16px 16px 0 0; padding:8px 0 20px;
+           transition:transform .25s cubic-bezier(.33,1,.68,1); }
+  .closed .scrim { opacity:0; pointer-events:none; }
+  .closed .sheet { transform:translateY(105%); }
+  .handle { width:32px; height:4px; border-radius:2px; background:var(--s3); margin:0 auto 12px; }
+  .sheet .top { display:flex; gap:12px; align-items:center; padding:0 16px 8px; }
+  .sheet .top .c { width:56px; height:56px; border-radius:8px; }
+  .sheet .top b { display:block; font-size:14px; }
+  .sheet .top small { display:block; font-size:13px; color:var(--mu); }
+  .sheet .top em { display:block; font-style:normal; font-size:12px; color:var(--fa); }
+  .sheet .grp { margin-top:8px; }
+  .sheet .it { display:flex; align-items:center; gap:16px; width:100%; height:48px; padding:0 20px; font-size:15px; font-weight:500; text-align:left; }
+  .sheet .it:hover { background:var(--s2); }
+  .sheet .it i { color:var(--mu); }
+  .sheet .it.danger, .sheet .it.danger i { color:var(--err); }
+
+  /* dock from round 1, for context */
+  .dock { position:absolute; left:10px; right:10px; bottom:10px; background:var(--s2); border-radius:28px; padding:6px 6px 4px; z-index:3; }
+  .mini { display:flex; align-items:center; gap:10px; padding:4px 8px 6px 6px; }
+  .mr { position:relative; width:48px; height:48px; flex:none; }
+  .mr .c { position:absolute; inset:7px; border-radius:50%; }
+  .mini .t { flex:1; min-width:0; }
+  .mini b { display:block; font-size:14px; } .mini small { font-size:12.5px; color:var(--mu); }
+  .tabs { display:flex; }
+  .tabs button { flex:1; display:flex; flex-direction:column; align-items:center; gap:2px; padding:6px 0 4px; font-size:12px; font-weight:600; color:var(--mu); }
+  .tabs .on { color:var(--tx); }
+  .tabs .ti { position:relative; }
+  .tabs .on .ti em { position:absolute; top:-2px; right:-5px; width:7px; height:7px; border-radius:50%; background:var(--acc); }
+
+  /* desktop frame, scaled to fit its column */
+  .dwrap { position:relative; width:100%; overflow:hidden; border-radius:16px; box-shadow:0 24px 60px rgba(20,10,40,.35); }
+  .dsk { position:absolute; top:0; left:0; width:1200px; height:700px; transform-origin:0 0; background:var(--bg); color:var(--tx);
+         display:grid; grid-template-columns:240px 1fr; grid-template-rows:1fr 80px; user-select:none; }
+  .side { padding:20px 12px; display:flex; flex-direction:column; gap:2px; }
+  .side .si { display:flex; align-items:center; gap:14px; height:44px; padding:0 12px; border-radius:12px; font-weight:600; font-size:14px; color:var(--mu); text-align:left; width:100%; }
+  .side .si:hover { background:var(--s1); }
+  .side .si.on { color:var(--tx); }
+  .side .si .ti { position:relative; }
+  .side .si.on .ti em { position:absolute; top:-2px; right:-5px; width:7px; height:7px; border-radius:50%; background:var(--acc); }
+  .side .lab { font-size:13px; font-weight:700; color:var(--mu); padding:20px 12px 6px; }
+  .side .pl { display:flex; align-items:center; gap:12px; font-size:14px; padding:6px 12px 6px 8px; color:var(--mu); border-radius:10px; }
+  .side .pl .c { width:40px; height:40px; border-radius:8px; flex:none; display:grid; place-items:center; }
+  .side .pl .c.fav { background:var(--acc); color:var(--onacc); }
+  .side .pl span { min-width:0; display:flex; flex-direction:column; }
+  .side .pl span b { font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .side .pl span small { font-size:12px; color:var(--fa); }
+  .side .pl.on { color:var(--tx); background:var(--s1); }
+  .main { overflow:hidden; padding:16px 32px 0; }
+  .main .in { max-width:960px; }
+  .dsk .hd { padding:8px 0 0; gap:24px; }
+  .dsk .hd .c { width:200px; height:200px; }
+  .dsk .hd h2 { font-size:30px; font-weight:700; }
+  .dsk .acts { padding:20px 0 12px; flex-wrap:nowrap; }
+  .dsk .acts .ib { margin-left:0; }
+  .dsk .row { padding:0 12px; height:56px; border-radius:8px; }
+  .dsk .row .alb { width:260px; font-size:13px; color:var(--mu); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .dsk .row .hv { opacity:0; color:var(--mu); }
+  .dsk .row:hover .hv { opacity:1; }
+  .pbar { grid-column:1 / 3; background:var(--s1); display:grid; grid-template-columns:1fr auto 1fr; align-items:center; padding:0 20px; }
+  .pbar .lt { display:flex; align-items:center; gap:12px; }
+  .pbar .mr { width:56px; height:56px; } .pbar .mr .c { inset:8px; }
+  .pbar b { display:block; font-size:14px; } .pbar small { font-size:12.5px; color:var(--mu); }
+  .pbar .ctr { display:flex; align-items:center; gap:12px; }
+  .pbar .pp { width:44px; height:44px; border-radius:50%; background:var(--tx); color:var(--bg); display:grid; place-items:center; }
+  .pbar .rt { justify-self:end; font-size:12.5px; color:var(--mu); font-variant-numeric:tabular-nums; }
+
+  /* rows entering: fade and 8 px, 20 ms apart */
+  @keyframes rise { from { opacity:0; transform:translateY(8px); } }
+  .enter .rows > * { animation:rise .18s cubic-bezier(.33,1,.68,1) both; animation-delay:calc(var(--i,0) * 20ms); }
+
+  .rm *, .rm *::before { transition:none !important; animation:none !important; }
+  @media (prefers-reduced-motion: reduce) { *, *::before { transition:none !important; animation:none !important; } }
+
+  /* Memoria */
+  .grid .fk + p { margin-top:8px; }
+  .hero { display:flex; flex-direction:column; align-items:center; padding:16px 16px 4px; }
+  .rg { position:relative; }
+  .rg .ctr { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; }
+  .rg .ctr b { font-family:'Unbounded',sans-serif; font-weight:600; font-size:30px; letter-spacing:-.01em; font-variant-numeric:tabular-nums; }
+  .rg .ctr small { font-size:13px; color:var(--mu); margin-top:2px; }
+  .hero .cap { margin:10px 0 0; font-size:14px; color:var(--tx); font-variant-numeric:tabular-nums; }
+  .lg { display:flex; justify-content:center; gap:16px; margin-top:8px; font-size:13px; color:var(--mu); }
+  .lg span { display:flex; align-items:center; gap:6px; }
+  .lg i { width:8px; height:8px; border-radius:50%; }
+  .seg.s3 { grid-template-columns:repeat(3, 1fr); }
+  .seg.s2 { grid-template-columns:repeat(2, 1fr); padding:4px 16px 4px; }
+  .seg.s2 button { height:40px; flex-direction:row; gap:8px; border-radius:12px; }
+  .seg.s2 .ind { border-radius:12px; }
+  .row.sz { height:64px; }
+  .row.sz .c.ico { display:grid; place-items:center; color:var(--mu); background:var(--s2); }
+  .row .q { display:block; height:3px; border-radius:2px; background:var(--s2); margin-top:6px; }
+  .row .q i { display:block; height:100%; border-radius:2px; background:var(--mu); opacity:.6; }
+  .row .v { font-size:14px; font-weight:600; font-variant-numeric:tabular-nums; flex:none; padding-left:8px; }
+  .row small.path { color:var(--fa); }
+  .note { padding:4px 16px 0; font-size:13px; color:var(--fa); }
+  .card .row .ic { width:40px; height:40px; border-radius:10px; background:var(--s2); color:var(--accs); display:grid; place-items:center; flex:none; }
+  .clean { display:flex; align-items:center; gap:12px; padding:12px 16px 4px; }
+  .clean small { font-size:13px; color:var(--mu); line-height:1.4; }
+  .clean .pill { white-space:nowrap; flex:none; }
+  .tools2 { display:grid; grid-template-columns:1fr 1fr; gap:8px; padding:4px 16px 0; }
+  .tools2 button { display:flex; align-items:center; gap:12px; height:64px; padding:0 14px; border-radius:16px; background:var(--s1); text-align:left; }
+  .tools2 button i { color:var(--mu); flex:none; }
+  .tools2 b { display:block; font-size:14px; font-weight:600; }
+  .tools2 small { display:block; font-size:12.5px; color:var(--mu); }
+  .dsk .mcols { display:grid; grid-template-columns:330px 1fr; gap:40px; padding-top:8px; }
+  .dsk .mcols .seg, .dsk .mcols .tools2, .dsk .mcols .sh { padding-left:0; padding-right:0; }
+  .dsk .mcols .card { margin:8px 0; }
+  .dsk .row.sz { height:58px; padding:0 8px; }
+</style>
+</head>
+<body class="enter">
+
+<header class="intro">
+  <h1>Anello, Memoria</h1>
+  <p>Memoria risponde a una domanda: dove va lo spazio. In cima l'anello del marchio diventa il disco: l'arco viola è la musica, quello chiaro il resto del telefono, la traccia vuota lo spazio libero. Sotto, una sola lista che cambia con i blocchi, come in Libreria.</p>
+  <p>Le barre restano sottili e spente: servono a confrontare le righe, non a riempire la pagina. Numeri con la virgola italiana, cartelle col loro nome e il percorso in piccolo, nessuna riga da «0 B».</p>
+  <div class="tools">
+    <button type="button" id="replay">Rivedi le entrate</button>
+    <label><input type="checkbox" id="rm"> Riduci animazioni</label>
+  </div>
+</header>
+
+<main class="grid">
+
+  <!-- 1: top of the page -->
+  <section class="fig">
+    <div class="fk"><div class="scroll">
+      <div class="lhead"><h2>Memoria</h2></div>
+      <div class="hero">
+        <div class="rg" data-store="208|0.30|0.32"><div class="ctr"><b>38,4 GB</b><small>di musica</small></div></div>
+        <p class="cap">11,2 GB liberi su 128 GB</p>
+        <div class="lg"><span><i style="background:var(--acc)"></i>Musica</span><span><i style="background:var(--mu)"></i>Altro</span><span><i style="background:var(--s3)"></i>Libero</span></div>
+      </div>
+      <div class="seg s3" role="tablist" aria-label="Raggruppa per" data-list="m1">
+        <span class="ind"></span>
+        <button class="on" role="tab" aria-selected="true" data-k="pl"><i data-i="queue" data-s="22"></i>Playlist</button>
+        <button role="tab" aria-selected="false" data-k="fm"><i data-i="file" data-s="22"></i>Formati</button>
+        <button role="tab" aria-selected="false" data-k="fd"><i data-i="folder" data-s="22"></i>Cartelle</button>
+      </div>
+      <div class="rows" id="m1"></div>
+    </div>
+    <div data-dock="3" data-song="Notte prima degli esami|Antonello Venditti|g3|0.42"></div></div>
+    <h3>In cima: il disco</h3>
+    <p>Il numero grande è la musica, perché è l'unica cosa che l'app può liberare. Libero e totale stanno sotto in una frase. I blocchi scelgono come raggruppare la lista: si tocca e la lista cambia, la pagina no.</p>
+  </section>
+
+  <!-- 2: scrolled -->
+  <section class="fig">
+    <div class="fk"><div class="scroll">
+      <div class="bar"><span class="ttl">Memoria</span></div>
+      <div class="sh">I più pesanti <a href="#" onclick="return false">Mostra tutti</a></div>
+      <div class="seg s2" role="tablist" aria-label="Mostra" data-list="m2">
+        <span class="ind"></span>
+        <button class="on" role="tab" aria-selected="true" data-k="tr"><i data-i="note" data-s="20"></i>Brani</button>
+        <button role="tab" aria-selected="false" data-k="al"><i data-i="album" data-s="20"></i>Album</button>
+      </div>
+      <div class="rows" id="m2"></div>
+      <div class="card"><div class="row">
+        <span class="ic" data-i="history" data-s="22"></span>
+        <span class="t"><b>Mai ascoltati</b><small>412 brani, 9,6 GB</small></span>
+        <span class="ib" data-i="chev"></span>
+      </div></div>
+      <div class="sh">Strumenti</div>
+      <div class="tools2">
+        <button><i data-i="copy" data-s="22"></i><span><b>Duplicati</b><small>12 gruppi</small></span></button>
+        <button><i data-i="help" data-s="22"></i><span><b>Non trovati</b><small>3 brani</small></span></button>
+      </div>
+    </div>
+    <div data-dock="3" data-song="Notte prima degli esami|Antonello Venditti|g3|0.42"></div></div>
+    <h3>Scorrendo: cosa liberare</h3>
+    <p>I cinque brani o album più pesanti, poi «Mai ascoltati» che apre la selezione con «Elimina dal dispositivo». Duplicati e brani non trovati sono blocchi con l'icona a sinistra, come le scorciatoie della Libreria.</p>
+  </section>
+
+  <!-- 3: app data -->
+  <section class="fig">
+    <div class="fk"><div class="scroll">
+      <div class="bar"><span class="ttl">Memoria</span></div>
+      <div class="sh">Dati dell'app</div>
+      <div class="rows">
+        <div class="row sz"><span class="c ico" data-i="album" data-s="22"></span><span class="t"><b>Copertine</b><small>2.204 immagini</small><span class="q"><i style="width:100%"></i></span></span><span class="v">820 MB</span></div>
+        <div class="row sz"><span class="c ico" data-i="cloud" data-s="22"></span><span class="t"><b>Cache</b><small>Immagini, ricerche, Jam</small><span class="q"><i style="width:12%"></i></span></span><span class="v">96,4 MB</span></div>
+        <div class="row sz"><span class="c ico" data-i="lib" data-s="22"></span><span class="t"><b>Libreria</b><small>Il database con brani e ascolti</small><span class="q"><i style="width:3%"></i></span></span><span class="v">14,2 MB</span></div>
+        <div class="row sz"><span class="c ico" data-i="backup" data-s="22"></span><span class="t"><b>Backup dei tag</b><small>Prima di ogni modifica ai file</small><span class="q"><i style="width:1%"></i></span></span><span class="v">3,1 MB</span></div>
+      </div>
+      <p class="note">Log e altri dati sotto 1 MB non sono elencati.</p>
+      <div class="clean">
+        <button class="pill line"><i data-i="delete" data-s="20"></i>Svuota cache</button>
+        <small>Libera 96,4 MB. Brani, copertine e ascolti restano.</small>
+      </div>
+    </div>
+    <div data-dock="3" data-song="Notte prima degli esami|Antonello Venditti|g3|0.42"></div></div>
+    <h3>In fondo: i dati dell'app</h3>
+    <p>Nomi che dicono cosa c'è dentro, non come è fatto: «Libreria» invece di «Database». Il pulsante dice quanto libera e cosa non tocca, così non serve una conferma.</p>
+  </section>
+
+</main>
+
+<!-- desktop -->
+<section class="wide fig">
+  <div class="dwrap" id="dwrap">
+    <div class="dsk">
+      <aside class="side">
+        <button class="si"><span class="ti" data-i="home"></span>Home</button>
+        <button class="si"><span class="ti" data-i="search"></span>Cerca</button>
+        <button class="si"><span class="ti" data-i="lib"></span>Libreria</button>
+        <button class="si on"><span class="ti" data-i="mem"><em></em></span>Memoria</button>
+        <div class="lab">Playlist</div>
+        <div class="pl"><i class="c fav" data-i="heart" data-s="20"></i><span><b>Preferiti</b><small>214 brani</small></span></div>
+        <div class="pl"><i class="c g2"></i><span><b>Corsa del sabato</b><small>32 brani</small></span></div>
+        <div class="pl"><i class="c g4"></i><span><b>Lavoro concentrato</b><small>58 brani</small></span></div>
+        <div class="pl"><i class="c g1"></i><span><b>Viaggio in macchina</b><small>41 brani</small></span></div>
+      </aside>
+      <div class="main"><div class="in">
+        <div class="lhead" style="padding-left:0"><h2>Memoria</h2></div>
+        <div class="mcols">
+          <div>
+            <div class="hero" style="padding:16px 0 4px">
+              <div class="rg" data-store="236|0.30|0.32"><div class="ctr"><b>38,4 GB</b><small>di musica</small></div></div>
+              <p class="cap">11,2 GB liberi su 128 GB</p>
+              <div class="lg"><span><i style="background:var(--acc)"></i>Musica</span><span><i style="background:var(--mu)"></i>Altro</span><span><i style="background:var(--s3)"></i>Libero</span></div>
+            </div>
+            <div class="card" style="margin-top:20px"><div class="row">
+              <span class="ic" data-i="history" data-s="22"></span>
+              <span class="t"><b>Mai ascoltati</b><small>412 brani, 9,6 GB</small></span>
+              <span class="ib" data-i="chev"></span>
+            </div></div>
+            <div class="tools2" style="margin-top:8px">
+              <button><i data-i="copy" data-s="22"></i><span><b>Duplicati</b><small>12 gruppi</small></span></button>
+              <button><i data-i="help" data-s="22"></i><span><b>Non trovati</b><small>3 brani</small></span></button>
+            </div>
+          </div>
+          <div>
+            <div class="seg s3" role="tablist" aria-label="Raggruppa per" data-list="d1">
+              <span class="ind"></span>
+              <button class="on" role="tab" aria-selected="true" data-k="pl"><i data-i="queue" data-s="22"></i>Playlist</button>
+              <button role="tab" aria-selected="false" data-k="fm"><i data-i="file" data-s="22"></i>Formati</button>
+              <button role="tab" aria-selected="false" data-k="fd"><i data-i="folder" data-s="22"></i>Cartelle</button>
+            </div>
+            <div class="rows" id="d1" style="padding-top:8px"></div>
+          </div>
+        </div>
+      </div></div>
+      <div class="pbar">
+        <div class="lt"><span class="mr" data-ring="56|0.42"><i class="c g3"></i></span><span><b>Notte prima degli esami</b><small>Antonello Venditti</small></span></div>
+        <div class="ctr"><button class="ib" data-i="prev"></button><button class="pp" data-i="pause"></button><button class="ib" data-i="next2"></button></div>
+        <div class="rt">1:58 / 4:41</div>
+      </div>
+    </div>
+  </div>
+  <h3>Desktop</h3>
+  <p>Il disco e gli strumenti a sinistra, fermi; la lista a destra con gli stessi tre blocchi. I dati dell'app stanno sotto la lista, scorrendo.</p>
+</section>
+
+<script>
+const I = {
+  back:'M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z',
+  play:'M8 5.14v13.72a1 1 0 0 0 1.5.86l11-6.86a1 1 0 0 0 0-1.72l-11-6.86A1 1 0 0 0 8 5.14z',
+  pause:'M7 5h3v14H7zM14 5h3v14h-3z',
+  shuffle:'M10.59 9.17 5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z',
+  more:'M6 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm6 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm6 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4z',
+  vert:'M12 4a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm0 6a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm0 6a2 2 0 1 0 0 4 2 2 0 0 0 0-4z',
+  search:'M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z',
+  plus:'M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z',
+  heart:'M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z',
+  grid:'M4 4h7v7H4zm9 0h7v7h-7zM4 13h7v7H4zm9 0h7v7h-7z',
+  apps:'M4 8h4V4H4v4zm6 12h4v-4h-4v4zm-6 0h4v-4H4v4zm0-6h4v-4H4v4zm6 0h4v-4h-4v4zm6-10v4h4V4h-4zm-6 4h4V4h-4v4zm6 6h4v-4h-4v4zm0 6h4v-4h-4v4z',
+  sort:'M3 18h6v-2H3v2zM3 6v2h18V6H3zm0 7h12v-2H3v2z',
+  history:'M13 3a9 9 0 0 0-9 9H1l4 4 4-4H6a7 7 0 1 1 2.05 4.95l-1.42 1.42A9 9 0 1 0 13 3zm-1 5v5l4.25 2.52.77-1.28-3.52-2.09V8H12z',
+  home:'M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z',
+  lib:'M20 2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 5h-3v5.5a2.5 2.5 0 0 1-5 0 2.5 2.5 0 0 1 2.5-2.5c.57 0 1.08.19 1.5.51V5h4v2zM4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6z',
+  mem:'M18 2h-8L4 8v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-6 6h-2V4h2v4zm3 0h-2V4h2v4zm3 0h-2V4h2v4z',
+  palette:'M12 3a9 9 0 0 0 0 18c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8zm-5.5 9a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm3-4a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm3 4a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z',
+  playc:'M10 16.5l6-4.5-6-4.5v9zM12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16z',
+  folder:'M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z',
+  cloud:'M19.35 10.04A7.49 7.49 0 0 0 12 4C9.11 4 6.6 5.64 5.35 8.04A5.994 5.994 0 0 0 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z',
+  devices:'M4 6h18V4H4c-1.1 0-2 .9-2 2v11H0v3h14v-3H4V6zm19 2h-6c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h6c.55 0 1-.45 1-1V9c0-.55-.45-1-1-1zm-1 9h-4v-7h4v7z',
+  backup:'M19.35 10.04A7.49 7.49 0 0 0 12 4C9.11 4 6.6 5.64 5.35 8.04A5.994 5.994 0 0 0 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z',
+  info:'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z',
+  next:'M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z',
+  queue:'M15 6H3v2h12V6zm0 4H3v2h12v-2zM3 16h8v-2H3v2zM17 6v8.18A3 3 0 0 0 16 14a3 3 0 1 0 3 3V8h3V6h-5z',
+  pladd:'M14 10H2v2h12v-2zm0-4H2v2h12V6zm4 8v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zM2 16h8v-2H2v2z',
+  album:'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 14.5a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9zm0-5.5a1 1 0 1 0 0 2 1 1 0 0 0 0-2z',
+  person:'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z',
+  share:'M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11A2.99 2.99 0 0 0 21 5a3 3 0 1 0-5.91.7L8.04 9.81A2.99 2.99 0 0 0 3 12a3 3 0 0 0 5.04 2.19l7.12 4.16c-.05.21-.08.43-.08.65A2.92 2.92 0 1 0 18 16.08z',
+  delete:'M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z',
+  prev:'M6 6h2v12H6zm3.5 6 8.5 6V6z',
+  next2:'M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z',
+  chev:'M10 6 8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z',
+  copy:'M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z',
+  help:'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 17h-2v-2h2v2zm2.07-7.75-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26A2 2 0 1 0 10 9H8a4 4 0 1 1 8 0c0 .88-.36 1.68-.93 2.25z',
+  file:'M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z',
+  note:'M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z'
+};
+const ic = (n, s = 24) => `<svg viewBox="0 0 24 24" width="${s}" height="${s}" aria-hidden="true"><path fill="currentColor" d="${I[n]}"/></svg>`;
+
+// The open ring of the logo: 40° gap centred at top right, accent arc, dot at the tip.
+function ring(size, prog, st = 3) {
+  const c = size / 2, r = c - st * 1.2, gap = 40, s = -45 + gap / 2, span = 360 - gap, e = s + span * prog;
+  const pt = a => [c + r * Math.cos(a * Math.PI / 180), c + r * Math.sin(a * Math.PI / 180)];
+  const arc = (a0, a1) => { const [x0, y0] = pt(a0), [x1, y1] = pt(a1); return `M${x0} ${y0}A${r} ${r} 0 ${a1 - a0 > 180 ? 1 : 0} 1 ${x1} ${y1}`; };
+  const [dx, dy] = pt(e);
+  return `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" role="img" aria-label="Avanzamento">` +
+    `<path d="${arc(s, s + span)}" stroke="var(--s3)" stroke-width="${st}" fill="none" stroke-linecap="round"/>` +
+    `<path d="${arc(s, e)}" stroke="var(--acc)" stroke-width="${st}" fill="none" stroke-linecap="round"/>` +
+    `<circle cx="${dx}" cy="${dy}" r="${st * 1.1}" fill="var(--acc)"/></svg>`;
+}
+
+const TABS = [['home', 'Home'], ['search', 'Cerca'], ['lib', 'Libreria'], ['mem', 'Memoria']];
+document.querySelectorAll('[data-dock]').forEach(el => {
+  const active = +el.dataset.dock, song = el.dataset.song && el.dataset.song.split('|');
+  const mini = song ? `<div class="mini"><span class="mr">${ring(48, +song[3])}<i class="c ${song[2]}"></i></span>` +
+    `<span class="t"><b>${song[0]}</b><small>${song[1]}</small></span><button class="ib" aria-label="Pausa">${ic('pause')}</button></div>` : '';
+  el.outerHTML = `<div class="dock">${mini}<nav class="tabs">${TABS.map((t, i) =>
+    `<button class="${i === active ? 'on' : ''}" aria-selected="${i === active}"><span class="ti">${ic(t[0])}<em></em></span>${t[1]}</button>`).join('')}</nav></div>`;
+});
+document.querySelectorAll('[data-ring]').forEach(el => { const [s, p] = el.dataset.ring.split('|'); el.insertAdjacentHTML('afterbegin', ring(+s, +p)); });
+document.querySelectorAll('[data-i]').forEach(el => el.insertAdjacentHTML('afterbegin', ic(el.dataset.i, +el.dataset.s || 24)));
+
+// Storage ring: the logo's open ring, music arc in accent with the dot, the rest in a lighter tone, free space is the bare track.
+function store(size, music, other, st = 10) {
+  const c = size / 2, r = c - st, gap = 40, s = -45 + gap / 2, span = 360 - gap, sep = 4;
+  const pt = a => [c + r * Math.cos(a * Math.PI / 180), c + r * Math.sin(a * Math.PI / 180)];
+  const arc = (a0, a1, col) => { const [x0, y0] = pt(a0), [x1, y1] = pt(a1);
+    return `<path d="M${x0} ${y0}A${r} ${r} 0 ${a1 - a0 > 180 ? 1 : 0} 1 ${x1} ${y1}" stroke="${col}" stroke-width="${st}" fill="none" stroke-linecap="round"/>`; };
+  const m = s + span * music, o = m + span * other, [dx, dy] = pt(m);
+  return `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" role="img" aria-label="Musica ${Math.round(music * 100)} %, altro ${Math.round(other * 100)} %, il resto libero">` +
+    arc(s, s + span, 'var(--s2)') + arc(m + sep, o, 'var(--mu)') + arc(s, m, 'var(--acc)') +
+    `<circle cx="${dx}" cy="${dy}" r="${st * .9}" fill="var(--accs)"/></svg>`;
+}
+document.querySelectorAll('[data-store]').forEach(el => { const [z, m, o] = el.dataset.store.split('|'); el.style.width = el.style.height = z + 'px'; el.insertAdjacentHTML('afterbegin', store(+z, +m, +o)); });
+
+// Lists: title, line, share of the biggest row, size. Cover class or icon name.
+const sz = (c, t, s, w, v, path) => `<div class="row sz"><span class="c ${c.startsWith('g') ? c : 'ico'}"${c.startsWith('g') ? '' : ` data-i="${c}" data-s="22"`}></span>` +
+  `<span class="t"><b>${t}</b><small${path ? ' class="path"' : ''}>${s}</small><span class="q"><i style="width:${w}%"></i></span></span><span class="v">${v}</span></div>`;
+const LISTS = {
+  pl: sz('heart', 'Preferiti', '214 brani, 14 ore', 100, '1,8 GB') + sz('g5', 'Allenamento', '48 brani, 3 ore', 41, '742 MB') + sz('g4', 'Lavoro concentrato', '58 brani, 4 ore', 36, '655 MB') +
+      sz('g1', 'Viaggio in macchina', '41 brani, 2 ore', 24, '431 MB') + sz('g2', 'Corsa del sabato', '32 brani, 1 ora', 15, '268 MB'),
+  fm: sz('file', 'FLAC', '1.204 brani', 100, '22,1 GB') + sz('file', 'MP3', '2.480 brani', 58, '12,8 GB') + sz('file', 'M4A', '310 brani', 13, '2,9 GB') + sz('file', 'Opus', '96 brani', 3, '612 MB'),
+  fd: sz('folder', 'Musica', '/Music', 100, '24,6 GB', 1) + sz('folder', 'Scaricati da Codecore', '/Android/data/com.codecore.player', 46, '11,3 GB', 1) +
+      sz('folder', 'Download', '/Download', 7, '1,7 GB', 1) + sz('folder', 'Registrazioni', '/Recordings', 3, '802 MB', 1),
+  tr: sz('g6', 'Shine On You Crazy Diamond', 'Pink Floyd, FLAC, 26 min', 100, '312 MB') + sz('g3', 'Echoes', 'Pink Floyd, FLAC, 23 min', 88, '274 MB') +
+      sz('g1', 'Bohemian Rhapsody', 'Queen, FLAC 24 bit, 6 min', 52, '163 MB') + sz('g4', 'Hey Jude', 'The Beatles, FLAC, 7 min', 37, '116 MB') + sz('g2', 'Stairway to Heaven', 'Led Zeppelin, FLAC, 8 min', 35, '109 MB'),
+  al: sz('g6', 'Wish You Were Here', 'Pink Floyd, 5 brani', 100, '1,1 GB') + sz('g1', 'A Night at the Opera', 'Queen, 12 brani', 82, '904 MB') +
+      sz('g4', 'Abbey Road', 'The Beatles, 17 brani', 74, '812 MB') + sz('g2', 'Led Zeppelin IV', 'Led Zeppelin, 8 brani', 61, '671 MB') + sz('g3', 'Meddle', 'Pink Floyd, 6 brani', 55, '603 MB')
+};
+const draw = (box, k) => { box.innerHTML = LISTS[k]; box.querySelectorAll('[data-i]').forEach(e => e.insertAdjacentHTML('afterbegin', ic(e.dataset.i, +e.dataset.s || 24)));
+  box.querySelectorAll('.row').forEach((r, i) => r.style.setProperty('--i', i)); };
+function place() { document.querySelectorAll('.seg').forEach(sg => { const b = sg.querySelector('.on'), ind = sg.querySelector('.ind');
+  Object.assign(ind.style, { left: b.offsetLeft + 'px', top: b.offsetTop + 'px', width: b.offsetWidth + 'px', height: b.offsetHeight + 'px' }); }); }
+document.querySelectorAll('.seg').forEach(sg => {
+  const box = document.getElementById(sg.dataset.list);
+  sg.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    sg.querySelectorAll('button').forEach(x => { x.classList.toggle('on', x === b); x.setAttribute('aria-selected', x === b); });
+    place(); draw(box, b.dataset.k);
+  }));
+  draw(box, sg.querySelector('.on').dataset.k);
+});
+
+document.getElementById('replay').addEventListener('click', () => { document.body.classList.remove('enter'); void document.body.offsetWidth; document.body.classList.add('enter'); });
+document.getElementById('rm').addEventListener('change', e => document.body.classList.toggle('rm', e.target.checked));
+
+const dw = document.getElementById('dwrap'), dk = dw.firstElementChild;
+function fit() { const s = Math.min(1, dw.clientWidth / 1200); dk.style.transform = `scale(${s})`; dw.style.height = 700 * s + 'px'; place(); }
+addEventListener('resize', fit);
+document.fonts && document.fonts.ready.then(fit);
+fit();
+</script>
+</body>
+</html>
