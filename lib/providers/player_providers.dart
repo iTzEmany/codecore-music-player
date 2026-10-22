@@ -106,6 +106,7 @@ class PlayerController {
   }
 
   Future<void> togglePlayPause() => _handler.togglePlayPause();
+  Future<void> pause() => _handler.pause();
   Future<void> next() => _handler.skipToNext();
   bool get hasNext => _handler.hasNext;
   Future<void> previous() => _handler.skipToPrevious();

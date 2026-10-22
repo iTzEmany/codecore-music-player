@@ -1,0 +1,285 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
+
+import '../../../data/db/app_database.dart';
+import '../../../data/repositories/radio_repository.dart';
+import '../../../l10n/l10n_ext.dart';
+import '../../../providers/radio_providers.dart';
+import '../../../providers/settings_providers.dart';
+import '../../../services/radio/radio_catalog.dart';
+import '../../../services/radio/radio_station.dart';
+import '../../../services/radio/regions.dart';
+import '../../theme/tokens.dart';
+import '../../widgets/section_header.dart';
+import 'radio_actions.dart';
+import 'radio_labels.dart';
+import 'radio_region_sheet.dart';
+import 'radio_station_row.dart';
+import 'radio_station_sheet.dart';
+
+/// The longest list played as a queue: a whole country is thousands of rows.
+const kRadioListCap = 200;
+
+/// Rows of [stations]; a tap plays from there with the same list as the queue.
+class StationsSliver extends ConsumerWidget {
+  const StationsSliver({super.key, required this.stations, required this.listName});
+
+  final List<RadioStation> stations;
+  final String listName;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final list = stations.length > kRadioListCap ? stations.sublist(0, kRadioListCap) : stations;
+    return SliverFixedExtentList(
+      itemExtent: kRadioRowHeight,
+      delegate: SliverChildBuilderDelegate(
+        childCount: list.length,
+        (context, i) => RadioStationRow(
+          key: ValueKey('${listName}_${list[i].id}'),
+          station: list[i],
+          onTap: () => playRadioList(context, ref, list, i, listName),
+          onMore: () => RadioStationSheet.show(context, list[i]),
+        ),
+      ),
+    );
+  }
+}
+
+/// A one-line message in a sliver, with an optional button.
+class _Message extends StatelessWidget {
+  const _Message(this.text, {this.actionLabel, this.onAction});
+
+  final String text;
+  final String? actionLabel;
+  final VoidCallback? onAction;
+
+  @override
+  Widget build(BuildContext context) => SliverToBoxAdapter(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: CcDims.margin, vertical: 8),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(text,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: context.cc.textMuted)),
+              ),
+              if (actionLabel != null) TextButton(onPressed: onAction, child: Text(actionLabel!)),
+            ],
+          ),
+        ),
+      );
+}
+
+class _Loading extends StatelessWidget {
+  const _Loading();
+
+  @override
+  Widget build(BuildContext context) => const SliverToBoxAdapter(
+        child: Padding(
+          padding: EdgeInsets.all(24),
+          child: Center(child: SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2))),
+        ),
+      );
+}
+
+/// Loading, error with «Riprova», empty and data of a list of stations.
+Widget _stationsOf(
+  BuildContext context,
+  AsyncValue<List<RadioStation>> value,
+  String listName,
+  VoidCallback retry,
+) {
+  final l = context.l10n;
+  return value.when(
+    loading: () => const _Loading(),
+    error: (_, _) => _Message(l.radioLoadFailed, actionLabel: l.retry, onAction: retry),
+    data: (list) => list.isEmpty
+        ? _Message(l.radioNoResults)
+        : StationsSliver(stations: list, listName: listName),
+  );
+}
+
+/// «Le mie radio»: reorderable; hidden when nothing is saved.
+class MineSection extends ConsumerWidget {
+  const MineSection({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    final saved = ref.watch(savedRadiosProvider).value ?? const <SavedRadio>[];
+    if (saved.isEmpty) return const SliverToBoxAdapter(child: SizedBox.shrink());
+    final stations = [for (final r in saved) r.toStation()];
+    return SliverMainAxisGroup(slivers: [
+      SliverToBoxAdapter(child: SectionHeader(l.radioMine)),
+      SliverReorderableList(
+        itemCount: saved.length,
+        itemExtent: kRadioRowHeight,
+        onReorderItem: (from, to) {
+          final ids = [for (final r in saved) r.stationId];
+          ids.insert(to, ids.removeAt(from));
+          ref.read(radioRepositoryProvider).reorder(ids);
+        },
+        itemBuilder: (context, i) => Material(
+          key: ValueKey('mine_${saved[i].stationId}'),
+          color: Colors.transparent,
+          child: RadioStationRow(
+            station: stations[i],
+            unreachable: saved[i].unreachable,
+            onTap: () => playRadioList(context, ref, stations, i, l.radioMine),
+            onMore: () => RadioStationSheet.show(context, stations[i]),
+            dragHandle: ReorderableDragStartListener(
+              index: i,
+              child: Tooltip(
+                message: l.radioReorder,
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Icon(Icons.drag_handle_rounded, color: context.cc.textFaint),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    ]);
+  }
+}
+
+/// «Vicino a te»: the region the user chose, with its stations.
+class NearYouSection extends ConsumerWidget {
+  const NearYouSection({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    final country = ref.watch(radioCountryProvider);
+    final regionId = ref.watch(settingsProvider.select((s) => s.radioRegion));
+    final region = regionById(country, regionId);
+    final header = SliverToBoxAdapter(
+      child: SectionHeader(
+        l.radioNearYou,
+        actionLabel: region == null ? l.radioChooseRegion : '${region.label} ▾',
+        onAction: () => RadioRegionSheet.show(context),
+      ),
+    );
+    if (region == null) return SliverMainAxisGroup(slivers: [header]);
+    final near = ref.watch(nearYouProvider);
+    final name = '${l.radioNearYou} · ${region.label}';
+    return SliverMainAxisGroup(slivers: [
+      header,
+      ..._withStale(context, near.value, <Widget>[
+        near.when(
+          loading: () => const _Loading(),
+          error: (_, _) => _Message(l.radioLoadFailed,
+              actionLabel: l.retry, onAction: () => ref.invalidate(nearYouProvider)),
+          data: (list) => list == null || list.stations.isEmpty
+              ? _Message(l.radioNoResults)
+              : StationsSliver(stations: list.stations, listName: name),
+        ),
+      ]),
+    ]);
+  }
+}
+
+/// The «Non in linea · elenco del …» line above a list read from the old copy.
+List<Widget> _withStale(BuildContext context, RadioList? list, List<Widget> body) {
+  if (list == null || !list.stale) return body;
+  final at = list.fetchedAt;
+  final date = at == null ? '' : DateFormat.yMMMd(Localizations.localeOf(context).toString()).format(at);
+  return [_Message(context.l10n.radioOfflineList(date)), ...body];
+}
+
+/// The 24 genres as chips; [selected] is highlighted.
+class GenresSection extends StatelessWidget {
+  const GenresSection({super.key, required this.selected, required this.onSelect});
+
+  final String? selected;
+  final ValueChanged<String> onSelect;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    return SliverToBoxAdapter(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SectionHeader(l.radioGenres),
+          SizedBox(
+            height: 44,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: CcDims.margin),
+              itemCount: kRadioGenreTags.length,
+              itemBuilder: (_, i) {
+                final tag = kRadioGenreTags[i];
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: ChoiceChip(
+                    key: ValueKey('genre-$tag'),
+                    label: Text(radioGenreLabel(l, tag)),
+                    selected: tag == selected,
+                    onSelected: (_) => onSelect(tag),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// «Le più ascoltate» of the whole country.
+class TopSection extends ConsumerWidget {
+  const TopSection({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    final top = ref.watch(radioCountryStationsProvider);
+    return SliverMainAxisGroup(slivers: [
+      SliverToBoxAdapter(child: SectionHeader(l.radioTopListened)),
+      ..._withStale(context, top.value, <Widget>[
+        _stationsOf(context, top.whenData((r) => r.stations), l.radioTopListened,
+            () => ref.invalidate(radioCountryStationsProvider)),
+      ]),
+    ]);
+  }
+}
+
+/// Results of a name search.
+class SearchResultsSection extends ConsumerWidget {
+  const SearchResultsSection({super.key, required this.query});
+
+  final String query;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    return SliverMainAxisGroup(slivers: [
+      SliverToBoxAdapter(child: SectionHeader(l.radioResults)),
+      _stationsOf(context, ref.watch(radioSearchProvider(query)), l.radioResults,
+          () => ref.invalidate(radioSearchProvider(query))),
+    ]);
+  }
+}
+
+/// Stations of one genre.
+class GenreResultsSection extends ConsumerWidget {
+  const GenreResultsSection({super.key, required this.tag, required this.onClose});
+
+  final String tag;
+  final VoidCallback onClose;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    final name = radioGenreLabel(l, tag);
+    return SliverMainAxisGroup(slivers: [
+      SliverToBoxAdapter(child: SectionHeader(name, actionLabel: l.close, onAction: onClose)),
+      _stationsOf(context, ref.watch(radioGenreProvider(tag)), name,
+          () => ref.invalidate(radioGenreProvider(tag))),
+    ]);
+  }
+}

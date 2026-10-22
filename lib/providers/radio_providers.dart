@@ -8,9 +8,13 @@ import '../data/db/app_database.dart';
 import '../data/repositories/radio_repository.dart';
 import '../services/radio/radio_browser_client.dart';
 import '../services/radio/radio_catalog.dart';
+import '../services/radio/playlist_fetch.dart';
+import '../services/radio/radio_prefs.dart';
+import '../services/radio/saved_refresh.dart';
 import '../services/radio/radio_station.dart';
 import '../services/radio/regions.dart';
 import 'database_providers.dart';
+import 'player_providers.dart';
 import 'settings_providers.dart';
 
 final radioClientProvider = Provider<RadioBrowserClient>((ref) => RadioBrowserClient.standard());
@@ -85,3 +89,47 @@ final radioGenreProvider =
   final catalog = await ref.watch(radioCatalogProvider.future);
   return catalog.byGenre(tag, countryCode: only);
 }, retry: (_, _) => null);
+
+final radioPrefsProvider = Provider<RadioPrefs>((ref) => RadioPrefs());
+
+/// The ids of the saved stations (for the star of every row).
+final savedRadioIdsProvider = Provider.autoDispose<Set<String>>(
+  (ref) => {
+    for (final r in ref.watch(savedRadiosProvider).value ?? const <SavedRadio>[]) r.stationId,
+  },
+);
+
+/// What the station says is on air now (null: nothing, or not a radio).
+final onAirProvider = StreamProvider<String?>((ref) async* {
+  final h = ref.watch(audioHandlerProvider);
+  yield h.onAir;
+  yield* h.onAirStream;
+});
+
+/// The countries Radio Browser knows, to choose from.
+final radioCountriesProvider = FutureProvider.autoDispose<List<RadioCountry>>(
+  (ref) => ref.watch(radioClientProvider).countries(),
+  retry: (_, _) => null,
+);
+
+/// Reads the saved stations again (once a day at most); called by the page.
+final radioRefreshProvider = Provider<Future<bool> Function()>((ref) => () => refreshSavedRadios(
+      repo: ref.read(radioRepositoryProvider),
+      client: ref.read(radioClientProvider),
+      prefs: ref.read(radioPrefsProvider),
+    ));
+
+/// A text for the Search tab to run in «Online» (from «Cerca questo brano»).
+class SearchPrefillNotifier extends Notifier<String?> {
+  @override
+  String? build() => null;
+
+  void set(String? text) => state = text;
+}
+
+final searchPrefillProvider =
+    NotifierProvider<SearchPrefillNotifier, String?>(SearchPrefillNotifier.new);
+
+/// How a typed `.pls` / `.m3u` address is downloaded (faked in tests).
+final playlistFetchProvider =
+    Provider<Future<String> Function(Uri)>((ref) => (url) => fetchPlaylistText(url));

@@ -16,6 +16,7 @@ import 'import_providers.dart' show searchCacheProvider;
 import 'ytm_catalog_providers.dart' show catalogCacheProvider;
 import 'jam_providers.dart';
 import 'library_providers.dart';
+import 'radio_providers.dart' show radioCatalogProvider;
 import 'shuffle_plus_providers.dart' show seedIndexProvider, suggestionLogProvider;
 
 final memoryQueriesProvider = Provider<MemoryQueries>(
@@ -49,6 +50,7 @@ final appDataPathsProvider = FutureProvider<AppDataPaths>((ref) async {
     searchCache: File(p.join(support, 'search_cache.json')),
     catalogCache: File(p.join(support, 'catalog_cache.json')),
     log: File(p.join(support, 'codecore.log')),
+    radio: Directory(p.join(support, 'radio')),
     suggestionFiles: [
       File(p.join(support, 'suggestions.json')),
       File(p.join(support, 'seed_ids.json')),
@@ -112,6 +114,8 @@ class MemoryActions {
         await _ref.read(suggestionLogProvider).clear();
         await _ref.read(seedIndexProvider).clear();
       },
+      radioDir: paths.radio,
+      clearRadioMemory: () => _ref.read(radioCatalogProvider).value?.clearMemory(),
       pickerTempDir: await pickerTempDirectory(),
       jamActive: () {
         final phase = _ref.read(jamProvider).phase;

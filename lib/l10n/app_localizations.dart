@@ -7118,6 +7118,408 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'{source} non ha risposto: risultati solo da {other}'**
   String onlineNoticeFailed(String source, String other);
+
+  /// No description provided for @radioTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Radio'**
+  String get radioTitle;
+
+  /// No description provided for @radioLibrarySubtitle.
+  ///
+  /// In it, this message translates to:
+  /// **'{count, plural, =0{Stazioni in diretta} one{1 stazione salvata} other{{count} stazioni salvate}}'**
+  String radioLibrarySubtitle(int count);
+
+  /// No description provided for @radioSearchHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Cerca una radio'**
+  String get radioSearchHint;
+
+  /// No description provided for @radioOnlyCountry.
+  ///
+  /// In it, this message translates to:
+  /// **'Solo {country}'**
+  String radioOnlyCountry(String country);
+
+  /// No description provided for @radioMine.
+  ///
+  /// In it, this message translates to:
+  /// **'Le mie radio'**
+  String get radioMine;
+
+  /// No description provided for @radioNearYou.
+  ///
+  /// In it, this message translates to:
+  /// **'Vicino a te'**
+  String get radioNearYou;
+
+  /// No description provided for @radioGenres.
+  ///
+  /// In it, this message translates to:
+  /// **'Generi'**
+  String get radioGenres;
+
+  /// No description provided for @radioTopListened.
+  ///
+  /// In it, this message translates to:
+  /// **'Le più ascoltate'**
+  String get radioTopListened;
+
+  /// No description provided for @radioChooseRegion.
+  ///
+  /// In it, this message translates to:
+  /// **'Scegli la regione'**
+  String get radioChooseRegion;
+
+  /// No description provided for @radioRegionHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Le radio vicine si trovano dal paese e dalla regione che scegli: l\'app non usa la tua posizione.'**
+  String get radioRegionHint;
+
+  /// No description provided for @radioCountryChip.
+  ///
+  /// In it, this message translates to:
+  /// **'Paese: {country}'**
+  String radioCountryChip(String country);
+
+  /// No description provided for @radioChooseCountry.
+  ///
+  /// In it, this message translates to:
+  /// **'Scegli il paese'**
+  String get radioChooseCountry;
+
+  /// No description provided for @radioOfflineList.
+  ///
+  /// In it, this message translates to:
+  /// **'Non in linea · elenco del {date}'**
+  String radioOfflineList(String date);
+
+  /// No description provided for @radioLoadFailed.
+  ///
+  /// In it, this message translates to:
+  /// **'Non riesco a caricare le radio'**
+  String get radioLoadFailed;
+
+  /// No description provided for @radioNoResults.
+  ///
+  /// In it, this message translates to:
+  /// **'Nessuna radio trovata'**
+  String get radioNoResults;
+
+  /// No description provided for @radioResults.
+  ///
+  /// In it, this message translates to:
+  /// **'Risultati'**
+  String get radioResults;
+
+  /// No description provided for @radioSave.
+  ///
+  /// In it, this message translates to:
+  /// **'Salva in Le mie radio'**
+  String get radioSave;
+
+  /// No description provided for @radioUnsave.
+  ///
+  /// In it, this message translates to:
+  /// **'Togli da Le mie radio'**
+  String get radioUnsave;
+
+  /// No description provided for @radioSavedDone.
+  ///
+  /// In it, this message translates to:
+  /// **'Radio salvata'**
+  String get radioSavedDone;
+
+  /// No description provided for @radioRemovedDone.
+  ///
+  /// In it, this message translates to:
+  /// **'Radio tolta da Le mie radio'**
+  String get radioRemovedDone;
+
+  /// No description provided for @radioNotResponding.
+  ///
+  /// In it, this message translates to:
+  /// **'non risponde'**
+  String get radioNotResponding;
+
+  /// No description provided for @radioLive.
+  ///
+  /// In it, this message translates to:
+  /// **'In diretta'**
+  String get radioLive;
+
+  /// No description provided for @reasonRadioUnavailable.
+  ///
+  /// In it, this message translates to:
+  /// **'la radio non risponde'**
+  String get reasonRadioUnavailable;
+
+  /// No description provided for @radioDataPerHour.
+  ///
+  /// In it, this message translates to:
+  /// **'≈ {mb} MB all\'ora'**
+  String radioDataPerHour(String mb);
+
+  /// No description provided for @radioSite.
+  ///
+  /// In it, this message translates to:
+  /// **'Sito della stazione'**
+  String get radioSite;
+
+  /// No description provided for @radioSiteCopied.
+  ///
+  /// In it, this message translates to:
+  /// **'Indirizzo del sito copiato'**
+  String get radioSiteCopied;
+
+  /// No description provided for @radioSearchSong.
+  ///
+  /// In it, this message translates to:
+  /// **'Cerca questo brano'**
+  String get radioSearchSong;
+
+  /// No description provided for @radioRenameTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Nome della radio'**
+  String get radioRenameTitle;
+
+  /// No description provided for @radioMobileNotice.
+  ///
+  /// In it, this message translates to:
+  /// **'La radio usa circa 1 MB al minuto di dati.'**
+  String get radioMobileNotice;
+
+  /// No description provided for @radioAddAddress.
+  ///
+  /// In it, this message translates to:
+  /// **'Aggiungi indirizzo'**
+  String get radioAddAddress;
+
+  /// No description provided for @radioAddName.
+  ///
+  /// In it, this message translates to:
+  /// **'Nome'**
+  String get radioAddName;
+
+  /// No description provided for @radioAddUrl.
+  ///
+  /// In it, this message translates to:
+  /// **'Indirizzo dello stream'**
+  String get radioAddUrl;
+
+  /// No description provided for @radioAddTest.
+  ///
+  /// In it, this message translates to:
+  /// **'Prova 10 secondi'**
+  String get radioAddTest;
+
+  /// No description provided for @radioAddTesting.
+  ///
+  /// In it, this message translates to:
+  /// **'Provo… se la senti, puoi salvarla.'**
+  String get radioAddTesting;
+
+  /// No description provided for @radioLinkEmpty.
+  ///
+  /// In it, this message translates to:
+  /// **'Scrivi l\'indirizzo dello stream'**
+  String get radioLinkEmpty;
+
+  /// No description provided for @radioLinkNotAnAddress.
+  ///
+  /// In it, this message translates to:
+  /// **'Non sembra un indirizzo: scrivilo per intero, per esempio https://…'**
+  String get radioLinkNotAnAddress;
+
+  /// No description provided for @radioLinkBadScheme.
+  ///
+  /// In it, this message translates to:
+  /// **'L\'indirizzo deve iniziare con http:// o https://'**
+  String get radioLinkBadScheme;
+
+  /// No description provided for @radioLinkNoEntries.
+  ///
+  /// In it, this message translates to:
+  /// **'Nel file non c\'è nessun indirizzo da ascoltare'**
+  String get radioLinkNoEntries;
+
+  /// No description provided for @radioLinkTooBig.
+  ///
+  /// In it, this message translates to:
+  /// **'Il file è troppo grande per essere una lista di radio'**
+  String get radioLinkTooBig;
+
+  /// No description provided for @radioLinkFetchFailed.
+  ///
+  /// In it, this message translates to:
+  /// **'Non riesco a scaricare il file'**
+  String get radioLinkFetchFailed;
+
+  /// No description provided for @radioReorder.
+  ///
+  /// In it, this message translates to:
+  /// **'Trascina per riordinare'**
+  String get radioReorder;
+
+  /// No description provided for @homeYourRadios.
+  ///
+  /// In it, this message translates to:
+  /// **'Le tue radio'**
+  String get homeYourRadios;
+
+  /// No description provided for @memoryRadio.
+  ///
+  /// In it, this message translates to:
+  /// **'Radio (elenco stazioni)'**
+  String get memoryRadio;
+
+  /// No description provided for @radioGenrePop.
+  ///
+  /// In it, this message translates to:
+  /// **'Pop'**
+  String get radioGenrePop;
+
+  /// No description provided for @radioGenreRock.
+  ///
+  /// In it, this message translates to:
+  /// **'Rock'**
+  String get radioGenreRock;
+
+  /// No description provided for @radioGenreClassicRock.
+  ///
+  /// In it, this message translates to:
+  /// **'Rock classico'**
+  String get radioGenreClassicRock;
+
+  /// No description provided for @radioGenreJazz.
+  ///
+  /// In it, this message translates to:
+  /// **'Jazz'**
+  String get radioGenreJazz;
+
+  /// No description provided for @radioGenreBlues.
+  ///
+  /// In it, this message translates to:
+  /// **'Blues'**
+  String get radioGenreBlues;
+
+  /// No description provided for @radioGenreClassical.
+  ///
+  /// In it, this message translates to:
+  /// **'Classica'**
+  String get radioGenreClassical;
+
+  /// No description provided for @radioGenreDance.
+  ///
+  /// In it, this message translates to:
+  /// **'Dance'**
+  String get radioGenreDance;
+
+  /// No description provided for @radioGenreElectronic.
+  ///
+  /// In it, this message translates to:
+  /// **'Elettronica'**
+  String get radioGenreElectronic;
+
+  /// No description provided for @radioGenreHouse.
+  ///
+  /// In it, this message translates to:
+  /// **'House'**
+  String get radioGenreHouse;
+
+  /// No description provided for @radioGenreHipHop.
+  ///
+  /// In it, this message translates to:
+  /// **'Hip hop'**
+  String get radioGenreHipHop;
+
+  /// No description provided for @radioGenreLoFi.
+  ///
+  /// In it, this message translates to:
+  /// **'Lo-fi'**
+  String get radioGenreLoFi;
+
+  /// No description provided for @radioGenreChillout.
+  ///
+  /// In it, this message translates to:
+  /// **'Chillout'**
+  String get radioGenreChillout;
+
+  /// No description provided for @radioGenreSixties.
+  ///
+  /// In it, this message translates to:
+  /// **'Anni 60'**
+  String get radioGenreSixties;
+
+  /// No description provided for @radioGenreSeventies.
+  ///
+  /// In it, this message translates to:
+  /// **'Anni 70'**
+  String get radioGenreSeventies;
+
+  /// No description provided for @radioGenreEighties.
+  ///
+  /// In it, this message translates to:
+  /// **'Anni 80'**
+  String get radioGenreEighties;
+
+  /// No description provided for @radioGenreNineties.
+  ///
+  /// In it, this message translates to:
+  /// **'Anni 90'**
+  String get radioGenreNineties;
+
+  /// No description provided for @radioGenreOldies.
+  ///
+  /// In it, this message translates to:
+  /// **'Oldies'**
+  String get radioGenreOldies;
+
+  /// No description provided for @radioGenreMetal.
+  ///
+  /// In it, this message translates to:
+  /// **'Metal'**
+  String get radioGenreMetal;
+
+  /// No description provided for @radioGenreReggae.
+  ///
+  /// In it, this message translates to:
+  /// **'Reggae'**
+  String get radioGenreReggae;
+
+  /// No description provided for @radioGenreLatin.
+  ///
+  /// In it, this message translates to:
+  /// **'Latina'**
+  String get radioGenreLatin;
+
+  /// No description provided for @radioGenreSoul.
+  ///
+  /// In it, this message translates to:
+  /// **'Soul'**
+  String get radioGenreSoul;
+
+  /// No description provided for @radioGenreNews.
+  ///
+  /// In it, this message translates to:
+  /// **'Notizie'**
+  String get radioGenreNews;
+
+  /// No description provided for @radioGenreTalk.
+  ///
+  /// In it, this message translates to:
+  /// **'Parlato'**
+  String get radioGenreTalk;
+
+  /// No description provided for @radioGenreSports.
+  ///
+  /// In it, this message translates to:
+  /// **'Sport'**
+  String get radioGenreSports;
 }
 
 class _AppLocalizationsDelegate

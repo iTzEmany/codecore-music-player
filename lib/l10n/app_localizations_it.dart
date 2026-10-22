@@ -4476,4 +4476,227 @@ class AppLocalizationsIt extends AppLocalizations {
   String onlineNoticeFailed(String source, String other) {
     return '$source non ha risposto: risultati solo da $other';
   }
+
+  @override
+  String get radioTitle => 'Radio';
+
+  @override
+  String radioLibrarySubtitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count stazioni salvate',
+      one: '1 stazione salvata',
+      zero: 'Stazioni in diretta',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get radioSearchHint => 'Cerca una radio';
+
+  @override
+  String radioOnlyCountry(String country) {
+    return 'Solo $country';
+  }
+
+  @override
+  String get radioMine => 'Le mie radio';
+
+  @override
+  String get radioNearYou => 'Vicino a te';
+
+  @override
+  String get radioGenres => 'Generi';
+
+  @override
+  String get radioTopListened => 'Le più ascoltate';
+
+  @override
+  String get radioChooseRegion => 'Scegli la regione';
+
+  @override
+  String get radioRegionHint =>
+      'Le radio vicine si trovano dal paese e dalla regione che scegli: l\'app non usa la tua posizione.';
+
+  @override
+  String radioCountryChip(String country) {
+    return 'Paese: $country';
+  }
+
+  @override
+  String get radioChooseCountry => 'Scegli il paese';
+
+  @override
+  String radioOfflineList(String date) {
+    return 'Non in linea · elenco del $date';
+  }
+
+  @override
+  String get radioLoadFailed => 'Non riesco a caricare le radio';
+
+  @override
+  String get radioNoResults => 'Nessuna radio trovata';
+
+  @override
+  String get radioResults => 'Risultati';
+
+  @override
+  String get radioSave => 'Salva in Le mie radio';
+
+  @override
+  String get radioUnsave => 'Togli da Le mie radio';
+
+  @override
+  String get radioSavedDone => 'Radio salvata';
+
+  @override
+  String get radioRemovedDone => 'Radio tolta da Le mie radio';
+
+  @override
+  String get radioNotResponding => 'non risponde';
+
+  @override
+  String get radioLive => 'In diretta';
+
+  @override
+  String get reasonRadioUnavailable => 'la radio non risponde';
+
+  @override
+  String radioDataPerHour(String mb) {
+    return '≈ $mb MB all\'ora';
+  }
+
+  @override
+  String get radioSite => 'Sito della stazione';
+
+  @override
+  String get radioSiteCopied => 'Indirizzo del sito copiato';
+
+  @override
+  String get radioSearchSong => 'Cerca questo brano';
+
+  @override
+  String get radioRenameTitle => 'Nome della radio';
+
+  @override
+  String get radioMobileNotice => 'La radio usa circa 1 MB al minuto di dati.';
+
+  @override
+  String get radioAddAddress => 'Aggiungi indirizzo';
+
+  @override
+  String get radioAddName => 'Nome';
+
+  @override
+  String get radioAddUrl => 'Indirizzo dello stream';
+
+  @override
+  String get radioAddTest => 'Prova 10 secondi';
+
+  @override
+  String get radioAddTesting => 'Provo… se la senti, puoi salvarla.';
+
+  @override
+  String get radioLinkEmpty => 'Scrivi l\'indirizzo dello stream';
+
+  @override
+  String get radioLinkNotAnAddress =>
+      'Non sembra un indirizzo: scrivilo per intero, per esempio https://…';
+
+  @override
+  String get radioLinkBadScheme =>
+      'L\'indirizzo deve iniziare con http:// o https://';
+
+  @override
+  String get radioLinkNoEntries =>
+      'Nel file non c\'è nessun indirizzo da ascoltare';
+
+  @override
+  String get radioLinkTooBig =>
+      'Il file è troppo grande per essere una lista di radio';
+
+  @override
+  String get radioLinkFetchFailed => 'Non riesco a scaricare il file';
+
+  @override
+  String get radioReorder => 'Trascina per riordinare';
+
+  @override
+  String get homeYourRadios => 'Le tue radio';
+
+  @override
+  String get memoryRadio => 'Radio (elenco stazioni)';
+
+  @override
+  String get radioGenrePop => 'Pop';
+
+  @override
+  String get radioGenreRock => 'Rock';
+
+  @override
+  String get radioGenreClassicRock => 'Rock classico';
+
+  @override
+  String get radioGenreJazz => 'Jazz';
+
+  @override
+  String get radioGenreBlues => 'Blues';
+
+  @override
+  String get radioGenreClassical => 'Classica';
+
+  @override
+  String get radioGenreDance => 'Dance';
+
+  @override
+  String get radioGenreElectronic => 'Elettronica';
+
+  @override
+  String get radioGenreHouse => 'House';
+
+  @override
+  String get radioGenreHipHop => 'Hip hop';
+
+  @override
+  String get radioGenreLoFi => 'Lo-fi';
+
+  @override
+  String get radioGenreChillout => 'Chillout';
+
+  @override
+  String get radioGenreSixties => 'Anni 60';
+
+  @override
+  String get radioGenreSeventies => 'Anni 70';
+
+  @override
+  String get radioGenreEighties => 'Anni 80';
+
+  @override
+  String get radioGenreNineties => 'Anni 90';
+
+  @override
+  String get radioGenreOldies => 'Oldies';
+
+  @override
+  String get radioGenreMetal => 'Metal';
+
+  @override
+  String get radioGenreReggae => 'Reggae';
+
+  @override
+  String get radioGenreLatin => 'Latina';
+
+  @override
+  String get radioGenreSoul => 'Soul';
+
+  @override
+  String get radioGenreNews => 'Notizie';
+
+  @override
+  String get radioGenreTalk => 'Parlato';
+
+  @override
+  String get radioGenreSports => 'Sport';
 }

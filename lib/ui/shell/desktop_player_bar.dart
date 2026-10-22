@@ -22,6 +22,9 @@ import '../widgets/play_buttons.dart';
 import 'shell_nav.dart';
 import '../widgets/motion.dart';
 import '../widgets/track_art.dart';
+import '../widgets/radio_now.dart';
+import '../../services/audio/online_entries.dart' show isOnlineId;
+import '../../providers/radio_providers.dart' show onAirProvider;
 import '../widgets/shuffle_button.dart';
 
 /// The 80 px player of the desktop layout (replaces the mini-player).
@@ -58,7 +61,10 @@ class DesktopPlayerBar extends ConsumerWidget {
               flex: 4,
               child: inJam
                   ? const _JamControls()
-                  : _Center(hasTrack: track != null),
+                  : _Center(
+                      hasTrack: track != null,
+                      live: track != null && radioOfTrack(ref, track) != null,
+                    ),
             ),
             const Expanded(flex: 3, child: _Right()),
           ],
@@ -78,6 +84,9 @@ class _TrackInfo extends ConsumerWidget {
     final cc = context.cc;
     final l = context.l10n;
     final theme = Theme.of(context).textTheme;
+    final radio = radioOfTrack(ref, track);
+    final onAir = radio == null ? null : ref.watch(onAirProvider).value;
+    final texts = radio == null ? null : radioTexts(l, radio, onAir);
     void openArtist() {
       final key = (track.artist ?? '').trim().toLowerCase();
       ShellNav.openInLibrary(
@@ -116,15 +125,15 @@ class _TrackInfo extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                track.title,
+                texts?.title ?? track.title,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: theme.bodyLarge,
               ),
               InkWell(
-                onTap: openArtist,
+                onTap: radio != null || isOnlineId(track.id) ? null : openArtist,
                 child: Text(
-                  track.artist ?? l.unknownArtist,
+                  texts?.subtitle ?? track.artist ?? l.unknownArtist,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: theme.bodyMedium,
@@ -133,14 +142,17 @@ class _TrackInfo extends ConsumerWidget {
             ],
           ),
         ),
-        IconButton(
-          tooltip: track.isFavorite ? l.removeFromFavorites : l.favorite,
-          onPressed: () => toggleFavorite(context, ref, track),
-          icon: HeartIcon(
-            favorite: track.isFavorite,
-            color: track.isFavorite ? cc.accent : cc.textMuted,
+        if (radio != null)
+          RadioStarButton(station: radio, color: cc.textMuted)
+        else if (!isOnlineId(track.id))
+          IconButton(
+            tooltip: track.isFavorite ? l.removeFromFavorites : l.favorite,
+            onPressed: () => toggleFavorite(context, ref, track),
+            icon: HeartIcon(
+              favorite: track.isFavorite,
+              color: track.isFavorite ? cc.accent : cc.textMuted,
+            ),
           ),
-        ),
       ],
     );
   }
@@ -238,9 +250,12 @@ class _JamControls extends ConsumerWidget {
 
 /// Transport buttons and the seek line.
 class _Center extends ConsumerWidget {
-  const _Center({required this.hasTrack});
+  const _Center({required this.hasTrack, this.live = false});
 
   final bool hasTrack;
+
+  /// A radio: no shuffle, repeat or seek line, a «In diretta» mark instead.
+  final bool live;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -257,7 +272,7 @@ class _Center extends ConsumerWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const ShuffleModeButton(size: 20, dot: false),
+              if (!live) const ShuffleModeButton(size: 20, dot: false),
               IconButton(
                 tooltip: l.previousTrack,
                 onPressed: hasTrack ? ctrl.previous : null,
@@ -273,6 +288,7 @@ class _Center extends ConsumerWidget {
                 onPressed: hasTrack ? ctrl.next : null,
                 icon: const Icon(Icons.skip_next_rounded),
               ),
+              if (!live)
               IconButton(
                 tooltip: l.repeat,
                 iconSize: 20,
@@ -287,7 +303,10 @@ class _Center extends ConsumerWidget {
             ],
           ),
         ),
-        const _BarSeek(),
+        if (live)
+          Text(l.radioLive, style: Theme.of(context).textTheme.labelMedium?.copyWith(color: cc.accent))
+        else
+          const _BarSeek(),
       ],
     );
   }

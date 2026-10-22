@@ -153,4 +153,48 @@ void main() {
     expect(other.existsSync(), isTrue);
     expect(r.freedBytes, 40);
   });
+
+  test('«Svuota cache» empties the radio lists and the searches in memory, never the saved stations',
+      () async {
+    final list = put('support/radio/country_IT.json', 80);
+    final tmp = put('support/radio/country_IT.json.tmp', 5);
+    final other = put('support/keep.bin', 3);
+    var memoryCleared = false;
+    final cleaner = CacheCleaner(
+      jamDir: Directory(p.join(root.path, 'jam_cache')),
+      themeDir: Directory(p.join(root.path, 'theme')),
+      searchCacheFile: File(p.join(root.path, 'search_cache.json')),
+      clearSearchCache: () async {},
+      catalogCacheFile: File(p.join(root.path, 'catalog_cache.json')),
+      clearCatalogCache: () async {},
+      clearImageMemory: () {},
+      imageMemoryBytes: () => 0,
+      jamActive: () => false,
+      radioDir: Directory(p.join(root.path, 'support/radio')),
+      clearRadioMemory: () => memoryCleared = true,
+    );
+    final r = await cleaner.clear();
+    expect(list.existsSync() || tmp.existsSync(), isFalse);
+    expect(other.existsSync(), isTrue);
+    expect(memoryCleared, isTrue);
+    expect(r.freedBytes, 85);
+    expect(clearableKinds, contains(AppDataKind.radio));
+  });
+
+  test('the app data list measures the radio folder', () async {
+    put('radio/country_IT.json', 40);
+    final paths = AppDataPaths(
+      covers: Directory(p.join(root.path, 'covers')),
+      database: File(p.join(root.path, 'db')),
+      jam: Directory(p.join(root.path, 'jam')),
+      theme: Directory(p.join(root.path, 'theme')),
+      tagBackups: Directory(p.join(root.path, 'tb')),
+      searchCache: File(p.join(root.path, 's')),
+      catalogCache: File(p.join(root.path, 'c')),
+      log: File(p.join(root.path, 'l')),
+      radio: Directory(p.join(root.path, 'radio')),
+    );
+    final items = await measureAppData(paths, podcastBytes: 0, imageMemoryBytes: 0);
+    expect(items.firstWhere((i) => i.kind == AppDataKind.radio).bytes, 40);
+  });
 }

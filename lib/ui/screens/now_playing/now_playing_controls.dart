@@ -96,7 +96,10 @@ class _NpSeekRowState extends ConsumerState<NpSeekRow> {
 
 /// Shuffle · previous · play · next · repeat.
 class NpControls extends ConsumerWidget {
-  const NpControls({super.key});
+  const NpControls({super.key, this.live = false});
+
+  /// A radio: no shuffle and no repeat, only the stations' own previous / next.
+  final bool live;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -109,7 +112,7 @@ class NpControls extends ConsumerWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        const ShuffleModeButton(),
+        if (!live) const ShuffleModeButton(),
         IconButton(
           tooltip: l.previousTrack,
           iconSize: 36,
@@ -127,6 +130,7 @@ class NpControls extends ConsumerWidget {
           onPressed: ctrl.next,
           icon: const Icon(Icons.skip_next_rounded),
         ),
+        if (!live)
         IconButton(
           tooltip: l.repeat,
           onPressed: ctrl.cycleRepeat,

@@ -2874,5 +2874,107 @@
         "type": "String"
       }
     }
-  }
+  },
+  "radioTitle": "Radio",
+  "radioLibrarySubtitle": "{count, plural, =0{Stazioni in diretta} one{1 stazione salvata} other{{count} stazioni salvate}}",
+  "@radioLibrarySubtitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "radioSearchHint": "Cerca una radio",
+  "radioOnlyCountry": "Solo {country}",
+  "@radioOnlyCountry": {
+    "placeholders": {
+      "country": {
+        "type": "String"
+      }
+    }
+  },
+  "radioMine": "Le mie radio",
+  "radioNearYou": "Vicino a te",
+  "radioGenres": "Generi",
+  "radioTopListened": "Le più ascoltate",
+  "radioChooseRegion": "Scegli la regione",
+  "radioRegionHint": "Le radio vicine si trovano dal paese e dalla regione che scegli: l'app non usa la tua posizione.",
+  "radioCountryChip": "Paese: {country}",
+  "@radioCountryChip": {
+    "placeholders": {
+      "country": {
+        "type": "String"
+      }
+    }
+  },
+  "radioChooseCountry": "Scegli il paese",
+  "radioOfflineList": "Non in linea · elenco del {date}",
+  "@radioOfflineList": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "radioLoadFailed": "Non riesco a caricare le radio",
+  "radioNoResults": "Nessuna radio trovata",
+  "radioResults": "Risultati",
+  "radioSave": "Salva in Le mie radio",
+  "radioUnsave": "Togli da Le mie radio",
+  "radioSavedDone": "Radio salvata",
+  "radioRemovedDone": "Radio tolta da Le mie radio",
+  "radioNotResponding": "non risponde",
+  "radioLive": "In diretta",
+  "reasonRadioUnavailable": "la radio non risponde",
+  "radioDataPerHour": "≈ {mb} MB all'ora",
+  "@radioDataPerHour": {
+    "placeholders": {
+      "mb": {
+        "type": "String"
+      }
+    }
+  },
+  "radioSite": "Sito della stazione",
+  "radioSiteCopied": "Indirizzo del sito copiato",
+  "radioSearchSong": "Cerca questo brano",
+  "radioRenameTitle": "Nome della radio",
+  "radioMobileNotice": "La radio usa circa 1 MB al minuto di dati.",
+  "radioAddAddress": "Aggiungi indirizzo",
+  "radioAddName": "Nome",
+  "radioAddUrl": "Indirizzo dello stream",
+  "radioAddTest": "Prova 10 secondi",
+  "radioAddTesting": "Provo… se la senti, puoi salvarla.",
+  "radioLinkEmpty": "Scrivi l'indirizzo dello stream",
+  "radioLinkNotAnAddress": "Non sembra un indirizzo: scrivilo per intero, per esempio https://…",
+  "radioLinkBadScheme": "L'indirizzo deve iniziare con http:// o https://",
+  "radioLinkNoEntries": "Nel file non c'è nessun indirizzo da ascoltare",
+  "radioLinkTooBig": "Il file è troppo grande per essere una lista di radio",
+  "radioLinkFetchFailed": "Non riesco a scaricare il file",
+  "radioReorder": "Trascina per riordinare",
+  "homeYourRadios": "Le tue radio",
+  "memoryRadio": "Radio (elenco stazioni)",
+  "radioGenrePop": "Pop",
+  "radioGenreRock": "Rock",
+  "radioGenreClassicRock": "Rock classico",
+  "radioGenreJazz": "Jazz",
+  "radioGenreBlues": "Blues",
+  "radioGenreClassical": "Classica",
+  "radioGenreDance": "Dance",
+  "radioGenreElectronic": "Elettronica",
+  "radioGenreHouse": "House",
+  "radioGenreHipHop": "Hip hop",
+  "radioGenreLoFi": "Lo-fi",
+  "radioGenreChillout": "Chillout",
+  "radioGenreSixties": "Anni 60",
+  "radioGenreSeventies": "Anni 70",
+  "radioGenreEighties": "Anni 80",
+  "radioGenreNineties": "Anni 90",
+  "radioGenreOldies": "Oldies",
+  "radioGenreMetal": "Metal",
+  "radioGenreReggae": "Reggae",
+  "radioGenreLatin": "Latina",
+  "radioGenreSoul": "Soul",
+  "radioGenreNews": "Notizie",
+  "radioGenreTalk": "Parlato",
+  "radioGenreSports": "Sport"
 }

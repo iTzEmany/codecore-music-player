@@ -7,6 +7,7 @@ import '../../providers/player_providers.dart';
 import '../theme/tokens.dart';
 import 'now_playing_bars.dart';
 import 'track_actions.dart';
+import 'radio_now.dart';
 import 'track_art.dart';
 
 /// «Suggerito»: the small cloud and the word, shown wherever a streamed
@@ -54,6 +55,7 @@ class OnlineQueueRow extends ConsumerWidget {
     final isCurrent = ref.watch(currentTrackProvider.select((t) => t.value?.id == track.id));
     final playing = isCurrent && (ref.watch(isPlayingProvider).value ?? false);
     final i = reorderIndex;
+    final radio = radioOfTrack(ref, track);
     return InkWell(
       onTap: onTap,
       onLongPress: () => showTrackActions(context, ref, track),
@@ -88,8 +90,14 @@ class OnlineQueueRow extends ConsumerWidget {
                   const SizedBox(height: 2),
                   Row(
                     children: [
-                      const SuggestedMarker(),
-                      if (track.artist != null) ...[
+                      if (radio != null)
+                        Icon(Icons.circle, size: 8, color: cc.accent)
+                      else
+                        const SuggestedMarker(),
+                      if (radio != null) ...[
+                        const SizedBox(width: 6),
+                        Text(l.radioLive, style: theme.bodySmall),
+                      ] else if (track.artist != null) ...[
                         Text(' · ', style: theme.bodySmall),
                         Flexible(
                           child: Text(

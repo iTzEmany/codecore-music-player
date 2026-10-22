@@ -12,6 +12,8 @@ import '../theme/cover_tint.dart';
 import '../theme/tokens.dart';
 import 'favorite_actions.dart';
 import 'motion.dart';
+import 'radio_now.dart';
+import '../../providers/radio_providers.dart' show onAirProvider;
 import 'track_art.dart';
 
 /// Shared-element tag of the cover between mini-player and Now Playing.
@@ -111,6 +113,8 @@ class _MiniPlayerState extends ConsumerState<MiniPlayer>
     final ctrl = ref.read(playerControllerProvider);
     final width = MediaQuery.sizeOf(context).width;
 
+    final radio = (!inJam && track != null) ? radioOfTrack(ref, track) : null;
+    final onAir = radio == null ? null : ref.watch(onAirProvider).value;
     final String title;
     final String subtitle;
     final String? coverKey;
@@ -121,9 +125,11 @@ class _MiniPlayerState extends ConsumerState<MiniPlayer>
       coverKey = null;
       playing = jam.jam?.playing ?? false;
     } else {
-      title = track!.title;
-      subtitle = track.artist ?? l.unknownArtist;
-      coverKey = track.coverKey;
+      final texts = radio == null ? null : radioTexts(l, radio, onAir);
+      final t = track!;
+      title = texts?.title ?? t.title;
+      subtitle = texts?.subtitle ?? t.artist ?? l.unknownArtist;
+      coverKey = t.coverKey;
       playing = ref.watch(isPlayingProvider).value ?? false;
     }
     final tint = inJam
@@ -208,7 +214,9 @@ class _MiniPlayerState extends ConsumerState<MiniPlayer>
                 tooltip: l.devicesTitle,
                 onPressed: () => DevicesSheet.show(context),
               ),
-              if (!inJam && track != null)
+              if (radio != null)
+                RadioStarButton(station: radio, compact: true, color: cc.textMuted)
+              else if (!inJam && track != null)
                 _MiniButton(
                   icon: Icons.favorite_rounded,
                   iconWidget: HeartIcon(favorite: track.isFavorite),
@@ -236,7 +244,7 @@ class _MiniPlayerState extends ConsumerState<MiniPlayer>
               const SizedBox(width: 4),
             ],
           ),
-          if (!inJam)
+          if (!inJam && radio == null)
             // Decorative: its percentage would lead the merged label of the card.
             const Positioned(
               left: 0,

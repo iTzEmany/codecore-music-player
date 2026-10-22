@@ -11,6 +11,7 @@ import '../../../l10n/l10n_ext.dart';
 import '../../../providers/database_providers.dart';
 import '../../../providers/library_providers.dart';
 import '../../../providers/player_providers.dart';
+import '../../../providers/radio_providers.dart' show searchPrefillProvider;
 import '../../../providers/settings_providers.dart';
 import '../../../providers/ui_providers.dart';
 import '../../shell/shell_nav.dart';
@@ -49,6 +50,28 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   String _text = '';
   _Mode _mode = _Mode.library;
   int _onlineSubmitted = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    // A text sent here before this tab was ever opened.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _applyPrefill(ref.read(searchPrefillProvider));
+    });
+  }
+
+  /// «Cerca questo brano» from the radio: runs the text in «Online».
+  void _applyPrefill(String? text) {
+    if (text == null || text.trim().isEmpty) return;
+    ref.read(searchPrefillProvider.notifier).set(null);
+    _controller.text = text;
+    _controller.selection = TextSelection.collapsed(offset: text.length);
+    setState(() {
+      _text = text.trim();
+      _mode = _Mode.online;
+      _onlineSubmitted++;
+    });
+  }
 
   @override
   void dispose() {
@@ -121,6 +144,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   Widget build(BuildContext context) {
     final l = context.l10n;
     final theme = Theme.of(context).textTheme;
+    ref.listen(searchPrefillProvider, (_, next) => _applyPrefill(next));
     final Widget body;
     if (_mode == _Mode.online) {
       body = OnlineResults(query: _text, submitted: _onlineSubmitted);

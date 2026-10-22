@@ -23,6 +23,7 @@ import '../library/album_detail_screen.dart';
 import '../library/favorites_screen.dart';
 import '../library/folders_sheet.dart';
 import '../playlists/playlist_detail_screen.dart';
+import 'radio_shelf.dart';
 import '../settings/settings_screen.dart';
 import '../stats/stats_screen.dart';
 import '../../widgets/motion.dart';
@@ -341,6 +342,7 @@ class HomeScreen extends ConsumerWidget {
           shelf(l.homeRecentlyPlayed, albumCards(recentlyPlayedAlbums(albums))),
           shelf(l.homeRecentlyAdded, albumCards(recentlyAddedAlbums(albums))),
           shelf(l.homeTopTracks, topCards),
+          const HomeRadioShelf(),
           shelf(
             l.homeRediscover,
             albumCards(rediscoverAlbums(albums, DateTime.now())),

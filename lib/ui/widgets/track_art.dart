@@ -8,6 +8,7 @@ import '../../services/online/google_thumb.dart';
 import '../theme/tokens.dart';
 import 'cover_image.dart';
 import 'net_thumbnail.dart';
+import 'radio_art.dart';
 
 /// The picture of a track: the cover of a library track, the thumbnail of
 /// the registry for a streamed one (negative id).
@@ -29,7 +30,13 @@ class TrackArt extends ConsumerWidget {
     if (!isOnlineId(track.id)) {
       return CoverImage(coverKey: track.coverKey, size: size, radius: radius, heroTag: heroTag);
     }
-    final url = ref.watch(onlineEntriesProvider)?[track.id]?.result.thumbnailUrl;
+    final online = ref.watch(onlineEntriesProvider);
+    final radio = online?.radioOf(track.id)?.station;
+    if (radio != null) {
+      final art = RadioArt(station: radio, size: size, radius: radius);
+      return heroTag == null ? art : Hero(tag: heroTag!, child: art);
+    }
+    final url = online?[track.id]?.result.thumbnailUrl;
     final px = (size * MediaQuery.devicePixelRatioOf(context)).round();
     Widget image = NetThumbnail(
       url: url == null ? null : googleThumbAt(url, px),

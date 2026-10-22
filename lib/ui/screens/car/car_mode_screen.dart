@@ -11,6 +11,9 @@ import '../../widgets/favorite_actions.dart';
 import 'car_playlists_sheet.dart';
 import '../../widgets/motion.dart';
 import '../../widgets/track_art.dart';
+import '../../widgets/radio_now.dart';
+import '../../../providers/radio_providers.dart' show onAirProvider;
+import '../../../services/audio/online_entries.dart' show isOnlineId;
 
 /// Big-button player for the car: cover, title, ⏮ ⏯ ⏭, favourite, a short
 /// playlist list. Opened by hand from Now Playing; nothing starts it.
@@ -44,6 +47,8 @@ class _CarModeScreenState extends ConsumerState<CarModeScreen> {
     final track = ref.watch(liveCurrentTrackProvider).value ?? ref.watch(currentTrackProvider).value;
     final playing = ref.watch(isPlayingProvider).value ?? false;
     final ctrl = ref.read(playerControllerProvider);
+    final radio = track == null ? null : radioOfTrack(ref, track);
+    final texts = radio == null ? null : radioTexts(l, radio, ref.watch(onAirProvider).value);
 
     Widget big(IconData icon, String tip, VoidCallback? onTap, {bool main = false}) => SizedBox(
           width: _big,
@@ -73,11 +78,11 @@ class _CarModeScreenState extends ConsumerState<CarModeScreen> {
     final info = Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(track?.title ?? l.carNothing,
+        Text(texts?.title ?? track?.title ?? l.carNothing,
             textAlign: TextAlign.center, maxLines: 2, overflow: TextOverflow.ellipsis,
             style: theme.headlineMedium?.copyWith(fontWeight: FontWeight.w700)),
-        if (track?.artist != null)
-          Text(track!.artist!,
+        if ((texts?.subtitle ?? track?.artist) != null)
+          Text((texts?.subtitle ?? track?.artist)!,
               textAlign: TextAlign.center, maxLines: 1, overflow: TextOverflow.ellipsis,
               style: theme.titleLarge?.copyWith(color: cc.textMuted)),
       ],
@@ -100,7 +105,7 @@ class _CarModeScreenState extends ConsumerState<CarModeScreen> {
           icon: const Icon(Icons.brightness_high_outlined),
           selectedIcon: Icon(Icons.brightness_high, color: cc.accent),
         ),
-        if (track != null)
+        if (track != null && !isOnlineId(track.id))
           IconButton(
             tooltip: track.isFavorite ? l.removeFromFavorites : l.favorite,
             iconSize: 36,

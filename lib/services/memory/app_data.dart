@@ -22,6 +22,7 @@ enum AppDataKind {
   tagBackups,
   log,
   podcasts,
+  radio,
 }
 
 /// Kinds that are made again by themselves when needed: the only ones
@@ -34,6 +35,7 @@ const clearableKinds = {
   AppDataKind.catalogCache,
   AppDataKind.suggestions,
   AppDataKind.blurCopies,
+  AppDataKind.radio,
 };
 
 class AppDataItem {
@@ -58,9 +60,13 @@ class AppDataPaths {
     required this.catalogCache,
     required this.log,
     this.suggestionFiles = const [],
+    this.radio,
   });
 
   final Directory covers, jam, theme, tagBackups;
+
+  /// `<appSupport>/radio`: the lists of stations (never the saved ones).
+  final Directory? radio;
   final File database, searchCache, catalogCache, log;
 
   /// `suggestions.json` and `seed_ids.json` (Shuffle+).
@@ -124,6 +130,8 @@ Future<List<AppDataItem>> measureAppData(
     AppDataItem(AppDataKind.tagBackups, await tags),
     AppDataItem(AppDataKind.log, await _filesSize(paths.logFiles)),
     AppDataItem(AppDataKind.podcasts, podcastBytes),
+    if (paths.radio != null)
+      AppDataItem(AppDataKind.radio, await directorySize(paths.radio!.path)),
   ];
 }
 
@@ -153,6 +161,8 @@ class CacheCleaner {
     this.pickerTempDir,
     this.suggestionFiles = const [],
     this.clearSuggestions,
+    this.radioDir,
+    this.clearRadioMemory,
   });
 
   final Directory jamDir, themeDir;
@@ -165,6 +175,11 @@ class CacheCleaner {
   /// Shuffle+ files and the call that empties them (log and seed index).
   final List<File> suggestionFiles;
   final Future<void> Function()? clearSuggestions;
+
+  /// The cached lists of radio stations and the searches kept in memory. The
+  /// stations the user saved live in the database and are not touched.
+  final Directory? radioDir;
+  final void Function()? clearRadioMemory;
 
   /// Where the file picker copies the files it hands over (backups, CSVs…):
   /// `<cache dir>/file_picker`. Only copies, safe to delete.
@@ -195,6 +210,12 @@ class CacheCleaner {
       final after = await _filesSize([for (final f in suggestionFiles) f.path]);
       freed += math.max(0, before - after);
     }
+    final radio = radioDir;
+    if (radio != null) {
+      freed += await directorySize(radio.path);
+      await _deleteTree(radio);
+    }
+    clearRadioMemory?.call();
     final picker = pickerTempDir;
     if (picker != null) {
       freed += await directorySize(picker.path);

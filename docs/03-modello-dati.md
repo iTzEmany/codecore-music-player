@@ -89,6 +89,12 @@ Un episodio **scaricato** ha una riga in `tracks` con `kind = 1`, `folderId = nu
 ## Curiosità sull'artista (schema v11)
 `artist_infos`: `artistKey` text **PK** (`matchKey` dell'artista principale: «Queen feat. X» e «queen» sono lo stesso) · `body` text · `sourceUrl` text · `lang` text · `fetchedAt` int (epoch ms). Una riga per artista, non per brano: tutti i brani dello stesso artista la mostrano senza altre richieste. È una cache: non entra nei dati utente portabili del backup (il file `.sqlite` del backup però la contiene).
 
+## Radio (schema v12, fase 33)
+Una tabella nuova, nessuna esistente toccata.
+
+### `radio_stations`
+`stationId` text **PK** (`stationuuid` di Radio Browser, oppure `manual:<uuid>` per un indirizzo scritto a mano) · `name` text · `streamUrl` text · `homepage`, `faviconUrl`, `countryCode`, `state` text default `''` · `tags` text (separati da virgola) · `codec` text · `bitrate` int · `hls` bool · `position` int (l'ordine scelto, 0 = prima) · `addedAt` int · `lastPlayedAt` int? · `lastOkAt` int? (l'ultima rilettura che l'ha trovata funzionante) · `unreachable` bool default false (l'ultima rilettura non l'ha trovata o la dà rotta: «non risponde» nella riga, **la riga non si cancella mai**). Le liste di stazioni di Radio Browser (paese, ricerche) **non** sono nel DB: file `<appSupport>/radio/country_<CC>.json`, una cache. Entra nei dati utente portabili del backup (`user_data.json`, campo `radios`).
+
 ## Importazione da CSV (schema v4, fase 12)
 | Tabella | Colonne | Note |
 |---|---|---|
@@ -158,6 +164,10 @@ File scomparsi: `missing = true` **solo se la cartella radice è raggiungibile**
 | `downloadRateLimitKBps` | int | 0 | 0 = nessun limite (fase 14) |
 | `downloadFormat` | string | `m4a` | `original` (audio così com'è, di solito Opus), `m4a` (AAC di YouTube senza ricodifica), `mp3High` (320 kbps), `mp3Low` (192 kbps); sostituisce `downloadOriginal` della fase 14 (2026-10-20) |
 | `playbackSpeed` | double | 1.0 | 0.5–2.0, globale (fase 17) |
+| `radioCountry` | string | `''` | codice ISO del paese di «Vicino a te»; vuoto = quello del sistema, altrimenti Italia (fase 33) |
+| `radioRegion` | string | `''` | regione scelta (per l'Italia un id della tabella, es. `lombardia`; altrove il nome come lo scrivono le stazioni); vuoto = da chiedere (fase 33) |
+| `radioOnlyCountry` | bool | false | ricerca e generi solo nel paese scelto (fase 33) |
+| `radioDataNoticeSeen`, `radioRefreshedAt` | bool, int | assenti | avviso «circa 1 MB al minuto» già mostrato; ultima rilettura delle radio salvate (ms). Fuori da `AppSettings`: non sono scelte dell'utente e non vanno nel backup (fase 33) |
 | `eqEnabled` | bool | false | equalizzatore acceso (fase 17) |
 | `eqPreset.speaker`, `eqPreset.headphones` | string | `flat` | nome del preset (`custom` = guadagni propri) |
 | `eqGains.speaker`, `eqGains.headphones` | list<string> | `[]` | guadagni in dB, uno per banda, usati con `custom` |

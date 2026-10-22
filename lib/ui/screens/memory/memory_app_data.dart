@@ -24,6 +24,7 @@ String _label(AppLocalizations l, AppDataKind k) => switch (k) {
   AppDataKind.tagBackups => l.memoryTagBackups,
   AppDataKind.log => l.memoryLog,
   AppDataKind.podcasts => l.memoryPodcasts,
+  AppDataKind.radio => l.memoryRadio,
 };
 
 /// «Dati dell'app»: what the app keeps besides the music, and «Svuota cache».

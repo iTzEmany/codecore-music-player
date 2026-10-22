@@ -17,6 +17,8 @@ import '../../widgets/cover_backdrop.dart';
 import '../../widgets/track_art.dart';
 import '../../../services/audio/online_entries.dart';
 import 'suggested_info.dart';
+import '../../../providers/radio_providers.dart' show onAirProvider;
+import '../../widgets/radio_now.dart';
 import '../../widgets/favorite_actions.dart';
 import '../../widgets/mini_player.dart' show kPlayerCoverHero;
 import '../../widgets/track_actions.dart';
@@ -220,6 +222,9 @@ class _Player extends ConsumerWidget {
     final ctx = playContextName(l, ref.watch(playContextProvider));
     final ctrl = ref.read(playerControllerProvider);
     final online = isOnlineId(track.id);
+    final radio = radioOfTrack(ref, track);
+    final onAir = radio == null ? null : ref.watch(onAirProvider).value;
+    final texts = radio == null ? null : radioTexts(l, radio, onAir);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: CcDims.margin),
       child: Column(
@@ -314,7 +319,7 @@ class _Player extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      track.title,
+                      texts?.title ?? track.title,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: theme.titleLarge,
@@ -324,7 +329,7 @@ class _Player extends ConsumerWidget {
                       child: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 2),
                         child: Text(
-                          track.artist ?? l.unknownArtist,
+                          texts?.subtitle ?? track.artist ?? l.unknownArtist,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: theme.bodyLarge?.copyWith(color: cc.textMuted),
@@ -334,7 +339,9 @@ class _Player extends ConsumerWidget {
                   ],
                 ),
               ),
-              if (!online)
+              if (radio != null)
+                RadioStarButton(station: radio)
+              else if (!online)
                 IconButton(
                   tooltip: track.isFavorite
                       ? l.removeFromFavorites
@@ -347,10 +354,13 @@ class _Player extends ConsumerWidget {
                 ),
             ],
           ),
-          if (online) SuggestedInfo(track: track),
-          NpSeekRow(track: track),
+          if (radio != null)
+            NpRadioActions(station: radio, onAir: onAir)
+          else if (online)
+            SuggestedInfo(track: track),
+          if (radio != null) NpLiveRow(station: radio) else NpSeekRow(track: track),
           const SizedBox(height: 8),
-          const NpControls(),
+          NpControls(live: radio != null),
           const NpBottomRow(),
           const SizedBox(height: 8),
         ],

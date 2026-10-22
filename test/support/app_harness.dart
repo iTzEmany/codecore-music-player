@@ -9,6 +9,7 @@ import 'package:codecore/providers/library_providers.dart';
 import 'package:codecore/providers/player_providers.dart';
 import 'package:codecore/providers/settings_providers.dart';
 import 'package:codecore/services/audio/codecore_audio_handler.dart';
+import 'package:codecore/services/audio/online_entries.dart';
 import 'package:codecore/services/audio/play_queue.dart';
 import 'package:codecore/ui/theme/app_theme.dart';
 import 'package:codecore/ui/theme/tokens.dart';
@@ -33,13 +34,13 @@ class Harness {
   /// Overridable before `pump`: where cover files are looked up.
   Directory coversDir = Directory.systemTemp;
 
-  static Future<Harness> create(WidgetTester tester, {int tracks = 0}) async {
+  static Future<Harness> create(WidgetTester tester, {int tracks = 0, bool radio = false}) async {
     SharedPreferences.setMockInitialValues({});
     final store = await SettingsStore.open();
     final db = AppDatabase(NativeDatabase.memory());
     final backend = FakeBackend();
     final handler = CodecoreAudioHandler(backend, PlayQueue(), TrackRepository(db),
-        onError: (_) {});
+        onError: (_) {}, online: radio ? OnlineEntries() : null);
     for (var i = 0; i < tracks; i++) {
       await db.into(db.tracks).insert(TracksCompanion.insert(
             path: '/m/t$i.mp3',

@@ -20,6 +20,11 @@ const _sameAsItalian = {
   'youtube', 'ytDlpVersion', 'statsHoursMinutes', 'statsFirstValue', 'ruleChipTag',
   'smartName', 'smartPlaylistLabel', 'searchSourceYoutube', 'searchSourceYoutubeMusic',
   'searchSourceSoundcloud', 'searchModeOnline', 'onlineSourceVideo', 'downloadFormatMp3High', 'importPhaseDownloading', 'activityLog', 'importPhaseDownloadStart', 'memoryDatabase',
+  'radioTitle', 'radioAddName', 'radioOnlyCountry', 'radioGenrePop', 'radioGenreRock',
+  'radioGenreJazz', 'radioGenreBlues', 'radioGenreDance', 'radioGenreHouse',
+  'radioGenreHipHop', 'radioGenreLoFi', 'radioGenreChillout', 'radioGenreOldies',
+  'radioGenreMetal', 'radioGenreReggae', 'radioGenreLatin', 'radioGenreSoul',
+  'radioGenreSports',
 };
 
 Map<String, dynamic> _arb(String lang) =>

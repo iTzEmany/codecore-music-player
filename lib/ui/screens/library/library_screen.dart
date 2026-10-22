@@ -26,6 +26,8 @@ import '../devices/devices_sheet.dart';
 import '../import/import_flow.dart';
 import '../playlists/playlist_detail_screen.dart';
 import '../podcast/podcasts_screen.dart';
+import '../radio/radio_screen.dart';
+import '../../../providers/radio_providers.dart' show savedRadiosProvider;
 import '../playlists/playlist_dialogs.dart';
 import 'album_detail_screen.dart';
 import 'all_tracks_screen.dart';
@@ -92,6 +94,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
     );
     final tagCount = ref.watch(tagsProvider.select((t) => t.value?.length ?? 0));
     final podcastCount = ref.watch(podcastsProvider.select((p) => p.value?.length ?? 0));
+    final radioCount = ref.watch(savedRadiosProvider.select((r) => r.value?.length ?? 0));
     final reviewCount = ref.watch(reviewCountProvider.select((c) => c.value ?? 0));
     final theme = Theme.of(context).textTheme;
     final denied = ref.watch(permissionDeniedProvider);
@@ -153,6 +156,12 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
           title: l.podcastsTitle,
           subtitle: l.podcastsSubtitle(podcastCount),
           onTap: () => ShellNav.open<void>(context, const PodcastsScreen()),
+        ),
+        _Pinned(
+          icon: Icons.radio_rounded,
+          title: l.radioTitle,
+          subtitle: l.radioLibrarySubtitle(radioCount),
+          onTap: () => ShellNav.open<void>(context, const RadioScreen()),
         ),
         _Pinned(
           icon: Icons.history_rounded,

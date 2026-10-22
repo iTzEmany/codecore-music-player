@@ -14,6 +14,7 @@ class NetThumbnail extends StatelessWidget {
     required this.icon,
     this.radius = CcDims.rList,
     this.circle = false,
+    this.placeholderChild,
   });
 
   final String? url;
@@ -23,6 +24,9 @@ class NetThumbnail extends StatelessWidget {
   /// A round picture (artists); [radius] is then ignored.
   final bool circle;
 
+  /// In place of [icon] while there is no picture (a radio's initial).
+  final Widget? placeholderChild;
+
   static const fade = Duration(milliseconds: 180);
 
   @override
@@ -30,7 +34,7 @@ class NetThumbnail extends StatelessWidget {
     final cc = context.cc;
     final placeholder = ColoredBox(
       color: cc.surface3,
-      child: Icon(icon, color: cc.textMuted),
+      child: placeholderChild ?? Icon(icon, color: cc.textMuted),
     );
     final u = url;
     return ClipRRect(

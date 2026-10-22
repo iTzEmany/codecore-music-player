@@ -32,6 +32,10 @@ import '../../data/repositories/library_queries.dart';
 import '../../providers/library_providers.dart';
 import '../theme/tokens.dart';
 import 'track_art.dart';
+import 'radio_now.dart';
+import '../screens/radio/radio_actions.dart';
+import '../../providers/radio_providers.dart' show savedRadioIdsProvider;
+import '../../services/radio/radio_station.dart';
 import 'delete_tracks.dart';
 import 'favorite_actions.dart';
 import 'format_utils.dart';
@@ -95,6 +99,36 @@ List<TrackActionGroup> onlineTrackActions(
   ];
 }
 
+/// A radio in the queue is not a track: it can be saved in «Le mie radio» (or
+/// taken out), the song on air looked up, and the station taken out of the
+/// queue. No favourites, downloads, playlists or tags.
+List<TrackActionGroup> radioTrackActions(
+  BuildContext outer,
+  WidgetRef ref,
+  Track track,
+  RadioStation station,
+) {
+  final l = outer.l10n;
+  final saved = ref.read(savedRadioIdsProvider).contains(station.id);
+  final onAir = ref.read(audioHandlerProvider).onAir;
+  final isCurrent = ref.read(currentTrackProvider).value?.id == track.id;
+  return [
+    TrackActionGroup(l.groupCollection, [
+      TrackAction(
+        saved ? Icons.star_rounded : Icons.star_border_rounded,
+        saved ? l.radioUnsave : l.radioSave,
+        () => toggleSavedRadio(outer, ref, station),
+      ),
+      if (isCurrent && onAir != null && kEnableYoutube)
+        TrackAction(Icons.search_rounded, l.radioSearchSong, () async => searchOnAir(outer, ref, onAir)),
+    ]),
+    TrackActionGroup(l.groupQueue, [
+      TrackAction(Icons.remove_circle_outline_rounded, l.removeFromQueueAction,
+          () => ref.read(suggestionActionsProvider).remove(track.id)),
+    ]),
+  ];
+}
+
 /// The single model of the track actions, used by the bottom sheet (mobile:
 /// long press, ⋮) and by the pointer menu (desktop: right click).
 /// [outer] is the context the effects (snackbars, pages) are tied to.
@@ -103,6 +137,8 @@ List<TrackActionGroup> trackActions(
   WidgetRef ref,
   Track track,
 ) {
+  final radio = radioOfTrackRead(ref, track);
+  if (radio != null) return radioTrackActions(outer, ref, track, radio);
   if (isOnlineId(track.id)) return onlineTrackActions(outer, ref, track);
   final l = outer.l10n;
   final ctrl = ref.read(playerControllerProvider);
