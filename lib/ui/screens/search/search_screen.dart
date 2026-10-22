@@ -20,9 +20,7 @@ import '../../theme/tokens.dart';
 import '../../widgets/artist_avatar.dart';
 import '../../widgets/cover_image.dart';
 import '../../widgets/playlist_cover.dart';
-import '../../../services/library/rules/rule_parser.dart';
 import '../../widgets/section_header.dart';
-import 'rules_help_sheet.dart';
 import '../../widgets/selection_bar.dart';
 import '../../widgets/track_row.dart';
 import '../../widgets/track_row_selection.dart';
@@ -50,6 +48,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   String _text = '';
   _Mode _mode = _Mode.library;
   int _onlineSubmitted = 0;
+  // Not remembered across launches: they start off every time.
+  bool _favorites = false;
+  bool _recent = false;
 
   @override
   void initState() {
@@ -120,18 +121,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     setState(() => _text = q);
   }
 
-  /// Adds an operator (`artista:`) to the end of the text, ready to be filled.
-  void _insertOperator(String op) {
-    final t = _controller.text;
-    final next = '$t${t.isEmpty || t.endsWith(' ') ? '' : ' '}$op';
-    _controller.value = TextEditingValue(
-      text: next,
-      selection: TextSelection.collapsed(offset: next.length),
-    );
-    ref.read(searchFocusProvider).requestFocus();
-    _onChanged(next);
-  }
-
   void _toOnline() {
     _remember(_text);
     setState(() {
@@ -148,10 +137,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     final Widget body;
     if (_mode == _Mode.online) {
       body = OnlineResults(query: _text, submitted: _onlineSubmitted);
-    } else if (_text.isEmpty) {
+    } else if (_text.isEmpty && !_favorites && !_recent) {
       body = _EmptyQuery(onRecent: _useRecent);
     } else {
-      body = _LibraryResults(text: _text, onOnline: _toOnline);
+      body = _LibraryResults(
+        query: SearchQuery(_text, favorites: _favorites, recent: _recent),
+        onOnline: _toOnline,
+      );
     }
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -167,12 +159,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             child: Row(
               children: [
                 Expanded(child: Text(l.navSearch, style: theme.headlineSmall)),
-                if (_mode == _Mode.library)
-                  IconButton(
-                    tooltip: l.ruleHelpTooltip,
-                    icon: const Icon(Icons.help_outline_rounded),
-                    onPressed: () => showRulesHelp(context),
-                  ),
               ],
             ),
           ),
@@ -200,7 +186,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               ),
             ),
           ),
-          if (_mode == _Mode.library) ...[
+          if (_mode == _Mode.library)
             SizedBox(
               height: 48,
               child: ListView(
@@ -210,42 +196,24 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   vertical: 6,
                 ),
                 children: [
-                  for (final label in [
-                    l.ruleChipArtist,
-                    l.ruleChipYear,
-                    l.ruleChipGenre,
-                    l.ruleChipTag,
-                    l.ruleChipFavorites,
-                  ])
-                    Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: ActionChip(
-                        label: Text(label),
-                        onPressed: () => _insertOperator(label),
-                      ),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: FilterChip(
+                      avatar: const Icon(Icons.favorite_rounded),
+                      label: Text(l.navFavorites),
+                      selected: _favorites,
+                      onSelected: (v) => setState(() => _favorites = v),
                     ),
+                  ),
+                  FilterChip(
+                    avatar: const Icon(Icons.schedule_rounded),
+                    label: Text(l.sortRecent),
+                    selected: _recent,
+                    onSelected: (v) => setState(() => _recent = v),
+                  ),
                 ],
               ),
             ),
-            // What the rule language could not read (it is searched as text).
-            for (final w in parseRules(_text).warnings.where(
-              (w) =>
-                  w.kind != RuleWarningKind.emptyValue &&
-                  w.kind != RuleWarningKind.danglingOr,
-            ).take(1))
-              Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  CcDims.margin,
-                  0,
-                  CcDims.margin,
-                  4,
-                ),
-                child: Text(
-                  l.ruleWarning(w.term),
-                  style: theme.bodyMedium?.copyWith(color: context.cc.textMuted),
-                ),
-              ),
-          ],
           if (kEnableYoutube)
             SizedBox(
               height: 52,
@@ -378,9 +346,9 @@ class _GenreTile extends StatelessWidget {
 }
 
 class _LibraryResults extends ConsumerWidget {
-  const _LibraryResults({required this.text, required this.onOnline});
+  const _LibraryResults({required this.query, required this.onOnline});
 
-  final String text;
+  final SearchQuery query;
   final VoidCallback onOnline;
 
   @override
@@ -388,10 +356,12 @@ class _LibraryResults extends ConsumerWidget {
     final l = context.l10n;
     final cc = context.cc;
     final theme = Theme.of(context).textTheme;
+    final text = query.text;
     final tracks =
-        ref.watch(searchTracksProvider(text)).value ?? const <Track>[];
+        ref.watch(searchTracksProvider(query)).value ?? const <Track>[];
     final res = searchLibrary(
       text: text,
+      quickFilter: query.quick,
       tracks: tracks,
       artists: ref.watch(artistsProvider).value ?? const [],
       albums: ref.watch(albumsProvider).value ?? const [],
@@ -558,7 +528,7 @@ class _LibraryResults extends ConsumerWidget {
                   child: TextButton(
                     onPressed: () => ShellNav.open<void>(
                       context,
-                      SearchTracksScreen(text: text),
+                      SearchTracksScreen(query: query),
                     ),
                     child: Text(l.showAll),
                   ),
@@ -685,7 +655,7 @@ class _LibraryResults extends ConsumerWidget {
               ),
           ],
         ],
-        if (kEnableYoutube)
+        if (kEnableYoutube && text.isNotEmpty)
           Padding(
             padding: const EdgeInsets.fromLTRB(
               CcDims.margin,
@@ -724,15 +694,15 @@ class _LibraryResults extends ConsumerWidget {
 
 /// «Mostra tutti»: every track matching the text.
 class SearchTracksScreen extends ConsumerWidget {
-  const SearchTracksScreen({super.key, required this.text});
+  const SearchTracksScreen({super.key, required this.query});
 
-  final String text;
+  final SearchQuery query;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
     final tracks =
-        ref.watch(searchTracksProvider(text)).value ?? const <Track>[];
+        ref.watch(searchTracksProvider(query)).value ?? const <Track>[];
     final ctrl = ref.read(playerControllerProvider);
     final compact = ref.watch(settingsProvider).compactMode;
     const key = 'search-all';

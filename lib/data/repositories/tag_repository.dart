@@ -31,6 +31,25 @@ class TagRepository {
         ]);
   }
 
+  /// The names of the tags of every tagged track, kept up to date (for the
+  /// search index).
+  Stream<Map<int, List<String>>> watchNamesByTrack() {
+    return _db
+        .customSelect(
+          'SELECT tt.track_id AS track_id, u.name AS name FROM track_tags tt '
+          'JOIN user_tags u ON u.id = tt.tag_id',
+          readsFrom: {_db.trackTags, _db.userTags},
+        )
+        .watch()
+        .map((rows) {
+      final out = <int, List<String>>{};
+      for (final r in rows) {
+        (out[r.read<int>('track_id')] ??= []).add(r.read<String>('name'));
+      }
+      return out;
+    });
+  }
+
   Future<UserTag?> byName(String name) => (_db.select(_db.userTags)
         ..where((t) => t.name.equals(name.trim())))
       .getSingleOrNull();

@@ -1389,11 +1389,6 @@
       }
     }
   },
-  "ruleChipArtist": "artist:",
-  "ruleChipYear": "year:",
-  "ruleChipGenre": "genre:",
-  "ruleChipTag": "tag:",
-  "ruleChipFavorites": "favorites",
   "ruleWarning": "I don’t understand “{term}”: searching it as text.",
   "@ruleWarning": {
     "placeholders": {
@@ -1402,7 +1397,6 @@
       }
     }
   },
-  "ruleHelpTooltip": "Search help",
   "smartPlaylistNew": "New smart playlist",
   "smartPlaylistEdit": "Edit smart playlist",
   "smartPlaylistLabel": "Smart playlist",
@@ -1498,17 +1492,6 @@
     }
   },
   "tagNoneToRemove": "The chosen tracks have no tags.",
-  "ruleHelpTitle": "Searching with operators",
-  "ruleHelpIntro": "Type words as usual, or add operators: all of them must hold together.",
-  "ruleHelpArtist": "artist:\"pink floyd\" — tracks by an artist (part of the name is enough); the same with album:, genre:, folder:",
-  "ruleHelpYear": "year:1990..1999 — a range (open too: year:..1980, year:2000..); year>1990, year<=1985",
-  "ruleHelpDuration": "duration>5m — length (m minutes, s seconds): duration<90s, duration:2m..4m",
-  "ruleHelpAdded": "added<30g — added less than 30 days ago (g days, sett weeks, mesi months): added>6mesi",
-  "ruleHelpNot": "-live — the minus sign excludes: -artist:floyd, -\"live at\"",
-  "ruleHelpOr": "rock OR jazz — OR (capitals) between two terms: one is enough",
-  "ruleHelpFlags": "favorites, never-played — only favorites, or tracks never played; plays>10 for the most played",
-  "ruleHelpOthers": "tag:live, format:flac — one of your tags, or the file format (the whole name, any case)",
-  "ruleHelpSmart": "The same rules make smart playlists (Library → + → New smart playlist).",
   "cleanupSection": "Library cleanup",
   "duplicatesTitle": "Duplicates",
   "duplicatesTileHint": "The same song in several copies or qualities",

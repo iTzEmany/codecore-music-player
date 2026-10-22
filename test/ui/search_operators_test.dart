@@ -60,49 +60,64 @@ void main() {
     await h.dispose(tester);
   });
 
-  testWidgets('the suggestion chips put an operator in the box', (tester) async {
+  testWidgets('nothing in the box suggests operators; two quick filters sit under it',
+      (tester) async {
     await open(tester);
-    final chips = find
-        .byWidgetPredicate((w) => w is ListView && w.scrollDirection == Axis.horizontal)
-        .first;
-    expect(find.text('artista:'), findsOneWidget);
-    expect(find.text('anno:'), findsOneWidget);
-    expect(find.text('genere:'), findsOneWidget);
-    await tester.drag(chips, const Offset(-600, 0)); // the row scrolls
-    await tester.pump();
-    expect(find.text('tag:'), findsOneWidget);
-    expect(find.text('preferiti'), findsOneWidget);
-    await tester.drag(chips, const Offset(600, 0));
-    await tester.pump();
-    await tester.tap(find.text('anno:'));
-    await tester.pump();
-    expect(tester.widget<TextField>(find.byType(TextField)).controller!.text, 'anno:');
-    await type(tester, 'anno:1992');
-    await tester.drag(chips, const Offset(-600, 0));
-    await tester.pump();
-    await tester.tap(find.text('preferiti'));
-    await tester.pump();
-    expect(tester.widget<TextField>(find.byType(TextField)).controller!.text, 'anno:1992 preferiti');
+    for (final op in ['artista:', 'anno:', 'genere:', 'tag:']) {
+      expect(find.text(op), findsNothing);
+    }
+    expect(find.byTooltip('Aiuto sulla ricerca'), findsNothing);
+    expect(find.widgetWithText(FilterChip, 'Preferiti'), findsOneWidget);
+    expect(find.widgetWithText(FilterChip, 'Recenti'), findsOneWidget);
+    expect(tester.widget<FilterChip>(find.widgetWithText(FilterChip, 'Preferiti')).selected, isFalse);
+    expect(tester.widget<FilterChip>(find.widgetWithText(FilterChip, 'Recenti')).selected, isFalse);
     await h.dispose(tester);
   });
 
-  testWidgets('what the parser cannot read is said, and searched as text', (tester) async {
+  testWidgets('«Preferiti» alone lists the favourites; with a text it limits the matches',
+      (tester) async {
+    await open(tester);
+    await tester.runAsync(() => h.db.customUpdate('UPDATE tracks SET is_favorite = 1 WHERE title = \'Song 1\''));
+    await tester.tap(find.widgetWithText(FilterChip, 'Preferiti'));
+    await _settle(tester);
+    expect(_row('Song 1'), findsOneWidget);
+    expect(_row('Song 2'), findsNothing);
+    await type(tester, 'song');
+    expect(_row('Song 1'), findsOneWidget);
+    expect(_row('Song 2'), findsNothing);
+    await tester.tap(find.widgetWithText(FilterChip, 'Preferiti'));
+    await _settle(tester);
+    expect(_row('Song 2'), findsOneWidget);
+    await h.dispose(tester);
+  });
+
+  testWidgets('«Recenti» lists what was played or added lately', (tester) async {
+    await open(tester);
+    final now = DateTime.now().millisecondsSinceEpoch;
+    await tester.runAsync(() => h.db.customUpdate('UPDATE tracks SET added_at = 1'));
+    await tester.runAsync(
+        () => h.db.customUpdate('UPDATE tracks SET last_played_at = $now WHERE title = \'Song 2\''));
+    await tester.tap(find.widgetWithText(FilterChip, 'Recenti'));
+    await _settle(tester);
+    expect(_row('Song 2'), findsOneWidget);
+    expect(_row('Song 0'), findsNothing);
+    await h.dispose(tester);
+  });
+
+  testWidgets('a plain text finds by year and artist together, in any order', (tester) async {
+    await open(tester);
+    await type(tester, '1992 artist');
+    expect(_row('Song 1'), findsOneWidget);
+    expect(_row('Song 0'), findsNothing);
+    await h.dispose(tester);
+  });
+
+  testWidgets('what the parser cannot read is searched as text, without a complaint',
+      (tester) async {
     await open(tester);
     await type(tester, 'colore:rosso');
-    expect(find.textContaining('Non capisco «colore:rosso»'), findsOneWidget);
-    await type(tester, 'anno:');
-    expect(find.textContaining('Non capisco'), findsNothing, reason: 'still typing: no complaint');
-    await h.dispose(tester);
-  });
-
-  testWidgets('the «?» opens the guide to the operators', (tester) async {
-    await open(tester);
-    await tester.tap(find.byTooltip('Aiuto sulla ricerca'));
-    await _settle(tester);
-    expect(find.text('Cercare con gli operatori'), findsOneWidget);
-    expect(find.textContaining('anno:1990..1999'), findsOneWidget);
-    expect(find.textContaining('rock OR jazz'), findsOneWidget);
+    expect(find.textContaining('Non capisco'), findsNothing);
+    expect(find.text('Nessun risultato in libreria'), findsOneWidget);
     await h.dispose(tester);
   });
 }
-

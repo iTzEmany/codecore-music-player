@@ -18,7 +18,7 @@ const _sameAsItalian = {
   'jamWith', 'kindAlbum', 'kindArtist', 'kindPlaylist', 'navHome', 'pause',
   'proposedValue', 'settingsAbout', 'settingsOnline', 'settingsTheme',
   'sharePin', 'sortAlbum', 'sortArtist', 'textLarge', 'tracksAndDuration',
-  'youtube', 'ytDlpVersion', 'statsHoursMinutes', 'statsFirstValue', 'ruleChipTag',
+  'youtube', 'ytDlpVersion', 'statsHoursMinutes', 'statsFirstValue',
   'smartName', 'smartPlaylistLabel', 'searchSourceYoutube', 'searchSourceYoutubeMusic',
   'searchSourceSoundcloud', 'searchModeOnline', 'onlineSourceVideo', 'downloadFormatMp3High', 'importPhaseDownloading', 'activityLog', 'importPhaseDownloadStart', 'memoryDatabase',
   'radioTitle', 'radioAddName', 'radioOnlyCountry', 'radioGenrePop', 'radioGenreRock',

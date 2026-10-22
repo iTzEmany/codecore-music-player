@@ -1580,11 +1580,6 @@
       }
     }
   },
-  "ruleChipArtist": "artist:",
-  "ruleChipYear": "year:",
-  "ruleChipGenre": "genre:",
-  "ruleChipTag": "tag:",
-  "ruleChipFavorites": "favorites",
   "ruleWarning": "Não percebo «{term}»: procuro-o como texto.",
   "@ruleWarning": {
     "placeholders": {
@@ -1593,7 +1588,6 @@
       }
     }
   },
-  "ruleHelpTooltip": "Ajuda da pesquisa",
   "smartPlaylistNew": "Nova playlist inteligente",
   "smartPlaylistEdit": "Editar playlist inteligente",
   "smartPlaylistLabel": "Playlist inteligente",
@@ -1689,17 +1683,6 @@
     }
   },
   "tagNoneToRemove": "As faixas escolhidas não têm etiquetas.",
-  "ruleHelpTitle": "Pesquisar com operadores",
-  "ruleHelpIntro": "Escreva palavras como de costume, ou junte operadores: todos têm de se verificar em conjunto.",
-  "ruleHelpArtist": "artist:\"pink floyd\" — faixas de um artista (basta parte do nome); o mesmo com album:, genre:, folder:",
-  "ruleHelpYear": "year:1990..1999 — um intervalo (também aberto: year:..1980, year:2000..); year>1990, year<=1985",
-  "ruleHelpDuration": "duration>5m — duração (m minutos, s segundos): duration<90s, duration:2m..4m",
-  "ruleHelpAdded": "added<30g — adicionadas há menos de 30 dias (g dias, sett semanas, mesi meses): added>6mesi",
-  "ruleHelpNot": "-live — o sinal de menos exclui: -artist:floyd, -\"live at\"",
-  "ruleHelpOr": "rock OR jazz — OR (em maiúsculas) entre dois termos: basta um",
-  "ruleHelpFlags": "favorites, never-played — só os favoritos, ou as faixas nunca ouvidas; plays>10 para as mais ouvidas",
-  "ruleHelpOthers": "tag:live, format:flac — uma das suas etiquetas, ou o formato do ficheiro (nome inteiro, sem distinguir maiúsculas)",
-  "ruleHelpSmart": "As mesmas regras servem para as playlists inteligentes (Biblioteca → + → Nova playlist inteligente).",
   "cleanupSection": "Limpeza da biblioteca",
   "duplicatesTitle": "Duplicados",
   "duplicatesTileHint": "A mesma música em várias cópias ou qualidades",

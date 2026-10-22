@@ -6,6 +6,7 @@ import 'package:path/path.dart' as p;
 import '../core/app_log.dart';
 import '../data/db/app_database.dart';
 import '../data/repositories/library_queries.dart';
+import '../data/repositories/smart_search.dart';
 import '../data/repositories/track_repository.dart';
 import '../services/covers/cover_store.dart';
 import '../services/covers/cover_thumbnails.dart';
@@ -186,16 +187,65 @@ final genreTracksProvider = StreamProvider.family<List<Track>, String>(
   (ref, genre) => ref.watch(libraryQueriesProvider).watchGenreTracks(genre),
 );
 
-/// Tracks matching a search text: words look in title / artist / album, and
-/// with operators (`artista:x anno:1990..1999 -live`) the rules run in SQL.
-final searchTracksProvider = StreamProvider.family<List<Track>, String>((
+/// What the Library search asks for: the text and the two quick filters.
+class SearchQuery {
+  const SearchQuery(this.text, {this.favorites = false, this.recent = false});
+
+  final String text;
+  final bool favorites, recent;
+
+  bool get quick => favorites || recent;
+
+  @override
+  bool operator ==(Object other) =>
+      other is SearchQuery &&
+      other.text == text &&
+      other.favorites == favorites &&
+      other.recent == recent;
+
+  @override
+  int get hashCode => Object.hash(text, favorites, recent);
+}
+
+/// Every visible track with its tags, normalised once per change of the
+/// library (not at every key typed).
+final _indexTracksProvider = StreamProvider<List<Track>>(
+  (ref) => ref.watch(trackRepositoryProvider).watchTracks(),
+);
+
+final _indexTagsProvider = StreamProvider<Map<int, List<String>>>(
+  (ref) => ref.watch(tagRepositoryProvider).watchNamesByTrack(),
+);
+
+final searchIndexProvider = Provider<AsyncValue<SearchIndex>>((ref) {
+  final tracks = ref.watch(_indexTracksProvider);
+  final tags = ref.watch(_indexTagsProvider);
+  if (tracks.hasError) return AsyncError(tracks.error!, tracks.stackTrace!);
+  final list = tracks.value;
+  if (list == null) return const AsyncLoading();
+  return AsyncData(SearchIndex(list, tags.value ?? const {}));
+});
+
+final _ruleTracksProvider = StreamProvider.family<List<Track>, String>(
+  (ref, text) => ref.watch(trackRepositoryProvider).watchByRules(parseRules(text).expr),
+);
+
+/// Tracks matching a search: free words look in title, artist, album, genre,
+/// year and tags together, best match first. Typed operators
+/// (`artista:x anno:1990..1999 -live`) still run as rules in SQL, silently.
+final searchTracksProvider = Provider.family<AsyncValue<List<Track>>, SearchQuery>((
   ref,
-  text,
+  q,
 ) {
-  final repo = ref.watch(trackRepositoryProvider);
-  return hasOperators(text)
-      ? repo.watchByRules(parseRules(text).expr)
-      : repo.watchTracks(query: text);
+  final now = DateTime.now().millisecondsSinceEpoch;
+  if (hasOperators(q.text)) {
+    return ref.watch(_ruleTracksProvider(q.text)).whenData(
+      (l) => applyQuickFilters(l, favorites: q.favorites, recent: q.recent, nowMs: now),
+    );
+  }
+  return ref.watch(searchIndexProvider).whenData(
+    (i) => smartSearch(i, q.text, favorites: q.favorites, recent: q.recent, nowMs: now),
+  );
 });
 
 final topTracksProvider = StreamProvider<List<Track>>(

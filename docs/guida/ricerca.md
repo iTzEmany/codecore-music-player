@@ -4,7 +4,12 @@ Cerca nella tua musica o online, con un campo solo.
 
 ## Due modi
 - **In libreria**: cerca fra i brani, gli album, gli artisti e le playlist che hai già.
+  Scrivi quello che ti viene in mente, in qualsiasi ordine: titolo, artista, album, genere, anno o un'etichetta tua, anche insieme ("queen 1975", "rock bohemian", "pop palestra"). Gli accenti e le maiuscole non contano. Un anno di quattro cifre o il nome di un genere restringono da soli i risultati.
+- Sotto la barra due pulsanti: **Preferiti** (solo i brani preferiti) e **Recenti** (ascoltati o aggiunti negli ultimi 30 giorni, i più freschi per primi). Da soli, senza scrivere nulla, mostrano il loro elenco; con un testo lo restringono. Partono spenti a ogni apertura.
 - **Online**: cerca su YouTube Music e su YouTube insieme (parte all'invio, non a ogni tasto) e mostra i risultati in un elenco solo. SoundCloud non fa più parte della ricerca: i download e le revisioni già fatti da lì restano come sono.
+
+## Come sono ordinati i risultati in libreria
+Prima il brano con quel titolo preciso, poi i titoli che iniziano così, l'artista, l'album, i titoli che la contengono e infine genere, anno ed etichette. A pari merito, i brani più ascoltati. I risultati sono raggruppati in risultato principale, brani, artisti, album e playlist.
 
 ## Come sono ordinati i risultati online
 - Sopra compare una **card** se la ricerca è un artista («pink floyd»), un album («the wall») o un brano preciso; toccandola si apre la pagina.

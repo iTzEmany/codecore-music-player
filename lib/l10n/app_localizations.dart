@@ -4534,47 +4534,11 @@ abstract class AppLocalizations {
   /// **'Il più ascoltato: {name}'**
   String statsTopArtistHome(String name);
 
-  /// No description provided for @ruleChipArtist.
-  ///
-  /// In it, this message translates to:
-  /// **'artista:'**
-  String get ruleChipArtist;
-
-  /// No description provided for @ruleChipYear.
-  ///
-  /// In it, this message translates to:
-  /// **'anno:'**
-  String get ruleChipYear;
-
-  /// No description provided for @ruleChipGenre.
-  ///
-  /// In it, this message translates to:
-  /// **'genere:'**
-  String get ruleChipGenre;
-
-  /// No description provided for @ruleChipTag.
-  ///
-  /// In it, this message translates to:
-  /// **'tag:'**
-  String get ruleChipTag;
-
-  /// No description provided for @ruleChipFavorites.
-  ///
-  /// In it, this message translates to:
-  /// **'preferiti'**
-  String get ruleChipFavorites;
-
   /// No description provided for @ruleWarning.
   ///
   /// In it, this message translates to:
   /// **'Non capisco «{term}»: lo cerco come testo.'**
   String ruleWarning(String term);
-
-  /// No description provided for @ruleHelpTooltip.
-  ///
-  /// In it, this message translates to:
-  /// **'Aiuto sulla ricerca'**
-  String get ruleHelpTooltip;
 
   /// No description provided for @smartPlaylistNew.
   ///
@@ -4815,72 +4779,6 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'I brani scelti non hanno etichette.'**
   String get tagNoneToRemove;
-
-  /// No description provided for @ruleHelpTitle.
-  ///
-  /// In it, this message translates to:
-  /// **'Cercare con gli operatori'**
-  String get ruleHelpTitle;
-
-  /// No description provided for @ruleHelpIntro.
-  ///
-  /// In it, this message translates to:
-  /// **'Scrivi parole come sempre, oppure aggiungi operatori: tutti devono valere insieme.'**
-  String get ruleHelpIntro;
-
-  /// No description provided for @ruleHelpArtist.
-  ///
-  /// In it, this message translates to:
-  /// **'artista:\"pink floyd\" — brani di un artista (basta una parte del nome); lo stesso con album:, genere:, cartella:'**
-  String get ruleHelpArtist;
-
-  /// No description provided for @ruleHelpYear.
-  ///
-  /// In it, this message translates to:
-  /// **'anno:1990..1999 — un intervallo (anche aperto: anno:..1980, anno:2000..); anno>1990, anno<=1985'**
-  String get ruleHelpYear;
-
-  /// No description provided for @ruleHelpDuration.
-  ///
-  /// In it, this message translates to:
-  /// **'durata>5m — durata (m minuti, s secondi): durata<90s, durata:2m..4m'**
-  String get ruleHelpDuration;
-
-  /// No description provided for @ruleHelpAdded.
-  ///
-  /// In it, this message translates to:
-  /// **'aggiunto<30g — aggiunti da meno di 30 giorni (g giorni, sett settimane, mesi): aggiunto>6mesi'**
-  String get ruleHelpAdded;
-
-  /// No description provided for @ruleHelpNot.
-  ///
-  /// In it, this message translates to:
-  /// **'-live — il segno meno esclude: -artista:floyd, -\"dal vivo\"'**
-  String get ruleHelpNot;
-
-  /// No description provided for @ruleHelpOr.
-  ///
-  /// In it, this message translates to:
-  /// **'rock OR jazz — OR (maiuscolo) tra due termini: ne basta uno'**
-  String get ruleHelpOr;
-
-  /// No description provided for @ruleHelpFlags.
-  ///
-  /// In it, this message translates to:
-  /// **'preferiti, mai-ascoltati — solo i preferiti, o i brani mai ascoltati; ascolti>10 per quelli più ascoltati'**
-  String get ruleHelpFlags;
-
-  /// No description provided for @ruleHelpOthers.
-  ///
-  /// In it, this message translates to:
-  /// **'tag:live, formato:flac — un’etichetta tua, o il formato del file (nome intero, senza maiuscole)'**
-  String get ruleHelpOthers;
-
-  /// No description provided for @ruleHelpSmart.
-  ///
-  /// In it, this message translates to:
-  /// **'Le stesse regole servono per le playlist intelligenti (Libreria → + → Nuova playlist intelligente).'**
-  String get ruleHelpSmart;
 
   /// No description provided for @cleanupSection.
   ///

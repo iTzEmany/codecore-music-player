@@ -74,7 +74,7 @@ senza il file la build release usa la chiave di debug.
 
 ## Libreria intelligente (fase 20)
 - **Cronologia e statistiche:** Libreria → Cronologia (per giorno, con l'ora) e Statistiche (mese o anno: tempo ascoltato, grafico, ora preferita, brani/artisti/album più ascoltati); la Home mostra «Il tuo mese» da 10 ascolti. Tutto resta sul dispositivo; si può spegnere in Impostazioni → Riproduzione.
-- **Ricerca con operatori** (il «?» accanto a Cerca spiega tutto): `artista:"pink floyd" -live anno:1970..1979`, `durata>5m`, `aggiunto<30g`, `tag:live`, `preferiti`, `mai-ascoltati`, `rock OR jazz`.
+- **Ricerca intelligente**: una frase sola trova per titolo, artista, album, genere, anno ed etichette, in qualsiasi ordine e senza badare agli accenti; due chip, «Preferiti» e «Recenti», restringono i risultati. Le regole con operatori (`artista:"pink floyd" -live anno:1970..1979`, `durata>5m`, `tag:live`, `rock OR jazz`) restano per le playlist intelligenti.
 - **Playlist intelligenti:** Libreria → + → Nuova playlist intelligente: le stesse regole, l'elenco si aggiorna da solo (ordine, limite, modelli pronti); si può convertire in playlist normale.
 - **Etichette tue:** dal menu di un brano o dalla selezione multipla; Libreria → Etichette.
 

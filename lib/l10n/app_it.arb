@@ -1670,11 +1670,6 @@
       }
     }
   },
-  "ruleChipArtist": "artista:",
-  "ruleChipYear": "anno:",
-  "ruleChipGenre": "genere:",
-  "ruleChipTag": "tag:",
-  "ruleChipFavorites": "preferiti",
   "ruleWarning": "Non capisco «{term}»: lo cerco come testo.",
   "@ruleWarning": {
     "placeholders": {
@@ -1683,7 +1678,6 @@
       }
     }
   },
-  "ruleHelpTooltip": "Aiuto sulla ricerca",
   "smartPlaylistNew": "Nuova playlist intelligente",
   "smartPlaylistEdit": "Modifica playlist intelligente",
   "smartPlaylistLabel": "Playlist intelligente",
@@ -1779,17 +1773,6 @@
     }
   },
   "tagNoneToRemove": "I brani scelti non hanno etichette.",
-  "ruleHelpTitle": "Cercare con gli operatori",
-  "ruleHelpIntro": "Scrivi parole come sempre, oppure aggiungi operatori: tutti devono valere insieme.",
-  "ruleHelpArtist": "artista:\"pink floyd\" — brani di un artista (basta una parte del nome); lo stesso con album:, genere:, cartella:",
-  "ruleHelpYear": "anno:1990..1999 — un intervallo (anche aperto: anno:..1980, anno:2000..); anno>1990, anno<=1985",
-  "ruleHelpDuration": "durata>5m — durata (m minuti, s secondi): durata<90s, durata:2m..4m",
-  "ruleHelpAdded": "aggiunto<30g — aggiunti da meno di 30 giorni (g giorni, sett settimane, mesi): aggiunto>6mesi",
-  "ruleHelpNot": "-live — il segno meno esclude: -artista:floyd, -\"dal vivo\"",
-  "ruleHelpOr": "rock OR jazz — OR (maiuscolo) tra due termini: ne basta uno",
-  "ruleHelpFlags": "preferiti, mai-ascoltati — solo i preferiti, o i brani mai ascoltati; ascolti>10 per quelli più ascoltati",
-  "ruleHelpOthers": "tag:live, formato:flac — un’etichetta tua, o il formato del file (nome intero, senza maiuscole)",
-  "ruleHelpSmart": "Le stesse regole servono per le playlist intelligenti (Libreria → + → Nuova playlist intelligente).",
   "cleanupSection": "Pulizia libreria",
   "duplicatesTitle": "Duplicati",
   "duplicatesTileHint": "Lo stesso brano in più copie o qualità",
