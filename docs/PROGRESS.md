@@ -494,6 +494,9 @@ Richiesta (2026-10-22): «Secondo parere automatico: applica solo se YouTube Mus
   - [x] 2.6 il resto delle schermate (360543d), pulizie: separatori, intestazione podcast, matrice 150 % (5fa3528)
   - [x] 2.7 Memoria come il mockup (65f7560), titoli interi e chip bianco (4943bbf), Tutti i brani da raccolta (579e44e); golden rigenerati (2a492d2)
 - [x] Prova sul Mi A3 delle schermate della fase 2 (Memoria, Tutti i brani, chip, titoli): APK 6071; «Predefinito» spezzato a metà parola nei blocchi di ordinamento, corretto (blocchi 2x2 se la parola più lunga non entra)
+- [x] Jam nello stile Anello (era rimasta col vecchio design): lettore ad anello, partecipanti, coda, copertine vere dei propri brani (b0b074c)
+- [ ] Prova della nuova Jam sul Motorola e sul PC (Xephyr)
+- [ ] **Dopo tutte le fasi rimaste** (richiesta dell'utente, 2026-10-23): analisi completa del codice e verifica che ogni componente UI sotto `lib/ui` abbia il redesign Anello (elenco schermata per schermata, sì/no), poi correggere i buchi
 
 ## Note di deviazione
 <!-- una riga per deviazione: data — task — cosa è cambiato e perché -->
