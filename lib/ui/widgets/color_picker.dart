@@ -196,6 +196,39 @@ class _CcColorPickerState extends State<CcColorPicker> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        Row(
+          children: [
+            Expanded(
+              child: Semantics(
+                label: l.hex,
+                child: TextField(
+                  controller: _hexCtrl,
+                  focusNode: _hexFocus,
+                  autocorrect: false,
+                  enableSuggestions: false,
+                  onChanged: _onHexTyped,
+                  decoration: InputDecoration(
+                    labelText: l.hex,
+                    errorText: _hexInvalid ? l.invalidHex : null,
+                    isDense: true,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: _current,
+                borderRadius: BorderRadius.circular(CcDims.rGrid),
+                border: Border.all(color: cc.surface3),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        _Caption(l.saturationValue),
         LayoutBuilder(
           builder: (context, box) {
             final w = box.maxWidth;
@@ -236,63 +269,46 @@ class _CcColorPickerState extends State<CcColorPicker> {
           },
         ),
         const SizedBox(height: 8),
-        Semantics(
+        _Caption(l.hue),
+        _GradientSlider(
+          key: const ValueKey('hue-slider'),
           label: l.hue,
-          child: Slider(
-            min: 0,
-            max: 360,
-            value: _h.clamp(0.0, 360.0),
+          value: _h / 360,
+          max: 360,
+          colors: [
+            for (var i = 0; i <= 6; i++)
+              HSVColor.fromAHSV(1, i * 60.0, 1, 1).toColor(),
+          ],
+          thumbColor: HSVColor.fromAHSV(1, _h, 1, 1).toColor(),
+          border: cc.text,
+          shadow: cc.bg,
+          onChanged: (x) {
+            _h = x * 360;
+            _changed();
+          },
+        ),
+        if (widget.allowAlpha) ...[
+          const SizedBox(height: 4),
+          _Caption(l.alpha),
+          _GradientSlider(
+            key: const ValueKey('alpha-slider'),
+            label: l.alpha,
+            value: _a,
+            max: 1,
+            checkerboard: true,
+            colors: [
+              HSVColor.fromAHSV(0, _h, _s, _v).toColor(),
+              HSVColor.fromAHSV(1, _h, _s, _v).toColor(),
+            ],
+            thumbColor: _current,
+            border: cc.text,
+            shadow: cc.bg,
             onChanged: (x) {
-              _h = x;
+              _a = x;
               _changed();
             },
           ),
-        ),
-        if (widget.allowAlpha)
-          Semantics(
-            label: l.alpha,
-            child: Slider(
-              min: 0,
-              max: 1,
-              value: _a.clamp(0.0, 1.0),
-              onChanged: (x) {
-                _a = x;
-                _changed();
-              },
-            ),
-          ),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            Expanded(
-              child: Semantics(
-                label: l.hex,
-                child: TextField(
-                  controller: _hexCtrl,
-                  focusNode: _hexFocus,
-                  autocorrect: false,
-                  enableSuggestions: false,
-                  onChanged: _onHexTyped,
-                  decoration: InputDecoration(
-                    labelText: l.hex,
-                    errorText: _hexInvalid ? l.invalidHex : null,
-                    isDense: true,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: _current,
-                borderRadius: BorderRadius.circular(CcDims.rGrid),
-                border: Border.all(color: cc.surface3),
-              ),
-            ),
-          ],
-        ),
+        ],
         if (widget.recent.isNotEmpty) ...[
           const SizedBox(height: 12),
           Text(l.recent, style: TextStyle(color: cc.textMuted, fontSize: 12)),
@@ -326,6 +342,143 @@ class _CcColorPickerState extends State<CcColorPicker> {
       ],
     );
   }
+}
+
+class _Caption extends StatelessWidget {
+  const _Caption(this.text);
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(bottom: 2),
+    child: Text(
+      text,
+      style: TextStyle(color: context.cc.textMuted, fontSize: 12),
+    ),
+  );
+}
+
+/// Slider whose track IS what it changes: a gradient (optionally over a
+/// checkerboard) with a round thumb showing the current colour. Tapping or
+/// dragging anywhere on the track sets the value.
+class _GradientSlider extends StatelessWidget {
+  const _GradientSlider({
+    super.key,
+    required this.label,
+    required this.value,
+    required this.max,
+    required this.colors,
+    required this.thumbColor,
+    required this.border,
+    required this.shadow,
+    required this.onChanged,
+    this.checkerboard = false,
+  });
+
+  static const trackHeight = 20.0;
+  static const _thumb = 26.0;
+
+  final String label;
+
+  /// 0..1 position.
+  final double value;
+  final double max;
+  final List<Color> colors;
+  final Color thumbColor, border, shadow;
+  final bool checkerboard;
+  final ValueChanged<double> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final v = value.clamp(0.0, 1.0);
+    final step = max / 20;
+    return Semantics(
+      slider: true,
+      label: label,
+      value: '${(v * max).round()}',
+      increasedValue: '${((v * max + step).clamp(0, max)).round()}',
+      decreasedValue: '${((v * max - step).clamp(0, max)).round()}',
+      onIncrease: () => onChanged((v + 0.05).clamp(0.0, 1.0)),
+      onDecrease: () => onChanged((v - 0.05).clamp(0.0, 1.0)),
+      child: LayoutBuilder(
+        builder: (context, box) {
+          final w = box.maxWidth;
+          final usable = (w - _thumb).clamp(1.0, double.infinity);
+          void at(double dx) =>
+              onChanged(((dx - _thumb / 2) / usable).clamp(0.0, 1.0));
+          return GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTapDown: (d) => at(d.localPosition.dx),
+            onHorizontalDragStart: (d) => at(d.localPosition.dx),
+            onHorizontalDragUpdate: (d) => at(d.localPosition.dx),
+            child: SizedBox(
+              height: 36,
+              child: Stack(
+                alignment: Alignment.centerLeft,
+                clipBehavior: Clip.none,
+                children: [
+                  Positioned(
+                    left: _thumb / 2 - 4,
+                    right: _thumb / 2 - 4,
+                    height: trackHeight,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(trackHeight / 2),
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          if (checkerboard)
+                            CustomPaint(painter: _CheckerPainter()),
+                          DecoratedBox(
+                            key: const ValueKey('track-gradient'),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(colors: colors),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: v * usable,
+                    child: Container(
+                      width: _thumb,
+                      height: _thumb,
+                      decoration: BoxDecoration(
+                        color: thumbColor,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: border, width: 3),
+                        boxShadow: [BoxShadow(color: shadow, blurRadius: 3)],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _CheckerPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    const cell = 6.0;
+    final light = Paint()..color = const Color(0xFFFFFFFF);
+    final dark = Paint()..color = const Color(0xFFBBBBBB);
+    for (var y = 0; y * cell < size.height; y++) {
+      for (var x = 0; x * cell < size.width; x++) {
+        canvas.drawRect(
+          Rect.fromLTWH(x * cell, y * cell, cell, cell),
+          (x + y).isEven ? light : dark,
+        );
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(_CheckerPainter o) => false;
 }
 
 class _SvPainter extends CustomPainter {

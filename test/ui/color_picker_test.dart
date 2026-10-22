@@ -145,13 +145,54 @@ void main() {
       final log = <Color>[];
       final start = HSVColor.fromAHSV(1, 200, 0.6, 0.8).toColor();
       await tester.pumpWidget(_host(_Harness(initial: start, log: log)));
-      await tester.drag(find.byType(Slider).first, const Offset(60, 0));
+      await tester.drag(
+        find.byKey(const ValueKey('hue-slider')),
+        const Offset(60, 0),
+      );
       await tester.pump();
       expect(log, isNotEmpty);
       final h = _hsv(log.last);
       expect((h.hue - 200).abs(), greaterThan(5));
       expect(h.saturation, closeTo(0.6, 0.03));
       expect(h.value, closeTo(0.8, 0.03));
+    });
+
+    testWidgets('hue track is a rainbow gradient and tapping jumps', (
+      tester,
+    ) async {
+      final log = <Color>[];
+      await tester.pumpWidget(
+        _host(_Harness(initial: const Color(0xFFFF0000), log: log)),
+      );
+      final track = find.descendant(
+        of: find.byKey(const ValueKey('hue-slider')),
+        matching: find.byKey(const ValueKey('track-gradient')),
+      );
+      final box = tester.widget<DecoratedBox>(track);
+      final g = (box.decoration as BoxDecoration).gradient! as LinearGradient;
+      expect(g.colors.length, 7);
+      expect(g.colors.toSet().length, 6); // red repeats at both ends
+      final r = tester.getRect(find.byKey(const ValueKey('hue-slider')));
+      await tester.tapAt(Offset(r.left + r.width * 0.5, r.center.dy));
+      await tester.pump();
+      expect(_hsv(log.last).hue, closeTo(180, 15));
+    });
+
+    testWidgets('no overflow at 360 px with 150% text', (tester) async {
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(textScaler: TextScaler.linear(1.5)),
+          child: _host(
+            _Harness(
+              initial: const Color(0xFFFF0000),
+              log: [],
+              allowAlpha: true,
+            ),
+            width: 360,
+          ),
+        ),
+      );
+      expect(tester.takeException(), isNull);
     });
 
     testWidgets('a grey keeps its hue', (tester) async {
@@ -174,7 +215,7 @@ void main() {
       await tester.pumpWidget(
         _host(_Harness(initial: const Color(0x40FF0000), log: log)),
       );
-      expect(find.byType(Slider), findsOneWidget);
+      expect(find.byKey(const ValueKey('alpha-slider')), findsNothing);
       await tester.tapAt(tester.getCenter(_square));
       await tester.enterText(find.byType(TextField), '#80112233');
       expect(log, isNotEmpty);
@@ -194,8 +235,11 @@ void main() {
           ),
         ),
       );
-      expect(find.byType(Slider), findsNWidgets(2));
-      await tester.drag(find.byType(Slider).last, const Offset(-60, 0));
+      expect(find.byKey(const ValueKey('alpha-slider')), findsOneWidget);
+      await tester.drag(
+        find.byKey(const ValueKey('alpha-slider')),
+        const Offset(-60, 0),
+      );
       await tester.pump();
       expect(log.last.toARGB32() >> 24, lessThan(0xFF));
     });
