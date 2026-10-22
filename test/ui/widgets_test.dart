@@ -261,6 +261,32 @@ void main() {
       expect(t.takeException(), isNull);
     });
 
+    testWidgets('falls back to 2x2 when a single word is wider than a block',
+        (t) async {
+      await _pump(
+        t,
+        Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 320,
+            child: SegmentedBlocks<int>(
+              items: const [
+                BlockItem(value: 0, icon: Icons.apps_rounded, label: 'Predefinitissimo'),
+                BlockItem(value: 1, icon: Icons.title_rounded, label: 'Titolo'),
+                BlockItem(value: 2, icon: Icons.person_rounded, label: 'Artista'),
+                BlockItem(value: 3, icon: Icons.schedule_rounded, label: 'Recenti'),
+              ],
+              selected: 0,
+              onChanged: (_) {},
+            ),
+          ),
+        ),
+      );
+      expect(t.getRect(find.text('Artista')).top,
+          greaterThan(t.getRect(find.text('Predefinitissimo')).bottom));
+      expect(t.takeException(), isNull);
+    });
+
     testWidgets('reduced motion: no slide', (t) async {
       Widget app(int sel) => MaterialApp(
             theme: buildThemeFromColors(CcColors.notte, false),

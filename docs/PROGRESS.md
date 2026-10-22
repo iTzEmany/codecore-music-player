@@ -481,7 +481,7 @@ Richiesta (2026-10-22): «avere aggiornamenti per quanto riguarda le nuove uscit
   - [x] 2.5 Impostazioni (80a9c6b)
   - [x] 2.6 il resto delle schermate (360543d), pulizie: separatori, intestazione podcast, matrice 150 % (5fa3528)
   - [x] 2.7 Memoria come il mockup (65f7560), titoli interi e chip bianco (4943bbf), Tutti i brani da raccolta (579e44e); golden rigenerati (2a492d2)
-- [ ] Prova sul Mi A3 delle schermate della fase 2 (Memoria, Tutti i brani, chip, titoli)
+- [x] Prova sul Mi A3 delle schermate della fase 2 (Memoria, Tutti i brani, chip, titoli): APK 6071; «Predefinito» spezzato a metà parola nei blocchi di ordinamento, corretto (blocchi 2x2 se la parola più lunga non entra)
 
 ## Note di deviazione
 <!-- una riga per deviazione: data — task — cosa è cambiato e perché -->

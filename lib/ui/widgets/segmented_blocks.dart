@@ -72,12 +72,33 @@ class SegmentedBlocks<T> extends StatelessWidget {
     );
   }
 
+  /// Width of the longest single word among the labels, as [Text] lays it out.
+  double _widestWord(BuildContext context) {
+    final style = Theme.of(context).textTheme.labelLarge;
+    final scaler = MediaQuery.textScalerOf(context);
+    final dir = Directionality.of(context);
+    var widest = 0.0;
+    for (final word in items.expand((e) => e.label.split(' '))) {
+      final p = TextPainter(
+        text: TextSpan(text: word, style: style),
+        textScaler: scaler,
+        textDirection: dir,
+      )..layout();
+      widest = widest > p.width ? widest : p.width;
+      p.dispose();
+    }
+    return widest;
+  }
+
   @override
   Widget build(BuildContext context) {
     final n = items.length;
     final scale = MediaQuery.textScalerOf(context).scale(1);
     return LayoutBuilder(builder: (context, c) {
-      if (n > 2 && c.maxWidth / n < 72 * scale) {
+      // 8 = horizontal padding of [_block]; a word wider than that would break.
+      if (n > 2 &&
+          (c.maxWidth / n < 72 * scale ||
+              _widestWord(context) > (c.maxWidth - _gap * (n - 1)) / n - 8)) {
         Widget line(Iterable<BlockItem<T>> its) => Row(children: [
           for (final (i, it) in its.indexed) ...[
             if (i > 0) const SizedBox(width: _gap),
