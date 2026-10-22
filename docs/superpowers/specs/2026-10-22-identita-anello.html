@@ -1,0 +1,297 @@
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=Unbounded:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  .fk-wrap { display:flex; flex-wrap:wrap; gap:36px; justify-content:center; align-items:flex-start; }
+  .fk-col { width:350px; }
+  .fk-col h3 { margin:16px 4px 4px; }
+  .fk-col p { margin:0 4px; opacity:.8; font-size:14px; line-height:1.5; }
+
+  /* theme tokens = the app's own CcColors */
+  .fk { --bg:#07050C; --s1:#120E1C; --s2:#1D1630; --s3:#2A2140; --acc:#A06BFF; --accs:#D9C8FF; --onacc:#12081F;
+        --tx:#F4F0FA; --mu:#A79DB8; --fa:#6E6680; }
+  .fk.light { --bg:#FAF8FD; --s1:#F2EEF9; --s2:#E9E3F4; --s3:#DAD1EB; --acc:#1F7A3A; --accs:#18622E; --onacc:#FFFFFF;
+        --tx:#1B1427; --mu:#5C5170; --fa:#8C829E; }
+
+  .fk { width:350px; height:720px; border-radius:40px; overflow:hidden; position:relative; background:var(--bg); color:var(--tx);
+        font-family:'Figtree',sans-serif; box-shadow:0 24px 60px rgba(20,10,40,.35); user-select:none; }
+  .fk * { box-sizing:border-box; }
+  .fk button { font:inherit; color:inherit; background:none; border:0; padding:0; cursor:pointer; }
+  .fk button:focus-visible { outline:2px solid var(--acc); outline-offset:2px; border-radius:10px; }
+  .fk-scroll { position:absolute; inset:0 0 150px 0; overflow:hidden; padding-top:26px; }
+  .fk-c { border-radius:9px; flex:none; }
+  .g1 { background:linear-gradient(135deg,#FF8A5B,#C2185B); } .g2 { background:linear-gradient(135deg,#3A7BD5,#00D2FF); }
+  .g3 { background:linear-gradient(135deg,#2E2A4F,#A06BFF); } .g4 { background:linear-gradient(135deg,#F7C948,#E07A22); }
+  .g5 { background:linear-gradient(135deg,#1D976C,#93F9B9); } .g6 { background:linear-gradient(135deg,#3d3d48,#9a98a8); }
+
+  .fk-top { display:flex; align-items:center; justify-content:space-between; padding:0 20px; }
+  .fk-me { width:34px; height:34px; border-radius:50%; background:var(--s2); display:grid; place-items:center; font-weight:700; font-size:14px; }
+
+  /* the one loud thing on Home: shuffle everything */
+  .fk-shuffle { display:flex; align-items:flex-end; justify-content:space-between; width:calc(100% - 40px); margin:18px 20px 0; text-align:left;
+                transition:transform .2s cubic-bezier(.3,1.5,.5,1); }
+  .fk-shuffle:active { transform:scale(.97); }
+  .fk-shuffle .w { font-family:'Unbounded',sans-serif; font-weight:700; font-size:30px; line-height:1.08; letter-spacing:-.5px; }
+  .fk-shuffle .w small { display:block; font-family:'Figtree'; font-weight:500; font-size:15px; letter-spacing:0; color:var(--mu); margin-top:6px; }
+  .fk-disc { width:64px; height:64px; border-radius:50%; background:var(--acc); color:var(--onacc); display:grid; place-items:center; flex:none; }
+  .fk-shuffle:hover .fk-disc svg { transform:rotate(180deg); }
+  .fk-disc svg { transition:transform .5s cubic-bezier(.3,1.4,.5,1); }
+
+  .fk-quick { display:flex; gap:8px; padding:18px 20px 0; }
+  .fk-quick button { padding:9px 12px; border-radius:14px; background:var(--s1); font-size:13.5px; font-weight:600; transition:background .2s, transform .2s cubic-bezier(.3,1.5,.5,1); }
+  .fk-quick button span { color:var(--mu); font-weight:500; margin-left:4px; }
+  .fk-quick button:hover { background:var(--s2); }
+  .fk-quick button:active { transform:scale(.94); }
+
+  .fk-h { display:flex; justify-content:space-between; align-items:baseline; padding:22px 20px 6px; font-weight:700; font-size:16px; }
+  .fk-h a { font-size:13px; font-weight:600; color:var(--accs); text-decoration:none; }
+  .fk-row { display:flex; align-items:center; gap:12px; padding:7px 20px; transition:background .2s; }
+  .fk-row:hover { background:var(--s1); }
+  .fk-row .fk-c { width:44px; height:44px; }
+  .fk-row .t { flex:1; min-width:0; }
+  .fk-row b { display:block; font-weight:600; font-size:15px; }
+  .fk-row small { font-size:13px; color:var(--mu); }
+  .fk-row .left { font-size:12.5px; color:var(--fa); font-variant-numeric:tabular-nums; }
+  .fk-row .bar { height:3px; border-radius:2px; background:var(--s3); margin-top:6px; overflow:hidden; }
+  .fk-row .bar i { display:block; height:100%; background:var(--mu); }
+
+  /* recently added: a small fanned stack that opens when you reach for it */
+  .fk-fan { position:relative; height:92px; margin:6px 20px 0; }
+  .fk-fan .fk-c { position:absolute; top:6px; width:80px; height:80px; box-shadow:0 6px 16px rgba(0,0,0,.35);
+                  transition:transform .45s cubic-bezier(.25,1.3,.45,1); }
+  .fk-fan .fk-c:nth-child(1){ left:0;   transform:rotate(-6deg); }
+  .fk-fan .fk-c:nth-child(2){ left:34px; transform:rotate(-2deg); }
+  .fk-fan .fk-c:nth-child(3){ left:68px; transform:rotate(3deg); }
+  .fk-fan .fk-c:nth-child(4){ left:102px; transform:rotate(-3deg); }
+  .fk-fan .fk-c:nth-child(5){ left:136px; transform:rotate(5deg); }
+  .fk-fan:hover .fk-c:nth-child(1){ transform:translateX(0) rotate(0); }
+  .fk-fan:hover .fk-c:nth-child(2){ transform:translateX(52px) rotate(0); }
+  .fk-fan:hover .fk-c:nth-child(3){ transform:translateX(104px) rotate(0); }
+  .fk-fan:hover .fk-c:nth-child(4){ transform:translateX(156px) rotate(0); }
+  .fk-fan:hover .fk-c:nth-child(5){ transform:translateX(208px) rotate(0); }
+
+  /* dock: mini player + nav in one surface */
+  .fk-dock { position:absolute; left:10px; right:10px; bottom:12px; background:var(--s2); border-radius:28px; padding:8px 8px 6px;
+             box-shadow:0 -6px 30px rgba(0,0,0,.25); }
+  .fk.light .fk-dock { box-shadow:0 -6px 24px rgba(60,30,110,.12); }
+  .fk-mini { display:flex; align-items:center; gap:12px; width:100%; padding:2px 6px 8px 2px; text-align:left; }
+  .fk-ring { position:relative; width:54px; height:54px; flex:none; }
+  .fk-ring svg { position:absolute; inset:0; overflow:visible; }
+  .fk-ring .fk-c { position:absolute; inset:9px; border-radius:50%; }
+  .fk-mini .t { flex:1; min-width:0; font-size:14.5px; } .fk-mini .t b { display:block; font-weight:700; }
+  .fk-mini .t span { color:var(--mu); font-size:13px; }
+  .fk-pp { width:40px; height:40px; border-radius:50%; background:var(--tx); color:var(--bg); display:grid; place-items:center; flex:none;
+           transition:transform .2s cubic-bezier(.3,1.6,.5,1); }
+  .fk-pp:active { transform:scale(.88); }
+
+  .fk-nav { position:relative; height:52px; }
+  .fk-tabs { display:flex; height:100%; transition:opacity .25s, transform .3s; }
+  .fk .fk-tab { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; font-size:11.5px; font-weight:600; color:var(--fa); transition:color .25s; }
+  .fk-tab svg { width:22px; height:22px; }
+  .fk-tab.on { color:var(--tx); }
+  .fk-dot { position:absolute; top:2px; left:0; width:7px; height:7px; border-radius:50%; background:var(--acc); pointer-events:none; }
+
+  /* Cerca: the nav itself stretches into the search field */
+  .fk-search { position:absolute; inset:4px 4px 4px; border-radius:20px; background:var(--s3); display:flex; align-items:center; gap:10px; padding:0 8px 0 14px;
+               clip-path:inset(0 calc(100% - 25% - 4px) 0 25% round 20px); opacity:0; pointer-events:none;
+               transition:clip-path .45s cubic-bezier(.2,.9,.25,1), opacity .2s; }
+  .fk-search .q { flex:1; font-size:15px; color:var(--tx); }
+  .fk-search .q i { display:inline-block; width:2px; height:18px; background:var(--acc); vertical-align:-4px; margin-left:1px; animation:fk-caret 1s steps(1) infinite; }
+  @keyframes fk-caret { 50% { opacity:0; } }
+  .fk-search .x { width:34px; height:34px; border-radius:50%; display:grid; place-items:center; color:var(--mu); }
+  .fk-nav.searching .fk-search { clip-path:inset(0 0 0 0 round 20px); opacity:1; pointer-events:auto; }
+  .fk-nav.searching .fk-tabs { opacity:0; transform:scale(.96); pointer-events:none; }
+  .fk-nav.searching .fk-dot { opacity:0; }
+  .fk-results { position:absolute; left:0; right:0; top:0; bottom:150px; padding:0 0 8px; display:flex; flex-direction:column; justify-content:flex-end; opacity:0; transform:translateY(12px); pointer-events:none;
+                transition:opacity .3s .1s, transform .35s .1s cubic-bezier(.2,.9,.25,1); background:var(--bg); }
+  .fk.searching .fk-results { opacity:1; transform:none; }
+  .fk-results .lbl { padding:12px 20px 4px; font-size:13px; color:var(--mu); font-weight:600; }
+
+  /* full player grows out of the dock */
+  .fk-full { position:absolute; inset:0; background:var(--s1); z-index:5; padding:22px 26px; display:flex; flex-direction:column; align-items:center;
+             clip-path:inset(calc(100% - 140px) 10px 80px 10px round 28px); opacity:0; pointer-events:none;
+             transition:clip-path .55s cubic-bezier(.2,.9,.2,1), opacity .25s; }
+  .fk.open .fk-full { clip-path:inset(0 0 0 0 round 40px); opacity:1; pointer-events:auto; }
+  .fk-full .down { align-self:flex-start; color:var(--mu); width:36px; height:36px; display:grid; place-items:center; }
+  .fk-bigring { position:relative; width:270px; height:270px; margin-top:24px; }
+  .fk-bigring svg { position:absolute; inset:0; overflow:visible; }
+  .fk-bigring .fk-c { position:absolute; inset:26px; border-radius:50%; }
+  .fk.open .fk-bigring .fk-c { animation:fk-spin 18s linear infinite; }
+  @keyframes fk-spin { to { transform:rotate(360deg); } }
+  .fk-full h4 { font-family:'Unbounded',sans-serif; font-weight:700; font-size:22px; margin:26px 0 2px; letter-spacing:-.3px; }
+  .fk-full .ar { color:var(--mu); font-size:15px; }
+  .fk-full .tm { display:flex; justify-content:space-between; width:100%; font-size:12.5px; color:var(--fa); margin-top:18px; font-variant-numeric:tabular-nums; }
+  .fk-ctl { display:flex; align-items:center; gap:34px; margin-top:14px; }
+  .fk-ctl .pl { width:70px; height:70px; border-radius:50%; background:var(--acc); color:var(--onacc); display:grid; place-items:center; transition:transform .2s cubic-bezier(.3,1.6,.5,1); }
+  .fk-ctl .pl:active { transform:scale(.9); }
+  .fk-full .next { margin-top:auto; width:100%; display:flex; align-items:center; gap:12px; background:var(--s2); border-radius:18px; padding:10px 12px; font-size:13.5px; }
+  .fk-full .next .fk-c { width:36px; height:36px; }
+  .fk-full .next span { color:var(--mu); }
+
+  /* library (light phone) */
+  .fk-title { font-family:'Unbounded',sans-serif; font-weight:700; font-size:26px; padding:0 20px; letter-spacing:-.4px; }
+  .fk-seg { display:flex; gap:6px; padding:16px 20px 4px; }
+  .fk-seg span { padding:8px 13px; border-radius:14px; font-size:13.5px; font-weight:600; background:var(--s1); }
+  .fk-seg span.on { background:var(--tx); color:var(--bg); }
+  .fk-sort { display:flex; justify-content:space-between; padding:14px 20px 0; font-size:13px; color:var(--mu); font-weight:600; }
+  .fk-l { font-family:'Unbounded',sans-serif; font-weight:700; font-size:15px; color:var(--acc); padding:14px 20px 2px; }
+
+  @media (prefers-reduced-motion: reduce) { .fk *, .fk { animation:none !important; transition:none !important; } }
+</style>
+
+<h2>A, con un carattere suo</h2>
+<p class="subtitle">Il segno dell'app è l'anello aperto del logo, e torna in tre punti che servono davvero. Sul telefono scuro si può toccare tutto: le schede in basso, «Cerca», il brano in ascolto (e la freccia per richiuderlo).</p>
+
+<div class="fk-wrap">
+
+  <div class="fk-col">
+    <div class="fk" id="fkA">
+      <div class="fk-scroll">
+        <div class="fk-top">
+          <svg width="30" height="30" viewBox="0 0 108 108" aria-label="FreeKMusic"><path d="M70.25 53.31 A22 22 0 1 1 54.69 37.75" fill="none" stroke="#A06BFF" stroke-width="7" stroke-linecap="round"/><rect x="39" y="47" width="6.5" height="24" rx="3.25" fill="#F4F0FA"/><path d="M45 61 L67 39 M50 56 L58 70" fill="none" stroke="#F4F0FA" stroke-width="6.5" stroke-linecap="round"/><circle cx="74.5" cy="31.5" r="4.5" fill="#D9C8FF"/></svg>
+          <div class="fk-me">E</div>
+        </div>
+        <button class="fk-shuffle"><span class="w">Casuale<br>su tutto<small>2.041 brani, 131 ore</small></span>
+          <span class="fk-disc"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h3.5c2 0 3.2 1 4.3 2.6l2.4 3.8c1.1 1.6 2.3 2.6 4.3 2.6H21M3 17h3.5c1.2 0 2.1-.4 2.9-1M17.5 4 21 7l-3.5 3M17.5 14l3.5 3-3.5 3M21 7h-3.5c-1.2 0-2.1.4-2.9 1"/></svg></span></button>
+        <div class="fk-quick"><button>Preferiti<span>312</span></button><button>Playlist<span>18</span></button><button>Radio<span>9</span></button></div>
+        <div class="fk-h">Riprendi</div>
+        <div class="fk-row"><div class="fk-c g1"></div><div class="t"><b>Fine settimana</b><small>Playlist, al brano 14 di 52</small><div class="bar"><i style="width:27%"></i></div></div></div>
+        <div class="fk-row"><div class="fk-c g4"></div><div class="t"><b>Il giro del mondo</b><small>Podcast, mancano 23 minuti</small><div class="bar"><i style="width:62%"></i></div></div></div>
+        <div class="fk-h">Aggiunti da poco <a href="#" onclick="return false">Tutti</a></div>
+        <div class="fk-fan"><div class="fk-c g2"></div><div class="fk-c g5"></div><div class="fk-c g6"></div><div class="fk-c g1"></div><div class="fk-c g3"></div></div>
+      </div>
+
+      <div class="fk-results">
+        <div class="lbl">Cercati di recente</div>
+        <div class="fk-row"><div class="fk-c g6" style="border-radius:50%"></div><div class="t"><b>Mina</b><small>Artista</small></div></div>
+        <div class="fk-row"><div class="fk-c g2"></div><div class="t"><b>Modal Soul</b><small>Album di Nujabes</small></div></div>
+        <div class="fk-row"><div class="fk-c g4"></div><div class="t"><b>Radio Deejay</b><small>Radio</small></div></div>
+      </div>
+
+      <div class="fk-dock">
+        <button class="fk-mini" data-open>
+          <span class="fk-ring" data-ring="54"><span class="fk-c g3"></span></span>
+          <span class="t"><b>Se telefonando</b><span>Mina</span></span>
+          <span class="fk-pp" data-pp><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><rect x="3" y="2" width="3.6" height="12" rx="1.2"/><rect x="9.4" y="2" width="3.6" height="12" rx="1.2"/></svg></span>
+        </button>
+        <div class="fk-nav">
+          <div class="fk-tabs">
+            <button class="fk-tab on" data-tab><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 10.5 12 4l8 6.5V20h-5.5v-5.5h-5V20H4z"/></svg>Home</button>
+            <button class="fk-tab" data-tab data-search><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg>Cerca</button>
+            <button class="fk-tab" data-tab><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 4v16M10 4v16M15 5l4 14.5"/></svg>Libreria</button>
+            <button class="fk-tab" data-tab><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 13.5A8 8 0 1 1 10.5 4"/><path d="M14 3.5A7 7 0 0 1 20.5 10H14z" fill="currentColor"/></svg>Memoria</button>
+          </div>
+          <div class="fk-search"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg><span class="q">min<i></i></span><button class="x" data-close aria-label="Chiudi la ricerca">✕</button></div>
+          <span class="fk-dot"></span>
+        </div>
+      </div>
+
+      <div class="fk-full">
+        <button class="down" data-close-full aria-label="Riduci"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg></button>
+        <div class="fk-bigring" data-ring="270"><div class="fk-c g3"></div></div>
+        <h4>Se telefonando</h4>
+        <div class="ar">Mina</div>
+        <div class="tm"><span data-el>1:12</span><span>3:20</span></div>
+        <div class="fk-ctl">
+          <button aria-label="Precedente"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5v14H5V5zm12 0v14L8.5 12z"/></svg></button>
+          <button class="pl" aria-label="Pausa"><svg width="24" height="24" viewBox="0 0 16 16" fill="currentColor"><rect x="3" y="2" width="3.6" height="12" rx="1.2"/><rect x="9.4" y="2" width="3.6" height="12" rx="1.2"/></svg></button>
+          <button aria-label="Successivo"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M17 5v14h2V5zM5 5v14l10.5-7z"/></svg></button>
+        </div>
+        <div class="next"><div class="fk-c g1"></div><div><b>Futura</b><br><span>Dopo, di Lucio Dalla</span></div></div>
+      </div>
+    </div>
+    <h3>Home, scuro</h3>
+    <p>Un solo invito grande: «Casuale su tutto». Sotto, le scorciatoie con i numeri, «Riprendi» con il punto in cui eri, e gli ultimi arrivati a ventaglio che si apre quando ci passi sopra.</p>
+  </div>
+
+  <div class="fk-col">
+    <div class="fk light" id="fkB">
+      <div class="fk-scroll">
+        <div class="fk-title" style="margin-top:12px">Libreria</div>
+        <div class="fk-seg"><span class="on">Brani</span><span>Album</span><span>Artisti</span><span>Playlist</span></div>
+        <div class="fk-sort"><span>2.041 brani</span><span>A–Z</span></div>
+        <div class="fk-l">D</div>
+        <div class="fk-row"><div class="fk-c g4"></div><div class="t"><b>Digital Love</b><small>Daft Punk</small></div><span class="left">4:58</span></div>
+        <div class="fk-row"><div class="fk-c g2"></div><div class="t"><b>Dove si balla</b><small>Dargen D'Amico</small></div><span class="left">3:22</span></div>
+        <div class="fk-l">F</div>
+        <div class="fk-row"><div class="fk-c g2"></div><div class="t"><b>Feather</b><small>Nujabes</small></div><span class="left">2:55</span></div>
+        <div class="fk-row"><div class="fk-c g1"></div><div class="t"><b>Futura</b><small>Lucio Dalla</small></div><span class="left">5:14</span></div>
+        <div class="fk-l">P</div>
+        <div class="fk-row"><div class="fk-c g5"></div><div class="t"><b>Paracetamolo</b><small>Calcutta</small></div><span class="left">3:31</span></div>
+      </div>
+      <div class="fk-dock">
+        <button class="fk-mini">
+          <span class="fk-ring" data-ring="54"><span class="fk-c g3"></span></span>
+          <span class="t"><b>Se telefonando</b><span>Mina</span></span>
+          <span class="fk-pp"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><rect x="3" y="2" width="3.6" height="12" rx="1.2"/><rect x="9.4" y="2" width="3.6" height="12" rx="1.2"/></svg></span>
+        </button>
+        <div class="fk-nav">
+          <div class="fk-tabs">
+            <button class="fk-tab" data-tab><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 10.5 12 4l8 6.5V20h-5.5v-5.5h-5V20H4z"/></svg>Home</button>
+            <button class="fk-tab" data-tab><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg>Cerca</button>
+            <button class="fk-tab on" data-tab><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 4v16M10 4v16M15 5l4 14.5"/></svg>Libreria</button>
+            <button class="fk-tab" data-tab><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 13.5A8 8 0 1 1 10.5 4"/><path d="M14 3.5A7 7 0 0 1 20.5 10H14z" fill="currentColor"/></svg>Memoria</button>
+          </div>
+          <span class="fk-dot"></span>
+        </div>
+      </div>
+    </div>
+    <h3>Libreria, chiaro con accento verde</h3>
+    <p>Stesso disegno con un altro tema: colori e icona seguono l'accento scelto. Liste a righe con la lettera, niente griglie di copertine.</p>
+  </div>
+</div>
+
+<div style="max-width:760px;margin:28px auto 0;font-size:14.5px;line-height:1.55;opacity:.9">
+  <h3>Dove torna l'anello</h3>
+  <p><b>Il brano in ascolto.</b> La copertina sta dentro l'anello aperto del logo; l'arco colorato è l'avanzamento e il pallino in punta è il punto in cui sei. A colpo d'occhio vedi quanto manca, senza barre.</p>
+  <p><b>Le schede in basso.</b> La scheda attiva è segnata dal pallino del logo, che salta di scheda in scheda con un piccolo arco.</p>
+  <p><b>Cerca.</b> Toccandola, la barra delle schede si allarga e diventa il campo di ricerca, con le ricerche recenti che salgono sopra. La ✕ la richiude.</p>
+  <p>Caratteri: Unbounded (già nell'app) solo per i titoli grandi, Figtree per tutto il resto.</p>
+</div>
+
+<script>
+(() => {
+  const NS = 'http://www.w3.org/2000/svg';
+  const GAP = 50, START = -20;                 // open gap at upper right, like the logo
+  const rings = [];
+  document.querySelectorAll('[data-ring]').forEach(el => {
+    const s = +el.dataset.ring, sw = s > 100 ? 6 : 3.5, r = s / 2 - sw / 2 - (s > 100 ? 6 : 1);
+    const C = 2 * Math.PI * r, arc = C * (360 - GAP) / 360;
+    const svg = document.createElementNS(NS, 'svg'); svg.setAttribute('viewBox', `0 0 ${s} ${s}`);
+    const mk = (stroke, op) => { const c = document.createElementNS(NS, 'circle');
+      Object.entries({ cx: s/2, cy: s/2, r, fill: 'none', 'stroke-width': sw, 'stroke-linecap': 'round', transform: `rotate(${START} ${s/2} ${s/2})` })
+        .forEach(([k, v]) => c.setAttribute(k, v));
+      c.style.stroke = stroke; c.style.opacity = op; svg.appendChild(c); return c; };
+    mk('var(--s3)', 1).setAttribute('stroke-dasharray', `${arc} ${C}`);
+    const prog = mk('var(--acc)', 1);
+    const dot = document.createElementNS(NS, 'circle'); dot.setAttribute('r', sw * 1.1); dot.style.fill = 'var(--accs)'; svg.appendChild(dot);
+    el.prepend(svg);
+    rings.push(p => { prog.setAttribute('stroke-dasharray', `${arc * p} ${C}`);
+      const a = (START + (360 - GAP) * p) * Math.PI / 180;
+      dot.setAttribute('cx', s/2 + r * Math.cos(a)); dot.setAttribute('cy', s/2 + r * Math.sin(a)); });
+  });
+  let p = 0.36; const total = 200;
+  const tick = () => { p = (p + 1 / (total * 60)) % 1; rings.forEach(f => f(p));
+    const el = Math.floor(p * total); document.querySelectorAll('[data-el]').forEach(e => e.textContent = `${Math.floor(el/60)}:${String(el%60).padStart(2,'0')}`);
+    requestAnimationFrame(tick); };
+  tick();
+
+  // the logo's dot marks the current tab and hops between tabs
+  document.querySelectorAll('.fk').forEach(ph => {
+    const nav = ph.querySelector('.fk-nav'), dot = nav.querySelector('.fk-dot'), tabs = [...nav.querySelectorAll('[data-tab]')];
+    const xOf = t => t.offsetLeft + t.offsetWidth / 2 + 13;
+    let cur = tabs.find(t => t.classList.contains('on'));
+    dot.style.transform = `translateX(${xOf(cur)}px)`;
+    tabs.forEach(t => t.addEventListener('click', e => {
+      e.stopPropagation();
+      const from = xOf(cur), to = xOf(t);
+      if (t !== cur) dot.animate([{ transform: `translate(${from}px,0)` }, { transform: `translate(${(from+to)/2}px,-16px) scale(1.3)` }, { transform: `translate(${to}px,0)` }],
+        { duration: 420, easing: 'cubic-bezier(.3,.7,.4,1)' });
+      dot.style.transform = `translateX(${to}px)`;
+      tabs.forEach(x => x.classList.toggle('on', x === t)); cur = t;
+      if (t.hasAttribute('data-search')) { nav.classList.add('searching'); ph.classList.add('searching'); }
+    }));
+    nav.querySelector('[data-close]')?.addEventListener('click', e => { e.stopPropagation(); nav.classList.remove('searching'); ph.classList.remove('searching'); tabs[0].click(); });
+    ph.querySelector('[data-open]')?.addEventListener('click', e => { if (!e.target.closest('[data-pp]')) ph.classList.add('open'); });
+    ph.querySelector('[data-close-full]')?.addEventListener('click', () => ph.classList.remove('open'));
+  });
+})();
+</script>
