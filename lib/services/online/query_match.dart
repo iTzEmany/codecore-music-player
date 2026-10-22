@@ -32,6 +32,12 @@ const _cardSongBonus = 0.10;
 /// the result: it is another song of theirs.
 const _noTitleWordPenalty = 0.6;
 
+/// A phrase with no artist: a result by an artist the user has in the library
+/// gets this much more, but only when it already scores at least
+/// [_affinityFloor] (so it reorders near-ties and never lifts junk).
+const _affinityBonus = 0.2;
+const _affinityFloor = 0.45;
+
 /// Phrases that ask for a long recording: no penalty for a result over 20 min.
 const _longAsks = ['mix', 'set', 'live', 'concerto', 'full album'];
 
@@ -97,11 +103,36 @@ String _without(String queryKey, String phrase) {
   return queryKey;
 }
 
+/// The key under which a library artist is compared with a result's artist:
+/// primary artist only, without a leading «the».
+String libraryArtistKey(String name) {
+  final key = matchKey(extractPrimaryArtist(name));
+  return key.startsWith('the ') ? key.substring(4) : key;
+}
+
+bool _byLibraryArtist(YtResult r, Set<String> library) {
+  final String name;
+  if (r.artists.isNotEmpty) {
+    name = r.artists.first;
+  } else {
+    final clean = cleanSearchQuery(r.title, r.channel).artist;
+    name = clean.isNotEmpty
+        ? clean
+        : matchKey(r.channel).replaceFirst(_channelNoise, '').trim();
+  }
+  final key = libraryArtistKey(name);
+  return key.isNotEmpty && library.contains(key);
+}
+
 /// How likely [r] is what [query] asks for, 0..1. [rank] is the place among
 /// the YouTube Music songs (the first two get a small bonus), -1 for a video;
-/// [fromTopCard] marks the song the top card points to.
+/// [fromTopCard] marks the song the top card points to. [libraryArtists]
+/// ([libraryArtistKey] of each) give a small bonus to their results; pass it
+/// only for a phrase that names no artist (see [scoreAll]).
 double queryConfidence(String query, YtResult r,
-    {int rank = -1, bool fromTopCard = false}) {
+    {int rank = -1,
+    bool fromTopCard = false,
+    Set<String> libraryArtists = const {}}) {
   final queryKey = matchKey(query);
   final artist = _recognizedArtist(queryKey, r);
   // With only the artist in the phrase the title cannot tell results apart:
@@ -134,26 +165,40 @@ double queryConfidence(String query, YtResult r,
   if (artist == null && queryKey.split(' ').any((w) => !gotWords.contains(w))) {
     c *= _otherArtistPenalty;
   }
+  if (libraryArtists.isNotEmpty &&
+      c >= _affinityFloor &&
+      _byLibraryArtist(r, libraryArtists)) {
+    c += _affinityBonus;
+  }
   return c.clamp(0.0, 1.0).toDouble();
 }
 
 /// Scores every result of both sources. A result over 20 minutes is cut down
 /// when the phrase looks for a song (YouTube Music has one above the
-/// threshold) and does not ask for a mix, a set or a concert.
+/// threshold) and does not ask for a mix, a set or a concert. With
+/// [libraryArtists] and a phrase that names no artist (none of the results
+/// credits one that is in it), results by those artists get a small bonus.
 List<ScoredResult> scoreAll(
   String query, {
   required List<YtResult> songs,
   required List<YtResult> videos,
   TopCard? card,
+  Set<String> libraryArtists = const {},
 }) {
+  final phraseKey = matchKey(query);
+  final namesArtist = libraryArtists.isNotEmpty &&
+      [...songs, ...videos].any((r) => _recognizedArtist(phraseKey, r) != null);
+  final affinity = namesArtist ? const <String>{} : libraryArtists;
   final cardSong = card is TopSong ? card.videoId : null;
   final out = <ScoredResult>[
     for (final (i, r) in songs.indexed)
       ScoredResult(r,
-          queryConfidence(query, r, rank: i, fromTopCard: r.id == cardSong),
+          queryConfidence(query, r,
+              rank: i, fromTopCard: r.id == cardSong, libraryArtists: affinity),
           MediaKind.ytmSong, i),
     for (final (i, r) in videos.indexed)
-      ScoredResult(r, queryConfidence(query, r), MediaKind.ytVideo, i),
+      ScoredResult(
+          r, queryConfidence(query, r, libraryArtists: affinity), MediaKind.ytVideo, i),
   ];
   final queryKey = matchKey(query);
   final asksLong = _longAsks.any((w) => hasPhrase(queryKey, w));

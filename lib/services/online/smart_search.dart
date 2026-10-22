@@ -117,12 +117,17 @@ class SmartSearch {
     SourceCooldown? cooldown,
     DateTime Function()? now,
     this.cap = const Duration(milliseconds: 1500),
+    this.libraryArtists,
   })  : _now = now ?? DateTime.now,
         cooldown = cooldown ?? SourceCooldown(now: now);
 
   final YoutubeService youtube;
   final YtmCatalog catalog;
   final SourceCooldown cooldown;
+
+  /// [libraryArtistKey] of the artists in the library, read at each search: a
+  /// phrase with no artist favours their results.
+  final Set<String> Function()? libraryArtists;
 
   /// How long after the first answer the page waits for the others.
   final Duration cap;
@@ -363,7 +368,10 @@ class _Run {
       return [for (final (i, r) in videos.indexed) ScoredResult(r, 1, MediaKind.ytVideo, i)];
     }
     return scoreAll(query,
-        songs: songs, videos: videos, card: useCard ? _card?.value : null);
+        songs: songs,
+        videos: videos,
+        card: useCard ? _card?.value : null,
+        libraryArtists: engine.libraryArtists?.call() ?? const {});
   }
 
   SmartSearchState _base(QueryKind kind) => SmartSearchState(

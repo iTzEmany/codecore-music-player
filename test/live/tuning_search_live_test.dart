@@ -104,6 +104,13 @@ void main() {
 
   test('score a dump', () {
     final cases = jsonDecode(File(dumpPath!).readAsStringSync()) as List;
+    // The library is simulated with the artists of the dump (TUNING_LIBRARY=none: empty).
+    final library = env['TUNING_LIBRARY'] == 'none'
+        ? <String>{}
+        : {
+            for (final c in cases.cast<Map>())
+              for (final a in '${c['artist']}'.split(', ')) libraryArtistKey(a),
+          };
     final stats = <String, Map<String, int>>{};
     final lines = <String>[];
     for (final c in cases.cast<Map>()) {
@@ -112,7 +119,13 @@ void main() {
       final songs = [for (final s in c['songs'] as List) ytResultFromJson(s)!];
       final videos = [for (final s in c['videos'] as List) ytResultFromJson(s)!];
       final card = c['card'] == null ? null : parseTopCard(c['card'] as Map);
-      final scored = scoreAll(text, songs: songs, videos: videos, card: card);
+      final scored = scoreAll(
+        text,
+        songs: songs,
+        videos: videos,
+        card: card,
+        libraryArtists: library,
+      );
       final split = splitBest(mergeResults(scored), kBestThreshold);
       final s = stats.putIfAbsent(kind, () => {});
       void inc(String k) => s[k] = (s[k] ?? 0) + 1;

@@ -79,4 +79,46 @@ void main() {
     expect(queryConfidence('pink floyd mother', r, rank: 2), base);
     expect(queryConfidence('pink floyd mother', r, fromTopCard: true), closeTo(base + 0.10, 1e-9));
   });
+
+  group('library artist affinity', () {
+    YtResult song(String id, String artist) => YtResult(
+        id: id,
+        title: 'All of Me',
+        channel: artist,
+        duration: const Duration(minutes: 3),
+        artists: [artist]);
+    final songs = [song('legend', 'John Legend'), song('billie', 'Billie Holiday')];
+    final library = {libraryArtistKey('Billie Holiday')};
+
+    double conf(List<ScoredResult> l, String id) =>
+        l.firstWhere((s) => s.result.id == id).confidence;
+
+    test('a title-only phrase puts the library artist\'s version first', () {
+      final without = scoreAll('all of me', songs: songs, videos: const []);
+      final withLib =
+          scoreAll('all of me', songs: songs, videos: const [], libraryArtists: library);
+      expect(conf(without, 'legend'), greaterThanOrEqualTo(conf(without, 'billie')));
+      expect(conf(withLib, 'billie'), greaterThan(conf(withLib, 'legend')));
+    });
+
+    test('a phrase that names an artist is not changed', () {
+      final a = scoreAll('john legend all of me', songs: songs, videos: const []);
+      final b = scoreAll('john legend all of me',
+          songs: songs, videos: const [], libraryArtists: library);
+      expect(conf(b, 'legend'), conf(a, 'legend'));
+      expect(conf(b, 'billie'), conf(a, 'billie'));
+    });
+
+    test('junk below the floor is not lifted by the bonus', () {
+      final junk = YtResult(
+          id: 'junk',
+          title: 'Something else entirely',
+          channel: 'Billie Holiday',
+          duration: const Duration(minutes: 3),
+          artists: const ['Billie Holiday']);
+      final scored = scoreAll('all of me',
+          songs: [...songs, junk], videos: const [], libraryArtists: library);
+      expect(conf(scored, 'junk'), lessThan(kBestThreshold));
+    });
+  });
 }
