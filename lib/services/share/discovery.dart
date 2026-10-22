@@ -78,23 +78,46 @@ class LanDiscovery {
     await stop();
     _tlsPort = tlsPort;
     _httpPort = httpPort;
-    // SO_REUSEPORT is unsupported by Dart on Android and Windows.
-    final reusePort = Platform.isLinux || Platform.isMacOS;
-    final s = await RawDatagramSocket.bind(
-      InternetAddress.anyIPv4,
-      port,
-      reuseAddress: true,
-      reusePort: reusePort,
-    );
-    s.broadcastEnabled = true;
-    s.listen(_onEvent(s));
-    _socket = s;
+    _socket = await _bind();
     _send();
-    _beat = Timer.periodic(interval, (_) {
+    _beat = Timer.periodic(interval, (t) async {
+      if (_socket == null) {
+        final s = await _bind();
+        if (_beat != t) return s?.close();
+        _socket = s;
+      }
       _send();
       _prune();
     });
     AppLog.i('discovery: started on $port');
+  }
+
+  // The SDK reports a failed send (e.g. no network) asynchronously and closes
+  // the socket: the beat binds a new one.
+  Future<RawDatagramSocket?> _bind() async {
+    try {
+      // SO_REUSEPORT is unsupported by Dart on Android and Windows.
+      final reusePort = Platform.isLinux || Platform.isMacOS;
+      final s = await RawDatagramSocket.bind(
+        InternetAddress.anyIPv4,
+        port,
+        reuseAddress: true,
+        reusePort: reusePort,
+      );
+      s.broadcastEnabled = true;
+      void lost() {
+        if (_socket == s) _socket = null;
+      }
+      s.listen(_onEvent(s), onError: (Object e) {
+        AppLog.d('discovery: socket error', e);
+        lost();
+        s.close();
+      }, onDone: lost);
+      return s;
+    } on SocketException catch (e) {
+      AppLog.w('discovery: bind on $port failed', e);
+      return null;
+    }
   }
 
   Future<void> stop() async {

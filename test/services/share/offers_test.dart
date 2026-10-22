@@ -293,4 +293,37 @@ void main() {
     await until(() => open.current.isNotEmpty);
     expect(strict.current, isEmpty);
   });
+
+  test('a failed send does not kill discovery: it binds again and still finds peers',
+      () async {
+    // An IPv6 target on the IPv4 socket: the SDK reports the failure
+    // asynchronously and closes the socket.
+    final aTargets = [(address: InternetAddress.loopbackIPv6, port: 45906)];
+    final a = LanDiscovery(
+      deviceId: 'a',
+      deviceName: 'Alpha',
+      port: 45905,
+      interval: const Duration(milliseconds: 50),
+      allowLoopback: true,
+      targets: aTargets,
+    );
+    final b = LanDiscovery(
+      deviceId: 'b',
+      deviceName: 'Beta',
+      port: 45906,
+      interval: const Duration(milliseconds: 50),
+      allowLoopback: true,
+      targets: [(address: InternetAddress.loopbackIPv4, port: 45905)],
+    );
+    addTearDown(() async {
+      await a.dispose();
+      await b.dispose();
+    });
+    await a.start(1111);
+    await Future<void>.delayed(const Duration(milliseconds: 200));
+    aTargets.clear();
+    await b.start(2222);
+    await until(() => a.current.isNotEmpty);
+    expect(a.current.single.id, 'b');
+  });
 }
