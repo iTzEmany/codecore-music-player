@@ -133,7 +133,7 @@ class EnrichJobNotifier extends Notifier<EnrichJobState> {
       last = const BatchProgress(finished: true);
     }
     state = EnrichJobState(result: last ?? const BatchProgress(finished: true));
-    onFinished?.call();
+    if (last?.cancelled != true) onFinished?.call();
   }
 
   void cancel() => _cancel?.cancel();

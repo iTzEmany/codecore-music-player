@@ -92,9 +92,9 @@ class SecondOpinionNotifier extends Notifier<SecondOpinionState> {
         if (t != null && (!force || reviewReasons(t).isNotEmpty)) {
           final out = await service.check(t, cancel: token);
           if (out.written.isNotEmpty) updated++;
-          if (out.kind == SecondOpinionKind.networkError) {
-            // Not marked: the answer never came, so it is worth another try.
-          } else {
+          // Not marked on networkError or throttled: no real answer came, so
+          // it is worth another try.
+          if (out.kind == SecondOpinionKind.notConfirmed || out.kind == SecondOpinionKind.confirmed) {
             await ref.read(reviewCheckedProvider.notifier).add(id);
           }
           if (out.kind == SecondOpinionKind.throttled) {

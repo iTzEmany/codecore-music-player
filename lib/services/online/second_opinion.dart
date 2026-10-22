@@ -60,6 +60,9 @@ class SecondOpinion {
   final TrackRepository tracks;
   final String Function() hl;
 
+  /// MusicBrainz answered «too many requests»: no genre lookups until then.
+  DateTime? _mbRestUntil;
+
   static const _maxDuration = Duration(minutes: 20);
   static const _durationSlack = Duration(seconds: 3);
 
@@ -139,11 +142,13 @@ class SecondOpinion {
         album = r.album;
         fields.add(EnrichField.album);
       }
-      if (t.year == null || t.trackNumber == null || !t.hasCover) {
+      // A cover with no album would spread to the whole «unknown|dir» key.
+      final wantCover = !t.hasCover && (album != null || t.album != null);
+      if (t.year == null || t.trackNumber == null || wantCover) {
         try {
           final page = (await catalog.album(r.albumId!, hl())).value;
           if (t.year == null) year = int.tryParse(page.year ?? '');
-          if (!t.hasCover) cover = page.coverUrl;
+          if (wantCover) cover = page.coverUrl;
           if (t.trackNumber == null) {
             number = page.tracks
                 .where((x) =>
@@ -165,12 +170,14 @@ class SecondOpinion {
       if (year != null) fields.add(EnrichField.year);
       if (cover != null) fields.add(EnrichField.cover);
       if (number != null) fields.add(EnrichField.trackNumber);
-      if (t.genre == null) {
+      final mbRest = _mbRestUntil;
+      if (t.genre == null && (mbRest == null || DateTime.now().isAfter(mbRest))) {
         try {
           genre = await musicBrainz.genreFor(
               t.title, (t.artist ?? '').trim().isEmpty ? resultArtist ?? '' : t.artist!,
               t.durationMs, cancel: cancel);
         } on RateLimitedException catch (e) {
+          _mbRestUntil = DateTime.now().add(const Duration(minutes: 10));
           AppLog.w('second opinion genre skipped: $e');
         } on DioException catch (e) {
           if (CancelToken.isCancel(e)) rethrow;
@@ -180,6 +187,7 @@ class SecondOpinion {
       }
       if (t.lyricsPlain == null && t.lyricsSynced == null && !limited) {
         try {
+          await enrichment.limiter.wait();
           lyrics = await client.lyrics(r.id, cancel: cancel);
         } on YtException catch (e) {
           limited = e.kind == YtErrorKind.rateLimited;
@@ -192,6 +200,13 @@ class SecondOpinion {
         }
         if (lyrics != null) fields.add(EnrichField.lyrics);
       }
+    }
+    // The user may have edited the track meanwhile: drop what is filled now.
+    final cur = await tracks.getById(t.id);
+    if (cur != null) {
+      if (cur.year != null) fields.remove(EnrichField.year);
+      if (cur.genre != null) fields.remove(EnrichField.genre);
+      if (cur.lyricsPlain != null || cur.lyricsSynced != null) fields.remove(EnrichField.lyrics);
     }
     final proposal = EnrichmentProposal(
       track: t,

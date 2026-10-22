@@ -91,7 +91,7 @@ void main() {
     expect(fake.asked, hasLength(1));
     expect(c.read(secondOpinionJobProvider).throttled, isTrue);
     expect(c.read(sourceCooldownProvider).isPaused(MediaKind.ytmSong), isTrue);
-    expect(c.read(reviewCheckedProvider), {ids[0]}, reason: 'the others stay unchecked');
+    expect(c.read(reviewCheckedProvider), isEmpty, reason: 'the throttled one is not marked either');
   });
 
   test('while the source rests the job does not start', () async {

@@ -27,10 +27,12 @@ Object _fixture(String name) => jsonDecode(File('test/fixtures/musicbrainz/$name
 class _Web implements WebClient {
   final recordingGenres = <Map<String, Object?>>[];
   final asked = <String>[];
+  var mbLimited = false;
 
   @override
   Future<Object?> getJson(String url, {Map<String, String>? query, CancelToken? cancel}) async {
     asked.add(Uri.parse(url).path);
+    if (mbLimited && url.contains('musicbrainz')) throw const RateLimitedException(429);
     if (!url.contains('musicbrainz')) return null;
     if (url.endsWith('/recording')) return _fixture('recording_search_official');
     if (url.contains('/recording/')) return {'genres': recordingGenres};
@@ -237,5 +239,23 @@ void main() {
     final t = await add();
     final out = await opinion(_Client(const [], searchError: const InnerTubeChanged('x'))).check(t);
     expect(out.kind, SecondOpinionKind.networkError);
+  });
+
+  test('a user-edited track with no album gets no cover (it would spread to the folder)', () async {
+    final t = await add(userEdited: true);
+    final out = await opinion(_Client([_hit()])).check(t);
+    expect(out.written, isNot(contains(EnrichField.cover)));
+    expect((await repo.getById(t.id))!.hasCover, isFalse);
+  });
+
+  test('after a MusicBrainz 429 the genre is not asked again for a while', () async {
+    web.mbLimited = true;
+    final t = await add();
+    final op = opinion(_Client([_hit()]));
+    await op.check(t);
+    final first = web.asked.where((a) => a.contains('/ws/2')).length;
+    expect(first, 1);
+    await op.check(t);
+    expect(web.asked.where((a) => a.contains('/ws/2')).length, first);
   });
 }
