@@ -82,4 +82,17 @@ void main() {
     await repo.applyRefresh([st('b')], []);
     expect((await repo.getAll()).firstWhere((r) => r.stationId == 'b').unreachable, isFalse);
   });
+
+  test('saveManual stores a manual: station at the end, names it after the host when blank, no duplicates',
+      () async {
+    await repo.save(st('a'));
+    final m = await repo.saveManual('  My radio ', ' http://x.example:8000/live ');
+    expect(m.id, startsWith('manual:'));
+    expect((m.name, m.streamUrl), ('My radio', 'http://x.example:8000/live'));
+    final again = await repo.saveManual('Other', 'http://x.example:8000/live');
+    expect(again.id, m.id);
+    final blank = await repo.saveManual('', 'https://y.example/s');
+    expect(blank.name, 'y.example');
+    expect(await ids(), ['a', m.id, blank.id]);
+  });
 }

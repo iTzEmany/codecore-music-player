@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:drift/drift.dart';
 
 import '../../core/clock.dart';
@@ -58,6 +60,24 @@ class RadioRepository {
               lastOkAt: Value(nowMs()),
             ));
       });
+
+  /// Saves an address typed in by hand as `manual:<random>`. Nothing is sent to
+  /// Radio Browser. The same address twice gives back the station already
+  /// saved. A blank [name] becomes the address' host.
+  Future<RadioStation> saveManual(String name, String streamUrl, {Random? random}) async {
+    final url = streamUrl.trim();
+    final existing = await (_db.select(_db.radioStations)
+          ..where((r) => r.stationId.like('manual:%') & r.streamUrl.equals(url)))
+        .getSingleOrNull();
+    if (existing != null) return existing.toStation();
+    final r = random ?? Random.secure();
+    final id = 'manual:${List.generate(16, (_) => r.nextInt(16).toRadixString(16)).join()}';
+    final n = name.trim();
+    final station = RadioStation(
+        id: id, name: n.isEmpty ? (Uri.tryParse(url)?.host ?? url) : n, streamUrl: url);
+    await save(station);
+    return station;
+  }
 
   Future<int> _nextPosition() async {
     final max = _db.radioStations.position.max();

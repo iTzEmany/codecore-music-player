@@ -1,6 +1,9 @@
 import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/data/repositories/library_queries.dart';
 import 'package:codecore/data/repositories/playlist_repository.dart';
+import 'package:codecore/data/repositories/radio_repository.dart';
+import 'package:codecore/services/audio/online_entries.dart';
+import 'package:codecore/services/radio/radio_station.dart';
 import 'package:codecore/data/repositories/track_repository.dart';
 import 'package:codecore/services/audio/codecore_audio_handler.dart';
 import 'package:codecore/services/audio/media_browse_tree.dart';
@@ -52,5 +55,24 @@ void main() {
     expect(handler.queueIds, hasLength(3));
     expect(handler.currentIndex, 1);
     expect(handler.currentTrack!.title, 'T1');
+  });
+
+  test('choosing a saved station in the browser plays the saved list from it', () async {
+    final h = CodecoreAudioHandler(FakeBackend(), PlayQueue(), TrackRepository(db),
+        onError: (_) {}, online: OnlineEntries());
+    addTearDown(h.dispose);
+    final radios = RadioRepository(db);
+    for (final id in ['a', 'manual:m', 'c']) {
+      await radios.save(RadioStation(id: id, name: 'R $id', streamUrl: 'http://r.test/$id'));
+    }
+    h.browse = MediaBrowseTree(DbBrowseSource(
+        TrackRepository(db), LibraryQueries(db), PlaylistRepository(db), radios));
+    final items = await h.getChildren('radio');
+    expect(items, hasLength(3));
+
+    await h.playFromMediaId(items[1].id);
+    expect(h.queueIds, hasLength(3));
+    expect(h.currentIndex, 1);
+    expect(h.currentTrack!.title, 'R manual:m');
   });
 }

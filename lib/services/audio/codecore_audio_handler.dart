@@ -301,6 +301,11 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   Future<void> playFromMediaId(String mediaId,
       [Map<String, dynamic>? extras]) async {
     try {
+      final radio = await browse?.resolveRadio(mediaId);
+      if (radio != null) {
+        await playStations(radio.stations, radio.index);
+        return;
+      }
       final r = await browse?.resolve(mediaId);
       if (r != null) await playQueue(r.ids, r.index);
     } on Object catch (e, st) {

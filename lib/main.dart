@@ -164,7 +164,7 @@ Future<void> main() async {
 
   if (kPerfBuild) PerfProbe.mark('settings', sinceMain);
   handler.browse = MediaBrowseTree(
-    DbBrowseSource(TrackRepository(db), LibraryQueries(db), PlaylistRepository(db)),
+    DbBrowseSource(TrackRepository(db), LibraryQueries(db), PlaylistRepository(db), radioRepo),
     labels: BrowseLabels.forLanguage(settingsStore.readSettings().language),
     coverUri: (k) => covers.fileFor(k)?.uri,
   );

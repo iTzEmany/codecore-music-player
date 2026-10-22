@@ -1,6 +1,8 @@
 import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/data/repositories/library_queries.dart';
 import 'package:codecore/data/repositories/playlist_repository.dart';
+import 'package:codecore/data/repositories/radio_repository.dart';
+import 'package:codecore/services/radio/radio_station.dart';
 import 'package:codecore/data/repositories/track_repository.dart';
 import 'package:codecore/services/audio/media_browse_tree.dart';
 import 'package:drift/drift.dart' show Value;
@@ -12,6 +14,7 @@ void main() {
   late MediaBrowseTree tree;
   late PlaylistRepository playlists;
   late TrackRepository tracks;
+  late RadioRepository radios;
 
   Future<void> seed(int n, {String album = 'k1', String prefix = 'T', bool fav = false}) =>
       tracks.upsertBatch([
@@ -29,8 +32,9 @@ void main() {
     db = AppDatabase(NativeDatabase.memory());
     tracks = TrackRepository(db);
     playlists = PlaylistRepository(db);
+    radios = RadioRepository(db);
     tree = MediaBrowseTree(
-      DbBrowseSource(tracks, LibraryQueries(db), playlists),
+      DbBrowseSource(tracks, LibraryQueries(db), playlists, radios),
       coverUri: (k) => Uri.file('/covers/$k'),
     );
   });
@@ -117,5 +121,41 @@ void main() {
   test('labels follow the language', () {
     expect(BrowseLabels.forLanguage('en').favorites, 'Favourites');
     expect(BrowseLabels.forLanguage('xx').favorites, 'Preferiti');
+  });
+
+  RadioStation station(String id) =>
+      RadioStation(id: id, name: 'Radio $id', streamUrl: 'http://s/$id', tags: const ['pop']);
+
+  test('the Radio folder shows only with saved stations, which list in the saved order', () async {
+    expect((await tree.children('root')).map((i) => i.id), isNot(contains('radio')));
+    for (final id in ['a', 'b', 'c']) {
+      await radios.save(station(id));
+    }
+    await radios.reorder(['c', 'a', 'b']);
+    final root = await tree.children('root');
+    expect(root.last.id, 'radio');
+    expect(root.last.playable, isFalse);
+    final items = await tree.children('radio');
+    expect(items.map((i) => i.id), ['radio:c', 'radio:a', 'radio:b']);
+    expect(items.every((i) => i.playable == true), isTrue);
+    expect((await tree.item('radio:a'))!.title, 'Radio a');
+    expect(await tree.item('radio:zzz'), isNull);
+  });
+
+  test('choosing a station resolves to the saved list from it; track ids are not radios', () async {
+    await radios.save(station('a'));
+    await radios.save(station('manual:m'));
+    await radios.save(station('c'));
+    final r = (await tree.resolveRadio('radio:manual:m'))!;
+    expect(r.stations.map((s) => s.id), ['a', 'manual:m', 'c']);
+    expect(r.index, 1);
+    expect(await tree.resolveRadio('radio:gone'), isNull);
+    expect(await tree.resolveRadio('track:1@fav'), isNull);
+    expect(await tree.resolve('radio:a'), isNull);
+  });
+
+  test('the Radio label is localized', () {
+    expect(BrowseLabels.forLanguage('pt').radio, 'Rádio');
+    expect(BrowseLabels.forLanguage('it').radio, 'Radio');
   });
 }

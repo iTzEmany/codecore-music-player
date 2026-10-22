@@ -3,7 +3,9 @@ import 'package:audio_service/audio_service.dart';
 import '../../data/db/app_database.dart';
 import '../../data/repositories/library_queries.dart';
 import '../../data/repositories/playlist_repository.dart';
+import '../../data/repositories/radio_repository.dart';
 import '../../data/repositories/track_repository.dart';
+import '../radio/radio_station.dart';
 
 /// Android Auto (and any other media browser) asks for lists of this many
 /// entries at most.
@@ -18,9 +20,10 @@ class BrowseLabels {
     this.albums = 'Album',
     this.top = 'Più ascoltati',
     this.recent = 'Ultimi aggiunti',
+    this.radio = 'Radio',
   });
 
-  final String favorites, playlists, albums, top, recent;
+  final String favorites, playlists, albums, top, recent, radio;
 
   static BrowseLabels forLanguage(String code) => switch (code) {
         'en' => const BrowseLabels(
@@ -37,7 +40,7 @@ class BrowseLabels {
             top: 'Les plus écoutés', recent: 'Ajoutés récemment'),
         'pt' => const BrowseLabels(
             favorites: 'Favoritos', playlists: 'Playlists', albums: 'Álbuns',
-            top: 'Mais ouvidas', recent: 'Adicionadas recentemente'),
+            top: 'Mais ouvidas', recent: 'Adicionadas recentemente', radio: 'Rádio'),
         _ => const BrowseLabels(),
       };
 }
@@ -52,14 +55,22 @@ abstract class BrowseSource {
   Future<List<Track>> top();
   Future<List<Track>> recent();
   Future<List<Track>> search(String query);
+
+  /// «Le mie radio», in the user's order.
+  Future<List<RadioStation>> radios();
 }
 
 class DbBrowseSource implements BrowseSource {
-  DbBrowseSource(this._tracks, this._queries, this._playlists);
+  DbBrowseSource(this._tracks, this._queries, this._playlists, [this._radios]);
 
   final TrackRepository _tracks;
   final LibraryQueries _queries;
   final PlaylistRepository _playlists;
+  final RadioRepository? _radios;
+
+  @override
+  Future<List<RadioStation>> radios() async =>
+      [for (final r in await _radios?.getAll() ?? const <SavedRadio>[]) r.toStation()];
 
   @override
   Future<List<Track>> favorites() => _tracks
@@ -99,7 +110,8 @@ class DbBrowseSource implements BrowseSource {
 /// strings: `root`, `fav`, `playlists`, `playlist:<id>`, `albums`,
 /// `album:<albumKey>`, `top`, `recent`, and for a track
 /// `track:<id>@<id of the folder it was listed in>`: the folder is the queue
-/// that plays when the track is chosen.
+/// that plays when the track is chosen. `radio` (only with saved stations)
+/// lists `radio:<station id>` items.
 class MediaBrowseTree {
   MediaBrowseTree(
     this._src, {
@@ -114,6 +126,25 @@ class MediaBrowseTree {
   final Uri? Function(String coverKey)? coverUri;
 
   static const root = 'root';
+
+  /// The folder of the saved radios; a station is `radio:<station id>`.
+  static const radioFolder = 'radio';
+  static const _radioPrefix = 'radio:';
+
+  Future<List<RadioStation>> _stations() async {
+    final all = await _src.radios();
+    return all.length > kBrowseLimit ? all.sublist(0, kBrowseLimit) : all;
+  }
+
+  MediaItem _station(RadioStation s) {
+    final art = Uri.tryParse(s.faviconUrl);
+    return MediaItem(
+      id: '$_radioPrefix${s.id}',
+      title: s.name,
+      artist: s.tags.isEmpty ? null : s.tags.first,
+      artUri: art != null && art.hasScheme && art.host.isNotEmpty ? art : null,
+    );
+  }
 
   MediaItem _folder(String id, String title, {String? subtitle, Uri? art}) =>
       MediaItem(id: id, title: title, artist: subtitle, artUri: art, playable: false);
@@ -136,7 +167,10 @@ class MediaBrowseTree {
           _folder('albums', labels.albums),
           _folder('top', labels.top),
           _folder('recent', labels.recent),
+          if ((await _src.radios()).isNotEmpty) _folder(radioFolder, labels.radio),
         ];
+      case radioFolder:
+        return [for (final s in (await _stations())) _station(s)];
       case 'playlists':
         return [
           for (final p in (await _src.playlists()).take(kBrowseLimit))
@@ -195,6 +229,11 @@ class MediaBrowseTree {
         'albums' => _folder('albums', labels.albums),
         'top' => _folder('top', labels.top),
         'recent' => _folder('recent', labels.recent),
+        radioFolder => _folder(radioFolder, labels.radio),
+        final id when id.startsWith(_radioPrefix) => (await _stations())
+            .where((s) => '$_radioPrefix${s.id}' == id)
+            .map(_station)
+            .firstOrNull,
         _ => null,
       };
     }
@@ -213,6 +252,17 @@ class MediaBrowseTree {
     final ids = [for (final t in list ?? const <Track>[]) t.id];
     final at = ids.indexOf(ref.id);
     return at < 0 ? (ids: [ref.id], index: 0) : (ids: ids, index: at);
+  }
+
+  /// The stations to play when [mediaId] (a `radio:<id>` item) is chosen: the
+  /// saved list, starting at that station. Null if it is not a radio id; a
+  /// station no longer saved is not played at all (null).
+  Future<({List<RadioStation> stations, int index})?> resolveRadio(String mediaId) async {
+    if (!mediaId.startsWith(_radioPrefix)) return null;
+    final id = mediaId.substring(_radioPrefix.length);
+    final list = await _stations();
+    final at = list.indexWhere((s) => s.id == id);
+    return at < 0 ? null : (stations: list, index: at);
   }
 
   /// `track:12@album:Key` → (12, `album:Key`).
