@@ -188,4 +188,34 @@ void main() {
       expect(StatsPeriod.containing(now, year: true).start, DateTime(2026));
     });
   });
+
+  group('topArtistsSince', () {
+    final from = DateTime(2026, 8, 1);
+
+    test('ranks main artists by time played since the date, one per matchKey', () async {
+      final feat = await track('Feat', artist: 'Daft Punk feat. Pharrell');
+      await listen('One More Time', _ms(2026, 9, 1), ms: 100000);
+      await history.start(feat, _ms(2026, 9, 2), msPlayed: 50000);
+      await listen('Futura', _ms(2026, 9, 3), ms: 120000);
+      await listen('Futura', _ms(2026, 6, 3), ms: 900000); // before the window
+      final top = await stats.topArtistsSince(from);
+      expect([for (final a in top) (a.name, a.playedMs, a.plays)], [
+        ('Daft Punk', 150000, 2),
+        ('Lucio Dalla', 120000, 1),
+      ]);
+      expect(top.first.key, 'daft punk');
+      expect(await stats.topArtistsSince(from, limit: 1), hasLength(1));
+    });
+
+    test('without any history it sums play_count', () async {
+      await (db.update(db.tracks)..where((t) => t.id.equals(id['One More Time']!)))
+          .write(const TracksCompanion(playCount: Value(5)));
+      await (db.update(db.tracks)..where((t) => t.id.equals(id['Get Lucky']!)))
+          .write(const TracksCompanion(playCount: Value(3)));
+      await (db.update(db.tracks)..where((t) => t.id.equals(id['Futura']!)))
+          .write(const TracksCompanion(playCount: Value(6)));
+      final top = await stats.topArtistsSince(from);
+      expect([for (final a in top) (a.name, a.plays)], [('Daft Punk', 8), ('Lucio Dalla', 6)]);
+    });
+  });
 }

@@ -8376,6 +8376,1715 @@ class RadioStationsCompanion extends UpdateCompanion<SavedRadio> {
   }
 }
 
+class $FollowedArtistsTable extends FollowedArtists
+    with TableInfo<$FollowedArtistsTable, FollowedArtist> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $FollowedArtistsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _ytmIdMeta = const VerificationMeta('ytmId');
+  @override
+  late final GeneratedColumn<String> ytmId = GeneratedColumn<String>(
+    'ytm_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _thumbUrlMeta = const VerificationMeta(
+    'thumbUrl',
+  );
+  @override
+  late final GeneratedColumn<String> thumbUrl = GeneratedColumn<String>(
+    'thumb_url',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _originMeta = const VerificationMeta('origin');
+  @override
+  late final GeneratedColumn<int> origin = GeneratedColumn<int>(
+    'origin',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _excludedMeta = const VerificationMeta(
+    'excluded',
+  );
+  @override
+  late final GeneratedColumn<bool> excluded = GeneratedColumn<bool>(
+    'excluded',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("excluded" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _mutedMeta = const VerificationMeta('muted');
+  @override
+  late final GeneratedColumn<bool> muted = GeneratedColumn<bool>(
+    'muted',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("muted" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _followedAtMeta = const VerificationMeta(
+    'followedAt',
+  );
+  @override
+  late final GeneratedColumn<int> followedAt = GeneratedColumn<int>(
+    'followed_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    clientDefault: nowMs,
+  );
+  static const VerificationMeta _lastCheckedAtMeta = const VerificationMeta(
+    'lastCheckedAt',
+  );
+  @override
+  late final GeneratedColumn<int> lastCheckedAt = GeneratedColumn<int>(
+    'last_checked_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _lastErrorMeta = const VerificationMeta(
+    'lastError',
+  );
+  @override
+  late final GeneratedColumn<String> lastError = GeneratedColumn<String>(
+    'last_error',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _checksFailedMeta = const VerificationMeta(
+    'checksFailed',
+  );
+  @override
+  late final GeneratedColumn<int> checksFailed = GeneratedColumn<int>(
+    'checks_failed',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    ytmId,
+    name,
+    thumbUrl,
+    origin,
+    excluded,
+    muted,
+    followedAt,
+    lastCheckedAt,
+    lastError,
+    checksFailed,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'followed_artists';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<FollowedArtist> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('ytm_id')) {
+      context.handle(
+        _ytmIdMeta,
+        ytmId.isAcceptableOrUnknown(data['ytm_id']!, _ytmIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_ytmIdMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('thumb_url')) {
+      context.handle(
+        _thumbUrlMeta,
+        thumbUrl.isAcceptableOrUnknown(data['thumb_url']!, _thumbUrlMeta),
+      );
+    }
+    if (data.containsKey('origin')) {
+      context.handle(
+        _originMeta,
+        origin.isAcceptableOrUnknown(data['origin']!, _originMeta),
+      );
+    }
+    if (data.containsKey('excluded')) {
+      context.handle(
+        _excludedMeta,
+        excluded.isAcceptableOrUnknown(data['excluded']!, _excludedMeta),
+      );
+    }
+    if (data.containsKey('muted')) {
+      context.handle(
+        _mutedMeta,
+        muted.isAcceptableOrUnknown(data['muted']!, _mutedMeta),
+      );
+    }
+    if (data.containsKey('followed_at')) {
+      context.handle(
+        _followedAtMeta,
+        followedAt.isAcceptableOrUnknown(data['followed_at']!, _followedAtMeta),
+      );
+    }
+    if (data.containsKey('last_checked_at')) {
+      context.handle(
+        _lastCheckedAtMeta,
+        lastCheckedAt.isAcceptableOrUnknown(
+          data['last_checked_at']!,
+          _lastCheckedAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('last_error')) {
+      context.handle(
+        _lastErrorMeta,
+        lastError.isAcceptableOrUnknown(data['last_error']!, _lastErrorMeta),
+      );
+    }
+    if (data.containsKey('checks_failed')) {
+      context.handle(
+        _checksFailedMeta,
+        checksFailed.isAcceptableOrUnknown(
+          data['checks_failed']!,
+          _checksFailedMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {ytmId};
+  @override
+  FollowedArtist map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return FollowedArtist(
+      ytmId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}ytm_id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      thumbUrl: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}thumb_url'],
+      ),
+      origin: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}origin'],
+      )!,
+      excluded: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}excluded'],
+      )!,
+      muted: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}muted'],
+      )!,
+      followedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}followed_at'],
+      )!,
+      lastCheckedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}last_checked_at'],
+      ),
+      lastError: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}last_error'],
+      ),
+      checksFailed: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}checks_failed'],
+      )!,
+    );
+  }
+
+  @override
+  $FollowedArtistsTable createAlias(String alias) {
+    return $FollowedArtistsTable(attachedDatabase, alias);
+  }
+}
+
+class FollowedArtist extends DataClass implements Insertable<FollowedArtist> {
+  /// `UC…` channel id of the YouTube Music artist page.
+  final String ytmId;
+  final String name;
+  final String? thumbUrl;
+  final int origin;
+
+  /// An automatic artist the user stopped following: never added again.
+  final bool excluded;
+
+  /// No notification for this artist; the release still shows in Home.
+  final bool muted;
+  final int followedAt;
+
+  /// Null until the first check (which marks everything as seen).
+  final int? lastCheckedAt;
+  final String? lastError;
+
+  /// Checks in a row that did not find the artist page.
+  final int checksFailed;
+  const FollowedArtist({
+    required this.ytmId,
+    required this.name,
+    this.thumbUrl,
+    required this.origin,
+    required this.excluded,
+    required this.muted,
+    required this.followedAt,
+    this.lastCheckedAt,
+    this.lastError,
+    required this.checksFailed,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['ytm_id'] = Variable<String>(ytmId);
+    map['name'] = Variable<String>(name);
+    if (!nullToAbsent || thumbUrl != null) {
+      map['thumb_url'] = Variable<String>(thumbUrl);
+    }
+    map['origin'] = Variable<int>(origin);
+    map['excluded'] = Variable<bool>(excluded);
+    map['muted'] = Variable<bool>(muted);
+    map['followed_at'] = Variable<int>(followedAt);
+    if (!nullToAbsent || lastCheckedAt != null) {
+      map['last_checked_at'] = Variable<int>(lastCheckedAt);
+    }
+    if (!nullToAbsent || lastError != null) {
+      map['last_error'] = Variable<String>(lastError);
+    }
+    map['checks_failed'] = Variable<int>(checksFailed);
+    return map;
+  }
+
+  FollowedArtistsCompanion toCompanion(bool nullToAbsent) {
+    return FollowedArtistsCompanion(
+      ytmId: Value(ytmId),
+      name: Value(name),
+      thumbUrl: thumbUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(thumbUrl),
+      origin: Value(origin),
+      excluded: Value(excluded),
+      muted: Value(muted),
+      followedAt: Value(followedAt),
+      lastCheckedAt: lastCheckedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastCheckedAt),
+      lastError: lastError == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastError),
+      checksFailed: Value(checksFailed),
+    );
+  }
+
+  factory FollowedArtist.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return FollowedArtist(
+      ytmId: serializer.fromJson<String>(json['ytmId']),
+      name: serializer.fromJson<String>(json['name']),
+      thumbUrl: serializer.fromJson<String?>(json['thumbUrl']),
+      origin: serializer.fromJson<int>(json['origin']),
+      excluded: serializer.fromJson<bool>(json['excluded']),
+      muted: serializer.fromJson<bool>(json['muted']),
+      followedAt: serializer.fromJson<int>(json['followedAt']),
+      lastCheckedAt: serializer.fromJson<int?>(json['lastCheckedAt']),
+      lastError: serializer.fromJson<String?>(json['lastError']),
+      checksFailed: serializer.fromJson<int>(json['checksFailed']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'ytmId': serializer.toJson<String>(ytmId),
+      'name': serializer.toJson<String>(name),
+      'thumbUrl': serializer.toJson<String?>(thumbUrl),
+      'origin': serializer.toJson<int>(origin),
+      'excluded': serializer.toJson<bool>(excluded),
+      'muted': serializer.toJson<bool>(muted),
+      'followedAt': serializer.toJson<int>(followedAt),
+      'lastCheckedAt': serializer.toJson<int?>(lastCheckedAt),
+      'lastError': serializer.toJson<String?>(lastError),
+      'checksFailed': serializer.toJson<int>(checksFailed),
+    };
+  }
+
+  FollowedArtist copyWith({
+    String? ytmId,
+    String? name,
+    Value<String?> thumbUrl = const Value.absent(),
+    int? origin,
+    bool? excluded,
+    bool? muted,
+    int? followedAt,
+    Value<int?> lastCheckedAt = const Value.absent(),
+    Value<String?> lastError = const Value.absent(),
+    int? checksFailed,
+  }) => FollowedArtist(
+    ytmId: ytmId ?? this.ytmId,
+    name: name ?? this.name,
+    thumbUrl: thumbUrl.present ? thumbUrl.value : this.thumbUrl,
+    origin: origin ?? this.origin,
+    excluded: excluded ?? this.excluded,
+    muted: muted ?? this.muted,
+    followedAt: followedAt ?? this.followedAt,
+    lastCheckedAt: lastCheckedAt.present
+        ? lastCheckedAt.value
+        : this.lastCheckedAt,
+    lastError: lastError.present ? lastError.value : this.lastError,
+    checksFailed: checksFailed ?? this.checksFailed,
+  );
+  FollowedArtist copyWithCompanion(FollowedArtistsCompanion data) {
+    return FollowedArtist(
+      ytmId: data.ytmId.present ? data.ytmId.value : this.ytmId,
+      name: data.name.present ? data.name.value : this.name,
+      thumbUrl: data.thumbUrl.present ? data.thumbUrl.value : this.thumbUrl,
+      origin: data.origin.present ? data.origin.value : this.origin,
+      excluded: data.excluded.present ? data.excluded.value : this.excluded,
+      muted: data.muted.present ? data.muted.value : this.muted,
+      followedAt: data.followedAt.present
+          ? data.followedAt.value
+          : this.followedAt,
+      lastCheckedAt: data.lastCheckedAt.present
+          ? data.lastCheckedAt.value
+          : this.lastCheckedAt,
+      lastError: data.lastError.present ? data.lastError.value : this.lastError,
+      checksFailed: data.checksFailed.present
+          ? data.checksFailed.value
+          : this.checksFailed,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('FollowedArtist(')
+          ..write('ytmId: $ytmId, ')
+          ..write('name: $name, ')
+          ..write('thumbUrl: $thumbUrl, ')
+          ..write('origin: $origin, ')
+          ..write('excluded: $excluded, ')
+          ..write('muted: $muted, ')
+          ..write('followedAt: $followedAt, ')
+          ..write('lastCheckedAt: $lastCheckedAt, ')
+          ..write('lastError: $lastError, ')
+          ..write('checksFailed: $checksFailed')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    ytmId,
+    name,
+    thumbUrl,
+    origin,
+    excluded,
+    muted,
+    followedAt,
+    lastCheckedAt,
+    lastError,
+    checksFailed,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is FollowedArtist &&
+          other.ytmId == this.ytmId &&
+          other.name == this.name &&
+          other.thumbUrl == this.thumbUrl &&
+          other.origin == this.origin &&
+          other.excluded == this.excluded &&
+          other.muted == this.muted &&
+          other.followedAt == this.followedAt &&
+          other.lastCheckedAt == this.lastCheckedAt &&
+          other.lastError == this.lastError &&
+          other.checksFailed == this.checksFailed);
+}
+
+class FollowedArtistsCompanion extends UpdateCompanion<FollowedArtist> {
+  final Value<String> ytmId;
+  final Value<String> name;
+  final Value<String?> thumbUrl;
+  final Value<int> origin;
+  final Value<bool> excluded;
+  final Value<bool> muted;
+  final Value<int> followedAt;
+  final Value<int?> lastCheckedAt;
+  final Value<String?> lastError;
+  final Value<int> checksFailed;
+  final Value<int> rowid;
+  const FollowedArtistsCompanion({
+    this.ytmId = const Value.absent(),
+    this.name = const Value.absent(),
+    this.thumbUrl = const Value.absent(),
+    this.origin = const Value.absent(),
+    this.excluded = const Value.absent(),
+    this.muted = const Value.absent(),
+    this.followedAt = const Value.absent(),
+    this.lastCheckedAt = const Value.absent(),
+    this.lastError = const Value.absent(),
+    this.checksFailed = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  FollowedArtistsCompanion.insert({
+    required String ytmId,
+    required String name,
+    this.thumbUrl = const Value.absent(),
+    this.origin = const Value.absent(),
+    this.excluded = const Value.absent(),
+    this.muted = const Value.absent(),
+    this.followedAt = const Value.absent(),
+    this.lastCheckedAt = const Value.absent(),
+    this.lastError = const Value.absent(),
+    this.checksFailed = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : ytmId = Value(ytmId),
+       name = Value(name);
+  static Insertable<FollowedArtist> custom({
+    Expression<String>? ytmId,
+    Expression<String>? name,
+    Expression<String>? thumbUrl,
+    Expression<int>? origin,
+    Expression<bool>? excluded,
+    Expression<bool>? muted,
+    Expression<int>? followedAt,
+    Expression<int>? lastCheckedAt,
+    Expression<String>? lastError,
+    Expression<int>? checksFailed,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (ytmId != null) 'ytm_id': ytmId,
+      if (name != null) 'name': name,
+      if (thumbUrl != null) 'thumb_url': thumbUrl,
+      if (origin != null) 'origin': origin,
+      if (excluded != null) 'excluded': excluded,
+      if (muted != null) 'muted': muted,
+      if (followedAt != null) 'followed_at': followedAt,
+      if (lastCheckedAt != null) 'last_checked_at': lastCheckedAt,
+      if (lastError != null) 'last_error': lastError,
+      if (checksFailed != null) 'checks_failed': checksFailed,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  FollowedArtistsCompanion copyWith({
+    Value<String>? ytmId,
+    Value<String>? name,
+    Value<String?>? thumbUrl,
+    Value<int>? origin,
+    Value<bool>? excluded,
+    Value<bool>? muted,
+    Value<int>? followedAt,
+    Value<int?>? lastCheckedAt,
+    Value<String?>? lastError,
+    Value<int>? checksFailed,
+    Value<int>? rowid,
+  }) {
+    return FollowedArtistsCompanion(
+      ytmId: ytmId ?? this.ytmId,
+      name: name ?? this.name,
+      thumbUrl: thumbUrl ?? this.thumbUrl,
+      origin: origin ?? this.origin,
+      excluded: excluded ?? this.excluded,
+      muted: muted ?? this.muted,
+      followedAt: followedAt ?? this.followedAt,
+      lastCheckedAt: lastCheckedAt ?? this.lastCheckedAt,
+      lastError: lastError ?? this.lastError,
+      checksFailed: checksFailed ?? this.checksFailed,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (ytmId.present) {
+      map['ytm_id'] = Variable<String>(ytmId.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (thumbUrl.present) {
+      map['thumb_url'] = Variable<String>(thumbUrl.value);
+    }
+    if (origin.present) {
+      map['origin'] = Variable<int>(origin.value);
+    }
+    if (excluded.present) {
+      map['excluded'] = Variable<bool>(excluded.value);
+    }
+    if (muted.present) {
+      map['muted'] = Variable<bool>(muted.value);
+    }
+    if (followedAt.present) {
+      map['followed_at'] = Variable<int>(followedAt.value);
+    }
+    if (lastCheckedAt.present) {
+      map['last_checked_at'] = Variable<int>(lastCheckedAt.value);
+    }
+    if (lastError.present) {
+      map['last_error'] = Variable<String>(lastError.value);
+    }
+    if (checksFailed.present) {
+      map['checks_failed'] = Variable<int>(checksFailed.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('FollowedArtistsCompanion(')
+          ..write('ytmId: $ytmId, ')
+          ..write('name: $name, ')
+          ..write('thumbUrl: $thumbUrl, ')
+          ..write('origin: $origin, ')
+          ..write('excluded: $excluded, ')
+          ..write('muted: $muted, ')
+          ..write('followedAt: $followedAt, ')
+          ..write('lastCheckedAt: $lastCheckedAt, ')
+          ..write('lastError: $lastError, ')
+          ..write('checksFailed: $checksFailed, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ArtistReleasesTable extends ArtistReleases
+    with TableInfo<$ArtistReleasesTable, ArtistRelease> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ArtistReleasesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _browseIdMeta = const VerificationMeta(
+    'browseId',
+  );
+  @override
+  late final GeneratedColumn<String> browseId = GeneratedColumn<String>(
+    'browse_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _artistIdMeta = const VerificationMeta(
+    'artistId',
+  );
+  @override
+  late final GeneratedColumn<String> artistId = GeneratedColumn<String>(
+    'artist_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES followed_artists (ytm_id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+    'title',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
+  @override
+  late final GeneratedColumn<int> kind = GeneratedColumn<int>(
+    'kind',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _yearMeta = const VerificationMeta('year');
+  @override
+  late final GeneratedColumn<int> year = GeneratedColumn<int>(
+    'year',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _thumbUrlMeta = const VerificationMeta(
+    'thumbUrl',
+  );
+  @override
+  late final GeneratedColumn<String> thumbUrl = GeneratedColumn<String>(
+    'thumb_url',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _firstSeenAtMeta = const VerificationMeta(
+    'firstSeenAt',
+  );
+  @override
+  late final GeneratedColumn<int> firstSeenAt = GeneratedColumn<int>(
+    'first_seen_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _isNewMeta = const VerificationMeta('isNew');
+  @override
+  late final GeneratedColumn<bool> isNew = GeneratedColumn<bool>(
+    'is_new',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_new" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _openedAtMeta = const VerificationMeta(
+    'openedAt',
+  );
+  @override
+  late final GeneratedColumn<int> openedAt = GeneratedColumn<int>(
+    'opened_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _groupKeyMeta = const VerificationMeta(
+    'groupKey',
+  );
+  @override
+  late final GeneratedColumn<String> groupKey = GeneratedColumn<String>(
+    'group_key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    browseId,
+    artistId,
+    title,
+    kind,
+    year,
+    thumbUrl,
+    firstSeenAt,
+    isNew,
+    openedAt,
+    groupKey,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'artist_releases';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ArtistRelease> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('browse_id')) {
+      context.handle(
+        _browseIdMeta,
+        browseId.isAcceptableOrUnknown(data['browse_id']!, _browseIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_browseIdMeta);
+    }
+    if (data.containsKey('artist_id')) {
+      context.handle(
+        _artistIdMeta,
+        artistId.isAcceptableOrUnknown(data['artist_id']!, _artistIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_artistIdMeta);
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+        _titleMeta,
+        title.isAcceptableOrUnknown(data['title']!, _titleMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_titleMeta);
+    }
+    if (data.containsKey('kind')) {
+      context.handle(
+        _kindMeta,
+        kind.isAcceptableOrUnknown(data['kind']!, _kindMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_kindMeta);
+    }
+    if (data.containsKey('year')) {
+      context.handle(
+        _yearMeta,
+        year.isAcceptableOrUnknown(data['year']!, _yearMeta),
+      );
+    }
+    if (data.containsKey('thumb_url')) {
+      context.handle(
+        _thumbUrlMeta,
+        thumbUrl.isAcceptableOrUnknown(data['thumb_url']!, _thumbUrlMeta),
+      );
+    }
+    if (data.containsKey('first_seen_at')) {
+      context.handle(
+        _firstSeenAtMeta,
+        firstSeenAt.isAcceptableOrUnknown(
+          data['first_seen_at']!,
+          _firstSeenAtMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_firstSeenAtMeta);
+    }
+    if (data.containsKey('is_new')) {
+      context.handle(
+        _isNewMeta,
+        isNew.isAcceptableOrUnknown(data['is_new']!, _isNewMeta),
+      );
+    }
+    if (data.containsKey('opened_at')) {
+      context.handle(
+        _openedAtMeta,
+        openedAt.isAcceptableOrUnknown(data['opened_at']!, _openedAtMeta),
+      );
+    }
+    if (data.containsKey('group_key')) {
+      context.handle(
+        _groupKeyMeta,
+        groupKey.isAcceptableOrUnknown(data['group_key']!, _groupKeyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_groupKeyMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {browseId};
+  @override
+  ArtistRelease map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ArtistRelease(
+      browseId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}browse_id'],
+      )!,
+      artistId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}artist_id'],
+      )!,
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      )!,
+      kind: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}kind'],
+      )!,
+      year: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}year'],
+      ),
+      thumbUrl: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}thumb_url'],
+      ),
+      firstSeenAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}first_seen_at'],
+      )!,
+      isNew: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_new'],
+      )!,
+      openedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}opened_at'],
+      ),
+      groupKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}group_key'],
+      )!,
+    );
+  }
+
+  @override
+  $ArtistReleasesTable createAlias(String alias) {
+    return $ArtistReleasesTable(attachedDatabase, alias);
+  }
+}
+
+class ArtistRelease extends DataClass implements Insertable<ArtistRelease> {
+  /// `MPREb_…`.
+  final String browseId;
+  final String artistId;
+  final String title;
+
+  /// `ReleaseKind.index`: 0 album, 1 single or EP.
+  final int kind;
+  final int? year;
+  final String? thumbUrl;
+  final int firstSeenAt;
+  final bool isNew;
+  final int? openedAt;
+
+  /// Same for the variants and reissues of one title (`releaseGroupKey`).
+  final String groupKey;
+  const ArtistRelease({
+    required this.browseId,
+    required this.artistId,
+    required this.title,
+    required this.kind,
+    this.year,
+    this.thumbUrl,
+    required this.firstSeenAt,
+    required this.isNew,
+    this.openedAt,
+    required this.groupKey,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['browse_id'] = Variable<String>(browseId);
+    map['artist_id'] = Variable<String>(artistId);
+    map['title'] = Variable<String>(title);
+    map['kind'] = Variable<int>(kind);
+    if (!nullToAbsent || year != null) {
+      map['year'] = Variable<int>(year);
+    }
+    if (!nullToAbsent || thumbUrl != null) {
+      map['thumb_url'] = Variable<String>(thumbUrl);
+    }
+    map['first_seen_at'] = Variable<int>(firstSeenAt);
+    map['is_new'] = Variable<bool>(isNew);
+    if (!nullToAbsent || openedAt != null) {
+      map['opened_at'] = Variable<int>(openedAt);
+    }
+    map['group_key'] = Variable<String>(groupKey);
+    return map;
+  }
+
+  ArtistReleasesCompanion toCompanion(bool nullToAbsent) {
+    return ArtistReleasesCompanion(
+      browseId: Value(browseId),
+      artistId: Value(artistId),
+      title: Value(title),
+      kind: Value(kind),
+      year: year == null && nullToAbsent ? const Value.absent() : Value(year),
+      thumbUrl: thumbUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(thumbUrl),
+      firstSeenAt: Value(firstSeenAt),
+      isNew: Value(isNew),
+      openedAt: openedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(openedAt),
+      groupKey: Value(groupKey),
+    );
+  }
+
+  factory ArtistRelease.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ArtistRelease(
+      browseId: serializer.fromJson<String>(json['browseId']),
+      artistId: serializer.fromJson<String>(json['artistId']),
+      title: serializer.fromJson<String>(json['title']),
+      kind: serializer.fromJson<int>(json['kind']),
+      year: serializer.fromJson<int?>(json['year']),
+      thumbUrl: serializer.fromJson<String?>(json['thumbUrl']),
+      firstSeenAt: serializer.fromJson<int>(json['firstSeenAt']),
+      isNew: serializer.fromJson<bool>(json['isNew']),
+      openedAt: serializer.fromJson<int?>(json['openedAt']),
+      groupKey: serializer.fromJson<String>(json['groupKey']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'browseId': serializer.toJson<String>(browseId),
+      'artistId': serializer.toJson<String>(artistId),
+      'title': serializer.toJson<String>(title),
+      'kind': serializer.toJson<int>(kind),
+      'year': serializer.toJson<int?>(year),
+      'thumbUrl': serializer.toJson<String?>(thumbUrl),
+      'firstSeenAt': serializer.toJson<int>(firstSeenAt),
+      'isNew': serializer.toJson<bool>(isNew),
+      'openedAt': serializer.toJson<int?>(openedAt),
+      'groupKey': serializer.toJson<String>(groupKey),
+    };
+  }
+
+  ArtistRelease copyWith({
+    String? browseId,
+    String? artistId,
+    String? title,
+    int? kind,
+    Value<int?> year = const Value.absent(),
+    Value<String?> thumbUrl = const Value.absent(),
+    int? firstSeenAt,
+    bool? isNew,
+    Value<int?> openedAt = const Value.absent(),
+    String? groupKey,
+  }) => ArtistRelease(
+    browseId: browseId ?? this.browseId,
+    artistId: artistId ?? this.artistId,
+    title: title ?? this.title,
+    kind: kind ?? this.kind,
+    year: year.present ? year.value : this.year,
+    thumbUrl: thumbUrl.present ? thumbUrl.value : this.thumbUrl,
+    firstSeenAt: firstSeenAt ?? this.firstSeenAt,
+    isNew: isNew ?? this.isNew,
+    openedAt: openedAt.present ? openedAt.value : this.openedAt,
+    groupKey: groupKey ?? this.groupKey,
+  );
+  ArtistRelease copyWithCompanion(ArtistReleasesCompanion data) {
+    return ArtistRelease(
+      browseId: data.browseId.present ? data.browseId.value : this.browseId,
+      artistId: data.artistId.present ? data.artistId.value : this.artistId,
+      title: data.title.present ? data.title.value : this.title,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      year: data.year.present ? data.year.value : this.year,
+      thumbUrl: data.thumbUrl.present ? data.thumbUrl.value : this.thumbUrl,
+      firstSeenAt: data.firstSeenAt.present
+          ? data.firstSeenAt.value
+          : this.firstSeenAt,
+      isNew: data.isNew.present ? data.isNew.value : this.isNew,
+      openedAt: data.openedAt.present ? data.openedAt.value : this.openedAt,
+      groupKey: data.groupKey.present ? data.groupKey.value : this.groupKey,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ArtistRelease(')
+          ..write('browseId: $browseId, ')
+          ..write('artistId: $artistId, ')
+          ..write('title: $title, ')
+          ..write('kind: $kind, ')
+          ..write('year: $year, ')
+          ..write('thumbUrl: $thumbUrl, ')
+          ..write('firstSeenAt: $firstSeenAt, ')
+          ..write('isNew: $isNew, ')
+          ..write('openedAt: $openedAt, ')
+          ..write('groupKey: $groupKey')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    browseId,
+    artistId,
+    title,
+    kind,
+    year,
+    thumbUrl,
+    firstSeenAt,
+    isNew,
+    openedAt,
+    groupKey,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ArtistRelease &&
+          other.browseId == this.browseId &&
+          other.artistId == this.artistId &&
+          other.title == this.title &&
+          other.kind == this.kind &&
+          other.year == this.year &&
+          other.thumbUrl == this.thumbUrl &&
+          other.firstSeenAt == this.firstSeenAt &&
+          other.isNew == this.isNew &&
+          other.openedAt == this.openedAt &&
+          other.groupKey == this.groupKey);
+}
+
+class ArtistReleasesCompanion extends UpdateCompanion<ArtistRelease> {
+  final Value<String> browseId;
+  final Value<String> artistId;
+  final Value<String> title;
+  final Value<int> kind;
+  final Value<int?> year;
+  final Value<String?> thumbUrl;
+  final Value<int> firstSeenAt;
+  final Value<bool> isNew;
+  final Value<int?> openedAt;
+  final Value<String> groupKey;
+  final Value<int> rowid;
+  const ArtistReleasesCompanion({
+    this.browseId = const Value.absent(),
+    this.artistId = const Value.absent(),
+    this.title = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.year = const Value.absent(),
+    this.thumbUrl = const Value.absent(),
+    this.firstSeenAt = const Value.absent(),
+    this.isNew = const Value.absent(),
+    this.openedAt = const Value.absent(),
+    this.groupKey = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ArtistReleasesCompanion.insert({
+    required String browseId,
+    required String artistId,
+    required String title,
+    required int kind,
+    this.year = const Value.absent(),
+    this.thumbUrl = const Value.absent(),
+    required int firstSeenAt,
+    this.isNew = const Value.absent(),
+    this.openedAt = const Value.absent(),
+    required String groupKey,
+    this.rowid = const Value.absent(),
+  }) : browseId = Value(browseId),
+       artistId = Value(artistId),
+       title = Value(title),
+       kind = Value(kind),
+       firstSeenAt = Value(firstSeenAt),
+       groupKey = Value(groupKey);
+  static Insertable<ArtistRelease> custom({
+    Expression<String>? browseId,
+    Expression<String>? artistId,
+    Expression<String>? title,
+    Expression<int>? kind,
+    Expression<int>? year,
+    Expression<String>? thumbUrl,
+    Expression<int>? firstSeenAt,
+    Expression<bool>? isNew,
+    Expression<int>? openedAt,
+    Expression<String>? groupKey,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (browseId != null) 'browse_id': browseId,
+      if (artistId != null) 'artist_id': artistId,
+      if (title != null) 'title': title,
+      if (kind != null) 'kind': kind,
+      if (year != null) 'year': year,
+      if (thumbUrl != null) 'thumb_url': thumbUrl,
+      if (firstSeenAt != null) 'first_seen_at': firstSeenAt,
+      if (isNew != null) 'is_new': isNew,
+      if (openedAt != null) 'opened_at': openedAt,
+      if (groupKey != null) 'group_key': groupKey,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ArtistReleasesCompanion copyWith({
+    Value<String>? browseId,
+    Value<String>? artistId,
+    Value<String>? title,
+    Value<int>? kind,
+    Value<int?>? year,
+    Value<String?>? thumbUrl,
+    Value<int>? firstSeenAt,
+    Value<bool>? isNew,
+    Value<int?>? openedAt,
+    Value<String>? groupKey,
+    Value<int>? rowid,
+  }) {
+    return ArtistReleasesCompanion(
+      browseId: browseId ?? this.browseId,
+      artistId: artistId ?? this.artistId,
+      title: title ?? this.title,
+      kind: kind ?? this.kind,
+      year: year ?? this.year,
+      thumbUrl: thumbUrl ?? this.thumbUrl,
+      firstSeenAt: firstSeenAt ?? this.firstSeenAt,
+      isNew: isNew ?? this.isNew,
+      openedAt: openedAt ?? this.openedAt,
+      groupKey: groupKey ?? this.groupKey,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (browseId.present) {
+      map['browse_id'] = Variable<String>(browseId.value);
+    }
+    if (artistId.present) {
+      map['artist_id'] = Variable<String>(artistId.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<int>(kind.value);
+    }
+    if (year.present) {
+      map['year'] = Variable<int>(year.value);
+    }
+    if (thumbUrl.present) {
+      map['thumb_url'] = Variable<String>(thumbUrl.value);
+    }
+    if (firstSeenAt.present) {
+      map['first_seen_at'] = Variable<int>(firstSeenAt.value);
+    }
+    if (isNew.present) {
+      map['is_new'] = Variable<bool>(isNew.value);
+    }
+    if (openedAt.present) {
+      map['opened_at'] = Variable<int>(openedAt.value);
+    }
+    if (groupKey.present) {
+      map['group_key'] = Variable<String>(groupKey.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ArtistReleasesCompanion(')
+          ..write('browseId: $browseId, ')
+          ..write('artistId: $artistId, ')
+          ..write('title: $title, ')
+          ..write('kind: $kind, ')
+          ..write('year: $year, ')
+          ..write('thumbUrl: $thumbUrl, ')
+          ..write('firstSeenAt: $firstSeenAt, ')
+          ..write('isNew: $isNew, ')
+          ..write('openedAt: $openedAt, ')
+          ..write('groupKey: $groupKey, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ArtistLookupsTable extends ArtistLookups
+    with TableInfo<$ArtistLookupsTable, ArtistLookup> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ArtistLookupsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _artistKeyMeta = const VerificationMeta(
+    'artistKey',
+  );
+  @override
+  late final GeneratedColumn<String> artistKey = GeneratedColumn<String>(
+    'artist_key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<int> status = GeneratedColumn<int>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _ytmIdMeta = const VerificationMeta('ytmId');
+  @override
+  late final GeneratedColumn<String> ytmId = GeneratedColumn<String>(
+    'ytm_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _ytmNameMeta = const VerificationMeta(
+    'ytmName',
+  );
+  @override
+  late final GeneratedColumn<String> ytmName = GeneratedColumn<String>(
+    'ytm_name',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _thumbUrlMeta = const VerificationMeta(
+    'thumbUrl',
+  );
+  @override
+  late final GeneratedColumn<String> thumbUrl = GeneratedColumn<String>(
+    'thumb_url',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _checkedAtMeta = const VerificationMeta(
+    'checkedAt',
+  );
+  @override
+  late final GeneratedColumn<int> checkedAt = GeneratedColumn<int>(
+    'checked_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    artistKey,
+    name,
+    status,
+    ytmId,
+    ytmName,
+    thumbUrl,
+    checkedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'artist_lookups';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ArtistLookup> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('artist_key')) {
+      context.handle(
+        _artistKeyMeta,
+        artistKey.isAcceptableOrUnknown(data['artist_key']!, _artistKeyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_artistKeyMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_statusMeta);
+    }
+    if (data.containsKey('ytm_id')) {
+      context.handle(
+        _ytmIdMeta,
+        ytmId.isAcceptableOrUnknown(data['ytm_id']!, _ytmIdMeta),
+      );
+    }
+    if (data.containsKey('ytm_name')) {
+      context.handle(
+        _ytmNameMeta,
+        ytmName.isAcceptableOrUnknown(data['ytm_name']!, _ytmNameMeta),
+      );
+    }
+    if (data.containsKey('thumb_url')) {
+      context.handle(
+        _thumbUrlMeta,
+        thumbUrl.isAcceptableOrUnknown(data['thumb_url']!, _thumbUrlMeta),
+      );
+    }
+    if (data.containsKey('checked_at')) {
+      context.handle(
+        _checkedAtMeta,
+        checkedAt.isAcceptableOrUnknown(data['checked_at']!, _checkedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_checkedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {artistKey};
+  @override
+  ArtistLookup map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ArtistLookup(
+      artistKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}artist_key'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}status'],
+      )!,
+      ytmId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}ytm_id'],
+      ),
+      ytmName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}ytm_name'],
+      ),
+      thumbUrl: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}thumb_url'],
+      ),
+      checkedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}checked_at'],
+      )!,
+    );
+  }
+
+  @override
+  $ArtistLookupsTable createAlias(String alias) {
+    return $ArtistLookupsTable(attachedDatabase, alias);
+  }
+}
+
+class ArtistLookup extends DataClass implements Insertable<ArtistLookup> {
+  /// `matchKey` of the main artist's name.
+  final String artistKey;
+  final String name;
+
+  /// 0 = one exact artist ([ytmId]), 1 = nobody, 2 = several (to confirm).
+  final int status;
+  final String? ytmId;
+  final String? ytmName;
+  final String? thumbUrl;
+  final int checkedAt;
+  const ArtistLookup({
+    required this.artistKey,
+    required this.name,
+    required this.status,
+    this.ytmId,
+    this.ytmName,
+    this.thumbUrl,
+    required this.checkedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['artist_key'] = Variable<String>(artistKey);
+    map['name'] = Variable<String>(name);
+    map['status'] = Variable<int>(status);
+    if (!nullToAbsent || ytmId != null) {
+      map['ytm_id'] = Variable<String>(ytmId);
+    }
+    if (!nullToAbsent || ytmName != null) {
+      map['ytm_name'] = Variable<String>(ytmName);
+    }
+    if (!nullToAbsent || thumbUrl != null) {
+      map['thumb_url'] = Variable<String>(thumbUrl);
+    }
+    map['checked_at'] = Variable<int>(checkedAt);
+    return map;
+  }
+
+  ArtistLookupsCompanion toCompanion(bool nullToAbsent) {
+    return ArtistLookupsCompanion(
+      artistKey: Value(artistKey),
+      name: Value(name),
+      status: Value(status),
+      ytmId: ytmId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(ytmId),
+      ytmName: ytmName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(ytmName),
+      thumbUrl: thumbUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(thumbUrl),
+      checkedAt: Value(checkedAt),
+    );
+  }
+
+  factory ArtistLookup.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ArtistLookup(
+      artistKey: serializer.fromJson<String>(json['artistKey']),
+      name: serializer.fromJson<String>(json['name']),
+      status: serializer.fromJson<int>(json['status']),
+      ytmId: serializer.fromJson<String?>(json['ytmId']),
+      ytmName: serializer.fromJson<String?>(json['ytmName']),
+      thumbUrl: serializer.fromJson<String?>(json['thumbUrl']),
+      checkedAt: serializer.fromJson<int>(json['checkedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'artistKey': serializer.toJson<String>(artistKey),
+      'name': serializer.toJson<String>(name),
+      'status': serializer.toJson<int>(status),
+      'ytmId': serializer.toJson<String?>(ytmId),
+      'ytmName': serializer.toJson<String?>(ytmName),
+      'thumbUrl': serializer.toJson<String?>(thumbUrl),
+      'checkedAt': serializer.toJson<int>(checkedAt),
+    };
+  }
+
+  ArtistLookup copyWith({
+    String? artistKey,
+    String? name,
+    int? status,
+    Value<String?> ytmId = const Value.absent(),
+    Value<String?> ytmName = const Value.absent(),
+    Value<String?> thumbUrl = const Value.absent(),
+    int? checkedAt,
+  }) => ArtistLookup(
+    artistKey: artistKey ?? this.artistKey,
+    name: name ?? this.name,
+    status: status ?? this.status,
+    ytmId: ytmId.present ? ytmId.value : this.ytmId,
+    ytmName: ytmName.present ? ytmName.value : this.ytmName,
+    thumbUrl: thumbUrl.present ? thumbUrl.value : this.thumbUrl,
+    checkedAt: checkedAt ?? this.checkedAt,
+  );
+  ArtistLookup copyWithCompanion(ArtistLookupsCompanion data) {
+    return ArtistLookup(
+      artistKey: data.artistKey.present ? data.artistKey.value : this.artistKey,
+      name: data.name.present ? data.name.value : this.name,
+      status: data.status.present ? data.status.value : this.status,
+      ytmId: data.ytmId.present ? data.ytmId.value : this.ytmId,
+      ytmName: data.ytmName.present ? data.ytmName.value : this.ytmName,
+      thumbUrl: data.thumbUrl.present ? data.thumbUrl.value : this.thumbUrl,
+      checkedAt: data.checkedAt.present ? data.checkedAt.value : this.checkedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ArtistLookup(')
+          ..write('artistKey: $artistKey, ')
+          ..write('name: $name, ')
+          ..write('status: $status, ')
+          ..write('ytmId: $ytmId, ')
+          ..write('ytmName: $ytmName, ')
+          ..write('thumbUrl: $thumbUrl, ')
+          ..write('checkedAt: $checkedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(artistKey, name, status, ytmId, ytmName, thumbUrl, checkedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ArtistLookup &&
+          other.artistKey == this.artistKey &&
+          other.name == this.name &&
+          other.status == this.status &&
+          other.ytmId == this.ytmId &&
+          other.ytmName == this.ytmName &&
+          other.thumbUrl == this.thumbUrl &&
+          other.checkedAt == this.checkedAt);
+}
+
+class ArtistLookupsCompanion extends UpdateCompanion<ArtistLookup> {
+  final Value<String> artistKey;
+  final Value<String> name;
+  final Value<int> status;
+  final Value<String?> ytmId;
+  final Value<String?> ytmName;
+  final Value<String?> thumbUrl;
+  final Value<int> checkedAt;
+  final Value<int> rowid;
+  const ArtistLookupsCompanion({
+    this.artistKey = const Value.absent(),
+    this.name = const Value.absent(),
+    this.status = const Value.absent(),
+    this.ytmId = const Value.absent(),
+    this.ytmName = const Value.absent(),
+    this.thumbUrl = const Value.absent(),
+    this.checkedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ArtistLookupsCompanion.insert({
+    required String artistKey,
+    required String name,
+    required int status,
+    this.ytmId = const Value.absent(),
+    this.ytmName = const Value.absent(),
+    this.thumbUrl = const Value.absent(),
+    required int checkedAt,
+    this.rowid = const Value.absent(),
+  }) : artistKey = Value(artistKey),
+       name = Value(name),
+       status = Value(status),
+       checkedAt = Value(checkedAt);
+  static Insertable<ArtistLookup> custom({
+    Expression<String>? artistKey,
+    Expression<String>? name,
+    Expression<int>? status,
+    Expression<String>? ytmId,
+    Expression<String>? ytmName,
+    Expression<String>? thumbUrl,
+    Expression<int>? checkedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (artistKey != null) 'artist_key': artistKey,
+      if (name != null) 'name': name,
+      if (status != null) 'status': status,
+      if (ytmId != null) 'ytm_id': ytmId,
+      if (ytmName != null) 'ytm_name': ytmName,
+      if (thumbUrl != null) 'thumb_url': thumbUrl,
+      if (checkedAt != null) 'checked_at': checkedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ArtistLookupsCompanion copyWith({
+    Value<String>? artistKey,
+    Value<String>? name,
+    Value<int>? status,
+    Value<String?>? ytmId,
+    Value<String?>? ytmName,
+    Value<String?>? thumbUrl,
+    Value<int>? checkedAt,
+    Value<int>? rowid,
+  }) {
+    return ArtistLookupsCompanion(
+      artistKey: artistKey ?? this.artistKey,
+      name: name ?? this.name,
+      status: status ?? this.status,
+      ytmId: ytmId ?? this.ytmId,
+      ytmName: ytmName ?? this.ytmName,
+      thumbUrl: thumbUrl ?? this.thumbUrl,
+      checkedAt: checkedAt ?? this.checkedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (artistKey.present) {
+      map['artist_key'] = Variable<String>(artistKey.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<int>(status.value);
+    }
+    if (ytmId.present) {
+      map['ytm_id'] = Variable<String>(ytmId.value);
+    }
+    if (ytmName.present) {
+      map['ytm_name'] = Variable<String>(ytmName.value);
+    }
+    if (thumbUrl.present) {
+      map['thumb_url'] = Variable<String>(thumbUrl.value);
+    }
+    if (checkedAt.present) {
+      map['checked_at'] = Variable<int>(checkedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ArtistLookupsCompanion(')
+          ..write('artistKey: $artistKey, ')
+          ..write('name: $name, ')
+          ..write('status: $status, ')
+          ..write('ytmId: $ytmId, ')
+          ..write('ytmName: $ytmName, ')
+          ..write('thumbUrl: $thumbUrl, ')
+          ..write('checkedAt: $checkedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -8398,6 +10107,11 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   );
   late final $ArtistInfosTable artistInfos = $ArtistInfosTable(this);
   late final $RadioStationsTable radioStations = $RadioStationsTable(this);
+  late final $FollowedArtistsTable followedArtists = $FollowedArtistsTable(
+    this,
+  );
+  late final $ArtistReleasesTable artistReleases = $ArtistReleasesTable(this);
+  late final $ArtistLookupsTable artistLookups = $ArtistLookupsTable(this);
   late final Index tracksAlbumKey = Index(
     'tracks_album_key',
     'CREATE INDEX tracks_album_key ON tracks (album_key)',
@@ -8461,6 +10175,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     podcastEpisodes,
     artistInfos,
     radioStations,
+    followedArtists,
+    artistReleases,
+    artistLookups,
     tracksAlbumKey,
     tracksArtist,
     tracksFavorite,
@@ -8544,6 +10261,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('podcast_episodes', kind: UpdateKind.update)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'followed_artists',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('artist_releases', kind: UpdateKind.delete)],
     ),
   ]);
 }
@@ -14686,6 +16410,1085 @@ typedef $$RadioStationsTableProcessedTableManager =
       SavedRadio,
       PrefetchHooks Function()
     >;
+typedef $$FollowedArtistsTableCreateCompanionBuilder =
+    FollowedArtistsCompanion Function({
+      required String ytmId,
+      required String name,
+      Value<String?> thumbUrl,
+      Value<int> origin,
+      Value<bool> excluded,
+      Value<bool> muted,
+      Value<int> followedAt,
+      Value<int?> lastCheckedAt,
+      Value<String?> lastError,
+      Value<int> checksFailed,
+      Value<int> rowid,
+    });
+typedef $$FollowedArtistsTableUpdateCompanionBuilder =
+    FollowedArtistsCompanion Function({
+      Value<String> ytmId,
+      Value<String> name,
+      Value<String?> thumbUrl,
+      Value<int> origin,
+      Value<bool> excluded,
+      Value<bool> muted,
+      Value<int> followedAt,
+      Value<int?> lastCheckedAt,
+      Value<String?> lastError,
+      Value<int> checksFailed,
+      Value<int> rowid,
+    });
+
+final class $$FollowedArtistsTableReferences
+    extends
+        BaseReferences<_$AppDatabase, $FollowedArtistsTable, FollowedArtist> {
+  $$FollowedArtistsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static MultiTypedResultKey<$ArtistReleasesTable, List<ArtistRelease>>
+  _artistReleasesRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.artistReleases,
+    aliasName: 'followed_artists__ytm_id__artist_releases__artist_id',
+  );
+
+  $$ArtistReleasesTableProcessedTableManager get artistReleasesRefs {
+    final manager = $$ArtistReleasesTableTableManager($_db, $_db.artistReleases)
+        .filter(
+          (f) => f.artistId.ytmId.sqlEquals($_itemColumn<String>('ytm_id')!),
+        );
+
+    final cache = $_typedResult.readTableOrNull(_artistReleasesRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$FollowedArtistsTableFilterComposer
+    extends Composer<_$AppDatabase, $FollowedArtistsTable> {
+  $$FollowedArtistsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get ytmId => $composableBuilder(
+    column: $table.ytmId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get thumbUrl => $composableBuilder(
+    column: $table.thumbUrl,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get origin => $composableBuilder(
+    column: $table.origin,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get excluded => $composableBuilder(
+    column: $table.excluded,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get muted => $composableBuilder(
+    column: $table.muted,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get followedAt => $composableBuilder(
+    column: $table.followedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get lastCheckedAt => $composableBuilder(
+    column: $table.lastCheckedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get lastError => $composableBuilder(
+    column: $table.lastError,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get checksFailed => $composableBuilder(
+    column: $table.checksFailed,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  Expression<bool> artistReleasesRefs(
+    Expression<bool> Function($$ArtistReleasesTableFilterComposer f) f,
+  ) {
+    final $$ArtistReleasesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.ytmId,
+      referencedTable: $db.artistReleases,
+      getReferencedColumn: (t) => t.artistId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ArtistReleasesTableFilterComposer(
+            $db: $db,
+            $table: $db.artistReleases,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$FollowedArtistsTableOrderingComposer
+    extends Composer<_$AppDatabase, $FollowedArtistsTable> {
+  $$FollowedArtistsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get ytmId => $composableBuilder(
+    column: $table.ytmId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get thumbUrl => $composableBuilder(
+    column: $table.thumbUrl,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get origin => $composableBuilder(
+    column: $table.origin,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get excluded => $composableBuilder(
+    column: $table.excluded,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get muted => $composableBuilder(
+    column: $table.muted,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get followedAt => $composableBuilder(
+    column: $table.followedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get lastCheckedAt => $composableBuilder(
+    column: $table.lastCheckedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get lastError => $composableBuilder(
+    column: $table.lastError,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get checksFailed => $composableBuilder(
+    column: $table.checksFailed,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$FollowedArtistsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $FollowedArtistsTable> {
+  $$FollowedArtistsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get ytmId =>
+      $composableBuilder(column: $table.ytmId, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get thumbUrl =>
+      $composableBuilder(column: $table.thumbUrl, builder: (column) => column);
+
+  GeneratedColumn<int> get origin =>
+      $composableBuilder(column: $table.origin, builder: (column) => column);
+
+  GeneratedColumn<bool> get excluded =>
+      $composableBuilder(column: $table.excluded, builder: (column) => column);
+
+  GeneratedColumn<bool> get muted =>
+      $composableBuilder(column: $table.muted, builder: (column) => column);
+
+  GeneratedColumn<int> get followedAt => $composableBuilder(
+    column: $table.followedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get lastCheckedAt => $composableBuilder(
+    column: $table.lastCheckedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get lastError =>
+      $composableBuilder(column: $table.lastError, builder: (column) => column);
+
+  GeneratedColumn<int> get checksFailed => $composableBuilder(
+    column: $table.checksFailed,
+    builder: (column) => column,
+  );
+
+  Expression<T> artistReleasesRefs<T extends Object>(
+    Expression<T> Function($$ArtistReleasesTableAnnotationComposer a) f,
+  ) {
+    final $$ArtistReleasesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.ytmId,
+      referencedTable: $db.artistReleases,
+      getReferencedColumn: (t) => t.artistId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ArtistReleasesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.artistReleases,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$FollowedArtistsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $FollowedArtistsTable,
+          FollowedArtist,
+          $$FollowedArtistsTableFilterComposer,
+          $$FollowedArtistsTableOrderingComposer,
+          $$FollowedArtistsTableAnnotationComposer,
+          $$FollowedArtistsTableCreateCompanionBuilder,
+          $$FollowedArtistsTableUpdateCompanionBuilder,
+          (FollowedArtist, $$FollowedArtistsTableReferences),
+          FollowedArtist,
+          PrefetchHooks Function({bool artistReleasesRefs})
+        > {
+  $$FollowedArtistsTableTableManager(
+    _$AppDatabase db,
+    $FollowedArtistsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$FollowedArtistsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$FollowedArtistsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$FollowedArtistsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> ytmId = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String?> thumbUrl = const Value.absent(),
+                Value<int> origin = const Value.absent(),
+                Value<bool> excluded = const Value.absent(),
+                Value<bool> muted = const Value.absent(),
+                Value<int> followedAt = const Value.absent(),
+                Value<int?> lastCheckedAt = const Value.absent(),
+                Value<String?> lastError = const Value.absent(),
+                Value<int> checksFailed = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => FollowedArtistsCompanion(
+                ytmId: ytmId,
+                name: name,
+                thumbUrl: thumbUrl,
+                origin: origin,
+                excluded: excluded,
+                muted: muted,
+                followedAt: followedAt,
+                lastCheckedAt: lastCheckedAt,
+                lastError: lastError,
+                checksFailed: checksFailed,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String ytmId,
+                required String name,
+                Value<String?> thumbUrl = const Value.absent(),
+                Value<int> origin = const Value.absent(),
+                Value<bool> excluded = const Value.absent(),
+                Value<bool> muted = const Value.absent(),
+                Value<int> followedAt = const Value.absent(),
+                Value<int?> lastCheckedAt = const Value.absent(),
+                Value<String?> lastError = const Value.absent(),
+                Value<int> checksFailed = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => FollowedArtistsCompanion.insert(
+                ytmId: ytmId,
+                name: name,
+                thumbUrl: thumbUrl,
+                origin: origin,
+                excluded: excluded,
+                muted: muted,
+                followedAt: followedAt,
+                lastCheckedAt: lastCheckedAt,
+                lastError: lastError,
+                checksFailed: checksFailed,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$FollowedArtistsTable, FollowedArtist>(table),
+                  $$FollowedArtistsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({artistReleasesRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (artistReleasesRefs) db.artistReleases,
+              ],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (artistReleasesRefs)
+                    await $_getPrefetchedData<
+                      FollowedArtist,
+                      $FollowedArtistsTable,
+                      ArtistRelease
+                    >(
+                      currentTable: table,
+                      referencedTable: $$FollowedArtistsTableReferences
+                          ._artistReleasesRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$FollowedArtistsTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).artistReleasesRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where(
+                            (e) => e.artistId == item.ytmId,
+                          ),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$FollowedArtistsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $FollowedArtistsTable,
+      FollowedArtist,
+      $$FollowedArtistsTableFilterComposer,
+      $$FollowedArtistsTableOrderingComposer,
+      $$FollowedArtistsTableAnnotationComposer,
+      $$FollowedArtistsTableCreateCompanionBuilder,
+      $$FollowedArtistsTableUpdateCompanionBuilder,
+      (FollowedArtist, $$FollowedArtistsTableReferences),
+      FollowedArtist,
+      PrefetchHooks Function({bool artistReleasesRefs})
+    >;
+typedef $$ArtistReleasesTableCreateCompanionBuilder =
+    ArtistReleasesCompanion Function({
+      required String browseId,
+      required String artistId,
+      required String title,
+      required int kind,
+      Value<int?> year,
+      Value<String?> thumbUrl,
+      required int firstSeenAt,
+      Value<bool> isNew,
+      Value<int?> openedAt,
+      required String groupKey,
+      Value<int> rowid,
+    });
+typedef $$ArtistReleasesTableUpdateCompanionBuilder =
+    ArtistReleasesCompanion Function({
+      Value<String> browseId,
+      Value<String> artistId,
+      Value<String> title,
+      Value<int> kind,
+      Value<int?> year,
+      Value<String?> thumbUrl,
+      Value<int> firstSeenAt,
+      Value<bool> isNew,
+      Value<int?> openedAt,
+      Value<String> groupKey,
+      Value<int> rowid,
+    });
+
+final class $$ArtistReleasesTableReferences
+    extends BaseReferences<_$AppDatabase, $ArtistReleasesTable, ArtistRelease> {
+  $$ArtistReleasesTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $FollowedArtistsTable _artistIdTable(_$AppDatabase db) => db
+      .followedArtists
+      .createAlias('artist_releases__artist_id__followed_artists__ytm_id');
+
+  $$FollowedArtistsTableProcessedTableManager get artistId {
+    final $_column = $_itemColumn<String>('artist_id')!;
+
+    final manager = $$FollowedArtistsTableTableManager(
+      $_db,
+      $_db.followedArtists,
+    ).filter((f) => f.ytmId.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_artistIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$ArtistReleasesTableFilterComposer
+    extends Composer<_$AppDatabase, $ArtistReleasesTable> {
+  $$ArtistReleasesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get browseId => $composableBuilder(
+    column: $table.browseId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get year => $composableBuilder(
+    column: $table.year,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get thumbUrl => $composableBuilder(
+    column: $table.thumbUrl,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get firstSeenAt => $composableBuilder(
+    column: $table.firstSeenAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isNew => $composableBuilder(
+    column: $table.isNew,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get openedAt => $composableBuilder(
+    column: $table.openedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get groupKey => $composableBuilder(
+    column: $table.groupKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$FollowedArtistsTableFilterComposer get artistId {
+    final $$FollowedArtistsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.artistId,
+      referencedTable: $db.followedArtists,
+      getReferencedColumn: (t) => t.ytmId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$FollowedArtistsTableFilterComposer(
+            $db: $db,
+            $table: $db.followedArtists,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ArtistReleasesTableOrderingComposer
+    extends Composer<_$AppDatabase, $ArtistReleasesTable> {
+  $$ArtistReleasesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get browseId => $composableBuilder(
+    column: $table.browseId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get year => $composableBuilder(
+    column: $table.year,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get thumbUrl => $composableBuilder(
+    column: $table.thumbUrl,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get firstSeenAt => $composableBuilder(
+    column: $table.firstSeenAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isNew => $composableBuilder(
+    column: $table.isNew,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get openedAt => $composableBuilder(
+    column: $table.openedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get groupKey => $composableBuilder(
+    column: $table.groupKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$FollowedArtistsTableOrderingComposer get artistId {
+    final $$FollowedArtistsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.artistId,
+      referencedTable: $db.followedArtists,
+      getReferencedColumn: (t) => t.ytmId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$FollowedArtistsTableOrderingComposer(
+            $db: $db,
+            $table: $db.followedArtists,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ArtistReleasesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ArtistReleasesTable> {
+  $$ArtistReleasesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get browseId =>
+      $composableBuilder(column: $table.browseId, builder: (column) => column);
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<int> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  GeneratedColumn<int> get year =>
+      $composableBuilder(column: $table.year, builder: (column) => column);
+
+  GeneratedColumn<String> get thumbUrl =>
+      $composableBuilder(column: $table.thumbUrl, builder: (column) => column);
+
+  GeneratedColumn<int> get firstSeenAt => $composableBuilder(
+    column: $table.firstSeenAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isNew =>
+      $composableBuilder(column: $table.isNew, builder: (column) => column);
+
+  GeneratedColumn<int> get openedAt =>
+      $composableBuilder(column: $table.openedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get groupKey =>
+      $composableBuilder(column: $table.groupKey, builder: (column) => column);
+
+  $$FollowedArtistsTableAnnotationComposer get artistId {
+    final $$FollowedArtistsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.artistId,
+      referencedTable: $db.followedArtists,
+      getReferencedColumn: (t) => t.ytmId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$FollowedArtistsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.followedArtists,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ArtistReleasesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ArtistReleasesTable,
+          ArtistRelease,
+          $$ArtistReleasesTableFilterComposer,
+          $$ArtistReleasesTableOrderingComposer,
+          $$ArtistReleasesTableAnnotationComposer,
+          $$ArtistReleasesTableCreateCompanionBuilder,
+          $$ArtistReleasesTableUpdateCompanionBuilder,
+          (ArtistRelease, $$ArtistReleasesTableReferences),
+          ArtistRelease,
+          PrefetchHooks Function({bool artistId})
+        > {
+  $$ArtistReleasesTableTableManager(
+    _$AppDatabase db,
+    $ArtistReleasesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ArtistReleasesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ArtistReleasesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ArtistReleasesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> browseId = const Value.absent(),
+                Value<String> artistId = const Value.absent(),
+                Value<String> title = const Value.absent(),
+                Value<int> kind = const Value.absent(),
+                Value<int?> year = const Value.absent(),
+                Value<String?> thumbUrl = const Value.absent(),
+                Value<int> firstSeenAt = const Value.absent(),
+                Value<bool> isNew = const Value.absent(),
+                Value<int?> openedAt = const Value.absent(),
+                Value<String> groupKey = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ArtistReleasesCompanion(
+                browseId: browseId,
+                artistId: artistId,
+                title: title,
+                kind: kind,
+                year: year,
+                thumbUrl: thumbUrl,
+                firstSeenAt: firstSeenAt,
+                isNew: isNew,
+                openedAt: openedAt,
+                groupKey: groupKey,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String browseId,
+                required String artistId,
+                required String title,
+                required int kind,
+                Value<int?> year = const Value.absent(),
+                Value<String?> thumbUrl = const Value.absent(),
+                required int firstSeenAt,
+                Value<bool> isNew = const Value.absent(),
+                Value<int?> openedAt = const Value.absent(),
+                required String groupKey,
+                Value<int> rowid = const Value.absent(),
+              }) => ArtistReleasesCompanion.insert(
+                browseId: browseId,
+                artistId: artistId,
+                title: title,
+                kind: kind,
+                year: year,
+                thumbUrl: thumbUrl,
+                firstSeenAt: firstSeenAt,
+                isNew: isNew,
+                openedAt: openedAt,
+                groupKey: groupKey,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$ArtistReleasesTable, ArtistRelease>(table),
+                  $$ArtistReleasesTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({artistId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (artistId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.artistId,
+                        referencedTable: $$ArtistReleasesTableReferences
+                            ._artistIdTable(db),
+                        referencedColumn: $$ArtistReleasesTableReferences
+                            ._artistIdTable(db)
+                            .ytmId,
+                      ) as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$ArtistReleasesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ArtistReleasesTable,
+      ArtistRelease,
+      $$ArtistReleasesTableFilterComposer,
+      $$ArtistReleasesTableOrderingComposer,
+      $$ArtistReleasesTableAnnotationComposer,
+      $$ArtistReleasesTableCreateCompanionBuilder,
+      $$ArtistReleasesTableUpdateCompanionBuilder,
+      (ArtistRelease, $$ArtistReleasesTableReferences),
+      ArtistRelease,
+      PrefetchHooks Function({bool artistId})
+    >;
+typedef $$ArtistLookupsTableCreateCompanionBuilder =
+    ArtistLookupsCompanion Function({
+      required String artistKey,
+      required String name,
+      required int status,
+      Value<String?> ytmId,
+      Value<String?> ytmName,
+      Value<String?> thumbUrl,
+      required int checkedAt,
+      Value<int> rowid,
+    });
+typedef $$ArtistLookupsTableUpdateCompanionBuilder =
+    ArtistLookupsCompanion Function({
+      Value<String> artistKey,
+      Value<String> name,
+      Value<int> status,
+      Value<String?> ytmId,
+      Value<String?> ytmName,
+      Value<String?> thumbUrl,
+      Value<int> checkedAt,
+      Value<int> rowid,
+    });
+
+class $$ArtistLookupsTableFilterComposer
+    extends Composer<_$AppDatabase, $ArtistLookupsTable> {
+  $$ArtistLookupsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get artistKey => $composableBuilder(
+    column: $table.artistKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ytmId => $composableBuilder(
+    column: $table.ytmId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ytmName => $composableBuilder(
+    column: $table.ytmName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get thumbUrl => $composableBuilder(
+    column: $table.thumbUrl,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get checkedAt => $composableBuilder(
+    column: $table.checkedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ArtistLookupsTableOrderingComposer
+    extends Composer<_$AppDatabase, $ArtistLookupsTable> {
+  $$ArtistLookupsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get artistKey => $composableBuilder(
+    column: $table.artistKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ytmId => $composableBuilder(
+    column: $table.ytmId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ytmName => $composableBuilder(
+    column: $table.ytmName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get thumbUrl => $composableBuilder(
+    column: $table.thumbUrl,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get checkedAt => $composableBuilder(
+    column: $table.checkedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ArtistLookupsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ArtistLookupsTable> {
+  $$ArtistLookupsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get artistKey =>
+      $composableBuilder(column: $table.artistKey, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<int> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<String> get ytmId =>
+      $composableBuilder(column: $table.ytmId, builder: (column) => column);
+
+  GeneratedColumn<String> get ytmName =>
+      $composableBuilder(column: $table.ytmName, builder: (column) => column);
+
+  GeneratedColumn<String> get thumbUrl =>
+      $composableBuilder(column: $table.thumbUrl, builder: (column) => column);
+
+  GeneratedColumn<int> get checkedAt =>
+      $composableBuilder(column: $table.checkedAt, builder: (column) => column);
+}
+
+class $$ArtistLookupsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ArtistLookupsTable,
+          ArtistLookup,
+          $$ArtistLookupsTableFilterComposer,
+          $$ArtistLookupsTableOrderingComposer,
+          $$ArtistLookupsTableAnnotationComposer,
+          $$ArtistLookupsTableCreateCompanionBuilder,
+          $$ArtistLookupsTableUpdateCompanionBuilder,
+          (
+            ArtistLookup,
+            BaseReferences<_$AppDatabase, $ArtistLookupsTable, ArtistLookup>,
+          ),
+          ArtistLookup,
+          PrefetchHooks Function()
+        > {
+  $$ArtistLookupsTableTableManager(_$AppDatabase db, $ArtistLookupsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ArtistLookupsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ArtistLookupsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ArtistLookupsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> artistKey = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<int> status = const Value.absent(),
+                Value<String?> ytmId = const Value.absent(),
+                Value<String?> ytmName = const Value.absent(),
+                Value<String?> thumbUrl = const Value.absent(),
+                Value<int> checkedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ArtistLookupsCompanion(
+                artistKey: artistKey,
+                name: name,
+                status: status,
+                ytmId: ytmId,
+                ytmName: ytmName,
+                thumbUrl: thumbUrl,
+                checkedAt: checkedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String artistKey,
+                required String name,
+                required int status,
+                Value<String?> ytmId = const Value.absent(),
+                Value<String?> ytmName = const Value.absent(),
+                Value<String?> thumbUrl = const Value.absent(),
+                required int checkedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => ArtistLookupsCompanion.insert(
+                artistKey: artistKey,
+                name: name,
+                status: status,
+                ytmId: ytmId,
+                ytmName: ytmName,
+                thumbUrl: thumbUrl,
+                checkedAt: checkedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$ArtistLookupsTable, ArtistLookup>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $ArtistLookupsTable,
+                    ArtistLookup
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ArtistLookupsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ArtistLookupsTable,
+      ArtistLookup,
+      $$ArtistLookupsTableFilterComposer,
+      $$ArtistLookupsTableOrderingComposer,
+      $$ArtistLookupsTableAnnotationComposer,
+      $$ArtistLookupsTableCreateCompanionBuilder,
+      $$ArtistLookupsTableUpdateCompanionBuilder,
+      (
+        ArtistLookup,
+        BaseReferences<_$AppDatabase, $ArtistLookupsTable, ArtistLookup>,
+      ),
+      ArtistLookup,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -14718,4 +17521,10 @@ class $AppDatabaseManager {
       $$ArtistInfosTableTableManager(_db, _db.artistInfos);
   $$RadioStationsTableTableManager get radioStations =>
       $$RadioStationsTableTableManager(_db, _db.radioStations);
+  $$FollowedArtistsTableTableManager get followedArtists =>
+      $$FollowedArtistsTableTableManager(_db, _db.followedArtists);
+  $$ArtistReleasesTableTableManager get artistReleases =>
+      $$ArtistReleasesTableTableManager(_db, _db.artistReleases);
+  $$ArtistLookupsTableTableManager get artistLookups =>
+      $$ArtistLookupsTableTableManager(_db, _db.artistLookups);
 }

@@ -313,3 +313,76 @@ class RadioStations extends Table {
   @override
   Set<Column> get primaryKey => {stationId};
 }
+
+/// Artists whose new releases are checked (phase 34). [origin] 0 = followed by
+/// hand, 1 = followed automatically (most listened).
+@DataClassName('FollowedArtist')
+class FollowedArtists extends Table {
+  /// `UC…` channel id of the YouTube Music artist page.
+  TextColumn get ytmId => text()();
+  TextColumn get name => text()();
+  TextColumn get thumbUrl => text().nullable()();
+  IntColumn get origin => integer().withDefault(const Constant(0))();
+
+  /// An automatic artist the user stopped following: never added again.
+  BoolColumn get excluded => boolean().withDefault(const Constant(false))();
+
+  /// No notification for this artist; the release still shows in Home.
+  BoolColumn get muted => boolean().withDefault(const Constant(false))();
+  IntColumn get followedAt => integer().clientDefault(nowMs)();
+
+  /// Null until the first check (which marks everything as seen).
+  IntColumn get lastCheckedAt => integer().nullable()();
+  TextColumn get lastError => text().nullable()();
+
+  /// Checks in a row that did not find the artist page.
+  IntColumn get checksFailed => integer().withDefault(const Constant(0))();
+
+  @override
+  Set<Column> get primaryKey => {ytmId};
+}
+
+/// Albums, singles and EPs seen on a followed artist's page. A row is shown in
+/// «Nuove uscite» when it was flagged new ([isNew], or [openedAt] once
+/// opened); the others are the past, stored only to tell new ones apart.
+@DataClassName('ArtistRelease')
+class ArtistReleases extends Table {
+  /// `MPREb_…`.
+  TextColumn get browseId => text()();
+  TextColumn get artistId =>
+      text().references(FollowedArtists, #ytmId, onDelete: KeyAction.cascade)();
+  TextColumn get title => text()();
+
+  /// `ReleaseKind.index`: 0 album, 1 single or EP.
+  IntColumn get kind => integer()();
+  IntColumn get year => integer().nullable()();
+  TextColumn get thumbUrl => text().nullable()();
+  IntColumn get firstSeenAt => integer()();
+  BoolColumn get isNew => boolean().withDefault(const Constant(false))();
+  IntColumn get openedAt => integer().nullable()();
+
+  /// Same for the variants and reissues of one title (`releaseGroupKey`).
+  TextColumn get groupKey => text()();
+
+  @override
+  Set<Column> get primaryKey => {browseId};
+}
+
+/// What «most listened» artist names were found to be on YouTube Music, kept
+/// 30 days (also «nobody» and «several»), so the search is not repeated.
+@DataClassName('ArtistLookup')
+class ArtistLookups extends Table {
+  /// `matchKey` of the main artist's name.
+  TextColumn get artistKey => text()();
+  TextColumn get name => text()();
+
+  /// 0 = one exact artist ([ytmId]), 1 = nobody, 2 = several (to confirm).
+  IntColumn get status => integer()();
+  TextColumn get ytmId => text().nullable()();
+  TextColumn get ytmName => text().nullable()();
+  TextColumn get thumbUrl => text().nullable()();
+  IntColumn get checkedAt => integer()();
+
+  @override
+  Set<Column> get primaryKey => {artistKey};
+}

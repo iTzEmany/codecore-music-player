@@ -1,5 +1,7 @@
 import 'package:drift/drift.dart';
 
+import '../../services/import/track_matcher.dart' show matchKey;
+import '../../services/online/query_cleaner.dart' show extractPrimaryArtist;
 import '../db/app_database.dart';
 
 /// A month or a year, in local time: [start] inclusive, [end] exclusive.
@@ -330,6 +332,61 @@ class StatsQueries {
           : DateTime.fromMillisecondsSinceEpoch(first.single.read<int>('at')),
     );
   }
+
+  /// The [limit] artists listened to most since [from], by main artist
+  /// (`matchKey(extractPrimaryArtist)`, as the library names them). The
+  /// measure is the time really played (listens break ties); a history that
+  /// has no listens at all falls back to the sum of `play_count`.
+  Future<List<ListenedArtist>> topArtistsSince(DateTime from, {int limit = 15}) async {
+    final hasHistory = (await _q('SELECT 1 AS x FROM plays LIMIT 1', const [])).isNotEmpty;
+    final rows = hasHistory
+        ? await _q(
+            'SELECT t.artist AS artist, COUNT(*) AS n, SUM(p.ms_played) AS ms '
+            'FROM plays p JOIN tracks t ON t.id = p.track_id '
+            'WHERE p.played_at >= ? AND t.kind = 0 AND t.artist IS NOT NULL '
+            'GROUP BY t.artist',
+            [Variable.withInt(from.millisecondsSinceEpoch)])
+        : await _q(
+            'SELECT artist, SUM(play_count) AS n, 0 AS ms FROM tracks '
+            'WHERE kind = 0 AND artist IS NOT NULL AND play_count > 0 GROUP BY artist',
+            const []);
+    final groups = <String, ({String name, int n, int ms, int best})>{};
+    for (final r in rows) {
+      final artist = (r.data['artist']! as String).trim();
+      final main = extractPrimaryArtist(artist);
+      final key = matchKey(main);
+      if (key.isEmpty) continue;
+      final n = (r.data['n'] as int?) ?? 0, ms = (r.data['ms'] as int?) ?? 0;
+      final cur = groups[key];
+      // The spelling shown is the one most listened to.
+      final better = cur == null || n > cur.best;
+      groups[key] = (
+        name: better ? main : cur.name,
+        n: (cur?.n ?? 0) + n,
+        ms: (cur?.ms ?? 0) + ms,
+        best: better ? n : cur.best,
+      );
+    }
+    final out = [
+      for (final e in groups.entries)
+        ListenedArtist(e.key, e.value.name, e.value.n, e.value.ms),
+    ]..sort((a, b) {
+        final c = b.playedMs.compareTo(a.playedMs);
+        if (c != 0) return c;
+        final n = b.plays.compareTo(a.plays);
+        return n != 0 ? n : a.key.compareTo(b.key);
+      });
+    return out.take(limit).toList();
+  }
+}
+
+/// An artist of the «most listened» ranking.
+class ListenedArtist {
+  const ListenedArtist(this.key, this.name, this.plays, this.playedMs);
+
+  /// `matchKey` of the main artist's name.
+  final String key, name;
+  final int plays, playedMs;
 }
 
 /// The artist key of the library: lower-cased (ASCII only, as SQLite's

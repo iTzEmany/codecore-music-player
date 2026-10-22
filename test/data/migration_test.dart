@@ -284,4 +284,32 @@ void main() {
     expect((await db.select(db.playlists).getSingle()).name, 'Mine');
     await db.close();
   });
+
+  test('a v12 database gets the follow tables and keeps its radios and tracks', () async {
+    final db = AppDatabase(NativeDatabase.memory(setup: (raw) {
+      raw.execute('CREATE TABLE tracks (id INTEGER PRIMARY KEY AUTOINCREMENT, '
+          'path TEXT NOT NULL, title TEXT NOT NULL)');
+      raw.execute("INSERT INTO tracks (path, title) VALUES ('/a.mp3', 'Old')");
+      raw.execute('CREATE TABLE radio_stations (station_id TEXT NOT NULL PRIMARY KEY, '
+          'name TEXT NOT NULL, stream_url TEXT NOT NULL, homepage TEXT NOT NULL DEFAULT \'\', '
+          'favicon_url TEXT NOT NULL DEFAULT \'\', country_code TEXT NOT NULL DEFAULT \'\', '
+          'state TEXT NOT NULL DEFAULT \'\', tags TEXT NOT NULL DEFAULT \'\', '
+          'codec TEXT NOT NULL DEFAULT \'\', bitrate INTEGER NOT NULL DEFAULT 0, '
+          'hls INTEGER NOT NULL DEFAULT 0, position INTEGER NOT NULL, added_at INTEGER NOT NULL, '
+          'last_played_at INTEGER, last_ok_at INTEGER, unreachable INTEGER NOT NULL DEFAULT 0)');
+      raw.execute("INSERT INTO radio_stations (station_id, name, stream_url, position, added_at) "
+          "VALUES ('r', 'Radio', 'http://r', 0, 1)");
+      raw.userVersion = 12;
+    }));
+    expect(await db.select(db.followedArtists).get(), isEmpty);
+    expect(await db.select(db.artistReleases).get(), isEmpty);
+    expect(await db.select(db.artistLookups).get(), isEmpty);
+    await db.into(db.followedArtists).insert(
+        FollowedArtistsCompanion.insert(ytmId: 'UC1', name: 'A'));
+    final a = await db.select(db.followedArtists).getSingle();
+    expect((a.origin, a.excluded, a.muted, a.lastCheckedAt, a.checksFailed), (0, false, false, null, 0));
+    expect((await db.select(db.radioStations).getSingle()).name, 'Radio');
+    expect((await db.customSelect('SELECT title FROM tracks').getSingle()).read<String>('title'), 'Old');
+    await db.close();
+  });
 }

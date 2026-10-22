@@ -27,6 +27,12 @@ const artistPageMask = 'header.musicImmersiveHeaderRenderer(title,thumbnail,desc
     'title,moreContentButton),contents.musicTwoRowItemRenderer('
     'title,subtitle,navigationEndpoint,thumbnailRenderer)),'
     'musicDescriptionShelfRenderer(header,description))';
+/// Only the name and the carousels (with covers): what the new-releases check
+/// reads, ~10 KB instead of ~35 KB.
+const artistReleasesMask = 'header.musicImmersiveHeaderRenderer(title),$_singleColumn('
+    'musicCarouselShelfRenderer(header.musicCarouselShelfBasicHeaderRenderer('
+    'title,moreContentButton),contents.musicTwoRowItemRenderer('
+    'title,subtitle,navigationEndpoint,thumbnailRenderer)))';
 const albumPageMask = 'contents.twoColumnBrowseResultsRenderer('
     'tabs.tabRenderer.content.sectionListRenderer.contents.musicResponsiveHeaderRenderer('
     'title,subtitle,straplineTextOne,secondSubtitle,thumbnail),'
@@ -118,6 +124,12 @@ class YtmCatalog {
         (v) => v.toJson(),
         YtmArtistPage.fromJson,
       );
+
+  /// The artist page as the new-releases check reads it: the releases
+  /// carousels only, always fresh (neither read from nor written to the cache).
+  Future<YtmArtistPage> releases(String id, String hl, {CancelToken? cancel}) =>
+      client.browseMusic(id, (d) => parseArtistPage(d, id),
+          hl: hl, mask: artistReleasesMask, cancel: cancel);
 
   /// The album page; when it cannot be read, yt-dlp lists the same tracks
   /// (slower, and without track numbers or the artist's page id).
