@@ -50,6 +50,7 @@ un'unica codebase Flutter per Android, Windows e Linux. Uso personale, niente co
 | 32 | `fase-32-ricerca-intelligente.md` | Ricerca con due modi (In libreria · Online): online YouTube Music e YouTube insieme, confidenza, stesso brano in una riga, «Altri risultati», intento (artista, album, brano, indirizzo), fonti come filtro; SoundCloud misurato e proposto fuori dalla ricerca |
 | 33 | `fase-33-radio.md` | Radio in diretta da Radio Browser: «Vicino a te» (paese e regione), ricerca, generi, «Le mie radio» salvate (schema v12), ascolto dal lettore principale con titolo in onda, Android Auto |
 | 34 | `fase-34-nuove-uscite.md` | Nuove uscite degli artisti seguiti (e, a scelta, dei più ascoltati): un controllo al giorno, «Nuove uscite» in Home, notifica Android (schema v13) |
+| 35 | `fase-35-secondo-parere-ytm.md` | Secondo parere da YouTube Music in «Da revisionare» (solo se conferma), genere da MusicBrainz, testo dalla scheda «Testo», curiosità da YouTube Music e Discogs, «Riprova» che non perde brani |
 
 Dopo la **Fase 3** l'app è già usabile come lettore. Le fasi 5 e 6 sono indipendenti tra loro. La fase 8 (Jam) richiede la 6.
 

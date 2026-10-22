@@ -463,6 +463,18 @@ Richiesta (2026-10-22): «avere aggiornamenti per quanto riguarda le nuove uscit
 - [x] 34.11 ~~(Facoltativo, da approvare) Controllo ad app chiusa~~ (FACOLTATIVO, da approvare (WorkManager): non fatto)
 - [~] 34.12 Test dal vivo, documentazione e prova a mano (8a48ee1: test dal vivo 2/2, documenti; prova sul telefono da fare)
 
+## Fase 35 — Secondo parere da YouTube Music (`fase-35-secondo-parere-ytm.md`)
+Richiesta (2026-10-22): «Secondo parere automatico: applica solo se YouTube Music conferma», solo in «Da revisionare» e su «Riprova»; poi genere da MusicBrainz, testo dalla scheda «Testo» di YouTube Music, curiosità senza chiave (descrizione dell'artista su YouTube Music, note del master su Discogs). Si corregge «Riprova» che faceva sparire i brani non raggiunti.
+- [ ] 35.1 Fixture
+- [ ] 35.2 Conferma e scrittura
+- [ ] 35.3 «Riprova» con `force`
+- [ ] 35.4 Quando parte, controllati e raffreddamento
+- [ ] 35.5 Genere da MusicBrainz
+- [ ] 35.6 Testo dalla scheda «Testo»
+- [ ] 35.7 Interfaccia e ARB
+- [ ] 35.8 Curiosità: YouTube Music e Discogs
+- [ ] 35.9 Prova dal vivo e documentazione
+
 - Streaming di YouTube sul Mi A3 (notte del 2026-10-22): con yt-dlp 2026.10 i client predefiniti risolvono la sfida JS sul telefono in 50–70 s; `android_vr` ora chiede un PO token (403 da googlevideo, mascherato da ExoPlayer come «(0) Source error»). Ora: indirizzo con gli header di yt-dlp (`-j`), «Source error» = indirizzo scaduto, client veloce `visionos` (misura dal PC: unico che risponde in 2–4 s e si scarica) con ripiego ai predefiniti, Casuale+ mette in coda un suggerito solo con l'indirizzo pronto (c1b1562, f3d806c). Mi A3 (APK 6047): «Ascolta» 8–19 s (60–65 s circa 1 volta su 4, quando il client veloce non risponde entro 20 s), suggeriti suonati senza salti. Da rifinire: tempo del client veloce; verificare che «Ascolta» non lasci file (il test ha toccato per sbaglio «Scarica»).
 
 ## Identità «Anello», fase 1 (richiesta dell'utente, 2026-10-22; piano `docs/superpowers/plans/2026-10-22-identita-anello.md`)
