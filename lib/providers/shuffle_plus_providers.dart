@@ -170,6 +170,9 @@ final shufflePlusProvider = FutureProvider<ShufflePlusController?>((ref) async {
     loadTracks: tracks.getByIdsLight,
     loadLibrary: () async => LibraryIndex(await tracks.liteEntries()),
     hasDownload: downloads.contains,
+    prepare: handler.addresses == null
+        ? null
+        : (r) => handler.addresses!.address(r, timeout: const Duration(seconds: 120)),
   );
   ref.listen(shufflePlusConfigProvider, (_, _) => controller.poke());
   ref.listen(jamProvider, (_, _) => controller.poke());

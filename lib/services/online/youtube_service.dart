@@ -211,7 +211,7 @@ abstract interface class StreamSource {
 }
 
 /// A direct address plus the HTTP headers the server expects with it (the
-/// client yt-dlp used, e.g. android_vr, is tied to its User-Agent: without
+/// client yt-dlp used, e.g. visionos, is tied to its User-Agent: without
 /// them googlevideo answers 403).
 class StreamAddress {
   const StreamAddress(this.uri,

@@ -53,14 +53,14 @@ class StreamAddressCache {
   }
 
   /// The address for [r]: cached, or the one request already running, or a new
-  /// one. Errors of the resolver reach every caller waiting; a timeout throws
-  /// [TimeoutException] (the request itself goes on and fills the cache).
-  Future<StreamAddress> address(YtResult r) {
+  /// one. Errors of the resolver reach every caller waiting; a timeout ([timeout], by
+  /// default [wait]) throws [TimeoutException] (the request itself goes on and fills the cache).
+  Future<StreamAddress> address(YtResult r, {Duration? timeout}) {
     final key = r.indexKey;
     final cached = _done[key];
     if (cached != null && _fresh(cached)) return Future.value(cached);
     final request = _pending[key] ?? _start(r, key);
-    return request.timeout(wait);
+    return request.timeout(timeout ?? wait);
   }
 
   Future<StreamAddress> _start(YtResult r, String key) {

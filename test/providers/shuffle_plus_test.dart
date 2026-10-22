@@ -126,6 +126,8 @@ void main() {
   var jam = false;
   var metered = false;
   var searches = 0;
+  Future<void> Function(YtResult) prepareHook = (_) async {};
+  final prepared = <String>[];
   const library = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
   Future<void> settle() async {
@@ -142,6 +144,8 @@ void main() {
     jam = false;
     metered = false;
     searches = 0;
+    prepared.clear();
+    prepareHook = (r) async => prepared.add(r.id);
     cfg = const ShufflePlusConfig(enabled: true);
     host = _Host([...library], [...library]);
     online = OnlineEntries();
@@ -175,6 +179,7 @@ void main() {
       loadTracks: (ids) async => [for (final id in ids) track(id)],
       loadLibrary: () async => LibraryIndex(const []),
       hasDownload: (_) => false,
+      prepare: (r) => prepareHook(r),
       now: () => now,
     );
     addTearDown(controller.dispose);
@@ -248,6 +253,48 @@ void main() {
     final passed = host.queueIds.take(host.currentIndex).where(isOnlineId);
     expect(passed, isEmpty, reason: 'passed suggestions are taken out');
     expect(adapter.sent, hasLength(1), reason: 'one radio feeds many suggestions');
+  });
+
+  test('a suggestion enters the queue only after its address is ready', () async {
+    final gate = Completer<void>();
+    prepareHook = (r) async {
+      prepared.add(r.id);
+      await gate.future;
+    };
+    controller.start();
+    await settle();
+    expect(prepared, hasLength(1));
+    expect(host.queueIds, library, reason: 'address not ready: nothing queued');
+    expect(log.recent, isEmpty);
+    gate.complete();
+    await settle();
+    expect(host.queueIds.where(isOnlineId), hasLength(1));
+  });
+
+  test('a failed address tries the next candidate, no entry for the failed one', () async {
+    var calls = 0;
+    prepareHook = (r) async {
+      prepared.add(r.id);
+      if (calls++ == 0) throw TimeoutException('slow');
+    };
+    controller.start();
+    await settle();
+    expect(prepared, hasLength(2));
+    expect(prepared.first, isNot(prepared.last));
+    final queued = host.queueIds.where(isOnlineId).map((id) => online[id]!.result.id);
+    expect(queued, [prepared.last]);
+  });
+
+  test('when every candidate fails nothing is queued', () async {
+    prepareHook = (r) async {
+      prepared.add(r.id);
+      throw TimeoutException('slow');
+    };
+    controller.start();
+    await settle();
+    expect(prepared, hasLength(ShufflePlusController.prepareAttempts));
+    expect(host.queueIds, library);
+    expect(log.recent, isEmpty);
   });
 
   test('outcomes: heard to the end, skipped otherwise', () async {

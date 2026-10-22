@@ -59,6 +59,7 @@ class ShufflePlusController {
     required this.loadTracks,
     required this.loadLibrary,
     required this.hasDownload,
+    this.prepare,
     SuggestionPool? pool,
     DateTime Function()? now,
     Random? random,
@@ -72,6 +73,7 @@ class ShufflePlusController {
   static const seedsLifetime = 8;
   static const minSourceSize = 5;
   static const maxErrors = 3;
+  static const prepareAttempts = 2;
 
   final ShuffleHost host;
   final OnlineEntries online;
@@ -88,6 +90,11 @@ class ShufflePlusController {
   final Future<List<Track>> Function(List<int> ids) loadTracks;
   final Future<LibraryIndex> Function() loadLibrary;
   final bool Function(String videoId) hasDownload;
+
+  /// Gets the stream address of a suggestion ready (throws when it cannot).
+  /// A suggestion enters the queue only after this succeeds, so it never
+  /// reaches its turn with a slow or failing address. Null: no preparation.
+  final Future<void> Function(YtResult r)? prepare;
   final DateTime Function() _now;
   final Random _random;
 
@@ -307,6 +314,27 @@ class ShufflePlusController {
       candidate = await _take();
     }
     if (candidate == null) return;
+    final prep = prepare;
+    if (prep != null) {
+      // A failed address is not a playback failure: the next candidate.
+      var attempts = 0;
+      while (true) {
+        try {
+          await prep(candidate!.result);
+          break;
+        } on Object catch (e) {
+          AppLog.w('shuffle+ address of ${candidate!.result.id} not ready: $e');
+          candidate = ++attempts >= prepareAttempts ? null : await _take();
+          if (candidate == null) {
+            _retryAt = _now().add(retryAfterError);
+            _wakeAt(_retryAt!);
+            return;
+          }
+        }
+        if (_disposed) return;
+      }
+      if (_disposed || !config().enabled) return;
+    }
     // The queue may have changed while the radio was asked for.
     final at = nextInsertion(host.queueIds, host.currentIndex, _played, every);
     if (at == null) return;

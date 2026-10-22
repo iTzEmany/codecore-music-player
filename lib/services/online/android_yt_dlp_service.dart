@@ -69,8 +69,8 @@ class AndroidYtDlpService implements YoutubeService, StreamSource {
 
   @override
   Future<StreamAddress> streamUrl(YtResult r, {bool fast = true}) async {
-    // Fast path: the android_vr client needs neither the JS challenge solver
-    // nor a PO token (~2 s instead of ~45 s on the phone). If it cannot serve
+    // Fast path: the visionos client needs neither the JS challenge solver
+    // nor a PO token (android_vr needs one now) (~2 s instead of ~45 s on the phone). If it cannot serve
     // this video (age limit, region...) yt-dlp's default clients take over.
     if (fast) {
       try {

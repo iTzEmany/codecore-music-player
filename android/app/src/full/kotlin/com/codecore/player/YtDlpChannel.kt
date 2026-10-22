@@ -82,9 +82,11 @@ class YtDlpChannel(private val applicationContext: Context) {
                 req.addOption("-j")
                 req.addOption("--no-warnings")
                 req.addOption("--no-playlist")
-                // android_vr: direct audio URLs without the JS challenge or a PO token.
+                // visionos: direct audio URLs without the JS challenge or a PO token
+                // (android_vr now needs a GVS PO token). An unknown client name is
+                // skipped by yt-dlp, which then uses its default clients.
                 if (call.argument<Boolean>("fast") == true) {
-                    req.addOption("--extractor-args", "youtube:player_client=android_vr")
+                    req.addOption("--extractor-args", "youtube:player_client=visionos")
                 }
                 req.addOption("-f", call.argument<String>("format") ?: "bestaudio/best")
                 val processId = call.argument<String>("processId")
