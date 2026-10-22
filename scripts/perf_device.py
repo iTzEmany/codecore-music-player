@@ -5,7 +5,7 @@ Installa la build «perf» (pacchetto com.codecore.player.perf, dati suoi: la
 libreria vera dell'utente non viene mai toccata), le dà la libreria di prova di
 scripts/perf_library.py, poi misura: scansione, avvio a freddo, memoria e i
 frame mentre scorre «Tutti i brani», «Album», la ricerca e (con --playback)
-«In riproduzione». Tabella in build/perf/<etichetta>.md.
+«In riproduzione», il lettore che cresce dal dock e l'anello. Tabella in build/perf/<etichetta>.md.
 
     scripts/perf_library.py
     scripts/perf_device.py <id-adb> --label prima
@@ -197,6 +197,9 @@ def main():
         windows[name] = (t0, dev.now_ms() + 3000)
         print(f'  {name}: fatto')
 
+    tab = lambda name: dev.tap(rf'^{name}\n', cls='Button')
+    scenario('Pallino schede', lambda: None,
+             lambda: [(tab(t), time.sleep(0.5)) for t in ('Libreria', 'Memoria', 'Home', 'Libreria', 'Home')])
     scenario('Tutti i brani', lambda: (dev.tap(r'^Libreria'), dev.tap(r'^Tutti i brani')), dev.flings)
     scenario('Album', lambda: (dev.sh('input keyevent KEYCODE_BACK'), time.sleep(1), dev.tap(r'^Album$')),
              dev.flings)
@@ -204,10 +207,28 @@ def main():
              lambda: (dev.sh('input keyevent KEYCODE_BACK'), time.sleep(1), dev.tap(r'^Cerca'),
                       dev.tap(r'', cls='EditText')),
              lambda: (dev.sh('input text notte'), time.sleep(2), dev.flings(3)))
+    def mini():
+        # The mini-player: the «title\nartist» View on the row of its «Dispositivi» button.
+        ns = dev.nodes()
+        y = next(y for l, c, x, y in ns if l == 'Dispositivi')
+        x = next(x for l, c, x, yy in ns if '\n' in l and c == 'android.view.View' and yy == y)
+        dev.sh(f'input tap {x} {y}')
+        time.sleep(1.5)
+    def leave_search():
+        # The open search field hides the tabs: BACK (keyboard, then field) until they are back.
+        for _ in range(3):
+            if any(l.startswith('Libreria\n') for l, *_ in dev.nodes()):
+                return
+            dev.sh('input keyevent KEYCODE_BACK')
+            time.sleep(1)
     if args.playback:
         scenario('In riproduzione',
-                 lambda: (dev.tap(r'^Libreria'), dev.tap(r'^Tutti i brani'), dev.tap(r'^[A-Z].* \d+')),
-                 lambda: (dev.tap(r'Artista \d+'), time.sleep(2), dev.sh('input keyevent KEYCODE_BACK')))
+                 lambda: (leave_search(), tab('Libreria'), dev.tap(r'^Tutti i brani'), dev.tap(r'^[A-Z].* \d+')),
+                 lambda: (mini(), time.sleep(2), dev.sh('input keyevent KEYCODE_BACK')))
+        scenario('Lettore dal dock', lambda: None,
+                 lambda: [(mini(), dev.sh('input keyevent KEYCODE_BACK'), time.sleep(1.5)) for _ in range(3)])
+        scenario('Anello', mini, lambda: time.sleep(6))
+        dev.sh('input keyevent KEYCODE_BACK')
         dev.sh('input keyevent KEYCODE_MEDIA_PAUSE', check=False)
 
     mem = dev.sh(f'dumpsys meminfo {PKG}')

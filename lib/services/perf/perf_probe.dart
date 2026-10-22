@@ -41,6 +41,7 @@ class PerfProbe {
   final File _out;
   final _frames = <FrameSample>[];
   Timer? _idle;
+  final _burst = Stopwatch();
   Future<void> _writing = Future.value();
 
   /// Before `runApp`: no onboarding, no network on its own.
@@ -66,8 +67,14 @@ class PerfProbe {
   }
 
   void _onTimings(List<FrameTiming> timings) {
+    if (_frames.isEmpty) _burst..reset()..start();
     _frames.addAll(timings.map(FrameSample.of));
     _idle?.cancel();
+    // Playback repaints without pause: cut the burst so it lands inside its scenario.
+    if (_burst.elapsedMilliseconds > 2000) {
+      _flush();
+      return;
+    }
     _idle = Timer(const Duration(milliseconds: 1200), _flush);
   }
 
