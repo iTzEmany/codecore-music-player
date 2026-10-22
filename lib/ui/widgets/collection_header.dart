@@ -2,18 +2,17 @@ import 'package:flutter/material.dart';
 
 import '../../l10n/l10n_ext.dart';
 import '../theme/tokens.dart';
-import 'cover_backdrop.dart';
 import 'play_buttons.dart';
 
-/// Page of one collection (album, artist, playlist, favourites): a tinted
-/// backdrop, a pinned bar whose title appears while scrolling, the big cover
-/// with name and meta, then the actions row and the page's own slivers.
+/// Page of one collection (album, artist, playlist, favourites): a pinned bar
+/// whose title appears while scrolling, the cover at the left of name and meta
+/// (above them when the text is large), then the actions and the page's slivers.
 class CollectionScaffold extends StatefulWidget {
   const CollectionScaffold({
     super.key,
     required this.title,
     required this.name,
-    required this.cover,
+    this.cover,
     required this.slivers,
     this.coverKey,
     this.subtitle,
@@ -29,11 +28,11 @@ class CollectionScaffold extends StatefulWidget {
   final String title;
   final String name;
 
-  /// Builds the cover at the given size.
-  final Widget Function(double size) cover;
+  /// Builds the cover at the given size; null lays out the text only.
+  final Widget Function(double size)? cover;
   final List<Widget> slivers;
 
-  /// Drives the backdrop tint.
+  /// Identifies the cover (kept for callers).
   final String? coverKey;
 
   /// A line under the name (e.g. the artist link).
@@ -73,26 +72,28 @@ class _CollectionScaffoldState extends State<CollectionScaffold> {
   Widget build(BuildContext context) {
     final cc = context.cc;
     final theme = Theme.of(context).textTheme;
+    final scale = MediaQuery.textScalerOf(context).scale(1);
     final width = MediaQuery.sizeOf(context).width;
     final wide = width >= CcDims.wideBreakpoint;
-    final coverSize = wide ? 232.0 : (width * 0.6).clamp(120.0, 280.0);
-    final nameStyle = widget.name.length > 40
-        ? theme.displaySmall?.copyWith(fontSize: 24)
-        : theme.displaySmall;
-    final nameText = Text(
-      widget.name,
-      maxLines: 2,
-      overflow: TextOverflow.ellipsis,
-      style: nameStyle,
-    );
+    final stacked = !wide && (width / scale < 300 || width < 360);
+    final coverSize = wide ? 200.0 : 128.0;
     final info = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        nameText,
+        Text(
+          widget.name,
+          key: const ValueKey('collection-name'),
+          maxLines: 3,
+          overflow: TextOverflow.ellipsis,
+          style: wide ? theme.displaySmall : theme.headlineSmall,
+        ),
         if (widget.subtitle != null) ...[
           const SizedBox(height: 6),
-          widget.subtitle!,
+          DefaultTextStyle.merge(
+            style: theme.bodyLarge?.copyWith(color: cc.textMuted),
+            child: widget.subtitle!,
+          ),
         ],
         if (widget.meta != null) ...[
           const SizedBox(height: 4),
@@ -103,6 +104,12 @@ class _CollectionScaffoldState extends State<CollectionScaffold> {
         ],
       ],
     );
+    final coverBox = widget.cover == null
+        ? null
+        : KeyedSubtree(
+            key: const ValueKey('collection-cover'),
+            child: widget.cover!(coverSize),
+          );
     final actions = Row(
       children: [
         ?widget.menu,
@@ -118,68 +125,68 @@ class _CollectionScaffoldState extends State<CollectionScaffold> {
       body: Stack(
         children: [
           Positioned.fill(
-            child: CoverBackdrop(
-              coverKey: widget.coverKey,
-              child: CustomScrollView(
-                controller: _scroll,
-                slivers: [
-                  SliverAppBar(
-                    pinned: true,
-                    backgroundColor: _showTitle
-                        ? cc.surface1
-                        : Colors.transparent,
-                    surfaceTintColor: Colors.transparent,
-                    elevation: 0,
-                    title: AnimatedOpacity(
-                      duration: ccDuration(context, CcMotion.press),
-                      opacity: _showTitle ? 1 : 0,
-                      child: Text(
-                        widget.title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    actions: widget.barActions,
-                  ),
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                        CcDims.margin,
-                        8,
-                        CcDims.margin,
-                        12,
-                      ),
-                      child: wide
-                          ? Row(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                widget.cover(coverSize),
-                                const SizedBox(width: 24),
-                                Expanded(child: info),
-                              ],
-                            )
-                          : Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Center(child: widget.cover(coverSize)),
-                                const SizedBox(height: 16),
-                                info,
-                              ],
-                            ),
+            child: CustomScrollView(
+              controller: _scroll,
+              slivers: [
+                SliverAppBar(
+                  pinned: true,
+                  backgroundColor: cc.bg,
+                  surfaceTintColor: Colors.transparent,
+                  elevation: 0,
+                  title: AnimatedOpacity(
+                    duration: ccDuration(context, CcMotion.press),
+                    opacity: _showTitle ? 1 : 0,
+                    child: Text(
+                      widget.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: CcDims.margin,
+                  actions: widget.barActions,
+                ),
+                SliverToBoxAdapter(
+                  child: Align(
+                    alignment: Alignment.topLeft,
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxWidth: wide ? 960 : double.infinity,
                       ),
-                      child: actions,
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                          CcDims.margin,
+                          8,
+                          CcDims.margin,
+                          12,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (coverBox == null)
+                              info
+                            else if (stacked) ...[
+                              coverBox,
+                              const SizedBox(height: 16),
+                              info,
+                            ] else
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  coverBox,
+                                  SizedBox(width: wide ? 24 : 16),
+                                  Expanded(child: info),
+                                ],
+                              ),
+                            const SizedBox(height: 16),
+                            actions,
+                          ],
+                        ),
+                      ),
                     ),
                   ),
-                  ...widget.slivers,
-                  const SliverToBoxAdapter(child: SizedBox(height: 24)),
-                ],
-              ),
+                ),
+                ...widget.slivers,
+                const SliverToBoxAdapter(child: SizedBox(height: 24)),
+              ],
             ),
           ),
           if (widget.selectionBar != null)

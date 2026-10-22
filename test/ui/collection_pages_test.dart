@@ -6,6 +6,8 @@ import 'package:codecore/ui/screens/library/artist_screen.dart';
 import 'package:codecore/ui/screens/library/favorites_screen.dart';
 import 'package:codecore/ui/screens/playlists/playlist_detail_screen.dart';
 import 'package:codecore/l10n/app_localizations.dart';
+import 'package:codecore/ui/theme/tokens.dart';
+import 'package:codecore/ui/widgets/cover_backdrop.dart';
 import 'package:codecore/ui/widgets/play_buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -61,6 +63,51 @@ void main() {
     expect(find.byType(PlayCircleButton), findsOneWidget);
     expect(find.text('Song 0'), findsOneWidget);
     expect(find.textContaining('2019'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await h.dispose(tester);
+  });
+
+  AlbumSummary album(String title) => AlbumSummary(
+        albumKey: 'artist|album 0',
+        title: title,
+        artist: 'Artist',
+        variousArtists: false,
+        trackCount: 2,
+        durationMs: 370000,
+        year: 2019,
+        coverKey: null,
+      );
+
+  testWidgets('header: cover left of the name, no backdrop', (tester) async {
+    _phone(tester);
+    final h = await Harness.create(tester, tracks: 4);
+    await h.pump(tester, AlbumDetailScreen(album: album('Album 0')));
+    await _settle(tester);
+    expect(find.byType(CoverBackdrop), findsNothing);
+    final cover = tester.getRect(find.byKey(const ValueKey('collection-cover')));
+    final name = tester.getRect(find.byKey(const ValueKey('collection-name')));
+    expect(cover.left, CcDims.margin);
+    expect(name.left, greaterThan(cover.right));
+    await h.dispose(tester);
+  });
+
+  testWidgets('header stacks at 150 % on 360 dp', (tester) async {
+    tester.view.physicalSize = const Size(360, 780);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final h = await Harness.create(tester, tracks: 4);
+    await h.pump(
+      tester,
+      MediaQuery(
+        data: const MediaQueryData(
+            size: Size(360, 780), textScaler: TextScaler.linear(1.5)),
+        child: AlbumDetailScreen(album: album('A very long album name ' * 4)),
+      ),
+    );
+    await _settle(tester);
+    final cover = tester.getRect(find.byKey(const ValueKey('collection-cover')));
+    final name = tester.getRect(find.byKey(const ValueKey('collection-name')));
+    expect(name.top, greaterThan(cover.bottom));
     expect(tester.takeException(), isNull);
     await h.dispose(tester);
   });
