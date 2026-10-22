@@ -136,6 +136,18 @@ void main() {
     }
   }
 
+  /// Waits (in real time, generously) until [done]: the controller's work
+  /// goes through file and isolate I/O, so a fixed number of event-loop
+  /// turns is not enough on a loaded machine.
+  Future<void> until(bool Function() done) async {
+    final end = DateTime.now().add(const Duration(seconds: 30));
+    while (!done() && DateTime.now().isBefore(end)) {
+      await Future<void>.delayed(const Duration(milliseconds: 5));
+    }
+    expect(done(), isTrue, reason: 'the condition was never reached');
+    await settle();
+  }
+
   setUp(() async {
     dir = Directory.systemTemp.createTempSync('shuffle_plus');
     addTearDown(() => dir.deleteSync(recursive: true));
@@ -262,12 +274,12 @@ void main() {
       await gate.future;
     };
     controller.start();
-    await settle();
+    await until(() => prepared.isNotEmpty);
     expect(prepared, hasLength(1));
     expect(host.queueIds, library, reason: 'address not ready: nothing queued');
     expect(log.recent, isEmpty);
     gate.complete();
-    await settle();
+    await until(() => host.queueIds.where(isOnlineId).isNotEmpty);
     expect(host.queueIds.where(isOnlineId), hasLength(1));
   });
 
@@ -278,7 +290,7 @@ void main() {
       if (calls++ == 0) throw TimeoutException('slow');
     };
     controller.start();
-    await settle();
+    await until(() => host.queueIds.any(isOnlineId));
     expect(prepared, hasLength(2));
     expect(prepared.first, isNot(prepared.last));
     final queued = host.queueIds.where(isOnlineId).map((id) => online[id]!.result.id);
@@ -291,6 +303,7 @@ void main() {
       throw TimeoutException('slow');
     };
     controller.start();
+    await until(() => prepared.length >= ShufflePlusController.prepareAttempts);
     await settle();
     expect(prepared, hasLength(ShufflePlusController.prepareAttempts));
     expect(host.queueIds, library);
