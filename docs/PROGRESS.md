@@ -426,11 +426,11 @@ Richiesta (2026-10-22): «non voglio stare io a selezionare il filtro della rice
 - [x] 32.3 Confidenza di una ricerca libera (bdff42c)
 - [x] 32.4 Lo stesso brano da più fonti (bdff42c)
 - [x] 32.5 Il motore della ricerca online (bdff42c)
-- [ ] 32.6 Cerca: In libreria · Online
-- [ ] 32.7 Rifinitura del punteggio con le ricerche vere
-- [ ] 32.8 SoundCloud fuori dalla ricerca (dopo la risposta dell'utente)
-- [ ] 32.9 (Facoltativo) Link SoundCloud incollato
-- [ ] 32.10 Test dal vivo, documentazione e prova a mano
+- [x] 32.6 Cerca: In libreria · Online (684f6b4)
+- [ ] 32.7 Rifinitura del punteggio con le ricerche vere (serve un elenco di ricerche vere dell'utente: in «Tocca a te»)
+- [x] 32.8 SoundCloud fuori dalla ricerca (dopo la risposta dell'utente) (684f6b4: SoundCloud fuori da ricerca e importazione, dati vecchi leggibili)
+- [x] 32.9 (Facoltativo) Link SoundCloud incollato (FACOLTATIVO: non fatto (SoundCloud tolto))
+- [~] 32.10 Test dal vivo, documentazione e prova a mano (1a5c98d: timer annullabile, test dal vivo 4/4, documenti; prova sul telefono da fare)
 
 ## Fase 33 — Radio (`fase-33-radio.md`)
 Richiesta (2026-10-22): «l'inserimento della sezione radio per permettermi anche di ascoltare le radio locali e salvarmele». Scelte concordate: Radio Browser (API pubblica senza chiave, server da `all.api.radio-browser.info`, `User-Agent`, `hidebroken`, un clic per ascolto); «Vicino a te» con paese e regione scelti dall'utente (nessun permesso di posizione), ricerca, generi, «Le mie radio» salvate (tabella nuova, schema v12, nel backup); ascolto dal lettore principale (notifica, cuffie, Android Auto) con le voci online della fase 31, avanti/indietro = stazioni; titolo «in onda» ICY dove c'è (Android; desktop solo con la copia modificata di 33.11); niente gapless, dissolvenza, statistiche, Jam; ≈ 1 MB al minuto. Dove sta (Libreria + Home, oppure una quinta scheda): decide l'utente.
@@ -442,8 +442,8 @@ Richiesta (2026-10-22): «l'inserimento della sezione radio per permettermi anch
 - [x] 33.6 La radio nel lettore principale (efa2425)
 - [ ] 33.7 Pagina Radio
 - [ ] 33.8 «In riproduzione», mini-player e notifica per la radio
-- [ ] 33.9 Home e Android Auto
-- [ ] 33.10 Aggiungere un indirizzo a mano
+- [~] 33.9 Home e Android Auto (7e0333d: cartella Radio in Android Auto; riga in Home con l'interfaccia)
+- [~] 33.10 Aggiungere un indirizzo a mano (7e0333d: logica dei link e salvataggio; dialogo con l'interfaccia)
 - [ ] 33.11 (Facoltativo, da approvare) «In onda» anche su desktop
 - [ ] 33.12 Test dal vivo, documentazione e prova a mano
 
@@ -454,11 +454,11 @@ Richiesta (2026-10-22): «avere aggiornamenti per quanto riguarda le nuove uscit
 - [x] 34.3 Schema v13 e repository (f15a9f5)
 - [x] 34.4 Artisti più ascoltati in automatico (f15a9f5)
 - [x] 34.5 Il giro di controllo (f15a9f5)
-- [ ] 34.6 Quando parte il giro e impostazioni
+- [~] 34.6 Quando parte il giro e impostazioni (7b201cb: controller e impostazioni (logica); interruttori con l'interfaccia)
 - [ ] 34.7 «Segui» e «Artisti seguiti»
 - [ ] 34.8 «Nuove uscite» in Home e pagina dedicata
 - [ ] 34.9 Notifica Android
-- [ ] 34.10 Artisti seguiti nel backup
+- [x] 34.10 Artisti seguiti nel backup (7b201cb)
 - [ ] 34.11 (Facoltativo, da approvare) Controllo ad app chiusa
 - [ ] 34.12 Test dal vivo, documentazione e prova a mano
 
