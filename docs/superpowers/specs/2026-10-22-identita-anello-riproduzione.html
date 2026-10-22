@@ -209,8 +209,10 @@
         background:linear-gradient(to bottom, var(--tint), transparent 60%), var(--bg); }
   .t-g1 { --tint:rgba(194,24,91,.38); } .t-g4 { --tint:rgba(224,122,34,.30); } .t-g5 { --tint:rgba(29,151,108,.22); } .t-g2 { --tint:rgba(58,123,213,.32); }
   .light .np { --tint:rgba(29,151,108,.16); }
-  .npbar { display:flex; align-items:center; height:56px; padding:0 8px; }
-  .npbar .ctx { flex:1; text-align:center; min-width:0; }
+  .npbar { display:grid; grid-template-columns:80px minmax(0,1fr) 80px; align-items:center; height:56px; padding:0 8px; }
+  .npbar .l, .npbar .r { display:flex; }
+  .npbar .r { justify-content:flex-end; }
+  .npbar .ctx { text-align:center; min-width:0; }
   .npbar .ctx small { display:block; font-size:11px; color:var(--mu); }
   .npbar .ctx b { display:block; font-size:13px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .art { flex:1; display:grid; place-items:center; min-height:0; }
@@ -234,19 +236,29 @@
   .track { position:relative; height:4px; border-radius:2px; background:var(--s3); }
   .track i { position:absolute; left:0; top:0; bottom:0; border-radius:2px; background:var(--acc); }
   .track em { position:absolute; top:50%; width:12px; height:12px; border-radius:50%; background:var(--acc); transform:translate(-50%,-50%); }
-  .times { display:flex; align-items:center; justify-content:space-between; margin-top:8px; font-size:12px; color:var(--mu); font-variant-numeric:tabular-nums; }
+  .times { display:grid; grid-template-columns:1fr auto 1fr; align-items:center; margin-top:8px; font-size:12px; color:var(--mu); font-variant-numeric:tabular-nums; }
   .q { font-size:11px; font-weight:700; color:var(--accs); background:var(--s2); border-radius:6px; padding:2px 6px; }
+  .times > :last-child { text-align:right; }
+  .times .mid { display:flex; align-items:center; gap:8px; }
+  .fk .spd, .dnp .spd { font-size:11px; font-weight:700; color:var(--mu); background:var(--s2); border-radius:6px; padding:2px 6px; }
+  .fk .spd.on, .dnp .spd.on { color:var(--acc); background:color-mix(in srgb, var(--acc) 18%, transparent); }
+  .spds { display:grid; grid-template-columns:repeat(7, 1fr); gap:4px; padding:8px 16px 4px; }
+  .spds button { height:40px; border-radius:999px; font-size:13px; font-weight:700; color:var(--mu); background:var(--s2); }
+  .spds button.on { background:var(--acc); color:var(--onacc); }
+  .sheet .hint { margin:8px 20px 0; font-size:13px; color:var(--mu); line-height:1.45; text-align:center; }
+  .sheet h5.c { text-align:center; }
   .live { display:flex; align-items:center; gap:8px; padding:20px 24px 4px; font-size:13px; font-weight:600; color:var(--mu); }
   .live i { width:8px; height:8px; border-radius:50%; background:var(--acc); }
-  .ctl { display:flex; align-items:center; justify-content:space-between; padding:14px 20px 0; }
+  .ctl { display:flex; align-items:center; justify-content:space-between; padding:14px 12px 0; }
   .ctl.short { justify-content:center; gap:36px; }
   .ctl .ib { width:48px; height:48px; color:var(--tx); }
-  .ctl .ib.side { color:var(--mu); position:relative; }
-  .ctl .ib.side.on { color:var(--acc); }
-  .ctl .ib.side.on::after { content:''; position:absolute; inset:2px; border-radius:50%; background:var(--acc); opacity:.14; }
-  .ctl .ib.side sup { position:absolute; right:5px; top:4px; font-size:12px; font-weight:800; }
+  .ctl .ib.sd { color:var(--mu); position:relative; }
+  .ctl .ib.sd.on { color:var(--acc); }
+  .ctl .ib.sd.on::after { content:''; position:absolute; inset:2px; border-radius:50%; background:var(--acc); opacity:.14; }
+  .ctl .ib.sd sup { position:absolute; right:5px; top:4px; font-size:12px; font-weight:800; }
   .ctl .pp { width:64px; height:64px; border-radius:50%; background:var(--tx); color:var(--bg); display:grid; place-items:center; }
-  .bot { display:flex; align-items:center; justify-content:space-between; padding:16px 16px 0; }
+  .bot { display:grid; grid-template-columns:1fr auto 1fr; align-items:center; padding:16px 14px 0; }
+  .bot > :first-child { justify-self:start; } .bot > :last-child { justify-self:end; }
   .bot button { display:flex; align-items:center; gap:6px; height:36px; padding:0 10px; border-radius:999px; font-size:13px; font-weight:600; color:var(--mu); }
   .bot button.on { color:var(--acc); }
   .bot .chip { box-shadow:inset 0 0 0 1px var(--s3); }
@@ -298,8 +310,8 @@
   .sheet hr { border:0; height:1px; background:var(--s2); margin:6px 0; }
 
   /* sleep popup */
-  .menu { position:absolute; z-index:6; right:96px; bottom:66px; width:184px; background:var(--s2); border-radius:12px; padding:6px 0; }
-  .menu button { display:block; width:100%; text-align:left; padding:0 16px; height:44px; font-size:14.5px; }
+  .menu { position:absolute; z-index:6; left:calc(50% - 92px); bottom:66px; width:184px; background:var(--s2); border-radius:12px; padding:6px 0; }
+  .menu button { display:block; width:100%; text-align:center; padding:0 16px; height:44px; font-size:14.5px; }
   .menu button:hover { background:var(--s3); }
   .menu button.on { color:var(--acc); font-weight:700; }
   .menu hr { border:0; height:1px; background:var(--s3); margin:4px 0; }
@@ -316,8 +328,9 @@
   .dnp .pl > * { width:100%; max-width:560px; }
   .dnp .npbar { padding:0; }
   .dnp .art { display:grid; }
-  .vol { display:flex; align-items:center; gap:12px; padding:14px 24px 0; color:var(--mu); }
+  .vol { display:flex; align-items:center; gap:12px; padding:14px 14px 0; color:var(--mu); }
   .vol .track { flex:1; }
+  .vol .pc { width:40px; text-align:center; font-size:12px; font-variant-numeric:tabular-nums; }
   .dnp .cards { padding:76px 0 24px; overflow:hidden; }
   .dnp .nc { margin:0 0 16px; }
 </style>
@@ -341,20 +354,19 @@
     <div class="fk js-np">
       <div class="np t-g1">
         <div class="npbar">
-          <button class="ib" aria-label="Chiudi" data-i="chevdown"></button>
+          <span class="l"><button class="ib" aria-label="Chiudi" data-i="chevdown"></button></span>
           <div class="ctx"><small>In riproduzione da</small><b>Preferiti</b></div>
-          <button class="ib" aria-label="Modalità in auto" data-i="car"></button>
-          <button class="ib" aria-label="Altro" data-i="more"></button>
+          <span class="r"><button class="ib" aria-label="Modalità in auto" data-i="car"></button> <button class="ib" aria-label="Altro" data-i="more"></button></span>
         </div>
         <div class="art"><div class="rg" data-big="296|0.48"><i class="cv g1 spin"></i></div></div>
         <div class="tt"><span class="t"><b>Seven Nation Army</b><small>The White Stripes</small></span><button class="ib js-heart" aria-label="Aggiungi ai Preferiti" data-i="heart"></button></div>
-        <div class="seek"><div class="track"><i style="width:48%"></i><em style="left:48%"></em></div><div class="times"><span>1:51</span><span class="q">FLAC</span><span>3:51</span></div></div>
+        <div class="seek"><div class="track"><i style="width:48%"></i><em style="left:48%"></em></div><div class="times"><span>1:51</span><span class="mid"><span class="q">FLAC</span><button class="spd" aria-label="Velocità di riproduzione">1×</button></span><span>3:51</span></div></div>
         <div class="ctl">
-          <button class="ib side" aria-label="Casuale" data-i="shuffle"></button>
+          <button class="ib sd" aria-label="Casuale" data-i="shuffle"></button>
           <button class="ib" aria-label="Brano precedente" data-i="prev" data-s="36"></button>
           <button class="pp js-pp" aria-label="Pausa" data-i="pause" data-s="32"></button>
           <button class="ib" aria-label="Brano successivo" data-i="next2" data-s="36"></button>
-          <button class="ib side" aria-label="Ripeti" data-i="repeat"></button>
+          <button class="ib sd" aria-label="Ripeti" data-i="repeat"></button>
         </div>
         <div class="bot">
           <button><i data-i="devices" data-s="20"></i>Dispositivi</button>
@@ -405,10 +417,9 @@
     <div class="fk oled a-ambra">
       <div class="np t-g4">
         <div class="npbar">
-          <button class="ib" aria-label="Chiudi" data-i="chevdown"></button>
+          <span class="l"><button class="ib" aria-label="Chiudi" data-i="chevdown"></button></span>
           <div class="ctx"><small>In riproduzione da</small><b>Le mie radio</b></div>
-          <button class="ib" aria-label="Modalità in auto" data-i="car"></button>
-          <button class="ib" aria-label="Altro" data-i="more"></button>
+          <span class="r"><button class="ib" aria-label="Modalità in auto" data-i="car"></button> <button class="ib" aria-label="Altro" data-i="more"></button></span>
         </div>
         <div class="art"><div class="rg" data-live="296"><i class="cv ic" data-i="radio" data-s="96"></i></div></div>
         <div class="tt"><span class="t"><b>Radio Capital</b><small>Ora: Bill Withers, Lovely Day</small></span><button class="ib on" aria-label="Togli dalle mie radio" data-i="star"></button></div>
@@ -433,7 +444,7 @@
   <section class="fig">
     <div class="fk">
       <div class="np t-g1">
-        <div class="npbar"><button class="ib" data-i="chevdown" aria-label="Chiudi"></button><div class="ctx"><small>In riproduzione da</small><b>Preferiti</b></div><button class="ib" data-i="more" aria-label="Altro"></button></div>
+        <div class="npbar"><span class="l"><button class="ib" data-i="chevdown" aria-label="Chiudi"></button></span><div class="ctx"><small>In riproduzione da</small><b>Preferiti</b></div><span class="r"><button class="ib" data-i="more" aria-label="Altro"></button></span></div>
       </div>
       <div class="scrim"></div>
       <div class="sheet tall" role="dialog" aria-label="Coda">
@@ -460,7 +471,7 @@
   <!-- 5. Shuffle+ -->
   <section class="fig">
     <div class="fk">
-      <div class="np t-g1"><div class="npbar"><button class="ib" data-i="chevdown" aria-label="Chiudi"></button><div class="ctx"><small>In riproduzione da</small><b>Corsa del sabato</b></div><button class="ib" data-i="more" aria-label="Altro"></button></div></div>
+      <div class="np t-g1"><div class="npbar"><span class="l"><button class="ib" data-i="chevdown" aria-label="Chiudi"></button></span><div class="ctx"><small>In riproduzione da</small><b>Corsa del sabato</b></div><span class="r"><button class="ib" data-i="more" aria-label="Altro"></button></span></div></div>
       <div class="scrim"></div>
       <div class="sheet" role="dialog" aria-label="Casuale+">
         <div class="handle"></div>
@@ -482,16 +493,16 @@
   <section class="fig">
     <div class="fk">
       <div class="np t-g1">
-        <div class="npbar"><button class="ib" aria-label="Chiudi" data-i="chevdown"></button><div class="ctx"><small>In riproduzione da</small><b>Preferiti</b></div><button class="ib" aria-label="Modalità in auto" data-i="car"></button><button class="ib" aria-label="Altro" data-i="more"></button></div>
+        <div class="npbar"><span class="l"><button class="ib" aria-label="Chiudi" data-i="chevdown"></button></span><div class="ctx"><small>In riproduzione da</small><b>Preferiti</b></div><span class="r"><button class="ib" aria-label="Modalità in auto" data-i="car"></button><button class="ib" aria-label="Altro" data-i="more"></button></span></div>
         <div class="art"><div class="rg" data-big="296|0.62"><i class="cv g1 spin"></i></div></div>
         <div class="tt"><span class="t"><b>Seven Nation Army</b><small>The White Stripes</small></span><button class="ib on" aria-label="Togli dai Preferiti" data-i="heart"></button></div>
-        <div class="seek"><div class="track"><i style="width:62%"></i><em style="left:62%"></em></div><div class="times"><span>2:23</span><span class="q">FLAC</span><span>3:51</span></div></div>
+        <div class="seek"><div class="track"><i style="width:62%"></i><em style="left:62%"></em></div><div class="times"><span>2:23</span><span class="mid"><span class="q">FLAC</span><button class="spd" aria-label="Velocità di riproduzione">1×</button></span><span>3:51</span></div></div>
         <div class="ctl">
-          <button class="ib side" aria-label="Casuale" data-i="shuffle"></button>
+          <button class="ib sd" aria-label="Casuale" data-i="shuffle"></button>
           <button class="ib" aria-label="Brano precedente" data-i="prev" data-s="36"></button>
           <button class="pp js-pp" aria-label="Pausa" data-i="pause" data-s="32"></button>
           <button class="ib" aria-label="Brano successivo" data-i="next2" data-s="36"></button>
-          <button class="ib side" aria-label="Ripeti" data-i="repeat"></button>
+          <button class="ib sd" aria-label="Ripeti" data-i="repeat"></button>
         </div>
         <div class="bot">
           <button><i data-i="devices" data-s="20"></i>Dispositivi</button>
@@ -513,20 +524,20 @@
   <section class="fig">
     <div class="fk a-blu">
       <div class="np t-g2">
-        <div class="npbar"><button class="ib" aria-label="Chiudi" data-i="chevdown"></button><div class="ctx"><small>In riproduzione da</small><b>Corsa del sabato</b></div><button class="ib" aria-label="Modalità in auto" data-i="car"></button><button class="ib" aria-label="Altro" data-i="more"></button></div>
+        <div class="npbar"><span class="l"><button class="ib" aria-label="Chiudi" data-i="chevdown"></button></span><div class="ctx"><small>In riproduzione da</small><b>Corsa del sabato</b></div><span class="r"><button class="ib" aria-label="Modalità in auto" data-i="car"></button><button class="ib" aria-label="Altro" data-i="more"></button></span></div>
         <div class="art"><div class="rg" data-big="272|0.22"><i class="cv g2 spin"></i></div></div>
         <div class="tt"><span class="t"><b>Dog Days Are Over</b><small>Florence + The Machine</small></span><button class="ib js-heart" aria-label="Aggiungi ai Preferiti" data-i="heart"></button></div>
         <div class="sug">
           <p>Suggerito, simile a «Corsa del sabato»</p>
           <div style="display:flex;gap:8px"><button class="pill line"><i data-i="download" data-s="18"></i>Scarica</button><button class="pill line"><i data-i="pladd" data-s="18"></i>Aggiungi a playlist…</button></div>
         </div>
-        <div class="seek"><div class="track"><i style="width:22%"></i><em style="left:22%"></em></div><div class="times"><span>0:56</span><span class="q">Streaming</span><span>4:12</span></div></div>
+        <div class="seek"><div class="track"><i style="width:22%"></i><em style="left:22%"></em></div><div class="times"><span>0:56</span><span class="mid"><span class="q">Streaming</span><button class="spd" aria-label="Velocità di riproduzione">1×</button></span><span>4:12</span></div></div>
         <div class="ctl">
-          <button class="ib side on" aria-label="Casuale+" data-i="shuffle"><sup>+</sup></button>
+          <button class="ib sd on" aria-label="Casuale+" data-i="shuffle"><sup>+</sup></button>
           <button class="ib" aria-label="Brano precedente" data-i="prev" data-s="36"></button>
           <button class="pp js-pp" aria-label="Pausa" data-i="pause" data-s="32"></button>
           <button class="ib" aria-label="Brano successivo" data-i="next2" data-s="36"></button>
-          <button class="ib side" aria-label="Ripeti" data-i="repeat"></button>
+          <button class="ib sd" aria-label="Ripeti" data-i="repeat"></button>
         </div>
         <div class="bot">
           <button><i data-i="devices" data-s="20"></i>Dispositivi</button>
@@ -563,16 +574,16 @@
   <section class="fig">
     <div class="fk light a-verde">
       <div class="np paused">
-        <div class="npbar"><button class="ib" aria-label="Chiudi" data-i="chevdown"></button><div class="ctx"><small>In riproduzione da</small><b>Rumours</b></div><button class="ib" aria-label="Modalità in auto" data-i="car"></button><button class="ib" aria-label="Altro" data-i="more"></button></div>
+        <div class="npbar"><span class="l"><button class="ib" aria-label="Chiudi" data-i="chevdown"></button></span><div class="ctx"><small>In riproduzione da</small><b>Rumours</b></div><span class="r"><button class="ib" aria-label="Modalità in auto" data-i="car"></button><button class="ib" aria-label="Altro" data-i="more"></button></span></div>
         <div class="art"><div class="rg" data-big="296|0.81"><i class="cv g5 spin"></i></div></div>
         <div class="tt"><span class="t"><b>Dreams</b><small>Fleetwood Mac</small></span><button class="ib on" aria-label="Togli dai Preferiti" data-i="heart"></button></div>
-        <div class="seek"><div class="track"><i style="width:81%"></i><em style="left:81%"></em></div><div class="times"><span>3:22</span><span class="q">MP3 320</span><span>4:14</span></div></div>
+        <div class="seek"><div class="track"><i style="width:81%"></i><em style="left:81%"></em></div><div class="times"><span>3:22</span><span class="mid"><span class="q">MP3 320</span><button class="spd on" aria-label="Velocità di riproduzione: 1,25×">1,25×</button></span><span>4:14</span></div></div>
         <div class="ctl">
-          <button class="ib side on" aria-label="Casuale+" data-i="shuffle"><sup>+</sup></button>
+          <button class="ib sd on" aria-label="Casuale+" data-i="shuffle"><sup>+</sup></button>
           <button class="ib" aria-label="Brano precedente" data-i="prev" data-s="36"></button>
           <button class="pp js-pp" aria-label="Riproduci" data-i="play" data-s="32"></button>
           <button class="ib" aria-label="Brano successivo" data-i="next2" data-s="36"></button>
-          <button class="ib side on" aria-label="Ripeti un brano" data-i="repeat1"></button>
+          <button class="ib sd on" aria-label="Ripeti un brano" data-i="repeat1"></button>
         </div>
         <div class="bot">
           <button><i data-i="devices" data-s="20"></i>Dispositivi</button>
@@ -585,6 +596,39 @@
     <p>Chiaro con accento verde. In pausa il disco si ferma dov'è, senza tornare a zero. Casuale+ e «ripeti un brano» accesi: l'icona prende l'accento e un cerchio tenue dietro. Il timer mostra i 23 minuti che restano.</p>
   </section>
 
+  <!-- 10. Speed sheet -->
+  <section class="fig">
+    <div class="fk light a-verde">
+      <div class="np paused">
+        <div class="npbar"><span class="l"><button class="ib" aria-label="Chiudi" data-i="chevdown"></button></span><div class="ctx"><small>In riproduzione da</small><b>Rumours</b></div><span class="r"><button class="ib" aria-label="Modalità in auto" data-i="car"></button><button class="ib" aria-label="Altro" data-i="more"></button></span></div>
+        <div class="art"><div class="rg" data-big="296|0.81"><i class="cv g5 spin"></i></div></div>
+        <div class="tt"><span class="t"><b>Dreams</b><small>Fleetwood Mac</small></span><button class="ib on" aria-label="Togli dai Preferiti" data-i="heart"></button></div>
+        <div class="seek"><div class="track"><i style="width:81%"></i><em style="left:81%"></em></div><div class="times"><span>3:22</span><span class="mid"><span class="q">MP3 320</span><button class="spd on" aria-label="Velocità di riproduzione: 1,25×">1,25×</button></span><span>4:14</span></div></div>
+        <div class="ctl">
+          <button class="ib sd on" aria-label="Casuale+" data-i="shuffle"><sup>+</sup></button>
+          <button class="ib" aria-label="Brano precedente" data-i="prev" data-s="36"></button>
+          <button class="pp js-pp" aria-label="Riproduci" data-i="play" data-s="32"></button>
+          <button class="ib" aria-label="Brano successivo" data-i="next2" data-s="36"></button>
+          <button class="ib sd on" aria-label="Ripeti un brano" data-i="repeat1"></button>
+        </div>
+        <div class="bot">
+          <button><i data-i="devices" data-s="20"></i>Dispositivi</button>
+          <button class="chip on" aria-label="Timer di spegnimento"><i data-i="timer" data-s="18"></i>23′</button>
+          <button><i data-i="queue" data-s="20"></i>Coda</button>
+        </div>
+      </div>
+      <div class="scrim"></div>
+      <div class="sheet" role="dialog" aria-label="Velocità di riproduzione">
+        <div class="handle"></div>
+        <h5 class="c">Velocità di riproduzione</h5>
+        <div class="spds"><button class="js-sp" aria-pressed="false">0,5×</button><button class="js-sp" aria-pressed="false">0,75×</button><button class="js-sp" aria-pressed="false">1×</button><button class="js-sp on" aria-pressed="true">1,25×</button><button class="js-sp" aria-pressed="false">1,5×</button><button class="js-sp" aria-pressed="false">1,75×</button><button class="js-sp" aria-pressed="false">2×</button></div>
+        <p class="hint">Il tono resta quello originale. Il timer di spegnimento conta il tempo reale, non quello del brano.</p>
+      </div>
+    </div>
+    <h3>Velocità</h3>
+    <p>Si apre toccando l'etichetta della velocità accanto alla qualità. Sette valori in fila, tutti larghi uguali; quello scelto è pieno di accento. Diverso da 1×, l'etichetta resta colorata nella schermata così si vede subito. Le radio in diretta non ce l'hanno.</p>
+  </section>
+
 </main>
 
 <!-- desktop -->
@@ -593,21 +637,21 @@
     <div class="dnp fk-d t-g1" style="--bg:#07050C;--s1:#120E1C;--s2:#1D1630;--s3:#2A2140;--acc:#A06BFF;--accs:#D9C8FF;--onacc:#12081F;--tx:#F4F0FA;--mu:#A79DB8;--fa:#6E6680">
       <div class="pl js-np">
         <div class="npbar">
-          <button class="ib" aria-label="Chiudi" data-i="chevdown"></button>
+          <span class="l"><button class="ib" aria-label="Chiudi" data-i="chevdown"></button></span>
           <div class="ctx"><small>In riproduzione da</small><b>Preferiti</b></div>
-          <button class="ib" aria-label="Altro" data-i="more"></button>
+          <span class="r"><button class="ib" aria-label="Altro" data-i="more"></button></span>
         </div>
         <div class="art"><div class="rg" data-big="300|0.48"><i class="cv g1 spin"></i></div></div>
         <div class="tt"><span class="t"><b>Seven Nation Army</b><small>The White Stripes</small></span><button class="ib js-heart" aria-label="Aggiungi ai Preferiti" data-i="heart"></button></div>
-        <div class="seek"><div class="track"><i style="width:48%"></i><em style="left:48%"></em></div><div class="times"><span>1:51</span><span class="q">FLAC</span><span>3:51</span></div></div>
+        <div class="seek"><div class="track"><i style="width:48%"></i><em style="left:48%"></em></div><div class="times"><span>1:51</span><span class="mid"><span class="q">FLAC</span><button class="spd" aria-label="Velocità di riproduzione">1×</button></span><span>3:51</span></div></div>
         <div class="ctl" style="padding:14px 80px 0">
-          <button class="ib side" aria-label="Casuale" data-i="shuffle"></button>
+          <button class="ib sd" aria-label="Casuale" data-i="shuffle"></button>
           <button class="ib" aria-label="Brano precedente" data-i="prev" data-s="36"></button>
           <button class="pp js-pp" aria-label="Pausa" data-i="pause" data-s="32"></button>
           <button class="ib" aria-label="Brano successivo" data-i="next2" data-s="36"></button>
-          <button class="ib side" aria-label="Ripeti" data-i="repeat"></button>
+          <button class="ib sd" aria-label="Ripeti" data-i="repeat"></button>
         </div>
-        <div class="vol"><button class="ib" aria-label="Muto" data-i="volume" data-s="20"></button><div class="track"><i style="width:70%"></i><em style="left:70%"></em></div></div>
+        <div class="vol"><button class="ib" aria-label="Muto" data-i="volume" data-s="20"></button><div class="track"><i style="width:70%"></i><em style="left:70%"></em></div><span class="pc">70%</span></div>
         <div class="bot">
           <button><i data-i="devices" data-s="20"></i>Dispositivi</button>
           <button class="chip" aria-label="Timer di spegnimento"><i data-i="timer" data-s="18"></i></button>
@@ -640,7 +684,7 @@
     </div>
   </div>
   <h3>Desktop sopra 900 px</h3>
-  <p>Su Linux e Windows la schermata copre tutta la finestra, barra laterale compresa. Il lettore resta al centro della colonna sinistra, largo al massimo 560 px; il volume con «Muto» sta sopra Dispositivi, Timer e Coda, e il pulsante della modalità in auto non c'è. A destra una colonna di 380 px con Testo, Curiosità e Prossimi sempre visibili.</p>
+  <p>Su Linux e Windows la schermata copre tutta la finestra, barra laterale compresa. Il lettore resta al centro della colonna sinistra, largo al massimo 560 px; il volume, con «Muto» a sinistra e la percentuale a destra, sta sopra Dispositivi, Timer e Coda, e il pulsante della modalità in auto non c'è. A destra una colonna di 380 px con Testo, Curiosità e Prossimi sempre visibili.</p>
 </section>
 
 <script>
@@ -725,6 +769,7 @@ document.querySelectorAll('.js-pp').forEach(b => b.addEventListener('click', () 
 document.querySelectorAll('.js-heart').forEach(b => b.addEventListener('click', () => {
   const on = b.classList.toggle('on'); b.setAttribute('aria-label', on ? 'Togli dai Preferiti' : 'Aggiungi ai Preferiti');
 }));
+document.querySelectorAll('.js-sp').forEach(b => b.addEventListener('click', () => b.parentElement.querySelectorAll('.js-sp').forEach(o => { o.classList.toggle('on', o === b); o.setAttribute('aria-pressed', o === b); })));
 document.querySelectorAll('.js-sw').forEach(b => b.addEventListener('click', () => b.setAttribute('aria-checked', b.classList.toggle('on'))));
 
 const stagger = () => document.querySelectorAll('.rows').forEach(rs => [...rs.children].forEach((r, i) => r.style.setProperty('--i', Math.min(i, 12))));
