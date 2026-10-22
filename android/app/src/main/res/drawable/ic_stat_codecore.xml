@@ -1,9 +1,17 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp"
     android:height="24dp"
-    android:viewportWidth="24"
-    android:viewportHeight="24">
-    <path
-        android:fillColor="#FFFFFFFF"
-        android:pathData="M12,3v10.55c-0.59,-0.34 -1.27,-0.55 -2,-0.55 -2.21,0 -4,1.79 -4,4s1.79,4 4,4 4,-1.79 4,-4V7h4V3h-6z" />
+    android:viewportWidth="72"
+    android:viewportHeight="72">
+    <!-- Logo D on the 108 launcher grid, cropped to its 72 safe zone -->
+    <group android:translateX="-18" android:translateY="-18">
+        <path
+            android:strokeColor="#FFFFFFFF"
+            android:strokeWidth="6.5"
+            android:strokeLineCap="round"
+            android:pathData="M70.25,53.31 A22,22 0 1,1 54.69,37.75 M45,61 L67,39 M50,56 L58,70" />
+        <path
+            android:fillColor="#FFFFFFFF"
+            android:pathData="M39,50.25 a3.25,3.25 0 0,1 6.5,0 v17.5 a3.25,3.25 0 0,1 -6.5,0 z M70.5,31.5 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0 z" />
+    </group>
 </vector>
