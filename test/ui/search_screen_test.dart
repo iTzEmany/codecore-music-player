@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:codecore/providers/library_providers.dart' show SearchQuery;
 import 'package:codecore/ui/screens/search/search_screen.dart';
 import 'package:codecore/ui/screens/search/search_section_screen.dart';
+import 'package:codecore/ui/widgets/empty_state.dart';
 import 'package:codecore/ui/widgets/segmented_blocks.dart';
 import 'package:codecore/ui/widgets/track_row.dart';
 import 'package:flutter/material.dart';
@@ -20,6 +21,29 @@ Future<void> _settle(WidgetTester tester) async {
   );
   await tester.pump(const Duration(milliseconds: 300));
   await tester.pump(const Duration(milliseconds: 300));
+}
+
+/// Five single-track albums "Disc 0".."Disc 4" by "Band 0".."Band 4"; the
+/// first two are favourites.
+Future<void> _insertDiscs(Harness h) async {
+  for (var i = 0; i < 5; i++) {
+    await h.db
+        .into(h.db.tracks)
+        .insert(
+          TracksCompanion.insert(
+            path: '/m/d$i.mp3',
+            title: 'Tune $i',
+            albumKey: 'band $i|disc $i',
+            format: 'mp3',
+            sizeBytes: 1,
+            mtimeMs: 1,
+            addedAt: i,
+            artist: Value('Band $i'),
+            album: Value('Disc $i'),
+            isFavorite: Value(i < 2),
+          ),
+        );
+  }
 }
 
 void main() {
@@ -158,6 +182,92 @@ void main() {
     await _settle(tester);
     expect(find.text('Album 0'), findsOneWidget);
     expect(find.text('Album 1'), findsOneWidget);
+    await h.dispose(tester);
+  });
+
+  testWidgets('Tutti appears above the limit and opens the full list', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(400, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final h = await Harness.create(tester, tracks: 0);
+    await _insertDiscs(h);
+    await h.pump(tester, const SearchScreen());
+    await _settle(tester);
+    typeSearch(tester, 'Disc');
+    await tester.pump(const Duration(milliseconds: 400));
+    await _settle(tester);
+    expect(find.text('Disc 4'), findsNothing, reason: 'only three are shown');
+    expect(find.text('Tutti'), findsWidgets);
+    await tester.tap(find.text('Tutti').first);
+    await tester.pumpAndSettle();
+    expect(find.byType(SearchSectionScreen), findsOneWidget);
+    for (var i = 0; i < 5; i++) {
+      expect(find.text('Disc $i'), findsOneWidget);
+    }
+    await h.dispose(tester);
+  });
+
+  testWidgets('section screen honours the quick filter', (tester) async {
+    tester.view.physicalSize = const Size(400, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final h = await Harness.create(tester, tracks: 0);
+    await _insertDiscs(h);
+    await h.pump(
+      tester,
+      const SearchSectionScreen(
+        query: SearchQuery('Disc', favorites: true),
+        kind: SearchSectionKind.albums,
+      ),
+    );
+    await _settle(tester);
+    expect(find.text('Disc 0'), findsOneWidget);
+    expect(find.text('Disc 1'), findsOneWidget);
+    expect(find.text('Disc 2'), findsNothing);
+    await h.dispose(tester);
+  });
+
+  testWidgets('section screen without matches shows the empty state', (
+    tester,
+  ) async {
+    final h = await Harness.create(tester, tracks: 2);
+    await h.pump(
+      tester,
+      const SearchSectionScreen(
+        query: SearchQuery('zzzz'),
+        kind: SearchSectionKind.albums,
+      ),
+    );
+    await _settle(tester);
+    expect(find.byType(EmptyState), findsOneWidget);
+    await h.dispose(tester);
+  });
+
+  testWidgets('result rows grow with 150 % text instead of overflowing', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(360, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final h = await Harness.create(tester, tracks: 4);
+    await h.pump(
+      tester,
+      const MediaQuery(
+        data: MediaQueryData(
+          size: Size(360, 800),
+          textScaler: TextScaler.linear(1.5),
+        ),
+        child: SearchSectionScreen(
+          query: SearchQuery('Album'),
+          kind: SearchSectionKind.albums,
+        ),
+      ),
+    );
+    await _settle(tester);
+    expect(tester.takeException(), isNull);
+    expect(find.text('Album 0'), findsOneWidget);
     await h.dispose(tester);
   });
 }

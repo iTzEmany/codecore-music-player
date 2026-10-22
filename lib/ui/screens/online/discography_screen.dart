@@ -29,7 +29,7 @@ class DiscographyScreen extends ConsumerWidget {
     final page = ref.watch(discographyProvider(key));
     final data = page.value;
     return OnlinePageFrame(
-      title: '${artist.name} · $title',
+      title: '${artist.name}, $title',
       onRefresh: () async {
         try {
           await ref

@@ -11,6 +11,7 @@ import '../../shell/shell_nav.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/artist_avatar.dart';
 import '../../widgets/cover_image.dart';
+import '../../widgets/empty_state.dart';
 import '../../widgets/playlist_cover.dart';
 import '../library/album_detail_screen.dart';
 import '../library/artist_screen.dart';
@@ -59,15 +60,17 @@ class SearchResultRow extends StatelessWidget {
     final theme = Theme.of(context).textTheme;
     return InkWell(
       onTap: onTap,
-      child: SizedBox(
-        height: 56,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 56),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const SizedBox(width: CcDims.margin),
             leading,
             const SizedBox(width: 12),
             Expanded(
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -202,10 +205,16 @@ class SearchSectionScreen extends ConsumerWidget {
     final rows = searchSectionRows(context, kind, res);
     return Scaffold(
       appBar: AppBar(title: Text(searchSectionTitle(context, kind))),
-      body: ListView.builder(
-        itemCount: rows.length + 1,
-        itemBuilder: (_, i) => i < rows.length ? rows[i] : const SizedBox(height: 24),
-      ),
+      body: rows.isEmpty
+          ? EmptyState(
+              icon: Icons.search_off_rounded,
+              message: context.l10n.noResults,
+            )
+          : ListView.builder(
+              itemCount: rows.length + 1,
+              itemBuilder: (_, i) =>
+                  i < rows.length ? rows[i] : const SizedBox(height: 24),
+            ),
     );
   }
 }

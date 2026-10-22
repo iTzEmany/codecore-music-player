@@ -4,6 +4,8 @@ import 'package:codecore/services/online/innertube_client.dart';
 import 'package:codecore/services/online/ytm_artist.dart';
 import 'package:codecore/services/online/ytm_catalog.dart';
 import 'package:codecore/ui/screens/online/artist_page_screen.dart';
+import 'package:codecore/ui/screens/online/artist_page_sections.dart';
+import 'package:codecore/ui/widgets/net_thumbnail.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -249,7 +251,22 @@ void main() {
     );
     await _settle(tester);
     expect(tester.takeException(), isNull);
-    expect(find.byKey(const ValueKey('collection-name')), findsOneWidget);
+    final name = find.byKey(const ValueKey('collection-name'));
+    final cover = find.byKey(const ValueKey('collection-cover'));
+    expect(name, findsOneWidget);
+    expect(cover, findsOneWidget);
+    expect(
+      tester.getRect(cover).bottom,
+      lessThanOrEqualTo(tester.getRect(name).top),
+      reason: 'narrow and large text: the cover sits above the name',
+    );
+    expect(
+      find.descendant(
+        of: find.byType(ArtistHeader),
+        matching: find.byWidgetPredicate((w) => w is NetThumbnail && w.circle),
+      ),
+      findsOneWidget,
+    );
     await h.dispose(tester);
   });
 
