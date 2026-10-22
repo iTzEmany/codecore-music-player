@@ -53,21 +53,4 @@ class ReviewQueries {
         .map((r) => r.read(n) ?? 0)
         .watchSingle();
   }
-
-  /// Back to «not tried yet», so the enrichment looks at them again.
-  Future<void> resetStatus(Set<int> ids) async {
-    if (ids.isEmpty) return;
-    await _db.transaction(() async {
-      final all = ids.toList();
-      for (var i = 0; i < all.length; i += 500) {
-        final chunk = all.sublist(
-          i,
-          i + 500 > all.length ? all.length : i + 500,
-        );
-        await (_db.update(_db.tracks)..where((t) => t.id.isIn(chunk))).write(
-          const TracksCompanion(enrichStatus: Value(0)),
-        );
-      }
-    });
-  }
 }

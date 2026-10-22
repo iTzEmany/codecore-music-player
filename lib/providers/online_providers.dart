@@ -80,11 +80,13 @@ class EnrichJobNotifier extends Notifier<EnrichJobState> {
     bool includeLyrics = true,
     bool includeCuriosities = false,
     bool includeMetadata = true,
+    bool force = false,
+    void Function()? onFinished,
   }) {
     if (state.running || ids.isEmpty) return false;
     _cancel = CancelToken();
     state = const EnrichJobState(running: true);
-    _run(ids, includeLyrics, includeCuriosities, includeMetadata);
+    _run(ids, includeLyrics, includeCuriosities, includeMetadata, force, onFinished);
     return true;
   }
 
@@ -93,6 +95,8 @@ class EnrichJobNotifier extends Notifier<EnrichJobState> {
     bool lyrics,
     bool curiosities,
     bool metadata,
+    bool force,
+    void Function()? onFinished,
   ) async {
     BatchProgress? last;
     try {
@@ -105,6 +109,7 @@ class EnrichJobNotifier extends Notifier<EnrichJobState> {
                 includeLyrics: lyrics,
                 includeCuriosities: curiosities,
                 includeMetadata: metadata,
+                force: force,
               )) {
         last = p;
         state = EnrichJobState(running: !p.finished, progress: p);
@@ -113,6 +118,7 @@ class EnrichJobNotifier extends Notifier<EnrichJobState> {
       last = const BatchProgress(finished: true);
     }
     state = EnrichJobState(result: last ?? const BatchProgress(finished: true));
+    onFinished?.call();
   }
 
   void cancel() => _cancel?.cancel();

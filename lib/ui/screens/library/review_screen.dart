@@ -35,6 +35,14 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
   /// null = «Tutti».
   ReviewReason? _filter;
 
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      if (mounted) ref.read(reviewActionsProvider).secondOpinionOnOpen();
+    });
+  }
+
   String _label(ReviewReason? r) {
     final l = context.l10n;
     return switch (r) {

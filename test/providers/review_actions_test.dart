@@ -14,6 +14,7 @@ class _FakeJob extends EnrichJobNotifier {
   _FakeJob(this.busy);
   final bool busy;
   List<int>? started;
+  bool? forced;
 
   @override
   EnrichJobState build() => EnrichJobState(running: busy);
@@ -21,12 +22,15 @@ class _FakeJob extends EnrichJobNotifier {
   @override
   bool start(
     List<int> ids, {
+    bool force = false,
+    void Function()? onFinished,
     bool includeLyrics = true,
     bool includeCuriosities = false,
     bool includeMetadata = true,
   }) {
     if (busy) return false;
     started = ids;
+    forced = force;
     return true;
   }
 }
@@ -72,12 +76,13 @@ void main() {
   Future<int> status() async =>
       (await db.select(db.tracks).getSingle()).enrichStatus;
 
-  test('«Riprova» resets the status and starts the enrichment', () async {
+  test('«Riprova» starts a forced enrichment without touching the status', () async {
     final job = _FakeJob(false);
     final r = await container(job).read(reviewActionsProvider).retry({id});
     expect(r, ReviewRetryResult.started);
-    expect(await status(), 0);
+    expect(await status(), 2);
     expect(job.started, [id]);
+    expect(job.forced, isTrue);
   });
 
   test('«Riprova» does nothing while another enrichment runs', () async {

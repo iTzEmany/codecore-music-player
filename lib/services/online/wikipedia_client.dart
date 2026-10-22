@@ -111,7 +111,7 @@ class WikipediaClient {
     final name = extractPrimaryArtist(artist).trim();
     final key = matchKey(name);
     if (key.isEmpty) return null;
-    final spellings = {name, _titleCase(name)};
+    final spellings = {name, titleCase(name)};
     List<String> titlesFor(String l) {
       final forms = l == 'en'
           ? ['(musician)', '(band)', '(singer)', '(rapper)', '(group)']
@@ -145,7 +145,7 @@ class WikipediaClient {
   static const _maxTitles = 20;
 
   /// «bob dylan» → «Bob Dylan»: Wikipedia only capitalises the first letter.
-  static String _titleCase(String s) => s
+  static String titleCase(String s) => s
       .split(' ')
       .map((w) => w.isEmpty ? w : w[0].toUpperCase() + w.substring(1))
       .join(' ');

@@ -472,6 +472,18 @@ class SettingsStore {
     [for (final i in ids.toList()..sort()) '$i'],
   );
 
+  /// Tracks the second opinion of YouTube Music already looked at, so opening
+  /// «Da revisionare» does not ask again (track ids).
+  Set<int> readReviewChecked() => (_prefs.getStringList('reviewChecked') ?? const [])
+      .map(int.tryParse)
+      .whereType<int>()
+      .toSet();
+
+  Future<void> writeReviewChecked(Set<int> ids) => _prefs.setStringList(
+    'reviewChecked',
+    [for (final i in ids.toList()..sort()) '$i'],
+  );
+
   SavedPlayback readPlayback() {
     final ids = (_prefs.getStringList('lastQueueIds') ?? const [])
         .map(int.tryParse)

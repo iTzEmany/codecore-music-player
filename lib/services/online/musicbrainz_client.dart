@@ -4,6 +4,7 @@ import '../../core/app_log.dart';
 import '../import/track_matcher.dart';
 import 'http_client.dart';
 import 'query_cleaner.dart';
+import 'wikipedia_client.dart';
 
 /// One recording of MusicBrainz (a performance of a song, with its credit).
 class MbRecording {
@@ -12,9 +13,13 @@ class MbRecording {
     required this.title,
     required this.artistId,
     required this.artistName,
+    this.length,
   });
 
   final String id, title, artistId, artistName;
+
+  /// Milliseconds, when MusicBrainz knows them.
+  final int? length;
 }
 
 /// MusicBrainz, the open music database: it says *which* song and *which*
@@ -57,14 +62,17 @@ class MusicBrainzClient {
 
   /// The recordings called [title] by [artist], best first: the ones whose
   /// title and credit are the same as asked (compared without accents and case).
-  Future<List<MbRecording>> recordings(String title, String artist, {CancelToken? cancel}) async {
+  /// With [studioOnly] the search leaves out live recordings and bootlegs.
+  Future<List<MbRecording>> recordings(String title, String artist,
+      {bool studioOnly = false, CancelToken? cancel}) async {
     final t = title.replaceAll('"', ' ').trim();
     if (t.isEmpty) return const [];
     final by = artist.replaceAll('"', ' ').trim();
     final data = await _get(
       'recording',
       {
-        'query': by.isEmpty ? 'recording:"$t"' : 'recording:"$t" AND artist:"$by"',
+        'query': '${by.isEmpty ? 'recording:"$t"' : 'recording:"$t" AND artist:"$by"'}'
+            '${studioOnly ? ' AND status:official AND primarytype:album AND NOT secondarytype:live' : ''}',
         'limit': '8',
       },
       cancel,
@@ -89,11 +97,44 @@ class MusicBrainzClient {
           title: r['title'] as String,
           artistId: a['id'] as String,
           artistName: a['name'] as String,
+          length: r['length'] is num ? (r['length'] as num).toInt() : null,
         ));
         break;
       }
     }
     return out;
+  }
+
+  /// The genre of a recording of [title] by [artist] that lasts [durationMs]
+  /// (within 3 s when MusicBrainz knows its length), null when none is sure.
+  /// The recording's own genre counts with 2 votes or more; otherwise the
+  /// artist's most voted one stands in. Capitalised like Wikipedia's titles.
+  Future<String?> genreFor(String title, String artist, int durationMs,
+      {CancelToken? cancel}) async {
+    final found = await recordings(title, artist, studioOnly: true, cancel: cancel);
+    final rec = found.where((r) {
+      final len = r.length;
+      return len == null || (len - durationMs).abs() <= 3000;
+    }).firstOrNull;
+    if (rec == null) return null;
+    final own = _topGenre(await _get('recording/${rec.id}', {'inc': 'genres'}, cancel), 2);
+    final name = own ?? _topGenre(await _get('artist/${rec.artistId}', {'inc': 'genres'}, cancel), 1);
+    return name == null ? null : WikipediaClient.titleCase(name);
+  }
+
+  static String? _topGenre(Map? data, int minVotes) {
+    final genres = data?['genres'];
+    if (genres is! List) return null;
+    String? best;
+    var votes = minVotes - 1;
+    for (final g in genres) {
+      if (g is! Map || g['name'] is! String || g['count'] is! num) continue;
+      if ((g['count'] as num) > votes) {
+        best = g['name'] as String;
+        votes = (g['count'] as num).toInt();
+      }
+    }
+    return best;
   }
 
   /// The artist called [name], when MusicBrainz is sure (an exact name and a

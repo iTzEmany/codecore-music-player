@@ -95,11 +95,4 @@ void main() {
     expect(await titles(dismissed: {a}), ['b']);
     expect(await q.watchCount(dismissed: {a}).first, 1);
   });
-
-  test('resetStatus puts the tracks back to «not tried yet»', () async {
-    final a = await add('a', status: 2);
-    await q.resetStatus({a});
-    expect((await (db.select(db.tracks)).getSingle()).enrichStatus, 0);
-    expect(await titles(), isEmpty);
-  });
 }

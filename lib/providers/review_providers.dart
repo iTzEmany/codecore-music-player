@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/repositories/review_queries.dart';
 import '../data/db/app_database.dart';
 import 'database_providers.dart';
 import 'online_providers.dart';
+import 'second_opinion_providers.dart';
 import 'settings_providers.dart';
 
 final reviewQueriesProvider = Provider<ReviewQueries>(
@@ -47,14 +50,31 @@ class ReviewActions {
 
   final Ref _ref;
 
-  /// «Riprova»: the tracks go back to status 0 and the batch enrichment (the
-  /// same job as «Arricchisci») asks the online sources again. Nothing is
-  /// reset while another job runs, or the tracks would leave the list untried.
+  /// «Riprova»: the batch enrichment (the same job as «Arricchisci») asks the
+  /// online sources again, even for tracks it gave up on; then YouTube Music
+  /// gives its second opinion on the ones that still have holes.
   Future<ReviewRetryResult> retry(Set<int> ids) async {
-    if (_ref.read(enrichJobProvider).running) return ReviewRetryResult.busy;
-    await _ref.read(reviewQueriesProvider).resetStatus(ids);
-    final started = _ref.read(enrichJobProvider.notifier).start(ids.toList());
+    if (_ref.read(enrichJobProvider).running ||
+        _ref.read(secondOpinionJobProvider).running) {
+      return ReviewRetryResult.busy;
+    }
+    final list = ids.toList();
+    final started = _ref.read(enrichJobProvider.notifier).start(
+          list,
+          force: true,
+          onFinished: () => unawaited(
+              _ref.read(secondOpinionJobProvider.notifier).run(list, force: true)),
+        );
     return started ? ReviewRetryResult.started : ReviewRetryResult.busy;
+  }
+
+  /// On opening the list: the second opinion on the tracks never checked.
+  Future<void> secondOpinionOnOpen() async {
+    if (_ref.read(enrichJobProvider).running) return;
+    final list = await _ref.read(reviewTracksProvider.future);
+    await _ref
+        .read(secondOpinionJobProvider.notifier)
+        .run([for (final t in list) t.id]);
   }
 
   Future<void> dismiss(Set<int> ids) =>

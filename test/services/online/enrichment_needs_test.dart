@@ -102,7 +102,9 @@ void main() {
     });
 
     test('a track for which nothing was found waits for the user', () async {
-      expect(needsEnrichment(await add(status: 2)), isFalse);
+      final gaveUp = await add(status: 2);
+      expect(needsEnrichment(gaveUp), isFalse);
+      expect(needsEnrichment(gaveUp, force: true), isTrue, reason: '«Riprova» asks again');
     });
   });
 
@@ -119,5 +121,18 @@ void main() {
     final half = await add(lyrics: true, status: 1);
     await svc.enrichMany([half.id]).toList();
     expect(web.asked, isNotEmpty);
+  });
+
+  test('a cancelled batch leaves the tracks it did not reach as they were', () async {
+    final first = await add(status: 1);
+    final second = await add(status: 1);
+    final cancel = CancelToken();
+    await for (final _ in svc.enrichMany([first.id, second.id], cancel: cancel)) {
+      cancel.cancel();
+    }
+    Future<int> status(Track t) async =>
+        (await (db.select(db.tracks)..where((r) => r.id.equals(t.id))).getSingle()).enrichStatus;
+    expect(await status(first), 2, reason: 'tried, nothing found');
+    expect(await status(second), 1, reason: 'never reached');
   });
 }

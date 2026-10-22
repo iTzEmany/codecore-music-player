@@ -6,6 +6,7 @@ import '../../core/app_log.dart';
 import '../../core/text_utils.dart';
 import 'innertube_json.dart';
 import 'request_budget.dart';
+import 'ytm_lyrics_parser.dart';
 import 'ytm_radio_parser.dart';
 import 'youtube_service.dart';
 
@@ -159,6 +160,13 @@ class InnerTubeClient {
         (RadioPage page) => page.items.isEmpty,
         cancel,
       );
+
+  /// The plain lyrics of the YouTube Music song [videoId] (its «Testo» tab),
+  /// null when it has none. Two requests, both unmasked: the answers are small.
+  Future<String?> lyrics(String videoId, {CancelToken? cancel}) async {
+    final id = await _musicPage('next', {'videoId': videoId}, 'en', lyricsBrowseId, null, null, cancel);
+    return id == null ? null : browseMusic(id, parseLyrics, cancel: cancel);
+  }
 
   Future<T> _musicPage<T>(
     String endpoint,

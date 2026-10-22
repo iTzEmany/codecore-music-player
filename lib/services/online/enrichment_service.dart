@@ -62,14 +62,15 @@ class BatchProgress {
 /// [t]. A track whose requested fields are all filled is not looked up again
 /// (every run used to ask iTunes again for every track already enriched), and
 /// one for which nothing was ever found (status 2) waits until the user asks
-/// for it explicitly.
+/// for it explicitly ([force]).
 bool needsEnrichment(
   Track t, {
   bool metadata = true,
   bool lyrics = true,
   bool curiosities = false,
+  bool force = false,
 }) {
-  if (t.enrichStatus == 2) return false;
+  if (t.enrichStatus == 2 && !force) return false;
   final meta = metadata &&
       (t.album == null ||
           t.year == null ||
@@ -103,6 +104,9 @@ class EnrichmentService {
   final WebClient web;
   final String Function() language;
   final RateLimiter _limiter;
+
+  /// The pause between online lookups, shared with the second opinion.
+  RateLimiter get limiter => _limiter;
 
   /// Reads only: nothing is written until [apply].
   Future<EnrichmentProposal> propose(Track t,
@@ -236,6 +240,7 @@ class EnrichmentService {
     bool includeLyrics = true,
     bool includeCuriosities = false,
     bool includeMetadata = true,
+    bool force = false,
   }) async* {
     var updated = 0, notFound = 0, done = 0;
     for (final id in ids) {
@@ -251,7 +256,8 @@ class EnrichmentService {
           !needsEnrichment(t,
               metadata: includeMetadata,
               lyrics: includeLyrics,
-              curiosities: includeCuriosities)) {
+              curiosities: includeCuriosities,
+              force: force)) {
         yield BatchProgress(
             done: done, total: ids.length, updated: updated, notFound: notFound);
         continue;
