@@ -837,8 +837,7 @@
     }
   },
   "homeFanOpen": "Mostra le copertine",
-  "searchMainResult": "Risultato principale",
-  "showAll": "Mostra tutti",
+  "showAll": "Tutti",
   "recentSearches": "Ricerche recenti",
   "genresTitle": "Generi",
   "downloadsChip": "Download ({n})",
@@ -2783,7 +2782,7 @@
   "memoryClearFailed": "Impossibile svuotare la cache",
   "memoryTools": "Pulizia",
   "memoryUnavailable": "Non disponibile",
-  "ytmArtistWithAudience": "Artista · {audience}",
+  "ytmArtistWithAudience": "Artista, {audience}",
   "@ytmArtistWithAudience": {
     "placeholders": {
       "audience": {
@@ -2791,7 +2790,7 @@
       }
     }
   },
-  "ytmOffline": "Non in linea · dati del {date}",
+  "ytmOffline": "Non in linea, dati del {date}",
   "@ytmOffline": {
     "placeholders": {
       "date": {
@@ -2811,8 +2810,6 @@
     }
   },
   "ytmInYourLibrary": "Nella tua libreria",
-  "ytmSeeAll": "Vedi tutti",
-  "ytmShowAll": "Mostra tutto",
   "ytmAbout": "Informazioni",
   "ytmMore": "Altro",
   "ytmLess": "Meno",
@@ -3170,7 +3167,7 @@
   "followedToConfirm": "Da confermare",
   "followedNotFound": "Non trovato",
   "followedRetry": "Riprova",
-  "releaseAlbumYear": "Album · {year}",
+  "releaseAlbumYear": "Album, {year}",
   "@releaseAlbumYear": {
     "placeholders": {
       "year": {
@@ -3178,7 +3175,7 @@
       }
     }
   },
-  "releaseSingleYear": "Singolo · {year}",
+  "releaseSingleYear": "Singolo, {year}",
   "@releaseSingleYear": {
     "placeholders": {
       "year": {

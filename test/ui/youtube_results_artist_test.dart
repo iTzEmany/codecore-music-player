@@ -76,7 +76,7 @@ void main() {
   testWidgets('the card shows when the top result is an artist and opens the artist page', (tester) async {
     final h = await open(tester, (_) async => _pink);
     expect(find.byKey(const ValueKey('artist-card')), findsOneWidget);
-    expect(find.text('Artista · 25.9M monthly audience'), findsOneWidget);
+    expect(find.text('Artista, 25.9M monthly audience'), findsOneWidget);
     expect(find.text('Mother'), findsOneWidget, reason: 'the results are there as well');
 
     await tester.tap(find.byKey(const ValueKey('artist-card')));

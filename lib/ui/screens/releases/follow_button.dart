@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/releases_providers.dart';
 import '../../../services/online/ytm_artist.dart';
+import '../../theme/tokens.dart';
 import '../../widgets/confirm.dart';
 import '../online/artist_picker_sheet.dart' show lookupYtmArtist;
 
@@ -45,7 +46,7 @@ class FollowButton extends ConsumerWidget {
     final l = context.l10n;
     final followed = ref.watch(isFollowedProvider(artist.id)).value ?? false;
     if (!followed) {
-      return FilledButton.icon(
+      return OutlinedButton.icon(
         key: const ValueKey('follow-button'),
         onPressed: () => followArtist(ref, artist),
         icon: const Icon(Icons.add_rounded),
@@ -54,6 +55,7 @@ class FollowButton extends ConsumerWidget {
     }
     return OutlinedButton.icon(
       key: const ValueKey('following-button'),
+      style: OutlinedButton.styleFrom(foregroundColor: context.cc.accent),
       onPressed: () async {
         final ok = await showConfirm(
           context,

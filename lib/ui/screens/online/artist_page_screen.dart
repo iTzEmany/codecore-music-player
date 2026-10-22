@@ -96,7 +96,7 @@ class ArtistPageScreen extends ConsumerWidget {
           case YtmArtistShelf():
             if (shelf.artists.isEmpty) break;
             slivers.add(SliverToBoxAdapter(
-              child: ArtistCarousel(
+              child: ArtistList(
                 shelf: shelf,
                 onOpen: (a) =>
                     ShellNav.open<void>(context, ArtistPageScreen(artist: a)),
@@ -140,7 +140,7 @@ class ArtistPageScreen extends ConsumerWidget {
       SliverToBoxAdapter(
         child: SectionHeader(
           l.ytmInYourLibrary,
-          actionLabel: l.ytmSeeAll,
+          actionLabel: l.showAll,
           onAction: () => ShellNav.open<void>(context, ArtistDetailScreen(artist: local)),
         ),
       ),
@@ -165,7 +165,7 @@ class ArtistPageScreen extends ConsumerWidget {
       SliverToBoxAdapter(
         child: SectionHeader(
           shelf.title,
-          actionLabel: link == null ? null : l.ytmShowAll,
+          actionLabel: link == null ? null : l.showAll,
           onAction: link == null
               ? null
               : () => ShellNav.open<void>(
@@ -186,7 +186,7 @@ class ArtistPageScreen extends ConsumerWidget {
 
   Widget _releases(BuildContext context, YtmReleaseShelf shelf) {
     final more = shelf.more;
-    return ReleaseCarousel(
+    return ReleaseList(
       shelf: shelf,
       onOpen: (r) => ShellNav.open<void>(
           context, OnlineAlbumScreen(browseId: r.browseId, release: r)),

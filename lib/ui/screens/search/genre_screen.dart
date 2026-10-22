@@ -7,12 +7,12 @@ import '../../../providers/library_providers.dart';
 import '../../../providers/player_providers.dart';
 import '../../../providers/settings_providers.dart';
 import '../../theme/app_theme.dart';
-import '../../theme/tokens.dart';
-import '../../widgets/play_buttons.dart';
-import '../../widgets/shuffle_button.dart';
+import '../../widgets/collection_header.dart';
+import '../../widgets/empty_state.dart';
 import '../../widgets/selection_bar.dart';
 import '../../widgets/track_row.dart';
 import '../../widgets/track_row_selection.dart';
+import '../library/album_detail_screen.dart' show collectionMeta;
 
 /// Tracks of one genre.
 class GenreScreen extends ConsumerWidget {
@@ -33,52 +33,41 @@ class GenreScreen extends ConsumerWidget {
       listKey: key,
       visibleIds: [for (final t in tracks) t.id],
     );
+    if (tracks.isEmpty) {
+      return Scaffold(
+        appBar: AppBar(title: Text(genre)),
+        body: EmptyState(
+          icon: Icons.music_note_rounded,
+          message: l.noResults,
+        ),
+      );
+    }
     return SelectionScope(
       listKey: key,
       visibleIds: selection.visibleIds,
-      child: Scaffold(
-        appBar: SelectableAppBar(
-          listKey: key,
-          tracks: tracks,
-          normal: AppBar(title: Text(genre)),
+      child: CollectionScaffold(
+        selectionBar: SelectionBarSlot(listKey: key, tracks: tracks),
+        title: genre,
+        name: genre,
+        meta: collectionMeta(
+          l,
+          tracks: tracks.length,
+          durationMs: tracks.fold<int>(0, (sum, t) => sum + t.durationMs),
         ),
-        body: tracks.isEmpty
-            ? Center(child: Text(l.noResults))
-            : Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: CcDims.margin,
-                      vertical: 8,
-                    ),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: [
-                          PlayPill(
-                            onPressed: () => ctrl.playAll(tracks, context: ctx),
-                          ),
-                          ShufflePill(onPressed: ctrl.toggleShuffle),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: ListView.builder(
-                      itemExtent: trackRowExtentOf(context, compact),
-                      itemCount: tracks.length,
-                      itemBuilder: (_, i) => LiveTrackRow(
-                        track: tracks[i],
-                        compact: compact,
-                        selection: selection,
-                        onTap: () => ctrl.playFromList(tracks, i, context: ctx),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+        onPlay: () => ctrl.playAll(tracks, context: ctx),
+        onShuffle: ctrl.toggleShuffle,
+        slivers: [
+          SliverFixedExtentList.builder(
+            itemExtent: trackRowExtentOf(context, compact),
+            itemCount: tracks.length,
+            itemBuilder: (_, i) => LiveTrackRow(
+              track: tracks[i],
+              compact: compact,
+              selection: selection,
+              onTap: () => ctrl.playFromList(tracks, i, context: ctx),
+            ),
+          ),
+        ],
       ),
     );
   }

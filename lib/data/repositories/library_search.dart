@@ -12,7 +12,9 @@ class LibrarySearchResults {
     this.artists = const [],
     this.albums = const [],
     this.playlists = const [],
-    this.main,
+    this.artistTotal = 0,
+    this.albumTotal = 0,
+    this.playlistTotal = 0,
   });
 
   /// First few matching tracks (see `trackLimit` of [searchLibrary]).
@@ -22,8 +24,8 @@ class LibrarySearchResults {
   final List<AlbumSummary> albums;
   final List<PlaylistSummary> playlists;
 
-  /// An [ArtistSummary], [AlbumSummary] or [Track].
-  final Object? main;
+  /// Matches of each kind before `sectionLimit`.
+  final int artistTotal, albumTotal, playlistTotal;
 
   bool get isEmpty =>
       tracks.isEmpty && artists.isEmpty && albums.isEmpty && playlists.isEmpty;
@@ -59,8 +61,8 @@ List<T> _ranked<T>(List<(T, String)> items, String needle) {
 
 /// Filters the (small) artist / album / playlist lists in memory (every word
 /// of the text must be in the name, accents and case ignored); [tracks] are
-/// the matches of the same text. The main result is the artist whose name
-/// starts with the text, otherwise the first album, otherwise the first track.
+/// the matches of the same text. Artists, albums and playlists are cut at
+/// `sectionLimit`; the totals say how many matched.
 ///
 /// When the text uses operators (`artista:x anno:1990..`), [tracks] are the
 /// matches of the rules and the other sections only look at its plain words;
@@ -84,7 +86,6 @@ LibrarySearchResults searchLibrary({
     return LibrarySearchResults(
       tracks: tracks.take(trackLimit).toList(),
       trackTotal: tracks.length,
-      main: tracks.firstOrNull,
     );
   }
   final words = needle.split(' ');
@@ -115,27 +116,14 @@ LibrarySearchResults searchLibrary({
           for (var i = 0; i < playlists.length; i++)
             if (_hasAll(playlistNames[i], words)) playlists[i],
         ];
-  Object? main;
-  final starts = [
-    for (var i = 0; i < artists.length; i++)
-      if (artists[i].key.isNotEmpty && artists[i].name != null && artistNames[i].startsWith(needle))
-        if (matchedArtists.contains(artists[i])) artists[i],
-  ].firstOrNull;
-  if (starts != null) {
-    main = starts;
-  } else if (tracks.isNotEmpty && normalize(tracks.first.title) == needle) {
-    main = tracks.first;
-  } else if (matchedAlbums.isNotEmpty) {
-    main = matchedAlbums.first;
-  } else if (tracks.isNotEmpty) {
-    main = tracks.first;
-  }
   return LibrarySearchResults(
     tracks: tracks.take(trackLimit).toList(),
     trackTotal: tracks.length,
     artists: matchedArtists.take(sectionLimit).toList(),
     albums: matchedAlbums.take(sectionLimit).toList(),
     playlists: matchedPlaylists.take(sectionLimit).toList(),
-    main: main,
+    artistTotal: matchedArtists.length,
+    albumTotal: matchedAlbums.length,
+    playlistTotal: matchedPlaylists.length,
   );
 }

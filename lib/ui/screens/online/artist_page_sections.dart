@@ -4,21 +4,28 @@ import '../../../l10n/l10n_ext.dart';
 import '../../../services/online/google_thumb.dart';
 import '../../../services/online/ytm_artist.dart';
 import '../../theme/tokens.dart';
+import '../../widgets/collection_header.dart';
+import '../../widgets/motion.dart';
 import '../../widgets/net_thumbnail.dart';
 import '../../widgets/section_header.dart';
-
-/// Picture size of a release in a carousel.
-const releaseCover = 128.0;
 
 /// A picture of [url] at [size] dp, asked of Google at the right step.
 String? thumbAt(BuildContext context, String? url, double size) => url == null
     ? null
-    : googleThumbAt(url, (size * MediaQuery.devicePixelRatioOf(context)).round());
+    : googleThumbAt(
+        url,
+        (size * MediaQuery.devicePixelRatioOf(context)).round(),
+      );
 
 /// Photo, name and monthly audience at the top of an artist page. Built from
 /// the reference the page was opened from, so it is there while the page loads.
 class ArtistHeader extends StatelessWidget {
-  const ArtistHeader({super.key, required this.artist, this.audience, this.action});
+  const ArtistHeader({
+    super.key,
+    required this.artist,
+    this.audience,
+    this.action,
+  });
 
   final YtmArtistRef artist;
 
@@ -30,34 +37,18 @@ class ArtistHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cc = context.cc;
-    final theme = Theme.of(context).textTheme;
     final text = audience ?? artist.audience;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(CcDims.margin, 0, CcDims.margin, 8),
-      child: Column(
-        children: [
-          NetThumbnail(
-            url: thumbAt(context, artist.thumbnailUrl, 140),
-            width: 140,
-            height: 140,
-            icon: Icons.person_rounded,
-            circle: true,
-          ),
-          const SizedBox(height: 12),
-          Text(artist.name,
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: theme.displaySmall),
-          if (text != null && text.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: Text(text, style: theme.bodyMedium?.copyWith(color: cc.textMuted)),
-            ),
-          if (action != null) Padding(padding: const EdgeInsets.only(top: 12), child: action),
-        ],
+    return CollectionHeader(
+      cover: (s) => NetThumbnail(
+        url: thumbAt(context, artist.thumbnailUrl, s.round().toDouble()),
+        width: s,
+        height: s,
+        icon: Icons.person_rounded,
+        circle: true,
       ),
+      name: artist.name,
+      meta: text == null || text.isEmpty ? null : text,
+      actions: [?action],
     );
   }
 }
@@ -86,8 +77,10 @@ class OfflineNotice extends StatelessWidget {
             Icon(Icons.cloud_off_rounded, size: 18, color: cc.textMuted),
             const SizedBox(width: 8),
             Expanded(
-              child: Text(context.l10n.ytmOffline(date),
-                  style: Theme.of(context).textTheme.bodyMedium),
+              child: Text(
+                context.l10n.ytmOffline(date),
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
             ),
           ],
         ),
@@ -107,7 +100,10 @@ class PageSkeleton extends StatelessWidget {
     final cc = context.cc;
     return Padding(
       key: const ValueKey('page-skeleton'),
-      padding: const EdgeInsets.symmetric(horizontal: CcDims.margin, vertical: 12),
+      padding: const EdgeInsets.symmetric(
+        horizontal: CcDims.margin,
+        vertical: 12,
+      ),
       child: Column(
         children: [
           for (var i = 0; i < rows; i++)
@@ -119,14 +115,18 @@ class PageSkeleton extends StatelessWidget {
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                        color: cc.surface1, borderRadius: BorderRadius.circular(CcDims.rList)),
+                      color: cc.surface1,
+                      borderRadius: BorderRadius.circular(CcDims.rList),
+                    ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Container(
                       height: 14,
                       decoration: BoxDecoration(
-                          color: cc.surface1, borderRadius: BorderRadius.circular(CcDims.rList)),
+                        color: cc.surface1,
+                        borderRadius: BorderRadius.circular(CcDims.rList),
+                      ),
                     ),
                   ),
                 ],
@@ -138,143 +138,175 @@ class PageSkeleton extends StatelessWidget {
   }
 }
 
-/// A shelf of albums, singles or EPs, scrolling sideways.
-class ReleaseCarousel extends StatelessWidget {
-  const ReleaseCarousel({super.key, required this.shelf, required this.onOpen, this.onMore});
+/// A shelf of albums, singles or EPs: the first few as rows.
+class ReleaseList extends StatelessWidget {
+  const ReleaseList({
+    super.key,
+    required this.shelf,
+    required this.onOpen,
+    this.onMore,
+  });
 
   final YtmReleaseShelf shelf;
   final void Function(YtmRelease) onOpen;
 
-  /// Null hides «Mostra tutto» (the page gave no link).
+  /// Null hides «Tutti» (the page gave no link).
   final VoidCallback? onMore;
+
+  static const maxRows = 5;
 
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    final scaler = MediaQuery.textScalerOf(context);
-    final height = releaseCover + 8 + scaler.scale(62);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SectionHeader(shelf.title,
-            actionLabel: onMore == null ? null : l.ytmShowAll, onAction: onMore),
-        SizedBox(
-          height: height,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: CcDims.margin - 6),
-            itemExtent: releaseCover + 12,
-            itemCount: shelf.releases.length,
-            itemBuilder: (_, i) => ReleaseTile(release: shelf.releases[i], onTap: onOpen),
-          ),
+        SectionHeader(
+          shelf.title,
+          actionLabel: onMore == null ? null : l.showAll,
+          onAction: onMore,
         ),
+        for (final r in shelf.releases.take(maxRows))
+          ReleaseRow(release: r, onTap: onOpen),
       ],
     );
   }
 }
 
-/// One release: cover, title and «EP • 2025».
-class ReleaseTile extends StatelessWidget {
-  const ReleaseTile({super.key, required this.release, required this.onTap, this.size = releaseCover});
+/// «EP • 2025» as «EP, 2025»; empty when the page gave nothing.
+String releaseLine(String subtitle) =>
+    subtitle.replaceAll(' • ', ', ').replaceAll(' · ', ', ');
+
+/// One row: a square cover, the title and a line like «EP, 2025».
+class ReleaseRow extends StatelessWidget {
+  const ReleaseRow({super.key, required this.release, required this.onTap});
 
   final YtmRelease release;
   final void Function(YtmRelease) onTap;
-  final double size;
 
   @override
   Widget build(BuildContext context) {
     final cc = context.cc;
     final theme = Theme.of(context).textTheme;
-    return InkWell(
-      key: ValueKey('release-${release.browseId}'),
-      borderRadius: BorderRadius.circular(CcDims.rGrid),
-      onTap: () => onTap(release),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 6),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            NetThumbnail(
-              url: thumbAt(context, release.thumbnailUrl, size),
-              width: size,
-              height: size,
-              radius: CcDims.rGrid,
-              icon: Icons.album_rounded,
-            ),
-            const SizedBox(height: 8),
-            Text(release.title, maxLines: 2, overflow: TextOverflow.ellipsis, style: theme.bodyMedium),
-            if (release.subtitle.isNotEmpty)
-              Text(release.subtitle,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.labelSmall?.copyWith(color: cc.textMuted)),
-          ],
+    final line = releaseLine(release.subtitle);
+    return PressScale(
+      child: InkWell(
+        key: ValueKey('release-${release.browseId}'),
+        onTap: () => onTap(release),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: CcDims.margin,
+            vertical: 8,
+          ),
+          child: Row(
+            children: [
+              NetThumbnail(
+                url: thumbAt(context, release.thumbnailUrl, 56),
+                width: 56,
+                height: 56,
+                radius: CcDims.rGrid,
+                icon: Icons.album_rounded,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      release.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.titleSmall,
+                    ),
+                    if (line.isNotEmpty)
+                      Text(
+                        line,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.bodySmall?.copyWith(color: cc.textMuted),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-/// «Fans might also like»: round photos sideways.
-class ArtistCarousel extends StatelessWidget {
-  const ArtistCarousel({super.key, required this.shelf, required this.onOpen});
+/// «Fans might also like»: three rows with a round photo.
+class ArtistList extends StatelessWidget {
+  const ArtistList({super.key, required this.shelf, required this.onOpen});
 
   final YtmArtistShelf shelf;
   final void Function(YtmArtistRef) onOpen;
 
-  static const photo = 96.0;
+  static const maxRows = 3;
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
+    final cc = context.cc;
     final theme = Theme.of(context).textTheme;
-    final height = photo + 8 + MediaQuery.textScalerOf(context).scale(40);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SectionHeader(shelf.title),
-        SizedBox(
-          height: height,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: CcDims.margin - 6),
-            itemExtent: photo + 20,
-            itemCount: shelf.artists.length,
-            itemBuilder: (_, i) {
-              final a = shelf.artists[i];
-              return InkWell(
-                key: ValueKey('similar-${a.id}'),
-                borderRadius: BorderRadius.circular(CcDims.rGrid),
-                onTap: () => onOpen(a),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 6),
-                  child: Column(
-                    children: [
-                      NetThumbnail(
-                        url: thumbAt(context, a.thumbnailUrl, photo),
-                        width: photo,
-                        height: photo,
-                        icon: Icons.person_rounded,
-                        circle: true,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(a.name,
-                          maxLines: 2,
-                          textAlign: TextAlign.center,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.bodyMedium),
-                    ],
-                  ),
+        for (final a in shelf.artists.take(maxRows))
+          PressScale(
+            child: InkWell(
+              key: ValueKey('similar-${a.id}'),
+              onTap: () => onOpen(a),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: CcDims.margin,
+                  vertical: 8,
                 ),
-              );
-            },
+                child: Row(
+                  children: [
+                    NetThumbnail(
+                      url: thumbAt(context, a.thumbnailUrl, 56),
+                      width: 56,
+                      height: 56,
+                      icon: Icons.person_rounded,
+                      circle: true,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            a.name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.titleSmall,
+                          ),
+                          if (a.audience != null && a.audience!.isNotEmpty)
+                            Text(
+                              l.ytmArtistWithAudience(a.audience!),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.bodySmall?.copyWith(
+                                color: cc.textMuted,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
-        ),
       ],
     );
   }
 }
 
-/// The biography: three lines, «Altro» opens the rest.
+/// The biography: four lines, «Altro» opens the rest.
 class AboutSection extends StatefulWidget {
   const AboutSection({super.key, required this.text});
 
@@ -297,16 +329,13 @@ class _AboutSectionState extends State<AboutSection> {
         SectionHeader(l.ytmAbout),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: CcDims.margin),
-          child: AnimatedSize(
-            duration: ccDuration(context, CcMotion.sheet),
-            alignment: Alignment.topCenter,
-            child: Text(
-              widget.text,
-              key: const ValueKey('about-text'),
-              maxLines: _open ? null : 3,
-              overflow: _open ? TextOverflow.visible : TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: cc.textMuted),
-            ),
+          child: Text(
+            widget.text,
+            key: const ValueKey('about-text'),
+            maxLines: _open ? null : 4,
+            overflow: _open ? TextOverflow.visible : TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.bodyMedium
+                ?.copyWith(color: cc.textMuted),
           ),
         ),
         Padding(

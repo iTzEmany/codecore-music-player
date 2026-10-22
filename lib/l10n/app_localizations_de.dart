@@ -1378,10 +1378,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get homeFanOpen => 'Cover anzeigen';
 
   @override
-  String get searchMainResult => 'Bestes Ergebnis';
-
-  @override
-  String get showAll => 'Alle anzeigen';
+  String get showAll => 'Alle';
 
   @override
   String get recentSearches => 'Letzte Suchen';
@@ -4339,12 +4336,12 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String ytmArtistWithAudience(String audience) {
-    return 'Künstler · $audience';
+    return 'Künstler, $audience';
   }
 
   @override
   String ytmOffline(String date) {
-    return 'Offline · Daten vom $date';
+    return 'Offline, Daten vom $date';
   }
 
   @override
@@ -4365,12 +4362,6 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get ytmInYourLibrary => 'In deiner Bibliothek';
-
-  @override
-  String get ytmSeeAll => 'Alle ansehen';
-
-  @override
-  String get ytmShowAll => 'Alle anzeigen';
 
   @override
   String get ytmAbout => 'Info';
@@ -4979,12 +4970,12 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String releaseAlbumYear(String year) {
-    return 'Album · $year';
+    return 'Album, $year';
   }
 
   @override
   String releaseSingleYear(String year) {
-    return 'Single · $year';
+    return 'Single, $year';
   }
 
   @override

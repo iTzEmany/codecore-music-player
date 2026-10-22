@@ -582,8 +582,7 @@
   "homeResumeQueueFrom": "{source}: track {n} of {m}",
   "homeMinutesLeft": "{count, plural, one{1 minute left} other{{count} minutes left}}",
   "homeFanOpen": "Show the covers",
-  "searchMainResult": "Top result",
-  "showAll": "Show all",
+  "showAll": "All",
   "recentSearches": "Recent searches",
   "genresTitle": "Genres",
   "downloadsChip": "Downloads ({n})",
@@ -2438,15 +2437,13 @@
   "memoryClearFailed": "Could not clear the cache",
   "memoryTools": "Cleanup",
   "memoryUnavailable": "Not available",
-  "ytmArtistWithAudience": "Artist · {audience}",
-  "ytmOffline": "Offline · data from {date}",
+  "ytmArtistWithAudience": "Artist, {audience}",
+  "ytmOffline": "Offline, data from {date}",
   "ytmArtistNotFound": "Artist not found",
   "ytmPageUnreadable": "The page cannot be read (YouTube changed something)",
   "ytmArtistUnreadable": "The artist page cannot be read (YouTube changed something)",
   "ytmSearchSongsOf": "Search songs by {name}",
   "ytmInYourLibrary": "In your library",
-  "ytmSeeAll": "See all",
-  "ytmShowAll": "Show all",
   "ytmAbout": "About",
   "ytmMore": "More",
   "ytmLess": "Less",
@@ -2673,7 +2670,7 @@
   "followedToConfirm": "To confirm",
   "followedNotFound": "Not found",
   "followedRetry": "Retry",
-  "releaseAlbumYear": "Album · {year}",
+  "releaseAlbumYear": "Album, {year}",
   "@releaseAlbumYear": {
     "placeholders": {
       "year": {
@@ -2681,7 +2678,7 @@
       }
     }
   },
-  "releaseSingleYear": "Single · {year}",
+  "releaseSingleYear": "Single, {year}",
   "@releaseSingleYear": {
     "placeholders": {
       "year": {

@@ -10,7 +10,7 @@ import '../../../services/releases/release_diff.dart';
 import '../../shell/shell_nav.dart';
 import '../online/online_album_screen.dart';
 
-/// «Album · 2026» / «Singolo · 2026» (just the word when the year is unknown).
+/// «Album, 2026» / «Singolo, 2026» (just the word when the year is unknown).
 String releaseKindLabel(AppLocalizations l, ArtistRelease r) {
   final single = ReleaseKind.values[r.kind] == ReleaseKind.single;
   final year = r.year;

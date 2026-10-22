@@ -582,8 +582,7 @@
   "homeResumeQueueFrom": "{source}: canción {n} de {m}",
   "homeMinutesLeft": "{count, plural, one{Falta 1 minuto} other{Faltan {count} minutos}}",
   "homeFanOpen": "Mostrar las portadas",
-  "searchMainResult": "Mejor resultado",
-  "showAll": "Mostrar todo",
+  "showAll": "Todos",
   "recentSearches": "Búsquedas recientes",
   "genresTitle": "Géneros",
   "downloadsChip": "Descargas ({n})",
@@ -2438,15 +2437,13 @@
   "memoryClearFailed": "No se pudo vaciar la caché",
   "memoryTools": "Limpieza",
   "memoryUnavailable": "No disponible",
-  "ytmArtistWithAudience": "Artista · {audience}",
-  "ytmOffline": "Sin conexión · datos del {date}",
+  "ytmArtistWithAudience": "Artista, {audience}",
+  "ytmOffline": "Sin conexión, datos del {date}",
   "ytmArtistNotFound": "Artista no encontrado",
   "ytmPageUnreadable": "No se puede leer la página (YouTube cambió algo)",
   "ytmArtistUnreadable": "No se puede leer la página del artista (YouTube cambió algo)",
   "ytmSearchSongsOf": "Buscar canciones de {name}",
   "ytmInYourLibrary": "En tu biblioteca",
-  "ytmSeeAll": "Ver todo",
-  "ytmShowAll": "Mostrar todo",
   "ytmAbout": "Información",
   "ytmMore": "Más",
   "ytmLess": "Menos",
@@ -2673,7 +2670,7 @@
   "followedToConfirm": "Por confirmar",
   "followedNotFound": "No encontrado",
   "followedRetry": "Reintentar",
-  "releaseAlbumYear": "Álbum · {year}",
+  "releaseAlbumYear": "Álbum, {year}",
   "@releaseAlbumYear": {
     "placeholders": {
       "year": {
@@ -2681,7 +2678,7 @@
       }
     }
   },
-  "releaseSingleYear": "Sencillo · {year}",
+  "releaseSingleYear": "Sencillo, {year}",
   "@releaseSingleYear": {
     "placeholders": {
       "year": {

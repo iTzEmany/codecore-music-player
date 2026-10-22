@@ -43,36 +43,21 @@ void main() {
     PlaylistSummary(Playlist(id: 1, name: 'Queen e amici', createdAt: 0, updatedAt: 0), 3)
   ];
 
-  test('artist whose name starts with the text is the main result', () {
+  test('ranked by name, and totals count past the section limit', () {
     final r = searchLibrary(
       text: 'que',
       tracks: [track(1, 'Bohemian Rhapsody')],
-      artists: artists,
+      artists: [...artists, artist('Queens'), artist('Queenie'), artist('Quebec')],
       albums: albums,
       playlists: playlists,
+      sectionLimit: 2,
     );
-    expect(r.main, isA<ArtistSummary>());
-    expect((r.main! as ArtistSummary).name, 'Queen');
+    expect(r.artists.map((a) => a.name), ['Queen', 'Queens']);
+    expect(r.artistTotal, 4);
     expect(r.albums.length, 2);
+    expect(r.albumTotal, 2);
+    expect(r.playlistTotal, 1);
     expect(r.playlists.single.playlist.name, 'Queen e amici');
-  });
-
-  test('without a matching artist the first album wins, then the first track',
-      () {
-    final r1 = searchLibrary(
-        text: 'night',
-        tracks: const [],
-        artists: artists,
-        albums: albums,
-        playlists: playlists);
-    expect(r1.main, isA<AlbumSummary>());
-    final r2 = searchLibrary(
-        text: 'rhapsody',
-        tracks: [track(1, 'Bohemian Rhapsody')],
-        artists: artists,
-        albums: albums,
-        playlists: playlists);
-    expect(r2.main, isA<Track>());
   });
 
   test('diacritics and case are ignored; tracks limited to 4 with a total',
@@ -97,7 +82,6 @@ void main() {
         albums: albums,
         playlists: playlists);
     expect(r.isEmpty, isTrue);
-    expect(r.main, isNull);
   });
 
   group('with operators', () {
@@ -114,7 +98,6 @@ void main() {
       expect(r.artists, isEmpty, reason: 'no plain word: the artist is not filtered on «artista:queen»');
       expect(r.albums, isEmpty);
       expect(r.playlists, isEmpty);
-      expect((r.main! as Track).title, 'Bohemian Rhapsody');
     });
 
     test('plain words next to operators still filter the other sections', () {
