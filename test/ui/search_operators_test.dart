@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/app_harness.dart';
+import '../support/search_input.dart';
 
 /// One turn of the real event loop (not real time) lets drift finish what a
 /// `runAsync` write started; everything else runs on the test clock.
@@ -38,7 +39,7 @@ void main() {
   }
 
   Future<void> type(WidgetTester tester, String text) async {
-    await tester.enterText(find.byType(TextField), text);
+    typeSearch(tester, text);
     await _settle(tester); // the 250 ms debounce runs on the test clock
   }
 

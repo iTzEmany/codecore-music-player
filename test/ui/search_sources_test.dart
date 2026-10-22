@@ -1,16 +1,21 @@
 import 'dart:io';
 
+import 'package:codecore/providers/ui_providers.dart';
 import 'package:codecore/providers/youtube_providers.dart';
 import 'package:codecore/providers/ytm_catalog_providers.dart';
 import 'package:codecore/services/online/youtube_service.dart';
 import 'package:codecore/ui/screens/search/search_screen.dart';
 import 'package:codecore/ui/screens/youtube/online_results.dart';
+import 'package:codecore/ui/shell/app_shell.dart';
+import 'package:codecore/ui/shell/bottom_bar.dart';
 import 'package:dio/dio.dart' show CancelToken;
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/app_harness.dart';
 import '../support/fake_ytm.dart';
+import '../support/search_input.dart';
 
 Future<void> _settle(WidgetTester tester) async {
   await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 120)));
@@ -79,8 +84,8 @@ void main() {
   Future<void> searchOnline(WidgetTester tester, String text) async {
     await tester.tap(find.widgetWithText(ChoiceChip, 'Online'));
     await _settle(tester);
-    await tester.enterText(find.byType(TextField), text);
-    await tester.testTextInput.receiveAction(TextInputAction.search);
+    typeSearch(tester, text);
+    submitSearch(tester);
     await _settle(tester);
   }
 
@@ -105,6 +110,32 @@ void main() {
     await h.dispose(tester);
   });
 
+  testWidgets('submit in the dock field runs the page search once', (tester) async {
+    tester.view.physicalSize = const Size(400, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    h = await Harness.create(tester, tracks: 2);
+    svc = _Sources();
+    await h.pump(tester, const AppShell(), extraOverrides: [
+      youtubeServiceProvider.overrideWithValue(svc),
+      ytmCatalogProvider.overrideWithValue(FakeCatalog((_) async => null)),
+    ]);
+    await _settle(tester);
+    await tester.tap(find.descendant(of: find.byType(ShellDock), matching: find.text('Cerca')));
+    await _settle(tester);
+    ProviderScope.containerOf(tester.element(find.byType(AppShell)))
+        .read(searchOnlineProvider.notifier)
+        .set(true);
+    await tester.pump();
+    final field = find.descendant(of: find.byType(ShellDock), matching: find.byType(TextField));
+    expect(find.text('Cerca o incolla un link'), findsOneWidget, reason: 'online hint');
+    await tester.enterText(field, 'daft punk');
+    await tester.testTextInput.receiveAction(TextInputAction.search);
+    await _settle(tester);
+    expect(svc.calls, unorderedEquals(['music:daft punk:10', 'youtube:daft punk']));
+    await h.dispose(tester);
+  });
+
   testWidgets('the filter keeps the rows of one source, asks nothing, and a new search starts from «Tutte»', (tester) async {
     await open(tester);
     await searchOnline(tester, 'daft punk');
@@ -117,8 +148,8 @@ void main() {
     expect(find.text('From YouTube'), findsNothing);
     expect(svc.calls, hasLength(2));
 
-    await tester.enterText(find.byType(TextField), 'daft punk around');
-    await tester.testTextInput.receiveAction(TextInputAction.search);
+    typeSearch(tester, 'daft punk around');
+    submitSearch(tester);
     await _settle(tester);
     expect(tester.widget<ChoiceChip>(find.byKey(const ValueKey('filter-all'))).selected, isTrue);
     expect(svc.calls, hasLength(4), reason: 'the new words were asked, both sources');
@@ -127,7 +158,7 @@ void main() {
 
   testWidgets('«Cerca online» under the library results moves to Online and searches the text', (tester) async {
     await open(tester);
-    await tester.enterText(find.byType(TextField), 'Song 1');
+    typeSearch(tester, 'Song 1');
     await tester.pump(const Duration(milliseconds: 400));
     await _settle(tester);
     await tester.dragUntilVisible(find.text('Cerca «Song 1» online'), find.byType(ListView).last, const Offset(0, -300));

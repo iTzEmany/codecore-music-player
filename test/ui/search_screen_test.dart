@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/app_harness.dart';
+import '../support/search_input.dart';
 
 Future<void> _settle(WidgetTester tester) async {
   await tester.runAsync(
@@ -26,7 +27,7 @@ void main() {
     expect(find.text('Risultato principale'), findsNothing);
     expect(find.widgetWithText(ChoiceChip, 'Online'),
         kEnableYoutube ? findsOneWidget : findsNothing);
-    await tester.enterText(find.byType(TextField), 'Song 1');
+    typeSearch(tester, 'Song 1');
     await tester.pump(const Duration(milliseconds: 400));
     await _settle(tester);
     expect(find.text('Risultato principale'), findsOneWidget);
@@ -48,7 +49,7 @@ void main() {
     addTearDown(tester.view.reset);
     final h = await Harness.create(tester, tracks: 2);
     await h.pump(tester, const SearchScreen());
-    await tester.enterText(find.byType(TextField), 'zzzz');
+    typeSearch(tester, 'zzzz');
     await tester.pump(const Duration(milliseconds: 400));
     await _settle(tester);
     expect(find.text('Nessun risultato in libreria'), findsOneWidget);

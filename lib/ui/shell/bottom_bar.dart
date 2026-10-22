@@ -3,8 +3,11 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../l10n/l10n_ext.dart';
 import '../../providers/jam_providers.dart';
+import '../../providers/nav_providers.dart';
 import '../../providers/player_providers.dart';
+import '../../providers/ui_providers.dart';
 import '../theme/tokens.dart';
 import '../widgets/mini_player.dart';
 import '../widgets/motion.dart';
@@ -23,8 +26,12 @@ const _dotSize = 6.0;
 // its top edge (no track playing).
 const _dotLift = 4.0;
 
+// The «Cerca» tab's centre, horizontally, in the dock (second of four).
+const _searchTabAlign = Alignment(-0.33, 0);
+
 /// One block at the bottom: the mini-player (when something plays) above the
-/// always-labelled tabs, with a dot on the active tab's icon.
+/// always-labelled tabs, with a dot on the active tab's icon. While the Search
+/// field is open it is replaced by the field alone.
 class ShellDock extends ConsumerWidget {
   const ShellDock({
     super.key,
@@ -48,13 +55,19 @@ class ShellDock extends ConsumerWidget {
     final hasPlayer =
         showPlayer &&
         (track != null || ref.watch(jamProvider.select((j) => j.active)));
+    final field =
+        ref.watch(searchBarProvider) && selected == NavTab.search.index;
     const m = CcDims.dockMargin;
     return Padding(
       padding: EdgeInsets.fromLTRB(
         m,
         m,
         m,
-        m + MediaQuery.paddingOf(context).bottom,
+        // The Scaffold does not lift its bottom bar: the field clears the
+        // keyboard by itself.
+        m +
+            MediaQuery.paddingOf(context).bottom +
+            (field ? MediaQuery.viewInsetsOf(context).bottom : 0),
       ),
       // Material (not a coloured Container) so the ink of the taps shows.
       child: Material(
@@ -63,12 +76,90 @@ class ShellDock extends ConsumerWidget {
           borderRadius: BorderRadius.circular(CcDims.dockRadius),
         ),
         clipBehavior: Clip.antiAlias,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (hasPlayer) const MiniPlayer(),
-            _Tabs(items: items, selected: selected, onSelect: onSelect),
-          ],
+        // Opacity and a horizontal scale from the «Cerca» tab; the dock takes
+        // the new height at once, so no size is animated.
+        child: AnimatedSwitcher(
+          duration: ccDuration(context, const Duration(milliseconds: 450)),
+          switchInCurve: Motion.curve,
+          switchOutCurve: Motion.curve,
+          layoutBuilder: (current, previous) => Stack(
+            children: [
+              for (final p in previous)
+                Positioned(top: 0, left: 0, right: 0, child: p),
+              ?current,
+            ],
+          ),
+          transitionBuilder: (child, a) => FadeTransition(
+            opacity: a,
+            child: AnimatedBuilder(
+              animation: a,
+              builder: (_, child) => Transform.scale(
+                scaleX: 0.5 + 0.5 * a.value,
+                alignment: _searchTabAlign,
+                child: child,
+              ),
+              child: child,
+            ),
+          ),
+          child: field
+              ? const _SearchField(key: ValueKey('dock-field'))
+              : Column(
+                  key: const ValueKey('dock-tabs'),
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (hasPlayer) const MiniPlayer(),
+                    _Tabs(items: items, selected: selected, onSelect: onSelect),
+                  ],
+                ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The dock while searching: the shared Search field and a ✕.
+class _SearchField extends ConsumerStatefulWidget {
+  const _SearchField({super.key});
+
+  @override
+  ConsumerState<_SearchField> createState() => _SearchFieldState();
+}
+
+class _SearchFieldState extends ConsumerState<_SearchField> {
+  @override
+  void initState() {
+    super.initState();
+    // autofocus loses to a focus the tapped tab may have left in the scope.
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => mounted ? ref.read(searchFocusProvider).requestFocus() : null,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final online = ref.watch(searchOnlineProvider);
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: CcDims.bottomBarHeight),
+      child: Center(
+        child: TextField(
+          controller: ref.watch(searchControllerProvider),
+          focusNode: ref.watch(searchFocusProvider),
+          textInputAction: TextInputAction.search,
+          onSubmitted: (_) => ref.read(searchSubmitProvider.notifier).submit(),
+          decoration: InputDecoration(
+            hintText: online ? l.ytHint : l.searchHint,
+            prefixIcon: const Icon(Icons.search_rounded),
+            suffixIcon: IconButton(
+              tooltip: l.closeSearch,
+              icon: const Icon(Icons.close_rounded),
+              onPressed: ref.read(searchBarProvider.notifier).dismiss,
+            ),
+            filled: false,
+            border: InputBorder.none,
+            enabledBorder: InputBorder.none,
+            focusedBorder: InputBorder.none,
+          ),
         ),
       ),
     );

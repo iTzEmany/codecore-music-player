@@ -19,6 +19,7 @@ import '../../theme/app_theme.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/artist_avatar.dart';
 import '../../widgets/cover_image.dart';
+import '../../widgets/motion.dart' show RiseIn;
 import '../../widgets/playlist_cover.dart';
 import '../../widgets/section_header.dart';
 import '../../widgets/selection_bar.dart';
@@ -31,8 +32,6 @@ import '../playlists/playlist_detail_screen.dart';
 import '../youtube/online_results.dart';
 import 'genre_screen.dart';
 
-enum _Mode { library, online }
-
 /// Search: one pill, [In libreria] and [Online] chips. Online only runs when
 /// the user submits.
 class SearchScreen extends ConsumerStatefulWidget {
@@ -43,10 +42,10 @@ class SearchScreen extends ConsumerStatefulWidget {
 }
 
 class _SearchScreenState extends ConsumerState<SearchScreen> {
-  final _controller = TextEditingController();
+  // Shared with the dock's field, which is where a phone types.
+  late final _controller = ref.read(searchControllerProvider);
   Timer? _debounce;
-  String _text = '';
-  _Mode _mode = _Mode.library;
+  late String _text = _controller.text.trim();
   int _onlineSubmitted = 0;
   // Not remembered across launches: they start off every time.
   bool _favorites = false;
@@ -55,6 +54,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   @override
   void initState() {
     super.initState();
+    _controller.addListener(_onTextChanged);
     // A text sent here before this tab was ever opened.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _applyPrefill(ref.read(searchPrefillProvider));
@@ -67,9 +67,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     ref.read(searchPrefillProvider.notifier).set(null);
     _controller.text = text;
     _controller.selection = TextSelection.collapsed(offset: text.length);
+    ref.read(searchOnlineProvider.notifier).set(true);
     setState(() {
       _text = text.trim();
-      _mode = _Mode.online;
       _onlineSubmitted++;
     });
   }
@@ -77,14 +77,17 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   @override
   void dispose() {
     _debounce?.cancel();
-    _controller.dispose();
+    _controller.removeListener(_onTextChanged);
     super.dispose();
   }
 
-  void _onChanged(String v) {
+  // Also fires on cursor moves, hence the comparison.
+  void _onTextChanged() {
     _debounce?.cancel();
+    final v = _controller.text.trim();
+    if (v == _text) return;
     _debounce = Timer(const Duration(milliseconds: 250), () {
-      if (mounted) setState(() => _text = v.trim());
+      if (mounted) setState(() => _text = v);
     });
   }
 
@@ -108,7 +111,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   void _submit(String v) {
     _debounce?.cancel();
     setState(() => _text = v.trim());
-    if (_mode == _Mode.online) {
+    if (ref.read(searchOnlineProvider)) {
       setState(() => _onlineSubmitted++);
     } else {
       _remember(v);
@@ -123,10 +126,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   void _toOnline() {
     _remember(_text);
-    setState(() {
-      _mode = _Mode.online;
-      _onlineSubmitted++;
-    });
+    ref.read(searchOnlineProvider.notifier).set(true);
+    setState(() => _onlineSubmitted++);
   }
 
   @override
@@ -134,8 +135,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     final l = context.l10n;
     final theme = Theme.of(context).textTheme;
     ref.listen(searchPrefillProvider, (_, next) => _applyPrefill(next));
+    ref.listen(searchSubmitProvider, (_, _) => _submit(_controller.text));
+    final online = ref.watch(searchOnlineProvider);
+    // The phone types in the dock; only the desktop has a field on the page.
+    final showField = MediaQuery.sizeOf(context).width >= CcDims.wideBreakpoint;
     final Widget body;
-    if (_mode == _Mode.online) {
+    if (online) {
       body = OnlineResults(query: _text, submitted: _onlineSubmitted);
     } else if (_text.isEmpty && !_favorites && !_recent) {
       body = _EmptyQuery(onRecent: _useRecent);
@@ -162,31 +167,31 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               ],
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: CcDims.margin),
-            child: TextField(
-              controller: _controller,
-              focusNode: ref.watch(searchFocusProvider),
-              onChanged: _onChanged,
-              onSubmitted: _submit,
-              textInputAction: TextInputAction.search,
-              decoration: InputDecoration(
-                hintText: _mode == _Mode.online ? l.ytHint : l.searchHint,
-                prefixIcon: const Icon(Icons.search_rounded),
-                suffixIcon: _controller.text.isEmpty
-                    ? null
-                    : IconButton(
-                        tooltip: l.cancel,
-                        icon: const Icon(Icons.close_rounded),
-                        onPressed: () {
-                          _controller.clear();
-                          setState(() => _text = '');
-                        },
-                      ),
+          if (showField)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: CcDims.margin),
+              child: TextField(
+                controller: _controller,
+                focusNode: ref.watch(searchFocusProvider),
+                onSubmitted: _submit,
+                textInputAction: TextInputAction.search,
+                decoration: InputDecoration(
+                  hintText: online ? l.ytHint : l.searchHint,
+                  prefixIcon: const Icon(Icons.search_rounded),
+                  suffixIcon: _controller.text.isEmpty
+                      ? null
+                      : IconButton(
+                          tooltip: l.cancel,
+                          icon: const Icon(Icons.close_rounded),
+                          onPressed: () {
+                            _controller.clear();
+                            setState(() => _text = '');
+                          },
+                        ),
+                ),
               ),
             ),
-          ),
-          if (_mode == _Mode.library)
+          if (!online)
             SizedBox(
               height: 48,
               child: ListView(
@@ -228,14 +233,16 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     padding: const EdgeInsets.only(right: 8),
                     child: ChoiceChip(
                       label: Text(l.searchModeLibrary),
-                      selected: _mode == _Mode.library,
-                      onSelected: (_) => setState(() => _mode = _Mode.library),
+                      selected: !online,
+                      onSelected: (_) =>
+                          ref.read(searchOnlineProvider.notifier).set(false),
                     ),
                   ),
                   ChoiceChip(
                     label: Text(l.searchModeOnline),
-                    selected: _mode == _Mode.online,
-                    onSelected: (_) => setState(() => _mode = _Mode.online),
+                    selected: online,
+                    onSelected: (_) =>
+                        ref.read(searchOnlineProvider.notifier).set(true),
                   ),
                 ],
               ),
@@ -261,26 +268,33 @@ class _EmptyQuery extends ConsumerWidget {
     final genres = ref.watch(genresProvider).value ?? const <GenreSummary>[];
     return ListView(
       children: [
-        if (recents.isNotEmpty) ...[
-          SectionHeader(l.recentSearches),
-          for (final q in recents)
-            ListTile(
-              leading: Icon(Icons.history_rounded, color: cc.textMuted),
-              title: Text(q, maxLines: 1, overflow: TextOverflow.ellipsis),
-              trailing: IconButton(
-                tooltip: l.removeRecentSearch,
-                icon: const Icon(Icons.close_rounded),
-                onPressed: () => ref
-                    .read(settingsProvider.notifier)
-                    .update(
-                      (s) => s.copyWith(
-                        recentSearches: [...s.recentSearches]..remove(q),
-                      ),
+        if (recents.isNotEmpty)
+          // New key per open/close of the dock's field: they rise in with it.
+          RiseIn(
+            key: ValueKey(ref.watch(searchBarProvider)),
+            child: Column(
+              children: [
+                SectionHeader(l.recentSearches),
+                for (final q in recents)
+                  ListTile(
+                    leading: Icon(Icons.history_rounded, color: cc.textMuted),
+                    title: Text(q, maxLines: 1, overflow: TextOverflow.ellipsis),
+                    trailing: IconButton(
+                      tooltip: l.removeRecentSearch,
+                      icon: const Icon(Icons.close_rounded),
+                      onPressed: () => ref
+                          .read(settingsProvider.notifier)
+                          .update(
+                            (s) => s.copyWith(
+                              recentSearches: [...s.recentSearches]..remove(q),
+                            ),
+                          ),
                     ),
-              ),
-              onTap: () => onRecent(q),
+                    onTap: () => onRecent(q),
+                  ),
+              ],
             ),
-        ],
+          ),
         if (genres.isNotEmpty) ...[
           SectionHeader(l.genresTitle),
           Padding(

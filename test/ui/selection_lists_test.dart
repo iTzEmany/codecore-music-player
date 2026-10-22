@@ -23,6 +23,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
 
 import '../support/app_harness.dart';
+import '../support/search_input.dart';
 import '../support/fake_ytm.dart';
 
 void _phone(WidgetTester tester) {
@@ -170,7 +171,7 @@ void main() {
     _phone(tester);
     final h = await Harness.create(tester, tracks: 3);
     await h.pump(tester, const SearchScreen());
-    await tester.enterText(find.byType(TextField), 'Song');
+    typeSearch(tester, 'Song');
     await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 400)));
     await _settle(tester);
     await _settle(tester);

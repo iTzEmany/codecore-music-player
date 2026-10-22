@@ -164,9 +164,10 @@ class AppShell extends ConsumerWidget {
     final wide = MediaQuery.sizeOf(context).width >= _wideBreakpoint;
     final l = context.l10n;
     void select(int i) {
-      if (i == index) {
-        keys[i].currentState?.popUntil((r) => r.isFirst);
-      } else {
+      if (i == index) keys[i].currentState?.popUntil((r) => r.isFirst);
+      if (i == NavTab.search.index) {
+        ref.read(searchBarProvider.notifier).open();
+      } else if (i != index) {
         ref.read(navIndexProvider.notifier).set(i);
       }
     }
@@ -285,6 +286,13 @@ class AppShell extends ConsumerWidget {
       canPop: false,
       onPopInvokedWithResult: (didPop, _) async {
         if (didPop) return;
+        // The phone's Search field closes first (the text stays).
+        if (!wide &&
+            index == NavTab.search.index &&
+            ref.read(searchBarProvider)) {
+          ref.read(searchBarProvider.notifier).close();
+          return;
+        }
         final nav = keys[index].currentState;
         // maybePop (not pop) so a page's own PopScope, e.g. a selection that
         // Back must end first, is consulted.

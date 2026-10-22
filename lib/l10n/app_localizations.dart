@@ -196,6 +196,12 @@ abstract class AppLocalizations {
   /// **'Cerca'**
   String get searchHint;
 
+  /// No description provided for @closeSearch.
+  ///
+  /// In it, this message translates to:
+  /// **'Chiudi la ricerca'**
+  String get closeSearch;
+
   /// No description provided for @sortBy.
   ///
   /// In it, this message translates to:
