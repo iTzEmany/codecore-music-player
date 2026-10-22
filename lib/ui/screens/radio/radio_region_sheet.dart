@@ -1,3 +1,4 @@
+import '../../widgets/cc_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -14,7 +15,7 @@ import '../../theme/tokens.dart';
 class RadioRegionSheet extends ConsumerStatefulWidget {
   const RadioRegionSheet({super.key});
 
-  static Future<void> show(BuildContext context) => showModalBottomSheet<void>(
+  static Future<void> show(BuildContext context) => showCcSheet<void>(
         context: context,
         isScrollControlled: true,
         useRootNavigator: true,
@@ -57,7 +58,7 @@ class _RadioRegionSheetState extends ConsumerState<RadioRegionSheet> {
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(CcDims.margin, 0, CcDims.margin, 4),
-          child: Text(_pickingCountry ? l.radioChooseCountry : l.radioChooseRegion, style: theme.titleLarge),
+          child: Text(_pickingCountry ? l.radioChooseCountry : l.radioChooseRegion, style: theme.titleMedium),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: CcDims.margin),

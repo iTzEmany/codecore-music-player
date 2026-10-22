@@ -1,3 +1,4 @@
+import '../../widgets/cc_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -26,7 +27,7 @@ class PlaylistSourceSheet extends ConsumerStatefulWidget {
   final String url;
 
   static Future<void> show(BuildContext context, String url) =>
-      showModalBottomSheet<void>(
+      showCcSheet<void>(
         context: context,
         isScrollControlled: true,
         useRootNavigator: true,
@@ -93,7 +94,7 @@ class _PlaylistSourceSheetState extends ConsumerState<PlaylistSourceSheet> {
           padding: const EdgeInsets.symmetric(horizontal: CcDims.margin),
           child: Align(
             alignment: Alignment.centerLeft,
-            child: Text(l.playlistSourceTitle, style: theme.titleLarge),
+            child: Text(l.playlistSourceTitle, style: theme.titleMedium),
           ),
         ),
         Expanded(
@@ -211,7 +212,7 @@ class _PlaylistSourceSheetState extends ConsumerState<PlaylistSourceSheet> {
                   [
                     if (e.channel.isNotEmpty) e.channel,
                     if (e.duration != null) formatDuration(e.duration!.inMilliseconds),
-                  ].join(' · '),
+                  ].join(', '),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),

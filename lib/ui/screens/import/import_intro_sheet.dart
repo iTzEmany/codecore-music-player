@@ -1,3 +1,4 @@
+import '../../widgets/cc_sheet.dart';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
@@ -23,7 +24,7 @@ class ImportIntroSheet extends StatefulWidget {
   const ImportIntroSheet({super.key});
 
   static Future<ImportedPlaylist?> show(BuildContext context) =>
-      showModalBottomSheet<ImportedPlaylist>(
+      showCcSheet<ImportedPlaylist>(
         context: context,
         isScrollControlled: true,
         useRootNavigator: true,
@@ -128,7 +129,7 @@ class _ImportIntroSheetState extends State<ImportIntroSheet> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(l.csvImportIntroTitle, style: theme.titleLarge),
+            Text(l.csvImportIntroTitle, style: theme.titleMedium),
             const SizedBox(height: 8),
             Text(l.csvImportIntroSource, style: theme.bodyMedium),
             const SizedBox(height: 12),

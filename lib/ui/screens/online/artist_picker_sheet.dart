@@ -1,3 +1,4 @@
+import '../../widgets/cc_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -52,7 +53,7 @@ Future<YtmArtistRef?> lookupYtmArtist(
     case ExactArtist(:final artist):
       return artist;
     case ChooseArtist(:final artists):
-      return showModalBottomSheet<YtmArtistRef>(
+      return showCcSheet<YtmArtistRef>(
         context: context,
         showDragHandle: true,
         isScrollControlled: true,

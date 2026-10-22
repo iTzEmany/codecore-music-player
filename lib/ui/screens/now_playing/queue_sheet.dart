@@ -1,3 +1,4 @@
+import '../../widgets/cc_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -13,7 +14,7 @@ import '../../widgets/track_row.dart';
 import 'suggestions_screen.dart';
 
 /// The queue as a draggable modal sheet (Now Playing, desktop bar).
-Future<void> showQueueSheet(BuildContext context) => showModalBottomSheet<void>(
+Future<void> showQueueSheet(BuildContext context) => showCcSheet<void>(
   context: context,
   isScrollControlled: true,
   useRootNavigator: true,

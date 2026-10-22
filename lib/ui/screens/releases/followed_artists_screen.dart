@@ -1,3 +1,4 @@
+import '../../widgets/cc_sheet.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -161,7 +162,7 @@ class _PendingRow extends ConsumerWidget {
       return;
     }
     if (!context.mounted || found.isEmpty) return;
-    final chosen = await showModalBottomSheet<YtmArtistRef>(
+    final chosen = await showCcSheet<YtmArtistRef>(
       context: context,
       showDragHandle: true,
       isScrollControlled: true,

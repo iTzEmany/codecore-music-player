@@ -2,7 +2,10 @@ import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/l10n/app_localizations.dart';
 import 'package:codecore/ui/theme/app_theme.dart';
 import 'package:codecore/ui/theme/tokens.dart';
+import 'dart:io';
+
 import 'package:codecore/ui/widgets/artist_avatar.dart';
+import 'package:codecore/ui/widgets/cc_sheet.dart';
 import 'package:codecore/ui/widgets/playlist_cover.dart';
 import 'package:codecore/ui/widgets/quality_tag.dart';
 import 'package:codecore/ui/widgets/track_row.dart';
@@ -143,5 +146,40 @@ void main() {
     expect(isHiRes(_track(bitDepth: 16, rate: 44100)), isFalse);
     expect(isHiRes(_track(bitDepth: 16, rate: 96000)), isTrue);
     expect(isHiRes(_track()), isFalse);
+  });
+
+  group('showCcSheet', () {
+    testWidgets('showCcSheet honours reduced motion', (tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(disableAnimations: true),
+          child: Builder(
+            builder: (context) => TextButton(
+              onPressed: () => showCcSheet<void>(
+                  context: context, builder: (_) => const Text('body')),
+              child: const Text('open'),
+            ),
+          ),
+        ),
+      ));
+      await tester.tap(find.text('open'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 1));
+      final sheetTop = tester.getTopLeft(find.text('body')).dy;
+      expect(find.text('body'), findsOneWidget);
+      expect(sheetTop, lessThan(800), reason: 'already in place after one frame');
+    });
+
+    test('no raw showModalBottomSheet outside cc_sheet and car mode', () {
+      final bad = [
+        for (final f in Directory('lib').listSync(recursive: true).whereType<File>())
+          if (f.path.endsWith('.dart') &&
+              !f.path.endsWith('cc_sheet.dart') &&
+              !f.path.endsWith('car_playlists_sheet.dart') &&
+              f.readAsStringSync().contains('showModalBottomSheet'))
+            f.path,
+      ];
+      expect(bad, isEmpty);
+    });
   });
 }

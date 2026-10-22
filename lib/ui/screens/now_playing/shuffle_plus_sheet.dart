@@ -1,3 +1,4 @@
+import '../../widgets/cc_sheet.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -7,7 +8,7 @@ import '../settings/shuffle_plus_tiles.dart';
 import 'suggestions_screen.dart';
 
 /// Long press on the shuffle button: the Shuffle+ settings and its state.
-Future<void> showShufflePlusSheet(BuildContext context) => showModalBottomSheet<void>(
+Future<void> showShufflePlusSheet(BuildContext context) => showCcSheet<void>(
       context: context,
       isScrollControlled: true,
       useRootNavigator: true,
