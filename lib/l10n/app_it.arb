@@ -2734,6 +2734,7 @@
     }
   },
   "reviewSecondOpinionThrottled": "YouTube Music ha chiesto di rallentare: i brani rimasti si controlleranno più tardi",
+  "sourceYoutubeMusic": "Fonte: YouTube Music",
   "curiositySourceDiscogs": "Dall'album, da Discogs",
   "navMemory": "Memoria",
   "memoryMusicLabel": "Musica",

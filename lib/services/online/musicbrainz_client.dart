@@ -178,6 +178,35 @@ class MusicBrainzClient {
     return null;
   }
 
+  static final _discogsMaster = RegExp(r'discogs\.com/master/(\d+)');
+
+  /// The Discogs master id linked from the release-group (the album) a
+  /// recording appears on, or null. Two requests; the link sits on the
+  /// release-group, not on the release.
+  Future<int?> discogsMasterOf(String recordingId, {CancelToken? cancel}) async {
+    final rec = await _get('recording/$recordingId', {'inc': 'releases+release-groups'}, cancel);
+    final releases = rec?['releases'];
+    if (releases is! List) return null;
+    for (final r in releases) {
+      final rg = r is Map ? r['release-group'] : null;
+      if (rg is! Map || rg['id'] is! String) continue;
+      // Albums only: a single's master would speak of the single.
+      if (rg['primary-type'] != 'Album') continue;
+      final data = await _get('release-group/${rg['id']}', {'inc': 'url-rels'}, cancel);
+      final rels = data?['relations'];
+      if (rels is! List) return null;
+      for (final rel in rels) {
+        if (rel is! Map || rel['type'] != 'discogs') continue;
+        final url = rel['url'];
+        final res = url is Map ? url['resource'] : null;
+        final m = res is String ? _discogsMaster.firstMatch(res) : null;
+        if (m != null) return int.parse(m.group(1)!);
+      }
+      return null;
+    }
+    return null;
+  }
+
   static final _qid = RegExp(r'/(Q\d+)$');
 
   static String? _wikidataOf(Map? data) {

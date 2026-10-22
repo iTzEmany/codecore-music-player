@@ -6,9 +6,12 @@ import '../services/online/http_client.dart';
 import '../services/online/itunes_client.dart';
 import '../services/online/lrclib_client.dart';
 import '../services/online/curiosity_finder.dart';
+import '../services/online/discogs_client.dart';
 import '../services/online/musicbrainz_client.dart';
 import '../services/online/quiet_enricher.dart';
 import '../services/online/wikipedia_client.dart';
+import '../services/online/ytm_artist_resolver.dart';
+import 'ytm_catalog_providers.dart';
 import 'database_providers.dart';
 import 'library_providers.dart';
 import 'settings_providers.dart';
@@ -41,6 +44,18 @@ final curiosityFinderProvider = Provider(
     wikipedia: ref.watch(wikipediaClientProvider),
     musicBrainz: ref.watch(musicBrainzClientProvider),
     wikidata: WikidataClient(ref.watch(webClientProvider)),
+    discogs: DiscogsClient(ref.watch(webClientProvider)),
+    ytmArtist: (name, cancel) async {
+      final catalog = ref.read(ytmCatalogProvider);
+      final hl = ref.read(ytmLanguageProvider);
+      // Only a certain match: a wrong artist's story is worse than none.
+      final pick = pickYtmArtist(name, await catalog.searchArtists(name, hl));
+      if (pick is! ExactArtist) return null;
+      final page = (await catalog.artist(pick.artist.id, hl)).value;
+      final text = page.description;
+      if (text == null) return null;
+      return (text: text, source: Uri.parse('https://music.youtube.com/channel/${pick.artist.id}'), lang: hl);
+    },
   ),
 );
 

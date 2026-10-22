@@ -6543,6 +6543,12 @@ abstract class AppLocalizations {
   /// **'YouTube Music ha chiesto di rallentare: i brani rimasti si controlleranno più tardi'**
   String get reviewSecondOpinionThrottled;
 
+  /// No description provided for @sourceYoutubeMusic.
+  ///
+  /// In it, this message translates to:
+  /// **'Fonte: YouTube Music'**
+  String get sourceYoutubeMusic;
+
   /// No description provided for @curiositySourceDiscogs.
   ///
   /// In it, this message translates to:

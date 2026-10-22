@@ -4226,6 +4226,9 @@ class AppLocalizationsEs extends AppLocalizations {
       'YouTube Music pidió ir más despacio: las canciones restantes se comprobarán más tarde';
 
   @override
+  String get sourceYoutubeMusic => 'Fuente: YouTube Music';
+
+  @override
   String get curiositySourceDiscogs => 'Del álbum, de Discogs';
 
   @override

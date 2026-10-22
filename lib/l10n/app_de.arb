@@ -2389,6 +2389,7 @@
     }
   },
   "reviewSecondOpinionThrottled": "YouTube Music hat um langsamere Anfragen gebeten: die übrigen Titel werden später geprüft",
+  "sourceYoutubeMusic": "Quelle: YouTube Music",
   "curiositySourceDiscogs": "Vom Album, über Discogs",
   "navMemory": "Speicher",
   "memoryMusicLabel": "Musik",

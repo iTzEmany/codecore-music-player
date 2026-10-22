@@ -1,4 +1,5 @@
 import 'package:codecore/services/online/curiosity_finder.dart';
+import 'package:codecore/services/online/discogs_client.dart';
 import 'package:codecore/services/online/http_client.dart';
 import 'package:codecore/services/online/musicbrainz_client.dart';
 import 'package:codecore/services/online/wikipedia_client.dart';
@@ -7,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 /// All three services behind one fake: it answers by address and records the calls.
 class _World implements WebClient {
-  _World({this.mb = true, this.mbRecordings = const [], this.work, this.artistQ, this.songQ, this.sitelinks = const {}, this.pages = const {}, this.wikipediaLimited = false});
+  _World({this.mb = true, this.mbRecordings = const [], this.work, this.artistQ, this.songQ, this.sitelinks = const {}, this.pages = const {}, this.wikipediaLimited = false, this.discogsNotes});
 
   final bool mb;
   final List<Map<String, Object?>> mbRecordings;
@@ -15,6 +16,9 @@ class _World implements WebClient {
   final Map<String, Map<String, String>> sitelinks; // Q -> lang -> title
   final Map<String, String> pages; // 'lang:Title' -> extract
   final bool wikipediaLimited;
+
+  /// Notes of the Discogs master 26600 (the album the recording is on); null = no link.
+  final String? discogsNotes;
   final calls = <String>[];
 
   @override
@@ -26,6 +30,12 @@ class _World implements WebClient {
     if (host == 'musicbrainz.org') {
       if (!mb) return null;
       if (path.endsWith('/recording')) return {'recordings': mbRecordings};
+      if (path.contains('/release-group/')) {
+        return {'relations': [{'type': 'discogs', 'url': {'resource': 'https://www.discogs.com/master/26600'}}]};
+      }
+      if (path.contains('/recording/') && q['inc'] == 'releases+release-groups') {
+        return {'releases': discogsNotes == null ? [] : [{'release-group': {'id': 'rg1', 'primary-type': 'Album'}}]};
+      }
       if (path.contains('/recording/')) {
         return {'relations': work == null ? [] : [{'work': {'id': work}}]};
       }
@@ -37,6 +47,7 @@ class _World implements WebClient {
       }
       if (path.endsWith('/artist')) return {'artists': []};
     }
+    if (host == 'api.discogs.com') return {'notes': discogsNotes};
     if (host == 'www.wikidata.org') {
       final ids = (q['ids'] ?? '').split('|');
       return {
@@ -76,10 +87,12 @@ Map<String, Object?> _rec(String id, String title, String artist, String artistI
 
 final _long = ' è una pagina abbastanza lunga da contare come introduzione di un articolo vero. ' * 2;
 
-CuriosityFinder _finder(_World w, {List<Duration>? pauses}) => CuriosityFinder(
+CuriosityFinder _finder(_World w, {List<Duration>? pauses, YtmArtistDescription? ytm}) => CuriosityFinder(
       wikipedia: WikipediaClient(w),
       musicBrainz: MusicBrainzClient(w, pause: (d) async => pauses?.add(d), now: () => DateTime(2026)),
       wikidata: WikidataClient(w),
+      discogs: DiscogsClient(w),
+      ytmArtist: ytm,
     );
 
 void main() {
@@ -215,6 +228,48 @@ void main() {
       expect(r, {'Q1': {'it': 'Uno', 'en': 'One'}, 'Q2': {'en': 'Two'}});
       expect(await WikidataClient(w).sitelinks([], ['it']), isEmpty);
     });
+  });
+  group('fallbacks', () {
+    final notes = 'Initially released in early 2008 as a ten track album, later re-issued as a special edition. [b]Bold[/b] notes.';
+
+    test('Wikipedia has no page for the song: the notes of the album master on Discogs, BBCode removed', () async {
+      final w = _World(mbRecordings: [_rec('r1', 'Viva la Vida', 'Coldplay', 'a1')], discogsNotes: notes);
+      final r = await _finder(w).find('Viva la Vida', 'Coldplay', 'it');
+      expect(r.song!.text, startsWith('Initially released'));
+      expect(r.song!.text, contains('Bold notes.'));
+      expect(r.song!.source.toString(), 'https://www.discogs.com/master/26600');
+    });
+
+    test('Discogs notes under 80 characters are dropped', () async {
+      final w = _World(mbRecordings: [_rec('r1', 'Viva la Vida', 'Coldplay', 'a1')], discogsNotes: 'Too short.');
+      final r = await _finder(w).find('Viva la Vida', 'Coldplay', 'it');
+      expect(r.song, isNull);
+    });
+
+    test('Wikipedia has no page for the artist: the YouTube Music description', () async {
+      final text = 'Coldplay are a British rock band formed in London in 1997. ' * 2;
+      final w = _World();
+      final r = await _finder(w, ytm: (name, _) async => (
+            text: text,
+            source: Uri.parse('https://music.youtube.com/channel/UC1'),
+            lang: 'it',
+          )).find('Viva la Vida', 'Coldplay', 'it');
+      expect(r.artist!.text, text.trim());
+      expect(r.artist!.source.host, 'music.youtube.com');
+    });
+
+    test('a short YouTube Music description is dropped', () async {
+      final r = await _finder(_World(), ytm: (_, _) async => (text: 'Band.', source: Uri.parse('https://music.youtube.com/channel/UC1'), lang: 'it'))
+          .find('Viva la Vida', 'Coldplay', 'it');
+      expect(r.artist, isNull);
+    });
+  });
+
+  test('Discogs BBCode: links, artist names and formatting tags become plain text', () {
+    expect(
+      DiscogsClient.stripBbcode('[b]Hi[/b] [a=Coldplay] and [a123] [url=https://x.y/z]the EP[/url] [r456]\n\n\n\nEnd'),
+      'Hi Coldplay and the EP\n\nEnd',
+    );
   });
 }
 

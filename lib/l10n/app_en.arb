@@ -2389,6 +2389,7 @@
     }
   },
   "reviewSecondOpinionThrottled": "YouTube Music asked to slow down: the remaining songs will be checked later",
+  "sourceYoutubeMusic": "Source: YouTube Music",
   "curiositySourceDiscogs": "From the album, via Discogs",
   "navMemory": "Storage",
   "memoryMusicLabel": "Music",

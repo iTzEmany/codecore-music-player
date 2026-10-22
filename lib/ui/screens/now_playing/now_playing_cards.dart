@@ -465,7 +465,11 @@ class _CuriosityTextState extends ConsumerState<_CuriosityText> {
           children: [
             Expanded(
               child: Text(
-                l.sourceWikipedia,
+                switch (Uri.tryParse(widget.url ?? '')?.host) {
+                  final h? when h.endsWith('discogs.com') => l.curiositySourceDiscogs,
+                  final h? when h.endsWith('youtube.com') => l.sourceYoutubeMusic,
+                  _ => l.sourceWikipedia,
+                },
                 style: theme.labelSmall?.copyWith(color: cc.textMuted),
               ),
             ),
