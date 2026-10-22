@@ -18,6 +18,7 @@
 
 ## Global Constraints
 
+- **Strict symmetry (user, 22/10).** Every row with content on both sides uses equal-width side slots (`Expanded` sides or the same fixed width), so its middle never moves when a side changes width. A test measures the centre (±1 px) wherever a row has a centred element. No HTML mockups: Jam, the import window / activity log and the Settings pages are redesigned directly in code under this rule.
 - **No new packages, fonts or colours.** Only `CcColors` via `context.cc`, `CcDims`, `Motion`/`CcMotion` and `ccDuration`.
 - **ARB edits.** They go in all 6 ARBs (it, en, de, es, fr, pt), then run `flutter gen-l10n`.
   - fr and pt use the typographic apostrophe ’.

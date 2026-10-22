@@ -17,6 +17,7 @@
 
 ## Global Constraints
 
+- **Strict symmetry (user, 22/10).** Every row with content on both sides uses equal-width side slots (`Expanded` sides or the same fixed width), so its middle never moves when a side changes width. A test measures the centre (±1 px) wherever a row has a centred element. No HTML mockups: Jam, the import window / activity log and the Settings pages are redesigned directly in code under this rule.
 - **No new packages, fonts or colours.**
   - Only `CcColors` via `context.cc`: `bg`, `surface1/2/3`, `accent`, `accentSoft`, `text`, `textMuted`, `textFaint`, `error`.
   - Only `CcDims` (`rList 4`, `rGrid 8`, `rCard 12`, `rSheet 16`, `margin 16`, `wideBreakpoint 840`), `Motion`/`CcMotion` and `ccDuration`.
