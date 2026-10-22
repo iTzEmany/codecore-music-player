@@ -73,9 +73,9 @@ void main() {
     expect(find.text('Identici'), findsOneWidget);
     expect(find.text('Da tenere'), findsOneWidget);
     expect(find.textContaining('1 gruppo'), findsOneWidget);
-    expect(find.text(paths[0]), findsOneWidget);
-    expect(find.text(paths[1]), findsOneWidget);
-    expect(find.text(paths[2]), findsNothing, reason: 'a different hash is no duplicate');
+    expect(find.text(p.basename(paths[0])), findsOneWidget);
+    expect(find.text(p.basename(paths[1])), findsOneWidget);
+    expect(find.text(p.basename(paths[2])), findsNothing, reason: 'a different hash is no duplicate');
     await h.dispose(tester);
   });
 

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../services/library/duplicate_finder.dart';
 import '../../theme/tokens.dart';
-import '../../widgets/format_utils.dart';
+import 'duplicate_member_row.dart';
 
 /// One group of duplicates: its tracks with path, quality and size, the one
 /// proposed to keep highlighted (a tap picks another), and the two ways out.
@@ -31,13 +31,6 @@ class _DuplicateGroupCardState extends State<DuplicateGroupCard> {
     super.didUpdateWidget(old);
     if (old.group.key != widget.group.key) _keepId = widget.group.proposed.id;
   }
-
-  String _meta(DupEntry e) => [
-    e.format.toUpperCase(),
-    if (e.bitrateKbps != null) '${e.bitrateKbps} kbps',
-    formatBytes(e.sizeBytes),
-    formatDuration(e.durationMs),
-  ].join(' · ');
 
   @override
   Widget build(BuildContext context) {
@@ -100,7 +93,12 @@ class _DuplicateGroupCardState extends State<DuplicateGroupCard> {
                 style: theme.labelSmall?.copyWith(color: cc.textMuted),
               ),
             ),
-            for (final m in g.members) _memberRow(context, m),
+            for (final m in g.members)
+              DuplicateMemberRow(
+                entry: m,
+                keep: m.id == _keepId,
+                onTap: () => setState(() => _keepId = m.id),
+              ),
             Padding(
               padding: const EdgeInsets.fromLTRB(8, 4, 8, 0),
               child: Wrap(
@@ -119,63 +117,6 @@ class _DuplicateGroupCardState extends State<DuplicateGroupCard> {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _memberRow(BuildContext context, DupEntry m) {
-    final l = context.l10n;
-    final cc = context.cc;
-    final theme = Theme.of(context).textTheme;
-    final keep = m.id == _keepId;
-    return Semantics(
-      selected: keep,
-      inMutuallyExclusiveGroup: true,
-      child: InkWell(
-        key: ValueKey('dup-member-${m.id}'),
-        onTap: () => setState(() => _keepId = m.id),
-        child: Container(
-          color: keep ? cc.accentSoft.withValues(alpha: 0.14) : null,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(
-                keep
-                    ? Icons.radio_button_checked_rounded
-                    : Icons.radio_button_unchecked_rounded,
-                size: 20,
-                color: keep ? cc.accent : cc.textMuted,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      m.path,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.bodyMedium,
-                    ),
-                    Text(
-                      _meta(m),
-                      style: theme.labelSmall?.copyWith(color: cc.textMuted),
-                    ),
-                  ],
-                ),
-              ),
-              if (keep)
-                Padding(
-                  padding: const EdgeInsets.only(left: 8),
-                  child: Text(
-                    l.duplicatesKeepLabel,
-                    style: theme.labelSmall?.copyWith(color: cc.accent),
-                  ),
-                ),
-            ],
-          ),
         ),
       ),
     );
