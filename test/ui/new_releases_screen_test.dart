@@ -119,7 +119,7 @@ void main() {
     await h.pump(tester, const LibraryScreen(), extraOverrides: [checks.override]);
     await _settle(tester);
     expect(find.text('Artisti seguiti'), findsOneWidget);
-    expect(find.text('1 artista'), findsOneWidget);
+    expect(find.bySemanticsLabel('Artisti seguiti, 1'), findsOneWidget);
     await tester.tap(find.text('Artisti seguiti'));
     await _settle(tester);
     expect(find.byType(FollowedArtistsScreen), findsOneWidget);

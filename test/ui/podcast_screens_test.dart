@@ -464,7 +464,7 @@ void main() {
     await _settle(tester);
 
     expect(find.text('Podcast'), findsOneWidget);
-    expect(find.text('2 podcast'), findsOneWidget);
+    expect(find.bySemanticsLabel('Podcast, 2'), findsOneWidget);
     await tester.tap(find.text('Podcast'));
     await _settle(tester);
     expect(find.text('I podcast si aggiornano solo quando lo chiedi.'), findsOneWidget);
