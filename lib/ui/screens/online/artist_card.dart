@@ -7,14 +7,17 @@ import '../../theme/tokens.dart';
 import '../../widgets/net_thumbnail.dart';
 
 /// The artist on top of the online results: round photo, name and «Artista ·
-/// monthly audience»; a tap opens the artist's page.
+/// monthly audience»; a tap opens the artist's page. [large] is the card of a
+/// search that is just the artist's name.
 class ArtistCard extends StatelessWidget {
-  const ArtistCard({super.key, required this.artist, required this.onTap});
+  const ArtistCard({super.key, required this.artist, required this.onTap, this.large = false});
 
   final YtmArtistRef artist;
   final VoidCallback onTap;
+  final bool large;
 
   static const photo = 64.0;
+  static const largePhoto = 96.0;
 
   @override
   Widget build(BuildContext context) {
@@ -24,6 +27,7 @@ class ArtistCard extends StatelessWidget {
     final dpr = MediaQuery.devicePixelRatioOf(context);
     final thumb = artist.thumbnailUrl;
     final audience = artist.audience;
+    final size = large ? largePhoto : photo;
     return Padding(
       padding: const EdgeInsets.fromLTRB(CcDims.margin, 4, CcDims.margin, 8),
       child: Material(
@@ -34,13 +38,13 @@ class ArtistCard extends StatelessWidget {
         child: InkWell(
           onTap: onTap,
           child: Padding(
-            padding: const EdgeInsets.all(12),
+            padding: EdgeInsets.all(large ? 16 : 12),
             child: Row(
               children: [
                 NetThumbnail(
-                  url: thumb == null ? null : googleThumbAt(thumb, (photo * dpr).round()),
-                  width: photo,
-                  height: photo,
+                  url: thumb == null ? null : googleThumbAt(thumb, (size * dpr).round()),
+                  width: size,
+                  height: size,
                   icon: Icons.person_rounded,
                   circle: true,
                 ),
@@ -50,7 +54,9 @@ class ArtistCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(artist.name,
-                          maxLines: 1, overflow: TextOverflow.ellipsis, style: theme.titleMedium),
+                          maxLines: large ? 2 : 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: large ? theme.headlineSmall : theme.titleMedium),
                       Text(
                         audience == null || audience.isEmpty
                             ? l.kindArtist

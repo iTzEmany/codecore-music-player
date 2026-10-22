@@ -65,8 +65,6 @@ class _YtDlp implements YoutubeService {
   Future<PlaylistListing> listPlaylist(String url, {int limit = 500}) async =>
       const PlaylistListing.empty();
 
-  @override
-  Future<List<YtResult>> searchSoundCloud(String query, {int limit = 5}) async => const [];
 
   @override
   Stream<DownloadProgress> download(YtResult r, Directory outDir,

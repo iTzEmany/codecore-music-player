@@ -19,7 +19,7 @@ const _sameAsItalian = {
   'sharePin', 'sortAlbum', 'sortArtist', 'textLarge', 'tracksAndDuration',
   'youtube', 'ytDlpVersion', 'statsHoursMinutes', 'statsFirstValue', 'ruleChipTag',
   'smartName', 'smartPlaylistLabel', 'searchSourceYoutube', 'searchSourceYoutubeMusic',
-  'searchSourceSoundcloud', 'downloadFormatMp3High', 'importPhaseDownloading', 'activityLog', 'importPhaseDownloadStart', 'memoryDatabase',
+  'searchSourceSoundcloud', 'searchModeOnline', 'onlineSourceVideo', 'downloadFormatMp3High', 'importPhaseDownloading', 'activityLog', 'importPhaseDownloadStart', 'memoryDatabase',
 };
 
 Map<String, dynamic> _arb(String lang) =>

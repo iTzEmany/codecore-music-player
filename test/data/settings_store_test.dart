@@ -2,7 +2,7 @@ import 'package:codecore/data/settings/settings_store.dart';
 import 'package:codecore/services/audio/audio_backend.dart' show TransitionMode;
 import 'package:codecore/services/audio/play_queue.dart';
 import 'package:codecore/services/online/youtube_service.dart'
-    show DownloadFormat, SearchSource;
+    show DownloadFormat;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -91,23 +91,13 @@ void main() {
     expect(store.readSettings().recordHistory, isFalse);
   });
 
-  test('online sources: YouTube and no SoundCloud fallback by default; both are remembered', () async {
-    SharedPreferences.setMockInitialValues({});
+  test('the old online-source and SoundCloud choices are ignored: nothing breaks, nothing is written back', () async {
+    SharedPreferences.setMockInitialValues({'searchSource': 'soundcloud', 'importSoundCloud': true});
     final store = await SettingsStore.open();
-    expect(store.readSettings().searchSource, SearchSource.youtube);
-    expect(store.readSettings().importSoundCloud, isFalse);
-
-    await store.writeSettings(store.readSettings().copyWith(
-        searchSource: SearchSource.soundcloud, importSoundCloud: true));
-    final again = store.readSettings();
-    expect(again.searchSource, SearchSource.soundcloud);
-    expect(again.importSoundCloud, isTrue);
-  });
-
-  test('an unknown stored source falls back to YouTube', () async {
-    SharedPreferences.setMockInitialValues({'searchSource': 'bandcamp'});
-    final store = await SettingsStore.open();
-    expect(store.readSettings().searchSource, SearchSource.youtube);
+    await store.writeSettings(store.readSettings().copyWith(recordHistory: false));
+    final prefs = await SharedPreferences.getInstance();
+    expect(prefs.getString('searchSource'), 'soundcloud', reason: 'left as it was, never read');
+    expect(store.readSettings().recordHistory, isFalse);
   });
 
   test('downloads are M4A by default, also for those who had the old MP3 default; a choice is remembered',

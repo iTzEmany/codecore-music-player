@@ -1,4 +1,11 @@
+import 'dart:async';
 import 'dart:io';
+
+import 'package:codecore/providers/smart_search_providers.dart';
+import 'package:codecore/providers/youtube_providers.dart';
+import 'package:codecore/providers/ytm_catalog_providers.dart';
+import 'package:codecore/services/online/smart_search.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 
 import 'package:codecore/services/online/catalog_cache.dart';
 import 'package:codecore/services/online/innertube_client.dart';
@@ -17,6 +24,12 @@ class FakeCatalog extends YtmCatalog {
 
   @override
   Future<YtmArtistRef?> topArtist(String query, String hl) => onTopArtist(query);
+
+  @override
+  Future<TopCard?> topCard(String query, String hl, {CancelToken? cancel}) async {
+    final artist = await onTopArtist(query);
+    return artist == null ? null : TopArtist(artist);
+  }
 }
 
 class _NoYoutube implements YoutubeService {
@@ -31,8 +44,6 @@ class _NoYoutube implements YoutubeService {
   @override
   Future<PlaylistListing> listPlaylist(String url, {int limit = 500}) async =>
       const PlaylistListing.empty();
-  @override
-  Future<List<YtResult>> searchSoundCloud(String query, {int limit = 5}) async => const [];
   @override
   Stream<DownloadProgress> download(YtResult r, Directory outDir,
           {CancelToken? cancel, DownloadOptions options = const DownloadOptions()}) =>
@@ -54,3 +65,12 @@ YtResult ytmSong(String id, String title,
       artists: [artist],
       artistIds: [artistId],
     );
+
+
+/// The online search engine on the test's own services, whose 1.5 s wait for
+/// the slower source never fires (a real timer would outlive the test).
+final Override noCapEngine = smartSearchEngineProvider.overrideWith((ref) => SmartSearch(
+      youtube: ref.watch(youtubeServiceProvider),
+      catalog: ref.watch(ytmCatalogProvider),
+      delay: (_) => Completer<void>().future,
+    ));

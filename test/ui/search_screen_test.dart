@@ -22,9 +22,9 @@ void main() {
     final h = await Harness.create(tester, tracks: 4);
     await h.pump(tester, const SearchScreen());
     await _settle(tester);
-    // Empty query: no results yet; the YouTube chip follows the flag.
+    // Empty query: no results yet; the Online chip follows the flag.
     expect(find.text('Risultato principale'), findsNothing);
-    expect(find.widgetWithText(ChoiceChip, 'YouTube'),
+    expect(find.widgetWithText(ChoiceChip, 'Online'),
         kEnableYoutube ? findsOneWidget : findsNothing);
     await tester.enterText(find.byType(TextField), 'Song 1');
     await tester.pump(const Duration(milliseconds: 400));

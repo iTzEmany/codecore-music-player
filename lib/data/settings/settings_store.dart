@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../services/audio/audio_backend.dart' show TransitionMode;
 import '../../services/audio/equalizer.dart';
 import '../../services/audio/play_queue.dart';
-import '../../services/online/youtube_service.dart' show DownloadFormat, SearchSource;
+import '../../services/online/youtube_service.dart' show DownloadFormat;
 
 /// The equalizer curve chosen for one kind of output (speaker or headphones).
 class EqProfile {
@@ -53,8 +53,6 @@ class AppSettings {
     this.transition = TransitionMode.normal,
     this.crossfadeSeconds = 6,
     this.crossfadePlainInAlbum = true,
-    this.searchSource = SearchSource.youtube,
-    this.importSoundCloud = false,
     this.writeTagsToFiles = false,
     this.tagsAlsoInFile = true,
     this.shufflePlus = false,
@@ -136,12 +134,6 @@ class AppSettings {
   final String radioCountry, radioRegion;
   final bool radioOnlyCountry;
 
-  /// Where the online search of the Search page looks.
-  final SearchSource searchSource;
-
-  /// CSV import: try SoundCloud for the rows YouTube did not find.
-  final bool importSoundCloud;
-
   /// Edits of title, artist, album… are also written into the music files
   /// (through `SafeTagWriter`, with a backup). Off by default.
   final bool writeTagsToFiles;
@@ -187,8 +179,6 @@ class AppSettings {
     TransitionMode? transition,
     int? crossfadeSeconds,
     bool? crossfadePlainInAlbum,
-    SearchSource? searchSource,
-    bool? importSoundCloud,
     bool? writeTagsToFiles,
     bool? tagsAlsoInFile,
     bool? shufflePlus,
@@ -233,8 +223,6 @@ class AppSettings {
         crossfadeSeconds: crossfadeSeconds ?? this.crossfadeSeconds,
         crossfadePlainInAlbum:
             crossfadePlainInAlbum ?? this.crossfadePlainInAlbum,
-        searchSource: searchSource ?? this.searchSource,
-        importSoundCloud: importSoundCloud ?? this.importSoundCloud,
         writeTagsToFiles: writeTagsToFiles ?? this.writeTagsToFiles,
         tagsAlsoInFile: tagsAlsoInFile ?? this.tagsAlsoInFile,
         shufflePlus: shufflePlus ?? this.shufflePlus,
@@ -314,11 +302,6 @@ class SettingsStore {
         ),
         crossfadeSeconds: (_prefs.getInt('crossfadeSeconds') ?? 6).clamp(2, 12),
         crossfadePlainInAlbum: _prefs.getBool('crossfadePlainInAlbum') ?? true,
-        searchSource: SearchSource.values.firstWhere(
-          (m) => m.name == _prefs.getString('searchSource'),
-          orElse: () => SearchSource.youtube,
-        ),
-        importSoundCloud: _prefs.getBool('importSoundCloud') ?? false,
         writeTagsToFiles: _prefs.getBool('writeTagsToFiles') ?? false,
         tagsAlsoInFile: _prefs.getBool('tagsAlsoInFile') ?? true,
         shufflePlus: _prefs.getBool('shufflePlus') ?? false,
@@ -378,8 +361,6 @@ class SettingsStore {
     await _prefs.setString('transition', s.transition.name);
     await _prefs.setInt('crossfadeSeconds', s.crossfadeSeconds);
     await _prefs.setBool('crossfadePlainInAlbum', s.crossfadePlainInAlbum);
-    await _prefs.setString('searchSource', s.searchSource.name);
-    await _prefs.setBool('importSoundCloud', s.importSoundCloud);
     await _prefs.setBool('writeTagsToFiles', s.writeTagsToFiles);
     await _prefs.setBool('tagsAlsoInFile', s.tagsAlsoInFile);
     await _prefs.setBool('shufflePlus', s.shufflePlus);
@@ -428,6 +409,35 @@ class SettingsStore {
   int readLastUpdateCheckDay() => _prefs.getInt('lastUpdateCheckDay') ?? 0;
 
   Future<void> writeLastUpdateCheckDay(int day) => _prefs.setInt('lastUpdateCheckDay', day);
+
+  // New releases of followed artists (phase 34).
+
+  /// «Più ascoltati»: follow the most listened artists automatically (off).
+  bool get releasesTopArtists => _prefs.getBool('releasesTopArtists') ?? false;
+  Future<void> writeReleasesTopArtists(bool on) => _prefs.setBool('releasesTopArtists', on);
+
+  /// A notification for new releases (Android).
+  bool get releasesNotify => _prefs.getBool('releasesNotify') ?? true;
+  Future<void> writeReleasesNotify(bool on) => _prefs.setBool('releasesNotify', on);
+
+  /// Check only on a network that is not metered (off).
+  bool get releasesUnmeteredOnly => _prefs.getBool('releasesUnmeteredOnly') ?? false;
+  Future<void> writeReleasesUnmeteredOnly(bool on) => _prefs.setBool('releasesUnmeteredOnly', on);
+
+  /// The Home card about «Più ascoltati» was answered (either way).
+  bool get releasesTopCardSeen => _prefs.getBool('releasesTopCardSeen') ?? false;
+  Future<void> writeReleasesTopCardSeen(bool seen) => _prefs.setBool('releasesTopCardSeen', seen);
+
+  /// Start of the last round, and the earliest time for another after a 429
+  /// (epoch ms; null = none).
+  int? get releasesLastRunAt => _prefs.getInt('releasesLastRunAt');
+  int? get releasesRetryAt => _prefs.getInt('releasesRetryAt');
+  int? get releasesLastNotifiedAt => _prefs.getInt('releasesLastNotifiedAt');
+
+  Future<void> writeReleasesLastRunAt(int ms) => _prefs.setInt('releasesLastRunAt', ms);
+  Future<void> writeReleasesLastNotifiedAt(int ms) => _prefs.setInt('releasesLastNotifiedAt', ms);
+  Future<void> writeReleasesRetryAt(int? ms) =>
+      ms == null ? _prefs.remove('releasesRetryAt') : _prefs.setInt('releasesRetryAt', ms);
 
   /// Duplicate groups the user marked «not duplicates» (`DuplicateGroup.key`).
   Set<String> readNotDuplicates() =>

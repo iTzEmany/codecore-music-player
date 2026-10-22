@@ -83,7 +83,6 @@ class PlaylistImportService {
     required this.applyTags,
     this.forgetSearches,
     this.trackDurationMs,
-    this.soundCloudFallback,
     this.fetchCover,
     this.enrichLater,
     this.thresholds,
@@ -135,9 +134,6 @@ class PlaylistImportService {
   final MatchThresholds Function()? thresholds;
 
   MatchThresholds get _cutoffs => thresholds?.call() ?? const MatchThresholds();
-
-  /// Asked at each search: SoundCloud is only tried while the user wants it.
-  final bool Function()? soundCloudFallback;
 
   /// Drops cached search answers; called when a chosen video proved unavailable.
   final void Function(List<String> queries)? forgetSearches;
@@ -829,14 +825,7 @@ class PlaylistImportService {
             if (seen.add(p.id)) p,
         ],
         thresholds: _cutoffs);
-    if (decision.kind != MatchKind.notFound || !(soundCloudFallback?.call() ?? false)) {
-      return decision;
-    }
-    // Last resort, and only for what nothing else found: one SoundCloud search.
-    await Future<void>.delayed(searchGap);
-    final sc = await youtube.searchSoundCloud(queries[1], limit: 5);
-    final fromSc = decide(row, sc, thresholds: _cutoffs);
-    return fromSc.kind == MatchKind.notFound ? decision : fromSc;
+    return decision;
   }
 
   Future<void> _onSearchError(

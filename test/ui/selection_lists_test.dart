@@ -5,6 +5,7 @@ import 'package:codecore/data/repositories/library_queries.dart';
 import 'package:codecore/data/repositories/playlist_repository.dart';
 import 'package:codecore/providers/selection_providers.dart';
 import 'package:codecore/providers/youtube_providers.dart';
+import 'package:codecore/providers/ytm_catalog_providers.dart';
 import 'package:codecore/services/online/download_index.dart';
 import 'package:codecore/services/online/download_queue.dart';
 import 'package:codecore/services/online/youtube_service.dart';
@@ -13,7 +14,7 @@ import 'package:codecore/ui/screens/library/all_tracks_screen.dart';
 import 'package:codecore/ui/screens/library/favorites_screen.dart';
 import 'package:codecore/ui/screens/playlists/playlist_detail_screen.dart';
 import 'package:codecore/ui/screens/search/search_screen.dart';
-import 'package:codecore/ui/screens/youtube/youtube_results.dart';
+import 'package:codecore/ui/screens/youtube/online_results.dart';
 import 'package:dio/dio.dart' show CancelToken;
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
@@ -22,6 +23,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
 
 import '../support/app_harness.dart';
+import '../support/fake_ytm.dart';
 
 void _phone(WidgetTester tester) {
   tester.view.physicalSize = const Size(400, 900);
@@ -56,8 +58,6 @@ class _FakeYoutube implements YoutubeService {
   Future<List<YtResult>> searchSongs(String query, {int limit = 5}) async => const [];
   @override
   Future<PlaylistListing> listPlaylist(String url, {int limit = 500}) async => const PlaylistListing.empty();
-  @override
-  Future<List<YtResult>> searchSoundCloud(String query, {int limit = 5}) async => const [];
   @override
   Future<List<YtResult>> searchAlbums(String query, {int limit = 3}) async => const [];
   @override
@@ -191,9 +191,11 @@ void main() {
     await tester.runAsync(() => index.add('v2', known.path)); // «Clip 2» is in the library already
     await h.pump(
       tester,
-      Scaffold(body: YoutubeResults(query: 'x', submitted: 1)),
+      Scaffold(body: OnlineResults(query: 'x', submitted: 1)),
       extraOverrides: [
         youtubeServiceProvider.overrideWithValue(_FakeYoutube()),
+        ytmCatalogProvider.overrideWithValue(FakeCatalog((_) async => null)),
+        noCapEngine,
         downloadsProvider.overrideWith(() => downloads),
         downloadIndexProvider.overrideWith((ref) async => index),
       ],

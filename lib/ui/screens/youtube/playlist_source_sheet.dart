@@ -7,7 +7,7 @@ import '../../../providers/youtube_providers.dart';
 import '../../../services/online/youtube_service.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/format_utils.dart';
-import 'youtube_results.dart' show ytErrorText;
+import 'online_results.dart' show ytErrorText;
 
 /// A playlist (or channel) is long enough to warn about from here.
 const longPlaylistVideos = 200;

@@ -5,7 +5,7 @@ import '../../../l10n/l10n_ext.dart';
 import '../../../services/online/innertube_client.dart';
 import '../../../services/online/youtube_service.dart';
 import '../../theme/tokens.dart';
-import '../youtube/youtube_results.dart' show ytErrorText;
+import '../youtube/online_results.dart' show ytErrorText;
 
 /// Why an online page could not be shown, each cause with its own words:
 /// not found (no «Riprova»), unreadable (offers [onSearch]), network or other.

@@ -246,7 +246,7 @@
   "ytErrNetwork": "Réseau indisponible",
   "ytErrChanged": "YouTube a changé quelque chose : mettez à jour l’application ou le paquet",
   "ytNoFolder": "Ajoutez d’abord un dossier de musique",
-  "ytLegal": "Usage personnel uniquement. Respectez les droits d’auteur et les conditions d’utilisation de YouTube et SoundCloud.",
+  "ytLegal": "Usage personnel uniquement. Respectez les droits d’auteur et les conditions d’utilisation de YouTube.",
   "useDefaultFolder": "Utiliser le dossier Musique de l’appareil",
   "ytErrToolMissing": "yt-dlp introuvable : installez-le (pip install -U yt-dlp) puis réessayez",
   "ytErrRateLimited": "YouTube demande de ralentir : réessayez dans quelques minutes",
@@ -699,14 +699,6 @@
   "homeRediscover": "À redécouvrir",
   "searchMainResult": "Résultat principal",
   "showAll": "Tout afficher",
-  "searchOnYoutube": "Rechercher « {query} » sur YouTube",
-  "@searchOnYoutube": {
-    "placeholders": {
-      "query": {
-        "type": "String"
-      }
-    }
-  },
   "recentSearches": "Recherches récentes",
   "genresTitle": "Genres",
   "downloadsChip": "Téléchargements ({n})",
@@ -1916,9 +1908,6 @@
   "searchSourceYoutube": "YouTube",
   "searchSourceYoutubeMusic": "YouTube Music",
   "searchSourceSoundcloud": "SoundCloud",
-  "importSoundCloud": "Chercher aussi sur SoundCloud si un morceau est introuvable",
-  "importSoundCloudHint": "Seulement pour les lignes d’un import que YouTube ne trouve pas : une recherche de plus par ligne. Désactivé par défaut.",
-  "ytHintSoundcloud": "Chercher sur SoundCloud",
   "playlistSourceTitle": "Playlist ou chaîne YouTube",
   "playlistSourceLoading": "Lecture de la liste des vidéos…",
   "playlistSourceName": "Nom de la playlist",
@@ -2741,5 +2730,18 @@
   "suggestionOutcomeHeard": "Écouté",
   "suggestionOutcomeDownloaded": "Téléchargé",
   "suggestionOutcomeDisliked": "Je n’aime pas",
-  "memorySuggestions": "Suggestions d’Aléatoire+"
+  "memorySuggestions": "Suggestions d’Aléatoire+",
+  "searchModeLibrary": "Dans la bibliothèque",
+  "searchModeOnline": "En ligne",
+  "searchOnline": "Rechercher « {query} » en ligne",
+  "onlineBestResults": "Meilleurs résultats",
+  "onlineOthersChip": "Autres résultats ({count})",
+  "onlineNoneSure": "Aucun résultat sûr",
+  "onlineArtistSongs": "Titres de {artist}",
+  "onlineFilterAll": "Toutes",
+  "onlineSourceVideo": "Vidéo",
+  "onlineAlsoVideo": "aussi en vidéo",
+  "onlineListenVideo": "Écouter la vidéo",
+  "onlineNoticeRateLimited": "{source} demande une pause : résultats uniquement de {other}",
+  "onlineNoticeFailed": "{source} n’a pas répondu : résultats uniquement de {other}"
 }

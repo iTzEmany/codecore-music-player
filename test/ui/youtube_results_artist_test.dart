@@ -6,7 +6,7 @@ import 'package:codecore/services/online/ytm_artist.dart';
 import 'package:codecore/services/online/ytm_catalog.dart';
 import 'package:codecore/services/online/youtube_service.dart';
 import 'package:codecore/ui/screens/online/artist_page_screen.dart';
-import 'package:codecore/ui/screens/youtube/youtube_results.dart';
+import 'package:codecore/ui/screens/youtube/online_results.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -41,8 +41,6 @@ class _Base extends Object implements YoutubeService {
   Future<PlaylistListing> listPlaylist(String url, {int limit = 500}) async =>
       const PlaylistListing.empty();
   @override
-  Future<List<YtResult>> searchSoundCloud(String query, {int limit = 5}) async => const [];
-  @override
   dynamic noSuchMethod(Invocation i) => super.noSuchMethod(i);
 }
 
@@ -60,10 +58,11 @@ void main() {
     asked.clear();
     await h.pump(
       tester,
-      Scaffold(body: YoutubeResults(query: query, submitted: submitted)),
+      Scaffold(body: OnlineResults(query: query, submitted: submitted)),
       extraOverrides: [
         youtubeServiceProvider.overrideWithValue(_Search()),
         ytmCatalogProvider.overrideWithValue(FakeCatalog(top)),
+        noCapEngine,
         artistPageProvider.overrideWith((ref, id) async {
           asked.add(id);
           return CatalogResult(
@@ -110,8 +109,9 @@ void main() {
       youtubeServiceProvider.overrideWithValue(_Search()),
       ytmCatalogProvider.overrideWithValue(
           FakeCatalog((q) => q == 'pink floyd' ? late.future : Future.value(null))),
+      noCapEngine,
     ];
-    Widget page(String q, int n) => Scaffold(body: YoutubeResults(query: q, submitted: n));
+    Widget page(String q, int n) => Scaffold(body: OnlineResults(query: q, submitted: n));
     await h.pump(tester, page('pink floyd', 1), extraOverrides: overrides);
     await _settle(tester);
     await h.pump(tester, page('mother', 2), extraOverrides: overrides);
@@ -123,10 +123,8 @@ void main() {
     await h.dispose(tester);
   });
 
-  testWidgets('on a YouTube Music row the artist name opens that artist', (tester) async {
+  testWidgets('on a row the artist name opens that artist', (tester) async {
     final h = await open(tester, (_) async => null);
-    await tester.tap(find.byKey(const ValueKey('source-youtubeMusic')));
-    await _settle(tester);
     expect(find.text('Time'), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('artist-link-m1')));

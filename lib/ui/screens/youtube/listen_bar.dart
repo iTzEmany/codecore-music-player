@@ -8,7 +8,7 @@ import '../../../services/online/download_queue.dart';
 import '../../../services/online/youtube_service.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/format_utils.dart';
-import 'youtube_results.dart' show ytErrorText;
+import 'online_results.dart' show ytErrorText;
 
 /// «Ascolta» on a result row: plays it, then pauses and resumes it.
 class ListenButton extends ConsumerWidget {

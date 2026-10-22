@@ -246,7 +246,7 @@
   "ytErrNetwork": "Rede indisponível",
   "ytErrChanged": "O YouTube mudou alguma coisa: atualize a app ou o pacote",
   "ytNoFolder": "Adicione primeiro uma pasta de música",
-  "ytLegal": "Apenas para uso pessoal. Respeite os direitos de autor e os termos do YouTube e do SoundCloud.",
+  "ytLegal": "Apenas para uso pessoal. Respeite os direitos de autor e os termos do YouTube.",
   "useDefaultFolder": "Usar a pasta Música do dispositivo",
   "ytErrToolMissing": "yt-dlp não encontrado: instale-o (pip install -U yt-dlp) e tente novamente",
   "ytErrRateLimited": "O YouTube pediu para abrandar: tente novamente dentro de alguns minutos",
@@ -699,14 +699,6 @@
   "homeRediscover": "Para redescobrir",
   "searchMainResult": "Resultado principal",
   "showAll": "Mostrar todos",
-  "searchOnYoutube": "Pesquisar «{query}» no YouTube",
-  "@searchOnYoutube": {
-    "placeholders": {
-      "query": {
-        "type": "String"
-      }
-    }
-  },
   "recentSearches": "Pesquisas recentes",
   "genresTitle": "Géneros",
   "downloadsChip": "Transferências ({n})",
@@ -1916,9 +1908,6 @@
   "searchSourceYoutube": "YouTube",
   "searchSourceYoutubeMusic": "YouTube Music",
   "searchSourceSoundcloud": "SoundCloud",
-  "importSoundCloud": "Procurar também no SoundCloud se uma música não for encontrada",
-  "importSoundCloudHint": "Apenas para as linhas de uma importação que o YouTube não encontra: uma pesquisa a mais por linha. Desligado por defeito.",
-  "ytHintSoundcloud": "Procurar no SoundCloud",
   "playlistSourceTitle": "Playlist ou canal do YouTube",
   "playlistSourceLoading": "A ler a lista de vídeos…",
   "playlistSourceName": "Nome da playlist",
@@ -2741,5 +2730,18 @@
   "suggestionOutcomeHeard": "Ouvido",
   "suggestionOutcomeDownloaded": "Transferido",
   "suggestionOutcomeDisliked": "Não gosto",
-  "memorySuggestions": "Sugestões do Aleatório+"
+  "memorySuggestions": "Sugestões do Aleatório+",
+  "searchModeLibrary": "Na biblioteca",
+  "searchModeOnline": "Online",
+  "searchOnline": "Pesquisar «{query}» online",
+  "onlineBestResults": "Melhores resultados",
+  "onlineOthersChip": "Outros resultados ({count})",
+  "onlineNoneSure": "Nenhum resultado seguro",
+  "onlineArtistSongs": "Músicas de {artist}",
+  "onlineFilterAll": "Todas",
+  "onlineSourceVideo": "Vídeo",
+  "onlineAlsoVideo": "também como vídeo",
+  "onlineListenVideo": "Ouvir o vídeo",
+  "onlineNoticeRateLimited": "{source} pede uma pausa: resultados só de {other}",
+  "onlineNoticeFailed": "{source} não respondeu: resultados só de {other}"
 }

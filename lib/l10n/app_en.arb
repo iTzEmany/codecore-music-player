@@ -164,7 +164,7 @@
   "ytErrNetwork": "Network unavailable",
   "ytErrChanged": "YouTube changed something: update the app or package",
   "ytNoFolder": "Add a music folder first",
-  "ytLegal": "Personal use only. Respect copyright and the terms of YouTube and SoundCloud.",
+  "ytLegal": "Personal use only. Respect copyright and the terms of YouTube.",
   "useDefaultFolder": "Use the device Music folder",
   "ytErrToolMissing": "yt-dlp not found: install it (pip install -U yt-dlp) and retry",
   "ytErrRateLimited": "YouTube asked to slow down: try again in a few minutes",
@@ -508,14 +508,6 @@
   "homeRediscover": "Rediscover",
   "searchMainResult": "Top result",
   "showAll": "Show all",
-  "searchOnYoutube": "Search “{query}” on YouTube",
-  "@searchOnYoutube": {
-    "placeholders": {
-      "query": {
-        "type": "String"
-      }
-    }
-  },
   "recentSearches": "Recent searches",
   "genresTitle": "Genres",
   "downloadsChip": "Downloads ({n})",
@@ -1725,9 +1717,6 @@
   "searchSourceYoutube": "YouTube",
   "searchSourceYoutubeMusic": "YouTube Music",
   "searchSourceSoundcloud": "SoundCloud",
-  "importSoundCloud": "Also search SoundCloud when a track is not found",
-  "importSoundCloudHint": "Only for the rows of an import that YouTube cannot find: one extra search per row. Off by default.",
-  "ytHintSoundcloud": "Search SoundCloud",
   "playlistSourceTitle": "YouTube playlist or channel",
   "playlistSourceLoading": "Reading the list of videos…",
   "playlistSourceName": "Playlist name",
@@ -2474,5 +2463,18 @@
   "suggestionOutcomeHeard": "Heard",
   "suggestionOutcomeDownloaded": "Downloaded",
   "suggestionOutcomeDisliked": "Disliked",
-  "memorySuggestions": "Shuffle+ suggestions"
+  "memorySuggestions": "Shuffle+ suggestions",
+  "searchModeLibrary": "In library",
+  "searchModeOnline": "Online",
+  "searchOnline": "Search “{query}” online",
+  "onlineBestResults": "Best results",
+  "onlineOthersChip": "Other results ({count})",
+  "onlineNoneSure": "No sure result",
+  "onlineArtistSongs": "Songs by {artist}",
+  "onlineFilterAll": "All",
+  "onlineSourceVideo": "Video",
+  "onlineAlsoVideo": "also as a video",
+  "onlineListenVideo": "Listen to the video",
+  "onlineNoticeRateLimited": "{source} asked to slow down: results only from {other}",
+  "onlineNoticeFailed": "{source} did not answer: results only from {other}"
 }

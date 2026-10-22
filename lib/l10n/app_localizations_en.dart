@@ -540,7 +540,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ytLegal =>
-      'Personal use only. Respect copyright and the terms of YouTube and SoundCloud.';
+      'Personal use only. Respect copyright and the terms of YouTube.';
 
   @override
   String get useDefaultFolder => 'Use the device Music folder';
@@ -1185,11 +1185,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get showAll => 'Show all';
-
-  @override
-  String searchOnYoutube(String query) {
-    return 'Search “$query” on YouTube';
-  }
 
   @override
   String get recentSearches => 'Recent searches';
@@ -3186,17 +3181,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searchSourceSoundcloud => 'SoundCloud';
 
   @override
-  String get importSoundCloud =>
-      'Also search SoundCloud when a track is not found';
-
-  @override
-  String get importSoundCloudHint =>
-      'Only for the rows of an import that YouTube cannot find: one extra search per row. Off by default.';
-
-  @override
-  String get ytHintSoundcloud => 'Search SoundCloud';
-
-  @override
   String get playlistSourceTitle => 'YouTube playlist or channel';
 
   @override
@@ -4436,4 +4420,53 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get memorySuggestions => 'Shuffle+ suggestions';
+
+  @override
+  String get searchModeLibrary => 'In library';
+
+  @override
+  String get searchModeOnline => 'Online';
+
+  @override
+  String searchOnline(String query) {
+    return 'Search “$query” online';
+  }
+
+  @override
+  String get onlineBestResults => 'Best results';
+
+  @override
+  String onlineOthersChip(int count) {
+    return 'Other results ($count)';
+  }
+
+  @override
+  String get onlineNoneSure => 'No sure result';
+
+  @override
+  String onlineArtistSongs(String artist) {
+    return 'Songs by $artist';
+  }
+
+  @override
+  String get onlineFilterAll => 'All';
+
+  @override
+  String get onlineSourceVideo => 'Video';
+
+  @override
+  String get onlineAlsoVideo => 'also as a video';
+
+  @override
+  String get onlineListenVideo => 'Listen to the video';
+
+  @override
+  String onlineNoticeRateLimited(String source, String other) {
+    return '$source asked to slow down: results only from $other';
+  }
+
+  @override
+  String onlineNoticeFailed(String source, String other) {
+    return '$source did not answer: results only from $other';
+  }
 }

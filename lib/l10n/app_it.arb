@@ -246,7 +246,7 @@
   "ytErrNetwork": "Rete non disponibile",
   "ytErrChanged": "YouTube ha cambiato qualcosa: aggiorna l’app o il pacchetto",
   "ytNoFolder": "Aggiungi prima una cartella musicale",
-  "ytLegal": "Solo per uso personale. Rispetta i diritti d’autore e i termini di YouTube e SoundCloud.",
+  "ytLegal": "Solo per uso personale. Rispetta i diritti d’autore e i termini di YouTube.",
   "useDefaultFolder": "Usa la cartella Musica del dispositivo",
   "ytErrToolMissing": "yt-dlp non trovato: installalo (pip install -U yt-dlp) e riprova",
   "ytErrRateLimited": "YouTube ha chiesto di rallentare: riprova tra qualche minuto",
@@ -699,14 +699,6 @@
   "homeRediscover": "Da riscoprire",
   "searchMainResult": "Risultato principale",
   "showAll": "Mostra tutti",
-  "searchOnYoutube": "Cerca «{query}» su YouTube",
-  "@searchOnYoutube": {
-    "placeholders": {
-      "query": {
-        "type": "String"
-      }
-    }
-  },
   "recentSearches": "Ricerche recenti",
   "genresTitle": "Generi",
   "downloadsChip": "Download ({n})",
@@ -2006,9 +1998,6 @@
   "searchSourceYoutube": "YouTube",
   "searchSourceYoutubeMusic": "YouTube Music",
   "searchSourceSoundcloud": "SoundCloud",
-  "importSoundCloud": "Cerca anche su SoundCloud se un brano non si trova",
-  "importSoundCloudHint": "Solo per le righe di un’importazione che YouTube non trova: una ricerca in più per riga. Spento di serie.",
-  "ytHintSoundcloud": "Cerca su SoundCloud",
   "playlistSourceTitle": "Playlist o canale YouTube",
   "playlistSourceLoading": "Leggo l’elenco dei video…",
   "playlistSourceName": "Nome della playlist",
@@ -2831,5 +2820,59 @@
   "suggestionOutcomeHeard": "Ascoltato",
   "suggestionOutcomeDownloaded": "Scaricato",
   "suggestionOutcomeDisliked": "Non mi piace",
-  "memorySuggestions": "Suggeriti di Casuale+"
+  "memorySuggestions": "Suggeriti di Casuale+",
+  "searchModeLibrary": "In libreria",
+  "searchModeOnline": "Online",
+  "searchOnline": "Cerca «{query}» online",
+  "@searchOnline": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "onlineBestResults": "Migliori risultati",
+  "onlineOthersChip": "Altri risultati ({count})",
+  "@onlineOthersChip": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "onlineNoneSure": "Nessun risultato sicuro",
+  "onlineArtistSongs": "Brani di {artist}",
+  "@onlineArtistSongs": {
+    "placeholders": {
+      "artist": {
+        "type": "String"
+      }
+    }
+  },
+  "onlineFilterAll": "Tutte",
+  "onlineSourceVideo": "Video",
+  "onlineAlsoVideo": "anche come video",
+  "onlineListenVideo": "Ascolta il video",
+  "onlineNoticeRateLimited": "{source} chiede una pausa: risultati solo da {other}",
+  "@onlineNoticeRateLimited": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      },
+      "other": {
+        "type": "String"
+      }
+    }
+  },
+  "onlineNoticeFailed": "{source} non ha risposto: risultati solo da {other}",
+  "@onlineNoticeFailed": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      },
+      "other": {
+        "type": "String"
+      }
+    }
+  }
 }

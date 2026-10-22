@@ -5,14 +5,16 @@ import 'package:codecore/data/repositories/import_repository.dart';
 import 'package:codecore/data/repositories/playlist_repository.dart';
 import 'package:codecore/providers/import_providers.dart';
 import 'package:codecore/providers/youtube_providers.dart';
+import 'package:codecore/providers/ytm_catalog_providers.dart';
 import 'package:codecore/services/import/playlist_import_service.dart';
 import 'package:codecore/services/online/youtube_service.dart';
-import 'package:codecore/ui/screens/youtube/youtube_results.dart';
+import 'package:codecore/ui/screens/youtube/online_results.dart';
 import 'package:dio/dio.dart' show CancelToken;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/app_harness.dart';
+import '../support/fake_ytm.dart';
 
 Future<void> _settle(WidgetTester tester) async {
   await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 150)));
@@ -39,8 +41,6 @@ class _Yt implements YoutubeService {
 
   @override
   Future<List<YtResult>> searchSongs(String query, {int limit = 5}) async => const [];
-  @override
-  Future<List<YtResult>> searchSoundCloud(String query, {int limit = 5}) async => const [];
   @override
   Future<List<YtResult>> searchAlbums(String query, {int limit = 3}) async => const [];
   @override
@@ -101,10 +101,12 @@ void main() {
         );
     await h.pump(
       tester,
-      Scaffold(body: YoutubeResults(query: query, submitted: 1)),
+      Scaffold(body: OnlineResults(query: query, submitted: 1)),
       extraOverrides: [
         youtubeServiceProvider.overrideWithValue(yt),
         playlistImportServiceProvider.overrideWithValue(service),
+        ytmCatalogProvider.overrideWithValue(FakeCatalog((_) async => null)),
+        noCapEngine,
       ],
     );
     await _settle(tester);
@@ -205,7 +207,7 @@ void main() {
     };
     await h.pump(
       tester,
-      const Scaffold(body: YoutubeResults(query: url, submitted: 1)),
+      const Scaffold(body: OnlineResults(query: url, submitted: 1)),
       extraOverrides: [youtubeServiceProvider.overrideWithValue(yt)],
     );
     await _settle(tester);

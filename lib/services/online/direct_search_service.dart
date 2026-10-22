@@ -17,7 +17,7 @@ String? _ytmAlbumId(String link) {
 }
 
 /// Searches YouTube and YouTube Music with one direct request ([client]) and
-/// leaves everything else (addresses, SoundCloud, albums, playlists,
+/// leaves everything else (addresses, albums, playlists,
 /// downloads) to yt-dlp ([inner]). When the direct answer cannot be read, the
 /// same search is made with yt-dlp, and yt-dlp alone is used for [cooldown].
 class DirectSearchService implements YoutubeService {
@@ -88,10 +88,6 @@ class DirectSearchService implements YoutubeService {
   @override
   Future<PlaylistListing> listPlaylist(String url, {int limit = 500}) =>
       inner.listPlaylist(url, limit: limit);
-
-  @override
-  Future<List<YtResult>> searchSoundCloud(String query, {int limit = 5}) =>
-      inner.searchSoundCloud(query, limit: limit);
 
   @override
   Stream<DownloadProgress> download(YtResult r, Directory outDir,

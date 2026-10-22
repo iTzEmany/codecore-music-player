@@ -541,7 +541,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get ytLegal =>
-      'Solo per uso personale. Rispetta i diritti d’autore e i termini di YouTube e SoundCloud.';
+      'Solo per uso personale. Rispetta i diritti d’autore e i termini di YouTube.';
 
   @override
   String get useDefaultFolder => 'Usa la cartella Musica del dispositivo';
@@ -1188,11 +1188,6 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get showAll => 'Mostra tutti';
-
-  @override
-  String searchOnYoutube(String query) {
-    return 'Cerca «$query» su YouTube';
-  }
 
   @override
   String get recentSearches => 'Ricerche recenti';
@@ -3189,17 +3184,6 @@ class AppLocalizationsIt extends AppLocalizations {
   String get searchSourceSoundcloud => 'SoundCloud';
 
   @override
-  String get importSoundCloud =>
-      'Cerca anche su SoundCloud se un brano non si trova';
-
-  @override
-  String get importSoundCloudHint =>
-      'Solo per le righe di un’importazione che YouTube non trova: una ricerca in più per riga. Spento di serie.';
-
-  @override
-  String get ytHintSoundcloud => 'Cerca su SoundCloud';
-
-  @override
   String get playlistSourceTitle => 'Playlist o canale YouTube';
 
   @override
@@ -4443,4 +4427,53 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get memorySuggestions => 'Suggeriti di Casuale+';
+
+  @override
+  String get searchModeLibrary => 'In libreria';
+
+  @override
+  String get searchModeOnline => 'Online';
+
+  @override
+  String searchOnline(String query) {
+    return 'Cerca «$query» online';
+  }
+
+  @override
+  String get onlineBestResults => 'Migliori risultati';
+
+  @override
+  String onlineOthersChip(int count) {
+    return 'Altri risultati ($count)';
+  }
+
+  @override
+  String get onlineNoneSure => 'Nessun risultato sicuro';
+
+  @override
+  String onlineArtistSongs(String artist) {
+    return 'Brani di $artist';
+  }
+
+  @override
+  String get onlineFilterAll => 'Tutte';
+
+  @override
+  String get onlineSourceVideo => 'Video';
+
+  @override
+  String get onlineAlsoVideo => 'anche come video';
+
+  @override
+  String get onlineListenVideo => 'Ascolta il video';
+
+  @override
+  String onlineNoticeRateLimited(String source, String other) {
+    return '$source chiede una pausa: risultati solo da $other';
+  }
+
+  @override
+  String onlineNoticeFailed(String source, String other) {
+    return '$source non ha risposto: risultati solo da $other';
+  }
 }

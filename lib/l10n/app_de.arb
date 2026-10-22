@@ -164,7 +164,7 @@
   "ytErrNetwork": "Netzwerk nicht verfügbar",
   "ytErrChanged": "YouTube hat etwas geändert: App oder Paket aktualisieren",
   "ytNoFolder": "Füge zuerst einen Musikordner hinzu",
-  "ytLegal": "Nur für den persönlichen Gebrauch. Urheberrecht sowie die Bedingungen von YouTube und SoundCloud beachten.",
+  "ytLegal": "Nur für den persönlichen Gebrauch. Urheberrecht sowie die Bedingungen von YouTube beachten.",
   "useDefaultFolder": "Musikordner des Geräts verwenden",
   "ytErrToolMissing": "yt-dlp nicht gefunden: installieren (pip install -U yt-dlp) und erneut versuchen",
   "ytErrRateLimited": "YouTube verlangt eine Pause: versuche es in einigen Minuten erneut",
@@ -508,14 +508,6 @@
   "homeRediscover": "Wiederentdecken",
   "searchMainResult": "Bestes Ergebnis",
   "showAll": "Alle anzeigen",
-  "searchOnYoutube": "„{query}“ auf YouTube suchen",
-  "@searchOnYoutube": {
-    "placeholders": {
-      "query": {
-        "type": "String"
-      }
-    }
-  },
   "recentSearches": "Letzte Suchen",
   "genresTitle": "Genres",
   "downloadsChip": "Downloads ({n})",
@@ -1725,9 +1717,6 @@
   "searchSourceYoutube": "YouTube",
   "searchSourceYoutubeMusic": "YouTube Music",
   "searchSourceSoundcloud": "SoundCloud",
-  "importSoundCloud": "Auch auf SoundCloud suchen, wenn ein Titel nicht gefunden wird",
-  "importSoundCloudHint": "Nur für Zeilen eines Imports, die YouTube nicht findet: eine zusätzliche Suche pro Zeile. Standardmäßig aus.",
-  "ytHintSoundcloud": "SoundCloud durchsuchen",
   "playlistSourceTitle": "YouTube-Playlist oder -Kanal",
   "playlistSourceLoading": "Videoliste wird gelesen …",
   "playlistSourceName": "Name der Playlist",
@@ -2474,5 +2463,18 @@
   "suggestionOutcomeHeard": "Gehört",
   "suggestionOutcomeDownloaded": "Heruntergeladen",
   "suggestionOutcomeDisliked": "Gefällt mir nicht",
-  "memorySuggestions": "Shuffle+-Vorschläge"
+  "memorySuggestions": "Shuffle+-Vorschläge",
+  "searchModeLibrary": "In der Bibliothek",
+  "searchModeOnline": "Online",
+  "searchOnline": "„{query}“ online suchen",
+  "onlineBestResults": "Beste Ergebnisse",
+  "onlineOthersChip": "Weitere Ergebnisse ({count})",
+  "onlineNoneSure": "Kein sicheres Ergebnis",
+  "onlineArtistSongs": "Titel von {artist}",
+  "onlineFilterAll": "Alle",
+  "onlineSourceVideo": "Video",
+  "onlineAlsoVideo": "auch als Video",
+  "onlineListenVideo": "Video anhören",
+  "onlineNoticeRateLimited": "{source} bittet um eine Pause: Ergebnisse nur von {other}",
+  "onlineNoticeFailed": "{source} hat nicht geantwortet: Ergebnisse nur von {other}"
 }

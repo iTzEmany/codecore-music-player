@@ -23,8 +23,7 @@ class FakeYoutube implements YoutubeService {
   final Map<String, List<YtResult>> songs = {};
   final Map<String, List<YtResult>> plain = {};
   final Map<String, List<YtResult>> albums = {};
-  final Map<String, List<YtResult>> soundcloud = {};
-  int albumSearches = 0, albumPages = 0, scSearches = 0;
+  int albumSearches = 0, albumPages = 0;
   YtException? failWith;
 
   /// With [failWith]: how many calls fail before the answers come back
@@ -72,16 +71,6 @@ class FakeYoutube implements YoutubeService {
   @override
   Future<PlaylistListing> listPlaylist(String url, {int limit = 500}) async =>
       const PlaylistListing.empty();
-
-  @override
-  Future<List<YtResult>> searchSoundCloud(String query, {int limit = 5}) async {
-    scSearches++;
-    queries.add('sc:$query');
-    return soundcloud.entries
-        .firstWhere((e) => query.contains(e.key),
-            orElse: () => const MapEntry('', []))
-        .value;
-  }
 
   @override
   Future<List<YtResult>> searchAlbums(String query, {int limit = 3}) async {
@@ -148,7 +137,6 @@ void main() {
   var coverFails = false;
   final forgotten = <List<String>>[];
   var enabled = true;
-  var scFallback = false;
   var maxInFlight = 3;
   // No wait by default: a network error or a rate limit pauses at once.
   var backoff = <Duration>[];
@@ -194,7 +182,6 @@ void main() {
         if (coverFails) throw StateError('iTunes down');
       },
       youtubeEnabled: enabled,
-      soundCloudFallback: () => scFallback,
       searchGap: Duration.zero,
       pollDelay: Duration.zero,
       maxInFlight: maxInFlight,
@@ -247,7 +234,6 @@ void main() {
     coverFails = false;
     forgotten.clear();
     enabled = true;
-    scFallback = false;
     maxInFlight = 3;
     backoff = [];
     waits = [];
@@ -355,69 +341,14 @@ void main() {
     expect(queued.single.$2, importTag(id, 1));
   });
 
-  group('SoundCloud as a last resort', () {
-    YtResult scTrack(String id, String title, String uploader, int seconds) => YtResult(
-          id: id,
-          title: title,
-          channel: uploader,
-          duration: Duration(seconds: seconds),
-          source: MediaSource.soundcloud,
-          webpageUrl: 'https://soundcloud.com/$uploader/$id',
-        );
-
-    test('off (the default): a row nobody else finds stays not found and SoundCloud is never asked', () async {
-      yt.soundcloud['rare'] = [scTrack('s1', 'Rare Song', 'Band', 200)];
-      final id = await service.start(csv([row(0, 'Rare Song', 'Band', 200)]));
-      await idle();
-      expect(yt.scSearches, 0);
-      expect((await imports.item(id, 0))!.state, ImportItemStatus.notFound);
-      expect(queued, isEmpty);
-    });
-
-    test('on: one SoundCloud search for the row, and a sure match is downloaded from its page', () async {
-      scFallback = true;
-      yt.soundcloud['rare'] = [scTrack('s1', 'Rare Song', 'Band', 200)];
-      final id = await service.start(csv([row(0, 'Rare Song', 'Band', 200)]));
-      await idle();
-      expect(yt.scSearches, 1);
-      expect(queued, hasLength(1));
-      final r = queued.single.$1;
-      expect(r.source, MediaSource.soundcloud);
-      expect(r.downloadUrl, 'https://soundcloud.com/Band/s1');
-      expect((await imports.item(id, 0))!.state, ImportItemStatus.queued);
-    });
-
-    test('on: a row YouTube finds never reaches SoundCloud', () async {
-      scFallback = true;
-      yt.songs['one'] = [topic('v1', 'One', 'Band', 200)];
-      yt.soundcloud['one'] = [scTrack('s1', 'One', 'Band', 200)];
-      await service.start(csv([row(0, 'One', 'Band', 200)]));
-      await idle();
-      expect(yt.scSearches, 0);
-      expect(queued.single.$1.source, MediaSource.youtube);
-    });
-
-    test('on: nothing on SoundCloud either is still just «not found», after exactly one search', () async {
-      scFallback = true;
-      final id = await service.start(csv([row(0, 'Zzz Unknown', 'Nobody', 100)]));
-      await idle();
-      expect(yt.scSearches, 1);
-      expect((await imports.item(id, 0))!.state, ImportItemStatus.notFound);
-    });
-
-    test('on: an unsure SoundCloud match waits for the user and keeps its source and page', () async {
-      scFallback = true;
-      // A third party with the artist only in the title and a length 6 s off:
-      // plausible, not sure.
-      yt.soundcloud['rare'] = [scTrack('s2', 'Band - Rare Song', 'dj', 206)];
-      final id = await service.start(csv([row(0, 'Rare Song', 'Band', 200)]));
-      await idle();
-      final it = (await imports.item(id, 0))!;
-      expect(it.state, ImportItemStatus.review);
-      final c = decodeCandidates(it.candidates).single;
+  group('candidates saved with a source', () {
+    test('a SoundCloud candidate saved by an older version is still read and downloads from its page', () {
+      final c = decodeCandidates('[{"id":"s2","title":"Band - Rare Song","channel":"dj","durationSec":206,'
+              '"score":0.7,"src":"soundcloud","url":"https://soundcloud.com/dj/s2"}]')
+          .single;
       expect(c.source, MediaSource.soundcloud);
-      expect(c.webpageUrl, 'https://soundcloud.com/dj/s2');
-      expect(c.toYtResult().downloadUrl, c.webpageUrl);
+      expect(c.toYtResult().source, MediaSource.soundcloud);
+      expect(c.toYtResult().downloadUrl, 'https://soundcloud.com/dj/s2');
     });
 
     test('a candidate saved before sources existed reads back as YouTube', () {

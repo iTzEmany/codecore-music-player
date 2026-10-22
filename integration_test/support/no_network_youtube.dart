@@ -20,12 +20,6 @@ class NoNetworkYoutube implements YoutubeService {
   }
 
   @override
-  Future<List<YtResult>> searchSoundCloud(String query, {int limit = 5}) async {
-    searches++;
-    return const [];
-  }
-
-  @override
   Future<List<YtResult>> searchAlbums(String query, {int limit = 3}) async {
     searches++;
     return const [];

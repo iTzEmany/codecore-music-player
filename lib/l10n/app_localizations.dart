@@ -1093,7 +1093,7 @@ abstract class AppLocalizations {
   /// No description provided for @ytLegal.
   ///
   /// In it, this message translates to:
-  /// **'Solo per uso personale. Rispetta i diritti d’autore e i termini di YouTube e SoundCloud.'**
+  /// **'Solo per uso personale. Rispetta i diritti d’autore e i termini di YouTube.'**
   String get ytLegal;
 
   /// No description provided for @useDefaultFolder.
@@ -2193,12 +2193,6 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Mostra tutti'**
   String get showAll;
-
-  /// No description provided for @searchOnYoutube.
-  ///
-  /// In it, this message translates to:
-  /// **'Cerca «{query}» su YouTube'**
-  String searchOnYoutube(String query);
 
   /// No description provided for @recentSearches.
   ///
@@ -5236,24 +5230,6 @@ abstract class AppLocalizations {
   /// **'SoundCloud'**
   String get searchSourceSoundcloud;
 
-  /// No description provided for @importSoundCloud.
-  ///
-  /// In it, this message translates to:
-  /// **'Cerca anche su SoundCloud se un brano non si trova'**
-  String get importSoundCloud;
-
-  /// No description provided for @importSoundCloudHint.
-  ///
-  /// In it, this message translates to:
-  /// **'Solo per le righe di un’importazione che YouTube non trova: una ricerca in più per riga. Spento di serie.'**
-  String get importSoundCloudHint;
-
-  /// No description provided for @ytHintSoundcloud.
-  ///
-  /// In it, this message translates to:
-  /// **'Cerca su SoundCloud'**
-  String get ytHintSoundcloud;
-
   /// No description provided for @playlistSourceTitle.
   ///
   /// In it, this message translates to:
@@ -7064,6 +7040,84 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Suggeriti di Casuale+'**
   String get memorySuggestions;
+
+  /// No description provided for @searchModeLibrary.
+  ///
+  /// In it, this message translates to:
+  /// **'In libreria'**
+  String get searchModeLibrary;
+
+  /// No description provided for @searchModeOnline.
+  ///
+  /// In it, this message translates to:
+  /// **'Online'**
+  String get searchModeOnline;
+
+  /// No description provided for @searchOnline.
+  ///
+  /// In it, this message translates to:
+  /// **'Cerca «{query}» online'**
+  String searchOnline(String query);
+
+  /// No description provided for @onlineBestResults.
+  ///
+  /// In it, this message translates to:
+  /// **'Migliori risultati'**
+  String get onlineBestResults;
+
+  /// No description provided for @onlineOthersChip.
+  ///
+  /// In it, this message translates to:
+  /// **'Altri risultati ({count})'**
+  String onlineOthersChip(int count);
+
+  /// No description provided for @onlineNoneSure.
+  ///
+  /// In it, this message translates to:
+  /// **'Nessun risultato sicuro'**
+  String get onlineNoneSure;
+
+  /// No description provided for @onlineArtistSongs.
+  ///
+  /// In it, this message translates to:
+  /// **'Brani di {artist}'**
+  String onlineArtistSongs(String artist);
+
+  /// No description provided for @onlineFilterAll.
+  ///
+  /// In it, this message translates to:
+  /// **'Tutte'**
+  String get onlineFilterAll;
+
+  /// No description provided for @onlineSourceVideo.
+  ///
+  /// In it, this message translates to:
+  /// **'Video'**
+  String get onlineSourceVideo;
+
+  /// No description provided for @onlineAlsoVideo.
+  ///
+  /// In it, this message translates to:
+  /// **'anche come video'**
+  String get onlineAlsoVideo;
+
+  /// No description provided for @onlineListenVideo.
+  ///
+  /// In it, this message translates to:
+  /// **'Ascolta il video'**
+  String get onlineListenVideo;
+
+  /// No description provided for @onlineNoticeRateLimited.
+  ///
+  /// In it, this message translates to:
+  /// **'{source} chiede una pausa: risultati solo da {other}'**
+  String onlineNoticeRateLimited(String source, String other);
+
+  /// No description provided for @onlineNoticeFailed.
+  ///
+  /// In it, this message translates to:
+  /// **'{source} non ha risposto: risultati solo da {other}'**
+  String onlineNoticeFailed(String source, String other);
 }
 
 class _AppLocalizationsDelegate

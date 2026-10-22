@@ -116,6 +116,7 @@ class OnlineSongRow extends StatelessWidget {
     this.square = false,
     this.number,
     this.note,
+    this.tagLine,
   });
 
   final YtResult result;
@@ -144,6 +145,10 @@ class OnlineSongRow extends StatelessWidget {
 
   /// A line under the artist (replaces «Già in libreria»).
   final String? note;
+
+  /// A small line of its own under the artist (where the song comes from),
+  /// before «Già in libreria».
+  final Widget? tagLine;
 
   @override
   Widget build(BuildContext context) {
@@ -238,9 +243,7 @@ class OnlineSongRow extends StatelessWidget {
                       Row(
                         children: [
                           Icon(
-                            result.source == MediaSource.soundcloud
-                                ? Icons.cloud_rounded
-                                : Icons.smart_display_rounded,
+                            Icons.smart_display_rounded,
                             key: ValueKey('from-${result.source.name}'),
                             size: 14,
                             color: cc.textMuted,
@@ -276,9 +279,18 @@ class OnlineSongRow extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: theme.labelSmall?.copyWith(color: cc.textMuted))
-                      else if (inLibrary)
-                        Text(l.ytAlreadyInLibrary,
-                            style: theme.labelSmall?.copyWith(color: cc.accentSoft)),
+                      else if (tagLine != null || inLibrary)
+                        Row(children: [
+                          if (tagLine != null) Flexible(child: tagLine!),
+                          if (tagLine != null && inLibrary) const SizedBox(width: 8),
+                          if (inLibrary)
+                            Flexible(
+                              child: Text(l.ytAlreadyInLibrary,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: theme.labelSmall?.copyWith(color: cc.accentSoft)),
+                            ),
+                        ]),
                     ],
                   ),
                 ),

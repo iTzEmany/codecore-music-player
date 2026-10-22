@@ -10,7 +10,6 @@ import 'query_cleaner.dart';
 enum MediaSource { youtube, soundcloud }
 
 /// What the online search of the Search page looks in (the user's choice).
-enum SearchSource { youtube, youtubeMusic, soundcloud }
 
 class YtResult {
   const YtResult({
@@ -161,10 +160,6 @@ class PlaylistListing {
   final bool truncated;
 }
 
-/// How many SoundCloud results to ask for to end up with [limit] full tracks
-/// once the previews are dropped.
-int soundCloudFetchCount(int limit) => limit + 5;
-
 /// `music.youtube.com` search page filtered on songs.
 Uri youtubeMusicSearchUri(String query) => Uri.parse(
     'https://music.youtube.com/search?q=${Uri.encodeQueryComponent(query)}#songs');
@@ -246,11 +241,6 @@ abstract class YoutubeService {
   /// YouTube gives them. Empty by default: only the real services list.
   Future<PlaylistListing> listPlaylist(String url, {int limit = 500}) async =>
       const PlaylistListing.empty();
-
-  /// Full-length SoundCloud tracks matching [query], best first (the 30 s
-  /// previews are left out). Empty by default: only the real services search it.
-  Future<List<YtResult>> searchSoundCloud(String query, {int limit = 5}) async =>
-      const [];
 
   /// Emits progress; the last event carries the final file path. A cancelled
   /// download ends without a path and leaves no partial files.

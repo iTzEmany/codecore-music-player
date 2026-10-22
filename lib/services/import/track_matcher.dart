@@ -172,9 +172,6 @@ const otherVersions = [
   'parody',
 ];
 
-// What SoundCloud uploaders add to a title for their own version of a song.
-const _soundCloudVersions = ['bootleg', 'edit', 'flip', 'rework', 'vip', 'refix', 'blend'];
-
 /// Whether the whole-word [phrase] is in the [matchKey] string [key].
 bool hasPhrase(String key, String phrase) => ' $key '.contains(' $phrase ');
 
@@ -220,21 +217,12 @@ double _artistScore(ImportRow r, YtResult c, String titleKey) {
 double _bonus(ImportRow r, YtResult c) {
   var b = 0.0;
   final channel = matchKey(c.channel);
-  final soundcloud = c.source == MediaSource.soundcloud;
-  // «- Topic» and VEVO are YouTube's own labels: SoundCloud has no such thing.
-  if (!soundcloud) {
-    if (channel.endsWith(' topic')) b += 0.08;
-    if (channel.endsWith('vevo')) b += 0.04;
-  }
+  if (channel.endsWith(' topic')) b += 0.08;
+  if (channel.endsWith('vevo')) b += 0.04;
   if (r.artists.isNotEmpty) {
     final uploader = channel.replaceFirst(_channelNoise, '').trim();
     final artist = matchKey(r.primaryArtist);
-    if (uploader == artist) {
-      b += 0.04;
-    } else if (soundcloud && artist.isNotEmpty && hasPhrase(uploader, artist)) {
-      // «Daft Punk Archive», «Daft Punk Music»: probably theirs.
-      b += 0.03;
-    }
+    if (uploader == artist) b += 0.04;
   }
   final album = r.album, got = c.album;
   if (album != null &&
@@ -253,11 +241,7 @@ double scoreCandidate(ImportRow r, YtResult c) {
   final artist = _artistScore(r, c, gotTitle);
   final duration = _durationScore(r.durationMs, c.duration);
   var score = 0.45 * duration + 0.35 * title + 0.20 * artist + _bonus(r, c);
-  final versions = [
-    ...otherVersions,
-    if (c.source == MediaSource.soundcloud) ..._soundCloudVersions,
-  ];
-  for (final w in versions) {
+  for (final w in otherVersions) {
     if (hasPhrase(gotTitle, w) && !hasPhrase(wantTitle, w)) {
       score *= 0.4;
       break;

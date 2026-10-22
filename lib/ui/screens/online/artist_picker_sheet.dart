@@ -10,7 +10,7 @@ import '../../../services/online/ytm_artist.dart';
 import '../../../services/online/ytm_artist_resolver.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/net_thumbnail.dart';
-import '../youtube/youtube_results.dart' show ytErrorText;
+import '../youtube/online_results.dart' show ytErrorText;
 import 'artist_page_screen.dart';
 import 'artist_page_sections.dart' show thumbAt;
 

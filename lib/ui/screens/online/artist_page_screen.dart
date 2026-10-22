@@ -15,7 +15,7 @@ import '../../shell/shell_nav.dart';
 import '../../widgets/section_header.dart';
 import '../../widgets/track_row.dart';
 import '../library/artist_screen.dart';
-import '../youtube/youtube_results.dart';
+import '../youtube/online_results.dart';
 import 'artist_page_sections.dart';
 import 'artist_songs_screen.dart';
 import 'catalog_error_view.dart';
@@ -50,7 +50,7 @@ class ArtistPageScreen extends ConsumerWidget {
         context,
         Scaffold(
           appBar: AppBar(title: Text(artist.name)),
-          body: YoutubeResults(query: artist.name, submitted: 1),
+          body: OnlineResults(query: artist.name, submitted: 1),
         ),
       );
 

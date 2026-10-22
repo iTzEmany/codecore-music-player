@@ -105,20 +105,6 @@ class AndroidYtDlpService implements YoutubeService, StreamSource {
   }
 
   @override
-  Future<List<YtResult>> searchSoundCloud(String query, {int limit = 5}) async {
-    final q = query.trim();
-    if (q.isEmpty) return const [];
-    final n = soundCloudFetchCount(limit);
-    final res = await _search({
-      'query': 'scsearch$n:$q',
-      'isUrl': true,
-      'items': n,
-      'flat': true,
-    }, parse: parseSoundCloudJson);
-    return res.take(limit).toList();
-  }
-
-  @override
   Future<List<YtResult>> searchSongs(String query, {int limit = 5}) async {
     final q = query.trim();
     if (q.isEmpty) return const [];

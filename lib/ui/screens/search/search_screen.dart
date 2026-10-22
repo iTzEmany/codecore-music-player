@@ -29,12 +29,12 @@ import '../library/album_detail_screen.dart';
 import '../library/artist_screen.dart';
 import '../online/artist_picker_sheet.dart';
 import '../playlists/playlist_detail_screen.dart';
-import '../youtube/youtube_results.dart';
+import '../youtube/online_results.dart';
 import 'genre_screen.dart';
 
-enum _Mode { library, youtube }
+enum _Mode { library, online }
 
-/// Search: one pill, [Libreria] and [YouTube] chips. YouTube only runs when
+/// Search: one pill, [In libreria] and [Online] chips. Online only runs when
 /// the user submits.
 class SearchScreen extends ConsumerStatefulWidget {
   const SearchScreen({super.key});
@@ -48,7 +48,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   Timer? _debounce;
   String _text = '';
   _Mode _mode = _Mode.library;
-  int _ytSubmitted = 0;
+  int _onlineSubmitted = 0;
 
   @override
   void dispose() {
@@ -84,8 +84,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   void _submit(String v) {
     _debounce?.cancel();
     setState(() => _text = v.trim());
-    if (_mode == _Mode.youtube) {
-      setState(() => _ytSubmitted++);
+    if (_mode == _Mode.online) {
+      setState(() => _onlineSubmitted++);
     } else {
       _remember(v);
     }
@@ -109,11 +109,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     _onChanged(next);
   }
 
-  void _toYoutube() {
+  void _toOnline() {
     _remember(_text);
     setState(() {
-      _mode = _Mode.youtube;
-      _ytSubmitted++;
+      _mode = _Mode.online;
+      _onlineSubmitted++;
     });
   }
 
@@ -122,12 +122,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     final l = context.l10n;
     final theme = Theme.of(context).textTheme;
     final Widget body;
-    if (_mode == _Mode.youtube) {
-      body = YoutubeResults(query: _text, submitted: _ytSubmitted);
+    if (_mode == _Mode.online) {
+      body = OnlineResults(query: _text, submitted: _onlineSubmitted);
     } else if (_text.isEmpty) {
       body = _EmptyQuery(onRecent: _useRecent);
     } else {
-      body = _LibraryResults(text: _text, onYoutube: _toYoutube);
+      body = _LibraryResults(text: _text, onOnline: _toOnline);
     }
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -161,7 +161,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               onSubmitted: _submit,
               textInputAction: TextInputAction.search,
               decoration: InputDecoration(
-                hintText: _mode == _Mode.youtube ? l.ytHint : l.searchHint,
+                hintText: _mode == _Mode.online ? l.ytHint : l.searchHint,
                 prefixIcon: const Icon(Icons.search_rounded),
                 suffixIcon: _controller.text.isEmpty
                     ? null
@@ -235,15 +235,15 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   Padding(
                     padding: const EdgeInsets.only(right: 8),
                     child: ChoiceChip(
-                      label: Text(l.navLibrary),
+                      label: Text(l.searchModeLibrary),
                       selected: _mode == _Mode.library,
                       onSelected: (_) => setState(() => _mode = _Mode.library),
                     ),
                   ),
                   ChoiceChip(
-                    label: Text(l.youtube),
-                    selected: _mode == _Mode.youtube,
-                    onSelected: (_) => setState(() => _mode = _Mode.youtube),
+                    label: Text(l.searchModeOnline),
+                    selected: _mode == _Mode.online,
+                    onSelected: (_) => setState(() => _mode = _Mode.online),
                   ),
                 ],
               ),
@@ -354,10 +354,10 @@ class _GenreTile extends StatelessWidget {
 }
 
 class _LibraryResults extends ConsumerWidget {
-  const _LibraryResults({required this.text, required this.onYoutube});
+  const _LibraryResults({required this.text, required this.onOnline});
 
   final String text;
-  final VoidCallback onYoutube;
+  final VoidCallback onOnline;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -670,10 +670,10 @@ class _LibraryResults extends ConsumerWidget {
               24,
             ),
             child: OutlinedButton.icon(
-              onPressed: onYoutube,
+              onPressed: onOnline,
               icon: const Icon(Icons.smart_display_outlined),
               label: Text(
-                l.searchOnYoutube(text),
+                l.searchOnline(text),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),

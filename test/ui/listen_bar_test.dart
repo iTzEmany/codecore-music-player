@@ -2,11 +2,12 @@ import 'dart:io';
 
 import 'package:codecore/providers/listen_providers.dart';
 import 'package:codecore/providers/youtube_providers.dart';
+import 'package:codecore/providers/ytm_catalog_providers.dart';
 import 'package:codecore/services/online/download_index.dart';
 import 'package:codecore/services/online/download_queue.dart';
 import 'package:codecore/services/online/youtube_service.dart';
 import 'package:codecore/ui/screens/youtube/listen_bar.dart';
-import 'package:codecore/ui/screens/youtube/youtube_results.dart';
+import 'package:codecore/ui/screens/youtube/online_results.dart';
 import 'package:dio/dio.dart' show CancelToken;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -14,6 +15,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
 
 import '../support/app_harness.dart';
+import '../support/fake_ytm.dart';
 import '../support/fake_backend.dart';
 
 class _Downloads extends DownloadsNotifier {
@@ -34,8 +36,6 @@ class _Youtube implements YoutubeService {
   Future<List<YtResult>> searchSongs(String query, {int limit = 5}) async => const [];
   @override
   Future<PlaylistListing> listPlaylist(String url, {int limit = 500}) async => const PlaylistListing.empty();
-  @override
-  Future<List<YtResult>> searchSoundCloud(String query, {int limit = 5}) async => const [];
   @override
   Future<List<YtResult>> searchAlbums(String query, {int limit = 3}) async => const [];
   @override
@@ -68,9 +68,11 @@ void main() {
     final players = <FakeBackend>[];
     await h.pump(
       tester,
-      const Scaffold(body: YoutubeResults(query: 'pink floyd', submitted: 1)),
+      const Scaffold(body: OnlineResults(query: 'pink floyd', submitted: 1)),
       extraOverrides: [
         youtubeServiceProvider.overrideWithValue(_Youtube()),
+        ytmCatalogProvider.overrideWithValue(FakeCatalog((_) async => null)),
+        noCapEngine,
         downloadsProvider.overrideWith(() => downloads),
         downloadIndexProvider.overrideWith((ref) async => DownloadIndex(File(p.join(dir.path, 'd.json')))),
         streamResolverProvider.overrideWithValue((r) async => Uri.parse('https://media.example/${r.id}')),

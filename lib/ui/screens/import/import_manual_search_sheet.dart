@@ -9,7 +9,7 @@ import '../../../providers/youtube_providers.dart';
 import '../../../services/online/youtube_service.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/format_utils.dart';
-import '../youtube/youtube_results.dart' show ytErrorText;
+import '../youtube/online_results.dart' show ytErrorText;
 
 /// Plain YouTube search for one CSV row; the chosen result is downloaded and
 /// ends up at the row's place in the playlist.

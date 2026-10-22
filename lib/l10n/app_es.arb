@@ -164,7 +164,7 @@
   "ytErrNetwork": "Red no disponible",
   "ytErrChanged": "YouTube cambió algo: actualiza la app o el paquete",
   "ytNoFolder": "Añade primero una carpeta de música",
-  "ytLegal": "Solo para uso personal. Respeta los derechos de autor y los términos de YouTube y SoundCloud.",
+  "ytLegal": "Solo para uso personal. Respeta los derechos de autor y los términos de YouTube.",
   "useDefaultFolder": "Usar la carpeta Música del dispositivo",
   "ytErrToolMissing": "yt-dlp no encontrado: instálalo (pip install -U yt-dlp) y reintenta",
   "ytErrRateLimited": "YouTube pide ir más despacio: inténtalo de nuevo en unos minutos",
@@ -508,14 +508,6 @@
   "homeRediscover": "Para redescubrir",
   "searchMainResult": "Mejor resultado",
   "showAll": "Mostrar todo",
-  "searchOnYoutube": "Buscar «{query}» en YouTube",
-  "@searchOnYoutube": {
-    "placeholders": {
-      "query": {
-        "type": "String"
-      }
-    }
-  },
   "recentSearches": "Búsquedas recientes",
   "genresTitle": "Géneros",
   "downloadsChip": "Descargas ({n})",
@@ -1725,9 +1717,6 @@
   "searchSourceYoutube": "YouTube",
   "searchSourceYoutubeMusic": "YouTube Music",
   "searchSourceSoundcloud": "SoundCloud",
-  "importSoundCloud": "Buscar también en SoundCloud si no se encuentra una canción",
-  "importSoundCloudHint": "Solo para las filas de una importación que YouTube no encuentra: una búsqueda más por fila. Desactivado de serie.",
-  "ytHintSoundcloud": "Buscar en SoundCloud",
   "playlistSourceTitle": "Lista o canal de YouTube",
   "playlistSourceLoading": "Leyendo la lista de vídeos…",
   "playlistSourceName": "Nombre de la lista",
@@ -2474,5 +2463,18 @@
   "suggestionOutcomeHeard": "Escuchado",
   "suggestionOutcomeDownloaded": "Descargado",
   "suggestionOutcomeDisliked": "No me gusta",
-  "memorySuggestions": "Sugeridos de Aleatorio+"
+  "memorySuggestions": "Sugeridos de Aleatorio+",
+  "searchModeLibrary": "En la biblioteca",
+  "searchModeOnline": "En línea",
+  "searchOnline": "Buscar «{query}» en línea",
+  "onlineBestResults": "Mejores resultados",
+  "onlineOthersChip": "Otros resultados ({count})",
+  "onlineNoneSure": "Ningún resultado seguro",
+  "onlineArtistSongs": "Canciones de {artist}",
+  "onlineFilterAll": "Todas",
+  "onlineSourceVideo": "Vídeo",
+  "onlineAlsoVideo": "también como vídeo",
+  "onlineListenVideo": "Escuchar el vídeo",
+  "onlineNoticeRateLimited": "{source} pide una pausa: resultados solo de {other}",
+  "onlineNoticeFailed": "{source} no respondió: resultados solo de {other}"
 }
