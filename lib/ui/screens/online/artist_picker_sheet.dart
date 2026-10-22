@@ -37,11 +37,13 @@ Future<YtmArtistRef?> lookupYtmArtist(
   } on Object catch (e) {
     AppLog.w('artist lookup failed ($e)');
     if (!context.mounted) return null;
-    say(e is YtException
-        ? ytErrorText(context, e.kind)
-        : e is InnerTubeChanged
-            ? l.ytmPageUnreadable
-            : l.loadFailed);
+    say(
+      e is YtException
+          ? ytErrorText(context, e.kind)
+          : e is InnerTubeChanged
+          ? l.ytmPageUnreadable
+          : l.loadFailed,
+    );
     return null;
   }
   messenger.clearSnackBars();
@@ -53,6 +55,7 @@ Future<YtmArtistRef?> lookupYtmArtist(
       return showModalBottomSheet<YtmArtistRef>(
         context: context,
         showDragHandle: true,
+        isScrollControlled: true,
         builder: (_) => ArtistPickerSheet(artists: artists),
       );
     case NoArtist():
@@ -83,36 +86,62 @@ class ArtistPickerSheet extends StatelessWidget {
     final l = context.l10n;
     final cc = context.cc;
     return SafeArea(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(CcDims.margin, 0, CcDims.margin, 8),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(l.ytmPickArtist, style: Theme.of(context).textTheme.titleMedium),
-            ),
-          ),
-          for (final a in artists)
-            ListTile(
-              key: ValueKey('pick-${a.id}'),
-              leading: NetThumbnail(
-                url: thumbAt(context, a.thumbnailUrl, 48),
-                width: 48,
-                height: 48,
-                icon: Icons.person_rounded,
-                circle: true,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.sizeOf(context).height * 0.85,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                CcDims.margin,
+                0,
+                CcDims.margin,
+                8,
               ),
-              title: Text(a.name, maxLines: 1, overflow: TextOverflow.ellipsis),
-              subtitle: a.audience == null
-                  ? null
-                  : Text(a.audience!,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(color: cc.textMuted)),
-              onTap: () => Navigator.pop(context, a),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  l.ytmPickArtist,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ),
             ),
-        ],
+            Flexible(
+              child: ListView(
+                shrinkWrap: true,
+                children: [
+                  for (final a in artists)
+                    ListTile(
+                      key: ValueKey('pick-${a.id}'),
+                      leading: NetThumbnail(
+                        url: thumbAt(context, a.thumbnailUrl, 48),
+                        width: 48,
+                        height: 48,
+                        icon: Icons.person_rounded,
+                        circle: true,
+                      ),
+                      title: Text(
+                        a.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      subtitle: a.audience == null
+                          ? null
+                          : Text(
+                              a.audience!,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(color: cc.textMuted),
+                            ),
+                      onTap: () => Navigator.pop(context, a),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

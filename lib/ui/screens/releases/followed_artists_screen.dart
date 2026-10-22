@@ -140,6 +140,7 @@ class _PendingRow extends ConsumerWidget {
     final chosen = await showModalBottomSheet<YtmArtistRef>(
       context: context,
       showDragHandle: true,
+      isScrollControlled: true,
       builder: (_) => ArtistPickerSheet(artists: found.take(5).toList()),
     );
     if (chosen == null) return;

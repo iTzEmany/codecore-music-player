@@ -93,7 +93,7 @@ class RadioStationSheet extends ConsumerWidget {
       station.tags.take(6).join(', '),
     ].where((e) => e.isNotEmpty).toList();
     return SafeArea(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(CcDims.margin, 0, CcDims.margin, 16),
         child: Column(
           mainAxisSize: MainAxisSize.min,
