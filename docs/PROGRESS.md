@@ -440,12 +440,12 @@ Richiesta (2026-10-22): «l'inserimento della sezione radio per permettermi anch
 - [x] 33.4 Elenco del paese, cache e voce in Memoria (cbfbfea)
 - [x] 33.5 Schema v12, «Le mie radio» e backup (cbfbfea)
 - [x] 33.6 La radio nel lettore principale (efa2425)
-- [ ] 33.7 Pagina Radio
-- [ ] 33.8 «In riproduzione», mini-player e notifica per la radio
+- [~] 33.7 Pagina Radio (054af9d; prova sul telefono in «Tocca a te»)
+- [~] 33.8 «In riproduzione», mini-player e notifica per la radio (054af9d; prova sul telefono in «Tocca a te»)
 - [~] 33.9 Home e Android Auto (7e0333d: cartella Radio in Android Auto; riga in Home con l'interfaccia)
 - [~] 33.10 Aggiungere un indirizzo a mano (7e0333d: logica dei link e salvataggio; dialogo con l'interfaccia)
-- [ ] 33.11 (Facoltativo, da approvare) «In onda» anche su desktop
-- [ ] 33.12 Test dal vivo, documentazione e prova a mano
+- [x] 33.11 ~~(Facoltativo, da approvare) «In onda» anche su desktop~~ (FACOLTATIVO, da approvare: non fatto)
+- [~] 33.12 Test dal vivo, documentazione e prova a mano (054af9d: test dal vivo 4/4, documenti; prova sul telefono da fare)
 
 ## Fase 34 — Nuove uscite degli artisti (`fase-34-nuove-uscite.md`)
 Richiesta (2026-10-22): «avere aggiornamenti per quanto riguarda le nuove uscite degli artisti». Scelte concordate: artisti seguiti («Segui» sulla pagina artista della fase 30) più, con l'opzione, i più ascoltati; controllo delle loro pagine YouTube Music (parser della fase 30, maschera delle uscite ≈ 6–12 KB) all'apertura dell'app al più una volta al giorno, in serie con pausa su 429; il primo controllo segna tutto come visto; «Nuove uscite» in Home e notifica Android (nessun pacchetto; WorkManager solo come extra da approvare); schema v13.
