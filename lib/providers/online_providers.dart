@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show ProviderListenable;
 
 import '../services/online/enrichment_service.dart';
 import '../services/online/http_client.dart';
@@ -14,6 +15,7 @@ import '../core/app_log.dart';
 import '../services/online/musicbrainz_client.dart';
 import '../services/online/youtube_service.dart' show YtException, YtErrorKind;
 import '../services/online/quiet_enricher.dart';
+import '../services/share/track_meta.dart';
 import '../services/library/download_tagger.dart';
 import '../services/library/track_file_sync.dart';
 import '../services/tags/tag_writer.dart';
@@ -240,5 +242,25 @@ void afterDownload(Ref ref, int trackId) {
     }
   } on Object catch (e, st) {
     AppLog.w('afterDownload failed for track $trackId', e, st);
+  }
+}
+
+/// A received song is ready. With an ISRC and Deezer metadata on, it joins the
+/// download enricher (whose `onDone` writes the tags); otherwise tags go now.
+/// [read] is `ref.read` of a Ref or a WidgetRef.
+void afterReceive(
+  T Function<T>(ProviderListenable<T>) read,
+  int trackId,
+  TrackMeta? meta,
+) {
+  try {
+    final s = read(settingsProvider);
+    if (meta?.isrc != null && s.deezerMeta && s.autoEnrich) {
+      read(downloadEnricherProvider).add(trackId);
+    } else {
+      unawaited(read(downloadTaggerProvider).tag(trackId));
+    }
+  } on Object catch (e, st) {
+    AppLog.w('afterReceive failed for track $trackId', e, st);
   }
 }
