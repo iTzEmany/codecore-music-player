@@ -12,8 +12,18 @@ import '../covers/cover_store.dart';
 import '../tags/tag_reader.dart';
 
 const audioExtensions = {
-  'mp3', 'flac', 'wav', 'ogg', 'oga', 'opus', 'm4a', 'aac', 'aiff', 'aif',
-  'wma', 'webm',
+  'mp3',
+  'flac',
+  'wav',
+  'ogg',
+  'oga',
+  'opus',
+  'm4a',
+  'aac',
+  'aiff',
+  'aif',
+  'wma',
+  'webm',
 };
 
 class ScanProgress {
@@ -26,7 +36,7 @@ class ScanProgress {
   });
 
   const ScanProgress.failed(String message)
-      : this(finished: true, error: message);
+    : this(finished: true, error: message);
 
   final int done, total;
   final String? currentPath;
@@ -43,8 +53,12 @@ class _Found {
 }
 
 class LibraryScanner {
-  LibraryScanner(this._tags, this._tracks, this._covers,
-      {this.useIsolate = true});
+  LibraryScanner(
+    this._tags,
+    this._tracks,
+    this._covers, {
+    this.useIsolate = true,
+  });
 
   final TagReader _tags;
   final TrackRepository _tracks;
@@ -68,7 +82,9 @@ class LibraryScanner {
         if (!audioExtensions.contains(ext)) continue;
         try {
           final st = await e.stat();
-          found.add(_Found(e.path, st.size, st.modified.millisecondsSinceEpoch));
+          found.add(
+            _Found(e.path, st.size, st.modified.millisecondsSinceEpoch),
+          );
         } on Object catch (err, st) {
           AppLog.w('stat failed: ${e.path}', err, st);
         }
@@ -94,8 +110,11 @@ class LibraryScanner {
     yield* _process(folder, found, markMissing: false);
   }
 
-  Stream<ScanProgress> _process(Folder folder, List<_Found> found,
-      {required bool markMissing}) async* {
+  Stream<ScanProgress> _process(
+    Folder folder,
+    List<_Found> found, {
+    required bool markMissing,
+  }) async* {
     final index = await _tracks.fileIndexForFolder(folder.id);
     final changed = found.where((f) {
       final old = index[f.path];
@@ -124,7 +143,10 @@ class LibraryScanner {
         pending.clear();
       }
       yield ScanProgress(
-          done: done, total: changed.length, currentPath: batch.last.path);
+        done: done,
+        total: changed.length,
+        currentPath: batch.last.path,
+      );
     }
     if (pending.isNotEmpty) await _tracks.upsertBatch(pending);
 
@@ -148,17 +170,23 @@ class LibraryScanner {
       return Future.wait(paths.map((path) => reader.read(path)));
     }
     return Isolate.run(
-        () => Future.wait(paths.map((path) => reader.read(path))));
+      () => Future.wait(paths.map((path) => reader.read(path))),
+    );
   }
 
-  Future<TracksCompanion> _toRow(Folder folder, _Found f, TagInfo t,
-      Map<String, String?> albumCovers) async {
+  Future<TracksCompanion> _toRow(
+    Folder folder,
+    _Found f,
+    TagInfo t,
+    Map<String, String?> albumCovers,
+  ) async {
     final dir = p.dirname(f.path);
     final albumKey = computeAlbumKey(
-        albumArtist: t.albumArtist,
-        artist: t.artist,
-        album: t.album,
-        directory: dir);
+      albumArtist: t.albumArtist,
+      artist: t.artist,
+      album: t.album,
+      directory: dir,
+    );
     String? coverKey;
     if (albumCovers.containsKey(albumKey)) {
       coverKey = albumCovers[albumKey];
@@ -194,6 +222,7 @@ class LibraryScanner {
       hasCover: Value(coverKey != null),
       coverKey: Value(coverKey),
       replayGainDb: Value(t.replayGainDb),
+      isrc: Value(t.isrc),
     );
   }
 
@@ -209,7 +238,12 @@ class LibraryScanner {
     if (folderCover == null) return null;
     final data = await File(folderCover).readAsBytes();
     return _covers.saveFromBytes(
-        albumKey, data, p.extension(folderCover).toLowerCase() == '.png' ? 'image/png' : 'image/jpeg');
+      albumKey,
+      data,
+      p.extension(folderCover).toLowerCase() == '.png'
+          ? 'image/png'
+          : 'image/jpeg',
+    );
   }
 
   bool _isHidden(String path, String root) {

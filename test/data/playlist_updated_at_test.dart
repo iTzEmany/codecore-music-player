@@ -19,6 +19,7 @@ void main() {
         raw.execute("INSERT INTO playlists (name, created_at, cover_key) VALUES ('Rock', 111, 'c1')");
         raw.execute("INSERT INTO playlists (name, created_at, cover_key) VALUES ('Jazz', 222, NULL)");
         raw.execute("INSERT INTO playlists (name, created_at) VALUES ('Mix', 333)");
+        raw.execute("CREATE TABLE tracks (id INTEGER PRIMARY KEY AUTOINCREMENT, path TEXT NOT NULL)");
         raw.userVersion = 9;
       }));
       addTearDown(db.close);

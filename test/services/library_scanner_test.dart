@@ -48,8 +48,12 @@ void main() {
           coverMime: 'image/jpeg',
         ),
     });
-    scanner = LibraryScanner(reader, tracks, CoverStore(covers),
-        useIsolate: false);
+    scanner = LibraryScanner(
+      reader,
+      tracks,
+      CoverStore(covers),
+      useIsolate: false,
+    );
   });
   tearDown(() async {
     await db.close();
@@ -65,28 +69,33 @@ void main() {
     return d;
   }
 
-  test('first scan inserts, second does not re-read, delete -> missing',
-      () async {
-    final d = music();
-    final folder = await folders.add(d.path);
-    await scanner.scan(folder).drain<void>();
-    expect(await tracks.countAll(), 3);
-    expect(reader.calls, 3);
+  test(
+    'first scan inserts, second does not re-read, delete -> missing',
+    () async {
+      final d = music();
+      final folder = await folders.add(d.path);
+      await scanner.scan(folder).drain<void>();
+      expect(await tracks.countAll(), 3);
+      expect(reader.calls, 3);
 
-    reader.calls = 0;
-    await scanner.scan(folder).drain<void>();
-    expect(reader.calls, 0);
+      reader.calls = 0;
+      await scanner.scan(folder).drain<void>();
+      expect(reader.calls, 0);
 
-    File(p.join(d.path, 'b.mp3')).deleteSync();
-    await scanner.scan(folder).drain<void>();
-    final all = await db.select(db.tracks).get();
-    expect(all.firstWhere((t) => t.title == 'b.mp3').missing, true);
-    expect(all.where((t) => t.missing).length, 1);
+      File(p.join(d.path, 'b.mp3')).deleteSync();
+      await scanner.scan(folder).drain<void>();
+      final all = await db.select(db.tracks).get();
+      expect(all.firstWhere((t) => t.title == 'b.mp3').missing, true);
+      expect(all.where((t) => t.missing).length, 1);
 
-    File(p.join(d.path, 'b.mp3')).writeAsBytesSync([0, 1]);
-    await scanner.scan(folder).drain<void>();
-    expect((await db.select(db.tracks).get()).where((t) => t.missing), isEmpty);
-  });
+      File(p.join(d.path, 'b.mp3')).writeAsBytesSync([0, 1]);
+      await scanner.scan(folder).drain<void>();
+      expect(
+        (await db.select(db.tracks).get()).where((t) => t.missing),
+        isEmpty,
+      );
+    },
+  );
 
   test('missing root does not mark anything', () async {
     final d = music();
@@ -102,7 +111,11 @@ void main() {
     final d = music();
     final other = Directory(p.join(tmp.path, 'other'))..createSync();
     File(p.join(other.path, 'x.mp3')).writeAsBytesSync([0]);
-    reader.byName['x.mp3'] = const TagInfo(title: 'x', album: 'Solo', artist: 'Z');
+    reader.byName['x.mp3'] = const TagInfo(
+      title: 'x',
+      album: 'Solo',
+      artist: 'Z',
+    );
     final f1 = await folders.add(d.path);
     final f2 = await folders.add(other.path);
     await scanner.scan(f1).drain<void>();
@@ -113,26 +126,56 @@ void main() {
     expect(rows.firstWhere((t) => t.title == 'x').hasCover, false);
   });
 
-  test('a replaced file (new size) is re-read and its duration updated',
-      () async {
+  test(
+    'a replaced file (new size) is re-read and its duration updated',
+    () async {
+      final d = music();
+      final folder = await folders.add(d.path);
+      await scanner.scan(folder).drain<void>();
+      final before = await (db.select(
+        db.tracks,
+      )..where((t) => t.title.equals('a.mp3'))).getSingle();
+      expect(before.durationMs, 1000);
+
+      reader.byName['a.mp3'] = const TagInfo(
+        title: 'a.mp3',
+        artist: 'Art',
+        album: 'Alb',
+        durationMs: 355000,
+      );
+      File(p.join(d.path, 'a.mp3')).writeAsBytesSync(List.filled(500, 1));
+      reader.calls = 0;
+      await scanner.scan(folder).drain<void>();
+      expect(reader.calls, 1);
+      final after = await (db.select(
+        db.tracks,
+      )..where((t) => t.title.equals('a.mp3'))).getSingle();
+      expect(after.durationMs, 355000);
+      expect(after.sizeBytes, 500);
+    },
+  );
+
+  test('scan writes the ISRC of the tag when the track has none', () async {
     final d = music();
+    reader.byName['a.mp3'] = const TagInfo(title: 'a', isrc: 'ITA123');
     final folder = await folders.add(d.path);
     await scanner.scan(folder).drain<void>();
-    final before = await (db.select(db.tracks)
-          ..where((t) => t.title.equals('a.mp3')))
-        .getSingle();
-    expect(before.durationMs, 1000);
+    final all = await db.select(db.tracks).get();
+    expect(all.firstWhere((t) => t.title == 'a').isrc, 'ITA123');
+    expect(all.firstWhere((t) => t.title == 'b.mp3').isrc, isNull);
+  });
 
-    reader.byName['a.mp3'] = const TagInfo(
-        title: 'a.mp3', artist: 'Art', album: 'Alb', durationMs: 355000);
-    File(p.join(d.path, 'a.mp3')).writeAsBytesSync(List.filled(500, 1));
-    reader.calls = 0;
+  test('a rescan never overwrites an ISRC already on the track', () async {
+    final d = music();
+    reader.byName['a.mp3'] = const TagInfo(title: 'a', isrc: 'FIRST');
+    final folder = await folders.add(d.path);
     await scanner.scan(folder).drain<void>();
-    expect(reader.calls, 1);
-    final after = await (db.select(db.tracks)
-          ..where((t) => t.title.equals('a.mp3')))
-        .getSingle();
-    expect(after.durationMs, 355000);
-    expect(after.sizeBytes, 500);
+    reader.byName['a.mp3'] = const TagInfo(title: 'a', isrc: 'OTHER');
+    File(p.join(d.path, 'a.mp3')).writeAsBytesSync([0, 1, 2]);
+    await scanner.scan(folder).drain<void>();
+    expect(
+      (await db.select(db.tracks).get()).firstWhere((t) => t.title == 'a').isrc,
+      'FIRST',
+    );
   });
 }

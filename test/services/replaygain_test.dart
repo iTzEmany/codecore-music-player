@@ -18,4 +18,10 @@ void main() {
     expect(CodecoreAudioHandler.gainFactor(-6.0), closeTo(0.501, 0.01));
     expect(CodecoreAudioHandler.gainFactor(-20.0), closeTo(0.1, 0.001));
   });
+
+  test('normalizeIsrc uppercases and strips dashes and spaces', () {
+    expect(normalizeIsrc(' it-abc 12-34567 '), 'ITABC1234567');
+    expect(normalizeIsrc(' - '), isNull);
+    expect(normalizeIsrc(null), isNull);
+  });
 }

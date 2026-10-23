@@ -113,7 +113,7 @@ Impostazioni nuove in `SettingsStore` (fuori da `AppSettings`, quindi non nel ba
 | Tabella | Colonne | Note |
 |---|---|---|
 | `playlist_imports` | `id`, `playlist_id` → playlists (cascade), `source_name`, `created_at`, `status` | `status`: 0 in corso · 1 in pausa · 2 finita · 3 annullata |
-| `playlist_import_items` | PK (`import_id` cascade, `row_index`), `title`, `artists` (separati da `;`), `album?`, `duration_ms?`, `isrc?`, `status`, `video_id?`, `candidates?` (JSON), `track_id?` → tracks (set null), `score?` | `status`: 0 da cercare · 1 in coda · 2 scaricato · 3 collegato · 4 da verificare · 5 non trovato · 6 errore · 7 saltato |
+| `playlist_import_items` | PK (`import_id` cascade, `row_index`), `title`, `artists` (separati da `;`), `album?`, `duration_ms?`, `isrc?`, `year?` (v14), `status`, `video_id?`, `candidates?` (JSON), `track_id?` → tracks (set null), `score?` | `status`: 0 da cercare · 1 in coda · 2 scaricato · 3 collegato · 4 da verificare · 5 non trovato · 6 errore · 7 saltato |
 **Schema v5 (fase 15):** `playlist_imports` + `source_kind` (`exportify`|`tunemymusic`|`soundiiz`|`lastfm`|`csv`|`m3u`|`xspf`, default `exportify`), `folder_path?`, `number_files`, `link_only`, `plan_first`, `fetch_covers` (bool, default false); `playlist_import_items` + `note?`, `location?`; stati riga nuovi **8 pianificato** · **9 rimosso dalla sorgente**.
 Allo avvio le importazioni «in corso» diventano «in pausa» e le righe «in coda» tornano «da cercare»:
 niente rete senza un'azione dell'utente. Cancellare la playlist cancella l'importazione.
@@ -190,3 +190,11 @@ File scomparsi: `missing = true` **solo se la cartella radice è raggiungibile**
 | `crossfadePlainInAlbum` | bool | true | tra brani dello stesso album niente dissolvenza |
 
 Le vecchie impostazioni finte (crossfade, gapless, normalizzazione, "bit-perfect WASAPI", autoplay) **non** vengono portate.
+
+## ISRC in libreria (schema v14, fase 36)
+- `tracks.isrc` (testo, nullable, indice `tracks_isrc`) e `playlist_import_items.year` (intero, nullable).
+- Migrazione v13 → v14: aggiunge colonne e indice, poi copia in `tracks.isrc` l'ISRC dell'ultima riga d'importazione
+  collegata al brano (per `playlist_imports.created_at`), solo dove il brano non ne ha uno.
+- Scritture: la scansione (tag TSRC mp3, commento ISRC flac/ogg; m4a non letto) e il collegamento di una riga
+  d'importazione (`ImportRepository.setItem` con `trackId`) scrivono l'ISRC solo se quello del brano è vuoto: mai sovrascritto.
+- I file già in libreria ricevono l'ISRC dai tag solo quando lo scanner li rilegge (dimensione/mtime cambiati): nessuna riscansione forzata, per evitare una rilettura completa sui telefoni; l'arricchimento Deezer ripiega sulla ricerca testuale.

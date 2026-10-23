@@ -424,6 +424,15 @@ class $TracksTable extends Tracks with TableInfo<$TracksTable, Track> {
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _isrcMeta = const VerificationMeta('isrc');
+  @override
+  late final GeneratedColumn<String> isrc = GeneratedColumn<String>(
+    'isrc',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -463,6 +472,7 @@ class $TracksTable extends Tracks with TableInfo<$TracksTable, Track> {
     replayGainDb,
     resumePositionMs,
     lastPlayedAt,
+    isrc,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -742,6 +752,12 @@ class $TracksTable extends Tracks with TableInfo<$TracksTable, Track> {
         ),
       );
     }
+    if (data.containsKey('isrc')) {
+      context.handle(
+        _isrcMeta,
+        isrc.isAcceptableOrUnknown(data['isrc']!, _isrcMeta),
+      );
+    }
     return context;
   }
 
@@ -899,6 +915,10 @@ class $TracksTable extends Tracks with TableInfo<$TracksTable, Track> {
         DriftSqlType.int,
         data['${effectivePrefix}last_played_at'],
       ),
+      isrc: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}isrc'],
+      ),
     );
   }
 
@@ -954,6 +974,9 @@ class Track extends DataClass implements Insertable<Track> {
   /// «Riprendi da qui»: where a long track (≥ 20 min) was left; null = none.
   final int? resumePositionMs;
   final int? lastPlayedAt;
+
+  /// International Standard Recording Code; never overwritten once set.
+  final String? isrc;
   const Track({
     required this.id,
     required this.path,
@@ -992,6 +1015,7 @@ class Track extends DataClass implements Insertable<Track> {
     this.replayGainDb,
     this.resumePositionMs,
     this.lastPlayedAt,
+    this.isrc,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1073,6 +1097,9 @@ class Track extends DataClass implements Insertable<Track> {
     if (!nullToAbsent || lastPlayedAt != null) {
       map['last_played_at'] = Variable<int>(lastPlayedAt);
     }
+    if (!nullToAbsent || isrc != null) {
+      map['isrc'] = Variable<String>(isrc);
+    }
     return map;
   }
 
@@ -1153,6 +1180,7 @@ class Track extends DataClass implements Insertable<Track> {
       lastPlayedAt: lastPlayedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(lastPlayedAt),
+      isrc: isrc == null && nullToAbsent ? const Value.absent() : Value(isrc),
     );
   }
 
@@ -1199,6 +1227,7 @@ class Track extends DataClass implements Insertable<Track> {
       replayGainDb: serializer.fromJson<double?>(json['replayGainDb']),
       resumePositionMs: serializer.fromJson<int?>(json['resumePositionMs']),
       lastPlayedAt: serializer.fromJson<int?>(json['lastPlayedAt']),
+      isrc: serializer.fromJson<String?>(json['isrc']),
     );
   }
   @override
@@ -1242,6 +1271,7 @@ class Track extends DataClass implements Insertable<Track> {
       'replayGainDb': serializer.toJson<double?>(replayGainDb),
       'resumePositionMs': serializer.toJson<int?>(resumePositionMs),
       'lastPlayedAt': serializer.toJson<int?>(lastPlayedAt),
+      'isrc': serializer.toJson<String?>(isrc),
     };
   }
 
@@ -1283,6 +1313,7 @@ class Track extends DataClass implements Insertable<Track> {
     Value<double?> replayGainDb = const Value.absent(),
     Value<int?> resumePositionMs = const Value.absent(),
     Value<int?> lastPlayedAt = const Value.absent(),
+    Value<String?> isrc = const Value.absent(),
   }) => Track(
     id: id ?? this.id,
     path: path ?? this.path,
@@ -1323,6 +1354,7 @@ class Track extends DataClass implements Insertable<Track> {
         ? resumePositionMs.value
         : this.resumePositionMs,
     lastPlayedAt: lastPlayedAt.present ? lastPlayedAt.value : this.lastPlayedAt,
+    isrc: isrc.present ? isrc.value : this.isrc,
   );
   Track copyWithCompanion(TracksCompanion data) {
     return Track(
@@ -1393,6 +1425,7 @@ class Track extends DataClass implements Insertable<Track> {
       lastPlayedAt: data.lastPlayedAt.present
           ? data.lastPlayedAt.value
           : this.lastPlayedAt,
+      isrc: data.isrc.present ? data.isrc.value : this.isrc,
     );
   }
 
@@ -1435,7 +1468,8 @@ class Track extends DataClass implements Insertable<Track> {
           ..write('playCount: $playCount, ')
           ..write('replayGainDb: $replayGainDb, ')
           ..write('resumePositionMs: $resumePositionMs, ')
-          ..write('lastPlayedAt: $lastPlayedAt')
+          ..write('lastPlayedAt: $lastPlayedAt, ')
+          ..write('isrc: $isrc')
           ..write(')'))
         .toString();
   }
@@ -1479,6 +1513,7 @@ class Track extends DataClass implements Insertable<Track> {
     replayGainDb,
     resumePositionMs,
     lastPlayedAt,
+    isrc,
   ]);
   @override
   bool operator ==(Object other) =>
@@ -1520,7 +1555,8 @@ class Track extends DataClass implements Insertable<Track> {
           other.playCount == this.playCount &&
           other.replayGainDb == this.replayGainDb &&
           other.resumePositionMs == this.resumePositionMs &&
-          other.lastPlayedAt == this.lastPlayedAt);
+          other.lastPlayedAt == this.lastPlayedAt &&
+          other.isrc == this.isrc);
 }
 
 class TracksCompanion extends UpdateCompanion<Track> {
@@ -1561,6 +1597,7 @@ class TracksCompanion extends UpdateCompanion<Track> {
   final Value<double?> replayGainDb;
   final Value<int?> resumePositionMs;
   final Value<int?> lastPlayedAt;
+  final Value<String?> isrc;
   const TracksCompanion({
     this.id = const Value.absent(),
     this.path = const Value.absent(),
@@ -1599,6 +1636,7 @@ class TracksCompanion extends UpdateCompanion<Track> {
     this.replayGainDb = const Value.absent(),
     this.resumePositionMs = const Value.absent(),
     this.lastPlayedAt = const Value.absent(),
+    this.isrc = const Value.absent(),
   });
   TracksCompanion.insert({
     this.id = const Value.absent(),
@@ -1638,6 +1676,7 @@ class TracksCompanion extends UpdateCompanion<Track> {
     this.replayGainDb = const Value.absent(),
     this.resumePositionMs = const Value.absent(),
     this.lastPlayedAt = const Value.absent(),
+    this.isrc = const Value.absent(),
   }) : path = Value(path),
        title = Value(title),
        albumKey = Value(albumKey),
@@ -1683,6 +1722,7 @@ class TracksCompanion extends UpdateCompanion<Track> {
     Expression<double>? replayGainDb,
     Expression<int>? resumePositionMs,
     Expression<int>? lastPlayedAt,
+    Expression<String>? isrc,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1722,6 +1762,7 @@ class TracksCompanion extends UpdateCompanion<Track> {
       if (replayGainDb != null) 'replay_gain_db': replayGainDb,
       if (resumePositionMs != null) 'resume_position_ms': resumePositionMs,
       if (lastPlayedAt != null) 'last_played_at': lastPlayedAt,
+      if (isrc != null) 'isrc': isrc,
     });
   }
 
@@ -1763,6 +1804,7 @@ class TracksCompanion extends UpdateCompanion<Track> {
     Value<double?>? replayGainDb,
     Value<int?>? resumePositionMs,
     Value<int?>? lastPlayedAt,
+    Value<String?>? isrc,
   }) {
     return TracksCompanion(
       id: id ?? this.id,
@@ -1802,6 +1844,7 @@ class TracksCompanion extends UpdateCompanion<Track> {
       replayGainDb: replayGainDb ?? this.replayGainDb,
       resumePositionMs: resumePositionMs ?? this.resumePositionMs,
       lastPlayedAt: lastPlayedAt ?? this.lastPlayedAt,
+      isrc: isrc ?? this.isrc,
     );
   }
 
@@ -1919,6 +1962,9 @@ class TracksCompanion extends UpdateCompanion<Track> {
     if (lastPlayedAt.present) {
       map['last_played_at'] = Variable<int>(lastPlayedAt.value);
     }
+    if (isrc.present) {
+      map['isrc'] = Variable<String>(isrc.value);
+    }
     return map;
   }
 
@@ -1961,7 +2007,8 @@ class TracksCompanion extends UpdateCompanion<Track> {
           ..write('playCount: $playCount, ')
           ..write('replayGainDb: $replayGainDb, ')
           ..write('resumePositionMs: $resumePositionMs, ')
-          ..write('lastPlayedAt: $lastPlayedAt')
+          ..write('lastPlayedAt: $lastPlayedAt, ')
+          ..write('isrc: $isrc')
           ..write(')'))
         .toString();
   }
@@ -3704,6 +3751,15 @@ class $PlaylistImportItemsTable extends PlaylistImportItems
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _yearMeta = const VerificationMeta('year');
+  @override
+  late final GeneratedColumn<int> year = GeneratedColumn<int>(
+    'year',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _statusMeta = const VerificationMeta('status');
   @override
   late final GeneratedColumn<int> status = GeneratedColumn<int>(
@@ -3788,6 +3844,7 @@ class $PlaylistImportItemsTable extends PlaylistImportItems
     album,
     durationMs,
     isrc,
+    year,
     status,
     videoId,
     candidates,
@@ -3856,6 +3913,12 @@ class $PlaylistImportItemsTable extends PlaylistImportItems
       context.handle(
         _isrcMeta,
         isrc.isAcceptableOrUnknown(data['isrc']!, _isrcMeta),
+      );
+    }
+    if (data.containsKey('year')) {
+      context.handle(
+        _yearMeta,
+        year.isAcceptableOrUnknown(data['year']!, _yearMeta),
       );
     }
     if (data.containsKey('status')) {
@@ -3937,6 +4000,10 @@ class $PlaylistImportItemsTable extends PlaylistImportItems
         DriftSqlType.string,
         data['${effectivePrefix}isrc'],
       ),
+      year: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}year'],
+      ),
       status: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}status'],
@@ -3985,6 +4052,7 @@ class PlaylistImportItem extends DataClass
   final String? album;
   final int? durationMs;
   final String? isrc;
+  final int? year;
 
   /// 0 to search · 1 queued · 2 downloaded · 3 linked (already in library)
   /// · 4 to review · 5 not found · 6 failed · 7 skipped by the user
@@ -4010,6 +4078,7 @@ class PlaylistImportItem extends DataClass
     this.album,
     this.durationMs,
     this.isrc,
+    this.year,
     required this.status,
     this.videoId,
     this.candidates,
@@ -4033,6 +4102,9 @@ class PlaylistImportItem extends DataClass
     }
     if (!nullToAbsent || isrc != null) {
       map['isrc'] = Variable<String>(isrc);
+    }
+    if (!nullToAbsent || year != null) {
+      map['year'] = Variable<int>(year);
     }
     map['status'] = Variable<int>(status);
     if (!nullToAbsent || videoId != null) {
@@ -4069,6 +4141,7 @@ class PlaylistImportItem extends DataClass
           ? const Value.absent()
           : Value(durationMs),
       isrc: isrc == null && nullToAbsent ? const Value.absent() : Value(isrc),
+      year: year == null && nullToAbsent ? const Value.absent() : Value(year),
       status: Value(status),
       videoId: videoId == null && nullToAbsent
           ? const Value.absent()
@@ -4102,6 +4175,7 @@ class PlaylistImportItem extends DataClass
       album: serializer.fromJson<String?>(json['album']),
       durationMs: serializer.fromJson<int?>(json['durationMs']),
       isrc: serializer.fromJson<String?>(json['isrc']),
+      year: serializer.fromJson<int?>(json['year']),
       status: serializer.fromJson<int>(json['status']),
       videoId: serializer.fromJson<String?>(json['videoId']),
       candidates: serializer.fromJson<String?>(json['candidates']),
@@ -4122,6 +4196,7 @@ class PlaylistImportItem extends DataClass
       'album': serializer.toJson<String?>(album),
       'durationMs': serializer.toJson<int?>(durationMs),
       'isrc': serializer.toJson<String?>(isrc),
+      'year': serializer.toJson<int?>(year),
       'status': serializer.toJson<int>(status),
       'videoId': serializer.toJson<String?>(videoId),
       'candidates': serializer.toJson<String?>(candidates),
@@ -4140,6 +4215,7 @@ class PlaylistImportItem extends DataClass
     Value<String?> album = const Value.absent(),
     Value<int?> durationMs = const Value.absent(),
     Value<String?> isrc = const Value.absent(),
+    Value<int?> year = const Value.absent(),
     int? status,
     Value<String?> videoId = const Value.absent(),
     Value<String?> candidates = const Value.absent(),
@@ -4155,6 +4231,7 @@ class PlaylistImportItem extends DataClass
     album: album.present ? album.value : this.album,
     durationMs: durationMs.present ? durationMs.value : this.durationMs,
     isrc: isrc.present ? isrc.value : this.isrc,
+    year: year.present ? year.value : this.year,
     status: status ?? this.status,
     videoId: videoId.present ? videoId.value : this.videoId,
     candidates: candidates.present ? candidates.value : this.candidates,
@@ -4174,6 +4251,7 @@ class PlaylistImportItem extends DataClass
           ? data.durationMs.value
           : this.durationMs,
       isrc: data.isrc.present ? data.isrc.value : this.isrc,
+      year: data.year.present ? data.year.value : this.year,
       status: data.status.present ? data.status.value : this.status,
       videoId: data.videoId.present ? data.videoId.value : this.videoId,
       candidates: data.candidates.present
@@ -4196,6 +4274,7 @@ class PlaylistImportItem extends DataClass
           ..write('album: $album, ')
           ..write('durationMs: $durationMs, ')
           ..write('isrc: $isrc, ')
+          ..write('year: $year, ')
           ..write('status: $status, ')
           ..write('videoId: $videoId, ')
           ..write('candidates: $candidates, ')
@@ -4216,6 +4295,7 @@ class PlaylistImportItem extends DataClass
     album,
     durationMs,
     isrc,
+    year,
     status,
     videoId,
     candidates,
@@ -4235,6 +4315,7 @@ class PlaylistImportItem extends DataClass
           other.album == this.album &&
           other.durationMs == this.durationMs &&
           other.isrc == this.isrc &&
+          other.year == this.year &&
           other.status == this.status &&
           other.videoId == this.videoId &&
           other.candidates == this.candidates &&
@@ -4252,6 +4333,7 @@ class PlaylistImportItemsCompanion extends UpdateCompanion<PlaylistImportItem> {
   final Value<String?> album;
   final Value<int?> durationMs;
   final Value<String?> isrc;
+  final Value<int?> year;
   final Value<int> status;
   final Value<String?> videoId;
   final Value<String?> candidates;
@@ -4268,6 +4350,7 @@ class PlaylistImportItemsCompanion extends UpdateCompanion<PlaylistImportItem> {
     this.album = const Value.absent(),
     this.durationMs = const Value.absent(),
     this.isrc = const Value.absent(),
+    this.year = const Value.absent(),
     this.status = const Value.absent(),
     this.videoId = const Value.absent(),
     this.candidates = const Value.absent(),
@@ -4285,6 +4368,7 @@ class PlaylistImportItemsCompanion extends UpdateCompanion<PlaylistImportItem> {
     this.album = const Value.absent(),
     this.durationMs = const Value.absent(),
     this.isrc = const Value.absent(),
+    this.year = const Value.absent(),
     this.status = const Value.absent(),
     this.videoId = const Value.absent(),
     this.candidates = const Value.absent(),
@@ -4305,6 +4389,7 @@ class PlaylistImportItemsCompanion extends UpdateCompanion<PlaylistImportItem> {
     Expression<String>? album,
     Expression<int>? durationMs,
     Expression<String>? isrc,
+    Expression<int>? year,
     Expression<int>? status,
     Expression<String>? videoId,
     Expression<String>? candidates,
@@ -4322,6 +4407,7 @@ class PlaylistImportItemsCompanion extends UpdateCompanion<PlaylistImportItem> {
       if (album != null) 'album': album,
       if (durationMs != null) 'duration_ms': durationMs,
       if (isrc != null) 'isrc': isrc,
+      if (year != null) 'year': year,
       if (status != null) 'status': status,
       if (videoId != null) 'video_id': videoId,
       if (candidates != null) 'candidates': candidates,
@@ -4341,6 +4427,7 @@ class PlaylistImportItemsCompanion extends UpdateCompanion<PlaylistImportItem> {
     Value<String?>? album,
     Value<int?>? durationMs,
     Value<String?>? isrc,
+    Value<int?>? year,
     Value<int>? status,
     Value<String?>? videoId,
     Value<String?>? candidates,
@@ -4358,6 +4445,7 @@ class PlaylistImportItemsCompanion extends UpdateCompanion<PlaylistImportItem> {
       album: album ?? this.album,
       durationMs: durationMs ?? this.durationMs,
       isrc: isrc ?? this.isrc,
+      year: year ?? this.year,
       status: status ?? this.status,
       videoId: videoId ?? this.videoId,
       candidates: candidates ?? this.candidates,
@@ -4392,6 +4480,9 @@ class PlaylistImportItemsCompanion extends UpdateCompanion<PlaylistImportItem> {
     }
     if (isrc.present) {
       map['isrc'] = Variable<String>(isrc.value);
+    }
+    if (year.present) {
+      map['year'] = Variable<int>(year.value);
     }
     if (status.present) {
       map['status'] = Variable<int>(status.value);
@@ -4430,6 +4521,7 @@ class PlaylistImportItemsCompanion extends UpdateCompanion<PlaylistImportItem> {
           ..write('album: $album, ')
           ..write('durationMs: $durationMs, ')
           ..write('isrc: $isrc, ')
+          ..write('year: $year, ')
           ..write('status: $status, ')
           ..write('videoId: $videoId, ')
           ..write('candidates: $candidates, ')
@@ -10124,6 +10216,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     'tracks_favorite',
     'CREATE INDEX tracks_favorite ON tracks (is_favorite)',
   );
+  late final Index tracksIsrc = Index(
+    'tracks_isrc',
+    'CREATE INDEX tracks_isrc ON tracks (isrc)',
+  );
   late final Index tracksKind = Index(
     'tracks_kind',
     'CREATE INDEX tracks_kind ON tracks (kind)',
@@ -10181,6 +10277,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     tracksAlbumKey,
     tracksArtist,
     tracksFavorite,
+    tracksIsrc,
     tracksKind,
     tracksMissing,
     tracksTitle,
@@ -10310,6 +10407,7 @@ typedef $$TracksTableCreateCompanionBuilder = TracksCompanion Function({
   Value<double?> replayGainDb,
   Value<int?> resumePositionMs,
   Value<int?> lastPlayedAt,
+  Value<String?> isrc,
 });
 typedef $$TracksTableUpdateCompanionBuilder = TracksCompanion Function({
   Value<int> id,
@@ -10349,6 +10447,7 @@ typedef $$TracksTableUpdateCompanionBuilder = TracksCompanion Function({
   Value<double?> replayGainDb,
   Value<int?> resumePositionMs,
   Value<int?> lastPlayedAt,
+  Value<String?> isrc,
 });
 
 final class $$TracksTableReferences
@@ -10646,6 +10745,11 @@ class $$TracksTableFilterComposer
 
   ColumnFilters<int> get lastPlayedAt => $composableBuilder(
     column: $table.lastPlayedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get isrc => $composableBuilder(
+    column: $table.isrc,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -10968,6 +11072,11 @@ class $$TracksTableOrderingComposer
     column: $table.lastPlayedAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get isrc => $composableBuilder(
+    column: $table.isrc,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$TracksTableAnnotationComposer
@@ -11119,6 +11228,9 @@ class $$TracksTableAnnotationComposer
     column: $table.lastPlayedAt,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get isrc =>
+      $composableBuilder(column: $table.isrc, builder: (column) => column);
 
   Expression<T> playlistTracksRefs<T extends Object>(
     Expression<T> Function($$PlaylistTracksTableAnnotationComposer a) f,
@@ -11318,6 +11430,7 @@ class $$TracksTableTableManager
                 Value<double?> replayGainDb = const Value.absent(),
                 Value<int?> resumePositionMs = const Value.absent(),
                 Value<int?> lastPlayedAt = const Value.absent(),
+                Value<String?> isrc = const Value.absent(),
               }) => TracksCompanion(
                 id: id,
                 path: path,
@@ -11356,6 +11469,7 @@ class $$TracksTableTableManager
                 replayGainDb: replayGainDb,
                 resumePositionMs: resumePositionMs,
                 lastPlayedAt: lastPlayedAt,
+                isrc: isrc,
               ),
           createCompanionCallback:
               ({
@@ -11396,6 +11510,7 @@ class $$TracksTableTableManager
                 Value<double?> replayGainDb = const Value.absent(),
                 Value<int?> resumePositionMs = const Value.absent(),
                 Value<int?> lastPlayedAt = const Value.absent(),
+                Value<String?> isrc = const Value.absent(),
               }) => TracksCompanion.insert(
                 id: id,
                 path: path,
@@ -11434,6 +11549,7 @@ class $$TracksTableTableManager
                 replayGainDb: replayGainDb,
                 resumePositionMs: resumePositionMs,
                 lastPlayedAt: lastPlayedAt,
+                isrc: isrc,
               ),
           withReferenceMapper: (p0) => p0
               .map(
@@ -13098,6 +13214,7 @@ typedef $$PlaylistImportItemsTableCreateCompanionBuilder =
       Value<String?> album,
       Value<int?> durationMs,
       Value<String?> isrc,
+      Value<int?> year,
       Value<int> status,
       Value<String?> videoId,
       Value<String?> candidates,
@@ -13116,6 +13233,7 @@ typedef $$PlaylistImportItemsTableUpdateCompanionBuilder =
       Value<String?> album,
       Value<int?> durationMs,
       Value<String?> isrc,
+      Value<int?> year,
       Value<int> status,
       Value<String?> videoId,
       Value<String?> candidates,
@@ -13211,6 +13329,11 @@ class $$PlaylistImportItemsTableFilterComposer
 
   ColumnFilters<String> get isrc => $composableBuilder(
     column: $table.isrc,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get year => $composableBuilder(
+    column: $table.year,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -13330,6 +13453,11 @@ class $$PlaylistImportItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get year => $composableBuilder(
+    column: $table.year,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get status => $composableBuilder(
     column: $table.status,
     builder: (column) => ColumnOrderings(column),
@@ -13435,6 +13563,9 @@ class $$PlaylistImportItemsTableAnnotationComposer
 
   GeneratedColumn<String> get isrc =>
       $composableBuilder(column: $table.isrc, builder: (column) => column);
+
+  GeneratedColumn<int> get year =>
+      $composableBuilder(column: $table.year, builder: (column) => column);
 
   GeneratedColumn<int> get status =>
       $composableBuilder(column: $table.status, builder: (column) => column);
@@ -13546,6 +13677,7 @@ class $$PlaylistImportItemsTableTableManager
                 Value<String?> album = const Value.absent(),
                 Value<int?> durationMs = const Value.absent(),
                 Value<String?> isrc = const Value.absent(),
+                Value<int?> year = const Value.absent(),
                 Value<int> status = const Value.absent(),
                 Value<String?> videoId = const Value.absent(),
                 Value<String?> candidates = const Value.absent(),
@@ -13562,6 +13694,7 @@ class $$PlaylistImportItemsTableTableManager
                 album: album,
                 durationMs: durationMs,
                 isrc: isrc,
+                year: year,
                 status: status,
                 videoId: videoId,
                 candidates: candidates,
@@ -13580,6 +13713,7 @@ class $$PlaylistImportItemsTableTableManager
                 Value<String?> album = const Value.absent(),
                 Value<int?> durationMs = const Value.absent(),
                 Value<String?> isrc = const Value.absent(),
+                Value<int?> year = const Value.absent(),
                 Value<int> status = const Value.absent(),
                 Value<String?> videoId = const Value.absent(),
                 Value<String?> candidates = const Value.absent(),
@@ -13596,6 +13730,7 @@ class $$PlaylistImportItemsTableTableManager
                 album: album,
                 durationMs: durationMs,
                 isrc: isrc,
+                year: year,
                 status: status,
                 videoId: videoId,
                 candidates: candidates,

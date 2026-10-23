@@ -6,6 +6,7 @@ import '../../core/uuid.dart';
 @TableIndex(name: 'tracks_album_key', columns: {#albumKey})
 @TableIndex(name: 'tracks_artist', columns: {#artist})
 @TableIndex(name: 'tracks_favorite', columns: {#isFavorite})
+@TableIndex(name: 'tracks_isrc', columns: {#isrc})
 @TableIndex(name: 'tracks_kind', columns: {#kind})
 @TableIndex(name: 'tracks_missing', columns: {#missing})
 @TableIndex(name: 'tracks_title', columns: {#title})
@@ -55,6 +56,9 @@ class Tracks extends Table {
   /// «Riprendi da qui»: where a long track (≥ 20 min) was left; null = none.
   IntColumn get resumePositionMs => integer().nullable()();
   IntColumn get lastPlayedAt => integer().nullable()();
+
+  /// International Standard Recording Code; never overwritten once set.
+  TextColumn get isrc => text().nullable()();
 }
 
 class Folders extends Table {
@@ -77,7 +81,8 @@ class Playlists extends Table {
 
   /// Epoch ms of the last change to its name, cover, tracks or order: «last
   /// change wins» when playlists are synced.
-  IntColumn get updatedAt => integer().withDefault(const Constant(0)).clientDefault(nowMs)();
+  IntColumn get updatedAt =>
+      integer().withDefault(const Constant(0)).clientDefault(nowMs)();
 
   /// File name inside the covers folder; null = use the first track's cover.
   TextColumn get coverKey => text().nullable()();
@@ -108,7 +113,8 @@ class PlaylistImports extends Table {
 
   /// Where the rows came from: `exportify` · `tunemymusic` · `soundiiz` ·
   /// `lastfm` · `csv` · `m3u` · `xspf`.
-  TextColumn get sourceKind => text().withDefault(const Constant('exportify'))();
+  TextColumn get sourceKind =>
+      text().withDefault(const Constant('exportify'))();
 
   /// Sub-folder of the download folder for this import (null = none).
   TextColumn get folderPath => text().nullable()();
@@ -138,6 +144,7 @@ class PlaylistImportItems extends Table {
   TextColumn get album => text().nullable()();
   IntColumn get durationMs => integer().nullable()();
   TextColumn get isrc => text().nullable()();
+  IntColumn get year => integer().nullable()();
 
   /// 0 to search · 1 queued · 2 downloaded · 3 linked (already in library)
   /// · 4 to review · 5 not found · 6 failed · 7 skipped by the user
@@ -147,9 +154,11 @@ class PlaylistImportItems extends Table {
 
   /// JSON list of the best candidates, kept while status is 4 (to review).
   TextColumn get candidates => text().nullable()();
-  IntColumn get trackId => integer()
-      .nullable()
-      .references(Tracks, #id, onDelete: KeyAction.setNull)();
+  IntColumn get trackId => integer().nullable().references(
+    Tracks,
+    #id,
+    onDelete: KeyAction.setNull,
+  )();
   RealColumn get score => real().nullable()();
 
   /// Why a row is «not found» or «to review» (shown and exported).
@@ -240,7 +249,10 @@ class Podcasts extends Table {
 
 /// One episode of a feed. Downloaded ones also have a `tracks` row (kind 1),
 /// linked by [trackId]; the others are only listed.
-@TableIndex(name: 'podcast_episodes_podcast', columns: {#podcastId, #publishedAt})
+@TableIndex(
+  name: 'podcast_episodes_podcast',
+  columns: {#podcastId, #publishedAt},
+)
 class PodcastEpisodes extends Table {
   IntColumn get id => integer().autoIncrement()();
   IntColumn get podcastId =>
@@ -253,16 +265,18 @@ class PodcastEpisodes extends Table {
   TextColumn get mimeType => text().nullable()();
   IntColumn get sizeBytes => integer().nullable()();
   TextColumn get description => text().nullable()();
-  IntColumn get trackId => integer()
-      .nullable()
-      .references(Tracks, #id, onDelete: KeyAction.setNull)();
+  IntColumn get trackId => integer().nullable().references(
+    Tracks,
+    #id,
+    onDelete: KeyAction.setNull,
+  )();
   BoolColumn get played => boolean().withDefault(const Constant(false))();
   IntColumn get playedAt => integer().nullable()();
 
   @override
   List<Set<Column>> get uniqueKeys => [
-        {podcastId, guid},
-      ];
+    {podcastId, guid},
+  ];
 }
 
 /// What Wikipedia says about an artist, kept once per artist (not per track)

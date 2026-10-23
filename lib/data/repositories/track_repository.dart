@@ -20,61 +20,71 @@ class TrackRepository {
     await _db.transaction(() async {
       for (final row in rows) {
         final path = row.path.value;
-        final existing = await (_db.select(_db.tracks)
-              ..where((t) => t.path.equals(path)))
-            .getSingleOrNull();
+        final existing = await (_db.select(
+          _db.tracks,
+        )..where((t) => t.path.equals(path))).getSingleOrNull();
         if (existing == null) {
           await _db.into(_db.tracks).insert(row);
           continue;
         }
         final keepText = existing.userEdited;
         // A hash of the old bytes says nothing about the new ones.
-        final changed = existing.sizeBytes != row.sizeBytes.value ||
+        final changed =
+            existing.sizeBytes != row.sizeBytes.value ||
             existing.mtimeMs != row.mtimeMs.value;
-        await (_db.update(_db.tracks)..where((t) => t.id.equals(existing.id)))
-            .write(TracksCompanion(
-          folderId: row.folderId,
-          title: keepText ? const Value.absent() : row.title,
-          artist: keepText ? const Value.absent() : row.artist,
-          albumArtist: row.albumArtist,
-          album: keepText ? const Value.absent() : row.album,
-          albumKey: keepText ? const Value.absent() : row.albumKey,
-          trackNumber: row.trackNumber,
-          discNumber: row.discNumber,
-          year: row.year,
-          genre: row.genre,
-          durationMs: row.durationMs,
-          format: row.format,
-          sampleRateHz: row.sampleRateHz,
-          bitDepth: row.bitDepth,
-          bitrateKbps: row.bitrateKbps,
-          channels: row.channels,
-          sizeBytes: row.sizeBytes,
-          mtimeMs: row.mtimeMs,
-          hasCover: row.hasCover,
-          coverKey: row.coverKey,
-          replayGainDb: row.replayGainDb,
-          missing: const Value(false),
-          sha256: changed ? const Value(null) : const Value.absent(),
-        ));
+        await (_db.update(
+          _db.tracks,
+        )..where((t) => t.id.equals(existing.id))).write(
+          TracksCompanion(
+            folderId: row.folderId,
+            title: keepText ? const Value.absent() : row.title,
+            artist: keepText ? const Value.absent() : row.artist,
+            albumArtist: row.albumArtist,
+            album: keepText ? const Value.absent() : row.album,
+            albumKey: keepText ? const Value.absent() : row.albumKey,
+            trackNumber: row.trackNumber,
+            discNumber: row.discNumber,
+            year: row.year,
+            genre: row.genre,
+            durationMs: row.durationMs,
+            format: row.format,
+            sampleRateHz: row.sampleRateHz,
+            bitDepth: row.bitDepth,
+            bitrateKbps: row.bitrateKbps,
+            channels: row.channels,
+            sizeBytes: row.sizeBytes,
+            mtimeMs: row.mtimeMs,
+            hasCover: row.hasCover,
+            coverKey: row.coverKey,
+            replayGainDb: row.replayGainDb,
+            isrc: (existing.isrc ?? '').isEmpty
+                ? row.isrc
+                : const Value.absent(),
+            missing: const Value(false),
+            sha256: changed ? const Value(null) : const Value.absent(),
+          ),
+        );
       }
     });
   }
 
   Future<Map<String, ({int size, int mtime})>> fileIndexForFolder(
-      int folderId) async {
-    final rows = await (_db.select(_db.tracks)
-          ..where((t) => t.folderId.equals(folderId)))
-        .get();
+    int folderId,
+  ) async {
+    final rows = await (_db.select(
+      _db.tracks,
+    )..where((t) => t.folderId.equals(folderId))).get();
     return {
       for (final r in rows) r.path: (size: r.sizeBytes, mtime: r.mtimeMs),
     };
   }
 
   Future<Set<String>> missingPathsForFolder(int folderId) async {
-    final rows = await (_db.select(_db.tracks)
-          ..where((t) => t.folderId.equals(folderId) & t.missing.equals(true)))
-        .get();
+    final rows =
+        await (_db.select(_db.tracks)..where(
+              (t) => t.folderId.equals(folderId) & t.missing.equals(true),
+            ))
+            .get();
     return rows.map((r) => r.path).toSet();
   }
 
@@ -82,17 +92,23 @@ class TrackRepository {
     if (paths.isEmpty) return;
     await _db.transaction(() async {
       for (final chunk in _chunks(paths.toList(), 500)) {
-        await (_db.update(_db.tracks)..where((t) => t.path.isIn(chunk)))
-            .write(TracksCompanion(missing: Value(missing)));
+        await (_db.update(_db.tracks)..where((t) => t.path.isIn(chunk))).write(
+          TracksCompanion(missing: Value(missing)),
+        );
       }
     });
   }
 
   Future<void> setCoverForAlbum(
-      String albumKey, bool hasCover, String? coverKey) async {
-    await (_db.update(_db.tracks)..where((t) => t.albumKey.equals(albumKey)))
-        .write(TracksCompanion(
-            hasCover: Value(hasCover), coverKey: Value(coverKey)));
+    String albumKey,
+    bool hasCover,
+    String? coverKey,
+  ) async {
+    await (_db.update(
+      _db.tracks,
+    )..where((t) => t.albumKey.equals(albumKey))).write(
+      TracksCompanion(hasCover: Value(hasCover), coverKey: Value(coverKey)),
+    );
   }
 
   Stream<List<Track>> watchTracks({
@@ -110,7 +126,8 @@ class TrackRepository {
         final text = query.trim();
         if (text.isNotEmpty) {
           final pattern = '%${_escapeLike(text)}%';
-          cond = cond &
+          cond =
+              cond &
               (t.title.like(pattern, escapeChar: r'\') |
                   t.artist.like(pattern, escapeChar: r'\') |
                   t.album.like(pattern, escapeChar: r'\'));
@@ -128,28 +145,32 @@ class TrackRepository {
       SortOption.title => [(t) => nocase(t.title)],
       SortOption.artist => [(t) => nocase(t.artist), (t) => nocase(t.title)],
       SortOption.album => [
-          (t) => nocase(t.album),
-          (t) => OrderingTerm.asc(t.discNumber),
-          (t) => OrderingTerm.asc(t.trackNumber),
-        ],
+        (t) => nocase(t.album),
+        (t) => OrderingTerm.asc(t.discNumber),
+        (t) => OrderingTerm.asc(t.trackNumber),
+      ],
       SortOption.year => [
-          (t) => OrderingTerm.desc(t.year),
-          (t) => nocase(t.title),
-        ],
+        (t) => OrderingTerm.desc(t.year),
+        (t) => nocase(t.title),
+      ],
       SortOption.addedAt => [(t) => OrderingTerm.desc(t.addedAt)],
       SortOption.duration => [(t) => OrderingTerm.desc(t.durationMs)],
       SortOption.defaultOrder => [
-          (t) => OrderingTerm.asc(t.albumKey),
-          (t) => OrderingTerm.asc(t.discNumber),
-          (t) => OrderingTerm.asc(t.trackNumber),
-          (t) => nocase(t.title),
-        ],
+        (t) => OrderingTerm.asc(t.albumKey),
+        (t) => OrderingTerm.asc(t.discNumber),
+        (t) => OrderingTerm.asc(t.trackNumber),
+        (t) => nocase(t.title),
+      ],
     };
   }
 
   /// The `ORDER BY` of [sort] in SQL (the same orders as [watchTracks]), or a
   /// shuffle that stays the same for a given [randomSeed].
-  static String _orderSql(SortOption sort, int? randomSeed, {bool mostPlayed = false}) {
+  static String _orderSql(
+    SortOption sort,
+    int? randomSeed, {
+    bool mostPlayed = false,
+  }) {
     if (mostPlayed) {
       return 'play_count DESC, COALESCE(last_played_at, 0) DESC, title COLLATE NOCASE';
     }
@@ -161,8 +182,7 @@ class TrackRepository {
     return switch (sort) {
       SortOption.title => 'title COLLATE NOCASE',
       SortOption.artist => 'artist COLLATE NOCASE, title COLLATE NOCASE',
-      SortOption.album =>
-        'album COLLATE NOCASE, disc_number, track_number',
+      SortOption.album => 'album COLLATE NOCASE, disc_number, track_number',
       SortOption.year => 'year DESC, title COLLATE NOCASE',
       SortOption.addedAt => 'added_at DESC',
       SortOption.duration => 'duration_ms DESC',
@@ -184,7 +204,8 @@ class TrackRepository {
     final lim = limit == null ? '' : ' LIMIT ?';
     if (limit != null) vars.add(Variable<int>(limit));
     return (
-      sql: 'SELECT ${lightTrackColumns(_db)} FROM tracks WHERE ${q.where} '
+      sql:
+          'SELECT ${lightTrackColumns(_db)} FROM tracks WHERE ${q.where} '
           'ORDER BY ${_orderSql(sort, randomSeed, mostPlayed: mostPlayed)}$lim',
       vars: vars,
     );
@@ -203,9 +224,14 @@ class TrackRepository {
     bool mostPlayed = false,
     DateTime? now,
   }) {
-    final q = _byRules(rules, sort, limit, randomSeed,
-        (now ?? DateTime.now()).millisecondsSinceEpoch,
-        mostPlayed: mostPlayed);
+    final q = _byRules(
+      rules,
+      sort,
+      limit,
+      randomSeed,
+      (now ?? DateTime.now()).millisecondsSinceEpoch,
+      mostPlayed: mostPlayed,
+    );
     return _db
         .customSelect(q.sql, variables: q.vars, readsFrom: _ruleTables)
         .watch()
@@ -214,34 +240,43 @@ class TrackRepository {
 
   /// How many tracks match (for the «37 brani» of the editor).
   Future<int> countByRules(RuleExpr rules, {DateTime? now}) async {
-    final q = toSql(rules, nowMs: (now ?? DateTime.now()).millisecondsSinceEpoch);
+    final q = toSql(
+      rules,
+      nowMs: (now ?? DateTime.now()).millisecondsSinceEpoch,
+    );
     final rows = await _db
-        .customSelect('SELECT COUNT(*) AS n FROM tracks WHERE ${q.where}',
-            variables: q.vars, readsFrom: _ruleTables)
+        .customSelect(
+          'SELECT COUNT(*) AS n FROM tracks WHERE ${q.where}',
+          variables: q.vars,
+          readsFrom: _ruleTables,
+        )
         .get();
     return rows.single.read<int>('n');
   }
 
   Future<Track?> getById(int id) =>
-      (_db.select(_db.tracks)..where((t) => t.id.equals(id)))
-          .getSingleOrNull();
+      (_db.select(_db.tracks)..where((t) => t.id.equals(id))).getSingleOrNull();
 
   /// The visible tracks of the albums [keys], album by album, in album order.
   Future<List<Track>> tracksOfAlbums(Iterable<String> keys) =>
       _db.transaction(() async {
         final out = <Track>[];
         for (final key in keys) {
-          out.addAll(await (_db.select(_db.tracks)
-                ..where((t) =>
-                    t.albumKey.equals(key) &
-                    t.missing.equals(false) &
-                    t.ignored.equals(false) &
-                    t.kind.equals(0))
-                ..orderBy([
-                  (t) => OrderingTerm.asc(t.discNumber),
-                  (t) => OrderingTerm.asc(t.trackNumber),
-                ]))
-              .get());
+          out.addAll(
+            await (_db.select(_db.tracks)
+                  ..where(
+                    (t) =>
+                        t.albumKey.equals(key) &
+                        t.missing.equals(false) &
+                        t.ignored.equals(false) &
+                        t.kind.equals(0),
+                  )
+                  ..orderBy([
+                    (t) => OrderingTerm.asc(t.discNumber),
+                    (t) => OrderingTerm.asc(t.trackNumber),
+                  ]))
+                .get(),
+          );
         }
         return out;
       });
@@ -249,17 +284,27 @@ class TrackRepository {
   /// [getByIds] as list rows (without the long texts): for the play queue.
   Future<List<Track>> getByIdsLight(List<int> ids) async {
     if (ids.isEmpty) return const [];
-    final rows = await lightSelect(_db, _db.select(_db.tracks)..where((t) => t.id.isIn(ids))).get();
+    final rows = await lightSelect(
+      _db,
+      _db.select(_db.tracks)..where((t) => t.id.isIn(ids)),
+    ).get();
     final byId = {for (final r in rows) r.id: r};
-    return [for (final id in ids) if (byId[id] != null) byId[id]!];
+    return [
+      for (final id in ids)
+        if (byId[id] != null) byId[id]!,
+    ];
   }
 
   Future<List<Track>> getByIds(List<int> ids) async {
     if (ids.isEmpty) return const [];
-    final rows = await (_db.select(_db.tracks)..where((t) => t.id.isIn(ids)))
-        .get();
+    final rows = await (_db.select(
+      _db.tracks,
+    )..where((t) => t.id.isIn(ids))).get();
     final byId = {for (final r in rows) r.id: r};
-    return [for (final id in ids) if (byId[id] != null) byId[id]!];
+    return [
+      for (final id in ids)
+        if (byId[id] != null) byId[id]!,
+    ];
   }
 
   Future<void> registerPlay(int id) async {
@@ -275,13 +320,15 @@ class TrackRepository {
 
   /// Where a long track was left (see `resumePointFor`); null clears it.
   Future<void> setResumePosition(int id, int? ms) =>
-      (_db.update(_db.tracks)..where((t) => t.id.equals(id)))
-          .write(TracksCompanion(resumePositionMs: Value(ms)));
+      (_db.update(_db.tracks)..where((t) => t.id.equals(id))).write(
+        TracksCompanion(resumePositionMs: Value(ms)),
+      );
 
   /// The length the player measured (an episode's tags or feed can be wrong).
   Future<void> setDurationMs(int id, int ms) =>
-      (_db.update(_db.tracks)..where((t) => t.id.equals(id)))
-          .write(TracksCompanion(durationMs: Value(ms)));
+      (_db.update(_db.tracks)..where((t) => t.id.equals(id))).write(
+        TracksCompanion(durationMs: Value(ms)),
+      );
 
   /// Hides or shows tracks (the duplicates a merge leaves behind). The
   /// scanner never touches the flag, so a hidden file stays hidden.
@@ -289,8 +336,9 @@ class TrackRepository {
     if (ids.isEmpty) return;
     await _db.transaction(() async {
       for (final chunk in _chunks(ids.toList(), 500)) {
-        await (_db.update(_db.tracks)..where((t) => t.id.isIn(chunk)))
-            .write(TracksCompanion(ignored: Value(value)));
+        await (_db.update(_db.tracks)..where((t) => t.id.isIn(chunk))).write(
+          TracksCompanion(ignored: Value(value)),
+        );
       }
     });
   }
@@ -306,11 +354,13 @@ class TrackRepository {
   /// Tracks left in the middle, newest first (the Home «Riprendi» rows).
   Stream<List<Track>> watchResumable({int limit = 3}) =>
       (_db.select(_db.tracks)
-            ..where((t) =>
-                t.resumePositionMs.isNotNull() &
-                t.missing.equals(false) &
-                t.ignored.equals(false) &
-                t.kind.equals(0))
+            ..where(
+              (t) =>
+                  t.resumePositionMs.isNotNull() &
+                  t.missing.equals(false) &
+                  t.ignored.equals(false) &
+                  t.kind.equals(0),
+            )
             ..orderBy([(t) => OrderingTerm.desc(t.lastPlayedAt)])
             ..limit(limit))
           .watch();
@@ -325,9 +375,15 @@ class TrackRepository {
       (_db.delete(_db.tracks)..where((t) => t.id.equals(id))).go();
 
   /// Forgets cover info and forces the next scan to re-read every file.
-  Future<void> resetCovers() => _db.update(_db.tracks).write(
-      const TracksCompanion(
-          hasCover: Value(false), coverKey: Value(null), mtimeMs: Value(0)));
+  Future<void> resetCovers() => _db
+      .update(_db.tracks)
+      .write(
+        const TracksCompanion(
+          hasCover: Value(false),
+          coverKey: Value(null),
+          mtimeMs: Value(0),
+        ),
+      );
 
   /// Id, title, artist and length of every available track, for matching an
   /// imported playlist against the library without loading whole rows.
@@ -354,14 +410,16 @@ class TrackRepository {
   }
 
   Future<int?> idForPath(String path) async {
-    final t = await (_db.select(_db.tracks)..where((r) => r.path.equals(path)))
-        .getSingleOrNull();
+    final t = await (_db.select(
+      _db.tracks,
+    )..where((r) => r.path.equals(path))).getSingleOrNull();
     return t?.id;
   }
 
   Future<void> setFavorite(int id, bool value) =>
-      (_db.update(_db.tracks)..where((t) => t.id.equals(id)))
-          .write(TracksCompanion(isFavorite: Value(value)));
+      (_db.update(_db.tracks)..where((t) => t.id.equals(id))).write(
+        TracksCompanion(isFavorite: Value(value)),
+      );
 
   /// Sets the favourite flag of many tracks in one transaction.
   Future<void> setFavoriteMany(List<int> ids, bool value) async {
@@ -369,7 +427,8 @@ class TrackRepository {
     await _db.transaction(() async {
       for (final chunk in _chunks(ids, 500)) {
         await (_db.update(_db.tracks)..where((t) => t.id.isIn(chunk))).write(
-            TracksCompanion(isFavorite: Value(value)));
+          TracksCompanion(isFavorite: Value(value)),
+        );
       }
     });
   }
@@ -381,9 +440,9 @@ class TrackRepository {
     return _db.transaction(() async {
       var removed = 0;
       for (final chunk in _chunks(ids, 500)) {
-        removed += await (_db.delete(_db.tracks)
-              ..where((t) => t.id.isIn(chunk) & t.missing.equals(true)))
-            .go();
+        removed += await (_db.delete(
+          _db.tracks,
+        )..where((t) => t.id.isIn(chunk) & t.missing.equals(true))).go();
       }
       return removed;
     });
@@ -397,24 +456,26 @@ class TrackRepository {
     return _db.transaction(() async {
       var removed = 0;
       for (final chunk in _chunks(ids, 500)) {
-        removed +=
-            await (_db.delete(_db.tracks)..where((t) => t.id.isIn(chunk))).go();
+        removed += await (_db.delete(
+          _db.tracks,
+        )..where((t) => t.id.isIn(chunk))).go();
       }
       return removed;
     });
   }
 
-  Stream<Track?> watchById(int id) =>
-      (_db.select(_db.tracks)..where((t) => t.id.equals(id)))
-          .watchSingleOrNull();
+  Stream<Track?> watchById(int id) => (_db.select(
+    _db.tracks,
+  )..where((t) => t.id.equals(id))).watchSingleOrNull();
 
   /// How many music tracks there are (podcast episodes are not counted).
   Future<int> countAll() async {
     final c = _db.tracks.id.count();
-    final row = await (_db.selectOnly(_db.tracks)
-          ..addColumns([c])
-          ..where(_db.tracks.kind.equals(0)))
-        .getSingle();
+    final row =
+        await (_db.selectOnly(_db.tracks)
+              ..addColumns([c])
+              ..where(_db.tracks.kind.equals(0)))
+            .getSingle();
     return row.read(c) ?? 0;
   }
 
@@ -428,10 +489,8 @@ class TrackRepository {
         .map((r) => r.read(c) ?? 0);
   }
 
-  static String _escapeLike(String s) => s
-      .replaceAll(r'\', r'\\')
-      .replaceAll('%', r'\%')
-      .replaceAll('_', r'\_');
+  static String _escapeLike(String s) =>
+      s.replaceAll(r'\', r'\\').replaceAll('%', r'\%').replaceAll('_', r'\_');
 
   static Iterable<List<T>> _chunks<T>(List<T> list, int size) sync* {
     for (var i = 0; i < list.length; i += size) {

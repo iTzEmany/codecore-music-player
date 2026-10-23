@@ -9,35 +9,53 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('v1 database gets the playlists.cover_key column', () async {
-    final db = AppDatabase(NativeDatabase.memory(setup: (raw) {
-      raw.execute('CREATE TABLE playlists (id INTEGER PRIMARY KEY '
-          'AUTOINCREMENT, name TEXT NOT NULL, created_at INTEGER NOT NULL)');
-      raw.execute("INSERT INTO playlists (name, created_at) VALUES ('Old', 1)");
-      // v1 also had a tracks table (without replay_gain_db).
-      raw.execute('CREATE TABLE tracks (id INTEGER PRIMARY KEY AUTOINCREMENT, '
-          'path TEXT NOT NULL)');
-      raw.userVersion = 1;
-    }));
+    final db = AppDatabase(
+      NativeDatabase.memory(
+        setup: (raw) {
+          raw.execute(
+            'CREATE TABLE playlists (id INTEGER PRIMARY KEY '
+            'AUTOINCREMENT, name TEXT NOT NULL, created_at INTEGER NOT NULL)',
+          );
+          raw.execute(
+            "INSERT INTO playlists (name, created_at) VALUES ('Old', 1)",
+          );
+          // v1 also had a tracks table (without replay_gain_db).
+          raw.execute(
+            'CREATE TABLE tracks (id INTEGER PRIMARY KEY AUTOINCREMENT, '
+            'path TEXT NOT NULL)',
+          );
+          raw.userVersion = 1;
+        },
+      ),
+    );
     final rows = await db.select(db.playlists).get();
     expect(rows.single.name, 'Old');
     expect(rows.single.coverKey, isNull);
-    final cols = await db
-        .customSelect('PRAGMA table_info(tracks)')
-        .get();
+    final cols = await db.customSelect('PRAGMA table_info(tracks)').get();
     expect(cols.map((c) => c.read<String>('name')), contains('replay_gain_db'));
     await db.close();
   });
 
   test('v3 database gets the import tables and keeps its data', () async {
-    final db = AppDatabase(NativeDatabase.memory(setup: (raw) {
-      raw.execute('CREATE TABLE playlists (id INTEGER PRIMARY KEY '
-          'AUTOINCREMENT, name TEXT NOT NULL, created_at INTEGER NOT NULL, '
-          'cover_key TEXT)');
-      raw.execute("INSERT INTO playlists (name, created_at) VALUES ('Mine', 1)");
-      raw.execute('CREATE TABLE tracks (id INTEGER PRIMARY KEY AUTOINCREMENT, '
-          'path TEXT NOT NULL, replay_gain_db REAL)');
-      raw.userVersion = 3;
-    }));
+    final db = AppDatabase(
+      NativeDatabase.memory(
+        setup: (raw) {
+          raw.execute(
+            'CREATE TABLE playlists (id INTEGER PRIMARY KEY '
+            'AUTOINCREMENT, name TEXT NOT NULL, created_at INTEGER NOT NULL, '
+            'cover_key TEXT)',
+          );
+          raw.execute(
+            "INSERT INTO playlists (name, created_at) VALUES ('Mine', 1)",
+          );
+          raw.execute(
+            'CREATE TABLE tracks (id INTEGER PRIMARY KEY AUTOINCREMENT, '
+            'path TEXT NOT NULL, replay_gain_db REAL)',
+          );
+          raw.userVersion = 3;
+        },
+      ),
+    );
     final rows = await db.select(db.playlists).get();
     expect(rows.single.name, 'Mine');
     final tables = await db
@@ -46,36 +64,64 @@ void main() {
     final names = tables.map((t) => t.read<String>('name'));
     expect(names, containsAll(['playlist_imports', 'playlist_import_items']));
     expect(await db.select(db.playlistImports).get(), isEmpty);
-    final cols = await db.customSelect('PRAGMA table_info(playlist_imports)').get();
-    expect(cols.map((c) => c.read<String>('name')),
-        containsAll(['source_kind', 'folder_path', 'number_files', 'link_only', 'plan_first', 'fetch_covers']),
-        reason: 'created from the current definition, v5 columns included');
+    final cols = await db
+        .customSelect('PRAGMA table_info(playlist_imports)')
+        .get();
+    expect(
+      cols.map((c) => c.read<String>('name')),
+      containsAll([
+        'source_kind',
+        'folder_path',
+        'number_files',
+        'link_only',
+        'plan_first',
+        'fetch_covers',
+      ]),
+      reason: 'created from the current definition, v5 columns included',
+    );
     await db.close();
   });
 
-  test('v4 database gets the v5 import columns and keeps its import intact',
-      () async {
-    final db = AppDatabase(NativeDatabase.memory(setup: (raw) {
-      raw.execute('CREATE TABLE playlists (id INTEGER PRIMARY KEY '
-          'AUTOINCREMENT, name TEXT NOT NULL, created_at INTEGER NOT NULL, '
-          'cover_key TEXT)');
-      raw.execute("INSERT INTO playlists (name, created_at) VALUES ('Mood', 1)");
-      raw.execute('CREATE TABLE tracks (id INTEGER PRIMARY KEY AUTOINCREMENT, '
-          'path TEXT NOT NULL, replay_gain_db REAL)');
-      raw.execute('CREATE TABLE playlist_imports (id INTEGER PRIMARY KEY '
-          'AUTOINCREMENT, playlist_id INTEGER NOT NULL, source_name TEXT NOT '
-          'NULL, created_at INTEGER NOT NULL, status INTEGER NOT NULL DEFAULT 0)');
-      raw.execute('CREATE TABLE playlist_import_items (import_id INTEGER NOT '
-          'NULL, row_index INTEGER NOT NULL, title TEXT NOT NULL, artists TEXT '
-          'NOT NULL, album TEXT, duration_ms INTEGER, isrc TEXT, status INTEGER '
-          'NOT NULL DEFAULT 0, video_id TEXT, candidates TEXT, track_id '
-          'INTEGER, score REAL, PRIMARY KEY (import_id, row_index))');
-      raw.execute("INSERT INTO playlist_imports (playlist_id, source_name, "
-          "created_at, status) VALUES (1, 'Mood', 5, 2)");
-      raw.execute("INSERT INTO playlist_import_items (import_id, row_index, "
-          "title, artists, status) VALUES (1, 0, 'Song', 'Band', 2)");
-      raw.userVersion = 4;
-    }));
+  test('v4 database gets the v5 import columns and keeps its import intact', () async {
+    final db = AppDatabase(
+      NativeDatabase.memory(
+        setup: (raw) {
+          raw.execute(
+            'CREATE TABLE playlists (id INTEGER PRIMARY KEY '
+            'AUTOINCREMENT, name TEXT NOT NULL, created_at INTEGER NOT NULL, '
+            'cover_key TEXT)',
+          );
+          raw.execute(
+            "INSERT INTO playlists (name, created_at) VALUES ('Mood', 1)",
+          );
+          raw.execute(
+            'CREATE TABLE tracks (id INTEGER PRIMARY KEY AUTOINCREMENT, '
+            'path TEXT NOT NULL, replay_gain_db REAL)',
+          );
+          raw.execute(
+            'CREATE TABLE playlist_imports (id INTEGER PRIMARY KEY '
+            'AUTOINCREMENT, playlist_id INTEGER NOT NULL, source_name TEXT NOT '
+            'NULL, created_at INTEGER NOT NULL, status INTEGER NOT NULL DEFAULT 0)',
+          );
+          raw.execute(
+            'CREATE TABLE playlist_import_items (import_id INTEGER NOT '
+            'NULL, row_index INTEGER NOT NULL, title TEXT NOT NULL, artists TEXT '
+            'NOT NULL, album TEXT, duration_ms INTEGER, isrc TEXT, status INTEGER '
+            'NOT NULL DEFAULT 0, video_id TEXT, candidates TEXT, track_id '
+            'INTEGER, score REAL, PRIMARY KEY (import_id, row_index))',
+          );
+          raw.execute(
+            "INSERT INTO playlist_imports (playlist_id, source_name, "
+            "created_at, status) VALUES (1, 'Mood', 5, 2)",
+          );
+          raw.execute(
+            "INSERT INTO playlist_import_items (import_id, row_index, "
+            "title, artists, status) VALUES (1, 0, 'Song', 'Band', 2)",
+          );
+          raw.userVersion = 4;
+        },
+      ),
+    );
     final imp = (await db.select(db.playlistImports).get()).single;
     expect(imp.sourceName, 'Mood');
     expect(imp.status, 2);
@@ -94,150 +140,338 @@ void main() {
   });
 
   test('v5 database gets tracks.resume_position_ms and keeps its tracks', () async {
-    final db = AppDatabase(NativeDatabase.memory(setup: (raw) {
-      raw.execute('CREATE TABLE playlists (id INTEGER PRIMARY KEY AUTOINCREMENT, '
-          'name TEXT NOT NULL, created_at INTEGER NOT NULL, cover_key TEXT)');
-      raw.execute('CREATE TABLE tracks (id INTEGER PRIMARY KEY AUTOINCREMENT, '
-          'path TEXT NOT NULL, title TEXT NOT NULL, album_key TEXT NOT NULL, '
-          'format TEXT NOT NULL, size_bytes INTEGER NOT NULL, mtime_ms INTEGER '
-          'NOT NULL, added_at INTEGER NOT NULL, replay_gain_db REAL)');
-      raw.execute("INSERT INTO tracks (path, title, album_key, format, size_bytes, "
-          "mtime_ms, added_at) VALUES ('/a.mp3', 'Old', 'k', 'mp3', 1, 1, 1)");
-      raw.userVersion = 5;
-    }));
-    final t = (await db
-            .customSelect('SELECT title, resume_position_ms FROM tracks')
-            .get())
-        .single;
+    final db = AppDatabase(
+      NativeDatabase.memory(
+        setup: (raw) {
+          raw.execute(
+            'CREATE TABLE playlists (id INTEGER PRIMARY KEY AUTOINCREMENT, '
+            'name TEXT NOT NULL, created_at INTEGER NOT NULL, cover_key TEXT)',
+          );
+          raw.execute(
+            'CREATE TABLE tracks (id INTEGER PRIMARY KEY AUTOINCREMENT, '
+            'path TEXT NOT NULL, title TEXT NOT NULL, album_key TEXT NOT NULL, '
+            'format TEXT NOT NULL, size_bytes INTEGER NOT NULL, mtime_ms INTEGER '
+            'NOT NULL, added_at INTEGER NOT NULL, replay_gain_db REAL)',
+          );
+          raw.execute(
+            "INSERT INTO tracks (path, title, album_key, format, size_bytes, "
+            "mtime_ms, added_at) VALUES ('/a.mp3', 'Old', 'k', 'mp3', 1, 1, 1)",
+          );
+          raw.userVersion = 5;
+        },
+      ),
+    );
+    final t =
+        (await db
+                .customSelect('SELECT title, resume_position_ms FROM tracks')
+                .get())
+            .single;
     expect(t.read<String>('title'), 'Old');
     expect(t.read<int?>('resume_position_ms'), isNull);
     final cols = await db.customSelect('PRAGMA table_info(tracks)').get();
-    expect(cols.map((c) => c.read<String>('name')), contains('resume_position_ms'));
+    expect(
+      cols.map((c) => c.read<String>('name')),
+      contains('resume_position_ms'),
+    );
     await db.close();
   });
 
   test('v6 database gets the history, smart playlist and tag tables and keeps its data', () async {
-    final db = AppDatabase(NativeDatabase.memory(setup: (raw) {
-      raw.execute('CREATE TABLE playlists (id INTEGER PRIMARY KEY AUTOINCREMENT, '
-          'name TEXT NOT NULL, created_at INTEGER NOT NULL, cover_key TEXT)');
-      raw.execute('CREATE TABLE tracks (id INTEGER PRIMARY KEY AUTOINCREMENT, '
-          'path TEXT NOT NULL, title TEXT NOT NULL, album_key TEXT NOT NULL, '
-          'format TEXT NOT NULL, size_bytes INTEGER NOT NULL, mtime_ms INTEGER '
-          'NOT NULL, added_at INTEGER NOT NULL, play_count INTEGER NOT NULL '
-          'DEFAULT 0, replay_gain_db REAL, resume_position_ms INTEGER)');
-      raw.execute("INSERT INTO tracks (path, title, album_key, format, size_bytes, "
-          "mtime_ms, added_at, play_count) VALUES ('/a.mp3', 'Old', 'k', 'mp3', 1, 1, 1, 7)");
-      raw.userVersion = 6;
-    }));
-    final t = (await db.customSelect('SELECT title, play_count FROM tracks').get()).single;
+    final db = AppDatabase(
+      NativeDatabase.memory(
+        setup: (raw) {
+          raw.execute(
+            'CREATE TABLE playlists (id INTEGER PRIMARY KEY AUTOINCREMENT, '
+            'name TEXT NOT NULL, created_at INTEGER NOT NULL, cover_key TEXT)',
+          );
+          raw.execute(
+            'CREATE TABLE tracks (id INTEGER PRIMARY KEY AUTOINCREMENT, '
+            'path TEXT NOT NULL, title TEXT NOT NULL, album_key TEXT NOT NULL, '
+            'format TEXT NOT NULL, size_bytes INTEGER NOT NULL, mtime_ms INTEGER '
+            'NOT NULL, added_at INTEGER NOT NULL, play_count INTEGER NOT NULL '
+            'DEFAULT 0, replay_gain_db REAL, resume_position_ms INTEGER)',
+          );
+          raw.execute(
+            "INSERT INTO tracks (path, title, album_key, format, size_bytes, "
+            "mtime_ms, added_at, play_count) VALUES ('/a.mp3', 'Old', 'k', 'mp3', 1, 1, 1, 7)",
+          );
+          raw.userVersion = 6;
+        },
+      ),
+    );
+    final t =
+        (await db.customSelect('SELECT title, play_count FROM tracks').get())
+            .single;
     expect(t.read<String>('title'), 'Old');
-    expect(t.read<int>('play_count'), 7, reason: 'the old counter is untouched');
-    final tables = (await db
-            .customSelect("SELECT name FROM sqlite_master WHERE type = 'table'")
-            .get())
-        .map((r) => r.read<String>('name'));
-    expect(tables, containsAll(['plays', 'smart_playlists', 'user_tags', 'track_tags']));
-    expect(await db.select(db.plays).get(), isEmpty, reason: 'new tables start empty');
+    expect(
+      t.read<int>('play_count'),
+      7,
+      reason: 'the old counter is untouched',
+    );
+    final tables =
+        (await db
+                .customSelect(
+                  "SELECT name FROM sqlite_master WHERE type = 'table'",
+                )
+                .get())
+            .map((r) => r.read<String>('name'));
+    expect(
+      tables,
+      containsAll(['plays', 'smart_playlists', 'user_tags', 'track_tags']),
+    );
+    expect(
+      await db.select(db.plays).get(),
+      isEmpty,
+      reason: 'new tables start empty',
+    );
     expect(await db.select(db.smartPlaylists).get(), isEmpty);
     expect(await db.select(db.userTags).get(), isEmpty);
     expect(await db.select(db.trackTags).get(), isEmpty);
-    final indexes = (await db
-            .customSelect("SELECT name FROM sqlite_master WHERE type = 'index'")
-            .get())
-        .map((r) => r.read<String>('name'));
+    final indexes =
+        (await db
+                .customSelect(
+                  "SELECT name FROM sqlite_master WHERE type = 'index'",
+                )
+                .get())
+            .map((r) => r.read<String>('name'));
     expect(indexes, containsAll(['plays_track', 'plays_at']));
     await db.close();
   });
 
   test('v7 database gets tracks.ignored, false for every existing track', () async {
-    final db = AppDatabase(NativeDatabase.memory(setup: (raw) {
-      raw.execute('CREATE TABLE playlists (id INTEGER PRIMARY KEY AUTOINCREMENT, '
-          'name TEXT NOT NULL, created_at INTEGER NOT NULL, cover_key TEXT)');
-      raw.execute('CREATE TABLE tracks (id INTEGER PRIMARY KEY AUTOINCREMENT, '
-          'path TEXT NOT NULL, title TEXT NOT NULL, album_key TEXT NOT NULL, '
-          'format TEXT NOT NULL, size_bytes INTEGER NOT NULL, mtime_ms INTEGER '
-          'NOT NULL, added_at INTEGER NOT NULL, play_count INTEGER NOT NULL '
-          'DEFAULT 0, missing INTEGER NOT NULL DEFAULT 0)');
-      raw.execute("INSERT INTO tracks (path, title, album_key, format, size_bytes, "
-          "mtime_ms, added_at, play_count) VALUES ('/a.mp3', 'Old', 'k', 'mp3', 1, 1, 1, 7)");
-      raw.userVersion = 7;
-    }));
-    final t = (await db.customSelect('SELECT title, play_count, ignored FROM tracks').get()).single;
+    final db = AppDatabase(
+      NativeDatabase.memory(
+        setup: (raw) {
+          raw.execute(
+            'CREATE TABLE playlists (id INTEGER PRIMARY KEY AUTOINCREMENT, '
+            'name TEXT NOT NULL, created_at INTEGER NOT NULL, cover_key TEXT)',
+          );
+          raw.execute(
+            'CREATE TABLE tracks (id INTEGER PRIMARY KEY AUTOINCREMENT, '
+            'path TEXT NOT NULL, title TEXT NOT NULL, album_key TEXT NOT NULL, '
+            'format TEXT NOT NULL, size_bytes INTEGER NOT NULL, mtime_ms INTEGER '
+            'NOT NULL, added_at INTEGER NOT NULL, play_count INTEGER NOT NULL '
+            'DEFAULT 0, missing INTEGER NOT NULL DEFAULT 0)',
+          );
+          raw.execute(
+            "INSERT INTO tracks (path, title, album_key, format, size_bytes, "
+            "mtime_ms, added_at, play_count) VALUES ('/a.mp3', 'Old', 'k', 'mp3', 1, 1, 1, 7)",
+          );
+          raw.userVersion = 7;
+        },
+      ),
+    );
+    final t =
+        (await db
+                .customSelect('SELECT title, play_count, ignored FROM tracks')
+                .get())
+            .single;
     expect(t.read<String>('title'), 'Old');
-    expect(t.read<int>('play_count'), 7, reason: 'the old counter is untouched');
-    expect(t.read<int>('ignored'), 0, reason: 'nothing is hidden by the upgrade');
+    expect(
+      t.read<int>('play_count'),
+      7,
+      reason: 'the old counter is untouched',
+    );
+    expect(
+      t.read<int>('ignored'),
+      0,
+      reason: 'nothing is hidden by the upgrade',
+    );
     await db.close();
   });
 
   test('v8 database gets tracks.kind (0 for every track) and the podcast tables, and keeps its data', () async {
-    final db = AppDatabase(NativeDatabase.memory(setup: (raw) {
-      raw.execute('CREATE TABLE playlists (id INTEGER PRIMARY KEY AUTOINCREMENT, '
-          'name TEXT NOT NULL, created_at INTEGER NOT NULL, cover_key TEXT)');
-      raw.execute('CREATE TABLE tracks (id INTEGER PRIMARY KEY AUTOINCREMENT, '
-          'path TEXT NOT NULL, title TEXT NOT NULL, album_key TEXT NOT NULL, '
-          'format TEXT NOT NULL, size_bytes INTEGER NOT NULL, mtime_ms INTEGER '
-          'NOT NULL, added_at INTEGER NOT NULL, play_count INTEGER NOT NULL '
-          'DEFAULT 0, missing INTEGER NOT NULL DEFAULT 0, ignored INTEGER NOT NULL DEFAULT 0)');
-      raw.execute("INSERT INTO tracks (path, title, album_key, format, size_bytes, "
-          "mtime_ms, added_at, play_count) VALUES ('/a.mp3', 'Old', 'k', 'mp3', 1, 1, 1, 7)");
-      raw.execute("INSERT INTO tracks (path, title, album_key, format, size_bytes, "
-          "mtime_ms, added_at, ignored) VALUES ('/b.mp3', 'Hidden', 'k', 'mp3', 1, 1, 1, 1)");
-      raw.userVersion = 8;
-    }));
-    final rows = await db.customSelect('SELECT title, play_count, ignored, kind FROM tracks ORDER BY id').get();
-    expect(rows.map((r) => r.read<int>('kind')), [0, 0], reason: 'every old track is music');
-    expect(rows.first.read<int>('play_count'), 7, reason: 'the old counter is untouched');
-    expect(rows.last.read<int>('ignored'), 1, reason: 'a hidden track stays hidden');
+    final db = AppDatabase(
+      NativeDatabase.memory(
+        setup: (raw) {
+          raw.execute(
+            'CREATE TABLE playlists (id INTEGER PRIMARY KEY AUTOINCREMENT, '
+            'name TEXT NOT NULL, created_at INTEGER NOT NULL, cover_key TEXT)',
+          );
+          raw.execute(
+            'CREATE TABLE tracks (id INTEGER PRIMARY KEY AUTOINCREMENT, '
+            'path TEXT NOT NULL, title TEXT NOT NULL, album_key TEXT NOT NULL, '
+            'format TEXT NOT NULL, size_bytes INTEGER NOT NULL, mtime_ms INTEGER '
+            'NOT NULL, added_at INTEGER NOT NULL, play_count INTEGER NOT NULL '
+            'DEFAULT 0, missing INTEGER NOT NULL DEFAULT 0, ignored INTEGER NOT NULL DEFAULT 0)',
+          );
+          raw.execute(
+            "INSERT INTO tracks (path, title, album_key, format, size_bytes, "
+            "mtime_ms, added_at, play_count) VALUES ('/a.mp3', 'Old', 'k', 'mp3', 1, 1, 1, 7)",
+          );
+          raw.execute(
+            "INSERT INTO tracks (path, title, album_key, format, size_bytes, "
+            "mtime_ms, added_at, ignored) VALUES ('/b.mp3', 'Hidden', 'k', 'mp3', 1, 1, 1, 1)",
+          );
+          raw.userVersion = 8;
+        },
+      ),
+    );
+    final rows = await db
+        .customSelect(
+          'SELECT title, play_count, ignored, kind FROM tracks ORDER BY id',
+        )
+        .get();
+    expect(rows.map((r) => r.read<int>('kind')), [
+      0,
+      0,
+    ], reason: 'every old track is music');
+    expect(
+      rows.first.read<int>('play_count'),
+      7,
+      reason: 'the old counter is untouched',
+    );
+    expect(
+      rows.last.read<int>('ignored'),
+      1,
+      reason: 'a hidden track stays hidden',
+    );
     expect(await db.select(db.podcasts).get(), isEmpty);
     expect(await db.select(db.podcastEpisodes).get(), isEmpty);
-    final names = (await db
-            .customSelect("SELECT name FROM sqlite_master WHERE type IN ('table', 'index')")
-            .get())
-        .map((r) => r.read<String>('name'));
-    expect(names, containsAll(['podcasts', 'podcast_episodes', 'tracks_kind', 'podcast_episodes_podcast']));
+    final names =
+        (await db
+                .customSelect(
+                  "SELECT name FROM sqlite_master WHERE type IN ('table', 'index')",
+                )
+                .get())
+            .map((r) => r.read<String>('name'));
+    expect(
+      names,
+      containsAll([
+        'podcasts',
+        'podcast_episodes',
+        'tracks_kind',
+        'podcast_episodes_podcast',
+      ]),
+    );
     await db.close();
   });
 
   test('podcast rows: a feed address is unique, an episode is unique per podcast, deleting a podcast takes its episodes and a track link goes null', () async {
     final db = AppDatabase(NativeDatabase.memory());
-    final pid = await db.into(db.podcasts).insert(PodcastsCompanion.insert(feedUrl: 'https://x/feed', title: 'P', addedAt: 1));
+    final pid = await db
+        .into(db.podcasts)
+        .insert(
+          PodcastsCompanion.insert(
+            feedUrl: 'https://x/feed',
+            title: 'P',
+            addedAt: 1,
+          ),
+        );
     await expectLater(
-      db.into(db.podcasts).insert(PodcastsCompanion.insert(feedUrl: 'https://x/feed', title: 'Other', addedAt: 2)),
+      db
+          .into(db.podcasts)
+          .insert(
+            PodcastsCompanion.insert(
+              feedUrl: 'https://x/feed',
+              title: 'Other',
+              addedAt: 2,
+            ),
+          ),
       throwsA(anything),
     );
-    final trackId = await db.into(db.tracks).insert(TracksCompanion.insert(
-        path: '/p/e1.mp3', title: 'E1', albumKey: 'k', format: 'mp3', sizeBytes: 1, mtimeMs: 1, addedAt: 1,
-        kind: const Value(1)));
-    await db.into(db.podcastEpisodes).insert(PodcastEpisodesCompanion.insert(
-        podcastId: pid, guid: 'g1', title: 'E1', audioUrl: 'https://x/e1.mp3', trackId: Value(trackId)));
+    final trackId = await db
+        .into(db.tracks)
+        .insert(
+          TracksCompanion.insert(
+            path: '/p/e1.mp3',
+            title: 'E1',
+            albumKey: 'k',
+            format: 'mp3',
+            sizeBytes: 1,
+            mtimeMs: 1,
+            addedAt: 1,
+            kind: const Value(1),
+          ),
+        );
+    await db
+        .into(db.podcastEpisodes)
+        .insert(
+          PodcastEpisodesCompanion.insert(
+            podcastId: pid,
+            guid: 'g1',
+            title: 'E1',
+            audioUrl: 'https://x/e1.mp3',
+            trackId: Value(trackId),
+          ),
+        );
     await expectLater(
-      db.into(db.podcastEpisodes).insert(PodcastEpisodesCompanion.insert(
-          podcastId: pid, guid: 'g1', title: 'dup', audioUrl: 'https://x/e1b.mp3')),
+      db
+          .into(db.podcastEpisodes)
+          .insert(
+            PodcastEpisodesCompanion.insert(
+              podcastId: pid,
+              guid: 'g1',
+              title: 'dup',
+              audioUrl: 'https://x/e1b.mp3',
+            ),
+          ),
       throwsA(anything),
     );
     // The same guid in another podcast is fine.
-    final other = await db.into(db.podcasts).insert(PodcastsCompanion.insert(feedUrl: 'https://y/feed', title: 'Q', addedAt: 1));
-    await db.into(db.podcastEpisodes).insert(PodcastEpisodesCompanion.insert(
-        podcastId: other, guid: 'g1', title: 'E1', audioUrl: 'https://y/e1.mp3'));
+    final other = await db
+        .into(db.podcasts)
+        .insert(
+          PodcastsCompanion.insert(
+            feedUrl: 'https://y/feed',
+            title: 'Q',
+            addedAt: 1,
+          ),
+        );
+    await db
+        .into(db.podcastEpisodes)
+        .insert(
+          PodcastEpisodesCompanion.insert(
+            podcastId: other,
+            guid: 'g1',
+            title: 'E1',
+            audioUrl: 'https://y/e1.mp3',
+          ),
+        );
 
     await (db.delete(db.tracks)..where((t) => t.id.equals(trackId))).go();
-    final ep = await (db.select(db.podcastEpisodes)..where((e) => e.podcastId.equals(pid))).getSingle();
-    expect(ep.trackId, isNull, reason: 'the episode stays listed as not downloaded');
+    final ep = await (db.select(
+      db.podcastEpisodes,
+    )..where((e) => e.podcastId.equals(pid))).getSingle();
+    expect(
+      ep.trackId,
+      isNull,
+      reason: 'the episode stays listed as not downloaded',
+    );
 
     await (db.delete(db.podcasts)..where((p) => p.id.equals(pid))).go();
-    expect((await db.select(db.podcastEpisodes).get()).map((e) => e.podcastId), [other]);
+    expect(
+      (await db.select(db.podcastEpisodes).get()).map((e) => e.podcastId),
+      [other],
+    );
     await db.close();
   });
 
   test('deleting a track takes its listens and its tag links with it, and a tag name is unique ignoring case', () async {
     final db = AppDatabase(NativeDatabase.memory());
-    await db.into(db.tracks).insert(TracksCompanion.insert(
-        path: '/a.mp3', title: 'A', albumKey: 'k', format: 'mp3',
-        sizeBytes: 1, mtimeMs: 1, addedAt: 1));
+    await db
+        .into(db.tracks)
+        .insert(
+          TracksCompanion.insert(
+            path: '/a.mp3',
+            title: 'A',
+            albumKey: 'k',
+            format: 'mp3',
+            sizeBytes: 1,
+            mtimeMs: 1,
+            addedAt: 1,
+          ),
+        );
     final trackId = (await db.select(db.tracks).getSingle()).id;
-    final tagId = await db.into(db.userTags).insert(UserTagsCompanion.insert(name: 'Live'));
-    await db.into(db.trackTags).insert(TrackTagsCompanion.insert(trackId: trackId, tagId: tagId));
-    await db.into(db.plays).insert(PlaysCompanion.insert(trackId: trackId, playedAt: 5));
+    final tagId = await db
+        .into(db.userTags)
+        .insert(UserTagsCompanion.insert(name: 'Live'));
+    await db
+        .into(db.trackTags)
+        .insert(TrackTagsCompanion.insert(trackId: trackId, tagId: tagId));
+    await db
+        .into(db.plays)
+        .insert(PlaysCompanion.insert(trackId: trackId, playedAt: 5));
     await expectLater(
       db.into(db.userTags).insert(UserTagsCompanion.insert(name: 'LIVE')),
       throwsA(anything),
@@ -245,71 +479,192 @@ void main() {
     await (db.delete(db.tracks)..where((t) => t.id.equals(trackId))).go();
     expect(await db.select(db.plays).get(), isEmpty);
     expect(await db.select(db.trackTags).get(), isEmpty);
-    expect(await db.select(db.userTags).get(), hasLength(1), reason: 'the label stays');
+    expect(
+      await db.select(db.userTags).get(),
+      hasLength(1),
+      reason: 'the label stays',
+    );
     await db.close();
   });
 
-  test('a v10 database gets the artist_infos table and keeps its tracks', () async {
-    final db = AppDatabase(NativeDatabase.memory(setup: (raw) {
-      raw.execute('CREATE TABLE tracks (id INTEGER PRIMARY KEY AUTOINCREMENT, '
-          'path TEXT NOT NULL, title TEXT NOT NULL)');
-      raw.execute("INSERT INTO tracks (path, title) VALUES ('/a.mp3', 'Old')");
-      raw.userVersion = 10;
-    }));
-    final tables = await db
-        .customSelect("SELECT name FROM sqlite_master WHERE type = 'table'")
-        .get();
-    expect(tables.map((r) => r.read<String>('name')), contains('artist_infos'));
-    expect(await db.select(db.artistInfos).get(), isEmpty);
-    expect((await db.customSelect('SELECT title FROM tracks').getSingle()).read<String>('title'), 'Old');
-    await db.close();
-  });
+  test(
+    'a v10 database gets the artist_infos table and keeps its tracks',
+    () async {
+      final db = AppDatabase(
+        NativeDatabase.memory(
+          setup: (raw) {
+            raw.execute(
+              'CREATE TABLE tracks (id INTEGER PRIMARY KEY AUTOINCREMENT, '
+              'path TEXT NOT NULL, title TEXT NOT NULL)',
+            );
+            raw.execute(
+              "INSERT INTO tracks (path, title) VALUES ('/a.mp3', 'Old')",
+            );
+            raw.userVersion = 10;
+          },
+        ),
+      );
+      final tables = await db
+          .customSelect("SELECT name FROM sqlite_master WHERE type = 'table'")
+          .get();
+      expect(
+        tables.map((r) => r.read<String>('name')),
+        contains('artist_infos'),
+      );
+      expect(await db.select(db.artistInfos).get(), isEmpty);
+      expect(
+        (await db.customSelect('SELECT title FROM tracks').getSingle())
+            .read<String>('title'),
+        'Old',
+      );
+      await db.close();
+    },
+  );
 
-  test('a v11 database gets radio_stations and keeps its tracks and playlists', () async {
-    final db = AppDatabase(NativeDatabase.memory(setup: (raw) {
-      raw.execute('CREATE TABLE tracks (id INTEGER PRIMARY KEY AUTOINCREMENT, '
-          'path TEXT NOT NULL, title TEXT NOT NULL)');
-      raw.execute("INSERT INTO tracks (path, title) VALUES ('/a.mp3', 'Old')");
-      raw.execute('CREATE TABLE playlists (id INTEGER PRIMARY KEY AUTOINCREMENT, '
-          'name TEXT NOT NULL, created_at INTEGER NOT NULL, cover_key TEXT, uuid TEXT, updated_at INTEGER)');
-      raw.execute("INSERT INTO playlists (name, created_at, updated_at) VALUES ('Mine', 1, 1)");
-      raw.userVersion = 11;
-    }));
-    expect(await db.select(db.radioStations).get(), isEmpty);
-    await db.into(db.radioStations).insert(RadioStationsCompanion.insert(
-        stationId: 'x', name: 'X', streamUrl: 'http://x', position: 0));
-    final row = await db.select(db.radioStations).getSingle();
-    expect((row.homepage, row.hls, row.unreachable, row.lastPlayedAt), ('', false, false, null));
-    expect((await db.customSelect('SELECT title FROM tracks').getSingle()).read<String>('title'), 'Old');
-    expect((await db.select(db.playlists).getSingle()).name, 'Mine');
-    await db.close();
-  });
+  test(
+    'a v11 database gets radio_stations and keeps its tracks and playlists',
+    () async {
+      final db = AppDatabase(
+        NativeDatabase.memory(
+          setup: (raw) {
+            raw.execute(
+              'CREATE TABLE tracks (id INTEGER PRIMARY KEY AUTOINCREMENT, '
+              'path TEXT NOT NULL, title TEXT NOT NULL)',
+            );
+            raw.execute(
+              "INSERT INTO tracks (path, title) VALUES ('/a.mp3', 'Old')",
+            );
+            raw.execute(
+              'CREATE TABLE playlists (id INTEGER PRIMARY KEY AUTOINCREMENT, '
+              'name TEXT NOT NULL, created_at INTEGER NOT NULL, cover_key TEXT, uuid TEXT, updated_at INTEGER)',
+            );
+            raw.execute(
+              "INSERT INTO playlists (name, created_at, updated_at) VALUES ('Mine', 1, 1)",
+            );
+            raw.userVersion = 11;
+          },
+        ),
+      );
+      expect(await db.select(db.radioStations).get(), isEmpty);
+      await db
+          .into(db.radioStations)
+          .insert(
+            RadioStationsCompanion.insert(
+              stationId: 'x',
+              name: 'X',
+              streamUrl: 'http://x',
+              position: 0,
+            ),
+          );
+      final row = await db.select(db.radioStations).getSingle();
+      expect(
+        (row.homepage, row.hls, row.unreachable, row.lastPlayedAt),
+        ('', false, false, null),
+      );
+      expect(
+        (await db.customSelect('SELECT title FROM tracks').getSingle())
+            .read<String>('title'),
+        'Old',
+      );
+      expect((await db.select(db.playlists).getSingle()).name, 'Mine');
+      await db.close();
+    },
+  );
 
-  test('a v12 database gets the follow tables and keeps its radios and tracks', () async {
-    final db = AppDatabase(NativeDatabase.memory(setup: (raw) {
-      raw.execute('CREATE TABLE tracks (id INTEGER PRIMARY KEY AUTOINCREMENT, '
-          'path TEXT NOT NULL, title TEXT NOT NULL)');
-      raw.execute("INSERT INTO tracks (path, title) VALUES ('/a.mp3', 'Old')");
-      raw.execute('CREATE TABLE radio_stations (station_id TEXT NOT NULL PRIMARY KEY, '
-          'name TEXT NOT NULL, stream_url TEXT NOT NULL, homepage TEXT NOT NULL DEFAULT \'\', '
-          'favicon_url TEXT NOT NULL DEFAULT \'\', country_code TEXT NOT NULL DEFAULT \'\', '
-          'state TEXT NOT NULL DEFAULT \'\', tags TEXT NOT NULL DEFAULT \'\', '
-          'codec TEXT NOT NULL DEFAULT \'\', bitrate INTEGER NOT NULL DEFAULT 0, '
-          'hls INTEGER NOT NULL DEFAULT 0, position INTEGER NOT NULL, added_at INTEGER NOT NULL, '
-          'last_played_at INTEGER, last_ok_at INTEGER, unreachable INTEGER NOT NULL DEFAULT 0)');
-      raw.execute("INSERT INTO radio_stations (station_id, name, stream_url, position, added_at) "
-          "VALUES ('r', 'Radio', 'http://r', 0, 1)");
-      raw.userVersion = 12;
-    }));
-    expect(await db.select(db.followedArtists).get(), isEmpty);
-    expect(await db.select(db.artistReleases).get(), isEmpty);
-    expect(await db.select(db.artistLookups).get(), isEmpty);
-    await db.into(db.followedArtists).insert(
-        FollowedArtistsCompanion.insert(ytmId: 'UC1', name: 'A'));
-    final a = await db.select(db.followedArtists).getSingle();
-    expect((a.origin, a.excluded, a.muted, a.lastCheckedAt, a.checksFailed), (0, false, false, null, 0));
-    expect((await db.select(db.radioStations).getSingle()).name, 'Radio');
-    expect((await db.customSelect('SELECT title FROM tracks').getSingle()).read<String>('title'), 'Old');
+  test(
+    'a v12 database gets the follow tables and keeps its radios and tracks',
+    () async {
+      final db = AppDatabase(
+        NativeDatabase.memory(
+          setup: (raw) {
+            raw.execute(
+              'CREATE TABLE tracks (id INTEGER PRIMARY KEY AUTOINCREMENT, '
+              'path TEXT NOT NULL, title TEXT NOT NULL)',
+            );
+            raw.execute(
+              "INSERT INTO tracks (path, title) VALUES ('/a.mp3', 'Old')",
+            );
+            raw.execute(
+              'CREATE TABLE radio_stations (station_id TEXT NOT NULL PRIMARY KEY, '
+              'name TEXT NOT NULL, stream_url TEXT NOT NULL, homepage TEXT NOT NULL DEFAULT \'\', '
+              'favicon_url TEXT NOT NULL DEFAULT \'\', country_code TEXT NOT NULL DEFAULT \'\', '
+              'state TEXT NOT NULL DEFAULT \'\', tags TEXT NOT NULL DEFAULT \'\', '
+              'codec TEXT NOT NULL DEFAULT \'\', bitrate INTEGER NOT NULL DEFAULT 0, '
+              'hls INTEGER NOT NULL DEFAULT 0, position INTEGER NOT NULL, added_at INTEGER NOT NULL, '
+              'last_played_at INTEGER, last_ok_at INTEGER, unreachable INTEGER NOT NULL DEFAULT 0)',
+            );
+            raw.execute(
+              "INSERT INTO radio_stations (station_id, name, stream_url, position, added_at) "
+              "VALUES ('r', 'Radio', 'http://r', 0, 1)",
+            );
+            raw.userVersion = 12;
+          },
+        ),
+      );
+      expect(await db.select(db.followedArtists).get(), isEmpty);
+      expect(await db.select(db.artistReleases).get(), isEmpty);
+      expect(await db.select(db.artistLookups).get(), isEmpty);
+      await db
+          .into(db.followedArtists)
+          .insert(FollowedArtistsCompanion.insert(ytmId: 'UC1', name: 'A'));
+      final a = await db.select(db.followedArtists).getSingle();
+      expect(
+        (a.origin, a.excluded, a.muted, a.lastCheckedAt, a.checksFailed),
+        (0, false, false, null, 0),
+      );
+      expect((await db.select(db.radioStations).getSingle()).name, 'Radio');
+      expect(
+        (await db.customSelect('SELECT title FROM tracks').getSingle())
+            .read<String>('title'),
+        'Old',
+      );
+      await db.close();
+    },
+  );
+
+  test('a v13 database gets tracks.isrc from the latest linked import row', () async {
+    final db = AppDatabase(
+      NativeDatabase.memory(
+        setup: (raw) {
+          raw.execute(
+            'CREATE TABLE tracks (id INTEGER PRIMARY KEY AUTOINCREMENT, '
+            'path TEXT NOT NULL, title TEXT NOT NULL)',
+          );
+          raw.execute(
+            "INSERT INTO tracks (path, title) VALUES ('/a.mp3', 'A'), ('/b.mp3', 'B')",
+          );
+          raw.execute(
+            'CREATE TABLE playlist_imports (id INTEGER PRIMARY KEY AUTOINCREMENT, '
+            'playlist_id INTEGER NOT NULL, source_name TEXT NOT NULL, created_at INTEGER NOT NULL)',
+          );
+          raw.execute(
+            "INSERT INTO playlist_imports (playlist_id, source_name, created_at) "
+            "VALUES (1, 'old', 1), (1, 'new', 2)",
+          );
+          raw.execute(
+            'CREATE TABLE playlist_import_items (import_id INTEGER NOT NULL, '
+            'row_index INTEGER NOT NULL, title TEXT NOT NULL, artists TEXT NOT NULL, '
+            'isrc TEXT, track_id INTEGER, PRIMARY KEY (import_id, row_index))',
+          );
+          raw.execute(
+            "INSERT INTO playlist_import_items VALUES "
+            "(1, 0, 't', 'a', 'OLD', 1), (2, 0, 't', 'a', 'NEW', 1)",
+          );
+          raw.userVersion = 13;
+        },
+      ),
+    );
+    final rows = await db.customSelect('SELECT title, isrc FROM tracks').get();
+    String? isrcOf(String title) =>
+        rows.firstWhere((r) => r.read<String>('title') == title).read<String?>('isrc');
+    expect(isrcOf('A'), 'NEW');
+    expect(isrcOf('B'), isNull);
+    final cols = await db.customSelect('PRAGMA table_info(playlist_import_items)').get();
+    expect(cols.map((c) => c.read<String>('name')), contains('year'));
+    final idx = await db.customSelect('PRAGMA index_list(tracks)').get();
+    expect(idx.map((c) => c.read<String>('name')), contains('tracks_isrc'));
+    final tmp = await db.customSelect("SELECT name FROM sqlite_master WHERE name = 'tmp_items_track'").get();
+    expect(tmp, isEmpty);
     await db.close();
   });
 }

@@ -15,6 +15,7 @@ class AudioMetadataTagReader implements TagReader {
       final pic = m.pictures.isEmpty ? null : _bestPicture(m.pictures);
       final ms = m.duration?.inMilliseconds;
       final br = m.bitrate;
+      final extras = _extras(path);
       return TagInfo(
         title: _clean(m.title),
         artist: _clean(m.artist),
@@ -26,11 +27,14 @@ class AudioMetadataTagReader implements TagReader {
         year: (m.year?.year ?? 0) > 0 ? m.year!.year : null,
         durationMs: (ms == null || ms <= 0) ? null : ms,
         // The package may report bps or kbps depending on the container.
-        bitrateKbps: br == null || br <= 0 ? null : (br >= 5000 ? br ~/ 1000 : br),
+        bitrateKbps: br == null || br <= 0
+            ? null
+            : (br >= 5000 ? br ~/ 1000 : br),
         sampleRateHz: m.sampleRate,
         coverBytes: pic?.bytes,
         coverMime: pic?.mimetype,
-        replayGainDb: _replayGain(path),
+        replayGainDb: extras.$1,
+        isrc: extras.$2,
       );
     } on Object catch (e, st) {
       AppLog.w('tag read failed: $path', e, st);
@@ -38,29 +42,39 @@ class AudioMetadataTagReader implements TagReader {
     }
   }
 
-  double? _replayGain(String path) {
+  /// One parse for the extras: ReplayGain and ISRC (TSRC / Vorbis ISRC;
+  /// m4a has none in the package).
+  (double?, String?) _extras(String path) {
     try {
       final tag = readAllMetadata(File(path), getImage: false);
       return switch (tag) {
-        VorbisMetadata t => parseReplayGain(
-            t.replayGainTrackGain.isEmpty ? null : t.replayGainTrackGain.first),
-        Mp3Metadata t => parseReplayGain(
+        VorbisMetadata t => (
+          parseReplayGain(
+            t.replayGainTrackGain.isEmpty ? null : t.replayGainTrackGain.first,
+          ),
+          normalizeIsrc(t.isrc.firstOrNull),
+        ),
+        Mp3Metadata t => (
+          parseReplayGain(
             t.customMetadata.entries
                 .where((e) => e.key.toLowerCase() == 'replaygain_track_gain')
                 .map((e) => e.value)
-                .firstOrNull),
-        _ => null,
+                .firstOrNull,
+          ),
+          normalizeIsrc(t.isrc),
+        ),
+        _ => (null, null),
       };
     } on Object catch (e, st) {
-      AppLog.d('replaygain read skipped: $path', e, st);
-      return null;
+      AppLog.d('extra tags read skipped: $path', e, st);
+      return (null, null);
     }
   }
 
   Picture _bestPicture(List<Picture> pics) => pics.firstWhere(
-        (p) => p.pictureType == PictureType.coverFront,
-        orElse: () => pics.first,
-      );
+    (p) => p.pictureType == PictureType.coverFront,
+    orElse: () => pics.first,
+  );
 
   String? _clean(String? s) {
     final t = s?.trim();
