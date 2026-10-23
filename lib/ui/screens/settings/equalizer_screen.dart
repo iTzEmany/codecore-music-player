@@ -9,6 +9,8 @@ import '../../../providers/equalizer_providers.dart';
 import '../../../providers/settings_providers.dart';
 import '../../../services/audio/equalizer.dart';
 import '../../theme/tokens.dart';
+import '../../widgets/empty_state.dart';
+import '../../widgets/segmented_blocks.dart';
 
 /// Equalizer: on/off, a preset or the user's own bands, for the speaker and
 /// for headphones separately. Only reachable where the player has one.
@@ -48,7 +50,7 @@ class _EqualizerScreenState extends ConsumerState<EqualizerScreen> {
 
     Widget body;
     if (eq == null) {
-      body = Center(child: Text(l.eqUnavailable));
+      body = EmptyState(icon: Icons.equalizer, message: l.eqUnavailable);
     } else {
       body = ListView(
         padding: const EdgeInsets.symmetric(vertical: 8),
@@ -61,19 +63,19 @@ class _EqualizerScreenState extends ConsumerState<EqualizerScreen> {
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(CcDims.margin, 4, CcDims.margin, 0),
-            child: SegmentedButton<OutputRoute>(
-              segments: [
-                ButtonSegment(
+            child: SegmentedBlocks<OutputRoute>(
+              items: [
+                BlockItem(
                     value: OutputRoute.speaker,
-                    icon: const Icon(Icons.speaker_outlined),
-                    label: Text(l.eqOutputSpeaker)),
-                ButtonSegment(
+                    icon: Icons.speaker_outlined,
+                    label: l.eqOutputSpeaker),
+                BlockItem(
                     value: OutputRoute.headphones,
-                    icon: const Icon(Icons.headphones_outlined),
-                    label: Text(l.eqOutputHeadphones)),
+                    icon: Icons.headphones_outlined,
+                    label: l.eqOutputHeadphones),
               ],
-              selected: {_editing},
-              onSelectionChanged: (v) => setState(() => _editing = v.first),
+              selected: _editing,
+              onChanged: (v) => setState(() => _editing = v),
             ),
           ),
           Padding(
@@ -110,23 +112,12 @@ class _EqualizerScreenState extends ConsumerState<EqualizerScreen> {
           bands.when(
             loading: () => Padding(
               padding: const EdgeInsets.all(CcDims.margin),
-              child: Row(children: [
-                const SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2)),
-                const SizedBox(width: 12),
-                Expanded(child: Text(l.eqWaiting)),
-              ]),
+              child: Text(l.eqWaiting,
+                  style: theme.bodyMedium?.copyWith(color: cc.textMuted)),
             ),
-            error: (_, _) => Padding(
-              padding: const EdgeInsets.all(CcDims.margin),
-              child: Text(l.eqUnavailable),
-            ),
+            error: (_, _) => EmptyState(icon: Icons.equalizer, message: l.eqUnavailable),
             data: (b) => b == null
-                ? Padding(
-                    padding: const EdgeInsets.all(CcDims.margin),
-                    child: Text(l.eqUnavailable))
+                ? EmptyState(icon: Icons.equalizer, message: l.eqUnavailable)
                 : _Bands(
                     bands: b,
                     gains: gainsFor(profile, b),

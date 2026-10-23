@@ -42,6 +42,7 @@ import 'translation_models_tiles.dart';
 import 'update_tiles.dart';
 import 'shuffle_plus_tiles.dart';
 import 'release_settings_tiles.dart';
+import '../../widgets/segmented_blocks.dart';
 
 const _languages = {
   'it': 'Italiano',
@@ -115,16 +116,15 @@ List<SettingsGroup> _appearance(BuildContext context, WidgetRef ref) {
                   title: Text(l.settingsTextSize),
                   subtitle: Padding(
                     padding: const EdgeInsets.only(top: 8),
-                    child: SegmentedButton<double>(
-                      showSelectedIcon: false,
-                      segments: [
-                        ButtonSegment(value: 0.9, label: Text(l.textSmall)),
-                        ButtonSegment(value: 1.0, label: Text(l.textNormal)),
-                        ButtonSegment(value: 1.15, label: Text(l.textLarge)),
+                    child: SegmentedBlocks<double>(
+                      items: [
+                        BlockItem(value: 0.9, icon: Icons.text_decrease, label: l.textSmall),
+                        BlockItem(value: 1.0, icon: Icons.text_fields, label: l.textNormal),
+                        BlockItem(value: 1.15, icon: Icons.text_increase, label: l.textLarge),
                       ],
-                      selected: {s.fontScale},
-                      onSelectionChanged: (v) => notifier.update(
-                        (c) => c.copyWith(fontScale: v.first),
+                      selected: s.fontScale,
+                      onChanged: (v) => notifier.update(
+                        (c) => c.copyWith(fontScale: v),
                       ),
                     ),
                   ),

@@ -10,6 +10,7 @@ import '../../theme/app_theme.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/color_picker.dart';
 import 'theme_labels.dart';
+import '../../widgets/segmented_blocks.dart';
 
 /// The «Sfondo delle pagine» part of the theme editor: plain colour, gradient
 /// or a picture, and whether Now playing keeps the tint of the cover.
@@ -83,16 +84,14 @@ class _ThemeBackgroundEditorState extends State<ThemeBackgroundEditor> {
       children: [
         Text(l.themeBackground, style: text.titleSmall),
         const SizedBox(height: 8),
-        SegmentedButton<ThemeBackgroundKind>(
-          showSelectedIcon: false,
-          segments: [
-            ButtonSegment(value: ThemeBackgroundKind.solid, label: Text(l.bgSolid)),
-            ButtonSegment(value: ThemeBackgroundKind.gradient, label: Text(l.bgGradient)),
-            ButtonSegment(value: ThemeBackgroundKind.image, label: Text(l.bgImage)),
+        SegmentedBlocks<ThemeBackgroundKind>(
+          items: [
+            BlockItem(value: ThemeBackgroundKind.solid, icon: Icons.format_color_fill, label: l.bgSolid),
+            BlockItem(value: ThemeBackgroundKind.gradient, icon: Icons.gradient, label: l.bgGradient),
+            BlockItem(value: ThemeBackgroundKind.image, icon: Icons.image_outlined, label: l.bgImage),
           ],
-          selected: {_b.kind},
-          onSelectionChanged: (v) {
-            final kind = v.first;
+          selected: _b.kind,
+          onChanged: (kind) {
             widget.onChanged(
               kind == ThemeBackgroundKind.gradient && _b.gradientEnd == null
                   ? _b.copyWith(kind: kind, gradientEnd: widget.colors.heroBase)

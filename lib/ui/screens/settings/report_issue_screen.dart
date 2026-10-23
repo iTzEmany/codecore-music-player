@@ -6,6 +6,8 @@ import '../../../core/app_info.dart';
 import '../../../core/issue_report.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/issue_providers.dart';
+import '../../theme/tokens.dart';
+import '../../widgets/segmented_blocks.dart';
 
 const kIssueMinDescription = 20;
 
@@ -70,21 +72,21 @@ class _ReportIssueScreenState extends ConsumerState<ReportIssueScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          SegmentedButton<IssueKind>(
-            segments: [
-              ButtonSegment(
+          SegmentedBlocks<IssueKind>(
+            items: [
+              BlockItem(
                 value: IssueKind.bug,
-                icon: const Icon(Icons.bug_report_outlined),
-                label: Text(l.reportKindBug),
+                icon: Icons.bug_report_outlined,
+                label: l.reportKindBug,
               ),
-              ButtonSegment(
+              BlockItem(
                 value: IssueKind.idea,
-                icon: const Icon(Icons.lightbulb_outline),
-                label: Text(l.reportKindIdea),
+                icon: Icons.lightbulb_outline,
+                label: l.reportKindIdea,
               ),
             ],
-            selected: {_kind},
-            onSelectionChanged: (v) => setState(() => _kind = v.first),
+            selected: _kind,
+            onChanged: (v) => setState(() => _kind = v),
           ),
           const SizedBox(height: 16),
           TextField(
@@ -180,8 +182,8 @@ class _Preview extends StatelessWidget {
       key: const ValueKey('report-preview'),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: t.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(8),
+        color: context.cc.surface1,
+        borderRadius: BorderRadius.circular(CcDims.rCard),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

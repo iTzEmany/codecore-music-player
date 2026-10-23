@@ -11,6 +11,7 @@ import '../../widgets/color_picker.dart';
 import '../../widgets/confirm.dart';
 import 'theme_background_editor.dart';
 import 'theme_labels.dart';
+import '../../widgets/segmented_blocks.dart';
 
 /// The tokens a simple theme asks for; the rest follow from them.
 const _simpleTokens = [CcToken.bg, CcToken.accent, CcToken.text];
@@ -160,27 +161,25 @@ class _ThemeEditorScreenState extends ConsumerState<ThemeEditorScreen> {
                 const SizedBox(height: 16),
                 Text(l.themeBase, style: text.titleSmall),
                 const SizedBox(height: 8),
-                SegmentedButton<AppThemeId>(
-                  showSelectedIcon: false,
-                  segments: [
-                    ButtonSegment(value: AppThemeId.notte, label: Text(l.themeNotte)),
-                    ButtonSegment(value: AppThemeId.oled, label: Text(l.themeOled)),
-                    ButtonSegment(value: AppThemeId.chiaro, label: Text(l.themeChiaro)),
+                SegmentedBlocks<AppThemeId>(
+                  items: [
+                    BlockItem(value: AppThemeId.notte, icon: Icons.dark_mode_outlined, label: l.themeNotte),
+                    BlockItem(value: AppThemeId.oled, icon: Icons.contrast, label: l.themeOled),
+                    BlockItem(value: AppThemeId.chiaro, icon: Icons.light_mode_outlined, label: l.themeChiaro),
                   ],
-                  selected: {_t.base},
-                  onSelectionChanged: (v) => _set(_t.copyWith(base: v.first)),
+                  selected: _t.base,
+                  onChanged: (v) => _set(_t.copyWith(base: v)),
                 ),
                 const SizedBox(height: 16),
-                SegmentedButton<bool>(
-                  showSelectedIcon: false,
-                  segments: [
-                    ButtonSegment(value: false, label: Text(l.themeModeSimple)),
-                    ButtonSegment(value: true, label: Text(l.themeModeAdvanced)),
+                SegmentedBlocks<bool>(
+                  items: [
+                    BlockItem(value: false, icon: Icons.palette_outlined, label: l.themeModeSimple),
+                    BlockItem(value: true, icon: Icons.tune, label: l.themeModeAdvanced),
                   ],
-                  selected: {_advanced},
-                  onSelectionChanged: (v) => setState(() {
+                  selected: _advanced,
+                  onChanged: (v) => setState(() {
                     _commitOpen();
-                    _advanced = v.first;
+                    _advanced = v;
                     _open = null;
                   }),
                 ),
