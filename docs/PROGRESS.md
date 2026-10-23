@@ -482,7 +482,7 @@ Richiesta (2026-10-23): «scrivi il documento di fase con Deezer ed Exportify se
 Redesign Anello delle schermate rimaste (analisi del 2026-10-23 in `docs/audit-ui-anello.md`, un passo per pacchetto, prima di 36.1):
 - [ ] 36.R1 Impostazioni: schermate (pagine, editor del tema e dello sfondo, equalizzatore, segnala un problema, brani mancanti)
 - [ ] 36.R2 Impostazioni: righe e piccole finestre (scelte singole a blocchi, niente RadioListTile)
-- [ ] 36.R3 Condividi e dispositivi (invia, ricevi, scelta brani, QR, abbinamento, offerte, sincronizzazione)
+- [x] 36.R3 Condividi e dispositivi (invia, ricevi, scelta brani, QR, abbinamento, offerte, sincronizzazione) — blocchi e token della casa; dialoghi e AppBar con schede restano (spec), QR su bianco voluto (1321599)
 - [ ] 36.R4 Online, YouTube e nuove uscite (cornice delle pagine online, album, righe, sezioni dei risultati, fogli)
 - [ ] 36.R5 Radio e Importazione
 - [ ] 36.R6 Pulizia, tag, podcast, cronologia, attività
