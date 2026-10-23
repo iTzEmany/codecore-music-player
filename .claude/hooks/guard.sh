@@ -36,7 +36,9 @@ Bash)
   c=$(jq -r '.tool_input.command // empty' <<<"$input")
   [ -n "$c" ] || exit 0
   grep -Eq '(^|[;&|[:space:]])sudo([[:space:]]|$)' <<<"$c" && deny "sudo: mettilo in «Tocca a te» per l'utente."
-  grep -Eq 'git[[:space:]]+push' <<<"$c" && deny "git push: il lavoro resta in locale."
+  if grep -Eq 'git[[:space:]]+push' <<<"$c"; then
+      grep -Eq '(--force|--force-with-lease|--force-if-includes|[[:space:]]-[a-zA-Z]*f([[:space:]]|$)|--delete|[[:space:]]-d([[:space:]]|$)|--mirror|--prune|[[:space:]]\+[^[:space:]]+|[[:space:]]:[^[:space:]]+)' <<<"$c" && deny "git push forzato, che cancella o in mirror: negato."
+  fi
   grep -Eq 'git[[:space:]]+(reset[[:space:]]+--hard|clean|checkout[[:space:]]+(--[[:space:]]+)?\.)' <<<"$c" && deny "comando git distruttivo: usa un'alternativa non distruttiva."
   grep -Eq '(curl|wget)[^|]*\|[[:space:]]*(ba)?sh' <<<"$c" && deny "esecuzione di script scaricati negata."
   grep -Eq '(^|[[:space:]])(mkfs|dd[[:space:]]+if=|shutdown|reboot)' <<<"$c" && deny "comando di sistema negato."

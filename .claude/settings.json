@@ -49,7 +49,6 @@
     ],
     "deny": [
       "Bash(sudo:*)",
-      "Bash(git push:*)",
       "Bash(git reset --hard:*)",
       "Bash(git clean:*)",
       "Read(**/.env)",

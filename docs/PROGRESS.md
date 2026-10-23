@@ -477,6 +477,31 @@ Richiesta (2026-10-22): «Secondo parere automatico: applica solo se YouTube Mus
 
 - Streaming di YouTube sul Mi A3 (notte del 2026-10-22): con yt-dlp 2026.10 i client predefiniti risolvono la sfida JS sul telefono in 50–70 s; `android_vr` ora chiede un PO token (403 da googlevideo, mascherato da ExoPlayer come «(0) Source error»). Ora: indirizzo con gli header di yt-dlp (`-j`), «Source error» = indirizzo scaduto, client veloce `visionos` (misura dal PC: unico che risponde in 2–4 s e si scarica) con ripiego ai predefiniti, Casuale+ mette in coda un suggerito solo con l'indirizzo pronto (c1b1562, f3d806c). Mi A3 (APK 6047): «Ascolta» 8–19 s (60–65 s circa 1 volta su 4, quando il client veloce non risponde entro 20 s), suggeriti suonati senza salti. Da rifinire: tempo del client veloce; verificare che «Ascolta» non lasci file (il test ha toccato per sbaglio «Scarica»).
 
+## Fase 36 — Deezer per i metadati, Exportify semi-automatico (`fase-36-deezer-ed-exportify.md`)
+Richiesta (2026-10-23): «scrivi il documento di fase con Deezer ed Exportify semi-automatico», come miglioramento di arricchimento (5/6), importazione e sincronizzazione (12/15) e secondo parere (35), non come funzioni nuove. Scelte concordate: Deezer solo per i metadati, per ISRC prima che per testo, opzione spenta di default; niente credenziali né cookie di Spotify: l'utente esporta da exportify.net, Codecore prende lo ZIP. Fuori da questa fase: pagina artista, nuove uscite e Casuale+ con Deezer (servono gli id di YouTube per suonare).
+- [ ] 36.1 Verifiche preliminari e fixture (con «Export All» vero fatto dall'utente)
+- [ ] 36.2 Schema v14 e ISRC in libreria
+- [ ] 36.3 Client Deezer
+- [ ] 36.4 Scelta del brano e controllo d'edizione
+- [ ] 36.5 Arricchimento con Deezer
+- [ ] 36.6 Importazione: anno e copertine
+- [ ] 36.7 MusicBrainz per ISRC
+- [ ] 36.8 ZIP di Exportify e abbinamento
+- [ ] 36.9 «Sincronizza da Spotify» e «Apri exportify.net»
+- [ ] 36.10 File in arrivo (Android e desktop)
+- [ ] 36.11 Promemoria e onboarding
+- [ ] 36.12 Prova dal vivo e documentazione
+
+## Fase 37 — Metadati che viaggiano (`fase-37-metadati-che-viaggiano.md`)
+Richiesta (2026-10-23): un brano passato a un altro dispositivo deve portare i suoi metadati, non solo il nome; oggi gli m4a scaricati da YouTube arrivano senza tag e il ricevente li legge male (titolo sbagliato, artista e album sconosciuti). Da fare **dopo la fase 36** (ISRC in libreria, Deezer). Scelte dell'utente: scrittura dei tag nei file scaricati e ricevuti **accesa di default**; se tag del file e pacchetto non coincidono **vince il pacchetto**; l'ISRC **non si scrive nei file** (solo DB e pacchetto). Fuori: doppioni (li gestisce «Duplicati»), testo nei file, file della libreria dell'utente.
+- [ ] 37.1 `TrackMeta`: pacchetto e lettura severa
+- [ ] 37.2 Il pacchetto viaggia (elenco con PIN e offerte, copertina nelle offerte)
+- [ ] 37.3 Il ricevente applica il pacchetto
+- [ ] 37.4 Scrittura dei tag nei file di Codecore (`writeTagsAfterDownload`, disco e copertina)
+- [ ] 37.5 Ripiego dal nome del file («Artista - Titolo»)
+- [ ] 37.6 Deezer al ricevente (con ISRC e opzione accesa)
+- [ ] 37.7 Prova dal vivo e documentazione
+
 ## Identità «Anello», fase 1 (richiesta dell'utente, 2026-10-22; piano `docs/superpowers/plans/2026-10-22-identita-anello.md`)
 - [x] Anello di avanzamento attorno alla copertina (mini-player, Jam, lettore, barra desktop) (ff3fefa, 4e25b39, 37d5101)
 - [x] Blocco unico in basso con il pallino della scheda; la ricerca nasce dalla barra (79cd6a0, 90bcc01, 972a6d3, 6313a2a, 21c2c42)
@@ -496,6 +521,11 @@ Richiesta (2026-10-22): «Secondo parere automatico: applica solo se YouTube Mus
 - [x] Prova sul Mi A3 delle schermate della fase 2 (Memoria, Tutti i brani, chip, titoli): APK 6071; «Predefinito» spezzato a metà parola nei blocchi di ordinamento, corretto (blocchi 2x2 se la parola più lunga non entra)
 - [x] Jam nello stile Anello (era rimasta col vecchio design): lettore ad anello, partecipanti, coda, copertine vere dei propri brani (b0b074c)
 - [x] Prova della nuova Jam sul Motorola e sul PC (Xephyr): avvio da tutti e due i lati, sincronia, pausa dell'ospite, «Termina Jam»; i brani dell'ospite entrano subito dopo quello in corso, in ordine, prima della coda ereditata (23/10)
+- [ ] Difetti trovati sul PC (2026-10-23, approvati dall'utente; da fare **prima** della fase 36):
+  - [ ] 2. «In riproduzione» su desktop sbilanciata: circa 360 px vuoti al centro
+  - [ ] 3. Home in una colonna stretta al centro (circa 690 px su 1600); «Aggiunti da poco» mostra un riquadro vuoto senza copertine
+  - [ ] 4. Libreria: il contenuto si ferma a circa 1180 px mentre le icone in alto stanno sul bordo destro; Cerca vuota non mostra nulla (né ricerche recenti né suggerimenti); Alt+← non torna indietro
+  - (il difetto 1, metadati dei brani condivisi, è diventato la fase 37)
 - [ ] **Dopo tutte le fasi rimaste** (richiesta dell'utente, 2026-10-23): analisi completa del codice e verifica che ogni componente UI sotto `lib/ui` abbia il redesign Anello (elenco schermata per schermata, sì/no), poi correggere i buchi
 
 ## Note di deviazione

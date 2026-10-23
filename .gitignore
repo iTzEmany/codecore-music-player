@@ -18,3 +18,7 @@ test_shots/goldens/
 
 # Golden failure diffs
 test/goldens/failures/
+
+# CodeGraph index (local)
+.codegraph/
+scripts/__pycache__/
