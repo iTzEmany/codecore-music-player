@@ -497,8 +497,8 @@ Redesign Anello delle schermate rimaste (analisi del 2026-10-23 in `docs/audit-u
 - [ ] 36.7 MusicBrainz per ISRC
 - [x] 36.8 ZIP di Exportify e abbinamento — limiti controllati sulle dimensioni dichiarate prima di estrarre (d94b7df)
 - [x] 36.9 «Sincronizza da Spotify» e «Apri exportify.net» (1764cd0). Da provare su telefono: il pulsante «Apri exportify.net».
-- [ ] 36.10 File in arrivo (Android e desktop)
-- [ ] 36.11 Promemoria e onboarding
+- [~] 36.10 File in arrivo (Android e desktop) — canale codecore/incoming (VIEW/SEND zip e csv, 20 MB), desktop cerca in Download entro 30 min (65d3ce5). Da provare su telefono: «Apri» di Chrome e Condividi con app aperta e chiusa
+- [~] 36.11 Promemoria e onboarding — scheda in Home con «Più tardi», scelta 7/14/30 giorni, pagina «Playlist da Spotify» (65d3ce5). Da provare a vista: scheda e impostazione
 - [ ] 36.12 Prova dal vivo e documentazione
 
 ## Fase 37 — Metadati che viaggiano (`fase-37-metadati-che-viaggiano.md`)
