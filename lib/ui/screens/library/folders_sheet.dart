@@ -9,6 +9,7 @@ import '../../../core/platform.dart';
 import '../../../providers/database_providers.dart';
 import '../../../providers/library_providers.dart';
 import '../../../l10n/l10n_ext.dart';
+import '../../theme/tokens.dart';
 import '../../widgets/confirm.dart';
 
 Future<void> scanWithPermission(WidgetRef ref) async {
@@ -60,10 +61,16 @@ class FoldersSheet extends ConsumerWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          ListTile(
-            title: Text(context.l10n.folders),
-            trailing: Wrap(
+          Padding(
+            padding: const EdgeInsets.fromLTRB(CcDims.margin, 4, 4, 0),
+            child: Row(
               children: [
+                Expanded(
+                  child: Text(
+                    context.l10n.folders,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                ),
                 IconButton(
                   tooltip: context.l10n.refreshLibrary,
                   onPressed: scanning ? null : () => scanWithPermission(ref),

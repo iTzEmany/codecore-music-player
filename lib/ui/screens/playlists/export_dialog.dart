@@ -13,6 +13,7 @@ import '../../../l10n/l10n_ext.dart';
 import '../../../providers/database_providers.dart';
 import '../../../services/export/playlist_exporter.dart';
 import '../../../services/export/save_file.dart';
+import '../../widgets/segmented_blocks.dart';
 
 class _ExportChoice {
   const _ExportChoice(this.format, this.relative);
@@ -48,18 +49,21 @@ class _ExportDialogState extends State<ExportDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            RadioGroup<ExportFormat>(
-              groupValue: _format,
-              onChanged: (v) => setState(() => _format = v ?? _format),
-              child: Column(
-                children: [
-                  for (final f in ExportFormat.values)
-                    RadioListTile<ExportFormat>(
-                      value: f,
-                      title: Text(_label(l, f)),
-                    ),
-                ],
-              ),
+            SegmentedBlocks<ExportFormat>(
+              items: [
+                for (final f in ExportFormat.values)
+                  BlockItem(
+                    value: f,
+                    icon: switch (f) {
+                      ExportFormat.m3u8 => Icons.queue_music_rounded,
+                      ExportFormat.csv => Icons.table_chart_rounded,
+                      ExportFormat.json => Icons.data_object_rounded,
+                    },
+                    label: _label(l, f),
+                  ),
+              ],
+              selected: _format,
+              onChanged: (v) => setState(() => _format = v),
             ),
             if (_format == ExportFormat.m3u8)
               CheckboxListTile(

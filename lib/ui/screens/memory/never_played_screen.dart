@@ -43,43 +43,48 @@ class NeverPlayedScreen extends ConsumerWidget {
           tracks: shown,
           normal: AppBar(title: Text(l.memoryNeverPlayed)),
         ),
-        body: tracks.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, st) => loadErrorState(
-            context,
-            e,
-            st,
-            onRetry: () => ref.invalidate(neverPlayedTracksProvider),
-          ),
-          data: (list) => list.isEmpty
-              ? EmptyState(
-                  icon: Icons.headphones_rounded,
-                  message: l.memoryNeverPlayedNone,
-                )
-              : Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(CcDims.margin),
-                      child: Text(
-                        l.memoryNeverPlayedHint,
-                        style: Theme.of(context).textTheme.bodyMedium
-                            ?.copyWith(color: context.cc.textMuted),
-                      ),
-                    ),
-                    Expanded(
-                      child: ListView.builder(
-                        itemCount: list.length,
-                        itemExtent: extent,
-                        itemBuilder: (_, i) => LiveTrackRow(
-                          track: list[i],
-                          compact: compact,
-                          selection: selection,
-                          onTap: () => ctrl.playFromList(list, i),
+        body: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 960),
+            child: tracks.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (e, st) => loadErrorState(
+                context,
+                e,
+                st,
+                onRetry: () => ref.invalidate(neverPlayedTracksProvider),
+              ),
+              data: (list) => list.isEmpty
+                  ? EmptyState(
+                      icon: Icons.headphones_rounded,
+                      message: l.memoryNeverPlayedNone,
+                    )
+                  : Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(CcDims.margin),
+                          child: Text(
+                            l.memoryNeverPlayedHint,
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(color: context.cc.textMuted),
+                          ),
                         ),
-                      ),
+                        Expanded(
+                          child: ListView.builder(
+                            itemCount: list.length,
+                            itemExtent: extent,
+                            itemBuilder: (_, i) => LiveTrackRow(
+                              track: list[i],
+                              compact: compact,
+                              selection: selection,
+                              onTap: () => ctrl.playFromList(list, i),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+            ),
+          ),
         ),
       ),
     );

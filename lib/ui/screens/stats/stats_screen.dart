@@ -68,75 +68,81 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
     );
     return Scaffold(
       appBar: AppBar(title: Text(l.statsTitle)),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              CcDims.margin,
-              4,
-              CcDims.margin,
-              0,
-            ),
-            child: SegmentedBlocks<bool>(
-              items: [
-                BlockItem(
-                  value: false,
-                  icon: Icons.calendar_view_month_rounded,
-                  label: l.statsMonth,
-                ),
-                BlockItem(
-                  value: true,
-                  icon: Icons.date_range_rounded,
-                  label: l.statsYear,
-                ),
-              ],
-              selected: _period.isYear,
-              onChanged: _setYear,
-            ),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 960),
+          child: Column(
             children: [
-              IconButton(
-                tooltip: l.statsPrevious,
-                icon: const Icon(Icons.chevron_left_rounded),
-                onPressed: () => setState(() => _period = _period.previous),
-              ),
-              Flexible(
-                child: Text(
-                  _title(locale),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.titleMedium,
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  CcDims.margin,
+                  4,
+                  CcDims.margin,
+                  0,
+                ),
+                child: SegmentedBlocks<bool>(
+                  items: [
+                    BlockItem(
+                      value: false,
+                      icon: Icons.calendar_view_month_rounded,
+                      label: l.statsMonth,
+                    ),
+                    BlockItem(
+                      value: true,
+                      icon: Icons.date_range_rounded,
+                      label: l.statsYear,
+                    ),
+                  ],
+                  selected: _period.isYear,
+                  onChanged: _setYear,
                 ),
               ),
-              IconButton(
-                tooltip: l.statsNext,
-                icon: const Icon(Icons.chevron_right_rounded),
-                onPressed: _canGoNext
-                    ? () => setState(() => _period = _period.next)
-                    : null,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                    tooltip: l.statsPrevious,
+                    icon: const Icon(Icons.chevron_left_rounded),
+                    onPressed: () => setState(() => _period = _period.previous),
+                  ),
+                  Flexible(
+                    child: Text(
+                      _title(locale),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: l.statsNext,
+                    icon: const Icon(Icons.chevron_right_rounded),
+                    onPressed: _canGoNext
+                        ? () => setState(() => _period = _period.next)
+                        : null,
+                  ),
+                ],
+              ),
+              Expanded(
+                child: stats.when(
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  error: (e, st) => loadErrorState(
+                    context,
+                    e,
+                    st,
+                    onRetry: () => ref.invalidate(periodStatsProvider),
+                  ),
+                  data: (s) => s.isEmpty
+                      ? EmptyState(
+                          icon: Icons.bar_chart_rounded,
+                          message: l.statsEmpty,
+                        )
+                      : _Body(stats: s, locale: locale, cc: cc),
+                ),
               ),
             ],
           ),
-          Expanded(
-            child: stats.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, st) => loadErrorState(
-                context,
-                e,
-                st,
-                onRetry: () => ref.invalidate(periodStatsProvider),
-              ),
-              data: (s) => s.isEmpty
-                  ? EmptyState(
-                      icon: Icons.bar_chart_rounded,
-                      message: l.statsEmpty,
-                    )
-                  : _Body(stats: s, locale: locale, cc: cc),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

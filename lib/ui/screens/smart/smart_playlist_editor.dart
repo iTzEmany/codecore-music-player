@@ -34,10 +34,20 @@ class _Template {
 }
 
 final _templates = [
-  _Template((l) => l.smartTplNever, 'mai-ascoltati', SmartSort.defaultOrder, null),
+  _Template(
+    (l) => l.smartTplNever,
+    'mai-ascoltati',
+    SmartSort.defaultOrder,
+    null,
+  ),
   _Template((l) => l.smartTplRecent, 'aggiunto<30g', SmartSort.addedAt, null),
   _Template((l) => l.smartTplTop, 'ascolti>0', SmartSort.mostPlayed, 50),
-  _Template((l) => l.smartTpl90s, 'anno:1990..1999', SmartSort.defaultOrder, null),
+  _Template(
+    (l) => l.smartTpl90s,
+    'anno:1990..1999',
+    SmartSort.defaultOrder,
+    null,
+  ),
 ];
 
 /// Creates a smart playlist, or edits [existing]: name, rules with a live
@@ -48,7 +58,8 @@ class SmartPlaylistEditor extends ConsumerStatefulWidget {
   final SmartPlaylist? existing;
 
   @override
-  ConsumerState<SmartPlaylistEditor> createState() => _SmartPlaylistEditorState();
+  ConsumerState<SmartPlaylistEditor> createState() =>
+      _SmartPlaylistEditorState();
 }
 
 class _SmartPlaylistEditorState extends ConsumerState<SmartPlaylistEditor> {
@@ -150,88 +161,97 @@ class _SmartPlaylistEditorState extends ConsumerState<SmartPlaylistEditor> {
         title: Text(
           widget.existing == null ? l.smartPlaylistNew : l.smartPlaylistEdit,
         ),
-        actions: [
-          TextButton(onPressed: _save, child: Text(l.save)),
-        ],
+        actions: [TextButton(onPressed: _save, child: Text(l.save))],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(CcDims.margin),
-        children: [
-          TextField(
-            controller: _name,
-            maxLength: 60,
-            textCapitalization: TextCapitalization.sentences,
-            onChanged: (_) => setState(() {}),
-            decoration: InputDecoration(
-              labelText: l.smartName,
-              errorText: _triedSave && _name.text.trim().isEmpty
-                  ? l.smartNameRequired
-                  : null,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(l.smartTemplates, style: theme.labelLarge),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 4,
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 960),
+          child: ListView(
+            padding: const EdgeInsets.all(CcDims.margin),
             children: [
-              for (final t in _templates)
-                ActionChip(label: Text(t.label(l)), onPressed: () => _apply(t)),
-            ],
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: _rules,
-            minLines: 1,
-            maxLines: 3,
-            onChanged: _onRulesChanged,
-            decoration: InputDecoration(
-              labelText: l.smartRules,
-              hintText: l.smartRulesHint,
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
-            child: Text(
-              shown == null ? '' : l.tracksCount(shown),
-              style: theme.titleMedium?.copyWith(color: cc.accent),
-            ),
-          ),
-          if (_rules.text.trim().isEmpty)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(4, 4, 4, 0),
-              child: Text(l.smartNoRules, style: theme.bodyMedium),
-            ),
-          for (final w in warnings)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(4, 4, 4, 0),
-              child: Text(
-                l.ruleWarning(w.term),
-                style: theme.bodyMedium?.copyWith(color: cc.textMuted),
+              TextField(
+                controller: _name,
+                maxLength: 60,
+                textCapitalization: TextCapitalization.sentences,
+                onChanged: (_) => setState(() {}),
+                decoration: InputDecoration(
+                  labelText: l.smartName,
+                  errorText: _triedSave && _name.text.trim().isEmpty
+                      ? l.smartNameRequired
+                      : null,
+                ),
               ),
-            ),
-          const SizedBox(height: 16),
-          DropdownButtonFormField<SmartSort>(
-            initialValue: _sort,
-            isExpanded: true,
-            decoration: InputDecoration(labelText: l.smartSortBy),
-            items: [
-              for (final s in SmartSort.values)
-                DropdownMenuItem(value: s, child: Text(smartSortLabel(l, s))),
+              const SizedBox(height: 8),
+              Text(l.smartTemplates, style: theme.labelLarge),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 4,
+                children: [
+                  for (final t in _templates)
+                    ActionChip(
+                      label: Text(t.label(l)),
+                      onPressed: () => _apply(t),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _rules,
+                minLines: 1,
+                maxLines: 3,
+                onChanged: _onRulesChanged,
+                decoration: InputDecoration(
+                  labelText: l.smartRules,
+                  hintText: l.smartRulesHint,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
+                child: Text(
+                  shown == null ? '' : l.tracksCount(shown),
+                  style: theme.titleMedium?.copyWith(color: cc.accent),
+                ),
+              ),
+              if (_rules.text.trim().isEmpty)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(4, 4, 4, 0),
+                  child: Text(l.smartNoRules, style: theme.bodyMedium),
+                ),
+              for (final w in warnings)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(4, 4, 4, 0),
+                  child: Text(
+                    l.ruleWarning(w.term),
+                    style: theme.bodyMedium?.copyWith(color: cc.textMuted),
+                  ),
+                ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<SmartSort>(
+                initialValue: _sort,
+                isExpanded: true,
+                decoration: InputDecoration(labelText: l.smartSortBy),
+                items: [
+                  for (final s in SmartSort.values)
+                    DropdownMenuItem(
+                      value: s,
+                      child: Text(smartSortLabel(l, s)),
+                    ),
+                ],
+                onChanged: (s) => setState(() => _sort = s ?? _sort),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _limit,
+                keyboardType: TextInputType.number,
+                onChanged: (_) => setState(() {}),
+                decoration: InputDecoration(labelText: l.smartLimit),
+              ),
+              const SizedBox(height: 16),
+              Text(l.smartAutoNote, style: theme.bodyMedium),
             ],
-            onChanged: (s) => setState(() => _sort = s ?? _sort),
           ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: _limit,
-            keyboardType: TextInputType.number,
-            onChanged: (_) => setState(() {}),
-            decoration: InputDecoration(labelText: l.smartLimit),
-          ),
-          const SizedBox(height: 16),
-          Text(l.smartAutoNote, style: theme.bodyMedium),
-        ],
+        ),
       ),
     );
   }
