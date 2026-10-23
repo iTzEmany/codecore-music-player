@@ -494,7 +494,7 @@ Redesign Anello delle schermate rimaste (analisi del 2026-10-23 in `docs/audit-u
 - [x] 36.4 Scelta del brano e controllo d'edizione — ricerca per testo solo con durata locale nota (9d2e807)
 - [ ] 36.5 Arricchimento con Deezer
 - [ ] 36.6 Importazione: anno e copertine
-- [ ] 36.7 MusicBrainz per ISRC
+- [x] 36.7 MusicBrainz per ISRC (91a91bb)
 - [x] 36.8 ZIP di Exportify e abbinamento — limiti controllati sulle dimensioni dichiarate prima di estrarre (d94b7df)
 - [x] 36.9 «Sincronizza da Spotify» e «Apri exportify.net» (1764cd0). Da provare su telefono: il pulsante «Apri exportify.net».
 - [~] 36.10 File in arrivo (Android e desktop) — canale codecore/incoming (VIEW/SEND zip e csv, 20 MB), desktop cerca in Download entro 30 min (65d3ce5). Da provare su telefono: «Apri» di Chrome e Condividi con app aperta e chiusa
