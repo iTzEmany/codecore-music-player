@@ -491,11 +491,11 @@ Redesign Anello delle schermate rimaste (analisi del 2026-10-23 in `docs/audit-u
 - [~] 36.1 Verifiche preliminari e fixture (con «Export All» vero fatto dall'utente) — fixture Deezer e MusicBrainz (5fdc82e); ISRC letto da mp3 (TSRC) e flac/ogg, non da m4a; manca «Export All» dell'utente
 - [ ] 36.2 Schema v14 e ISRC in libreria
 - [x] 36.3 Client Deezer — trackByIsrc, searchTracks, album; riposo di 10 min tenuto nel client (MediaKind non ha Deezer) (bd381c4)
-- [ ] 36.4 Scelta del brano e controllo d'edizione
+- [x] 36.4 Scelta del brano e controllo d'edizione — ricerca per testo solo con durata locale nota (9d2e807)
 - [ ] 36.5 Arricchimento con Deezer
 - [ ] 36.6 Importazione: anno e copertine
 - [ ] 36.7 MusicBrainz per ISRC
-- [ ] 36.8 ZIP di Exportify e abbinamento
+- [x] 36.8 ZIP di Exportify e abbinamento — limiti controllati sulle dimensioni dichiarate prima di estrarre (d94b7df)
 - [ ] 36.9 «Sincronizza da Spotify» e «Apri exportify.net»
 - [ ] 36.10 File in arrivo (Android e desktop)
 - [ ] 36.11 Promemoria e onboarding
