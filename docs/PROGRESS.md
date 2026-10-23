@@ -624,6 +624,7 @@ Refactor «ui-fluida» (piano in `docs/refactor/ui-fluida/analisi.md`, decisioni
 - [ ] 44.3 Verifiche finali
 - [ ] 44.4 Aggiornare `analisi.md` con i risultati
 - [ ] 44.5 Pulizia dell'APK profile
+- [ ] 44.6 Nuova versione `1.3.0+4` e tag `v1.3.0` (push del tag solo con un sì: avvia la release)
 
 ## Note di deviazione
 <!-- una riga per deviazione: data — task — cosa è cambiato e perché -->

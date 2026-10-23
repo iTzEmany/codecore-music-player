@@ -36,3 +36,12 @@ Nuova sezione «Risultati» in `docs/refactor/ui-fluida/analisi.md`: per ogni F-
 Cancellare l'APK profile, che non serve più: `~/.claude/skills/obiettivo/scripts/pulizia.sh via build/app/outputs/flutter-apk/app-profile.apk`. Solo con lo script di pulizia, non con cancellazioni a mano.
 
 **Fatto quando:** `ls build/app/outputs/flutter-apk/app-profile.apk` risponde «No such file»; `build/perf/*.md` (le misure) restano.
+
+### 44.6 — Nuova versione e tag (richiesta dell'utente, D-35)
+Solo dopo 44.1–44.5 e con la CI verde su `master`:
+1. Portare `pubspec.yaml` da `1.2.0+3` a `1.3.0+4`, a meno che l'utente non scelga un altro numero.
+2. Aggiungere una voce al changelog o alle note di rilascio, se il progetto ne ha uno: fluidità, accessibilità, nuovo aspetto e i cambi di comportamento elencati in 44.4.
+3. Creare il tag annotato `v1.3.0` sul commit di chiusura.
+4. **Chiedere un sì all'utente prima di fare il push del tag.** Il push avvia `release.yml`, che costruisce gli APK, Linux e Windows e pubblica la release su GitHub.
+
+**Fatto quando:** `git tag -l v1.3.0` lo mostra; dopo il sì, `gh run list -w release.yml -L 1` è verde e la release esiste (`gh release view v1.3.0`).
