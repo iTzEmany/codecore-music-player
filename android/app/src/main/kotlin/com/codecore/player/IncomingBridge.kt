@@ -86,11 +86,13 @@ object IncomingBridge {
     private fun copyToCache(ctx: Context, uri: Uri): String? {
         val safe = withExtension(ctx, uri, displayName(ctx, uri).substringAfterLast('/'))
             .replace(Regex("[^A-Za-z0-9._ ()-]"), "_").take(80)
-        // A new name each time, so Dart sees every arrival as a different file.
-        val dir = File(ctx.cacheDir, "incoming").apply { mkdirs() }
+        // A new folder each time, so Dart sees every arrival as a different file
+        // while the name (the playlist name in Dart) stays the shared one.
+        val root = File(ctx.cacheDir, "incoming").apply { mkdirs() }
         val old = System.currentTimeMillis() - 60 * 60 * 1000
-        dir.listFiles()?.forEach { if (it.lastModified() < old) it.delete() }
-        val out = File(dir, "${System.currentTimeMillis()}_$safe")
+        root.listFiles()?.forEach { if (it.lastModified() < old) it.deleteRecursively() }
+        val dir = File(root, "${System.currentTimeMillis()}").apply { mkdirs() }
+        val out = File(dir, safe)
         return try {
             ctx.contentResolver.openInputStream(uri)?.use { input ->
                 out.outputStream().use { o ->
