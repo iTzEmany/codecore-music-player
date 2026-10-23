@@ -490,7 +490,7 @@ Redesign Anello delle schermate rimaste (analisi del 2026-10-23 in `docs/audit-u
 - [x] 36.R8 Statistiche, Memoria, dettagli della libreria, playlist, playlist intelligenti — pagine interne a 960, formato export a blocchi, intestazione cartelle (d68bdf1)
 - [~] 36.1 Verifiche preliminari e fixture (con «Export All» vero fatto dall'utente) — fixture Deezer e MusicBrainz (5fdc82e); ISRC letto da mp3 (TSRC) e flac/ogg, non da m4a; manca «Export All» dell'utente
 - [ ] 36.2 Schema v14 e ISRC in libreria
-- [ ] 36.3 Client Deezer
+- [x] 36.3 Client Deezer — trackByIsrc, searchTracks, album; riposo di 10 min tenuto nel client (MediaKind non ha Deezer) (bd381c4)
 - [ ] 36.4 Scelta del brano e controllo d'edizione
 - [ ] 36.5 Arricchimento con Deezer
 - [ ] 36.6 Importazione: anno e copertine
