@@ -155,6 +155,17 @@ void main() {
     },
   );
 
+  test('untagged file falls back to artist and title from its name', () async {
+    final d = music();
+    File(p.join(d.path, 'Art - Song (Lyrics).mp3')).writeAsBytesSync([0, 1]);
+    final folder = await folders.add(d.path);
+    await scanner.scan(folder).drain<void>();
+    final all = await db.select(db.tracks).get();
+    final t = all.firstWhere((t) => t.title == 'Song');
+    expect(t.artist, 'Art');
+    expect(all.firstWhere((t) => t.title == 'b.mp3').artist, 'Art'); // tagged
+  });
+
   test('scan writes the ISRC of the tag when the track has none', () async {
     final d = music();
     reader.byName['a.mp3'] = const TagInfo(title: 'a', isrc: 'ITA123');

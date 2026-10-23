@@ -10,6 +10,7 @@ import '../../data/db/app_database.dart';
 import '../../data/repositories/track_repository.dart';
 import '../covers/cover_store.dart';
 import '../tags/tag_reader.dart';
+import 'file_name_tags.dart';
 
 const audioExtensions = {
   'mp3',
@@ -198,16 +199,23 @@ class LibraryScanner {
       }
     }
     final ext = p.extension(f.path).replaceFirst('.', '').toLowerCase();
+    var title = t.title ?? p.basenameWithoutExtension(f.path);
+    var artist = t.artist;
+    if (t.title == null && t.artist == null) {
+      final split = splitArtistTitle(title);
+      title = split.title;
+      if (split.artist.isNotEmpty) artist = split.artist;
+    }
     return TracksCompanion.insert(
       path: f.path,
-      title: t.title ?? p.basenameWithoutExtension(f.path),
+      title: title,
       albumKey: albumKey,
       format: ext,
       sizeBytes: f.size,
       mtimeMs: f.mtime,
       addedAt: DateTime.now().millisecondsSinceEpoch,
       folderId: Value(folder.id),
-      artist: Value(t.artist),
+      artist: Value(artist),
       albumArtist: Value(t.albumArtist),
       album: Value(t.album),
       trackNumber: Value(t.trackNumber),
