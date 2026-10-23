@@ -484,7 +484,7 @@ Redesign Anello delle schermate rimaste (analisi del 2026-10-23 in `docs/audit-u
 - [ ] 36.R2 Impostazioni: righe e piccole finestre (scelte singole a blocchi, niente RadioListTile)
 - [x] 36.R3 Condividi e dispositivi (invia, ricevi, scelta brani, QR, abbinamento, offerte, sincronizzazione) — blocchi e token della casa; dialoghi e AppBar con schede restano (spec), QR su bianco voluto (1321599)
 - [x] 36.R4 Online, YouTube e nuove uscite (cornice delle pagine online, album, righe, sezioni dei risultati, fogli) — 960, filtro a blocchi, stati della casa; chip artisti (multipli) e AppBar restano (fad5e8b)
-- [ ] 36.R5 Radio e Importazione
+- [x] 36.R5 Radio e Importazione — pagine a 960, stati della casa, Sincronizza a blocchi con anteprima pigra; chip dei generi (24) e interruttore del paese restano (31fa6ec)
 - [x] 36.R6 Pulizia, tag, podcast, cronologia, attività — pagine a 960, stati vuoti e di errore della casa, podcast su CollectionScaffold, eliminazione automatica a blocchi (265e97e)
 - [x] 36.R7 Jam (uscite), testi, auto, finestre di brano e arricchimento — foglio auto CcSheet, token e caricamenti lineari; chip uscite (scelta multipla) e AppBar del brano restano (4bf3e9b)
 - [x] 36.R8 Statistiche, Memoria, dettagli della libreria, playlist, playlist intelligenti — pagine interne a 960, formato export a blocchi, intestazione cartelle (d68bdf1)
