@@ -496,7 +496,7 @@ Redesign Anello delle schermate rimaste (analisi del 2026-10-23 in `docs/audit-u
 - [ ] 36.6 Importazione: anno e copertine
 - [ ] 36.7 MusicBrainz per ISRC
 - [x] 36.8 ZIP di Exportify e abbinamento — limiti controllati sulle dimensioni dichiarate prima di estrarre (d94b7df)
-- [ ] 36.9 «Sincronizza da Spotify» e «Apri exportify.net»
+- [x] 36.9 «Sincronizza da Spotify» e «Apri exportify.net» (1764cd0). Da provare su telefono: il pulsante «Apri exportify.net».
 - [ ] 36.10 File in arrivo (Android e desktop)
 - [ ] 36.11 Promemoria e onboarding
 - [ ] 36.12 Prova dal vivo e documentazione
