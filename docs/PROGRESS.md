@@ -537,6 +537,95 @@ Richiesta (2026-10-23): un brano passato a un altro dispositivo deve portare i s
   - (il difetto 1, metadati dei brani condivisi, è diventato la fase 37)
 - [x] **Dopo tutte le fasi rimaste** (richiesta dell'utente, 2026-10-23; anticipata: analisi in `docs/audit-ui-anello.md`, buchi = passi 36.R1–36.R8): analisi completa del codice e verifica che ogni componente UI sotto `lib/ui` abbia il redesign Anello (elenco schermata per schermata, sì/no), poi correggere i buchi
 
+## Fase 38 — Rete di sicurezza (`fase-38-rete-ui-fluida.md`)
+Refactor «ui-fluida» (piano in `docs/refactor/ui-fluida/analisi.md`, decisioni D-01..D-30 in `docs/decisioni.md`, 2026-10-23). Strumenti di misura e test di caratterizzazione prima di toccare `lib/ui`.
+- [ ] 38.1 Strumenti di misura riparati (`perf_device.py:226`, `perf_test.dart:67`)
+- [ ] 38.2 Scenari nuovi in `perf_device.py` (apri album/torna, fogli, swipe mini player, apertura player)
+- [ ] 38.3 Test A: transizioni
+- [ ] 38.4 Test B: liste e fogli
+- [ ] 38.5 Test C: azioni, selezione, menu, dialoghi del nome, `architecture_test` con eccezioni
+- [ ] 38.6 Test D (accessibilità) e E (golden nuovi)
+- [ ] 38.7 `scripts/build_len.py` e conteggi di struttura
+- [ ] 38.8 Misure di partenza sul Mi A3 (app perf) in `build/perf/` e `docs/refactor/ui-fluida/misure.md`
+
+## Fase 39 — Fluidità (`fase-39-fluidita.md`)
+Refactor «ui-fluida» (piano in `docs/refactor/ui-fluida/analisi.md`, decisioni D-01..D-30 in `docs/decisioni.md`, 2026-10-23). Scatti su Mi A3 e Motorola; un rilievo per passo, misura prima e dopo.
+- [ ] 39.1 F-40 transizione di pagina senza opacità (slide o zoom, decide la misura, D-10)
+- [ ] 39.2 F-41 apertura e chiusura del player (D-18)
+- [ ] 39.3 F-44 cambio di scheda senza sfumatura
+- [ ] 39.4 F-42 swipe del mini player
+- [ ] 39.5 F-31 trascinamento di chiusura del player
+- [ ] 39.6 F-33 copertina che ruota: opzione spenta di default (D-11)
+- [ ] 39.7 F-35 tag Hero separati
+- [ ] 39.8 F-30 testi sincronizzati
+- [ ] 39.9 F-43 fogli con liste pigre
+- [ ] 39.10 F-45 ricerca e cambio di scheda
+- [ ] 39.11 F-32 riga seek
+- [ ] 39.12 F-36 animazioni implicite e backdrop
+- [ ] 39.13 F-65 `AnimatedSize` e movimento ridotto
+- [ ] 39.14 F-64 una sola scala di movimento
+- [ ] 39.15 F-66 curve
+- [ ] 39.16 Misura finale contro le soglie
+
+## Fase 40 — Accessibilità e token (`fase-40-accessibilita-e-token.md`)
+Refactor «ui-fluida» (piano in `docs/refactor/ui-fluida/analisi.md`, decisioni D-01..D-30 in `docs/decisioni.md`, 2026-10-23). Opzioni di sistema, contrasto, bersagli, etichette, token di arrivo (D-23).
+- [ ] 40.1 F-60 opzioni di sistema (D-14)
+- [ ] 40.2 F-61 `textFaint` ≥ 4,5:1 (golden rigenerati)
+- [ ] 40.3 F-62 accento ed errore su s2/s3 (D-17)
+- [ ] 40.4 F-63 avviso sul tema personalizzato (solo avviso, D-13)
+- [ ] 40.5 F-70 bersagli da 48 dp (D-15)
+- [ ] 40.6 F-71 gesti con etichetta e tastiera
+- [ ] 40.7 F-74 focus visibile
+- [ ] 40.8 F-72 copertine fuori dalla semantica (D-16)
+- [ ] 40.9 F-73 scala del testo al 200 %
+- [ ] 40.10 F-67 stili di testo nel tema
+- [ ] 40.11 F-68 scala di spaziature e raggi
+- [ ] 40.12 F-69 `oled` = `notte` con bg nero
+
+## Fase 41 — Mattoni condivisi (`fase-41-mattoni-condivisi.md`)
+Refactor «ui-fluida» (piano in `docs/refactor/ui-fluida/analisi.md`, decisioni D-01..D-30 in `docs/decisioni.md`, 2026-10-23). Strangler: mattone + test, migrazione per gruppi di `screens/`, poi si toglie il vecchio.
+- [ ] 41.1 F-01 `showMsg`
+- [ ] 41.2 F-06 `promptName`
+- [ ] 41.3 F-12 `CcAppBar`
+- [ ] 41.4 F-13 `AsyncBody<T>`
+- [ ] 41.5 F-14 regola dialogo/foglio e `showCcSheet`
+- [ ] 41.6 F-18 `AppLog` nei catch tipizzati
+- [ ] 41.7 F-19 `reorder(ids)` atteso
+- [ ] 41.8 Chiusura: metriche e `integration_test`
+
+## Fase 42 — Livelli e tipi (`fase-42-livelli-e-tipi.md`)
+Refactor «ui-fluida» (piano in `docs/refactor/ui-fluida/analisi.md`, decisioni D-01..D-30 in `docs/decisioni.md`, 2026-10-23). UI solo tramite provider (test di architettura), tipi al posto di stringhe.
+- [ ] 42.1 F-02 + F-03 `TrackOps`, `pathsById`, `architecture_test` a lista vuota
+- [ ] 42.2 F-08 selezione unica
+- [ ] 42.3 F-10 `SelectionKey`
+- [ ] 42.4 F-09 `OnlineSelectionScope`
+- [ ] 42.5 F-11 enum per menu
+- [ ] 42.6 F-16 `track.kind`
+- [ ] 42.7 F-15 `curiosityProvider`
+- [ ] 42.8 F-05 build oltre 150 righe
+- [ ] 42.9 F-07 `addFolderAndScan` (scansione dall'onboarding, D-12)
+- [ ] 42.10 F-04 via l'importer Python (D-04)
+- [ ] 42.11 Chiusura: metriche e `integration_test`
+
+## Fase 43 — Nuovo aspetto (`fase-43-nuovo-aspetto.md`)
+Refactor «ui-fluida» (piano in `docs/refactor/ui-fluida/analisi.md`, decisioni D-01..D-30 in `docs/decisioni.md`, 2026-10-23). Mockup approvati in `docs/refactor/ui-fluida/mockup/` (D-21..D-28); golden rigenerati solo qui (D-20).
+- [ ] 43.1 Un solo dock ovunque
+- [ ] 43.2 Home
+- [ ] 43.3 Libreria (filtri e scorciatoie a blocchi)
+- [ ] 43.4 Album e artista
+- [ ] 43.5 In riproduzione (anello 12 dp)
+- [ ] 43.6 Onboarding con scansione
+- [ ] 43.7 Resto delle schermate e prova sul Mi A3
+
+## Fase 44 — Chiusura ui-fluida (`fase-44-chiusura-ui-fluida.md`)
+Refactor «ui-fluida» (piano in `docs/refactor/ui-fluida/analisi.md`, decisioni D-01..D-30 in `docs/decisioni.md`, 2026-10-23). Misure finali contro le soglie e pulizia.
+- [ ] 44.1 Misure finali sul Mi A3
+- [ ] 44.2 Metriche di struttura
+- [ ] 44.3 Verifiche finali
+- [ ] 44.4 Aggiornare `analisi.md` con i risultati
+- [ ] 44.5 Pulizia dell'APK profile
+- [ ] 44.6 Nuova versione `1.3.0+4` e tag `v1.3.0` (push del tag solo con un sì: avvia la release)
+
 ## Note di deviazione
 <!-- una riga per deviazione: data — task — cosa è cambiato e perché -->
 

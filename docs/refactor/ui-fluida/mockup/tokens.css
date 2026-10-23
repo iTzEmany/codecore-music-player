@@ -1,0 +1,26 @@
+/* Token di arrivo del refactor ui-fluida (analisi.md, «Arrivo»). Tema notte, accento viola. */
+@font-face { font-family: Figtree; src: url(fonts/Figtree-Variable.ttf); font-weight: 300 900; }
+@font-face { font-family: Unbounded; src: url(fonts/Unbounded-Variable.ttf); font-weight: 200 900; }
+
+:root {
+  --bg: #07050C; --s1: #120E1C; --s2: #1D1630; --s3: #2A2140;
+  --accent: #A06BFF; --accent-soft: #D9C8FF; --on-accent: #12081F;
+  --text: #F4F0FA; --muted: #A79DB8; --faint: #887F99; --error: #FF6B81;
+
+  --gap-1: 4px; --gap-2: 8px; --gap-3: 12px; --gap-4: 16px; --gap-5: 24px; --gap-6: 32px;
+  --r-list: 4px; --r-grid: 8px; --r-card: 12px; --r-sheet: 16px; --r-dock: 28px;
+  --sep: 1px solid var(--s2);
+
+  --ring-player: 12px; --ring-mini: 3px; --ring-row: 2px;
+  --target: 48px;
+
+  --t-press: 120ms; --t-enter: 180ms; --t-sheet: 250ms; --t-player: 320ms;
+  --ease-in: cubic-bezier(.32,0,.67,0); --ease-out: cubic-bezier(.33,1,.68,1);
+
+  --display: 700 28px/1.1 Unbounded, sans-serif;   /* solo invito Home */
+  --title: 600 20px/1.2 Unbounded, sans-serif;     /* titoli di schermata, titolo nel player */
+  --body-l: 600 15px/1.35 Figtree, sans-serif;
+  --body: 400 13px/1.35 Figtree, sans-serif;
+  --small: 500 12px/1.3 Figtree, sans-serif;       /* minimo: niente sotto 12 */
+}
+@media (prefers-reduced-motion: reduce) { :root { --t-press: 0ms; --t-enter: 0ms; --t-sheet: 0ms; --t-player: 0ms; } }
