@@ -488,7 +488,7 @@ Redesign Anello delle schermate rimaste (analisi del 2026-10-23 in `docs/audit-u
 - [x] 36.R6 Pulizia, tag, podcast, cronologia, attività — pagine a 960, stati vuoti e di errore della casa, podcast su CollectionScaffold, eliminazione automatica a blocchi (265e97e)
 - [x] 36.R7 Jam (uscite), testi, auto, finestre di brano e arricchimento — foglio auto CcSheet, token e caricamenti lineari; chip uscite (scelta multipla) e AppBar del brano restano (4bf3e9b)
 - [x] 36.R8 Statistiche, Memoria, dettagli della libreria, playlist, playlist intelligenti — pagine interne a 960, formato export a blocchi, intestazione cartelle (d68bdf1)
-- [~] 36.1 Verifiche preliminari e fixture (con «Export All» vero fatto dall'utente) — fixture Deezer e MusicBrainz (5fdc82e); ISRC letto da mp3 (TSRC) e flac/ogg, non da m4a; manca «Export All» dell'utente
+- [x] 36.1 Verifiche preliminari e fixture — fixture Deezer e MusicBrainz (5fdc82e); ISRC letto da mp3 (TSRC) e flac/ogg, non da m4a; Export All vero (zip, account free): «Liked Songs» e «Saved Albums» presenti (album come brani), colonna ISRC in ogni CSV, 43 file e 10254 righe lette senza scarti, 1 sola senza ISRC (a7bb9e4)
 - [x] 36.2 Schema v14 e ISRC in libreria — ISRC normalizzato dai tag (mp3, flac, ogg) e dall'importazione, mai sovrascritto; niente riscansione forzata: i file già in libreria lo prendono quando cambiano (a8174f3)
 - [x] 36.3 Client Deezer — trackByIsrc, searchTracks, album; riposo di 10 min tenuto nel client (MediaKind non ha Deezer) (bd381c4)
 - [x] 36.4 Scelta del brano e controllo d'edizione — ricerca per testo solo con durata locale nota (9d2e807)
