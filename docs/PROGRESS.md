@@ -488,7 +488,7 @@ Redesign Anello delle schermate rimaste (analisi del 2026-10-23 in `docs/audit-u
 - [x] 36.R6 Pulizia, tag, podcast, cronologia, attività — pagine a 960, stati vuoti e di errore della casa, podcast su CollectionScaffold, eliminazione automatica a blocchi (265e97e)
 - [ ] 36.R7 Jam (uscite), testi, auto, finestre di brano e arricchimento
 - [x] 36.R8 Statistiche, Memoria, dettagli della libreria, playlist, playlist intelligenti — pagine interne a 960, formato export a blocchi, intestazione cartelle (d68bdf1)
-- [ ] 36.1 Verifiche preliminari e fixture (con «Export All» vero fatto dall'utente)
+- [~] 36.1 Verifiche preliminari e fixture (con «Export All» vero fatto dall'utente) — fixture Deezer e MusicBrainz (5fdc82e); ISRC letto da mp3 (TSRC) e flac/ogg, non da m4a; manca «Export All» dell'utente
 - [ ] 36.2 Schema v14 e ISRC in libreria
 - [ ] 36.3 Client Deezer
 - [ ] 36.4 Scelta del brano e controllo d'edizione
