@@ -24,7 +24,9 @@ import '../screens/jam/jam_request_dialog.dart';
 import '../screens/search/search_screen.dart';
 import '../screens/home/home_screen.dart';
 import '../screens/releases/new_releases_screen.dart';
+import '../../providers/exportify_providers.dart' show incomingPathProvider;
 import '../../providers/releases_providers.dart' show launchTargetProvider;
+import '../screens/import/import_flow.dart' show openImportFile;
 import 'shell_nav.dart';
 import '../../l10n/l10n_ext.dart';
 import '../theme/tokens.dart';
@@ -138,6 +140,14 @@ class AppShell extends ConsumerWidget {
         if (context.mounted) {
           ShellNav.openInHome(context, ref, const NewReleasesScreen());
         }
+      });
+    });
+    // A ZIP/CSV opened with Codecore from another app (Android).
+    ref.listen(incomingPathProvider, (_, next) {
+      final path = next.value;
+      if (path == null) return;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (context.mounted) openImportFile(context, ref, path);
       });
     });
     ref.listen(shareOffersProvider, (_, next) {

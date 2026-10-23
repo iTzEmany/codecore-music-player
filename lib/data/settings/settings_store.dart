@@ -518,4 +518,24 @@ class SettingsStore {
 
   Future<void> writeExportifyLastSyncAt(int ms) =>
       _prefs.setInt('exportifyLastSyncAt', ms);
+
+  /// Days between sync reminders: 0 = off, else 7, 14 or 30.
+  int readExportifyRemindDays() => _prefs.getInt('exportifyRemindDays') ?? 0;
+
+  Future<void> writeExportifyRemindDays(int days) =>
+      _prefs.setInt('exportifyRemindDays', days);
+
+  /// The reminder stays quiet until then (ms since epoch); null = not snoozed.
+  int? readExportifySnoozeUntil() => _prefs.getInt('exportifySnoozeUntil');
+
+  Future<void> writeExportifySnoozeUntil(int ms) =>
+      _prefs.setInt('exportifySnoozeUntil', ms);
+
+  /// When «Apri exportify.net» was last tapped (ms since epoch); null = never
+  /// or already used. The desktop looks for a download newer than this.
+  int? readExportifyOpenedAt() => _prefs.getInt('exportifyOpenedAt');
+
+  Future<void> writeExportifyOpenedAt(int? ms) => ms == null
+      ? _prefs.remove('exportifyOpenedAt')
+      : _prefs.setInt('exportifyOpenedAt', ms);
 }

@@ -1,26 +1,22 @@
 import '../../widgets/cc_sheet.dart';
 
-import 'dart:io';
-
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
 import '../../../core/app_log.dart';
 import '../../../core/constants.dart';
 import '../../../core/platform.dart';
 import '../../../l10n/l10n_ext.dart';
-import '../../../providers/issue_providers.dart';
+import '../../../providers/exportify_providers.dart';
 import '../../../services/import/exportify_reader.dart'
-    show CsvTooLargeException, checkCsvSize;
-import '../../../services/import/exportify_zip.dart';
-import '../../../services/import/playlist_reader.dart';
+    show CsvTooLargeException;
+import '../../../services/import/playlist_reader.dart'
+    show supportedPlaylistExtensions;
+import '../../../services/import/read_import_file.dart';
 import '../../theme/tokens.dart';
-
-const exportifyAddress = 'https://exportify.net';
 
 /// Explains where the CSV comes from (exportify.net) and lets the user pick it.
 /// Pops with the parsed playlist, or with an [ExportifyZipResult] for a ZIP.
@@ -75,25 +71,9 @@ class _ImportIntroSheetState extends ConsumerState<ImportIntroSheet> {
       if (path == null) {
         if (files.isNotEmpty) error = l.csvImportReadFailed;
       } else {
-        final isZip = files.first.name.toLowerCase().endsWith('.zip');
-        final size = await File(path).length();
-        if (isZip) {
-          if (size > kMaxZipBytes) {
-            throw CsvTooLargeException('ZIP of $size bytes');
-          }
-          final zip = await readExportifyZip(await File(path).readAsBytes());
-          if (!mounted) return;
-          Navigator.of(context).pop(zip);
-          return;
-        }
-        checkCsvSize(size);
-        final text = decodePlaylistBytes(
-          files.first.name,
-          await File(path).readAsBytes(),
-        );
-        final csv = await readPlaylistFileInIsolate(files.first.name, text);
+        final picked = await readImportPath(path);
         if (!mounted) return;
-        Navigator.of(context).pop(csv.withBaseDir(p.dirname(path)));
+        Navigator.of(context).pop(picked);
         return;
       }
     } on CsvTooLargeException catch (e, st) {
@@ -125,7 +105,7 @@ class _ImportIntroSheetState extends ConsumerState<ImportIntroSheet> {
   Future<void> _openExportify() async {
     final messenger = ScaffoldMessenger.of(context);
     final failed = context.l10n.csvImportOpenFailed;
-    if (await ref.read(linkOpenerProvider).open(exportifyAddress)) return;
+    if (await openExportify(ref)) return;
     messenger
       ..clearSnackBars()
       ..showSnackBar(SnackBar(content: Text(failed)));

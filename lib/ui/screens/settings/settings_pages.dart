@@ -43,6 +43,7 @@ import 'update_tiles.dart';
 import 'shuffle_plus_tiles.dart';
 import 'release_settings_tiles.dart';
 import '../../widgets/segmented_blocks.dart';
+import '../import/exportify_remind_choice.dart';
 
 const _languages = {
   'it': 'Italiano',
@@ -275,6 +276,15 @@ List<SettingsGroup> _online(BuildContext context, WidgetRef ref) {
                   value: s.autoLyrics,
                   onChanged: (v) =>
                       notifier.update((c) => c.copyWith(autoLyrics: v)),
+                ),
+              ],
+            ),
+            SettingsGroup(
+              title: l.exportifyRemindTitle,
+              children: const [
+                Padding(
+                  padding: EdgeInsets.fromLTRB(16, 4, 16, 8),
+                  child: ExportifyRemindChoice(),
                 ),
               ],
             ),

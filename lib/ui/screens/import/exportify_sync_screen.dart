@@ -7,6 +7,7 @@ import '../../../data/repositories/playlist_repository.dart'
     show PlaylistSummary;
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/database_providers.dart';
+import '../../../providers/exportify_providers.dart';
 import '../../../providers/import_providers.dart';
 import '../../../providers/settings_providers.dart';
 import '../../../services/import/exportify_zip.dart';
@@ -192,6 +193,7 @@ class _ExportifySyncScreenState extends ConsumerState<ExportifySyncScreen> {
       await store.writeExportifyLastSyncAt(
         DateTime.now().millisecondsSinceEpoch,
       );
+      ref.invalidate(exportifyReminderProvider);
     }
     messenger
       ..clearSnackBars()

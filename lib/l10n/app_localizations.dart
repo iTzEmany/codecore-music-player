@@ -8216,6 +8216,66 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Non riesco a leggere le playlist dello ZIP'**
   String get exportifySyncLoadFailed;
+
+  /// No description provided for @exportifyRemindTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Ricordami di sincronizzare con Spotify'**
+  String get exportifyRemindTitle;
+
+  /// No description provided for @exportifyRemindOff.
+  ///
+  /// In it, this message translates to:
+  /// **'Spento'**
+  String get exportifyRemindOff;
+
+  /// No description provided for @exportifyRemindDays.
+  ///
+  /// In it, this message translates to:
+  /// **'{days} giorni'**
+  String exportifyRemindDays(int days);
+
+  /// No description provided for @exportifyCardTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'È ora di sincronizzare le playlist con Spotify'**
+  String get exportifyCardTitle;
+
+  /// No description provided for @exportifyCardOpen.
+  ///
+  /// In it, this message translates to:
+  /// **'Apri Exportify'**
+  String get exportifyCardOpen;
+
+  /// No description provided for @exportifyCardLater.
+  ///
+  /// In it, this message translates to:
+  /// **'Più tardi'**
+  String get exportifyCardLater;
+
+  /// No description provided for @exportifyFoundTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Trovata l’esportazione di Exportify'**
+  String get exportifyFoundTitle;
+
+  /// No description provided for @exportifyFoundSync.
+  ///
+  /// In it, this message translates to:
+  /// **'Sincronizza'**
+  String get exportifyFoundSync;
+
+  /// No description provided for @onboardingSpotifyTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Playlist da Spotify'**
+  String get onboardingSpotifyTitle;
+
+  /// No description provided for @onboardingSpotifyBody.
+  ///
+  /// In it, this message translates to:
+  /// **'Su exportify.net scarichi le tue playlist di Spotify in un file. Codecore lo prende e le aggiorna qui.\nNon serve collegare nessun account: il file lo scarichi tu.'**
+  String get onboardingSpotifyBody;
 }
 
 class _AppLocalizationsDelegate

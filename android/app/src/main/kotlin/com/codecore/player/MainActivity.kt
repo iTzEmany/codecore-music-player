@@ -15,6 +15,14 @@ class MainActivity : AudioServiceActivity() {
     private val main = Handler(Looper.getMainLooper())
     private var deviceCallback: AudioDeviceCallback? = null
 
+    // A restored activity gets its old launch intent again: not a new file.
+    private var restored = false
+
+    override fun onCreate(savedInstanceState: android.os.Bundle?) {
+        restored = savedInstanceState != null
+        super.onCreate(savedInstanceState)
+    }
+
     override fun onResume() {
         super.onResume()
         ShareBridge.foreground = true
@@ -30,6 +38,7 @@ class MainActivity : AudioServiceActivity() {
     override fun onNewIntent(intent: android.content.Intent) {
         super.onNewIntent(intent)
         NotifyBridge.handleIntent(intent)
+        IncomingBridge.handleIntent(applicationContext, intent)
     }
 
     override fun onPause() {
@@ -49,6 +58,8 @@ class MainActivity : AudioServiceActivity() {
         LinkBridge.register(flutterEngine.dartExecutor.binaryMessenger, applicationContext)
         IconBridge.register(flutterEngine.dartExecutor.binaryMessenger, applicationContext)
         NotifyBridge.handleIntent(intent)
+        IncomingBridge.register(flutterEngine.dartExecutor.binaryMessenger)
+        if (!restored) IncomingBridge.handleIntent(applicationContext, intent)
 
         // Where the sound goes (headphones or speaker): the equalizer keeps a
         // curve for each.
@@ -136,6 +147,7 @@ class MainActivity : AudioServiceActivity() {
         ShareBridge.channel = null
         ImportBridge.channel = null
         NotifyBridge.detach()
+        IncomingBridge.detach()
         MediaDeleteBridge.detach()
         super.cleanUpFlutterEngine(flutterEngine)
     }

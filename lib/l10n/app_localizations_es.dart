@@ -5239,4 +5239,38 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get exportifySyncLoadFailed => 'No se pueden leer las listas del ZIP';
+
+  @override
+  String get exportifyRemindTitle => 'Recuérdame sincronizar con Spotify';
+
+  @override
+  String get exportifyRemindOff => 'Desactivado';
+
+  @override
+  String exportifyRemindDays(int days) {
+    return '$days días';
+  }
+
+  @override
+  String get exportifyCardTitle =>
+      'Es hora de sincronizar tus listas con Spotify';
+
+  @override
+  String get exportifyCardOpen => 'Abrir Exportify';
+
+  @override
+  String get exportifyCardLater => 'Más tarde';
+
+  @override
+  String get exportifyFoundTitle => 'Exportación de Exportify encontrada';
+
+  @override
+  String get exportifyFoundSync => 'Sincronizar';
+
+  @override
+  String get onboardingSpotifyTitle => 'Listas de Spotify';
+
+  @override
+  String get onboardingSpotifyBody =>
+      'En exportify.net descargas tus listas de Spotify en un archivo. Codecore lo recoge y las actualiza aquí.\nNo hace falta conectar ninguna cuenta: el archivo lo descargas tú.';
 }

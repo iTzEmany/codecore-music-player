@@ -9,10 +9,11 @@ import '../../theme/tokens.dart';
 import '../library/folders_sheet.dart';
 import 'onboarding_pages.dart';
 
-const onboardingPageCount = 4;
+const onboardingPageCount = 5;
 
 /// The guide of the first start: welcome, music folders (and, on Android, the
-/// audio permission), the online features (off by default) and what downloads,
+/// audio permission), the online features (off by default), the optional
+/// Spotify sync reminder and what downloads,
 /// Jam and sharing do. Every page can be skipped.
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key, this.onFinished, this.askAudioPermission});
@@ -95,6 +96,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       const WelcomePage(),
                       FoldersPage(askAudioPermission: askPermission),
                       const OnlinePage(),
+                      const SpotifyPage(),
                       const SharePage(),
                     ],
                   ),

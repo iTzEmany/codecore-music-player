@@ -8,6 +8,7 @@ import 'package:codecore/providers/database_providers.dart';
 import 'package:codecore/providers/library_providers.dart';
 import 'package:codecore/providers/player_providers.dart';
 import 'package:codecore/providers/settings_providers.dart';
+import 'package:codecore/providers/startup_providers.dart';
 import 'package:codecore/services/audio/codecore_audio_handler.dart';
 import 'package:codecore/services/audio/online_entries.dart';
 import 'package:codecore/services/audio/play_queue.dart';
@@ -63,6 +64,8 @@ class Harness {
         audioHandlerProvider.overrideWithValue(handler),
         settingsStoreProvider.overrideWithValue(store),
         coversDirProvider.overrideWithValue(coversDir),
+        // No two-second wait in widget tests.
+        startupSettledProvider.overrideWith((ref) async {}),
       ];
 
   Future<void> pump(WidgetTester tester, Widget child,

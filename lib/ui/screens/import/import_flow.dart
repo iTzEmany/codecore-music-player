@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/app_log.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/database_providers.dart';
 import '../../../providers/import_providers.dart';
+import '../../../services/import/exportify_reader.dart'
+    show CsvTooLargeException;
 import '../../../services/import/exportify_zip.dart';
 import '../../../services/import/imported_playlist.dart';
+import '../../../services/import/read_import_file.dart';
 import '../../../services/import/track_matcher.dart';
 import 'exportify_sync_screen.dart';
 import 'import_intro_sheet.dart';
@@ -15,6 +19,46 @@ import 'import_preview_dialog.dart';
 Future<void> startCsvImport(BuildContext context, WidgetRef ref) async {
   final picked = await ImportIntroSheet.show(context);
   if (picked == null || !context.mounted) return;
+  await continueImport(context, ref, picked);
+}
+
+/// A file from outside (Android «Apri con», a download found on the desktop):
+/// the same flow as the file picker.
+Future<void> openImportFile(
+  BuildContext context,
+  WidgetRef ref,
+  String path,
+) async {
+  final l = context.l10n;
+  final messenger = ScaffoldMessenger.of(context);
+  String? error;
+  try {
+    final picked = await readImportPath(path);
+    if (!context.mounted) return;
+    await continueImport(context, ref, picked);
+  } on CsvTooLargeException catch (e, st) {
+    AppLog.w('incoming file too large', e, st);
+    error = l.csvImportTooBig;
+  } on FormatException catch (e, st) {
+    AppLog.w('incoming file is not Exportify', e, st);
+    error = l.csvImportNotExportify;
+  } on Object catch (e, st) {
+    AppLog.w('incoming file not readable', e, st);
+    error = l.csvImportReadFailed;
+  }
+  if (error != null) {
+    messenger
+      ..clearSnackBars()
+      ..showSnackBar(SnackBar(content: Text(error)));
+  }
+}
+
+/// [picked] is an [ExportifyZipResult] or an [ImportedPlaylist].
+Future<void> continueImport(
+  BuildContext context,
+  WidgetRef ref,
+  Object picked,
+) async {
   if (picked is ExportifyZipResult) {
     await Navigator.of(context).push(
       MaterialPageRoute<void>(builder: (_) => ExportifySyncScreen(zip: picked)),

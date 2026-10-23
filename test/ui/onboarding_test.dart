@@ -47,10 +47,10 @@ void main() {
     await h.dispose(tester);
   });
 
-  testWidgets('four pages with Avanti, the last says «Inizia» and marks the notice as seen', (tester) async {
+  testWidgets('five pages with Avanti, the last says «Inizia» and marks the notice as seen', (tester) async {
     final h = await Harness.create(tester);
     await _openGate(tester, h);
-    for (final title in ['La tua musica', 'Funzioni online', 'Download, Jam e condivisione']) {
+    for (final title in ['La tua musica', 'Funzioni online', 'Playlist da Spotify', 'Download, Jam e condivisione']) {
       await tester.tap(find.text('Avanti'));
       await _settle(tester);
       expect(find.text(title), findsOneWidget);
@@ -78,6 +78,23 @@ void main() {
     await _settle(tester);
     expect(_settings(tester).autoEnrich, isTrue);
     expect(_settings(tester).autoLyrics, isFalse);
+    await h.dispose(tester);
+  });
+
+  testWidgets('the Spotify page leaves the reminder off, and a choice is saved', (tester) async {
+    final h = await Harness.create(tester);
+    await _openGate(tester, h);
+    for (var i = 0; i < 3; i++) {
+      await tester.tap(find.text('Avanti'));
+      await _settle(tester);
+    }
+    expect(find.text('Playlist da Spotify'), findsOneWidget);
+    expect(h.store.readExportifyRemindDays(), 0);
+    await tester.ensureVisible(find.text('14 giorni'));
+    await tester.pump();
+    await tester.tap(find.text('14 giorni'));
+    await _settle(tester);
+    expect(h.store.readExportifyRemindDays(), 14);
     await h.dispose(tester);
   });
 

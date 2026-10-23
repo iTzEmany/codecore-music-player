@@ -2842,5 +2842,15 @@
   "csvImportZipHint": "With «Export All» you get a ZIP with all your playlists: pick it here and sync them together.",
   "exportifySyncFailed": "Sync failed",
   "exportifySyncEntryFailed": "Cannot read this playlist",
-  "exportifySyncLoadFailed": "Cannot read the playlists in the ZIP"
+  "exportifySyncLoadFailed": "Cannot read the playlists in the ZIP",
+  "exportifyRemindTitle": "Remind me to sync with Spotify",
+  "exportifyRemindOff": "Off",
+  "exportifyRemindDays": "{days} days",
+  "exportifyCardTitle": "Time to sync your playlists with Spotify",
+  "exportifyCardOpen": "Open Exportify",
+  "exportifyCardLater": "Later",
+  "exportifyFoundTitle": "Exportify export found",
+  "exportifyFoundSync": "Sync",
+  "onboardingSpotifyTitle": "Playlists from Spotify",
+  "onboardingSpotifyBody": "On exportify.net you download your Spotify playlists as a file. Codecore picks it up and updates them here.\nNo account to connect: you download the file yourself."
 }

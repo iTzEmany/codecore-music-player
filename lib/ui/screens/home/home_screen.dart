@@ -11,6 +11,7 @@ import '../../widgets/activity_button.dart';
 import '../../widgets/empty_state.dart';
 import '../library/folders_sheet.dart';
 import '../settings/settings_screen.dart';
+import 'exportify_card.dart';
 import 'home_blocks.dart';
 import 'home_bottom_rows.dart';
 import 'resume_rows.dart';
@@ -95,6 +96,7 @@ class HomeScreen extends ConsumerWidget {
             child: ListView(
               children: [
                 header,
+                const ExportifyCard(),
                 const ShuffleHero(),
                 const ShortcutsRow(),
                 const ResumeList(),

@@ -8,9 +8,11 @@ import '../../../core/permissions.dart';
 import '../../../core/platform.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/database_providers.dart';
+import '../../../providers/exportify_providers.dart';
 import '../../../providers/library_providers.dart';
 import '../../../providers/settings_providers.dart';
 import '../../theme/tokens.dart';
+import '../import/exportify_remind_choice.dart';
 
 class _Page extends StatelessWidget {
   const _Page({
@@ -189,6 +191,39 @@ class OnlinePage extends ConsumerWidget {
           value: s.autoLyrics,
           onChanged: (v) => notifier.update((c) => c.copyWith(autoLyrics: v)),
         ),
+      ],
+    );
+  }
+}
+
+/// Optional: how to bring Spotify playlists in, and the reminder (off).
+class SpotifyPage extends ConsumerWidget {
+  const SpotifyPage({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    final lines = l.onboardingSpotifyBody.split('\n');
+    return _Page(
+      icon: Icons.playlist_add_rounded,
+      title: l.onboardingSpotifyTitle,
+      children: [
+        for (final line in lines) _body(context, line),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: OutlinedButton.icon(
+            onPressed: () => openExportify(ref),
+            icon: const Icon(Icons.open_in_new_rounded),
+            label: Text(l.csvImportOpenExportify),
+          ),
+        ),
+        const SizedBox(height: 16),
+        Text(
+          l.exportifyRemindTitle,
+          style: Theme.of(context).textTheme.titleSmall,
+        ),
+        const SizedBox(height: 8),
+        const ExportifyRemindChoice(),
       ],
     );
   }

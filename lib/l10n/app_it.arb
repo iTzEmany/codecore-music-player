@@ -3387,5 +3387,22 @@
   "csvImportZipHint": "Con «Export All» ottieni uno ZIP con tutte le playlist: scegli quello e le sincronizzi insieme.",
   "exportifySyncFailed": "Sincronizzazione non riuscita",
   "exportifySyncEntryFailed": "Non riesco a leggere questa playlist",
-  "exportifySyncLoadFailed": "Non riesco a leggere le playlist dello ZIP"
+  "exportifySyncLoadFailed": "Non riesco a leggere le playlist dello ZIP",
+  "exportifyRemindTitle": "Ricordami di sincronizzare con Spotify",
+  "exportifyRemindOff": "Spento",
+  "exportifyRemindDays": "{days} giorni",
+  "@exportifyRemindDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "exportifyCardTitle": "È ora di sincronizzare le playlist con Spotify",
+  "exportifyCardOpen": "Apri Exportify",
+  "exportifyCardLater": "Più tardi",
+  "exportifyFoundTitle": "Trovata l’esportazione di Exportify",
+  "exportifyFoundSync": "Sincronizza",
+  "onboardingSpotifyTitle": "Playlist da Spotify",
+  "onboardingSpotifyBody": "Su exportify.net scarichi le tue playlist di Spotify in un file. Codecore lo prende e le aggiorna qui.\nNon serve collegare nessun account: il file lo scarichi tu."
 }
