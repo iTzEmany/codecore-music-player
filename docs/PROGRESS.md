@@ -489,7 +489,7 @@ Redesign Anello delle schermate rimaste (analisi del 2026-10-23 in `docs/audit-u
 - [x] 36.R7 Jam (uscite), testi, auto, finestre di brano e arricchimento — foglio auto CcSheet, token e caricamenti lineari; chip uscite (scelta multipla) e AppBar del brano restano (4bf3e9b)
 - [x] 36.R8 Statistiche, Memoria, dettagli della libreria, playlist, playlist intelligenti — pagine interne a 960, formato export a blocchi, intestazione cartelle (d68bdf1)
 - [~] 36.1 Verifiche preliminari e fixture (con «Export All» vero fatto dall'utente) — fixture Deezer e MusicBrainz (5fdc82e); ISRC letto da mp3 (TSRC) e flac/ogg, non da m4a; manca «Export All» dell'utente
-- [ ] 36.2 Schema v14 e ISRC in libreria
+- [x] 36.2 Schema v14 e ISRC in libreria — ISRC normalizzato dai tag (mp3, flac, ogg) e dall'importazione, mai sovrascritto; niente riscansione forzata: i file già in libreria lo prendono quando cambiano (a8174f3)
 - [x] 36.3 Client Deezer — trackByIsrc, searchTracks, album; riposo di 10 min tenuto nel client (MediaKind non ha Deezer) (bd381c4)
 - [x] 36.4 Scelta del brano e controllo d'edizione — ricerca per testo solo con durata locale nota (9d2e807)
 - [ ] 36.5 Arricchimento con Deezer
@@ -503,7 +503,7 @@ Redesign Anello delle schermate rimaste (analisi del 2026-10-23 in `docs/audit-u
 
 ## Fase 37 — Metadati che viaggiano (`fase-37-metadati-che-viaggiano.md`)
 Richiesta (2026-10-23): un brano passato a un altro dispositivo deve portare i suoi metadati, non solo il nome; oggi gli m4a scaricati da YouTube arrivano senza tag e il ricevente li legge male (titolo sbagliato, artista e album sconosciuti). Da fare **dopo la fase 36** (ISRC in libreria, Deezer). Scelte dell'utente: scrittura dei tag nei file scaricati e ricevuti **accesa di default**; se tag del file e pacchetto non coincidono **vince il pacchetto**; l'ISRC **non si scrive nei file** (solo DB e pacchetto). Fuori: doppioni (li gestisce «Duplicati»), testo nei file, file della libreria dell'utente.
-- [ ] 37.1 `TrackMeta`: pacchetto e lettura severa
+- [x] 37.1 `TrackMeta`: pacchetto e lettura severa — tolto `origin`; il ricevente non applica l'enrichStatus del mittente (b33e00b)
 - [ ] 37.2 Il pacchetto viaggia (elenco con PIN e offerte, copertina nelle offerte)
 - [ ] 37.3 Il ricevente applica il pacchetto
 - [ ] 37.4 Scrittura dei tag nei file di Codecore (`writeTagsAfterDownload`, disco e copertina)
