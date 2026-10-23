@@ -1,4 +1,3 @@
-import '../../widgets/cc_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -9,6 +8,8 @@ import '../../../services/radio/radio_browser_client.dart';
 import '../../../services/radio/regions.dart';
 import '../../../services/radio/country_names.dart';
 import '../../theme/tokens.dart';
+import '../../widgets/cc_sheet.dart';
+import '../../widgets/error_state.dart';
 
 /// Country and region for «Vicino a te». Nothing about the user's position is
 /// asked: they are picked by hand. The sheet opens by itself the first time.
@@ -16,12 +17,15 @@ class RadioRegionSheet extends ConsumerStatefulWidget {
   const RadioRegionSheet({super.key});
 
   static Future<void> show(BuildContext context) => showCcSheet<void>(
-        context: context,
-        isScrollControlled: true,
-        useRootNavigator: true,
-        showDragHandle: true,
-        builder: (_) => const FractionallySizedBox(heightFactor: 0.8, child: RadioRegionSheet()),
-      );
+    context: context,
+    isScrollControlled: true,
+    useRootNavigator: true,
+    showDragHandle: true,
+    builder: (_) => const FractionallySizedBox(
+      heightFactor: 0.8,
+      child: RadioRegionSheet(),
+    ),
+  );
 
   @override
   ConsumerState<RadioRegionSheet> createState() => _RadioRegionSheetState();
@@ -31,7 +35,9 @@ class _RadioRegionSheetState extends ConsumerState<RadioRegionSheet> {
   bool _pickingCountry = false;
 
   void _chooseRegion(RadioRegion r) {
-    ref.read(settingsProvider.notifier).update((s) => s.copyWith(radioRegion: r.id));
+    ref
+        .read(settingsProvider.notifier)
+        .update((s) => s.copyWith(radioRegion: r.id));
     Navigator.of(context).pop();
   }
 
@@ -50,19 +56,37 @@ class _RadioRegionSheetState extends ConsumerState<RadioRegionSheet> {
     final theme = Theme.of(context).textTheme;
     final code = ref.watch(radioCountryProvider);
     final countries = ref.watch(radioCountriesProvider);
-    final countryName = countryNameIn(code, Localizations.localeOf(context).languageCode,
-        countries.value?.where((c) => c.code == code).map((c) => c.name).firstOrNull ?? code);
+    final countryName = countryNameIn(
+      code,
+      Localizations.localeOf(context).languageCode,
+      countries.value
+              ?.where((c) => c.code == code)
+              .map((c) => c.name)
+              .firstOrNull ??
+          code,
+    );
     final selected = ref.watch(settingsProvider.select((s) => s.radioRegion));
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(CcDims.margin, 0, CcDims.margin, 4),
-          child: Text(_pickingCountry ? l.radioChooseCountry : l.radioChooseRegion, style: theme.titleMedium),
+          padding: const EdgeInsets.fromLTRB(
+            CcDims.margin,
+            0,
+            CcDims.margin,
+            4,
+          ),
+          child: Text(
+            _pickingCountry ? l.radioChooseCountry : l.radioChooseRegion,
+            style: theme.titleMedium,
+          ),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: CcDims.margin),
-          child: Text(l.radioRegionHint, style: theme.bodySmall?.copyWith(color: cc.textMuted)),
+          child: Text(
+            l.radioRegionHint,
+            style: theme.bodySmall?.copyWith(color: cc.textMuted),
+          ),
         ),
         const SizedBox(height: 8),
         if (!_pickingCountry)
@@ -73,16 +97,22 @@ class _RadioRegionSheetState extends ConsumerState<RadioRegionSheet> {
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () => setState(() => _pickingCountry = true),
           ),
-        Expanded(child: _pickingCountry ? _countryList(countries) : _regionList(selected)),
+        Expanded(
+          child: _pickingCountry
+              ? _countryList(countries)
+              : _regionList(selected),
+        ),
       ],
     );
   }
 
-  Widget _countryList(AsyncValue<List<RadioCountry>> countries) => countries.when(
+  Widget _countryList(AsyncValue<List<RadioCountry>> countries) =>
+      countries.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => Center(child: Text(context.l10n.radioLoadFailed)),
+        error: (_, _) => ErrorState(message: context.l10n.radioLoadFailed),
         data: (list) {
-          final sorted = [...list]..sort((a, b) => b.stationCount.compareTo(a.stationCount));
+          final sorted = [...list]
+            ..sort((a, b) => b.stationCount.compareTo(a.stationCount));
           return ListView.builder(
             itemCount: sorted.length,
             itemBuilder: (_, i) => ListTile(
@@ -98,13 +128,15 @@ class _RadioRegionSheetState extends ConsumerState<RadioRegionSheet> {
     final regions = ref.watch(radioRegionsProvider);
     return regions.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (_, _) => Center(child: Text(context.l10n.radioLoadFailed)),
+      error: (_, _) => ErrorState(message: context.l10n.radioLoadFailed),
       data: (list) => ListView.builder(
         itemCount: list.length,
         itemBuilder: (_, i) => ListTile(
           key: ValueKey('region-${list[i].id}'),
           title: Text(list[i].label),
-          trailing: list[i].id == selected ? Icon(Icons.check_rounded, color: context.cc.accent) : null,
+          trailing: list[i].id == selected
+              ? Icon(Icons.check_rounded, color: context.cc.accent)
+              : null,
           onTap: () => _chooseRegion(list[i]),
         ),
       ),

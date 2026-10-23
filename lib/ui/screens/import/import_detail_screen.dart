@@ -11,7 +11,9 @@ import '../../../services/online/download_queue.dart';
 import '../../shell/shell_nav.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/confirm.dart';
+import '../../widgets/empty_state.dart';
 import '../../widgets/format_utils.dart';
+import '../../widgets/segmented_blocks.dart';
 import 'import_labels.dart';
 import 'import_review_screen.dart';
 
@@ -34,11 +36,11 @@ class _ImportDetailScreenState extends ConsumerState<ImportDetailScreen> {
   _Filter _filter = _Filter.all;
 
   bool _shows(RowPhase p) => switch (_filter) {
-        _Filter.all => true,
-        _Filter.active => p.active,
-        _Filter.problems => p.problem,
-        _Filter.done => p.settled,
-      };
+    _Filter.all => true,
+    _Filter.active => p.active,
+    _Filter.problems => p.problem,
+    _Filter.done => p.settled,
+  };
 
   Future<void> _cancel(int id) async {
     final l = context.l10n;
@@ -58,7 +60,9 @@ class _ImportDetailScreenState extends ConsumerState<ImportDetailScreen> {
     final cc = context.cc;
     final theme = Theme.of(context).textTheme;
     final p = ref.watch(importChainProgressProvider(widget.importId));
-    final items = ref.watch(importChainItemsProvider(widget.importId)) ?? const <PlaylistImportItem>[];
+    final items =
+        ref.watch(importChainItemsProvider(widget.importId)) ??
+        const <PlaylistImportItem>[];
     final steps = ref.watch(importStepsProvider).value ?? const {};
     final enriching = ref.watch(enrichingTracksProvider).value ?? const {};
     final downloads = ref.watch(importDownloadsProvider);
@@ -68,7 +72,15 @@ class _ImportDetailScreenState extends ConsumerState<ImportDetailScreen> {
         if (i.state != ImportItemStatus.removed)
           (item: i, download: downloads[(i.importId, i.rowIndex)]),
     ];
-    final phases = [for (final r in rows) rowPhase(r.item, steps: steps, enriching: enriching, download: r.download)];
+    final phases = [
+      for (final r in rows)
+        rowPhase(
+          r.item,
+          steps: steps,
+          enriching: enriching,
+          download: r.download,
+        ),
+    ];
     int count(bool Function(RowPhase) test) => phases.where(test).length;
     final shown = [
       for (var i = 0; i < rows.length; i++)
@@ -78,13 +90,20 @@ class _ImportDetailScreenState extends ConsumerState<ImportDetailScreen> {
     final unfinished = p != null && p.done < p.total;
     return Scaffold(
       appBar: AppBar(
-        title: Text(p?.name ?? '', maxLines: 1, overflow: TextOverflow.ellipsis),
+        title: Text(
+          p?.name ?? '',
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
         actions: [
           if (p != null && unfinished)
             IconButton(
               tooltip: p.paused ? l.csvImportResume : l.csvImportPause,
-              icon: Icon(p.paused ? Icons.play_arrow_rounded : Icons.pause_rounded),
-              onPressed: () => p.paused ? svc.resumeChain(p.id) : svc.pauseChain(p.id),
+              icon: Icon(
+                p.paused ? Icons.play_arrow_rounded : Icons.pause_rounded,
+              ),
+              onPressed: () =>
+                  p.paused ? svc.resumeChain(p.id) : svc.pauseChain(p.id),
             ),
           if (p != null && unfinished)
             IconButton(
@@ -94,76 +113,117 @@ class _ImportDetailScreenState extends ConsumerState<ImportDetailScreen> {
             ),
         ],
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          if (p != null)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(CcDims.margin, 4, CcDims.margin, 8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  LinearProgressIndicator(value: p.fraction),
-                  const SizedBox(height: 8),
-                  Text(
-                    (p.paused
-                            ? l.csvImportBannerPaused(p.done, p.total, p.review, p.missing)
-                            : l.csvImportBanner(p.done, p.total, p.review, p.missing)) +
-                        (p.eta == null ? '' : ', ${etaLabel(l, p.eta!)}'),
-                    style: theme.bodyMedium?.copyWith(color: cc.textMuted),
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 960),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (p != null)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    CcDims.margin,
+                    4,
+                    CcDims.margin,
+                    8,
                   ),
-                  if (wait != null && !p.paused)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 4),
-                      child: Text(
-                        importWaitLabel(l, wait),
-                        style: theme.bodyMedium?.copyWith(color: cc.accentSoft),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      LinearProgressIndicator(value: p.fraction),
+                      const SizedBox(height: 8),
+                      Text(
+                        (p.paused
+                                ? l.csvImportBannerPaused(
+                                    p.done,
+                                    p.total,
+                                    p.review,
+                                    p.missing,
+                                  )
+                                : l.csvImportBanner(
+                                    p.done,
+                                    p.total,
+                                    p.review,
+                                    p.missing,
+                                  )) +
+                            (p.eta == null ? '' : ', ${etaLabel(l, p.eta!)}'),
+                        style: theme.bodyMedium?.copyWith(color: cc.textMuted),
                       ),
+                      if (wait != null && !p.paused)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Text(
+                            importWaitLabel(l, wait),
+                            style: theme.bodyMedium?.copyWith(
+                              color: cc.accentSoft,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: CcDims.margin),
+                child: SegmentedBlocks<_Filter>(
+                  selected: _filter,
+                  onChanged: (f) => setState(() => _filter = f),
+                  items: [
+                    BlockItem(
+                      value: _Filter.all,
+                      icon: Icons.list_rounded,
+                      label: '${l.importFilterAll} (${rows.length})',
                     ),
-                ],
+                    BlockItem(
+                      value: _Filter.active,
+                      icon: Icons.downloading_rounded,
+                      label:
+                          '${l.importFilterActive} (${count((p) => p.active)})',
+                    ),
+                    BlockItem(
+                      value: _Filter.problems,
+                      icon: Icons.error_outline_rounded,
+                      label:
+                          '${l.importFilterProblems} (${count((p) => p.problem)})',
+                    ),
+                    BlockItem(
+                      value: _Filter.done,
+                      icon: Icons.check_rounded,
+                      label:
+                          '${l.importFilterDone} (${count((p) => p.settled)})',
+                    ),
+                  ],
+                ),
               ),
-            ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: CcDims.margin),
-            child: Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                for (final (f, label, n) in [
-                  (_Filter.all, l.importFilterAll, rows.length),
-                  (_Filter.active, l.importFilterActive, count((p) => p.active)),
-                  (_Filter.problems, l.importFilterProblems, count((p) => p.problem)),
-                  (_Filter.done, l.importFilterDone, count((p) => p.settled)),
-                ])
-                  ChoiceChip(
-                    label: Text('$label ($n)'),
-                    selected: _filter == f,
-                    onSelected: (_) => setState(() => _filter = f),
-                  ),
-              ],
-            ),
+              Expanded(
+                child: shown.isEmpty
+                    ? EmptyState(
+                        icon: Icons.list_rounded,
+                        message: l.importRowsNone,
+                      )
+                    : ListView.builder(
+                        itemExtent: 64,
+                        itemCount: shown.length,
+                        itemBuilder: (_, i) => _SongRow(
+                          item: shown[i].row.item,
+                          phase: shown[i].phase,
+                          download: shown[i].row.download,
+                        ),
+                      ),
+              ),
+            ],
           ),
-          Expanded(
-            child: shown.isEmpty
-                ? Center(child: Text(l.importRowsNone, style: theme.bodyMedium))
-                : ListView.builder(
-                    itemExtent: 64,
-                    itemCount: shown.length,
-                    itemBuilder: (_, i) => _SongRow(
-                      item: shown[i].row.item,
-                      phase: shown[i].phase,
-                      download: shown[i].row.download,
-                    ),
-                  ),
-          ),
-        ],
+        ),
       ),
     );
   }
 }
 
 class _SongRow extends StatelessWidget {
-  const _SongRow({required this.item, required this.phase, required this.download});
+  const _SongRow({
+    required this.item,
+    required this.phase,
+    required this.download,
+  });
 
   final PlaylistImportItem item;
   final RowPhase phase;
@@ -177,8 +237,8 @@ class _SongRow extends StatelessWidget {
     final color = phase.problem
         ? cc.error
         : phase.active
-            ? cc.accentSoft
-            : cc.textMuted;
+        ? cc.accentSoft
+        : cc.textMuted;
     final Widget leading = phase.active
         ? SizedBox(
             width: 22,
@@ -186,17 +246,21 @@ class _SongRow extends StatelessWidget {
             child: CircularProgressIndicator(
               strokeWidth: 2.5,
               // Before the first bytes the size is unknown: no empty ring.
-              value: phase == RowPhase.downloading && (download?.progress ?? 0) > 0
+              value:
+                  phase == RowPhase.downloading && (download?.progress ?? 0) > 0
                   ? download!.progress
                   : null,
             ),
           )
         : Icon(
             switch (phase) {
-              RowPhase.downloaded || RowPhase.linked => Icons.check_circle_rounded,
+              RowPhase.downloaded ||
+              RowPhase.linked => Icons.check_circle_rounded,
               RowPhase.review => Icons.help_outline_rounded,
-              RowPhase.notFound || RowPhase.failed => Icons.error_outline_rounded,
-              RowPhase.skipped || RowPhase.removed => Icons.remove_circle_outline_rounded,
+              RowPhase.notFound ||
+              RowPhase.failed => Icons.error_outline_rounded,
+              RowPhase.skipped ||
+              RowPhase.removed => Icons.remove_circle_outline_rounded,
               _ => Icons.schedule_rounded,
             },
             color: color,
@@ -205,7 +269,10 @@ class _SongRow extends StatelessWidget {
     return InkWell(
       // A song that needs the user opens the review of its block.
       onTap: phase.problem
-          ? () => ShellNav.open<void>(context, ImportReviewScreen(importId: item.importId))
+          ? () => ShellNav.open<void>(
+              context,
+              ImportReviewScreen(importId: item.importId),
+            )
           : null,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: CcDims.margin),
@@ -218,12 +285,19 @@ class _SongRow extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(item.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: theme.bodyLarge),
+                  Text(
+                    item.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.bodyLarge,
+                  ),
                   Text(
                     '${item.artistList.join(', ')}, ${rowPhaseLabel(l, phase, download)}',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: theme.bodyMedium?.copyWith(color: phase.active || phase.problem ? color : null),
+                    style: theme.bodyMedium?.copyWith(
+                      color: phase.active || phase.problem ? color : null,
+                    ),
                   ),
                 ],
               ),

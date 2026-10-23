@@ -11,6 +11,7 @@ import '../../../services/radio/radio_catalog.dart';
 import '../../../services/radio/radio_station.dart';
 import '../../../services/radio/regions.dart';
 import '../../theme/tokens.dart';
+import '../../widgets/error_state.dart';
 import '../../widgets/section_header.dart';
 import 'radio_actions.dart';
 import 'radio_labels.dart';
@@ -23,14 +24,20 @@ const kRadioListCap = 200;
 
 /// Rows of [stations]; a tap plays from there with the same list as the queue.
 class StationsSliver extends ConsumerWidget {
-  const StationsSliver({super.key, required this.stations, required this.listName});
+  const StationsSliver({
+    super.key,
+    required this.stations,
+    required this.listName,
+  });
 
   final List<RadioStation> stations;
   final String listName;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final list = stations.length > kRadioListCap ? stations.sublist(0, kRadioListCap) : stations;
+    final list = stations.length > kRadioListCap
+        ? stations.sublist(0, kRadioListCap)
+        : stations;
     return SliverFixedExtentList(
       itemExtent: kRadioRowHeight,
       delegate: SliverChildBuilderDelegate(
@@ -46,29 +53,32 @@ class StationsSliver extends ConsumerWidget {
   }
 }
 
-/// A one-line message in a sliver, with an optional button.
+/// A one-line message in a sliver.
 class _Message extends StatelessWidget {
-  const _Message(this.text, {this.actionLabel, this.onAction});
+  const _Message(this.text);
 
   final String text;
-  final String? actionLabel;
-  final VoidCallback? onAction;
 
   @override
   Widget build(BuildContext context) => SliverToBoxAdapter(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: CcDims.margin, vertical: 8),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(text,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: context.cc.textMuted)),
-              ),
-              if (actionLabel != null) TextButton(onPressed: onAction, child: Text(actionLabel!)),
-            ],
+    child: Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: CcDims.margin,
+        vertical: 8,
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              text,
+              style: Theme.of(context).textTheme.bodyMedium
+                  ?.copyWith(color: context.cc.textMuted),
+            ),
           ),
-        ),
-      );
+        ],
+      ),
+    ),
+  );
 }
 
 class _Loading extends StatelessWidget {
@@ -76,11 +86,17 @@ class _Loading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => const SliverToBoxAdapter(
-        child: Padding(
-          padding: EdgeInsets.all(24),
-          child: Center(child: SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2))),
+    child: Padding(
+      padding: EdgeInsets.all(24),
+      child: Center(
+        child: SizedBox(
+          width: 24,
+          height: 24,
+          child: CircularProgressIndicator(strokeWidth: 2),
         ),
-      );
+      ),
+    ),
+  );
 }
 
 /// Loading, error with «Riprova», empty and data of a list of stations.
@@ -93,7 +109,9 @@ Widget _stationsOf(
   final l = context.l10n;
   return value.when(
     loading: () => const _Loading(),
-    error: (_, _) => _Message(l.radioLoadFailed, actionLabel: l.retry, onAction: retry),
+    error: (_, _) => SliverToBoxAdapter(
+      child: ErrorState(message: l.radioLoadFailed, onRetry: retry),
+    ),
     data: (list) => list.isEmpty
         ? _Message(l.radioNoResults)
         : StationsSliver(stations: list, listName: listName),
@@ -108,40 +126,48 @@ class MineSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
     final saved = ref.watch(savedRadiosProvider).value ?? const <SavedRadio>[];
-    if (saved.isEmpty) return const SliverToBoxAdapter(child: SizedBox.shrink());
+    if (saved.isEmpty) {
+      return const SliverToBoxAdapter(child: SizedBox.shrink());
+    }
     final stations = [for (final r in saved) r.toStation()];
-    return SliverMainAxisGroup(slivers: [
-      SliverToBoxAdapter(child: SectionHeader(l.radioMine)),
-      SliverReorderableList(
-        itemCount: saved.length,
-        itemExtent: kRadioRowHeight,
-        onReorderItem: (from, to) {
-          final ids = [for (final r in saved) r.stationId];
-          ids.insert(to, ids.removeAt(from));
-          ref.read(radioRepositoryProvider).reorder(ids);
-        },
-        itemBuilder: (context, i) => Material(
-          key: ValueKey('mine_${saved[i].stationId}'),
-          color: Colors.transparent,
-          child: RadioStationRow(
-            station: stations[i],
-            unreachable: saved[i].unreachable,
-            onTap: () => playRadioList(context, ref, stations, i, l.radioMine),
-            onMore: () => RadioStationSheet.show(context, stations[i]),
-            dragHandle: ReorderableDragStartListener(
-              index: i,
-              child: Tooltip(
-                message: l.radioReorder,
-                child: Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: Icon(Icons.drag_handle_rounded, color: context.cc.textFaint),
+    return SliverMainAxisGroup(
+      slivers: [
+        SliverToBoxAdapter(child: SectionHeader(l.radioMine)),
+        SliverReorderableList(
+          itemCount: saved.length,
+          itemExtent: kRadioRowHeight,
+          onReorderItem: (from, to) {
+            final ids = [for (final r in saved) r.stationId];
+            ids.insert(to, ids.removeAt(from));
+            ref.read(radioRepositoryProvider).reorder(ids);
+          },
+          itemBuilder: (context, i) => Material(
+            key: ValueKey('mine_${saved[i].stationId}'),
+            color: Colors.transparent,
+            child: RadioStationRow(
+              station: stations[i],
+              unreachable: saved[i].unreachable,
+              onTap: () =>
+                  playRadioList(context, ref, stations, i, l.radioMine),
+              onMore: () => RadioStationSheet.show(context, stations[i]),
+              dragHandle: ReorderableDragStartListener(
+                index: i,
+                child: Tooltip(
+                  message: l.radioReorder,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: Icon(
+                      Icons.drag_handle_rounded,
+                      color: context.cc.textFaint,
+                    ),
+                  ),
                 ),
               ),
             ),
           ),
         ),
-      ),
-    ]);
+      ],
+    );
   }
 }
 
@@ -165,33 +191,49 @@ class NearYouSection extends ConsumerWidget {
     if (region == null) return SliverMainAxisGroup(slivers: [header]);
     final near = ref.watch(nearYouProvider);
     final name = '${l.radioNearYou}, ${region.label}';
-    return SliverMainAxisGroup(slivers: [
-      header,
-      ..._withStale(context, near.value, <Widget>[
-        near.when(
-          loading: () => const _Loading(),
-          error: (_, _) => _Message(l.radioLoadFailed,
-              actionLabel: l.retry, onAction: () => ref.invalidate(nearYouProvider)),
-          data: (list) => list == null || list.stations.isEmpty
-              ? _Message(l.radioNoResults)
-              : StationsSliver(stations: list.stations, listName: name),
-        ),
-      ]),
-    ]);
+    return SliverMainAxisGroup(
+      slivers: [
+        header,
+        ..._withStale(context, near.value, <Widget>[
+          near.when(
+            loading: () => const _Loading(),
+            error: (_, _) => SliverToBoxAdapter(
+              child: ErrorState(
+                message: l.radioLoadFailed,
+                onRetry: () => ref.invalidate(nearYouProvider),
+              ),
+            ),
+            data: (list) => list == null || list.stations.isEmpty
+                ? _Message(l.radioNoResults)
+                : StationsSliver(stations: list.stations, listName: name),
+          ),
+        ]),
+      ],
+    );
   }
 }
 
 /// The «Non in linea · elenco del …» line above a list read from the old copy.
-List<Widget> _withStale(BuildContext context, RadioList? list, List<Widget> body) {
+List<Widget> _withStale(
+  BuildContext context,
+  RadioList? list,
+  List<Widget> body,
+) {
   if (list == null || !list.stale) return body;
   final at = list.fetchedAt;
-  final date = at == null ? '' : DateFormat.yMMMd(Localizations.localeOf(context).toString()).format(at);
+  final date = at == null
+      ? ''
+      : DateFormat.yMMMd(Localizations.localeOf(context).toString()).format(at);
   return [_Message(context.l10n.radioOfflineList(date)), ...body];
 }
 
 /// The 24 genres as chips; [selected] is highlighted.
 class GenresSection extends StatelessWidget {
-  const GenresSection({super.key, required this.selected, required this.onSelect});
+  const GenresSection({
+    super.key,
+    required this.selected,
+    required this.onSelect,
+  });
 
   final String? selected;
   final ValueChanged<String> onSelect;
@@ -234,13 +276,19 @@ class TopSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
     final top = ref.watch(radioCountryStationsProvider);
-    return SliverMainAxisGroup(slivers: [
-      SliverToBoxAdapter(child: SectionHeader(l.radioTopListened)),
-      ..._withStale(context, top.value, <Widget>[
-        _stationsOf(context, top.whenData((r) => r.stations), l.radioTopListened,
-            () => ref.invalidate(radioCountryStationsProvider)),
-      ]),
-    ]);
+    return SliverMainAxisGroup(
+      slivers: [
+        SliverToBoxAdapter(child: SectionHeader(l.radioTopListened)),
+        ..._withStale(context, top.value, <Widget>[
+          _stationsOf(
+            context,
+            top.whenData((r) => r.stations),
+            l.radioTopListened,
+            () => ref.invalidate(radioCountryStationsProvider),
+          ),
+        ]),
+      ],
+    );
   }
 }
 
@@ -253,17 +301,27 @@ class SearchResultsSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
-    return SliverMainAxisGroup(slivers: [
-      SliverToBoxAdapter(child: SectionHeader(l.radioResults)),
-      _stationsOf(context, ref.watch(radioSearchProvider(query)), l.radioResults,
-          () => ref.invalidate(radioSearchProvider(query))),
-    ]);
+    return SliverMainAxisGroup(
+      slivers: [
+        SliverToBoxAdapter(child: SectionHeader(l.radioResults)),
+        _stationsOf(
+          context,
+          ref.watch(radioSearchProvider(query)),
+          l.radioResults,
+          () => ref.invalidate(radioSearchProvider(query)),
+        ),
+      ],
+    );
   }
 }
 
 /// Stations of one genre.
 class GenreResultsSection extends ConsumerWidget {
-  const GenreResultsSection({super.key, required this.tag, required this.onClose});
+  const GenreResultsSection({
+    super.key,
+    required this.tag,
+    required this.onClose,
+  });
 
   final String tag;
   final VoidCallback onClose;
@@ -272,10 +330,18 @@ class GenreResultsSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
     final name = radioGenreLabel(l, tag);
-    return SliverMainAxisGroup(slivers: [
-      SliverToBoxAdapter(child: SectionHeader(name, actionLabel: l.close, onAction: onClose)),
-      _stationsOf(context, ref.watch(radioGenreProvider(tag)), name,
-          () => ref.invalidate(radioGenreProvider(tag))),
-    ]);
+    return SliverMainAxisGroup(
+      slivers: [
+        SliverToBoxAdapter(
+          child: SectionHeader(name, actionLabel: l.close, onAction: onClose),
+        ),
+        _stationsOf(
+          context,
+          ref.watch(radioGenreProvider(tag)),
+          name,
+          () => ref.invalidate(radioGenreProvider(tag)),
+        ),
+      ],
+    );
   }
 }

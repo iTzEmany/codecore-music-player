@@ -34,7 +34,8 @@ class ImportPlanScreen extends ConsumerWidget {
 
     Widget tile(PlaylistImportItem it) {
       final candidates = decodeCandidates(it.candidates);
-      final chosen = candidates.where((c) => c.id == it.videoId).firstOrNull ??
+      final chosen =
+          candidates.where((c) => c.id == it.videoId).firstOrNull ??
           (candidates.isEmpty ? null : candidates.first);
       final want = it.durationMs;
       String diffOf(ImportCandidate c) {
@@ -47,7 +48,8 @@ class ImportPlanScreen extends ConsumerWidget {
           '${c.source == MediaSource.soundcloud ? '${l.searchSourceSoundcloud}, ' : ''}'
           '${c.channel}, ${formatDuration((c.durationSec ?? 0) * 1000)}'
           '${diffOf(c)}, ${(c.score * 100).round()}%';
-      final alreadyHere = chosen != null &&
+      final alreadyHere =
+          chosen != null &&
           known?.pathFor(chosen.id, source: chosen.source) != null;
       return ExpansionTile(
         title: Text(
@@ -62,7 +64,8 @@ class ImportPlanScreen extends ConsumerWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  color: (want != null &&
+                  color:
+                      (want != null &&
                           chosen.durationSec != null &&
                           (chosen.durationSec! - want / 1000).abs() > 5)
                       ? cc.error
@@ -82,7 +85,11 @@ class ImportPlanScreen extends ConsumerWidget {
                   RadioListTile<String>(
                     dense: true,
                     value: c.id,
-                    title: Text(c.title, maxLines: 1, overflow: TextOverflow.ellipsis),
+                    title: Text(
+                      c.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                     subtitle: Text(
                       '${line(c)}${known?.pathFor(c.id, source: c.source) != null ? ', ${l.csvImportPlanKnown}' : ''}',
                       maxLines: 1,
@@ -110,7 +117,12 @@ class ImportPlanScreen extends ConsumerWidget {
               icon: Icons.check_circle_outline_rounded,
               message: l.csvImportPlanEmpty,
             )
-          : ListView(children: [for (final it in planned) tile(it)]),
+          : Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 960),
+                child: ListView(children: [for (final it in planned) tile(it)]),
+              ),
+            ),
       bottomNavigationBar: planned.isEmpty
           ? null
           : SafeArea(
@@ -122,8 +134,10 @@ class ImportPlanScreen extends ConsumerWidget {
                     await svc.startPlanned(importId);
                     nav.pop();
                   },
-                  child: Text(l.csvImportPlanGo(planned.length),
-                      style: theme.labelLarge),
+                  child: Text(
+                    l.csvImportPlanGo(planned.length),
+                    style: theme.labelLarge,
+                  ),
                 ),
               ),
             ),

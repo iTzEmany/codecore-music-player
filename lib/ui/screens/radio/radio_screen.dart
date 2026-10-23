@@ -35,7 +35,9 @@ class _RadioScreenState extends ConsumerState<RadioScreen> {
       // The saved stations are read again once a day, without waiting for it.
       unawaited(ref.read(radioRefreshProvider)());
       // First visit: no region yet, so the sheet that asks for it opens by itself.
-      if (ref.read(settingsProvider).radioRegion.isEmpty) RadioRegionSheet.show(context);
+      if (ref.read(settingsProvider).radioRegion.isEmpty) {
+        RadioRegionSheet.show(context);
+      }
     });
   }
 
@@ -58,31 +60,43 @@ class _RadioScreenState extends ConsumerState<RadioScreen> {
   Widget build(BuildContext context) {
     final l = context.l10n;
     final searching = _query.length >= 2;
-    final onlyCountry = ref.watch(settingsProvider.select((s) => s.radioOnlyCountry));
+    final onlyCountry = ref.watch(
+      settingsProvider.select((s) => s.radioOnlyCountry),
+    );
     final code = ref.watch(radioCountryProvider);
     final countryName = countryNameIn(
-        code,
-        Localizations.localeOf(context).languageCode,
-        ref
-                .watch(radioCountriesProvider)
-                .value
-                ?.where((c) => c.code == code)
-                .map((c) => c.name)
-                .firstOrNull ??
-            code);
+      code,
+      Localizations.localeOf(context).languageCode,
+      ref
+              .watch(radioCountriesProvider)
+              .value
+              ?.where((c) => c.code == code)
+              .map((c) => c.name)
+              .firstOrNull ??
+          code,
+    );
     final List<Widget> body;
     if (searching) {
       body = [SearchResultsSection(query: _query)];
     } else if (_genre != null) {
       body = [
-        GenresSection(selected: _genre, onSelect: (t) => setState(() => _genre = t)),
-        GenreResultsSection(tag: _genre!, onClose: () => setState(() => _genre = null)),
+        GenresSection(
+          selected: _genre,
+          onSelect: (t) => setState(() => _genre = t),
+        ),
+        GenreResultsSection(
+          tag: _genre!,
+          onClose: () => setState(() => _genre = null),
+        ),
       ];
     } else {
       body = [
         const MineSection(),
         const NearYouSection(),
-        GenresSection(selected: null, onSelect: (t) => setState(() => _genre = t)),
+        GenresSection(
+          selected: null,
+          onSelect: (t) => setState(() => _genre = t),
+        ),
         const TopSection(),
       ];
     }
@@ -98,53 +112,63 @@ class _RadioScreenState extends ConsumerState<RadioScreen> {
           ),
         ],
       ),
-      body: CustomScrollView(
-        slivers: [
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(CcDims.margin, 8, CcDims.margin, 0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  TextField(
-                    key: const ValueKey('radio-search'),
-                    controller: _controller,
-                    onChanged: _onChanged,
-                    textInputAction: TextInputAction.search,
-                    decoration: InputDecoration(
-                      hintText: l.radioSearchHint,
-                      prefixIcon: const Icon(Icons.search_rounded),
-                      suffixIcon: _controller.text.isEmpty
-                          ? null
-                          : IconButton(
-                              tooltip: l.close,
-                              icon: const Icon(Icons.close_rounded),
-                              onPressed: () {
-                                _controller.clear();
-                                setState(() => _query = '');
-                              },
-                            ),
-                    ),
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 960),
+          child: CustomScrollView(
+            slivers: [
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    CcDims.margin,
+                    8,
+                    CcDims.margin,
+                    0,
                   ),
-                  if (searching || _genre != null)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8),
-                      child: FilterChip(
-                        key: const ValueKey('radio-only-country'),
-                        label: Text(l.radioOnlyCountry(countryName)),
-                        selected: onlyCountry,
-                        onSelected: (v) => ref
-                            .read(settingsProvider.notifier)
-                            .update((s) => s.copyWith(radioOnlyCountry: v)),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      TextField(
+                        key: const ValueKey('radio-search'),
+                        controller: _controller,
+                        onChanged: _onChanged,
+                        textInputAction: TextInputAction.search,
+                        decoration: InputDecoration(
+                          hintText: l.radioSearchHint,
+                          prefixIcon: const Icon(Icons.search_rounded),
+                          suffixIcon: _controller.text.isEmpty
+                              ? null
+                              : IconButton(
+                                  tooltip: l.close,
+                                  icon: const Icon(Icons.close_rounded),
+                                  onPressed: () {
+                                    _controller.clear();
+                                    setState(() => _query = '');
+                                  },
+                                ),
+                        ),
                       ),
-                    ),
-                ],
+                      if (searching || _genre != null)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: FilterChip(
+                            key: const ValueKey('radio-only-country'),
+                            label: Text(l.radioOnlyCountry(countryName)),
+                            selected: onlyCountry,
+                            onSelected: (v) => ref
+                                .read(settingsProvider.notifier)
+                                .update((s) => s.copyWith(radioOnlyCountry: v)),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
               ),
-            ),
+              ...body,
+              const SliverToBoxAdapter(child: SizedBox(height: 24)),
+            ],
           ),
-          ...body,
-          const SliverToBoxAdapter(child: SizedBox(height: 24)),
-        ],
+        ),
       ),
     );
   }

@@ -15,6 +15,7 @@ import '../../../services/import/import_outcome.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/format_utils.dart';
+import '../../widgets/section_header.dart';
 import 'import_labels.dart';
 import 'import_manual_search_sheet.dart';
 
@@ -32,8 +33,10 @@ class ImportReviewScreen extends ConsumerWidget {
     final theme = Theme.of(context).textTheme;
     final items = ref.watch(importItemsProvider(importId)).value ?? const [];
     final svc = ref.read(playlistImportServiceProvider);
-    List<PlaylistImportItem> of(ImportItemStatus s) =>
-        [for (final i in items) if (i.state == s) i];
+    List<PlaylistImportItem> of(ImportItemStatus s) => [
+      for (final i in items)
+        if (i.state == s) i,
+    ];
     final review = of(ImportItemStatus.review);
     final missing = of(ImportItemStatus.notFound);
     final failed = of(ImportItemStatus.failed);
@@ -52,8 +55,10 @@ class ImportReviewScreen extends ConsumerWidget {
             style: theme.titleSmall,
           ),
           if (it.note != null)
-            Text(importNoteLabel(l, it.note!),
-                style: theme.bodySmall?.copyWith(color: cc.textMuted)),
+            Text(
+              importNoteLabel(l, it.note!),
+              style: theme.bodySmall?.copyWith(color: cc.textMuted),
+            ),
         ],
       ),
     );
@@ -78,8 +83,10 @@ class ImportReviewScreen extends ConsumerWidget {
         ],
       );
       final saved = await saveBytes(
-          'import-result.csv', Uint8List.fromList(utf8.encode('\uFEFF$csv')),
-          mimeType: 'text/csv');
+        'import-result.csv',
+        Uint8List.fromList(utf8.encode('\uFEFF$csv')),
+        mimeType: 'text/csv',
+      );
       if (saved) {
         messenger.showSnackBar(SnackBar(content: Text(l.csvImportExported)));
       }
@@ -92,10 +99,12 @@ class ImportReviewScreen extends ConsumerWidget {
         return ListTile(
           dense: true,
           leading: Icon(Icons.warning_amber_rounded, color: cc.error),
-          title: Text(l.csvImportLengthOff(
-            formatDuration(t.durationMs),
-            formatDuration(it.durationMs ?? 0),
-          )),
+          title: Text(
+            l.csvImportLengthOff(
+              formatDuration(t.durationMs),
+              formatDuration(it.durationMs ?? 0),
+            ),
+          ),
           trailing: TextButton(
             onPressed: () => svc.keepDownloaded(importId, it.rowIndex),
             child: Text(l.csvImportKeep),
@@ -122,11 +131,6 @@ class ImportReviewScreen extends ConsumerWidget {
           ),
         ],
       ),
-    );
-
-    Widget header(String text) => Padding(
-      padding: const EdgeInsets.fromLTRB(CcDims.margin, 20, CcDims.margin, 0),
-      child: Text(text, style: theme.labelLarge?.copyWith(color: cc.textMuted)),
     );
 
     Widget candidate(PlaylistImportItem it, ImportCandidate c) {
@@ -178,22 +182,27 @@ class ImportReviewScreen extends ConsumerWidget {
               icon: Icons.check_circle_outline_rounded,
               message: l.csvImportNothing,
             )
-          : ListView(
-              children: [
-                if (review.isNotEmpty) header(l.csvImportToReview),
-                for (final it in review) ...[
-                  wanted(it),
-                  if (it.trackId != null) lengthNote(it),
-                  for (final c in decodeCandidates(it.candidates))
-                    candidate(it, c),
-                  actions(it),
-                ],
-                if (missing.isNotEmpty) header(l.csvImportNotFound),
-                for (final it in missing) ...[wanted(it), actions(it)],
-                if (failed.isNotEmpty) header(l.csvImportErrors),
-                for (final it in failed) ...[wanted(it), actions(it)],
-                const SizedBox(height: 24),
-              ],
+          : Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 960),
+                child: ListView(
+                  children: [
+                    if (review.isNotEmpty) SectionHeader(l.csvImportToReview),
+                    for (final it in review) ...[
+                      wanted(it),
+                      if (it.trackId != null) lengthNote(it),
+                      for (final c in decodeCandidates(it.candidates))
+                        candidate(it, c),
+                      actions(it),
+                    ],
+                    if (missing.isNotEmpty) SectionHeader(l.csvImportNotFound),
+                    for (final it in missing) ...[wanted(it), actions(it)],
+                    if (failed.isNotEmpty) SectionHeader(l.csvImportErrors),
+                    for (final it in failed) ...[wanted(it), actions(it)],
+                    const SizedBox(height: 24),
+                  ],
+                ),
+              ),
             ),
     );
   }

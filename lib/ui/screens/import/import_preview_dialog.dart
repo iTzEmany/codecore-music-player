@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 import '../../../core/constants.dart';
 import '../../../l10n/l10n_ext.dart';
@@ -6,14 +7,20 @@ import '../../../services/import/exportify_reader.dart';
 import '../../../services/import/import_diff.dart' show ImportDiff;
 import '../../../services/import/import_options.dart';
 import '../../theme/tokens.dart';
+import '../../widgets/segmented_blocks.dart';
 
 /// Above this many songs to download the preview suggests splitting the import.
 const bigImportRows = 200;
 const importBlockSize = 100;
 
 class ImportChoice {
-  const ImportChoice(this.name, this.intoPlaylistId,
-      [this.options = const ImportOptions(), this.blockSize, this.sync = false]);
+  const ImportChoice(
+    this.name,
+    this.intoPlaylistId, [
+    this.options = const ImportOptions(),
+    this.blockSize,
+    this.sync = false,
+  ]);
 
   /// Make the existing playlist follow the file (adds and removes).
   final bool sync;
@@ -69,6 +76,7 @@ class _State extends State<ImportPreviewDialog> {
     }
     return _diff!;
   }
+
   bool _linkOnly = false;
   late bool _blocks = (widget.csv.rows.length - widget.known) > bigImportRows;
   bool _planFirst = false;
@@ -184,39 +192,49 @@ class _State extends State<ImportPreviewDialog> {
             if (same != null) ...[
               const SizedBox(height: 16),
               Text(l.csvImportExists, style: theme.titleSmall),
-              RadioGroup<_Existing>(
-                groupValue: _existing,
-                onChanged: (v) =>
-                    setState(() => _existing = v ?? _Existing.addNew),
-                child: Column(
-                  children: [
-                    RadioListTile<_Existing>(
-                      contentPadding: EdgeInsets.zero,
+              const SizedBox(height: 8),
+              _NoIntrinsics(
+                child: SegmentedBlocks<_Existing>(
+                  selected: _existing,
+                  onChanged: (v) => setState(() => _existing = v),
+                  items: [
+                    BlockItem(
                       value: _Existing.addNew,
-                      title: Text(l.csvImportUpdate),
+                      icon: Icons.playlist_add_rounded,
+                      label: l.csvImportUpdate,
                     ),
                     if (widget.syncPreview != null)
-                      RadioListTile<_Existing>(
-                        contentPadding: EdgeInsets.zero,
+                      BlockItem(
                         value: _Existing.sync,
-                        title: Text(l.csvImportSync),
-                        subtitle: FutureBuilder<ImportDiff>(
-                          key: ValueKey(same),
-                          future: _diffFor(same),
-                          builder: (context, snap) => Text(snap.hasData
-                              ? l.csvImportSyncCounts(
-                                  snap.data!.added.length, snap.data!.removed.length)
-                              : l.csvImportSyncChecking),
-                        ),
+                        icon: Icons.sync_rounded,
+                        label: l.csvImportSync,
                       ),
-                    RadioListTile<_Existing>(
-                      contentPadding: EdgeInsets.zero,
+                    BlockItem(
                       value: _Existing.create,
-                      title: Text(l.csvImportNew),
+                      icon: Icons.add_rounded,
+                      label: l.csvImportNew,
                     ),
                   ],
                 ),
               ),
+
+              if (_existing == _Existing.sync && widget.syncPreview != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: FutureBuilder<ImportDiff>(
+                    key: ValueKey(same),
+                    future: _diffFor(same),
+                    builder: (context, snap) => Text(
+                      snap.hasData
+                          ? l.csvImportSyncCounts(
+                              snap.data!.added.length,
+                              snap.data!.removed.length,
+                            )
+                          : l.csvImportSyncChecking,
+                      style: theme.bodySmall?.copyWith(color: cc.textMuted),
+                    ),
+                  ),
+                ),
             ],
           ],
         ),
@@ -254,4 +272,25 @@ class _State extends State<ImportPreviewDialog> {
       ],
     );
   }
+}
+
+/// AlertDialog measures its content by intrinsic sizes, which the blocks'
+/// LayoutBuilder cannot give: they report 0 and take the width the dialog has.
+class _NoIntrinsics extends SingleChildRenderObjectWidget {
+  const _NoIntrinsics({required Widget super.child});
+
+  @override
+  RenderObject createRenderObject(BuildContext context) =>
+      _RenderNoIntrinsics();
+}
+
+class _RenderNoIntrinsics extends RenderProxyBox {
+  @override
+  double computeMinIntrinsicWidth(double height) => 0;
+  @override
+  double computeMaxIntrinsicWidth(double height) => 0;
+  @override
+  double computeMinIntrinsicHeight(double width) => 0;
+  @override
+  double computeMaxIntrinsicHeight(double width) => 0;
 }

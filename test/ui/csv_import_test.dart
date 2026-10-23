@@ -238,11 +238,12 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Sincronizza'), findsOneWidget);
+    expect(calls, isEmpty, reason: 'counted only once Sincronizza is chosen');
+    await tester.tap(find.text('Sincronizza'));
+    await tester.pumpAndSettle();
     expect(find.text('3 nuovi, 1 rimossi dalla playlist (i file restano)'),
         findsOneWidget);
     expect(calls, [7], reason: 'asked once for that playlist');
-    await tester.tap(find.text('Sincronizza'));
-    await tester.pump();
     await tester.tap(find.text('Importa'));
     await tester.pumpAndSettle();
     expect(picked!.sync, isTrue);
