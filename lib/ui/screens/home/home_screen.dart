@@ -91,7 +91,7 @@ class HomeScreen extends ConsumerWidget {
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 720),
+            constraints: const BoxConstraints(maxWidth: 1200),
             child: ListView(
               children: [
                 header,

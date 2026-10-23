@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/repositories/library_queries.dart';
 import '../../../l10n/l10n_ext.dart';
@@ -132,9 +133,44 @@ class _CoverFanState extends State<CoverFan>
     child: Semantics(
       button: _open,
       label: _open ? a.title : null,
-      child: CoverImage(coverKey: a.coverKey, size: size, radius: CcDims.rGrid),
+      child: _FanCard(album: a, size: size),
     ),
   );
 
   static double _lerp(double a, double b, double t) => a + (b - a) * t;
+}
+
+/// The cover, or, when the album has no cover file, its title on the same square.
+class _FanCard extends ConsumerWidget {
+  const _FanCard({required this.album, required this.size});
+
+  final AlbumSummary album;
+  final double size;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final key = album.coverKey;
+    final hasCover =
+        key != null && ref.watch(coverIndexProvider.select((m) => m[key]?.original != null));
+    if (hasCover) {
+      return CoverImage(coverKey: key, size: size, radius: CcDims.rGrid);
+    }
+    return Container(
+      width: size,
+      height: size,
+      padding: const EdgeInsets.all(12),
+      alignment: Alignment.topLeft,
+      decoration: BoxDecoration(
+        color: context.cc.surface3,
+        borderRadius: BorderRadius.circular(CcDims.rGrid),
+      ),
+      child: Text(
+        album.title ?? context.l10n.unknownAlbum,
+        maxLines: 3,
+        overflow: TextOverflow.ellipsis,
+        textAlign: TextAlign.left,
+        style: Theme.of(context).textTheme.titleSmall?.copyWith(color: context.cc.text),
+      ),
+    );
+  }
 }

@@ -147,4 +147,24 @@ void main() {
     );
     await h.dispose(tester);
   });
+
+  testWidgets('wide window: Home uses the width, fan shows covers or art', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1600, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final h = await Harness.create(tester, tracks: 4);
+    await h.pump(tester, const HomeScreen());
+    await _settle(tester);
+    expect(tester.getSize(find.byType(ListView).first).width, greaterThan(1000));
+    final cover = find.byKey(const ValueKey('fan-cover-0'));
+    expect(cover, findsOneWidget);
+    expect(
+      find.descendant(of: cover, matching: find.byType(Text)),
+      findsOneWidget,
+    );
+    expect(tester.getSize(cover).width, greaterThan(100));
+    await h.dispose(tester);
+  });
 }
