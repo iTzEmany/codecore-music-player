@@ -4,18 +4,30 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/database_providers.dart';
 import '../../../providers/import_providers.dart';
+import '../../../services/import/exportify_zip.dart';
+import '../../../services/import/imported_playlist.dart';
 import '../../../services/import/track_matcher.dart';
+import 'exportify_sync_screen.dart';
 import 'import_intro_sheet.dart';
 import 'import_preview_dialog.dart';
 
 /// «Importa da Exportify (CSV)»: instructions + file → preview → start.
 Future<void> startCsvImport(BuildContext context, WidgetRef ref) async {
-  final csv = await ImportIntroSheet.show(context);
-  if (csv == null || !context.mounted) return;
+  final picked = await ImportIntroSheet.show(context);
+  if (picked == null || !context.mounted) return;
+  if (picked is ExportifyZipResult) {
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(builder: (_) => ExportifySyncScreen(zip: picked)),
+    );
+    return;
+  }
+  final csv = picked as ImportedPlaylist;
   final library = LibraryIndex(
     await ref.read(trackRepositoryProvider).liteEntries(),
   );
-  final known = csv.rows.where((r) => library.find(r, baseDir: csv.baseDir) != null).length;
+  final known = csv.rows
+      .where((r) => library.find(r, baseDir: csv.baseDir) != null)
+      .length;
   final lists = await ref.read(playlistsProvider.future);
   if (!context.mounted) return;
   final choice = await showDialog<ImportChoice>(
@@ -35,11 +47,13 @@ Future<void> startCsvImport(BuildContext context, WidgetRef ref) async {
   if (choice.sync && choice.intoPlaylistId != null) {
     await svc.sync(csv, choice.intoPlaylistId!, options: choice.options);
   } else {
-    await svc.start(csv,
-        name: choice.name,
-        intoPlaylistId: choice.intoPlaylistId,
-        options: choice.options,
-        blockSize: choice.blockSize);
+    await svc.start(
+      csv,
+      name: choice.name,
+      intoPlaylistId: choice.intoPlaylistId,
+      options: choice.options,
+      blockSize: choice.blockSize,
+    );
   }
   messenger
     ..clearSnackBars()

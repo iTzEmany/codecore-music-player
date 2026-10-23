@@ -2826,5 +2826,21 @@
   "iconDontAsk": "Don't ask again",
   "iconFollowTitle": "Themed icon",
   "iconFollowSubtitle": "The icon follows the theme and colour when you leave the app",
-  "searchEmptyPrompt": "Type a title, artist or album to search your library"
+  "searchEmptyPrompt": "Type a title, artist or album to search your library",
+  "exportifySyncTitle": "Sync from Spotify",
+  "exportifySyncChanges": "+{added} new, −{removed} removed",
+  "exportifySyncNew": "New playlist",
+  "exportifySyncChoose": "To choose",
+  "exportifySyncNoChanges": "No changes",
+  "exportifySyncSkipped": "{n} files skipped (not readable playlists)",
+  "exportifySyncGo": "Sync {n}",
+  "exportifySyncDone": "{n} playlists syncing: follow them in the Activity Center",
+  "exportifySyncEmpty": "No playlists in the ZIP",
+  "exportifySyncPickTitle": "Choose the playlist",
+  "csvImportOpenExportify": "Open exportify.net",
+  "csvImportOpenFailed": "Cannot open the browser",
+  "csvImportZipHint": "With «Export All» you get a ZIP with all your playlists: pick it here and sync them together.",
+  "exportifySyncFailed": "Sync failed",
+  "exportifySyncEntryFailed": "Cannot read this playlist",
+  "exportifySyncLoadFailed": "Cannot read the playlists in the ZIP"
 }

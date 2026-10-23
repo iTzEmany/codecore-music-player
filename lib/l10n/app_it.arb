@@ -3340,5 +3340,52 @@
   "iconDontAsk": "Non chiederlo più",
   "iconFollowTitle": "Icona a tema",
   "iconFollowSubtitle": "L'icona segue tema e colore quando esci dall'app",
-  "searchEmptyPrompt": "Scrivi un titolo, un artista o un album per cercare nella libreria"
+  "searchEmptyPrompt": "Scrivi un titolo, un artista o un album per cercare nella libreria",
+  "exportifySyncTitle": "Sincronizza da Spotify",
+  "exportifySyncChanges": "+{added} nuovi, −{removed} rimossi",
+  "@exportifySyncChanges": {
+    "placeholders": {
+      "added": {
+        "type": "int"
+      },
+      "removed": {
+        "type": "int"
+      }
+    }
+  },
+  "exportifySyncNew": "Nuova playlist",
+  "exportifySyncChoose": "Da scegliere",
+  "exportifySyncNoChanges": "Senza cambiamenti",
+  "exportifySyncSkipped": "{n} file saltati (non sono playlist leggibili)",
+  "@exportifySyncSkipped": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "exportifySyncGo": "Sincronizza {n}",
+  "@exportifySyncGo": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "exportifySyncDone": "{n} playlist in sincronizzazione: le segui nel Centro Attività",
+  "@exportifySyncDone": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "exportifySyncEmpty": "Nessuna playlist nello ZIP",
+  "exportifySyncPickTitle": "Scegli la playlist",
+  "csvImportOpenExportify": "Apri exportify.net",
+  "csvImportOpenFailed": "Non riesco ad aprire il browser",
+  "csvImportZipHint": "Con «Export All» ottieni uno ZIP con tutte le playlist: scegli quello e le sincronizzi insieme.",
+  "exportifySyncFailed": "Sincronizzazione non riuscita",
+  "exportifySyncEntryFailed": "Non riesco a leggere questa playlist",
+  "exportifySyncLoadFailed": "Non riesco a leggere le playlist dello ZIP"
 }

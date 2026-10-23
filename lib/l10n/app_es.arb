@@ -2826,5 +2826,21 @@
   "iconDontAsk": "No volver a preguntar",
   "iconFollowTitle": "Icono según el tema",
   "iconFollowSubtitle": "El icono sigue el tema y el color cuando sales de la app",
-  "searchEmptyPrompt": "Escribe un título, artista o álbum para buscar en tu biblioteca"
+  "searchEmptyPrompt": "Escribe un título, artista o álbum para buscar en tu biblioteca",
+  "exportifySyncTitle": "Sincronizar desde Spotify",
+  "exportifySyncChanges": "+{added} nuevas, −{removed} quitadas",
+  "exportifySyncNew": "Lista nueva",
+  "exportifySyncChoose": "Por elegir",
+  "exportifySyncNoChanges": "Sin cambios",
+  "exportifySyncSkipped": "{n} archivos omitidos (no son listas legibles)",
+  "exportifySyncGo": "Sincronizar {n}",
+  "exportifySyncDone": "{n} listas sincronizándose: sigue el avance en el Centro de actividad",
+  "exportifySyncEmpty": "No hay listas en el ZIP",
+  "exportifySyncPickTitle": "Elige la lista",
+  "csvImportOpenExportify": "Abrir exportify.net",
+  "csvImportOpenFailed": "No se puede abrir el navegador",
+  "csvImportZipHint": "Con «Export All» obtienes un ZIP con todas tus listas: elígelo aquí y sincronízalas juntas.",
+  "exportifySyncFailed": "Error al sincronizar",
+  "exportifySyncEntryFailed": "No se puede leer esta lista",
+  "exportifySyncLoadFailed": "No se pueden leer las listas del ZIP"
 }

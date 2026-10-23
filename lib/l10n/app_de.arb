@@ -2826,5 +2826,21 @@
   "iconDontAsk": "Nicht mehr fragen",
   "iconFollowTitle": "Symbol passend zum Thema",
   "iconFollowSubtitle": "Das Symbol folgt Thema und Farbe, wenn du die App verlässt",
-  "searchEmptyPrompt": "Gib einen Titel, Künstler oder ein Album ein, um deine Bibliothek zu durchsuchen"
+  "searchEmptyPrompt": "Gib einen Titel, Künstler oder ein Album ein, um deine Bibliothek zu durchsuchen",
+  "exportifySyncTitle": "Mit Spotify synchronisieren",
+  "exportifySyncChanges": "+{added} neu, −{removed} entfernt",
+  "exportifySyncNew": "Neue Playlist",
+  "exportifySyncChoose": "Auswählen",
+  "exportifySyncNoChanges": "Keine Änderungen",
+  "exportifySyncSkipped": "{n} Dateien übersprungen (keine lesbaren Playlists)",
+  "exportifySyncGo": "{n} synchronisieren",
+  "exportifySyncDone": "{n} Playlists werden synchronisiert: im Aktivitätszentrum verfolgen",
+  "exportifySyncEmpty": "Keine Playlists in der ZIP-Datei",
+  "exportifySyncPickTitle": "Playlist auswählen",
+  "csvImportOpenExportify": "exportify.net öffnen",
+  "csvImportOpenFailed": "Browser kann nicht geöffnet werden",
+  "csvImportZipHint": "Mit «Export All» erhältst du eine ZIP-Datei mit allen Playlists: wähle sie hier und synchronisiere alle zusammen.",
+  "exportifySyncFailed": "Synchronisierung fehlgeschlagen",
+  "exportifySyncEntryFailed": "Diese Playlist kann nicht gelesen werden",
+  "exportifySyncLoadFailed": "Die Playlists der ZIP-Datei können nicht gelesen werden"
 }

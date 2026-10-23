@@ -3086,5 +3086,21 @@
   "iconDontAsk": "Ne plus demander",
   "iconFollowTitle": "Icône assortie au thème",
   "iconFollowSubtitle": "L’icône suit le thème et la couleur quand tu quittes l’app",
-  "searchEmptyPrompt": "Saisis un titre, un artiste ou un album pour chercher dans ta bibliothèque"
+  "searchEmptyPrompt": "Saisis un titre, un artiste ou un album pour chercher dans ta bibliothèque",
+  "exportifySyncTitle": "Synchroniser depuis Spotify",
+  "exportifySyncChanges": "+{added} nouveaux, −{removed} retirés",
+  "exportifySyncNew": "Nouvelle playlist",
+  "exportifySyncChoose": "À choisir",
+  "exportifySyncNoChanges": "Aucun changement",
+  "exportifySyncSkipped": "{n} fichiers ignorés (playlists illisibles)",
+  "exportifySyncGo": "Synchroniser {n}",
+  "exportifySyncDone": "{n} playlists en cours de synchronisation : suivez-les dans le Centre d’activité",
+  "exportifySyncEmpty": "Aucune playlist dans le ZIP",
+  "exportifySyncPickTitle": "Choisir la playlist",
+  "csvImportOpenExportify": "Ouvrir exportify.net",
+  "csvImportOpenFailed": "Impossible d’ouvrir le navigateur",
+  "csvImportZipHint": "Avec « Export All » vous obtenez un ZIP avec toutes vos playlists : choisissez-le ici et synchronisez-les ensemble.",
+  "exportifySyncFailed": "Échec de la synchronisation",
+  "exportifySyncEntryFailed": "Impossible de lire cette playlist",
+  "exportifySyncLoadFailed": "Impossible de lire les playlists du ZIP"
 }

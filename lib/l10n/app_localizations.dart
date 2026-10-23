@@ -8120,6 +8120,102 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Scrivi un titolo, un artista o un album per cercare nella libreria'**
   String get searchEmptyPrompt;
+
+  /// No description provided for @exportifySyncTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Sincronizza da Spotify'**
+  String get exportifySyncTitle;
+
+  /// No description provided for @exportifySyncChanges.
+  ///
+  /// In it, this message translates to:
+  /// **'+{added} nuovi, −{removed} rimossi'**
+  String exportifySyncChanges(int added, int removed);
+
+  /// No description provided for @exportifySyncNew.
+  ///
+  /// In it, this message translates to:
+  /// **'Nuova playlist'**
+  String get exportifySyncNew;
+
+  /// No description provided for @exportifySyncChoose.
+  ///
+  /// In it, this message translates to:
+  /// **'Da scegliere'**
+  String get exportifySyncChoose;
+
+  /// No description provided for @exportifySyncNoChanges.
+  ///
+  /// In it, this message translates to:
+  /// **'Senza cambiamenti'**
+  String get exportifySyncNoChanges;
+
+  /// No description provided for @exportifySyncSkipped.
+  ///
+  /// In it, this message translates to:
+  /// **'{n} file saltati (non sono playlist leggibili)'**
+  String exportifySyncSkipped(int n);
+
+  /// No description provided for @exportifySyncGo.
+  ///
+  /// In it, this message translates to:
+  /// **'Sincronizza {n}'**
+  String exportifySyncGo(int n);
+
+  /// No description provided for @exportifySyncDone.
+  ///
+  /// In it, this message translates to:
+  /// **'{n} playlist in sincronizzazione: le segui nel Centro Attività'**
+  String exportifySyncDone(int n);
+
+  /// No description provided for @exportifySyncEmpty.
+  ///
+  /// In it, this message translates to:
+  /// **'Nessuna playlist nello ZIP'**
+  String get exportifySyncEmpty;
+
+  /// No description provided for @exportifySyncPickTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Scegli la playlist'**
+  String get exportifySyncPickTitle;
+
+  /// No description provided for @csvImportOpenExportify.
+  ///
+  /// In it, this message translates to:
+  /// **'Apri exportify.net'**
+  String get csvImportOpenExportify;
+
+  /// No description provided for @csvImportOpenFailed.
+  ///
+  /// In it, this message translates to:
+  /// **'Non riesco ad aprire il browser'**
+  String get csvImportOpenFailed;
+
+  /// No description provided for @csvImportZipHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Con «Export All» ottieni uno ZIP con tutte le playlist: scegli quello e le sincronizzi insieme.'**
+  String get csvImportZipHint;
+
+  /// No description provided for @exportifySyncFailed.
+  ///
+  /// In it, this message translates to:
+  /// **'Sincronizzazione non riuscita'**
+  String get exportifySyncFailed;
+
+  /// No description provided for @exportifySyncEntryFailed.
+  ///
+  /// In it, this message translates to:
+  /// **'Non riesco a leggere questa playlist'**
+  String get exportifySyncEntryFailed;
+
+  /// No description provided for @exportifySyncLoadFailed.
+  ///
+  /// In it, this message translates to:
+  /// **'Non riesco a leggere le playlist dello ZIP'**
+  String get exportifySyncLoadFailed;
 }
 
 class _AppLocalizationsDelegate

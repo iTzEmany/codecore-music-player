@@ -5190,4 +5190,63 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get searchEmptyPrompt =>
       'Gib einen Titel, Künstler oder ein Album ein, um deine Bibliothek zu durchsuchen';
+
+  @override
+  String get exportifySyncTitle => 'Mit Spotify synchronisieren';
+
+  @override
+  String exportifySyncChanges(int added, int removed) {
+    return '+$added neu, −$removed entfernt';
+  }
+
+  @override
+  String get exportifySyncNew => 'Neue Playlist';
+
+  @override
+  String get exportifySyncChoose => 'Auswählen';
+
+  @override
+  String get exportifySyncNoChanges => 'Keine Änderungen';
+
+  @override
+  String exportifySyncSkipped(int n) {
+    return '$n Dateien übersprungen (keine lesbaren Playlists)';
+  }
+
+  @override
+  String exportifySyncGo(int n) {
+    return '$n synchronisieren';
+  }
+
+  @override
+  String exportifySyncDone(int n) {
+    return '$n Playlists werden synchronisiert: im Aktivitätszentrum verfolgen';
+  }
+
+  @override
+  String get exportifySyncEmpty => 'Keine Playlists in der ZIP-Datei';
+
+  @override
+  String get exportifySyncPickTitle => 'Playlist auswählen';
+
+  @override
+  String get csvImportOpenExportify => 'exportify.net öffnen';
+
+  @override
+  String get csvImportOpenFailed => 'Browser kann nicht geöffnet werden';
+
+  @override
+  String get csvImportZipHint =>
+      'Mit «Export All» erhältst du eine ZIP-Datei mit allen Playlists: wähle sie hier und synchronisiere alle zusammen.';
+
+  @override
+  String get exportifySyncFailed => 'Synchronisierung fehlgeschlagen';
+
+  @override
+  String get exportifySyncEntryFailed =>
+      'Diese Playlist kann nicht gelesen werden';
+
+  @override
+  String get exportifySyncLoadFailed =>
+      'Die Playlists der ZIP-Datei können nicht gelesen werden';
 }

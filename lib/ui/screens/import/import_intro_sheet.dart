@@ -1,9 +1,11 @@
 import '../../widgets/cc_sheet.dart';
+
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
@@ -11,31 +13,32 @@ import '../../../core/app_log.dart';
 import '../../../core/constants.dart';
 import '../../../core/platform.dart';
 import '../../../l10n/l10n_ext.dart';
-import '../../../services/import/exportify_reader.dart' show CsvTooLargeException, checkCsvSize;
-import '../../../services/import/imported_playlist.dart';
+import '../../../providers/issue_providers.dart';
+import '../../../services/import/exportify_reader.dart'
+    show CsvTooLargeException, checkCsvSize;
+import '../../../services/import/exportify_zip.dart';
 import '../../../services/import/playlist_reader.dart';
 import '../../theme/tokens.dart';
 
 const exportifyAddress = 'https://exportify.net';
 
 /// Explains where the CSV comes from (exportify.net) and lets the user pick it.
-/// Pops with the parsed playlist.
-class ImportIntroSheet extends StatefulWidget {
+/// Pops with the parsed playlist, or with an [ExportifyZipResult] for a ZIP.
+class ImportIntroSheet extends ConsumerStatefulWidget {
   const ImportIntroSheet({super.key});
 
-  static Future<ImportedPlaylist?> show(BuildContext context) =>
-      showCcSheet<ImportedPlaylist>(
-        context: context,
-        isScrollControlled: true,
-        useRootNavigator: true,
-        builder: (_) => const ImportIntroSheet(),
-      );
+  static Future<Object?> show(BuildContext context) => showCcSheet<Object>(
+    context: context,
+    isScrollControlled: true,
+    useRootNavigator: true,
+    builder: (_) => const ImportIntroSheet(),
+  );
 
   @override
-  State<ImportIntroSheet> createState() => _ImportIntroSheetState();
+  ConsumerState<ImportIntroSheet> createState() => _ImportIntroSheetState();
 }
 
-class _ImportIntroSheetState extends State<ImportIntroSheet> {
+class _ImportIntroSheetState extends ConsumerState<ImportIntroSheet> {
   bool _busy = false;
   String? _error;
 
@@ -64,13 +67,26 @@ class _ImportIntroSheetState extends State<ImportIntroSheet> {
         dialogTitle: l.csvImportPick,
         initialDirectory: await _startDir(),
         type: isAndroid ? FileType.any : FileType.custom,
-        allowedExtensions: isAndroid ? null : supportedPlaylistExtensions,
+        allowedExtensions: isAndroid
+            ? null
+            : [...supportedPlaylistExtensions, 'zip'],
       );
       final path = files.isEmpty ? null : files.first.path;
       if (path == null) {
         if (files.isNotEmpty) error = l.csvImportReadFailed;
       } else {
-        checkCsvSize(await File(path).length());
+        final isZip = files.first.name.toLowerCase().endsWith('.zip');
+        final size = await File(path).length();
+        if (isZip) {
+          if (size > kMaxZipBytes) {
+            throw CsvTooLargeException('ZIP of $size bytes');
+          }
+          final zip = await readExportifyZip(await File(path).readAsBytes());
+          if (!mounted) return;
+          Navigator.of(context).pop(zip);
+          return;
+        }
+        checkCsvSize(size);
         final text = decodePlaylistBytes(
           files.first.name,
           await File(path).readAsBytes(),
@@ -104,6 +120,15 @@ class _ImportIntroSheetState extends State<ImportIntroSheet> {
     messenger
       ..clearSnackBars()
       ..showSnackBar(SnackBar(content: Text(text)));
+  }
+
+  Future<void> _openExportify() async {
+    final messenger = ScaffoldMessenger.of(context);
+    final failed = context.l10n.csvImportOpenFailed;
+    if (await ref.read(linkOpenerProvider).open(exportifyAddress)) return;
+    messenger
+      ..clearSnackBars()
+      ..showSnackBar(SnackBar(content: Text(failed)));
   }
 
   @override
@@ -151,13 +176,13 @@ class _ImportIntroSheetState extends State<ImportIntroSheet> {
                 ),
               ),
             const SizedBox(height: 4),
-            Row(
+            const SelectableText(exportifyAddress, maxLines: 1),
+            Wrap(
               children: [
-                const Expanded(
-                  child: SelectableText(
-                    exportifyAddress,
-                    maxLines: 1,
-                  ),
+                TextButton.icon(
+                  onPressed: _openExportify,
+                  icon: const Icon(Icons.open_in_new_rounded, size: 18),
+                  label: Text(l.csvImportOpenExportify),
                 ),
                 TextButton.icon(
                   onPressed: _copy,
@@ -167,8 +192,15 @@ class _ImportIntroSheetState extends State<ImportIntroSheet> {
               ],
             ),
             const SizedBox(height: 8),
-            Text(l.csvImportAlsoAccepts,
-                style: theme.bodySmall?.copyWith(color: cc.textMuted)),
+            Text(
+              l.csvImportZipHint,
+              style: theme.bodySmall?.copyWith(color: cc.textMuted),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              l.csvImportAlsoAccepts,
+              style: theme.bodySmall?.copyWith(color: cc.textMuted),
+            ),
             const SizedBox(height: 8),
             Text(
               kEnableYoutube ? l.csvImportNote : l.csvImportNoteOffline,
@@ -176,10 +208,7 @@ class _ImportIntroSheetState extends State<ImportIntroSheet> {
             ),
             if (_error != null) ...[
               const SizedBox(height: 12),
-              Text(
-                _error!,
-                style: theme.bodyMedium?.copyWith(color: cc.error),
-              ),
+              Text(_error!, style: theme.bodyMedium?.copyWith(color: cc.error)),
             ],
             const SizedBox(height: 16),
             Align(

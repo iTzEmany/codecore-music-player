@@ -512,4 +512,10 @@ class SettingsStore {
     await _prefs.setBool('shuffle', s.shuffle);
     await _prefs.setString('repeat', s.repeat.name);
   }
+
+  /// When the last Exportify sync ended (ms since epoch); null if never.
+  int? readExportifyLastSyncAt() => _prefs.getInt('exportifyLastSyncAt');
+
+  Future<void> writeExportifyLastSyncAt(int ms) =>
+      _prefs.setInt('exportifyLastSyncAt', ms);
 }
