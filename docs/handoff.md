@@ -49,7 +49,18 @@
 Leggi docs/handoff.md e docs/PROGRESS.md. <obiettivo scelto fra quelli sotto>
 ```
 
+## Refactor «ui-fluida» (piano pronto, 2026-10-23)
+- Il piano è pronto: fasi **38–44** in `docs/PROGRESS.md` e `docs/fase-38..44-*.md`. Le decisioni sono D-01..D-34 in `docs/decisioni.md`.
+- Analisi, rilievi, rete e soglie: `docs/refactor/ui-fluida/analisi.md`.
+- Mockup approvati (specifica visiva della fase 43), da aprire con `xdg-open`:
+  - `docs/refactor/ui-fluida/mockup/` — now-playing, home, libreria, album-artista, onboarding;
+  - `tokens.css`.
+- Misura di partenza Mi A3: `build/perf/refactor-prima-mia3.md`.
+- L'APK profile in `build/app/outputs/flutter-apk/app-profile.apk` si cancella nella fase 44.
+- Avvio, in una nuova chat nella radice del progetto: `/obiettivo fase 38`.
+
 ## Prossimi obiettivi
+0. **Refactor ui-fluida:** `/obiettivo fase 38` (poi 39 … 44, nell'ordine).
 1. **(Consigliato)** Smaltire le prove a mano `[~]` delle fasi 31–37, con i telefoni collegati e il PC.
    - Sono funzioni già scritte ma mai viste dal vivo: è lì che si nascondono i difetti.
    - Comando: `/obiettivo prove a mano [~] fasi 31-37 con telefoni collegati`.

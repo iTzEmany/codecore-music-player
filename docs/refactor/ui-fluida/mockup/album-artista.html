@@ -1,0 +1,171 @@
+<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=1320"><title>Mockup Album e artista</title><link rel="stylesheet" href="tokens.css"><style>
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:#F4F2F8}
+body{font:400 15px/1.5 Figtree,sans-serif;color:#1B1626;background:#F4F2F8;min-width:1320px;padding:32px 40px 80px}
+.pg-h{max-width:1280px;margin:0 auto 8px;display:flex;align-items:baseline;gap:16px;flex-wrap:wrap}
+.pg-h h1{font:600 22px/1.2 Unbounded,sans-serif}
+.pg-h p{color:#5B5170;font-size:14px}
+.nav{max-width:1280px;margin:0 auto 24px;font-size:14px;color:#5B5170}
+.nav a{color:#5B2BB5;margin-right:16px}
+h2.cap{font:700 16px/1.3 Figtree,sans-serif;margin:0 0 12px}
+.wrap{max-width:1280px;margin:0 auto}
+.row{display:flex;gap:40px;align-items:flex-start;flex-wrap:wrap;margin-bottom:56px}
+.col{flex:none}
+.col.prima img{display:block;width:360px;height:auto;border:1px solid #D6D0E2}
+.col.prima img.d{width:640px}
+.note{margin-top:8px;font-size:13px;color:#5B5170;max-width:360px}
+.ann{max-width:400px;flex:1 1 320px}
+.ann ol{list-style:none;counter-reset:a}
+.ann li{counter-increment:a;position:relative;padding:0 0 14px 40px;font-size:14px;color:#1B1626}
+.ann li::before{content:counter(a);position:absolute;left:0;top:0;width:26px;height:26px;border-radius:50%;background:#5B2BB5;color:#fff;font:700 13px/26px Figtree,sans-serif;text-align:center}
+.ann li b{display:block;font-size:14px}
+.ann li span{color:#4A4060}
+.dev{color:var(--text);background:var(--bg);font:var(--body);overflow:hidden;position:relative;border:1px solid #CFC8DC}
+.dev button,.dev a{font:inherit;color:inherit;background:none;border:0;text-decoration:none;cursor:pointer}
+.i{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.i.f{fill:currentColor;stroke:none}
+.btn{width:var(--target);height:var(--target);display:grid;place-items:center;border-radius:50%;color:var(--text);flex:none}
+.btn.m{color:var(--muted)}
+.phone{width:360px;height:780px;border-radius:24px}
+.sb{position:absolute;left:0;right:0;top:0;height:28px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;font:600 12px/1 Figtree,sans-serif;color:var(--text);z-index:3;background:var(--bg)}
+.sb .r{display:flex;gap:6px;align-items:center}
+.sb svg{width:14px;height:14px;fill:currentColor}
+.scr{position:absolute;left:0;right:0;top:28px;bottom:0;overflow-y:auto;padding-bottom:176px;scrollbar-width:none}
+.scr::-webkit-scrollbar{display:none}
+/* screen title: Unbounded 20 */
+.hd{display:flex;align-items:center;padding:4px 4px 4px 16px;min-height:56px}
+.hd h1{font:var(--title);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.01em}
+/* floating dock, flat, no shadow */
+.dock{position:absolute;left:12px;right:12px;bottom:16px;background:var(--s2);border-radius:var(--r-dock);padding:8px 8px 6px;z-index:4}
+.mini{display:flex;align-items:center;gap:10px;height:64px;padding-left:4px}
+.mini .tx{flex:1;min-width:0}
+.mini .t{font:var(--body-l);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mini .s{font:var(--small);color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dock hr{border:0;border-top:1px solid var(--s3);margin:2px 8px 4px}
+.tabs{display:flex;height:56px}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--muted);font:var(--small);position:relative}
+.tab.on{color:var(--text);font-weight:700}
+.tab .ic{position:relative;display:block;height:24px}
+.tab.on .ic::after{content:"";position:absolute;right:-6px;top:-3px;width:6px;height:6px;border-radius:50%;background:var(--accent)}
+/* the ring: the only graphic sign. SVG stroke, no gradient. */
+.rw{position:relative;display:block;flex:none}
+.rw svg.rg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg);overflow:visible}
+.rw .tr{fill:none;stroke:var(--s3)}
+.rw .ar{fill:none;stroke:var(--accent)}
+.rw .cv{position:absolute}
+.cv{display:block}
+.c1{background:#6F7BE0}.c2{background:#D9885B}.c3{background:#4FA6A0}.c4{background:#B34F6E}.c5{background:#C7B14F}.c6{background:#4C5C8F}.c7{background:#8E7BB5}
+.ph{background:var(--s3);display:grid;place-items:center;color:var(--accent-soft)}
+/* list rows: 1px separators, no tiles */
+.li{position:relative;display:flex;align-items:center;gap:12px;min-height:64px;padding:6px 16px 6px 16px}
+.li::after{content:"";position:absolute;left:80px;right:16px;bottom:0;border-bottom:var(--sep)}
+.li.last::after{display:none}
+.li .tx{flex:1;min-width:0}
+.li .t{font:var(--body-l);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.li .s{font:var(--small);color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.li.now .t{color:var(--accent-soft)}
+.sec{display:flex;align-items:center;justify-content:space-between;padding:16px 16px 0 16px;min-height:48px}
+.sec h2{font:700 15px/1.3 Figtree,sans-serif}
+.sec .a{color:var(--accent-soft);font:var(--body-l);min-height:var(--target);padding:0 0 0 16px}
+.txtbtn{min-height:var(--target);padding:0 12px;font:var(--body-l);color:var(--accent-soft)}
+.txtbtn.m{color:var(--muted)}
+.btnp{display:inline-flex;align-items:center;gap:8px;height:var(--target);padding:0 24px;border-radius:var(--r-dock);background:var(--accent);color:var(--on-accent);font:var(--body-l)}
+.btng{display:inline-flex;align-items:center;gap:8px;height:var(--target);padding:0 16px;color:var(--text);font:var(--body-l)}
+.seek{height:4px;background:var(--s3);border-radius:2px;position:relative;flex:1}
+.seek i{position:absolute;left:0;top:0;bottom:0;background:var(--accent);border-radius:2px}
+.seek b{position:absolute;top:-4px;width:12px;height:12px;border-radius:50%;background:var(--accent)}
+/* desktop */
+.desk{width:1280px;height:800px;display:grid;grid-template-columns:240px 1fr;grid-template-rows:1fr 88px}
+.side{background:var(--s1);border-right:var(--sep);padding:8px 0;display:flex;flex-direction:column;overflow:hidden}
+.nv{display:flex;align-items:center;gap:16px;height:48px;padding:0 16px;color:var(--muted);font:var(--body-l);position:relative}
+.nv.on{color:var(--text);font-weight:700}
+.nv.on .ic::after{content:"";position:absolute;right:-6px;top:-3px;width:6px;height:6px;border-radius:50%;background:var(--accent)}
+.nv .ic{position:relative;display:block;height:24px}
+.nv .btn{margin-left:auto;margin-right:-8px}
+.side hr{border:0;border-top:var(--sep);margin:8px 16px}
+.pl{display:flex;align-items:center;gap:12px;padding:4px 16px;min-height:56px}
+.pl .t{font:var(--body-l);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pl .s{font:var(--small);color:var(--muted)}
+.pl .tx{min-width:0}
+.main{overflow:hidden;position:relative}
+.main .in{position:absolute;inset:0;overflow-y:auto;padding:0 32px 24px;scrollbar-width:none}
+.main .in::-webkit-scrollbar{display:none}
+.bar{grid-column:1/3;background:var(--s1);border-top:var(--sep);display:grid;grid-template-columns:1fr 2fr 1fr;align-items:center;padding:0 16px}
+.bar .l{display:flex;align-items:center;gap:12px;min-width:0}
+.bar .c{display:flex;flex-direction:column;align-items:center;gap:0}
+.bar .ctl{display:flex;align-items:center;gap:8px}
+.bar .sk{display:flex;align-items:center;gap:12px;width:100%;font:var(--small);color:var(--muted);margin-top:-4px}
+.bar .r{display:flex;align-items:center;justify-content:flex-end;gap:0}
+.chip{font:var(--small);color:var(--accent-soft);background:var(--s2);border-radius:var(--r-card);padding:4px 10px}
+.dev .play{background:var(--accent);color:var(--on-accent)}
+.play{width:var(--target);height:var(--target);border-radius:50%;background:var(--accent);color:var(--on-accent);display:grid;place-items:center}
+.vol{width:96px}
+</style><style>
+.hdr{display:flex;gap:16px;padding:8px 16px 0;align-items:flex-end}
+.hdr .cv{flex:none}
+.hdr .id{min-width:0;padding-bottom:4px}
+.hdr .k{font:var(--small);color:var(--muted)}
+.hdr h1{font:var(--title);letter-spacing:-.01em;margin:2px 0 6px;overflow-wrap:anywhere}
+.hdr .ar{font:var(--body-l);color:var(--accent-soft);display:inline-flex;align-items:center;min-height:var(--target);margin:-8px 0 -8px}
+.hdr .m{font:var(--body);color:var(--muted)}
+.act{display:flex;align-items:center;gap:4px;padding:16px 16px 8px}
+.act .btng{margin-left:auto}
+.dh{padding:16px 16px 0;font:var(--small);color:var(--muted);min-height:36px;display:flex;align-items:flex-end}
+.tr{position:relative;display:grid;grid-template-columns:36px 1fr auto 48px;align-items:center;min-height:56px;padding:0 0 0 16px}
+.tr::after{content:"";position:absolute;left:52px;right:16px;bottom:0;border-bottom:var(--sep)}
+.tr.last::after{display:none}
+.tr .n{display:grid;place-items:center;font:var(--small);color:var(--muted);width:28px;height:28px}
+.tr.now .n{color:var(--accent-soft)}
+.tr.now .rn{position:relative}
+.tr .t{font:var(--body-l);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:8px}
+.tr.now .t{color:var(--accent-soft)}
+.tr .d{font:var(--small);color:var(--muted);padding-right:0}
+.tr .t svg{width:14px;height:14px;vertical-align:-1px;margin-left:6px;color:var(--accent)}
+.sp{height:8px}
+.act.cmp{gap:0}.act.cmp .btnp{padding:0 18px}.act.cmp .btng{padding:0 10px;margin-left:0}
+/* desktop album: two columns */
+.da{display:grid;grid-template-columns:320px 1fr;gap:48px;padding-top:24px}
+.da .side2{position:sticky;top:0}
+.da .side2 h1{font:var(--title);margin:16px 0 4px}
+.da .side2 .ar{font:var(--body-l);color:var(--accent-soft);display:inline-flex;align-items:center;min-height:var(--target)}
+.da .side2 .m{font:var(--body);color:var(--muted)}
+.da .side2 .act{padding:16px 0 0;flex-wrap:wrap}
+.tw{display:grid;grid-template-columns:44px 1fr 64px 48px 48px;align-items:center;min-height:56px;position:relative}
+.tw::after{content:"";position:absolute;left:44px;right:0;bottom:0;border-bottom:var(--sep)}
+.tw .n{display:grid;place-items:center;width:28px;height:28px;font:var(--small);color:var(--muted)}
+.tw .t{font:var(--body-l)} .tw.now .t{color:var(--accent-soft)} .tw.now .n{color:var(--accent-soft)}
+.tw .d{font:var(--small);color:var(--muted);text-align:right;padding-right:8px}
+.alb{display:flex;align-items:center;gap:12px;min-height:72px;padding:8px 16px;position:relative}
+.alb::after{content:"";position:absolute;left:84px;right:16px;bottom:0;border-bottom:var(--sep)}
+.alb.last::after{display:none}
+.alb .tx{flex:1;min-width:0}.alb .t{font:var(--body-l)}.alb .s{font:var(--small);color:var(--muted)}
+</style></head><body><svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="home" viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/></symbol>
+<symbol id="search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></symbol>
+<symbol id="lib" viewBox="0 0 24 24"><rect x="8" y="3.5" width="12.5" height="12.5" rx="2"/><path d="M4 8v10a2 2 0 0 0 2 2h10"/><circle cx="12.6" cy="12.6" r="1.4"/><path d="M14 12.6V7.5l3 .8"/></symbol>
+<symbol id="mem" viewBox="0 0 24 24"><rect x="3.5" y="4" width="17" height="4.5" rx="1.2"/><rect x="3.5" y="10" width="17" height="4.5" rx="1.2"/><rect x="3.5" y="16" width="17" height="4.5" rx="1.2"/></symbol>
+<symbol id="set" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.5"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></symbol>
+<symbol id="act" viewBox="0 0 24 24"><path d="M3 12h4l3-7 4 14 3-7h4"/></symbol>
+<symbol id="shuf" viewBox="0 0 24 24"><path d="M3 7h4l10 10h4M3 17h4l3-3M14 10l3-3h4M18 4l3 3-3 3M18 14l3 3-3 3"/></symbol>
+<symbol id="dev" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v7H3zM1 18h14M18.5 10h2a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1v-8a1 1 0 0 1 1-1z"/></symbol>
+<symbol id="heart" viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></symbol>
+<symbol id="play" viewBox="0 0 24 24"><path d="M7 4.5v15l12-7.5z"/></symbol>
+<symbol id="pause" viewBox="0 0 24 24"><rect x="6" y="4.5" width="4" height="15" rx="1"/><rect x="14" y="4.5" width="4" height="15" rx="1"/></symbol>
+<symbol id="mv" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></symbol>
+<symbol id="mh" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></symbol>
+<symbol id="plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="dn" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5"/></symbol>
+<symbol id="grid" viewBox="0 0 24 24"><rect x="4" y="4" width="6.5" height="6.5" rx="1"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1"/></symbol>
+<symbol id="prev" viewBox="0 0 24 24"><path d="M6 5v14M19 5.5v13L9 12z"/></symbol>
+<symbol id="next" viewBox="0 0 24 24"><path d="M18 5v14M5 5.5v13L15 12z"/></symbol>
+<symbol id="rep" viewBox="0 0 24 24"><path d="M4 11V9a3 3 0 0 1 3-3h13l-3-3M20 13v2a3 3 0 0 1-3 3H4l3 3"/></symbol>
+<symbol id="lyr" viewBox="0 0 24 24"><path d="M4 5h16M4 10h10M4 15h7M17 14v6M17 14l3 1"/></symbol>
+<symbol id="que" viewBox="0 0 24 24"><path d="M4 6h12M4 11h12M4 16h7M18 14v6M18 14l3 1"/></symbol>
+<symbol id="vol" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4zM15.5 9a4.5 4.5 0 0 1 0 6M18 6.5a8 8 0 0 1 0 11"/></symbol>
+<symbol id="bell" viewBox="0 0 24 24"><path d="M6 17V11a6 6 0 0 1 12 0v6l1.5 2h-15zM10 21h4"/></symbol>
+<symbol id="ytm" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M10 9.5v5l4.5-2.5z"/></symbol>
+<symbol id="sync" viewBox="0 0 24 24"><path d="M20 8a8 8 0 0 0-14-2L4 8M4 4v4h4M4 16a8 8 0 0 0 14 2l2-2M20 20v-4h-4"/></symbol>
+<symbol id="star" viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.4 6.7 19.4l1.2-6L3.4 9.3l6-.7z"/></symbol>
+<symbol id="bars" viewBox="0 0 24 24"><path d="M6 20v-7M12 20V5M18 20v-10"/></symbol>
+<symbol id="back" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol>
+</defs></svg><div class="pg-h"><h1>Album e artista</h1><p>Dopo: testata guidata dalla copertina, righe compatte. Dati di esempio (album «Dalla», edizione con secondo disco).</p></div><div class="nav"><a href="home.html">Home</a><a href="libreria.html">Libreria</a><a href="album-artista.html">Album e artista</a></div><div class="wrap"><div class="row"><div class="col prima"><h2 class="cap">Prima</h2><img class="" src="img/phone_100_album.png" alt="Schermata attuale (album)."><p class="note">Schermata attuale (album).</p></div><div class="col"><h2 class="cap">Dopo: album</h2><div class="dev phone"><div class="sb"><span>14:32</span><span class="r"><svg viewBox="0 0 24 24"><path d="M2 20h20L22 4z"/></svg><svg viewBox="0 0 24 24"><path d="M12 20l-3-3a4.2 4.2 0 0 1 6 0zM5.5 12.5a9.2 9.2 0 0 1 13 0l-2 2a6.4 6.4 0 0 0-9 0zM2 9a14 14 0 0 1 20 0l-2 2a11 11 0 0 0-16 0z"/></svg><svg viewBox="0 0 24 24"><rect x="7" y="3" width="10" height="19" rx="2"/></svg><span>82%</span></span></div><div class="scr"><div class="hdr"><span class="cv c1" style="width:144px;height:144px;border-radius:8px"></span><div class="id"><div class="k">Album</div><h1>Dalla</h1><a class="ar">Lucio Dalla</a><div class="m">1980 · 8 brani · 36 minuti</div></div></div><div class="act"><span class="btnp"><svg class="i f"><use href="#play"/></svg>Riproduci</span><span class="btng"><svg class="i "><use href="#shuf"/></svg>Casuale</span><button class="btn m" aria-label="Altre azioni"><svg class="i "><use href="#mh"/></svg></button></div><div class="dh">Disco 1</div><div class="tr"><span class="n">1</span><div class="t">Anna e Marco</div><div class="d">4:11</div><button class="btn m" aria-label="Altre opzioni"><svg class="i "><use href="#mv"/></svg></button></div><div class="tr"><span class="n">2</span><div class="t">Balla balla ballerino</div><div class="d">4:34</div><button class="btn m" aria-label="Altre opzioni"><svg class="i "><use href="#mv"/></svg></button></div><div class="tr now"><span class="rw" style="width:28px;height:28px"><svg class="rg" viewBox="0 0 28 28"><circle class="ar" cx="14" cy="14" r="13" stroke-width="2"/></svg><span class="n" style="position:absolute;inset:0">3</span></span><div class="t">Cara</div><div class="d">4:19</div><button class="btn m" aria-label="Altre opzioni"><svg class="i "><use href="#mv"/></svg></button></div><div class="tr"><span class="n">4</span><div class="t">Futura</div><div class="d">4:56</div><button class="btn m" aria-label="Altre opzioni"><svg class="i "><use href="#mv"/></svg></button></div><div class="tr"><span class="n">5</span><div class="t">Stella di mare<svg class="i f"><use href="#heart"/></svg></div><div class="d">4:20</div><button class="btn m" aria-label="Altre opzioni"><svg class="i "><use href="#mv"/></svg></button></div><div class="tr"><span class="n">6</span><div class="t">Telefonami tra vent'anni</div><div class="d">4:18</div><button class="btn m" aria-label="Altre opzioni"><svg class="i "><use href="#mv"/></svg></button></div><div class="dh">Disco 2</div><div class="tr"><span class="n">7</span><div class="t">Futura (dal vivo)</div><div class="d">5:01</div><button class="btn m" aria-label="Altre opzioni"><svg class="i "><use href="#mv"/></svg></button></div><div class="tr last"><span class="n">8</span><div class="t">Cara (dal vivo)</div><div class="d">4:43</div><button class="btn m" aria-label="Altre opzioni"><svg class="i "><use href="#mv"/></svg></button></div><div class="sp"></div></div><nav class="dock" aria-label="Lettore e schede"><div class="mini"><span class="rw" style="width:52px;height:52px"><svg class="rg" viewBox="0 0 52 52"><circle class="tr" cx="26.0" cy="26.0" r="24.5" stroke-width="3"/><circle class="ar" cx="26.0" cy="26.0" r="24.5" stroke-width="3" pathLength="100" stroke-dasharray="38 100"/></svg><span class="cv c1" style="inset:6px;border-radius:50%"></span></span><div class="tx"><div class="t">Cara</div><div class="s">Lucio Dalla</div></div><button class="btn m" aria-label="Dispositivi"><svg class="i "><use href="#dev"/></svg></button><button class="btn " style="color:var(--accent)" aria-label="Rimuovi dai preferiti"><svg class="i f"><use href="#heart"/></svg></button><button class="btn " aria-label="Pausa"><svg class="i f"><use href="#pause"/></svg></button></div><hr><div class="tabs"><a class="tab" aria-label="Home"><span class="ic"><svg class="i "><use href="#home"/></svg></span>Home</a><a class="tab" aria-label="Cerca"><span class="ic"><svg class="i "><use href="#search"/></svg></span>Cerca</a><a class="tab on" aria-label="Libreria"><span class="ic"><svg class="i "><use href="#lib"/></svg></span>Libreria</a><a class="tab" aria-label="Memoria"><span class="ic"><svg class="i "><use href="#mem"/></svg></span>Memoria</a></div></nav></div></div><div class="col"><h2 class="cap">Dopo: artista</h2><div class="dev phone"><div class="sb"><span>14:32</span><span class="r"><svg viewBox="0 0 24 24"><path d="M2 20h20L22 4z"/></svg><svg viewBox="0 0 24 24"><path d="M12 20l-3-3a4.2 4.2 0 0 1 6 0zM5.5 12.5a9.2 9.2 0 0 1 13 0l-2 2a6.4 6.4 0 0 0-9 0zM2 9a14 14 0 0 1 20 0l-2 2a11 11 0 0 0-16 0z"/></svg><svg viewBox="0 0 24 24"><rect x="7" y="3" width="10" height="19" rx="2"/></svg><span>82%</span></span></div><div class="scr"><div class="hdr" style="align-items:center"><span class="cv c1" style="width:112px;height:112px;border-radius:50%"></span><div class="id"><div class="k">Artista</div><h1>Lucio Dalla</h1><div class="m">2 album · 18 brani · 1 ora e 14 minuti</div></div></div><div class="act cmp"><span class="btnp"><svg class="i f"><use href="#play"/></svg>Riproduci</span><span class="btng"><svg class="i "><use href="#shuf"/></svg>Casuale</span><button class="btn m" aria-label="Segui su YouTube Music"><svg class="i "><use href="#bell"/></svg></button><button class="btn m" aria-label="Apri su YouTube Music"><svg class="i "><use href="#ytm"/></svg></button></div><div class="sec"><h2>Più ascoltati</h2></div><div class="li now" ><span class="rw" style="width:52px;height:52px"><svg class="rg" viewBox="0 0 52 52" style="transform:none"><rect class="ar" x="1.0" y="1.0" width="50" height="50" rx="7.0" stroke-width="2" pathLength="100" stroke-dasharray="100 100"/></svg><span class="cv c1" style="inset:4px;border-radius:4px;display:grid;place-items:center"></span></span><div class="tx"><div class="t">Cara</div><div class="s">Dalla</div></div><button class="btn m" aria-label="Altre opzioni"><svg class="i "><use href="#mv"/></svg></button></div><div class="li" ><span class="rw" style="width:52px;height:52px"><span class="cv c1" style="inset:4px;border-radius:4px;display:grid;place-items:center"></span></span><div class="tx"><div class="t">Futura</div><div class="s">Dalla</div></div><button class="btn m" aria-label="Altre opzioni"><svg class="i "><use href="#mv"/></svg></button></div><div class="li" ><span class="rw" style="width:52px;height:52px"><span class="cv c1" style="inset:4px;border-radius:4px;display:grid;place-items:center"></span></span><div class="tx"><div class="t">Balla balla ballerino</div><div class="s">Dalla</div></div><button class="btn m" aria-label="Altre opzioni"><svg class="i "><use href="#mv"/></svg></button></div><div class="li" ><span class="rw" style="width:52px;height:52px"><span class="cv c2" style="inset:4px;border-radius:4px;display:grid;place-items:center"></span></span><div class="tx"><div class="t">Attenti al lupo</div><div class="s">Canzoni</div></div><button class="btn m" aria-label="Altre opzioni"><svg class="i "><use href="#mv"/></svg></button></div><div class="li last" ><span class="rw" style="width:52px;height:52px"><span class="cv c2" style="inset:4px;border-radius:4px;display:grid;place-items:center"></span></span><div class="tx"><div class="t">Ciao</div><div class="s">Canzoni</div></div><button class="btn m" aria-label="Altre opzioni"><svg class="i "><use href="#mv"/></svg></button></div><div class="sec"><h2>Album</h2></div><div class="alb" role="button"><span class="rw" style="width:60px;height:60px"><span class="cv c1" style="inset:4px;border-radius:4px;display:grid;place-items:center"></span></span><div class="tx"><div class="t">Dalla</div><div class="s">1980 · 8 brani</div></div></div><div class="alb last" role="button"><span class="rw" style="width:60px;height:60px"><span class="cv c2" style="inset:4px;border-radius:4px;display:grid;place-items:center"></span></span><div class="tx"><div class="t">Canzoni</div><div class="s">1996 · 10 brani</div></div></div></div><nav class="dock" aria-label="Lettore e schede"><div class="mini"><span class="rw" style="width:52px;height:52px"><svg class="rg" viewBox="0 0 52 52"><circle class="tr" cx="26.0" cy="26.0" r="24.5" stroke-width="3"/><circle class="ar" cx="26.0" cy="26.0" r="24.5" stroke-width="3" pathLength="100" stroke-dasharray="38 100"/></svg><span class="cv c1" style="inset:6px;border-radius:50%"></span></span><div class="tx"><div class="t">Cara</div><div class="s">Lucio Dalla</div></div><button class="btn m" aria-label="Dispositivi"><svg class="i "><use href="#dev"/></svg></button><button class="btn " style="color:var(--accent)" aria-label="Rimuovi dai preferiti"><svg class="i f"><use href="#heart"/></svg></button><button class="btn " aria-label="Pausa"><svg class="i f"><use href="#pause"/></svg></button></div><hr><div class="tabs"><a class="tab" aria-label="Home"><span class="ic"><svg class="i "><use href="#home"/></svg></span>Home</a><a class="tab" aria-label="Cerca"><span class="ic"><svg class="i "><use href="#search"/></svg></span>Cerca</a><a class="tab on" aria-label="Libreria"><span class="ic"><svg class="i "><use href="#lib"/></svg></span>Libreria</a><a class="tab" aria-label="Memoria"><span class="ic"><svg class="i "><use href="#mem"/></svg></span>Memoria</a></div></nav></div></div></div><div class="row"><div class="ann"><h2 class="cap">Cosa cambia</h2><ol><li><b>Copertina in testa, identità accanto</b><span>La copertina da 144 dp guida l'intestazione; titolo in Unbounded 20, artista come voce toccabile in accentSoft (apre la pagina artista, come oggi), meta su una riga. Niente sfumatura sullo sfondo.</span></li><li><b>Righe compatte da 56 dp</b><span>Numero, titolo, durata, menu: una riga di testo con separatore da 1 dp al posto delle righe alte e vuote di oggi. Il brano in riproduzione ha l'anello da 2 dp attorno al numero (non esiste la miniatura nelle righe dell'album).</span></li><li><b>Pulsanti piani</b><span>«Riproduci» pieno in accento (testo scuro, contrasto 5,6:1), «Casuale» solo testo, il menu «⋯» con tutte le voci di oggi. Nessun bordo da pillola e nessuna ombra.</span></li><li><b>Artista: stessa testata, più azioni</b><span>Avatar tondo, due azioni YouTube Music (segui, apri) accanto a Riproduci e Casuale. «Più ascoltati» con anello sul brano in corso; gli album diventano righe, non una griglia di riquadri uguali.</span></li><li><b>Desktop su due colonne</b><span>A sinistra la copertina grande con titolo e azioni (resta ferma scorrendo), a destra i brani su tutta la larghezza con durata, preferito e menu. La metà destra non resta più vuota.</span></li><li><b>Costo di disegno</b><span>Tutto piatto, un solo tipo di riga, nessun clip o sfocatura: meno layer da comporre durante lo scorrimento (da misurare sul Mi A3).</span></li></ol></div></div><div class="row"><div class="col prima"><h2 class="cap">Prima (desktop, ridotto a 640 px)</h2><img class="d" src="img/desktop_100_album.png" alt="Album desktop attuale"></div></div><div class="row"><div class="col"><h2 class="cap">Dopo: album (desktop 1280 px)</h2><div class="dev desk"><aside class="side"><div class="nv"><span class="ic"><svg class="i "><use href="#home"/></svg></span>Home</div><div class="nv"><span class="ic"><svg class="i "><use href="#search"/></svg></span>Cerca</div><hr><div class="nv on"><span class="ic"><svg class="i "><use href="#lib"/></svg></span>La tua libreria<button class="btn m" aria-label="Nuova playlist"><svg class="i "><use href="#plus"/></svg></button></div><div class="pl"><span class="rw" style="width:52px;height:52px"><span class="cv ph" style="inset:4px;border-radius:4px"><svg class="i f" style="width:20px;height:20px"><use href="#heart"/></svg></span></span><div class="tx"><div class="t">Preferiti</div><div class="s">Playlist di 6 brani</div></div></div><div class="pl"><span class="rw" style="width:52px;height:52px"><svg class="rg" viewBox="0 0 52 52" style="transform:none"><rect class="ar" x="1.0" y="1.0" width="50" height="50" rx="7.0" stroke-width="2" pathLength="100" stroke-dasharray="100 100"/></svg><span class="cv c1" style="inset:4px;border-radius:4px;display:grid;place-items:center"></span></span><div class="tx"><div class="t">In macchina</div><div class="s">Playlist di 12 brani</div></div></div><div class="pl"><span class="rw" style="width:52px;height:52px"><span class="cv c4" style="inset:4px;border-radius:4px;display:grid;place-items:center"></span></span><div class="tx"><div class="t">Notte</div><div class="s">Playlist di 5 brani</div></div></div><div style="flex:1"></div><hr><div class="nv"><span class="ic"><svg class="i "><use href="#mem"/></svg></span>Memoria</div></aside><main class="main"><div class="in"><div class="da"><div class="side2"><span class="cv c1" style="width:320px;height:320px;border-radius:8px"></span><h1>Dalla</h1><a class="ar">Lucio Dalla</a><div class="m">1980 · 8 brani · 36 minuti</div><div class="act"><span class="btnp"><svg class="i f"><use href="#play"/></svg>Riproduci</span><span class="btng"><svg class="i "><use href="#shuf"/></svg>Casuale</span><button class="btn m" aria-label="Altre azioni"><svg class="i "><use href="#mh"/></svg></button></div></div><div><div class="dh" style="padding-left:0">Disco 1</div><div class="tw"><span class="n">1</span><div class="t">Anna e Marco</div><div class="d">4:11</div><button class="btn m" aria-label="Aggiungi ai preferiti"><svg class="i "><use href="#heart"/></svg></button><button class="btn m" aria-label="Altre opzioni"><svg class="i "><use href="#mh"/></svg></button></div><div class="tw"><span class="n">2</span><div class="t">Balla balla ballerino</div><div class="d">4:34</div><button class="btn m" aria-label="Aggiungi ai preferiti"><svg class="i "><use href="#heart"/></svg></button><button class="btn m" aria-label="Altre opzioni"><svg class="i "><use href="#mh"/></svg></button></div><div class="tw now"><span class="rw" style="width:28px;height:28px"><svg class="rg" viewBox="0 0 28 28"><circle class="ar" cx="14" cy="14" r="13" stroke-width="2"/></svg><span class="n" style="position:absolute;inset:0">3</span></span><div class="t">Cara</div><div class="d">4:19</div><button class="btn m" aria-label="Aggiungi ai preferiti"><svg class="i "><use href="#heart"/></svg></button><button class="btn m" aria-label="Altre opzioni"><svg class="i "><use href="#mh"/></svg></button></div><div class="tw"><span class="n">4</span><div class="t">Futura</div><div class="d">4:56</div><button class="btn m" aria-label="Aggiungi ai preferiti"><svg class="i "><use href="#heart"/></svg></button><button class="btn m" aria-label="Altre opzioni"><svg class="i "><use href="#mh"/></svg></button></div><div class="tw"><span class="n">5</span><div class="t">Stella di mare<svg style="width:14px;height:14px;color:var(--accent);margin-left:8px;vertical-align:-1px" class="i f"><use href="#heart"/></svg></div><div class="d">4:20</div><button class="btn m" aria-label="Aggiungi ai preferiti"><svg class="i "><use href="#heart"/></svg></button><button class="btn m" aria-label="Altre opzioni"><svg class="i "><use href="#mh"/></svg></button></div><div class="tw"><span class="n">6</span><div class="t">Telefonami tra vent'anni</div><div class="d">4:18</div><button class="btn m" aria-label="Aggiungi ai preferiti"><svg class="i "><use href="#heart"/></svg></button><button class="btn m" aria-label="Altre opzioni"><svg class="i "><use href="#mh"/></svg></button></div><div class="dh" style="padding-left:0">Disco 2</div><div class="tw"><span class="n">7</span><div class="t">Futura (dal vivo)</div><div class="d">5:01</div><button class="btn m" aria-label="Aggiungi ai preferiti"><svg class="i "><use href="#heart"/></svg></button><button class="btn m" aria-label="Altre opzioni"><svg class="i "><use href="#mh"/></svg></button></div><div class="tw"><span class="n">8</span><div class="t">Cara (dal vivo)</div><div class="d">4:43</div><button class="btn m" aria-label="Aggiungi ai preferiti"><svg class="i "><use href="#heart"/></svg></button><button class="btn m" aria-label="Altre opzioni"><svg class="i "><use href="#mh"/></svg></button></div></div></div></div></main><footer class="bar"><div class="l"><span class="rw" style="width:56px;height:56px"><svg class="rg" viewBox="0 0 56 56"><circle class="tr" cx="28.0" cy="28.0" r="26.5" stroke-width="3"/><circle class="ar" cx="28.0" cy="28.0" r="26.5" stroke-width="3" pathLength="100" stroke-dasharray="38 100"/></svg><span class="cv c1" style="inset:6px;border-radius:50%"></span></span><div style="min-width:0"><div style="font:var(--body-l)">Cara</div><div style="font:var(--small);color:var(--muted)">Lucio Dalla</div></div><button class="btn " style="color:var(--accent)" aria-label="Rimuovi dai preferiti"><svg class="i f"><use href="#heart"/></svg></button></div><div class="c"><div class="ctl"><button class="btn m" aria-label="Casuale"><svg class="i "><use href="#shuf"/></svg></button><button class="btn " aria-label="Precedente"><svg class="i f"><use href="#prev"/></svg></button><button class="play" aria-label="Pausa"><svg class="i f"><use href="#pause"/></svg></button><button class="btn " aria-label="Successivo"><svg class="i f"><use href="#next"/></svg></button><button class="btn m" aria-label="Ripeti"><svg class="i "><use href="#rep"/></svg></button></div><div class="sk"><span>1:38</span><div class="seek"><i style="width:38%"></i><b style="left:calc(38% - 6px)"></b></div><span>4:19</span><span class="chip">1×</span></div></div><div class="r"><button class="btn m" aria-label="Testo"><svg class="i "><use href="#lyr"/></svg></button><button class="btn m" aria-label="Coda"><svg class="i "><use href="#que"/></svg></button><button class="btn m" aria-label="Dispositivi"><svg class="i "><use href="#dev"/></svg></button><button class="btn m" aria-label="Muto"><svg class="i "><use href="#vol"/></svg></button><div class="seek vol"><i style="width:70%"></i><b style="left:calc(70% - 6px)"></b></div></div></footer></div></div></div></div></body></html>

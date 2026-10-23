@@ -1,0 +1,238 @@
+<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>In riproduzione - prima e dopo</title>
+<link rel="stylesheet" href="tokens.css"><style>*{box-sizing:border-box;margin:0}
+html{background:var(--s1)}
+body{background:var(--s1);color:var(--text);font:var(--body);padding:24px;min-width:0}
+h1{font:var(--title);margin-bottom:4px}
+.lead{color:var(--muted);margin-bottom:24px;max-width:90ch}
+h2{font:var(--body-l);color:var(--accent-soft);margin:32px 0 12px;border-bottom:var(--sep);padding-bottom:8px}
+.cols{display:flex;gap:32px;align-items:flex-start;flex-wrap:wrap}
+.col>.cap{font:var(--small);color:var(--muted);margin-bottom:8px}
+.prima{width:360px;display:block;border:1px solid var(--s3);border-radius:var(--r-sheet)}
+button,input{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+button:focus-visible,[tabindex]:focus-visible,input:focus-visible+.sw{outline:2px solid var(--accent-soft);outline-offset:2px}
+svg.i{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+svg.i.f{fill:currentColor}
+.ph{position:relative;width:360px;height:780px;background:var(--bg);border:1px solid var(--s3);border-radius:var(--r-sheet);overflow:hidden;display:flex;flex-direction:column;flex:none}
+.sb{height:24px;display:flex;justify-content:space-between;align-items:center;padding:0 16px;font:var(--small);color:var(--text);flex:none}
+.sb span:last-child{display:flex;gap:6px;align-items:center}
+.sb i{display:block;width:14px;height:8px;border:1.5px solid var(--text);border-radius:2px}
+.sb b{display:block;width:12px;height:10px;background:var(--text);clip-path:polygon(0 100%,100% 0,100% 100%)}
+.gest{height:20px;flex:none;display:flex;justify-content:center;align-items:center}
+.gest::after{content:"";width:108px;height:4px;border-radius:2px;background:var(--faint)}
+.ib{width:var(--target);height:var(--target);display:grid;place-items:center;border-radius:50%;color:var(--text);flex:none}
+.ib.m{color:var(--muted)}
+.ib:active{transform:scale(.92);transition:transform var(--t-press) var(--ease-out)}
+.t{font:var(--title)}
+.mut{color:var(--muted)}
+.num{font-variant-numeric:tabular-nums}
+.chip{display:inline-flex;align-items:center;min-height:var(--target);padding:0 4px}
+.chip span{background:var(--s2);color:var(--accent-soft);font:var(--small);border-radius:var(--r-grid);padding:6px 8px}
+.badge{position:absolute;z-index:5;width:22px;height:22px;border-radius:50%;background:var(--accent-soft);color:var(--on-accent);font:600 12px/22px Figtree,sans-serif;text-align:center;pointer-events:none}
+.notes{width:330px;flex:none}
+.notes ol{list-style:none;padding:0;counter-reset:n}
+.notes li{counter-increment:n;border-bottom:var(--sep);padding:10px 0 10px 32px;position:relative;color:var(--muted)}
+.notes li::before{content:counter(n);position:absolute;left:0;top:10px;width:22px;height:22px;border-radius:50%;background:var(--accent-soft);color:var(--on-accent);font:600 12px/22px Figtree,sans-serif;text-align:center}
+.notes li b{color:var(--text);font-weight:600}
+.motion{margin-top:16px;color:var(--muted)}
+.motion button{min-height:var(--target);padding:0 16px;border:1px solid var(--faint);border-radius:var(--r-dock);color:var(--text);margin:8px 0}
+.demo{height:64px;width:100%;border:var(--sep);border-radius:var(--r-card);position:relative;overflow:hidden}
+.demo i{position:absolute;left:8px;top:8px;width:48px;height:48px;border-radius:50%;background:var(--accent);transition:transform var(--t-player) var(--ease-out)}
+.demo.on i{transform:translateX(250px) scale(1.2)}
+.sw{display:inline-block;width:52px;height:32px;border-radius:16px;border:2px solid var(--faint);position:relative;flex:none;transition:background var(--t-enter)}
+.sw::after{content:"";position:absolute;left:4px;top:4px;width:20px;height:20px;border-radius:50%;background:var(--faint);transition:transform var(--t-enter) var(--ease-out)}
+input:checked+.sw{background:var(--accent);border-color:var(--accent)}
+input:checked+.sw::after{background:var(--on-accent);transform:translateX(20px)}
+.cover{display:block;width:100%;height:100%}
+.sr{position:absolute;opacity:0;width:1px;height:1px}
+.scale{transform-origin:0 0}
+.fr{border:1px solid var(--s3);border-radius:var(--r-sheet);overflow:hidden;background:var(--bg);display:flex;flex-direction:column;width:1280px;height:800px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+.small{font:var(--small)}
+.hd{height:56px;display:flex;align-items:center;justify-content:space-between;flex:none}
+.hd>*:first-child{width:48px}
+.hc{text-align:center;display:flex;flex-direction:column;min-width:0}.hc b{font:600 13px/1.3 Figtree,sans-serif}
+.rg{display:flex;justify-content:center;align-items:center;flex:1;min-height:0}
+.ti{display:flex;align-items:center;padding:0 8px 0 16px;gap:8px;flex:none}
+.ar{color:var(--muted);font:var(--body-l);font-weight:400;min-height:var(--target);text-align:left;display:block}
+.t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-top:4px}
+.tr{display:flex;align-items:center;justify-content:space-between;padding:0 16px;flex:none}
+.tr button.tot{min-width:48px;min-height:48px;text-align:right;font:var(--small)}.tr .el{min-width:48px;font:var(--small)}
+.chips{display:flex}
+.ctl{display:flex;justify-content:space-evenly;align-items:center;padding:0 8px;flex:none}
+.ib.big svg{width:32px;height:32px}
+.play{width:72px;height:72px;border-radius:50%;background:var(--accent);color:var(--on-accent);display:grid;place-items:center}.play svg{width:32px;height:32px}
+.play:active{transform:scale(.94);transition:transform var(--t-press) var(--ease-out)}
+.rep{position:relative}.rep em{position:absolute;bottom:8px;width:4px;height:4px;border-radius:50%;background:var(--accent)}.rep svg{color:var(--accent-soft)}
+.ir{display:flex;justify-content:space-around;padding:4px 8px 0;flex:none;border-top:var(--sep);margin:8px 16px 0}
+.lb{min-width:var(--target);min-height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--muted);font:var(--small)}
+.vol{display:flex;align-items:center;margin:0 16px;flex:none}
+.pk{padding:0 16px 4px;text-align:center;color:var(--faint);font:var(--small);flex:none}
+.cd{padding:16px 0;border-bottom:var(--sep)}.cd h3{font:var(--body-l)}.cd h4{font:var(--small);color:var(--muted);margin-top:12px}
+.ch{display:flex;justify-content:space-between;align-items:center;min-height:32px}
+.cd p{margin-top:4px}.ly{font:var(--body-l);font-weight:400;padding:4px 0}.ly.cur{color:var(--text);font-weight:600}
+.tx{min-height:var(--target);padding:0 8px;color:var(--accent-soft);font:var(--body-l);display:inline-flex;align-items:center;gap:6px}
+.tx svg{width:18px;height:18px}.act{display:flex;justify-content:space-between;align-items:center}
+.row{display:flex;gap:12px;align-items:center;min-height:56px;border-bottom:var(--sep)}.row div{display:flex;flex-direction:column}.row b{font:var(--body-l)}.row span{font:var(--small)}
+.scr{padding:0 16px;overflow:hidden;flex:1}
+.spin.run{animation:sp 24s linear infinite}@keyframes sp{to{transform:rotate(360deg)}}
+.lr{display:flex;align-items:center;gap:12px;min-height:56px;border-bottom:var(--sep)}.lr>div{flex:1;min-width:0}.lr b{display:block;font:var(--body-l)}.lr span{font:var(--small);color:var(--muted)}
+.lr.now b{color:var(--accent-soft)}.lr>em{font:var(--small);font-style:normal;color:var(--muted)}
+.dsk{display:flex;flex:1;justify-content:center;align-items:center;gap:32px;min-height:0}
+.dsk .pl{width:560px;display:flex;flex-direction:column;height:100%}.dsk .side{width:420px;overflow:hidden;height:100%;padding:16px 0}
+.dock{position:absolute;left:12px;right:12px;bottom:16px;background:var(--s2);border-radius:var(--r-dock);padding:8px 8px 6px;z-index:4}
+.d-mini{display:flex;align-items:center;gap:10px;height:64px;padding-left:4px}
+.d-tx{flex:1;min-width:0}
+.d-t{font:var(--body-l);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.d-s{font:var(--small);color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dock hr{border:0;border-top:1px solid var(--s3);margin:2px 8px 4px}
+.d-tabs{display:flex;height:56px}
+.d-tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--muted);font:var(--small);position:relative}
+.d-tab.d-on{color:var(--text);font-weight:700}
+.d-ic{position:relative;display:block;height:24px}
+.d-tab.d-on .d-ic::after{content:"";position:absolute;right:-6px;top:-3px;width:6px;height:6px;border-radius:50%;background:var(--accent)}
+.d-rw{position:relative;display:block;flex:none}
+.d-rw svg.d-rg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg);overflow:visible}
+.d-rw .d-tr{fill:none;stroke:var(--s3)}
+.d-rw .d-ar{fill:none;stroke:var(--accent)}
+.d-cv{position:absolute;display:block}
+.d-c1{background:#6F7BE0}
+.d-btn{width:var(--target);height:var(--target);display:grid;place-items:center;border-radius:50%;color:var(--text);flex:none}
+.d-btn.d-m{color:var(--muted)}
+.dock svg.i.f{stroke:none}
+</style></head><body><svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<symbol id="down" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+<symbol id="up" viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></symbol>
+<symbol id="more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></symbol>
+<symbol id="car" viewBox="0 0 24 24"><path d="M4 16v-4l2-5h12l2 5v4zM4 16v3h3v-3M17 16v3h3v-3M4 12h16"/></symbol>
+<symbol id="heart" viewBox="0 0 24 24"><path d="M12 20s-8-4.8-8-10.5A4.3 4.3 0 0 1 12 7a4.3 4.3 0 0 1 8 2.5C20 15.200 12 20 12 20z"/></symbol>
+<symbol id="shuffle" viewBox="0 0 24 24"><path d="M3 7h3c5 0 5 10 10 10h5M3 17h3c1.500 0 2.600-.8 3.500-2M13.500 9C14.400 7.800 15.500 7 17 7h4M18 4l3 3-3 3M18 14l3 3-3 3"/></symbol>
+<symbol id="prev" viewBox="0 0 24 24"><path d="M6 5v14M19 5v14L9 12z"/></symbol>
+<symbol id="next" viewBox="0 0 24 24"><path d="M18 5v14M5 5v14l10-7z"/></symbol>
+<symbol id="play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></symbol>
+<symbol id="pause" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14" stroke-width="3.500"/></symbol>
+<symbol id="repeat" viewBox="0 0 24 24"><path d="M4 11V9a2 2 0 0 1 2-2h13M16 4l3 3-3 3M20 13v2a2 2 0 0 1-2 2H5M8 20l-3-3 3-3"/></symbol>
+<symbol id="devices" viewBox="0 0 24 24"><path d="M3 6h14v9H3zM7 19h6M19 9h2v10h-4v-4"/></symbol>
+<symbol id="moon" viewBox="0 0 24 24"><path d="M20 14.500A8 8 0 0 1 9.500 4 8 8 0 1 0 20 14.500z"/></symbol>
+<symbol id="queue" viewBox="0 0 24 24"><path d="M4 6h13M4 11h13M4 16h6M16 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM18 18v-5l3 1"/></symbol>
+<symbol id="vol" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9zM16 9a4 4 0 0 1 0 6"/></symbol>
+<symbol id="home" viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9H4z"/></symbol>
+<symbol id="lib" viewBox="0 0 24 24"><path d="M5 4v16M10 4v16M15 5l4 15"/></symbol>
+<symbol id="search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M16 16l4 4"/></symbol>
+<symbol id="gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.600 5.600l2 2M16.400 16.400l2 2M5.600 18.400l2-2M16.400 7.600l2-2"/></symbol>
+<symbol id="note" viewBox="0 0 24 24"><path d="M9 18V6l10-2v12M9 18a3 3 0 1 1-3-3 3 3 0 0 1 3 3zM19 16a3 3 0 1 1-3-3 3 3 0 0 1 3 3z"/></symbol>
+<symbol id="folder" viewBox="0 0 24 24"><path d="M3 6h7l2 2h9v11H3z"/></symbol>
+<symbol id="folderp" viewBox="0 0 24 24"><path d="M3 6h7l2 2h9v11H3zM12 11v5M9.500 13.500h5"/></symbol>
+<symbol id="lock" viewBox="0 0 24 24"><path d="M6 11h12v9H6zM9 11V8a3 3 0 0 1 6 0"/></symbol>
+<symbol id="check" viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></symbol>
+<symbol id="cloud" viewBox="0 0 24 24"><path d="M7 18a4 4 0 0 1-.5-8A5.500 5.500 0 0 1 17 9a4.500 4.500 0 0 1 0 9z"/></symbol>
+<symbol id="plist" viewBox="0 0 24 24"><path d="M4 6h12M4 11h8M4 16h6M17 11v8M13 15h8"/></symbol>
+<symbol id="ext" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v6H4V6h6"/></symbol>
+<symbol id="info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.500v.5"/></symbol>
+<symbol id="share" viewBox="0 0 24 24"><path d="M3 6h14v9H3zM7 19h6M19 9h2v10h-4v-4"/></symbol>
+<symbol id="tr" viewBox="0 0 24 24"><path d="M4 5h9M8.500 3v2M6 5c1 4 4 7 7 8M12 5c-1 4-4 7-8 9M14 21l4-10 4 10M15.500 18h5"/></symbol>
+<symbol id="cov" viewBox="0 0 100 100"><rect width="100" height="100" fill="#C94B2B"/><circle cx="62" cy="38" r="22" fill="#F2C14E"/><rect y="64" width="100" height="36" fill="#1F2A44"/><rect y="64" width="100" height="5" fill="#F4F0FA"/></symbol>
+<symbol id="cov2" viewBox="0 0 100 100"><rect width="100" height="100" fill="#2E6F6A"/><circle cx="30" cy="70" r="26" fill="#E9D8A6"/></symbol>
+<symbol id="cov3" viewBox="0 0 100 100"><rect width="100" height="100" fill="#6B4C9A"/><rect x="20" y="20" width="60" height="60" fill="#F4F0FA"/></symbol>
+<symbol id="cov4" viewBox="0 0 100 100"><rect width="100" height="100" fill="#B8872B"/><circle cx="50" cy="50" r="18" fill="#12081F"/></symbol>
+<symbol id="dk-home" viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/></symbol>
+<symbol id="dk-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></symbol>
+<symbol id="dk-lib" viewBox="0 0 24 24"><rect x="8" y="3.5" width="12.5" height="12.5" rx="2"/><path d="M4 8v10a2 2 0 0 0 2 2h10"/><circle cx="12.6" cy="12.6" r="1.4"/><path d="M14 12.6V7.5l3 .8"/></symbol>
+<symbol id="dk-mem" viewBox="0 0 24 24"><rect x="3.5" y="4" width="17" height="4.5" rx="1.2"/><rect x="3.5" y="10" width="17" height="4.5" rx="1.2"/><rect x="3.5" y="16" width="17" height="4.5" rx="1.2"/></symbol>
+<symbol id="dk-dev" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v7H3zM1 18h14M18.5 10h2a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1v-8a1 1 0 0 1 1-1z"/></symbol>
+<symbol id="dk-heart" viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></symbol>
+<symbol id="dk-pause" viewBox="0 0 24 24"><rect x="6" y="4.5" width="4" height="15" rx="1"/><rect x="14" y="4.5" width="4" height="15" rx="1"/></symbol>
+</svg>
+
+<h1>In riproduzione</h1><p class="lead">Mockup «Anello vivo / Disco / Quaderno». Stesse funzioni di oggi, nuovo ordine e nuova grafica. Trascina sull’anello del player per fare seek.</p>
+<h2>Telefono 360 × 780</h2>
+<div class="cols">
+<div class="col"><div class="cap">Prima (phone_100_now_playing.png)</div><img class="prima" src="img/phone_100_now_playing.png" width="360" alt="Schermata attuale In riproduzione"></div>
+<div class="col"><div class="cap">Dopo - player</div><div style="position:relative"><div class="ph" ><div class="sb"><span>9:41</span><span><b></b><i></i></span></div><div class="hd"><button class="ib" aria-label="Indietro" style="margin-left:8px"><svg class="i " aria-hidden="true"><use href="#down"/></svg></button>
+<div class="hc"><span class="small mut">In riproduzione da</span><b>Album · Dalla</b></div>
+<div style="display:flex;width:96px;justify-content:flex-end;margin-right:8px"><button class="ib" aria-label="Modalità in auto"><svg class="i " aria-hidden="true"><use href="#car"/></svg></button><button class="ib" aria-label="Altre azioni"><svg class="i " aria-hidden="true"><use href="#more"/></svg></button></div></div>
+<div class="rg" aria-label="Copertina: scorri a lato per cambiare brano"><svg class="ringseek" data-size="328" data-r="158.0" data-f=".716" data-dur="310" data-time="at" width="328" height="328" viewBox="0 0 328 328" role="slider" tabindex="0" aria-label="Posizione nel brano" aria-valuemin="0" aria-valuemax="310" aria-valuenow="222" aria-valuetext="3:42 di 5:10" style="touch-action:none;cursor:pointer">
+<circle cx="164.0" cy="164.0" r="158.0" fill="none" stroke="var(--s3)" stroke-width="12"/>
+<circle class="arc" cx="164.0" cy="164.0" r="158.0" fill="none" stroke="var(--accent)" stroke-width="12" stroke-linecap="round" transform="rotate(-90 164.0 164.0)"/>
+<g class="spin" style="transform-origin:164.0px 164.0px"><clipPath id="cla"><circle cx="164.0" cy="164.0" r="146.0"/></clipPath>
+<g clip-path="url(#cla)"><svg x="18.0" y="18.0" width="292.0" height="292.0" viewBox="0 0 100 100"><use href="#cov" width="100" height="100"/></svg></g></g>
+<circle class="thumb" r="11" fill="var(--accent-soft)" stroke="var(--bg)" stroke-width="3"/>
+<circle class="hit" cx="164.0" cy="164.0" r="158.0" fill="none" stroke="transparent" stroke-width="48"/>
+</svg></div>
+<div class="ti"><div style="min-width:0;flex:1"><div class="t">Futura</div><button class="ar">Lucio Dalla</button></div><button class="ib" aria-label="Rimuovi dai preferiti" style="color:var(--accent)"><svg class="i f" aria-hidden="true"><use href="#heart"/></svg></button></div>
+<div class="tr"><span class="num mut el" id="at">3:42</span><span class="chips"><button class="chip" aria-label="Qualità: MP3, 320 kbps"><span>MP3 320 kbps</span></button><button class="chip" aria-label="Velocità di riproduzione: 1x"><span>1×</span></button></span><button class="num mut tot" aria-label="Durata 5:10, tocca per il tempo rimanente" data-dur="310">5:10</button></div><div class="ctl">
+<button class="ib m" aria-label="Casuale: spenta (tocca per cambiare, tieni premuto per Shuffle+)"><svg class="i " aria-hidden="true"><use href="#shuffle"/></svg></button>
+<button class="ib big" aria-label="Brano precedente"><svg class="i f" aria-hidden="true"><use href="#prev"/></svg></button>
+<button class="play" aria-label="Pausa"><svg class="i " aria-hidden="true"><use href="#pause"/></svg></button>
+<button class="ib big" aria-label="Brano successivo"><svg class="i f" aria-hidden="true"><use href="#next"/></svg></button>
+<button class="ib rep" aria-label="Ripeti: tutti"><svg class="i " aria-hidden="true"><use href="#repeat"/></svg><em></em></button></div><div class="ir"><button class="lb"><svg class="i " aria-hidden="true"><use href="#devices"/></svg><span>Dispositivi</span></button><button class="lb" aria-label="Timer di spegnimento: 15, 30, 45, 60 min, fine brano"><svg class="i " aria-hidden="true"><use href="#moon"/></svg><span>Timer</span></button><button class="lb"><svg class="i " aria-hidden="true"><use href="#queue"/></svg><span>Coda</span></button></div><div class="pk"><svg class="i " aria-hidden="true"><use href="#up"/></svg><br>Scorri: Testo, Curiosità, Prossimi</div><div class="gest"></div></div>
+<i class="badge" style="left:322px;top:178px">1</i><i class="badge" style="left:8px;top:588px">2</i><i class="badge" style="left:24px;top:676px">3</i></div></div>
+<div class="col"><div class="cap">Dopo - scorrendo: Testo, Curiosità, Prossimi</div><div style="position:relative"><div class="ph" ><div class="sb"><span>9:41</span><span><b></b><i></i></span></div><div style="height:40px;flex:none"></div><div class="scr"><section class="cd"><div class="ch"><h3>Testo</h3><button class="tx" aria-label="Traduci il testo"><svg class="i " aria-hidden="true"><use href="#tr"/></svg>Traduci</button></div>
+<p class="ly mut">Riga precedente del testo sincronizzato</p><p class="ly cur">Riga corrente, evidenziata</p><p class="ly mut">Riga successiva del testo</p></section>
+<section class="cd"><div class="ch"><h3>Curiosità</h3></div>
+<h4>Sul brano</h4><p>«Futura» apre l’album «Dalla», uscito nel 1980, lo stesso di «Cara». Parla di un amore che nasce sotto lo sguardo di un futuro incerto.</p>
+<div class="act"><button class="tx">Mostra tutto</button><button class="tx"><svg class="i " aria-hidden="true"><use href="#tr"/></svg>Traduci</button></div>
+<h4>Sull’artista</h4><p>Lucio Dalla (Bologna, 1943 - Montreux, 2012), cantautore e polistrumentista.</p>
+<div class="act"><span class="small mut">Fonte: Wikipedia</span><button class="tx">Copia link</button></div></section>
+<section class="cd"><div class="ch"><h3>Prossimi</h3></div>
+<div class="row"><svg width="40" height="40" viewBox="0 0 100 100" style="border-radius:var(--r-list);flex:none"><use href="#cov" width="100" height="100"/></svg><div><b>Cara</b><span class="mut">Lucio Dalla</span></div></div><div class="row"><svg width="40" height="40" viewBox="0 0 100 100" style="border-radius:var(--r-list);flex:none"><use href="#cov2" width="100" height="100"/></svg><div><b>Anna e Marco</b><span class="mut">Lucio Dalla</span></div></div><div class="row"><svg width="40" height="40" viewBox="0 0 100 100" style="border-radius:var(--r-list);flex:none"><use href="#cov3" width="100" height="100"/></svg><div><b>Caruso</b><span class="mut">Lucio Dalla</span></div></div>
+<button class="tx">Apri coda</button></section></div><div class="gest"></div></div><i class="badge" style="left:322px;top:60px">4</i></div></div>
+<div class="col"><div class="cap">Dopo - mini player e dock (fuori dal player)</div><div style="position:relative"><div class="ph" ><div class="sb"><span>9:41</span><span><b></b><i></i></span></div><div style="padding:8px 16px 0"><div class="t" style="padding:8px 0 8px">Dalla</div><div class="small mut" style="margin-bottom:8px">1980 · 9 brani</div><div class="lr now"><svg width="44" height="44" viewBox="0 0 44 44"><circle cx="22" cy="22" r="21" fill="none" stroke="var(--accent)" stroke-width="2" stroke-dasharray="94.5 132" transform="rotate(-90 22 22)"/><circle cx="22" cy="22" r="21" fill="none" stroke="var(--s3)" stroke-width="2" stroke-dasharray="0 94.5 38 0" transform="rotate(-90 22 22)" opacity="0"/><svg x="4" y="4" width="36" height="36" viewBox="0 0 100 100" style="overflow:visible"><clipPath id="lc"><circle cx="50" cy="50" r="50"/></clipPath><g clip-path="url(#lc)"><use href="#cov" width="100" height="100"/></g></svg></svg><div><b>Futura</b><span>Lucio Dalla · Dalla</span></div><em class="num">5:10</em></div><div class="lr"><svg width="44" height="44" viewBox="0 0 100 100" style="padding:2px;border-radius:6px"><use href="#cov2" width="100" height="100"/></svg><div><b>Cara</b><span>Lucio Dalla · Dalla</span></div><em class="num">4:14</em></div><div class="lr"><svg width="44" height="44" viewBox="0 0 100 100" style="padding:2px;border-radius:6px"><use href="#cov3" width="100" height="100"/></svg><div><b>Caruso</b><span>Lucio Dalla · Caruso</span></div><em class="num">4:35</em></div><div class="lr"><svg width="44" height="44" viewBox="0 0 100 100" style="padding:2px;border-radius:6px"><use href="#cov4" width="100" height="100"/></svg><div><b>Anna e Marco</b><span>Lucio Dalla · Lucio Dalla</span></div><em class="num">3:48</em></div></div>
+<nav class="dock" aria-label="Lettore e schede"><div class="d-mini"><span class="d-rw" style="width:52px;height:52px"><svg class="d-rg" viewBox="0 0 52 52"><circle class="d-tr" cx="26.0" cy="26.0" r="24.5" stroke-width="3"/><circle class="d-ar" cx="26.0" cy="26.0" r="24.5" stroke-width="3" pathLength="100" stroke-dasharray="38 100"/></svg><span class="d-cv d-c1" style="inset:6px;border-radius:50%"></span></span><div class="d-tx"><div class="d-t">Cara</div><div class="d-s">Lucio Dalla</div></div><button class="d-btn d-m" aria-label="Dispositivi"><svg class="i "><use href="#dk-dev"/></svg></button><button class="d-btn " style="color:var(--accent)" aria-label="Rimuovi dai preferiti"><svg class="i f"><use href="#dk-heart"/></svg></button><button class="d-btn " aria-label="Pausa"><svg class="i f"><use href="#dk-pause"/></svg></button></div><hr><div class="d-tabs"><a class="d-tab" aria-label="Home"><span class="d-ic"><svg class="i "><use href="#dk-home"/></svg></span>Home</a><a class="d-tab" aria-label="Cerca"><span class="d-ic"><svg class="i "><use href="#dk-search"/></svg></span>Cerca</a><a class="d-tab d-on" aria-label="Libreria"><span class="d-ic"><svg class="i "><use href="#dk-lib"/></svg></span>Libreria</a><a class="d-tab" aria-label="Memoria"><span class="d-ic"><svg class="i "><use href="#dk-mem"/></svg></span>Memoria</a></div></nav><div class="gest"></div></div><i class="badge" style="left:2px;top:596px">5</i></div></div>
+<aside class="notes"><div class="cap small mut" style="margin-bottom:8px">Note</div><ol>
+<li><b>L’anello è il seek.</b> 12 px attorno alla copertina tonda: si trascina su di esso (tastiera: frecce, ±5 s). Via la barra grigia: un controllo e un disegno in meno, e lo stato del brano è sempre visibile.</li>
+<li><b>Comandi raggruppati.</b> Play 72 px al centro, precedente e successivo 48+, casuale e ripeti più piccoli e smorzati. Ripeti attivo = pallino in accento.</li>
+<li><b>Una sola riga di icone</b> con etichetta da 12 px: Dispositivi, Timer (menu 15/30/45/60 min, fine brano), Coda. Il volume c’è solo su desktop (come oggi).</li>
+<li><b>Schede senza riquadri.</b> Testo, Curiosità e Prossimi diventano sezioni con separatore da 1 px e titoli Figtree: niente superfici sovrapposte, meno strati da disegnare.</li>
+<li><b>Anello di stato ovunque uguale.</b> Mini player 3 px, riga in riproduzione 2 px attorno alla miniatura: stesso segno, non va su bottoni o schede.</li>
+<li><b>Accessibilità.</b> Tutti i bersagli ≥ 48 px, testo ≥ 12 px, slider con valore letto («3:42 di 5:10»), copertina decorativa fuori dalla semantica, nessuna animazione con «riduci movimento».</li></ol>
+<div class="motion"><b style="color:var(--text)">Movimento.</b> Apertura del player: scale + translate 320 ms (ease-out), nessuna opacità a pagina intera; chiusura: trascinare in giù, 250 ms ease-in. Nessuna sfumatura sullo sfondo (via CoverBackdrop).
+<button id="demo-b">Prova movimento</button><div class="demo" id="demo"><i></i></div>
+<label style="display:flex;align-items:center;gap:8px;min-height:48px"><input type="checkbox" id="rot"> Copertina che ruota (opzione, spenta di default)</label></div></aside>
+</div>
+<h2>Desktop 1280 × 800 (mostrato al 75%)</h2>
+<div class="cols"><div class="col"><div class="cap">Prima (desktop_100_now_playing.png)</div><img src="img/desktop_100_now_playing.png" width="960" alt="Schermata desktop attuale" style="border:1px solid var(--s3);border-radius:var(--r-sheet);display:block"></div></div>
+<div class="cols" style="margin-top:16px"><div class="col"><div class="cap">Dopo</div><div style="width:960px;height:600px"><div class="scale" style="transform:scale(.75)"><div class="fr"><div class="sb" style="height:32px;padding:0 24px"><span>Codecore</span><span class="mut">Linux · 1280×800</span></div>
+<div class="hd" style="padding:0 24px;max-width:1012px;width:100%;margin:0 auto"><button class="ib" aria-label="Indietro" style="margin:0"><svg class="i " aria-hidden="true"><use href="#down"/></svg></button><div class="hc"><span class="small mut">In riproduzione da</span><b>Album · Dalla</b></div><button class="ib" aria-label="Altre azioni" style="margin:0"><svg class="i " aria-hidden="true"><use href="#more"/></svg></button></div>
+<div class="dsk"><div class="pl"><div class="rg" aria-label="Copertina: scorri a lato per cambiare brano"><svg class="ringseek" data-size="360" data-r="174.0" data-f=".716" data-dur="310" data-time="dt" width="360" height="360" viewBox="0 0 360 360" role="slider" tabindex="0" aria-label="Posizione nel brano" aria-valuemin="0" aria-valuemax="310" aria-valuenow="222" aria-valuetext="3:42 di 5:10" style="touch-action:none;cursor:pointer">
+<circle cx="180.0" cy="180.0" r="174.0" fill="none" stroke="var(--s3)" stroke-width="12"/>
+<circle class="arc" cx="180.0" cy="180.0" r="174.0" fill="none" stroke="var(--accent)" stroke-width="12" stroke-linecap="round" transform="rotate(-90 180.0 180.0)"/>
+<g class="spin" style="transform-origin:180.0px 180.0px"><clipPath id="cld"><circle cx="180.0" cy="180.0" r="162.0"/></clipPath>
+<g clip-path="url(#cld)"><svg x="18.0" y="18.0" width="324.0" height="324.0" viewBox="0 0 100 100"><use href="#cov" width="100" height="100"/></svg></g></g>
+<circle class="thumb" r="11" fill="var(--accent-soft)" stroke="var(--bg)" stroke-width="3"/>
+<circle class="hit" cx="180.0" cy="180.0" r="174.0" fill="none" stroke="transparent" stroke-width="48"/>
+</svg></div>
+<div class="ti"><div style="min-width:0;flex:1"><div class="t">Futura</div><button class="ar">Lucio Dalla</button></div><button class="ib" aria-label="Rimuovi dai preferiti" style="color:var(--accent)"><svg class="i f" aria-hidden="true"><use href="#heart"/></svg></button></div>
+<div class="tr"><span class="num mut el" id="dt">3:42</span><span class="chips"><button class="chip" aria-label="Qualità: MP3, 320 kbps"><span>MP3 320 kbps</span></button><button class="chip" aria-label="Velocità di riproduzione: 1x"><span>1×</span></button></span><button class="num mut tot" aria-label="Durata 5:10, tocca per il tempo rimanente" data-dur="310">5:10</button></div><div class="ctl">
+<button class="ib m" aria-label="Casuale: spenta (tocca per cambiare, tieni premuto per Shuffle+)"><svg class="i " aria-hidden="true"><use href="#shuffle"/></svg></button>
+<button class="ib big" aria-label="Brano precedente"><svg class="i f" aria-hidden="true"><use href="#prev"/></svg></button>
+<button class="play" aria-label="Pausa"><svg class="i " aria-hidden="true"><use href="#pause"/></svg></button>
+<button class="ib big" aria-label="Brano successivo"><svg class="i f" aria-hidden="true"><use href="#next"/></svg></button>
+<button class="ib rep" aria-label="Ripeti: tutti"><svg class="i " aria-hidden="true"><use href="#repeat"/></svg><em></em></button></div><div class="vol"><button class="ib m" aria-label="Muto"><svg class="i " aria-hidden="true"><use href="#vol"/></svg></button><input type="range" min="0" max="100" value="100" aria-label="Volume" style="flex:1;accent-color:var(--accent)"><span class="num mut" style="width:48px;text-align:center">100%</span></div><div class="ir"><button class="lb"><svg class="i " aria-hidden="true"><use href="#devices"/></svg><span>Dispositivi</span></button><button class="lb" aria-label="Timer di spegnimento: 15, 30, 45, 60 min, fine brano"><svg class="i " aria-hidden="true"><use href="#moon"/></svg><span>Timer</span></button><button class="lb"><svg class="i " aria-hidden="true"><use href="#queue"/></svg><span>Coda</span></button></div></div><div class="side"><section class="cd"><div class="ch"><h3>Testo</h3><button class="tx" aria-label="Traduci il testo"><svg class="i " aria-hidden="true"><use href="#tr"/></svg>Traduci</button></div>
+<p class="ly mut">Riga precedente del testo sincronizzato</p><p class="ly cur">Riga corrente, evidenziata</p><p class="ly mut">Riga successiva del testo</p></section>
+<section class="cd"><div class="ch"><h3>Curiosità</h3></div>
+<h4>Sul brano</h4><p>«Futura» apre l’album «Dalla», uscito nel 1980, lo stesso di «Cara». Parla di un amore che nasce sotto lo sguardo di un futuro incerto.</p>
+<div class="act"><button class="tx">Mostra tutto</button><button class="tx"><svg class="i " aria-hidden="true"><use href="#tr"/></svg>Traduci</button></div>
+<h4>Sull’artista</h4><p>Lucio Dalla (Bologna, 1943 - Montreux, 2012), cantautore e polistrumentista.</p>
+<div class="act"><span class="small mut">Fonte: Wikipedia</span><button class="tx">Copia link</button></div></section>
+<section class="cd"><div class="ch"><h3>Prossimi</h3></div>
+<div class="row"><svg width="40" height="40" viewBox="0 0 100 100" style="border-radius:var(--r-list);flex:none"><use href="#cov" width="100" height="100"/></svg><div><b>Cara</b><span class="mut">Lucio Dalla</span></div></div><div class="row"><svg width="40" height="40" viewBox="0 0 100 100" style="border-radius:var(--r-list);flex:none"><use href="#cov2" width="100" height="100"/></svg><div><b>Anna e Marco</b><span class="mut">Lucio Dalla</span></div></div><div class="row"><svg width="40" height="40" viewBox="0 0 100 100" style="border-radius:var(--r-list);flex:none"><use href="#cov3" width="100" height="100"/></svg><div><b>Caruso</b><span class="mut">Lucio Dalla</span></div></div>
+<button class="tx">Apri coda</button></section></div></div></div></div></div></div>
+<aside class="notes"><ol><li><b>Due colonne centrate</b> (player + 420 px di sezioni), come oggi sopra i 900 px. Sul desktop: volume con muto e percentuale, nessun tasto «modalità in auto».</li><li><b>Stesse azioni, meno pittura:</b> niente sfondo sfumato dalla copertina, niente riquadri nelle sezioni.</li></ol></aside></div>
+<script>
+const fmt=s=>{s=Math.round(s);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
+document.querySelectorAll('.ringseek').forEach(s=>{
+ const S=+s.dataset.size,c=S/2,r=+s.dataset.r,C=2*Math.PI*r,dur=+s.dataset.dur;let f=+s.dataset.f;
+ const arc=s.querySelector('.arc'),th=s.querySelector('.thumb'),el=document.getElementById(s.dataset.time);
+ const draw=()=>{arc.setAttribute('stroke-dasharray',C);arc.setAttribute('stroke-dashoffset',C*(1-f));const a=2*Math.PI*f;
+  th.setAttribute('cx',c+r*Math.sin(a));th.setAttribute('cy',c-r*Math.cos(a));const t=f*dur;el.textContent=fmt(t);
+  s.setAttribute('aria-valuenow',Math.round(t));s.setAttribute('aria-valuetext',fmt(t)+' di '+fmt(dur));};
+ const at=e=>{const b=s.getBoundingClientRect(),k=S/b.width,x=(e.clientX-b.left)*k-c,y=(e.clientY-b.top)*k-c;
+  let n=Math.atan2(x,-y)/(2*Math.PI);if(n<0)n+=1;if(f>.75&&n<.25)n=1;else if(f<.25&&n>.75)n=0;f=n;draw();};
+ let on=false;s.addEventListener('pointerdown',e=>{on=true;s.setPointerCapture(e.pointerId);at(e)});
+ s.addEventListener('pointermove',e=>on&&at(e));s.addEventListener('pointerup',()=>on=false);
+ s.addEventListener('keydown',e=>{const d={ArrowRight:5,ArrowUp:5,ArrowLeft:-5,ArrowDown:-5}[e.key];if(d){f=Math.min(1,Math.max(0,f+d/dur));draw();e.preventDefault()}});draw();});
+document.querySelectorAll('.tot').forEach(b=>b.addEventListener('click',()=>{b.dataset.r=b.dataset.r?'':'1';const el=b.closest('.tr').querySelector('.el');const cur=parseFloat(el.textContent.split(':')[0])*60+ +el.textContent.split(':')[1];b.textContent=b.dataset.r?'-'+fmt(310-cur):'5:10'}));
+document.getElementById('demo-b').onclick=()=>document.getElementById('demo').classList.toggle('on');
+document.getElementById('rot').onchange=e=>document.querySelectorAll('.spin').forEach(g=>g.classList.toggle('run',e.target.checked&&!matchMedia('(prefers-reduced-motion:reduce)').matches));
+</script></body></html>

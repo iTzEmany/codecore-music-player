@@ -53,6 +53,13 @@ un'unica codebase Flutter per Android, Windows e Linux. Uso personale, niente co
 | 35 | `fase-35-secondo-parere-ytm.md` | Secondo parere da YouTube Music in «Da revisionare» (solo se conferma), genere da MusicBrainz, testo dalla scheda «Testo», curiosità da YouTube Music e Discogs, «Riprova» che non perde brani |
 | 36 | `fase-36-deezer-ed-exportify.md` | Deezer come fonte di metadati (per ISRC: numero di disco, copertina 1000 px, controllo d'edizione contro i cofanetti), ISRC in libreria (schema v14), MusicBrainz per ISRC; Exportify semi-automatico: «Apri exportify.net», ZIP di «Export All» abbinato a tutte le playlist, anteprima unica, file da Chrome, promemoria |
 | 37 | `fase-37-metadati-che-viaggiano.md` | Metadati che viaggiano con il brano condiviso (titolo, artista, album, anno, genere, traccia e disco, ISRC, testo, copertina), il pacchetto vince sui tag del file; tag scritti nei file scaricati e ricevuti (accesi di default, mai l'ISRC), ripiego «Artista - Titolo» dal nome del file, Deezer al ricevente |
+| 38 | `fase-38-rete-ui-fluida.md` | Rete di sicurezza del refactor «ui-fluida»: strumenti di misura riparati, scenari nuovi, test di caratterizzazione A–E, misure di partenza sul Mi A3 |
+| 39 | `fase-39-fluidita.md` | Fluidità: transizioni senza opacità, apertura del player, swipe, testi sincronizzati, fogli pigri, una scala di movimento; misura contro le soglie |
+| 40 | `fase-40-accessibilita-e-token.md` | Accessibilità e token: opzioni di sistema, contrasto, bersagli da 48 dp, etichette e tastiera, focus, scala del testo, spaziature |
+| 41 | `fase-41-mattoni-condivisi.md` | Mattoni condivisi: `showMsg`, `promptName`, `CcAppBar`, `AsyncBody`, `showCcSheet`, migrazione a gruppi |
+| 42 | `fase-42-livelli-e-tipi.md` | Livelli e tipi: UI solo tramite provider (`TrackOps`, test di architettura), selezione unica, enum dei menu, `track.kind`, build corti, via l'importer Python |
+| 43 | `fase-43-nuovo-aspetto.md` | Nuovo aspetto dai mockup approvati: dock unico, Home, Libreria, Album/artista, In riproduzione, Onboarding con scansione |
+| 44 | `fase-44-chiusura-ui-fluida.md` | Chiusura di «ui-fluida»: misure finali, metriche di struttura, risultati in `analisi.md`, pulizia |
 
 Dopo la **Fase 3** l'app è già usabile come lettore. Le fasi 5 e 6 sono indipendenti tra loro. La fase 8 (Jam) richiede la 6.
 

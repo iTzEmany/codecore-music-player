@@ -328,3 +328,12 @@ Scritture con debounce 400 ms, mai in un handler di slider a ogni tick.
 - **«Svuota cache»** (`CacheCleaner`, `MemoryActions.clearCaches`): tocca solo `clearableKinds` = immagini in memoria, cache Jam, cache delle ricerche (`SearchCache.clear`), catalogo online (`CatalogCache.clear`), copie sfocate (`deleteBlurredCopies`: solo `bg-*-blur<n>.png`, le foto restano). Mai copertine, database, backup dei tag, podcast. La cache Jam non si tocca mentre una Jam è attiva. Conferma prima, poi un avviso con lo spazio liberato.
 - **«Mai ascoltati»** (`never_played_screen.dart`): elenco con selezione (`SelectableAppBar`), quindi le azioni di gruppo, «Elimina dal dispositivo» compreso (`confirmAndDeleteTracks`).
 - **Segnala un problema:** `ReportIssueScreen` (Impostazioni → Info) compila con `buildIssue` (`core/issue_report.dart`: URL ≤ 7000 caratteri, log accorciato per primo, ultime righe W/E ripulite con `redactLog`) la pagina `issues/new` di `kReleaseRepo` e la apre con `LinkOpener` (`xdg-open`/`rundll32`; Android: canale `codecore/link`, `LinkBridge.kt`, ACTION_VIEW + info dispositivo). Nessun token nell'app.
+
+## Interfaccia (refactor ui-fluida, 2026-10-23)
+Dettagli e motivazioni in `docs/refactor/ui-fluida/analisi.md` («Arrivo»), decisioni D-21..D-24.
+- **La UI passa solo dai provider.** In `lib/ui` non si usano `databaseProvider` né `*RepositoryProvider`; i tipi drift (`Track`, …) si possono importare. Le azioni sui brani stanno in `TrackOps` (`lib/providers/`). Lo controlla `test/ui/architecture_test.dart`.
+- **Mattoni condivisi** (`lib/ui/widgets/`): `showMsg` per i messaggi, `promptName` per il dialogo del nome, `CcAppBar` per l'intestazione, `AsyncBody<T>` per caricamento, vuoto ed errore. I fogli passano da `showCcSheet`. Dialogo per il testo, foglio per le scelte.
+- **Selezione:** solo `selectionProvider`, con le chiavi in `SelectionKey`. I menu usano un enum (come `TrackAction`). Il tipo del brano si legge da `track.kind`.
+- **Movimento:** una sola scala in `tokens.dart` (120/180/250/320 ms, easeOutCubic/easeInCubic), sempre con `ccDuration`. Solo transform e scale, mai opacità su tutta la pagina. Le transizioni di pagina stanno in `app_theme.dart`.
+- **Aspetto:** l'anello è l'unico segno grafico e porta lo stato; superfici piatte, niente gradienti né ombre. Mockup approvati in `docs/refactor/ui-fluida/mockup/`.
+
