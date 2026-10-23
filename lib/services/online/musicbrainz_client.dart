@@ -44,9 +44,9 @@ class MusicBrainzClient {
   static const gap = Duration(milliseconds: 1100);
   DateTime? _last;
 
-  Future<Map?> _get(String path, Map<String, String> query, CancelToken? cancel) async {
+  Future<Map?> _get(String path, Map<String, String> query, CancelToken? cancel, {bool retry = true}) async {
     // The service answers 503 now and then; a non-answer is tried once more.
-    for (var attempt = 0; attempt < 2; attempt++) {
+    for (var attempt = 0; attempt < (retry ? 2 : 1); attempt++) {
       final last = _last;
       if (last != null) {
         final wait = gap - _now().difference(last);
@@ -105,17 +105,59 @@ class MusicBrainzClient {
     return out;
   }
 
+  /// The recordings that carry [isrc], the one closest in length to
+  /// [durationMs] first (those with no length last). Empty when unknown.
+  /// A recording counts only if its title or its first artist is the local
+  /// [title] / [artist] (an ISRC is sometimes reused for another song).
+  Future<List<MbRecording>> recordingsByIsrc(String isrc, int durationMs,
+      {required String title, required String artist, CancelToken? cancel}) async {
+    final code = isrc.trim().toUpperCase();
+    if (code.isEmpty) return const [];
+    // 404 means an unknown ISRC: no retry.
+    final list = (await _get('isrc/$code', {'inc': 'artist-credits'}, cancel, retry: false))?['recordings'];
+    if (list is! List) return const [];
+    final wantTitle = matchKey(title);
+    final wantArtist = matchKey(extractPrimaryArtist(artist));
+    final out = <MbRecording>[];
+    for (final r in list) {
+      if (r is! Map || r['id'] is! String || r['title'] is! String) continue;
+      final credit = r['artist-credit'];
+      final a = credit is List && credit.isNotEmpty && credit.first is Map ? (credit.first as Map)['artist'] : null;
+      if (a is! Map || a['id'] is! String || a['name'] is! String) {
+        AppLog.i('musicbrainz isrc $code: recording ${r['id']} has no artist credit');
+        continue;
+      }
+      if (matchKey(r['title'] as String) != wantTitle && matchKey(a['name'] as String) != wantArtist) {
+        AppLog.i('musicbrainz isrc $code: recording ${r['id']} is another song, skipped');
+        continue;
+      }
+      out.add(MbRecording(
+        id: r['id'] as String,
+        title: r['title'] as String,
+        artistId: a['id'] as String,
+        artistName: a['name'] as String,
+        length: r['length'] is num ? (r['length'] as num).toInt() : null,
+      ));
+    }
+    int gap(MbRecording r) => r.length == null ? 1 << 40 : (r.length! - durationMs).abs();
+    out.sort((a, b) => gap(a).compareTo(gap(b)));
+    return out;
+  }
+
   /// The genre of a recording of [title] by [artist] that lasts [durationMs]
   /// (within 3 s when MusicBrainz knows its length), null when none is sure.
   /// The recording's own genre counts with 2 votes or more; otherwise the
   /// artist's most voted one stands in. Capitalised like Wikipedia's titles.
+  /// With an [isrc] the recording is looked up by it first, by text otherwise.
   Future<String?> genreFor(String title, String artist, int durationMs,
-      {CancelToken? cancel}) async {
-    final found = await recordings(title, artist, studioOnly: true, cancel: cancel);
-    final rec = found.where((r) {
-      final len = r.length;
-      return len == null || (len - durationMs).abs() <= 3000;
-    }).firstOrNull;
+      {String? isrc, CancelToken? cancel}) async {
+    bool near(MbRecording r) => r.length == null || (r.length! - durationMs).abs() <= 3000;
+    final byIsrc = isrc == null
+        ? const <MbRecording>[]
+        : await recordingsByIsrc(isrc, durationMs, title: title, artist: artist, cancel: cancel);
+    // No ISRC match of the right length: the text search decides.
+    final rec = byIsrc.where(near).firstOrNull ??
+        (await recordings(title, artist, studioOnly: true, cancel: cancel)).where(near).firstOrNull;
     if (rec == null) return null;
     final own = _topGenre(await _get('recording/${rec.id}', {'inc': 'genres'}, cancel), 2);
     final name = own ?? _topGenre(await _get('artist/${rec.artistId}', {'inc': 'genres'}, cancel), 1);

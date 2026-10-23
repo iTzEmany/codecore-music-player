@@ -48,9 +48,10 @@ class CuriosityFinder {
   final DiscogsClient? discogs;
   final YtmArtistDescription? ytmArtist;
 
-  Future<CuriosityPair> find(String title, String artist, String lang, {CancelToken? cancel}) async {
+  Future<CuriosityPair> find(String title, String artist, String lang,
+      {String? isrc, int durationMs = 0, CancelToken? cancel}) async {
     final langs = lang == 'en' ? ['en'] : [lang, 'en'];
-    final ids = await _identify(title, artist, langs, cancel);
+    final ids = await _identify(title, artist, langs, cancel, isrc, durationMs);
 
     Object? songError, artistError;
     Curiosity? song, art;
@@ -106,12 +107,17 @@ class CuriosityFinder {
     String artist,
     List<String> langs,
     CancelToken? cancel,
+    String? isrc,
+    int durationMs,
   ) async {
     try {
       String? songQ, artistQ, recordingId;
       final main = extractPrimaryArtist(artist);
-      if (main.isNotEmpty) {
-        final recs = await musicBrainz.recordings(title, main, cancel: cancel);
+      final byIsrc = isrc == null
+          ? const <MbRecording>[]
+          : await musicBrainz.recordingsByIsrc(isrc, durationMs, title: title, artist: artist, cancel: cancel);
+      if (main.isNotEmpty || byIsrc.isNotEmpty) {
+        final recs = byIsrc.isNotEmpty ? byIsrc : await musicBrainz.recordings(title, main, cancel: cancel);
         if (recs.isNotEmpty) {
           recordingId = recs.first.id;
           artistQ = await musicBrainz.artistWikidata(recs.first.artistId, cancel: cancel);

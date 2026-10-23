@@ -178,7 +178,7 @@ class _InfoCardState extends ConsumerState<InfoCard> {
 
     // Identity first (MusicBrainz → Wikidata → the exact pages), the names
     // after; each part reports on its own, so one failing does not lose the other.
-    final found = await ref.read(curiosityFinderProvider).find(c.title, c.artist, lang);
+    final found = await ref.read(curiosityFinderProvider).find(c.title, c.artist, lang, isrc: t.isrc, durationMs: t.durationMs);
     final song = found.song, artist = found.artist;
     final songDone = found.songError == null;
     for (final (err, isSong) in [(found.songError, true), (found.artistError, false)]) {

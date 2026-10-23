@@ -175,7 +175,7 @@ class SecondOpinion {
         try {
           genre = await musicBrainz.genreFor(
               t.title, (t.artist ?? '').trim().isEmpty ? resultArtist ?? '' : t.artist!,
-              t.durationMs, cancel: cancel);
+              t.durationMs, isrc: t.isrc, cancel: cancel);
         } on RateLimitedException catch (e) {
           _mbRestUntil = DateTime.now().add(const Duration(minutes: 10));
           AppLog.w('second opinion genre skipped: $e');
