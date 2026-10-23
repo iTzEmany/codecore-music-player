@@ -2073,7 +2073,7 @@
   "podcastDeleteFile": "Apagar o ficheiro",
   "podcastAutoDelete": "Apagar os episódios ouvidos",
   "podcastAutoDeleteNever": "Nunca",
-  "podcastAutoDeleteAfter": "{days, plural, one{Após 1 dia} other{Após {days} dias}}",
+  "podcastAutoDeleteAfter": "{days, plural, one{1 dia} other{{days} dias}}",
   "@podcastAutoDeleteAfter": {
     "placeholders": {
       "days": {

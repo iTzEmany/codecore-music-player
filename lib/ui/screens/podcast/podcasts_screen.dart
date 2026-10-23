@@ -77,34 +77,46 @@ class _PodcastsScreenState extends ConsumerState<PodcastsScreen> {
           ),
         ],
       ),
-      body: podcasts.isEmpty
-          ? EmptyState(
-              icon: Icons.podcasts_rounded,
-              message: '${l.podcastsEmpty}\n${l.podcastsNotice}',
-              actionLabel: l.podcastAdd,
-              onAction: () => PodcastSubscribeSheet.show(context),
-            )
-          : Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(CcDims.margin, 8, CcDims.margin, 4),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      l.podcastsNotice,
-                      style: theme.bodySmall?.copyWith(color: cc.textMuted),
+      body: Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 960),
+          child: podcasts.isEmpty
+              ? EmptyState(
+                  icon: Icons.podcasts_rounded,
+                  message: l.podcastsEmpty,
+                  help: l.podcastsNotice,
+                  actionLabel: l.podcastAdd,
+                  onAction: () => PodcastSubscribeSheet.show(context),
+                )
+              : Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        CcDims.margin,
+                        8,
+                        CcDims.margin,
+                        4,
+                      ),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          l.podcastsNotice,
+                          style: theme.bodySmall?.copyWith(color: cc.textMuted),
+                        ),
+                      ),
                     ),
-                  ),
+                    Expanded(
+                      child: ListView.builder(
+                        itemExtent: 72,
+                        itemCount: podcasts.length,
+                        itemBuilder: (_, i) => _PodcastTile(podcasts[i]),
+                      ),
+                    ),
+                  ],
                 ),
-                Expanded(
-                  child: ListView.builder(
-                    itemExtent: 72,
-                    itemCount: podcasts.length,
-                    itemBuilder: (_, i) => _PodcastTile(podcasts[i]),
-                  ),
-                ),
-              ],
-            ),
+        ),
+      ),
     );
   }
 }
@@ -133,11 +145,13 @@ class _PodcastTile extends StatelessWidget {
       ),
       subtitle: Text(
         [if (p.author != null) p.author!, line].join(', '),
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: context.cc.textMuted),
+        style: Theme.of(context).textTheme.bodySmall
+            ?.copyWith(color: context.cc.textMuted),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       ),
-      onTap: () => ShellNav.open<void>(context, PodcastDetailScreen(podcastId: p.id)),
+      onTap: () =>
+          ShellNav.open<void>(context, PodcastDetailScreen(podcastId: p.id)),
     );
   }
 }

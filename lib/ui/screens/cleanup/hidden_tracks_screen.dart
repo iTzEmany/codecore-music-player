@@ -68,37 +68,43 @@ class HiddenTracksScreen extends ConsumerWidget {
                 ),
               )
             : AppBar(title: Text(l.hiddenTracksTitle)),
-        body: tracks.isEmpty
-            ? EmptyState(
-                icon: Icons.visibility_off_outlined,
-                message: l.hiddenTracksEmpty,
-              )
-            : Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(CcDims.margin),
-                    child: Text(
-                      l.hiddenTracksHint,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: context.cc.textMuted,
+        body: Align(
+          alignment: Alignment.topCenter,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 960),
+            child: tracks.isEmpty
+                ? EmptyState(
+                    icon: Icons.visibility_off_outlined,
+                    message: l.hiddenTracksEmpty,
+                  )
+                : Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(CcDims.margin),
+                        child: Text(
+                          l.hiddenTracksHint,
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(color: context.cc.textMuted),
+                        ),
                       ),
-                    ),
-                  ),
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: tracks.length,
-                      itemExtent: extent,
-                      itemBuilder: (_, i) => LiveTrackRow(
-                        track: tracks[i],
-                        compact: compact,
-                        selection: selection,
-                        onTap: () {},
-                        onMore: () => _restore(context, ref, {tracks[i].id}),
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount: tracks.length,
+                          itemExtent: extent,
+                          itemBuilder: (_, i) => LiveTrackRow(
+                            track: tracks[i],
+                            compact: compact,
+                            selection: selection,
+                            onTap: () {},
+                            onMore: () =>
+                                _restore(context, ref, {tracks[i].id}),
+                          ),
+                        ),
                       ),
-                    ),
+                    ],
                   ),
-                ],
-              ),
+          ),
+        ),
       ),
     );
   }

@@ -19,15 +19,15 @@ class ActivityLogScreen extends ConsumerWidget {
   const ActivityLogScreen({super.key});
 
   String _outcome(AppLocalizations l, LogEntry e) => switch (e.event) {
-        null => e.failed ? l.offerFailed : l.offerDone,
-        ImportEventKind.completed => l.offerDone,
-        ImportEventKind.planned => l.csvImportPlanned,
-        ImportEventKind.rateLimited => l.ytErrRateLimited,
-        ImportEventKind.network => l.ytErrNetwork,
-        ImportEventKind.toolMissing => l.ytErrToolMissing,
-        ImportEventKind.toolOutdated => l.ytErrToolOutdated,
-        ImportEventKind.failing => l.csvImportFailing,
-      };
+    null => e.failed ? l.offerFailed : l.offerDone,
+    ImportEventKind.completed => l.offerDone,
+    ImportEventKind.planned => l.csvImportPlanned,
+    ImportEventKind.rateLimited => l.ytErrRateLimited,
+    ImportEventKind.network => l.ytErrNetwork,
+    ImportEventKind.toolMissing => l.ytErrToolMissing,
+    ImportEventKind.toolOutdated => l.ytErrToolOutdated,
+    ImportEventKind.failing => l.csvImportFailing,
+  };
 
   IconData _icon(LogEntry e) {
     if (e.failed) return Icons.error_outline_rounded;
@@ -57,33 +57,52 @@ class ActivityLogScreen extends ConsumerWidget {
             ),
         ],
       ),
-      body: entries.isEmpty
-          ? EmptyState(icon: Icons.receipt_long_rounded, message: l.activityLogEmpty)
-          : ListView.builder(
-              itemExtent: 64,
-              itemCount: entries.length,
-              itemBuilder: (_, i) {
-                final e = entries[i];
-                final item = e.item;
-                return ListTile(
-                  onTap: item?.kind == ActivityKind.secondOpinion
-                      ? () => ShellNav.open<void>(context, const SecondOpinionLogScreen())
-                      : null,
-                  leading: Icon(_icon(e), color: e.failed ? cc.error : cc.accentSoft),
-                  title: Text(
-                    item != null ? activityTitle(l, item) : l.logImport(e.importName ?? ''),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  subtitle: Text(
-                    '${time.format(e.at)}, ${_outcome(l, e)}',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.bodyMedium?.copyWith(color: e.failed ? cc.error : null),
-                  ),
-                );
-              },
-            ),
+      body: Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 960),
+          child: entries.isEmpty
+              ? EmptyState(
+                  icon: Icons.receipt_long_rounded,
+                  message: l.activityLogEmpty,
+                )
+              : ListView.builder(
+                  itemExtent: 64,
+                  itemCount: entries.length,
+                  itemBuilder: (_, i) {
+                    final e = entries[i];
+                    final item = e.item;
+                    return ListTile(
+                      onTap: item?.kind == ActivityKind.secondOpinion
+                          ? () => ShellNav.open<void>(
+                              context,
+                              const SecondOpinionLogScreen(),
+                            )
+                          : null,
+                      leading: Icon(
+                        _icon(e),
+                        color: e.failed ? cc.error : cc.accentSoft,
+                      ),
+                      title: Text(
+                        item != null
+                            ? activityTitle(l, item)
+                            : l.logImport(e.importName ?? ''),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      subtitle: Text(
+                        '${time.format(e.at)}, ${_outcome(l, e)}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.bodyMedium?.copyWith(
+                          color: e.failed ? cc.error : null,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+        ),
+      ),
     );
   }
 }

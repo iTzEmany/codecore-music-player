@@ -1889,7 +1889,7 @@
   "podcastDeleteFile": "Delete the file",
   "podcastAutoDelete": "Delete heard episodes",
   "podcastAutoDeleteNever": "Never",
-  "podcastAutoDeleteAfter": "{days, plural, one{After 1 day} other{After {days} days}}",
+  "podcastAutoDeleteAfter": "{days, plural, one{1 day} other{{days} days}}",
   "@podcastAutoDeleteAfter": {
     "placeholders": {
       "days": {

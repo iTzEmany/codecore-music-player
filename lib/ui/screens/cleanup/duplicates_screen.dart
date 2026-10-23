@@ -6,6 +6,7 @@ import '../../../providers/duplicate_providers.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/confirm.dart';
 import '../../widgets/empty_state.dart';
+import '../../widgets/error_state.dart';
 import '../../widgets/format_utils.dart';
 import 'delete_files_dialogs.dart';
 import 'duplicate_group_card.dart';
@@ -55,25 +56,29 @@ class DuplicatesScreen extends ConsumerWidget {
             ),
         ],
       ),
-      body: switch (s.phase) {
-        DuplicatePhase.idle => _Intro(onSearch: notifier.start),
-        DuplicatePhase.reading ||
-        DuplicatePhase.hashing ||
-        DuplicatePhase.grouping => _Progress(
-          state: s,
-          onCancel: notifier.cancel,
+      body: Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 960),
+          child: switch (s.phase) {
+            DuplicatePhase.idle => _Intro(onSearch: notifier.start),
+            DuplicatePhase.reading ||
+            DuplicatePhase.hashing ||
+            DuplicatePhase.grouping => _Progress(
+              state: s,
+              onCancel: notifier.cancel,
+            ),
+            DuplicatePhase.failed => ErrorState(
+              message: l.duplicatesFailed,
+              onRetry: notifier.start,
+            ),
+            DuplicatePhase.done => _Results(
+              state: s,
+              onMergeAll: () => _mergeAll(context, ref),
+            ),
+          },
         ),
-        DuplicatePhase.failed => EmptyState(
-          icon: Icons.error_outline_rounded,
-          message: l.duplicatesFailed,
-          actionLabel: l.retry,
-          onAction: notifier.start,
-        ),
-        DuplicatePhase.done => _Results(
-          state: s,
-          onMergeAll: () => _mergeAll(context, ref),
-        ),
-      },
+      ),
     );
   }
 }
@@ -86,29 +91,19 @@ class _Intro extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    return Align(
-      alignment: Alignment.topLeft,
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 520),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                l.duplicatesIntro,
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
-              const SizedBox(height: 20),
-              FilledButton.icon(
-                onPressed: onSearch,
-                icon: const Icon(Icons.search_rounded),
-                label: Text(l.duplicatesSearch),
-              ),
-            ],
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(CcDims.margin),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(l.duplicatesIntro, style: Theme.of(context).textTheme.bodyLarge),
+          const SizedBox(height: 20),
+          FilledButton.icon(
+            onPressed: onSearch,
+            icon: const Icon(Icons.search_rounded),
+            label: Text(l.duplicatesSearch),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -139,10 +134,7 @@ class _Progress extends StatelessWidget {
           children: [
             Text(text, style: Theme.of(context).textTheme.bodyLarge),
             const SizedBox(height: 12),
-            SizedBox(
-              width: 320,
-              child: LinearProgressIndicator(value: value),
-            ),
+            SizedBox(width: 320, child: LinearProgressIndicator(value: value)),
             const SizedBox(height: 16),
             TextButton(onPressed: onCancel, child: Text(l.cancel)),
           ],
@@ -176,8 +168,9 @@ class _Results extends ConsumerWidget {
             CcDims.margin,
             4,
           ),
-          child: Card(
+          child: Material(
             color: context.cc.surface2,
+            borderRadius: BorderRadius.circular(CcDims.rCard),
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 8, 8),
               child: Column(
@@ -198,7 +191,10 @@ class _Results extends ConsumerWidget {
                       child: Text(
                         l.duplicatesDeleteFiles(
                           files.length,
-                          formatBytes(bytes, Localizations.localeOf(context).toString()),
+                          formatBytes(
+                            bytes,
+                            Localizations.localeOf(context).toString(),
+                          ),
                         ),
                       ),
                     ),
@@ -210,7 +206,12 @@ class _Results extends ConsumerWidget {
         ),
       if (groups.isNotEmpty)
         Padding(
-          padding: const EdgeInsets.fromLTRB(CcDims.margin, 8, CcDims.margin, 4),
+          padding: const EdgeInsets.fromLTRB(
+            CcDims.margin,
+            8,
+            CcDims.margin,
+            4,
+          ),
           child: Wrap(
             alignment: WrapAlignment.spaceBetween,
             crossAxisAlignment: WrapCrossAlignment.center,

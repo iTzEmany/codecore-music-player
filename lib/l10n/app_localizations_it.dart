@@ -3473,8 +3473,8 @@ class AppLocalizationsIt extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       days,
       locale: localeName,
-      other: 'Dopo $days giorni',
-      one: 'Dopo 1 giorno',
+      other: '$days giorni',
+      one: '1 giorno',
     );
     return '$_temp0';
   }

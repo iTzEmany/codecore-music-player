@@ -34,32 +34,43 @@ class TagsScreen extends ConsumerWidget {
             icon: const Icon(Icons.add_rounded),
             onPressed: () async {
               final name = await askTagName(context);
-              if (name != null) await ref.read(tagRepositoryProvider).create(name);
+              if (name != null) {
+                await ref.read(tagRepositoryProvider).create(name);
+              }
             },
           ),
         ],
       ),
-      body: tags.isEmpty
-          ? EmptyState(icon: Icons.label_outline_rounded, message: l.tagsEmpty)
-          : ListView(
-              children: [
-                for (final s in tags)
-                  ListTile(
-                    leading: TagDot(s.tag, size: 16),
-                    title: Text(s.tag.name),
-                    subtitle: Text(l.tracksCount(s.trackCount)),
-                    trailing: IconButton(
-                      tooltip: l.moreOptions,
-                      icon: const Icon(Icons.more_vert_rounded),
-                      onPressed: () => editTag(context, ref, s),
-                    ),
-                    onTap: () => ShellNav.open<void>(
-                      context,
-                      TagTracksScreen(name: s.tag.name),
-                    ),
-                  ),
-              ],
-            ),
+      body: Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 960),
+          child: tags.isEmpty
+              ? EmptyState(
+                  icon: Icons.label_outline_rounded,
+                  message: l.tagsEmpty,
+                )
+              : ListView(
+                  children: [
+                    for (final s in tags)
+                      ListTile(
+                        leading: TagDot(s.tag, size: 16),
+                        title: Text(s.tag.name),
+                        subtitle: Text(l.tracksCount(s.trackCount)),
+                        trailing: IconButton(
+                          tooltip: l.moreOptions,
+                          icon: const Icon(Icons.more_vert_rounded),
+                          onPressed: () => editTag(context, ref, s),
+                        ),
+                        onTap: () => ShellNav.open<void>(
+                          context,
+                          TagTracksScreen(name: s.tag.name),
+                        ),
+                      ),
+                  ],
+                ),
+        ),
+      ),
     );
   }
 }
@@ -91,12 +102,17 @@ class TagTracksScreen extends ConsumerWidget {
         title: name,
         name: name,
         meta: collectionMeta(l, tracks: tracks.length, durationMs: durationMs),
-        onPlay: tracks.isEmpty ? null : () => ctrl.playAll(tracks, context: ctx),
+        onPlay: tracks.isEmpty
+            ? null
+            : () => ctrl.playAll(tracks, context: ctx),
         onShuffle: tracks.isEmpty ? null : ctrl.toggleShuffle,
         slivers: [
           if (tracks.isEmpty)
             SliverToBoxAdapter(
-              child: EmptyState(icon: Icons.sell_outlined, message: l.collectionNoTracks),
+              child: EmptyState(
+                icon: Icons.sell_outlined,
+                message: l.collectionNoTracks,
+              ),
             )
           else
             SliverList.builder(

@@ -406,9 +406,7 @@ void main() {
     testWidgets('the cleaning setting is saved per podcast', (tester) async {
       await openDetail(tester);
       expect((await tester.runAsync(() => repo.byId(pid)))!.autoDeleteDays, isNull);
-      await tester.tap(find.byKey(const ValueKey('auto-delete')));
-      await _settle(tester);
-      await tester.tap(find.text('Dopo 7 giorni').last);
+      await tester.tap(find.text('7 giorni'));
       await _settle(tester);
       expect((await tester.runAsync(() => repo.byId(pid)))!.autoDeleteDays, 7);
       await h.dispose(tester);

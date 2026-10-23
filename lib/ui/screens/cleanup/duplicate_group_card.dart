@@ -39,84 +39,88 @@ class _DuplicateGroupCardState extends State<DuplicateGroupCard> {
     final theme = Theme.of(context).textTheme;
     final g = widget.group;
     final first = g.proposed;
-    return Card(
+    return Padding(
       key: ValueKey('dup-${g.key}'),
-      margin: const EdgeInsets.symmetric(
+      padding: const EdgeInsets.symmetric(
         horizontal: CcDims.margin,
         vertical: 6,
       ),
-      color: cc.surface1,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          first.title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.titleMedium,
-                        ),
-                        if ((first.artist ?? '').isNotEmpty)
+      child: Material(
+        color: cc.surface1,
+        borderRadius: BorderRadius.circular(CcDims.rCard),
+        clipBehavior: Clip.antiAlias,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
                           Text(
-                            first.artist!,
+                            first.title,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: theme.bodyMedium,
+                            style: theme.titleMedium,
                           ),
-                      ],
+                          if ((first.artist ?? '').isNotEmpty)
+                            Text(
+                              first.artist!,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.bodyMedium,
+                            ),
+                        ],
+                      ),
                     ),
-                  ),
-                  Chip(
-                    visualDensity: VisualDensity.compact,
-                    label: Text(
+                    Text(
                       g.exact
                           ? l.duplicatesExactBadge
                           : l.duplicatesProbableBadge,
+                      style: theme.labelMedium?.copyWith(
+                        color: g.exact ? cc.accent : cc.textMuted,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
-              child: Text(
-                l.duplicatesPickKeep,
-                style: theme.labelSmall?.copyWith(color: cc.textMuted),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+                child: Text(
+                  l.duplicatesPickKeep,
+                  style: theme.labelSmall?.copyWith(color: cc.textMuted),
+                ),
               ),
-            ),
-            for (final m in g.members)
-              DuplicateMemberRow(
-                entry: m,
-                keep: m.id == _keepId,
-                onTap: () => setState(() => _keepId = m.id),
+              for (final m in g.members)
+                DuplicateMemberRow(
+                  entry: m,
+                  keep: m.id == _keepId,
+                  onTap: () => setState(() => _keepId = m.id),
+                ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8, 4, 8, 0),
+                child: Wrap(
+                  alignment: WrapAlignment.end,
+                  spacing: 8,
+                  children: [
+                    TextButton(
+                      onPressed: widget.onNotDuplicates,
+                      child: Text(l.duplicatesNotDuplicates),
+                    ),
+                    FilledButton(
+                      onPressed: () => widget.onMerge(_keepId),
+                      child: Text(l.duplicatesMerge),
+                    ),
+                  ],
+                ),
               ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(8, 4, 8, 0),
-              child: Wrap(
-                alignment: WrapAlignment.end,
-                spacing: 8,
-                children: [
-                  TextButton(
-                    onPressed: widget.onNotDuplicates,
-                    child: Text(l.duplicatesNotDuplicates),
-                  ),
-                  FilledButton(
-                    onPressed: () => widget.onMerge(_keepId),
-                    child: Text(l.duplicatesMerge),
-                  ),
-                ],
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

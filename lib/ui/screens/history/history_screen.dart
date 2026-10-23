@@ -9,16 +9,16 @@ import '../../../providers/history_providers.dart';
 import '../../../providers/player_providers.dart';
 import '../../../providers/settings_providers.dart';
 import '../../theme/app_theme.dart';
-import '../../theme/tokens.dart';
 import '../../shell/shell_nav.dart';
 import '../../widgets/confirm.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_state.dart';
+import '../../widgets/section_header.dart';
 import '../../widgets/track_row.dart';
 import '../settings/settings_screen.dart';
 
 const _block = 200;
-const _headerExtent = 44.0;
+const _headerExtent = 56.0;
 
 /// What was listened to, newest first, grouped by day. Listens come in blocks
 /// of 200 as the list is scrolled.
@@ -61,9 +61,8 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     if (day == DateTime(today.year, today.month, today.day - 1)) {
       return l.historyYesterday;
     }
-    return DateFormat.yMMMMEEEEd(
-      Localizations.localeOf(context).toString(),
-    ).format(day);
+    return DateFormat.yMMMMEEEEd(Localizations.localeOf(context).toString())
+        .format(day);
   }
 
   Future<void> _clear() async {
@@ -104,76 +103,71 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
           ),
         ],
       ),
-      body: history.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, st) => loadErrorState(
-          context,
-          e,
-          st,
-          onRetry: () => ref.invalidate(historyProvider(_limit)),
-        ),
-        data: (entries) {
-          if (entries.isEmpty) {
-            return EmptyState(
-              icon: Icons.history_rounded,
-              message: on ? l.historyEmpty : l.historyOff,
-              actionLabel: on ? null : l.openPlaybackSettings,
-              onAction: on
-                  ? null
-                  : () => ShellNav.open<void>(
-                        context,
-                        Scaffold(
-                          appBar: AppBar(title: Text(l.navSettings)),
-                          body: const SettingsScreen(initial: SettingsPage.playback),
+      body: Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 960),
+          child: history.when(
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (e, st) => loadErrorState(
+              context,
+              e,
+              st,
+              onRetry: () => ref.invalidate(historyProvider(_limit)),
+            ),
+            data: (entries) {
+              if (entries.isEmpty) {
+                return EmptyState(
+                  icon: Icons.history_rounded,
+                  message: on ? l.historyEmpty : l.historyOff,
+                  actionLabel: on ? null : l.openPlaybackSettings,
+                  onAction: on
+                      ? null
+                      : () => ShellNav.open<void>(
+                          context,
+                          Scaffold(
+                            appBar: AppBar(title: Text(l.navSettings)),
+                            body: const SettingsScreen(
+                              initial: SettingsPage.playback,
+                            ),
+                          ),
                         ),
-                      ),
-            );
-          }
-          final items = groupHistoryByDay(entries);
-          final tracks = [for (final e in entries) e.track];
-          // Position of each entry among the tracks (headers do not count).
-          var next = 0;
-          final trackIndex = <int, int>{};
-          for (var i = 0; i < items.length; i++) {
-            if (items[i] is HistoryEntry) trackIndex[i] = next++;
-          }
-          return ListView.builder(
-            controller: _scroll,
-            itemCount: items.length,
-            itemExtentBuilder: (i, _) =>
-                items[i] is HistoryEntry ? extent : _headerExtent,
-            itemBuilder: (_, i) {
-              final it = items[i];
-              if (it is DateTime) {
-                return Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    CcDims.margin,
-                    16,
-                    CcDims.margin,
-                    4,
-                  ),
-                  child: Text(
-                    _dayLabel(context, it),
-                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: context.cc.textMuted,
-                    ),
-                  ),
                 );
               }
-              final e = it as HistoryEntry;
-              return LiveTrackRow(
-                track: e.track,
-                compact: compact,
-                subtitleSuffix: time.format(e.at),
-                onTap: () => ctrl.playFromList(
-                  tracks,
-                  trackIndex[i]!,
-                  context: const PlayContext(PlayContextKind.library),
-                ),
+              final items = groupHistoryByDay(entries);
+              final tracks = [for (final e in entries) e.track];
+              // Position of each entry among the tracks (headers do not count).
+              var next = 0;
+              final trackIndex = <int, int>{};
+              for (var i = 0; i < items.length; i++) {
+                if (items[i] is HistoryEntry) trackIndex[i] = next++;
+              }
+              return ListView.builder(
+                controller: _scroll,
+                itemCount: items.length,
+                itemExtentBuilder: (i, _) =>
+                    items[i] is HistoryEntry ? extent : _headerExtent,
+                itemBuilder: (_, i) {
+                  final it = items[i];
+                  if (it is DateTime) {
+                    return SectionHeader(_dayLabel(context, it));
+                  }
+                  final e = it as HistoryEntry;
+                  return LiveTrackRow(
+                    track: e.track,
+                    compact: compact,
+                    subtitleSuffix: time.format(e.at),
+                    onTap: () => ctrl.playFromList(
+                      tracks,
+                      trackIndex[i]!,
+                      context: const PlayContext(PlayContextKind.library),
+                    ),
+                  );
+                },
               );
             },
-          );
-        },
+          ),
+        ),
       ),
     );
   }

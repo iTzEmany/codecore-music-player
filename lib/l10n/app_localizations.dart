@@ -5509,7 +5509,7 @@ abstract class AppLocalizations {
   /// No description provided for @podcastAutoDeleteAfter.
   ///
   /// In it, this message translates to:
-  /// **'{days, plural, one{Dopo 1 giorno} other{Dopo {days} giorni}}'**
+  /// **'{days, plural, one{1 giorno} other{{days} giorni}}'**
   String podcastAutoDeleteAfter(int days);
 
   /// No description provided for @podcastUnsubscribe.

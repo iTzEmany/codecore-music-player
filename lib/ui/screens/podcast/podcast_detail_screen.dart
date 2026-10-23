@@ -15,6 +15,7 @@ import '../../widgets/confirm.dart';
 import '../../widgets/cover_image.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/format_utils.dart';
+import '../../widgets/segmented_blocks.dart';
 import '../../widgets/speed_button.dart';
 import 'podcast_texts.dart';
 
@@ -108,62 +109,55 @@ class _PodcastDetailScreenState extends ConsumerState<PodcastDetailScreen> {
                 .add_Hm()
                 .format(DateTime.fromMillisecondsSinceEpoch(checked)),
           );
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(podcast.title, maxLines: 1, overflow: TextOverflow.ellipsis),
-        actions: [
-          if (_refreshing)
-            const Padding(
-              padding: EdgeInsets.all(14),
-              child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
-            )
-          else
-            IconButton(
-              key: const ValueKey('refresh'),
-              tooltip: l.podcastRefresh,
-              icon: const Icon(Icons.refresh_rounded),
-              onPressed: _refresh,
+    return CollectionScaffold(
+      title: podcast.title,
+      name: podcast.title,
+      cover: (size) => CoverImage(coverKey: podcast.coverKey, size: size, radius: CcDims.rGrid),
+      subtitle: podcast.author == null ? null : Text(podcast.author!),
+      meta: when,
+      menu: const SpeedButton(),
+      barActions: [
+        if (_refreshing)
+          const Padding(
+            padding: EdgeInsets.all(14),
+            child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
+          )
+        else
+          IconButton(
+            key: const ValueKey('refresh'),
+            tooltip: l.podcastRefresh,
+            icon: const Icon(Icons.refresh_rounded),
+            onPressed: _refresh,
+          ),
+        PopupMenuButton<String>(
+          key: const ValueKey('podcast-menu'),
+          tooltip: l.moreActions,
+          onSelected: (v) {
+            if (v == 'unsubscribe') _unsubscribe(podcast, downloadedCount);
+          },
+          itemBuilder: (_) => [
+            PopupMenuItem(
+              value: 'unsubscribe',
+              child: Text(l.podcastUnsubscribe, key: const ValueKey('unsubscribe')),
             ),
-          PopupMenuButton<String>(
-            key: const ValueKey('podcast-menu'),
-            tooltip: l.moreActions,
-            onSelected: (v) {
-              if (v == 'unsubscribe') _unsubscribe(podcast, downloadedCount);
-            },
-            itemBuilder: (_) => [
-              PopupMenuItem(
-                value: 'unsubscribe',
-                child: Text(l.podcastUnsubscribe, key: const ValueKey('unsubscribe')),
-              ),
-            ],
+          ],
+        ),
+      ],
+      slivers: [
+        SliverToBoxAdapter(child: _AutoDelete(podcast: podcast)),
+        if (rows.isEmpty)
+          SliverToBoxAdapter(child: EmptyState(icon: Icons.podcasts_rounded, message: l.podcastNoEpisodes))
+        else
+          SliverFixedExtentList.builder(
+            itemExtent: 84,
+            itemCount: rows.length,
+            itemBuilder: (_, i) => _EpisodeTile(
+              row: rows[i],
+              download: running[rows[i].episode.id],
+              onPlay: () => _play(rows, rows[i], podcast.title),
+            ),
           ),
-        ],
-      ),
-      body: Column(
-        children: [
-          CollectionHeader(
-            cover: (size) => CoverImage(coverKey: podcast.coverKey, size: size, radius: CcDims.rGrid),
-            name: podcast.title,
-            subtitle: podcast.author == null ? null : Text(podcast.author!),
-            meta: when,
-            actions: const [SpeedButton()],
-          ),
-          _AutoDelete(podcast: podcast),
-          Expanded(
-            child: rows.isEmpty
-                ? EmptyState(icon: Icons.podcasts_rounded, message: l.podcastNoEpisodes)
-                : ListView.builder(
-                    itemExtent: 84,
-                    itemCount: rows.length,
-                    itemBuilder: (_, i) => _EpisodeTile(
-                      row: rows[i],
-                      download: running[rows[i].episode.id],
-                      onPlay: () => _play(rows, rows[i], podcast.title),
-                    ),
-                  ),
-          ),
-        ],
-      ),
+      ],
     );
   }
 }
@@ -177,25 +171,23 @@ class _AutoDelete extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
-    final theme = Theme.of(context).textTheme;
+    final days = const [1, 7, 30].contains(podcast.autoDeleteDays) ? podcast.autoDeleteDays : null;
     return Padding(
       padding: const EdgeInsets.fromLTRB(CcDims.margin, 0, CcDims.margin, 8),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(child: Text(l.podcastAutoDelete, style: theme.bodyMedium)),
-          Flexible(
-            child: DropdownButton<int?>(
-              isExpanded: true,
-              key: const ValueKey('auto-delete'),
-              value: const [null, 1, 7, 30].contains(podcast.autoDeleteDays) ? podcast.autoDeleteDays : null,
-              underline: const SizedBox.shrink(),
-              items: [
-                DropdownMenuItem(value: null, child: Text(l.podcastAutoDeleteNever)),
-                for (final d in const [1, 7, 30])
-                  DropdownMenuItem(value: d, child: Text(l.podcastAutoDeleteAfter(d))),
-              ],
-              onChanged: (d) => ref.read(podcastRepositoryProvider).setAutoDeleteDays(podcast.id, d),
-            ),
+          Text(l.podcastAutoDelete, style: Theme.of(context).textTheme.bodyMedium),
+          const SizedBox(height: 8),
+          SegmentedBlocks<int?>(
+            key: const ValueKey('auto-delete'),
+            selected: days,
+            onChanged: (d) => ref.read(podcastRepositoryProvider).setAutoDeleteDays(podcast.id, d),
+            items: [
+              BlockItem(value: null, icon: Icons.block_rounded, label: l.podcastAutoDeleteNever),
+              for (final d in const [1, 7, 30])
+                BlockItem(value: d, icon: Icons.auto_delete_outlined, label: l.podcastAutoDeleteAfter(d)),
+            ],
           ),
         ],
       ),
