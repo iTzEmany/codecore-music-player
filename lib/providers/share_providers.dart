@@ -10,6 +10,7 @@ import '../core/app_log.dart';
 import '../data/db/app_database.dart';
 import '../services/share/lan_client.dart';
 import '../services/share/lan_server.dart';
+import '../services/share/track_meta.dart';
 import '../services/share/trusted_devices.dart';
 import 'database_providers.dart';
 import 'library_providers.dart';
@@ -83,6 +84,7 @@ Future<List<ShareEntry>> buildShareEntries(Ref ref, List<Track> tracks) async {
           durationMs: t.durationMs,
           ext: t.format,
           coverPath: coverPath(t),
+          meta: TrackMeta.fromTrack(t),
         ),
   ];
 }

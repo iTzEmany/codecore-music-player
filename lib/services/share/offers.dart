@@ -10,6 +10,7 @@ import '../../core/app_log.dart';
 import '../../core/text_utils.dart';
 import 'lan_server.dart';
 import 'offer_node.dart' show callerFingerprint;
+import 'track_meta.dart';
 
 export 'offer_node.dart' show OfferNode, callerFingerprint, kCallerKey;
 
@@ -53,6 +54,8 @@ class OfferItem {
     this.album,
     required this.sizeBytes,
     required this.ext,
+    this.meta,
+    this.hasCover = false,
   });
 
   final int id;
@@ -60,6 +63,8 @@ class OfferItem {
   final String? artist, album;
   final int sizeBytes;
   final String ext;
+  final TrackMeta? meta;
+  final bool hasCover;
 
   Map<String, Object?> toJson() => {
         'id': id,
@@ -68,6 +73,8 @@ class OfferItem {
         'album': album,
         'sizeBytes': sizeBytes,
         'ext': ext,
+        if (meta != null) 'meta': meta!.toJson(),
+        if (hasCover) 'hasCover': true,
       };
 
   /// Strict parsing of untrusted input; returns null for anything odd.
@@ -91,6 +98,8 @@ class OfferItem {
       album: clip(raw['album'], 200),
       sizeBytes: size,
       ext: e,
+      meta: TrackMeta.tryParse(raw['meta']),
+      hasCover: raw['hasCover'] == true,
     );
   }
 
@@ -242,6 +251,8 @@ class OfferService {
               album: e.album,
               sizeBytes: e.sizeBytes,
               ext: e.ext,
+              meta: e.meta,
+              hasCover: e.coverPath != null,
             ).toJson(),
         ],
       };
@@ -390,6 +401,25 @@ class OfferService {
       if (o.status == OfferStatus.accepted) o.status = OfferStatus.done;
       notify();
       return Response.ok('ok');
+    });
+
+    // Sender: the cover of one item of an accepted offer.
+    router.get('/<id>/cover/<n>', (Request r, String id, String n) async {
+      expire();
+      final o = authorised(r, id);
+      if (o == null) return Response(401, body: 'unauthorized');
+      if (o.status != OfferStatus.accepted) {
+        return Response.forbidden('offer not accepted');
+      }
+      final itemId = int.tryParse(n);
+      final cover = itemId == null ? null : o.entries[itemId]?.coverPath;
+      if (cover == null) return Response.notFound('not found');
+      final file = File(cover);
+      if (!await file.exists()) return Response.notFound('not found');
+      return Response.ok(file.openRead(), headers: {
+        'content-type': cover.endsWith('.png') ? 'image/png' : 'image/jpeg',
+        'content-length': '${await file.length()}',
+      });
     });
 
     // Sender: stream one file of an accepted offer.

@@ -8,6 +8,7 @@ import 'package:shelf/shelf_io.dart' as io;
 import 'package:shelf_router/shelf_router.dart';
 
 import '../../core/app_log.dart';
+import 'track_meta.dart';
 
 /// One shared track. The client only ever sees [id]; [path] stays server-side.
 class ShareEntry {
@@ -21,6 +22,7 @@ class ShareEntry {
     required this.durationMs,
     required this.ext,
     this.coverPath,
+    this.meta,
   });
 
   final int id;
@@ -30,6 +32,9 @@ class ShareEntry {
   final int sizeBytes, durationMs;
   final String ext;
 
+  /// Built once from the library row; travels with the track.
+  final TrackMeta? meta;
+
   Map<String, Object?> toManifestJson() => {
         'id': id,
         'title': title,
@@ -38,6 +43,7 @@ class ShareEntry {
         'sizeBytes': sizeBytes,
         'durationMs': durationMs,
         'ext': ext,
+        if (meta != null) 'meta': meta!.toJson(),
       };
 }
 

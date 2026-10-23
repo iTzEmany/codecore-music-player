@@ -1,16 +1,20 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
 import 'package:path/path.dart' as p;
 
+import '../../core/app_log.dart';
 import '../../core/text_utils.dart';
 import '../online/youtube_service.dart' show DownloadProgress, uniquePath;
 import 'device_identity.dart';
 import 'offers.dart' show OfferItem;
 import 'request_signing.dart';
+import 'track_meta.dart';
 
 class RemoteInfo {
   const RemoteInfo(this.name, {this.tlsPort, this.fingerprint});
@@ -31,6 +35,7 @@ class RemoteTrack {
     required this.sizeBytes,
     required this.durationMs,
     required this.ext,
+    this.meta,
   });
 
   factory RemoteTrack.fromJson(Map<String, dynamic> j) => RemoteTrack(
@@ -41,6 +46,7 @@ class RemoteTrack {
         sizeBytes: (j['sizeBytes'] as num?)?.toInt() ?? 0,
         durationMs: (j['durationMs'] as num?)?.toInt() ?? 0,
         ext: j['ext'] as String? ?? 'mp3',
+        meta: TrackMeta.tryParse(j['meta']),
       );
 
   final int id;
@@ -48,6 +54,7 @@ class RemoteTrack {
   final String? artist, album;
   final int sizeBytes, durationMs;
   final String ext;
+  final TrackMeta? meta;
 
   /// `Artist - Title` (sanitised); used for the received file name.
   String get baseName => sanitizeFileName(
@@ -78,6 +85,8 @@ class SecureReply {
   final Map<String, dynamic>? json;
   final String? seenFingerprint;
 }
+
+const maxOfferCoverBytes = 5 * 1024 * 1024;
 
 class LanClient {
   LanClient({Dio? dio, this.identity})
@@ -279,6 +288,39 @@ class LanClient {
         outDir: outDir,
         cancel: cancel,
       );
+
+  /// The cover of one offered item, or null (one log line, no retry) when it
+  /// is missing, over 5 MB, not a JPEG/PNG, or does not decode.
+  Future<({Uint8List bytes, String mime})?> downloadOfferCover(String host,
+      int port, String offerId, String token, int itemId) async {
+    try {
+      final r = await _dio.get<ResponseBody>(
+        'http://$host:$port/offer/$offerId/cover/$itemId',
+        options: Options(
+            headers: {'X-Token': token}, responseType: ResponseType.stream),
+      );
+      final mime = r.headers.value(Headers.contentTypeHeader)?.split(';').first;
+      if (r.statusCode != 200 || (mime != 'image/jpeg' && mime != 'image/png')) {
+        AppLog.w('offer cover $itemId: status ${r.statusCode}, type $mime');
+        return null;
+      }
+      final buf = BytesBuilder(copy: false);
+      await for (final chunk in r.data!.stream) {
+        buf.add(chunk);
+        if (buf.length > maxOfferCoverBytes) {
+          AppLog.w('offer cover $itemId: over $maxOfferCoverBytes B, discarded');
+          return null;
+        }
+      }
+      final bytes = buf.takeBytes();
+      final codec = await ui.instantiateImageCodec(bytes, targetWidth: 24);
+      codec.dispose();
+      return (bytes: bytes, mime: mime!);
+    } on Object catch (e) {
+      AppLog.w('offer cover $itemId failed: $e');
+      return null;
+    }
+  }
 
   /// Delivers an offer (metadata only) to a receiver; it stays pending there.
   /// Over HTTPS (signed) when the peer has a [tlsPort]; [pin] is the
