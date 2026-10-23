@@ -84,6 +84,8 @@ final enrichmentServiceProvider = Provider<EnrichmentService>((ref) {
     tracks: ref.watch(trackRepositoryProvider),
     covers: ref.watch(coverStoreProvider),
     itunes: ref.watch(itunesClientProvider),
+    deezer: ref.watch(deezerClientProvider),
+    useDeezer: () => ref.read(settingsProvider).deezerMeta,
     lrclib: ref.watch(lrclibClientProvider),
     wikipedia: ref.watch(wikipediaClientProvider),
     web: web,

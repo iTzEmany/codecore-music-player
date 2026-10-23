@@ -34,6 +34,7 @@ class AppSettings {
     this.language = 'it',
     this.autoEnrich = false,
     this.autoLyrics = false,
+    this.deezerMeta = false,
     this.showUndoSnackbar = true,
     this.deviceName,
     this.jamLatencyMs = 0,
@@ -80,6 +81,9 @@ class AppSettings {
   final String accent;
   final double fontScale;
   final bool compactMode, reducedMotion, autoEnrich, autoLyrics, showUndoSnackbar;
+
+  /// Deezer as a metadata source (data only); off until the user asks.
+  final bool deezerMeta;
 
   /// Applies ReplayGain (track gain) at playback time.
   final bool normalizeVolume;
@@ -164,6 +168,7 @@ class AppSettings {
     String? language,
     bool? autoEnrich,
     bool? autoLyrics,
+    bool? deezerMeta,
     bool? showUndoSnackbar,
     String? deviceName,
     int? jamLatencyMs,
@@ -206,6 +211,7 @@ class AppSettings {
         language: language ?? this.language,
         autoEnrich: autoEnrich ?? this.autoEnrich,
         autoLyrics: autoLyrics ?? this.autoLyrics,
+        deezerMeta: deezerMeta ?? this.deezerMeta,
         showUndoSnackbar: showUndoSnackbar ?? this.showUndoSnackbar,
         deviceName: deviceName ?? this.deviceName,
         jamLatencyMs: jamLatencyMs ?? this.jamLatencyMs,
@@ -279,6 +285,7 @@ class SettingsStore {
         language: _prefs.getString('language') ?? 'it',
         autoEnrich: _prefs.getBool('autoEnrich') ?? false,
         autoLyrics: _prefs.getBool('autoLyrics') ?? false,
+        deezerMeta: _prefs.getBool('deezerMeta') ?? false,
         showUndoSnackbar: _prefs.getBool('showUndoSnackbar') ?? true,
         deviceName: _prefs.getString('deviceName'),
         normalizeVolume: _prefs.getBool('normalizeVolume') ?? false,
@@ -352,6 +359,7 @@ class SettingsStore {
     await _prefs.setString('language', s.language);
     await _prefs.setBool('autoEnrich', s.autoEnrich);
     await _prefs.setBool('autoLyrics', s.autoLyrics);
+    await _prefs.setBool('deezerMeta', s.deezerMeta);
     await _prefs.setBool('showUndoSnackbar', s.showUndoSnackbar);
     await _prefs.setBool('normalizeVolume', s.normalizeVolume);
     await _prefs.setBool('receiveFromLan', s.receiveFromLan);

@@ -10,6 +10,7 @@ class ImportRow {
     this.spotifyUri,
     this.location,
     this.trackNumber,
+    this.year,
   });
 
   final int index;
@@ -26,6 +27,9 @@ class ImportRow {
   /// Place on the record, set for the rows of an online album import only.
   final int? trackNumber;
 
+  /// Release year from the CSV `Release Date`, when it has a valid one.
+  final int? year;
+
   ImportRow withLocation(String? location) => ImportRow(
         index: index,
         title: title,
@@ -36,6 +40,7 @@ class ImportRow {
         spotifyUri: spotifyUri,
         location: location,
         trackNumber: trackNumber,
+        year: year,
       );
 
   ImportRow withTrackNumber(int? n) => ImportRow(
@@ -48,6 +53,7 @@ class ImportRow {
         spotifyUri: spotifyUri,
         location: location,
         trackNumber: n,
+        year: year,
       );
 
   String get primaryArtist => artists.isEmpty ? '' : artists.first;

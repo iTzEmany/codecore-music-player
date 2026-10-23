@@ -35,6 +35,7 @@ extension PlaylistImportItemX on PlaylistImportItem {
     album: album,
     durationMs: durationMs,
     isrc: isrc,
+    year: year,
   );
 }
 
@@ -85,6 +86,7 @@ class ImportRepository {
               album: Value(r.album),
               durationMs: Value(r.durationMs),
               isrc: Value(r.isrc),
+              year: Value(r.year),
               location: Value(r.location),
               videoId: Value(presets[r.index]?.videoId),
               candidates: Value(presets[r.index]?.candidates),

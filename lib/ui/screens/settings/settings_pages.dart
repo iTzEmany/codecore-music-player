@@ -277,6 +277,21 @@ List<SettingsGroup> _online(BuildContext context, WidgetRef ref) {
                   onChanged: (v) =>
                       notifier.update((c) => c.copyWith(autoLyrics: v)),
                 ),
+                SwitchListTile(
+                  title: Text(l.deezerMeta),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(l.deezerMetaHint),
+                      const SizedBox(height: 4),
+                      Text(l.deezerMetaNote),
+                    ],
+                  ),
+                  isThreeLine: true,
+                  value: s.deezerMeta,
+                  onChanged: (v) =>
+                      notifier.update((c) => c.copyWith(deezerMeta: v)),
+                ),
               ],
             ),
             SettingsGroup(

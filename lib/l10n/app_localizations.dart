@@ -8276,6 +8276,24 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Su exportify.net scarichi le tue playlist di Spotify in un file. Codecore lo prende e le aggiorna qui.\nNon serve collegare nessun account: il file lo scarichi tu.'**
   String get onboardingSpotifyBody;
+
+  /// No description provided for @deezerMeta.
+  ///
+  /// In it, this message translates to:
+  /// **'Metadati da Deezer'**
+  String get deezerMeta;
+
+  /// No description provided for @deezerMetaHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Solo dati (copertine, numeri di traccia), mai musica'**
+  String get deezerMetaHint;
+
+  /// No description provided for @deezerMetaNote.
+  ///
+  /// In it, this message translates to:
+  /// **'Uso privato e non commerciale. Le condizioni di Deezer vietano di promuovere lo scaricamento non autorizzato, e Codecore scarica da YouTube: è un rischio tuo.'**
+  String get deezerMetaNote;
 }
 
 class _AppLocalizationsDelegate

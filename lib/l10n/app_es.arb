@@ -2852,5 +2852,8 @@
   "exportifyFoundTitle": "Exportación de Exportify encontrada",
   "exportifyFoundSync": "Sincronizar",
   "onboardingSpotifyTitle": "Listas de Spotify",
-  "onboardingSpotifyBody": "En exportify.net descargas tus listas de Spotify en un archivo. Codecore lo recoge y las actualiza aquí.\nNo hace falta conectar ninguna cuenta: el archivo lo descargas tú."
+  "onboardingSpotifyBody": "En exportify.net descargas tus listas de Spotify en un archivo. Codecore lo recoge y las actualiza aquí.\nNo hace falta conectar ninguna cuenta: el archivo lo descargas tú.",
+  "deezerMeta": "Metadatos de Deezer",
+  "deezerMetaHint": "Solo datos (carátulas, números de pista), nunca música",
+  "deezerMetaNote": "Uso privado y no comercial. Las condiciones de Deezer prohíben promover la descarga no autorizada, y Codecore descarga de YouTube: el riesgo es tuyo."
 }

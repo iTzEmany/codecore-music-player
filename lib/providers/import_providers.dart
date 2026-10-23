@@ -69,7 +69,7 @@ final playlistImportServiceProvider = Provider<PlaylistImportService>((ref) {
       if (t == null) return;
       await ref
           .read(enrichmentServiceProvider)
-          .coverForAlbum(t, row.album!, row.primaryArtist);
+          .coverForAlbum(t, row.album!, row.primaryArtist, isrc: row.isrc);
     },
     enrichLater: (id) => ref.read(downloadEnricherProvider).add(id),
     pathForVideo: (v) async =>
@@ -86,7 +86,7 @@ final playlistImportServiceProvider = Provider<PlaylistImportService>((ref) {
               artist: row.artistLine,
               album: row.album,
               albumArtist: row.primaryArtist,
-              year: t.year,
+              year: t.year ?? row.year,
               trackNumber: row.trackNumber ?? t.trackNumber,
               genre: t.genre,
             ),

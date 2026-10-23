@@ -5262,4 +5262,15 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get onboardingSpotifyBody =>
       'Su exportify.net scarichi le tue playlist di Spotify in un file. Codecore lo prende e le aggiorna qui.\nNon serve collegare nessun account: il file lo scarichi tu.';
+
+  @override
+  String get deezerMeta => 'Metadati da Deezer';
+
+  @override
+  String get deezerMetaHint =>
+      'Solo dati (copertine, numeri di traccia), mai musica';
+
+  @override
+  String get deezerMetaNote =>
+      'Uso privato e non commerciale. Le condizioni di Deezer vietano di promuovere lo scaricamento non autorizzato, e Codecore scarica da YouTube: è un rischio tuo.';
 }

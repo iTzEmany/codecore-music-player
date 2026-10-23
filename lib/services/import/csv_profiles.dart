@@ -87,6 +87,14 @@ int? parseDurationMs(String? raw, {required bool headerSaysMs}) {
   return (headerSaysMs || n >= 10000) ? n.round() : (n * 1000).round();
 }
 
+/// The year of an Exportify `Release Date` («1971-10-11», «1971-10», «1971»);
+/// anything else is no year.
+int? parseReleaseYear(String? raw) {
+  final m = RegExp(r'^(\d{4})(-\d{2}(-\d{2})?)?$').firstMatch(raw?.trim() ?? '');
+  final y = m == null ? null : int.parse(m.group(1)!);
+  return y != null && y >= 1900 && y <= DateTime.now().year + 1 ? y : null;
+}
+
 /// Exportify names the file after the playlist, with spaces turned into `_`.
 String playlistNameFromFile(String fileName) {
   final base = fileName.split(RegExp(r'[\\/]')).last;
@@ -118,6 +126,7 @@ ImportedPlaylist readCsvPlaylist(String fileName, String text) {
   final albumCol = _col(header, _albumHeaders);
   final durationCol = _col(header, _durationHeaders);
   final isrcCol = _col(header, const ['isrc']);
+  final yearCol = _col(header, const ['release date']);
   final uriCol = _col(header, _uriHeaders);
   final playlistCol = _col(header, _playlistHeaders);
   final kind = detectCsvKind(header);
@@ -153,6 +162,7 @@ ImportedPlaylist readCsvPlaylist(String fileName, String text) {
       durationMs: parseDurationMs(_cell(r, durationCol), headerSaysMs: msHeader),
       isrc: _cell(r, isrcCol),
       spotifyUri: uri,
+      year: parseReleaseYear(_cell(r, yearCol)),
     ));
   }
   return ImportedPlaylist(

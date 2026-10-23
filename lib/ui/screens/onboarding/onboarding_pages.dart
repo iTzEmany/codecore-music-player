@@ -191,6 +191,13 @@ class OnlinePage extends ConsumerWidget {
           value: s.autoLyrics,
           onChanged: (v) => notifier.update((c) => c.copyWith(autoLyrics: v)),
         ),
+        SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          title: Text(l.deezerMeta),
+          subtitle: Text(l.deezerMetaHint),
+          value: s.deezerMeta,
+          onChanged: (v) => notifier.update((c) => c.copyWith(deezerMeta: v)),
+        ),
       ],
     );
   }
