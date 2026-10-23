@@ -33,7 +33,6 @@ class CatalogErrorView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    final cc = context.cc;
     final e = error;
     AppLog.w('online page failed: $e');
     final String message;
@@ -48,31 +47,35 @@ class CatalogErrorView extends StatelessWidget {
     } else {
       message = l.loadFailed;
     }
-    return Padding(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.error_outline_rounded, size: 48, color: cc.error),
-          const SizedBox(height: 12),
-          Text(message,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyLarge),
-          if (e is InnerTubeChanged && onSearch != null && searchLabel != null) ...[
-            const SizedBox(height: 16),
-            FilledButton(
+    return Align(
+      alignment: Alignment.topLeft,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(CcDims.margin, 24, CcDims.margin, 0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(message, style: Theme.of(context).textTheme.titleSmall),
+            if (e is InnerTubeChanged &&
+                onSearch != null &&
+                searchLabel != null) ...[
+              const SizedBox(height: 16),
+              FilledButton(
                 key: const ValueKey('error-search'),
                 onPressed: onSearch,
-                child: Text(searchLabel!)),
-          ],
-          if (retry) ...[
-            const SizedBox(height: 12),
-            OutlinedButton(
+                child: Text(searchLabel!),
+              ),
+            ],
+            if (retry) ...[
+              const SizedBox(height: 12),
+              OutlinedButton(
                 key: const ValueKey('error-retry'),
                 onPressed: onRetry,
-                child: Text(l.retry)),
+                child: Text(l.retry),
+              ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }

@@ -10,17 +10,22 @@ import '../../../services/online/query_match.dart' show MediaKind;
 import '../../../services/online/smart_search.dart';
 import '../../../services/online/ytm_artist.dart';
 import '../../theme/tokens.dart';
+import '../../widgets/segmented_blocks.dart';
 import '../online/online_song_row.dart';
 import 'listen_bar.dart';
 
 String sourceName(AppLocalizations l, MediaKind k) => switch (k) {
-      MediaKind.ytmSong => l.searchSourceYoutubeMusic,
-      MediaKind.ytVideo => l.searchSourceYoutube,
-    };
+  MediaKind.ytmSong => l.searchSourceYoutubeMusic,
+  MediaKind.ytVideo => l.searchSourceYoutube,
+};
 
-/// «Tutte · YouTube Music · YouTube»: a filter on the rows already there.
+/// «Tutte, YouTube Music, YouTube»: a filter on the rows already there.
 class SourceFilterChips extends StatelessWidget {
-  const SourceFilterChips({super.key, required this.filter, required this.onPick});
+  const SourceFilterChips({
+    super.key,
+    required this.filter,
+    required this.onPick,
+  });
 
   final MediaKind? filter;
   final ValueChanged<MediaKind?> onPick;
@@ -29,23 +34,26 @@ class SourceFilterChips extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = context.l10n;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(CcDims.margin, 0, CcDims.margin, 4),
-      child: Wrap(
-        spacing: 8,
-        children: [
-          ChoiceChip(
-            key: const ValueKey('filter-all'),
-            label: Text(l.onlineFilterAll),
-            selected: filter == null,
-            onSelected: (_) => onPick(null),
+      padding: const EdgeInsets.fromLTRB(CcDims.margin, 0, CcDims.margin, 8),
+      child: SegmentedBlocks<MediaKind?>(
+        selected: filter,
+        onChanged: onPick,
+        items: [
+          BlockItem(
+            value: null,
+            icon: Icons.apps_rounded,
+            label: l.onlineFilterAll,
           ),
-          for (final k in MediaKind.values)
-            ChoiceChip(
-              key: ValueKey('filter-${k.name}'),
-              label: Text(sourceName(l, k)),
-              selected: filter == k,
-              onSelected: (_) => onPick(k),
-            ),
+          BlockItem(
+            value: MediaKind.ytmSong,
+            icon: Icons.music_note_rounded,
+            label: sourceName(l, MediaKind.ytmSong),
+          ),
+          BlockItem(
+            value: MediaKind.ytVideo,
+            icon: Icons.smart_display_rounded,
+            label: sourceName(l, MediaKind.ytVideo),
+          ),
         ],
       ),
     );
@@ -61,10 +69,14 @@ class SearchNotices extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    final style = Theme.of(context).textTheme.bodyMedium?.copyWith(color: context.cc.textMuted);
+    final style = Theme.of(context).textTheme.bodyMedium
+        ?.copyWith(color: context.cc.textMuted);
     String text(SearchNotice n) {
       final source = sourceName(l, n.source);
-      final other = sourceName(l, MediaKind.values.firstWhere((k) => k != n.source));
+      final other = sourceName(
+        l,
+        MediaKind.values.firstWhere((k) => k != n.source),
+      );
       return switch (n.kind) {
         NoticeKind.rateLimited => l.onlineNoticeRateLimited(source, other),
         NoticeKind.offline => l.ytErrNetwork,
@@ -77,8 +89,17 @@ class SearchNotices extends StatelessWidget {
       children: [
         for (final n in notices)
           Padding(
-            padding: const EdgeInsets.fromLTRB(CcDims.margin, 0, CcDims.margin, 6),
-            child: Text(text(n), key: ValueKey('notice-${n.source.name}'), style: style),
+            padding: const EdgeInsets.fromLTRB(
+              CcDims.margin,
+              0,
+              CcDims.margin,
+              6,
+            ),
+            child: Text(
+              text(n),
+              key: ValueKey('notice-${n.source.name}'),
+              style: style,
+            ),
           ),
       ],
     );
@@ -87,7 +108,12 @@ class SearchNotices extends StatelessWidget {
 
 /// «Altri risultati (N)»: opens the list of the less sure rows below it.
 class OthersChip extends StatelessWidget {
-  const OthersChip({super.key, required this.count, required this.open, required this.onTap});
+  const OthersChip({
+    super.key,
+    required this.count,
+    required this.open,
+    required this.onTap,
+  });
 
   final int count;
   final bool open;
@@ -101,7 +127,9 @@ class OthersChip extends StatelessWidget {
         alignment: Alignment.centerLeft,
         child: ActionChip(
           key: const ValueKey('others-chip'),
-          avatar: Icon(open ? Icons.expand_less_rounded : Icons.expand_more_rounded),
+          avatar: Icon(
+            open ? Icons.expand_less_rounded : Icons.expand_more_rounded,
+          ),
           label: Text(context.l10n.onlineOthersChip(count)),
           onPressed: onTap,
         ),
@@ -137,16 +165,24 @@ class SmartRow extends ConsumerWidget {
     final picked = ref.watch(selectionProvider(selectionKey));
     final notifier = ref.read(selectionProvider(selectionKey).notifier);
     final ids = row.ids.toSet();
-    final inLibrary = ref.watch(downloadIndexProvider.select(
-        (i) => ids.any((id) => i.value?.contains(id, source: r.source) ?? false)));
-    final item = ref.watch(downloadsProvider
-        .select((d) => d.where((x) => ids.contains(x.result.id)).lastOrNull));
+    final inLibrary = ref.watch(
+      downloadIndexProvider.select(
+        (i) =>
+            ids.any((id) => i.value?.contains(id, source: r.source) ?? false),
+      ),
+    );
+    final item = ref.watch(
+      downloadsProvider.select(
+        (d) => d.where((x) => ids.contains(x.result.id)).lastOrNull,
+      ),
+    );
     final selecting = picked.active;
     final who = r.artistIds.indexWhere((id) => id.isNotEmpty);
     final label = row.sources.contains(MediaKind.ytmSong)
         ? l.searchSourceYoutubeMusic
         : l.onlineSourceVideo;
-    final small = Theme.of(context).textTheme.labelSmall?.copyWith(color: cc.textMuted);
+    final small = Theme.of(context).textTheme.labelSmall
+        ?.copyWith(color: cc.textMuted);
     return OnlineSongRow(
       result: r,
       inLibrary: inLibrary,
@@ -160,11 +196,20 @@ class SmartRow extends ConsumerWidget {
       listen: selecting ? null : ListenButton(result: r),
       onArtistTap: onArtistTap == null || who < 0 || who >= r.artists.length
           ? null
-          : () => onArtistTap!(YtmArtistRef(id: r.artistIds[who], name: r.artists[who])),
+          : () => onArtistTap!(
+              YtmArtistRef(id: r.artistIds[who], name: r.artists[who]),
+            ),
       tagLine: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Flexible(child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: small)),
+          Flexible(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: small,
+            ),
+          ),
           if (row.hasVideo && !selecting) ...[
             Text(', ', style: small),
             Flexible(
@@ -175,11 +220,15 @@ class SmartRow extends ConsumerWidget {
                   onTap: onListenVideo,
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 2),
-                    child: Text(l.onlineAlsoVideo,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: small?.copyWith(
-                            color: cc.accentSoft, decoration: TextDecoration.underline)),
+                    child: Text(
+                      l.onlineAlsoVideo,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: small?.copyWith(
+                        color: cc.accentSoft,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
                   ),
                 ),
               ),

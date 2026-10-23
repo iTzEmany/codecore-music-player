@@ -29,8 +29,9 @@ class _NewReleasesScreenState extends ConsumerState<NewReleasesScreen> {
   static const _maxArtistChips = 8;
   bool _allArtists = false;
 
-  Iterable<MapEntry<String, String>> _artistsShown(Map<String, String> artists) =>
-      _allArtists ? artists.entries : artists.entries.take(_maxArtistChips);
+  Iterable<MapEntry<String, String>> _artistsShown(
+    Map<String, String> artists,
+  ) => _allArtists ? artists.entries : artists.entries.take(_maxArtistChips);
 
   String? _artistId;
 
@@ -90,117 +91,134 @@ class _NewReleasesScreenState extends ConsumerState<NewReleasesScreen> {
     ];
     return Scaffold(
       appBar: AppBar(title: Text(l.newReleasesTitle)),
-      body: ListView(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              CcDims.margin,
-              8,
-              CcDims.margin,
-              0,
-            ),
-            child: ValueListenableBuilder<bool>(
-              valueListenable: controller.running,
-              builder: (_, running, _) {
-                final last = ref.read(settingsStoreProvider).releasesLastRunAt;
-                final lastText = last == null
-                    ? l.releasesNeverChecked
-                    : l.releasesLastCheck(
-                        DateFormat.yMd(
+      body: Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 960),
+          child: ListView(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  CcDims.margin,
+                  8,
+                  CcDims.margin,
+                  0,
+                ),
+                child: ValueListenableBuilder<bool>(
+                  valueListenable: controller.running,
+                  builder: (_, running, _) {
+                    final last = ref
+                        .read(settingsStoreProvider)
+                        .releasesLastRunAt;
+                    final lastText = last == null
+                        ? l.releasesNeverChecked
+                        : l.releasesLastCheck(
+                            DateFormat.yMd(
                               Localizations.localeOf(context).toLanguageTag(),
-                            )
-                            .add_Hm()
-                            .format(DateTime.fromMillisecondsSinceEpoch(last)),
-                      );
-                final pause = _pause(l);
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
+                            ).add_Hm().format(
+                              DateTime.fromMillisecondsSinceEpoch(last),
+                            ),
+                          );
+                    final pause = _pause(l);
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        FilledButton.tonalIcon(
-                          key: const ValueKey('check-now'),
-                          onPressed: running ? null : _checkNow,
-                          icon: running
-                              ? const SizedBox(
-                                  width: 16,
-                                  height: 16,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                              : const Icon(Icons.refresh_rounded),
-                          label: Text(
-                            running ? l.releasesChecking : l.releasesCheckNow,
+                        Row(
+                          children: [
+                            FilledButton.tonalIcon(
+                              key: const ValueKey('check-now'),
+                              onPressed: running ? null : _checkNow,
+                              icon: running
+                                  ? const SizedBox(
+                                      width: 16,
+                                      height: 16,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : const Icon(Icons.refresh_rounded),
+                              label: Text(
+                                running
+                                    ? l.releasesChecking
+                                    : l.releasesCheckNow,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          lastText,
+                          key: const ValueKey('last-check'),
+                          style: theme.bodyMedium?.copyWith(
+                            color: cc.textMuted,
                           ),
                         ),
+                        if (pause != null)
+                          Text(
+                            pause,
+                            key: const ValueKey('check-pause'),
+                            style: theme.bodyMedium?.copyWith(color: cc.error),
+                          ),
                       ],
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      lastText,
-                      key: const ValueKey('last-check'),
-                      style: theme.bodyMedium?.copyWith(color: cc.textMuted),
-                    ),
-                    if (pause != null)
-                      Text(
-                        pause,
-                        key: const ValueKey('check-pause'),
-                        style: theme.bodyMedium?.copyWith(color: cc.error),
-                      ),
-                  ],
-                );
-              },
-            ),
-          ),
-          ListTile(
-            key: const ValueKey('followed-artists-link'),
-            leading: const Icon(Icons.people_outline_rounded),
-            title: Text(l.releasesFollowedTitle(followedCount)),
-            trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () =>
-                ShellNav.open<void>(context, const FollowedArtistsScreen()),
-          ),
-          if (artists.length > 1)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(CcDims.margin, 4, CcDims.margin, 8),
-              child: Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  _chip(
-                    l.releasesAllArtists,
-                    _artistId == null,
-                    () => setState(() => _artistId = null),
+                    );
+                  },
+                ),
+              ),
+              ListTile(
+                key: const ValueKey('followed-artists-link'),
+                leading: const Icon(Icons.people_outline_rounded),
+                title: Text(l.releasesFollowedTitle(followedCount)),
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () =>
+                    ShellNav.open<void>(context, const FollowedArtistsScreen()),
+              ),
+              if (artists.length > 1)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    CcDims.margin,
+                    4,
+                    CcDims.margin,
+                    8,
                   ),
-                  for (final e in _artistsShown(artists))
-                    _chip(
-                      e.value,
-                      _artistId == e.key,
-                      () => setState(
-                        () => _artistId = _artistId == e.key ? null : e.key,
+                  child: Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      _chip(
+                        l.releasesAllArtists,
+                        _artistId == null,
+                        () => setState(() => _artistId = null),
                       ),
-                    ),
-                  if (!_allArtists && artists.length > _maxArtistChips)
-                    ActionChip(
-                      key: const ValueKey('artist-chips-more'),
-                      label: Text(l.showMore),
-                      onPressed: () => setState(() => _allArtists = true),
-                    ),
-                ],
-              ),
-            ),
-          if (shown.isEmpty)
-            SizedBox(
-              height: 260,
-              child: EmptyState(
-                icon: Icons.album_outlined,
-                message: l.releasesEmpty,
-              ),
-            )
-          else
-            for (final r in shown) _ReleaseRow(release: r),
-        ],
+                      for (final e in _artistsShown(artists))
+                        _chip(
+                          e.value,
+                          _artistId == e.key,
+                          () => setState(
+                            () => _artistId = _artistId == e.key ? null : e.key,
+                          ),
+                        ),
+                      if (!_allArtists && artists.length > _maxArtistChips)
+                        ActionChip(
+                          key: const ValueKey('artist-chips-more'),
+                          label: Text(l.showMore),
+                          onPressed: () => setState(() => _allArtists = true),
+                        ),
+                    ],
+                  ),
+                ),
+              if (shown.isEmpty)
+                SizedBox(
+                  height: 260,
+                  child: EmptyState(
+                    icon: Icons.album_outlined,
+                    message: l.releasesEmpty,
+                  ),
+                )
+              else
+                for (final r in shown) _ReleaseRow(release: r),
+            ],
+          ),
+        ),
       ),
     );
   }

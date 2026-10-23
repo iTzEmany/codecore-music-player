@@ -75,8 +75,16 @@ class _OnlinePageFrameState extends ConsumerState<OnlinePageFrame> {
           pinned: true,
           backgroundColor: cc.bg,
           surfaceTintColor: Colors.transparent,
-          title: Text(widget.title, maxLines: 1, overflow: TextOverflow.ellipsis),
-          actions: [...widget.actions, const ActivityButton(), const SizedBox(width: 8)],
+          title: Text(
+            widget.title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          actions: [
+            ...widget.actions,
+            const ActivityButton(),
+            const SizedBox(width: 8),
+          ],
         ),
         ...widget.slivers,
         const SliverToBoxAdapter(child: SizedBox(height: 24)),
@@ -85,13 +93,21 @@ class _OnlinePageFrameState extends ConsumerState<OnlinePageFrame> {
     final body = Stack(
       children: [
         Positioned.fill(
-          child: widget.onRefresh == null
-              ? scroll
-              // The spinner starts under the pinned bar, not behind the status bar.
-              : RefreshIndicator(
-                  onRefresh: widget.onRefresh!,
-                  edgeOffset: MediaQuery.paddingOf(context).top + kToolbarHeight,
-                  child: scroll),
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 960),
+              child: widget.onRefresh == null
+                  ? scroll
+                  // The spinner starts under the pinned bar, not behind the status bar.
+                  : RefreshIndicator(
+                      onRefresh: widget.onRefresh!,
+                      edgeOffset:
+                          MediaQuery.paddingOf(context).top + kToolbarHeight,
+                      child: scroll,
+                    ),
+            ),
+          ),
         ),
         if (key != null && picked != null && picked.active)
           Positioned(
@@ -101,9 +117,10 @@ class _OnlinePageFrameState extends ConsumerState<OnlinePageFrame> {
             child: SelectionBarFrame(
               count: picked.count,
               onClose: ref.read(selectionProvider(key).notifier).clear,
-              onSelectAll: () => ref
-                  .read(selectionProvider(key).notifier)
-                  .selectAll([for (var i = 0; i < widget.pickable.length; i++) i]),
+              onSelectAll: () =>
+                  ref.read(selectionProvider(key).notifier).selectAll([
+                    for (var i = 0; i < widget.pickable.length; i++) i,
+                  ]),
               actions: [
                 IconButton(
                   tooltip: l.ytDownload,
@@ -130,7 +147,9 @@ class _OnlinePageFrameState extends ConsumerState<OnlinePageFrame> {
                 ? body
                 : SelectionScope(
                     listKey: key,
-                    visibleIds: [for (var i = 0; i < widget.pickable.length; i++) i],
+                    visibleIds: [
+                      for (var i = 0; i < widget.pickable.length; i++) i,
+                    ],
                     child: body,
                   ),
           ),

@@ -1,4 +1,3 @@
-import '../../widgets/cc_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -7,6 +6,9 @@ import '../../../providers/import_providers.dart';
 import '../../../providers/youtube_providers.dart';
 import '../../../services/online/youtube_service.dart';
 import '../../theme/tokens.dart';
+import '../../widgets/cc_sheet.dart';
+import '../../widgets/empty_state.dart';
+import '../../widgets/error_state.dart';
 import '../../widgets/format_utils.dart';
 import 'online_results.dart' show ytErrorText;
 
@@ -68,7 +70,9 @@ class _PlaylistSourceSheetState extends ConsumerState<PlaylistSourceSheet> {
     ];
     setState(() => _starting = true);
     final name = _name.text.trim();
-    await ref.read(playlistImportServiceProvider).startFromResults(name, chosen);
+    await ref
+        .read(playlistImportServiceProvider)
+        .startFromResults(name, chosen);
     if (!mounted) return;
     final messenger = ScaffoldMessenger.of(context);
     Navigator.of(context).pop();
@@ -99,35 +103,22 @@ class _PlaylistSourceSheetState extends ConsumerState<PlaylistSourceSheet> {
         ),
         Expanded(
           child: listing.when(
-            loading: () => Center(
+            loading: () => Padding(
+              padding: const EdgeInsets.symmetric(horizontal: CcDims.margin),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const CircularProgressIndicator(),
-                  const SizedBox(height: 16),
+                  const LinearProgressIndicator(minHeight: 2),
+                  const SizedBox(height: 12),
                   Text(l.playlistSourceLoading),
                 ],
               ),
             ),
-            error: (e, _) => Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      e is YtException ? ytErrorText(context, e.kind) : '$e',
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 12),
-                    OutlinedButton(
-                      onPressed: () =>
-                          ref.invalidate(playlistListingProvider(widget.url)),
-                      child: Text(l.retry),
-                    ),
-                  ],
-                ),
-              ),
+            error: (e, _) => ErrorState(
+              message: e is YtException ? ytErrorText(context, e.kind) : '$e',
+              onRetry: () =>
+                  ref.invalidate(playlistListingProvider(widget.url)),
             ),
             data: (data) {
               _init(data);
@@ -144,7 +135,10 @@ class _PlaylistSourceSheetState extends ConsumerState<PlaylistSourceSheet> {
     final cc = context.cc;
     final theme = Theme.of(context).textTheme;
     if (data.entries.isEmpty) {
-      return Center(child: Text(l.playlistSourceEmpty));
+      return EmptyState(
+        icon: Icons.queue_music_rounded,
+        message: l.playlistSourceEmpty,
+      );
     }
     final picked = _picked!;
     final all = picked.length == data.entries.length;
@@ -152,7 +146,12 @@ class _PlaylistSourceSheetState extends ConsumerState<PlaylistSourceSheet> {
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(CcDims.margin, 8, CcDims.margin, 0),
+          padding: const EdgeInsets.fromLTRB(
+            CcDims.margin,
+            8,
+            CcDims.margin,
+            0,
+          ),
           child: TextField(
             key: const ValueKey('playlist-name'),
             controller: _name,
@@ -207,11 +206,16 @@ class _PlaylistSourceSheetState extends ConsumerState<PlaylistSourceSheet> {
                 onChanged: (v) => setState(() {
                   v == true ? picked.add(e.id) : picked.remove(e.id);
                 }),
-                title: Text(e.title, maxLines: 1, overflow: TextOverflow.ellipsis),
+                title: Text(
+                  e.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
                 subtitle: Text(
                   [
                     if (e.channel.isNotEmpty) e.channel,
-                    if (e.duration != null) formatDuration(e.duration!.inMilliseconds),
+                    if (e.duration != null)
+                      formatDuration(e.duration!.inMilliseconds),
                   ].join(', '),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,

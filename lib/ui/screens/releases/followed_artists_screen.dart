@@ -1,4 +1,3 @@
-import '../../widgets/cc_sheet.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -13,6 +12,7 @@ import '../../../providers/ytm_catalog_providers.dart';
 import '../../../services/online/ytm_artist.dart';
 import '../../theme/tokens.dart';
 import '../../shell/shell_nav.dart';
+import '../../widgets/cc_sheet.dart';
 import '../../widgets/confirm.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/net_thumbnail.dart';
@@ -53,17 +53,23 @@ class FollowedArtistsScreen extends ConsumerWidget {
         ],
       ),
       body: !followed.hasValue
-          ? const Center(child: CircularProgressIndicator())
-          : rows.isEmpty && toConfirm.isEmpty
-          ? EmptyState(
-              icon: Icons.notifications_none_rounded,
-              message: l.followedEmpty,
-            )
-          : ListView.builder(
-              itemCount: toConfirm.length + rows.length,
-              itemBuilder: (_, i) => i < toConfirm.length
-                  ? _PendingRow(lookup: toConfirm[i])
-                  : _FollowedRow(artist: rows[i - toConfirm.length]),
+          ? const LinearProgressIndicator(minHeight: 2)
+          : Align(
+              alignment: Alignment.topCenter,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 960),
+                child: rows.isEmpty && toConfirm.isEmpty
+                    ? EmptyState(
+                        icon: Icons.notifications_none_rounded,
+                        message: l.followedEmpty,
+                      )
+                    : ListView.builder(
+                        itemCount: toConfirm.length + rows.length,
+                        itemBuilder: (_, i) => i < toConfirm.length
+                            ? _PendingRow(lookup: toConfirm[i])
+                            : _FollowedRow(artist: rows[i - toConfirm.length]),
+                      ),
+              ),
             ),
     );
   }
