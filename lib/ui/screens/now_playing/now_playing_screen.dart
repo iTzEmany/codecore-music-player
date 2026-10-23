@@ -104,39 +104,40 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                         onDragEnd: _onDragEnd,
                       );
                       if (wide) {
-                        return Row(
-                          children: [
-                            Expanded(
-                              child: Center(
-                                child: ConstrainedBox(
-                                  constraints: const BoxConstraints(
-                                    maxWidth: 560,
+                        // Player and cards form one group, centred, so no hole opens between them.
+                        return Center(
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 1012),
+                            child: Row(
+                              children: [
+                                Flexible(child: player),
+                                const SizedBox(width: 32),
+                                // The player pads its own side by CcDims.margin: mirror it.
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                    right: CcDims.margin,
                                   ),
-                                  child: player,
+                                  child: SizedBox(
+                                    width: 420,
+                                    child: ListView(
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 16,
+                                      ),
+                                      children: [
+                                        if (!online) ...[
+                                          LyricsCard(track: track),
+                                          const SizedBox(height: 12),
+                                          InfoCard(track: track),
+                                          const SizedBox(height: 12),
+                                        ],
+                                        const UpNextCard(),
+                                      ],
+                                    ),
+                                  ),
                                 ),
-                              ),
+                              ],
                             ),
-                            SizedBox(
-                              width: 380,
-                              child: ListView(
-                                padding: const EdgeInsets.fromLTRB(
-                                  0,
-                                  16,
-                                  16,
-                                  16,
-                                ),
-                                children: [
-                                  if (!online) ...[
-                                    LyricsCard(track: track),
-                                    const SizedBox(height: 12),
-                                    InfoCard(track: track),
-                                    const SizedBox(height: 12),
-                                  ],
-                                  const UpNextCard(),
-                                ],
-                              ),
-                            ),
-                          ],
+                          ),
                         );
                       }
                       return CustomScrollView(

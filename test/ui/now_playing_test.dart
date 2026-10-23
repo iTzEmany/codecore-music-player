@@ -1,6 +1,7 @@
 import 'package:codecore/providers/player_providers.dart';
 import 'package:codecore/ui/screens/library/artist_screen.dart';
 import 'package:codecore/ui/screens/now_playing/now_playing_screen.dart';
+import 'package:codecore/ui/screens/now_playing/now_playing_cards.dart';
 import 'package:codecore/ui/shell/app_shell.dart';
 import 'package:codecore/ui/widgets/motion.dart';
 import 'package:codecore/ui/widgets/quality_tag.dart';
@@ -198,6 +199,23 @@ void main() {
     expect(400 - tester.getTopRight(find.byType(HeartIcon)).dx, closeTo(left, 1));
     // Same edge as the elapsed time below the seek bar.
     expect(tester.getTopLeft(find.text('0:00').first).dx, closeTo(left, 1));
+    await h.dispose(tester);
+  });
+
+  testWidgets('wide layout: player and cards form one centred group',
+      (tester) async {
+    tester.view.physicalSize = const Size(1600, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final h = await Harness.create(tester, tracks: 2);
+    final rows = await tester.runAsync(() => h.db.select(h.db.tracks).get());
+    await tester.runAsync(
+        () => h.handler.playQueue(rows!.map((t) => t.id).toList(), 0));
+    await h.pump(tester, const NowPlayingScreen());
+    final cards = tester.getRect(find.byType(UpNextCard));
+    final slider = tester.getRect(find.byType(Slider).first);
+    // Cards end as far from the right edge as the player starts from the left.
+    expect(slider.left, closeTo(1600 - cards.right, 1));
     await h.dispose(tester);
   });
 
