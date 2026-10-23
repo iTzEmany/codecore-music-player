@@ -497,7 +497,7 @@ Redesign Anello delle schermate rimaste (analisi del 2026-10-23 in `docs/audit-u
 - [x] 36.7 MusicBrainz per ISRC (91a91bb)
 - [x] 36.8 ZIP di Exportify e abbinamento — limiti controllati sulle dimensioni dichiarate prima di estrarre (d94b7df)
 - [x] 36.9 «Sincronizza da Spotify» e «Apri exportify.net» (1764cd0). Da provare su telefono: il pulsante «Apri exportify.net».
-- [~] 36.10 File in arrivo (Android e desktop) — canale codecore/incoming (VIEW/SEND zip e csv, 20 MB), desktop cerca in Download entro 30 min (65d3ce5). Da provare su telefono: «Apri» di Chrome e Condividi con app aperta e chiusa
+- [~] 36.10 File in arrivo (Android e desktop) — canale codecore/incoming (VIEW/SEND zip e csv, 20 MB), desktop cerca in Download entro 30 min (65d3ce5). «Apri» di Chrome propone Codecore (provato dall'utente). Da provare su telefono: Condividi con app aperta e chiusa
 - [~] 36.11 Promemoria e onboarding — scheda in Home con «Più tardi», scelta 7/14/30 giorni, pagina «Playlist da Spotify» (65d3ce5). Da provare a vista: scheda e impostazione
 - [ ] 36.12 Prova dal vivo e documentazione
 
@@ -508,7 +508,7 @@ Richiesta (2026-10-23): un brano passato a un altro dispositivo deve portare i s
 - [x] 37.3 Il ricevente applica il pacchetto (895e1b7)
 - [x] 37.4 Scrittura dei tag nei file di Codecore (`writeTagsAfterDownload`, disco e copertina) (ffea943)
 - [x] 37.5 Ripiego dal nome del file («Artista - Titolo») (e856ca6)
-- [ ] 37.6 Deezer al ricevente (con ISRC e opzione accesa)
+- [x] 37.6 Deezer al ricevente (con ISRC e opzione accesa) — coda dell'arricchitore dei download, tag scritti alla fine; campi del mittente non sovrascritti (3965a51)
 - [ ] 37.7 Prova dal vivo e documentazione
 
 ## Identità «Anello», fase 1 (richiesta dell'utente, 2026-10-22; piano `docs/superpowers/plans/2026-10-22-identita-anello.md`)
