@@ -499,7 +499,7 @@ Redesign Anello delle schermate rimaste (analisi del 2026-10-23 in `docs/audit-u
 - [x] 36.9 «Sincronizza da Spotify» e «Apri exportify.net» (1764cd0). Da provare su telefono: il pulsante «Apri exportify.net».
 - [x] 36.10 File in arrivo (Android e desktop) — canale codecore/incoming (VIEW/SEND zip e csv, 20 MB), desktop cerca in Download entro 30 min (65d3ce5). «Apri» di Chrome propone Codecore (provato dall'utente). Condividi da File provato su Motorola con app aperta e chiusa; nome senza prefisso numerico (ebf4f3b)
 - [x] 36.11 Promemoria e onboarding — scheda in Home con «Più tardi», scelta 7/14/30 giorni, pagina «Playlist da Spotify» (65d3ce5). Provato su Motorola: 7/14/30 salvano il giorno giusto, scheda in Home quando scade, «Più tardi» la nasconde per 1 giorno
-- [ ] 36.12 Prova dal vivo e documentazione
+- [~] 36.12 Prova dal vivo e documentazione — Deezer reale su 20 brani noti (`test/live/deezer_live_test.dart`): 17 trovati con album giusto (mancano Viva la Vida, solo live/strumentale; Bella ciao e Clair de lune senza album); ISRC che porta a una compilation (80 brani) non sovrascrive l'album. Export All → «Apri» da Chrome propone Codecore (utente). Promemoria provato (36.11). Documentazione in 02-architettura (e7e7a01, 17cfdfc). Restano all'utente: CSV Exportify piccolo con anno e copertine, sincronizzazione di più playlist (mai l'Export All intero)
 
 ## Fase 37 — Metadati che viaggiano (`fase-37-metadati-che-viaggiano.md`)
 Richiesta (2026-10-23): un brano passato a un altro dispositivo deve portare i suoi metadati, non solo il nome; oggi gli m4a scaricati da YouTube arrivano senza tag e il ricevente li legge male (titolo sbagliato, artista e album sconosciuti). Da fare **dopo la fase 36** (ISRC in libreria, Deezer). Scelte dell'utente: scrittura dei tag nei file scaricati e ricevuti **accesa di default**; se tag del file e pacchetto non coincidono **vince il pacchetto**; l'ISRC **non si scrive nei file** (solo DB e pacchetto). Fuori: doppioni (li gestisce «Duplicati»), testo nei file, file della libreria dell'utente.
@@ -509,7 +509,7 @@ Richiesta (2026-10-23): un brano passato a un altro dispositivo deve portare i s
 - [x] 37.4 Scrittura dei tag nei file di Codecore (`writeTagsAfterDownload`, disco e copertina) (ffea943)
 - [x] 37.5 Ripiego dal nome del file («Artista - Titolo») (e856ca6)
 - [x] 37.6 Deezer al ricevente (con ISRC e opzione accesa) — coda dell'arricchitore dei download, tag scritti alla fine; campi del mittente non sovrascritti (3965a51)
-- [ ] 37.7 Prova dal vivo e documentazione
+- [~] 37.7 Prova dal vivo e documentazione — Mi A3 con l'APK del 22/10 → Motorola: brano ricevuto e in libreria con i soli tag del file, nessun errore. Mi A3 aggiornato (migrazione v13→v14 riuscita, 69 righe intatte) → Motorola: «Bohemian Rhapsody» arriva con titolo, album, anno, numero, genere, testo semplice e sincronizzato, copertina; tag riscritti nel file (+63 KB, nessun errore nel log); enrichStatus del mittente non applicato. File di prova cancellati dal Motorola. Documentazione in 02/03 (17cfdfc). Restano all'utente: ricevente con APK vecchio, 5 brani da YouTube con un altro lettore, sincronizzazione fidati di una playlist, download PC con opzione accesa/spenta
 
 ## Identità «Anello», fase 1 (richiesta dell'utente, 2026-10-22; piano `docs/superpowers/plans/2026-10-22-identita-anello.md`)
 - [x] Anello di avanzamento attorno alla copertina (mini-player, Jam, lettore, barra desktop) (ff3fefa, 4e25b39, 37d5101)
