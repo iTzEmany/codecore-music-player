@@ -25,7 +25,7 @@ class LyricsScreen extends ConsumerWidget {
     final track = ref.watch(liveCurrentTrackProvider).value;
     if (track == null) {
       return Scaffold(
-        backgroundColor: embedded ? Colors.transparent : null,
+        backgroundColor: embedded ? Colors.transparent : context.cc.bg,
         appBar: embedded ? null : AppBar(title: Text(l.lyrics)),
         body: Center(child: Text(l.nothingPlaying)),
       );
@@ -111,7 +111,7 @@ class _TranslateButton extends ConsumerWidget {
       tooltip: active ? l.translateRemove : l.translateLyrics,
       icon: Icon(
         active ? Icons.translate_rounded : Icons.g_translate_rounded,
-        color: active ? Theme.of(context).colorScheme.primary : null,
+        color: active ? context.cc.accent : null,
       ),
       onPressed: () => active
           ? ref.read(lyricsTranslationProvider.notifier).clear()

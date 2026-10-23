@@ -107,7 +107,10 @@ class _JamScreenState extends ConsumerState<JamScreen> {
     if (!s.active || jam == null) {
       return Scaffold(
         appBar: AppBar(title: Text(l.jamTitle)),
-        body: EmptyState(icon: Icons.group_outlined, message: l.jamWaitingEmpty),
+        body: EmptyState(
+          icon: Icons.group_outlined,
+          message: l.jamWaitingEmpty,
+        ),
       );
     }
     final ownId = ref.read(shareHubProvider.notifier).deviceId ?? '';
@@ -150,7 +153,7 @@ class _JamScreenState extends ConsumerState<JamScreen> {
                               icon: const Icon(Icons.arrow_back),
                               onPressed: () => Navigator.of(context).maybePop(),
                             ),
-                            Text(l.jamTitle, style: theme.headlineSmall),
+                            Text(l.jamTitle, style: theme.titleLarge),
                             const SizedBox(width: 12),
                             Expanded(
                               child: Align(

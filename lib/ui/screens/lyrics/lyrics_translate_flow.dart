@@ -51,7 +51,9 @@ Future<void> runTranslateFlow(
   }
   var ok = true;
   try {
-    if (!await ensureTranslationModels(context, translator, [from, target])) return;
+    if (!await ensureTranslationModels(context, translator, [from, target])) {
+      return;
+    }
     ok = await ref
         .read(lyricsTranslationProvider.notifier)
         .translate(
@@ -95,7 +97,9 @@ Future<bool> ensureTranslationModels(
     }
     if (nav.canPop()) nav.pop();
     if (!ok) {
-      messenger.showSnackBar(SnackBar(content: Text(l.translateDownloadFailed)));
+      messenger.showSnackBar(
+        SnackBar(content: Text(l.translateDownloadFailed)),
+      );
       return false;
     }
   }
@@ -133,13 +137,17 @@ void _progress(BuildContext context, String text) {
       child: AlertDialog(
         content: Row(
           children: [
-            const SizedBox(
-              width: 24,
-              height: 24,
-              child: CircularProgressIndicator(strokeWidth: 2),
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(text),
+                  const SizedBox(height: 12),
+                  const LinearProgressIndicator(minHeight: 2),
+                ],
+              ),
             ),
-            const SizedBox(width: 16),
-            Expanded(child: Text(text)),
           ],
         ),
       ),
@@ -182,7 +190,8 @@ class _SourceDialogState extends State<_SourceDialog> {
           ),
           const SizedBox(height: 12),
           Semantics(
-            label: '${l.translateLyrics}: ${translationLanguages[widget.target] ?? widget.target}',
+            label:
+                '${l.translateLyrics}: ${translationLanguages[widget.target] ?? widget.target}',
             excludeSemantics: true,
             child: Row(
               children: [

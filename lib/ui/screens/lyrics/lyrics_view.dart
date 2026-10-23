@@ -219,7 +219,10 @@ class _LyricsViewState extends ConsumerState<LyricsView> {
           ),
           const SizedBox(height: 12),
           _searching
-              ? const CircularProgressIndicator()
+              ? const SizedBox(
+                  width: 120,
+                  child: LinearProgressIndicator(minHeight: 2),
+                )
               : FilledButton(
                   onPressed: () => _search(track),
                   child: Text(l.searchLyrics),

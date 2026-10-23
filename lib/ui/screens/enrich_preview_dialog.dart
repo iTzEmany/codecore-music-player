@@ -146,7 +146,7 @@ class _State extends ConsumerState<_EnrichPreviewDialog> {
     if (_loading) {
       body = const SizedBox(
         height: 80,
-        child: Center(child: CircularProgressIndicator()),
+        child: Center(child: LinearProgressIndicator(minHeight: 2)),
       );
     } else if (_rateLimited) {
       body = Text(l.serviceUnavailable);
