@@ -507,7 +507,7 @@ Richiesta (2026-10-23): un brano passato a un altro dispositivo deve portare i s
 - [ ] 37.2 Il pacchetto viaggia (elenco con PIN e offerte, copertina nelle offerte)
 - [ ] 37.3 Il ricevente applica il pacchetto
 - [ ] 37.4 Scrittura dei tag nei file di Codecore (`writeTagsAfterDownload`, disco e copertina)
-- [ ] 37.5 Ripiego dal nome del file («Artista - Titolo»)
+- [x] 37.5 Ripiego dal nome del file («Artista - Titolo») (e856ca6)
 - [ ] 37.6 Deezer al ricevente (con ISRC e opzione accesa)
 - [ ] 37.7 Prova dal vivo e documentazione
 
