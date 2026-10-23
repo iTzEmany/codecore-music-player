@@ -6,6 +6,7 @@ import '../services/online/http_client.dart';
 import '../services/online/itunes_client.dart';
 import '../services/online/lrclib_client.dart';
 import '../services/online/curiosity_finder.dart';
+import '../services/online/deezer_client.dart';
 import '../services/online/discogs_client.dart';
 import '../core/app_log.dart';
 import '../services/online/musicbrainz_client.dart';
@@ -31,6 +32,9 @@ final itunesClientProvider = Provider(
       _ => 'US',
     },
   ),
+);
+final deezerClientProvider = Provider(
+  (ref) => DeezerClient(ref.watch(webClientProvider)),
 );
 final lrclibClientProvider = Provider(
   (ref) => LrclibClient(ref.watch(webClientProvider)),
