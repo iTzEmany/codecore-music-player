@@ -479,6 +479,15 @@ Richiesta (2026-10-22): «Secondo parere automatico: applica solo se YouTube Mus
 
 ## Fase 36 — Deezer per i metadati, Exportify semi-automatico (`fase-36-deezer-ed-exportify.md`)
 Richiesta (2026-10-23): «scrivi il documento di fase con Deezer ed Exportify semi-automatico», come miglioramento di arricchimento (5/6), importazione e sincronizzazione (12/15) e secondo parere (35), non come funzioni nuove. Scelte concordate: Deezer solo per i metadati, per ISRC prima che per testo, opzione spenta di default; niente credenziali né cookie di Spotify: l'utente esporta da exportify.net, Codecore prende lo ZIP. Fuori da questa fase: pagina artista, nuove uscite e Casuale+ con Deezer (servono gli id di YouTube per suonare).
+Redesign Anello delle schermate rimaste (analisi del 2026-10-23 in `docs/audit-ui-anello.md`, un passo per pacchetto, prima di 36.1):
+- [ ] 36.R1 Impostazioni: schermate (pagine, editor del tema e dello sfondo, equalizzatore, segnala un problema, brani mancanti)
+- [ ] 36.R2 Impostazioni: righe e piccole finestre (scelte singole a blocchi, niente RadioListTile)
+- [ ] 36.R3 Condividi e dispositivi (invia, ricevi, scelta brani, QR, abbinamento, offerte, sincronizzazione)
+- [ ] 36.R4 Online, YouTube e nuove uscite (cornice delle pagine online, album, righe, sezioni dei risultati, fogli)
+- [ ] 36.R5 Radio e Importazione
+- [ ] 36.R6 Pulizia, tag, podcast, cronologia, attività
+- [ ] 36.R7 Jam (uscite), testi, auto, finestre di brano e arricchimento
+- [ ] 36.R8 Statistiche, Memoria, dettagli della libreria, playlist, playlist intelligenti
 - [ ] 36.1 Verifiche preliminari e fixture (con «Export All» vero fatto dall'utente)
 - [ ] 36.2 Schema v14 e ISRC in libreria
 - [ ] 36.3 Client Deezer
@@ -526,7 +535,7 @@ Richiesta (2026-10-23): un brano passato a un altro dispositivo deve portare i s
   - [ ] 3. Home in una colonna stretta al centro (circa 690 px su 1600); «Aggiunti da poco» mostra un riquadro vuoto senza copertine
   - [ ] 4. Libreria: il contenuto si ferma a circa 1180 px mentre le icone in alto stanno sul bordo destro; Cerca vuota non mostra nulla (né ricerche recenti né suggerimenti); Alt+← non torna indietro
   - (il difetto 1, metadati dei brani condivisi, è diventato la fase 37)
-- [ ] **Dopo tutte le fasi rimaste** (richiesta dell'utente, 2026-10-23): analisi completa del codice e verifica che ogni componente UI sotto `lib/ui` abbia il redesign Anello (elenco schermata per schermata, sì/no), poi correggere i buchi
+- [x] **Dopo tutte le fasi rimaste** (richiesta dell'utente, 2026-10-23; anticipata: analisi in `docs/audit-ui-anello.md`, buchi = passi 36.R1–36.R8): analisi completa del codice e verifica che ogni componente UI sotto `lib/ui` abbia il redesign Anello (elenco schermata per schermata, sì/no), poi correggere i buchi
 
 ## Note di deviazione
 <!-- una riga per deviazione: data — task — cosa è cambiato e perché -->
