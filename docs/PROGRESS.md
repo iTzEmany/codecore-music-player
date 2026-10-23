@@ -487,7 +487,7 @@ Redesign Anello delle schermate rimaste (analisi del 2026-10-23 in `docs/audit-u
 - [ ] 36.R5 Radio e Importazione
 - [ ] 36.R6 Pulizia, tag, podcast, cronologia, attività
 - [ ] 36.R7 Jam (uscite), testi, auto, finestre di brano e arricchimento
-- [ ] 36.R8 Statistiche, Memoria, dettagli della libreria, playlist, playlist intelligenti
+- [x] 36.R8 Statistiche, Memoria, dettagli della libreria, playlist, playlist intelligenti — pagine interne a 960, formato export a blocchi, intestazione cartelle (d68bdf1)
 - [ ] 36.1 Verifiche preliminari e fixture (con «Export All» vero fatto dall'utente)
 - [ ] 36.2 Schema v14 e ISRC in libreria
 - [ ] 36.3 Client Deezer
@@ -530,10 +530,10 @@ Richiesta (2026-10-23): un brano passato a un altro dispositivo deve portare i s
 - [x] Prova sul Mi A3 delle schermate della fase 2 (Memoria, Tutti i brani, chip, titoli): APK 6071; «Predefinito» spezzato a metà parola nei blocchi di ordinamento, corretto (blocchi 2x2 se la parola più lunga non entra)
 - [x] Jam nello stile Anello (era rimasta col vecchio design): lettore ad anello, partecipanti, coda, copertine vere dei propri brani (b0b074c)
 - [x] Prova della nuova Jam sul Motorola e sul PC (Xephyr): avvio da tutti e due i lati, sincronia, pausa dell'ospite, «Termina Jam»; i brani dell'ospite entrano subito dopo quello in corso, in ordine, prima della coda ereditata (23/10)
-- [ ] Difetti trovati sul PC (2026-10-23, approvati dall'utente; da fare **prima** della fase 36):
-  - [ ] 2. «In riproduzione» su desktop sbilanciata: circa 360 px vuoti al centro
-  - [ ] 3. Home in una colonna stretta al centro (circa 690 px su 1600); «Aggiunti da poco» mostra un riquadro vuoto senza copertine
-  - [ ] 4. Libreria: il contenuto si ferma a circa 1180 px mentre le icone in alto stanno sul bordo destro; Cerca vuota non mostra nulla (né ricerche recenti né suggerimenti); Alt+← non torna indietro
+- [x] Difetti trovati sul PC (2026-10-23, approvati dall'utente; da fare **prima** della fase 36):
+  - [x] 2. «In riproduzione» su desktop sbilanciata: circa 360 px vuoti al centro (a203c07)
+  - [x] 3. Home in una colonna stretta al centro (circa 690 px su 1600); «Aggiunti da poco» mostra un riquadro vuoto senza copertine (a20641e)
+  - [x] 4. Libreria: il contenuto si ferma a circa 1180 px mentre le icone in alto stanno sul bordo destro; Cerca vuota non mostra nulla (né ricerche recenti né suggerimenti); Alt+← non torna indietro (92270ed)
   - (il difetto 1, metadati dei brani condivisi, è diventato la fase 37)
 - [x] **Dopo tutte le fasi rimaste** (richiesta dell'utente, 2026-10-23; anticipata: analisi in `docs/audit-ui-anello.md`, buchi = passi 36.R1–36.R8): analisi completa del codice e verifica che ogni componente UI sotto `lib/ui` abbia il redesign Anello (elenco schermata per schermata, sì/no), poi correggere i buchi
 
