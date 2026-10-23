@@ -367,6 +367,7 @@
     }
   },
   "jamIncomingBody": "Gemeinsam aus einer geteilten Warteschlange hören.",
+  "jamIncomingDialog": "Die Musik läuft auf diesem Gerät und ihr könnt beide Titel hinzufügen.",
   "jamQueue": "Gemeinsame Warteschlange",
   "jamEmpty": "Die Warteschlange ist leer. Füge Titel hinzu.",
   "jamAddedBy": "hinzugefügt von {name}",

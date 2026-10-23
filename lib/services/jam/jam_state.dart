@@ -93,6 +93,11 @@ JamResult applyCommand(
       final curId = s.current?.id;
       final it = items.removeAt(idx);
       items.insert(to, it);
+      // Keep the inherited block contiguous: adopt the neighbour's flag.
+      if (items.length > 1) {
+        final nb = items[to + 1 < items.length ? to + 1 : to - 1];
+        items[to] = it.copyWith(inherited: nb.inherited);
+      }
       return commit(s.copyWith(
         items: items,
         currentIndex: curId == null ? -1 : items.indexWhere((i) => i.id == curId),

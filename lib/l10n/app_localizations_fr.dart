@@ -1016,6 +1016,10 @@ class AppLocalizationsFr extends AppLocalizations {
       'Écoutez ensemble depuis une file d’attente partagée.';
 
   @override
+  String get jamIncomingDialog =>
+      'La musique est diffusée depuis cet appareil et vous pouvez tous les deux ajouter des titres.';
+
+  @override
   String get jamQueue => 'File d’attente partagée';
 
   @override

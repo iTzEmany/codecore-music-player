@@ -1010,6 +1010,10 @@ class AppLocalizationsIt extends AppLocalizations {
   String get jamIncomingBody => 'Ascoltate insieme da una coda condivisa.';
 
   @override
+  String get jamIncomingDialog =>
+      'La musica parte da questo dispositivo e potete aggiungere brani entrambi.';
+
+  @override
   String get jamQueue => 'Coda condivisa';
 
   @override

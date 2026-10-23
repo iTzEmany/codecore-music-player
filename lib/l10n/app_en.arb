@@ -367,6 +367,7 @@
     }
   },
   "jamIncomingBody": "Listen together from a shared queue.",
+  "jamIncomingDialog": "The music plays from this device and you can both add tracks.",
   "jamQueue": "Shared queue",
   "jamEmpty": "The queue is empty. Add some tracks.",
   "jamAddedBy": "added by {name}",

@@ -1011,6 +1011,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get jamIncomingBody => 'Escuchad juntos desde una cola compartida.';
 
   @override
+  String get jamIncomingDialog =>
+      'La música suena en este dispositivo y los dos podéis añadir canciones.';
+
+  @override
   String get jamQueue => 'Cola compartida';
 
   @override

@@ -160,6 +160,35 @@ void main() {
     expect(s.items.map((i) => i.title), ['cur', 'g1', 'h2', 'i0', 'i1']);
   });
 
+  test('move: inherited track dragged into the added block becomes added', () {
+    var s = ok(seeded(2), JamCommand.add(item(guest, title: 'a1')), guest);
+    s = ok(s, JamCommand.add(item(guest, title: 'a2')), guest);
+    s = ok(s, JamCommand.move(s.items[3].id, 1), host);
+    expect(s.items[1].title, 'i0');
+    expect(s.items[1].inherited, false);
+    s = ok(s, JamCommand.add(item(guest, title: 'b')), guest);
+    expect(s.items.map((i) => i.title), ['cur', 'i0', 'a1', 'a2', 'b', 'i1']);
+  });
+
+  test('move: added track dragged to the end becomes inherited', () {
+    var s = ok(seeded(1), JamCommand.add(item(guest, title: 'a')), guest);
+    s = ok(s, JamCommand.move(s.items[1].id, 2), host);
+    expect(s.items.last.title, 'a');
+    expect(s.items.last.inherited, true);
+  });
+
+  test('add after next lands right after the new current', () {
+    var s = ok(seeded(2), const JamCommand.next(), host);
+    s = ok(s, JamCommand.add(item(guest, title: 'g')), guest);
+    expect(s.items.map((i) => i.title), ['cur', 'i0', 'g', 'i1']);
+  });
+
+  test('add when current is the last item goes to the end', () {
+    var s = ok(seeded(1), const JamCommand.next(), host);
+    s = ok(s, JamCommand.add(item(guest, title: 'g')), guest);
+    expect(s.items.map((i) => i.title), ['cur', 'i0', 'g']);
+  });
+
   test('full queue: add evicts the last inherited item', () {
     final s0 = seeded(maxJamItems - 1);
     expect(s0.items.length, maxJamItems);

@@ -1010,6 +1010,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get jamIncomingBody => 'Listen together from a shared queue.';
 
   @override
+  String get jamIncomingDialog =>
+      'The music plays from this device and you can both add tracks.';
+
+  @override
   String get jamQueue => 'Shared queue';
 
   @override

@@ -1762,6 +1762,12 @@ abstract class AppLocalizations {
   /// **'Ascoltate insieme da una coda condivisa.'**
   String get jamIncomingBody;
 
+  /// No description provided for @jamIncomingDialog.
+  ///
+  /// In it, this message translates to:
+  /// **'La musica parte da questo dispositivo e potete aggiungere brani entrambi.'**
+  String get jamIncomingDialog;
+
   /// No description provided for @jamQueue.
   ///
   /// In it, this message translates to:

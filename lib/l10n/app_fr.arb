@@ -551,6 +551,7 @@
     }
   },
   "jamIncomingBody": "Écoutez ensemble depuis une file d’attente partagée.",
+  "jamIncomingDialog": "La musique est diffusée depuis cet appareil et vous pouvez tous les deux ajouter des titres.",
   "jamQueue": "File d’attente partagée",
   "jamEmpty": "La file d’attente est vide. Ajoutez des titres.",
   "jamAddedBy": "ajouté par {name}",

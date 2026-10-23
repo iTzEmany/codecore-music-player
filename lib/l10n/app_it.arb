@@ -575,6 +575,7 @@
     }
   },
   "jamIncomingBody": "Ascoltate insieme da una coda condivisa.",
+  "jamIncomingDialog": "La musica parte da questo dispositivo e potete aggiungere brani entrambi.",
   "jamQueue": "Coda condivisa",
   "jamEmpty": "La coda è vuota. Aggiungi dei brani.",
   "jamAddedBy": "aggiunto da {name}",

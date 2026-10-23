@@ -551,6 +551,7 @@
     }
   },
   "jamIncomingBody": "Ouçam juntos a partir de uma fila partilhada.",
+  "jamIncomingDialog": "A música toca neste dispositivo e ambos podem adicionar faixas.",
   "jamQueue": "Fila partilhada",
   "jamEmpty": "A fila está vazia. Adicione faixas.",
   "jamAddedBy": "adicionada por {name}",

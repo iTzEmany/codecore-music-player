@@ -1012,6 +1012,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get jamIncomingBody => 'Ouçam juntos a partir de uma fila partilhada.';
 
   @override
+  String get jamIncomingDialog =>
+      'A música toca neste dispositivo e ambos podem adicionar faixas.';
+
+  @override
   String get jamQueue => 'Fila partilhada';
 
   @override

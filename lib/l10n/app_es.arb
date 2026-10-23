@@ -367,6 +367,7 @@
     }
   },
   "jamIncomingBody": "Escuchad juntos desde una cola compartida.",
+  "jamIncomingDialog": "La música suena en este dispositivo y los dos podéis añadir canciones.",
   "jamQueue": "Cola compartida",
   "jamEmpty": "La cola está vacía. Añade canciones.",
   "jamAddedBy": "añadido por {name}",

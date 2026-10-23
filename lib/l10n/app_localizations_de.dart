@@ -1012,6 +1012,10 @@ class AppLocalizationsDe extends AppLocalizations {
       'Gemeinsam aus einer geteilten Warteschlange hören.';
 
   @override
+  String get jamIncomingDialog =>
+      'Die Musik läuft auf diesem Gerät und ihr könnt beide Titel hinzufügen.';
+
+  @override
   String get jamQueue => 'Gemeinsame Warteschlange';
 
   @override
