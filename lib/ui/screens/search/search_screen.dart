@@ -18,6 +18,7 @@ import '../../shell/shell_nav.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/motion.dart' show PressScale, RiseIn;
+import '../../widgets/empty_state.dart';
 import '../../widgets/section_header.dart';
 import '../../widgets/segmented_blocks.dart';
 import '../../widgets/selection_bar.dart';
@@ -255,7 +256,12 @@ class _EmptyQuery extends ConsumerWidget {
     final l = context.l10n;
     final cc = context.cc;
     final recents = ref.watch(settingsProvider.select((s) => s.recentSearches));
-    final genres = ref.watch(genresProvider).value ?? const <GenreSummary>[];
+    final genresAsync = ref.watch(genresProvider);
+    final genres = genresAsync.value ?? const <GenreSummary>[];
+    // Nothing to suggest (no recents, genres loaded and empty): say what to do.
+    if (recents.isEmpty && genresAsync.hasValue && genres.isEmpty) {
+      return EmptyState(icon: Icons.search_rounded, message: l.searchEmptyPrompt);
+    }
     return ListView(
       children: [
         if (recents.isNotEmpty)

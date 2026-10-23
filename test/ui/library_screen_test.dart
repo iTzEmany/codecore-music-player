@@ -130,11 +130,12 @@ void main() {
     await h.dispose(t);
   });
 
-  testWidgets('desktop: the block row is at most 960 wide', (t) async {
-    final h = await open(t, width: 1400);
+  testWidgets('desktop: content reaches the same right edge as the header',
+      (t) async {
+    final h = await open(t, width: 1600);
     final r = t.getRect(find.byType(SegmentedBlocks<LibraryKind?>));
-    expect(r.width, lessThanOrEqualTo(960));
-    expect(r.left, lessThan(300));
+    final menu = t.getRect(find.byTooltip('Altre azioni'));
+    expect(r.right, greaterThanOrEqualTo(menu.right - 2 * CcDims.margin));
     await h.dispose(t);
   });
 }

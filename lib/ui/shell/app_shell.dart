@@ -53,6 +53,10 @@ class AppShell extends ConsumerWidget {
   );
 
   Map<ShortcutActivator, VoidCallback> _shortcuts(WidgetRef ref) {
+    void back() => ref
+        .read(tabNavigatorKeysProvider)[ref.read(navIndexProvider)]
+        .currentState
+        ?.maybePop();
     final ctrl = ref.read(playerControllerProvider);
     final vol = ref.read(volumeProvider.notifier);
 
@@ -77,6 +81,7 @@ class AppShell extends ConsumerWidget {
           (_) => ref.read(searchFocusProvider).requestFocus(),
         );
       },
+      const SingleActivator(LogicalKeyboardKey.arrowLeft, alt: true): back,
       // Ends a 20 s preview started from the menu.
       const SingleActivator(LogicalKeyboardKey.escape): () {
         final preview = ref.read(previewProvider);

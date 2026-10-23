@@ -2825,5 +2825,6 @@
   "iconKeep": "Leave it as it is",
   "iconDontAsk": "Don't ask again",
   "iconFollowTitle": "Themed icon",
-  "iconFollowSubtitle": "The icon follows the theme and colour when you leave the app"
+  "iconFollowSubtitle": "The icon follows the theme and colour when you leave the app",
+  "searchEmptyPrompt": "Type a title, artist or album to search your library"
 }

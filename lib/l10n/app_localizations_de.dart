@@ -5186,4 +5186,8 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get iconFollowSubtitle =>
       'Das Symbol folgt Thema und Farbe, wenn du die App verlässt';
+
+  @override
+  String get searchEmptyPrompt =>
+      'Gib einen Titel, Künstler oder ein Album ein, um deine Bibliothek zu durchsuchen';
 }

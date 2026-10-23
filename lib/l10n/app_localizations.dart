@@ -8114,6 +8114,12 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'L\'icona segue tema e colore quando esci dall\'app'**
   String get iconFollowSubtitle;
+
+  /// No description provided for @searchEmptyPrompt.
+  ///
+  /// In it, this message translates to:
+  /// **'Scrivi un titolo, un artista o un album per cercare nella libreria'**
+  String get searchEmptyPrompt;
 }
 
 class _AppLocalizationsDelegate

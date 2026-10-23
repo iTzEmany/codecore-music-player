@@ -5171,4 +5171,8 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get iconFollowSubtitle =>
       'O ícone acompanha o tema e a cor quando você sai do app';
+
+  @override
+  String get searchEmptyPrompt =>
+      'Escreve um título, artista ou álbum para pesquisar na tua biblioteca';
 }

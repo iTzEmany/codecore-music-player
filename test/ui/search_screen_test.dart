@@ -1,5 +1,6 @@
 import 'package:codecore/core/constants.dart';
 import 'package:codecore/data/db/app_database.dart';
+import 'package:codecore/providers/settings_providers.dart';
 import 'package:codecore/providers/ui_providers.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -309,6 +310,39 @@ void main() {
     );
     await _settle(tester);
     expect(find.byType(EmptyState), findsOneWidget);
+    await h.dispose(tester);
+  });
+
+  testWidgets('empty query lists recent searches', (tester) async {
+    tester.view.physicalSize = const Size(1400, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final h = await Harness.create(tester, tracks: 2);
+    await h.pump(tester, const SearchScreen());
+    await _settle(tester);
+    expect(find.text('Ricerche recenti'), findsNothing);
+    ProviderScope.containerOf(tester.element(find.byType(SearchScreen)))
+        .read(settingsProvider.notifier)
+        .update((s) => s.copyWith(recentSearches: ['queen']));
+    await _settle(tester);
+    expect(find.text('Ricerche recenti'), findsOneWidget);
+    expect(find.text('queen'), findsOneWidget);
+    await h.dispose(tester);
+  });
+
+  testWidgets('desktop: empty query without recents or genres says what to do',
+      (tester) async {
+    tester.view.physicalSize = const Size(1400, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final h = await Harness.create(tester, tracks: 2);
+    await h.pump(tester, const SearchScreen());
+    await _settle(tester);
+    expect(
+      find.text(
+          'Scrivi un titolo, un artista o un album per cercare nella libreria'),
+      findsOneWidget,
+    );
     await h.dispose(tester);
   });
 }

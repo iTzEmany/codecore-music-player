@@ -335,6 +335,25 @@ void main() {
     await h.dispose(tester);
   });
 
+  testWidgets('Alt+Left goes back from a page opened in the tab', (t) async {
+    t.view.physicalSize = const Size(1400, 900);
+    t.view.devicePixelRatio = 1;
+    addTearDown(t.view.reset);
+    final h = await Harness.create(t, tracks: 4);
+    await h.pump(t, const AppShell());
+    await t.tap(find.text('La tua libreria'));
+    await _settle(t);
+    await t.tap(find.text('Tutti i brani'));
+    await _settle(t);
+    expect(find.byType(AllTracksScreen), findsOneWidget);
+    await t.sendKeyDownEvent(LogicalKeyboardKey.altLeft);
+    await t.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await t.sendKeyUpEvent(LogicalKeyboardKey.altLeft);
+    await _settle(t);
+    expect(find.byType(AllTracksScreen), findsNothing);
+    await h.dispose(t);
+  });
+
   testWidgets('Ctrl+F in a narrow window opens the dock field with focus',
       (t) async {
     _phone(t);

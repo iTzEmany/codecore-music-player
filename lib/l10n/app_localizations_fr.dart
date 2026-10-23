@@ -5217,4 +5217,8 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get iconFollowSubtitle =>
       'L’icône suit le thème et la couleur quand tu quittes l’app';
+
+  @override
+  String get searchEmptyPrompt =>
+      'Saisis un titre, un artiste ou un album pour chercher dans ta bibliothèque';
 }

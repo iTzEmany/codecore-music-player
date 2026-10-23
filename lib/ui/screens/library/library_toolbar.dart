@@ -45,30 +45,34 @@ class LibraryToolbar extends StatelessWidget {
             ),
           ),
           Flexible(
-            child: PopupMenuButton<LibrarySort>(
-              onSelected: onSort,
-              itemBuilder: (_) => [
-                for (final s in LibrarySort.values)
-                  PopupMenuItem(value: s, child: Text(name(s))),
-              ],
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 10,
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Flexible(
-                      child: Text(
-                        name(sort),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.labelLarge,
+            // Right-aligned: the flexible slot is half the row, sort sits by the grid button.
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: PopupMenuButton<LibrarySort>(
+                onSelected: onSort,
+                itemBuilder: (_) => [
+                  for (final s in LibrarySort.values)
+                    PopupMenuItem(value: s, child: Text(name(s))),
+                ],
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 10,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          name(sort),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.labelLarge,
+                        ),
                       ),
-                    ),
-                    Icon(Icons.arrow_drop_down_rounded, color: cc.textMuted),
-                  ],
+                      Icon(Icons.arrow_drop_down_rounded, color: cc.textMuted),
+                    ],
+                  ),
                 ),
               ),
             ),

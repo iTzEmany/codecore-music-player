@@ -82,12 +82,6 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
     ShellNav.open<void>(context, page);
   }
 
-  /// Desktop: header content stays left-aligned within 960 px.
-  static Widget _cap(Widget c) => Align(
-    alignment: Alignment.topLeft,
-    child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 960), child: c),
-  );
-
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
@@ -166,8 +160,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
       void open(Widget w) => ShellNav.open<void>(context, w);
       final shortcuts = _kind != null
           ? null
-          : _cap(
-              LibraryShortcuts(
+          : LibraryShortcuts(
                 items: [
                   LibraryShortcut(
                     label: l.navFavorites,
@@ -227,8 +220,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
                       onTap: () => open(const ReviewScreen()),
                     ),
                 ],
-              ),
-            );
+              );
       body = settings.libraryGrid
           ? _LibraryGrid(header: shortcuts, entries: entries, onOpen: _open)
           : _LibraryList(
@@ -325,8 +317,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
             ),
           ),
           const ScanStatus(),
-          _cap(
-            Padding(
+          Padding(
               padding: const EdgeInsets.fromLTRB(CcDims.margin, 8, CcDims.margin, 0),
               child: SegmentedBlocks<LibraryKind?>(
                 items: [
@@ -351,15 +342,12 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
                 onChanged: (k) => setState(() => _kind = k),
               ),
             ),
-          ),
-          _cap(
-            LibraryToolbar(
-              countLabel: count,
-              sort: sort,
-              grid: settings.libraryGrid,
-              onSort: (s) => _setSettings(sort: s),
-              onToggleGrid: () => _setSettings(grid: !settings.libraryGrid),
-            ),
+          LibraryToolbar(
+            countLabel: count,
+            sort: sort,
+            grid: settings.libraryGrid,
+            onSort: (s) => _setSettings(sort: s),
+            onToggleGrid: () => _setSettings(grid: !settings.libraryGrid),
           ),
           Expanded(child: body),
         ],

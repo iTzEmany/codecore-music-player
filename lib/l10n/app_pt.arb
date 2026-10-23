@@ -3085,5 +3085,6 @@
   "iconKeep": "Deixar como está",
   "iconDontAsk": "Não perguntar de novo",
   "iconFollowTitle": "Ícone do tema",
-  "iconFollowSubtitle": "O ícone acompanha o tema e a cor quando você sai do app"
+  "iconFollowSubtitle": "O ícone acompanha o tema e a cor quando você sai do app",
+  "searchEmptyPrompt": "Escreve um título, artista ou álbum para pesquisar na tua biblioteca"
 }
