@@ -292,23 +292,38 @@ class LanClient {
   /// The cover of one offered item, or null (one log line, no retry) when it
   /// is missing, over 5 MB, not a JPEG/PNG, or does not decode.
   Future<({Uint8List bytes, String mime})?> downloadOfferCover(String host,
-      int port, String offerId, String token, int itemId) async {
+          int port, String offerId, String token, int itemId) =>
+      _fetchCover('http://$host:$port/offer/$offerId/cover/$itemId',
+          {'X-Token': token}, 'offer cover $itemId');
+
+  /// The cover of a track in the PIN list; null (silently when 404) like
+  /// [downloadOfferCover].
+  Future<({Uint8List bytes, String mime})?> downloadCover(
+          String host, int port, String pin, int trackId) =>
+      _fetchCover('http://$host:$port/cover/$trackId', {'X-Pin': pin},
+          'cover $trackId');
+
+  Future<({Uint8List bytes, String mime})?> _fetchCover(
+      String url, Map<String, String> headers, String label) async {
     try {
       final r = await _dio.get<ResponseBody>(
-        'http://$host:$port/offer/$offerId/cover/$itemId',
+        url,
         options: Options(
-            headers: {'X-Token': token}, responseType: ResponseType.stream),
+            headers: headers,
+            responseType: ResponseType.stream,
+            validateStatus: (s) => s != null && s < 500),
       );
+      if (r.statusCode == 404) return null; // no cover: not worth a warning
       final mime = r.headers.value(Headers.contentTypeHeader)?.split(';').first;
       if (r.statusCode != 200 || (mime != 'image/jpeg' && mime != 'image/png')) {
-        AppLog.w('offer cover $itemId: status ${r.statusCode}, type $mime');
+        AppLog.w('$label: status ${r.statusCode}, type $mime');
         return null;
       }
       final buf = BytesBuilder(copy: false);
       await for (final chunk in r.data!.stream) {
         buf.add(chunk);
         if (buf.length > maxOfferCoverBytes) {
-          AppLog.w('offer cover $itemId: over $maxOfferCoverBytes B, discarded');
+          AppLog.w('$label: over $maxOfferCoverBytes B, discarded');
           return null;
         }
       }
@@ -317,7 +332,7 @@ class LanClient {
       codec.dispose();
       return (bytes: bytes, mime: mime!);
     } on Object catch (e) {
-      AppLog.w('offer cover $itemId failed: $e');
+      AppLog.w('$label failed: $e');
       return null;
     }
   }

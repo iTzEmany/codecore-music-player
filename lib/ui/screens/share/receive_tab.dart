@@ -13,6 +13,7 @@ import '../../../providers/library_providers.dart';
 import '../../../providers/share_providers.dart';
 import '../../../providers/youtube_providers.dart';
 import '../../../services/share/lan_client.dart';
+import '../../../services/share/received_meta.dart';
 import '../../../providers/share_hub.dart';
 import '../../../core/platform.dart';
 import 'incoming_offer_tile.dart';
@@ -133,21 +134,28 @@ class _ReceiveTabState extends ConsumerState<ReceiveTab> {
       _fileProgress = 0;
     });
     final client = ref.read(lanClientProvider);
+    final repo = ref.read(trackRepositoryProvider);
+    final covers = ref.read(coverStoreProvider);
+    final pin = _pin.text.trim();
     final saved = <String>[];
+    final savedTracks = <String, RemoteTrack>{};
     try {
       for (final t in todo) {
         if (cancel.isCancelled) break;
         await for (final e in client.download(
           target.host,
           target.port,
-          _pin.text.trim(),
+          pin,
           t,
           out,
           cancel: cancel,
         )) {
           if (!mounted) return;
           setState(() => _fileProgress = e.fraction);
-          if (e.path != null) saved.add(e.path!);
+          if (e.path != null) {
+            saved.add(e.path!);
+            savedTracks[e.path!] = t;
+          }
         }
         if (mounted) setState(() => _doneCount++);
       }
@@ -156,6 +164,16 @@ class _ReceiveTabState extends ConsumerState<ReceiveTab> {
             .read(libraryScannerProvider)
             .scanFiles(base.$2, saved)
             .drain<void>();
+        for (final entry in savedTracks.entries) {
+          await applyReceivedPackage(
+            repo,
+            covers,
+            entry.key,
+            entry.value.meta,
+            fetchCover: () => client.downloadCover(
+                target.host, target.port, pin, entry.value.id),
+          );
+        }
       }
       if (mounted) setState(() => _received = saved.length);
     } on LanException catch (e) {

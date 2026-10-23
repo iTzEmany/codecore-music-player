@@ -223,4 +223,22 @@ void main() {
       );
     });
   });
+
+  group('downloadCover (PIN)', () {
+    Future<({int port, String pin})> serve(List<ShareEntry> es) async {
+      final server = LanServer();
+      final info = await server.start(
+          entries: es, host: '127.0.0.1', deviceName: 'PC');
+      addTearDown(server.stop);
+      return (port: info.port, pin: info.pin);
+    }
+
+    test('returns the image, and null without a cover', () async {
+      final s = await serve([entry(1, cover: base64Decode(_png)), entry(2)]);
+      final c = LanClient();
+      final ok = await c.downloadCover('127.0.0.1', s.port, s.pin, 1);
+      expect(ok!.bytes, base64Decode(_png));
+      expect(await c.downloadCover('127.0.0.1', s.port, s.pin, 2), isNull);
+    });
+  });
 }

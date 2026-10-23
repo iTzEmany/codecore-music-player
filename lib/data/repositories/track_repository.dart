@@ -1,6 +1,9 @@
 import 'package:drift/drift.dart';
+import 'package:path/path.dart' as p;
 
 import '../../core/import_row.dart';
+import '../../core/text_utils.dart';
+import '../../services/share/track_meta.dart';
 import '../../services/library/rules/rule_ast.dart';
 import '../../services/library/rules/rule_sql.dart';
 import '../db/app_database.dart';
@@ -28,6 +31,8 @@ class TrackRepository {
           continue;
         }
         final keepText = existing.userEdited;
+        final keepCover =
+            keepText && !(row.hasCover.present && row.hasCover.value);
         // A hash of the old bytes says nothing about the new ones.
         final changed =
             existing.sizeBytes != row.sizeBytes.value ||
@@ -39,7 +44,7 @@ class TrackRepository {
             folderId: row.folderId,
             title: keepText ? const Value.absent() : row.title,
             artist: keepText ? const Value.absent() : row.artist,
-            albumArtist: row.albumArtist,
+            albumArtist: keepText ? const Value.absent() : row.albumArtist,
             album: keepText ? const Value.absent() : row.album,
             albumKey: keepText ? const Value.absent() : row.albumKey,
             trackNumber: row.trackNumber,
@@ -54,8 +59,9 @@ class TrackRepository {
             channels: row.channels,
             sizeBytes: row.sizeBytes,
             mtimeMs: row.mtimeMs,
-            hasCover: row.hasCover,
-            coverKey: row.coverKey,
+            // An edited row keeps the cover it was given when the scan finds none.
+            hasCover: keepCover ? const Value.absent() : row.hasCover,
+            coverKey: keepCover ? const Value.absent() : row.coverKey,
             replayGainDb: row.replayGainDb,
             isrc: (existing.isrc ?? '').isEmpty
                 ? row.isrc
@@ -66,6 +72,48 @@ class TrackRepository {
         );
       }
     });
+  }
+
+  Future<Track?> byPath(String path) =>
+      (_db.select(_db.tracks)..where((t) => t.path.equals(path))).getSingleOrNull();
+
+  /// Writes the non-null fields of a received [TrackMeta] over the row (the
+  /// sender's package wins over the local tags), recomputes `albumKey` and
+  /// sets `userEdited` so a rescan keeps title, artist and album.
+  /// `enrichStatus` is not applied: the receiver judges its own enrichment.
+  /// shortcut: year/genre/numbers come back from the file on a rescan if it
+  /// changes outside Codecore; fixed by writing tags (37.4).
+  /// Returns the new `albumKey`, or null when the row does not exist.
+  Future<String?> applyReceivedMeta(int trackId, TrackMeta m) async {
+    final t = await (_db.select(_db.tracks)..where((r) => r.id.equals(trackId))).getSingleOrNull();
+    if (t == null) return null;
+    final albumArtist = m.albumArtist ?? t.albumArtist;
+    final artist = m.artist ?? t.artist;
+    final album = m.album ?? t.album;
+    final key = computeAlbumKey(
+      albumArtist: albumArtist,
+      artist: artist,
+      album: album,
+      directory: p.dirname(t.path),
+    );
+    await (_db.update(_db.tracks)..where((r) => r.id.equals(trackId))).write(
+      TracksCompanion(
+        title: Value(m.title ?? t.title),
+        artist: Value(artist),
+        albumArtist: Value(albumArtist),
+        album: Value(album),
+        albumKey: Value(key),
+        year: Value(m.year ?? t.year),
+        genre: Value(m.genre ?? t.genre),
+        trackNumber: Value(m.trackNumber ?? t.trackNumber),
+        discNumber: Value(m.discNumber ?? t.discNumber),
+        isrc: Value(m.isrc ?? t.isrc),
+        lyricsPlain: Value(m.lyricsPlain ?? t.lyricsPlain),
+        lyricsSynced: Value(m.lyricsSynced ?? t.lyricsSynced),
+        userEdited: const Value(true),
+      ),
+    );
+    return key;
   }
 
   Future<Map<String, ({int size, int mtime})>> fileIndexForFolder(

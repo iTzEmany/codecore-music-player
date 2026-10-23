@@ -17,6 +17,7 @@ import '../services/share/discovery.dart';
 import '../services/share/lan_client.dart';
 import '../l10n/app_localizations.dart';
 import '../services/share/offers.dart';
+import '../services/share/received_meta.dart';
 import '../services/share/pairing.dart';
 import '../services/share/pairing_client.dart';
 import '../services/share/sync_client.dart';
@@ -514,6 +515,7 @@ class ShareHubNotifier extends Notifier<ShareHubState> {
     _service?.notify();
     final cancel = _cancels[o.offerId] = CancelToken();
     final saved = <String>[];
+    final savedItems = <String, OfferItem>{};
     try {
       final base = await resolveDownloadFolder(
         ref.read(folderRepositoryProvider),
@@ -534,7 +536,10 @@ class ShareHubNotifier extends Notifier<ShareHubState> {
           out,
           cancel: cancel,
         )) {
-          if (e.path != null) saved.add(e.path!);
+          if (e.path != null) {
+            saved.add(e.path!);
+            savedItems[e.path!] = item;
+          }
         }
         o.received++;
         _service?.notify();
@@ -544,6 +549,19 @@ class ShareHubNotifier extends Notifier<ShareHubState> {
             .read(libraryScannerProvider)
             .scanFiles(base.$2, saved)
             .drain<void>();
+        for (final entry in savedItems.entries) {
+          final item = entry.value;
+          await applyReceivedPackage(
+            ref.read(trackRepositoryProvider),
+            ref.read(coverStoreProvider),
+            entry.key,
+            item.meta,
+            fetchCover: item.hasCover
+                ? () => client.downloadOfferCover(
+                      o.fromHost, o.fromPort, o.offerId, o.token, item.id)
+                : null,
+          );
+        }
       }
       o.status = o.received == o.items.length
           ? OfferStatus.done
