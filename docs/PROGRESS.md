@@ -504,7 +504,7 @@ Redesign Anello delle schermate rimaste (analisi del 2026-10-23 in `docs/audit-u
 ## Fase 37 — Metadati che viaggiano (`fase-37-metadati-che-viaggiano.md`)
 Richiesta (2026-10-23): un brano passato a un altro dispositivo deve portare i suoi metadati, non solo il nome; oggi gli m4a scaricati da YouTube arrivano senza tag e il ricevente li legge male (titolo sbagliato, artista e album sconosciuti). Da fare **dopo la fase 36** (ISRC in libreria, Deezer). Scelte dell'utente: scrittura dei tag nei file scaricati e ricevuti **accesa di default**; se tag del file e pacchetto non coincidono **vince il pacchetto**; l'ISRC **non si scrive nei file** (solo DB e pacchetto). Fuori: doppioni (li gestisce «Duplicati»), testo nei file, file della libreria dell'utente.
 - [x] 37.1 `TrackMeta`: pacchetto e lettura severa — tolto `origin`; il ricevente non applica l'enrichStatus del mittente (b33e00b)
-- [ ] 37.2 Il pacchetto viaggia (elenco con PIN e offerte, copertina nelle offerte)
+- [x] 37.2 Il pacchetto viaggia (elenco con PIN e offerte, copertina nelle offerte) (9ae4a19)
 - [ ] 37.3 Il ricevente applica il pacchetto
 - [ ] 37.4 Scrittura dei tag nei file di Codecore (`writeTagsAfterDownload`, disco e copertina)
 - [x] 37.5 Ripiego dal nome del file («Artista - Titolo») (e856ca6)
