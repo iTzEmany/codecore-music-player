@@ -101,4 +101,24 @@ void main() {
     );
     expect(m.single.ambiguous, isTrue);
   });
+
+  test(
+    'a real Exportify «Export All» ZIP is read with ISRC, year, duration',
+    () async {
+      final bytes = File('test/fixtures/exportify/spotify_playlists_real.zip')
+          .readAsBytesSync();
+      final r = await readExportifyZip(bytes);
+      expect(r.entries.length, 3);
+      expect(r.skipped, 0);
+      final liked = r.entries.firstWhere(
+        (e) => e.fileName == 'Liked_Songs.csv',
+      );
+      final row = liked.playlist.rows.first;
+      expect(row.title, '500 Miles');
+      expect(row.artists, ['Peter, Paul and Mary']);
+      expect(row.isrc, 'USWB16500047');
+      expect(row.durationMs, 162933);
+      expect(row.year, 1962);
+    },
+  );
 }
