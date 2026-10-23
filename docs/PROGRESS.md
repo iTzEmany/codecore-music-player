@@ -485,7 +485,7 @@ Redesign Anello delle schermate rimaste (analisi del 2026-10-23 in `docs/audit-u
 - [x] 36.R3 Condividi e dispositivi (invia, ricevi, scelta brani, QR, abbinamento, offerte, sincronizzazione) — blocchi e token della casa; dialoghi e AppBar con schede restano (spec), QR su bianco voluto (1321599)
 - [ ] 36.R4 Online, YouTube e nuove uscite (cornice delle pagine online, album, righe, sezioni dei risultati, fogli)
 - [ ] 36.R5 Radio e Importazione
-- [ ] 36.R6 Pulizia, tag, podcast, cronologia, attività
+- [x] 36.R6 Pulizia, tag, podcast, cronologia, attività — pagine a 960, stati vuoti e di errore della casa, podcast su CollectionScaffold, eliminazione automatica a blocchi (265e97e)
 - [ ] 36.R7 Jam (uscite), testi, auto, finestre di brano e arricchimento
 - [x] 36.R8 Statistiche, Memoria, dettagli della libreria, playlist, playlist intelligenti — pagine interne a 960, formato export a blocchi, intestazione cartelle (d68bdf1)
 - [ ] 36.1 Verifiche preliminari e fixture (con «Export All» vero fatto dall'utente)
