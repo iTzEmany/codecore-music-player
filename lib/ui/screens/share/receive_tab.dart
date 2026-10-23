@@ -7,6 +7,7 @@ import 'package:path/path.dart' as p;
 
 import '../../../core/app_log.dart';
 import '../../../l10n/l10n_ext.dart';
+import '../../theme/tokens.dart';
 import '../../../providers/database_providers.dart';
 import '../../../providers/library_providers.dart';
 import '../../../providers/share_providers.dart';
@@ -176,7 +177,7 @@ class _ReceiveTabState extends ConsumerState<ReceiveTab> {
           style: Theme.of(context).textTheme.titleMedium,
         ),
         for (final o in hub.incoming) IncomingOfferTile(offer: o),
-        const Divider(height: 32),
+        const SizedBox(height: 24),
       ],
       Text(l.manualConnection, style: Theme.of(context).textTheme.titleSmall),
       const SizedBox(height: 8),
@@ -216,10 +217,7 @@ class _ReceiveTabState extends ConsumerState<ReceiveTab> {
       if (_error != null)
         Padding(
           padding: const EdgeInsets.only(top: 12),
-          child: Text(
-            _error!,
-            style: TextStyle(color: Theme.of(context).colorScheme.error),
-          ),
+          child: Text(_error!, style: TextStyle(color: context.cc.error)),
         ),
       if (_remoteName != null) ...[
         const SizedBox(height: 16),
@@ -251,7 +249,7 @@ class _ReceiveTabState extends ConsumerState<ReceiveTab> {
     ];
     final shown = _remoteName == null ? 0 : _tracks.length;
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(CcDims.margin),
       itemCount: head.length + shown + foot.length,
       itemBuilder: (_, i) {
         if (i < head.length) return head[i];

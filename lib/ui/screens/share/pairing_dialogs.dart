@@ -10,19 +10,33 @@ import '../../../services/share/discovery.dart';
 import '../../../services/share/pairing.dart';
 import '../../../services/share/pairing_client.dart';
 import '../../../services/share/trusted_devices.dart';
+import '../../theme/tokens.dart';
 
 /// The PIN typed on the device that asked to pair (the one that does not show
 /// it). Returns the digits, or null to give up.
-Future<String?> askPairingPin(BuildContext context, String peerName, String peerFingerprint, int? attemptsLeft) {
+Future<String?> askPairingPin(
+  BuildContext context,
+  String peerName,
+  String peerFingerprint,
+  int? attemptsLeft,
+) {
   return showDialog<String>(
     context: context,
     barrierDismissible: false,
-    builder: (_) => _PinDialog(name: peerName, fingerprint: peerFingerprint, attemptsLeft: attemptsLeft),
+    builder: (_) => _PinDialog(
+      name: peerName,
+      fingerprint: peerFingerprint,
+      attemptsLeft: attemptsLeft,
+    ),
   );
 }
 
 class _PinDialog extends StatefulWidget {
-  const _PinDialog({required this.name, required this.fingerprint, this.attemptsLeft});
+  const _PinDialog({
+    required this.name,
+    required this.fingerprint,
+    this.attemptsLeft,
+  });
 
   final String name, fingerprint;
   final int? attemptsLeft;
@@ -52,7 +66,10 @@ class _PinDialogState extends State<_PinDialog> {
           Text(l.pairPinHint(widget.name)),
           if (widget.attemptsLeft != null) ...[
             const SizedBox(height: 8),
-            Text(l.pairPinWrong(widget.attemptsLeft!), style: TextStyle(color: Theme.of(context).colorScheme.error)),
+            Text(
+              l.pairPinWrong(widget.attemptsLeft!),
+              style: TextStyle(color: context.cc.error),
+            ),
           ],
           const SizedBox(height: 12),
           TextField(
@@ -64,14 +81,22 @@ class _PinDialogState extends State<_PinDialog> {
             style: Theme.of(context).textTheme.headlineSmall,
             onChanged: (_) => setState(() {}),
           ),
-          Text(l.pairFingerprint(formatFingerprint(widget.fingerprint)), style: Theme.of(context).textTheme.bodySmall),
+          Text(
+            l.pairFingerprint(formatFingerprint(widget.fingerprint)),
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
           Text(l.pairCompare, style: Theme.of(context).textTheme.bodySmall),
         ],
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(context), child: Text(l.cancel)),
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(l.cancel),
+        ),
         FilledButton(
-          onPressed: _pin.text.length == 6 ? () => Navigator.pop(context, _pin.text) : null,
+          onPressed: _pin.text.length == 6
+              ? () => Navigator.pop(context, _pin.text)
+              : null,
           child: Text(l.pairConfirm),
         ),
       ],
@@ -100,7 +125,10 @@ class _PairRequestDialogState extends ConsumerState<PairRequestDialog> {
     _poll = Timer.periodic(const Duration(milliseconds: 500), (_) {
       if (!mounted) return;
       final st = widget.request.state;
-      if (st == PairState.expired || st == PairState.blocked || st == PairState.rejected || st == PairState.accepted) {
+      if (st == PairState.expired ||
+          st == PairState.blocked ||
+          st == PairState.rejected ||
+          st == PairState.accepted) {
         Navigator.of(context).maybePop();
         return;
       }
@@ -128,10 +156,17 @@ class _PairRequestDialogState extends ConsumerState<PairRequestDialog> {
           Text(l.pairRequestBody),
           const SizedBox(height: 12),
           Center(
-            child: Text(r.pin, style: Theme.of(context).textTheme.displaySmall?.copyWith(letterSpacing: 6)),
+            child: Text(
+              r.pin,
+              style: Theme.of(context).textTheme.displaySmall
+                  ?.copyWith(letterSpacing: 6),
+            ),
           ),
           const SizedBox(height: 12),
-          Text(l.pairFingerprint(formatFingerprint(r.fingerprint)), style: Theme.of(context).textTheme.bodySmall),
+          Text(
+            l.pairFingerprint(formatFingerprint(r.fingerprint)),
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
           Text(l.pairCompare, style: Theme.of(context).textTheme.bodySmall),
         ],
       ),
@@ -163,7 +198,9 @@ Future<void> pairFlow(BuildContext context, WidgetRef ref, Peer peer) async {
   final messenger = ScaffoldMessenger.of(context);
   String msg;
   try {
-    final paired = await ref.read(shareHubProvider.notifier).pairWith(
+    final paired = await ref
+        .read(shareHubProvider.notifier)
+        .pairWith(
           peer,
           (fp, left) => askPairingPin(context, peer.name, fp, left),
         );

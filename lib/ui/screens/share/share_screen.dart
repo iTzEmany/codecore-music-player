@@ -57,7 +57,12 @@ class _ShareScreenState extends ConsumerState<ShareScreen> {
             if (Platform.isWindows)
               Container(
                 width: double.infinity,
-                margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                margin: const EdgeInsets.fromLTRB(
+                  CcDims.margin,
+                  8,
+                  CcDims.margin,
+                  0,
+                ),
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: context.cc.surface1,
@@ -75,11 +80,16 @@ class _ShareScreenState extends ConsumerState<ShareScreen> {
                 ),
               ),
             Expanded(
-              child: TabBarView(
-                children: [
-                  SendTab(initialTrackIds: widget.initialTrackIds),
-                  const ReceiveTab(),
-                ],
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 960),
+                  child: TabBarView(
+                    children: [
+                      SendTab(initialTrackIds: widget.initialTrackIds),
+                      const ReceiveTab(),
+                    ],
+                  ),
+                ),
               ),
             ),
           ],

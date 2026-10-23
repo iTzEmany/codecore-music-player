@@ -11,6 +11,8 @@ import '../../../providers/share_hub.dart';
 import '../../../providers/share_providers.dart';
 import '../../../services/share/discovery.dart';
 import '../../../services/share/lan_server.dart';
+import '../../theme/tokens.dart';
+import '../../widgets/segmented_blocks.dart';
 import '../jam/jam_screen.dart';
 import '../../../providers/jam_providers.dart';
 import '../devices/peer_card.dart';
@@ -117,21 +119,23 @@ class _SendTabState extends ConsumerState<SendTab> {
     final hub = ref.watch(shareHubProvider);
     final all = _ids == null;
     return ListView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(CcDims.margin),
       children: [
-        RadioGroup<bool>(
-          groupValue: all,
-          onChanged: (v) =>
-              setState(() => _ids = v == true ? null : (_ids ?? {})),
-          child: Column(
-            children: [
-              RadioListTile<bool>(value: true, title: Text(l.shareAll)),
-              RadioListTile<bool>(
-                value: false,
-                title: Text(l.shareSelection(_ids?.length ?? 0)),
-              ),
-            ],
-          ),
+        SegmentedBlocks<bool>(
+          selected: all,
+          onChanged: (v) => setState(() => _ids = v ? null : (_ids ?? {})),
+          items: [
+            BlockItem(
+              value: true,
+              icon: Icons.library_music_rounded,
+              label: l.shareAll,
+            ),
+            BlockItem(
+              value: false,
+              icon: Icons.checklist_rounded,
+              label: l.shareSelection(_ids?.length ?? 0),
+            ),
+          ],
         ),
         if (!all)
           Align(
@@ -140,15 +144,21 @@ class _SendTabState extends ConsumerState<SendTab> {
           ),
         const SizedBox(height: 16),
         if (ref.watch(jamProvider).active)
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.queue_music),
-              title: Text(l.jamPlaying),
-              trailing: TextButton(
-                onPressed: () => Navigator.of(context).push(
-                  MaterialPageRoute<void>(builder: (_) => const JamScreen()),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: Material(
+              color: context.cc.surface1,
+              borderRadius: BorderRadius.circular(CcDims.rCard),
+              clipBehavior: Clip.antiAlias,
+              child: ListTile(
+                leading: const Icon(Icons.queue_music),
+                title: Text(l.jamPlaying),
+                trailing: TextButton(
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(builder: (_) => const JamScreen()),
+                  ),
+                  child: Text(l.jamOpen),
                 ),
-                child: Text(l.jamOpen),
               ),
             ),
           ),
@@ -174,7 +184,9 @@ class _SendTabState extends ConsumerState<SendTab> {
             onSend: () => _sendTo(peer),
             onJam: () => _startJam(peer),
             trusted: ref.watch(trustedDevicesProvider).byId(peer.id) != null,
-            onPair: peer.tlsPort != null && ref.watch(trustedDevicesProvider).byId(peer.id) == null
+            onPair:
+                peer.tlsPort != null &&
+                    ref.watch(trustedDevicesProvider).byId(peer.id) == null
                 ? () => pairFlow(context, ref, peer)
                 : null,
           ),
@@ -224,9 +236,7 @@ class _SendTabState extends ConsumerState<SendTab> {
                   padding: const EdgeInsets.only(top: 12),
                   child: Text(
                     l.shareNoNetwork,
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.error,
-                    ),
+                    style: TextStyle(color: context.cc.error),
                   ),
                 ),
             ],
@@ -252,6 +262,7 @@ class _Active extends StatelessWidget {
         Text(l.shareActive, style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 12),
         Container(
+          // A QR needs a light quiet zone in every theme.
           color: Colors.white,
           padding: const EdgeInsets.all(8),
           child: QrImageView(data: url, size: 180),
