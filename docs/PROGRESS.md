@@ -480,13 +480,13 @@ Richiesta (2026-10-22): «Secondo parere automatico: applica solo se YouTube Mus
 ## Fase 36 — Deezer per i metadati, Exportify semi-automatico (`fase-36-deezer-ed-exportify.md`)
 Richiesta (2026-10-23): «scrivi il documento di fase con Deezer ed Exportify semi-automatico», come miglioramento di arricchimento (5/6), importazione e sincronizzazione (12/15) e secondo parere (35), non come funzioni nuove. Scelte concordate: Deezer solo per i metadati, per ISRC prima che per testo, opzione spenta di default; niente credenziali né cookie di Spotify: l'utente esporta da exportify.net, Codecore prende lo ZIP. Fuori da questa fase: pagina artista, nuove uscite e Casuale+ con Deezer (servono gli id di YouTube per suonare).
 Redesign Anello delle schermate rimaste (analisi del 2026-10-23 in `docs/audit-ui-anello.md`, un passo per pacchetto, prima di 36.1):
-- [ ] 36.R1 Impostazioni: schermate (pagine, editor del tema e dello sfondo, equalizzatore, segnala un problema, brani mancanti)
+- [x] 36.R1 Impostazioni: schermate (pagine, editor del tema e dello sfondo, equalizzatore, segnala un problema, brani mancanti) — scelte a blocchi, stati vuoti della casa, golden rigenerati (d06d5e1)
 - [ ] 36.R2 Impostazioni: righe e piccole finestre (scelte singole a blocchi, niente RadioListTile)
 - [x] 36.R3 Condividi e dispositivi (invia, ricevi, scelta brani, QR, abbinamento, offerte, sincronizzazione) — blocchi e token della casa; dialoghi e AppBar con schede restano (spec), QR su bianco voluto (1321599)
-- [ ] 36.R4 Online, YouTube e nuove uscite (cornice delle pagine online, album, righe, sezioni dei risultati, fogli)
+- [x] 36.R4 Online, YouTube e nuove uscite (cornice delle pagine online, album, righe, sezioni dei risultati, fogli) — 960, filtro a blocchi, stati della casa; chip artisti (multipli) e AppBar restano (fad5e8b)
 - [ ] 36.R5 Radio e Importazione
 - [x] 36.R6 Pulizia, tag, podcast, cronologia, attività — pagine a 960, stati vuoti e di errore della casa, podcast su CollectionScaffold, eliminazione automatica a blocchi (265e97e)
-- [ ] 36.R7 Jam (uscite), testi, auto, finestre di brano e arricchimento
+- [x] 36.R7 Jam (uscite), testi, auto, finestre di brano e arricchimento — foglio auto CcSheet, token e caricamenti lineari; chip uscite (scelta multipla) e AppBar del brano restano (4bf3e9b)
 - [x] 36.R8 Statistiche, Memoria, dettagli della libreria, playlist, playlist intelligenti — pagine interne a 960, formato export a blocchi, intestazione cartelle (d68bdf1)
 - [~] 36.1 Verifiche preliminari e fixture (con «Export All» vero fatto dall'utente) — fixture Deezer e MusicBrainz (5fdc82e); ISRC letto da mp3 (TSRC) e flac/ogg, non da m4a; manca «Export All» dell'utente
 - [ ] 36.2 Schema v14 e ISRC in libreria
