@@ -1,0 +1,20 @@
+{
+ "id": 7163299,
+ "title": "Imagine (Remastered 2010)",
+ "title_short": "Imagine",
+ "isrc": "GBAYE1000769",
+ "duration": 184,
+ "track_position": 1,
+ "disk_number": 2,
+ "release_date": "2010-10-01",
+ "artist": {
+  "id": 226,
+  "name": "John Lennon"
+ },
+ "album": {
+  "id": 660832,
+  "title": "Signature Box",
+  "cover_xl": "https://cdn-images.dzcdn.net/images/cover/7c89db5249da1843f557174df2df1006/1000x1000-000000-80-0-0.jpg",
+  "release_date": "2010-01-01"
+ }
+}

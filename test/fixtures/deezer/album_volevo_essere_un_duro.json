@@ -1,0 +1,25 @@
+{
+ "id": 730631321,
+ "title": "Volevo essere un duro",
+ "upc": "8059482265379",
+ "cover_xl": "https://cdn-images.dzcdn.net/images/cover/33f7e5e138e57db20bc4246ca7f0bd4b/1000x1000-000000-80-0-0.jpg",
+ "genres": {
+  "data": [
+   {
+    "id": 132,
+    "name": "Pop",
+    "picture": "https://api.deezer.com/genre/132/image",
+    "type": "genre"
+   }
+  ]
+ },
+ "label": "Universal Music Italia srL. (Sugar)",
+ "nb_tracks": 9,
+ "duration": 1874,
+ "release_date": "2025-03-20",
+ "record_type": "album",
+ "artist": {
+  "id": 5790178,
+  "name": "Lucio Corsi"
+ }
+}

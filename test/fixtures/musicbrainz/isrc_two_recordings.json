@@ -1,0 +1,53 @@
+{
+ "recordings": [
+  {
+   "artist-credit": [
+    {
+     "artist": {
+      "sort-name": "Lennon, John",
+      "name": "John Lennon",
+      "type-id": "b6e035f4-3ce9-331c-97df-83397230b0df",
+      "disambiguation": "The Beatles",
+      "type": "Person",
+      "country": "GB",
+      "id": "4d5447d7-c61c-4120-ba1b-d7f471d385b9"
+     },
+     "joinphrase": "",
+     "name": "John Lennon"
+    }
+   ],
+   "first-release-date": "1971-09-09",
+   "length": 184000,
+   "video": false,
+   "title": "Imagine",
+   "id": "ec04e3c5-0548-4e73-bfc3-19a26108f302",
+   "disambiguation": "original studio mix",
+   "releases": []
+  },
+  {
+   "video": false,
+   "length": 187866,
+   "first-release-date": "2025-10-01",
+   "artist-credit": [
+    {
+     "joinphrase": "",
+     "artist": {
+      "sort-name": "Lennon, John",
+      "name": "John Lennon",
+      "type-id": "b6e035f4-3ce9-331c-97df-83397230b0df",
+      "type": "Person",
+      "disambiguation": "The Beatles",
+      "id": "4d5447d7-c61c-4120-ba1b-d7f471d385b9",
+      "country": "GB"
+     },
+     "name": "John Lennon"
+    }
+   ],
+   "disambiguation": "",
+   "id": "d583f8f4-34bc-4f68-a72e-0a766382b96a",
+   "title": "Imagine (Remastered 2010)",
+   "releases": []
+  }
+ ],
+ "isrc": "GBAYE1000769"
+}

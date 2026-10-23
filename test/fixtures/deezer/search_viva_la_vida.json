@@ -1,0 +1,165 @@
+{
+ "data": [
+  {
+   "id": 56646351,
+   "title": "Coldplay - Viva La Vida (Instrumental Version)",
+   "title_short": "Coldplay - Viva La Vida (Instrumental Version)",
+   "isrc": "USA561212596",
+   "duration": 223,
+   "artist": {
+    "id": 3076211,
+    "name": "Party Machine"
+   },
+   "album": {
+    "id": 5531271,
+    "title": "2012 Party Songs",
+    "cover_xl": "https://cdn-images.dzcdn.net/images/cover/4f22a956c22207674d303ea302294e6e/1000x1000-000000-80-0-0.jpg"
+   }
+  },
+  {
+   "id": 62031186,
+   "title": "Viva La Vida (Live)",
+   "title_short": "Viva La Vida",
+   "isrc": "GBAYE1202187",
+   "duration": 298,
+   "artist": {
+    "id": 892,
+    "name": "Coldplay"
+   },
+   "album": {
+    "id": 6082458,
+    "title": "Live 2012",
+    "cover_xl": "https://cdn-images.dzcdn.net/images/cover/eb56003f4c40510f1de1920a2ebc6efb/1000x1000-000000-80-0-0.jpg"
+   }
+  },
+  {
+   "id": 114685478,
+   "title": "Coldplay - Viva LA Vida (String Quartet)",
+   "title_short": "Coldplay - Viva LA Vida",
+   "isrc": "US25T1010242",
+   "duration": 32,
+   "artist": {
+    "id": 9446042,
+    "name": "CMH Label Group"
+   },
+   "album": {
+    "id": 11882708,
+    "title": "CMH Label Group Reinterpreted - Ringtones",
+    "cover_xl": "https://cdn-images.dzcdn.net/images/cover/d41d8cd98f00b204e9800998ecf8427e/1000x1000-000000-80-0-0.jpg"
+   }
+  },
+  {
+   "id": 599314402,
+   "title": "Viva La Vida (Live in Buenos Aires)",
+   "title_short": "Viva La Vida",
+   "isrc": "GBAYE1800793",
+   "duration": 251,
+   "artist": {
+    "id": 892,
+    "name": "Coldplay"
+   },
+   "album": {
+    "id": 80900852,
+    "title": "Live in Buenos Aires",
+    "cover_xl": "https://cdn-images.dzcdn.net/images/cover/1bc81da3e04b66ccc4faa35fa3c2e74f/1000x1000-000000-80-0-0.jpg"
+   }
+  },
+  {
+   "id": 1455370342,
+   "title": "Viva La Vida (Live in Paris, 2008)",
+   "title_short": "Viva La Vida",
+   "isrc": "GBAYE0901112",
+   "duration": 324,
+   "artist": {
+    "id": 892,
+    "name": "Coldplay"
+   },
+   "album": {
+    "id": 249503962,
+    "title": "LeftRightLeftRightLeft (Live)",
+    "cover_xl": "https://cdn-images.dzcdn.net/images/cover/36e73cb56b39b8485a8ae24d2c603929/1000x1000-000000-80-0-0.jpg"
+   }
+  },
+  {
+   "id": 3160069,
+   "title": "Yes",
+   "title_short": "Yes",
+   "isrc": "GBAYE0800257",
+   "duration": 426,
+   "artist": {
+    "id": 892,
+    "name": "Coldplay"
+   },
+   "album": {
+    "id": 303743,
+    "title": "Viva La Vida (Prospekt's March Edition)",
+    "cover_xl": "https://cdn-images.dzcdn.net/images/cover/eede3cd0dc3a5a87c7a5b1085b022e2d/1000x1000-000000-80-0-0.jpg"
+   }
+  },
+  {
+   "id": 3160066,
+   "title": "Lost!",
+   "title_short": "Lost!",
+   "isrc": "GBAYE0800255",
+   "duration": 235,
+   "artist": {
+    "id": 892,
+    "name": "Coldplay"
+   },
+   "album": {
+    "id": 303743,
+    "title": "Viva La Vida (Prospekt's March Edition)",
+    "cover_xl": "https://cdn-images.dzcdn.net/images/cover/eede3cd0dc3a5a87c7a5b1085b022e2d/1000x1000-000000-80-0-0.jpg"
+   }
+  },
+  {
+   "id": 3160067,
+   "title": "42",
+   "title_short": "42",
+   "isrc": "GBAYE0800259",
+   "duration": 237,
+   "artist": {
+    "id": 892,
+    "name": "Coldplay"
+   },
+   "album": {
+    "id": 303743,
+    "title": "Viva La Vida (Prospekt's March Edition)",
+    "cover_xl": "https://cdn-images.dzcdn.net/images/cover/eede3cd0dc3a5a87c7a5b1085b022e2d/1000x1000-000000-80-0-0.jpg"
+   }
+  },
+  {
+   "id": 13444568,
+   "title": "Glass of Water",
+   "title_short": "Glass of Water",
+   "isrc": "GBAYE0800410",
+   "duration": 284,
+   "artist": {
+    "id": 892,
+    "name": "Coldplay"
+   },
+   "album": {
+    "id": 1231799,
+    "title": "Viva La Vida (Prospekt's March Edition)",
+    "cover_xl": "https://cdn-images.dzcdn.net/images/cover/eede3cd0dc3a5a87c7a5b1085b022e2d/1000x1000-000000-80-0-0.jpg"
+   }
+  },
+  {
+   "id": 3160065,
+   "title": "Cemeteries of London",
+   "title_short": "Cemeteries of London",
+   "isrc": "GBAYE0800254",
+   "duration": 201,
+   "artist": {
+    "id": 892,
+    "name": "Coldplay"
+   },
+   "album": {
+    "id": 303743,
+    "title": "Viva La Vida (Prospekt's March Edition)",
+    "cover_xl": "https://cdn-images.dzcdn.net/images/cover/eede3cd0dc3a5a87c7a5b1085b022e2d/1000x1000-000000-80-0-0.jpg"
+   }
+  }
+ ],
+ "total": 96
+}

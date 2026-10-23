@@ -1,0 +1,53 @@
+{
+ "data": [
+  {
+   "id": 13444256,
+   "title": "Viva La Vida",
+   "title_short": "Viva La Vida",
+   "isrc": "GBAYE0800265",
+   "duration": 242,
+   "artist": {
+    "id": 892,
+    "name": "Coldplay"
+   },
+   "album": {
+    "id": 1231767,
+    "title": "Viva La Vida or Death and All His Friends",
+    "cover_xl": "https://cdn-images.dzcdn.net/images/cover/eede3cd0dc3a5a87c7a5b1085b022e2d/1000x1000-000000-80-0-0.jpg"
+   }
+  },
+  {
+   "id": 13444259,
+   "title": "Death and All His Friends",
+   "title_short": "Death and All His Friends",
+   "isrc": "GBAYE0800261",
+   "duration": 378,
+   "artist": {
+    "id": 892,
+    "name": "Coldplay"
+   },
+   "album": {
+    "id": 1231767,
+    "title": "Viva La Vida or Death and All His Friends",
+    "cover_xl": "https://cdn-images.dzcdn.net/images/cover/eede3cd0dc3a5a87c7a5b1085b022e2d/1000x1000-000000-80-0-0.jpg"
+   }
+  },
+  {
+   "id": 12285739,
+   "title": "Viva la Vida - Coldplay (Viva la Vida or Death and All His Friends)(Instrumental)",
+   "title_short": "Viva la Vida - Coldplay (Viva la Vida or Death and All His Friends)(Instrumental)",
+   "isrc": "USA371300829",
+   "duration": 224,
+   "artist": {
+    "id": 1223855,
+    "name": "DJ ReDo"
+   },
+   "album": {
+    "id": 1128843,
+    "title": "Viva la Vida (Viva La Vida or Death and All His Friends)(Instrumental)",
+    "cover_xl": "https://cdn-images.dzcdn.net/images/cover/90f3459a16d4b4ee6d15df2973ba6afd/1000x1000-000000-80-0-0.jpg"
+   }
+  }
+ ],
+ "total": 3
+}

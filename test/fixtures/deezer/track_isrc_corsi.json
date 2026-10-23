@@ -1,0 +1,20 @@
+{
+ "id": 3288054591,
+ "title": "Sigarette",
+ "title_short": "Sigarette",
+ "isrc": "ITZ042500021",
+ "duration": 179,
+ "track_position": 2,
+ "disk_number": 1,
+ "release_date": "2025-03-20",
+ "artist": {
+  "id": 5790178,
+  "name": "Lucio Corsi"
+ },
+ "album": {
+  "id": 730631321,
+  "title": "Volevo essere un duro",
+  "cover_xl": "https://cdn-images.dzcdn.net/images/cover/33f7e5e138e57db20bc4246ca7f0bd4b/1000x1000-000000-80-0-0.jpg",
+  "release_date": "2025-03-20"
+ }
+}

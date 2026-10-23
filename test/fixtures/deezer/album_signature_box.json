@@ -1,0 +1,25 @@
+{
+ "id": 660832,
+ "title": "Signature Box",
+ "upc": "5099991773456",
+ "cover_xl": "https://cdn-images.dzcdn.net/images/cover/7c89db5249da1843f557174df2df1006/1000x1000-000000-80-0-0.jpg",
+ "genres": {
+  "data": [
+   {
+    "id": 152,
+    "name": "Rock",
+    "picture": "https://api.deezer.com/genre/152/image",
+    "type": "genre"
+   }
+  ]
+ },
+ "label": "EMI Catalogue",
+ "nb_tracks": 119,
+ "duration": 5676,
+ "release_date": "2010-10-01",
+ "record_type": "album",
+ "artist": {
+  "id": 226,
+  "name": "John Lennon"
+ }
+}
