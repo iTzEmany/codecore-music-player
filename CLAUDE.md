@@ -37,6 +37,7 @@ flutter build linux / windows   # windows solo da una macchina Windows
   quanto scritto nei documenti, leggi il suo sorgente in `~/.pub-cache` e adatta.
 - Nessun `catch (_) {}` muto: logga con `AppLog`.
 - Nessun lavoro pesante (I/O, DB lungo, rete) nel thread UI.
+- Git: si lavora sempre in un ramo da `origin/master` e si entra con una PR in auto-merge (squash), mai con commit diretti su `master`. `master` è protetto e richiede il check «Analyze and test». `/obiettivo` lavora in modalità PR.
 - Non toccare file fuori dalla cartella del progetto (la radice del repo, `codecore-music-player/`). Mai modificare la vecchia app Python.
 
 ## Modalità autonoma
