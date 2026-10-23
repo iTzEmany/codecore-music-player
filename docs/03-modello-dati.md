@@ -198,3 +198,21 @@ Le vecchie impostazioni finte (crossfade, gapless, normalizzazione, "bit-perfect
 - Scritture: la scansione (tag TSRC mp3, commento ISRC flac/ogg; m4a non letto) e il collegamento di una riga
   d'importazione (`ImportRepository.setItem` con `trackId`) scrivono l'ISRC solo se quello del brano è vuoto: mai sovrascritto.
 - I file già in libreria ricevono l'ISRC dai tag solo quando lo scanner li rilegge (dimensione/mtime cambiati): nessuna riscansione forzata, per evitare una rilettura completa sui telefoni; l'arricchimento Deezer ripiega sulla ricerca testuale.
+
+## Blocco `meta` dei brani condivisi (fase 37)
+Oggetto JSON facoltativo nel manifesto di condivisione (`RemoteTrack.meta`, `TrackMeta.toJson`); solo i campi non nulli.
+Il ricevente valida ogni campo da solo (`TrackMeta.tryParse`): un campo fuori regola diventa null.
+
+| Campo | Tipo | Regola |
+|---|---|---|
+| `title`, `artist`, `albumArtist`, `album` | string | tagliati a 200 caratteri |
+| `genre` | string | tagliato a 100 |
+| `year` | int | 1000 – anno corrente + 1 |
+| `trackNumber`, `discNumber` | int | 1 – 999 |
+| `isrc` | string | maiuscolo, `^[A-Z]{2}[A-Z0-9]{3}\d{7}$` |
+| `lyricsPlain` | string | ≤ 20 000 caratteri, altrimenti scartato |
+| `lyricsSynced` | string | ≤ 40 000 e LRC leggibile (`parseLrc` non vuoto) |
+| `enrichStatus` | int | 0 – 2; il ricevente non lo applica |
+| `youtubeId` | string | 11 caratteri `[A-Za-z0-9_-]` (oggi sempre assente: nessuna colonna) |
+
+La copertina non è nel blocco: si scarica a parte (`downloadCover`). Un'app senza la fase 37 ignora il campo.
