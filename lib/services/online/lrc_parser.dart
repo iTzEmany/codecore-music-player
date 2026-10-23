@@ -15,7 +15,8 @@ List<LrcLine> parseLrc(String raw) {
     final trimmed = line.trim();
     final off = _offsetTag.firstMatch(trimmed);
     if (off != null) {
-      offsetMs = int.parse(off.group(1)!);
+      // A huge offset from a shared file must not throw.
+      offsetMs = int.tryParse(off.group(1)!) ?? 0;
       continue;
     }
     final stamps = _stamp.allMatches(trimmed).toList();
