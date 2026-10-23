@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -12,12 +14,17 @@ import '../core/app_log.dart';
 import '../services/online/musicbrainz_client.dart';
 import '../services/online/youtube_service.dart' show YtException, YtErrorKind;
 import '../services/online/quiet_enricher.dart';
+import '../services/library/download_tagger.dart';
+import '../services/library/track_file_sync.dart';
+import '../services/tags/tag_writer.dart';
 import '../services/online/wikipedia_client.dart';
 import '../services/online/ytm_artist_resolver.dart';
 import 'ytm_catalog_providers.dart';
 import 'database_providers.dart';
 import 'library_providers.dart';
 import 'settings_providers.dart';
+import 'player_providers.dart';
+import 'youtube_providers.dart' show resolveDownloadFolder;
 
 final webClientProvider = Provider<WebClient>((ref) => DioWebClient());
 
@@ -170,6 +177,7 @@ final enrichJobProvider = NotifierProvider<EnrichJobNotifier, EnrichJobState>(
 /// own «Arricchisci»).
 final downloadEnricherProvider = Provider<QuietEnricher>((ref) {
   final enricher = QuietEnricher(
+    onDone: (id) => ref.read(downloadTaggerProvider).tag(id),
     enabled: () {
       final s = ref.read(settingsProvider);
       return s.autoEnrich || s.autoLyrics;
@@ -192,3 +200,45 @@ final enrichingTracksProvider = StreamProvider<Set<int>>((ref) async* {
   yield enricher.pending;
   yield* enricher.changes;
 });
+
+/// Writes the tags of files Codecore downloaded or received into them.
+/// Call `tag(trackId)` once the row has its final tags (also after a receive).
+final downloadTaggerProvider = Provider<DownloadTagger>((ref) {
+  final db = ref.watch(databaseProvider);
+  final tracks = ref.watch(trackRepositoryProvider);
+  final covers = ref.watch(coverStoreProvider);
+  final handler = ref.watch(audioHandlerProvider);
+  final tagger = DownloadTagger(
+    trackById: tracks.getById,
+    sync: TrackFileSync(db, () => ref.read(safeTagWriterProvider.future)),
+    reader: ref.watch(tagReaderProvider),
+    downloadRoot: () async =>
+        (await resolveDownloadFolder(ref.read(folderRepositoryProvider)))?.$1.path,
+    enabled: () => ref.read(settingsProvider).writeTagsAfterDownload,
+    coverOf: (t) async {
+      final f = t.coverKey == null ? null : covers.fileFor(t.coverKey!);
+      if (f == null) return null;
+      final png = f.path.toLowerCase().endsWith('.png');
+      return TagCover(await f.readAsBytes(), png ? 'image/png' : 'image/jpeg');
+    },
+    playingPath: () => handler.currentTrack?.path,
+    playingChanges: handler.currentTrackStream.map((t) => t?.path),
+  );
+  ref.onDispose(tagger.dispose);
+  return tagger;
+});
+
+/// A downloaded song is ready: enrich it (tags are written when that ends), or
+/// write its tags now when enrichment is off.
+void afterDownload(Ref ref, int trackId) {
+  try {
+    final s = ref.read(settingsProvider);
+    if (s.autoEnrich || s.autoLyrics) {
+      ref.read(downloadEnricherProvider).add(trackId);
+    } else {
+      unawaited(ref.read(downloadTaggerProvider).tag(trackId));
+    }
+  } on Object catch (e, st) {
+    AppLog.w('afterDownload failed for track $trackId', e, st);
+  }
+}

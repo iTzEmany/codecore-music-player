@@ -2221,6 +2221,8 @@
   "ownFingerprintHint": "Compárala con la que aparece en la otra pantalla al emparejar.",
   "writeTagsToFiles": "Escribir los cambios en los archivos",
   "writeTagsToFilesHint": "El título, artista, álbum, año, género y pista editados aquí se escriben también en archivos MP3, FLAC, M4A y OGG. Se conserva el original de cada archivo. Desactivado de serie.",
+  "writeTagsAfterDownload": "Escribir las etiquetas en los archivos descargados",
+  "writeTagsAfterDownloadHint": "Solo en los archivos que Codecore ha descargado o recibido. El ISRC se queda en la app.",
   "writeTagsWarnTitle": "¿Escribir los cambios en los archivos?",
   "writeTagsWarnBody": "Al guardar un cambio, las etiquetas se reescriben también en el archivo de música (MP3, FLAC, M4A, OGG). Se trabaja sobre una copia, se comprueba el resultado y el archivo se sustituye solo si todo coincide; antes el original se guarda en «Copias de etiquetas» (las últimas 200 o 2 GB). La carátula, las letras y el ReplayGain no se tocan. Antes de activarlo conviene hacer una copia de seguridad de la biblioteca (Ajustes, Copia de seguridad).",
   "writeTagsEnable": "Activar",

@@ -108,4 +108,48 @@ void main() {
       expect(File(song).readAsBytesSync(), bytesBefore);
     });
   }
+
+  // Files without a cover, as downloads are: disc number + cover go in once.
+  for (final fixture in ['original.m4a', 'sample.mp3']) {
+    test('$fixture: disc and cover are written once, a second pass adds no picture', () async {
+      if (skip != null) {
+        markTestSkipped(skip!);
+        return;
+      }
+      final song = p.join(root.path, fixture);
+      File('test/fixtures/$fixture').copySync(song);
+      const reader = AudioMetadataTagReader();
+      final before = await reader.read(song);
+      if (before.coverBytes?.isNotEmpty ?? false) {
+        markTestSkipped('fixture already has a cover');
+        return;
+      }
+      final safe = SafeTagWriter(
+        writer: writer,
+        reader: reader,
+        workDir: Directory(p.join(root.path, 'work')),
+        backups: TagBackupStore(Directory(p.join(root.path, 'bk'))),
+      );
+      // A minimal JPEG: SOI, JFIF header, EOI.
+      final jpeg = [
+        0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10, 0x4A, 0x46, 0x49, 0x46, 0x00, 0x01,
+        0x01, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0xFF, 0xD9,
+      ];
+      await safe.write(
+        song,
+        TagChanges(discNumber: 2, cover: TagCover(jpeg, 'image/jpeg')),
+        backup: false,
+      );
+      final once = await reader.read(song);
+      expect(once.discNumber, 2);
+      expect(once.coverBytes, isNotEmpty);
+      expect(once.durationMs, closeTo(before.durationMs!, 100));
+
+      // The tagger sees a cover now and passes none: the picture count stays.
+      await safe.write(song, const TagChanges(discNumber: 2), backup: false);
+      final twice = await reader.read(song);
+      expect(twice.coverBytes!.length, once.coverBytes!.length);
+      expect(Directory(p.join(root.path, 'bk')).existsSync(), isFalse);
+    });
+  }
 }

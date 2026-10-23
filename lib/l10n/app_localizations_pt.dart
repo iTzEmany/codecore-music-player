@@ -3966,6 +3966,14 @@ class AppLocalizationsPt extends AppLocalizations {
       'O título, artista, álbum, ano, género e faixa editados aqui são também gravados nos ficheiros MP3, FLAC, M4A e OGG. O original de cada ficheiro é guardado. Desligado por defeito.';
 
   @override
+  String get writeTagsAfterDownload =>
+      'Gravar as etiquetas nos ficheiros descarregados';
+
+  @override
+  String get writeTagsAfterDownloadHint =>
+      'Apenas nos ficheiros que o Codecore descarregou ou recebeu. O ISRC fica na aplicação.';
+
+  @override
   String get writeTagsWarnTitle => 'Gravar as alterações nos ficheiros?';
 
   @override

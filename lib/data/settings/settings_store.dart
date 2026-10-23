@@ -60,6 +60,7 @@ class AppSettings {
     this.crossfadePlainInAlbum = true,
     this.writeTagsToFiles = false,
     this.tagsAlsoInFile = true,
+    this.writeTagsAfterDownload = true,
     this.shufflePlus = false,
     this.shufflePlusEvery = 4,
     this.shufflePlusUnmeteredOnly = true,
@@ -153,6 +154,9 @@ class AppSettings {
   /// With [writeTagsToFiles] on: the last answer to «also in the file?».
   final bool tagsAlsoInFile;
 
+  /// Tags of files Codecore downloaded or received are written into them.
+  final bool writeTagsAfterDownload;
+
   /// Shown to the device on the other side of a LAN share; null = hostname.
   final String? deviceName;
 
@@ -194,6 +198,7 @@ class AppSettings {
     bool? crossfadePlainInAlbum,
     bool? writeTagsToFiles,
     bool? tagsAlsoInFile,
+    bool? writeTagsAfterDownload,
     bool? shufflePlus,
     int? shufflePlusEvery,
     bool? shufflePlusUnmeteredOnly,
@@ -240,6 +245,7 @@ class AppSettings {
             crossfadePlainInAlbum ?? this.crossfadePlainInAlbum,
         writeTagsToFiles: writeTagsToFiles ?? this.writeTagsToFiles,
         tagsAlsoInFile: tagsAlsoInFile ?? this.tagsAlsoInFile,
+        writeTagsAfterDownload: writeTagsAfterDownload ?? this.writeTagsAfterDownload,
         shufflePlus: shufflePlus ?? this.shufflePlus,
         shufflePlusEvery: shufflePlusEvery ?? this.shufflePlusEvery,
         shufflePlusUnmeteredOnly:
@@ -321,6 +327,7 @@ class SettingsStore {
         crossfadePlainInAlbum: _prefs.getBool('crossfadePlainInAlbum') ?? true,
         writeTagsToFiles: _prefs.getBool('writeTagsToFiles') ?? false,
         tagsAlsoInFile: _prefs.getBool('tagsAlsoInFile') ?? true,
+        writeTagsAfterDownload: _prefs.getBool('writeTagsAfterDownload') ?? true,
         shufflePlus: _prefs.getBool('shufflePlus') ?? false,
         shufflePlusEvery: (_prefs.getInt('shufflePlusEvery') ?? 4).clamp(3, 10),
         shufflePlusUnmeteredOnly: _prefs.getBool('shufflePlusUnmeteredOnly') ?? true,
@@ -385,6 +392,7 @@ class SettingsStore {
     await _prefs.setBool('crossfadePlainInAlbum', s.crossfadePlainInAlbum);
     await _prefs.setBool('writeTagsToFiles', s.writeTagsToFiles);
     await _prefs.setBool('tagsAlsoInFile', s.tagsAlsoInFile);
+    await _prefs.setBool('writeTagsAfterDownload', s.writeTagsAfterDownload);
     await _prefs.setBool('shufflePlus', s.shufflePlus);
     await _prefs.setInt('shufflePlusEvery', s.shufflePlusEvery);
     await _prefs.setBool('shufflePlusUnmeteredOnly', s.shufflePlusUnmeteredOnly);

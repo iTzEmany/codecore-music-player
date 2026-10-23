@@ -50,13 +50,15 @@ class SafeTagWriter {
 
   /// Writes [changes] into [path]; resolves to the file's new size and date.
   /// One write at a time, so two edits never race on the same file.
-  Future<FileStamp> write(String path, TagChanges changes) {
-    final run = _queue.then((_) => _write(path, changes));
+  /// [backup] false for files Codecore just created: nothing of the user's
+  /// to keep, and it must not evict their manual-edit backups.
+  Future<FileStamp> write(String path, TagChanges changes, {bool backup = true}) {
+    final run = _queue.then((_) => _write(path, changes, backup));
     _queue = run.then<void>((_) {}, onError: (Object _) {});
     return run;
   }
 
-  Future<FileStamp> _write(String path, TagChanges changes) async {
+  Future<FileStamp> _write(String path, TagChanges changes, bool backup) async {
     final why = await check(path);
     if (why != null) throw TagWriteException(why);
     final tmp = File(p.join(
@@ -73,7 +75,7 @@ class SafeTagWriter {
       if (problem != null) {
         throw TagWriteException(TagWriteReason.verifyFailed, problem);
       }
-      await backups.add(path);
+      if (backup) await backups.add(path);
       await installFile(tmp.path, path, rename: rename);
       return await stampOf(path);
     } on TagWriteException catch (e) {
@@ -125,7 +127,11 @@ String? tagMismatch(
         (after.genre == null || !c.genre!.contains(after.genre!)))
       'genre: "${after.genre}" instead of "${c.genre}"',
     // The audio and the cover must come out as they went in.
-    bad('cover', before.coverBytes?.length, after.coverBytes?.length),
+    if (c.discNumber != null) bad('disc', c.discNumber, after.discNumber),
+    if (c.cover != null)
+      (after.coverBytes?.isNotEmpty ?? false) ? null : 'cover: missing after write'
+    else
+      bad('cover', before.coverBytes?.length, after.coverBytes?.length),
     if (before.durationMs != null &&
         after.durationMs != null &&
         (before.durationMs! - after.durationMs!).abs() > 100)

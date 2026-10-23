@@ -6219,6 +6219,18 @@ abstract class AppLocalizations {
   /// **'Titolo, artista, album, anno, genere e traccia modificati qui vengono scritti anche in MP3, FLAC, M4A e OGG. Di ogni file si conserva l’originale. Spenta di default.'**
   String get writeTagsToFilesHint;
 
+  /// No description provided for @writeTagsAfterDownload.
+  ///
+  /// In it, this message translates to:
+  /// **'Scrivi i tag nei file scaricati'**
+  String get writeTagsAfterDownload;
+
+  /// No description provided for @writeTagsAfterDownloadHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Solo nei file che Codecore ha scaricato o ricevuto. L\'ISRC resta nell\'app.'**
+  String get writeTagsAfterDownloadHint;
+
   /// No description provided for @writeTagsWarnTitle.
   ///
   /// In it, this message translates to:

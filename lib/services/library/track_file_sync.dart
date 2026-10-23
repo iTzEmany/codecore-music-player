@@ -40,10 +40,21 @@ class TrackFileSync {
   final AppDatabase _db;
   final Future<SafeTagWriter> Function() _writer;
 
+  /// False only when the writer is known not to handle [path]'s format.
+  Future<bool> canWrite(String path) async {
+    try {
+      return (await _writer()).writer.supports(SafeTagWriter.formatOf(path));
+    } on Object catch (e, st) {
+      AppLog.e('tag writer unavailable', e, st);
+      return false;
+    }
+  }
+
   Future<TagFileOutcome> write(
     List<Track> tracks,
-    TagChanges Function(Track) changes,
-  ) async {
+    TagChanges Function(Track) changes, {
+    bool backup = true,
+  }) async {
     final failures = <int, TagWriteReason>{};
     final SafeTagWriter writer;
     try {
@@ -59,7 +70,7 @@ class TrackFileSync {
       final c = changes(t);
       if (c.isEmpty) continue;
       try {
-        final stamp = await writer.write(t.path, c);
+        final stamp = await writer.write(t.path, c, backup: backup);
         await stampTrack(_db, t.path, stamp);
       } on TagWriteException catch (e) {
         failures[t.id] = e.reason;
@@ -75,5 +86,9 @@ class TrackFileSync {
 /// Records the new size and date of a file we replaced.
 Future<void> stampTrack(AppDatabase db, String path, FileStamp s) =>
     (db.update(db.tracks)..where((t) => t.path.equals(path))).write(
-      TracksCompanion(sizeBytes: Value(s.sizeBytes), mtimeMs: Value(s.mtimeMs)),
+      TracksCompanion(
+        sizeBytes: Value(s.sizeBytes),
+        mtimeMs: Value(s.mtimeMs),
+        sha256: const Value(null), // the bytes changed
+      ),
     );

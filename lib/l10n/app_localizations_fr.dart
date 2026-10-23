@@ -4003,6 +4003,14 @@ class AppLocalizationsFr extends AppLocalizations {
       'Le titre, l’artiste, l’album, l’année, le genre et la piste modifiés ici sont aussi écrits dans les fichiers MP3, FLAC, M4A et OGG. L’original de chaque fichier est conservé. Désactivé par défaut.';
 
   @override
+  String get writeTagsAfterDownload =>
+      'Écrire les tags dans les fichiers téléchargés';
+
+  @override
+  String get writeTagsAfterDownloadHint =>
+      'Uniquement dans les fichiers que Codecore a téléchargés ou reçus. L’ISRC reste dans l’appli.';
+
+  @override
   String get writeTagsWarnTitle =>
       'Écrire les modifications dans les fichiers ?';
 

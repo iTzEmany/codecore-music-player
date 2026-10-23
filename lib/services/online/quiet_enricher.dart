@@ -7,12 +7,15 @@ import '../../core/app_log.dart';
 /// Activity centre and no snackbar for each song. A song added while another
 /// waits is never lost (the batch job refuses a second start).
 class QuietEnricher {
-  QuietEnricher({required this.enrich, this.enabled});
+  QuietEnricher({required this.enrich, this.enabled, this.onDone});
 
   final Future<void> Function(int trackId) enrich;
 
   /// Read at each [add]: off = the song is left as it is.
   final bool Function()? enabled;
+
+  /// Called after each song, whether the enrichment worked or not.
+  final Future<void> Function(int trackId)? onDone;
 
   final _todo = Queue<int>();
   int? _current;
@@ -38,6 +41,11 @@ class QuietEnricher {
         await enrich(id);
       } on Object catch (e, st) {
         AppLog.w('enrichment of downloaded track $id failed', e, st);
+      }
+      try {
+        await onDone?.call(id);
+      } on Object catch (e, st) {
+        AppLog.w('after-enrichment step of track $id failed', e, st);
       }
       _current = null;
       _changed();

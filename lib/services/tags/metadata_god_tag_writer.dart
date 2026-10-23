@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:metadata_god/metadata_god.dart';
 
 import '../../core/app_log.dart';
@@ -39,6 +41,10 @@ class MetadataGodTagWriter implements TagWriter {
           year: c.year,
           genre: c.genre,
           trackNumber: c.trackNumber,
+          discNumber: c.discNumber,
+          picture: c.cover == null
+              ? null
+              : Picture(data: Uint8List.fromList(c.cover!.bytes), mimeType: c.cover!.mime),
         ),
       );
     } catch (e, st) {

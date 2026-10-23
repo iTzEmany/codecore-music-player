@@ -9,10 +9,15 @@ class TagChanges {
     this.year,
     this.genre,
     this.trackNumber,
+    this.discNumber,
+    this.cover,
   });
 
   final String? title, artist, album, albumArtist, genre;
-  final int? year, trackNumber;
+  final int? year, trackNumber, discNumber;
+
+  /// Front cover to embed.
+  final TagCover? cover;
 
   bool get isEmpty =>
       title == null &&
@@ -21,7 +26,16 @@ class TagChanges {
       albumArtist == null &&
       year == null &&
       genre == null &&
-      trackNumber == null;
+      trackNumber == null &&
+      discNumber == null &&
+      cover == null;
+}
+
+class TagCover {
+  const TagCover(this.bytes, this.mime);
+
+  final List<int> bytes;
+  final String mime;
 }
 
 enum TagWriteReason {

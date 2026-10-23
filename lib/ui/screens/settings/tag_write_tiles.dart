@@ -11,6 +11,8 @@ import '../../widgets/confirm.dart';
 List<Widget> tagWriteTiles(BuildContext context, WidgetRef ref) {
   final l = context.l10n;
   final on = ref.watch(settingsProvider.select((s) => s.writeTagsToFiles));
+  final afterDownload =
+      ref.watch(settingsProvider.select((s) => s.writeTagsAfterDownload));
   final count = ref.watch(tagBackupsProvider).value?.length ?? 0;
   Future<void> toggle(bool v) async {
     if (v) {
@@ -34,6 +36,15 @@ List<Widget> tagWriteTiles(BuildContext context, WidgetRef ref) {
       subtitle: Text(l.writeTagsToFilesHint),
       value: on,
       onChanged: toggle,
+    ),
+    SwitchListTile(
+      secondary: const Icon(Icons.download_done_rounded),
+      title: Text(l.writeTagsAfterDownload),
+      subtitle: Text(l.writeTagsAfterDownloadHint),
+      value: afterDownload,
+      onChanged: (v) => ref
+          .read(settingsProvider.notifier)
+          .update((c) => c.copyWith(writeTagsAfterDownload: v)),
     ),
     ListTile(
       leading: const Icon(Icons.history_rounded),

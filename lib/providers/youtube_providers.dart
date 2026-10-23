@@ -188,7 +188,7 @@ class DownloadsNotifier extends Notifier<List<DownloadItem>> {
   Future<void> _autoEnrich(String path) async {
     try {
       final id = await ref.read(trackRepositoryProvider).idForPath(path);
-      if (id != null) ref.read(downloadEnricherProvider).add(id);
+      if (id != null) afterDownload(ref, id);
     } on Object catch (e, st) {
       AppLog.w('auto enrich after download failed', e, st);
     }

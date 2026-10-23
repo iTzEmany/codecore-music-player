@@ -2566,6 +2566,8 @@
   "ownFingerprintHint": "Si confronta con quella mostrata sull’altro schermo quando ci si abbina.",
   "writeTagsToFiles": "Scrivi le modifiche nei file",
   "writeTagsToFilesHint": "Titolo, artista, album, anno, genere e traccia modificati qui vengono scritti anche in MP3, FLAC, M4A e OGG. Di ogni file si conserva l’originale. Spenta di default.",
+  "writeTagsAfterDownload": "Scrivi i tag nei file scaricati",
+  "writeTagsAfterDownloadHint": "Solo nei file che Codecore ha scaricato o ricevuto. L'ISRC resta nell'app.",
   "writeTagsWarnTitle": "Scrivere le modifiche nei file?",
   "writeTagsWarnBody": "Salvando una modifica, i tag vengono riscritti anche nel file musicale (MP3, FLAC, M4A, OGG). Si lavora su una copia, si controlla il risultato e il file viene sostituito solo se tutto torna; prima l’originale è salvato in «Backup dei tag» (gli ultimi 200 o 2 GB). Copertina, testi e ReplayGain non vengono toccati. Prima di attivare conviene fare un backup della libreria (Impostazioni, Backup).",
   "writeTagsEnable": "Attiva",

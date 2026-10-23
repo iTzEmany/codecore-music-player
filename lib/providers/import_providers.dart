@@ -71,7 +71,7 @@ final playlistImportServiceProvider = Provider<PlaylistImportService>((ref) {
           .read(enrichmentServiceProvider)
           .coverForAlbum(t, row.album!, row.primaryArtist, isrc: row.isrc);
     },
-    enrichLater: (id) => ref.read(downloadEnricherProvider).add(id),
+    enrichLater: (id) => afterDownload(ref, id),
     pathForVideo: (v) async =>
         (await ref.read(downloadIndexProvider.future)).pathFor(v.id, source: v.source),
     applyTags: (trackId, row) async {

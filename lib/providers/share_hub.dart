@@ -28,6 +28,7 @@ import '../services/share/share_notifier.dart';
 import '../core/paths.dart';
 import '../core/platform.dart';
 import 'database_providers.dart';
+import 'online_providers.dart' show downloadTaggerProvider;
 import 'library_providers.dart';
 import 'settings_providers.dart';
 import 'share_providers.dart';
@@ -561,6 +562,9 @@ class ShareHubNotifier extends Notifier<ShareHubState> {
                       o.fromHost, o.fromPort, o.offerId, o.token, item.id)
                 : null,
           );
+          final row =
+              await ref.read(trackRepositoryProvider).byPath(entry.key);
+          if (row != null) unawaited(ref.read(downloadTaggerProvider).tag(row.id));
         }
       }
       o.status = o.received == o.items.length

@@ -3961,6 +3961,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Title, artist, album, year, genre and track edited here are also written into MP3, FLAC, M4A and OGG files. The original of every file is kept. Off by default.';
 
   @override
+  String get writeTagsAfterDownload => 'Write tags into downloaded files';
+
+  @override
+  String get writeTagsAfterDownloadHint =>
+      'Only in files Codecore downloaded or received. The ISRC stays in the app.';
+
+  @override
   String get writeTagsWarnTitle => 'Write edits into the files?';
 
   @override

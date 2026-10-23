@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -10,6 +11,7 @@ import '../../../l10n/l10n_ext.dart';
 import '../../theme/tokens.dart';
 import '../../../providers/database_providers.dart';
 import '../../../providers/library_providers.dart';
+import '../../../providers/online_providers.dart' show downloadTaggerProvider;
 import '../../../providers/share_providers.dart';
 import '../../../providers/youtube_providers.dart';
 import '../../../services/share/lan_client.dart';
@@ -136,6 +138,7 @@ class _ReceiveTabState extends ConsumerState<ReceiveTab> {
     final client = ref.read(lanClientProvider);
     final repo = ref.read(trackRepositoryProvider);
     final covers = ref.read(coverStoreProvider);
+    final tagger = ref.read(downloadTaggerProvider);
     final pin = _pin.text.trim();
     final saved = <String>[];
     final savedTracks = <String, RemoteTrack>{};
@@ -173,6 +176,8 @@ class _ReceiveTabState extends ConsumerState<ReceiveTab> {
             fetchCover: () => client.downloadCover(
                 target.host, target.port, pin, entry.value.id),
           );
+          final row = await repo.byPath(entry.key);
+          if (row != null) unawaited(tagger.tag(row.id));
         }
       }
       if (mounted) setState(() => _received = saved.length);
