@@ -5,12 +5,19 @@ import '../../../l10n/app_localizations.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/settings_providers.dart';
 import '../../../services/audio/audio_backend.dart' show TransitionMode;
+import '../../widgets/segmented_blocks.dart';
 
 String transitionLabel(AppLocalizations l, TransitionMode m) => switch (m) {
-      TransitionMode.normal => l.transitionNormal,
-      TransitionMode.gapless => l.transitionGapless,
-      TransitionMode.crossfade => l.transitionCrossfade,
-    };
+  TransitionMode.normal => l.transitionNormal,
+  TransitionMode.gapless => l.transitionGapless,
+  TransitionMode.crossfade => l.transitionCrossfade,
+};
+
+const _icons = {
+  TransitionMode.normal: Icons.skip_next_rounded,
+  TransitionMode.gapless: Icons.link_rounded,
+  TransitionMode.crossfade: Icons.blur_linear_rounded,
+};
 
 /// «Passaggio tra i brani»: normal, gapless or crossfade, and its options.
 class TransitionSettingsTiles extends ConsumerWidget {
@@ -30,18 +37,17 @@ class TransitionSettingsTiles extends ConsumerWidget {
         ),
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-          child: Wrap(
-            spacing: 8,
-            runSpacing: 4,
-            children: [
+          child: SegmentedBlocks<TransitionMode>(
+            items: [
               for (final m in TransitionMode.values)
-                ChoiceChip(
-                  label: Text(transitionLabel(l, m)),
-                  selected: s.transition == m,
-                  onSelected: (_) =>
-                      notifier.update((c) => c.copyWith(transition: m)),
+                BlockItem(
+                  value: m,
+                  icon: _icons[m]!,
+                  label: transitionLabel(l, m),
                 ),
             ],
+            selected: s.transition,
+            onChanged: (m) => notifier.update((c) => c.copyWith(transition: m)),
           ),
         ),
         if (s.transition == TransitionMode.crossfade) ...[
@@ -53,8 +59,9 @@ class TransitionSettingsTiles extends ConsumerWidget {
               divisions: 10,
               value: s.crossfadeSeconds.toDouble(),
               label: '${s.crossfadeSeconds} s',
-              onChanged: (v) => notifier
-                  .update((c) => c.copyWith(crossfadeSeconds: v.round())),
+              onChanged: (v) => notifier.update(
+                (c) => c.copyWith(crossfadeSeconds: v.round()),
+              ),
             ),
           ),
           SwitchListTile(
