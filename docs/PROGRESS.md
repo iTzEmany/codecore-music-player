@@ -492,8 +492,8 @@ Redesign Anello delle schermate rimaste (analisi del 2026-10-23 in `docs/audit-u
 - [x] 36.2 Schema v14 e ISRC in libreria — ISRC normalizzato dai tag (mp3, flac, ogg) e dall'importazione, mai sovrascritto; niente riscansione forzata: i file già in libreria lo prendono quando cambiano (a8174f3)
 - [x] 36.3 Client Deezer — trackByIsrc, searchTracks, album; riposo di 10 min tenuto nel client (MediaKind non ha Deezer) (bd381c4)
 - [x] 36.4 Scelta del brano e controllo d'edizione — ricerca per testo solo con durata locale nota (9d2e807)
-- [ ] 36.5 Arricchimento con Deezer
-- [ ] 36.6 Importazione: anno e copertine
+- [x] 36.5 Arricchimento con Deezer (8351f52)
+- [x] 36.6 Importazione: anno e copertine (8351f52)
 - [x] 36.7 MusicBrainz per ISRC (91a91bb)
 - [x] 36.8 ZIP di Exportify e abbinamento — limiti controllati sulle dimensioni dichiarate prima di estrarre (d94b7df)
 - [x] 36.9 «Sincronizza da Spotify» e «Apri exportify.net» (1764cd0). Da provare su telefono: il pulsante «Apri exportify.net».
