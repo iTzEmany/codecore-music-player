@@ -29,6 +29,7 @@ Future<void> syncFlow(BuildContext context, WidgetRef ref, TrustedDevice device)
       showMsg(context, l.syncApplied(plan.toWrite.length));
     }
   } on SyncException catch (e) {
+    AppLog.w('sync failed', e);
     if (!context.mounted) return;
     showMsg(context, switch (e.error) {
       SyncError.unreachable => l.syncUnreachable,

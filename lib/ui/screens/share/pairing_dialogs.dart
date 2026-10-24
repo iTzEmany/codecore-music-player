@@ -12,6 +12,7 @@ import '../../../services/share/pairing_client.dart';
 import '../../../services/share/trusted_devices.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/show_msg.dart';
+import '../../../core/app_log.dart';
 
 /// The PIN typed on the device that asked to pair (the one that does not show
 /// it). Returns the digits, or null to give up.
@@ -206,6 +207,7 @@ Future<void> pairFlow(BuildContext context, WidgetRef ref, Peer peer) async {
         );
     msg = l.pairDone(paired.name);
   } on PairingException catch (e) {
+    AppLog.w('pairing failed', e);
     if (e.error == PairingError.cancelled) return;
     msg = switch (e.error) {
       PairingError.blocked => l.pairBlocked,

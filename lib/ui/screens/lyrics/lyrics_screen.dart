@@ -42,11 +42,11 @@ class LyricsScreen extends ConsumerWidget {
     final theme = Theme.of(context).textTheme;
     return Scaffold(
       backgroundColor: context.cc.bg,
-      appBar: AppBar(
+      appBar: CcAppBar(
         backgroundColor: Colors.transparent,
         surfaceTintColor: Colors.transparent,
         titleSpacing: 0,
-        title: Row(
+        titleWidget: Row(
           children: [
             CoverImage(coverKey: track.coverKey, size: 40),
             const SizedBox(width: 12),

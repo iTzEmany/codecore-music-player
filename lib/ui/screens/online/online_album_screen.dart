@@ -66,6 +66,7 @@ class OnlineAlbumScreen extends ConsumerWidget {
       showMsg(
         context,
         l.ytmAlbumStarted(plan.importName),
+        persist: true,
         action: SnackBarAction(
           label: l.ytmShowImport,
           onPressed: () => nav.push(MaterialPageRoute<void>(

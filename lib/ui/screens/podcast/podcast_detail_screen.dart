@@ -19,6 +19,7 @@ import '../../widgets/segmented_blocks.dart';
 import '../../widgets/speed_button.dart';
 import 'podcast_texts.dart';
 import '../../widgets/show_msg.dart';
+import '../../../core/app_log.dart';
 
 /// One podcast: its header, and its episodes (newest first) with what each one
 /// is doing. Opening it refreshes the feed only if it is older than 6 hours.
@@ -52,6 +53,7 @@ class _PodcastDetailScreenState extends ConsumerState<PodcastDetailScreen> {
         showMsg(context, context.l10n.podcastRefreshed(added));
       }
     } on PodcastException catch (e) {
+      AppLog.w('podcast refresh failed', e);
       if (mounted) {
         showMsg(context, podcastErrorText(context.l10n, e.kind));
       }

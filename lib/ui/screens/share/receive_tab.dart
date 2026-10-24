@@ -106,6 +106,7 @@ class _ReceiveTabState extends ConsumerState<ReceiveTab> {
           ..addAll(list.map((t) => t.id));
       });
     } on LanException catch (e) {
+      AppLog.w('share receive failed', e);
       if (mounted) setState(() => _error = _errorText(e.error));
     } finally {
       if (mounted) setState(() => _busy = false);

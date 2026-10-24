@@ -9,6 +9,7 @@ import '../../theme/tokens.dart';
 import 'podcast_texts.dart';
 import '../../widgets/net_thumbnail.dart';
 import '../../widgets/show_msg.dart';
+import '../../../core/app_log.dart';
 
 /// «Aggiungi podcast»: paste a feed address, or search the public directory by
 /// name and pick a result. Nothing is fetched until the user asks.
@@ -57,6 +58,7 @@ class _PodcastSubscribeSheetState extends ConsumerState<PodcastSubscribeSheet> {
       showMsg(context, l.podcastSubscribed(name ?? url.trim()));
       Navigator.of(context).pop();
     } on PodcastException catch (e) {
+      AppLog.w('podcast subscribe failed', e);
       if (mounted) {
         setState(() {
           _busy = false;
@@ -82,6 +84,7 @@ class _PodcastSubscribeSheetState extends ConsumerState<PodcastSubscribeSheet> {
         });
       }
     } on PodcastException catch (e) {
+      AppLog.w('podcast subscribe failed', e);
       if (mounted) {
         setState(() {
           _busy = false;

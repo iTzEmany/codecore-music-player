@@ -36,6 +36,14 @@ void main() {
     expect(find.text('fatto'), findsNothing);
   });
 
+  testWidgets('persist keeps an action snackbar on screen', (tester) async {
+    final ctx = await _pump(tester);
+    showMsg(ctx, 'resta', persist: true, action: SnackBarAction(label: 'Vai', onPressed: () {}));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 30));
+    expect(find.text('resta'), findsOneWidget);
+  });
+
   testWidgets('a new message replaces the old one (one at a time)', (tester) async {
     final ctx = await _pump(tester);
     showMsg(ctx, 'uno');
@@ -43,6 +51,15 @@ void main() {
     await tester.pumpAndSettle(const Duration(milliseconds: 100));
     expect(find.text('uno'), findsNothing);
     expect(find.text('due'), findsOneWidget);
+  });
+
+  testWidgets('showMsgOn shows with a messenger captured before unmount', (tester) async {
+    final ctx = await _pump(tester);
+    final messenger = ScaffoldMessenger.of(ctx);
+    showMsgOn(messenger, 'dopo');
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.text('dopo'), findsOneWidget);
   });
 
   testWidgets('a context unmounted during an await does not throw', (tester) async {

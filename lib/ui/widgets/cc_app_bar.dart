@@ -12,6 +12,7 @@ class CcAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.automaticallyImplyLeading = true,
     this.backgroundColor,
     this.titleSpacing,
+    this.surfaceTintColor,
   });
 
   /// Plain text title; use [titleWidget] for anything else.
@@ -23,6 +24,7 @@ class CcAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool automaticallyImplyLeading;
   final Color? backgroundColor;
   final double? titleSpacing;
+  final Color? surfaceTintColor;
 
   @override
   Size get preferredSize =>
@@ -37,5 +39,6 @@ class CcAppBar extends StatelessWidget implements PreferredSizeWidget {
     automaticallyImplyLeading: automaticallyImplyLeading,
     backgroundColor: backgroundColor,
     titleSpacing: titleSpacing,
+    surfaceTintColor: surfaceTintColor,
   );
 }

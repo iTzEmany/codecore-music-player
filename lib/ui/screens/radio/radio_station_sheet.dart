@@ -13,6 +13,7 @@ import '../../../services/radio/radio_station.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/prompt_name.dart';
 import '../../widgets/radio_art.dart';
+import '../../widgets/show_msg.dart';
 import 'radio_actions.dart';
 import 'radio_labels.dart';
 
@@ -34,9 +35,7 @@ Future<void> openStationSite(BuildContext context, String address) async {
     AppLog.w('opening the station site failed', e, st);
   }
   await Clipboard.setData(ClipboardData(text: address));
-  messenger
-    ?..clearSnackBars()
-    ..showSnackBar(SnackBar(content: Text(copied)));
+  if (messenger != null) showMsgOn(messenger, copied);
 }
 
 /// What is known about a station, with save / remove, rename (saved ones) and

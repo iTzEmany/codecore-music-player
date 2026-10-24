@@ -14,6 +14,7 @@ import '../../../providers/database_providers.dart';
 import '../../../services/export/playlist_exporter.dart';
 import '../../../services/export/save_file.dart';
 import '../../widgets/segmented_blocks.dart';
+import '../../widgets/show_msg.dart';
 
 class _ExportChoice {
   const _ExportChoice(this.format, this.relative);
@@ -101,7 +102,7 @@ Future<void> exportPlaylistFlow(
   final l = context.l10n;
   final messenger = ScaffoldMessenger.of(context);
   if (tracks.isEmpty) {
-    messenger.showSnackBar(SnackBar(content: Text(l.exportEmpty)));
+    showMsgOn(messenger, l.exportEmpty);
     return;
   }
   final choice = await showDialog<_ExportChoice>(
@@ -130,10 +131,10 @@ Future<void> exportPlaylistFlow(
       utf8.encode(text),
       mimeType: choice.format.mimeType,
     );
-    if (saved) messenger.showSnackBar(SnackBar(content: Text(l.exportSaved)));
+    if (saved) showMsgOn(messenger, l.exportSaved);
   } on Object catch (e, st) {
     AppLog.e('export playlist failed', e, st);
-    messenger.showSnackBar(SnackBar(content: Text(l.exportFailed)));
+    showMsgOn(messenger, l.exportFailed);
   }
 }
 
@@ -224,9 +225,9 @@ Future<void> exportAllPlaylistsFlow(BuildContext context, WidgetRef ref) async {
       Uint8List.fromList(ZipEncoder().encode(archive)),
       mimeType: 'application/zip',
     );
-    if (saved) messenger.showSnackBar(SnackBar(content: Text(l.exportSaved)));
+    if (saved) showMsgOn(messenger, l.exportSaved);
   } on Object catch (e, st) {
     AppLog.e('export all playlists failed', e, st);
-    messenger.showSnackBar(SnackBar(content: Text(l.exportFailed)));
+    showMsgOn(messenger, l.exportFailed);
   }
 }

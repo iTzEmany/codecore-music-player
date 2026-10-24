@@ -7,6 +7,7 @@ import '../../providers/settings_providers.dart';
 import '../../providers/tag_backup_providers.dart';
 import '../../services/library/track_file_sync.dart';
 import '../../services/tags/tag_writer.dart';
+import 'show_msg.dart';
 
 String tagReasonText(AppLocalizations l, TagWriteReason r) => switch (r) {
   TagWriteReason.unsupported => l.tagReasonUnsupported,
@@ -26,18 +27,10 @@ void showTagFileOutcome(
 ) {
   final reason = outcome.mainReason;
   if (reason == null) return;
-  messenger
-    ..clearSnackBars()
-    ..showSnackBar(
-      SnackBar(
-        content: Text(
-          l.tagsFileWriteFailed(
-            outcome.failures.length,
-            tagReasonText(l, reason),
-          ),
-        ),
-      ),
-    );
+  showMsgOn(
+    messenger,
+    l.tagsFileWriteFailed(outcome.failures.length, tagReasonText(l, reason)),
+  );
 }
 
 /// «Also write to the file» checkbox of the edit dialogs. Hidden when the

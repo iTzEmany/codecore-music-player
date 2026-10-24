@@ -72,7 +72,7 @@ class _State extends ConsumerState<ImportEventListener> {
         text = importStopText(l, e.kind)!;
     }
     if (!mounted) return;
-    showMsg(context, text, action: action);
+    showMsg(context, text, action: action, persist: true);
   }
 
   @override

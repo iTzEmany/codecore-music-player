@@ -5,6 +5,7 @@ import '../../data/db/app_database.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../providers/track_deleter_providers.dart';
 import 'confirm.dart';
+import 'show_msg.dart';
 
 /// «Elimina dal dispositivo»: confirms, then deletes the files and the library
 /// rows of [tracks] and says what happened. True when at least one went.
@@ -40,8 +41,6 @@ Future<bool> confirmAndDeleteTracks(
         ? l.tracksDeleted(report.deleted.length)
         : l.tracksDeletedSome(report.deleted.length, failed);
   }
-  messenger
-    ..clearSnackBars()
-    ..showSnackBar(SnackBar(content: Text(text)));
+  showMsgOn(messenger, text);
   return report.deleted.isNotEmpty;
 }
