@@ -44,25 +44,31 @@ class _NpSeekRowState extends ConsumerState<NpSeekRow> {
       color: cc.textMuted,
       fontFeatures: const [FontFeature.tabularFigures()],
     );
-    final pos = ref.watch(positionProvider).value ?? Duration.zero;
     final dur = ref.watch(durationProvider).value ?? Duration.zero;
     final max = dur.inMilliseconds.toDouble();
-    final shown = (_dragging ?? pos.inMilliseconds.toDouble()).clamp(
-      0.0,
-      max <= 0 ? 1.0 : max,
-    );
+    // Only the position consumers rebuild on each tick, not the whole row.
+    double shownOf(WidgetRef ref) {
+      final pos = ref.watch(positionProvider).value ?? Duration.zero;
+      return (_dragging ?? pos.inMilliseconds.toDouble()).clamp(
+        0.0,
+        max <= 0 ? 1.0 : max,
+      );
+    }
+
     return Column(
       children: [
-        Slider(
-          value: shown,
-          max: max <= 0 ? 1 : max,
-          onChanged: max <= 0 ? null : (v) => setState(() => _dragging = v),
-          onChangeEnd: (v) {
-            setState(() => _dragging = null);
-            ref
-                .read(playerControllerProvider)
-                .seek(Duration(milliseconds: v.round()));
-          },
+        Consumer(
+          builder: (context, ref, _) => Slider(
+            value: shownOf(ref),
+            max: max <= 0 ? 1 : max,
+            onChanged: max <= 0 ? null : (v) => setState(() => _dragging = v),
+            onChangeEnd: (v) {
+              setState(() => _dragging = null);
+              ref
+                  .read(playerControllerProvider)
+                  .seek(Duration(milliseconds: v.round()));
+            },
+          ),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: npEdge),
@@ -71,7 +77,10 @@ class _NpSeekRowState extends ConsumerState<NpSeekRow> {
               Expanded(
                 child: Align(
                   alignment: AlignmentDirectional.centerStart,
-                  child: Text(formatDuration(shown.round()), style: style),
+                  child: Consumer(
+                    builder: (context, ref, _) =>
+                        Text(formatDuration(shownOf(ref).round()), style: style),
+                  ),
                 ),
               ),
               QualityTag(widget.track),
@@ -82,11 +91,13 @@ class _NpSeekRowState extends ConsumerState<NpSeekRow> {
                   alignment: AlignmentDirectional.centerEnd,
                   child: InkWell(
                     onTap: () => setState(() => _remaining = !_remaining),
-                    child: Text(
-                      _remaining
-                          ? '-${formatDuration((max - shown).round())}'
-                          : formatDuration(max.round()),
-                      style: style,
+                    child: Consumer(
+                      builder: (context, ref, _) => Text(
+                        _remaining
+                            ? '-${formatDuration((max - shownOf(ref)).round())}'
+                            : formatDuration(max.round()),
+                        style: style,
+                      ),
                     ),
                   ),
                 ),

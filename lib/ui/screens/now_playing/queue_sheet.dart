@@ -1,4 +1,5 @@
 import '../../widgets/cc_sheet.dart';
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -106,6 +107,7 @@ class _QueueSheetState extends ConsumerState<QueueSheet> {
   /// suggestion) and the list must not be rebuilt with other items then.
   _Upcoming? _dragSnapshot;
   bool _dragging = false;
+  List<Track> _lastQueue = const [];
 
   @override
   Widget build(BuildContext context) {
@@ -114,7 +116,11 @@ class _QueueSheetState extends ConsumerState<QueueSheet> {
     final showTitle = widget.showTitle;
     final l = context.l10n;
     final cc = context.cc;
-    final queue = ref.watch(queueProvider).value ?? const <Track>[];
+    // Rebuild only when the list really changed, not on every queue event.
+    final queue = ref.watch(queueProvider.select((q) {
+      final next = q.value ?? const <Track>[];
+      return listEquals(_lastQueue, next) ? _lastQueue : _lastQueue = next;
+    }));
     ref.watch(currentTrackProvider.select((t) => t.value?.id));
     final ctrl = ref.read(playerControllerProvider);
     if (queue.isEmpty) {

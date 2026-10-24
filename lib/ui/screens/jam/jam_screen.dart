@@ -273,7 +273,7 @@ class _PulsingAvatarsState extends State<_PulsingAvatars>
     with SingleTickerProviderStateMixin {
   late final AnimationController _c = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 1200),
+    duration: CcTiming.avatarPulse,
   );
 
   @override

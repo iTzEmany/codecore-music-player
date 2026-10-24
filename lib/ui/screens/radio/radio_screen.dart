@@ -51,7 +51,7 @@ class _RadioScreenState extends ConsumerState<RadioScreen> {
   void _onChanged(String v) {
     setState(() {}); // the clear button
     _debounce?.cancel();
-    _debounce = Timer(const Duration(milliseconds: 400), () {
+    _debounce = Timer(CcTiming.radioDebounce, () {
       if (mounted) setState(() => _query = v.trim());
     });
   }

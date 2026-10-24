@@ -120,6 +120,9 @@ void main() {
     expect(find.byWidgetPredicate((w) => w is ClipRRect && w.clipper != null), findsNothing);
     final route = ModalRoute.of(tester.element(find.byType(NowPlayingScreen)))!;
     expect(route.animation!.status, AnimationStatus.completed, reason: 'the route settled in one frame');
+    await tester.dragFrom(const Offset(200, 840), const Offset(0, -700));
+    await tester.pump();
+    expect(find.byType(UpNextCard), findsOneWidget);
     expect(
         find.descendant(
             of: find.byType(SpinWhilePlaying), matching: find.byType(RotationTransition)),
@@ -138,13 +141,17 @@ void main() {
     await _settle(tester);
     await tester.tap(find.text('Song 0').last);
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 40));
     final clip = tester.widget<ClipRRect>(
         find.byWidgetPredicate((w) => w is ClipRRect && w.clipper != null));
     final rrect = clip.clipper!.getClip(const Size(400, 900));
     expect(rrect.height, lessThan(900));
     expect(rrect.top, greaterThan(300), reason: 'still near the dock');
+    expect(find.byType(UpNextCard), findsNothing, reason: 'cards wait for the end');
     await _settle(tester);
+    await tester.dragFrom(const Offset(200, 840), const Offset(0, -700));
+    await tester.pump();
+    expect(find.byType(UpNextCard), findsOneWidget);
     expect(find.byType(NowPlayingScreen), findsOneWidget);
     await h.dispose(tester);
   });

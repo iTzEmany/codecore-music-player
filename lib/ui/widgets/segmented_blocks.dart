@@ -136,8 +136,8 @@ class SegmentedBlocks<T> extends StatelessWidget {
             width: w,
             child: AnimatedSlide(
               offset: Offset(index * (w + _gap) / w, 0),
-              duration: ccDuration(context, Motion.enter),
-              curve: Motion.curve,
+              duration: ccDuration(context, CcMotion.enter),
+              curve: CcMotion.curveIn,
               child: DecoratedBox(
                 decoration: BoxDecoration(color: cc.text, borderRadius: _radius),
               ),

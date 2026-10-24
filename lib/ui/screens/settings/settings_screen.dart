@@ -86,7 +86,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             child: Align(
               alignment: Alignment.topLeft,
               child: TabFade(
-                index: _page.index,
                 child: SettingsPageView(_page, key: ValueKey(_page)),
               ),
             ),

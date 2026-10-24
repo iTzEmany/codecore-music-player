@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/db/app_database.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/database_providers.dart';
+import '../../theme/tokens.dart';
 import '../../widgets/cover_image.dart';
 
 /// Multi-select over the whole library; pops with the chosen ids.
@@ -52,7 +53,7 @@ class _State extends ConsumerState<TrackPickerScreen> {
               controller: _controller,
               onChanged: (t) {
                 _debounce?.cancel();
-                _debounce = Timer(const Duration(milliseconds: 250), () {
+                _debounce = Timer(CcTiming.debounce, () {
                   if (mounted) setState(() => _query = t);
                 });
               },

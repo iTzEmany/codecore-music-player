@@ -8,10 +8,17 @@ export 'custom_theme.dart';
 export 'theme_background.dart';
 export 'palette.dart';
 
-/// The same fade-and-rise page transition on every platform; none at all
-/// with «Riduci animazioni».
+/// The same page transition on every platform, with no opacity layer (F-40):
+/// a side slide, transform only; none at all with
+/// «Riduci animazioni».
 class CcPageTransitionsBuilder extends PageTransitionsBuilder {
   const CcPageTransitionsBuilder();
+
+  @override
+  Duration get transitionDuration => CcMotion.page;
+
+  @override
+  Duration get reverseTransitionDuration => CcMotion.page;
 
   @override
   Widget buildTransitions<T>(
@@ -22,14 +29,38 @@ class CcPageTransitionsBuilder extends PageTransitionsBuilder {
     Widget child,
   ) {
     if (MediaQuery.disableAnimationsOf(context)) return child;
-    return const FadeUpwardsPageTransitionsBuilder().buildTransitions(
-      route,
-      context,
-      animation,
-      secondaryAnimation,
-      child,
-    );
+    return _PageMotion(animation: animation, child: child);
   }
+}
+
+class _PageMotion extends StatefulWidget {
+  const _PageMotion({required this.animation, required this.child});
+  final Animation<double> animation;
+  final Widget child;
+
+  @override
+  State<_PageMotion> createState() => _PageMotionState();
+}
+
+class _PageMotionState extends State<_PageMotion> {
+  late final CurvedAnimation _curved = CurvedAnimation(
+    parent: widget.animation,
+    curve: CcMotion.curveIn,
+    reverseCurve: CcMotion.curveOut,
+  );
+
+  @override
+  void dispose() {
+    _curved.dispose();
+    super.dispose();
+  }
+
+  // 15 %: a full-width slide paints both pages and doubled the janky frames on the Mi A3 (D-46).
+  @override
+  Widget build(BuildContext context) => SlideTransition(
+        position: Tween(begin: const Offset(0.15, 0), end: Offset.zero).animate(_curved),
+        child: widget.child,
+      );
 }
 
 /// The theme the `theme` setting names: a built-in one with its accent, or one
@@ -273,7 +304,7 @@ Widget ccDragProxy(BuildContext context, Widget child, Animation<double> anim) {
   return AnimatedBuilder(
     animation: anim,
     builder: (_, _) {
-      final t = Curves.easeOut.transform(anim.value);
+      final t = CcMotion.curveIn.transform(anim.value);
       return Material(
         elevation: 6 * t,
         color: Color.lerp(cc.surface1, cc.accent.withValues(alpha: 0.28), t),

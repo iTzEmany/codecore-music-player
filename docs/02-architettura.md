@@ -247,7 +247,7 @@ Scritture con debounce 400 ms, mai in un handler di slider a ogni tick.
 - **Ascolta**: `listenProvider` su un player suo (`AudioBackend.loadUri`), indirizzo da yt-dlp `-g` a ogni ascolto (`StreamSource`), nessuna cache su disco (R71).
 - **Sfondo sfocato**: copia già sfocata (`blurredBackground`, ≤ 800 px) invece di un filtro a schermo.
 - **Avvio**: dopo il primo frame la coda salvata, la ricezione LAN e il controllo aggiornamenti (`startupSettledProvider`), le miniature mancanti.
-- **Microanimazioni**: `lib/ui/widgets/motion.dart` (`PressScale`, `EnterOnce`/`EntranceScope`, `TabFade`, `RiseIn`, `HeartIcon`, `popIn`); solo opacità e trasformazioni, `RepaintBoundary`, ferme con «Riduci animazioni».
+- **Microanimazioni**: `lib/ui/widgets/motion.dart` (`PressScale`, `EnterOnce`/`EntranceScope`, `TabFade` (non sfuma più: tiene vive le pagine sotto, senza livello di opacità), `RiseIn`, `HeartIcon`, `popIn`); solo opacità e trasformazioni, `RepaintBoundary`, ferme con «Riduci animazioni». Una sola scala di movimento: `CcMotion` (durate e curve del movimento) e `CcTiming` (attese e giri che non sono movimento, come la rotazione della «Copertina che ruota») in `tokens.dart`.
 - **Misure**: app separata `com.codecore.player.perf` (`CODECORE_PERF=1` + `--dart-define=CODECORE_PERF=true`) con `PerfProbe` (frame, primo frame, passi di `main`, scansione); `scripts/perf_library.py` e `scripts/perf_device.py`; risultati in `docs/fase-28-misure.md`.
 
 ## Catalogo YouTube Music (fase 30)

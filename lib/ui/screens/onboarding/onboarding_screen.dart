@@ -63,7 +63,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     } else {
       _controller.nextPage(
         duration: ccDuration(context, CcMotion.sheet),
-        curve: Curves.easeOut,
+        curve: CcMotion.curveIn,
       );
     }
   }

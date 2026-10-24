@@ -8306,6 +8306,18 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Uso privato e non commerciale. Le condizioni di Deezer vietano di promuovere lo scaricamento non autorizzato, e Codecore scarica da YouTube: è un rischio tuo.'**
   String get deezerMetaNote;
+
+  /// No description provided for @settingsSpinCover.
+  ///
+  /// In it, this message translates to:
+  /// **'Copertina che ruota'**
+  String get settingsSpinCover;
+
+  /// No description provided for @settingsSpinCoverHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Nel player, quando la musica suona'**
+  String get settingsSpinCoverHint;
 }
 
 class _AppLocalizationsDelegate

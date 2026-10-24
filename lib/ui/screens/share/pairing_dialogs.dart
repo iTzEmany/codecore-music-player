@@ -122,7 +122,7 @@ class _PairRequestDialogState extends ConsumerState<PairRequestDialog> {
   void initState() {
     super.initState();
     // The request changes state on its own (PIN proven, expired): look again.
-    _poll = Timer.periodic(const Duration(milliseconds: 500), (_) {
+    _poll = Timer.periodic(CcTiming.poll, (_) {
       if (!mounted) return;
       final st = widget.request.state;
       if (st == PairState.expired ||

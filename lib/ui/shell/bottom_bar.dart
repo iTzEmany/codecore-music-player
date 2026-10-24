@@ -10,7 +10,6 @@ import '../../providers/player_providers.dart';
 import '../../providers/ui_providers.dart';
 import '../theme/tokens.dart';
 import '../widgets/mini_player.dart';
-import '../widgets/motion.dart';
 
 class BottomBarItem {
   const BottomBarItem(this.icon, this.selectedIcon, this.label);
@@ -79,9 +78,9 @@ class ShellDock extends ConsumerWidget {
         // Opacity and a horizontal scale from the «Cerca» tab; the dock takes
         // the new height at once, so no size is animated.
         child: AnimatedSwitcher(
-          duration: ccDuration(context, const Duration(milliseconds: 450)),
-          switchInCurve: Motion.curve,
-          switchOutCurve: Motion.curve,
+          duration: ccDuration(context, CcMotion.page),
+          switchInCurve: CcMotion.curveIn,
+          switchOutCurve: CcMotion.curveOut,
           layoutBuilder: (current, previous) => Stack(
             children: [
               for (final p in previous)
@@ -300,7 +299,7 @@ class _TabDotState extends State<_TabDot> with SingleTickerProviderStateMixin {
     if (old.index == widget.index) return;
     // Start from where the dot is now, so a quick second tap doesn't jump back.
     _fromX = _currentX(old.index, old.tabWidth);
-    _c.duration = ccDuration(context, Motion.dot);
+    _c.duration = ccDuration(context, CcMotion.page);
     _c.forward(from: 0);
   }
 
@@ -317,7 +316,7 @@ class _TabDotState extends State<_TabDot> with SingleTickerProviderStateMixin {
   // Where the dot is, heading for tab [to].
   double _currentX(int to, [double? tabWidth]) =>
       _fromX +
-      (_x(to, tabWidth) - _fromX) * Curves.easeInOut.transform(_c.value);
+      (_x(to, tabWidth) - _fromX) * CcMotion.curveIn.transform(_c.value);
 
   @override
   Widget build(BuildContext context) {
@@ -330,7 +329,7 @@ class _TabDotState extends State<_TabDot> with SingleTickerProviderStateMixin {
             child: AnimatedBuilder(
               animation: _c,
               builder: (context, child) {
-                final t = Curves.easeInOut.transform(_c.value);
+                final t = CcMotion.curveIn.transform(_c.value);
                 final x = _currentX(widget.index);
                 final y = _tabTop - math.sin(math.pi * t) * _dotLift;
                 return Transform.translate(

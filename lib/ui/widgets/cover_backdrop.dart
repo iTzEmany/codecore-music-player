@@ -26,13 +26,18 @@ class CoverBackdrop extends ConsumerWidget {
           child: FractionallySizedBox(
             alignment: Alignment.topCenter,
             heightFactor: 0.6,
-            child: AnimatedContainer(
-              duration: ccDuration(context, CcMotion.color),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [tint, cc.bg],
+            child: RepaintBoundary(
+              child: TweenAnimationBuilder<Color?>(
+                tween: ColorTween(end: tint),
+                duration: ccDuration(context, CcMotion.page),
+                builder: (context, c, _) => DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [c ?? tint, cc.bg],
+                    ),
+                  ),
                 ),
               ),
             ),

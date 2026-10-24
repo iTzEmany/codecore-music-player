@@ -118,7 +118,7 @@ class _OnlineResultsState extends ConsumerState<OnlineResults> {
 
   Future<void> _pullToRefresh() async {
     _search(refresh: true);
-    await Future<void>.delayed(const Duration(milliseconds: 400));
+    await Future<void>.delayed(CcTiming.afterRefresh);
   }
 
   void _openArtist(YtmArtistRef artist) =>

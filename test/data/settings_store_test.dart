@@ -83,6 +83,14 @@ void main() {
     expect(s.accent, 'rosa');
   });
 
+  test('the spinning cover is off by default and the choice is kept', () async {
+    SharedPreferences.setMockInitialValues({});
+    final store = await SettingsStore.open();
+    expect(store.readSettings().spinCover, isFalse);
+    await store.writeSettings(const AppSettings(spinCover: true));
+    expect(store.readSettings().spinCover, isTrue);
+  });
+
   test('the listening history is on by default and the choice is kept', () async {
     SharedPreferences.setMockInitialValues({});
     final store = await SettingsStore.open();

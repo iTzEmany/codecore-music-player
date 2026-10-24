@@ -2,23 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../providers/player_providers.dart';
-
-/// The small movements of phase 28.9. Only opacity and transforms (nothing
-/// that changes a size or a layout), 120–220 ms with an easing out, what moves
-/// on its own layer (`RepaintBoundary`), and nothing at all with «Riduci
-/// animazioni».
-abstract final class Motion {
-  static const press = Duration(milliseconds: 120);
-  static const enter = Duration(milliseconds: 180);
-  static const tab = Duration(milliseconds: 160);
-  static const pulse = Duration(milliseconds: 220);
-  static const dot = Duration(milliseconds: 420);
-  static const curve = Curves.easeOutCubic;
-
-  /// Rows that come in one after the other when a list appears.
-  static const staggered = 12;
-  static const stagger = Duration(milliseconds: 20);
-}
+import '../../providers/settings_providers.dart';
+import '../theme/tokens.dart';
 
 /// Shrinks a little (0.97) while pressed: the touch is felt before the next
 /// page opens. It only listens, so taps and long presses still reach [child].
@@ -47,8 +32,8 @@ class _PressScaleState extends State<PressScale> {
       onPointerCancel: (_) => _set(false),
       child: AnimatedScale(
         scale: _down ? 0.97 : 1,
-        duration: Motion.press,
-        curve: Motion.curve,
+        duration: CcMotion.press,
+        curve: CcMotion.curveIn,
         child: RepaintBoundary(child: widget.child),
       ),
     );
@@ -86,7 +71,7 @@ class _EntranceClock extends InheritedWidget {
 }
 
 /// Row [index] of a list that just appeared: it fades in and rises by 8 px,
-/// [Motion.stagger] after the one above. Only the first [Motion.staggered]
+/// [CcMotion.stagger] after the one above. Only the first [CcMotion.staggered]
 /// rows, only inside an [EntranceScope], and only while the list is new.
 class EnterOnce extends StatefulWidget {
   const EnterOnce({super.key, required this.index, required this.child});
@@ -97,8 +82,8 @@ class EnterOnce extends StatefulWidget {
   /// Whether row [index] of a list shown since [since] still comes in at [now].
   @visibleForTesting
   static bool shouldEnter(int index, DateTime? since, DateTime now) {
-    if (since == null || index >= Motion.staggered) return false;
-    final window = Motion.stagger * Motion.staggered + Motion.enter;
+    if (since == null || index >= CcMotion.staggered) return false;
+    final window = CcMotion.stagger * CcMotion.staggered + CcMotion.enter;
     return now.difference(since) < window;
   }
 
@@ -120,12 +105,12 @@ class _EnterOnceState extends State<EnterOnce> with SingleTickerProviderStateMix
       return;
     }
     // One controller covers the wait and the movement: no extra timer.
-    final delay = Motion.stagger * widget.index;
-    final total = delay + Motion.enter;
+    final delay = CcMotion.stagger * widget.index;
+    final total = delay + CcMotion.enter;
     final c = _c = AnimationController(vsync: this, duration: total);
     _t = CurvedAnimation(
       parent: c,
-      curve: Interval(delay.inMicroseconds / total.inMicroseconds, 1, curve: Motion.curve),
+      curve: Interval(delay.inMicroseconds / total.inMicroseconds, 1, curve: CcMotion.curveIn),
     );
     c.forward();
   }
@@ -151,41 +136,16 @@ class _EnterOnceState extends State<EnterOnce> with SingleTickerProviderStateMix
   }
 }
 
-/// Fades the body in when the tab changes; the pages underneath keep their
-/// state (the same element stays, only its opacity moves).
-class TabFade extends StatefulWidget {
-  const TabFade({super.key, required this.index, required this.child});
+/// Keeps the pages underneath alive across a tab change (same element, state
+/// kept). No opacity layer over the whole body: it cost a full-screen
+/// offscreen pass on every tab change (F-44).
+class TabFade extends StatelessWidget {
+  const TabFade({super.key, required this.child});
 
-  final int index;
   final Widget child;
 
   @override
-  State<TabFade> createState() => _TabFadeState();
-}
-
-class _TabFadeState extends State<TabFade> with SingleTickerProviderStateMixin {
-  late final _c = AnimationController(vsync: this, duration: Motion.tab, value: 1);
-  late final _opacity = CurvedAnimation(parent: _c, curve: Motion.curve);
-
-  @override
-  void didUpdateWidget(TabFade old) {
-    super.didUpdateWidget(old);
-    if (old.index != widget.index && !MediaQuery.disableAnimationsOf(context)) {
-      _c.forward(from: 0);
-    }
-  }
-
-  @override
-  void dispose() {
-    _c.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) => FadeTransition(
-        opacity: _opacity,
-        child: RepaintBoundary(child: widget.child),
-      );
+  Widget build(BuildContext context) => RepaintBoundary(child: child);
 }
 
 /// The heart of a favourite: it beats once (up to 1.25 and back) when the
@@ -202,12 +162,12 @@ class HeartIcon extends StatefulWidget {
 }
 
 class _HeartIconState extends State<HeartIcon> with SingleTickerProviderStateMixin {
-  late final _c = AnimationController(vsync: this, duration: Motion.pulse);
+  late final _c = AnimationController(vsync: this, duration: CcMotion.sheet);
   late final _scale = TweenSequence<double>([
     TweenSequenceItem(
-        tween: Tween<double>(begin: 1, end: 1.25).chain(CurveTween(curve: Curves.easeOut)), weight: 45),
+        tween: Tween<double>(begin: 1, end: 1.25).chain(CurveTween(curve: CcMotion.curveIn)), weight: 45),
     TweenSequenceItem(
-        tween: Tween<double>(begin: 1.25, end: 1).chain(CurveTween(curve: Curves.easeIn)), weight: 55),
+        tween: Tween<double>(begin: 1.25, end: 1).chain(CurveTween(curve: CcMotion.curveOut)), weight: 55),
   ]).animate(_c);
 
   @override
@@ -254,8 +214,8 @@ class RiseIn extends StatefulWidget {
 }
 
 class _RiseInState extends State<RiseIn> with SingleTickerProviderStateMixin {
-  late final _c = AnimationController(vsync: this, duration: Motion.enter);
-  late final _t = CurvedAnimation(parent: _c, curve: Motion.curve);
+  late final _c = AnimationController(vsync: this, duration: CcMotion.enter);
+  late final _t = CurvedAnimation(parent: _c, curve: CcMotion.curveIn);
 
   @override
   void didChangeDependencies() {
@@ -286,8 +246,9 @@ class _RiseInState extends State<RiseIn> with SingleTickerProviderStateMixin {
 }
 
 /// Turns [child] once every 30 s while a song plays; it stops at its angle
-/// when paused and starts again from 0 when [trackKey] changes. Not at all
-/// with «Riduci animazioni».
+/// when paused and starts again from 0 when [trackKey] changes. Only when the
+/// «Copertina che ruota» setting is on, never with «Riduci animazioni» and not
+/// while the page is still opening (Hero flight).
 class SpinWhilePlaying extends ConsumerStatefulWidget {
   const SpinWhilePlaying({super.key, required this.trackKey, required this.child});
 
@@ -300,7 +261,7 @@ class SpinWhilePlaying extends ConsumerStatefulWidget {
 
 class _SpinWhilePlayingState extends ConsumerState<SpinWhilePlaying>
     with SingleTickerProviderStateMixin {
-  late final _c = AnimationController(vsync: this, duration: const Duration(seconds: 30));
+  late final _c = AnimationController(vsync: this, duration: CcTiming.coverSpin);
   late bool _playing = ref.read(isPlayingProvider).value ?? false;
 
   @override
@@ -310,13 +271,32 @@ class _SpinWhilePlayingState extends ConsumerState<SpinWhilePlaying>
       _playing = next.value ?? false;
       _sync();
     });
+    ref.listenManual(settingsProvider.select((s) => s.spinCover), (_, _) => _sync());
   }
+
+  Animation<double>? _route;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    final a = ModalRoute.of(context)?.animation;
+    if (a != _route) {
+      _route?.removeStatusListener(_onRoute);
+      _route = a?..addStatusListener(_onRoute);
+    }
     _sync();
   }
+
+  void _onRoute(AnimationStatus status) {
+    // Leaving: back to 0 so the return Hero does not jump.
+    if (status == AnimationStatus.reverse) _c.value = 0;
+    _sync();
+  }
+
+  bool get _enabled =>
+      ref.read(settingsProvider).spinCover &&
+      !MediaQuery.disableAnimationsOf(context) &&
+      (_route == null || _route!.isCompleted);
 
   @override
   void didUpdateWidget(SpinWhilePlaying old) {
@@ -328,7 +308,7 @@ class _SpinWhilePlayingState extends ConsumerState<SpinWhilePlaying>
   }
 
   void _sync() {
-    if (_playing && !MediaQuery.disableAnimationsOf(context)) {
+    if (_playing && _enabled) {
       if (!_c.isAnimating) _c.repeat();
     } else {
       _c.stop();
@@ -337,12 +317,14 @@ class _SpinWhilePlayingState extends ConsumerState<SpinWhilePlaying>
 
   @override
   void dispose() {
+    _route?.removeStatusListener(_onRoute);
     _c.dispose();
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) => MediaQuery.disableAnimationsOf(context)
+  Widget build(BuildContext context) =>
+      MediaQuery.disableAnimationsOf(context) || !ref.watch(settingsProvider.select((s) => s.spinCover))
       ? widget.child
       : RotationTransition(turns: _c, child: RepaintBoundary(child: widget.child));
 }

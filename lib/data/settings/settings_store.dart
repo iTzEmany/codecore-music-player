@@ -31,6 +31,7 @@ class AppSettings {
     this.fontScale = 1.0,
     this.compactMode = false,
     this.reducedMotion = false,
+    this.spinCover = false,
     this.language = 'it',
     this.autoEnrich = false,
     this.autoLyrics = false,
@@ -81,6 +82,8 @@ class AppSettings {
   /// One of the eight accent names (`CcAccent`); unknown ones mean violet.
   final String accent;
   final double fontScale;
+  /// The now-playing cover turns while music plays; off by default.
+  final bool spinCover;
   final bool compactMode, reducedMotion, autoEnrich, autoLyrics, showUndoSnackbar;
 
   /// Deezer as a metadata source (data only); off until the user asks.
@@ -169,6 +172,7 @@ class AppSettings {
     double? fontScale,
     bool? compactMode,
     bool? reducedMotion,
+    bool? spinCover,
     String? language,
     bool? autoEnrich,
     bool? autoLyrics,
@@ -213,6 +217,7 @@ class AppSettings {
         fontScale: fontScale ?? this.fontScale,
         compactMode: compactMode ?? this.compactMode,
         reducedMotion: reducedMotion ?? this.reducedMotion,
+        spinCover: spinCover ?? this.spinCover,
         language: language ?? this.language,
         autoEnrich: autoEnrich ?? this.autoEnrich,
         autoLyrics: autoLyrics ?? this.autoLyrics,
@@ -288,6 +293,7 @@ class SettingsStore {
         fontScale: _prefs.getDouble('fontScale') ?? 1.0,
         compactMode: _prefs.getBool('compactMode') ?? false,
         reducedMotion: _prefs.getBool('reducedMotion') ?? false,
+        spinCover: _prefs.getBool('spinCover') ?? false,
         language: _prefs.getString('language') ?? 'it',
         autoEnrich: _prefs.getBool('autoEnrich') ?? false,
         autoLyrics: _prefs.getBool('autoLyrics') ?? false,
@@ -363,6 +369,7 @@ class SettingsStore {
     await _prefs.setDouble('fontScale', s.fontScale);
     await _prefs.setBool('compactMode', s.compactMode);
     await _prefs.setBool('reducedMotion', s.reducedMotion);
+    await _prefs.setBool('spinCover', s.spinCover);
     await _prefs.setString('language', s.language);
     await _prefs.setBool('autoEnrich', s.autoEnrich);
     await _prefs.setBool('autoLyrics', s.autoLyrics);

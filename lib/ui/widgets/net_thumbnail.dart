@@ -27,7 +27,7 @@ class NetThumbnail extends StatelessWidget {
   /// In place of [icon] while there is no picture (a radio's initial).
   final Widget? placeholderChild;
 
-  static const fade = Duration(milliseconds: 180);
+  static const fade = CcMotion.enter;
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +57,7 @@ class NetThumbnail extends StatelessWidget {
                         : AnimatedOpacity(
                             opacity: frame == null ? 0 : 1,
                             duration: ccDuration(context, fade),
-                            curve: Curves.easeOut,
+                            curve: CcMotion.curveIn,
                             child: image,
                           ),
                     errorBuilder: (_, _, _) => const SizedBox.shrink(),

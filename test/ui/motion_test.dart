@@ -1,10 +1,13 @@
 import 'dart:async';
 
 import 'package:codecore/ui/widgets/motion.dart';
-import 'package:codecore/providers/player_providers.dart';
+import 'package:codecore/ui/theme/app_theme.dart';
+import 'package:codecore/providers/settings_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../support/spin_support.dart';
 
 Widget _app(Widget child, {bool reduce = false}) => MaterialApp(
       home: MediaQuery(
@@ -20,6 +23,7 @@ double _opacity(WidgetTester tester, Finder owner) =>
 Finder _fades(Finder owner) => find.descendant(of: owner, matching: find.byType(FadeTransition));
 
 void main() {
+  pageTransitionTests();
   test('only the first 12 rows of a list just shown come in', () {
     final since = DateTime(2026, 10, 21, 12);
     expect(EnterOnce.shouldEnter(0, since, since), isTrue);
@@ -80,7 +84,7 @@ void main() {
             EntranceScope(child: EnterOnce(index: 0, child: Text('row', key: ValueKey(tab)))),
             const PressScale(child: Text('card')),
             HeartIcon(favorite: fav),
-            Expanded(child: TabFade(index: tab, child: Text('tab $tab'))),
+            Expanded(child: TabFade(child: Text('tab $tab'))),
             const RiseIn(child: Text('mini')),
           ]);
         }),
@@ -94,14 +98,13 @@ void main() {
       });
       await tester.pump();
       expect(tester.hasRunningAnimations, isFalse, reason: 'durations are zero');
-      expect(_opacity(tester, find.byType(TabFade)), 1);
       expect(_opacity(tester, find.byType(RiseIn)), 1);
     });
   });
 
   group('SpinWhilePlaying', () {
-    Widget spin(Object key, {bool playing = true, bool reduce = false}) => ProviderScope(
-          overrides: [isPlayingProvider.overrideWith((_) => Stream.value(playing))],
+    Widget spin(Object key, {bool playing = true, bool reduce = false, bool spinCover = true}) => ProviderScope(
+          overrides: spinOverrides(playing: playing, spinCover: spinCover),
           child: _app(SpinWhilePlaying(trackKey: key, child: const SizedBox(width: 10, height: 10)), reduce: reduce),
         );
     final rotation = find.descendant(of: find.byType(SpinWhilePlaying), matching: find.byType(RotationTransition));
@@ -123,10 +126,10 @@ void main() {
       addTearDown(ctl.close);
       await tester.pumpWidget(ProviderScope(
         overrides: [
-          isPlayingProvider.overrideWith((_) async* {
+          ...spinOverrides(stream: (() async* {
             yield true;
             yield* ctl.stream;
-          }),
+          })()),
         ],
         child: _app(const SpinWhilePlaying(trackKey: 'a', child: SizedBox(width: 10, height: 10))),
       ));
@@ -154,5 +157,77 @@ void main() {
       await tester.pump(const Duration(seconds: 5));
       expect(rotation, findsNothing);
     });
+
+    testWidgets('the setting toggled live starts and stops the spin', (tester) async {
+      await tester.pumpWidget(spin('a', spinCover: false));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 5));
+      expect(rotation, findsNothing);
+      final c = ProviderScope.containerOf(tester.element(find.byType(SpinWhilePlaying)));
+      c.read(settingsProvider.notifier).update((s) => s.copyWith(spinCover: true));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 5));
+      expect(angle(tester), greaterThan(0));
+      c.read(settingsProvider.notifier).update((s) => s.copyWith(spinCover: false));
+      await tester.pump();
+      expect(tester.hasRunningAnimations, isFalse);
+    });
+
+    testWidgets('inside a route it waits for the opening transition', (tester) async {
+      await tester.pumpWidget(ProviderScope(
+        overrides: spinOverrides(),
+        child: const MaterialApp(home: Scaffold(body: Text('home'))),
+      ));
+      final nav = tester.state<NavigatorState>(find.byType(Navigator));
+      nav.push(MaterialPageRoute<void>(
+          builder: (_) => const Scaffold(body: SpinWhilePlaying(trackKey: 'a', child: SizedBox(width: 10, height: 10)))));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(angle(tester), 0, reason: 'no spin while the page opens');
+      await tester.pump(const Duration(seconds: 1)); // the route is done (it keeps turning, so no pumpAndSettle)
+      await tester.pump(const Duration(seconds: 3));
+      expect(angle(tester), greaterThan(0));
+    });
+  });
+}
+
+Widget _routes({bool reduce = false}) => MaterialApp(
+      theme: ThemeData(
+        pageTransitionsTheme: PageTransitionsTheme(builders: {
+          for (final p in TargetPlatform.values) p: const CcPageTransitionsBuilder(),
+        }),
+      ),
+      builder: (c, child) => MediaQuery(
+        data: MediaQuery.of(c).copyWith(disableAnimations: reduce),
+        child: child!,
+      ),
+      home: Builder(
+        builder: (c) => TextButton(
+          onPressed: () => Navigator.of(c).push(MaterialPageRoute<void>(builder: (_) => const Text('next'))),
+          child: const Text('go'),
+        ),
+      ),
+    );
+
+void pageTransitionTests() {
+  testWidgets('page transition has no opacity layer and takes the page duration', (tester) async {
+    await tester.pumpWidget(_routes());
+    await tester.tap(find.text('go'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.descendant(of: find.byType(MaterialApp), matching: find.byType(FadeTransition)), findsNothing);
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.byType(SlideTransition), findsWidgets);
+    await tester.pumpAndSettle();
+    expect(find.text('next'), findsOneWidget);
+  });
+
+  testWidgets('with reduced motion the page switch is instant', (tester) async {
+    await tester.pumpWidget(_routes(reduce: true));
+    await tester.tap(find.text('go'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 1));
+    expect(find.descendant(of: find.byType(MaterialApp), matching: find.byType(SlideTransition)), findsNothing);
+    expect(find.text('next'), findsOneWidget);
   });
 }

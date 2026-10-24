@@ -39,7 +39,11 @@ final _lrc = [
     '[${(i * 5 + 5) ~/ 60}:${((i * 5 + 5) % 60).toString().padLeft(2, '0')}.00]Line ${i.toString().padLeft(2, '0')}',
 ].join('\n');
 
-Future<Harness> _pumpLyrics(WidgetTester tester, {bool reducedMotion = false}) async {
+Future<Harness> _pumpLyrics(
+  WidgetTester tester, {
+  bool reducedMotion = false,
+  bool noAnimations = false,
+}) async {
   _phone(tester);
   final h = await Harness.create(tester, tracks: 1);
   if (reducedMotion) {
@@ -49,7 +53,18 @@ Future<Harness> _pumpLyrics(WidgetTester tester, {bool reducedMotion = false}) a
     await (h.db.update(h.db.tracks)).write(TracksCompanion(lyricsSynced: Value(_lrc)));
     return h.db.select(h.db.tracks).getSingle();
   }))!;
-  await h.pump(tester, Scaffold(body: LyricsView(track: track)));
+  final view = Scaffold(body: LyricsView(track: track));
+  await h.pump(
+    tester,
+    noAnimations
+        ? Builder(
+            builder: (c) => MediaQuery(
+              data: MediaQuery.of(c).copyWith(disableAnimations: true),
+              child: view,
+            ),
+          )
+        : view,
+  );
   return h;
 }
 
@@ -59,9 +74,16 @@ Future<void> _at(WidgetTester tester, Harness h, int seconds) async {
   await tester.pump();
 }
 
-double _opacity(WidgetTester tester, String line) => tester
-    .widget<Opacity>(find.ancestor(of: find.text(line), matching: find.byType(Opacity)).first)
-    .opacity;
+// The row colour fades (200 ms), so the alpha of the text colour is the highlight.
+double _opacity(WidgetTester tester, String line) =>
+    tester.widget<Text>(find.text(line)).style!.color!.a;
+
+/// Lets the 200 ms colour fade finish.
+Future<void> _fade(WidgetTester tester) => tester.pump(const Duration(milliseconds: 250));
+
+/// A row far from the viewport is not built: the view first jumps to an estimated
+/// offset, a frame later it centres the real row.
+Future<void> _reached(WidgetTester tester) => tester.pump();
 
 double _offset(WidgetTester tester) =>
     tester.state<ScrollableState>(find.byType(Scrollable).first).position.pixels;
@@ -126,6 +148,7 @@ void main() {
       final h = await _pumpLyrics(tester);
       expect(_opacity(tester, 'Line 00'), 0.55, reason: 'before the first timestamp nothing is current');
       await _at(tester, h, 52); // Line 09 starts at 50 s
+      await _fade(tester);
       expect(_opacity(tester, 'Line 09'), 1.0);
       expect(_opacity(tester, 'Line 08'), 0.55);
       expect(_opacity(tester, 'Line 10'), 0.35);
@@ -140,14 +163,17 @@ void main() {
       await h.dispose(tester);
     });
 
-    // Relies on GlobalKey + Scrollable.ensureVisible over a SingleChildScrollView:
-    // expected to need updating with F-30 (39.8).
     testWidgets('the list scrolls by itself to keep the current line in view', (tester) async {
       final h = await _pumpLyrics(tester);
       expect(_offset(tester), 0);
       await _at(tester, h, 105); // Line 20
+      await _reached(tester);
       await tester.pump(const Duration(milliseconds: 400)); // first tick
       await tester.pump(const Duration(milliseconds: 400));
+      // The reach of a row not built yet now animates (250 ms per attempt), then ensureVisible.
+      for (var k = 0; k < 4; k++) {
+        await tester.pump(const Duration(milliseconds: 400));
+      }
       expect(_offset(tester), greaterThan(0));
       // ensureVisible(alignment: 0.35): the line's row (8 px padding) sits at 35 % of the viewport.
       expect(tester.getTopLeft(find.text('Line 20')).dy, closeTo(640 * 0.35 + 8, 40));
@@ -158,6 +184,7 @@ void main() {
         (tester) async {
       final h = await _pumpLyrics(tester, reducedMotion: true);
       await _at(tester, h, 105);
+      await _reached(tester);
       final o = _offset(tester);
       expect(o, greaterThan(0));
       await tester.pump(const Duration(milliseconds: 400));
@@ -165,23 +192,62 @@ void main() {
       await h.dispose(tester);
     });
 
-    testWidgets('KNOWN DEFECT: the highlight jumps at once while the scroll animates for 300 ms',
-        (tester) async {
+    // F-30 (39.8): the highlight used to switch at once (plain Opacity); now the colour fades.
+    testWidgets('the highlight fades over 200 ms instead of switching at once', (tester) async {
       final h = await _pumpLyrics(tester);
-      await _at(tester, h, 52);
-      await tester.pump(const Duration(milliseconds: 400));
-      await tester.pump(const Duration(milliseconds: 400));
-      final before = _offset(tester);
-      await _at(tester, h, 105); // far jump: Line 20
-      await tester.pump(const Duration(milliseconds: 16)); // starts the ticker
+      await _at(tester, h, 52); // Line 09
+      await _fade(tester);
+      await _at(tester, h, 57); // Line 10, built and in view
       await tester.pump(const Duration(milliseconds: 100));
-      final o1 = _offset(tester);
-      // Fixed as it is today: the highlight is final at once (plain Opacity),
-      // the scroll is a separate 300 ms animation. A smoother version changes this.
-      expect(_opacity(tester, 'Line 20'), 1.0);
-      expect(o1, greaterThan(before));
-      await tester.pump(const Duration(milliseconds: 300));
-      expect(_offset(tester), greaterThan(o1));
+      expect(_opacity(tester, 'Line 10'), inExclusiveRange(0.35, 1.0));
+      await _fade(tester);
+      expect(_opacity(tester, 'Line 10'), 1.0);
+      expect(_opacity(tester, 'Line 09'), 0.55);
+      await h.dispose(tester);
+    });
+
+    testWidgets('with reduced animations the highlight switches at once', (tester) async {
+      final h = await _pumpLyrics(tester, noAnimations: true);
+      await _at(tester, h, 52);
+      expect(_opacity(tester, 'Line 09'), 1.0);
+      await h.dispose(tester);
+    });
+
+    testWidgets('tall rows in a long song: the current line ends up in view', (tester) async {
+      _phone(tester);
+      final h = await Harness.create(tester, tracks: 1);
+      final long = 'wrapping words ' * 12;
+      final lrc = [
+        for (var i = 0; i < 80; i++)
+          '[${i ~/ 60}:${(i % 60).toString().padLeft(2, '0')}.00]L$i $long',
+      ].join('\n');
+      final track = (await tester.runAsync(() async {
+        await (h.db.update(h.db.tracks)).write(TracksCompanion(lyricsSynced: Value(lrc)));
+        return h.db.select(h.db.tracks).getSingle();
+      }))!;
+      await h.pump(tester, Scaffold(body: LyricsView(track: track)));
+      await _at(tester, h, 70);
+      for (var k = 0; k < 6; k++) {
+        await tester.pump(const Duration(milliseconds: 400));
+      }
+      // A row taller than the viewport is centred, so only part of it shows.
+      final r = tester.getRect(find.textContaining('L70 '));
+      expect(r.top < 640 && r.bottom > 0, isTrue);
+      await h.dispose(tester);
+    });
+
+    testWidgets('the lyrics changing before the scroll callback does not throw', (tester) async {
+      _phone(tester);
+      final h = await Harness.create(tester, tracks: 1);
+      final track = (await tester.runAsync(() async {
+        await (h.db.update(h.db.tracks)).write(TracksCompanion(lyricsSynced: Value(_lrc)));
+        return h.db.select(h.db.tracks).getSingle();
+      }))!;
+      await h.pump(tester, Scaffold(body: LyricsView(track: track)));
+      h.backend.posC.add(const Duration(seconds: 105));
+      await tester.pumpWidget(const SizedBox());
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(tester.takeException(), isNull);
       await h.dispose(tester);
     });
   });
@@ -238,6 +304,12 @@ void main() {
       await h.dispose(tester);
     });
 
+    testWidgets('tags sheet: with 3 tags it is not 70 % tall', (tester) async {
+      final h = await _pumpTagsSheet(tester, 3);
+      expect(tester.getSize(find.byType(BottomSheet)).height, lessThan(640 * 0.7));
+      await h.dispose(tester);
+    });
+
     testWidgets('activity sheet: reaches the last running activity by scrolling', (tester) async {
       _phone(tester);
       final h = await Harness.create(tester);
@@ -278,9 +350,8 @@ void main() {
       await h.dispose(tester);
     });
 
-    testWidgets('with 100 rows not all are built (skip: dopo F-30 (39.x))', (tester) async {
-      // Today the synced lyrics are a SingleChildScrollView + Column: every
-      // line is built, on screen or not.
+    testWidgets('with 100 rows not all are built', (tester) async {
+      // Synced lyrics are a lazy ListView.builder: off-screen lines are not built.
       _phone(tester);
       final h = await Harness.create(tester, tracks: 1);
       final lrc = [
@@ -295,6 +366,6 @@ void main() {
       expect(find.textContaining('Line ', skipOffstage: false).evaluate().length, lessThan(40));
       expect(find.text('Line 99', skipOffstage: false), findsNothing);
       await h.dispose(tester);
-    }, skip: true); // dopo F-30 (39.x) // dopo F-30 (39.x): lazy lists instead of shrinkWrap
+    });
   });
 }

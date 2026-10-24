@@ -110,11 +110,13 @@ class ArtistPickerSheet extends StatelessWidget {
               ),
             ),
             Flexible(
-              child: ListView(
-                shrinkWrap: true,
-                children: [
-                  for (final a in artists)
-                    ListTile(
+              child: ListView.builder(
+                // Many entries already exceed the max height, so lazy changes nothing visible.
+                shrinkWrap: artists.length <= 20,
+                itemCount: artists.length,
+                itemBuilder: (context, i) {
+                  final a = artists[i];
+                  return ListTile(
                       key: ValueKey('pick-${a.id}'),
                       leading: NetThumbnail(
                         url: thumbAt(context, a.thumbnailUrl, 48),
@@ -137,8 +139,8 @@ class ArtistPickerSheet extends StatelessWidget {
                               style: TextStyle(color: cc.textMuted),
                             ),
                       onTap: () => Navigator.pop(context, a),
-                    ),
-                ],
+                    );
+                },
               ),
             ),
           ],

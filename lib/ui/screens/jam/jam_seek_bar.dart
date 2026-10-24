@@ -25,7 +25,7 @@ class _JamSeekBarState extends State<JamSeekBar> {
   @override
   void initState() {
     super.initState();
-    _tick = Timer.periodic(const Duration(milliseconds: 500), (_) {
+    _tick = Timer.periodic(CcTiming.poll, (_) {
       if (mounted && _dragging == null) setState(() {});
     });
   }
