@@ -852,6 +852,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get back => 'Back';
 
   @override
+  String get seekPosition => 'Position in the track';
+
+  @override
   String get settingsPlayback => 'Playback';
 
   @override

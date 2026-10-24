@@ -852,6 +852,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get back => 'Indietro';
 
   @override
+  String get seekPosition => 'Posizione nel brano';
+
+  @override
   String get settingsPlayback => 'Riproduzione';
 
   @override

@@ -5,6 +5,9 @@ import 'package:codecore/ui/screens/now_playing/now_playing_cards.dart';
 import 'package:codecore/ui/shell/app_shell.dart';
 import 'package:codecore/ui/widgets/motion.dart';
 import 'package:codecore/ui/widgets/quality_tag.dart';
+import 'package:codecore/ui/screens/now_playing/now_playing_controls.dart';
+import 'package:codecore/ui/theme/tokens.dart';
+import 'package:codecore/ui/widgets/cover_backdrop.dart';
 import 'package:codecore/ui/widgets/ring_progress.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -97,6 +100,22 @@ void main() {
             of: find.byType(NowPlayingScreen), matching: find.byType(RingProgress)),
         findsOneWidget);
     expect(find.byType(SpinWhilePlaying), findsOneWidget);
+    await h.dispose(tester);
+  });
+
+  testWidgets('the player background is one flat tint (no gradient)', (tester) async {
+    tester.view.physicalSize = const Size(400, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final h = await Harness.create(tester, tracks: 2);
+    final rows = await tester.runAsync(() => h.db.select(h.db.tracks).get());
+    await tester.runAsync(() => h.handler.playQueue([rows!.first.id], 0));
+    await h.pump(tester, const NowPlayingScreen());
+    final scaffold = tester.widget<Scaffold>(
+        find.descendant(of: find.byType(NowPlayingScreen), matching: find.byType(Scaffold)).first);
+    // No cover: the tint falls back to heroBase.
+    expect(scaffold.backgroundColor, CcColors.notte.heroBase);
+    expect(find.byType(CoverBackdrop), findsNothing);
     await h.dispose(tester);
   });
 
@@ -220,7 +239,7 @@ void main() {
         () => h.handler.playQueue(rows!.map((t) => t.id).toList(), 0));
     await h.pump(tester, const NowPlayingScreen());
     final cards = tester.getRect(find.byType(UpNextCard));
-    final slider = tester.getRect(find.byType(Slider).first);
+    final slider = tester.getRect(find.byType(NpSeekRow));
     // Cards end as far from the right edge as the player starts from the left.
     expect(slider.left, closeTo(1600 - cards.right, 1));
     await h.dispose(tester);

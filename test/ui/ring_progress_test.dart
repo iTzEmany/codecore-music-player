@@ -1,9 +1,13 @@
 import 'dart:math' as math;
 
+import 'package:codecore/l10n/app_localizations.dart';
+import 'package:codecore/providers/player_providers.dart';
 import 'package:codecore/ui/shell/app_shell.dart';
 import 'package:codecore/ui/widgets/mini_player.dart';
 import 'package:codecore/ui/widgets/ring_progress.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/app_harness.dart';
@@ -38,6 +42,16 @@ class _Rec implements Canvas {
 
   @override
   void drawCircle(Offset c, double radius, Paint paint) => dots.add(c);
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => null;
+}
+
+class _FakeController implements PlayerController {
+  final seeks = <Duration>[];
+
+  @override
+  Future<void> seek(Duration position) async => seeks.add(position);
 
   @override
   dynamic noSuchMethod(Invocation invocation) => null;
@@ -129,5 +143,88 @@ void main() {
       findsNothing,
     );
     await h.dispose(tester);
+  });
+
+  group('seekable ring (full player)', () {
+    final ctrl = _FakeController();
+    Future<void> pump(WidgetTester tester, {bool seekable = true}) =>
+        tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              playerControllerProvider.overrideWithValue(ctrl),
+              positionProvider.overrideWith((_) => Stream.value(Duration.zero)),
+              durationProvider.overrideWith(
+                (_) => Stream.value(const Duration(seconds: 100)),
+              ),
+            ],
+            child: MaterialApp(
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              locale: const Locale('it'),
+              home: Center(
+                child: RingProgress(
+                  size: 300,
+                  stroke: 12,
+                  seekable: seekable,
+                  child: const SizedBox.expand(),
+                ),
+              ),
+            ),
+          ),
+        );
+
+    setUp(ctrl.seeks.clear);
+
+    testWidgets('dragging on the ring seeks to the position under the finger', (
+      tester,
+    ) async {
+      await pump(tester);
+      final c = tester.getCenter(find.byType(RingProgress));
+      // Bottom of the ring band: 115 deg past the start of the 320 deg arc.
+      final g = await tester.startGesture(c + const Offset(0, 139));
+      await g.moveBy(const Offset(0, 4));
+      expect(ctrl.seeks, isEmpty, reason: 'seek only on release');
+      await g.up();
+      expect(ctrl.seeks, hasLength(1));
+      expect(ctrl.seeks.single.inMilliseconds / 1000, closeTo(36, 1.5));
+    });
+
+    testWidgets('a touch on the cover does not seek', (tester) async {
+      await pump(tester);
+      final c = tester.getCenter(find.byType(RingProgress));
+      await tester.tapAt(c);
+      expect(ctrl.seeks, isEmpty);
+    });
+
+    testWidgets('right arrow with focus seeks +5 s', (tester) async {
+      await pump(tester);
+      Focus.of(
+        tester.element(
+          find
+              .descendant(
+                of: find.byType(RingProgress),
+                matching: find.byType(DecoratedBox),
+              )
+              .first,
+        ),
+      ).requestFocus();
+      await tester.pump();
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      expect(ctrl.seeks.single, const Duration(seconds: 5));
+    });
+
+    testWidgets('screen readers get a slider with +/-10 s', (tester) async {
+      final handle = tester.ensureSemantics();
+      await pump(tester);
+      await tester.pump();
+      final node = tester.getSemantics(
+        find.bySemanticsLabel('Posizione nel brano'),
+      );
+      expect(node.value, '0:00 / 1:40');
+      expect(node.increasedValue, '0:10');
+      tester.semantics.increase(find.semantics.byLabel('Posizione nel brano'));
+      expect(ctrl.seeks.single, const Duration(seconds: 10));
+      handle.dispose();
+    });
   });
 }

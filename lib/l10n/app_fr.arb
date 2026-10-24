@@ -417,6 +417,7 @@
   "repeat": "Répéter",
   "moreOptions": "Plus d’options",
   "back": "Retour",
+  "seekPosition": "Position dans le morceau",
   "settingsPlayback": "Lecture",
   "normalizeVolume": "Normaliser le volume",
   "normalizeVolumeHint": "Utilise le ReplayGain des fichiers pour atténuer les titres trop forts",

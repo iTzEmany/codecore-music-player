@@ -290,6 +290,7 @@
   "repeat": "Repetir",
   "moreOptions": "Más opciones",
   "back": "Atrás",
+  "seekPosition": "Posición en la canción",
   "settingsPlayback": "Reproducción",
   "normalizeVolume": "Normalizar volumen",
   "normalizeVolumeHint": "Usa el ReplayGain de los archivos para bajar canciones muy fuertes",

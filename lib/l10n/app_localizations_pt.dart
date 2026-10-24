@@ -855,6 +855,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get back => 'Voltar';
 
   @override
+  String get seekPosition => 'Posição na faixa';
+
+  @override
   String get settingsPlayback => 'Reprodução';
 
   @override

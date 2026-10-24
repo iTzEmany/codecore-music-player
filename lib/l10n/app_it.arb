@@ -441,6 +441,7 @@
   "repeat": "Ripeti",
   "moreOptions": "Altre opzioni",
   "back": "Indietro",
+  "seekPosition": "Posizione nel brano",
   "settingsPlayback": "Riproduzione",
   "normalizeVolume": "Normalizza volume",
   "normalizeVolumeHint": "Usa il ReplayGain dei file per ridurre i brani troppo forti",

@@ -15,7 +15,6 @@ import '../../../l10n/l10n_ext.dart';
 import '../../../providers/player_providers.dart';
 import '../../shell/shell_nav.dart';
 import '../../theme/tokens.dart';
-import '../../widgets/cover_backdrop.dart';
 import '../../widgets/track_art.dart';
 import 'suggested_info.dart';
 import '../../../providers/radio_providers.dart' show onAirProvider;
@@ -28,6 +27,8 @@ import 'now_playing_cards.dart';
 import 'now_playing_controls.dart';
 import '../../widgets/motion.dart';
 import '../../widgets/ring_progress.dart';
+import '../../../providers/theme_providers.dart';
+import '../../theme/cover_tint.dart';
 
 const _wideBreakpoint = 900.0;
 const _closeDistance = 120.0;
@@ -129,84 +130,83 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
     final online = track != null && track.trackKind == TrackKind.online;
     final wide = MediaQuery.sizeOf(context).width >= _wideBreakpoint;
     final reduce = MediaQuery.disableAnimationsOf(context);
+    // Option «tinta della copertina»: one flat colour, else the theme's own.
+    final themeBg = ref.watch(themeBackgroundProvider);
+    final tinted = !(themeBg.isCustom && !themeBg.coverBackdrop);
     return Scaffold(
-      backgroundColor: cc.bg,
-      body: CoverBackdrop(
-        coverKey: track?.coverKey,
-        child: SafeArea(
-          child: ValueListenableBuilder<double>(
-            valueListenable: _dy,
-            builder: (_, dy, child) => AnimatedContainer(
-              duration: _dragging || reduce ? Duration.zero : CcMotion.sheet,
-              transform: Matrix4.translationValues(0, dy, 0),
-              child: child,
-            ),
-            child: track == null
-                ? _Empty(onClose: () => Navigator.of(context).maybePop())
-                : LayoutBuilder(
-                    builder: (context, c) {
-                      final player = _Player(
-                        track: track,
-                        desktop: widget.desktop ?? isDesktop,
-                        onDragUpdate: (d) {
-                          _dragging = true;
-                          _dy.value = (_dy.value + d.delta.dy).clamp(
-                            0.0,
-                            600.0,
-                          );
-                        },
-                        onDragEnd: _onDragEnd,
-                      );
-                      if (wide) {
-                        // Player and cards form one group, centred, so no hole opens between them.
-                        return Center(
-                          child: ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 1012),
-                            child: Row(
-                              children: [
-                                Flexible(child: player),
-                                const SizedBox(width: 32),
-                                // The player pads its own side by CcDims.margin: mirror it.
-                                Padding(
-                                  padding: const EdgeInsets.only(
-                                    right: CcDims.margin,
-                                  ),
-                                  child: SizedBox(
-                                    width: 420,
-                                    child: ListView(
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: CcDims.gap16,
-                                      ),
-                                      children: _cards(online, track),
+      backgroundColor: tinted
+          ? resolvedHeroTint(context, ref, track?.coverKey)
+          : cc.bg,
+      body: SafeArea(
+        child: ValueListenableBuilder<double>(
+          valueListenable: _dy,
+          builder: (_, dy, child) => AnimatedContainer(
+            duration: _dragging || reduce ? Duration.zero : CcMotion.sheet,
+            transform: Matrix4.translationValues(0, dy, 0),
+            child: child,
+          ),
+          child: track == null
+              ? _Empty(onClose: () => Navigator.of(context).maybePop())
+              : LayoutBuilder(
+                  builder: (context, c) {
+                    final player = _Player(
+                      track: track,
+                      desktop: widget.desktop ?? isDesktop,
+                      onDragUpdate: (d) {
+                        _dragging = true;
+                        _dy.value = (_dy.value + d.delta.dy).clamp(0.0, 600.0);
+                      },
+                      onDragEnd: _onDragEnd,
+                    );
+                    if (wide) {
+                      // Player and cards form one group, centred, so no hole opens between them.
+                      return Center(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 1012),
+                          child: Row(
+                            children: [
+                              Flexible(child: player),
+                              const SizedBox(width: 32),
+                              // The player pads its own side by CcDims.margin: mirror it.
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  right: CcDims.margin,
+                                ),
+                                child: SizedBox(
+                                  width: 420,
+                                  child: ListView(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: CcDims.gap16,
                                     ),
+                                    children: _cards(online, track),
                                   ),
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
-                        );
-                      }
-                      return CustomScrollView(
-                        slivers: [
-                          SliverToBoxAdapter(
-                            child: SizedBox(height: c.maxHeight, child: player),
-                          ),
-                          SliverPadding(
-                            padding: const EdgeInsets.fromLTRB(
-                              CcDims.margin,
-                              0,
-                              CcDims.margin,
-                              CcDims.gap24,
-                            ),
-                            sliver: SliverList.list(
-                              children: _cards(online, track),
-                            ),
-                          ),
-                        ],
+                        ),
                       );
-                    },
-                  ),
-          ),
+                    }
+                    return CustomScrollView(
+                      slivers: [
+                        SliverToBoxAdapter(
+                          child: SizedBox(height: c.maxHeight, child: player),
+                        ),
+                        SliverPadding(
+                          padding: const EdgeInsets.fromLTRB(
+                            CcDims.margin,
+                            0,
+                            CcDims.margin,
+                            CcDims.gap24,
+                          ),
+                          sliver: SliverList.list(
+                            children: _cards(online, track),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
         ),
       ),
     );
@@ -412,12 +412,13 @@ class _PlayerCover extends ConsumerWidget {
         child: LayoutBuilder(
           builder: (_, c) {
             final s = (c.biggest.shortestSide).clamp(80.0, 460.0);
-            const stroke = 4.0;
+            const stroke = 12.0;
             final inner = RingProgress.innerSize(s, stroke: stroke);
             return Center(
               child: RingProgress(
                 size: s,
                 stroke: stroke,
+                seekable: true,
                 live: radio != null,
                 child: SpinWhilePlaying(
                   trackKey: track.id,

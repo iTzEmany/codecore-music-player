@@ -854,6 +854,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get back => 'Atrás';
 
   @override
+  String get seekPosition => 'Posición en la canción';
+
+  @override
   String get settingsPlayback => 'Reproducción';
 
   @override
