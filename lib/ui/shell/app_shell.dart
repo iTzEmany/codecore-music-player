@@ -37,7 +37,6 @@ import 'desktop_player_bar.dart';
 import 'desktop_sidebar.dart';
 import 'shell_keys.dart';
 import 'side_panel.dart';
-import '../widgets/mini_player.dart' show kWideShellBreakpoint;
 import '../widgets/motion.dart';
 
 
@@ -177,7 +176,7 @@ class AppShell extends ConsumerWidget {
     });
     final index = ref.watch(navIndexProvider);
     final keys = ref.watch(tabNavigatorKeysProvider);
-    final wide = MediaQuery.sizeOf(context).width >= kWideShellBreakpoint;
+    final wide = MediaQuery.sizeOf(context).width >= CcDims.wideBreakpoint;
     final l = context.l10n;
     void select(int i) {
       if (i == index) keys[i].currentState?.popUntil((r) => r.isFirst);
@@ -212,7 +211,6 @@ class AppShell extends ConsumerWidget {
       onGenerateRoute: (_) => MaterialPageRoute<void>(builder: (_) => root),
     );
     final body = TabFade(
-      index: index,
       child: IndexedStack(
         index: index,
         children: [

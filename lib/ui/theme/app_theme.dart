@@ -46,7 +46,7 @@ class _PageMotionState extends State<_PageMotion> {
   late final CurvedAnimation _curved = CurvedAnimation(
     parent: widget.animation,
     curve: CcMotion.curveIn,
-    reverseCurve: Curves.easeInCubic,
+    reverseCurve: CcMotion.curveOut,
   );
 
   @override
@@ -57,7 +57,7 @@ class _PageMotionState extends State<_PageMotion> {
 
   @override
   Widget build(BuildContext context) => SlideTransition(
-        position: Tween(begin: const Offset(0.15, 0), end: Offset.zero).animate(_curved),
+        position: Tween(begin: const Offset(1, 0), end: Offset.zero).animate(_curved),
         child: widget.child,
       );
 }

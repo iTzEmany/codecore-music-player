@@ -86,7 +86,7 @@ void main() {
   // layer on every tab change); what stays pinned is the kept state.
   testWidgets('TabFade: changing tab keeps the child state, with no opacity layer',
       (tester) async {
-    Widget app(int i) => MaterialApp(home: TabFade(index: i, child: const _Counter()));
+    Widget app(int i) => MaterialApp(home: TabFade(child: const _Counter()));
     await tester.pumpWidget(app(0));
     await tester.tap(find.text('count 0'));
     await tester.pump();

@@ -140,9 +140,8 @@ class _EnterOnceState extends State<EnterOnce> with SingleTickerProviderStateMix
 /// kept). No opacity layer over the whole body: it cost a full-screen
 /// offscreen pass on every tab change (F-44).
 class TabFade extends StatelessWidget {
-  const TabFade({super.key, required this.index, required this.child});
+  const TabFade({super.key, required this.child});
 
-  final int index;
   final Widget child;
 
   @override
@@ -262,7 +261,7 @@ class SpinWhilePlaying extends ConsumerStatefulWidget {
 
 class _SpinWhilePlayingState extends ConsumerState<SpinWhilePlaying>
     with SingleTickerProviderStateMixin {
-  late final _c = AnimationController(vsync: this, duration: const Duration(seconds: 30));
+  late final _c = AnimationController(vsync: this, duration: CcTiming.coverSpin);
   late bool _playing = ref.read(isPlayingProvider).value ?? false;
 
   @override

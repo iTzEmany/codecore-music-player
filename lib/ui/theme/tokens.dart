@@ -149,6 +149,7 @@ abstract final class CcTiming {
   static const afterRefresh = Duration(milliseconds: 400);
   static const poll = Duration(milliseconds: 500);
   static const avatarPulse = Duration(milliseconds: 1200);
+  static const coverSpin = Duration(seconds: 30);
 }
 
 Duration ccDuration(BuildContext context, Duration d) =>

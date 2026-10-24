@@ -170,6 +170,10 @@ void main() {
       await _reached(tester);
       await tester.pump(const Duration(milliseconds: 400)); // first tick
       await tester.pump(const Duration(milliseconds: 400));
+      // The reach of a row not built yet now animates (250 ms per attempt), then ensureVisible.
+      for (var k = 0; k < 4; k++) {
+        await tester.pump(const Duration(milliseconds: 400));
+      }
       expect(_offset(tester), greaterThan(0));
       // ensureVisible(alignment: 0.35): the line's row (8 px padding) sits at 35 % of the viewport.
       expect(tester.getTopLeft(find.text('Line 20')).dy, closeTo(640 * 0.35 + 8, 40));

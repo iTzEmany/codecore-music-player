@@ -84,7 +84,7 @@ void main() {
             EntranceScope(child: EnterOnce(index: 0, child: Text('row', key: ValueKey(tab)))),
             const PressScale(child: Text('card')),
             HeartIcon(favorite: fav),
-            Expanded(child: TabFade(index: tab, child: Text('tab $tab'))),
+            Expanded(child: TabFade(child: Text('tab $tab'))),
             const RiseIn(child: Text('mini')),
           ]);
         }),

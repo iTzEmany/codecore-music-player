@@ -72,7 +72,7 @@ class _LyricsViewState extends ConsumerState<LyricsView> {
     });
   }
 
-  /// Centres line [i]. A row not built yet is reached by a jump to an offset
+  /// Centres line [i]. A row not built yet is reached by a scroll to an offset
   /// estimated from the rows built so far, then tried again next frame.
   void _reveal(int i, int attempt) {
     final ctx = _keys[i].currentContext;
@@ -91,10 +91,19 @@ class _LyricsViewState extends ConsumerState<LyricsView> {
     final pos = _scroll.position;
     // The list's own extent estimate follows the average built row height.
     final total = pos.maxScrollExtent + pos.viewportDimension;
-    pos.jumpTo((total * i / _lines.length).clamp(0.0, pos.maxScrollExtent));
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    // Aim half a viewport short so the row is inside the built range, not just past it.
+    final target = (total * i / _lines.length - pos.viewportDimension / 2).clamp(0.0, pos.maxScrollExtent);
+    void retry() {
       if (mounted && i < _keys.length) _reveal(i, attempt + 1);
-    });
+    }
+
+    if (ref.read(settingsProvider).reducedMotion) {
+      pos.jumpTo(target);
+      WidgetsBinding.instance.addPostFrameCallback((_) => retry());
+    } else {
+      // Try again once the scroll has landed, so the row is built by then.
+      pos.animateTo(target, duration: CcMotion.sheet, curve: CcMotion.curveIn).then((_) => retry());
+    }
   }
 
   Future<void> _search(Track t) async {
