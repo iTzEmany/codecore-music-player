@@ -23,4 +23,9 @@ class FolderRepository {
   Stream<List<Folder>> watchAll() => _db.select(_db.folders).watch();
 
   Future<List<Folder>> getAll() => _db.select(_db.folders).get();
+
+  /// Root path of every folder, by folder id.
+  Future<Map<int, String>> pathsById() async => {
+        for (final f in await getAll()) f.id: f.path,
+      };
 }
