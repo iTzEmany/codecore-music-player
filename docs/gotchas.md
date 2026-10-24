@@ -1,0 +1,10 @@
+# Trappole
+
+- **Un `TextScaler` su misura deve avere `==` e `hashCode`.** Senza, ogni rebuild del builder di `MaterialApp` passa a `MediaQuery` un valore «diverso», e ogni `Text` rifà il layout. Sul Mi A3 «Pallino schede» è passato dal 3 % al 12 % (fase 40), ed è tornato giù con 261f43e. Lo stesso vale per ogni valore messo in `MediaQuery`, `Theme` o in un `InheritedWidget`.
+- **Integration test su Linux un file per volta** (`for f in integration_test/*_test.dart; do flutter test $f -d linux; done`). Tutti insieme si bloccano fra un'app e l'altra.
+- **Il driver degli integration test deve chiamare `JustAudioMediaKit.ensureInitialized()`**, come `main`. Altrimenti `playback_test` fallisce senza audio (be3e937).
+- **`scripts/perf_device.py` dipende dalla semantica del mini player.** Lo trova come `android.widget.Button`, con «titolo\nartista», sulla riga del bottone «Dispositivi». Se cambia il mini player, vanno aggiornati `mini()` e `setup_mini()`.
+- **Misure con 60–140 frame:** un frame vale 0,7–1,6 punti. Un singolo giro non decide una soglia vicina; per bisecare usa `--only "<scenario>"` su ogni commit, senza `--playback` per confrontare a parità.
+- **`flutter test -d linux` rigenera `lib/l10n/app_localizations*.dart`.** Per un momento `git status` li mostra cambiati, poi tornano identici: non committarli a metà di un giro.
+- **Golden:** si rigenerano solo nei passi che cambiano l'aspetto (D-20), con `--update-goldens`. Le immagini di `test/goldens/failures` vanno cancellate con `pulizia.sh`.
+- **Mi A3, APK di debug:** `install -r -d` (con il solo `-r` va in VERSION_DOWNGRADE).
