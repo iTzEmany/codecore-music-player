@@ -8,12 +8,8 @@ export 'custom_theme.dart';
 export 'theme_background.dart';
 export 'palette.dart';
 
-// shortcut: build-time A/B switch (slide | zoom) for the 39.1 phone measurement;
-// remove it, and the losing variant, after that measurement.
-const _pageTransition = String.fromEnvironment('CC_PAGE_TRANSITION', defaultValue: 'slide');
-
 /// The same page transition on every platform, with no opacity layer (F-40):
-/// a side slide or a light zoom, transform only; none at all with
+/// a side slide, transform only; none at all with
 /// «Riduci animazioni».
 class CcPageTransitionsBuilder extends PageTransitionsBuilder {
   const CcPageTransitionsBuilder();
@@ -33,14 +29,13 @@ class CcPageTransitionsBuilder extends PageTransitionsBuilder {
     Widget child,
   ) {
     if (MediaQuery.disableAnimationsOf(context)) return child;
-    return _PageMotion(animation: animation, zoom: _pageTransition == 'zoom', child: child);
+    return _PageMotion(animation: animation, child: child);
   }
 }
 
 class _PageMotion extends StatefulWidget {
-  const _PageMotion({required this.animation, required this.zoom, required this.child});
+  const _PageMotion({required this.animation, required this.child});
   final Animation<double> animation;
-  final bool zoom;
   final Widget child;
 
   @override
@@ -61,12 +56,10 @@ class _PageMotionState extends State<_PageMotion> {
   }
 
   @override
-  Widget build(BuildContext context) => widget.zoom
-      ? ScaleTransition(scale: Tween(begin: 0.96, end: 1.0).animate(_curved), child: widget.child)
-      : SlideTransition(
-          position: Tween(begin: const Offset(0.15, 0), end: Offset.zero).animate(_curved),
-          child: widget.child,
-        );
+  Widget build(BuildContext context) => SlideTransition(
+        position: Tween(begin: const Offset(0.15, 0), end: Offset.zero).animate(_curved),
+        child: widget.child,
+      );
 }
 
 /// The theme the `theme` setting names: a built-in one with its accent, or one
