@@ -1,9 +1,12 @@
 import '../../widgets/cc_sheet.dart';
+
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+
 import '../../widgets/prompt_name.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/db/app_database.dart';
@@ -77,6 +80,84 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
     if (old != null) await store.fileFor(old)?.delete();
   }
 
+  Future<void> _onAction(
+    _PlaylistAction v,
+    int id,
+    String key,
+    List<Track> tracks,
+  ) async {
+    final l = context.l10n;
+    final ops = ref.read(playlistOpsProvider);
+    switch (v) {
+      case _PlaylistAction.edit:
+        // Reordering and picking do not mix.
+        ref.read(selectionProvider(key).notifier).clear();
+        setState(() => _editing = !_editing);
+      case _PlaylistAction.add:
+        ShellNav.open<void>(context, AddTracksScreen(playlistId: id));
+      case _PlaylistAction.cover:
+        await _pickCover(id);
+      case _PlaylistAction.clearCover:
+        await ops.setCover(id, null);
+      case _PlaylistAction.export:
+        await exportPlaylistFlow(
+          context,
+          ref,
+          playlist: widget.playlist,
+          name: _name,
+          tracks: tracks,
+        );
+      case _PlaylistAction.rename:
+        final n = await promptName(
+          context,
+          initial: _name,
+          confirmLabel: l.save,
+          title: l.renamePlaylist,
+          hint: l.playlistName,
+        );
+        if (n == null) return;
+        await ops.rename(id, n);
+        if (mounted) setState(() => _name = n);
+      case _PlaylistAction.delete:
+        final ok = await showConfirm(
+          context,
+          title: l.confirmDeletePlaylistTitle,
+          body: l.confirmDeletePlaylistBody(_name),
+          confirmLabel: l.delete,
+          destructive: true,
+        );
+        if (!ok) return;
+        await ops.delete(id);
+        if (mounted) Navigator.of(context).pop();
+    }
+  }
+
+  List<PopupMenuEntry<_PlaylistAction>> _menuItems(bool hasCustomCover) {
+    final l = context.l10n;
+    return [
+      PopupMenuItem(
+        value: _PlaylistAction.edit,
+        child: Text(_editing ? l.finishEditing : l.editOrder),
+      ),
+      PopupMenuItem(value: _PlaylistAction.add, child: Text(l.addSongs)),
+      PopupMenuItem(
+        value: _PlaylistAction.cover,
+        child: Text(l.playlistChangeCover),
+      ),
+      if (hasCustomCover)
+        PopupMenuItem(
+          value: _PlaylistAction.clearCover,
+          child: Text(l.playlistRemoveCover),
+        ),
+      PopupMenuItem(
+        value: _PlaylistAction.export,
+        child: Text(l.exportPlaylist),
+      ),
+      PopupMenuItem(value: _PlaylistAction.rename, child: Text(l.rename)),
+      PopupMenuItem(value: _PlaylistAction.delete, child: Text(l.delete)),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
@@ -103,37 +184,15 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
     );
 
     Future<void> remove(Track t, int i) async {
-      final undo = await ops.removeTrack(id, t.id, index: i, length: tracks.length);
+      final undo = await ops.removeTrack(
+        id,
+        t.id,
+        index: i,
+        length: tracks.length,
+      );
       if (!context.mounted) return;
       showUndoSnack(context, l.removedFromPlaylist, undo);
     }
-
-    void rowMenu(Track t, int i) => showCcSheet<void>(
-      context: context,
-      builder: (sheet) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.playlist_remove_rounded),
-              title: Text(l.removeFromPlaylistAction),
-              onTap: () {
-                Navigator.of(sheet).pop();
-                remove(t, i);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.more_horiz_rounded),
-              title: Text(l.moreActions),
-              onTap: () {
-                Navigator.of(sheet).pop();
-                showTrackActions(context, ref, t);
-              },
-            ),
-          ],
-        ),
-      ),
-    );
 
     final Widget list;
     if (tracks.isEmpty) {
@@ -153,48 +212,11 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
         onReorderItem: (from, to) => ops.reorder(id, from, to),
         itemBuilder: (_, i) {
           final t = tracks[i];
-          return Material(
+          return _EditRow(
             key: ValueKey('pl-edit-${t.id}'),
-            color: Colors.transparent,
-            child: SizedBox(
-              height: 64,
-              child: Row(
-                children: [
-                  ReorderableDragStartListener(
-                    index: i,
-                    child: const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: CcDims.margin),
-                      child: Icon(Icons.drag_handle_rounded),
-                    ),
-                  ),
-                  Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          t.title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.bodyLarge,
-                        ),
-                        Text(
-                          t.artist ?? l.unknownArtist,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                      ],
-                    ),
-                  ),
-                  IconButton(
-                    tooltip: l.removeFromPlaylistAction,
-                    icon: const Icon(Icons.close_rounded),
-                    onPressed: () => remove(t, i),
-                  ),
-                ],
-              ),
-            ),
+            track: t,
+            index: i,
+            onRemove: () => remove(t, i),
           );
         },
       );
@@ -212,7 +234,7 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
                   track: t,
                   compact: compact,
                   selection: selection,
-                  onMore: () => rowMenu(t, i),
+                  onMore: () => _rowMenu(context, ref, t, () => remove(t, i)),
                   onTap: () => ctrl.playFromList(tracks, i, context: playCtx),
                 ),
               ),
@@ -240,69 +262,12 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
         onPlay: tracks.isEmpty
             ? null
             : () => ctrl.playAll(tracks, context: playCtx),
-        onShuffle: tracks.isEmpty
-            ? null
-            : ctrl.toggleShuffle,
+        onShuffle: tracks.isEmpty ? null : ctrl.toggleShuffle,
         menu: PopupMenuButton<_PlaylistAction>(
           tooltip: l.moreActions,
           icon: const Icon(Icons.more_horiz_rounded),
-          onSelected: (v) async {
-            switch (v) {
-              case _PlaylistAction.edit:
-                // Reordering and picking do not mix.
-                ref.read(selectionProvider(key).notifier).clear();
-                setState(() => _editing = !_editing);
-              case _PlaylistAction.add:
-                ShellNav.open<void>(context, AddTracksScreen(playlistId: id));
-              case _PlaylistAction.cover:
-                await _pickCover(id);
-              case _PlaylistAction.clearCover:
-                await ops.setCover(id, null);
-              case _PlaylistAction.export:
-                await exportPlaylistFlow(
-                  context,
-                  ref,
-                  playlist: widget.playlist,
-                  name: _name,
-                  tracks: tracks,
-                );
-              case _PlaylistAction.rename:
-                final n = await promptName(
-                  context,
-                  initial: _name,
-                  confirmLabel: l.save,
-                  title: l.renamePlaylist,
-                  hint: l.playlistName,
-                );
-                if (n == null) return;
-                await ops.rename(id, n);
-                if (mounted) setState(() => _name = n);
-              case _PlaylistAction.delete:
-                final ok = await showConfirm(
-                  context,
-                  title: l.confirmDeletePlaylistTitle,
-                  body: l.confirmDeletePlaylistBody(_name),
-                  confirmLabel: l.delete,
-                  destructive: true,
-                );
-                if (!ok) return;
-                await ops.delete(id);
-                if (context.mounted) Navigator.of(context).pop();
-            }
-          },
-          itemBuilder: (_) => [
-            PopupMenuItem(
-              value: _PlaylistAction.edit,
-              child: Text(_editing ? l.finishEditing : l.editOrder),
-            ),
-            PopupMenuItem(value: _PlaylistAction.add, child: Text(l.addSongs)),
-            PopupMenuItem(value: _PlaylistAction.cover, child: Text(l.playlistChangeCover)),
-            if (custom != null)
-              PopupMenuItem(value: _PlaylistAction.clearCover, child: Text(l.playlistRemoveCover)),
-            PopupMenuItem(value: _PlaylistAction.export, child: Text(l.exportPlaylist)),
-            PopupMenuItem(value: _PlaylistAction.rename, child: Text(l.rename)),
-            PopupMenuItem(value: _PlaylistAction.delete, child: Text(l.delete)),
-          ],
+          onSelected: (v) => _onAction(v, id, key, tracks),
+          itemBuilder: (_) => _menuItems(custom != null),
         ),
         slivers: [
           SliverToBoxAdapter(child: ImportBanner(playlistId: id)),
@@ -314,3 +279,98 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
 }
 
 enum _PlaylistAction { edit, add, cover, clearCover, export, rename, delete }
+
+void _rowMenu(
+  BuildContext context,
+  WidgetRef ref,
+  Track t,
+  VoidCallback remove,
+) {
+  final l = context.l10n;
+  showCcSheet<void>(
+    context: context,
+    builder: (sheet) => SafeArea(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            leading: const Icon(Icons.playlist_remove_rounded),
+            title: Text(l.removeFromPlaylistAction),
+            onTap: () {
+              Navigator.of(sheet).pop();
+              remove();
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.more_horiz_rounded),
+            title: Text(l.moreActions),
+            onTap: () {
+              Navigator.of(sheet).pop();
+              showTrackActions(context, ref, t);
+            },
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+class _EditRow extends StatelessWidget {
+  const _EditRow({
+    super.key,
+    required this.track,
+    required this.index,
+    required this.onRemove,
+  });
+
+  final Track track;
+  final int index;
+  final VoidCallback onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    return Material(
+      color: Colors.transparent,
+      child: SizedBox(
+        height: 64,
+        child: Row(
+          children: [
+            ReorderableDragStartListener(
+              index: index,
+              child: const Padding(
+                padding: EdgeInsets.symmetric(horizontal: CcDims.margin),
+                child: Icon(Icons.drag_handle_rounded),
+              ),
+            ),
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    track.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                  Text(
+                    track.artist ?? l.unknownArtist,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ],
+              ),
+            ),
+            IconButton(
+              tooltip: l.removeFromPlaylistAction,
+              icon: const Icon(Icons.close_rounded),
+              onPressed: onRemove,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
