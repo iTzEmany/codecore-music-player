@@ -303,10 +303,7 @@ class _Player extends ConsumerWidget {
                           textAlign: TextAlign.center,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: theme.labelSmall?.copyWith(
-                            fontSize: 11,
-                            color: cc.textMuted,
-                          ),
+                          style: theme.labelSmall,
                         ),
                         if (ctx != null)
                           Text(
@@ -315,7 +312,6 @@ class _Player extends ConsumerWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: theme.bodyMedium?.copyWith(
-                              fontSize: 13,
                               fontWeight: FontWeight.w600,
                               color: cc.text,
                             ),

@@ -164,9 +164,15 @@ TextStyle ccStyle(
   fontFeatures: tabular ? const [FontFeature.tabularFigures()] : null,
 );
 
+/// The only place a size is set outside [buildTextTheme]: sizes that follow
+/// a widget's own size (monograms) or a fit-to-width factor.
+extension CcTextStyle on TextStyle {
+  TextStyle sized(double size) => copyWith(fontSize: size);
+}
+
 TextTheme buildTextTheme(CcColors c) => TextTheme(
-  displaySmall: ccStyle(_unbounded, 30, 700, color: c.text, height: 1.1),
-  headlineSmall: ccStyle(_unbounded, 24, 600, color: c.text),
+  displaySmall: ccStyle(_unbounded, 28, 700, color: c.text, height: 1.1),
+  headlineSmall: ccStyle(_unbounded, 20, 600, color: c.text),
   titleLarge: ccStyle(_figtree, 22, 700, color: c.text),
   titleMedium: ccStyle(_figtree, 18, 700, color: c.text),
   titleSmall: ccStyle(_figtree, 14, 700, color: c.text),

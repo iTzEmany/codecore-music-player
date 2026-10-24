@@ -72,10 +72,9 @@ class SelectionBox extends StatelessWidget {
                     child: FittedBox(
                       child: Text(
                         position! > 99 ? '99+' : '$position',
-                        style: TextStyle(
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: cc.onAccent,
                           fontWeight: FontWeight.w700,
-                          fontSize: 13,
                         ),
                       ),
                     ),

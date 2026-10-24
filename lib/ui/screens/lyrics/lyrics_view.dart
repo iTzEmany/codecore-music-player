@@ -198,20 +198,14 @@ class _LyricsViewState extends ConsumerState<LyricsView> {
           children: [
             SelectableText(
               plain,
-              style: theme.bodyLarge?.copyWith(
-                fontSize: 20,
-                fontWeight: FontWeight.w500,
-              ),
+              style: theme.titleLarge?.copyWith(fontWeight: FontWeight.w500),
             ),
             if (translated != null && !translated.synced) ...[
               const Divider(height: 32),
               SelectableText(
                 translated.lines.join('\n'),
                 key: const ValueKey('translated-plain'),
-                style: theme.bodyLarge?.copyWith(
-                  fontSize: 18,
-                  color: cc.textMuted,
-                ),
+                style: theme.titleMedium?.copyWith(color: cc.textMuted),
               ),
             ],
           ],
@@ -291,10 +285,7 @@ class _LyricRowState extends State<_LyricRow> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context).textTheme;
-    final big = theme.titleLarge?.copyWith(
-      fontSize: 24,
-      fontWeight: FontWeight.w700,
-    );
+    final big = theme.titleLarge;
     final small = theme.titleMedium?.copyWith(color: context.cc.textMuted);
     Color? fade(TextStyle? s, double a) =>
         s?.color?.withValues(alpha: a * (s.color?.a ?? 1));

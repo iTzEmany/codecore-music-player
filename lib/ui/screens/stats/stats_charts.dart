@@ -33,7 +33,7 @@ class StatsBars extends StatelessWidget {
             color: cc.accent,
             emptyColor: cc.surface3,
             labels: [for (var i = 0; i < values.length; i++) labelOf(i)],
-            labelStyle: style ?? const TextStyle(fontSize: 11),
+            labelStyle: style ?? const TextStyle(),
             textDirection: Directionality.of(context),
           ),
         ),

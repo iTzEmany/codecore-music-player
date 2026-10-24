@@ -133,7 +133,6 @@ class _SyncedLines extends ConsumerWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                fontSize: i == index ? 17 : 15,
                 fontWeight: i == index ? FontWeight.w700 : FontWeight.w500,
                 color: i == index ? cc.text : cc.textMuted,
               ),

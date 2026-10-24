@@ -256,7 +256,7 @@ class _FittedName extends StatelessWidget {
           key: const ValueKey('collection-name'),
           maxLines: 3,
           overflow: TextOverflow.ellipsis,
-          style: k < 1 ? style.copyWith(fontSize: style.fontSize! * k) : style,
+          style: k < 1 ? style.sized(style.fontSize! * k) : style,
         );
       },
     );

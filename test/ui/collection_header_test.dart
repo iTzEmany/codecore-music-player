@@ -27,7 +27,7 @@ void main() {
     testWidgets('long single word title shrinks instead of breaking ($scale)',
         (tester) async {
       await _pump(tester,
-          const CollectionHeader(name: 'Supercalifragil'),
+          const CollectionHeader(name: 'Supercalifragilis'),
           scale: scale);
       final text = tester.widget<Text>(find.byKey(const ValueKey('collection-name')));
       final box = tester.renderObject<RenderParagraph>(

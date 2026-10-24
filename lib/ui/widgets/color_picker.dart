@@ -311,7 +311,7 @@ class _CcColorPickerState extends State<CcColorPicker> {
         ],
         if (widget.recent.isNotEmpty) ...[
           const SizedBox(height: 12),
-          Text(l.recent, style: TextStyle(color: cc.textMuted, fontSize: 12)),
+          Text(l.recent, style: Theme.of(context).textTheme.bodySmall),
           const SizedBox(height: 6),
           Wrap(
             spacing: 8,
@@ -353,7 +353,7 @@ class _Caption extends StatelessWidget {
     padding: const EdgeInsets.only(bottom: 2),
     child: Text(
       text,
-      style: TextStyle(color: context.cc.textMuted, fontSize: 12),
+      style: Theme.of(context).textTheme.bodySmall,
     ),
   );
 }

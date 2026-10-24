@@ -28,11 +28,7 @@ class JamAvatar extends StatelessWidget {
       decoration: BoxDecoration(color: color, shape: BoxShape.circle),
       child: Text(
         artistMonogram(name),
-        style: TextStyle(
-          fontSize: size * 0.38,
-          fontWeight: FontWeight.w700,
-          color: context.cc.text,
-        ),
+        style: Theme.of(context).textTheme.titleSmall!.sized(size * 0.38),
       ),
     );
   }
