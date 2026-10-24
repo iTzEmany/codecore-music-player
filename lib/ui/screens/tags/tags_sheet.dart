@@ -215,11 +215,13 @@ class _TagsSheetState extends ConsumerState<_TagsSheet> {
               onTap: _create,
             ),
             Flexible(
-              child: ListView(
-                shrinkWrap: true,
-                children: [
-                  for (final s in tags)
-                    CheckboxListTile(
+              child: ListView.builder(
+                // Many entries already exceed the max height, so lazy changes nothing visible.
+                shrinkWrap: tags.length <= 20,
+                itemCount: tags.length,
+                itemBuilder: (_, i) {
+                  final s = tags[i];
+                  return CheckboxListTile(
                       tristate: true,
                       value: !_loaded
                           ? false
@@ -232,8 +234,8 @@ class _TagsSheetState extends ConsumerState<_TagsSheet> {
                       secondary: TagDot(s.tag),
                       title: Text(s.tag.name),
                       subtitle: Text(l.tracksCount(s.trackCount)),
-                    ),
-                ],
+                    );
+                },
               ),
             ),
           ],
@@ -274,11 +276,13 @@ Future<void> pickTagFor(
     builder: (c) => SafeArea(
       child: ConstrainedBox(
         constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(c).height * 0.7),
-        child: ListView(
-          shrinkWrap: true,
-          children: [
-            if (!remove)
-              ListTile(
+        child: ListView.builder(
+          // Many entries already exceed the max height, so lazy changes nothing visible.
+          shrinkWrap: choices.length <= 20,
+          itemCount: choices.length + (remove ? 0 : 1),
+          itemBuilder: (_, k) {
+            if (!remove && k == 0) {
+              return ListTile(
                 leading: const Icon(Icons.add_rounded),
                 title: Text(l.tagNew),
                 onTap: () async {
@@ -288,15 +292,16 @@ Future<void> pickTagFor(
                   final tag = await repo.byName(name);
                   if (tag != null && c.mounted && tag.id == id) Navigator.of(c).pop(tag);
                 },
-              ),
-            for (final s in choices)
-              ListTile(
-                leading: TagDot(s.tag),
-                title: Text(s.tag.name),
-                subtitle: Text(l.tracksCount(s.trackCount)),
-                onTap: () => Navigator.of(c).pop(s.tag),
-              ),
-          ],
+              );
+            }
+            final s = choices[remove ? k : k - 1];
+            return ListTile(
+              leading: TagDot(s.tag),
+              title: Text(s.tag.name),
+              subtitle: Text(l.tracksCount(s.trackCount)),
+              onTap: () => Navigator.of(c).pop(s.tag),
+            );
+          },
         ),
       ),
     ),

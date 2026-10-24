@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart' show Value;
+import 'package:flutter/foundation.dart' show ValueListenable, ValueNotifier;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -40,7 +41,8 @@ class _LyricsViewState extends ConsumerState<LyricsView> {
   List<LrcLine> _lines = const [];
   List<GlobalKey> _keys = const [];
   String? _parsedFor;
-  int _index = -1;
+  final _index = ValueNotifier<int>(-1);
+  final _scroll = ScrollController();
   bool _searching = false;
 
   void _ensureParsed(String? synced) {
@@ -48,18 +50,34 @@ class _LyricsViewState extends ConsumerState<LyricsView> {
     _parsedFor = synced;
     _lines = synced == null ? const [] : parseLrc(synced);
     _keys = [for (var i = 0; i < _lines.length; i++) GlobalKey()];
-    _index = -1;
+    _index.value = -1;
+  }
+
+  @override
+  void dispose() {
+    _index.dispose();
+    _scroll.dispose();
+    super.dispose();
   }
 
   void _onPosition(Duration pos) {
     if (_lines.isEmpty) return;
     final i = currentLrcIndex(_lines, pos);
-    if (i == _index) return;
-    setState(() => _index = i);
+    if (i == _index.value) return;
+    _index.value = i;
     if (i < 0) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final ctx = i < _keys.length ? _keys[i].currentContext : null;
-      if (ctx == null || !ctx.mounted) return;
+      if (!mounted || i >= _keys.length) return;
+      _reveal(i, 0);
+    });
+  }
+
+  /// Centres line [i]. A row not built yet is reached by a jump to an offset
+  /// estimated from the rows built so far, then tried again next frame.
+  void _reveal(int i, int attempt) {
+    final ctx = _keys[i].currentContext;
+    if (ctx != null) {
+      if (!ctx.mounted) return;
       final reduce = ref.read(settingsProvider).reducedMotion;
       Scrollable.ensureVisible(
         ctx,
@@ -67,6 +85,15 @@ class _LyricsViewState extends ConsumerState<LyricsView> {
         duration: reduce ? Duration.zero : const Duration(milliseconds: 300),
         curve: Curves.easeOut,
       );
+      return;
+    }
+    if (attempt >= 3 || !_scroll.hasClients) return;
+    final pos = _scroll.position;
+    // The list's own extent estimate follows the average built row height.
+    final total = pos.maxScrollExtent + pos.viewportDimension;
+    pos.jumpTo((total * i / _lines.length).clamp(0.0, pos.maxScrollExtent));
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && i < _keys.length) _reveal(i, attempt + 1);
     });
   }
 
@@ -129,54 +156,28 @@ class _LyricsViewState extends ConsumerState<LyricsView> {
 
     if (_lines.isNotEmpty) {
       final ctrl = ref.read(playerControllerProvider);
-      return SingleChildScrollView(
+      return ListView.builder(
+        controller: _scroll,
         padding: const EdgeInsets.fromLTRB(
           CcDims.margin,
           24,
           CcDims.margin,
           200,
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            for (var i = 0; i < _lines.length; i++)
-              InkWell(
-                key: _keys[i],
-                onTap: () => ctrl.seek(_lines[i].time),
-                borderRadius: BorderRadius.circular(8),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: Opacity(
-                    opacity: _index < 0
-                        ? 0.55
-                        : (i == _index ? 1.0 : (i < _index ? 0.55 : 0.35)),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          _lines[i].text.isEmpty ? '♪' : _lines[i].text,
-                          style: theme.titleLarge?.copyWith(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        if (translated != null &&
-                            translated.synced &&
-                            i < translated.lines.length &&
-                            translated.lines[i] != _lines[i].text)
-                          Text(
-                            translated.lines[i],
-                            key: ValueKey('translated-$i'),
-                            style: theme.titleMedium?.copyWith(
-                              color: cc.textMuted,
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-          ],
+        itemCount: _lines.length,
+        itemBuilder: (_, i) => _LyricRow(
+          key: _keys[i],
+          index: i,
+          current: _index,
+          onTap: () => ctrl.seek(_lines[i].time),
+          text: _lines[i].text.isEmpty ? '♪' : _lines[i].text,
+          translation:
+              translated != null &&
+                  translated.synced &&
+                  i < translated.lines.length &&
+                  translated.lines[i] != _lines[i].text
+              ? translated.lines[i]
+              : null,
         ),
       );
     }
@@ -228,6 +229,88 @@ class _LyricsViewState extends ConsumerState<LyricsView> {
                   child: Text(l.searchLyrics),
                 ),
         ],
+      ),
+    );
+  }
+}
+
+/// One synced line: only the old and the new current row repaint on a change;
+/// the colour fades instead of an Opacity layer.
+class _LyricRow extends StatefulWidget {
+  const _LyricRow({
+    super.key,
+    required this.index,
+    required this.current,
+    required this.onTap,
+    required this.text,
+    this.translation,
+  });
+
+  final int index;
+  final ValueListenable<int> current;
+  final VoidCallback onTap;
+  final String text;
+  final String? translation;
+
+  @override
+  State<_LyricRow> createState() => _LyricRowState();
+}
+
+class _LyricRowState extends State<_LyricRow> {
+  late double _alpha = _alphaFor(widget.current.value);
+
+  double _alphaFor(int cur) => cur < 0
+      ? 0.55
+      : (widget.index == cur ? 1.0 : (widget.index < cur ? 0.55 : 0.35));
+
+  void _changed() {
+    final a = _alphaFor(widget.current.value);
+    if (a != _alpha) setState(() => _alpha = a);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    widget.current.addListener(_changed);
+  }
+
+  @override
+  void dispose() {
+    widget.current.removeListener(_changed);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context).textTheme;
+    final big = theme.titleLarge?.copyWith(
+      fontSize: 24,
+      fontWeight: FontWeight.w700,
+    );
+    final small = theme.titleMedium?.copyWith(color: context.cc.textMuted);
+    Color? fade(TextStyle? s, double a) =>
+        s?.color?.withValues(alpha: a * (s.color?.a ?? 1));
+    return InkWell(
+      onTap: widget.onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: TweenAnimationBuilder<double>(
+          tween: Tween(end: _alpha),
+          duration: ccDuration(context, const Duration(milliseconds: 200)),
+          builder: (_, a, _) => Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(widget.text, style: big?.copyWith(color: fade(big, a))),
+              if (widget.translation != null)
+                Text(
+                  widget.translation!,
+                  key: ValueKey('translated-${widget.index}'),
+                  style: small?.copyWith(color: fade(small, a)),
+                ),
+            ],
+          ),
+        ),
       ),
     );
   }
