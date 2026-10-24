@@ -22,6 +22,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:just_audio_media_kit/just_audio_media_kit.dart';
 import 'package:path/path.dart' as p;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -68,6 +69,8 @@ class AppUnderTest {
   static const names = ['Tone A', 'Tone B', 'Tone C', 'Tone D'];
 
   static Future<AppUnderTest> create({double seconds = 2.5}) async {
+    // Same as lib/main.dart: desktop has no native just_audio plugin.
+    if (Platform.isLinux || Platform.isWindows) JustAudioMediaKit.ensureInitialized();
     SharedPreferences.setMockInitialValues({'onboardingDone': true, 'autoEnrich': false, 'autoLyrics': false});
     final dir = await Directory.systemTemp.createTemp('codecore-it');
     final music = Directory(p.join(dir.path, 'music'))..createSync();
