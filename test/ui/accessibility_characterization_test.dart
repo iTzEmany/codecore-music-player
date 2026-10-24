@@ -56,22 +56,28 @@ void main() {
     await h.dispose(tester);
   });
 
-  testWidgets('mini player and dock at 200 %: KNOWN DEFECT, the mini player overflows',
-      (tester) async {
+  testWidgets('mini player and dock at 200 %: no overflow', (tester) async {
     _phone(tester);
     final h = await _playing(tester);
     await h.pump(tester, const AppShell(), textScale: 2.0);
     await _settle(tester);
-    // The text column of the mini player is taller than its 56 px bar.
-    final errors = <String>[];
-    Object? e;
-    while ((e = tester.takeException()) != null) {
-      errors.add(e.toString());
-    }
-    expect(errors, isNotEmpty);
-    expect(errors, everyElement(contains('overflowed')));
-    // Still usable: the dock and the current title are on screen.
+    expect(tester.takeException(), isNull);
     expect(find.text('Song 0'), findsWidgets);
+    await h.dispose(tester);
+  });
+
+  testWidgets('system 1,5 x app 1,5 is capped at 2,0 (D-31)', (tester) async {
+    _phone(tester, scale: 1.5);
+    final h = await Harness.create(tester, tracks: 1);
+    await tester.pumpWidget(
+        ProviderScope(overrides: h.overrides, child: const CodecoreApp()));
+    await tester.pump(const Duration(milliseconds: 600));
+    final ctx = tester.element(find.byType(AppShell));
+    ProviderScope.containerOf(ctx)
+        .read(settingsProvider.notifier)
+        .update((s) => s.copyWith(fontScale: 1.5));
+    await tester.pump();
+    expect(MediaQuery.of(ctx).textScaler.scale(10), closeTo(20, 1e-6));
     await h.dispose(tester);
   });
 

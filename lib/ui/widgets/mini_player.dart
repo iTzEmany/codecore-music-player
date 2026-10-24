@@ -151,8 +151,9 @@ class _MiniPlayerState extends ConsumerState<MiniPlayer>
     }
 
     final card = FocusTraversalGroup(
-      child: SizedBox(
-        height: CcDims.miniPlayerHeight,
+      child: ConstrainedBox(
+        // Grows with the text so nothing overflows at 200 %.
+        constraints: const BoxConstraints(minHeight: CcDims.miniPlayerHeight),
         child: Row(
           children: [
             const SizedBox(width: 8),
@@ -182,6 +183,7 @@ class _MiniPlayerState extends ConsumerState<MiniPlayer>
             const SizedBox(width: 12),
             Expanded(
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -190,7 +192,6 @@ class _MiniPlayerState extends ConsumerState<MiniPlayer>
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: theme.titleSmall?.copyWith(
-                      fontSize: 14,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
