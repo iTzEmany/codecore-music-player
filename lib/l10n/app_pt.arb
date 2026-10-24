@@ -1519,6 +1519,7 @@
   "onboardingNext": "Seguinte",
   "onboardingStart": "Começar",
   "onboardingPageOf": "Página {page} de {total}",
+  "onboardingStepOf": "{page} de {total}",
   "@onboardingPageOf": {
     "placeholders": {
       "page": {

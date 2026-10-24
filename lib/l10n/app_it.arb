@@ -1690,6 +1690,17 @@
       }
     }
   },
+  "onboardingStepOf": "{page} di {total}",
+  "@onboardingStepOf": {
+    "placeholders": {
+      "page": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "onboardingWelcomeTitle": "Benvenuto in Codecore",
   "onboardingWelcomeBody": "Il tuo lettore musicale personale: niente account, niente server. La musica resta sul tuo dispositivo.",
   "onboardingFoldersTitle": "La tua musica",

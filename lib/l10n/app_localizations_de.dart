@@ -2672,6 +2672,11 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String onboardingStepOf(int page, int total) {
+    return '$page von $total';
+  }
+
+  @override
   String get onboardingWelcomeTitle => 'Willkommen bei Codecore';
 
   @override

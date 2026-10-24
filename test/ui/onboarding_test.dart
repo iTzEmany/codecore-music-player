@@ -1,4 +1,10 @@
+import 'dart:async';
+
+import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/data/repositories/folder_repository.dart';
+import 'package:codecore/providers/library_providers.dart';
+import 'package:codecore/services/scanner/library_scanner.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:codecore/data/settings/settings_store.dart';
 import 'package:codecore/providers/settings_providers.dart';
 import 'package:codecore/ui/screens/onboarding/onboarding_gate.dart';
@@ -22,6 +28,33 @@ AppSettings _settings(WidgetTester tester) => ProviderScope.containerOf(
 Future<void> _openGate(WidgetTester tester, Harness h) async {
   await h.pump(tester, const OnboardingGate(child: Scaffold(body: Text('APP'))));
   await _settle(tester);
+}
+
+class _FakePicker extends FilePickerPlatform {
+  @override
+  Future<String?> getDirectoryPath({
+    String? dialogTitle,
+    String? initialDirectory,
+    AndroidOptions androidOptions = const AndroidOptions(),
+    WindowsOptions windowsOptions = const WindowsOptions(),
+    LinuxOptions linuxOptions = const LinuxOptions(),
+    WebOptions webOptions = const WebOptions(),
+  }) async => '/tmp/codecore-onboarding-scan';
+}
+
+/// A scan that reports 3 of 10 and waits until [release] completes.
+class _SlowScanner implements LibraryScanner {
+  final release = Completer<void>();
+
+  @override
+  Stream<ScanProgress> scan(Folder folder) async* {
+    yield const ScanProgress(done: 3, total: 10);
+    await release.future;
+    yield const ScanProgress(done: 10, total: 10, finished: true);
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation i) => super.noSuchMethod(i);
 }
 
 void main() {
@@ -152,6 +185,27 @@ void main() {
     await tester.tap(find.text('Avanti'));
     await _settle(tester);
     expect(find.text('Consenti l’accesso ai file audio'), findsNothing);
+    await h.dispose(tester);
+  });
+
+  testWidgets('after «Aggiungi cartella» the scan starts and its progress shows', (tester) async {
+    FilePickerPlatform.instance = _FakePicker();
+    final scanner = _SlowScanner();
+    final h = await Harness.create(tester);
+    await h.pump(
+      tester,
+      const OnboardingScreen(askAudioPermission: false),
+      extraOverrides: [libraryScannerProvider.overrideWithValue(scanner)],
+    );
+    await tester.tap(find.text('Avanti'));
+    await _settle(tester);
+    await tester.tap(find.text('Aggiungi cartella'));
+    await _settle(tester);
+    expect(find.text('Scansione in corso… 3 / 10'), findsOneWidget);
+    expect(find.byType(LinearProgressIndicator), findsOneWidget);
+    scanner.release.complete();
+    await _settle(tester);
+    expect(find.byType(LinearProgressIndicator), findsNothing);
     await h.dispose(tester);
   });
 }

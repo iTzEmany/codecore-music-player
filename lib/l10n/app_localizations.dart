@@ -4420,6 +4420,12 @@ abstract class AppLocalizations {
   /// **'Pagina {page} di {total}'**
   String onboardingPageOf(int page, int total);
 
+  /// No description provided for @onboardingStepOf.
+  ///
+  /// In it, this message translates to:
+  /// **'{page} di {total}'**
+  String onboardingStepOf(int page, int total);
+
   /// No description provided for @onboardingWelcomeTitle.
   ///
   /// In it, this message translates to:
