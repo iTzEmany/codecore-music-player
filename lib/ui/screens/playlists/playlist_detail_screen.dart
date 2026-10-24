@@ -177,7 +177,7 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
     final coverKeys = playlistCoverKeys(custom, tracks.map((t) => t.coverKey));
     final durationMs = tracks.fold<int>(0, (a, t) => a + t.durationMs);
     final extent = trackRowExtentOf(context, compact);
-    final key = 'playlist:$id';
+    final key = SelectionKey.playlistOf(id);
     final selection = RowSelection(
       listKey: key,
       visibleIds: [for (final t in tracks) t.id],

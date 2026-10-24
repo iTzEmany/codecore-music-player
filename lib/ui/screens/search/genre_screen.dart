@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/db/app_database.dart';
 import '../../../l10n/l10n_ext.dart';
+import '../../../providers/selection_providers.dart';
 import '../../../providers/library_providers.dart';
 import '../../../providers/player_providers.dart';
 import '../../../providers/settings_providers.dart';
@@ -29,7 +30,7 @@ class GenreScreen extends ConsumerWidget {
     final ctrl = ref.read(playerControllerProvider);
     final compact = ref.watch(settingsProvider).compactMode;
     final ctx = PlayContext(PlayContextKind.playlist, genre);
-    final key = 'genre:$genre';
+    final key = SelectionKey.genreOf(genre);
     final selection = RowSelection(
       listKey: key,
       visibleIds: [for (final t in tracks) t.id],

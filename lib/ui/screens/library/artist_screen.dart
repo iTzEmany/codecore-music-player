@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/db/app_database.dart';
 import '../../../data/repositories/library_queries.dart';
 import '../../../l10n/l10n_ext.dart';
+import '../../../providers/selection_providers.dart';
 import '../../../providers/library_providers.dart';
 import '../../../providers/player_providers.dart';
 import '../../../providers/settings_providers.dart';
@@ -56,7 +57,7 @@ class ArtistDetailScreen extends ConsumerWidget {
       durationMs: list.fold<int>(0, (sum, t) => sum + t.durationMs),
     );
     // The rows shown here are the most played ones.
-    final key = 'artist:${artist.key}';
+    final key = SelectionKey.artistOf(artist.key);
     final selection = RowSelection(
       listKey: key,
       visibleIds: [for (final t in top) t.id],
@@ -89,10 +90,9 @@ class ArtistDetailScreen extends ConsumerWidget {
             SliverToBoxAdapter(
               child: SizedBox(
                 height: 240,
-                child: loadErrorState(
-                  context,
+                child: LoadError(
                   tracks.error ?? albums.error!,
-                  StackTrace.current,
+                  tracks.stackTrace ?? albums.stackTrace ?? StackTrace.current,
                   onRetry: () {
                     ref.invalidate(artistTracksProvider(artist.key));
                     ref.invalidate(artistAlbumsProvider(artist.key));

@@ -112,10 +112,9 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
         onAction: openAppSettings,
       );
     } else if (error != null) {
-      body = loadErrorState(
-        context,
+      body = LoadError(
         error,
-        StackTrace.current,
+        playlists.stackTrace ?? albums.stackTrace ?? artists.stackTrace ?? StackTrace.current,
         onRetry: () {
           ref.invalidate(playlistsProvider);
           ref.invalidate(albumsProvider);

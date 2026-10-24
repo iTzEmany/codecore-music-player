@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/app_log.dart';
 import '../../../l10n/l10n_ext.dart';
+import '../../../providers/selection_providers.dart';
 import '../../../providers/import_providers.dart';
 import '../../../providers/library_overlap_providers.dart';
 import '../../../providers/youtube_providers.dart';
@@ -33,7 +34,7 @@ class OnlineAlbumScreen extends ConsumerWidget {
   final String browseId;
   final YtmRelease? release;
 
-  String get _listKey => 'ytm-album:$browseId';
+  String get _listKey => SelectionKey.ytmAlbumOf(browseId);
 
   Future<void> _downloadAlbum(BuildContext context, WidgetRef ref, YtmAlbum album) async {
     final l = context.l10n;

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/db/app_database.dart';
 import '../../../l10n/l10n_ext.dart';
+import '../../../providers/selection_providers.dart';
 import '../../../providers/player_providers.dart';
 import '../../../providers/settings_providers.dart';
 import '../../../providers/tag_providers.dart';
@@ -82,7 +83,7 @@ class TagTracksScreen extends ConsumerWidget {
     final tracks = ref.watch(tagTracksProvider(name)).value ?? const <Track>[];
     final compact = ref.watch(settingsProvider).compactMode;
     final ctrl = ref.read(playerControllerProvider);
-    final key = 'tag:$name';
+    final key = SelectionKey.tagOf(name);
     final selection = RowSelection(
       listKey: key,
       visibleIds: [for (final t in tracks) t.id],

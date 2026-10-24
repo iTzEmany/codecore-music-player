@@ -5,6 +5,7 @@ import '../../../data/db/app_database.dart';
 import '../../../data/repositories/library_queries.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../l10n/l10n_ext.dart';
+import '../../../providers/selection_providers.dart';
 import '../../../providers/library_providers.dart';
 import '../../../providers/online_providers.dart';
 import '../../../services/online/enrichment_service.dart' show needsEnrichment;
@@ -15,7 +16,7 @@ import '../../theme/app_theme.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/collection_header.dart';
 import '../../widgets/cover_image.dart';
-import '../../widgets/error_state.dart';
+import '../../widgets/async_body.dart';
 import '../../widgets/selection_bar.dart';
 import '../../widgets/track_row.dart';
 import '../../widgets/track_row_selection.dart';
@@ -91,47 +92,14 @@ class AlbumDetailScreen extends ConsumerWidget {
     }
     final position = {for (var i = 0; i < list.length; i++) list[i].id: i};
     final extent = trackRowExtentOf(context, compact);
-    final key = 'album:${album.albumKey}';
+    final key = SelectionKey.albumOf(album.albumKey);
     final selection = RowSelection(
       listKey: key,
       visibleIds: [for (final t in list) t.id],
     );
 
-    return SelectionScope(
-      listKey: key,
-      visibleIds: selection.visibleIds,
-      child: CollectionScaffold(
-        selectionBar: SelectionBarSlot(listKey: key, tracks: list),
-        title: name,
-        name: name,
-        coverKey: album.coverKey,
-        cover: (s) =>
-            CoverImage(coverKey: album.coverKey, size: s, radius: CcDims.rGrid),
-        subtitle: _AlbumSubtitle(album: album),
-        meta: meta,
-        onPlay: list.isEmpty
-            ? null
-            : () => ctrl.playAll(list, context: playCtx),
-        onShuffle: list.isEmpty
-            ? null
-            : ctrl.toggleShuffle,
-        menu: _AlbumMenu(album: album, tracks: list),
-        slivers: [
-          if (tracks.hasError)
-            SliverToBoxAdapter(
-              child: SizedBox(
-                height: 240,
-                child: loadErrorState(
-                  context,
-                  tracks.error!,
-                  StackTrace.current,
-                  onRetry: () =>
-                      ref.invalidate(albumTracksProvider(album.albumKey)),
-                ),
-              ),
-            )
-          else
-            EntranceScope(
+    final rows =
+EntranceScope(
               child: SliverList.builder(
               itemCount: items.length,
               itemBuilder: (_, i) {
@@ -156,7 +124,34 @@ class AlbumDetailScreen extends ConsumerWidget {
                 );
               },
             ),
-            ),
+            );
+
+    return SelectionScope(
+      listKey: key,
+      visibleIds: selection.visibleIds,
+      child: CollectionScaffold(
+        selectionBar: SelectionBarSlot(listKey: key, tracks: list),
+        title: name,
+        name: name,
+        coverKey: album.coverKey,
+        cover: (s) =>
+            CoverImage(coverKey: album.coverKey, size: s, radius: CcDims.rGrid),
+        subtitle: _AlbumSubtitle(album: album),
+        meta: meta,
+        onPlay: list.isEmpty
+            ? null
+            : () => ctrl.playAll(list, context: playCtx),
+        onShuffle: list.isEmpty
+            ? null
+            : ctrl.toggleShuffle,
+        menu: _AlbumMenu(album: album, tracks: list),
+        slivers: [
+          SliverAsyncBody(
+            value: tracks,
+            onRetry: () => ref.invalidate(albumTracksProvider(album.albumKey)),
+            loading: rows,
+            data: (_) => rows,
+          ),
         ],
       ),
     );

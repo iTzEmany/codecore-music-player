@@ -43,11 +43,13 @@ class TagDot extends StatelessWidget {
   );
 }
 
+enum _TagAction { rename, color, delete }
+
 /// Rename, colour and delete of one tag, from its row's menu.
 Future<void> editTag(BuildContext context, WidgetRef ref, TagSummary s) async {
   final l = context.l10n;
   final ops = ref.read(tagOpsProvider);
-  final action = await showCcSheet<String>(
+  final action = await showCcSheet<_TagAction>(
     context: context,
     builder: (c) => SafeArea(
       child: Column(
@@ -56,17 +58,17 @@ Future<void> editTag(BuildContext context, WidgetRef ref, TagSummary s) async {
           ListTile(
             leading: const Icon(Icons.edit_outlined),
             title: Text(l.tagRename),
-            onTap: () => Navigator.of(c).pop('rename'),
+            onTap: () => Navigator.of(c).pop(_TagAction.rename),
           ),
           ListTile(
             leading: const Icon(Icons.palette_outlined),
             title: Text(l.tagColor),
-            onTap: () => Navigator.of(c).pop('color'),
+            onTap: () => Navigator.of(c).pop(_TagAction.color),
           ),
           ListTile(
             leading: const Icon(Icons.delete_outline_rounded),
             title: Text(l.delete),
-            onTap: () => Navigator.of(c).pop('delete'),
+            onTap: () => Navigator.of(c).pop(_TagAction.delete),
           ),
         ],
       ),
@@ -74,7 +76,7 @@ Future<void> editTag(BuildContext context, WidgetRef ref, TagSummary s) async {
   );
   if (action == null || !context.mounted) return;
   switch (action) {
-    case 'rename':
+    case _TagAction.rename:
       final name = await promptName(
         context,
         initial: s.tag.name,
@@ -86,7 +88,7 @@ Future<void> editTag(BuildContext context, WidgetRef ref, TagSummary s) async {
       if (!await ops.rename(s.tag.id, name) && context.mounted) {
         showMsg(context, l.tagNameTaken);
       }
-    case 'color':
+    case _TagAction.color:
       final picked = await showCcSheet<int>(
         context: context,
         builder: (c) => SafeArea(
@@ -131,7 +133,7 @@ Future<void> editTag(BuildContext context, WidgetRef ref, TagSummary s) async {
       if (picked != null) {
         await ops.setColor(s.tag.id, picked < 0 ? null : picked);
       }
-    case 'delete':
+    case _TagAction.delete:
       final ok = await showConfirm(
         context,
         title: l.tagDeleteTitle(s.tag.name),
