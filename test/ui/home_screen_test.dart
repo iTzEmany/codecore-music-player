@@ -61,6 +61,9 @@ void main() {
     final h = await openHome(tester);
     await tester.tap(find.text('Casuale su tutto'));
     await _settle(tester);
+    expect(h.handler.shuffleEnabled, isFalse, reason: 'the title is not a button');
+    await tester.tap(find.byIcon(Icons.shuffle));
+    await _settle(tester);
     expect(h.handler.shuffleEnabled, isTrue);
     expect(h.handler.queueIds, hasLength(4));
     await h.dispose(tester);
@@ -134,7 +137,7 @@ void main() {
     tester,
   ) async {
     final h = await openHome(tester);
-    await tester.tap(find.text('Casuale su tutto'));
+    await tester.tap(find.byIcon(Icons.shuffle));
     await _settle(tester);
     final row = find.byKey(const ValueKey('resume-queue'));
     expect(row, findsOneWidget);

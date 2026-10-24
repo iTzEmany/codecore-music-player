@@ -32,54 +32,59 @@ class ShuffleHero extends ConsumerWidget {
     final cc = context.cc;
     final theme = Theme.of(context).textTheme;
     final totals = ref.watch(memoryTotalsProvider).value;
-    return Semantics(
-      button: true,
-      child: InkWell(
-        onTap: () => _play(ref),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(
-            CcDims.margin,
-            CcDims.gap8,
-            CcDims.margin,
-            0,
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        CcDims.margin,
+        CcDims.gap8,
+        CcDims.margin,
+        0,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Unbounded 28 on one line, shrunk rather than wrapped.
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(l.homeShuffleAll, style: theme.displaySmall),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          Row(
             children: [
-              // Unbounded 28 on one line, shrunk rather than wrapped.
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(l.homeShuffleAll, style: theme.displaySmall),
+              Expanded(
+                child: Text(
+                  totals == null
+                      ? ''
+                      : l.homeShuffleAllSub(
+                          l.tracksCount(totals.trackCount),
+                          l.hoursCount(totals.durationMs ~/ 3600000),
+                        ),
+                  style: theme.bodyMedium,
+                ),
               ),
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      totals == null
-                          ? ''
-                          : l.homeShuffleAllSub(
-                              l.tracksCount(totals.trackCount),
-                              l.hoursCount(totals.durationMs ~/ 3600000),
-                            ),
-                      style: theme.bodyMedium,
+              const SizedBox(width: 12),
+              Semantics(
+                button: true,
+                label: l.homeShuffleAll,
+                excludeSemantics: true,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Material(
+                    color: cc.accent,
+                    shape: const CircleBorder(),
+                    clipBehavior: Clip.antiAlias,
+                    child: InkWell(
+                      customBorder: const CircleBorder(),
+                      onTap: () => _play(ref),
+                      child: SizedBox.square(
+                        dimension: 48,
+                        child: Icon(Icons.shuffle, color: cc.onAccent),
+                      ),
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  Container(
-                    width: 48,
-                    height: 48,
-                    margin: const EdgeInsets.symmetric(vertical: 4),
-                    decoration: BoxDecoration(
-                      color: cc.accent,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(Icons.shuffle, color: cc.onAccent),
-                  ),
-                ],
+                ),
               ),
             ],
           ),
-        ),
+        ],
       ),
     );
   }
