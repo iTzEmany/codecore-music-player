@@ -237,7 +237,12 @@ ThemeData buildThemeFromColors(CcColors c, bool compact, {bool pageBackdrop = fa
       backgroundColor: c.surface2,
       selectedColor: c.text,
       disabledColor: c.surface1,
-      labelStyle: text.labelLarge,
+      // Selected chips are filled with c.text, so the label flips to c.bg.
+      labelStyle: text.labelLarge?.copyWith(
+        color: WidgetStateColor.resolveWith(
+          (s) => s.contains(WidgetState.selected) ? c.bg : c.text,
+        ),
+      ),
       secondaryLabelStyle: text.labelLarge?.copyWith(color: c.bg),
       checkmarkColor: c.bg,
       showCheckmark: false,

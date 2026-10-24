@@ -90,6 +90,63 @@ void main() {
     await h.dispose(tester);
   });
 
+  testWidgets('submit with no local results starts the online search', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(400, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final h = await Harness.create(tester, tracks: 2);
+    await h.pump(tester, const SearchScreen());
+    typeSearch(tester, 'zzzz');
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(SearchScreen)),
+    );
+    expect(container.read(searchOnlineProvider), isFalse);
+    // Enter right after typing: the debounce has not fired, providers load.
+    submitSearch(tester);
+    await _settle(tester);
+    expect(container.read(searchOnlineProvider), isTrue);
+    await h.dispose(tester);
+  }, skip: !kEnableYoutube);
+
+  testWidgets('submit with local results stays local', (tester) async {
+    tester.view.physicalSize = const Size(400, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final h = await Harness.create(tester, tracks: 2);
+    await h.pump(tester, const SearchScreen());
+    typeSearch(tester, 'Song 1');
+    submitSearch(tester);
+    await _settle(tester);
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(SearchScreen)),
+    );
+    expect(container.read(searchOnlineProvider), isFalse);
+    await h.dispose(tester);
+  }, skip: !kEnableYoutube);
+
+  testWidgets('selected filter chip label contrasts with its fill', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(400, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final h = await Harness.create(tester, tracks: 2);
+    await h.pump(tester, const SearchScreen());
+    await _settle(tester);
+    await tester.tap(find.text('Preferiti'));
+    await tester.pump(const Duration(milliseconds: 400));
+    final ctx = tester.element(find.text('Preferiti'));
+    final fill = Theme.of(ctx).chipTheme.selectedColor;
+    final label = DefaultTextStyle.of(ctx).style.color;
+    expect(label, isNotNull);
+    expect(label, isNot(fill));
+    final icon = tester.widget<Icon>(find.byIcon(Icons.favorite_rounded));
+    expect(icon.color, isNot(fill));
+    await h.dispose(tester);
+  });
+
   testWidgets('mode is a two-block selector', (tester) async {
     tester.view.physicalSize = const Size(400, 900);
     tester.view.devicePixelRatio = 1;
@@ -330,19 +387,22 @@ void main() {
     await h.dispose(tester);
   });
 
-  testWidgets('desktop: empty query without recents or genres says what to do',
-      (tester) async {
-    tester.view.physicalSize = const Size(1400, 900);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.reset);
-    final h = await Harness.create(tester, tracks: 2);
-    await h.pump(tester, const SearchScreen());
-    await _settle(tester);
-    expect(
-      find.text(
-          'Scrivi un titolo, un artista o un album per cercare nella libreria'),
-      findsOneWidget,
-    );
-    await h.dispose(tester);
-  });
+  testWidgets(
+    'desktop: empty query without recents or genres says what to do',
+    (tester) async {
+      tester.view.physicalSize = const Size(1400, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final h = await Harness.create(tester, tracks: 2);
+      await h.pump(tester, const SearchScreen());
+      await _settle(tester);
+      expect(
+        find.text(
+          'Scrivi un titolo, un artista o un album per cercare nella libreria',
+        ),
+        findsOneWidget,
+      );
+      await h.dispose(tester);
+    },
+  );
 }
