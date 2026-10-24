@@ -8,7 +8,7 @@ import '../../../core/app_info.dart';
 import '../../../core/constants.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../l10n/l10n_ext.dart';
-import '../../../providers/database_providers.dart';
+import '../../../providers/track_ops.dart';
 import '../../../providers/equalizer_providers.dart';
 import '../../../providers/library_providers.dart';
 import '../../../providers/online_providers.dart';
@@ -454,7 +454,7 @@ Future<void> _enrichLibrary(BuildContext context, WidgetRef ref) async {
   final l = context.l10n;
   // Only what still has something missing: the estimate is honest and
   // tracks already complete are not asked about again.
-  final ids = (await ref.read(trackRepositoryProvider).watchTracks().first)
+  final ids = (await ref.read(trackOpsProvider).all())
       .where((t) => needsEnrichment(t))
       .map((t) => t.id)
       .toList();
@@ -505,7 +505,7 @@ Future<void> _clearCovers(BuildContext context, WidgetRef ref) async {
         if (e is File) await e.delete();
       }
     }
-    await ref.read(trackRepositoryProvider).resetCovers();
+    await ref.read(trackOpsProvider).resetCovers();
     ref.invalidate(coverIndexProvider);
   } on Object catch (e, st) {
     AppLog.e('clear covers failed', e, st);

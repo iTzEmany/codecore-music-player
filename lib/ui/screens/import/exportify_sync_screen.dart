@@ -6,6 +6,7 @@ import '../../../data/db/app_database.dart';
 import '../../../data/repositories/playlist_repository.dart'
     show PlaylistSummary;
 import '../../../l10n/l10n_ext.dart';
+import '../../../providers/playlist_ops.dart';
 import '../../../providers/database_providers.dart';
 import '../../../providers/exportify_providers.dart';
 import '../../../providers/import_providers.dart';
@@ -68,9 +69,9 @@ class _ExportifySyncScreenState extends ConsumerState<ExportifySyncScreen> {
     if (_loadFailed) setState(() => _loadFailed = false);
     try {
       final lists = await ref.read(playlistsProvider.future);
-      final repo = ref.read(importRepositoryProvider);
+      final ops = ref.read(playlistOpsProvider);
       for (final p in lists) {
-        final all = await repo.forPlaylist(p.playlist.id);
+        final all = await ops.importsOf(p.playlist.id);
         if (all.isNotEmpty) {
           _lastImport[p.playlist.id] = all.reduce(
             (a, b) => a.id > b.id ? a : b,

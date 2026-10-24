@@ -1,3 +1,4 @@
+import '../../../providers/playlist_ops.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -7,7 +8,6 @@ import '../../../data/db/app_database.dart';
 import '../../../data/repositories/smart_playlist_repository.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../l10n/l10n_ext.dart';
-import '../../../providers/database_providers.dart';
 import '../../../providers/smart_playlist_providers.dart';
 import '../../../services/library/rules/rule_parser.dart';
 import '../../theme/tokens.dart';
@@ -121,25 +121,13 @@ class _SmartPlaylistEditorState extends ConsumerState<SmartPlaylistEditor> {
       setState(() => _triedSave = true);
       return;
     }
-    final repo = ref.read(smartPlaylistRepositoryProvider);
-    final p = widget.existing;
-    if (p == null) {
-      await repo.create(
-        name: _name.text,
-        rules: _rules.text,
-        sort: _sort,
-        limit: _limitValue,
-      );
-    } else {
-      await repo.update(
-        p.id,
-        name: _name.text,
-        rules: _rules.text,
-        sort: _sort,
-        limit: _limitValue,
-        clearLimit: _limitValue == null,
-      );
-    }
+    await ref.read(playlistOpsProvider).saveSmart(
+      existingId: widget.existing?.id,
+      name: _name.text,
+      rules: _rules.text,
+      sort: _sort,
+      limit: _limitValue,
+    );
     if (mounted) Navigator.of(context).pop(true);
   }
 

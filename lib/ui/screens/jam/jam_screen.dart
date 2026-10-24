@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/app_localizations.dart';
 import '../../../l10n/l10n_ext.dart';
+import '../../../providers/track_ops.dart';
 import '../../../providers/jam_providers.dart';
 import '../../../providers/share_hub.dart';
 import '../../../services/jam/jam_guest.dart';
@@ -14,7 +15,6 @@ import '../../widgets/empty_state.dart';
 import '../../widgets/ring_progress.dart';
 import 'jam_parts.dart';
 import 'jam_player_card.dart';
-import '../../../providers/database_providers.dart';
 import '../../widgets/show_msg.dart';
 import '../../widgets/cc_app_bar.dart';
 
@@ -53,9 +53,7 @@ class _JamScreenState extends ConsumerState<JamScreen> {
     );
     if (ids == null || ids.isEmpty || !mounted) return;
     final l = context.l10n;
-    final tracks = await ref
-        .read(trackRepositoryProvider)
-        .getByIds(ids.toList());
+    final tracks = await ref.read(trackOpsProvider).byIds(ids.toList());
     final n = await ref.read(jamProvider.notifier).addTracks(tracks);
     if (!mounted) return;
     showMsg(context, l.jamAdded(n));

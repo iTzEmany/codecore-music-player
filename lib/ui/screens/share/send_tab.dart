@@ -6,7 +6,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../../data/db/app_database.dart';
 import '../../../l10n/l10n_ext.dart';
-import '../../../providers/database_providers.dart';
+import '../../../providers/track_ops.dart';
 import '../../../providers/share_hub.dart';
 import '../../../providers/share_providers.dart';
 import '../../../services/share/discovery.dart';
@@ -64,10 +64,10 @@ class _SendTabState extends ConsumerState<SendTab> {
 
   Future<void> _sendTo(Peer peer) async {
     final l = context.l10n;
-    final repo = ref.read(trackRepositoryProvider);
+    final repo = ref.read(trackOpsProvider);
     final List<Track> tracks = _ids == null
-        ? await repo.watchTracks().first
-        : await repo.getByIds(_ids!.toList());
+        ? await repo.all()
+        : await repo.byIds(_ids!.toList());
     if (tracks.isEmpty) {
       if (!mounted) return;
       showMsg(context, l.offerChooseFirst);

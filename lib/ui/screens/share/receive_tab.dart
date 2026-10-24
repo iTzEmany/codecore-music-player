@@ -9,13 +9,12 @@ import 'package:path/path.dart' as p;
 import '../../../core/app_log.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../theme/tokens.dart';
-import '../../../providers/database_providers.dart';
+import '../../../providers/folder_ops.dart';
+import '../../../providers/track_ops.dart';
 import '../../../providers/library_providers.dart';
 import '../../../providers/online_providers.dart' show afterReceive;
 import '../../../providers/share_providers.dart';
-import '../../../providers/youtube_providers.dart';
 import '../../../services/share/lan_client.dart';
-import '../../../services/share/received_meta.dart';
 import '../../../providers/share_hub.dart';
 import '../../../core/platform.dart';
 import 'incoming_offer_tile.dart';
@@ -118,9 +117,7 @@ class _ReceiveTabState extends ConsumerState<ReceiveTab> {
     if (target == null || _selected.isEmpty) return;
     // The container outlives this widget: tags are written after the awaits.
     final read = ProviderScope.containerOf(context, listen: false).read;
-    final base = await resolveDownloadFolder(
-      ref.read(folderRepositoryProvider),
-    );
+    final base = await ref.read(folderOpsProvider).downloadFolder();
     if (base == null) {
       if (mounted) setState(() => _error = context.l10n.ytNoFolder);
       return;
@@ -139,8 +136,7 @@ class _ReceiveTabState extends ConsumerState<ReceiveTab> {
       _fileProgress = 0;
     });
     final client = ref.read(lanClientProvider);
-    final repo = ref.read(trackRepositoryProvider);
-    final covers = ref.read(coverStoreProvider);
+    final repo = ref.read(trackOpsProvider);
     final pin = _pin.text.trim();
     final saved = <String>[];
     final savedTracks = <String, RemoteTrack>{};
@@ -170,9 +166,7 @@ class _ReceiveTabState extends ConsumerState<ReceiveTab> {
             .scanFiles(base.$2, saved)
             .drain<void>();
         for (final entry in savedTracks.entries) {
-          await applyReceivedPackage(
-            repo,
-            covers,
+          await repo.applyReceived(
             entry.key,
             entry.value.meta,
             fetchCover: () => client.downloadCover(

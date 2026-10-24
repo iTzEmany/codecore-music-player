@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/app_log.dart';
 import '../../../l10n/l10n_ext.dart';
+import '../../../providers/track_ops.dart';
 import '../../../providers/database_providers.dart';
 import '../../../providers/import_providers.dart';
 import '../../../services/import/exportify_reader.dart'
@@ -66,7 +67,7 @@ Future<void> continueImport(
   }
   final csv = picked as ImportedPlaylist;
   final library = LibraryIndex(
-    await ref.read(trackRepositoryProvider).liteEntries(),
+    await ref.read(trackOpsProvider).liteEntries(),
   );
   final known = csv.rows
       .where((r) => library.find(r, baseDir: csv.baseDir) != null)

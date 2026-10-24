@@ -5,11 +5,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/db/app_database.dart';
 import '../../../data/repositories/tag_repository.dart';
 import '../../../l10n/l10n_ext.dart';
-import '../../../providers/database_providers.dart';
+import '../../../providers/tag_ops.dart';
 import '../../../providers/tag_providers.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/confirm.dart';
+import '../../widgets/create_flows.dart';
 import '../../widgets/prompt_name.dart';
 import '../settings/accent_picker.dart';
 import '../../widgets/show_msg.dart';
@@ -44,7 +45,7 @@ class TagDot extends StatelessWidget {
 /// Rename, colour and delete of one tag, from its row's menu.
 Future<void> editTag(BuildContext context, WidgetRef ref, TagSummary s) async {
   final l = context.l10n;
-  final repo = ref.read(tagRepositoryProvider);
+  final ops = ref.read(tagOpsProvider);
   final action = await showCcSheet<String>(
     context: context,
     builder: (c) => SafeArea(
@@ -81,7 +82,7 @@ Future<void> editTag(BuildContext context, WidgetRef ref, TagSummary s) async {
         maxLength: 40,
       );
       if (name == null || !context.mounted) return;
-      if (!await repo.rename(s.tag.id, name) && context.mounted) {
+      if (!await ops.rename(s.tag.id, name) && context.mounted) {
         showMsg(context, l.tagNameTaken);
       }
     case 'color':
@@ -102,7 +103,7 @@ Future<void> editTag(BuildContext context, WidgetRef ref, TagSummary s) async {
           ],
         ),
       );
-      if (picked != null) await repo.setColor(s.tag.id, picked < 0 ? null : picked);
+      if (picked != null) await ops.setColor(s.tag.id, picked < 0 ? null : picked);
     case 'delete':
       final ok = await showConfirm(
         context,
@@ -111,7 +112,7 @@ Future<void> editTag(BuildContext context, WidgetRef ref, TagSummary s) async {
         confirmLabel: l.delete,
         destructive: true,
       );
-      if (ok) await repo.delete(s.tag.id);
+      if (ok) await ops.delete(s.tag.id);
   }
 }
 
@@ -146,7 +147,7 @@ class _TagsSheetState extends ConsumerState<_TagsSheet> {
   }
 
   Future<void> _reload() async {
-    final counts = await ref.read(tagRepositoryProvider).countsAmong(_ids);
+    final counts = await ref.read(tagOpsProvider).countsAmong(_ids);
     if (mounted) {
       setState(() {
         _counts = counts;
@@ -156,29 +157,19 @@ class _TagsSheetState extends ConsumerState<_TagsSheet> {
   }
 
   Future<void> _toggle(UserTag tag) async {
-    final repo = ref.read(tagRepositoryProvider);
+    final ops = ref.read(tagOpsProvider);
     final n = widget.tracks.length;
     if ((_counts[tag.id] ?? 0) == n) {
-      await repo.unassign(_ids, tag.id);
+      await ops.unassign(_ids, tag.id);
     } else {
-      await repo.assign(_ids, tag.id);
+      await ops.assign(_ids, tag.id);
     }
     await _reload();
   }
 
   Future<void> _create() async {
-    final l = context.l10n;
-    final name = await promptName(
-      context,
-      title: l.tagNew,
-      confirmLabel: l.save,
-      maxLength: 40,
-    );
-    if (name == null) return;
-    final repo = ref.read(tagRepositoryProvider);
-    final id = await repo.create(name);
-    await repo.assign(_ids, id);
-    await _reload();
+    await createTagFlow(context, ref, assignTo: _ids);
+    if (mounted) await _reload();
   }
 
   @override
@@ -238,10 +229,10 @@ Future<void> pickTagFor(
   VoidCallback? done,
 }) async {
   final l = context.l10n;
-  final repo = ref.read(tagRepositoryProvider);
+  final ops = ref.read(tagOpsProvider);
   final ids = [for (final t in tracks) t.id];
-  final all = ref.read(tagsProvider).value ?? await repo.watchAll().first;
-  final carried = remove ? await repo.countsAmong(ids) : const <int, int>{};
+  final all = ref.read(tagsProvider).value ?? await ops.all();
+  final carried = remove ? await ops.countsAmong(ids) : const <int, int>{};
   final choices = [
     for (final s in all)
       if (!remove || carried.containsKey(s.tag.id)) s,
@@ -267,16 +258,8 @@ Future<void> pickTagFor(
                 leading: const Icon(Icons.add_rounded),
                 title: Text(l.tagNew),
                 onTap: () async {
-                  final name = await promptName(
-                    c,
-                    title: l.tagNew,
-                    confirmLabel: l.save,
-                    maxLength: 40,
-                  );
-                  if (name == null || !c.mounted) return;
-                  final id = await repo.create(name);
-                  final tag = await repo.byName(name);
-                  if (tag != null && c.mounted && tag.id == id) Navigator.of(c).pop(tag);
+                  final tag = await createTagFlow(c, ref);
+                  if (tag != null && c.mounted) Navigator.of(c).pop(tag);
                 },
               );
             }
@@ -295,9 +278,9 @@ Future<void> pickTagFor(
   if (picked == null) return;
   int changed;
   if (remove) {
-    changed = await repo.unassign(ids, picked.id);
+    changed = await ops.unassign(ids, picked.id);
   } else {
-    await repo.assign(ids, picked.id);
+    await ops.assign(ids, picked.id);
     changed = ids.length; // all of them carry it now, even if some already did
   }
   if (!context.mounted) return;

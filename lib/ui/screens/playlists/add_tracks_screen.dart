@@ -6,6 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/db/app_database.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/database_providers.dart';
+import '../../../providers/playlist_ops.dart';
+import '../../../providers/track_ops.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/track_row.dart';
@@ -27,6 +29,7 @@ class _AddTracksScreenState extends ConsumerState<AddTracksScreen> {
   final _controller = TextEditingController();
   Timer? _debounce;
   String _query = '';
+  List<Track>? _lastFound;
 
   @override
   void dispose() {
@@ -43,9 +46,7 @@ class _AddTracksScreenState extends ConsumerState<AddTracksScreen> {
   }
 
   Future<void> _add() async {
-    await ref
-        .read(playlistRepositoryProvider)
-        .addTracks(widget.playlistId, _selected.toList());
+    await ref.read(playlistOpsProvider).addTracks(widget.playlistId, _selected.toList());
     if (mounted) Navigator.of(context).pop();
   }
 
@@ -93,16 +94,14 @@ class _AddTracksScreenState extends ConsumerState<AddTracksScreen> {
                 ),
               ),
               Expanded(
-                child: StreamBuilder<List<Track>>(
-                  stream: ref
-                      .watch(trackRepositoryProvider)
-                      .watchTracks(query: _query),
-                  builder: (context, snap) {
+                child: Builder(
+                  builder: (context) {
+                    _lastFound = ref.watch(trackSearchProvider(_query)).value ?? _lastFound;
                     final tracks = [
-                      for (final t in snap.data ?? const <Track>[])
+                      for (final t in _lastFound ?? const <Track>[])
                         if (!inPlaylist.contains(t.id)) t,
                     ];
-                    if (snap.hasData && tracks.isEmpty) {
+                    if (_lastFound != null && tracks.isEmpty) {
                       return EmptyState(
                         icon: Icons.library_music,
                         message: _query.isEmpty

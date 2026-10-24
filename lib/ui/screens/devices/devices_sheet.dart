@@ -1,3 +1,4 @@
+import '../../../providers/track_ops.dart';
 import '../../widgets/cc_sheet.dart';
 import 'dart:async';
 
@@ -6,7 +7,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/db/app_database.dart';
 import '../../../l10n/l10n_ext.dart';
-import '../../../providers/database_providers.dart';
 import '../../../providers/jam_providers.dart';
 import '../../../providers/settings_providers.dart';
 import '../../../providers/share_hub.dart';
@@ -68,9 +68,7 @@ class _DevicesSheetState extends ConsumerState<DevicesSheet> {
       if (picked == null || picked.isEmpty) return;
       ids = picked.toList();
     }
-    final List<Track> tracks = await ref
-        .read(trackRepositoryProvider)
-        .getByIds(ids);
+    final List<Track> tracks = await ref.read(trackOpsProvider).byIds(ids);
     if (tracks.isEmpty) return;
     final ok = await _hub.sendOffer(peer, tracks);
     if (!mounted) return;

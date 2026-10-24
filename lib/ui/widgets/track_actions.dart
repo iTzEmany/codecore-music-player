@@ -12,12 +12,12 @@ import '../../core/constants.dart';
 import '../../core/platform.dart';
 import '../../data/db/app_database.dart';
 import '../../l10n/l10n_ext.dart';
-import '../../providers/database_providers.dart';
 import '../../providers/equalizer_providers.dart';
 import '../../providers/jam_providers.dart';
 import '../../providers/player_providers.dart';
 import '../../providers/preview_providers.dart';
 import '../../providers/suggestion_actions.dart';
+import '../../providers/track_ops.dart';
 import '../screens/playlists/playlist_dialogs.dart';
 import '../screens/playlists/playlist_picker.dart';
 import '../screens/tags/tags_sheet.dart';
@@ -177,7 +177,7 @@ List<TrackActionGroup> trackActions(
       if (track.resumePositionMs != null)
         TrackAction(Icons.restart_alt_rounded, l.restartFromBeginning, () async {
           // The bookmark goes first: the player reads it when it loads the track.
-          await ref.read(trackRepositoryProvider).setResumePosition(track.id, null);
+          await ref.read(trackOpsProvider).setResumePosition(track.id, null);
           await ctrl.playFromList([track], 0);
         }),
       TrackAction(Icons.playlist_play_rounded, l.playNext, () async {

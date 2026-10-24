@@ -1,3 +1,4 @@
+import '../../../providers/podcast_ops.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -181,7 +182,7 @@ class _AutoDelete extends ConsumerWidget {
           SegmentedBlocks<int?>(
             key: const ValueKey('auto-delete'),
             selected: days,
-            onChanged: (d) => ref.read(podcastRepositoryProvider).setAutoDeleteDays(podcast.id, d),
+            onChanged: (d) => ref.read(podcastOpsProvider).setAutoDeleteDays(podcast.id, d),
             items: [
               BlockItem(value: null, icon: Icons.block_rounded, label: l.podcastAutoDeleteNever),
               for (final d in const [1, 7, 30])
@@ -229,7 +230,7 @@ class _EpisodeTile extends ConsumerWidget {
         ? null
         : DateFormat.yMMMd(locale).format(DateTime.fromMillisecondsSinceEpoch(e.publishedAt!));
     final status = _status(l);
-    final repo = ref.read(podcastRepositoryProvider);
+    final podcastOps = ref.read(podcastOpsProvider);
     final busy = download?.active ?? false;
     final Widget action;
     if (busy) {
@@ -293,10 +294,9 @@ class _EpisodeTile extends ConsumerWidget {
               key: ValueKey('menu-${e.id}'),
               tooltip: l.moreActions,
               onSelected: (v) async {
-                final now = DateTime.now().millisecondsSinceEpoch;
                 switch (v) {
                   case 'heard':
-                    await repo.markPlayed(e.id, !e.played, now: now);
+                    await podcastOps.markPlayed(e.id, !e.played);
                   case 'delete':
                     final d = await ref.read(episodeDownloaderProvider.future);
                     await d.deleteFile(e.id);

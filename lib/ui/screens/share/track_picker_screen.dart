@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/db/app_database.dart';
 import '../../../l10n/l10n_ext.dart';
-import '../../../providers/database_providers.dart';
+import '../../../providers/track_ops.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/cover_image.dart';
 import '../../widgets/cc_app_bar.dart';
@@ -25,6 +25,7 @@ class _State extends ConsumerState<TrackPickerScreen> {
   final _controller = TextEditingController();
   Timer? _debounce;
   String _query = '';
+  List<Track>? _lastFound;
 
   @override
   void dispose() {
@@ -67,12 +68,10 @@ class _State extends ConsumerState<TrackPickerScreen> {
             ),
           ),
           Expanded(
-            child: StreamBuilder<List<Track>>(
-              stream: ref
-                  .watch(trackRepositoryProvider)
-                  .watchTracks(query: _query),
-              builder: (context, snap) {
-                final tracks = snap.data ?? const <Track>[];
+            child: Builder(
+              builder: (context) {
+                _lastFound = ref.watch(trackSearchProvider(_query)).value ?? _lastFound;
+                final tracks = _lastFound ?? const <Track>[];
                 return ListView.builder(
                   itemExtent: 64,
                   itemCount: tracks.length,

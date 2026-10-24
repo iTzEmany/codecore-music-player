@@ -1,3 +1,5 @@
+import '../../../providers/playlist_ops.dart';
+import '../../../providers/track_ops.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -71,10 +73,7 @@ class _CarPlaylistsSheet extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             row(Icons.favorite_rounded, l.navFavorites, () async {
-              final tracks = await ref
-                  .read(trackRepositoryProvider)
-                  .watchTracks(favoritesOnly: true, sort: SortOption.title)
-                  .first;
+              final tracks = await ref.read(trackOpsProvider).favorites(sort: SortOption.title);
               if (context.mounted) {
                 await _play(
                   context,
@@ -86,10 +85,7 @@ class _CarPlaylistsSheet extends ConsumerWidget {
             }),
             for (final p in lists)
               row(Icons.queue_music_rounded, p.playlist.name, () async {
-                final tracks = await ref
-                    .read(playlistRepositoryProvider)
-                    .watchTracks(p.playlist.id)
-                    .first;
+                final tracks = await ref.read(playlistOpsProvider).tracksOf(p.playlist.id);
                 if (context.mounted) {
                   await _play(
                     context,

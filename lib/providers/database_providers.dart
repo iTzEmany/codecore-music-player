@@ -63,3 +63,6 @@ final playlistsProvider = StreamProvider<List<PlaylistSummary>>(
 final playlistTracksProvider = StreamProvider.family<List<Track>, int>(
   (ref, id) => ref.watch(playlistRepositoryProvider).watchTracks(id),
 );
+
+/// Schema version of the open database (backups are checked against it).
+final schemaVersionProvider = Provider<int>((ref) => ref.watch(databaseProvider).schemaVersion);

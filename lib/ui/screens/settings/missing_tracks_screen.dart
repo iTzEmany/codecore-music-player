@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/l10n_ext.dart';
-import '../../../providers/database_providers.dart';
+import '../../../providers/track_ops.dart';
 import '../../../providers/library_providers.dart';
 import '../../widgets/confirm.dart';
 import '../../widgets/empty_state.dart';
@@ -38,7 +38,7 @@ class _MissingTracksScreenState extends ConsumerState<MissingTracksScreen> {
         ],
       ),
     );
-    if (ok == true) await ref.read(trackRepositoryProvider).deleteTrack(id);
+    if (ok == true) await ref.read(trackOpsProvider).deleteTrack(id);
   }
 
   Future<void> _confirmRemoveAll(List<int> ids) async {
@@ -51,7 +51,7 @@ class _MissingTracksScreenState extends ConsumerState<MissingTracksScreen> {
       destructive: true,
     );
     if (!ok) return;
-    final repo = ref.read(trackRepositoryProvider);
+    final repo = ref.read(trackOpsProvider);
     for (final id in ids) {
       await repo.deleteTrack(id);
     }

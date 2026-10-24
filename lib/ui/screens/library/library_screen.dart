@@ -1,6 +1,5 @@
 import '../../widgets/cc_sheet.dart';
 import 'package:flutter/material.dart';
-import '../../widgets/prompt_name.dart';
 import '../playlists/export_dialog.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -20,6 +19,7 @@ import '../../theme/tokens.dart';
 import '../../widgets/activity_button.dart';
 import '../../widgets/artist_avatar.dart';
 import '../../widgets/cover_image.dart';
+import '../../widgets/create_flows.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_state.dart';
 import '../../widgets/playlist_cover.dart';
@@ -271,14 +271,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
                       );
                       return;
                     }
-                    final name = await promptName(
-                      context,
-                      title: l.newPlaylist,
-                      confirmLabel: l.create,
-                      hint: l.playlistName,
-                    );
-                    if (name == null) return;
-                    await ref.read(playlistRepositoryProvider).create(name);
+                    await createPlaylistFlow(context, ref);
                   },
                   itemBuilder: (_) => [
                     PopupMenuItem(

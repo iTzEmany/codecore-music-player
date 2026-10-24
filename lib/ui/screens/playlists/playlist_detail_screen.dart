@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/db/app_database.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/database_providers.dart';
+import '../../../providers/playlist_ops.dart';
 import '../../../providers/library_providers.dart';
 import '../../../providers/player_providers.dart';
 import '../../../services/covers/cover_store.dart';
@@ -72,9 +73,8 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
         .firstOrNull
         ?.playlist
         .coverKey;
-    await ref.read(playlistRepositoryProvider).setCover(id, key);
+    await ref.read(playlistOpsProvider).setCover(id, key);
     if (old != null) await store.fileFor(old)?.delete();
-    ref.invalidate(playlistsProvider);
   }
 
   @override
@@ -83,7 +83,7 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
     final id = widget.playlist.id;
     final tracks =
         ref.watch(playlistTracksProvider(id)).value ?? const <Track>[];
-    final repo = ref.read(playlistRepositoryProvider);
+    final ops = ref.read(playlistOpsProvider);
     final summary = ref
         .watch(playlistsProvider)
         .value
@@ -103,12 +103,9 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
     );
 
     Future<void> remove(Track t, int i) async {
-      await repo.removeTrack(id, t.id);
+      final undo = await ops.removeTrack(id, t.id, index: i, length: tracks.length);
       if (!context.mounted) return;
-      showUndoSnack(context, l.removedFromPlaylist, () async {
-        await repo.addTracks(id, [t.id]);
-        await repo.reorder(id, tracks.length - 1, i);
-      });
+      showUndoSnack(context, l.removedFromPlaylist, undo);
     }
 
     void rowMenu(Track t, int i) => showCcSheet<void>(
@@ -153,7 +150,7 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
       list = SliverReorderableList(
         proxyDecorator: (child, _, anim) => ccDragProxy(context, child, anim),
         itemCount: tracks.length,
-        onReorderItem: (from, to) => repo.reorder(id, from, to),
+        onReorderItem: (from, to) => ops.reorder(id, from, to),
         itemBuilder: (_, i) {
           final t = tracks[i];
           return Material(
@@ -260,7 +257,7 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
               case 'cover':
                 await _pickCover(id);
               case 'clear':
-                await repo.setCover(id, null);
+                await ops.setCover(id, null);
               case 'export':
                 await exportPlaylistFlow(
                   context,
@@ -278,7 +275,7 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
                   hint: l.playlistName,
                 );
                 if (n == null) return;
-                await repo.rename(id, n);
+                await ops.rename(id, n);
                 if (mounted) setState(() => _name = n);
               case 'delete':
                 final ok = await showConfirm(
@@ -289,7 +286,7 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
                   destructive: true,
                 );
                 if (!ok) return;
-                await repo.delete(id);
+                await ops.delete(id);
                 if (context.mounted) Navigator.of(context).pop();
             }
           },

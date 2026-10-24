@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../widgets/prompt_name.dart';
+import '../../widgets/create_flows.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/l10n_ext.dart';
@@ -32,16 +32,7 @@ class PlaylistsScreen extends ConsumerWidget {
           const SizedBox(height: 12),
           FloatingActionButton.extended(
             heroTag: 'new-playlist',
-            onPressed: () async {
-              final name = await promptName(
-                context,
-                title: l.newPlaylist,
-                confirmLabel: l.create,
-                hint: l.playlistName,
-              );
-              if (name == null) return;
-              await ref.read(playlistRepositoryProvider).create(name);
-            },
+            onPressed: () => createPlaylistFlow(context, ref),
             icon: const Icon(Icons.add),
             label: Text(l.newPlaylist),
           ),

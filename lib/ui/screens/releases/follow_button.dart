@@ -1,3 +1,4 @@
+import '../../../providers/follow_ops.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -11,13 +12,6 @@ import '../../widgets/confirm.dart';
 import '../online/artist_picker_sheet.dart' show lookupYtmArtist;
 import '../../widgets/show_msg.dart';
 
-/// Follows [artist] and runs its first check at once (it stores everything as
-/// already seen, so the next round only tells what is really new).
-Future<void> followArtist(WidgetRef ref, YtmArtistRef artist) async {
-  await ref.read(followRepositoryProvider).follow(artist);
-  unawaited(ref.read(releaseCheckControllerProvider).checkArtist(artist.id));
-}
-
 /// «Segui su YouTube Music» from the library: looks the artist up by name and
 /// follows the one found (or the one picked among a few).
 Future<void> followFromLibrary(
@@ -28,7 +22,7 @@ Future<void> followFromLibrary(
   final l = context.l10n;
   final artist = await lookupYtmArtist(context, ref, name);
   if (artist == null) return;
-  await followArtist(ref, artist);
+  await ref.read(followOpsProvider).follow(artist);
   if (!context.mounted) return;
   showMsg(context, l.followedNow(artist.name));
 }
@@ -47,7 +41,7 @@ class FollowButton extends ConsumerWidget {
     if (!followed) {
       return OutlinedButton.icon(
         key: const ValueKey('follow-button'),
-        onPressed: () => followArtist(ref, artist),
+        onPressed: () => ref.read(followOpsProvider).follow(artist),
         icon: const Icon(Icons.add_rounded),
         label: Text(l.followAction),
       );
@@ -63,7 +57,7 @@ class FollowButton extends ConsumerWidget {
           confirmLabel: l.followStop,
           destructive: true,
         );
-        if (ok) await ref.read(followRepositoryProvider).unfollow(artist.id);
+        if (ok) await ref.read(followOpsProvider).unfollow(artist.id);
       },
       icon: const Icon(Icons.check_rounded),
       label: Text(l.followingAction),

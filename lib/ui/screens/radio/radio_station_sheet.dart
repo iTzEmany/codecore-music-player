@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/app_log.dart';
 import '../../../core/platform.dart';
 import '../../../l10n/l10n_ext.dart';
+import '../../../providers/radio_ops.dart';
 import '../../../providers/radio_providers.dart';
 import '../../../services/radio/radio_station.dart';
 import '../../theme/tokens.dart';
@@ -56,7 +57,7 @@ class RadioStationSheet extends ConsumerWidget {
 
   Future<void> _rename(BuildContext context, WidgetRef ref, String current) async {
     final l = context.l10n;
-    final repo = ref.read(radioRepositoryProvider);
+    final repo = ref.read(radioOpsProvider);
     final name = await promptName(
       context,
       title: l.radioRenameTitle,

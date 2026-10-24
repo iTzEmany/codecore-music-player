@@ -1,7 +1,7 @@
+import '../../../providers/folder_ops.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../providers/database_providers.dart';
 import '../../../providers/folder_actions.dart';
 import '../../../providers/library_providers.dart';
 import '../../../l10n/l10n_ext.dart';
@@ -22,7 +22,7 @@ Future<void> confirmRemoveFolder(
     confirmLabel: l.removeFolder,
     destructive: true,
   );
-  if (ok) await ref.read(folderRepositoryProvider).remove(folderId);
+  if (ok) await ref.read(folderOpsProvider).remove(folderId);
 }
 
 class FoldersSheet extends ConsumerWidget {

@@ -1,10 +1,10 @@
+import '../../../providers/playlist_ops.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/db/app_database.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../library/album_detail_screen.dart' show collectionMeta;
-import '../../../providers/database_providers.dart';
 import '../../../providers/player_providers.dart';
 import '../../../providers/settings_providers.dart';
 import '../../../providers/smart_playlist_providers.dart';
@@ -33,9 +33,7 @@ class SmartPlaylistScreen extends ConsumerWidget {
     SmartPlaylist p,
     List<Track> tracks,
   ) async {
-    final repo = ref.read(playlistRepositoryProvider);
-    final copy = await repo.create(p.name);
-    await repo.addTracks(copy, [for (final t in tracks) t.id]);
+    await ref.read(playlistOpsProvider).createWith(p.name, [for (final t in tracks) t.id]);
     if (!context.mounted) return;
     showMsg(context, context.l10n.smartConverted(p.name));
   }
@@ -50,7 +48,7 @@ class SmartPlaylistScreen extends ConsumerWidget {
       destructive: true,
     );
     if (!ok) return;
-    await ref.read(smartPlaylistRepositoryProvider).delete(p.id);
+    await ref.read(playlistOpsProvider).deleteSmart(p.id);
     if (context.mounted) Navigator.of(context).pop();
   }
 

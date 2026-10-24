@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
-import '../widgets/prompt_name.dart';
+import '../widgets/create_flows.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../l10n/l10n_ext.dart';
 import '../../providers/database_providers.dart';
 import '../../providers/library_providers.dart';
 import '../../providers/nav_providers.dart';
+import '../../providers/playlist_ops.dart';
+import '../../providers/track_ops.dart';
 import '../screens/import/import_flow.dart';
 import '../screens/library/favorites_screen.dart';
 import '../screens/playlists/playlist_detail_screen.dart';
@@ -103,21 +105,12 @@ class DesktopSidebar extends ConsumerWidget {
     void say(String text) => showMsg(context, text);
 
     Future<void> dropOnPlaylist(int id, String name, List<int> ids) async {
-      final added = await ref
-          .read(playlistRepositoryProvider)
-          .addTracks(id, ids);
+      final added = await ref.read(playlistOpsProvider).addTracks(id, ids);
       say(addedToPlaylistText(l, total: ids.length, added: added, name: name));
     }
 
     Future<void> dropOnFavorites(List<int> ids) async {
-      final repo = ref.read(trackRepositoryProvider);
-      final fresh = await repo.getByIds(ids);
-      final changed = [
-        for (final t in fresh)
-          if (!t.isFavorite) t.id,
-      ];
-      await repo.setFavoriteMany(changed, true);
-      say(l.favoritesAdded(changed.length));
+      say(l.favoritesAdded(await ref.read(trackOpsProvider).addFavorites(ids)));
     }
 
     Widget rowWithCover(
@@ -215,14 +208,7 @@ class DesktopSidebar extends ConsumerWidget {
                     );
                     return;
                   }
-                  final name = await promptName(
-                    context,
-                    title: l.newPlaylist,
-                    confirmLabel: l.create,
-                    hint: l.playlistName,
-                  );
-                  if (name == null) return;
-                  await ref.read(playlistRepositoryProvider).create(name);
+                  await createPlaylistFlow(context, ref);
                 },
                 itemBuilder: (_) => [
                   PopupMenuItem(value: 'new', child: Text(l.newPlaylist)),
