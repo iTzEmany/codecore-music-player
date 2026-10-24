@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/tokens.dart';
 
 import '../../data/repositories/library_queries.dart';
 import 'album_card.dart';
@@ -26,7 +27,7 @@ class AlbumGrid extends StatelessWidget {
       builder: (context, c) => GridView.builder(
         shrinkWrap: shrinkWrap,
         physics: shrinkWrap ? const NeverScrollableScrollPhysics() : null,
-        padding: const EdgeInsets.all(8),
+        padding: const EdgeInsets.all(CcDims.gap8),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: albumGridColumns(c.maxWidth),
           childAspectRatio: 0.78,

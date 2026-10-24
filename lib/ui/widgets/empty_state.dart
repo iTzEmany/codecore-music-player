@@ -29,7 +29,7 @@ class EmptyState extends StatelessWidget {
     return Align(
       alignment: Alignment.topLeft,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(CcDims.margin, 24, CcDims.margin, 0),
+        padding: const EdgeInsets.fromLTRB(CcDims.margin, CcDims.gap24, CcDims.margin, 0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,

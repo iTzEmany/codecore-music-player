@@ -51,7 +51,7 @@ class _SidePanelViewState extends ConsumerState<SidePanelView> {
         track == null
             ? const SizedBox.shrink()
             : ListView(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(CcDims.gap12),
                 children: [InfoCard(track: track)],
               ),
       SidePanel.none => const SizedBox.shrink(),

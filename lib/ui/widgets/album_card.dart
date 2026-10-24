@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/tokens.dart';
 import 'package:flutter/semantics.dart' show CustomSemanticsAction;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -33,7 +34,7 @@ class AlbumCard extends ConsumerWidget {
     return PressScale(
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(CcDims.rGrid),
         child: Padding(
           padding: const EdgeInsets.all(6),
           child: Column(

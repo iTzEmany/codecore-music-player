@@ -23,9 +23,9 @@ class YtDlpOutdatedBanner extends ConsumerWidget {
         context.l10n, ref.watch(ytDlpUpdateProvider));
     return Padding(
       padding: const EdgeInsets.fromLTRB(
-          CcDims.margin, 4, CcDims.margin, 8),
+          CcDims.margin, CcDims.gap4, CcDims.margin, CcDims.gap8),
       child: Container(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(CcDims.gap12),
         decoration: BoxDecoration(
           color: cc.surface1,
           borderRadius: BorderRadius.circular(CcDims.rCard),

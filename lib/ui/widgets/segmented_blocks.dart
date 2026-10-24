@@ -47,7 +47,7 @@ class SegmentedBlocks<T> extends StatelessWidget {
             child: ConstrainedBox(
               constraints: const BoxConstraints(minHeight: 64),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: CcDims.gap4, vertical: CcDims.gap8),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [

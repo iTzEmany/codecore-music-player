@@ -25,7 +25,7 @@ class DragPill extends StatelessWidget {
       elevation: 6,
       borderRadius: BorderRadius.circular(CcDims.rCard),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: CcDims.gap8),
         child: Text(
           context.l10n.tracksCount(countOf()),
           style: Theme.of(context).textTheme.labelLarge

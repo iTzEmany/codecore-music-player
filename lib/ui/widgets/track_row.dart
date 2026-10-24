@@ -237,7 +237,7 @@ class _TrackRowState extends State<TrackRow> {
     switch (widget.variant) {
       case TrackRowVariant.pick:
         return Padding(
-          padding: const EdgeInsets.only(left: 8),
+          padding: const EdgeInsets.only(left: CcDims.gap8),
           child: Icon(
             widget.picked
                 ? Icons.check_circle_rounded
@@ -248,7 +248,7 @@ class _TrackRowState extends State<TrackRow> {
       case TrackRowVariant.queue:
         final i = widget.reorderIndex;
         return Padding(
-          padding: const EdgeInsets.only(left: 8),
+          padding: const EdgeInsets.only(left: CcDims.gap8),
           child: i == null
               ? Icon(Icons.drag_handle_rounded, color: cc.textMuted)
               : ReorderableDragStartListener(
@@ -275,7 +275,7 @@ class _TrackRowState extends State<TrackRow> {
           )
         else if (fav)
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
+            padding: const EdgeInsets.symmetric(horizontal: CcDims.gap4),
             child: Icon(Icons.favorite_rounded, size: 16, color: cc.accent),
           ),
         if (widget.onMore != null)
@@ -570,7 +570,7 @@ class LiveTrackRow extends ConsumerWidget {
       dismissThresholds: const {DismissDirection.startToEnd: 0.3},
       background: Container(
         alignment: Alignment.centerLeft,
-        padding: const EdgeInsets.only(left: 24),
+        padding: const EdgeInsets.only(left: CcDims.gap24),
         color: context.cc.surface2,
         child: Icon(Icons.queue_rounded, color: context.cc.accentSoft),
       ),
