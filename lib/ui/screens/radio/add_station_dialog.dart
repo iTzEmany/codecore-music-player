@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/player_providers.dart';
+import '../../../providers/radio_ops.dart';
 import '../../../providers/radio_providers.dart';
 import '../../../services/radio/radio_station.dart';
 import '../../../services/radio/stream_link.dart';
@@ -99,7 +100,7 @@ class _AddStationDialogState extends ConsumerState<AddStationDialog> {
     final messenger = ScaffoldMessenger.of(context);
     final saved = context.l10n.radioSavedDone;
     _stopTest();
-    await ref.read(radioRepositoryProvider).saveManual(_name.text, address);
+    await ref.read(radioOpsProvider).saveManual(_name.text, address);
     if (!mounted) return;
     Navigator.of(context).pop();
     showMsgOn(messenger, saved);

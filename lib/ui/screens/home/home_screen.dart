@@ -9,7 +9,7 @@ import '../../shell/shell_nav.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/activity_button.dart';
 import '../../widgets/empty_state.dart';
-import '../library/folders_sheet.dart';
+import '../../../providers/folder_actions.dart';
 import '../settings/settings_screen.dart';
 import 'exportify_card.dart';
 import 'home_blocks.dart';

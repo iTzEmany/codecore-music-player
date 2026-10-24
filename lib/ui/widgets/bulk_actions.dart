@@ -1,12 +1,13 @@
+import 'track_kind.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/db/app_database.dart';
 import '../../l10n/l10n_ext.dart';
-import '../../providers/database_providers.dart';
 import '../../providers/jam_providers.dart';
 import '../../providers/player_providers.dart';
-import '../../services/audio/online_entries.dart';
+import '../../providers/playlist_ops.dart';
+import '../../providers/track_ops.dart';
 import '../screens/cleanup/move_to_album_dialog.dart';
 import '../screens/playlists/playlist_dialogs.dart';
 import '../screens/tags/tags_sheet.dart';
@@ -39,7 +40,7 @@ List<TrackActionGroup> bulkActions(
   // Streamed entries are not library rows: the group actions skip them.
   final tracks = [
     for (final t in picked)
-      if (!isOnlineId(t.id)) t,
+      if (t.trackKind != TrackKind.online) t,
   ];
   if (tracks.isEmpty) return const [];
   final l = outer.l10n;
@@ -52,20 +53,12 @@ List<TrackActionGroup> bulkActions(
   final allMissing = tracks.isNotEmpty && tracks.every((t) => t.missing);
 
   Future<void> favorites() async {
-    final target = !allFavorite;
-    final changed = [
-      for (final t in tracks)
-        if (t.isFavorite != target) t.id,
-    ];
-    final repo = ref.read(trackRepositoryProvider);
-    await repo.setFavoriteMany(changed, target);
+    final r = await ref.read(trackOpsProvider).toggleFavorites(tracks);
     if (!outer.mounted) return;
     showUndoSnack(
       outer,
-      target
-          ? l.favoritesAdded(changed.length)
-          : l.favoritesRemoved(changed.length),
-      () => repo.setFavoriteMany(changed, !target),
+      r.added ? l.favoritesAdded(r.count) : l.favoritesRemoved(r.count),
+      r.undo,
     );
     done();
   }
@@ -78,15 +71,9 @@ List<TrackActionGroup> bulkActions(
       confirmLabel: l.removeFromList,
     );
     if (!ok) return;
-    final repo = ref.read(playlistRepositoryProvider);
-    final ids = [for (final t in tracks) t.id];
-    final before = await repo.removeTracks(playlistId, ids);
+    final undo = await ref.read(playlistOpsProvider).removeTracks(playlistId, [for (final t in tracks) t.id]);
     if (!outer.mounted) return;
-    showUndoSnack(
-      outer,
-      l.removedManyFromPlaylist(n),
-      () => repo.restoreTracks(playlistId, before, ids),
-    );
+    showUndoSnack(outer, l.removedManyFromPlaylist(n), undo);
     done();
   }
 
@@ -99,7 +86,7 @@ List<TrackActionGroup> bulkActions(
       destructive: true,
     );
     if (!ok) return;
-    final removed = await ref.read(trackRepositoryProvider).deleteMissingTracks(
+    final removed = await ref.read(trackOpsProvider).deleteMissing(
       [for (final t in tracks) t.id],
     );
     snack(l.removedManyFromLibrary(removed));

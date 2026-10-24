@@ -1,3 +1,4 @@
+import '../../../providers/podcast_ops.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -128,15 +129,15 @@ class _PodcastDetailScreenState extends ConsumerState<PodcastDetailScreen> {
             icon: const Icon(Icons.refresh_rounded),
             onPressed: _refresh,
           ),
-        PopupMenuButton<String>(
+        PopupMenuButton<_PodcastAction>(
           key: const ValueKey('podcast-menu'),
           tooltip: l.moreActions,
           onSelected: (v) {
-            if (v == 'unsubscribe') _unsubscribe(podcast, downloadedCount);
+            if (v == _PodcastAction.unsubscribe) _unsubscribe(podcast, downloadedCount);
           },
           itemBuilder: (_) => [
             PopupMenuItem(
-              value: 'unsubscribe',
+              value: _PodcastAction.unsubscribe,
               child: Text(l.podcastUnsubscribe, key: const ValueKey('unsubscribe')),
             ),
           ],
@@ -181,7 +182,7 @@ class _AutoDelete extends ConsumerWidget {
           SegmentedBlocks<int?>(
             key: const ValueKey('auto-delete'),
             selected: days,
-            onChanged: (d) => ref.read(podcastRepositoryProvider).setAutoDeleteDays(podcast.id, d),
+            onChanged: (d) => ref.read(podcastOpsProvider).setAutoDeleteDays(podcast.id, d),
             items: [
               BlockItem(value: null, icon: Icons.block_rounded, label: l.podcastAutoDeleteNever),
               for (final d in const [1, 7, 30])
@@ -229,7 +230,7 @@ class _EpisodeTile extends ConsumerWidget {
         ? null
         : DateFormat.yMMMd(locale).format(DateTime.fromMillisecondsSinceEpoch(e.publishedAt!));
     final status = _status(l);
-    final repo = ref.read(podcastRepositoryProvider);
+    final podcastOps = ref.read(podcastOpsProvider);
     final busy = download?.active ?? false;
     final Widget action;
     if (busy) {
@@ -289,26 +290,25 @@ class _EpisodeTile extends ConsumerWidget {
               ),
             ),
             action,
-            PopupMenuButton<String>(
+            PopupMenuButton<_EpisodeAction>(
               key: ValueKey('menu-${e.id}'),
               tooltip: l.moreActions,
               onSelected: (v) async {
-                final now = DateTime.now().millisecondsSinceEpoch;
                 switch (v) {
-                  case 'heard':
-                    await repo.markPlayed(e.id, !e.played, now: now);
-                  case 'delete':
+                  case _EpisodeAction.heard:
+                    await podcastOps.markPlayed(e.id, !e.played);
+                  case _EpisodeAction.delete:
                     final d = await ref.read(episodeDownloaderProvider.future);
                     await d.deleteFile(e.id);
                 }
               },
               itemBuilder: (_) => [
                 PopupMenuItem(
-                  value: 'heard',
+                  value: _EpisodeAction.heard,
                   child: Text(e.played ? l.podcastMarkNotHeard : l.podcastMarkHeard),
                 ),
                 if (row.downloaded)
-                  PopupMenuItem(value: 'delete', child: Text(l.podcastDeleteFile)),
+                  PopupMenuItem(value: _EpisodeAction.delete, child: Text(l.podcastDeleteFile)),
               ],
             ),
           ],
@@ -317,3 +317,7 @@ class _EpisodeTile extends ConsumerWidget {
     );
   }
 }
+
+enum _PodcastAction { unsubscribe }
+
+enum _EpisodeAction { heard, delete }

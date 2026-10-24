@@ -6,6 +6,7 @@ import '../../../core/app_log.dart';
 import '../../../data/db/app_database.dart';
 import '../../../data/repositories/radio_repository.dart';
 import '../../../l10n/l10n_ext.dart';
+import '../../../providers/radio_ops.dart';
 import '../../../providers/radio_providers.dart';
 import '../../../providers/settings_providers.dart';
 import '../../../services/radio/radio_catalog.dart';
@@ -142,7 +143,7 @@ class MineSection extends ConsumerWidget {
             final ids = [for (final r in saved) r.stationId];
             ids.insert(to, ids.removeAt(from));
             try {
-              await ref.read(radioRepositoryProvider).reorder(ids);
+              await ref.read(radioOpsProvider).reorder(ids);
             } catch (e, st) {
               // The list reads the DB stream, so the old order stays on screen.
               AppLog.w('reordering saved radios failed', e, st);

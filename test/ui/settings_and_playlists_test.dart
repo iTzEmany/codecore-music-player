@@ -66,7 +66,7 @@ void main() {
             name: 'Rock', createdAt: 1))))!;
     final pl = Playlist(id: id, name: 'Rock', createdAt: 1, updatedAt: 1);
     await h.pump(tester, PlaylistDetailScreen(playlist: pl));
-    await tester.tap(find.byType(PopupMenuButton<String>));
+    await tester.tap(find.byWidgetPredicate((w) => w is PopupMenuButton));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Rinomina'));
     await tester.pumpAndSettle();
@@ -75,7 +75,7 @@ void main() {
     await tester.tap(find.text('Annulla'));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byType(PopupMenuButton<String>));
+    await tester.tap(find.byWidgetPredicate((w) => w is PopupMenuButton));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Elimina'));
     await tester.pumpAndSettle();

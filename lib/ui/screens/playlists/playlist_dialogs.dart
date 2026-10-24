@@ -1,4 +1,5 @@
 import '../../widgets/cc_sheet.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -6,9 +7,10 @@ import '../../../data/db/app_database.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/database_providers.dart';
+import '../../../providers/playlist_ops.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/playlist_cover.dart';
-import '../../widgets/prompt_name.dart';
+import '../../widgets/create_flows.dart';
 import '../../widgets/show_msg.dart';
 
 /// What to say after adding [total] tracks of which [added] were new. One
@@ -25,14 +27,6 @@ String addedToPlaylistText(
   if (skipped == 0) return l.addedToPlaylistMany(added, name);
   return l.addedToPlaylistSkipped(added, skipped, name);
 }
-
-/// Argument: the track ids joined by «,» (a List has no value equality).
-final _playlistsWithProvider = FutureProvider.autoDispose
-    .family<Set<int>, String>(
-      (ref, ids) => ref.watch(playlistRepositoryProvider).containing([
-        for (final s in ids.split(',')) int.parse(s),
-      ]),
-    );
 
 /// Bottom sheet to add tracks to an existing or a new playlist. Resolves to
 /// true when they were added, false when the sheet was dismissed.
@@ -61,8 +55,9 @@ class _AddToPlaylistSheet extends ConsumerWidget {
     int id,
     String name,
   ) async {
-    final repo = ref.read(playlistRepositoryProvider);
-    final added = await repo.addTracks(id, [for (final t in tracks) t.id]);
+    final added = await ref.read(playlistOpsProvider).addTracks(id, [
+      for (final t in tracks) t.id,
+    ]);
     if (sheetContext.mounted) Navigator.of(sheetContext).pop(true);
     if (!outer.mounted) return;
     showMsg(
@@ -83,7 +78,9 @@ class _AddToPlaylistSheet extends ConsumerWidget {
     // Playlists that already hold every picked track get a ✓.
     final contains =
         ref
-            .watch(_playlistsWithProvider(tracks.map((t) => t.id).join(',')))
+            .watch(
+              playlistsContainingProvider(tracks.map((t) => t.id).join(',')),
+            )
             .value ??
         const <int>{};
     return SafeArea(
@@ -94,18 +91,9 @@ class _AddToPlaylistSheet extends ConsumerWidget {
             leading: const Icon(Icons.add),
             title: Text(l.newPlaylistEllipsis),
             onTap: () async {
-              final name = await promptName(
-                context,
-                title: l.newPlaylist,
-                confirmLabel: l.create,
-                hint: l.playlistName,
-              );
-              if (name == null || !context.mounted) return;
-              final id = await ref
-                  .read(playlistRepositoryProvider)
-                  .create(name);
-              if (!context.mounted) return;
-              await _add(ref, context, id, name);
+              final r = await createPlaylistFlow(context, ref);
+              if (r == null || !context.mounted) return;
+              await _add(ref, context, r.id, r.name);
             },
           ),
           for (final p in lists)

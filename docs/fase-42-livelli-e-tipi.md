@@ -11,6 +11,7 @@ un test la fa rispettare; sostituire stringhe e biforcazioni con tipi. Percorso 
 ## Cambi di comportamento voluti
 - Sparisce l'import dal vecchio DB Python (F-04, D-04). Il vecchio schema non c'è più sul PC né sui telefoni.
 - Il flusso «aggiungi cartella» dall'onboarding avvia la scansione (D-12).
+- Libreria: Podcast, Radio e Tag sempre visibili anche vuote; prima erano nascoste a zero e Podcast/Tag diventavano irraggiungibili (D-51). Indietro: togliere `keepWhenZero`.
 
 ## Comportamento invariato
 Tutto il resto. Golden identici. `lib/data`: **solo aggiunte** (`setLyrics` già esiste, `pathsById`; nessun cambio di

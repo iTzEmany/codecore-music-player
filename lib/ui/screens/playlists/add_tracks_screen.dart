@@ -6,6 +6,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/db/app_database.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/database_providers.dart';
+import '../../../providers/playlist_ops.dart';
+import '../../../providers/selection_providers.dart';
+import '../../../providers/track_ops.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/track_row.dart';
@@ -23,10 +26,11 @@ class AddTracksScreen extends ConsumerStatefulWidget {
 }
 
 class _AddTracksScreenState extends ConsumerState<AddTracksScreen> {
-  final _selected = <int>{};
+  static final _key = SelectionKey.addTracks.key;
   final _controller = TextEditingController();
   Timer? _debounce;
   String _query = '';
+  List<Track>? _lastFound;
 
   @override
   void dispose() {
@@ -43,15 +47,14 @@ class _AddTracksScreenState extends ConsumerState<AddTracksScreen> {
   }
 
   Future<void> _add() async {
-    await ref
-        .read(playlistRepositoryProvider)
-        .addTracks(widget.playlistId, _selected.toList());
+    await ref.read(playlistOpsProvider).addTracks(widget.playlistId, ref.read(selectionProvider(_key)).orderedIds);
     if (mounted) Navigator.of(context).pop();
   }
 
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
+    final picked = ref.watch(selectionProvider(_key));
     final inPlaylist = {
       for (final t
           in ref.watch(playlistTracksProvider(widget.playlistId)).value ??
@@ -60,14 +63,14 @@ class _AddTracksScreenState extends ConsumerState<AddTracksScreen> {
     };
     return Scaffold(
       appBar: CcAppBar(title: l.addSongs),
-      bottomNavigationBar: _selected.isEmpty
+      bottomNavigationBar: !picked.active
           ? null
           : SafeArea(
               child: Padding(
                 padding: const EdgeInsets.all(CcDims.margin),
                 child: FilledButton(
                   onPressed: _add,
-                  child: Text(l.addNSongs(_selected.length)),
+                  child: Text(l.addNSongs(picked.count)),
                 ),
               ),
             ),
@@ -93,16 +96,14 @@ class _AddTracksScreenState extends ConsumerState<AddTracksScreen> {
                 ),
               ),
               Expanded(
-                child: StreamBuilder<List<Track>>(
-                  stream: ref
-                      .watch(trackRepositoryProvider)
-                      .watchTracks(query: _query),
-                  builder: (context, snap) {
+                child: Builder(
+                  builder: (context) {
+                    _lastFound = ref.watch(trackSearchProvider(_query)).value ?? _lastFound;
                     final tracks = [
-                      for (final t in snap.data ?? const <Track>[])
+                      for (final t in _lastFound ?? const <Track>[])
                         if (!inPlaylist.contains(t.id)) t,
                     ];
-                    if (snap.hasData && tracks.isEmpty) {
+                    if (_lastFound != null && tracks.isEmpty) {
                       return EmptyState(
                         icon: Icons.library_music,
                         message: _query.isEmpty
@@ -118,12 +119,8 @@ class _AddTracksScreenState extends ConsumerState<AddTracksScreen> {
                         return TrackRow(
                           track: t,
                           variant: TrackRowVariant.pick,
-                          picked: _selected.contains(t.id),
-                          onTap: () => setState(
-                            () => _selected.contains(t.id)
-                                ? _selected.remove(t.id)
-                                : _selected.add(t.id),
-                          ),
+                          picked: picked.contains(t.id),
+                          onTap: () => ref.read(selectionProvider(_key).notifier).toggle(t.id),
                         );
                       },
                     );

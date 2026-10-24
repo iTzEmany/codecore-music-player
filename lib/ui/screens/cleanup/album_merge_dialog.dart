@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/text_utils.dart';
 import '../../../data/repositories/library_queries.dart';
 import '../../../l10n/l10n_ext.dart';
-import '../../../providers/database_providers.dart';
+import '../../../providers/track_ops.dart';
 import '../../../providers/library_providers.dart';
 import '../../../services/tags/tag_writer.dart';
 import '../../widgets/confirm.dart';
@@ -28,7 +28,7 @@ Future<bool> showAlbumMergeDialog(
   final l = context.l10n;
   final messenger = ScaffoldMessenger.of(context);
   final editor = ref.read(trackEditorProvider);
-  final tracks = await ref.read(trackRepositoryProvider).tracksOfAlbums([
+  final tracks = await ref.read(trackOpsProvider).ofAlbums([
     main.albumKey,
     ...done.keys,
   ]);

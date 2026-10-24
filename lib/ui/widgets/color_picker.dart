@@ -187,6 +187,116 @@ class _CcColorPickerState extends State<CcColorPicker> {
     _changed();
   }
 
+  Widget _hexRow(CcColors cc, CcColorPickerLabels l) {
+    return Row(
+      children: [
+        Expanded(
+          child: Semantics(
+            label: l.hex,
+            child: TextField(
+              controller: _hexCtrl,
+              focusNode: _hexFocus,
+              autocorrect: false,
+              enableSuggestions: false,
+              onChanged: _onHexTyped,
+              decoration: InputDecoration(
+                labelText: l.hex,
+                errorText: _hexInvalid ? l.invalidHex : null,
+                isDense: true,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: _current,
+            borderRadius: BorderRadius.circular(CcDims.rGrid),
+            border: Border.all(color: cc.surface3),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _square(CcColors cc, CcColorPickerLabels l, String pct) {
+    return LayoutBuilder(
+      builder: (context, box) {
+        final w = box.maxWidth;
+        final size = Size(w, (w * 3 / 4).clamp(0.0, _maxSquareHeight));
+        return Semantics(
+          label: l.saturationValue,
+          value: pct,
+          focusable: true,
+          child: Focus(
+            focusNode: _squareFocus,
+            onKeyEvent: _onSquareKey,
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTapDown: (d) {
+                _squareFocus.requestFocus();
+                _onSquare(d.localPosition, size);
+              },
+              onPanDown: (d) => _onSquare(d.localPosition, size),
+              onPanUpdate: (d) => _onSquare(d.localPosition, size),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(CcDims.rGrid),
+                child: CustomPaint(
+                  size: size,
+                  painter: _SvPainter(
+                    hue: _h,
+                    s: _s,
+                    v: _v,
+                    outline: cc.text,
+                    shadow: cc.bg,
+                    focused: _squareFocus.hasFocus,
+                    focusColor: cc.accent,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  List<Widget> _recent(CcColors cc, CcColorPickerLabels l) {
+    if (widget.recent.isEmpty) return const [];
+    return [
+      const SizedBox(height: 12),
+      Text(l.recent, style: Theme.of(context).textTheme.bodySmall),
+      const SizedBox(height: 6),
+      Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: [
+          for (final c in widget.recent)
+            Semantics(
+              button: true,
+              label: colorToHex(c, withAlpha: widget.allowAlpha),
+              child: InkResponse(
+                key: ValueKey('recent-${c.toARGB32()}'),
+                onTap: () => _pickRecent(c),
+                radius: 20,
+                child: Container(
+                  width: 28,
+                  height: 28,
+                  decoration: BoxDecoration(
+                    color: c,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: cc.surface3),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     final cc = context.cc;
@@ -196,78 +306,10 @@ class _CcColorPickerState extends State<CcColorPicker> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: Semantics(
-                label: l.hex,
-                child: TextField(
-                  controller: _hexCtrl,
-                  focusNode: _hexFocus,
-                  autocorrect: false,
-                  enableSuggestions: false,
-                  onChanged: _onHexTyped,
-                  decoration: InputDecoration(
-                    labelText: l.hex,
-                    errorText: _hexInvalid ? l.invalidHex : null,
-                    isDense: true,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: _current,
-                borderRadius: BorderRadius.circular(CcDims.rGrid),
-                border: Border.all(color: cc.surface3),
-              ),
-            ),
-          ],
-        ),
+        _hexRow(cc, l),
         const SizedBox(height: 12),
         _Caption(l.saturationValue),
-        LayoutBuilder(
-          builder: (context, box) {
-            final w = box.maxWidth;
-            final size = Size(w, (w * 3 / 4).clamp(0.0, _maxSquareHeight));
-            return Semantics(
-              label: l.saturationValue,
-              value: pct,
-              focusable: true,
-              child: Focus(
-                focusNode: _squareFocus,
-                onKeyEvent: _onSquareKey,
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTapDown: (d) {
-                    _squareFocus.requestFocus();
-                    _onSquare(d.localPosition, size);
-                  },
-                  onPanDown: (d) => _onSquare(d.localPosition, size),
-                  onPanUpdate: (d) => _onSquare(d.localPosition, size),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(CcDims.rGrid),
-                    child: CustomPaint(
-                      size: size,
-                      painter: _SvPainter(
-                        hue: _h,
-                        s: _s,
-                        v: _v,
-                        outline: cc.text,
-                        shadow: cc.bg,
-                        focused: _squareFocus.hasFocus,
-                        focusColor: cc.accent,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            );
-          },
-        ),
+        _square(cc, l, pct),
         const SizedBox(height: 8),
         _Caption(l.hue),
         _GradientSlider(
@@ -309,36 +351,7 @@ class _CcColorPickerState extends State<CcColorPicker> {
             },
           ),
         ],
-        if (widget.recent.isNotEmpty) ...[
-          const SizedBox(height: 12),
-          Text(l.recent, style: Theme.of(context).textTheme.bodySmall),
-          const SizedBox(height: 6),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              for (final c in widget.recent)
-                Semantics(
-                  button: true,
-                  label: colorToHex(c, withAlpha: widget.allowAlpha),
-                  child: InkResponse(
-                    key: ValueKey('recent-${c.toARGB32()}'),
-                    onTap: () => _pickRecent(c),
-                    radius: 20,
-                    child: Container(
-                      width: 28,
-                      height: 28,
-                      decoration: BoxDecoration(
-                        color: c,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: cc.surface3),
-                      ),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ],
+        ..._recent(cc, l),
       ],
     );
   }
@@ -351,10 +364,7 @@ class _Caption extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Padding(
     padding: const EdgeInsets.only(bottom: 2),
-    child: Text(
-      text,
-      style: Theme.of(context).textTheme.bodySmall,
-    ),
+    child: Text(text, style: Theme.of(context).textTheme.bodySmall),
   );
 }
 

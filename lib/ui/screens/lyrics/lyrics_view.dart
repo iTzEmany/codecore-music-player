@@ -1,11 +1,10 @@
-import 'package:drift/drift.dart' show Value;
 import 'package:flutter/foundation.dart' show ValueListenable, ValueNotifier;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/db/app_database.dart';
 import '../../../l10n/l10n_ext.dart';
-import '../../../providers/database_providers.dart';
+import '../../../providers/track_ops.dart';
 import '../../../providers/online_providers.dart';
 import '../../../providers/player_providers.dart';
 import '../../../providers/translation_providers.dart';
@@ -133,13 +132,7 @@ class _LyricsViewState extends ConsumerState<LyricsView> {
       return;
     }
     final result = found;
-    final db = ref.read(databaseProvider);
-    await (db.update(db.tracks)..where((r) => r.id.equals(t.id))).write(
-      TracksCompanion(
-        lyricsPlain: Value(result.plain),
-        lyricsSynced: Value(result.synced),
-      ),
-    );
+    await ref.read(trackOpsProvider).setLyrics(t.id, plain: result.plain, synced: result.synced);
   }
 
   @override

@@ -400,26 +400,6 @@
   "shareHint": "Sur le même Wi‑Fi, ouvrez « Recevoir » sur l’autre appareil et saisissez l’adresse et le PIN.",
   "shareMenu": "Partager…",
   "shareDeviceName": "Nom de l’appareil",
-  "importOld": "Importer depuis l’ancienne application",
-  "importOldHint": "Choisissez codecore_library.db de la version Python",
-  "importSummary": "{favorites} favoris, {playlists} playlists, {lyrics} paroles importées, {unmatched} non associés",
-  "@importSummary": {
-    "placeholders": {
-      "favorites": {
-        "type": "int"
-      },
-      "lyrics": {
-        "type": "int"
-      },
-      "playlists": {
-        "type": "int"
-      },
-      "unmatched": {
-        "type": "int"
-      }
-    }
-  },
-  "importFailed": "Échec de l’importation : fichier invalide",
   "sleepTimer": "Minuteur d’arrêt",
   "sleepMinutes": "{count} minutes",
   "@sleepMinutes": {

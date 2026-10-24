@@ -3,10 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/platform.dart';
 import '../../../l10n/l10n_ext.dart';
-import '../../../providers/library_providers.dart';
 import '../../../providers/settings_providers.dart';
 import '../../theme/tokens.dart';
-import '../library/folders_sheet.dart';
 import 'onboarding_pages.dart';
 
 const onboardingPageCount = 5;
@@ -41,7 +39,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   bool get _last => _page == onboardingPageCount - 1;
 
-  Future<void> _finish({required bool reachedEnd}) async {
+  void _finish({required bool reachedEnd}) {
     // Whoever read the last page has seen the download notice.
     ref
         .read(settingsProvider.notifier)
@@ -52,9 +50,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           ),
         );
     widget.onFinished?.call();
-    // The folders chosen on the way are scanned now.
-    final folders = ref.read(foldersProvider).value ?? const [];
-    if (folders.isNotEmpty) await scanWithPermission(ref);
   }
 
   void _next() {

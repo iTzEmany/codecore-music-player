@@ -5,7 +5,7 @@ import '../../data/db/app_database.dart' show PlaylistImportItem;
 import '../../data/repositories/import_repository.dart';
 import '../../services/import/import_options.dart' show ImportNote;
 import '../../l10n/l10n_ext.dart';
-import '../../providers/database_providers.dart';
+import '../../providers/playlist_ops.dart';
 import '../../providers/import_providers.dart';
 import '../../services/import/playlist_import_service.dart';
 import '../screens/import/import_labels.dart';
@@ -37,7 +37,7 @@ class _State extends ConsumerState<ImportEventListener> {
         // Every block of the import, counted together.
         final items = [
           for (final b in await svc.chainOf(e.importId))
-            ...await ref.read(importRepositoryProvider).items(b.id),
+            ...await ref.read(playlistOpsProvider).importItems(b.id),
         ];
         int count(bool Function(PlaylistImportItem) test) =>
             items.where(test).length;

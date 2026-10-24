@@ -5,10 +5,9 @@ import 'package:path/path.dart' as p;
 
 import '../../../core/app_log.dart';
 import '../../../l10n/l10n_ext.dart';
-import '../../../providers/database_providers.dart';
+import '../../../providers/track_ops.dart';
 import '../../../providers/library_providers.dart';
 import '../../../providers/tag_backup_providers.dart';
-import '../../../services/library/track_file_sync.dart';
 import '../../../services/tags/tag_backups.dart';
 import '../../../services/tags/tag_writer.dart';
 import '../../theme/tokens.dart';
@@ -41,7 +40,7 @@ class TagBackupsScreen extends ConsumerWidget {
     try {
       final store = await ref.read(tagBackupStoreProvider.future);
       final stamp = await store.restore(b);
-      await stampTrack(ref.read(databaseProvider), b.path, stamp);
+      await ref.read(trackOpsProvider).stampFile(b.path, stamp);
       msg = l.tagBackupRestored;
     } on TagWriteException catch (e) {
       msg = l.tagBackupRestoreFailed(tagReasonText(l, e.reason));
@@ -106,17 +105,17 @@ class TagBackupsScreen extends ConsumerWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                       isThreeLine: true,
-                      trailing: PopupMenuButton<String>(
-                        onSelected: (v) => v == 'restore'
+                      trailing: PopupMenuButton<_BackupAction>(
+                        onSelected: (v) => v == _BackupAction.restore
                             ? _restore(context, ref, b)
                             : _delete(context, ref, b),
                         itemBuilder: (_) => [
                           PopupMenuItem(
-                            value: 'restore',
+                            value: _BackupAction.restore,
                             child: Text(l.tagBackupRestore),
                           ),
                           PopupMenuItem(
-                            value: 'delete',
+                            value: _BackupAction.delete,
                             child: Text(l.tagBackupDelete),
                           ),
                         ],
@@ -129,3 +128,5 @@ class TagBackupsScreen extends ConsumerWidget {
     );
   }
 }
+
+enum _BackupAction { restore, delete }

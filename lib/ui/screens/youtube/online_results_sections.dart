@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/app_localizations.dart';
 import '../../../l10n/l10n_ext.dart';
-import '../../../providers/selection_providers.dart';
 import '../../../providers/youtube_providers.dart';
 import '../../../services/online/merge_results.dart';
 import '../../../services/online/query_match.dart' show MediaKind;
@@ -11,6 +10,7 @@ import '../../../services/online/smart_search.dart';
 import '../../../services/online/ytm_artist.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/segmented_blocks.dart';
+import '../online/online_selection_scope.dart';
 import '../online/online_song_row.dart';
 import 'listen_bar.dart';
 
@@ -162,8 +162,7 @@ class SmartRow extends ConsumerWidget {
     final l = context.l10n;
     final cc = context.cc;
     final r = row.primary;
-    final picked = ref.watch(selectionProvider(selectionKey));
-    final notifier = ref.read(selectionProvider(selectionKey).notifier);
+    final pick = watchOnlinePick(ref, selectionKey, index);
     final ids = row.ids.toSet();
     final inLibrary = ref.watch(
       downloadIndexProvider.select(
@@ -176,7 +175,6 @@ class SmartRow extends ConsumerWidget {
         (d) => d.where((x) => ids.contains(x.result.id)).lastOrNull,
       ),
     );
-    final selecting = picked.active;
     final who = r.artistIds.indexWhere((id) => id.isNotEmpty);
     final label = row.sources.contains(MediaKind.ytmSong)
         ? l.searchSourceYoutubeMusic
@@ -187,13 +185,13 @@ class SmartRow extends ConsumerWidget {
       result: r,
       inLibrary: inLibrary,
       item: item,
-      selecting: selecting,
-      selected: picked.contains(index),
-      position: picked.contains(index) ? picked.positionOf(index) + 1 : null,
-      onTap: selecting ? () => notifier.toggle(index) : null,
-      onLongPress: () => notifier.toggle(index),
+      selecting: pick.selecting,
+      selected: pick.selected,
+      position: pick.position,
+      onTap: pick.onTap,
+      onLongPress: pick.onLongPress,
       onDownload: () => ref.read(downloadsProvider.notifier).add(r),
-      listen: selecting ? null : ListenButton(result: r),
+      listen: pick.selecting ? null : ListenButton(result: r),
       onArtistTap: onArtistTap == null || who < 0 || who >= r.artists.length
           ? null
           : () => onArtistTap!(
@@ -210,7 +208,7 @@ class SmartRow extends ConsumerWidget {
               style: small,
             ),
           ),
-          if (row.hasVideo && !selecting) ...[
+          if (row.hasVideo && !pick.selecting) ...[
             Text(', ', style: small),
             Flexible(
               child: Tooltip(

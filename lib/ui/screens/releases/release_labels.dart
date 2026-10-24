@@ -1,10 +1,10 @@
+import '../../../providers/follow_ops.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/db/app_database.dart' show ArtistRelease;
 import '../../../data/repositories/release_repository.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../../providers/releases_providers.dart';
 import '../../../services/online/ytm_artist.dart';
 import '../../../services/releases/release_diff.dart';
 import '../../shell/shell_nav.dart';
@@ -21,7 +21,7 @@ String releaseKindLabel(AppLocalizations l, ArtistRelease r) {
 /// Opens the album page of [r] and marks it opened (the dot goes away).
 void openRelease(BuildContext context, WidgetRef ref, RecentRelease r) {
   final rel = r.release;
-  ref.read(releaseRepositoryProvider).markOpened(rel.browseId);
+  ref.read(followOpsProvider).markReleaseOpened(rel.browseId);
   ShellNav.open<void>(
     context,
     OnlineAlbumScreen(

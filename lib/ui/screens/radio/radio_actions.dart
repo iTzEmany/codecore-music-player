@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/player_providers.dart';
+import '../../../providers/radio_ops.dart';
 import '../../../providers/radio_providers.dart';
 import '../../../providers/settings_providers.dart';
 import '../../../providers/shuffle_plus_providers.dart' show networkProbeProvider;
@@ -42,22 +43,17 @@ Future<void> _mobileDataNotice(WidgetRef ref, ScaffoldMessengerState? messenger,
 
 /// The star: saves the station in «Le mie radio» or takes it out.
 Future<void> toggleSavedRadio(BuildContext context, WidgetRef ref, RadioStation s) async {
-  final repo = ref.read(radioRepositoryProvider);
   final saved = ref.read(savedRadioIdsProvider).contains(s.id);
   final l = context.l10n;
   final messenger = ScaffoldMessenger.maybeOf(context);
-  if (saved) {
-    await repo.remove(s.id);
-  } else {
-    await repo.save(s);
-  }
+  final undo = await ref.read(radioOpsProvider).toggleSaved(s);
   if (messenger == null || !ref.read(settingsProvider).showUndoSnackbar) return;
   showMsgOn(
     messenger,
     saved ? l.radioRemovedDone : l.radioSavedDone,
     action: SnackBarAction(
       label: l.undo,
-      onPressed: () => saved ? repo.save(s) : repo.remove(s.id),
+      onPressed: undo,
     ),
   );
 }

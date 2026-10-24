@@ -5,7 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/db/app_database.dart';
 import '../../../l10n/l10n_ext.dart';
-import '../../../providers/database_providers.dart';
+import '../../../providers/selection_providers.dart';
+import '../../../providers/track_ops.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/cover_image.dart';
 import '../../widgets/cc_app_bar.dart';
@@ -21,10 +22,21 @@ class TrackPickerScreen extends ConsumerStatefulWidget {
 }
 
 class _State extends ConsumerState<TrackPickerScreen> {
-  late final Set<int> _selected = {...widget.initial};
+  static final _key = SelectionKey.picker.key;
   final _controller = TextEditingController();
   Timer? _debounce;
   String _query = '';
+  List<Track>? _lastFound;
+
+  @override
+  void initState() {
+    super.initState();
+    // Keeps the provider alive; a provider cannot change during initState.
+    ref.listenManual(selectionProvider(_key), (_, _) {});
+    Future.microtask(() {
+      if (mounted) ref.read(selectionProvider(_key).notifier).selectAll(widget.initial.toList());
+    });
+  }
 
   @override
   void dispose() {
@@ -36,12 +48,13 @@ class _State extends ConsumerState<TrackPickerScreen> {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
+    final picked = ref.watch(selectionProvider(_key));
     return Scaffold(
       appBar: CcAppBar(
         title: l.sharePick,
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(_selected),
+            onPressed: () => Navigator.of(context).pop(Set.of(picked.ids)),
             child: Text(l.save),
           ),
         ],
@@ -67,24 +80,18 @@ class _State extends ConsumerState<TrackPickerScreen> {
             ),
           ),
           Expanded(
-            child: StreamBuilder<List<Track>>(
-              stream: ref
-                  .watch(trackRepositoryProvider)
-                  .watchTracks(query: _query),
-              builder: (context, snap) {
-                final tracks = snap.data ?? const <Track>[];
+            child: Builder(
+              builder: (context) {
+                _lastFound = ref.watch(trackSearchProvider(_query)).value ?? _lastFound;
+                final tracks = _lastFound ?? const <Track>[];
                 return ListView.builder(
                   itemExtent: 64,
                   itemCount: tracks.length,
                   itemBuilder: (_, i) {
                     final t = tracks[i];
                     return CheckboxListTile(
-                      value: _selected.contains(t.id),
-                      onChanged: (v) => setState(
-                        () => v == true
-                            ? _selected.add(t.id)
-                            : _selected.remove(t.id),
-                      ),
+                      value: picked.contains(t.id),
+                      onChanged: (_) => ref.read(selectionProvider(_key).notifier).toggle(t.id),
                       secondary: CoverImage(coverKey: t.coverKey, size: 44),
                       title: Text(
                         t.title,

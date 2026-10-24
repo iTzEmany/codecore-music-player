@@ -1,3 +1,4 @@
+import '../../../providers/track_ops.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -83,10 +84,7 @@ class ShuffleHero extends ConsumerWidget {
     final ctrl = ref.read(playerControllerProvider);
     try {
       // The whole library, not what the «Tutti i brani» search shows.
-      final tracks = await ref
-          .read(trackRepositoryProvider)
-          .watchTracks()
-          .first;
+      final tracks = await ref.read(trackOpsProvider).all();
       if (tracks.isEmpty) return;
       await ctrl.setShuffle(true);
       await ctrl.playAll(

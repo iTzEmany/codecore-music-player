@@ -1,14 +1,10 @@
-import 'dart:io';
-
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/permissions.dart';
-import '../../../core/platform.dart';
 import '../../../l10n/l10n_ext.dart';
-import '../../../providers/database_providers.dart';
 import '../../../providers/exportify_providers.dart';
+import '../../../providers/folder_actions.dart';
 import '../../../providers/library_providers.dart';
 import '../../../providers/settings_providers.dart';
 import '../../theme/tokens.dart';
@@ -77,7 +73,7 @@ class WelcomePage extends StatelessWidget {
   }
 }
 
-/// Folders are added here but scanned when the guide ends.
+/// Folders are added (and scanned) here.
 class FoldersPage extends ConsumerStatefulWidget {
   const FoldersPage({super.key, required this.askAudioPermission});
 
@@ -89,18 +85,6 @@ class FoldersPage extends ConsumerStatefulWidget {
 
 class _FoldersPageState extends ConsumerState<FoldersPage> {
   bool? _granted;
-
-  Future<void> _addFolder() async {
-    final path = await FilePicker.getDirectoryPath();
-    if (path == null) return;
-    await ref.read(folderRepositoryProvider).add(path);
-  }
-
-  Future<void> _addDefault() async {
-    final path = await defaultMusicDir();
-    if (!await Directory(path).exists()) return;
-    await ref.read(folderRepositoryProvider).add(path);
-  }
 
   Future<void> _allow() async {
     final ok = await ensureAudioPermission();
@@ -138,12 +122,12 @@ class _FoldersPageState extends ConsumerState<FoldersPage> {
           const SizedBox(height: 12),
         ],
         FilledButton.icon(
-          onPressed: _addFolder,
+          onPressed: () => addFolderAndScan(ref),
           icon: const Icon(Icons.create_new_folder_rounded),
           label: Text(l.addFolder),
         ),
         const SizedBox(height: 8),
-        TextButton(onPressed: _addDefault, child: Text(l.useDefaultFolder)),
+        TextButton(onPressed: () => addDefaultFolderAndScan(ref), child: Text(l.useDefaultFolder)),
         if (folders.isNotEmpty) ...[
           const SizedBox(height: 8),
           Text(

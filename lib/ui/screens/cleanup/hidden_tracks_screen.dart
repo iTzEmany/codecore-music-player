@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/l10n_ext.dart';
-import '../../../providers/database_providers.dart';
+import '../../../providers/track_ops.dart';
 import '../../../providers/duplicate_providers.dart';
 import '../../../providers/selection_providers.dart';
 import '../../../providers/settings_providers.dart';
@@ -20,7 +20,7 @@ import '../../widgets/cc_app_bar.dart';
 class HiddenTracksScreen extends ConsumerWidget {
   const HiddenTracksScreen({super.key});
 
-  static const _key = 'hidden';
+  static final _key = SelectionKey.hidden.key;
 
   Future<void> _restore(
     BuildContext context,
@@ -28,7 +28,7 @@ class HiddenTracksScreen extends ConsumerWidget {
     Set<int> ids,
   ) async {
     final l = context.l10n;
-    await ref.read(trackRepositoryProvider).setIgnored(ids, false);
+    await ref.read(trackOpsProvider).setIgnored(ids, false);
     ref.read(selectionProvider(_key).notifier).clear();
     if (!context.mounted) return;
     showMsg(context, l.hiddenRestored(ids.length));

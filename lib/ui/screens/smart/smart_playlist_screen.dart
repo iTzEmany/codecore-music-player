@@ -1,10 +1,10 @@
+import '../../../providers/playlist_ops.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/db/app_database.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../library/album_detail_screen.dart' show collectionMeta;
-import '../../../providers/database_providers.dart';
 import '../../../providers/player_providers.dart';
 import '../../../providers/settings_providers.dart';
 import '../../../providers/smart_playlist_providers.dart';
@@ -33,9 +33,7 @@ class SmartPlaylistScreen extends ConsumerWidget {
     SmartPlaylist p,
     List<Track> tracks,
   ) async {
-    final repo = ref.read(playlistRepositoryProvider);
-    final copy = await repo.create(p.name);
-    await repo.addTracks(copy, [for (final t in tracks) t.id]);
+    await ref.read(playlistOpsProvider).createWith(p.name, [for (final t in tracks) t.id]);
     if (!context.mounted) return;
     showMsg(context, context.l10n.smartConverted(p.name));
   }
@@ -50,7 +48,7 @@ class SmartPlaylistScreen extends ConsumerWidget {
       destructive: true,
     );
     if (!ok) return;
-    await ref.read(smartPlaylistRepositoryProvider).delete(p.id);
+    await ref.read(playlistOpsProvider).deleteSmart(p.id);
     if (context.mounted) Navigator.of(context).pop();
   }
 
@@ -93,23 +91,23 @@ class SmartPlaylistScreen extends ConsumerWidget {
         onShuffle: tracks.isEmpty
             ? null
             : ctrl.toggleShuffle,
-        menu: PopupMenuButton<String>(
+        menu: PopupMenuButton<_SmartAction>(
           tooltip: l.moreActions,
           icon: const Icon(Icons.more_horiz_rounded),
           onSelected: (v) async {
             switch (v) {
-              case 'edit':
+              case _SmartAction.edit:
                 await ShellNav.open<bool>(context, SmartPlaylistEditor(existing: p));
-              case 'convert':
+              case _SmartAction.convert:
                 await _convert(context, ref, p, tracks);
-              case 'delete':
+              case _SmartAction.delete:
                 await _delete(context, ref, p);
             }
           },
           itemBuilder: (_) => [
-            PopupMenuItem(value: 'edit', child: Text(l.smartPlaylistEdit)),
-            PopupMenuItem(value: 'convert', child: Text(l.smartConvert)),
-            PopupMenuItem(value: 'delete', child: Text(l.delete)),
+            PopupMenuItem(value: _SmartAction.edit, child: Text(l.smartPlaylistEdit)),
+            PopupMenuItem(value: _SmartAction.convert, child: Text(l.smartConvert)),
+            PopupMenuItem(value: _SmartAction.delete, child: Text(l.delete)),
           ],
         ),
         slivers: [
@@ -130,3 +128,5 @@ class SmartPlaylistScreen extends ConsumerWidget {
     );
   }
 }
+
+enum _SmartAction { edit, convert, delete }

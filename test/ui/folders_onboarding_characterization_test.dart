@@ -1,14 +1,12 @@
-// Characterization (38.5): the «add folder» flow is written twice (F-07) and
-// the copies diverge. Today adding a folder in the onboarding does not scan;
-// the scan starts when the guide ends. D-12 changes that on purpose: whoever
-// does it updates these tests in the same step.
+// Characterization: the «add folder» flow is one (D-12, addFolderAndScan): a
+// folder added in the onboarding is scanned straight away, like in the sheet.
 //
-// «Aggiungi cartella» itself opens the system picker (a static call), so it is
-// not driven here; folders are put in the database the way the picker would.
+// The system picker is replaced by a fake that answers with a fixed path.
 import 'package:codecore/data/repositories/folder_repository.dart';
 import 'package:codecore/providers/library_providers.dart';
 import 'package:codecore/ui/screens/library/folders_sheet.dart';
 import 'package:codecore/ui/screens/onboarding/onboarding_screen.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -26,36 +24,30 @@ Future<void> _settle(WidgetTester tester) async {
 ScanState _scan(WidgetTester tester) => ProviderScope.containerOf(tester.element(find.byType(Scaffold).first))
     .read(scanStateProvider);
 
-Future<void> _addFolder(WidgetTester tester, Harness h) async {
-  // In a transaction: see onboarding_test.dart.
-  await tester.runAsync(() => h.db.transaction(() => FolderRepository(h.db).add(_gone)));
-  await _settle(tester);
+class _FakePicker extends FilePickerPlatform {
+  @override
+  Future<String?> getDirectoryPath({
+    String? dialogTitle,
+    String? initialDirectory,
+    AndroidOptions androidOptions = const AndroidOptions(),
+    WindowsOptions windowsOptions = const WindowsOptions(),
+    LinuxOptions linuxOptions = const LinuxOptions(),
+    WebOptions webOptions = const WebOptions(),
+  }) async => _gone;
 }
 
 void main() {
-  group('onboarding', () {
-    testWidgets('a folder added on the folders page is not scanned', (tester) async {
-      final h = await Harness.create(tester);
-      await h.pump(tester, const OnboardingScreen(askAudioPermission: false));
-      await tester.tap(find.text('Avanti'));
-      await _settle(tester);
-      await _addFolder(tester, h);
-      expect(find.text('1 cartella aggiunta'), findsOneWidget);
-      final s = _scan(tester);
-      expect(s.running, isFalse);
-      expect(s.progress, isNull, reason: 'no scan ran');
-      expect(s.error, isNull);
-      await h.dispose(tester);
-    });
+  setUp(() => FilePickerPlatform.instance = _FakePicker());
 
-    testWidgets('the scan starts only when the guide ends (here «Salta»), and only with folders', (tester) async {
+  group('onboarding', () {
+    testWidgets('a folder added on the folders page is scanned straight away', (tester) async {
       final h = await Harness.create(tester);
       await h.pump(tester, const OnboardingScreen(askAudioPermission: false));
       await tester.tap(find.text('Avanti'));
       await _settle(tester);
-      await _addFolder(tester, h);
-      await tester.tap(find.text('Salta'));
+      await tester.tap(find.text('Aggiungi cartella'));
       await _settle(tester);
+      expect(find.text('1 cartella aggiunta'), findsOneWidget);
       expect(_scan(tester).error, contains(_gone), reason: 'the unreachable folder was visited');
       await h.dispose(tester);
     });

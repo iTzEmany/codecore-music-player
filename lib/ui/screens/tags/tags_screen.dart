@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import '../../widgets/prompt_name.dart';
+import '../../widgets/create_flows.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/db/app_database.dart';
 import '../../../l10n/l10n_ext.dart';
-import '../../../providers/database_providers.dart';
 import '../../../providers/player_providers.dart';
 import '../../../providers/settings_providers.dart';
 import '../../../providers/tag_providers.dart';
@@ -34,17 +33,7 @@ class TagsScreen extends ConsumerWidget {
           IconButton(
             tooltip: l.tagNew,
             icon: const Icon(Icons.add_rounded),
-            onPressed: () async {
-              final name = await promptName(
-                context,
-                title: l.tagNew,
-                confirmLabel: l.save,
-                maxLength: 40,
-              );
-              if (name != null) {
-                await ref.read(tagRepositoryProvider).create(name);
-              }
-            },
+            onPressed: () => createTagFlow(context, ref),
           ),
         ],
       ),

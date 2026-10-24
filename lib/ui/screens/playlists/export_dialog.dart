@@ -7,10 +7,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/app_log.dart';
 import '../../../data/db/app_database.dart';
-import '../../../data/repositories/hidden_playlists.dart';
+import '../../../data/repositories/track_repository.dart' show SortOption;
 import '../../../l10n/app_localizations.dart';
 import '../../../l10n/l10n_ext.dart';
-import '../../../providers/database_providers.dart';
+import '../../../providers/playlist_ops.dart';
+import '../../../providers/track_ops.dart';
 import '../../../services/export/playlist_exporter.dart';
 import '../../../services/export/save_file.dart';
 import '../../widgets/segmented_blocks.dart';
@@ -111,19 +112,14 @@ Future<void> exportPlaylistFlow(
   );
   if (choice == null) return;
   try {
-    final db = ref.read(databaseProvider);
     final text = renderPlaylist(
       choice.format,
       name: name,
       createdAt: playlist.createdAt,
       coverKey: playlist.coverKey,
       tracks: tracks,
-      isrcByTrack: await ref
-          .read(importRepositoryProvider)
-          .isrcByTrack(playlist.id),
-      folders: {
-        for (final f in await db.select(db.folders).get()) f.id: f.path,
-      },
+      isrcByTrack: await ref.read(playlistOpsProvider).isrcByTrack(playlist.id),
+      folders: await ref.read(trackOpsProvider).folderPaths(),
       relativePaths: choice.relative,
     );
     final saved = await saveBytes(
@@ -146,11 +142,8 @@ Future<Archive> buildPlaylistsArchive(
   required bool relativePaths,
   required String favoritesName,
 }) async {
-  final db = ref.read(databaseProvider);
-  final folders = {
-    for (final f in await db.select(db.folders).get()) f.id: f.path,
-  };
-  final repo = ref.read(playlistRepositoryProvider);
+  final folders = await ref.read(trackOpsProvider).folderPaths();
+  final plOps = ref.read(playlistOpsProvider);
   final archive = Archive();
   final used = <String>{};
   void add(
@@ -177,19 +170,16 @@ Future<Archive> buildPlaylistsArchive(
     archive.addFile(ArchiveFile.bytes(file, utf8.encode(text)));
   }
 
-  for (final p in await db.visiblePlaylists()) {
+  for (final p in await plOps.visible()) {
     add(
       p.name,
       p.createdAt,
       p.coverKey,
-      await repo.watchTracks(p.id).first,
-      await ref.read(importRepositoryProvider).isrcByTrack(p.id),
+      await plOps.tracksOf(p.id),
+      await plOps.isrcByTrack(p.id),
     );
   }
-  final favorites = await ref
-      .read(trackRepositoryProvider)
-      .watchTracks(favoritesOnly: true)
-      .first;
+  final favorites = await ref.read(trackOpsProvider).favorites(sort: SortOption.defaultOrder);
   if (favorites.isNotEmpty) {
     add(
       favoritesName,

@@ -88,13 +88,14 @@ void main() {
     await h.dispose(t);
   });
 
-  testWidgets('zero-count shortcuts disappear except Preferiti and Tutti i brani',
+  testWidgets('with zero podcasts, radios and tags the three shortcuts show',
       (t) async {
     final h = await open(t);
     expect(find.text('Preferiti'), findsOneWidget);
     expect(find.text('Tutti i brani'), findsOneWidget);
-    expect(find.text('Podcast'), findsNothing);
-    expect(find.text('Radio'), findsNothing);
+    expect(find.text('Podcast'), findsOneWidget);
+    expect(find.text('Radio'), findsOneWidget);
+    expect(find.text('Etichette'), findsOneWidget);
     await h.dispose(t);
   });
 

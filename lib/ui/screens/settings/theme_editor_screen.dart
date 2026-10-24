@@ -119,10 +119,8 @@ class _ThemeEditorScreenState extends ConsumerState<ThemeEditorScreen> {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    final cc = context.cc;
     final colors = _t.resolve();
     final tokens = _advanced ? CcToken.values : _simpleTokens;
-    final checks = contrastChecks(l, colors);
     final text = Theme.of(context).textTheme;
     return PopScope(
       canPop: _saved || !_dirty,
@@ -197,37 +195,10 @@ class _ThemeEditorScreenState extends ConsumerState<ThemeEditorScreen> {
                     onReset: () => _set(_t.withoutColor(t)),
                   ),
                 const SizedBox(height: 16),
-                Text(l.themeContrastTitle, style: text.titleSmall),
-                if (hasLowContrastText(colors))
-                  Padding(
-                    padding: const EdgeInsets.only(top: CcDims.gap4),
-                    child: Text(l.themeLowContrastWarning,
-                        key: const ValueKey('low-contrast-warning'),
-                        style: text.bodySmall?.copyWith(color: cc.error)),
-                  ),
-                for (final c in checks)
-                  ListTile(
-                    key: ValueKey('contrast-${c.label}'),
-                    dense: true,
-                    contentPadding: EdgeInsets.zero,
-                    leading: Icon(
-                      c.ok ? Icons.check_circle_outline_rounded : Icons.warning_amber_rounded,
-                      color: c.ok ? cc.accentSoft : cc.error,
-                    ),
-                    title: Text(c.label),
-                    subtitle: Text(
-                      '${c.ratio.toStringAsFixed(1)}:1, ${c.ok ? l.themeContrastOk : l.themeContrastLow}',
-                    ),
-                    trailing: c.ok
-                        ? null
-                        : TextButton(
-                            onPressed: () {
-                              final (token, color) = c.fix();
-                              _set(_t.withColor(token, color));
-                            },
-                            child: Text(l.themeFix),
-                          ),
-                  ),
+                _ContrastSection(
+                  colors: colors,
+                  onFix: (token, color) => _set(_t.withColor(token, color)),
+                ),
                 const SizedBox(height: 16),
                 ThemeBackgroundEditor(
                   themeId: _t.id,
@@ -241,6 +212,57 @@ class _ThemeEditorScreenState extends ConsumerState<ThemeEditorScreen> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _ContrastSection extends StatelessWidget {
+  const _ContrastSection({required this.colors, required this.onFix});
+
+  final CcColors colors;
+  final void Function(CcToken token, Color color) onFix;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final cc = context.cc;
+    final text = Theme.of(context).textTheme;
+    final checks = contrastChecks(l, colors);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(l.themeContrastTitle, style: text.titleSmall),
+        if (hasLowContrastText(colors))
+          Padding(
+            padding: const EdgeInsets.only(top: CcDims.gap4),
+            child: Text(l.themeLowContrastWarning,
+                key: const ValueKey('low-contrast-warning'),
+                style: text.bodySmall?.copyWith(color: cc.error)),
+          ),
+        for (final c in checks)
+          ListTile(
+            key: ValueKey('contrast-${c.label}'),
+            dense: true,
+            contentPadding: EdgeInsets.zero,
+            leading: Icon(
+              c.ok ? Icons.check_circle_outline_rounded : Icons.warning_amber_rounded,
+              color: c.ok ? cc.accentSoft : cc.error,
+            ),
+            title: Text(c.label),
+            subtitle: Text(
+              '${c.ratio.toStringAsFixed(1)}:1, ${c.ok ? l.themeContrastOk : l.themeContrastLow}',
+            ),
+            trailing: c.ok
+                ? null
+                : TextButton(
+                    onPressed: () {
+                      final (token, color) = c.fix();
+                      onFix(token, color);
+                    },
+                    child: Text(l.themeFix),
+                  ),
+          ),
+      ],
     );
   }
 }

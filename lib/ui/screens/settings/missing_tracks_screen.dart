@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/l10n_ext.dart';
-import '../../../providers/database_providers.dart';
+import '../../../providers/track_ops.dart';
 import '../../../providers/library_providers.dart';
 import '../../widgets/confirm.dart';
 import '../../widgets/empty_state.dart';
@@ -38,7 +38,7 @@ class _MissingTracksScreenState extends ConsumerState<MissingTracksScreen> {
         ],
       ),
     );
-    if (ok == true) await ref.read(trackRepositoryProvider).deleteTrack(id);
+    if (ok == true) await ref.read(trackOpsProvider).deleteTrack(id);
   }
 
   Future<void> _confirmRemoveAll(List<int> ids) async {
@@ -51,7 +51,7 @@ class _MissingTracksScreenState extends ConsumerState<MissingTracksScreen> {
       destructive: true,
     );
     if (!ok) return;
-    final repo = ref.read(trackRepositoryProvider);
+    final repo = ref.read(trackOpsProvider);
     for (final id in ids) {
       await repo.deleteTrack(id);
     }
@@ -95,19 +95,19 @@ class _MissingTracksScreenState extends ConsumerState<MissingTracksScreen> {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  trailing: PopupMenuButton<String>(
+                  trailing: PopupMenuButton<_MissingAction>(
                     tooltip: l.moreActions,
                     onSelected: (v) {
-                      if (v == 'ignore') {
+                      if (v == _MissingAction.ignore) {
                         setState(() => _ignored.add(t.id));
                       } else {
                         _confirmRemove(t.id);
                       }
                     },
                     itemBuilder: (_) => [
-                      PopupMenuItem(value: 'ignore', child: Text(l.ignore)),
+                      PopupMenuItem(value: _MissingAction.ignore, child: Text(l.ignore)),
                       PopupMenuItem(
-                        value: 'remove',
+                        value: _MissingAction.remove,
                         child: Text(l.removeFromLibrary),
                       ),
                     ],
@@ -118,3 +118,5 @@ class _MissingTracksScreenState extends ConsumerState<MissingTracksScreen> {
     );
   }
 }
+
+enum _MissingAction { ignore, remove }

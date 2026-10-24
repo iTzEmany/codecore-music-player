@@ -332,13 +332,22 @@ Scritture con debounce 400 ms, mai in un handler di slider a ogni tick.
 ## Interfaccia (refactor ui-fluida, 2026-10-23)
 Dettagli e motivazioni in `docs/refactor/ui-fluida/analisi.md` («Arrivo»), decisioni D-21..D-24.
 - **La UI passa solo dai provider.** In `lib/ui` non si usano `databaseProvider` né `*RepositoryProvider`; i tipi drift (`Track`, …) si possono importare. Le azioni sui brani stanno in `TrackOps` (`lib/providers/`). Lo controlla `test/ui/architecture_test.dart`.
-- **Regola dei dialoghi (41.5):** **dialogo per il testo** (un nome, una conferma: `AlertDialog`), **foglio per le scelte** (elenchi, azioni, selettori). Ogni foglio si apre con `showCcSheet` (`widgets/cc_sheet.dart`, l'unico `showModalBottomSheet`). Tre scelte sono ancora `SimpleDialog` (lingua, playlist di exportify, colore del tag): passano a foglio nella fase 42 (D-50).
+- **Regola dei dialoghi (41.5):** **dialogo per il testo** (un nome, una conferma: `AlertDialog`), **foglio per le scelte** (elenchi, azioni, selettori). Ogni foglio si apre con `showCcSheet` (`widgets/cc_sheet.dart`, l'unico `showModalBottomSheet`).
 - **Mattoni condivisi** (`lib/ui/widgets/`):
   - `showMsg(context, text, {action, persist})`: un solo messaggio alla volta, durata dai token (`CcTiming.msg` 4 s, `msgAction` 3 s con azione; `persist: true` con un'azione resta finché non si tocca), sicuro dopo un `await`. `showMsgOn(messenger, …)` quando il messenger va catturato prima che un dialogo si chiuda. Unico `SnackBar(` di `lib/ui`; fuori resta l'avviso di nuova versione in `lib/app.dart` (messenger globale).
   - `CcAppBar({title, titleWidget, actions, bottom, ...})`: l'unico `AppBar(`; stile dal tema. `SliverAppBar` (`CollectionHeader`, pagine online) e `SelectableAppBar` restano varianti dichiarate.
   - `AsyncBody<T>({value, data, isEmpty, empty, onRetry, loading, errorMessage})`: caricamento (spinner centrato, o `loading`), vuoto (il widget `empty` quando `isEmpty`), errore (`loadErrorState`: `ErrorState`, «Riprova» con `onRetry`, log con `AppLog`), dati.
   - `promptName` (`prompt_name.dart`): dialogo «scegli un nome»: trim, vuoto non accettato, `maxLength` (60; 40 per i tag, D-39).
-- **Selezione:** solo `selectionProvider`, con le chiavi in `SelectionKey`. I menu usano un enum (come `TrackAction`). Il tipo del brano si legge da `track.kind`.
+- **Selezione:** solo `selectionProvider`, con le chiavi in `SelectionKey`. I menu `PopupMenuButton` usano un enum per menu. Il tipo del brano si legge da `track.trackKind` (enum `TrackKind`: locale, episodio, online; `ui/widgets/track_kind.dart`). `Track.kind` è la colonna 0/1 del DB; la radio non si distingue dall'id: serve la coda (`radioOfTrack`).
+- **Ops** (`lib/providers/*_ops.dart`, fase 42): un Ops per dominio (Track, Playlist, Tag, Folder, Follow, Radio, Podcast).
+  - È l'unico punto da cui la UI scrive. Le letture restano live con `StreamProvider`/`FutureProvider`.
+  - Tiene la logica (undo, «solo quelli che cambiano»): non è un alias del repository. Le deleghe di una riga sono ammesse finché gli Ops restano il confine della scrittura.
+  - I flussi che servono un `WidgetRef` stanno in `providers/folder_actions.dart` (`addFolderAndScan`, D-12; usa `file_picker`).
+  - La curiosità passa da `curiosityProvider` (`AsyncNotifier`).
+  - Selezione: enum `SelectionKey` per le liste fisse; le chiavi con parametro hanno la forma `'<tipo>:<id>'`. `OnlineSelectionScope` è l'unico cablaggio della selezione online.
+  - I menu `PopupMenuButton` usano un enum per menu.
+  - `create_flows.dart` (`createPlaylistFlow`, `createTagFlow`) è l'unico «crea playlist/tag».
+  - `architecture_test`: `lib/ui` non usa `databaseProvider` né `*RepositoryProvider`, senza eccezioni.
 - **Movimento:** una sola scala in `tokens.dart` (120/180/250/320 ms, easeOutCubic/easeInCubic), sempre con `ccDuration`. Solo transform e scale, mai opacità su tutta la pagina. Le transizioni di pagina stanno in `app_theme.dart`.
 - **Aspetto:** l'anello è l'unico segno grafico e porta lo stato; superfici piatte, niente gradienti né ombre. Mockup approvati in `docs/refactor/ui-fluida/mockup/`.
 

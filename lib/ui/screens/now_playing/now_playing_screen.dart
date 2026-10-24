@@ -1,3 +1,4 @@
+import '../../widgets/track_kind.dart';
 import '../../../core/platform.dart';
 
 import 'package:flutter/material.dart';
@@ -9,13 +10,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/db/app_database.dart';
 import '../../../data/repositories/library_queries.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../services/radio/radio_station.dart' show RadioStation;
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/player_providers.dart';
 import '../../shell/shell_nav.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/cover_backdrop.dart';
 import '../../widgets/track_art.dart';
-import '../../../services/audio/online_entries.dart';
 import 'suggested_info.dart';
 import '../../../providers/radio_providers.dart' show onAirProvider;
 import '../../widgets/radio_now.dart';
@@ -125,7 +126,7 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
         ref.watch(liveCurrentTrackProvider).value ??
         ref.watch(currentTrackProvider).value;
     final cc = context.cc;
-    final online = track != null && isOnlineId(track.id);
+    final online = track != null && track.trackKind == TrackKind.online;
     final wide = MediaQuery.sizeOf(context).width >= _wideBreakpoint;
     final reduce = MediaQuery.disableAnimationsOf(context);
     return Scaffold(
@@ -149,7 +150,10 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                         desktop: widget.desktop ?? isDesktop,
                         onDragUpdate: (d) {
                           _dragging = true;
-                          _dy.value = (_dy.value + d.delta.dy).clamp(0.0, 600.0);
+                          _dy.value = (_dy.value + d.delta.dy).clamp(
+                            0.0,
+                            600.0,
+                          );
                         },
                         onDragEnd: _onDragEnd,
                       );
@@ -244,6 +248,207 @@ class _Player extends ConsumerWidget {
   final GestureDragUpdateCallback onDragUpdate;
   final GestureDragEndCallback onDragEnd;
 
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final online = track.trackKind == TrackKind.online;
+    final radio = radioOfTrack(ref, track);
+    final onAir = radio == null ? null : ref.watch(onAirProvider).value;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: CcDims.margin),
+      child: Column(
+        children: [
+          _PlayerHeader(
+            track: track,
+            desktop: desktop,
+            onDragUpdate: onDragUpdate,
+            onDragEnd: onDragEnd,
+          ),
+          _PlayerCover(
+            track: track,
+            radio: radio,
+            onDragUpdate: onDragUpdate,
+            onDragEnd: onDragEnd,
+          ),
+          const SizedBox(height: 16),
+          _TitleRow(track: track, radio: radio, onAir: onAir),
+          if (radio != null)
+            NpRadioActions(station: radio, onAir: onAir)
+          else if (online)
+            SuggestedInfo(track: track),
+          if (radio != null)
+            NpLiveRow(station: radio)
+          else
+            NpSeekRow(track: track),
+          const SizedBox(height: 8),
+          NpControls(live: radio != null),
+          const NpBottomRow(),
+          const SizedBox(height: 8),
+        ],
+      ),
+    );
+  }
+}
+
+class _PlayerHeader extends ConsumerWidget {
+  const _PlayerHeader({
+    required this.track,
+    required this.desktop,
+    required this.onDragUpdate,
+    required this.onDragEnd,
+  });
+
+  final Track track;
+  final bool desktop;
+  final GestureDragUpdateCallback onDragUpdate;
+  final GestureDragEndCallback onDragEnd;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    final cc = context.cc;
+    final theme = Theme.of(context).textTheme;
+    final ctx = playContextName(l, ref.watch(playContextProvider));
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onVerticalDragUpdate: onDragUpdate,
+      onVerticalDragEnd: onDragEnd,
+      child: SizedBox(
+        height: 56,
+        child: Row(
+          children: [
+            // Equal side slots (two 48 px buttons) keep the title centred.
+            SizedBox(
+              width: 96,
+              child: Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: IconButton(
+                  tooltip: l.back,
+                  icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 32),
+                  onPressed: () => Navigator.of(context).maybePop(),
+                ),
+              ),
+            ),
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    ctx == null ? l.nowPlaying : l.playingFrom,
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.labelSmall,
+                  ),
+                  if (ctx != null)
+                    Text(
+                      ctx,
+                      textAlign: TextAlign.center,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: cc.text,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            SizedBox(
+              width: 96,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  if (!desktop)
+                    IconButton(
+                      tooltip: l.carMode,
+                      icon: const Icon(Icons.directions_car_outlined),
+                      onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const CarModeScreen(),
+                        ),
+                      ),
+                    ),
+                  IconButton(
+                    tooltip: l.moreActions,
+                    icon: const Icon(Icons.more_horiz_rounded),
+                    onPressed: () => showTrackActions(context, ref, track),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PlayerCover extends ConsumerWidget {
+  const _PlayerCover({
+    required this.track,
+    required this.radio,
+    required this.onDragUpdate,
+    required this.onDragEnd,
+  });
+
+  final Track track;
+  final RadioStation? radio;
+  final GestureDragUpdateCallback onDragUpdate;
+  final GestureDragEndCallback onDragEnd;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ctrl = ref.read(playerControllerProvider);
+    return Expanded(
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onVerticalDragUpdate: onDragUpdate,
+        onVerticalDragEnd: onDragEnd,
+        onHorizontalDragEnd: (d) {
+          final v = d.primaryVelocity ?? 0;
+          if (v < -300 && ctrl.hasNext) ctrl.next();
+          if (v > 300) ctrl.previous();
+        },
+        child: LayoutBuilder(
+          builder: (_, c) {
+            final s = (c.biggest.shortestSide).clamp(80.0, 460.0);
+            const stroke = 4.0;
+            final inner = RingProgress.innerSize(s, stroke: stroke);
+            return Center(
+              child: RingProgress(
+                size: s,
+                stroke: stroke,
+                live: radio != null,
+                child: SpinWhilePlaying(
+                  trackKey: track.id,
+                  child: TrackArt(
+                    track: track,
+                    size: inner,
+                    radius: inner / 2,
+                    semanticLabel: track.album ?? track.title,
+                    heroTag: coverHeroTagFor(MediaQuery.sizeOf(context).width),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _TitleRow extends ConsumerWidget {
+  const _TitleRow({
+    required this.track,
+    required this.radio,
+    required this.onAir,
+  });
+
+  final Track track;
+  final RadioStation? radio;
+  final String? onAir;
+
   void _openArtist(BuildContext context, WidgetRef ref) {
     // The page only needs the same key `watchArtists` groups by.
     final key = (track.artist ?? '').trim().toLowerCase();
@@ -261,197 +466,58 @@ class _Player extends ConsumerWidget {
     final l = context.l10n;
     final cc = context.cc;
     final theme = Theme.of(context).textTheme;
-    final ctx = playContextName(l, ref.watch(playContextProvider));
-    final ctrl = ref.read(playerControllerProvider);
-    final online = isOnlineId(track.id);
-    final radio = radioOfTrack(ref, track);
-    final onAir = radio == null ? null : ref.watch(onAirProvider).value;
+    final online = track.trackKind == TrackKind.online;
+    final radio = this.radio;
     final texts = radio == null ? null : radioTexts(l, radio, onAir);
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: CcDims.margin),
-      child: Column(
-        children: [
-          GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onVerticalDragUpdate: onDragUpdate,
-            onVerticalDragEnd: onDragEnd,
-            child: SizedBox(
-              height: 56,
-              child: Row(
-                children: [
-                  // Equal side slots (two 48 px buttons) keep the title centred.
-                  SizedBox(
-                    width: 96,
-                    child: Align(
-                      alignment: AlignmentDirectional.centerStart,
-                      child: IconButton(
-                        tooltip: l.back,
-                        icon: const Icon(
-                          Icons.keyboard_arrow_down_rounded,
-                          size: 32,
-                        ),
-                        onPressed: () => Navigator.of(context).maybePop(),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          ctx == null ? l.nowPlaying : l.playingFrom,
-                          textAlign: TextAlign.center,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.labelSmall,
-                        ),
-                        if (ctx != null)
-                          Text(
-                            ctx,
-                            textAlign: TextAlign.center,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: cc.text,
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(
-                    width: 96,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        if (!desktop)
-                          IconButton(
-                            tooltip: l.carMode,
-                            icon: const Icon(Icons.directions_car_outlined),
-                            onPressed: () => Navigator.of(context).push(
-                              MaterialPageRoute<void>(
-                                builder: (_) => const CarModeScreen(),
-                              ),
-                            ),
-                          ),
-                        IconButton(
-                          tooltip: l.moreActions,
-                          icon: const Icon(Icons.more_horiz_rounded),
-                          onPressed: () =>
-                              showTrackActions(context, ref, track),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+    return Row(
+      children: [
+        Expanded(
+          child: Padding(
+            // The heart's glyph ends at npEdge: the title mirrors it.
+            padding: EdgeInsetsDirectional.only(
+              start: npEdge,
+              end: radio == null && online ? npEdge : 0,
             ),
-          ),
-          Expanded(
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onVerticalDragUpdate: onDragUpdate,
-              onVerticalDragEnd: onDragEnd,
-              onHorizontalDragEnd: (d) {
-                final v = d.primaryVelocity ?? 0;
-                if (v < -300 && ctrl.hasNext) ctrl.next();
-                if (v > 300) ctrl.previous();
-              },
-              child: LayoutBuilder(
-                builder: (_, c) {
-                  final s = (c.biggest.shortestSide).clamp(80.0, 460.0);
-                  const stroke = 4.0;
-                  final inner = RingProgress.innerSize(s, stroke: stroke);
-                  return Center(
-                    child: RingProgress(
-                      size: s,
-                      stroke: stroke,
-                      live: radio != null,
-                      child: SpinWhilePlaying(
-                        trackKey: track.id,
-                        child: TrackArt(
-                          track: track,
-                          size: inner,
-                          radius: inner / 2,
-                          semanticLabel: track.album ?? track.title,
-                          heroTag: coverHeroTagFor(MediaQuery.sizeOf(context).width),
-                        ),
-                      ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  texts?.title ?? track.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.titleLarge,
+                ),
+                InkWell(
+                  onTap: online ? null : () => _openArtist(context, ref),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 2),
+                    child: Text(
+                      // «In diretta» is already in the live row below.
+                      texts == null
+                          ? (track.artist ?? l.unknownArtist)
+                          : (onAir == null ? '' : texts.subtitle),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.bodyLarge?.copyWith(color: cc.textMuted),
                     ),
-                  );
-                },
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: Padding(
-                  // The heart's glyph ends at npEdge: the title mirrors it.
-                  padding: EdgeInsetsDirectional.only(
-                    start: npEdge,
-                    end: radio == null && online ? npEdge : 0,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        texts?.title ?? track.title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.titleLarge,
-                      ),
-                      InkWell(
-                        onTap: online ? null : () => _openArtist(context, ref),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 2),
-                          child: Text(
-                            // «In diretta» is already in the live row below.
-                            texts == null
-                                ? (track.artist ?? l.unknownArtist)
-                                : (onAir == null ? '' : texts.subtitle),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.bodyLarge?.copyWith(
-                              color: cc.textMuted,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
                   ),
                 ),
-              ),
-              if (radio != null)
-                RadioStarButton(station: radio)
-              else if (!online)
-                IconButton(
-                  tooltip: track.isFavorite
-                      ? l.removeFromFavorites
-                      : l.favorite,
-                  onPressed: () => toggleFavorite(context, ref, track),
-                  icon: HeartIcon(
-                    favorite: track.isFavorite,
-                    color: track.isFavorite ? cc.accent : cc.text,
-                  ),
-                ),
-            ],
+              ],
+            ),
           ),
-          if (radio != null)
-            NpRadioActions(station: radio, onAir: onAir)
-          else if (online)
-            SuggestedInfo(track: track),
-          if (radio != null)
-            NpLiveRow(station: radio)
-          else
-            NpSeekRow(track: track),
-          const SizedBox(height: 8),
-          NpControls(live: radio != null),
-          const NpBottomRow(),
-          const SizedBox(height: 8),
-        ],
-      ),
+        ),
+        if (radio != null)
+          RadioStarButton(station: radio)
+        else if (!online)
+          IconButton(
+            tooltip: track.isFavorite ? l.removeFromFavorites : l.favorite,
+            onPressed: () => toggleFavorite(context, ref, track),
+            icon: HeartIcon(
+              favorite: track.isFavorite,
+              color: track.isFavorite ? cc.accent : cc.text,
+            ),
+          ),
+      ],
     );
   }
 }

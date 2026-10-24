@@ -1,4 +1,3 @@
-import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,12 +5,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/app_log.dart';
 import '../../../data/db/app_database.dart';
 import '../../../l10n/l10n_ext.dart';
+import '../../../providers/curiosity_provider.dart';
 import '../../../providers/database_providers.dart';
-import '../../../providers/online_providers.dart';
 import '../../../providers/player_providers.dart';
 import '../../../providers/settings_providers.dart';
 import '../../../providers/translation_providers.dart';
-import '../../../services/online/http_client.dart';
 import '../../../services/online/lrc_parser.dart';
 import '../../../services/online/lyrics_translator.dart';
 import '../../../services/online/query_cleaner.dart';
@@ -157,71 +155,12 @@ class InfoCard extends ConsumerStatefulWidget {
 }
 
 class _InfoCardState extends ConsumerState<InfoCard> {
-  bool _loading = false;
-
-  /// What the last search could not do, per part: true = Wikipedia refused (too
-  /// many requests), so «nothing found» would be a lie.
-  bool _searched = false, _songLimited = false, _artistLimited = false;
-
   Future<void> _fetch() async {
     final l = context.l10n;
-    final t = widget.track;
-    setState(() {
-      _loading = true;
-      _songLimited = _artistLimited = false;
-    });
-    final c = cleanSearchQuery(t.title, t.artist ?? '');
-    final lang = ref.read(settingsProvider).language;
-    final db = ref.read(databaseProvider);
-    var limited = false, failed = false;
-
-    // Identity first (MusicBrainz → Wikidata → the exact pages), the names
-    // after; each part reports on its own, so one failing does not lose the other.
-    final found = await ref.read(curiosityFinderProvider).find(c.title, c.artist, lang, isrc: t.isrc, durationMs: t.durationMs);
-    final song = found.song, artist = found.artist;
-    final songDone = found.songError == null;
-    for (final (err, isSong) in [(found.songError, true), (found.artistError, false)]) {
-      if (err == null) continue;
-      if (err is RateLimitedException) {
-        AppLog.w('curiosity refused', err);
-        limited = true;
-        isSong ? _songLimited = true : _artistLimited = true;
-      } else {
-        AppLog.w('curiosity lookup failed', err);
-        failed = true;
-      }
-    }
-    try {
-      // A new search replaces what was saved before, also with nothing: an
-      // older version could have saved the artist's page as the song's. A part
-      // that could not be asked is left as it was.
-      if (songDone) {
-        await (db.update(db.tracks)..where((r) => r.id.equals(t.id))).write(
-          TracksCompanion(
-            curiosities: Value(song == null ? null : '${song.text}\n${song.source}'),
-          ),
-        );
-      }
-      if (artist != null) {
-        await ref.read(artistInfoRepositoryProvider).save(
-              c.artist,
-              body: artist.text,
-              source: artist.source,
-              lang: artist.lang,
-            );
-      }
-    } on Object catch (e, st) {
-      AppLog.w('could not save the curiosities', e, st);
-      failed = true;
-    }
+    final out = await ref.read(curiosityProvider(widget.track.id).notifier).fetch(widget.track);
     if (!mounted) return;
-    setState(() {
-      _loading = false;
-      _searched = true;
-    });
-    final nothing = song == null && artist == null;
-    if (limited || failed || nothing) {
-      showMsg(context, limited || failed ? l.serviceUnavailable : l.noResults);
+    if (out.limited || out.failed || out.nothing) {
+      showMsg(context, out.limited || out.failed ? l.serviceUnavailable : l.noResults);
     }
   }
 
@@ -233,17 +172,21 @@ class _InfoCardState extends ConsumerState<InfoCard> {
     final cleaned = cleanSearchQuery(t.title, t.artist ?? '');
     final artistInfo = ref.watch(artistInfoProvider(cleaned.artist)).value;
     final raw = t.curiosities;
+    final search = ref.watch(curiosityProvider(t.id));
+    final loading = search.isLoading;
+    final outcome = search.value;
+    final searched = outcome != null;
     final spinner = const SizedBox(
       width: 20,
       height: 20,
       child: CircularProgressIndicator(strokeWidth: 2),
     );
-    if (raw == null && artistInfo == null && !_searched) {
+    if (raw == null && artistInfo == null && !searched) {
       return _Card(
         title: l.fieldCuriosity,
         child: Align(
           alignment: Alignment.centerLeft,
-          child: _loading
+          child: loading
               ? spinner
               : OutlinedButton(
                   onPressed: _fetch,
@@ -268,7 +211,7 @@ class _InfoCardState extends ConsumerState<InfoCard> {
             )
           else
             Text(
-              _songLimited ? l.serviceUnavailable : l.curiosityNoSong,
+              (outcome?.songLimited ?? false) ? l.serviceUnavailable : l.curiosityNoSong,
               key: const ValueKey('curiosity-no-song'),
               style: muted,
             ),
@@ -284,7 +227,7 @@ class _InfoCardState extends ConsumerState<InfoCard> {
             Text(
               cleaned.artist.isEmpty
                   ? l.unknownArtist
-                  : _artistLimited
+                  : (outcome?.artistLimited ?? false)
                   ? l.serviceUnavailable
                   : l.curiosityNoArtist,
               key: const ValueKey('curiosity-no-artist'),
@@ -293,7 +236,7 @@ class _InfoCardState extends ConsumerState<InfoCard> {
           const SizedBox(height: 4),
           Align(
             alignment: Alignment.centerLeft,
-            child: _loading
+            child: loading
                 ? Padding(padding: const EdgeInsets.all(CcDims.gap8), child: spinner)
                 : TextButton(onPressed: _fetch, child: Text(l.retry)),
           ),

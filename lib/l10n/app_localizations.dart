@@ -1450,30 +1450,6 @@ abstract class AppLocalizations {
   /// **'Nome dispositivo'**
   String get shareDeviceName;
 
-  /// No description provided for @importOld.
-  ///
-  /// In it, this message translates to:
-  /// **'Importa dalla vecchia app'**
-  String get importOld;
-
-  /// No description provided for @importOldHint.
-  ///
-  /// In it, this message translates to:
-  /// **'Scegli codecore_library.db della versione Python'**
-  String get importOldHint;
-
-  /// No description provided for @importSummary.
-  ///
-  /// In it, this message translates to:
-  /// **'{favorites} preferiti, {playlists} playlist, {lyrics} testi importati, {unmatched} non abbinati'**
-  String importSummary(int favorites, int lyrics, int playlists, int unmatched);
-
-  /// No description provided for @importFailed.
-  ///
-  /// In it, this message translates to:
-  /// **'Importazione non riuscita: file non valido'**
-  String get importFailed;
-
   /// No description provided for @sleepTimer.
   ///
   /// In it, this message translates to:

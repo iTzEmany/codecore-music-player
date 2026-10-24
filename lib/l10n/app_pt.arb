@@ -400,26 +400,6 @@
   "shareHint": "Na mesma rede Wi‑Fi, abra «Receber» no outro dispositivo e introduza o endereço e o PIN.",
   "shareMenu": "Partilhar…",
   "shareDeviceName": "Nome do dispositivo",
-  "importOld": "Importar da app antiga",
-  "importOldHint": "Escolha o codecore_library.db da versão Python",
-  "importSummary": "{favorites} favoritos, {playlists} playlists, {lyrics} letras importadas, {unmatched} sem correspondência",
-  "@importSummary": {
-    "placeholders": {
-      "favorites": {
-        "type": "int"
-      },
-      "lyrics": {
-        "type": "int"
-      },
-      "playlists": {
-        "type": "int"
-      },
-      "unmatched": {
-        "type": "int"
-      }
-    }
-  },
-  "importFailed": "Falha na importação: ficheiro inválido",
   "sleepTimer": "Temporizador de repouso",
   "sleepMinutes": "{count} minutos",
   "@sleepMinutes": {

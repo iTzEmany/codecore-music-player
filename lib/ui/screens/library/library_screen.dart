@@ -1,6 +1,5 @@
 import '../../widgets/cc_sheet.dart';
 import 'package:flutter/material.dart';
-import '../../widgets/prompt_name.dart';
 import '../playlists/export_dialog.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -20,6 +19,7 @@ import '../../theme/tokens.dart';
 import '../../widgets/activity_button.dart';
 import '../../widgets/artist_avatar.dart';
 import '../../widgets/cover_image.dart';
+import '../../widgets/create_flows.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_state.dart';
 import '../../widgets/playlist_cover.dart';
@@ -39,6 +39,7 @@ import '../smart/smart_playlist_editor.dart';
 import '../smart/smart_playlist_screen.dart';
 import '../stats/stats_screen.dart';
 import '../tags/tags_screen.dart';
+import '../../../providers/folder_actions.dart';
 import 'folders_sheet.dart';
 import '../../../core/constants.dart';
 import '../../../providers/releases_providers.dart'
@@ -95,19 +96,9 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
     final albums = ref.watch(albumsProvider);
     final artists = ref.watch(artistsProvider);
     final folders = ref.watch(foldersProvider).value;
-    final favCount = ref.watch(
-      tracksProvider(true).select((t) => t.value?.length ?? 0),
-    );
     final trackCount = ref.watch(
       tracksProvider(false).select((t) => t.value?.length ?? 0),
     );
-    final tagCount = ref.watch(tagsProvider.select((t) => t.value?.length ?? 0));
-    final podcastCount = ref.watch(podcastsProvider.select((p) => p.value?.length ?? 0));
-    final radioCount = ref.watch(savedRadiosProvider.select((r) => r.value?.length ?? 0));
-    final followedCount = ref.watch(followedArtistsProvider.select((v) => v.value?.length ?? 0));
-    final releaseTopArtists = ref.watch(releaseOptionsProvider.select((o) => o.topArtists));
-    final reviewCount = ref.watch(reviewCountProvider.select((c) => c.value ?? 0));
-    final theme = Theme.of(context).textTheme;
     final denied = ref.watch(permissionDeniedProvider);
 
     Widget body;
@@ -157,10 +148,184 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
         LibraryKind.album => l.albumsCount(entries.length),
         LibraryKind.artist => l.artistsCount(entries.length),
       };
-      void open(Widget w) => ShellNav.open<void>(context, w);
-      final shortcuts = _kind != null
-          ? null
-          : LibraryShortcuts(
+      final shortcuts = _kind != null ? null : const _LibraryShortcuts();
+      body = settings.libraryGrid
+          ? _LibraryGrid(header: shortcuts, entries: entries, onOpen: _open)
+          : _LibraryList(
+              header: shortcuts,
+              entries: entries,
+              onOpen: _open,
+              showLetters: sort == LibrarySort.alpha,
+            );
+    }
+
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: Column(
+        children: [
+          const _LibraryHeader(),
+          const ScanStatus(),
+          _KindTabs(selected: _kind, onChanged: (k) => setState(() => _kind = k)),
+          LibraryToolbar(
+            countLabel: count,
+            sort: sort,
+            grid: settings.libraryGrid,
+            onSort: (s) => _setSettings(sort: s),
+            onToggleGrid: () => _setSettings(grid: !settings.libraryGrid),
+          ),
+          Expanded(child: body),
+        ],
+      ),
+    );
+  }
+}
+
+class _LibraryHeader extends ConsumerWidget {
+  const _LibraryHeader();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    final theme = Theme.of(context).textTheme;
+    return Padding(
+            padding: const EdgeInsets.fromLTRB(CcDims.margin, CcDims.gap12, CcDims.gap4, 0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    l.navLibrary,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.headlineSmall,
+                  ),
+                ),
+                const ActivityButton(),
+                IconButton(
+                  tooltip: l.navSearch,
+                  icon: const Icon(Icons.search_rounded),
+                  onPressed: () => ref
+                      .read(navIndexProvider.notifier)
+                      .set(NavTab.search.index),
+                ),
+                PopupMenuButton<_NewPlaylistAction>(
+                  tooltip: l.newPlaylist,
+                  icon: const Icon(Icons.add_rounded),
+                  onSelected: (v) async {
+                    if (v == _NewPlaylistAction.csv) {
+                      startCsvImport(context, ref);
+                      return;
+                    }
+                    if (v == _NewPlaylistAction.smart) {
+                      await ShellNav.open<bool>(
+                        context,
+                        const SmartPlaylistEditor(),
+                      );
+                      return;
+                    }
+                    await createPlaylistFlow(context, ref);
+                  },
+                  itemBuilder: (_) => [
+                    PopupMenuItem(
+                      value: _NewPlaylistAction.create,
+                      child: Text(l.newPlaylist),
+                    ),
+                    PopupMenuItem(
+                      value: _NewPlaylistAction.smart,
+                      child: Text(l.smartPlaylistNew),
+                    ),
+                    PopupMenuItem(
+                      value: _NewPlaylistAction.csv,
+                      child: Text(l.csvImportMenu),
+                    ),
+                  ],
+                ),
+                PopupMenuButton<_LibraryMenuAction>(
+                  tooltip: l.moreActions,
+                  onSelected: (v) {
+                    switch (v) {
+                      case _LibraryMenuAction.folders:
+                        showCcSheet<void>(
+                          context: context,
+                          builder: (_) => const FoldersSheet(),
+                        );
+                      case _LibraryMenuAction.scan:
+                        scanWithPermission(ref);
+                      case _LibraryMenuAction.share:
+                        DevicesSheet.show(context);
+                      case _LibraryMenuAction.exportAll:
+                        exportAllPlaylistsFlow(context, ref);
+                    }
+                  },
+                  itemBuilder: (_) => [
+                    PopupMenuItem(value: _LibraryMenuAction.folders, child: Text(l.folders)),
+                    PopupMenuItem(value: _LibraryMenuAction.scan, child: Text(l.refreshLibrary)),
+                    PopupMenuItem(value: _LibraryMenuAction.share, child: Text(l.shareTitle)),
+                    PopupMenuItem(value: _LibraryMenuAction.exportAll, child: Text(l.exportAllPlaylists)),
+                  ],
+                ),
+              ],
+            ),
+          );
+  }
+}
+
+class _KindTabs extends StatelessWidget {
+  const _KindTabs({required this.selected, required this.onChanged});
+
+  final LibraryKind? selected;
+  final ValueChanged<LibraryKind?> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    return Padding(
+              padding: const EdgeInsets.fromLTRB(CcDims.margin, CcDims.gap8, CcDims.margin, 0),
+              child: SegmentedBlocks<LibraryKind?>(
+                items: [
+                  BlockItem(value: null, icon: Icons.apps_rounded, label: l.libraryAll),
+                  BlockItem(
+                    value: LibraryKind.playlist,
+                    icon: Icons.queue_music_rounded,
+                    label: l.navPlaylists,
+                  ),
+                  BlockItem(
+                    value: LibraryKind.album,
+                    icon: Icons.album_rounded,
+                    label: l.albums,
+                  ),
+                  BlockItem(
+                    value: LibraryKind.artist,
+                    icon: Icons.person_rounded,
+                    label: l.artists,
+                  ),
+                ],
+                selected: selected,
+                onChanged: onChanged,
+              ),
+            );
+  }
+}
+
+class _LibraryShortcuts extends ConsumerWidget {
+  const _LibraryShortcuts();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    final favCount = ref.watch(
+      tracksProvider(true).select((t) => t.value?.length ?? 0),
+    );
+    final tagCount = ref.watch(tagsProvider.select((t) => t.value?.length ?? 0));
+    final podcastCount = ref.watch(podcastsProvider.select((p) => p.value?.length ?? 0));
+    final radioCount = ref.watch(savedRadiosProvider.select((r) => r.value?.length ?? 0));
+    final followedCount = ref.watch(followedArtistsProvider.select((v) => v.value?.length ?? 0));
+    final releaseTopArtists = ref.watch(releaseOptionsProvider.select((o) => o.topArtists));
+    final reviewCount = ref.watch(reviewCountProvider.select((c) => c.value ?? 0));
+    final trackCount = ref.watch(
+      tracksProvider(false).select((t) => t.value?.length ?? 0),
+    );
+    void open(Widget w) => ShellNav.open<void>(context, w);
+    return LibraryShortcuts(
                 items: [
                   LibraryShortcut(
                     label: l.navFavorites,
@@ -185,12 +350,14 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
                     label: l.podcastsTitle,
                     icon: Icons.podcasts_rounded,
                     count: podcastCount,
+                    keepWhenZero: true,
                     onTap: () => open(const PodcastsScreen()),
                   ),
                   LibraryShortcut(
                     label: l.radioTitle,
                     icon: Icons.radio_rounded,
                     count: radioCount,
+                    keepWhenZero: true,
                     onTap: () => open(const RadioScreen()),
                   ),
                   if (kEnableYoutube && (followedCount > 0 || releaseTopArtists))
@@ -205,6 +372,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
                     label: l.tagsTitle,
                     icon: Icons.label_outline_rounded,
                     count: tagCount,
+                    keepWhenZero: true,
                     onTap: () => open(const TagsScreen()),
                   ),
                   LibraryShortcut(
@@ -221,143 +389,6 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
                     ),
                 ],
               );
-      body = settings.libraryGrid
-          ? _LibraryGrid(header: shortcuts, entries: entries, onOpen: _open)
-          : _LibraryList(
-              header: shortcuts,
-              entries: entries,
-              onOpen: _open,
-              showLetters: sort == LibrarySort.alpha,
-            );
-    }
-
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(CcDims.margin, CcDims.gap12, CcDims.gap4, 0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    l.navLibrary,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.headlineSmall,
-                  ),
-                ),
-                const ActivityButton(),
-                IconButton(
-                  tooltip: l.navSearch,
-                  icon: const Icon(Icons.search_rounded),
-                  onPressed: () => ref
-                      .read(navIndexProvider.notifier)
-                      .set(NavTab.search.index),
-                ),
-                PopupMenuButton<String>(
-                  tooltip: l.newPlaylist,
-                  icon: const Icon(Icons.add_rounded),
-                  onSelected: (v) async {
-                    if (v == 'csv') {
-                      startCsvImport(context, ref);
-                      return;
-                    }
-                    if (v == 'smart') {
-                      await ShellNav.open<bool>(
-                        context,
-                        const SmartPlaylistEditor(),
-                      );
-                      return;
-                    }
-                    final name = await promptName(
-                      context,
-                      title: l.newPlaylist,
-                      confirmLabel: l.create,
-                      hint: l.playlistName,
-                    );
-                    if (name == null) return;
-                    await ref.read(playlistRepositoryProvider).create(name);
-                  },
-                  itemBuilder: (_) => [
-                    PopupMenuItem(
-                      value: 'new',
-                      child: Text(l.newPlaylist),
-                    ),
-                    PopupMenuItem(
-                      value: 'smart',
-                      child: Text(l.smartPlaylistNew),
-                    ),
-                    PopupMenuItem(
-                      value: 'csv',
-                      child: Text(l.csvImportMenu),
-                    ),
-                  ],
-                ),
-                PopupMenuButton<String>(
-                  tooltip: l.moreActions,
-                  onSelected: (v) {
-                    switch (v) {
-                      case 'folders':
-                        showCcSheet<void>(
-                          context: context,
-                          builder: (_) => const FoldersSheet(),
-                        );
-                      case 'scan':
-                        scanWithPermission(ref);
-                      case 'share':
-                        DevicesSheet.show(context);
-                      case 'exportAll':
-                        exportAllPlaylistsFlow(context, ref);
-                    }
-                  },
-                  itemBuilder: (_) => [
-                    PopupMenuItem(value: 'folders', child: Text(l.folders)),
-                    PopupMenuItem(value: 'scan', child: Text(l.refreshLibrary)),
-                    PopupMenuItem(value: 'share', child: Text(l.shareTitle)),
-                    PopupMenuItem(value: 'exportAll', child: Text(l.exportAllPlaylists)),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          const ScanStatus(),
-          Padding(
-              padding: const EdgeInsets.fromLTRB(CcDims.margin, CcDims.gap8, CcDims.margin, 0),
-              child: SegmentedBlocks<LibraryKind?>(
-                items: [
-                  BlockItem(value: null, icon: Icons.apps_rounded, label: l.libraryAll),
-                  BlockItem(
-                    value: LibraryKind.playlist,
-                    icon: Icons.queue_music_rounded,
-                    label: l.navPlaylists,
-                  ),
-                  BlockItem(
-                    value: LibraryKind.album,
-                    icon: Icons.album_rounded,
-                    label: l.albums,
-                  ),
-                  BlockItem(
-                    value: LibraryKind.artist,
-                    icon: Icons.person_rounded,
-                    label: l.artists,
-                  ),
-                ],
-                selected: _kind,
-                onChanged: (k) => setState(() => _kind = k),
-              ),
-            ),
-          LibraryToolbar(
-            countLabel: count,
-            sort: sort,
-            grid: settings.libraryGrid,
-            onSort: (s) => _setSettings(sort: s),
-            onToggleGrid: () => _setSettings(grid: !settings.libraryGrid),
-          ),
-          Expanded(child: body),
-        ],
-      ),
-    );
   }
 }
 
@@ -545,3 +576,6 @@ class _LibraryGrid extends StatelessWidget {
     );
   }
 }
+
+enum _NewPlaylistAction { create, smart, csv }
+enum _LibraryMenuAction { folders, scan, share, exportAll }

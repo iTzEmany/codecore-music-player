@@ -1,6 +1,6 @@
 import '../../widgets/cc_sheet.dart';
 import 'package:flutter/material.dart';
-import '../../widgets/prompt_name.dart';
+import '../../widgets/create_flows.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/l10n_ext.dart';
@@ -27,15 +27,8 @@ Future<PickedPlaylist?> pickPlaylist(BuildContext context, WidgetRef ref) =>
                   leading: const Icon(Icons.add),
                   title: Text(l.newPlaylistEllipsis),
                   onTap: () async {
-                    final name = await promptName(
-                      sheet,
-                      title: l.newPlaylist,
-                      confirmLabel: l.create,
-                      hint: l.playlistName,
-                    );
-                    if (name == null || !sheet.mounted) return;
-                    final id = await ref.read(playlistRepositoryProvider).create(name);
-                    if (sheet.mounted) Navigator.of(sheet).pop((id: id, name: name));
+                    final r = await createPlaylistFlow(sheet, ref);
+                    if (r != null && sheet.mounted) Navigator.of(sheet).pop(r);
                   },
                 ),
                 for (final p in lists)

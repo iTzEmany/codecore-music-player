@@ -76,24 +76,7 @@ class ArtistDetailScreen extends ConsumerWidget {
         ),
         meta: meta,
         menu: kEnableYoutube && artist.name != null
-            ? Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    key: const ValueKey('artist-follow-ytm'),
-                    tooltip: l.followOnYtm,
-                    onPressed: () => followFromLibrary(context, ref, artist.name!),
-                    icon: const Icon(Icons.notifications_none_rounded),
-                  ),
-                  IconButton(
-                    key: const ValueKey('artist-on-ytm'),
-                    tooltip: l.ytmOnYoutubeMusic,
-                    onPressed: () => openYtmArtist(context, ref, artist.name!,
-                        open: (page) => ShellNav.open<void>(context, page)),
-                    icon: const Icon(Icons.smart_display_rounded),
-                  ),
-                ],
-              )
+            ? _YtmButtons(name: artist.name!)
             : null,
         onPlay: list.isEmpty
             ? null
@@ -152,5 +135,34 @@ class ArtistDetailScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+}
+
+class _YtmButtons extends ConsumerWidget {
+  const _YtmButtons({required this.name});
+
+  final String name;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    return Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    key: const ValueKey('artist-follow-ytm'),
+                    tooltip: l.followOnYtm,
+                    onPressed: () => followFromLibrary(context, ref, name),
+                    icon: const Icon(Icons.notifications_none_rounded),
+                  ),
+                  IconButton(
+                    key: const ValueKey('artist-on-ytm'),
+                    tooltip: l.ytmOnYoutubeMusic,
+                    onPressed: () => openYtmArtist(context, ref, name,
+                        open: (page) => ShellNav.open<void>(context, page)),
+                    icon: const Icon(Icons.smart_display_rounded),
+                  ),
+                ],
+              );
   }
 }

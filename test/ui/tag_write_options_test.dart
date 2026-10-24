@@ -29,9 +29,8 @@ class _Tiles extends ConsumerWidget {
   const _Tiles();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) => Scaffold(
-    body: ListView(children: tagWriteTiles(context, ref)),
-  );
+  Widget build(BuildContext context, WidgetRef ref) =>
+      Scaffold(body: ListView(children: tagWriteTiles(context, ref)));
 }
 
 void main() {
@@ -48,19 +47,20 @@ void main() {
     addTearDown(tester.view.reset);
     h = await Harness.create(tester, tracks: 1);
     if (optionOn) {
-      await h.store.writeSettings(
-        const AppSettings(writeTagsToFiles: true),
-      );
+      await h.store.writeSettings(const AppSettings(writeTagsToFiles: true));
     }
     await h.pump(tester, child, extraOverrides: extra);
     await _settle(tester);
   }
 
-  bool optionNow(WidgetTester tester) => ProviderScope.containerOf(
-    tester.element(find.byType(Scaffold).first),
-  ).read(settingsProvider).writeTagsToFiles;
+  bool optionNow(WidgetTester tester) =>
+      ProviderScope.containerOf(tester.element(find.byType(Scaffold).first))
+          .read(settingsProvider)
+          .writeTagsToFiles;
 
-  testWidgets('turning the option on shows the warning; Cancel leaves it off', (tester) async {
+  testWidgets('turning the option on shows the warning; Cancel leaves it off', (
+    tester,
+  ) async {
     await open(tester, const _Tiles());
     expect(optionNow(tester), isFalse);
 
@@ -87,34 +87,47 @@ void main() {
     await h.dispose(tester);
   });
 
-  testWidgets('the edit dialog has «Scrivi anche nel file» only with the option on, and gives the reason when blocked', (tester) async {
-    final blocked = tagWritableProvider('/m/t0.mp3').overrideWith(
-      (ref) async => TagWriteReason.unsupported,
-    );
-    await open(
-      tester,
-      Builder(
-        builder: (c) => TextButton(
-          onPressed: () async {
-            final t = await h.db.select(h.db.tracks).getSingle();
-            if (c.mounted) await showTrackEditDialog(c, t);
-          },
-          child: const Text('open'),
+  testWidgets(
+    'the edit dialog has «Scrivi anche nel file» only with the option on, and gives the reason when blocked',
+    (tester) async {
+      final blocked = tagWritableProvider('/m/t0.mp3')
+          .overrideWith((ref) async => TagWriteReason.unsupported);
+      await open(
+        tester,
+        Builder(
+          builder: (c) => TextButton(
+            onPressed: () async {
+              final t = await h.db.select(h.db.tracks).getSingle();
+              if (c.mounted) await showTrackEditDialog(c, t);
+            },
+            child: const Text('open'),
+          ),
         ),
-      ),
-      optionOn: true,
-      extra: [blocked],
-    );
-    await tester.tap(find.text('open'));
-    await _settle(tester);
-    expect(find.text('Scrivi anche nel file'), findsOneWidget);
-    expect(find.textContaining('Formato non modificabile (MP3)'), findsOneWidget);
-    final box = tester.widget<CheckboxListTile>(find.byType(CheckboxListTile));
-    expect(box.onChanged, isNull, reason: 'disabled for a file we cannot write');
-    await h.dispose(tester);
-  });
+        optionOn: true,
+        extra: [blocked],
+      );
+      await tester.tap(find.text('open'));
+      await _settle(tester);
+      expect(find.text('Scrivi anche nel file'), findsOneWidget);
+      expect(
+        find.textContaining('Formato non modificabile (MP3)'),
+        findsOneWidget,
+      );
+      final box = tester.widget<CheckboxListTile>(
+        find.byType(CheckboxListTile),
+      );
+      expect(
+        box.onChanged,
+        isNull,
+        reason: 'disabled for a file we cannot write',
+      );
+      await h.dispose(tester);
+    },
+  );
 
-  testWidgets('with the option off the edit dialog does not mention files', (tester) async {
+  testWidgets('with the option off the edit dialog does not mention files', (
+    tester,
+  ) async {
     await open(
       tester,
       Builder(
@@ -134,54 +147,60 @@ void main() {
     await h.dispose(tester);
   });
 
-  testWidgets('tag backups: list, restore the original (with confirmation) and delete', (tester) async {
-    final store = _FakeStore([
-      TagBackup(
-        id: '1',
-        path: '/m/song.mp3',
-        createdAt: DateTime(2026, 10, 19, 12, 30),
-        sizeBytes: 4 << 20,
-      ),
-    ]);
-    await open(
-      tester,
-      const TagBackupsScreen(),
-      extra: [tagBackupStoreProvider.overrideWith((ref) async => store)],
-    );
-    expect(find.text('Backup dei tag'), findsOneWidget);
-    expect(find.text('song.mp3'), findsOneWidget);
-    expect(find.textContaining('4,0 MB'), findsOneWidget);
+  testWidgets(
+    'tag backups: list, restore the original (with confirmation) and delete',
+    (tester) async {
+      final store = _FakeStore([
+        TagBackup(
+          id: '1',
+          path: '/m/song.mp3',
+          createdAt: DateTime(2026, 10, 19, 12, 30),
+          sizeBytes: 4 << 20,
+        ),
+      ]);
+      await open(
+        tester,
+        const TagBackupsScreen(),
+        extra: [tagBackupStoreProvider.overrideWith((ref) async => store)],
+      );
+      expect(find.text('Backup dei tag'), findsOneWidget);
+      expect(find.text('song.mp3'), findsOneWidget);
+      expect(find.textContaining('4,0 MB'), findsOneWidget);
 
-    // Cancel at the confirmation: nothing is restored.
-    await tester.tap(find.byType(PopupMenuButton<String>));
-    await _settle(tester);
-    await tester.tap(find.text('Ripristina originale').last);
-    await _settle(tester);
-    expect(find.textContaining('torna com’era prima della modifica'), findsOneWidget);
-    await tester.tap(find.text('Annulla'));
-    await _settle(tester);
-    expect(store.restored, isEmpty);
+      // Cancel at the confirmation: nothing is restored.
+      await tester.tap(find.byWidgetPredicate((w) => w is PopupMenuButton));
+      await _settle(tester);
+      await tester.tap(find.text('Ripristina originale').last);
+      await _settle(tester);
+      expect(
+        find.textContaining('torna com’era prima della modifica'),
+        findsOneWidget,
+      );
+      await tester.tap(find.text('Annulla'));
+      await _settle(tester);
+      expect(store.restored, isEmpty);
 
-    await tester.tap(find.byType(PopupMenuButton<String>));
-    await _settle(tester);
-    await tester.tap(find.text('Ripristina originale').last);
-    await _settle(tester);
-    await tester.tap(find.text('Ripristina originale').last);
-    await _settle(tester);
-    expect(store.restored, ['1']);
-    expect(find.text('Originale ripristinato'), findsOneWidget);
+      await tester.tap(find.byWidgetPredicate((w) => w is PopupMenuButton));
+      await _settle(tester);
+      await tester.tap(find.text('Ripristina originale').last);
+      await _settle(tester);
+      await tester.tap(find.text('Ripristina originale').last);
+      await _settle(tester);
+      expect(store.restored, ['1']);
+      expect(find.text('Originale ripristinato'), findsOneWidget);
 
-    await tester.tap(find.byType(PopupMenuButton<String>));
-    await _settle(tester);
-    await tester.tap(find.text('Elimina backup'));
-    await _settle(tester);
-    await tester.tap(find.text('Elimina backup').last);
-    await _settle(tester);
-    expect(store.items, isEmpty);
-    expect(find.text('song.mp3'), findsNothing);
-    expect(find.text('Backup eliminato'), findsOneWidget);
-    await h.dispose(tester);
-  });
+      await tester.tap(find.byWidgetPredicate((w) => w is PopupMenuButton));
+      await _settle(tester);
+      await tester.tap(find.text('Elimina backup'));
+      await _settle(tester);
+      await tester.tap(find.text('Elimina backup').last);
+      await _settle(tester);
+      expect(store.items, isEmpty);
+      expect(find.text('song.mp3'), findsNothing);
+      expect(find.text('Backup eliminato'), findsOneWidget);
+      await h.dispose(tester);
+    },
+  );
 }
 
 /// In-memory store: file I/O started under FakeAsync never completes.
@@ -204,4 +223,3 @@ class _FakeStore extends TagBackupStore {
   Future<void> delete(TagBackup b) async =>
       items.removeWhere((x) => x.id == b.id);
 }
-

@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 
 import '../../../data/repositories/play_history_repository.dart';
 import '../../../l10n/l10n_ext.dart';
-import '../../../providers/database_providers.dart';
+import '../../../providers/track_ops.dart';
 import '../../../providers/history_providers.dart';
 import '../../../providers/player_providers.dart';
 import '../../../providers/settings_providers.dart';
@@ -77,7 +77,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
       destructive: true,
     );
     if (!ok) return;
-    await ref.read(playHistoryRepositoryProvider).clear();
+    await ref.read(trackOpsProvider).clearHistory();
     if (!mounted) return;
     showMsg(context, l.historyCleared);
   }

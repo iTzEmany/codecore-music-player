@@ -1,7 +1,5 @@
 import 'dart:io';
 
-import 'package:file_picker/file_picker.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -10,20 +8,21 @@ import '../../../core/app_info.dart';
 import '../../../core/constants.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../l10n/l10n_ext.dart';
-import '../../../providers/database_providers.dart';
+import '../../../providers/track_ops.dart';
 import '../../../providers/equalizer_providers.dart';
 import '../../../providers/library_providers.dart';
 import '../../../providers/online_providers.dart';
 import '../../../services/online/enrichment_service.dart' show needsEnrichment;
 import '../../../providers/settings_providers.dart';
+import '../../widgets/cc_sheet.dart';
 import '../../widgets/confirm.dart';
 import '../../widgets/cover_image.dart';
+import '../../../providers/folder_actions.dart';
 import '../library/folders_sheet.dart';
 import '../../../providers/share_providers.dart';
 import '../../../providers/translation_providers.dart';
 import '../../shell/shell_nav.dart';
 import '../share/share_screen.dart';
-import '../../../services/migration/python_db_importer.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/prompt_name.dart';
 import 'icon_follow_tile.dart';
@@ -374,12 +373,6 @@ List<SettingsGroup> _network(BuildContext context, WidgetRef ref) {
           subtitle: Text(ref.watch(deviceNameProvider)),
           onTap: () => _editDeviceName(context, ref),
         ),
-        ListTile(
-          leading: const Icon(Icons.history),
-          title: Text(l.importOld),
-          subtitle: Text(l.importOldHint),
-          onTap: () => _importOld(context, ref),
-        ),
       ],
     ),
     ..._trustedGroup(context, ref),
@@ -424,40 +417,37 @@ Future<void> _pickLanguage(BuildContext context, WidgetRef ref) async {
   final l = context.l10n;
   final notifier = ref.read(settingsProvider.notifier);
   final current = ref.read(settingsProvider).language;
-  final picked = await showDialog<String>(
+  final picked = await showCcSheet<String>(
     context: context,
-    builder: (c) => SimpleDialog(
-      title: Text(l.settingsLanguage),
-      children: [
-        for (final e in _languages.entries)
-          ListTile(
-            title: Text(e.value),
-            trailing: e.key == current
-                ? Icon(Icons.check_rounded, color: c.cc.accent)
-                : null,
-            onTap: () => Navigator.of(c).pop(e.key),
+    builder: (c) => SafeArea(
+      child: ListView(
+        shrinkWrap: true,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              CcDims.gap24,
+              CcDims.gap16,
+              CcDims.gap24,
+              CcDims.gap8,
+            ),
+            child: Text(
+              l.settingsLanguage,
+              style: Theme.of(c).textTheme.titleMedium,
+            ),
           ),
-      ],
+          for (final e in _languages.entries)
+            ListTile(
+              title: Text(e.value),
+              trailing: e.key == current
+                  ? Icon(Icons.check_rounded, color: c.cc.accent)
+                  : null,
+              onTap: () => Navigator.of(c).pop(e.key),
+            ),
+        ],
+      ),
     ),
   );
   if (picked != null) notifier.update((s) => s.copyWith(language: picked));
-}
-
-Future<void> _importOld(BuildContext context, WidgetRef ref) async {
-  final l = context.l10n;
-  final picked = await FilePicker.pickFiles();
-  final path = picked.isEmpty ? null : picked.first.path;
-  if (path == null) return;
-  String text;
-  try {
-    final s = await PythonDbImporter(ref.read(databaseProvider)).import(path);
-    text = l.importSummary(s.favorites, s.playlists, s.lyrics, s.unmatched);
-  } on Object catch (e, st) {
-    AppLog.w('python import failed', e, st);
-    text = l.importFailed;
-  }
-  if (!context.mounted) return;
-  showMsg(context, text);
 }
 
 Future<void> _editDeviceName(BuildContext context, WidgetRef ref) async {
@@ -479,7 +469,7 @@ Future<void> _enrichLibrary(BuildContext context, WidgetRef ref) async {
   final l = context.l10n;
   // Only what still has something missing: the estimate is honest and
   // tracks already complete are not asked about again.
-  final ids = (await ref.read(trackRepositoryProvider).watchTracks().first)
+  final ids = (await ref.read(trackOpsProvider).all())
       .where((t) => needsEnrichment(t))
       .map((t) => t.id)
       .toList();
@@ -530,7 +520,7 @@ Future<void> _clearCovers(BuildContext context, WidgetRef ref) async {
         if (e is File) await e.delete();
       }
     }
-    await ref.read(trackRepositoryProvider).resetCovers();
+    await ref.read(trackOpsProvider).resetCovers();
     ref.invalidate(coverIndexProvider);
   } on Object catch (e, st) {
     AppLog.e('clear covers failed', e, st);

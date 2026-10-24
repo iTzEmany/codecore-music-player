@@ -469,6 +469,18 @@ class TrackRepository {
         TracksCompanion(isFavorite: Value(value)),
       );
 
+  /// Stores the lyrics of one track; a missing synced version clears the column.
+  Future<void> setLyrics(int id, {String? plain, String? synced}) =>
+      (_db.update(_db.tracks)..where((t) => t.id.equals(id))).write(
+        TracksCompanion(lyricsPlain: Value(plain), lyricsSynced: Value(synced)),
+      );
+
+  /// Stores the «curiosities» text of one track (null clears it).
+  Future<void> setCuriosities(int id, String? text) =>
+      (_db.update(_db.tracks)..where((t) => t.id.equals(id))).write(
+        TracksCompanion(curiosities: Value(text)),
+      );
+
   /// Sets the favourite flag of many tracks in one transaction.
   Future<void> setFavoriteMany(List<int> ids, bool value) async {
     if (ids.isEmpty) return;

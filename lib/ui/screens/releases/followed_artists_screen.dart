@@ -1,3 +1,4 @@
+import '../../../providers/follow_ops.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -18,7 +19,6 @@ import '../../widgets/empty_state.dart';
 import '../../widgets/net_thumbnail.dart';
 import '../online/artist_page_sections.dart' show thumbAt;
 import '../online/artist_picker_sheet.dart' show ArtistPickerSheet;
-import 'follow_button.dart' show followArtist;
 import 'new_releases_screen.dart';
 import '../../widgets/show_msg.dart';
 import '../../widgets/cc_app_bar.dart';
@@ -86,7 +86,7 @@ class _FollowedRow extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
     final cc = context.cc;
-    final repo = ref.read(followRepositoryProvider);
+    final ops = ref.read(followOpsProvider);
     final subtitle = artist.notFound
         ? l.followedNotFound
         : artist.isAuto
@@ -116,13 +116,13 @@ class _FollowedRow extends ConsumerWidget {
           if (artist.notFound)
             TextButton(
               key: ValueKey('retry-${artist.ytmId}'),
-              onPressed: () => repo.retry(artist.ytmId),
+              onPressed: () => ops.retry(artist.ytmId),
               child: Text(l.followedRetry),
             ),
           IconButton(
             key: ValueKey('mute-${artist.ytmId}'),
             tooltip: artist.muted ? l.followUnmute : l.followMute,
-            onPressed: () => repo.setMuted(artist.ytmId, !artist.muted),
+            onPressed: () => ops.setMuted(artist.ytmId, !artist.muted),
             icon: Icon(
               artist.muted
                   ? Icons.notifications_off_outlined
@@ -140,7 +140,7 @@ class _FollowedRow extends ConsumerWidget {
                 confirmLabel: l.followStop,
                 destructive: true,
               );
-              if (ok) await repo.unfollow(artist.ytmId);
+              if (ok) await ops.unfollow(artist.ytmId);
             },
             icon: const Icon(Icons.person_remove_outlined),
           ),
@@ -177,10 +177,7 @@ class _PendingRow extends ConsumerWidget {
       builder: (_) => ArtistPickerSheet(artists: found.take(5).toList()),
     );
     if (chosen == null) return;
-    final repo = ref.read(followRepositoryProvider);
-    await repo.saveLookup(lookup.artistKey, lookup.name, artist: chosen);
-    await followArtist(ref, chosen);
-    ref.invalidate(pendingArtistsProvider);
+    await ref.read(followOpsProvider).followPicked(lookup.artistKey, lookup.name, chosen);
   }
 
   @override

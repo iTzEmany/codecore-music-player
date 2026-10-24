@@ -1,4 +1,5 @@
 import '../../widgets/cc_sheet.dart';
+
 import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -56,7 +57,8 @@ class _Upcoming {
     final tracks = queue.sublist(first);
     final seen = <int, int>{};
     return _Upcoming(first, tracks, [
-      for (final t in tracks) 'q-${t.id}-${seen[t.id] = (seen[t.id] ?? -1) + 1}',
+      for (final t in tracks)
+        'q-${t.id}-${seen[t.id] = (seen[t.id] ?? -1) + 1}',
     ]);
   }
 
@@ -109,18 +111,58 @@ class _QueueSheetState extends ConsumerState<QueueSheet> {
   bool _dragging = false;
   List<Track> _lastQueue = const [];
 
+  Widget _queueItem(
+    int i,
+    List<Track> upcoming,
+    List<String> keys,
+    int first,
+    int queueLength,
+  ) {
+    final ctrl = ref.read(playerControllerProvider);
+    final l = context.l10n;
+    final cc = context.cc;
+    final t = upcoming[i];
+    return Dismissible(
+      key: ValueKey(keys[i]),
+      background: const DismissBackground(),
+      secondaryBackground: const DismissBackground(alignEnd: true),
+      onDismissed: (_) async {
+        await ctrl.removeFromQueue(first + i);
+        if (!mounted) return;
+        showUndoSnack(context, l.removedFromQueue, () {
+          ctrl.addToQueue(t.id);
+          final n = ref.read(queueProvider).value?.length ?? queueLength;
+          ctrl.reorderQueue(n - 1, first + i);
+        });
+      },
+      child: Material(
+        color: cc.surface1.withValues(alpha: 0),
+        child: SizedBox(
+          height: 64,
+          child: LiveTrackRow(
+            track: t,
+            variant: TrackRowVariant.queue,
+            reorderIndex: i,
+            onTap: () => ctrl.jumpToQueueIndex(first + i),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final ref = this.ref;
     final scrollController = widget.scrollController;
     final showTitle = widget.showTitle;
     final l = context.l10n;
-    final cc = context.cc;
     // Rebuild only when the list really changed, not on every queue event.
-    final queue = ref.watch(queueProvider.select((q) {
-      final next = q.value ?? const <Track>[];
-      return listEquals(_lastQueue, next) ? _lastQueue : _lastQueue = next;
-    }));
+    final queue = ref.watch(
+      queueProvider.select((q) {
+        final next = q.value ?? const <Track>[];
+        return listEquals(_lastQueue, next) ? _lastQueue : _lastQueue = next;
+      }),
+    );
     ref.watch(currentTrackProvider.select((t) => t.value?.id));
     final ctrl = ref.read(playerControllerProvider);
     if (queue.isEmpty) {
@@ -140,37 +182,19 @@ class _QueueSheetState extends ConsumerState<QueueSheet> {
       final rebuilt = ctrl.hasQueueSource;
       final before = ctrl.rebuildUpcoming();
       if (before == null) return;
-      showUndoSnack(context, rebuilt ? l.queueRebuilt : l.queueCleared,
-          () => ctrl.restoreQueue(before));
+      showUndoSnack(
+        context,
+        rebuilt ? l.queueRebuilt : l.queueCleared,
+        () => ctrl.restoreQueue(before),
+      );
     }
 
     return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(CcDims.margin, CcDims.gap4, CcDims.gap8, 0),
-          child: Row(
-            children: [
-              Expanded(
-                child: showTitle
-                    ? Text(
-                        l.queue,
-                        style: Theme.of(context).textTheme.titleMedium,
-                      )
-                    : const SizedBox.shrink(),
-              ),
-              if (upcoming.isNotEmpty)
-                TextButton(onPressed: clearNext, child: Text(l.queueClear)),
-              PopupMenuButton<void>(
-                tooltip: l.moreOptions,
-                itemBuilder: (_) => [
-                  PopupMenuItem<void>(
-                    onTap: () => openSuggestions(context),
-                    child: Text(l.suggestionsRecentTitle),
-                  ),
-                ],
-              ),
-            ],
-          ),
+        _QueueTitleRow(
+          showTitle: showTitle,
+          hasUpcoming: upcoming.isNotEmpty,
+          onClear: clearNext,
         ),
         Expanded(
           child: ReorderableListView.builder(
@@ -206,7 +230,10 @@ class _QueueSheetState extends ConsumerState<QueueSheet> {
               final snap = _dragSnapshot;
               if (snap == null || from < 0 || from >= snap.keys.length) return;
               final dropped = [...snap.keys];
-              dropped.insert(to.clamp(0, dropped.length - 1), dropped.removeAt(from));
+              dropped.insert(
+                to.clamp(0, dropped.length - 1),
+                dropped.removeAt(from),
+              );
               // Map by entry, against the queue as it is now.
               final liveNow = _Upcoming.of(
                 ref.read(queueProvider).value ?? const <Track>[],
@@ -220,38 +247,56 @@ class _QueueSheetState extends ConsumerState<QueueSheet> {
               );
               if (move != null) ctrl.reorderQueue(move.from, move.to);
             },
-            itemBuilder: (_, i) {
-              final t = upcoming[i];
-              return Dismissible(
-                key: ValueKey(keys[i]),
-                background: const DismissBackground(),
-                secondaryBackground: const DismissBackground(alignEnd: true),
-                onDismissed: (_) async {
-                  await ctrl.removeFromQueue(first + i);
-                  if (!context.mounted) return;
-                  showUndoSnack(context, l.removedFromQueue, () {
-                    ctrl.addToQueue(t.id);
-                    final n = ref.read(queueProvider).value?.length ?? queue.length;
-                    ctrl.reorderQueue(n - 1, first + i);
-                  });
-                },
-                child: Material(
-                  color: cc.surface1.withValues(alpha: 0),
-                  child: SizedBox(
-                    height: 64,
-                    child: LiveTrackRow(
-                      track: t,
-                      variant: TrackRowVariant.queue,
-                      reorderIndex: i,
-                      onTap: () => ctrl.jumpToQueueIndex(first + i),
-                    ),
-                  ),
-                ),
-              );
-            },
+            itemBuilder: (_, i) =>
+                _queueItem(i, upcoming, keys, first, queue.length),
           ),
         ),
       ],
+    );
+  }
+}
+
+class _QueueTitleRow extends StatelessWidget {
+  const _QueueTitleRow({
+    required this.showTitle,
+    required this.hasUpcoming,
+    required this.onClear,
+  });
+
+  final bool showTitle;
+  final bool hasUpcoming;
+  final VoidCallback onClear;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        CcDims.margin,
+        CcDims.gap4,
+        CcDims.gap8,
+        0,
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: showTitle
+                ? Text(l.queue, style: Theme.of(context).textTheme.titleMedium)
+                : const SizedBox.shrink(),
+          ),
+          if (hasUpcoming)
+            TextButton(onPressed: onClear, child: Text(l.queueClear)),
+          PopupMenuButton<void>(
+            tooltip: l.moreOptions,
+            itemBuilder: (_) => [
+              PopupMenuItem<void>(
+                onTap: () => openSuggestions(context),
+                child: Text(l.suggestionsRecentTitle),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

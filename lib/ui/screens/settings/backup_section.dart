@@ -10,6 +10,7 @@ import '../../../core/app_log.dart';
 import '../../../core/paths.dart';
 import '../../../data/repositories/backup_merge.dart';
 import '../../../l10n/l10n_ext.dart';
+import '../../../providers/track_ops.dart';
 import '../../../providers/backup_providers.dart';
 import '../../../providers/database_providers.dart';
 import '../../../providers/settings_providers.dart';
@@ -87,12 +88,11 @@ Future<void> _restore(BuildContext context, WidgetRef ref) async {
   if (path == null) return;
   if (!context.mounted) return;
   if (!path.toLowerCase().endsWith('.zip')) return showMsg(context, l.restoreNotBackup);
-  final db = ref.read(databaseProvider);
   try {
     final plan = await inspectBackup(
       File(path),
       deviceId: await ref.read(settingsStoreProvider).deviceId(),
-      schemaVersion: db.schemaVersion,
+      schemaVersion: ref.read(schemaVersionProvider),
     );
     if (!context.mounted) return;
     final choice = await showDialog<RestoreChoice>(context: context, builder: (_) => RestoreDialog(plan: plan));
@@ -120,7 +120,7 @@ Future<void> _restore(BuildContext context, WidgetRef ref) async {
         ),
       );
     } else {
-      final report = await mergeBackup(File(path), db, Directory(await coversDir()));
+      final report = await ref.read(trackOpsProvider).mergeBackupFile(File(path), Directory(await coversDir()));
       if (!context.mounted) return;
       await _showMergeReport(context, report);
     }

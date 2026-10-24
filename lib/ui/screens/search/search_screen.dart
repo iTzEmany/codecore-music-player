@@ -9,6 +9,7 @@ import '../../../data/repositories/library_queries.dart';
 import '../../../data/repositories/library_search.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/database_providers.dart';
+import '../../../providers/selection_providers.dart';
 import '../../../providers/library_providers.dart';
 import '../../../providers/player_providers.dart';
 import '../../../providers/radio_providers.dart' show searchPrefillProvider;
@@ -393,7 +394,7 @@ class _LibraryResults extends ConsumerWidget {
     final ctrl = ref.read(playerControllerProvider);
     final compact = ref.watch(settingsProvider.select((s) => s.compactMode));
     final extent = trackRowExtentOf(context, compact);
-    const key = 'search';
+    final key = SelectionKey.search.key;
     final selection = RowSelection(
       listKey: key,
       visibleIds: [for (final t in res.tracks) t.id],
@@ -488,7 +489,7 @@ class SearchTracksScreen extends ConsumerWidget {
         ref.watch(searchTracksProvider(query)).value ?? const <Track>[];
     final ctrl = ref.read(playerControllerProvider);
     final compact = ref.watch(settingsProvider.select((s) => s.compactMode));
-    const key = 'search-all';
+    final key = SelectionKey.searchAll.key;
     final selection = RowSelection(
       listKey: key,
       visibleIds: [for (final t in tracks) t.id],

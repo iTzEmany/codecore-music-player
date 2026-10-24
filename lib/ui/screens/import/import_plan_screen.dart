@@ -23,17 +23,62 @@ class ImportPlanScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
-    final cc = context.cc;
     final theme = Theme.of(context).textTheme;
     final items = ref.watch(importItemsProvider(importId)).value ?? const [];
     final planned = [
       for (final i in items)
         if (i.state == ImportItemStatus.planned) i,
     ];
-    final known = ref.watch(downloadIndexProvider).value;
     final svc = ref.read(playlistImportServiceProvider);
 
-    Widget tile(PlaylistImportItem it) {
+    return Scaffold(
+      appBar: CcAppBar(title: l.csvImportPlanTitle),
+      body: planned.isEmpty
+          ? EmptyState(
+              icon: Icons.check_circle_outline_rounded,
+              message: l.csvImportPlanEmpty,
+            )
+          : Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 960),
+                child: ListView(children: [for (final it in planned) _PlanTile(importId, it)]),
+              ),
+            ),
+      bottomNavigationBar: planned.isEmpty
+          ? null
+          : SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(CcDims.margin),
+                child: FilledButton(
+                  onPressed: () async {
+                    final nav = Navigator.of(context);
+                    await svc.startPlanned(importId);
+                    nav.pop();
+                  },
+                  child: Text(
+                    l.csvImportPlanGo(planned.length),
+                    style: theme.labelLarge,
+                  ),
+                ),
+              ),
+            ),
+    );
+  }
+}
+
+
+class _PlanTile extends ConsumerWidget {
+  const _PlanTile(this.importId, this.it);
+
+  final int importId;
+  final PlaylistImportItem it;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    final cc = context.cc;
+    final known = ref.watch(downloadIndexProvider).value;
+    final svc = ref.read(playlistImportServiceProvider);
       final candidates = decodeCandidates(it.candidates);
       final chosen =
           candidates.where((c) => c.id == it.videoId).firstOrNull ??
@@ -109,39 +154,5 @@ class ImportPlanScreen extends ConsumerWidget {
           ),
         ],
       );
-    }
-
-    return Scaffold(
-      appBar: CcAppBar(title: l.csvImportPlanTitle),
-      body: planned.isEmpty
-          ? EmptyState(
-              icon: Icons.check_circle_outline_rounded,
-              message: l.csvImportPlanEmpty,
-            )
-          : Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 960),
-                child: ListView(children: [for (final it in planned) tile(it)]),
-              ),
-            ),
-      bottomNavigationBar: planned.isEmpty
-          ? null
-          : SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.all(CcDims.margin),
-                child: FilledButton(
-                  onPressed: () async {
-                    final nav = Navigator.of(context);
-                    await svc.startPlanned(importId);
-                    nav.pop();
-                  },
-                  child: Text(
-                    l.csvImportPlanGo(planned.length),
-                    style: theme.labelLarge,
-                  ),
-                ),
-              ),
-            ),
-    );
   }
 }

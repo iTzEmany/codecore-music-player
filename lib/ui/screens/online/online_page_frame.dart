@@ -7,8 +7,8 @@ import '../../../providers/selection_providers.dart';
 import '../../../services/online/youtube_service.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/activity_button.dart';
-import '../../widgets/selection_bar.dart';
 import '../youtube/listen_bar.dart';
+import 'online_selection_scope.dart';
 import 'online_song_row.dart';
 
 /// The frame of every online page (artist, album, long song list): a pinned
@@ -67,7 +67,6 @@ class _OnlinePageFrameState extends ConsumerState<OnlinePageFrame> {
     final l = context.l10n;
     final cc = context.cc;
     final key = widget.selectionKey;
-    final picked = key == null ? null : ref.watch(selectionProvider(key));
     final scroll = CustomScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
       slivers: [
@@ -90,53 +89,19 @@ class _OnlinePageFrameState extends ConsumerState<OnlinePageFrame> {
         const SliverToBoxAdapter(child: SizedBox(height: 24)),
       ],
     );
-    final body = Stack(
-      children: [
-        Positioned.fill(
-          child: Align(
-            alignment: Alignment.topCenter,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 960),
-              child: widget.onRefresh == null
-                  ? scroll
-                  // The spinner starts under the pinned bar, not behind the status bar.
-                  : RefreshIndicator(
-                      onRefresh: widget.onRefresh!,
-                      edgeOffset:
-                          MediaQuery.paddingOf(context).top + kToolbarHeight,
-                      child: scroll,
-                    ),
-            ),
-          ),
-        ),
-        if (key != null && picked != null && picked.active)
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: SelectionBarFrame(
-              count: picked.count,
-              onClose: ref.read(selectionProvider(key).notifier).clear,
-              onSelectAll: () =>
-                  ref.read(selectionProvider(key).notifier).selectAll([
-                    for (var i = 0; i < widget.pickable.length; i++) i,
-                  ]),
-              actions: [
-                IconButton(
-                  tooltip: l.ytDownload,
-                  icon: const Icon(Icons.download_rounded),
-                  onPressed: () {
-                    startOnlineDownloads(context, ref, [
-                      for (final i in picked.orderedIds)
-                        if (i < widget.pickable.length) widget.pickable[i],
-                    ]);
-                    ref.read(selectionProvider(key).notifier).clear();
-                  },
-                ),
-              ],
-            ),
-          ),
-      ],
+    final body = Align(
+      alignment: Alignment.topCenter,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 960),
+        child: widget.onRefresh == null
+            ? scroll
+            // The spinner starts under the pinned bar, not behind the status bar.
+            : RefreshIndicator(
+                onRefresh: widget.onRefresh!,
+                edgeOffset: MediaQuery.paddingOf(context).top + kToolbarHeight,
+                child: scroll,
+              ),
+      ),
     );
     return Scaffold(
       backgroundColor: cc.bg,
@@ -145,10 +110,22 @@ class _OnlinePageFrameState extends ConsumerState<OnlinePageFrame> {
           Expanded(
             child: key == null
                 ? body
-                : SelectionScope(
-                    listKey: key,
-                    visibleIds: [
-                      for (var i = 0; i < widget.pickable.length; i++) i,
+                : OnlineSelectionScope(
+                    selectionKey: key,
+                    overlay: true,
+                    ids: [for (var i = 0; i < widget.pickable.length; i++) i],
+                    actions: (picked) => [
+                      IconButton(
+                        tooltip: l.ytDownload,
+                        icon: const Icon(Icons.download_rounded),
+                        onPressed: () {
+                          startOnlineDownloads(context, ref, [
+                            for (final i in picked.orderedIds)
+                              if (i < widget.pickable.length) widget.pickable[i],
+                          ]);
+                          ref.read(selectionProvider(key).notifier).clear();
+                        },
+                      ),
                     ],
                     child: body,
                   ),

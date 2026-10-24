@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/repositories/track_repository.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/library_providers.dart';
+import '../../../providers/selection_providers.dart';
 import '../../../providers/player_providers.dart';
 import '../../../providers/settings_providers.dart';
 import '../../theme/app_theme.dart';
@@ -48,7 +49,7 @@ class FavoritesScreen extends ConsumerWidget {
     const playCtx = PlayContext(PlayContextKind.favorites);
     final durationMs = list.fold<int>(0, (a, t) => a + t.durationMs);
     final extent = trackRowExtentOf(context, compact);
-    const key = 'favorites';
+    final key = SelectionKey.favorites.key;
     final selection = RowSelection(
       listKey: key,
       visibleIds: [for (final t in list) t.id],
