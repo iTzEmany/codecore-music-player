@@ -17,6 +17,7 @@ import '../theme/tokens.dart';
 import '../widgets/quality_tag.dart';
 import '../widgets/speed_button.dart';
 import '../widgets/favorite_actions.dart';
+import '../widgets/focus_ring_button.dart';
 import '../widgets/format_utils.dart';
 import '../widgets/mini_player.dart' show kBarCoverHero;
 import '../widgets/play_buttons.dart';
@@ -109,18 +110,25 @@ class _TrackInfo extends ConsumerWidget {
       children: [
         MouseRegion(
           cursor: SystemMouseCursors.click,
-          child: GestureDetector(
-            onTap: () => Navigator.of(context, rootNavigator: true).push(
-              MaterialPageRoute<void>(builder: (_) => const NowPlayingScreen()),
-            ),
-            child: RingProgress(
-              size: 56,
-              live: radio != null,
-              child: TrackArt(
-                track: track,
-                size: RingProgress.innerSize(56),
-                radius: RingProgress.innerSize(56) / 2,
-                heroTag: kBarCoverHero,
+          child: Semantics(
+            button: true,
+            label: l.nowPlaying,
+            excludeSemantics: true,
+            child: FocusRingButton(
+              onTap: () => Navigator.of(context, rootNavigator: true).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const NowPlayingScreen(),
+                ),
+              ),
+              child: RingProgress(
+                size: 56,
+                live: radio != null,
+                child: TrackArt(
+                  track: track,
+                  size: RingProgress.innerSize(56),
+                  radius: RingProgress.innerSize(56) / 2,
+                  heroTag: kBarCoverHero,
+                ),
               ),
             ),
           ),
@@ -138,7 +146,9 @@ class _TrackInfo extends ConsumerWidget {
                 style: theme.bodyLarge,
               ),
               InkWell(
-                onTap: radio != null || isOnlineId(track.id) ? null : openArtist,
+                onTap: radio != null || isOnlineId(track.id)
+                    ? null
+                    : openArtist,
                 child: Text(
                   texts?.subtitle ?? track.artist ?? l.unknownArtist,
                   maxLines: 1,
@@ -299,22 +309,26 @@ class _Center extends ConsumerWidget {
                 icon: const Icon(Icons.skip_next_rounded),
               ),
               if (!live)
-              IconButton(
-                tooltip: l.repeat,
-                iconSize: 20,
-                onPressed: ctrl.cycleRepeat,
-                icon: Icon(
-                  repeat == PlayRepeat.one
-                      ? Icons.repeat_one_rounded
-                      : Icons.repeat_rounded,
-                  color: repeat == PlayRepeat.off ? cc.textMuted : cc.accent,
+                IconButton(
+                  tooltip: l.repeat,
+                  iconSize: 20,
+                  onPressed: ctrl.cycleRepeat,
+                  icon: Icon(
+                    repeat == PlayRepeat.one
+                        ? Icons.repeat_one_rounded
+                        : Icons.repeat_rounded,
+                    color: repeat == PlayRepeat.off ? cc.textMuted : cc.accent,
+                  ),
                 ),
-              ),
             ],
           ),
         ),
         if (live)
-          Text(l.radioLive, style: Theme.of(context).textTheme.labelMedium?.copyWith(color: cc.accent))
+          Text(
+            l.radioLive,
+            style: Theme.of(context).textTheme.labelMedium
+                ?.copyWith(color: cc.accent),
+          )
         else
           _BarSeek(track: track),
       ],
@@ -375,8 +389,9 @@ class _BarSeekState extends ConsumerState<_BarSeek> {
               builder: (context, ref, _) => Slider(
                 value: shownOf(ref),
                 max: max <= 0 ? 1 : max,
-                onChanged:
-                    max <= 0 ? null : (v) => setState(() => _dragging = v),
+                onChanged: max <= 0
+                    ? null
+                    : (v) => setState(() => _dragging = v),
                 onChangeEnd: (v) {
                   setState(() => _dragging = null);
                   ref

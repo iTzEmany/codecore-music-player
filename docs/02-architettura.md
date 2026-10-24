@@ -50,7 +50,7 @@ lib/
     jam/jam_state.dart, jam_host.dart, jam_guest.dart, jam_output.dart, jam_cache.dart  # (fase 8)
   providers/                      # provider Riverpod (database, settings, player, library, ...)
   ui/
-    theme/tokens.dart             # colori (CcColors), dimensioni (CcDims), movimento, font
+    theme/tokens.dart             # colori (CcColors), dimensioni e scala gap/r (CcDims), movimento, font
     theme/app_theme.dart          # ThemeData dai token (Notte viola / Nero puro)
     theme/cover_tint.dart         # colore dalla copertina (heroTint, coverTintProvider)
     shell/app_shell.dart          # 3 schede (Home/Cerca/Libreria), un Navigator per scheda, tasto indietro
@@ -121,7 +121,7 @@ Scritture con debounce 400 ms, mai in un handler di slider a ogni tick.
 - **Layout per larghezza (≥ 840):** barra laterale 240 (72 sotto i 1000 px) + barra player 80 + pannello destro
   320 (`sidePanelProvider`: coda, testo, info). Sotto: mini-player a card sopra la barra in basso.
 - **Token:** nessun esadecimale nei widget; `context.cc` (estensione `CcColors`) e `Theme.of(context)`.
-  Font Figtree + Unbounded (asset OFL). Solo temi `notte` e `oled`.
+  Font Figtree + Unbounded (asset OFL). Temi predefiniti più i temi dell'utente (`CustomTheme`, `resolve()`).
 - **Colore dalla copertina:** `coverTintProvider` (24 px, in cache) → `heroTint` (luminosità limitata, testo ≥ 7:1)
   → `CoverBackdrop` (Now Playing, Testi, pagine di raccolta) e fondo del mini-player.
 - **Una riga brano:** `TrackRow`/`LiveTrackRow` con varianti `standard|album|queue|pick`; tocco suona, pressione
@@ -337,3 +337,9 @@ Dettagli e motivazioni in `docs/refactor/ui-fluida/analisi.md` («Arrivo»), dec
 - **Movimento:** una sola scala in `tokens.dart` (120/180/250/320 ms, easeOutCubic/easeInCubic), sempre con `ccDuration`. Solo transform e scale, mai opacità su tutta la pagina. Le transizioni di pagina stanno in `app_theme.dart`.
 - **Aspetto:** l'anello è l'unico segno grafico e porta lo stato; superfici piatte, niente gradienti né ombre. Mockup approvati in `docs/refactor/ui-fluida/mockup/`.
 
+## Accessibilità e token (fase 40)
+- **Token di forma:** `CcDims` ha la scala `gap` e `r`; fuori dal tema niente `fontSize` né `BorderRadius` letterali.
+- **Densità:** compatta solo su desktop (`ccIconDensity`, `isDesktop`; D-48). Su telefono restano i 48 dp. I test usano `debugIsDesktopOverride` (`core/platform.dart`).
+- **Copertine:** fuori dalla semantica salvo `semanticLabel` (`coverSemantics` in `cover_image.dart`; D-16).
+- **Testo:** scala di sistema × scala dell'app, tetto 2,0; le animazioni si riducono anche con il flag di sistema (D-14, D-31).
+- **Contrasto del tema:** `hasLowContrastText` (`custom_theme.dart`) avvisa con le stesse coppie dell'elenco dell'editor, senza cambiare i colori (D-13).

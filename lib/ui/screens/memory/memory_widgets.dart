@@ -38,7 +38,7 @@ class WeightRow extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(
           horizontal: CcDims.margin,
-          vertical: 8,
+          vertical: CcDims.gap8,
         ),
         child: Row(
           children: [
@@ -71,7 +71,7 @@ class WeightRow extends StatelessWidget {
                     const SizedBox(height: 6),
                     ExcludeSemantics(
                       child: ClipRRect(
-                        borderRadius: BorderRadius.circular(2),
+                        borderRadius: BorderRadius.circular(CcDims.rBar),
                         child: LinearProgressIndicator(
                           value: f.clamp(0.0, 1.0),
                           minHeight: 3,

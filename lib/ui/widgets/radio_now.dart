@@ -12,6 +12,7 @@ import '../../services/radio/radio_station.dart';
 import '../screens/radio/radio_actions.dart';
 import '../screens/radio/radio_labels.dart';
 import '../screens/radio/radio_station_sheet.dart';
+import '../theme/app_theme.dart' show ccIconDensity;
 import '../theme/tokens.dart';
 
 /// The station behind [track], or null when it is not a radio entry.
@@ -59,10 +60,9 @@ class NpLiveRow extends StatelessWidget {
 
 /// Star that saves or takes out the station, for the players.
 class RadioStarButton extends ConsumerWidget {
-  const RadioStarButton({super.key, required this.station, this.compact = false, this.color});
+  const RadioStarButton({super.key, required this.station, this.color});
 
   final RadioStation station;
-  final bool compact;
   final Color? color;
 
   @override
@@ -71,8 +71,8 @@ class RadioStarButton extends ConsumerWidget {
     final cc = context.cc;
     final saved = ref.watch(savedRadioIdsProvider.select((s) => s.contains(station.id)));
     return IconButton(
+      visualDensity: ccIconDensity,
       tooltip: saved ? l.radioUnsave : l.radioSave,
-      visualDensity: compact ? VisualDensity.compact : null,
       onPressed: () => toggleSavedRadio(context, ref, station),
       icon: Icon(
         saved ? Icons.star_rounded : Icons.star_border_rounded,

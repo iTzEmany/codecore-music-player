@@ -359,7 +359,7 @@ class _TrackActionsSheet extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+              padding: const EdgeInsets.fromLTRB(CcDims.gap16, CcDims.gap4, CcDims.gap16, CcDims.gap12),
               child: Row(
                 children: [
                   TrackArt(track: track, size: 56),

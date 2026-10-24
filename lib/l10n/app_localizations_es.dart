@@ -5299,4 +5299,8 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get settingsSpinCoverHint =>
       'En el reproductor, mientras suena la música';
+
+  @override
+  String get themeLowContrastWarning =>
+      'Algunos colores de texto se leen mal sobre el fondo (menos de 4,5:1). El tema se queda como está.';
 }

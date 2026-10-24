@@ -50,12 +50,12 @@ class _DuplicateGroupCardState extends State<DuplicateGroupCard> {
         borderRadius: BorderRadius.circular(CcDims.rCard),
         clipBehavior: Clip.antiAlias,
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
+          padding: const EdgeInsets.symmetric(vertical: CcDims.gap8),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.symmetric(horizontal: CcDims.gap16),
                 child: Row(
                   children: [
                     Expanded(
@@ -90,7 +90,7 @@ class _DuplicateGroupCardState extends State<DuplicateGroupCard> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+                padding: const EdgeInsets.fromLTRB(CcDims.gap16, CcDims.gap4, CcDims.gap16, CcDims.gap4),
                 child: Text(
                   l.duplicatesPickKeep,
                   style: theme.labelSmall?.copyWith(color: cc.textMuted),
@@ -103,7 +103,7 @@ class _DuplicateGroupCardState extends State<DuplicateGroupCard> {
                   onTap: () => setState(() => _keepId = m.id),
                 ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(8, 4, 8, 0),
+                padding: const EdgeInsets.fromLTRB(CcDims.gap8, CcDims.gap4, CcDims.gap8, 0),
                 child: Wrap(
                   alignment: WrapAlignment.end,
                   spacing: 8,

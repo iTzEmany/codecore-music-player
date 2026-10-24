@@ -84,7 +84,7 @@ class _JamScreenState extends ConsumerState<JamScreen> {
         appBar: AppBar(title: Text(l.jamTitle)),
         body: Center(
           child: Padding(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(CcDims.gap24),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -141,10 +141,10 @@ class _JamScreenState extends ConsumerState<JamScreen> {
                     SliverToBoxAdapter(
                       child: Padding(
                         padding: const EdgeInsets.fromLTRB(
-                          4,
-                          8,
+                          CcDims.gap4,
+                          CcDims.gap8,
                           CcDims.margin,
-                          4,
+                          CcDims.gap4,
                         ),
                         child: Row(
                           children: [
@@ -180,7 +180,7 @@ class _JamScreenState extends ConsumerState<JamScreen> {
                           CcDims.margin,
                           0,
                           CcDims.margin,
-                          12,
+                          CcDims.gap12,
                         ),
                         child: JamParticipants(jam: jam),
                       ),
@@ -190,9 +190,9 @@ class _JamScreenState extends ConsumerState<JamScreen> {
                       child: Padding(
                         padding: const EdgeInsets.fromLTRB(
                           CcDims.margin,
-                          16,
+                          CcDims.gap16,
                           CcDims.margin,
-                          4,
+                          CcDims.gap4,
                         ),
                         child: Text(l.jamQueue, style: theme.titleMedium),
                       ),

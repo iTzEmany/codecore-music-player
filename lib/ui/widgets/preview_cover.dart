@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart' show CustomSemanticsAction;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/db/app_database.dart';
+import '../../l10n/l10n_ext.dart';
 import '../../providers/preview_providers.dart';
 import '../theme/tokens.dart';
 
@@ -21,19 +23,28 @@ class PreviewCover extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final active = ref.watch(previewProvider.select((s) => s.trackId == track.id));
+    final active = ref.watch(
+      previewProvider.select((s) => s.trackId == track.id),
+    );
     final notifier = ref.read(previewProvider.notifier);
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onLongPressStart: (_) => notifier.start(track),
-      onLongPressEnd: (_) => notifier.stop(),
-      onLongPressCancel: notifier.stop,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          child,
-          if (active) _Ring(size: size),
-        ],
+    // A custom action keeps the row's own label and long press for TalkBack.
+    return Semantics(
+      customSemanticsActions: {
+        CustomSemanticsAction(label: context.l10n.previewTrack): () =>
+            active ? notifier.stop() : notifier.start(track),
+      },
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onLongPressStart: (_) => notifier.start(track),
+        onLongPressEnd: (_) => notifier.stop(),
+        onLongPressCancel: notifier.stop,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            child,
+            if (active) _Ring(size: size),
+          ],
+        ),
       ),
     );
   }

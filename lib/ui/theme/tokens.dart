@@ -38,25 +38,12 @@ class CcColors extends ThemeExtension<CcColors> {
     onAccent: Color(0xFF12081F),
     text: Color(0xFFF4F0FA),
     textMuted: Color(0xFFA79DB8),
-    textFaint: Color(0xFF6E6680),
+    textFaint: Color(0xFF887F99),
     heroBase: Color(0xFF3B1F70),
     error: Color(0xFFFF6B81),
   );
 
-  static const oled = CcColors(
-    bg: Color(0xFF000000),
-    surface1: Color(0xFF120E1C),
-    surface2: Color(0xFF1D1630),
-    surface3: Color(0xFF2A2140),
-    accent: Color(0xFFA06BFF),
-    accentSoft: Color(0xFFD9C8FF),
-    onAccent: Color(0xFF12081F),
-    text: Color(0xFFF4F0FA),
-    textMuted: Color(0xFFA79DB8),
-    textFaint: Color(0xFF6E6680),
-    heroBase: Color(0xFF3B1F70),
-    error: Color(0xFFFF6B81),
-  );
+  static final oled = notte.copyWith(bg: Colors.black);
 
   static const chiaro = CcColors(
     bg: Color(0xFFFAF8FD),
@@ -68,9 +55,9 @@ class CcColors extends ThemeExtension<CcColors> {
     onAccent: Color(0xFFFFFFFF),
     text: Color(0xFF1B1427),
     textMuted: Color(0xFF5C5170),
-    textFaint: Color(0xFF8C829E),
+    textFaint: Color(0xFF6D6280),
     heroBase: Color(0xFFE6DAFA),
-    error: Color(0xFFC8203B),
+    error: Color(0xFFB01B33),
     isLight: true,
   );
 
@@ -107,6 +94,19 @@ abstract final class CcDims {
   static const rCard = 12.0; // mini-player, cards
   static const rSheet = 16.0; // top edge of sheets and dialogs
   static const margin = 16.0;
+
+  /// Spacing scale (D-23).
+  static const gap4 = 4.0;
+  static const gap8 = 8.0;
+  static const gap12 = 12.0;
+  static const gap16 = 16.0;
+  static const gap24 = 24.0;
+  static const gap32 = 32.0;
+
+  /// Off-scale radii: pills and hairline bars.
+  static const rPill = 999.0;
+  static const rBar = 2.0;
+  static const rHair = 1.0;
 
   static const miniPlayerHeight = 56.0;
   static const dockRadius = 28.0;
@@ -177,9 +177,15 @@ TextStyle ccStyle(
   fontFeatures: tabular ? const [FontFeature.tabularFigures()] : null,
 );
 
+/// The only place a size is set outside [buildTextTheme]: sizes that follow
+/// a widget's own size (monograms) or a fit-to-width factor.
+extension CcTextStyle on TextStyle {
+  TextStyle sized(double size) => copyWith(fontSize: size);
+}
+
 TextTheme buildTextTheme(CcColors c) => TextTheme(
-  displaySmall: ccStyle(_unbounded, 30, 700, color: c.text, height: 1.1),
-  headlineSmall: ccStyle(_unbounded, 24, 600, color: c.text),
+  displaySmall: ccStyle(_unbounded, 28, 700, color: c.text, height: 1.1),
+  headlineSmall: ccStyle(_unbounded, 20, 600, color: c.text),
   titleLarge: ccStyle(_figtree, 22, 700, color: c.text),
   titleMedium: ccStyle(_figtree, 18, 700, color: c.text),
   titleSmall: ccStyle(_figtree, 14, 700, color: c.text),

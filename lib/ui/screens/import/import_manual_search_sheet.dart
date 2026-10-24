@@ -96,7 +96,7 @@ class _State extends ConsumerState<ImportManualSearchSheet> {
                   CcDims.margin,
                   0,
                   CcDims.margin,
-                  8,
+                  CcDims.gap8,
                 ),
                 child: TextField(
                   controller: _q,

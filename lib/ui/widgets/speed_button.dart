@@ -25,13 +25,13 @@ class SpeedButton extends ConsumerWidget {
     return Tooltip(
       message: context.l10n.playbackSpeed,
       child: InkWell(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(CcDims.rSheet),
         onTap: () => SpeedSheet.show(context),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: CcDims.gap4),
           decoration: BoxDecoration(
             color: changed ? cc.accent.withValues(alpha: 0.18) : cc.surface2,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(CcDims.rSheet),
           ),
           child: Text(
             formatSpeed(context, speed),

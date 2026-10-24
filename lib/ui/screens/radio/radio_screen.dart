@@ -121,7 +121,7 @@ class _RadioScreenState extends ConsumerState<RadioScreen> {
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(
                     CcDims.margin,
-                    8,
+                    CcDims.gap8,
                     CcDims.margin,
                     0,
                   ),
@@ -150,7 +150,7 @@ class _RadioScreenState extends ConsumerState<RadioScreen> {
                       ),
                       if (searching || _genre != null)
                         Padding(
-                          padding: const EdgeInsets.only(top: 8),
+                          padding: const EdgeInsets.only(top: CcDims.gap8),
                           child: FilterChip(
                             key: const ValueKey('radio-only-country'),
                             label: Text(l.radioOnlyCountry(countryName)),

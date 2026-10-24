@@ -242,9 +242,7 @@ class _Tabs extends StatelessWidget {
                                 items[i].label,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
+                                style: Theme.of(context).textTheme.labelMedium?.copyWith(
                                   color: i == selected ? cc.text : cc.textMuted,
                                 ),
                               ),

@@ -104,7 +104,7 @@ class ActivitySheet extends ConsumerWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(
           horizontal: CcDims.margin,
-          vertical: 8,
+          vertical: CcDims.gap8,
         ),
         child: Row(
           children: [
@@ -188,7 +188,7 @@ class ActivitySheet extends ConsumerWidget {
                 CcDims.margin,
                 0,
                 CcDims.margin,
-                8,
+                CcDims.gap8,
               ),
               child: Text(l.activityTitle, style: theme.titleMedium),
             ),

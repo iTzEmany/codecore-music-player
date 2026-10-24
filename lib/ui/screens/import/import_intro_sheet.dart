@@ -126,7 +126,7 @@ class _ImportIntroSheetState extends ConsumerState<ImportIntroSheet> {
       child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(
           CcDims.margin,
-          8,
+          CcDims.gap8,
           CcDims.margin,
           CcDims.margin,
         ),
@@ -148,7 +148,7 @@ class _ImportIntroSheetState extends ConsumerState<ImportIntroSheet> {
                       width: 24,
                       child: Text(
                         '${i + 1}.',
-                        style: theme.bodyMedium?.copyWith(color: cc.accent),
+                        style: theme.bodyMedium?.copyWith(color: cc.accentSoft),
                       ),
                     ),
                     Expanded(child: Text(steps[i], style: theme.bodyMedium)),

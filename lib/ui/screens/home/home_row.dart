@@ -87,7 +87,7 @@ class HomeBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ClipRRect(
-    borderRadius: BorderRadius.circular(1),
+    borderRadius: BorderRadius.circular(CcDims.rHair),
     child: LinearProgressIndicator(
       value: fraction,
       minHeight: 2,

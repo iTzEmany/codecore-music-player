@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../theme/tokens.dart';
+import 'package:flutter/semantics.dart' show CustomSemanticsAction;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/repositories/library_queries.dart';
@@ -32,7 +34,7 @@ class AlbumCard extends ConsumerWidget {
     return PressScale(
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(CcDims.rGrid),
         child: Padding(
           padding: const EdgeInsets.all(6),
           child: Column(
@@ -40,16 +42,26 @@ class AlbumCard extends ConsumerWidget {
             children: [
               Expanded(
                 child: LayoutBuilder(
-                  builder: (context, c) => GestureDetector(
-                    // Hold the cover: 20 s of the album's first track.
-                    onLongPressStart: (_) => _preview(ref),
-                    onLongPressEnd: (_) =>
-                        ref.read(previewProvider.notifier).stop(),
-                    onLongPressCancel: ref.read(previewProvider.notifier).stop,
-                    child: CoverImage(
-                      coverKey: album.coverKey,
-                      size: c.biggest.shortestSide,
-                      radius: 8,
+                  builder: (context, c) => Semantics(
+                    customSemanticsActions: {
+                      CustomSemanticsAction(
+                        label: context.l10n.previewTrack,
+                      ): () =>
+                          _preview(ref),
+                    },
+                    child: GestureDetector(
+                      // Hold the cover: 20 s of the album's first track.
+                      onLongPressStart: (_) => _preview(ref),
+                      onLongPressEnd: (_) =>
+                          ref.read(previewProvider.notifier).stop(),
+                      onLongPressCancel: ref
+                          .read(previewProvider.notifier)
+                          .stop,
+                      child: CoverImage(
+                        coverKey: album.coverKey,
+                        size: c.biggest.shortestSide,
+                        radius: 8,
+                      ),
                     ),
                   ),
                 ),

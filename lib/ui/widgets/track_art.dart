@@ -19,22 +19,24 @@ class TrackArt extends ConsumerWidget {
     required this.size,
     this.radius = CcDims.rList,
     this.heroTag,
+    this.semanticLabel,
   });
 
   final Track track;
   final double size, radius;
   final Object? heroTag;
+  final String? semanticLabel;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     if (!isOnlineId(track.id)) {
-      return CoverImage(coverKey: track.coverKey, size: size, radius: radius, heroTag: heroTag);
+      return CoverImage(coverKey: track.coverKey, size: size, radius: radius, heroTag: heroTag, semanticLabel: semanticLabel);
     }
     final online = ref.watch(onlineEntriesProvider);
     final radio = online?.radioOf(track.id)?.station;
     if (radio != null) {
       final art = RadioArt(station: radio, size: size, radius: radius);
-      return heroTag == null ? art : Hero(tag: heroTag!, child: art);
+      return coverSemantics(heroTag == null ? art : Hero(tag: heroTag!, child: art), semanticLabel);
     }
     final url = online?[track.id]?.result.thumbnailUrl;
     final px = (size * MediaQuery.devicePixelRatioOf(context)).round();
@@ -46,6 +48,6 @@ class TrackArt extends ConsumerWidget {
       icon: Icons.cloud_outlined,
     );
     if (heroTag != null) image = Hero(tag: heroTag!, child: image);
-    return image;
+    return coverSemantics(image, semanticLabel);
   }
 }

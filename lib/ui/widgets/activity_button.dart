@@ -18,13 +18,13 @@ class ActivityButton extends ConsumerWidget {
     return Tooltip(
       message: context.l10n.activityRunning(n),
       child: InkWell(
-        borderRadius: BorderRadius.circular(999),
+        borderRadius: BorderRadius.circular(CcDims.rPill),
         onTap: () => ActivitySheet.show(context),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: CcDims.gap12, vertical: CcDims.gap8),
           decoration: BoxDecoration(
             color: cc.surface2,
-            borderRadius: BorderRadius.circular(999),
+            borderRadius: BorderRadius.circular(CcDims.rPill),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,

@@ -2859,5 +2859,6 @@
   "deezerMetaHint": "Nur Daten (Cover, Titelnummern), nie Musik",
   "deezerMetaNote": "Nur privat und nicht kommerziell. Die Bedingungen von Deezer verbieten die Förderung nicht autorisierter Downloads, und Codecore lädt von YouTube: das Risiko trägst du.",
   "settingsSpinCover": "Drehendes Cover",
-  "settingsSpinCoverHint": "Im Player, während Musik läuft"
+  "settingsSpinCoverHint": "Im Player, während Musik läuft",
+  "themeLowContrastWarning": "Einige Textfarben sind auf dem Hintergrund schlecht lesbar (unter 4,5:1). Das Theme bleibt unverändert."
 }

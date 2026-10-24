@@ -34,7 +34,7 @@ class PeerCard extends StatelessWidget {
     final l = context.l10n;
     final theme = Theme.of(context).textTheme;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(vertical: CcDims.gap8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -93,7 +93,7 @@ class PeerCard extends StatelessWidget {
               OutlinedButton(
                 onPressed: onJam,
                 style: OutlinedButton.styleFrom(
-                  minimumSize: const Size(0, 36),
+                  minimumSize: const Size(0, 48),
                   padding: const EdgeInsets.symmetric(horizontal: 18),
                 ),
                 child: Text(l.devicesJamShort),
@@ -102,7 +102,7 @@ class PeerCard extends StatelessWidget {
               FilledButton(
                 onPressed: onSend,
                 style: FilledButton.styleFrom(
-                  minimumSize: const Size(0, 36),
+                  minimumSize: const Size(0, 48),
                   padding: const EdgeInsets.symmetric(horizontal: 18),
                 ),
                 child: Text(l.devicesSendShort),

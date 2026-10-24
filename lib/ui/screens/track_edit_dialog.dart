@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/db/app_database.dart';
@@ -114,7 +115,7 @@ class _TrackEditDialogState extends ConsumerState<_TrackEditDialog> {
     bool number = false,
     String? error,
   }) => Padding(
-    padding: const EdgeInsets.only(bottom: 8),
+    padding: const EdgeInsets.only(bottom: CcDims.gap8),
     child: TextField(
       controller: c,
       keyboardType: number ? TextInputType.number : null,
@@ -165,7 +166,7 @@ class _TrackEditDialogState extends ConsumerState<_TrackEditDialog> {
           actions: [TextButton(onPressed: _save, child: Text(l.save))],
         ),
         body: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(CcDims.gap16),
           child: form,
         ),
       );

@@ -62,7 +62,7 @@ class FoldersSheet extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(CcDims.margin, 4, 4, 0),
+            padding: const EdgeInsets.fromLTRB(CcDims.margin, CcDims.gap4, CcDims.gap4, 0),
             child: Row(
               children: [
                 Expanded(

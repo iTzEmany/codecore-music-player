@@ -64,7 +64,7 @@ class _Message extends StatelessWidget {
     child: Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: CcDims.margin,
-        vertical: 8,
+        vertical: CcDims.gap8,
       ),
       child: Row(
         children: [
@@ -87,7 +87,7 @@ class _Loading extends StatelessWidget {
   @override
   Widget build(BuildContext context) => const SliverToBoxAdapter(
     child: Padding(
-      padding: EdgeInsets.all(24),
+      padding: EdgeInsets.all(CcDims.gap24),
       child: Center(
         child: SizedBox(
           width: 24,
@@ -155,7 +155,7 @@ class MineSection extends ConsumerWidget {
                 child: Tooltip(
                   message: l.radioReorder,
                   child: Padding(
-                    padding: const EdgeInsets.all(8),
+                    padding: const EdgeInsets.all(CcDims.gap8),
                     child: Icon(
                       Icons.drag_handle_rounded,
                       color: context.cc.textFaint,

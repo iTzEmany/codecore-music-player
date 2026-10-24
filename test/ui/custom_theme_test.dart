@@ -204,4 +204,19 @@ void main() {
       expect(contrastRatio(const Color(0xFF336699), const Color(0xFF336699)), closeTo(1, 0.001));
     });
   });
+
+  group('low contrast warning', () {
+    test('bg #808080 warns and the colours stay those of the file', () {
+      final t = CustomTheme(
+        id: 'a',
+        name: 'A',
+        base: AppThemeId.notte,
+        overrides: const {CcToken.bg: Color(0xFF808080)},
+      );
+      final c = CustomTheme.decode(t.encode())!.resolve();
+      expect(c.bg, const Color(0xFF808080));
+      expect(hasLowContrastText(c), isTrue);
+      expect(hasLowContrastText(CustomTheme(id: 'b', name: 'B', base: AppThemeId.notte).resolve()), isFalse);
+    });
+  });
 }

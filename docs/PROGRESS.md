@@ -569,18 +569,18 @@ Refactor «ui-fluida» (piano in `docs/refactor/ui-fluida/analisi.md`, decisioni
 
 ## Fase 40 — Accessibilità e token (`fase-40-accessibilita-e-token.md`)
 Refactor «ui-fluida» (piano in `docs/refactor/ui-fluida/analisi.md`, decisioni D-01..D-30 in `docs/decisioni.md`, 2026-10-23). Opzioni di sistema, contrasto, bersagli, etichette, token di arrivo (D-23).
-- [ ] 40.1 F-60 opzioni di sistema (D-14)
-- [ ] 40.2 F-61 `textFaint` ≥ 4,5:1 (golden rigenerati)
-- [ ] 40.3 F-62 accento ed errore su s2/s3 (D-17)
-- [ ] 40.4 F-63 avviso sul tema personalizzato (solo avviso, D-13)
-- [ ] 40.5 F-70 bersagli da 48 dp (D-15)
-- [ ] 40.6 F-71 gesti con etichetta e tastiera
-- [ ] 40.7 F-74 focus visibile
-- [ ] 40.8 F-72 copertine fuori dalla semantica (D-16)
-- [ ] 40.9 F-73 scala del testo al 200 %
-- [ ] 40.10 F-67 stili di testo nel tema
-- [ ] 40.11 F-68 scala di spaziature e raggi
-- [ ] 40.12 F-69 `oled` = `notte` con bg nero
+- [x] 40.1 F-60 opzioni di sistema (D-14)
+- [x] 40.2 F-61 `textFaint` ≥ 4,5:1 (golden rigenerati)
+- [x] 40.3 F-62 accento ed errore su s2/s3 (D-17) — errore chiaro #B01B33 (D-47)
+- [x] 40.4 F-63 avviso sul tema personalizzato (solo avviso, D-13)
+- [x] 40.5 F-70 bersagli da 48 dp (D-15) — «desktop» = piattaforma (D-48)
+- [x] 40.6 F-71 gesti con etichetta e tastiera
+- [x] 40.7 F-74 focus visibile
+- [x] 40.8 F-72 copertine fuori dalla semantica (D-16)
+- [x] 40.9 F-73 scala del testo al 200 %
+- [x] 40.10 F-67 stili di testo nel tema — eccezioni in D-49
+- [x] 40.11 F-68 scala di spaziature e raggi
+- [x] 40.12 F-69 `oled` = `notte` con bg nero
 
 ## Fase 41 — Mattoni condivisi (`fase-41-mattoni-condivisi.md`)
 Refactor «ui-fluida» (piano in `docs/refactor/ui-fluida/analisi.md`, decisioni D-01..D-30 in `docs/decisioni.md`, 2026-10-23). Strangler: mattone + test, migrazione per gruppi di `screens/`, poi si toglie il vecchio.

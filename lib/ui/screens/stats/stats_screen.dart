@@ -76,7 +76,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
               Padding(
                 padding: const EdgeInsets.fromLTRB(
                   CcDims.margin,
-                  4,
+                  CcDims.gap4,
                   CcDims.margin,
                   0,
                 ),
@@ -256,9 +256,9 @@ class _Body extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.fromLTRB(
             CcDims.margin,
-            16,
+            CcDims.gap16,
             CcDims.margin,
-            4,
+            CcDims.gap4,
           ),
           child: Text(
             formatListened(l, stats.playedMs),
@@ -270,7 +270,7 @@ class _Body extends StatelessWidget {
             CcDims.margin,
             0,
             CcDims.margin,
-            16,
+            CcDims.gap16,
           ),
           child: Text(
             '${l.statsPlays(stats.plays)}, ${l.statsDistinct(stats.distinctTracks)}',

@@ -70,7 +70,7 @@ class _ReportIssueScreenState extends ConsumerState<ReportIssueScreen> {
     return Scaffold(
       appBar: AppBar(title: Text(l.reportIssue)),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(CcDims.gap16),
         children: [
           SegmentedBlocks<IssueKind>(
             items: [
@@ -126,7 +126,7 @@ class _ReportIssueScreenState extends ConsumerState<ReportIssueScreen> {
           if (_attach) _Preview(info: info),
           if (draft != null && draft.logTruncated)
             Padding(
-              padding: const EdgeInsets.only(top: 8),
+              padding: const EdgeInsets.only(top: CcDims.gap8),
               child: Text(
                 l.reportLogShortened,
                 style: Theme.of(context).textTheme.bodySmall,
@@ -180,7 +180,7 @@ class _Preview extends StatelessWidget {
         : i.render();
     return Container(
       key: const ValueKey('report-preview'),
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(CcDims.gap12),
       decoration: BoxDecoration(
         color: context.cc.surface1,
         borderRadius: BorderRadius.circular(CcDims.rCard),

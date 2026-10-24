@@ -36,11 +36,9 @@ class RadioArt extends StatelessWidget {
           : Center(
               child: Text(
                 initial,
-                style: TextStyle(
-                  fontSize: size * 0.42,
-                  fontWeight: FontWeight.w700,
-                  color: cc.textMuted,
-                ),
+                style: Theme.of(context).textTheme.titleSmall!
+                    .sized(size * 0.42)
+                    .copyWith(color: cc.textMuted),
               ),
             ),
     );

@@ -59,11 +59,11 @@ class _ShareScreenState extends ConsumerState<ShareScreen> {
                 width: double.infinity,
                 margin: const EdgeInsets.fromLTRB(
                   CcDims.margin,
-                  8,
+                  CcDims.gap8,
                   CcDims.margin,
                   0,
                 ),
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(CcDims.gap12),
                 decoration: BoxDecoration(
                   color: context.cc.surface1,
                   borderRadius: BorderRadius.circular(CcDims.rCard),

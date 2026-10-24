@@ -38,7 +38,7 @@ class _Card extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(CcDims.gap16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -133,7 +133,6 @@ class _SyncedLines extends ConsumerWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                fontSize: i == index ? 17 : 15,
                 fontWeight: i == index ? FontWeight.w700 : FontWeight.w500,
                 color: i == index ? cc.text : cc.textMuted,
               ),
@@ -299,7 +298,7 @@ class _InfoCardState extends ConsumerState<InfoCard> {
           Align(
             alignment: Alignment.centerLeft,
             child: _loading
-                ? Padding(padding: const EdgeInsets.all(8), child: spinner)
+                ? Padding(padding: const EdgeInsets.all(CcDims.gap8), child: spinner)
                 : TextButton(onPressed: _fetch, child: Text(l.retry)),
           ),
         ],
@@ -435,7 +434,7 @@ class _CuriosityTextState extends ConsumerState<_CuriosityText> {
                     if (canTranslate)
                       _busy
                           ? const Padding(
-                              padding: EdgeInsets.all(12),
+                              padding: EdgeInsets.all(CcDims.gap12),
                               child: SizedBox(
                                 width: 18,
                                 height: 18,
@@ -517,7 +516,7 @@ class UpNextCard extends ConsumerWidget {
             ),
           for (final t in next)
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4),
+              padding: const EdgeInsets.symmetric(vertical: CcDims.gap4),
               child: Row(
                 children: [
                   TrackArt(track: t, size: 40),

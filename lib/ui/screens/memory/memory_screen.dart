@@ -67,7 +67,7 @@ class _MemoryScreenState extends ConsumerState<MemoryScreen> {
     if (selected) _opened = true;
     final header = Padding(
       // Same frame as the Library header (whose row is 48 high).
-      padding: const EdgeInsets.fromLTRB(CcDims.margin, 12, 4, 0),
+      padding: const EdgeInsets.fromLTRB(CcDims.margin, CcDims.gap12, CcDims.gap4, 0),
       child: ConstrainedBox(
         constraints: const BoxConstraints(minHeight: 48),
         child: Align(
@@ -139,7 +139,7 @@ class _MemoryListState extends ConsumerState<_MemoryList> {
       return const Center(child: CircularProgressIndicator());
     }
     final ring = Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(vertical: CcDims.gap8),
       child: MemoryRing(
         musicBytes: t.sizeBytes,
         disk: ref.watch(musicDiskSpaceProvider).value,
@@ -151,7 +151,7 @@ class _MemoryListState extends ConsumerState<_MemoryList> {
       ..._groups(context, b),
       ..._heaviest(context, b),
     ];
-    const pad = EdgeInsets.only(bottom: 32);
+    const pad = EdgeInsets.only(bottom: CcDims.gap32);
     if (MediaQuery.sizeOf(context).width >= CcDims.wideBreakpoint) {
       return Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -191,7 +191,7 @@ class _MemoryListState extends ConsumerState<_MemoryList> {
     T selected,
     ValueChanged<T> onChanged,
   ) => Padding(
-    padding: const EdgeInsets.fromLTRB(CcDims.margin, 8, CcDims.margin, 8),
+    padding: const EdgeInsets.fromLTRB(CcDims.margin, CcDims.gap8, CcDims.margin, CcDims.gap8),
     child: SegmentedBlocks<T>(
       items: items,
       selected: selected,
@@ -271,7 +271,7 @@ class _MemoryListState extends ConsumerState<_MemoryList> {
         Padding(
           padding: const EdgeInsets.fromLTRB(
             CcDims.margin,
-            8,
+            CcDims.gap8,
             CcDims.margin,
             0,
           ),
@@ -353,7 +353,7 @@ class _MemoryListState extends ConsumerState<_MemoryList> {
     const radius = BorderRadius.all(Radius.circular(CcDims.rSheet));
     return [
       Padding(
-        padding: const EdgeInsets.fromLTRB(CcDims.margin, 16, CcDims.margin, 0),
+        padding: const EdgeInsets.fromLTRB(CcDims.margin, CcDims.gap16, CcDims.margin, 0),
         child: Material(
           color: cc.surface1,
           borderRadius: radius,
@@ -362,7 +362,7 @@ class _MemoryListState extends ConsumerState<_MemoryList> {
             onTap: () =>
                 ShellNav.open<void>(context, const NeverPlayedScreen()),
             child: Padding(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(CcDims.gap12),
               child: Row(
                 children: [
                   Icon(Icons.headphones_rounded, size: 22, color: cc.textMuted),

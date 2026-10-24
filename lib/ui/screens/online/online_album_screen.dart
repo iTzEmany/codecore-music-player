@@ -167,7 +167,7 @@ class _AlbumHeader extends StatelessWidget {
           ].join(', ');
     final artist = a?.artist;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(CcDims.margin, 0, CcDims.margin, 8),
+      padding: const EdgeInsets.fromLTRB(CcDims.margin, 0, CcDims.margin, CcDims.gap8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -194,7 +194,7 @@ class _AlbumHeader extends StatelessWidget {
                             ? null
                             : () => ShellNav.open<void>(context, ArtistPageScreen(artist: artist)),
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          padding: const EdgeInsets.symmetric(vertical: CcDims.gap4),
                           child: Text(artist.name,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,

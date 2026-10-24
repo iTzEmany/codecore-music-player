@@ -34,8 +34,8 @@ class ImportBanner extends ConsumerWidget {
               (p.eta == null ? '' : ', ${etaLabel(l, p.eta!)}');
     final svc = ref.read(playlistImportServiceProvider);
     return Container(
-      margin: const EdgeInsets.fromLTRB(CcDims.margin, 8, CcDims.margin, 8),
-      padding: const EdgeInsets.fromLTRB(12, 8, 4, 8),
+      margin: const EdgeInsets.fromLTRB(CcDims.margin, CcDims.gap8, CcDims.margin, CcDims.gap8),
+      padding: const EdgeInsets.fromLTRB(CcDims.gap12, CcDims.gap8, CcDims.gap4, CcDims.gap8),
       decoration: BoxDecoration(
         color: cc.surface2,
         borderRadius: BorderRadius.circular(CcDims.rCard),
@@ -73,7 +73,7 @@ class ImportBanner extends ConsumerWidget {
           ),
           if (running && !p.paused)
             Padding(
-              padding: const EdgeInsets.only(right: 8, bottom: 4),
+              padding: const EdgeInsets.only(right: CcDims.gap8, bottom: CcDims.gap4),
               child: LinearProgressIndicator(value: p.fraction),
             ),
         ],

@@ -340,10 +340,10 @@ class _SleepChipState extends ConsumerState<_SleepChip> {
         if (timer.active) PopupMenuItem(value: 0, child: Text(l.sleepCancel)),
       ],
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: CcDims.gap12, vertical: CcDims.gap8),
         decoration: BoxDecoration(
           color: timer.active ? cc.accent.withValues(alpha: 0.16) : null,
-          borderRadius: BorderRadius.circular(999),
+          borderRadius: BorderRadius.circular(CcDims.rPill),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,

@@ -151,9 +151,9 @@ class _AllTracksScreenState extends ConsumerState<AllTracksScreen> {
             Padding(
               padding: const EdgeInsets.fromLTRB(
                 CcDims.margin,
-                8,
+                CcDims.gap8,
                 CcDims.margin,
-                12,
+                CcDims.gap12,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -196,9 +196,9 @@ class _AllTracksScreenState extends ConsumerState<AllTracksScreen> {
             Padding(
               padding: const EdgeInsets.fromLTRB(
                 CcDims.margin,
-                4,
+                CcDims.gap4,
                 CcDims.margin,
-                8,
+                CcDims.gap8,
               ),
               child: TextField(
                 controller: _controller,
@@ -214,7 +214,7 @@ class _AllTracksScreenState extends ConsumerState<AllTracksScreen> {
                 CcDims.margin,
                 0,
                 CcDims.margin,
-                8,
+                CcDims.gap8,
               ),
               child: SegmentedBlocks<SortOption>(
                 items: [

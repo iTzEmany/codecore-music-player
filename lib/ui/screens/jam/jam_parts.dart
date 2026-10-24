@@ -5,6 +5,7 @@ import '../../../l10n/l10n_ext.dart';
 import '../../../providers/import_providers.dart';
 import '../../../providers/share_hub.dart';
 import '../../../services/jam/jam_models.dart';
+import '../../theme/app_theme.dart' show ccIconDensity;
 import '../../theme/tokens.dart';
 import '../../widgets/artist_avatar.dart';
 import '../../widgets/cover_image.dart';
@@ -27,11 +28,7 @@ class JamAvatar extends StatelessWidget {
       decoration: BoxDecoration(color: color, shape: BoxShape.circle),
       child: Text(
         artistMonogram(name),
-        style: TextStyle(
-          fontSize: size * 0.38,
-          fontWeight: FontWeight.w700,
-          color: context.cc.text,
-        ),
+        style: Theme.of(context).textTheme.titleSmall!.sized(size * 0.38),
       ),
     );
   }
@@ -149,7 +146,7 @@ class JamQueueRow extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(
           horizontal: CcDims.margin,
-          vertical: 4,
+          vertical: CcDims.gap4,
         ),
         child: Row(
           children: [
@@ -200,14 +197,14 @@ class JamQueueRow extends StatelessWidget {
             if (canRemove)
               IconButton(
                 tooltip: l.delete,
-                visualDensity: VisualDensity.compact,
+                visualDensity: ccIconDensity,
                 icon: Icon(Icons.close, color: cc.textMuted),
                 onPressed: onRemove,
               ),
             ReorderableDragStartListener(
               index: index,
               child: Padding(
-                padding: const EdgeInsets.all(8),
+                padding: const EdgeInsets.all(CcDims.gap8),
                 child: Icon(Icons.drag_handle_rounded, color: cc.textMuted),
               ),
             ),

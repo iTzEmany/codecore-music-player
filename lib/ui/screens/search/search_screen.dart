@@ -153,9 +153,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           Padding(
             padding: const EdgeInsets.fromLTRB(
               CcDims.margin,
-              12,
+              CcDims.gap12,
               CcDims.margin,
-              8,
+              CcDims.gap8,
             ),
             child: Row(
               children: [
@@ -219,7 +219,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: CcDims.margin,
-                vertical: 8,
+                vertical: CcDims.gap8,
               ),
               child: SegmentedBlocks<bool>(
                 selected: online,
@@ -334,7 +334,7 @@ class _GenrePill extends StatelessWidget {
           borderRadius: radius,
           onTap: onTap,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: CcDims.gap16, vertical: 10),
             child: Text(name, style: Theme.of(context).textTheme.labelLarge),
           ),
         ),
@@ -441,9 +441,9 @@ class _LibraryResults extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(
               CcDims.margin,
-              16,
+              CcDims.gap16,
               CcDims.margin,
-              24,
+              CcDims.gap24,
             ),
             child: OutlinedButton.icon(
               onPressed: onOnline,

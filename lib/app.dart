@@ -67,9 +67,11 @@ class CodecoreApp extends ConsumerWidget {
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       builder: (context, child) => MediaQuery(
+        // App setting OR system flag; system text scale times the app one, capped at 2.0 (D-31).
         data: MediaQuery.of(context).copyWith(
-          disableAnimations: s.reducedMotion,
-          textScaler: TextScaler.linear(s.fontScale),
+          disableAnimations: s.reducedMotion || MediaQuery.disableAnimationsOf(context),
+          textScaler: _AppTextScaler(MediaQuery.textScalerOf(context), s.fontScale)
+              .clamp(maxScaleFactor: 2.0),
         ),
         child: AppBackground(
           colors: themeColors,
@@ -80,4 +82,18 @@ class CodecoreApp extends ConsumerWidget {
       home: const AppIconSync(child: OnboardingGate(child: AppShell())),
     );
   }
+}
+
+/// System scaler (kept, so non-linear Android scaling survives) times the app setting.
+class _AppTextScaler extends TextScaler {
+  const _AppTextScaler(this.base, this.app);
+
+  final TextScaler base;
+  final double app;
+
+  @override
+  double scale(double fontSize) => base.scale(fontSize) * app;
+
+  @override
+  double get textScaleFactor => scale(1);
 }

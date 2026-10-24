@@ -171,7 +171,7 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                                     width: 420,
                                     child: ListView(
                                       padding: const EdgeInsets.symmetric(
-                                        vertical: 16,
+                                        vertical: CcDims.gap16,
                                       ),
                                       children: _cards(online, track),
                                     ),
@@ -192,7 +192,7 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                               CcDims.margin,
                               0,
                               CcDims.margin,
-                              24,
+                              CcDims.gap24,
                             ),
                             sliver: SliverList.list(
                               children: _cards(online, track),
@@ -303,10 +303,7 @@ class _Player extends ConsumerWidget {
                           textAlign: TextAlign.center,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: theme.labelSmall?.copyWith(
-                            fontSize: 11,
-                            color: cc.textMuted,
-                          ),
+                          style: theme.labelSmall,
                         ),
                         if (ctx != null)
                           Text(
@@ -315,7 +312,6 @@ class _Player extends ConsumerWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: theme.bodyMedium?.copyWith(
-                              fontSize: 13,
                               fontWeight: FontWeight.w600,
                               color: cc.text,
                             ),
@@ -377,6 +373,7 @@ class _Player extends ConsumerWidget {
                           track: track,
                           size: inner,
                           radius: inner / 2,
+                          semanticLabel: track.album ?? track.title,
                           heroTag: coverHeroTagFor(MediaQuery.sizeOf(context).width),
                         ),
                       ),

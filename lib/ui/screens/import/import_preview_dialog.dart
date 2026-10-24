@@ -132,7 +132,7 @@ class _State extends State<ImportPreviewDialog> {
               ),
             if (todo > 0)
               Padding(
-                padding: const EdgeInsets.only(top: 8),
+                padding: const EdgeInsets.only(top: CcDims.gap8),
                 child: Text(
                   !kEnableYoutube
                       ? l.csvImportNoteOffline
@@ -220,7 +220,7 @@ class _State extends State<ImportPreviewDialog> {
 
               if (_existing == _Existing.sync && widget.syncPreview != null)
                 Padding(
-                  padding: const EdgeInsets.only(top: 8),
+                  padding: const EdgeInsets.only(top: CcDims.gap8),
                   child: FutureBuilder<ImportDiff>(
                     key: ValueKey(same),
                     future: _diffFor(same),

@@ -206,7 +206,7 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
                       CcDims.margin,
                       0,
                       CcDims.margin,
-                      4,
+                      CcDims.gap4,
                     ),
                     child: Row(
                       key: const ValueKey('review-second-opinion'),
@@ -240,9 +240,9 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(
                     CcDims.margin,
-                    4,
+                    CcDims.gap4,
                     CcDims.margin,
-                    8,
+                    CcDims.gap8,
                   ),
                   child: Wrap(
                     spacing: 8,

@@ -202,9 +202,9 @@ class _OnlineResultsState extends ConsumerState<OnlineResults> {
           const YtDlpOutdatedBanner(),
           if (!seen)
             Padding(
-              padding: const EdgeInsets.fromLTRB(CcDims.margin, 4, CcDims.margin, 8),
+              padding: const EdgeInsets.fromLTRB(CcDims.margin, CcDims.gap4, CcDims.margin, CcDims.gap8),
               child: Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(CcDims.gap12),
                 decoration: BoxDecoration(
                   color: cc.surface1,
                   borderRadius: BorderRadius.circular(CcDims.rCard),
@@ -358,7 +358,7 @@ class _ErrorView extends StatelessWidget {
     final e = error;
     final text = e is YtException ? ytErrorText(context, e.kind) : context.l10n.ytErrUnavailable;
     return Padding(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(CcDims.gap12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

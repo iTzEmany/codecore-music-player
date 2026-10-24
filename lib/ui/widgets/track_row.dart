@@ -7,6 +7,7 @@ import '../../l10n/l10n_ext.dart';
 import '../../providers/player_providers.dart';
 import '../../core/platform.dart';
 import '../../providers/selection_providers.dart';
+import '../theme/app_theme.dart' show ccIconDensity;
 import '../theme/tokens.dart';
 import 'cover_image.dart';
 import 'favorite_actions.dart';
@@ -192,7 +193,7 @@ class _TrackRowState extends State<TrackRow> {
               ? IconButton(
                   tooltip: fav ? l.removeFromFavorites : l.favorite,
                   onPressed: widget.onFavorite,
-                  visualDensity: VisualDensity.compact,
+                  visualDensity: ccIconDensity,
                   icon: HeartIcon(
                     favorite: fav,
                     size: 18,
@@ -220,7 +221,7 @@ class _TrackRowState extends State<TrackRow> {
                   child: IconButton(
                     tooltip: l.moreOptions,
                     onPressed: widget.onMore,
-                    visualDensity: VisualDensity.compact,
+                    visualDensity: ccIconDensity,
                     icon: Icon(Icons.more_horiz_rounded, color: cc.textMuted),
                   ),
                 ),
@@ -236,7 +237,7 @@ class _TrackRowState extends State<TrackRow> {
     switch (widget.variant) {
       case TrackRowVariant.pick:
         return Padding(
-          padding: const EdgeInsets.only(left: 8),
+          padding: const EdgeInsets.only(left: CcDims.gap8),
           child: Icon(
             widget.picked
                 ? Icons.check_circle_rounded
@@ -247,7 +248,7 @@ class _TrackRowState extends State<TrackRow> {
       case TrackRowVariant.queue:
         final i = widget.reorderIndex;
         return Padding(
-          padding: const EdgeInsets.only(left: 8),
+          padding: const EdgeInsets.only(left: CcDims.gap8),
           child: i == null
               ? Icon(Icons.drag_handle_rounded, color: cc.textMuted)
               : ReorderableDragStartListener(
@@ -265,7 +266,7 @@ class _TrackRowState extends State<TrackRow> {
           IconButton(
             tooltip: fav ? l.removeFromFavorites : l.favorite,
             onPressed: widget.onFavorite,
-            visualDensity: VisualDensity.compact,
+            visualDensity: ccIconDensity,
             icon: Icon(
               fav ? Icons.favorite_rounded : Icons.favorite_border_rounded,
               size: 18,
@@ -274,7 +275,7 @@ class _TrackRowState extends State<TrackRow> {
           )
         else if (fav)
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
+            padding: const EdgeInsets.symmetric(horizontal: CcDims.gap4),
             child: Icon(Icons.favorite_rounded, size: 16, color: cc.accent),
           ),
         if (widget.onMore != null)
@@ -283,7 +284,7 @@ class _TrackRowState extends State<TrackRow> {
             child: IconButton(
               tooltip: l.moreOptions,
               onPressed: widget.onMore,
-              visualDensity: VisualDensity.compact,
+              visualDensity: ccIconDensity,
               icon: Icon(
                 wide ? Icons.more_horiz_rounded : Icons.more_vert_rounded,
                 color: cc.textMuted,
@@ -569,7 +570,7 @@ class LiveTrackRow extends ConsumerWidget {
       dismissThresholds: const {DismissDirection.startToEnd: 0.3},
       background: Container(
         alignment: Alignment.centerLeft,
-        padding: const EdgeInsets.only(left: 24),
+        padding: const EdgeInsets.only(left: CcDims.gap24),
         color: context.cc.surface2,
         child: Icon(Icons.queue_rounded, color: context.cc.accentSoft),
       ),

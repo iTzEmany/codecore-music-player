@@ -62,7 +62,7 @@ class _JamSeekBarState extends State<JamSeekBar> {
           },
         ),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.symmetric(horizontal: CcDims.gap16),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [

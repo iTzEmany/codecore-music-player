@@ -5338,4 +5338,8 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settingsSpinCoverHint => 'Dans le lecteur, pendant la lecture';
+
+  @override
+  String get themeLowContrastWarning =>
+      'Certaines couleurs de texte se lisent mal sur le fond (moins de 4,5:1). Le thème reste tel quel.';
 }

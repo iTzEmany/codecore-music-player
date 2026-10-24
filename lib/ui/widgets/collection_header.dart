@@ -184,9 +184,9 @@ class CollectionHeader extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.fromLTRB(
             CcDims.margin,
-            8,
+            CcDims.gap8,
             CcDims.margin,
-            12,
+            CcDims.gap12,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -256,7 +256,7 @@ class _FittedName extends StatelessWidget {
           key: const ValueKey('collection-name'),
           maxLines: 3,
           overflow: TextOverflow.ellipsis,
-          style: k < 1 ? style.copyWith(fontSize: style.fontSize! * k) : style,
+          style: k < 1 ? style.sized(style.fontSize! * k) : style,
         );
       },
     );
@@ -271,7 +271,7 @@ class DiscHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.fromLTRB(CcDims.margin, 16, CcDims.margin, 4),
+    padding: const EdgeInsets.fromLTRB(CcDims.margin, CcDims.gap16, CcDims.margin, CcDims.gap4),
     child: Text(
       context.l10n.discN(disc),
       style: Theme.of(context).textTheme.labelLarge

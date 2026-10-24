@@ -8,7 +8,6 @@ import '../../../l10n/l10n_ext.dart';
 import '../../../providers/database_providers.dart';
 import '../../../providers/online_providers.dart';
 import '../../../providers/player_providers.dart';
-import '../../../providers/settings_providers.dart';
 import '../../../providers/translation_providers.dart';
 import '../../../services/online/http_client.dart';
 import '../../../services/online/lrc_parser.dart';
@@ -78,7 +77,7 @@ class _LyricsViewState extends ConsumerState<LyricsView> {
     final ctx = _keys[i].currentContext;
     if (ctx != null) {
       if (!ctx.mounted) return;
-      final reduce = ref.read(settingsProvider).reducedMotion;
+      final reduce = MediaQuery.disableAnimationsOf(context);
       Scrollable.ensureVisible(
         ctx,
         alignment: 0.35,
@@ -97,7 +96,7 @@ class _LyricsViewState extends ConsumerState<LyricsView> {
       if (mounted && i < _keys.length) _reveal(i, attempt + 1);
     }
 
-    if (ref.read(settingsProvider).reducedMotion) {
+    if (MediaQuery.disableAnimationsOf(context)) {
       pos.jumpTo(target);
       WidgetsBinding.instance.addPostFrameCallback((_) => retry());
     } else {
@@ -169,7 +168,7 @@ class _LyricsViewState extends ConsumerState<LyricsView> {
         controller: _scroll,
         padding: const EdgeInsets.fromLTRB(
           CcDims.margin,
-          24,
+          CcDims.gap24,
           CcDims.margin,
           200,
         ),
@@ -199,20 +198,14 @@ class _LyricsViewState extends ConsumerState<LyricsView> {
           children: [
             SelectableText(
               plain,
-              style: theme.bodyLarge?.copyWith(
-                fontSize: 20,
-                fontWeight: FontWeight.w500,
-              ),
+              style: theme.titleLarge?.copyWith(fontWeight: FontWeight.w500),
             ),
             if (translated != null && !translated.synced) ...[
               const Divider(height: 32),
               SelectableText(
                 translated.lines.join('\n'),
                 key: const ValueKey('translated-plain'),
-                style: theme.bodyLarge?.copyWith(
-                  fontSize: 18,
-                  color: cc.textMuted,
-                ),
+                style: theme.titleMedium?.copyWith(color: cc.textMuted),
               ),
             ],
           ],
@@ -292,18 +285,15 @@ class _LyricRowState extends State<_LyricRow> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context).textTheme;
-    final big = theme.titleLarge?.copyWith(
-      fontSize: 24,
-      fontWeight: FontWeight.w700,
-    );
+    final big = theme.titleLarge;
     final small = theme.titleMedium?.copyWith(color: context.cc.textMuted);
     Color? fade(TextStyle? s, double a) =>
         s?.color?.withValues(alpha: a * (s.color?.a ?? 1));
     return InkWell(
       onTap: widget.onTap,
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.circular(CcDims.rGrid),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.symmetric(vertical: CcDims.gap8),
         child: TweenAnimationBuilder<double>(
           tween: Tween(end: _alpha),
           duration: ccDuration(context, CcMotion.enter),

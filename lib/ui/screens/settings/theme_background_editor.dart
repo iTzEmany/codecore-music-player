@@ -119,7 +119,7 @@ class _ThemeBackgroundEditorState extends State<ThemeBackgroundEditor> {
           ),
           if (_endOpen)
             Padding(
-              padding: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.only(bottom: CcDims.gap8),
               child: CcColorPicker(
                 color: end,
                 recent: widget.recent,

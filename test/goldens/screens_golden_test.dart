@@ -79,7 +79,7 @@ void main() {
     for (final scale in const [1.0, 1.5]) {
       final tag = '${size.name}_${(scale * 100).round()}';
       group(tag, () {
-        testWidgets('library', (tester) => withShot(tester, size, (s) async {
+        testWidgets('library', (tester) => withGoldenShot(tester, size, (s) async {
               await s.show(const AppShell(),
                   textScale: scale,
                   extra: [navIndexProvider.overrideWith(_LibraryTab.new)]);
@@ -87,7 +87,7 @@ void main() {
             }));
 
         if (size == ShotSize.phone && scale == 1.0) {
-          testWidgets('home', (tester) => withShot(tester, size, (s) async {
+          testWidgets('home', (tester) => withGoldenShot(tester, size, (s) async {
                 // Two half-played tracks fill «Riprendi»; a playing queue gives
                 // the mini-player (ring around the cover).
                 await tester.runAsync(() async {
@@ -108,7 +108,7 @@ void main() {
               }));
         }
 
-        testWidgets('album', (tester) => withShot(tester, size, (s) async {
+        testWidgets('album', (tester) => withGoldenShot(tester, size, (s) async {
               final rows = await tester.runAsync(() => s.h.db.customSelect(
                   "SELECT album_key FROM tracks WHERE album = 'The Wall' LIMIT 1").get());
               final key = rows!.first.read<String>('album_key');
@@ -127,13 +127,13 @@ void main() {
               await s.expectGolden('${tag}_album.png');
             }));
 
-        testWidgets('now_playing', (tester) => withShot(tester, size, (s) async {
+        testWidgets('now_playing', (tester) => withGoldenShot(tester, size, (s) async {
               await tester.runAsync(() => s.h.handler.playQueue(s.seed.trackIds, 12));
               await s.show(const NowPlayingScreen(), textScale: scale);
               await s.expectGolden('${tag}_now_playing.png');
             }));
 
-        testWidgets('settings', (tester) => withShot(tester, size, (s) async {
+        testWidgets('settings', (tester) => withGoldenShot(tester, size, (s) async {
               await s.show(const SettingsScreen(), textScale: scale, extra: [
                 ytDlpStatusProvider
                     .overrideWith((_) async => const YtDlpStatus('2026.08.19')),
@@ -142,7 +142,7 @@ void main() {
               await s.expectGolden('${tag}_settings.png');
             }));
 
-        testWidgets('selection', (tester) => withShot(tester, size, (s) async {
+        testWidgets('selection', (tester) => withGoldenShot(tester, size, (s) async {
               await s.show(const AllTracksScreen(), textScale: scale);
               await tester.longPress(find.byType(TrackRow).at(1));
               await tester.tap(find.byType(TrackRow).at(3));
@@ -150,7 +150,7 @@ void main() {
               await s.expectGolden('${tag}_selection.png');
             }));
 
-        testWidgets('light_library', (tester) => withShot(tester, size, (s) async {
+        testWidgets('light_library', (tester) => withGoldenShot(tester, size, (s) async {
               await s.show(const AppShell(),
                   textScale: scale,
                   theme: AppThemeId.chiaro,
@@ -159,7 +159,7 @@ void main() {
               await s.expectGolden('${tag}_light_library.png');
             }));
 
-        testWidgets('onboarding', (tester) => withShot(tester, size, (s) async {
+        testWidgets('onboarding', (tester) => withGoldenShot(tester, size, (s) async {
               await s.show(const OnboardingScreen(askAudioPermission: true),
                   textScale: scale);
               await tester.tap(find.text('Avanti'));
@@ -167,7 +167,7 @@ void main() {
               await s.expectGolden('${tag}_onboarding.png');
             }));
 
-        testWidgets('jam', (tester) => withShot(tester, size, (s) async {
+        testWidgets('jam', (tester) => withGoldenShot(tester, size, (s) async {
               await s.show(const JamScreen(),
                   textScale: scale,
                   extra: [jamProvider.overrideWith(_FakeJam.new)]);

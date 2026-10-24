@@ -59,25 +59,34 @@ void main() {
     }
   }
 
-  // Pinned as they are TODAY (38.6). textFaint is below AA (4.5) on purpose or
-  // by neglect: it is a known defect, phase 40 moves it; update then.
-  test('textFaint: today\'s values and ratios (below AA, a known defect)', () {
+  test('textFaint reaches AA on bg and surface1 in every theme (40.2)', () {
     const faint = {
-      AppThemeId.notte: (Color(0xFF6E6680), [3.74, 3.51, 3.20]),
-      AppThemeId.oled: (Color(0xFF6E6680), [3.88, 3.51, 3.20]),
-      AppThemeId.chiaro: (Color(0xFF8C829E), [3.43, 3.17, 2.89]),
+      AppThemeId.notte: Color(0xFF887F99),
+      AppThemeId.oled: Color(0xFF887F99),
+      AppThemeId.chiaro: Color(0xFF6D6280),
     };
     for (final e in faint.entries) {
       final c = buildPalette(e.key, CcAccent.viola);
-      expect(c.textFaint, e.value.$1, reason: e.key.name);
-      final onto = [c.bg, c.surface1, c.surface2];
-      for (var i = 0; i < onto.length; i++) {
-        final r = contrast(c.textFaint, onto[i]);
-        expect(r, closeTo(e.value.$2[i], 0.01), reason: '${e.key.name} #$i');
-        expect(r, lessThan(4.5), reason: '${e.key.name} #$i');
-      }
+      expect(c.textFaint, e.value, reason: e.key.name);
+      expect(contrast(c.textFaint, c.surface1), greaterThanOrEqualTo(4.5),
+          reason: e.key.name);
     }
   });
+
+  // Text on sheets, dialogs and cards (s2/s3): accentSoft, never the accent.
+  for (final id in AppThemeId.values) {
+    for (final accent in CcAccent.values) {
+      test('${id.name} + ${accent.name}: accentSoft and error reach AA on s2/s3', () {
+        final c = buildPalette(id, accent);
+        for (final fg in {'accentSoft': c.accentSoft, 'error': c.error}.entries) {
+          for (final bg in {'s2': c.surface2, 's3': c.surface3}.entries) {
+            expect(contrast(fg.value, bg.value), greaterThanOrEqualTo(4.5),
+                reason: '${fg.key}/${bg.key}');
+          }
+        }
+      });
+    }
+  }
 
   test('accentSoft: today\'s values (violet) and ratios', () {
     expect(CcColors.notte.accentSoft, const Color(0xFFD9C8FF));

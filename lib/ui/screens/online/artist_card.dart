@@ -29,7 +29,7 @@ class ArtistCard extends StatelessWidget {
     final audience = artist.audience;
     final size = large ? largePhoto : photo;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(CcDims.margin, 4, CcDims.margin, 8),
+      padding: const EdgeInsets.fromLTRB(CcDims.margin, CcDims.gap4, CcDims.margin, CcDims.gap8),
       child: Material(
         key: const ValueKey('artist-card'),
         color: cc.surface1,
@@ -38,7 +38,7 @@ class ArtistCard extends StatelessWidget {
         child: InkWell(
           onTap: onTap,
           child: Padding(
-            padding: EdgeInsets.all(large ? 16 : 12),
+            padding: EdgeInsets.all(large ? CcDims.gap16 : CcDims.gap12),
             child: Row(
               children: [
                 NetThumbnail(

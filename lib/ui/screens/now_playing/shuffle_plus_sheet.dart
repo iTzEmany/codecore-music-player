@@ -1,4 +1,5 @@
 import '../../widgets/cc_sheet.dart';
+import '../../theme/tokens.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -18,7 +19,7 @@ Future<void> showShufflePlusSheet(BuildContext context) => showCcSheet<void>(
             mainAxisSize: MainAxisSize.min,
             children: [
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                padding: const EdgeInsets.fromLTRB(CcDims.gap16, CcDims.gap8, CcDims.gap16, 0),
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: Text(sheet.l10n.shufflePlusTitle, style: Theme.of(sheet).textTheme.titleMedium),

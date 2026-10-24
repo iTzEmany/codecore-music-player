@@ -146,12 +146,12 @@ class _PodcastSubscribeSheetState extends ConsumerState<PodcastSubscribeSheet> {
             onSubmitted: (_) => _busy ? null : _search(),
           ),
           if (_busy) const Padding(
-            padding: EdgeInsets.only(top: 12),
+            padding: EdgeInsets.only(top: CcDims.gap12),
             child: LinearProgressIndicator(),
           ),
           if (_error != null)
             Padding(
-              padding: const EdgeInsets.only(top: 12),
+              padding: const EdgeInsets.only(top: CcDims.gap12),
               child: Text(
                 podcastErrorText(l, _error!),
                 key: const ValueKey('subscribe-error'),
@@ -160,7 +160,7 @@ class _PodcastSubscribeSheetState extends ConsumerState<PodcastSubscribeSheet> {
             ),
           if (_hits != null && _hits!.isEmpty && !_busy)
             Padding(
-              padding: const EdgeInsets.only(top: 16),
+              padding: const EdgeInsets.only(top: CcDims.gap16),
               child: Text(l.podcastSearchNone),
             ),
           for (final h in _hits ?? const <PodcastSearchHit>[])

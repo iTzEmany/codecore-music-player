@@ -207,7 +207,7 @@ class _SmartPlaylistEditorState extends ConsumerState<SmartPlaylistEditor> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
+                padding: const EdgeInsets.fromLTRB(CcDims.gap4, CcDims.gap8, CcDims.gap4, 0),
                 child: Text(
                   shown == null ? '' : l.tracksCount(shown),
                   style: theme.titleMedium?.copyWith(color: cc.accent),
@@ -215,12 +215,12 @@ class _SmartPlaylistEditorState extends ConsumerState<SmartPlaylistEditor> {
               ),
               if (_rules.text.trim().isEmpty)
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(4, 4, 4, 0),
+                  padding: const EdgeInsets.fromLTRB(CcDims.gap4, CcDims.gap4, CcDims.gap4, 0),
                   child: Text(l.smartNoRules, style: theme.bodyMedium),
                 ),
               for (final w in warnings)
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(4, 4, 4, 0),
+                  padding: const EdgeInsets.fromLTRB(CcDims.gap4, CcDims.gap4, CcDims.gap4, 0),
                   child: Text(
                     l.ruleWarning(w.term),
                     style: theme.bodyMedium?.copyWith(color: cc.textMuted),

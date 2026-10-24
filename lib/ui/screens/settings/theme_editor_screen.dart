@@ -146,7 +146,7 @@ class _ThemeEditorScreenState extends ConsumerState<ThemeEditorScreen> {
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 760),
             child: ListView(
-              padding: const EdgeInsets.fromLTRB(CcDims.margin, 8, CcDims.margin, 32),
+              padding: const EdgeInsets.fromLTRB(CcDims.margin, CcDims.gap8, CcDims.margin, CcDims.gap32),
               children: [
                 TextField(
                   controller: _name,
@@ -201,6 +201,13 @@ class _ThemeEditorScreenState extends ConsumerState<ThemeEditorScreen> {
                   ),
                 const SizedBox(height: 16),
                 Text(l.themeContrastTitle, style: text.titleSmall),
+                if (hasLowContrastText(colors))
+                  Padding(
+                    padding: const EdgeInsets.only(top: CcDims.gap4),
+                    child: Text(l.themeLowContrastWarning,
+                        key: const ValueKey('low-contrast-warning'),
+                        style: text.bodySmall?.copyWith(color: cc.error)),
+                  ),
                 for (final c in checks)
                   ListTile(
                     key: ValueKey('contrast-${c.label}'),
@@ -294,7 +301,7 @@ class _TokenRow extends StatelessWidget {
         // Instant open/close: no per-row layout animation.
         if (open)
           Padding(
-            padding: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.only(bottom: CcDims.gap12),
             child: CcColorPicker(
               color: color,
               onChanged: onChanged,
@@ -334,7 +341,7 @@ class ThemePreview extends StatelessWidget {
                 borderRadius: BorderRadius.circular(CcDims.rCard),
               ),
               child: Padding(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(CcDims.gap12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -367,7 +374,7 @@ class ThemePreview extends StatelessWidget {
                     ),
                     const SizedBox(height: 12),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      padding: const EdgeInsets.symmetric(horizontal: CcDims.gap12, vertical: CcDims.gap8),
                       decoration: BoxDecoration(
                         color: colors.surface1,
                         borderRadius: BorderRadius.circular(CcDims.rCard),
@@ -381,7 +388,7 @@ class ThemePreview extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      padding: const EdgeInsets.symmetric(horizontal: CcDims.gap12, vertical: CcDims.gap8),
                       decoration: BoxDecoration(
                         color: colors.surface2,
                         borderRadius: BorderRadius.circular(CcDims.rCard),

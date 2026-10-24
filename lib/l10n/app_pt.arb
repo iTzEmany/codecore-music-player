@@ -3119,5 +3119,6 @@
   "deezerMetaHint": "Só dados (capas, números de faixa), nunca música",
   "deezerMetaNote": "Uso privado e não comercial. Os termos do Deezer proíbem promover o download não autorizado, e o Codecore baixa do YouTube: o risco é seu.",
   "settingsSpinCover": "Capa giratória",
-  "settingsSpinCoverHint": "No player, enquanto a música toca"
+  "settingsSpinCoverHint": "No player, enquanto a música toca",
+  "themeLowContrastWarning": "Algumas cores de texto ficam difíceis de ler sobre o fundo (abaixo de 4,5:1). O tema fica como está."
 }

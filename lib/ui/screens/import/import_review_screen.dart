@@ -42,7 +42,7 @@ class ImportReviewScreen extends ConsumerWidget {
     final failed = of(ImportItemStatus.failed);
 
     Widget wanted(PlaylistImportItem it) => Padding(
-      padding: const EdgeInsets.fromLTRB(CcDims.margin, 12, CcDims.margin, 4),
+      padding: const EdgeInsets.fromLTRB(CcDims.margin, CcDims.gap12, CcDims.margin, CcDims.gap4),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -114,7 +114,7 @@ class ImportReviewScreen extends ConsumerWidget {
     );
 
     Widget actions(PlaylistImportItem it) => Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
+      padding: const EdgeInsets.symmetric(horizontal: CcDims.gap8),
       child: Row(
         children: [
           TextButton(

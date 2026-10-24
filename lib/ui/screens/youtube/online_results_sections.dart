@@ -34,7 +34,7 @@ class SourceFilterChips extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = context.l10n;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(CcDims.margin, 0, CcDims.margin, 8),
+      padding: const EdgeInsets.fromLTRB(CcDims.margin, 0, CcDims.margin, CcDims.gap8),
       child: SegmentedBlocks<MediaKind?>(
         selected: filter,
         onChanged: onPick,
@@ -122,7 +122,7 @@ class OthersChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(CcDims.margin, 8, CcDims.margin, 8),
+      padding: const EdgeInsets.fromLTRB(CcDims.margin, CcDims.gap8, CcDims.margin, CcDims.gap8),
       child: Align(
         alignment: Alignment.centerLeft,
         child: ActionChip(
