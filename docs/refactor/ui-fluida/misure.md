@@ -115,3 +115,34 @@ Struttura dopo la fase 39: `Duration(milliseconds` 13 righe in 4 file (10 sono i
 | `build` più lungo | `library_screen.dart` 276 | `exportify_sync_screen.dart` 118 (le `build` sono divise in sezioni private) | < 120 |
 
 `integration_test` su Linux, un file per volta: 5/5 verdi (`playback_test` ora verde dopo be3e937: il driver non registrava media_kit).
+
+## Dopo la fase 43 (`nuovo-aspetto`, 24/10)
+
+Stesso telefono e stesso comando (`--playback`). Giro completo sul codice di 43.1–43.6; le quattro righe con «†»
+sono rimisurate (`nuovo-aspetto-2`) dopo le correzioni della review.
+
+| Scenario | > 16,7 ms | build p99 ms | Dopo la 39 | Soglia | ok |
+|---|---|---|---|---|---|
+| Pallino schede † | 12,1 % | 43.6 | 3,9 % | ≤ 2 % | no |
+| Tutti i brani | 1,2 % | 13.1 | 1,1 % | ≤ 1 % | no (pari) |
+| Album | 0,8 % | 8.1 | 0,4 % | ≤ 0,6 % | no (pari) |
+| Ricerca «notte» | 3,6 % | 71.7 | 9,7 % | ≤ 3 %, build p99 ≤ 16 ms | no |
+| Apri album † | 5,7 % | 45.6 | 4,3 % | ≤ 3 % | no |
+| Fogli | 2,3 % | 19.6 | 1,8 % | ≤ 3 % | sì |
+| Swipe mini player † | 5,5 % | 31.0 | 8,2 % | ≤ 2 % | no |
+| Apertura player † | 6,8 % | 44.7 | 6,8 % | ≤ 3 %, p99 ≤ 33 ms | no |
+| In riproduzione | 5,9 % | 53.1 | 5,5 % | non peggiorare | sì (pari) |
+| Lettore dal dock | 9,1 % | 106.9 | 7,9 % | — | — |
+| Anello | 1,7 % | 20.1 | 2,7 % | — | — |
+
+| Altro | Valore | Dopo la 39 | Soglia | ok |
+|---|---|---|---|---|
+| Avvio a freddo (mediana di 5) | 2493 ms | 2415 ms | ≤ 2400 ms | no |
+| PSS | 254 MB (245 MB nel giro breve) | 271 MB | ≤ 210 MB | no |
+
+**Pallino schede non viene dalla fase 43.** Bisezione, solo questo scenario e senza `--playback`: `master` prima
+della 43 (ffdf9fd) 12,4 % · 43.1 13,0 % · 43.2 11,5 % · 43.3 9,7 %. Il salto da 3,9 % è entrato fra la fase 40 e la 42;
+la 43 lo abbassa un poco. Da bisecare nelle fasi 40–42 (rimando in fase 44).
+
+Soglie non raggiunte (D-41: annotate, si prosegue). Con 70–130 frame un frame vale 0,8–1,4 punti, quindi «Tutti i
+brani» e «Album» sono pari. Gli altri picchi sono ancora nei frame di build (cambio di brano, prima apertura di una scheda).

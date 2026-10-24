@@ -609,13 +609,13 @@ Refactor «ui-fluida» (piano in `docs/refactor/ui-fluida/analisi.md`, decisioni
 
 ## Fase 43 — Nuovo aspetto (`fase-43-nuovo-aspetto.md`)
 Refactor «ui-fluida» (piano in `docs/refactor/ui-fluida/analisi.md`, decisioni D-01..D-30 in `docs/decisioni.md`, 2026-10-23). Mockup approvati in `docs/refactor/ui-fluida/mockup/` (D-21..D-28); golden rigenerati solo qui (D-20).
-- [ ] 43.1 Un solo dock ovunque
-- [ ] 43.2 Home
-- [ ] 43.3 Libreria (filtri e scorciatoie a blocchi)
-- [ ] 43.4 Album e artista
-- [ ] 43.5 In riproduzione (anello 12 dp)
-- [ ] 43.6 Onboarding con scansione
-- [ ] 43.7 Resto delle schermate e prova sul Mi A3
+- [x] 43.1 Un solo dock ovunque
+- [x] 43.2 Home
+- [x] 43.3 Libreria (filtri e scorciatoie a blocchi)
+- [x] 43.4 Album e artista
+- [x] 43.5 In riproduzione (anello 12 dp)
+- [x] 43.6 Onboarding con scansione
+- [x] 43.7 Resto delle schermate e prova sul Mi A3 (la prova a vista è dell'utente, «Tocca a te»)
 
 ## Fase 44 — Chiusura ui-fluida (`fase-44-chiusura-ui-fluida.md`)
 Refactor «ui-fluida» (piano in `docs/refactor/ui-fluida/analisi.md`, decisioni D-01..D-30 in `docs/decisioni.md`, 2026-10-23). Misure finali contro le soglie e pulizia.
