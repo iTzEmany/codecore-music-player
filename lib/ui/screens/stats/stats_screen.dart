@@ -168,84 +168,6 @@ class _Body extends StatelessWidget {
     }
 
     final fav = stats.favouriteHour;
-    Widget fact(String title, String value) => Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: CcDims.margin,
-        vertical: 6,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title, style: theme.bodyMedium?.copyWith(color: cc.textMuted)),
-          Text(value, style: theme.bodyLarge),
-        ],
-      ),
-    );
-
-    Widget ranking(
-      String title,
-      List<RankedItem> items, {
-      bool cover = false,
-    }) => items.isEmpty
-        ? const SizedBox.shrink()
-        : Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SectionHeader(title),
-              for (var i = 0; i < items.length; i++)
-                SizedBox(
-                  height: 56,
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: 44,
-                        child: Center(
-                          child: Text(
-                            '${i + 1}',
-                            style: theme.titleMedium?.copyWith(
-                              color: cc.textMuted,
-                            ),
-                          ),
-                        ),
-                      ),
-                      if (cover) ...[
-                        CoverImage(
-                          coverKey: items[i].coverKey,
-                          size: 40,
-                          radius: CcDims.rList,
-                        ),
-                        const SizedBox(width: 12),
-                      ],
-                      Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              items[i].name ?? l.unknownAlbum,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: theme.bodyLarge,
-                            ),
-                            Text(
-                              [
-                                if (items[i].artist != null) items[i].artist!,
-                                l.statsPlays(items[i].plays),
-                              ].join(', '),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: theme.bodyMedium,
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: CcDims.margin),
-                    ],
-                  ),
-                ),
-            ],
-          );
-
     return ListView(
       children: [
         Padding(
@@ -283,22 +205,120 @@ class _Body extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         if (fav != null)
-          fact(
+          _Fact(
             l.statsFavouriteHour,
             '${fav.toString().padLeft(2, '0')}:00–${((fav + 1) % 24).toString().padLeft(2, '0')}:00',
           ),
         if (stats.firstTitle != null && stats.firstAt != null)
-          fact(
+          _Fact(
             l.statsFirstListen,
             l.statsFirstValue(
               stats.firstTitle!,
               DateFormat.MMMd(locale).format(stats.firstAt!),
             ),
           ),
-        ranking(l.statsTopTracks, stats.topTracks, cover: true),
-        ranking(l.statsTopArtists, stats.topArtists),
-        ranking(l.statsTopAlbums, stats.topAlbums, cover: true),
+        _Ranking(l.statsTopTracks, stats.topTracks, cover: true),
+        _Ranking(l.statsTopArtists, stats.topArtists),
+        _Ranking(l.statsTopAlbums, stats.topAlbums, cover: true),
         const SizedBox(height: 24),
+      ],
+    );
+  }
+}
+
+class _Fact extends StatelessWidget {
+  const _Fact(this.title, this.value);
+
+  final String title, value;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context).textTheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: CcDims.margin,
+        vertical: 6,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: theme.bodyMedium?.copyWith(color: context.cc.textMuted),
+          ),
+          Text(value, style: theme.bodyLarge),
+        ],
+      ),
+    );
+  }
+}
+
+class _Ranking extends StatelessWidget {
+  const _Ranking(this.title, this.items, {this.cover = false});
+
+  final String title;
+  final List<RankedItem> items;
+  final bool cover;
+
+  @override
+  Widget build(BuildContext context) {
+    if (items.isEmpty) return const SizedBox.shrink();
+    final l = context.l10n;
+    final cc = context.cc;
+    final theme = Theme.of(context).textTheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SectionHeader(title),
+        for (var i = 0; i < items.length; i++)
+          SizedBox(
+            height: 56,
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 44,
+                  child: Center(
+                    child: Text(
+                      '${i + 1}',
+                      style: theme.titleMedium?.copyWith(color: cc.textMuted),
+                    ),
+                  ),
+                ),
+                if (cover) ...[
+                  CoverImage(
+                    coverKey: items[i].coverKey,
+                    size: 40,
+                    radius: CcDims.rList,
+                  ),
+                  const SizedBox(width: 12),
+                ],
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        items[i].name ?? l.unknownAlbum,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.bodyLarge,
+                      ),
+                      Text(
+                        [
+                          if (items[i].artist != null) items[i].artist!,
+                          l.statsPlays(items[i].plays),
+                        ].join(', '),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.bodyMedium,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: CcDims.margin),
+              ],
+            ),
+          ),
       ],
     );
   }
