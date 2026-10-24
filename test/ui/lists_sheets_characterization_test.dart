@@ -182,7 +182,7 @@ void main() {
 
     testWidgets('with reduced motion the scroll is already final right after the first frame',
         (tester) async {
-      final h = await _pumpLyrics(tester, reducedMotion: true);
+      final h = await _pumpLyrics(tester, noAnimations: true);
       await _at(tester, h, 105);
       await _reached(tester);
       final o = _offset(tester);

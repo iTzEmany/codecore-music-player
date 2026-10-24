@@ -67,9 +67,10 @@ class CodecoreApp extends ConsumerWidget {
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       builder: (context, child) => MediaQuery(
+        // App setting OR system flag; system text scale times the app one.
         data: MediaQuery.of(context).copyWith(
-          disableAnimations: s.reducedMotion,
-          textScaler: TextScaler.linear(s.fontScale),
+          disableAnimations: s.reducedMotion || MediaQuery.disableAnimationsOf(context),
+          textScaler: TextScaler.linear(MediaQuery.textScalerOf(context).scale(1) * s.fontScale),
         ),
         child: AppBackground(
           colors: themeColors,

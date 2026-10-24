@@ -8,7 +8,6 @@ import '../../../l10n/l10n_ext.dart';
 import '../../../providers/database_providers.dart';
 import '../../../providers/online_providers.dart';
 import '../../../providers/player_providers.dart';
-import '../../../providers/settings_providers.dart';
 import '../../../providers/translation_providers.dart';
 import '../../../services/online/http_client.dart';
 import '../../../services/online/lrc_parser.dart';
@@ -78,7 +77,7 @@ class _LyricsViewState extends ConsumerState<LyricsView> {
     final ctx = _keys[i].currentContext;
     if (ctx != null) {
       if (!ctx.mounted) return;
-      final reduce = ref.read(settingsProvider).reducedMotion;
+      final reduce = MediaQuery.disableAnimationsOf(context);
       Scrollable.ensureVisible(
         ctx,
         alignment: 0.35,
@@ -97,7 +96,7 @@ class _LyricsViewState extends ConsumerState<LyricsView> {
       if (mounted && i < _keys.length) _reveal(i, attempt + 1);
     }
 
-    if (ref.read(settingsProvider).reducedMotion) {
+    if (MediaQuery.disableAnimationsOf(context)) {
       pos.jumpTo(target);
       WidgetsBinding.instance.addPostFrameCallback((_) => retry());
     } else {

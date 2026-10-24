@@ -36,8 +36,8 @@ Future<void> _settle(WidgetTester tester) async {
 }
 
 void main() {
-  testWidgets('KNOWN DEFECT (D-14): the system flags are ignored', (tester) async {
-    _phone(tester, scale: 2.0);
+  testWidgets('D-14: the system flags are followed (animations off, 1.3 x 1.5 = 1.95)', (tester) async {
+    _phone(tester, scale: 1.3);
     tester.platformDispatcher.accessibilityFeaturesTestValue =
         const FakeAccessibilityFeatures(disableAnimations: true);
     addTearDown(tester.platformDispatcher.clearAccessibilityFeaturesTestValue);
@@ -45,14 +45,14 @@ void main() {
     await tester.pumpWidget(
         ProviderScope(overrides: h.overrides, child: const CodecoreApp()));
     await tester.pump(const Duration(milliseconds: 600));
-    final mq = MediaQuery.of(tester.element(find.byType(AppShell)));
-    // The system asks for 2x text and no animations; the app follows only
-    // its own settings (defaults: scale 1, motion on).
-    expect(mq.disableAnimations, isFalse);
-    expect(mq.textScaler.scale(10), 10);
-    final c = ProviderScope.containerOf(tester.element(find.byType(CodecoreApp)));
+    final ctx = tester.element(find.byType(AppShell));
+    final c = ProviderScope.containerOf(ctx);
     expect(c.read(settingsProvider).reducedMotion, isFalse);
-    expect(c.read(settingsProvider).fontScale, 1.0);
+    expect(MediaQuery.of(ctx).disableAnimations, isTrue);
+    expect(MediaQuery.of(ctx).textScaler.scale(10), closeTo(13, 1e-6));
+    c.read(settingsProvider.notifier).update((s) => s.copyWith(fontScale: 1.5));
+    await tester.pump();
+    expect(MediaQuery.of(ctx).textScaler.scale(10), closeTo(19.5, 1e-6));
     await h.dispose(tester);
   });
 
