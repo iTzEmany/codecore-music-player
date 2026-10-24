@@ -4824,6 +4824,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get radioReorder => 'Arraste para reordenar';
 
   @override
+  String get radioReorderFailed => 'Não foi possível guardar a nova ordem';
+
+  @override
   String get memoryRadio => 'Rádio (listas de estações)';
 
   @override

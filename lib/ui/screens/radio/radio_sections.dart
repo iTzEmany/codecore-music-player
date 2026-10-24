@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/app_log.dart';
 import '../../../data/db/app_database.dart';
 import '../../../data/repositories/radio_repository.dart';
 import '../../../l10n/l10n_ext.dart';
@@ -13,6 +14,7 @@ import '../../../services/radio/regions.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/error_state.dart';
 import '../../widgets/section_header.dart';
+import '../../widgets/show_msg.dart';
 import 'radio_actions.dart';
 import 'radio_labels.dart';
 import 'radio_region_sheet.dart';
@@ -136,10 +138,16 @@ class MineSection extends ConsumerWidget {
         SliverReorderableList(
           itemCount: saved.length,
           itemExtent: kRadioRowHeight,
-          onReorderItem: (from, to) {
+          onReorderItem: (from, to) async {
             final ids = [for (final r in saved) r.stationId];
             ids.insert(to, ids.removeAt(from));
-            ref.read(radioRepositoryProvider).reorder(ids);
+            try {
+              await ref.read(radioRepositoryProvider).reorder(ids);
+            } catch (e, st) {
+              // The list reads the DB stream, so the old order stays on screen.
+              AppLog.w('reordering saved radios failed', e, st);
+              if (context.mounted) showMsg(context, l.radioReorderFailed);
+            }
           },
           itemBuilder: (context, i) => Material(
             key: ValueKey('mine_${saved[i].stationId}'),

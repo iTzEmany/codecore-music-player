@@ -4838,6 +4838,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get radioReorder => 'Zum Sortieren ziehen';
 
   @override
+  String get radioReorderFailed =>
+      'Die neue Reihenfolge konnte nicht gespeichert werden';
+
+  @override
   String get memoryRadio => 'Radio (Senderlisten)';
 
   @override

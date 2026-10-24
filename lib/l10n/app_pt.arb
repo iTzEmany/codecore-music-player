@@ -2863,6 +2863,7 @@
   "radioLinkTooBig": "O ficheiro é demasiado grande para ser uma lista de estações",
   "radioLinkFetchFailed": "Não foi possível transferir o ficheiro",
   "radioReorder": "Arraste para reordenar",
+  "radioReorderFailed": "Não foi possível guardar a nova ordem",
   "memoryRadio": "Rádio (listas de estações)",
   "radioGenrePop": "Pop",
   "radioGenreRock": "Rock",

@@ -4818,6 +4818,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get radioReorder => 'Trascina per riordinare';
 
   @override
+  String get radioReorderFailed => 'Non riesco a salvare il nuovo ordine';
+
+  @override
   String get memoryRadio => 'Radio (elenco stazioni)';
 
   @override
