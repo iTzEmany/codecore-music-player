@@ -4868,7 +4868,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get radioReorder => 'Faites glisser pour réorganiser';
 
   @override
-  String get radioReorderFailed => 'Impossible d\'enregistrer le nouvel ordre';
+  String get radioReorderFailed => 'Impossible d’enregistrer le nouvel ordre';
 
   @override
   String get memoryRadio => 'Radio (listes de stations)';

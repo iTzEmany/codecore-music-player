@@ -2863,7 +2863,7 @@
   "radioLinkTooBig": "Le fichier est trop volumineux pour être une liste de stations",
   "radioLinkFetchFailed": "Impossible de télécharger le fichier",
   "radioReorder": "Faites glisser pour réorganiser",
-  "radioReorderFailed": "Impossible d'enregistrer le nouvel ordre",
+  "radioReorderFailed": "Impossible d’enregistrer le nouvel ordre",
   "memoryRadio": "Radio (listes de stations)",
   "radioGenrePop": "Pop",
   "radioGenreRock": "Rock",
