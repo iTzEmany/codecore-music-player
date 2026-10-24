@@ -121,7 +121,7 @@ Future<void> _showReport(BuildContext context, DeleteReport r) {
               if (Platform.isAndroid) Text(l.duplicatesDeleteAndroidHint),
               for (final e in r.failed.entries)
                 Padding(
-                  padding: const EdgeInsets.only(top: 4),
+                  padding: const EdgeInsets.only(top: CcDims.gap4),
                   child: Text(
                     '${e.key.path}\n${e.value}',
                     style: Theme.of(ctx).textTheme.bodySmall,

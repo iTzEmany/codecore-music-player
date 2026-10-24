@@ -79,7 +79,7 @@ class DuplicateMemberRow extends ConsumerWidget {
         onLongPress: () => showDupPathDialog(context, entry.path),
         child: Container(
           color: keep ? cc.accentSoft.withValues(alpha: 0.14) : null,
-          padding: const EdgeInsets.fromLTRB(16, 8, 4, 8),
+          padding: const EdgeInsets.fromLTRB(CcDims.gap16, CcDims.gap8, CcDims.gap4, CcDims.gap8),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

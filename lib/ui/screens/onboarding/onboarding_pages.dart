@@ -30,7 +30,7 @@ class _Page extends StatelessWidget {
     final cc = context.cc;
     final theme = Theme.of(context).textTheme;
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: CcDims.margin + 8),
+      padding: const EdgeInsets.symmetric(horizontal: CcDims.margin + CcDims.gap8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -55,7 +55,7 @@ class _Page extends StatelessWidget {
 }
 
 Widget _body(BuildContext context, String text) => Padding(
-  padding: const EdgeInsets.only(bottom: 12),
+  padding: const EdgeInsets.only(bottom: CcDims.gap12),
   child: Text(
     text,
     style: Theme.of(context).textTheme.bodyLarge
@@ -249,8 +249,8 @@ class SharePage extends StatelessWidget {
       children: [
         _body(context, l.onboardingYoutubeBody),
         Container(
-          padding: const EdgeInsets.all(12),
-          margin: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.all(CcDims.gap12),
+          margin: const EdgeInsets.only(bottom: CcDims.gap12),
           decoration: BoxDecoration(
             color: cc.surface1,
             borderRadius: BorderRadius.circular(CcDims.rCard),

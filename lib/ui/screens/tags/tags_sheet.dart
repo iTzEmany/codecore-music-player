@@ -114,7 +114,7 @@ Future<void> editTag(BuildContext context, WidgetRef ref, TagSummary s) async {
           title: Text(l.tagColor),
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: CcDims.gap24, vertical: CcDims.gap8),
               child: AccentPicker(
                 theme: c.cc.isLight ? AppThemeId.chiaro : AppThemeId.notte,
                 selected: CcAccent.values[(s.tag.color ?? 0).clamp(0, CcAccent.values.length - 1)],

@@ -128,7 +128,7 @@ class _Progress extends StatelessWidget {
         : null;
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(CcDims.gap24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -164,15 +164,15 @@ class _Results extends ConsumerWidget {
         Padding(
           padding: const EdgeInsets.fromLTRB(
             CcDims.margin,
-            8,
+            CcDims.gap8,
             CcDims.margin,
-            4,
+            CcDims.gap4,
           ),
           child: Material(
             color: context.cc.surface2,
             borderRadius: BorderRadius.circular(CcDims.rCard),
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 8, 8),
+              padding: const EdgeInsets.fromLTRB(CcDims.gap16, CcDims.gap12, CcDims.gap8, CcDims.gap8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -208,9 +208,9 @@ class _Results extends ConsumerWidget {
         Padding(
           padding: const EdgeInsets.fromLTRB(
             CcDims.margin,
-            8,
+            CcDims.gap8,
             CcDims.margin,
-            4,
+            CcDims.gap4,
           ),
           child: Wrap(
             alignment: WrapAlignment.spaceBetween,

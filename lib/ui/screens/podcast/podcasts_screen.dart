@@ -94,9 +94,9 @@ class _PodcastsScreenState extends ConsumerState<PodcastsScreen> {
                     Padding(
                       padding: const EdgeInsets.fromLTRB(
                         CcDims.margin,
-                        8,
+                        CcDims.gap8,
                         CcDims.margin,
-                        4,
+                        CcDims.gap4,
                       ),
                       child: Align(
                         alignment: Alignment.centerLeft,

@@ -108,7 +108,7 @@ class MemoryAppDataSection extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(
               CcDims.margin,
-              8,
+              CcDims.gap8,
               CcDims.margin,
               0,
             ),
@@ -117,7 +117,7 @@ class MemoryAppDataSection extends ConsumerWidget {
         Padding(
           padding: const EdgeInsets.fromLTRB(
             CcDims.margin,
-            16,
+            CcDims.gap16,
             CcDims.margin,
             0,
           ),

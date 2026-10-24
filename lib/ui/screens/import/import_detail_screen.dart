@@ -123,9 +123,9 @@ class _ImportDetailScreenState extends ConsumerState<ImportDetailScreen> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(
                     CcDims.margin,
-                    4,
+                    CcDims.gap4,
                     CcDims.margin,
-                    8,
+                    CcDims.gap8,
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -151,7 +151,7 @@ class _ImportDetailScreenState extends ConsumerState<ImportDetailScreen> {
                       ),
                       if (wait != null && !p.paused)
                         Padding(
-                          padding: const EdgeInsets.only(top: 4),
+                          padding: const EdgeInsets.only(top: CcDims.gap4),
                           child: Text(
                             importWaitLabel(l, wait),
                             style: theme.bodyMedium?.copyWith(

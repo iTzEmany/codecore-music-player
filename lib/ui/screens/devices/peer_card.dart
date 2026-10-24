@@ -34,7 +34,7 @@ class PeerCard extends StatelessWidget {
     final l = context.l10n;
     final theme = Theme.of(context).textTheme;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(vertical: CcDims.gap8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

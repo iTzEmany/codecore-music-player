@@ -99,7 +99,7 @@ class ArtistPickerSheet extends StatelessWidget {
                 CcDims.margin,
                 0,
                 CcDims.margin,
-                8,
+                CcDims.gap8,
               ),
               child: Align(
                 alignment: Alignment.centerLeft,

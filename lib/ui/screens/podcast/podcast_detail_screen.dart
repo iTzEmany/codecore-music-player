@@ -173,7 +173,7 @@ class _AutoDelete extends ConsumerWidget {
     final l = context.l10n;
     final days = const [1, 7, 30].contains(podcast.autoDeleteDays) ? podcast.autoDeleteDays : null;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(CcDims.margin, 0, CcDims.margin, 8),
+      padding: const EdgeInsets.fromLTRB(CcDims.margin, 0, CcDims.margin, CcDims.gap8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -262,7 +262,7 @@ class _EpisodeTile extends ConsumerWidget {
     return InkWell(
       onTap: row.downloaded && !busy ? onPlay : null,
       child: Padding(
-        padding: const EdgeInsets.only(left: CcDims.margin, right: 4),
+        padding: const EdgeInsets.only(left: CcDims.margin, right: CcDims.gap4),
         child: Row(
           children: [
             Expanded(

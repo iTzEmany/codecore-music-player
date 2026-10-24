@@ -146,7 +146,7 @@ class JamQueueRow extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(
           horizontal: CcDims.margin,
-          vertical: 4,
+          vertical: CcDims.gap4,
         ),
         child: Row(
           children: [
@@ -204,7 +204,7 @@ class JamQueueRow extends StatelessWidget {
             ReorderableDragStartListener(
               index: index,
               child: Padding(
-                padding: const EdgeInsets.all(8),
+                padding: const EdgeInsets.all(CcDims.gap8),
                 child: Icon(Icons.drag_handle_rounded, color: cc.textMuted),
               ),
             ),

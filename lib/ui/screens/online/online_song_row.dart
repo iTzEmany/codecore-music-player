@@ -214,7 +214,7 @@ class OnlineSongRow extends StatelessWidget {
               children: [
                 if (selecting)
                   Padding(
-                    padding: const EdgeInsets.only(left: 4),
+                    padding: const EdgeInsets.only(left: CcDims.gap4),
                     child: SelectionBox(selected: selected, position: position, size: 40),
                   )
                 else

@@ -64,10 +64,10 @@ class OfflineNotice extends StatelessWidget {
     final cc = context.cc;
     final date = MaterialLocalizations.of(context).formatShortDate(fetchedAt);
     return Padding(
-      padding: const EdgeInsets.fromLTRB(CcDims.margin, 4, CcDims.margin, 4),
+      padding: const EdgeInsets.fromLTRB(CcDims.margin, CcDims.gap4, CcDims.margin, CcDims.gap4),
       child: Container(
         key: const ValueKey('offline-notice'),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: CcDims.gap12, vertical: CcDims.gap8),
         decoration: BoxDecoration(
           color: cc.surface1,
           borderRadius: BorderRadius.circular(CcDims.rCard),
@@ -102,13 +102,13 @@ class PageSkeleton extends StatelessWidget {
       key: const ValueKey('page-skeleton'),
       padding: const EdgeInsets.symmetric(
         horizontal: CcDims.margin,
-        vertical: 12,
+        vertical: CcDims.gap12,
       ),
       child: Column(
         children: [
           for (var i = 0; i < rows; i++)
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
+              padding: const EdgeInsets.symmetric(vertical: CcDims.gap8),
               child: Row(
                 children: [
                   Container(
@@ -196,7 +196,7 @@ class ReleaseRow extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: CcDims.margin,
-            vertical: 8,
+            vertical: CcDims.gap8,
           ),
           child: Row(
             children: [
@@ -262,7 +262,7 @@ class ArtistList extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: CcDims.margin,
-                  vertical: 8,
+                  vertical: CcDims.gap8,
                 ),
                 child: Row(
                   children: [
@@ -339,7 +339,7 @@ class _AboutSectionState extends State<AboutSection> {
           ),
         ),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: CcDims.margin - 8),
+          padding: const EdgeInsets.symmetric(horizontal: CcDims.margin - CcDims.gap8),
           child: TextButton(
             key: const ValueKey('about-toggle'),
             onPressed: () => setState(() => _open = !_open),

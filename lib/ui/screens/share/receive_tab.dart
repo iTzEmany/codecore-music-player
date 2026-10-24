@@ -227,7 +227,7 @@ class _ReceiveTabState extends ConsumerState<ReceiveTab> {
       ),
       if (isAndroid)
         Padding(
-          padding: const EdgeInsets.only(bottom: 8),
+          padding: const EdgeInsets.only(bottom: CcDims.gap8),
           child: OutlinedButton.icon(
             onPressed: _busy ? null : _scan,
             icon: const Icon(Icons.qr_code_scanner_rounded),
@@ -240,7 +240,7 @@ class _ReceiveTabState extends ConsumerState<ReceiveTab> {
       ),
       if (_error != null)
         Padding(
-          padding: const EdgeInsets.only(top: 12),
+          padding: const EdgeInsets.only(top: CcDims.gap12),
           child: Text(_error!, style: TextStyle(color: context.cc.error)),
         ),
       if (_remoteName != null) ...[
@@ -266,7 +266,7 @@ class _ReceiveTabState extends ConsumerState<ReceiveTab> {
           ),
         if (_received != null)
           Padding(
-            padding: const EdgeInsets.only(top: 8),
+            padding: const EdgeInsets.only(top: CcDims.gap8),
             child: Text(l.shareDone(_received!)),
           ),
       ],

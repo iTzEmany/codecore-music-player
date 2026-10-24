@@ -104,7 +104,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(
                     CcDims.margin,
-                    8,
+                    CcDims.gap8,
                     CcDims.margin,
                     CcDims.margin,
                   ),
@@ -124,7 +124,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                                 margin: const EdgeInsets.only(right: 6),
                                 decoration: BoxDecoration(
                                   color: i == _page ? cc.accent : cc.surface3,
-                                  borderRadius: BorderRadius.circular(4),
+                                  borderRadius: BorderRadius.circular(CcDims.rList),
                                 ),
                               ),
                           ],

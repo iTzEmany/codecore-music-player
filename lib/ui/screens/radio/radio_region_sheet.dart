@@ -74,7 +74,7 @@ class _RadioRegionSheetState extends ConsumerState<RadioRegionSheet> {
             CcDims.margin,
             0,
             CcDims.margin,
-            4,
+            CcDims.gap4,
           ),
           child: Text(
             _pickingCountry ? l.radioChooseCountry : l.radioChooseRegion,

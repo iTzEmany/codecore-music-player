@@ -125,7 +125,7 @@ class _DevicesSheetState extends ConsumerState<DevicesSheet> {
     return SafeArea(
       child: ListView(
         shrinkWrap: true,
-        padding: const EdgeInsets.fromLTRB(CcDims.margin, 0, CcDims.margin, 16),
+        padding: const EdgeInsets.fromLTRB(CcDims.margin, 0, CcDims.margin, CcDims.gap16),
         children: [
           Text(l.devicesTitle, style: theme.titleMedium),
           const SizedBox(height: 12),
@@ -136,7 +136,7 @@ class _DevicesSheetState extends ConsumerState<DevicesSheet> {
             ),
             const SizedBox(height: 4),
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4),
+              padding: const EdgeInsets.symmetric(vertical: CcDims.gap4),
               child: Row(
                 children: [
                   Container(
@@ -208,7 +208,7 @@ class _DevicesSheetState extends ConsumerState<DevicesSheet> {
           if (hub.peers.isEmpty) ...[
             if (!visible) ...[
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
+                padding: const EdgeInsets.symmetric(vertical: CcDims.gap8),
                 child: Text(l.devicesVisibleHint, style: theme.bodyMedium),
               ),
               SwitchListTile(
@@ -221,7 +221,7 @@ class _DevicesSheetState extends ConsumerState<DevicesSheet> {
               ),
             ] else
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12),
+                padding: const EdgeInsets.symmetric(vertical: CcDims.gap12),
                 child: Row(
                   children: [
                     const SizedBox(

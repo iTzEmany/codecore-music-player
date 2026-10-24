@@ -122,7 +122,7 @@ class _Bar extends ConsumerWidget {
           children: [
             LinearProgressIndicator(value: progress, minHeight: 2),
             Padding(
-              padding: const EdgeInsets.fromLTRB(CcDims.margin, 4, 4, 4),
+              padding: const EdgeInsets.fromLTRB(CcDims.margin, CcDims.gap4, CcDims.gap4, CcDims.gap4),
               child: Row(
                 children: [
                   Icon(

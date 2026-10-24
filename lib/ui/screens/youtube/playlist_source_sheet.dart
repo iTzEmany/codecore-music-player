@@ -148,7 +148,7 @@ class _PlaylistSourceSheetState extends ConsumerState<PlaylistSourceSheet> {
         Padding(
           padding: const EdgeInsets.fromLTRB(
             CcDims.margin,
-            8,
+            CcDims.gap8,
             CcDims.margin,
             0,
           ),
@@ -159,7 +159,7 @@ class _PlaylistSourceSheetState extends ConsumerState<PlaylistSourceSheet> {
           ),
         ),
         Padding(
-          padding: const EdgeInsets.fromLTRB(CcDims.margin, 8, 8, 0),
+          padding: const EdgeInsets.fromLTRB(CcDims.margin, CcDims.gap8, CcDims.gap8, 0),
           child: Row(
             children: [
               Expanded(
@@ -243,7 +243,7 @@ class _PlaylistSourceSheetState extends ConsumerState<PlaylistSourceSheet> {
   }
 
   Widget _note(String text, Color color) => Padding(
-    padding: const EdgeInsets.fromLTRB(CcDims.margin, 4, CcDims.margin, 0),
+    padding: const EdgeInsets.fromLTRB(CcDims.margin, CcDims.gap4, CcDims.margin, 0),
     child: Align(
       alignment: Alignment.centerLeft,
       child: Text(

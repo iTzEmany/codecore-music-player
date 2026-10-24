@@ -26,7 +26,7 @@ class AlbumCard extends StatelessWidget {
     final thumb = release.thumbnailUrl;
     final line = [l.kindAlbum, ?artist?.name, if (release.subtitle.isNotEmpty) release.subtitle];
     return Padding(
-      padding: const EdgeInsets.fromLTRB(CcDims.margin, 4, CcDims.margin, 8),
+      padding: const EdgeInsets.fromLTRB(CcDims.margin, CcDims.gap4, CcDims.margin, CcDims.gap8),
       child: Material(
         key: const ValueKey('album-card'),
         color: cc.surface1,
@@ -35,7 +35,7 @@ class AlbumCard extends StatelessWidget {
         child: InkWell(
           onTap: onTap,
           child: Padding(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(CcDims.gap12),
             child: Row(
               children: [
                 NetThumbnail(

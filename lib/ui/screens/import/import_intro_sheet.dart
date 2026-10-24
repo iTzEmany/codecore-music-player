@@ -126,7 +126,7 @@ class _ImportIntroSheetState extends ConsumerState<ImportIntroSheet> {
       child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(
           CcDims.margin,
-          8,
+          CcDims.gap8,
           CcDims.margin,
           CcDims.margin,
         ),

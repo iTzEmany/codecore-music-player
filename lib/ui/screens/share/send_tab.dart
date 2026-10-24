@@ -145,7 +145,7 @@ class _SendTabState extends ConsumerState<SendTab> {
         const SizedBox(height: 16),
         if (ref.watch(jamProvider).active)
           Padding(
-            padding: const EdgeInsets.only(bottom: 16),
+            padding: const EdgeInsets.only(bottom: CcDims.gap16),
             child: Material(
               color: context.cc.surface1,
               borderRadius: BorderRadius.circular(CcDims.rCard),
@@ -165,7 +165,7 @@ class _SendTabState extends ConsumerState<SendTab> {
         Text(l.nearbyDevices, style: Theme.of(context).textTheme.titleMedium),
         if (hub.peers.isEmpty)
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12),
+            padding: const EdgeInsets.symmetric(vertical: CcDims.gap12),
             child: Row(
               children: [
                 const SizedBox(
@@ -233,7 +233,7 @@ class _SendTabState extends ConsumerState<SendTab> {
               ),
               if (_noNetwork)
                 Padding(
-                  padding: const EdgeInsets.only(top: 12),
+                  padding: const EdgeInsets.only(top: CcDims.gap12),
                   child: Text(
                     l.shareNoNetwork,
                     style: TextStyle(color: context.cc.error),
@@ -264,7 +264,7 @@ class _Active extends StatelessWidget {
         Container(
           // A QR needs a light quiet zone in every theme.
           color: Colors.white,
-          padding: const EdgeInsets.all(8),
+          padding: const EdgeInsets.all(CcDims.gap8),
           child: QrImageView(data: url, size: 180),
         ),
         ListTile(
