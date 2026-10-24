@@ -48,7 +48,11 @@ String ytErrorText(BuildContext context, YtErrorKind k) {
 /// song once, the sure ones first. The search runs only when [submitted]
 /// changes (Enter / the arrow / «Cerca online»), never while typing.
 class OnlineResults extends ConsumerStatefulWidget {
-  const OnlineResults({super.key, required this.query, required this.submitted});
+  const OnlineResults({
+    super.key,
+    required this.query,
+    required this.submitted,
+  });
 
   final String query;
   final int submitted;
@@ -111,7 +115,9 @@ class _OnlineResultsState extends ConsumerState<OnlineResults> {
     // Picks refer to rows of the old results (not while the tree is building).
     if (!first) {
       scheduleMicrotask(() {
-        if (mounted) ref.read(selectionProvider(_selectionKey).notifier).clear();
+        if (mounted) {
+          ref.read(selectionProvider(_selectionKey).notifier).clear();
+        }
       });
     }
   }
@@ -125,7 +131,9 @@ class _OnlineResultsState extends ConsumerState<OnlineResults> {
       ShellNav.open<void>(context, ArtistPageScreen(artist: artist));
 
   void _openAlbum(YtmRelease r) => ShellNav.open<void>(
-      context, OnlineAlbumScreen(browseId: r.browseId, release: r));
+    context,
+    OnlineAlbumScreen(browseId: r.browseId, release: r),
+  );
 
   void _pickFilter(MediaKind? k) {
     if (k == _filter) return;
@@ -149,12 +157,12 @@ class _OnlineResultsState extends ConsumerState<OnlineResults> {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    final cc = context.cc;
     final seen = ref.watch(settingsProvider.select((s) => s.ytNoticeSeen));
     final picked = ref.watch(selectionProvider(_selectionKey));
-    final theme = Theme.of(context).textTheme;
     final request = _request;
-    final async = request == null ? null : ref.watch(smartSearchProvider(request));
+    final async = request == null
+        ? null
+        : ref.watch(smartSearchProvider(request));
     final s = async?.value;
     final all = s == null ? const <SmartResult>[] : [...s.best, ...s.others];
     final bestEnd = s?.best.length ?? 0;
@@ -192,74 +200,41 @@ class _OnlineResultsState extends ConsumerState<OnlineResults> {
         children: [
           const YtDlpOutdatedBanner(),
           if (!seen)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(CcDims.margin, CcDims.gap4, CcDims.margin, CcDims.gap8),
-              child: Container(
-                padding: const EdgeInsets.all(CcDims.gap12),
-                decoration: BoxDecoration(
-                  color: cc.surface1,
-                  borderRadius: BorderRadius.circular(CcDims.rCard),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(child: Text(l.ytLegal, style: theme.bodyMedium)),
-                    TextButton(
-                      onPressed: () => ref
-                          .read(settingsProvider.notifier)
-                          .update((s) => s.copyWith(ytNoticeSeen: true)),
-                      child: Text(l.gotIt),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: CcDims.margin),
-            child: Row(
-              children: [
-                if (seen)
-                  IconButton(
-                    tooltip: l.ytInfoTooltip,
-                    icon: const Icon(Icons.info_outline_rounded),
-                    onPressed: () => showDialog<void>(
-                      context: context,
-                      builder: (dialogContext) => AlertDialog(
-                        content: Text(l.ytLegal),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.of(dialogContext).pop(),
-                            child: Text(l.close),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                const Spacer(),
-                const ActivityButton(),
-              ],
-            ),
-          ),
+            const _LegalNotice()
+          else
+            const _ActivityRowBar(showInfo: true),
           if (request == null)
-            Expanded(child: EmptyState(icon: Icons.smart_display, message: l.ytSearchPrompt))
+            Expanded(
+              child: EmptyState(
+                icon: Icons.smart_display,
+                message: l.ytSearchPrompt,
+              ),
+            )
           else if (s == null && error == null)
             const LinearProgressIndicator(minHeight: 2)
           else ...[
             // Its place is always there: the list below never jumps when it goes.
             SizedBox(
               height: 2,
-              child: s != null && s.loading ? const LinearProgressIndicator(minHeight: 2) : null,
+              child: s != null && s.loading
+                  ? const LinearProgressIndicator(minHeight: 2)
+                  : null,
             ),
             if (s != null) SearchNotices(notices: s.notices),
-            if (all.isNotEmpty) SourceFilterChips(filter: _filter, onPick: _pickFilter),
+            if (all.isNotEmpty)
+              SourceFilterChips(filter: _filter, onPick: _pickFilter),
             Expanded(
               child: error != null && all.isEmpty
                   ? _ErrorView(error: error, retry: retry)
                   : s != null && all.isEmpty && s.card == null && !s.loading
-                      ? EmptyState(icon: Icons.smart_display, message: l.ytNoResults)
-                      : RefreshIndicator(
-                          onRefresh: _pullToRefresh,
-                          child: _list(s!, shownBest, shownOthers, picked.active),
-                        ),
+                  ? EmptyState(
+                      icon: Icons.smart_display,
+                      message: l.ytNoResults,
+                    )
+                  : RefreshIndicator(
+                      onRefresh: _pullToRefresh,
+                      child: _list(s!, shownBest, shownOthers, picked.active),
+                    ),
             ),
           ],
           if (request != null && s == null && error == null) const Spacer(),
@@ -269,38 +244,53 @@ class _OnlineResultsState extends ConsumerState<OnlineResults> {
     );
   }
 
-  Widget _list(SmartSearchState s, List<(int, SmartResult)> best,
-      List<(int, SmartResult)> others, bool selecting) {
+  Widget _list(
+    SmartSearchState s,
+    List<(int, SmartResult)> best,
+    List<(int, SmartResult)> others,
+    bool selecting,
+  ) {
     final l = context.l10n;
     var n = 0;
     Widget enter(Widget child) => EnterOnce(index: n++, child: child);
     Widget row((int, SmartResult) e) {
       final (i, r) = e;
-      return enter(SmartRow(
-        key: ValueKey('row-${r.primary.id}'),
-        row: r,
-        index: i,
-        selectionKey: _selectionKey,
-        onArtistTap: _openArtist,
-        onListenVideo: () => ref.read(listenProvider.notifier).toggle(r.alternatives.first),
-      ));
+      return enter(
+        SmartRow(
+          key: ValueKey('row-${r.primary.id}'),
+          row: r,
+          index: i,
+          selectionKey: _selectionKey,
+          onArtistTap: _openArtist,
+          onListenVideo: () =>
+              ref.read(listenProvider.notifier).toggle(r.alternatives.first),
+        ),
+      );
     }
 
     final card = s.card;
     final children = <Widget>[];
     switch (card) {
       case TopArtist(:final artist):
-        children.add(enter(ArtistCard(
-          artist: artist,
-          large: s.intent == SearchIntent.artistPage,
-          onTap: () => _openArtist(artist),
-        )));
+        children.add(
+          enter(
+            ArtistCard(
+              artist: artist,
+              large: s.intent == SearchIntent.artistPage,
+              onTap: () => _openArtist(artist),
+            ),
+          ),
+        );
       case TopAlbum(:final release, :final artist):
-        children.add(enter(AlbumCard(
-          release: release,
-          artist: artist,
-          onTap: () => _openAlbum(release),
-        )));
+        children.add(
+          enter(
+            AlbumCard(
+              release: release,
+              artist: artist,
+              onTap: () => _openAlbum(release),
+            ),
+          ),
+        );
       default:
     }
     var rest = best;
@@ -312,19 +302,26 @@ class _OnlineResultsState extends ConsumerState<OnlineResults> {
       if (mine.isNotEmpty) {
         children.add(SectionHeader(l.onlineArtistSongs(card.artist.name)));
         children.addAll(mine.map(row));
-        rest = [for (final e in best) if (!mine.contains(e)) e];
+        rest = [
+          for (final e in best)
+            if (!mine.contains(e)) e,
+        ];
       }
     }
     if (rest.isNotEmpty) {
-      children.add(SectionHeader(s.noneSure ? l.onlineNoneSure : l.onlineBestResults));
+      children.add(
+        SectionHeader(s.noneSure ? l.onlineNoneSure : l.onlineBestResults),
+      );
       children.addAll(rest.map(row));
     }
     if (others.isNotEmpty) {
-      children.add(OthersChip(
-        count: others.length,
-        open: _othersOpen,
-        onTap: () => setState(() => _othersOpen = !_othersOpen),
-      ));
+      children.add(
+        OthersChip(
+          count: others.length,
+          open: _othersOpen,
+          onTap: () => setState(() => _othersOpen = !_othersOpen),
+        ),
+      );
       if (_othersOpen) children.addAll(others.map(row));
     }
     return EntranceScope(
@@ -347,7 +344,9 @@ class _ErrorView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final e = error;
-    final text = e is YtException ? ytErrorText(context, e.kind) : context.l10n.ytErrUnavailable;
+    final text = e is YtException
+        ? ytErrorText(context, e.kind)
+        : context.l10n.ytErrUnavailable;
     return Padding(
       padding: const EdgeInsets.all(CcDims.gap12),
       child: Column(
@@ -355,6 +354,89 @@ class _ErrorView extends StatelessWidget {
         children: [
           Text(text, style: TextStyle(color: context.cc.error)),
           retry,
+        ],
+      ),
+    );
+  }
+}
+
+class _LegalNotice extends ConsumerWidget {
+  const _LegalNotice();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+            CcDims.margin,
+            CcDims.gap4,
+            CcDims.margin,
+            CcDims.gap8,
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(CcDims.gap12),
+            decoration: BoxDecoration(
+              color: context.cc.surface1,
+              borderRadius: BorderRadius.circular(CcDims.rCard),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    l.ytLegal,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ),
+                TextButton(
+                  onPressed: () => ref
+                      .read(settingsProvider.notifier)
+                      .update((s) => s.copyWith(ytNoticeSeen: true)),
+                  child: Text(l.gotIt),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const _ActivityRowBar(showInfo: false),
+      ],
+    );
+  }
+}
+
+/// The row with the info button (once the notice was seen) and the activity button.
+class _ActivityRowBar extends StatelessWidget {
+  const _ActivityRowBar({required this.showInfo});
+
+  final bool showInfo;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: CcDims.margin),
+      child: Row(
+        children: [
+          if (showInfo)
+            IconButton(
+              tooltip: l.ytInfoTooltip,
+              icon: const Icon(Icons.info_outline_rounded),
+              onPressed: () => showDialog<void>(
+                context: context,
+                builder: (dialogContext) => AlertDialog(
+                  content: Text(l.ytLegal),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(dialogContext).pop(),
+                      child: Text(l.close),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          const Spacer(),
+          const ActivityButton(),
         ],
       ),
     );
