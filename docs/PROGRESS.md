@@ -550,22 +550,22 @@ Refactor «ui-fluida» (piano in `docs/refactor/ui-fluida/analisi.md`, decisioni
 
 ## Fase 39 — Fluidità (`fase-39-fluidita.md`)
 Refactor «ui-fluida» (piano in `docs/refactor/ui-fluida/analisi.md`, decisioni D-01..D-30 in `docs/decisioni.md`, 2026-10-23). Scatti su Mi A3 e Motorola; un rilievo per passo, misura prima e dopo.
-- [ ] 39.1 F-40 transizione di pagina senza opacità (slide o zoom, decide la misura, D-10)
-- [ ] 39.2 F-41 apertura e chiusura del player (D-18)
-- [ ] 39.3 F-44 cambio di scheda senza sfumatura
-- [ ] 39.4 F-42 swipe del mini player
-- [ ] 39.5 F-31 trascinamento di chiusura del player
-- [ ] 39.6 F-33 copertina che ruota: opzione spenta di default (D-11)
-- [ ] 39.7 F-35 tag Hero separati
-- [ ] 39.8 F-30 testi sincronizzati
-- [ ] 39.9 F-43 fogli con liste pigre
-- [ ] 39.10 F-45 ricerca e cambio di scheda
-- [ ] 39.11 F-32 riga seek
-- [ ] 39.12 F-36 animazioni implicite e backdrop
-- [ ] 39.13 F-65 `AnimatedSize` e movimento ridotto
-- [ ] 39.14 F-64 una sola scala di movimento
-- [ ] 39.15 F-66 curve
-- [ ] 39.16 Misura finale contro le soglie
+- [x] 39.1 F-40 transizione di pagina senza opacità (slide o zoom, decide la misura, D-10) — slide a tutta larghezza (D-45)
+- [x] 39.2 F-41 apertura e chiusura del player (D-18)
+- [x] 39.3 F-44 cambio di scheda senza sfumatura
+- [x] 39.4 F-42 swipe del mini player
+- [x] 39.5 F-31 trascinamento di chiusura del player
+- [x] 39.6 F-33 copertina che ruota: opzione spenta di default (D-11) — chiave `spinCover`, interruttore in Impostazioni
+- [x] 39.7 F-35 tag Hero separati
+- [x] 39.8 F-30 testi sincronizzati
+- [x] 39.9 F-43 fogli con liste pigre — `shrinkWrap` solo fino a 20 righe (D-43)
+- [x] 39.10 F-45 ricerca e cambio di scheda
+- [x] 39.11 F-32 riga seek
+- [x] 39.12 F-36 animazioni implicite e backdrop
+- [x] 39.13 F-65 `AnimatedSize` e movimento ridotto
+- [x] 39.14 F-64 una sola scala di movimento — `CcMotion` e `CcTiming` in tokens.dart (D-44)
+- [x] 39.15 F-66 curve
+- [x] 39.16 Misura finale contro le soglie — soglie in gran parte non raggiunte, annotate in misure.md (D-37)
 
 ## Fase 40 — Accessibilità e token (`fase-40-accessibilita-e-token.md`)
 Refactor «ui-fluida» (piano in `docs/refactor/ui-fluida/analisi.md`, decisioni D-01..D-30 in `docs/decisioni.md`, 2026-10-23). Opzioni di sistema, contrasto, bersagli, etichette, token di arrivo (D-23).

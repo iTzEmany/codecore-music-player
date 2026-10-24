@@ -55,9 +55,10 @@ class _PageMotionState extends State<_PageMotion> {
     super.dispose();
   }
 
+  // 15 %: a full-width slide paints both pages and doubled the janky frames on the Mi A3 (D-46).
   @override
   Widget build(BuildContext context) => SlideTransition(
-        position: Tween(begin: const Offset(1, 0), end: Offset.zero).animate(_curved),
+        position: Tween(begin: const Offset(0.15, 0), end: Offset.zero).animate(_curved),
         child: widget.child,
       );
 }
