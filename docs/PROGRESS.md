@@ -624,7 +624,7 @@ Refactor «ui-fluida» (piano in `docs/refactor/ui-fluida/analisi.md`, decisioni
 - [x] 44.3 Verifiche finali (prova a mano su Mi A3 e Motorola: «Tocca a te» in handoff)
 - [x] 44.4 Aggiornare `analisi.md` con i risultati
 - [x] 44.5 Pulizia dell'APK profile
-- [x] 44.6 Nuova versione `1.3.0+4` e tag `v1.3.0` (tag locale; il push lo fa l'utente: avvia la release)
+- [~] 44.6 Nuova versione `1.3.0+4` fatta; tag `v1.3.0` rimandato a dopo il prossimo obiettivo (D-58)
 
 ## Note di deviazione
 <!-- una riga per deviazione: data — task — cosa è cambiato e perché -->
