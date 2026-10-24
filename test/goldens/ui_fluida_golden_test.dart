@@ -34,7 +34,7 @@ void main() {
 
   final clock = clockProvider.overrideWithValue(() => DateTime(2026, 1, 1, 14));
 
-  testWidgets('home on desktop', (tester) => withShot(tester, ShotSize.desktop, (s) async {
+  testWidgets('home on desktop', (tester) => withGoldenShot(tester, ShotSize.desktop, (s) async {
         await tester.runAsync(() => s.h.handler.playQueue(s.seed.trackIds.take(6).toList(), 2));
         await s.show(const AppShell(), extra: [clock]);
         await s.expectGolden('desktop_100_home.png');
@@ -42,7 +42,7 @@ void main() {
 
   for (final scale in const [1.0, 2.0]) {
     final tag = (scale * 100).round();
-    testWidgets('mini player and dock at $tag %', (tester) => withShot(tester, ShotSize.phone, (s) async {
+    testWidgets('mini player and dock at $tag %', (tester) => withGoldenShot(tester, ShotSize.phone, (s) async {
           await tester.runAsync(() => s.h.handler.playQueue(s.seed.trackIds.take(6).toList(), 2));
           await s.show(const AppShell(), textScale: scale, extra: [clock]);
           // At 200 % the mini player overflows (pinned in
@@ -51,7 +51,7 @@ void main() {
           await s.expectGolden('phone_${tag}_mini_dock.png');
         }));
 
-    testWidgets('car mode at $tag %', (tester) => withShot(tester, ShotSize.phone, (s) async {
+    testWidgets('car mode at $tag %', (tester) => withGoldenShot(tester, ShotSize.phone, (s) async {
           await tester.runAsync(() => s.h.handler.playQueue(s.seed.trackIds.take(6).toList(), 2));
           await s.show(const CarModeScreen(), textScale: scale);
           await s.expectGolden('phone_${tag}_car_mode.png');

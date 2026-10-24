@@ -36,7 +36,7 @@ class TrackArt extends ConsumerWidget {
     final radio = online?.radioOf(track.id)?.station;
     if (radio != null) {
       final art = RadioArt(station: radio, size: size, radius: radius);
-      return _spoken(heroTag == null ? art : Hero(tag: heroTag!, child: art));
+      return coverSemantics(heroTag == null ? art : Hero(tag: heroTag!, child: art), semanticLabel);
     }
     final url = online?[track.id]?.result.thumbnailUrl;
     final px = (size * MediaQuery.devicePixelRatioOf(context)).round();
@@ -48,13 +48,6 @@ class TrackArt extends ConsumerWidget {
       icon: Icons.cloud_outlined,
     );
     if (heroTag != null) image = Hero(tag: heroTag!, child: image);
-    return _spoken(image);
-  }
-
-  /// Same rule as [CoverImage]: hidden unless there is a label.
-  Widget _spoken(Widget art) {
-    final hidden = ExcludeSemantics(child: art);
-    final label = semanticLabel;
-    return label == null ? hidden : Semantics(image: true, label: label, child: hidden);
+    return coverSemantics(image, semanticLabel);
   }
 }

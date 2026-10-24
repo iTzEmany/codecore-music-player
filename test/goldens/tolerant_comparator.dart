@@ -1,6 +1,9 @@
 
+import 'package:codecore/core/platform.dart' show debugIsDesktopOverride;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../../test_shots/support/shot_harness.dart';
 
 /// Accepts a golden that differs in at most [tolerance] (a fraction) of its
 /// pixels: anti-aliasing moves a few edge pixels between runs.
@@ -25,4 +28,15 @@ class TolerantComparator extends LocalFileComparator {
     final error = await generateFailureOutput(result, golden, basedir);
     throw FlutterError(error);
   }
+}
+
+/// [withShot] with the platform the size stands for (phone sizes are not desktop).
+Future<void> withGoldenShot(
+  WidgetTester tester,
+  ShotSize size,
+  Future<void> Function(Shot s) body,
+) {
+  debugIsDesktopOverride = size == ShotSize.desktop;
+  addTearDown(() => debugIsDesktopOverride = null);
+  return withShot(tester, size, body);
 }

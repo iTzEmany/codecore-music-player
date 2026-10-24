@@ -79,13 +79,7 @@ CcColors resolveColors(String theme, String accent, CustomThemes customs) {
 /// [pageBackdrop]: pages and the app bar are see-through, so the gradient or
 /// picture behind them shows (see `AppBackground`).
 /// Icon buttons stay dense with a desktop mouse; a phone keeps the 48 dp default.
-/// Tests set it to false to see the phone layout on a Linux host.
-@visibleForTesting
-bool? debugDesktopOverride;
-
-bool get _desktop => debugDesktopOverride ?? isDesktop;
-
-VisualDensity? get ccIconDensity => _desktop ? VisualDensity.compact : null;
+VisualDensity? get ccIconDensity => isDesktop ? VisualDensity.compact : null;
 
 ThemeData buildThemeFromColors(CcColors c, bool compact, {bool pageBackdrop = false}) {
   final brightness = c.isLight ? Brightness.light : Brightness.dark;
@@ -151,7 +145,7 @@ ThemeData buildThemeFromColors(CcColors c, bool compact, {bool pageBackdrop = fa
       },
     ),
     // Dense targets only for a desktop mouse; a phone keeps 48 dp (D-15).
-    visualDensity: compact && _desktop ? VisualDensity.compact : VisualDensity.standard,
+    visualDensity: compact && isDesktop ? VisualDensity.compact : VisualDensity.standard,
     extensions: [c],
     appBarTheme: AppBarTheme(
       backgroundColor: pageBackdrop ? Colors.transparent : c.bg,

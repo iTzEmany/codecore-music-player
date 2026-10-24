@@ -270,6 +270,7 @@ class _MiniPlayerState extends ConsumerState<MiniPlayer>
             type: MaterialType.transparency,
             child: Semantics(
               button: true,
+              label: l.nowPlaying,
               child: InkWell(
                 onTap: inJam ? _openJam : _openNowPlaying,
                 child: card,

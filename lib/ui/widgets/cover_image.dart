@@ -99,8 +99,12 @@ class CoverImage extends ConsumerWidget {
       ),
     );
     if (heroTag != null) image = Hero(tag: heroTag!, child: image);
-    image = ExcludeSemantics(child: image);
-    final label = semanticLabel;
-    return label == null ? image : Semantics(image: true, label: label, child: image);
+    return coverSemantics(image, semanticLabel);
   }
+}
+
+/// Covers are hidden from the screen reader unless they have a label (D-16).
+Widget coverSemantics(Widget art, String? label) {
+  final hidden = ExcludeSemantics(child: art);
+  return label == null ? hidden : Semantics(image: true, label: label, child: hidden);
 }

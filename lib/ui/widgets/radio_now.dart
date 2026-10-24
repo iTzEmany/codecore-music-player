@@ -12,6 +12,7 @@ import '../../services/radio/radio_station.dart';
 import '../screens/radio/radio_actions.dart';
 import '../screens/radio/radio_labels.dart';
 import '../screens/radio/radio_station_sheet.dart';
+import '../theme/app_theme.dart' show ccIconDensity;
 import '../theme/tokens.dart';
 
 /// The station behind [track], or null when it is not a radio entry.
@@ -70,6 +71,7 @@ class RadioStarButton extends ConsumerWidget {
     final cc = context.cc;
     final saved = ref.watch(savedRadioIdsProvider.select((s) => s.contains(station.id)));
     return IconButton(
+      visualDensity: ccIconDensity,
       tooltip: saved ? l.radioUnsave : l.radioSave,
       onPressed: () => toggleSavedRadio(context, ref, station),
       icon: Icon(

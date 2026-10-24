@@ -300,8 +300,6 @@ class AppShell extends ConsumerWidget {
         ),
       );
     }
-    // One traversal group: Tab follows reading order across the shell.
-    content = FocusTraversalGroup(child: content);
     // Android back: nested navigator first, then Home, then leave the app.
     content = PopScope(
       canPop: false,

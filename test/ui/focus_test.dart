@@ -1,4 +1,4 @@
-import 'package:codecore/ui/shell/desktop_player_bar.dart' show FocusRingButton;
+import 'package:codecore/ui/widgets/focus_ring_button.dart';
 import 'package:codecore/ui/theme/app_theme.dart';
 import 'package:codecore/ui/theme/tokens.dart';
 import 'package:flutter/material.dart';

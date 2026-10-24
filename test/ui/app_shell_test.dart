@@ -331,7 +331,7 @@ void main() {
     await _settle(tester);
     final node = tester.getSemantics(
         find.descendant(of: find.byType(MiniPlayer), matching: find.text('Song 1')));
-    expect(node.label, startsWith('Song 1'));
+    expect(node.label, contains('Song 1')); // prefixed by «In riproduzione» (40)
     expect(node.value, isEmpty, reason: 'the progress bar value would lead the spoken label');
     handle.dispose();
     await h.dispose(tester);

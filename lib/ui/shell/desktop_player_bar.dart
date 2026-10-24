@@ -17,6 +17,7 @@ import '../theme/tokens.dart';
 import '../widgets/quality_tag.dart';
 import '../widgets/speed_button.dart';
 import '../widgets/favorite_actions.dart';
+import '../widgets/focus_ring_button.dart';
 import '../widgets/format_utils.dart';
 import '../widgets/mini_player.dart' show kBarCoverHero;
 import '../widgets/play_buttons.dart';
@@ -465,37 +466,4 @@ class _Right extends ConsumerWidget {
       ],
     );
   }
-}
-
-/// A round tap target whose keyboard focus draws an accent ring OVER the
-/// (opaque) cover, where an InkWell's own highlight would be hidden.
-class FocusRingButton extends StatefulWidget {
-  const FocusRingButton({super.key, required this.onTap, required this.child});
-
-  final VoidCallback onTap;
-  final Widget child;
-
-  @override
-  State<FocusRingButton> createState() => _FocusRingButtonState();
-}
-
-class _FocusRingButtonState extends State<FocusRingButton> {
-  bool _focused = false;
-
-  @override
-  Widget build(BuildContext context) => InkWell(
-    customBorder: const CircleBorder(),
-    onTap: widget.onTap,
-    onFocusChange: (f) => setState(() => _focused = f),
-    child: DecoratedBox(
-      position: DecorationPosition.foreground,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: _focused
-            ? Border.all(color: context.cc.accent, width: 2)
-            : null,
-      ),
-      child: widget.child,
-    ),
-  );
 }

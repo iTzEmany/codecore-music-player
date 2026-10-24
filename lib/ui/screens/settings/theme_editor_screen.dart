@@ -42,11 +42,6 @@ List<ContrastCheck> contrastChecks(AppLocalizations l, CcColors c) => [
       () => (CcToken.accent, ensureContrast(c.accent, c.bg, min: 3))),
 ];
 
-/// True when text, secondary or faint text sits under 4.5:1 on the background.
-/// Only a warning: the colours are never changed (D-07, D-13).
-bool hasLowContrastText(CcColors c) =>
-    [c.text, c.textMuted, c.textFaint].any((t) => contrastRatio(t, c.bg) < 4.5);
-
 /// Makes or changes one of the user's themes. Nothing is applied until «Salva».
 class ThemeEditorScreen extends ConsumerStatefulWidget {
   const ThemeEditorScreen({super.key, required this.initial});

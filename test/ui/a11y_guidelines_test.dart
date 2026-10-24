@@ -6,7 +6,7 @@ import 'package:codecore/ui/screens/library/all_tracks_screen.dart';
 import 'package:codecore/ui/screens/now_playing/now_playing_screen.dart';
 import 'package:codecore/ui/screens/settings/settings_screen.dart';
 import 'package:codecore/ui/shell/app_shell.dart';
-import 'package:codecore/ui/theme/app_theme.dart' show debugDesktopOverride;
+import 'package:codecore/core/platform.dart' show debugIsDesktopOverride;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -49,10 +49,8 @@ const _known = <(String, String), Map<String, int>>{
     'Timer di spegnimento': 1,
     'Velocità di riproduzione': 1,
   },
-  // A button with no label or tooltip.
-  ('now playing', 'labeledTapTarget'): {'unnamed': 1},
-  // Long-press-only nodes (rows, selection area) and unnamed toggles.
-  ('all tracks', 'labeledTapTarget'): {'unnamed': 7},
+  // Row nodes without a label: the preview cover (custom action) and the swipe area.
+  ('all tracks', 'labeledTapTarget'): {'unnamed': 6},
 };
 
 void main() {
@@ -70,8 +68,8 @@ void main() {
   for (final s in screens.entries) {
     for (final g in guidelines.entries) {
       testWidgets('${s.key}: ${g.key}', (tester) async {
-        debugDesktopOverride = false; // phone targets (48 dp), not the desktop's dense ones
-        addTearDown(() => debugDesktopOverride = null);
+        debugIsDesktopOverride = false; // phone targets (48 dp), not the desktop's dense ones
+        addTearDown(() => debugIsDesktopOverride = null);
         final sem = tester.ensureSemantics();
         // A tear-down would run after the handle check, so dispose in finally.
         try {

@@ -372,3 +372,11 @@ Color ensureContrast(Color fg, Color bg, {double min = 4.5}) {
       ? const Color(0xFFFFFFFF)
       : const Color(0xFF000000);
 }
+
+/// True when any pair of the editor's contrast list (text, muted text, on-accent,
+/// accent) is under its minimum. Only a warning: colours are never changed (D-07, D-13).
+bool hasLowContrastText(CcColors c) =>
+    contrastRatio(c.text, c.bg) < 4.5 ||
+    contrastRatio(c.textMuted, c.surface1) < 4.5 ||
+    contrastRatio(c.onAccent, c.accent) < 4.5 ||
+    contrastRatio(c.accent, c.bg) < 3;

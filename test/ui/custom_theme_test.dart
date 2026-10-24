@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:codecore/ui/screens/settings/theme_editor_screen.dart';
 import 'package:codecore/ui/theme/custom_theme.dart';
 import 'package:codecore/ui/theme/palette.dart';
 import 'package:codecore/ui/theme/tokens.dart';

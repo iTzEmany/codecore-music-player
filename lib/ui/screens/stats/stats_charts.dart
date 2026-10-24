@@ -19,8 +19,8 @@ class StatsBars extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cc = context.cc;
-    final style = Theme.of(context).textTheme.labelSmall
-        ?.copyWith(color: cc.textMuted);
+    final style = Theme.of(context).textTheme.labelSmall!
+        .copyWith(color: cc.textMuted);
     return Semantics(
       label: semanticsLabel,
       image: true,
@@ -33,7 +33,7 @@ class StatsBars extends StatelessWidget {
             color: cc.accent,
             emptyColor: cc.surface3,
             labels: [for (var i = 0; i < values.length; i++) labelOf(i)],
-            labelStyle: style ?? const TextStyle(),
+            labelStyle: style,
             textDirection: Directionality.of(context),
           ),
         ),
