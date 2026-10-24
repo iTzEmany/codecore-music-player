@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('builds a themed AppBar with title, actions and leading', (tester) async {
+  testWidgets('builds a themed AppBar with title and actions', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
@@ -12,7 +12,6 @@ void main() {
         home: Scaffold(
           appBar: CcAppBar(
             title: 'Titolo',
-            leading: const Icon(Icons.menu),
             actions: const [Icon(Icons.add)],
           ),
         ),
@@ -20,7 +19,6 @@ void main() {
     );
     expect(find.byType(AppBar), findsOneWidget);
     expect(find.text('Titolo'), findsOneWidget);
-    expect(find.byIcon(Icons.menu), findsOneWidget);
     expect(find.byIcon(Icons.add), findsOneWidget);
     // Typography comes from the theme, not from the widget.
     final style = tester.widget<DefaultTextStyle>(

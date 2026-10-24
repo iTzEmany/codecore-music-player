@@ -9,7 +9,7 @@ import '../../../services/radio/regions.dart';
 import '../../../services/radio/country_names.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/cc_sheet.dart';
-import '../../widgets/error_state.dart';
+import '../../widgets/async_body.dart';
 
 /// Country and region for «Vicino a te». Nothing about the user's position is
 /// asked: they are picked by hand. The sheet opens by itself the first time.
@@ -107,9 +107,9 @@ class _RadioRegionSheetState extends ConsumerState<RadioRegionSheet> {
   }
 
   Widget _countryList(AsyncValue<List<RadioCountry>> countries) =>
-      countries.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => ErrorState(message: context.l10n.radioLoadFailed),
+      AsyncBody(
+        value: countries,
+        errorMessage: context.l10n.radioLoadFailed,
         data: (list) {
           final sorted = [...list]
             ..sort((a, b) => b.stationCount.compareTo(a.stationCount));
@@ -126,9 +126,9 @@ class _RadioRegionSheetState extends ConsumerState<RadioRegionSheet> {
 
   Widget _regionList(String selected) {
     final regions = ref.watch(radioRegionsProvider);
-    return regions.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (_, _) => ErrorState(message: context.l10n.radioLoadFailed),
+    return AsyncBody(
+      value: regions,
+      errorMessage: context.l10n.radioLoadFailed,
       data: (list) => ListView.builder(
         itemCount: list.length,
         itemBuilder: (_, i) => ListTile(

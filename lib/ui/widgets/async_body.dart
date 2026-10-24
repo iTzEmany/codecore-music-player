@@ -14,6 +14,7 @@ class AsyncBody<T> extends StatelessWidget {
     this.empty,
     this.onRetry,
     this.loading,
+    this.errorMessage,
   });
 
   final AsyncValue<T> value;
@@ -27,10 +28,13 @@ class AsyncBody<T> extends StatelessWidget {
   /// Replaces the centred spinner (e.g. a thin linear bar).
   final Widget? loading;
 
+  /// Replaces the default `loadFailed` text.
+  final String? errorMessage;
+
   @override
   Widget build(BuildContext context) => value.when(
     loading: () => loading ?? const Center(child: CircularProgressIndicator()),
-    error: (e, st) => loadErrorState(context, e, st, onRetry: onRetry),
+    error: (e, st) => loadErrorState(context, e, st, onRetry: onRetry, message: errorMessage),
     data: (d) => empty != null && (isEmpty?.call(d) ?? false) ? empty! : data(d),
   );
 }

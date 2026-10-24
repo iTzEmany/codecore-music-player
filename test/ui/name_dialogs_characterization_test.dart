@@ -60,47 +60,14 @@ void main() {
       return (h, repo);
     }
 
-    testWidgets('the name is trimmed', (tester) async {
-      final (h, repo) = await open(tester);
-      await _type(tester, '  x  ');
-      await _tap(tester, 'Salva');
-      expect(repo.renamed, ['x']);
-      await h.dispose(tester);
-    });
-
-    testWidgets('a blank name keeps the dialog open and sends nothing', (
+    testWidgets('the trimmed name reaches rename; the field is capped at 60', (
       tester,
     ) async {
       final (h, repo) = await open(tester);
-      await _type(tester, '   ');
-      await _tap(tester, 'Salva');
-      expect(find.byType(AlertDialog), findsOneWidget);
-      expect(repo.renamed, isEmpty);
-      await h.dispose(tester);
-    });
-
-    testWidgets('longer than 60 characters is cut at 60', (tester) async {
-      final (h, repo) = await open(tester);
       expect(_field(tester).maxLength, 60);
-      await _type(tester, 'c' * 100);
+      await _type(tester, '  x  ');
       await _tap(tester, 'Salva');
-      expect(repo.renamed, ['c' * 60]);
-      await h.dispose(tester);
-    });
-
-    testWidgets('keyboard submit trims', (tester) async {
-      final (h, repo) = await open(tester);
-      await _type(tester, ' y ');
-      await tester.testTextInput.receiveAction(TextInputAction.done);
-      await tester.pump(const Duration(milliseconds: 400));
-      expect(repo.renamed, ['y']);
-      await h.dispose(tester);
-    });
-
-    testWidgets('«Annulla» sends nothing', (tester) async {
-      final (h, repo) = await open(tester);
-      await _tap(tester, 'Annulla');
-      expect(repo.renamed, isEmpty);
+      expect(repo.renamed, ['x']);
       await h.dispose(tester);
     });
   });

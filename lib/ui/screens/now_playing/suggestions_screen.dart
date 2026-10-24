@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/app_log.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/shuffle_plus_providers.dart';
@@ -78,7 +79,10 @@ class SuggestionsScreen extends ConsumerWidget {
       ),
       body: records.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => EmptyState(icon: Icons.error_outline, message: l.suggestionsRecentEmpty),
+        error: (e, st) {
+          AppLog.w('suggestions load failed', e, st);
+          return EmptyState(icon: Icons.error_outline, message: l.suggestionsRecentEmpty);
+        },
         data: (list) => list.isEmpty
             ? EmptyState(icon: Icons.cloud_outlined, message: l.suggestionsRecentEmpty)
             : ListView.builder(

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:codecore/ui/theme/tokens.dart';
 import 'package:codecore/ui/widgets/show_msg.dart';
 import 'package:flutter/material.dart';
@@ -53,9 +55,24 @@ void main() {
     expect(find.text('due'), findsOneWidget);
   });
 
-  testWidgets('showMsgOn shows with a messenger captured before unmount', (tester) async {
+  testWidgets('showMsgOn shows with a messenger captured before the dialog closed', (
+    tester,
+  ) async {
     final ctx = await _pump(tester);
-    final messenger = ScaffoldMessenger.of(ctx);
+    late ScaffoldMessengerState messenger;
+    unawaited(
+      showDialog<void>(
+        context: ctx,
+        builder: (dc) {
+          messenger = ScaffoldMessenger.of(dc);
+          return const AlertDialog(content: Text('dialogo'));
+        },
+      ),
+    );
+    await tester.pumpAndSettle();
+    Navigator.of(tester.element(find.byType(AlertDialog))).pop();
+    await tester.pumpAndSettle();
+    expect(find.byType(AlertDialog), findsNothing);
     showMsgOn(messenger, 'dopo');
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));

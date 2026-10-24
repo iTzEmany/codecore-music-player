@@ -5,7 +5,7 @@ import '../../data/db/app_database.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../providers/database_providers.dart';
 import '../../providers/settings_providers.dart';
-import 'show_msg.dart';
+import 'confirm.dart';
 
 /// Toggles the favourite flag and shows a single "Undo" snackbar that
 /// restores the state of the last change.
@@ -22,12 +22,9 @@ Future<void> toggleFavorite(
   if (!context.mounted) return;
   if (!ref.read(settingsProvider).showUndoSnackbar) return;
   final l = context.l10n;
-  showMsg(
+  showUndoSnack(
     context,
     previous ? l.removedFromFavorites : l.addedToFavorites,
-    action: SnackBarAction(
-      label: l.undo,
-      onPressed: () => repo.setFavorite(track.id, previous),
-    ),
+    () => repo.setFavorite(track.id, previous),
   );
 }

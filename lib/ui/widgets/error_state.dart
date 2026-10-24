@@ -39,7 +39,8 @@ Widget loadErrorState(
   Object error,
   StackTrace stack, {
   VoidCallback? onRetry,
+  String? message,
 }) {
   AppLog.e('load failed', error, stack);
-  return ErrorState(message: context.l10n.loadFailed, onRetry: onRetry);
+  return ErrorState(message: message ?? context.l10n.loadFailed, onRetry: onRetry);
 }

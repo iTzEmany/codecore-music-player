@@ -332,13 +332,12 @@ Scritture con debounce 400 ms, mai in un handler di slider a ogni tick.
 ## Interfaccia (refactor ui-fluida, 2026-10-23)
 Dettagli e motivazioni in `docs/refactor/ui-fluida/analisi.md` («Arrivo»), decisioni D-21..D-24.
 - **La UI passa solo dai provider.** In `lib/ui` non si usano `databaseProvider` né `*RepositoryProvider`; i tipi drift (`Track`, …) si possono importare. Le azioni sui brani stanno in `TrackOps` (`lib/providers/`). Lo controlla `test/ui/architecture_test.dart`.
-- **Mattoni condivisi** (`lib/ui/widgets/`): `showMsg` per i messaggi, `promptName` per il dialogo del nome, `CcAppBar` per l'intestazione, `AsyncBody<T>` per caricamento, vuoto ed errore. I fogli passano da `showCcSheet`. Dialogo per il testo, foglio per le scelte.
-- **Regola dei dialoghi (41.5):** **dialogo per il testo** (un nome, una conferma: `AlertDialog`), **foglio per le scelte** (elenchi, azioni, selettori). Ogni foglio si apre con `showCcSheet` (`widgets/cc_sheet.dart`, l'unico `showModalBottomSheet`); nessuno chiama `showModalBottomSheet` o `SnackBar(` direttamente.
-- **Mattoni** (`lib/ui/widgets/`):
-  - `showMsg(context, text, {action})`: un solo messaggio alla volta, durata dai token (`CcTiming.msg` 4 s, `msgAction` 3 s con azione), sicuro dopo un `await`.
-  - `CcAppBar({title, titleWidget, actions, bottom, leading, ...})`: l'unico `AppBar(`; stile dal tema. `CollectionHeader` e `SelectableAppBar` restano a parte.
-  - `AsyncBody<T>({value, data, isEmpty, empty, onRetry, loading})`: caricamento, vuoto (`EmptyState`), errore (`ErrorState` con «Riprova», log con `AppLog`), dati.
-  - `promptName` (`prompt_name.dart`): dialogo «scegli un nome» con le regole di validazione comuni.
+- **Regola dei dialoghi (41.5):** **dialogo per il testo** (un nome, una conferma: `AlertDialog`), **foglio per le scelte** (elenchi, azioni, selettori). Ogni foglio si apre con `showCcSheet` (`widgets/cc_sheet.dart`, l'unico `showModalBottomSheet`). Tre scelte sono ancora `SimpleDialog` (lingua, playlist di exportify, colore del tag): passano a foglio nella fase 42 (D-50).
+- **Mattoni condivisi** (`lib/ui/widgets/`):
+  - `showMsg(context, text, {action, persist})`: un solo messaggio alla volta, durata dai token (`CcTiming.msg` 4 s, `msgAction` 3 s con azione; `persist: true` con un'azione resta finché non si tocca), sicuro dopo un `await`. `showMsgOn(messenger, …)` quando il messenger va catturato prima che un dialogo si chiuda. Unico `SnackBar(` di `lib/ui`; fuori resta l'avviso di nuova versione in `lib/app.dart` (messenger globale).
+  - `CcAppBar({title, titleWidget, actions, bottom, ...})`: l'unico `AppBar(`; stile dal tema. `SliverAppBar` (`CollectionHeader`, pagine online) e `SelectableAppBar` restano varianti dichiarate.
+  - `AsyncBody<T>({value, data, isEmpty, empty, onRetry, loading, errorMessage})`: caricamento (spinner centrato, o `loading`), vuoto (il widget `empty` quando `isEmpty`), errore (`loadErrorState`: `ErrorState`, «Riprova» con `onRetry`, log con `AppLog`), dati.
+  - `promptName` (`prompt_name.dart`): dialogo «scegli un nome»: trim, vuoto non accettato, `maxLength` (60; 40 per i tag, D-39).
 - **Selezione:** solo `selectionProvider`, con le chiavi in `SelectionKey`. I menu usano un enum (come `TrackAction`). Il tipo del brano si legge da `track.kind`.
 - **Movimento:** una sola scala in `tokens.dart` (120/180/250/320 ms, easeOutCubic/easeInCubic), sempre con `ccDuration`. Solo transform e scale, mai opacità su tutta la pagina. Le transizioni di pagina stanno in `app_theme.dart`.
 - **Aspetto:** l'anello è l'unico segno grafico e porta lo stato; superfici piatte, niente gradienti né ombre. Mockup approvati in `docs/refactor/ui-fluida/mockup/`.

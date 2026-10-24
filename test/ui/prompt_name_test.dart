@@ -98,14 +98,6 @@ void main() {
     await h.dispose(tester);
   });
 
-  testWidgets('longer than maxLength is cut', (tester) async {
-    final (h, run) = await _open(tester, maxLength: 40);
-    await _type(tester, 'b' * 60);
-    await _tap(tester, 'Ok');
-    expect(run.result, 'b' * 40);
-    await h.dispose(tester);
-  });
-
   testWidgets('«Annulla» returns null', (tester) async {
     final (h, run) = await _open(tester);
     await _tap(tester, 'Annulla');

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Widget _app(AsyncValue<List<int>> v, {VoidCallback? onRetry}) => MaterialApp(
+Widget _app(AsyncValue<List<int>> v, {VoidCallback? onRetry, String? errorMessage}) => MaterialApp(
   localizationsDelegates: AppLocalizations.localizationsDelegates,
   supportedLocales: AppLocalizations.supportedLocales,
   locale: const Locale('it'),
@@ -12,6 +12,7 @@ Widget _app(AsyncValue<List<int>> v, {VoidCallback? onRetry}) => MaterialApp(
     body: AsyncBody<List<int>>(
       value: v,
       onRetry: onRetry,
+      errorMessage: errorMessage,
       isEmpty: (d) => d.isEmpty,
       empty: const Text('vuoto'),
       data: (d) => Text('dati ${d.length}'),
@@ -41,5 +42,13 @@ void main() {
     expect(find.byType(FilledButton), findsOneWidget);
     await tester.tap(find.byType(FilledButton));
     expect(n, 1);
+  });
+
+  testWidgets('error shows the custom errorMessage', (tester) async {
+    await tester.pumpWidget(
+      _app(AsyncError(Exception('boom'), StackTrace.empty), errorMessage: 'su misura'),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('su misura'), findsOneWidget);
   });
 }
