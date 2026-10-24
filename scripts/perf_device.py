@@ -5,7 +5,8 @@ Installa la build «perf» (pacchetto com.codecore.player.perf, dati suoi: la
 libreria vera dell'utente non viene mai toccata), le dà la libreria di prova di
 scripts/perf_library.py, poi misura: scansione, avvio a freddo, memoria e i
 frame mentre scorre «Tutti i brani», «Album», la ricerca e (con --playback)
-«In riproduzione», il lettore che cresce dal dock e l'anello. Tabella in build/perf/<etichetta>.md.
+«In riproduzione», il lettore che cresce dal dock, l'anello, «Apri album», i fogli,
+lo swipe del mini player e l'apertura del player. Tabella in build/perf/<etichetta>.md.
 
     scripts/perf_library.py
     scripts/perf_device.py <id-adb> --label prima
@@ -187,6 +188,7 @@ def main():
     time.sleep(3)
 
     windows = {}
+    w, h = map(int, re.search(r'(\d+)x(\d+)', dev.sh('wm size')).groups())
 
     def scenario(name, setup, action):
         setup()
@@ -194,8 +196,39 @@ def main():
         t0 = dev.now_ms()
         action()
         time.sleep(2.5)
-        windows[name] = (t0, dev.now_ms() + 3000)
+        windows[name] = ([(t0, dev.now_ms() + 3000)], False)
         print(f'  {name}: fatto')
+
+    def gestures(name, setup, action):
+        """Like scenario(), but only short spans around each gesture are measured (not the idle between)."""
+        spans = []
+
+        def timed(act, wait=0.8):
+            t0 = dev.now_ms()
+            act()
+            time.sleep(wait)
+            spans.append((t0, dev.now_ms()))
+        timed.spans = spans
+        setup()
+        time.sleep(2.5)
+        action(timed)
+        time.sleep(1)
+        windows[name] = (spans, True)
+        print(f'  {name}: fatto')
+
+    def find(pattern, cls=None):
+        rx = re.compile(pattern)
+        for label, c, x, y in dev.nodes():
+            if rx.search(label) and (cls is None or cls in c):
+                return x, y
+        raise RuntimeError(f'nothing on screen matches {pattern!r}')
+
+    def press(xy):
+        dev.sh(f'input tap {xy[0]} {xy[1]}')
+
+    def back():
+        dev.sh('input keyevent KEYCODE_BACK')
+        time.sleep(1.2)
 
     tab = lambda name: dev.tap(rf'^{name}\n', cls='Button')
     scenario('Pallino schede', lambda: None,
@@ -221,12 +254,98 @@ def main():
                 return
             dev.sh('input keyevent KEYCODE_BACK')
             time.sleep(1)
+    pos = {}  # screen positions resolved in the setups, never inside a measured span
+
+    def setup_album():
+        leave_search(), tab('Libreria'), dev.tap(r'^Tutto$')
+        pos['album'] = find(r'^Album \d+')
+
+    def open_albums(timed):
+        for _ in range(3):
+            timed(lambda: press(pos['album']))
+            timed(lambda: dev.sh('input keyevent KEYCODE_BACK'))
+            time.sleep(0.7)
+    gestures('Apri album', setup_album, open_albums)
+
+    def setup_mini():
+        mini_nodes = dev.nodes()
+        y = next(y for l, c, x, y in mini_nodes if l == 'Dispositivi')
+        pos['devices'] = next((x, y) for l, c, x, y in mini_nodes if l == 'Dispositivi')
+        pos['mini'] = (next(x for l, c, x, yy in mini_nodes if '\n' in l and c == 'android.view.View' and yy == y), y)
+
+    def swipes(timed):
+        x, y = pos['mini']
+        for _ in range(3):
+            for a, b in ((0.8, 0.2), (0.2, 0.8)):
+                timed(lambda: dev.sh(f'input swipe {int(w * a)} {y} {int(w * b)} {y} 150'))
+
+    def sheets(timed):
+        # The player screen has no accessibility tree while it plays: its buttons are tried by label
+        # once and then taken by screen fraction. Each sheet, which does have a tree, is checked by label.
+        labels = [True]
+
+        def target(rx, fx, fy):
+            if labels[0]:
+                try:
+                    return find(rx)
+                except RuntimeError:
+                    labels[0] = False
+            return int(w * fx), int(h * fy)
+
+        for _ in range(3):
+            press(pos['mini'])
+            time.sleep(1.5)
+            for rx, fx, fy, shown in ((r'^Coda$', 0.85, 0.897, r'^Prossimi$'),
+                                      (r'^Dispositivi$', 0.2, 0.897, r'^Dispositivi vicini')):
+                xy = target(rx, fx, fy)
+                timed(lambda: press(xy))
+                find(shown)
+                timed(lambda: dev.sh('input keyevent KEYCODE_BACK'))
+                time.sleep(0.7)
+            xy = target(r'^Altre opzioni$', 0.89, 0.08)
+            timed(lambda: press(xy))
+            etichette = find(r'^Etichette')
+            timed(lambda: press(etichette))
+            find(r'^Nuova etichetta')
+            timed(lambda: dev.sh('input keyevent KEYCODE_BACK'))
+            time.sleep(0.7)
+            back()  # the player
+
+    def open_player(timed):
+        # Alternating the gestures: a tap on the mini player and a fling up from it. A fling that
+        # misses (it does now and then) is dropped from the measure and tried again.
+        x, y = pos['mini']
+        opened = {'tap': 0, 'fling': 0}
+        for attempt in range(12):
+            kind = 'tap' if opened['tap'] <= opened['fling'] else 'fling'
+            if opened[kind] == 3:
+                kind = 'fling' if kind == 'tap' else 'tap'
+            act = (lambda: press((x, y))) if kind == 'tap' else (
+                lambda: dev.sh(f'input swipe {x} {y} {x} {y - int(h * 0.25)} 80'))
+            timed(act, wait=1.0)
+            try:
+                shown = dev.nodes()
+            except RuntimeError:
+                shown = []  # no accessibility tree: the player (always animating) is open
+            if any(l == 'Dispositivi' and (xx, yy) == pos['devices'] for l, c, xx, yy in shown):
+                timed.spans.pop()  # the mini player is still there: nothing opened
+            else:
+                opened[kind] += 1
+                back()
+            if opened['tap'] + opened['fling'] == 6:
+                return
+        raise RuntimeError(f'the mini player opened the player only {opened} times in 12 tries')
+
     if args.playback:
         scenario('In riproduzione',
-                 lambda: (leave_search(), tab('Libreria'), dev.tap(r'^Tutti i brani'), dev.tap(r'^[A-Z].* \d+')),
+                 lambda: (leave_search(), tab('Libreria'), dev.tap(r'^Tutto$'), dev.tap(r'^Tutti i brani'),
+                          dev.tap(r'^[A-Z].* \d+')),
                  lambda: (mini(), time.sleep(2), dev.sh('input keyevent KEYCODE_BACK')))
         scenario('Lettore dal dock', lambda: None,
                  lambda: [(mini(), dev.sh('input keyevent KEYCODE_BACK'), time.sleep(1.5)) for _ in range(3)])
+        gestures('Swipe mini player', setup_mini, swipes)
+        gestures('Fogli', setup_mini, sheets)
+        gestures('Apertura player', setup_mini, open_player)
         scenario('Anello', mini, lambda: time.sleep(6))
         dev.sh('input keyevent KEYCODE_BACK')
         dev.sh('input keyevent KEYCODE_MEDIA_PAUSE', check=False)
@@ -249,8 +368,23 @@ def main():
         lines.append(f'- Memoria (PSS totale): {int(pss.group(1)) // 1024} MB')
     lines += ['', '| Scenario | Frame | build p50/p90/p99 ms | raster p50/p90/p99 ms | > 16,7 ms | > budget |',
               '|---|---|---|---|---|---|']
-    for name, (t0, t1) in windows.items():
-        s = summary([b for b in bursts if t0 <= b['t'] <= t1])
+    def in_spans(spans, trim):
+        if not trim:
+            return [b for t0, t1 in spans for b in bursts if t0 <= b['t'] <= t1]
+        # A burst has one timestamp (its flush) for frames that keep coming without a pause while
+        # playing: spread them back from it at one budget each, keep those inside a span.
+        # shortcut: estimated frame times, upgrade by timestamping frames in perf_probe (lib/).
+        kept = []
+        for b in bursts:
+            raw, step = b.get('raw', []), b.get('budgetMs', FRAME_60HZ)
+            for t0, t1 in spans:
+                if t0 <= b['t'] <= t1 + 2500:
+                    inside = [f for i, f in enumerate(raw) if t0 <= b['t'] - (len(raw) - 1 - i) * step <= t1]
+                    kept.append({**b, 'raw': inside})
+        return kept
+
+    for name, (spans, trim) in windows.items():
+        s = summary(in_spans(spans, trim))
         if s is None:
             lines.append(f'| {name} | 0 | – | – | – | – |')
             continue

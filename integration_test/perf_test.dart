@@ -64,13 +64,14 @@ void main() {
       }
     }
 
-    await tester.tap(find.text('Libreria').last);
+    // The tab icon exists in both the phone dock and the desktop sidebar (the label does not).
+    await tester.tap(find.byIcon(Icons.library_music_outlined).last);
     await settle(tester);
     await tester.tap(find.text('Tutti i brani').first);
     await settle(tester);
     await measure('Tutti i brani', flings);
 
-    await tester.pageBack();
+    await tester.tap(find.byType(BackButton).last);
     await settle(tester);
     await tester.tap(find.text('Album').first);
     await settle(tester);
