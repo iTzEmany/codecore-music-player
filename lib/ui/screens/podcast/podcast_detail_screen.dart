@@ -18,6 +18,7 @@ import '../../widgets/format_utils.dart';
 import '../../widgets/segmented_blocks.dart';
 import '../../widgets/speed_button.dart';
 import 'podcast_texts.dart';
+import '../../widgets/show_msg.dart';
 
 /// One podcast: its header, and its episodes (newest first) with what each one
 /// is doing. Opening it refreshes the feed only if it is older than 6 hours.
@@ -48,15 +49,11 @@ class _PodcastDetailScreenState extends ConsumerState<PodcastDetailScreen> {
           ? await svc.refreshIfStale(widget.podcastId)
           : await svc.refresh(widget.podcastId);
       if (added != null && mounted && !onlyIfStale) {
-        ScaffoldMessenger.of(context)
-          ..clearSnackBars()
-          ..showSnackBar(SnackBar(content: Text(context.l10n.podcastRefreshed(added))));
+        showMsg(context, context.l10n.podcastRefreshed(added));
       }
     } on PodcastException catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-          ..clearSnackBars()
-          ..showSnackBar(SnackBar(content: Text(podcastErrorText(context.l10n, e.kind))));
+        showMsg(context, podcastErrorText(context.l10n, e.kind));
       }
     } finally {
       if (mounted) setState(() => _refreshing = false);

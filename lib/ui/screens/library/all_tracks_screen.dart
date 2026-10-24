@@ -13,7 +13,6 @@ import '../../theme/tokens.dart';
 import '../../../data/db/app_database.dart';
 import '../../widgets/alpha_scroller.dart';
 import '../../widgets/empty_state.dart';
-import '../../widgets/error_state.dart';
 import '../../widgets/play_buttons.dart';
 import '../../widgets/segmented_blocks.dart';
 import '../../widgets/shuffle_button.dart';
@@ -23,6 +22,8 @@ import '../../widgets/track_row_selection.dart';
 import 'album_detail_screen.dart' show durationWords;
 import 'scan_status.dart';
 import '../../widgets/motion.dart';
+import '../../widgets/cc_app_bar.dart';
+import '../../widgets/async_body.dart';
 
 String _sortLabel(BuildContext context, SortOption o) {
   final l = context.l10n;
@@ -142,7 +143,7 @@ class _AllTracksScreenState extends ConsumerState<AllTracksScreen> {
         appBar: SelectableAppBar(
           listKey: _selectionKey,
           tracks: shown,
-          normal: AppBar(),
+          normal: const CcAppBar(),
         ),
         body: Column(
           children: [
@@ -235,25 +236,15 @@ class _AllTracksScreenState extends ConsumerState<AllTracksScreen> {
               ),
             ),
             Expanded(
-              child: tracks.when(
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (e, st) => loadErrorState(
-                  context,
-                  e,
-                  st,
-                  onRetry: () => ref.invalidate(tracksProvider(false)),
+              child: AsyncBody(
+                value: tracks,
+                onRetry: () => ref.invalidate(tracksProvider(false)),
+                isEmpty: (list) => list.isEmpty,
+                empty: EmptyState(
+                  icon: query.text.isEmpty ? Icons.music_off : Icons.search_off,
+                  message: query.text.isEmpty ? l.noTracks : l.noResults,
                 ),
-                data: (list) {
-                  if (list.isEmpty) {
-                    return EmptyState(
-                      icon: query.text.isEmpty
-                          ? Icons.music_off
-                          : Icons.search_off,
-                      message: query.text.isEmpty ? l.noTracks : l.noResults,
-                    );
-                  }
-                  return _list(list, query.sort, compact, ctrl, ctx);
-                },
+                data: (list) => _list(list, query.sort, compact, ctrl, ctx),
               ),
             ),
           ],

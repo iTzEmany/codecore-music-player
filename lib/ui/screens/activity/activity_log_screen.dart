@@ -12,6 +12,7 @@ import '../../widgets/empty_state.dart';
 import '../library/second_opinion_log_screen.dart';
 import '../../shell/shell_nav.dart';
 import 'activity_sheet.dart';
+import '../../widgets/cc_app_bar.dart';
 
 /// What ended in the background (downloads, transfers, imports), newest
 /// first, with the time and how it went.
@@ -47,8 +48,8 @@ class ActivityLogScreen extends ConsumerWidget {
     final entries = ref.watch(activityLogProvider);
     final time = DateFormat.Hm(Localizations.localeOf(context).toLanguageTag());
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l.activityLog),
+      appBar: CcAppBar(
+        title: l.activityLog,
         actions: [
           if (entries.isNotEmpty)
             TextButton(

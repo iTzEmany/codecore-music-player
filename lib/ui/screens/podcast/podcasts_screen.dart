@@ -11,6 +11,8 @@ import '../../widgets/empty_state.dart';
 import 'podcast_detail_screen.dart';
 import 'podcast_subscribe_sheet.dart';
 import 'podcast_texts.dart';
+import '../../widgets/show_msg.dart';
+import '../../widgets/cc_app_bar.dart';
 
 /// Library → Podcast: the shows the user subscribed to. Opening it tidies up
 /// (interrupted downloads, heard episodes past their limit) but never goes to
@@ -36,9 +38,7 @@ class _PodcastsScreenState extends ConsumerState<PodcastsScreen> {
         : '${l.podcastRefreshed(report.totalAdded)}, '
               '${l.podcastRefreshFailed(report.failed.length)}: '
               '${podcastErrorText(l, report.failed.values.first.kind)}';
-    ScaffoldMessenger.of(context)
-      ..clearSnackBars()
-      ..showSnackBar(SnackBar(content: Text(text)));
+    showMsg(context, text);
   }
 
   @override
@@ -50,8 +50,8 @@ class _PodcastsScreenState extends ConsumerState<PodcastsScreen> {
     ref.watch(podcastMaintenanceProvider);
     final podcasts = ref.watch(podcastsProvider).value ?? const [];
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l.podcastsTitle),
+      appBar: CcAppBar(
+        title: l.podcastsTitle,
         actions: [
           if (podcasts.isNotEmpty)
             _refreshing

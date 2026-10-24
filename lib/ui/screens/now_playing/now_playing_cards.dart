@@ -20,6 +20,7 @@ import '../lyrics/lyrics_screen.dart';
 import '../lyrics/lyrics_translate_flow.dart';
 import 'queue_sheet.dart';
 import '../../widgets/track_art.dart';
+import '../../widgets/show_msg.dart';
 
 class _Card extends StatelessWidget {
   const _Card({required this.title, required this.child, this.onTap});
@@ -164,7 +165,6 @@ class _InfoCardState extends ConsumerState<InfoCard> {
 
   Future<void> _fetch() async {
     final l = context.l10n;
-    final messenger = ScaffoldMessenger.of(context);
     final t = widget.track;
     setState(() {
       _loading = true;
@@ -221,11 +221,7 @@ class _InfoCardState extends ConsumerState<InfoCard> {
     });
     final nothing = song == null && artist == null;
     if (limited || failed || nothing) {
-      messenger
-        ..clearSnackBars()
-        ..showSnackBar(SnackBar(
-          content: Text(limited || failed ? l.serviceUnavailable : l.noResults),
-        ));
+      showMsg(context, limited || failed ? l.serviceUnavailable : l.noResults);
     }
   }
 
@@ -351,7 +347,6 @@ class _CuriosityTextState extends ConsumerState<_CuriosityText> {
     final translator = ref.read(lyricsTranslatorProvider);
     if (translator == null) return;
     final l = context.l10n;
-    final messenger = ScaffoldMessenger.of(context);
     setState(() => _busy = true);
     var ok = false;
     try {
@@ -370,9 +365,7 @@ class _CuriosityTextState extends ConsumerState<_CuriosityText> {
     if (!mounted) return;
     setState(() => _busy = false);
     if (!ok) {
-      messenger
-        ..clearSnackBars()
-        ..showSnackBar(SnackBar(content: Text(l.translateFailed)));
+      showMsg(context, l.translateFailed);
     }
   }
 
@@ -475,11 +468,9 @@ class _CuriosityTextState extends ConsumerState<_CuriosityText> {
             if (widget.url != null)
               TextButton(
                 onPressed: () async {
-                  final messenger = ScaffoldMessenger.of(context);
                   await Clipboard.setData(ClipboardData(text: widget.url!));
-                  messenger
-                    ..clearSnackBars()
-                    ..showSnackBar(SnackBar(content: Text(l.copied)));
+                  if (!context.mounted) return;
+                  showMsg(context, l.copied);
                 },
                 child: Text(l.copyLink),
               ),

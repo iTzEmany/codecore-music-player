@@ -16,6 +16,7 @@ import '../jam/jam_screen.dart';
 import '../share/share_screen.dart';
 import '../share/track_picker_screen.dart';
 import 'peer_card.dart';
+import '../../widgets/show_msg.dart';
 
 /// «Dispositivi»: the active Jam and the nearby devices, with [Jam] / [Invia].
 class DevicesSheet extends ConsumerStatefulWidget {
@@ -59,7 +60,6 @@ class _DevicesSheetState extends ConsumerState<DevicesSheet> {
   Future<void> _send(Peer peer) async {
     final l = context.l10n;
     final nav = Navigator.of(context, rootNavigator: true);
-    final messenger = ScaffoldMessenger.of(context);
     var ids = widget.trackIds;
     if (ids == null) {
       final picked = await nav.push<Set<int>>(
@@ -74,14 +74,8 @@ class _DevicesSheetState extends ConsumerState<DevicesSheet> {
     if (tracks.isEmpty) return;
     final ok = await _hub.sendOffer(peer, tracks);
     if (!mounted) return;
+    showMsg(context, ok ? l.offerSent(peer.name) : l.shareErrUnreachable);
     nav.maybePop();
-    messenger
-      ..clearSnackBars()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(ok ? l.offerSent(peer.name) : l.shareErrUnreachable),
-        ),
-      );
   }
 
   void _startJam(Peer peer) {

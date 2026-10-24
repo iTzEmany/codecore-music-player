@@ -11,6 +11,7 @@ import '../../widgets/format_utils.dart';
 import '../../widgets/net_thumbnail.dart';
 import '../../widgets/track_row_selection.dart';
 import '../youtube/listen_bar.dart';
+import '../../widgets/show_msg.dart';
 
 /// Starts a download for each of [picked] (in this order) that is not already
 /// in the library or on its way, and says how many started and how many not.
@@ -33,19 +34,14 @@ void startOnlineDownloads(BuildContext context, WidgetRef ref, Iterable<YtResult
     ref.read(downloadsProvider.notifier).add(r);
     started++;
   }
-  ScaffoldMessenger.of(context)
-    ..clearSnackBars()
-    ..showSnackBar(
-      SnackBar(
-        content: Text(
-          started == 0
-              ? l.ytNothingToDownload
-              : skipped == 0
-              ? l.ytDownloadsStarted(started)
-              : l.ytDownloadsSkipped(started, skipped),
-        ),
-      ),
-    );
+  showMsg(
+    context,
+    started == 0
+        ? l.ytNothingToDownload
+        : skipped == 0
+        ? l.ytDownloadsStarted(started)
+        : l.ytDownloadsSkipped(started, skipped),
+  );
 }
 
 /// A song of an artist page, an album or a long list: the row, with its

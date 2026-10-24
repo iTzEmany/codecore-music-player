@@ -12,6 +12,7 @@ import '../../theme/tokens.dart';
 import '../../widgets/confirm.dart';
 import '../../widgets/prompt_name.dart';
 import '../settings/accent_picker.dart';
+import '../../widgets/show_msg.dart';
 
 /// The colour of a tag (an index into the eight accents), or null.
 Color? tagColor(BuildContext context, UserTag t) {
@@ -81,9 +82,7 @@ Future<void> editTag(BuildContext context, WidgetRef ref, TagSummary s) async {
       );
       if (name == null || !context.mounted) return;
       if (!await repo.rename(s.tag.id, name) && context.mounted) {
-        ScaffoldMessenger.of(context)
-          ..clearSnackBars()
-          ..showSnackBar(SnackBar(content: Text(l.tagNameTaken)));
+        showMsg(context, l.tagNameTaken);
       }
     case 'color':
       final picked = await showDialog<int?>(
@@ -249,9 +248,7 @@ Future<void> pickTagFor(
   ];
   if (!context.mounted) return;
   if (remove && choices.isEmpty) {
-    ScaffoldMessenger.of(context)
-      ..clearSnackBars()
-      ..showSnackBar(SnackBar(content: Text(l.tagNoneToRemove)));
+    showMsg(context, l.tagNoneToRemove);
     return;
   }
   final picked = await showCcSheet<UserTag>(
@@ -304,16 +301,11 @@ Future<void> pickTagFor(
     changed = ids.length; // all of them carry it now, even if some already did
   }
   if (!context.mounted) return;
-  ScaffoldMessenger.of(context)
-    ..clearSnackBars()
-    ..showSnackBar(
-      SnackBar(
-        content: Text(
-          remove
-              ? l.tagUnassigned(changed, picked.name)
-              : l.tagAssigned(changed, picked.name),
-        ),
-      ),
-    );
+  showMsg(
+    context,
+    remove
+        ? l.tagUnassigned(changed, picked.name)
+        : l.tagAssigned(changed, picked.name),
+  );
   done?.call();
 }

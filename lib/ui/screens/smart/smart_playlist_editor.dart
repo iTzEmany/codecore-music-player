@@ -11,6 +11,7 @@ import '../../../providers/database_providers.dart';
 import '../../../providers/smart_playlist_providers.dart';
 import '../../../services/library/rules/rule_parser.dart';
 import '../../theme/tokens.dart';
+import '../../widgets/cc_app_bar.dart';
 
 String smartSortLabel(AppLocalizations l, SmartSort s) => switch (s) {
   SmartSort.defaultOrder => l.sortDefault,
@@ -157,10 +158,8 @@ class _SmartPlaylistEditorState extends ConsumerState<SmartPlaylistEditor> {
         ? null
         : (_limitValue == null ? count : count.clamp(0, _limitValue!));
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          widget.existing == null ? l.smartPlaylistNew : l.smartPlaylistEdit,
-        ),
+      appBar: CcAppBar(
+        title: widget.existing == null ? l.smartPlaylistNew : l.smartPlaylistEdit,
         actions: [TextButton(onPressed: _save, child: Text(l.save))],
       ),
       body: Center(

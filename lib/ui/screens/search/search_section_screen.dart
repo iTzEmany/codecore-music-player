@@ -17,6 +17,7 @@ import '../library/album_detail_screen.dart';
 import '../library/artist_screen.dart';
 import '../online/artist_picker_sheet.dart';
 import '../playlists/playlist_detail_screen.dart';
+import '../../widgets/cc_app_bar.dart';
 
 enum SearchSectionKind { artists, albums, playlists }
 
@@ -207,7 +208,7 @@ class SearchSectionScreen extends ConsumerWidget {
     );
     final rows = searchSectionRows(context, kind, res);
     return Scaffold(
-      appBar: AppBar(title: Text(searchSectionTitle(context, kind))),
+      appBar: CcAppBar(title: searchSectionTitle(context, kind)),
       body: rows.isEmpty
           ? EmptyState(
               icon: Icons.search_off_rounded,

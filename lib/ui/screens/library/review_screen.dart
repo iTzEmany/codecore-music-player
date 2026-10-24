@@ -19,6 +19,8 @@ import '../../shell/shell_nav.dart';
 import 'second_opinion_log_screen.dart';
 import '../track_edit_dialog.dart';
 import '../../widgets/cc_sheet.dart';
+import '../../widgets/show_msg.dart';
+import '../../widgets/cc_app_bar.dart';
 
 /// Library → «Da revisionare»: the songs online enrichment found nothing for,
 /// or left without lyrics, cover or album/year/genre.
@@ -57,16 +59,12 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
     };
   }
 
-  void _snack(String text) => ScaffoldMessenger.of(context)
-    ..clearSnackBars()
-    ..showSnackBar(SnackBar(content: Text(text)));
-
   Future<void> _retry(Set<int> ids) async {
     final l = context.l10n;
     final result = await ref.read(reviewActionsProvider).retry(ids);
     if (!mounted) return;
     ref.read(selectionProvider(_key).notifier).clear();
-    _snack(
+    showMsg(context, 
       result == ReviewRetryResult.busy
           ? l.enrichBusy
           : l.reviewRetryStarted(ids.length),
@@ -78,7 +76,7 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
     await ref.read(reviewActionsProvider).dismiss(ids);
     if (!mounted) return;
     ref.read(selectionProvider(_key).notifier).clear();
-    _snack(l.reviewDismissed(ids.length));
+    showMsg(context, l.reviewDismissed(ids.length));
   }
 
   void _rowMenu(Track track) {
@@ -137,7 +135,7 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
         if (next.updated > 0) l.reviewSecondOpinionDone(next.updated),
         if (next.throttled) l.reviewSecondOpinionThrottled,
       ];
-      if (lines.isNotEmpty) _snack(lines.join('\n'));
+      if (lines.isNotEmpty) showMsg(context, lines.join('\n'));
     });
     final job = ref.watch(secondOpinionJobProvider);
     final all = ref.watch(reviewTracksProvider).value ?? const <Track>[];
@@ -181,8 +179,8 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
                   ],
                 ),
               )
-            : AppBar(
-                title: Text(l.reviewTitle),
+            : CcAppBar(
+                title: l.reviewTitle,
                 actions: [
                   if (job.log.isNotEmpty && !job.running)
                     TextButton(

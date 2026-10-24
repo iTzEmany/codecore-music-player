@@ -11,6 +11,7 @@ import '../../widgets/confirm.dart';
 import '../../widgets/empty_state.dart';
 import '../online/online_song_row.dart';
 import '../youtube/listen_bar.dart';
+import '../../widgets/cc_app_bar.dart';
 
 /// Newest first; waits for the file to be read.
 final suggestionRecordsProvider = FutureProvider.autoDispose<List<SuggestionRecord>>((ref) async {
@@ -64,8 +65,8 @@ class SuggestionsScreen extends ConsumerWidget {
     final records = ref.watch(suggestionRecordsProvider);
     final hasAny = records.value?.isNotEmpty ?? false;
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l.suggestionsRecentTitle),
+      appBar: CcAppBar(
+        title: l.suggestionsRecentTitle,
         actions: [
           if (hasAny)
             IconButton(

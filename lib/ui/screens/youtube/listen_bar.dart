@@ -9,6 +9,7 @@ import '../../../services/online/youtube_service.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/format_utils.dart';
 import 'online_results.dart' show ytErrorText;
+import '../../widgets/show_msg.dart';
 
 /// «Ascolta» on a result row: plays it, then pauses and resumes it.
 class ListenButton extends ConsumerWidget {
@@ -222,9 +223,7 @@ class ListenErrorToaster extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     ref.listen(listenProvider.select((s) => s.error), (_, error) {
       if (error == null) return;
-      ScaffoldMessenger.of(context)
-        ..clearSnackBars()
-        ..showSnackBar(SnackBar(content: Text(ytErrorText(context, error))));
+      showMsg(context, ytErrorText(context, error));
     });
     return child;
   }
