@@ -38,25 +38,12 @@ class CcColors extends ThemeExtension<CcColors> {
     onAccent: Color(0xFF12081F),
     text: Color(0xFFF4F0FA),
     textMuted: Color(0xFFA79DB8),
-    textFaint: Color(0xFF6E6680),
+    textFaint: Color(0xFF887F99),
     heroBase: Color(0xFF3B1F70),
     error: Color(0xFFFF6B81),
   );
 
-  static const oled = CcColors(
-    bg: Color(0xFF000000),
-    surface1: Color(0xFF120E1C),
-    surface2: Color(0xFF1D1630),
-    surface3: Color(0xFF2A2140),
-    accent: Color(0xFFA06BFF),
-    accentSoft: Color(0xFFD9C8FF),
-    onAccent: Color(0xFF12081F),
-    text: Color(0xFFF4F0FA),
-    textMuted: Color(0xFFA79DB8),
-    textFaint: Color(0xFF6E6680),
-    heroBase: Color(0xFF3B1F70),
-    error: Color(0xFFFF6B81),
-  );
+  static final oled = notte.copyWith(bg: Colors.black);
 
   static const chiaro = CcColors(
     bg: Color(0xFFFAF8FD),
@@ -68,9 +55,9 @@ class CcColors extends ThemeExtension<CcColors> {
     onAccent: Color(0xFFFFFFFF),
     text: Color(0xFF1B1427),
     textMuted: Color(0xFF5C5170),
-    textFaint: Color(0xFF8C829E),
+    textFaint: Color(0xFF6D6280),
     heroBase: Color(0xFFE6DAFA),
-    error: Color(0xFFC8203B),
+    error: Color(0xFFB01B33),
     isLight: true,
   );
 
