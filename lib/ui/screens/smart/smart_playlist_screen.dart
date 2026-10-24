@@ -91,23 +91,23 @@ class SmartPlaylistScreen extends ConsumerWidget {
         onShuffle: tracks.isEmpty
             ? null
             : ctrl.toggleShuffle,
-        menu: PopupMenuButton<String>(
+        menu: PopupMenuButton<_SmartAction>(
           tooltip: l.moreActions,
           icon: const Icon(Icons.more_horiz_rounded),
           onSelected: (v) async {
             switch (v) {
-              case 'edit':
+              case _SmartAction.edit:
                 await ShellNav.open<bool>(context, SmartPlaylistEditor(existing: p));
-              case 'convert':
+              case _SmartAction.convert:
                 await _convert(context, ref, p, tracks);
-              case 'delete':
+              case _SmartAction.delete:
                 await _delete(context, ref, p);
             }
           },
           itemBuilder: (_) => [
-            PopupMenuItem(value: 'edit', child: Text(l.smartPlaylistEdit)),
-            PopupMenuItem(value: 'convert', child: Text(l.smartConvert)),
-            PopupMenuItem(value: 'delete', child: Text(l.delete)),
+            PopupMenuItem(value: _SmartAction.edit, child: Text(l.smartPlaylistEdit)),
+            PopupMenuItem(value: _SmartAction.convert, child: Text(l.smartConvert)),
+            PopupMenuItem(value: _SmartAction.delete, child: Text(l.delete)),
           ],
         ),
         slivers: [
@@ -128,3 +128,5 @@ class SmartPlaylistScreen extends ConsumerWidget {
     );
   }
 }
+
+enum _SmartAction { edit, convert, delete }

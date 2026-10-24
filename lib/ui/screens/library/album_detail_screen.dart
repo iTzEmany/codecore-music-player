@@ -138,24 +138,24 @@ class AlbumDetailScreen extends ConsumerWidget {
         onShuffle: list.isEmpty
             ? null
             : ctrl.toggleShuffle,
-        menu: PopupMenuButton<String>(
+        menu: PopupMenuButton<_AlbumAction>(
           tooltip: l.moreActions,
           icon: const Icon(Icons.more_horiz_rounded),
           onSelected: (v) {
             switch (v) {
-              case 'queue':
+              case _AlbumAction.queue:
                 for (final t in list) {
                   ctrl.addToQueue(t.id);
                 }
                 showMsg(context, l.addedToQueue);
-              case 'playlist':
+              case _AlbumAction.playlist:
                 showAddToPlaylistSheet(context, ref, list);
-              case 'share':
+              case _AlbumAction.share:
                 DevicesSheet.show(
                   context,
                   trackIds: [for (final t in list) t.id],
                 );
-              case 'enrich':
+              case _AlbumAction.enrich:
                 final todo = [
                   for (final t in list)
                     if (needsEnrichment(t)) t.id,
@@ -165,7 +165,7 @@ class AlbumDetailScreen extends ConsumerWidget {
                 } else if (!ref.read(enrichJobProvider.notifier).start(todo)) {
                   showMsg(context, l.enrichBusy);
                 }
-              case 'merge':
+              case _AlbumAction.merge:
                 // The album this page shows is gone once merged: leave it.
                 showAlbumMergeDialog(context, ref, album).then((merged) {
                   if (merged && context.mounted) Navigator.of(context).maybePop();
@@ -173,11 +173,11 @@ class AlbumDetailScreen extends ConsumerWidget {
             }
           },
           itemBuilder: (_) => [
-            PopupMenuItem(value: 'queue', child: Text(l.addToQueue)),
-            PopupMenuItem(value: 'playlist', child: Text(l.addToPlaylist)),
-            PopupMenuItem(value: 'share', child: Text(l.shareMenu)),
-            PopupMenuItem(value: 'enrich', child: Text(l.enrichAlbum)),
-            PopupMenuItem(value: 'merge', child: Text(l.albumMergeWith)),
+            PopupMenuItem(value: _AlbumAction.queue, child: Text(l.addToQueue)),
+            PopupMenuItem(value: _AlbumAction.playlist, child: Text(l.addToPlaylist)),
+            PopupMenuItem(value: _AlbumAction.share, child: Text(l.shareMenu)),
+            PopupMenuItem(value: _AlbumAction.enrich, child: Text(l.enrichAlbum)),
+            PopupMenuItem(value: _AlbumAction.merge, child: Text(l.albumMergeWith)),
           ],
         ),
         slivers: [
@@ -226,3 +226,5 @@ class AlbumDetailScreen extends ConsumerWidget {
     );
   }
 }
+
+enum _AlbumAction { queue, playlist, share, enrich, merge }

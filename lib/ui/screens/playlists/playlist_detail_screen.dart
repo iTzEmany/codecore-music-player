@@ -243,22 +243,22 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
         onShuffle: tracks.isEmpty
             ? null
             : ctrl.toggleShuffle,
-        menu: PopupMenuButton<String>(
+        menu: PopupMenuButton<_PlaylistAction>(
           tooltip: l.moreActions,
           icon: const Icon(Icons.more_horiz_rounded),
           onSelected: (v) async {
             switch (v) {
-              case 'edit':
+              case _PlaylistAction.edit:
                 // Reordering and picking do not mix.
                 ref.read(selectionProvider(key).notifier).clear();
                 setState(() => _editing = !_editing);
-              case 'add':
+              case _PlaylistAction.add:
                 ShellNav.open<void>(context, AddTracksScreen(playlistId: id));
-              case 'cover':
+              case _PlaylistAction.cover:
                 await _pickCover(id);
-              case 'clear':
+              case _PlaylistAction.clearCover:
                 await ops.setCover(id, null);
-              case 'export':
+              case _PlaylistAction.export:
                 await exportPlaylistFlow(
                   context,
                   ref,
@@ -266,7 +266,7 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
                   name: _name,
                   tracks: tracks,
                 );
-              case 'rename':
+              case _PlaylistAction.rename:
                 final n = await promptName(
                   context,
                   initial: _name,
@@ -277,7 +277,7 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
                 if (n == null) return;
                 await ops.rename(id, n);
                 if (mounted) setState(() => _name = n);
-              case 'delete':
+              case _PlaylistAction.delete:
                 final ok = await showConfirm(
                   context,
                   title: l.confirmDeletePlaylistTitle,
@@ -292,16 +292,16 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
           },
           itemBuilder: (_) => [
             PopupMenuItem(
-              value: 'edit',
+              value: _PlaylistAction.edit,
               child: Text(_editing ? l.finishEditing : l.editOrder),
             ),
-            PopupMenuItem(value: 'add', child: Text(l.addSongs)),
-            PopupMenuItem(value: 'cover', child: Text(l.playlistChangeCover)),
+            PopupMenuItem(value: _PlaylistAction.add, child: Text(l.addSongs)),
+            PopupMenuItem(value: _PlaylistAction.cover, child: Text(l.playlistChangeCover)),
             if (custom != null)
-              PopupMenuItem(value: 'clear', child: Text(l.playlistRemoveCover)),
-            PopupMenuItem(value: 'export', child: Text(l.exportPlaylist)),
-            PopupMenuItem(value: 'rename', child: Text(l.rename)),
-            PopupMenuItem(value: 'delete', child: Text(l.delete)),
+              PopupMenuItem(value: _PlaylistAction.clearCover, child: Text(l.playlistRemoveCover)),
+            PopupMenuItem(value: _PlaylistAction.export, child: Text(l.exportPlaylist)),
+            PopupMenuItem(value: _PlaylistAction.rename, child: Text(l.rename)),
+            PopupMenuItem(value: _PlaylistAction.delete, child: Text(l.delete)),
           ],
         ),
         slivers: [
@@ -312,3 +312,5 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
     );
   }
 }
+
+enum _PlaylistAction { edit, add, cover, clearCover, export, rename, delete }

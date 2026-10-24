@@ -1,6 +1,5 @@
-// Characterization (38.5): the `PopupMenuButton<String>` menus of lib/ui, with
-// the string values they use today (F-10: they become enums). Whoever changes
-// a menu updates its test in the same step.
+// Characterization (38.5): the PopupMenuButton menus of lib/ui, one enum per menu (42.5);
+// the values read are the enum names. Whoever changes a menu updates its test in the same step.
 //
 // The podcast «podcast-menu», the episode menu and the tag-backups menu are
 // driven for real by podcast_screens_test.dart and tag_write_options_test.dart
@@ -34,7 +33,8 @@ import 'package:codecore/ui/screens/playlists/playlist_detail_screen.dart';
 import 'package:codecore/ui/screens/settings/missing_tracks_screen.dart';
 import 'package:codecore/ui/screens/smart/smart_playlist_screen.dart';
 import 'package:codecore/ui/shell/desktop_sidebar.dart';
-import 'package:drift/drift.dart' show BooleanExpressionOperators, OrderingTerm, Value;
+import 'package:drift/drift.dart'
+    show BooleanExpressionOperators, OrderingTerm, Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -59,10 +59,11 @@ Future<List<String>> _open(WidgetTester tester, Finder button) async {
   await tester.tap(button);
   await _settle(tester);
   return [
-    for (final i in tester.widgetList<PopupMenuItem<String>>(
-      find.byType(PopupMenuItem<String>),
+    for (final i in tester.widgetList<PopupMenuItem>(
+      find.byWidgetPredicate((w) => w is PopupMenuItem),
     ))
-      i.value!,
+      // Menus are enums now (42.5); the names are the old string values.
+      i.value is Enum ? (i.value as Enum).name : i.value as String,
   ];
 }
 
@@ -108,7 +109,7 @@ class _FakeStore extends TagBackupStore {
   Future<List<TagBackup>> list() async => List.of(items);
 }
 
-const _newMenu = ['new', 'smart', 'csv'];
+const _newMenu = ['create', 'smart', 'csv'];
 
 void main() {
   testWidgets(
@@ -262,10 +263,13 @@ void main() {
       await h.pump(tester, const MissingTracksScreen());
       await _settle(tester);
       expect(find.text('Song 0'), findsOneWidget);
-      expect(await _open(tester, find.byType(PopupMenuButton<String>)), [
-        'ignore',
-        'remove',
-      ]);
+      expect(
+        await _open(
+          tester,
+          find.byWidgetPredicate((w) => w is PopupMenuButton),
+        ),
+        ['ignore', 'remove'],
+      );
       await tester.tap(find.text('Ignora'));
       await _settle(tester);
       expect(find.text('Song 0'), findsNothing);
@@ -396,10 +400,10 @@ void main() {
       ],
     );
     await _settle(tester);
-    expect(await _open(tester, find.byType(PopupMenuButton<String>)), [
-      'restore',
-      'delete',
-    ]);
+    expect(
+      await _open(tester, find.byWidgetPredicate((w) => w is PopupMenuButton)),
+      ['restore', 'delete'],
+    );
     await h.dispose(tester);
   });
 }

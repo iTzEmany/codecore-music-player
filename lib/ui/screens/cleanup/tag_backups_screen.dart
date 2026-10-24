@@ -105,17 +105,17 @@ class TagBackupsScreen extends ConsumerWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                       isThreeLine: true,
-                      trailing: PopupMenuButton<String>(
-                        onSelected: (v) => v == 'restore'
+                      trailing: PopupMenuButton<_BackupAction>(
+                        onSelected: (v) => v == _BackupAction.restore
                             ? _restore(context, ref, b)
                             : _delete(context, ref, b),
                         itemBuilder: (_) => [
                           PopupMenuItem(
-                            value: 'restore',
+                            value: _BackupAction.restore,
                             child: Text(l.tagBackupRestore),
                           ),
                           PopupMenuItem(
-                            value: 'delete',
+                            value: _BackupAction.delete,
                             child: Text(l.tagBackupDelete),
                           ),
                         ],
@@ -128,3 +128,5 @@ class TagBackupsScreen extends ConsumerWidget {
     );
   }
 }
+
+enum _BackupAction { restore, delete }

@@ -192,15 +192,15 @@ class DesktopSidebar extends ConsumerWidget {
               l.yourLibrary,
               index == NavTab.library.index,
               () => select(NavTab.library),
-              trailing: PopupMenuButton<String>(
+              trailing: PopupMenuButton<_NewPlaylistAction>(
                 tooltip: l.newPlaylist,
                 icon: const Icon(Icons.add_rounded),
                 onSelected: (v) async {
-                  if (v == 'csv') {
+                  if (v == _NewPlaylistAction.csv) {
                     startCsvImport(context, ref);
                     return;
                   }
-                  if (v == 'smart') {
+                  if (v == _NewPlaylistAction.smart) {
                     ShellNav.openInLibrary(
                       context,
                       ref,
@@ -211,9 +211,9 @@ class DesktopSidebar extends ConsumerWidget {
                   await createPlaylistFlow(context, ref);
                 },
                 itemBuilder: (_) => [
-                  PopupMenuItem(value: 'new', child: Text(l.newPlaylist)),
-                  PopupMenuItem(value: 'smart', child: Text(l.smartPlaylistNew)),
-                  PopupMenuItem(value: 'csv', child: Text(l.csvImportMenu)),
+                  PopupMenuItem(value: _NewPlaylistAction.create, child: Text(l.newPlaylist)),
+                  PopupMenuItem(value: _NewPlaylistAction.smart, child: Text(l.smartPlaylistNew)),
+                  PopupMenuItem(value: _NewPlaylistAction.csv, child: Text(l.csvImportMenu)),
                 ],
               ),
             ),
@@ -268,3 +268,5 @@ class DesktopSidebar extends ConsumerWidget {
     );
   }
 }
+
+enum _NewPlaylistAction { create, smart, csv }

@@ -129,15 +129,15 @@ class _PodcastDetailScreenState extends ConsumerState<PodcastDetailScreen> {
             icon: const Icon(Icons.refresh_rounded),
             onPressed: _refresh,
           ),
-        PopupMenuButton<String>(
+        PopupMenuButton<_PodcastAction>(
           key: const ValueKey('podcast-menu'),
           tooltip: l.moreActions,
           onSelected: (v) {
-            if (v == 'unsubscribe') _unsubscribe(podcast, downloadedCount);
+            if (v == _PodcastAction.unsubscribe) _unsubscribe(podcast, downloadedCount);
           },
           itemBuilder: (_) => [
             PopupMenuItem(
-              value: 'unsubscribe',
+              value: _PodcastAction.unsubscribe,
               child: Text(l.podcastUnsubscribe, key: const ValueKey('unsubscribe')),
             ),
           ],
@@ -290,25 +290,25 @@ class _EpisodeTile extends ConsumerWidget {
               ),
             ),
             action,
-            PopupMenuButton<String>(
+            PopupMenuButton<_EpisodeAction>(
               key: ValueKey('menu-${e.id}'),
               tooltip: l.moreActions,
               onSelected: (v) async {
                 switch (v) {
-                  case 'heard':
+                  case _EpisodeAction.heard:
                     await podcastOps.markPlayed(e.id, !e.played);
-                  case 'delete':
+                  case _EpisodeAction.delete:
                     final d = await ref.read(episodeDownloaderProvider.future);
                     await d.deleteFile(e.id);
                 }
               },
               itemBuilder: (_) => [
                 PopupMenuItem(
-                  value: 'heard',
+                  value: _EpisodeAction.heard,
                   child: Text(e.played ? l.podcastMarkNotHeard : l.podcastMarkHeard),
                 ),
                 if (row.downloaded)
-                  PopupMenuItem(value: 'delete', child: Text(l.podcastDeleteFile)),
+                  PopupMenuItem(value: _EpisodeAction.delete, child: Text(l.podcastDeleteFile)),
               ],
             ),
           ],
@@ -317,3 +317,7 @@ class _EpisodeTile extends ConsumerWidget {
     );
   }
 }
+
+enum _PodcastAction { unsubscribe }
+
+enum _EpisodeAction { heard, delete }

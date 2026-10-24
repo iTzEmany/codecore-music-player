@@ -256,15 +256,15 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
                       .read(navIndexProvider.notifier)
                       .set(NavTab.search.index),
                 ),
-                PopupMenuButton<String>(
+                PopupMenuButton<_NewPlaylistAction>(
                   tooltip: l.newPlaylist,
                   icon: const Icon(Icons.add_rounded),
                   onSelected: (v) async {
-                    if (v == 'csv') {
+                    if (v == _NewPlaylistAction.csv) {
                       startCsvImport(context, ref);
                       return;
                     }
-                    if (v == 'smart') {
+                    if (v == _NewPlaylistAction.smart) {
                       await ShellNav.open<bool>(
                         context,
                         const SmartPlaylistEditor(),
@@ -275,41 +275,41 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
                   },
                   itemBuilder: (_) => [
                     PopupMenuItem(
-                      value: 'new',
+                      value: _NewPlaylistAction.create,
                       child: Text(l.newPlaylist),
                     ),
                     PopupMenuItem(
-                      value: 'smart',
+                      value: _NewPlaylistAction.smart,
                       child: Text(l.smartPlaylistNew),
                     ),
                     PopupMenuItem(
-                      value: 'csv',
+                      value: _NewPlaylistAction.csv,
                       child: Text(l.csvImportMenu),
                     ),
                   ],
                 ),
-                PopupMenuButton<String>(
+                PopupMenuButton<_LibraryMenuAction>(
                   tooltip: l.moreActions,
                   onSelected: (v) {
                     switch (v) {
-                      case 'folders':
+                      case _LibraryMenuAction.folders:
                         showCcSheet<void>(
                           context: context,
                           builder: (_) => const FoldersSheet(),
                         );
-                      case 'scan':
+                      case _LibraryMenuAction.scan:
                         scanWithPermission(ref);
-                      case 'share':
+                      case _LibraryMenuAction.share:
                         DevicesSheet.show(context);
-                      case 'exportAll':
+                      case _LibraryMenuAction.exportAll:
                         exportAllPlaylistsFlow(context, ref);
                     }
                   },
                   itemBuilder: (_) => [
-                    PopupMenuItem(value: 'folders', child: Text(l.folders)),
-                    PopupMenuItem(value: 'scan', child: Text(l.refreshLibrary)),
-                    PopupMenuItem(value: 'share', child: Text(l.shareTitle)),
-                    PopupMenuItem(value: 'exportAll', child: Text(l.exportAllPlaylists)),
+                    PopupMenuItem(value: _LibraryMenuAction.folders, child: Text(l.folders)),
+                    PopupMenuItem(value: _LibraryMenuAction.scan, child: Text(l.refreshLibrary)),
+                    PopupMenuItem(value: _LibraryMenuAction.share, child: Text(l.shareTitle)),
+                    PopupMenuItem(value: _LibraryMenuAction.exportAll, child: Text(l.exportAllPlaylists)),
                   ],
                 ),
               ],
@@ -539,3 +539,6 @@ class _LibraryGrid extends StatelessWidget {
     );
   }
 }
+
+enum _NewPlaylistAction { create, smart, csv }
+enum _LibraryMenuAction { folders, scan, share, exportAll }

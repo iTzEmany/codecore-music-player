@@ -95,19 +95,19 @@ class _MissingTracksScreenState extends ConsumerState<MissingTracksScreen> {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  trailing: PopupMenuButton<String>(
+                  trailing: PopupMenuButton<_MissingAction>(
                     tooltip: l.moreActions,
                     onSelected: (v) {
-                      if (v == 'ignore') {
+                      if (v == _MissingAction.ignore) {
                         setState(() => _ignored.add(t.id));
                       } else {
                         _confirmRemove(t.id);
                       }
                     },
                     itemBuilder: (_) => [
-                      PopupMenuItem(value: 'ignore', child: Text(l.ignore)),
+                      PopupMenuItem(value: _MissingAction.ignore, child: Text(l.ignore)),
                       PopupMenuItem(
-                        value: 'remove',
+                        value: _MissingAction.remove,
                         child: Text(l.removeFromLibrary),
                       ),
                     ],
@@ -118,3 +118,5 @@ class _MissingTracksScreenState extends ConsumerState<MissingTracksScreen> {
     );
   }
 }
+
+enum _MissingAction { ignore, remove }
