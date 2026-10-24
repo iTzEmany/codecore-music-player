@@ -14,6 +14,7 @@ import '../../../providers/library_providers.dart';
 import '../../../providers/online_providers.dart';
 import '../../../services/online/enrichment_service.dart' show needsEnrichment;
 import '../../../providers/settings_providers.dart';
+import '../../widgets/cc_sheet.dart';
 import '../../widgets/confirm.dart';
 import '../../widgets/cover_image.dart';
 import '../../../providers/folder_actions.dart';
@@ -416,20 +417,34 @@ Future<void> _pickLanguage(BuildContext context, WidgetRef ref) async {
   final l = context.l10n;
   final notifier = ref.read(settingsProvider.notifier);
   final current = ref.read(settingsProvider).language;
-  final picked = await showDialog<String>(
+  final picked = await showCcSheet<String>(
     context: context,
-    builder: (c) => SimpleDialog(
-      title: Text(l.settingsLanguage),
-      children: [
-        for (final e in _languages.entries)
-          ListTile(
-            title: Text(e.value),
-            trailing: e.key == current
-                ? Icon(Icons.check_rounded, color: c.cc.accent)
-                : null,
-            onTap: () => Navigator.of(c).pop(e.key),
+    builder: (c) => SafeArea(
+      child: ListView(
+        shrinkWrap: true,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              CcDims.gap24,
+              CcDims.gap16,
+              CcDims.gap24,
+              CcDims.gap8,
+            ),
+            child: Text(
+              l.settingsLanguage,
+              style: Theme.of(c).textTheme.titleMedium,
+            ),
           ),
-      ],
+          for (final e in _languages.entries)
+            ListTile(
+              title: Text(e.value),
+              trailing: e.key == current
+                  ? Icon(Icons.check_rounded, color: c.cc.accent)
+                  : null,
+              onTap: () => Navigator.of(c).pop(e.key),
+            ),
+        ],
+      ),
     ),
   );
   if (picked != null) notifier.update((s) => s.copyWith(language: picked));

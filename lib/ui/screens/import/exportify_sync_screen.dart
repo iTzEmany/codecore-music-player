@@ -17,6 +17,7 @@ import '../../../services/import/import_chain.dart';
 import '../../../services/import/import_diff.dart' show ImportDiff;
 import '../../../services/import/import_options.dart';
 import '../../theme/tokens.dart';
+import '../../widgets/cc_sheet.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_state.dart';
 import '../../widgets/section_header.dart';
@@ -134,21 +135,36 @@ class _ExportifySyncScreenState extends ConsumerState<ExportifySyncScreen> {
     final l = context.l10n;
     final lists = _lists ?? const <PlaylistSummary>[];
     // -1 = new playlist.
-    final id = await showDialog<int>(
+    final id = await showCcSheet<int>(
       context: context,
-      builder: (_) => SimpleDialog(
-        title: Text(l.exportifySyncPickTitle),
-        children: [
-          SimpleDialogOption(
-            onPressed: () => Navigator.pop(context, -1),
-            child: Text(l.exportifySyncNew),
-          ),
-          for (final p in lists)
-            SimpleDialogOption(
-              onPressed: () => Navigator.pop(context, p.playlist.id),
-              child: Text(p.playlist.name),
+      builder: (c) => SafeArea(
+        child: ListView(
+          shrinkWrap: true,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                CcDims.gap24,
+                CcDims.gap16,
+                CcDims.gap24,
+                CcDims.gap8,
+              ),
+              child: Text(
+                l.exportifySyncPickTitle,
+                style: Theme.of(c).textTheme.titleMedium,
+              ),
             ),
-        ],
+            ListTile(
+              leading: const Icon(Icons.add_rounded),
+              title: Text(l.exportifySyncNew),
+              onTap: () => Navigator.pop(c, -1),
+            ),
+            for (final p in lists)
+              ListTile(
+                title: Text(p.playlist.name),
+                onTap: () => Navigator.pop(c, p.playlist.id),
+              ),
+          ],
+        ),
       ),
     );
     if (id == null || !mounted) return;

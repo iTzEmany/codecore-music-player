@@ -1,4 +1,5 @@
 import '../../widgets/cc_sheet.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -86,24 +87,50 @@ Future<void> editTag(BuildContext context, WidgetRef ref, TagSummary s) async {
         showMsg(context, l.tagNameTaken);
       }
     case 'color':
-      final picked = await showDialog<int?>(
+      final picked = await showCcSheet<int>(
         context: context,
-        builder: (c) => SimpleDialog(
-          title: Text(l.tagColor),
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: CcDims.gap24, vertical: CcDims.gap8),
-              child: AccentPicker(
-                theme: c.cc.isLight ? AppThemeId.chiaro : AppThemeId.notte,
-                selected: CcAccent.values[(s.tag.color ?? 0).clamp(0, CcAccent.values.length - 1)],
-                onSelected: (a) => Navigator.of(c).pop(a.index),
+        builder: (c) => SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  CcDims.gap24,
+                  CcDims.gap16,
+                  CcDims.gap24,
+                  CcDims.gap8,
+                ),
+                child: Text(
+                  l.tagColor,
+                  style: Theme.of(c).textTheme.titleMedium,
+                ),
               ),
-            ),
-            TextButton(onPressed: () => Navigator.of(c).pop(-1), child: Text(l.tagNoColor)),
-          ],
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: CcDims.gap24,
+                  vertical: CcDims.gap8,
+                ),
+                child: AccentPicker(
+                  theme: c.cc.isLight ? AppThemeId.chiaro : AppThemeId.notte,
+                  selected:
+                      CcAccent.values[(s.tag.color ?? 0).clamp(
+                        0,
+                        CcAccent.values.length - 1,
+                      )],
+                  onSelected: (a) => Navigator.of(c).pop(a.index),
+                ),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(c).pop(-1),
+                child: Text(l.tagNoColor),
+              ),
+            ],
+          ),
         ),
       );
-      if (picked != null) await ops.setColor(s.tag.id, picked < 0 ? null : picked);
+      if (picked != null) {
+        await ops.setColor(s.tag.id, picked < 0 ? null : picked);
+      }
     case 'delete':
       final ok = await showConfirm(
         context,
@@ -118,12 +145,15 @@ Future<void> editTag(BuildContext context, WidgetRef ref, TagSummary s) async {
 
 /// «Etichette…»: check or uncheck tags for [tracks]. With several tracks a tag
 /// that only some of them carry shows a dash; tapping gives it to all.
-Future<void> showTagsSheet(BuildContext context, WidgetRef ref, List<Track> tracks) =>
-    showCcSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      builder: (_) => _TagsSheet(tracks: tracks),
-    );
+Future<void> showTagsSheet(
+  BuildContext context,
+  WidgetRef ref,
+  List<Track> tracks,
+) => showCcSheet<void>(
+  context: context,
+  isScrollControlled: true,
+  builder: (_) => _TagsSheet(tracks: tracks),
+);
 
 class _TagsSheet extends ConsumerStatefulWidget {
   const _TagsSheet({required this.tracks});
@@ -179,7 +209,9 @@ class _TagsSheetState extends ConsumerState<_TagsSheet> {
     final n = widget.tracks.length;
     return SafeArea(
       child: ConstrainedBox(
-        constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(context).height * 0.7),
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.sizeOf(context).height * 0.7,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -196,19 +228,19 @@ class _TagsSheetState extends ConsumerState<_TagsSheet> {
                 itemBuilder: (_, i) {
                   final s = tags[i];
                   return CheckboxListTile(
-                      tristate: true,
-                      value: !_loaded
-                          ? false
-                          : (_counts[s.tag.id] ?? 0) == 0
-                          ? false
-                          : (_counts[s.tag.id] ?? 0) == n
-                          ? true
-                          : null,
-                      onChanged: _loaded ? (_) => _toggle(s.tag) : null,
-                      secondary: TagDot(s.tag),
-                      title: Text(s.tag.name),
-                      subtitle: Text(l.tracksCount(s.trackCount)),
-                    );
+                    tristate: true,
+                    value: !_loaded
+                        ? false
+                        : (_counts[s.tag.id] ?? 0) == 0
+                        ? false
+                        : (_counts[s.tag.id] ?? 0) == n
+                        ? true
+                        : null,
+                    onChanged: _loaded ? (_) => _toggle(s.tag) : null,
+                    secondary: TagDot(s.tag),
+                    title: Text(s.tag.name),
+                    subtitle: Text(l.tracksCount(s.trackCount)),
+                  );
                 },
               ),
             ),
@@ -247,7 +279,9 @@ Future<void> pickTagFor(
     isScrollControlled: true,
     builder: (c) => SafeArea(
       child: ConstrainedBox(
-        constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(c).height * 0.7),
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.sizeOf(c).height * 0.7,
+        ),
         child: ListView.builder(
           // Many entries already exceed the max height, so lazy changes nothing visible.
           shrinkWrap: choices.length <= 20,
