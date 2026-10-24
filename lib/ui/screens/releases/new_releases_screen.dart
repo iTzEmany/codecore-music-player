@@ -7,6 +7,8 @@ import '../../../l10n/app_localizations.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/releases_providers.dart';
 import '../../../providers/settings_providers.dart';
+import '../../../services/releases/release_check_controller.dart'
+    show ReleaseCheckController;
 import '../../../services/releases/release_checker.dart' show CheckStop;
 import '../../shell/shell_nav.dart';
 import '../../theme/tokens.dart';
@@ -70,11 +72,91 @@ class _NewReleasesScreenState extends ConsumerState<NewReleasesScreen> {
     showMsg(context, text);
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _checkHeader(ReleaseCheckController controller) {
     final l = context.l10n;
     final cc = context.cc;
     final theme = Theme.of(context).textTheme;
+    return ValueListenableBuilder<bool>(
+      valueListenable: controller.running,
+      builder: (_, running, _) {
+        final last = ref.read(settingsStoreProvider).releasesLastRunAt;
+        final lastText = last == null
+            ? l.releasesNeverChecked
+            : l.releasesLastCheck(
+                DateFormat.yMd(Localizations.localeOf(context).toLanguageTag())
+                    .add_Hm()
+                    .format(DateTime.fromMillisecondsSinceEpoch(last)),
+              );
+        final pause = _pause(l);
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                FilledButton.tonalIcon(
+                  key: const ValueKey('check-now'),
+                  onPressed: running ? null : _checkNow,
+                  icon: running
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.refresh_rounded),
+                  label: Text(
+                    running ? l.releasesChecking : l.releasesCheckNow,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              lastText,
+              key: const ValueKey('last-check'),
+              style: theme.bodyMedium?.copyWith(color: cc.textMuted),
+            ),
+            if (pause != null)
+              Text(
+                pause,
+                key: const ValueKey('check-pause'),
+                style: theme.bodyMedium?.copyWith(color: cc.error),
+              ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _artistChips(Map<String, String> artists) {
+    final l = context.l10n;
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        _chip(
+          l.releasesAllArtists,
+          _artistId == null,
+          () => setState(() => _artistId = null),
+        ),
+        for (final e in _artistsShown(artists))
+          _chip(
+            e.value,
+            _artistId == e.key,
+            () => setState(() => _artistId = _artistId == e.key ? null : e.key),
+          ),
+        if (!_allArtists && artists.length > _maxArtistChips)
+          ActionChip(
+            key: const ValueKey('artist-chips-more'),
+            label: Text(l.showMore),
+            onPressed: () => setState(() => _allArtists = true),
+          ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
     final all =
         ref.watch(recentReleasesProvider(90)).value ?? const <RecentRelease>[];
     final followedCount = ref.watch(
@@ -103,65 +185,7 @@ class _NewReleasesScreenState extends ConsumerState<NewReleasesScreen> {
                   CcDims.margin,
                   0,
                 ),
-                child: ValueListenableBuilder<bool>(
-                  valueListenable: controller.running,
-                  builder: (_, running, _) {
-                    final last = ref
-                        .read(settingsStoreProvider)
-                        .releasesLastRunAt;
-                    final lastText = last == null
-                        ? l.releasesNeverChecked
-                        : l.releasesLastCheck(
-                            DateFormat.yMd(
-                              Localizations.localeOf(context).toLanguageTag(),
-                            ).add_Hm().format(
-                              DateTime.fromMillisecondsSinceEpoch(last),
-                            ),
-                          );
-                    final pause = _pause(l);
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            FilledButton.tonalIcon(
-                              key: const ValueKey('check-now'),
-                              onPressed: running ? null : _checkNow,
-                              icon: running
-                                  ? const SizedBox(
-                                      width: 16,
-                                      height: 16,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                      ),
-                                    )
-                                  : const Icon(Icons.refresh_rounded),
-                              label: Text(
-                                running
-                                    ? l.releasesChecking
-                                    : l.releasesCheckNow,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          lastText,
-                          key: const ValueKey('last-check'),
-                          style: theme.bodyMedium?.copyWith(
-                            color: cc.textMuted,
-                          ),
-                        ),
-                        if (pause != null)
-                          Text(
-                            pause,
-                            key: const ValueKey('check-pause'),
-                            style: theme.bodyMedium?.copyWith(color: cc.error),
-                          ),
-                      ],
-                    );
-                  },
-                ),
+                child: _checkHeader(controller),
               ),
               ListTile(
                 key: const ValueKey('followed-artists-link'),
@@ -179,31 +203,7 @@ class _NewReleasesScreenState extends ConsumerState<NewReleasesScreen> {
                     CcDims.margin,
                     CcDims.gap8,
                   ),
-                  child: Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      _chip(
-                        l.releasesAllArtists,
-                        _artistId == null,
-                        () => setState(() => _artistId = null),
-                      ),
-                      for (final e in _artistsShown(artists))
-                        _chip(
-                          e.value,
-                          _artistId == e.key,
-                          () => setState(
-                            () => _artistId = _artistId == e.key ? null : e.key,
-                          ),
-                        ),
-                      if (!_allArtists && artists.length > _maxArtistChips)
-                        ActionChip(
-                          key: const ValueKey('artist-chips-more'),
-                          label: Text(l.showMore),
-                          onPressed: () => setState(() => _allArtists = true),
-                        ),
-                    ],
-                  ),
+                  child: _artistChips(artists),
                 ),
               if (shown.isEmpty)
                 SizedBox(
