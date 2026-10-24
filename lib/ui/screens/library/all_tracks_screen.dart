@@ -39,6 +39,74 @@ String _sortLabel(BuildContext context, SortOption o) {
   };
 }
 
+class _AllTracksHeader extends StatelessWidget {
+  const _AllTracksHeader({
+    required this.loaded,
+    required this.shown,
+    required this.wide,
+    required this.onPlay,
+    required this.onShuffle,
+  });
+
+  final bool loaded;
+  final List<Track> shown;
+  final bool wide;
+  final VoidCallback onPlay;
+  final VoidCallback onShuffle;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final theme = Theme.of(context).textTheme;
+    final cc = context.cc;
+    return Padding(
+              padding: const EdgeInsets.fromLTRB(
+                CcDims.margin,
+                CcDims.gap8,
+                CcDims.margin,
+                CcDims.gap12,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l.allTracks,
+                    style: wide ? theme.displaySmall : theme.headlineSmall,
+                  ),
+                  // No «0 brani» while loading or on error.
+                  if (loaded) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      l.tracksAndDuration(
+                        l.tracksCount(shown.length),
+                        durationWords(
+                          l,
+                          shown.fold<int>(0, (sum, t) => sum + t.durationMs),
+                        ),
+                      ),
+                      style: theme.bodyMedium?.copyWith(color: cc.textMuted),
+                    ),
+                  ],
+                  if (shown.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        PlayPill(
+                          onPressed: onPlay,
+                        ),
+                        ShufflePill(onPressed: onShuffle),
+                      ],
+                    ),
+                  ],
+                ],
+              ),
+            );
+  }
+}
+
 /// Every track as a collection: header, Play and Shuffle, search, sort chips.
 class AllTracksScreen extends ConsumerStatefulWidget {
   const AllTracksScreen({super.key});
@@ -128,8 +196,6 @@ class _AllTracksScreenState extends ConsumerState<AllTracksScreen> {
     final query = ref.watch(trackQueryProvider(false));
     final compact = ref.watch(settingsProvider).compactMode;
     final ctrl = ref.read(playerControllerProvider);
-    final theme = Theme.of(context).textTheme;
-    final cc = context.cc;
     final ctx = PlayContext(
       query.text.trim().isEmpty
           ? PlayContextKind.library
@@ -150,50 +216,12 @@ class _AllTracksScreenState extends ConsumerState<AllTracksScreen> {
           children: [
             const ScanStatus(),
             // Outside the list: AlphaScroller offsets are index * itemExtent.
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                CcDims.margin,
-                CcDims.gap8,
-                CcDims.margin,
-                CcDims.gap12,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    l.allTracks,
-                    style: wide ? theme.displaySmall : theme.headlineSmall,
-                  ),
-                  // No «0 brani» while loading or on error.
-                  if (tracks.hasValue) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      l.tracksAndDuration(
-                        l.tracksCount(shown.length),
-                        durationWords(
-                          l,
-                          shown.fold<int>(0, (sum, t) => sum + t.durationMs),
-                        ),
-                      ),
-                      style: theme.bodyMedium?.copyWith(color: cc.textMuted),
-                    ),
-                  ],
-                  if (shown.isNotEmpty) ...[
-                    const SizedBox(height: 16),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        PlayPill(
-                          onPressed: () => ctrl.playAll(shown, context: ctx),
-                        ),
-                        ShufflePill(onPressed: ctrl.toggleShuffle),
-                      ],
-                    ),
-                  ],
-                ],
-              ),
+            _AllTracksHeader(
+              loaded: tracks.hasValue,
+              shown: shown,
+              wide: wide,
+              onPlay: () => ctrl.playAll(shown, context: ctx),
+              onShuffle: ctrl.toggleShuffle,
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(
