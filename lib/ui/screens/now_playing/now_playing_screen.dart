@@ -1,3 +1,4 @@
+import '../../../data/model/track_kind.dart';
 import '../../../core/platform.dart';
 
 import 'package:flutter/material.dart';
@@ -15,7 +16,6 @@ import '../../shell/shell_nav.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/cover_backdrop.dart';
 import '../../widgets/track_art.dart';
-import '../../../services/audio/online_entries.dart';
 import 'suggested_info.dart';
 import '../../../providers/radio_providers.dart' show onAirProvider;
 import '../../widgets/radio_now.dart';
@@ -125,7 +125,7 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
         ref.watch(liveCurrentTrackProvider).value ??
         ref.watch(currentTrackProvider).value;
     final cc = context.cc;
-    final online = track != null && isOnlineId(track.id);
+    final online = track != null && track.trackKind == TrackKind.online;
     final wide = MediaQuery.sizeOf(context).width >= _wideBreakpoint;
     final reduce = MediaQuery.disableAnimationsOf(context);
     return Scaffold(
@@ -263,7 +263,7 @@ class _Player extends ConsumerWidget {
     final theme = Theme.of(context).textTheme;
     final ctx = playContextName(l, ref.watch(playContextProvider));
     final ctrl = ref.read(playerControllerProvider);
-    final online = isOnlineId(track.id);
+    final online = track.trackKind == TrackKind.online;
     final radio = radioOfTrack(ref, track);
     final onAir = radio == null ? null : ref.watch(onAirProvider).value;
     final texts = radio == null ? null : radioTexts(l, radio, onAir);

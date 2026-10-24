@@ -1,3 +1,4 @@
+import '../../data/model/track_kind.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,7 +13,6 @@ import '../theme/tokens.dart';
 import 'cover_image.dart';
 import 'favorite_actions.dart';
 import 'format_utils.dart';
-import '../../services/audio/online_entries.dart';
 import 'ring_progress.dart' show NowPlayingDot;
 import 'online_queue_row.dart';
 import 'preview_cover.dart';
@@ -478,7 +478,7 @@ class LiveTrackRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (isOnlineId(track.id)) {
+    if (track.trackKind == TrackKind.online) {
       return OnlineQueueRow(track: track, onTap: onTap, reorderIndex: reorderIndex);
     }
     final isCurrent = ref.watch(

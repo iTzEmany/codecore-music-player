@@ -1,3 +1,4 @@
+import '../../data/model/track_kind.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -26,7 +27,6 @@ import '../widgets/motion.dart';
 import '../widgets/track_art.dart';
 import '../widgets/radio_now.dart';
 import '../widgets/ring_progress.dart';
-import '../../services/audio/online_entries.dart' show isOnlineId;
 import '../../providers/radio_providers.dart' show onAirProvider;
 import '../widgets/shuffle_button.dart';
 
@@ -146,7 +146,7 @@ class _TrackInfo extends ConsumerWidget {
                 style: theme.bodyLarge,
               ),
               InkWell(
-                onTap: radio != null || isOnlineId(track.id)
+                onTap: radio != null || track.trackKind == TrackKind.online
                     ? null
                     : openArtist,
                 child: Text(
@@ -161,7 +161,7 @@ class _TrackInfo extends ConsumerWidget {
         ),
         if (radio != null)
           RadioStarButton(station: radio, color: cc.textMuted)
-        else if (!isOnlineId(track.id))
+        else if (track.trackKind != TrackKind.online)
           IconButton(
             tooltip: track.isFavorite ? l.removeFromFavorites : l.favorite,
             onPressed: () => toggleFavorite(context, ref, track),

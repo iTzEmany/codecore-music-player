@@ -1,9 +1,9 @@
+import '../../data/model/track_kind.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/db/app_database.dart';
 import '../../providers/player_providers.dart';
-import '../../services/audio/online_entries.dart';
 import '../../services/online/google_thumb.dart';
 import '../theme/tokens.dart';
 import 'cover_image.dart';
@@ -29,7 +29,7 @@ class TrackArt extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (!isOnlineId(track.id)) {
+    if (track.trackKind != TrackKind.online) {
       return CoverImage(coverKey: track.coverKey, size: size, radius: radius, heroTag: heroTag, semanticLabel: semanticLabel);
     }
     final online = ref.watch(onlineEntriesProvider);

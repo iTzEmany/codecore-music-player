@@ -1,3 +1,4 @@
+import '../../data/model/track_kind.dart';
 import 'cc_sheet.dart';
 import 'dart:io';
 
@@ -16,7 +17,6 @@ import '../../providers/equalizer_providers.dart';
 import '../../providers/jam_providers.dart';
 import '../../providers/player_providers.dart';
 import '../../providers/preview_providers.dart';
-import '../../services/audio/online_entries.dart';
 import '../../providers/suggestion_actions.dart';
 import '../screens/playlists/playlist_dialogs.dart';
 import '../screens/playlists/playlist_picker.dart';
@@ -137,7 +137,7 @@ List<TrackActionGroup> trackActions(
 ) {
   final radio = radioOfTrackRead(ref, track);
   if (radio != null) return radioTrackActions(outer, ref, track, radio);
-  if (isOnlineId(track.id)) return onlineTrackActions(outer, ref, track);
+  if (track.trackKind == TrackKind.online) return onlineTrackActions(outer, ref, track);
   final l = outer.l10n;
   final ctrl = ref.read(playerControllerProvider);
   void snack(String text) => showMsg(outer, text);

@@ -1,3 +1,4 @@
+import '../../data/model/track_kind.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -6,7 +7,6 @@ import '../../l10n/l10n_ext.dart';
 import '../../providers/database_providers.dart';
 import '../../providers/jam_providers.dart';
 import '../../providers/player_providers.dart';
-import '../../services/audio/online_entries.dart';
 import '../screens/cleanup/move_to_album_dialog.dart';
 import '../screens/playlists/playlist_dialogs.dart';
 import '../screens/tags/tags_sheet.dart';
@@ -39,7 +39,7 @@ List<TrackActionGroup> bulkActions(
   // Streamed entries are not library rows: the group actions skip them.
   final tracks = [
     for (final t in picked)
-      if (!isOnlineId(t.id)) t,
+      if (t.trackKind != TrackKind.online) t,
   ];
   if (tracks.isEmpty) return const [];
   final l = outer.l10n;

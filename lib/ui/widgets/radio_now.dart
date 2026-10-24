@@ -1,3 +1,4 @@
+import '../../data/model/track_kind.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -7,7 +8,6 @@ import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../providers/player_providers.dart';
 import '../../providers/radio_providers.dart';
-import '../../services/audio/online_entries.dart';
 import '../../services/radio/radio_station.dart';
 import '../screens/radio/radio_actions.dart';
 import '../screens/radio/radio_labels.dart';
@@ -18,11 +18,11 @@ import '../theme/tokens.dart';
 /// The station behind [track], or null when it is not a radio entry.
 /// Watches the registry, so a screen rebuilds if the entry changes.
 RadioStation? radioOfTrack(WidgetRef ref, Track track) =>
-    isOnlineId(track.id) ? ref.watch(onlineEntriesProvider)?.radioOf(track.id)?.station : null;
+    track.trackKind == TrackKind.online ? ref.watch(onlineEntriesProvider)?.radioOf(track.id)?.station : null;
 
 /// Same, for code that only reads (menus).
 RadioStation? radioOfTrackRead(WidgetRef ref, Track track) =>
-    isOnlineId(track.id) ? ref.read(onlineEntriesProvider)?.radioOf(track.id)?.station : null;
+    track.trackKind == TrackKind.online ? ref.read(onlineEntriesProvider)?.radioOf(track.id)?.station : null;
 
 /// What the screens write for a station: the title on air (or the name) and
 /// the line below it (the name when something is on air, else «In diretta»).

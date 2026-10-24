@@ -1,3 +1,4 @@
+import '../../../data/model/track_kind.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -13,7 +14,6 @@ import '../../widgets/motion.dart';
 import '../../widgets/track_art.dart';
 import '../../widgets/radio_now.dart';
 import '../../../providers/radio_providers.dart' show onAirProvider;
-import '../../../services/audio/online_entries.dart' show isOnlineId;
 
 /// Big-button player for the car: cover, title, ⏮ ⏯ ⏭, favourite, a short
 /// playlist list. Opened by hand from Now Playing; nothing starts it.
@@ -105,7 +105,7 @@ class _CarModeScreenState extends ConsumerState<CarModeScreen> {
           icon: const Icon(Icons.brightness_high_outlined),
           selectedIcon: Icon(Icons.brightness_high, color: cc.accent),
         ),
-        if (track != null && !isOnlineId(track.id))
+        if (track != null && track.trackKind != TrackKind.online)
           IconButton(
             tooltip: track.isFavorite ? l.removeFromFavorites : l.favorite,
             iconSize: 36,
