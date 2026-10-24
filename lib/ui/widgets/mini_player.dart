@@ -49,20 +49,22 @@ class _MiniPlayerState extends ConsumerState<MiniPlayer>
       AnimationController(vsync: this, duration: _flingDuration)
         ..addListener(() {
           final a = _anim;
-          if (a != null) setState(() => _dx = a.value);
+          if (a != null) _dx.value = a.value;
         });
   Animation<double>? _anim;
-  double _dx = 0;
+  // Drag offset: only the translate rebuilds while dragging, not the card.
+  final _dx = ValueNotifier<double>(0);
 
   @override
   void dispose() {
     _settle.dispose();
+    _dx.dispose();
     super.dispose();
   }
 
   Future<void> _animateTo(double target) {
     _anim = Tween<double>(
-      begin: _dx,
+      begin: _dx.value,
       end: target,
     ).animate(CurvedAnimation(parent: _settle, curve: Curves.easeOut));
     return _settle.forward(from: 0);
@@ -74,18 +76,19 @@ class _MiniPlayerState extends ConsumerState<MiniPlayer>
     PlayerController ctrl,
   ) async {
     final v = d.primaryVelocity ?? 0;
-    final go = _dx.abs() > _swipeDistance || v.abs() > _swipeVelocity;
-    final wantsNext = (_dx != 0 ? _dx : -v) < 0;
+    final dx = _dx.value;
+    final go = dx.abs() > _swipeDistance || v.abs() > _swipeVelocity;
+    final wantsNext = (dx != 0 ? dx : -v) < 0;
     // Past the last track the player would stop and the card disappear.
     if (!go || (wantsNext && !ctrl.hasNext)) {
       await _animateTo(0);
       return;
     }
-    final dir = (_dx != 0 ? _dx : -v).sign;
+    final dir = (dx != 0 ? dx : -v).sign;
     await _animateTo(dir * width);
     if (!mounted) return;
     dir < 0 ? ctrl.next() : ctrl.previous();
-    setState(() => _dx = -dir * width * 0.4);
+    _dx.value = -dir * width * 0.4;
     await _animateTo(0);
   }
 
@@ -253,14 +256,19 @@ class _MiniPlayerState extends ConsumerState<MiniPlayer>
         onHorizontalDragStart: inJam ? null : (_) => _settle.stop(),
         onHorizontalDragUpdate: inJam
             ? null
-            : (d) => setState(() => _dx += d.delta.dx),
+            : (d) => _dx.value += d.delta.dx,
         onHorizontalDragEnd: inJam ? null : (d) => _onDragEnd(d, width, ctrl),
         onVerticalDragEnd: (d) {
           if ((d.primaryVelocity ?? 0) < -300) {
             inJam ? _openJam() : _openNowPlaying();
           }
         },
-        child: Transform.translate(offset: Offset(_dx, 0), child: card),
+        child: ValueListenableBuilder<double>(
+          valueListenable: _dx,
+          child: card,
+          builder: (_, dx, c) =>
+              Transform.translate(offset: Offset(dx, 0), child: c),
+        ),
       ),
     );
   }
