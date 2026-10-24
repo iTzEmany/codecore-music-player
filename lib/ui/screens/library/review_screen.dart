@@ -34,9 +34,6 @@ class ReviewScreen extends ConsumerStatefulWidget {
 class _ReviewScreenState extends ConsumerState<ReviewScreen> {
   static final _key = SelectionKey.review.key;
 
-  /// Left inset of the reasons line: under the title, past the cover.
-  static const _reasonsInset = 72.0;
-
   /// null = «Tutti».
   ReviewReason? _filter;
 
@@ -198,68 +195,14 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
             constraints: const BoxConstraints(maxWidth: 960),
             child: Column(
               children: [
-                if (job.running)
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(
-                      CcDims.margin,
-                      0,
-                      CcDims.margin,
-                      CcDims.gap4,
-                    ),
-                    child: Row(
-                      key: const ValueKey('review-second-opinion'),
-                      children: [
-                        Expanded(
-                          child: InkWell(
-                            onTap: () => ShellNav.open<void>(
-                              context,
-                              const SecondOpinionLogScreen(),
-                            ),
-                            child: Text(
-                              l.reviewSecondOpinionProgress(
-                                job.done,
-                                job.total,
-                              ),
-                              style: Theme.of(context).textTheme.bodyMedium
-                                  ?.copyWith(color: context.cc.textMuted),
-                            ),
-                          ),
-                        ),
-                        TextButton(
-                          key: const ValueKey('review-second-opinion-stop'),
-                          onPressed: ref
-                              .read(secondOpinionJobProvider.notifier)
-                              .cancel,
-                          child: Text(l.reviewSecondOpinionStop),
-                        ),
-                      ],
-                    ),
-                  ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    CcDims.margin,
-                    CcDims.gap4,
-                    CcDims.margin,
-                    CcDims.gap8,
-                  ),
-                  child: Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      for (final r in <ReviewReason?>[
-                        null,
-                        ...ReviewReason.values,
-                      ])
-                        ChoiceChip(
-                          label: Text(_label(r)),
-                          selected: _filter == r,
-                          onSelected: (_) {
-                            notifier.clear();
-                            setState(() => _filter = r);
-                          },
-                        ),
-                    ],
-                  ),
+                if (job.running) _SecondOpinionBar(job: job),
+                _FilterChips(
+                  filter: _filter,
+                  label: _label,
+                  onSelected: (r) {
+                    notifier.clear();
+                    setState(() => _filter = r);
+                  },
                 ),
                 Expanded(
                   child: tracks.isEmpty
@@ -267,69 +210,14 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
                           icon: Icons.fact_check_outlined,
                           message: l.reviewEmpty,
                         )
-                      : Column(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(CcDims.margin),
-                              child: Text(
-                                l.reviewHint,
-                                style: Theme.of(context).textTheme.bodyMedium
-                                    ?.copyWith(color: context.cc.textMuted),
-                              ),
-                            ),
-                            Expanded(
-                              child: ListView.builder(
-                                itemCount: tracks.length,
-                                itemBuilder: (_, i) => Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    SizedBox(
-                                      height: extent,
-                                      child: LiveTrackRow(
-                                        track: tracks[i],
-                                        compact: compact,
-                                        selection: selection,
-                                        onTap: () => _rowMenu(tracks[i]),
-                                        onMore: () => _rowMenu(tracks[i]),
-                                      ),
-                                    ),
-                                    // The reasons get their own (up to two) lines
-                                    // so a phone does not cut them with «…».
-                                    Padding(
-                                      padding: const EdgeInsets.fromLTRB(
-                                        _reasonsInset,
-                                        0,
-                                        CcDims.margin,
-                                        6,
-                                      ),
-                                      child: Align(
-                                        alignment:
-                                            AlignmentDirectional.centerStart,
-                                        child: Text(
-                                          [
-                                            for (final r
-                                                in reasons[tracks[i].id]!)
-                                              _label(r),
-                                          ].join(', '),
-                                          key: ValueKey(
-                                            'review-reasons-${tracks[i].id}',
-                                          ),
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodySmall
-                                              ?.copyWith(
-                                                color: context.cc.textMuted,
-                                              ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
+                      : _ReviewList(
+                          tracks: tracks,
+                          reasons: reasons,
+                          label: _label,
+                          compact: compact,
+                          extent: extent,
+                          selection: selection,
+                          onRowMenu: _rowMenu,
                         ),
                 ),
               ],
@@ -337,6 +225,165 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _SecondOpinionBar extends ConsumerWidget {
+  const _SecondOpinionBar({required this.job});
+
+  final SecondOpinionState job;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        CcDims.margin,
+        0,
+        CcDims.margin,
+        CcDims.gap4,
+      ),
+      child: Row(
+        key: const ValueKey('review-second-opinion'),
+        children: [
+          Expanded(
+            child: InkWell(
+              onTap: () => ShellNav.open<void>(
+                context,
+                const SecondOpinionLogScreen(),
+              ),
+              child: Text(
+                l.reviewSecondOpinionProgress(job.done, job.total),
+                style: Theme.of(context).textTheme.bodyMedium
+                    ?.copyWith(color: context.cc.textMuted),
+              ),
+            ),
+          ),
+          TextButton(
+            key: const ValueKey('review-second-opinion-stop'),
+            onPressed: ref.read(secondOpinionJobProvider.notifier).cancel,
+            child: Text(l.reviewSecondOpinionStop),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FilterChips extends StatelessWidget {
+  const _FilterChips({
+    required this.filter,
+    required this.label,
+    required this.onSelected,
+  });
+
+  final ReviewReason? filter;
+  final String Function(ReviewReason?) label;
+  final ValueChanged<ReviewReason?> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        CcDims.margin,
+        CcDims.gap4,
+        CcDims.margin,
+        CcDims.gap8,
+      ),
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: [
+          for (final r in <ReviewReason?>[null, ...ReviewReason.values])
+            ChoiceChip(
+              label: Text(label(r)),
+              selected: filter == r,
+              onSelected: (_) => onSelected(r),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ReviewList extends StatelessWidget {
+  const _ReviewList({
+    required this.tracks,
+    required this.reasons,
+    required this.label,
+    required this.compact,
+    required this.extent,
+    required this.selection,
+    required this.onRowMenu,
+  });
+
+  /// Left inset of the reasons line: under the title, past the cover.
+  static const _reasonsInset = 72.0;
+
+  final List<Track> tracks;
+  final Map<int, Set<ReviewReason>> reasons;
+  final String Function(ReviewReason?) label;
+  final bool compact;
+  final double extent;
+  final RowSelection selection;
+  final void Function(Track) onRowMenu;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(CcDims.margin),
+          child: Text(
+            context.l10n.reviewHint,
+            style: Theme.of(context).textTheme.bodyMedium
+                ?.copyWith(color: context.cc.textMuted),
+          ),
+        ),
+        Expanded(
+          child: ListView.builder(
+            itemCount: tracks.length,
+            itemBuilder: (_, i) => Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(
+                  height: extent,
+                  child: LiveTrackRow(
+                    track: tracks[i],
+                    compact: compact,
+                    selection: selection,
+                    onTap: () => onRowMenu(tracks[i]),
+                    onMore: () => onRowMenu(tracks[i]),
+                  ),
+                ),
+                // The reasons get their own (up to two) lines
+                // so a phone does not cut them with «…».
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    _reasonsInset,
+                    0,
+                    CcDims.margin,
+                    6,
+                  ),
+                  child: Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: Text(
+                      [for (final r in reasons[tracks[i].id]!) label(r)]
+                          .join(', '),
+                      key: ValueKey('review-reasons-${tracks[i].id}'),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodySmall
+                          ?.copyWith(color: context.cc.textMuted),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
