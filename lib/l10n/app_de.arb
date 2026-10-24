@@ -290,6 +290,7 @@
   "repeat": "Wiederholen",
   "moreOptions": "Weitere Optionen",
   "back": "Zurück",
+  "seekPosition": "Position im Titel",
   "settingsPlayback": "Wiedergabe",
   "normalizeVolume": "Lautstärke normalisieren",
   "normalizeVolumeHint": "Nutzt ReplayGain der Dateien, um zu laute Titel zu senken",
@@ -1351,6 +1352,7 @@
   "onboardingNext": "Weiter",
   "onboardingStart": "Los geht’s",
   "onboardingPageOf": "Seite {page} von {total}",
+  "onboardingStepOf": "{page} von {total}",
   "@onboardingPageOf": {
     "placeholders": {
       "page": {

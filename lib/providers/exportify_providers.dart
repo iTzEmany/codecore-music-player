@@ -7,7 +7,12 @@ import 'package:path_provider/path_provider.dart';
 import '../core/app_log.dart';
 import '../core/platform.dart';
 import '../services/android/incoming_files.dart';
+import '../data/db/app_database.dart' show PlaylistImport;
 import '../services/import/exportify_hints.dart';
+import '../services/import/imported_playlist.dart';
+import '../services/import/import_diff.dart' show ImportDiff;
+import '../services/import/import_options.dart';
+import 'import_providers.dart';
 import 'issue_providers.dart';
 import 'settings_providers.dart';
 import 'startup_providers.dart';
@@ -25,6 +30,55 @@ Future<bool> openExportify(WidgetRef ref) async {
   }
   return ok;
 }
+
+/// Writes of the Exportify «Sincronizza» screen.
+class ExportifyOps {
+  ExportifyOps(this._ref);
+
+  final Ref _ref;
+
+  Future<ImportDiff> previewSync(ImportedPlaylist csv, int playlistId) =>
+      _ref.read(playlistImportServiceProvider).previewSync(csv, playlistId);
+
+  /// Imports or syncs each entry in turn (a null playlist = new), with the
+  /// options of that playlist's [lastImport]. Returns how many went through.
+  Future<int> syncAll(
+    List<({ImportedPlaylist csv, int? playlistId})> entries,
+    Map<int, PlaylistImport> lastImport,
+  ) async {
+    final svc = _ref.read(playlistImportServiceProvider);
+    var ok = 0;
+    for (final e in entries) {
+      try {
+        final id = e.playlistId;
+        final last = id == null ? null : lastImport[id];
+        final options = last == null
+            ? const ImportOptions()
+            : ImportOptions(
+                folderPath: last.folderPath,
+                numberFiles: last.numberFiles,
+                linkOnly: last.linkOnly,
+                fetchCovers: last.fetchCovers,
+              );
+        if (id == null) {
+          await svc.start(e.csv, name: e.csv.name);
+        } else {
+          await svc.sync(e.csv, id, options: options);
+        }
+        ok++;
+      } on Object catch (err, st) {
+        AppLog.w('Exportify sync of ${e.csv.name} failed', err, st);
+      }
+    }
+    if (ok > 0) {
+      await _ref.read(settingsStoreProvider).writeExportifyLastSyncAt(DateTime.now().millisecondsSinceEpoch);
+      _ref.invalidate(exportifyReminderProvider);
+    }
+    return ok;
+  }
+}
+
+final exportifyOpsProvider = Provider<ExportifyOps>(ExportifyOps.new);
 
 final incomingFilesProvider = Provider<IncomingFiles>((_) => IncomingFiles());
 

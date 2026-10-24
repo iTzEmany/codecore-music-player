@@ -42,7 +42,12 @@ class HomeScreen extends ConsumerWidget {
     final folders = ref.watch(foldersProvider).value;
 
     final header = Padding(
-      padding: const EdgeInsets.fromLTRB(CcDims.margin, CcDims.gap16, CcDims.gap4, CcDims.gap8),
+      padding: const EdgeInsets.fromLTRB(
+        CcDims.margin,
+        CcDims.gap16,
+        CcDims.gap4,
+        CcDims.gap8,
+      ),
       child: Row(
         children: [
           Expanded(
@@ -94,17 +99,43 @@ class HomeScreen extends ConsumerWidget {
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 1200),
-            child: ListView(
-              children: [
-                header,
-                const ExportifyCard(),
-                const ShuffleHero(),
-                const ShortcutsRow(),
-                const ResumeList(),
-                const AddedLately(),
-                const HomeBottomRows(),
-                const SizedBox(height: 24),
-              ],
+            child: LayoutBuilder(
+              builder: (context, box) {
+                final wide = box.maxWidth >= CcDims.wideBreakpoint;
+                const lead = [ShuffleHero(), ShortcutsRow(), ExportifyCard()];
+                return ListView(
+                  children: [
+                    header,
+                    if (wide) ...[
+                      // Desktop (mockup): invite and counters left, Riprendi right.
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: const [
+                          SizedBox(
+                            width: 420,
+                            child: Column(
+                              children: [
+                                ShuffleHero(),
+                                ShortcutsRow(),
+                                ExportifyCard(),
+                                AddedLately(),
+                              ],
+                            ),
+                          ),
+                          SizedBox(width: 48),
+                          Expanded(child: ResumeList()),
+                        ],
+                      ),
+                    ] else ...[
+                      ...lead,
+                      const ResumeList(),
+                      const AddedLately(),
+                    ],
+                    HomeBottomRows(wide: wide),
+                    const SizedBox(height: 24),
+                  ],
+                );
+              },
             ),
           ),
         ),

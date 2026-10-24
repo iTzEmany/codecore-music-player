@@ -5,7 +5,6 @@ import 'package:path/path.dart' as p;
 
 import '../../../core/app_log.dart';
 import '../../../l10n/l10n_ext.dart';
-import '../../../providers/track_ops.dart';
 import '../../../providers/library_providers.dart';
 import '../../../providers/tag_backup_providers.dart';
 import '../../../services/tags/tag_backups.dart';
@@ -38,9 +37,7 @@ class TagBackupsScreen extends ConsumerWidget {
     if (!ok) return;
     String msg;
     try {
-      final store = await ref.read(tagBackupStoreProvider.future);
-      final stamp = await store.restore(b);
-      await ref.read(trackOpsProvider).stampFile(b.path, stamp);
+      await ref.read(tagBackupOpsProvider).restore(b);
       msg = l.tagBackupRestored;
     } on TagWriteException catch (e) {
       msg = l.tagBackupRestoreFailed(tagReasonText(l, e.reason));

@@ -107,75 +107,77 @@ class ResumeList extends ConsumerWidget {
     return Column(
       children: [
         SectionHeader(l.homeResume),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: CcDims.margin),
-          child: Column(
-            children: [
-              for (final r in rows)
-                switch (r) {
-                  ReleasesResume() => HomeRow(
-                    key: const ValueKey('resume-releases'),
-                    cover: const HomeIconCover(Icons.new_releases_outlined),
-                    title: l.newReleasesTitle,
-                    onTap: () =>
-                        ShellNav.open<void>(context, const NewReleasesScreen()),
+        Column(
+          children: [
+            for (final (i, r) in rows.indexed)
+              switch (r) {
+                ReleasesResume() => HomeRow(
+                  last: i == rows.length - 1,
+                  key: const ValueKey('resume-releases'),
+                  cover: const HomeIconCover(Icons.new_releases_outlined),
+                  title: l.newReleasesTitle,
+                  onTap: () =>
+                      ShellNav.open<void>(context, const NewReleasesScreen()),
+                ),
+                QueueResume() => _QueueRow(
+                  r,
+                  last: i == rows.length - 1,
+                  subtitle: _queueSubtitle(context, r),
+                ),
+                TrackResume() => HomeRow(
+                  last: i == rows.length - 1,
+                  key: ValueKey('resume-track-${r.track.id}'),
+                  cover: CoverImage(
+                    coverKey: r.track.coverKey,
+                    size: kHomeCover,
+                    radius: CcDims.rList,
                   ),
-                  QueueResume() => _QueueRow(
-                    r,
-                    subtitle: _queueSubtitle(context, r),
+                  title: r.track.title,
+                  subtitle: l.homeMinutesLeft(_minutesLeft(r.track)),
+                  progress: _fraction(
+                    r.track.resumePositionMs,
+                    r.track.durationMs,
                   ),
-                  TrackResume() => HomeRow(
-                    key: ValueKey('resume-track-${r.track.id}'),
-                    cover: CoverImage(
-                      coverKey: r.track.coverKey,
-                      size: 48,
-                      radius: CcDims.rList,
-                    ),
-                    title: r.track.title,
-                    subtitle: l.homeMinutesLeft(_minutesLeft(r.track)),
-                    bar: HomeBar(
-                      _fraction(r.track.resumePositionMs, r.track.durationMs),
-                    ),
-                    onTap: () => ctrl.playFromList([r.track], 0),
+                  onTap: () => ctrl.playFromList([r.track], 0),
+                ),
+                EntryResume() => HomeRow(
+                  last: i == rows.length - 1,
+                  key: ValueKey(
+                    'resume-entry-${r.entry.kind.name}-${r.entry.id}',
                   ),
-                  EntryResume() => HomeRow(
-                    key: ValueKey(
-                      'resume-entry-${r.entry.kind.name}-${r.entry.id}',
-                    ),
-                    cover: r.entry.kind == LibraryKind.playlist
-                        ? PlaylistCover(
-                            size: 48,
-                            radius: CcDims.rList,
-                            coverKeys: playlistCoverKeys(null, [
-                              r.entry.coverKey,
-                            ]),
-                          )
-                        : CoverImage(
-                            coverKey: r.entry.coverKey,
-                            size: 48,
-                            radius: CcDims.rList,
+                  cover: r.entry.kind == LibraryKind.playlist
+                      ? PlaylistCover(
+                          size: kHomeCover,
+                          radius: CcDims.rList,
+                          coverKeys: playlistCoverKeys(null, [
+                            r.entry.coverKey,
+                          ]),
+                        )
+                      : CoverImage(
+                          coverKey: r.entry.coverKey,
+                          size: kHomeCover,
+                          radius: CcDims.rList,
+                        ),
+                  title: r.entry.title ?? l.unknownAlbum,
+                  subtitle: r.entry.kind == LibraryKind.playlist
+                      ? l.tracksCount(r.entry.count)
+                      : (r.entry.variousArtists
+                            ? l.variousArtists
+                            : (r.entry.artist ?? l.unknownArtist)),
+                  onTap: () => r.entry.kind == LibraryKind.playlist
+                      ? ShellNav.open<void>(
+                          context,
+                          PlaylistDetailScreen(
+                            playlist: r.entry.playlist!.playlist,
                           ),
-                    title: r.entry.title ?? l.unknownAlbum,
-                    subtitle: r.entry.kind == LibraryKind.playlist
-                        ? l.tracksCount(r.entry.count)
-                        : (r.entry.variousArtists
-                              ? l.variousArtists
-                              : (r.entry.artist ?? l.unknownArtist)),
-                    onTap: () => r.entry.kind == LibraryKind.playlist
-                        ? ShellNav.open<void>(
-                            context,
-                            PlaylistDetailScreen(
-                              playlist: r.entry.playlist!.playlist,
-                            ),
-                          )
-                        : ShellNav.open<void>(
-                            context,
-                            AlbumDetailScreen(album: r.entry.album!),
-                          ),
-                  ),
-                },
-            ],
-          ),
+                        )
+                      : ShellNav.open<void>(
+                          context,
+                          AlbumDetailScreen(album: r.entry.album!),
+                        ),
+                ),
+              },
+          ],
         ),
       ],
     );
@@ -202,10 +204,11 @@ class ResumeList extends ConsumerWidget {
 
 /// Watches play/pause itself so the list above does not rebuild on it.
 class _QueueRow extends ConsumerWidget {
-  const _QueueRow(this.row, {required this.subtitle});
+  const _QueueRow(this.row, {required this.subtitle, required this.last});
 
   final QueueResume row;
   final String subtitle;
+  final bool last;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -214,12 +217,13 @@ class _QueueRow extends ConsumerWidget {
       key: const ValueKey('resume-queue'),
       cover: CoverImage(
         coverKey: row.track.coverKey,
-        size: 48,
+        size: kHomeCover,
         radius: CcDims.rList,
       ),
       title: row.track.title,
       subtitle: subtitle,
-      bar: const HomePlayingBar(),
+      now: true,
+      last: last,
       // shortcut: a playing row does nothing, open Now Playing if it feels dead.
       onTap: playing
           ? null

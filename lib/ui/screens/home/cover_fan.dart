@@ -11,10 +11,9 @@ import '../../widgets/cover_image.dart';
 import '../library/album_detail_screen.dart';
 
 const _maxCovers = 5;
-const _maxTilt = 8 * math.pi / 180;
 const _gap = 8.0;
 
-/// Up to five albums as overlapping, tilted covers. The first tap (or the
+/// Up to five albums as overlapping flat covers. The first tap (or the
 /// mouse pointer) spreads them into a row; a tap on a spread cover opens that
 /// album. Only transforms move, on their own layer.
 class CoverFan extends StatefulWidget {
@@ -63,7 +62,7 @@ class _CoverFanState extends State<CoverFan>
       child: LayoutBuilder(
         builder: (context, box) {
           final w = box.maxWidth;
-          final size = math.min(w * 0.42, 168.0);
+          final size = math.min(w * 0.26, 84.0);
           final spread = math.min(size, (w - _gap * (n - 1)) / n);
           // Built once per layout: the animation only moves the Transforms.
           final covers = [
@@ -86,7 +85,7 @@ class _CoverFanState extends State<CoverFan>
                   builder: (context, _) {
                     final t = CcMotion.curveIn.transform(_c.value);
                     return SizedBox(
-                      height: size + 24,
+                      height: size + 16,
                       width: w,
                       child: Stack(
                         alignment: Alignment.center,
@@ -115,11 +114,9 @@ class _CoverFanState extends State<CoverFan>
     double t,
   ) {
     final mid = i - (n - 1) / 2;
-    final dx = _lerp(mid * size * 0.28, mid * (spread + _gap), t);
-    final tilt = n == 1 ? 0.0 : _lerp(_maxTilt * (2 * i / (n - 1) - 1), 0, t);
+    final dx = _lerp(mid * size * 0.67, mid * (spread + _gap), t);
     final scale = _lerp(1, spread / size, t);
     final m = Matrix4.translationValues(dx, 0, 0)
-      ..rotateZ(tilt)
       ..scaleByDouble(scale, scale, 1, 1);
     return Transform(alignment: Alignment.center, transform: m, child: cover);
   }
@@ -150,7 +147,8 @@ class _FanCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final key = album.coverKey;
     final hasCover =
-        key != null && ref.watch(coverIndexProvider.select((m) => m[key]?.original != null));
+        key != null &&
+        ref.watch(coverIndexProvider.select((m) => m[key]?.original != null));
     if (hasCover) {
       return CoverImage(coverKey: key, size: size, radius: CcDims.rGrid);
     }
@@ -168,7 +166,8 @@ class _FanCard extends ConsumerWidget {
         maxLines: 3,
         overflow: TextOverflow.ellipsis,
         textAlign: TextAlign.left,
-        style: Theme.of(context).textTheme.titleSmall?.copyWith(color: context.cc.text),
+        style: Theme.of(context).textTheme.titleSmall
+            ?.copyWith(color: context.cc.text),
       ),
     );
   }

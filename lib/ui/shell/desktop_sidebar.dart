@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../widgets/create_flows.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -10,12 +9,12 @@ import '../../providers/library_providers.dart';
 import '../../providers/nav_providers.dart';
 import '../../providers/playlist_ops.dart';
 import '../../providers/track_ops.dart';
-import '../screens/import/import_flow.dart';
 import '../screens/library/favorites_screen.dart';
 import '../screens/playlists/playlist_detail_screen.dart';
 import '../screens/playlists/playlist_dialogs.dart';
 import '../screens/smart/smart_playlist_editor.dart';
 import '../theme/tokens.dart';
+import '../widgets/new_playlist_menu.dart';
 import '../widgets/playlist_cover.dart';
 import '../widgets/track_drag.dart';
 import 'shell_nav.dart';
@@ -85,7 +84,13 @@ class DesktopSidebar extends ConsumerWidget {
               l.yourLibrary,
               index == NavTab.library.index,
               () => select(NavTab.library),
-              trailing: const _NewPlaylistMenu(),
+              trailing: NewPlaylistMenu(
+                onSmart: () => ShellNav.openInLibrary(
+                  context,
+                  ref,
+                  const SmartPlaylistEditor(),
+                ),
+              ),
             ),
             Expanded(child: _SidebarPlaylists(collapsed: collapsed)),
             const Divider(height: 1),
@@ -101,44 +106,6 @@ class DesktopSidebar extends ConsumerWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-class _NewPlaylistMenu extends ConsumerWidget {
-  const _NewPlaylistMenu();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l = context.l10n;
-    return PopupMenuButton<_NewPlaylistAction>(
-      tooltip: l.newPlaylist,
-      icon: const Icon(Icons.add_rounded),
-      onSelected: (v) async {
-        if (v == _NewPlaylistAction.csv) {
-          startCsvImport(context, ref);
-          return;
-        }
-        if (v == _NewPlaylistAction.smart) {
-          ShellNav.openInLibrary(context, ref, const SmartPlaylistEditor());
-          return;
-        }
-        await createPlaylistFlow(context, ref);
-      },
-      itemBuilder: (_) => [
-        PopupMenuItem(
-          value: _NewPlaylistAction.create,
-          child: Text(l.newPlaylist),
-        ),
-        PopupMenuItem(
-          value: _NewPlaylistAction.smart,
-          child: Text(l.smartPlaylistNew),
-        ),
-        PopupMenuItem(
-          value: _NewPlaylistAction.csv,
-          child: Text(l.csvImportMenu),
-        ),
-      ],
     );
   }
 }
@@ -349,4 +316,3 @@ class _CoverRow extends StatelessWidget {
   }
 }
 
-enum _NewPlaylistAction { create, smart, csv }

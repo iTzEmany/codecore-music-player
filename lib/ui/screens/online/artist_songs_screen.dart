@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/app_log.dart';
+import '../../../providers/selection_providers.dart';
 import '../../../providers/library_overlap_providers.dart';
 import '../../../providers/ytm_catalog_providers.dart';
 import '../../../services/online/youtube_service.dart';
@@ -27,7 +28,7 @@ class ArtistSongsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final key = (browseId: link.browseId, params: link.params);
-    final listKey = 'ytm-songs:${link.browseId}';
+    final listKey = SelectionKey.ytmSongsOf(link.browseId);
     final page = ref.watch(artistSongsProvider(key));
     final overlap = ref.watch(localOverlapProvider(artist.name));
     final data = page.value;

@@ -45,3 +45,11 @@ Solo dopo 44.1–44.5 e con la CI verde su `master`:
 4. **Chiedere un sì all'utente prima di fare il push del tag.** Il push avvia `release.yml`, che costruisce gli APK, Linux e Windows e pubblica la release su GitHub.
 
 **Fatto quando:** `git tag -l v1.3.0` lo mostra; dopo il sì, `gh run list -w release.yml -L 1` è verde e la release esiste (`gh release view v1.3.0`).
+
+## Dalla fase 43
+- **Pallino schede al 12 %** (era 3,9 % dopo la 39): la bisezione in `misure.md` lo colloca fra la fase 40 e la 42,
+  non nella 43. In 44.1, prima delle misure finali, bisecare i commit 40–42 con
+  `--only "Pallino schede"` e aprire il passo di correzione nella fase responsabile.
+- **CoverBackdrop** (D-54): «Testi» e «Auto» usano ancora la sfumatura della copertina; il player è piatto.
+  Decidere in 44.4 se allinearli o annotarlo come cambio rimandato.
+- Soglie non raggiunte dopo la 43: tabella «Dopo la fase 43» in `misure.md`.

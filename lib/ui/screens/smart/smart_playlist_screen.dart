@@ -1,3 +1,4 @@
+import '../../../providers/selection_providers.dart';
 import '../../../providers/playlist_ops.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -63,7 +64,7 @@ class SmartPlaylistScreen extends ConsumerWidget {
     final ctrl = ref.read(playerControllerProvider);
     final playCtx = PlayContext(PlayContextKind.playlist, p.name);
     final extent = trackRowExtentOf(context, compact);
-    final key = 'smart:$id';
+    final key = SelectionKey.smartOf(id);
     final selection = RowSelection(
       listKey: key,
       visibleIds: [for (final t in tracks) t.id],

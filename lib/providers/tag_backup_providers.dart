@@ -1,9 +1,25 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../services/library/track_file_sync.dart' show stampTrack;
 import '../services/tags/safe_tag_writer.dart';
 import '../services/tags/tag_backups.dart';
 import '../services/tags/tag_writer.dart';
+import 'database_providers.dart';
 import 'library_providers.dart';
+
+/// Puts a saved original back and records the new size and date of the file.
+class TagBackupOps {
+  TagBackupOps(this._ref);
+
+  final Ref _ref;
+
+  Future<void> restore(TagBackup b) async {
+    final stamp = await (await _ref.read(tagBackupStoreProvider.future)).restore(b);
+    await stampTrack(_ref.read(databaseProvider), b.path, stamp);
+  }
+}
+
+final tagBackupOpsProvider = Provider<TagBackupOps>(TagBackupOps.new);
 
 /// The saved originals, newest first. Follows the store: a new or deleted
 /// backup refreshes it.

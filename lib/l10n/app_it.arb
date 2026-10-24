@@ -441,6 +441,7 @@
   "repeat": "Ripeti",
   "moreOptions": "Altre opzioni",
   "back": "Indietro",
+  "seekPosition": "Posizione nel brano",
   "settingsPlayback": "Riproduzione",
   "normalizeVolume": "Normalizza volume",
   "normalizeVolumeHint": "Usa il ReplayGain dei file per ridurre i brani troppo forti",
@@ -1681,6 +1682,17 @@
   "onboardingStart": "Inizia",
   "onboardingPageOf": "Pagina {page} di {total}",
   "@onboardingPageOf": {
+    "placeholders": {
+      "page": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "onboardingStepOf": "{page} di {total}",
+  "@onboardingStepOf": {
     "placeholders": {
       "page": {
         "type": "int"

@@ -14,12 +14,13 @@ import '../../theme/tokens.dart';
 import '../../widgets/format_utils.dart';
 import '../../widgets/play_buttons.dart';
 import '../../widgets/quality_tag.dart';
+import '../../widgets/ring_progress.dart';
 import '../../widgets/speed_button.dart';
 import '../devices/devices_sheet.dart';
 import 'queue_sheet.dart';
 import '../../widgets/shuffle_button.dart';
 
-/// Slider plus «elapsed · quality tag · total» (tap the total for the rest).
+/// «Elapsed · quality tag · total» (tap the total for the rest).
 class NpSeekRow extends ConsumerStatefulWidget {
   const NpSeekRow({super.key, required this.track});
 
@@ -34,7 +35,6 @@ class NpSeekRow extends ConsumerStatefulWidget {
 const npEdge = 12.0;
 
 class _NpSeekRowState extends ConsumerState<NpSeekRow> {
-  double? _dragging;
   bool _remaining = false;
 
   @override
@@ -48,28 +48,14 @@ class _NpSeekRowState extends ConsumerState<NpSeekRow> {
     final max = dur.inMilliseconds.toDouble();
     // Only the position consumers rebuild on each tick, not the whole row.
     double shownOf(WidgetRef ref) {
+      final drag = ref.watch(ringDragProvider);
+      if (drag != null) return drag * max;
       final pos = ref.watch(positionProvider).value ?? Duration.zero;
-      return (_dragging ?? pos.inMilliseconds.toDouble()).clamp(
-        0.0,
-        max <= 0 ? 1.0 : max,
-      );
+      return pos.inMilliseconds.toDouble().clamp(0.0, max <= 0 ? 1.0 : max);
     }
 
     return Column(
       children: [
-        Consumer(
-          builder: (context, ref, _) => Slider(
-            value: shownOf(ref),
-            max: max <= 0 ? 1 : max,
-            onChanged: max <= 0 ? null : (v) => setState(() => _dragging = v),
-            onChangeEnd: (v) {
-              setState(() => _dragging = null);
-              ref
-                  .read(playerControllerProvider)
-                  .seek(Duration(milliseconds: v.round()));
-            },
-          ),
-        ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: npEdge),
           child: Row(
@@ -78,8 +64,10 @@ class _NpSeekRowState extends ConsumerState<NpSeekRow> {
                 child: Align(
                   alignment: AlignmentDirectional.centerStart,
                   child: Consumer(
-                    builder: (context, ref, _) =>
-                        Text(formatDuration(shownOf(ref).round()), style: style),
+                    builder: (context, ref, _) => Text(
+                      formatDuration(shownOf(ref).round()),
+                      style: style,
+                    ),
                   ),
                 ),
               ),
@@ -340,7 +328,10 @@ class _SleepChipState extends ConsumerState<_SleepChip> {
         if (timer.active) PopupMenuItem(value: 0, child: Text(l.sleepCancel)),
       ],
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: CcDims.gap12, vertical: CcDims.gap8),
+        padding: const EdgeInsets.symmetric(
+          horizontal: CcDims.gap12,
+          vertical: CcDims.gap8,
+        ),
         decoration: BoxDecoration(
           color: timer.active ? cc.accent.withValues(alpha: 0.16) : null,
           borderRadius: BorderRadius.circular(CcDims.rPill),

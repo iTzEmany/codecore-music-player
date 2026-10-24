@@ -166,7 +166,7 @@ class _ReceiveTabState extends ConsumerState<ReceiveTab> {
             .scanFiles(base.$2, saved)
             .drain<void>();
         for (final entry in savedTracks.entries) {
-          await repo.applyReceived(
+          await ref.read(shareControllerProvider).applyReceived(
             entry.key,
             entry.value.meta,
             fetchCover: () => client.downloadCover(

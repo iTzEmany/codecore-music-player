@@ -7,15 +7,12 @@ import '../../../data/repositories/playlist_repository.dart'
     show PlaylistSummary;
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/playlist_ops.dart';
-import '../../../providers/database_providers.dart';
 import '../../../providers/exportify_providers.dart';
-import '../../../providers/import_providers.dart';
-import '../../../providers/settings_providers.dart';
+import '../../../providers/database_providers.dart' show playlistsProvider;
 import '../../../services/import/exportify_zip.dart';
 import '../../../services/import/imported_playlist.dart';
 import '../../../services/import/import_chain.dart';
 import '../../../services/import/import_diff.dart' show ImportDiff;
-import '../../../services/import/import_options.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/cc_sheet.dart';
 import '../../widgets/empty_state.dart';
@@ -118,9 +115,7 @@ class _ExportifySyncScreenState extends ConsumerState<ExportifySyncScreen> {
   /// Fills [e]'s diff; on failure the entry is marked failed and unticked.
   Future<void> _preview(_Entry e) async {
     try {
-      e.diff = await ref
-          .read(playlistImportServiceProvider)
-          .previewSync(e.csv, e.playlistId!);
+      e.diff = await ref.read(exportifyOpsProvider).previewSync(e.csv, e.playlistId!);
       e.failed = false;
       e.selected = e.changes > 0;
     } on Object catch (err, st) {
@@ -179,40 +174,12 @@ class _ExportifySyncScreenState extends ConsumerState<ExportifySyncScreen> {
 
   Future<void> _run(List<_Entry> chosen) async {
     final nav = Navigator.of(context);
-    final svc = ref.read(playlistImportServiceProvider);
-    final store = ref.read(settingsStoreProvider);
     final done = context.l10n.exportifySyncDone;
     final failedText = context.l10n.exportifySyncFailed;
     setState(() => _busy = true);
-    var ok = 0;
-    for (final e in chosen) {
-      try {
-        final id = e.playlistId;
-        final last = id == null ? null : _lastImport[id];
-        final options = last == null
-            ? const ImportOptions()
-            : ImportOptions(
-                folderPath: last.folderPath,
-                numberFiles: last.numberFiles,
-                linkOnly: last.linkOnly,
-                fetchCovers: last.fetchCovers,
-              );
-        if (id == null) {
-          await svc.start(e.csv, name: e.csv.name);
-        } else {
-          await svc.sync(e.csv, id, options: options);
-        }
-        ok++;
-      } on Object catch (err, st) {
-        AppLog.w('Exportify sync of ${e.csv.name} failed', err, st);
-      }
-    }
-    if (ok > 0) {
-      await store.writeExportifyLastSyncAt(
-        DateTime.now().millisecondsSinceEpoch,
-      );
-      ref.invalidate(exportifyReminderProvider);
-    }
+    final ok = await ref.read(exportifyOpsProvider).syncAll([
+      for (final e in chosen) (csv: e.csv, playlistId: e.playlistId),
+    ], _lastImport);
     if (!mounted) return;
     showMsg(context, ok > 0 ? done(ok) : failedText);
     if (!mounted) return;

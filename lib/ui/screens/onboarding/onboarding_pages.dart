@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -7,16 +9,21 @@ import '../../../providers/exportify_providers.dart';
 import '../../../providers/folder_actions.dart';
 import '../../../providers/library_providers.dart';
 import '../../../providers/settings_providers.dart';
+import '../../../services/scanner/library_scanner.dart' show ScanProgress;
 import '../../theme/tokens.dart';
 import '../import/exportify_remind_choice.dart';
+import 'onboarding_screen.dart' show onboardingPageCount;
 
 class _Page extends StatelessWidget {
   const _Page({
+    required this.index,
     required this.icon,
     required this.title,
     required this.children,
   });
 
+  /// Zero-based position in the guide: the ring fills one fifth per page.
+  final int index;
   final IconData icon;
   final String title;
   final List<Widget> children;
@@ -24,23 +31,42 @@ class _Page extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cc = context.cc;
+    final l = context.l10n;
     final theme = Theme.of(context).textTheme;
+    const total = onboardingPageCount;
+    final label = l.onboardingPageOf(index + 1, total);
+    final step = l.onboardingStepOf(index + 1, total);
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: CcDims.margin + CcDims.gap8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 16),
-          Container(
-            width: 72,
-            height: 72,
-            decoration: BoxDecoration(
-              color: cc.accent,
-              borderRadius: BorderRadius.circular(CcDims.rSheet),
+          const SizedBox(height: CcDims.margin),
+          Semantics(
+            label: label,
+            excludeSemantics: true,
+            child: SizedBox.square(
+              dimension: 140,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  TweenAnimationBuilder<double>(
+                    tween: Tween(end: (index + 1) / total),
+                    duration: ccDuration(context, CcMotion.enter),
+                    curve: CcMotion.curveIn,
+                    builder: (_, v, _) => CustomPaint(
+                      size: const Size.square(140),
+                      painter: _PageRing(v, cc.accent, cc.surface3, cc.surface2),
+                    ),
+                  ),
+                  Icon(icon, size: 44, color: cc.accentSoft),
+                ],
+              ),
             ),
-            child: Icon(icon, size: 40, color: cc.onAccent),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: CcDims.gap8),
+          Text(step, style: theme.bodySmall?.copyWith(color: cc.textMuted)),
+          const SizedBox(height: CcDims.gap24),
           Text(title, style: theme.headlineSmall),
           const SizedBox(height: 12),
           ...children,
@@ -49,6 +75,42 @@ class _Page extends StatelessWidget {
     );
   }
 }
+
+/// Ring of the page counter: a track, the arc from the top and a centre disc.
+class _PageRing extends CustomPainter {
+  const _PageRing(this.fraction, this.arc, this.rest, this.disc);
+
+  final double fraction;
+  final Color arc, rest, disc;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    const stroke = 12.0;
+    final c = size.center(Offset.zero);
+    final r = size.shortestSide / 2 - stroke / 2;
+    final line = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = stroke
+      ..strokeCap = StrokeCap.round;
+    canvas.drawCircle(c, r, line..color = rest);
+    canvas.drawArc(Rect.fromCircle(center: c, radius: r), -math.pi / 2, 2 * math.pi * fraction, false, line..color = arc);
+    canvas.drawCircle(c, r - stroke, Paint()..color = disc);
+  }
+
+  @override
+  bool shouldRepaint(_PageRing o) =>
+      o.fraction != fraction || o.arc != arc || o.rest != rest || o.disc != disc;
+}
+
+/// A list row with the 1 px separator under it (folders).
+Widget _row(BuildContext context, Widget child) => Container(
+  constraints: const BoxConstraints(minHeight: 48),
+  alignment: Alignment.centerLeft,
+  decoration: BoxDecoration(
+    border: Border(bottom: BorderSide(color: context.cc.separator, width: CcDims.rHair)),
+  ),
+  child: child,
+);
 
 Widget _body(BuildContext context, String text) => Padding(
   padding: const EdgeInsets.only(bottom: CcDims.gap12),
@@ -66,6 +128,7 @@ class WelcomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = context.l10n;
     return _Page(
+      index: 0,
       icon: Icons.music_note_rounded,
       title: l.onboardingWelcomeTitle,
       children: [_body(context, l.onboardingWelcomeBody)],
@@ -95,7 +158,9 @@ class _FoldersPageState extends ConsumerState<FoldersPage> {
   Widget build(BuildContext context) {
     final l = context.l10n;
     final folders = ref.watch(foldersProvider).value ?? const [];
+    final scan = ref.watch(scanStateProvider);
     return _Page(
+      index: 1,
       icon: Icons.folder_rounded,
       title: l.onboardingFoldersTitle,
       children: [
@@ -128,21 +193,63 @@ class _FoldersPageState extends ConsumerState<FoldersPage> {
         ),
         const SizedBox(height: 8),
         TextButton(onPressed: () => addDefaultFolderAndScan(ref), child: Text(l.useDefaultFolder)),
+        if (scan.running) _ScanProgress(scan.progress),
         if (folders.isNotEmpty) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
           Text(
             l.onboardingFoldersAdded(folders.length),
             style: Theme.of(context).textTheme.labelLarge,
           ),
           for (final f in folders)
-            ListTile(
-              dense: true,
-              contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.folder_outlined),
-              title: Text(f.path, maxLines: 1, overflow: TextOverflow.ellipsis),
+            _row(
+              context,
+              Row(
+                children: [
+                  Icon(Icons.folder_outlined, color: context.cc.textMuted),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      f.path,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(color: context.cc.textMuted),
+                    ),
+                  ),
+                ],
+              ),
             ),
         ],
       ],
+    );
+  }
+}
+
+/// Scan in progress after a folder is added (the scan itself is shared).
+class _ScanProgress extends StatelessWidget {
+  const _ScanProgress(this.progress);
+
+  final ScanProgress? progress;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = progress;
+    final known = p != null && p.total > 0;
+    return Padding(
+      padding: const EdgeInsets.only(top: CcDims.gap12),
+      child: Semantics(
+        liveRegion: true,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              known ? '${context.l10n.scanning} ${p.done} / ${p.total}' : context.l10n.scanning,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const SizedBox(height: CcDims.gap8),
+            LinearProgressIndicator(value: known ? p.done / p.total : null),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -157,6 +264,7 @@ class OnlinePage extends ConsumerWidget {
     final s = ref.watch(settingsProvider);
     final notifier = ref.read(settingsProvider.notifier);
     return _Page(
+      index: 2,
       icon: Icons.cloud_outlined,
       title: l.onboardingOnlineTitle,
       children: [
@@ -196,6 +304,7 @@ class SpotifyPage extends ConsumerWidget {
     final l = context.l10n;
     final lines = l.onboardingSpotifyBody.split('\n');
     return _Page(
+      index: 3,
       icon: Icons.playlist_add_rounded,
       title: l.onboardingSpotifyTitle,
       children: [
@@ -228,6 +337,7 @@ class SharePage extends StatelessWidget {
     final l = context.l10n;
     final cc = context.cc;
     return _Page(
+      index: 4,
       icon: Icons.devices_rounded,
       title: l.onboardingShareTitle,
       children: [

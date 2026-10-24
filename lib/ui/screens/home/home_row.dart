@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../providers/player_providers.dart';
 import '../../theme/tokens.dart';
+import '../../widgets/progress_frame.dart';
 
-/// A cover, two lines and an optional bar: the row of Home lists.
+/// Cover side inside the 52 dp frame of a row.
+const kHomeCover = 44.0;
+
+/// A cover in a 52 dp frame, two lines and a 1 dp separator ("Quaderno" row).
+/// [progress] draws the 2 dp ring around the cover; [now] marks the playing
+/// row (full ring, title in the soft accent).
 class HomeRow extends StatelessWidget {
   const HomeRow({
     super.key,
@@ -12,50 +16,85 @@ class HomeRow extends StatelessWidget {
     required this.title,
     required this.onTap,
     this.subtitle,
-    this.bar,
+    this.progress,
+    this.now = false,
+    this.last = false,
   });
 
   final Widget cover;
   final String title;
   final String? subtitle;
-  final Widget? bar;
+  final double? progress;
+  final bool now, last;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context).textTheme;
+    final cc = context.cc;
+    final framed = Padding(
+      padding: const EdgeInsets.all(4),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(CcDims.rList),
+        child: SizedBox.square(dimension: kHomeCover, child: cover),
+      ),
+    );
     return Semantics(
       button: onTap != null,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(CcDims.rList),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 6),
-          child: Row(
+        child: Container(
+          constraints: const BoxConstraints(minHeight: 64),
+          padding: const EdgeInsets.symmetric(
+            horizontal: CcDims.margin,
+            vertical: 6,
+          ),
+          child: Stack(
+            clipBehavior: Clip.none,
             children: [
-              cover,
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.bodyLarge,
+              Row(
+                children: [
+                  if (now || progress != null)
+                    ProgressFrame(
+                      size: 52,
+                      progress: now ? null : progress,
+                      child: framed,
+                    )
+                  else
+                    SizedBox.square(dimension: 52, child: framed),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.bodyLarge?.copyWith(
+                            color: now ? cc.accentSoft : null,
+                          ),
+                        ),
+                        if (subtitle != null)
+                          Text(
+                            subtitle!,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.bodyMedium,
+                          ),
+                      ],
                     ),
-                    if (subtitle != null)
-                      Text(
-                        subtitle!,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.bodyMedium,
-                      ),
-                    if (bar != null) ...[const SizedBox(height: 6), bar!],
-                  ],
-                ),
+                  ),
+                ],
               ),
+              if (!last)
+                Positioned(
+                  left: 64,
+                  right: 0,
+                  bottom: -6,
+                  child: Divider(height: 1, thickness: 1, color: cc.separator),
+                ),
             ],
           ),
         ),
@@ -64,51 +103,14 @@ class HomeRow extends StatelessWidget {
   }
 }
 
+/// Placeholder cover with an icon.
 class HomeIconCover extends StatelessWidget {
   const HomeIconCover(this.icon, {super.key});
   final IconData icon;
 
   @override
   Widget build(BuildContext context) => Container(
-    width: 48,
-    height: 48,
-    decoration: BoxDecoration(
-      color: context.cc.surface2,
-      borderRadius: BorderRadius.circular(CcDims.rList),
-    ),
-    child: Icon(icon, color: context.cc.accent),
+    color: context.cc.surface3,
+    child: Icon(icon, color: context.cc.accentSoft),
   );
-}
-
-/// The 2 px progress line under a row.
-class HomeBar extends StatelessWidget {
-  const HomeBar(this.fraction, {super.key});
-  final double fraction;
-
-  @override
-  Widget build(BuildContext context) => ClipRRect(
-    borderRadius: BorderRadius.circular(CcDims.rHair),
-    child: LinearProgressIndicator(
-      value: fraction,
-      minHeight: 2,
-      color: context.cc.accent,
-      backgroundColor: context.cc.surface3,
-    ),
-  );
-}
-
-/// Only this widget follows the position tick, not the whole list.
-class HomePlayingBar extends ConsumerWidget {
-  const HomePlayingBar({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final pos = ref.watch(positionProvider).value ?? Duration.zero;
-    final dur = ref.watch(durationProvider).value;
-    return HomeBar(
-      dur == null || dur.inMilliseconds <= 0
-          ? 0
-          : (pos.inMilliseconds / dur.inMilliseconds).clamp(0.0, 1.0),
-    );
-  }
 }

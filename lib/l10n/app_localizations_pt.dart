@@ -855,6 +855,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get back => 'Voltar';
 
   @override
+  String get seekPosition => 'Posição na faixa';
+
+  @override
   String get settingsPlayback => 'Reprodução';
 
   @override
@@ -2663,6 +2666,11 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String onboardingPageOf(int page, int total) {
     return 'Página $page de $total';
+  }
+
+  @override
+  String onboardingStepOf(int page, int total) {
+    return '$page de $total';
   }
 
   @override

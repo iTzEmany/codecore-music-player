@@ -17,6 +17,9 @@ class FolderOps {
   /// Its tracks leave the library with it.
   Future<void> remove(int id) => _ref.read(folderRepositoryProvider).remove(id);
 
+  /// Root path of every library folder, by folder id.
+  Future<Map<int, String>> paths() => _ref.read(folderRepositoryProvider).pathsById();
+
   /// Where downloads go (registered as a library folder), or null if none.
   Future<(Directory, Folder)?> downloadFolder() => resolveDownloadFolder(_ref.read(folderRepositoryProvider));
 }

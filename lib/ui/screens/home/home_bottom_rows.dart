@@ -23,7 +23,10 @@ import 'home_row.dart';
 /// Three-line lists at the bottom: the month, top artists, most played and
 /// albums to rediscover. Each shows only when it has something to say.
 class HomeBottomRows extends ConsumerWidget {
-  const HomeBottomRows({super.key});
+  const HomeBottomRows({super.key, this.wide = false});
+
+  /// Desktop: the three blocks side by side instead of one under the other.
+  final bool wide;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -35,54 +38,51 @@ class HomeBottomRows extends ConsumerWidget {
       albums,
       DateTime.now(),
     ).take(3).toList();
-    return Column(
+    final month = [
+      const _MonthBlock(),
+      if (kEnableYoutube) const TopArtistsCard(),
+    ];
+    final topRows = [
+      if (top.isNotEmpty) SectionHeader(l.homeTopTracks),
+      for (var i = 0; i < math.min(3, top.length); i++)
+        HomeRow(
+          last: i == math.min(3, top.length) - 1,
+          cover: CoverImage(coverKey: top[i].coverKey, size: kHomeCover),
+          title: top[i].title,
+          subtitle: top[i].artist ?? l.unknownArtist,
+          onTap: () => ctrl.playFromList(
+            top,
+            i,
+            context: const PlayContext(PlayContextKind.library),
+          ),
+        ),
+    ];
+    final redo = [
+      if (rediscover.isNotEmpty) SectionHeader(l.homeRediscover),
+      for (final (i, a) in rediscover.indexed)
+        HomeRow(
+          last: i == rediscover.length - 1,
+          cover: CoverImage(coverKey: a.coverKey, size: kHomeCover),
+          title: a.title ?? l.unknownAlbum,
+          subtitle: a.variousArtists
+              ? l.variousArtists
+              : (a.artist ?? l.unknownArtist),
+          onTap: () =>
+              ShellNav.open<void>(context, AlbumDetailScreen(album: a)),
+        ),
+    ];
+    if (!wide) return Column(children: [...month, ...topRows, ...redo]);
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const _MonthBlock(),
-        if (kEnableYoutube) const TopArtistsCard(),
-        if (top.isNotEmpty) SectionHeader(l.homeTopTracks),
-        for (var i = 0; i < math.min(3, top.length); i++)
-          _padded(
-            HomeRow(
-              cover: CoverImage(
-                coverKey: top[i].coverKey,
-                size: 48,
-                radius: CcDims.rList,
-              ),
-              title: top[i].title,
-              subtitle: top[i].artist ?? l.unknownArtist,
-              onTap: () => ctrl.playFromList(
-                top,
-                i,
-                context: const PlayContext(PlayContextKind.library),
-              ),
-            ),
-          ),
-        if (rediscover.isNotEmpty) SectionHeader(l.homeRediscover),
-        for (final a in rediscover)
-          _padded(
-            HomeRow(
-              cover: CoverImage(
-                coverKey: a.coverKey,
-                size: 48,
-                radius: CcDims.rList,
-              ),
-              title: a.title ?? l.unknownAlbum,
-              subtitle: a.variousArtists
-                  ? l.variousArtists
-                  : (a.artist ?? l.unknownArtist),
-              onTap: () =>
-                  ShellNav.open<void>(context, AlbumDetailScreen(album: a)),
-            ),
-          ),
+        for (final (i, c) in [month, topRows, redo].indexed) ...[
+          if (i > 0) const SizedBox(width: CcDims.gap32),
+          Expanded(child: Column(children: c)),
+        ],
       ],
     );
   }
 }
-
-Widget _padded(Widget row) => Padding(
-  padding: const EdgeInsets.symmetric(horizontal: CcDims.margin),
-  child: row,
-);
 
 /// «Il tuo mese», once there are ten listens; a tap anywhere opens the stats.
 class _MonthBlock extends ConsumerWidget {
@@ -110,30 +110,18 @@ class _MonthBlock extends ConsumerWidget {
             actionLabel: l.showAll,
             onAction: open,
           ),
-          _padded(
-            HomeRow(
-              cover: Container(
-                width: 48,
-                height: 48,
-                alignment: Alignment.center,
-                child: Icon(
-                  Icons.bar_chart_rounded,
-                  color: context.cc.accent,
-                  size: 32,
-                ),
-              ),
-              title: formatListened(l, month.playedMs),
-              onTap: open,
-            ),
+          HomeRow(
+            cover: const HomeIconCover(Icons.bar_chart_rounded),
+            title: formatListened(l, month.playedMs),
+            onTap: open,
           ),
-          for (final a in month.topArtists.take(2))
-            _padded(
-              HomeRow(
-                cover: const SizedBox(width: 48, height: 48),
-                title: a.name ?? l.unknownArtist,
-                subtitle: l.statsPlays(a.plays),
-                onTap: open,
-              ),
+          for (final (i, a) in month.topArtists.take(2).indexed)
+            HomeRow(
+              last: i == month.topArtists.take(2).length - 1,
+              cover: const SizedBox.shrink(),
+              title: a.name ?? l.unknownArtist,
+              subtitle: l.statsPlays(a.plays),
+              onTap: open,
             ),
         ],
       ),

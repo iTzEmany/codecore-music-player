@@ -127,8 +127,7 @@ class _MemoryListState extends ConsumerState<_MemoryList> {
     final breakdown = ref.watch(memoryBreakdownProvider);
     final error = totals.error ?? breakdown.error;
     if (error != null) {
-      return loadErrorState(
-        context,
+      return LoadError(
         error,
         totals.stackTrace ?? breakdown.stackTrace ?? StackTrace.current,
         onRetry: widget.onRetry,

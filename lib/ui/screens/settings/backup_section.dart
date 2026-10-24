@@ -7,13 +7,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 
 import '../../../core/app_log.dart';
-import '../../../core/paths.dart';
 import '../../../data/repositories/backup_merge.dart';
 import '../../../l10n/l10n_ext.dart';
-import '../../../providers/track_ops.dart';
-import '../../../providers/backup_providers.dart';
-import '../../../providers/database_providers.dart';
-import '../../../providers/settings_providers.dart';
+import '../../../providers/backup_ops.dart';
 import '../../../services/backup/backup_service.dart';
 import '../../../services/backup/restore_service.dart';
 import '../../../services/export/save_file.dart';
@@ -58,10 +54,9 @@ Future<void> _create(BuildContext context, WidgetRef ref) async {
   File? tmp;
   String msg;
   try {
-    final service = await ref.read(backupServiceProvider.future);
     final name = BackupService.fileName(DateTime.now());
     tmp = File(p.join((await Directory.systemTemp.createTemp('codecore-save')).path, name));
-    await service.createBackup(tmp.path);
+    await ref.read(backupOpsProvider).create(tmp.path);
     nav.pop();
     final saved = await saveBytes(name, await tmp.readAsBytes(), mimeType: 'application/zip');
     if (!saved) return;
@@ -89,11 +84,7 @@ Future<void> _restore(BuildContext context, WidgetRef ref) async {
   if (!context.mounted) return;
   if (!path.toLowerCase().endsWith('.zip')) return showMsg(context, l.restoreNotBackup);
   try {
-    final plan = await inspectBackup(
-      File(path),
-      deviceId: await ref.read(settingsStoreProvider).deviceId(),
-      schemaVersion: ref.read(schemaVersionProvider),
-    );
+    final plan = await ref.read(backupOpsProvider).inspect(File(path));
     if (!context.mounted) return;
     final choice = await showDialog<RestoreChoice>(context: context, builder: (_) => RestoreDialog(plan: plan));
     if (choice == null || !context.mounted) return;
@@ -104,7 +95,7 @@ Future<void> _restore(BuildContext context, WidgetRef ref) async {
           confirmLabel: l.restoreReplaceGo,
           destructive: true);
       if (!ok) return;
-      await stageFullRestore(File(path), await restoreStagingDir());
+      await ref.read(backupOpsProvider).stageReplace(File(path));
       if (!context.mounted) return;
       await showDialog<void>(
         context: context,
@@ -120,7 +111,7 @@ Future<void> _restore(BuildContext context, WidgetRef ref) async {
         ),
       );
     } else {
-      final report = await ref.read(trackOpsProvider).mergeBackupFile(File(path), Directory(await coversDir()));
+      final report = await ref.read(backupOpsProvider).merge(File(path));
       if (!context.mounted) return;
       await _showMergeReport(context, report);
     }

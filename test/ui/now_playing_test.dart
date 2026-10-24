@@ -5,7 +5,12 @@ import 'package:codecore/ui/screens/now_playing/now_playing_cards.dart';
 import 'package:codecore/ui/shell/app_shell.dart';
 import 'package:codecore/ui/widgets/motion.dart';
 import 'package:codecore/ui/widgets/quality_tag.dart';
+import 'package:codecore/ui/screens/now_playing/now_playing_controls.dart';
+import 'package:codecore/ui/theme/tokens.dart';
+import 'package:codecore/ui/widgets/cover_backdrop.dart';
 import 'package:codecore/ui/widgets/ring_progress.dart';
+import 'package:codecore/ui/theme/custom_theme.dart';
+import 'package:codecore/providers/theme_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -17,6 +22,18 @@ Future<void> _settle(WidgetTester tester) async {
       () => Future<void>.delayed(const Duration(milliseconds: 100)));
   await tester.pump(const Duration(milliseconds: 300));
   await tester.pump(const Duration(milliseconds: 300));
+}
+
+class _SeekSpy implements PlayerController {
+  _SeekSpy(this.seeks);
+
+  final List<Duration> seeks;
+
+  @override
+  Future<void> seek(Duration position) async => seeks.add(position);
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => null;
 }
 
 void main() {
@@ -34,7 +51,13 @@ void main() {
     expect(find.text('Artist'), findsOneWidget);
     expect(find.byIcon(Icons.favorite_border_rounded), findsOneWidget);
     expect(find.byIcon(Icons.queue_music_rounded), findsOneWidget);
-    expect(find.byType(Slider), findsWidgets);
+    expect(
+        tester
+            .widget<RingProgress>(find.descendant(
+                of: find.byType(NowPlayingScreen),
+                matching: find.byType(RingProgress)))
+            .seekable,
+        isTrue);
     // Without a context the header just says «In riproduzione».
     expect(find.text('In riproduzione'), findsOneWidget);
     await h.dispose(tester);
@@ -98,6 +121,98 @@ void main() {
         findsOneWidget);
     expect(find.byType(SpinWhilePlaying), findsOneWidget);
     await h.dispose(tester);
+  });
+
+  testWidgets('the player background is one flat tint when the option is on',
+      (tester) async {
+    tester.view.physicalSize = const Size(400, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final h = await Harness.create(tester, tracks: 2);
+    final rows = await tester.runAsync(() => h.db.select(h.db.tracks).get());
+    await tester.runAsync(() => h.handler.playQueue([rows!.first.id], 0));
+    await h.pump(tester, const NowPlayingScreen());
+    final scaffold = tester.widget<Scaffold>(
+        find.descendant(of: find.byType(NowPlayingScreen), matching: find.byType(Scaffold)).first);
+    // No cover: the tint falls back to heroBase.
+    expect(scaffold.backgroundColor, CcColors.notte.heroBase);
+    expect(find.byType(CoverBackdrop), findsNothing);
+    await h.dispose(tester);
+  });
+
+  testWidgets('the player background is bg when the tint option is off',
+      (tester) async {
+    tester.view.physicalSize = const Size(400, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final h = await Harness.create(tester, tracks: 2);
+    final rows = await tester.runAsync(() => h.db.select(h.db.tracks).get());
+    await tester.runAsync(() => h.handler.playQueue([rows!.first.id], 0));
+    await h.pump(tester, const NowPlayingScreen(), extraOverrides: [
+      themeBackgroundProvider
+          .overrideWithValue(const ThemeBackground(coverBackdrop: false)),
+    ]);
+    final scaffold = tester.widget<Scaffold>(
+        find.descendant(of: find.byType(NowPlayingScreen), matching: find.byType(Scaffold)).first);
+    expect(scaffold.backgroundColor, CcColors.notte.bg);
+    await h.dispose(tester);
+  });
+
+  group('seek ring on the screen', () {
+    final seeks = <Duration>[];
+    setUp(seeks.clear);
+
+    Future<(Harness, Offset, double)> open(WidgetTester tester) async {
+      tester.view.physicalSize = const Size(400, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final h = await Harness.create(tester, tracks: 2);
+      final rows = await tester.runAsync(() => h.db.select(h.db.tracks).get());
+      await tester.runAsync(() => h.handler.playQueue([rows!.first.id], 0));
+      await h.pump(tester, const NowPlayingScreen(), extraOverrides: [
+        playerControllerProvider.overrideWithValue(_SeekSpy(seeks)),
+        positionProvider.overrideWith((_) => Stream.value(Duration.zero)),
+        durationProvider
+            .overrideWith((_) => Stream.value(const Duration(seconds: 100))),
+      ]);
+      final ring = find.descendant(
+          of: find.byType(NowPlayingScreen), matching: find.byType(RingProgress));
+      final size = tester.getSize(ring).width;
+      return (h, tester.getCenter(ring), RingProgress.innerSize(size, stroke: 12) / 2);
+    }
+
+    testWidgets('a drag just inside the cover edge does not seek', (tester) async {
+      final (h, c, coverR) = await open(tester);
+      final g = await tester.startGesture(c + Offset(0, coverR - 8));
+      // A first move to cross the touch slop, then the ones that count.
+      await g.moveBy(const Offset(0, 30));
+      await g.moveBy(const Offset(0, 30));
+      await tester.pump();
+      final shift = tester
+          .widgetList<AnimatedContainer>(find.descendant(
+              of: find.byType(NowPlayingScreen),
+              matching: find.byType(AnimatedContainer)))
+          .map((w) => w.transform?.getTranslation().y ?? 0)
+          .fold(0.0, (a, b) => a + b);
+      expect(shift, greaterThan(0), reason: 'the sheet drag took it');
+      await g.up();
+      expect(seeks, isEmpty);
+      await h.dispose(tester);
+    });
+
+    testWidgets('a drag on the ring band seeks and moves the elapsed time',
+        (tester) async {
+      final (h, c, coverR) = await open(tester);
+      // 30 dp past the cover edge: outside the drawing's box, inside the band.
+      final g = await tester.startGesture(c + Offset(0, coverR + 30));
+      await g.moveBy(const Offset(0, 4));
+      await tester.pump();
+      expect(find.text('0:00'), findsNothing);
+      await g.up();
+      expect(seeks, hasLength(1));
+      expect(seeks.single.inMilliseconds / 1000, closeTo(36, 2));
+      await h.dispose(tester);
+    });
   });
 
   testWidgets('reduce motion: the player opens without growing and the cover does not spin',
@@ -220,7 +335,7 @@ void main() {
         () => h.handler.playQueue(rows!.map((t) => t.id).toList(), 0));
     await h.pump(tester, const NowPlayingScreen());
     final cards = tester.getRect(find.byType(UpNextCard));
-    final slider = tester.getRect(find.byType(Slider).first);
+    final slider = tester.getRect(find.byType(NpSeekRow));
     // Cards end as far from the right edge as the player starts from the left.
     expect(slider.left, closeTo(1600 - cards.right, 1));
     await h.dispose(tester);

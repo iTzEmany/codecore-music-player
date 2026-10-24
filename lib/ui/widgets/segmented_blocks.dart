@@ -4,9 +4,9 @@ import '../theme/tokens.dart';
 import 'motion.dart';
 
 class BlockItem<T> {
-  const BlockItem({required this.value, required this.icon, required this.label});
+  const BlockItem({required this.value, this.icon, required this.label});
   final T value;
-  final IconData icon;
+  final IconData? icon;
   final String label;
 }
 
@@ -45,13 +45,14 @@ class SegmentedBlocks<T> extends StatelessWidget {
             borderRadius: _radius,
             onTap: () => onChanged(item.value),
             child: ConstrainedBox(
-              constraints: const BoxConstraints(minHeight: 64),
+              constraints: BoxConstraints(minHeight: item.icon == null ? 48 : 64),
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: CcDims.gap4, vertical: CcDims.gap8),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(item.icon, size: 22, color: on ? cc.bg : cc.textMuted),
+                    if (item.icon != null)
+                      Icon(item.icon, size: 22, color: on ? cc.bg : cc.textMuted),
                     Text(
                       item.label,
                       maxLines: 2,

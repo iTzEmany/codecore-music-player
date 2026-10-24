@@ -852,6 +852,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get back => 'Indietro';
 
   @override
+  String get seekPosition => 'Posizione nel brano';
+
+  @override
   String get settingsPlayback => 'Riproduzione';
 
   @override
@@ -2660,6 +2663,11 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String onboardingPageOf(int page, int total) {
     return 'Pagina $page di $total';
+  }
+
+  @override
+  String onboardingStepOf(int page, int total) {
+    return '$page di $total';
   }
 
   @override

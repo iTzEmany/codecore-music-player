@@ -1,6 +1,7 @@
 import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/data/repositories/library_entries.dart';
 import 'package:codecore/ui/screens/library/library_screen.dart';
+import 'package:codecore/ui/screens/library/library_shortcuts.dart';
 import 'package:codecore/ui/shell/app_shell.dart';
 import 'package:codecore/ui/theme/tokens.dart';
 import 'package:codecore/ui/widgets/segmented_blocks.dart';
@@ -75,16 +76,85 @@ void main() {
     await h.dispose(t);
   });
 
-  testWidgets('shortcuts are blocks with the icon left of the label', (t) async {
+  Rect block(WidgetTester t, String label) => t.getRect(find.ancestor(
+      of: find.text(label), matching: find.byType(InkWell)).first);
+
+  testWidgets('phone: shortcuts are 2 columns, the odd last one is full width',
+      (t) async {
     final h = await open(t, width: 360);
-    final icon = t.getRect(find.byIcon(Icons.favorite_rounded));
-    final fav = t.getRect(find.text('Preferiti'));
-    expect(icon.right, lessThanOrEqualTo(fav.left));
-    final favBlock = t.getRect(find.ancestor(
-        of: find.text('Preferiti'), matching: find.byType(InkWell)));
-    final allBlock = t.getRect(find.ancestor(
-        of: find.text('Tutti i brani'), matching: find.byType(InkWell)));
-    expect(allBlock.top, favBlock.top);
+    final fav = block(t, 'Preferiti');
+    final all = block(t, 'Tutti i brani');
+    final last = block(t, 'Statistiche');
+    expect(all.top, fav.top);
+    expect(all.left, greaterThan(fav.right));
+    expect(find.byIcon(Icons.favorite_rounded), findsNothing);
+    // 7 blocks here: the seventh spans both columns.
+    expect(last.left, fav.left);
+    expect(last.right, all.right);
+    await h.dispose(t);
+  });
+
+  testWidgets('desktop: all shortcuts on one row', (t) async {
+    final h = await open(t, width: 1600);
+    final fav = block(t, 'Preferiti');
+    final last = block(t, 'Statistiche');
+    expect(last.top, fav.top);
+    expect(last.left, greaterThan(fav.right));
+    await h.dispose(t);
+  });
+
+  testWidgets('desktop, German: shortcuts stay on one row without overflow',
+      (t) async {
+    t.view.physicalSize = const Size(1280, 1400);
+    t.view.devicePixelRatio = 1;
+    addTearDown(t.view.reset);
+    final h = await Harness.create(t, tracks: 4);
+    await h.pump(t, const LibraryScreen(), locale: const Locale('de'));
+    await _settle(t);
+    final tops = {
+      for (final e in find
+          .descendant(
+              of: find.byType(LibraryShortcuts), matching: find.byType(InkWell))
+          .evaluate())
+        t.getRect(find.byWidget(e.widget)).top,
+    };
+    expect(tops.length, 1);
+    expect(t.takeException(), isNull);
+    await h.dispose(t);
+  });
+
+  testWidgets('shortcuts with icons keep the old grid on a wide screen',
+      (t) async {
+    t.view.physicalSize = const Size(1200, 800);
+    t.view.devicePixelRatio = 1;
+    addTearDown(t.view.reset);
+    final h = await Harness.create(t);
+    await h.pump(
+      t,
+      Scaffold(
+        body: LibraryShortcuts(items: [
+          for (var i = 0; i < 5; i++)
+            LibraryShortcut(label: 'S$i', icon: Icons.star, onTap: () {}),
+        ]),
+      ),
+    );
+    // 4 per row, the fifth wraps to a second row.
+    expect(t.getRect(find.text('S3')).top, t.getRect(find.text('S0')).top);
+    expect(t.getRect(find.text('S4')).top,
+        greaterThan(t.getRect(find.text('S0')).top));
+    await h.dispose(t);
+  });
+
+  testWidgets('filters never scroll sideways', (t) async {
+    final h = await open(t);
+    expect(
+      find.descendant(
+        of: find.byType(SegmentedBlocks<LibraryKind?>),
+        matching: find.byWidgetPredicate(
+            (w) => w is ListView && w.scrollDirection == Axis.horizontal),
+      ),
+      findsNothing,
+    );
     await h.dispose(t);
   });
 

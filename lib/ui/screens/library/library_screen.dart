@@ -1,6 +1,9 @@
 import '../../widgets/cc_sheet.dart';
+
 import 'package:flutter/material.dart';
+
 import '../playlists/export_dialog.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -19,13 +22,13 @@ import '../../theme/tokens.dart';
 import '../../widgets/activity_button.dart';
 import '../../widgets/artist_avatar.dart';
 import '../../widgets/cover_image.dart';
-import '../../widgets/create_flows.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_state.dart';
 import '../../widgets/playlist_cover.dart';
+import '../../widgets/progress_frame.dart';
+import '../../../providers/player_providers.dart' show currentTrackProvider;
 import '../../widgets/smart_cover.dart';
 import '../devices/devices_sheet.dart';
-import '../import/import_flow.dart';
 import '../playlists/playlist_detail_screen.dart';
 import '../podcast/podcasts_screen.dart';
 import '../radio/radio_screen.dart';
@@ -51,6 +54,7 @@ import 'library_shortcuts.dart';
 import 'library_toolbar.dart';
 import '../../widgets/alpha_scroller.dart';
 import '../../widgets/motion.dart';
+import '../../widgets/new_playlist_menu.dart';
 import '../../widgets/segmented_blocks.dart';
 
 /// Playlists, albums and artists in one place, with Favourites and
@@ -112,10 +116,12 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
         onAction: openAppSettings,
       );
     } else if (error != null) {
-      body = loadErrorState(
-        context,
+      body = LoadError(
         error,
-        StackTrace.current,
+        playlists.stackTrace ??
+            albums.stackTrace ??
+            artists.stackTrace ??
+            StackTrace.current,
         onRetry: () {
           ref.invalidate(playlistsProvider);
           ref.invalidate(albumsProvider);
@@ -165,7 +171,10 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
         children: [
           const _LibraryHeader(),
           const ScanStatus(),
-          _KindTabs(selected: _kind, onChanged: (k) => setState(() => _kind = k)),
+          _KindTabs(
+            selected: _kind,
+            onChanged: (k) => setState(() => _kind = k),
+          ),
           LibraryToolbar(
             countLabel: count,
             sort: sort,
@@ -188,84 +197,72 @@ class _LibraryHeader extends ConsumerWidget {
     final l = context.l10n;
     final theme = Theme.of(context).textTheme;
     return Padding(
-            padding: const EdgeInsets.fromLTRB(CcDims.margin, CcDims.gap12, CcDims.gap4, 0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    l.navLibrary,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.headlineSmall,
-                  ),
-                ),
-                const ActivityButton(),
-                IconButton(
-                  tooltip: l.navSearch,
-                  icon: const Icon(Icons.search_rounded),
-                  onPressed: () => ref
-                      .read(navIndexProvider.notifier)
-                      .set(NavTab.search.index),
-                ),
-                PopupMenuButton<_NewPlaylistAction>(
-                  tooltip: l.newPlaylist,
-                  icon: const Icon(Icons.add_rounded),
-                  onSelected: (v) async {
-                    if (v == _NewPlaylistAction.csv) {
-                      startCsvImport(context, ref);
-                      return;
-                    }
-                    if (v == _NewPlaylistAction.smart) {
-                      await ShellNav.open<bool>(
-                        context,
-                        const SmartPlaylistEditor(),
-                      );
-                      return;
-                    }
-                    await createPlaylistFlow(context, ref);
-                  },
-                  itemBuilder: (_) => [
-                    PopupMenuItem(
-                      value: _NewPlaylistAction.create,
-                      child: Text(l.newPlaylist),
-                    ),
-                    PopupMenuItem(
-                      value: _NewPlaylistAction.smart,
-                      child: Text(l.smartPlaylistNew),
-                    ),
-                    PopupMenuItem(
-                      value: _NewPlaylistAction.csv,
-                      child: Text(l.csvImportMenu),
-                    ),
-                  ],
-                ),
-                PopupMenuButton<_LibraryMenuAction>(
-                  tooltip: l.moreActions,
-                  onSelected: (v) {
-                    switch (v) {
-                      case _LibraryMenuAction.folders:
-                        showCcSheet<void>(
-                          context: context,
-                          builder: (_) => const FoldersSheet(),
-                        );
-                      case _LibraryMenuAction.scan:
-                        scanWithPermission(ref);
-                      case _LibraryMenuAction.share:
-                        DevicesSheet.show(context);
-                      case _LibraryMenuAction.exportAll:
-                        exportAllPlaylistsFlow(context, ref);
-                    }
-                  },
-                  itemBuilder: (_) => [
-                    PopupMenuItem(value: _LibraryMenuAction.folders, child: Text(l.folders)),
-                    PopupMenuItem(value: _LibraryMenuAction.scan, child: Text(l.refreshLibrary)),
-                    PopupMenuItem(value: _LibraryMenuAction.share, child: Text(l.shareTitle)),
-                    PopupMenuItem(value: _LibraryMenuAction.exportAll, child: Text(l.exportAllPlaylists)),
-                  ],
-                ),
-              ],
+      padding: const EdgeInsets.fromLTRB(
+        CcDims.margin,
+        CcDims.gap12,
+        CcDims.gap4,
+        0,
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              l.navLibrary,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.headlineSmall,
             ),
-          );
+          ),
+          const ActivityButton(),
+          IconButton(
+            tooltip: l.navSearch,
+            icon: const Icon(Icons.search_rounded),
+            onPressed: () =>
+                ref.read(navIndexProvider.notifier).set(NavTab.search.index),
+          ),
+          NewPlaylistMenu(
+            onSmart: () =>
+                ShellNav.open<bool>(context, const SmartPlaylistEditor()),
+          ),
+          PopupMenuButton<_LibraryMenuAction>(
+            tooltip: l.moreActions,
+            onSelected: (v) {
+              switch (v) {
+                case _LibraryMenuAction.folders:
+                  showCcSheet<void>(
+                    context: context,
+                    builder: (_) => const FoldersSheet(),
+                  );
+                case _LibraryMenuAction.scan:
+                  scanWithPermission(ref);
+                case _LibraryMenuAction.share:
+                  DevicesSheet.show(context);
+                case _LibraryMenuAction.exportAll:
+                  exportAllPlaylistsFlow(context, ref);
+              }
+            },
+            itemBuilder: (_) => [
+              PopupMenuItem(
+                value: _LibraryMenuAction.folders,
+                child: Text(l.folders),
+              ),
+              PopupMenuItem(
+                value: _LibraryMenuAction.scan,
+                child: Text(l.refreshLibrary),
+              ),
+              PopupMenuItem(
+                value: _LibraryMenuAction.share,
+                child: Text(l.shareTitle),
+              ),
+              PopupMenuItem(
+                value: _LibraryMenuAction.exportAll,
+                child: Text(l.exportAllPlaylists),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -279,30 +276,23 @@ class _KindTabs extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = context.l10n;
     return Padding(
-              padding: const EdgeInsets.fromLTRB(CcDims.margin, CcDims.gap8, CcDims.margin, 0),
-              child: SegmentedBlocks<LibraryKind?>(
-                items: [
-                  BlockItem(value: null, icon: Icons.apps_rounded, label: l.libraryAll),
-                  BlockItem(
-                    value: LibraryKind.playlist,
-                    icon: Icons.queue_music_rounded,
-                    label: l.navPlaylists,
-                  ),
-                  BlockItem(
-                    value: LibraryKind.album,
-                    icon: Icons.album_rounded,
-                    label: l.albums,
-                  ),
-                  BlockItem(
-                    value: LibraryKind.artist,
-                    icon: Icons.person_rounded,
-                    label: l.artists,
-                  ),
-                ],
-                selected: selected,
-                onChanged: onChanged,
-              ),
-            );
+      padding: const EdgeInsets.fromLTRB(
+        CcDims.margin,
+        CcDims.gap8,
+        CcDims.margin,
+        0,
+      ),
+      child: SegmentedBlocks<LibraryKind?>(
+        items: [
+          BlockItem(value: null, label: l.libraryAll),
+          BlockItem(value: LibraryKind.playlist, label: l.navPlaylists),
+          BlockItem(value: LibraryKind.album, label: l.albums),
+          BlockItem(value: LibraryKind.artist, label: l.artists),
+        ],
+        selected: selected,
+        onChanged: onChanged,
+      ),
+    );
   }
 }
 
@@ -315,80 +305,83 @@ class _LibraryShortcuts extends ConsumerWidget {
     final favCount = ref.watch(
       tracksProvider(true).select((t) => t.value?.length ?? 0),
     );
-    final tagCount = ref.watch(tagsProvider.select((t) => t.value?.length ?? 0));
-    final podcastCount = ref.watch(podcastsProvider.select((p) => p.value?.length ?? 0));
-    final radioCount = ref.watch(savedRadiosProvider.select((r) => r.value?.length ?? 0));
-    final followedCount = ref.watch(followedArtistsProvider.select((v) => v.value?.length ?? 0));
-    final releaseTopArtists = ref.watch(releaseOptionsProvider.select((o) => o.topArtists));
-    final reviewCount = ref.watch(reviewCountProvider.select((c) => c.value ?? 0));
+    final tagCount = ref.watch(
+      tagsProvider.select((t) => t.value?.length ?? 0),
+    );
+    final podcastCount = ref.watch(
+      podcastsProvider.select((p) => p.value?.length ?? 0),
+    );
+    final radioCount = ref.watch(
+      savedRadiosProvider.select((r) => r.value?.length ?? 0),
+    );
+    final followedCount = ref.watch(
+      followedArtistsProvider.select((v) => v.value?.length ?? 0),
+    );
+    final releaseTopArtists = ref.watch(
+      releaseOptionsProvider.select((o) => o.topArtists),
+    );
+    final reviewCount = ref.watch(
+      reviewCountProvider.select((c) => c.value ?? 0),
+    );
     final trackCount = ref.watch(
       tracksProvider(false).select((t) => t.value?.length ?? 0),
     );
     void open(Widget w) => ShellNav.open<void>(context, w);
     return LibraryShortcuts(
-                items: [
-                  LibraryShortcut(
-                    label: l.navFavorites,
-                    icon: Icons.favorite_rounded,
-                    count: favCount,
-                    keepWhenZero: true,
-                    onTap: () => open(const FavoritesScreen()),
-                  ),
-                  LibraryShortcut(
-                    label: l.allTracks,
-                    icon: Icons.music_note_rounded,
-                    count: trackCount,
-                    keepWhenZero: true,
-                    onTap: () => open(const AllTracksScreen()),
-                  ),
-                  LibraryShortcut(
-                    label: l.historyTitle,
-                    icon: Icons.history_rounded,
-                    onTap: () => open(const HistoryScreen()),
-                  ),
-                  LibraryShortcut(
-                    label: l.podcastsTitle,
-                    icon: Icons.podcasts_rounded,
-                    count: podcastCount,
-                    keepWhenZero: true,
-                    onTap: () => open(const PodcastsScreen()),
-                  ),
-                  LibraryShortcut(
-                    label: l.radioTitle,
-                    icon: Icons.radio_rounded,
-                    count: radioCount,
-                    keepWhenZero: true,
-                    onTap: () => open(const RadioScreen()),
-                  ),
-                  if (kEnableYoutube && (followedCount > 0 || releaseTopArtists))
-                    LibraryShortcut(
-                      label: l.releasesFollowedLibrary,
-                      icon: Icons.how_to_reg_rounded,
-                      count: followedCount,
-                      keepWhenZero: true,
-                      onTap: () => open(const FollowedArtistsScreen()),
-                    ),
-                  LibraryShortcut(
-                    label: l.tagsTitle,
-                    icon: Icons.label_outline_rounded,
-                    count: tagCount,
-                    keepWhenZero: true,
-                    onTap: () => open(const TagsScreen()),
-                  ),
-                  LibraryShortcut(
-                    label: l.statsTitle,
-                    icon: Icons.bar_chart_rounded,
-                    onTap: () => open(const StatsScreen()),
-                  ),
-                  if (reviewCount > 0)
-                    LibraryShortcut(
-                      label: l.reviewTitle,
-                      icon: Icons.fact_check_rounded,
-                      count: reviewCount,
-                      onTap: () => open(const ReviewScreen()),
-                    ),
-                ],
-              );
+      items: [
+        LibraryShortcut(
+          label: l.navFavorites,
+          count: favCount,
+          keepWhenZero: true,
+          onTap: () => open(const FavoritesScreen()),
+        ),
+        LibraryShortcut(
+          label: l.allTracks,
+          count: trackCount,
+          keepWhenZero: true,
+          onTap: () => open(const AllTracksScreen()),
+        ),
+        LibraryShortcut(
+          label: l.historyTitle,
+          onTap: () => open(const HistoryScreen()),
+        ),
+        LibraryShortcut(
+          label: l.podcastsTitle,
+          count: podcastCount,
+          keepWhenZero: true,
+          onTap: () => open(const PodcastsScreen()),
+        ),
+        LibraryShortcut(
+          label: l.radioTitle,
+          count: radioCount,
+          keepWhenZero: true,
+          onTap: () => open(const RadioScreen()),
+        ),
+        if (kEnableYoutube && (followedCount > 0 || releaseTopArtists))
+          LibraryShortcut(
+            label: l.releasesFollowedLibrary,
+            count: followedCount,
+            keepWhenZero: true,
+            onTap: () => open(const FollowedArtistsScreen()),
+          ),
+        LibraryShortcut(
+          label: l.tagsTitle,
+          count: tagCount,
+          keepWhenZero: true,
+          onTap: () => open(const TagsScreen()),
+        ),
+        LibraryShortcut(
+          label: l.statsTitle,
+          onTap: () => open(const StatsScreen()),
+        ),
+        if (reviewCount > 0)
+          LibraryShortcut(
+            label: l.reviewTitle,
+            count: reviewCount,
+            onTap: () => open(const ReviewScreen()),
+          ),
+      ],
+    );
   }
 }
 
@@ -427,6 +420,37 @@ Widget _cover(LibraryEntry e, double size) => switch (e.kind) {
   ),
 };
 
+/// Row cover; the playing album gets the progress frame (playlists have no
+/// cheap «is playing» signal, so they don't).
+class _EntryCover extends ConsumerWidget {
+  const _EntryCover(this.e);
+
+  final LibraryEntry e;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final current =
+        e.kind == LibraryKind.album &&
+        ref.watch(
+          currentTrackProvider.select((t) => t.value?.albumKey == e.id),
+        );
+    if (!current) return _cover(e, 48);
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        _cover(e, 48),
+        const Positioned(
+          left: -4,
+          top: -4,
+          right: -4,
+          bottom: -4,
+          child: LiveProgressFrame(),
+        ),
+      ],
+    );
+  }
+}
+
 class _LibraryList extends StatelessWidget {
   const _LibraryList({
     required this.header,
@@ -458,32 +482,45 @@ class _LibraryList extends StatelessWidget {
     }
     Widget entryRow(LibraryEntry e) => InkWell(
       onTap: () => onOpen(e),
-      child: Row(
+      child: Stack(
+        fit: StackFit.passthrough,
         children: [
-          const SizedBox(width: CcDims.margin),
-          _cover(e, 48),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  _title(context, e),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.bodyLarge,
-                ),
-                Text(
-                  _subtitle(context, e),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.bodyMedium,
-                ),
-              ],
-            ),
+          // «Quaderno» hairline from the text on.
+          Positioned(
+            left: CcDims.margin + 48 + 12,
+            right: CcDims.margin,
+            bottom: 0,
+            height: 1,
+            child: ColoredBox(color: cc.separator),
           ),
-          const SizedBox(width: CcDims.margin),
+          Row(
+            children: [
+              const SizedBox(width: CcDims.margin),
+              _EntryCover(e),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _title(context, e),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.bodyLarge,
+                    ),
+                    Text(
+                      _subtitle(context, e),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.bodyMedium,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: CcDims.margin),
+            ],
+          ),
         ],
       ),
     );
@@ -497,7 +534,12 @@ class _LibraryList extends StatelessWidget {
             final r = rows[i];
             if (r is LibraryEntry) return entryRow(r);
             return Padding(
-              padding: const EdgeInsets.fromLTRB(CcDims.margin, CcDims.gap16, CcDims.margin, CcDims.gap4),
+              padding: const EdgeInsets.fromLTRB(
+                CcDims.margin,
+                CcDims.gap16,
+                CcDims.margin,
+                CcDims.gap4,
+              ),
               child: Text(
                 r as String,
                 style: theme.titleSmall?.copyWith(color: cc.accentSoft),
@@ -525,37 +567,39 @@ class _LibraryGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context).textTheme;
     Widget tile(LibraryEntry e) {
-      return PressScale(child: InkWell(
-        onTap: () => onOpen(e),
-        borderRadius: BorderRadius.circular(CcDims.rGrid),
-        child: Padding(
-          padding: const EdgeInsets.all(6),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: LayoutBuilder(
-                  builder: (_, c) =>
-                      Center(child: _cover(e, c.biggest.shortestSide)),
+      return PressScale(
+        child: InkWell(
+          onTap: () => onOpen(e),
+          borderRadius: BorderRadius.circular(CcDims.rGrid),
+          child: Padding(
+            padding: const EdgeInsets.all(6),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: LayoutBuilder(
+                    builder: (_, c) =>
+                        Center(child: _cover(e, c.biggest.shortestSide)),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                _title(context, e),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: theme.bodyLarge,
-              ),
-              Text(
-                _subtitle(context, e),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: theme.bodyMedium,
-              ),
-            ],
+                const SizedBox(height: 6),
+                Text(
+                  _title(context, e),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.bodyLarge,
+                ),
+                Text(
+                  _subtitle(context, e),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.bodyMedium,
+                ),
+              ],
+            ),
           ),
         ),
-      ));
+      );
     }
 
     return CustomScrollView(
@@ -577,5 +621,4 @@ class _LibraryGrid extends StatelessWidget {
   }
 }
 
-enum _NewPlaylistAction { create, smart, csv }
 enum _LibraryMenuAction { folders, scan, share, exportAll }

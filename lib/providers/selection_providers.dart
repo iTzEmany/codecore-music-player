@@ -88,8 +88,8 @@ class SelectionNotifier extends Notifier<Selection> {
   void clear() => state = Selection.empty;
 }
 
-/// The lists with a fixed selection key; the per-item ones (`album:<key>`,
-/// `playlist:<id>`…) are still built as strings.
+/// The selection keys: fixed lists as values, per-item ones (`album:<key>`,
+/// `playlist:<id>`…) as static builders.
 enum SelectionKey {
   all('all'),
   favorites('favorites'),
@@ -105,6 +105,17 @@ enum SelectionKey {
 
   const SelectionKey(this.key);
   final String key;
+
+  // Per-item keys, kept as strings: the shared widgets take a `String listKey`.
+  static String playlistOf(int id) => 'playlist:$id';
+  static String genreOf(String genre) => 'genre:$genre';
+  static String artistOf(String artistKey) => 'artist:$artistKey';
+  static String smartOf(int id) => 'smart:$id';
+  static String albumOf(String albumKey) => 'album:$albumKey';
+  static String tagOf(String name) => 'tag:$name';
+  static String ytmArtistOf(String id) => 'ytm-artist:$id';
+  static String ytmAlbumOf(String browseId) => 'ytm-album:$browseId';
+  static String ytmSongsOf(String browseId) => 'ytm-songs:$browseId';
 }
 
 /// One selection per list, forgotten when its page goes away.

@@ -4,14 +4,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/db/app_database.dart';
 import '../../../data/repositories/library_queries.dart';
 import '../../../l10n/l10n_ext.dart';
+import '../../../providers/selection_providers.dart';
 import '../../../providers/library_providers.dart';
 import '../../../providers/player_providers.dart';
 import '../../../providers/settings_providers.dart';
 import '../../../core/constants.dart';
 import '../../shell/shell_nav.dart';
 import '../../theme/app_theme.dart';
-import '../../theme/tokens.dart';
-import '../../widgets/album_grid.dart';
+import '../../widgets/album_card.dart';
 import '../../widgets/artist_avatar.dart';
 import '../../widgets/collection_header.dart';
 import '../../widgets/error_state.dart';
@@ -24,7 +24,7 @@ import '../releases/follow_button.dart';
 import 'album_detail_screen.dart';
 
 /// An artist: Play / Shuffle over all their tracks, the five most played and
-/// the albums in a grid.
+/// the albums (rows if few, grid if many).
 class ArtistDetailScreen extends ConsumerWidget {
   const ArtistDetailScreen({super.key, required this.artist});
 
@@ -56,7 +56,7 @@ class ArtistDetailScreen extends ConsumerWidget {
       durationMs: list.fold<int>(0, (sum, t) => sum + t.durationMs),
     );
     // The rows shown here are the most played ones.
-    final key = 'artist:${artist.key}';
+    final key = SelectionKey.artistOf(artist.key);
     final selection = RowSelection(
       listKey: key,
       visibleIds: [for (final t in top) t.id],
@@ -89,10 +89,9 @@ class ArtistDetailScreen extends ConsumerWidget {
             SliverToBoxAdapter(
               child: SizedBox(
                 height: 240,
-                child: loadErrorState(
-                  context,
+                child: LoadError(
                   tracks.error ?? albums.error!,
-                  StackTrace.current,
+                  tracks.stackTrace ?? albums.stackTrace ?? StackTrace.current,
                   onRetry: () {
                     ref.invalidate(artistTracksProvider(artist.key));
                     ref.invalidate(artistAlbumsProvider(artist.key));
@@ -118,17 +117,11 @@ class ArtistDetailScreen extends ConsumerWidget {
           ],
           if (albumList.isNotEmpty) ...[
             SliverToBoxAdapter(child: SectionHeader(l.albumsSection)),
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: CcDims.margin - CcDims.gap8,
-              ),
-              sliver: SliverToBoxAdapter(
-                child: AlbumGrid(
-                  albums: albumList,
-                  shrinkWrap: true,
-                  onOpen: (a) =>
-                      ShellNav.open<void>(context, AlbumDetailScreen(album: a)),
-                ),
+            SliverToBoxAdapter(
+              child: AlbumShelf(
+                albums: albumList,
+                onOpen: (a) =>
+                    ShellNav.open<void>(context, AlbumDetailScreen(album: a)),
               ),
             ),
           ],

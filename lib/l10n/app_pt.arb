@@ -417,6 +417,7 @@
   "repeat": "Repetir",
   "moreOptions": "Mais opções",
   "back": "Voltar",
+  "seekPosition": "Posição na faixa",
   "settingsPlayback": "Reprodução",
   "normalizeVolume": "Normalizar volume",
   "normalizeVolumeHint": "Usa o ReplayGain dos ficheiros para reduzir as faixas demasiado altas",
@@ -1519,6 +1520,7 @@
   "onboardingNext": "Seguinte",
   "onboardingStart": "Começar",
   "onboardingPageOf": "Página {page} de {total}",
+  "onboardingStepOf": "{page} de {total}",
   "@onboardingPageOf": {
     "placeholders": {
       "page": {

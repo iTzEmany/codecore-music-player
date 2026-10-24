@@ -12,7 +12,7 @@ import '../../theme/tokens.dart';
 import '../../widgets/collection_header.dart';
 import '../../shell/shell_nav.dart';
 import '../../widgets/empty_state.dart';
-import '../../widgets/error_state.dart';
+import '../../widgets/async_body.dart';
 import '../../widgets/playlist_cover.dart';
 import '../../widgets/selection_bar.dart';
 import '../../widgets/track_row.dart';
@@ -54,6 +54,36 @@ class FavoritesScreen extends ConsumerWidget {
       listKey: key,
       visibleIds: [for (final t in list) t.id],
     );
+    final rows =
+EntranceScope(
+              child: SliverList.builder(
+                itemCount: list.length,
+                itemBuilder: (_, i) => SizedBox(
+                  height: extent,
+                  child: EnterOnce(
+                    index: i,
+                    child: LiveTrackRow(
+                      track: list[i],
+                      compact: compact,
+                      selection: selection,
+                      onTap: () => ctrl.playFromList(list, i, context: playCtx),
+                    ),
+                  ),
+                ),
+              ),
+            );
+    final emptyState =
+SliverToBoxAdapter(
+              child: EmptyState(
+                icon: Icons.favorite_border_rounded,
+                message: l.favoritesEmptyTitle,
+                help: l.favoritesEmptyHelp,
+                actionLabel: l.openAllTracks,
+                onAction: () =>
+                    ShellNav.open<void>(context, const AllTracksScreen()),
+              ),
+            );
+
     return SelectionScope(
       listKey: key,
       visibleIds: selection.visibleIds,
@@ -81,47 +111,12 @@ class FavoritesScreen extends ConsumerWidget {
           ],
         ),
         slivers: [
-          if (tracks.hasError)
-            SliverToBoxAdapter(
-              child: SizedBox(
-                height: 240,
-                child: loadErrorState(
-                  context,
-                  tracks.error!,
-                  StackTrace.current,
-                  onRetry: () => ref.invalidate(tracksProvider(true)),
-                ),
-              ),
-            )
-          else if (tracks.hasValue && list.isEmpty)
-            SliverToBoxAdapter(
-              child: EmptyState(
-                icon: Icons.favorite_border_rounded,
-                message: l.favoritesEmptyTitle,
-                help: l.favoritesEmptyHelp,
-                actionLabel: l.openAllTracks,
-                onAction: () =>
-                    ShellNav.open<void>(context, const AllTracksScreen()),
-              ),
-            )
-          else
-            EntranceScope(
-              child: SliverList.builder(
-                itemCount: list.length,
-                itemBuilder: (_, i) => SizedBox(
-                  height: extent,
-                  child: EnterOnce(
-                    index: i,
-                    child: LiveTrackRow(
-                      track: list[i],
-                      compact: compact,
-                      selection: selection,
-                      onTap: () => ctrl.playFromList(list, i, context: playCtx),
-                    ),
-                  ),
-                ),
-              ),
-            ),
+          SliverAsyncBody(
+            value: tracks,
+            onRetry: () => ref.invalidate(tracksProvider(true)),
+            loading: rows,
+            data: (_) => list.isEmpty ? emptyState : rows,
+          ),
         ],
       ),
     );

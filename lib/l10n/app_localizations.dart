@@ -1510,6 +1510,12 @@ abstract class AppLocalizations {
   /// **'Indietro'**
   String get back;
 
+  /// No description provided for @seekPosition.
+  ///
+  /// In it, this message translates to:
+  /// **'Posizione nel brano'**
+  String get seekPosition;
+
   /// No description provided for @settingsPlayback.
   ///
   /// In it, this message translates to:
@@ -4419,6 +4425,12 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Pagina {page} di {total}'**
   String onboardingPageOf(int page, int total);
+
+  /// No description provided for @onboardingStepOf.
+  ///
+  /// In it, this message translates to:
+  /// **'{page} di {total}'**
+  String onboardingStepOf(int page, int total);
 
   /// No description provided for @onboardingWelcomeTitle.
   ///

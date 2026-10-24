@@ -6,6 +6,7 @@ import '../../../core/constants.dart';
 import '../../../data/db/app_database.dart' show Track;
 import '../../../data/repositories/library_queries.dart' show ArtistSummary;
 import '../../../l10n/l10n_ext.dart';
+import '../../../providers/selection_providers.dart';
 import '../../../providers/library_providers.dart';
 import '../../../providers/player_providers.dart';
 import '../../../providers/ytm_catalog_providers.dart';
@@ -35,7 +36,7 @@ class ArtistPageScreen extends ConsumerWidget {
 
   final YtmArtistRef artist;
 
-  String get _listKey => 'ytm-artist:${artist.id}';
+  String get _listKey => SelectionKey.ytmArtistOf(artist.id);
 
   Future<void> _refresh(WidgetRef ref) async {
     try {

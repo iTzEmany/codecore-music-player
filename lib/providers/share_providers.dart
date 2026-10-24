@@ -9,6 +9,7 @@ import 'package:path/path.dart' as p;
 import '../core/app_log.dart';
 import '../data/db/app_database.dart';
 import '../services/share/lan_client.dart';
+import '../services/share/received_meta.dart';
 import '../services/share/lan_server.dart';
 import '../services/share/track_meta.dart';
 import '../services/share/trusted_devices.dart';
@@ -112,6 +113,11 @@ class ShareController {
   }
 
   Future<void> stopSharing() => _ref.read(lanServerProvider).stop();
+
+  /// Gives a received file the sender's metadata and cover (never throws).
+  Future<void> applyReceived(String path, TrackMeta? meta, {Future<ReceivedCover?> Function()? fetchCover}) =>
+      applyReceivedPackage(_ref.read(trackRepositoryProvider), _ref.read(coverStoreProvider), path, meta,
+          fetchCover: fetchCover);
 }
 
 final shareControllerProvider = Provider<ShareController>(

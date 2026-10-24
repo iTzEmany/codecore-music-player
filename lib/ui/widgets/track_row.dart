@@ -13,6 +13,7 @@ import '../theme/tokens.dart';
 import 'cover_image.dart';
 import 'favorite_actions.dart';
 import 'format_utils.dart';
+import 'progress_frame.dart';
 import 'ring_progress.dart' show NowPlayingDot;
 import 'online_queue_row.dart';
 import 'preview_cover.dart';
@@ -79,6 +80,7 @@ class TrackRow extends StatefulWidget {
 
   /// The subtitle shows the album instead of the artist (artist page).
   final bool albumAsSubtitle;
+
   final VoidCallback? onMore, onFavorite, onLongPress;
 
   /// Right click on desktop; receives the global pointer position.
@@ -137,12 +139,24 @@ class _TrackRowState extends State<TrackRow> {
       return SizedBox(
         width: 32,
         child: Center(
-          child: widget.isCurrent
-              ? const NowPlayingDot()
-              : Text(
+          // 2 dp ring around the number of the playing track.
+          child: DecoratedBox(
+            decoration: widget.isCurrent
+                ? BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: context.cc.accent, width: 2),
+                  )
+                : const BoxDecoration(),
+            child: SizedBox.square(
+              dimension: 28,
+              child: Center(
+                child: Text(
                   n == null ? '' : '$n',
                   style: Theme.of(context).textTheme.labelSmall,
                 ),
+              ),
+            ),
+          ),
         ),
       );
     }
@@ -152,11 +166,21 @@ class _TrackRowState extends State<TrackRow> {
         ? plain
         : PreviewCover(track: t, size: cover, child: plain);
     if (!widget.isCurrent || !dot) return image;
+    // Progress frame 4 dp off the cover (D-25).
     return Stack(
       clipBehavior: Clip.none,
       children: [
         image,
-        const Positioned(top: -3, right: -3, child: NowPlayingDot()),
+        Positioned(
+          left: -4,
+          top: -4,
+          right: -4,
+          bottom: -4,
+          child: Semantics(
+            label: context.l10n.nowPlaying,
+            child: const LiveProgressFrame(),
+          ),
+        ),
       ],
     );
   }
@@ -400,6 +424,16 @@ class _TrackRowState extends State<TrackRow> {
           _leading(context, cover),
           const SizedBox(width: 12),
           Expanded(child: titleBlock),
+          if (widget.variant == TrackRowVariant.album)
+            Padding(
+              padding: const EdgeInsetsDirectional.only(start: CcDims.gap8),
+              child: Text(
+                formatDuration(t.durationMs),
+                style: theme.textTheme.labelSmall?.copyWith(
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+              ),
+            ),
           _trailing(context, false),
         ],
       );
@@ -430,9 +464,26 @@ class _TrackRowState extends State<TrackRow> {
             child: InkWell(
               onTap: widget.onTap,
               onLongPress: widget.onLongPress,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: CcDims.margin),
-                child: row,
+              child: Stack(
+                fit: StackFit.passthrough,
+                children: [
+                  // «Quaderno» row: 1 dp hairline in surface2 from the text on.
+                  Positioned(
+                    left: CcDims.margin +
+                        (wide || widget.variant == TrackRowVariant.album
+                            ? 0
+                            : cover + 12),
+                    right: CcDims.margin,
+                    bottom: 0,
+                    height: 1,
+                    child: ColoredBox(color: cc.separator),
+                  ),
+                  Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: CcDims.margin),
+                    child: row,
+                  ),
+                ],
               ),
             ),
           ),
@@ -464,6 +515,7 @@ class LiveTrackRow extends ConsumerWidget {
   final TrackRowVariant variant;
   final bool compact;
   final bool albumAsSubtitle;
+
   final int? index;
   final String? albumArtist;
 

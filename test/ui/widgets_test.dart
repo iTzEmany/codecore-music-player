@@ -11,6 +11,7 @@ import 'package:codecore/ui/widgets/playlist_cover.dart';
 import 'package:codecore/ui/widgets/quality_tag.dart';
 import 'package:codecore/ui/widgets/segmented_blocks.dart';
 import 'package:codecore/ui/widgets/ring_progress.dart';
+import 'package:codecore/ui/widgets/progress_frame.dart';
 import 'package:codecore/ui/widgets/track_row.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -126,7 +127,7 @@ void main() {
         ],
       ),
     );
-    expect(find.byType(NowPlayingDot), findsOneWidget);
+    expect(find.byType(LiveProgressFrame), findsOneWidget);
     expect(find.bySemanticsLabel(RegExp('In riproduzione')), findsOneWidget);
     sem.dispose();
   });

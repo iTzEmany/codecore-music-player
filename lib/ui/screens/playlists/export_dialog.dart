@@ -10,6 +10,7 @@ import '../../../data/db/app_database.dart';
 import '../../../data/repositories/track_repository.dart' show SortOption;
 import '../../../l10n/app_localizations.dart';
 import '../../../l10n/l10n_ext.dart';
+import '../../../providers/folder_ops.dart';
 import '../../../providers/playlist_ops.dart';
 import '../../../providers/track_ops.dart';
 import '../../../services/export/playlist_exporter.dart';
@@ -119,7 +120,7 @@ Future<void> exportPlaylistFlow(
       coverKey: playlist.coverKey,
       tracks: tracks,
       isrcByTrack: await ref.read(playlistOpsProvider).isrcByTrack(playlist.id),
-      folders: await ref.read(trackOpsProvider).folderPaths(),
+      folders: await ref.read(folderOpsProvider).paths(),
       relativePaths: choice.relative,
     );
     final saved = await saveBytes(
@@ -142,7 +143,7 @@ Future<Archive> buildPlaylistsArchive(
   required bool relativePaths,
   required String favoritesName,
 }) async {
-  final folders = await ref.read(trackOpsProvider).folderPaths();
+  final folders = await ref.read(folderOpsProvider).paths();
   final plOps = ref.read(playlistOpsProvider);
   final archive = Archive();
   final used = <String>{};

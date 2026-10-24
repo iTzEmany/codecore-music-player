@@ -80,6 +80,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   alignment: Alignment.centerRight,
                   child: TextButton(
                     onPressed: () => _finish(reachedEnd: false),
+                    style: TextButton.styleFrom(foregroundColor: cc.accentSoft, minimumSize: const Size(48, 48)),
                     child: Text(l.onboardingSkip),
                   ),
                 ),
@@ -105,25 +106,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   ),
                   child: Row(
                     children: [
-                      Semantics(
-                        label: l.onboardingPageOf(
-                          _page + 1,
-                          onboardingPageCount,
-                        ),
-                        child: Row(
-                          children: [
-                            for (var i = 0; i < onboardingPageCount; i++)
-                              Container(
-                                width: i == _page ? 20 : 8,
-                                height: 8,
-                                margin: const EdgeInsets.only(right: 6),
-                                decoration: BoxDecoration(
-                                  color: i == _page ? cc.accent : cc.surface3,
-                                  borderRadius: BorderRadius.circular(CcDims.rList),
-                                ),
-                              ),
-                          ],
-                        ),
+                      Text(
+                        l.onboardingPageOf(_page + 1, onboardingPageCount),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: cc.textMuted),
                       ),
                       const Spacer(),
                       FilledButton(

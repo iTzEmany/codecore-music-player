@@ -6,7 +6,7 @@ import '../../widgets/motion.dart';
 class LibraryShortcut {
   const LibraryShortcut({
     required this.label,
-    required this.icon,
+    this.icon,
     this.count,
     this.meta,
     required this.onTap,
@@ -14,7 +14,9 @@ class LibraryShortcut {
   });
 
   final String label;
-  final IconData icon;
+
+  /// Libreria shortcuts have none (D-26); Memoria tools keep theirs.
+  final IconData? icon;
   final int? count;
 
   /// A small second line under the label.
@@ -23,8 +25,9 @@ class LibraryShortcut {
   final bool keepWhenZero;
 }
 
-/// The Libreria shortcuts as a grid of equal-width blocks (icon left of the
-/// label, like the segmented blocks above); empty ones are hidden.
+/// Grid of equal-width blocks; empty ones are hidden. Blocks without an icon
+/// (Libreria, D-26/D-53): 2 columns, all on one row from 720 dp. Blocks with an
+/// icon (Memoria): one column per 160 dp, up to 4.
 class LibraryShortcuts extends StatelessWidget {
   const LibraryShortcuts({super.key, required this.items});
 
@@ -38,7 +41,11 @@ class LibraryShortcuts extends StatelessWidget {
     final theme = Theme.of(context).textTheme;
     return Semantics(
       button: true,
-      label: [s.label, if (s.count != null) '${s.count}', if (s.meta != null) s.meta!].join(', '),
+      label: [
+        s.label,
+        if (s.count != null) '${s.count}',
+        if (s.meta != null) s.meta!,
+      ].join(', '),
       excludeSemantics: true,
       onTap: s.onTap,
       child: PressScale(
@@ -51,40 +58,79 @@ class LibraryShortcuts extends StatelessWidget {
             child: ConstrainedBox(
               constraints: const BoxConstraints(minHeight: 56),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: CcDims.gap12, vertical: 10),
-                child: Row(
-                  children: [
-                    Icon(s.icon, size: 22, color: cc.textMuted),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                // 6 dp like the mockup, so nine labels fit one row at 1280 px.
+                padding: s.icon == null
+                    ? const EdgeInsets.symmetric(horizontal: 6, vertical: 4)
+                    : const EdgeInsets.symmetric(
+                        horizontal: CcDims.gap12,
+                        vertical: 10,
+                      ),
+                child: s.icon == null
+                    ? Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
                             s.label,
-                            maxLines: 2,
+                            maxLines: 1,
+                            textAlign: TextAlign.center,
                             overflow: TextOverflow.ellipsis,
                             style: theme.labelLarge,
                           ),
+                          if (s.count != null)
+                            Text(
+                              '${s.count}',
+                              style: theme.bodySmall?.copyWith(
+                                color: cc.textMuted,
+                              ),
+                            ),
                           if (s.meta != null)
                             Text(
                               s.meta!,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: theme.bodySmall?.copyWith(color: cc.textMuted),
+                              style: theme.bodySmall?.copyWith(
+                                color: cc.textMuted,
+                              ),
                             ),
                         ],
+                      )
+                    : Row(
+                        children: [
+                          Icon(s.icon, size: 22, color: cc.textMuted),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  s.label,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: theme.labelLarge,
+                                ),
+                                if (s.meta != null)
+                                  Text(
+                                    s.meta!,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: theme.bodySmall?.copyWith(
+                                      color: cc.textMuted,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                          if (s.count != null) ...[
+                            const SizedBox(width: 8),
+                            Text(
+                              '${s.count}',
+                              style: theme.bodyMedium?.copyWith(
+                                color: cc.textMuted,
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
-                    ),
-                    if (s.count != null) ...[
-                      const SizedBox(width: 8),
-                      Text(
-                        '${s.count}',
-                        style: theme.bodyMedium?.copyWith(color: cc.textMuted),
-                      ),
-                    ],
-                  ],
-                ),
               ),
             ),
           ),
@@ -101,32 +147,49 @@ class LibraryShortcuts extends StatelessWidget {
     ];
     final scale = MediaQuery.textScalerOf(context).scale(1);
     return Padding(
-      padding: const EdgeInsets.fromLTRB(CcDims.margin, CcDims.gap8, CcDims.margin, CcDims.gap8),
-      child: LayoutBuilder(builder: (context, c) {
-        final cols = ((c.maxWidth / scale) ~/ 160).clamp(1, 4);
-        return Column(
-          children: [
-            for (var i = 0; i < visible.length; i += cols) ...[
-              if (i > 0) const SizedBox(height: _gap),
-              IntrinsicHeight(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    for (var j = i; j < i + cols; j++) ...[
-                      if (j > i) const SizedBox(width: _gap),
-                      Expanded(
-                        child: j < visible.length
-                            ? _block(context, visible[j])
-                            : const SizedBox.shrink(),
-                      ),
+      padding: const EdgeInsets.fromLTRB(
+        CcDims.margin,
+        CcDims.gap8,
+        CcDims.margin,
+        CcDims.gap8,
+      ),
+      child: LayoutBuilder(
+        builder: (context, c) {
+          final w = c.maxWidth / scale;
+          // Iconless: wide = every block on one row; phone = 2 columns, an odd
+          // last one takes the whole row (D-28, D-53). Icons: as before 43.
+          final iconic = visible.any((s) => s.icon != null);
+          final cols = iconic
+              ? (w ~/ 160).clamp(1, 4)
+              : (w >= 720 ? visible.length : 2);
+          return Column(
+            children: [
+              for (var i = 0; i < visible.length; i += cols) ...[
+                if (i > 0) const SizedBox(height: _gap),
+                IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      for (
+                        var j = i;
+                        j < i + cols && (iconic || j < visible.length);
+                        j++
+                      ) ...[
+                        if (j > i) const SizedBox(width: _gap),
+                        Expanded(
+                          child: j < visible.length
+                              ? _block(context, visible[j])
+                              : const SizedBox.shrink(),
+                        ),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ],
-          ],
-        );
-      }),
+          );
+        },
+      ),
     );
   }
 }

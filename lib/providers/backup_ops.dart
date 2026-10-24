@@ -1,0 +1,36 @@
+import 'dart:io';
+
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../core/paths.dart';
+import '../data/repositories/backup_merge.dart' show MergeReport;
+import '../services/backup/restore_service.dart';
+import 'backup_providers.dart';
+import 'database_providers.dart';
+import 'settings_providers.dart';
+
+/// Backups: create, look inside, replace the library or merge into it.
+class BackupOps {
+  BackupOps(this._ref);
+
+  final Ref _ref;
+
+  /// Writes a backup zip to [path].
+  Future<void> create(String path) async => (await _ref.read(backupServiceProvider.future)).createBackup(path);
+
+  /// What the zip holds and how it fits this device; throws [RestoreException] if it is no backup.
+  Future<RestorePlan> inspect(File zip) async => inspectBackup(
+        zip,
+        deviceId: await _ref.read(settingsStoreProvider).deviceId(),
+        schemaVersion: _ref.read(schemaVersionProvider),
+      );
+
+  /// Unpacks the zip for the full restore that runs at the next start.
+  Future<void> stageReplace(File zip) async => stageFullRestore(zip, await restoreStagingDir());
+
+  /// Merges the zip into the live library.
+  Future<MergeReport> merge(File zip) async =>
+      mergeBackup(zip, _ref.read(databaseProvider), Directory(await coversDir()));
+}
+
+final backupOpsProvider = Provider<BackupOps>(BackupOps.new);

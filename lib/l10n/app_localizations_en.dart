@@ -852,6 +852,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get back => 'Back';
 
   @override
+  String get seekPosition => 'Position in the track';
+
+  @override
   String get settingsPlayback => 'Playback';
 
   @override
@@ -2657,6 +2660,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String onboardingPageOf(int page, int total) {
     return 'Page $page of $total';
+  }
+
+  @override
+  String onboardingStepOf(int page, int total) {
+    return '$page of $total';
   }
 
   @override

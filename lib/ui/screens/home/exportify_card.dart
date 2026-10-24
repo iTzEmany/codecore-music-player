@@ -20,13 +20,17 @@ class ExportifyCard extends ConsumerWidget {
     final cc = context.cc;
     final reminder = ref.read(exportifyReminderProvider.notifier);
     return Padding(
-      padding: const EdgeInsets.fromLTRB(CcDims.margin, CcDims.gap16, CcDims.margin, 0),
+      padding: const EdgeInsets.fromLTRB(
+        CcDims.margin,
+        CcDims.gap8,
+        CcDims.margin,
+        0,
+      ),
       child: Container(
         key: const ValueKey('exportify-card'),
-        padding: const EdgeInsets.fromLTRB(14, 14, 14, 6),
+        padding: const EdgeInsets.only(top: CcDims.gap8),
         decoration: BoxDecoration(
-          color: cc.surface1,
-          borderRadius: BorderRadius.circular(CcDims.rCard),
+          border: Border.symmetric(horizontal: BorderSide(color: cc.separator)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -34,7 +38,7 @@ class ExportifyCard extends ConsumerWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(Icons.sync_rounded, color: cc.accent),
+                Icon(Icons.sync_rounded, color: cc.accentSoft),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
@@ -57,7 +61,7 @@ class ExportifyCard extends ConsumerWidget {
                       onPressed: reminder.snooze,
                       child: Text(l.exportifyCardLater),
                     ),
-                  FilledButton(
+                  TextButton(
                     key: const ValueKey('exportify-go'),
                     onPressed: () async {
                       if (found != null) {
