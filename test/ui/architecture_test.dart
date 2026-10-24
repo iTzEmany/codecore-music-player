@@ -22,7 +22,6 @@ const _exceptions = <String>{
   'lib/ui/screens/library/library_screen.dart',
   'lib/ui/screens/lyrics/lyrics_view.dart',
   'lib/ui/screens/now_playing/now_playing_cards.dart',
-  'lib/ui/screens/onboarding/onboarding_pages.dart',
   'lib/ui/screens/playlists/add_tracks_screen.dart',
   'lib/ui/screens/playlists/export_dialog.dart',
   'lib/ui/screens/playlists/playlist_detail_screen.dart',

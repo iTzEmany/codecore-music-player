@@ -820,26 +820,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shareDeviceName => 'Device name';
 
   @override
-  String get importOld => 'Import from the old app';
-
-  @override
-  String get importOldHint =>
-      'Choose codecore_library.db from the Python version';
-
-  @override
-  String importSummary(
-    int favorites,
-    int lyrics,
-    int playlists,
-    int unmatched,
-  ) {
-    return '$favorites favorites, $playlists playlists, $lyrics lyrics imported, $unmatched unmatched';
-  }
-
-  @override
-  String get importFailed => 'Import failed: invalid file';
-
-  @override
   String get sleepTimer => 'Sleep timer';
 
   @override

@@ -39,6 +39,7 @@ import '../smart/smart_playlist_editor.dart';
 import '../smart/smart_playlist_screen.dart';
 import '../stats/stats_screen.dart';
 import '../tags/tags_screen.dart';
+import '../../../providers/folder_actions.dart';
 import 'folders_sheet.dart';
 import '../../../core/constants.dart';
 import '../../../providers/releases_providers.dart'

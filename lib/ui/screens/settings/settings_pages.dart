@@ -1,7 +1,5 @@
 import 'dart:io';
 
-import 'package:file_picker/file_picker.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -18,12 +16,12 @@ import '../../../services/online/enrichment_service.dart' show needsEnrichment;
 import '../../../providers/settings_providers.dart';
 import '../../widgets/confirm.dart';
 import '../../widgets/cover_image.dart';
+import '../../../providers/folder_actions.dart';
 import '../library/folders_sheet.dart';
 import '../../../providers/share_providers.dart';
 import '../../../providers/translation_providers.dart';
 import '../../shell/shell_nav.dart';
 import '../share/share_screen.dart';
-import '../../../services/migration/python_db_importer.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/prompt_name.dart';
 import 'icon_follow_tile.dart';
@@ -374,12 +372,6 @@ List<SettingsGroup> _network(BuildContext context, WidgetRef ref) {
           subtitle: Text(ref.watch(deviceNameProvider)),
           onTap: () => _editDeviceName(context, ref),
         ),
-        ListTile(
-          leading: const Icon(Icons.history),
-          title: Text(l.importOld),
-          subtitle: Text(l.importOldHint),
-          onTap: () => _importOld(context, ref),
-        ),
       ],
     ),
     ..._trustedGroup(context, ref),
@@ -441,23 +433,6 @@ Future<void> _pickLanguage(BuildContext context, WidgetRef ref) async {
     ),
   );
   if (picked != null) notifier.update((s) => s.copyWith(language: picked));
-}
-
-Future<void> _importOld(BuildContext context, WidgetRef ref) async {
-  final l = context.l10n;
-  final picked = await FilePicker.pickFiles();
-  final path = picked.isEmpty ? null : picked.first.path;
-  if (path == null) return;
-  String text;
-  try {
-    final s = await PythonDbImporter(ref.read(databaseProvider)).import(path);
-    text = l.importSummary(s.favorites, s.playlists, s.lyrics, s.unmatched);
-  } on Object catch (e, st) {
-    AppLog.w('python import failed', e, st);
-    text = l.importFailed;
-  }
-  if (!context.mounted) return;
-  showMsg(context, text);
 }
 
 Future<void> _editDeviceName(BuildContext context, WidgetRef ref) async {

@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/library_providers.dart';
-import 'folders_sheet.dart';
+import '../../../providers/folder_actions.dart';
 
 /// Scan failure banner and progress bar, shared by every library page.
 class ScanStatus extends ConsumerWidget {

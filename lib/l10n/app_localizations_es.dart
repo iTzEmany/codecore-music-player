@@ -822,25 +822,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get shareDeviceName => 'Nombre del dispositivo';
 
   @override
-  String get importOld => 'Importar de la app antigua';
-
-  @override
-  String get importOldHint => 'Elige codecore_library.db de la versión Python';
-
-  @override
-  String importSummary(
-    int favorites,
-    int lyrics,
-    int playlists,
-    int unmatched,
-  ) {
-    return '$favorites favoritos, $playlists listas, $lyrics letras importadas, $unmatched sin emparejar';
-  }
-
-  @override
-  String get importFailed => 'Importación fallida: archivo no válido';
-
-  @override
   String get sleepTimer => 'Temporizador de apagado';
 
   @override
