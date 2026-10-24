@@ -350,12 +350,14 @@ class _LibraryShortcuts extends ConsumerWidget {
                     label: l.podcastsTitle,
                     icon: Icons.podcasts_rounded,
                     count: podcastCount,
+                    keepWhenZero: true,
                     onTap: () => open(const PodcastsScreen()),
                   ),
                   LibraryShortcut(
                     label: l.radioTitle,
                     icon: Icons.radio_rounded,
                     count: radioCount,
+                    keepWhenZero: true,
                     onTap: () => open(const RadioScreen()),
                   ),
                   if (kEnableYoutube && (followedCount > 0 || releaseTopArtists))
@@ -370,6 +372,7 @@ class _LibraryShortcuts extends ConsumerWidget {
                     label: l.tagsTitle,
                     icon: Icons.label_outline_rounded,
                     count: tagCount,
+                    keepWhenZero: true,
                     onTap: () => open(const TagsScreen()),
                   ),
                   LibraryShortcut(
