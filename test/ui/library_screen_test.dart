@@ -75,16 +75,43 @@ void main() {
     await h.dispose(t);
   });
 
-  testWidgets('shortcuts are blocks with the icon left of the label', (t) async {
+  Rect block(WidgetTester t, String label) => t.getRect(find.ancestor(
+      of: find.text(label), matching: find.byType(InkWell)).first);
+
+  testWidgets('phone: shortcuts are 2 columns, the odd last one is full width',
+      (t) async {
     final h = await open(t, width: 360);
-    final icon = t.getRect(find.byIcon(Icons.favorite_rounded));
-    final fav = t.getRect(find.text('Preferiti'));
-    expect(icon.right, lessThanOrEqualTo(fav.left));
-    final favBlock = t.getRect(find.ancestor(
-        of: find.text('Preferiti'), matching: find.byType(InkWell)));
-    final allBlock = t.getRect(find.ancestor(
-        of: find.text('Tutti i brani'), matching: find.byType(InkWell)));
-    expect(allBlock.top, favBlock.top);
+    final fav = block(t, 'Preferiti');
+    final all = block(t, 'Tutti i brani');
+    final last = block(t, 'Statistiche');
+    expect(all.top, fav.top);
+    expect(all.left, greaterThan(fav.right));
+    expect(find.byIcon(Icons.favorite_rounded), findsNothing);
+    // 7 blocks here: the seventh spans both columns.
+    expect(last.left, fav.left);
+    expect(last.right, all.right);
+    await h.dispose(t);
+  });
+
+  testWidgets('desktop: all shortcuts on one row', (t) async {
+    final h = await open(t, width: 1600);
+    final fav = block(t, 'Preferiti');
+    final last = block(t, 'Statistiche');
+    expect(last.top, fav.top);
+    expect(last.left, greaterThan(fav.right));
+    await h.dispose(t);
+  });
+
+  testWidgets('filters never scroll sideways', (t) async {
+    final h = await open(t);
+    expect(
+      find.descendant(
+        of: find.byType(SegmentedBlocks<LibraryKind?>),
+        matching: find.byWidgetPredicate(
+            (w) => w is ListView && w.scrollDirection == Axis.horizontal),
+      ),
+      findsNothing,
+    );
     await h.dispose(t);
   });
 

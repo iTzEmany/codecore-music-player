@@ -155,7 +155,15 @@ class _TrackRowState extends State<TrackRow> {
     return Stack(
       clipBehavior: Clip.none,
       children: [
-        image,
+        // 2 dp ring on the playing track.
+        DecoratedBox(
+          position: DecorationPosition.foreground,
+          decoration: BoxDecoration(
+            border: Border.all(color: context.cc.accent, width: 2),
+            borderRadius: BorderRadius.circular(CcDims.rList + 2),
+          ),
+          child: image,
+        ),
         const Positioned(top: -3, right: -3, child: NowPlayingDot()),
       ],
     );
@@ -430,9 +438,26 @@ class _TrackRowState extends State<TrackRow> {
             child: InkWell(
               onTap: widget.onTap,
               onLongPress: widget.onLongPress,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: CcDims.margin),
-                child: row,
+              child: Stack(
+                fit: StackFit.passthrough,
+                children: [
+                  // «Quaderno» row: 1 dp hairline in surface2 from the text on.
+                  Positioned(
+                    left: CcDims.margin +
+                        (wide || widget.variant == TrackRowVariant.album
+                            ? 0
+                            : cover + 12),
+                    right: CcDims.margin,
+                    bottom: 0,
+                    height: 1,
+                    child: ColoredBox(color: cc.surface2),
+                  ),
+                  Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: CcDims.margin),
+                    child: row,
+                  ),
+                ],
               ),
             ),
           ),
