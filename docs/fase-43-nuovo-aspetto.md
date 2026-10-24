@@ -67,3 +67,13 @@ Pagine come il mockup, con la scansione dopo la scelta della cartella (già unif
 2. Prova a mano sul Mi A3 con l'app perf (D-19): schermate dei passi 43.1–43.6 aperte e fotografate; screenshot già letti cancellati con `~/.claude/skills/obiettivo/scripts/pulizia.sh via <percorsi>`.
 
 **Fatto quando:** `flutter analyze` pulito; `flutter test test/ui test/golden` verde; `python3 scripts/perf_device.py 0d7ae9df206e --label nuovo-aspetto --playback` scrive `build/perf/nuovo-aspetto.md` con ogni scenario entro le soglie; Motorola non toccato.
+
+## Dalla review della fase 42
+- D-52: `loadErrorState` (log fuori da `build`) e variante sliver di `AsyncBody`.
+- `BackupOps` (inspect/replace/merge): oggi `mergeBackupFile` sta in `TrackOps` e `backup_section` chiama `inspectBackup`/`stageFullRestore` sul servizio. `folderPaths` da `TrackOps` a `FolderOps`, `applyReceived` verso lo share, `clearHistory`.
+- `SelectionKey` per le chiavi con parametro: costruttori tipo `SelectionKey.playlistOf(id)`, family tipizzata. 9 chiavi stringa in playlist_detail, genre_screen, artist_screen, smart_playlist_screen, album_detail, tags_screen, artist_page_screen, online_album_screen, artist_songs_screen.
+- Un widget `NewPlaylistMenu` unico (l'enum `_NewPlaylistAction` è duplicato in desktop_sidebar e library_screen).
+- `tags_sheet` usa ancora `showCcSheet<String>` con case stringa: passare a un enum.
+- `architecture_test` esteso a `*QueriesProvider` (album_card legge `libraryQueriesProvider`).
+- Logica ancora nei widget via servizi, da portare negli Ops: exportify_sync_screen (ciclo di import), tag_backups_screen (restore + stampFile), now_playing_cards (traduzione), sync_flow.
+- `TrackKind` senza radio (il documento prometteva anche la radio).

@@ -595,17 +595,17 @@ Refactor «ui-fluida» (piano in `docs/refactor/ui-fluida/analisi.md`, decisioni
 
 ## Fase 42 — Livelli e tipi (`fase-42-livelli-e-tipi.md`)
 Refactor «ui-fluida» (piano in `docs/refactor/ui-fluida/analisi.md`, decisioni D-01..D-30 in `docs/decisioni.md`, 2026-10-23). UI solo tramite provider (test di architettura), tipi al posto di stringhe.
-- [ ] 42.1 F-02 + F-03 `TrackOps`, `pathsById`, `architecture_test` a lista vuota
-- [ ] 42.2 F-08 selezione unica
-- [ ] 42.3 F-10 `SelectionKey`
-- [ ] 42.4 F-09 `OnlineSelectionScope`
-- [ ] 42.5 F-11 enum per menu
-- [ ] 42.6 F-16 `track.kind`
-- [ ] 42.7 F-15 `curiosityProvider`
-- [ ] 42.8 F-05 build oltre 150 righe
-- [ ] 42.9 F-07 `addFolderAndScan` (scansione dall'onboarding, D-12)
-- [ ] 42.10 F-04 via l'importer Python (D-04)
-- [ ] 42.11 Chiusura: metriche e `integration_test`
+- [x] 42.1 F-02 + F-03 `TrackOps`, `pathsById`, `architecture_test` a lista vuota — 2e81a3d + ff7e570 (1a: TrackOps e Ops di dominio; 1b: `lib/ui` passa dalle Ops, `createPlaylistFlow`/`createTagFlow`, regola senza eccezioni)
+- [x] 42.2 F-08 selezione unica — efdd18d, un solo `selectionProvider`
+- [x] 42.3 F-10 `SelectionKey` — efdd18d, `SelectionKey` enum
+- [x] 42.4 F-09 `OnlineSelectionScope` — efdd18d, `OnlineSelectionScope`
+- [x] 42.5 F-11 enum per menu — 4ce0f57 + 2c31b7b, un enum per `PopupMenuButton`; scelte lingua, playlist e colore tag in `showCcSheet` al posto di `SimpleDialog`
+- [x] 42.6 F-16 `track.kind` — ae06d97, `track.trackKind` al posto di `isOnlineId` in `lib/ui`
+- [x] 42.7 F-15 `curiosityProvider` — 7ea2e41, `curiosityProvider` (pulizia query, limiti, scrittura DB)
+- [x] 42.8 F-05 build oltre 150 righe — da 7bc5159 a e556af0 (una `build` per commit divisa in sezioni private); `build` > 120 / > 150 = 0 / 0
+- [x] 42.9 F-07 `addFolderAndScan` (scansione dall'onboarding, D-12) — 393f302, un solo `addFolderAndScan`, l'onboarding scansiona (D-12)
+- [x] 42.10 F-04 via l'importer Python (D-04) — 393f302, importer Python rimosso (D-04)
+- [x] 42.11 Chiusura: metriche e `integration_test` — misure.md «Dopo la fase 42»; integration_test file per file su Linux: 5/5 verdi (be3e937: il driver registra media_kit come `main.dart`, prima `playback_test` era rosso per MissingPlugin). D-51 (3546159): scorciatoie Podcast, Radio e Tag sempre visibili in Libreria anche se vuote
 
 ## Fase 43 — Nuovo aspetto (`fase-43-nuovo-aspetto.md`)
 Refactor «ui-fluida» (piano in `docs/refactor/ui-fluida/analisi.md`, decisioni D-01..D-30 in `docs/decisioni.md`, 2026-10-23). Mockup approvati in `docs/refactor/ui-fluida/mockup/` (D-21..D-28); golden rigenerati solo qui (D-20).

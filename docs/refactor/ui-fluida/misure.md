@@ -93,3 +93,25 @@ Struttura dopo la fase 39: `Duration(milliseconds` 13 righe in 4 file (10 sono i
 | `build` più lungo | `library_screen.dart` 271 | `library_screen.dart` 276 | fase 42 |
 
 `lib/app.dart` ha ancora uno `SnackBar(` (avviso di nuova versione: messenger globale senza context, 8 s): fuori da `lib/ui`, resta.
+
+## Dopo la fase 42 (livelli e tipi, 24/10)
+
+| Metrica | Dopo la 41 | Dopo la 42 | Arrivo |
+|---|---|---|---|
+| `databaseProvider\|RepositoryProvider` in `lib/ui` | — | 0 (la UI passa dai provider/Ops; `architecture_test` a lista vuota) | 0 |
+| `PopupMenuButton<String>` | — | 0 (un enum per menu) | 0 |
+| `Set<int> _selected` | — | 0 (`selectionProvider` unico) | 0 |
+| `selectionProvider('...')` con chiave stringa | — | 0 (`SelectionKey`) | 0 |
+| `SimpleDialog` | — | 0 (`showCcSheet`) | 0 |
+| `isOnlineId` in `lib/ui` | — | 0 (`track.trackKind`) | 0 |
+| `SnackBar(` in `lib/ui` | 1 (`show_msg.dart`) | 1 (`show_msg.dart`) | 1 |
+| `AppBar(` non `CcAppBar` | 1 + 2 `SliverAppBar` + 4 `SelectableAppBar` | invariato (7 righe: `cc_app_bar.dart`, 2 `SliverAppBar`, 4 `SelectableAppBar`) | 1 |
+| `showModalBottomSheet` | 1 | 1 (`showCcSheet`) | 1 |
+| `CircularProgressIndicator` | 28 | 26 | ≤ 3 (non raggiunto, D-50) |
+| `LinearProgressIndicator` | 19 | 19 | — |
+| `.when(` in `lib/ui` | 10 | 8 | — |
+| dialoghi del nome (`promptName`) | 1 definizione, 7 call site | 1 definizione, 7 righe | 1 |
+| `build` > 120 / > 150 righe | 27 / 16 (di 319) | 0 / 0 (di 370) | 0 |
+| `build` più lungo | `library_screen.dart` 276 | `exportify_sync_screen.dart` 118 (le `build` sono divise in sezioni private) | < 120 |
+
+`integration_test` su Linux, un file per volta: 5/5 verdi (`playback_test` ora verde dopo be3e937: il driver non registrava media_kit).
