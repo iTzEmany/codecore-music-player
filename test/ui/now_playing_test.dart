@@ -141,7 +141,7 @@ void main() {
     await _settle(tester);
     await tester.tap(find.text('Song 0').last);
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 40));
     final clip = tester.widget<ClipRRect>(
         find.byWidgetPredicate((w) => w is ClipRRect && w.clipper != null));
     final rrect = clip.clipper!.getClip(const Size(400, 900));

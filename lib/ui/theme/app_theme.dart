@@ -50,7 +50,7 @@ class _PageMotion extends StatefulWidget {
 class _PageMotionState extends State<_PageMotion> {
   late final CurvedAnimation _curved = CurvedAnimation(
     parent: widget.animation,
-    curve: Curves.easeOutCubic,
+    curve: CcMotion.curveIn,
     reverseCurve: Curves.easeInCubic,
   );
 
@@ -310,7 +310,7 @@ Widget ccDragProxy(BuildContext context, Widget child, Animation<double> anim) {
   return AnimatedBuilder(
     animation: anim,
     builder: (_, _) {
-      final t = Curves.easeOut.transform(anim.value);
+      final t = CcMotion.curveIn.transform(anim.value);
       return Material(
         elevation: 6 * t,
         color: Color.lerp(cc.surface1, cc.accent.withValues(alpha: 0.28), t),

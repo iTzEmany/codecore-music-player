@@ -11,7 +11,7 @@ import 'package:codecore/ui/shell/desktop_player_bar.dart';
 import 'package:codecore/ui/shell/desktop_sidebar.dart';
 import 'package:codecore/ui/shell/side_panel.dart';
 import 'package:codecore/ui/widgets/mini_player.dart';
-import 'package:codecore/ui/widgets/motion.dart';
+import 'package:codecore/ui/theme/tokens.dart';
 import 'package:codecore/ui/widgets/quality_tag.dart';
 import 'package:codecore/ui/widgets/ring_progress.dart';
 import 'package:codecore/ui/widgets/speed_button.dart';
@@ -68,12 +68,12 @@ void main() {
     await _settle(t);
     await t.tap(_bar('Libreria'));
     await t.pump();
-    await t.pump(Motion.dot ~/ 2);
+    await t.pump(CcMotion.page ~/ 2);
     final dock = t.getRect(find.descendant(
         of: find.byType(ShellDock), matching: find.byType(Material)).first);
     final dot = t.getRect(find.byKey(const ValueKey('tab-dot')));
     expect(dot.top, greaterThanOrEqualTo(dock.top));
-    await t.pump(Motion.dot);
+    await t.pump(CcMotion.page);
     await h.dispose(t);
   });
 
@@ -103,7 +103,7 @@ void main() {
     await h.pump(t, const AppShell());
     await t.tap(_bar('Libreria'));
     await _settle(t);
-    await t.pump(Motion.dot); // the hop is still on its way after _settle
+    await t.pump(CcMotion.page); // the hop is still on its way after _settle
     final tab = find.ancestor(of: _bar('Libreria'), matching: find.byType(InkWell));
     expect(
       t.getSemantics(tab.first),

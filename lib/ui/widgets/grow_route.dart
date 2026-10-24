@@ -3,9 +3,8 @@ import 'dart:ui' show lerpDouble;
 import 'package:flutter/material.dart';
 
 import '../theme/tokens.dart';
-import 'motion.dart';
 
-const _duration = Duration(milliseconds: 550);
+const _duration = CcMotion.page;
 
 /// Opens a page growing out of [from] (the dock's global rect): a rounded clip
 /// widens to the whole screen (no full-page fade: the page is opaque).
@@ -23,7 +22,7 @@ Route<T> growRoute<T>({
     if (ccDuration(context, _duration) == Duration.zero) {
       return child;
     }
-    final t = animation.drive(CurveTween(curve: Motion.curve));
+    final t = animation.drive(CurveTween(curve: CcMotion.curveIn));
     return ClipRRect(
       clipper: _GrowClipper(from, t),
       child: RepaintBoundary(child: child),

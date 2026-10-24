@@ -29,7 +29,7 @@ class CoverBackdrop extends ConsumerWidget {
             child: RepaintBoundary(
               child: TweenAnimationBuilder<Color?>(
                 tween: ColorTween(end: tint),
-                duration: ccDuration(context, CcMotion.color),
+                duration: ccDuration(context, CcMotion.page),
                 builder: (context, c, _) => DecoratedBox(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(

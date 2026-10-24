@@ -52,8 +52,8 @@ class SelectionBox extends StatelessWidget {
             ),
           ),
           child: AnimatedSwitcher(
-            duration: ccDuration(context, Motion.enter),
-            switchInCurve: Motion.curve,
+            duration: ccDuration(context, CcMotion.enter),
+            switchInCurve: CcMotion.curveIn,
             transitionBuilder: popIn,
             child: !selected
                 ? const SizedBox.shrink()

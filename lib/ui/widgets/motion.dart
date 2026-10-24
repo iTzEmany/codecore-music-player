@@ -3,23 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../providers/player_providers.dart';
 import '../../providers/settings_providers.dart';
-
-/// The small movements of phase 28.9. Only opacity and transforms (nothing
-/// that changes a size or a layout), 120–220 ms with an easing out, what moves
-/// on its own layer (`RepaintBoundary`), and nothing at all with «Riduci
-/// animazioni».
-abstract final class Motion {
-  static const press = Duration(milliseconds: 120);
-  static const enter = Duration(milliseconds: 180);
-  static const tab = Duration(milliseconds: 160);
-  static const pulse = Duration(milliseconds: 220);
-  static const dot = Duration(milliseconds: 420);
-  static const curve = Curves.easeOutCubic;
-
-  /// Rows that come in one after the other when a list appears.
-  static const staggered = 12;
-  static const stagger = Duration(milliseconds: 20);
-}
+import '../theme/tokens.dart';
 
 /// Shrinks a little (0.97) while pressed: the touch is felt before the next
 /// page opens. It only listens, so taps and long presses still reach [child].
@@ -48,8 +32,8 @@ class _PressScaleState extends State<PressScale> {
       onPointerCancel: (_) => _set(false),
       child: AnimatedScale(
         scale: _down ? 0.97 : 1,
-        duration: Motion.press,
-        curve: Motion.curve,
+        duration: CcMotion.press,
+        curve: CcMotion.curveIn,
         child: RepaintBoundary(child: widget.child),
       ),
     );
@@ -87,7 +71,7 @@ class _EntranceClock extends InheritedWidget {
 }
 
 /// Row [index] of a list that just appeared: it fades in and rises by 8 px,
-/// [Motion.stagger] after the one above. Only the first [Motion.staggered]
+/// [CcMotion.stagger] after the one above. Only the first [CcMotion.staggered]
 /// rows, only inside an [EntranceScope], and only while the list is new.
 class EnterOnce extends StatefulWidget {
   const EnterOnce({super.key, required this.index, required this.child});
@@ -98,8 +82,8 @@ class EnterOnce extends StatefulWidget {
   /// Whether row [index] of a list shown since [since] still comes in at [now].
   @visibleForTesting
   static bool shouldEnter(int index, DateTime? since, DateTime now) {
-    if (since == null || index >= Motion.staggered) return false;
-    final window = Motion.stagger * Motion.staggered + Motion.enter;
+    if (since == null || index >= CcMotion.staggered) return false;
+    final window = CcMotion.stagger * CcMotion.staggered + CcMotion.enter;
     return now.difference(since) < window;
   }
 
@@ -121,12 +105,12 @@ class _EnterOnceState extends State<EnterOnce> with SingleTickerProviderStateMix
       return;
     }
     // One controller covers the wait and the movement: no extra timer.
-    final delay = Motion.stagger * widget.index;
-    final total = delay + Motion.enter;
+    final delay = CcMotion.stagger * widget.index;
+    final total = delay + CcMotion.enter;
     final c = _c = AnimationController(vsync: this, duration: total);
     _t = CurvedAnimation(
       parent: c,
-      curve: Interval(delay.inMicroseconds / total.inMicroseconds, 1, curve: Motion.curve),
+      curve: Interval(delay.inMicroseconds / total.inMicroseconds, 1, curve: CcMotion.curveIn),
     );
     c.forward();
   }
@@ -179,12 +163,12 @@ class HeartIcon extends StatefulWidget {
 }
 
 class _HeartIconState extends State<HeartIcon> with SingleTickerProviderStateMixin {
-  late final _c = AnimationController(vsync: this, duration: Motion.pulse);
+  late final _c = AnimationController(vsync: this, duration: CcMotion.sheet);
   late final _scale = TweenSequence<double>([
     TweenSequenceItem(
-        tween: Tween<double>(begin: 1, end: 1.25).chain(CurveTween(curve: Curves.easeOut)), weight: 45),
+        tween: Tween<double>(begin: 1, end: 1.25).chain(CurveTween(curve: CcMotion.curveIn)), weight: 45),
     TweenSequenceItem(
-        tween: Tween<double>(begin: 1.25, end: 1).chain(CurveTween(curve: Curves.easeIn)), weight: 55),
+        tween: Tween<double>(begin: 1.25, end: 1).chain(CurveTween(curve: CcMotion.curveOut)), weight: 55),
   ]).animate(_c);
 
   @override
@@ -231,8 +215,8 @@ class RiseIn extends StatefulWidget {
 }
 
 class _RiseInState extends State<RiseIn> with SingleTickerProviderStateMixin {
-  late final _c = AnimationController(vsync: this, duration: Motion.enter);
-  late final _t = CurvedAnimation(parent: _c, curve: Motion.curve);
+  late final _c = AnimationController(vsync: this, duration: CcMotion.enter);
+  late final _t = CurvedAnimation(parent: _c, curve: CcMotion.curveIn);
 
   @override
   void didChangeDependencies() {

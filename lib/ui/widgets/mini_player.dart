@@ -31,7 +31,7 @@ String coverHeroTagFor(double width) =>
 
 const _swipeDistance = 72.0;
 const _swipeVelocity = 700.0;
-const _flingDuration = Duration(milliseconds: 160);
+const _flingDuration = CcMotion.enter;
 
 /// The row at the top of the dock (the dock gives it background and clip):
 /// swipe sideways to change track, up or tap to open Now Playing. With a Jam
@@ -66,7 +66,7 @@ class _MiniPlayerState extends ConsumerState<MiniPlayer>
     _anim = Tween<double>(
       begin: _dx.value,
       end: target,
-    ).animate(CurvedAnimation(parent: _settle, curve: Curves.easeOut));
+    ).animate(CurvedAnimation(parent: _settle, curve: CcMotion.curveIn));
     return _settle.forward(from: 0);
   }
 

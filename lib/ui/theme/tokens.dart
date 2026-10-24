@@ -124,12 +124,31 @@ abstract final class CcDims {
   static const sidePanelWidthXl = 360.0;
 }
 
-/// Animation durations (zero with «Riduci animazioni», see [ccDuration]).
+/// The one motion scale (D-23): press 120, enter 180, sheet 250, page/hero 320
+/// ms; ease-out-cubic in, ease-in-cubic out. Durations go through [ccDuration]
+/// (zero with «Riduci animazioni»).
 abstract final class CcMotion {
-  static const press = Duration(milliseconds: 150);
+  static const press = Duration(milliseconds: 120);
+  static const enter = Duration(milliseconds: 180);
   static const sheet = Duration(milliseconds: 250);
-  static const color = Duration(milliseconds: 400);
   static const page = Duration(milliseconds: 320);
+  static const curveIn = Curves.easeOutCubic;
+  static const curveOut = Curves.easeInCubic;
+
+  /// Delay between rows that come in one after the other (not a duration of
+  /// the scale).
+  static const stagger = Duration(milliseconds: 20);
+  static const staggered = 12;
+}
+
+/// Waits and loops that are not movement: they keep their value whatever the
+/// motion scale says.
+abstract final class CcTiming {
+  static const debounce = Duration(milliseconds: 250);
+  static const radioDebounce = Duration(milliseconds: 400);
+  static const afterRefresh = Duration(milliseconds: 400);
+  static const poll = Duration(milliseconds: 500);
+  static const avatarPulse = Duration(milliseconds: 1200);
 }
 
 Duration ccDuration(BuildContext context, Duration d) =>
