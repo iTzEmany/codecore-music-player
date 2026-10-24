@@ -14,6 +14,7 @@ import '../../theme/tokens.dart';
 import '../../widgets/format_utils.dart';
 import '../../widgets/play_buttons.dart';
 import '../../widgets/quality_tag.dart';
+import '../../widgets/ring_progress.dart';
 import '../../widgets/speed_button.dart';
 import '../devices/devices_sheet.dart';
 import 'queue_sheet.dart';
@@ -47,6 +48,8 @@ class _NpSeekRowState extends ConsumerState<NpSeekRow> {
     final max = dur.inMilliseconds.toDouble();
     // Only the position consumers rebuild on each tick, not the whole row.
     double shownOf(WidgetRef ref) {
+      final drag = ref.watch(ringDragProvider);
+      if (drag != null) return drag * max;
       final pos = ref.watch(positionProvider).value ?? Duration.zero;
       return pos.inMilliseconds.toDouble().clamp(0.0, max <= 0 ? 1.0 : max);
     }

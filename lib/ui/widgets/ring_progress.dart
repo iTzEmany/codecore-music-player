@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../l10n/l10n_ext.dart';
@@ -14,6 +15,17 @@ import 'format_utils.dart';
 double? ringProgress(Duration position, Duration? duration) {
   if (duration == null || duration <= Duration.zero) return null;
   return (position.inMilliseconds / duration.inMilliseconds).clamp(0.0, 1.0);
+}
+
+/// Fraction under the finger while dragging the full player's ring (null
+/// otherwise), so the elapsed time can follow it.
+final ringDragProvider = NotifierProvider<RingDrag, double?>(RingDrag.new);
+
+class RingDrag extends Notifier<double?> {
+  @override
+  double? build() => null;
+
+  void set(double? f) => state = f;
 }
 
 /// The cover inside an open ring (the app logo): the arc fills clockwise from
@@ -53,10 +65,19 @@ class _RingProgressState extends ConsumerState<RingProgress> {
   double? _drag;
   bool _focused = false;
 
-  static const _step = Duration(seconds: 10);
-  static const _keyStep = Duration(seconds: 5);
+  // Same step for the keyboard and for screen readers.
+  static const _step = Duration(seconds: 5);
 
   void _seekTo(Duration d) => ref.read(playerControllerProvider).seek(d);
+
+  late final RingDrag _dragNotifier = ref.read(ringDragProvider.notifier);
+
+  @override
+  void dispose() {
+    // Closed mid-drag: the elapsed time must not stay on the finger.
+    if (_drag != null) Future.microtask(() => _dragNotifier.set(null));
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -125,8 +146,8 @@ class _RingProgressState extends ConsumerState<RingProgress> {
         onFocusChange: (f) => setState(() => _focused = f),
         onKeyEvent: (_, e) {
           final step = switch (e.logicalKey) {
-            LogicalKeyboardKey.arrowRight => _keyStep,
-            LogicalKeyboardKey.arrowLeft => -_keyStep,
+            LogicalKeyboardKey.arrowRight => _step,
+            LogicalKeyboardKey.arrowLeft => -_step,
             _ => null,
           };
           if (step == null || e is KeyUpEvent) return KeyEventResult.ignored;
@@ -154,28 +175,34 @@ class _RingProgressState extends ConsumerState<RingProgress> {
         ),
       );
     }
-    return widget.seekable && !widget.live
-        ? RepaintBoundary(child: body)
-        : ExcludeSemantics(child: RepaintBoundary(child: body));
+    if (!widget.seekable || widget.live) {
+      return ExcludeSemantics(child: RepaintBoundary(child: body));
+    }
+    // The seek band reaches 48 dp out from the cover edge, past the drawing.
+    final pad = _band - (size - inner) / 2;
+    return _WideHit(pad: pad, child: RepaintBoundary(child: body));
   }
 
   Widget _gestures(Widget body) {
     final size = widget.size;
+    final inner = RingProgress.innerSize(size, stroke: widget.stroke);
     return RawGestureDetector(
       gestures: {
         _RingSeekRecognizer:
             GestureRecognizerFactoryWithHandlers<_RingSeekRecognizer>(
-              () => _RingSeekRecognizer(size, widget.stroke),
+              () => _RingSeekRecognizer(size, inner),
               (r) {
                 r
                   ..size = size
-                  ..stroke = widget.stroke
+                  ..inner = inner
                   ..onFraction = (f) {
                     setState(() => _drag = f);
+                    _dragNotifier.set(f);
                   }
                   ..onEnd = (commit) {
                     final f = _drag;
                     setState(() => _drag = null);
+                    _dragNotifier.set(null);
                     final dur = ref.read(durationProvider).value;
                     if (commit && f != null && dur != null) {
                       _seekTo(dur * f);
@@ -189,21 +216,24 @@ class _RingProgressState extends ConsumerState<RingProgress> {
   }
 }
 
-/// Wins the arena at once for a touch on the ring band (48 dp wide, like the
-/// mockup) so the cover's swipe and the sheet drag do not take it; touches
-/// elsewhere are ignored.
-class _RingSeekRecognizer extends OneSequenceGestureRecognizer {
-  _RingSeekRecognizer(this.size, this.stroke);
+/// Width of the seek band, measured outwards from the cover edge.
+const _band = 48.0;
 
-  double size, stroke;
+/// Wins the arena at once for a touch on the ring band (from the cover edge,
+/// 48 dp wide) so the cover's swipe and the sheet drag do not take it;
+/// touches elsewhere, the cover included, are ignored.
+class _RingSeekRecognizer extends OneSequenceGestureRecognizer {
+  _RingSeekRecognizer(this.size, this.inner);
+
+  double size, inner;
   void Function(double fraction)? onFraction;
   void Function(bool commit)? onEnd;
 
   @override
   void addAllowedPointer(PointerDownEvent event) {
     final c = Offset(size / 2, size / 2);
-    final r = size / 2 - RingPainter.dotRadius(stroke);
-    if (((event.localPosition - c).distance - r).abs() > 24) return;
+    final d = (event.localPosition - c).distance - inner / 2;
+    if (d < 0 || d > _band) return;
     startTrackingPointer(event.pointer, event.transform);
     resolve(GestureDisposition.accepted);
     onFraction?.call(RingPainter.fractionAt(event.localPosition - c));
@@ -231,6 +261,39 @@ class _RingSeekRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void didStopTrackingLastPointer(int pointer) {}
+}
+
+/// Hit-tests [pad] dp past its own bounds (the position is clamped onto them
+/// for the child), so a touch just outside the drawing still reaches it.
+class _WideHit extends SingleChildRenderObjectWidget {
+  const _WideHit({required this.pad, super.child});
+
+  final double pad;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) => _RenderWideHit(pad);
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderWideHit r) =>
+      r.pad = pad;
+}
+
+class _RenderWideHit extends RenderProxyBox {
+  _RenderWideHit(this.pad);
+
+  double pad;
+
+  @override
+  bool hitTest(BoxHitTestResult result, {required Offset position}) {
+    if (!(Offset.zero & size).inflate(pad).contains(position)) return false;
+    return super.hitTest(
+      result,
+      position: Offset(
+        position.dx.clamp(0.0, size.width - 0.01),
+        position.dy.clamp(0.0, size.height - 0.01),
+      ),
+    );
+  }
 }
 
 /// Open ring with the gap at top right. [progress] null paints the whole arc

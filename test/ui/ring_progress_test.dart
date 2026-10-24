@@ -213,7 +213,7 @@ void main() {
       expect(ctrl.seeks.single, const Duration(seconds: 5));
     });
 
-    testWidgets('screen readers get a slider with +/-10 s', (tester) async {
+    testWidgets('screen readers get a slider with +/-5 s', (tester) async {
       final handle = tester.ensureSemantics();
       await pump(tester);
       await tester.pump();
@@ -221,9 +221,9 @@ void main() {
         find.bySemanticsLabel('Posizione nel brano'),
       );
       expect(node.value, '0:00 / 1:40');
-      expect(node.increasedValue, '0:10');
+      expect(node.increasedValue, '0:05');
       tester.semantics.increase(find.semantics.byLabel('Posizione nel brano'));
-      expect(ctrl.seeks.single, const Duration(seconds: 10));
+      expect(ctrl.seeks.single, const Duration(seconds: 5));
       handle.dispose();
     });
   });

@@ -130,9 +130,8 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
     final online = track != null && track.trackKind == TrackKind.online;
     final wide = MediaQuery.sizeOf(context).width >= _wideBreakpoint;
     final reduce = MediaQuery.disableAnimationsOf(context);
-    // Option «tinta della copertina»: one flat colour, else the theme's own.
-    final themeBg = ref.watch(themeBackgroundProvider);
-    final tinted = !(themeBg.isCustom && !themeBg.coverBackdrop);
+    // Option «tinta della copertina» (D-54): one flat colour, else `bg`.
+    final tinted = ref.watch(themeBackgroundProvider).coverBackdrop;
     return Scaffold(
       backgroundColor: tinted
           ? resolvedHeroTint(context, ref, track?.coverKey)
