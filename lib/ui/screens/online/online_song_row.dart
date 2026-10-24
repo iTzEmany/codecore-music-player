@@ -15,7 +15,11 @@ import '../../widgets/show_msg.dart';
 
 /// Starts a download for each of [picked] (in this order) that is not already
 /// in the library or on its way, and says how many started and how many not.
-void startOnlineDownloads(BuildContext context, WidgetRef ref, Iterable<YtResult> picked) {
+void startOnlineDownloads(
+  BuildContext context,
+  WidgetRef ref,
+  Iterable<YtResult> picked,
+) {
   final l = context.l10n;
   final index = ref.read(downloadIndexProvider).value;
   final busy = {
@@ -27,7 +31,8 @@ void startOnlineDownloads(BuildContext context, WidgetRef ref, Iterable<YtResult
   };
   var started = 0, skipped = 0;
   for (final r in picked) {
-    if ((index?.contains(r.id, source: r.source) ?? false) || busy.contains(r.id)) {
+    if ((index?.contains(r.id, source: r.source) ?? false) ||
+        busy.contains(r.id)) {
       skipped++;
       continue;
     }
@@ -70,10 +75,18 @@ class OnlineSongTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final pick = watchOnlinePick(ref, selectionKey, index);
-    final inLibrary = ownedLocally ||
-        (ref.watch(downloadIndexProvider).value?.contains(result.id, source: result.source) ?? false);
-    final item = ref.watch(downloadsProvider.select(
-        (d) => d.where((x) => x.result.id == result.id).lastOrNull));
+    final inLibrary =
+        ownedLocally ||
+        (ref
+                .watch(downloadIndexProvider)
+                .value
+                ?.contains(result.id, source: result.source) ??
+            false);
+    final item = ref.watch(
+      downloadsProvider.select(
+        (d) => d.where((x) => x.result.id == result.id).lastOrNull,
+      ),
+    );
     return OnlineSongRow(
       result: result,
       inLibrary: inLibrary,
@@ -149,12 +162,97 @@ class OnlineSongRow extends StatelessWidget {
     final l = context.l10n;
     final cc = context.cc;
     final theme = Theme.of(context).textTheme;
-    final length = result.duration == null
-        ? null
-        : formatDuration(result.duration!.inMilliseconds);
-    final artist = result.artists.isEmpty ? '' : result.artists.first;
-    final linked = onArtistTap != null && artist.isNotEmpty;
-    final meta = [if (!linked) result.channel, ?length].join(', ');
+    return Semantics(
+      selected: selecting ? selected : null,
+      value: selected
+          ? (position == null ? l.selectedRow : l.selectedRowAt(position!))
+          : null,
+      child: Material(
+        color: selected
+            ? cc.accentSoft.withValues(alpha: 0.16)
+            : Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          onLongPress: onLongPress,
+          child: SizedBox(
+            height: 72,
+            child: Row(
+              children: [
+                if (selecting)
+                  Padding(
+                    padding: const EdgeInsets.only(left: CcDims.gap4),
+                    child: SelectionBox(
+                      selected: selected,
+                      position: position,
+                      size: 40,
+                    ),
+                  )
+                else
+                  const SizedBox(width: CcDims.margin),
+                if (number != null && !selecting)
+                  SizedBox(
+                    width: 32,
+                    child: Text(
+                      '$number',
+                      textAlign: TextAlign.center,
+                      style: theme.bodyMedium?.copyWith(color: cc.textMuted),
+                    ),
+                  )
+                else if (square)
+                  NetThumbnail(
+                    url: result.thumbnailUrl,
+                    width: 48,
+                    height: 48,
+                    icon: Icons.music_note,
+                  )
+                else
+                  NetThumbnail(
+                    url: result.thumbnailUrl,
+                    width: 80,
+                    height: 45,
+                    icon: Icons.music_video,
+                  ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _SongText(
+                    result: result,
+                    inLibrary: inLibrary,
+                    onArtistTap: onArtistTap,
+                    note: note,
+                    tagLine: tagLine,
+                  ),
+                ),
+                ?listen,
+                _DownloadState(
+                  item: item,
+                  inLibrary: inLibrary,
+                  onDownload: onDownload,
+                ),
+                const SizedBox(width: 8),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DownloadState extends StatelessWidget {
+  const _DownloadState({
+    required this.item,
+    required this.inLibrary,
+    required this.onDownload,
+  });
+
+  final DownloadItem? item;
+  final bool inLibrary;
+  final VoidCallback onDownload;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final cc = context.cc;
     final st = item?.status;
     final Widget trailing;
     if (st == DownloadStatus.queued ||
@@ -177,7 +275,9 @@ class OnlineSongRow extends StatelessWidget {
     } else if (st == DownloadStatus.done || inLibrary) {
       trailing = SizedBox(
         width: 48,
-        child: Center(child: Icon(Icons.check_circle_rounded, color: cc.accentSoft)),
+        child: Center(
+          child: Icon(Icons.check_circle_rounded, color: cc.accentSoft),
+        ),
       );
     } else if (st == DownloadStatus.failed) {
       trailing = IconButton(
@@ -192,111 +292,109 @@ class OnlineSongRow extends StatelessWidget {
         onPressed: onDownload,
       );
     }
-    return Semantics(
-      selected: selecting ? selected : null,
-      value: selected
-          ? (position == null ? l.selectedRow : l.selectedRowAt(position!))
-          : null,
-      child: Material(
-        color: selected ? cc.accentSoft.withValues(alpha: 0.16) : Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          onLongPress: onLongPress,
-          child: SizedBox(
-            height: 72,
-            child: Row(
-              children: [
-                if (selecting)
-                  Padding(
-                    padding: const EdgeInsets.only(left: CcDims.gap4),
-                    child: SelectionBox(selected: selected, position: position, size: 40),
-                  )
-                else
-                  const SizedBox(width: CcDims.margin),
-                if (number != null && !selecting)
-                  SizedBox(
-                    width: 32,
-                    child: Text('$number',
-                        textAlign: TextAlign.center,
-                        style: theme.bodyMedium?.copyWith(color: cc.textMuted)),
-                  )
-                else if (square)
-                  NetThumbnail(
-                      url: result.thumbnailUrl, width: 48, height: 48, icon: Icons.music_note)
-                else
-                  NetThumbnail(
-                      url: result.thumbnailUrl, width: 80, height: 45, icon: Icons.music_video),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(result.title,
-                          maxLines: 1, overflow: TextOverflow.ellipsis, style: theme.bodyLarge),
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.smart_display_rounded,
-                            key: ValueKey('from-${result.source.name}'),
-                            size: 14,
-                            color: cc.textMuted,
-                          ),
-                          const SizedBox(width: 4),
-                          if (linked)
-                            Flexible(
-                              child: InkWell(
-                                key: ValueKey('artist-link-${result.id}'),
-                                onTap: onArtistTap,
-                                child: Text(artist,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: theme.bodyMedium?.copyWith(
-                                      color: cc.accentSoft,
-                                      decoration: TextDecoration.underline,
-                                      decorationColor: cc.accentSoft,
-                                    )),
-                              ),
-                            ),
-                          if (meta.isNotEmpty && linked) const SizedBox(width: 8),
-                          if (meta.isNotEmpty)
-                            Flexible(
-                              fit: linked ? FlexFit.loose : FlexFit.tight,
-                              child: Text(meta,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: theme.bodyMedium),
-                            ),
-                        ],
-                      ),
-                      if (note != null)
-                        Text(note!,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.labelSmall?.copyWith(color: cc.textMuted))
-                      else if (tagLine != null || inLibrary)
-                        Row(children: [
-                          if (tagLine != null) Flexible(child: tagLine!),
-                          if (tagLine != null && inLibrary) const SizedBox(width: 8),
-                          if (inLibrary)
-                            Flexible(
-                              child: Text(l.ytAlreadyInLibrary,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: theme.labelSmall?.copyWith(color: cc.accentSoft)),
-                            ),
-                        ]),
-                    ],
+    return trailing;
+  }
+}
+
+class _SongText extends StatelessWidget {
+  const _SongText({
+    required this.result,
+    required this.inLibrary,
+    required this.onArtistTap,
+    required this.note,
+    required this.tagLine,
+  });
+
+  final YtResult result;
+  final bool inLibrary;
+  final VoidCallback? onArtistTap;
+  final String? note;
+  final Widget? tagLine;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final cc = context.cc;
+    final theme = Theme.of(context).textTheme;
+    final length = result.duration == null
+        ? null
+        : formatDuration(result.duration!.inMilliseconds);
+    final artist = result.artists.isEmpty ? '' : result.artists.first;
+    final linked = onArtistTap != null && artist.isNotEmpty;
+    final meta = [if (!linked) result.channel, ?length].join(', ');
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          result.title,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: theme.bodyLarge,
+        ),
+        Row(
+          children: [
+            Icon(
+              Icons.smart_display_rounded,
+              key: ValueKey('from-${result.source.name}'),
+              size: 14,
+              color: cc.textMuted,
+            ),
+            const SizedBox(width: 4),
+            if (linked)
+              Flexible(
+                child: InkWell(
+                  key: ValueKey('artist-link-${result.id}'),
+                  onTap: onArtistTap,
+                  child: Text(
+                    artist,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.bodyMedium?.copyWith(
+                      color: cc.accentSoft,
+                      decoration: TextDecoration.underline,
+                      decorationColor: cc.accentSoft,
+                    ),
                   ),
                 ),
-                ?listen,
-                trailing,
-                const SizedBox(width: 8),
-              ],
-            ),
-          ),
+              ),
+            if (meta.isNotEmpty && linked) const SizedBox(width: 8),
+            if (meta.isNotEmpty)
+              Flexible(
+                fit: linked ? FlexFit.loose : FlexFit.tight,
+                child: Text(
+                  meta,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.bodyMedium,
+                ),
+              ),
+          ],
         ),
-      ),
+        if (note != null)
+          Text(
+            note!,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.labelSmall?.copyWith(color: cc.textMuted),
+          )
+        else if (tagLine != null || inLibrary)
+          Row(
+            children: [
+              if (tagLine != null) Flexible(child: tagLine!),
+              if (tagLine != null && inLibrary) const SizedBox(width: 8),
+              if (inLibrary)
+                Flexible(
+                  child: Text(
+                    l.ytAlreadyInLibrary,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.labelSmall?.copyWith(color: cc.accentSoft),
+                  ),
+                ),
+            ],
+          ),
+      ],
     );
   }
 }
