@@ -83,10 +83,7 @@ class _Bar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final l = context.l10n;
     final cc = context.cc;
-    final theme = Theme.of(context).textTheme;
-    final notifier = ref.read(listenProvider.notifier);
     final total = state.duration ?? result.duration;
     final progress =
         state.phase == ListenPhase.resolving ||
@@ -97,6 +94,98 @@ class _Bar extends ConsumerWidget {
             0.0,
             1.0,
           );
+    return Material(
+      key: const ValueKey('listen-bar'),
+      color: cc.surface2,
+      child: SafeArea(
+        top: false,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            LinearProgressIndicator(value: progress, minHeight: 2),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                CcDims.margin,
+                CcDims.gap4,
+                CcDims.gap4,
+                CcDims.gap4,
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.headphones_rounded,
+                    color: cc.accentSoft,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 12),
+                  _BarTexts(state: state, result: result, total: total),
+                  _BarButtons(state: state, result: result),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _BarTexts extends StatelessWidget {
+  const _BarTexts({
+    required this.state,
+    required this.result,
+    required this.total,
+  });
+
+  final ListenState state;
+  final YtResult result;
+  final Duration? total;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final theme = Theme.of(context).textTheme;
+    final total = this.total;
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            result.title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.bodyLarge,
+          ),
+          Text(
+            state.phase == ListenPhase.resolving
+                ? l.listenResolving
+                : [
+                    result.channel,
+                    if (total != null)
+                      '${formatDuration(state.position.inMilliseconds)} / '
+                          '${formatDuration(total.inMilliseconds)}',
+                  ].join(', '),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.bodyMedium,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BarButtons extends ConsumerWidget {
+  const _BarButtons({required this.state, required this.result});
+
+  final ListenState state;
+  final YtResult result;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    final notifier = ref.read(listenProvider.notifier);
     final downloading = ref.watch(
       downloadsProvider.select(
         (d) => d.any(
@@ -113,101 +202,45 @@ class _Bar extends ConsumerWidget {
         (i) => i.value?.contains(result.id, source: result.source) ?? false,
       ),
     );
-    return Material(
-      key: const ValueKey('listen-bar'),
-      color: cc.surface2,
-      child: SafeArea(
-        top: false,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            LinearProgressIndicator(value: progress, minHeight: 2),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(CcDims.margin, CcDims.gap4, CcDims.gap4, CcDims.gap4),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.headphones_rounded,
-                    color: cc.accentSoft,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          result.title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.bodyLarge,
-                        ),
-                        Text(
-                          state.phase == ListenPhase.resolving
-                              ? l.listenResolving
-                              : [
-                                  result.channel,
-                                  if (total != null)
-                                    '${formatDuration(state.position.inMilliseconds)} / '
-                                        '${formatDuration(total.inMilliseconds)}',
-                                ].join(', '),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.bodyMedium,
-                        ),
-                      ],
-                    ),
-                  ),
-                  // Fixed slots (48 px each) in every state: the buttons never
-                  // move, so a tap meant for «Chiudi» cannot land on «Scarica».
-                  if (state.phase == ListenPhase.resolving)
-                    const SizedBox(width: 48, height: 48)
-                  else
-                    IconButton(
-                      tooltip: state.phase == ListenPhase.playing
-                          ? l.pause
-                          : l.play,
-                      icon: Icon(
-                        state.phase == ListenPhase.playing
-                            ? Icons.pause_rounded
-                            : Icons.play_arrow_rounded,
-                      ),
-                      onPressed: state.phase == ListenPhase.playing
-                          ? notifier.pause
-                          : notifier.resume,
-                    ),
-                  if (inLibrary)
-                    const SizedBox(width: 48, height: 48)
-                  else
-                    IconButton(
-                      tooltip: l.ytDownload,
-                      icon: downloading
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2.5,
-                              ),
-                            )
-                          : const Icon(Icons.download_rounded),
-                      onPressed: downloading
-                          ? null
-                          : () => ref
-                                .read(downloadsProvider.notifier)
-                                .add(result),
-                    ),
-                  IconButton(
-                    tooltip: l.close,
-                    icon: const Icon(Icons.close_rounded),
-                    onPressed: notifier.stop,
-                  ),
-                ],
-              ),
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (state.phase == ListenPhase.resolving)
+          const SizedBox(width: 48, height: 48)
+        else
+          IconButton(
+            tooltip: state.phase == ListenPhase.playing ? l.pause : l.play,
+            icon: Icon(
+              state.phase == ListenPhase.playing
+                  ? Icons.pause_rounded
+                  : Icons.play_arrow_rounded,
             ),
-          ],
+            onPressed: state.phase == ListenPhase.playing
+                ? notifier.pause
+                : notifier.resume,
+          ),
+        if (inLibrary)
+          const SizedBox(width: 48, height: 48)
+        else
+          IconButton(
+            tooltip: l.ytDownload,
+            icon: downloading
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2.5),
+                  )
+                : const Icon(Icons.download_rounded),
+            onPressed: downloading
+                ? null
+                : () => ref.read(downloadsProvider.notifier).add(result),
+          ),
+        IconButton(
+          tooltip: l.close,
+          icon: const Icon(Icons.close_rounded),
+          onPressed: notifier.stop,
         ),
-      ),
+      ],
     );
   }
 }
