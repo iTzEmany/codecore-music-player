@@ -1,8 +1,9 @@
 # Handoff — 2026-10-24
 
 ## Stato
+- Correzioni del 24-10 fuse (PR #14): download 403 (yt-dlp Android ora si aggiorna prima di ogni operazione), chip della ricerca leggibili, Invio senza risultati locali → online (D-60), pallino dell'anello sopra la copertina, immagine degli artisti più ascoltati, hover dello shuffle solo sul pulsante, swipe in coda che non parte dal bordo (D-59). Provate sul Mi A3.
 - Il refactor «ui-fluida» (fasi 38–44) è completo nel codice. Le PR #6–#11 sono fuse, e la fase 44 è nella PR finale.
-- Versione `1.3.0+4`. Il tag `v1.3.0` è **rimandato** (D-58): si crea dopo il prossimo obiettivo, sul suo commit di chiusura.
+- Versione `1.3.0+4`. Il tag `v1.3.0` ora si può creare (D-58).
 - Verifiche:
   - `flutter analyze` pulito.
   - `flutter test test/ui test/goldens test/providers test/l10n` verde (934 test). La suite completa la esegue la CI.
@@ -15,7 +16,8 @@
 - Risultati per rilievo (F-NN), con i commit: `docs/refactor/ui-fluida/analisi.md`, sezione «Risultati».
 
 ## Tocca a te
-- **Tag (dopo il prossimo obiettivo, D-58):** `git tag -a v1.3.0 -m "Codecore 1.3.0"`, poi `git push origin v1.3.0`: costruisce APK, Linux e Windows e pubblica la release; controlla con `gh run list -w release.yml -L 1`.
+- **Motorola:** `install -r` del nuovo APK e prova l'import di una playlist Spotify e un download da ricerca.
+- **Tag (D-58):** `git tag -a v1.3.0 -m "Codecore 1.3.0"`, poi `git push origin v1.3.0`: costruisce APK, Linux e Windows e pubblica la release; controlla con `gh run list -w release.yml -L 1`.
 - **Mi A3, a vista:**
   - Il nuovo aspetto: dock, Home, Libreria, album, player e onboarding.
   - Trascina l'anello del player: fa il seek e il tempo segue il dito.
