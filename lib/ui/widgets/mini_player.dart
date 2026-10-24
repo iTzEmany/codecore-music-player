@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../data/db/app_database.dart' show Track;
 import '../../l10n/l10n_ext.dart';
 import '../../providers/jam_providers.dart';
 import '../../providers/player_providers.dart';
 import '../../services/jam/jam_models.dart';
+import '../../services/radio/radio_station.dart' show RadioStation;
 import '../screens/devices/devices_sheet.dart';
 import '../screens/jam/jam_screen.dart';
 import '../screens/now_playing/now_playing_screen.dart';
@@ -127,9 +129,7 @@ class _MiniPlayerState extends ConsumerState<MiniPlayer>
     final inJam = jam.active;
     if (!inJam && track == null) return const SizedBox.shrink();
 
-    final cc = context.cc;
     final l = context.l10n;
-    final theme = Theme.of(context).textTheme;
     final ctrl = ref.read(playerControllerProvider);
     final width = MediaQuery.sizeOf(context).width;
 
@@ -150,7 +150,75 @@ class _MiniPlayerState extends ConsumerState<MiniPlayer>
       playing = ref.watch(isPlayingProvider).value ?? false;
     }
 
-    final card = FocusTraversalGroup(
+    final card = _MiniCard(
+      inJam: inJam,
+      track: track,
+      radio: radio,
+      title: title,
+      subtitle: subtitle,
+      playing: playing,
+    );
+
+    return RiseIn(
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onHorizontalDragStart: inJam ? null : (_) => _settle.stop(),
+        onHorizontalDragUpdate: inJam ? null : (d) => _dx.value += d.delta.dx,
+        onHorizontalDragEnd: inJam ? null : (d) => _onDragEnd(d, width, ctrl),
+        onVerticalDragEnd: (d) {
+          if ((d.primaryVelocity ?? 0) < -300) {
+            inJam ? _openJam() : _openNowPlaying();
+          }
+        },
+        child: ValueListenableBuilder<double>(
+          valueListenable: _dx,
+          // InkWell gives Enter/Space and the focus ring; the rest of the
+          // gestures stay on the GestureDetector above.
+          child: Material(
+            type: MaterialType.transparency,
+            child: Semantics(
+              button: true,
+              label: l.nowPlaying,
+              child: InkWell(
+                onTap: inJam ? _openJam : _openNowPlaying,
+                child: card,
+              ),
+            ),
+          ),
+          builder: (_, dx, c) =>
+              Transform.translate(offset: Offset(dx, 0), child: c),
+        ),
+      ),
+    );
+  }
+}
+
+class _MiniCard extends ConsumerWidget {
+  const _MiniCard({
+    required this.inJam,
+    required this.track,
+    required this.radio,
+    required this.title,
+    required this.subtitle,
+    required this.playing,
+  });
+
+  final bool inJam;
+  final Track? track;
+  final RadioStation? radio;
+  final String title;
+  final String subtitle;
+  final bool playing;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final cc = context.cc;
+    final l = context.l10n;
+    final theme = Theme.of(context).textTheme;
+    final ctrl = ref.read(playerControllerProvider);
+    final track = this.track;
+    final radio = this.radio;
+    return FocusTraversalGroup(
       child: ConstrainedBox(
         // Grows with the text so nothing overflows at 200 %.
         constraints: const BoxConstraints(minHeight: CcDims.miniPlayerHeight),
@@ -247,38 +315,6 @@ class _MiniPlayerState extends ConsumerState<MiniPlayer>
             ),
             const SizedBox(width: 4),
           ],
-        ),
-      ),
-    );
-
-    return RiseIn(
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onHorizontalDragStart: inJam ? null : (_) => _settle.stop(),
-        onHorizontalDragUpdate: inJam ? null : (d) => _dx.value += d.delta.dx,
-        onHorizontalDragEnd: inJam ? null : (d) => _onDragEnd(d, width, ctrl),
-        onVerticalDragEnd: (d) {
-          if ((d.primaryVelocity ?? 0) < -300) {
-            inJam ? _openJam() : _openNowPlaying();
-          }
-        },
-        child: ValueListenableBuilder<double>(
-          valueListenable: _dx,
-          // InkWell gives Enter/Space and the focus ring; the rest of the
-          // gestures stay on the GestureDetector above.
-          child: Material(
-            type: MaterialType.transparency,
-            child: Semantics(
-              button: true,
-              label: l.nowPlaying,
-              child: InkWell(
-                onTap: inJam ? _openJam : _openNowPlaying,
-                child: card,
-              ),
-            ),
-          ),
-          builder: (_, dx, c) =>
-              Transform.translate(offset: Offset(dx, 0), child: c),
         ),
       ),
     );
