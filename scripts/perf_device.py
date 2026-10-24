@@ -134,6 +134,12 @@ def wait_for(dev, event, timeout_s):
     raise RuntimeError(f'no «{event}» from the app within {timeout_s} s')
 
 
+# Every scenario name, in order; the second tuple needs playback. scenario()/gestures() assert against it.
+SCENARIOS = ('Pallino schede', 'Tutti i brani', 'Album', 'Ricerca «notte»', 'Apri album', 'In riproduzione',
+             'Lettore dal dock', 'Swipe mini player', 'Fogli', 'Apertura player', 'Anello')
+PLAYBACK_SCENARIOS = set(SCENARIOS[SCENARIOS.index('In riproduzione'):])
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('device')
@@ -143,7 +149,16 @@ def main():
     ap.add_argument('--no-push', action='store_true', help='keep the perf app data (library already scanned)')
     ap.add_argument('--runs', type=int, default=5, help='cold starts')
     ap.add_argument('--playback', action='store_true', help='also «In riproduzione» (plays silent tracks)')
+    ap.add_argument('--only', help='run only these scenarios (exact names, comma separated, e.g. "Fogli,Apertura player"); '
+                                   'skips the cold starts; the playback ones imply --playback')
     args = ap.parse_args()
+    only = {n.strip() for n in args.only.split(',') if n.strip()} if args.only is not None else None
+    if only is not None:
+        bad = sorted(only - set(SCENARIOS)) or ([''] if not only else [])
+        if bad:
+            sys.exit(f'--only: nomi non validi {bad}; validi: ' + ', '.join(SCENARIOS))
+        args.runs = 0
+        args.playback = args.playback or bool(only & PLAYBACK_SCENARIOS)
     dev = Device(args.device)
     lib = os.path.join(ROOT, 'build/perf_library')
     if not args.no_push and not os.path.isdir(lib):
@@ -191,6 +206,11 @@ def main():
     w, h = map(int, re.search(r'(\d+)x(\d+)', dev.sh('wm size')).groups())
 
     def scenario(name, setup, action):
+        assert name in SCENARIOS, name
+        if only and name not in only:
+            if name == 'In riproduzione':  # starts the playback the later scenarios need
+                setup(), action()
+            return
         setup()
         time.sleep(2.5)
         t0 = dev.now_ms()
@@ -201,6 +221,9 @@ def main():
 
     def gestures(name, setup, action):
         """Like scenario(), but only short spans around each gesture are measured (not the idle between)."""
+        assert name in SCENARIOS, name
+        if only and name not in only:
+            return
         spans = []
 
         def timed(act, wait=0.8):
