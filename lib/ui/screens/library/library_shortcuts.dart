@@ -25,8 +25,9 @@ class LibraryShortcut {
   final bool keepWhenZero;
 }
 
-/// The Libreria shortcuts as a grid of equal-width blocks (icon left of the
-/// label, like the segmented blocks above); empty ones are hidden.
+/// Grid of equal-width blocks; empty ones are hidden. Blocks without an icon
+/// (Libreria, D-26/D-53): 2 columns, all on one row from 720 dp. Blocks with an
+/// icon (Memoria): one column per 160 dp, up to 4.
 class LibraryShortcuts extends StatelessWidget {
   const LibraryShortcuts({super.key, required this.items});
 
@@ -57,10 +58,13 @@ class LibraryShortcuts extends StatelessWidget {
             child: ConstrainedBox(
               constraints: const BoxConstraints(minHeight: 56),
               child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: CcDims.gap12,
-                  vertical: 10,
-                ),
+                // 6 dp like the mockup, so nine labels fit one row at 1280 px.
+                padding: s.icon == null
+                    ? const EdgeInsets.symmetric(horizontal: 6, vertical: 4)
+                    : const EdgeInsets.symmetric(
+                        horizontal: CcDims.gap12,
+                        vertical: 10,
+                      ),
                 child: s.icon == null
                     ? Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -75,6 +79,15 @@ class LibraryShortcuts extends StatelessWidget {
                           if (s.count != null)
                             Text(
                               '${s.count}',
+                              style: theme.bodySmall?.copyWith(
+                                color: cc.textMuted,
+                              ),
+                            ),
+                          if (s.meta != null)
+                            Text(
+                              s.meta!,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                               style: theme.bodySmall?.copyWith(
                                 color: cc.textMuted,
                               ),
@@ -142,9 +155,13 @@ class LibraryShortcuts extends StatelessWidget {
       ),
       child: LayoutBuilder(
         builder: (context, c) {
-          // Wide: every block on one row; phone: 2 columns, an odd last one
-          // takes the whole row (D-28, D-53).
-          final cols = c.maxWidth / scale >= 720 ? visible.length : 2;
+          final w = c.maxWidth / scale;
+          // Iconless: wide = every block on one row; phone = 2 columns, an odd
+          // last one takes the whole row (D-28, D-53). Icons: as before 43.
+          final iconic = visible.any((s) => s.icon != null);
+          final cols = iconic
+              ? (w ~/ 160).clamp(1, 4)
+              : (w >= 720 ? visible.length : 2);
           return Column(
             children: [
               for (var i = 0; i < visible.length; i += cols) ...[
@@ -155,11 +172,15 @@ class LibraryShortcuts extends StatelessWidget {
                     children: [
                       for (
                         var j = i;
-                        j < i + cols && j < visible.length;
+                        j < i + cols && (iconic || j < visible.length);
                         j++
                       ) ...[
                         if (j > i) const SizedBox(width: _gap),
-                        Expanded(child: _block(context, visible[j])),
+                        Expanded(
+                          child: j < visible.length
+                              ? _block(context, visible[j])
+                              : const SizedBox.shrink(),
+                        ),
                       ],
                     ],
                   ),

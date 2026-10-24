@@ -1,6 +1,7 @@
 import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/data/repositories/library_entries.dart';
 import 'package:codecore/ui/screens/library/library_screen.dart';
+import 'package:codecore/ui/screens/library/library_shortcuts.dart';
 import 'package:codecore/ui/shell/app_shell.dart';
 import 'package:codecore/ui/theme/tokens.dart';
 import 'package:codecore/ui/widgets/segmented_blocks.dart';
@@ -99,6 +100,48 @@ void main() {
     final last = block(t, 'Statistiche');
     expect(last.top, fav.top);
     expect(last.left, greaterThan(fav.right));
+    await h.dispose(t);
+  });
+
+  testWidgets('desktop, German: shortcuts stay on one row without overflow',
+      (t) async {
+    t.view.physicalSize = const Size(1280, 1400);
+    t.view.devicePixelRatio = 1;
+    addTearDown(t.view.reset);
+    final h = await Harness.create(t, tracks: 4);
+    await h.pump(t, const LibraryScreen(), locale: const Locale('de'));
+    await _settle(t);
+    final tops = {
+      for (final e in find
+          .descendant(
+              of: find.byType(LibraryShortcuts), matching: find.byType(InkWell))
+          .evaluate())
+        t.getRect(find.byWidget(e.widget)).top,
+    };
+    expect(tops.length, 1);
+    expect(t.takeException(), isNull);
+    await h.dispose(t);
+  });
+
+  testWidgets('shortcuts with icons keep the old grid on a wide screen',
+      (t) async {
+    t.view.physicalSize = const Size(1200, 800);
+    t.view.devicePixelRatio = 1;
+    addTearDown(t.view.reset);
+    final h = await Harness.create(t);
+    await h.pump(
+      t,
+      Scaffold(
+        body: LibraryShortcuts(items: [
+          for (var i = 0; i < 5; i++)
+            LibraryShortcut(label: 'S$i', icon: Icons.star, onTap: () {}),
+        ]),
+      ),
+    );
+    // 4 per row, the fifth wraps to a second row.
+    expect(t.getRect(find.text('S3')).top, t.getRect(find.text('S0')).top);
+    expect(t.getRect(find.text('S4')).top,
+        greaterThan(t.getRect(find.text('S0')).top));
     await h.dispose(t);
   });
 
