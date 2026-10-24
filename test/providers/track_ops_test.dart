@@ -98,9 +98,9 @@ void main() {
   });
 
   group('TagOps', () {
-    test('createAndAssign gives the new tag to the tracks and returns it', () async {
+    test('create with assignTo gives the new tag to the tracks and returns it', () async {
       final ids = [for (final t in await rows()) t.id];
-      final tag = await c.read(tagOpsProvider).createAndAssign('rock', ids);
+      final tag = await c.read(tagOpsProvider).create('rock', assignTo: ids);
       expect(tag?.name, 'rock');
       expect(await c.read(tagOpsProvider).countsAmong(ids), {tag!.id: 3});
     });

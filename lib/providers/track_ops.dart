@@ -58,8 +58,6 @@ class TrackOps {
 
   Future<void> setLyrics(int id, {String? plain, String? synced}) => _repo.setLyrics(id, plain: plain, synced: synced);
 
-  Future<void> setCuriosities(int id, String? text) => _repo.setCuriosities(id, text);
-
   /// Records the new size and date of a file we rewrote.
   Future<void> stampFile(String path, FileStamp stamp) => stampTrack(_ref.read(databaseProvider), path, stamp);
 

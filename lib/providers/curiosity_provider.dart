@@ -1,8 +1,7 @@
-import 'package:drift/drift.dart' show Value;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/app_log.dart';
-import '../data/db/app_database.dart';
+import '../data/db/app_database.dart' show Track;
 import '../services/online/http_client.dart';
 import '../services/online/query_cleaner.dart';
 import 'database_providers.dart';
@@ -38,15 +37,19 @@ class CuriosityNotifier extends AsyncNotifier<CuriosityOutcome?> {
     state = const AsyncLoading();
     final c = cleanSearchQuery(t.title, t.artist ?? '');
     final lang = ref.read(settingsProvider).language;
-    final db = ref.read(databaseProvider);
     var songLimited = false, artistLimited = false, failed = false;
 
     // Identity first (MusicBrainz → Wikidata → the exact pages), the names
     // after; each part reports on its own, so one failing does not lose the other.
-    final found = await ref.read(curiosityFinderProvider).find(c.title, c.artist, lang, isrc: t.isrc, durationMs: t.durationMs);
+    final found = await ref
+        .read(curiosityFinderProvider)
+        .find(c.title, c.artist, lang, isrc: t.isrc, durationMs: t.durationMs);
     final song = found.song, artist = found.artist;
     final songDone = found.songError == null;
-    for (final (err, isSong) in [(found.songError, true), (found.artistError, false)]) {
+    for (final (err, isSong) in [
+      (found.songError, true),
+      (found.artistError, false),
+    ]) {
       if (err == null) continue;
       if (err is RateLimitedException) {
         AppLog.w('curiosity refused', err);
@@ -61,14 +64,17 @@ class CuriosityNotifier extends AsyncNotifier<CuriosityOutcome?> {
       // older version could have saved the artist's page as the song's. A part
       // that could not be asked is left as it was.
       if (songDone) {
-        await (db.update(db.tracks)..where((r) => r.id.equals(t.id))).write(
-          TracksCompanion(
-            curiosities: Value(song == null ? null : '${song.text}\n${song.source}'),
-          ),
-        );
+        await ref
+            .read(trackRepositoryProvider)
+            .setCuriosities(
+              t.id,
+              song == null ? null : '${song.text}\n${song.source}',
+            );
       }
       if (artist != null) {
-        await ref.read(artistInfoRepositoryProvider).save(
+        await ref
+            .read(artistInfoRepositoryProvider)
+            .save(
               c.artist,
               body: artist.text,
               source: artist.source,

@@ -1,4 +1,4 @@
-import '../../../data/model/track_kind.dart';
+import '../../widgets/track_kind.dart';
 import '../../../core/platform.dart';
 
 import 'package:flutter/material.dart';

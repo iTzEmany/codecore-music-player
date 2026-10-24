@@ -1,5 +1,5 @@
 import 'package:codecore/data/db/app_database.dart';
-import 'package:codecore/data/model/track_kind.dart';
+import 'package:codecore/ui/widgets/track_kind.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Track _t(int id, {int kind = 0}) => Track(

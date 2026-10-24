@@ -21,6 +21,5 @@ Future<UserTag?> createTagFlow(BuildContext context, WidgetRef ref, {List<int> a
   final l = context.l10n;
   final name = await promptName(context, title: l.tagNew, confirmLabel: l.save, maxLength: 40);
   if (name == null || !context.mounted) return null;
-  final ops = ref.read(tagOpsProvider);
-  return assignTo.isEmpty ? ops.createNamed(name) : ops.createAndAssign(name, assignTo);
+  return ref.read(tagOpsProvider).create(name, assignTo: assignTo);
 }

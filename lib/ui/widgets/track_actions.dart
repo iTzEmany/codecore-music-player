@@ -1,4 +1,4 @@
-import '../../data/model/track_kind.dart';
+import 'track_kind.dart';
 import 'cc_sheet.dart';
 import 'dart:io';
 

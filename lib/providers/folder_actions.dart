@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/permissions.dart';
 import '../core/platform.dart';
-import 'database_providers.dart';
+import 'folder_ops.dart';
 import 'library_providers.dart';
 
 /// Scans every folder, after the audio permission (the denial is remembered).
@@ -20,13 +20,13 @@ Future<void> scanWithPermission(WidgetRef ref) async {
 Future<void> addFolderAndScan(WidgetRef ref) async {
   final path = await FilePicker.getDirectoryPath();
   if (path == null) return;
-  await ref.read(folderRepositoryProvider).add(path);
+  await ref.read(folderOpsProvider).add(path);
   await scanWithPermission(ref);
 }
 
 Future<void> addDefaultFolderAndScan(WidgetRef ref) async {
   final path = await defaultMusicDir();
   if (!await Directory(path).exists()) return;
-  await ref.read(folderRepositoryProvider).add(path);
+  await ref.read(folderOpsProvider).add(path);
   await scanWithPermission(ref);
 }

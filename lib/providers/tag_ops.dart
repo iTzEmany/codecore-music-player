@@ -12,17 +12,13 @@ class TagOps {
 
   TagRepository get _repo => _ref.read(tagRepositoryProvider);
 
-  Future<int> create(String name) => _repo.create(name);
-
-  /// Creates the tag and gives it to [trackIds].
-  Future<UserTag?> createAndAssign(String name, List<int> trackIds) async {
+  /// Creates the tag and gives it to [assignTo]; null if it did not come out
+  /// as the row just made.
+  Future<UserTag?> create(String name, {List<int> assignTo = const []}) async {
     final id = await _repo.create(name);
-    await _repo.assign(trackIds, id);
+    if (assignTo.isNotEmpty) await _repo.assign(assignTo, id);
     return _byId(id, name);
   }
-
-  /// Creates the tag; null if it did not come out as the row just made.
-  Future<UserTag?> createNamed(String name) async => _byId(await _repo.create(name), name);
 
   Future<UserTag?> _byId(int id, String name) async {
     final tag = await _repo.byName(name);
