@@ -233,11 +233,37 @@ class StatsQueries {
     ];
 
     // Artists and albums were grouped above, as the library groups them.
+    final artistEntries = (artistGroups.entries.toList()
+          ..sort((a, b) => _byCount(a.value.n, a.value.ms, a.key, b.value.n,
+              b.value.ms, b.key)))
+        .take(top)
+        .toList();
+    // The artist's cover is the library's: the one most present among the
+    // artist's tracks (ties by key).
+    final artistCover = <String, ({String cover, int n})>{};
+    if (artistEntries.isNotEmpty) {
+      for (final r in await _q(
+        'SELECT lower(trim(artist)) AS k, cover_key, COUNT(*) AS n FROM tracks '
+        'WHERE missing = 0 AND ignored = 0 AND kind = 0 AND cover_key IS NOT NULL '
+        'AND lower(trim(artist)) IN (${List.filled(artistEntries.length, '?').join(',')}) '
+        'GROUP BY k, cover_key ORDER BY k, n DESC, cover_key',
+        [for (final e in artistEntries) Variable.withString(e.key)],
+      )) {
+        artistCover.putIfAbsent(
+          r.read<String>('k'),
+          () => (cover: r.read<String>('cover_key'), n: r.read<int>('n')),
+        );
+      }
+    }
     final topArtists = [
-      for (final e in (artistGroups.entries.toList()
-        ..sort((a, b) => _byCount(a.value.n, a.value.ms, a.key, b.value.n,
-            b.value.ms, b.key))).take(top))
-        RankedItem(key: e.key, name: e.value.name, plays: e.value.n, playedMs: e.value.ms),
+      for (final e in artistEntries)
+        RankedItem(
+          key: e.key,
+          name: e.value.name,
+          plays: e.value.n,
+          playedMs: e.value.ms,
+          coverKey: artistCover[e.key]?.cover,
+        ),
     ];
     final albumEntries = (albumGroups.entries.toList()
           ..sort((a, b) => _byCount(
