@@ -144,7 +144,7 @@ class _AlbumHeader extends StatelessWidget {
   final YtmRelease? release;
   final VoidCallback? onDownload;
 
-  static const _cover = 120.0;
+  static const _cover = 144.0;
 
   @override
   Widget build(BuildContext context) {

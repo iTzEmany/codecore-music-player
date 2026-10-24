@@ -7,8 +7,18 @@ import '../../data/repositories/library_queries.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../providers/library_providers.dart';
 import '../../providers/preview_providers.dart';
+import '../../providers/player_providers.dart';
+import 'album_grid.dart';
 import 'cover_image.dart';
 import 'motion.dart';
+
+/// Hold a cover: 20 s of the album's first track.
+Future<void> _previewAlbum(WidgetRef ref, String albumKey) async {
+  final tracks = await ref.read(albumTracksOnceProvider)(albumKey);
+  if (tracks.isNotEmpty) {
+    await ref.read(previewProvider.notifier).start(tracks.first);
+  }
+}
 
 class AlbumCard extends ConsumerWidget {
   const AlbumCard({super.key, required this.album, required this.onTap});
@@ -16,12 +26,7 @@ class AlbumCard extends ConsumerWidget {
   final AlbumSummary album;
   final VoidCallback onTap;
 
-  Future<void> _preview(WidgetRef ref) async {
-    final tracks = await ref.read(albumTracksOnceProvider)(album.albumKey);
-    if (tracks.isNotEmpty) {
-      await ref.read(previewProvider.notifier).start(tracks.first);
-    }
-  }
+  Future<void> _preview(WidgetRef ref) => _previewAlbum(ref, album.albumKey);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -81,4 +86,178 @@ class AlbumCard extends ConsumerWidget {
       ),
     );
   }
+}
+
+/// Up to this many albums are listed as rows; more become a grid (D-33).
+const albumRowsMax = 4;
+
+/// Few albums as rows, many as a grid.
+class AlbumShelf extends StatelessWidget {
+  const AlbumShelf({super.key, required this.albums, required this.onOpen});
+
+  final List<AlbumSummary> albums;
+  final void Function(AlbumSummary) onOpen;
+
+  @override
+  Widget build(BuildContext context) => albums.length <= albumRowsMax
+      ? Column(
+          children: [
+            for (final a in albums) AlbumRow(album: a, onTap: () => onOpen(a)),
+          ],
+        )
+      : Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: CcDims.margin - CcDims.gap8,
+          ),
+          child: AlbumGrid(albums: albums, shrinkWrap: true, onOpen: onOpen),
+        );
+}
+
+/// One album as a row: square cover (with the playback frame while one of its
+/// tracks plays), title and «year, N tracks».
+class AlbumRow extends ConsumerWidget {
+  const AlbumRow({super.key, required this.album, required this.onTap});
+
+  final AlbumSummary album;
+  final VoidCallback onTap;
+
+  static const _box = 60.0, _inset = 4.0;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    final cc = context.cc;
+    final theme = Theme.of(context).textTheme;
+    final current = ref.watch(
+      currentTrackProvider.select((t) => t.value?.albumKey == album.albumKey),
+    );
+    final cover = CoverImage(
+      coverKey: album.coverKey,
+      size: _box - 2 * _inset,
+      radius: CcDims.rList,
+    );
+    final meta = [
+      if (album.year != null) '${album.year}',
+      l.tracksCount(album.trackCount),
+    ].join(', ');
+    return PressScale(
+      child: InkWell(
+        onTap: onTap,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 72),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: CcDims.margin,
+              vertical: CcDims.gap8,
+            ),
+            child: Row(
+              children: [
+                GestureDetector(
+                  onLongPressStart: (_) => _previewAlbum(ref, album.albumKey),
+                  onLongPressEnd: (_) =>
+                      ref.read(previewProvider.notifier).stop(),
+                  onLongPressCancel: ref.read(previewProvider.notifier).stop,
+                  child: SizedBox.square(
+                    dimension: _box,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        if (current) const Positioned.fill(child: _SquareFrame()),
+                        cover,
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: CcDims.gap12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        album.title ?? l.unknownAlbum,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.bodyLarge?.copyWith(
+                          color: current ? cc.accentSoft : cc.text,
+                        ),
+                      ),
+                      Text(
+                        meta,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.bodySmall?.copyWith(color: cc.textMuted),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Playback progress as a frame around a square thumbnail.
+class _SquareFrame extends ConsumerWidget {
+  const _SquareFrame();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final cc = context.cc;
+    final pos = ref.watch(positionProvider).value ?? Duration.zero;
+    final dur = ref.watch(durationProvider).value;
+    final progress = dur == null || dur <= Duration.zero
+        ? 0.0
+        : pos.inMilliseconds / dur.inMilliseconds;
+    return ExcludeSemantics(
+      child: RepaintBoundary(
+        child: CustomPaint(
+          painter: SquareFramePainter(
+            progress: progress,
+            arc: cc.accent,
+            rest: cc.surface3,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Square frame whose stroke fills clockwise from the top middle.
+class SquareFramePainter extends CustomPainter {
+  const SquareFramePainter({
+    required this.progress,
+    required this.arc,
+    required this.rest,
+    this.stroke = 2,
+  });
+
+  final double progress, stroke;
+  final Color arc, rest;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final r = Rect.fromLTWH(0, 0, size.width, size.height).deflate(stroke / 2);
+    final path = Path()
+      ..moveTo(r.center.dx, r.top)
+      ..lineTo(r.right, r.top)
+      ..lineTo(r.right, r.bottom)
+      ..lineTo(r.left, r.bottom)
+      ..lineTo(r.left, r.top)
+      ..close();
+    final line = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = stroke
+      ..strokeJoin = StrokeJoin.round;
+    canvas.drawPath(path, line..color = rest);
+    final metric = path.computeMetrics().first;
+    final done = metric.length * progress.clamp(0.0, 1.0);
+    if (done > 0) canvas.drawPath(metric.extractPath(0, done), line..color = arc);
+  }
+
+  @override
+  bool shouldRepaint(SquareFramePainter o) =>
+      o.progress != progress || o.arc != arc || o.rest != rest;
 }

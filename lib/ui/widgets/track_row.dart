@@ -60,6 +60,7 @@ class TrackRow extends StatefulWidget {
     this.selectedPosition,
     this.subtitleSuffix,
     this.albumAsSubtitle = false,
+    this.showDuration = false,
   });
 
   final Track track;
@@ -79,6 +80,9 @@ class TrackRow extends StatefulWidget {
 
   /// The subtitle shows the album instead of the artist (artist page).
   final bool albumAsSubtitle;
+
+  /// Narrow rows: the duration before the menu (wide rows always show it).
+  final bool showDuration;
   final VoidCallback? onMore, onFavorite, onLongPress;
 
   /// Right click on desktop; receives the global pointer position.
@@ -137,12 +141,24 @@ class _TrackRowState extends State<TrackRow> {
       return SizedBox(
         width: 32,
         child: Center(
-          child: widget.isCurrent
-              ? const NowPlayingDot()
-              : Text(
+          // 2 dp ring around the number of the playing track.
+          child: DecoratedBox(
+            decoration: widget.isCurrent
+                ? BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: context.cc.accent, width: 2),
+                  )
+                : const BoxDecoration(),
+            child: SizedBox.square(
+              dimension: 28,
+              child: Center(
+                child: Text(
                   n == null ? '' : '$n',
                   style: Theme.of(context).textTheme.labelSmall,
                 ),
+              ),
+            ),
+          ),
         ),
       );
     }
@@ -408,6 +424,16 @@ class _TrackRowState extends State<TrackRow> {
           _leading(context, cover),
           const SizedBox(width: 12),
           Expanded(child: titleBlock),
+          if (widget.showDuration)
+            Padding(
+              padding: const EdgeInsetsDirectional.only(start: CcDims.gap8),
+              child: Text(
+                formatDuration(t.durationMs),
+                style: theme.textTheme.labelSmall?.copyWith(
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+              ),
+            ),
           _trailing(context, false),
         ],
       );
@@ -482,6 +508,7 @@ class LiveTrackRow extends ConsumerWidget {
     this.selection,
     this.subtitleSuffix,
     this.albumAsSubtitle = false,
+    this.showDuration = false,
   });
 
   final Track track;
@@ -489,6 +516,9 @@ class LiveTrackRow extends ConsumerWidget {
   final TrackRowVariant variant;
   final bool compact;
   final bool albumAsSubtitle;
+
+  /// Narrow rows: the duration before the menu (wide rows always show it).
+  final bool showDuration;
   final int? index;
   final String? albumArtist;
 
@@ -558,6 +588,7 @@ class LiveTrackRow extends ConsumerWidget {
       selectedPosition: picked ? position + 1 : null,
       subtitleSuffix: subtitleSuffix,
       albumAsSubtitle: albumAsSubtitle,
+      showDuration: showDuration,
       onSecondaryTap: (pos) => showTrackContextMenu(context, ref, track, pos),
       onFavorite: () => toggleFavorite(context, ref, track),
       compact: compact,
