@@ -1,4 +1,5 @@
 import '../../../providers/track_ops.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -31,40 +32,43 @@ class ShuffleHero extends ConsumerWidget {
     final cc = context.cc;
     final theme = Theme.of(context).textTheme;
     final totals = ref.watch(memoryTotalsProvider).value;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(CcDims.margin, CcDims.gap8, CcDims.margin, 0),
-      child: Semantics(
-        button: true,
-        child: Material(
-          color: cc.surface1,
-          borderRadius: BorderRadius.circular(CcDims.rCard),
-          clipBehavior: Clip.antiAlias,
-          child: InkWell(
-            onTap: () => _play(ref),
-            child: Padding(
-              padding: const EdgeInsets.all(18),
-              child: Row(
+    return Semantics(
+      button: true,
+      child: InkWell(
+        onTap: () => _play(ref),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            CcDims.margin,
+            CcDims.gap8,
+            CcDims.margin,
+            0,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Unbounded 28 on one line, shrunk rather than wrapped.
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(l.homeShuffleAll, style: theme.displaySmall),
+              ),
+              Row(
                 children: [
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(l.homeShuffleAll, style: theme.displaySmall),
-                        if (totals != null)
-                          Text(
-                            l.homeShuffleAllSub(
+                    child: Text(
+                      totals == null
+                          ? ''
+                          : l.homeShuffleAllSub(
                               l.tracksCount(totals.trackCount),
                               l.hoursCount(totals.durationMs ~/ 3600000),
                             ),
-                            style: theme.bodyMedium,
-                          ),
-                      ],
+                      style: theme.bodyMedium,
                     ),
                   ),
                   const SizedBox(width: 12),
                   Container(
-                    width: 56,
-                    height: 56,
+                    width: 48,
+                    height: 48,
+                    margin: const EdgeInsets.symmetric(vertical: 4),
                     decoration: BoxDecoration(
                       color: cc.accent,
                       shape: BoxShape.circle,
@@ -73,7 +77,7 @@ class ShuffleHero extends ConsumerWidget {
                   ),
                 ],
               ),
-            ),
+            ],
           ),
         ),
       ),
@@ -105,38 +109,50 @@ class ShortcutsRow extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
     int count<T>(AsyncValue<List<T>> v) => v.value?.length ?? 0;
-    Widget tile(String label, int n, Widget page) => Expanded(
-      child: _Shortcut(
-        label: label,
-        count: n,
-        onTap: () => ShellNav.open<void>(context, page),
+    final cc = context.cc;
+    Widget tile(String label, int n, Widget page, {bool first = false}) =>
+        Expanded(
+          child: _Shortcut(
+            label: label,
+            count: n,
+            border: first ? null : BorderSide(color: cc.surface3),
+            onTap: () => ShellNav.open<void>(context, page),
+          ),
+        );
+    return Container(
+      margin: const EdgeInsets.fromLTRB(
+        CcDims.margin,
+        CcDims.gap8,
+        CcDims.margin,
+        0,
       ),
-    );
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(CcDims.margin, CcDims.gap12, CcDims.margin, 0),
-      child: Row(
-        children: [
-          tile(
-            l.navFavorites,
-            count(ref.watch(tracksProvider(true))),
-            const FavoritesScreen(),
-          ),
-          const SizedBox(width: 8),
-          tile(
-            l.navPlaylists,
-            count(ref.watch(playlistsProvider)),
-            Scaffold(
-              appBar: CcAppBar(title: l.navPlaylists),
-              body: const PlaylistsScreen(),
+      decoration: BoxDecoration(
+        border: Border.symmetric(horizontal: BorderSide(color: cc.surface3)),
+      ),
+      child: IntrinsicHeight(
+        child: Row(
+          children: [
+            tile(
+              l.navFavorites,
+              count(ref.watch(tracksProvider(true))),
+              const FavoritesScreen(),
+              first: true,
             ),
-          ),
-          const SizedBox(width: 8),
-          tile(
-            l.radioTitle,
-            count(ref.watch(savedRadiosProvider)),
-            const RadioScreen(),
-          ),
-        ],
+            tile(
+              l.navPlaylists,
+              count(ref.watch(playlistsProvider)),
+              Scaffold(
+                appBar: CcAppBar(title: l.navPlaylists),
+                body: const PlaylistsScreen(),
+              ),
+            ),
+            tile(
+              l.radioTitle,
+              count(ref.watch(savedRadiosProvider)),
+              const RadioScreen(),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -147,10 +163,12 @@ class _Shortcut extends StatelessWidget {
     required this.label,
     required this.count,
     required this.onTap,
+    this.border,
   });
 
   final String label;
   final int count;
+  final BorderSide? border;
   final VoidCallback onTap;
 
   @override
@@ -158,26 +176,28 @@ class _Shortcut extends StatelessWidget {
     final theme = Theme.of(context).textTheme;
     return Semantics(
       button: true,
-      child: Material(
-        color: context.cc.surface1,
-        borderRadius: BorderRadius.circular(CcDims.rCard),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.all(CcDims.gap12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      child: InkWell(
+        onTap: onTap,
+        child: Container(
+          constraints: const BoxConstraints(minHeight: 48),
+          alignment: Alignment.center,
+          padding: const EdgeInsets.symmetric(
+            vertical: CcDims.gap12,
+            horizontal: CcDims.gap4,
+          ),
+          decoration: BoxDecoration(
+            border: border == null ? null : Border(left: border!),
+          ),
+          // Count and label side by side; the label wraps at large text.
+          child: Text.rich(
+            TextSpan(
               children: [
-                Text('$count', style: theme.titleLarge),
-                Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.bodyMedium,
-                ),
+                TextSpan(text: '$count', style: theme.bodyLarge),
+                TextSpan(text: '  $label'),
               ],
             ),
+            textAlign: TextAlign.center,
+            style: theme.bodyMedium,
           ),
         ),
       ),

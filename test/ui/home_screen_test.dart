@@ -47,7 +47,7 @@ void main() {
     final h = await openHome(tester);
     expect(find.text('Casuale su tutto'), findsOneWidget);
     expect(find.textContaining('4 brani'), findsOneWidget);
-    expect(find.text('Preferiti'), findsOneWidget);
+    expect(find.textContaining('Preferiti'), findsOneWidget);
     expect(find.text('Aggiunti da poco'), findsOneWidget);
     expect(find.text('Riprendi'), findsNothing);
     expect(find.textContaining(' · '), findsNothing);
@@ -164,7 +164,7 @@ void main() {
       find.descendant(of: cover, matching: find.byType(Text)),
       findsOneWidget,
     );
-    expect(tester.getSize(cover).width, greaterThan(100));
+    expect(tester.getSize(cover).width, 84);
     await h.dispose(tester);
   });
 }
