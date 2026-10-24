@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/repositories/track_repository.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/library_providers.dart';
+import '../../../providers/selection_providers.dart';
 import '../../../providers/player_providers.dart';
 import '../../../providers/settings_providers.dart';
 import '../../theme/app_theme.dart';
@@ -47,7 +48,7 @@ class AllTracksScreen extends ConsumerStatefulWidget {
 }
 
 class _AllTracksScreenState extends ConsumerState<AllTracksScreen> {
-  static const _selectionKey = 'all';
+  static final _selectionKey = SelectionKey.all.key;
   final _controller = TextEditingController();
   final _scroll = ScrollController();
   Timer? _debounce;

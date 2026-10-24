@@ -13,6 +13,7 @@ import '../../../providers/folder_ops.dart';
 import '../../../providers/track_ops.dart';
 import '../../../providers/library_providers.dart';
 import '../../../providers/online_providers.dart' show afterReceive;
+import '../../../providers/selection_providers.dart';
 import '../../../providers/share_providers.dart';
 import '../../../services/share/lan_client.dart';
 import '../../../providers/share_hub.dart';
@@ -32,7 +33,7 @@ class _ReceiveTabState extends ConsumerState<ReceiveTab> {
   final _pin = TextEditingController();
   ({String host, int port})? _target;
   List<RemoteTrack> _tracks = const [];
-  final _selected = <int>{};
+  static final _key = SelectionKey.receive.key;
   String? _remoteName;
   String? _error;
   bool _busy = false;
@@ -100,10 +101,8 @@ class _ReceiveTabState extends ConsumerState<ReceiveTab> {
         _target = target;
         _remoteName = info.name;
         _tracks = list;
-        _selected
-          ..clear()
-          ..addAll(list.map((t) => t.id));
       });
+      ref.read(selectionProvider(_key).notifier).selectAll([for (final t in list) t.id]);
     } on LanException catch (e) {
       AppLog.w('share receive failed', e);
       if (mounted) setState(() => _error = _errorText(e.error));
@@ -114,10 +113,11 @@ class _ReceiveTabState extends ConsumerState<ReceiveTab> {
 
   Future<void> _download() async {
     final target = _target;
-    if (target == null || _selected.isEmpty) return;
+    if (target == null || !ref.read(selectionProvider(_key)).active) return;
     // The container outlives this widget: tags are written after the awaits.
     final read = ProviderScope.containerOf(context, listen: false).read;
     final base = await ref.read(folderOpsProvider).downloadFolder();
+    if (!mounted) return;
     if (base == null) {
       if (mounted) setState(() => _error = context.l10n.ytNoFolder);
       return;
@@ -125,7 +125,7 @@ class _ReceiveTabState extends ConsumerState<ReceiveTab> {
     final out = Directory(p.join(base.$1.path, 'Ricevuti'));
     final todo = [
       for (final t in _tracks)
-        if (_selected.contains(t.id)) t,
+        if (ref.read(selectionProvider(_key)).contains(t.id)) t,
     ];
     final cancel = _cancel = CancelToken();
     setState(() {
@@ -187,6 +187,7 @@ class _ReceiveTabState extends ConsumerState<ReceiveTab> {
 
   @override
   Widget build(BuildContext context) {
+    final picked = ref.watch(selectionProvider(_key));
     final l = context.l10n;
     final hub = ref.watch(shareHubProvider);
     final head = <Widget>[
@@ -255,9 +256,9 @@ class _ReceiveTabState extends ConsumerState<ReceiveTab> {
           TextButton(onPressed: () => _cancel?.cancel(), child: Text(l.cancel)),
         ] else
           FilledButton.icon(
-            onPressed: _selected.isEmpty ? null : _download,
+            onPressed: !picked.active ? null : _download,
             icon: const Icon(Icons.download),
-            label: Text(l.shareDownloadSelected(_selected.length)),
+            label: Text(l.shareDownloadSelected(picked.count)),
           ),
         if (_received != null)
           Padding(
@@ -277,13 +278,10 @@ class _ReceiveTabState extends ConsumerState<ReceiveTab> {
         final t = _tracks[i];
         return CheckboxListTile(
           dense: true,
-          value: _selected.contains(t.id),
+          value: picked.contains(t.id),
           onChanged: _busy
               ? null
-              : (v) => setState(
-                  () =>
-                      v == true ? _selected.add(t.id) : _selected.remove(t.id),
-                ),
+              : (_) => ref.read(selectionProvider(_key).notifier).toggle(t.id),
           title: Text(t.title, maxLines: 1, overflow: TextOverflow.ellipsis),
           subtitle: Text(t.artist ?? '', maxLines: 1),
         );

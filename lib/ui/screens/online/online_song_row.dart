@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/l10n_ext.dart';
-import '../../../providers/selection_providers.dart';
 import '../../../providers/youtube_providers.dart';
 import '../../../services/online/download_queue.dart';
 import '../../../services/online/youtube_service.dart';
@@ -11,6 +10,7 @@ import '../../widgets/format_utils.dart';
 import '../../widgets/net_thumbnail.dart';
 import '../../widgets/track_row_selection.dart';
 import '../youtube/listen_bar.dart';
+import 'online_selection_scope.dart';
 import '../../widgets/show_msg.dart';
 
 /// Starts a download for each of [picked] (in this order) that is not already
@@ -69,26 +69,24 @@ class OnlineSongTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final picked = ref.watch(selectionProvider(selectionKey));
-    final notifier = ref.read(selectionProvider(selectionKey).notifier);
+    final pick = watchOnlinePick(ref, selectionKey, index);
     final inLibrary = ownedLocally ||
         (ref.watch(downloadIndexProvider).value?.contains(result.id, source: result.source) ?? false);
     final item = ref.watch(downloadsProvider.select(
         (d) => d.where((x) => x.result.id == result.id).lastOrNull));
-    final selecting = picked.active;
     return OnlineSongRow(
       result: result,
       inLibrary: inLibrary,
       item: item,
-      selecting: selecting,
-      selected: picked.contains(index),
-      position: picked.contains(index) ? picked.positionOf(index) + 1 : null,
+      selecting: pick.selecting,
+      selected: pick.selected,
+      position: pick.position,
       number: number,
       square: true,
-      onTap: selecting ? () => notifier.toggle(index) : null,
-      onLongPress: () => notifier.toggle(index),
+      onTap: pick.onTap,
+      onLongPress: pick.onLongPress,
       onDownload: () => ref.read(downloadsProvider.notifier).add(result),
-      listen: selecting ? null : ListenButton(result: result),
+      listen: pick.selecting ? null : ListenButton(result: result),
     );
   }
 }

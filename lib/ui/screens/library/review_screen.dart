@@ -32,7 +32,7 @@ class ReviewScreen extends ConsumerStatefulWidget {
 }
 
 class _ReviewScreenState extends ConsumerState<ReviewScreen> {
-  static const _key = 'review';
+  static final _key = SelectionKey.review.key;
 
   /// Left inset of the reasons line: under the title, past the cover.
   static const _reasonsInset = 72.0;

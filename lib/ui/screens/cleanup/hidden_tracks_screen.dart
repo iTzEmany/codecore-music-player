@@ -20,7 +20,7 @@ import '../../widgets/cc_app_bar.dart';
 class HiddenTracksScreen extends ConsumerWidget {
   const HiddenTracksScreen({super.key});
 
-  static const _key = 'hidden';
+  static final _key = SelectionKey.hidden.key;
 
   Future<void> _restore(
     BuildContext context,

@@ -1,6 +1,6 @@
-// Characterization (38.5): the three screens that keep their own Set<int>
-// instead of selectionProvider (F-08). Whoever moves them onto the shared
-// selection updates these tests in the same step.
+// Characterization (38.5): the three screens that used their own Set<int>;
+// since 42.2 they use selectionProvider, with the same behaviour (none of them
+// has a «select all» bar).
 import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/data/repositories/playlist_repository.dart';
 import 'package:codecore/providers/share_providers.dart';

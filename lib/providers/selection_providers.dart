@@ -88,6 +88,25 @@ class SelectionNotifier extends Notifier<Selection> {
   void clear() => state = Selection.empty;
 }
 
+/// The lists with a fixed selection key; the per-item ones (`album:<key>`,
+/// `playlist:<id>`…) are still built as strings.
+enum SelectionKey {
+  all('all'),
+  favorites('favorites'),
+  search('search'),
+  searchAll('search-all'),
+  neverPlayed('never-played'),
+  online('online'),
+  hidden('hidden'),
+  review('review'),
+  addTracks('add-tracks'),
+  picker('picker'),
+  receive('receive');
+
+  const SelectionKey(this.key);
+  final String key;
+}
+
 /// One selection per list, forgotten when its page goes away.
 final selectionProvider = NotifierProvider.autoDispose
     .family<SelectionNotifier, Selection, String>(SelectionNotifier.new);

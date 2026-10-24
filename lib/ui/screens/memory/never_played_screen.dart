@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/db/app_database.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/memory_providers.dart';
+import '../../../providers/selection_providers.dart';
 import '../../../providers/player_providers.dart';
 import '../../../providers/settings_providers.dart';
 import '../../theme/app_theme.dart';
@@ -21,7 +22,7 @@ import '../../widgets/cc_app_bar.dart';
 class NeverPlayedScreen extends ConsumerWidget {
   const NeverPlayedScreen({super.key});
 
-  static const _key = 'never-played';
+  static final _key = SelectionKey.neverPlayed.key;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

@@ -21,12 +21,12 @@ import '../../widgets/activity_button.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/motion.dart';
 import '../../widgets/section_header.dart';
-import '../../widgets/selection_bar.dart';
 import '../../widgets/yt_dlp_outdated_banner.dart';
 import '../online/album_card.dart';
 import '../online/artist_card.dart';
 import '../online/artist_page_screen.dart';
 import '../online/online_album_screen.dart';
+import '../online/online_selection_scope.dart';
 import '../online/online_song_row.dart';
 import 'listen_bar.dart';
 import 'online_results_sections.dart';
@@ -59,7 +59,7 @@ class OnlineResults extends ConsumerStatefulWidget {
 
 class _OnlineResultsState extends ConsumerState<OnlineResults> {
   /// Results are picked by their place in best + others (before any filter).
-  static const _selectionKey = 'online';
+  static final _selectionKey = SelectionKey.online.key;
   late final ListenNotifier _listen;
   SmartSearchRequest? _request;
   int _serial = 0;
@@ -172,33 +172,24 @@ class _OnlineResultsState extends ConsumerState<OnlineResults> {
       if (_othersOpen)
         for (final (i, _) in shownOthers) i,
     ];
-    final selecting = picked.active;
     final error = s?.error ?? async?.error;
     final retry = TextButton(
       key: const ValueKey('online-retry'),
       onPressed: () => _search(refresh: true),
       child: Text(l.retry),
     );
-    return SelectionScope(
-      listKey: _selectionKey,
-      visibleIds: shownIds,
+    return OnlineSelectionScope(
+      selectionKey: _selectionKey,
+      ids: shownIds,
+      actions: (_) => [
+        IconButton(
+          tooltip: l.ytDownload,
+          icon: const Icon(Icons.download_rounded),
+          onPressed: () => _downloadSelection(all),
+        ),
+      ],
       child: Column(
         children: [
-          if (selecting)
-            SelectionBarFrame(
-              count: picked.count,
-              belowStatusBar: false,
-              onClose: ref.read(selectionProvider(_selectionKey).notifier).clear,
-              onSelectAll: () =>
-                  ref.read(selectionProvider(_selectionKey).notifier).selectAll(shownIds),
-              actions: [
-                IconButton(
-                  tooltip: l.ytDownload,
-                  icon: const Icon(Icons.download_rounded),
-                  onPressed: () => _downloadSelection(all),
-                ),
-              ],
-            ),
           const YtDlpOutdatedBanner(),
           if (!seen)
             Padding(
