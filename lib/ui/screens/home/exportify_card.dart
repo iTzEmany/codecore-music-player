@@ -30,7 +30,7 @@ class ExportifyCard extends ConsumerWidget {
         key: const ValueKey('exportify-card'),
         padding: const EdgeInsets.only(top: CcDims.gap8),
         decoration: BoxDecoration(
-          border: Border.symmetric(horizontal: BorderSide(color: cc.surface3)),
+          border: Border.symmetric(horizontal: BorderSide(color: cc.separator)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

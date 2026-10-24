@@ -25,6 +25,9 @@ class CcColors extends ThemeExtension<CcColors> {
   final Color text, textMuted, textFaint;
   final Color heroBase, error;
 
+  /// The one 1 dp separator colour (D-55).
+  Color get separator => surface2;
+
   /// A light palette: dark text on light surfaces.
   final bool isLight;
 

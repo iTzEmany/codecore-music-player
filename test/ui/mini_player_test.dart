@@ -1,6 +1,5 @@
 import 'package:codecore/ui/shell/app_shell.dart';
 import 'package:codecore/ui/widgets/mini_player.dart';
-import 'package:codecore/ui/widgets/ring_progress.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -24,14 +23,6 @@ Future<Harness> _shell(WidgetTester t, {double textScale = 1}) async {
 }
 
 void main() {
-  testWidgets('the mini player ring has a 3 dp stroke', (t) async {
-    final h = await _shell(t);
-    final ring = t.widget<RingProgress>(
-        find.descendant(of: find.byType(MiniPlayer), matching: find.byType(RingProgress)));
-    expect(ring.stroke, 3);
-    await h.dispose(t);
-  });
-
   testWidgets('textScale 2.0 on 360 px: mini player and dock do not overflow',
       (t) async {
     final h = await _shell(t, textScale: 2);

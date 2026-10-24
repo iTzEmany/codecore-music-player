@@ -107,7 +107,7 @@ Widget _row(BuildContext context, Widget child) => Container(
   constraints: const BoxConstraints(minHeight: 48),
   alignment: Alignment.centerLeft,
   decoration: BoxDecoration(
-    border: Border(bottom: BorderSide(color: context.cc.surface3, width: CcDims.rHair)),
+    border: Border(bottom: BorderSide(color: context.cc.separator, width: CcDims.rHair)),
   ),
   child: child,
 );

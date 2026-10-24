@@ -1,6 +1,7 @@
 import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/ui/screens/home/home_row.dart';
 import 'package:codecore/ui/screens/home/home_screen.dart';
+import 'package:codecore/ui/widgets/progress_frame.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -41,13 +42,13 @@ void main() {
     tester,
   ) async {
     final h = await _open(tester);
-    final frame = tester.widget<HomeFrame>(
+    final frame = tester.widget<ProgressFrame>(
       find.descendant(
         of: find.ancestor(
           of: find.text('Song 2'),
           matching: find.byType(HomeRow),
         ),
-        matching: find.byType(HomeFrame),
+        matching: find.byType(ProgressFrame),
       ),
     );
     expect(frame.progress, closeTo(60 / 185, 0.01));

@@ -11,6 +11,7 @@ import '../../providers/player_providers.dart';
 import 'album_grid.dart';
 import 'cover_image.dart';
 import 'motion.dart';
+import 'progress_frame.dart';
 
 /// Hold a cover: 20 s of the album's first track.
 Future<void> _previewAlbum(WidgetRef ref, String albumKey) async {
@@ -162,7 +163,7 @@ class AlbumRow extends ConsumerWidget {
                     child: Stack(
                       alignment: Alignment.center,
                       children: [
-                        if (current) const Positioned.fill(child: _SquareFrame()),
+                        if (current) const Positioned.fill(child: LiveProgressFrame()),
                         cover,
                       ],
                     ),
@@ -197,67 +198,4 @@ class AlbumRow extends ConsumerWidget {
       ),
     );
   }
-}
-
-/// Playback progress as a frame around a square thumbnail.
-class _SquareFrame extends ConsumerWidget {
-  const _SquareFrame();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final cc = context.cc;
-    final pos = ref.watch(positionProvider).value ?? Duration.zero;
-    final dur = ref.watch(durationProvider).value;
-    final progress = dur == null || dur <= Duration.zero
-        ? 0.0
-        : pos.inMilliseconds / dur.inMilliseconds;
-    return ExcludeSemantics(
-      child: RepaintBoundary(
-        child: CustomPaint(
-          painter: SquareFramePainter(
-            progress: progress,
-            arc: cc.accent,
-            rest: cc.surface3,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Square frame whose stroke fills clockwise from the top middle.
-class SquareFramePainter extends CustomPainter {
-  const SquareFramePainter({
-    required this.progress,
-    required this.arc,
-    required this.rest,
-    this.stroke = 2,
-  });
-
-  final double progress, stroke;
-  final Color arc, rest;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final r = Rect.fromLTWH(0, 0, size.width, size.height).deflate(stroke / 2);
-    final path = Path()
-      ..moveTo(r.center.dx, r.top)
-      ..lineTo(r.right, r.top)
-      ..lineTo(r.right, r.bottom)
-      ..lineTo(r.left, r.bottom)
-      ..lineTo(r.left, r.top)
-      ..close();
-    final line = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = stroke
-      ..strokeJoin = StrokeJoin.round;
-    canvas.drawPath(path, line..color = rest);
-    final metric = path.computeMetrics().first;
-    final done = metric.length * progress.clamp(0.0, 1.0);
-    if (done > 0) canvas.drawPath(metric.extractPath(0, done), line..color = arc);
-  }
-
-  @override
-  bool shouldRepaint(SquareFramePainter o) =>
-      o.progress != progress || o.arc != arc || o.rest != rest;
 }

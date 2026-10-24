@@ -25,6 +25,8 @@ import '../../widgets/cover_image.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_state.dart';
 import '../../widgets/playlist_cover.dart';
+import '../../widgets/progress_frame.dart';
+import '../../../providers/player_providers.dart' show currentTrackProvider;
 import '../../widgets/smart_cover.dart';
 import '../devices/devices_sheet.dart';
 import '../playlists/playlist_detail_screen.dart';
@@ -418,6 +420,37 @@ Widget _cover(LibraryEntry e, double size) => switch (e.kind) {
   ),
 };
 
+/// Row cover; the playing album gets the progress frame (playlists have no
+/// cheap «is playing» signal, so they don't).
+class _EntryCover extends ConsumerWidget {
+  const _EntryCover(this.e);
+
+  final LibraryEntry e;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final current =
+        e.kind == LibraryKind.album &&
+        ref.watch(
+          currentTrackProvider.select((t) => t.value?.albumKey == e.id),
+        );
+    if (!current) return _cover(e, 48);
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        _cover(e, 48),
+        const Positioned(
+          left: -4,
+          top: -4,
+          right: -4,
+          bottom: -4,
+          child: LiveProgressFrame(),
+        ),
+      ],
+    );
+  }
+}
+
 class _LibraryList extends StatelessWidget {
   const _LibraryList({
     required this.header,
@@ -458,12 +491,12 @@ class _LibraryList extends StatelessWidget {
             right: CcDims.margin,
             bottom: 0,
             height: 1,
-            child: ColoredBox(color: cc.surface2),
+            child: ColoredBox(color: cc.separator),
           ),
           Row(
             children: [
               const SizedBox(width: CcDims.margin),
-              _cover(e, 48),
+              _EntryCover(e),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(

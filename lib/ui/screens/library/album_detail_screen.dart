@@ -118,7 +118,6 @@ EntranceScope(
                       albumArtist: album.artist,
                       index: at + 1,
                       selection: selection,
-                      showDuration: true,
                       onTap: () => ctrl.playFromList(list, at, context: playCtx),
                     ),
                   ),

@@ -146,7 +146,7 @@ class ShellDock extends ConsumerWidget {
                           thickness: 1,
                           indent: CcDims.gap8,
                           endIndent: CcDims.gap8,
-                          color: cc.surface3,
+                          color: cc.separator,
                         ),
                         const SizedBox(height: CcDims.gap4),
                       ],

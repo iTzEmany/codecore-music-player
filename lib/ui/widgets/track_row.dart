@@ -13,6 +13,7 @@ import '../theme/tokens.dart';
 import 'cover_image.dart';
 import 'favorite_actions.dart';
 import 'format_utils.dart';
+import 'progress_frame.dart';
 import 'ring_progress.dart' show NowPlayingDot;
 import 'online_queue_row.dart';
 import 'preview_cover.dart';
@@ -60,7 +61,6 @@ class TrackRow extends StatefulWidget {
     this.selectedPosition,
     this.subtitleSuffix,
     this.albumAsSubtitle = false,
-    this.showDuration = false,
   });
 
   final Track track;
@@ -81,8 +81,6 @@ class TrackRow extends StatefulWidget {
   /// The subtitle shows the album instead of the artist (artist page).
   final bool albumAsSubtitle;
 
-  /// Narrow rows: the duration before the menu (wide rows always show it).
-  final bool showDuration;
   final VoidCallback? onMore, onFavorite, onLongPress;
 
   /// Right click on desktop; receives the global pointer position.
@@ -168,19 +166,21 @@ class _TrackRowState extends State<TrackRow> {
         ? plain
         : PreviewCover(track: t, size: cover, child: plain);
     if (!widget.isCurrent || !dot) return image;
+    // Progress frame 4 dp off the cover (D-25).
     return Stack(
       clipBehavior: Clip.none,
       children: [
-        // 2 dp ring on the playing track.
-        DecoratedBox(
-          position: DecorationPosition.foreground,
-          decoration: BoxDecoration(
-            border: Border.all(color: context.cc.accent, width: 2),
-            borderRadius: BorderRadius.circular(CcDims.rList + 2),
+        image,
+        Positioned(
+          left: -4,
+          top: -4,
+          right: -4,
+          bottom: -4,
+          child: Semantics(
+            label: context.l10n.nowPlaying,
+            child: const LiveProgressFrame(),
           ),
-          child: image,
         ),
-        const Positioned(top: -3, right: -3, child: NowPlayingDot()),
       ],
     );
   }
@@ -424,7 +424,7 @@ class _TrackRowState extends State<TrackRow> {
           _leading(context, cover),
           const SizedBox(width: 12),
           Expanded(child: titleBlock),
-          if (widget.showDuration)
+          if (widget.variant == TrackRowVariant.album)
             Padding(
               padding: const EdgeInsetsDirectional.only(start: CcDims.gap8),
               child: Text(
@@ -476,7 +476,7 @@ class _TrackRowState extends State<TrackRow> {
                     right: CcDims.margin,
                     bottom: 0,
                     height: 1,
-                    child: ColoredBox(color: cc.surface2),
+                    child: ColoredBox(color: cc.separator),
                   ),
                   Padding(
                     padding:
@@ -508,7 +508,6 @@ class LiveTrackRow extends ConsumerWidget {
     this.selection,
     this.subtitleSuffix,
     this.albumAsSubtitle = false,
-    this.showDuration = false,
   });
 
   final Track track;
@@ -517,8 +516,6 @@ class LiveTrackRow extends ConsumerWidget {
   final bool compact;
   final bool albumAsSubtitle;
 
-  /// Narrow rows: the duration before the menu (wide rows always show it).
-  final bool showDuration;
   final int? index;
   final String? albumArtist;
 
@@ -588,7 +585,6 @@ class LiveTrackRow extends ConsumerWidget {
       selectedPosition: picked ? position + 1 : null,
       subtitleSuffix: subtitleSuffix,
       albumAsSubtitle: albumAsSubtitle,
-      showDuration: showDuration,
       onSecondaryTap: (pos) => showTrackContextMenu(context, ref, track, pos),
       onFavorite: () => toggleFavorite(context, ref, track),
       compact: compact,

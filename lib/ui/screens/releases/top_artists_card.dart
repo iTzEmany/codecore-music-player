@@ -28,7 +28,7 @@ class TopArtistsCard extends ConsumerWidget {
         key: const ValueKey('top-artists-card'),
         padding: const EdgeInsets.only(top: CcDims.gap12),
         decoration: BoxDecoration(
-          border: Border(top: BorderSide(color: cc.surface3)),
+          border: Border(top: BorderSide(color: cc.separator)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -40,7 +40,7 @@ class TopArtistsCard extends ConsumerWidget {
             Container(
               alignment: Alignment.centerRight,
               decoration: BoxDecoration(
-                border: Border(bottom: BorderSide(color: cc.surface3)),
+                border: Border(bottom: BorderSide(color: cc.separator)),
               ),
               child: Wrap(
                 children: [

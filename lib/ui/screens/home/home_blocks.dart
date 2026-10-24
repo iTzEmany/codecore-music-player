@@ -115,7 +115,7 @@ class ShortcutsRow extends ConsumerWidget {
           child: _Shortcut(
             label: label,
             count: n,
-            border: first ? null : BorderSide(color: cc.surface3),
+            border: first ? null : BorderSide(color: cc.separator),
             onTap: () => ShellNav.open<void>(context, page),
           ),
         );
@@ -127,7 +127,7 @@ class ShortcutsRow extends ConsumerWidget {
         0,
       ),
       decoration: BoxDecoration(
-        border: Border.symmetric(horizontal: BorderSide(color: cc.surface3)),
+        border: Border.symmetric(horizontal: BorderSide(color: cc.separator)),
       ),
       child: IntrinsicHeight(
         child: Row(

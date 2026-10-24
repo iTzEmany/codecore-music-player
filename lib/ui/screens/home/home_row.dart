@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../theme/tokens.dart';
+import '../../widgets/progress_frame.dart';
 
 /// Cover side inside the 52 dp frame of a row.
 const kHomeCover = 44.0;
@@ -53,9 +54,14 @@ class HomeRow extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  now
-                      ? HomePlayingFrame(child: framed)
-                      : HomeFrame(progress: progress, child: framed),
+                  if (now || progress != null)
+                    ProgressFrame(
+                      size: 52,
+                      progress: now ? null : progress,
+                      child: framed,
+                    )
+                  else
+                    SizedBox.square(dimension: 52, child: framed),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -87,7 +93,7 @@ class HomeRow extends StatelessWidget {
                   left: 64,
                   right: 0,
                   bottom: -6,
-                  child: Divider(height: 1, thickness: 1, color: cc.surface3),
+                  child: Divider(height: 1, thickness: 1, color: cc.separator),
                 ),
             ],
           ),
@@ -107,70 +113,4 @@ class HomeIconCover extends StatelessWidget {
     color: context.cc.surface3,
     child: Icon(icon, color: context.cc.accentSoft),
   );
-}
-
-/// 52 dp square holding [child]; with [progress] a 2 dp rounded-square ring
-/// (track in s3, arc in the accent) runs clockwise from the top.
-class HomeFrame extends StatelessWidget {
-  const HomeFrame({super.key, required this.child, this.progress});
-
-  final Widget child;
-  final double? progress;
-
-  @override
-  Widget build(BuildContext context) {
-    final cc = context.cc;
-    return SizedBox.square(
-      dimension: 52,
-      child: progress == null
-          ? child
-          : CustomPaint(
-              foregroundPainter: _FramePainter(
-                progress!,
-                cc.accent,
-                cc.surface3,
-              ),
-              child: child,
-            ),
-    );
-  }
-}
-
-class _FramePainter extends CustomPainter {
-  const _FramePainter(this.fraction, this.arc, this.rest);
-
-  final double fraction;
-  final Color arc, rest;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final line = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2;
-    final path = Path()
-      ..addRRect(
-        RRect.fromRectAndRadius(
-          (Offset.zero & size).deflate(1),
-          const Radius.circular(7),
-        ),
-      );
-    if (fraction < 1) canvas.drawPath(path, line..color = rest);
-    for (final m in path.computeMetrics()) {
-      canvas.drawPath(m.extractPath(0, m.length * fraction), line..color = arc);
-    }
-  }
-
-  @override
-  bool shouldRepaint(_FramePainter o) =>
-      o.fraction != fraction || o.arc != arc || o.rest != rest;
-}
-
-/// The playing row: a full ring (a state, not the playhead).
-class HomePlayingFrame extends StatelessWidget {
-  const HomePlayingFrame({super.key, required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) => HomeFrame(progress: 1, child: child);
 }
