@@ -17,10 +17,7 @@ class AlbumCard extends ConsumerWidget {
   final VoidCallback onTap;
 
   Future<void> _preview(WidgetRef ref) async {
-    final tracks = await ref
-        .read(libraryQueriesProvider)
-        .watchAlbumTracks(album.albumKey)
-        .first;
+    final tracks = await ref.read(albumTracksOnceProvider)(album.albumKey);
     if (tracks.isNotEmpty) {
       await ref.read(previewProvider.notifier).start(tracks.first);
     }

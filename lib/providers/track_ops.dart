@@ -1,18 +1,9 @@
-import 'dart:io';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/import_row.dart' show LibraryEntryLite;
 import '../data/db/app_database.dart';
 import '../data/repositories/track_repository.dart';
-import '../services/library/track_file_sync.dart' show stampTrack;
-import '../services/tags/tag_backups.dart' show FileStamp;
-import '../data/repositories/backup_merge.dart' show MergeReport;
-import '../services/backup/restore_service.dart' show mergeBackup;
-import '../services/share/received_meta.dart';
-import '../services/share/track_meta.dart' show TrackMeta;
 import 'database_providers.dart';
-import 'library_providers.dart' show coverStoreProvider;
 
 /// What the UI does to library tracks: writes that used to be spread over
 /// widgets via the repositories. Streams stay in their own providers.
@@ -58,12 +49,6 @@ class TrackOps {
 
   Future<void> setLyrics(int id, {String? plain, String? synced}) => _repo.setLyrics(id, plain: plain, synced: synced);
 
-  /// Records the new size and date of a file we rewrote.
-  Future<void> stampFile(String path, FileStamp stamp) => stampTrack(_ref.read(databaseProvider), path, stamp);
-
-  /// Root path of every library folder, by folder id.
-  Future<Map<int, String>> folderPaths() => _ref.read(folderRepositoryProvider).pathsById();
-
   Future<void> setIgnored(Set<int> ids, bool value) => _repo.setIgnored(ids, value);
 
   Future<void> deleteTrack(int id) => _repo.deleteTrack(id);
@@ -85,14 +70,6 @@ class TrackOps {
   Future<List<Track>> ofAlbums(Iterable<String> keys) => _repo.tracksOfAlbums(keys);
   Future<Track?> byPath(String path) => _repo.byPath(path);
   Future<List<LibraryEntryLite>> liteEntries() => _repo.liteEntries();
-
-  /// Gives a received file the sender's metadata and cover (never throws).
-  Future<void> applyReceived(String path, TrackMeta? meta, {Future<ReceivedCover?> Function()? fetchCover}) =>
-      applyReceivedPackage(_repo, _ref.read(coverStoreProvider), path, meta, fetchCover: fetchCover);
-
-  /// Merges a backup zip into the live library.
-  Future<MergeReport> mergeBackupFile(File zip, Directory coversDir) =>
-      mergeBackup(zip, _ref.read(databaseProvider), coversDir);
 }
 
 final trackOpsProvider = Provider<TrackOps>(TrackOps.new);

@@ -184,6 +184,14 @@ final albumTracksProvider = StreamProvider.family<List<Track>, String>(
       ref.watch(libraryQueriesProvider).watchAlbumTracks(albumKey),
 );
 
+/// One-shot read (album preview): unlike [albumTracksProvider], no stream
+/// stays open afterwards.
+final albumTracksOnceProvider = Provider<Future<List<Track>> Function(String)>(
+  (ref) =>
+      (albumKey) =>
+          ref.read(libraryQueriesProvider).watchAlbumTracks(albumKey).first,
+);
+
 final genresProvider = StreamProvider<List<GenreSummary>>(
   (ref) => ref.watch(libraryQueriesProvider).watchGenres(),
 );

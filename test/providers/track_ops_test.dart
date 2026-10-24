@@ -1,5 +1,6 @@
 import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/providers/database_providers.dart';
+import 'package:codecore/providers/folder_ops.dart';
 import 'package:codecore/providers/playlist_ops.dart';
 import 'package:codecore/providers/radio_providers.dart';
 import 'package:codecore/providers/radio_ops.dart';
@@ -72,10 +73,10 @@ void main() {
       expect((t.lyricsPlain, t.lyricsSynced), ('only', null));
     });
 
-    test('folderPaths maps folder id to its root path', () async {
+    test('FolderOps.paths maps folder id to its root path', () async {
       final a = await db.into(db.folders).insert(FoldersCompanion.insert(path: '/m', addedAt: 1));
       final b = await db.into(db.folders).insert(FoldersCompanion.insert(path: '/n', addedAt: 1));
-      expect(await ops().folderPaths(), {a: '/m', b: '/n'});
+      expect(await c.read(folderOpsProvider).paths(), {a: '/m', b: '/n'});
     });
   });
 
