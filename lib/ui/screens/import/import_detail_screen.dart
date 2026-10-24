@@ -7,6 +7,7 @@ import '../../../l10n/l10n_ext.dart';
 import '../../../providers/import_providers.dart';
 import '../../../providers/online_providers.dart';
 import '../../../services/import/import_row_phase.dart';
+import '../../../services/import/playlist_import_service.dart' show ImportWait;
 import '../../../services/online/download_queue.dart';
 import '../../shell/shell_nav.dart';
 import '../../theme/tokens.dart';
@@ -58,8 +59,6 @@ class _ImportDetailScreenState extends ConsumerState<ImportDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    final cc = context.cc;
-    final theme = Theme.of(context).textTheme;
     final p = ref.watch(importChainProgressProvider(widget.importId));
     final items =
         ref.watch(importChainItemsProvider(widget.importId)) ??
@@ -120,80 +119,14 @@ class _ImportDetailScreenState extends ConsumerState<ImportDetailScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              if (p != null)
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    CcDims.margin,
-                    CcDims.gap4,
-                    CcDims.margin,
-                    CcDims.gap8,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      LinearProgressIndicator(value: p.fraction),
-                      const SizedBox(height: 8),
-                      Text(
-                        (p.paused
-                                ? l.csvImportBannerPaused(
-                                    p.done,
-                                    p.total,
-                                    p.review,
-                                    p.missing,
-                                  )
-                                : l.csvImportBanner(
-                                    p.done,
-                                    p.total,
-                                    p.review,
-                                    p.missing,
-                                  )) +
-                            (p.eta == null ? '' : ', ${etaLabel(l, p.eta!)}'),
-                        style: theme.bodyMedium?.copyWith(color: cc.textMuted),
-                      ),
-                      if (wait != null && !p.paused)
-                        Padding(
-                          padding: const EdgeInsets.only(top: CcDims.gap4),
-                          child: Text(
-                            importWaitLabel(l, wait),
-                            style: theme.bodyMedium?.copyWith(
-                              color: cc.accentSoft,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: CcDims.margin),
-                child: SegmentedBlocks<_Filter>(
-                  selected: _filter,
-                  onChanged: (f) => setState(() => _filter = f),
-                  items: [
-                    BlockItem(
-                      value: _Filter.all,
-                      icon: Icons.list_rounded,
-                      label: '${l.importFilterAll} (${rows.length})',
-                    ),
-                    BlockItem(
-                      value: _Filter.active,
-                      icon: Icons.downloading_rounded,
-                      label:
-                          '${l.importFilterActive} (${count((p) => p.active)})',
-                    ),
-                    BlockItem(
-                      value: _Filter.problems,
-                      icon: Icons.error_outline_rounded,
-                      label:
-                          '${l.importFilterProblems} (${count((p) => p.problem)})',
-                    ),
-                    BlockItem(
-                      value: _Filter.done,
-                      icon: Icons.check_rounded,
-                      label:
-                          '${l.importFilterDone} (${count((p) => p.settled)})',
-                    ),
-                  ],
-                ),
+              if (p != null) _ChainBanner(p: p, wait: wait),
+              _FilterBlocks(
+                selected: _filter,
+                onChanged: (f) => setState(() => _filter = f),
+                total: rows.length,
+                active: count((p) => p.active),
+                problems: count((p) => p.problem),
+                done: count((p) => p.settled),
               ),
               Expanded(
                 child: shown.isEmpty
@@ -240,33 +173,11 @@ class _SongRow extends StatelessWidget {
         : phase.active
         ? cc.accentSoft
         : cc.textMuted;
-    final Widget leading = phase.active
-        ? SizedBox(
-            width: 22,
-            height: 22,
-            child: CircularProgressIndicator(
-              strokeWidth: 2.5,
-              // Before the first bytes the size is unknown: no empty ring.
-              value:
-                  phase == RowPhase.downloading && (download?.progress ?? 0) > 0
-                  ? download!.progress
-                  : null,
-            ),
-          )
-        : Icon(
-            switch (phase) {
-              RowPhase.downloaded ||
-              RowPhase.linked => Icons.check_circle_rounded,
-              RowPhase.review => Icons.help_outline_rounded,
-              RowPhase.notFound ||
-              RowPhase.failed => Icons.error_outline_rounded,
-              RowPhase.skipped ||
-              RowPhase.removed => Icons.remove_circle_outline_rounded,
-              _ => Icons.schedule_rounded,
-            },
-            color: color,
-            size: 22,
-          );
+    final Widget leading = _RowLeading(
+      phase: phase,
+      download: download,
+      color: color,
+    );
     return InkWell(
       // A song that needs the user opens the review of its block.
       onTap: phase.problem
@@ -307,5 +218,146 @@ class _SongRow extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class _ChainBanner extends StatelessWidget {
+  const _ChainBanner({required this.p, required this.wait});
+
+  final ImportProgress p;
+  final ImportWait? wait;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final cc = context.cc;
+    final theme = Theme.of(context).textTheme;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        CcDims.margin,
+        CcDims.gap4,
+        CcDims.margin,
+        CcDims.gap8,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          LinearProgressIndicator(value: p.fraction),
+          const SizedBox(height: 8),
+          Text(
+            (p.paused
+                    ? l.csvImportBannerPaused(
+                        p.done,
+                        p.total,
+                        p.review,
+                        p.missing,
+                      )
+                    : l.csvImportBanner(p.done, p.total, p.review, p.missing)) +
+                (p.eta == null ? '' : ', ${etaLabel(l, p.eta!)}'),
+            style: theme.bodyMedium?.copyWith(color: cc.textMuted),
+          ),
+          if (wait != null && !p.paused)
+            Padding(
+              padding: const EdgeInsets.only(top: CcDims.gap4),
+              child: Text(
+                importWaitLabel(l, wait!),
+                style: theme.bodyMedium?.copyWith(color: cc.accentSoft),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FilterBlocks extends StatelessWidget {
+  const _FilterBlocks({
+    required this.selected,
+    required this.onChanged,
+    required this.total,
+    required this.active,
+    required this.problems,
+    required this.done,
+  });
+
+  final _Filter selected;
+  final ValueChanged<_Filter> onChanged;
+  final int total, active, problems, done;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: CcDims.margin),
+      child: SegmentedBlocks<_Filter>(
+        selected: selected,
+        onChanged: onChanged,
+        items: [
+          BlockItem(
+            value: _Filter.all,
+            icon: Icons.list_rounded,
+            label: '${l.importFilterAll} ($total)',
+          ),
+          BlockItem(
+            value: _Filter.active,
+            icon: Icons.downloading_rounded,
+            label: '${l.importFilterActive} ($active)',
+          ),
+          BlockItem(
+            value: _Filter.problems,
+            icon: Icons.error_outline_rounded,
+            label: '${l.importFilterProblems} ($problems)',
+          ),
+          BlockItem(
+            value: _Filter.done,
+            icon: Icons.check_rounded,
+            label: '${l.importFilterDone} ($done)',
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RowLeading extends StatelessWidget {
+  const _RowLeading({
+    required this.phase,
+    required this.download,
+    required this.color,
+  });
+
+  final RowPhase phase;
+  final DownloadItem? download;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return phase.active
+        ? SizedBox(
+            width: 22,
+            height: 22,
+            child: CircularProgressIndicator(
+              strokeWidth: 2.5,
+              // Before the first bytes the size is unknown: no empty ring.
+              value:
+                  phase == RowPhase.downloading && (download?.progress ?? 0) > 0
+                  ? download!.progress
+                  : null,
+            ),
+          )
+        : Icon(
+            switch (phase) {
+              RowPhase.downloaded ||
+              RowPhase.linked => Icons.check_circle_rounded,
+              RowPhase.review => Icons.help_outline_rounded,
+              RowPhase.notFound ||
+              RowPhase.failed => Icons.error_outline_rounded,
+              RowPhase.skipped ||
+              RowPhase.removed => Icons.remove_circle_outline_rounded,
+              _ => Icons.schedule_rounded,
+            },
+            color: color,
+            size: 22,
+          );
   }
 }
