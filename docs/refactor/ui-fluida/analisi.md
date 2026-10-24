@@ -218,3 +218,60 @@ Test già presenti sulle parti toccate: motion, now_playing (grow, reduce motion
 - `lib/data`, provider, servizi, Jam e l10n non cambiano;
 - i golden restano identici, salvo nei passi di redesign o dei token (D-20);
 - `integration_test` gira prima e dopo il gruppo C e alla chiusura.
+
+## Risultati
+
+Chiusura della fase 44, 24/10. Numeri completi in `misure.md`, sezione «Finale».
+
+### Stato dei rilievi
+Fase 39 (bf4656d, #7):
+- F-40 fatto, 39.1 (scorrimento laterale, D-45/D-46) · F-41 fatto, 39.2 · F-44 fatto, 39.3 · F-42 fatto, 39.4
+- F-31 fatto, 39.5 · F-33 fatto, 39.6 · F-35 fatto, 39.7 · F-30 fatto, 39.8 · F-43 fatto, 39.9 (D-43)
+- F-45 fatto, 39.10 (soglie non raggiunte, vedi sotto) · F-32 fatto, 39.11 · F-36 fatto, 39.12
+- F-65 fatto, 39.13 · F-64 fatto, 39.14 (D-44) · F-66 fatto, 39.15
+
+Fase 40 (5cd2538, #8):
+- F-60 fatto, 40.1 · F-61 fatto, 40.2 · F-62 fatto, 40.3 · F-63 fatto, 40.4 (solo avviso)
+- F-70 fatto, 40.5 · F-71 fatto, 40.6 · F-74 fatto, 40.7 · F-72 fatto, 40.8
+- F-73 fatto, 40.9 · F-67 fatto, 40.10 · F-68 fatto, 40.11 · F-69 fatto, 40.12
+
+Fase 41 (96e7f2e, #9):
+- F-01 fatto, 41.1 · F-06 fatto, 41.2 · F-12 fatto, 41.3 · F-13 fatto, 41.4 (con eccezioni in D-50/D-52)
+- F-14 fatto, 41.5 · F-18 fatto, 41.6 · F-19 fatto, 41.7
+
+Fase 42 (ffdf9fd, #10):
+- F-02 e F-03 fatti, 42.1 · F-08 fatto, 42.2 · F-10 fatto, 42.3 · F-09 fatto, 42.4 · F-11 fatto, 42.5
+- F-16 fatto, 42.6 · F-15 fatto, 42.7 · F-05 fatto, 42.8 · F-07 fatto, 42.9 · F-04 fatto, 42.10
+
+Fase 43 (a296a08, #11): nuovo aspetto (D-21..D-28), nessun F-NN proprio; chiude le voci di D-52 rimandate (`loadErrorState`, variante sliver di `AsyncBody`).
+
+Altri:
+- F-37, F-38, F-39: nessuna azione (costo trascurabile, scartati nel giro 2).
+- Ex F-17 e F-34: confluiti in F-64/F-68 e in F-41.
+
+### Prima e dopo
+Dettaglio in `misure.md`, «Finale».
+
+| Misura | Prima (fase 38) | Finale | Soglia |
+|---|---|---|---|
+| Pallino schede | 5,8 % | 4,3 % | ≤ 2 % |
+| Ricerca «notte» | 3,5 %, p99 57,4 ms | 4,5 %, p99 35,0 ms | ≤ 3 %, p99 ≤ 16 ms |
+| Swipe mini player | 8,7 % | 8,1 % | ≤ 2 % |
+| Apertura player | 9,5 %, p99 116,0 ms | 7,4 %, p99 113,8 ms | ≤ 3 %, p99 ≤ 33 ms |
+| Avvio a freddo | 2575 ms | 2500 ms | ≤ 2400 ms |
+| `databaseProvider\|RepositoryProvider` in `lib/ui` | 74 righe / 44 file | 0 | 0 |
+
+### Cambi di comportamento avvenuti
+- D-04: tolto l'import dal vecchio DB Python (pulsante, importer, test, stringhe).
+- D-11: la copertina che ruota è un'opzione, spenta di default; ferma durante il volo Hero e con «riduci animazioni».
+- D-12: l'onboarding avvia la scansione dopo «aggiungi cartella».
+- D-13: tema personalizzato poco leggibile: solo avviso (editor e import), nessuna correzione automatica.
+- D-14: animazioni ridotte se lo chiede l'app o il sistema; scala del testo = sistema × app.
+- D-15: bersagli ≥ 48 dp sul telefono; compatto solo su desktop (D-48: per piattaforma).
+- D-16: copertine decorative escluse dalla semantica; etichetta solo dove sono l'unico contenuto.
+- D-17: `textFaint` e accento come testo su s2/s3 corretti a ≥ 4,5:1 (piccolo cambio di aspetto, golden rigenerati).
+
+### Soglie non raggiunte
+- Pallino schede (4,3 %), Apri album (7,9 %), Swipe (8,1 %), Apertura player (7,4 %, p99 113,8 ms), Ricerca (4,5 %, p99 35,0 ms): tutte con picchi nei frame di build (cambio di brano, prima apertura di una scheda, `smartSearch` sincrono).
+- Album (0,8 % contro 0,6 %) è a un frame dalla soglia; avvio (2500 ms) e PSS (270 MB) restano sopra, come già prima del refactor.
+- Annotate secondo D-37/D-41; la fase 44 non cambia codice di prodotto. Tocca all'utente accettarle o aprire un seguito. Dettaglio in `misure.md`.

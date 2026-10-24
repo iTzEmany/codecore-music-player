@@ -146,3 +146,25 @@ la 43 lo abbassa un poco. Da bisecare nelle fasi 40–42 (rimando in fase 44).
 
 Soglie non raggiunte (D-41: annotate, si prosegue). Con 70–130 frame un frame vale 0,8–1,4 punti, quindi «Tutti i
 brani» e «Album» sono pari. Gli altri picchi sono ancora nei frame di build (cambio di brano, prima apertura di una scheda).
+
+## Finale (`ui-fluida-dopo`, 24/10, fase 44)
+
+Stesso telefono e stesso comando (`--playback`), codice di `wip/fase-44` con il fix dello scaler (261f43e).
+
+| Scenario | Prima | Dopo la 39 | Dopo (finale) | Soglia | ok |
+|---|---|---|---|---|---|
+| Pallino schede | 5,8 % | 3,9 % | 4,3 % | ≤ 2 % | no |
+| Tutti i brani | 0,8 % | 1,1 % | 0,8 % | ≤ 1 % | sì |
+| Album | 1,0 % | 0,4 % | 0,8 % | ≤ 0,6 % | no (pari) |
+| Ricerca «notte» | 3,5 % · p99 57,4 ms | 9,7 % · p99 30,1 ms | 4,5 % · p99 35,0 ms | ≤ 3 %, build p99 ≤ 16 ms | no |
+| Apri album | 3,5 % | 4,3 % | 7,9 % | ≤ 3 % | no |
+| Fogli | 1,7 % | 1,8 % | 1,8 % | ≤ 3 % | sì |
+| Swipe mini player | 8,7 % | 8,2 % | 8,1 % | ≤ 2 % | no |
+| Apertura player | 9,5 % · p99 116,0 ms | 6,8 % · p99 71,9 ms | 7,4 % · p99 113,8 ms | ≤ 3 %, p99 ≤ 33 ms | no |
+| Avvio a freddo (mediana di 5) | 2575 ms | 2415 ms | 2500 ms | ≤ 2400 ms | no |
+| PSS | 262 MB | 271 MB | 270 MB | ≤ 210 MB | no |
+
+- «Pallino schede» è stato al 12 % dalla fase 40 alla 43 perché `_AppTextScaler` in `lib/app.dart` non aveva `==` (a ogni rebuild ogni `Text` rifaceva il layout). Corretto in 261f43e su `wip/fase-44` (giro `fix-scaler`: 3,2 %); ora 4,3 %.
+- Le soglie non raggiunte sono annotate (D-37, D-41). All'utente si chiede di accettarle o di aprire un seguito; la fase 44 non cambia codice di prodotto.
+- Restano i picchi nei frame di build: il cambio di brano ricostruisce il player e decodifica la copertina, e la prima apertura di una scheda o pagina costruisce tutto. Le sezioni sopra spiegano il resto.
+- Con 63–140 frame un frame vale 0,7–1,6 punti: «Album» (0,8 %) è a un frame dalla soglia, «Apri album» (63 frame) oscilla molto da un giro all'altro.

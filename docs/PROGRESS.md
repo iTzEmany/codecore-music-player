@@ -619,12 +619,12 @@ Refactor «ui-fluida» (piano in `docs/refactor/ui-fluida/analisi.md`, decisioni
 
 ## Fase 44 — Chiusura ui-fluida (`fase-44-chiusura-ui-fluida.md`)
 Refactor «ui-fluida» (piano in `docs/refactor/ui-fluida/analisi.md`, decisioni D-01..D-30 in `docs/decisioni.md`, 2026-10-23). Misure finali contro le soglie e pulizia.
-- [ ] 44.1 Misure finali sul Mi A3
-- [ ] 44.2 Metriche di struttura
-- [ ] 44.3 Verifiche finali
-- [ ] 44.4 Aggiornare `analisi.md` con i risultati
-- [ ] 44.5 Pulizia dell'APK profile
-- [ ] 44.6 Nuova versione `1.3.0+4` e tag `v1.3.0` (push del tag solo con un sì: avvia la release)
+- [x] 44.1 Misure finali sul Mi A3
+- [x] 44.2 Metriche di struttura
+- [x] 44.3 Verifiche finali (prova a mano su Mi A3 e Motorola: «Tocca a te» in handoff)
+- [x] 44.4 Aggiornare `analisi.md` con i risultati
+- [x] 44.5 Pulizia dell'APK profile
+- [x] 44.6 Nuova versione `1.3.0+4` e tag `v1.3.0` (tag locale; il push lo fa l'utente: avvia la release)
 
 ## Note di deviazione
 <!-- una riga per deviazione: data — task — cosa è cambiato e perché -->
