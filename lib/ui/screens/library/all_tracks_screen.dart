@@ -72,7 +72,7 @@ class _AllTracksScreenState extends ConsumerState<AllTracksScreen> {
   void _onChanged(String text) {
     _debounce?.cancel();
     _debounce = Timer(
-      const Duration(milliseconds: 250),
+      CcTiming.debounce,
       () => _query.update((q) => q.copyWith(text: text)),
     );
   }

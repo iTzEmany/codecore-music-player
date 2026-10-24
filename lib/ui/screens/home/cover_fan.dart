@@ -8,7 +8,6 @@ import '../../../l10n/l10n_ext.dart';
 import '../../shell/shell_nav.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/cover_image.dart';
-import '../../widgets/motion.dart';
 import '../library/album_detail_screen.dart';
 
 const _maxCovers = 5;
@@ -36,7 +35,7 @@ class _CoverFanState extends State<CoverFan>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _c.duration = ccDuration(context, Motion.pulse);
+    _c.duration = ccDuration(context, CcMotion.sheet);
   }
 
   @override
@@ -85,7 +84,7 @@ class _CoverFanState extends State<CoverFan>
                 child: AnimatedBuilder(
                   animation: _c,
                   builder: (context, _) {
-                    final t = Motion.curve.transform(_c.value);
+                    final t = CcMotion.curveIn.transform(_c.value);
                     return SizedBox(
                       height: size + 24,
                       width: w,

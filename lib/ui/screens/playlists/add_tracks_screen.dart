@@ -36,7 +36,7 @@ class _AddTracksScreenState extends ConsumerState<AddTracksScreen> {
 
   void _onChanged(String text) {
     _debounce?.cancel();
-    _debounce = Timer(const Duration(milliseconds: 250), () {
+    _debounce = Timer(CcTiming.debounce, () {
       if (mounted) setState(() => _query = text);
     });
   }

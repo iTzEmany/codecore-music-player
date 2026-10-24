@@ -82,7 +82,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     _debounce?.cancel();
     final v = _controller.text.trim();
     if (v == _text) return;
-    _debounce = Timer(const Duration(milliseconds: 250), () {
+    _debounce = Timer(CcTiming.debounce, () {
       if (mounted) setState(() => _text = v);
     });
   }

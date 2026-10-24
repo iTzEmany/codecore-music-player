@@ -94,7 +94,7 @@ class _SmartPlaylistEditorState extends ConsumerState<SmartPlaylistEditor> {
   void _onRulesChanged(String text) {
     setState(() {});
     _debounce?.cancel();
-    _debounce = Timer(const Duration(milliseconds: 250), () {
+    _debounce = Timer(CcTiming.debounce, () {
       if (mounted) setState(() => _previewRules = text);
     });
   }

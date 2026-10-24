@@ -82,8 +82,8 @@ class _LyricsViewState extends ConsumerState<LyricsView> {
       Scrollable.ensureVisible(
         ctx,
         alignment: 0.35,
-        duration: reduce ? Duration.zero : const Duration(milliseconds: 300),
-        curve: Curves.easeOut,
+        duration: reduce ? Duration.zero : CcMotion.sheet,
+        curve: CcMotion.curveIn,
       );
       return;
     }
@@ -297,7 +297,7 @@ class _LyricRowState extends State<_LyricRow> {
         padding: const EdgeInsets.symmetric(vertical: 8),
         child: TweenAnimationBuilder<double>(
           tween: Tween(end: _alpha),
-          duration: ccDuration(context, const Duration(milliseconds: 200)),
+          duration: ccDuration(context, CcMotion.enter),
           builder: (_, a, _) => Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
