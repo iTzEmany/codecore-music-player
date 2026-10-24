@@ -1,10 +1,12 @@
 import 'dart:async';
 
 import 'package:codecore/ui/widgets/motion.dart';
-import 'package:codecore/providers/player_providers.dart';
+import 'package:codecore/providers/settings_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../support/spin_support.dart';
 
 Widget _app(Widget child, {bool reduce = false}) => MaterialApp(
       home: MediaQuery(
@@ -94,14 +96,13 @@ void main() {
       });
       await tester.pump();
       expect(tester.hasRunningAnimations, isFalse, reason: 'durations are zero');
-      expect(_opacity(tester, find.byType(TabFade)), 1);
       expect(_opacity(tester, find.byType(RiseIn)), 1);
     });
   });
 
   group('SpinWhilePlaying', () {
-    Widget spin(Object key, {bool playing = true, bool reduce = false}) => ProviderScope(
-          overrides: [isPlayingProvider.overrideWith((_) => Stream.value(playing))],
+    Widget spin(Object key, {bool playing = true, bool reduce = false, bool spinCover = true}) => ProviderScope(
+          overrides: spinOverrides(playing: playing, spinCover: spinCover),
           child: _app(SpinWhilePlaying(trackKey: key, child: const SizedBox(width: 10, height: 10)), reduce: reduce),
         );
     final rotation = find.descendant(of: find.byType(SpinWhilePlaying), matching: find.byType(RotationTransition));
@@ -123,10 +124,10 @@ void main() {
       addTearDown(ctl.close);
       await tester.pumpWidget(ProviderScope(
         overrides: [
-          isPlayingProvider.overrideWith((_) async* {
+          ...spinOverrides(stream: (() async* {
             yield true;
             yield* ctl.stream;
-          }),
+          })()),
         ],
         child: _app(const SpinWhilePlaying(trackKey: 'a', child: SizedBox(width: 10, height: 10))),
       ));
@@ -153,6 +154,37 @@ void main() {
       await tester.pumpWidget(spin('a', reduce: true));
       await tester.pump(const Duration(seconds: 5));
       expect(rotation, findsNothing);
+    });
+
+    testWidgets('the setting toggled live starts and stops the spin', (tester) async {
+      await tester.pumpWidget(spin('a', spinCover: false));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 5));
+      expect(rotation, findsNothing);
+      final c = ProviderScope.containerOf(tester.element(find.byType(SpinWhilePlaying)));
+      c.read(settingsProvider.notifier).update((s) => s.copyWith(spinCover: true));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 5));
+      expect(angle(tester), greaterThan(0));
+      c.read(settingsProvider.notifier).update((s) => s.copyWith(spinCover: false));
+      await tester.pump();
+      expect(tester.hasRunningAnimations, isFalse);
+    });
+
+    testWidgets('inside a route it waits for the opening transition', (tester) async {
+      await tester.pumpWidget(ProviderScope(
+        overrides: spinOverrides(),
+        child: const MaterialApp(home: Scaffold(body: Text('home'))),
+      ));
+      final nav = tester.state<NavigatorState>(find.byType(Navigator));
+      nav.push(MaterialPageRoute<void>(
+          builder: (_) => const Scaffold(body: SpinWhilePlaying(trackKey: 'a', child: SizedBox(width: 10, height: 10)))));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(angle(tester), 0, reason: 'no spin while the page opens');
+      await tester.pump(const Duration(seconds: 1)); // the route is done (it keeps turning, so no pumpAndSettle)
+      await tester.pump(const Duration(seconds: 3));
+      expect(angle(tester), greaterThan(0));
     });
   });
 }

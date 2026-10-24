@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../providers/player_providers.dart';
+import '../../providers/settings_providers.dart';
 
 /// The small movements of phase 28.9. Only opacity and transforms (nothing
 /// that changes a size or a layout), 120–220 ms with an easing out, what moves
@@ -151,41 +152,17 @@ class _EnterOnceState extends State<EnterOnce> with SingleTickerProviderStateMix
   }
 }
 
-/// Fades the body in when the tab changes; the pages underneath keep their
-/// state (the same element stays, only its opacity moves).
-class TabFade extends StatefulWidget {
+/// Keeps the pages underneath alive across a tab change (same element, state
+/// kept). No opacity layer over the whole body: it cost a full-screen
+/// offscreen pass on every tab change (F-44).
+class TabFade extends StatelessWidget {
   const TabFade({super.key, required this.index, required this.child});
 
   final int index;
   final Widget child;
 
   @override
-  State<TabFade> createState() => _TabFadeState();
-}
-
-class _TabFadeState extends State<TabFade> with SingleTickerProviderStateMixin {
-  late final _c = AnimationController(vsync: this, duration: Motion.tab, value: 1);
-  late final _opacity = CurvedAnimation(parent: _c, curve: Motion.curve);
-
-  @override
-  void didUpdateWidget(TabFade old) {
-    super.didUpdateWidget(old);
-    if (old.index != widget.index && !MediaQuery.disableAnimationsOf(context)) {
-      _c.forward(from: 0);
-    }
-  }
-
-  @override
-  void dispose() {
-    _c.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) => FadeTransition(
-        opacity: _opacity,
-        child: RepaintBoundary(child: widget.child),
-      );
+  Widget build(BuildContext context) => RepaintBoundary(child: child);
 }
 
 /// The heart of a favourite: it beats once (up to 1.25 and back) when the
@@ -286,8 +263,9 @@ class _RiseInState extends State<RiseIn> with SingleTickerProviderStateMixin {
 }
 
 /// Turns [child] once every 30 s while a song plays; it stops at its angle
-/// when paused and starts again from 0 when [trackKey] changes. Not at all
-/// with «Riduci animazioni».
+/// when paused and starts again from 0 when [trackKey] changes. Only when the
+/// «Copertina che ruota» setting is on, never with «Riduci animazioni» and not
+/// while the page is still opening (Hero flight).
 class SpinWhilePlaying extends ConsumerStatefulWidget {
   const SpinWhilePlaying({super.key, required this.trackKey, required this.child});
 
@@ -310,13 +288,32 @@ class _SpinWhilePlayingState extends ConsumerState<SpinWhilePlaying>
       _playing = next.value ?? false;
       _sync();
     });
+    ref.listenManual(settingsProvider.select((s) => s.spinCover), (_, _) => _sync());
   }
+
+  Animation<double>? _route;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    final a = ModalRoute.of(context)?.animation;
+    if (a != _route) {
+      _route?.removeStatusListener(_onRoute);
+      _route = a?..addStatusListener(_onRoute);
+    }
     _sync();
   }
+
+  void _onRoute(AnimationStatus status) {
+    // Leaving: back to 0 so the return Hero does not jump.
+    if (status == AnimationStatus.reverse) _c.value = 0;
+    _sync();
+  }
+
+  bool get _enabled =>
+      ref.read(settingsProvider).spinCover &&
+      !MediaQuery.disableAnimationsOf(context) &&
+      (_route == null || _route!.isCompleted);
 
   @override
   void didUpdateWidget(SpinWhilePlaying old) {
@@ -328,7 +325,7 @@ class _SpinWhilePlayingState extends ConsumerState<SpinWhilePlaying>
   }
 
   void _sync() {
-    if (_playing && !MediaQuery.disableAnimationsOf(context)) {
+    if (_playing && _enabled) {
       if (!_c.isAnimating) _c.repeat();
     } else {
       _c.stop();
@@ -337,12 +334,14 @@ class _SpinWhilePlayingState extends ConsumerState<SpinWhilePlaying>
 
   @override
   void dispose() {
+    _route?.removeStatusListener(_onRoute);
     _c.dispose();
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) => MediaQuery.disableAnimationsOf(context)
+  Widget build(BuildContext context) =>
+      MediaQuery.disableAnimationsOf(context) || !ref.watch(settingsProvider.select((s) => s.spinCover))
       ? widget.child
       : RotationTransition(turns: _c, child: RepaintBoundary(child: widget.child));
 }

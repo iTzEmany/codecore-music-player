@@ -142,6 +142,13 @@ List<SettingsGroup> _appearance(BuildContext context, WidgetRef ref) {
                   onChanged: (v) =>
                       notifier.update((c) => c.copyWith(reducedMotion: v)),
                 ),
+                SwitchListTile(
+                  title: Text(l.settingsSpinCover),
+                  subtitle: Text(l.settingsSpinCoverHint),
+                  value: s.spinCover,
+                  onChanged: (v) =>
+                      notifier.update((c) => c.copyWith(spinCover: v)),
+                ),
               ],
             ),
             SettingsGroup(

@@ -5286,4 +5286,10 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get deezerMetaNote =>
       'Uso privado e não comercial. Os termos do Deezer proíbem promover o download não autorizado, e o Codecore baixa do YouTube: o risco é seu.';
+
+  @override
+  String get settingsSpinCover => 'Capa giratória';
+
+  @override
+  String get settingsSpinCoverHint => 'No player, enquanto a música toca';
 }

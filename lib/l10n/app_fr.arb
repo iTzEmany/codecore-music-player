@@ -3117,5 +3117,7 @@
   "onboardingSpotifyBody": "Sur exportify.net, vous téléchargez vos playlists Spotify dans un fichier. Codecore le récupère et les met à jour ici.\nAucun compte à relier : le fichier, c’est vous qui le téléchargez.",
   "deezerMeta": "Métadonnées de Deezer",
   "deezerMetaHint": "Données seulement (pochettes, numéros de piste), jamais de musique",
-  "deezerMetaNote": "Usage privé et non commercial. Les conditions de Deezer interdisent de promouvoir le téléchargement non autorisé, et Codecore télécharge depuis YouTube : le risque est le vôtre."
+  "deezerMetaNote": "Usage privé et non commercial. Les conditions de Deezer interdisent de promouvoir le téléchargement non autorisé, et Codecore télécharge depuis YouTube : le risque est le vôtre.",
+  "settingsSpinCover": "Pochette qui tourne",
+  "settingsSpinCoverHint": "Dans le lecteur, pendant la lecture"
 }
