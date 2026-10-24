@@ -20,7 +20,7 @@ import 'suggested_info.dart';
 import '../../../providers/radio_providers.dart' show onAirProvider;
 import '../../widgets/radio_now.dart';
 import '../../widgets/favorite_actions.dart';
-import '../../widgets/mini_player.dart' show kPlayerCoverHero;
+import '../../widgets/mini_player.dart' show coverHeroTagFor;
 import '../../widgets/track_actions.dart';
 import '../library/artist_screen.dart';
 import 'now_playing_cards.dart';
@@ -31,6 +31,7 @@ import '../../widgets/ring_progress.dart';
 const _wideBreakpoint = 900.0;
 const _closeDistance = 120.0;
 const _closeVelocity = 700.0;
+const _cardsPlaceholderHeight = 480.0;
 
 /// «In riproduzione da»: the name of where the queue came from.
 String? playContextName(AppLocalizations l, PlayContext? c) {
@@ -58,20 +59,65 @@ class NowPlayingScreen extends ConsumerStatefulWidget {
 }
 
 class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
-  double _dy = 0;
+  // The close drag moves only the Transform: no rebuild per pointer move.
+  final _dy = ValueNotifier<double>(0);
   bool _dragging = false;
+  // Cards are built once the open transition is over (flat placeholder before).
+  bool _cardsReady = false;
+  Animation<double>? _routeAnim;
 
   void _onDragEnd(DragEndDetails d) {
     final v = d.primaryVelocity ?? 0;
-    if (_dy > _closeDistance || v > _closeVelocity) {
+    if (_dy.value > _closeDistance || v > _closeVelocity) {
       Navigator.of(context).maybePop();
       return;
     }
-    setState(() {
-      _dragging = false;
-      _dy = 0;
-    });
+    _dragging = false;
+    _dy.value = 0;
   }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_cardsReady || _routeAnim != null) return;
+    final a = _routeAnim = ModalRoute.of(context)?.animation;
+    if (a == null || a.isCompleted) {
+      _cardsReady = true;
+    } else {
+      a.addStatusListener(_onRouteStatus);
+    }
+  }
+
+  void _onRouteStatus(AnimationStatus s) {
+    if (s != AnimationStatus.completed) return;
+    _routeAnim?.removeStatusListener(_onRouteStatus);
+    if (mounted) setState(() => _cardsReady = true);
+  }
+
+  @override
+  void dispose() {
+    _routeAnim?.removeStatusListener(_onRouteStatus);
+    _dy.dispose();
+    super.dispose();
+  }
+
+  List<Widget> _cards(bool online, Track track) => !_cardsReady
+      ? const [SizedBox(height: _cardsPlaceholderHeight)]
+      : [
+          RiseIn(
+            child: Column(
+              children: [
+                if (!online) ...[
+                  LyricsCard(track: track),
+                  const SizedBox(height: 12),
+                  InfoCard(track: track),
+                  const SizedBox(height: 12),
+                ],
+                const UpNextCard(),
+              ],
+            ),
+          ),
+        ];
 
   @override
   Widget build(BuildContext context) {
@@ -87,9 +133,13 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
       body: CoverBackdrop(
         coverKey: track?.coverKey,
         child: SafeArea(
-          child: AnimatedContainer(
-            duration: _dragging || reduce ? Duration.zero : CcMotion.sheet,
-            transform: Matrix4.translationValues(0, _dy, 0),
+          child: ValueListenableBuilder<double>(
+            valueListenable: _dy,
+            builder: (_, dy, child) => AnimatedContainer(
+              duration: _dragging || reduce ? Duration.zero : CcMotion.sheet,
+              transform: Matrix4.translationValues(0, dy, 0),
+              child: child,
+            ),
             child: track == null
                 ? _Empty(onClose: () => Navigator.of(context).maybePop())
                 : LayoutBuilder(
@@ -97,10 +147,10 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                       final player = _Player(
                         track: track,
                         desktop: widget.desktop ?? isDesktop,
-                        onDragUpdate: (d) => setState(() {
+                        onDragUpdate: (d) {
                           _dragging = true;
-                          _dy = (_dy + d.delta.dy).clamp(0.0, 600.0);
-                        }),
+                          _dy.value = (_dy.value + d.delta.dy).clamp(0.0, 600.0);
+                        },
                         onDragEnd: _onDragEnd,
                       );
                       if (wide) {
@@ -123,15 +173,7 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                                       padding: const EdgeInsets.symmetric(
                                         vertical: 16,
                                       ),
-                                      children: [
-                                        if (!online) ...[
-                                          LyricsCard(track: track),
-                                          const SizedBox(height: 12),
-                                          InfoCard(track: track),
-                                          const SizedBox(height: 12),
-                                        ],
-                                        const UpNextCard(),
-                                      ],
+                                      children: _cards(online, track),
                                     ),
                                   ),
                                 ),
@@ -153,15 +195,7 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                               24,
                             ),
                             sliver: SliverList.list(
-                              children: [
-                                if (!online) ...[
-                                  LyricsCard(track: track),
-                                  const SizedBox(height: 12),
-                                  InfoCard(track: track),
-                                  const SizedBox(height: 12),
-                                ],
-                                const UpNextCard(),
-                              ],
+                              children: _cards(online, track),
                             ),
                           ),
                         ],
@@ -343,7 +377,7 @@ class _Player extends ConsumerWidget {
                           track: track,
                           size: inner,
                           radius: inner / 2,
-                          heroTag: kPlayerCoverHero,
+                          heroTag: coverHeroTagFor(MediaQuery.sizeOf(context).width),
                         ),
                       ),
                     ),

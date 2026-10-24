@@ -19,7 +19,15 @@ import '../../providers/radio_providers.dart' show onAirProvider;
 import 'track_art.dart';
 
 /// Shared-element tag of the cover between mini-player and Now Playing.
-const kPlayerCoverHero = 'player-cover';
+const kMiniCoverHero = 'player-cover-mini';
+const kBarCoverHero = 'player-cover-bar';
+
+/// Width from which the shell shows the desktop bar instead of the mini player.
+const kWideShellBreakpoint = 840.0;
+
+/// The cover tag of whichever of the two the shell shows at this [width].
+String coverHeroTagFor(double width) =>
+    width >= kWideShellBreakpoint ? kBarCoverHero : kMiniCoverHero;
 
 const _swipeDistance = 72.0;
 const _swipeVelocity = 700.0;
@@ -165,7 +173,7 @@ class _MiniPlayerState extends ConsumerState<MiniPlayer>
                 track: track!,
                 size: 38,
                 radius: 19,
-                heroTag: kPlayerCoverHero,
+                heroTag: kMiniCoverHero,
               ),
             ),
           const SizedBox(width: 12),

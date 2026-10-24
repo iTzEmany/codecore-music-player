@@ -40,8 +40,8 @@ Future<Harness> _shellPlaying(WidgetTester tester, Size s) async {
   return h;
 }
 
-Finder _coverHeroes() => find.byWidgetPredicate(
-    (w) => w is Hero && w.tag == kPlayerCoverHero);
+Finder _coverHeroes(String tag) =>
+    find.byWidgetPredicate((w) => w is Hero && w.tag == tag);
 
 String? _currentTitle(WidgetTester t) => ProviderScope.containerOf(
         t.element(find.byType(MiniPlayer)))
@@ -82,34 +82,19 @@ void main() {
     await h.dispose(tester);
   });
 
-  testWidgets('TabFade: changing tab fades the same child in, state kept',
+  // 39.3 (F-44): TabFade no longer fades the body (a full-screen opacity
+  // layer on every tab change); what stays pinned is the kept state.
+  testWidgets('TabFade: changing tab keeps the child state, with no opacity layer',
       (tester) async {
     Widget app(int i) => MaterialApp(home: TabFade(index: i, child: const _Counter()));
     await tester.pumpWidget(app(0));
     await tester.tap(find.text('count 0'));
     await tester.pump();
     await tester.pumpWidget(app(1));
-    final fade = find.descendant(
-        of: find.byType(TabFade), matching: find.byType(FadeTransition));
-    await tester.pump(const Duration(milliseconds: 10));
-    expect(tester.widget<FadeTransition>(fade.first).opacity.value,
-        lessThan(1));
-    await tester.pumpAndSettle();
-    expect(tester.widget<FadeTransition>(fade.first).opacity.value, 1);
+    expect(
+        find.descendant(of: find.byType(TabFade), matching: find.byType(FadeTransition)),
+        findsNothing);
     expect(find.text('count 1'), findsOneWidget);
-  });
-
-  testWidgets('TabFade: with reduced motion the child is opaque at once',
-      (tester) async {
-    Widget app(int i) => MaterialApp(
-        builder: (c, w) => MediaQuery(
-            data: MediaQuery.of(c).copyWith(disableAnimations: true), child: w!),
-        home: TabFade(index: i, child: const _Counter()));
-    await tester.pumpWidget(app(0));
-    await tester.pumpWidget(app(1));
-    final fade = find.descendant(
-        of: find.byType(TabFade), matching: find.byType(FadeTransition));
-    expect(tester.widget<FadeTransition>(fade.first).opacity.value, 1);
   });
 
   testWidgets('mini player: a short swipe snaps back, the track stays',
@@ -173,23 +158,23 @@ void main() {
   testWidgets('phone: one cover Hero in the mini player, still one with the player open',
       (tester) async {
     final h = await _shellPlaying(tester, const Size(400, 900));
-    expect(_coverHeroes(), findsOneWidget);
+    expect(_coverHeroes(kMiniCoverHero), findsOneWidget);
     await tester.tap(find.text('Song 0').last);
     await _settle(tester);
-    expect(find.descendant(of: find.byType(NowPlayingScreen), matching: _coverHeroes()), findsOneWidget);
+    expect(find.descendant(of: find.byType(NowPlayingScreen), matching: _coverHeroes(kMiniCoverHero)), findsOneWidget);
     // The opaque route hides the shell, so the mini player's Hero is gone.
-    expect(_coverHeroes(), findsOneWidget);
+    expect(_coverHeroes(kMiniCoverHero), findsOneWidget);
     await h.dispose(tester);
   });
 
   testWidgets('desktop: one cover Hero in the player bar, one with the player open',
       (tester) async {
     final h = await _shellPlaying(tester, const Size(1280, 800));
-    expect(_coverHeroes(), findsOneWidget);
-    await tester.tap(_coverHeroes());
+    expect(_coverHeroes(kBarCoverHero), findsOneWidget);
+    await tester.tap(_coverHeroes(kBarCoverHero));
     await _settle(tester);
     expect(find.byType(NowPlayingScreen), findsOneWidget);
-    expect(_coverHeroes(), findsOneWidget);
+    expect(_coverHeroes(kBarCoverHero), findsOneWidget);
     await h.dispose(tester);
   });
 }

@@ -37,9 +37,9 @@ import 'desktop_player_bar.dart';
 import 'desktop_sidebar.dart';
 import 'shell_keys.dart';
 import 'side_panel.dart';
+import '../widgets/mini_player.dart' show kWideShellBreakpoint;
 import '../widgets/motion.dart';
 
-const _wideBreakpoint = 840.0;
 
 class AppShell extends ConsumerWidget {
   const AppShell({super.key});
@@ -177,7 +177,7 @@ class AppShell extends ConsumerWidget {
     });
     final index = ref.watch(navIndexProvider);
     final keys = ref.watch(tabNavigatorKeysProvider);
-    final wide = MediaQuery.sizeOf(context).width >= _wideBreakpoint;
+    final wide = MediaQuery.sizeOf(context).width >= kWideShellBreakpoint;
     final l = context.l10n;
     void select(int i) {
       if (i == index) keys[i].currentState?.popUntil((r) => r.isFirst);

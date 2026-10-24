@@ -18,7 +18,7 @@ import '../widgets/quality_tag.dart';
 import '../widgets/speed_button.dart';
 import '../widgets/favorite_actions.dart';
 import '../widgets/format_utils.dart';
-import '../widgets/mini_player.dart' show kPlayerCoverHero;
+import '../widgets/mini_player.dart' show kBarCoverHero;
 import '../widgets/play_buttons.dart';
 import 'shell_nav.dart';
 import '../widgets/motion.dart';
@@ -120,7 +120,7 @@ class _TrackInfo extends ConsumerWidget {
                 track: track,
                 size: RingProgress.innerSize(56),
                 radius: RingProgress.innerSize(56) / 2,
-                heroTag: kPlayerCoverHero,
+                heroTag: kBarCoverHero,
               ),
             ),
           ),

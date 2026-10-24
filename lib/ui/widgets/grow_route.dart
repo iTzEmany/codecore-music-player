@@ -8,7 +8,7 @@ import 'motion.dart';
 const _duration = Duration(milliseconds: 550);
 
 /// Opens a page growing out of [from] (the dock's global rect): a rounded clip
-/// widens to the whole screen while the page fades in over the first 40 %.
+/// widens to the whole screen (no full-page fade: the page is opaque).
 /// With [reduceMotion] («Riduci animazioni», read when the route is pushed) the
 /// route takes no time and the page is simply there.
 Route<T> growRoute<T>({
@@ -26,10 +26,7 @@ Route<T> growRoute<T>({
     final t = animation.drive(CurveTween(curve: Motion.curve));
     return ClipRRect(
       clipper: _GrowClipper(from, t),
-      child: FadeTransition(
-        opacity: animation.drive(CurveTween(curve: const Interval(0, 0.4))),
-        child: RepaintBoundary(child: child),
-      ),
+      child: RepaintBoundary(child: child),
     );
   },
 );
