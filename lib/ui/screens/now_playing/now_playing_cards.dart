@@ -415,7 +415,7 @@ class _CuriosityTextState extends ConsumerState<_CuriosityText> {
                 InkWell(
                   onTap: longer ? () => setState(() => _open = !_open) : null,
                   child: AnimatedSize(
-                    duration: const Duration(milliseconds: 200),
+                    duration: ccDuration(context, const Duration(milliseconds: 200)),
                     alignment: Alignment.topCenter,
                     child: Text(
                       shown,

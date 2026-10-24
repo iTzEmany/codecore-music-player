@@ -339,13 +339,17 @@ class _BarSeekState extends ConsumerState<_BarSeek> {
     final cc = context.cc;
     final style = Theme.of(context).textTheme.labelSmall
         ?.copyWith(color: cc.textMuted);
-    final pos = ref.watch(positionProvider).value ?? Duration.zero;
     final dur = ref.watch(durationProvider).value ?? Duration.zero;
     final max = dur.inMilliseconds.toDouble();
-    final shown = (_dragging ?? pos.inMilliseconds.toDouble()).clamp(
-      0.0,
-      max <= 0 ? 1.0 : max,
-    );
+    // Only the position consumers rebuild on each tick, not the whole row.
+    double shownOf(WidgetRef ref) {
+      final pos = ref.watch(positionProvider).value ?? Duration.zero;
+      return (_dragging ?? pos.inMilliseconds.toDouble()).clamp(
+        0.0,
+        max <= 0 ? 1.0 : max,
+      );
+    }
+
     // Equal side slots keep the slider centred.
     Widget slot(Widget? child) => SizedBox(
       width: 56,
@@ -356,25 +360,30 @@ class _BarSeekState extends ConsumerState<_BarSeek> {
         slot(widget.track == null ? null : QualityTag(widget.track!)),
         SizedBox(
           width: 44,
-          child: Text(
-            formatDuration(shown.round()),
-            textAlign: TextAlign.right,
-            style: style,
+          child: Consumer(
+            builder: (context, ref, _) => Text(
+              formatDuration(shownOf(ref).round()),
+              textAlign: TextAlign.right,
+              style: style,
+            ),
           ),
         ),
         Expanded(
           child: SizedBox(
             height: 20,
-            child: Slider(
-              value: shown,
-              max: max <= 0 ? 1 : max,
-              onChanged: max <= 0 ? null : (v) => setState(() => _dragging = v),
-              onChangeEnd: (v) {
-                setState(() => _dragging = null);
-                ref
-                    .read(playerControllerProvider)
-                    .seek(Duration(milliseconds: v.round()));
-              },
+            child: Consumer(
+              builder: (context, ref, _) => Slider(
+                value: shownOf(ref),
+                max: max <= 0 ? 1 : max,
+                onChanged:
+                    max <= 0 ? null : (v) => setState(() => _dragging = v),
+                onChangeEnd: (v) {
+                  setState(() => _dragging = null);
+                  ref
+                      .read(playerControllerProvider)
+                      .seek(Duration(milliseconds: v.round()));
+                },
+              ),
             ),
           ),
         ),

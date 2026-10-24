@@ -291,21 +291,17 @@ class _TokenRow extends StatelessWidget {
                 )
               : Icon(open ? Icons.expand_less_rounded : Icons.expand_more_rounded),
         ),
-        AnimatedSize(
-          duration: ccDuration(context, CcMotion.sheet),
-          alignment: Alignment.topCenter,
-          child: open
-              ? Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: CcColorPicker(
-                    color: color,
-                    onChanged: onChanged,
-                    recent: recent,
-                    labels: pickerLabels(l),
-                  ),
-                )
-              : const SizedBox(width: double.infinity),
-        ),
+        // Instant open/close: no per-row layout animation.
+        if (open)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: CcColorPicker(
+              color: color,
+              onChanged: onChanged,
+              recent: recent,
+              labels: pickerLabels(l),
+            ),
+          ),
       ],
     );
   }

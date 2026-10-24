@@ -37,8 +37,8 @@ class SelectionBox extends StatelessWidget {
       width: size,
       height: size,
       child: Center(
-        child: AnimatedContainer(
-          duration: ccDuration(context, CcMotion.press),
+        child: // Instant box change: the pop-in below carries the motion (no per-row layout animation).
+        Container(
           width: box,
           height: box,
           decoration: BoxDecoration(
