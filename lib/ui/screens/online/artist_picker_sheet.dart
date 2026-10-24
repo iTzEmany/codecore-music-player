@@ -14,6 +14,7 @@ import '../../widgets/net_thumbnail.dart';
 import '../youtube/online_results.dart' show ytErrorText;
 import 'artist_page_screen.dart';
 import 'artist_page_sections.dart' show thumbAt;
+import '../../widgets/show_msg.dart';
 
 /// Looks the artist [name] up among YouTube Music's artists: a single exact
 /// name is the answer, otherwise the first few are offered in a sheet. Null
@@ -26,10 +27,7 @@ Future<YtmArtistRef?> lookupYtmArtist(
 ) async {
   final l = context.l10n;
   final messenger = ScaffoldMessenger.of(context);
-  void say(String text) => messenger
-    ..clearSnackBars()
-    ..showSnackBar(SnackBar(content: Text(text)));
-  say(l.ytmSearchingArtist);
+  showMsg(context, l.ytmSearchingArtist);
   final List<YtmArtistRef> found;
   try {
     found = await ref
@@ -38,7 +36,7 @@ Future<YtmArtistRef?> lookupYtmArtist(
   } on Object catch (e) {
     AppLog.w('artist lookup failed ($e)');
     if (!context.mounted) return null;
-    say(
+    showMsg(context, 
       e is YtException
           ? ytErrorText(context, e.kind)
           : e is InnerTubeChanged
@@ -60,7 +58,7 @@ Future<YtmArtistRef?> lookupYtmArtist(
         builder: (_) => ArtistPickerSheet(artists: artists),
       );
     case NoArtist():
-      say(l.ytmArtistNone);
+      showMsg(context, l.ytmArtistNone);
       return null;
   }
 }

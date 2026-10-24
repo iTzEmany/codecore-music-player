@@ -14,6 +14,7 @@ import '../../../services/import/track_matcher.dart';
 import 'exportify_sync_screen.dart';
 import 'import_intro_sheet.dart';
 import 'import_preview_dialog.dart';
+import '../../widgets/show_msg.dart';
 
 /// «Importa da Exportify (CSV)»: instructions + file → preview → start.
 Future<void> startCsvImport(BuildContext context, WidgetRef ref) async {
@@ -30,7 +31,6 @@ Future<void> openImportFile(
   String path,
 ) async {
   final l = context.l10n;
-  final messenger = ScaffoldMessenger.of(context);
   String? error;
   try {
     final picked = await readImportPath(path);
@@ -47,9 +47,8 @@ Future<void> openImportFile(
     error = l.csvImportReadFailed;
   }
   if (error != null) {
-    messenger
-      ..clearSnackBars()
-      ..showSnackBar(SnackBar(content: Text(error)));
+    if (!context.mounted) return;
+    showMsg(context, error);
   }
 }
 
@@ -85,7 +84,6 @@ Future<void> continueImport(
     ),
   );
   if (choice == null || !context.mounted) return;
-  final messenger = ScaffoldMessenger.of(context);
   final started = context.l10n.csvImportStarted;
   final svc = ref.read(playlistImportServiceProvider);
   if (choice.sync && choice.intoPlaylistId != null) {
@@ -99,7 +97,6 @@ Future<void> continueImport(
       blockSize: choice.blockSize,
     );
   }
-  messenger
-    ..clearSnackBars()
-    ..showSnackBar(SnackBar(content: Text(started)));
+  if (!context.mounted) return;
+  showMsg(context, started);
 }

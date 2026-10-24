@@ -10,7 +10,9 @@ import '../../../providers/tag_providers.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/confirm.dart';
+import '../../widgets/prompt_name.dart';
 import '../settings/accent_picker.dart';
+import '../../widgets/show_msg.dart';
 
 /// The colour of a tag (an index into the eight accents), or null.
 Color? tagColor(BuildContext context, UserTag t) {
@@ -35,35 +37,6 @@ class TagDot extends StatelessWidget {
     decoration: BoxDecoration(
       shape: BoxShape.circle,
       color: tagColor(context, tag) ?? context.cc.surface3,
-    ),
-  );
-}
-
-/// Asks for a name; null when cancelled.
-Future<String?> askTagName(BuildContext context, {String? initial, String? title}) {
-  final controller = TextEditingController(text: initial);
-  final l = context.l10n;
-  return showDialog<String>(
-    context: context,
-    builder: (c) => AlertDialog(
-      title: Text(title ?? l.tagNew),
-      content: TextField(
-        controller: controller,
-        autofocus: true,
-        maxLength: 40,
-        textCapitalization: TextCapitalization.sentences,
-        onSubmitted: (v) => Navigator.of(c).pop(v.trim().isEmpty ? null : v.trim()),
-      ),
-      actions: [
-        TextButton(onPressed: () => Navigator.of(c).pop(), child: Text(l.cancel)),
-        FilledButton(
-          onPressed: () {
-            final v = controller.text.trim();
-            Navigator.of(c).pop(v.isEmpty ? null : v);
-          },
-          child: Text(l.save),
-        ),
-      ],
     ),
   );
 }
@@ -100,12 +73,16 @@ Future<void> editTag(BuildContext context, WidgetRef ref, TagSummary s) async {
   if (action == null || !context.mounted) return;
   switch (action) {
     case 'rename':
-      final name = await askTagName(context, initial: s.tag.name, title: l.tagRename);
+      final name = await promptName(
+        context,
+        initial: s.tag.name,
+        title: l.tagRename,
+        confirmLabel: l.save,
+        maxLength: 40,
+      );
       if (name == null || !context.mounted) return;
       if (!await repo.rename(s.tag.id, name) && context.mounted) {
-        ScaffoldMessenger.of(context)
-          ..clearSnackBars()
-          ..showSnackBar(SnackBar(content: Text(l.tagNameTaken)));
+        showMsg(context, l.tagNameTaken);
       }
     case 'color':
       final picked = await showDialog<int?>(
@@ -190,7 +167,13 @@ class _TagsSheetState extends ConsumerState<_TagsSheet> {
   }
 
   Future<void> _create() async {
-    final name = await askTagName(context);
+    final l = context.l10n;
+    final name = await promptName(
+      context,
+      title: l.tagNew,
+      confirmLabel: l.save,
+      maxLength: 40,
+    );
     if (name == null) return;
     final repo = ref.read(tagRepositoryProvider);
     final id = await repo.create(name);
@@ -265,9 +248,7 @@ Future<void> pickTagFor(
   ];
   if (!context.mounted) return;
   if (remove && choices.isEmpty) {
-    ScaffoldMessenger.of(context)
-      ..clearSnackBars()
-      ..showSnackBar(SnackBar(content: Text(l.tagNoneToRemove)));
+    showMsg(context, l.tagNoneToRemove);
     return;
   }
   final picked = await showCcSheet<UserTag>(
@@ -286,7 +267,12 @@ Future<void> pickTagFor(
                 leading: const Icon(Icons.add_rounded),
                 title: Text(l.tagNew),
                 onTap: () async {
-                  final name = await askTagName(c);
+                  final name = await promptName(
+                    c,
+                    title: l.tagNew,
+                    confirmLabel: l.save,
+                    maxLength: 40,
+                  );
                   if (name == null || !c.mounted) return;
                   final id = await repo.create(name);
                   final tag = await repo.byName(name);
@@ -315,16 +301,11 @@ Future<void> pickTagFor(
     changed = ids.length; // all of them carry it now, even if some already did
   }
   if (!context.mounted) return;
-  ScaffoldMessenger.of(context)
-    ..clearSnackBars()
-    ..showSnackBar(
-      SnackBar(
-        content: Text(
-          remove
-              ? l.tagUnassigned(changed, picked.name)
-              : l.tagAssigned(changed, picked.name),
-        ),
-      ),
-    );
+  showMsg(
+    context,
+    remove
+        ? l.tagUnassigned(changed, picked.name)
+        : l.tagAssigned(changed, picked.name),
+  );
   done?.call();
 }

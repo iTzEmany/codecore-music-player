@@ -8,6 +8,7 @@ import '../../../l10n/l10n_ext.dart';
 import '../../../providers/database_providers.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/cover_image.dart';
+import '../../widgets/cc_app_bar.dart';
 
 /// Multi-select over the whole library; pops with the chosen ids.
 class TrackPickerScreen extends ConsumerStatefulWidget {
@@ -36,8 +37,8 @@ class _State extends ConsumerState<TrackPickerScreen> {
   Widget build(BuildContext context) {
     final l = context.l10n;
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l.sharePick),
+      appBar: CcAppBar(
+        title: l.sharePick,
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(_selected),

@@ -11,7 +11,9 @@ import '../../../l10n/l10n_ext.dart';
 import '../../../providers/radio_providers.dart';
 import '../../../services/radio/radio_station.dart';
 import '../../theme/tokens.dart';
+import '../../widgets/prompt_name.dart';
 import '../../widgets/radio_art.dart';
+import '../../widgets/show_msg.dart';
 import 'radio_actions.dart';
 import 'radio_labels.dart';
 
@@ -33,9 +35,7 @@ Future<void> openStationSite(BuildContext context, String address) async {
     AppLog.w('opening the station site failed', e, st);
   }
   await Clipboard.setData(ClipboardData(text: address));
-  messenger
-    ?..clearSnackBars()
-    ..showSnackBar(SnackBar(content: Text(copied)));
+  if (messenger != null) showMsgOn(messenger, copied);
 }
 
 /// What is known about a station, with save / remove, rename (saved ones) and
@@ -57,19 +57,12 @@ class RadioStationSheet extends ConsumerWidget {
   Future<void> _rename(BuildContext context, WidgetRef ref, String current) async {
     final l = context.l10n;
     final repo = ref.read(radioRepositoryProvider);
-    final c = TextEditingController(text: current);
-    final name = await showDialog<String>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l.radioRenameTitle),
-        content: TextField(controller: c, autofocus: true, onSubmitted: (v) => Navigator.pop(ctx, v)),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l.cancel)),
-          FilledButton(onPressed: () => Navigator.pop(ctx, c.text), child: Text(l.save)),
-        ],
-      ),
+    final name = await promptName(
+      context,
+      title: l.radioRenameTitle,
+      confirmLabel: l.save,
+      initial: current,
     );
-    c.dispose();
     if (name != null) await repo.rename(station.id, name);
   }
 

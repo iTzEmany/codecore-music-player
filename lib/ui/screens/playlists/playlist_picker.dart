@@ -1,11 +1,11 @@
 import '../../widgets/cc_sheet.dart';
 import 'package:flutter/material.dart';
+import '../../widgets/prompt_name.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/database_providers.dart';
 import '../../widgets/playlist_cover.dart';
-import 'playlist_dialogs.dart';
 
 /// A playlist chosen from the sheet (or created there).
 typedef PickedPlaylist = ({int id, String name});
@@ -27,7 +27,12 @@ Future<PickedPlaylist?> pickPlaylist(BuildContext context, WidgetRef ref) =>
                   leading: const Icon(Icons.add),
                   title: Text(l.newPlaylistEllipsis),
                   onTap: () async {
-                    final name = await askPlaylistName(sheet);
+                    final name = await promptName(
+                      sheet,
+                      title: l.newPlaylist,
+                      confirmLabel: l.create,
+                      hint: l.playlistName,
+                    );
                     if (name == null || !sheet.mounted) return;
                     final id = await ref.read(playlistRepositoryProvider).create(name);
                     if (sheet.mounted) Navigator.of(sheet).pop((id: id, name: name));

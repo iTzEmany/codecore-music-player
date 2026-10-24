@@ -8,6 +8,7 @@ import '../../../providers/settings_providers.dart';
 import '../../../providers/translation_providers.dart';
 import '../../../services/online/lrc_parser.dart';
 import '../../../services/online/lyrics_translator.dart';
+import '../../widgets/show_msg.dart';
 
 /// Source language picked last time, so the next track starts from it.
 String _lastSource = 'en';
@@ -46,7 +47,7 @@ Future<void> runTranslateFlow(
   if (from == null || !context.mounted) return;
   _lastSource = from;
   if (from == target) {
-    messenger.showSnackBar(SnackBar(content: Text(l.translateSameLanguage)));
+    showMsgOn(messenger, l.translateSameLanguage);
     return;
   }
   var ok = true;
@@ -68,7 +69,7 @@ Future<void> runTranslateFlow(
     ok = false;
   }
   if (!ok) {
-    messenger.showSnackBar(SnackBar(content: Text(l.translateFailed)));
+    showMsgOn(messenger, l.translateFailed);
   }
 }
 
@@ -97,9 +98,7 @@ Future<bool> ensureTranslationModels(
     }
     if (nav.canPop()) nav.pop();
     if (!ok) {
-      messenger.showSnackBar(
-        SnackBar(content: Text(l.translateDownloadFailed)),
-      );
+      showMsgOn(messenger, l.translateDownloadFailed);
       return false;
     }
   }

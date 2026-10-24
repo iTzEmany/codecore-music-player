@@ -14,6 +14,7 @@ import '../../../services/online/lrc_parser.dart';
 import '../../../services/online/lrclib_client.dart';
 import '../../../services/online/query_cleaner.dart';
 import '../../theme/tokens.dart';
+import '../../widgets/show_msg.dart';
 
 /// Plain text of a track's lyrics (copy action), or null.
 String? lyricsPlainText(Track t) {
@@ -107,7 +108,6 @@ class _LyricsViewState extends ConsumerState<LyricsView> {
 
   Future<void> _search(Track t) async {
     final l = context.l10n;
-    final messenger = ScaffoldMessenger.of(context);
     setState(() => _searching = true);
     LyricsResult? found;
     var limited = false;
@@ -129,13 +129,7 @@ class _LyricsViewState extends ConsumerState<LyricsView> {
     if (!mounted) return;
     setState(() => _searching = false);
     if (found == null) {
-      messenger
-        ..clearSnackBars()
-        ..showSnackBar(
-          SnackBar(
-            content: Text(limited ? l.serviceUnavailable : l.lyricsNotFound),
-          ),
-        );
+      showMsg(context, limited ? l.serviceUnavailable : l.lyricsNotFound);
       return;
     }
     final result = found;

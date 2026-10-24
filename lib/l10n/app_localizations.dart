@@ -7533,6 +7533,12 @@ abstract class AppLocalizations {
   /// **'Trascina per riordinare'**
   String get radioReorder;
 
+  /// No description provided for @radioReorderFailed.
+  ///
+  /// In it, this message translates to:
+  /// **'Non riesco a salvare il nuovo ordine'**
+  String get radioReorderFailed;
+
   /// No description provided for @memoryRadio.
   ///
   /// In it, this message translates to:

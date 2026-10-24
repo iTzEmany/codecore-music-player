@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../l10n/l10n_ext.dart';
 import '../theme/tokens.dart';
+import 'show_msg.dart';
 
 /// Asks before a destructive or hard-to-undo action. Resolves to false when
 /// dismissed.
@@ -41,15 +42,9 @@ Future<bool> showConfirm(
 
 /// One snackbar with an «Annulla» action (3 s; a snackbar with an action
 /// would otherwise never time out).
-void showUndoSnack(BuildContext context, String text, VoidCallback onUndo) {
-  ScaffoldMessenger.of(context)
-    ..clearSnackBars()
-    ..showSnackBar(
-      SnackBar(
-        persist: false,
-        duration: const Duration(seconds: 3),
-        content: Text(text),
-        action: SnackBarAction(label: context.l10n.undo, onPressed: onUndo),
-      ),
+void showUndoSnack(BuildContext context, String text, VoidCallback onUndo) =>
+    showMsg(
+      context,
+      text,
+      action: SnackBarAction(label: context.l10n.undo, onPressed: onUndo),
     );
-}

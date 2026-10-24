@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/prompt_name.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../l10n/l10n_ext.dart';
@@ -14,6 +15,7 @@ import '../theme/tokens.dart';
 import '../widgets/playlist_cover.dart';
 import '../widgets/track_drag.dart';
 import 'shell_nav.dart';
+import '../widgets/show_msg.dart';
 
 /// Left column of the desktop layout: Home, Search, the library with the
 /// pinned Favourites and every playlist, then Memoria. Icons only when narrow.
@@ -98,9 +100,7 @@ class DesktopSidebar extends ConsumerWidget {
       );
     }
 
-    void say(String text) => ScaffoldMessenger.of(context)
-      ..clearSnackBars()
-      ..showSnackBar(SnackBar(content: Text(text)));
+    void say(String text) => showMsg(context, text);
 
     Future<void> dropOnPlaylist(int id, String name, List<int> ids) async {
       final added = await ref
@@ -215,7 +215,12 @@ class DesktopSidebar extends ConsumerWidget {
                     );
                     return;
                   }
-                  final name = await askPlaylistName(context);
+                  final name = await promptName(
+                    context,
+                    title: l.newPlaylist,
+                    confirmLabel: l.create,
+                    hint: l.playlistName,
+                  );
                   if (name == null) return;
                   await ref.read(playlistRepositoryProvider).create(name);
                 },

@@ -8,6 +8,8 @@ import '../../../l10n/l10n_ext.dart';
 import '../../../providers/issue_providers.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/segmented_blocks.dart';
+import '../../widgets/show_msg.dart';
+import '../../widgets/cc_app_bar.dart';
 
 const kIssueMinDescription = 20;
 
@@ -47,19 +49,19 @@ class _ReportIssueScreenState extends ConsumerState<ReportIssueScreen> {
 
   Future<void> _open(TechInfo? info) async {
     final l = context.l10n;
-    final messenger = ScaffoldMessenger.of(context);
     final draft = _draft(info);
     final ok = await ref.read(linkOpenerProvider).open(draft.url);
     if (ok) return;
     await Clipboard.setData(ClipboardData(text: draft.plainText));
-    messenger.showSnackBar(SnackBar(content: Text(l.reportOpenFailed)));
+    if (!mounted) return;
+    showMsg(context, l.reportOpenFailed);
   }
 
   Future<void> _copy(TechInfo? info) async {
     final l = context.l10n;
-    final messenger = ScaffoldMessenger.of(context);
     await Clipboard.setData(ClipboardData(text: _draft(info).plainText));
-    messenger.showSnackBar(SnackBar(content: Text(l.reportCopied)));
+    if (!mounted) return;
+    showMsg(context, l.reportCopied);
   }
 
   @override
@@ -68,7 +70,7 @@ class _ReportIssueScreenState extends ConsumerState<ReportIssueScreen> {
     final info = ref.watch(issueTechInfoProvider).value;
     final draft = _valid ? _draft(info) : null;
     return Scaffold(
-      appBar: AppBar(title: Text(l.reportIssue)),
+      appBar: CcAppBar(title: l.reportIssue),
       body: ListView(
         padding: const EdgeInsets.all(CcDims.gap16),
         children: [

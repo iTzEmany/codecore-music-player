@@ -10,6 +10,7 @@ import '../../theme/tokens.dart';
 import '../../widgets/format_utils.dart';
 import '../../widgets/section_header.dart';
 import 'memory_widgets.dart';
+import '../../widgets/show_msg.dart';
 
 String _label(AppLocalizations l, AppDataKind k) => switch (k) {
   AppDataKind.covers => l.memoryCovers,
@@ -36,27 +37,18 @@ class MemoryAppDataSection extends ConsumerWidget {
   Future<void> _clear(BuildContext context, WidgetRef ref) async {
     final l = context.l10n;
     final locale = l.localeName;
-    final messenger = ScaffoldMessenger.of(context);
     try {
       final r = await ref.read(memoryActionsProvider).clearCaches();
       ref.invalidate(appDataUsageProvider);
       final size = formatBytes(r.freedBytes, locale);
-      messenger
-        ..clearSnackBars()
-        ..showSnackBar(
-          SnackBar(
-            content: Text(
-              r.jamSkipped
+      if (!context.mounted) return;
+      showMsg(context, r.jamSkipped
                   ? l.memoryClearedJamKept(size)
-                  : l.memoryCleared(size),
-            ),
-          ),
-        );
+                  : l.memoryCleared(size));
     } on Object catch (e, st) {
       AppLog.e('clearing the caches failed', e, st);
-      messenger
-        ..clearSnackBars()
-        ..showSnackBar(SnackBar(content: Text(l.memoryClearFailed)));
+      if (!context.mounted) return;
+      showMsg(context, l.memoryClearFailed);
     }
   }
 

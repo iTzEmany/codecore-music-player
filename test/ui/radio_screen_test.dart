@@ -34,6 +34,13 @@ NetworkProbe _probe(bool metered) {
 final near = [st('n1', 'Radio Vicina Uno'), st('n2', 'Radio Vicina Due')];
 final top = [st('t1', 'Radio Nazionale', state: '')];
 
+class _FailingReorder extends RadioRepository {
+  _FailingReorder(super.db);
+
+  @override
+  Future<void> reorder(List<String> ids) async => throw Exception('disk full');
+}
+
 void main() {
   late Harness h;
   late RadioRepository repo;
@@ -47,6 +54,7 @@ void main() {
     Future<List<RadioStation>> Function(String)? genre,
     bool metered = false,
     double height = 900,
+    bool failReorder = false,
   }) async {
     tester.view.physicalSize = Size(420, height);
     tester.view.devicePixelRatio = 1;
@@ -61,6 +69,7 @@ void main() {
       }
     });
     await h.pump(tester, const RadioScreen(), extraOverrides: [
+      if (failReorder) radioRepositoryProvider.overrideWithValue(_FailingReorder(h.db)),
       radioRefreshProvider.overrideWithValue(() async => false),
       networkProbeProvider.overrideWithValue(_probe(metered)),
       radioCountriesProvider.overrideWith(
@@ -167,6 +176,23 @@ void main() {
     await gesture.up();
     await _settle(tester);
     expect((await tester.runAsync(repo.getAll))!.map((r) => r.stationId), ['b', 'c', 'a']);
+    await h.dispose(tester);
+  });
+
+  testWidgets('a reorder that fails shows the message and keeps the old order', (tester) async {
+    await open(tester,
+        saved: [st('a', 'Prima'), st('b', 'Seconda'), st('c', 'Terza')], failReorder: true);
+    final gesture = await tester.startGesture(tester.getCenter(find.byIcon(Icons.drag_handle_rounded).first));
+    await tester.pump(const Duration(milliseconds: 50));
+    for (var i = 0; i < 10; i++) {
+      await gesture.moveBy(const Offset(0, 18));
+      await tester.pump(const Duration(milliseconds: 20));
+    }
+    await gesture.up();
+    await _settle(tester);
+    expect(find.text('Non riesco a salvare il nuovo ordine'), findsOneWidget);
+    expect((await tester.runAsync(repo.getAll))!.map((r) => r.stationId), ['a', 'b', 'c']);
+    expect(tester.getTopLeft(find.text('Prima')).dy, lessThan(tester.getTopLeft(find.text('Seconda')).dy));
     await h.dispose(tester);
   });
 

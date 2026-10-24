@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../widgets/prompt_name.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/l10n_ext.dart';
@@ -7,8 +8,7 @@ import '../../widgets/empty_state.dart';
 import '../../widgets/cover_image.dart';
 import '../import/import_flow.dart';
 import 'playlist_detail_screen.dart';
-import 'playlist_dialogs.dart';
-import '../../widgets/error_state.dart';
+import '../../widgets/async_body.dart';
 
 class PlaylistsScreen extends ConsumerWidget {
   const PlaylistsScreen({super.key});
@@ -33,7 +33,12 @@ class PlaylistsScreen extends ConsumerWidget {
           FloatingActionButton.extended(
             heroTag: 'new-playlist',
             onPressed: () async {
-              final name = await askPlaylistName(context);
+              final name = await promptName(
+                context,
+                title: l.newPlaylist,
+                confirmLabel: l.create,
+                hint: l.playlistName,
+              );
               if (name == null) return;
               await ref.read(playlistRepositoryProvider).create(name);
             },
@@ -42,14 +47,9 @@ class PlaylistsScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: lists.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, st) => loadErrorState(
-          context,
-          e,
-          st,
-          onRetry: () => ref.invalidate(playlistsProvider),
-        ),
+      body: AsyncBody(
+        value: lists,
+        onRetry: () => ref.invalidate(playlistsProvider),
         data: (items) => items.isEmpty
             ? EmptyState(icon: Icons.queue_music, message: l.noPlaylists)
             : ListView.builder(

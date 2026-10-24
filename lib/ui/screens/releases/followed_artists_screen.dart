@@ -20,6 +20,8 @@ import '../online/artist_page_sections.dart' show thumbAt;
 import '../online/artist_picker_sheet.dart' show ArtistPickerSheet;
 import 'follow_button.dart' show followArtist;
 import 'new_releases_screen.dart';
+import '../../widgets/show_msg.dart';
+import '../../widgets/cc_app_bar.dart';
 
 /// The artists whose new releases are checked: followed by hand and the most
 /// listened (automatic), each with its bell and «Non seguire più».
@@ -39,8 +41,8 @@ class FollowedArtistsScreen extends ConsumerWidget {
         if (!followedIds.contains(p.ytmId)) p,
     ];
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l.releasesFollowedTitle(rows.length)),
+      appBar: CcAppBar(
+        title: l.releasesFollowedTitle(rows.length),
         actions: [
           // The page is also the way to «Controlla ora» when the shelf is hidden.
           IconButton(
@@ -156,7 +158,6 @@ class _PendingRow extends ConsumerWidget {
 
   Future<void> _pick(BuildContext context, WidgetRef ref) async {
     final l = context.l10n;
-    final messenger = ScaffoldMessenger.of(context);
     final List<YtmArtistRef> found;
     try {
       found = await ref
@@ -164,7 +165,8 @@ class _PendingRow extends ConsumerWidget {
           .searchArtists(lookup.name, ref.read(ytmLanguageProvider));
     } on Object catch (e) {
       AppLog.w('artist lookup failed ($e)');
-      messenger.showSnackBar(SnackBar(content: Text(l.loadFailed)));
+      if (!context.mounted) return;
+      showMsg(context, l.loadFailed);
       return;
     }
     if (!context.mounted || found.isEmpty) return;

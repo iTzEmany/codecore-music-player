@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../widgets/prompt_name.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/db/app_database.dart';
@@ -16,6 +17,7 @@ import '../../widgets/track_row.dart';
 import '../../widgets/track_row_selection.dart';
 import '../library/album_detail_screen.dart' show collectionMeta;
 import 'tags_sheet.dart';
+import '../../widgets/cc_app_bar.dart';
 
 /// The user's tags with how many tracks each one has; a tap opens its tracks.
 class TagsScreen extends ConsumerWidget {
@@ -26,14 +28,19 @@ class TagsScreen extends ConsumerWidget {
     final l = context.l10n;
     final tags = ref.watch(tagsProvider).value ?? const [];
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l.tagsTitle),
+      appBar: CcAppBar(
+        title: l.tagsTitle,
         actions: [
           IconButton(
             tooltip: l.tagNew,
             icon: const Icon(Icons.add_rounded),
             onPressed: () async {
-              final name = await askTagName(context);
+              final name = await promptName(
+                context,
+                title: l.tagNew,
+                confirmLabel: l.save,
+                maxLength: 40,
+              );
               if (name != null) {
                 await ref.read(tagRepositoryProvider).create(name);
               }

@@ -150,6 +150,11 @@ abstract final class CcTiming {
   static const poll = Duration(milliseconds: 500);
   static const avatarPulse = Duration(milliseconds: 1200);
   static const coverSpin = Duration(seconds: 30);
+
+  /// Snackbar: Material default for plain text; shorter with an action (a
+  /// snackbar with an action would otherwise never time out).
+  static const msg = Duration(seconds: 4);
+  static const msgAction = Duration(seconds: 3);
 }
 
 Duration ccDuration(BuildContext context, Duration d) =>

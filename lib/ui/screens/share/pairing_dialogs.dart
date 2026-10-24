@@ -11,6 +11,8 @@ import '../../../services/share/pairing.dart';
 import '../../../services/share/pairing_client.dart';
 import '../../../services/share/trusted_devices.dart';
 import '../../theme/tokens.dart';
+import '../../widgets/show_msg.dart';
+import '../../../core/app_log.dart';
 
 /// The PIN typed on the device that asked to pair (the one that does not show
 /// it). Returns the digits, or null to give up.
@@ -195,7 +197,6 @@ class _PairRequestDialogState extends ConsumerState<PairRequestDialog> {
 /// Pairs with [peer], asking for the PIN; reports the outcome in a snackbar.
 Future<void> pairFlow(BuildContext context, WidgetRef ref, Peer peer) async {
   final l = context.l10n;
-  final messenger = ScaffoldMessenger.of(context);
   String msg;
   try {
     final paired = await ref
@@ -206,6 +207,7 @@ Future<void> pairFlow(BuildContext context, WidgetRef ref, Peer peer) async {
         );
     msg = l.pairDone(paired.name);
   } on PairingException catch (e) {
+    AppLog.w('pairing failed', e);
     if (e.error == PairingError.cancelled) return;
     msg = switch (e.error) {
       PairingError.blocked => l.pairBlocked,
@@ -215,5 +217,6 @@ Future<void> pairFlow(BuildContext context, WidgetRef ref, Peer peer) async {
       _ => l.pairFailed,
     };
   }
-  messenger.showSnackBar(SnackBar(content: Text(msg)));
+  if (!context.mounted) return;
+  showMsg(context, msg);
 }

@@ -7,6 +7,7 @@ import '../../../providers/player_providers.dart';
 import '../../../providers/suggestion_actions.dart';
 import '../../theme/tokens.dart';
 import '../playlists/playlist_picker.dart';
+import '../../widgets/show_msg.dart';
 
 /// «Suggerito · simile a «…»» with the two things worth doing with a streamed
 /// song: download it, or download it into a playlist.
@@ -21,9 +22,6 @@ class SuggestedInfo extends ConsumerWidget {
     final cc = context.cc;
     final seed = ref.watch(onlineEntriesProvider)?[track.id]?.seedTitle;
     final actions = ref.read(suggestionActionsProvider);
-    void snack(String text) => ScaffoldMessenger.of(context)
-      ..clearSnackBars()
-      ..showSnackBar(SnackBar(content: Text(text)));
     return Column(
       children: [
         Row(
@@ -44,7 +42,7 @@ class SuggestedInfo extends ConsumerWidget {
           children: [
             TextButton.icon(
               onPressed: () {
-                if (actions.downloadEntry(track.id)) snack(l.suggestionDownloadStarted);
+                if (actions.downloadEntry(track.id)) showMsg(context, l.suggestionDownloadStarted);
               },
               icon: const Icon(Icons.download_rounded, size: 20),
               label: Text(l.ytDownload),
@@ -54,7 +52,7 @@ class SuggestedInfo extends ConsumerWidget {
                 final picked = await pickPlaylist(context, ref);
                 if (picked == null || !context.mounted) return;
                 if (actions.addToPlaylist(track.id, picked.id)) {
-                  snack(l.suggestionAddWhenDownloaded(picked.name));
+                  showMsg(context, l.suggestionAddWhenDownloaded(picked.name));
                 }
               },
               icon: const Icon(Icons.playlist_add_rounded, size: 20),

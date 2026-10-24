@@ -79,3 +79,9 @@ Si tolgono il pulsante in `settings_pages.dart:436`, `_importOld`, `lib/services
 `integration_test` e metriche.
 
 **Fatto quando:** `flutter test integration_test -d linux` verde (via `sorveglia.sh`); `databaseProvider|RepositoryProvider` = 0, build ≤ 120 righe; `docs/refactor/ui-fluida/misure.md` aggiornato.
+
+## Dalla review della fase 41 (D-50, punto 7)
+Da fare dentro i task che toccano già quei file:
+- **42.1:** un «crea playlist» e un «crea tag» unici (oggi 9 chiamate `promptName` + `create` in playlists_screen, playlist_dialogs, desktop_sidebar, playlist_picker, library_screen, tags_screen, tags_sheet); il log degli errori di caricamento dove nasce l'errore, non in `loadErrorState` dentro `build`.
+- **42.5 / 42.8:** le scelte ancora in `SimpleDialog` passano a `showCcSheet` (lingua in settings_pages, playlist in exportify_sync_screen, colore in tags_sheet).
+- **42.8:** se le schermate si spezzano, una variante sliver di `AsyncBody` per radio_sections e gli usi diretti di `loadErrorState` (album_detail, favorites, artist).

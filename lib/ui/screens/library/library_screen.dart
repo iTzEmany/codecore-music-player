@@ -1,5 +1,6 @@
 import '../../widgets/cc_sheet.dart';
 import 'package:flutter/material.dart';
+import '../../widgets/prompt_name.dart';
 import '../playlists/export_dialog.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -29,7 +30,6 @@ import '../playlists/playlist_detail_screen.dart';
 import '../podcast/podcasts_screen.dart';
 import '../radio/radio_screen.dart';
 import '../../../providers/radio_providers.dart' show savedRadiosProvider;
-import '../playlists/playlist_dialogs.dart';
 import 'album_detail_screen.dart';
 import 'all_tracks_screen.dart';
 import 'artist_screen.dart';
@@ -270,7 +270,12 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
                       );
                       return;
                     }
-                    final name = await askPlaylistName(context);
+                    final name = await promptName(
+                      context,
+                      title: l.newPlaylist,
+                      confirmLabel: l.create,
+                      hint: l.playlistName,
+                    );
                     if (name == null) return;
                     await ref.read(playlistRepositoryProvider).create(name);
                   },

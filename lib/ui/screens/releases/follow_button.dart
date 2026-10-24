@@ -9,6 +9,7 @@ import '../../../services/online/ytm_artist.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/confirm.dart';
 import '../online/artist_picker_sheet.dart' show lookupYtmArtist;
+import '../../widgets/show_msg.dart';
 
 /// Follows [artist] and runs its first check at once (it stores everything as
 /// already seen, so the next round only tells what is really new).
@@ -25,13 +26,11 @@ Future<void> followFromLibrary(
   String name,
 ) async {
   final l = context.l10n;
-  final messenger = ScaffoldMessenger.of(context);
   final artist = await lookupYtmArtist(context, ref, name);
   if (artist == null) return;
   await followArtist(ref, artist);
-  messenger
-    ..clearSnackBars()
-    ..showSnackBar(SnackBar(content: Text(l.followedNow(artist.name))));
+  if (!context.mounted) return;
+  showMsg(context, l.followedNow(artist.name));
 }
 
 /// «Segui» / «Segui già» on the page of an artist of YouTube Music; stopping

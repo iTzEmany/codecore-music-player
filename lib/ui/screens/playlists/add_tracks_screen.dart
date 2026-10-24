@@ -9,6 +9,7 @@ import '../../../providers/database_providers.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/track_row.dart';
+import '../../widgets/cc_app_bar.dart';
 
 /// Pick saved tracks to put into a playlist: rows with a ＋ / ✓ circle and a
 /// fixed «Aggiungi N brani» bar at the bottom.
@@ -58,7 +59,7 @@ class _AddTracksScreenState extends ConsumerState<AddTracksScreen> {
         t.id,
     };
     return Scaffold(
-      appBar: AppBar(title: Text(l.addSongs)),
+      appBar: CcAppBar(title: l.addSongs),
       bottomNavigationBar: _selected.isEmpty
           ? null
           : SafeArea(

@@ -22,10 +22,10 @@ import '../library/folders_sheet.dart';
 import '../../../providers/share_providers.dart';
 import '../../../providers/translation_providers.dart';
 import '../../shell/shell_nav.dart';
-import '../playlists/playlist_dialogs.dart';
 import '../share/share_screen.dart';
 import '../../../services/migration/python_db_importer.dart';
 import '../../theme/tokens.dart';
+import '../../widgets/prompt_name.dart';
 import 'icon_follow_tile.dart';
 import 'theme_tiles.dart';
 import 'cleanup_tiles.dart';
@@ -44,6 +44,7 @@ import 'shuffle_plus_tiles.dart';
 import 'release_settings_tiles.dart';
 import '../../widgets/segmented_blocks.dart';
 import '../import/exportify_remind_choice.dart';
+import '../../widgets/show_msg.dart';
 
 const _languages = {
   'it': 'Italiano',
@@ -57,17 +58,25 @@ const _languages = {
 /// Language name as shown in the picker and in the index summary.
 String languageName(String code) => _languages[code] ?? code;
 
-enum SettingsPage { appearance, playback, library, online, network, backup, advanced }
+enum SettingsPage {
+  appearance,
+  playback,
+  library,
+  online,
+  network,
+  backup,
+  advanced,
+}
 
 String settingsPageTitle(AppLocalizations l, SettingsPage p) => switch (p) {
-      SettingsPage.appearance => l.settingsPageAppearance,
-      SettingsPage.playback => l.settingsPagePlayback,
-      SettingsPage.library => l.settingsPageLibrary,
-      SettingsPage.online => l.settingsPageOnline,
-      SettingsPage.network => l.settingsPageNetwork,
-      SettingsPage.backup => l.settingsPageBackup,
-      SettingsPage.advanced => l.settingsPageAdvanced,
-    };
+  SettingsPage.appearance => l.settingsPageAppearance,
+  SettingsPage.playback => l.settingsPagePlayback,
+  SettingsPage.library => l.settingsPageLibrary,
+  SettingsPage.online => l.settingsPageOnline,
+  SettingsPage.network => l.settingsPageNetwork,
+  SettingsPage.backup => l.settingsPageBackup,
+  SettingsPage.advanced => l.settingsPageAdvanced,
+};
 
 /// The groups of one settings page, in a scrolling column (max 760 wide).
 class SettingsPageView extends ConsumerWidget {
@@ -108,60 +117,69 @@ List<SettingsGroup> _appearance(BuildContext context, WidgetRef ref) {
   final s = ref.watch(settingsProvider);
   final notifier = ref.read(settingsProvider.notifier);
   return [
-            SettingsGroup(
-              title: l.settingsAppearance,
-              children: [
-                const ThemeTiles(),
-                const IconFollowTile(),
-                ListTile(
-                  title: Text(l.settingsTextSize),
-                  subtitle: Padding(
-                    padding: const EdgeInsets.only(top: CcDims.gap8),
-                    child: SegmentedBlocks<double>(
-                      items: [
-                        BlockItem(value: 0.9, icon: Icons.text_decrease, label: l.textSmall),
-                        BlockItem(value: 1.0, icon: Icons.text_fields, label: l.textNormal),
-                        BlockItem(value: 1.15, icon: Icons.text_increase, label: l.textLarge),
-                      ],
-                      selected: s.fontScale,
-                      onChanged: (v) => notifier.update(
-                        (c) => c.copyWith(fontScale: v),
-                      ),
-                    ),
-                  ),
+    SettingsGroup(
+      title: l.settingsAppearance,
+      children: [
+        const ThemeTiles(),
+        const IconFollowTile(),
+        ListTile(
+          title: Text(l.settingsTextSize),
+          subtitle: Padding(
+            padding: const EdgeInsets.only(top: CcDims.gap8),
+            child: SegmentedBlocks<double>(
+              items: [
+                BlockItem(
+                  value: 0.9,
+                  icon: Icons.text_decrease,
+                  label: l.textSmall,
                 ),
-                SwitchListTile(
-                  title: Text(l.settingsCompact),
-                  value: s.compactMode,
-                  onChanged: (v) =>
-                      notifier.update((c) => c.copyWith(compactMode: v)),
+                BlockItem(
+                  value: 1.0,
+                  icon: Icons.text_fields,
+                  label: l.textNormal,
                 ),
-                SwitchListTile(
-                  title: Text(l.settingsReducedMotion),
-                  value: s.reducedMotion,
-                  onChanged: (v) =>
-                      notifier.update((c) => c.copyWith(reducedMotion: v)),
-                ),
-                SwitchListTile(
-                  title: Text(l.settingsSpinCover),
-                  subtitle: Text(l.settingsSpinCoverHint),
-                  value: s.spinCover,
-                  onChanged: (v) =>
-                      notifier.update((c) => c.copyWith(spinCover: v)),
+                BlockItem(
+                  value: 1.15,
+                  icon: Icons.text_increase,
+                  label: l.textLarge,
                 ),
               ],
+              selected: s.fontScale,
+              onChanged: (v) =>
+                  notifier.update((c) => c.copyWith(fontScale: v)),
             ),
-            SettingsGroup(
-              title: l.settingsLanguage,
-              children: [
-                ListTile(
-                  leading: const Icon(Icons.language_rounded),
-                  title: Text(_languages[s.language] ?? s.language),
-                  trailing: const Icon(Icons.chevron_right_rounded),
-                  onTap: () => _pickLanguage(context, ref),
-                ),
-              ],
-            ),
+          ),
+        ),
+        SwitchListTile(
+          title: Text(l.settingsCompact),
+          value: s.compactMode,
+          onChanged: (v) => notifier.update((c) => c.copyWith(compactMode: v)),
+        ),
+        SwitchListTile(
+          title: Text(l.settingsReducedMotion),
+          value: s.reducedMotion,
+          onChanged: (v) =>
+              notifier.update((c) => c.copyWith(reducedMotion: v)),
+        ),
+        SwitchListTile(
+          title: Text(l.settingsSpinCover),
+          subtitle: Text(l.settingsSpinCoverHint),
+          value: s.spinCover,
+          onChanged: (v) => notifier.update((c) => c.copyWith(spinCover: v)),
+        ),
+      ],
+    ),
+    SettingsGroup(
+      title: l.settingsLanguage,
+      children: [
+        ListTile(
+          leading: const Icon(Icons.language_rounded),
+          title: Text(_languages[s.language] ?? s.language),
+          trailing: const Icon(Icons.chevron_right_rounded),
+          onTap: () => _pickLanguage(context, ref),
+        ),
+      ],
+    ),
   ];
 }
 
@@ -170,34 +188,34 @@ List<SettingsGroup> _playback(BuildContext context, WidgetRef ref) {
   final s = ref.watch(settingsProvider);
   final notifier = ref.read(settingsProvider.notifier);
   return [
-            SettingsGroup(
-              title: l.settingsPlayback,
-              children: [
-                if (ref.watch(equalizerProvider) != null)
-                  ListTile(
-                    leading: const Icon(Icons.equalizer_rounded),
-                    title: Text(l.equalizer),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () => ShellNav.open<void>(context, const EqualizerScreen()),
-                  ),
-                const TransitionSettingsTiles(),
-                const ShufflePlusTiles(),
-                SwitchListTile(
-                  title: Text(l.settingsRecordHistory),
-                  subtitle: Text(l.settingsRecordHistoryHint),
-                  value: s.recordHistory,
-                  onChanged: (v) =>
-                      notifier.update((c) => c.copyWith(recordHistory: v)),
-                ),
-                SwitchListTile(
-                  title: Text(l.normalizeVolume),
-                  subtitle: Text(l.normalizeVolumeHint),
-                  value: s.normalizeVolume,
-                  onChanged: (v) =>
-                      notifier.update((c) => c.copyWith(normalizeVolume: v)),
-                ),
-              ],
-            ),
+    SettingsGroup(
+      title: l.settingsPlayback,
+      children: [
+        if (ref.watch(equalizerProvider) != null)
+          ListTile(
+            leading: const Icon(Icons.equalizer_rounded),
+            title: Text(l.equalizer),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => ShellNav.open<void>(context, const EqualizerScreen()),
+          ),
+        const TransitionSettingsTiles(),
+        const ShufflePlusTiles(),
+        SwitchListTile(
+          title: Text(l.settingsRecordHistory),
+          subtitle: Text(l.settingsRecordHistoryHint),
+          value: s.recordHistory,
+          onChanged: (v) =>
+              notifier.update((c) => c.copyWith(recordHistory: v)),
+        ),
+        SwitchListTile(
+          title: Text(l.normalizeVolume),
+          subtitle: Text(l.normalizeVolumeHint),
+          value: s.normalizeVolume,
+          onChanged: (v) =>
+              notifier.update((c) => c.copyWith(normalizeVolume: v)),
+        ),
+      ],
+    ),
   ];
 }
 
@@ -206,54 +224,50 @@ List<SettingsGroup> _library(BuildContext context, WidgetRef ref) {
   final folders = ref.watch(foldersProvider).value ?? const [];
   final missing = ref.watch(missingTracksProvider).value ?? const [];
   return [
-            SettingsGroup(
-              title: l.settingsLibrary,
-              children: [
-                for (final f in folders)
-                  ListTile(
-                    leading: const Icon(Icons.folder),
-                    title: Text(
-                      f.path,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    trailing: IconButton(
-                      tooltip: l.removeFolder,
-                      icon: const Icon(Icons.delete_outline),
-                      onPressed: () => confirmRemoveFolder(context, ref, f.id),
-                    ),
-                  ),
-                ListTile(
-                  leading: const Icon(Icons.create_new_folder),
-                  title: Text(l.addFolder),
-                  onTap: () => addFolderAndScan(ref),
-                ),
-                ListTile(
-                  leading: const Icon(Icons.refresh),
-                  title: Text(l.rescanNow),
-                  onTap: () => scanWithPermission(ref),
-                ),
-                ListTile(
-                  leading: const Icon(Icons.image_not_supported_outlined),
-                  title: Text(l.clearCoverCache),
-                  onTap: () => _clearCovers(context, ref),
-                ),
-                if (missing.isNotEmpty)
-                  ListTile(
-                    leading: const Icon(Icons.report_problem_outlined),
-                    title: Text(l.missingTracksCount(missing.length)),
-                    onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) => const MissingTracksScreen(),
-                      ),
-                    ),
-                  ),
-              ],
+    SettingsGroup(
+      title: l.settingsLibrary,
+      children: [
+        for (final f in folders)
+          ListTile(
+            leading: const Icon(Icons.folder),
+            title: Text(f.path, maxLines: 1, overflow: TextOverflow.ellipsis),
+            trailing: IconButton(
+              tooltip: l.removeFolder,
+              icon: const Icon(Icons.delete_outline),
+              onPressed: () => confirmRemoveFolder(context, ref, f.id),
             ),
-            SettingsGroup(
-              title: l.cleanupSection,
-              children: cleanupTiles(context, ref),
+          ),
+        ListTile(
+          leading: const Icon(Icons.create_new_folder),
+          title: Text(l.addFolder),
+          onTap: () => addFolderAndScan(ref),
+        ),
+        ListTile(
+          leading: const Icon(Icons.refresh),
+          title: Text(l.rescanNow),
+          onTap: () => scanWithPermission(ref),
+        ),
+        ListTile(
+          leading: const Icon(Icons.image_not_supported_outlined),
+          title: Text(l.clearCoverCache),
+          onTap: () => _clearCovers(context, ref),
+        ),
+        if (missing.isNotEmpty)
+          ListTile(
+            leading: const Icon(Icons.report_problem_outlined),
+            title: Text(l.missingTracksCount(missing.length)),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const MissingTracksScreen(),
+              ),
             ),
+          ),
+      ],
+    ),
+    SettingsGroup(
+      title: l.cleanupSection,
+      children: cleanupTiles(context, ref),
+    ),
   ];
 }
 
@@ -262,69 +276,71 @@ List<SettingsGroup> _online(BuildContext context, WidgetRef ref) {
   final s = ref.watch(settingsProvider);
   final notifier = ref.read(settingsProvider.notifier);
   return [
-            SettingsGroup(
-              title: l.settingsOnline,
-              children: [
-                ListTile(
-                  leading: const Icon(Icons.travel_explore),
-                  title: Text(l.enrichLibrary),
-                  onTap: () => _enrichLibrary(context, ref),
-                ),
-                SwitchListTile(
-                  title: Text(l.autoEnrich),
-                  subtitle: Text(l.autoEnrichHint),
-                  value: s.autoEnrich,
-                  onChanged: (v) =>
-                      notifier.update((c) => c.copyWith(autoEnrich: v)),
-                ),
-                SwitchListTile(
-                  title: Text(l.autoLyrics),
-                  subtitle: Text(l.autoLyricsHint),
-                  value: s.autoLyrics,
-                  onChanged: (v) =>
-                      notifier.update((c) => c.copyWith(autoLyrics: v)),
-                ),
-                SwitchListTile(
-                  title: Text(l.deezerMeta),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(l.deezerMetaHint),
-                      const SizedBox(height: 4),
-                      Text(l.deezerMetaNote),
-                    ],
-                  ),
-                  isThreeLine: true,
-                  value: s.deezerMeta,
-                  onChanged: (v) =>
-                      notifier.update((c) => c.copyWith(deezerMeta: v)),
-                ),
-              ],
-            ),
-            SettingsGroup(
-              title: l.exportifyRemindTitle,
-              children: const [
-                Padding(
-                  padding: EdgeInsets.fromLTRB(CcDims.gap16, CcDims.gap4, CcDims.gap16, CcDims.gap8),
-                  child: ExportifyRemindChoice(),
-                ),
-              ],
-            ),
-            if (kEnableYoutube)
-              SettingsGroup(
-                title: l.newReleasesTitle,
-                children: const [ReleaseSettingsTiles()],
-              ),
-            if (kEnableYoutube)
-              SettingsGroup(
-                title: l.settingsDownloads,
-                children: const [DownloadSettingsTiles()],
-              ),
-            if (ref.watch(lyricsTranslatorProvider) != null)
-              SettingsGroup(
-                title: l.translationModels,
-                children: const [TranslationModelsTiles()],
-              ),
+    SettingsGroup(
+      title: l.settingsOnline,
+      children: [
+        ListTile(
+          leading: const Icon(Icons.travel_explore),
+          title: Text(l.enrichLibrary),
+          onTap: () => _enrichLibrary(context, ref),
+        ),
+        SwitchListTile(
+          title: Text(l.autoEnrich),
+          subtitle: Text(l.autoEnrichHint),
+          value: s.autoEnrich,
+          onChanged: (v) => notifier.update((c) => c.copyWith(autoEnrich: v)),
+        ),
+        SwitchListTile(
+          title: Text(l.autoLyrics),
+          subtitle: Text(l.autoLyricsHint),
+          value: s.autoLyrics,
+          onChanged: (v) => notifier.update((c) => c.copyWith(autoLyrics: v)),
+        ),
+        SwitchListTile(
+          title: Text(l.deezerMeta),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(l.deezerMetaHint),
+              const SizedBox(height: 4),
+              Text(l.deezerMetaNote),
+            ],
+          ),
+          isThreeLine: true,
+          value: s.deezerMeta,
+          onChanged: (v) => notifier.update((c) => c.copyWith(deezerMeta: v)),
+        ),
+      ],
+    ),
+    SettingsGroup(
+      title: l.exportifyRemindTitle,
+      children: const [
+        Padding(
+          padding: EdgeInsets.fromLTRB(
+            CcDims.gap16,
+            CcDims.gap4,
+            CcDims.gap16,
+            CcDims.gap8,
+          ),
+          child: ExportifyRemindChoice(),
+        ),
+      ],
+    ),
+    if (kEnableYoutube)
+      SettingsGroup(
+        title: l.newReleasesTitle,
+        children: const [ReleaseSettingsTiles()],
+      ),
+    if (kEnableYoutube)
+      SettingsGroup(
+        title: l.settingsDownloads,
+        children: const [DownloadSettingsTiles()],
+      ),
+    if (ref.watch(lyricsTranslatorProvider) != null)
+      SettingsGroup(
+        title: l.translationModels,
+        children: const [TranslationModelsTiles()],
+      ),
   ];
 }
 
@@ -333,79 +349,74 @@ List<SettingsGroup> _network(BuildContext context, WidgetRef ref) {
   final s = ref.watch(settingsProvider);
   final notifier = ref.read(settingsProvider.notifier);
   return [
-            SettingsGroup(
-              title: l.settingsLocalNetwork,
-              children: [
-                ListTile(
-                  leading: const Icon(Icons.wifi_tethering),
-                  title: Text(l.shareTitle),
-                  onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => const ShareScreen(),
-                    ),
-                  ),
-                ),
-                SwitchListTile(
-                  title: Text(l.receiveFromLan),
-                  subtitle: Text(l.receiveFromLanHint),
-                  value: s.receiveFromLan,
-                  // The hub reacts to this setting (service, notification, discovery).
-                  onChanged: (v) =>
-                      notifier.update((c) => c.copyWith(receiveFromLan: v)),
-                ),
-                ownFingerprintTile(context, ref),
-                ListTile(
-                  leading: const Icon(Icons.badge_outlined),
-                  title: Text(l.shareDeviceName),
-                  subtitle: Text(ref.watch(deviceNameProvider)),
-                  onTap: () => _editDeviceName(context, ref),
-                ),
-                ListTile(
-                  leading: const Icon(Icons.history),
-                  title: Text(l.importOld),
-                  subtitle: Text(l.importOldHint),
-                  onTap: () => _importOld(context, ref),
-                ),
-              ],
-            ),
-      ..._trustedGroup(context, ref),
+    SettingsGroup(
+      title: l.settingsLocalNetwork,
+      children: [
+        ListTile(
+          leading: const Icon(Icons.wifi_tethering),
+          title: Text(l.shareTitle),
+          onTap: () => Navigator.of(
+            context,
+          ).push(MaterialPageRoute<void>(builder: (_) => const ShareScreen())),
+        ),
+        SwitchListTile(
+          title: Text(l.receiveFromLan),
+          subtitle: Text(l.receiveFromLanHint),
+          value: s.receiveFromLan,
+          // The hub reacts to this setting (service, notification, discovery).
+          onChanged: (v) =>
+              notifier.update((c) => c.copyWith(receiveFromLan: v)),
+        ),
+        ownFingerprintTile(context, ref),
+        ListTile(
+          leading: const Icon(Icons.badge_outlined),
+          title: Text(l.shareDeviceName),
+          subtitle: Text(ref.watch(deviceNameProvider)),
+          onTap: () => _editDeviceName(context, ref),
+        ),
+        ListTile(
+          leading: const Icon(Icons.history),
+          title: Text(l.importOld),
+          subtitle: Text(l.importOldHint),
+          onTap: () => _importOld(context, ref),
+        ),
+      ],
+    ),
+    ..._trustedGroup(context, ref),
   ];
 }
 
 List<SettingsGroup> _backup(BuildContext context, WidgetRef ref) {
   final l = context.l10n;
   return [
-            SettingsGroup(
-              title: l.backupSection,
-              children: backupTiles(context, ref),
-            ),
+    SettingsGroup(title: l.backupSection, children: backupTiles(context, ref)),
   ];
 }
 
 List<SettingsGroup> _advanced(BuildContext context, WidgetRef ref) {
   final l = context.l10n;
   return [
-            SettingsGroup(
-              title: l.settingsAdvanced,
-              children: const [AdvancedSettingsTiles()],
-            ),
-            SettingsGroup(
-              title: l.settingsAbout,
-              children: [
-                ListTile(
-                  leading: const Icon(Icons.info_outline),
-                  title: Text(l.appVersion(kAppVersion)),
-                ),
-                ListTile(
-                  leading: const Icon(Icons.description_outlined),
-                  title: Text(l.licenses),
-                  onTap: () => showLicensePage(context: context),
-                ),
-                ...updateTiles(context, ref),
-                const LogExportTile(),
-                const ReportIssueTile(),
-              ],
-            ),
+    SettingsGroup(
+      title: l.settingsAdvanced,
+      children: const [AdvancedSettingsTiles()],
+    ),
+    SettingsGroup(
+      title: l.settingsAbout,
+      children: [
+        ListTile(
+          leading: const Icon(Icons.info_outline),
+          title: Text(l.appVersion(kAppVersion)),
+        ),
+        ListTile(
+          leading: const Icon(Icons.description_outlined),
+          title: Text(l.licenses),
+          onTap: () => showLicensePage(context: context),
+        ),
+        ...updateTiles(context, ref),
+        const LogExportTile(),
+        const ReportIssueTile(),
+      ],
+    ),
   ];
 }
 
@@ -434,7 +445,6 @@ Future<void> _pickLanguage(BuildContext context, WidgetRef ref) async {
 
 Future<void> _importOld(BuildContext context, WidgetRef ref) async {
   final l = context.l10n;
-  final messenger = ScaffoldMessenger.of(context);
   final picked = await FilePicker.pickFiles();
   final path = picked.isEmpty ? null : picked.first.path;
   if (path == null) return;
@@ -446,19 +456,18 @@ Future<void> _importOld(BuildContext context, WidgetRef ref) async {
     AppLog.w('python import failed', e, st);
     text = l.importFailed;
   }
-  messenger
-    ..clearSnackBars()
-    ..showSnackBar(SnackBar(content: Text(text)));
+  if (!context.mounted) return;
+  showMsg(context, text);
 }
 
 Future<void> _editDeviceName(BuildContext context, WidgetRef ref) async {
   final l = context.l10n;
-  final name = await askPlaylistName(
+  final name = await promptName(
     context,
     initial: ref.read(deviceNameProvider),
     confirmLabel: l.save,
     title: l.shareDeviceName,
-    label: l.shareDeviceName,
+    hint: l.shareDeviceName,
   );
   if (name == null) return;
   ref
@@ -476,9 +485,7 @@ Future<void> _enrichLibrary(BuildContext context, WidgetRef ref) async {
       .toList();
   if (!context.mounted) return;
   if (ids.isEmpty) {
-    ScaffoldMessenger.of(context)
-      ..clearSnackBars()
-      ..showSnackBar(SnackBar(content: Text(l.enrichNothingToDo)));
+    showMsg(context, l.enrichNothingToDo);
     return;
   }
   final minutes = (ids.length * 3 / 60).ceil();
@@ -502,9 +509,7 @@ Future<void> _enrichLibrary(BuildContext context, WidgetRef ref) async {
   if (ok != true) return;
   final started = ref.read(enrichJobProvider.notifier).start(ids);
   if (!started && context.mounted) {
-    ScaffoldMessenger.of(context)
-      ..clearSnackBars()
-      ..showSnackBar(SnackBar(content: Text(l.enrichBusy)));
+    showMsg(context, l.enrichBusy);
   }
 }
 
@@ -531,9 +536,7 @@ Future<void> _clearCovers(BuildContext context, WidgetRef ref) async {
     AppLog.e('clear covers failed', e, st);
   }
   if (!context.mounted) return;
-  ScaffoldMessenger.of(context)
-    ..clearSnackBars()
-    ..showSnackBar(SnackBar(content: Text(msg)));
+  showMsg(context, msg);
   await scanWithPermission(ref);
 }
 
@@ -561,8 +564,14 @@ class SettingsGroup extends StatelessWidget {
         children: [
           if (title != null)
             Padding(
-              padding: const EdgeInsets.only(left: CcDims.gap4, bottom: CcDims.gap8),
-              child: Text(title!, style: Theme.of(context).textTheme.titleMedium),
+              padding: const EdgeInsets.only(
+                left: CcDims.gap4,
+                bottom: CcDims.gap8,
+              ),
+              child: Text(
+                title!,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
             ),
           Material(
             color: cc.surface1,

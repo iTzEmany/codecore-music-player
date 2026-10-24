@@ -13,6 +13,7 @@ import '../../widgets/selection_bar.dart';
 import '../../widgets/track_row.dart';
 import '../../widgets/track_row_selection.dart';
 import '../library/album_detail_screen.dart' show collectionMeta;
+import '../../widgets/cc_app_bar.dart';
 
 /// Tracks of one genre.
 class GenreScreen extends ConsumerWidget {
@@ -35,7 +36,7 @@ class GenreScreen extends ConsumerWidget {
     );
     if (tracks.isEmpty) {
       return Scaffold(
-        appBar: AppBar(title: Text(genre)),
+        appBar: CcAppBar(title: genre),
         body: EmptyState(
           icon: Icons.music_note_rounded,
           message: l.noResults,

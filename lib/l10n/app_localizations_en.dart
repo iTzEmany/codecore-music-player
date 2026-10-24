@@ -4810,6 +4810,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get radioReorder => 'Drag to reorder';
 
   @override
+  String get radioReorderFailed => 'Couldn\'t save the new order';
+
+  @override
   String get memoryRadio => 'Radio (station lists)';
 
   @override

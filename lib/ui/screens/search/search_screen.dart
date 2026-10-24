@@ -27,6 +27,7 @@ import '../../widgets/track_row_selection.dart';
 import '../youtube/online_results.dart';
 import 'genre_screen.dart';
 import 'search_section_screen.dart';
+import '../../widgets/cc_app_bar.dart';
 
 /// Search: one pill, [In libreria] and [Online] chips. Online only runs when
 /// the user submits.
@@ -499,7 +500,7 @@ class SearchTracksScreen extends ConsumerWidget {
         appBar: SelectableAppBar(
           listKey: key,
           tracks: tracks,
-          normal: AppBar(title: Text(l.tracks)),
+          normal: CcAppBar(title: l.tracks),
         ),
         body: ListView.builder(
           itemExtent: trackRowExtentOf(context, compact),

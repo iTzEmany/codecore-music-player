@@ -13,6 +13,7 @@ import '../screens/tags/tags_sheet.dart';
 import 'confirm.dart';
 import 'delete_tracks.dart';
 import 'track_actions.dart';
+import 'show_msg.dart';
 
 /// Where a selection lives: decides which actions make sense.
 class BulkContext {
@@ -45,12 +46,7 @@ List<TrackActionGroup> bulkActions(
   final ctrl = ref.read(playerControllerProvider);
   final n = tracks.length;
 
-  void snack(String text) {
-    if (!outer.mounted) return;
-    ScaffoldMessenger.of(outer)
-      ..clearSnackBars()
-      ..showSnackBar(SnackBar(content: Text(text)));
-  }
+  void snack(String text) => showMsg(outer, text);
 
   final allFavorite = tracks.isNotEmpty && tracks.every((t) => t.isFavorite);
   final allMissing = tracks.isNotEmpty && tracks.every((t) => t.missing);

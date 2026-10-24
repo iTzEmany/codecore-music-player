@@ -11,6 +11,7 @@ import '../../../services/online/youtube_service.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/format_utils.dart';
+import '../../widgets/cc_app_bar.dart';
 
 /// «Rivedi prima di scaricare»: for each CSV row the video that would be
 /// downloaded, with the other candidates to switch to, and one button to go.
@@ -111,7 +112,7 @@ class ImportPlanScreen extends ConsumerWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(title: Text(l.csvImportPlanTitle)),
+      appBar: CcAppBar(title: l.csvImportPlanTitle),
       body: planned.isEmpty
           ? EmptyState(
               icon: Icons.check_circle_outline_rounded,

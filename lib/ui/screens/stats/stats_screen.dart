@@ -9,10 +9,11 @@ import '../../../providers/history_providers.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/cover_image.dart';
 import '../../widgets/empty_state.dart';
-import '../../widgets/error_state.dart';
 import '../../widgets/section_header.dart';
 import '../../widgets/segmented_blocks.dart';
 import 'stats_charts.dart';
+import '../../widgets/cc_app_bar.dart';
+import '../../widgets/async_body.dart';
 
 /// «3 h 20 min», or «45 min» under an hour.
 String formatListened(AppLocalizations l, int ms) {
@@ -67,7 +68,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
       )),
     );
     return Scaffold(
-      appBar: AppBar(title: Text(l.statsTitle)),
+      appBar: CcAppBar(title: l.statsTitle),
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 960),
@@ -123,21 +124,15 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
                 ],
               ),
               Expanded(
-                child: stats.when(
-                  loading: () =>
-                      const Center(child: CircularProgressIndicator()),
-                  error: (e, st) => loadErrorState(
-                    context,
-                    e,
-                    st,
-                    onRetry: () => ref.invalidate(periodStatsProvider),
+                child: AsyncBody(
+                  value: stats,
+                  onRetry: () => ref.invalidate(periodStatsProvider),
+                  isEmpty: (s) => s.isEmpty,
+                  empty: EmptyState(
+                    icon: Icons.bar_chart_rounded,
+                    message: l.statsEmpty,
                   ),
-                  data: (s) => s.isEmpty
-                      ? EmptyState(
-                          icon: Icons.bar_chart_rounded,
-                          message: l.statsEmpty,
-                        )
-                      : _Body(stats: s, locale: locale, cc: cc),
+                  data: (s) => _Body(stats: s, locale: locale, cc: cc),
                 ),
               ),
             ],

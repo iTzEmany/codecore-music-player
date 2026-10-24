@@ -9,6 +9,8 @@ import '../../../providers/radio_providers.dart';
 import '../../../services/radio/radio_station.dart';
 import '../../../services/radio/stream_link.dart';
 import 'radio_labels.dart';
+import '../../widgets/show_msg.dart';
+import '../../../core/app_log.dart';
 
 const kRadioTestId = 'manual:test';
 
@@ -52,6 +54,7 @@ class _AddStationDialogState extends ConsumerState<AddStationDialog> {
     try {
       return await resolveStreamLink(_url.text, ref.read(playlistFetchProvider));
     } on StreamLinkException catch (e) {
+      AppLog.w('station link test failed', e);
       if (mounted) setState(() => _error = e.reason);
       return null;
     } finally {
@@ -99,9 +102,7 @@ class _AddStationDialogState extends ConsumerState<AddStationDialog> {
     await ref.read(radioRepositoryProvider).saveManual(_name.text, address);
     if (!mounted) return;
     Navigator.of(context).pop();
-    messenger
-      ..clearSnackBars()
-      ..showSnackBar(SnackBar(content: Text(saved)));
+    showMsgOn(messenger, saved);
   }
 
   @override

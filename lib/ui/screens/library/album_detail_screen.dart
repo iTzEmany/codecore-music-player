@@ -24,6 +24,7 @@ import '../cleanup/album_merge_dialog.dart';
 import '../playlists/playlist_dialogs.dart';
 import 'artist_screen.dart';
 import '../../widgets/motion.dart';
+import '../../widgets/show_msg.dart';
 
 /// «1 ora e 52 minuti»; never «0 minuti» (under a minute rounds up).
 String durationWords(AppLocalizations l, int ms) {
@@ -69,10 +70,6 @@ class AlbumDetailScreen extends ConsumerWidget {
         : (album.artist ?? l.unknownArtist);
     final list = tracks.value ?? const <Track>[];
     final ctrl = ref.read(playerControllerProvider);
-
-    void snack(String text) => ScaffoldMessenger.of(context)
-      ..clearSnackBars()
-      ..showSnackBar(SnackBar(content: Text(text)));
 
     // Follow the rows once loaded: the summary is a snapshot (a track moved
     // away or edited changes the album under this page).
@@ -150,7 +147,7 @@ class AlbumDetailScreen extends ConsumerWidget {
                 for (final t in list) {
                   ctrl.addToQueue(t.id);
                 }
-                snack(l.addedToQueue);
+                showMsg(context, l.addedToQueue);
               case 'playlist':
                 showAddToPlaylistSheet(context, ref, list);
               case 'share':
@@ -164,9 +161,9 @@ class AlbumDetailScreen extends ConsumerWidget {
                     if (needsEnrichment(t)) t.id,
                 ];
                 if (todo.isEmpty) {
-                  snack(l.enrichNothingToDo);
+                  showMsg(context, l.enrichNothingToDo);
                 } else if (!ref.read(enrichJobProvider.notifier).start(todo)) {
-                  snack(l.enrichBusy);
+                  showMsg(context, l.enrichBusy);
                 }
               case 'merge':
                 // The album this page shows is gone once merged: leave it.

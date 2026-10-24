@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import '../../widgets/prompt_name.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/db/app_database.dart';
@@ -29,8 +30,8 @@ import '../import/import_banner.dart';
 import '../library/album_detail_screen.dart' show collectionMeta;
 import 'add_tracks_screen.dart';
 import 'export_dialog.dart';
-import 'playlist_dialogs.dart';
 import '../../widgets/motion.dart';
+import '../../widgets/show_msg.dart';
 
 class PlaylistDetailScreen extends ConsumerStatefulWidget {
   const PlaylistDetailScreen({super.key, required this.playlist});
@@ -48,15 +49,12 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
 
   Future<void> _pickCover(int id) async {
     final l = context.l10n;
-    final messenger = ScaffoldMessenger.of(context);
     final res = await FilePicker.pickFiles(type: FileType.image);
     final path = res.isEmpty ? null : res.first.path;
     if (path == null) return;
     final bytes = await File(path).readAsBytes();
     if (bytes.length > CoverStore.maxBytes) {
-      messenger
-        ..clearSnackBars()
-        ..showSnackBar(SnackBar(content: Text(l.coverTooLarge)));
+      if (mounted) showMsg(context, l.coverTooLarge);
       return;
     }
     final store = ref.read(coverStoreProvider);
@@ -272,11 +270,12 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
                   tracks: tracks,
                 );
               case 'rename':
-                final n = await askPlaylistName(
+                final n = await promptName(
                   context,
                   initial: _name,
                   confirmLabel: l.save,
                   title: l.renamePlaylist,
+                  hint: l.playlistName,
                 );
                 if (n == null) return;
                 await repo.rename(id, n);

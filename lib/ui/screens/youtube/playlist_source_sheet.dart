@@ -11,6 +11,7 @@ import '../../widgets/empty_state.dart';
 import '../../widgets/error_state.dart';
 import '../../widgets/format_utils.dart';
 import 'online_results.dart' show ytErrorText;
+import '../../widgets/show_msg.dart';
 
 /// A playlist (or channel) is long enough to warn about from here.
 const longPlaylistVideos = 200;
@@ -74,17 +75,11 @@ class _PlaylistSourceSheetState extends ConsumerState<PlaylistSourceSheet> {
         .read(playlistImportServiceProvider)
         .startFromResults(name, chosen);
     if (!mounted) return;
-    final messenger = ScaffoldMessenger.of(context);
+    showMsg(
+      context,
+      l10n.playlistSourceStarted(name.isEmpty ? 'YouTube' : name),
+    );
     Navigator.of(context).pop();
-    messenger
-      ..clearSnackBars()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(
-            l10n.playlistSourceStarted(name.isEmpty ? 'YouTube' : name),
-          ),
-        ),
-      );
   }
 
   @override

@@ -14,6 +14,7 @@ import '../../theme/tokens.dart';
 import '../../widgets/format_utils.dart';
 import '../../widgets/track_actions.dart' show revealInFolder;
 import '../memory/folder_labels.dart';
+import '../../widgets/show_msg.dart';
 
 /// «Music › Pink Floyd › The Wall»: the folder of [path] relative to the
 /// library root that contains it, the root named like Memoria names it. With
@@ -162,9 +163,7 @@ Future<void> showDupPathDialog(BuildContext context, String path) {
           onPressed: () async {
             await Clipboard.setData(ClipboardData(text: path));
             if (!ctx.mounted) return;
-            ScaffoldMessenger.of(context)
-              ..clearSnackBars()
-              ..showSnackBar(SnackBar(content: Text(l.copied)));
+            showMsg(context, l.copied);
           },
           child: Text(l.copy),
         ),

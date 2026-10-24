@@ -77,3 +77,19 @@ Altri giri dello stesso codice danno numeri vicini ma non uguali: con 69–140 f
 
 Struttura dopo la fase 39: `Duration(milliseconds` 13 righe in 4 file (10 sono i token in `tokens.dart`, D-44);
 `build` > 150 righe 16, con `now_playing_screen` cresciuto per le card dopo la transizione.
+
+## Dopo la fase 41 (mattoni condivisi, 24/10)
+
+| Metrica | Prima (fase 38) | Dopo la 41 | Arrivo |
+|---|---|---|---|
+| `SnackBar(` in `lib/ui` | 106 righe / 62 file | 1 (`show_msg.dart`) | 1 |
+| `AppBar(` non `CcAppBar` | 48 | 1 (`cc_app_bar.dart`) + 2 `SliverAppBar` + 4 `SelectableAppBar` (varianti dichiarate) | 1 |
+| `showModalBottomSheet` | 1 | 1 (`showCcSheet`) | 1 |
+| `CircularProgressIndicator` | 32 | 28 | ≤ 3 (non raggiunto: quasi tutti spinner d'azione dentro bottoni e righe, D-50) |
+| `LinearProgressIndicator` | 19 | 19 | — (barre con valore, non stati a mano) |
+| `.when(` in `lib/ui` | — | 10 (sliver, caricamento/errore propri) | — |
+| dialoghi del nome | 6 copie | 1 (`promptName`) | 1 |
+| `build` > 120 / > 150 righe | 26 / 15 | 27 / 16 (di 319) | fase 42 |
+| `build` più lungo | `library_screen.dart` 271 | `library_screen.dart` 276 | fase 42 |
+
+`lib/app.dart` ha ancora uno `SnackBar(` (avviso di nuova versione: messenger globale senza context, 8 s): fuori da `lib/ui`, resta.

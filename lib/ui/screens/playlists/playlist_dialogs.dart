@@ -8,82 +8,8 @@ import '../../../l10n/l10n_ext.dart';
 import '../../../providers/database_providers.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/playlist_cover.dart';
-
-/// Asks for a playlist name (1..60 chars). Returns null when cancelled.
-Future<String?> askPlaylistName(
-  BuildContext context, {
-  String initial = '',
-  String? confirmLabel,
-  String? title,
-  String? label,
-}) {
-  return showDialog<String>(
-    context: context,
-    builder: (_) => _NameDialog(
-      initial: initial,
-      confirmLabel: confirmLabel,
-      title: title,
-      label: label,
-    ),
-  );
-}
-
-class _NameDialog extends StatefulWidget {
-  const _NameDialog({
-    required this.initial,
-    this.confirmLabel,
-    this.title,
-    this.label,
-  });
-
-  final String initial;
-  final String? confirmLabel, title, label;
-
-  @override
-  State<_NameDialog> createState() => _NameDialogState();
-}
-
-class _NameDialogState extends State<_NameDialog> {
-  late final TextEditingController _c = TextEditingController(
-    text: widget.initial,
-  );
-
-  @override
-  void dispose() {
-    _c.dispose();
-    super.dispose();
-  }
-
-  void _submit() {
-    final t = _c.text.trim();
-    if (t.isNotEmpty) Navigator.of(context).pop(t);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l = context.l10n;
-    return AlertDialog(
-      title: Text(widget.title ?? l.newPlaylist),
-      content: TextField(
-        controller: _c,
-        autofocus: true,
-        maxLength: 60,
-        decoration: InputDecoration(hintText: widget.label ?? l.playlistName),
-        onSubmitted: (_) => _submit(),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: Text(l.cancel),
-        ),
-        FilledButton(
-          onPressed: _submit,
-          child: Text(widget.confirmLabel ?? l.create),
-        ),
-      ],
-    );
-  }
-}
+import '../../widgets/prompt_name.dart';
+import '../../widgets/show_msg.dart';
 
 /// What to say after adding [total] tracks of which [added] were new. One
 /// track keeps the short message; several say how many were already there.
@@ -138,22 +64,16 @@ class _AddToPlaylistSheet extends ConsumerWidget {
     final repo = ref.read(playlistRepositoryProvider);
     final added = await repo.addTracks(id, [for (final t in tracks) t.id]);
     if (sheetContext.mounted) Navigator.of(sheetContext).pop(true);
-    if (outer.mounted) {
-      ScaffoldMessenger.of(outer)
-        ..clearSnackBars()
-        ..showSnackBar(
-          SnackBar(
-            content: Text(
-              addedToPlaylistText(
-                outer.l10n,
-                total: tracks.length,
-                added: added,
-                name: name,
-              ),
-            ),
-          ),
-        );
-    }
+    if (!outer.mounted) return;
+    showMsg(
+      outer,
+      addedToPlaylistText(
+        outer.l10n,
+        total: tracks.length,
+        added: added,
+        name: name,
+      ),
+    );
   }
 
   @override
@@ -174,7 +94,12 @@ class _AddToPlaylistSheet extends ConsumerWidget {
             leading: const Icon(Icons.add),
             title: Text(l.newPlaylistEllipsis),
             onTap: () async {
-              final name = await askPlaylistName(context);
+              final name = await promptName(
+                context,
+                title: l.newPlaylist,
+                confirmLabel: l.create,
+                hint: l.playlistName,
+              );
               if (name == null || !context.mounted) return;
               final id = await ref
                   .read(playlistRepositoryProvider)

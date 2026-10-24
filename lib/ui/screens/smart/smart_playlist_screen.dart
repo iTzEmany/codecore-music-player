@@ -18,6 +18,7 @@ import '../../widgets/selection_bar.dart';
 import '../../widgets/track_row.dart';
 import '../../widgets/track_row_selection.dart';
 import 'smart_playlist_editor.dart';
+import '../../widgets/show_msg.dart';
 
 /// A smart playlist: its tracks come from the rules and change by themselves,
 /// so the page is read-only (no reordering, no «add songs»).
@@ -36,11 +37,7 @@ class SmartPlaylistScreen extends ConsumerWidget {
     final copy = await repo.create(p.name);
     await repo.addTracks(copy, [for (final t in tracks) t.id]);
     if (!context.mounted) return;
-    ScaffoldMessenger.of(context)
-      ..clearSnackBars()
-      ..showSnackBar(
-        SnackBar(content: Text(context.l10n.smartConverted(p.name))),
-      );
+    showMsg(context, context.l10n.smartConverted(p.name));
   }
 
   Future<void> _delete(BuildContext context, WidgetRef ref, SmartPlaylist p) async {

@@ -9,6 +9,7 @@ import '../../providers/database_providers.dart';
 import '../../providers/import_providers.dart';
 import '../../services/import/playlist_import_service.dart';
 import '../screens/import/import_labels.dart';
+import 'show_msg.dart';
 
 /// Starts the import engine at app launch (running imports of the last
 /// session become paused) and reports its events as snackbars.
@@ -28,7 +29,6 @@ class _State extends ConsumerState<ImportEventListener> {
 
   Future<void> _report(ImportEvent e) async {
     final l = context.l10n;
-    final messenger = ScaffoldMessenger.of(context);
     final svc = ref.read(playlistImportServiceProvider);
     String text;
     SnackBarAction? action;
@@ -72,9 +72,7 @@ class _State extends ConsumerState<ImportEventListener> {
         text = importStopText(l, e.kind)!;
     }
     if (!mounted) return;
-    messenger
-      ..clearSnackBars()
-      ..showSnackBar(SnackBar(content: Text(text), action: action));
+    showMsg(context, text, action: action, persist: true);
   }
 
   @override

@@ -15,6 +15,7 @@ import 'exportify_card.dart';
 import 'home_blocks.dart';
 import 'home_bottom_rows.dart';
 import 'resume_rows.dart';
+import '../../widgets/cc_app_bar.dart';
 
 /// The clock of the greeting; tests override it to be independent of the time of day.
 final clockProvider = Provider<DateTime Function()>((_) => DateTime.now);
@@ -57,7 +58,7 @@ class HomeScreen extends ConsumerWidget {
             onPressed: () => ShellNav.open<void>(
               context,
               Scaffold(
-                appBar: AppBar(title: Text(l.navSettings)),
+                appBar: CcAppBar(title: l.navSettings),
                 body: const SettingsScreen(),
               ),
             ),

@@ -18,6 +18,7 @@ import '../library/favorites_screen.dart';
 import '../playlists/playlists_screen.dart';
 import '../radio/radio_screen.dart';
 import 'cover_fan.dart';
+import '../../widgets/cc_app_bar.dart';
 
 /// «Casuale su tutto»: shuffle on, then the whole library from a random track.
 class ShuffleHero extends ConsumerWidget {
@@ -127,7 +128,7 @@ class ShortcutsRow extends ConsumerWidget {
             l.navPlaylists,
             count(ref.watch(playlistsProvider)),
             Scaffold(
-              appBar: AppBar(title: Text(l.navPlaylists)),
+              appBar: CcAppBar(title: l.navPlaylists),
               body: const PlaylistsScreen(),
             ),
           ),

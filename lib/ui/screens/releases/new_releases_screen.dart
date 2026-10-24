@@ -15,6 +15,8 @@ import '../../widgets/net_thumbnail.dart';
 import '../online/artist_page_sections.dart' show thumbAt;
 import 'followed_artists_screen.dart';
 import 'release_labels.dart';
+import '../../widgets/show_msg.dart';
+import '../../widgets/cc_app_bar.dart';
 
 /// «Nuove uscite»: the last 90 days, filtered by artist, with «Controlla ora»,
 /// the time of the last check and the list of followed artists.
@@ -49,7 +51,6 @@ class _NewReleasesScreenState extends ConsumerState<NewReleasesScreen> {
 
   Future<void> _checkNow() async {
     final l = context.l10n;
-    final messenger = ScaffoldMessenger.of(context);
     final controller = ref.read(releaseCheckControllerProvider);
     if (controller.running.value) return;
     final manual = ref.read(manualReleaseCheckProvider.notifier)..set(true);
@@ -66,9 +67,7 @@ class _NewReleasesScreenState extends ConsumerState<NewReleasesScreen> {
                   ? l.releasesCheckNone
                   : l.releasesCheckFound(out.fresh.length),
           };
-    messenger
-      ..clearSnackBars()
-      ..showSnackBar(SnackBar(content: Text(text)));
+    showMsg(context, text);
   }
 
   @override
@@ -90,7 +89,7 @@ class _NewReleasesScreenState extends ConsumerState<NewReleasesScreen> {
         if (_artistId == null || r.release.artistId == _artistId) r,
     ];
     return Scaffold(
-      appBar: AppBar(title: Text(l.newReleasesTitle)),
+      appBar: CcAppBar(title: l.newReleasesTitle),
       body: Align(
         alignment: Alignment.topCenter,
         child: ConstrainedBox(

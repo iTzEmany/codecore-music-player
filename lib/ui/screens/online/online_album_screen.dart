@@ -22,6 +22,7 @@ import 'artist_page_sections.dart';
 import 'catalog_error_view.dart';
 import 'online_page_frame.dart';
 import 'online_song_row.dart';
+import '../../widgets/show_msg.dart';
 
 /// An album, single or EP of YouTube Music: cover, numbered songs with
 /// «Ascolta» and «Scarica», and «Scarica album». [release] is what the page
@@ -53,7 +54,6 @@ class OnlineAlbumScreen extends ConsumerWidget {
       confirmLabel: l.ytDownload,
     );
     if (!ok || !context.mounted) return;
-    final messenger = ScaffoldMessenger.of(context);
     final nav = Navigator.of(context);
     try {
       final id = await ref.read(playlistImportServiceProvider).startFromResults(
@@ -62,21 +62,21 @@ class OnlineAlbumScreen extends ConsumerWidget {
             options: ImportOptions(folderPath: plan.folder, fetchCovers: true),
             sourceKind: ytmAlbumSourceKind,
           );
-      messenger
-        ..clearSnackBars()
-        ..showSnackBar(SnackBar(
-          content: Text(l.ytmAlbumStarted(plan.importName)),
-          action: SnackBarAction(
-            label: l.ytmShowImport,
-            onPressed: () => nav.push(MaterialPageRoute<void>(
-                builder: (_) => ImportDetailScreen(importId: id))),
-          ),
-        ));
+      if (!context.mounted) return;
+      showMsg(
+        context,
+        l.ytmAlbumStarted(plan.importName),
+        persist: true,
+        action: SnackBarAction(
+          label: l.ytmShowImport,
+          onPressed: () => nav.push(MaterialPageRoute<void>(
+              builder: (_) => ImportDetailScreen(importId: id))),
+        ),
+      );
     } on Object catch (e, st) {
       AppLog.e('album download: could not start the import', e, st);
-      messenger
-        ..clearSnackBars()
-        ..showSnackBar(SnackBar(content: Text(l.loadFailed)));
+      if (!context.mounted) return;
+      showMsg(context, l.loadFailed);
     }
   }
 

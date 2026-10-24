@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/app_log.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/shuffle_plus_providers.dart';
@@ -11,6 +12,7 @@ import '../../widgets/confirm.dart';
 import '../../widgets/empty_state.dart';
 import '../online/online_song_row.dart';
 import '../youtube/listen_bar.dart';
+import '../../widgets/cc_app_bar.dart';
 
 /// Newest first; waits for the file to be read.
 final suggestionRecordsProvider = FutureProvider.autoDispose<List<SuggestionRecord>>((ref) async {
@@ -64,8 +66,8 @@ class SuggestionsScreen extends ConsumerWidget {
     final records = ref.watch(suggestionRecordsProvider);
     final hasAny = records.value?.isNotEmpty ?? false;
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l.suggestionsRecentTitle),
+      appBar: CcAppBar(
+        title: l.suggestionsRecentTitle,
         actions: [
           if (hasAny)
             IconButton(
@@ -77,7 +79,10 @@ class SuggestionsScreen extends ConsumerWidget {
       ),
       body: records.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => EmptyState(icon: Icons.error_outline, message: l.suggestionsRecentEmpty),
+        error: (e, st) {
+          AppLog.w('suggestions load failed', e, st);
+          return EmptyState(icon: Icons.error_outline, message: l.suggestionsRecentEmpty);
+        },
         data: (list) => list.isEmpty
             ? EmptyState(icon: Icons.cloud_outlined, message: l.suggestionsRecentEmpty)
             : ListView.builder(

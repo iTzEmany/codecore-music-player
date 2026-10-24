@@ -9,6 +9,7 @@ import '../../../services/online/enrichment_service.dart' show EnrichField;
 import '../../../services/online/second_opinion.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/empty_state.dart';
+import '../../widgets/cc_app_bar.dart';
 
 /// The tracks YouTube Music's second opinion looked at in this session, newest
 /// first, each with how it went.
@@ -51,7 +52,7 @@ class SecondOpinionLogScreen extends ConsumerWidget {
     final log = ref.watch(secondOpinionJobProvider.select((s) => s.log));
     final time = DateFormat.Hm(Localizations.localeOf(context).toLanguageTag());
     return Scaffold(
-      appBar: AppBar(title: Text(l.secondOpinionLogTitle)),
+      appBar: CcAppBar(title: l.secondOpinionLogTitle),
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 960),

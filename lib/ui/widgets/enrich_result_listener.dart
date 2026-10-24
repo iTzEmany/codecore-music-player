@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../l10n/l10n_ext.dart';
 import '../../providers/online_providers.dart';
+import 'show_msg.dart';
 
 /// Shows the outcome of an enrichment batch once, as a snackbar. The running
 /// progress lives in the Activity centre.
@@ -18,9 +19,7 @@ class EnrichResultListener extends ConsumerWidget {
       final text = r.rateLimited
           ? l.serviceUnavailable
           : l.enrichResult(r.updated, r.notFound);
-      ScaffoldMessenger.of(context)
-        ..clearSnackBars()
-        ..showSnackBar(SnackBar(content: Text(text)));
+      showMsg(context, text);
       ref.read(enrichJobProvider.notifier).clearResult();
     });
     return const SizedBox.shrink();

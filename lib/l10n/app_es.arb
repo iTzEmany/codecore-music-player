@@ -2603,6 +2603,7 @@
   "radioLinkTooBig": "El archivo es demasiado grande para ser una lista de emisoras",
   "radioLinkFetchFailed": "No se pudo descargar el archivo",
   "radioReorder": "Arrastra para reordenar",
+  "radioReorderFailed": "No se pudo guardar el nuevo orden",
   "memoryRadio": "Radio (listas de emisoras)",
   "radioGenrePop": "Pop",
   "radioGenreRock": "Rock",

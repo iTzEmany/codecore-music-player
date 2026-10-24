@@ -18,6 +18,8 @@ import '../../widgets/format_utils.dart';
 import '../../widgets/section_header.dart';
 import 'import_labels.dart';
 import 'import_manual_search_sheet.dart';
+import '../../widgets/show_msg.dart';
+import '../../widgets/cc_app_bar.dart';
 
 /// Rows of an import that need the user: unsure matches (with candidates),
 /// nothing found and errors.
@@ -64,7 +66,6 @@ class ImportReviewScreen extends ConsumerWidget {
     );
 
     Future<void> exportOutcome() async {
-      final messenger = ScaffoldMessenger.of(context);
       final csv = importOutcomeCsv(
         items,
         status: (s) => importStatusLabel(l, s),
@@ -88,7 +89,8 @@ class ImportReviewScreen extends ConsumerWidget {
         mimeType: 'text/csv',
       );
       if (saved) {
-        messenger.showSnackBar(SnackBar(content: Text(l.csvImportExported)));
+        if (!context.mounted) return;
+        showMsg(context, l.csvImportExported);
       }
     }
 
@@ -162,8 +164,8 @@ class ImportReviewScreen extends ConsumerWidget {
 
     final empty = review.isEmpty && missing.isEmpty && failed.isEmpty;
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l.csvImportReviewTitle),
+      appBar: CcAppBar(
+        title: l.csvImportReviewTitle,
         actions: [
           IconButton(
             tooltip: l.csvImportExport,

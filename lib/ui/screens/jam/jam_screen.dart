@@ -15,6 +15,8 @@ import '../../widgets/ring_progress.dart';
 import 'jam_parts.dart';
 import 'jam_player_card.dart';
 import '../../../providers/database_providers.dart';
+import '../../widgets/show_msg.dart';
+import '../../widgets/cc_app_bar.dart';
 
 /// The Jam: waiting for the answer, then the shared queue and controls.
 class JamScreen extends ConsumerStatefulWidget {
@@ -30,13 +32,10 @@ class _JamScreenState extends ConsumerState<JamScreen> {
   void _leave(String? message) {
     if (_popped || !mounted) return;
     _popped = true;
-    final messenger = ScaffoldMessenger.of(context);
     final ctrl = ref.read(jamProvider.notifier);
     Navigator.of(context).pop();
     if (message != null) {
-      messenger
-        ..clearSnackBars()
-        ..showSnackBar(SnackBar(content: Text(message)));
+      showMsg(context, message);
     }
     Future<void>.microtask(ctrl.reset);
   }
@@ -54,14 +53,12 @@ class _JamScreenState extends ConsumerState<JamScreen> {
     );
     if (ids == null || ids.isEmpty || !mounted) return;
     final l = context.l10n;
-    final messenger = ScaffoldMessenger.of(context);
     final tracks = await ref
         .read(trackRepositoryProvider)
         .getByIds(ids.toList());
     final n = await ref.read(jamProvider.notifier).addTracks(tracks);
-    messenger
-      ..clearSnackBars()
-      ..showSnackBar(SnackBar(content: Text(l.jamAdded(n))));
+    if (!mounted) return;
+    showMsg(context, l.jamAdded(n));
   }
 
   @override
@@ -81,7 +78,7 @@ class _JamScreenState extends ConsumerState<JamScreen> {
 
     if (s.phase == JamPhase.requesting) {
       return Scaffold(
-        appBar: AppBar(title: Text(l.jamTitle)),
+        appBar: CcAppBar(title: l.jamTitle),
         body: Center(
           child: Padding(
             padding: const EdgeInsets.all(CcDims.gap24),
@@ -106,7 +103,7 @@ class _JamScreenState extends ConsumerState<JamScreen> {
     final jam = s.jam;
     if (!s.active || jam == null) {
       return Scaffold(
-        appBar: AppBar(title: Text(l.jamTitle)),
+        appBar: CcAppBar(title: l.jamTitle),
         body: EmptyState(
           icon: Icons.group_outlined,
           message: l.jamWaitingEmpty,

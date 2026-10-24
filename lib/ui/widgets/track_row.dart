@@ -20,6 +20,7 @@ import 'track_actions.dart';
 import 'track_drag.dart';
 import 'track_row_selection.dart';
 import 'motion.dart';
+import 'show_msg.dart';
 
 enum TrackRowVariant {
   /// Cover, title, «artist · album».
@@ -577,9 +578,7 @@ class LiveTrackRow extends ConsumerWidget {
       // The row always comes back; only the queue changes.
       confirmDismiss: (_) async {
         ref.read(playerControllerProvider).addToQueue(track.id);
-        ScaffoldMessenger.of(context)
-          ..clearSnackBars()
-          ..showSnackBar(SnackBar(content: Text(context.l10n.addedToQueue)));
+        showMsg(context, context.l10n.addedToQueue);
         return false;
       },
       child: draggable(row),

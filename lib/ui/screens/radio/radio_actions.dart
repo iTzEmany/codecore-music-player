@@ -10,6 +10,7 @@ import '../../../providers/settings_providers.dart';
 import '../../../providers/shuffle_plus_providers.dart' show networkProbeProvider;
 import '../../../services/radio/radio_station.dart';
 import '../../shell/shell_nav.dart';
+import '../../widgets/show_msg.dart';
 
 /// Plays [stations] from [index]: next and previous move between them. The
 /// first time on mobile data a notice says what the radio costs.
@@ -36,9 +37,7 @@ Future<void> _mobileDataNotice(WidgetRef ref, ScaffoldMessengerState? messenger,
   final kind = await ref.read(networkProbeProvider).current();
   if (!kind.metered) return;
   await prefs.setDataNoticeSeen();
-  messenger
-    ..clearSnackBars()
-    ..showSnackBar(SnackBar(content: Text(text)));
+  showMsgOn(messenger, text);
 }
 
 /// The star: saves the station in «Le mie radio» or takes it out.
@@ -53,17 +52,14 @@ Future<void> toggleSavedRadio(BuildContext context, WidgetRef ref, RadioStation 
     await repo.save(s);
   }
   if (messenger == null || !ref.read(settingsProvider).showUndoSnackbar) return;
-  messenger
-    ..clearSnackBars()
-    ..showSnackBar(SnackBar(
-      persist: false,
-      duration: const Duration(seconds: 3),
-      content: Text(saved ? l.radioRemovedDone : l.radioSavedDone),
-      action: SnackBarAction(
-        label: l.undo,
-        onPressed: () => saved ? repo.save(s) : repo.remove(s.id),
-      ),
-    ));
+  showMsgOn(
+    messenger,
+    saved ? l.radioRemovedDone : l.radioSavedDone,
+    action: SnackBarAction(
+      label: l.undo,
+      onPressed: () => saved ? repo.save(s) : repo.remove(s.id),
+    ),
+  );
 }
 
 /// «Cerca questo brano»: opens Search → Online with the title on air.

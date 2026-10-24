@@ -25,6 +25,7 @@ import 'discography_screen.dart';
 import 'online_album_screen.dart';
 import 'online_page_frame.dart';
 import 'online_song_row.dart';
+import '../../widgets/cc_app_bar.dart';
 
 /// The page of an artist on YouTube Music: the songs of the library first,
 /// then top songs, releases, similar artists and the biography. [artist] is
@@ -51,7 +52,7 @@ class ArtistPageScreen extends ConsumerWidget {
   void _searchSongs(BuildContext context) => ShellNav.open<void>(
         context,
         Scaffold(
-          appBar: AppBar(title: Text(artist.name)),
+          appBar: CcAppBar(title: artist.name),
           body: OnlineResults(query: artist.name, submitted: 1),
         ),
       );

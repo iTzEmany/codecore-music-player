@@ -38,6 +38,7 @@ import 'desktop_sidebar.dart';
 import 'shell_keys.dart';
 import 'side_panel.dart';
 import '../widgets/motion.dart';
+import '../widgets/show_msg.dart';
 
 
 class AppShell extends ConsumerWidget {
@@ -109,11 +110,7 @@ class AppShell extends ConsumerWidget {
         PlaybackFailureReason.onlineUnavailable => l.reasonOnlineUnavailable,
         PlaybackFailureReason.radioUnavailable => l.reasonRadioUnavailable,
       };
-      ScaffoldMessenger.of(context)
-        ..clearSnackBars()
-        ..showSnackBar(
-          SnackBar(content: Text(l.playbackError(f.title ?? '', reason))),
-        );
+      showMsg(context, l.playbackError(f.title ?? '', reason));
     });
     // Shuffle+ runs while the shell is up; a suggestion downloaded "into a
     // playlist" joins it when the file lands.
@@ -123,14 +120,13 @@ class AppShell extends ConsumerWidget {
       final n = next.value;
       if (n == null) return;
       final l = context.l10n;
-      ScaffoldMessenger.of(context)
-        ..clearSnackBars()
-        ..showSnackBar(SnackBar(
-          content: Text(switch (n) {
-            ShufflePlusNotice.rateLimited => l.shufflePlusNoticeRateLimited,
-            ShufflePlusNotice.tooManyErrors => l.shufflePlusNoticeTooManyErrors,
-          }),
-        ));
+      showMsg(
+        context,
+        switch (n) {
+          ShufflePlusNotice.rateLimited => l.shufflePlusNoticeRateLimited,
+          ShufflePlusNotice.tooManyErrors => l.shufflePlusNoticeTooManyErrors,
+        },
+      );
     });
     // A tap on the «Nuove uscite» notification opens that page.
     ref.listen(launchTargetProvider, (_, next) {
