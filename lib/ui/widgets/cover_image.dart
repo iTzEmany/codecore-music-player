@@ -52,6 +52,7 @@ class CoverImage extends ConsumerWidget {
     required this.size,
     this.radius = CcDims.rList,
     this.heroTag,
+    this.semanticLabel,
   });
 
   final String? coverKey;
@@ -59,6 +60,10 @@ class CoverImage extends ConsumerWidget {
 
   /// Shared-element tag (mini-player ↔ Now Playing); null = no Hero.
   final Object? heroTag;
+
+  /// Spoken label; null hides the cover from screen readers (the row already
+  /// says title and artist). Set it only where the cover is the sole content.
+  final String? semanticLabel;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -94,6 +99,8 @@ class CoverImage extends ConsumerWidget {
       ),
     );
     if (heroTag != null) image = Hero(tag: heroTag!, child: image);
-    return image;
+    image = ExcludeSemantics(child: image);
+    final label = semanticLabel;
+    return label == null ? image : Semantics(image: true, label: label, child: image);
   }
 }

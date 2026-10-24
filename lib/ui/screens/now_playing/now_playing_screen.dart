@@ -377,6 +377,7 @@ class _Player extends ConsumerWidget {
                           track: track,
                           size: inner,
                           radius: inner / 2,
+                          semanticLabel: track.album ?? track.title,
                           heroTag: coverHeroTagFor(MediaQuery.sizeOf(context).width),
                         ),
                       ),
