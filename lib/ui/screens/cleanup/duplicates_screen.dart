@@ -10,16 +10,13 @@ import '../../widgets/error_state.dart';
 import '../../widgets/format_utils.dart';
 import 'delete_files_dialogs.dart';
 import 'duplicate_group_card.dart';
+import '../../widgets/show_msg.dart';
+import '../../widgets/cc_app_bar.dart';
 
 /// Settings → Library cleanup → Duplicates: search, preview of every group,
 /// merge one by one or all the identical ones, and (optionally) delete files.
 class DuplicatesScreen extends ConsumerWidget {
   const DuplicatesScreen({super.key});
-
-  void _snack(BuildContext context, String text) =>
-      ScaffoldMessenger.of(context)
-        ..clearSnackBars()
-        ..showSnackBar(SnackBar(content: Text(text)));
 
   Future<void> _mergeAll(BuildContext context, WidgetRef ref) async {
     final l = context.l10n;
@@ -36,7 +33,7 @@ class DuplicatesScreen extends ConsumerWidget {
     );
     if (!ok) return;
     await ref.read(duplicateSearchProvider.notifier).mergeAllExact();
-    if (context.mounted) _snack(context, l.duplicatesMerged(hidden));
+    if (context.mounted) showMsg(context, l.duplicatesMerged(hidden));
   }
 
   @override
@@ -45,8 +42,8 @@ class DuplicatesScreen extends ConsumerWidget {
     final s = ref.watch(duplicateSearchProvider);
     final notifier = ref.read(duplicateSearchProvider.notifier);
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l.duplicatesTitle),
+      appBar: CcAppBar(
+        title: l.duplicatesTitle,
         actions: [
           if (s.phase == DuplicatePhase.done && s.groups.isNotEmpty)
             IconButton(
@@ -259,11 +256,7 @@ class _Results extends ConsumerWidget {
             final dropped = g.members.length - 1;
             await notifier.merge(g, keepId);
             if (context.mounted) {
-              ScaffoldMessenger.of(context)
-                ..clearSnackBars()
-                ..showSnackBar(
-                  SnackBar(content: Text(l.duplicatesMerged(dropped))),
-                );
+              showMsg(context, l.duplicatesMerged(dropped));
             }
           },
           onNotDuplicates: () => notifier.notDuplicates(g),

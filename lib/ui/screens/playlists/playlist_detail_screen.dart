@@ -31,6 +31,7 @@ import '../library/album_detail_screen.dart' show collectionMeta;
 import 'add_tracks_screen.dart';
 import 'export_dialog.dart';
 import '../../widgets/motion.dart';
+import '../../widgets/show_msg.dart';
 
 class PlaylistDetailScreen extends ConsumerStatefulWidget {
   const PlaylistDetailScreen({super.key, required this.playlist});
@@ -48,15 +49,12 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
 
   Future<void> _pickCover(int id) async {
     final l = context.l10n;
-    final messenger = ScaffoldMessenger.of(context);
     final res = await FilePicker.pickFiles(type: FileType.image);
     final path = res.isEmpty ? null : res.first.path;
     if (path == null) return;
     final bytes = await File(path).readAsBytes();
     if (bytes.length > CoverStore.maxBytes) {
-      messenger
-        ..clearSnackBars()
-        ..showSnackBar(SnackBar(content: Text(l.coverTooLarge)));
+      if (mounted) showMsg(context, l.coverTooLarge);
       return;
     }
     final store = ref.read(coverStoreProvider);

@@ -9,6 +9,7 @@ import '../../../providers/database_providers.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/playlist_cover.dart';
 import '../../widgets/prompt_name.dart';
+import '../../widgets/show_msg.dart';
 
 /// What to say after adding [total] tracks of which [added] were new. One
 /// track keeps the short message; several say how many were already there.
@@ -63,22 +64,16 @@ class _AddToPlaylistSheet extends ConsumerWidget {
     final repo = ref.read(playlistRepositoryProvider);
     final added = await repo.addTracks(id, [for (final t in tracks) t.id]);
     if (sheetContext.mounted) Navigator.of(sheetContext).pop(true);
-    if (outer.mounted) {
-      ScaffoldMessenger.of(outer)
-        ..clearSnackBars()
-        ..showSnackBar(
-          SnackBar(
-            content: Text(
-              addedToPlaylistText(
-                outer.l10n,
-                total: tracks.length,
-                added: added,
-                name: name,
-              ),
-            ),
-          ),
-        );
-    }
+    if (!outer.mounted) return;
+    showMsg(
+      outer,
+      addedToPlaylistText(
+        outer.l10n,
+        total: tracks.length,
+        added: added,
+        name: name,
+      ),
+    );
   }
 
   @override

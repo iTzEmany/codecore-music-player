@@ -11,6 +11,8 @@ import '../../widgets/cover_backdrop.dart';
 import '../../widgets/cover_image.dart';
 import 'lyrics_translate_flow.dart';
 import 'lyrics_view.dart';
+import '../../widgets/show_msg.dart';
+import '../../widgets/cc_app_bar.dart';
 
 /// Lyrics page: tinted backdrop, cover + title in the header, copy action.
 /// [embedded] (desktop side panel) drops the app bar and the backdrop.
@@ -26,7 +28,7 @@ class LyricsScreen extends ConsumerWidget {
     if (track == null) {
       return Scaffold(
         backgroundColor: embedded ? Colors.transparent : context.cc.bg,
-        appBar: embedded ? null : AppBar(title: Text(l.lyrics)),
+        appBar: embedded ? null : CcAppBar(title: l.lyrics),
         body: Center(child: Text(l.nothingPlaying)),
       );
     }
@@ -77,11 +79,8 @@ class LyricsScreen extends ConsumerWidget {
               tooltip: l.copy,
               icon: const Icon(Icons.copy_rounded),
               onPressed: () async {
-                final messenger = ScaffoldMessenger.of(context);
                 await Clipboard.setData(ClipboardData(text: plain));
-                messenger
-                  ..clearSnackBars()
-                  ..showSnackBar(SnackBar(content: Text(l.copied)));
+                if (context.mounted) showMsg(context, l.copied);
               },
             ),
         ],

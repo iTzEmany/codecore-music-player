@@ -10,6 +10,7 @@ import '../../services/library/track_file_sync.dart';
 import '../../providers/tag_backup_providers.dart';
 import '../widgets/confirm.dart';
 import '../widgets/tag_write_ui.dart';
+import '../widgets/cc_app_bar.dart';
 
 /// A dialog on wide screens, a full page under 600 px.
 Future<void> showTrackEditDialog(BuildContext context, Track track) {
@@ -161,8 +162,8 @@ class _TrackEditDialogState extends ConsumerState<_TrackEditDialog> {
     );
     if (widget.page) {
       return Scaffold(
-        appBar: AppBar(
-          title: Text(l.editInfo),
+        appBar: CcAppBar(
+          title: l.editInfo,
           actions: [TextButton(onPressed: _save, child: Text(l.save))],
         ),
         body: SingleChildScrollView(

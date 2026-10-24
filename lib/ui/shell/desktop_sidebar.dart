@@ -15,6 +15,7 @@ import '../theme/tokens.dart';
 import '../widgets/playlist_cover.dart';
 import '../widgets/track_drag.dart';
 import 'shell_nav.dart';
+import '../widgets/show_msg.dart';
 
 /// Left column of the desktop layout: Home, Search, the library with the
 /// pinned Favourites and every playlist, then Memoria. Icons only when narrow.
@@ -99,9 +100,7 @@ class DesktopSidebar extends ConsumerWidget {
       );
     }
 
-    void say(String text) => ScaffoldMessenger.of(context)
-      ..clearSnackBars()
-      ..showSnackBar(SnackBar(content: Text(text)));
+    void say(String text) => showMsg(context, text);
 
     Future<void> dropOnPlaylist(int id, String name, List<int> ids) async {
       final added = await ref

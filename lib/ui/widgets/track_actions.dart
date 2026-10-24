@@ -41,6 +41,7 @@ import 'delete_tracks.dart';
 import 'favorite_actions.dart';
 import 'format_utils.dart';
 import 'quality_tag.dart';
+import 'show_msg.dart';
 
 /// One entry of the track menu.
 class TrackAction {
@@ -70,12 +71,7 @@ List<TrackActionGroup> onlineTrackActions(
 ) {
   final l = outer.l10n;
   final actions = ref.read(suggestionActionsProvider);
-  void snack(String text) {
-    if (!outer.mounted) return;
-    ScaffoldMessenger.of(outer)
-      ..clearSnackBars()
-      ..showSnackBar(SnackBar(content: Text(text)));
-  }
+  void snack(String text) => showMsg(outer, text);
 
   return [
     TrackActionGroup(l.groupCollection, [
@@ -144,12 +140,7 @@ List<TrackActionGroup> trackActions(
   if (isOnlineId(track.id)) return onlineTrackActions(outer, ref, track);
   final l = outer.l10n;
   final ctrl = ref.read(playerControllerProvider);
-  void snack(String text) {
-    if (!outer.mounted) return;
-    ScaffoldMessenger.of(outer)
-      ..clearSnackBars()
-      ..showSnackBar(SnackBar(content: Text(text)));
-  }
+  void snack(String text) => showMsg(outer, text);
 
   Future<void> goToAlbum() async {
     final albums = await ref.read(albumsProvider.future);

@@ -16,6 +16,8 @@ import '../../widgets/confirm.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/format_utils.dart';
 import '../../widgets/tag_write_ui.dart';
+import '../../widgets/show_msg.dart';
+import '../../widgets/cc_app_bar.dart';
 
 /// Settings → Tag backups: the original of every file whose tags were
 /// rewritten, with «Restore original» and «Delete backup».
@@ -28,7 +30,6 @@ class TagBackupsScreen extends ConsumerWidget {
     TagBackup b,
   ) async {
     final l = context.l10n;
-    final messenger = ScaffoldMessenger.of(context);
     final ok = await showConfirm(
       context,
       title: l.tagBackupRestore,
@@ -48,14 +49,12 @@ class TagBackupsScreen extends ConsumerWidget {
       AppLog.e('tag backup restore failed', e, st);
       msg = l.tagBackupRestoreFailed(tagReasonText(l, TagWriteReason.ioError));
     }
-    messenger
-      ..clearSnackBars()
-      ..showSnackBar(SnackBar(content: Text(msg)));
+    if (!context.mounted) return;
+    showMsg(context, msg);
   }
 
   Future<void> _delete(BuildContext context, WidgetRef ref, TagBackup b) async {
     final l = context.l10n;
-    final messenger = ScaffoldMessenger.of(context);
     final ok = await showConfirm(
       context,
       title: l.tagBackupDelete,
@@ -66,9 +65,8 @@ class TagBackupsScreen extends ConsumerWidget {
     if (!ok) return;
     await (await ref.read(tagBackupStoreProvider.future)).delete(b);
     ref.invalidate(tagBackupsProvider);
-    messenger
-      ..clearSnackBars()
-      ..showSnackBar(SnackBar(content: Text(l.tagBackupDeleted)));
+    if (!context.mounted) return;
+    showMsg(context, l.tagBackupDeleted);
   }
 
   @override
@@ -78,7 +76,7 @@ class TagBackupsScreen extends ConsumerWidget {
     final fmt = DateFormat.yMd(Localizations.localeOf(context).toString())
         .add_Hm();
     return Scaffold(
-      appBar: AppBar(title: Text(l.tagBackupsTitle)),
+      appBar: CcAppBar(title: l.tagBackupsTitle),
       body: Align(
         alignment: Alignment.topCenter,
         child: ConstrainedBox(

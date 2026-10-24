@@ -8,7 +8,7 @@ import '../../widgets/empty_state.dart';
 import '../../widgets/cover_image.dart';
 import '../import/import_flow.dart';
 import 'playlist_detail_screen.dart';
-import '../../widgets/error_state.dart';
+import '../../widgets/async_body.dart';
 
 class PlaylistsScreen extends ConsumerWidget {
   const PlaylistsScreen({super.key});
@@ -47,14 +47,9 @@ class PlaylistsScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: lists.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, st) => loadErrorState(
-          context,
-          e,
-          st,
-          onRetry: () => ref.invalidate(playlistsProvider),
-        ),
+      body: AsyncBody(
+        value: lists,
+        onRetry: () => ref.invalidate(playlistsProvider),
         data: (items) => items.isEmpty
             ? EmptyState(icon: Icons.queue_music, message: l.noPlaylists)
             : ListView.builder(

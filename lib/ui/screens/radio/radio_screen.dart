@@ -11,6 +11,7 @@ import '../../theme/tokens.dart';
 import 'add_station_dialog.dart';
 import 'radio_region_sheet.dart';
 import 'radio_sections.dart';
+import '../../widgets/cc_app_bar.dart';
 
 /// Library → Radio: a search box, «Le mie radio», «Vicino a te» (country and
 /// region chosen by hand), the genres and the most listened of the country.
@@ -101,8 +102,8 @@ class _RadioScreenState extends ConsumerState<RadioScreen> {
       ];
     }
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l.radioTitle),
+      appBar: CcAppBar(
+        title: l.radioTitle,
         actions: [
           IconButton(
             key: const ValueKey('radio-add-address'),

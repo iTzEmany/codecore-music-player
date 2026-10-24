@@ -12,6 +12,8 @@ import '../../widgets/empty_state.dart';
 import '../../widgets/selection_bar.dart';
 import '../../widgets/track_row.dart';
 import '../../widgets/track_row_selection.dart';
+import '../../widgets/show_msg.dart';
+import '../../widgets/cc_app_bar.dart';
 
 /// Settings → Hidden tracks: the duplicates a merge hid, with «Restore» (one
 /// by one from the ⋮ menu, or several at once from the selection bar).
@@ -29,9 +31,7 @@ class HiddenTracksScreen extends ConsumerWidget {
     await ref.read(trackRepositoryProvider).setIgnored(ids, false);
     ref.read(selectionProvider(_key).notifier).clear();
     if (!context.mounted) return;
-    ScaffoldMessenger.of(context)
-      ..clearSnackBars()
-      ..showSnackBar(SnackBar(content: Text(l.hiddenRestored(ids.length))));
+    showMsg(context, l.hiddenRestored(ids.length));
   }
 
   @override
@@ -67,7 +67,7 @@ class HiddenTracksScreen extends ConsumerWidget {
                   ],
                 ),
               )
-            : AppBar(title: Text(l.hiddenTracksTitle)),
+            : CcAppBar(title: l.hiddenTracksTitle),
         body: Align(
           alignment: Alignment.topCenter,
           child: ConstrainedBox(
