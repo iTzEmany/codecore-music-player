@@ -129,6 +129,7 @@ abstract final class CcMotion {
   static const press = Duration(milliseconds: 150);
   static const sheet = Duration(milliseconds: 250);
   static const color = Duration(milliseconds: 400);
+  static const page = Duration(milliseconds: 320);
 }
 
 Duration ccDuration(BuildContext context, Duration d) =>

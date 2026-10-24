@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:codecore/ui/widgets/motion.dart';
+import 'package:codecore/ui/theme/app_theme.dart';
 import 'package:codecore/providers/settings_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -22,6 +23,7 @@ double _opacity(WidgetTester tester, Finder owner) =>
 Finder _fades(Finder owner) => find.descendant(of: owner, matching: find.byType(FadeTransition));
 
 void main() {
+  pageTransitionTests();
   test('only the first 12 rows of a list just shown come in', () {
     final since = DateTime(2026, 10, 21, 12);
     expect(EnterOnce.shouldEnter(0, since, since), isTrue);
@@ -186,5 +188,46 @@ void main() {
       await tester.pump(const Duration(seconds: 3));
       expect(angle(tester), greaterThan(0));
     });
+  });
+}
+
+Widget _routes({bool reduce = false}) => MaterialApp(
+      theme: ThemeData(
+        pageTransitionsTheme: PageTransitionsTheme(builders: {
+          for (final p in TargetPlatform.values) p: const CcPageTransitionsBuilder(),
+        }),
+      ),
+      builder: (c, child) => MediaQuery(
+        data: MediaQuery.of(c).copyWith(disableAnimations: reduce),
+        child: child!,
+      ),
+      home: Builder(
+        builder: (c) => TextButton(
+          onPressed: () => Navigator.of(c).push(MaterialPageRoute<void>(builder: (_) => const Text('next'))),
+          child: const Text('go'),
+        ),
+      ),
+    );
+
+void pageTransitionTests() {
+  testWidgets('page transition has no opacity layer and takes the page duration', (tester) async {
+    await tester.pumpWidget(_routes());
+    await tester.tap(find.text('go'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.descendant(of: find.byType(MaterialApp), matching: find.byType(FadeTransition)), findsNothing);
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.byType(SlideTransition), findsWidgets);
+    await tester.pumpAndSettle();
+    expect(find.text('next'), findsOneWidget);
+  });
+
+  testWidgets('with reduced motion the page switch is instant', (tester) async {
+    await tester.pumpWidget(_routes(reduce: true));
+    await tester.tap(find.text('go'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 1));
+    expect(find.descendant(of: find.byType(MaterialApp), matching: find.byType(SlideTransition)), findsNothing);
+    expect(find.text('next'), findsOneWidget);
   });
 }
