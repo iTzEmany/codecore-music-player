@@ -539,14 +539,14 @@ Richiesta (2026-10-23): un brano passato a un altro dispositivo deve portare i s
 
 ## Fase 38 — Rete di sicurezza (`fase-38-rete-ui-fluida.md`)
 Refactor «ui-fluida» (piano in `docs/refactor/ui-fluida/analisi.md`, decisioni D-01..D-30 in `docs/decisioni.md`, 2026-10-23). Strumenti di misura e test di caratterizzazione prima di toccare `lib/ui`.
-- [ ] 38.1 Strumenti di misura riparati (`perf_device.py:226`, `perf_test.dart:67`)
-- [ ] 38.2 Scenari nuovi in `perf_device.py` (apri album/torna, fogli, swipe mini player, apertura player)
-- [ ] 38.3 Test A: transizioni
-- [ ] 38.4 Test B: liste e fogli
-- [ ] 38.5 Test C: azioni, selezione, menu, dialoghi del nome, `architecture_test` con eccezioni
-- [ ] 38.6 Test D (accessibilità) e E (golden nuovi)
-- [ ] 38.7 `scripts/build_len.py` e conteggi di struttura
-- [ ] 38.8 Misure di partenza sul Mi A3 (app perf) in `build/perf/` e `docs/refactor/ui-fluida/misure.md`
+- [x] 38.1 Strumenti di misura riparati (`perf_device.py:226`, `perf_test.dart:67`)
+- [x] 38.2 Scenari nuovi in `perf_device.py` (apri album/torna, fogli, swipe mini player, apertura player)
+- [x] 38.3 Test A: transizioni
+- [x] 38.4 Test B: liste e fogli
+- [x] 38.5 Test C: azioni, selezione, menu, dialoghi del nome, `architecture_test` con eccezioni
+- [x] 38.6 Test D (accessibilità) e E (golden nuovi)
+- [x] 38.7 `scripts/build_len.py` e conteggi di struttura
+- [x] 38.8 Misure di partenza sul Mi A3 (app perf) in `build/perf/` e `docs/refactor/ui-fluida/misure.md` — misura `scenari` del 24/10 (codice identico) copiata come `ui-fluida-prima`; 9 scenari su 11 fuori soglia, PSS 262 MB, avvio 2575 ms
 
 ## Fase 39 — Fluidità (`fase-39-fluidita.md`)
 Refactor «ui-fluida» (piano in `docs/refactor/ui-fluida/analisi.md`, decisioni D-01..D-30 in `docs/decisioni.md`, 2026-10-23). Scatti su Mi A3 e Motorola; un rilievo per passo, misura prima e dopo.
