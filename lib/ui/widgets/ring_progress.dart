@@ -132,12 +132,15 @@ class _RingProgressState extends ConsumerState<RingProgress> {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          ring,
           ExcludeSemantics(
             child: ClipOval(
               child: SizedBox.square(dimension: inner, child: widget.child),
             ),
           ),
+          // Above the cover so the playhead dot is not clipped by it; taps
+          // still reach the cover.
+          // ignore: deprecated_member_use
+          IgnorePointer(ignoringSemantics: false, child: ring),
         ],
       ),
     );
@@ -187,6 +190,8 @@ class _RingProgressState extends ConsumerState<RingProgress> {
     final size = widget.size;
     final inner = RingProgress.innerSize(size, stroke: widget.stroke);
     return RawGestureDetector(
+      // The ring no longer takes hits itself (it sits above the cover).
+      behavior: HitTestBehavior.opaque,
       gestures: {
         _RingSeekRecognizer:
             GestureRecognizerFactoryWithHandlers<_RingSeekRecognizer>(
