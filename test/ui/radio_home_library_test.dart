@@ -45,9 +45,10 @@ void main() {
   testWidgets('home: the Radio shortcut counts the saved stations and opens the page',
       (tester) async {
     await open(tester, const HomeScreen(), saved: [_a, _b]);
-    expect(find.text('Radio'), findsOneWidget);
-    expect(find.text('2'), findsOneWidget);
-    await tester.tap(find.text('Radio'));
+    // Count and label are one rich text: «2  Radio».
+    final radio = find.text('2  Radio', findRichText: true);
+    expect(radio, findsOneWidget);
+    await tester.tap(radio);
     await _settle(tester);
     expect(find.byType(RadioScreen), findsOneWidget);
     await h.dispose(tester);
