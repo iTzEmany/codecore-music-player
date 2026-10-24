@@ -196,4 +196,30 @@ void main() {
     expect(find.byType(SelectionBox), findsNothing);
     await h.dispose(tester);
   });
+
+  testWidgets('a swipe starting at the left edge does not queue; one further in does',
+      (tester) async {
+    _phone(tester);
+    final h = await Harness.create(tester, tracks: 2);
+    final ts = (await tester.runAsync(() => h.db.select(h.db.tracks).get()))!;
+    // No selection scope: on desktop a scoped row is a Draggable that wins the swipe.
+    await h.pump(
+      tester,
+      Scaffold(
+        body: ListView(children: [
+          for (final t in ts)
+            SizedBox(height: 64, child: LiveTrackRow(track: t, onTap: () {})),
+        ]),
+      ),
+    );
+    final y = tester.getCenter(find.text('Song 0')).dy;
+    await tester.dragFrom(Offset(10, y), const Offset(250, 0));
+    await tester.pumpAndSettle();
+    expect(h.handler.queueIds, isEmpty);
+
+    await tester.dragFrom(Offset(100, y + 64), const Offset(250, 0));
+    await tester.pumpAndSettle();
+    expect(h.handler.queueIds, [ts[1].id]);
+    await h.dispose(tester);
+  });
 }
