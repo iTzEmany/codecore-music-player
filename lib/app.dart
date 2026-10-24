@@ -70,7 +70,7 @@ class CodecoreApp extends ConsumerWidget {
         // App setting OR system flag; system text scale times the app one, capped at 2.0 (D-31).
         data: MediaQuery.of(context).copyWith(
           disableAnimations: s.reducedMotion || MediaQuery.disableAnimationsOf(context),
-          textScaler: _AppTextScaler(MediaQuery.textScalerOf(context), s.fontScale)
+          textScaler: AppTextScaler(MediaQuery.textScalerOf(context), s.fontScale)
               .clamp(maxScaleFactor: 2.0),
         ),
         child: AppBackground(
@@ -85,8 +85,11 @@ class CodecoreApp extends ConsumerWidget {
 }
 
 /// System scaler (kept, so non-linear Android scaling survives) times the app setting.
-class _AppTextScaler extends TextScaler {
-  const _AppTextScaler(this.base, this.app);
+/// Value equality matters: an unequal scaler on every rebuild makes MediaQuery
+/// relayout every Text in the app.
+@visibleForTesting
+class AppTextScaler extends TextScaler {
+  const AppTextScaler(this.base, this.app);
 
   final TextScaler base;
   final double app;
@@ -96,4 +99,11 @@ class _AppTextScaler extends TextScaler {
 
   @override
   double get textScaleFactor => scale(1);
+
+  @override
+  bool operator ==(Object other) =>
+      other is AppTextScaler && other.base == base && other.app == app;
+
+  @override
+  int get hashCode => Object.hash(base, app);
 }

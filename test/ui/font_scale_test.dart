@@ -37,4 +37,12 @@ void main() {
       await h.dispose(tester);
     });
   }
+
+  test('the app text scaler is equal when rebuilt with the same values', () {
+    // An unequal scaler on every rebuild relayouts every Text (Pallino schede 3 % → 12 %).
+    const a = AppTextScaler(TextScaler.noScaling, 1.15);
+    expect(a, const AppTextScaler(TextScaler.noScaling, 1.15));
+    expect(a.clamp(maxScaleFactor: 2), const AppTextScaler(TextScaler.noScaling, 1.15).clamp(maxScaleFactor: 2));
+    expect(a == const AppTextScaler(TextScaler.noScaling, 1.0), isFalse);
+  });
 }
