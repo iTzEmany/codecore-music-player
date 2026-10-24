@@ -137,25 +137,7 @@ class _SendTabState extends ConsumerState<SendTab> {
             child: OutlinedButton(onPressed: _pick, child: Text(l.sharePick)),
           ),
         const SizedBox(height: 16),
-        if (ref.watch(jamProvider).active)
-          Padding(
-            padding: const EdgeInsets.only(bottom: CcDims.gap16),
-            child: Material(
-              color: context.cc.surface1,
-              borderRadius: BorderRadius.circular(CcDims.rCard),
-              clipBehavior: Clip.antiAlias,
-              child: ListTile(
-                leading: const Icon(Icons.queue_music),
-                title: Text(l.jamPlaying),
-                trailing: TextButton(
-                  onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute<void>(builder: (_) => const JamScreen()),
-                  ),
-                  child: Text(l.jamOpen),
-                ),
-              ),
-            ),
-          ),
+        if (ref.watch(jamProvider).active) const _JamBanner(),
         Text(l.nearbyDevices, style: Theme.of(context).textTheme.titleMedium),
         if (hub.peers.isEmpty)
           Padding(
@@ -186,30 +168,7 @@ class _SendTabState extends ConsumerState<SendTab> {
           ),
         if (hub.peers.isEmpty && hub.active)
           Text(l.noDevicesHint, style: Theme.of(context).textTheme.bodySmall),
-        if (hub.outgoing.isNotEmpty) ...[
-          const SizedBox(height: 16),
-          Text(l.sentRequests, style: Theme.of(context).textTheme.titleMedium),
-          for (final o in hub.outgoing)
-            ListTile(
-              leading: const Icon(Icons.north_east),
-              title: Text(o.toName),
-              subtitle: Text(
-                '${l.tracksCount(o.entries.length)}, ${offerStatusLabel(l, o.status)}',
-              ),
-              trailing: o.open
-                  ? IconButton(
-                      tooltip: l.cancel,
-                      icon: const Icon(Icons.close),
-                      onPressed: () => ref
-                          .read(shareHubProvider.notifier)
-                          .cancelOutgoing(
-                            o,
-                            hub.peers.where((p) => p.id == o.toId).firstOrNull,
-                          ),
-                    )
-                  : null,
-            ),
-        ],
+        if (hub.outgoing.isNotEmpty) _SentRequests(hub: hub),
         const SizedBox(height: 8),
         ExpansionTile(
           title: Text(l.manualConnection),
@@ -281,6 +240,71 @@ class _Active extends StatelessWidget {
           icon: const Icon(Icons.stop),
           label: Text(l.shareStop),
         ),
+      ],
+    );
+  }
+}
+
+class _JamBanner extends StatelessWidget {
+  const _JamBanner();
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: CcDims.gap16),
+      child: Material(
+        color: context.cc.surface1,
+        borderRadius: BorderRadius.circular(CcDims.rCard),
+        clipBehavior: Clip.antiAlias,
+        child: ListTile(
+          leading: const Icon(Icons.queue_music),
+          title: Text(l.jamPlaying),
+          trailing: TextButton(
+            onPressed: () => Navigator.of(
+              context,
+            ).push(MaterialPageRoute<void>(builder: (_) => const JamScreen())),
+            child: Text(l.jamOpen),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SentRequests extends ConsumerWidget {
+  const _SentRequests({required this.hub});
+
+  final ShareHubState hub;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 16),
+        Text(l.sentRequests, style: Theme.of(context).textTheme.titleMedium),
+        for (final o in hub.outgoing)
+          ListTile(
+            leading: const Icon(Icons.north_east),
+            title: Text(o.toName),
+            subtitle: Text(
+              '${l.tracksCount(o.entries.length)}, ${offerStatusLabel(l, o.status)}',
+            ),
+            trailing: o.open
+                ? IconButton(
+                    tooltip: l.cancel,
+                    icon: const Icon(Icons.close),
+                    onPressed: () => ref
+                        .read(shareHubProvider.notifier)
+                        .cancelOutgoing(
+                          o,
+                          hub.peers.where((p) => p.id == o.toId).firstOrNull,
+                        ),
+                  )
+                : null,
+          ),
       ],
     );
   }
