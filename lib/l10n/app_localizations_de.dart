@@ -5307,4 +5307,8 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get settingsSpinCoverHint => 'Im Player, während Musik läuft';
+
+  @override
+  String get themeLowContrastWarning =>
+      'Einige Textfarben sind auf dem Hintergrund schlecht lesbar (unter 4,5:1). Das Theme bleibt unverändert.';
 }

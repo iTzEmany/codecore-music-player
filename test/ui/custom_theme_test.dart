@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:codecore/ui/screens/settings/theme_editor_screen.dart';
 import 'package:codecore/ui/theme/custom_theme.dart';
 import 'package:codecore/ui/theme/palette.dart';
 import 'package:codecore/ui/theme/tokens.dart';
@@ -202,6 +203,21 @@ void main() {
     test('contrastRatio: black on white is 21, a colour on itself 1', () {
       expect(contrastRatio(const Color(0xFF000000), const Color(0xFFFFFFFF)), closeTo(21, 0.01));
       expect(contrastRatio(const Color(0xFF336699), const Color(0xFF336699)), closeTo(1, 0.001));
+    });
+  });
+
+  group('low contrast warning', () {
+    test('bg #808080 warns and the colours stay those of the file', () {
+      final t = CustomTheme(
+        id: 'a',
+        name: 'A',
+        base: AppThemeId.notte,
+        overrides: const {CcToken.bg: Color(0xFF808080)},
+      );
+      final c = CustomTheme.decode(t.encode())!.resolve();
+      expect(c.bg, const Color(0xFF808080));
+      expect(hasLowContrastText(c), isTrue);
+      expect(hasLowContrastText(CustomTheme(id: 'b', name: 'B', base: AppThemeId.notte).resolve()), isFalse);
     });
   });
 }

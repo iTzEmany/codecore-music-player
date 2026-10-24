@@ -124,7 +124,9 @@ class _ThemeTilesState extends ConsumerState<ThemeTiles> {
     final imported = t.forExport().withId(n.newId());
     if (!n.put(imported)) return _say(l.themeLimit);
     _select(customThemeSettingValue(imported.id));
-    _say(l.themeImported);
+    _say(hasLowContrastText(imported.resolve())
+        ? '${l.themeImported} ${l.themeLowContrastWarning}'
+        : l.themeImported);
   }
 
   void _delete(CustomTheme t) {

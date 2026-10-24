@@ -8318,6 +8318,12 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Nel player, quando la musica suona'**
   String get settingsSpinCoverHint;
+
+  /// No description provided for @themeLowContrastWarning.
+  ///
+  /// In it, this message translates to:
+  /// **'Alcuni colori del testo si leggono male sullo sfondo (sotto 4,5:1). Il tema resta com\'è.'**
+  String get themeLowContrastWarning;
 }
 
 class _AppLocalizationsDelegate
