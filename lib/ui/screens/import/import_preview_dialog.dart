@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
 import '../../../core/constants.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../services/import/exportify_reader.dart';
 import '../../../services/import/import_diff.dart' show ImportDiff;
@@ -99,49 +100,8 @@ class _State extends State<ImportPreviewDialog> {
     return null;
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final l = context.l10n;
-    final cc = context.cc;
-    final theme = Theme.of(context).textTheme;
-    final total = widget.csv.rows.length;
-    final todo = total - widget.known;
-    final same = _sameName();
-    final minutes = (todo * 12 / 60).ceil();
-    return AlertDialog(
-      title: Text(l.csvImportPreviewTitle),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextField(
-              controller: _name,
-              decoration: InputDecoration(labelText: l.csvImportName),
-              onChanged: (_) => setState(() {}),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              l.csvImportSummary(total, widget.known, todo),
-              style: theme.bodyLarge,
-            ),
-            if (widget.csv.skipped > 0)
-              Text(
-                l.csvImportSkipped(widget.csv.skipped),
-                style: theme.bodySmall?.copyWith(color: cc.textMuted),
-              ),
-            if (todo > 0)
-              Padding(
-                padding: const EdgeInsets.only(top: CcDims.gap8),
-                child: Text(
-                  !kEnableYoutube
-                      ? l.csvImportNoteOffline
-                      : minutes >= 60
-                      ? l.csvImportEstimateHours(minutes ~/ 60, minutes % 60)
-                      : l.csvImportEstimate(minutes < 1 ? 1 : minutes),
-                  style: theme.bodySmall?.copyWith(color: cc.textMuted),
-                ),
-              ),
+
+  List<Widget> _optionTiles(AppLocalizations l, int todo) => [
             if (kEnableYoutube && todo > bigImportRows && !_linkOnly)
               CheckboxListTile(
                 contentPadding: EdgeInsets.zero,
@@ -189,6 +149,12 @@ class _State extends State<ImportPreviewDialog> {
                 ),
               ],
             ],
+  ];
+
+  List<Widget> _existsSection(AppLocalizations l, int? same) {
+    final cc = context.cc;
+    final theme = Theme.of(context).textTheme;
+    return [
             if (same != null) ...[
               const SizedBox(height: 16),
               Text(l.csvImportExists, style: theme.titleSmall),
@@ -236,6 +202,54 @@ class _State extends State<ImportPreviewDialog> {
                   ),
                 ),
             ],
+    ];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final cc = context.cc;
+    final theme = Theme.of(context).textTheme;
+    final total = widget.csv.rows.length;
+    final todo = total - widget.known;
+    final same = _sameName();
+    final minutes = (todo * 12 / 60).ceil();
+    return AlertDialog(
+      title: Text(l.csvImportPreviewTitle),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextField(
+              controller: _name,
+              decoration: InputDecoration(labelText: l.csvImportName),
+              onChanged: (_) => setState(() {}),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              l.csvImportSummary(total, widget.known, todo),
+              style: theme.bodyLarge,
+            ),
+            if (widget.csv.skipped > 0)
+              Text(
+                l.csvImportSkipped(widget.csv.skipped),
+                style: theme.bodySmall?.copyWith(color: cc.textMuted),
+              ),
+            if (todo > 0)
+              Padding(
+                padding: const EdgeInsets.only(top: CcDims.gap8),
+                child: Text(
+                  !kEnableYoutube
+                      ? l.csvImportNoteOffline
+                      : minutes >= 60
+                      ? l.csvImportEstimateHours(minutes ~/ 60, minutes % 60)
+                      : l.csvImportEstimate(minutes < 1 ? 1 : minutes),
+                  style: theme.bodySmall?.copyWith(color: cc.textMuted),
+                ),
+              ),
+            ..._optionTiles(l, todo),
+            ..._existsSection(l, same),
           ],
         ),
       ),
