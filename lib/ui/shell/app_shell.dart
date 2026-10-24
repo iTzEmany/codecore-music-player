@@ -1,6 +1,7 @@
 import 'dart:ui' show DisplayFeatureType;
 
 import '../screens/share/pairing_dialogs.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,7 +12,8 @@ import '../../providers/player_providers.dart';
 import '../../providers/pending_playlist_adds.dart';
 import '../../providers/preview_providers.dart';
 import '../../providers/shuffle_plus_providers.dart';
-import '../../services/shuffle_plus/shuffle_plus_controller.dart' show ShufflePlusNotice;
+import '../../services/shuffle_plus/shuffle_plus_controller.dart'
+    show ShufflePlusNotice;
 import '../../providers/ui_providers.dart';
 import '../../providers/youtube_providers.dart' show ytDlpStatusProvider;
 import '../../services/audio/codecore_audio_handler.dart';
@@ -39,7 +41,6 @@ import 'shell_keys.dart';
 import 'side_panel.dart';
 import '../widgets/motion.dart';
 import '../widgets/show_msg.dart';
-
 
 class AppShell extends ConsumerWidget {
   const AppShell({super.key});
@@ -96,80 +97,7 @@ class AppShell extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Desktop only: starts the yt-dlp version check at launch (Android would
-    // have to boot its embedded Python for it).
-    if (isDesktop) ref.listen(ytDlpStatusProvider, (_, _) {});
-    ref.listen(playerFailuresProvider, (_, next) {
-      final f = next.value;
-      if (f == null) return;
-      final l = context.l10n;
-      final reason = switch (f.reason) {
-        PlaybackFailureReason.fileMissing => l.reasonFileMissing,
-        PlaybackFailureReason.unplayable => l.reasonUnplayable,
-        PlaybackFailureReason.notInLibrary => l.reasonNotInLibrary,
-        PlaybackFailureReason.onlineUnavailable => l.reasonOnlineUnavailable,
-        PlaybackFailureReason.radioUnavailable => l.reasonRadioUnavailable,
-      };
-      showMsg(context, l.playbackError(f.title ?? '', reason));
-    });
-    // Shuffle+ runs while the shell is up; a suggestion downloaded "into a
-    // playlist" joins it when the file lands.
-    ref.watch(shufflePlusProvider);
-    ref.watch(pendingPlaylistAddsProvider);
-    ref.listen(shufflePlusNoticesProvider, (_, next) {
-      final n = next.value;
-      if (n == null) return;
-      final l = context.l10n;
-      showMsg(
-        context,
-        switch (n) {
-          ShufflePlusNotice.rateLimited => l.shufflePlusNoticeRateLimited,
-          ShufflePlusNotice.tooManyErrors => l.shufflePlusNoticeTooManyErrors,
-        },
-      );
-    });
-    // A tap on the «Nuove uscite» notification opens that page.
-    ref.listen(launchTargetProvider, (_, next) {
-      if (next.value != 'releases') return;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (context.mounted) {
-          ShellNav.openInHome(context, ref, const NewReleasesScreen());
-        }
-      });
-    });
-    // A ZIP/CSV opened with Codecore from another app (Android).
-    ref.listen(incomingPathProvider, (_, next) {
-      final path = next.value;
-      if (path == null) return;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (context.mounted) openImportFile(context, ref, path);
-      });
-    });
-    ref.listen(shareOffersProvider, (_, next) {
-      final o = next.value;
-      if (o == null) return;
-      showDialog<void>(
-        context: context,
-        builder: (_) => IncomingOfferDialog(offer: o),
-      );
-    });
-    ref.listen(pairRequestsProvider, (_, next) {
-      final r = next.value;
-      if (r == null) return;
-      showDialog<void>(
-        context: context,
-        barrierDismissible: false,
-        builder: (_) => PairRequestDialog(request: r),
-      );
-    });
-    ref.listen(jamRequestsProvider, (_, next) {
-      final r = next.value;
-      if (r == null) return;
-      showDialog<void>(
-        context: context,
-        builder: (_) => JamRequestDialog(request: r),
-      );
-    });
+    _listen(context, ref);
     final index = ref.watch(navIndexProvider);
     final keys = ref.watch(tabNavigatorKeysProvider);
     final wide = MediaQuery.sizeOf(context).width >= CcDims.wideBreakpoint;
@@ -191,11 +119,7 @@ class AppShell extends ConsumerWidget {
         Icons.library_music_rounded,
         l.navLibrary,
       ),
-      BottomBarItem(
-        Icons.storage_outlined,
-        Icons.storage_rounded,
-        l.navMemory,
-      ),
+      BottomBarItem(Icons.storage_outlined, Icons.storage_rounded, l.navMemory),
     ];
     Widget tab(int i, Widget root) => Navigator(
       key: keys[i],
@@ -219,64 +143,7 @@ class AppShell extends ConsumerWidget {
     );
     Widget content;
     if (wide) {
-      final width = MediaQuery.sizeOf(context).width;
-      final panel = ref.watch(sidePanelProvider);
-      final collapsed = width < 1000;
-      // Wide windows show the queue from the first track on, until the user
-      // closes it (or picks another panel).
-      if (width >= CcDims.xlBreakpoint &&
-          panel == SidePanel.none &&
-          !ref.read(sidePanelProvider.notifier).chosen &&
-          ref.watch(currentTrackProvider.select((t) => t.value != null))) {
-        WidgetsBinding.instance.addPostFrameCallback(
-          (_) => ref.read(sidePanelProvider.notifier).autoOpen(),
-        );
-      }
-      // A vertical hinge must not cut the sidebar: the content starts after it.
-      final hinge = MediaQuery.displayFeaturesOf(context)
-          .where(
-            (f) =>
-                (f.type == DisplayFeatureType.hinge ||
-                    f.type == DisplayFeatureType.fold) &&
-                f.bounds.height >= MediaQuery.sizeOf(context).height * 0.9 &&
-                f.bounds.width < width / 3,
-          )
-          .firstOrNull;
-      final sidebarWidth = collapsed
-          ? CcDims.sidebarCollapsedWidth
-          : CcDims.sidebarWidth;
-      final inset = hinge != null && hinge.bounds.left < sidebarWidth
-          ? hinge.bounds.right
-          : 0.0;
-      content = Scaffold(
-        body: SafeArea(
-          child: Padding(
-            padding: EdgeInsets.only(left: inset),
-            child: Column(
-              children: [
-                Expanded(
-                  child: Row(
-                    children: [
-                      DesktopSidebar(collapsed: collapsed),
-                      Expanded(
-                        child: Column(
-                          children: [
-                            Expanded(child: body),
-                            const EnrichResultListener(),
-                            const ImportEventListener(),
-                          ],
-                        ),
-                      ),
-                      if (panel != SidePanel.none) SidePanelView(panel: panel),
-                    ],
-                  ),
-                ),
-                const DesktopPlayerBar(),
-              ],
-            ),
-          ),
-        ),
-      );
+      content = _WideShell(body: body);
     } else {
       content = Scaffold(
         body: SafeArea(
@@ -338,6 +205,148 @@ class AppShell extends ConsumerWidget {
       );
     }
     return content;
+  }
+
+  void _listen(BuildContext context, WidgetRef ref) {
+    // Desktop only: starts the yt-dlp version check at launch (Android would
+    // have to boot its embedded Python for it).
+    if (isDesktop) ref.listen(ytDlpStatusProvider, (_, _) {});
+    ref.listen(playerFailuresProvider, (_, next) {
+      final f = next.value;
+      if (f == null) return;
+      final l = context.l10n;
+      final reason = switch (f.reason) {
+        PlaybackFailureReason.fileMissing => l.reasonFileMissing,
+        PlaybackFailureReason.unplayable => l.reasonUnplayable,
+        PlaybackFailureReason.notInLibrary => l.reasonNotInLibrary,
+        PlaybackFailureReason.onlineUnavailable => l.reasonOnlineUnavailable,
+        PlaybackFailureReason.radioUnavailable => l.reasonRadioUnavailable,
+      };
+      showMsg(context, l.playbackError(f.title ?? '', reason));
+    });
+    // Shuffle+ runs while the shell is up; a suggestion downloaded "into a
+    // playlist" joins it when the file lands.
+    ref.watch(shufflePlusProvider);
+    ref.watch(pendingPlaylistAddsProvider);
+    ref.listen(shufflePlusNoticesProvider, (_, next) {
+      final n = next.value;
+      if (n == null) return;
+      final l = context.l10n;
+      showMsg(context, switch (n) {
+        ShufflePlusNotice.rateLimited => l.shufflePlusNoticeRateLimited,
+        ShufflePlusNotice.tooManyErrors => l.shufflePlusNoticeTooManyErrors,
+      });
+    });
+    // A tap on the «Nuove uscite» notification opens that page.
+    ref.listen(launchTargetProvider, (_, next) {
+      if (next.value != 'releases') return;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (context.mounted) {
+          ShellNav.openInHome(context, ref, const NewReleasesScreen());
+        }
+      });
+    });
+    // A ZIP/CSV opened with Codecore from another app (Android).
+    ref.listen(incomingPathProvider, (_, next) {
+      final path = next.value;
+      if (path == null) return;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (context.mounted) openImportFile(context, ref, path);
+      });
+    });
+    ref.listen(shareOffersProvider, (_, next) {
+      final o = next.value;
+      if (o == null) return;
+      showDialog<void>(
+        context: context,
+        builder: (_) => IncomingOfferDialog(offer: o),
+      );
+    });
+    ref.listen(pairRequestsProvider, (_, next) {
+      final r = next.value;
+      if (r == null) return;
+      showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => PairRequestDialog(request: r),
+      );
+    });
+    ref.listen(jamRequestsProvider, (_, next) {
+      final r = next.value;
+      if (r == null) return;
+      showDialog<void>(
+        context: context,
+        builder: (_) => JamRequestDialog(request: r),
+      );
+    });
+  }
+}
+
+class _WideShell extends ConsumerWidget {
+  const _WideShell({required this.body});
+
+  final Widget body;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final width = MediaQuery.sizeOf(context).width;
+    final panel = ref.watch(sidePanelProvider);
+    final collapsed = width < 1000;
+    // Wide windows show the queue from the first track on, until the user
+    // closes it (or picks another panel).
+    if (width >= CcDims.xlBreakpoint &&
+        panel == SidePanel.none &&
+        !ref.read(sidePanelProvider.notifier).chosen &&
+        ref.watch(currentTrackProvider.select((t) => t.value != null))) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => ref.read(sidePanelProvider.notifier).autoOpen(),
+      );
+    }
+    // A vertical hinge must not cut the sidebar: the content starts after it.
+    final hinge = MediaQuery.displayFeaturesOf(context)
+        .where(
+          (f) =>
+              (f.type == DisplayFeatureType.hinge ||
+                  f.type == DisplayFeatureType.fold) &&
+              f.bounds.height >= MediaQuery.sizeOf(context).height * 0.9 &&
+              f.bounds.width < width / 3,
+        )
+        .firstOrNull;
+    final sidebarWidth = collapsed
+        ? CcDims.sidebarCollapsedWidth
+        : CcDims.sidebarWidth;
+    final inset = hinge != null && hinge.bounds.left < sidebarWidth
+        ? hinge.bounds.right
+        : 0.0;
+    return Scaffold(
+      body: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.only(left: inset),
+          child: Column(
+            children: [
+              Expanded(
+                child: Row(
+                  children: [
+                    DesktopSidebar(collapsed: collapsed),
+                    Expanded(
+                      child: Column(
+                        children: [
+                          Expanded(child: body),
+                          const EnrichResultListener(),
+                          const ImportEventListener(),
+                        ],
+                      ),
+                    ),
+                    if (panel != SidePanel.none) SidePanelView(panel: panel),
+                  ],
+                ),
+              ),
+              const DesktopPlayerBar(),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 
