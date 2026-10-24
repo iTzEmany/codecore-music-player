@@ -62,12 +62,8 @@ class AlbumDetailScreen extends ConsumerWidget {
     final l = context.l10n;
     final tracks = ref.watch(albumTracksProvider(album.albumKey));
     final compact = ref.watch(settingsProvider).compactMode;
-    final cc = context.cc;
     final name = album.title ?? l.unknownAlbum;
     final playCtx = PlayContext(PlayContextKind.album, name);
-    final artistName = album.variousArtists
-        ? l.variousArtists
-        : (album.artist ?? l.unknownArtist);
     final list = tracks.value ?? const <Track>[];
     final ctrl = ref.read(playerControllerProvider);
 
@@ -111,26 +107,7 @@ class AlbumDetailScreen extends ConsumerWidget {
         coverKey: album.coverKey,
         cover: (s) =>
             CoverImage(coverKey: album.coverKey, size: s, radius: CcDims.rGrid),
-        subtitle: album.variousArtists || album.artist == null
-            ? Text(artistName, style: Theme.of(context).textTheme.bodyLarge)
-            : InkWell(
-                onTap: () => ShellNav.open<void>(
-                  context,
-                  ArtistDetailScreen(
-                    artist: ArtistSummary(
-                      key: album.artist!.trim().toLowerCase(),
-                      name: album.artist,
-                      trackCount: 0,
-                      albumCount: 0,
-                    ),
-                  ),
-                ),
-                child: Text(
-                  artistName,
-                  style: Theme.of(context).textTheme.bodyLarge
-                      ?.copyWith(fontWeight: FontWeight.w700, color: cc.text),
-                ),
-              ),
+        subtitle: _AlbumSubtitle(album: album),
         meta: meta,
         onPlay: list.isEmpty
             ? null
@@ -138,48 +115,7 @@ class AlbumDetailScreen extends ConsumerWidget {
         onShuffle: list.isEmpty
             ? null
             : ctrl.toggleShuffle,
-        menu: PopupMenuButton<_AlbumAction>(
-          tooltip: l.moreActions,
-          icon: const Icon(Icons.more_horiz_rounded),
-          onSelected: (v) {
-            switch (v) {
-              case _AlbumAction.queue:
-                for (final t in list) {
-                  ctrl.addToQueue(t.id);
-                }
-                showMsg(context, l.addedToQueue);
-              case _AlbumAction.playlist:
-                showAddToPlaylistSheet(context, ref, list);
-              case _AlbumAction.share:
-                DevicesSheet.show(
-                  context,
-                  trackIds: [for (final t in list) t.id],
-                );
-              case _AlbumAction.enrich:
-                final todo = [
-                  for (final t in list)
-                    if (needsEnrichment(t)) t.id,
-                ];
-                if (todo.isEmpty) {
-                  showMsg(context, l.enrichNothingToDo);
-                } else if (!ref.read(enrichJobProvider.notifier).start(todo)) {
-                  showMsg(context, l.enrichBusy);
-                }
-              case _AlbumAction.merge:
-                // The album this page shows is gone once merged: leave it.
-                showAlbumMergeDialog(context, ref, album).then((merged) {
-                  if (merged && context.mounted) Navigator.of(context).maybePop();
-                });
-            }
-          },
-          itemBuilder: (_) => [
-            PopupMenuItem(value: _AlbumAction.queue, child: Text(l.addToQueue)),
-            PopupMenuItem(value: _AlbumAction.playlist, child: Text(l.addToPlaylist)),
-            PopupMenuItem(value: _AlbumAction.share, child: Text(l.shareMenu)),
-            PopupMenuItem(value: _AlbumAction.enrich, child: Text(l.enrichAlbum)),
-            PopupMenuItem(value: _AlbumAction.merge, child: Text(l.albumMergeWith)),
-          ],
-        ),
+        menu: _AlbumMenu(album: album, tracks: list),
         slivers: [
           if (tracks.hasError)
             SliverToBoxAdapter(
@@ -224,6 +160,97 @@ class AlbumDetailScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+}
+
+class _AlbumSubtitle extends StatelessWidget {
+  const _AlbumSubtitle({required this.album});
+
+  final AlbumSummary album;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final cc = context.cc;
+    final artistName = album.variousArtists
+        ? l.variousArtists
+        : (album.artist ?? l.unknownArtist);
+    return album.variousArtists || album.artist == null
+            ? Text(artistName, style: Theme.of(context).textTheme.bodyLarge)
+            : InkWell(
+                onTap: () => ShellNav.open<void>(
+                  context,
+                  ArtistDetailScreen(
+                    artist: ArtistSummary(
+                      key: album.artist!.trim().toLowerCase(),
+                      name: album.artist,
+                      trackCount: 0,
+                      albumCount: 0,
+                    ),
+                  ),
+                ),
+                child: Text(
+                  artistName,
+                  style: Theme.of(context).textTheme.bodyLarge
+                      ?.copyWith(fontWeight: FontWeight.w700, color: cc.text),
+                ),
+              );
+  }
+}
+
+class _AlbumMenu extends ConsumerWidget {
+  const _AlbumMenu({required this.album, required this.tracks});
+
+  final AlbumSummary album;
+  final List<Track> tracks;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    final list = tracks;
+    final ctrl = ref.read(playerControllerProvider);
+    return PopupMenuButton<_AlbumAction>(
+          tooltip: l.moreActions,
+          icon: const Icon(Icons.more_horiz_rounded),
+          onSelected: (v) {
+            switch (v) {
+              case _AlbumAction.queue:
+                for (final t in list) {
+                  ctrl.addToQueue(t.id);
+                }
+                showMsg(context, l.addedToQueue);
+              case _AlbumAction.playlist:
+                showAddToPlaylistSheet(context, ref, list);
+              case _AlbumAction.share:
+                DevicesSheet.show(
+                  context,
+                  trackIds: [for (final t in list) t.id],
+                );
+              case _AlbumAction.enrich:
+                final todo = [
+                  for (final t in list)
+                    if (needsEnrichment(t)) t.id,
+                ];
+                if (todo.isEmpty) {
+                  showMsg(context, l.enrichNothingToDo);
+                } else if (!ref.read(enrichJobProvider.notifier).start(todo)) {
+                  showMsg(context, l.enrichBusy);
+                }
+              case _AlbumAction.merge:
+                // The album this page shows is gone once merged: leave it.
+                showAlbumMergeDialog(context, ref, album).then((merged) {
+                  if (merged && context.mounted) Navigator.of(context).maybePop();
+                });
+            }
+          },
+          itemBuilder: (_) => [
+            PopupMenuItem(value: _AlbumAction.queue, child: Text(l.addToQueue)),
+            PopupMenuItem(value: _AlbumAction.playlist, child: Text(l.addToPlaylist)),
+            PopupMenuItem(value: _AlbumAction.share, child: Text(l.shareMenu)),
+            PopupMenuItem(value: _AlbumAction.enrich, child: Text(l.enrichAlbum)),
+            PopupMenuItem(value: _AlbumAction.merge, child: Text(l.albumMergeWith)),
+          ],
+        );
   }
 }
 
