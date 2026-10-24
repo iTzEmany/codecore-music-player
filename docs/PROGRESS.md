@@ -584,14 +584,14 @@ Refactor «ui-fluida» (piano in `docs/refactor/ui-fluida/analisi.md`, decisioni
 
 ## Fase 41 — Mattoni condivisi (`fase-41-mattoni-condivisi.md`)
 Refactor «ui-fluida» (piano in `docs/refactor/ui-fluida/analisi.md`, decisioni D-01..D-30 in `docs/decisioni.md`, 2026-10-23). Strangler: mattone + test, migrazione per gruppi di `screens/`, poi si toglie il vecchio.
-- [ ] 41.1 F-01 `showMsg`
-- [ ] 41.2 F-06 `promptName`
-- [ ] 41.3 F-12 `CcAppBar`
-- [ ] 41.4 F-13 `AsyncBody<T>`
-- [ ] 41.5 F-14 regola dialogo/foglio e `showCcSheet`
-- [ ] 41.6 F-18 `AppLog` nei catch tipizzati
-- [ ] 41.7 F-19 `reorder(ids)` atteso
-- [ ] 41.8 Chiusura: metriche e `integration_test`
+- [x] 41.1 F-01 `showMsg` — gruppi G1 (settings, import, share, memory, history, jam), G2 (widgets, cleanup, playlists, lyrics, radio, shell), G3 (il resto); `showMsgOn` per i messenger catturati, `persist` per «Riprendi»/«Mostra import»; `SnackBar(` = 1
+- [x] 41.2 F-06 `promptName` — regole più severe (D-32), limite 60/40 (D-39); 7 call site
+- [x] 41.3 F-12 `CcAppBar` — stessi gruppi; restano le varianti `SliverAppBar`/`SelectableAppBar` (D-50)
+- [x] 41.4 F-13 `AsyncBody<T>` — 5 schermate; spinner d'azione e `.when` con sliver o stati propri restano (D-50: 28 spinner, criterio ≤ 3 non raggiunto)
+- [x] 41.5 F-14 regola dialogo/foglio e `showCcSheet` — in 02-architettura.md; `showModalBottomSheet` = 1
+- [x] 41.6 F-18 `AppLog` nei catch tipizzati — 7 blocchi (gli altri loggavano già)
+- [x] 41.7 F-19 `reorder(ids)` atteso — test in radio_screen_test.dart
+- [x] 41.8 Chiusura: metriche e `integration_test` — misure.md «Dopo la fase 41»; integration_test file per file su Linux: 4/5 verdi, playback rosso per MissingPlugin just_audio (il driver non inizializza JustAudioMediaKit; preesistente, la fase non tocca audio né integration_test)
 
 ## Fase 42 — Livelli e tipi (`fase-42-livelli-e-tipi.md`)
 Refactor «ui-fluida» (piano in `docs/refactor/ui-fluida/analisi.md`, decisioni D-01..D-30 in `docs/decisioni.md`, 2026-10-23). UI solo tramite provider (test di architettura), tipi al posto di stringhe.
