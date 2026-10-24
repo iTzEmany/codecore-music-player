@@ -95,6 +95,19 @@ abstract final class CcDims {
   static const rSheet = 16.0; // top edge of sheets and dialogs
   static const margin = 16.0;
 
+  /// Spacing scale (D-23).
+  static const gap4 = 4.0;
+  static const gap8 = 8.0;
+  static const gap12 = 12.0;
+  static const gap16 = 16.0;
+  static const gap24 = 24.0;
+  static const gap32 = 32.0;
+
+  /// Off-scale radii: pills and hairline bars.
+  static const rPill = 999.0;
+  static const rBar = 2.0;
+  static const rHair = 1.0;
+
   static const miniPlayerHeight = 56.0;
   static const dockRadius = 28.0;
   static const dockMargin = 10.0;

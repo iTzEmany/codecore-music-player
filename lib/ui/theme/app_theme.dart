@@ -192,7 +192,7 @@ ThemeData buildThemeFromColors(CcColors c, bool compact, {bool pageBackdrop = fa
       filled: true,
       fillColor: c.surface2,
       isDense: true,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      contentPadding: const EdgeInsets.symmetric(horizontal: CcDims.gap16, vertical: CcDims.gap12),
       border: const OutlineInputBorder(
         borderRadius: BorderRadius.all(Radius.circular(999)),
         borderSide: BorderSide.none,
@@ -269,7 +269,7 @@ ThemeData buildThemeFromColors(CcColors c, bool compact, {bool pageBackdrop = fa
       overlayColor: c.text.withValues(alpha: 0.12),
     ),
     listTileTheme: ListTileThemeData(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+      contentPadding: const EdgeInsets.symmetric(horizontal: CcDims.gap16),
       iconColor: c.textMuted,
       textColor: c.text,
       titleTextStyle: text.bodyLarge,
