@@ -236,7 +236,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(CcDims.margin, 12, 4, 0),
+            padding: const EdgeInsets.fromLTRB(CcDims.margin, CcDims.gap12, CcDims.gap4, 0),
             child: Row(
               children: [
                 Expanded(
@@ -318,7 +318,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
           ),
           const ScanStatus(),
           Padding(
-              padding: const EdgeInsets.fromLTRB(CcDims.margin, 8, CcDims.margin, 0),
+              padding: const EdgeInsets.fromLTRB(CcDims.margin, CcDims.gap8, CcDims.margin, 0),
               child: SegmentedBlocks<LibraryKind?>(
                 items: [
                   BlockItem(value: null, icon: Icons.apps_rounded, label: l.libraryAll),
@@ -461,7 +461,7 @@ class _LibraryList extends StatelessWidget {
             final r = rows[i];
             if (r is LibraryEntry) return entryRow(r);
             return Padding(
-              padding: const EdgeInsets.fromLTRB(CcDims.margin, 16, CcDims.margin, 4),
+              padding: const EdgeInsets.fromLTRB(CcDims.margin, CcDims.gap16, CcDims.margin, CcDims.gap4),
               child: Text(
                 r as String,
                 style: theme.titleSmall?.copyWith(color: cc.accentSoft),

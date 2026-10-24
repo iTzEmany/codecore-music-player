@@ -41,7 +41,7 @@ class HomeScreen extends ConsumerWidget {
     final folders = ref.watch(foldersProvider).value;
 
     final header = Padding(
-      padding: const EdgeInsets.fromLTRB(CcDims.margin, 16, 4, 8),
+      padding: const EdgeInsets.fromLTRB(CcDims.margin, CcDims.gap16, CcDims.gap4, CcDims.gap8),
       child: Row(
         children: [
           Expanded(

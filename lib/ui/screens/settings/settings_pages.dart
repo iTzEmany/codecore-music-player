@@ -92,7 +92,7 @@ class SettingsPageView extends ConsumerWidget {
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 760),
         child: ListView(
-          padding: const EdgeInsets.only(bottom: 24),
+          padding: const EdgeInsets.only(bottom: CcDims.gap24),
           children: [
             for (final g in groups)
               single ? SettingsGroup(children: g.children) : g,
@@ -116,7 +116,7 @@ List<SettingsGroup> _appearance(BuildContext context, WidgetRef ref) {
                 ListTile(
                   title: Text(l.settingsTextSize),
                   subtitle: Padding(
-                    padding: const EdgeInsets.only(top: 8),
+                    padding: const EdgeInsets.only(top: CcDims.gap8),
                     child: SegmentedBlocks<double>(
                       items: [
                         BlockItem(value: 0.9, icon: Icons.text_decrease, label: l.textSmall),
@@ -305,7 +305,7 @@ List<SettingsGroup> _online(BuildContext context, WidgetRef ref) {
               title: l.exportifyRemindTitle,
               children: const [
                 Padding(
-                  padding: EdgeInsets.fromLTRB(16, 4, 16, 8),
+                  padding: EdgeInsets.fromLTRB(CcDims.gap16, CcDims.gap4, CcDims.gap16, CcDims.gap8),
                   child: ExportifyRemindChoice(),
                 ),
               ],
@@ -561,7 +561,7 @@ class SettingsGroup extends StatelessWidget {
         children: [
           if (title != null)
             Padding(
-              padding: const EdgeInsets.only(left: 4, bottom: 8),
+              padding: const EdgeInsets.only(left: CcDims.gap4, bottom: CcDims.gap8),
               child: Text(title!, style: Theme.of(context).textTheme.titleMedium),
             ),
           Material(

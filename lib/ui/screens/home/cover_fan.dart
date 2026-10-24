@@ -157,7 +157,7 @@ class _FanCard extends ConsumerWidget {
     return Container(
       width: size,
       height: size,
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(CcDims.gap12),
       alignment: Alignment.topLeft,
       decoration: BoxDecoration(
         color: context.cc.surface3,

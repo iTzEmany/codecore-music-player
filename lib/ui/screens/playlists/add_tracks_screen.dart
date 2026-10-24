@@ -78,9 +78,9 @@ class _AddTracksScreenState extends ConsumerState<AddTracksScreen> {
               Padding(
                 padding: const EdgeInsets.fromLTRB(
                   CcDims.margin,
-                  4,
+                  CcDims.gap4,
                   CcDims.margin,
-                  8,
+                  CcDims.gap8,
                 ),
                 child: TextField(
                   controller: _controller,

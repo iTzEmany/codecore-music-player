@@ -156,7 +156,7 @@ class _ThemeTilesState extends ConsumerState<ThemeTiles> {
         ListTile(
           title: Text(l.settingsTheme),
           subtitle: Padding(
-            padding: const EdgeInsets.only(top: 8),
+            padding: const EdgeInsets.only(top: CcDims.gap8),
             child: Wrap(
               runSpacing: 8,
               children: [
@@ -234,7 +234,7 @@ class _ThemeTilesState extends ConsumerState<ThemeTiles> {
           ListTile(
             title: Text(l.settingsAccent),
             subtitle: Padding(
-              padding: const EdgeInsets.only(top: 12),
+              padding: const EdgeInsets.only(top: CcDims.gap12),
               child: AccentPicker(
                 theme: appThemeIdFromName(s.theme),
                 selected: accent,
@@ -247,5 +247,5 @@ class _ThemeTilesState extends ConsumerState<ThemeTiles> {
     );
   }
 
-  Widget _gap(Widget w) => Padding(padding: const EdgeInsets.only(right: 12), child: w);
+  Widget _gap(Widget w) => Padding(padding: const EdgeInsets.only(right: CcDims.gap12), child: w);
 }

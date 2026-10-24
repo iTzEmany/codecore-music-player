@@ -33,7 +33,7 @@ class LibraryToolbar extends StatelessWidget {
       LibrarySort.added => l.sortAddedRecently,
     };
     return Padding(
-      padding: const EdgeInsets.fromLTRB(CcDims.margin, 4, 4, 0),
+      padding: const EdgeInsets.fromLTRB(CcDims.margin, CcDims.gap4, CcDims.gap4, 0),
       child: Row(
         children: [
           Expanded(
@@ -56,7 +56,7 @@ class LibraryToolbar extends StatelessWidget {
                 ],
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
+                    horizontal: CcDims.gap8,
                     vertical: 10,
                   ),
                   child: Row(

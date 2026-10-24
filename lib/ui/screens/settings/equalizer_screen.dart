@@ -53,7 +53,7 @@ class _EqualizerScreenState extends ConsumerState<EqualizerScreen> {
       body = EmptyState(icon: Icons.equalizer, message: l.eqUnavailable);
     } else {
       body = ListView(
-        padding: const EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.symmetric(vertical: CcDims.gap8),
         children: [
           SwitchListTile(
             title: Text(l.equalizer),
@@ -62,7 +62,7 @@ class _EqualizerScreenState extends ConsumerState<EqualizerScreen> {
                 ref.read(settingsProvider.notifier).update((c) => c.copyWith(eqEnabled: v)),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(CcDims.margin, 4, CcDims.margin, 0),
+            padding: const EdgeInsets.fromLTRB(CcDims.margin, CcDims.gap4, CcDims.margin, 0),
             child: SegmentedBlocks<OutputRoute>(
               items: [
                 BlockItem(
@@ -128,7 +128,7 @@ class _EqualizerScreenState extends ConsumerState<EqualizerScreen> {
                   ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(CcDims.margin, 8, CcDims.margin, 0),
+            padding: const EdgeInsets.fromLTRB(CcDims.margin, CcDims.gap8, CcDims.margin, 0),
             child: Align(
               alignment: Alignment.centerLeft,
               child: TextButton.icon(

@@ -30,7 +30,7 @@ class ShuffleHero extends ConsumerWidget {
     final theme = Theme.of(context).textTheme;
     final totals = ref.watch(memoryTotalsProvider).value;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(CcDims.margin, 8, CcDims.margin, 0),
+      padding: const EdgeInsets.fromLTRB(CcDims.margin, CcDims.gap8, CcDims.margin, 0),
       child: Semantics(
         button: true,
         child: Material(
@@ -114,7 +114,7 @@ class ShortcutsRow extends ConsumerWidget {
       ),
     );
     return Padding(
-      padding: const EdgeInsets.fromLTRB(CcDims.margin, 12, CcDims.margin, 0),
+      padding: const EdgeInsets.fromLTRB(CcDims.margin, CcDims.gap12, CcDims.margin, 0),
       child: Row(
         children: [
           tile(
@@ -166,7 +166,7 @@ class _Shortcut extends StatelessWidget {
         child: InkWell(
           onTap: onTap,
           child: Padding(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(CcDims.gap12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

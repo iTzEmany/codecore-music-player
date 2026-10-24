@@ -137,7 +137,7 @@ class ArtistDetailScreen extends ConsumerWidget {
             SliverToBoxAdapter(child: SectionHeader(l.albumsSection)),
             SliverPadding(
               padding: const EdgeInsets.symmetric(
-                horizontal: CcDims.margin - 8,
+                horizontal: CcDims.margin - CcDims.gap8,
               ),
               sliver: SliverToBoxAdapter(
                 child: AlbumGrid(

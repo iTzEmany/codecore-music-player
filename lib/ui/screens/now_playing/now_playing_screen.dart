@@ -171,7 +171,7 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                                     width: 420,
                                     child: ListView(
                                       padding: const EdgeInsets.symmetric(
-                                        vertical: 16,
+                                        vertical: CcDims.gap16,
                                       ),
                                       children: _cards(online, track),
                                     ),
@@ -192,7 +192,7 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                               CcDims.margin,
                               0,
                               CcDims.margin,
-                              24,
+                              CcDims.gap24,
                             ),
                             sliver: SliverList.list(
                               children: _cards(online, track),

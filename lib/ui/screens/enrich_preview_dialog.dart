@@ -201,7 +201,7 @@ class _State extends ConsumerState<_EnrichPreviewDialog> {
                                       ),
                                       const Padding(
                                         padding: EdgeInsets.symmetric(
-                                          horizontal: 8,
+                                          horizontal: CcDims.gap8,
                                         ),
                                         child: Icon(
                                           Icons.arrow_forward_rounded,

@@ -51,7 +51,7 @@ class LibraryShortcuts extends StatelessWidget {
             child: ConstrainedBox(
               constraints: const BoxConstraints(minHeight: 56),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                padding: const EdgeInsets.symmetric(horizontal: CcDims.gap12, vertical: 10),
                 child: Row(
                   children: [
                     Icon(s.icon, size: 22, color: cc.textMuted),
@@ -101,7 +101,7 @@ class LibraryShortcuts extends StatelessWidget {
     ];
     final scale = MediaQuery.textScalerOf(context).scale(1);
     return Padding(
-      padding: const EdgeInsets.fromLTRB(CcDims.margin, 8, CcDims.margin, 8),
+      padding: const EdgeInsets.fromLTRB(CcDims.margin, CcDims.gap8, CcDims.margin, CcDims.gap8),
       child: LayoutBuilder(builder: (context, c) {
         final cols = ((c.maxWidth / scale) ~/ 160).clamp(1, 4);
         return Column(

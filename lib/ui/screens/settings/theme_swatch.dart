@@ -32,7 +32,7 @@ class ThemeSwatch extends StatelessWidget {
         borderRadius: BorderRadius.circular(CcDims.rCard),
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.all(4),
+          padding: const EdgeInsets.all(CcDims.gap4),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [

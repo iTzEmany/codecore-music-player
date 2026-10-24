@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../theme/tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/app_localizations.dart';
@@ -36,7 +37,7 @@ class TransitionSettingsTiles extends ConsumerWidget {
           subtitle: Text(l.transitionHint),
         ),
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+          padding: const EdgeInsets.fromLTRB(CcDims.gap16, 0, CcDims.gap16, CcDims.gap8),
           child: SegmentedBlocks<TransitionMode>(
             items: [
               for (final m in TransitionMode.values)

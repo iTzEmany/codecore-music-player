@@ -147,7 +147,7 @@ class _QueueSheetState extends ConsumerState<QueueSheet> {
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(CcDims.margin, 4, 8, 0),
+          padding: const EdgeInsets.fromLTRB(CcDims.margin, CcDims.gap4, CcDims.gap8, 0),
           child: Row(
             children: [
               Expanded(

@@ -168,7 +168,7 @@ class _LyricsViewState extends ConsumerState<LyricsView> {
         controller: _scroll,
         padding: const EdgeInsets.fromLTRB(
           CcDims.margin,
-          24,
+          CcDims.gap24,
           CcDims.margin,
           200,
         ),
@@ -291,9 +291,9 @@ class _LyricRowState extends State<_LyricRow> {
         s?.color?.withValues(alpha: a * (s.color?.a ?? 1));
     return InkWell(
       onTap: widget.onTap,
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.circular(CcDims.rGrid),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.symmetric(vertical: CcDims.gap8),
         child: TweenAnimationBuilder<double>(
           tween: Tween(end: _alpha),
           duration: ccDuration(context, CcMotion.enter),
