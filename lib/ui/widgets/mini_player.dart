@@ -224,10 +224,10 @@ class _MiniCard extends ConsumerWidget {
         constraints: const BoxConstraints(minHeight: CcDims.miniPlayerHeight),
         child: Row(
           children: [
-            const SizedBox(width: 8),
+            const SizedBox(width: 4),
             if (inJam)
               RingProgress(
-                size: 48,
+                size: 52,
                 live: true,
                 child: DecoratedBox(
                   decoration: BoxDecoration(
@@ -239,16 +239,16 @@ class _MiniCard extends ConsumerWidget {
               )
             else
               RingProgress(
-                size: 48,
+                size: 52,
                 live: radio != null,
                 child: TrackArt(
                   track: track!,
-                  size: 38,
-                  radius: 19,
+                  size: RingProgress.innerSize(52),
+                  radius: RingProgress.innerSize(52) / 2,
                   heroTag: kMiniCoverHero,
                 ),
               ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 10),
             Expanded(
               child: Column(
                 mainAxisSize: MainAxisSize.min,

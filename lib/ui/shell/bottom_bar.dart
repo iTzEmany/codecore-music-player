@@ -64,7 +64,7 @@ class ShellDock extends ConsumerWidget {
         m,
         // The Scaffold does not lift its bottom bar: the field clears the
         // keyboard by itself.
-        m +
+        CcDims.dockBottom +
             MediaQuery.paddingOf(context).bottom +
             (field ? MediaQuery.viewInsetsOf(context).bottom : 0),
       ),
@@ -77,64 +77,87 @@ class ShellDock extends ConsumerWidget {
         clipBehavior: Clip.antiAlias,
         // Opacity and a horizontal scale from the «Cerca» tab; the dock takes
         // the new height at once, so no size is animated.
-        child: AnimatedSwitcher(
-          duration: ccDuration(context, CcMotion.page),
-          switchInCurve: CcMotion.curveIn,
-          switchOutCurve: CcMotion.curveOut,
-          layoutBuilder: (current, previous) => Stack(
-            children: [
-              for (final p in previous)
-                Positioned(
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  child: IgnorePointer(child: p),
-                ),
-              ?current,
-            ],
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            CcDims.gap8,
+            CcDims.gap8,
+            CcDims.gap8,
+            6,
           ),
-          transitionBuilder: (child, a) => FadeTransition(
-            opacity: a,
-            child: AnimatedBuilder(
-              animation: a,
-              builder: (_, child) => Transform.scale(
-                scaleX: 0.5 + 0.5 * a.value,
-                alignment: _searchTabAlign,
+          child: AnimatedSwitcher(
+            duration: ccDuration(context, CcMotion.page),
+            switchInCurve: CcMotion.curveIn,
+            switchOutCurve: CcMotion.curveOut,
+            layoutBuilder: (current, previous) => Stack(
+              children: [
+                for (final p in previous)
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    child: IgnorePointer(child: p),
+                  ),
+                ?current,
+              ],
+            ),
+            transitionBuilder: (child, a) => FadeTransition(
+              opacity: a,
+              child: AnimatedBuilder(
+                animation: a,
+                builder: (_, child) => Transform.scale(
+                  scaleX: 0.5 + 0.5 * a.value,
+                  alignment: _searchTabAlign,
+                  child: child,
+                ),
                 child: child,
               ),
-              child: child,
             ),
-          ),
-          child: field
-              ? Stack(
-                  key: const ValueKey('dock-field'),
-                  alignment: Alignment.center,
-                  children: [
-                    // Hidden tabs hold the dock's height: the page above
-                    // keeps its size and its scroll offset.
-                    // Sized only: no taps, focus or TalkBack on them.
-                    Visibility(
-                      visible: false,
-                      maintainSize: true,
-                      maintainAnimation: true,
-                      maintainState: true,
-                      child: _Tabs(
+            child: field
+                ? Stack(
+                    key: const ValueKey('dock-field'),
+                    alignment: Alignment.center,
+                    children: [
+                      // Hidden tabs hold the dock's height: the page above
+                      // keeps its size and its scroll offset.
+                      // Sized only: no taps, focus or TalkBack on them.
+                      Visibility(
+                        visible: false,
+                        maintainSize: true,
+                        maintainAnimation: true,
+                        maintainState: true,
+                        child: _Tabs(
+                          items: items,
+                          selected: selected,
+                          onSelect: onSelect,
+                        ),
+                      ),
+                      const _SearchField(),
+                    ],
+                  )
+                : Column(
+                    key: const ValueKey('dock-tabs'),
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (hasPlayer) ...[
+                        const MiniPlayer(),
+                        // 1 dp rule between the player and the tabs.
+                        Divider(
+                          height: 1,
+                          thickness: 1,
+                          indent: CcDims.gap8,
+                          endIndent: CcDims.gap8,
+                          color: cc.surface3,
+                        ),
+                        const SizedBox(height: CcDims.gap4),
+                      ],
+                      _Tabs(
                         items: items,
                         selected: selected,
                         onSelect: onSelect,
                       ),
-                    ),
-                    const _SearchField(),
-                  ],
-                )
-              : Column(
-                  key: const ValueKey('dock-tabs'),
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (hasPlayer) const MiniPlayer(),
-                    _Tabs(items: items, selected: selected, onSelect: onSelect),
-                  ],
-                ),
+                    ],
+                  ),
+          ),
         ),
       ),
     );
@@ -242,9 +265,12 @@ class _Tabs extends StatelessWidget {
                                 items[i].label,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                                  color: i == selected ? cc.text : cc.textMuted,
-                                ),
+                                style: Theme.of(context).textTheme.labelMedium
+                                    ?.copyWith(
+                                      color: i == selected
+                                          ? cc.text
+                                          : cc.textMuted,
+                                    ),
                               ),
                             ],
                           ),
