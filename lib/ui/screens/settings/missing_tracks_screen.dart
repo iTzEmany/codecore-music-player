@@ -6,6 +6,7 @@ import '../../../providers/database_providers.dart';
 import '../../../providers/library_providers.dart';
 import '../../widgets/confirm.dart';
 import '../../widgets/empty_state.dart';
+import '../../widgets/cc_app_bar.dart';
 
 class MissingTracksScreen extends ConsumerStatefulWidget {
   const MissingTracksScreen({super.key});
@@ -63,8 +64,8 @@ class _MissingTracksScreenState extends ConsumerState<MissingTracksScreen> {
         .where((t) => !_ignored.contains(t.id))
         .toList();
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l.missingTracksTitle),
+      appBar: CcAppBar(
+        title: l.missingTracksTitle,
         actions: [
           if (items.length > 1)
             TextButton(

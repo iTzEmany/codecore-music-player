@@ -12,6 +12,7 @@ import '../../../services/online/youtube_service.dart' show DownloadFormat;
 import '../../theme/tokens.dart';
 import '../../widgets/segmented_blocks.dart';
 import '../../widgets/yt_dlp_update_button.dart';
+import '../../widgets/show_msg.dart';
 
 String downloadFormatLabel(AppLocalizations l, DownloadFormat f) => switch (f) {
   DownloadFormat.original => l.downloadFormatOriginal,
@@ -187,10 +188,10 @@ class _SearchCacheTile extends ConsumerWidget {
       subtitle: Text(l.searchCacheCount(n)),
       enabled: n > 0,
       onTap: () async {
-        final messenger = ScaffoldMessenger.of(context);
         await ref.read(searchCacheProvider).clear();
         ref.invalidate(searchCacheCountProvider);
-        messenger.showSnackBar(SnackBar(content: Text(l.searchCacheCleared)));
+        if (!context.mounted) return;
+        showMsg(context, l.searchCacheCleared);
       },
     );
   }

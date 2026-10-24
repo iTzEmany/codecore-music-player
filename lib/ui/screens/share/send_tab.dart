@@ -19,6 +19,7 @@ import '../devices/peer_card.dart';
 import 'offer_status_label.dart';
 import 'pairing_dialogs.dart';
 import 'track_picker_screen.dart';
+import '../../widgets/show_msg.dart';
 
 class SendTab extends ConsumerStatefulWidget {
   const SendTab({super.key, this.initialTrackIds});
@@ -63,27 +64,20 @@ class _SendTabState extends ConsumerState<SendTab> {
 
   Future<void> _sendTo(Peer peer) async {
     final l = context.l10n;
-    final messenger = ScaffoldMessenger.of(context);
     final repo = ref.read(trackRepositoryProvider);
     final List<Track> tracks = _ids == null
         ? await repo.watchTracks().first
         : await repo.getByIds(_ids!.toList());
     if (tracks.isEmpty) {
-      messenger
-        ..clearSnackBars()
-        ..showSnackBar(SnackBar(content: Text(l.offerChooseFirst)));
+      if (!mounted) return;
+      showMsg(context, l.offerChooseFirst);
       return;
     }
     final ok = await ref
         .read(shareHubProvider.notifier)
         .sendOffer(peer, tracks);
-    messenger
-      ..clearSnackBars()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(ok ? l.offerSent(peer.name) : l.shareErrUnreachable),
-        ),
-      );
+    if (!mounted) return;
+    showMsg(context, ok ? l.offerSent(peer.name) : l.shareErrUnreachable);
   }
 
   void _startJam(Peer peer) {

@@ -44,6 +44,7 @@ import 'shuffle_plus_tiles.dart';
 import 'release_settings_tiles.dart';
 import '../../widgets/segmented_blocks.dart';
 import '../import/exportify_remind_choice.dart';
+import '../../widgets/show_msg.dart';
 
 const _languages = {
   'it': 'Italiano',
@@ -444,7 +445,6 @@ Future<void> _pickLanguage(BuildContext context, WidgetRef ref) async {
 
 Future<void> _importOld(BuildContext context, WidgetRef ref) async {
   final l = context.l10n;
-  final messenger = ScaffoldMessenger.of(context);
   final picked = await FilePicker.pickFiles();
   final path = picked.isEmpty ? null : picked.first.path;
   if (path == null) return;
@@ -456,9 +456,8 @@ Future<void> _importOld(BuildContext context, WidgetRef ref) async {
     AppLog.w('python import failed', e, st);
     text = l.importFailed;
   }
-  messenger
-    ..clearSnackBars()
-    ..showSnackBar(SnackBar(content: Text(text)));
+  if (!context.mounted) return;
+  showMsg(context, text);
 }
 
 Future<void> _editDeviceName(BuildContext context, WidgetRef ref) async {
@@ -486,9 +485,7 @@ Future<void> _enrichLibrary(BuildContext context, WidgetRef ref) async {
       .toList();
   if (!context.mounted) return;
   if (ids.isEmpty) {
-    ScaffoldMessenger.of(context)
-      ..clearSnackBars()
-      ..showSnackBar(SnackBar(content: Text(l.enrichNothingToDo)));
+    showMsg(context, l.enrichNothingToDo);
     return;
   }
   final minutes = (ids.length * 3 / 60).ceil();
@@ -512,9 +509,7 @@ Future<void> _enrichLibrary(BuildContext context, WidgetRef ref) async {
   if (ok != true) return;
   final started = ref.read(enrichJobProvider.notifier).start(ids);
   if (!started && context.mounted) {
-    ScaffoldMessenger.of(context)
-      ..clearSnackBars()
-      ..showSnackBar(SnackBar(content: Text(l.enrichBusy)));
+    showMsg(context, l.enrichBusy);
   }
 }
 
@@ -541,9 +536,7 @@ Future<void> _clearCovers(BuildContext context, WidgetRef ref) async {
     AppLog.e('clear covers failed', e, st);
   }
   if (!context.mounted) return;
-  ScaffoldMessenger.of(context)
-    ..clearSnackBars()
-    ..showSnackBar(SnackBar(content: Text(msg)));
+  showMsg(context, msg);
   await scanWithPermission(ref);
 }
 

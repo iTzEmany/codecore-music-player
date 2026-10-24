@@ -17,6 +17,7 @@ import '../../../services/import/playlist_reader.dart'
     show supportedPlaylistExtensions;
 import '../../../services/import/read_import_file.dart';
 import '../../theme/tokens.dart';
+import '../../widgets/show_msg.dart';
 
 /// Explains where the CSV comes from (exportify.net) and lets the user pick it.
 /// Pops with the parsed playlist, or with an [ExportifyZipResult] for a ZIP.
@@ -94,21 +95,17 @@ class _ImportIntroSheetState extends ConsumerState<ImportIntroSheet> {
   }
 
   Future<void> _copy() async {
-    final messenger = ScaffoldMessenger.of(context);
     final text = context.l10n.csvImportCopied;
     await Clipboard.setData(const ClipboardData(text: exportifyAddress));
-    messenger
-      ..clearSnackBars()
-      ..showSnackBar(SnackBar(content: Text(text)));
+    if (!mounted) return;
+    showMsg(context, text);
   }
 
   Future<void> _openExportify() async {
-    final messenger = ScaffoldMessenger.of(context);
     final failed = context.l10n.csvImportOpenFailed;
     if (await openExportify(ref)) return;
-    messenger
-      ..clearSnackBars()
-      ..showSnackBar(SnackBar(content: Text(failed)));
+    if (!mounted) return;
+    showMsg(context, failed);
   }
 
   @override

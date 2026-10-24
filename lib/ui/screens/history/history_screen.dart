@@ -12,10 +12,12 @@ import '../../theme/app_theme.dart';
 import '../../shell/shell_nav.dart';
 import '../../widgets/confirm.dart';
 import '../../widgets/empty_state.dart';
-import '../../widgets/error_state.dart';
 import '../../widgets/section_header.dart';
 import '../../widgets/track_row.dart';
 import '../settings/settings_screen.dart';
+import '../../widgets/show_msg.dart';
+import '../../widgets/async_body.dart';
+import '../../widgets/cc_app_bar.dart';
 
 const _block = 200;
 const _headerExtent = 56.0;
@@ -77,9 +79,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     if (!ok) return;
     await ref.read(playHistoryRepositoryProvider).clear();
     if (!mounted) return;
-    ScaffoldMessenger.of(context)
-      ..clearSnackBars()
-      ..showSnackBar(SnackBar(content: Text(l.historyCleared)));
+    showMsg(context, l.historyCleared);
   }
 
   @override
@@ -93,8 +93,8 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     final locale = Localizations.localeOf(context).toString();
     final time = DateFormat.Hm(locale);
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l.historyTitle),
+      appBar: CcAppBar(
+        title: l.historyTitle,
         actions: [
           IconButton(
             tooltip: l.historyClear,
@@ -107,14 +107,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 960),
-          child: history.when(
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, st) => loadErrorState(
-              context,
-              e,
-              st,
-              onRetry: () => ref.invalidate(historyProvider(_limit)),
-            ),
+          child: AsyncBody(
+            value: history,
+            onRetry: () => ref.invalidate(historyProvider(_limit)),
             data: (entries) {
               if (entries.isEmpty) {
                 return EmptyState(
@@ -126,7 +121,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                       : () => ShellNav.open<void>(
                           context,
                           Scaffold(
-                            appBar: AppBar(title: Text(l.navSettings)),
+                            appBar: CcAppBar(title: l.navSettings),
                             body: const SettingsScreen(
                               initial: SettingsPage.playback,
                             ),

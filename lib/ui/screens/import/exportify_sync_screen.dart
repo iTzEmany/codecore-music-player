@@ -19,6 +19,8 @@ import '../../theme/tokens.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_state.dart';
 import '../../widgets/section_header.dart';
+import '../../widgets/show_msg.dart';
+import '../../widgets/cc_app_bar.dart';
 
 class _Entry {
   _Entry(this.csv);
@@ -160,7 +162,6 @@ class _ExportifySyncScreenState extends ConsumerState<ExportifySyncScreen> {
 
   Future<void> _run(List<_Entry> chosen) async {
     final nav = Navigator.of(context);
-    final messenger = ScaffoldMessenger.of(context);
     final svc = ref.read(playlistImportServiceProvider);
     final store = ref.read(settingsStoreProvider);
     final done = context.l10n.exportifySyncDone;
@@ -195,9 +196,8 @@ class _ExportifySyncScreenState extends ConsumerState<ExportifySyncScreen> {
       );
       ref.invalidate(exportifyReminderProvider);
     }
-    messenger
-      ..clearSnackBars()
-      ..showSnackBar(SnackBar(content: Text(ok > 0 ? done(ok) : failedText)));
+    if (!mounted) return;
+    showMsg(context, ok > 0 ? done(ok) : failedText);
     if (!mounted) return;
     if (ok > 0) {
       nav.pop(true);
@@ -272,7 +272,7 @@ class _ExportifySyncScreenState extends ConsumerState<ExportifySyncScreen> {
     return PopScope(
       canPop: !_busy,
       child: Scaffold(
-        appBar: AppBar(title: Text(l.exportifySyncTitle)),
+        appBar: CcAppBar(title: l.exportifySyncTitle),
         body: _loadFailed
             ? ErrorState(message: l.exportifySyncLoadFailed, onRetry: _load)
             : entries == null

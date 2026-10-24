@@ -11,6 +11,7 @@ import '../../../services/audio/equalizer.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/segmented_blocks.dart';
+import '../../widgets/cc_app_bar.dart';
 
 /// Equalizer: on/off, a preset or the user's own bands, for the speaker and
 /// for headphones separately. Only reachable where the player has one.
@@ -141,7 +142,7 @@ class _EqualizerScreenState extends ConsumerState<EqualizerScreen> {
         ],
       );
     }
-    return Scaffold(appBar: AppBar(title: Text(l.equalizer)), body: body);
+    return Scaffold(appBar: CcAppBar(title: l.equalizer), body: body);
   }
 }
 

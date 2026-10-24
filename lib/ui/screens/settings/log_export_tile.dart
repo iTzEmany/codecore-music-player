@@ -12,6 +12,7 @@ import '../../../core/paths.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/share_providers.dart';
 import '../../../services/export/save_file.dart';
+import '../../widgets/show_msg.dart';
 
 String _stamp() => DateTime.now().toIso8601String().substring(0, 10);
 
@@ -21,7 +22,6 @@ class LogExportTile extends ConsumerWidget {
 
   Future<void> _export(BuildContext context, WidgetRef ref) async {
     final l = context.l10n;
-    final messenger = ScaffoldMessenger.of(context);
     final deviceName = ref.read(deviceNameProvider);
     String msg;
     try {
@@ -48,7 +48,8 @@ class LogExportTile extends ConsumerWidget {
       AppLog.e('export log failed', e, st);
       msg = l.exportLogFailed;
     }
-    messenger.showSnackBar(SnackBar(content: Text(msg)));
+    if (!context.mounted) return;
+    showMsg(context, msg);
   }
 
   @override

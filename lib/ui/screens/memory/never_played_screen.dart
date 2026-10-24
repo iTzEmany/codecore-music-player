@@ -9,10 +9,11 @@ import '../../../providers/settings_providers.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/empty_state.dart';
-import '../../widgets/error_state.dart';
 import '../../widgets/selection_bar.dart';
 import '../../widgets/track_row.dart';
 import '../../widgets/track_row_selection.dart';
+import '../../widgets/async_body.dart';
+import '../../widgets/cc_app_bar.dart';
 
 /// Memoria → «Mai ascoltati»: music with no listen at all, the biggest first.
 /// Picking tracks offers the usual bulk actions, «Elimina dal dispositivo»
@@ -41,19 +42,14 @@ class NeverPlayedScreen extends ConsumerWidget {
         appBar: SelectableAppBar(
           listKey: _key,
           tracks: shown,
-          normal: AppBar(title: Text(l.memoryNeverPlayed)),
+          normal: CcAppBar(title: l.memoryNeverPlayed),
         ),
         body: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 960),
-            child: tracks.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, st) => loadErrorState(
-                context,
-                e,
-                st,
-                onRetry: () => ref.invalidate(neverPlayedTracksProvider),
-              ),
+            child: AsyncBody(
+              value: tracks,
+              onRetry: () => ref.invalidate(neverPlayedTracksProvider),
               data: (list) => list.isEmpty
                   ? EmptyState(
                       icon: Icons.headphones_rounded,

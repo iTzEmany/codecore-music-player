@@ -8,6 +8,7 @@ import '../../../providers/share_hub.dart';
 import '../../theme/tokens.dart';
 import 'receive_tab.dart';
 import 'send_tab.dart';
+import '../../widgets/cc_app_bar.dart';
 
 class ShareScreen extends ConsumerStatefulWidget {
   const ShareScreen({super.key, this.initialTrackIds});
@@ -43,8 +44,8 @@ class _ShareScreenState extends ConsumerState<ShareScreen> {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
-        appBar: AppBar(
-          title: Text(l.shareTitle),
+        appBar: CcAppBar(
+          title: l.shareTitle,
           bottom: TabBar(
             tabs: [
               Tab(text: l.shareSend),

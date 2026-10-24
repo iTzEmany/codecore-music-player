@@ -7,6 +7,7 @@ import '../../theme/tokens.dart';
 import '../../widgets/motion.dart';
 import 'settings_pages.dart';
 import 'settings_summaries.dart';
+import '../../widgets/cc_app_bar.dart';
 
 export 'settings_pages.dart' show SettingsPage, SettingsPageView, SettingsGroup, settingsPageTitle;
 
@@ -63,7 +64,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       : ShellNav.open<void>(
                           context,
                           Scaffold(
-                            appBar: AppBar(title: Text(settingsPageTitle(l, p))),
+                            appBar: CcAppBar(title: settingsPageTitle(l, p)),
                             body: SettingsPageView(p),
                           ),
                         ),

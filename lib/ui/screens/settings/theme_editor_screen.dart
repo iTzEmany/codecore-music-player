@@ -12,6 +12,8 @@ import '../../widgets/confirm.dart';
 import 'theme_background_editor.dart';
 import 'theme_labels.dart';
 import '../../widgets/segmented_blocks.dart';
+import '../../widgets/show_msg.dart';
+import '../../widgets/cc_app_bar.dart';
 
 /// The tokens a simple theme asks for; the rest follow from them.
 const _simpleTokens = [CcToken.bg, CcToken.accent, CcToken.text];
@@ -102,20 +104,15 @@ class _ThemeEditorScreenState extends ConsumerState<ThemeEditorScreen> {
     final name = _name.text.trim();
     final theme = _t.copyWith(name: name.isEmpty ? l.themeEditorTitle : name);
     final ok = ref.read(customThemesProvider.notifier).put(theme);
-    final messenger = ScaffoldMessenger.of(context);
     if (!ok) {
-      messenger
-        ..clearSnackBars()
-        ..showSnackBar(SnackBar(content: Text(l.themeLimit)));
+      showMsg(context, l.themeLimit);
       return;
     }
     _saved = true;
     ref
         .read(settingsProvider.notifier)
         .update((s) => s.copyWith(theme: customThemeSettingValue(theme.id)));
-    messenger
-      ..clearSnackBars()
-      ..showSnackBar(SnackBar(content: Text(l.themeSaved)));
+    showMsg(context, l.themeSaved);
     Navigator.of(context).pop();
   }
 
@@ -135,8 +132,8 @@ class _ThemeEditorScreenState extends ConsumerState<ThemeEditorScreen> {
         if (await _confirmDiscard()) nav.pop();
       },
       child: Scaffold(
-        appBar: AppBar(
-          title: Text(l.themeEditorTitle),
+        appBar: CcAppBar(
+          title: l.themeEditorTitle,
           actions: [
             TextButton(onPressed: _save, child: Text(l.themeSave)),
             const SizedBox(width: 8),

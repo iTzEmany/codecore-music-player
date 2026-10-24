@@ -11,6 +11,7 @@ import '../../theme/tokens.dart';
 import '../../widgets/color_picker.dart';
 import 'theme_labels.dart';
 import '../../widgets/segmented_blocks.dart';
+import '../../widgets/show_msg.dart';
 
 /// The «Sfondo delle pagine» part of the theme editor: plain colour, gradient
 /// or a picture, and whether Now playing keeps the tint of the cover.
@@ -57,7 +58,6 @@ class _ThemeBackgroundEditorState extends State<ThemeBackgroundEditor> {
 
   Future<void> _pick() async {
     final l = context.l10n;
-    final messenger = ScaffoldMessenger.of(context);
     final file = await (widget.pickImage ?? _defaultPick)();
     if (file == null) return;
     setState(() => _busy = true);
@@ -65,9 +65,7 @@ class _ThemeBackgroundEditorState extends State<ThemeBackgroundEditor> {
     if (!mounted) return;
     setState(() => _busy = false);
     if (path == null) {
-      messenger
-        ..clearSnackBars()
-        ..showSnackBar(SnackBar(content: Text(l.bgImageFailed)));
+      showMsg(context, l.bgImageFailed);
       return;
     }
     widget.onChanged(_b.copyWith(kind: ThemeBackgroundKind.image, imagePath: path));

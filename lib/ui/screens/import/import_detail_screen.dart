@@ -16,6 +16,7 @@ import '../../widgets/format_utils.dart';
 import '../../widgets/segmented_blocks.dart';
 import 'import_labels.dart';
 import 'import_review_screen.dart';
+import '../../widgets/cc_app_bar.dart';
 
 enum _Filter { all, active, problems, done }
 
@@ -89,8 +90,8 @@ class _ImportDetailScreenState extends ConsumerState<ImportDetailScreen> {
     final svc = ref.read(playlistImportServiceProvider);
     final unfinished = p != null && p.done < p.total;
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
+      appBar: CcAppBar(
+        titleWidget: Text(
           p?.name ?? '',
           maxLines: 1,
           overflow: TextOverflow.ellipsis,

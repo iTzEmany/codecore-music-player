@@ -18,6 +18,7 @@ import '../../../services/backup/restore_service.dart';
 import '../../../services/export/save_file.dart';
 import '../../widgets/confirm.dart';
 import 'restore_dialog.dart';
+import '../../widgets/show_msg.dart';
 
 /// «Crea backup» and «Ripristina da backup».
 List<Widget> backupTiles(BuildContext context, WidgetRef ref) {
@@ -40,7 +41,6 @@ List<Widget> backupTiles(BuildContext context, WidgetRef ref) {
 
 Future<void> _create(BuildContext context, WidgetRef ref) async {
   final l = context.l10n;
-  final messenger = ScaffoldMessenger.of(context);
   final nav = Navigator.of(context, rootNavigator: true);
   showDialog<void>(
     context: context,
@@ -76,17 +76,17 @@ Future<void> _create(BuildContext context, WidgetRef ref) async {
       AppLog.w('backup temp not removed', e);
     }
   }
-  messenger.showSnackBar(SnackBar(content: Text(msg)));
+  if (!context.mounted) return;
+  showMsg(context, msg);
 }
 
 Future<void> _restore(BuildContext context, WidgetRef ref) async {
   final l = context.l10n;
-  final messenger = ScaffoldMessenger.of(context);
-  void say(String m) => messenger.showSnackBar(SnackBar(content: Text(m)));
   final picked = await FilePicker.pickFiles();
   final path = picked.isEmpty ? null : picked.first.path;
   if (path == null) return;
-  if (!path.toLowerCase().endsWith('.zip')) return say(l.restoreNotBackup);
+  if (!context.mounted) return;
+  if (!path.toLowerCase().endsWith('.zip')) return showMsg(context, l.restoreNotBackup);
   final db = ref.read(databaseProvider);
   try {
     final plan = await inspectBackup(
@@ -126,10 +126,12 @@ Future<void> _restore(BuildContext context, WidgetRef ref) async {
     }
   } on RestoreException catch (e) {
     AppLog.w('restore refused', e);
-    say(l.restoreNotBackup);
+    if (!context.mounted) return;
+    showMsg(context, l.restoreNotBackup);
   } on Object catch (e, st) {
     AppLog.e('restore failed', e, st);
-    say(l.restoreFailed);
+    if (!context.mounted) return;
+    showMsg(context, l.restoreFailed);
   }
 }
 

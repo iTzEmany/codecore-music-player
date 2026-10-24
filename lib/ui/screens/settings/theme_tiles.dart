@@ -19,6 +19,7 @@ import '../../widgets/confirm.dart';
 import 'accent_picker.dart';
 import 'theme_editor_screen.dart';
 import 'theme_swatch.dart';
+import '../../widgets/show_msg.dart';
 
 /// The largest theme file taken in: a theme is a few hundred bytes.
 const _maxThemeFileBytes = 256 * 1024;
@@ -68,7 +69,7 @@ class _ThemeTilesState extends ConsumerState<ThemeTiles> {
     final s = ref.read(settingsProvider);
     final customs = ref.read(customThemesProvider);
     if (customs.items.length >= kMaxCustomThemes) {
-      _say(l.themeLimit);
+      showMsg(context, l.themeLimit);
       return;
     }
     final id = ref.read(customThemesProvider.notifier).newId();
@@ -91,7 +92,7 @@ class _ThemeTilesState extends ConsumerState<ThemeTiles> {
     final l = context.l10n;
     final n = ref.read(customThemesProvider.notifier);
     final copy = t.withId(n.newId()).copyWith(name: l.themeCopyName(t.name));
-    if (!n.put(copy)) return _say(l.themeLimit);
+    if (!n.put(copy)) return showMsg(context, l.themeLimit);
     _select(customThemeSettingValue(copy.id));
   }
 
@@ -118,13 +119,13 @@ class _ThemeTilesState extends ConsumerState<ThemeTiles> {
       AppLog.w('could not read the theme file', e, st);
     }
     if (!mounted) return;
-    if (t == null) return _say(l.themeImportFailed);
+    if (t == null) return showMsg(context, l.themeImportFailed);
     final n = ref.read(customThemesProvider.notifier);
     // Another id (the file may come from this very device), and no picture.
     final imported = t.forExport().withId(n.newId());
-    if (!n.put(imported)) return _say(l.themeLimit);
+    if (!n.put(imported)) return showMsg(context, l.themeLimit);
     _select(customThemeSettingValue(imported.id));
-    _say(hasLowContrastText(imported.resolve())
+    showMsg(context, hasLowContrastText(imported.resolve())
         ? '${l.themeImported} ${l.themeLowContrastWarning}'
         : l.themeImported);
   }
@@ -138,10 +139,6 @@ class _ThemeTilesState extends ConsumerState<ThemeTiles> {
       if (wasActive) _select(customThemeSettingValue(t.id));
     });
   }
-
-  void _say(String text) => ScaffoldMessenger.of(context)
-    ..clearSnackBars()
-    ..showSnackBar(SnackBar(content: Text(text)));
 
   @override
   Widget build(BuildContext context) {

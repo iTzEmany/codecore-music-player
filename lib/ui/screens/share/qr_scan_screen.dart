@@ -4,6 +4,8 @@ import 'package:permission_handler/permission_handler.dart';
 
 import '../../../l10n/l10n_ext.dart';
 import '../../../services/share/share_link.dart';
+import '../../widgets/show_msg.dart';
+import '../../widgets/cc_app_bar.dart';
 
 /// Builds the camera view; [onText] gets every text the camera reads. Replaced
 /// in tests, where there is no camera.
@@ -45,9 +47,7 @@ class _QrScanScreenState extends State<QrScanScreen> {
     final now = DateTime.now();
     if (_lastNotice == null || now.difference(_lastNotice!) > const Duration(seconds: 3)) {
       _lastNotice = now;
-      ScaffoldMessenger.of(context)
-        ..clearSnackBars()
-        ..showSnackBar(SnackBar(content: Text(context.l10n.scanNotCodecore)));
+      showMsg(context, context.l10n.scanNotCodecore);
     }
   }
 
@@ -55,7 +55,7 @@ class _QrScanScreenState extends State<QrScanScreen> {
   Widget build(BuildContext context) {
     final l = context.l10n;
     return Scaffold(
-      appBar: AppBar(title: Text(l.scanTitle)),
+      appBar: CcAppBar(title: l.scanTitle),
       body: widget.scannerBuilder(_onText),
     );
   }

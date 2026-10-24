@@ -6,6 +6,7 @@ import '../../../core/app_info.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/update_providers.dart';
 import '../../../services/online/update_checker.dart';
+import '../../widgets/show_msg.dart';
 
 /// «Controlla aggiornamenti» and «Controlla all'avvio». Nothing while no
 /// release repository is configured.
@@ -85,9 +86,9 @@ class _UpdateDialogState extends ConsumerState<UpdateDialog> {
             if (info == null) return const SizedBox.shrink();
             return TextButton(
               onPressed: () async {
-                final messenger = ScaffoldMessenger.of(context);
                 await Clipboard.setData(ClipboardData(text: info.url));
-                messenger.showSnackBar(SnackBar(content: Text(l.updateLinkCopied)));
+                if (!context.mounted) return;
+                showMsg(context, l.updateLinkCopied);
               },
               child: Text(l.updateCopyLink),
             );
