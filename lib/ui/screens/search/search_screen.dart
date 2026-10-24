@@ -390,7 +390,7 @@ class _LibraryResults extends ConsumerWidget {
       sectionLimit: 3,
     );
     final ctrl = ref.read(playerControllerProvider);
-    final compact = ref.watch(settingsProvider).compactMode;
+    final compact = ref.watch(settingsProvider.select((s) => s.compactMode));
     final extent = trackRowExtentOf(context, compact);
     const key = 'search';
     final selection = RowSelection(
@@ -420,6 +420,7 @@ class _LibraryResults extends ConsumerWidget {
             ),
             for (var i = 0; i < res.tracks.length; i++)
               SizedBox(
+                key: ValueKey(res.tracks[i].id),
                 height: extent,
                 child: LiveTrackRow(
                   track: res.tracks[i],
@@ -485,7 +486,7 @@ class SearchTracksScreen extends ConsumerWidget {
     final tracks =
         ref.watch(searchTracksProvider(query)).value ?? const <Track>[];
     final ctrl = ref.read(playerControllerProvider);
-    final compact = ref.watch(settingsProvider).compactMode;
+    final compact = ref.watch(settingsProvider.select((s) => s.compactMode));
     const key = 'search-all';
     final selection = RowSelection(
       listKey: key,

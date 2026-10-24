@@ -110,6 +110,7 @@ List<Widget> searchSectionRows(
       return [
         for (final a in res.artists)
           SearchResultRow(
+            key: ValueKey('artist-${a.key}'),
             leading: ArtistAvatar(name: a.name, size: 40, coverKey: a.coverKey),
             title: a.name ?? l.unknownArtist,
             subtitle: [
@@ -127,6 +128,7 @@ List<Widget> searchSectionRows(
       return [
         for (final a in res.albums)
           SearchResultRow(
+            key: ValueKey('album-${a.albumKey}'),
             leading: CoverImage(
               coverKey: a.coverKey,
               size: 40,
@@ -142,6 +144,7 @@ List<Widget> searchSectionRows(
       return [
         for (final p in res.playlists)
           SearchResultRow(
+            key: ValueKey('playlist-${p.playlist.id}'),
             leading: PlaylistCover(
               size: 40,
               coverKeys: playlistCoverKeys(p.playlist.coverKey, [
