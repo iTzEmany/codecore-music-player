@@ -96,19 +96,9 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
     final albums = ref.watch(albumsProvider);
     final artists = ref.watch(artistsProvider);
     final folders = ref.watch(foldersProvider).value;
-    final favCount = ref.watch(
-      tracksProvider(true).select((t) => t.value?.length ?? 0),
-    );
     final trackCount = ref.watch(
       tracksProvider(false).select((t) => t.value?.length ?? 0),
     );
-    final tagCount = ref.watch(tagsProvider.select((t) => t.value?.length ?? 0));
-    final podcastCount = ref.watch(podcastsProvider.select((p) => p.value?.length ?? 0));
-    final radioCount = ref.watch(savedRadiosProvider.select((r) => r.value?.length ?? 0));
-    final followedCount = ref.watch(followedArtistsProvider.select((v) => v.value?.length ?? 0));
-    final releaseTopArtists = ref.watch(releaseOptionsProvider.select((o) => o.topArtists));
-    final reviewCount = ref.watch(reviewCountProvider.select((c) => c.value ?? 0));
-    final theme = Theme.of(context).textTheme;
     final denied = ref.watch(permissionDeniedProvider);
 
     Widget body;
@@ -158,70 +148,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
         LibraryKind.album => l.albumsCount(entries.length),
         LibraryKind.artist => l.artistsCount(entries.length),
       };
-      void open(Widget w) => ShellNav.open<void>(context, w);
-      final shortcuts = _kind != null
-          ? null
-          : LibraryShortcuts(
-                items: [
-                  LibraryShortcut(
-                    label: l.navFavorites,
-                    icon: Icons.favorite_rounded,
-                    count: favCount,
-                    keepWhenZero: true,
-                    onTap: () => open(const FavoritesScreen()),
-                  ),
-                  LibraryShortcut(
-                    label: l.allTracks,
-                    icon: Icons.music_note_rounded,
-                    count: trackCount,
-                    keepWhenZero: true,
-                    onTap: () => open(const AllTracksScreen()),
-                  ),
-                  LibraryShortcut(
-                    label: l.historyTitle,
-                    icon: Icons.history_rounded,
-                    onTap: () => open(const HistoryScreen()),
-                  ),
-                  LibraryShortcut(
-                    label: l.podcastsTitle,
-                    icon: Icons.podcasts_rounded,
-                    count: podcastCount,
-                    onTap: () => open(const PodcastsScreen()),
-                  ),
-                  LibraryShortcut(
-                    label: l.radioTitle,
-                    icon: Icons.radio_rounded,
-                    count: radioCount,
-                    onTap: () => open(const RadioScreen()),
-                  ),
-                  if (kEnableYoutube && (followedCount > 0 || releaseTopArtists))
-                    LibraryShortcut(
-                      label: l.releasesFollowedLibrary,
-                      icon: Icons.how_to_reg_rounded,
-                      count: followedCount,
-                      keepWhenZero: true,
-                      onTap: () => open(const FollowedArtistsScreen()),
-                    ),
-                  LibraryShortcut(
-                    label: l.tagsTitle,
-                    icon: Icons.label_outline_rounded,
-                    count: tagCount,
-                    onTap: () => open(const TagsScreen()),
-                  ),
-                  LibraryShortcut(
-                    label: l.statsTitle,
-                    icon: Icons.bar_chart_rounded,
-                    onTap: () => open(const StatsScreen()),
-                  ),
-                  if (reviewCount > 0)
-                    LibraryShortcut(
-                      label: l.reviewTitle,
-                      icon: Icons.fact_check_rounded,
-                      count: reviewCount,
-                      onTap: () => open(const ReviewScreen()),
-                    ),
-                ],
-              );
+      final shortcuts = _kind != null ? null : const _LibraryShortcuts();
       body = settings.libraryGrid
           ? _LibraryGrid(header: shortcuts, entries: entries, onOpen: _open)
           : _LibraryList(
@@ -236,7 +163,31 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
       backgroundColor: Colors.transparent,
       body: Column(
         children: [
-          Padding(
+          const _LibraryHeader(),
+          const ScanStatus(),
+          _KindTabs(selected: _kind, onChanged: (k) => setState(() => _kind = k)),
+          LibraryToolbar(
+            countLabel: count,
+            sort: sort,
+            grid: settings.libraryGrid,
+            onSort: (s) => _setSettings(sort: s),
+            onToggleGrid: () => _setSettings(grid: !settings.libraryGrid),
+          ),
+          Expanded(child: body),
+        ],
+      ),
+    );
+  }
+}
+
+class _LibraryHeader extends ConsumerWidget {
+  const _LibraryHeader();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    final theme = Theme.of(context).textTheme;
+    return Padding(
             padding: const EdgeInsets.fromLTRB(CcDims.margin, CcDims.gap12, CcDims.gap4, 0),
             child: Row(
               children: [
@@ -314,9 +265,20 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
                 ),
               ],
             ),
-          ),
-          const ScanStatus(),
-          Padding(
+          );
+  }
+}
+
+class _KindTabs extends StatelessWidget {
+  const _KindTabs({required this.selected, required this.onChanged});
+
+  final LibraryKind? selected;
+  final ValueChanged<LibraryKind?> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    return Padding(
               padding: const EdgeInsets.fromLTRB(CcDims.margin, CcDims.gap8, CcDims.margin, 0),
               child: SegmentedBlocks<LibraryKind?>(
                 items: [
@@ -337,21 +299,93 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
                     label: l.artists,
                   ),
                 ],
-                selected: _kind,
-                onChanged: (k) => setState(() => _kind = k),
+                selected: selected,
+                onChanged: onChanged,
               ),
-            ),
-          LibraryToolbar(
-            countLabel: count,
-            sort: sort,
-            grid: settings.libraryGrid,
-            onSort: (s) => _setSettings(sort: s),
-            onToggleGrid: () => _setSettings(grid: !settings.libraryGrid),
-          ),
-          Expanded(child: body),
-        ],
-      ),
+            );
+  }
+}
+
+class _LibraryShortcuts extends ConsumerWidget {
+  const _LibraryShortcuts();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    final favCount = ref.watch(
+      tracksProvider(true).select((t) => t.value?.length ?? 0),
     );
+    final tagCount = ref.watch(tagsProvider.select((t) => t.value?.length ?? 0));
+    final podcastCount = ref.watch(podcastsProvider.select((p) => p.value?.length ?? 0));
+    final radioCount = ref.watch(savedRadiosProvider.select((r) => r.value?.length ?? 0));
+    final followedCount = ref.watch(followedArtistsProvider.select((v) => v.value?.length ?? 0));
+    final releaseTopArtists = ref.watch(releaseOptionsProvider.select((o) => o.topArtists));
+    final reviewCount = ref.watch(reviewCountProvider.select((c) => c.value ?? 0));
+    final trackCount = ref.watch(
+      tracksProvider(false).select((t) => t.value?.length ?? 0),
+    );
+    void open(Widget w) => ShellNav.open<void>(context, w);
+    return LibraryShortcuts(
+                items: [
+                  LibraryShortcut(
+                    label: l.navFavorites,
+                    icon: Icons.favorite_rounded,
+                    count: favCount,
+                    keepWhenZero: true,
+                    onTap: () => open(const FavoritesScreen()),
+                  ),
+                  LibraryShortcut(
+                    label: l.allTracks,
+                    icon: Icons.music_note_rounded,
+                    count: trackCount,
+                    keepWhenZero: true,
+                    onTap: () => open(const AllTracksScreen()),
+                  ),
+                  LibraryShortcut(
+                    label: l.historyTitle,
+                    icon: Icons.history_rounded,
+                    onTap: () => open(const HistoryScreen()),
+                  ),
+                  LibraryShortcut(
+                    label: l.podcastsTitle,
+                    icon: Icons.podcasts_rounded,
+                    count: podcastCount,
+                    onTap: () => open(const PodcastsScreen()),
+                  ),
+                  LibraryShortcut(
+                    label: l.radioTitle,
+                    icon: Icons.radio_rounded,
+                    count: radioCount,
+                    onTap: () => open(const RadioScreen()),
+                  ),
+                  if (kEnableYoutube && (followedCount > 0 || releaseTopArtists))
+                    LibraryShortcut(
+                      label: l.releasesFollowedLibrary,
+                      icon: Icons.how_to_reg_rounded,
+                      count: followedCount,
+                      keepWhenZero: true,
+                      onTap: () => open(const FollowedArtistsScreen()),
+                    ),
+                  LibraryShortcut(
+                    label: l.tagsTitle,
+                    icon: Icons.label_outline_rounded,
+                    count: tagCount,
+                    onTap: () => open(const TagsScreen()),
+                  ),
+                  LibraryShortcut(
+                    label: l.statsTitle,
+                    icon: Icons.bar_chart_rounded,
+                    onTap: () => open(const StatsScreen()),
+                  ),
+                  if (reviewCount > 0)
+                    LibraryShortcut(
+                      label: l.reviewTitle,
+                      icon: Icons.fact_check_rounded,
+                      count: reviewCount,
+                      onTap: () => open(const ReviewScreen()),
+                    ),
+                ],
+              );
   }
 }
 
