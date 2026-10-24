@@ -7,6 +7,7 @@ import '../../l10n/l10n_ext.dart';
 import '../../providers/player_providers.dart';
 import '../../core/platform.dart';
 import '../../providers/selection_providers.dart';
+import '../theme/app_theme.dart' show ccIconDensity;
 import '../theme/tokens.dart';
 import 'cover_image.dart';
 import 'favorite_actions.dart';
@@ -192,7 +193,7 @@ class _TrackRowState extends State<TrackRow> {
               ? IconButton(
                   tooltip: fav ? l.removeFromFavorites : l.favorite,
                   onPressed: widget.onFavorite,
-                  visualDensity: VisualDensity.compact,
+                  visualDensity: ccIconDensity,
                   icon: HeartIcon(
                     favorite: fav,
                     size: 18,
@@ -220,7 +221,7 @@ class _TrackRowState extends State<TrackRow> {
                   child: IconButton(
                     tooltip: l.moreOptions,
                     onPressed: widget.onMore,
-                    visualDensity: VisualDensity.compact,
+                    visualDensity: ccIconDensity,
                     icon: Icon(Icons.more_horiz_rounded, color: cc.textMuted),
                   ),
                 ),
@@ -265,7 +266,7 @@ class _TrackRowState extends State<TrackRow> {
           IconButton(
             tooltip: fav ? l.removeFromFavorites : l.favorite,
             onPressed: widget.onFavorite,
-            visualDensity: VisualDensity.compact,
+            visualDensity: ccIconDensity,
             icon: Icon(
               fav ? Icons.favorite_rounded : Icons.favorite_border_rounded,
               size: 18,
@@ -283,7 +284,7 @@ class _TrackRowState extends State<TrackRow> {
             child: IconButton(
               tooltip: l.moreOptions,
               onPressed: widget.onMore,
-              visualDensity: VisualDensity.compact,
+              visualDensity: ccIconDensity,
               icon: Icon(
                 wide ? Icons.more_horiz_rounded : Icons.more_vert_rounded,
                 color: cc.textMuted,

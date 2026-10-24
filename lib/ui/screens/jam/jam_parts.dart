@@ -5,6 +5,7 @@ import '../../../l10n/l10n_ext.dart';
 import '../../../providers/import_providers.dart';
 import '../../../providers/share_hub.dart';
 import '../../../services/jam/jam_models.dart';
+import '../../theme/app_theme.dart' show ccIconDensity;
 import '../../theme/tokens.dart';
 import '../../widgets/artist_avatar.dart';
 import '../../widgets/cover_image.dart';
@@ -200,7 +201,7 @@ class JamQueueRow extends StatelessWidget {
             if (canRemove)
               IconButton(
                 tooltip: l.delete,
-                visualDensity: VisualDensity.compact,
+                visualDensity: ccIconDensity,
                 icon: Icon(Icons.close, color: cc.textMuted),
                 onPressed: onRemove,
               ),

@@ -9,6 +9,7 @@ import '../../../data/repositories/memory_queries.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/library_providers.dart';
 import '../../../services/library/duplicate_finder.dart';
+import '../../theme/app_theme.dart' show ccIconDensity;
 import '../../theme/tokens.dart';
 import '../../widgets/format_utils.dart';
 import '../../widgets/track_actions.dart' show revealInFolder;
@@ -121,7 +122,7 @@ class DuplicateMemberRow extends ConsumerWidget {
               IconButton(
                 key: ValueKey('dup-info-${entry.id}'),
                 tooltip: l.details,
-                visualDensity: VisualDensity.compact,
+                visualDensity: ccIconDensity,
                 icon: const Icon(Icons.info_outline_rounded, size: 20),
                 onPressed: () => showDupPathDialog(context, entry.path),
               ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/platform.dart';
 
 import 'custom_theme.dart';
 import 'palette.dart';
@@ -77,6 +78,15 @@ CcColors resolveColors(String theme, String accent, CustomThemes customs) {
 ///
 /// [pageBackdrop]: pages and the app bar are see-through, so the gradient or
 /// picture behind them shows (see `AppBackground`).
+/// Icon buttons stay dense with a desktop mouse; a phone keeps the 48 dp default.
+/// Tests set it to false to see the phone layout on a Linux host.
+@visibleForTesting
+bool? debugDesktopOverride;
+
+bool get _desktop => debugDesktopOverride ?? isDesktop;
+
+VisualDensity? get ccIconDensity => _desktop ? VisualDensity.compact : null;
+
 ThemeData buildThemeFromColors(CcColors c, bool compact, {bool pageBackdrop = false}) {
   final brightness = c.isLight ? Brightness.light : Brightness.dark;
   final scheme = ColorScheme(
@@ -111,6 +121,12 @@ ThemeData buildThemeFromColors(CcColors c, bool compact, {bool pageBackdrop = fa
     scrim: Colors.black,
   );
   final text = buildTextTheme(c);
+  // A visible ring on the keyboard-focused main buttons (F-74).
+  final focusRing = WidgetStateProperty.resolveWith<BorderSide?>(
+    (s) => s.contains(WidgetState.focused)
+        ? BorderSide(color: c.accent, width: 2)
+        : null,
+  );
   const pill = StadiumBorder();
   RoundedRectangleBorder top(double r) => RoundedRectangleBorder(
     borderRadius: BorderRadius.vertical(top: Radius.circular(r)),
@@ -125,7 +141,7 @@ ThemeData buildThemeFromColors(CcColors c, bool compact, {bool pageBackdrop = fa
     scaffoldBackgroundColor: pageBackdrop ? Colors.transparent : c.bg,
     canvasColor: c.bg,
     dividerColor: c.surface3,
-    focusColor: c.accent.withValues(alpha: 0.24),
+    focusColor: c.accent.withValues(alpha: 0.4),
     hoverColor: c.surface2.withValues(alpha: 0.5),
     splashFactory: InkRipple.splashFactory,
     pageTransitionsTheme: PageTransitionsTheme(
@@ -134,7 +150,8 @@ ThemeData buildThemeFromColors(CcColors c, bool compact, {bool pageBackdrop = fa
           p: const CcPageTransitionsBuilder(),
       },
     ),
-    visualDensity: compact ? VisualDensity.compact : VisualDensity.standard,
+    // Dense targets only for a desktop mouse; a phone keeps 48 dp (D-15).
+    visualDensity: compact && _desktop ? VisualDensity.compact : VisualDensity.standard,
     extensions: [c],
     appBarTheme: AppBarTheme(
       backgroundColor: pageBackdrop ? Colors.transparent : c.bg,
@@ -193,13 +210,14 @@ ThemeData buildThemeFromColors(CcColors c, bool compact, {bool pageBackdrop = fa
         fontWeight: FontWeight.w400,
       ),
     ),
+    iconButtonTheme: IconButtonThemeData(style: ButtonStyle(side: focusRing)),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
         shape: pill,
         backgroundColor: c.accent,
         foregroundColor: c.onAccent,
         textStyle: text.labelLarge,
-      ),
+      ).copyWith(side: focusRing),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(shape: pill, textStyle: text.labelLarge),

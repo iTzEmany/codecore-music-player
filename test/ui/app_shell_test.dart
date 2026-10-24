@@ -5,6 +5,7 @@ import 'package:codecore/providers/ui_providers.dart';
 import 'package:codecore/services/memory/app_data.dart';
 import 'package:codecore/ui/screens/library/album_detail_screen.dart';
 import 'package:codecore/ui/screens/library/all_tracks_screen.dart';
+import 'package:codecore/ui/screens/now_playing/now_playing_screen.dart';
 import 'package:codecore/ui/shell/app_shell.dart';
 import 'package:codecore/ui/shell/bottom_bar.dart';
 import 'package:codecore/ui/shell/desktop_player_bar.dart';
@@ -268,6 +269,25 @@ void main() {
     expect(find.text('Rendi visibile questo dispositivo'), findsOneWidget);
     expect(find.text('Collegamento manuale (IP e PIN)'), findsOneWidget);
     expect(tester.takeException(), isNull);
+    await h.dispose(tester);
+  });
+
+  testWidgets('Enter on the focused mini player opens the player', (tester) async {
+    _phone(tester);
+    final h = await Harness.create(tester, tracks: 2);
+    final rows = await tester.runAsync(() => h.db.select(h.db.tracks).get());
+    await tester.runAsync(() => h.handler.playQueue([rows!.first.id], 0));
+    await h.pump(tester, const AppShell());
+    await _settle(tester);
+    // The InkWell's own Focus sits right above its MouseRegion.
+    final probe = find.descendant(
+        of: find.descendant(of: find.byType(MiniPlayer), matching: find.byType(InkWell)),
+        matching: find.byType(MouseRegion));
+    Focus.of(tester.element(probe.first)).requestFocus();
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await _settle(tester);
+    expect(find.byType(NowPlayingScreen), findsOneWidget);
     await h.dispose(tester);
   });
 

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/db/app_database.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../providers/player_providers.dart';
+import '../theme/app_theme.dart' show ccIconDensity;
 import '../theme/tokens.dart';
 import 'ring_progress.dart' show NowPlayingDot;
 import 'track_actions.dart';
@@ -114,7 +115,7 @@ class OnlineQueueRow extends ConsumerWidget {
             ),
             IconButton(
               tooltip: l.moreOptions,
-              visualDensity: VisualDensity.compact,
+              visualDensity: ccIconDensity,
               onPressed: () => showTrackActions(context, ref, track),
               icon: Icon(Icons.more_vert_rounded, color: cc.textMuted),
             ),

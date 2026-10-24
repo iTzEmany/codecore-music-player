@@ -9,6 +9,7 @@ import '../screens/devices/devices_sheet.dart';
 import '../screens/jam/jam_screen.dart';
 import '../screens/now_playing/now_playing_screen.dart';
 import '../shell/bottom_bar.dart' show ShellDock;
+import '../theme/app_theme.dart' show ccIconDensity;
 import '../theme/tokens.dart';
 import 'favorite_actions.dart';
 import 'grow_route.dart';
@@ -149,112 +150,111 @@ class _MiniPlayerState extends ConsumerState<MiniPlayer>
       playing = ref.watch(isPlayingProvider).value ?? false;
     }
 
-    final card = SizedBox(
-      height: CcDims.miniPlayerHeight,
-      child: Row(
-        children: [
-          const SizedBox(width: 8),
-          if (inJam)
-            RingProgress(
-              size: 48,
-              live: true,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: cc.surface3,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(Icons.queue_music_rounded, color: cc.accent),
-              ),
-            )
-          else
-            RingProgress(
-              size: 48,
-              live: radio != null,
-              child: TrackArt(
-                track: track!,
-                size: 38,
-                radius: 19,
-                heroTag: kMiniCoverHero,
-              ),
-            ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.titleSmall?.copyWith(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
+    final card = FocusTraversalGroup(
+      child: SizedBox(
+        height: CcDims.miniPlayerHeight,
+        child: Row(
+          children: [
+            const SizedBox(width: 8),
+            if (inJam)
+              RingProgress(
+                size: 48,
+                live: true,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: cc.surface3,
+                    shape: BoxShape.circle,
                   ),
+                  child: Icon(Icons.queue_music_rounded, color: cc.accent),
                 ),
-                Row(
-                  children: [
-                    if (inJam)
-                      Padding(
-                        padding: const EdgeInsets.only(right: 6),
-                        child: Icon(Icons.circle, size: 8, color: cc.accent),
-                      ),
-                    Expanded(
-                      child: Text(
-                        subtitle,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.bodyMedium,
-                      ),
+              )
+            else
+              RingProgress(
+                size: 48,
+                live: radio != null,
+                child: TrackArt(
+                  track: track!,
+                  size: 38,
+                  radius: 19,
+                  heroTag: kMiniCoverHero,
+                ),
+              ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.titleSmall?.copyWith(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
                     ),
-                  ],
-                ),
-              ],
+                  ),
+                  Row(
+                    children: [
+                      if (inJam)
+                        Padding(
+                          padding: const EdgeInsets.only(right: 6),
+                          child: Icon(Icons.circle, size: 8, color: cc.accent),
+                        ),
+                      Expanded(
+                        child: Text(
+                          subtitle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.bodyMedium,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-          _MiniButton(
-            icon: Icons.devices_rounded,
-            tooltip: l.devicesTitle,
-            onPressed: () => DevicesSheet.show(context),
-          ),
-          if (radio != null)
-            RadioStarButton(station: radio, compact: true, color: cc.textMuted)
-          else if (!inJam && track != null)
             _MiniButton(
-              icon: Icons.favorite_rounded,
-              iconWidget: HeartIcon(favorite: track.isFavorite),
-              color: track.isFavorite ? cc.accent : null,
-              tooltip: track.isFavorite ? l.removeFromFavorites : l.favorite,
-              onPressed: () => toggleFavorite(context, ref, track),
+              icon: Icons.devices_rounded,
+              tooltip: l.devicesTitle,
+              onPressed: () => DevicesSheet.show(context),
             ),
-          _MiniButton(
-            icon: playing ? Icons.pause_rounded : Icons.play_arrow_rounded,
-            color: cc.text,
-            size: 28,
-            tooltip: playing ? l.pause : l.play,
-            onPressed: inJam
-                ? () => ref
-                      .read(jamProvider.notifier)
-                      .send(
-                        playing
-                            ? const JamCommand.pause()
-                            : const JamCommand.play(),
-                      )
-                : ctrl.togglePlayPause,
-          ),
-          const SizedBox(width: 4),
-        ],
+            if (radio != null)
+              RadioStarButton(station: radio, color: cc.textMuted)
+            else if (!inJam && track != null)
+              _MiniButton(
+                icon: Icons.favorite_rounded,
+                iconWidget: HeartIcon(favorite: track.isFavorite),
+                color: track.isFavorite ? cc.accent : null,
+                tooltip: track.isFavorite ? l.removeFromFavorites : l.favorite,
+                onPressed: () => toggleFavorite(context, ref, track),
+              ),
+            _MiniButton(
+              icon: playing ? Icons.pause_rounded : Icons.play_arrow_rounded,
+              color: cc.text,
+              size: 28,
+              tooltip: playing ? l.pause : l.play,
+              onPressed: inJam
+                  ? () => ref
+                        .read(jamProvider.notifier)
+                        .send(
+                          playing
+                              ? const JamCommand.pause()
+                              : const JamCommand.play(),
+                        )
+                  : ctrl.togglePlayPause,
+            ),
+            const SizedBox(width: 4),
+          ],
+        ),
       ),
     );
 
     return RiseIn(
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: inJam ? _openJam : _openNowPlaying,
         onHorizontalDragStart: inJam ? null : (_) => _settle.stop(),
-        onHorizontalDragUpdate: inJam
-            ? null
-            : (d) => _dx.value += d.delta.dx,
+        onHorizontalDragUpdate: inJam ? null : (d) => _dx.value += d.delta.dx,
         onHorizontalDragEnd: inJam ? null : (d) => _onDragEnd(d, width, ctrl),
         onVerticalDragEnd: (d) {
           if ((d.primaryVelocity ?? 0) < -300) {
@@ -263,7 +263,18 @@ class _MiniPlayerState extends ConsumerState<MiniPlayer>
         },
         child: ValueListenableBuilder<double>(
           valueListenable: _dx,
-          child: card,
+          // InkWell gives Enter/Space and the focus ring; the rest of the
+          // gestures stay on the GestureDetector above.
+          child: Material(
+            type: MaterialType.transparency,
+            child: Semantics(
+              button: true,
+              child: InkWell(
+                onTap: inJam ? _openJam : _openNowPlaying,
+                child: card,
+              ),
+            ),
+          ),
           builder: (_, dx, c) =>
               Transform.translate(offset: Offset(dx, 0), child: c),
         ),
@@ -297,7 +308,7 @@ class _MiniButton extends StatelessWidget {
     onPressed: onPressed,
     iconSize: size,
     color: color ?? context.cc.textMuted,
-    visualDensity: VisualDensity.compact,
+    visualDensity: ccIconDensity,
     icon: iconWidget ?? Icon(icon),
   );
 }

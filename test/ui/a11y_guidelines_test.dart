@@ -6,6 +6,7 @@ import 'package:codecore/ui/screens/library/all_tracks_screen.dart';
 import 'package:codecore/ui/screens/now_playing/now_playing_screen.dart';
 import 'package:codecore/ui/screens/settings/settings_screen.dart';
 import 'package:codecore/ui/shell/app_shell.dart';
+import 'package:codecore/ui/theme/app_theme.dart' show debugDesktopOverride;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -41,12 +42,6 @@ Map<String, int> _failures(Evaluation e) {
 /// Every failure that exists today, per (screen, guideline). Known defects:
 /// phase 40 (D-14 and the tap-target work) removes entries as it fixes them.
 const _known = <(String, String), Map<String, int>>{
-  // Mini player buttons are 40 px wide, the play button 44 px (< 48).
-  ('shell (home, mini player, dock)', 'androidTapTarget'): {
-    'Dispositivi': 1,
-    'Pausa': 1,
-    'Preferito': 1,
-  },
   // Artist link, seek time, sleep timer and speed chips are under 48 px.
   ('now playing', 'androidTapTarget'): {
     '0:00': 1,
@@ -56,8 +51,6 @@ const _known = <(String, String), Map<String, int>>{
   },
   // A button with no label or tooltip.
   ('now playing', 'labeledTapTarget'): {'unnamed': 1},
-  // The row's more-menu button is 40 px, one per row (3 rows).
-  ('all tracks', 'androidTapTarget'): {'Altre opzioni': 3},
   // Long-press-only nodes (rows, selection area) and unnamed toggles.
   ('all tracks', 'labeledTapTarget'): {'unnamed': 7},
 };
@@ -77,6 +70,8 @@ void main() {
   for (final s in screens.entries) {
     for (final g in guidelines.entries) {
       testWidgets('${s.key}: ${g.key}', (tester) async {
+        debugDesktopOverride = false; // phone targets (48 dp), not the desktop's dense ones
+        addTearDown(() => debugDesktopOverride = null);
         final sem = tester.ensureSemantics();
         // A tear-down would run after the handle check, so dispose in finally.
         try {

@@ -109,18 +109,25 @@ class _TrackInfo extends ConsumerWidget {
       children: [
         MouseRegion(
           cursor: SystemMouseCursors.click,
-          child: GestureDetector(
-            onTap: () => Navigator.of(context, rootNavigator: true).push(
-              MaterialPageRoute<void>(builder: (_) => const NowPlayingScreen()),
-            ),
-            child: RingProgress(
-              size: 56,
-              live: radio != null,
-              child: TrackArt(
-                track: track,
-                size: RingProgress.innerSize(56),
-                radius: RingProgress.innerSize(56) / 2,
-                heroTag: kBarCoverHero,
+          child: Semantics(
+            button: true,
+            label: l.nowPlaying,
+            excludeSemantics: true,
+            child: FocusRingButton(
+              onTap: () => Navigator.of(context, rootNavigator: true).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const NowPlayingScreen(),
+                ),
+              ),
+              child: RingProgress(
+                size: 56,
+                live: radio != null,
+                child: TrackArt(
+                  track: track,
+                  size: RingProgress.innerSize(56),
+                  radius: RingProgress.innerSize(56) / 2,
+                  heroTag: kBarCoverHero,
+                ),
               ),
             ),
           ),
@@ -138,7 +145,9 @@ class _TrackInfo extends ConsumerWidget {
                 style: theme.bodyLarge,
               ),
               InkWell(
-                onTap: radio != null || isOnlineId(track.id) ? null : openArtist,
+                onTap: radio != null || isOnlineId(track.id)
+                    ? null
+                    : openArtist,
                 child: Text(
                   texts?.subtitle ?? track.artist ?? l.unknownArtist,
                   maxLines: 1,
@@ -299,22 +308,26 @@ class _Center extends ConsumerWidget {
                 icon: const Icon(Icons.skip_next_rounded),
               ),
               if (!live)
-              IconButton(
-                tooltip: l.repeat,
-                iconSize: 20,
-                onPressed: ctrl.cycleRepeat,
-                icon: Icon(
-                  repeat == PlayRepeat.one
-                      ? Icons.repeat_one_rounded
-                      : Icons.repeat_rounded,
-                  color: repeat == PlayRepeat.off ? cc.textMuted : cc.accent,
+                IconButton(
+                  tooltip: l.repeat,
+                  iconSize: 20,
+                  onPressed: ctrl.cycleRepeat,
+                  icon: Icon(
+                    repeat == PlayRepeat.one
+                        ? Icons.repeat_one_rounded
+                        : Icons.repeat_rounded,
+                    color: repeat == PlayRepeat.off ? cc.textMuted : cc.accent,
+                  ),
                 ),
-              ),
             ],
           ),
         ),
         if (live)
-          Text(l.radioLive, style: Theme.of(context).textTheme.labelMedium?.copyWith(color: cc.accent))
+          Text(
+            l.radioLive,
+            style: Theme.of(context).textTheme.labelMedium
+                ?.copyWith(color: cc.accent),
+          )
         else
           _BarSeek(track: track),
       ],
@@ -375,8 +388,9 @@ class _BarSeekState extends ConsumerState<_BarSeek> {
               builder: (context, ref, _) => Slider(
                 value: shownOf(ref),
                 max: max <= 0 ? 1 : max,
-                onChanged:
-                    max <= 0 ? null : (v) => setState(() => _dragging = v),
+                onChanged: max <= 0
+                    ? null
+                    : (v) => setState(() => _dragging = v),
                 onChangeEnd: (v) {
                   setState(() => _dragging = null);
                   ref
@@ -451,4 +465,37 @@ class _Right extends ConsumerWidget {
       ],
     );
   }
+}
+
+/// A round tap target whose keyboard focus draws an accent ring OVER the
+/// (opaque) cover, where an InkWell's own highlight would be hidden.
+class FocusRingButton extends StatefulWidget {
+  const FocusRingButton({super.key, required this.onTap, required this.child});
+
+  final VoidCallback onTap;
+  final Widget child;
+
+  @override
+  State<FocusRingButton> createState() => _FocusRingButtonState();
+}
+
+class _FocusRingButtonState extends State<FocusRingButton> {
+  bool _focused = false;
+
+  @override
+  Widget build(BuildContext context) => InkWell(
+    customBorder: const CircleBorder(),
+    onTap: widget.onTap,
+    onFocusChange: (f) => setState(() => _focused = f),
+    child: DecoratedBox(
+      position: DecorationPosition.foreground,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: _focused
+            ? Border.all(color: context.cc.accent, width: 2)
+            : null,
+      ),
+      child: widget.child,
+    ),
+  );
 }

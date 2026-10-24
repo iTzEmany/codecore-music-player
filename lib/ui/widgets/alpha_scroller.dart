@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/platform.dart';
 import '../../core/text_utils.dart';
 import '../theme/tokens.dart';
 
@@ -63,7 +64,7 @@ class _AlphaScrollerState extends State<AlphaScroller> {
           top: 0,
           bottom: 0,
           right: 0,
-          width: 28,
+          width: isDesktop ? 28 : 48,
           child: LayoutBuilder(
             builder: (_, c) => GestureDetector(
               behavior: HitTestBehavior.translucent,

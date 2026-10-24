@@ -59,10 +59,9 @@ class NpLiveRow extends StatelessWidget {
 
 /// Star that saves or takes out the station, for the players.
 class RadioStarButton extends ConsumerWidget {
-  const RadioStarButton({super.key, required this.station, this.compact = false, this.color});
+  const RadioStarButton({super.key, required this.station, this.color});
 
   final RadioStation station;
-  final bool compact;
   final Color? color;
 
   @override
@@ -72,7 +71,6 @@ class RadioStarButton extends ConsumerWidget {
     final saved = ref.watch(savedRadioIdsProvider.select((s) => s.contains(station.id)));
     return IconButton(
       tooltip: saved ? l.radioUnsave : l.radioSave,
-      visualDensity: compact ? VisualDensity.compact : null,
       onPressed: () => toggleSavedRadio(context, ref, station),
       icon: Icon(
         saved ? Icons.star_rounded : Icons.star_border_rounded,
