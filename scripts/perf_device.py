@@ -267,8 +267,10 @@ def main():
         # The mini-player: the «title\nartist» View on the row of its «Dispositivi» button.
         ns = dev.nodes()
         y = next(y for l, c, x, y in ns if l == 'Dispositivi')
-        x = next(x for l, c, x, yy in ns if '\n' in l and c == 'android.view.View' and yy == y)
-        dev.sh(f'input tap {x} {y}')
+        x = next(x for l, c, x, yy in ns if '\n' in l and c in ('android.view.View', 'android.widget.Button')
+                 and abs(yy - y) <= 24)
+        # Since 43.1 the whole card is one button: tap its left half, clear of the action buttons.
+        dev.sh(f'input tap {x // 2} {y}')
         time.sleep(1.5)
     def leave_search():
         # The open search field hides the tabs: BACK (keyboard, then field) until they are back.
@@ -294,7 +296,9 @@ def main():
         mini_nodes = dev.nodes()
         y = next(y for l, c, x, y in mini_nodes if l == 'Dispositivi')
         pos['devices'] = next((x, y) for l, c, x, y in mini_nodes if l == 'Dispositivi')
-        pos['mini'] = (next(x for l, c, x, yy in mini_nodes if '\n' in l and c == 'android.view.View' and yy == y), y)
+        # The left half of the mini-player card (one Button since 43.1), clear of its action buttons.
+        pos['mini'] = (next(x for l, c, x, yy in mini_nodes if '\n' in l
+                            and c in ('android.view.View', 'android.widget.Button') and abs(yy - y) <= 24) // 2, y)
 
     def swipes(timed):
         x, y = pos['mini']
