@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show ProviderListenable;
 
 import '../../../core/constants.dart';
 import '../../../data/db/app_database.dart';
@@ -113,7 +114,33 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       setState(() => _onlineSubmitted++);
     } else {
       _remember(v);
+      if (kEnableYoutube && _text.isNotEmpty) _goOnlineIfNoLocal();
     }
+  }
+
+  /// Waits for every local source, then goes online if the text is unchanged
+  /// and nothing matched locally.
+  Future<void> _goOnlineIfNoLocal() async {
+    final text = _text;
+    final q = SearchQuery(text, favorites: _favorites, recent: _recent);
+    await Future.wait([
+      _loaded(searchTracksProvider(q)),
+      _loaded(artistsProvider),
+      _loaded(albumsProvider),
+      _loaded(playlistsProvider),
+    ]);
+    if (mounted && _text == text && _localResults(ref.read, q).isEmpty) {
+      _toOnline();
+    }
+  }
+
+  /// Completes once [p] is no longer loading (data or error).
+  Future<void> _loaded(ProviderListenable<AsyncValue<Object?>> p) {
+    final done = Completer<void>();
+    final sub = ref.listenManual(p, (_, v) {
+      if (!v.isLoading && !done.isCompleted) done.complete();
+    }, fireImmediately: true);
+    return done.future.whenComplete(sub.close);
   }
 
   void _useRecent(String q) {
@@ -202,13 +229,19 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   runSpacing: 8,
                   children: [
                     FilterChip(
-                      avatar: const Icon(Icons.favorite_rounded),
+                      avatar: Icon(
+                        Icons.favorite_rounded,
+                        color: _favorites ? context.cc.bg : context.cc.text,
+                      ),
                       label: Text(l.navFavorites),
                       selected: _favorites,
                       onSelected: (v) => setState(() => _favorites = v),
                     ),
                     FilterChip(
-                      avatar: const Icon(Icons.schedule_rounded),
+                      avatar: Icon(
+                        Icons.schedule_rounded,
+                        color: _recent ? context.cc.bg : context.cc.text,
+                      ),
                       label: Text(l.sortRecent),
                       selected: _recent,
                       onSelected: (v) => setState(() => _recent = v),
@@ -262,7 +295,10 @@ class _EmptyQuery extends ConsumerWidget {
     final genres = genresAsync.value ?? const <GenreSummary>[];
     // Nothing to suggest (no recents, genres loaded and empty): say what to do.
     if (recents.isEmpty && genresAsync.hasValue && genres.isEmpty) {
-      return EmptyState(icon: Icons.search_rounded, message: l.searchEmptyPrompt);
+      return EmptyState(
+        icon: Icons.search_rounded,
+        message: l.searchEmptyPrompt,
+      );
     }
     return ListView(
       children: [
@@ -276,7 +312,11 @@ class _EmptyQuery extends ConsumerWidget {
                 for (final q in recents)
                   ListTile(
                     leading: Icon(Icons.search_rounded, color: cc.textMuted),
-                    title: Text(q, maxLines: 1, overflow: TextOverflow.ellipsis),
+                    title: Text(
+                      q,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                     trailing: IconButton(
                       tooltip: l.removeRecentSearch,
                       icon: const Icon(Icons.close_rounded),
@@ -336,7 +376,10 @@ class _GenrePill extends StatelessWidget {
           borderRadius: radius,
           onTap: onTap,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: CcDims.gap16, vertical: 10),
+            padding: const EdgeInsets.symmetric(
+              horizontal: CcDims.gap16,
+              vertical: 10,
+            ),
             child: Text(name, style: Theme.of(context).textTheme.labelLarge),
           ),
         ),
@@ -344,6 +387,21 @@ class _GenrePill extends StatelessWidget {
     );
   }
 }
+
+/// Local results for [query]; [read] is `ref.watch` (build) or `ref.read` (submit).
+LibrarySearchResults _localResults(
+  T Function<T>(ProviderListenable<T>) read,
+  SearchQuery query,
+) => searchLibrary(
+  text: query.text,
+  quickFilter: query.quick,
+  tracks: read(searchTracksProvider(query)).value ?? const <Track>[],
+  artists: read(artistsProvider).value ?? const [],
+  albums: read(albumsProvider).value ?? const [],
+  playlists: read(playlistsProvider).value ?? const [],
+  trackLimit: 5,
+  sectionLimit: 3,
+);
 
 class _LibraryResults extends ConsumerWidget {
   const _LibraryResults({required this.query, required this.onOnline});
@@ -381,16 +439,7 @@ class _LibraryResults extends ConsumerWidget {
     final text = query.text;
     final tracks =
         ref.watch(searchTracksProvider(query)).value ?? const <Track>[];
-    final res = searchLibrary(
-      text: text,
-      quickFilter: query.quick,
-      tracks: tracks,
-      artists: ref.watch(artistsProvider).value ?? const [],
-      albums: ref.watch(albumsProvider).value ?? const [],
-      playlists: ref.watch(playlistsProvider).value ?? const [],
-      trackLimit: 5,
-      sectionLimit: 3,
-    );
+    final res = _localResults(ref.watch, query);
     final ctrl = ref.read(playerControllerProvider);
     final compact = ref.watch(settingsProvider.select((s) => s.compactMode));
     final extent = trackRowExtentOf(context, compact);
@@ -414,7 +463,9 @@ class _LibraryResults extends ConsumerWidget {
           if (res.tracks.isNotEmpty) ...[
             SectionHeader(
               l.tracks,
-              actionLabel: res.trackTotal > res.tracks.length ? l.showAll : null,
+              actionLabel: res.trackTotal > res.tracks.length
+                  ? l.showAll
+                  : null,
               onAction: () => ShellNav.open<void>(
                 context,
                 SearchTracksScreen(query: query),

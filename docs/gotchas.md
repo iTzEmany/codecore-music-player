@@ -8,3 +8,4 @@
 - **`flutter test -d linux` rigenera `lib/l10n/app_localizations*.dart`.** Per un momento `git status` li mostra cambiati, poi tornano identici: non committarli a metà di un giro.
 - **Golden:** si rigenerano solo nei passi che cambiano l'aspetto (D-20), con `--update-goldens`. Le immagini di `test/goldens/failures` vanno cancellate con `pulizia.sh`.
 - **Mi A3, APK di debug:** `install -r -d` (con il solo `-r` va in VERSION_DOWNGRADE).
+- **yt-dlp su Android si aggiorna solo se viene chiamato.** L'APK porta la versione di youtubedl-android (2025.11.12 con la 0.18.1), che YouTube rifiuta con `HTTP Error 403` sui download. L'aggiornamento parte in `ensureInit()` di `YtDlpChannel.kt`, prima di ogni chiamata: prima partiva solo dalla ricerca, che ora passa da InnerTube, e i download (import Spotify compreso) fallivano. Versione in uso sul telefono: `run-as <pacchetto> cat shared_prefs/youtubedl-android.xml` (`dlpVersion`).

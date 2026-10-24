@@ -147,33 +147,50 @@ void main() {
 
   group('seekable ring (full player)', () {
     final ctrl = _FakeController();
-    Future<void> pump(WidgetTester tester, {bool seekable = true}) =>
-        tester.pumpWidget(
-          ProviderScope(
-            overrides: [
-              playerControllerProvider.overrideWithValue(ctrl),
-              positionProvider.overrideWith((_) => Stream.value(Duration.zero)),
-              durationProvider.overrideWith(
-                (_) => Stream.value(const Duration(seconds: 100)),
-              ),
-            ],
-            child: MaterialApp(
-              localizationsDelegates: AppLocalizations.localizationsDelegates,
-              supportedLocales: AppLocalizations.supportedLocales,
-              locale: const Locale('it'),
-              home: Center(
-                child: RingProgress(
-                  size: 300,
-                  stroke: 12,
-                  seekable: seekable,
-                  child: const SizedBox.expand(),
-                ),
-              ),
+    Future<void> pump(
+      WidgetTester tester, {
+      bool seekable = true,
+      Widget child = const SizedBox.expand(),
+    }) => tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          playerControllerProvider.overrideWithValue(ctrl),
+          positionProvider.overrideWith((_) => Stream.value(Duration.zero)),
+          durationProvider.overrideWith(
+            (_) => Stream.value(const Duration(seconds: 100)),
+          ),
+        ],
+        child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('it'),
+          home: Center(
+            child: RingProgress(
+              size: 300,
+              stroke: 12,
+              seekable: seekable,
+              child: child,
             ),
           ),
-        );
+        ),
+      ),
+    );
 
     setUp(ctrl.seeks.clear);
+
+    testWidgets('a tap on the cover goes through the ring', (tester) async {
+      var taps = 0;
+      await pump(
+        tester,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () => taps++,
+          child: const SizedBox.expand(),
+        ),
+      );
+      await tester.tap(find.byType(RingProgress));
+      expect(taps, 1);
+    });
 
     testWidgets('dragging on the ring seeks to the position under the finger', (
       tester,

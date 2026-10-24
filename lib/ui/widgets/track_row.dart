@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'track_kind.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -617,23 +619,34 @@ class LiveTrackRow extends ConsumerWidget {
       return row;
     }
     if (active) return draggable(row);
-    return Dismissible(
-      key: ValueKey('swipe-queue-${track.id}'),
-      direction: DismissDirection.startToEnd,
-      dismissThresholds: const {DismissDirection.startToEnd: 0.3},
-      background: Container(
-        alignment: Alignment.centerLeft,
-        padding: const EdgeInsets.only(left: CcDims.gap24),
-        color: context.cc.surface2,
-        child: Icon(Icons.queue_rounded, color: context.cc.accentSoft),
+    // A swipe that starts at the left edge belongs to the system back gesture.
+    final media = MediaQuery.of(context);
+    final edge = math.max(48.0, media.systemGestureInsets.left + 24);
+    return Listener(
+      onPointerDown: (e) => _lastDownX = e.position.dx,
+      child: Dismissible(
+        key: ValueKey('swipe-queue-${track.id}'),
+        direction: DismissDirection.startToEnd,
+        dismissThresholds: const {DismissDirection.startToEnd: 0.3},
+        background: Container(
+          alignment: Alignment.centerLeft,
+          padding: const EdgeInsets.only(left: CcDims.gap24),
+          color: context.cc.surface2,
+          child: Icon(Icons.queue_rounded, color: context.cc.accentSoft),
+        ),
+        // The row always comes back; only the queue changes.
+        confirmDismiss: (_) async {
+          if (_lastDownX < edge) return false;
+          ref.read(playerControllerProvider).addToQueue(track.id);
+          showMsg(context, context.l10n.addedToQueue);
+          return false;
+        },
+        child: draggable(row),
       ),
-      // The row always comes back; only the queue changes.
-      confirmDismiss: (_) async {
-        ref.read(playerControllerProvider).addToQueue(track.id);
-        showMsg(context, context.l10n.addedToQueue);
-        return false;
-      },
-      child: draggable(row),
     );
   }
 }
+
+/// Global x of the latest pointer-down: the one that started the swipe.
+// shortcut: one shared x for all rows, a second finger during a swipe overwrites it; per-pointer tracking if it ever matters.
+double _lastDownX = double.infinity;

@@ -21,7 +21,8 @@ class YtDlpChannel(private val applicationContext: Context) {
     private val main = Handler(Looper.getMainLooper())
     private lateinit var channel: MethodChannel
     private var initialized = false
-    private var updateTried = false
+    private var updated = false
+    private var lastUpdateAttempt = 0L
 
     fun register(messenger: BinaryMessenger) {
         channel = MethodChannel(messenger, "codecore/ytdlp")
@@ -30,21 +31,26 @@ class YtDlpChannel(private val applicationContext: Context) {
 
     @Synchronized
     private fun ensureInit() {
-        if (initialized) return
-        YoutubeDL.getInstance().init(applicationContext)
-        FFmpeg.getInstance().init(applicationContext)
-        initialized = true
+        if (!initialized) {
+            YoutubeDL.getInstance().init(applicationContext)
+            FFmpeg.getInstance().init(applicationContext)
+            initialized = true
+        }
+        updateOnce()
     }
 
-    /** Best effort: YouTube changes often, so pull the latest stable yt-dlp once per run. */
+    /** Best effort: YouTube changes often, so pull the latest stable yt-dlp before any use; after a failure retry no sooner than 10 minutes. */
     @Synchronized
     private fun updateOnce() {
-        if (updateTried) return
-        updateTried = true
+        if (updated) return
+        val now = System.currentTimeMillis()
+        if (lastUpdateAttempt != 0L && now - lastUpdateAttempt < 10 * 60 * 1000) return
+        lastUpdateAttempt = now
         try {
             YoutubeDL.getInstance().updateYoutubeDL(
                 applicationContext, YoutubeDL.UpdateChannel.STABLE
             )
+            updated = true
         } catch (e: Exception) {
             android.util.Log.w("codecore", "yt-dlp update failed: ${e.message}")
         }
@@ -54,7 +60,6 @@ class YtDlpChannel(private val applicationContext: Context) {
         when (call.method) {
             "search" -> run(result) {
                 ensureInit()
-                updateOnce()
                 val query = call.argument<String>("query")!!
                 val isUrl = call.argument<Boolean>("isUrl") ?: false
                 // `items` = a search page with full metadata for the first N results.

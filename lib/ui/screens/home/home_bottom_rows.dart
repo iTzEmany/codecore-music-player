@@ -13,6 +13,7 @@ import '../../../providers/library_providers.dart';
 import '../../../providers/player_providers.dart';
 import '../../shell/shell_nav.dart';
 import '../../theme/tokens.dart';
+import '../../widgets/artist_avatar.dart';
 import '../../widgets/cover_image.dart';
 import '../../widgets/section_header.dart';
 import '../library/album_detail_screen.dart';
@@ -118,7 +119,7 @@ class _MonthBlock extends ConsumerWidget {
           for (final (i, a) in month.topArtists.take(2).indexed)
             HomeRow(
               last: i == month.topArtists.take(2).length - 1,
-              cover: const SizedBox.shrink(),
+              cover: ArtistAvatar(name: a.name, size: kHomeCover, coverKey: a.coverKey),
               title: a.name ?? l.unknownArtist,
               subtitle: l.statsPlays(a.plays),
               onTap: open,

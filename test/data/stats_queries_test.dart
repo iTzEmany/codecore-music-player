@@ -89,6 +89,7 @@ void main() {
     final s = await stats.period(StatsPeriod.month(2026, 10));
     expect(s.topArtists.map((a) => a.key), ['daft punk', 'lucio dalla']);
     expect(s.topArtists.first.plays, 3);
+    expect(s.topArtists.map((x) => x.coverKey), ['c1', null], reason: 'the library cover of the artist, if any');
     expect(s.topArtists.map((a) => a.name), isNot(contains(null)), reason: 'no «unknown artist» in the ranking');
   });
 
