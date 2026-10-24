@@ -59,6 +59,36 @@ void main() {
     }
   }
 
+  // Pinned as they are TODAY (38.6). textFaint is below AA (4.5) on purpose or
+  // by neglect: it is a known defect, phase 40 moves it; update then.
+  test('textFaint: today\'s values and ratios (below AA, a known defect)', () {
+    const faint = {
+      AppThemeId.notte: (Color(0xFF6E6680), [3.74, 3.51, 3.20]),
+      AppThemeId.oled: (Color(0xFF6E6680), [3.88, 3.51, 3.20]),
+      AppThemeId.chiaro: (Color(0xFF8C829E), [3.43, 3.17, 2.89]),
+    };
+    for (final e in faint.entries) {
+      final c = buildPalette(e.key, CcAccent.viola);
+      expect(c.textFaint, e.value.$1, reason: e.key.name);
+      final onto = [c.bg, c.surface1, c.surface2];
+      for (var i = 0; i < onto.length; i++) {
+        final r = contrast(c.textFaint, onto[i]);
+        expect(r, closeTo(e.value.$2[i], 0.01), reason: '${e.key.name} #$i');
+        expect(r, lessThan(4.5), reason: '${e.key.name} #$i');
+      }
+    }
+  });
+
+  test('accentSoft: today\'s values (violet) and ratios', () {
+    expect(CcColors.notte.accentSoft, const Color(0xFFD9C8FF));
+    expect(CcColors.oled.accentSoft, const Color(0xFFD9C8FF));
+    expect(CcColors.chiaro.accentSoft, const Color(0xFF5B2BBE));
+    expect(contrast(CcColors.notte.accentSoft, CcColors.notte.bg), closeTo(13.18, 0.01));
+    expect(contrast(CcColors.notte.accentSoft, CcColors.notte.surface1), closeTo(12.36, 0.01));
+    expect(contrast(CcColors.chiaro.accentSoft, CcColors.chiaro.bg), closeTo(7.86, 0.01));
+    expect(contrast(CcColors.chiaro.accentSoft, CcColors.chiaro.surface1), closeTo(7.25, 0.01));
+  });
+
   test('the light theme is light and the others are dark', () {
     Brightness of(AppThemeId id) =>
         buildThemeFromColors(buildPalette(id, CcAccent.viola), false).brightness;
