@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import '../../widgets/prompt_name.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/db/app_database.dart';
@@ -29,7 +30,6 @@ import '../import/import_banner.dart';
 import '../library/album_detail_screen.dart' show collectionMeta;
 import 'add_tracks_screen.dart';
 import 'export_dialog.dart';
-import 'playlist_dialogs.dart';
 import '../../widgets/motion.dart';
 
 class PlaylistDetailScreen extends ConsumerStatefulWidget {
@@ -272,11 +272,12 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
                   tracks: tracks,
                 );
               case 'rename':
-                final n = await askPlaylistName(
+                final n = await promptName(
                   context,
                   initial: _name,
                   confirmLabel: l.save,
                   title: l.renamePlaylist,
+                  hint: l.playlistName,
                 );
                 if (n == null) return;
                 await repo.rename(id, n);

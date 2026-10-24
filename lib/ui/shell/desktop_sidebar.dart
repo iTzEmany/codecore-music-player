@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/prompt_name.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../l10n/l10n_ext.dart';
@@ -215,7 +216,12 @@ class DesktopSidebar extends ConsumerWidget {
                     );
                     return;
                   }
-                  final name = await askPlaylistName(context);
+                  final name = await promptName(
+                    context,
+                    title: l.newPlaylist,
+                    confirmLabel: l.create,
+                    hint: l.playlistName,
+                  );
                   if (name == null) return;
                   await ref.read(playlistRepositoryProvider).create(name);
                 },
