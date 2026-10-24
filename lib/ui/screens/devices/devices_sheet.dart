@@ -1,5 +1,6 @@
 import '../../../providers/track_ops.dart';
 import '../../widgets/cc_sheet.dart';
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -110,79 +111,31 @@ class _DevicesSheetState extends ConsumerState<DevicesSheet> {
     final jam = ref.watch(jamProvider);
     final visible = ref.watch(settingsProvider.select((s) => s.receiveFromLan));
     final ownId = _hub.deviceId ?? '';
-    final others = [
+    final others = <String>[
       for (final p in jam.jam?.participants ?? const [])
         if (p.id != ownId) p.name,
     ];
     return SafeArea(
       child: ListView(
         shrinkWrap: true,
-        padding: const EdgeInsets.fromLTRB(CcDims.margin, 0, CcDims.margin, CcDims.gap16),
+        padding: const EdgeInsets.fromLTRB(
+          CcDims.margin,
+          0,
+          CcDims.margin,
+          CcDims.gap16,
+        ),
         children: [
           Text(l.devicesTitle, style: theme.titleMedium),
           const SizedBox(height: 12),
           if (jam.active) ...[
-            Text(
-              l.devicesJamActive,
-              style: theme.labelLarge?.copyWith(color: cc.textMuted),
-            ),
-            const SizedBox(height: 4),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: CcDims.gap4),
-              child: Row(
-                children: [
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: cc.surface2,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(Icons.queue_music_rounded, color: cc.accent),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          others.isEmpty ? jam.peerName : others.join(', '),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.bodyLarge,
-                        ),
-                        Text(
-                          l.jamParticipantsCount(others.length + 1),
-                          style: theme.labelSmall?.copyWith(
-                            color: cc.textMuted,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  FilledButton(
-                    onPressed: _openJam,
-                    style: FilledButton.styleFrom(
-                      minimumSize: const Size(0, 36),
-                      padding: const EdgeInsets.symmetric(horizontal: 18),
-                    ),
-                    child: Text(l.jamOpen),
-                  ),
-                  const SizedBox(width: 8),
-                  OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                      minimumSize: const Size(0, 36),
-                      padding: const EdgeInsets.symmetric(horizontal: 18),
-                    ),
-                    onPressed: () {
-                      unawaited(ref.read(jamProvider.notifier).end());
-                      Navigator.of(context).pop();
-                    },
-                    child: Text(jam.isHost ? l.jamEnd : l.jamLeave),
-                  ),
-                ],
-              ),
+            _JamActive(
+              jam: jam,
+              others: others,
+              onOpen: _openJam,
+              onEnd: () {
+                unawaited(ref.read(jamProvider.notifier).end());
+                Navigator.of(context).pop();
+              },
             ),
             const SizedBox(height: 16),
           ],
@@ -197,41 +150,8 @@ class _DevicesSheetState extends ConsumerState<DevicesSheet> {
               onJam: () => _startJam(peer),
               onSend: () => _send(peer),
             ),
-          if (hub.peers.isEmpty) ...[
-            if (!visible) ...[
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: CcDims.gap8),
-                child: Text(l.devicesVisibleHint, style: theme.bodyMedium),
-              ),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: Text(l.devicesVisibleTitle),
-                value: visible,
-                onChanged: (v) => ref
-                    .read(settingsProvider.notifier)
-                    .update((s) => s.copyWith(receiveFromLan: v)),
-              ),
-            ] else
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: CcDims.gap12),
-                child: Row(
-                  children: [
-                    const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        hub.active ? l.noDevicesHint : l.searchingDevices,
-                        style: theme.bodyMedium,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-          ],
+          if (hub.peers.isEmpty)
+            _NoPeers(visible: visible, hubActive: hub.active),
           const SizedBox(height: 8),
           ListTile(
             contentPadding: EdgeInsets.zero,
@@ -239,6 +159,138 @@ class _DevicesSheetState extends ConsumerState<DevicesSheet> {
             title: Text(l.manualConnection),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: _manual,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _JamActive extends StatelessWidget {
+  const _JamActive({
+    required this.jam,
+    required this.others,
+    required this.onOpen,
+    required this.onEnd,
+  });
+
+  final JamUiState jam;
+  final List<String> others;
+  final VoidCallback onOpen, onEnd;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final cc = context.cc;
+    final theme = Theme.of(context).textTheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l.devicesJamActive,
+          style: theme.labelLarge?.copyWith(color: cc.textMuted),
+        ),
+        const SizedBox(height: 4),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: CcDims.gap4),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: cc.surface2,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.queue_music_rounded, color: cc.accent),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      others.isEmpty ? jam.peerName : others.join(', '),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.bodyLarge,
+                    ),
+                    Text(
+                      l.jamParticipantsCount(others.length + 1),
+                      style: theme.labelSmall?.copyWith(color: cc.textMuted),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              FilledButton(
+                onPressed: onOpen,
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size(0, 36),
+                  padding: const EdgeInsets.symmetric(horizontal: 18),
+                ),
+                child: Text(l.jamOpen),
+              ),
+              const SizedBox(width: 8),
+              OutlinedButton(
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size(0, 36),
+                  padding: const EdgeInsets.symmetric(horizontal: 18),
+                ),
+                onPressed: onEnd,
+                child: Text(jam.isHost ? l.jamEnd : l.jamLeave),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Shown when no device is around: the visibility switch or the searching hint.
+class _NoPeers extends ConsumerWidget {
+  const _NoPeers({required this.visible, required this.hubActive});
+
+  final bool visible, hubActive;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    final theme = Theme.of(context).textTheme;
+    if (!visible) {
+      return Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: CcDims.gap8),
+            child: Text(l.devicesVisibleHint, style: theme.bodyMedium),
+          ),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: Text(l.devicesVisibleTitle),
+            value: visible,
+            onChanged: (v) => ref
+                .read(settingsProvider.notifier)
+                .update((s) => s.copyWith(receiveFromLan: v)),
+          ),
+        ],
+      );
+    }
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: CcDims.gap12),
+      child: Row(
+        children: [
+          const SizedBox(
+            width: 18,
+            height: 18,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              hubActive ? l.noDevicesHint : l.searchingDevices,
+              style: theme.bodyMedium,
+            ),
           ),
         ],
       ),
