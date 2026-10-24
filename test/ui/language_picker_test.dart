@@ -13,6 +13,8 @@ void main() {
     addTearDown(tester.view.reset);
     final h = await Harness.create(tester);
     await h.pump(tester, const Scaffold(body: SettingsScreen(initial: SettingsPage.appearance)));
+    await tester.ensureVisible(find.text('Italiano'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Italiano'));
     await tester.pumpAndSettle();
     for (final name in ['English', 'Deutsch', 'Español', 'Français', 'Português']) {
