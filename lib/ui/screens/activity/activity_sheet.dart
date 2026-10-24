@@ -1,4 +1,5 @@
 import '../../widgets/cc_sheet.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -42,63 +43,123 @@ class ActivitySheet extends ConsumerWidget {
     final state = ref.watch(activityProvider);
 
     final log = ref.watch(activityLogProvider.select((e) => e.length));
-    String title(ActivityItem a) => activityTitle(l, a);
-
     // In the Library tab, below the bar: the sheet closes on the way.
     void open(Widget page) => ShellNav.openInLibrary(context, ref, page);
 
-    Future<void> cancelImport(ActivityItem a) async {
-      final ok = await showConfirm(
-        context,
-        title: l.csvImportCancelTitle,
-        body: l.csvImportCancelBody,
-        confirmLabel: l.csvImportCancelGo,
-        destructive: true,
-      );
-      if (ok) {
-        await ref
-            .read(playlistImportServiceProvider)
-            .cancelChain(a.ref! as int);
-      }
-    }
+    return SafeArea(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.sizeOf(context).height * 0.7,
+        ),
+        child: ListView(
+          shrinkWrap: true,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                CcDims.margin,
+                0,
+                CcDims.margin,
+                CcDims.gap8,
+              ),
+              child: Text(l.activityTitle, style: theme.titleMedium),
+            ),
+            const YtDlpOutdatedBanner(),
+            if (state.running.isEmpty)
+              Padding(
+                padding: const EdgeInsets.all(CcDims.margin),
+                child: Text(
+                  l.activityNone,
+                  style: theme.bodyMedium?.copyWith(color: cc.textMuted),
+                ),
+              ),
+            for (final a in state.running) _ActivityRow(item: a),
+            // What ended goes to the Registro, not under the running ones.
+            ListTile(
+              leading: const Icon(Icons.receipt_long_rounded),
+              title: Text(l.activityLog),
+              subtitle: Text(l.activityLogCount(log)),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => open(const ActivityLogScreen()),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
-    void cancel(ActivityItem a) {
-      switch (a.kind) {
-        case ActivityKind.enrich:
-          ref.read(enrichJobProvider.notifier).cancel();
-        case ActivityKind.download:
-          final r = a.ref;
-          if (r is PodcastDownloadRef) {
-            ref.read(podcastDownloadsProvider.notifier).cancel(r.episodeId);
-          } else {
-            ref.read(downloadsProvider.notifier).cancel(r! as int);
-          }
-        case ActivityKind.transfer:
-          final o = a.ref! as OutgoingOffer;
-          final hub = ref.read(shareHubProvider);
-          ref
-              .read(shareHubProvider.notifier)
-              .cancelOutgoing(
-                o,
-                hub.peers.where((p) => p.id == o.toId).firstOrNull,
-              );
-        case ActivityKind.cleanup:
-          ref.read(duplicateSearchProvider.notifier).cancel();
-        case ActivityKind.secondOpinion:
-          ref.read(secondOpinionJobProvider.notifier).cancel();
-        case ActivityKind.import:
-          cancelImport(a);
-        case ActivityKind.scan:
-        case ActivityKind.releases:
-          break;
-      }
-    }
+Future<void> _cancelImport(
+  BuildContext context,
+  WidgetRef ref,
+  ActivityItem a,
+) async {
+  final l = context.l10n;
+  final ok = await showConfirm(
+    context,
+    title: l.csvImportCancelTitle,
+    body: l.csvImportCancelBody,
+    confirmLabel: l.csvImportCancelGo,
+    destructive: true,
+  );
+  if (ok) {
+    await ref.read(playlistImportServiceProvider).cancelChain(a.ref! as int);
+  }
+}
 
-    Widget row(ActivityItem a) => InkWell(
+void _cancel(BuildContext context, WidgetRef ref, ActivityItem a) {
+  switch (a.kind) {
+    case ActivityKind.enrich:
+      ref.read(enrichJobProvider.notifier).cancel();
+    case ActivityKind.download:
+      final r = a.ref;
+      if (r is PodcastDownloadRef) {
+        ref.read(podcastDownloadsProvider.notifier).cancel(r.episodeId);
+      } else {
+        ref.read(downloadsProvider.notifier).cancel(r! as int);
+      }
+    case ActivityKind.transfer:
+      final o = a.ref! as OutgoingOffer;
+      final hub = ref.read(shareHubProvider);
+      ref
+          .read(shareHubProvider.notifier)
+          .cancelOutgoing(
+            o,
+            hub.peers.where((p) => p.id == o.toId).firstOrNull,
+          );
+    case ActivityKind.cleanup:
+      ref.read(duplicateSearchProvider.notifier).cancel();
+    case ActivityKind.secondOpinion:
+      ref.read(secondOpinionJobProvider.notifier).cancel();
+    case ActivityKind.import:
+      _cancelImport(context, ref, a);
+    case ActivityKind.scan:
+    case ActivityKind.releases:
+      break;
+  }
+}
+
+class _ActivityRow extends ConsumerWidget {
+  const _ActivityRow({required this.item});
+
+  final ActivityItem item;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final a = item;
+    final l = context.l10n;
+    final cc = context.cc;
+    final theme = Theme.of(context).textTheme;
+    void open(Widget page) => ShellNav.openInLibrary(context, ref, page);
+
+    return InkWell(
       // An import opens the list of its songs, the second opinion its log.
       onTap: switch (a.kind) {
-        ActivityKind.import => () => open(ImportDetailScreen(importId: a.ref! as int)),
-        ActivityKind.secondOpinion => () => open(const SecondOpinionLogScreen()),
+        ActivityKind.import => () => open(
+          ImportDetailScreen(importId: a.ref! as int),
+        ),
+        ActivityKind.secondOpinion => () => open(
+          const SecondOpinionLogScreen(),
+        ),
         _ => null,
       },
       child: Padding(
@@ -128,13 +189,15 @@ class ActivitySheet extends ConsumerWidget {
                         const SizedBox(width: 8),
                         Text(
                           '${a.done}/${a.total}',
-                          style: theme.bodyMedium?.copyWith(color: cc.textMuted),
+                          style: theme.bodyMedium?.copyWith(
+                            color: cc.textMuted,
+                          ),
                         ),
                       ],
                     )
                   else
                     Text(
-                      title(a),
+                      activityTitle(l, a),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: theme.bodyLarge,
@@ -168,48 +231,8 @@ class ActivitySheet extends ConsumerWidget {
               IconButton(
                 tooltip: l.cancel,
                 icon: const Icon(Icons.close_rounded),
-                onPressed: () => cancel(a),
+                onPressed: () => _cancel(context, ref, a),
               ),
-          ],
-        ),
-      ),
-    );
-
-    return SafeArea(
-      child: ConstrainedBox(
-        constraints: BoxConstraints(
-          maxHeight: MediaQuery.sizeOf(context).height * 0.7,
-        ),
-        child: ListView(
-          shrinkWrap: true,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                CcDims.margin,
-                0,
-                CcDims.margin,
-                CcDims.gap8,
-              ),
-              child: Text(l.activityTitle, style: theme.titleMedium),
-            ),
-            const YtDlpOutdatedBanner(),
-            if (state.running.isEmpty)
-              Padding(
-                padding: const EdgeInsets.all(CcDims.margin),
-                child: Text(
-                  l.activityNone,
-                  style: theme.bodyMedium?.copyWith(color: cc.textMuted),
-                ),
-              ),
-            for (final a in state.running) row(a),
-            // What ended goes to the Registro, not under the running ones.
-            ListTile(
-              leading: const Icon(Icons.receipt_long_rounded),
-              title: Text(l.activityLog),
-              subtitle: Text(l.activityLogCount(log)),
-              trailing: const Icon(Icons.chevron_right_rounded),
-              onTap: () => open(const ActivityLogScreen()),
-            ),
           ],
         ),
       ),
