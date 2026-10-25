@@ -628,14 +628,14 @@ Refactor «ui-fluida» (piano in `docs/refactor/ui-fluida/analisi.md`, decisioni
 
 ## Fase 45 — Cache di streaming e motore (`fase-45-cache-streaming.md`)
 Feature «Streaming e coda online» (`docs/feature-streaming.md`, decisioni D-61…D-81, 2026-10-25). Una PR per la fase, un commit per task.
-- [ ] 45.1 `StreamCache` e chiave
-- [ ] 45.2 Righe ombra, `listenKinds` e test «riga `kind = 2` in ogni vista» (K-02)
-- [ ] 45.3 `StreamPreparer`
-- [ ] 45.4 Il lettore suona dal file in cache
-- [ ] 45.5 Suggeriti di Shuffle+ sulla cache; via `StreamAddressCache`
-- [ ] 45.6 Impostazione `streamCacheMb`, cursore e «Svuota»
-- [ ] 45.7 Controlli di fase (K-01, K-02, K-03)
-- [ ] 45.8 Prove a mano (utente)
+- [x] 45.1 `StreamCache` e chiave
+- [x] 45.2 Righe ombra, `listenKinds` e test «riga `kind = 2` in ogni vista» (K-02)
+- [x] 45.3 `StreamPreparer`
+- [x] 45.4 Il lettore suona dal file in cache
+- [x] 45.5 Suggeriti di Shuffle+ sulla cache; via `StreamAddressCache`
+- [x] 45.6 Impostazione `streamCacheMb`, cursore e «Svuota»
+- [x] 45.7 Controlli di fase (K-01, K-02, K-03)
+- [~] 45.8 Prove a mano (utente, «Tocca a te» in handoff)
 
 ## Fase 46 — Streaming dalla ricerca (`fase-46-streaming-ricerca.md`)
 - [ ] 46.1 `PlayerController`: suonare e accodare brani online
@@ -676,6 +676,12 @@ Feature «Streaming e coda online» (`docs/feature-streaming.md`, decisioni D-61
 
 ## Note di deviazione
 <!-- una riga per deviazione: data — task — cosa è cambiato e perché -->
+- 2026-10-25 — 45.1 — limite effettivo = min(cursore, libero + usato − 500 MB): i byte della cache contano come spazio libero, altrimenti una cache piena si restringerebbe da sola.
+- 2026-10-25 — 45.2 — il backup esclude `kind = 2` invece di tenere «solo `kind = 0`», così gli episodi dei podcast restano esportati. Tolto il test della cartella (R-11): servirebbe `path_provider_platform_interface`, pacchetto non elencato. Query toccate: `watchHistory`, `topArtistsSince` (via `listenKinds`), `watchIgnored`, `watchMissing`, `collectUserData`, conteggio brani, `PlaylistRepository.addTracks`/`watchAll`.
+- 2026-10-25 — 45.3 — K-01: il canale yt-dlp di Android non serializza le chiamate (pool di thread); il limite di parallelismo (2) sta tutto in `StreamPreparer`.
+- 2026-10-25 — 45.4 — ha fatto in anticipo parte di 45.5 (caricamento dei suggeriti tramite il preparer); 45.5 ha tolto `StreamAddressCache` e collegato Shuffle+ con `shufflePlusPrepareProvider`.
+- 2026-10-25 — 45.6 — «Svuota» tiene file e righe del brano in corso **e di tutta la coda online** (`StreamPreparer.queuedKeys`), non solo del brano in corso: cancellare la riga di un brano in coda lo farebbe fallire con «non in libreria». Il widget test sostituisce `streamCacheUsedProvider` (l'I/O reale non termina nella zona dei widget test); la pulizia è coperta da un test unitario.
+- 2026-10-25 — 45.7 — K-03: Fogli e Swipe mini player oltre un frame in due giri; corretto al primo tentativo (D-90) leggendo solo le righe ombra leggere in `_syncPreparer` (78725da). «Tutti i brani» resta sopra «Finale» ma pari a `master` misurato lo stesso giorno (rumore): tabella in `docs/refactor/ui-fluida/misure.md`.
 
 ## Note di deviazione
 - 11.5 (2026-10-15): `flutter run` non accetta `--build-number`; per il Mi A3 (versionCode 5000) si usa `flutter build apk --debug --build-number=5000 --target-platform android-arm64` + `adb install -r`. Provato su telefono: avvio debug ~17 s. Nel segnaposto Home restano anche Playlist e YouTube (rifatti in 11.12/11.13). `TracksTab(primarySearch)`: solo la scheda Cerca usa il FocusNode condiviso.
