@@ -394,6 +394,7 @@ LibrarySearchResults _localResults(
   SearchQuery query,
 ) => searchLibrary(
   text: query.text,
+  credited: read(searchCreditedProvider(query)).value ?? const <Track>[],
   quickFilter: query.quick,
   tracks: read(searchTracksProvider(query)).value ?? const <Track>[],
   artists: read(artistsProvider).value ?? const [],
@@ -489,6 +490,23 @@ class _LibraryResults extends ConsumerWidget {
           ],
           for (final kind in SearchSectionKind.values)
             ..._section(context, kind, res),
+          if (res.credited.isNotEmpty) ...[
+            SectionHeader(l.creditsInCredits),
+            for (var i = 0; i < res.credited.length; i++)
+              SizedBox(
+                key: ValueKey('credited-${res.credited[i].id}'),
+                height: extent,
+                child: LiveTrackRow(
+                  track: res.credited[i],
+                  compact: compact,
+                  onTap: () => ctrl.playFromList(
+                    res.credited,
+                    i,
+                    context: const PlayContext(PlayContextKind.search),
+                  ),
+                ),
+              ),
+          ],
         ],
         if (kEnableYoutube && text.isNotEmpty)
           Padding(

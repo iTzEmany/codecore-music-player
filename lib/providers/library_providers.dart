@@ -6,6 +6,7 @@ import 'package:path/path.dart' as p;
 import '../core/app_log.dart';
 import '../data/db/app_database.dart';
 import '../data/repositories/library_queries.dart';
+import '../data/repositories/library_search.dart' show creditedTracks;
 import '../data/repositories/smart_search.dart';
 import '../data/repositories/track_repository.dart';
 import '../services/covers/cover_store.dart';
@@ -263,6 +264,17 @@ final searchTracksProvider = Provider.autoDispose.family<AsyncValue<List<Track>>
     (i) => smartSearch(i, q.text, favorites: q.favorites, recent: q.recent, nowMs: now),
   );
 });
+
+/// Tracks found only through a credit; not for operators or quick filters.
+final searchCreditedProvider = FutureProvider.autoDispose
+    .family<List<Track>, SearchQuery>((ref, q) {
+      final text = q.text.trim();
+      if (text.isEmpty || q.quick || hasOperators(text)) return const [];
+      final found = ref.watch(searchTracksProvider(q)).value ?? const <Track>[];
+      return creditedTracks(ref.watch(databaseProvider), text, {
+        for (final t in found) t.id,
+      });
+    });
 
 final topTracksProvider = StreamProvider<List<Track>>(
   (ref) => ref.watch(libraryQueriesProvider).watchTopTracks(),
