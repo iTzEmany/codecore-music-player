@@ -8,6 +8,7 @@ import 'package:shelf_router/shelf_router.dart';
 import '../../core/app_log.dart';
 import '../share/lan_server.dart';
 import '../share/offers.dart';
+import '../share/track_meta.dart';
 import 'jam_models.dart';
 import 'jam_state.dart';
 
@@ -22,6 +23,9 @@ const jamFileHeader = 'x-jam-file';
 
 /// Resolves an item this device owns (via [JamItem.ref]) to a local file.
 typedef JamFileResolver = Future<String?> Function(JamItem item);
+
+/// Resolves an item this device owns to its [TrackMeta] (null: unknown).
+typedef JamMetaResolver = Future<TrackMeta?> Function(JamItem item);
 
 enum JamRequestStatus { pending, accepted, declined, expired, cancelled }
 
@@ -79,6 +83,7 @@ class JamHost {
   final DateTime Function() _now;
 
   JamFileResolver? resolveFile;
+  JamMetaResolver? resolveMeta;
 
   /// A new valid request arrived (the UI asks the user).
   void Function(JamRequest request)? onRequest;
@@ -502,22 +507,8 @@ class JamHost {
 
     // Owner: stream a queued item that this device owns.
     router.get('/<sid>/file/<n>', (Request r, String sid, String n) async {
-      final hostSide = _sid != null && sid == _sid;
-      final guestSide = _gSid != null && sid == _gSid;
-      if (!hostSide && !guestSide) return Response(401, body: 'unauthorized');
-      final token = hostSide ? _fileToken : _gFileToken;
-      if (!_tokenOk(token, r.headers[jamFileHeader])) {
-        return Response(401, body: 'unauthorized');
-      }
-      final st = hostSide ? _state : _gState?.call();
-      final id = int.tryParse(n);
-      final item = id == null || st == null
-          ? null
-          : st.items.where((i) => i.id == id).firstOrNull;
-      // Only items in the queue are ever exposed.
-      if (item == null || item.ownerDeviceId != deviceId) {
-        return Response.notFound('not found');
-      }
+      final (:err, :item) = _ownedItem(r, sid, n);
+      if (item == null) return err!;
       final path = await resolveFile?.call(item);
       if (path == null) return Response.notFound('not found');
       final file = File(path);
@@ -544,6 +535,35 @@ class JamHost {
           });
     });
 
+    // Owner: the TrackMeta of a queued item that this device owns.
+    router.get('/<sid>/meta/<n>', (Request r, String sid, String n) async {
+      final (:err, :item) = _ownedItem(r, sid, n);
+      if (item == null) return err!;
+      final meta = await resolveMeta?.call(item);
+      return meta == null ? Response.notFound('not found') : _json(meta.toJson());
+    });
+
     return router;
+  }
+
+  /// Shared guard of the per-item routes: valid sid + file token, and the
+  /// item is in the queue and owned by this device. Else [err] is the reply.
+  ({Response? err, JamItem? item}) _ownedItem(Request r, String sid, String n) {
+    final hostSide = _sid != null && sid == _sid;
+    final guestSide = _gSid != null && sid == _gSid;
+    final token = hostSide ? _fileToken : _gFileToken;
+    if ((!hostSide && !guestSide) || !_tokenOk(token, r.headers[jamFileHeader])) {
+      return (err: Response(401, body: 'unauthorized'), item: null);
+    }
+    final st = hostSide ? _state : _gState?.call();
+    final id = int.tryParse(n);
+    final item = id == null || st == null
+        ? null
+        : st.items.where((i) => i.id == id).firstOrNull;
+    // Only items in the queue are ever exposed.
+    if (item == null || item.ownerDeviceId != deviceId) {
+      return (err: Response.notFound('not found'), item: null);
+    }
+    return (err: null, item: item);
   }
 }

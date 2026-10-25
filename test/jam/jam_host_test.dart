@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:codecore/services/jam/jam_host.dart';
 import 'package:codecore/services/jam/jam_models.dart';
+import 'package:codecore/services/share/track_meta.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
 import 'package:shelf/shelf.dart';
@@ -175,5 +176,28 @@ void main() {
             JamItem(id: 0, ownerDeviceId: 'guest', title: 'C', ext: 'mp3', ref: 'mine')),
         from: 'guest');
     expect((await call('GET', '${s.sid}/file/3', headers: auth)).statusCode, 404);
+  });
+
+  test('serves the TrackMeta of queued owned items, library and cached', () async {
+    host.resolveMeta = (item) async => switch (item.ref) {
+          'lib' => const TrackMeta(title: 'Lib', isrc: 'USRC17607839'),
+          'yt:abcdefghijk' => const TrackMeta(title: 'Cached', youtubeId: 'abcdefghijk'),
+          _ => null,
+        };
+    final s = await startSession();
+    final auth = {'x-jam-file': host.fileToken!};
+    for (final ref in ['lib', 'yt:abcdefghijk', 'none']) {
+      host.apply(JamCommand.add(
+          JamItem(id: 0, ownerDeviceId: 'host', title: ref, ext: 'mp3', ref: ref)));
+    }
+    expect((await json(await call('GET', '${s.sid}/meta/1', headers: auth)))['isrc'],
+        'USRC17607839');
+    expect((await json(await call('GET', '${s.sid}/meta/2', headers: auth)))['youtubeId'],
+        'abcdefghijk');
+    // callback says unknown, not in queue, wrong sid, no token
+    expect((await call('GET', '${s.sid}/meta/3', headers: auth)).statusCode, 404);
+    expect((await call('GET', '${s.sid}/meta/99', headers: auth)).statusCode, 404);
+    expect((await call('GET', 'wrong/meta/1', headers: auth)).statusCode, 401);
+    expect((await call('GET', '${s.sid}/meta/1')).statusCode, 401);
   });
 }
