@@ -30,6 +30,7 @@ import '../services/jam/jam_transport.dart';
 import '../services/share/discovery.dart';
 import 'database_providers.dart';
 import 'library_providers.dart' show coverStoreProvider;
+import 'online_providers.dart' show creditsRepositoryProvider;
 import 'player_providers.dart';
 import 'settings_providers.dart';
 import 'share_hub.dart';
@@ -478,7 +479,9 @@ class JamController extends Notifier<JamUiState> {
 
   Future<TrackMeta?> _localMeta(JamItem item) async {
     final row = await _localRow(item);
-    return row == null ? null : TrackMeta.fromTrack(row);
+    if (row == null) return null;
+    final c = await ref.read(creditsRepositoryProvider).portableOf(row.id);
+    return TrackMeta.fromTrack(row, credits: c.credits, details: c.details);
   }
 
   Future<String?> _localCover(JamItem item) async {

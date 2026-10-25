@@ -28,7 +28,7 @@ import '../services/share/share_notifier.dart';
 import '../core/paths.dart';
 import '../core/platform.dart';
 import 'database_providers.dart';
-import 'online_providers.dart' show afterReceive;
+import 'online_providers.dart' show afterReceive, creditsRepositoryProvider;
 import 'library_providers.dart';
 import 'settings_providers.dart';
 import 'share_providers.dart';
@@ -557,6 +557,7 @@ class ShareHubNotifier extends Notifier<ShareHubState> {
             ref.read(coverStoreProvider),
             entry.key,
             item.meta,
+            credits: ref.read(creditsRepositoryProvider),
             fetchCover: item.hasCover
                 ? () => client.downloadOfferCover(
                       o.fromHost, o.fromPort, o.offerId, o.token, item.id)

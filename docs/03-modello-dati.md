@@ -199,6 +199,12 @@ Le vecchie impostazioni finte (crossfade, gapless, normalizzazione, "bit-perfect
   d'importazione (`ImportRepository.setItem` con `trackId`) scrivono l'ISRC solo se quello del brano è vuoto: mai sovrascritto.
 - I file già in libreria ricevono l'ISRC dai tag solo quando lo scanner li rilegge (dimensione/mtime cambiati): nessuna riscansione forzata, per evitare una rilettura completa sui telefoni; l'arricchimento Deezer ripiega sulla ricerca testuale.
 
+## Crediti e dettagli (schema v15, fase 50-51)
+- `track_credits` (`track_id` → `tracks` con cascade, `name`, `name_key` = `creditNameKey(name)`, `role`, `source`; chiave `(track_id, name_key, role)`, indice `track_credits_name_key`).
+- `track_enrich` (`track_id` chiave; `details` JSON, `deezer_id`, `mbid`; `meta_none_at`, `lyrics_none_at`, `synced_none_at`, `curio_none_at`, `credits_none_at` = quando la ricerca non ha trovato niente, ritentata dopo 30 giorni; `lyrics_by_user`).
+- `activity_log` (`id`, `at`, `kind`, `name`, `done`, `total`, `failed`, `detail`; indice su `at`): il «Registro» dei lavori in background.
+- `tracks.cover_source` (intero, di serie 0).
+
 ## Blocco `meta` dei brani condivisi (fase 37)
 Oggetto JSON facoltativo nel manifesto di condivisione (`RemoteTrack.meta`, `TrackMeta.toJson`); solo i campi non nulli.
 Il ricevente valida ogni campo da solo (`TrackMeta.tryParse`): un campo fuori regola diventa null.

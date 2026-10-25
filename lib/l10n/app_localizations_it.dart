@@ -5332,4 +5332,129 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get creditsDetailsNote => 'Usa anche un\'API non ufficiale di Deezer';
+
+  @override
+  String get creditRoleVocals => 'Voce';
+
+  @override
+  String get creditRoleBackingVocals => 'Cori';
+
+  @override
+  String get creditRoleGuitar => 'Chitarra';
+
+  @override
+  String get creditRoleBassGuitar => 'Basso';
+
+  @override
+  String get creditRoleDrums => 'Batteria';
+
+  @override
+  String get creditRoleKeyboard => 'Tastiere';
+
+  @override
+  String get creditRolePiano => 'Piano';
+
+  @override
+  String get creditRoleSynthesizer => 'Sintetizzatore';
+
+  @override
+  String get creditRoleComposer => 'Compositore';
+
+  @override
+  String get creditRoleAuthor => 'Autore';
+
+  @override
+  String get creditRoleLyricist => 'Paroliere';
+
+  @override
+  String get creditRoleArranger => 'Arrangiatore';
+
+  @override
+  String get creditRoleProducer => 'Produttore';
+
+  @override
+  String get creditRoleAdditionalProducer => 'Produttore aggiuntivo';
+
+  @override
+  String get creditRoleMix => 'Mixaggio';
+
+  @override
+  String get creditRoleMastering => 'Mastering';
+
+  @override
+  String get creditRoleRecording => 'Registrazione';
+
+  @override
+  String get creditRoleEngineer => 'Tecnico del suono';
+
+  @override
+  String get creditRoleProgramming => 'Programmazione';
+
+  @override
+  String get creditRoleDrumProgrammer => 'Programmazione batteria';
+
+  @override
+  String get creditRoleMusicPublisher => 'Editore musicale';
+
+  @override
+  String get creditsGroupPerformers => 'Interpreti e strumenti';
+
+  @override
+  String get creditsGroupWriters => 'Autori';
+
+  @override
+  String get creditsGroupProduction => 'Produzione e tecnici';
+
+  @override
+  String get creditsGroupOther => 'Altro';
+
+  @override
+  String get creditsTitle => 'Crediti e dettagli';
+
+  @override
+  String get creditsShowAll => 'Mostra tutto';
+
+  @override
+  String get creditsRefresh => 'Aggiorna';
+
+  @override
+  String get creditsAppearsAs => 'Compare come';
+
+  @override
+  String get creditsInCredits => 'Nei crediti';
+
+  @override
+  String get creditsRefreshFailed => 'Impossibile aggiornare i crediti';
+
+  @override
+  String get creditsBpm => 'BPM';
+
+  @override
+  String get creditsLabel => 'Etichetta';
+
+  @override
+  String get creditsDigitalRelease => 'Uscita digitale';
+
+  @override
+  String get creditsPhysicalRelease => 'Uscita fisica';
+
+  @override
+  String get creditsKindSingle => 'Singolo';
+
+  @override
+  String get creditsKindEp => 'EP';
+
+  @override
+  String get creditsRank => 'Classifica';
+
+  @override
+  String get creditsAlbumFans => 'Fan dell’album';
+
+  @override
+  String get creditsExplicit => 'Esplicito';
+
+  @override
+  String creditsOpenArtist(String name) {
+    return 'Apri $name';
+  }
 }

@@ -8,7 +8,7 @@ String creditNameKey(String name) {
 
 /// One person with one role on a track. The DB key is `nameKey + role`.
 class TrackCredit {
-  TrackCredit(this.name, this.role, this.source, {this.mbid})
+  TrackCredit(this.name, this.role, this.source)
     : nameKey = creditNameKey(name);
 
   final String name;
@@ -20,8 +20,38 @@ class TrackCredit {
   /// `deezer` or `musicbrainz`.
   final String source;
 
-  /// MusicBrainz artist id, when the source has one.
-  final String? mbid;
+  Map<String, Object?> toJson() => {
+    'name': name,
+    'role': role,
+    'source': source,
+  };
+
+  /// Untrusted input: null when a field is not a usable string.
+  static TrackCredit? tryParse(Object? j) {
+    if (j is! Map) return null;
+    final (n, r, s) = (j['name'], j['role'], j['source']);
+    if (n is! String || r is! String || s is! String) return null;
+    if (n.trim().isEmpty ||
+        r.trim().isEmpty ||
+        n.length > 200 ||
+        r.length > 100 ||
+        (s != 'deezer' && s != 'musicbrainz')) {
+      return null;
+    }
+    return TrackCredit(n.trim(), r.trim().toLowerCase(), s);
+  }
+}
+
+/// The valid credits of a JSON list, stopping at the first [max].
+List<TrackCredit> parseCreditList(Object? raw, {required int max}) {
+  final out = <TrackCredit>[];
+  if (raw is! List) return out;
+  for (final j in raw) {
+    if (out.length >= max) break;
+    final c = TrackCredit.tryParse(j);
+    if (c != null) out.add(c);
+  }
+  return out;
 }
 
 class DeezerContributors {
@@ -71,7 +101,6 @@ List<TrackCredit> parseMbCredits(Map<String, dynamic> recording) {
       final artist = rel['artist'];
       if (artist is! Map) continue;
       final name = artist['name'];
-      final id = artist['id'];
       final type = rel['type'];
       final attrList = rel['attributes'];
       // A malformed relation is skipped, the others stay.
@@ -85,14 +114,7 @@ List<TrackCredit> parseMbCredits(Map<String, dynamic> recording) {
       final roles = t == 'instrument' && attrs.isNotEmpty ? attrs : [t];
       for (final role in roles) {
         if (role.isEmpty) continue;
-        out.add(
-          TrackCredit(
-            name.trim(),
-            role,
-            'musicbrainz',
-            mbid: id is String ? id : null,
-          ),
-        );
+        out.add(TrackCredit(name.trim(), role, 'musicbrainz'));
       }
     }
   }
@@ -121,4 +143,71 @@ List<TrackCredit> _dedupe(List<TrackCredit> all) {
     for (final c in all)
       if (seen.add('${c.nameKey}\u0000${c.role}')) c,
   ];
+}
+
+/// Extra data of the public API (`/track/{id}` + `/album/{id}`). [copyright] and
+/// [physicalReleaseDate] come from the gw API (task 50.4), never from here.
+class TrackDetails {
+  const TrackDetails({
+    this.bpm,
+    this.label,
+    this.digitalReleaseDate,
+    this.recordType,
+    this.rank,
+    this.albumFans,
+    this.explicit,
+    this.copyright,
+    this.physicalReleaseDate,
+  });
+
+  factory TrackDetails.fromJson(Map<dynamic, dynamic> j) => TrackDetails(
+    bpm: _num(j['bpm'], 1, 400)?.toDouble(),
+    label: _str(j['label']),
+    digitalReleaseDate: _str(j['digitalReleaseDate']),
+    recordType: _str(j['recordType']),
+    rank: _num(j['rank'], 0, _big)?.toInt(),
+    albumFans: _num(j['albumFans'], 0, _big)?.toInt(),
+    explicit: j['explicit'] is bool ? j['explicit'] as bool : null,
+    copyright: _str(j['copyright'], 500),
+    physicalReleaseDate: _str(j['physicalReleaseDate']),
+  );
+
+  // Untrusted input: a wrong type is null, a long string is cut.
+  static String? _str(Object? v, [int max = 200]) =>
+      v is String ? (v.length > max ? v.substring(0, max) : v) : null;
+  static const _big = 1e10;
+  static num? _num(Object? v, num min, num max) =>
+      v is num && v.isFinite && v >= min && v <= max ? v : null;
+
+  TrackDetails copyWith({String? copyright, String? physicalReleaseDate}) =>
+      TrackDetails(
+        bpm: bpm,
+        label: label,
+        digitalReleaseDate: digitalReleaseDate,
+        recordType: recordType,
+        rank: rank,
+        albumFans: albumFans,
+        explicit: explicit,
+        copyright: copyright ?? this.copyright,
+        physicalReleaseDate: physicalReleaseDate ?? this.physicalReleaseDate,
+      );
+
+  Map<String, Object?> toJson() => {
+    'bpm': bpm,
+    'label': label,
+    'digitalReleaseDate': digitalReleaseDate,
+    'recordType': recordType,
+    'rank': rank,
+    'albumFans': albumFans,
+    'explicit': explicit,
+    'copyright': copyright,
+    'physicalReleaseDate': physicalReleaseDate,
+  };
+
+  /// Null when Deezer has none (it answers 0).
+  final double? bpm;
+  final String? label, digitalReleaseDate, recordType;
+  final String? copyright, physicalReleaseDate;
+  final int? rank, albumFans;
+  final bool? explicit;
 }

@@ -12,6 +12,7 @@ class LibrarySearchResults {
     this.artists = const [],
     this.albums = const [],
     this.playlists = const [],
+    this.credited = const [],
     this.artistTotal = 0,
     this.albumTotal = 0,
     this.playlistTotal = 0,
@@ -24,11 +25,18 @@ class LibrarySearchResults {
   final List<AlbumSummary> albums;
   final List<PlaylistSummary> playlists;
 
+  /// Tracks that match only through a credit (writer, producer...).
+  final List<Track> credited;
+
   /// Matches of each kind before `sectionLimit`.
   final int artistTotal, albumTotal, playlistTotal;
 
   bool get isEmpty =>
-      tracks.isEmpty && artists.isEmpty && albums.isEmpty && playlists.isEmpty;
+      tracks.isEmpty &&
+      artists.isEmpty &&
+      albums.isEmpty &&
+      playlists.isEmpty &&
+      credited.isEmpty;
 }
 
 // The names of each list, normalised once per list (a new list comes only
@@ -43,13 +51,17 @@ List<String> _normalArtists(List<ArtistSummary> list) =>
 List<(String, String)> _normalAlbums(List<AlbumSummary> list) =>
     _albumNames[list] ??= [
       for (final a in list)
-        (normalize(a.title ?? ''), normalize('${a.artist ?? ''} ${a.year ?? ''}')),
+        (
+          normalize(a.title ?? ''),
+          normalize('${a.artist ?? ''} ${a.year ?? ''}'),
+        ),
     ];
 
 List<String> _normalPlaylists(List<PlaylistSummary> list) =>
     _playlistNames[list] ??= [for (final p in list) normalize(p.playlist.name)];
 
-bool _hasAll(String haystack, List<String> words) => words.every(haystack.contains);
+bool _hasAll(String haystack, List<String> words) =>
+    words.every(haystack.contains);
 
 /// [items] kept in order, those whose [name] equals the text first, then those
 /// that start with it, then the rest.
@@ -75,6 +87,7 @@ LibrarySearchResults searchLibrary({
   required List<ArtistSummary> artists,
   required List<AlbumSummary> albums,
   required List<PlaylistSummary> playlists,
+  List<Track> credited = const [],
   bool quickFilter = false,
   int trackLimit = 4,
   int sectionLimit = 12,
@@ -86,6 +99,7 @@ LibrarySearchResults searchLibrary({
     return LibrarySearchResults(
       tracks: tracks.take(trackLimit).toList(),
       trackTotal: tracks.length,
+      credited: credited,
     );
   }
   final words = needle.split(' ');
@@ -122,6 +136,7 @@ LibrarySearchResults searchLibrary({
     artists: matchedArtists.take(sectionLimit).toList(),
     albums: matchedAlbums.take(sectionLimit).toList(),
     playlists: matchedPlaylists.take(sectionLimit).toList(),
+    credited: credited,
     artistTotal: matchedArtists.length,
     albumTotal: matchedAlbums.length,
     playlistTotal: matchedPlaylists.length,

@@ -101,7 +101,7 @@ brano con crediti → sezione presente in entrambe le schermate (ospite con `Tra
 **File:** `lib/data/repositories/credits_repository.dart` (`creditedTracks(nameKey)`: brani `kind = 0` per
 `name_key`, con il ruolo), `lib/ui/screens/library/artist_screen.dart`, `test/data/credits_repository_test.dart`,
 `test/ui/artist_screen_test.dart`
-1. Query su `track_credits` JOIN `tracks` (`kind = 0`, non mancanti né ignorati), chiave `matchKey(nome artista)`.
+1. Query su `track_credits` JOIN `tracks` (`kind = 0`, non mancanti né ignorati), chiave `creditNameKey(nome artista)`.
 2. Sezione «Compare come»: un gruppo per ruolo (titolo tradotto con 51.1), brani toccabili come le altre righe; nessun
    brano → nessuna sezione. Solo dalla libreria (D-119).
 

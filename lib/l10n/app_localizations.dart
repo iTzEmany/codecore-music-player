@@ -8408,6 +8408,252 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Usa anche un\'API non ufficiale di Deezer'**
   String get creditsDetailsNote;
+
+  /// No description provided for @creditRoleVocals.
+  ///
+  /// In it, this message translates to:
+  /// **'Voce'**
+  String get creditRoleVocals;
+
+  /// No description provided for @creditRoleBackingVocals.
+  ///
+  /// In it, this message translates to:
+  /// **'Cori'**
+  String get creditRoleBackingVocals;
+
+  /// No description provided for @creditRoleGuitar.
+  ///
+  /// In it, this message translates to:
+  /// **'Chitarra'**
+  String get creditRoleGuitar;
+
+  /// No description provided for @creditRoleBassGuitar.
+  ///
+  /// In it, this message translates to:
+  /// **'Basso'**
+  String get creditRoleBassGuitar;
+
+  /// No description provided for @creditRoleDrums.
+  ///
+  /// In it, this message translates to:
+  /// **'Batteria'**
+  String get creditRoleDrums;
+
+  /// No description provided for @creditRoleKeyboard.
+  ///
+  /// In it, this message translates to:
+  /// **'Tastiere'**
+  String get creditRoleKeyboard;
+
+  /// No description provided for @creditRolePiano.
+  ///
+  /// In it, this message translates to:
+  /// **'Piano'**
+  String get creditRolePiano;
+
+  /// No description provided for @creditRoleSynthesizer.
+  ///
+  /// In it, this message translates to:
+  /// **'Sintetizzatore'**
+  String get creditRoleSynthesizer;
+
+  /// No description provided for @creditRoleComposer.
+  ///
+  /// In it, this message translates to:
+  /// **'Compositore'**
+  String get creditRoleComposer;
+
+  /// No description provided for @creditRoleAuthor.
+  ///
+  /// In it, this message translates to:
+  /// **'Autore'**
+  String get creditRoleAuthor;
+
+  /// No description provided for @creditRoleLyricist.
+  ///
+  /// In it, this message translates to:
+  /// **'Paroliere'**
+  String get creditRoleLyricist;
+
+  /// No description provided for @creditRoleArranger.
+  ///
+  /// In it, this message translates to:
+  /// **'Arrangiatore'**
+  String get creditRoleArranger;
+
+  /// No description provided for @creditRoleProducer.
+  ///
+  /// In it, this message translates to:
+  /// **'Produttore'**
+  String get creditRoleProducer;
+
+  /// No description provided for @creditRoleAdditionalProducer.
+  ///
+  /// In it, this message translates to:
+  /// **'Produttore aggiuntivo'**
+  String get creditRoleAdditionalProducer;
+
+  /// No description provided for @creditRoleMix.
+  ///
+  /// In it, this message translates to:
+  /// **'Mixaggio'**
+  String get creditRoleMix;
+
+  /// No description provided for @creditRoleMastering.
+  ///
+  /// In it, this message translates to:
+  /// **'Mastering'**
+  String get creditRoleMastering;
+
+  /// No description provided for @creditRoleRecording.
+  ///
+  /// In it, this message translates to:
+  /// **'Registrazione'**
+  String get creditRoleRecording;
+
+  /// No description provided for @creditRoleEngineer.
+  ///
+  /// In it, this message translates to:
+  /// **'Tecnico del suono'**
+  String get creditRoleEngineer;
+
+  /// No description provided for @creditRoleProgramming.
+  ///
+  /// In it, this message translates to:
+  /// **'Programmazione'**
+  String get creditRoleProgramming;
+
+  /// No description provided for @creditRoleDrumProgrammer.
+  ///
+  /// In it, this message translates to:
+  /// **'Programmazione batteria'**
+  String get creditRoleDrumProgrammer;
+
+  /// No description provided for @creditRoleMusicPublisher.
+  ///
+  /// In it, this message translates to:
+  /// **'Editore musicale'**
+  String get creditRoleMusicPublisher;
+
+  /// No description provided for @creditsGroupPerformers.
+  ///
+  /// In it, this message translates to:
+  /// **'Interpreti e strumenti'**
+  String get creditsGroupPerformers;
+
+  /// No description provided for @creditsGroupWriters.
+  ///
+  /// In it, this message translates to:
+  /// **'Autori'**
+  String get creditsGroupWriters;
+
+  /// No description provided for @creditsGroupProduction.
+  ///
+  /// In it, this message translates to:
+  /// **'Produzione e tecnici'**
+  String get creditsGroupProduction;
+
+  /// No description provided for @creditsGroupOther.
+  ///
+  /// In it, this message translates to:
+  /// **'Altro'**
+  String get creditsGroupOther;
+
+  /// No description provided for @creditsTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Crediti e dettagli'**
+  String get creditsTitle;
+
+  /// No description provided for @creditsShowAll.
+  ///
+  /// In it, this message translates to:
+  /// **'Mostra tutto'**
+  String get creditsShowAll;
+
+  /// No description provided for @creditsRefresh.
+  ///
+  /// In it, this message translates to:
+  /// **'Aggiorna'**
+  String get creditsRefresh;
+
+  /// No description provided for @creditsAppearsAs.
+  ///
+  /// In it, this message translates to:
+  /// **'Compare come'**
+  String get creditsAppearsAs;
+
+  /// No description provided for @creditsInCredits.
+  ///
+  /// In it, this message translates to:
+  /// **'Nei crediti'**
+  String get creditsInCredits;
+
+  /// No description provided for @creditsRefreshFailed.
+  ///
+  /// In it, this message translates to:
+  /// **'Impossibile aggiornare i crediti'**
+  String get creditsRefreshFailed;
+
+  /// No description provided for @creditsBpm.
+  ///
+  /// In it, this message translates to:
+  /// **'BPM'**
+  String get creditsBpm;
+
+  /// No description provided for @creditsLabel.
+  ///
+  /// In it, this message translates to:
+  /// **'Etichetta'**
+  String get creditsLabel;
+
+  /// No description provided for @creditsDigitalRelease.
+  ///
+  /// In it, this message translates to:
+  /// **'Uscita digitale'**
+  String get creditsDigitalRelease;
+
+  /// No description provided for @creditsPhysicalRelease.
+  ///
+  /// In it, this message translates to:
+  /// **'Uscita fisica'**
+  String get creditsPhysicalRelease;
+
+  /// No description provided for @creditsKindSingle.
+  ///
+  /// In it, this message translates to:
+  /// **'Singolo'**
+  String get creditsKindSingle;
+
+  /// No description provided for @creditsKindEp.
+  ///
+  /// In it, this message translates to:
+  /// **'EP'**
+  String get creditsKindEp;
+
+  /// No description provided for @creditsRank.
+  ///
+  /// In it, this message translates to:
+  /// **'Classifica'**
+  String get creditsRank;
+
+  /// No description provided for @creditsAlbumFans.
+  ///
+  /// In it, this message translates to:
+  /// **'Fan dell’album'**
+  String get creditsAlbumFans;
+
+  /// No description provided for @creditsExplicit.
+  ///
+  /// In it, this message translates to:
+  /// **'Esplicito'**
+  String get creditsExplicit;
+
+  /// No description provided for @creditsOpenArtist.
+  ///
+  /// In it, this message translates to:
+  /// **'Apri {name}'**
+  String creditsOpenArtist(String name);
 }
 
 class _AppLocalizationsDelegate

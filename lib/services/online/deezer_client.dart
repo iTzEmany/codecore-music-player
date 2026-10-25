@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 
 import '../../core/app_log.dart';
+import 'credits.dart';
 import 'deezer_models.dart';
 import 'http_client.dart';
 

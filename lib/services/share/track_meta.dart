@@ -1,8 +1,11 @@
 import '../../data/db/app_database.dart';
+import '../online/credits.dart';
 import '../online/lrc_parser.dart';
 
 final _isrcRe = RegExp(r'^[A-Z]{2}[A-Z0-9]{3}\d{7}$');
 final _ytIdRe = RegExp(r'^[A-Za-z0-9_-]{11}$');
+
+const kMaxMetaCredits = 200;
 
 /// The metadata that travels with a shared track. Untrusted input: every
 /// field is validated alone and a bad one becomes null, never the whole pack.
@@ -22,10 +25,16 @@ class TrackMeta {
     this.enrichStatus,
     this.youtubeId,
     this.curiosities,
+    this.credits = const [],
+    this.details,
   });
 
   /// `youtubeId` has no column on [Track] yet: null here.
-  factory TrackMeta.fromTrack(Track t) => TrackMeta(
+  factory TrackMeta.fromTrack(
+    Track t, {
+    List<TrackCredit> credits = const [],
+    TrackDetails? details,
+  }) => TrackMeta(
     title: t.title,
     artist: t.artist,
     albumArtist: t.albumArtist,
@@ -40,6 +49,8 @@ class TrackMeta {
     enrichStatus: t.enrichStatus,
     // A list row carries '' for "has some" (light_tracks): not a text.
     curiosities: (t.curiosities ?? '').isEmpty ? null : t.curiosities,
+    credits: credits.take(kMaxMetaCredits).toList(),
+    details: details,
   );
 
   final String? title, artist, albumArtist, album, genre;
@@ -48,6 +59,10 @@ class TrackMeta {
 
   /// Jam info screen only: never applied to a row by the share path.
   final String? curiosities;
+
+  /// Credits (at most [kMaxMetaCredits]) and Deezer details of the owner.
+  final List<TrackCredit> credits;
+  final TrackDetails? details;
 
   Map<String, Object?> toJson() => {
     if (title != null) 'title': title,
@@ -64,6 +79,8 @@ class TrackMeta {
     if (enrichStatus != null) 'enrichStatus': enrichStatus,
     if (youtubeId != null) 'youtubeId': youtubeId,
     if (curiosities != null) 'curiosities': curiosities,
+    if (credits.isNotEmpty) 'credits': [for (final c in credits) c.toJson()],
+    if (details != null) 'details': details!.toJson(),
   };
 
   /// Never throws: a non-map gives null, a bad field gives a null field.
@@ -104,6 +121,8 @@ class TrackMeta {
       enrichStatus: num('enrichStatus', 0, 2),
       youtubeId: yt is String && _ytIdRe.hasMatch(yt) ? yt : null,
       curiosities: lyrics('curiosities', 20000),
+      credits: parseCreditList(raw['credits'], max: kMaxMetaCredits),
+      details: raw['details'] is Map ? TrackDetails.fromJson(raw['details'] as Map) : null,
     );
   }
 }

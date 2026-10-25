@@ -2,6 +2,7 @@ import 'package:codecore/core/constants.dart';
 import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/providers/settings_providers.dart';
 import 'package:codecore/providers/ui_providers.dart';
+import 'package:codecore/services/online/credits.dart' show creditNameKey;
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:codecore/providers/library_providers.dart' show SearchQuery;
@@ -405,4 +406,33 @@ void main() {
       await h.dispose(tester);
     },
   );
+
+  testWidgets('search: a credited track shows under «Nei crediti», once', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(400, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final h = await Harness.create(tester, tracks: 1);
+    final id = await h.db.select(h.db.tracks).map((t) => t.id).getSingle();
+    await h.db.into(h.db.trackCredits).insert(TrackCreditsCompanion.insert(
+      trackId: id,
+      name: 'Pharrell Williams',
+      nameKey: creditNameKey('Pharrell Williams'),
+      role: 'producer',
+      source: 'deezer',
+    ));
+    await h.pump(tester, const SearchScreen());
+    await _settle(tester);
+    typeSearch(tester, 'Song');
+    await tester.pump(const Duration(milliseconds: 400));
+    await _settle(tester);
+    expect(find.text('Nei crediti'), findsNothing);
+    typeSearch(tester, 'Pharrell');
+    await tester.pump(const Duration(milliseconds: 400));
+    await _settle(tester);
+    expect(find.text('Nei crediti'), findsOneWidget);
+    expect(find.text('Song 0'), findsOneWidget);
+    await h.dispose(tester);
+  });
 }

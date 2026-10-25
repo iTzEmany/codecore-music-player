@@ -5,6 +5,8 @@ import '../../../data/db/app_database.dart';
 import '../../../data/repositories/library_queries.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/selection_providers.dart';
+import '../../../services/online/credit_roles.dart';
+import '../../../providers/credits_providers.dart';
 import '../../../providers/library_providers.dart';
 import '../../../providers/player_providers.dart';
 import '../../../providers/settings_providers.dart';
@@ -81,9 +83,7 @@ class ArtistDetailScreen extends ConsumerWidget {
         onPlay: list.isEmpty
             ? null
             : () => ctrl.playAll(list, context: playCtx),
-        onShuffle: list.isEmpty
-            ? null
-            : ctrl.toggleShuffle,
+        onShuffle: list.isEmpty ? null : ctrl.toggleShuffle,
         slivers: [
           if (tracks.hasError || albums.hasError)
             SliverToBoxAdapter(
@@ -125,8 +125,61 @@ class ArtistDetailScreen extends ConsumerWidget {
               ),
             ),
           ],
+          if (artist.name != null)
+            _CreditedSection(
+              name: artist.name!,
+              own: {for (final t in list) t.id},
+              playCtx: playCtx,
+            ),
         ],
       ),
+    );
+  }
+}
+
+/// «Compare come»: tracks where the artist is only credited, by role (never
+/// the ones where they are the main artist).
+class _CreditedSection extends ConsumerWidget {
+  const _CreditedSection({
+    required this.name,
+    required this.own,
+    required this.playCtx,
+  });
+
+  final String name;
+  final Set<int> own;
+  final PlayContext playCtx;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    final byRole = <String, List<Track>>{};
+    for (final c in ref.watch(artistCreditedProvider(name)).value ?? const []) {
+      if (!own.contains(c.track.id)) (byRole[c.role] ??= []).add(c.track);
+    }
+    if (byRole.isEmpty) return const SliverToBoxAdapter();
+    final compact = ref.watch(settingsProvider).compactMode;
+    final extent = trackRowExtentOf(context, compact);
+    final ctrl = ref.read(playerControllerProvider);
+    return SliverMainAxisGroup(
+      slivers: [
+        SliverToBoxAdapter(child: SectionHeader(l.creditsAppearsAs)),
+        for (final e in byRole.entries) ...[
+          SliverToBoxAdapter(child: SectionHeader(creditRoleLabel(l, e.key))),
+          SliverList.builder(
+            itemCount: e.value.length,
+            itemBuilder: (_, i) => SizedBox(
+              height: extent,
+              child: LiveTrackRow(
+                track: e.value[i],
+                compact: compact,
+                albumAsSubtitle: true,
+                onTap: () => ctrl.playFromList(e.value, i, context: playCtx),
+              ),
+            ),
+          ),
+        ],
+      ],
     );
   }
 }
@@ -140,22 +193,26 @@ class _YtmButtons extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
     return Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    key: const ValueKey('artist-follow-ytm'),
-                    tooltip: l.followOnYtm,
-                    onPressed: () => followFromLibrary(context, ref, name),
-                    icon: const Icon(Icons.notifications_none_rounded),
-                  ),
-                  IconButton(
-                    key: const ValueKey('artist-on-ytm'),
-                    tooltip: l.ytmOnYoutubeMusic,
-                    onPressed: () => openYtmArtist(context, ref, name,
-                        open: (page) => ShellNav.open<void>(context, page)),
-                    icon: const Icon(Icons.smart_display_rounded),
-                  ),
-                ],
-              );
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        IconButton(
+          key: const ValueKey('artist-follow-ytm'),
+          tooltip: l.followOnYtm,
+          onPressed: () => followFromLibrary(context, ref, name),
+          icon: const Icon(Icons.notifications_none_rounded),
+        ),
+        IconButton(
+          key: const ValueKey('artist-on-ytm'),
+          tooltip: l.ytmOnYoutubeMusic,
+          onPressed: () => openYtmArtist(
+            context,
+            ref,
+            name,
+            open: (page) => ShellNav.open<void>(context, page),
+          ),
+          icon: const Icon(Icons.smart_display_rounded),
+        ),
+      ],
+    );
   }
 }

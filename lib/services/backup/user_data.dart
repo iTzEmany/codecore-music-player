@@ -1,3 +1,5 @@
+import '../online/credits.dart';
+
 /// Portable user data: everything the user created, with tracks referenced by
 /// relative path + title/artist/duration instead of the local DB id.
 const kUserDataFormat = 1;
@@ -92,6 +94,8 @@ class TrackUserData {
     this.curiosities,
     this.playCount = 0,
     this.lastPlayedAt,
+    this.credits = const [],
+    this.details,
   });
 
   final TrackRef ref;
@@ -100,6 +104,10 @@ class TrackUserData {
   final String? lyricsPlain, lyricsSynced, curiosities;
   final int playCount;
   final int? lastPlayedAt;
+
+  /// Enrichment: written only when the track has them.
+  final List<TrackCredit> credits;
+  final TrackDetails? details;
 
   Map<String, Object?> toJson() => _nonNull({
         'ref': ref.toJson(),
@@ -110,6 +118,8 @@ class TrackUserData {
         'curiosities': curiosities,
         'playCount': playCount == 0 ? null : playCount,
         'lastPlayedAt': lastPlayedAt,
+        'credits': credits.isEmpty ? null : [for (final c in credits) c.toJson()],
+        'details': details?.toJson(),
       });
 
   factory TrackUserData.fromJson(Map<String, dynamic> j) => TrackUserData(
@@ -123,6 +133,8 @@ class TrackUserData {
         curiosities: j['curiosities'] as String?,
         playCount: (j['playCount'] as num?)?.toInt() ?? 0,
         lastPlayedAt: (j['lastPlayedAt'] as num?)?.toInt(),
+        credits: parseCreditList(j['credits'], max: 2000),
+        details: j['details'] is Map ? TrackDetails.fromJson(j['details'] as Map) : null,
       );
 }
 

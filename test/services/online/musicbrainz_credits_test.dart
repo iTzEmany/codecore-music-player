@@ -31,7 +31,7 @@ void main() {
     final w = _Web(fixture);
     final credits = await MusicBrainzClient(w, pause: (_) async {}).recordingCredits(mbid);
     final want = parseMbCredits(Map<String, dynamic>.from(fixture as Map));
-    String key(TrackCredit c) => '${c.name}|${c.role}|${c.source}|${c.mbid}';
+    String key(TrackCredit c) => '${c.name}|${c.role}|${c.source}';
     expect(credits.map(key), want.map(key));
     expect(credits, hasLength(14));
     expect(w.asked, hasLength(1));

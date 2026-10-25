@@ -9,6 +9,7 @@ import '../../l10n/l10n_ext.dart';
 import '../../providers/online_providers.dart';
 import '../../services/online/enrichment_service.dart';
 import '../../services/online/http_client.dart';
+import '../widgets/credits_section.dart';
 import '../widgets/net_thumbnail.dart';
 
 Future<void> showEnrichPreview(BuildContext context, Track track) {
@@ -152,7 +153,10 @@ class _State extends ConsumerState<_EnrichPreviewDialog> {
       body = Text(l.serviceUnavailable);
     } else {
       final rows = _rows(context);
-      body = rows.isEmpty
+      final cr = _proposal!.credits;
+      final hasCredits =
+          cr != null && CreditsSection.hasContent(cr.credits, cr.details);
+      body = rows.isEmpty && !hasCredits
           ? Text(l.nothingFound)
           : SingleChildScrollView(
               child: Column(
@@ -221,6 +225,18 @@ class _State extends ConsumerState<_EnrichPreviewDialog> {
                                     ],
                                   )),
                     ),
+                  if (hasCredits) ...[
+                    const Divider(),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        l.creditsTitle,
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                    ),
+                    const SizedBox(height: CcDims.gap8),
+                    CreditsSection(cr.credits, cr.details),
+                  ],
                 ],
               ),
             );

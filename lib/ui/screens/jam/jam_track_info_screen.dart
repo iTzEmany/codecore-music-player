@@ -6,6 +6,7 @@ import '../../../providers/jam_providers.dart';
 import '../../../services/jam/jam_models.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/cc_app_bar.dart';
+import '../../widgets/credits_section.dart';
 import '../../widgets/track_artists_sheet.dart';
 import 'jam_parts.dart';
 
@@ -37,19 +38,29 @@ class JamTrackInfoScreen extends ConsumerWidget {
     // «text\nurl»: the url is the source, not shown here.
     final raw = meta?.curiosities;
     final cut = raw?.lastIndexOf('\n') ?? -1;
-    final trivia = raw == null ? null : (cut > 0 && raw.substring(cut + 1).startsWith('http') ? raw.substring(0, cut) : raw);
+    final trivia = raw == null
+        ? null
+        : (cut > 0 && raw.substring(cut + 1).startsWith('http')
+              ? raw.substring(0, cut)
+              : raw);
     return Scaffold(
       appBar: CcAppBar(title: l.trackInfo),
       body: ListView(
         padding: const EdgeInsets.all(CcDims.margin),
         children: [
           Center(
-              child: cover == null
-                  ? JamCover(item: item, size: 200, radius: CcDims.rList)
-                  : ClipRRect(
-                      borderRadius: BorderRadius.circular(CcDims.rList),
-                      child: Image.memory(cover, width: 200, height: 200, fit: BoxFit.cover),
-                    )),
+            child: cover == null
+                ? JamCover(item: item, size: 200, radius: CcDims.rList)
+                : ClipRRect(
+                    borderRadius: BorderRadius.circular(CcDims.rList),
+                    child: Image.memory(
+                      cover,
+                      width: 200,
+                      height: 200,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+          ),
           const SizedBox(height: CcDims.gap16),
           Text(meta?.title ?? item.title, style: theme.headlineSmall),
           if (line.isNotEmpty) Text(line, style: theme.bodyMedium),
@@ -59,7 +70,8 @@ class JamTrackInfoScreen extends ConsumerWidget {
               child: TextButton.icon(
                 icon: const Icon(Icons.person_outline_rounded),
                 label: Text(l.goToArtist),
-                onPressed: () => goToArtists(context, ref, jamArtists(item, ref)),
+                onPressed: () =>
+                    goToArtists(context, ref, jamArtists(item, ref)),
               ),
             ),
           if (s.isHost) ...[
@@ -80,6 +92,14 @@ class JamTrackInfoScreen extends ConsumerWidget {
             Text(l.fieldCuriosity, style: theme.titleMedium),
             const SizedBox(height: CcDims.gap8),
             Text(trivia, style: theme.bodyMedium),
+          ],
+          // fetchMeta already reads local data for our own tracks.
+          if (meta != null &&
+              CreditsSection.hasContent(meta.credits, meta.details)) ...[
+            const SizedBox(height: CcDims.gap24),
+            Text(l.creditsTitle, style: theme.titleMedium),
+            const SizedBox(height: CcDims.gap8),
+            CreditsSection(meta.credits, meta.details),
           ],
           if (lyrics != null && lyrics.isNotEmpty) ...[
             const SizedBox(height: CcDims.gap24),
