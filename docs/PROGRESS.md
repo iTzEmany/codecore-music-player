@@ -692,11 +692,11 @@ Feature «Arricchimento completo» (`docs/feature-arricchimento.md`, decisioni D
 
 ## Fase 51 — Crediti a schermo (`fase-51-crediti-a-schermo.md`)
 - [x] 51.1 Tabella dei ruoli e traduzioni
-- [ ] 51.2 `CreditsSection` e card nella schermata di riproduzione
-- [ ] 51.3 «Aggiorna» nella card
+- [x] 51.2 `CreditsSection` e card nella schermata di riproduzione
+- [x] 51.3 «Aggiorna» nella card
 - [x] 51.4 Crediti e dettagli nel backup, nell'invio e nella Jam (nota: `CreditsRepository.portableOf` legge crediti+dettagli per invio e Jam; `saveIfNone` scrive i dettagli solo se mancano, i crediti solo se il brano non ne ha)
 - [ ] 51.5 Sezione nella Jam e nell'anteprima dell'arricchimento
-- [ ] 51.6 «Compare come» nella pagina artista
+- [x] 51.6 «Compare come» nella pagina artista
 - [x] 51.7 Gruppo «Nei crediti» nella ricerca locale
 - [ ] 51.8 Controlli di fase (K-AR-01, K-AR-02, K-AR-03, K-AR-04)
 - [ ] 51.9 Prove a mano (utente)
