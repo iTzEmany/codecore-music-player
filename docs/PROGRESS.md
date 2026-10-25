@@ -698,7 +698,7 @@ Feature «Arricchimento completo» (`docs/feature-arricchimento.md`, decisioni D
 - [x] 51.5 Sezione nella Jam e nell'anteprima dell'arricchimento
 - [x] 51.6 «Compare come» nella pagina artista
 - [x] 51.7 Gruppo «Nei crediti» nella ricerca locale
-- [ ] 51.8 Controlli di fase (K-AR-01, K-AR-02, K-AR-03, K-AR-04)
+- [x] 51.8 Controlli di fase (K-AR-01, K-AR-02, K-AR-03, K-AR-04) (nota: punti 1–6 verdi in locale, 744 test; suite completa in CI; D-130: card vuota visibile con «Crediti e dettagli» acceso)
 - [ ] 51.9 Prove a mano (utente)
 
 ## Fase 52 — Testo e curiosità complete (`fase-52-testo-e-curiosita.md`)
