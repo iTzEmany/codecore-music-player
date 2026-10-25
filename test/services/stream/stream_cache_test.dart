@@ -203,4 +203,18 @@ void main() {
     await c.evict();
     expect(gone.first, 'a_0.m4a'); // least recently used first
   });
+
+  test('fileFor follows put, evict and clear', () async {
+    final c = cache();
+    await c.open();
+    await add(c, 'a:1', 1, 1);
+    await add(c, 'a:2', 1, 2);
+    expect(await c.fileFor('a:1'), isNotNull);
+    c.limitBytes = 1 * _mb;
+    await c.evict(); // drops a:1, the oldest
+    expect(await c.fileFor('a:1'), isNull);
+    expect(await c.fileFor('a:2'), isNotNull);
+    await c.clear();
+    expect(await c.fileFor('a:2'), isNull);
+  });
 }

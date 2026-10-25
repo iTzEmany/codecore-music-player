@@ -39,6 +39,10 @@ class _Job {
   /// A `ready()` caller waits for it: runs first, even out of the queue window.
   var requested = false;
   var enriching = false;
+
+  /// Token of the running attempt; cancelled on timeout, on leaving the queue, on dispose.
+  CancelToken? cancel;
+  var dropped = false;
 }
 
 /// Downloads the queue's online tracks into the [StreamCache] ahead of the
@@ -87,7 +91,7 @@ class StreamPreparer {
   var _queue = <StreamItem>[];
   final _jobs = <String, _Job>{};
   final _pinned = <String>{};
-  final _cancel = CancelToken();
+  var _tmpSeq = 0;
   var _active = 0;
   var _pumping = false, _again = false, _disposed = false;
   Timer? _resume;
@@ -113,8 +117,12 @@ class StreamPreparer {
       ..addAll(want);
     // Forget what nobody waits for any more.
     final inQueue = {for (final i in items) i.key};
-    _jobs.removeWhere((k, j) =>
-        !inQueue.contains(k) && !j.requested && j.phase != StreamPhase.downloading);
+    _jobs.removeWhere((k, j) {
+      if (inQueue.contains(k) || j.requested) return false;
+      j.dropped = true;
+      j.cancel?.cancel('left the queue');
+      return true;
+    });
     final keep = {...inQueue, ..._jobs.keys};
     if (phases.value.keys.any((k) => !keep.contains(k))) {
       phases.value = {
@@ -157,8 +165,8 @@ class StreamPreparer {
     if (_disposed) return;
     _disposed = true;
     _resume?.cancel();
-    _cancel.cancel('disposed');
     for (final j in _jobs.values) {
+      j.cancel?.cancel('disposed');
       _fail(j, StateError('disposed'));
     }
     _pinned.forEach(cache.unpin);
@@ -267,10 +275,11 @@ class StreamPreparer {
     }
     File? part;
     Object? error;
-    for (var attempt = 1; attempt <= 2 && part == null && !_disposed; attempt++) {
+    for (var attempt = 1; attempt <= 2 && part == null && !_disposed && !j.dropped; attempt++) {
       try {
         part = await _download(j);
       } on Object catch (e, st) {
+        if (j.dropped) break; // cancelled on purpose
         AppLog.w('stream download of ${j.key} ($attempt)', e, st);
         error = e;
         if (_isRateLimited(e)) {
@@ -279,20 +288,33 @@ class StreamPreparer {
           _resume = Timer(cooldown, _pump);
           if (!j.requested) {
             // Prefetch only: forget it, the queue walk picks it up after the pause.
-            _jobs.remove(j.key);
+            final mine = identical(_jobs[j.key], j); // the key may have been re-queued
+            if (mine) _jobs.remove(j.key);
             if (!j.rowId.isCompleted) j.rowId.completeError(e); // enrich must not wait forever
-            if (!_disposed) phases.value = {...phases.value}..remove(j.key);
+            if (mine && !_disposed) phases.value = {...phases.value}..remove(j.key);
             return _finish();
           }
         }
       }
+    }
+    if (j.dropped) {
+      // Left the queue mid-download: nobody waits for it, leave no trace.
+      if (!j.rowId.isCompleted) j.rowId.completeError(StateError('dropped'));
+      final leftover = part;
+      if (leftover != null) {
+        unawaited(leftover.delete().catchError((Object e, StackTrace st) {
+          AppLog.w('stream preparer: cannot delete ${leftover.path}', e, st);
+          return leftover; // File.delete's future type
+        }));
+      }
+      return _finish();
     }
     if (_disposed) error = StateError('disposed');
     if (part != null && !_disposed) {
       try {
         final file = await cache.put(j.key, part, trim: j.requested);
         j.rowId.complete(await tracks.upsertStreamRow(j.key, j.result, file));
-        _jobs.remove(j.key);
+        if (identical(_jobs[j.key], j)) _jobs.remove(j.key);
         _setPhase(j.key, StreamPhase.ready);
         j.done.complete(file);
         return _finish();
@@ -314,17 +336,22 @@ class StreamPreparer {
   /// `<key>.<ext>.part`, the shape [StreamCache.put] takes.
   Future<File> _download(_Job j) async {
     final name = streamFileName(j.key);
-    final tmp = Directory(p.join(cache.dir.path, '.dl-$name'));
+    // A folder and a token per attempt: a hung attempt must not share them with the retry.
+    final tmp = Directory(p.join(cache.dir.path, '.dl-$name-${_tmpSeq++}'));
+    final cancel = j.cancel = CancelToken();
     try {
       String? path;
       // One attempt that hangs counts as a failed attempt.
       path = await (() async {
         String? found;
-        await for (final e in youtube.download(j.result, tmp, cancel: _cancel)) {
+        await for (final e in youtube.download(j.result, tmp, cancel: cancel)) {
           found = e.path ?? found;
         }
         return found;
-      })().timeout(attemptTimeout);
+      })().timeout(attemptTimeout, onTimeout: () {
+        cancel.cancel('attempt timed out');
+        throw TimeoutException('download attempt', attemptTimeout);
+      });
       if (path == null) throw StateError('download ended without a file');
       return await File(path).rename(p.join(cache.dir.path, '$name${p.extension(path)}.part'));
     } finally {

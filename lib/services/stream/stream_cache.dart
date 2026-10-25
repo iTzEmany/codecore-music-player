@@ -35,6 +35,10 @@ class StreamCache {
   final _pins = <String, int>{};
   var _evicting = Future<void>.value();
 
+  /// stem -> file, refreshed by every folder scan and kept by put/remove.
+  Map<String, File>? _index;
+  var _mutations = 0; // bumped by put/_remove: a scan that raced with one must not publish
+
   /// Called with each file the cache deletes to make room (evict/clear).
   void Function(File)? onEvicted;
 
@@ -63,6 +67,7 @@ class StreamCache {
   /// The cached file (any extension), or null.
   Future<File?> fileFor(String key) async {
     final name = streamFileName(key);
+    if (_index != null) return _index![name];
     for (final e in await _files()) {
       if (_stem(e.file) == name) return e.file;
     }
@@ -80,6 +85,8 @@ class StreamCache {
       if (_stem(e.file) == name) await _remove(e.file);
     }
     final f = await part.rename(p.join(dir.path, '$name$ext'));
+    _mutations++;
+    _index?[name] = f;
     if (!trim) return f;
     pin(key);
     try {
@@ -148,13 +155,21 @@ class StreamCache {
 
   Future<List<({File file, int size, DateTime time})>> _files() async {
     final out = <({File file, int size, DateTime time})>[];
-    if (!await dir.exists()) return out;
+    final index = <String, File>{};
+    final seen = _mutations;
+    if (!await dir.exists()) {
+      _index = null;
+      return out;
+    }
     await for (final e in dir.list()) {
       if (e is! File || e.path.endsWith('.part')) continue;
       final s = await e.stat();
       if (s.type != FileSystemEntityType.file) continue;
       out.add((file: e, size: s.size, time: s.modified));
+      index[_stem(e)] = e;
     }
+    // Swapped whole; a scan that raced with a put/remove is stale, so the next fileFor rescans.
+    _index = seen == _mutations ? index : null;
     return out;
   }
 
@@ -167,8 +182,12 @@ class StreamCache {
   Future<bool> _remove(File f) async {
     try {
       await _delete(f);
+      _mutations++;
+      _index?.remove(_stem(f));
       return true;
     } on PathNotFoundException {
+      _mutations++;
+      _index?.remove(_stem(f));
       return true; // already gone
     } on FileSystemException catch (e, st) {
       AppLog.w('stream cache: cannot delete ${f.path}', e, st);
