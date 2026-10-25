@@ -15,6 +15,7 @@ import 'database_providers.dart';
 import 'library_providers.dart';
 import 'settings_providers.dart';
 import 'online_providers.dart';
+import 'player_providers.dart' show audioHandlerProvider;
 import 'shuffle_plus_providers.dart' show networkProbeProvider;
 import 'youtube_providers.dart';
 
@@ -115,4 +116,5 @@ final streamPromoterProvider = Provider<StreamPromoter>((ref) => StreamPromoter(
         await for (final _ in ref.read(libraryScannerProvider).scanFiles(folder, [path])) {}
       },
       tag: ref.read(downloadTaggerProvider).tag,
+      onShadowMerged: (shadow, keep) => ref.read(audioHandlerProvider).replaceQueueId(shadow, keep),
     ));

@@ -206,7 +206,8 @@ class DownloadsNotifier extends Notifier<List<DownloadItem>> {
     try {
       final tracks = ref.read(trackRepositoryProvider);
       final id = await tracks.idForPath(path);
-      if (id != null) await tracks.mergeStreamRow(r.indexKey, id);
+      final gone = id == null ? null : await tracks.mergeStreamRow(r.indexKey, id);
+      if (gone != null) ref.read(audioHandlerProvider).replaceQueueId(gone, id!);
     } on Object catch (e, st) {
       AppLog.w('merge of the stream row failed for ${r.indexKey}', e, st);
     }
