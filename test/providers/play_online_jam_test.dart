@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/data/repositories/track_repository.dart';
+import 'package:codecore/providers/database_providers.dart';
 import 'package:codecore/providers/jam_providers.dart';
 import 'package:codecore/providers/player_providers.dart';
 import 'package:codecore/services/audio/codecore_audio_handler.dart';
@@ -10,6 +11,7 @@ import 'package:codecore/services/audio/play_queue.dart';
 import 'package:codecore/services/online/youtube_service.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/fake_backend.dart';
@@ -118,7 +120,12 @@ void main() {
         path: 'stream:youtube:abc', title: 'S', albumKey: 'k', format: '', sizeBytes: 0,
         mtimeMs: 0, addedAt: 1, kind: const Value(2)));
     final jamCtl = _SpyJam();
-    await libraryToJam(jamCtl, TrackRepository(db), [ids[0], shadow]);
+    final container = ProviderContainer(overrides: [
+      trackRepositoryProvider.overrideWithValue(TrackRepository(db)),
+      jamProvider.overrideWith(() => jamCtl),
+    ]);
+    addTearDown(container.dispose);
+    await container.read(jamProvider.notifier).addLibraryIds([ids[0], shadow]);
     expect(jamCtl.online, ['abc']);
     expect(jamCtl.files, [ids[0]]);
   });

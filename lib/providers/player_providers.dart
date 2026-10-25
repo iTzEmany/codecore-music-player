@@ -3,7 +3,6 @@ import 'dart:math';
 
 import '../core/app_log.dart';
 import 'package:audio_service/audio_service.dart';
-import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -17,10 +16,7 @@ import '../services/audio/playback_persistence.dart';
 import '../services/online/youtube_service.dart';
 import 'youtube_providers.dart' show downloadIndexProvider;
 import 'database_providers.dart';
-import '../services/stream/stream_key.dart';
-import 'jam_providers.dart';
-import '../data/repositories/track_kinds.dart';
-import '../data/repositories/track_repository.dart' show TrackRepository;
+import 'jam_providers.dart' show jamProvider;
 import 'queue_tracks.dart';
 import 'settings_providers.dart';
 
@@ -313,8 +309,7 @@ final playerControllerProvider = Provider<PlayerController>(
         .read(settingsProvider.notifier)
         .update((c) => c.copyWith(shufflePlus: on)),
     jamActive: () => ref.read(jamProvider).active,
-    addToJam: (ids) => unawaited(libraryToJam(
-        ref.read(jamProvider.notifier), ref.read(trackRepositoryProvider), ids)),
+    addToJam: (ids) => unawaited(ref.read(jamProvider.notifier).addLibraryIds(ids)),
     addOnlineToJam: (r) => ref.read(jamProvider.notifier).addOnline(r),
     libraryIdOf: (r) async {
       final path = (await ref.read(downloadIndexProvider.future))
@@ -322,30 +317,6 @@ final playerControllerProvider = Provider<PlayerController>(
       return path == null ? null : ref.read(trackRepositoryProvider).idForPath(path);
     },
   ),
-);
-
-/// Library ids to the shared queue; a shadow row (`stream:` path, no extension) goes as an online result.
-@visibleForTesting
-Future<void> libraryToJam(JamController jam, TrackRepository repo, List<int> ids) async {
-  try {
-    final files = <Track>[];
-    for (final t in await repo.getByIds(ids)) {
-      final key = t.kind == kStreamKind ? keyOfStreamPath(t.path) : null;
-      if (key == null) {
-        files.add(t);
-      } else {
-        jam.addOnline(streamResultOfRow(key, t));
-      }
-    }
-    await jam.addTracks(files);
-  } on Object catch (e, st) {
-    AppLog.w('jam: could not queue $ids', e, st);
-  }
-}
-
-/// Online tracks the Jam accepted but could not download or add.
-final jamOnlineFailuresProvider = StreamProvider<YtResult>(
-  (ref) => ref.watch(jamProvider.notifier).onlineFailures,
 );
 
 final currentTrackProvider = StreamProvider<Track?>((ref) async* {
