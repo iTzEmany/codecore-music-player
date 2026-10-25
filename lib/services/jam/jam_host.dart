@@ -216,13 +216,16 @@ class JamHost {
     return r;
   }
 
-  /// Removes a guest and every item it owns. The session ends when nobody is
+  /// Removes a guest and the items it owns, except the online ones not yet played:
+  /// the output downloads those by video id (D-93). The session ends when nobody is
   /// left but the host.
   void removeMember(String id) {
     if (_members.remove(id) == null || _state == null) return;
     var s = _state!;
     final now = _now().millisecondsSinceEpoch;
     for (final item in s.items.where((i) => i.ownerDeviceId == id).toList()) {
+      final upcoming = s.items.indexOf(item) >= s.currentIndex;
+      if (upcoming && item.videoId != null && item.ref?.startsWith('yt:') == true) continue;
       final r = applyCommand(s, JamCommand.remove(item.id),
           from: deviceId, nowMs: now);
       if (r.isOk) s = r.state!;

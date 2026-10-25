@@ -406,10 +406,22 @@ class JamController extends Notifier<JamUiState> {
     final uri = _remoteUri(item);
     final remote = uri == null ? null : JamSource.remote(uri, _headers);
     // Synchronised outputs play from the local copy: no network jitter.
+    File? copy;
     if (uri != null && (state.jam?.synced ?? false) && _cache != null) {
-      await _cache!.fetch(item, uri, _headers);
+      copy = await _cache!.fetch(item, uri, _headers);
+    }
+    // Owner gone or not answering: an online track comes from its YouTube id.
+    final sj = state.jam;
+    if (sj != null && (uri == null || (copy == null && (sj.synced)))) {
+      final own = await _selfFetch(item);
+      if (own != null) return JamSource.local(own.path);
     }
     return _cache?.sourceFor(item, remote);
+  }
+
+  Future<File?> _selfFetch(JamItem item) {
+    if (item.videoId == null || item.ref?.startsWith('yt:youtube:') != true) return Future.value();
+    return jamFetchByVideoId(item, (k, r) => ref.read(streamPreparerProvider).ready(k, r));
   }
 
   Future<String?> _localFile(JamItem item) => jamLocalFile(
@@ -449,6 +461,9 @@ class JamController extends Notifier<JamUiState> {
       keep.add(i.id);
     }
     unawaited(cache.prune(keep));
+    for (final i in jamSelfFetchTargets(s, _ownId)) {
+      unawaited(_selfFetch(i));
+    }
     for (final i in [cur, next]) {
       if (i == null || i.ownerDeviceId == _ownId) continue;
       final uri = _remoteUri(i);

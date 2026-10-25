@@ -5,6 +5,8 @@ import 'package:codecore/services/jam/jam_cache.dart';
 import 'package:codecore/services/jam/jam_guest.dart';
 import 'package:codecore/services/jam/jam_host.dart';
 import 'package:codecore/services/jam/jam_models.dart';
+import 'package:codecore/services/jam/jam_online_adder.dart';
+import 'package:codecore/services/online/youtube_service.dart';
 import 'package:codecore/services/jam/jam_state.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shelf/shelf.dart';
@@ -24,6 +26,7 @@ JamError? err(JamState s, JamCommand c, String f) =>
 
 void main() {
   leaveTests();
+  goneOwnerTests();
   group('reducer edges', () {
     test('empty queue: play/seek/jump/remove/move are rejected', () {
       final s = s0();
@@ -333,5 +336,38 @@ void leaveTests() {
     expect((await call('POST', '${a.sid}/invite',
             body: {...inv, 'host': '8.8.8.8'}, hd: {'x-jam-token': a.token}))
         .statusCode, 400);
+  });
+}
+
+void goneOwnerTests() {
+  JamItem yt(String id, {String owner = 'gone'}) => JamItem(
+      id: 0, ownerDeviceId: owner, title: 'T$id', artist: 'A', ext: 'm4a',
+      ref: 'yt:youtube:$id', videoId: id);
+
+  test('owner gone: only the current and next online items are downloaded, by video id', () async {
+    var s = s0();
+    for (final c in [yt('a'), yt('b'), yt('c'), yt('x', owner: host)]) {
+      s = ok(s, JamCommand.add(c), c.ownerDeviceId);
+    }
+    // a library item of the gone owner stays as it is: nothing to download
+    s = ok(s, JamCommand.add(it('gone')), 'gone');
+    final targets = jamSelfFetchTargets(s, host);
+    expect(targets.map((i) => i.videoId), ['a', 'b']);
+
+    final asked = <YtResult>[];
+    final file = File('${Directory.systemTemp.path}/jam_gone.m4a');
+    final got = await jamFetchByVideoId(targets.first, (key, r) async {
+      asked.add(r);
+      expect(key, 'youtube:a');
+      return file;
+    });
+    expect(got, file);
+    expect(asked.single.id, 'a');
+    expect(asked.single.title, 'Ta');
+  });
+
+  test('a failed own download gives null, not an exception', () async {
+    final got = await jamFetchByVideoId(yt('a'), (_, _) async => throw StateError('offline'));
+    expect(got, isNull);
   });
 }

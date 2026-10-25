@@ -124,6 +124,23 @@ void main() {
     expect(host.memberIds, ['guest', 'g2']);
   });
 
+  test('a leaving guest keeps its upcoming online items, loses the rest (D-93)', () async {
+    await startSession();
+    expect((await call('POST', 'request', body: reqBody(id: 'g2'))).statusCode, 202);
+    host.accept(seen.last.id);
+    JamItem item(String t, {String? ref, String? vid}) => JamItem(
+        id: 0, ownerDeviceId: 'guest', title: t, ext: 'm4a', ref: ref, videoId: vid);
+    host.apply(const JamCommand.add(JamItem(id: 0, ownerDeviceId: 'host', title: 'H', ext: 'mp3')),
+        from: 'host');
+    host.apply(JamCommand.add(item('lib', ref: '7')), from: 'guest');
+    host.apply(JamCommand.add(item('yt', ref: 'yt:youtube:abc', vid: 'abc')), from: 'guest');
+
+    host.removeMember('guest');
+
+    expect(host.state!.items.map((i) => i.title), ['H', 'yt']);
+    expect(host.state!.items.last.ownerDeviceId, 'guest');
+  });
+
   test('long poll wakes up on change and times out otherwise', () async {
     final s = await startSession();
     final auth = {'x-jam-token': s.token};

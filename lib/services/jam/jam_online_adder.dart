@@ -78,3 +78,36 @@ class JamOnlineAdder {
     if (_pinned.remove(key)) cache.unpin(key);
   }
 }
+
+/// The online items the output must download itself because their owner is gone:
+/// the current and the next one only (K-07), never the whole queue.
+List<JamItem> jamSelfFetchTargets(JamState s, String ownId) {
+  final next = s.currentIndex + 1;
+  return [
+    for (final i in [s.current, if (next > 0 && next < s.items.length) s.items[next]])
+      if (i != null && i.ownerDeviceId != ownId && i.videoId != null &&
+          i.ref?.startsWith('yt:youtube:') == true && s.participant(i.ownerDeviceId) == null)
+        i,
+  ];
+}
+
+/// Downloads [item] from its YouTube id into our own cache through [ready]
+/// (R-21). Null when it fails. shortcut: YouTube only, a SoundCloud row has no page address to rebuild.
+Future<File?> jamFetchByVideoId(
+    JamItem item, Future<File> Function(String key, YtResult r) ready) async {
+  final key = item.ref!.substring('yt:'.length);
+  try {
+    return await ready(
+        key,
+        YtResult(
+            id: item.videoId!,
+            title: item.title,
+            channel: item.artist ?? '',
+            artists: [if (item.artist != null) item.artist!],
+            album: item.album,
+            duration: Duration(milliseconds: item.durationMs)));
+  } on Object catch (e, st) {
+    AppLog.w('jam: own download of $key failed', e, st);
+    return null;
+  }
+}
