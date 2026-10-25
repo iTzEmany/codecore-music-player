@@ -302,6 +302,15 @@ class _MiniCard extends ConsumerWidget {
                 onPressed: () => toggleFavorite(context, ref, track),
               ),
             _MiniButton(
+              iconWidget: !inJam && (ref.watch(streamLoadingProvider).value ?? false)
+                  ? SizedBox.square(
+                      dimension: 24,
+                      child: CircularProgressIndicator(
+                        key: const ValueKey('mini-loading'),
+                        semanticsLabel: l.playerLoading,
+                      ),
+                    )
+                  : null,
               icon: playing ? Icons.pause_rounded : Icons.play_arrow_rounded,
               color: cc.text,
               size: 28,
