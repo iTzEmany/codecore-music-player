@@ -1,15 +1,15 @@
 import '../import/track_matcher.dart';
 
+// Names without letters («!!!») have an empty matchKey: keep them apart.
+String creditNameKey(String name) {
+  final k = matchKey(name);
+  return k.isEmpty ? name.trim().toLowerCase() : k;
+}
+
 /// One person with one role on a track. The DB key is `nameKey + role`.
 class TrackCredit {
   TrackCredit(this.name, this.role, this.source, {this.mbid})
-    : nameKey = _key(name);
-
-  // Names without letters («!!!») have an empty matchKey: keep them apart.
-  static String _key(String name) {
-    final k = matchKey(name);
-    return k.isEmpty ? name.trim().toLowerCase() : k;
-  }
+    : nameKey = creditNameKey(name);
 
   final String name;
   final String nameKey;

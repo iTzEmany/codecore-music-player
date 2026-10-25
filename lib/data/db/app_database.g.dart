@@ -10231,7 +10231,7 @@ class ArtistLookupsCompanion extends UpdateCompanion<ArtistLookup> {
 }
 
 class $TrackCreditsTable extends TrackCredits
-    with TableInfo<$TrackCreditsTable, TrackCredit> {
+    with TableInfo<$TrackCreditsTable, TrackCreditRow> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -10297,7 +10297,7 @@ class $TrackCreditsTable extends TrackCredits
   static const String $name = 'track_credits';
   @override
   VerificationContext validateIntegrity(
-    Insertable<TrackCredit> instance, {
+    Insertable<TrackCreditRow> instance, {
     bool isInserting = false,
   }) {
     final context = VerificationContext();
@@ -10348,9 +10348,9 @@ class $TrackCreditsTable extends TrackCredits
   @override
   Set<GeneratedColumn> get $primaryKey => {trackId, nameKey, role};
   @override
-  TrackCredit map(Map<String, dynamic> data, {String? tablePrefix}) {
+  TrackCreditRow map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return TrackCredit(
+    return TrackCreditRow(
       trackId: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}track_id'],
@@ -10380,13 +10380,13 @@ class $TrackCreditsTable extends TrackCredits
   }
 }
 
-class TrackCredit extends DataClass implements Insertable<TrackCredit> {
+class TrackCreditRow extends DataClass implements Insertable<TrackCreditRow> {
   final int trackId;
   final String name;
   final String nameKey;
   final String role;
   final String source;
-  const TrackCredit({
+  const TrackCreditRow({
     required this.trackId,
     required this.name,
     required this.nameKey,
@@ -10414,12 +10414,12 @@ class TrackCredit extends DataClass implements Insertable<TrackCredit> {
     );
   }
 
-  factory TrackCredit.fromJson(
+  factory TrackCreditRow.fromJson(
     Map<String, dynamic> json, {
     ValueSerializer? serializer,
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return TrackCredit(
+    return TrackCreditRow(
       trackId: serializer.fromJson<int>(json['trackId']),
       name: serializer.fromJson<String>(json['name']),
       nameKey: serializer.fromJson<String>(json['nameKey']),
@@ -10439,21 +10439,21 @@ class TrackCredit extends DataClass implements Insertable<TrackCredit> {
     };
   }
 
-  TrackCredit copyWith({
+  TrackCreditRow copyWith({
     int? trackId,
     String? name,
     String? nameKey,
     String? role,
     String? source,
-  }) => TrackCredit(
+  }) => TrackCreditRow(
     trackId: trackId ?? this.trackId,
     name: name ?? this.name,
     nameKey: nameKey ?? this.nameKey,
     role: role ?? this.role,
     source: source ?? this.source,
   );
-  TrackCredit copyWithCompanion(TrackCreditsCompanion data) {
-    return TrackCredit(
+  TrackCreditRow copyWithCompanion(TrackCreditsCompanion data) {
+    return TrackCreditRow(
       trackId: data.trackId.present ? data.trackId.value : this.trackId,
       name: data.name.present ? data.name.value : this.name,
       nameKey: data.nameKey.present ? data.nameKey.value : this.nameKey,
@@ -10464,7 +10464,7 @@ class TrackCredit extends DataClass implements Insertable<TrackCredit> {
 
   @override
   String toString() {
-    return (StringBuffer('TrackCredit(')
+    return (StringBuffer('TrackCreditRow(')
           ..write('trackId: $trackId, ')
           ..write('name: $name, ')
           ..write('nameKey: $nameKey, ')
@@ -10479,7 +10479,7 @@ class TrackCredit extends DataClass implements Insertable<TrackCredit> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is TrackCredit &&
+      (other is TrackCreditRow &&
           other.trackId == this.trackId &&
           other.name == this.name &&
           other.nameKey == this.nameKey &&
@@ -10487,7 +10487,7 @@ class TrackCredit extends DataClass implements Insertable<TrackCredit> {
           other.source == this.source);
 }
 
-class TrackCreditsCompanion extends UpdateCompanion<TrackCredit> {
+class TrackCreditsCompanion extends UpdateCompanion<TrackCreditRow> {
   final Value<int> trackId;
   final Value<String> name;
   final Value<String> nameKey;
@@ -10514,7 +10514,7 @@ class TrackCreditsCompanion extends UpdateCompanion<TrackCredit> {
        nameKey = Value(nameKey),
        role = Value(role),
        source = Value(source);
-  static Insertable<TrackCredit> custom({
+  static Insertable<TrackCreditRow> custom({
     Expression<int>? trackId,
     Expression<String>? name,
     Expression<String>? nameKey,
@@ -12110,7 +12110,7 @@ final class $$TracksTableReferences
     );
   }
 
-  static MultiTypedResultKey<$TrackCreditsTable, List<TrackCredit>>
+  static MultiTypedResultKey<$TrackCreditsTable, List<TrackCreditRow>>
   _trackCreditsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
     db.trackCredits,
     aliasName: 'tracks__id__track_credits__track_id',
@@ -13398,7 +13398,7 @@ class $$TracksTableTableManager
                         await $_getPrefetchedData<
                           Track,
                           $TracksTable,
-                          TrackCredit
+                          TrackCreditRow
                         >(
                           currentTable: table,
                           referencedTable: $$TracksTableReferences
@@ -19406,7 +19406,7 @@ typedef $$TrackCreditsTableUpdateCompanionBuilder =
     });
 
 final class $$TrackCreditsTableReferences
-    extends BaseReferences<_$AppDatabase, $TrackCreditsTable, TrackCredit> {
+    extends BaseReferences<_$AppDatabase, $TrackCreditsTable, TrackCreditRow> {
   $$TrackCreditsTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static $TracksTable _trackIdTable(_$AppDatabase db) =>
@@ -19583,14 +19583,14 @@ class $$TrackCreditsTableTableManager
         RootTableManager<
           _$AppDatabase,
           $TrackCreditsTable,
-          TrackCredit,
+          TrackCreditRow,
           $$TrackCreditsTableFilterComposer,
           $$TrackCreditsTableOrderingComposer,
           $$TrackCreditsTableAnnotationComposer,
           $$TrackCreditsTableCreateCompanionBuilder,
           $$TrackCreditsTableUpdateCompanionBuilder,
-          (TrackCredit, $$TrackCreditsTableReferences),
-          TrackCredit,
+          (TrackCreditRow, $$TrackCreditsTableReferences),
+          TrackCreditRow,
           PrefetchHooks Function({bool trackId})
         > {
   $$TrackCreditsTableTableManager(_$AppDatabase db, $TrackCreditsTable table)
@@ -19639,7 +19639,7 @@ class $$TrackCreditsTableTableManager
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable<$TrackCreditsTable, TrackCredit>(table),
+                  e.readTable<$TrackCreditsTable, TrackCreditRow>(table),
                   $$TrackCreditsTableReferences(db, table, e),
                 ),
               )
@@ -19691,14 +19691,14 @@ typedef $$TrackCreditsTableProcessedTableManager =
     ProcessedTableManager<
       _$AppDatabase,
       $TrackCreditsTable,
-      TrackCredit,
+      TrackCreditRow,
       $$TrackCreditsTableFilterComposer,
       $$TrackCreditsTableOrderingComposer,
       $$TrackCreditsTableAnnotationComposer,
       $$TrackCreditsTableCreateCompanionBuilder,
       $$TrackCreditsTableUpdateCompanionBuilder,
-      (TrackCredit, $$TrackCreditsTableReferences),
-      TrackCredit,
+      (TrackCreditRow, $$TrackCreditsTableReferences),
+      TrackCreditRow,
       PrefetchHooks Function({bool trackId})
     >;
 typedef $$TrackEnrichTableCreateCompanionBuilder =

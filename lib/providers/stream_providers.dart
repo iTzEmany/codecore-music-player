@@ -70,13 +70,14 @@ final streamPreparerProvider = Provider<StreamPreparer>((ref) {
           meta: proposal.meta,
           lyrics: proposal.lyrics,
           curiosity: proposal.curiosity,
-          credits: proposal.credits,
           disc: proposal.disc,
           isrc: proposal.isrc,
           source: proposal.source,
         ),
         EnrichField.values.toSet(),
       );
+      // A shadow row had no id when `propose` ran, so its credits are saved here.
+      await enrichment.saveCredits(row.id, proposal.credits);
     },
   );
   ref.onDispose(preparer.dispose);

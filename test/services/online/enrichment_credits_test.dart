@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:codecore/data/db/app_database.dart' hide TrackCredit;
+import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/data/repositories/credits_repository.dart';
 import 'package:codecore/data/repositories/track_repository.dart';
 import 'package:codecore/services/covers/cover_store.dart';
@@ -118,6 +118,8 @@ class _Gw extends DeezerGwClient {
   }
 }
 
+Map<EnrichPart, PartOutcome> _only(PartOutcome o) => {EnrichPart.credits: o};
+
 class _Rest extends DeezerClient {
   _Rest(super.web);
   @override
@@ -196,7 +198,7 @@ void main() {
     expect(web.count('musicbrainz'), 0);
     expect(web.count('/track/1'), 0);
     expect(await creditsRepo.enrichOf(id), isNull);
-    expect(await svc.completeOne(id, {EnrichPart.credits}), isFalse);
+    expect(await svc.completeOne(id, {EnrichPart.credits}), _only(PartOutcome.skipped));
     expect(gw.calls, 0);
   });
 
@@ -278,17 +280,17 @@ void main() {
   test('completeOne skips a track that has credits or a none mark, force asks again',
       () async {
     final id = await add();
-    expect(await svc.completeOne(id, {EnrichPart.credits}), isTrue);
+    expect(await svc.completeOne(id, {EnrichPart.credits}), _only(PartOutcome.found));
     final calls = gw.calls;
     expect(calls, 1);
-    expect(await svc.completeOne(id, {EnrichPart.credits}), isFalse);
+    expect(await svc.completeOne(id, {EnrichPart.credits}), _only(PartOutcome.skipped));
     expect(gw.calls, calls);
-    expect(await svc.completeOne(id, {EnrichPart.credits}, force: true), isTrue);
+    expect(await svc.completeOne(id, {EnrichPart.credits}, force: true), _only(PartOutcome.found));
     expect(gw.calls, calls + 1);
 
     await creditsRepo.save(
         id, const [], TrackEnrichCompanion(trackId: Value(id), creditsNoneAt: const Value(5)));
-    expect(await svc.completeOne(id, {EnrichPart.credits}), isFalse);
+    expect(await svc.completeOne(id, {EnrichPart.credits}), _only(PartOutcome.skipped));
     expect(gw.calls, calls + 1);
   });
 
@@ -364,7 +366,7 @@ void main() {
     final id = await add();
     await creditsRepo.save(id, const [],
         TrackEnrichCompanion(trackId: Value(id), creditsNoneAt: const Value(5)));
-    expect(await svc.completeOne(id, {EnrichPart.credits}, force: true), isTrue);
+    expect(await svc.completeOne(id, {EnrichPart.credits}, force: true), _only(PartOutcome.found));
     expect((await creditsRepo.enrichOf(id))!.creditsNoneAt, isNull);
   });
 
@@ -380,6 +382,27 @@ void main() {
       language: () => 'it', limiter: RateLimiter(minGap: Duration.zero));
     await s2.completeOne(id, {EnrichPart.credits});
     expect((await creditsRepo.enrichOf(id))?.creditsNoneAt, isNull);
+  });
+
+  test('outcome per part: none for a complete empty answer, failed for a silent source',
+      () async {
+    gw.result = const DeezerContributors([]);
+    web.mbRecordings = [];
+    final id = await add();
+    expect(await svc.completeOne(id, {EnrichPart.credits}), _only(PartOutcome.none));
+    gw.paused = true;
+    expect(await svc.completeOne(id, {EnrichPart.credits}, force: true),
+        _only(PartOutcome.failed));
+  });
+
+  test('propose with credits on saves the track credits without apply', () async {
+    final id = await add();
+    final prop = await svc.propose((await repo.getById(id))!, lyrics: false, curiosity: false);
+    expect(prop.credits!.credits, isNotEmpty);
+    final saved = await creditsRepo.creditsOf(id);
+    expect(saved, hasLength(2));
+    await svc.apply(prop, {EnrichField.album});
+    expect(await creditsRepo.creditsOf(id), hasLength(2));
   });
 
   test('enrichMany force re-asks credits of a track that has them', () async {

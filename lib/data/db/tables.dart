@@ -406,7 +406,7 @@ class ArtistLookups extends Table {
 
 /// A credit (writer, producer, ...) of a track, from an online source.
 @TableIndex(name: 'track_credits_name_key', columns: {#nameKey})
-@DataClassName('TrackCredit')
+@DataClassName('TrackCreditRow')
 class TrackCredits extends Table {
   IntColumn get trackId =>
       integer().references(Tracks, #id, onDelete: KeyAction.cascade)();

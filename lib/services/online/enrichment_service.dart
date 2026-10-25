@@ -7,7 +7,7 @@ import 'package:path/path.dart' as p;
 import '../../core/app_log.dart';
 import '../../core/clock.dart';
 import '../../core/text_utils.dart';
-import '../../data/db/app_database.dart' hide TrackCredit;
+import '../../data/db/app_database.dart';
 import '../../data/repositories/credits_repository.dart';
 import '../../data/repositories/track_kinds.dart';
 import '../../data/repositories/track_repository.dart';
@@ -60,7 +60,8 @@ class EnrichmentProposal {
   final LyricsResult? lyrics;
   final Curiosity? curiosity;
 
-  /// Only with «Credits and details» on; saved by [EnrichmentService.apply].
+  /// Only with «Credits and details» on; [EnrichmentService.propose] already
+  /// saved them for a stored track (a shadow row saves them via [EnrichmentService.saveCredits]).
   /// Not part of [isEmpty]: credits never change the enrich status (K-AR-01).
   final CreditsPart? credits;
 
@@ -94,6 +95,11 @@ class CreditsPart {
 
 /// The parts [EnrichmentService.completeOne] can fill (phase 52 adds the rest).
 enum EnrichPart { credits }
+
+/// What one part of [EnrichmentService.completeOne] came to. [failed]: a source
+/// did not answer and no «searched, nothing» mark was written; [skipped]: off,
+/// not due, or no source reachable (no call made).
+enum PartOutcome { found, none, failed, skipped }
 
 class BatchProgress {
   const BatchProgress({
@@ -221,6 +227,8 @@ class EnrichmentService {
     final cp = credits && _creditsOn && (forceCredits || t.id <= 0 || await _creditsDue(t.id, false))
         ? await _creditsPart(t, m?.hit, cancel)
         : null;
+    // The only place credits are saved for a stored track, even if the preview is cancelled.
+    if (t.id > 0) await saveCredits(t.id, cp);
     return EnrichmentProposal(
         track: t,
         meta: m?.match,
@@ -422,7 +430,7 @@ class EnrichmentService {
 
   /// Writes `track_credits` and `track_enrich` only. Found → the none mark is
   /// cleared; valid and empty → marked now; any failure → left as it was.
-  Future<void> _saveCredits(int trackId, CreditsPart? part) async {
+  Future<void> saveCredits(int trackId, CreditsPart? part) async {
     final repo = creditsRepo;
     if (part == null || repo == null) return;
     // The track may have been deleted while the sources were asked (FK).
@@ -466,16 +474,28 @@ class EnrichmentService {
 
   /// Fills [parts] of one track: for now only the credits (and details), and
   /// only while «Credits and details» is on. Skipped when the track has them
-  /// or they were searched with an empty answer, unless [force]. True when
-  /// credits were found. The caller sets the pace.
-  Future<bool> completeOne(int trackId, Set<EnrichPart> parts,
+  /// or they were searched with an empty answer, unless [force]. The caller
+  /// sets the pace.
+  Future<Map<EnrichPart, PartOutcome>> completeOne(int trackId, Set<EnrichPart> parts,
       {bool force = false, CancelToken? cancel}) async {
-    if (!parts.contains(EnrichPart.credits) || !_creditsOn) return false;
+    if (!parts.contains(EnrichPart.credits)) return const {};
+    Map<EnrichPart, PartOutcome> only(PartOutcome o) => {EnrichPart.credits: o};
+    if (!_creditsOn) return only(PartOutcome.skipped);
     final t = await tracks.getById(trackId);
-    if (t == null || !await _creditsDue(trackId, force)) return false;
+    if (t == null || !await _creditsDue(trackId, force)) {
+      return only(PartOutcome.skipped);
+    }
+    final g = gw;
+    if (musicBrainz == null && (g == null || g.isPaused)) {
+      return only(PartOutcome.skipped);
+    }
     final part = await _creditsPart(t, null, cancel);
-    await _saveCredits(trackId, part);
-    return part.credits.isNotEmpty;
+    await saveCredits(trackId, part);
+    return only(part.credits.isNotEmpty
+        ? PartOutcome.found
+        : part.complete
+            ? PartOutcome.none
+            : PartOutcome.failed);
   }
 
   /// Writes only [fields]; `userEdited` tracks keep title/artist/album.
@@ -539,8 +559,6 @@ class EnrichmentService {
         enrichStatus: Value(found ? 1 : 2),
       ),
     );
-    // Credits never change [found] nor the status above: «Arricchisci» counts as today.
-    await _saveCredits(t.id, p.credits);
     if (f.contains(EnrichField.cover) && p.coverUrl != null) {
       found = await _applyCover(t.id, key, p.coverUrl!, replaceCover, cancel) ||
           found;
@@ -657,7 +675,6 @@ class EnrichmentService {
         if (prop.isEmpty) {
           await (db.update(db.tracks)..where((r) => r.id.equals(t.id)))
               .write(const TracksCompanion(enrichStatus: Value(2)));
-          await _saveCredits(t.id, prop.credits); // apply was skipped
         }
         if (found) {
           updated++;

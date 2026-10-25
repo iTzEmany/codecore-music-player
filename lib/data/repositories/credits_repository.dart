@@ -9,7 +9,7 @@ class CreditsRepository {
 
   final AppDatabase _db;
 
-  Future<List<TrackCredit>> creditsOf(int trackId) =>
+  Future<List<TrackCreditRow>> creditsOf(int trackId) =>
       (_db.select(_db.trackCredits)..where((c) => c.trackId.equals(trackId))).get();
 
   Future<TrackEnrichData?> enrichOf(int trackId) =>
