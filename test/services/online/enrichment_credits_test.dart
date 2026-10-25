@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:codecore/core/clock.dart';
 import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/data/repositories/credits_repository.dart';
 import 'package:codecore/data/repositories/track_repository.dart';
@@ -39,7 +40,7 @@ class _Web implements WebClient {
 
   @override
   Future<Object?> getJson(String url,
-      {Map<String, String>? query, CancelToken? cancel}) async {
+      {Map<String, String>? query, CancelToken? cancel, bool strict = false}) async {
     urls.add(url);
     if (url.contains('/track/isrc:')) {
       return {
@@ -65,10 +66,14 @@ class _Web implements WebClient {
       };
     }
     if (url.contains('musicbrainz.org/ws/2/isrc/')) {
+      if (mbIsrcDown && strict) throw WebUnavailableException(url, 503);
       return mbIsrcDown ? null : {'recordings': mbRecordings};
     }
     if (url.contains('musicbrainz.org/ws/2/recording/')) {
-      if (mbDown) return null;
+      if (mbDown) {
+        if (strict) throw WebUnavailableException(url, 503);
+        return null;
+      }
       return {
         'id': 'mbid-1',
         'relations': [
@@ -277,6 +282,15 @@ void main() {
     expect(await creditsRepo.creditsOf(id), isEmpty);
   });
 
+  test('completeOne asks again when the none mark is older than 30 days', () async {
+    final id = await add();
+    await creditsRepo.saveEnrich(
+        TrackEnrichCompanion(trackId: Value(id), creditsNoneAt: const Value(5)));
+    final out = await svc.completeOne(id, {EnrichPart.credits});
+    expect(out, isNot(_only(PartOutcome.skipped)));
+    expect(gw.calls, 1);
+  });
+
   test('completeOne skips a track that has credits or a none mark, force asks again',
       () async {
     final id = await add();
@@ -289,7 +303,7 @@ void main() {
     expect(gw.calls, calls + 1);
 
     await creditsRepo.save(
-        id, const [], TrackEnrichCompanion(trackId: Value(id), creditsNoneAt: const Value(5)));
+        id, const [], TrackEnrichCompanion(trackId: Value(id), creditsNoneAt: Value(nowMs())));
     expect(await svc.completeOne(id, {EnrichPart.credits}), _only(PartOutcome.skipped));
     expect(gw.calls, calls + 1);
   });
@@ -365,7 +379,7 @@ void main() {
   test('found credits clear an old none mark', () async {
     final id = await add();
     await creditsRepo.save(id, const [],
-        TrackEnrichCompanion(trackId: Value(id), creditsNoneAt: const Value(5)));
+        TrackEnrichCompanion(trackId: Value(id), creditsNoneAt: Value(nowMs())));
     expect(await svc.completeOne(id, {EnrichPart.credits}, force: true), _only(PartOutcome.found));
     expect((await creditsRepo.enrichOf(id))!.creditsNoneAt, isNull);
   });

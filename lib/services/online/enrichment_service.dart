@@ -1,28 +1,29 @@
-import 'dart:convert';
-
 import 'package:dio/dio.dart';
 import 'package:drift/drift.dart';
 import 'package:path/path.dart' as p;
 
 import '../../core/app_log.dart';
-import '../../core/clock.dart';
 import '../../core/text_utils.dart';
 import '../../data/db/app_database.dart';
 import '../../data/repositories/credits_repository.dart';
 import '../../data/repositories/track_kinds.dart';
 import '../../data/repositories/track_repository.dart';
 import '../covers/cover_store.dart';
-import 'credits.dart';
+import 'credits_enricher.dart';
 import 'deezer_client.dart';
 import 'deezer_gw_client.dart';
 import 'deezer_match.dart';
 import 'deezer_models.dart';
+import 'enrich_parts.dart';
 import 'http_client.dart';
 import 'itunes_client.dart';
 import 'lrclib_client.dart';
 import 'musicbrainz_client.dart';
 import 'query_cleaner.dart';
 import 'wikipedia_client.dart';
+
+export 'credits_enricher.dart' show CreditsPart;
+export 'enrich_parts.dart' show EnrichPart, PartOutcome;
 
 enum EnrichField {
   title,
@@ -69,37 +70,6 @@ class EnrichmentProposal {
   bool get isEmpty =>
       meta == null && (lyrics == null || lyrics!.isEmpty) && curiosity == null;
 }
-
-/// What the credits sources said about one track. Never touches `tracks`.
-class CreditsPart {
-  const CreditsPart({
-    this.credits = const [],
-    this.details,
-    this.deezerId,
-    this.mbid,
-    this.failed = const {},
-  });
-
-  /// Deezer's first, then what MusicBrainz adds ([mergeCredits]).
-  final List<TrackCredit> credits;
-  final TrackDetails? details;
-  final int? deezerId;
-  final String? mbid;
-
-  /// The credit sources (`deezer`, `musicbrainz`) that did not answer. Only
-  /// when none failed (a valid empty answer counts) may an empty result be
-  /// remembered as «searched, nothing» (invariant 3).
-  final Set<String> failed;
-  bool get complete => failed.isEmpty;
-}
-
-/// The parts [EnrichmentService.completeOne] can fill (phase 52 adds the rest).
-enum EnrichPart { credits }
-
-/// What one part of [EnrichmentService.completeOne] came to. [failed]: a source
-/// did not answer and no «searched, nothing» mark was written; [skipped]: off,
-/// not due, or no source reachable (no call made).
-enum PartOutcome { found, none, failed, skipped }
 
 class BatchProgress {
   const BatchProgress({
@@ -177,6 +147,21 @@ class EnrichmentService {
   final CreditsRepository? creditsRepo;
   final bool Function() useCredits;
   bool get _creditsOn => useCredits() && creditsRepo != null;
+  late final CreditsEnricher? _credits = creditsRepo == null
+      ? null
+      : CreditsEnricher(
+          tracks: tracks,
+          repo: creditsRepo!,
+          deezer: deezer,
+          gw: gw,
+          musicBrainz: musicBrainz,
+          deezerHit: _deezerHit,
+          albumOf: (id) => _albums[id],
+        );
+
+  /// Writes `track_credits` and `track_enrich` only (see [CreditsEnricher.save]).
+  Future<void> saveCredits(int trackId, CreditsPart? part) async =>
+      _credits?.save(trackId, part);
   final LrclibClient lrclib;
   final WikipediaClient wikipedia;
   final WebClient web;
@@ -224,8 +209,8 @@ class EnrichmentService {
     final cu = results[2] as Curiosity?;
     if (m != null) AppLog.i('enrichment: track ${t.id} metadata from ${m.source}');
     // After the other parts: it reuses their Deezer hit and can never abort them.
-    final cp = credits && _creditsOn && (forceCredits || t.id <= 0 || await _creditsDue(t.id, false))
-        ? await _creditsPart(t, m?.hit, cancel)
+    final cp = credits && _creditsOn && (forceCredits || t.id <= 0 || await _credits!.isDue(t))
+        ? await _credits!.fetch(t, m?.hit, cancel)
         : null;
     // The only place credits are saved for a stored track, even if the preview is cancelled.
     if (t.id > 0) await saveCredits(t.id, cp);
@@ -328,150 +313,6 @@ class EnrichmentService {
         want, await dz.searchTracks(deezerQuery(want), cancel: cancel));
   }
 
-  /// Deezer id (given [known] by the metadata part, else looked up even with
-  /// «Metadata from Deezer» off, and then nothing but credits comes of it:
-  /// R-36), details, Deezer and MusicBrainz credits. Each source is guarded on
-  /// its own; only a cancellation escapes.
-  Future<CreditsPart> _creditsPart(
-      Track t, DeezerTrack? known, CancelToken? cancel) async {
-    final failed = <String>{};
-    // [origin] is the credit source that gets no answer when [ask] fails
-    // (no answer is not an empty answer: invariant 3).
-    Future<T?> source<T>(String origin, String name, Future<T?> Function() ask) async {
-      try {
-        return await ask().timeout(const Duration(seconds: 25));
-      } on DioException catch (e) {
-        if (CancelToken.isCancel(e)) rethrow;
-        AppLog.w('credits source $name failed', e);
-      } catch (e, st) {
-        AppLog.w('credits source $name failed', e, st);
-      }
-      failed.add(origin);
-      return null;
-    }
-
-    final dz = deezer;
-    var hit = known;
-    if (hit == null) {
-      if (dz == null || dz.isResting) {
-        failed.add('deezer');
-      } else {
-        hit = await source('deezer', 'deezer lookup', () => _deezerHit(t, cancel));
-      }
-    }
-    final found = hit;
-    final isrc = t.isrc ?? found?.isrc;
-    final mb = musicBrainz;
-
-    Future<(TrackDetails?, DeezerContributors?)> deezerBranch() async {
-      if (found == null || dz == null) return (null, null);
-      final d = await source(
-          'deezer',
-          'deezer details',
-          () => dz.trackDetails(found.id,
-              album: _albums[found.album?.id], cancel: cancel));
-      final g = gw;
-      final ready = g == null
-          ? null
-          : await source('deezer', 'deezer gw', () async {
-              await g.load();
-              return !g.isPaused;
-            });
-      if (ready != true) {
-        failed.add('deezer'); // paused, missing or unreadable
-        return (d, null);
-      }
-      return (d, await source('deezer', 'deezer page', () => g!.pageTrack(found.id)));
-    }
-
-    Future<(String?, List<TrackCredit>)> mbBranch() async {
-      if (mb == null) {
-        failed.add('musicbrainz');
-        return (null, const <TrackCredit>[]);
-      }
-      if (isrc == null) return (null, const <TrackCredit>[]);
-      final recs = await source(
-          'musicbrainz',
-          'musicbrainz isrc',
-          () => mb.recordingsByIsrc(isrc, t.durationMs,
-              title: t.title, artist: t.artist ?? '', cancel: cancel, strict: true));
-      final mbid = recs?.firstOrNull?.id;
-      if (mbid == null) return (null, const <TrackCredit>[]);
-      final credits = await source('musicbrainz', 'musicbrainz credits',
-          () => mb.recordingCredits(mbid, cancel: cancel));
-      return (mbid, credits ?? const <TrackCredit>[]);
-    }
-
-    // Different services: asked side by side. (Not a record `.wait`, which
-    // would wrap a cancellation in a ParallelWaitError.)
-    final both = await Future.wait<Object?>([deezerBranch(), mbBranch()]);
-    final (details, page) = both[0] as (TrackDetails?, DeezerContributors?);
-    final (mbid, mbCredits) = both[1] as (String?, List<TrackCredit>);
-    return CreditsPart(
-      credits: mergeCredits(page?.credits ?? const [], mbCredits),
-      details: details == null && page == null
-          ? null
-          : (details ?? const TrackDetails()).copyWith(
-              copyright: page?.copyright,
-              physicalReleaseDate: page?.physicalReleaseDate),
-      deezerId: found?.id,
-      mbid: mbid,
-      failed: failed,
-    );
-  }
-
-  /// No credits yet and not searched with an empty answer.
-  Future<bool> _creditsDue(int trackId, bool force) async {
-    if (force) return true;
-    final repo = creditsRepo!;
-    return (await repo.enrichOf(trackId))?.creditsNoneAt == null &&
-        (await repo.creditsOf(trackId)).isEmpty;
-  }
-
-  /// Writes `track_credits` and `track_enrich` only. Found → the none mark is
-  /// cleared; valid and empty → marked now; any failure → left as it was.
-  Future<void> saveCredits(int trackId, CreditsPart? part) async {
-    final repo = creditsRepo;
-    if (part == null || repo == null) return;
-    // The track may have been deleted while the sources were asked (FK).
-    if (await tracks.getById(trackId) == null) {
-      AppLog.i('credits: track $trackId is gone, nothing saved');
-      return;
-    }
-    var list = part.credits;
-    if (list.isNotEmpty && !part.complete) {
-      // A source was down: keep only what it gave in an earlier run.
-      list = mergeCredits(list, [
-        for (final c in await repo.creditsOf(trackId))
-          if (part.failed.contains(c.source)) TrackCredit(c.name, c.role, c.source)
-      ]);
-    }
-    final row = TrackEnrichCompanion(
-      trackId: Value(trackId),
-      details: part.details == null
-          ? const Value.absent()
-          : Value(jsonEncode(part.details!.toJson())),
-      deezerId: part.deezerId == null ? const Value.absent() : Value(part.deezerId),
-      mbid: part.mbid == null ? const Value.absent() : Value(part.mbid),
-      creditsNoneAt: list.isNotEmpty
-          ? const Value(null)
-          : part.complete
-              ? Value(nowMs())
-              : const Value.absent(),
-    );
-    // Empty and complete replaces what was stored: credits and the none mark never coexist.
-    if (list.isEmpty && !part.complete) return repo.saveEnrich(row);
-    await repo.save(trackId, [
-      for (final c in list)
-        TrackCreditsCompanion.insert(
-            trackId: trackId,
-            name: c.name,
-            nameKey: c.nameKey,
-            role: c.role,
-            source: c.source)
-    ], row);
-  }
-
   /// Fills [parts] of one track: for now only the credits (and details), and
   /// only while «Credits and details» is on. Skipped when the track has them
   /// or they were searched with an empty answer, unless [force]. The caller
@@ -482,15 +323,15 @@ class EnrichmentService {
     Map<EnrichPart, PartOutcome> only(PartOutcome o) => {EnrichPart.credits: o};
     if (!_creditsOn) return only(PartOutcome.skipped);
     final t = await tracks.getById(trackId);
-    if (t == null || !await _creditsDue(trackId, force)) {
+    if (t == null || !await _credits!.isDue(t, force: force)) {
       return only(PartOutcome.skipped);
     }
     final g = gw;
     if (musicBrainz == null && (g == null || g.isPaused)) {
       return only(PartOutcome.skipped);
     }
-    final part = await _creditsPart(t, null, cancel);
-    await saveCredits(trackId, part);
+    final part = await _credits.fetch(t, null, cancel);
+    await _credits.save(trackId, part);
     return only(part.credits.isNotEmpty
         ? PartOutcome.found
         : part.complete

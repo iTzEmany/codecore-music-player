@@ -569,10 +569,17 @@ class TrackRepository {
       );
 
   /// Stores the lyrics of one track; a missing synced version clears the column.
-  Future<void> setLyrics(int id, {String? plain, String? synced}) =>
-      (_db.update(_db.tracks)..where((t) => t.id.equals(id))).write(
-        TracksCompanion(lyricsPlain: Value(plain), lyricsSynced: Value(synced)),
-      );
+  /// [byUser]: the user chose or wrote them, so the enrichment never replaces them.
+  Future<void> setLyrics(int id, {String? plain, String? synced, bool byUser = false}) =>
+      _db.transaction(() async {
+        await (_db.update(_db.tracks)..where((t) => t.id.equals(id))).write(
+          TracksCompanion(lyricsPlain: Value(plain), lyricsSynced: Value(synced)),
+        );
+        if (byUser) {
+          await _db.into(_db.trackEnrich).insertOnConflictUpdate(
+              TrackEnrichCompanion(trackId: Value(id), lyricsByUser: const Value(true)));
+        }
+      });
 
   /// Stores the «curiosities» text of one track (null clears it).
   Future<void> setCuriosities(int id, String? text) =>
