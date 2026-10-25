@@ -33,6 +33,7 @@ import '../screens/online/artist_page_screen.dart';
 import '../screens/online/artist_picker_sheet.dart';
 import '../shell/shell_nav.dart';
 import '../../services/online/youtube_service.dart' show YtResult;
+import '../../services/stream/stream_key.dart' show keyOfStreamPath, streamResultOfRow;
 import '../../services/online/ytm_artist.dart' show YtmArtistRef;
 import '../../data/repositories/library_queries.dart';
 import '../../data/repositories/track_kinds.dart';
@@ -210,6 +211,13 @@ List<TrackActionGroup> trackActions(
         }, onStreamRow: true),
     ]),
     TrackActionGroup(l.groupCollection, [
+      // A streamed shadow row: the download promotes it to a real library track.
+      if (track.kind == kStreamKind && keyOfStreamPath(track.path) != null)
+        TrackAction(Icons.download_rounded, l.ytDownload, () async {
+          ref
+              .read(downloadsProvider.notifier)
+              .add(streamResultOfRow(keyOfStreamPath(track.path)!, track));
+        }, onStreamRow: true),
       TrackAction(
         track.isFavorite
             ? Icons.favorite_rounded

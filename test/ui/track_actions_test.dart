@@ -1,5 +1,9 @@
 import 'package:codecore/data/db/app_database.dart' show Track;
 import 'package:codecore/data/repositories/track_repository.dart';
+import 'package:codecore/data/repositories/track_kinds.dart' show kStreamKind;
+import 'package:codecore/providers/youtube_providers.dart';
+import 'package:codecore/services/online/download_queue.dart' show DownloadItem;
+import 'package:codecore/services/online/youtube_service.dart' show YtResult;
 import 'package:codecore/ui/theme/tokens.dart';
 import 'package:codecore/ui/widgets/track_actions.dart';
 import 'package:drift/drift.dart' show Value;
@@ -13,6 +17,7 @@ import 'package:codecore/ui/widgets/track_row.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/app_harness.dart';
@@ -194,7 +199,7 @@ void main() {
   });
 
   Future<Harness> openSheet(WidgetTester tester, Track Function(Track) edit,
-      {double scale = 1}) async {
+      {double scale = 1, List<Override> extra = const []}) async {
     tester.view.physicalSize = const Size(360, 900);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -202,6 +207,7 @@ void main() {
     final t = edit((await tester.runAsync(() => h.db.select(h.db.tracks).get()))!.first);
     await h.pump(
       tester,
+      extraOverrides: extra,
       MediaQuery(
         data: MediaQueryData(textScaler: TextScaler.linear(scale)),
         child: Consumer(
@@ -252,4 +258,34 @@ void main() {
     expect(tester.widgetList<ListTile>(find.byType(ListTile)).where((x) => x.textColor == CcColors.notte.error), isEmpty);
     await h.dispose(tester);
   });
+
+  testWidgets('«Scarica»: in the menu of a streamed track, not of a local one', (tester) async {
+    var h = await openSheet(tester, (t) => t);
+    expect(find.text('Scarica'), findsNothing);
+    await h.dispose(tester);
+
+    h = await openSheet(tester, (t) => t.copyWith(id: -5));
+    expect(find.text('Scarica'), findsOneWidget);
+    await h.dispose(tester);
+
+    final downloads = _Downloads();
+    h = await openSheet(
+      tester,
+      (t) => t.copyWith(kind: kStreamKind, path: 'stream:youtube:abc', title: 'Streamed'),
+      extra: [downloadsProvider.overrideWith(() => downloads)],
+    );
+    await tester.tap(find.text('Scarica'));
+    await _settle(tester);
+    expect(downloads.added.single.id, 'abc');
+    expect(downloads.added.single.title, 'Streamed');
+    await h.dispose(tester);
+  });
+}
+
+class _Downloads extends DownloadsNotifier {
+  final added = <YtResult>[];
+  @override
+  List<DownloadItem> build() => [];
+  @override
+  void add(YtResult r, {String? tag}) => added.add(r);
 }
