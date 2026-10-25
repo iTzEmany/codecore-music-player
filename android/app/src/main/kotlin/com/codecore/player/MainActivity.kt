@@ -52,6 +52,7 @@ class MainActivity : AudioServiceActivity() {
         YtDlpChannel(applicationContext).register(flutterEngine.dartExecutor.binaryMessenger)
         ImportBridge.register(flutterEngine.dartExecutor.binaryMessenger, applicationContext)
         MediaDeleteBridge.register(flutterEngine.dartExecutor.binaryMessenger, this)
+        SaveFileBridge.register(flutterEngine.dartExecutor.binaryMessenger, this)
         StorageBridge.register(flutterEngine.dartExecutor.binaryMessenger)
         NetworkBridge.register(flutterEngine.dartExecutor.binaryMessenger, applicationContext)
         NotifyBridge.register(flutterEngine.dartExecutor.binaryMessenger, applicationContext)
@@ -149,12 +150,14 @@ class MainActivity : AudioServiceActivity() {
         NotifyBridge.detach()
         IncomingBridge.detach()
         MediaDeleteBridge.detach()
+        SaveFileBridge.detach()
         super.cleanUpFlutterEngine(flutterEngine)
     }
 
     @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: android.content.Intent?) {
         if (MediaDeleteBridge.onActivityResult(requestCode, resultCode)) return
+        if (SaveFileBridge.onActivityResult(this, requestCode, resultCode, data)) return
         @Suppress("DEPRECATION")
         super.onActivityResult(requestCode, resultCode, data)
     }
