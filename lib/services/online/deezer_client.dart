@@ -58,6 +58,32 @@ class DeezerClient {
     return j == null ? null : DeezerAlbum.fromJson(j);
   }
 
+  /// [album] is an already-read album: it saves the `/album` request.
+  Future<TrackDetails?> trackDetails(
+    int deezerId, {
+    DeezerAlbum? album,
+    CancelToken? cancel,
+  }) async {
+    final j = await _get('$_base/track/$deezerId', cancel: cancel);
+    if (j == null) return null;
+    final albumId = j['album'] is Map
+        ? (j['album'] as Map)['id'] as int?
+        : null;
+    final alb =
+        album ??
+        (albumId == null ? null : await this.album(albumId, cancel: cancel));
+    final bpm = (j['bpm'] as num?)?.toDouble();
+    return TrackDetails(
+      bpm: bpm == null || bpm <= 0 ? null : bpm,
+      label: alb?.label,
+      digitalReleaseDate: alb?.releaseDate ?? j['release_date'] as String?,
+      recordType: alb?.recordType,
+      rank: (j['rank'] as num?)?.toInt(),
+      albumFans: alb?.fans,
+      explicit: j['explicit_lyrics'] as bool?,
+    );
+  }
+
   Future<Map<dynamic, dynamic>?> _get(
     String url, {
     Map<String, String>? query,
