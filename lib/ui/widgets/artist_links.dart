@@ -32,7 +32,9 @@ class ArtistLinks extends ConsumerWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         for (final a in artists) ...[
+          // flex ~ text length: each part gets what it needs whenever the total fits.
           Flexible(
+            flex: a.name.length,
             child: Semantics(
               button: true,
               container: true,
@@ -57,7 +59,7 @@ class ArtistLinks extends ConsumerWidget {
             ),
           ),
           if (a.sep.isNotEmpty)
-            Flexible(child: Text(a.sep, maxLines: 1, overflow: TextOverflow.clip, style: style)),
+            Flexible(flex: a.sep.length, child: Text(a.sep, maxLines: 1, overflow: TextOverflow.clip, style: style)),
         ],
       ],
     );

@@ -24,13 +24,14 @@ bool Function(String) isLibraryArtistIn(List<ArtistSummary> artists) {
 }
 
 /// The artists of a credit line, with their original separators. A credit that
-/// is itself a library artist stays one name («AC/DC», «Tyler, The Creator»)
-/// unless each of its pieces is a library artist too («A, B» with solo tracks).
+/// is itself a library artist stays one name only when it has no comma and no
+/// feat./ft. («AC/DC», «Simon & Garfunkel») and not every piece is a library artist.
 List<ArtistName> creditedArtists(String credit,
     {bool Function(String name)? isLibraryArtist}) {
   final parts = splitArtists(credit);
   if (isLibraryArtist != null &&
       isLibraryArtist(credit) &&
+      !RegExp(r',|\b(feat|ft)\b', caseSensitive: false).hasMatch(credit) &&
       !parts.every((p) => isLibraryArtist(p.name))) {
     return [ArtistName(credit.trim())];
   }
