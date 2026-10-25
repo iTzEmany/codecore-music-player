@@ -554,10 +554,11 @@ class TrackRepository {
   }
 
   Future<int?> idForPath(String path) async {
-    final t = await (_db.select(
-      _db.tracks,
-    )..where((r) => r.path.equals(path))).getSingleOrNull();
-    return t?.id;
+    final rows = await lightSelect(
+      _db,
+      _db.select(_db.tracks)..where((r) => r.path.equals(path)),
+    ).get();
+    return rows.firstOrNull?.id;
   }
 
   Future<void> setFavorite(int id, bool value) =>

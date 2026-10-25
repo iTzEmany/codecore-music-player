@@ -8,6 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import '../core/app_log.dart';
 import '../core/paths.dart';
 import '../core/platform.dart';
+import 'player_providers.dart' show audioHandlerProvider;
 import '../data/db/app_database.dart';
 import '../data/repositories/folder_repository.dart';
 import '../services/import/playlist_import_service.dart' show parseImportTag;
@@ -175,6 +176,7 @@ class DownloadsNotifier extends Notifier<List<DownloadItem>> {
           final idx = await ref.read(downloadIndexProvider.future);
           await idx.add(item.result.id, path, source: item.result.source);
           await _mergeShadowRow(item.result, path);
+          _resyncPlayer();
         }
         // An import enriches its songs itself, after putting the CSV tags on.
         if (parseImportTag(item?.tag) == null) await _autoEnrich(path);
@@ -210,6 +212,15 @@ class DownloadsNotifier extends Notifier<List<DownloadItem>> {
     }
   }
 
+  /// The song is a library track now: the player's queue stops prefetching it.
+  void _resyncPlayer() {
+    try {
+      unawaited(ref.read(audioHandlerProvider).resyncPreparer());
+    } on Object catch (e) {
+      AppLog.d('player not told about the download', e); // no player (tests)
+    }
+  }
+
   /// Why the last promotion from the stream cache failed (e.g. disk full).
   Stream<String> get promoteErrors => _promoteErrors.stream;
   final _promoteErrors = StreamController<String>.broadcast();
@@ -229,11 +240,12 @@ class DownloadsNotifier extends Notifier<List<DownloadItem>> {
     try {
       if (await ref.read(streamPromoterProvider).promote(r)) {
         await _joinPlaylist(r, parseAddToPlaylistTag(tag));
+        _resyncPlayer();
         return;
       }
     } on StreamPromoteException catch (e) {
       AppLog.w('promotion failed: ${e.message}');
-      _promoteErrors.add(e.message);
+      if (!_promoteErrors.isClosed) _promoteErrors.add(e.message);
       if (e.noSpace) return; // a download would fail the same way
     } on Object catch (e, st) {
       AppLog.w('promotion failed, downloading instead', e, st);

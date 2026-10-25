@@ -53,7 +53,8 @@ class OnlineQueueRow extends ConsumerWidget {
     final cc = context.cc;
     final theme = Theme.of(context).textTheme;
     final l = context.l10n;
-    final isCurrent = ref.watch(currentTrackProvider.select((t) => t.value?.id == track.id));
+    final isCurrent = ref.watch(currentTrackProvider.select(
+        (_) => ref.read(audioHandlerProvider).currentQueueId == track.id));
     final i = reorderIndex;
     final radio = radioOfTrack(ref, track);
     return InkWell(

@@ -27,11 +27,15 @@ const _r = YtResult(
 
 class _Ctrl implements PlayerController {
   final calls = <String>[];
+  bool failEnqueue = false;
 
   @override
   Future<void> playOnline(YtResult r) async => calls.add('play');
   @override
-  Future<void> enqueueOnline(YtResult r) async => calls.add('enqueue');
+  Future<void> enqueueOnline(YtResult r) async {
+    if (failEnqueue) throw StateError('no');
+    calls.add('enqueue');
+  }
   @override
   Future<void> playOnlineNext(YtResult r) async => calls.add('next');
 
@@ -123,6 +127,20 @@ void main() {
     expect(container.read(selectionProvider('k')).active, isFalse);
     expect(ctrl.calls, isEmpty);
     expect(find.byType(NowPlayingScreen), findsNothing);
+    await h.dispose(tester);
+  });
+
+  testWidgets('a queueing that fails does not say «Aggiunto in coda»', (tester) async {
+    final h = await pumpRow(tester);
+    await tester.dragFrom(const Offset(120, 36), const Offset(300, 0));
+    await tester.pumpAndSettle();
+    expect(find.text('Aggiunto in coda'), findsOneWidget); // control: it shows when it works
+    ScaffoldMessenger.of(tester.element(find.byType(Scaffold).first)).clearSnackBars();
+    await tester.pumpAndSettle();
+    ctrl.failEnqueue = true;
+    await tester.dragFrom(const Offset(120, 36), const Offset(300, 0));
+    await tester.pumpAndSettle();
+    expect(find.text('Aggiunto in coda'), findsNothing);
     await h.dispose(tester);
   });
 

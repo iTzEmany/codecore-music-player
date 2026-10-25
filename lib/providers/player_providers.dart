@@ -161,7 +161,13 @@ class PlayerController {
   }
 
   Future<int?> _idOrLog(YtResult r) async {
-    final id = await _idOf(r);
+    final int? id;
+    try {
+      id = await _idOf(r);
+    } on Object catch (e, st) {
+      AppLog.w('online play ignored: lookup failed for ${r.indexKey}', e, st);
+      return null;
+    }
     if (id == null) AppLog.w('online play ignored: no online registry');
     return id;
   }

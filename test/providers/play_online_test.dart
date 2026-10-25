@@ -24,6 +24,7 @@ void main() {
   late List<int> ids;
   late bool plus;
   int? downloaded;
+  var lookupFails = false;
 
   setUp(() async {
     db = AppDatabase(NativeDatabase.memory());
@@ -51,12 +52,16 @@ void main() {
     ];
     plus = true;
     downloaded = null;
+    lookupFails = false;
     player = PlayerController(
       handler,
       null,
       shufflePlus: () => plus,
       setShufflePlus: (on) => plus = on,
-      libraryIdOf: (_) async => downloaded,
+      libraryIdOf: (_) async {
+        if (lookupFails) throw StateError('index unreadable');
+        return downloaded;
+      },
     );
     await handler.playQueue(ids, 0);
   });
@@ -116,6 +121,23 @@ void main() {
     await handler.playStations(
         [const RadioStation(id: 's', name: 'S', streamUrl: 'http://x')], 0);
     await player.enqueueOnline(_r('x'));
+    expect(handler.queueIds.length, 1);
+    expect(online.entryOf(handler.queueIds.single)?.result.id, 'x');
+    expect(handler.isRadio, isFalse);
+  });
+
+  test('playOnline, enqueueOnline and playOnlineNext survive an unreadable download index', () async {
+    lookupFails = true;
+    await player.playOnline(_r('x'));
+    await player.enqueueOnline(_r('x'));
+    await player.playOnlineNext(_r('x'));
+    expect(handler.queueIds, ids);
+  });
+
+  test('playOnline during radio plays the result alone', () async {
+    await handler.playStations(
+        [const RadioStation(id: 's', name: 'S', streamUrl: 'http://x')], 0);
+    await player.playOnline(_r('x'));
     expect(handler.queueIds.length, 1);
     expect(online.entryOf(handler.queueIds.single)?.result.id, 'x');
     expect(handler.isRadio, isFalse);

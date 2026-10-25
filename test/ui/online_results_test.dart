@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:codecore/providers/jam_providers.dart';
+import 'package:codecore/providers/player_providers.dart';
 import 'package:codecore/providers/smart_search_providers.dart';
 import 'package:codecore/services/online/merge_results.dart';
 import 'package:codecore/services/online/query_intent.dart';
@@ -82,6 +84,19 @@ SmartSearchState _state({
   error: error,
 );
 
+class _EnqueueSpy implements PlayerController {
+  final calls = <String>[];
+  @override
+  Future<void> enqueueOnline(YtResult r) async => calls.add(r.id);
+  @override
+  dynamic noSuchMethod(Invocation invocation) => null;
+}
+
+class _ActiveJam extends JamController {
+  @override
+  JamUiState build() => const JamUiState(phase: JamPhase.active);
+}
+
 const _pink = YtmArtistRef(
   id: 'UCpf',
   name: 'Pink Floyd',
@@ -97,6 +112,7 @@ void main() {
     WidgetTester tester, {
     int submitted = 1,
     Widget? page,
+    List<Override> more = const [],
   }) async {
     tester.view.physicalSize = const Size(400, 900);
     tester.view.devicePixelRatio = 1;
@@ -110,6 +126,7 @@ void main() {
         requests.add(request);
         return engine.stream;
       }),
+      ...more,
     ];
     await h.pump(
       tester,
@@ -303,6 +320,19 @@ void main() {
       await h.dispose(tester);
     },
   );
+
+  testWidgets('«anche come video» with a Jam on queues the video (D-89)', (tester) async {
+    final spy = _EnqueueSpy();
+    final h = await open(tester, more: [
+      playerControllerProvider.overrideWithValue(spy),
+      jamProvider.overrideWith(_ActiveJam.new),
+    ]);
+    await emit(tester, _state(best: [_song('a', 'Mother', hasVideo: true)]));
+    await tester.tap(find.byKey(const ValueKey('listen-video-a')));
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(spy.calls, ['a-v']);
+    await h.dispose(tester);
+  });
 
   testWidgets(
     'nothing sure says so; a source that gave nothing has a line above the list',

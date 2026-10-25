@@ -90,6 +90,71 @@ void main() {
     expect(handler.currentTrack?.id, id);
   });
 
+  test('a downloaded online entry is not prepared nor streamed; the other still is', () async {
+    handler.libraryIdOf = (r) async => r.id == 'v1' ? ids[1] : null;
+    final e = [online.register(result('v1')), online.register(result('v2'))];
+    await handler.playQueue(e, 0);
+    await settle();
+    expect(handler.currentTrack?.id, ids[1]);
+    expect(backend.loaded.single, '/m/b.mp3');
+    expect(preparer.asked, isEmpty);
+    expect(preparer.queues.last, ['youtube:v2']);
+    expect(handler.loadingStream, isFalse);
+  });
+
+  test('plays and the resume point of a downloaded online entry land on the library id', () async {
+    await (db.update(db.tracks)..where((t) => t.id.equals(ids[1]))).write(const TracksCompanion(
+        durationMs: Value(30 * 60 * 1000), resumePositionMs: Value(600000)));
+    handler.libraryIdOf = (_) async => ids[1];
+    await handler.playQueue([online.register(result('v1'))], 0);
+    expect(backend.seeks, [const Duration(milliseconds: 595000)]);
+    await listenTo(100);
+    backend.stateC.add(BackendState.completed);
+    await settle();
+    final plays = await db.select(db.plays).get();
+    expect(plays.map((p) => p.trackId), [ids[1]]);
+  });
+
+  test('deleting the library file of a playing online entry takes the entry out too', () async {
+    handler.libraryIdOf = (_) async => ids[1];
+    final id = online.register(result('v1'));
+    await handler.playQueue([id, ids[0]], 0);
+    expect(handler.currentTrack?.id, ids[1]);
+    await handler.removeTracks({ids[1]});
+    expect(handler.queueIds, [ids[0]]);
+    expect(handler.currentTrack?.id, ids[0]);
+  });
+
+  test('resyncPreparer drops an entry downloaded after it was queued', () async {
+    final e = [online.register(result('v1')), online.register(result('v2'))];
+    await handler.playQueue([ids[0], ...e], 0);
+    await settle();
+    expect(preparer.queues.last, ['youtube:v1', 'youtube:v2']);
+    handler.libraryIdOf = (r) async => r.id == 'v2' ? ids[1] : null;
+    await handler.resyncPreparer();
+    expect(preparer.queues.last, ['youtube:v1']);
+  });
+
+  test('a download lookup that fails leaves the entry streaming', () async {
+    handler.libraryIdOf = (_) async => throw StateError('index unreadable');
+    final id = online.register(result('v1'));
+    await handler.playQueue([id], 0);
+    expect(preparer.asked, ['youtube:v1']);
+    expect(backend.loaded.single, endsWith('youtube_v1.m4a'));
+  });
+
+  test('a seek while the stream loads never reaches the backend', () async {
+    final id = online.register(result('v1'));
+    final gate = preparer.gates['youtube:v1'] = Completer<void>();
+    final started = handler.playQueue([id], 0);
+    await settle();
+    expect(handler.loadingStream, isTrue);
+    await handler.seek(const Duration(seconds: 30));
+    expect(backend.seeks, isEmpty);
+    gate.complete();
+    await started;
+  });
+
   test('a row of kind 2 plays through the preparer with the key of its path', () async {
     final file = File('${dir.path}/x.m4a')..writeAsStringSync('x');
     final rowId = await TrackRepository(db).upsertStreamRow('youtube:v9', result('v9'), file);

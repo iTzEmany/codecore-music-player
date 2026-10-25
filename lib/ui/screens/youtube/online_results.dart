@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/l10n_ext.dart';
-import '../now_playing/now_playing_screen.dart' show playOnlineAndOpen;
 import '../../../providers/selection_providers.dart';
 import '../../../providers/settings_providers.dart';
 import '../../../providers/smart_search_providers.dart';
@@ -250,8 +249,7 @@ class _OnlineResultsState extends ConsumerState<OnlineResults> {
           index: i,
           selectionKey: _selectionKey,
           onArtistTap: _openArtist,
-          onListenVideo: () =>
-              playOnlineAndOpen(context, ref, r.alternatives.first),
+          onListenVideo: () => tapOnline(context, ref, r.alternatives.first),
         ),
       );
     }

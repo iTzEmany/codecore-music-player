@@ -212,6 +212,8 @@ Future<void> main() async {
     ],
   );
   runApp(UncontrolledProviderScope(container: container, child: const CodecoreApp()));
+  // A queued online entry downloaded meanwhile plays its library file (D-81).
+  handler.libraryIdOf = container.read(playerControllerProvider).libraryIdOf;
   // The player downloads streamed tracks through the preparer (45.4); before
   // the queue comes back, so a restored streamed track finds it.
   try {

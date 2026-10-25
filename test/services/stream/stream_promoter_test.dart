@@ -14,6 +14,9 @@ import 'package:codecore/providers/database_providers.dart';
 import 'package:codecore/providers/settings_providers.dart';
 import 'package:codecore/providers/stream_providers.dart';
 import 'package:codecore/providers/youtube_providers.dart';
+import 'package:codecore/providers/library_providers.dart';
+import 'package:dio/dio.dart' show CancelToken;
+import 'package:codecore/services/scanner/library_scanner.dart';
 import 'package:codecore/services/stream/stream_cache.dart';
 import 'package:codecore/services/stream/stream_promoter.dart';
 import 'package:drift/drift.dart' show Value;
@@ -38,19 +41,50 @@ class _Yt implements YoutubeService {
   dynamic noSuchMethod(Invocation i) => throw UnimplementedError();
 }
 
+class _DownloadingYt extends _Yt {
+  @override
+  Stream<DownloadProgress> download(YtResult r, Directory outDir,
+          {CancelToken? cancel, DownloadOptions options = const DownloadOptions()}) =>
+      Stream.value(DownloadProgress(received: 1, total: 1, path: p.join(outDir.path, 'dl.m4a')));
+}
+
+class _Scanner implements LibraryScanner {
+  _Scanner(this.db);
+  final AppDatabase db;
+  @override
+  Stream<ScanProgress> scanFiles(Folder folder, List<String> paths) async* {
+    for (final path in paths) {
+      await db.into(db.tracks).insert(TracksCompanion.insert(
+          path: path, title: 'Song', albumKey: 'k', format: 'm4a', sizeBytes: 1, mtimeMs: 1, addedAt: 1));
+    }
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation i) => throw UnimplementedError();
+}
+
+class _MergeSpy extends TrackRepository {
+  _MergeSpy(super.db);
+  final merged = <String>[];
+  @override
+  Future<void> mergeStreamRow(String key, int keepId) async => merged.add(key);
+}
+
 class _Settings extends SettingsNotifier {
   @override
   AppSettings build() => AppSettings();
 }
 
 class _FakePromoter implements StreamPromoter {
-  _FakePromoter(this.calls, [this.gate]);
+  _FakePromoter(this.calls, [this.gate, this.error]);
   final List<String> calls;
   final Completer<void>? gate;
+  final Object? error;
   @override
   Future<bool> promote(YtResult r) async {
     calls.add(r.indexKey);
     await gate?.future;
+    if (error != null) throw error!;
     return true;
   }
 
@@ -58,7 +92,8 @@ class _FakePromoter implements StreamPromoter {
   dynamic noSuchMethod(Invocation i) => throw UnimplementedError();
 }
 
-Future<ProviderContainer> _notifierWith(StreamPromoter promoter, {List<Override> extra = const []}) async {
+Future<ProviderContainer> _notifierWith(StreamPromoter promoter,
+    {List<Override> extra = const [], YoutubeService? yt}) async {
   final db = AppDatabase(NativeDatabase.memory());
   addTearDown(db.close);
   final dir = await Directory.systemTemp.createTemp('dl');
@@ -66,7 +101,7 @@ Future<ProviderContainer> _notifierWith(StreamPromoter promoter, {List<Override>
   await FolderRepository(db).add(dir.path);
   final c = ProviderContainer(overrides: [
     folderRepositoryProvider.overrideWithValue(FolderRepository(db)),
-    youtubeServiceProvider.overrideWithValue(_Yt()),
+    youtubeServiceProvider.overrideWithValue(yt ?? _Yt()),
     settingsProvider.overrideWith(_Settings.new),
     streamPromoterProvider.overrideWithValue(promoter),
     ...extra,
@@ -219,6 +254,83 @@ void main() {
     expect(await cache.fileFor(_key), isNull);
   });
 
+  StreamPromoter build({
+    Future<(Directory, Folder)?> Function()? folderFn,
+    Future<void> Function(File, String)? rename,
+    Future<void> Function(File, String)? copy,
+  }) =>
+      StreamPromoter(
+        cache: cache,
+        tracks: tracks,
+        covers: covers,
+        downloadFolder: folderFn ?? () async => (Directory(p.join(root.path, 'Music')), folder),
+        index: () async => index,
+        scan: (_, path) async => scanned.add(path),
+        tag: (id) async => tagged.add(id),
+        rename: rename,
+        copy: copy,
+      );
+  String destOf([String suffix = '']) => p.join(root.path, 'Music', '${downloadBaseName(_r)}$suffix.m4a');
+
+  test('a missing row already at the destination path: the index has the file and the scan runs', () async {
+    final libId = await db.into(db.tracks).insert(TracksCompanion.insert(
+        path: destOf(), title: 'Song', albumKey: 'artist|album', format: 'm4a', sizeBytes: 1, mtimeMs: 1,
+        addedAt: 1, missing: const Value(true)));
+    expect(await build().promote(_r), isTrue);
+    expect(index.pathFor(_key), destOf());
+    expect(scanned, [destOf()]);
+    expect(tagged, [libId]);
+    expect(await tracks.getById(shadowId), isNull, reason: 'the shadow merged into the library row');
+    expect((await db.select(db.plays).get()).single.trackId, libId);
+  });
+
+  test('no download folder: nothing is promoted and the cache keeps the file', () async {
+    expect(await build(folderFn: () async => null).promote(_r), isFalse);
+    expect(await cache.fileFor(_key), isNotNull);
+    expect((await tracks.getById(shadowId))!.kind, 2);
+  });
+
+  test('no shadow row: nothing is promoted and the cache keeps the file', () async {
+    await db.delete(db.plays).go();
+    await db.delete(db.tracks).go();
+    expect(await build().promote(_r), isFalse);
+    expect(await cache.fileFor(_key), isNotNull);
+    expect(File(destOf()).existsSync(), isFalse);
+  });
+
+  test('a taken destination name gets " (2)"', () async {
+    File(destOf()).writeAsBytesSync([7]);
+    expect(await build().promote(_r), isTrue);
+    expect(File(destOf(' (2)')).existsSync(), isTrue);
+    expect((await tracks.getById(shadowId))!.path, destOf(' (2)'));
+    expect(File(destOf()).readAsBytesSync(), [7]);
+  });
+
+  group('rename fails (other volume): copy', () {
+    Future<void> noRename(File f, String to) async => throw const FileSystemException('cross-device');
+
+    test('an incomplete copy throws, the partial copy goes and the source stays', () async {
+      final src = (await cache.fileFor(_key))!;
+      final pr = build(rename: noRename, copy: (f, to) async => File(to).writeAsBytesSync([1]));
+      await expectLater(pr.promote(_r), throwsA(isA<StreamPromoteException>().having((e) => e.noSpace, 'noSpace', isFalse)));
+      expect(File(destOf()).existsSync(), isFalse);
+      expect(src.existsSync(), isTrue);
+      expect((await tracks.getById(shadowId))!.kind, 2);
+    });
+
+    for (final (label, err) in [
+      ('code 28', OSError('x', 28)),
+      ('code 112', OSError('x', 112)),
+      ('message', OSError('No space left on device', 5)),
+    ]) {
+      test('disk full ($label) -> noSpace', () async {
+        final pr = build(rename: noRename, copy: (f, to) async => throw FileSystemException('copy', to, err));
+        await expectLater(pr.promote(_r), throwsA(isA<StreamPromoteException>().having((e) => e.noSpace, 'noSpace', isTrue)));
+        expect((await cache.fileFor(_key))!.existsSync(), isTrue);
+      });
+    }
+  });
+
   test('a second add of the same track while it moves is ignored', () async {
     final calls = <String>[];
     final gate = Completer<void>();
@@ -229,6 +341,47 @@ void main() {
     await Future<void>.delayed(Duration.zero);
     expect(calls, [_key]);
     gate.complete();
+  });
+
+  test('a second add after the first finished is not ignored', () async {
+    final calls = <String>[];
+    final c = await _notifierWith(_FakePromoter(calls));
+    final n = c.read(downloadsProvider.notifier);
+    n.add(_r);
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+    n.add(_r);
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+    expect(calls, [_key, _key]);
+  });
+
+  test('a normal download of a track with a shadow row merges the row', () async {
+    final spy = _MergeSpy(db);
+    final c = await _notifierWith(_FakePromoter([], null, null), yt: _DownloadingYt(), extra: [
+      libraryScannerProvider.overrideWithValue(_Scanner(db)),
+      trackRepositoryProvider.overrideWithValue(spy),
+      downloadIndexProvider.overrideWith((ref) async => index),
+    ]);
+    c.read(downloadsProvider.notifier).add(_r, tag: 'import:1:2');
+    await Future<void>.delayed(const Duration(milliseconds: 300));
+    expect(spy.merged, [_key]);
+  });
+
+  test('noSpace queues no download', () async {
+    final c = await _notifierWith(
+        _FakePromoter([], null, const StreamPromoteException('disk full', noSpace: true)));
+    c.read(downloadsProvider.notifier).add(_r);
+    await Future<void>.delayed(const Duration(milliseconds: 100));
+    expect(c.read(downloadsProvider), isEmpty);
+  });
+
+  test('a promotion error that lands after the notifier is gone does not throw', () async {
+    final gate = Completer<void>();
+    final c = await _notifierWith(
+        _FakePromoter([], gate, const StreamPromoteException('late')));
+    c.read(downloadsProvider.notifier).add(_r);
+    c.dispose();
+    gate.complete();
+    await Future<void>.delayed(const Duration(milliseconds: 50)); // an unhandled error fails the test
   });
 
   test('an import-tagged add skips the promoter', () async {
