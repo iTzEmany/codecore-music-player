@@ -208,7 +208,7 @@ List<TrackActionGroup> trackActions(
         TrackAction(Icons.queue_music_rounded, l.jamAddToJam, () async {
           final n = await ref.read(jamProvider.notifier).addTracks([track]);
           snack(l.jamAdded(n));
-        }, onStreamRow: true),
+        }),
     ]),
     TrackActionGroup(l.groupCollection, [
       // A streamed shadow row: the download promotes it to a real library track.

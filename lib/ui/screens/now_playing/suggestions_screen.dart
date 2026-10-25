@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/app_log.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../l10n/l10n_ext.dart';
-import '../../../providers/player_providers.dart';
 import '../../../providers/shuffle_plus_providers.dart';
 import '../../../providers/youtube_providers.dart';
 import '../../../services/online/youtube_service.dart';
@@ -122,7 +121,7 @@ class _SuggestionRow extends ConsumerWidget {
         key: ValueKey('listen-${result.indexKey}'),
         tooltip: l.listenAction,
         icon: const Icon(Icons.headphones_rounded),
-        onPressed: () => ref.read(playerControllerProvider).playOnline(result),
+        onPressed: () => tapOnline(context, ref, result),
       ),
     );
   }
