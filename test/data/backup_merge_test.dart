@@ -1,3 +1,5 @@
+import 'package:codecore/data/repositories/credits_repository.dart';
+import 'package:codecore/services/online/credits.dart';
 import 'package:codecore/data/db/app_database.dart';
 import 'dart:convert';
 import 'dart:io';
@@ -247,5 +249,25 @@ void main() {
       expect(out.checked, 1);
       expect(out.fresh, isEmpty);
     });
+  });
+
+  test('credits and details come back from a backup, and never replace the ones a track has', () async {
+    final repo = CreditsRepository(db);
+    final a = (await track('a')).id, b = (await track('b')).id;
+    TrackCreditsCompanion c(int id, String n) =>
+        TrackCreditsCompanion.insert(trackId: id, name: n, nameKey: n, role: 'composer', source: 'deezer');
+    await repo.save(a, [c(a, 'Ann')], TrackEnrichCompanion(trackId: Value(a), details: const Value('{"label":"L"}')));
+    final data = await collectUserData(db);
+    expect(data.tracks.single.credits.single.name, 'Ann');
+    await repo.saveCredits(b, [c(b, 'Mine')]);
+    await db.customStatement('DELETE FROM track_credits WHERE track_id = $a');
+    await db.customStatement('DELETE FROM track_enrich WHERE track_id = $a');
+    await merge(data);
+    expect((await repo.creditsOf(a)).map((x) => x.name), ['Ann']);
+    expect((await repo.portableOf(a)).details!.label, 'L');
+    await merge(UserData(createdAt: 1, tracks: [
+      TrackUserData(ref: ref('b'), credits: [TrackCredit('Other', 'guitar', 'deezer')]),
+    ]));
+    expect((await repo.creditsOf(b)).map((x) => x.name), ['Mine']);
   });
 }

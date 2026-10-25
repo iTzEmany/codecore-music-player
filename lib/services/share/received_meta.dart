@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import '../../core/app_log.dart';
+import '../../data/repositories/credits_repository.dart';
 import '../../data/repositories/track_repository.dart';
 import '../covers/cover_store.dart';
 import 'track_meta.dart';
@@ -15,6 +16,7 @@ Future<void> applyReceivedPackage(
   String path,
   TrackMeta? meta, {
   Future<ReceivedCover?> Function()? fetchCover,
+  CreditsRepository? credits,
 }) async {
   try {
     final row = await tracks.byPath(path);
@@ -25,6 +27,7 @@ Future<void> applyReceivedPackage(
     final albumKey = meta == null
         ? row.albumKey
         : await tracks.applyReceivedMeta(row.id, meta) ?? row.albumKey;
+    if (meta != null && credits != null) await credits.saveIfNone(row.id, meta.credits, meta.details);
     final cover = fetchCover == null ? null : await fetchCover();
     if (cover == null) return;
     final key = await covers.saveFromBytes(albumKey, cover.bytes, cover.mime);

@@ -2,7 +2,9 @@ import 'package:drift/drift.dart' show OrderingTerm;
 import 'package:path/path.dart' as p;
 
 import '../../services/backup/user_data.dart';
+import '../../services/online/credits.dart';
 import '../db/app_database.dart';
+import 'credits_repository.dart';
 import 'hidden_playlists.dart';
 import 'track_kinds.dart';
 
@@ -15,6 +17,14 @@ Future<UserData> collectUserData(AppDatabase db) {
     };
     final tracks = await (db.select(db.tracks)..where((t) => t.kind.isNotValue(kStreamKind)))
         .get();
+    final credits = <int, List<TrackCredit>>{};
+    for (final c in await db.select(db.trackCredits).get()) {
+      (credits[c.trackId] ??= []).add(TrackCredit(c.name, c.role, c.source));
+    }
+    final details = {
+      for (final e in await db.select(db.trackEnrich).get())
+        e.trackId: ?decodeDetails(e.trackId, e.details),
+    };
     final refs = <int, TrackRef>{};
     final userData = <TrackUserData>[];
     for (final t in tracks) {
@@ -23,7 +33,8 @@ Future<UserData> collectUserData(AppDatabase db) {
       final hasLyrics = t.lyricsPlain != null ||
           t.lyricsSynced != null ||
           t.curiosities != null;
-      if (!(t.isFavorite || t.userEdited || hasLyrics || t.playCount > 0)) {
+      if (!(t.isFavorite || t.userEdited || hasLyrics || t.playCount > 0 ||
+          credits.containsKey(t.id) || details.containsKey(t.id))) {
         continue;
       }
       userData.add(TrackUserData(
@@ -45,6 +56,8 @@ Future<UserData> collectUserData(AppDatabase db) {
         curiosities: t.curiosities,
         playCount: t.playCount,
         lastPlayedAt: t.lastPlayedAt,
+        credits: credits[t.id] ?? const [],
+        details: details[t.id],
       ));
     }
 

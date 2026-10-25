@@ -15,6 +15,7 @@ import '../services/share/track_meta.dart';
 import '../services/share/trusted_devices.dart';
 import 'database_providers.dart';
 import 'library_providers.dart';
+import 'online_providers.dart' show creditsRepositoryProvider;
 import 'settings_providers.dart';
 
 final lanClientProvider = Provider<LanClient>((ref) => LanClient());
@@ -72,22 +73,26 @@ Future<List<ShareEntry>> buildShareEntries(Ref ref, List<Track> tracks) async {
     return null;
   }
 
-  return [
-    for (final t in tracks)
-      if (!t.missing)
-        ShareEntry(
-          id: t.id,
-          path: t.path,
-          title: t.title,
-          artist: t.artist,
-          album: t.album,
-          sizeBytes: t.sizeBytes,
-          durationMs: t.durationMs,
-          ext: t.format,
-          coverPath: coverPath(t),
-          meta: TrackMeta.fromTrack(t),
-        ),
-  ];
+  final credits = ref.read(creditsRepositoryProvider);
+  final entries = <ShareEntry>[];
+  final extra = await credits.portableOfMany([for (final t in tracks) t.id]);
+  for (final t in tracks) {
+    if (t.missing) continue;
+    final c = extra[t.id]!;
+    entries.add(ShareEntry(
+      id: t.id,
+      path: t.path,
+      title: t.title,
+      artist: t.artist,
+      album: t.album,
+      sizeBytes: t.sizeBytes,
+      durationMs: t.durationMs,
+      ext: t.format,
+      coverPath: coverPath(t),
+      meta: TrackMeta.fromTrack(t, credits: c.credits, details: c.details),
+    ));
+  }
+  return entries;
 }
 
 class ShareController {
@@ -117,7 +122,7 @@ class ShareController {
   /// Gives a received file the sender's metadata and cover (never throws).
   Future<void> applyReceived(String path, TrackMeta? meta, {Future<ReceivedCover?> Function()? fetchCover}) =>
       applyReceivedPackage(_ref.read(trackRepositoryProvider), _ref.read(coverStoreProvider), path, meta,
-          fetchCover: fetchCover);
+          fetchCover: fetchCover, credits: _ref.read(creditsRepositoryProvider));
 }
 
 final shareControllerProvider = Provider<ShareController>(

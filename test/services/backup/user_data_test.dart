@@ -1,3 +1,4 @@
+import 'package:codecore/services/online/credits.dart';
 import 'dart:convert';
 
 import 'package:codecore/services/backup/user_data.dart';
@@ -73,5 +74,29 @@ void main() {
   test('optional fields are omitted from the JSON', () {
     const t = TrackUserData(ref: TrackRef(title: 'x'));
     expect(t.toJson().keys, ['ref']);
+  });
+
+  test('credits and details travel; a track without them writes neither key', () {
+    final t = TrackUserData(
+      ref: const TrackRef(title: 'B'),
+      credits: [TrackCredit('Ann', 'composer', 'deezer')],
+      details: const TrackDetails(label: 'L', bpm: 120),
+    );
+    final back = TrackUserData.fromJson(jsonDecode(jsonEncode(t.toJson())) as Map<String, dynamic>);
+    expect(back.credits.single.toJson(), {'name': 'Ann', 'role': 'composer', 'source': 'deezer'});
+    expect((back.details!.label, back.details!.bpm), ('L', 120));
+    final old = const TrackUserData(ref: TrackRef(title: 'B')).toJson();
+    expect(old.containsKey('credits') || old.containsKey('details'), isFalse);
+    final read = TrackUserData.fromJson(old);
+    expect(read.credits, isEmpty);
+    expect(read.details, isNull);
+  });
+
+  test('wrong-typed details in a backup do not break the reading', () {
+    final t = TrackUserData.fromJson({
+      'ref': {'title': 'B'},
+      'details': {'label': 5, 'bpm': '120', 'explicit': 1},
+    });
+    expect((t.details!.label, t.details!.bpm, t.details!.explicit), (null, null, null));
   });
 }

@@ -1,3 +1,4 @@
+import 'package:codecore/services/online/credits.dart';
 import 'package:codecore/services/share/track_meta.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -68,5 +69,34 @@ void main() {
     expect(TrackMeta.tryParse(const TrackMeta(curiosities: 'x').toJson())!.curiosities, 'x');
     expect(TrackMeta.tryParse({'title': 't'})!.curiosities, isNull);
     expect(const TrackMeta(title: 't').toJson().containsKey('curiosities'), false);
+  });
+
+  test('credits and details round trip; an old meta has none', () {
+    final m = TrackMeta(title: 'T', credits: [TrackCredit('Ann', 'composer', 'deezer')], details: const TrackDetails(label: 'L'));
+    final back = TrackMeta.tryParse(m.toJson())!;
+    expect(back.credits.single.name, 'Ann');
+    expect(back.details!.label, 'L');
+    final old = TrackMeta.tryParse(full.toJson())!;
+    expect(old.credits, isEmpty);
+    expect(old.details, isNull);
+  });
+
+  test('more than 200 credits are cut to 200, on both sides', () {
+    final many = [for (var i = 0; i < 250; i++) TrackCredit('P$i', 'guitar', 'deezer')];
+        final json = {'credits': [for (final c in many) c.toJson()]};
+    expect(TrackMeta.tryParse(json)!.credits, hasLength(200));
+  });
+
+  test('wrong-typed details and unknown credit sources do not throw', () {
+    final m = TrackMeta.tryParse({
+      'details': {'label': 5, 'bpm': '120', 'explicit': 1, 'copyright': 'c' * 900, 'rank': 7},
+      'credits': [
+        {'name': 'A', 'role': 'guitar', 'source': 'evil'},
+        {'name': 'B', 'role': 'guitar', 'source': 'deezer'},
+      ],
+    })!;
+    expect((m.details!.label, m.details!.bpm, m.details!.explicit, m.details!.rank), (null, null, null, 7));
+    expect(m.details!.copyright!.length, 500);
+    expect(m.credits.map((c) => c.name), ['B']);
   });
 }

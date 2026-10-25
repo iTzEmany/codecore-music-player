@@ -3,6 +3,7 @@ import 'package:drift/drift.dart';
 import '../../core/clock.dart';
 import '../../services/library/duplicate_finder.dart';
 import '../db/app_database.dart';
+import 'credits_repository.dart';
 
 /// Reads for the duplicate search, and the merge of the user's data.
 class DuplicateRepository {
@@ -109,62 +110,11 @@ class DuplicateRepository {
         updates: {_db.playlistImportItems},
       );
       _step('credits');
-      await _mergeCredits(keepId, drops);
+      await CreditsRepository(_db).moveInto(keepId, drops);
       _step('hide');
       await (_db.update(_db.tracks)..where((t) => t.id.isIn(drops)))
           .write(const TracksCompanion(ignored: Value(true)));
     });
-  }
-
-  /// Credits move only when [keepId] has none (first drop with credits wins);
-  /// `track_enrich` merges column by column, the keeper's value first.
-  Future<void> _mergeCredits(int keepId, Set<int> drops) async {
-    final c = _db.trackCredits;
-    final keepHas = await (_db.select(c)..where((t) => t.trackId.equals(keepId)))
-        .get();
-    if (keepHas.isEmpty) {
-      for (final id in drops) {
-        final n = await _db.customUpdate(
-          'INSERT OR IGNORE INTO track_credits '
-          '(track_id, name, name_key, role, source) '
-          'SELECT ?, name, name_key, role, source FROM track_credits '
-          'WHERE track_id = ?',
-          variables: [Variable<int>(keepId), Variable<int>(id)],
-          updates: {c},
-        );
-        if (n > 0) break;
-      }
-    }
-    await (_db.delete(c)..where((t) => t.trackId.isIn(drops))).go();
-
-    // Credits and the «searched, nothing» mark never coexist.
-    final hasCredits = (await (_db.select(c)
-              ..where((t) => t.trackId.equals(keepId))
-              ..limit(1))
-            .get())
-        .isNotEmpty;
-    final e = _db.trackEnrich;
-    final rows = <TrackEnrichData>[
-      for (final id in [keepId, ...drops])
-        ...await (_db.select(e)..where((t) => t.trackId.equals(id))).get(),
-    ];
-    if (rows.length > (rows.any((r) => r.trackId == keepId) ? 1 : 0)) {
-      T? first<T extends Object>(T? Function(TrackEnrichData) pick) =>
-          rows.map(pick).whereType<T>().firstOrNull;
-      await _db.into(e).insertOnConflictUpdate(TrackEnrichCompanion.insert(
-        trackId: Value(keepId),
-        details: Value(first((r) => r.details)),
-        deezerId: Value(first((r) => r.deezerId)),
-        mbid: Value(first((r) => r.mbid)),
-        metaNoneAt: Value(first((r) => r.metaNoneAt)),
-        lyricsNoneAt: Value(first((r) => r.lyricsNoneAt)),
-        syncedNoneAt: Value(first((r) => r.syncedNoneAt)),
-        curioNoneAt: Value(first((r) => r.curioNoneAt)),
-        creditsNoneAt: Value(hasCredits ? null : first((r) => r.creditsNoneAt)),
-        lyricsByUser: Value(rows.any((r) => r.lyricsByUser)),
-      ));
-    }
-    await (_db.delete(e)..where((t) => t.trackId.isIn(drops))).go();
   }
 
   Future<Track> _row(int id) =>

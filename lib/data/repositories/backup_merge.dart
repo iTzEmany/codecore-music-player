@@ -5,6 +5,7 @@ import '../../core/text_utils.dart';
 import '../../services/backup/track_resolver.dart';
 import '../../services/backup/user_data.dart';
 import '../db/app_database.dart';
+import 'credits_repository.dart';
 
 class MergeReport {
   MergeReport();
@@ -80,6 +81,9 @@ Future<MergeReport> mergeUserData(AppDatabase db, UserData data, TrackResolver r
         upd = upd.copyWith(lastPlayedAt: Value(last));
       }
       await (db.update(db.tracks)..where((r) => r.id.equals(id))).write(upd);
+      if (u.credits.isNotEmpty || u.details != null) {
+        await CreditsRepository(db).saveIfNone(id, u.credits, u.details);
+      }
     }
 
     final local = await db.select(db.playlists).get();

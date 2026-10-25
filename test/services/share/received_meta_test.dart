@@ -1,3 +1,5 @@
+import 'package:codecore/data/repositories/credits_repository.dart';
+import 'package:codecore/services/online/credits.dart';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -181,5 +183,21 @@ void main() {
     ]);
     final after = (await repo.byPath('/a/x.mp3'))!;
     expect([after.albumArtist, after.hasCover, after.coverKey], ['AA', true, before.coverKey]);
+  });
+
+  test('received credits are saved, but never over the ones the track has', () async {
+    await repo.upsertBatch([_row('/a/x.mp3'), _row('/a/y.mp3')]);
+    final y = (await repo.byPath('/a/y.mp3'))!;
+    final credits = CreditsRepository(db);
+    await credits.saveCredits(y.id, [
+      TrackCreditsCompanion.insert(trackId: y.id, name: 'Mine', nameKey: 'mine', role: 'composer', source: 'deezer')
+    ]);
+    final m = TrackMeta(credits: [TrackCredit('Ann', 'producer', 'deezer')], details: const TrackDetails(label: 'L'));
+    await applyReceivedPackage(repo, covers, '/a/x.mp3', m, credits: credits);
+    await applyReceivedPackage(repo, covers, '/a/y.mp3', m, credits: credits);
+    final x = (await repo.byPath('/a/x.mp3'))!;
+    expect((await credits.creditsOf(x.id)).map((c) => c.name), ['Ann']);
+    expect((await credits.portableOf(x.id)).details!.label, 'L');
+    expect((await credits.creditsOf(y.id)).map((c) => c.name), ['Mine']);
   });
 }

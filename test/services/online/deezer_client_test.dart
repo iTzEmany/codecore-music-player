@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:codecore/services/online/deezer_client.dart';
+import 'package:codecore/services/online/credits.dart';
 import 'package:codecore/services/online/deezer_models.dart';
 import 'package:codecore/services/online/http_client.dart';
 import 'package:dio/dio.dart' show CancelToken;

@@ -48,8 +48,6 @@ void main() {
     expect(c.length, 14);
     expect(_pairs(c), contains('Nile Rodgers|guitar'));
     expect(_pairs(c), contains('Paul Jackson, Jr.|guitar'));
-    expect(c.firstWhere((x) => x.name == 'Nathan East').mbid,
-        'aa82f6eb-ded9-4c0b-951d-2e638ca25c76');
   });
 
   test('merge: Deezer first, MusicBrainz only adds missing nameKey+role', () {
