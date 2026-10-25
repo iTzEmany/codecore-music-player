@@ -203,7 +203,7 @@ final shuffleModeProvider = Provider<ShuffleMode>((ref) {
 });
 
 /// Why Shuffle+ is not suggesting right now (null: it is, or it is off).
-enum ShufflePlusBlock { jam, shortList, noTool, metered, stopped }
+enum ShufflePlusBlock { jam, shortList, noTool, metered, stopped, online, radio }
 
 /// The first reason in the order the sheet reports them.
 ShufflePlusBlock? shufflePlusBlock({

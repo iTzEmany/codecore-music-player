@@ -2756,7 +2756,7 @@
   "shuffleModeOn": "Aleatório: ligado",
   "shuffleModePlus": "Aleatório+: ligado (prima longamente para definições)",
   "shufflePlusTitle": "Aleatório+",
-  "shufflePlusHint": "Com o modo aleatório, de vez em quando entra uma faixa que não tem, parecida com a lista em reprodução. Toca em streaming.",
+  "shufflePlusNote": "Ativa-se pelo botão aleatório (terceiro toque). Indisponível para álbuns em streaming, Jam e rádio",
   "shufflePlusEvery": "Uma sugestão a cada {n} faixas",
   "@shufflePlusEvery": {
     "placeholders": {
@@ -2775,6 +2775,8 @@
   "shufflePlusBlockNoTool": "yt-dlp indisponível",
   "shufflePlusBlockMetered": "Em pausa: rede com consumo limitado",
   "shufflePlusBlockStopped": "Desligado até reiniciar: demasiados erros de reprodução",
+  "shufflePlusBlockOnline": "Indisponível para um álbum em streaming",
+  "shufflePlusBlockRadio": "Indisponível com a rádio",
   "shufflePlusNoticeRateLimited": "O YouTube pede para abrandar: sugestões em pausa durante 15 minutos",
   "shufflePlusNoticeTooManyErrors": "Demasiados erros de reprodução: sugestões desligadas até reiniciar",
   "suggestionsRecentTitle": "Sugeridos recentemente",

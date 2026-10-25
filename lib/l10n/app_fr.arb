@@ -2756,7 +2756,7 @@
   "shuffleModeOn": "Aléatoire : activé",
   "shuffleModePlus": "Aléatoire+ : activé (appui long pour les réglages)",
   "shufflePlusTitle": "Aléatoire+",
-  "shufflePlusHint": "En lecture aléatoire, un titre que vous n’avez pas, proche de la liste en cours, s’ajoute de temps en temps. Il est lu en streaming.",
+  "shufflePlusNote": "S’active depuis le bouton aléatoire (troisième appui). Indisponible pour les albums en streaming, Jam et radio",
   "shufflePlusEvery": "Une suggestion tous les {n} titres",
   "@shufflePlusEvery": {
     "placeholders": {
@@ -2775,6 +2775,8 @@
   "shufflePlusBlockNoTool": "yt-dlp indisponible",
   "shufflePlusBlockMetered": "En pause : réseau limité",
   "shufflePlusBlockStopped": "Désactivé jusqu’au redémarrage : trop d’erreurs de lecture",
+  "shufflePlusBlockOnline": "Indisponible pour un album en streaming",
+  "shufflePlusBlockRadio": "Indisponible avec la radio",
   "shufflePlusNoticeRateLimited": "YouTube demande de ralentir : suggestions en pause pendant 15 minutes",
   "shufflePlusNoticeTooManyErrors": "Trop d’erreurs de lecture : suggestions désactivées jusqu’au redémarrage",
   "suggestionsRecentTitle": "Suggestions récentes",

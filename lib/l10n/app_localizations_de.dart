@@ -4545,8 +4545,8 @@ class AppLocalizationsDe extends AppLocalizations {
   String get shufflePlusTitle => 'Shuffle+';
 
   @override
-  String get shufflePlusHint =>
-      'Bei Zufallswiedergabe kommt ab und zu ein Titel hinzu, den du nicht hast und der zur laufenden Liste passt. Er wird gestreamt.';
+  String get shufflePlusNote =>
+      'Wird über die Shuffle-Taste aktiviert (dritter Tipp). Nicht verfügbar für Streaming-Alben, Jam und Radio';
 
   @override
   String shufflePlusEvery(int n) {
@@ -4587,6 +4587,13 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get shufflePlusBlockStopped =>
       'Aus bis zum Neustart: zu viele Wiedergabefehler';
+
+  @override
+  String get shufflePlusBlockOnline =>
+      'Für ein Streaming-Album nicht verfügbar';
+
+  @override
+  String get shufflePlusBlockRadio => 'Mit dem Radio nicht verfügbar';
 
   @override
   String get shufflePlusNoticeRateLimited =>

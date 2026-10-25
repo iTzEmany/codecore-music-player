@@ -1,11 +1,8 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/app_localizations.dart';
 import '../../../l10n/l10n_ext.dart';
-import '../../../providers/player_providers.dart';
 import '../../../providers/settings_providers.dart';
 import '../../../providers/shuffle_plus_providers.dart';
 
@@ -15,9 +12,11 @@ String shufflePlusBlockText(AppLocalizations l, ShufflePlusBlock b) => switch (b
       ShufflePlusBlock.noTool => l.shufflePlusBlockNoTool,
       ShufflePlusBlock.metered => l.shufflePlusBlockMetered,
       ShufflePlusBlock.stopped => l.shufflePlusBlockStopped,
+      ShufflePlusBlock.online => l.shufflePlusBlockOnline,
+      ShufflePlusBlock.radio => l.shufflePlusBlockRadio,
     };
 
-/// «Casuale+»: on/off, how often, Wi‑Fi only, and what it is doing now. Used
+/// «Casuale+»: how to turn it on (a note), how often, Wi‑Fi only, and what it is doing now. Used
 /// in Settings > Playback and in the sheet of the shuffle button.
 class ShufflePlusTiles extends ConsumerWidget {
   const ShufflePlusTiles({super.key});
@@ -37,15 +36,9 @@ class ShufflePlusTiles extends ConsumerWidget {
             : shufflePlusBlockText(l, block);
     return Column(
       children: [
-        SwitchListTile(
-          secondary: const Icon(Icons.shuffle_on_outlined),
-          title: Text(l.shufflePlusTitle),
-          subtitle: Text(l.shufflePlusHint),
-          value: plus,
-          onChanged: (on) {
-            if (on) unawaited(ref.read(playerControllerProvider).setShuffle(true));
-            notifier.update((c) => c.copyWith(shufflePlus: on));
-          },
+        ListTile(
+          leading: const Icon(Icons.shuffle_on_outlined),
+          title: Text(l.shufflePlusNote),
         ),
         ListTile(
           title: Text(l.shufflePlusEvery(s.shufflePlusEvery)),

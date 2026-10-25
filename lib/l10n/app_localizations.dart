@@ -7047,11 +7047,11 @@ abstract class AppLocalizations {
   /// **'Casuale+'**
   String get shufflePlusTitle;
 
-  /// No description provided for @shufflePlusHint.
+  /// No description provided for @shufflePlusNote.
   ///
   /// In it, this message translates to:
-  /// **'Con la casuale, ogni tanto entra un brano che non hai, simile alla lista in ascolto. Suona in streaming.'**
-  String get shufflePlusHint;
+  /// **'Si attiva dal pulsante shuffle (terzo tocco). Non disponibile per album in streaming, Jam e radio'**
+  String get shufflePlusNote;
 
   /// No description provided for @shufflePlusEvery.
   ///
@@ -7118,6 +7118,18 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Spento fino al riavvio: troppi errori di riproduzione'**
   String get shufflePlusBlockStopped;
+
+  /// No description provided for @shufflePlusBlockOnline.
+  ///
+  /// In it, this message translates to:
+  /// **'Non disponibile per un album in streaming'**
+  String get shufflePlusBlockOnline;
+
+  /// No description provided for @shufflePlusBlockRadio.
+  ///
+  /// In it, this message translates to:
+  /// **'Non disponibile con la radio'**
+  String get shufflePlusBlockRadio;
 
   /// No description provided for @shufflePlusNoticeRateLimited.
   ///

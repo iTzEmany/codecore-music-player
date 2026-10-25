@@ -4575,8 +4575,8 @@ class AppLocalizationsFr extends AppLocalizations {
   String get shufflePlusTitle => 'Aléatoire+';
 
   @override
-  String get shufflePlusHint =>
-      'En lecture aléatoire, un titre que vous n’avez pas, proche de la liste en cours, s’ajoute de temps en temps. Il est lu en streaming.';
+  String get shufflePlusNote =>
+      'S’active depuis le bouton aléatoire (troisième appui). Indisponible pour les albums en streaming, Jam et radio';
 
   @override
   String shufflePlusEvery(int n) {
@@ -4616,6 +4616,13 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get shufflePlusBlockStopped =>
       'Désactivé jusqu’au redémarrage : trop d’erreurs de lecture';
+
+  @override
+  String get shufflePlusBlockOnline =>
+      'Indisponible pour un album en streaming';
+
+  @override
+  String get shufflePlusBlockRadio => 'Indisponible avec la radio';
 
   @override
   String get shufflePlusNoticeRateLimited =>
