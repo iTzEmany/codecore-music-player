@@ -3,6 +3,7 @@ import 'dart:math';
 
 import '../core/app_log.dart';
 import 'package:audio_service/audio_service.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -19,6 +20,7 @@ import 'database_providers.dart';
 import '../services/stream/stream_key.dart';
 import 'jam_providers.dart';
 import '../data/repositories/track_kinds.dart';
+import '../data/repositories/track_repository.dart' show TrackRepository;
 import 'queue_tracks.dart';
 import 'settings_providers.dart';
 
@@ -311,7 +313,8 @@ final playerControllerProvider = Provider<PlayerController>(
         .read(settingsProvider.notifier)
         .update((c) => c.copyWith(shufflePlus: on)),
     jamActive: () => ref.read(jamProvider).active,
-    addToJam: (ids) => unawaited(_libraryToJam(ref, ids)),
+    addToJam: (ids) => unawaited(libraryToJam(
+        ref.read(jamProvider.notifier), ref.read(trackRepositoryProvider), ids)),
     addOnlineToJam: (r) => ref.read(jamProvider.notifier).addOnline(r),
     libraryIdOf: (r) async {
       final path = (await ref.read(downloadIndexProvider.future))
@@ -322,11 +325,11 @@ final playerControllerProvider = Provider<PlayerController>(
 );
 
 /// Library ids to the shared queue; a shadow row (`stream:` path, no extension) goes as an online result.
-Future<void> _libraryToJam(Ref ref, List<int> ids) async {
+@visibleForTesting
+Future<void> libraryToJam(JamController jam, TrackRepository repo, List<int> ids) async {
   try {
-    final jam = ref.read(jamProvider.notifier);
     final files = <Track>[];
-    for (final t in await ref.read(trackRepositoryProvider).getByIds(ids)) {
+    for (final t in await repo.getByIds(ids)) {
       final key = t.kind == kStreamKind ? keyOfStreamPath(t.path) : null;
       if (key == null) {
         files.add(t);

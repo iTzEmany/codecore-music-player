@@ -657,8 +657,8 @@ Note: D-89 (Jam: tap e «Riproduci dopo» vanno in coda) nella UI; la coda condi
 - [x] 47.4 Rotta `meta`: copertina, testo e curiosità dal proprietario
 - [x] 47.5 Via il FAB; swipe e «In coda» nella coda condivisa
 - [x] 47.6 Schermata del brano della Jam
-- [ ] 47.7 Controlli di fase (K-01, K-02)
-- [ ] 47.8 Prove a mano (utente)
+- [x] 47.7 Controlli di fase (K-01, K-02)
+- [~] 47.8 Prove a mano (utente)
 
 ## Fase 48 — Shuffle a 3 stati e Home (`fase-48-shuffle-tre-stati.md`)
 - [ ] 48.1 `plusAllowed` e ciclo che salta Shuffle+

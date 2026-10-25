@@ -312,6 +312,19 @@ void main() {
     expect(backend.playing, isFalse);
   });
 
+  test('pause then play while the file comes: playback starts when it is ready', () async {
+    final id = online.register(result('v2'));
+    final gate = preparer.gates['youtube:v2'] = Completer<void>();
+    final started = handler.playQueue([id], 0);
+    await settle();
+    await handler.pause();
+    await handler.play();
+    gate.complete();
+    await started;
+    expect(backend.loaded.single, endsWith('youtube_v2.m4a'));
+    expect(backend.playing, isTrue);
+  });
+
   test('a pause before the entry is even known as a stream still sticks', () async {
     final lookup = Completer<void>();
     handler.libraryIdOf = (_) async {

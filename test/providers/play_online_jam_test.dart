@@ -2,11 +2,13 @@ import 'dart:io';
 
 import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/data/repositories/track_repository.dart';
+import 'package:codecore/providers/jam_providers.dart';
 import 'package:codecore/providers/player_providers.dart';
 import 'package:codecore/services/audio/codecore_audio_handler.dart';
 import 'package:codecore/services/audio/online_entries.dart';
 import 'package:codecore/services/audio/play_queue.dart';
 import 'package:codecore/services/online/youtube_service.dart';
+import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -110,4 +112,30 @@ void main() {
     expect(handler.queueIds.sublist(0, 4), [ids[0], ids[1], ids[1], ids[0]]);
     expect(handler.queueIds.length, 5);
   });
+
+  test('in a Jam a stream shadow row goes as an online track, a file as a track', () async {
+    final shadow = await db.into(db.tracks).insert(TracksCompanion.insert(
+        path: 'stream:youtube:abc', title: 'S', albumKey: 'k', format: '', sizeBytes: 0,
+        mtimeMs: 0, addedAt: 1, kind: const Value(2)));
+    final jamCtl = _SpyJam();
+    await libraryToJam(jamCtl, TrackRepository(db), [ids[0], shadow]);
+    expect(jamCtl.online, ['abc']);
+    expect(jamCtl.files, [ids[0]]);
+  });
+}
+
+class _SpyJam extends JamController {
+  final online = <String>[];
+  final files = <int>[];
+  @override
+  bool addOnline(YtResult r) {
+    online.add(r.id);
+    return true;
+  }
+
+  @override
+  Future<int> addTracks(List<Track> tracks, {bool inherited = false}) async {
+    files.addAll(tracks.map((t) => t.id));
+    return tracks.length;
+  }
 }

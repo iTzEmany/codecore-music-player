@@ -2,6 +2,9 @@ import 'dart:io';
 
 import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/data/repositories/folder_repository.dart';
+import 'package:codecore/data/repositories/playlist_repository.dart';
+import 'package:codecore/data/repositories/track_repository.dart';
+import 'package:codecore/providers/pending_playlist_adds.dart';
 import 'package:codecore/providers/database_providers.dart';
 import 'package:codecore/providers/settings_providers.dart';
 import 'package:codecore/providers/stream_providers.dart';
@@ -35,6 +38,7 @@ class _Promoter implements StreamPromoter {
 }
 
 void main() {
+  late AppDatabase db;
   late DownloadIndex index;
   late Directory dir;
   late _Promoter promoter;
@@ -42,7 +46,7 @@ void main() {
   var builds = 0;
 
   setUp(() async {
-    final db = AppDatabase(NativeDatabase.memory());
+    db = AppDatabase(NativeDatabase.memory());
     addTearDown(db.close);
     dir = await Directory.systemTemp.createTemp('dl_promo');
     addTearDown(() => dir.delete(recursive: true));
@@ -51,6 +55,8 @@ void main() {
     promoter = _Promoter();
     c = ProviderContainer(overrides: [
       folderRepositoryProvider.overrideWithValue(FolderRepository(db)),
+      trackRepositoryProvider.overrideWithValue(TrackRepository(db)),
+      playlistRepositoryProvider.overrideWithValue(PlaylistRepository(db)),
       youtubeServiceProvider.overrideWithValue(_Yt()),
       settingsProvider.overrideWith(_Settings.new),
       streamPromoterProvider.overrideWithValue(promoter),
@@ -79,5 +85,18 @@ void main() {
     await Future<void>.delayed(const Duration(milliseconds: 100));
     expect(promoter.calls, 0);
     expect(c.read(downloadsProvider), isEmpty);
+  });
+
+  test('«Aggiungi a playlist» on a video already in the index joins the playlist, no download', () async {
+    final file = File('${dir.path}/song.m4a')..writeAsStringSync('x');
+    await index.add(_r.id, file.path);
+    final trackId = await db.into(db.tracks).insert(TracksCompanion.insert(
+        path: file.path, title: 'Song', albumKey: 'k', format: 'm4a', sizeBytes: 1, mtimeMs: 1, addedAt: 1));
+    final playlistId = await PlaylistRepository(db).create('P');
+    c.read(downloadsProvider.notifier).add(_r, tag: addToPlaylistTag(playlistId));
+    await Future<void>.delayed(const Duration(milliseconds: 200));
+    expect(promoter.calls, 0);
+    expect(c.read(downloadsProvider), isEmpty);
+    expect(await PlaylistRepository(db).containing([trackId]), {playlistId});
   });
 }

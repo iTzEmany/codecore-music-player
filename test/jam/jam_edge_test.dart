@@ -368,6 +368,16 @@ void goneOwnerTests() {
     expect(asked.single.title, 'Ta');
   });
 
+  test('no target while the owner is still in the Jam, nor for our own current item', () {
+    var s = s0();
+    s = ok(s, JamCommand.add(yt('a', owner: 'guest')), 'guest');
+    s = ok(s, JamCommand.add(yt('b', owner: host)), host);
+    expect(jamSelfFetchTargets(s, host), hasLength(1)); // 'guest' is not listed: gone
+    s = s.copyWith(participants: const [JamParticipant(id: 'guest', name: 'G')]);
+    expect(jamSelfFetchTargets(s, host), isEmpty);
+    expect(jamSelfFetchTargets(s.copyWith(currentIndex: 1), host), isEmpty);
+  });
+
   test('a failed own download gives null, not an exception', () async {
     final got = await jamFetchByVideoId(yt('a'), (_, _) async => throw StateError('offline'));
     expect(got, isNull);
