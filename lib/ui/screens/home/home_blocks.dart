@@ -15,6 +15,7 @@ import '../../../providers/radio_providers.dart';
 import '../../shell/shell_nav.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/section_header.dart';
+import '../../widgets/shuffle_button.dart';
 import '../library/all_tracks_screen.dart';
 import '../library/favorites_screen.dart';
 import '../playlists/playlists_screen.dart';
@@ -22,7 +23,8 @@ import '../radio/radio_screen.dart';
 import 'cover_fan.dart';
 import '../../widgets/cc_app_bar.dart';
 
-/// «Casuale su tutto»: shuffle on, then the whole library from a random track.
+/// «Casuale su tutto»: Play for the whole library (random start if shuffle is
+/// on) next to the three-state shuffle button, which only changes the mode.
 class ShuffleHero extends ConsumerWidget {
   const ShuffleHero({super.key});
 
@@ -63,7 +65,7 @@ class ShuffleHero extends ConsumerWidget {
               const SizedBox(width: 12),
               Semantics(
                 button: true,
-                label: l.homeShuffleAll,
+                label: l.play,
                 excludeSemantics: true,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 4),
@@ -76,12 +78,13 @@ class ShuffleHero extends ConsumerWidget {
                       onTap: () => _play(ref),
                       child: SizedBox.square(
                         dimension: 48,
-                        child: Icon(Icons.shuffle, color: cc.onAccent),
+                        child: Icon(Icons.play_arrow, color: cc.onAccent),
                       ),
                     ),
                   ),
                 ),
               ),
+              const ShuffleModeButton(),
             ],
           ),
         ],
@@ -95,13 +98,12 @@ class ShuffleHero extends ConsumerWidget {
       // The whole library, not what the «Tutti i brani» search shows.
       final tracks = await ref.read(trackOpsProvider).all();
       if (tracks.isEmpty) return;
-      await ctrl.setShuffle(true);
       await ctrl.playAll(
         tracks,
         context: const PlayContext(PlayContextKind.library),
       );
     } on Object catch (e, st) {
-      AppLog.e('shuffle everything failed', e, st);
+      AppLog.e('play everything failed', e, st);
     }
   }
 }

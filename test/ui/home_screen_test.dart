@@ -55,14 +55,39 @@ void main() {
     await h.dispose(tester);
   });
 
-  testWidgets('Casuale su tutto turns shuffle on and starts playing', (
+  testWidgets('the shuffle button in Home only changes the mode', (
     tester,
   ) async {
     final h = await openHome(tester);
     await tester.tap(find.text('Casuale su tutto'));
     await _settle(tester);
     expect(h.handler.shuffleEnabled, isFalse, reason: 'the title is not a button');
-    await tester.tap(find.byIcon(Icons.shuffle));
+    await tester.tap(find.byIcon(Icons.shuffle_rounded));
+    await _settle(tester);
+    expect(h.handler.shuffleEnabled, isTrue);
+    expect(h.handler.queueIds, isEmpty, reason: 'nothing starts');
+    await h.dispose(tester);
+  });
+
+  testWidgets('Play starts the library in order with shuffle off', (
+    tester,
+  ) async {
+    final h = await openHome(tester);
+    await tester.tap(find.byIcon(Icons.play_arrow));
+    await _settle(tester);
+    expect(h.handler.shuffleEnabled, isFalse);
+    expect(h.handler.queueIds, hasLength(4));
+    expect(h.handler.currentIndex, 0);
+    await h.dispose(tester);
+  });
+
+  testWidgets('Play with shuffle on keeps shuffle on and starts the library', (
+    tester,
+  ) async {
+    final h = await openHome(tester);
+    await tester.tap(find.byIcon(Icons.shuffle_rounded));
+    await _settle(tester);
+    await tester.tap(find.byIcon(Icons.play_arrow));
     await _settle(tester);
     expect(h.handler.shuffleEnabled, isTrue);
     expect(h.handler.queueIds, hasLength(4));
@@ -137,7 +162,7 @@ void main() {
     tester,
   ) async {
     final h = await openHome(tester);
-    await tester.tap(find.byIcon(Icons.shuffle));
+    await tester.tap(find.byIcon(Icons.play_arrow));
     await _settle(tester);
     final row = find.byKey(const ValueKey('resume-queue'));
     expect(row, findsOneWidget);
