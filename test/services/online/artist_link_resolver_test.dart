@@ -132,7 +132,7 @@ void main() {
     expect(artistsOfTrack(t, r).map((e) => e.name), ['Queen']);
   });
 
-  test('a credit that is a library artist stays one name unless every piece is one too', () {
+  test('a credit that is a library artist stays one name only without comma/feat. and unless every piece is one too', () {
     const lib = [
       ArtistSummary(key: 'ac/dc', name: 'AC/DC', trackCount: 1, albumCount: 1),
       ArtistSummary(key: 'foo/bar', name: 'Foo/Bar', trackCount: 1, albumCount: 1),
@@ -144,5 +144,14 @@ void main() {
     expect(names('AC/DC', lib), ['AC/DC']);
     expect(names('Foo/Bar', lib), ['Foo', 'Bar']);
     expect(names('AC/DC', const []), ['AC', 'DC']);
+    const multi = [
+      ArtistSummary(
+          key: 'damiano david, tyla, nile rodgers',
+          name: 'Damiano David, Tyla, Nile Rodgers',
+          trackCount: 1,
+          albumCount: 1),
+    ];
+    expect(names('Damiano David, Tyla, Nile Rodgers', multi),
+        ['Damiano David', 'Tyla', 'Nile Rodgers']);
   });
 }

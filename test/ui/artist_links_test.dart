@@ -17,6 +17,7 @@ import 'package:codecore/ui/shell/desktop_player_bar.dart';
 import 'package:codecore/ui/widgets/artist_links.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show RenderParagraph;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/app_harness.dart';
@@ -151,6 +152,27 @@ void main() {
     );
     await _settle(tester);
     expect(tester.takeException(), isNull);
+    await h.dispose(tester);
+  });
+
+  testWidgets('long names that fit are shown whole', (tester) async {
+    final h = await Harness.create(tester, tracks: 1);
+    final online = OnlineEntries();
+    const names = ['Daft Punk and Friends Collective Orchestra', 'Tyla', 'Nile Rod'];
+    final id = online.register(YtResult(
+        id: 'v2', title: 'T', channel: 'C', duration: null, artists: names));
+    await h.pump(
+      tester,
+      Scaffold(body: SizedBox(width: 1000, child: ArtistLinks(online.trackOf(id)!))),
+      extraOverrides: [onlineEntriesProvider.overrideWithValue(online)],
+    );
+    await _settle(tester);
+    for (final n in names) {
+      final box = tester.renderObject<RenderParagraph>(find.text(n));
+      expect(box.didExceedMaxLines, isFalse, reason: n);
+      expect(box.size.width, greaterThanOrEqualTo(box.getMaxIntrinsicWidth(double.infinity)),
+          reason: n);
+    }
     await h.dispose(tester);
   });
 }
