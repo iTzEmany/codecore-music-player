@@ -183,6 +183,15 @@ void main() {
     expect(failures.single.reason, PlaybackFailureReason.networkUnavailable);
   });
 
+  test('a non-network YtException is reported as onlineUnavailable', () async {
+    final id = online.register(result('v1'));
+    preparer.failing.add('youtube:v1');
+    preparer.failure = const YtException(YtErrorKind.unavailable);
+    await handler.playQueue([id, ids[0]], 0);
+    await settle();
+    expect(failures.single.reason, PlaybackFailureReason.onlineUnavailable);
+  });
+
   test('one failure skips to the next track', () async {
     final id = online.register(result('v1'));
     preparer.failing.add('youtube:v1');

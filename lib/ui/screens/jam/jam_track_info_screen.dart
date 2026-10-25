@@ -53,13 +53,13 @@ class JamTrackInfoScreen extends ConsumerWidget {
           const SizedBox(height: CcDims.gap16),
           Text(meta?.title ?? item.title, style: theme.headlineSmall),
           if (line.isNotEmpty) Text(line, style: theme.bodyMedium),
-          if (jamArtists(item).isNotEmpty)
+          if (jamArtists(item, ref).isNotEmpty)
             Align(
               alignment: Alignment.centerLeft,
               child: TextButton.icon(
                 icon: const Icon(Icons.person_outline_rounded),
                 label: Text(l.goToArtist),
-                onPressed: () => goToArtists(context, ref, jamArtists(item)),
+                onPressed: () => goToArtists(context, ref, jamArtists(item, ref)),
               ),
             ),
           if (s.isHost) ...[

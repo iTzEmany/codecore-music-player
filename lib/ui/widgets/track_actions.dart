@@ -77,6 +77,9 @@ class TrackActionGroup {
 }
 
 /// The queue entry [id] was downloaded or promoted meanwhile (it still plays under its online id).
+bool Function(String) _inLibrary(WidgetRef ref) =>
+    isLibraryArtistIn(ref.read(artistsProvider).value ?? const []);
+
 bool entryInLibrary(WidgetRef ref, int id) {
   final r = ref.read(onlineEntriesProvider)?[id]?.result;
   return r != null &&
@@ -123,7 +126,11 @@ List<TrackActionGroup> onlineTrackActions(
         () => goToArtists(
           outer,
           ref,
-          artistsOfTrack(track, ref.read(onlineEntriesProvider)?[track.id]?.result),
+          artistsOfTrack(
+            track,
+            ref.read(onlineEntriesProvider)?[track.id]?.result,
+            isLibraryArtist: _inLibrary(ref),
+          ),
         ),
       ),
     ]),
@@ -201,7 +208,11 @@ List<TrackActionGroup> trackActions(
     ShellNav.openInLibrary(outer, ref, AlbumDetailScreen(album: found));
   }
 
-  Future<void> goToArtist() => goToArtists(outer, ref, libraryArtists(track));
+  Future<void> goToArtist() => goToArtists(
+    outer,
+    ref,
+    libraryArtists(track, isLibraryArtist: _inLibrary(ref)),
+  );
 
   Future<void> artistOnYoutubeMusic() => openYtmArtist(
     outer,

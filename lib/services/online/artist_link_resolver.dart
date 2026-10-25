@@ -17,11 +17,30 @@ class ArtistName {
   final String sep;
 }
 
+/// Whether [name] is a library artist, from the already loaded [artists].
+bool Function(String) isLibraryArtistIn(List<ArtistSummary> artists) {
+  final keys = {for (final a in artists) a.key.toLowerCase()};
+  return (name) => keys.contains(name.trim().toLowerCase());
+}
+
+/// The artists of a credit line, with their original separators. A credit that
+/// is itself a library artist stays one name («AC/DC», «Tyler, The Creator»)
+/// unless each of its pieces is a library artist too («A, B» with solo tracks).
+List<ArtistName> creditedArtists(String credit,
+    {bool Function(String name)? isLibraryArtist}) {
+  final parts = splitArtists(credit);
+  if (isLibraryArtist != null &&
+      isLibraryArtist(credit) &&
+      !parts.every((p) => isLibraryArtist(p.name))) {
+    return [ArtistName(credit.trim())];
+  }
+  return [for (final a in parts) ArtistName(a.name, sep: a.sep)];
+}
+
 /// The artists of a library track, with their original separators.
-List<ArtistName> libraryArtists(Track t) => [
-      for (final a in splitArtists(t.artist ?? ''))
-        ArtistName(a.name, sep: a.sep),
-    ];
+List<ArtistName> libraryArtists(Track t,
+        {bool Function(String name)? isLibraryArtist}) =>
+    creditedArtists(t.artist ?? '', isLibraryArtist: isLibraryArtist);
 
 /// The artists credited on an online result; [ytmId] only where the id is not empty.
 List<ArtistName> onlineArtists(YtResult r) {
@@ -44,10 +63,11 @@ List<ArtistName> onlineArtists(YtResult r) {
 
 /// The artists of [t]: the online ones when it is streamed and [online] is
 /// known, otherwise its own `artist` text.
-List<ArtistName> artistsOfTrack(Track t, YtResult? online) =>
+List<ArtistName> artistsOfTrack(Track t, YtResult? online,
+        {bool Function(String name)? isLibraryArtist}) =>
     online != null && (isOnlineId(t.id) || t.kind == kStreamKind)
         ? onlineArtists(online)
-        : libraryArtists(t);
+        : libraryArtists(t, isLibraryArtist: isLibraryArtist);
 
 sealed class ArtistLink {
   const ArtistLink();
@@ -77,11 +97,11 @@ class NoArtistLink extends ArtistLink {
 class ArtistLinkResolver {
   const ArtistLinkResolver({required this.library, required this.search});
 
-  final Future<ArtistSummary?> Function(String key) library;
+  final Future<ArtistSummary?> Function(String name) library;
   final Future<List<YtmArtistRef>> Function(String name) search;
 
   Future<ArtistLink> resolve(String name, {String? ytmId}) async {
-    final local = await library(name.trim().toLowerCase());
+    final local = await library(name);
     if (local != null) return LibraryArtist(local);
     if (ytmId != null && ytmId.isNotEmpty) {
       return OnlineArtist(YtmArtistRef(id: ytmId, name: name));

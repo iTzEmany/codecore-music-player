@@ -34,7 +34,7 @@ final ytmLanguageProvider =
 /// Resolves a credited name to a library page, an online page or a choice.
 final artistLinkResolverProvider = Provider<ArtistLinkResolver>((ref) =>
     ArtistLinkResolver(
-      library: ref.read(libraryQueriesProvider).artistByKey,
+      library: ref.read(libraryQueriesProvider).artistNamed,
       search: (name) => ref
           .read(ytmCatalogProvider)
           .searchArtists(name, ref.read(ytmLanguageProvider)),

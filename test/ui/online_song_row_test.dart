@@ -47,12 +47,13 @@ class _Ctrl implements PlayerController {
 
 class _Downloads extends DownloadsNotifier {
   final adds = <String?>[];
+  bool instant = false;
   @override
   List<DownloadItem> build() => [];
   @override
   Future<bool> add(YtResult r, {String? tag}) async {
     adds.add(tag ?? 'plain');
-    return false;
+    return instant;
   }
 }
 
@@ -76,8 +77,8 @@ void main() {
         playerControllerProvider.overrideWithValue(ctrl),
         downloadsProvider.overrideWith(() => downloads),
         artistLinkResolverProvider.overrideWithValue(ArtistLinkResolver(
-          library: (key) async {
-            askedArtists.add(key);
+          library: (name) async {
+            askedArtists.add(name);
             return null;
           },
           search: (_) async => [],
@@ -177,6 +178,17 @@ void main() {
     await h.dispose(tester);
   });
 
+  testWidgets('«Scarica» of an instant promotion says it joined the library', (tester) async {
+    final h = await pumpRow(tester);
+    downloads.instant = true;
+    await tester.tap(find.byTooltip('Altre opzioni'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Scarica'));
+    await tester.pumpAndSettle();
+    expect(find.text('Aggiunto alla libreria'), findsOneWidget);
+    await h.dispose(tester);
+  });
+
   testWidgets('the ⋮ menu has the 5 actions and each runs', (tester) async {
     final h = await pumpRow(tester);
     await tester.runAsync(() => h.db.customStatement(
@@ -217,7 +229,7 @@ void main() {
     await tester.tap(find.text('Vai all’artista'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
-    expect(askedArtists, ['ann']); // library first (49.3); the page opens through ShellNav, absent in this harness
+    expect(askedArtists, ['Ann']); // library first (49.3); the page opens through ShellNav, absent in this harness
     await h.dispose(tester);
   });
 

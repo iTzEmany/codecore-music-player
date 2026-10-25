@@ -34,10 +34,14 @@ void main() {
     q = LibraryQueries(db);
     await db.into(db.tracks).insert(row('/1', 'Queen', 0));
     await db.into(db.tracks).insert(row('/2', 'Shadow', 2));
+    await db.into(db.tracks).insert(row('/3', 'Édith Piaf', 0));
+    await db.into(db.tracks).insert(row('/4', 'Gone', 0));
+    await (db.update(db.tracks)..where((t) => t.path.equals('/4')))
+        .write(const TracksCompanion(missing: Value(true)));
     searches = 0;
     found = [];
     resolver = ArtistLinkResolver(
-      library: q.artistByKey,
+      library: q.artistNamed,
       search: (_) async {
         searches++;
         return found;
@@ -91,5 +95,54 @@ void main() {
     final a = onlineArtists(r);
     expect(a.map((e) => e.ytmId), ['UCa', null]);
     expect(a.map((e) => e.sep), [', ', '']);
+  });
+
+  test('a non-ASCII name is found in the library without searching', () async {
+    final r = await resolver.resolve('Édith Piaf');
+    expect((r as LibraryArtist).artist.name, 'Édith Piaf');
+    expect(r.artist.key, 'Édith piaf'); // SQL lower is ASCII-only, like watchArtists
+    expect(searches, 0);
+  });
+
+  test('a missing row does not count as library', () async {
+    expect(await q.artistNamed('Gone'), isNull);
+  });
+
+  test('an empty ytmId searches', () async {
+    await resolver.resolve('Nobody', ytmId: '');
+    expect(searches, 1);
+  });
+
+  test('online artists: ids shorter than names give null ids, no error', () {
+    const r = YtResult(
+        id: 'x', title: 't', channel: 'c', duration: null,
+        artists: ['A', 'B'], artistIds: ['UCa']);
+    expect(onlineArtists(r).map((e) => e.ytmId), ['UCa', null]);
+  });
+
+  test('online artists: no artists splits the channel', () {
+    const r = YtResult(id: 'x', title: 't', channel: 'A, B', duration: null);
+    expect(onlineArtists(r).map((e) => e.name), ['A', 'B']);
+  });
+
+  test('a library track with an online result still uses its own artists', () async {
+    final t = await (db.select(db.tracks)..where((t) => t.path.equals('/1'))).getSingle();
+    // Queen is a kind 0 row
+    const r = YtResult(id: 'x', title: 't', channel: 'c', duration: null, artists: ['Net']);
+    expect(artistsOfTrack(t, r).map((e) => e.name), ['Queen']);
+  });
+
+  test('a credit that is a library artist stays one name unless every piece is one too', () {
+    const lib = [
+      ArtistSummary(key: 'ac/dc', name: 'AC/DC', trackCount: 1, albumCount: 1),
+      ArtistSummary(key: 'foo/bar', name: 'Foo/Bar', trackCount: 1, albumCount: 1),
+      ArtistSummary(key: 'foo', name: 'Foo', trackCount: 1, albumCount: 1),
+      ArtistSummary(key: 'bar', name: 'Bar', trackCount: 1, albumCount: 1),
+    ];
+    List<String> names(String c, List<ArtistSummary> l) => creditedArtists(c,
+        isLibraryArtist: isLibraryArtistIn(l)).map((e) => e.name).toList();
+    expect(names('AC/DC', lib), ['AC/DC']);
+    expect(names('Foo/Bar', lib), ['Foo', 'Bar']);
+    expect(names('AC/DC', const []), ['AC', 'DC']);
   });
 }

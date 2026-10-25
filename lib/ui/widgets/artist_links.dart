@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/db/app_database.dart';
 import '../../l10n/l10n_ext.dart';
+import '../../providers/library_providers.dart' show artistsProvider;
 import '../../providers/player_providers.dart';
 import '../../services/online/artist_link_resolver.dart';
 import 'artist_link_open.dart';
@@ -21,7 +22,9 @@ class ArtistLinks extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final online = ref.watch(onlineEntriesProvider)?[track.id]?.result;
-    final artists = artistsOfTrack(track, online);
+    final inLibrary =
+        isLibraryArtistIn(ref.watch(artistsProvider).value ?? const []);
+    final artists = artistsOfTrack(track, online, isLibraryArtist: inLibrary);
     if (artists.isEmpty) {
       return Text(context.l10n.unknownArtist, maxLines: 1, style: style);
     }
@@ -53,7 +56,8 @@ class ArtistLinks extends ConsumerWidget {
               ),
             ),
           ),
-          if (a.sep.isNotEmpty) Text(a.sep, maxLines: 1, style: style),
+          if (a.sep.isNotEmpty)
+            Flexible(child: Text(a.sep, maxLines: 1, overflow: TextOverflow.clip, style: style)),
         ],
       ],
     );

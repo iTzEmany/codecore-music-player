@@ -2,7 +2,10 @@ import 'dart:async';
 
 import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/data/repositories/library_queries.dart';
+import 'package:codecore/providers/player_providers.dart' show onlineEntriesProvider;
 import 'package:codecore/providers/ytm_catalog_providers.dart';
+import 'package:codecore/services/audio/online_entries.dart';
+import 'package:codecore/services/online/youtube_service.dart' show YtResult;
 import 'package:codecore/services/online/artist_link_resolver.dart';
 import 'package:codecore/services/online/ytm_artist.dart';
 import 'package:codecore/ui/screens/library/artist_screen.dart';
@@ -27,7 +30,7 @@ Future<void> _settle(WidgetTester tester) async {
 
 // "A" is in the library, "B" has one YouTube Music page, "C" has two: a choice.
 final _resolver = ArtistLinkResolver(
-  library: (key) async => key == 'a'
+  library: (name) async => name == 'A'
       ? const ArtistSummary(
           key: 'a', name: 'A', trackCount: 1, albumCount: 1)
       : null,
@@ -45,11 +48,15 @@ Future<Harness> _play(WidgetTester tester, String artist, Widget page) async {
   tester.view.physicalSize = const Size(1280, 800);
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
-  final h = await Harness.create(tester, tracks: 1);
-  await tester.runAsync(() => h.db
-      .update(h.db.tracks)
-      .write(TracksCompanion(artist: Value(artist))));
-  final rows = await tester.runAsync(() => h.db.select(h.db.tracks).get());
+  final h = await Harness.create(tester, tracks: 4);
+  var rows = await tester.runAsync(() => h.db.select(h.db.tracks).get());
+  // The credit is on the first track; A, B and C also have tracks of their own.
+  for (final (i, name) in [artist, 'A', 'B', 'C'].indexed) {
+    await tester.runAsync(() => (h.db.update(h.db.tracks)
+          ..where((t) => t.id.equals(rows![i].id)))
+        .write(TracksCompanion(artist: Value(name))));
+  }
+  rows = await tester.runAsync(() => h.db.select(h.db.tracks).get());
   await tester.runAsync(() => h.handler.playQueue([rows!.first.id], 0));
   await h.pump(tester, page, extraOverrides: [
     artistLinkResolverProvider.overrideWithValue(_resolver),
@@ -103,6 +110,47 @@ void main() {
     expect(find.descendant(
         of: find.byType(ArtistLinks), matching: find.byType(InkWell)),
         findsOneWidget);
+    await h.dispose(tester);
+  });
+
+  testWidgets('the separators are shown between the names', (tester) async {
+    final h = await _play(tester, 'A, B feat. C', const NowPlayingScreen());
+    final text = tester.widgetList<Text>(find.descendant(
+        of: find.byType(ArtistLinks), matching: find.byType(Text))).map((t) => t.data);
+    expect(text, ['A', ', ', 'B', ' feat. ', 'C']);
+    await h.dispose(tester);
+  });
+
+  testWidgets('a library artist with a separator in its name is one zone', (tester) async {
+    final h = await Harness.create(tester, tracks: 1);
+    await tester.runAsync(() => h.db
+        .update(h.db.tracks)
+        .write(const TracksCompanion(artist: Value('AC/DC'))));
+    final rows = await tester.runAsync(() => h.db.select(h.db.tracks).get());
+    await h.pump(tester, Scaffold(body: ArtistLinks(rows!.first)));
+    await _settle(tester);
+    expect(find.descendant(of: find.byType(ArtistLinks), matching: find.byType(InkWell)),
+        findsOneWidget);
+    await h.dispose(tester);
+  });
+
+  testWidgets('many long names in a narrow box do not overflow', (tester) async {
+    final h = await Harness.create(tester, tracks: 1);
+    final online = OnlineEntries();
+    final id = online.register(YtResult(
+      id: 'v1',
+      title: 'T',
+      channel: 'C',
+      duration: null,
+      artists: [for (var i = 0; i < 60; i++) 'Artist number $i'],
+    ));
+    await h.pump(
+      tester,
+      Scaffold(body: SizedBox(width: 200, child: ArtistLinks(online.trackOf(id)!))),
+      extraOverrides: [onlineEntriesProvider.overrideWithValue(online)],
+    );
+    await _settle(tester);
+    expect(tester.takeException(), isNull);
     await h.dispose(tester);
   });
 }

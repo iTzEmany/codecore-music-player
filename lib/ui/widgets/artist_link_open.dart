@@ -16,6 +16,9 @@ import '../shell/shell_nav.dart';
 import 'cc_sheet.dart';
 import 'show_msg.dart';
 
+// A double tap would start two searches and push two pages.
+var _opening = false;
+
 /// Opens the page of a credited artist: library, then YouTube Music (a sheet
 /// when several fit). Only ever started by the user's tap.
 Future<void> openArtistLink(
@@ -23,6 +26,8 @@ Future<void> openArtistLink(
   WidgetRef ref,
   ArtistName a,
 ) async {
+  if (_opening) return;
+  _opening = true;
   final l = context.l10n;
   final messenger = ScaffoldMessenger.of(context);
   final resolver = ref.read(artistLinkResolverProvider);
@@ -39,6 +44,7 @@ Future<void> openArtistLink(
       },
     ).resolve(a.name, ytmId: a.ytmId);
   } on Object catch (e) {
+    _opening = false;
     AppLog.w('artist link failed ($e)');
     if (!context.mounted) return;
     showMsg(
@@ -51,6 +57,7 @@ Future<void> openArtistLink(
     );
     return;
   }
+  _opening = false; // the picker below may stay open
   if (searching) messenger.clearSnackBars();
   if (!context.mounted) return;
   switch (link) {

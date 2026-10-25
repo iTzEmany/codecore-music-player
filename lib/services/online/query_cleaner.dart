@@ -107,6 +107,7 @@ List<({String name, String sep})> splitArtists(String artist) {
     pos = m.end;
   }
   add(artist.substring(pos), '');
+  if (out.isNotEmpty) out[out.length - 1] = (name: out.last.name, sep: '');
   return out;
 }
 

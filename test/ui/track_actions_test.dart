@@ -1,7 +1,9 @@
 import 'package:codecore/data/db/app_database.dart' show Track;
 import 'package:codecore/data/repositories/track_repository.dart';
 import 'package:codecore/data/repositories/track_kinds.dart' show kStreamKind;
+import 'package:codecore/providers/player_providers.dart' show onlineEntriesProvider;
 import 'package:codecore/providers/youtube_providers.dart';
+import 'package:codecore/services/audio/online_entries.dart';
 import 'package:codecore/services/online/download_queue.dart' show DownloadItem;
 import 'package:codecore/services/online/youtube_service.dart' show YtResult;
 import 'package:codecore/ui/theme/tokens.dart';
@@ -210,10 +212,12 @@ void main() {
       extraOverrides: extra,
       MediaQuery(
         data: MediaQueryData(textScaler: TextScaler.linear(scale)),
-        child: Consumer(
-          builder: (context, ref, _) => TextButton(
-            onPressed: () => showTrackActions(context, ref, t),
-            child: const Text('open'),
+        child: Scaffold(
+          body: Consumer(
+            builder: (context, ref, _) => TextButton(
+              onPressed: () => showTrackActions(context, ref, t),
+              child: const Text('open'),
+            ),
           ),
         ),
       ),
@@ -286,15 +290,35 @@ void main() {
     expect(downloads.added.single.title, 'Streamed');
     await h.dispose(tester);
   });
+
+  testWidgets('«Scarica» of a queue entry promoted at once says it joined the library', (tester) async {
+    final downloads = _Downloads()..instant = true;
+    final online = OnlineEntries();
+    final id = online.register(
+        const YtResult(id: 'v1', title: 'Streamed', channel: 'Chan', duration: null));
+    final h = await openSheet(
+      tester,
+      (_) => online.trackOf(id)!,
+      extra: [
+        downloadsProvider.overrideWith(() => downloads),
+        onlineEntriesProvider.overrideWithValue(online),
+      ],
+    );
+    await tester.tap(find.text('Scarica'));
+    await _settle(tester);
+    expect(find.text('Aggiunto alla libreria'), findsOneWidget);
+    await h.dispose(tester);
+  });
 }
 
 class _Downloads extends DownloadsNotifier {
   final added = <YtResult>[];
+  bool instant = false;
   @override
   List<DownloadItem> build() => [];
   @override
   Future<bool> add(YtResult r, {String? tag}) async {
     added.add(r);
-    return false;
+    return instant;
   }
 }

@@ -69,4 +69,10 @@ void main() {
     expect(r.map((e) => e.sep), [', ', ' feat. ', '']);
     expect(splitArtists(' , ').isEmpty, true);
   });
+
+  test('splitArtists: the last name has no separator even after a trailing one', () {
+    final r = splitArtists('A &');
+    expect(r.map((e) => e.name), ['A']);
+    expect(r.single.sep, '');
+  });
 }

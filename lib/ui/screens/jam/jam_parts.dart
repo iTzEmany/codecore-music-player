@@ -3,10 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/import_providers.dart';
+import '../../../providers/library_providers.dart' show artistsProvider;
 import '../../../providers/share_hub.dart';
 import '../../../services/jam/jam_models.dart';
 import '../../../services/online/artist_link_resolver.dart';
-import '../../../services/online/query_cleaner.dart' show splitArtists;
 import '../../theme/app_theme.dart' show ccIconDensity;
 import '../../theme/tokens.dart';
 import '../../widgets/artist_avatar.dart';
@@ -15,9 +15,10 @@ import '../../widgets/ring_progress.dart' show NowPlayingDot;
 import '../../widgets/track_artists_sheet.dart';
 
 /// The credited artists of a shared track (no YouTube Music ids on the wire).
-List<ArtistName> jamArtists(JamItem item) => [
-      for (final a in splitArtists(item.artist ?? '')) ArtistName(a.name, sep: a.sep),
-    ];
+List<ArtistName> jamArtists(JamItem item, WidgetRef ref) => creditedArtists(
+      item.artist ?? '',
+      isLibraryArtist: isLibraryArtistIn(ref.read(artistsProvider).value ?? const []),
+    );
 
 /// Initials on a tint taken from the name.
 class JamAvatar extends StatelessWidget {
@@ -153,7 +154,7 @@ class JamQueueRow extends ConsumerWidget {
     final cc = context.cc;
     final theme = Theme.of(context).textTheme;
     final l = context.l10n;
-    final artists = jamArtists(item);
+    final artists = jamArtists(item, ref);
     return InkWell(
       onTap: onTap,
       child: Padding(
