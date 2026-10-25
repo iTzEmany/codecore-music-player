@@ -263,15 +263,33 @@ void main() {
     expect(adapter.sent, isEmpty);
   });
 
-  test('one suggestion every 4 songs, and a passed one leaves the queue', () async {
+  test('with the queue running, the free slots fill at once and a passed one leaves', () async {
+    host.queueIds
+      ..clear()
+      ..addAll([for (var i = 1; i <= 20; i++) i]);
+    host.sourceIds = [...library];
+    host.currentIndex = 5;
     controller.start();
-    await settle();
-    final seen = await play(9);
-    expect(seen, [false, false, false, true, false, false, false, true, false]);
-    expect(host.queueIds.where(isOnlineId).length, lessThanOrEqualTo(1));
-    final passed = host.queueIds.take(host.currentIndex).where(isOnlineId);
-    expect(passed, isEmpty, reason: 'passed suggestions are taken out');
+    await until(() => host.queueIds.where(isOnlineId).length == 3);
+    final at = [
+      for (var i = 0; i < host.queueIds.length; i++)
+        if (isOnlineId(host.queueIds[i])) i
+    ];
+    expect(at, [8, 12, 16], reason: 'no track change needed');
+    expect(host.currentIndex, 5);
     expect(adapter.sent, hasLength(1), reason: 'one radio feeds many suggestions');
+    host.finishAndAdvance();
+    await settle();
+    host.finishAndAdvance();
+    await settle();
+    host.finishAndAdvance();
+    await settle();
+    host.finishAndAdvance(); // the first suggestion plays
+    await settle();
+    host.finishAndAdvance();
+    await settle();
+    expect(host.queueIds.take(host.currentIndex).where(isOnlineId), isEmpty,
+        reason: 'passed suggestions are taken out');
   });
 
   test('an online entry the user picked stays in the queue once passed', () async {
@@ -313,8 +331,7 @@ void main() {
     expect(host.queueIds, library, reason: 'address not ready: nothing queued');
     expect(log.recent, isEmpty);
     gate.complete();
-    await until(() => host.queueIds.where(isOnlineId).isNotEmpty);
-    expect(host.queueIds.where(isOnlineId), hasLength(1));
+    await until(() => host.queueIds.where(isOnlineId).length == 3);
   });
 
   test('a failed address tries the next candidate, no entry for the failed one', () async {
@@ -325,10 +342,10 @@ void main() {
     };
     controller.start();
     await until(() => host.queueIds.any(isOnlineId));
-    expect(prepared, hasLength(2));
-    expect(prepared.first, isNot(prepared.last));
+    await until(() => host.queueIds.where(isOnlineId).length == 3);
+    expect(prepared, hasLength(4));
     final queued = host.queueIds.where(isOnlineId).map((id) => online[id]!.result.id);
-    expect(queued, [prepared.last]);
+    expect(queued, prepared.skip(1));
   });
 
   test('when every candidate fails nothing is queued', () async {
@@ -359,26 +376,31 @@ void main() {
     expect(log.recent.last.seedTitle, startsWith('Song'));
   });
 
-  test('turning shuffle off takes the waiting suggestion out of the queue', () async {
+  test('turning shuffle off takes every suggestion after the current out', () async {
+    host.queueIds
+      ..clear()
+      ..addAll([for (var i = 1; i <= 20; i++) i]);
+    host.currentIndex = 5;
     controller.start();
-    await settle();
-    expect(host.queueIds.where(isOnlineId), hasLength(1));
+    await until(() => host.queueIds.where(isOnlineId).length == 3);
     host.shuffleEnabled = false;
     host.change();
-    await settle();
-    expect(host.queueIds, library);
+    await until(() => host.queueIds.every((id) => !isOnlineId(id)));
+    expect(host.queueIds, [for (var i = 1; i <= 20; i++) i]);
+    expect(host.queueIds[host.currentIndex], 6, reason: 'the current stays');
   });
 
   test('a new list drops the pool: the next suggestion asks for a new radio', () async {
     controller.start();
     await settle();
-    await play(5); // the first suggestion is behind us, the pool has rows
     expect(adapter.sent, hasLength(1));
     host.sourceIds = [for (var i = 1; i <= 8; i++) i];
     now = now.add(const Duration(minutes: 2));
-    host.change();
-    await settle();
-    await play(4);
+    // The suggestions are used up: the free slots need new rows.
+    for (final id in host.queueIds.where(isOnlineId).toList()) {
+      await host.removeQueueId(id);
+    }
+    await until(() => adapter.sent.length >= 2);
     expect(adapter.sent, hasLength(2), reason: 'rows of the old list are not reused');
   });
 
