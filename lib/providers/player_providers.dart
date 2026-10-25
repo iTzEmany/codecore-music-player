@@ -245,10 +245,13 @@ class PlayerController {
     onContext?.call(const PlayContext(PlayContextKind.search));
     _handler.setPlayContext(PlayContextKind.search.index, null);
     _requestNotificationPermissionOnce();
-    await _handler.playQueue(ids, shuffle ? _random.nextInt(ids.length) : 0);
-    // After playQueue: it would shuffle the upcoming of a shuffle already on.
+    final load = _handler.playQueue(ids, shuffle ? _random.nextInt(ids.length) : 0);
+    // After playQueue has set the queue (it does so before its first await) and
+    // not after the load: it would shuffle the upcoming of a shuffle already on,
+    // and the first track takes minutes to load.
     setShufflePlus?.call(false);
     await setShuffle(shuffle);
+    await load;
   }
 
   Future<void> setVolume(double v) {

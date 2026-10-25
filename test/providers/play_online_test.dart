@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:math' show Random;
 
@@ -113,6 +114,21 @@ void main() {
     player = PlayerController(handler, null, random: _FixedRandom(3), libraryIdOf: (_) async => null);
     await player.playOnlineList([for (var i = 0; i < 5; i++) _r('v$i')], shuffle: true);
     expect(online.entryOf(handler.queueIds[handler.currentIndex])?.result.id, 'v3');
+  });
+
+  test('playOnlineList sets the shuffle modes without waiting for the first track to load', () async {
+    await player.setShuffle(true);
+    plus = true;
+    final dir = Directory.systemTemp.createTempSync('play_online_gate');
+    addTearDown(() => dir.deleteSync(recursive: true));
+    final preparer = FakeStreamPreparer(TrackRepository(db), dir)..gates['youtube:v0'] = Completer<void>();
+    handler.preparer = preparer;
+    final playing = player.playOnlineList([_r('v0'), _r('v1')]);
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+    expect(handler.shuffleEnabled, isFalse);
+    expect(plus, isFalse);
+    preparer.gates['youtube:v0']!.complete();
+    await playing;
   });
 
   test('playOnlineList without shuffle un-shuffles a queue that was shuffled', () async {
