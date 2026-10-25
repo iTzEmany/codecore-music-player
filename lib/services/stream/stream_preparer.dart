@@ -59,7 +59,14 @@ class StreamPreparer {
     this.meteredAhead = 3,
     this.cooldown = const Duration(minutes: 5),
     this.attemptTimeout = const Duration(minutes: 5),
+    this.startTimeout = const Duration(seconds: 90),
+    this.stallTimeout = const Duration(seconds: 30),
   }) {
+    // A key promoted out of the cache (StreamCache.forget) is no longer ready.
+    cache.onForgotten = (key) {
+      if (_disposed || phases.value[key] != StreamPhase.ready) return;
+      phases.value = {...phases.value}..remove(key);
+    };
     // An evicted file is no longer ready: the queue walk may fetch it again.
     cache.onEvicted = (f) {
       if (_disposed) return;
@@ -84,6 +91,12 @@ class StreamPreparer {
 
   /// Longest a single download attempt may take.
   final Duration attemptTimeout;
+
+  /// Longest wait for the first progress event (yt-dlp extraction comes first).
+  final Duration startTimeout;
+
+  /// An attempt that reports no progress for this long is aborted (hung network).
+  final Duration stallTimeout;
 
   /// Phase per key, updated only when it changes (never the byte count).
   final phases = ValueNotifier<Map<String, StreamPhase>>({});
@@ -344,9 +357,28 @@ class StreamPreparer {
       // One attempt that hangs counts as a failed attempt.
       path = await (() async {
         String? found;
-        await for (final e in youtube.download(j.result, tmp, cancel: cancel)) {
-          found = e.path ?? found;
+        var stalled = false;
+        Timer? dog;
+        void arm(Duration wait) {
+          dog?.cancel();
+          dog = Timer(wait, () {
+            stalled = true;
+            cancel.cancel('attempt stalled'); // the downloader ends its stream on cancel
+          });
         }
+        arm(startTimeout);
+        try {
+          await for (final e in youtube.download(j.result, tmp, cancel: cancel)) {
+            found = e.path ?? found;
+            arm(stallTimeout);
+          }
+        } on Object {
+          if (stalled) throw TimeoutException('download stalled', stallTimeout);
+          rethrow;
+        } finally {
+          dog?.cancel();
+        }
+        if (stalled) throw TimeoutException('download stalled', stallTimeout);
         return found;
       })().timeout(attemptTimeout, onTimeout: () {
         cancel.cancel('attempt timed out');

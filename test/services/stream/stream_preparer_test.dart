@@ -99,9 +99,13 @@ void main() {
   StreamPreparer make({
     Duration cooldown = const Duration(minutes: 5),
     Duration attemptTimeout = const Duration(minutes: 5),
+    Duration stallTimeout = const Duration(minutes: 5),
+    Duration startTimeout = const Duration(minutes: 5),
   }) =>
       prep = StreamPreparer(
         attemptTimeout: attemptTimeout,
+        stallTimeout: stallTimeout,
+        startTimeout: startTimeout,
         cache: cache,
         tracks: tracks,
         youtube: yt,
@@ -368,6 +372,34 @@ void main() {
     make(attemptTimeout: const Duration(milliseconds: 30));
     await expectLater(prep.ready('youtube:slow', _r('slow')), throwsA(isA<TimeoutException>()));
     expect(yt.started, ['slow', 'slow']);
+  });
+
+  test('a stalled attempt is aborted long before attemptTimeout and retried', () async {
+    make(startTimeout: const Duration(milliseconds: 30), stallTimeout: const Duration(milliseconds: 30));
+    await expectLater(prep.ready('youtube:slow', _r('slow')), throwsA(isA<TimeoutException>()));
+    expect(yt.started, ['slow', 'slow']);
+    expect(yt.tokens['slow']!.every((t) => t!.isCancelled), isTrue);
+  });
+
+  test('a slow first event (extraction) is not a stall', () async {
+    make(stallTimeout: const Duration(milliseconds: 30), startTimeout: const Duration(seconds: 2));
+    final r = prep.ready('youtube:a', _r('a'));
+    await _until(() => yt.started.isNotEmpty);
+    await Future<void>.delayed(const Duration(milliseconds: 120));
+    yt.finish('a');
+    expect((await r).existsSync(), isTrue);
+    expect(yt.started, ['a']);
+  });
+
+  test('a forgotten key is not served stale: ready() downloads again', () async {
+    yt.autoFinish = true;
+    final first = await prep.ready('youtube:a', _r('a'));
+    expect(prep.phases.value['youtube:a'], StreamPhase.ready);
+    first.deleteSync(); // StreamPromoter moves the file out, then forgets the key
+    cache.forget('youtube:a');
+    expect(prep.phases.value['youtube:a'], isNull);
+    await prep.ready('youtube:a', _r('a'));
+    expect(yt.started, ['a', 'a']);
   });
 
   test('a timed-out attempt is cancelled and the retry gets a fresh token and folder', () async {

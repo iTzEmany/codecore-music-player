@@ -42,6 +42,9 @@ class StreamCache {
   /// Called with each file the cache deletes to make room (evict/clear).
   void Function(File)? onEvicted;
 
+  /// Called with the key of each [forget]: its file left the cache.
+  void Function(String key)? onForgotten;
+
   /// Bytes in the folder, measured after `open` and every `evict`.
   int usedBytes = 0;
 
@@ -101,6 +104,7 @@ class StreamCache {
   void forget(String key) {
     _mutations++;
     _index?.remove(streamFileName(key));
+    onForgotten?.call(key);
   }
 
   /// Marks [key] as just used.
