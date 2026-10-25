@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 
 import '../../core/app_log.dart';
-import '../../data/db/app_database.dart' show Folder;
+import '../../data/db/app_database.dart' show Folder, Track;
 import '../../data/repositories/track_repository.dart';
 import '../covers/cover_store.dart';
 import '../online/download_index.dart';
@@ -30,7 +30,10 @@ class StreamPromoter {
     required this.index,
     required this.scan,
     required this.tag,
-  });
+    Future<void> Function(File, String)? rename,
+    Future<void> Function(File, String)? copy,
+  })  : _rename = rename ?? ((f, to) => f.rename(to)),
+        _copy = copy ?? ((f, to) => f.copy(to));
 
   final StreamCache cache;
   final TrackRepository tracks;
@@ -39,6 +42,8 @@ class StreamPromoter {
   final Future<DownloadIndex> Function() index;
   final Future<void> Function(Folder folder, String path) scan;
   final Future<void> Function(int trackId) tag;
+  final Future<void> Function(File, String) _rename; // seams for the cross-volume path
+  final Future<void> Function(File, String) _copy;
 
   /// True when [r] was promoted from the cache; false = nothing to promote, download as usual.
   /// Throws [StreamPromoteException] when the move fails (the cache file stays).
@@ -54,17 +59,35 @@ class StreamPromoter {
     await _move(file, dest);
     cache.forget(key);
     // The file is in the downloads now: from here on nothing may lead to a second download.
-    try {
-      final old = await tracks.streamRow(key);
-      final row = await tracks.promoteStreamRow(key, dest, folder.id, File(dest));
-      await (await index()).add(r.id, dest, source: r.source);
-      if (row != null) await _moveCover(old?.coverKey, row.albumKey);
-      await scan(folder, dest);
-      if (row != null) await tag(row.id);
-    } on Object catch (e, st) {
-      AppLog.w('promote: step after the move failed for $key', e, st);
-    }
+    // Each step is logged on its own so one failure never skips the others.
+    Track? row;
+    String? oldCover;
+    await _step(key, 'row', () async {
+      oldCover = (await tracks.streamRow(key))?.coverKey;
+      final existing = await tracks.byPath(dest);
+      if (existing != null) {
+        // A library row (e.g. missing) already owns this path: the shadow row merges into it.
+        await tracks.mergeStreamRow(key, existing.id);
+        row = existing;
+      } else {
+        row = await tracks.promoteStreamRow(key, dest, folder.id, File(dest));
+        final r0 = row;
+        if (r0 != null) await _moveCover(oldCover, r0.albumKey);
+      }
+    });
+    await _step(key, 'index', () async => (await index()).add(r.id, dest, source: r.source));
+    await _step(key, 'scan', () => scan(folder, dest));
+    final id = row?.id;
+    if (id != null) await _step(key, 'tag', () => tag(id));
     return true;
+  }
+
+  Future<void> _step(String key, String name, Future<void> Function() body) async {
+    try {
+      await body();
+    } on Object catch (e, st) {
+      AppLog.w('promote: $name step failed for $key', e, st);
+    }
   }
 
   Future<String> _freePath(String dir, String base, String ext) async {
@@ -87,14 +110,14 @@ class StreamPromoter {
   /// `rename`, else (other volume, K-05) copy + size check + delete.
   Future<void> _move(File from, String to) async {
     try {
-      await from.rename(to);
+      await _rename(from, to);
       return;
     } on FileSystemException catch (e) {
       AppLog.i('promote: rename failed, copying (${e.osError?.errorCode})');
     }
     final dest = File(to);
     try {
-      await from.copy(to);
+      await _copy(from, to);
       if (await dest.length() != await from.length()) {
         throw const StreamPromoteException('Copia incompleta del file');
       }

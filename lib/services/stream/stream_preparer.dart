@@ -357,7 +357,7 @@ class StreamPreparer {
       // One attempt that hangs counts as a failed attempt.
       path = await (() async {
         String? found;
-        var stalled = false;
+        var stalled = false, downloaded = false;
         Timer? dog;
         void arm(Duration wait) {
           dog?.cancel();
@@ -370,7 +370,13 @@ class StreamPreparer {
         try {
           await for (final e in youtube.download(j.result, tmp, cancel: cancel)) {
             found = e.path ?? found;
-            arm(stallTimeout);
+            // 100% reached: yt-dlp is silent while ffmpeg post-processes; only attemptTimeout applies.
+            if (e.total > 0 && e.received >= e.total) downloaded = true;
+            if (downloaded) {
+              dog?.cancel();
+            } else {
+              arm(stallTimeout);
+            }
           }
         } on Object {
           if (stalled) throw TimeoutException('download stalled', stallTimeout);

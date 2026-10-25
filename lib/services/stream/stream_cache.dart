@@ -70,7 +70,11 @@ class StreamCache {
   /// The cached file (any extension), or null.
   Future<File?> fileFor(String key) async {
     final name = streamFileName(key);
-    if (_index != null) return _index![name];
+    final indexed = _index?[name];
+    if (_index != null) {
+      if (indexed == null || await indexed.exists()) return indexed;
+      _index = null; // deleted behind our back (e.g. the OS cleared cacheDir): rescan
+    }
     for (final e in await _files()) {
       if (_stem(e.file) == name) return e.file;
     }
@@ -110,7 +114,12 @@ class StreamCache {
   /// Marks [key] as just used.
   Future<void> touch(String key) async {
     final f = await fileFor(key);
-    if (f != null) await f.setLastModified(DateTime.now());
+    if (f == null) return;
+    try {
+      await f.setLastModified(DateTime.now());
+    } on FileSystemException catch (e, st) {
+      AppLog.w('stream cache: cannot touch ${f.path}', e, st);
+    }
   }
 
   void pin(String key) => _pins.update(key, (n) => n + 1, ifAbsent: () => 1);

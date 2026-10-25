@@ -217,4 +217,18 @@ void main() {
     await c.clear();
     expect(await c.fileFor('a:2'), isNull);
   });
+
+  test('a file deleted behind the cache back: fileFor is null and touch does not throw', () async {
+    final c = cache();
+    final f = await c.put('a:1', await part('a_1.m4a', 1));
+    expect(await c.fileFor('a:1'), isNotNull); // index is warm
+    f.deleteSync();
+    expect(await c.fileFor('a:1'), isNull);
+    await c.touch('a:1');
+    // touch racing with the deletion
+    final g = await c.put('a:2', await part('a_2.m4a', 1));
+    await c.fileFor('a:2');
+    g.deleteSync();
+    await c.touch('a:2');
+  });
 }

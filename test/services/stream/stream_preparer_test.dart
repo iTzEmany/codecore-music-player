@@ -29,6 +29,9 @@ class _Yt implements YoutubeService {
   final _gates = <String, Completer<void>>{};
   var open = 0, maxOpen = 0;
   var autoFinish = false;
+  /// Progress events (received, total) before the path, `gap` apart; then `silence` of nothing.
+  List<(int, int)> progress = const [];
+  Duration gap = Duration.zero, silence = Duration.zero;
   final tokens = <String, List<CancelToken?>>{};
   final dirs = <String, List<String>>{};
 
@@ -60,6 +63,11 @@ class _Yt implements YoutubeService {
         failuresLeft[r.id] = failuresLeft[r.id]! - 1;
         throw const YtException(YtErrorKind.network, 'boom');
       }
+      for (final (rec, tot) in progress) {
+        await Future<void>.delayed(gap);
+        yield DownloadProgress(received: rec, total: tot);
+      }
+      await Future<void>.delayed(silence);
       await outDir.create(recursive: true);
       final f = File(p.join(outDir.path, 'Some title - ${r.id}.m4a'))..writeAsBytesSync([1, 2, 3]);
       yield DownloadProgress(path: f.path);
@@ -389,6 +397,35 @@ void main() {
     yt.finish('a');
     expect((await r).existsSync(), isTrue);
     expect(yt.started, ['a']);
+  });
+
+  test('steady progress keeps re-arming the watchdog: no stall', () async {
+    make(startTimeout: const Duration(milliseconds: 100), stallTimeout: const Duration(seconds: 1));
+    yt
+      ..autoFinish = true
+      ..progress = [for (var n = 1; n <= 8; n++) (n, 100)]
+      ..gap = const Duration(milliseconds: 60);
+    expect((await prep.ready('youtube:a', _r('a'))).existsSync(), isTrue);
+    expect(yt.started, ['a']);
+  });
+
+  test('silence after 100% (post-processing) is not a stall', () async {
+    make(startTimeout: const Duration(seconds: 2), stallTimeout: const Duration(milliseconds: 40));
+    yt
+      ..autoFinish = true
+      ..progress = [(50, 100), (100, 100)]
+      ..silence = const Duration(milliseconds: 150);
+    expect((await prep.ready('youtube:a', _r('a'))).existsSync(), isTrue);
+    expect(yt.started, ['a']);
+  });
+
+  test('onForgotten for a key that is not ready leaves the phases untouched', () async {
+    yt.autoFinish = true;
+    await prep.ready('youtube:a', _r('a'));
+    final before = prep.phases.value;
+    cache.forget('youtube:zzz');
+    expect(identical(prep.phases.value, before), isTrue);
+    expect(prep.phases.value['youtube:a'], StreamPhase.ready);
   });
 
   test('a forgotten key is not served stale: ready() downloads again', () async {
