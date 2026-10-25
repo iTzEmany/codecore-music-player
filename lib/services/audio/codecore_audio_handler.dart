@@ -13,7 +13,6 @@ import '../stream/stream_key.dart';
 import '../stream/stream_preparer.dart';
 import 'audio_backend.dart';
 import '../online/google_thumb.dart';
-import '../online/youtube_service.dart';
 import 'crossfade_engine.dart';
 import 'equalizer.dart';
 import '../radio/icy_title.dart';
@@ -398,7 +397,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
         if (token != _loadToken) return;
         final File file;
         try {
-          file = await p.ready(streamKey, entry?.result ?? _resultOfRow(streamKey, track));
+          file = await p.ready(streamKey, entry?.result ?? streamResultOfRow(streamKey, track));
         } on Object catch (e, st) {
           AppLog.w('stream $streamKey is not ready', e, st);
           playNow = _playWhenReady;
@@ -555,24 +554,6 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     if (t != null && _remote == null) mediaItem.add(_toMediaItem(t));
   }
 
-  /// The download request of a shadow row, rebuilt from the row.
-  /// shortcut: a SoundCloud row loses its page address, fix with the first SoundCloud stream.
-  YtResult _resultOfRow(String key, Track row) {
-    final sep = key.indexOf(':');
-    final source = MediaSource.values.firstWhere((m) => m.name == key.substring(0, sep),
-        orElse: () => MediaSource.youtube);
-    final artist = row.artist;
-    return YtResult(
-      id: key.substring(sep + 1),
-      title: row.title,
-      channel: artist ?? '',
-      artists: artist == null ? const [] : [artist],
-      album: row.album,
-      duration: row.durationMs > 0 ? Duration(milliseconds: row.durationMs) : null,
-      source: source,
-    );
-  }
-
   /// Tells the preparer the upcoming streamed tracks, current first. Online
   /// entries need no lookup; only the next [_lookupAhead] library ids are read
   /// from the DB to find kind-2 rows.
@@ -601,7 +582,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
       } else {
         final row = byId[id];
         final key = row == null || row.kind != kStreamKind ? null : keyOfStreamPath(row.path);
-        if (key != null) out.add(StreamItem(key, _resultOfRow(key, row!)));
+        if (key != null) out.add(StreamItem(key, streamResultOfRow(key, row!)));
       }
     }
     p.setQueue(out);

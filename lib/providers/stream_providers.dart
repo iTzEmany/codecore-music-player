@@ -8,6 +8,7 @@ import '../data/repositories/track_repository.dart';
 import '../services/online/enrichment_service.dart';
 import '../services/online/youtube_service.dart' show YtResult;
 import '../services/stream/stream_cache.dart';
+import '../services/stream/stream_key.dart' show displayArtist;
 import '../services/stream/stream_preparer.dart';
 import 'database_providers.dart';
 import 'settings_providers.dart';
@@ -83,7 +84,7 @@ Track _syntheticTrack(YtResult r) => Track(
       id: 0,
       path: '',
       title: r.title,
-      artist: r.artists.isEmpty ? r.channel : r.artists.join(', '),
+      artist: displayArtist(r),
       album: r.album,
       albumKey: '',
       durationMs: r.duration?.inMilliseconds ?? 0,

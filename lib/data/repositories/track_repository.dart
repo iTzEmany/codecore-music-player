@@ -6,6 +6,7 @@ import 'package:path/path.dart' as p;
 import '../../core/import_row.dart';
 import '../../core/text_utils.dart';
 import '../../services/share/track_meta.dart';
+import '../../services/stream/stream_key.dart';
 import '../../services/library/rules/rule_ast.dart';
 import '../../services/library/rules/rule_sql.dart';
 import '../../services/online/youtube_service.dart' show YtResult;
@@ -88,14 +89,14 @@ class TrackRepository {
         ).get();
 
   /// The shadow row of the streamed track [key], if it has one.
-  Future<Track?> streamRow(String key) => byPath('stream:$key');
+  Future<Track?> streamRow(String key) => byPath(streamPathOf(key));
 
   /// Deletes the shadow rows with no plays, except the [keepKeys] ones (still
   /// in the cache). Rows with plays stay (D-81). Returns how many went.
   Future<int> deleteUnplayedStreamRows({Set<String> keepKeys = const {}}) =>
       (_db.delete(_db.tracks)..where((t) =>
               t.kind.equals(kStreamKind) &
-              t.path.isNotIn([for (final k in keepKeys) 'stream:$k']) &
+              t.path.isNotIn([for (final k in keepKeys) streamPathOf(k)]) &
               notExistsQuery(_db.select(_db.plays)..where((pl) => pl.trackId.equalsExp(t.id)))))
           .go();
 
@@ -103,8 +104,8 @@ class TrackRepository {
   /// [key] whose cached [file] is ready; one row per key. Returns its id.
   Future<int> upsertStreamRow(String key, YtResult r, File file) async {
     final stat = await file.stat();
-    final artist = r.artists.isEmpty ? r.channel : r.artists.join(', ');
-    final path = 'stream:$key';
+    final artist = displayArtist(r);
+    final path = streamPathOf(key);
     final row = TracksCompanion.insert(
       path: path,
       title: r.title,
