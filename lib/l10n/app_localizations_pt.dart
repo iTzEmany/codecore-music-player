@@ -5306,4 +5306,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get playerLoading => 'A carregar…';
+
+  @override
+  String get ytmAlbumQueue => 'Adicionar álbum à fila';
 }

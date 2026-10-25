@@ -5322,4 +5322,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get playerLoading => 'Wird geladen…';
+
+  @override
+  String get ytmAlbumQueue => 'Album zur Warteschlange hinzufügen';
 }

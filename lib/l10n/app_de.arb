@@ -2874,5 +2874,6 @@
   "streamCacheClear": "Leeren",
   "streamCacheCleared": "Streaming-Cache geleert",
   "streamCacheClearFailed": "Streaming-Cache konnte nicht geleert werden",
-  "playerLoading": "Wird geladen…"
+  "playerLoading": "Wird geladen…",
+  "ytmAlbumQueue": "Album zur Warteschlange hinzufügen"
 }

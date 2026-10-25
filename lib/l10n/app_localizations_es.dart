@@ -5313,4 +5313,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get playerLoading => 'Cargando…';
+
+  @override
+  String get ytmAlbumQueue => 'Añadir álbum a la cola';
 }

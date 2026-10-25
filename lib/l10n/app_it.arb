@@ -3420,5 +3420,6 @@
   "streamCacheClear": "Svuota",
   "streamCacheCleared": "Cache dello streaming svuotata",
   "streamCacheClearFailed": "Impossibile svuotare la cache dello streaming",
-  "playerLoading": "Caricamento…"
+  "playerLoading": "Caricamento…",
+  "ytmAlbumQueue": "Metti in coda l’album"
 }

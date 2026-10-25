@@ -5351,4 +5351,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get playerLoading => 'Chargement…';
+
+  @override
+  String get ytmAlbumQueue => 'Ajouter l’album à la file';
 }

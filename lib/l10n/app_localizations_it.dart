@@ -5299,4 +5299,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get playerLoading => 'Caricamento…';
+
+  @override
+  String get ytmAlbumQueue => 'Metti in coda l’album';
 }

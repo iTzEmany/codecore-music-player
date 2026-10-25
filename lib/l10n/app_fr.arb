@@ -3118,5 +3118,6 @@
   "streamCacheClear": "Vider",
   "streamCacheCleared": "Cache du streaming vidé",
   "streamCacheClearFailed": "Impossible de vider le cache du streaming",
-  "playerLoading": "Chargement…"
+  "playerLoading": "Chargement…",
+  "ytmAlbumQueue": "Ajouter l’album à la file"
 }

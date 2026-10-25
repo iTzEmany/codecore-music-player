@@ -3118,5 +3118,6 @@
   "streamCacheClear": "Esvaziar",
   "streamCacheCleared": "Cache de streaming esvaziado",
   "streamCacheClearFailed": "Não foi possível esvaziar o cache de streaming",
-  "playerLoading": "A carregar…"
+  "playerLoading": "A carregar…",
+  "ytmAlbumQueue": "Adicionar álbum à fila"
 }
