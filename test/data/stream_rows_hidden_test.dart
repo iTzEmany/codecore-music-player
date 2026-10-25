@@ -102,6 +102,26 @@ void main() {
     expect(await (db.select(db.tracks)).get(), hasLength(4));
   });
 
+  test('streamRowsAmong returns only the kind-2 rows among the ids', () async {
+    final shadow = (await tracks.streamRow('youtube:abc'))!;
+    final lib = await db
+        .into(db.tracks)
+        .insert(
+          TracksCompanion.insert(
+            path: '/m/a.mp3',
+            title: 'Local',
+            albumKey: 'k',
+            format: 'mp3',
+            sizeBytes: 1,
+            mtimeMs: 1,
+            addedAt: 1,
+          ),
+        );
+    final got = await tracks.streamRowsAmong([lib, shadow.id, 9999]);
+    expect(got.map((r) => r.id), [shadow.id]);
+    expect(await tracks.streamRowsAmong(const []), isEmpty);
+  });
+
   test('a playlist refuses a shadow row and counts only music', () async {
     final pl = PlaylistRepository(db);
     final id = (await db.select(db.playlists).getSingle()).id;

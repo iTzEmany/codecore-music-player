@@ -585,7 +585,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     final ids = _queue.items.skip(from).toList();
     final List<Track> rows;
     try {
-      rows = await _tracks.getByIds(
+      rows = await _tracks.streamRowsAmong(
           [for (final i in ids) if (!isOnlineId(i)) i].take(_lookupAhead).toList());
     } on Object catch (e, st) {
       AppLog.w('could not read the queue for the stream preparer', e, st);

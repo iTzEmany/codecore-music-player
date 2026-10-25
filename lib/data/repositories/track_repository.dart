@@ -78,6 +78,15 @@ class TrackRepository {
     });
   }
 
+  /// The shadow rows (`kind = 2`) among [ids], as list rows; other ids are skipped.
+  Future<List<Track>> streamRowsAmong(List<int> ids) => ids.isEmpty
+      ? Future.value(const [])
+      : lightSelect(
+          _db,
+          _db.select(_db.tracks)
+            ..where((t) => t.id.isIn(ids) & t.kind.equals(kStreamKind)),
+        ).get();
+
   /// The shadow row of the streamed track [key], if it has one.
   Future<Track?> streamRow(String key) => byPath('stream:$key');
 
