@@ -4,6 +4,8 @@
 - **Integration test su Linux un file per volta** (`for f in integration_test/*_test.dart; do flutter test $f -d linux; done`). Tutti insieme si bloccano fra un'app e l'altra.
 - **Il driver degli integration test deve chiamare `JustAudioMediaKit.ensureInitialized()`**, come `main`. Altrimenti `playback_test` fallisce senza audio (be3e937).
 - **`scripts/perf_device.py` dipende dalla semantica del mini player.** Lo trova come `android.widget.Button`, con «titolo\nartista», sulla riga del bottone «Dispositivi». Se cambia il mini player, vanno aggiornati `mini()` e `setup_mini()`.
+- **`perf_device.py` sul Mi A3 vuole `JAVA_HOME`** (`~/.jdks/jbr-17.0.14`, con il suo `bin` nel `PATH`): senza, la build Gradle si ferma subito.
+- **uiautomator e brani da 1 s:** mentre suonano, ogni cambio di brano manda un gruppo di eventi di accessibilità (app e notifica) e `uiautomator dump` spesso dà «could not get idle state». `Device.nodes()` allora mette in pausa, rilegge e riprende, e aspetta 1 s prima del gesto misurato dopo. Con questo i numeri dei gesti fatti durante la riproduzione non sono del tutto confrontabili con i giri di prima della fase 46.
 - **Misure con 60–140 frame:** un frame vale 0,7–1,6 punti. Un singolo giro non decide una soglia vicina; per bisecare usa `--only "<scenario>"` su ogni commit, senza `--playback` per confrontare a parità.
 - **`flutter test -d linux` rigenera `lib/l10n/app_localizations*.dart`.** Per un momento `git status` li mostra cambiati, poi tornano identici: non committarli a metà di un giro.
 - **Golden:** si rigenerano solo nei passi che cambiano l'aspetto (D-20), con `--update-goldens`. Le immagini di `test/goldens/failures` vanno cancellate con `pulizia.sh`.
