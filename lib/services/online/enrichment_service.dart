@@ -3,6 +3,7 @@ import 'package:drift/drift.dart';
 import 'package:path/path.dart' as p;
 
 import '../../core/app_log.dart';
+import '../../core/clock.dart';
 import '../../core/text_utils.dart';
 import '../../data/db/app_database.dart';
 import '../../data/repositories/credits_repository.dart';
@@ -10,6 +11,7 @@ import '../../data/repositories/track_kinds.dart';
 import '../../data/repositories/track_repository.dart';
 import '../covers/cover_store.dart';
 import 'credits_enricher.dart';
+import 'curiosity_service.dart';
 import 'deezer_client.dart';
 import 'deezer_gw_client.dart';
 import 'deezer_match.dart';
@@ -18,6 +20,7 @@ import 'enrich_parts.dart';
 import 'http_client.dart';
 import 'itunes_client.dart';
 import 'lrclib_client.dart';
+import 'lyrics_chain.dart';
 import 'musicbrainz_client.dart';
 import 'query_cleaner.dart';
 import 'wikipedia_client.dart';
@@ -125,6 +128,8 @@ class EnrichmentService {
     this.creditsRepo,
     this.useCredits = _never,
     required this.lrclib,
+    this.lyricsChain,
+    this.curiosities,
     required this.wikipedia,
     required this.web,
     required this.language,
@@ -163,6 +168,13 @@ class EnrichmentService {
   Future<void> saveCredits(int trackId, CreditsPart? part) async =>
       _credits?.save(trackId, part);
   final LrclibClient lrclib;
+
+  /// LRCLIB, NetEase, lyrics.ovh; LRCLIB alone when not given.
+  final LyricsChain? lyricsChain;
+  late final LyricsChain _chain = lyricsChain ?? LyricsChain(lrclib: lrclib);
+
+  /// The automatic curiosity search ([completeOne]'s `curio` part); without it that part is skipped.
+  final CuriosityService? curiosities;
   final WikipediaClient wikipedia;
   final WebClient web;
   final String Function() language;
@@ -192,13 +204,7 @@ class EnrichmentService {
     final results = await Future.wait<Object?>([
       metadata ? guarded(_metadata(t, c, cancel, needGenre)) : Future<Object?>.value(),
       lyrics
-          ? guarded(lrclib.find(
-              title: c.title,
-              artist: c.artist,
-              album: t.album,
-              durationSec:
-                  t.durationMs > 0 ? (t.durationMs / 1000).round() : null,
-              cancel: cancel))
+          ? guarded(_chain.find(t, cancel: cancel).then((r) => r.lyrics))
           : Future<Object?>.value(),
       curiosity
           ? guarded(wikipedia.find(c.title, c.artist, language(), cancel: cancel))
@@ -229,11 +235,12 @@ class EnrichmentService {
   /// cover, or a genre is wanted. Deezer fields win, iTunes fills the gaps
   /// (genre goes the other way: Deezer's is a last resort).
   Future<_Meta?> _metadata(
-      Track t, CleanQuery c, CancelToken? cancel, bool needGenre) async {
-    final dz = useDeezer() && deezer != null ? await _deezerLookup(t, cancel) : null;
+      Track t, CleanQuery c, CancelToken? cancel, bool needGenre,
+      {bool strict = false}) async {
+    final dz = useDeezer() && deezer != null ? await _deezerLookup(t, cancel, strict: strict) : null;
     final needItunes = dz == null || dz.match.artworkUrl == null || needGenre;
     final it = needItunes
-        ? await itunes.search(c.title, c.artist, cancel: cancel)
+        ? await itunes.search(c.title, c.artist, cancel: cancel, strict: strict)
         : null;
     if (dz == null && it == null) return null;
     if (dz == null) return _Meta(it!, 'itunes');
@@ -253,10 +260,15 @@ class EnrichmentService {
 
   final _albums = <int, DeezerAlbum>{};
 
-  /// Null when Deezer does not confirm the track (or cannot answer).
-  Future<_Meta?> _deezerLookup(Track t, CancelToken? cancel) async {
+  /// Null when Deezer does not confirm the track (or cannot answer). With
+  /// [strict] «cannot answer» (resting, refused, unreachable) throws instead.
+  Future<_Meta?> _deezerLookup(Track t, CancelToken? cancel,
+      {bool strict = false}) async {
     final dz = deezer!;
-    if (dz.isResting) return null;
+    if (dz.isResting) {
+      if (strict) throw const WebUnavailableException('deezer');
+      return null;
+    }
     try {
       final hit = await _deezerHit(t, cancel);
       if (hit == null) return null;
@@ -287,8 +299,10 @@ class EnrichmentService {
         hit: hit,
       );
     } on RateLimitedException catch (e) {
+      if (strict) rethrow;
       AppLog.w('Deezer resting, using iTunes: $e');
     } on DeezerNetworkException catch (e) {
+      if (strict) rethrow;
       AppLog.w('Deezer unreachable, using iTunes: $e');
     }
     return null;
@@ -313,30 +327,246 @@ class EnrichmentService {
         want, await dz.searchTracks(deezerQuery(want), cancel: cancel));
   }
 
-  /// Fills [parts] of one track: for now only the credits (and details), and
-  /// only while «Credits and details» is on. Skipped when the track has them
-  /// or they were searched with an empty answer, unless [force]. The caller
-  /// sets the pace.
-  Future<Map<EnrichPart, PartOutcome>> completeOne(int trackId, Set<EnrichPart> parts,
-      {bool force = false, CancelToken? cancel}) async {
-    if (!parts.contains(EnrichPart.credits)) return const {};
-    Map<EnrichPart, PartOutcome> only(PartOutcome o) => {EnrichPart.credits: o};
-    if (!_creditsOn) return only(PartOutcome.skipped);
+  /// Fills [parts] of one track; the caller says which are on. A part is asked
+  /// for only when empty and [isDue]; [force] also asks with a recent «searched,
+  /// nothing» mark. Valid and empty → `*_none_at = now`; found → cleared; an
+  /// error or a refusal → left as it was (invariant 3). Metadata and lyrics are
+  /// asked side by side, then credits, then curiosities; `tracks` (empty
+  /// columns only), `track_credits` and `track_enrich` are written in one
+  /// transaction at the end. The curiosities and the cover are saved by their
+  /// own steps. The caller sets the pace.
+  Future<Map<EnrichPart, PartOutcome>> completeOne(
+    int trackId,
+    Set<EnrichPart> parts, {
+    bool force = false,
+    CancelToken? cancel,
+  }) async {
+    final out = {for (final p in parts) p: PartOutcome.skipped};
     final t = await tracks.getById(trackId);
-    if (t == null || !await _credits!.isDue(t, force: force)) {
-      return only(PartOutcome.skipped);
-    }
+    if (t == null) return out;
+    final enrich = await (db.select(
+      db.trackEnrich,
+    )..where((e) => e.trackId.equals(trackId))).getSingleOrNull();
+    final now = nowMs();
+    final at = DateTime.fromMillisecondsSinceEpoch(now);
+    bool due(EnrichPart p) =>
+        parts.contains(p) && isDue(p, t, enrich, at, force: force);
+    final doMeta = due(EnrichPart.meta);
+    final doLyrics = due(EnrichPart.lyrics);
+    final doSynced = due(EnrichPart.synced);
     final g = gw;
-    if (musicBrainz == null && (g == null || g.isPaused)) {
-      return only(PartOutcome.skipped);
+    final doCredits =
+        _creditsOn &&
+        parts.contains(EnrichPart.credits) &&
+        (musicBrainz != null || (g != null && !g.isPaused)) &&
+        await _credits!.isDue(t, force: force);
+    final doCurio = curiosities != null && due(EnrichPart.curio);
+    final marks =
+        <EnrichPart, int?>{}; // now = searched with nothing, null = found
+    void settle(EnrichPart p, PartOutcome o) {
+      out[p] = o;
+      if (o == PartOutcome.found) marks[p] = null;
+      if (o == PartOutcome.none) marks[p] = now;
     }
-    final part = await _credits.fetch(t, null, cancel);
-    await _credits.save(trackId, part);
-    return only(part.credits.isNotEmpty
-        ? PartOutcome.found
-        : part.complete
-            ? PartOutcome.none
-            : PartOutcome.failed);
+
+    final c = cleanSearchQuery(t.title, t.artist ?? '');
+    final metaF = doMeta
+        ? _attempt(
+            'metadata',
+            () => _metadata(t, c, cancel, t.genre == null, strict: true),
+          )
+        : null;
+    final lyrF = doLyrics || doSynced
+        ? _attempt(
+            'lyrics',
+            () => _chain.find(
+              t,
+              wantSynced: parts.contains(EnrichPart.synced),
+              cancel: cancel,
+            ),
+          )
+        : null;
+    // Both settle before a cancellation is rethrown.
+    await Future.wait<Object?>([?metaF, ?lyrF]);
+    final meta = (await metaF)?.value;
+    // Settled in the transaction: «found» means a field was filled.
+    final metaAsked = metaF != null && !(await metaF).failed;
+    if (metaF != null && !metaAsked) out[EnrichPart.meta] = PartOutcome.failed;
+    String? plainW, syncedW;
+    if (lyrF != null) {
+      final r = await lyrF;
+      final res = r.value;
+      final text = res?.lyrics;
+      final hasPlain = text?.plain?.isNotEmpty ?? false;
+      final hasSynced = text?.synced?.isNotEmpty ?? false;
+      final lost =
+          r.failed ||
+          (res?.failed ?? false); // no answer is not an empty answer
+      if (doLyrics) {
+        plainW = hasPlain ? text!.plain : null;
+        settle(
+          EnrichPart.lyrics,
+          hasPlain || hasSynced
+              ? PartOutcome.found
+              : lost
+              ? PartOutcome.failed
+              : PartOutcome.none,
+        );
+      }
+      if (hasSynced) syncedW = text!.synced;
+      if (parts.contains(EnrichPart.synced) &&
+          (doSynced || (doLyrics && hasPlain))) {
+        settle(
+          EnrichPart.synced,
+          hasSynced
+              ? PartOutcome.found
+              : r.failed || (res?.syncedFailed ?? false)
+              ? PartOutcome.failed
+              : PartOutcome.none,
+        );
+      }
+    }
+
+    CreditsPart? creditsPart;
+    if (doCredits) {
+      final r = await _attempt(
+        'credits',
+        () => _credits.fetch(t, meta?.hit, cancel),
+        timeout: false,
+      );
+      creditsPart = r.value;
+      // CreditsEnricher.save writes the credits mark itself.
+      out[EnrichPart.credits] = creditsPart == null
+          ? PartOutcome.failed
+          : creditsPart.credits.isNotEmpty
+          ? PartOutcome.found
+          : creditsPart.complete
+          ? PartOutcome.none
+          : PartOutcome.failed;
+    }
+    if (doCurio) {
+      final r = await _attempt(
+        'curiosity',
+        () => curiosities!.fetch(t, language()),
+        timeout: false,
+      );
+      final o = r.value;
+      if (o == null || o.failed || o.limited) {
+        out[EnrichPart.curio] = PartOutcome.failed;
+      } else {
+        // The part is the track's own text: an artist bio alone leaves it empty.
+        final has = (await tracks.getById(trackId))?.curiosities != null;
+        settle(EnrichPart.curio, has ? PartOutcome.found : PartOutcome.none);
+      }
+    }
+
+    Track? fresh;
+    var albumKey = t.albumKey;
+    await db.transaction(() async {
+      // The row may have changed (or be gone) while the sources were asked.
+      fresh = await tracks.getById(trackId);
+      final f = fresh;
+      if (f == null) return;
+      final fields = <EnrichField>{
+        if (f.album == null && !f.userEdited) EnrichField.album,
+        if (f.year == null) EnrichField.year,
+        if (f.genre == null) EnrichField.genre,
+        if (f.trackNumber == null) EnrichField.trackNumber,
+        EnrichField.lyrics,
+      };
+      final m = meta?.match;
+      final fills =
+          m != null &&
+          ((fields.contains(EnrichField.album) && m.album != null) ||
+              (fields.contains(EnrichField.year) && m.year != null) ||
+              (fields.contains(EnrichField.genre) && m.genre != null) ||
+              (fields.contains(EnrichField.trackNumber) &&
+                  (m.trackNumber != null ||
+                      (meta!.disc != null && f.discNumber == null))) ||
+              (meta!.isrc != null && f.isrc == null) ||
+              (m.artworkUrl != null && !f.hasCover && f.coverSource == 0));
+      if (metaAsked) {
+        settle(EnrichPart.meta, fills ? PartOutcome.found : PartOutcome.none);
+      }
+      // The user may have saved a text while the sources were asked.
+      final byUser =
+          (await (db.select(db.trackEnrich)
+                    ..where((e) => e.trackId.equals(trackId)))
+                  .getSingleOrNull())
+              ?.lyricsByUser ??
+          false;
+      final plain = f.lyricsPlain == null && !byUser ? plainW : null;
+      final synced = f.lyricsSynced == null && !byUser ? syncedW : null;
+      if (fills || plain != null || synced != null) {
+        albumKey = (await _writeFields(
+          f,
+          EnrichmentProposal(
+            track: f,
+            meta: fills ? m : null,
+            disc: fills ? meta!.disc : null,
+            isrc: fills ? meta!.isrc : null,
+            lyrics: LyricsResult(plain: plain, synced: synced),
+          ),
+          fields,
+        )).$2;
+      } else if (metaAsked) {
+        // Like enrichMany: nothing found for the track → status 2.
+        await (db.update(db.tracks)..where((r) => r.id.equals(trackId))).write(
+          const TracksCompanion(enrichStatus: Value(2)),
+        );
+      }
+      if (creditsPart != null) await _credits!.save(trackId, creditsPart);
+      if (marks.isNotEmpty) {
+        Value<int?> mark(EnrichPart p) =>
+            marks.containsKey(p) ? Value(marks[p]) : const Value.absent();
+        final row = TrackEnrichCompanion(
+          trackId: Value(trackId),
+          metaNoneAt: mark(EnrichPart.meta),
+          lyricsNoneAt: mark(EnrichPart.lyrics),
+          syncedNoneAt: mark(EnrichPart.synced),
+          curioNoneAt: mark(EnrichPart.curio),
+        );
+        await db
+            .into(db.trackEnrich)
+            .insert(row, onConflict: DoUpdate((_) => row));
+      }
+    });
+    final f = fresh;
+    final url = metaAsked ? meta?.match.artworkUrl : null;
+    // Never over a hand-made cover (cover_source > 0) or an existing one.
+    if (f != null && url != null && !f.hasCover && f.coverSource == 0) {
+      try {
+        await _applyCover(trackId, albumKey, url, false, cancel);
+      } on DioException catch (e, st) {
+        if (CancelToken.isCancel(e)) rethrow;
+        AppLog.w('completion: cover of track $trackId failed', e, st);
+      } on Object catch (e, st) {
+        AppLog.w('completion: cover of track $trackId failed', e, st);
+      }
+    }
+    return out;
+  }
+
+  /// One source of [completeOne]: its answer, or `failed` (logged) when it
+  /// threw, timed out or was refused. A cancellation escapes.
+  Future<({T? value, bool failed})> _attempt<T>(
+    String what,
+    Future<T?> Function() ask, {
+    bool timeout = true,
+  }) async {
+    try {
+      final f = ask();
+      return (
+        value: await (timeout ? f.timeout(const Duration(seconds: 25)) : f),
+        failed: false,
+      );
+    } on DioException catch (e, st) {
+      if (CancelToken.isCancel(e)) rethrow;
+      AppLog.w('completion: $what failed', e, st);
+    } on Object catch (e, st) {
+      AppLog.w('completion: $what failed', e, st);
+    }
+    return (value: null, failed: true);
   }
 
   /// Writes only [fields]; `userEdited` tracks keep title/artist/album.
@@ -347,6 +577,18 @@ class EnrichmentService {
     if (t.userEdited) {
       f.removeAll({EnrichField.title, EnrichField.artist, EnrichField.album});
     }
+    var (found, key) = await _writeFields(t, p, f);
+    if (f.contains(EnrichField.cover) && p.coverUrl != null) {
+      found = await _applyCover(t.id, key, p.coverUrl!, replaceCover, cancel) ||
+          found;
+    }
+    return found;
+  }
+
+  /// The `tracks` row of [apply] (and of [completeOne]) for [f], without the
+  /// cover. Returns whether something was found and the album key.
+  Future<(bool, String)> _writeFields(
+      Track t, EnrichmentProposal p, Set<EnrichField> f) async {
     final m = p.meta;
     final title = f.contains(EnrichField.title) ? m?.title : null;
     final artist = f.contains(EnrichField.artist) ? m?.artist : null;
@@ -362,7 +604,7 @@ class EnrichmentService {
             album: newAlbum,
             directory: _dirOf(t.path))
         : t.albumKey;
-    var found = m != null || (p.lyrics != null && !p.lyrics!.isEmpty) ||
+    final found = m != null || (p.lyrics != null && !p.lyrics!.isEmpty) ||
         p.curiosity != null;
     await (db.update(db.tracks)..where((r) => r.id.equals(t.id))).write(
       TracksCompanion(
@@ -400,11 +642,7 @@ class EnrichmentService {
         enrichStatus: Value(found ? 1 : 2),
       ),
     );
-    if (f.contains(EnrichField.cover) && p.coverUrl != null) {
-      found = await _applyCover(t.id, key, p.coverUrl!, replaceCover, cancel) ||
-          found;
-    }
-    return found;
+    return (found, key);
   }
 
   Future<bool> _applyCover(int trackId, String albumKey, String url,

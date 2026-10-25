@@ -5,7 +5,6 @@ import '../../../core/app_log.dart';
 import '../../../data/db/app_database.dart' show Track;
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/credits_providers.dart';
-import '../../../providers/curiosity_provider.dart';
 import '../../../providers/online_providers.dart';
 import '../../../providers/settings_providers.dart';
 import '../../../services/online/enrichment_service.dart';
@@ -35,10 +34,9 @@ class _CreditsCardState extends ConsumerState<CreditsCard> {
     try {
       final out = await ref.read(enrichmentServiceProvider).completeOne(t.id, {
         EnrichPart.credits,
+        EnrichPart.curio, // the switch is for the automatic search only
       }, force: true);
       failed = out[EnrichPart.credits] == PartOutcome.failed;
-      // Today's curiosity search; phase 52 moves it into completeOne.
-      await ref.read(curiosityProvider(t.id).notifier).fetch(t);
     } on Object catch (e, st) {
       AppLog.w('credits refresh failed', e, st);
       failed = true;

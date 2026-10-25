@@ -1,0 +1,322 @@
+import 'package:codecore/core/clock.dart';
+import 'package:codecore/data/db/app_database.dart';
+import 'package:codecore/services/online/curiosity_finder.dart';
+import 'package:codecore/services/online/enrichment_service.dart';
+import 'package:codecore/services/online/http_client.dart';
+import 'package:codecore/services/online/lrclib_client.dart';
+import 'package:drift/drift.dart' show Value;
+import 'package:flutter_test/flutter_test.dart';
+
+import '../../support/enrich_fakes.dart';
+
+const _all = {
+  EnrichPart.meta,
+  EnrichPart.lyrics,
+  EnrichPart.synced,
+  EnrichPart.curio,
+  EnrichPart.credits,
+};
+
+void main() {
+  late EnrichRig r;
+
+  setUp(() => r = EnrichRig());
+  tearDown(() => r.dispose());
+
+  Future<void> markUserLyrics(int id) => r.db
+      .into(r.db.trackEnrich)
+      .insert(
+        TrackEnrichCompanion(
+          trackId: Value(id),
+          lyricsByUser: const Value(true),
+        ),
+      );
+
+  group('guards', () {
+    test('lyrics chosen by hand: no lyrics client is called, not even for the synced one', () async {
+      final id = await r.add(plain: 'mine');
+      await markUserLyrics(id);
+      final out = await r.svc.completeOne(id, {
+        EnrichPart.lyrics,
+        EnrichPart.synced,
+      });
+      expect(r.chain.calls, 0);
+      expect(out, {
+        EnrichPart.lyrics: PartOutcome.skipped,
+        EnrichPart.synced: PartOutcome.skipped,
+      });
+      expect((await r.repo.getById(id))!.lyricsPlain, 'mine');
+    });
+
+    test(
+      'userEdited: title, artist and album stay, the empty year is filled',
+      () async {
+        final id = await r.add(userEdited: true);
+        await r.svc.completeOne(id, {EnrichPart.meta});
+        final t = (await r.repo.getById(id))!;
+        expect([t.title, t.artist, t.album], ['Song', 'Band', null]);
+        expect(t.year, 2019);
+      },
+    );
+
+    test('cover_source > 0: no cover is fetched or written', () async {
+      final id = await r.add(coverSource: 2);
+      await r.svc.completeOne(id, {EnrichPart.meta});
+      expect(r.web.bytes, 0);
+      expect((await r.repo.getById(id))!.hasCover, isFalse);
+    });
+
+    test(
+      'an empty cover is filled when no hand-made one protects it',
+      () async {
+        final id = await r.add();
+        await r.svc.completeOne(id, {EnrichPart.meta});
+        expect((await r.repo.getById(id))!.hasCover, isTrue);
+      },
+    );
+
+    test('a genre already there is not replaced', () async {
+      final id = await r.add(genre: 'Jazz');
+      await r.svc.completeOne(id, {EnrichPart.meta});
+      final t = (await r.repo.getById(id))!;
+      expect(t.genre, 'Jazz');
+      expect(t.album, 'New Album');
+    });
+  });
+
+  group('state per part', () {
+    int? none(TrackEnrichData? e, EnrichPart p) => switch (p) {
+      EnrichPart.meta => e?.metaNoneAt,
+      EnrichPart.lyrics => e?.lyricsNoneAt,
+      EnrichPart.synced => e?.syncedNoneAt,
+      EnrichPart.curio => e?.curioNoneAt,
+      EnrichPart.credits => e?.creditsNoneAt,
+    };
+
+    test(
+      'a network error leaves no «nothing» mark, an empty answer does',
+      () async {
+        final id = await r.add();
+        r.web.itunes = ItunesMode.down;
+        r.chain.failed = true;
+        final bad = await r.svc.completeOne(id, {
+          EnrichPart.meta,
+          EnrichPart.lyrics,
+        });
+        expect(bad, {
+          EnrichPart.meta: PartOutcome.failed,
+          EnrichPart.lyrics: PartOutcome.failed,
+        });
+        expect(await r.enrichOf(id), isNull);
+
+        r.web.itunes = ItunesMode.empty;
+        r.chain
+          ..failed = false
+          ..result = null;
+        final empty = await r.svc.completeOne(id, {
+          EnrichPart.meta,
+          EnrichPart.lyrics,
+        });
+        expect(empty, {
+          EnrichPart.meta: PartOutcome.none,
+          EnrichPart.lyrics: PartOutcome.none,
+        });
+        final e = await r.enrichOf(id);
+        expect(none(e, EnrichPart.meta), closeTo(nowMs(), 60000));
+        expect(none(e, EnrichPart.lyrics), closeTo(nowMs(), 60000));
+        expect(
+          e!.syncedNoneAt,
+          isNull,
+          reason: 'no plain text: nothing to synchronise',
+        );
+      },
+    );
+
+    test('a recent «nothing» is not asked again, force asks, found clears the mark', () async {
+      final id = await r.add();
+      r.web.itunes = ItunesMode.empty;
+      await r.svc.completeOne(id, {EnrichPart.meta});
+      final asked = r.web.count('itunes');
+      expect(await r.svc.completeOne(id, {EnrichPart.meta}), {
+        EnrichPart.meta: PartOutcome.skipped,
+      });
+      expect(r.web.count('itunes'), asked);
+
+      r.web.itunes = ItunesMode.match;
+      final out = await r.svc.completeOne(id, {EnrichPart.meta}, force: true);
+      expect(out, {EnrichPart.meta: PartOutcome.found});
+      expect((await r.enrichOf(id))!.metaNoneAt, isNull);
+      expect((await r.repo.getById(id))!.album, 'New Album');
+    });
+
+    test('a «nothing» older than 30 days is asked again', () async {
+      final id = await r.add();
+      final old = DateTime.now()
+          .subtract(const Duration(days: 31))
+          .millisecondsSinceEpoch;
+      await r.db
+          .into(r.db.trackEnrich)
+          .insert(
+            TrackEnrichCompanion(trackId: Value(id), metaNoneAt: Value(old)),
+          );
+      expect(await r.svc.completeOne(id, {EnrichPart.meta}), {
+        EnrichPart.meta: PartOutcome.found,
+      });
+      expect((await r.enrichOf(id))!.metaNoneAt, isNull);
+    });
+
+    test(
+      'plain lyrics only: the synced part is asked and, with nothing, marked',
+      () async {
+        final id = await r.add(plain: 'words');
+        r.chain.result = const LyricsResult(plain: 'words');
+        final out = await r.svc.completeOne(id, {
+          EnrichPart.lyrics,
+          EnrichPart.synced,
+        });
+        expect(out, {
+          EnrichPart.lyrics: PartOutcome.skipped,
+          EnrichPart.synced: PartOutcome.none,
+        });
+        expect((await r.enrichOf(id))!.syncedNoneAt, isNotNull);
+        expect((await r.repo.getById(id))!.lyricsPlain, 'words');
+
+        r.chain.result = const LyricsResult(
+          plain: 'other',
+          synced: '[00:01.00]words',
+        );
+        expect(await r.svc.completeOne(id, {EnrichPart.synced}, force: true), {
+          EnrichPart.synced: PartOutcome.found,
+        });
+        final t = (await r.repo.getById(id))!;
+        expect([t.lyricsPlain, t.lyricsSynced], ['words', '[00:01.00]words']);
+      },
+    );
+
+    test(
+      'plain lyrics found while NetEase errored: text saved, no synced mark',
+      () async {
+        final id = await r.add();
+        r.chain
+          ..result = const LyricsResult(plain: 'words')
+          ..syncedFailed = true;
+        final out = await r.svc.completeOne(id, {
+          EnrichPart.lyrics,
+          EnrichPart.synced,
+        });
+        expect(out, {
+          EnrichPart.lyrics: PartOutcome.found,
+          EnrichPart.synced: PartOutcome.failed,
+        });
+        expect((await r.repo.getById(id))!.lyricsPlain, 'words');
+        expect((await r.enrichOf(id))!.syncedNoneAt, isNull);
+      },
+    );
+
+    test('force redoes the curiosities over a text already there; without force it does not', () async {
+      final id = await r.add(curiosities: 'old\nhttps://x');
+      expect(await r.svc.completeOne(id, {EnrichPart.curio}), {
+        EnrichPart.curio: PartOutcome.skipped,
+      });
+      expect(r.finder.calls, 0);
+      expect(await r.svc.completeOne(id, {EnrichPart.curio}, force: true), {
+        EnrichPart.curio: PartOutcome.found,
+      });
+      expect(r.finder.calls, 1);
+      expect((await r.repo.getById(id))!.curiosities, startsWith('A story'));
+    });
+
+    test(
+      'metadata: nothing found → status 2; a filled field → status 1',
+      () async {
+        final id = await r.add();
+        r.web.itunes = ItunesMode.empty;
+        await r.svc.completeOne(id, {EnrichPart.meta});
+        expect((await r.repo.getById(id))!.enrichStatus, 2);
+        r.web.itunes = ItunesMode.match;
+        await r.svc.completeOne(id, {EnrichPart.meta}, force: true);
+        expect((await r.repo.getById(id))!.enrichStatus, 1);
+      },
+    );
+
+    test('a match that fills nothing empty is «nothing», with its mark and status 2', () async {
+      final id = await r.add(
+        album: 'Mine',
+        genre: 'Jazz',
+        year: 1999,
+        trackNumber: 1,
+        coverSource: 1,
+      );
+      final out = await r.svc.completeOne(id, {EnrichPart.meta});
+      expect(out, {EnrichPart.meta: PartOutcome.none});
+      expect((await r.enrichOf(id))!.metaNoneAt, isNotNull);
+      final t = (await r.repo.getById(id))!;
+      expect(
+        [t.album, t.genre, t.year, t.enrichStatus],
+        ['Mine', 'Jazz', 1999, 2],
+      );
+    });
+
+    test('Deezer on but resting or unreachable: the metadata part failed, not «nothing»', () async {
+      final id = await r.add();
+      r.deezerMeta = true;
+      r.web.deezerDown = true;
+      expect(await r.svc.completeOne(id, {EnrichPart.meta}), {
+        EnrichPart.meta: PartOutcome.failed,
+      });
+      expect(await r.enrichOf(id), isNull);
+    });
+
+    test(
+      'lyrics saved by the user while the sources were asked are not replaced',
+      () async {
+        final id = await r.add();
+        r.chain.during = () =>
+            r.repo.setLyrics(id, plain: 'mine', byUser: true);
+        await r.svc.completeOne(id, {EnrichPart.lyrics, EnrichPart.synced});
+        final t = (await r.repo.getById(id))!;
+        expect([t.lyricsPlain, t.lyricsSynced], ['mine', null]);
+      },
+    );
+
+    test('a refused curiosity search leaves no mark; an empty page marks, even with a bio', () async {
+      final id = await r.add();
+      r.finder.pair = CuriosityPair(songError: const RateLimitedException(429));
+      expect(await r.svc.completeOne(id, {EnrichPart.curio}), {
+        EnrichPart.curio: PartOutcome.failed,
+      });
+      expect(await r.enrichOf(id), isNull);
+
+      r.finder.pair = const CuriosityPair();
+      expect(await r.svc.completeOne(id, {EnrichPart.curio}), {
+        EnrichPart.curio: PartOutcome.none,
+      });
+      expect((await r.enrichOf(id))!.curioNoneAt, isNotNull);
+    });
+
+    test(
+      'every part found: columns, credits and marks are all written',
+      () async {
+        final id = await r.add();
+        final out = await r.svc.completeOne(id, _all);
+        expect(out, {for (final p in _all) p: PartOutcome.found});
+        final t = (await r.repo.getById(id))!;
+        expect(
+          [t.album, t.lyricsPlain, t.lyricsSynced],
+          ['New Album', 'la la', '[00:01.00]la la'],
+        );
+        expect(t.curiosities, isNotNull);
+        expect(await r.credits.creditsOf(id), isNotEmpty);
+        final e = (await r.enrichOf(id))!;
+        expect([
+          e.metaNoneAt,
+          e.lyricsNoneAt,
+          e.syncedNoneAt,
+          e.curioNoneAt,
+          e.creditsNoneAt,
+        ], everyElement(isNull));
+        expect(e.details, isNotNull);
+      },
+    );
+  });
+}

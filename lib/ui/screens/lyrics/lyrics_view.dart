@@ -11,7 +11,6 @@ import '../../../providers/translation_providers.dart';
 import '../../../services/online/http_client.dart';
 import '../../../services/online/lrc_parser.dart';
 import '../../../services/online/lrclib_client.dart';
-import '../../../services/online/query_cleaner.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/show_msg.dart';
 
@@ -109,30 +108,24 @@ class _LyricsViewState extends ConsumerState<LyricsView> {
     final l = context.l10n;
     setState(() => _searching = true);
     LyricsResult? found;
-    var limited = false;
+    var unavailable = false;
     try {
-      final c = cleanSearchQuery(t.title, t.artist ?? '');
-      found = await ref
-          .read(lrclibClientProvider)
-          .find(
-            title: c.title,
-            artist: c.artist,
-            album: t.album,
-            durationSec: t.durationMs > 0
-                ? (t.durationMs / 1000).round()
-                : null,
-          );
+      final r = await ref.read(lyricsChainProvider).find(t);
+      found = r.lyrics;
+      unavailable = r.failed;
     } on RateLimitedException {
-      limited = true;
+      unavailable = true;
+    } finally {
+      if (mounted) setState(() => _searching = false);
     }
     if (!mounted) return;
-    setState(() => _searching = false);
     if (found == null) {
-      showMsg(context, limited ? l.serviceUnavailable : l.lyricsNotFound);
+      showMsg(context, unavailable ? l.serviceUnavailable : l.lyricsNotFound);
       return;
     }
     final result = found;
-    await ref.read(trackOpsProvider).setLyrics(t.id, plain: result.plain, synced: result.synced);
+    // The user asked for this text: the automatic searches never replace it.
+    await ref.read(trackOpsProvider).setLyrics(t.id, plain: result.plain, synced: result.synced, byUser: true);
   }
 
   @override

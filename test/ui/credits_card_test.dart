@@ -41,6 +41,7 @@ class _Service extends Fake implements EnrichmentService {
   final Future<PartOutcome> Function(CreditsRepository) onAsk;
   var asked = 0;
   bool? lastForce;
+  Set<EnrichPart>? lastParts;
 
   @override
   Future<Map<EnrichPart, PartOutcome>> completeOne(
@@ -51,6 +52,7 @@ class _Service extends Fake implements EnrichmentService {
   }) async {
     asked++;
     lastForce = force;
+    lastParts = parts;
     return {EnrichPart.credits: await onAsk(repo)};
   }
 }
@@ -212,6 +214,18 @@ void main() {
       expect(_service.asked, 1);
       expect(_service.lastForce, isTrue);
       expect(find.text('Person 0'), findsOneWidget);
+      await h.dispose(tester);
+    },
+  );
+
+  testWidgets(
+    'refresh is a manual command: it redoes the curiosities whatever the automatic switch says',
+    (tester) async {
+      await open(tester, credits: 1, setting: true);
+      await tester.tap(find.text('Aggiorna'));
+      await _settle(tester);
+      expect(_service.lastParts, {EnrichPart.credits, EnrichPart.curio});
+      expect(_service.lastForce, isTrue);
       await h.dispose(tester);
     },
   );

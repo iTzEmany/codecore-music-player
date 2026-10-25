@@ -15,12 +15,15 @@ const retryNoneAfter = Duration(days: 30);
 /// searched, or searched with an empty answer more than 30 days ago.
 /// [hasCredits] says whether `track_credits` has rows for the track.
 /// `synced` is due only with a plain text the user did not write and no synced one.
+/// [force] ignores a recent «searched, nothing» mark (the part must still be
+/// empty, except `curio`, which a refresh redoes over a full column).
 bool isDue(
   EnrichPart part,
   Track track,
   TrackEnrichData? enrich,
   DateTime now, {
   bool hasCredits = false,
+  bool force = false,
 }) {
   final byUser = enrich?.lyricsByUser ?? false;
   final (empty, noneAt) = switch (part) {
@@ -40,11 +43,13 @@ bool isDue(
       !byUser && track.lyricsPlain != null && track.lyricsSynced == null,
       enrich?.syncedNoneAt,
     ),
-    EnrichPart.curio => (track.curiosities == null, enrich?.curioNoneAt),
+    // A refresh replaces the curiosities, so force asks over a full column too.
+    EnrichPart.curio => (force || track.curiosities == null, enrich?.curioNoneAt),
     EnrichPart.credits => (!hasCredits, enrich?.creditsNoneAt),
   };
   if (!empty) return false;
-  return noneAt == null ||
+  return force ||
+      noneAt == null ||
       now.difference(DateTime.fromMillisecondsSinceEpoch(noneAt)) >
           retryNoneAfter;
 }

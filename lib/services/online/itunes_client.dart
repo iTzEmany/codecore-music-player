@@ -63,8 +63,10 @@ class ItunesClient {
     return out;
   }
 
+  /// [strict]: a network error throws [WebUnavailableException] instead of
+  /// looking like «no match» (the completion must not remember that as «nothing»).
   Future<ItunesMatch?> search(String title, String artist,
-      {CancelToken? cancel}) async {
+      {CancelToken? cancel, bool strict = false}) async {
     for (final q in buildQueries(title, artist)) {
       final data = await _web.getJson(_endpoint,
           query: {
@@ -74,7 +76,8 @@ class ItunesClient {
             'limit': '8',
             ..._store(),
           },
-          cancel: cancel);
+          cancel: cancel,
+          strict: strict);
       final results = data is Map ? data['results'] : null;
       if (results is! List) continue;
       final best = _pickBest(results, title, artist);

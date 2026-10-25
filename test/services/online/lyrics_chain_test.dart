@@ -156,6 +156,21 @@ void main() {
     expect(r.failed, isFalse);
   });
 
+  test('LRCLIB plain and NetEase in error: the text is there, the synced one is unknown', () async {
+    final chain = LyricsChain(
+      lrclib: _Lrclib(_plain),
+      netease: _Ne(null, error: StateError('x')),
+    );
+    final r = await chain.find(_track());
+    expect(r.lyrics!.plain, 'a');
+    expect([r.failed, r.syncedFailed], [false, true]);
+    final empty = await LyricsChain(
+      lrclib: _Lrclib(_plain),
+      netease: _Ne(null),
+    ).find(_track());
+    expect(empty.syncedFailed, isFalse);
+  });
+
   test('a source errors and nothing is found: failed; an error with text found elsewhere is not', () async {
     final bad = LyricsChain(
       lrclib: _Lrclib(null),

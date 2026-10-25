@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show ProviderListenable;
 
 import '../data/repositories/credits_repository.dart';
+import '../data/settings/settings_store.dart' show AppSettings;
 import '../services/online/enrichment_service.dart';
 import '../services/online/http_client.dart';
 import '../services/online/itunes_client.dart';
@@ -26,6 +27,7 @@ import '../services/library/track_file_sync.dart';
 import '../services/tags/tag_writer.dart';
 import '../services/online/wikipedia_client.dart';
 import '../services/online/ytm_artist_resolver.dart';
+import 'curiosity_provider.dart' show curiosityServiceProvider;
 import 'ytm_catalog_providers.dart';
 import 'database_providers.dart';
 import 'library_providers.dart';
@@ -126,6 +128,8 @@ final enrichmentServiceProvider = Provider<EnrichmentService>((ref) {
     creditsRepo: ref.watch(creditsRepositoryProvider),
     useCredits: () => ref.read(settingsProvider).creditsDetails,
     lrclib: ref.watch(lrclibClientProvider),
+    lyricsChain: ref.watch(lyricsChainProvider),
+    curiosities: ref.watch(curiosityServiceProvider),
     wikipedia: ref.watch(wikipediaClientProvider),
     web: web,
     language: () => ref.read(settingsProvider).language,
@@ -204,22 +208,25 @@ final enrichJobProvider = NotifierProvider<EnrichJobNotifier, EnrichJobState>(
   EnrichJobNotifier.new,
 );
 
-/// Downloaded songs get their lyrics and missing tags here, one at a time and
-/// without a line in the Activity centre (the batch job is for the user's
-/// own «Arricchisci»).
+/// The parts the switches turn on for a song that has just arrived.
+Set<EnrichPart> autoParts(AppSettings s) => {
+  if (s.autoEnrich) EnrichPart.meta,
+  if (s.autoLyrics) ...[EnrichPart.lyrics, EnrichPart.synced],
+  if (s.autoCuriosities) EnrichPart.curio,
+  if (s.creditsDetails) EnrichPart.credits,
+};
+
+/// Downloaded songs get every part that is on (tags, lyrics, curiosities,
+/// credits) here, one at a time and without a line in the Activity centre
+/// (the batch job is for the user's own «Arricchisci»).
 final downloadEnricherProvider = Provider<QuietEnricher>((ref) {
   final enricher = QuietEnricher(
     onDone: (id) => ref.read(downloadTaggerProvider).tag(id),
-    enabled: () {
-      final s = ref.read(settingsProvider);
-      return s.autoEnrich || s.autoLyrics;
-    },
-    enrich: (id) {
-      final s = ref.read(settingsProvider);
-      return ref
-          .read(enrichmentServiceProvider)
-          .enrichMany([id], includeLyrics: s.autoLyrics, includeMetadata: s.autoEnrich)
-          .drain<void>();
+    enabled: () => autoParts(ref.read(settingsProvider)).isNotEmpty,
+    enrich: (id) async {
+      final service = ref.read(enrichmentServiceProvider);
+      await service.limiter.wait();
+      await service.completeOne(id, autoParts(ref.read(settingsProvider)));
     },
   );
   ref.onDispose(enricher.dispose);
@@ -264,8 +271,7 @@ final downloadTaggerProvider = Provider<DownloadTagger>((ref) {
 /// write its tags now when enrichment is off.
 void afterDownload(Ref ref, int trackId) {
   try {
-    final s = ref.read(settingsProvider);
-    if (s.autoEnrich || s.autoLyrics) {
+    if (autoParts(ref.read(settingsProvider)).isNotEmpty) {
       ref.read(downloadEnricherProvider).add(trackId);
     } else {
       unawaited(ref.read(downloadTaggerProvider).tag(trackId));

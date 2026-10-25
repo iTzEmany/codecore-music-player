@@ -9,12 +9,15 @@ import 'netease_lyrics_client.dart';
 import 'query_cleaner.dart';
 
 class LyricsChainResult {
-  const LyricsChainResult({this.lyrics, this.failed = false, this.source});
+  const LyricsChainResult({this.lyrics, this.failed = false, this.syncedFailed = false, this.source});
 
   final LyricsResult? lyrics;
 
   /// A fallback source errored and there is no text, so «nothing found» must not be remembered.
   final bool failed;
+
+  /// LRCLIB or NetEase errored, so a missing synchronised text may only be unknown (even when plain text was found).
+  final bool syncedFailed;
 
   /// Which source gave the text: 'lrclib', 'netease' or 'lyricsovh'.
   final String? source;
@@ -80,6 +83,7 @@ class LyricsChain {
         source = 'netease';
       }
     }
+    final syncedFailed = failed; // lyrics.ovh never gives a synced text
     final o = ovh;
     if (!_has(plain) && !_has(synced) && o != null) {
       final r = await fallback(
@@ -92,7 +96,7 @@ class LyricsChain {
     }
     final out = LyricsResult(plain: plain, synced: synced);
     return out.isEmpty
-        ? LyricsChainResult(failed: failed)
-        : LyricsChainResult(lyrics: out, source: source);
+        ? LyricsChainResult(failed: failed, syncedFailed: syncedFailed)
+        : LyricsChainResult(lyrics: out, syncedFailed: syncedFailed, source: source);
   }
 }
