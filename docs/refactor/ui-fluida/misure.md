@@ -209,3 +209,26 @@ Stesso telefono e stesso comando (`--playback`). Tolleranza: un frame per scenar
 
 - «Fogli» resta sopra «Finale» in quattro giri. Per i brani della libreria la fase 46 non aggiunge lavoro né al player né ai fogli (lo spinner compare solo in caricamento, `SwipeToQueue` è lo stesso widget spostato). Il dato non è del tutto confrontabile: con i brani da 1 s in riproduzione uiautomator spesso non trova lo stato «idle», e `perf_device.py` ora rilegge lo schermo in pausa e poi riprende (vedi `docs/gotchas.md`). Resta aperto come seguito: misurare `master` con lo stesso script.
 - Report: `build/perf/streaming-46.md`, `streaming-46-only.md`, `streaming-46-fogli.md`, `streaming-46-fogli2.md`.
+
+## Base 30 s (1c5348a) contro la fase 47 (`base30-1c5348a`, `jam-47`, 25/10)
+
+Dalla fase 47 `perf_device.py` usa brani di prova da 30 s (con quelli da 1 s uiautomator non trovava lo stato «idle»): le misure precedenti non sono confrontabili una a una. Nuova base: l'APK di `master` dopo la fase 45 (`1c5348a`) con lo stesso script; poi giri alternati base/ramo sugli scenari dubbi (`rep-*`, `--only`, `--runs 1`).
+
+| Scenario | Base 30 s | Fase 47 | Ripetuti base | Ripetuti fase 47 | ok |
+|---|---|---|---|---|---|
+| Pallino schede | 4,3 % | 5,7 % | 3,9 · 2,2 % | 4,7 · 2,9 % | sì (rumore) |
+| Tutti i brani | 1,4 % | 5,9 % | 0,8 · 1,7 % | 6,7 · 0,8 % | sì (rumore: build p50 1 ms, picchi di raster) |
+| Album | 0,8 % | 0,8 % | — | — | sì |
+| Ricerca «notte» | 5,2 % | 3,0 % | — | — | sì |
+| Apri album | 4,1 % | 6,0 % | — | — | sì (67 frame: 1 frame = 1,5 %) |
+| In riproduzione | 1,6 % | 2,7 % | 2,1 · 2,2 % | 2,1 · 1,6 % | sì |
+| Lettore dal dock | 2,6 % | 2,4 % | — | — | sì |
+| Swipe mini player | 2,9 % | 3,3 % | 2,1 · 1,7 % | 2,3 · 2,9 % | sì |
+| Fogli | 3,5 % | 3,6 % | — | — | sì |
+| Apertura player | 1,7 % | 4,5 % | 2,8 · 4,5 % | 4,8 · 3,6 % | sì (rumore) |
+| Anello | 1,7 % | 0,4 % | — | — | sì |
+| Avvio a freddo | 2756 ms | 2697 ms | — | — | sì |
+| PSS | 231 MB | 228 MB | — | — | sì |
+
+- Il divario di «Fogli» della fase 46 era un artefatto dei brani da 1 s: con quelli da 30 s base e ramo sono pari.
+- Gli scenari sopra un frame al primo giro rientrano negli intervalli della base nei giri alternati: nessuna regressione della fase 47.
