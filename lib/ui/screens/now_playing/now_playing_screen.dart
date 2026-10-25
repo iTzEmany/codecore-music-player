@@ -1,6 +1,8 @@
 import '../../widgets/track_kind.dart';
 import '../../../core/platform.dart';
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../car/car_mode_screen.dart';
@@ -13,6 +15,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../services/radio/radio_station.dart' show RadioStation;
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/player_providers.dart';
+import '../../../services/online/youtube_service.dart' show YtResult;
 import '../../shell/shell_nav.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/track_art.dart';
@@ -48,6 +51,32 @@ String? playContextName(AppLocalizations l, PlayContext? c) {
     PlayContextKind.library => l.allTracks,
     PlayContextKind.search => l.playContextSearch,
   };
+}
+
+/// Opens the player on top of everything, as the desktop bar does.
+Future<void> _openPlayer(BuildContext context) =>
+    Navigator.of(context, rootNavigator: true).push(
+      MaterialPageRoute<void>(builder: (_) => const NowPlayingScreen()),
+    );
+
+/// Tap on an online result (rows and album call this): starts it and opens the
+/// player at once, in loading (R-02). The route is pushed before the load ends.
+Future<void> playOnlineAndOpen(BuildContext context, WidgetRef ref, YtResult r) =>
+    _playAndOpen(context, ref.read(playerControllerProvider).playOnline(r));
+
+Future<void> playOnlineListAndOpen(
+  BuildContext context,
+  WidgetRef ref,
+  List<YtResult> list, {
+  bool shuffle = false,
+}) => _playAndOpen(
+  context,
+  ref.read(playerControllerProvider).playOnlineList(list, shuffle: shuffle),
+);
+
+Future<void> _playAndOpen(BuildContext context, Future<void> playing) {
+  if (context.mounted) unawaited(_openPlayer(context));
+  return playing;
 }
 
 class NowPlayingScreen extends ConsumerStatefulWidget {
@@ -398,6 +427,7 @@ class _PlayerCover extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ctrl = ref.read(playerControllerProvider);
+    final loading = ref.watch(streamLoadingProvider).value ?? false;
     return Expanded(
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
@@ -419,15 +449,29 @@ class _PlayerCover extends ConsumerWidget {
                 stroke: stroke,
                 seekable: true,
                 live: radio != null,
-                child: SpinWhilePlaying(
-                  trackKey: track.id,
-                  child: TrackArt(
-                    track: track,
-                    size: inner,
-                    radius: inner / 2,
-                    semanticLabel: track.album ?? track.title,
-                    heroTag: coverHeroTagFor(MediaQuery.sizeOf(context).width),
-                  ),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    SpinWhilePlaying(
+                      trackKey: track.id,
+                      child: TrackArt(
+                        track: track,
+                        size: inner,
+                        radius: inner / 2,
+                        semanticLabel: track.album ?? track.title,
+                        heroTag: coverHeroTagFor(MediaQuery.sizeOf(context).width),
+                      ),
+                    ),
+                    // The thumbnail stays (R-02); the ring turns over it.
+                    if (loading)
+                      SizedBox.square(
+                        dimension: inner,
+                        child: CircularProgressIndicator(
+                          key: const ValueKey('np-cover-loading'),
+                          semanticsLabel: context.l10n.playerLoading,
+                        ),
+                      ),
+                  ],
                 ),
               ),
             );

@@ -329,7 +329,6 @@
   "ytHint": "Cerca o incolla un link",
   "ytDownload": "Scarica",
   "listenAction": "Ascolta",
-  "listenResolving": "Preparo l'ascolto…",
   "ytAlreadyInLibrary": "Già in libreria",
   "ytNoResults": "Nessun risultato",
   "ytQueued": "In coda",
@@ -3420,5 +3419,6 @@
   },
   "streamCacheClear": "Svuota",
   "streamCacheCleared": "Cache dello streaming svuotata",
-  "streamCacheClearFailed": "Impossibile svuotare la cache dello streaming"
+  "streamCacheClearFailed": "Impossibile svuotare la cache dello streaming",
+  "playerLoading": "Caricamento…"
 }

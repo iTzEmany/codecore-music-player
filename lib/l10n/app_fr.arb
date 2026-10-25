@@ -305,7 +305,6 @@
   "ytHint": "Rechercher ou coller un lien",
   "ytDownload": "Télécharger",
   "listenAction": "Écouter",
-  "listenResolving": "Préparation…",
   "ytAlreadyInLibrary": "Déjà dans la bibliothèque",
   "ytNoResults": "Aucun résultat",
   "ytQueued": "En attente",
@@ -3118,5 +3117,6 @@
   },
   "streamCacheClear": "Vider",
   "streamCacheCleared": "Cache du streaming vidé",
-  "streamCacheClearFailed": "Impossible de vider le cache du streaming"
+  "streamCacheClearFailed": "Impossible de vider le cache du streaming",
+  "playerLoading": "Chargement…"
 }

@@ -374,6 +374,11 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     final start = (startAt != null && startAt > Duration.zero)
         ? startAt
         : (isOnline || streamKey != null ? null : resumeStartFor(track.resumePositionMs));
+    // Before the item goes out: «Caricamento…» only while waiting for the file (no awaits up to the stream branch).
+    if (streamKey != null) {
+      _waitingStream = true;
+      _playWhenReady = play;
+    }
     _enterTrack(track);
     final synced = _syncPreparer();
     unawaited(synced);
@@ -682,7 +687,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
       return MediaItem(
         id: 'online:${entry.result.id}',
         title: t.title,
-        artist: t.artist,
+        artist: loadingStream ? loadingLabel() : t.artist,
         album: t.album,
         duration: _duration,
         artUri: thumb == null ? null : Uri.tryParse(googleThumbAt(thumb, 544)),
@@ -693,7 +698,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     return MediaItem(
       id: '${t.id}',
       title: t.title,
-      artist: t.artist,
+      artist: loadingStream ? loadingLabel() : t.artist,
       album: t.album,
       duration: _duration,
       artUri: cover == null ? null : Uri.file(cover),
@@ -938,8 +943,20 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     }
   }
 
+  /// The notification subtitle while a stream loads (the app sets the localized text).
+  String Function() loadingLabel = () => 'Caricamento…';
+
+  bool _loadingStream = false;
+
+  /// A stream (not a radio) waits for its file: the UI shows a spinner (R-02).
+  bool get loadingStream => _waitingStream && !isRadio;
+
   void _publish(AudioProcessingState processing) {
     if (_remote != null) return; // the Jam owns the notification
+    final cur = _current;
+    final loadingNow = loadingStream;
+    final loadingChanged = loadingNow != _loadingStream;
+    _loadingStream = loadingNow;
     final playing = _state == BackendState.playing;
     final live = isRadio;
     playbackState.add(PlaybackState(
@@ -964,6 +981,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
         PlayRepeat.one => AudioServiceRepeatMode.one,
       },
     ));
+    if (loadingChanged && cur != null) mediaItem.add(_toMediaItem(cur));
   }
 
   Future<void> togglePlayPause() async {

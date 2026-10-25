@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
+import 'l10n/app_localizations.dart' show lookupAppLocalizations;
 import 'package:flutter/foundation.dart' show LicenseEntryWithLineBreaks, LicenseRegistry;
 import 'package:flutter/services.dart' show DeviceOrientation, MethodChannel, SystemChrome, rootBundle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -165,6 +166,8 @@ Future<void> main() async {
     labels: BrowseLabels.forLanguage(settingsStore.readSettings().language),
     coverUri: (k) => covers.fileFor(k)?.uri,
   );
+  handler.loadingLabel = () =>
+      lookupAppLocalizations(Locale(settingsStore.readSettings().language)).playerLoading;
   // Home-screen widget and quick tile (Android): fed from here, not from the
   // UI, because the player outlives the activity.
   if (Platform.isAndroid) {

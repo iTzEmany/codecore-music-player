@@ -230,7 +230,6 @@
   "ytHint": "Search or paste a link",
   "ytDownload": "Download",
   "listenAction": "Listen",
-  "listenResolving": "Getting it ready…",
   "ytAlreadyInLibrary": "Already in library",
   "ytNoResults": "No results",
   "ytQueued": "Queued",
@@ -2874,5 +2873,6 @@
   },
   "streamCacheClear": "Clear",
   "streamCacheCleared": "Streaming cache cleared",
-  "streamCacheClearFailed": "Could not clear the streaming cache"
+  "streamCacheClearFailed": "Could not clear the streaming cache",
+  "playerLoading": "Loading…"
 }

@@ -110,6 +110,7 @@ class NpControls extends ConsumerWidget {
     final l = context.l10n;
     final cc = context.cc;
     final playing = ref.watch(isPlayingProvider).value ?? false;
+    final loading = ref.watch(streamLoadingProvider).value ?? false;
     final repeat = ref.watch(repeatProvider).value ?? PlayRepeat.off;
     final ctrl = ref.read(playerControllerProvider);
     final repeatOn = repeat != PlayRepeat.off;
@@ -123,11 +124,23 @@ class NpControls extends ConsumerWidget {
           onPressed: ctrl.previous,
           icon: const Icon(Icons.skip_previous_rounded),
         ),
-        PlayCircleButton(
-          size: 64,
-          playing: playing,
-          onPressed: ctrl.togglePlayPause,
-        ),
+        if (loading)
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: SizedBox.square(
+              dimension: 40,
+              child: CircularProgressIndicator(
+                key: const ValueKey('np-controls-loading'),
+                semanticsLabel: l.playerLoading,
+              ),
+            ),
+          )
+        else
+          PlayCircleButton(
+            size: 64,
+            playing: playing,
+            onPressed: ctrl.togglePlayPause,
+          ),
         IconButton(
           tooltip: l.nextTrack,
           iconSize: 36,

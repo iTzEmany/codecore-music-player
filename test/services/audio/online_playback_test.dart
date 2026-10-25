@@ -12,6 +12,7 @@ import 'package:codecore/services/audio/codecore_audio_handler.dart';
 import 'package:codecore/services/audio/online_entries.dart';
 import 'package:codecore/services/audio/play_queue.dart';
 import 'package:codecore/services/online/youtube_service.dart';
+import 'package:codecore/services/radio/radio_station.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -297,6 +298,57 @@ void main() {
     expect(item.album, 'Alb');
     expect(item.artUri.toString(), 'https://lh3.googleusercontent.com/x=w544-h544-l90-rj');
     expect(item.extras, {'online': true});
+  });
+
+  test('while a stream loads the notification says «Caricamento…» instead of the artist', () async {
+    final id = online.register(result('v1'));
+    final gate = preparer.gates['youtube:v1'] = Completer<void>();
+    final started = handler.playQueue([id], 0);
+    await settle();
+    expect(handler.loadingStream, isTrue);
+    expect(handler.mediaItem.value!.title, 'Song v1');
+    expect(handler.mediaItem.value!.artist, 'Caricamento…');
+    gate.complete();
+    await started;
+    await settle();
+    expect(handler.loadingStream, isFalse);
+    expect(handler.mediaItem.value!.artist, 'Ann, Bob');
+  });
+
+  test('a seek or backend buffering on a ready stream does not raise the loading flag', () async {
+    final id = online.register(result('v1'));
+    await handler.playQueue([id], 0);
+    await settle();
+    expect(handler.loadingStream, isFalse);
+    backend.stateC.add(BackendState.loading);
+    await handler.seek(const Duration(seconds: 30));
+    await settle();
+    expect(handler.loadingStream, isFalse);
+    expect(handler.mediaItem.value!.artist, 'Ann, Bob');
+  });
+
+  test('skipping from a loading stream to a local track clears the flag', () async {
+    final id = online.register(result('v1'));
+    preparer.gates['youtube:v1'] = Completer<void>();
+    unawaited(handler.playQueue([id, ids[0]], 0));
+    await settle();
+    expect(handler.loadingStream, isTrue);
+    await handler.skipToNext();
+    await settle();
+    expect(handler.loadingStream, isFalse);
+    expect(handler.mediaItem.value!.title, 'a');
+    expect(handler.mediaItem.value!.artist, isNot('Caricamento…'));
+  });
+
+  test('a radio never raises the loading flag', () async {
+    final states = <bool>[];
+    final sub = handler.playbackState.listen((_) => states.add(handler.loadingStream));
+    await handler.playStations(const [
+      RadioStation(id: 'r', name: 'Radio r', streamUrl: 'http://radio.test/r', faviconUrl: '')
+    ], 0);
+    await settle();
+    await sub.cancel();
+    expect(states, isNot(contains(true)));
   });
 
   test('insertAt and removeQueueId change the queue and tell the listeners', () async {

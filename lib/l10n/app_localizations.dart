@@ -1150,12 +1150,6 @@ abstract class AppLocalizations {
   /// **'Ascolta'**
   String get listenAction;
 
-  /// No description provided for @listenResolving.
-  ///
-  /// In it, this message translates to:
-  /// **'Preparo l\'ascolto…'**
-  String get listenResolving;
-
   /// No description provided for @ytAlreadyInLibrary.
   ///
   /// In it, this message translates to:
@@ -8348,6 +8342,12 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Impossibile svuotare la cache dello streaming'**
   String get streamCacheClearFailed;
+
+  /// No description provided for @playerLoading.
+  ///
+  /// In it, this message translates to:
+  /// **'Caricamento…'**
+  String get playerLoading;
 }
 
 class _AppLocalizationsDelegate

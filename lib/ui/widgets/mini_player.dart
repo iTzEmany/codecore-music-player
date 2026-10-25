@@ -146,7 +146,10 @@ class _MiniPlayerState extends ConsumerState<MiniPlayer>
       final texts = radio == null ? null : radioTexts(l, radio, onAir);
       final t = track!;
       title = texts?.title ?? t.title;
-      subtitle = texts?.subtitle ?? t.artist ?? l.unknownArtist;
+      final loading = ref.watch(streamLoadingProvider).value ?? false;
+      subtitle = loading
+          ? l.playerLoading
+          : texts?.subtitle ?? t.artist ?? l.unknownArtist;
       playing = ref.watch(isPlayingProvider).value ?? false;
     }
 

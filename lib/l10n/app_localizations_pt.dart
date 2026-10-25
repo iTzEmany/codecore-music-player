@@ -653,9 +653,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String get listenAction => 'Ouvir';
 
   @override
-  String get listenResolving => 'A preparar…';
-
-  @override
   String get ytAlreadyInLibrary => 'Já na biblioteca';
 
   @override
@@ -5306,4 +5303,7 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get streamCacheClearFailed =>
       'Não foi possível esvaziar o cache de streaming';
+
+  @override
+  String get playerLoading => 'A carregar…';
 }
