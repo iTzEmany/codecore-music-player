@@ -288,10 +288,31 @@ final playerFailuresProvider = StreamProvider<PlaybackFailure>(
 );
 
 /// Current track kept in sync with DB edits (favourite flag, title, ...).
-final liveCurrentTrackProvider = StreamProvider<Track?>((ref) {
+final liveCurrentTrackProvider = StreamProvider<Track?>((ref) async* {
   final id = ref.watch(currentTrackProvider.select((t) => t.value?.id));
-  if (id == null) return Stream.value(null);
-  // Streamed entries are not rows: the registry's synthetic track.
-  if (isOnlineId(id)) return Stream.value(ref.watch(onlineEntriesProvider)?.trackOf(id));
-  return ref.watch(trackRepositoryProvider).watchById(id);
+  if (id == null) {
+    yield null;
+    return;
+  }
+  final repo = ref.watch(trackRepositoryProvider);
+  if (!isOnlineId(id)) {
+    yield* repo.watchById(id);
+    return;
+  }
+  // A streamed entry shows its synthetic track until the preparer makes the
+  // shadow row; then the row's data (lyrics and trivia appear as enrichment
+  // ends) under the entry's own negative id, so the online menus and cover keep working.
+  final entries = ref.watch(onlineEntriesProvider);
+  yield entries?.trackOf(id);
+  final entry = entries?.entryOf(id);
+  if (entries == null || entry == null) return;
+  final rowIds = entry.trackId != null
+      ? Stream.value(entry.trackId!)
+      : entries.bound
+          .where((i) => i == id)
+          .take(1)
+          .map((_) => entries.entryOf(id)?.trackId)
+          .where((r) => r != null)
+          .cast<int>();
+  yield* rowIds.asyncExpand((r) => repo.watchById(r).map((t) => t?.copyWith(id: id)));
 });

@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 
-import 'track_kind.dart';
+import '../../services/audio/online_entries.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -532,7 +532,7 @@ class LiveTrackRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (track.trackKind == TrackKind.online) {
+    if (isOnlineId(track.id)) {
       return OnlineQueueRow(track: track, onTap: onTap, reorderIndex: reorderIndex);
     }
     final isCurrent = ref.watch(

@@ -168,3 +168,24 @@ Stesso telefono e stesso comando (`--playback`), codice di `wip/fase-44` con il 
 - Le soglie non raggiunte sono annotate (D-37, D-41). All'utente si chiede di accettarle o di aprire un seguito; la fase 44 non cambia codice di prodotto.
 - Restano i picchi nei frame di build: il cambio di brano ricostruisce il player e decodifica la copertina, e la prima apertura di una scheda o pagina costruisce tutto. Le sezioni sopra spiegano il resto.
 - Con 63–140 frame un frame vale 0,7–1,6 punti: «Album» (0,8 %) è a un frame dalla soglia, «Apri album» (63 frame) oscilla molto da un giro all'altro.
+
+## Dopo la fase 45 (`streaming-45`, 25/10)
+
+Stesso telefono e stesso comando (`--playback`). «Base oggi» = `origin/master` (6f29398) misurato lo stesso giorno, per separare il rumore dal codice. Tolleranza: un frame per scenario contro «Finale» (D-85).
+
+| Scenario | Finale | Base oggi | Fase 45 (giro 1 · giro 2) | Dopo la correzione | ok |
+|---|---|---|---|---|---|
+| Pallino schede | 4,3 % | 3,4 % | 3,5 % · 4,3 % | — | sì |
+| Tutti i brani | 0,8 % | 2,0 % | 1,4 % · 2,3 % | — | pari alla base di oggi (rumore) |
+| Album | 0,8 % | 0,3 % | 0,7 % · 0,6 % | — | sì |
+| Ricerca «notte» | 4,5 % · p99 35,0 ms | 3,4 % · p99 41,4 ms | 4,9 % · 2,8 % (p99 35,0 · 30,3 ms) | — | sì |
+| Apri album | 7,9 % | 6,9 % | 8,2 % · 5,4 % | — | sì |
+| Fogli | 1,8 % | 1,9 % | 2,3 % · 2,9 % | 1,6 % | sì, dopo la correzione |
+| Swipe mini player | 8,1 % | 8,4 % | 9,5 % · 10,0 % | 7,8 % (build p99 55 ms, prima 128–148) | sì, dopo la correzione |
+| Apertura player | 7,4 % · p99 113,8 ms | 8,2 % · p99 92,3 ms | 7,1 % · 7,3 % (p99 54,9 · 77,8 ms) | — | sì |
+| Avvio a freddo (mediana di 5) | 2500 ms | 2557 ms | 2708 · 2418 ms | — | sì (pari alla base) |
+| PSS | 270 MB | 268 MB | 269 · 259 MB | — | sì |
+
+- Fogli e Swipe mini player erano oltre la base in entrambi i giri: `_syncPreparer` leggeva a ogni cambio di brano le righe intere (testi e curiosità) dei 30 brani successivi. Ora legge solo le righe `kind = 2`, leggere (78725da); misura `streaming-45-fix1` con `--only`.
+- «Tutti i brani» supera «Finale» di 2–4 frame anche su `master` lo stesso giorno: è rumore del telefono, non della fase. Il giro sul ramo è a 1,4–2,3 % contro il 2,0 % della base.
+- Report: `build/perf/streaming-45.md`, `streaming-45b.md`, `streaming-45-fix1.md`, `base-45.md`.

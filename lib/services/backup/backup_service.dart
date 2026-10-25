@@ -10,6 +10,7 @@ import '../../core/app_info.dart';
 import '../../core/app_log.dart';
 import '../../data/db/app_database.dart';
 import '../../data/repositories/backup_queries.dart';
+import '../../data/repositories/track_kinds.dart';
 
 const kBackupFormat = 1;
 
@@ -97,7 +98,7 @@ class BackupService {
       await db.customStatement('VACUUM INTO ?', [dbCopy]);
 
       final data = await collectUserData(db);
-      final trackCount = (await db.select(db.tracks).get()).length;
+      final trackCount = (await (db.select(db.tracks)..where((t) => t.kind.isNotValue(kStreamKind))).get()).length;
       final folders = [for (final f in await db.select(db.folders).get()) f.path];
       final manifest = {
         'backupFormat': kBackupFormat,

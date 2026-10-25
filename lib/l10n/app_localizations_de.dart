@@ -5304,4 +5304,22 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get themeLowContrastWarning =>
       'Einige Textfarben sind auf dem Hintergrund schlecht lesbar (unter 4,5:1). Das Theme bleibt unverändert.';
+
+  @override
+  String get streamCacheTitle => 'Speicher für Streaming';
+
+  @override
+  String streamCacheUsage(String used, String limit) {
+    return '$used von $limit';
+  }
+
+  @override
+  String get streamCacheClear => 'Leeren';
+
+  @override
+  String get streamCacheCleared => 'Streaming-Cache geleert';
+
+  @override
+  String get streamCacheClearFailed =>
+      'Streaming-Cache konnte nicht geleert werden';
 }

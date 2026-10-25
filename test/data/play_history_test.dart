@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/data/repositories/play_history_repository.dart';
 import 'package:codecore/data/repositories/track_repository.dart';
+import 'package:codecore/services/online/youtube_service.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -84,6 +86,16 @@ void main() {
       await (db.update(db.tracks)..where((t) => t.id.equals(ids[1])))
           .write(const TracksCompanion(missing: Value(true)));
       expect((await repo.watchHistory().first).map((e) => e.track.id), [ids[0]]);
+    });
+
+    test('listens of a shadow row (a streamed track) are in the history', () async {
+      final shadow = await TrackRepository(db).upsertStreamRow(
+          'youtube:abc',
+          const YtResult(id: 'abc', title: 'S', channel: 'C', duration: null),
+          File('pubspec.yaml'));
+      await repo.start(shadow, 1000);
+      await repo.start(shadow, 2000);
+      expect((await repo.watchHistory().first).map((e) => e.track.id), [shadow, shadow]);
     });
 
     test('the stream follows new listens', () async {

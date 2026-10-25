@@ -14,9 +14,16 @@ import 'package:codecore/services/shuffle_plus/seed_resolver.dart';
 import 'package:codecore/services/shuffle_plus/shuffle_host.dart';
 import 'package:codecore/services/shuffle_plus/shuffle_plus_controller.dart';
 import 'package:codecore/services/shuffle_plus/suggestion_log.dart';
+import 'package:codecore/data/repositories/track_repository.dart';
+import 'package:codecore/providers/shuffle_plus_providers.dart';
+import 'package:codecore/providers/stream_providers.dart';
 import 'package:dio/dio.dart';
+import 'package:drift/native.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
+
+import '../support/fake_stream_preparer.dart';
 
 final radioJson =
     File('test/fixtures/innertube/ytm_radio.json').readAsStringSync();
@@ -280,6 +287,18 @@ void main() {
     host.finishAndAdvance();
     await settle();
     expect(host.queueIds, stations);
+  });
+
+  test('the engine prepares a suggestion through the stream preparer', () async {
+    final db = AppDatabase(NativeDatabase.memory());
+    addTearDown(db.close);
+    final fake = FakeStreamPreparer(TrackRepository(db), dir);
+    final c = ProviderContainer(overrides: [streamPreparerProvider.overrideWithValue(fake)]);
+    addTearDown(c.dispose);
+    const r = YtResult(id: 'v9', title: 'T', channel: 'C', duration: null);
+    await c.read(shufflePlusPrepareProvider)(r);
+    expect(fake.asked, [r.indexKey]);
+    expect(await TrackRepository(db).streamRow(r.indexKey), isNotNull);
   });
 
   test('a suggestion enters the queue only after its address is ready', () async {

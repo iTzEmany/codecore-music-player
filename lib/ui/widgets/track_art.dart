@@ -1,4 +1,4 @@
-import 'track_kind.dart';
+import '../../services/audio/online_entries.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -29,7 +29,8 @@ class TrackArt extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (track.trackKind != TrackKind.online) {
+    // Shadow rows (kind 2, positive id) have a real cover; only registry ids are online.
+    if (!isOnlineId(track.id)) {
       return CoverImage(coverKey: track.coverKey, size: size, radius: radius, heroTag: heroTag, semanticLabel: semanticLabel);
     }
     final online = ref.watch(onlineEntriesProvider);

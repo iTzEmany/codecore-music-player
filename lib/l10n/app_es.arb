@@ -2859,5 +2859,20 @@
   "deezerMetaNote": "Uso privado y no comercial. Las condiciones de Deezer prohíben promover la descarga no autorizada, y Codecore descarga de YouTube: el riesgo es tuyo.",
   "settingsSpinCover": "Carátula giratoria",
   "settingsSpinCoverHint": "En el reproductor, mientras suena la música",
-  "themeLowContrastWarning": "Algunos colores de texto se leen mal sobre el fondo (menos de 4,5:1). El tema se queda como está."
+  "themeLowContrastWarning": "Algunos colores de texto se leen mal sobre el fondo (menos de 4,5:1). El tema se queda como está.",
+  "streamCacheTitle": "Espacio para el streaming",
+  "streamCacheUsage": "{used} de {limit}",
+  "@streamCacheUsage": {
+    "placeholders": {
+      "used": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "streamCacheClear": "Vaciar",
+  "streamCacheCleared": "Caché de streaming vaciada",
+  "streamCacheClearFailed": "No se pudo vaciar la caché de streaming"
 }

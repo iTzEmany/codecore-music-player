@@ -9,6 +9,7 @@ import '../core/paths.dart';
 import '../data/settings/settings_store.dart';
 import '../services/audio/codecore_audio_handler.dart';
 import '../services/import/track_matcher.dart';
+import '../services/online/youtube_service.dart' show YtResult;
 import '../services/online/ytm_radio_service.dart';
 import '../services/shuffle_plus/seed_index.dart';
 import '../services/shuffle_plus/seed_resolver.dart';
@@ -19,6 +20,7 @@ import 'database_providers.dart';
 import 'jam_providers.dart';
 import 'player_providers.dart';
 import 'settings_providers.dart';
+import 'stream_providers.dart';
 import 'youtube_providers.dart';
 
 /// The user's Shuffle+ choices, read from the settings. [set] is for tests.
@@ -142,6 +144,10 @@ class HandlerShuffleHost implements ShuffleHost {
   Future<void> removeQueueId(int id) => _h.removeQueueId(id);
 }
 
+/// A suggestion is downloaded into the stream cache before it is queued.
+final shufflePlusPrepareProvider = Provider<Future<void> Function(YtResult)>(
+    (ref) => (r) => ref.read(streamPreparerProvider).ready(r.indexKey, r));
+
 /// The Shuffle+ engine, started the first time it is read (the shell reads it
 /// in 31.12). Null when the player has no online registry (tests).
 final shufflePlusProvider = FutureProvider<ShufflePlusController?>((ref) async {
@@ -170,9 +176,7 @@ final shufflePlusProvider = FutureProvider<ShufflePlusController?>((ref) async {
     loadTracks: tracks.getByIdsLight,
     loadLibrary: () async => LibraryIndex(await tracks.liteEntries()),
     hasDownload: downloads.contains,
-    prepare: handler.addresses == null
-        ? null
-        : (r) => handler.addresses!.address(r, timeout: const Duration(seconds: 120)),
+    prepare: ref.read(shufflePlusPrepareProvider),
   );
   ref.listen(shufflePlusConfigProvider, (_, _) => controller.poke());
   ref.listen(jamProvider, (_, _) => controller.poke());

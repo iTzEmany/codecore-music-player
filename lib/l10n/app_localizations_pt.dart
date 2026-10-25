@@ -5288,4 +5288,22 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get themeLowContrastWarning =>
       'Algumas cores de texto ficam difíceis de ler sobre o fundo (abaixo de 4,5:1). O tema fica como está.';
+
+  @override
+  String get streamCacheTitle => 'Espaço para streaming';
+
+  @override
+  String streamCacheUsage(String used, String limit) {
+    return '$used de $limit';
+  }
+
+  @override
+  String get streamCacheClear => 'Esvaziar';
+
+  @override
+  String get streamCacheCleared => 'Cache de streaming esvaziado';
+
+  @override
+  String get streamCacheClearFailed =>
+      'Não foi possível esvaziar o cache de streaming';
 }

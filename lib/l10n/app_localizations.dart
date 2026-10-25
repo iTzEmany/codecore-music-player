@@ -8318,6 +8318,36 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Alcuni colori del testo si leggono male sullo sfondo (sotto 4,5:1). Il tema resta com\'è.'**
   String get themeLowContrastWarning;
+
+  /// No description provided for @streamCacheTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Spazio per lo streaming'**
+  String get streamCacheTitle;
+
+  /// No description provided for @streamCacheUsage.
+  ///
+  /// In it, this message translates to:
+  /// **'{used} su {limit}'**
+  String streamCacheUsage(String used, String limit);
+
+  /// No description provided for @streamCacheClear.
+  ///
+  /// In it, this message translates to:
+  /// **'Svuota'**
+  String get streamCacheClear;
+
+  /// No description provided for @streamCacheCleared.
+  ///
+  /// In it, this message translates to:
+  /// **'Cache dello streaming svuotata'**
+  String get streamCacheCleared;
+
+  /// No description provided for @streamCacheClearFailed.
+  ///
+  /// In it, this message translates to:
+  /// **'Impossibile svuotare la cache dello streaming'**
+  String get streamCacheClearFailed;
 }
 
 class _AppLocalizationsDelegate

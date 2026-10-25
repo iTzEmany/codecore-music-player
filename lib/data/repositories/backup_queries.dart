@@ -4,6 +4,7 @@ import 'package:path/path.dart' as p;
 import '../../services/backup/user_data.dart';
 import '../db/app_database.dart';
 import 'hidden_playlists.dart';
+import 'track_kinds.dart';
 
 /// Reads everything the user created into the portable format, in one
 /// read transaction and without a query per row.
@@ -12,7 +13,8 @@ Future<UserData> collectUserData(AppDatabase db) {
     final folders = {
       for (final f in await db.select(db.folders).get()) f.id: f.path,
     };
-    final tracks = await db.select(db.tracks).get();
+    final tracks = await (db.select(db.tracks)..where((t) => t.kind.isNotValue(kStreamKind)))
+        .get();
     final refs = <int, TrackRef>{};
     final userData = <TrackUserData>[];
     for (final t in tracks) {

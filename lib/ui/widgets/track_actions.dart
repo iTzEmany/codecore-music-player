@@ -1,4 +1,4 @@
-import 'track_kind.dart';
+import '../../services/audio/online_entries.dart';
 import 'cc_sheet.dart';
 import 'dart:io';
 
@@ -30,6 +30,7 @@ import '../screens/library/artist_screen.dart';
 import '../screens/online/artist_picker_sheet.dart';
 import '../shell/shell_nav.dart';
 import '../../data/repositories/library_queries.dart';
+import '../../data/repositories/track_kinds.dart';
 import '../../providers/library_providers.dart';
 import '../theme/tokens.dart';
 import 'track_art.dart';
@@ -137,7 +138,7 @@ List<TrackActionGroup> trackActions(
 ) {
   final radio = radioOfTrackRead(ref, track);
   if (radio != null) return radioTrackActions(outer, ref, track, radio);
-  if (track.trackKind == TrackKind.online) return onlineTrackActions(outer, ref, track);
+  if (isOnlineId(track.id)) return onlineTrackActions(outer, ref, track);
   final l = outer.l10n;
   final ctrl = ref.read(playerControllerProvider);
   void snack(String text) => showMsg(outer, text);
@@ -168,7 +169,7 @@ List<TrackActionGroup> trackActions(
   Future<void> artistOnYoutubeMusic() => openYtmArtist(outer, ref, track.artist!.trim(),
       open: (page) => ShellNav.openInLibrary(outer, ref, page));
 
-  return [
+  final groups = [
     TrackActionGroup(l.groupQueue, [
       if (isDesktop)
         TrackAction(Icons.hearing_rounded, l.previewTrack, () async {
@@ -276,6 +277,17 @@ List<TrackActionGroup> trackActions(
           destructive: true,
         ),
     ]),
+  ];
+  // A streamed shadow row (kind 2) keeps only queue actions and Details until phase 46.
+  if (track.kind != kStreamKind) return groups;
+  bool keep(TrackAction a) =>
+      a.icon == Icons.playlist_play_rounded ||
+      a.icon == Icons.queue_rounded ||
+      a.icon == Icons.queue_music_rounded ||
+      a.icon == Icons.info_outline_rounded;
+  return [
+    for (final g in groups)
+      if (g.actions.any(keep)) TrackActionGroup(g.title, g.actions.where(keep).toList()),
   ];
 }
 

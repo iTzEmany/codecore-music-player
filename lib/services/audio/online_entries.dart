@@ -1,9 +1,15 @@
+import 'dart:async';
+
 import '../../data/db/app_database.dart';
+import '../../data/repositories/track_kinds.dart';
 import '../radio/radio_station.dart';
 import '../online/youtube_service.dart';
 
 /// Online entries in the queue have negative ids; library tracks are > 0.
 bool isOnlineId(int id) => id < 0;
+
+/// A track that plays from the stream cache: a registry entry or a shadow row.
+bool isStreamTrack(Track t) => isOnlineId(t.id) || t.kind == kStreamKind;
 
 /// One streamed (not owned) track: what to play and why it is there.
 class OnlineEntry {
@@ -12,9 +18,13 @@ class OnlineEntry {
     required this.result,
     required this.addedAt,
     this.seedTitle,
+    this.trackId,
   });
 
   final int id;
+
+  /// The shadow row (`kind = 2`) of this track, once the preparer made it.
+  final int? trackId;
   final YtResult result;
 
   /// The library track this one is «similar to», if any.
@@ -70,6 +80,19 @@ class OnlineEntries {
   bool isRadioId(int id) => _radios.containsKey(id);
 
   RadioEntry? radioOf(int id) => _radios[id];
+
+  final _bound = StreamController<int>.broadcast();
+
+  /// Ids of the entries that just got their shadow row.
+  Stream<int> get bound => _bound.stream;
+
+  void bindRow(int id, int rowId) {
+    final e = _entries[id];
+    if (e == null) return;
+    _entries[id] = OnlineEntry(
+        id: id, result: e.result, addedAt: e.addedAt, seedTitle: e.seedTitle, trackId: rowId);
+    _bound.add(id);
+  }
 
   OnlineEntry? operator [](int id) => _entries[id];
 
