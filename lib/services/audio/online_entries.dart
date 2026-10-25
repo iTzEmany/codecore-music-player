@@ -20,6 +20,7 @@ class OnlineEntry {
     required this.addedAt,
     this.seedTitle,
     this.trackId,
+    this.suggested = false,
   });
 
   final int id;
@@ -27,6 +28,9 @@ class OnlineEntry {
   /// The shadow row (`kind = 2`) of this track, once the preparer made it.
   final int? trackId;
   final YtResult result;
+
+  /// Put in the queue by Shuffle+ (not chosen by the user).
+  final bool suggested;
 
   /// The library track this one is «similar to», if any.
   final String? seedTitle;
@@ -53,12 +57,13 @@ class OnlineEntries {
   final Map<String, int> _radioIds = {};
   int _last = 0;
 
-  int register(YtResult result, {String? seedTitle}) {
+  int register(YtResult result, {String? seedTitle, bool suggested = false}) {
     final id = --_last;
     _entries[id] = OnlineEntry(
       id: id,
       result: result,
       seedTitle: seedTitle,
+      suggested: suggested,
       addedAt: _now(),
     );
     return id;
@@ -91,7 +96,7 @@ class OnlineEntries {
     final e = _entries[id];
     if (e == null) return;
     _entries[id] = OnlineEntry(
-        id: id, result: e.result, addedAt: e.addedAt, seedTitle: e.seedTitle, trackId: rowId);
+        id: id, result: e.result, addedAt: e.addedAt, seedTitle: e.seedTitle, trackId: rowId, suggested: e.suggested);
     _bound.add(id);
   }
 
