@@ -1,8 +1,15 @@
+import 'dart:async';
 import 'dart:io';
 
+import 'package:codecore/providers/jam_providers.dart';
+import 'package:codecore/services/jam/jam_cache.dart';
 import 'package:codecore/services/jam/jam_guest.dart';
 import 'package:codecore/services/jam/jam_host.dart';
 import 'package:codecore/services/jam/jam_models.dart';
+import 'package:codecore/services/jam/jam_online_adder.dart';
+import 'package:codecore/services/online/youtube_service.dart';
+import 'package:codecore/services/stream/stream_cache.dart';
+import 'package:path/path.dart' as p;
 import 'package:codecore/services/share/offers.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -170,5 +177,82 @@ void main() {
     await guestB.leave();
     await reach(guest, (s) => s.items.isEmpty && s.participants.length == 2);
     expect(hostJam.state!.ended, false);
+  });
+
+  group('online tracks from a guest (47.2)', () {
+    late StreamCache cache;
+    late Map<String, Completer<File>> downloads;
+    late List<YtResult> failed;
+    late JamOnlineAdder adder;
+
+    YtResult yt(String id) =>
+        YtResult(id: id, title: 'T$id', channel: 'C', duration: const Duration(seconds: 3));
+
+    setUp(() async {
+      cache = StreamCache(Directory(p.join(dir.path, 'cache')), freeSpace: () async => null);
+      await cache.open();
+      downloads = {};
+      failed = [];
+      await join();
+      guestJam.resolveFile = (i) async => (await cache.fileFor(jamCacheKey(i)!))?.path;
+      adder = JamOnlineAdder(
+        ownId: 'guest',
+        cache: cache,
+        ready: (key, r) => (downloads[r.id] = Completer<File>()).future,
+        send: (c) async => (await guest.send(c)).error,
+        onFailed: failed.add,
+      );
+    });
+
+    Future<File> finish(String id, List<int> bytes) async {
+      final part = File(p.join(cache.dir.path, 'x.mp3.part'))..writeAsBytesSync(bytes);
+      final f = await cache.put('youtube:$id', part);
+      downloads[id]!.complete(f);
+      return f;
+    }
+
+    test('items appear in order of addition and the host reads the guest cache', () async {
+      adder.add(yt('a'));
+      adder.add(yt('b'));
+      await finish('b', [2]); // the second is ready first
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+      expect(hostJam.state!.items, isEmpty);
+      await finish('a', [1]);
+      await reach(guest, (s) => s.items.length == 2);
+      final items = hostJam.state!.items;
+      expect(items.map((i) => i.title), ['Ta', 'Tb']);
+      expect(items.first.ref, 'yt:youtube:a');
+      expect(items.first.videoId, 'a');
+
+      // The host fetches it from the owner like `_resolve` does.
+      final hostCache = JamCache(Directory(p.join(dir.path, 'jc')));
+      final got = await hostCache.fetch(
+          items.first,
+          Uri.parse('http://127.0.0.1:$guestPort/jam/${guest.sessionId}/file/${items.first.id}'),
+          {'x-jam-file': hostJam.fileToken!});
+      expect(got!.readAsBytesSync(), [1]);
+    });
+
+    test('a failed download adds nothing and does not block the next', () async {
+      adder.add(yt('a'));
+      adder.add(yt('b'));
+      downloads['a']!.completeError(StateError('offline'));
+      await finish('b', [2]);
+      await reach(guest, (s) => s.items.length == 1);
+      expect(hostJam.state!.items.single.title, 'Tb');
+      expect(failed.map((r) => r.id), ['a']);
+    });
+
+    test('a file waiting for its turn is not evicted until it is queued', () async {
+      adder.add(yt('a'));
+      adder.add(yt('b'));
+      await finish('b', [2]); // waits for 'a'
+      cache.limitBytes = 0;
+      await cache.evict();
+      expect(await cache.fileFor('youtube:b'), isNotNull);
+      adder.dispose(); // the Jam ends: pins are let go
+      await cache.evict();
+      expect(await cache.fileFor('youtube:b'), isNull);
+    });
   });
 }

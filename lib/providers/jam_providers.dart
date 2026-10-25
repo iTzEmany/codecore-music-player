@@ -16,7 +16,9 @@ import '../services/jam/jam_clock.dart';
 import '../services/jam/jam_guest.dart';
 import '../services/jam/jam_host.dart';
 import '../services/jam/jam_models.dart';
+import '../services/jam/jam_online_adder.dart';
 import '../services/jam/jam_output.dart';
+import '../services/online/youtube_service.dart' show YtResult;
 import '../services/stream/stream_cache.dart';
 import '../services/jam/jam_transport.dart';
 import '../services/share/discovery.dart';
@@ -145,6 +147,11 @@ class JamController extends Notifier<JamUiState> {
   final _pinned = <String>{};
 
   final _incoming = StreamController<JamRequest>.broadcast();
+  final _onlineFailed = StreamController<YtResult>.broadcast();
+  JamOnlineAdder? _adder;
+
+  /// Online tracks whose download failed after [addOnline] had accepted them.
+  Stream<YtResult> get onlineFailures => _onlineFailed.stream;
 
   /// Requests to show as a dialog (accept/decline).
   Stream<JamRequest> get incomingRequests => _incoming.stream;
@@ -167,6 +174,7 @@ class JamController extends Notifier<JamUiState> {
     await _reqSub?.cancel();
     await _teardown(release: false);
     await _incoming.close();
+    await _onlineFailed.close();
   }
 
   String get _ownId => _hub.deviceId ?? '';
@@ -353,6 +361,7 @@ class JamController extends Notifier<JamUiState> {
     unawaited(_output?.apply(s));
     _precache(s);
     _syncPins(s);
+    _adder?.seen({for (final i in s.items) ?jamCacheKey(i)});
   }
 
   void _onItemFailed(int id) {
@@ -487,6 +496,20 @@ class JamController extends Notifier<JamUiState> {
     return added;
   }
 
+  /// Accepts [r] for the shared queue right away (false: no Jam). It is added when its
+  /// file is ready, in the order of the calls; a failed download goes to [onlineFailures].
+  bool addOnline(YtResult r) {
+    if (!state.active) return false;
+    (_adder ??= JamOnlineAdder(
+      ownId: _ownId,
+      cache: ref.read(streamCacheProvider),
+      ready: (key, r) => ref.read(streamPreparerProvider).ready(key, r),
+      send: send,
+      onFailed: _onlineFailed.add,
+    )).add(r);
+    return true;
+  }
+
   Future<void> setOutput(String deviceId) =>
       send(JamCommand.setOutput(deviceId));
 
@@ -539,6 +562,8 @@ class JamController extends Notifier<JamUiState> {
     _output = null;
     await _cache?.clear();
     _cache = null;
+    _adder?.dispose();
+    _adder = null;
     _syncPins(null);
     _host?.resolveFile = null;
     _host?.clearSession();
