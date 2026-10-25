@@ -1,4 +1,3 @@
-import 'package:codecore/providers/jam_providers.dart';
 import 'package:codecore/providers/player_providers.dart';
 import 'package:codecore/providers/youtube_providers.dart';
 import 'package:codecore/providers/ytm_catalog_providers.dart';
@@ -27,6 +26,8 @@ final _album = YtmAlbum(
 
 class _Ctrl implements PlayerController {
   final calls = <String>[];
+  @override
+  bool inJam = false;
 
   @override
   Future<void> playOnlineList(List<YtResult> list, {bool shuffle = false}) async =>
@@ -46,11 +47,6 @@ class _Downloads extends DownloadsNotifier {
   void add(YtResult r, {String? tag}) => adds.add('${r.id} ${tag ?? 'plain'}');
 }
 
-class _ActiveJam extends JamController {
-  @override
-  JamUiState build() => const JamUiState(phase: JamPhase.active);
-}
-
 void main() {
   late _Ctrl ctrl;
   late _Downloads downloads;
@@ -59,7 +55,7 @@ void main() {
     tester.view.physicalSize = const Size(500, 1400);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
-    ctrl = _Ctrl();
+    ctrl = _Ctrl()..inJam = jam;
     downloads = _Downloads();
     final h = await Harness.create(tester);
     await tester.runAsync(() => h.db.customStatement(
@@ -68,7 +64,6 @@ void main() {
       onlineAlbumProvider.overrideWith((ref, id) async => CatalogResult(_album, DateTime(2026, 10, 22))),
       playerControllerProvider.overrideWithValue(ctrl),
       downloadsProvider.overrideWith(() => downloads),
-      if (jam) jamProvider.overrideWith(_ActiveJam.new),
     ]);
     await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 120)));
     await tester.pumpAndSettle();

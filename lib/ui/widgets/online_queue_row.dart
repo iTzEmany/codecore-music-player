@@ -26,7 +26,8 @@ class SuggestedMarker extends StatelessWidget {
         const SizedBox(width: 4),
         Text(
           context.l10n.suggestedBadge,
-          style: Theme.of(context).textTheme.labelSmall?.copyWith(color: cc.accent),
+          style: Theme.of(context).textTheme.labelSmall
+              ?.copyWith(color: cc.accent),
         ),
       ],
     );
@@ -53,10 +54,15 @@ class OnlineQueueRow extends ConsumerWidget {
     final cc = context.cc;
     final theme = Theme.of(context).textTheme;
     final l = context.l10n;
-    final isCurrent = ref.watch(currentTrackProvider.select(
-        (_) => ref.read(audioHandlerProvider).currentQueueId == track.id));
+    final isCurrent = ref.watch(
+      currentTrackProvider.select(
+        (_) => ref.read(audioHandlerProvider).currentQueueId == track.id,
+      ),
+    );
     final i = reorderIndex;
     final radio = radioOfTrack(ref, track);
+    final suggested =
+        ref.watch(onlineEntriesProvider)?[track.id]?.suggested ?? false;
     return InkWell(
       onTap: onTap,
       onLongPress: () => showTrackActions(context, ref, track),
@@ -87,13 +93,18 @@ class OnlineQueueRow extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(track.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: theme.bodyLarge),
+                  Text(
+                    track.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.bodyLarge,
+                  ),
                   const SizedBox(height: 2),
                   Row(
                     children: [
                       if (radio != null)
                         Icon(Icons.circle, size: 8, color: cc.accent)
-                      else
+                      else if (suggested)
                         const SuggestedMarker(),
                       if (radio != null) ...[
                         const SizedBox(width: 6),

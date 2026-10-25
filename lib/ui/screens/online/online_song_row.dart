@@ -8,7 +8,6 @@ import '../../../l10n/l10n_ext.dart';
 import '../../../providers/youtube_providers.dart';
 import '../../../services/online/download_queue.dart';
 import '../../../services/online/youtube_service.dart';
-import '../../../providers/jam_providers.dart';
 import '../../../providers/player_providers.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/track_actions.dart' show showOnlineActions;
@@ -56,14 +55,12 @@ void startOnlineDownloads(
   );
 }
 
-/// Tap on an online row: streams it and opens the player; with a Jam on it
-/// goes to the end of the shared queue like a swipe (D-89).
+/// Tap on an online row: streams it and opens the player; the controller
+/// sends it to the shared queue instead when a Jam is on (D-89), then no player opens.
 void tapOnline(BuildContext context, WidgetRef ref, YtResult r) {
-  if (ref.read(jamProvider).active) {
-    unawaited(queueOnline(context, ref, r));
-  } else {
-    unawaited(playOnlineAndOpen(context, ref, r));
-  }
+  unawaited(ref.read(playerControllerProvider).inJam
+      ? queueOnline(context, ref, r)
+      : playOnlineAndOpen(context, ref, r));
 }
 
 /// Swipe or «In coda» on an online row; says so only when it worked.

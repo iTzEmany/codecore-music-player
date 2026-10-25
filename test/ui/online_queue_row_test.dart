@@ -17,6 +17,7 @@ void main() {
       const YtResult(
           id: 'v1', title: 'Streamed', channel: 'Chan', duration: null, artists: ['Ann']),
       seedTitle: 'Seed',
+      suggested: true,
     );
     await h.pump(
       tester,
@@ -42,6 +43,27 @@ void main() {
     for (final library in ['Preferito', 'Modifica…', 'Elimina', 'Aggiungi alla coda']) {
       expect(find.text(library), findsNothing, reason: library);
     }
+    await h.dispose(tester);
+  });
+
+  testWidgets('a searched online row has no «Suggerito» and no «Non mi piace»', (tester) async {
+    final h = await Harness.create(tester, tracks: 1);
+    final online = OnlineEntries();
+    final id = online.register(const YtResult(
+        id: 'v2', title: 'Searched', channel: 'Chan', duration: null, artists: ['Ann']));
+    await h.pump(
+      tester,
+      Scaffold(
+        body: LiveTrackRow(track: online.trackOf(id)!, variant: TrackRowVariant.queue, onTap: () {}),
+      ),
+      extraOverrides: [onlineEntriesProvider.overrideWithValue(online)],
+    );
+    expect(find.text('Searched'), findsOneWidget);
+    expect(find.text('Suggerito'), findsNothing);
+    await tester.tap(find.byTooltip('Altre opzioni'));
+    await tester.pumpAndSettle();
+    expect(find.text('Scarica'), findsOneWidget);
+    expect(find.text('Non mi piace'), findsNothing);
     await h.dispose(tester);
   });
 

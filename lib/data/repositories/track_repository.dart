@@ -125,12 +125,14 @@ class TrackRepository {
 
   /// A fresh download [keepId] of the track [key] was streamed before: its listens,
   /// counts, lyrics and curiosities move to [keepId] (as in `DuplicateRepository.merge`)
-  /// and the shadow row goes. Does nothing when there is no shadow row.
-  Future<void> mergeStreamRow(String key, int keepId) async {
+  /// and the shadow row goes. Returns the id of the deleted shadow row (a queue may still
+  /// hold it), or null when there was nothing to merge.
+  Future<int?> mergeStreamRow(String key, int keepId) async {
     final shadow = await streamRow(key);
-    if (shadow == null || shadow.id == keepId) return;
+    if (shadow == null || shadow.id == keepId) return null;
     await DuplicateRepository(_db).merge(keepId, [shadow.id]);
     await (_db.delete(_db.tracks)..where((t) => t.id.equals(shadow.id))).go();
+    return shadow.id;
   }
 
   /// Creates or refreshes the shadow row (`kind = 2`) of the streamed track

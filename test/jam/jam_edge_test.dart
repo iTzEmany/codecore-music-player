@@ -1,10 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:codecore/providers/jam_providers.dart';
 import 'package:codecore/services/jam/jam_cache.dart';
 import 'package:codecore/services/jam/jam_guest.dart';
 import 'package:codecore/services/jam/jam_host.dart';
 import 'package:codecore/services/jam/jam_models.dart';
+import 'package:codecore/services/jam/jam_online_adder.dart';
+import 'package:codecore/services/online/youtube_service.dart';
 import 'package:codecore/services/jam/jam_state.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shelf/shelf.dart';
@@ -24,6 +27,8 @@ JamError? err(JamState s, JamCommand c, String f) =>
 
 void main() {
   leaveTests();
+  goneOwnerTests();
+  fetchMetaTests();
   group('reducer edges', () {
     test('empty queue: play/seek/jump/remove/move are rejected', () {
       final s = s0();
@@ -333,5 +338,90 @@ void leaveTests() {
     expect((await call('POST', '${a.sid}/invite',
             body: {...inv, 'host': '8.8.8.8'}, hd: {'x-jam-token': a.token}))
         .statusCode, 400);
+  });
+}
+
+void goneOwnerTests() {
+  JamItem yt(String id, {String owner = 'gone'}) => JamItem(
+      id: 0, ownerDeviceId: owner, title: 'T$id', artist: 'A', ext: 'm4a',
+      ref: 'yt:youtube:$id', videoId: id);
+
+  test('owner gone: only the current and next online items are downloaded, by video id', () async {
+    var s = s0();
+    for (final c in [yt('a'), yt('b'), yt('c'), yt('x', owner: host)]) {
+      s = ok(s, JamCommand.add(c), c.ownerDeviceId);
+    }
+    // a library item of the gone owner stays as it is: nothing to download
+    s = ok(s, JamCommand.add(it('gone')), 'gone');
+    final targets = jamSelfFetchTargets(s, host);
+    expect(targets.map((i) => i.videoId), ['a', 'b']);
+
+    final asked = <YtResult>[];
+    final file = File('${Directory.systemTemp.path}/jam_gone.m4a');
+    final got = await jamFetchByVideoId(targets.first, (key, r) async {
+      asked.add(r);
+      expect(key, 'youtube:a');
+      return file;
+    });
+    expect(got, file);
+    expect(asked.single.id, 'a');
+    expect(asked.single.title, 'Ta');
+  });
+
+  test('a device that is not an output downloads nothing; a failed key is not retried', () {
+    var s = s0();
+    s = ok(s, JamCommand.add(yt('a')), 'gone');
+    expect(jamSelfFetchTargets(s, 'other'), isEmpty);
+    expect(jamSelfFetchTargets(s, host), hasLength(1));
+    expect(jamSelfFetchTargets(s, host, failed: {'youtube:a'}), isEmpty);
+  });
+
+  test('pins: own online items from the current one on, not the played ones', () {
+    var s = s0();
+    for (final c in [yt('a', owner: host), yt('b', owner: host), yt('c', owner: host), yt('x', owner: 'g')]) {
+      s = ok(s, JamCommand.add(c), c.ownerDeviceId);
+    }
+    expect(jamPinKeys(s.copyWith(currentIndex: 1), host), {'youtube:b', 'youtube:c'});
+    expect(jamPinKeys(null, host), isEmpty);
+  });
+
+  test('no target while the owner is still in the Jam, nor for our own current item', () {
+    var s = s0();
+    s = ok(s, JamCommand.add(yt('a', owner: 'guest')), 'guest');
+    s = ok(s, JamCommand.add(yt('b', owner: host)), host);
+    expect(jamSelfFetchTargets(s, host), hasLength(1)); // 'guest' is not listed: gone
+    s = s.copyWith(participants: const [JamParticipant(id: 'guest', name: 'G')]);
+    expect(jamSelfFetchTargets(s, host), isEmpty);
+    expect(jamSelfFetchTargets(s.copyWith(currentIndex: 1), host), isEmpty);
+  });
+
+  test('a failed own download gives null, not an exception', () async {
+    final got = await jamFetchByVideoId(yt('a'), (_, _) async => throw StateError('offline'));
+    expect(got, isNull);
+  });
+}
+
+void fetchMetaTests() {
+  const item = JamItem(id: 3, ownerDeviceId: 'o', title: 'T', artist: 'A', album: 'Al', ext: 'mp3');
+
+  test('fetchMeta: the owner answers, or the item\'s basic data comes back', () async {
+    final srv = await HttpServer.bind('127.0.0.1', 0);
+    addTearDown(() => srv.close(force: true));
+    srv.listen((r) async {
+      if (r.uri.path == '/ok') {
+        r.response.headers.contentType = ContentType.json;
+        r.response.write(jsonEncode({'title': 'T', 'lyricsPlain': 'la la'}));
+      } else {
+        r.response.statusCode = 404;
+      }
+      await r.response.close();
+    });
+    Uri u(String p) => Uri.parse('http://127.0.0.1:${srv.port}$p');
+
+    expect((await jamFetchMeta(item, u('/ok'), {})).lyricsPlain, 'la la');
+    for (final uri in [u('/missing'), null, Uri.parse('http://127.0.0.1:1/x')]) {
+      final m = await jamFetchMeta(item, uri, {});
+      expect([m.title, m.artist, m.album, m.lyricsPlain], ['T', 'A', 'Al', null]);
+    }
   });
 }

@@ -63,4 +63,10 @@ void main() {
     expect(TrackMeta.tryParse(null), isNull);
     expect(TrackMeta.tryParse(<String, Object?>{})!.toJson(), isEmpty);
   });
+
+  test('curiosities travel when present and an old payload reads null', () {
+    expect(TrackMeta.tryParse(const TrackMeta(curiosities: 'x').toJson())!.curiosities, 'x');
+    expect(TrackMeta.tryParse({'title': 't'})!.curiosities, isNull);
+    expect(const TrackMeta(title: 't').toJson().containsKey('curiosities'), false);
+  });
 }

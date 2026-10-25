@@ -35,6 +35,8 @@ JamError? err(JamState s, JamCommand c, String from) =>
     applyCommand(s, c, from: from, nowMs: 1000).error;
 
 void main() {
+  videoIdTests();
+  unsafeIdsTests();
   test('add assigns ids, selects first, bumps version', () {
     var s = ok(start(), JamCommand.add(item(host)), host);
     s = ok(s, JamCommand.add(item(guest)), guest);
@@ -216,4 +218,35 @@ void main() {
     expect(JamItem.tryParse(item(host, inherited: true).toJson())!.inherited, true);
     expect(JamItem.tryParse(item(host).toJson())!.inherited, false);
   });
+}
+
+void videoIdTests() {
+  test('videoId round-trips JSON; JSON without it reads null', () {
+    final i = JamItem(
+        id: 1, ownerDeviceId: 'a', title: 't', ext: 'm4a', ref: 'yt:youtube:abc', videoId: 'abc');
+    final back = JamItem.tryParse(i.toJson()..['extra'] = 1)!;
+    expect(back.videoId, 'abc');
+    expect(back.ref, 'yt:youtube:abc');
+    expect(i.copyWith(id: 2).videoId, 'abc');
+    expect((i.toJson()..remove('vid')).let(JamItem.tryParse)!.videoId, isNull);
+  });
+}
+
+void unsafeIdsTests() {
+  JamItem? parse(String ref, String vid) => JamItem.tryParse({
+        'id': 1, 'owner': 'o', 'title': 't', 'ext': 'm4a', 'ref': ref, 'vid': vid});
+
+  test('a guest ref or vid that is not a plain id is dropped', () {
+    final good = parse('yt:soundcloud:123-a_B', 'abc_-1')!;
+    expect([good.ref, good.videoId], ['yt:soundcloud:123-a_B', 'abc_-1']);
+    expect(parse('7', 'x')!.ref, '7');
+    for (final bad in ['yt:youtube:../../../evil', 'yt:other:abc', 'yt:youtube:', 'x/7']) {
+      expect(parse(bad, 'a')!.ref, isNull, reason: bad);
+    }
+    expect(parse('7', 'a&list=PLx')!.videoId, isNull);
+  });
+}
+
+extension<T> on T {
+  R let<R>(R Function(T) f) => f(this);
 }

@@ -5,6 +5,8 @@ import '../../../data/db/app_database.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/player_providers.dart';
 import '../../../providers/suggestion_actions.dart';
+import '../../../providers/youtube_providers.dart' show downloadIndexProvider;
+import '../../widgets/track_actions.dart' show entryInLibrary;
 import '../../theme/tokens.dart';
 import '../playlists/playlist_picker.dart';
 import '../../widgets/show_msg.dart';
@@ -20,29 +22,36 @@ class SuggestedInfo extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
     final cc = context.cc;
-    final seed = ref.watch(onlineEntriesProvider)?[track.id]?.seedTitle;
+    final entry = ref.watch(onlineEntriesProvider)?[track.id];
+    final seed = entry?.seedTitle;
     final actions = ref.read(suggestionActionsProvider);
+    ref.watch(downloadIndexProvider); // a promotion refreshes it
+    if (entryInLibrary(ref, track.id)) return const SizedBox.shrink();
     return Column(
       children: [
-        Row(
-          children: [
-            Icon(Icons.cloud_outlined, size: 16, color: cc.accent),
-            const SizedBox(width: 6),
-            Expanded(
-              child: Text(
-                seed == null ? l.suggestedBadge : l.suggestedSimilarTo(seed),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(color: cc.accent),
+        if (entry?.suggested ?? false)
+          Row(
+            children: [
+              Icon(Icons.cloud_outlined, size: 16, color: cc.accent),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  seed == null ? l.suggestedBadge : l.suggestedSimilarTo(seed),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodySmall
+                      ?.copyWith(color: cc.accent),
+                ),
               ),
-            ),
-          ],
-        ),
+            ],
+          ),
         Row(
           children: [
             TextButton.icon(
               onPressed: () {
-                if (actions.downloadEntry(track.id)) showMsg(context, l.suggestionDownloadStarted);
+                if (actions.downloadEntry(track.id)) {
+                  showMsg(context, l.suggestionDownloadStarted);
+                }
               },
               icon: const Icon(Icons.download_rounded, size: 20),
               label: Text(l.ytDownload),

@@ -346,7 +346,7 @@ class ShufflePlusController {
     final at = nextInsertion(host.queueIds, host.currentIndex, _played, every);
     if (at == null) return;
     final r = candidate.result;
-    final id = online.register(r, seedTitle: candidate.seedTitle);
+    final id = online.register(r, seedTitle: candidate.seedTitle, suggested: true);
     _mine.add(id);
     log.add(
       videoId: r.id,

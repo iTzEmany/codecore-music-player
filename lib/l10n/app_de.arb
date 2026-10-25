@@ -365,7 +365,15 @@
   "jamIncomingBody": "Gemeinsam aus einer geteilten Warteschlange hören.",
   "jamIncomingDialog": "Die Musik läuft auf diesem Gerät und ihr könnt beide Titel hinzufügen.",
   "jamQueue": "Gemeinsame Warteschlange",
-  "jamEmpty": "Die Warteschlange ist leer. Füge Titel hinzu.",
+  "jamEmpty": "Reihe Titel aus der Bibliothek oder der Suche ein",
+  "jamOnlineFailed": "„{title}“ konnte nicht zur Jam hinzugefügt werden",
+  "@jamOnlineFailed": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
   "jamAddedBy": "hinzugefügt von {name}",
   "@jamAddedBy": {
     "placeholders": {
@@ -374,8 +382,8 @@
       }
     }
   },
+  "jamJumpHere": "Hier abspielen",
   "jamYou": "dir",
-  "jamAddTracks": "Titel hinzufügen",
   "jamAddToJam": "Zur Jam hinzufügen",
   "jamAdded": "Zur Jam hinzugefügt: {count}",
   "@jamAdded": {

@@ -1,5 +1,6 @@
 import '../../services/audio/online_entries.dart';
 import 'cc_sheet.dart';
+
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -13,13 +14,13 @@ import '../../core/platform.dart';
 import '../../data/db/app_database.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../providers/equalizer_providers.dart';
-import '../../providers/jam_providers.dart';
 import '../../providers/pending_playlist_adds.dart' show addToPlaylistTag;
 import '../../providers/player_providers.dart';
 import '../../providers/preview_providers.dart';
 import '../../providers/suggestion_actions.dart';
 import '../../providers/track_ops.dart';
-import '../../providers/youtube_providers.dart' show downloadsProvider;
+import '../../providers/youtube_providers.dart'
+    show downloadIndexProvider, downloadsProvider;
 import '../screens/playlists/playlist_dialogs.dart';
 import '../screens/playlists/playlist_picker.dart';
 import '../screens/tags/tags_sheet.dart';
@@ -33,7 +34,8 @@ import '../screens/online/artist_page_screen.dart';
 import '../screens/online/artist_picker_sheet.dart';
 import '../shell/shell_nav.dart';
 import '../../services/online/youtube_service.dart' show YtResult;
-import '../../services/stream/stream_key.dart' show keyOfStreamPath, streamResultOfRow;
+import '../../services/stream/stream_key.dart'
+    show keyOfStreamPath, streamResultOfRow;
 import '../../services/online/ytm_artist.dart' show YtmArtistRef;
 import '../../data/repositories/library_queries.dart';
 import '../../data/repositories/track_kinds.dart';
@@ -76,6 +78,17 @@ class TrackActionGroup {
   final List<TrackAction> actions;
 }
 
+/// The queue entry [id] was downloaded or promoted meanwhile (it still plays under its online id).
+bool entryInLibrary(WidgetRef ref, int id) {
+  final r = ref.read(onlineEntriesProvider)?[id]?.result;
+  return r != null &&
+      (ref
+              .read(downloadIndexProvider)
+              .value
+              ?.contains(r.id, source: r.source) ??
+          false);
+}
+
 /// Streamed (online) entries are not library rows: no favourites, tags,
 /// playlists by id, edit, lyrics, share, details of a file or deletion. They
 /// can be downloaded, downloaded into a playlist, disliked or taken out of
@@ -92,6 +105,7 @@ List<TrackActionGroup> onlineTrackActions(
   return [
     TrackActionGroup(l.groupCollection, [
       TrackAction(Icons.download_rounded, l.ytDownload, () async {
+        if (entryInLibrary(ref, track.id)) return snack(l.ytAlreadyInLibrary);
         if (actions.downloadEntry(track.id)) snack(l.suggestionDownloadStarted);
       }),
       TrackAction(Icons.playlist_add_rounded, l.addToPlaylist, () async {
@@ -103,12 +117,16 @@ List<TrackActionGroup> onlineTrackActions(
       }),
     ]),
     TrackActionGroup(l.groupQueue, [
-      TrackAction(Icons.thumb_down_outlined, l.suggestionDislike, () async {
-        await actions.dislike(track.id);
-        snack(l.suggestionDisliked);
-      }),
-      TrackAction(Icons.remove_circle_outline_rounded, l.removeFromQueueAction,
-          () => actions.remove(track.id)),
+      if (ref.read(onlineEntriesProvider)?[track.id]?.suggested ?? false)
+        TrackAction(Icons.thumb_down_outlined, l.suggestionDislike, () async {
+          await actions.dislike(track.id);
+          snack(l.suggestionDisliked);
+        }),
+      TrackAction(
+        Icons.remove_circle_outline_rounded,
+        l.removeFromQueueAction,
+        () => actions.remove(track.id),
+      ),
     ]),
   ];
 }
@@ -134,11 +152,18 @@ List<TrackActionGroup> radioTrackActions(
         () => toggleSavedRadio(outer, ref, station),
       ),
       if (isCurrent && onAir != null && kEnableYoutube)
-        TrackAction(Icons.search_rounded, l.radioSearchSong, () async => searchOnAir(outer, ref, onAir)),
+        TrackAction(
+          Icons.search_rounded,
+          l.radioSearchSong,
+          () async => searchOnAir(outer, ref, onAir),
+        ),
     ]),
     TrackActionGroup(l.groupQueue, [
-      TrackAction(Icons.remove_circle_outline_rounded, l.removeFromQueueAction,
-          () => ref.read(suggestionActionsProvider).remove(track.id)),
+      TrackAction(
+        Icons.remove_circle_outline_rounded,
+        l.removeFromQueueAction,
+        () => ref.read(suggestionActionsProvider).remove(track.id),
+      ),
     ]),
   ];
 }
@@ -181,8 +206,12 @@ List<TrackActionGroup> trackActions(
     );
   }
 
-  Future<void> artistOnYoutubeMusic() => openYtmArtist(outer, ref, track.artist!.trim(),
-      open: (page) => ShellNav.openInLibrary(outer, ref, page));
+  Future<void> artistOnYoutubeMusic() => openYtmArtist(
+    outer,
+    ref,
+    track.artist!.trim(),
+    open: (page) => ShellNav.openInLibrary(outer, ref, page),
+  );
 
   final groups = [
     TrackActionGroup(l.groupQueue, [
@@ -191,24 +220,23 @@ List<TrackActionGroup> trackActions(
           await ref.read(previewProvider.notifier).start(track);
         }),
       if (track.resumePositionMs != null)
-        TrackAction(Icons.restart_alt_rounded, l.restartFromBeginning, () async {
-          // The bookmark goes first: the player reads it when it loads the track.
-          await ref.read(trackOpsProvider).setResumePosition(track.id, null);
-          await ctrl.playFromList([track], 0);
-        }),
+        TrackAction(
+          Icons.restart_alt_rounded,
+          l.restartFromBeginning,
+          () async {
+            // The bookmark goes first: the player reads it when it loads the track.
+            await ref.read(trackOpsProvider).setResumePosition(track.id, null);
+            await ctrl.playFromList([track], 0);
+          },
+        ),
       TrackAction(Icons.playlist_play_rounded, l.playNext, () async {
         ctrl.playNext(track.id);
-        snack(l.playNextDone);
+        snack(ctrl.inJam ? l.addedToQueue : l.playNextDone);
       }, onStreamRow: true),
       TrackAction(Icons.queue_rounded, l.addToQueue, () async {
         ctrl.addToQueue(track.id);
         snack(l.addedToQueue);
       }, onStreamRow: true),
-      if (ref.read(jamProvider).active)
-        TrackAction(Icons.queue_music_rounded, l.jamAddToJam, () async {
-          final n = await ref.read(jamProvider.notifier).addTracks([track]);
-          snack(l.jamAdded(n));
-        }, onStreamRow: true),
     ]),
     TrackActionGroup(l.groupCollection, [
       // A streamed shadow row: the download promotes it to a real library track.
@@ -290,14 +318,9 @@ List<TrackActionGroup> trackActions(
       // The file itself, not just a list: music only (episodes have their own
       // cleanup).
       if (track.kind == 0)
-        TrackAction(
-          Icons.delete_forever_rounded,
-          l.deleteFromDevice,
-          () async {
-            await confirmAndDeleteTracks(outer, ref, [track]);
-          },
-          destructive: true,
-        ),
+        TrackAction(Icons.delete_forever_rounded, l.deleteFromDevice, () async {
+          await confirmAndDeleteTracks(outer, ref, [track]);
+        }, destructive: true),
     ]),
   ];
   // A streamed shadow row (kind 2) keeps only queue actions and Details until phase 46.
@@ -305,7 +328,10 @@ List<TrackActionGroup> trackActions(
   return [
     for (final g in groups)
       if (g.actions.any((a) => a.onStreamRow))
-        TrackActionGroup(g.title, g.actions.where((a) => a.onStreamRow).toList()),
+        TrackActionGroup(
+          g.title,
+          g.actions.where((a) => a.onStreamRow).toList(),
+        ),
   ];
 }
 
@@ -380,7 +406,12 @@ class _TrackActionsSheet extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(CcDims.gap16, CcDims.gap4, CcDims.gap16, CcDims.gap12),
+              padding: const EdgeInsets.fromLTRB(
+                CcDims.gap16,
+                CcDims.gap4,
+                CcDims.gap16,
+                CcDims.gap12,
+              ),
               child: Row(
                 children: [
                   TrackArt(track: track, size: 56),
@@ -406,7 +437,9 @@ class _TrackActionsSheet extends StatelessWidget {
                             track.album!,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: theme.bodySmall?.copyWith(color: cc.textFaint),
+                            style: theme.bodySmall?.copyWith(
+                              color: cc.textFaint,
+                            ),
                           ),
                       ],
                     ),
@@ -497,7 +530,7 @@ class _DetailsDialog extends StatelessWidget {
 }
 
 /// The menu of an online row: play after, queue, playlist, download, artist
-/// (R-16). With a Jam on, «Riproduci dopo» goes to the shared queue (D-89).
+/// (R-16). With a Jam on, the controller sends it to the shared queue (D-89).
 List<TrackAction> onlineResultActions(
   BuildContext outer,
   WidgetRef ref,
@@ -505,11 +538,12 @@ List<TrackAction> onlineResultActions(
 ) {
   final l = outer.l10n;
   final ctrl = ref.read(playerControllerProvider);
-  final jam = ref.read(jamProvider).active;
   return [
     TrackAction(Icons.playlist_play_rounded, l.playNext, () async {
-      await (jam ? ctrl.enqueueOnline(r) : ctrl.playOnlineNext(r));
-      if (outer.mounted) showMsg(outer, jam ? l.addedToQueue : l.playNextDone);
+      await ctrl.playOnlineNext(r);
+      if (outer.mounted) {
+        showMsg(outer, ctrl.inJam ? l.addedToQueue : l.playNextDone);
+      }
     }),
     TrackAction(Icons.queue_rounded, l.addToQueue, () async {
       await ctrl.enqueueOnline(r);
@@ -526,6 +560,13 @@ List<TrackAction> onlineResultActions(
       }
     }),
     TrackAction(Icons.download_rounded, l.ytDownload, () async {
+      if (ref
+              .read(downloadIndexProvider)
+              .value
+              ?.contains(r.id, source: r.source) ??
+          false) {
+        return showMsg(outer, l.ytAlreadyInLibrary);
+      }
       ref.read(downloadsProvider.notifier).add(r);
       if (outer.mounted) showMsg(outer, l.suggestionDownloadStarted);
     }),

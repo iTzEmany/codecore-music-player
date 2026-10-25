@@ -52,16 +52,16 @@ secondo è pronto prima. `flutter analyze` pulito.
 ### 47.3 — Proprietario uscito: l'uscita scarica da sé
 **File:** `lib/providers/jam_providers.dart` (risoluzione della sorgente di un item con proprietario assente),
 `test/jam/jam_edge_test.dart`
-1. Item `yt:` con proprietario non più nella Jam (o che risponde 404) → il dispositivo d'uscita passa `videoId` al
+1. Item `yt:` con proprietario non più nella Jam → il dispositivo d'uscita passa `videoId` al
    proprio `StreamPreparer` (`YtResult` dai campi dell'item) e suona dalla sua cache (R-21). Gli altri item del
-   proprietario uscito (libreria) restano come oggi (`available = false`).
+   proprietario uscito (libreria) si tolgono dalla coda; restano solo gli `yt:` non ancora suonati (D-93).
 2. Solo gli item non ancora suonati e solo quando servono (il prossimo, come `_precache`): niente riscaricamento di
    tutta la coda (K-07).
 
 R-21.
 **Fatto quando:** `flutter test test/jam/jam_edge_test.dart` verde: proprietario uscito → l'uscita risolve il brano
 dall'id YouTube e lo scarica nella sua cache (downloader finto chiamato una volta con quel `videoId`); item di
-libreria del proprietario uscito → `available = false` come oggi; solo il prossimo item viene scaricato.
+libreria del proprietario uscito → tolti dalla coda (D-93), restano solo gli item YouTube non ancora suonati; solo il prossimo item viene scaricato.
 `flutter analyze` pulito.
 
 ### 47.4 — Rotta `meta`: copertina, testo e curiosità dal proprietario
@@ -89,6 +89,17 @@ R-22.
 **Fatto quando:** `flutter test test/ui/jam_screen_test.dart` verde: nessun `FloatingActionButton` in `JamScreen`;
 con la Jam attiva lo swipe su una riga chiama `jam.addTracks` (libreria) e su una riga online `jam.addOnline`; a coda
 vuota c'è il testo guida. `grep -n "FloatingActionButton" lib/ui/screens/jam/jam_screen.dart` = 0. `flutter analyze` pulito.
+
+**Dalla review della fase 46:**
+- L'instradamento D-89 (tap e «Riproduci dopo» in Jam → coda condivisa) oggi è nella UI, in tre punti:
+  `tapOnline`, `_play` dell'album online e «Riproduci dopo» in `track_actions.dart`. Spostalo in
+  `PlayerController`, con un `bool Function()? jamActive` come `shufflePlus`, e togli i tre controlli.
+- In Jam `enqueueOnline` deve decidere prima di `_idOf`: un id di libreria o negativo non vuol dire niente
+  per gli ospiti. Deve tornare quando il brano è accettato, non a download finito, se no «Aggiunto alla
+  coda» arriva minuti dopo.
+- Una riga ombra (`kind = 2`) va in Jam con `jam.addOnline(streamResultOfRow(…))`, non con `addTracks`:
+  il percorso `stream:` non ha estensione e verrebbe saltato. Fino ad allora «Aggiungi alla Jam» non
+  compare sulle righe ombra.
 
 ### 47.6 — Schermata del brano della Jam
 **File:** `lib/ui/screens/jam/jam_track_info_screen.dart` (nuovo), `lib/ui/screens/jam/jam_screen.dart` (tap sulla
@@ -126,3 +137,18 @@ host il telefono):
 - Log esportato senza 403/429 ripetuti dopo una coda Jam di 15 brani online (K-04).
 
 **Fatto quando:** l'utente conferma le prove su Linux e Mi A3 (casella `[~]` → `[x]` in PROGRESS).
+
+## Debito noto (review della fase 46, da fare dopo la feature)
+- Tre modi di dire «questa voce online ora è un brano della libreria»: `PendingPlaylistAdds.replaceStream`, il
+  `libraryIdOf`/`_downloadedId` dell'handler al caricamento e `currentQueueId` (con il `gone` di `removeIds`).
+  Dopo una promozione riuscita basterebbe `online.idsOf(r)` → `replaceQueueId`, come fa `replaceStream`, e
+  tenere `libraryIdOf` solo per le code ripristinate.
+- `DownloadsNotifier` fa anche promozioni, `promoteErrors`, playlist e risincronizzazione del player, e i provider
+  si importano in cerchio (`player`↔`youtube`, `youtube`↔`stream`, `youtube`↔`pending_playlist_adds`). Seguito:
+  un solo `libraryIdOfProvider` accanto a `downloadIndexProvider`, e `addToPlaylistTag` fuori dai provider.
+- (Review della fase 47) `libraryToJam` e `jamOnlineFailuresProvider` stanno in `player_providers.dart` ma sono
+  logica della Jam e creano il ciclo `player`↔`jam`: spostarli in `jam_providers.dart` (es.
+  `JamController.addLibraryIds`), così `PlayerController` vede solo `jamProvider`. Prima che la fase 48 faccia
+  crescere `PlayerController`.
+- `DownloadIndex` è un'istanza ricreata a ogni `invalidate` (scrittura ora atomica): meglio una sola istanza e un
+  contatore di revisione osservato dalle righe.

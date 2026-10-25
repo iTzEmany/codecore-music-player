@@ -125,7 +125,8 @@ class JamQueueRow extends StatelessWidget {
     required this.isCurrent,
     required this.canRemove,
     required this.index,
-    this.onTap,
+    required this.onTap,
+    this.onJump,
     required this.onRemove,
   });
 
@@ -133,7 +134,10 @@ class JamQueueRow extends StatelessWidget {
   final String who;
   final bool isCurrent, canRemove;
   final int index;
-  final VoidCallback? onTap;
+  final VoidCallback onTap;
+
+  /// Host only: «Salta qui» in the ⋮ menu.
+  final VoidCallback? onJump;
   final VoidCallback onRemove;
 
   @override
@@ -200,6 +204,14 @@ class JamQueueRow extends StatelessWidget {
                 visualDensity: ccIconDensity,
                 icon: Icon(Icons.close, color: cc.textMuted),
                 onPressed: onRemove,
+              ),
+            if (onJump != null)
+              PopupMenuButton<void>(
+                tooltip: l.moreActions,
+                icon: Icon(Icons.more_vert, color: cc.textMuted),
+                itemBuilder: (_) => [
+                  PopupMenuItem<void>(onTap: onJump, child: Text(l.jamJumpHere)),
+                ],
               ),
             ReorderableDragStartListener(
               index: index,

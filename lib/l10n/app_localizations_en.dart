@@ -997,7 +997,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get jamQueue => 'Shared queue';
 
   @override
-  String get jamEmpty => 'The queue is empty. Add some tracks.';
+  String get jamEmpty => 'Queue tracks from the library or from search';
+
+  @override
+  String jamOnlineFailed(String title) {
+    return 'Could not add “$title” to the Jam';
+  }
 
   @override
   String jamAddedBy(String name) {
@@ -1005,10 +1010,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get jamYou => 'you';
+  String get jamJumpHere => 'Jump here';
 
   @override
-  String get jamAddTracks => 'Add tracks';
+  String get jamYou => 'you';
 
   @override
   String get jamAddToJam => 'Add to Jam';

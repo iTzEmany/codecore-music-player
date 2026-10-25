@@ -25,6 +25,7 @@ class JamItem {
     this.sizeBytes = 0,
     this.available = true,
     this.ref,
+    this.videoId,
     this.inherited = false,
   });
 
@@ -43,8 +44,14 @@ class JamItem {
   /// Opaque key meaningful only to the owner (maps to a local file).
   final String? ref;
 
+  /// Online track only: visible to everyone (the library `ref` is not).
+  final String? videoId;
+
   /// Part of the host's seed queue: tracks added later are placed before it.
   final bool inherited;
+
+  /// A YouTube track any output can download again by its video id.
+  bool get selfFetchable => videoId != null && ref?.startsWith('yt:youtube:') == true;
 
   JamItem copyWith({int? id, bool? available, bool? inherited}) => JamItem(
         id: id ?? this.id,
@@ -57,6 +64,7 @@ class JamItem {
         sizeBytes: sizeBytes,
         available: available ?? this.available,
         ref: ref,
+        videoId: videoId,
         inherited: inherited ?? this.inherited,
       );
 
@@ -71,8 +79,14 @@ class JamItem {
         'size': sizeBytes,
         'ok': available,
         if (ref != null) 'ref': ref,
+        if (videoId != null) 'vid': videoId,
         if (inherited) 'inh': true,
       };
+
+  // A guest's ref/vid become a cache key and a yt-dlp URL: only plain ids pass.
+  static final _refRe = RegExp(r'^(\d+|yt:(youtube|soundcloud):[A-Za-z0-9_-]{1,64})$');
+  static final _vidRe = RegExp(r'^[A-Za-z0-9_-]{1,64}$');
+  static String? _valid(String? v, RegExp re) => v != null && re.hasMatch(v) ? v : null;
 
   /// Strict parser: returns null for anything malformed.
   static JamItem? tryParse(Object? j) {
@@ -97,7 +111,8 @@ class JamItem {
       ext: ext.toLowerCase(),
       sizeBytes: size is int && size >= 0 ? size : 0,
       available: j['ok'] is bool ? j['ok'] as bool : true,
-      ref: opt(j['ref']),
+      ref: _valid(opt(j['ref']), _refRe),
+      videoId: _valid(opt(j['vid']), _vidRe),
       inherited: j['inh'] == true,
     );
   }

@@ -67,7 +67,10 @@ class _MergeSpy extends TrackRepository {
   _MergeSpy(super.db);
   final merged = <String>[];
   @override
-  Future<void> mergeStreamRow(String key, int keepId) async => merged.add(key);
+  Future<int?> mergeStreamRow(String key, int keepId) async {
+    merged.add(key);
+    return null;
+  }
 }
 
 class _Settings extends SettingsNotifier {
@@ -258,6 +261,7 @@ void main() {
     Future<(Directory, Folder)?> Function()? folderFn,
     Future<void> Function(File, String)? rename,
     Future<void> Function(File, String)? copy,
+    void Function(int, int)? onShadowMerged,
   }) =>
       StreamPromoter(
         cache: cache,
@@ -269,6 +273,7 @@ void main() {
         tag: (id) async => tagged.add(id),
         rename: rename,
         copy: copy,
+        onShadowMerged: onShadowMerged,
       );
   String destOf([String suffix = '']) => p.join(root.path, 'Music', '${downloadBaseName(_r)}$suffix.m4a');
 
@@ -276,7 +281,9 @@ void main() {
     final libId = await db.into(db.tracks).insert(TracksCompanion.insert(
         path: destOf(), title: 'Song', albumKey: 'artist|album', format: 'm4a', sizeBytes: 1, mtimeMs: 1,
         addedAt: 1, missing: const Value(true)));
-    expect(await build().promote(_r), isTrue);
+    final merged = <(int, int)>[];
+    expect(await build(onShadowMerged: (s, k) => merged.add((s, k))).promote(_r), isTrue);
+    expect(merged, [(shadowId, libId)], reason: 'queues holding the shadow id can follow');
     expect(index.pathFor(_key), destOf());
     expect(scanned, [destOf()]);
     expect(tagged, [libId]);

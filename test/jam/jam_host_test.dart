@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:codecore/services/jam/jam_host.dart';
 import 'package:codecore/services/jam/jam_models.dart';
+import 'package:codecore/services/share/track_meta.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
 import 'package:shelf/shelf.dart';
@@ -123,6 +124,40 @@ void main() {
     expect(host.memberIds, ['guest', 'g2']);
   });
 
+  test('a leaving guest keeps its upcoming online items, loses the rest (D-93)', () async {
+    await startSession();
+    expect((await call('POST', 'request', body: reqBody(id: 'g2'))).statusCode, 202);
+    host.accept(seen.last.id);
+    JamItem item(String t, {String? ref, String? vid}) => JamItem(
+        id: 0, ownerDeviceId: 'guest', title: t, ext: 'm4a', ref: ref, videoId: vid);
+    host.apply(const JamCommand.add(JamItem(id: 0, ownerDeviceId: 'host', title: 'H', ext: 'mp3')),
+        from: 'host');
+    host.apply(JamCommand.add(item('lib', ref: '7')), from: 'guest');
+    host.apply(JamCommand.add(item('yt', ref: 'yt:youtube:abc', vid: 'abc')), from: 'guest');
+    host.apply(JamCommand.add(item('sc', ref: 'yt:soundcloud:9', vid: '9')), from: 'guest');
+
+    host.removeMember('guest');
+
+    // SoundCloud cannot be fetched again by the host: it goes.
+    expect(host.state!.items.map((i) => i.title), ['H', 'yt']);
+    expect(host.state!.items.last.ownerDeviceId, 'guest');
+  });
+
+  test('a leaving guest keeps its online item when it is the current one', () async {
+    await startSession();
+    expect((await call('POST', 'request', body: reqBody(id: 'g2'))).statusCode, 202);
+    host.accept(seen.last.id);
+    host.apply(
+        const JamCommand.add(JamItem(
+            id: 0, ownerDeviceId: 'guest', title: 'cur', ext: 'm4a', ref: 'yt:youtube:abc', videoId: 'abc')),
+        from: 'guest');
+    expect(host.state!.currentIndex, 0);
+
+    host.removeMember('guest');
+
+    expect(host.state!.items.map((i) => i.title), ['cur']);
+  });
+
   test('long poll wakes up on change and times out otherwise', () async {
     final s = await startSession();
     final auth = {'x-jam-token': s.token};
@@ -175,5 +210,45 @@ void main() {
             JamItem(id: 0, ownerDeviceId: 'guest', title: 'C', ext: 'mp3', ref: 'mine')),
         from: 'guest');
     expect((await call('GET', '${s.sid}/file/3', headers: auth)).statusCode, 404);
+  });
+
+  test('serves the TrackMeta of queued owned items, library and cached', () async {
+    host.resolveMeta = (item) async => switch (item.ref) {
+          'lib' => const TrackMeta(title: 'Lib', isrc: 'USRC17607839'),
+          'yt:abcdefghijk' => const TrackMeta(title: 'Cached', youtubeId: 'abcdefghijk'),
+          _ => null,
+        };
+    final s = await startSession();
+    final auth = {'x-jam-file': host.fileToken!};
+    for (final ref in ['lib', 'yt:abcdefghijk', 'none']) {
+      host.apply(JamCommand.add(
+          JamItem(id: 0, ownerDeviceId: 'host', title: ref, ext: 'mp3', ref: ref)));
+    }
+    expect((await json(await call('GET', '${s.sid}/meta/1', headers: auth)))['isrc'],
+        'USRC17607839');
+    expect((await json(await call('GET', '${s.sid}/meta/2', headers: auth)))['youtubeId'],
+        'abcdefghijk');
+    // callback says unknown, not in queue, wrong sid, no token
+    expect((await call('GET', '${s.sid}/meta/3', headers: auth)).statusCode, 404);
+    expect((await call('GET', '${s.sid}/meta/99', headers: auth)).statusCode, 404);
+    expect((await call('GET', 'wrong/meta/1', headers: auth)).statusCode, 401);
+    expect((await call('GET', '${s.sid}/meta/1')).statusCode, 401);
+  });
+
+  test('serves the cover of queued owned items', () async {
+    final img = File(p.join(Directory.systemTemp.createTempSync('jc').path, 'c.jpg'))
+      ..writeAsBytesSync([1, 2, 3]);
+    host.resolveCover = (item) async => item.ref == 'lib' ? img.path : null;
+    final s = await startSession();
+    final auth = {'x-jam-file': host.fileToken!};
+    for (final ref in ['lib', 'none']) {
+      host.apply(JamCommand.add(
+          JamItem(id: 0, ownerDeviceId: 'host', title: ref, ext: 'mp3', ref: ref)));
+    }
+    final ok = await call('GET', '${s.sid}/cover/1', headers: auth);
+    expect(ok.statusCode, 200);
+    expect(await ok.read().expand((c) => c).toList(), [1, 2, 3]);
+    expect((await call('GET', '${s.sid}/cover/2', headers: auth)).statusCode, 404);
+    expect((await call('GET', 'wrong/cover/1', headers: auth)).statusCode, 401);
   });
 }

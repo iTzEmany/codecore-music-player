@@ -997,7 +997,12 @@ class AppLocalizationsIt extends AppLocalizations {
   String get jamQueue => 'Coda condivisa';
 
   @override
-  String get jamEmpty => 'La coda è vuota. Aggiungi dei brani.';
+  String get jamEmpty => 'Metti in coda dalla libreria o dalla ricerca';
+
+  @override
+  String jamOnlineFailed(String title) {
+    return 'Impossibile aggiungere «$title» alla Jam';
+  }
 
   @override
   String jamAddedBy(String name) {
@@ -1005,10 +1010,10 @@ class AppLocalizationsIt extends AppLocalizations {
   }
 
   @override
-  String get jamYou => 'te';
+  String get jamJumpHere => 'Salta qui';
 
   @override
-  String get jamAddTracks => 'Aggiungi brani';
+  String get jamYou => 'te';
 
   @override
   String get jamAddToJam => 'Aggiungi alla Jam';

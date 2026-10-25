@@ -21,6 +21,7 @@ class TrackMeta {
     this.lyricsSynced,
     this.enrichStatus,
     this.youtubeId,
+    this.curiosities,
   });
 
   /// `youtubeId` has no column on [Track] yet: null here.
@@ -37,11 +38,16 @@ class TrackMeta {
     lyricsPlain: t.lyricsPlain,
     lyricsSynced: t.lyricsSynced,
     enrichStatus: t.enrichStatus,
+    // A list row carries '' for "has some" (light_tracks): not a text.
+    curiosities: (t.curiosities ?? '').isEmpty ? null : t.curiosities,
   );
 
   final String? title, artist, albumArtist, album, genre;
   final int? year, trackNumber, discNumber, enrichStatus;
   final String? isrc, lyricsPlain, lyricsSynced, youtubeId;
+
+  /// Jam info screen only: never applied to a row by the share path.
+  final String? curiosities;
 
   Map<String, Object?> toJson() => {
     if (title != null) 'title': title,
@@ -57,6 +63,7 @@ class TrackMeta {
     if (lyricsSynced != null) 'lyricsSynced': lyricsSynced,
     if (enrichStatus != null) 'enrichStatus': enrichStatus,
     if (youtubeId != null) 'youtubeId': youtubeId,
+    if (curiosities != null) 'curiosities': curiosities,
   };
 
   /// Never throws: a non-map gives null, a bad field gives a null field.
@@ -96,6 +103,7 @@ class TrackMeta {
           : null,
       enrichStatus: num('enrichStatus', 0, 2),
       youtubeId: yt is String && _ytIdRe.hasMatch(yt) ? yt : null,
+      curiosities: lyrics('curiosities', 20000),
     );
   }
 }

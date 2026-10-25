@@ -48,6 +48,14 @@ class CodecoreApp extends ConsumerWidget {
         _messengerKey.currentState?.showSnackBar(SnackBar(content: Text(e.text)));
       }
     });
+    ref.listen(jamOnlineFailuresProvider, (_, next) {
+      final r = next.value;
+      if (r != null) {
+        _messengerKey.currentState?.showSnackBar(SnackBar(
+          content: Builder(builder: (c) => Text(c.l10n.jamOnlineFailed(r.title))),
+        ));
+      }
+    });
     final s = ref.watch(settingsProvider);
     final themeColors = ref.watch(themeColorsProvider);
     final themeBackground = ref.watch(themeBackgroundProvider);

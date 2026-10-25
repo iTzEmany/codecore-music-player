@@ -1003,7 +1003,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get jamQueue => 'File d’attente partagée';
 
   @override
-  String get jamEmpty => 'La file d’attente est vide. Ajoutez des titres.';
+  String get jamEmpty =>
+      'Ajoutez des titres à la file depuis la bibliothèque ou la recherche';
+
+  @override
+  String jamOnlineFailed(String title) {
+    return 'Impossible d’ajouter « $title » à la Jam';
+  }
 
   @override
   String jamAddedBy(String name) {
@@ -1011,10 +1017,10 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get jamYou => 'vous';
+  String get jamJumpHere => 'Passer ici';
 
   @override
-  String get jamAddTracks => 'Ajouter des titres';
+  String get jamYou => 'vous';
 
   @override
   String get jamAddToJam => 'Ajouter à la Jam';

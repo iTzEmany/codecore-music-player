@@ -1000,7 +1000,12 @@ class AppLocalizationsDe extends AppLocalizations {
   String get jamQueue => 'Gemeinsame Warteschlange';
 
   @override
-  String get jamEmpty => 'Die Warteschlange ist leer. Füge Titel hinzu.';
+  String get jamEmpty => 'Reihe Titel aus der Bibliothek oder der Suche ein';
+
+  @override
+  String jamOnlineFailed(String title) {
+    return '„$title“ konnte nicht zur Jam hinzugefügt werden';
+  }
 
   @override
   String jamAddedBy(String name) {
@@ -1008,10 +1013,10 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get jamYou => 'dir';
+  String get jamJumpHere => 'Hier abspielen';
 
   @override
-  String get jamAddTracks => 'Titel hinzufügen';
+  String get jamYou => 'dir';
 
   @override
   String get jamAddToJam => 'Zur Jam hinzufügen';

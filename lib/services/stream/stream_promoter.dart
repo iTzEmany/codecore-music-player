@@ -30,6 +30,7 @@ class StreamPromoter {
     required this.index,
     required this.scan,
     required this.tag,
+    this.onShadowMerged,
     Future<void> Function(File, String)? rename,
     Future<void> Function(File, String)? copy,
   })  : _rename = rename ?? ((f, to) => f.rename(to)),
@@ -42,6 +43,8 @@ class StreamPromoter {
   final Future<DownloadIndex> Function() index;
   final Future<void> Function(Folder folder, String path) scan;
   final Future<void> Function(int trackId) tag;
+  /// The shadow row [shadowId] merged into the library row [keepId]: queues must follow.
+  final void Function(int shadowId, int keepId)? onShadowMerged;
   final Future<void> Function(File, String) _rename; // seams for the cross-volume path
   final Future<void> Function(File, String) _copy;
 
@@ -67,7 +70,8 @@ class StreamPromoter {
       final existing = await tracks.byPath(dest);
       if (existing != null) {
         // A library row (e.g. missing) already owns this path: the shadow row merges into it.
-        await tracks.mergeStreamRow(key, existing.id);
+        final gone = await tracks.mergeStreamRow(key, existing.id);
+        if (gone != null) onShadowMerged?.call(gone, existing.id);
         row = existing;
       } else {
         row = await tracks.promoteStreamRow(key, dest, folder.id, File(dest));

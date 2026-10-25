@@ -58,6 +58,7 @@ void main() {
     await t.pump(const Duration(milliseconds: 300));
     expect(find.text('Caricamento…'), findsOneWidget);
     expect(find.text('Ann'), findsNothing);
+    expect(find.byKey(const ValueKey('mini-loading')), findsOneWidget);
 
     gate.complete();
     await t.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 100)));
@@ -66,6 +67,7 @@ void main() {
     }
     expect(find.text('Caricamento…'), findsNothing);
     expect(find.text('Ann'), findsOneWidget);
+    expect(find.byKey(const ValueKey('mini-loading')), findsNothing);
 
     await t.pumpWidget(const SizedBox());
     await h.dispose(t);

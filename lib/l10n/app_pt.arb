@@ -533,7 +533,15 @@
   "jamIncomingBody": "Ouçam juntos a partir de uma fila partilhada.",
   "jamIncomingDialog": "A música toca neste dispositivo e ambos podem adicionar faixas.",
   "jamQueue": "Fila partilhada",
-  "jamEmpty": "A fila está vazia. Adicione faixas.",
+  "jamEmpty": "Ponha faixas na fila a partir da biblioteca ou da pesquisa",
+  "jamOnlineFailed": "Não foi possível adicionar «{title}» à Jam",
+  "@jamOnlineFailed": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
   "jamAddedBy": "adicionada por {name}",
   "@jamAddedBy": {
     "placeholders": {
@@ -542,8 +550,8 @@
       }
     }
   },
+  "jamJumpHere": "Saltar para aqui",
   "jamYou": "si",
-  "jamAddTracks": "Adicionar faixas",
   "jamAddToJam": "Adicionar à Jam",
   "jamAdded": "Adicionadas à Jam: {count}",
   "@jamAdded": {

@@ -175,6 +175,7 @@ class DownloadsNotifier extends Notifier<List<DownloadItem>> {
         if (item != null) {
           final idx = await ref.read(downloadIndexProvider.future);
           await idx.add(item.result.id, path, source: item.result.source);
+          ref.invalidate(downloadIndexProvider);
           await _mergeShadowRow(item.result, path);
           _resyncPlayer();
         }
@@ -206,7 +207,8 @@ class DownloadsNotifier extends Notifier<List<DownloadItem>> {
     try {
       final tracks = ref.read(trackRepositoryProvider);
       final id = await tracks.idForPath(path);
-      if (id != null) await tracks.mergeStreamRow(r.indexKey, id);
+      final gone = id == null ? null : await tracks.mergeStreamRow(r.indexKey, id);
+      if (gone != null) ref.read(audioHandlerProvider).replaceQueueId(gone, id!);
     } on Object catch (e, st) {
       AppLog.w('merge of the stream row failed for ${r.indexKey}', e, st);
     }
@@ -230,6 +232,13 @@ class DownloadsNotifier extends Notifier<List<DownloadItem>> {
   void add(YtResult r, {String? tag}) {
     // Imports (any tag but addto:) always download.
     if (tag != null && parseAddToPlaylistTag(tag) == null) return _queue.add(r, tag: tag);
+    final idx = ref.read(downloadIndexProvider).value;
+    if (idx != null && idx.contains(r.id, source: r.source)) {
+      // Already a library file: never a second copy (`Title (2).m4a`).
+      final playlist = parseAddToPlaylistTag(tag);
+      if (playlist != null) unawaited(_joinPlaylist(r, playlist));
+      return;
+    }
     if (!_promoting.add(r.indexKey)) return; // double tap while it is moving
     unawaited(_promoteOrQueue(r, tag).whenComplete(() => _promoting.remove(r.indexKey)));
   }
@@ -239,6 +248,7 @@ class DownloadsNotifier extends Notifier<List<DownloadItem>> {
   Future<void> _promoteOrQueue(YtResult r, String? tag) async {
     try {
       if (await ref.read(streamPromoterProvider).promote(r)) {
+        ref.invalidate(downloadIndexProvider); // rows and player watch the index
         await _joinPlaylist(r, parseAddToPlaylistTag(tag));
         _resyncPlayer();
         return;
