@@ -626,6 +626,54 @@ Refactor «ui-fluida» (piano in `docs/refactor/ui-fluida/analisi.md`, decisioni
 - [x] 44.5 Pulizia dell'APK profile
 - [~] 44.6 Nuova versione `1.3.0+4` fatta; tag `v1.3.0` rimandato a dopo il prossimo obiettivo (D-58)
 
+## Fase 45 — Cache di streaming e motore (`fase-45-cache-streaming.md`)
+Feature «Streaming e coda online» (`docs/feature-streaming.md`, decisioni D-61…D-81, 2026-10-25). Una PR per la fase, un commit per task.
+- [ ] 45.1 `StreamCache` e chiave
+- [ ] 45.2 Righe ombra, `listenKinds` e test «riga `kind = 2` in ogni vista» (K-02)
+- [ ] 45.3 `StreamPreparer`
+- [ ] 45.4 Il lettore suona dal file in cache
+- [ ] 45.5 Suggeriti di Shuffle+ sulla cache; via `StreamAddressCache`
+- [ ] 45.6 Impostazione `streamCacheMb`, cursore e «Svuota»
+- [ ] 45.7 Controlli di fase (K-01, K-02, K-03)
+- [ ] 45.8 Prove a mano (utente)
+
+## Fase 46 — Streaming dalla ricerca (`fase-46-streaming-ricerca.md`)
+- [ ] 46.1 `PlayerController`: suonare e accodare brani online
+- [ ] 46.2 Player in caricamento
+- [ ] 46.3 `StreamPromoter`: «Scarica» senza riscaricare
+- [ ] 46.4 «Aggiungi a playlist» su un brano online
+- [ ] 46.5 Righe online: tap, swipe e menu ⋮
+- [ ] 46.6 Via l'anteprima con le cuffie
+- [ ] 46.7 Album online: Play, Shuffle e menu ⋮
+- [ ] 46.8 «Scarica» nel menu ⋮ del player per un brano in streaming
+- [ ] 46.9 Controlli di fase (K-01, K-02, K-03)
+- [ ] 46.10 Prove a mano (utente)
+
+## Fase 47 — Jam online (`fase-47-jam-online.md`)
+- [ ] 47.1 `JamItem.videoId` e `ref` con prefisso
+- [ ] 47.2 Accodare brani online nella Jam (host e ospiti)
+- [ ] 47.3 Proprietario uscito: l'uscita scarica da sé
+- [ ] 47.4 Rotta `meta`: copertina, testo e curiosità dal proprietario
+- [ ] 47.5 Via il FAB; swipe e «In coda» nella coda condivisa
+- [ ] 47.6 Schermata del brano della Jam
+- [ ] 47.7 Controlli di fase (K-01, K-02)
+- [ ] 47.8 Prove a mano (utente)
+
+## Fase 48 — Shuffle a 3 stati e Home (`fase-48-shuffle-tre-stati.md`)
+- [ ] 48.1 `plusAllowed` e ciclo che salta Shuffle+
+- [ ] 48.2 Suggeriti inseriti subito e tolti allo spegnimento
+- [ ] 48.3 Impostazioni e foglio Shuffle+ senza interruttore
+- [ ] 48.4 Home: Play e shuffle separati in «Casuale su tutto»
+- [ ] 48.5 Controlli di fase (K-01, K-02, K-03)
+- [ ] 48.6 Prove a mano (utente)
+
+## Fase 49 — Artisti ospiti (`fase-49-artisti-ospiti.md`)
+- [ ] 49.1 `splitArtists` e `ArtistLinkResolver`
+- [ ] 49.2 Nomi toccabili nel player e nella barra desktop
+- [ ] 49.3 «Vai all'artista» con foglio di scelta
+- [ ] 49.4 Controlli di fase (K-01, K-02)
+- [ ] 49.5 Prove a mano (utente)
+
 ## Note di deviazione
 <!-- una riga per deviazione: data — task — cosa è cambiato e perché -->
 
