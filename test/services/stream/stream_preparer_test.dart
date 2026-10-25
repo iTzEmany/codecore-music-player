@@ -279,12 +279,15 @@ void main() {
     await Future.wait([w, x, c, d]);
   });
 
-  test('a user pick starts at once even when prefetches hold every slot', () async {
+  test('a user pick never waits for prefetches: one yields, the total stays at 2', () async {
     prep.setQueue([_i('a'), _i('b')]);
     await _until(() => yt.started.length == 2);
     final z = prep.ready('youtube:z', _r('z'));
-    await _until(() => yt.started.length == 3);
-    expect(yt.started, ['a', 'b', 'z']);
+    await _until(() => yt.started.contains('z'));
+    await _quiet();
+    expect(yt.started.first, 'a');
+    expect(yt.started.skip(2).first, 'z');
+    expect(yt.maxOpen, 2);
     yt.finish('z');
     await z;
   });

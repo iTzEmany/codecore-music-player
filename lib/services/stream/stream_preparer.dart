@@ -106,6 +106,7 @@ class StreamPreparer {
   final _pinned = <String>{};
   var _tmpSeq = 0;
   var _active = 0;
+  final _yielding = <_Job>{};
   var _pumping = false, _again = false, _disposed = false;
   Timer? _resume;
   DateTime? _pausedUntil;
@@ -231,11 +232,28 @@ class StreamPreparer {
     }
     final requested = _jobs.values.where((j) => j.requested && j.phase == StreamPhase.queued).toList()
       ..sort((a, b) => rank(a).compareTo(rank(b)));
-    // Requested jobs are limited only by other requested ones, never by prefetches.
-    var reqActive = _jobs.values.where((j) => j.requested && j.phase == StreamPhase.downloading).length;
+    // K-04: at most maxParallel downloads in all. A requested job never waits for
+    // prefetches: when the cap is hit, running prefetches yield (are cancelled, and
+    // picked up again later by the queue walk).
+    var free = maxParallel - _active;
+    var waiting = requested.length;
     for (final j in requested) {
-      if (reqActive++ >= maxParallel) return;
+      if (free <= 0) break;
+      free--;
+      waiting--;
       _start(j);
+    }
+    if (waiting > 0) {
+      for (final p in _jobs.values.toList()) {
+        if (_yielding.length >= waiting) break;
+        if (p.requested || p.phase != StreamPhase.downloading) continue;
+        p.dropped = true;
+        _yielding.add(p);
+        _jobs.remove(p.key);
+        _setPhase(p.key, StreamPhase.queued);
+        p.cancel?.cancel('yields to a requested download');
+      }
+      return;
     }
     if (_pausedUntil?.isAfter(DateTime.now()) ?? false) return;
     bool? room;
@@ -311,6 +329,7 @@ class StreamPreparer {
       }
     }
     if (j.dropped) {
+      _yielding.remove(j);
       // Left the queue mid-download: nobody waits for it, leave no trace.
       if (!j.rowId.isCompleted) j.rowId.completeError(StateError('dropped'));
       final leftover = part;
