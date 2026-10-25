@@ -5,6 +5,7 @@ import 'package:path/path.dart' as p;
 import '../../core/app_log.dart';
 import '../../core/text_utils.dart';
 import '../../data/db/app_database.dart';
+import '../../data/repositories/track_kinds.dart';
 import '../../data/repositories/track_repository.dart';
 import '../covers/cover_store.dart';
 import 'deezer_client.dart';
@@ -270,7 +271,8 @@ class EnrichmentService {
     final album = f.contains(EnrichField.album) ? m?.album : null;
     final newArtist = artist ?? t.artist;
     final newAlbum = album ?? t.album;
-    final changedKey = artist != null || album != null;
+    // A streamed shadow row keeps its own `stream|<key>` album key.
+    final changedKey = (artist != null || album != null) && t.kind != kStreamKind;
     final key = changedKey
         ? computeAlbumKey(
             albumArtist: t.albumArtist,

@@ -121,9 +121,13 @@ void main() {
     await dir.create(recursive: true);
     File(p.join(dir.path, 'x.part')).writeAsBytesSync([1, 2, 3]);
     File(p.join(dir.path, 'a_1')).writeAsBytesSync([1, 2]);
+    File(p.join(dir.path, '.dl-a_1', 'y.m4a'))
+      ..createSync(recursive: true)
+      ..writeAsBytesSync([1]);
     final c = cache();
     await c.open();
     expect(File(p.join(dir.path, 'x.part')).existsSync(), isFalse);
+    expect(Directory(p.join(dir.path, '.dl-a_1')).existsSync(), isFalse);
     expect(c.usedBytes, 2);
   });
 

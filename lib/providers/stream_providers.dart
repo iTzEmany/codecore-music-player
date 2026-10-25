@@ -1,0 +1,69 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../data/db/app_database.dart';
+import '../services/online/enrichment_service.dart';
+import '../services/online/youtube_service.dart' show YtResult;
+import '../services/stream/stream_cache.dart';
+import '../services/stream/stream_preparer.dart';
+import 'database_providers.dart';
+import 'online_providers.dart';
+import 'shuffle_plus_providers.dart' show networkProbeProvider;
+import 'youtube_providers.dart';
+
+/// Opened once in main (45.4); the limit follows the settings from 45.6.
+final streamCacheProvider = Provider<StreamCache>((ref) =>
+    throw StateError('streamCacheProvider must be overridden with an opened cache'));
+
+final streamPreparerProvider = Provider<StreamPreparer>((ref) {
+  final enrichment = ref.watch(enrichmentServiceProvider);
+  final tracks = ref.watch(trackRepositoryProvider);
+  final preparer = StreamPreparer(
+    cache: ref.watch(streamCacheProvider),
+    tracks: tracks,
+    youtube: ref.watch(youtubeServiceProvider),
+    isMetered: () async => (await ref.read(networkProbeProvider).current()).metered,
+    enrich: (r, rowId) async {
+      final proposal = await enrichment.propose(_syntheticTrack(r));
+      // Tags go to the database only, never into the cached file.
+      final row = await tracks.getById(await rowId);
+      if (row == null) return;
+      await enrichment.apply(
+        EnrichmentProposal(
+          track: row,
+          meta: proposal.meta,
+          lyrics: proposal.lyrics,
+          curiosity: proposal.curiosity,
+          disc: proposal.disc,
+          isrc: proposal.isrc,
+          source: proposal.source,
+        ),
+        EnrichField.values.toSet(),
+      );
+    },
+  );
+  ref.onDispose(preparer.dispose);
+  return preparer;
+});
+
+/// What `propose` reads (title, artist, album, length) before the row exists.
+Track _syntheticTrack(YtResult r) => Track(
+      id: 0,
+      path: '',
+      title: r.title,
+      artist: r.artists.isEmpty ? r.channel : r.artists.join(', '),
+      album: r.album,
+      albumKey: '',
+      durationMs: r.duration?.inMilliseconds ?? 0,
+      format: '',
+      sizeBytes: 0,
+      mtimeMs: 0,
+      hasCover: false,
+      isFavorite: false,
+      enrichStatus: 0,
+      userEdited: false,
+      missing: false,
+      ignored: false,
+      kind: 2,
+      addedAt: 0,
+      playCount: 0,
+    );

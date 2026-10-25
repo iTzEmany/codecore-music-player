@@ -42,6 +42,14 @@ class StreamCache {
     await dir.create(recursive: true);
     await for (final e in dir.list()) {
       if (e is File && e.path.endsWith('.part')) await _remove(e);
+      // Temp folders of the preparer's interrupted downloads.
+      if (e is Directory && p.basename(e.path).startsWith('.dl-')) {
+        try {
+          await e.delete(recursive: true);
+        } on FileSystemException catch (err, st) {
+          AppLog.w('stream cache: cannot delete ${e.path}', err, st);
+        }
+      }
     }
     await _measure();
   }

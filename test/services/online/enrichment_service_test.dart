@@ -134,4 +134,15 @@ void main() {
     expect(await svc.coverForAlbum(t, 'New Album', 'Somebody Else'), isFalse);
     expect((await repo.getById(t.id))!.hasCover, isFalse);
   });
+
+  test('apply on a streamed shadow row keeps its stream album key', () async {
+    final t = await add('stream:youtube:x', 'Song');
+    await (db.update(db.tracks)..where((r) => r.id.equals(t.id)))
+        .write(const TracksCompanion(kind: Value(2), albumKey: Value('stream|youtube:x')));
+    final prop = await svc.propose((await repo.getById(t.id))!, lyrics: false, curiosity: false);
+    await svc.apply(prop, {EnrichField.album, EnrichField.artist});
+    final r = (await repo.getById(t.id))!;
+    expect(r.album, 'New Album');
+    expect(r.albumKey, 'stream|youtube:x');
+  });
 }
