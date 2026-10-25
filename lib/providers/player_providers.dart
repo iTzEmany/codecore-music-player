@@ -19,6 +19,8 @@ import 'database_providers.dart';
 import 'jam_providers.dart' show jamProvider;
 import 'queue_tracks.dart';
 import 'settings_providers.dart';
+import 'shuffle_plus_providers.dart' show ShufflePlusBlock;
+import '../services/shuffle_plus/plus_allowed.dart';
 
 /// Overridden in `main` once the handler has been created (and, on Android,
 /// registered with `AudioService.init`).
@@ -74,6 +76,7 @@ class PlayerController {
     this.jamActive,
     this.addToJam,
     this.addOnlineToJam,
+    this.plusBlock,
     Random? random,
   }) : _random = random ?? Random();
 
@@ -91,6 +94,9 @@ class PlayerController {
   final bool Function()? jamActive;
   final void Function(List<int>)? addToJam;
   final bool Function(YtResult)? addOnlineToJam;
+
+  /// Why Shuffle+ is out of the cycle for the current queue (null: it is in).
+  final Future<ShufflePlusBlock?> Function()? plusBlock;
 
   bool get inJam => jamActive?.call() ?? false;
 
@@ -264,18 +270,23 @@ class PlayerController {
     return setShuffle(on);
   }
 
-  /// The shuffle button: off, then shuffle, then Shuffle+, then off again.
-  Future<void> cycleShuffle() async {
+  /// The shuffle button: off, shuffle, Shuffle+, off. Returns why it skipped
+  /// Shuffle+ (then: off, shuffle, off), else null.
+  Future<ShufflePlusBlock?> cycleShuffle() async {
     final plus = shufflePlus?.call() ?? false;
     if (!_handler.shuffleEnabled) {
       setShufflePlus?.call(false);
       await setShuffle(true);
-    } else if (!plus) {
-      setShufflePlus?.call(true);
-    } else {
-      setShufflePlus?.call(false);
-      await setShuffle(false);
+      return null;
     }
+    final block = plus ? null : await plusBlock?.call();
+    if (!plus && block == null) {
+      setShufflePlus?.call(true);
+      return null;
+    }
+    setShufflePlus?.call(false);
+    await setShuffle(false);
+    return block; // null when a stored plus goes off: no skip
   }
 
   Future<void> setShuffle(bool on) => _handler.setShuffleMode(
@@ -311,6 +322,19 @@ final playerControllerProvider = Provider<PlayerController>(
     jamActive: () => ref.read(jamProvider).active,
     addToJam: (ids) => unawaited(ref.read(jamProvider.notifier).addLibraryIds(ids)),
     addOnlineToJam: (r) => ref.read(jamProvider.notifier).addOnline(r),
+    plusBlock: () async {
+      final h = ref.read(audioHandlerProvider);
+      final local = await ref.read(trackRepositoryProvider).getByIdsLight([
+        for (final i in h.sourceIds ?? h.queueIds)
+          if (!isOnlineId(i)) i,
+      ]);
+      return plusAllowed(
+        queueIds: h.queueIds,
+        jam: ref.read(jamProvider).active,
+        radio: ref.read(playContextProvider)?.kind == PlayContextKind.radio,
+        localCount: local.where((t) => !t.missing && t.kind == 0).length,
+      );
+    },
     libraryIdOf: (r) async {
       final path = (await ref.read(downloadIndexProvider.future))
           .pathFor(r.id, source: r.source);
