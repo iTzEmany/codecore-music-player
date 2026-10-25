@@ -28,7 +28,7 @@ Track _track({
   int? trackNumber,
   int? bitDepth,
   int? rate,
-}) => Track(
+}) => Track(coverSource: 0, 
   id: 1,
   path: '/m/a.mp3',
   title: title,
