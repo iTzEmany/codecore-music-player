@@ -669,11 +669,11 @@ Note: D-89 (Jam: tap e «Riproduci dopo» vanno in coda) nella UI; la coda condi
 - [~] 48.6 Prove a mano (utente)
 
 ## Fase 49 — Artisti ospiti (`fase-49-artisti-ospiti.md`)
-- [ ] 49.1 `splitArtists` e `ArtistLinkResolver`
-- [ ] 49.2 Nomi toccabili nel player e nella barra desktop
-- [ ] 49.3 «Vai all'artista» con foglio di scelta
-- [ ] 49.4 Controlli di fase (K-01, K-02)
-- [ ] 49.5 Prove a mano (utente)
+- [x] 49.1 `splitArtists` e `ArtistLinkResolver`
+- [x] 49.2 Nomi toccabili nel player e nella barra desktop
+- [x] 49.3 «Vai all'artista» con foglio di scelta
+- [x] 49.4 Controlli di fase (K-01, K-02)
+- [~] 49.5 Prove a mano (utente)
 
 ## Note di deviazione
 <!-- una riga per deviazione: data — task — cosa è cambiato e perché -->

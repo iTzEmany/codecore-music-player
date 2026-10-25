@@ -65,7 +65,8 @@ void main() {
       ));
       await tester.pump(const Duration(milliseconds: 100));
       // «Salta qui» is in the row menu for the host only
-      expect(find.byTooltip('Altre azioni'), host ? findsNWidgets(2) : findsNothing);
+      // «Vai all'artista» is in the menu of a row with an artist; «Salta qui» only for the host.
+      expect(find.byTooltip('Altre azioni'), host ? findsNWidgets(2) : findsOneWidget);
 
       await tester.tap(find.text('Seconda'));
       await tester.pumpAndSettle();
@@ -74,6 +75,7 @@ void main() {
       expect(find.text('Una storia'), findsOneWidget);
       expect(find.text('Curiosità'), findsOneWidget);
       expect(find.text('Salta qui'), host ? findsOneWidget : findsNothing);
+      expect(find.text('Vai all’artista'), findsOneWidget);
       if (host) {
         await tester.tap(find.text('Salta qui'));
         await tester.pumpAndSettle();

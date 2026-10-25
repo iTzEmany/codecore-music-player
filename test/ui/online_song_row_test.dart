@@ -4,10 +4,11 @@ import 'package:codecore/app.dart';
 import 'package:codecore/providers/player_providers.dart';
 import 'package:codecore/providers/selection_providers.dart';
 import 'package:codecore/providers/youtube_providers.dart';
+import 'package:codecore/providers/ytm_catalog_providers.dart';
+import 'package:codecore/services/online/artist_link_resolver.dart';
 import 'package:codecore/services/online/download_queue.dart';
 import 'package:codecore/services/online/youtube_service.dart';
 import 'package:codecore/ui/screens/now_playing/now_playing_screen.dart';
-import 'package:codecore/ui/screens/online/artist_page_screen.dart';
 import 'package:codecore/ui/screens/online/online_song_row.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -46,17 +47,23 @@ class _Ctrl implements PlayerController {
 
 class _Downloads extends DownloadsNotifier {
   final adds = <String?>[];
+  bool instant = false;
   @override
   List<DownloadItem> build() => [];
   @override
-  void add(YtResult r, {String? tag}) => adds.add(tag ?? 'plain');
+  Future<bool> add(YtResult r, {String? tag}) async {
+    adds.add(tag ?? 'plain');
+    return instant;
+  }
 }
 
 void main() {
   late _Ctrl ctrl;
   late _Downloads downloads;
+  final askedArtists = <String>[];
 
   Future<Harness> pumpRow(WidgetTester tester, {bool jam = false, Widget? child}) async {
+    askedArtists.clear();
     ctrl = _Ctrl()..inJam = jam;
     downloads = _Downloads();
     final h = await Harness.create(tester);
@@ -69,6 +76,13 @@ void main() {
       extraOverrides: [
         playerControllerProvider.overrideWithValue(ctrl),
         downloadsProvider.overrideWith(() => downloads),
+        artistLinkResolverProvider.overrideWithValue(ArtistLinkResolver(
+          library: (name) async {
+            askedArtists.add(name);
+            return null;
+          },
+          search: (_) async => [],
+        )),
       ],
     );
     return h;
@@ -164,6 +178,17 @@ void main() {
     await h.dispose(tester);
   });
 
+  testWidgets('«Scarica» of an instant promotion says it joined the library', (tester) async {
+    final h = await pumpRow(tester);
+    downloads.instant = true;
+    await tester.tap(find.byTooltip('Altre opzioni'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Scarica'));
+    await tester.pumpAndSettle();
+    expect(find.text('Aggiunto alla libreria'), findsOneWidget);
+    await h.dispose(tester);
+  });
+
   testWidgets('the ⋮ menu has the 5 actions and each runs', (tester) async {
     final h = await pumpRow(tester);
     await tester.runAsync(() => h.db.customStatement(
@@ -204,11 +229,11 @@ void main() {
     await tester.tap(find.text('Vai all’artista'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
-    expect(find.byType(ArtistPageScreen), findsOneWidget);
+    expect(askedArtists, ['Ann']); // library first (49.3); the page opens through ShellNav, absent in this harness
     await h.dispose(tester);
   });
 
-  testWidgets('a failed promotion shows its message as a snackbar', (tester) async {
+  testWidgets('a failed promotion shows a localized snackbar, never the raw message', (tester) async {
     tester.view.physicalSize = const Size(400, 800);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -221,17 +246,17 @@ void main() {
     ));
     await tester.pump(const Duration(milliseconds: 600));
     await tester.pump(const Duration(milliseconds: 600));
-    errors.add(PromoteError('Disco pieno'));
+    errors.add(PromoteError(noSpace: true));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
-    expect(find.text('Disco pieno'), findsOneWidget);
+    expect(find.text('Spazio insufficiente per scaricare il brano'), findsOneWidget);
     // The same message again is a second snackbar, queued behind the first.
-    errors.add(PromoteError('Disco pieno'));
+    errors.add(PromoteError(noSpace: true));
     await tester.pump();
     ScaffoldMessenger.of(tester.element(find.byType(Scaffold).first)).hideCurrentSnackBar();
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 600));
-    expect(find.text('Disco pieno'), findsOneWidget);
+    expect(find.text('Spazio insufficiente per scaricare il brano'), findsOneWidget);
     await h.dispose(tester);
   });
 }

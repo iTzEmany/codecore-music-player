@@ -31,8 +31,14 @@ class _Settings extends SettingsNotifier {
 
 class _Promoter implements StreamPromoter {
   int calls = 0;
+  bool result = true;
+  Object? error;
   @override
-  Future<bool> promote(YtResult r) async => ++calls > 0;
+  Future<bool> promote(YtResult r) async {
+    calls++;
+    if (error != null) throw error!;
+    return result;
+  }
   @override
   dynamic noSuchMethod(Invocation i) => throw UnimplementedError();
 }
@@ -72,7 +78,7 @@ void main() {
 
   test('a promotion refreshes the download index the rows watch', () async {
     expect(builds, 1);
-    c.read(downloadsProvider.notifier).add(_r);
+    expect(await c.read(downloadsProvider.notifier).add(_r), isTrue);
     await Future<void>.delayed(const Duration(milliseconds: 100));
     expect(promoter.calls, 1);
     expect(builds, 2);
@@ -98,5 +104,33 @@ void main() {
     expect(promoter.calls, 0);
     expect(c.read(downloadsProvider), isEmpty);
     expect(await PlaylistRepository(db).containing([trackId]), {playlistId});
+  });
+
+  test('add returns false for a video already in the library', () async {
+    final file = File('${dir.path}/song.m4a')..writeAsStringSync('x');
+    await index.add(_r.id, file.path);
+    expect(await c.read(downloadsProvider.notifier).add(_r), isFalse);
+  });
+
+  test('add returns false and queues a download when the cache has nothing', () async {
+    promoter.result = false;
+    expect(await c.read(downloadsProvider.notifier).add(_r), isFalse);
+    expect(c.read(downloadsProvider), isNotEmpty);
+  });
+
+  test('a failed promotion falls back to the queue', () async {
+    promoter.error = StateError('boom');
+    expect(await c.read(downloadsProvider.notifier).add(_r), isFalse);
+    expect(c.read(downloadsProvider), isNotEmpty);
+  });
+
+  test('no space: nothing is queued and the error says so', () async {
+    promoter.error = const StreamPromoteException('full', noSpace: true);
+    final errors = <bool>[];
+    c.read(downloadsProvider.notifier).promoteErrors.listen(errors.add);
+    expect(await c.read(downloadsProvider.notifier).add(_r), isFalse);
+    await Future<void>.delayed(Duration.zero);
+    expect(c.read(downloadsProvider), isEmpty);
+    expect(errors, [true]);
   });
 }

@@ -220,6 +220,7 @@ class AppShell extends ConsumerWidget {
         PlaybackFailureReason.unplayable => l.reasonUnplayable,
         PlaybackFailureReason.notInLibrary => l.reasonNotInLibrary,
         PlaybackFailureReason.onlineUnavailable => l.reasonOnlineUnavailable,
+        PlaybackFailureReason.networkUnavailable => l.ytErrNetwork,
         PlaybackFailureReason.radioUnavailable => l.reasonRadioUnavailable,
       };
       showMsg(context, l.playbackError(f.title ?? '', reason));

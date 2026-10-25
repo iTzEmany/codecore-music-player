@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/db/app_database.dart';
-import '../../data/repositories/library_queries.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../providers/jam_providers.dart';
 import '../../providers/nav_providers.dart';
@@ -12,9 +11,9 @@ import '../../services/audio/play_queue.dart';
 import '../../services/jam/jam_models.dart';
 import '../screens/devices/devices_sheet.dart';
 import '../screens/jam/jam_screen.dart';
-import '../screens/library/artist_screen.dart';
 import '../screens/now_playing/now_playing_screen.dart';
 import '../theme/tokens.dart';
+import '../widgets/artist_links.dart';
 import '../widgets/quality_tag.dart';
 import '../widgets/speed_button.dart';
 import '../widgets/favorite_actions.dart';
@@ -22,7 +21,6 @@ import '../widgets/focus_ring_button.dart';
 import '../widgets/format_utils.dart';
 import '../widgets/mini_player.dart' show kBarCoverHero;
 import '../widgets/play_buttons.dart';
-import 'shell_nav.dart';
 import '../widgets/motion.dart';
 import '../widgets/track_art.dart';
 import '../widgets/radio_now.dart';
@@ -90,22 +88,6 @@ class _TrackInfo extends ConsumerWidget {
     final radio = radioOfTrack(ref, track);
     final onAir = radio == null ? null : ref.watch(onAirProvider).value;
     final texts = radio == null ? null : radioTexts(l, radio, onAir);
-    void openArtist() {
-      final key = (track.artist ?? '').trim().toLowerCase();
-      ShellNav.openInLibrary(
-        context,
-        ref,
-        ArtistDetailScreen(
-          artist: ArtistSummary(
-            key: key,
-            name: track.artist,
-            trackCount: 0,
-            albumCount: 0,
-          ),
-        ),
-      );
-    }
-
     return Row(
       children: [
         MouseRegion(
@@ -145,17 +127,15 @@ class _TrackInfo extends ConsumerWidget {
                 overflow: TextOverflow.ellipsis,
                 style: theme.bodyLarge,
               ),
-              InkWell(
-                onTap: radio != null || track.trackKind == TrackKind.online
-                    ? null
-                    : openArtist,
-                child: Text(
-                  texts?.subtitle ?? track.artist ?? l.unknownArtist,
+              if (radio == null)
+                ArtistLinks(track, style: theme.bodyMedium, minHeight: 0)
+              else
+                Text(
+                  texts!.subtitle,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: theme.bodyMedium,
                 ),
-              ),
             ],
           ),
         ),

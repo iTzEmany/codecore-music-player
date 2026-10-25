@@ -48,9 +48,10 @@ class SuggestedInfo extends ConsumerWidget {
         Row(
           children: [
             TextButton.icon(
-              onPressed: () {
-                if (actions.downloadEntry(track.id)) {
-                  showMsg(context, l.suggestionDownloadStarted);
+              onPressed: () async {
+                final now = await actions.downloadEntry(track.id);
+                if (now != null && context.mounted) {
+                  showMsg(context, now ? l.addedToLibrary : l.suggestionDownloadStarted);
                 }
               },
               icon: const Icon(Icons.download_rounded, size: 20),
@@ -60,8 +61,9 @@ class SuggestedInfo extends ConsumerWidget {
               onPressed: () async {
                 final picked = await pickPlaylist(context, ref);
                 if (picked == null || !context.mounted) return;
-                if (actions.addToPlaylist(track.id, picked.id)) {
-                  showMsg(context, l.suggestionAddWhenDownloaded(picked.name));
+                final now = await actions.addToPlaylist(track.id, picked.id);
+                if (now != null && context.mounted) {
+                  showMsg(context, now ? l.addedToPlaylist(picked.name) : l.suggestionAddWhenDownloaded(picked.name));
                 }
               },
               icon: const Icon(Icons.playlist_add_rounded, size: 20),

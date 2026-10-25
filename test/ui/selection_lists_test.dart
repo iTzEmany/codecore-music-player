@@ -50,7 +50,10 @@ class _FakeDownloads extends DownloadsNotifier {
   @override
   List<DownloadItem> build() => const [];
   @override
-  void add(YtResult r, {String? tag}) => added.add(r.id);
+  Future<bool> add(YtResult r, {String? tag}) async {
+    added.add(r.id);
+    return false;
+  }
 }
 
 class _FakeYoutube implements YoutubeService {

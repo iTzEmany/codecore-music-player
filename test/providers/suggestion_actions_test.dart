@@ -16,6 +16,7 @@ void main() {
   late SuggestionLog log;
   late int id;
   late List<(String, String?)> downloads;
+  var instant = false; // what the download callback reports
   late List<int> removed;
   late SuggestionActions actions;
 
@@ -30,25 +31,34 @@ void main() {
     await log.load();
     log.add(videoId: 'v1', title: 'Streamed', artist: 'Chan', seedTitle: 'Seed');
     downloads = [];
+    instant = false;
     removed = [];
     actions = SuggestionActions(
       online: online,
       log: log,
-      download: (r, {tag}) => downloads.add((r.id, tag)),
+      download: (r, {tag}) async {
+        downloads.add((r.id, tag));
+        return instant;
+      },
       removeQueueId: (i) async => removed.add(i),
     );
   });
 
   tearDown(() => dir.deleteSync(recursive: true));
 
-  test('download queues the song and marks it downloaded', () {
-    expect(actions.downloadEntry(id), isTrue);
+  test('download queues the song and marks it downloaded', () async {
+    expect(await actions.downloadEntry(id), isFalse);
     expect(downloads, [('v1', null)]);
     expect(log.latest('v1')?.outcome, SuggestionOutcome.downloaded);
   });
 
-  test('add to playlist downloads with the playlist in the tag', () {
-    expect(actions.addToPlaylist(id, 5), isTrue);
+  test('an instant promotion is reported to the caller', () async {
+    instant = true;
+    expect(await actions.downloadEntry(id), isTrue);
+  });
+
+  test('add to playlist downloads with the playlist in the tag', () async {
+    expect(await actions.addToPlaylist(id, 5), isFalse);
     expect(downloads, [('v1', addToPlaylistTag(5))]);
     expect(log.latest('v1')?.outcome, SuggestionOutcome.downloaded);
   });
@@ -66,9 +76,9 @@ void main() {
     expect(log.latest('v1')?.outcome, SuggestionOutcome.queued);
   });
 
-  test('an entry the registry forgot downloads nothing', () {
+  test('an entry the registry forgot downloads nothing', () async {
     online.forget(id);
-    expect(actions.downloadEntry(id), isFalse);
+    expect(await actions.downloadEntry(id), isNull);
     expect(downloads, isEmpty);
   });
 }

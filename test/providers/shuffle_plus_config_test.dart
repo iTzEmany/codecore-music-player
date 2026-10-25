@@ -63,22 +63,18 @@ void main() {
   test('the reasons Shuffle+ is idle are reported in order', () {
     ShufflePlusBlock? of({
       bool jam = false,
-      int? size = 10,
       bool tool = true,
       bool metered = false,
       bool stopped = false,
     }) =>
         shufflePlusBlock(
             jam: jam,
-            sourceSize: size,
             toolAvailable: tool,
             metered: metered,
             unmeteredOnly: true,
             stopped: stopped);
     expect(of(), isNull);
-    expect(of(jam: true, size: 2), ShufflePlusBlock.jam);
-    expect(of(size: 4), ShufflePlusBlock.shortList);
-    expect(of(size: null), ShufflePlusBlock.shortList);
+    expect(of(jam: true), ShufflePlusBlock.jam);
     expect(of(tool: false), ShufflePlusBlock.noTool);
     expect(of(metered: true), ShufflePlusBlock.metered);
     expect(of(stopped: true), ShufflePlusBlock.stopped);

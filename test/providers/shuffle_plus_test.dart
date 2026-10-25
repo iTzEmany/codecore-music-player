@@ -67,6 +67,7 @@ class _Host implements ShuffleHost {
   set shuffleEnabled(bool v) => _shuffle = v;
   @override
   bool isPlaying = true;
+  int inserts = 0;
 
   final _changes = StreamController<void>.broadcast(sync: true);
   final _pos = StreamController<Duration>.broadcast(sync: true);
@@ -84,6 +85,7 @@ class _Host implements ShuffleHost {
 
   @override
   void insertAt(int index, int id) {
+    inserts++;
     real != null ? real!.insertAt(index, id) : _ids.insert(index, id);
     _changes.add(null);
   }
@@ -422,6 +424,21 @@ void main() {
       await until(() => host.queueIds.where(isOnlineId).isEmpty);
     });
   }
+
+  test('a Jam that starts while a suggestion is being prepared inserts nothing', () async {
+    final gate = Completer<void>();
+    prepareHook = (r) async {
+      prepared.add(r.id);
+      await gate.future;
+    };
+    controller.start();
+    await until(() => prepared.isNotEmpty);
+    jam = true;
+    gate.complete();
+    await settle();
+    expect(host.inserts, 0);
+    expect(host.queueIds.where(isOnlineId), isEmpty);
+  });
 
   test('Shuffle+ turned off while a suggestion is being prepared inserts nothing more', () async {
     final gate = Completer<void>();

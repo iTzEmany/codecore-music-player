@@ -5322,4 +5322,13 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get ytmAlbumQueue => 'Adicionar álbum à fila';
+
+  @override
+  String get addedToLibrary => 'Adicionada à biblioteca';
+
+  @override
+  String get promoteNoSpace => 'Espaço insuficiente para transferir a faixa';
+
+  @override
+  String get promoteFailed => 'Não foi possível mover a faixa';
 }

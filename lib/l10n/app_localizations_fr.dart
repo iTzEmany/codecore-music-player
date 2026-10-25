@@ -5367,4 +5367,13 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get ytmAlbumQueue => 'Ajouter l’album à la file';
+
+  @override
+  String get addedToLibrary => 'Ajouté à la bibliothèque';
+
+  @override
+  String get promoteNoSpace => 'Espace insuffisant pour télécharger le titre';
+
+  @override
+  String get promoteFailed => 'Impossible de déplacer le titre';
 }

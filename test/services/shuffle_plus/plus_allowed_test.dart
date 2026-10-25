@@ -1,4 +1,3 @@
-import 'package:codecore/providers/shuffle_plus_providers.dart';
 import 'package:codecore/services/shuffle_plus/plus_allowed.dart';
 import 'package:flutter_test/flutter_test.dart';
 

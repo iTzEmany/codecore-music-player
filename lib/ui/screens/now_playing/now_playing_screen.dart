@@ -10,13 +10,12 @@ import '../car/car_mode_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/db/app_database.dart';
-import '../../../data/repositories/library_queries.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../services/radio/radio_station.dart' show RadioStation;
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/player_providers.dart';
 import '../../../services/online/youtube_service.dart' show YtResult;
-import '../../shell/shell_nav.dart';
+import '../../widgets/artist_links.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/track_art.dart';
 import 'suggested_info.dart';
@@ -25,7 +24,6 @@ import '../../widgets/radio_now.dart';
 import '../../widgets/favorite_actions.dart';
 import '../../widgets/mini_player.dart' show coverHeroTagFor;
 import '../../widgets/track_actions.dart';
-import '../library/artist_screen.dart';
 import 'now_playing_cards.dart';
 import 'now_playing_controls.dart';
 import '../../widgets/motion.dart';
@@ -507,18 +505,6 @@ class _TitleRow extends ConsumerWidget {
   final RadioStation? radio;
   final String? onAir;
 
-  void _openArtist(BuildContext context, WidgetRef ref) {
-    // The page only needs the same key `watchArtists` groups by.
-    final key = (track.artist ?? '').trim().toLowerCase();
-    final artist = ArtistSummary(
-      key: key,
-      name: track.artist,
-      trackCount: 0,
-      albumCount: 0,
-    );
-    ShellNav.openInLibrary(context, ref, ArtistDetailScreen(artist: artist));
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
@@ -545,21 +531,22 @@ class _TitleRow extends ConsumerWidget {
                   overflow: TextOverflow.ellipsis,
                   style: theme.titleLarge,
                 ),
-                InkWell(
-                  onTap: online ? null : () => _openArtist(context, ref),
-                  child: Padding(
+                if (radio == null)
+                  ArtistLinks(
+                    track,
+                    style: theme.bodyLarge?.copyWith(color: cc.textMuted),
+                  )
+                else
+                  Padding(
                     padding: const EdgeInsets.symmetric(vertical: 2),
                     child: Text(
                       // «In diretta» is already in the live row below.
-                      texts == null
-                          ? (track.artist ?? l.unknownArtist)
-                          : (onAir == null ? '' : texts.subtitle),
+                      onAir == null ? '' : texts!.subtitle,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: theme.bodyLarge?.copyWith(color: cc.textMuted),
                     ),
                   ),
-                ),
               ],
             ),
           ),

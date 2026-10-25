@@ -1,20 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../l10n/app_localizations.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/settings_providers.dart';
 import '../../../providers/shuffle_plus_providers.dart';
-
-String shufflePlusBlockText(AppLocalizations l, ShufflePlusBlock b) => switch (b) {
-      ShufflePlusBlock.jam => l.shufflePlusBlockJam,
-      ShufflePlusBlock.shortList => l.shufflePlusBlockShort,
-      ShufflePlusBlock.noTool => l.shufflePlusBlockNoTool,
-      ShufflePlusBlock.metered => l.shufflePlusBlockMetered,
-      ShufflePlusBlock.stopped => l.shufflePlusBlockStopped,
-      ShufflePlusBlock.online => l.shufflePlusBlockOnline,
-      ShufflePlusBlock.radio => l.shufflePlusBlockRadio,
-    };
+import '../../widgets/shuffle_plus_text.dart';
 
 /// «Casuale+»: how to turn it on (a note), how often, Wi‑Fi only, and what it is doing now. Used
 /// in Settings > Playback and in the sheet of the shuffle button.

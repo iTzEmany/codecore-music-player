@@ -62,4 +62,17 @@ void main() {
       expect([c.title, c.artist], ['The Sound of Silence', 'Simon and Garfunkel']);
     });
   });
+
+  test('splitArtists keeps names and original separators', () {
+    final r = splitArtists('A, B feat. C');
+    expect(r.map((e) => e.name), ['A', 'B', 'C']);
+    expect(r.map((e) => e.sep), [', ', ' feat. ', '']);
+    expect(splitArtists(' , ').isEmpty, true);
+  });
+
+  test('splitArtists: the last name has no separator even after a trailing one', () {
+    final r = splitArtists('A &');
+    expect(r.map((e) => e.name), ['A']);
+    expect(r.single.sep, '');
+  });
 }

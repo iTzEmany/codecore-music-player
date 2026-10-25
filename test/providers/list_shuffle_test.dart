@@ -3,12 +3,14 @@ import 'dart:math';
 
 import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/data/repositories/track_repository.dart';
+import 'package:codecore/providers/database_providers.dart';
 import 'package:codecore/providers/player_providers.dart';
-import 'package:codecore/providers/shuffle_plus_providers.dart' show ShufflePlusBlock;
+import 'package:codecore/services/shuffle_plus/plus_allowed.dart' show ShufflePlusBlock;
 import 'package:codecore/services/audio/codecore_audio_handler.dart';
 import 'package:codecore/services/audio/play_queue.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/fake_backend.dart';
@@ -21,6 +23,14 @@ class _LastPick implements Random {
   bool nextBool() => false;
   @override
   double nextDouble() => 0;
+}
+
+final _refProvider = Provider<Ref>((ref) => ref);
+
+class _ThrowingRepo extends TrackRepository {
+  _ThrowingRepo(super.db);
+  @override
+  Future<List<Track>> getByIdsLight(List<int> ids) => throw StateError('db down');
 }
 
 void main() {
@@ -106,5 +116,23 @@ void main() {
     await Future.wait([first, second]);
     expect(handler.shuffleEnabled, isFalse);
     expect(plus, isFalse);
+  });
+
+  test('a failing allowed-lookup still lets the cycle turn shuffle off', () async {
+    final c = ProviderContainer(overrides: [
+      audioHandlerProvider.overrideWithValue(handler),
+      trackRepositoryProvider.overrideWithValue(_ThrowingRepo(db)),
+    ]);
+    addTearDown(c.dispose);
+    final ctl = PlayerController(handler, null,
+        shufflePlus: () => plus,
+        setShufflePlus: (on) => plus = on,
+        plusBlock: () => plusAllowedNow(c.read(_refProvider)));
+    plus = false;
+    await ctl.toggleShuffle(); // shuffle on
+    await ctl.cycleShuffle(); // lookup throws -> treated as allowed: Shuffle+
+    expect(plus, isTrue);
+    await ctl.cycleShuffle();
+    expect(handler.shuffleEnabled, isFalse);
   });
 }

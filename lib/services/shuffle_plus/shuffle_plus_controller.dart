@@ -192,7 +192,10 @@ class ShufflePlusController {
   }
 
   void _onFailure(PlaybackFailure f) {
-    if (f.reason != PlaybackFailureReason.onlineUnavailable) return;
+    if (f.reason != PlaybackFailureReason.onlineUnavailable &&
+        f.reason != PlaybackFailureReason.networkUnavailable) {
+      return;
+    }
     if (++_errors < maxErrors || _sessionOff) return;
     _sessionOff = true;
     _notices.add(ShufflePlusNotice.tooManyErrors);
@@ -326,6 +329,7 @@ class ShufflePlusController {
 
   /// True when one more was inserted (the plan may have more slots).
   Future<bool> _suggestOne() async {
+    await _followCurrent();
     if (_plan().isEmpty) return false;
     var candidate = await _take();
     if (candidate == null) {
@@ -352,7 +356,7 @@ class ShufflePlusController {
         }
         if (_disposed) return false;
       }
-      if (_disposed || !config().enabled || !host.shuffleEnabled) return false;
+      if (_disposed || !config().enabled || !host.shuffleEnabled || jamActive()) return false;
     }
     // The queue may have changed while the radio was asked for.
     final plan = _plan();

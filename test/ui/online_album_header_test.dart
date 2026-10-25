@@ -44,7 +44,10 @@ class _Downloads extends DownloadsNotifier {
   @override
   List<DownloadItem> build() => [];
   @override
-  void add(YtResult r, {String? tag}) => adds.add('${r.id} ${tag ?? 'plain'}');
+  Future<bool> add(YtResult r, {String? tag}) async {
+    adds.add('${r.id} ${tag ?? 'plain'}');
+    return false;
+  }
 }
 
 void main() {

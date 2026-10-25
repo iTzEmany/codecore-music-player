@@ -224,43 +224,48 @@ class DownloadsNotifier extends Notifier<List<DownloadItem>> {
   }
 
   /// Why the last promotion from the stream cache failed (e.g. disk full).
-  Stream<String> get promoteErrors => _promoteErrors.stream;
-  final _promoteErrors = StreamController<String>.broadcast();
+  Stream<bool> get promoteErrors => _promoteErrors.stream; // true = disk full
+  final _promoteErrors = StreamController<bool>.broadcast();
 
   /// A track already in the stream cache is moved to the downloads (R-10);
   /// anything else, and every import, goes to the queue as before.
-  void add(YtResult r, {String? tag}) {
+  /// True when the song joined the library at once (no download started).
+  Future<bool> add(YtResult r, {String? tag}) async {
     // Imports (any tag but addto:) always download.
-    if (tag != null && parseAddToPlaylistTag(tag) == null) return _queue.add(r, tag: tag);
+    if (tag != null && parseAddToPlaylistTag(tag) == null) {
+      _queue.add(r, tag: tag);
+      return false;
+    }
     final idx = ref.read(downloadIndexProvider).value;
     if (idx != null && idx.contains(r.id, source: r.source)) {
       // Already a library file: never a second copy (`Title (2).m4a`).
       final playlist = parseAddToPlaylistTag(tag);
       if (playlist != null) unawaited(_joinPlaylist(r, playlist));
-      return;
+      return false;
     }
-    if (!_promoting.add(r.indexKey)) return; // double tap while it is moving
-    unawaited(_promoteOrQueue(r, tag).whenComplete(() => _promoting.remove(r.indexKey)));
+    if (!_promoting.add(r.indexKey)) return false; // double tap while it is moving
+    return _promoteOrQueue(r, tag).whenComplete(() => _promoting.remove(r.indexKey));
   }
 
   final _promoting = <String>{};
 
-  Future<void> _promoteOrQueue(YtResult r, String? tag) async {
+  Future<bool> _promoteOrQueue(YtResult r, String? tag) async {
     try {
       if (await ref.read(streamPromoterProvider).promote(r)) {
         ref.invalidate(downloadIndexProvider); // rows and player watch the index
         await _joinPlaylist(r, parseAddToPlaylistTag(tag));
         _resyncPlayer();
-        return;
+        return true;
       }
     } on StreamPromoteException catch (e) {
       AppLog.w('promotion failed: ${e.message}');
-      if (!_promoteErrors.isClosed) _promoteErrors.add(e.message);
-      if (e.noSpace) return; // a download would fail the same way
+      if (!_promoteErrors.isClosed) _promoteErrors.add(e.noSpace);
+      if (e.noSpace) return false; // a download would fail the same way
     } on Object catch (e, st) {
       AppLog.w('promotion failed, downloading instead', e, st);
     }
     if (ref.mounted) _queue.add(r, tag: tag);
+    return false;
   }
 
   /// A promoted song is a library track already: the playlist of an `addto:` tag takes it now.
@@ -289,11 +294,11 @@ final downloadsProvider =
 /// One failed promotion. No `==` on purpose: two identical messages are two
 /// events, and a provider would drop the second as «unchanged».
 class PromoteError {
-  PromoteError(this.text);
-  final String text;
+  PromoteError({required this.noSpace});
+  final bool noSpace;
 }
 
 /// Why a «Scarica» from the stream cache failed (shown by the app).
 final promoteErrorsProvider = StreamProvider<PromoteError>(
-  (ref) => ref.watch(downloadsProvider.notifier).promoteErrors.map(PromoteError.new),
+  (ref) => ref.watch(downloadsProvider.notifier).promoteErrors.map((noSpace) => PromoteError(noSpace: noSpace)),
 );

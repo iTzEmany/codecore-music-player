@@ -11,6 +11,7 @@ import '../services/audio/codecore_audio_handler.dart';
 import '../services/import/track_matcher.dart';
 import '../services/online/youtube_service.dart' show YtResult;
 import '../services/online/ytm_radio_service.dart';
+import '../services/shuffle_plus/plus_allowed.dart' show ShufflePlusBlock;
 import '../services/shuffle_plus/seed_index.dart';
 import '../services/shuffle_plus/seed_resolver.dart';
 import '../services/shuffle_plus/shuffle_host.dart';
@@ -22,6 +23,8 @@ import 'player_providers.dart';
 import 'settings_providers.dart';
 import 'stream_providers.dart';
 import 'youtube_providers.dart';
+
+export '../services/shuffle_plus/plus_allowed.dart' show ShufflePlusBlock;
 
 /// The user's Shuffle+ choices, read from the settings. [set] is for tests.
 class ShufflePlusConfigNotifier extends Notifier<ShufflePlusConfig> {
@@ -202,13 +205,9 @@ final shuffleModeProvider = Provider<ShuffleMode>((ref) {
   return !on ? ShuffleMode.off : (plus ? ShuffleMode.plus : ShuffleMode.shuffle);
 });
 
-/// Why Shuffle+ is not suggesting right now (null: it is, or it is off).
-enum ShufflePlusBlock { jam, shortList, noTool, metered, stopped, online, radio }
-
 /// The first reason in the order the sheet reports them.
 ShufflePlusBlock? shufflePlusBlock({
   required bool jam,
-  required int? sourceSize,
   required bool toolAvailable,
   required bool metered,
   required bool unmeteredOnly,
@@ -216,9 +215,6 @@ ShufflePlusBlock? shufflePlusBlock({
 }) {
   if (jam) return ShufflePlusBlock.jam;
   if (stopped) return ShufflePlusBlock.stopped;
-  if (sourceSize == null || sourceSize < ShufflePlusController.minSourceSize) {
-    return ShufflePlusBlock.shortList;
-  }
   if (!toolAvailable) return ShufflePlusBlock.noTool;
   if (unmeteredOnly && metered) return ShufflePlusBlock.metered;
   return null;
@@ -233,13 +229,11 @@ final shufflePlusBlockProvider = FutureProvider.autoDispose<ShufflePlusBlock?>((
   ref.watch(playContextProvider);
   final allowed = await plusAllowedNow(ref);
   if (allowed != null) return allowed;
-  final handler = ref.watch(audioHandlerProvider);
   final controller = await ref.watch(shufflePlusProvider.future);
   final tool = (await ref.watch(ytDlpStatusProvider.future)).version != null;
   final metered = await ref.read(shufflePlusMeteredProvider)();
   return shufflePlusBlock(
     jam: jam,
-    sourceSize: handler.sourceIds?.length,
     toolAvailable: tool,
     metered: metered,
     unmeteredOnly: cfg.unmeteredOnly,

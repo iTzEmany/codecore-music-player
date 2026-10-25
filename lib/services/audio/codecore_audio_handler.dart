@@ -30,6 +30,7 @@ enum PlaybackFailureReason {
   unplayable,
   notInLibrary,
   onlineUnavailable,
+  networkUnavailable,
   radioUnavailable,
 }
 
@@ -429,6 +430,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     unawaited(synced);
     _publish(AudioProcessingState.loading);
     var playNow = play;
+    var offline = false; // the stream could not be fetched for lack of network
     try {
       if (radio != null) {
         _radioBusy = true;
@@ -450,6 +452,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
           file = await p.ready(streamKey, entry?.result ?? streamResultOfRow(streamKey, track));
         } on Object catch (e, st) {
           AppLog.w('stream $streamKey is not ready', e, st);
+          offline = e is YtException && e.kind == YtErrorKind.network;
           playNow = _playWhenReady;
           throw BackendException('stream not ready: $e');
         }
@@ -502,7 +505,9 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
         return;
       }
       await _failAndSkip(
-          (isOnline && libTrack == null) || streamKey != null
+          offline
+              ? PlaybackFailureReason.networkUnavailable
+              : (isOnline && libTrack == null) || streamKey != null
               ? PlaybackFailureReason.onlineUnavailable
               : e.fileMissing
                   ? PlaybackFailureReason.fileMissing

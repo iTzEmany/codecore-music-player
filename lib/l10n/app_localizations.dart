@@ -8372,6 +8372,24 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Metti in coda l’album'**
   String get ytmAlbumQueue;
+
+  /// No description provided for @addedToLibrary.
+  ///
+  /// In it, this message translates to:
+  /// **'Aggiunto alla libreria'**
+  String get addedToLibrary;
+
+  /// No description provided for @promoteNoSpace.
+  ///
+  /// In it, this message translates to:
+  /// **'Spazio insufficiente per scaricare il brano'**
+  String get promoteNoSpace;
+
+  /// No description provided for @promoteFailed.
+  ///
+  /// In it, this message translates to:
+  /// **'Impossibile spostare il brano'**
+  String get promoteFailed;
 }
 
 class _AppLocalizationsDelegate

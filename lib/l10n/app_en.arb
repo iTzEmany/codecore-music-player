@@ -2885,5 +2885,8 @@
   "streamCacheCleared": "Streaming cache cleared",
   "streamCacheClearFailed": "Could not clear the streaming cache",
   "playerLoading": "Loading…",
-  "ytmAlbumQueue": "Add album to queue"
+  "ytmAlbumQueue": "Add album to queue",
+  "addedToLibrary": "Added to library",
+  "promoteNoSpace": "Not enough space to download the track",
+  "promoteFailed": "Couldn't move the track"
 }

@@ -1,5 +1,7 @@
 import '../../services/audio/online_entries.dart';
 import 'cc_sheet.dart';
+import 'track_artists_sheet.dart';
+import '../../services/online/artist_link_resolver.dart';
 
 import 'dart:io';
 
@@ -29,15 +31,11 @@ import '../screens/settings/equalizer_screen.dart';
 import '../screens/devices/devices_sheet.dart';
 import '../screens/track_edit_dialog.dart';
 import '../screens/library/album_detail_screen.dart';
-import '../screens/library/artist_screen.dart';
-import '../screens/online/artist_page_screen.dart';
 import '../screens/online/artist_picker_sheet.dart';
 import '../shell/shell_nav.dart';
 import '../../services/online/youtube_service.dart' show YtResult;
 import '../../services/stream/stream_key.dart'
     show keyOfStreamPath, streamResultOfRow;
-import '../../services/online/ytm_artist.dart' show YtmArtistRef;
-import '../../data/repositories/library_queries.dart';
 import '../../data/repositories/track_kinds.dart';
 import '../../providers/library_providers.dart';
 import '../theme/tokens.dart';
@@ -79,6 +77,9 @@ class TrackActionGroup {
 }
 
 /// The queue entry [id] was downloaded or promoted meanwhile (it still plays under its online id).
+bool Function(String) _inLibrary(WidgetRef ref) =>
+    isLibraryArtistIn(ref.read(artistsProvider).value ?? const []);
+
 bool entryInLibrary(WidgetRef ref, int id) {
   final r = ref.read(onlineEntriesProvider)?[id]?.result;
   return r != null &&
@@ -106,15 +107,32 @@ List<TrackActionGroup> onlineTrackActions(
     TrackActionGroup(l.groupCollection, [
       TrackAction(Icons.download_rounded, l.ytDownload, () async {
         if (entryInLibrary(ref, track.id)) return snack(l.ytAlreadyInLibrary);
-        if (actions.downloadEntry(track.id)) snack(l.suggestionDownloadStarted);
+        final now = await actions.downloadEntry(track.id);
+        if (now != null) snack(now ? l.addedToLibrary : l.suggestionDownloadStarted);
       }),
       TrackAction(Icons.playlist_add_rounded, l.addToPlaylist, () async {
         final picked = await pickPlaylist(outer, ref);
         if (picked == null) return;
-        if (actions.addToPlaylist(track.id, picked.id)) {
-          snack(l.suggestionAddWhenDownloaded(picked.name));
+        final now = await actions.addToPlaylist(track.id, picked.id);
+        if (now != null) {
+          snack(now ? l.addedToPlaylist(picked.name) : l.suggestionAddWhenDownloaded(picked.name));
         }
       }),
+    ]),
+    TrackActionGroup(l.groupGoTo, [
+      TrackAction(
+        Icons.person_outline_rounded,
+        l.goToArtist,
+        () => goToArtists(
+          outer,
+          ref,
+          artistsOfTrack(
+            track,
+            ref.read(onlineEntriesProvider)?[track.id]?.result,
+            isLibraryArtist: _inLibrary(ref),
+          ),
+        ),
+      ),
     ]),
     TrackActionGroup(l.groupQueue, [
       if (ref.read(onlineEntriesProvider)?[track.id]?.suggested ?? false)
@@ -190,21 +208,11 @@ List<TrackActionGroup> trackActions(
     ShellNav.openInLibrary(outer, ref, AlbumDetailScreen(album: found));
   }
 
-  void goToArtist() {
-    final key = (track.artist ?? '').trim().toLowerCase();
-    ShellNav.openInLibrary(
-      outer,
-      ref,
-      ArtistDetailScreen(
-        artist: ArtistSummary(
-          key: key,
-          name: track.artist,
-          trackCount: 0,
-          albumCount: 0,
-        ),
-      ),
-    );
-  }
+  Future<void> goToArtist() => goToArtists(
+    outer,
+    ref,
+    libraryArtists(track, isLibraryArtist: _inLibrary(ref)),
+  );
 
   Future<void> artistOnYoutubeMusic() => openYtmArtist(
     outer,
@@ -270,7 +278,7 @@ List<TrackActionGroup> trackActions(
         TrackAction(
           Icons.person_outline_rounded,
           l.goToArtist,
-          () async => goToArtist(),
+          goToArtist,
         ),
       if (kEnableYoutube && (track.artist ?? '').trim().isNotEmpty)
         TrackAction(
@@ -552,11 +560,11 @@ List<TrackAction> onlineResultActions(
     TrackAction(Icons.playlist_add_rounded, l.addToPlaylist, () async {
       final picked = await pickPlaylist(outer, ref);
       if (picked == null || !outer.mounted) return;
-      ref
+      final now = await ref
           .read(downloadsProvider.notifier)
           .add(r, tag: addToPlaylistTag(picked.id));
       if (outer.mounted) {
-        showMsg(outer, l.suggestionAddWhenDownloaded(picked.name));
+        showMsg(outer, now ? l.addedToPlaylist(picked.name) : l.suggestionAddWhenDownloaded(picked.name));
       }
     }),
     TrackAction(Icons.download_rounded, l.ytDownload, () async {
@@ -567,29 +575,14 @@ List<TrackAction> onlineResultActions(
           false) {
         return showMsg(outer, l.ytAlreadyInLibrary);
       }
-      ref.read(downloadsProvider.notifier).add(r);
-      if (outer.mounted) showMsg(outer, l.suggestionDownloadStarted);
+      final now = await ref.read(downloadsProvider.notifier).add(r);
+      if (outer.mounted) showMsg(outer, now ? l.addedToLibrary : l.suggestionDownloadStarted);
     }),
-    TrackAction(Icons.person_outline_rounded, l.goToArtist, () async {
-      final who = r.artistIds.indexWhere((id) => id.isNotEmpty);
-      if (who >= 0 && who < r.artists.length) {
-        ShellNav.open<void>(
-          outer,
-          ArtistPageScreen(
-            artist: YtmArtistRef(id: r.artistIds[who], name: r.artists[who]),
-          ),
-        );
-      } else if (r.artists.isNotEmpty) {
-        await openYtmArtist(
-          outer,
-          ref,
-          r.artists.first,
-          open: (page) => ShellNav.open<void>(outer, page),
-        );
-      } else {
-        showMsg(outer, l.ytmArtistNone);
-      }
-    }),
+    TrackAction(
+      Icons.person_outline_rounded,
+      l.goToArtist,
+      () => goToArtists(outer, ref, onlineArtists(r)),
+    ),
   ];
 }
 

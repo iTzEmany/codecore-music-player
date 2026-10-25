@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../providers/player_providers.dart';
 import '../../providers/shuffle_plus_providers.dart';
-import '../screens/settings/shuffle_plus_tiles.dart' show shufflePlusBlockText;
+import 'shuffle_plus_text.dart';
 import '../screens/now_playing/shuffle_plus_sheet.dart';
 import '../theme/tokens.dart';
 import 'motion.dart';

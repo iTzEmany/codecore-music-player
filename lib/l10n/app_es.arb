@@ -2885,5 +2885,8 @@
   "streamCacheCleared": "Caché de streaming vaciada",
   "streamCacheClearFailed": "No se pudo vaciar la caché de streaming",
   "playerLoading": "Cargando…",
-  "ytmAlbumQueue": "Añadir álbum a la cola"
+  "ytmAlbumQueue": "Añadir álbum a la cola",
+  "addedToLibrary": "Añadida a la biblioteca",
+  "promoteNoSpace": "No hay espacio suficiente para descargar la canción",
+  "promoteFailed": "No se pudo mover la canción"
 }

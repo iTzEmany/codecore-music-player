@@ -171,6 +171,7 @@ alternanza fra semi; stesso artista non tre volte di fila; registro: tetto di 50
 **File:** `lib/services/shuffle_plus/insertion_plan.dart` (puro), `lib/providers/shuffle_plus_providers.dart`
 (`ShufflePlusController`), `test/services/shuffle_plus/insertion_plan_test.dart`,
 `test/providers/shuffle_plus_test.dart`
+> Nota (fase 48): `nextInsertion` è stata sostituita da `plusPlan` (D-94 in `docs/decisioni.md`); quanto segue descrive la versione originale.
 1. `nextInsertion(items, currentIndex, playedSinceLast, every)` → indice in cui mettere il prossimo suggerito o null
    (ce n'è già uno in attesa dopo la corrente, oppure la coda finisce prima); `playedSinceLast` conta i brani della
    libreria passati (saltati compresi) dall'ultimo suggerito.
