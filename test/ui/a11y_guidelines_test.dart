@@ -42,10 +42,9 @@ Map<String, int> _failures(Evaluation e) {
 /// Every failure that exists today, per (screen, guideline). Known defects:
 /// phase 40 (D-14 and the tap-target work) removes entries as it fixes them.
 const _known = <(String, String), Map<String, int>>{
-  // Artist link, seek time, sleep timer and speed chips are under 48 px.
+  // Seek time, sleep timer and speed chips are under 48 px.
   ('now playing', 'androidTapTarget'): {
     '0:00': 1,
-    'Artist': 1,
     'Timer di spegnimento': 1,
     'Velocità di riproduzione': 1,
   },
