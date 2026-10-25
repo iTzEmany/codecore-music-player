@@ -214,7 +214,7 @@ class PlayerController {
     onContext?.call(const PlayContext(PlayContextKind.search));
     _handler.setPlayContext(PlayContextKind.search.index, null);
     _requestNotificationPermissionOnce();
-    await _handler.playQueue(ids, 0);
+    await _handler.playQueue(ids, shuffle ? _random.nextInt(ids.length) : 0);
     // After playQueue: it would shuffle the upcoming of a shuffle already on.
     setShufflePlus?.call(false);
     await setShuffle(shuffle);

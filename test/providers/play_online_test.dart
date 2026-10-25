@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math' show Random;
 
 import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/data/repositories/track_repository.dart';
@@ -108,6 +109,12 @@ void main() {
     expect(plus, isFalse);
   });
 
+  test('playOnlineList with shuffle starts at a random track, not always the first', () async {
+    player = PlayerController(handler, null, random: _FixedRandom(3), libraryIdOf: (_) async => null);
+    await player.playOnlineList([for (var i = 0; i < 5; i++) _r('v$i')], shuffle: true);
+    expect(online.entryOf(handler.queueIds[handler.currentIndex])?.result.id, 'v3');
+  });
+
   test('playOnlineList without shuffle un-shuffles a queue that was shuffled', () async {
     await player.setShuffle(true);
     final list = [for (var i = 0; i < 5; i++) _r('v$i')];
@@ -142,4 +149,13 @@ void main() {
     expect(online.entryOf(handler.queueIds.single)?.result.id, 'x');
     expect(handler.isRadio, isFalse);
   });
+}
+
+class _FixedRandom implements Random {
+  _FixedRandom(this.value);
+  final int value;
+  @override
+  int nextInt(int max) => value;
+  @override
+  dynamic noSuchMethod(Invocation i) => throw UnimplementedError();
 }
