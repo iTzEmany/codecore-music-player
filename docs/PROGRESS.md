@@ -677,16 +677,16 @@ Note: D-89 (Jam: tap e «Riproduci dopo» vanno in coda) nella UI; la coda condi
 
 ## Fase 50 — Dati e fonti dei crediti (`fase-50-dati-e-fonti-crediti.md`)
 Feature «Arricchimento completo» (`docs/feature-arricchimento.md`, decisioni D-96…D-126, 2026-10-25). Una PR per la fase, un commit per task.
-- [ ] 50.1 Schema v15 e migrazione 14 → 15
-- [ ] 50.2 Fixture reali di Deezer e MusicBrainz
-- [ ] 50.3 `credits.dart`: modello, parser e `mergeCredits`
-- [ ] 50.4 `DeezerGwClient`: sessione anonima e pausa di 24 ore
-- [ ] 50.5 Dettagli dall'API pubblica di Deezer
-- [ ] 50.6 `MusicBrainzClient.recordingCredits`
-- [ ] 50.7 `CreditsRepository` e interruttore «Crediti e dettagli»
-- [ ] 50.8 Crediti e dettagli nell'arricchimento (`completeOne`, parte crediti)
-- [ ] 50.9 «Scarica» e doppioni non perdono i crediti
-- [ ] 50.10 Controlli di fase (K-AR-01, K-AR-02, K-AR-03, K-AR-04, K-AR-05)
+- [x] 50.1 Schema v15 e migrazione 14 → 15
+- [x] 50.2 Fixture reali di Deezer e MusicBrainz
+- [x] 50.3 `credits.dart`: modello, parser e `mergeCredits`
+- [x] 50.4 `DeezerGwClient`: sessione anonima e pausa di 24 ore
+- [x] 50.5 Dettagli dall'API pubblica di Deezer (nota: `/search` non porta il BPM, serve `/track/{id}`)
+- [x] 50.6 `MusicBrainzClient.recordingCredits`
+- [x] 50.7 `CreditsRepository` e interruttore «Crediti e dettagli»
+- [x] 50.8 Crediti e dettagli nell'arricchimento (`completeOne`, parte crediti)
+- [x] 50.9 «Scarica» e doppioni non perdono i crediti
+- [x] 50.10 Controlli di fase (K-AR-01, K-AR-02, K-AR-03, K-AR-04, K-AR-05)
 - [ ] 50.11 Prove a mano (utente)
 
 ## Fase 51 — Crediti a schermo (`fase-51-crediti-a-schermo.md`)
