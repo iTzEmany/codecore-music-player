@@ -174,6 +174,15 @@ void main() {
     expect(backend.loaded, isEmpty);
   });
 
+  test('an offline preparer failure is reported as a network failure', () async {
+    final id = online.register(result('v1'));
+    preparer.failing.add('youtube:v1');
+    preparer.failure = const YtException(YtErrorKind.network);
+    await handler.playQueue([id, ids[0]], 0);
+    await settle();
+    expect(failures.single.reason, PlaybackFailureReason.networkUnavailable);
+  });
+
   test('one failure skips to the next track', () async {
     final id = online.register(result('v1'));
     preparer.failing.add('youtube:v1');

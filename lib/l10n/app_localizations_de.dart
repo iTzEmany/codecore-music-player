@@ -5337,4 +5337,13 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get ytmAlbumQueue => 'Album zur Warteschlange hinzufügen';
+
+  @override
+  String get addedToLibrary => 'Zur Bibliothek hinzugefügt';
+
+  @override
+  String get promoteNoSpace => 'Nicht genug Speicherplatz für den Download';
+
+  @override
+  String get promoteFailed => 'Titel konnte nicht verschoben werden';
 }

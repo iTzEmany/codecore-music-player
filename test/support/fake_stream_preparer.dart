@@ -16,6 +16,7 @@ class FakeStreamPreparer implements StreamPreparer {
   final queues = <List<String>>[];
   final asked = <String>[];
   final failing = <String>{};
+  Object failure = StateError('download failed'); // what a failing key throws
   final gates = <String, Completer<void>>{};
 
   @override
@@ -26,7 +27,7 @@ class FakeStreamPreparer implements StreamPreparer {
     asked.add(key);
     final gate = gates[key];
     if (gate != null) await gate.future;
-    if (failing.contains(key)) throw StateError('download failed');
+    if (failing.contains(key)) throw failure;
     final file = File('${dir.path}/${key.replaceAll(':', '_')}.m4a')..writeAsStringSync('x');
     await tracks.upsertStreamRow(key, r, file);
     return file;

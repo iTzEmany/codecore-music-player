@@ -192,7 +192,10 @@ class ShufflePlusController {
   }
 
   void _onFailure(PlaybackFailure f) {
-    if (f.reason != PlaybackFailureReason.onlineUnavailable) return;
+    if (f.reason != PlaybackFailureReason.onlineUnavailable &&
+        f.reason != PlaybackFailureReason.networkUnavailable) {
+      return;
+    }
     if (++_errors < maxErrors || _sessionOff) return;
     _sessionOff = true;
     _notices.add(ShufflePlusNotice.tooManyErrors);

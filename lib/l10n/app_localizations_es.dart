@@ -5329,4 +5329,14 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get ytmAlbumQueue => 'Añadir álbum a la cola';
+
+  @override
+  String get addedToLibrary => 'Añadida a la biblioteca';
+
+  @override
+  String get promoteNoSpace =>
+      'No hay espacio suficiente para descargar la canción';
+
+  @override
+  String get promoteFailed => 'No se pudo mover la canción';
 }

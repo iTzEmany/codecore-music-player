@@ -2885,5 +2885,8 @@
   "streamCacheCleared": "Streaming-Cache geleert",
   "streamCacheClearFailed": "Streaming-Cache konnte nicht geleert werden",
   "playerLoading": "Wird geladen…",
-  "ytmAlbumQueue": "Album zur Warteschlange hinzufügen"
+  "ytmAlbumQueue": "Album zur Warteschlange hinzufügen",
+  "addedToLibrary": "Zur Bibliothek hinzugefügt",
+  "promoteNoSpace": "Nicht genug Speicherplatz für den Download",
+  "promoteFailed": "Titel konnte nicht verschoben werden"
 }

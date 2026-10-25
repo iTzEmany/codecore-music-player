@@ -49,7 +49,10 @@ class _Downloads extends DownloadsNotifier {
   @override
   List<DownloadItem> build() => [];
   @override
-  void add(YtResult r, {String? tag}) => adds.add(tag ?? 'plain');
+  Future<bool> add(YtResult r, {String? tag}) async {
+    adds.add(tag ?? 'plain');
+    return false;
+  }
 }
 
 void main() {
@@ -208,7 +211,7 @@ void main() {
     await h.dispose(tester);
   });
 
-  testWidgets('a failed promotion shows its message as a snackbar', (tester) async {
+  testWidgets('a failed promotion shows a localized snackbar, never the raw message', (tester) async {
     tester.view.physicalSize = const Size(400, 800);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -221,17 +224,17 @@ void main() {
     ));
     await tester.pump(const Duration(milliseconds: 600));
     await tester.pump(const Duration(milliseconds: 600));
-    errors.add(PromoteError('Disco pieno'));
+    errors.add(PromoteError(noSpace: true));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
-    expect(find.text('Disco pieno'), findsOneWidget);
+    expect(find.text('Spazio insufficiente per scaricare il brano'), findsOneWidget);
     // The same message again is a second snackbar, queued behind the first.
-    errors.add(PromoteError('Disco pieno'));
+    errors.add(PromoteError(noSpace: true));
     await tester.pump();
     ScaffoldMessenger.of(tester.element(find.byType(Scaffold).first)).hideCurrentSnackBar();
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 600));
-    expect(find.text('Disco pieno'), findsOneWidget);
+    expect(find.text('Spazio insufficiente per scaricare il brano'), findsOneWidget);
     await h.dispose(tester);
   });
 }

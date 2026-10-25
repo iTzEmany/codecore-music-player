@@ -46,7 +46,9 @@ class CodecoreApp extends ConsumerWidget {
     ref.listen(promoteErrorsProvider, (_, next) {
       final e = next.value;
       if (e != null) {
-        _messengerKey.currentState?.showSnackBar(SnackBar(content: Text(e.text)));
+        _messengerKey.currentState?.showSnackBar(SnackBar(
+          content: Builder(builder: (c) => Text(e.noSpace ? c.l10n.promoteNoSpace : c.l10n.promoteFailed)),
+        ));
       }
     });
     ref.listen(jamOnlineFailuresProvider, (_, next) {

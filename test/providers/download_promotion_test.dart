@@ -72,7 +72,7 @@ void main() {
 
   test('a promotion refreshes the download index the rows watch', () async {
     expect(builds, 1);
-    c.read(downloadsProvider.notifier).add(_r);
+    expect(await c.read(downloadsProvider.notifier).add(_r), isTrue);
     await Future<void>.delayed(const Duration(milliseconds: 100));
     expect(promoter.calls, 1);
     expect(builds, 2);

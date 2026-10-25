@@ -104,13 +104,15 @@ List<TrackActionGroup> onlineTrackActions(
     TrackActionGroup(l.groupCollection, [
       TrackAction(Icons.download_rounded, l.ytDownload, () async {
         if (entryInLibrary(ref, track.id)) return snack(l.ytAlreadyInLibrary);
-        if (actions.downloadEntry(track.id)) snack(l.suggestionDownloadStarted);
+        final now = await actions.downloadEntry(track.id);
+        if (now != null) snack(now ? l.addedToLibrary : l.suggestionDownloadStarted);
       }),
       TrackAction(Icons.playlist_add_rounded, l.addToPlaylist, () async {
         final picked = await pickPlaylist(outer, ref);
         if (picked == null) return;
-        if (actions.addToPlaylist(track.id, picked.id)) {
-          snack(l.suggestionAddWhenDownloaded(picked.name));
+        final now = await actions.addToPlaylist(track.id, picked.id);
+        if (now != null) {
+          snack(now ? l.addedToPlaylist(picked.name) : l.suggestionAddWhenDownloaded(picked.name));
         }
       }),
     ]),
@@ -547,11 +549,11 @@ List<TrackAction> onlineResultActions(
     TrackAction(Icons.playlist_add_rounded, l.addToPlaylist, () async {
       final picked = await pickPlaylist(outer, ref);
       if (picked == null || !outer.mounted) return;
-      ref
+      final now = await ref
           .read(downloadsProvider.notifier)
           .add(r, tag: addToPlaylistTag(picked.id));
       if (outer.mounted) {
-        showMsg(outer, l.suggestionAddWhenDownloaded(picked.name));
+        showMsg(outer, now ? l.addedToPlaylist(picked.name) : l.suggestionAddWhenDownloaded(picked.name));
       }
     }),
     TrackAction(Icons.download_rounded, l.ytDownload, () async {
@@ -562,8 +564,8 @@ List<TrackAction> onlineResultActions(
           false) {
         return showMsg(outer, l.ytAlreadyInLibrary);
       }
-      ref.read(downloadsProvider.notifier).add(r);
-      if (outer.mounted) showMsg(outer, l.suggestionDownloadStarted);
+      final now = await ref.read(downloadsProvider.notifier).add(r);
+      if (outer.mounted) showMsg(outer, now ? l.addedToLibrary : l.suggestionDownloadStarted);
     }),
     TrackAction(
       Icons.person_outline_rounded,

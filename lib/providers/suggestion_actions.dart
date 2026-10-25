@@ -19,25 +19,25 @@ class SuggestionActions {
 
   final OnlineEntries? online;
   final SuggestionLog log;
-  final void Function(YtResult result, {String? tag}) download;
+  final Future<bool> Function(YtResult result, {String? tag}) download;
   final Future<void> Function(int id) removeQueueId;
 
-  /// Starts the download; the song joins the library when it arrives.
-  bool downloadEntry(int id) {
+  /// Starts the download (the song joins the library when it arrives) or, with
+  /// the file already cached, adds it at once. Null: no such entry; true: added at once.
+  Future<bool?> downloadEntry(int id) async {
     final r = online?[id]?.result;
-    if (r == null) return false;
-    download(r);
+    if (r == null) return null;
     log.setOutcome(r.id, SuggestionOutcome.downloaded);
-    return true;
+    return download(r);
   }
 
-  /// Downloads it and adds it to [playlistId] when the file is ready.
-  bool addToPlaylist(int id, int playlistId) {
+  /// Downloads it and adds it to [playlistId] when the file is ready (at once
+  /// if cached). Null: no such entry; true: added at once.
+  Future<bool?> addToPlaylist(int id, int playlistId) async {
     final r = online?[id]?.result;
-    if (r == null) return false;
-    download(r, tag: addToPlaylistTag(playlistId));
+    if (r == null) return null;
     log.setOutcome(r.id, SuggestionOutcome.downloaded);
-    return true;
+    return download(r, tag: addToPlaylistTag(playlistId));
   }
 
   /// Never suggested again; leaves the queue (the next song plays if it was

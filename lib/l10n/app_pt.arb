@@ -3129,5 +3129,8 @@
   "streamCacheCleared": "Cache de streaming esvaziado",
   "streamCacheClearFailed": "Não foi possível esvaziar o cache de streaming",
   "playerLoading": "A carregar…",
-  "ytmAlbumQueue": "Adicionar álbum à fila"
+  "ytmAlbumQueue": "Adicionar álbum à fila",
+  "addedToLibrary": "Adicionada à biblioteca",
+  "promoteNoSpace": "Espaço insuficiente para transferir a faixa",
+  "promoteFailed": "Não foi possível mover a faixa"
 }
