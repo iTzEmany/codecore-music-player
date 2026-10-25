@@ -230,6 +230,9 @@ final shufflePlusBlockProvider = FutureProvider.autoDispose<ShufflePlusBlock?>((
   final cfg = ref.watch(shufflePlusConfigProvider);
   ref.watch(currentTrackProvider);
   final jam = ref.watch(jamProvider).active;
+  ref.watch(playContextProvider);
+  final allowed = await plusAllowedNow(ref);
+  if (allowed != null) return allowed;
   final handler = ref.watch(audioHandlerProvider);
   final controller = await ref.watch(shufflePlusProvider.future);
   final tool = (await ref.watch(ytDlpStatusProvider.future)).version != null;

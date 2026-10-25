@@ -272,11 +272,10 @@ class ShufflePlusController {
 
   /// The suggestion waiting after the current song leaves the queue.
   Future<void> _removePending() async {
-    final ids = host.queueIds.toList();
-    for (var i = host.currentIndex + 1; i < ids.length; i++) {
-      if (isOnlineId(ids[i]) && ids[i] != _curId && _mine.contains(ids[i])) {
-        await _drop(ids[i]);
-      }
+    // The whole queue: with shuffle on, a suggestion sits after its natural
+    // predecessor, so it may fall before the current song once shuffle is off.
+    for (final id in host.queueIds.toList()) {
+      if (id != _curId && _mine.contains(id)) await _drop(id);
     }
   }
 
@@ -353,7 +352,7 @@ class ShufflePlusController {
         }
         if (_disposed) return false;
       }
-      if (_disposed || !config().enabled) return false;
+      if (_disposed || !config().enabled || !host.shuffleEnabled) return false;
     }
     // The queue may have changed while the radio was asked for.
     final plan = _plan();

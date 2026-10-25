@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/services/audio/codecore_audio_handler.dart';
 import 'package:codecore/services/audio/online_entries.dart';
+import 'package:codecore/services/audio/play_queue.dart';
 import 'package:codecore/services/import/track_matcher.dart';
 import 'package:codecore/services/online/download_index.dart';
 import 'package:codecore/services/online/innertube_client.dart';
@@ -45,16 +47,24 @@ class _Adapter implements HttpClientAdapter {
 }
 
 class _Host implements ShuffleHost {
-  _Host(this.queueIds, this.sourceIds);
+  _Host(this._ids, this.sourceIds);
+
+  /// When set, the real queue (its shuffle order) backs this host.
+  PlayQueue? real;
+  final List<int> _ids;
+  int _index = 0;
+  bool _shuffle = true;
 
   @override
-  final List<int> queueIds;
+  List<int> get queueIds => real?.items ?? _ids;
   @override
   List<int>? sourceIds;
   @override
-  int currentIndex = 0;
+  int get currentIndex => real?.currentIndex ?? _index;
+  set currentIndex(int v) => _index = v;
   @override
-  bool shuffleEnabled = true;
+  bool get shuffleEnabled => real?.shuffle ?? _shuffle;
+  set shuffleEnabled(bool v) => _shuffle = v;
   @override
   bool isPlaying = true;
 
@@ -74,16 +84,21 @@ class _Host implements ShuffleHost {
 
   @override
   void insertAt(int index, int id) {
-    queueIds.insert(index, id);
+    real != null ? real!.insertAt(index, id) : _ids.insert(index, id);
     _changes.add(null);
   }
 
   @override
   Future<void> removeQueueId(int id) async {
-    final i = queueIds.indexOf(id);
+    if (real != null) {
+      real!.removeId(id);
+      _changes.add(null);
+      return;
+    }
+    final i = _ids.indexOf(id);
     if (i < 0) return;
-    queueIds.removeAt(i);
-    if (i < currentIndex) currentIndex--;
+    _ids.removeAt(i);
+    if (i < _index) _index--;
     _changes.add(null);
   }
 
@@ -91,7 +106,7 @@ class _Host implements ShuffleHost {
   void finishAndAdvance({bool toTheEnd = true}) {
     _dur.add(const Duration(minutes: 3));
     _pos.add(toTheEnd ? const Duration(minutes: 3) : const Duration(seconds: 5));
-    currentIndex++;
+    real != null ? real!.next(auto: true) : _index++;
     _changes.add(null);
   }
 
@@ -388,6 +403,39 @@ void main() {
     await until(() => host.queueIds.every((id) => !isOnlineId(id)));
     expect(host.queueIds, [for (var i = 1; i <= 20; i++) i]);
     expect(host.queueIds[host.currentIndex], 6, reason: 'the current stays');
+  });
+
+  for (final seed in [5, 6, 8]) {
+    test('shuffle off removes suggestions even behind the current song (seed $seed)', () async {
+      host.real = PlayQueue(random: Random(seed))
+        ..setItems([for (var i = 1; i <= 20; i++) i])
+        ..shuffle = true;
+      controller.start();
+      await until(() => host.queueIds.where(isOnlineId).length == 3);
+      for (var i = 0; i < 6; i++) {
+        host.finishAndAdvance();
+        await settle();
+      }
+      await until(() => host.queueIds.where(isOnlineId).isNotEmpty);
+      host.real!.shuffle = false;
+      host.change();
+      await until(() => host.queueIds.where(isOnlineId).isEmpty);
+    });
+  }
+
+  test('Shuffle+ turned off while a suggestion is being prepared inserts nothing more', () async {
+    final gate = Completer<void>();
+    var calls = 0;
+    prepareHook = (r) async {
+      if (++calls == 2) await gate.future;
+    };
+    controller.start();
+    await until(() => calls == 2);
+    expect(host.queueIds.where(isOnlineId), hasLength(1));
+    host.shuffleEnabled = false;
+    gate.complete();
+    await settle();
+    expect(host.queueIds.where(isOnlineId), isEmpty);
   });
 
   test('a new list drops the pool: the next suggestion asks for a new radio', () async {

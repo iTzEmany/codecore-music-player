@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/data/repositories/track_repository.dart';
 import 'package:codecore/providers/player_providers.dart';
+import 'package:codecore/providers/shuffle_plus_providers.dart' show ShufflePlusBlock;
 import 'package:codecore/services/audio/codecore_audio_handler.dart';
 import 'package:codecore/services/audio/play_queue.dart';
 import 'package:drift/drift.dart' show Value;
@@ -88,5 +90,21 @@ void main() {
     await ctrl.playAll(tracks);
     await pumpEventQueue();
     expect(handler.currentTrack!.id, tracks.last.id);
+  });
+
+  test('two fast shuffle taps run one after the other: shuffle, then Shuffle+, then off', () async {
+    final gate = Completer<ShufflePlusBlock?>();
+    final c = PlayerController(handler, null,
+        shufflePlus: () => plus,
+        setShufflePlus: (on) => plus = on,
+        plusBlock: () => gate.future);
+    plus = false;
+    await c.toggleShuffle(); // shuffle on, Shuffle+ off
+    final first = c.cycleShuffle();
+    final second = c.cycleShuffle();
+    gate.complete(null);
+    await Future.wait([first, second]);
+    expect(handler.shuffleEnabled, isFalse);
+    expect(plus, isFalse);
   });
 }

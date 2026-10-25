@@ -22,6 +22,9 @@ void main() {
     expect(_allowed(jam: true), ShufflePlusBlock.jam);
     expect(_allowed(radio: true), ShufflePlusBlock.radio);
   });
+  test('a Jam wins over a radio', () {
+    expect(_allowed(jam: true, radio: true), ShufflePlusBlock.jam);
+  });
   test('fewer than 5 local tracks is blocked, 5 is allowed', () {
     expect(_allowed(queue: [1, 2, 3, 4]), ShufflePlusBlock.shortList);
     expect(_allowed(queue: [1, 2, 3, 4, 5]), isNull);

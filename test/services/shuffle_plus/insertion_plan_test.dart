@@ -24,6 +24,10 @@ void main() {
     expect(plusPlan([-1, 1, 2, 3, 4], 1, 4), [4]);
   });
 
+  test('no current song (-1) gives no slots', () {
+    expect(plusPlan(local(6), -1, 4), isEmpty);
+  });
+
   test('never a slot past the end of the queue', () {
     expect(plusPlan([1, 2, 3], 0, 4), isEmpty);
     expect(plusPlan([1, 2, 3, 4], 0, 4), [3], reason: 'one song still follows');

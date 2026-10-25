@@ -272,7 +272,16 @@ class PlayerController {
 
   /// The shuffle button: off, shuffle, Shuffle+, off. Returns why it skipped
   /// Shuffle+ (then: off, shuffle, off), else null.
-  Future<ShufflePlusBlock?> cycleShuffle() async {
+  Future<ShufflePlusBlock?> cycleShuffle() {
+    // Serialized: a second tap reads the state the first one left.
+    final run = _cycle.then((_) => _cycleShuffle());
+    _cycle = run.then<void>((_) {}, onError: (Object _) {});
+    return run;
+  }
+
+  Future<void> _cycle = Future<void>.value();
+
+  Future<ShufflePlusBlock?> _cycleShuffle() async {
     final plus = shufflePlus?.call() ?? false;
     if (!_handler.shuffleEnabled) {
       setShufflePlus?.call(false);
@@ -310,6 +319,21 @@ class PlayerController {
   }
 }
 
+/// Why the shuffle button may not reach Shuffle+ now (null: it may).
+Future<ShufflePlusBlock?> plusAllowedNow(Ref ref) async {
+  final h = ref.read(audioHandlerProvider);
+  final local = await ref.read(trackRepositoryProvider).getByIdsLight([
+    for (final i in h.sourceIds ?? h.queueIds)
+      if (!isOnlineId(i)) i,
+  ]);
+  return plusAllowed(
+    queueIds: h.queueIds,
+    jam: ref.read(jamProvider).active,
+    radio: ref.read(playContextProvider)?.kind == PlayContextKind.radio,
+    localCount: local.where((t) => !t.missing && t.kind == 0).length,
+  );
+}
+
 final playerControllerProvider = Provider<PlayerController>(
   (ref) => PlayerController(
     ref.watch(audioHandlerProvider),
@@ -322,19 +346,7 @@ final playerControllerProvider = Provider<PlayerController>(
     jamActive: () => ref.read(jamProvider).active,
     addToJam: (ids) => unawaited(ref.read(jamProvider.notifier).addLibraryIds(ids)),
     addOnlineToJam: (r) => ref.read(jamProvider.notifier).addOnline(r),
-    plusBlock: () async {
-      final h = ref.read(audioHandlerProvider);
-      final local = await ref.read(trackRepositoryProvider).getByIdsLight([
-        for (final i in h.sourceIds ?? h.queueIds)
-          if (!isOnlineId(i)) i,
-      ]);
-      return plusAllowed(
-        queueIds: h.queueIds,
-        jam: ref.read(jamProvider).active,
-        radio: ref.read(playContextProvider)?.kind == PlayContextKind.radio,
-        localCount: local.where((t) => !t.missing && t.kind == 0).length,
-      );
-    },
+    plusBlock: () => plusAllowedNow(ref),
     libraryIdOf: (r) async {
       final path = (await ref.read(downloadIndexProvider.future))
           .pathFor(r.id, source: r.source);
