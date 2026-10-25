@@ -142,7 +142,10 @@ class StreamCache {
     return out;
   }
 
-  Future<void> _measure() async =>
+  /// Re-reads the folder size into [usedBytes] without evicting.
+  Future<int> measure() async => _measure();
+
+  Future<int> _measure() async =>
       usedBytes = (await _files()).fold<int>(0, (s, e) => s + e.size);
 
   Future<bool> _remove(File f) async {

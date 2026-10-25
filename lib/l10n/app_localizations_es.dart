@@ -5295,4 +5295,22 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get themeLowContrastWarning =>
       'Algunos colores de texto se leen mal sobre el fondo (menos de 4,5:1). El tema se queda como está.';
+
+  @override
+  String get streamCacheTitle => 'Espacio para el streaming';
+
+  @override
+  String streamCacheUsage(String used, String limit) {
+    return '$used de $limit';
+  }
+
+  @override
+  String get streamCacheClear => 'Vaciar';
+
+  @override
+  String get streamCacheCleared => 'Caché de streaming vaciada';
+
+  @override
+  String get streamCacheClearFailed =>
+      'No se pudo vaciar la caché de streaming';
 }

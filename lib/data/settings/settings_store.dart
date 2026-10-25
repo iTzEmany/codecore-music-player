@@ -50,6 +50,7 @@ class AppSettings {
     this.downloadParallel = 2,
     this.downloadRateLimitKBps = 0,
     this.downloadFormat = DownloadFormat.m4a,
+    this.streamCacheMb = 1024,
     this.importSureThreshold = 0.80,
     this.importReviewThreshold = 0.55,
     this.playbackSpeed = 1.0,
@@ -116,6 +117,9 @@ class AppSettings {
 
   /// M4A keeps YouTube's AAC as served; MP3 converts for players that need it.
   final DownloadFormat downloadFormat;
+
+  /// Disk space for the streaming cache, in MB (256–8192).
+  final int streamCacheMb;
 
   /// CSV import: score from which a match is downloaded without asking, and
   /// from which it is at least proposed (advanced settings).
@@ -191,6 +195,7 @@ class AppSettings {
     int? downloadParallel,
     int? downloadRateLimitKBps,
     DownloadFormat? downloadFormat,
+    int? streamCacheMb,
     double? importSureThreshold,
     double? importReviewThreshold,
     double? playbackSpeed,
@@ -237,6 +242,7 @@ class AppSettings {
         downloadRateLimitKBps:
             downloadRateLimitKBps ?? this.downloadRateLimitKBps,
         downloadFormat: downloadFormat ?? this.downloadFormat,
+        streamCacheMb: streamCacheMb ?? this.streamCacheMb,
         importSureThreshold: importSureThreshold ?? this.importSureThreshold,
         importReviewThreshold:
             importReviewThreshold ?? this.importReviewThreshold,
@@ -312,6 +318,7 @@ class SettingsStore {
         downloadParallel:
             (_prefs.getInt('downloadParallel') ?? 2).clamp(1, 3),
         downloadRateLimitKBps: _prefs.getInt('downloadRateLimitKBps') ?? 0,
+        streamCacheMb: (_prefs.getInt('streamCacheMb') ?? 1024).clamp(256, 8192),
         // The old «downloadOriginal» switch is not read: MP3 was only ever the
         // default, so everyone moves to M4A.
         downloadFormat: DownloadFormat.values.firstWhere(
@@ -387,6 +394,7 @@ class SettingsStore {
     await _prefs.setInt('downloadParallel', s.downloadParallel);
     await _prefs.setInt('downloadRateLimitKBps', s.downloadRateLimitKBps);
     await _prefs.setString('downloadFormat', s.downloadFormat.name);
+    await _prefs.setInt('streamCacheMb', s.streamCacheMb);
     await _prefs.remove('downloadOriginal');
     await _prefs.setDouble('importSureThreshold', s.importSureThreshold);
     await _prefs.setDouble('importReviewThreshold', s.importReviewThreshold);

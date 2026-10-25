@@ -81,6 +81,15 @@ class TrackRepository {
   /// The shadow row of the streamed track [key], if it has one.
   Future<Track?> streamRow(String key) => byPath('stream:$key');
 
+  /// Deletes the shadow rows with no plays, except the [keepKeys] ones (still
+  /// in the cache). Rows with plays stay (D-81). Returns how many went.
+  Future<int> deleteUnplayedStreamRows({Set<String> keepKeys = const {}}) =>
+      (_db.delete(_db.tracks)..where((t) =>
+              t.kind.equals(kStreamKind) &
+              t.path.isNotIn([for (final k in keepKeys) 'stream:$k']) &
+              notExistsQuery(_db.select(_db.plays)..where((pl) => pl.trackId.equalsExp(t.id)))))
+          .go();
+
   /// Creates or refreshes the shadow row (`kind = 2`) of the streamed track
   /// [key] whose cached [file] is ready; one row per key. Returns its id.
   Future<int> upsertStreamRow(String key, YtResult r, File file) async {

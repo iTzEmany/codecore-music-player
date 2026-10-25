@@ -82,6 +82,9 @@ class StreamPreparer {
   Timer? _resume;
   DateTime? _pausedUntil;
 
+  /// Keys of the entries given to the last [setQueue].
+  Set<String> get queuedKeys => {for (final i in _queue) i.key};
+
   /// The upcoming online entries, current first. Pins current + next 2.
   void setQueue(List<StreamItem> items) {
     if (_disposed) return;

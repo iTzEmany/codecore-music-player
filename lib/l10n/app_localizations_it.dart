@@ -5281,4 +5281,22 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get themeLowContrastWarning =>
       'Alcuni colori del testo si leggono male sullo sfondo (sotto 4,5:1). Il tema resta com\'è.';
+
+  @override
+  String get streamCacheTitle => 'Spazio per lo streaming';
+
+  @override
+  String streamCacheUsage(String used, String limit) {
+    return '$used su $limit';
+  }
+
+  @override
+  String get streamCacheClear => 'Svuota';
+
+  @override
+  String get streamCacheCleared => 'Cache dello streaming svuotata';
+
+  @override
+  String get streamCacheClearFailed =>
+      'Impossibile svuotare la cache dello streaming';
 }

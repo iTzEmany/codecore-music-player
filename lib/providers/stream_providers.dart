@@ -1,11 +1,16 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../core/app_log.dart';
 import '../data/db/app_database.dart';
+import '../data/repositories/track_repository.dart';
 import '../services/online/enrichment_service.dart';
 import '../services/online/youtube_service.dart' show YtResult;
 import '../services/stream/stream_cache.dart';
 import '../services/stream/stream_preparer.dart';
 import 'database_providers.dart';
+import 'settings_providers.dart';
 import 'online_providers.dart';
 import 'shuffle_plus_providers.dart' show networkProbeProvider;
 import 'youtube_providers.dart';
@@ -14,7 +19,31 @@ import 'youtube_providers.dart';
 final streamCacheProvider = Provider<StreamCache>((ref) =>
     throw StateError('streamCacheProvider must be overridden with an opened cache'));
 
+/// Bytes the cache holds now; invalidate after anything that changes it.
+final streamCacheUsedProvider = FutureProvider.autoDispose<int>((ref) async {
+  final cache = ref.watch(streamCacheProvider);
+  return cache.measure();
+});
+
+/// «Svuota»: empties the cache but for the [keep] keys (current track and
+/// queue: the player still resolves them); then drops the shadow rows with no
+/// plays that are left (rows with plays stay, D-81).
+Future<void> clearStreamCache(StreamCache cache, TrackRepository tracks, {Set<String> keep = const {}}) async {
+  await cache.clear(keep: keep);
+  await tracks.deleteUnplayedStreamRows(keepKeys: keep);
+}
+
+void _applyLimit(StreamCache cache, int mb, void Function() done) {
+  cache.limitBytes = mb * 1024 * 1024;
+  // async I/O, never on the UI thread
+  cache.evict().then((_) => done()).catchError((Object e, StackTrace st) => AppLog.w('stream cache: evict failed', e, st));
+}
+
 final streamPreparerProvider = Provider<StreamPreparer>((ref) {
+  final cache = ref.watch(streamCacheProvider);
+  void used() => ref.invalidate(streamCacheUsedProvider);
+  _applyLimit(cache, ref.read(settingsProvider).streamCacheMb, used);
+  ref.listen(settingsProvider.select((s) => s.streamCacheMb), (_, mb) => _applyLimit(cache, mb, used));
   final enrichment = ref.watch(enrichmentServiceProvider);
   final tracks = ref.watch(trackRepositoryProvider);
   final preparer = StreamPreparer(

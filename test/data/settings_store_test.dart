@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
+  streamCacheSettingTests();
   test('playback state round trip', () async {
     SharedPreferences.setMockInitialValues({});
     final store = await SettingsStore.open();
@@ -155,5 +156,20 @@ void main() {
     await store.writeSettings(s.copyWith(radioCountry: 'DE', radioRegion: 'Bayern', radioOnlyCountry: true));
     s = store.readSettings();
     expect((s.radioCountry, s.radioRegion, s.radioOnlyCountry), ('DE', 'Bayern', true));
+  });
+}
+
+void streamCacheSettingTests() {
+  test('streamCacheMb: default 1024, saved, out-of-range clamped to 256-8192', () async {
+    SharedPreferences.setMockInitialValues({});
+    var store = await SettingsStore.open();
+    expect(store.readSettings().streamCacheMb, 1024);
+    await store.writeSettings(store.readSettings().copyWith(streamCacheMb: 2048));
+    expect(store.readSettings().streamCacheMb, 2048);
+    for (final (raw, want) in [(10, 256), (99999, 8192)]) {
+      SharedPreferences.setMockInitialValues({'streamCacheMb': raw});
+      store = await SettingsStore.open();
+      expect(store.readSettings().streamCacheMb, want);
+    }
   });
 }
