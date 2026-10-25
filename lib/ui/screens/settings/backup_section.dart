@@ -58,7 +58,7 @@ Future<void> _create(BuildContext context, WidgetRef ref) async {
     tmp = File(p.join((await Directory.systemTemp.createTemp('codecore-save')).path, name));
     await ref.read(backupOpsProvider).create(tmp.path);
     nav.pop();
-    final saved = await saveBytes(name, await tmp.readAsBytes(), mimeType: 'application/zip');
+    final saved = await saveFileAt(name, tmp.path, mimeType: 'application/zip');
     if (!saved) return;
     msg = l.backupSaved;
   } on Object catch (e, st) {

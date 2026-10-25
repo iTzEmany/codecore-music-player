@@ -20,3 +20,4 @@
 - **`/search` di Deezer non porta il BPM**: serve `/track/{id}` (e `bpm: 0` vuol dire «non noto»).
 - **`WebClient` restituisce null sia per un 404 sia per rete o 5xx**: chi deve distinguere «niente» da «non risponde» (MusicBrainz per i crediti) oggi tratta null come «non risponde» (D-129). Da sistemare all'inizio della fase 52.
 - **`pr-attendi.sh` vuole la stima in minuti senza unità** (`15`, non `15m`): con l'unità esce subito con codice 2.
+- **Mai passare file grandi come `Uint8List` su un MethodChannel Android**: il codec li copia nell'heap Java (limite 256 MB sul Motorola) e l'app va in crash con `OutOfMemoryError`. `FilePicker.saveFile` vuole solo `bytes`: per i file grandi usa `saveFileAt` (canale `codecore/save`, copia a flusso).
