@@ -30,7 +30,7 @@ class JamTrackInfoScreen extends ConsumerWidget {
       meta?.album ?? item.album,
       meta?.year?.toString(),
       meta?.genre,
-    ].whereType<String>().join(' · ');
+    ].whereType<String>().join(', ');
     final lyrics = meta?.lyricsPlain;
     final cover = ref.watch(jamTrackCoverProvider(itemId)).value;
     // «text\nurl»: the url is the source, not shown here.
