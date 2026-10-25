@@ -2,7 +2,7 @@
 """Libreria di prova per le misure della fase 28 (mai mescolata a quella vera).
 
 Crea in build/perf_library/ (ignorata da git) <album> cartelle da <tracks> brani:
-file MP3 di 1 s con titolo, artista, album, numero, anno e genere, più una
+file MP3 muti di 30 s (`--seconds`) con titolo, artista, album, numero, anno e genere, più una
 cover.jpg di 1200x1200 per album, come le copertine vere. Serve ffmpeg.
 
     scripts/perf_library.py                # 300 album x 10 = 3000 brani (~60 MB)
@@ -57,6 +57,8 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('--albums', type=int, default=300)
     ap.add_argument('--tracks', type=int, default=10)
+    # 1-second tracks change every second while playing: uiautomator then rarely finds the UI idle.
+    ap.add_argument('--seconds', type=int, default=30)
     ap.add_argument('--out', default='build/perf_library')
     args = ap.parse_args()
     if shutil.which('ffmpeg') is None:
@@ -69,8 +71,8 @@ def main():
         shutil.rmtree(out)
     os.makedirs(out)
     base = os.path.join(out, '.base.mp3')
-    run(['ffmpeg', '-y', '-loglevel', 'error', '-f', 'lavfi', '-i', 'anullsrc=r=22050:cl=mono',
-         '-t', '1', '-c:a', 'libmp3lame', '-b:a', '32k', base])
+    run(['ffmpeg', '-y', '-loglevel', 'error', '-f', 'lavfi', '-i', 'anullsrc=r=8000:cl=mono',
+         '-t', str(args.seconds), '-c:a', 'libmp3lame', '-b:a', '8k', base])
     with ThreadPoolExecutor(max_workers=os.cpu_count() or 4) as pool:
         list(pool.map(lambda a: make_album(base, out, a, args.tracks), range(args.albums)))
     os.remove(base)

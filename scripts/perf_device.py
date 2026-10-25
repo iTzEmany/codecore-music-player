@@ -50,7 +50,7 @@ class Device:
     def now_ms(self):
         return int(self.sh('date +%s%3N').strip())
 
-    def nodes(self, paused=False):
+    def nodes(self):
         for _ in range(5):
             self.sh('rm -f /sdcard/cc_perf_ui.xml', check=False)
             self.sh('uiautomator dump /sdcard/cc_perf_ui.xml', check=False)
@@ -66,18 +66,7 @@ class Device:
                         out.append((label, n.get('class', ''), (x1 + x2) // 2, (y1 + y2) // 2))
                 return out
             time.sleep(0.8)
-        # With 1-second tracks playing the tree may never go idle: look once while paused.
-        state = re.search(r'PlaybackState \{state=(\d+)', self.sh(
-            f'dumpsys media_session | grep -A10 "media-session {PKG}/" | grep PlaybackState', check=False))
-        if not paused and state and state.group(1) not in ('0', '1', '2'):  # 0 none, 1 stopped, 2 paused
-            self.sh('input keyevent KEYCODE_MEDIA_PAUSE')
-            time.sleep(1)  # a track still loading (state 6/8) takes the pause late
-            try:
-                return self.nodes(paused=True)
-            finally:
-                self.sh('input keyevent KEYCODE_MEDIA_PLAY')
-                time.sleep(1)  # the resume's frames stay out of the next timed gesture
-        raise RuntimeError(f'uiautomator dump failed (paused={paused}, state={state and state.group(1)})')
+        raise RuntimeError('uiautomator dump failed')
 
     def tap(self, pattern, cls=None):
         rx = re.compile(pattern)
