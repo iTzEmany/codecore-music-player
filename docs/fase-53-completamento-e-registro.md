@@ -34,6 +34,7 @@ verde: riga di 31 giorni fa sparita all'avvio, una di 29 resta; dopo il «riavvi
 stesso DB) le righe ci sono; «Svuota» → tabella vuota; i test di oggi del Registro verdi. `flutter analyze` pulito.
 
 ### 53.2 — Ogni attività finisce nel Registro
+> Dalla fase 50 (D-127): la pausa di 24 h dei crediti Deezer (`DeezerGwClient.onPaused`) scrive una riga nel Registro; mentre gw è in pausa la parte crediti non è dovuta per i brani che solo Deezer può dare. `completeOne` restituisce già l'esito per parte (`PartOutcome`).
 **File:** `lib/providers/activity_providers.dart` (`ActivityKind` + `podcastRefresh`, `radio`, `enrichBackground`;
 regola «c'era, non c'è più → riga»), `lib/providers/podcast_ops.dart`, `lib/providers/radio_ops.dart`,
 `lib/ui/screens/activity/activity_sheet.dart`, ARB con `scripts/arb_add.py`, `test/providers/activity_test.dart`

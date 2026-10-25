@@ -687,6 +687,7 @@ Feature «Arricchimento completo» (`docs/feature-arricchimento.md`, decisioni D
 - [x] 50.8 Crediti e dettagli nell'arricchimento (`completeOne`, parte crediti)
 - [x] 50.9 «Scarica» e doppioni non perdono i crediti
 - [x] 50.10 Controlli di fase (K-AR-01, K-AR-02, K-AR-03, K-AR-04, K-AR-05)
+- [x] 50.12 Dopo la review di architettura: un solo salvataggio dei crediti, esito per parte, `TrackCreditRow`
 - [ ] 50.11 Prove a mano (utente)
 
 ## Fase 51 — Crediti a schermo (`fase-51-crediti-a-schermo.md`)

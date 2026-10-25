@@ -21,6 +21,7 @@ il download come oggi. **Nessun pacchetto nuovo.** **Schema invariato (v15).** N
 ## Task
 
 ### 52.1 — `NeteaseLyricsClient` e `LyricsOvhClient`
+> Prima di questo task (review di fine fase 50): `WebClient.getJson` distingue 404 (null) da rete/5xx (eccezione), così si toglie `recordingsByIsrc(strict:)` e D-129; poi estrarre `CreditsEnricher` (`fetch`/`save`/`isDue`) da `EnrichmentService`, prima del 52.3.
 **File:** `lib/services/online/netease_lyrics_client.dart`, `lib/services/online/lyrics_ovh_client.dart` (nuovi),
 `lib/providers/online_providers.dart`, `test/fixtures/lyrics/` (nuova: `netease_search_get_lucky.json`,
 `netease_lyric_get_lucky.json`, `lyrics_ovh_get_lucky.json`, `README.md`),

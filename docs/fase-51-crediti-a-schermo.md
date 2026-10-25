@@ -20,6 +20,7 @@ come oggi. **Nessun pacchetto nuovo.** **Schema invariato (v15).** Nessun editor
 ## Task
 
 ### 51.1 — Tabella dei ruoli e traduzioni
+> Dalla review di fine fase 50: decidere qui se `TrackCredit.mbid` (artista) serve, altrimenti toglierlo (non ha colonna); spostare `TrackDetails` da `deezer_models.dart` a `credits.dart`. La ricerca per nome usa `creditNameKey()`, non `matchKey()`.
 **File:** `lib/services/online/credit_roles.dart` (nuovo), `lib/l10n/app_it.arb`, `app_en.arb`, `app_de.arb`,
 `app_es.arb`, `app_fr.arb`, `app_pt.arb` (con `scripts/arb_add.py`, poi `flutter gen-l10n`),
 `test/services/online/credit_roles_test.dart` (nuovo), `test/l10n/arb_test.dart`
@@ -67,6 +68,7 @@ una nuova richiesta ai client finti e la card mostra i crediti nuovi; errore →
 spento → nessun pulsante. `flutter analyze` pulito.
 
 ### 51.4 — Crediti e dettagli nel backup, nell'invio e nella Jam
+> Dalla review di fine fase 50: `CreditsRepository` diventa l'unico scrittore di `track_credits`/`track_enrich` (`moveInto` per `DuplicateRepository._mergeCredits`, `saveIfNone` per backup e invio); l'invariante «crediti e `credits_none_at` mai insieme» in un posto solo.
 **File:** `lib/services/backup/user_data.dart` (`TrackUserData.credits`, `details` facoltativi),
 `lib/data/repositories/backup_queries.dart`, `lib/data/repositories/backup_merge.dart`,
 `lib/services/share/track_meta.dart` (`credits` max 200, `details` facoltativi), `lib/services/share/received_meta.dart`,
