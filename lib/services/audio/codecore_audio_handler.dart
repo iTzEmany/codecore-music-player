@@ -24,7 +24,6 @@ import 'media_browse_tree.dart';
 import 'play_queue.dart';
 import 'remote_transport.dart';
 import 'resume_point.dart';
-import 'stream_address_cache.dart';
 
 enum PlaybackFailureReason {
   fileMissing,
@@ -51,7 +50,6 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     this.history,
     this.onEpisodeHeard,
     this.online,
-    this.addresses,
     this.preparer,
     this.onRadioStart,
     DateTime Function()? clock,
@@ -94,11 +92,9 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   /// about podcasts.
   final void Function(int trackId)? onEpisodeHeard;
 
-  /// Streamed (not owned) entries of the queue, which have negative ids, and
-  /// where their direct addresses come from. Both null: the queue holds only
-  /// library tracks.
+  /// Streamed (not owned) entries of the queue, which have negative ids.
+  /// Null: the queue holds only library tracks.
   final OnlineEntries? online;
-  final StreamAddressCache? addresses;
 
   /// Downloads online entries and `kind = 2` rows into the cache; null: they cannot play.
   /// Set by main once the providers exist, before any queue is restored.

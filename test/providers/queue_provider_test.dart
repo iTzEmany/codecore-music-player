@@ -8,7 +8,6 @@ import 'package:codecore/providers/player_providers.dart';
 import 'package:codecore/services/audio/codecore_audio_handler.dart';
 import 'package:codecore/services/audio/online_entries.dart';
 import 'package:codecore/services/audio/play_queue.dart';
-import 'package:codecore/services/audio/stream_address_cache.dart';
 import 'package:codecore/services/online/youtube_service.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -36,10 +35,6 @@ void main() {
       onError: (_) {},
       online: online,
       preparer: FakeStreamPreparer(repo, Directory.systemTemp.createTempSync('queue_provider')),
-      addresses: StreamAddressCache(
-        (r, {required fast}) async =>
-            StreamAddress(Uri.parse('https://stream.test/${r.id}')),
-      ),
     );
     ids = [
       for (final n in ['a', 'b', 'c'])
