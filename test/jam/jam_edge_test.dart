@@ -368,6 +368,23 @@ void goneOwnerTests() {
     expect(asked.single.title, 'Ta');
   });
 
+  test('a device that is not an output downloads nothing; a failed key is not retried', () {
+    var s = s0();
+    s = ok(s, JamCommand.add(yt('a')), 'gone');
+    expect(jamSelfFetchTargets(s, 'other'), isEmpty);
+    expect(jamSelfFetchTargets(s, host), hasLength(1));
+    expect(jamSelfFetchTargets(s, host, failed: {'youtube:a'}), isEmpty);
+  });
+
+  test('pins: own online items from the current one on, not the played ones', () {
+    var s = s0();
+    for (final c in [yt('a', owner: host), yt('b', owner: host), yt('c', owner: host), yt('x', owner: 'g')]) {
+      s = ok(s, JamCommand.add(c), c.ownerDeviceId);
+    }
+    expect(jamPinKeys(s.copyWith(currentIndex: 1), host), {'youtube:b', 'youtube:c'});
+    expect(jamPinKeys(null, host), isEmpty);
+  });
+
   test('no target while the owner is still in the Jam, nor for our own current item', () {
     var s = s0();
     s = ok(s, JamCommand.add(yt('a', owner: 'guest')), 'guest');

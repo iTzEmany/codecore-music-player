@@ -72,8 +72,14 @@ class JamOnlineAdder {
     });
   }
 
-  /// Keys now in the shared queue: the Jam's own pins hold them from here on.
-  void seen(Set<String> queued) => _pinned.intersection(queued).toList().forEach(_release);
+  /// Our items now in the shared queue: the Jam's own pins hold their keys from here on.
+  void seen(Iterable<JamItem> queued) {
+    final keys = {
+      for (final i in queued)
+        if (i.ownerDeviceId == ownId && i.ref?.startsWith('yt:') == true) i.ref!.substring(3),
+    };
+    _pinned.intersection(keys).toList().forEach(_release);
+  }
 
   void dispose() {
     _disposed = true;
@@ -86,13 +92,15 @@ class JamOnlineAdder {
 }
 
 /// The online items the output must download itself because their owner is gone:
-/// the current and the next one only (K-07), never the whole queue.
-List<JamItem> jamSelfFetchTargets(JamState s, String ownId) {
+/// the current and the next one only (K-07), never the whole queue. Only an output
+/// downloads; keys in [failed] already failed this session and are not retried.
+List<JamItem> jamSelfFetchTargets(JamState s, String ownId, {Set<String> failed = const {}}) {
+  if (!s.outputs.contains(ownId)) return const [];
   final next = s.currentIndex + 1;
   return [
     for (final i in [s.current, if (next > 0 && next < s.items.length) s.items[next]])
-      if (i != null && i.ownerDeviceId != ownId && i.videoId != null &&
-          i.ref?.startsWith('yt:youtube:') == true && s.participant(i.ownerDeviceId) == null)
+      if (i != null && i.ownerDeviceId != ownId && i.selfFetchable &&
+          s.participant(i.ownerDeviceId) == null && !failed.contains(i.ref!.substring(3)))
         i,
   ];
 }

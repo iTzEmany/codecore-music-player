@@ -32,9 +32,13 @@ class DownloadIndex {
       pathFor(id, source: source) != null;
 
   /// Where the video was downloaded, if the file is still there.
-  String? pathFor(String id, {MediaSource source = MediaSource.youtube}) {
-    final path = _map[downloadIndexKey(source, id)] ??
-        (source == MediaSource.youtube ? _map[id] : null);
+  String? pathFor(String id, {MediaSource source = MediaSource.youtube}) =>
+      pathForKey(downloadIndexKey(source, id));
+
+  /// Like [pathFor] from the `<source>:<id>` key.
+  String? pathForKey(String key) {
+    final path = _map[key] ??
+        (key.startsWith('youtube:') ? _map[key.substring('youtube:'.length)] : null);
     return path != null && File(path).existsSync() ? path : null;
   }
 
@@ -59,7 +63,10 @@ class DownloadIndex {
     return _lastWrite = _lastWrite.then((_) async {
       try {
         await _file.parent.create(recursive: true);
-        await _file.writeAsString(jsonEncode(_map));
+        // Write beside, then rename: a reader never sees a half-written file.
+        final tmp = File('${_file.path}.tmp');
+        await tmp.writeAsString(jsonEncode(_map));
+        await tmp.rename(_file.path);
       } on Object catch (e, st) {
         AppLog.w('downloads index write failed', e, st);
       }

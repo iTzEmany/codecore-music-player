@@ -20,6 +20,7 @@ import '../services/jam/jam_host.dart';
 import '../services/jam/jam_models.dart';
 import '../services/jam/jam_online_adder.dart';
 import '../services/jam/jam_output.dart';
+import '../services/online/download_index.dart';
 import '../services/online/youtube_service.dart' show YtResult;
 import '../services/share/track_meta.dart';
 import '../services/stream/stream_cache.dart';
@@ -31,6 +32,7 @@ import 'player_providers.dart';
 import 'settings_providers.dart';
 import 'share_hub.dart';
 import 'share_providers.dart';
+import 'youtube_providers.dart' show downloadIndexProvider;
 import 'stream_providers.dart';
 
 enum JamPhase { idle, requesting, active, ended }
@@ -144,13 +146,21 @@ String? jamCacheKey(JamItem i) {
 }
 
 /// The owner-side file of [item]: `yt:<key>` is a cache file, a number a library track
-/// (K-07); anything else has none.
-Future<String?> jamLocalFile(JamItem item, StreamCache cache, TrackRepository tracks) async {
+/// (K-07); anything else has none. A `yt:` file that left the cache (downloaded into
+/// the library meanwhile) is found through [index].
+Future<String?> jamLocalFile(JamItem item, StreamCache cache, TrackRepository tracks,
+    {DownloadIndex? index}) async {
   final key = jamCacheKey(item);
-  if (key != null) return (await cache.fileFor(key))?.path;
+  if (key != null) return (await cache.fileFor(key))?.path ?? index?.pathForKey(key);
   final id = int.tryParse(item.ref ?? '');
   return id == null ? null : (await tracks.getById(id))?.path;
 }
+
+/// Cache keys of [ownId]'s online items still to play (current and upcoming).
+Set<String> jamPinKeys(JamState? s, String ownId) => {
+      for (final (n, i) in (s?.items ?? const <JamItem>[]).indexed)
+        if (n >= s!.currentIndex && i.ownerDeviceId == ownId) ?jamCacheKey(i),
+    };
 
 class JamController extends Notifier<JamUiState> {
   JamGuest? _guest;
@@ -168,6 +178,12 @@ class JamController extends Notifier<JamUiState> {
 
   /// Cache keys pinned for the queue (counted pins: the player's own pins add up).
   final _pinned = <String>{};
+
+  /// Keys whose own download failed: not retried on every state change.
+  final _selfFailed = <String>{};
+
+  Dio? _dio;
+  Dio get _http => _dio ??= Dio(BaseOptions(connectTimeout: const Duration(seconds: 5)));
 
   final _incoming = StreamController<JamRequest>.broadcast();
   final _onlineFailed = StreamController<YtResult>.broadcast();
@@ -386,7 +402,7 @@ class JamController extends Notifier<JamUiState> {
     unawaited(_output?.apply(s));
     _precache(s);
     _syncPins(s);
-    _adder?.seen({for (final i in s.items) ?jamCacheKey(i)});
+    _adder?.seen(s.items);
   }
 
   void _onItemFailed(int id) {
@@ -431,13 +447,12 @@ class JamController extends Notifier<JamUiState> {
     final uri = _remoteUri(item);
     final remote = uri == null ? null : JamSource.remote(uri, _headers);
     // Synchronised outputs play from the local copy: no network jitter.
-    File? copy;
     if (uri != null && (state.jam?.synced ?? false) && _cache != null) {
-      copy = await _cache!.fetch(item, uri, _headers);
+      await _cache!.fetch(item, uri, _headers);
     }
     // Owner gone or not answering: an online track comes from its YouTube id.
     final sj = state.jam;
-    if (sj != null && (uri == null || (copy == null && (sj.synced)))) {
+    if (sj != null && uri == null) {
       final own = await _selfFetch(item);
       if (own != null) return JamSource.local(own.path);
     }
@@ -446,15 +461,17 @@ class JamController extends Notifier<JamUiState> {
 
   /// The row of an item this device owns: library, or the shadow row of a `yt:` track.
   /// Full rows: lyrics and curiosities are there.
-  Future<Track?> _localRow(JamItem item) {
+  Future<Track?> _localRow(JamItem item) async {
     final tracks = ref.read(trackRepositoryProvider);
     final key = jamCacheKey(item);
     final id = int.tryParse(item.ref ?? '');
-    return key != null
-        ? tracks.streamRow(key)
-        : id == null
-            ? Future.value()
-            : tracks.getById(id);
+    if (key != null) {
+      final path = (await ref.read(downloadIndexProvider.future)).pathForKey(key);
+      return await tracks.streamRow(key) ?? (path == null ? null : await tracks.byPath(path));
+    }
+    return id == null
+        ? null
+        : tracks.getById(id);
   }
 
   Future<TrackMeta?> _localMeta(JamItem item) async {
@@ -472,7 +489,7 @@ class JamController extends Notifier<JamUiState> {
     final uri = item.ownerDeviceId == _ownId ? null : _remoteUri(item, route: 'cover');
     if (uri == null) return null;
     try {
-      final r = await Dio(BaseOptions(connectTimeout: const Duration(seconds: 5))).getUri<List<int>>(uri,
+      final r = await _http.getUri<List<int>>(uri,
           options: Options(
               headers: _headers,
               responseType: ResponseType.bytes,
@@ -491,23 +508,21 @@ class JamController extends Notifier<JamUiState> {
       return await _localMeta(item) ??
           TrackMeta(title: item.title, artist: item.artist, album: item.album);
     }
-    return jamFetchMeta(item, _remoteUri(item, route: 'meta'), _headers);
+    return jamFetchMeta(item, _remoteUri(item, route: 'meta'), _headers, dio: _http);
   }
 
   Future<File?> _selfFetch(JamItem item) {
-    if (item.videoId == null || item.ref?.startsWith('yt:youtube:') != true) return Future.value();
+    if (!item.selfFetchable) return Future.value();
     return jamFetchByVideoId(item, (k, r) => ref.read(streamPreparerProvider).ready(k, r));
   }
 
-  Future<String?> _localFile(JamItem item) => jamLocalFile(
-      item, ref.read(streamCacheProvider), ref.read(trackRepositoryProvider));
+  Future<String?> _localFile(JamItem item) async => jamLocalFile(
+      item, ref.read(streamCacheProvider), ref.read(trackRepositoryProvider),
+      index: await ref.read(downloadIndexProvider.future));
 
-  /// Our own online items in the queue stay in the cache while they are there (D-81).
+  /// Our own online items still to play (current and upcoming) stay in the cache (D-81).
   void _syncPins(JamState? s) {
-    final want = <String>{
-      for (final i in s?.items ?? const <JamItem>[])
-        if (i.ownerDeviceId == _ownId) ?jamCacheKey(i),
-    };
+    final want = jamPinKeys(s, _ownId);
     if (want.isEmpty && _pinned.isEmpty) return; // no cache needed in a library-only Jam
     final cache = ref.read(streamCacheProvider);
     for (final k in _pinned.difference(want)) {
@@ -536,8 +551,10 @@ class JamController extends Notifier<JamUiState> {
       keep.add(i.id);
     }
     unawaited(cache.prune(keep));
-    for (final i in jamSelfFetchTargets(s, _ownId)) {
-      unawaited(_selfFetch(i));
+    for (final i in jamSelfFetchTargets(s, _ownId, failed: _selfFailed)) {
+      unawaited(_selfFetch(i).then((f) {
+        if (f == null) _selfFailed.add(jamCacheKey(i)!);
+      }));
     }
     for (final i in [cur, next]) {
       if (i == null || i.ownerDeviceId == _ownId) continue;
@@ -655,6 +672,9 @@ class JamController extends Notifier<JamUiState> {
     _adder?.dispose();
     _adder = null;
     _syncPins(null);
+    _selfFailed.clear();
+    _dio?.close();
+    _dio = null;
     _host?.resolveFile = null;
     _host?.resolveMeta = null;
     _host?.resolveCover = null;

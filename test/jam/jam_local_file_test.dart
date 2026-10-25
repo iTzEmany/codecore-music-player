@@ -4,6 +4,7 @@ import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/data/repositories/track_repository.dart';
 import 'package:codecore/providers/jam_providers.dart';
 import 'package:codecore/services/jam/jam_models.dart';
+import 'package:codecore/services/online/download_index.dart';
 import 'package:codecore/services/stream/stream_cache.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -46,6 +47,16 @@ void main() {
     for (final r in [null, '', 'yt:', 'abc', 'x:1', '../etc']) {
       expect(await jamLocalFile(item(r), cache, tracks), isNull, reason: '$r');
     }
+  });
+
+  test('a yt: file promoted to the library is found through the download index', () async {
+    await cache.open();
+    final lib = File(p.join(tmp.path, 'a.m4a'))..writeAsStringSync('abc');
+    final idx = DownloadIndex(File(p.join(tmp.path, 'downloads.json')));
+    await idx.add('abc', lib.path);
+    expect(await jamLocalFile(item('yt:youtube:abc'), cache, tracks), isNull);
+    expect(await jamLocalFile(item('yt:youtube:abc'), cache, tracks, index: idx), lib.path);
+    expect(await jamLocalFile(item('yt:youtube:zzz'), cache, tracks, index: idx), isNull);
   });
 
   test('a pinned yt: file survives eviction', () async {

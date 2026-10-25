@@ -52,16 +52,16 @@ secondo è pronto prima. `flutter analyze` pulito.
 ### 47.3 — Proprietario uscito: l'uscita scarica da sé
 **File:** `lib/providers/jam_providers.dart` (risoluzione della sorgente di un item con proprietario assente),
 `test/jam/jam_edge_test.dart`
-1. Item `yt:` con proprietario non più nella Jam (o che risponde 404) → il dispositivo d'uscita passa `videoId` al
+1. Item `yt:` con proprietario non più nella Jam → il dispositivo d'uscita passa `videoId` al
    proprio `StreamPreparer` (`YtResult` dai campi dell'item) e suona dalla sua cache (R-21). Gli altri item del
-   proprietario uscito (libreria) restano come oggi (`available = false`).
+   proprietario uscito (libreria) si tolgono dalla coda; restano solo gli `yt:` non ancora suonati (D-93).
 2. Solo gli item non ancora suonati e solo quando servono (il prossimo, come `_precache`): niente riscaricamento di
    tutta la coda (K-07).
 
 R-21.
 **Fatto quando:** `flutter test test/jam/jam_edge_test.dart` verde: proprietario uscito → l'uscita risolve il brano
 dall'id YouTube e lo scarica nella sua cache (downloader finto chiamato una volta con quel `videoId`); item di
-libreria del proprietario uscito → `available = false` come oggi; solo il prossimo item viene scaricato.
+libreria del proprietario uscito → tolti dalla coda (D-93), restano solo gli item YouTube non ancora suonati; solo il prossimo item viene scaricato.
 `flutter analyze` pulito.
 
 ### 47.4 — Rotta `meta`: copertina, testo e curiosità dal proprietario
@@ -146,3 +146,9 @@ host il telefono):
 - `DownloadsNotifier` fa anche promozioni, `promoteErrors`, playlist e risincronizzazione del player, e i provider
   si importano in cerchio (`player`↔`youtube`, `youtube`↔`stream`, `youtube`↔`pending_playlist_adds`). Seguito:
   un solo `libraryIdOfProvider` accanto a `downloadIndexProvider`, e `addToPlaylistTag` fuori dai provider.
+- (Review della fase 47) `libraryToJam` e `jamOnlineFailuresProvider` stanno in `player_providers.dart` ma sono
+  logica della Jam e creano il ciclo `player`↔`jam`: spostarli in `jam_providers.dart` (es.
+  `JamController.addLibraryIds`), così `PlayerController` vede solo `jamProvider`. Prima che la fase 48 faccia
+  crescere `PlayerController`.
+- `DownloadIndex` è un'istanza ricreata a ogni `invalidate` (scrittura ora atomica): meglio una sola istanza e un
+  contatore di revisione osservato dalle righe.

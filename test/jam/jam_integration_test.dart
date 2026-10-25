@@ -274,11 +274,25 @@ void main() {
       a2.add(yt('a'));
       a2.add(yt('a'));
       await Future<void>.delayed(const Duration(milliseconds: 100));
-      a2.seen({'youtube:a'});
+      a2.seen([_own('guest', 'a')]);
       a2.dispose();
       cache.limitBytes = 0;
       await cache.evict();
       expect(await cache.fileFor('youtube:a'), isNull);
+    });
+
+    test("someone else's item with the same key does not release our pin", () async {
+      final part = File(p.join(cache.dir.path, 'x.m4a.part'))..writeAsBytesSync([1, 2, 3]);
+      final f = await cache.put('youtube:a', part);
+      final a2 = JamOnlineAdder(
+          ownId: 'guest', cache: cache, ready: (k, r) async => f, send: (c) async => null, onFailed: (_) {});
+      a2.add(yt('a'));
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+      a2.seen([_own('host', 'a')]);
+      cache.limitBytes = 0;
+      await cache.evict();
+      expect(await cache.fileFor('youtube:a'), isNotNull);
+      a2.dispose();
     });
 
     test('a file waiting for its turn is not evicted until it is queued', () async {
@@ -294,3 +308,6 @@ void main() {
     });
   });
 }
+
+JamItem _own(String owner, String id) => JamItem(
+    id: 0, ownerDeviceId: owner, title: 'T', ext: 'm4a', ref: 'yt:youtube:$id', videoId: id);

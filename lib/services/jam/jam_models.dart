@@ -50,6 +50,9 @@ class JamItem {
   /// Part of the host's seed queue: tracks added later are placed before it.
   final bool inherited;
 
+  /// A YouTube track any output can download again by its video id.
+  bool get selfFetchable => videoId != null && ref?.startsWith('yt:youtube:') == true;
+
   JamItem copyWith({int? id, bool? available, bool? inherited}) => JamItem(
         id: id ?? this.id,
         ownerDeviceId: ownerDeviceId,
