@@ -13,8 +13,9 @@ class _Web implements WebClient {
   final asked = <(String, Map<String, String>?)>[];
 
   @override
-  Future<Object?> getJson(String url, {Map<String, String>? query, CancelToken? cancel}) async {
+  Future<Object?> getJson(String url, {Map<String, String>? query, CancelToken? cancel, bool strict = false}) async {
     asked.add((url, query));
+    if (strict && answer == null) throw WebUnavailableException(url, 503);
     return answer;
   }
 

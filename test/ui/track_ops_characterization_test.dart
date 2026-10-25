@@ -34,6 +34,7 @@ class _Lrclib implements LrclibClient {
     String? album,
     int? durationSec,
     dynamic cancel,
+    bool strict = false,
   }) async =>
       result;
 }

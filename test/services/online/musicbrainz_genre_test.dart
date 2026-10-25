@@ -16,7 +16,7 @@ class _Web implements WebClient {
   final asked = <String>[];
 
   @override
-  Future<Object?> getJson(String url, {Map<String, String>? query, CancelToken? cancel}) async {
+  Future<Object?> getJson(String url, {Map<String, String>? query, CancelToken? cancel, bool strict = false}) async {
     asked.add(url);
     if (url.endsWith('/recording')) return _fixture('recording_search_official');
     if (url.contains('/recording/')) {
@@ -53,7 +53,7 @@ void main() {
 
 class _MasterWeb implements WebClient {
   @override
-  Future<Object?> getJson(String url, {Map<String, String>? query, CancelToken? cancel}) async {
+  Future<Object?> getJson(String url, {Map<String, String>? query, CancelToken? cancel, bool strict = false}) async {
     if (url.contains('/recording/')) {
       return {
         'releases': [

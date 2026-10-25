@@ -31,7 +31,7 @@ Future<void> _settle(WidgetTester tester) async {
 class _Web implements WebClient {
   Object? json;
   @override
-  Future<Object?> getJson(String url, {Map<String, String>? query, CancelToken? cancel}) async => json;
+  Future<Object?> getJson(String url, {Map<String, String>? query, CancelToken? cancel, bool strict = false}) async => json;
   @override
   Future<List<int>?> getBytes(String url, {int maxBytes = 5 * 1024 * 1024, CancelToken? cancel}) async => null;
 }

@@ -264,7 +264,7 @@ class _Web implements WebClient {
   final Object Function(String search) pages;
 
   @override
-  Future<Object?> getJson(String url, {Map<String, String>? query, CancelToken? cancel}) async =>
+  Future<Object?> getJson(String url, {Map<String, String>? query, CancelToken? cancel, bool strict = false}) async =>
       {'query': {'pages': pages(query?['gsrsearch'] ?? '')}};
 
   @override
@@ -274,7 +274,7 @@ class _Web implements WebClient {
 /// A web client that has no answer for anything (the service is down).
 class _Silent implements WebClient {
   @override
-  Future<Object?> getJson(String url, {Map<String, String>? query, CancelToken? cancel}) async => null;
+  Future<Object?> getJson(String url, {Map<String, String>? query, CancelToken? cancel, bool strict = false}) async => null;
 
   @override
   Future<List<int>?> getBytes(String url, {int maxBytes = 0, CancelToken? cancel}) async => null;

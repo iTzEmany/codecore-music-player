@@ -9,6 +9,9 @@ import '../services/online/enrichment_service.dart';
 import '../services/online/http_client.dart';
 import '../services/online/itunes_client.dart';
 import '../services/online/lrclib_client.dart';
+import '../services/online/lyrics_chain.dart';
+import '../services/online/lyrics_ovh_client.dart';
+import '../services/online/netease_lyrics_client.dart';
 import '../services/online/curiosity_finder.dart';
 import '../services/online/deezer_client.dart';
 import '../services/online/deezer_gw_client.dart';
@@ -53,6 +56,19 @@ final deezerGwClientProvider = Provider(
 );
 final lrclibClientProvider = Provider(
   (ref) => LrclibClient(ref.watch(webClientProvider)),
+);
+final neteaseLyricsClientProvider = Provider(
+  (ref) => NeteaseLyricsClient(ref.watch(webClientProvider)),
+);
+final lyricsOvhClientProvider = Provider(
+  (ref) => LyricsOvhClient(ref.watch(webClientProvider)),
+);
+final lyricsChainProvider = Provider(
+  (ref) => LyricsChain(
+    lrclib: ref.watch(lrclibClientProvider),
+    netease: ref.watch(neteaseLyricsClientProvider),
+    ovh: ref.watch(lyricsOvhClientProvider),
+  ),
 );
 final wikipediaClientProvider = Provider(
   (ref) => WikipediaClient(ref.watch(webClientProvider)),

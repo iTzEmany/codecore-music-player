@@ -15,7 +15,7 @@ class _Web implements WebClient {
   final asked = <String>[];
 
   @override
-  Future<Object?> getJson(String url, {Map<String, String>? query, CancelToken? cancel}) async {
+  Future<Object?> getJson(String url, {Map<String, String>? query, CancelToken? cancel, bool strict = false}) async {
     asked.add(url);
     if (url.contains('/isrc/')) {
       expect(query?['inc'], 'artist-credits');

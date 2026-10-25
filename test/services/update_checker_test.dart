@@ -8,7 +8,7 @@ class _Web implements WebClient {
   final Object? Function() answer;
   final urls = <String>[];
   @override
-  Future<Object?> getJson(String url, {Map<String, String>? query, CancelToken? cancel}) async {
+  Future<Object?> getJson(String url, {Map<String, String>? query, CancelToken? cancel, bool strict = false}) async {
     urls.add(url);
     return answer();
   }

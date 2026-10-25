@@ -16,11 +16,24 @@ class RateLimitedException implements Exception {
   String toString() => 'RateLimitedException($statusCode)';
 }
 
+/// Thrown by a strict [WebClient.getJson] when the service could not answer
+/// (network, timeout, 5xx or any other non-200 except 404).
+class WebUnavailableException implements Exception {
+  const WebUnavailableException(this.url, [this.statusCode]);
+
+  final String url;
+  final int? statusCode;
+
+  @override
+  String toString() => 'WebUnavailableException($url, $statusCode)';
+}
+
 /// Network seam used by every online client (faked in tests).
 abstract class WebClient {
-  /// Decoded JSON, or null on 404 / network errors.
+  /// Decoded JSON, or null on 404 / network errors. With [strict], 404 stays null
+  /// but network errors, timeouts and other non-200 answers throw [WebUnavailableException].
   Future<Object?> getJson(String url,
-      {Map<String, String>? query, CancelToken? cancel});
+      {Map<String, String>? query, CancelToken? cancel, bool strict = false});
 
   /// Raw bytes for https URLs up to [maxBytes]; null otherwise.
   Future<List<int>?> getBytes(String url,
@@ -64,7 +77,7 @@ class DioWebClient implements WebClient {
 
   @override
   Future<Object?> getJson(String url,
-      {Map<String, String>? query, CancelToken? cancel}) async {
+      {Map<String, String>? query, CancelToken? cancel, bool strict = false}) async {
     try {
       for (var attempt = 0;; attempt++) {
         if (isWikimediaHost(Uri.tryParse(url)?.host ?? '')) await _wikimedia.acquire();
@@ -81,12 +94,16 @@ class DioWebClient implements WebClient {
           continue;
         }
         _checkRateLimit(res.statusCode, url, res.headers.value('retry-after'), res.data);
-        if (res.statusCode != 200) return null;
+        if (res.statusCode != 200) {
+          if (strict && res.statusCode != 404) throw WebUnavailableException(url, res.statusCode);
+          return null;
+        }
         return decodeJsonBody(res.data);
       }
     } on DioException catch (e, st) {
       if (CancelToken.isCancel(e)) rethrow;
       AppLog.w('GET failed: $url', e, st);
+      if (strict) throw WebUnavailableException(url);
       return null;
     }
   }

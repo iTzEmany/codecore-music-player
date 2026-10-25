@@ -25,6 +25,7 @@ class LrclibClient {
     String? album,
     int? durationSec,
     CancelToken? cancel,
+    bool strict = false,
   }) async {
     if (artist.trim().isEmpty) return null;
     final primary = extractPrimaryArtist(artist);
@@ -39,13 +40,14 @@ class LrclibClient {
             if (album != null && album.isNotEmpty) 'album_name': album,
             if (durationSec != null) 'duration': '$durationSec',
           },
-          cancel: cancel);
+          cancel: cancel,
+          strict: strict);
       final direct = _validated(get, artist, durationSec);
       if (direct != null) return direct;
     }
     for (final (a, t) in attempts) {
       final search = await _web.getJson('$_base/search',
-          query: {'track_name': t, 'artist_name': a}, cancel: cancel);
+          query: {'track_name': t, 'artist_name': a}, cancel: cancel, strict: strict);
       if (search is List) {
         for (final item in search) {
           final ok = _validated(item, artist, durationSec);
