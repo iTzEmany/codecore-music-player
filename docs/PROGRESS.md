@@ -691,7 +691,7 @@ Feature «Arricchimento completo» (`docs/feature-arricchimento.md`, decisioni D
 - [ ] 50.11 Prove a mano (utente)
 
 ## Fase 51 — Crediti a schermo (`fase-51-crediti-a-schermo.md`)
-- [ ] 51.1 Tabella dei ruoli e traduzioni
+- [x] 51.1 Tabella dei ruoli e traduzioni
 - [ ] 51.2 `CreditsSection` e card nella schermata di riproduzione
 - [ ] 51.3 «Aggiorna» nella card
 - [ ] 51.4 Crediti e dettagli nel backup, nell'invio e nella Jam

@@ -26,6 +26,7 @@ const _sameAsItalian = {
   'radioGenreHipHop', 'radioGenreLoFi', 'radioGenreChillout', 'radioGenreOldies',
   'radioGenreMetal', 'radioGenreReggae', 'radioGenreLatin', 'radioGenreSoul',
   'radioGenreSports', 'reportKindIdea', 'sortAToZ',
+  'creditRolePiano', 'creditRoleMastering', 'creditsBpm', 'creditsKindEp',
 };
 
 Map<String, dynamic> _arb(String lang) =>
@@ -120,6 +121,14 @@ void main() {
           reason: '$lang/$k: $v',
         );
       }
+    }
+  });
+
+  test('every creditRole key exists in all six ARB files', () {
+    final roles = _keys(it).where((k) => k.startsWith('creditRole')).toSet();
+    expect(roles, isNotEmpty);
+    for (final lang in _langs) {
+      expect(roles.difference(_keys(_arb(lang))), isEmpty, reason: lang);
     }
   });
 }
