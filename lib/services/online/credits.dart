@@ -20,14 +20,21 @@ class TrackCredit {
   /// `deezer` or `musicbrainz`.
   final String source;
 
-  Map<String, Object?> toJson() => {'name': name, 'role': role, 'source': source};
+  Map<String, Object?> toJson() => {
+    'name': name,
+    'role': role,
+    'source': source,
+  };
 
   /// Untrusted input: null when a field is not a usable string.
   static TrackCredit? tryParse(Object? j) {
     if (j is! Map) return null;
     final (n, r, s) = (j['name'], j['role'], j['source']);
     if (n is! String || r is! String || s is! String) return null;
-    if (n.trim().isEmpty || r.trim().isEmpty || n.length > 200 || r.length > 100 ||
+    if (n.trim().isEmpty ||
+        r.trim().isEmpty ||
+        n.length > 200 ||
+        r.length > 100 ||
         (s != 'deezer' && s != 'musicbrainz')) {
       return null;
     }
@@ -154,12 +161,12 @@ class TrackDetails {
   });
 
   factory TrackDetails.fromJson(Map<dynamic, dynamic> j) => TrackDetails(
-    bpm: _num(j['bpm'])?.toDouble(),
+    bpm: _num(j['bpm'], 1, 400)?.toDouble(),
     label: _str(j['label']),
     digitalReleaseDate: _str(j['digitalReleaseDate']),
     recordType: _str(j['recordType']),
-    rank: _num(j['rank'])?.toInt(),
-    albumFans: _num(j['albumFans'])?.toInt(),
+    rank: _num(j['rank'], 0, _big)?.toInt(),
+    albumFans: _num(j['albumFans'], 0, _big)?.toInt(),
     explicit: j['explicit'] is bool ? j['explicit'] as bool : null,
     copyright: _str(j['copyright'], 500),
     physicalReleaseDate: _str(j['physicalReleaseDate']),
@@ -168,7 +175,9 @@ class TrackDetails {
   // Untrusted input: a wrong type is null, a long string is cut.
   static String? _str(Object? v, [int max = 200]) =>
       v is String ? (v.length > max ? v.substring(0, max) : v) : null;
-  static num? _num(Object? v) => v is num && v.isFinite ? v : null;
+  static const _big = 1e10;
+  static num? _num(Object? v, num min, num max) =>
+      v is num && v.isFinite && v >= min && v <= max ? v : null;
 
   TrackDetails copyWith({String? copyright, String? physicalReleaseDate}) =>
       TrackDetails(

@@ -96,7 +96,12 @@ class CreditsRepository {
       for (final id in [keepId, ...drops])
         ...await (_db.select(e)..where((t) => t.trackId.equals(id))).get(),
     ];
-    if (rows.length > (rows.any((r) => r.trackId == keepId) ? 1 : 0)) {
+    final keeperMark = rows
+        .where((r) => r.trackId == keepId)
+        .firstOrNull
+        ?.creditsNoneAt;
+    if (rows.length > (rows.any((r) => r.trackId == keepId) ? 1 : 0) ||
+        (hasCredits && keeperMark != null)) {
       T? first<T extends Object>(T? Function(TrackEnrichData) pick) =>
           rows.map(pick).whereType<T>().firstOrNull;
       await _db
@@ -131,7 +136,7 @@ class CreditsRepository {
   portableOfMany(Iterable<int> ids) async {
     final credits = <int, List<TrackCredit>>{};
     final details = <int, TrackDetails?>{};
-    final all = ids.toList();
+    final all = ids.toSet().toList();
     // Chunks keep the IN list under SQLite's variable limit.
     for (var i = 0; i < all.length; i += 500) {
       final chunk = all.sublist(i, i + 500 > all.length ? all.length : i + 500);
@@ -163,7 +168,8 @@ class CreditsRepository {
     final hasCredits = (await creditsOf(trackId)).isNotEmpty;
     final saveCredits = credits.isNotEmpty && !hasCredits;
     final saveDetails =
-        details != null && (await enrichOf(trackId))?.details == null;
+        details != null &&
+        decodeDetails(trackId, (await enrichOf(trackId))?.details) == null;
     if (saveCredits) {
       await _replace(trackId, [
         for (final c in credits)

@@ -11,8 +11,9 @@ Map<String, dynamic> _json(String path) =>
 Map<String, dynamic> _gw(String n) =>
     _json('deezer/$n')['results']['DATA'] as Map<String, dynamic>;
 
-Set<String> _pairs(List<TrackCredit> c) =>
-    {for (final x in c) '${x.name}|${x.role}'};
+Set<String> _pairs(List<TrackCredit> c) => {
+  for (final x in c) '${x.name}|${x.role}',
+};
 
 void main() {
   test('Lose Yourself: roles, names, copyright and physical date', () {
@@ -52,31 +53,47 @@ void main() {
 
   test('merge: Deezer first, MusicBrainz only adds missing nameKey+role', () {
     final merged = mergeCredits(
-      [TrackCredit('A', 'composer', 'deezer'), TrackCredit('A', 'composer', 'deezer')],
-      [TrackCredit('Á', 'composer', 'musicbrainz'), TrackCredit('B', 'guitar', 'musicbrainz')],
+      [
+        TrackCredit('A', 'composer', 'deezer'),
+        TrackCredit('A', 'composer', 'deezer'),
+      ],
+      [
+        TrackCredit('Á', 'composer', 'musicbrainz'),
+        TrackCredit('B', 'guitar', 'musicbrainz'),
+      ],
     );
-    expect(merged.map((c) => '${c.name}|${c.role}|${c.source}'),
-        ['A|composer|deezer', 'B|guitar|musicbrainz']);
+    expect(merged.map((c) => '${c.name}|${c.role}|${c.source}'), [
+      'A|composer|deezer',
+      'B|guitar|musicbrainz',
+    ]);
   });
 
-  test('parseMbCredits skips malformed relations and blank names, keeps the rest', () {
-    Map<String, Object?> rel(Object? type, Object? name, {Object? attrs, Object? id}) => {
-          'target-type': 'artist',
-          'type': type,
-          'attributes': attrs ?? const <String>[],
-          'artist': {'name': name, 'id': id},
-        };
-    final r = parseMbCredits({
-      'relations': [
-        rel(5, 'Bad Type'),
-        rel('producer', 'Bad Attrs', attrs: 'x'),
-        rel('producer', 'Bad Id', id: 3),
-        rel('producer', '   '),
-        rel(' Mixer ', 'Ok'),
-      ],
-    });
-    expect(_pairs(r), {'Bad Id|producer', 'Ok|mixer'});
-  });
+  test(
+    'parseMbCredits skips malformed relations and blank names, keeps the rest',
+    () {
+      Map<String, Object?> rel(
+        Object? type,
+        Object? name, {
+        Object? attrs,
+        Object? id,
+      }) => {
+        'target-type': 'artist',
+        'type': type,
+        'attributes': attrs ?? const <String>[],
+        'artist': {'name': name, 'id': id},
+      };
+      final r = parseMbCredits({
+        'relations': [
+          rel(5, 'Bad Type'),
+          rel('producer', 'Bad Attrs', attrs: 'x'),
+          rel('producer', 'Bad Id', id: 3),
+          rel('producer', '   '),
+          rel(' Mixer ', 'Ok'),
+        ],
+      });
+      expect(_pairs(r), {'Bad Id|producer', 'Ok|mixer'});
+    },
+  );
 
   test('names without letters do not collapse in the dedupe', () {
     final r = mergeCredits([
@@ -84,5 +101,45 @@ void main() {
       TrackCredit('???', 'author', 'deezer'),
     ], []);
     expect(r, hasLength(2));
+  });
+
+  test('details out of range become null', () {
+    final d = TrackDetails.fromJson({
+      'bpm': 9999,
+      'rank': -1,
+      'albumFans': 1e12,
+    });
+    expect((d.bpm, d.rank, d.albumFans), (null, null, null));
+    expect(
+      TrackDetails.fromJson({'bpm': 120, 'rank': 5, 'albumFans': 0}).bpm,
+      120,
+    );
+  });
+
+  test('a name of 201 characters or a role of 101 is dropped', () {
+    expect(
+      TrackCredit.tryParse({
+        'name': 'a' * 201,
+        'role': 'x',
+        'source': 'deezer',
+      }),
+      isNull,
+    );
+    expect(
+      TrackCredit.tryParse({
+        'name': 'a',
+        'role': 'r' * 101,
+        'source': 'deezer',
+      }),
+      isNull,
+    );
+    expect(
+      TrackCredit.tryParse({
+        'name': 'a' * 200,
+        'role': 'r' * 100,
+        'source': 'deezer',
+      }),
+      isNotNull,
+    );
   });
 }

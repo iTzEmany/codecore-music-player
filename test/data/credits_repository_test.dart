@@ -1,7 +1,8 @@
+import 'package:codecore/services/online/credits.dart';
 import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/data/repositories/credits_repository.dart';
 import 'package:codecore/data/repositories/track_repository.dart';
-import 'package:drift/drift.dart';
+import 'package:drift/drift.dart' hide isNull, isNotNull;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -120,5 +121,64 @@ void main() {
       [('composer', 'A1'), ('producer', 'A1'), ('producer', 'B1')],
     );
     expect(await repo.creditedTracks('nobody'), isEmpty);
+  });
+
+  Future<int> addTrack(String t, {bool ignored = false}) => db
+      .into(db.tracks)
+      .insert(
+        TracksCompanion.insert(
+          path: '/$t.mp3',
+          title: t,
+          albumKey: 'y',
+          format: 'mp3',
+          sizeBytes: 1,
+          mtimeMs: 1,
+          addedAt: 1,
+          ignored: Value(ignored),
+        ),
+      );
+
+  test('portableOfMany: an id repeated across chunks counts once', () async {
+    await repo.saveCredits(id, [credit('Ann', 'composer')]);
+    final ids = [id, for (var i = 0; i < 600; i++) 100000 + i, id];
+    expect((await repo.portableOfMany(ids))[id]!.credits, hasLength(1));
+  });
+
+  test('moveInto: keeper with the none mark and no credits takes the drop credits, mark cleared', () async {
+    final drop = await addTrack('D');
+    await repo.saveEnrich(
+      TrackEnrichCompanion(trackId: Value(id), creditsNoneAt: const Value(5)),
+    );
+    await repo.saveCredits(drop, [credit('Ann', 'composer')]);
+    await repo.moveInto(id, {drop});
+    expect(await repo.creditsOf(id), hasLength(1));
+    expect((await repo.enrichOf(id))!.creditsNoneAt, isNull);
+  });
+
+  test('saveIfNone: unreadable stored details are replaced; the none mark is cleared by credits', () async {
+    await repo.saveEnrich(
+      TrackEnrichCompanion(
+        trackId: Value(id),
+        details: const Value('{broken'),
+        creditsNoneAt: const Value(5),
+      ),
+    );
+    await repo.saveIfNone(id, [
+      TrackCredit('Ann', 'composer', 'deezer'),
+    ], const TrackDetails(label: 'L'));
+    expect((await repo.portableOf(id)).details!.label, 'L');
+    expect((await repo.enrichOf(id))!.creditsNoneAt, isNull);
+  });
+
+  test('creditedTracks leaves out an ignored track', () async {
+    final x = await addTrack('X', ignored: true);
+    await repo.saveCredits(x, [credit('Pharrell', 'producer')]);
+    expect(await repo.creditedTracks('pharrell'), isEmpty);
+  });
+
+  test('decodeDetails: valid JSON that is not a map gives null', () {
+    for (final raw in ['[]', 'null', '1', '{broken']) {
+      expect(decodeDetails(1, raw), isNull);
+    }
   });
 }
