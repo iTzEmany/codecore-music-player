@@ -33,6 +33,7 @@ import '../../widgets/ring_progress.dart';
 import '../../../providers/theme_providers.dart';
 import '../../theme/cover_tint.dart';
 
+const _playerRouteName = 'now-playing';
 const _wideBreakpoint = 900.0;
 const _closeDistance = 120.0;
 const _closeVelocity = 700.0;
@@ -56,13 +57,26 @@ String? playContextName(AppLocalizations l, PlayContext? c) {
 /// Opens the player on top of everything, as the desktop bar does.
 Future<void> _openPlayer(BuildContext context) =>
     Navigator.of(context, rootNavigator: true).push(
-      MaterialPageRoute<void>(builder: (_) => const NowPlayingScreen()),
+      MaterialPageRoute<void>(
+        settings: const RouteSettings(name: _playerRouteName),
+        builder: (_) => const NowPlayingScreen(),
+      ),
     );
 
 /// Tap on an online result (rows and album call this): starts it and opens the
 /// player at once, in loading (R-02). The route is pushed before the load ends.
 Future<void> playOnlineAndOpen(BuildContext context, WidgetRef ref, YtResult r) =>
     _playAndOpen(context, ref.read(playerControllerProvider).playOnline(r));
+
+/// A second tap while the player is already on top plays but does not push again.
+bool _playerOnTop(BuildContext context) {
+  var onTop = false;
+  Navigator.of(context, rootNavigator: true).popUntil((route) {
+    onTop = route.settings.name == _playerRouteName;
+    return true;
+  });
+  return onTop;
+}
 
 Future<void> playOnlineListAndOpen(
   BuildContext context,
@@ -75,7 +89,7 @@ Future<void> playOnlineListAndOpen(
 );
 
 Future<void> _playAndOpen(BuildContext context, Future<void> playing) {
-  if (context.mounted) unawaited(_openPlayer(context));
+  if (context.mounted && !_playerOnTop(context)) unawaited(_openPlayer(context));
   return playing;
 }
 

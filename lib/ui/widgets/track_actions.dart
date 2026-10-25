@@ -14,10 +14,12 @@ import '../../data/db/app_database.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../providers/equalizer_providers.dart';
 import '../../providers/jam_providers.dart';
+import '../../providers/pending_playlist_adds.dart' show addToPlaylistTag;
 import '../../providers/player_providers.dart';
 import '../../providers/preview_providers.dart';
 import '../../providers/suggestion_actions.dart';
 import '../../providers/track_ops.dart';
+import '../../providers/youtube_providers.dart' show downloadsProvider;
 import '../screens/playlists/playlist_dialogs.dart';
 import '../screens/playlists/playlist_picker.dart';
 import '../screens/tags/tags_sheet.dart';
@@ -27,8 +29,11 @@ import '../screens/devices/devices_sheet.dart';
 import '../screens/track_edit_dialog.dart';
 import '../screens/library/album_detail_screen.dart';
 import '../screens/library/artist_screen.dart';
+import '../screens/online/artist_page_screen.dart';
 import '../screens/online/artist_picker_sheet.dart';
 import '../shell/shell_nav.dart';
+import '../../services/online/youtube_service.dart' show YtResult;
+import '../../services/online/ytm_artist.dart' show YtmArtistRef;
 import '../../data/repositories/library_queries.dart';
 import '../../data/repositories/track_kinds.dart';
 import '../../providers/library_providers.dart';
@@ -46,9 +51,18 @@ import 'show_msg.dart';
 
 /// One entry of the track menu.
 class TrackAction {
-  const TrackAction(this.icon, this.label, this.run, {this.destructive = false});
+  const TrackAction(
+    this.icon,
+    this.label,
+    this.run, {
+    this.destructive = false,
+    this.onStreamRow = false,
+  });
 
   final bool destructive;
+
+  /// Kept in the menu of a streamed shadow row (kind 2).
+  final bool onStreamRow;
   final IconData icon;
   final String label;
   final Future<void> Function() run;
@@ -184,16 +198,16 @@ List<TrackActionGroup> trackActions(
       TrackAction(Icons.playlist_play_rounded, l.playNext, () async {
         ctrl.playNext(track.id);
         snack(l.playNextDone);
-      }),
+      }, onStreamRow: true),
       TrackAction(Icons.queue_rounded, l.addToQueue, () async {
         ctrl.addToQueue(track.id);
         snack(l.addedToQueue);
-      }),
+      }, onStreamRow: true),
       if (ref.read(jamProvider).active)
         TrackAction(Icons.queue_music_rounded, l.jamAddToJam, () async {
           final n = await ref.read(jamProvider.notifier).addTracks([track]);
           snack(l.jamAdded(n));
-        }),
+        }, onStreamRow: true),
     ]),
     TrackActionGroup(l.groupCollection, [
       TrackAction(
@@ -258,7 +272,7 @@ List<TrackActionGroup> trackActions(
           context: outer,
           builder: (_) => _DetailsDialog(track: track),
         );
-      }),
+      }, onStreamRow: true),
       if (isDesktop)
         TrackAction(
           Icons.folder_open_rounded,
@@ -280,14 +294,10 @@ List<TrackActionGroup> trackActions(
   ];
   // A streamed shadow row (kind 2) keeps only queue actions and Details until phase 46.
   if (track.kind != kStreamKind) return groups;
-  bool keep(TrackAction a) =>
-      a.icon == Icons.playlist_play_rounded ||
-      a.icon == Icons.queue_rounded ||
-      a.icon == Icons.queue_music_rounded ||
-      a.icon == Icons.info_outline_rounded;
   return [
     for (final g in groups)
-      if (g.actions.any(keep)) TrackActionGroup(g.title, g.actions.where(keep).toList()),
+      if (g.actions.any((a) => a.onStreamRow))
+        TrackActionGroup(g.title, g.actions.where((a) => a.onStreamRow).toList()),
   ];
 }
 
@@ -476,4 +486,100 @@ class _DetailsDialog extends StatelessWidget {
       ],
     );
   }
+}
+
+/// The menu of an online row: play after, queue, playlist, download, artist
+/// (R-16). With a Jam on, «Riproduci dopo» goes to the shared queue (D-89).
+List<TrackAction> onlineResultActions(
+  BuildContext outer,
+  WidgetRef ref,
+  YtResult r,
+) {
+  final l = outer.l10n;
+  final ctrl = ref.read(playerControllerProvider);
+  final jam = ref.read(jamProvider).active;
+  return [
+    TrackAction(Icons.playlist_play_rounded, l.playNext, () async {
+      await (jam ? ctrl.enqueueOnline(r) : ctrl.playOnlineNext(r));
+      if (outer.mounted) showMsg(outer, jam ? l.addedToQueue : l.playNextDone);
+    }),
+    TrackAction(Icons.queue_rounded, l.addToQueue, () async {
+      await ctrl.enqueueOnline(r);
+      if (outer.mounted) showMsg(outer, l.addedToQueue);
+    }),
+    TrackAction(Icons.playlist_add_rounded, l.addToPlaylist, () async {
+      final picked = await pickPlaylist(outer, ref);
+      if (picked == null || !outer.mounted) return;
+      ref
+          .read(downloadsProvider.notifier)
+          .add(r, tag: addToPlaylistTag(picked.id));
+      if (outer.mounted) {
+        showMsg(outer, l.suggestionAddWhenDownloaded(picked.name));
+      }
+    }),
+    TrackAction(Icons.download_rounded, l.ytDownload, () async {
+      ref.read(downloadsProvider.notifier).add(r);
+      if (outer.mounted) showMsg(outer, l.suggestionDownloadStarted);
+    }),
+    TrackAction(Icons.person_outline_rounded, l.goToArtist, () async {
+      final who = r.artistIds.indexWhere((id) => id.isNotEmpty);
+      if (who >= 0 && who < r.artists.length) {
+        ShellNav.open<void>(
+          outer,
+          ArtistPageScreen(
+            artist: YtmArtistRef(id: r.artistIds[who], name: r.artists[who]),
+          ),
+        );
+      } else if (r.artists.isNotEmpty) {
+        await openYtmArtist(
+          outer,
+          ref,
+          r.artists.first,
+          open: (page) => ShellNav.open<void>(outer, page),
+        );
+      } else {
+        showMsg(outer, l.ytmArtistNone);
+      }
+    }),
+  ];
+}
+
+Future<void> showOnlineActions(
+  BuildContext context,
+  WidgetRef ref,
+  YtResult r,
+) {
+  final actions = onlineResultActions(context, ref, r);
+  return showCcSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    builder: (sheet) => SafeArea(
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              title: Text(
+                r.title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              subtitle: Text(
+                r.artists.isEmpty ? r.channel : r.artists.join(', '),
+              ),
+            ),
+            for (final a in actions)
+              ListTile(
+                leading: Icon(a.icon),
+                title: Text(a.label),
+                onTap: () {
+                  Navigator.of(sheet).pop();
+                  a.run();
+                },
+              ),
+          ],
+        ),
+      ),
+    ),
+  );
 }

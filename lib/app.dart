@@ -8,6 +8,7 @@ import 'providers/settings_providers.dart';
 import 'providers/share_hub.dart';
 import 'providers/theme_providers.dart';
 import 'providers/update_providers.dart';
+import 'providers/youtube_providers.dart' show promoteErrorsProvider;
 import 'providers/activity_log_providers.dart';
 import 'providers/import_notification_providers.dart';
 import 'l10n/l10n_ext.dart';
@@ -40,6 +41,12 @@ class CodecoreApp extends ConsumerWidget {
         duration: const Duration(seconds: 8),
         content: Builder(builder: (c) => Text(c.l10n.updateAvailable(info.version))),
       ));
+    });
+    ref.listen(promoteErrorsProvider, (_, next) {
+      final e = next.value;
+      if (e != null) {
+        _messengerKey.currentState?.showSnackBar(SnackBar(content: Text(e.text)));
+      }
     });
     final s = ref.watch(settingsProvider);
     final themeColors = ref.watch(themeColorsProvider);

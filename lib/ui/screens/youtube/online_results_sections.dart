@@ -10,6 +10,7 @@ import '../../../services/online/smart_search.dart';
 import '../../../services/online/ytm_artist.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/segmented_blocks.dart';
+import '../../widgets/track_actions.dart' show showOnlineActions;
 import '../online/online_selection_scope.dart';
 import '../online/online_song_row.dart';
 
@@ -187,8 +188,10 @@ class SmartRow extends ConsumerWidget {
       selecting: pick.selecting,
       selected: pick.selected,
       position: pick.position,
-      onTap: pick.onTap,
+      onTap: pick.onTap ?? () => tapOnline(context, ref, r),
       onLongPress: pick.onLongPress,
+      onQueue: () => queueOnline(context, ref, r),
+      onMore: () => showOnlineActions(context, ref, r),
       onDownload: () => ref.read(downloadsProvider.notifier).add(r),
       onArtistTap: onArtistTap == null || who < 0 || who >= r.artists.length
           ? null

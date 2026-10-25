@@ -263,3 +263,15 @@ final downloadsProvider =
     NotifierProvider<DownloadsNotifier, List<DownloadItem>>(
       DownloadsNotifier.new,
     );
+
+/// One failed promotion. No `==` on purpose: two identical messages are two
+/// events, and a provider would drop the second as «unchanged».
+class PromoteError {
+  PromoteError(this.text);
+  final String text;
+}
+
+/// Why a «Scarica» from the stream cache failed (shown by the app).
+final promoteErrorsProvider = StreamProvider<PromoteError>(
+  (ref) => ref.watch(downloadsProvider.notifier).promoteErrors.map(PromoteError.new),
+);
