@@ -5,6 +5,8 @@ import '../../../data/db/app_database.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/player_providers.dart';
 import '../../../providers/suggestion_actions.dart';
+import '../../../providers/youtube_providers.dart' show downloadIndexProvider;
+import '../../widgets/track_actions.dart' show entryInLibrary;
 import '../../theme/tokens.dart';
 import '../playlists/playlist_picker.dart';
 import '../../widgets/show_msg.dart';
@@ -22,6 +24,8 @@ class SuggestedInfo extends ConsumerWidget {
     final cc = context.cc;
     final seed = ref.watch(onlineEntriesProvider)?[track.id]?.seedTitle;
     final actions = ref.read(suggestionActionsProvider);
+    ref.watch(downloadIndexProvider); // a promotion refreshes it
+    if (entryInLibrary(ref, track.id)) return const SizedBox.shrink();
     return Column(
       children: [
         Row(

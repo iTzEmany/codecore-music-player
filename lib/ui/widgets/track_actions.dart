@@ -18,7 +18,7 @@ import '../../providers/player_providers.dart';
 import '../../providers/preview_providers.dart';
 import '../../providers/suggestion_actions.dart';
 import '../../providers/track_ops.dart';
-import '../../providers/youtube_providers.dart' show downloadsProvider;
+import '../../providers/youtube_providers.dart' show downloadIndexProvider, downloadsProvider;
 import '../screens/playlists/playlist_dialogs.dart';
 import '../screens/playlists/playlist_picker.dart';
 import '../screens/tags/tags_sheet.dart';
@@ -75,6 +75,12 @@ class TrackActionGroup {
   final List<TrackAction> actions;
 }
 
+/// The queue entry [id] was downloaded or promoted meanwhile (it still plays under its online id).
+bool entryInLibrary(WidgetRef ref, int id) {
+  final r = ref.read(onlineEntriesProvider)?[id]?.result;
+  return r != null && (ref.read(downloadIndexProvider).value?.contains(r.id, source: r.source) ?? false);
+}
+
 /// Streamed (online) entries are not library rows: no favourites, tags,
 /// playlists by id, edit, lyrics, share, details of a file or deletion. They
 /// can be downloaded, downloaded into a playlist, disliked or taken out of
@@ -91,6 +97,7 @@ List<TrackActionGroup> onlineTrackActions(
   return [
     TrackActionGroup(l.groupCollection, [
       TrackAction(Icons.download_rounded, l.ytDownload, () async {
+        if (entryInLibrary(ref, track.id)) return snack(l.ytAlreadyInLibrary);
         if (actions.downloadEntry(track.id)) snack(l.suggestionDownloadStarted);
       }),
       TrackAction(Icons.playlist_add_rounded, l.addToPlaylist, () async {
@@ -519,6 +526,9 @@ List<TrackAction> onlineResultActions(
       }
     }),
     TrackAction(Icons.download_rounded, l.ytDownload, () async {
+      if (ref.read(downloadIndexProvider).value?.contains(r.id, source: r.source) ?? false) {
+        return showMsg(outer, l.ytAlreadyInLibrary);
+      }
       ref.read(downloadsProvider.notifier).add(r);
       if (outer.mounted) showMsg(outer, l.suggestionDownloadStarted);
     }),
