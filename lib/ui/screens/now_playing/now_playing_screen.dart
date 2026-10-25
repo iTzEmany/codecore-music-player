@@ -64,8 +64,11 @@ Future<void> _openPlayer(BuildContext context) =>
 
 /// Tap on an online result (rows and album call this): starts it and opens the
 /// player at once, in loading (R-02). The route is pushed before the load ends.
-Future<void> playOnlineAndOpen(BuildContext context, WidgetRef ref, YtResult r) =>
-    _playAndOpen(context, ref.read(playerControllerProvider).playOnline(r));
+Future<void> playOnlineAndOpen(
+  BuildContext context,
+  WidgetRef ref,
+  YtResult r,
+) => _playAndOpen(context, ref.read(playerControllerProvider).playOnline(r));
 
 /// A second tap while the player is already on top plays but does not push again.
 bool _playerOnTop(BuildContext context) {
@@ -88,7 +91,9 @@ Future<void> playOnlineListAndOpen(
 );
 
 Future<void> _playAndOpen(BuildContext context, Future<void> playing) {
-  if (context.mounted && !_playerOnTop(context)) unawaited(_openPlayer(context));
+  if (context.mounted && !_playerOnTop(context)) {
+    unawaited(_openPlayer(context));
+  }
   return playing;
 }
 
@@ -156,7 +161,7 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
                   const SizedBox(height: 12),
                   InfoCard(track: track),
                   const SizedBox(height: 12),
-                  CreditsCard(track: track),
+                  CreditsCard(track: track, key: ValueKey(track.id)),
                 ],
                 const UpNextCard(),
               ],
@@ -473,7 +478,9 @@ class _PlayerCover extends ConsumerWidget {
                         size: inner,
                         radius: inner / 2,
                         semanticLabel: track.album ?? track.title,
-                        heroTag: coverHeroTagFor(MediaQuery.sizeOf(context).width),
+                        heroTag: coverHeroTagFor(
+                          MediaQuery.sizeOf(context).width,
+                        ),
                       ),
                     ),
                     // The thumbnail stays (R-02); the ring turns over it.

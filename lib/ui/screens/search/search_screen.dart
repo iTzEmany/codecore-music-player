@@ -9,6 +9,7 @@ import '../../../data/db/app_database.dart';
 import '../../../data/repositories/library_queries.dart';
 import '../../../data/repositories/library_search.dart';
 import '../../../l10n/l10n_ext.dart';
+import '../../../providers/credits_providers.dart';
 import '../../../providers/database_providers.dart';
 import '../../../providers/selection_providers.dart';
 import '../../../providers/library_providers.dart';

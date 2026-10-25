@@ -1,4 +1,5 @@
 import 'package:codecore/data/repositories/library_queries.dart';
+import 'package:codecore/providers/credits_providers.dart';
 import 'package:codecore/providers/library_providers.dart';
 import 'package:codecore/ui/screens/library/artist_screen.dart';
 import 'package:codecore/ui/widgets/album_card.dart';
@@ -94,7 +95,9 @@ void main() {
         ),
         extraOverrides: [
           artistAlbumsProvider('a').overrideWith((ref) => Stream.value([])),
-          artistTracksProvider('a').overrideWith((ref) => Stream.value([])),
+          // The artist's own track 3 is not «Compare come» material.
+          artistTracksProvider('a')
+              .overrideWith((ref) => Stream.value([if (has) t(3, 'C1')])),
           artistCreditedProvider('A').overrideWith(
             (ref) async => has
                 ? [
@@ -110,7 +113,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 300));
       expect(find.text('Compare come'), has ? findsOneWidget : findsNothing);
       expect(find.text('P1'), has ? findsOneWidget : findsNothing);
-      expect(find.text('C1'), has ? findsOneWidget : findsNothing);
+      expect(find.text('C1'), findsNothing);
       await h.dispose(tester);
     });
   }

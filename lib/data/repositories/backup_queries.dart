@@ -2,7 +2,6 @@ import 'package:drift/drift.dart' show OrderingTerm;
 import 'package:path/path.dart' as p;
 
 import '../../services/backup/user_data.dart';
-import '../../services/online/credits.dart';
 import '../db/app_database.dart';
 import 'credits_repository.dart';
 import 'hidden_playlists.dart';
@@ -15,56 +14,58 @@ Future<UserData> collectUserData(AppDatabase db) {
     final folders = {
       for (final f in await db.select(db.folders).get()) f.id: f.path,
     };
-    final tracks = await (db.select(db.tracks)..where((t) => t.kind.isNotValue(kStreamKind)))
-        .get();
-    final credits = <int, List<TrackCredit>>{};
-    for (final c in await db.select(db.trackCredits).get()) {
-      (credits[c.trackId] ??= []).add(TrackCredit(c.name, c.role, c.source));
-    }
-    final details = {
-      for (final e in await db.select(db.trackEnrich).get())
-        e.trackId: ?decodeDetails(e.trackId, e.details),
-    };
+    final tracks = await (db.select(
+      db.tracks,
+    )..where((t) => t.kind.isNotValue(kStreamKind))).get();
+    final portable = await CreditsRepository(db)
+        .portableOfMany([for (final t in tracks) t.id]);
     final refs = <int, TrackRef>{};
     final userData = <TrackUserData>[];
     for (final t in tracks) {
       final ref = trackRefFor(t, folders);
       refs[t.id] = ref;
-      final hasLyrics = t.lyricsPlain != null ||
+      final hasLyrics =
+          t.lyricsPlain != null ||
           t.lyricsSynced != null ||
           t.curiosities != null;
-      if (!(t.isFavorite || t.userEdited || hasLyrics || t.playCount > 0 ||
-          credits.containsKey(t.id) || details.containsKey(t.id))) {
+      if (!(t.isFavorite ||
+          t.userEdited ||
+          hasLyrics ||
+          t.playCount > 0 ||
+          portable[t.id]!.credits.isNotEmpty ||
+          portable[t.id]!.details != null)) {
         continue;
       }
-      userData.add(TrackUserData(
-        ref: ref,
-        favorite: t.isFavorite,
-        edit: t.userEdited
-            ? TrackEditData(
-                title: t.title,
-                artist: t.artist,
-                album: t.album,
-                albumArtist: t.albumArtist,
-                year: t.year,
-                trackNumber: t.trackNumber,
-                genre: t.genre,
-              )
-            : null,
-        lyricsPlain: t.lyricsPlain,
-        lyricsSynced: t.lyricsSynced,
-        curiosities: t.curiosities,
-        playCount: t.playCount,
-        lastPlayedAt: t.lastPlayedAt,
-        credits: credits[t.id] ?? const [],
-        details: details[t.id],
-      ));
+      userData.add(
+        TrackUserData(
+          ref: ref,
+          favorite: t.isFavorite,
+          edit: t.userEdited
+              ? TrackEditData(
+                  title: t.title,
+                  artist: t.artist,
+                  album: t.album,
+                  albumArtist: t.albumArtist,
+                  year: t.year,
+                  trackNumber: t.trackNumber,
+                  genre: t.genre,
+                )
+              : null,
+          lyricsPlain: t.lyricsPlain,
+          lyricsSynced: t.lyricsSynced,
+          curiosities: t.curiosities,
+          playCount: t.playCount,
+          lastPlayedAt: t.lastPlayedAt,
+          credits: portable[t.id]!.credits,
+          details: portable[t.id]!.details,
+        ),
+      );
     }
 
     final playlists = await db.visiblePlaylists();
-    final links = await (db.select(db.playlistTracks)
-          ..orderBy([(l) => OrderingTerm.asc(l.position)]))
-        .get();
+    final links = await (db.select(
+      db.playlistTracks,
+    )..orderBy([(l) => OrderingTerm.asc(l.position)])).get();
     final itemsByPlaylist = <int, List<TrackRef>>{};
     for (final l in links) {
       final ref = refs[l.trackId];
@@ -82,38 +83,43 @@ Future<UserData> collectUserData(AppDatabase db) {
     ];
 
     final names = {for (final pl in playlists) pl.id: pl.name};
-    final importRows = await (db.select(db.playlistImportItems)
-          ..orderBy([(i) => OrderingTerm.asc(i.rowIndex)]))
-        .get();
+    final importRows = await (db.select(
+      db.playlistImportItems,
+    )..orderBy([(i) => OrderingTerm.asc(i.rowIndex)])).get();
     final rowsByImport = <int, List<ImportRowData>>{};
     for (final r in importRows) {
-      (rowsByImport[r.importId] ??= []).add(ImportRowData(
-        rowIndex: r.rowIndex,
-        title: r.title,
-        artists: r.artists,
-        status: r.status,
-        album: r.album,
-        durationMs: r.durationMs,
-        isrc: r.isrc,
-        videoId: r.videoId,
-      ));
+      (rowsByImport[r.importId] ??= []).add(
+        ImportRowData(
+          rowIndex: r.rowIndex,
+          title: r.title,
+          artists: r.artists,
+          status: r.status,
+          album: r.album,
+          durationMs: r.durationMs,
+          isrc: r.isrc,
+          videoId: r.videoId,
+        ),
+      );
     }
     final imports = [
       for (final i in await db.select(db.playlistImports).get())
         if (i.sourceKind != ytmAlbumSourceKind)
-        ImportData(
-          playlistName: names[i.playlistId] ?? '',
-          sourceName: i.sourceName,
-          createdAt: i.createdAt,
-          status: i.status,
-          rows: rowsByImport[i.id] ?? const [],
-        ),
+          ImportData(
+            playlistName: names[i.playlistId] ?? '',
+            sourceName: i.sourceName,
+            createdAt: i.createdAt,
+            status: i.status,
+            rows: rowsByImport[i.id] ?? const [],
+          ),
     ];
 
     final radios = [
-      for (final r in await (db.select(db.radioStations)
-            ..orderBy([(r) => OrderingTerm.asc(r.position), (r) => OrderingTerm.asc(r.addedAt)]))
-          .get())
+      for (final r
+          in await (db.select(db.radioStations)..orderBy([
+                (r) => OrderingTerm.asc(r.position),
+                (r) => OrderingTerm.asc(r.addedAt),
+              ]))
+              .get())
         RadioData(
           stationId: r.stationId,
           name: r.name,
@@ -132,9 +138,12 @@ Future<UserData> collectUserData(AppDatabase db) {
     ];
 
     final followed = [
-      for (final a in await (db.select(db.followedArtists)
-            ..orderBy([(a) => OrderingTerm.asc(a.name), (a) => OrderingTerm.asc(a.ytmId)]))
-          .get())
+      for (final a
+          in await (db.select(db.followedArtists)..orderBy([
+                (a) => OrderingTerm.asc(a.name),
+                (a) => OrderingTerm.asc(a.ytmId),
+              ]))
+              .get())
         FollowedArtistData(
           ytmId: a.ytmId,
           name: a.name,
@@ -162,7 +171,9 @@ TrackRef trackRefFor(Track t, Map<int, String> folders) {
   final inside = root != null && p.isWithin(root, t.path);
   return TrackRef(
     folder: inside ? root : t.path,
-    relPath: inside ? p.relative(t.path, from: root).replaceAll(r'\', '/') : null,
+    relPath: inside
+        ? p.relative(t.path, from: root).replaceAll(r'\', '/')
+        : null,
     title: t.title,
     artist: t.artist,
     durationMs: t.durationMs,

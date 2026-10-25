@@ -176,6 +176,53 @@ void main() {
     expect(await repo.creditedTracks('pharrell'), isEmpty);
   });
 
+  test(
+    'creditedTracks prefix: not a substring, no duplicates, exclude, limit',
+    () async {
+      final ids = [
+        for (final t in ['T1', 'T2', 'T3']) await addTrack(t),
+      ];
+      await repo.saveCredits(ids[0], [
+        credit('Pharrell', 'producer'),
+        credit('Pharrell', 'composer'),
+      ]);
+      await repo.saveCredits(ids[1], [credit('Pharrell W', 'producer')]);
+      await repo.saveCredits(ids[2], [credit('Not Pharrell', 'producer')]);
+      List<String> titles(List<({String role, Track track})> r) => [
+        for (final e in r) e.track.title,
+      ];
+      expect(titles(await repo.creditedTracks('pharrell', prefix: true)), [
+        'T1',
+        'T2',
+      ]);
+      expect(
+        titles(
+          await repo.creditedTracks(
+            'pharrell',
+            prefix: true,
+            exclude: {ids[0]},
+          ),
+        ),
+        ['T2'],
+      );
+      expect(
+        titles(
+          await repo.creditedTracks(
+            'pharrell',
+            prefix: true,
+            exclude: {ids[0]},
+            limit: 1,
+          ),
+        ),
+        ['T2'],
+      );
+      expect(
+        titles(await repo.creditedTracks('pharrell', prefix: true, limit: 1)),
+        ['T1'],
+      );
+    },
+  );
+
   test('decodeDetails: valid JSON that is not a map gives null', () {
     for (final raw in ['[]', 'null', '1', '{broken']) {
       expect(decodeDetails(1, raw), isNull);

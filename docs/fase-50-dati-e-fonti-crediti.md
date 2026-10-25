@@ -64,7 +64,7 @@ valori veri di sessione; `flutter analyze` pulito.
 
 ### 50.3 — `credits.dart`: modello, parser e `mergeCredits`
 **File:** `lib/services/online/credits.dart` (nuovo), `test/services/online/credits_test.dart` (nuovo)
-1. `TrackCredit(name, nameKey, role, source)`; `nameKey` = `matchKey(name)` (senza maiuscole e accenti); ruolo
+1. `TrackCredit(name, nameKey, role, source)`; `nameKey` = `creditNameKey(name)` (senza maiuscole e accenti); ruolo
    normalizzato in minuscolo.
 2. `parseDeezerContributors(Map)`: `SNG_CONTRIBUTORS` (ruolo → lista di nomi), più `COPYRIGHT` e
    `PHYSICAL_RELEASE_DATE` restituiti a parte per i dettagli.

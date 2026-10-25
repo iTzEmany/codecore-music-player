@@ -102,6 +102,8 @@ verde: il test di oggi del provider invariato; il servizio salva curiosità del 
 `ProviderContainer`; «Aggiorna» rifà anche le curiosità. `flutter analyze` pulito.
 
 ### 52.6 — «Curiosità automatiche» e arricchimento completo dopo il download
+> Dalla review di fine fase 51: `trackCreditsProvider` e `artistCreditedProvider` sono `FutureProvider` invalidati solo da «Aggiorna»; quando i crediti arrivano in background (download, completamento) la card resta vecchia. Passarli a `StreamProvider.autoDispose.family` con un watch filtrato per `trackId` sulle due tabelle (non sugli stream di `tracks`, K-AR-04), togliere `ref.invalidate` in `credits_card.dart`, test «download → la card mostra i crediti».
+
 **File:** `lib/data/settings/settings_store.dart` (`autoCuriosities`, di serie `false`),
 `lib/ui/screens/settings/settings_pages.dart`, `lib/ui/screens/onboarding/onboarding_pages.dart` (proposto, D-105),
 `lib/providers/online_providers.dart` (`downloadEnricherProvider`: `QuietEnricher` → `completeOne` con le parti

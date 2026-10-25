@@ -22,26 +22,41 @@ class CreditsRepository {
     _db.trackEnrich,
   )..where((e) => e.trackId.equals(trackId))).getSingleOrNull();
 
-  /// Library tracks (`kind = 0`) credited to [nameKey] (a `creditNameKey`), one
-  /// entry per role; a track with two roles appears twice. Name key compared as
-  /// stored (made in Dart, not lower()'d by SQLite).
+  /// Library tracks (`kind = 0`) credited to [nameKey] (a `creditNameKey`).
+  /// Exact key: one entry per role (a track with two roles appears twice).
+  /// [prefix]: names starting with the key, one entry per track, by title,
+  /// without the [exclude] ids and at most [limit]. The key is compared as
+  /// stored (made in Dart, not lower()'d by SQLite); the prefix range uses the
+  /// `name_key` index.
   Future<List<({String role, Track track})>> creditedTracks(
-    String nameKey,
-  ) async {
+    String nameKey, {
+    bool prefix = false,
+    Set<int> exclude = const {},
+    int? limit,
+  }) async {
+    if (nameKey.isEmpty) return const [];
     final rows = await _db
         .customSelect(
-          'SELECT DISTINCT c.role AS credit_role, ${lightTrackColumns(_db, alias: 't')} '
+          'SELECT ${prefix ? '' : 'DISTINCT '}c.role AS credit_role, '
+          '${lightTrackColumns(_db, alias: 't')} '
           'FROM track_credits c JOIN tracks t ON t.id = c.track_id '
-          'WHERE c.name_key = ? AND t.kind = 0 AND t.missing = 0 AND t.ignored = 0 '
-          'ORDER BY c.role, t.title COLLATE NOCASE',
-          variables: [Variable<String>(nameKey)],
+          'WHERE ${prefix ? 'c.name_key >= ? AND c.name_key < ? || char(1114111)' : 'c.name_key = ?'} '
+          'AND t.kind = 0 AND t.missing = 0 AND t.ignored = 0 '
+          '${prefix ? 'GROUP BY t.id ORDER BY t.title COLLATE NOCASE' : 'ORDER BY c.role, t.title COLLATE NOCASE'}'
+          '${limit == null ? '' : ' LIMIT ?'}',
+          variables: [
+            Variable<String>(nameKey),
+            if (prefix) Variable<String>(nameKey),
+            if (limit != null) Variable<int>(limit + exclude.length),
+          ],
           readsFrom: {_db.tracks, _db.trackCredits},
         )
         .get();
-    return [
+    final all = [
       for (final r in rows)
         (role: r.read<String>('credit_role'), track: _db.tracks.map(r.data)),
-    ];
+    ].where((e) => !exclude.contains(e.track.id));
+    return (limit == null ? all : all.take(limit)).toList();
   }
 
   /// Replaces every credit of [trackId] with [credits] (their `trackId` is

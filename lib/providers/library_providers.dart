@@ -6,11 +6,9 @@ import 'package:path/path.dart' as p;
 import '../core/app_log.dart';
 import '../data/db/app_database.dart';
 import '../data/repositories/library_queries.dart';
-import '../data/repositories/library_search.dart' show creditedTracks;
 import '../data/repositories/smart_search.dart';
 import '../data/repositories/track_repository.dart';
 import '../services/covers/cover_store.dart';
-import '../services/online/credits.dart' show creditNameKey;
 import '../services/covers/cover_thumbnails.dart';
 import '../services/scanner/library_scanner.dart';
 import '../services/tags/audio_metadata_tag_reader.dart';
@@ -282,17 +280,6 @@ final searchTracksProvider = Provider.autoDispose
           );
     });
 
-/// Tracks found only through a credit; not for operators or quick filters.
-final searchCreditedProvider = FutureProvider.autoDispose
-    .family<List<Track>, SearchQuery>((ref, q) {
-      final text = q.text.trim();
-      if (text.isEmpty || q.quick || hasOperators(text)) return const [];
-      final found = ref.watch(searchTracksProvider(q)).value ?? const <Track>[];
-      return creditedTracks(ref.watch(databaseProvider), text, {
-        for (final t in found) t.id,
-      });
-    });
-
 final topTracksProvider = StreamProvider<List<Track>>(
   (ref) => ref.watch(libraryQueriesProvider).watchTopTracks(),
 );
@@ -304,14 +291,6 @@ final resumableTracksProvider = StreamProvider.autoDispose<List<Track>>(
 final artistTracksProvider = StreamProvider.family<List<Track>, String>(
   (ref, key) => ref.watch(libraryQueriesProvider).watchArtistTracks(key),
 );
-
-/// Tracks where the artist is only credited (producer, author...), by role.
-final artistCreditedProvider = FutureProvider.autoDispose
-    .family<List<({String role, Track track})>, String>(
-      (ref, name) => ref
-          .watch(creditsRepositoryProvider)
-          .creditedTracks(creditNameKey(name)),
-    );
 
 final artistAlbumsProvider = StreamProvider.family<List<AlbumSummary>, String>(
   (ref, key) => ref.watch(libraryQueriesProvider).watchArtistAlbums(key),

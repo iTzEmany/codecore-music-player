@@ -1,11 +1,7 @@
-import 'package:drift/drift.dart' show Variable;
-
 import '../../core/text_utils.dart';
-import '../../services/online/credits.dart' show creditNameKey;
 import '../../services/library/rules/rule_parser.dart';
 import '../db/app_database.dart';
 import 'library_queries.dart';
-import 'light_tracks.dart';
 import 'playlist_repository.dart';
 
 /// What the unified Library search shows for one text.
@@ -36,7 +32,9 @@ class LibrarySearchResults {
   final int artistTotal, albumTotal, playlistTotal;
 
   bool get isEmpty =>
-      tracks.isEmpty && artists.isEmpty && albums.isEmpty &&
+      tracks.isEmpty &&
+      artists.isEmpty &&
+      albums.isEmpty &&
       playlists.isEmpty &&
       credited.isEmpty;
 }
@@ -53,13 +51,17 @@ List<String> _normalArtists(List<ArtistSummary> list) =>
 List<(String, String)> _normalAlbums(List<AlbumSummary> list) =>
     _albumNames[list] ??= [
       for (final a in list)
-        (normalize(a.title ?? ''), normalize('${a.artist ?? ''} ${a.year ?? ''}')),
+        (
+          normalize(a.title ?? ''),
+          normalize('${a.artist ?? ''} ${a.year ?? ''}'),
+        ),
     ];
 
 List<String> _normalPlaylists(List<PlaylistSummary> list) =>
     _playlistNames[list] ??= [for (final p in list) normalize(p.playlist.name)];
 
-bool _hasAll(String haystack, List<String> words) => words.every(haystack.contains);
+bool _hasAll(String haystack, List<String> words) =>
+    words.every(haystack.contains);
 
 /// [items] kept in order, those whose [name] equals the text first, then those
 /// that start with it, then the rest.
@@ -139,31 +141,4 @@ LibrarySearchResults searchLibrary({
     albumTotal: matchedAlbums.length,
     playlistTotal: matchedPlaylists.length,
   );
-}
-
-/// Tracks with a credit whose name starts with [text], except [exclude] (those
-/// already in the normal results). Runs only at search time, never in lists.
-Future<List<Track>> creditedTracks(
-  AppDatabase db,
-  String text,
-  Set<int> exclude, {
-  int limit = 20,
-}) async {
-  final key = creditNameKey(text);
-  if (key.isEmpty) return const [];
-  // name_key is made in Dart (not lower()'d by SQLite): compare it as is.
-  final rows = await db
-      .customSelect(
-        'SELECT ${lightTrackColumns(db, alias: 't')} FROM tracks t '
-        'WHERE t.missing = 0 AND t.ignored = 0 AND t.kind = 0 AND t.id IN ('
-        'SELECT track_id FROM track_credits WHERE instr(name_key, ?) = 1) '
-        'ORDER BY t.title COLLATE NOCASE',
-        variables: [Variable<String>(key)],
-        readsFrom: {db.tracks, db.trackCredits},
-      )
-      .get();
-  return [
-    for (final r in rows)
-      if (!exclude.contains(r.read<int>('id'))) db.tracks.map(r.data),
-  ].take(limit).toList();
 }

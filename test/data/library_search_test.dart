@@ -2,9 +2,6 @@ import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/data/repositories/library_queries.dart';
 import 'package:codecore/data/repositories/library_search.dart';
 import 'package:codecore/data/repositories/playlist_repository.dart';
-import 'package:codecore/services/online/credits.dart' show creditNameKey;
-import 'package:drift/drift.dart' show Value;
-import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Track track(int id, String title) => Track(
@@ -158,74 +155,6 @@ void main() {
         playlists: playlists,
       );
       expect(r.isEmpty, isTrue);
-    });
-  });
-
-  group('creditedTracks', () {
-    late AppDatabase db;
-    setUp(() => db = AppDatabase(NativeDatabase.memory()));
-    tearDown(() => db.close());
-
-    Future<int> add(String title, {String? artist, int kind = 0}) => db
-        .into(db.tracks)
-        .insert(
-          TracksCompanion.insert(
-            path: '/$title',
-            title: title,
-            albumKey: 'k',
-            format: 'mp3',
-            sizeBytes: 1,
-            mtimeMs: 1,
-            addedAt: 1,
-            artist: Value(artist),
-            kind: Value(kind),
-          ),
-        );
-
-    Future<void> credit(int id, String name) => db
-        .into(db.trackCredits)
-        .insert(
-          TrackCreditsCompanion.insert(
-            trackId: id,
-            name: name,
-            nameKey: creditNameKey(name),
-            role: 'producer',
-            source: 'deezer',
-          ),
-        );
-
-    test(
-      'finds a track by credit once, and not the ones already shown',
-      () async {
-        final lucky = await add('Get Lucky', artist: 'Daft Punk');
-        final own = await add('Happy', artist: 'Pharrell Williams');
-        await credit(lucky, 'Pharrell Williams');
-        await credit(own, 'Pharrell Williams');
-        final r = await creditedTracks(db, 'Pharrell', {own});
-        expect(r.map((t) => t.title), ['Get Lucky']);
-      },
-    );
-
-    test('no credit gives an empty group', () async {
-      await add('Happy', artist: 'Pharrell Williams');
-      expect(await creditedTracks(db, 'Pharrell', {}), isEmpty);
-    });
-
-    test('a stream row (kind 2) with the same credit is left out', () async {
-      final s = await add('Stream', kind: 2);
-      await credit(s, 'Pharrell Williams');
-      expect(await creditedTracks(db, 'Pharrell', {}), isEmpty);
-    });
-
-    test('an ignored track is left out, and the match is a prefix, not a substring', () async {
-      final ign = await add('Ign');
-      await db
-          .update(db.tracks)
-          .write(const TracksCompanion(ignored: Value(true)));
-      await credit(ign, 'Ann');
-      final jo = await add('Jo');
-      await credit(jo, 'Joanna');
-      expect(await creditedTracks(db, 'Ann', {}), isEmpty);
     });
   });
 }

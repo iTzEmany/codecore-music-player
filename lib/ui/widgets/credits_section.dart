@@ -31,7 +31,7 @@ class CreditsSection extends ConsumerStatefulWidget {
 /// The short detail lines; with a null [l] only their presence is meaningful.
 List<String> detailLines(AppLocalizations? l, TrackDetails d) {
   String join(List<String?> parts) =>
-      parts.whereType<String>().where((s) => s.isNotEmpty).join(' · ');
+      parts.whereType<String>().where((s) => s.isNotEmpty).join(', ');
   String? kind(String? k) => switch (k) {
     null || '' => null,
     'album' => l?.kindAlbum ?? k,
