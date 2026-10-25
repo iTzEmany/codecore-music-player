@@ -232,3 +232,25 @@ Dalla fase 47 `perf_device.py` usa brani di prova da 30 s (con quelli da 1 s uia
 
 - Il divario di «Fogli» della fase 46 era un artefatto dei brani da 1 s: con quelli da 30 s base e ramo sono pari.
 - Gli scenari sopra un frame al primo giro rientrano negli intervalli della base nei giri alternati: nessuna regressione della fase 47.
+
+## Dopo la fase 48 (`streaming-48`, 25/10)
+
+Stesso telefono e script (brani da 30 s, `--playback`); confronto con la base 30 s (`1c5348a`), tolleranza un frame (D-85, D-90).
+
+| Scenario | Base 30 s | Fase 48 | Ripetuti base | Ripetuti fase 48 | ok |
+|---|---|---|---|---|---|
+| Pallino schede | 4,3 % | 3,4 % | — | — | sì |
+| Tutti i brani | 1,4 % | 1,1 % | 0,8 · 1,1 % | 1,6 · 0,8 % | sì |
+| Album | 0,8 % | 3,2 % (695 frame) | 0,5 · 0,6 % | 0,8 · 0,5 % | sì: il primo giro ha contato il doppio dei frame, i ripetuti sono pari |
+| Ricerca «notte» | 5,2 % | 3,6 % | — | — | sì |
+| Apri album | 4,1 % | 7,2 % | 7,8 · 9,7 % | 7,2 · 5,5 % | sì (rumore; ~70 frame) |
+| In riproduzione | 1,6 % | 1,9 % | — | — | sì |
+| Lettore dal dock | 2,6 % | 1,7 % | — | — | sì |
+| Swipe mini player | 2,9 % | 2,5 % | — | — | sì |
+| Fogli | 3,5 % | 2,9 % | — | — | sì |
+| Apertura player | 1,7 % | 2,9 % | — | — | sì (rientra nei ripetuti della base della fase 47: 2,8–4,5 %) |
+| Anello | 1,7 % | 0,3 % | — | — | sì |
+| Avvio a freddo | 2756 ms | 2439 ms | — | — | sì |
+| PSS | 231 MB | 229 MB | — | — | sì |
+
+- Report: `build/perf/streaming-48.md`, `r48-*.md` (giri alternati con `--only`; «Album» e «Apri album» richiedono anche «Tutti i brani» nell'elenco, che apre la scheda).
