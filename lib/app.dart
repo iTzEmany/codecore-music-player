@@ -8,12 +8,12 @@ import 'providers/settings_providers.dart';
 import 'providers/share_hub.dart';
 import 'providers/theme_providers.dart';
 import 'providers/update_providers.dart';
+import 'providers/youtube_providers.dart' show promoteErrorsProvider;
 import 'providers/activity_log_providers.dart';
 import 'providers/import_notification_providers.dart';
 import 'l10n/l10n_ext.dart';
 import 'ui/screens/onboarding/onboarding_gate.dart';
 import 'providers/releases_providers.dart' show releaseCheckControllerProvider;
-import 'ui/screens/youtube/listen_bar.dart' show ListenErrorToaster;
 import 'ui/shell/app_shell.dart';
 import 'ui/widgets/app_icon_sync.dart';
 import 'ui/theme/app_theme.dart';
@@ -41,6 +41,12 @@ class CodecoreApp extends ConsumerWidget {
         duration: const Duration(seconds: 8),
         content: Builder(builder: (c) => Text(c.l10n.updateAvailable(info.version))),
       ));
+    });
+    ref.listen(promoteErrorsProvider, (_, next) {
+      final e = next.value;
+      if (e != null) {
+        _messengerKey.currentState?.showSnackBar(SnackBar(content: Text(e.text)));
+      }
     });
     final s = ref.watch(settingsProvider);
     final themeColors = ref.watch(themeColorsProvider);
@@ -76,7 +82,7 @@ class CodecoreApp extends ConsumerWidget {
         child: AppBackground(
           colors: themeColors,
           background: themeBackground,
-          child: ListenErrorToaster(child: child ?? const SizedBox.shrink()),
+          child: child ?? const SizedBox.shrink(),
         ),
       ),
       home: const AppIconSync(child: OnboardingGate(child: AppShell())),

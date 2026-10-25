@@ -3,6 +3,7 @@ import 'dart:async';
 import '../../data/db/app_database.dart';
 import '../../data/repositories/track_kinds.dart';
 import '../radio/radio_station.dart';
+import '../stream/stream_key.dart' show displayArtist;
 import '../online/youtube_service.dart';
 
 /// Online entries in the queue have negative ids; library tracks are > 0.
@@ -123,7 +124,7 @@ class OnlineEntries {
       id: id,
       path: 'online:${r.source.name}:${r.id}',
       title: r.title,
-      artist: r.artists.isEmpty ? r.channel : r.artists.join(', '),
+      artist: displayArtist(r),
       album: r.album,
       albumKey: '',
       durationMs: r.duration?.inMilliseconds ?? 0,

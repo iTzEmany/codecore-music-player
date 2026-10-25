@@ -652,9 +652,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String get listenAction => 'Anhören';
 
   @override
-  String get listenResolving => 'Wird vorbereitet…';
-
-  @override
   String get ytAlreadyInLibrary => 'Bereits in der Bibliothek';
 
   @override
@@ -5322,4 +5319,10 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get streamCacheClearFailed =>
       'Streaming-Cache konnte nicht geleert werden';
+
+  @override
+  String get playerLoading => 'Wird geladen…';
+
+  @override
+  String get ytmAlbumQueue => 'Album zur Warteschlange hinzufügen';
 }

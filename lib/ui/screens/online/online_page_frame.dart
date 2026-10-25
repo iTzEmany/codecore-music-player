@@ -2,22 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/l10n_ext.dart';
-import '../../../providers/listen_providers.dart';
 import '../../../providers/selection_providers.dart';
 import '../../../services/online/youtube_service.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/activity_button.dart';
-import '../youtube/listen_bar.dart';
 import 'online_selection_scope.dart';
 import 'online_song_row.dart';
 
 /// The frame of every online page (artist, album, long song list): a pinned
 /// bar with the activity button, the page's [slivers], the selection bar with
-/// «Scarica» while songs are picked, and «Ascolta» at the bottom.
-///
-/// The page shares the listen of the other online pages: it keeps going while
-/// any is open and ends with the last (`ListenNotifier.attach`/`detach`).
-class OnlinePageFrame extends ConsumerStatefulWidget {
+/// «Scarica» while songs are picked.
+class OnlinePageFrame extends ConsumerWidget {
   const OnlinePageFrame({
     super.key,
     required this.title,
@@ -44,29 +39,10 @@ class OnlinePageFrame extends ConsumerStatefulWidget {
   final List<Widget> actions;
 
   @override
-  ConsumerState<OnlinePageFrame> createState() => _OnlinePageFrameState();
-}
-
-class _OnlinePageFrameState extends ConsumerState<OnlinePageFrame> {
-  late final ListenNotifier _listen;
-
-  @override
-  void initState() {
-    super.initState();
-    _listen = ref.read(listenProvider.notifier)..attach();
-  }
-
-  @override
-  void dispose() {
-    _listen.detach();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
     final cc = context.cc;
-    final key = widget.selectionKey;
+    final key = selectionKey;
     final scroll = CustomScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
       slivers: [
@@ -75,17 +51,17 @@ class _OnlinePageFrameState extends ConsumerState<OnlinePageFrame> {
           backgroundColor: cc.bg,
           surfaceTintColor: Colors.transparent,
           title: Text(
-            widget.title,
+            title,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
           actions: [
-            ...widget.actions,
+            ...actions,
             const ActivityButton(),
             const SizedBox(width: 8),
           ],
         ),
-        ...widget.slivers,
+        ...slivers,
         const SliverToBoxAdapter(child: SizedBox(height: 24)),
       ],
     );
@@ -93,11 +69,11 @@ class _OnlinePageFrameState extends ConsumerState<OnlinePageFrame> {
       alignment: Alignment.topCenter,
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 960),
-        child: widget.onRefresh == null
+        child: onRefresh == null
             ? scroll
             // The spinner starts under the pinned bar, not behind the status bar.
             : RefreshIndicator(
-                onRefresh: widget.onRefresh!,
+                onRefresh: onRefresh!,
                 edgeOffset: MediaQuery.paddingOf(context).top + kToolbarHeight,
                 child: scroll,
               ),
@@ -113,7 +89,7 @@ class _OnlinePageFrameState extends ConsumerState<OnlinePageFrame> {
                 : OnlineSelectionScope(
                     selectionKey: key,
                     overlay: true,
-                    ids: [for (var i = 0; i < widget.pickable.length; i++) i],
+                    ids: [for (var i = 0; i < pickable.length; i++) i],
                     actions: (picked) => [
                       IconButton(
                         tooltip: l.ytDownload,
@@ -121,7 +97,7 @@ class _OnlinePageFrameState extends ConsumerState<OnlinePageFrame> {
                         onPressed: () {
                           startOnlineDownloads(context, ref, [
                             for (final i in picked.orderedIds)
-                              if (i < widget.pickable.length) widget.pickable[i],
+                              if (i < pickable.length) pickable[i],
                           ]);
                           ref.read(selectionProvider(key).notifier).clear();
                         },
@@ -130,7 +106,6 @@ class _OnlinePageFrameState extends ConsumerState<OnlinePageFrame> {
                     child: body,
                   ),
           ),
-          const ListenBar(),
         ],
       ),
     );

@@ -189,3 +189,23 @@ Stesso telefono e stesso comando (`--playback`). «Base oggi» = `origin/master`
 - Fogli e Swipe mini player erano oltre la base in entrambi i giri: `_syncPreparer` leggeva a ogni cambio di brano le righe intere (testi e curiosità) dei 30 brani successivi. Ora legge solo le righe `kind = 2`, leggere (78725da); misura `streaming-45-fix1` con `--only`.
 - «Tutti i brani» supera «Finale» di 2–4 frame anche su `master` lo stesso giorno: è rumore del telefono, non della fase. Il giro sul ramo è a 1,4–2,3 % contro il 2,0 % della base.
 - Report: `build/perf/streaming-45.md`, `streaming-45b.md`, `streaming-45-fix1.md`, `base-45.md`.
+
+## Dopo la fase 46 (`streaming-46`, 25/10)
+
+Stesso telefono e stesso comando (`--playback`). Tolleranza: un frame per scenario contro «Finale» (D-85, D-90).
+
+| Scenario | Finale | Fase 46 | Ripetuto con `--only` | ok |
+|---|---|---|---|---|
+| Pallino schede | 4,3 % | 1,5 % | — | sì |
+| Tutti i brani | 0,8 % | 2,4 % | — | pari alla fase 45 (2,3 %, rumore del telefono) |
+| Album | 0,8 % | 1,1 % | — | sì (un frame) |
+| Ricerca «notte» | 4,5 % · p99 35,0 ms | 3,5 % · build p99 75,0 ms | — | sì |
+| Apri album | 7,9 % | 5,9 % | — | sì |
+| Swipe mini player | 8,1 % | 10,5 % (build p99 151,8 ms) | 8,1 % (build p99 31,8 ms) | sì |
+| Fogli | 1,8 % | 2,6 % | 2,6 % · 2,5 % · 2,4 % | **no**: 10–14 frame sopra, sotto la soglia del 3 % |
+| Apertura player | 7,4 % · p99 113,8 ms | 4,1 % · build p99 49,3 ms | — | sì |
+| Avvio a freddo (mediana di 5) | 2500 ms | 2392 ms | — | sì |
+| PSS | 270 MB | 269 MB | — | sì |
+
+- «Fogli» resta sopra «Finale» in quattro giri. Per i brani della libreria la fase 46 non aggiunge lavoro né al player né ai fogli (lo spinner compare solo in caricamento, `SwipeToQueue` è lo stesso widget spostato). Il dato non è del tutto confrontabile: con i brani da 1 s in riproduzione uiautomator spesso non trova lo stato «idle», e `perf_device.py` ora rilegge lo schermo in pausa e poi riprende (vedi `docs/gotchas.md`). Resta aperto come seguito: misurare `master` con lo stesso script.
+- Report: `build/perf/streaming-46.md`, `streaming-46-only.md`, `streaming-46-fogli.md`, `streaming-46-fogli2.md`.

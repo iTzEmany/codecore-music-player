@@ -1,15 +1,22 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/app_log.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/youtube_providers.dart';
 import '../../../services/online/download_queue.dart';
 import '../../../services/online/youtube_service.dart';
+import '../../../providers/jam_providers.dart';
+import '../../../providers/player_providers.dart';
 import '../../theme/tokens.dart';
+import '../../widgets/track_actions.dart' show showOnlineActions;
+import '../../widgets/track_row.dart' show SwipeToQueue;
+import '../now_playing/now_playing_screen.dart' show playOnlineAndOpen;
 import '../../widgets/format_utils.dart';
 import '../../widgets/net_thumbnail.dart';
 import '../../widgets/track_row_selection.dart';
-import '../youtube/listen_bar.dart';
 import 'online_selection_scope.dart';
 import '../../widgets/show_msg.dart';
 
@@ -47,6 +54,27 @@ void startOnlineDownloads(
         ? l.ytDownloadsStarted(started)
         : l.ytDownloadsSkipped(started, skipped),
   );
+}
+
+/// Tap on an online row: streams it and opens the player; with a Jam on it
+/// goes to the end of the shared queue like a swipe (D-89).
+void tapOnline(BuildContext context, WidgetRef ref, YtResult r) {
+  if (ref.read(jamProvider).active) {
+    unawaited(queueOnline(context, ref, r));
+  } else {
+    unawaited(playOnlineAndOpen(context, ref, r));
+  }
+}
+
+/// Swipe or «In coda» on an online row; says so only when it worked.
+Future<void> queueOnline(BuildContext context, WidgetRef ref, YtResult r) async {
+  try {
+    await ref.read(playerControllerProvider).enqueueOnline(r);
+  } on Object catch (e, st) {
+    AppLog.w('enqueue online failed for ${r.indexKey}', e, st);
+    return;
+  }
+  if (context.mounted) showMsg(context, context.l10n.addedToQueue);
 }
 
 /// A song of an artist page, an album or a long list: the row, with its
@@ -96,16 +124,17 @@ class OnlineSongTile extends ConsumerWidget {
       position: pick.position,
       number: number,
       square: true,
-      onTap: pick.onTap,
+      onTap: pick.onTap ?? () => tapOnline(context, ref, result),
       onLongPress: pick.onLongPress,
+      onQueue: () => queueOnline(context, ref, result),
+      onMore: () => showOnlineActions(context, ref, result),
       onDownload: () => ref.read(downloadsProvider.notifier).add(result),
-      listen: pick.selecting ? null : ListenButton(result: result),
     );
   }
 }
 
-/// One online song: picture, title, artist and length, «Ascolta» and
-/// «Scarica» (or the state of the download), 72 px tall.
+/// One online song: picture, title, artist and length, an optional
+/// extra button and «Scarica» (or the state of the download), 72 px tall.
 class OnlineSongRow extends StatelessWidget {
   const OnlineSongRow({
     super.key,
@@ -119,6 +148,8 @@ class OnlineSongRow extends StatelessWidget {
     this.position,
     this.onTap,
     this.onLongPress,
+    this.onQueue,
+    this.onMore,
     this.onArtistTap,
     this.square = false,
     this.number,
@@ -131,7 +162,7 @@ class OnlineSongRow extends StatelessWidget {
   final DownloadItem? item;
   final VoidCallback onDownload;
 
-  /// «Ascolta» (hidden while picking).
+  /// An extra button before «Scarica» (hidden while picking).
   final Widget? listen;
 
   /// While picking, a tick box leads the row and a tap picks or drops it.
@@ -140,6 +171,10 @@ class OnlineSongRow extends StatelessWidget {
   /// Place in the order of the picks (1-based) of a picked row.
   final int? position;
   final VoidCallback? onTap, onLongPress;
+
+  /// Swipe to the right (not from the edge, D-59) and the ⋮ menu; neither
+  /// while picking.
+  final VoidCallback? onQueue, onMore;
 
   /// Makes the artist's name a button that opens the artist.
   final VoidCallback? onArtistTap;
@@ -162,7 +197,7 @@ class OnlineSongRow extends StatelessWidget {
     final l = context.l10n;
     final cc = context.cc;
     final theme = Theme.of(context).textTheme;
-    return Semantics(
+    final row = Semantics(
       selected: selecting ? selected : null,
       value: selected
           ? (position == null ? l.selectedRow : l.selectedRowAt(position!))
@@ -228,12 +263,25 @@ class OnlineSongRow extends StatelessWidget {
                   inLibrary: inLibrary,
                   onDownload: onDownload,
                 ),
-                const SizedBox(width: 8),
+                if (onMore != null && !selecting)
+                  IconButton(
+                    tooltip: l.moreOptions,
+                    icon: const Icon(Icons.more_vert_rounded),
+                    onPressed: onMore,
+                  )
+                else
+                  const SizedBox(width: 8),
               ],
             ),
           ),
         ),
       ),
+    );
+    if (onQueue == null || selecting) return row;
+    return SwipeToQueue(
+      swipeKey: 'swipe-online-${result.indexKey}',
+      onQueue: onQueue!,
+      child: row,
     );
   }
 }
@@ -258,7 +306,7 @@ class _DownloadState extends StatelessWidget {
     if (st == DownloadStatus.queued ||
         st == DownloadStatus.downloading ||
         st == DownloadStatus.waitingRetry) {
-      // As wide as a button: «Ascolta» keeps its place on every row.
+      // As wide as a button: the download state keeps the width of the button.
       trailing = SizedBox(
         width: 48,
         child: Center(

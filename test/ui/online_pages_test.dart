@@ -57,7 +57,9 @@ void main() {
     expect(find.text('3'), findsOneWidget, reason: 'the number of the third song');
     expect(find.byKey(const ValueKey('album-artist')), findsOneWidget);
 
-    await tester.tap(find.byKey(const ValueKey('download-album')));
+    await tester.tap(find.byKey(const ValueKey('album-more')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('album-menu-download')));
     await _settle(tester);
     expect(find.text('Scaricare «The Wall»?'), findsOneWidget);
     expect(find.textContaining('3 brani, 8 min, circa'), findsOneWidget);

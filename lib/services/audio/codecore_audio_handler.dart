@@ -9,11 +9,11 @@ import '../../data/db/app_database.dart';
 import '../../data/repositories/play_history_repository.dart';
 import '../../data/repositories/track_kinds.dart';
 import '../../data/repositories/track_repository.dart';
+import '../online/youtube_service.dart';
 import '../stream/stream_key.dart';
 import '../stream/stream_preparer.dart';
 import 'audio_backend.dart';
 import '../online/google_thumb.dart';
-import '../online/youtube_service.dart';
 import 'crossfade_engine.dart';
 import 'equalizer.dart';
 import '../radio/icy_title.dart';
@@ -99,7 +99,34 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   /// Downloads online entries and `kind = 2` rows into the cache; null: they cannot play.
   /// Set by main once the providers exist, before any queue is restored.
   StreamPreparer? preparer;
+
+  /// The library track already holding an online result (a download), if any
+  /// (D-81). Set by main; null: every online entry streams.
+  Future<int?> Function(YtResult)? libraryIdOf;
   int _syncToken = 0;
+
+  /// [libraryIdOf] that never throws: an unreadable index means «not downloaded».
+  Future<int?> _downloadedId(YtResult r) async {
+    try {
+      final id = await libraryIdOf?.call(r);
+      _lookupWarned = false;
+      return id;
+    } on Object catch (e, st) {
+      if (!_lookupWarned) AppLog.w('download lookup failed: online entries stream', e, st);
+      _lookupWarned = true; // one line per failure streak, not per entry
+      return null;
+    }
+  }
+
+  bool _lookupWarned = false;
+
+  /// Tells the preparer again what is queued: a song downloaded or promoted
+  /// meanwhile must not be prefetched (K-02).
+  Future<void> resyncPreparer() => _syncPreparer();
+
+  /// The queue entry now playing (an online entry keeps its own id even when
+  /// its library file plays).
+  int? get currentQueueId => _queue.currentId;
 
   /// A streamed track is being fetched: the old one is paused, the backend's
   /// events and positions are not the new track's. [play]/[pause] only set
@@ -355,9 +382,14 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
       return;
     }
     final isOnline = isOnlineId(id);
-    final entry = isOnline ? online?.entryOf(id) : null;
+    var entry = isOnline ? online?.entryOf(id) : null;
     final radio = isOnline ? online?.radioOf(id) : null;
-    final track = isOnline ? online?.trackOf(id) : await _tracks.getById(id);
+    // Downloaded since it was queued (D-81): the library file plays, not a stream.
+    final libId = entry == null ? null : await _downloadedId(entry.result);
+    final libTrack = libId == null ? null : await _tracks.getById(libId);
+    if (libTrack != null) entry = null;
+    final track = libTrack ??
+        (isOnline ? online?.trackOf(id) : await _tracks.getById(id));
     if (token != _loadToken) return;
     if (track == null) {
       await _failAndSkip(PlaybackFailureReason.notInLibrary, null, token);
@@ -374,7 +406,12 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
         : (track.kind == kStreamKind ? keyOfStreamPath(track.path) : null);
     final start = (startAt != null && startAt > Duration.zero)
         ? startAt
-        : (isOnline || streamKey != null ? null : resumeStartFor(track.resumePositionMs));
+        : ((isOnline && libTrack == null) || streamKey != null ? null : resumeStartFor(track.resumePositionMs));
+    // Before the item goes out: «Caricamento…» only while waiting for the file (no awaits up to the stream branch).
+    if (streamKey != null) {
+      _waitingStream = true;
+      _playWhenReady = play;
+    }
     _enterTrack(track);
     final synced = _syncPreparer();
     unawaited(synced);
@@ -398,7 +435,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
         if (token != _loadToken) return;
         final File file;
         try {
-          file = await p.ready(streamKey, entry?.result ?? _resultOfRow(streamKey, track));
+          file = await p.ready(streamKey, entry?.result ?? streamResultOfRow(streamKey, track));
         } on Object catch (e, st) {
           AppLog.w('stream $streamKey is not ready', e, st);
           playNow = _playWhenReady;
@@ -453,7 +490,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
         return;
       }
       await _failAndSkip(
-          isOnline || streamKey != null
+          (isOnline && libTrack == null) || streamKey != null
               ? PlaybackFailureReason.onlineUnavailable
               : e.fileMissing
                   ? PlaybackFailureReason.fileMissing
@@ -555,27 +592,9 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     if (t != null && _remote == null) mediaItem.add(_toMediaItem(t));
   }
 
-  /// The download request of a shadow row, rebuilt from the row.
-  /// shortcut: a SoundCloud row loses its page address, fix with the first SoundCloud stream.
-  YtResult _resultOfRow(String key, Track row) {
-    final sep = key.indexOf(':');
-    final source = MediaSource.values.firstWhere((m) => m.name == key.substring(0, sep),
-        orElse: () => MediaSource.youtube);
-    final artist = row.artist;
-    return YtResult(
-      id: key.substring(sep + 1),
-      title: row.title,
-      channel: artist ?? '',
-      artists: artist == null ? const [] : [artist],
-      album: row.album,
-      duration: row.durationMs > 0 ? Duration(milliseconds: row.durationMs) : null,
-      source: source,
-    );
-  }
-
-  /// Tells the preparer the upcoming streamed tracks, current first. Online
-  /// entries need no lookup; only the next [_lookupAhead] library ids are read
-  /// from the DB to find kind-2 rows.
+  /// Tells the preparer the upcoming streamed tracks, current first. Only the
+  /// next [_lookupAhead] library ids are read from the DB to find kind-2 rows,
+  /// and only the next [_lookupAhead] online entries are checked for a download.
   static const _lookupAhead = 30;
   Future<void> _syncPreparer() async {
     final p = preparer;
@@ -594,14 +613,18 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     if (token != _syncToken) return;
     final byId = {for (final r in rows) r.id: r};
     final out = <StreamItem>[];
+    var looked = 0;
     for (final id in ids) {
       if (isOnlineId(id)) {
         final r = online?.entryOf(id)?.result;
-        if (r != null) out.add(StreamItem(r.indexKey, r));
+        if (r != null && (looked++ >= _lookupAhead || await _downloadedId(r) == null)) {
+          out.add(StreamItem(r.indexKey, r));
+        }
+        if (token != _syncToken) return;
       } else {
         final row = byId[id];
         final key = row == null || row.kind != kStreamKind ? null : keyOfStreamPath(row.path);
-        if (key != null) out.add(StreamItem(key, _resultOfRow(key, row!)));
+        if (key != null) out.add(StreamItem(key, streamResultOfRow(key, row!)));
       }
     }
     p.setQueue(out);
@@ -701,7 +724,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
       return MediaItem(
         id: 'online:${entry.result.id}',
         title: t.title,
-        artist: t.artist,
+        artist: loadingStream ? loadingLabel() : t.artist,
         album: t.album,
         duration: _duration,
         artUri: thumb == null ? null : Uri.tryParse(googleThumbAt(thumb, 544)),
@@ -712,7 +735,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     return MediaItem(
       id: '${t.id}',
       title: t.title,
-      artist: t.artist,
+      artist: loadingStream ? loadingLabel() : t.artist,
       album: t.album,
       duration: _duration,
       artUri: cover == null ? null : Uri.file(cover),
@@ -957,8 +980,20 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     }
   }
 
+  /// The notification subtitle while a stream loads (the app sets the localized text).
+  String Function() loadingLabel = () => 'Caricamento…';
+
+  bool _loadingStream = false;
+
+  /// A stream (not a radio) waits for its file: the UI shows a spinner (R-02).
+  bool get loadingStream => _waitingStream && !isRadio;
+
   void _publish(AudioProcessingState processing) {
     if (_remote != null) return; // the Jam owns the notification
+    final cur = _current;
+    final loadingNow = loadingStream;
+    final loadingChanged = loadingNow != _loadingStream;
+    _loadingStream = loadingNow;
     final playing = _state == BackendState.playing;
     final live = isRadio;
     playbackState.add(PlaybackState(
@@ -983,6 +1018,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
         PlayRepeat.one => AudioServiceRepeatMode.one,
       },
     ));
+    if (loadingChanged && cur != null) mediaItem.add(_toMediaItem(cur));
   }
 
   Future<void> togglePlayPause() async {
@@ -1051,7 +1087,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   Future<void> seek(Duration position) async {
     final remote = _remote;
     if (remote != null) return remote.seek(position);
-    if (isRadio) return; // live: nothing to seek in
+    if (isRadio || loadingStream) return; // live, or the old file is still loaded
     _position = position;
     await _backend.seek(position);
     _publish(playbackState.value.processingState);
@@ -1124,10 +1160,13 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     final items = _queue.items;
     final currentGone = _current != null && ids.contains(_current!.id);
     final playing = _state == BackendState.playing;
+    // An online entry playing its library file goes with it, or it would reload.
+    final qid = _queue.currentId;
+    final gone = currentGone && qid != null && isOnlineId(qid) ? {...ids, qid} : ids;
     var removed = false;
     // From the end, so the natural indices still to visit do not shift.
     for (var i = items.length - 1; i >= 0; i--) {
-      if (!ids.contains(items[i])) continue;
+      if (!gone.contains(items[i])) continue;
       _queue.removeAt(i);
       removed = true;
     }

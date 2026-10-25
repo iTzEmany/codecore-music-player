@@ -188,7 +188,7 @@ Su **Linux e Mi A3**, stesse prove:
 - Shuffle+ acceso su una playlist di ≥ 5 brani: il suggerito si mette in «Caricamento…», poi suona; dopo l'ascolto
   compare in Cronologia e Statistiche (R-12, R-29); testo e curiosità arrivano mentre suona (R-03).
 - Modalità aereo a metà del download di un suggerito: un solo nuovo tentativo, poi messaggio e brano successivo (R-05).
-- Impostazioni → «Spazio per lo streaming»: lo spazio usato cresce; «Svuota» lo azzera tranne il brano in corso (R-09).
+- Impostazioni → «Spazio per lo streaming»: lo spazio usato cresce; «Svuota» lo azzera tranne il brano in corso e i 2 prossimi, che sono fissati (R-09).
 - Il brano in streaming non compare in Brani, Album, Artisti, Home, ricerca della libreria (K-02).
 - Log (Impostazioni → esporta log) senza 403/429 ripetuti dopo 30 minuti di Shuffle+ (K-04: la prova con un album di
   15 brani arriva con la fase 46, quando l'album online si può ascoltare).

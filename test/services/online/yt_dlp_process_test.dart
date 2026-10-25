@@ -61,6 +61,8 @@ void main() {
         YtErrorKind.rateLimited);
     expect(ytExceptionFromStderr('Temporary failure in name resolution').kind,
         YtErrorKind.network);
+    expect(ytExceptionFromStderr('[Errno 7] No address associated with hostname').kind,
+        YtErrorKind.network);
     expect(ytExceptionFromStderr('HTTP Error 403').kind, YtErrorKind.changed);
   });
 

@@ -8,8 +8,11 @@ import '../data/repositories/track_repository.dart';
 import '../services/online/enrichment_service.dart';
 import '../services/online/youtube_service.dart' show YtResult;
 import '../services/stream/stream_cache.dart';
+import '../services/stream/stream_key.dart' show displayArtist;
 import '../services/stream/stream_preparer.dart';
+import '../services/stream/stream_promoter.dart';
 import 'database_providers.dart';
+import 'library_providers.dart';
 import 'settings_providers.dart';
 import 'online_providers.dart';
 import 'shuffle_plus_providers.dart' show networkProbeProvider;
@@ -83,7 +86,7 @@ Track _syntheticTrack(YtResult r) => Track(
       id: 0,
       path: '',
       title: r.title,
-      artist: r.artists.isEmpty ? r.channel : r.artists.join(', '),
+      artist: displayArtist(r),
       album: r.album,
       albumKey: '',
       durationMs: r.duration?.inMilliseconds ?? 0,
@@ -100,3 +103,16 @@ Track _syntheticTrack(YtResult r) => Track(
       addedAt: 0,
       playCount: 0,
     );
+
+/// «Scarica» on a cached track moves the file instead of downloading it (46.3).
+final streamPromoterProvider = Provider<StreamPromoter>((ref) => StreamPromoter(
+      cache: ref.watch(streamCacheProvider),
+      tracks: ref.watch(trackRepositoryProvider),
+      covers: ref.watch(coverStoreProvider),
+      downloadFolder: () => resolveDownloadFolder(ref.read(folderRepositoryProvider)),
+      index: () => ref.read(downloadIndexProvider.future),
+      scan: (folder, path) async {
+        await for (final _ in ref.read(libraryScannerProvider).scanFiles(folder, [path])) {}
+      },
+      tag: ref.read(downloadTaggerProvider).tag,
+    ));

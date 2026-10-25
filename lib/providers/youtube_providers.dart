@@ -8,6 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import '../core/app_log.dart';
 import '../core/paths.dart';
 import '../core/platform.dart';
+import 'player_providers.dart' show audioHandlerProvider;
 import '../data/db/app_database.dart';
 import '../data/repositories/folder_repository.dart';
 import '../services/import/playlist_import_service.dart' show parseImportTag;
@@ -20,12 +21,15 @@ import '../services/online/android_yt_dlp_service.dart';
 import '../services/online/yt_dlp_process_service.dart';
 import '../services/online/yt_dlp_version.dart';
 import '../services/online/youtube_service.dart';
+import '../services/stream/stream_promoter.dart' show StreamPromoteException;
 import 'database_providers.dart';
 import 'library_providers.dart';
 import 'online_providers.dart';
 import 'yt_dlp_update_providers.dart' show locateYtDlp;
 import 'ytm_catalog_providers.dart' show ytmCatalogProvider;
 import 'settings_providers.dart';
+import 'pending_playlist_adds.dart' show parseAddToPlaylistTag;
+import 'stream_providers.dart' show streamPromoterProvider;
 
 /// The videos of a pasted playlist or channel address, read once per address.
 final playlistListingProvider =
@@ -171,6 +175,8 @@ class DownloadsNotifier extends Notifier<List<DownloadItem>> {
         if (item != null) {
           final idx = await ref.read(downloadIndexProvider.future);
           await idx.add(item.result.id, path, source: item.result.source);
+          await _mergeShadowRow(item.result, path);
+          _resyncPlayer();
         }
         // An import enriches its songs itself, after putting the CSV tags on.
         if (parseImportTag(item?.tag) == null) await _autoEnrich(path);
@@ -181,6 +187,7 @@ class DownloadsNotifier extends Notifier<List<DownloadItem>> {
     ref.onDispose(() {
       _queue.dispose();
       _settled.close();
+      _promoteErrors.close();
     });
     return const [];
   }
@@ -194,7 +201,70 @@ class DownloadsNotifier extends Notifier<List<DownloadItem>> {
     }
   }
 
-  void add(YtResult r, {String? tag}) => _queue.add(r, tag: tag);
+  /// The listens of the shadow row of a track that was streamed before (46.3).
+  Future<void> _mergeShadowRow(YtResult r, String path) async {
+    try {
+      final tracks = ref.read(trackRepositoryProvider);
+      final id = await tracks.idForPath(path);
+      if (id != null) await tracks.mergeStreamRow(r.indexKey, id);
+    } on Object catch (e, st) {
+      AppLog.w('merge of the stream row failed for ${r.indexKey}', e, st);
+    }
+  }
+
+  /// The song is a library track now: the player's queue stops prefetching it.
+  void _resyncPlayer() {
+    try {
+      unawaited(ref.read(audioHandlerProvider).resyncPreparer());
+    } on Object catch (e) {
+      AppLog.d('player not told about the download', e); // no player (tests)
+    }
+  }
+
+  /// Why the last promotion from the stream cache failed (e.g. disk full).
+  Stream<String> get promoteErrors => _promoteErrors.stream;
+  final _promoteErrors = StreamController<String>.broadcast();
+
+  /// A track already in the stream cache is moved to the downloads (R-10);
+  /// anything else, and every import, goes to the queue as before.
+  void add(YtResult r, {String? tag}) {
+    // Imports (any tag but addto:) always download.
+    if (tag != null && parseAddToPlaylistTag(tag) == null) return _queue.add(r, tag: tag);
+    if (!_promoting.add(r.indexKey)) return; // double tap while it is moving
+    unawaited(_promoteOrQueue(r, tag).whenComplete(() => _promoting.remove(r.indexKey)));
+  }
+
+  final _promoting = <String>{};
+
+  Future<void> _promoteOrQueue(YtResult r, String? tag) async {
+    try {
+      if (await ref.read(streamPromoterProvider).promote(r)) {
+        await _joinPlaylist(r, parseAddToPlaylistTag(tag));
+        _resyncPlayer();
+        return;
+      }
+    } on StreamPromoteException catch (e) {
+      AppLog.w('promotion failed: ${e.message}');
+      if (!_promoteErrors.isClosed) _promoteErrors.add(e.message);
+      if (e.noSpace) return; // a download would fail the same way
+    } on Object catch (e, st) {
+      AppLog.w('promotion failed, downloading instead', e, st);
+    }
+    if (ref.mounted) _queue.add(r, tag: tag);
+  }
+
+  /// A promoted song is a library track already: the playlist of an `addto:` tag takes it now.
+  Future<void> _joinPlaylist(YtResult r, int? playlistId) async {
+    if (playlistId == null) return;
+    try {
+      final path = (await ref.read(downloadIndexProvider.future)).pathFor(r.id, source: r.source);
+      final id = path == null ? null : await ref.read(trackRepositoryProvider).idForPath(path);
+      if (id != null) await ref.read(playlistRepositoryProvider).addTracks(playlistId, [id]);
+    } on Object catch (e, st) {
+      AppLog.w('add to playlist after promotion failed for ${r.indexKey}', e, st);
+    }
+  }
+
   void cancel(int id) => _queue.cancel(id);
   void cancelWhere(bool Function(DownloadItem item) test) =>
       _queue.cancelWhere(test);
@@ -205,3 +275,15 @@ final downloadsProvider =
     NotifierProvider<DownloadsNotifier, List<DownloadItem>>(
       DownloadsNotifier.new,
     );
+
+/// One failed promotion. No `==` on purpose: two identical messages are two
+/// events, and a provider would drop the second as «unchanged».
+class PromoteError {
+  PromoteError(this.text);
+  final String text;
+}
+
+/// Why a «Scarica» from the stream cache failed (shown by the app).
+final promoteErrorsProvider = StreamProvider<PromoteError>(
+  (ref) => ref.watch(downloadsProvider.notifier).promoteErrors.map(PromoteError.new),
+);

@@ -12,6 +12,7 @@ import 'package:codecore/services/audio/codecore_audio_handler.dart';
 import 'package:codecore/services/audio/online_entries.dart';
 import 'package:codecore/services/audio/play_queue.dart';
 import 'package:codecore/services/online/youtube_service.dart';
+import 'package:codecore/services/radio/radio_station.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -87,6 +88,71 @@ void main() {
     expect(backend.loadedUris, isEmpty);
     expect(preparer.queues.first, ['youtube:v1']); // told before the file was asked for
     expect(handler.currentTrack?.id, id);
+  });
+
+  test('a downloaded online entry is not prepared nor streamed; the other still is', () async {
+    handler.libraryIdOf = (r) async => r.id == 'v1' ? ids[1] : null;
+    final e = [online.register(result('v1')), online.register(result('v2'))];
+    await handler.playQueue(e, 0);
+    await settle();
+    expect(handler.currentTrack?.id, ids[1]);
+    expect(backend.loaded.single, '/m/b.mp3');
+    expect(preparer.asked, isEmpty);
+    expect(preparer.queues.last, ['youtube:v2']);
+    expect(handler.loadingStream, isFalse);
+  });
+
+  test('plays and the resume point of a downloaded online entry land on the library id', () async {
+    await (db.update(db.tracks)..where((t) => t.id.equals(ids[1]))).write(const TracksCompanion(
+        durationMs: Value(30 * 60 * 1000), resumePositionMs: Value(600000)));
+    handler.libraryIdOf = (_) async => ids[1];
+    await handler.playQueue([online.register(result('v1'))], 0);
+    expect(backend.seeks, [const Duration(milliseconds: 595000)]);
+    await listenTo(100);
+    backend.stateC.add(BackendState.completed);
+    await settle();
+    final plays = await db.select(db.plays).get();
+    expect(plays.map((p) => p.trackId), [ids[1]]);
+  });
+
+  test('deleting the library file of a playing online entry takes the entry out too', () async {
+    handler.libraryIdOf = (_) async => ids[1];
+    final id = online.register(result('v1'));
+    await handler.playQueue([id, ids[0]], 0);
+    expect(handler.currentTrack?.id, ids[1]);
+    await handler.removeTracks({ids[1]});
+    expect(handler.queueIds, [ids[0]]);
+    expect(handler.currentTrack?.id, ids[0]);
+  });
+
+  test('resyncPreparer drops an entry downloaded after it was queued', () async {
+    final e = [online.register(result('v1')), online.register(result('v2'))];
+    await handler.playQueue([ids[0], ...e], 0);
+    await settle();
+    expect(preparer.queues.last, ['youtube:v1', 'youtube:v2']);
+    handler.libraryIdOf = (r) async => r.id == 'v2' ? ids[1] : null;
+    await handler.resyncPreparer();
+    expect(preparer.queues.last, ['youtube:v1']);
+  });
+
+  test('a download lookup that fails leaves the entry streaming', () async {
+    handler.libraryIdOf = (_) async => throw StateError('index unreadable');
+    final id = online.register(result('v1'));
+    await handler.playQueue([id], 0);
+    expect(preparer.asked, ['youtube:v1']);
+    expect(backend.loaded.single, endsWith('youtube_v1.m4a'));
+  });
+
+  test('a seek while the stream loads never reaches the backend', () async {
+    final id = online.register(result('v1'));
+    final gate = preparer.gates['youtube:v1'] = Completer<void>();
+    final started = handler.playQueue([id], 0);
+    await settle();
+    expect(handler.loadingStream, isTrue);
+    await handler.seek(const Duration(seconds: 30));
+    expect(backend.seeks, isEmpty);
+    gate.complete();
+    await started;
   });
 
   test('a row of kind 2 plays through the preparer with the key of its path', () async {
@@ -297,6 +363,57 @@ void main() {
     expect(item.album, 'Alb');
     expect(item.artUri.toString(), 'https://lh3.googleusercontent.com/x=w544-h544-l90-rj');
     expect(item.extras, {'online': true});
+  });
+
+  test('while a stream loads the notification says «Caricamento…» instead of the artist', () async {
+    final id = online.register(result('v1'));
+    final gate = preparer.gates['youtube:v1'] = Completer<void>();
+    final started = handler.playQueue([id], 0);
+    await settle();
+    expect(handler.loadingStream, isTrue);
+    expect(handler.mediaItem.value!.title, 'Song v1');
+    expect(handler.mediaItem.value!.artist, 'Caricamento…');
+    gate.complete();
+    await started;
+    await settle();
+    expect(handler.loadingStream, isFalse);
+    expect(handler.mediaItem.value!.artist, 'Ann, Bob');
+  });
+
+  test('a seek or backend buffering on a ready stream does not raise the loading flag', () async {
+    final id = online.register(result('v1'));
+    await handler.playQueue([id], 0);
+    await settle();
+    expect(handler.loadingStream, isFalse);
+    backend.stateC.add(BackendState.loading);
+    await handler.seek(const Duration(seconds: 30));
+    await settle();
+    expect(handler.loadingStream, isFalse);
+    expect(handler.mediaItem.value!.artist, 'Ann, Bob');
+  });
+
+  test('skipping from a loading stream to a local track clears the flag', () async {
+    final id = online.register(result('v1'));
+    preparer.gates['youtube:v1'] = Completer<void>();
+    unawaited(handler.playQueue([id, ids[0]], 0));
+    await settle();
+    expect(handler.loadingStream, isTrue);
+    await handler.skipToNext();
+    await settle();
+    expect(handler.loadingStream, isFalse);
+    expect(handler.mediaItem.value!.title, 'a');
+    expect(handler.mediaItem.value!.artist, isNot('Caricamento…'));
+  });
+
+  test('a radio never raises the loading flag', () async {
+    final states = <bool>[];
+    final sub = handler.playbackState.listen((_) => states.add(handler.loadingStream));
+    await handler.playStations(const [
+      RadioStation(id: 'r', name: 'Radio r', streamUrl: 'http://radio.test/r', faviconUrl: '')
+    ], 0);
+    await settle();
+    await sub.cancel();
+    expect(states, isNot(contains(true)));
   });
 
   test('insertAt and removeQueueId change the queue and tell the listeners', () async {

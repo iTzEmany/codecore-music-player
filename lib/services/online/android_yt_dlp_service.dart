@@ -11,11 +11,8 @@ import 'yt_dlp_process_service.dart';
 import 'youtube_service.dart';
 
 /// yt-dlp embedded in the Android app (see MainActivity.kt).
-class AndroidYtDlpService implements YoutubeService, StreamSource {
-  AndroidYtDlpService({
-    this.hedgeAfter = defaultHedgeAfter,
-    this.fastTimeout = fastStreamTimeout,
-  }) {
+class AndroidYtDlpService implements YoutubeService {
+  AndroidYtDlpService() {
     _channel.setMethodCallHandler(_onCall);
   }
 
@@ -24,22 +21,6 @@ class AndroidYtDlpService implements YoutubeService, StreamSource {
   /// A search that takes longer is cancelled and reported as a network error.
   static const searchTimeout = Duration(seconds: 45);
 
-  /// Stream resolution with the default clients can run YouTube's JS challenge
-  /// on the phone: much slower than a search, so it has its own limit.
-  static const streamTimeout = Duration(seconds: 90);
-
-  /// Measured on the phone: the fast client answers in 8-19 s, and when it
-  /// misses a 20 s limit the default clients then need ~60 s: waiting longer
-  /// for the fast one is cheaper.
-  static const fastStreamTimeout = Duration(seconds: 35);
-
-  /// If the fast client has not answered after this, the default clients are
-  /// started too (hedged request); the first answer wins, the other is killed.
-  static const defaultHedgeAfter = Duration(seconds: 15);
-  final Duration hedgeAfter;
-
-  /// Limit of the fast client (injectable for tests).
-  final Duration fastTimeout;
   final _progress = <String, StreamController<DownloadProgress>>{};
   int _counter = 0;
 
@@ -86,106 +67,6 @@ class AndroidYtDlpService implements YoutubeService, StreamSource {
     final q = query.trim();
     if (q.isEmpty) return const [];
     return _search({'query': q, 'isUrl': isYoutubeUrl(q)});
-  }
-
-  Future<void> _kill(String processId) => _channel
-      .invokeMethod<void>('cancel', {'processId': processId})
-      .catchError((Object e) => AppLog.w('yt-dlp cancel failed: $e'));
-
-  Future<StreamAddress?> _stream(
-    YtResult r,
-    String processId, {
-    required bool fast,
-  }) async {
-    final out = await _call(
-      {'url': r.downloadUrl, 'format': streamFormat, if (fast) 'fast': true},
-      method: 'streamUrl',
-      timeout: fast ? fastTimeout : streamTimeout,
-      processId: processId,
-    );
-    return parseStreamAddress(out, fast: fast);
-  }
-
-  @override
-  Future<StreamAddress> streamUrl(YtResult r, {bool fast = true}) async {
-    final watch = Stopwatch()..start();
-    final fastId = 'st-${_counter++}', defaultId = 'st-${_counter++}';
-    final result = Completer<StreamAddress>();
-    var fastDone = !fast, defaultStarted = false, defaultDone = false;
-    Object? defaultError;
-    Timer? hedge;
-
-    void win(StreamAddress a, String via, {required bool fastWon}) {
-      if (result.isCompleted) return;
-      hedge?.cancel();
-      AppLog.i('listen: address via $via in ${watch.elapsedMilliseconds} ms');
-      result.complete(a);
-      // Kill the other process only if it is still running.
-      if (fastWon && defaultStarted && !defaultDone) unawaited(_kill(defaultId));
-      if (!fastWon && !fastDone) unawaited(_kill(fastId));
-    }
-
-    void startDefault() {
-      if (defaultStarted) return;
-      defaultStarted = true;
-      hedge?.cancel();
-      _stream(r, defaultId, fast: false).then(
-        (a) {
-          defaultDone = true;
-          if (a != null) return win(a, 'default clients', fastWon: false);
-          defaultError = const YtException(
-            YtErrorKind.changed,
-            'no stream address',
-          );
-          if (fastDone && !result.isCompleted) {
-            result.completeError(defaultError!);
-          }
-        },
-        onError: (Object e, StackTrace st) {
-          defaultDone = true;
-          defaultError = e;
-          if (fastDone && !result.isCompleted) result.completeError(e, st);
-        },
-      );
-    }
-
-    if (!fast) {
-      startDefault();
-      return result.future;
-    }
-    // Fast path: the visionos client needs neither the JS challenge solver nor
-    // a PO token. If it cannot serve this video (age limit, region, time
-    // limit...) yt-dlp's default clients take over, already running when the
-    // fast one is merely slow.
-    hedge = Timer(hedgeAfter, () {
-      if (result.isCompleted) return;
-      AppLog.i('listen: fast client slow, starting default clients too');
-      startDefault();
-    });
-    void fastFailed(String why) {
-      fastDone = true;
-      AppLog.i('listen: fast client failed ($why), using default clients');
-      if (result.isCompleted) return;
-      if (defaultDone) {
-        result.completeError(defaultError!);
-      } else {
-        startDefault();
-      }
-    }
-
-    _stream(r, fastId, fast: true).then(
-      (a) {
-        if (a != null) {
-          fastDone = true;
-          return win(a, 'visionos', fastWon: true);
-        }
-        fastFailed('no address');
-      },
-      onError: (Object e, StackTrace st) {
-        fastFailed(e is YtException ? '${e.kind}: ${e.detail}' : '$e');
-      },
-    );
-    return result.future;
   }
 
   @override

@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
+import 'l10n/app_localizations.dart' show lookupAppLocalizations;
 import 'package:flutter/foundation.dart' show LicenseEntryWithLineBreaks, LicenseRegistry;
 import 'package:flutter/services.dart' show DeviceOrientation, MethodChannel, SystemChrome, rootBundle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -37,8 +38,6 @@ import 'services/audio/crossfade_engine.dart';
 import 'services/audio/just_audio_backend.dart';
 import 'services/audio/media_browse_tree.dart';
 import 'services/audio/online_entries.dart';
-import 'providers/listen_providers.dart' show fastClientGateProvider;
-import 'services/online/youtube_service.dart' show FastClientGate;
 import 'services/audio/mpris_controls.dart';
 import 'services/audio/smtc_controls.dart';
 import 'services/audio/play_queue.dart';
@@ -106,7 +105,6 @@ Future<void> main() async {
   // player (direct addresses of online entries) share it.
   final ytDlp = createYtDlpService();
   final onlineEntries = OnlineEntries();
-  final fastGate = FastClientGate();
   // Shared with the Radio page, so the chosen server is remembered once.
   final radioClient = RadioBrowserClient.standard();
   final radioRepo = RadioRepository(db);
@@ -168,6 +166,8 @@ Future<void> main() async {
     labels: BrowseLabels.forLanguage(settingsStore.readSettings().language),
     coverUri: (k) => covers.fileFor(k)?.uri,
   );
+  handler.loadingLabel = () =>
+      lookupAppLocalizations(Locale(settingsStore.readSettings().language)).playerLoading;
   // Home-screen widget and quick tile (Android): fed from here, not from the
   // UI, because the player outlives the activity.
   if (Platform.isAndroid) {
@@ -205,7 +205,6 @@ Future<void> main() async {
       audioHandlerProvider.overrideWithValue(handler),
       radioClientProvider.overrideWithValue(radioClient),
       ytDlpServiceProvider.overrideWithValue(ytDlp),
-      fastClientGateProvider.overrideWithValue(fastGate),
       playbackPersistenceProvider.overrideWithValue(persistence),
       playerErrorsProvider.overrideWithValue(errors.stream),
       coversDirProvider.overrideWithValue(covers.dir),
@@ -213,6 +212,8 @@ Future<void> main() async {
     ],
   );
   runApp(UncontrolledProviderScope(container: container, child: const CodecoreApp()));
+  // A queued online entry downloaded meanwhile plays its library file (D-81).
+  handler.libraryIdOf = container.read(playerControllerProvider).libraryIdOf;
   // The player downloads streamed tracks through the preparer (45.4); before
   // the queue comes back, so a restored streamed track finds it.
   try {

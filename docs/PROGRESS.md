@@ -638,16 +638,17 @@ Feature «Streaming e coda online» (`docs/feature-streaming.md`, decisioni D-61
 - [~] 45.8 Prove a mano (utente, «Tocca a te» in handoff)
 
 ## Fase 46 — Streaming dalla ricerca (`fase-46-streaming-ricerca.md`)
-- [ ] 46.1 `PlayerController`: suonare e accodare brani online
-- [ ] 46.2 Player in caricamento
-- [ ] 46.3 `StreamPromoter`: «Scarica» senza riscaricare
-- [ ] 46.4 «Aggiungi a playlist» su un brano online
-- [ ] 46.5 Righe online: tap, swipe e menu ⋮
-- [ ] 46.6 Via l'anteprima con le cuffie
-- [ ] 46.7 Album online: Play, Shuffle e menu ⋮
-- [ ] 46.8 «Scarica» nel menu ⋮ del player per un brano in streaming
-- [ ] 46.9 Controlli di fase (K-01, K-02, K-03)
-- [ ] 46.10 Prove a mano (utente)
+Note: D-89 (Jam: tap e «Riproduci dopo» vanno in coda) nella UI; la coda condivisa arriva in 47.5. In più: watchdog di stallo del download (90 s al primo evento, 30 s fra eventi, spento al 100 %), voce online già scaricata suona dalla libreria (niente riga ombra doppia), «[Errno 7]» → errore di rete. La prova 45.8 «Svuota» tiene il brano in corso **e i 2 prossimi** (fissati).
+- [x] 46.1 `PlayerController`: suonare e accodare brani online
+- [x] 46.2 Player in caricamento
+- [x] 46.3 `StreamPromoter`: «Scarica» senza riscaricare
+- [x] 46.4 «Aggiungi a playlist» su un brano online
+- [x] 46.5 Righe online: tap, swipe e menu ⋮
+- [x] 46.6 Via l'anteprima con le cuffie
+- [x] 46.7 Album online: Play, Shuffle e menu ⋮
+- [x] 46.8 «Scarica» nel menu ⋮ del player per un brano in streaming
+- [x] 46.9 Controlli di fase (K-01, K-02, K-03)
+- [~] 46.10 Prove a mano (utente, «Tocca a te» in handoff)
 
 ## Fase 47 — Jam online (`fase-47-jam-online.md`)
 - [ ] 47.1 `JamItem.videoId` e `ref` con prefisso

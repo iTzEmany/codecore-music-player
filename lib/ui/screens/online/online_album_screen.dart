@@ -1,8 +1,14 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/app_log.dart';
 import '../../../l10n/l10n_ext.dart';
+import '../../../providers/jam_providers.dart';
+import '../../../providers/pending_playlist_adds.dart' show addToPlaylistTag;
+import '../../../providers/player_providers.dart';
 import '../../../providers/selection_providers.dart';
 import '../../../providers/import_providers.dart';
 import '../../../providers/library_overlap_providers.dart';
@@ -12,8 +18,12 @@ import '../../../services/import/import_options.dart';
 import '../../../services/import/playlist_import_service.dart' show ytmAlbumSourceKind;
 import '../../../services/online/album_download_plan.dart';
 import '../../../services/online/ytm_artist.dart';
+import '../../../services/online/youtube_service.dart' show YtResult;
 import '../../shell/shell_nav.dart';
+import '../now_playing/now_playing_screen.dart';
+import '../playlists/playlist_picker.dart';
 import '../../theme/tokens.dart';
+import '../../widgets/cc_sheet.dart';
 import '../../widgets/confirm.dart';
 import '../../widgets/format_utils.dart';
 import '../../widgets/net_thumbnail.dart';
@@ -26,7 +36,7 @@ import 'online_song_row.dart';
 import '../../widgets/show_msg.dart';
 
 /// An album, single or EP of YouTube Music: cover, numbered songs with
-/// «Ascolta» and «Scarica», and «Scarica album». [release] is what the page
+/// «Scarica», Play, Shuffle and a ⋮ menu (with «Scarica album»). [release] is what the page
 /// was opened from (title and cover are shown while it loads).
 class OnlineAlbumScreen extends ConsumerWidget {
   const OnlineAlbumScreen({super.key, required this.browseId, this.release});
@@ -81,6 +91,74 @@ class OnlineAlbumScreen extends ConsumerWidget {
     }
   }
 
+  /// Play / Shuffle: opens the player in loading; with a Jam on, the album
+  /// goes to the shared queue instead (D-89).
+  void _play(BuildContext context, WidgetRef ref, List<YtResult> songs, {bool shuffle = false}) {
+    if (songs.isEmpty) return;
+    if (ref.read(jamProvider).active) {
+      unawaited(_queueAlbum(context, ref, songs));
+    } else {
+      unawaited(playOnlineListAndOpen(context, ref, songs, shuffle: shuffle));
+    }
+  }
+
+  Future<void> _queueAlbum(BuildContext context, WidgetRef ref, List<YtResult> songs) async {
+    final ctrl = ref.read(playerControllerProvider);
+    try {
+      for (final r in songs) {
+        await ctrl.enqueueOnline(r);
+      }
+    } on Object catch (e, st) {
+      AppLog.w('album queue failed', e, st);
+      return;
+    }
+    if (context.mounted) showMsg(context, context.l10n.addedToQueue);
+  }
+
+  Future<void> _addToPlaylist(BuildContext context, WidgetRef ref, List<YtResult> songs) async {
+    final picked = await pickPlaylist(context, ref);
+    if (picked == null || !context.mounted) return;
+    final downloads = ref.read(downloadsProvider.notifier);
+    for (final r in songs) {
+      downloads.add(r, tag: addToPlaylistTag(picked.id));
+    }
+    showMsg(context, context.l10n.suggestionAddWhenDownloaded(picked.name));
+  }
+
+  Future<void> _share(BuildContext context) async {
+    await Clipboard.setData(ClipboardData(text: 'https://music.youtube.com/browse/$browseId'));
+    if (context.mounted) showMsg(context, context.l10n.copied);
+  }
+
+  Future<void> _showMenu(BuildContext context, WidgetRef ref, YtmAlbum album, List<YtResult> songs) {
+    final l = context.l10n;
+    final items = <(String, IconData, String, VoidCallback)>[
+      ('album-menu-download', Icons.download_rounded, l.ytmDownloadAlbum,
+          () => _downloadAlbum(context, ref, album)),
+      ('album-menu-queue', Icons.queue_rounded, l.ytmAlbumQueue, () => _queueAlbum(context, ref, songs)),
+      ('album-menu-playlist', Icons.playlist_add_rounded, l.addToPlaylist,
+          () => _addToPlaylist(context, ref, songs)),
+      ('album-menu-share', Icons.share_rounded, l.shareMenu, () => _share(context)),
+    ];
+    return showCcSheet<void>(
+      context: context,
+      builder: (sheet) => SafeArea(
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          for (final (key, icon, label, run) in items)
+            ListTile(
+              key: ValueKey(key),
+              leading: Icon(icon),
+              title: Text(label),
+              onTap: () {
+                Navigator.of(sheet).pop();
+                run();
+              },
+            ),
+        ]),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final page = ref.watch(onlineAlbumProvider(browseId));
@@ -107,7 +185,9 @@ class OnlineAlbumScreen extends ConsumerWidget {
           child: _AlbumHeader(
             album: album,
             release: release,
-            onDownload: album == null ? null : () => _downloadAlbum(context, ref, album),
+            onPlay: songs.isEmpty ? null : () => _play(context, ref, songs),
+            onShuffle: songs.isEmpty ? null : () => _play(context, ref, songs, shuffle: true),
+            onMore: album == null ? null : () => _showMenu(context, ref, album, songs),
           ),
         ),
         if (data != null && data.stale)
@@ -138,11 +218,11 @@ class OnlineAlbumScreen extends ConsumerWidget {
 }
 
 class _AlbumHeader extends StatelessWidget {
-  const _AlbumHeader({required this.album, required this.release, required this.onDownload});
+  const _AlbumHeader({required this.album, required this.release, required this.onPlay, required this.onShuffle, required this.onMore});
 
   final YtmAlbum? album;
   final YtmRelease? release;
-  final VoidCallback? onDownload;
+  final VoidCallback? onPlay, onShuffle, onMore;
 
   static const _cover = 144.0;
 
@@ -213,12 +293,31 @@ class _AlbumHeader extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          FilledButton.icon(
-            key: const ValueKey('download-album'),
-            onPressed: onDownload,
-            icon: const Icon(Icons.download_rounded),
-            label: Text(l.ytmDownloadAlbum),
-          ),
+          Row(children: [
+            Expanded(
+              child: FilledButton.icon(
+                key: const ValueKey('album-play'),
+                onPressed: onPlay,
+                icon: const Icon(Icons.play_arrow_rounded),
+                label: Text(l.play),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: OutlinedButton.icon(
+                key: const ValueKey('album-shuffle'),
+                onPressed: onShuffle,
+                icon: const Icon(Icons.shuffle_rounded),
+                label: Text(l.shuffle),
+              ),
+            ),
+            IconButton(
+              key: const ValueKey('album-more'),
+              tooltip: l.ytmMore,
+              onPressed: onMore,
+              icon: const Icon(Icons.more_vert_rounded),
+            ),
+          ]),
         ],
       ),
     );

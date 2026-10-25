@@ -35,8 +35,15 @@ class StreamCache {
   final _pins = <String, int>{};
   var _evicting = Future<void>.value();
 
+  /// stem -> file, refreshed by every folder scan and kept by put/remove.
+  Map<String, File>? _index;
+  var _mutations = 0; // bumped by put/_remove: a scan that raced with one must not publish
+
   /// Called with each file the cache deletes to make room (evict/clear).
   void Function(File)? onEvicted;
+
+  /// Called with the key of each [forget]: its file left the cache.
+  void Function(String key)? onForgotten;
 
   /// Bytes in the folder, measured after `open` and every `evict`.
   int usedBytes = 0;
@@ -63,6 +70,11 @@ class StreamCache {
   /// The cached file (any extension), or null.
   Future<File?> fileFor(String key) async {
     final name = streamFileName(key);
+    final indexed = _index?[name];
+    if (_index != null) {
+      if (indexed == null || await indexed.exists()) return indexed;
+      _index = null; // deleted behind our back (e.g. the OS cleared cacheDir): rescan
+    }
     for (final e in await _files()) {
       if (_stem(e.file) == name) return e.file;
     }
@@ -80,6 +92,8 @@ class StreamCache {
       if (_stem(e.file) == name) await _remove(e.file);
     }
     final f = await part.rename(p.join(dir.path, '$name$ext'));
+    _mutations++;
+    _index?[name] = f;
     if (!trim) return f;
     pin(key);
     try {
@@ -90,10 +104,22 @@ class StreamCache {
     return f;
   }
 
+  /// Drops [key] from the index: its file was moved out of the cache.
+  void forget(String key) {
+    _mutations++;
+    _index?.remove(streamFileName(key));
+    onForgotten?.call(key);
+  }
+
   /// Marks [key] as just used.
   Future<void> touch(String key) async {
     final f = await fileFor(key);
-    if (f != null) await f.setLastModified(DateTime.now());
+    if (f == null) return;
+    try {
+      await f.setLastModified(DateTime.now());
+    } on FileSystemException catch (e, st) {
+      AppLog.w('stream cache: cannot touch ${f.path}', e, st);
+    }
   }
 
   void pin(String key) => _pins.update(key, (n) => n + 1, ifAbsent: () => 1);
@@ -148,13 +174,21 @@ class StreamCache {
 
   Future<List<({File file, int size, DateTime time})>> _files() async {
     final out = <({File file, int size, DateTime time})>[];
-    if (!await dir.exists()) return out;
+    final index = <String, File>{};
+    final seen = _mutations;
+    if (!await dir.exists()) {
+      _index = null;
+      return out;
+    }
     await for (final e in dir.list()) {
       if (e is! File || e.path.endsWith('.part')) continue;
       final s = await e.stat();
       if (s.type != FileSystemEntityType.file) continue;
       out.add((file: e, size: s.size, time: s.modified));
+      index[_stem(e)] = e;
     }
+    // Swapped whole; a scan that raced with a put/remove is stale, so the next fileFor rescans.
+    _index = seen == _mutations ? index : null;
     return out;
   }
 
@@ -167,8 +201,12 @@ class StreamCache {
   Future<bool> _remove(File f) async {
     try {
       await _delete(f);
+      _mutations++;
+      _index?.remove(_stem(f));
       return true;
     } on PathNotFoundException {
+      _mutations++;
+      _index?.remove(_stem(f));
       return true; // already gone
     } on FileSystemException catch (e, st) {
       AppLog.w('stream cache: cannot delete ${f.path}', e, st);

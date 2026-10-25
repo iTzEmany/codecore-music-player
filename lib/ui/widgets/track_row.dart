@@ -619,13 +619,40 @@ class LiveTrackRow extends ConsumerWidget {
       return row;
     }
     if (active) return draggable(row);
-    // A swipe that starts at the left edge belongs to the system back gesture.
+    return SwipeToQueue(
+      swipeKey: 'swipe-queue-${track.id}',
+      onQueue: () {
+        ref.read(playerControllerProvider).addToQueue(track.id);
+        showMsg(context, context.l10n.addedToQueue);
+      },
+      child: draggable(row),
+    );
+  }
+}
+
+/// A swipe to the right that asks to queue [child]'s song; the row always
+/// comes back. One that starts at the left edge belongs to the system back
+/// gesture and does nothing (D-59).
+class SwipeToQueue extends StatelessWidget {
+  const SwipeToQueue({
+    super.key,
+    required this.swipeKey,
+    required this.onQueue,
+    required this.child,
+  });
+
+  final String swipeKey;
+  final VoidCallback onQueue;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
     final media = MediaQuery.of(context);
     final edge = math.max(48.0, media.systemGestureInsets.left + 24);
     return Listener(
       onPointerDown: (e) => _lastDownX = e.position.dx,
       child: Dismissible(
-        key: ValueKey('swipe-queue-${track.id}'),
+        key: ValueKey(swipeKey),
         direction: DismissDirection.startToEnd,
         dismissThresholds: const {DismissDirection.startToEnd: 0.3},
         background: Container(
@@ -634,14 +661,11 @@ class LiveTrackRow extends ConsumerWidget {
           color: context.cc.surface2,
           child: Icon(Icons.queue_rounded, color: context.cc.accentSoft),
         ),
-        // The row always comes back; only the queue changes.
         confirmDismiss: (_) async {
-          if (_lastDownX < edge) return false;
-          ref.read(playerControllerProvider).addToQueue(track.id);
-          showMsg(context, context.l10n.addedToQueue);
+          if (_lastDownX >= edge) onQueue();
           return false;
         },
-        child: draggable(row),
+        child: child,
       ),
     );
   }

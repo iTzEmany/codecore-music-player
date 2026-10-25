@@ -78,26 +78,6 @@ class YtDlpChannel(private val applicationContext: Context) {
                 if (processId != null) YoutubeDL.getInstance().execute(req, processId).out
                 else YoutubeDL.getInstance().execute(req).out
             }
-            // The direct address of a result's audio, for listening without
-            // downloading (`yt-dlp -j`: the address AND the http headers the
-            // chosen client needs, which `-g` would drop).
-            "streamUrl" -> run(result) {
-                ensureInit()
-                val req = YoutubeDLRequest(call.argument<String>("url")!!)
-                req.addOption("-j")
-                req.addOption("--no-warnings")
-                req.addOption("--no-playlist")
-                // visionos: direct audio URLs without the JS challenge or a PO token
-                // (android_vr now needs a GVS PO token). An unknown client name is
-                // skipped by yt-dlp, which then uses its default clients.
-                if (call.argument<Boolean>("fast") == true) {
-                    req.addOption("--extractor-args", "youtube:player_client=visionos")
-                }
-                req.addOption("-f", call.argument<String>("format") ?: "bestaudio/best")
-                val processId = call.argument<String>("processId")
-                if (processId != null) YoutubeDL.getInstance().execute(req, processId).out
-                else YoutubeDL.getInstance().execute(req).out
-            }
             "download" -> run(result) {
                 ensureInit()
                 val id = call.argument<String>("id")!!

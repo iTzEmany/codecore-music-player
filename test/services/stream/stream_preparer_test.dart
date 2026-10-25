@@ -13,6 +13,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
 
 /// Writes a file per download; each one ends when its gate is opened.
+/// streamRow waits for [gate], so a ready() on a cached file stays in flight.
+class _SlowTracks extends TrackRepository {
+  _SlowTracks(super.db);
+  final gate = Completer<void>();
+  @override
+  Future<Track?> streamRow(String key) => gate.future.then((_) => super.streamRow(key));
+}
+
 class _Yt implements YoutubeService {
   final started = <String>[];
   final failuresLeft = <String, int>{};
@@ -21,6 +29,11 @@ class _Yt implements YoutubeService {
   final _gates = <String, Completer<void>>{};
   var open = 0, maxOpen = 0;
   var autoFinish = false;
+  /// Progress events (received, total) before the path, `gap` apart; then `silence` of nothing.
+  List<(int, int)> progress = const [];
+  Duration gap = Duration.zero, silence = Duration.zero;
+  final tokens = <String, List<CancelToken?>>{};
+  final dirs = <String, List<String>>{};
 
   void finish(String id) => _gates[id]!.complete();
 
@@ -28,10 +41,15 @@ class _Yt implements YoutubeService {
   Stream<DownloadProgress> download(YtResult r, Directory outDir,
       {CancelToken? cancel, DownloadOptions options = const DownloadOptions()}) async* {
     started.add(r.id);
+    (tokens[r.id] ??= []).add(cancel);
+    (dirs[r.id] ??= []).add(outDir.path);
     maxOpen = ++open > maxOpen ? open : maxOpen;
     try {
       final gate = _gates[r.id] = Completer<void>();
       if (autoFinish) gate.complete();
+      unawaited(cancel?.whenCancel.then((_) {
+        if (!gate.isCompleted) gate.completeError(StateError('cancelled'));
+      }));
       await gate.future;
       if ((rateLimits[r.id] ?? 0) > 0) {
         rateLimits[r.id] = rateLimits[r.id]! - 1;
@@ -45,6 +63,11 @@ class _Yt implements YoutubeService {
         failuresLeft[r.id] = failuresLeft[r.id]! - 1;
         throw const YtException(YtErrorKind.network, 'boom');
       }
+      for (final (rec, tot) in progress) {
+        await Future<void>.delayed(gap);
+        yield DownloadProgress(received: rec, total: tot);
+      }
+      await Future<void>.delayed(silence);
       await outDir.create(recursive: true);
       final f = File(p.join(outDir.path, 'Some title - ${r.id}.m4a'))..writeAsBytesSync([1, 2, 3]);
       yield DownloadProgress(path: f.path);
@@ -84,9 +107,13 @@ void main() {
   StreamPreparer make({
     Duration cooldown = const Duration(minutes: 5),
     Duration attemptTimeout = const Duration(minutes: 5),
+    Duration stallTimeout = const Duration(minutes: 5),
+    Duration startTimeout = const Duration(minutes: 5),
   }) =>
       prep = StreamPreparer(
         attemptTimeout: attemptTimeout,
+        stallTimeout: stallTimeout,
+        startTimeout: startTimeout,
         cache: cache,
         tracks: tracks,
         youtube: yt,
@@ -338,8 +365,11 @@ void main() {
     final f = (await cache.fileFor('youtube:a'))!;
     await f.setLastModified(DateTime(2020));
     cache.limitBytes = 0;
+    final slow = tracks = _SlowTracks(db);
+    make();
     final r = prep.ready('youtube:a', _r('a'));
-    await cache.evict(); // ready's pin is already set
+    await cache.evict(); // ready's pin is still set
+    slow.gate.complete();
     expect((await r).existsSync(), isTrue);
     expect((await r).lastModifiedSync().year, greaterThan(2020));
     await cache.evict(); // pin released
@@ -350,6 +380,97 @@ void main() {
     make(attemptTimeout: const Duration(milliseconds: 30));
     await expectLater(prep.ready('youtube:slow', _r('slow')), throwsA(isA<TimeoutException>()));
     expect(yt.started, ['slow', 'slow']);
+  });
+
+  test('a stalled attempt is aborted long before attemptTimeout and retried', () async {
+    make(startTimeout: const Duration(milliseconds: 30), stallTimeout: const Duration(milliseconds: 30));
+    await expectLater(prep.ready('youtube:slow', _r('slow')), throwsA(isA<TimeoutException>()));
+    expect(yt.started, ['slow', 'slow']);
+    expect(yt.tokens['slow']!.every((t) => t!.isCancelled), isTrue);
+  });
+
+  test('a slow first event (extraction) is not a stall', () async {
+    make(stallTimeout: const Duration(milliseconds: 30), startTimeout: const Duration(seconds: 2));
+    final r = prep.ready('youtube:a', _r('a'));
+    await _until(() => yt.started.isNotEmpty);
+    await Future<void>.delayed(const Duration(milliseconds: 120));
+    yt.finish('a');
+    expect((await r).existsSync(), isTrue);
+    expect(yt.started, ['a']);
+  });
+
+  test('steady progress keeps re-arming the watchdog: no stall', () async {
+    make(startTimeout: const Duration(milliseconds: 100), stallTimeout: const Duration(seconds: 1));
+    yt
+      ..autoFinish = true
+      ..progress = [for (var n = 1; n <= 8; n++) (n, 100)]
+      ..gap = const Duration(milliseconds: 60);
+    expect((await prep.ready('youtube:a', _r('a'))).existsSync(), isTrue);
+    expect(yt.started, ['a']);
+  });
+
+  test('silence after 100% (post-processing) is not a stall', () async {
+    make(startTimeout: const Duration(seconds: 2), stallTimeout: const Duration(milliseconds: 40));
+    yt
+      ..autoFinish = true
+      ..progress = [(50, 100), (100, 100)]
+      ..silence = const Duration(milliseconds: 150);
+    expect((await prep.ready('youtube:a', _r('a'))).existsSync(), isTrue);
+    expect(yt.started, ['a']);
+  });
+
+  test('onForgotten for a key that is not ready leaves the phases untouched', () async {
+    yt.autoFinish = true;
+    await prep.ready('youtube:a', _r('a'));
+    final before = prep.phases.value;
+    cache.forget('youtube:zzz');
+    expect(identical(prep.phases.value, before), isTrue);
+    expect(prep.phases.value['youtube:a'], StreamPhase.ready);
+  });
+
+  test('a forgotten key is not served stale: ready() downloads again', () async {
+    yt.autoFinish = true;
+    final first = await prep.ready('youtube:a', _r('a'));
+    expect(prep.phases.value['youtube:a'], StreamPhase.ready);
+    first.deleteSync(); // StreamPromoter moves the file out, then forgets the key
+    cache.forget('youtube:a');
+    expect(prep.phases.value['youtube:a'], isNull);
+    await prep.ready('youtube:a', _r('a'));
+    expect(yt.started, ['a', 'a']);
+  });
+
+  test('a timed-out attempt is cancelled and the retry gets a fresh token and folder', () async {
+    make(attemptTimeout: const Duration(milliseconds: 30));
+    await expectLater(prep.ready('youtube:slow', _r('slow')), throwsA(isA<TimeoutException>()));
+    final t = yt.tokens['slow']!, d = yt.dirs['slow']!;
+    expect(t[0]!.isCancelled, isTrue);
+    expect(t[1], isNot(same(t[0])));
+    expect(d[1], isNot(d[0]));
+  });
+
+  test('a prefetch that leaves the queue is cancelled, a requested one keeps running', () async {
+    prep.setQueue([_i('a'), _i('b')]);
+    await _until(() => yt.started.length == 2);
+    final b = prep.ready('youtube:b', _r('b')); // requested
+    await _quiet(); // ready() marks its job after a cache lookup
+    prep.setQueue([_i('c')]);
+    expect(yt.tokens['a']!.single!.isCancelled, isTrue);
+    expect(yt.tokens['b']!.single!.isCancelled, isFalse);
+    yt.finish('b');
+    await b;
+  });
+
+  test('a key re-queued while its dropped download winds down gets one new job', () async {
+    prep.setQueue([_i('a'), _i('b')]);
+    await _until(() => yt.started.length == 2);
+    prep.setQueue([_i('b')]);
+    prep.setQueue([_i('a'), _i('b')]);
+    await _until(() => yt.started.where((id) => id == 'a').length == 2);
+    await _quiet();
+    expect(yt.started.where((id) => id == 'a').length, 2);
+    expect(prep.phases.value['youtube:a'], StreamPhase.downloading);
+    yt.finish('a');
+    await _until(() => prep.phases.value['youtube:a'] == StreamPhase.ready);
   });
 
   test('a cache hit without a shadow row makes the row', () async {
@@ -364,9 +485,8 @@ void main() {
   test('a queue change drops stale jobs: the next one to start is the new head', () async {
     prep.setQueue([for (final n in ['a', 'b', 'c', 'd', 'e', 'f']) _i(n)]);
     await _until(() => yt.started.length == 2);
-    prep.setQueue([_i('e'), _i('f')]);
-    yt.finish('a');
-    await _until(() => yt.started.length == 3);
+    prep.setQueue([_i('e'), _i('f')]); // a and b are cancelled and free their slots
+    await _until(() => yt.started.length >= 3);
     expect(yt.started[2], 'e');
   });
 

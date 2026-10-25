@@ -1,9 +1,16 @@
+import 'dart:async';
+import 'dart:io';
+
+import 'package:codecore/data/repositories/track_repository.dart';
+import 'package:codecore/providers/player_providers.dart';
+import 'package:codecore/services/online/youtube_service.dart';
 import 'package:codecore/ui/shell/app_shell.dart';
 import 'package:codecore/ui/widgets/mini_player.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/app_harness.dart';
+import '../support/fake_stream_preparer.dart';
 
 // The horizontal swipe is covered in transitions_characterization_test.dart.
 Future<Harness> _shell(WidgetTester t, {double textScale = 1}) async {
@@ -28,6 +35,39 @@ void main() {
     final h = await _shell(t, textScale: 2);
     expect(t.takeException(), isNull);
     expect(find.byType(MiniPlayer), findsOneWidget);
+    await h.dispose(t);
+  });
+
+  testWidgets('mini player says «Caricamento…» while a stream loads, the artist after', (t) async {
+    final h = await Harness.create(t, radio: true);
+    final dir = Directory.systemTemp.createTempSync('mini_loading');
+    addTearDown(() => dir.deleteSync(recursive: true));
+    final online = h.handler.online!;
+    final preparer = FakeStreamPreparer(TrackRepository(h.db), dir);
+    final gate = preparer.gates['youtube:v1'] = Completer<void>();
+    final handler = h.handler..preparer = preparer;
+    final id = online.register(const YtResult(
+        id: 'v1', title: 'Online song', channel: 'Chan', artists: ['Ann'], duration: null));
+    await h.pump(t, const Scaffold(body: MiniPlayer()), extraOverrides: [
+      onlineEntriesProvider.overrideWithValue(online),
+    ]);
+    unawaited(handler.playQueue([id], 0));
+    await t.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 100)));
+    await t.pump(const Duration(milliseconds: 300));
+    expect(find.text('Online song'), findsOneWidget);
+    await t.pump(const Duration(milliseconds: 300));
+    expect(find.text('Caricamento…'), findsOneWidget);
+    expect(find.text('Ann'), findsNothing);
+
+    gate.complete();
+    await t.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 100)));
+    for (var i = 0; i < 3; i++) {
+      await t.pump(const Duration(milliseconds: 300));
+    }
+    expect(find.text('Caricamento…'), findsNothing);
+    expect(find.text('Ann'), findsOneWidget);
+
+    await t.pumpWidget(const SizedBox());
     await h.dispose(t);
   });
 }
