@@ -36,29 +36,35 @@ class JamOnlineAdder {
   /// Accepts [r] at once; the item appears when its file is ready.
   void add(YtResult r) {
     final key = r.indexKey;
-    cache.pin(key);
-    _pinned.add(key);
+    if (_pinned.add(key)) cache.pin(key);
     final file = ready(key, r).then<File?>((f) => f, onError: (Object e, StackTrace st) {
       AppLog.w('jam: download of $key failed', e, st);
       return null;
     });
     _tail = _tail.then((_) async {
-      final f = await file;
-      final ext = f == null ? '' : p.extension(f.path).replaceFirst('.', '').toLowerCase();
-      final err = f == null || _disposed || !jamExts.contains(ext)
-          ? JamError.invalid
-          : await send(JamCommand.add(JamItem(
-              id: 0,
-              ownerDeviceId: ownId,
-              title: r.title,
-              artist: displayArtist(r),
-              album: r.album,
-              durationMs: r.duration?.inMilliseconds ?? 0,
-              ext: ext,
-              sizeBytes: await f.length(),
-              ref: 'yt:$key',
-              videoId: r.id,
-            )));
+      JamError? err;
+      try {
+        final f = await file;
+        final ext = f == null ? '' : p.extension(f.path).replaceFirst('.', '').toLowerCase();
+        err = f == null || _disposed || !jamExts.contains(ext)
+            ? JamError.invalid
+            : await send(JamCommand.add(JamItem(
+                id: 0,
+                ownerDeviceId: ownId,
+                title: r.title,
+                artist: displayArtist(r),
+                album: r.album,
+                durationMs: r.duration?.inMilliseconds ?? 0,
+                ext: ext,
+                sizeBytes: await f.length(),
+                ref: 'yt:$key',
+                videoId: r.id,
+              )));
+      } on Object catch (e, st) {
+        // A failed step must not poison the chain: later adds still go out.
+        AppLog.w('jam: add of $key failed', e, st);
+        err = JamError.invalid;
+      }
       if (err != null) {
         _release(key);
         if (!_disposed) onFailed(r);

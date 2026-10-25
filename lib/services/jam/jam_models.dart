@@ -80,6 +80,11 @@ class JamItem {
         if (inherited) 'inh': true,
       };
 
+  // A guest's ref/vid become a cache key and a yt-dlp URL: only plain ids pass.
+  static final _refRe = RegExp(r'^(\d+|yt:(youtube|soundcloud):[A-Za-z0-9_-]{1,64})$');
+  static final _vidRe = RegExp(r'^[A-Za-z0-9_-]{1,64}$');
+  static String? _valid(String? v, RegExp re) => v != null && re.hasMatch(v) ? v : null;
+
   /// Strict parser: returns null for anything malformed.
   static JamItem? tryParse(Object? j) {
     if (j is! Map) return null;
@@ -103,8 +108,8 @@ class JamItem {
       ext: ext.toLowerCase(),
       sizeBytes: size is int && size >= 0 ? size : 0,
       available: j['ok'] is bool ? j['ok'] as bool : true,
-      ref: opt(j['ref']),
-      videoId: opt(j['vid']),
+      ref: _valid(opt(j['ref']), _refRe),
+      videoId: _valid(opt(j['vid']), _vidRe),
       inherited: j['inh'] == true,
     );
   }

@@ -243,6 +243,44 @@ void main() {
       expect(failed.map((r) => r.id), ['a']);
     });
 
+    test('a throwing send or a vanished file does not block the next add', () async {
+      var calls = 0;
+      final sent = <String>[];
+      final ok = File(p.join(dir.path, 'ok.m4a'))..writeAsBytesSync([1]);
+      final a2 = JamOnlineAdder(
+        ownId: 'guest',
+        cache: cache,
+        ready: (k, r) async => r.id == 'v' ? File(p.join(dir.path, 'gone.m4a')) : ok,
+        send: (c) async {
+          if (calls++ == 0) throw StateError('network blip');
+          sent.add(c.item!.title);
+          return null;
+        },
+        onFailed: failed.add,
+      );
+      a2.add(yt('t')); // send throws
+      a2.add(yt('v')); // file vanished
+      a2.add(yt('w'));
+      await Future<void>.delayed(const Duration(milliseconds: 200));
+      expect(failed.map((r) => r.id), ['t', 'v']);
+      expect(sent, ['Tw']);
+    });
+
+    test('the same track added twice leaves no pin behind', () async {
+      final part = File(p.join(cache.dir.path, 'x.m4a.part'))..writeAsBytesSync([1, 2, 3]);
+      final f = await cache.put('youtube:a', part);
+      final a2 = JamOnlineAdder(
+          ownId: 'guest', cache: cache, ready: (k, r) async => f, send: (c) async => null, onFailed: (_) {});
+      a2.add(yt('a'));
+      a2.add(yt('a'));
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+      a2.seen({'youtube:a'});
+      a2.dispose();
+      cache.limitBytes = 0;
+      await cache.evict();
+      expect(await cache.fileFor('youtube:a'), isNull);
+    });
+
     test('a file waiting for its turn is not evicted until it is queued', () async {
       adder.add(yt('a'));
       adder.add(yt('b'));

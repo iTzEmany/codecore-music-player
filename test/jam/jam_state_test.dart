@@ -36,6 +36,7 @@ JamError? err(JamState s, JamCommand c, String from) =>
 
 void main() {
   videoIdTests();
+  unsafeIdsTests();
   test('add assigns ids, selects first, bumps version', () {
     var s = ok(start(), JamCommand.add(item(host)), host);
     s = ok(s, JamCommand.add(item(guest)), guest);
@@ -228,6 +229,21 @@ void videoIdTests() {
     expect(back.ref, 'yt:youtube:abc');
     expect(i.copyWith(id: 2).videoId, 'abc');
     expect((i.toJson()..remove('vid')).let(JamItem.tryParse)!.videoId, isNull);
+  });
+}
+
+void unsafeIdsTests() {
+  JamItem? parse(String ref, String vid) => JamItem.tryParse({
+        'id': 1, 'owner': 'o', 'title': 't', 'ext': 'm4a', 'ref': ref, 'vid': vid});
+
+  test('a guest ref or vid that is not a plain id is dropped', () {
+    final good = parse('yt:soundcloud:123-a_B', 'abc_-1')!;
+    expect([good.ref, good.videoId], ['yt:soundcloud:123-a_B', 'abc_-1']);
+    expect(parse('7', 'x')!.ref, '7');
+    for (final bad in ['yt:youtube:../../../evil', 'yt:other:abc', 'yt:youtube:', 'x/7']) {
+      expect(parse(bad, 'a')!.ref, isNull, reason: bad);
+    }
+    expect(parse('7', 'a&list=PLx')!.videoId, isNull);
   });
 }
 

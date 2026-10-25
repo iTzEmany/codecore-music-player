@@ -229,7 +229,7 @@ class JamHost {
     final now = _now().millisecondsSinceEpoch;
     for (final item in s.items.where((i) => i.ownerDeviceId == id).toList()) {
       final upcoming = s.items.indexOf(item) >= s.currentIndex;
-      if (upcoming && item.videoId != null && item.ref?.startsWith('yt:') == true) continue;
+      if (upcoming && item.videoId != null && item.ref?.startsWith('yt:youtube:') == true) continue;
       final r = applyCommand(s, JamCommand.remove(item.id),
           from: deviceId, nowMs: now);
       if (r.isOk) s = r.state!;
