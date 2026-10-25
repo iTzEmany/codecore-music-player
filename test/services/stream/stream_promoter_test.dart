@@ -226,6 +226,23 @@ void main() {
     expect(await tracks.getById(shadowId), isNull);
   });
 
+  test('mergeStreamRow keeps the credits and the details of the shadow row', () async {
+    for (final n in ['a', 'b', 'c']) {
+      await db.into(db.trackCredits).insert(TrackCreditsCompanion.insert(
+          trackId: shadowId, name: n, nameKey: n, role: 'producer', source: 'deezer'));
+    }
+    await db.into(db.trackEnrich).insert(
+        TrackEnrichCompanion.insert(trackId: Value(shadowId), details: const Value('{"bpm":90}')));
+    final newId = await db.into(db.tracks).insert(TracksCompanion.insert(
+        path: '/m/new.m4a', title: 'Song', albumKey: 'artist|album', format: 'm4a', sizeBytes: 1, mtimeMs: 1, addedAt: 1));
+    await tracks.mergeStreamRow(_key, newId);
+
+    final credits = await db.select(db.trackCredits).get();
+    expect(credits.map((c) => (c.trackId, c.name)).toSet(), {(newId, 'a'), (newId, 'b'), (newId, 'c')});
+    final enrich = await db.select(db.trackEnrich).getSingle();
+    expect((enrich.trackId, enrich.details), (newId, '{"bpm":90}'));
+  });
+
   test('a failing step after the move is logged and the track still counts as promoted', () async {
     promoter = StreamPromoter(
         cache: cache,
