@@ -4526,8 +4526,8 @@ class AppLocalizationsIt extends AppLocalizations {
   String get shufflePlusTitle => 'Casuale+';
 
   @override
-  String get shufflePlusHint =>
-      'Con la casuale, ogni tanto entra un brano che non hai, simile alla lista in ascolto. Suona in streaming.';
+  String get shufflePlusNote =>
+      'Si attiva dal pulsante shuffle (terzo tocco). Non disponibile per album in streaming, Jam e radio';
 
   @override
   String shufflePlusEvery(int n) {
@@ -4567,6 +4567,13 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get shufflePlusBlockStopped =>
       'Spento fino al riavvio: troppi errori di riproduzione';
+
+  @override
+  String get shufflePlusBlockOnline =>
+      'Non disponibile per un album in streaming';
+
+  @override
+  String get shufflePlusBlockRadio => 'Non disponibile con la radio';
 
   @override
   String get shufflePlusNoticeRateLimited =>

@@ -203,7 +203,7 @@ final shuffleModeProvider = Provider<ShuffleMode>((ref) {
 });
 
 /// Why Shuffle+ is not suggesting right now (null: it is, or it is off).
-enum ShufflePlusBlock { jam, shortList, noTool, metered, stopped }
+enum ShufflePlusBlock { jam, shortList, noTool, metered, stopped, online, radio }
 
 /// The first reason in the order the sheet reports them.
 ShufflePlusBlock? shufflePlusBlock({
@@ -230,6 +230,9 @@ final shufflePlusBlockProvider = FutureProvider.autoDispose<ShufflePlusBlock?>((
   final cfg = ref.watch(shufflePlusConfigProvider);
   ref.watch(currentTrackProvider);
   final jam = ref.watch(jamProvider).active;
+  ref.watch(playContextProvider);
+  final allowed = await plusAllowedNow(ref);
+  if (allowed != null) return allowed;
   final handler = ref.watch(audioHandlerProvider);
   final controller = await ref.watch(shufflePlusProvider.future);
   final tool = (await ref.watch(ytDlpStatusProvider.future)).version != null;

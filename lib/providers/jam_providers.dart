@@ -9,7 +9,9 @@ import 'package:path/path.dart' as p;
 import '../core/app_log.dart';
 import '../core/paths.dart';
 import '../data/db/app_database.dart';
+import '../data/repositories/track_kinds.dart';
 import '../data/repositories/track_repository.dart';
+import '../services/stream/stream_key.dart';
 import '../services/audio/audio_backend.dart';
 import '../services/audio/codecore_audio_handler.dart';
 import '../services/audio/just_audio_backend.dart';
@@ -575,6 +577,24 @@ class JamController extends Notifier<JamUiState> {
     return r?.error;
   }
 
+  /// Library ids to the shared queue; a shadow row (`stream:` path, no extension) goes as an online result.
+  Future<void> addLibraryIds(List<int> ids) async {
+    try {
+      final files = <Track>[];
+      for (final t in await ref.read(trackRepositoryProvider).getByIds(ids)) {
+        final key = t.kind == kStreamKind ? keyOfStreamPath(t.path) : null;
+        if (key == null) {
+          files.add(t);
+        } else {
+          addOnline(streamResultOfRow(key, t));
+        }
+      }
+      await addTracks(files);
+    } on Object catch (e, st) {
+      AppLog.w('jam: could not queue $ids', e, st);
+    }
+  }
+
   /// Adds library tracks, owned by this device, to the shared queue.
   Future<int> addTracks(List<Track> tracks, {bool inherited = false}) async {
     var added = 0;
@@ -718,6 +738,11 @@ final jamTrackMetaProvider = FutureProvider.autoDispose.family<TrackMeta, int>((
 
 final jamProvider = NotifierProvider<JamController, JamUiState>(
   JamController.new,
+);
+
+/// Online tracks the Jam accepted but could not download or add.
+final jamOnlineFailuresProvider = StreamProvider<YtResult>(
+  (ref) => ref.watch(jamProvider.notifier).onlineFailures,
 );
 
 /// Requests to show as an accept/decline dialog.

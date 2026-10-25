@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'l10n/app_localizations.dart';
 import 'providers/equalizer_providers.dart';
+import 'providers/jam_providers.dart' show jamOnlineFailuresProvider;
 import 'providers/player_providers.dart';
 import 'providers/settings_providers.dart';
 import 'providers/share_hub.dart';

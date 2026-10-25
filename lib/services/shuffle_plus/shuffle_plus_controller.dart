@@ -74,6 +74,7 @@ class ShufflePlusController {
   static const minSourceSize = 5;
   static const maxErrors = 3;
   static const prepareAttempts = 2;
+  static const maxAhead = 3;
 
   final ShuffleHost host;
   final OnlineEntries online;
@@ -271,8 +272,10 @@ class ShufflePlusController {
 
   /// The suggestion waiting after the current song leaves the queue.
   Future<void> _removePending() async {
+    // The whole queue: with shuffle on, a suggestion sits after its natural
+    // predecessor, so it may fall before the current song once shuffle is off.
     for (final id in host.queueIds.toList()) {
-      if (isOnlineId(id) && id != _curId && _mine.contains(id)) await _drop(id);
+      if (id != _curId && _mine.contains(id)) await _drop(id);
     }
   }
 
@@ -312,15 +315,24 @@ class ShufflePlusController {
     _played = cur == null || isOnlineId(cur) ? 0 : 1;
   }
 
+  /// Fills every free slot of the plan, one suggestion after the other.
   Future<void> _suggest() async {
-    final every = config().every.clamp(3, 10);
-    if (nextInsertion(host.queueIds, host.currentIndex, _played, every) == null) return;
+    while (!_disposed && await _suggestOne()) {}
+  }
+
+  List<int> _plan() => plusPlan(host.queueIds, host.currentIndex,
+      config().every.clamp(3, 10),
+      playedSinceLast: _played, max: maxAhead);
+
+  /// True when one more was inserted (the plan may have more slots).
+  Future<bool> _suggestOne() async {
+    if (_plan().isEmpty) return false;
     var candidate = await _take();
     if (candidate == null) {
       await _fill();
       candidate = await _take();
     }
-    if (candidate == null) return;
+    if (candidate == null) return false;
     final prep = prepare;
     if (prep != null) {
       // A failed address is not a playback failure: the next candidate.
@@ -335,16 +347,17 @@ class ShufflePlusController {
           if (candidate == null) {
             _retryAt = _now().add(retryAfterError);
             _wakeAt(_retryAt!);
-            return;
+            return false;
           }
         }
-        if (_disposed) return;
+        if (_disposed) return false;
       }
-      if (_disposed || !config().enabled) return;
+      if (_disposed || !config().enabled || !host.shuffleEnabled) return false;
     }
     // The queue may have changed while the radio was asked for.
-    final at = nextInsertion(host.queueIds, host.currentIndex, _played, every);
-    if (at == null) return;
+    final plan = _plan();
+    if (plan.isEmpty) return false;
+    final at = plan.first;
     final r = candidate.result;
     final id = online.register(r, seedTitle: candidate.seedTitle, suggested: true);
     _mine.add(id);
@@ -359,6 +372,7 @@ class ShufflePlusController {
       ..removeRange(0, max(0, _lastArtists.length - 2));
     _suggestedWithSeeds++;
     host.insertAt(at, id);
+    return true;
   }
 
   Future<SuggestionCandidate?> _take() async {

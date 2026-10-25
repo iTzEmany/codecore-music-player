@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/services/audio/codecore_audio_handler.dart';
 import 'package:codecore/services/audio/online_entries.dart';
+import 'package:codecore/services/audio/play_queue.dart';
 import 'package:codecore/services/import/track_matcher.dart';
 import 'package:codecore/services/online/download_index.dart';
 import 'package:codecore/services/online/innertube_client.dart';
@@ -45,16 +47,24 @@ class _Adapter implements HttpClientAdapter {
 }
 
 class _Host implements ShuffleHost {
-  _Host(this.queueIds, this.sourceIds);
+  _Host(this._ids, this.sourceIds);
+
+  /// When set, the real queue (its shuffle order) backs this host.
+  PlayQueue? real;
+  final List<int> _ids;
+  int _index = 0;
+  bool _shuffle = true;
 
   @override
-  final List<int> queueIds;
+  List<int> get queueIds => real?.items ?? _ids;
   @override
   List<int>? sourceIds;
   @override
-  int currentIndex = 0;
+  int get currentIndex => real?.currentIndex ?? _index;
+  set currentIndex(int v) => _index = v;
   @override
-  bool shuffleEnabled = true;
+  bool get shuffleEnabled => real?.shuffle ?? _shuffle;
+  set shuffleEnabled(bool v) => _shuffle = v;
   @override
   bool isPlaying = true;
 
@@ -74,16 +84,21 @@ class _Host implements ShuffleHost {
 
   @override
   void insertAt(int index, int id) {
-    queueIds.insert(index, id);
+    real != null ? real!.insertAt(index, id) : _ids.insert(index, id);
     _changes.add(null);
   }
 
   @override
   Future<void> removeQueueId(int id) async {
-    final i = queueIds.indexOf(id);
+    if (real != null) {
+      real!.removeId(id);
+      _changes.add(null);
+      return;
+    }
+    final i = _ids.indexOf(id);
     if (i < 0) return;
-    queueIds.removeAt(i);
-    if (i < currentIndex) currentIndex--;
+    _ids.removeAt(i);
+    if (i < _index) _index--;
     _changes.add(null);
   }
 
@@ -91,7 +106,7 @@ class _Host implements ShuffleHost {
   void finishAndAdvance({bool toTheEnd = true}) {
     _dur.add(const Duration(minutes: 3));
     _pos.add(toTheEnd ? const Duration(minutes: 3) : const Duration(seconds: 5));
-    currentIndex++;
+    real != null ? real!.next(auto: true) : _index++;
     _changes.add(null);
   }
 
@@ -263,15 +278,33 @@ void main() {
     expect(adapter.sent, isEmpty);
   });
 
-  test('one suggestion every 4 songs, and a passed one leaves the queue', () async {
+  test('with the queue running, the free slots fill at once and a passed one leaves', () async {
+    host.queueIds
+      ..clear()
+      ..addAll([for (var i = 1; i <= 20; i++) i]);
+    host.sourceIds = [...library];
+    host.currentIndex = 5;
     controller.start();
-    await settle();
-    final seen = await play(9);
-    expect(seen, [false, false, false, true, false, false, false, true, false]);
-    expect(host.queueIds.where(isOnlineId).length, lessThanOrEqualTo(1));
-    final passed = host.queueIds.take(host.currentIndex).where(isOnlineId);
-    expect(passed, isEmpty, reason: 'passed suggestions are taken out');
+    await until(() => host.queueIds.where(isOnlineId).length == 3);
+    final at = [
+      for (var i = 0; i < host.queueIds.length; i++)
+        if (isOnlineId(host.queueIds[i])) i
+    ];
+    expect(at, [8, 12, 16], reason: 'no track change needed');
+    expect(host.currentIndex, 5);
     expect(adapter.sent, hasLength(1), reason: 'one radio feeds many suggestions');
+    host.finishAndAdvance();
+    await settle();
+    host.finishAndAdvance();
+    await settle();
+    host.finishAndAdvance();
+    await settle();
+    host.finishAndAdvance(); // the first suggestion plays
+    await settle();
+    host.finishAndAdvance();
+    await settle();
+    expect(host.queueIds.take(host.currentIndex).where(isOnlineId), isEmpty,
+        reason: 'passed suggestions are taken out');
   });
 
   test('an online entry the user picked stays in the queue once passed', () async {
@@ -313,8 +346,7 @@ void main() {
     expect(host.queueIds, library, reason: 'address not ready: nothing queued');
     expect(log.recent, isEmpty);
     gate.complete();
-    await until(() => host.queueIds.where(isOnlineId).isNotEmpty);
-    expect(host.queueIds.where(isOnlineId), hasLength(1));
+    await until(() => host.queueIds.where(isOnlineId).length == 3);
   });
 
   test('a failed address tries the next candidate, no entry for the failed one', () async {
@@ -325,10 +357,10 @@ void main() {
     };
     controller.start();
     await until(() => host.queueIds.any(isOnlineId));
-    expect(prepared, hasLength(2));
-    expect(prepared.first, isNot(prepared.last));
+    await until(() => host.queueIds.where(isOnlineId).length == 3);
+    expect(prepared, hasLength(4));
     final queued = host.queueIds.where(isOnlineId).map((id) => online[id]!.result.id);
-    expect(queued, [prepared.last]);
+    expect(queued, prepared.skip(1));
   });
 
   test('when every candidate fails nothing is queued', () async {
@@ -359,26 +391,64 @@ void main() {
     expect(log.recent.last.seedTitle, startsWith('Song'));
   });
 
-  test('turning shuffle off takes the waiting suggestion out of the queue', () async {
+  test('turning shuffle off takes every suggestion after the current out', () async {
+    host.queueIds
+      ..clear()
+      ..addAll([for (var i = 1; i <= 20; i++) i]);
+    host.currentIndex = 5;
     controller.start();
-    await settle();
-    expect(host.queueIds.where(isOnlineId), hasLength(1));
+    await until(() => host.queueIds.where(isOnlineId).length == 3);
     host.shuffleEnabled = false;
     host.change();
+    await until(() => host.queueIds.every((id) => !isOnlineId(id)));
+    expect(host.queueIds, [for (var i = 1; i <= 20; i++) i]);
+    expect(host.queueIds[host.currentIndex], 6, reason: 'the current stays');
+  });
+
+  for (final seed in [5, 6, 8]) {
+    test('shuffle off removes suggestions even behind the current song (seed $seed)', () async {
+      host.real = PlayQueue(random: Random(seed))
+        ..setItems([for (var i = 1; i <= 20; i++) i])
+        ..shuffle = true;
+      controller.start();
+      await until(() => host.queueIds.where(isOnlineId).length == 3);
+      for (var i = 0; i < 6; i++) {
+        host.finishAndAdvance();
+        await settle();
+      }
+      await until(() => host.queueIds.where(isOnlineId).isNotEmpty);
+      host.real!.shuffle = false;
+      host.change();
+      await until(() => host.queueIds.where(isOnlineId).isEmpty);
+    });
+  }
+
+  test('Shuffle+ turned off while a suggestion is being prepared inserts nothing more', () async {
+    final gate = Completer<void>();
+    var calls = 0;
+    prepareHook = (r) async {
+      if (++calls == 2) await gate.future;
+    };
+    controller.start();
+    await until(() => calls == 2);
+    expect(host.queueIds.where(isOnlineId), hasLength(1));
+    host.shuffleEnabled = false;
+    gate.complete();
     await settle();
-    expect(host.queueIds, library);
+    expect(host.queueIds.where(isOnlineId), isEmpty);
   });
 
   test('a new list drops the pool: the next suggestion asks for a new radio', () async {
     controller.start();
     await settle();
-    await play(5); // the first suggestion is behind us, the pool has rows
     expect(adapter.sent, hasLength(1));
     host.sourceIds = [for (var i = 1; i <= 8; i++) i];
     now = now.add(const Duration(minutes: 2));
-    host.change();
-    await settle();
-    await play(4);
+    // The suggestions are used up: the free slots need new rows.
+    for (final id in host.queueIds.where(isOnlineId).toList()) {
+      await host.removeQueueId(id);
+    }
+    await until(() => adapter.sent.length >= 2);
     expect(adapter.sent, hasLength(2), reason: 'rows of the old list are not reused');
   });
 

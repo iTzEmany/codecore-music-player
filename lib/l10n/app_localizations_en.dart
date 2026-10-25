@@ -4521,8 +4521,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shufflePlusTitle => 'Shuffle+';
 
   @override
-  String get shufflePlusHint =>
-      'With shuffle on, now and then a song you don’t have, similar to the list playing, joins the queue. It streams.';
+  String get shufflePlusNote =>
+      'Turns on from the shuffle button (third tap). Not available for streaming albums, Jam and radio';
 
   @override
   String shufflePlusEvery(int n) {
@@ -4561,6 +4561,12 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get shufflePlusBlockStopped =>
       'Off until restart: too many playback errors';
+
+  @override
+  String get shufflePlusBlockOnline => 'Not available for a streaming album';
+
+  @override
+  String get shufflePlusBlockRadio => 'Not available with radio';
 
   @override
   String get shufflePlusNoticeRateLimited =>

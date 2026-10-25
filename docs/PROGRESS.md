@@ -661,12 +661,12 @@ Note: D-89 (Jam: tap e «Riproduci dopo» vanno in coda) nella UI; la coda condi
 - [~] 47.8 Prove a mano (utente)
 
 ## Fase 48 — Shuffle a 3 stati e Home (`fase-48-shuffle-tre-stati.md`)
-- [ ] 48.1 `plusAllowed` e ciclo che salta Shuffle+
-- [ ] 48.2 Suggeriti inseriti subito e tolti allo spegnimento
-- [ ] 48.3 Impostazioni e foglio Shuffle+ senza interruttore
-- [ ] 48.4 Home: Play e shuffle separati in «Casuale su tutto»
-- [ ] 48.5 Controlli di fase (K-01, K-02, K-03)
-- [ ] 48.6 Prove a mano (utente)
+- [x] 48.1 `plusAllowed` e ciclo che salta Shuffle+
+- [x] 48.2 Suggeriti inseriti subito e tolti allo spegnimento
+- [x] 48.3 Impostazioni e foglio Shuffle+ senza interruttore
+- [x] 48.4 Home: Play e shuffle separati in «Casuale su tutto»
+- [x] 48.5 Controlli di fase (K-01, K-02, K-03)
+- [~] 48.6 Prove a mano (utente)
 
 ## Fase 49 — Artisti ospiti (`fase-49-artisti-ospiti.md`)
 - [ ] 49.1 `splitArtists` e `ArtistLinkResolver`

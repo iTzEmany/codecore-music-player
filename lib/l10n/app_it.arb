@@ -2944,7 +2944,7 @@
   "shuffleModeOn": "Casuale: attiva",
   "shuffleModePlus": "Casuale+: attiva (premi a lungo per le impostazioni)",
   "shufflePlusTitle": "Casuale+",
-  "shufflePlusHint": "Con la casuale, ogni tanto entra un brano che non hai, simile alla lista in ascolto. Suona in streaming.",
+  "shufflePlusNote": "Si attiva dal pulsante shuffle (terzo tocco). Non disponibile per album in streaming, Jam e radio",
   "shufflePlusEvery": "Un suggerito ogni {n} brani",
   "@shufflePlusEvery": {
     "placeholders": {
@@ -2963,6 +2963,8 @@
   "shufflePlusBlockNoTool": "yt-dlp non disponibile",
   "shufflePlusBlockMetered": "In pausa: rete a consumo",
   "shufflePlusBlockStopped": "Spento fino al riavvio: troppi errori di riproduzione",
+  "shufflePlusBlockOnline": "Non disponibile per un album in streaming",
+  "shufflePlusBlockRadio": "Non disponibile con la radio",
   "shufflePlusNoticeRateLimited": "YouTube chiede di rallentare: i suggeriti sono in pausa per 15 minuti",
   "shufflePlusNoticeTooManyErrors": "Troppi errori di riproduzione: i suggeriti sono spenti fino al riavvio",
   "suggestionsRecentTitle": "Suggeriti di recente",

@@ -4,9 +4,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../providers/player_providers.dart';
 import '../../providers/shuffle_plus_providers.dart';
+import '../screens/settings/shuffle_plus_tiles.dart' show shufflePlusBlockText;
 import '../screens/now_playing/shuffle_plus_sheet.dart';
 import '../theme/tokens.dart';
 import 'motion.dart';
+
+/// The «why no Shuffle+» message was shown (once per session, in memory; D-87).
+bool _explained = false;
+
+/// Test hook: a new session.
+@visibleForTesting
+void resetShuffleExplained() => _explained = false;
 
 /// The three-state shuffle button of the players: off, shuffle, Shuffle+
 /// (shuffle with a «+»). Tap goes to the next state, long press opens the
@@ -40,7 +48,16 @@ class ShuffleModeButton extends ConsumerWidget {
         triggerMode: TooltipTriggerMode.manual,
         message: message,
         child: IconButton(
-          onPressed: ref.read(playerControllerProvider).cycleShuffle,
+          onPressed: () async {
+            final block = await ref
+                .read(playerControllerProvider)
+                .cycleShuffle();
+            if (block == null || _explained || !context.mounted) return;
+            _explained = true;
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(shufflePlusBlockText(l, block))),
+            );
+          },
           // The tooltip is hover-only, so the button needs its own label.
           icon: Semantics(
             label: message,

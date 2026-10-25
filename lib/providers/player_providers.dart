@@ -3,7 +3,6 @@ import 'dart:math';
 
 import '../core/app_log.dart';
 import 'package:audio_service/audio_service.dart';
-import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -17,12 +16,11 @@ import '../services/audio/playback_persistence.dart';
 import '../services/online/youtube_service.dart';
 import 'youtube_providers.dart' show downloadIndexProvider;
 import 'database_providers.dart';
-import '../services/stream/stream_key.dart';
-import 'jam_providers.dart';
-import '../data/repositories/track_kinds.dart';
-import '../data/repositories/track_repository.dart' show TrackRepository;
+import 'jam_providers.dart' show jamProvider;
 import 'queue_tracks.dart';
 import 'settings_providers.dart';
+import 'shuffle_plus_providers.dart' show ShufflePlusBlock;
+import '../services/shuffle_plus/plus_allowed.dart';
 
 /// Overridden in `main` once the handler has been created (and, on Android,
 /// registered with `AudioService.init`).
@@ -78,6 +76,7 @@ class PlayerController {
     this.jamActive,
     this.addToJam,
     this.addOnlineToJam,
+    this.plusBlock,
     Random? random,
   }) : _random = random ?? Random();
 
@@ -95,6 +94,9 @@ class PlayerController {
   final bool Function()? jamActive;
   final void Function(List<int>)? addToJam;
   final bool Function(YtResult)? addOnlineToJam;
+
+  /// Why Shuffle+ is out of the cycle for the current queue (null: it is in).
+  final Future<ShufflePlusBlock?> Function()? plusBlock;
 
   bool get inJam => jamActive?.call() ?? false;
 
@@ -268,18 +270,32 @@ class PlayerController {
     return setShuffle(on);
   }
 
-  /// The shuffle button: off, then shuffle, then Shuffle+, then off again.
-  Future<void> cycleShuffle() async {
+  /// The shuffle button: off, shuffle, Shuffle+, off. Returns why it skipped
+  /// Shuffle+ (then: off, shuffle, off), else null.
+  Future<ShufflePlusBlock?> cycleShuffle() {
+    // Serialized: a second tap reads the state the first one left.
+    final run = _cycle.then((_) => _cycleShuffle());
+    _cycle = run.then<void>((_) {}, onError: (Object _) {});
+    return run;
+  }
+
+  Future<void> _cycle = Future<void>.value();
+
+  Future<ShufflePlusBlock?> _cycleShuffle() async {
     final plus = shufflePlus?.call() ?? false;
     if (!_handler.shuffleEnabled) {
       setShufflePlus?.call(false);
       await setShuffle(true);
-    } else if (!plus) {
-      setShufflePlus?.call(true);
-    } else {
-      setShufflePlus?.call(false);
-      await setShuffle(false);
+      return null;
     }
+    final block = plus ? null : await plusBlock?.call();
+    if (!plus && block == null) {
+      setShufflePlus?.call(true);
+      return null;
+    }
+    setShufflePlus?.call(false);
+    await setShuffle(false);
+    return block; // null when a stored plus goes off: no skip
   }
 
   Future<void> setShuffle(bool on) => _handler.setShuffleMode(
@@ -303,6 +319,21 @@ class PlayerController {
   }
 }
 
+/// Why the shuffle button may not reach Shuffle+ now (null: it may).
+Future<ShufflePlusBlock?> plusAllowedNow(Ref ref) async {
+  final h = ref.read(audioHandlerProvider);
+  final local = await ref.read(trackRepositoryProvider).getByIdsLight([
+    for (final i in h.sourceIds ?? h.queueIds)
+      if (!isOnlineId(i)) i,
+  ]);
+  return plusAllowed(
+    queueIds: h.queueIds,
+    jam: ref.read(jamProvider).active,
+    radio: ref.read(playContextProvider)?.kind == PlayContextKind.radio,
+    localCount: local.where((t) => !t.missing && t.kind == 0).length,
+  );
+}
+
 final playerControllerProvider = Provider<PlayerController>(
   (ref) => PlayerController(
     ref.watch(audioHandlerProvider),
@@ -313,39 +344,15 @@ final playerControllerProvider = Provider<PlayerController>(
         .read(settingsProvider.notifier)
         .update((c) => c.copyWith(shufflePlus: on)),
     jamActive: () => ref.read(jamProvider).active,
-    addToJam: (ids) => unawaited(libraryToJam(
-        ref.read(jamProvider.notifier), ref.read(trackRepositoryProvider), ids)),
+    addToJam: (ids) => unawaited(ref.read(jamProvider.notifier).addLibraryIds(ids)),
     addOnlineToJam: (r) => ref.read(jamProvider.notifier).addOnline(r),
+    plusBlock: () => plusAllowedNow(ref),
     libraryIdOf: (r) async {
       final path = (await ref.read(downloadIndexProvider.future))
           .pathFor(r.id, source: r.source);
       return path == null ? null : ref.read(trackRepositoryProvider).idForPath(path);
     },
   ),
-);
-
-/// Library ids to the shared queue; a shadow row (`stream:` path, no extension) goes as an online result.
-@visibleForTesting
-Future<void> libraryToJam(JamController jam, TrackRepository repo, List<int> ids) async {
-  try {
-    final files = <Track>[];
-    for (final t in await repo.getByIds(ids)) {
-      final key = t.kind == kStreamKind ? keyOfStreamPath(t.path) : null;
-      if (key == null) {
-        files.add(t);
-      } else {
-        jam.addOnline(streamResultOfRow(key, t));
-      }
-    }
-    await jam.addTracks(files);
-  } on Object catch (e, st) {
-    AppLog.w('jam: could not queue $ids', e, st);
-  }
-}
-
-/// Online tracks the Jam accepted but could not download or add.
-final jamOnlineFailuresProvider = StreamProvider<YtResult>(
-  (ref) => ref.watch(jamProvider.notifier).onlineFailures,
 );
 
 final currentTrackProvider = StreamProvider<Track?>((ref) async* {
