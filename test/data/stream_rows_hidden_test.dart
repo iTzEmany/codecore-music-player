@@ -88,6 +88,8 @@ void main() {
     expect(row.artist, 'Shadow Artist');
     expect(row.format, 'm4a');
     expect(row.durationMs, 200000);
+    await (db.update(db.tracks)..where((t) => t.id.equals(row.id)))
+        .write(const TracksCompanion(missing: Value(true)));
     final again = await tracks.upsertStreamRow(
       'youtube:abc',
       const YtResult(
@@ -99,6 +101,9 @@ void main() {
       File('${tmp.path}/a.m4a'),
     );
     expect(again, row.id);
+    final after = (await tracks.streamRow('youtube:abc'))!;
+    expect(after.missing, isFalse);
+    expect(after.albumKey, 'stream|youtube:abc');
     expect(await (db.select(db.tracks)).get(), hasLength(4));
   });
 
@@ -125,8 +130,10 @@ void main() {
   test('a playlist refuses a shadow row and counts only music', () async {
     final pl = PlaylistRepository(db);
     final id = (await db.select(db.playlists).getSingle()).id;
-    final shadow = (await tracks.streamRow('youtube:abc'))!.id;
-    expect(await pl.addTracks(id, [shadow]), 0);
+    // Not in the playlist yet: only the kind check can keep it out.
+    final fresh = (await tracks.streamRow('youtube:zero'))!.id;
+    expect(await pl.addTracks(id, [fresh]), 0);
+    expect(await (db.select(db.playlistTracks)..where((t) => t.trackId.equals(fresh))).get(), isEmpty);
     // The row seeded in setUp is in the playlist anyway: not counted.
     expect((await pl.watchAll().first).single.trackCount, 0);
   });

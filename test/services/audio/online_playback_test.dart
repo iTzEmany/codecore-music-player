@@ -139,6 +139,46 @@ void main() {
     expect(backend.nextCalls.whereType<String>(), isEmpty);
   });
 
+  Future<int> shadowRow(String v) async {
+    final file = File('${dir.path}/$v.m4a')..writeAsStringSync('x');
+    final id = await TrackRepository(db).upsertStreamRow('youtube:$v', result(v), file);
+    await (db.update(db.tracks)..where((t) => t.id.equals(id))).write(
+        const TracksCompanion(replayGainDb: Value(-6), resumePositionMs: Value(5000), durationMs: Value(200000)));
+    return id;
+  }
+
+  Future<int?> resumeOf(int id) async => (await TrackRepository(db).getById(id))!.resumePositionMs;
+
+  test('a shadow row is a stream: no next-track window, no ReplayGain, no bookmark on leaving', () async {
+    final row = await shadowRow('s1');
+    await handler.setNormalize(true);
+    await handler.setTransition(TransitionMode.gapless);
+    await handler.playQueue([row, ids[1]], 0);
+    await settle();
+    expect(backend.nextCalls.whereType<String>(), isEmpty);
+    expect(backend.volumes.last, 1.0);
+    expect(backend.seeks, isEmpty);
+    await listenTo(100);
+    await handler.skipToNext();
+    expect(await resumeOf(row), 5000);
+  });
+
+  test('a shadow row played to its end keeps its bookmark untouched', () async {
+    final row = await shadowRow('s2');
+    await handler.playQueue([row, ids[1]], 0);
+    await listenTo(100);
+    backend.stateC.add(BackendState.completed);
+    await settle();
+    expect(await resumeOf(row), 5000);
+  });
+
+  test('the preparer gets the queue from the current entry on', () async {
+    final e = [for (final n in ['q0', 'q1', 'q2']) online.register(result(n))];
+    await handler.playQueue(e, 1);
+    await settle();
+    expect(preparer.queues.last, ['youtube:q1', 'youtube:q2']);
+  });
+
   test('two full listens of a streamed track count on its shadow row', () async {
     final id = online.register(result('v1'));
     for (var i = 0; i < 2; i++) {

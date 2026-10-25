@@ -2,7 +2,9 @@ import 'dart:io';
 
 import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/data/repositories/track_repository.dart';
+import 'package:codecore/providers/player_providers.dart';
 import 'package:codecore/providers/settings_providers.dart';
+import 'package:codecore/services/audio/online_entries.dart';
 import 'package:codecore/providers/stream_providers.dart';
 import 'package:codecore/services/online/youtube_service.dart';
 import 'package:codecore/services/stream/stream_cache.dart';
@@ -13,6 +15,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/app_harness.dart';
+import '../support/fake_stream_preparer.dart';
 
 void main() {
   testWidgets('slider 256 MB-8 GB (default 1 GB), used space, new limit saved on release', (tester) async {
@@ -59,4 +62,39 @@ void main() {
     final left = (await db.select(db.tracks).get()).map((t) => t.id).toSet();
     expect(left, {ids['youtube:played'], ids['youtube:now'], ids['youtube:queued']});
   });
+
+  testWidgets('Svuota keeps the key of a current online entry (no stream: path)', (tester) async {
+    final h = await Harness.create(tester);
+    const r = YtResult(id: 'v1', title: 'T', channel: 'C', duration: Duration(seconds: 9));
+    final online = OnlineEntries();
+    final track = online.trackOf(online.register(r))!;
+    final cache = _RecordingCache();
+    await h.pump(
+      tester,
+      const Scaffold(body: SingleChildScrollView(child: StreamCacheTile())),
+      extraOverrides: [
+        streamCacheProvider.overrideWithValue(cache),
+        streamPreparerProvider.overrideWithValue(_Queued(h.db, Directory.systemTemp, {r.indexKey})),
+        currentTrackProvider.overrideWith((ref) => Stream.value(track)),
+      ],
+    );
+    await tester.pump();
+    await tester.tap(find.byType(TextButton));
+    await tester.pump();
+    expect(cache.kept, contains(r.indexKey));
+  });
+}
+
+class _RecordingCache extends StreamCache {
+  _RecordingCache() : super(Directory.systemTemp);
+  Set<String>? kept;
+  @override
+  Future<void> clear({Set<String> keep = const {}}) async => kept = keep;
+}
+
+class _Queued extends FakeStreamPreparer {
+  _Queued(AppDatabase db, Directory dir, this.keys) : super(TrackRepository(db), dir);
+  final Set<String> keys;
+  @override
+  Set<String> get queuedKeys => keys;
 }
