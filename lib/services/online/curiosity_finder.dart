@@ -12,10 +12,13 @@ import 'wikipedia_client.dart';
 /// asked says why in [songError] / [artistError] (usually a
 /// [RateLimitedException]); a part simply not found has neither.
 class CuriosityPair {
-  const CuriosityPair({this.song, this.artist, this.songError, this.artistError});
+  const CuriosityPair({this.song, this.artist, this.songError, this.artistError, this.recordingId});
 
   final Curiosity? song, artist;
   final Object? songError, artistError;
+
+  /// MusicBrainz recording the lookup identified, null when none (for the credits).
+  final String? recordingId;
 }
 
 /// The description of [artist]'s YouTube Music page with the page's address,
@@ -78,7 +81,7 @@ class CuriosityFinder {
         artistError = e;
       }
     }
-    return CuriosityPair(song: song, artist: art, songError: songError, artistError: artistError);
+    return CuriosityPair(song: song, artist: art, songError: songError, artistError: artistError, recordingId: ids.recordingId);
   }
 
   /// The notes of the album's Discogs master, as a curiosity about the album.
