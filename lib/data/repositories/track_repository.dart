@@ -11,6 +11,7 @@ import '../../services/library/rules/rule_ast.dart';
 import '../../services/library/rules/rule_sql.dart';
 import '../../services/online/youtube_service.dart' show YtResult;
 import '../db/app_database.dart';
+import 'duplicate_repository.dart';
 import 'light_tracks.dart';
 import 'track_kinds.dart';
 
@@ -99,6 +100,38 @@ class TrackRepository {
               t.path.isNotIn([for (final k in keepKeys) streamPathOf(k)]) &
               notExistsQuery(_db.select(_db.plays)..where((pl) => pl.trackId.equalsExp(t.id)))))
           .go();
+
+  /// Turns the shadow row of [key] into a library track at [path] (R-10): `kind = 0`,
+  /// real path and [folderId] (so the scan finds it by path and skips it), and the
+  /// `albumKey` a scanned file there would get. Plays, text and cover stay.
+  /// Returns the updated row, or null when there is no shadow row.
+  Future<Track?> promoteStreamRow(String key, String path, int folderId, File file) async {
+    final row = await streamRow(key);
+    if (row == null) return null;
+    final stat = await file.stat();
+    await (_db.update(_db.tracks)..where((t) => t.id.equals(row.id))).write(TracksCompanion(
+      path: Value(path),
+      kind: const Value(kMusicKind),
+      folderId: Value(folderId),
+      format: Value(p.extension(path).replaceFirst('.', '').toLowerCase()),
+      sizeBytes: Value(stat.size),
+      mtimeMs: Value(stat.modified.millisecondsSinceEpoch),
+      albumKey: Value(computeAlbumKey(
+          albumArtist: row.albumArtist, artist: row.artist, album: row.album, directory: p.dirname(path))),
+      missing: const Value(false),
+    ));
+    return getById(row.id);
+  }
+
+  /// A fresh download [keepId] of the track [key] was streamed before: its listens,
+  /// counts, lyrics and curiosities move to [keepId] (as in `DuplicateRepository.merge`)
+  /// and the shadow row goes. Does nothing when there is no shadow row.
+  Future<void> mergeStreamRow(String key, int keepId) async {
+    final shadow = await streamRow(key);
+    if (shadow == null || shadow.id == keepId) return;
+    await DuplicateRepository(_db).merge(keepId, [shadow.id]);
+    await (_db.delete(_db.tracks)..where((t) => t.id.equals(shadow.id))).go();
+  }
 
   /// Creates or refreshes the shadow row (`kind = 2`) of the streamed track
   /// [key] whose cached [file] is ready; one row per key. Returns its id.

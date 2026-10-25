@@ -97,6 +97,12 @@ class StreamCache {
     return f;
   }
 
+  /// Drops [key] from the index: its file was moved out of the cache.
+  void forget(String key) {
+    _mutations++;
+    _index?.remove(streamFileName(key));
+  }
+
   /// Marks [key] as just used.
   Future<void> touch(String key) async {
     final f = await fileFor(key);
