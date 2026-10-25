@@ -160,4 +160,47 @@ void main() {
     expect(await c.fileFor('a:1'), isNull);
     expect(c.usedBytes, 0);
   });
+
+  test('effectiveLimit counts the cache bytes as free space', () async {
+    final c = StreamCache(dir, limitBytes: 100 * _mb, freeSpace: () async => StreamCache.freeMargin + 3 * _mb);
+    await c.open();
+    expect(await c.effectiveLimit(2 * _mb), 5 * _mb);
+  });
+
+  test('a cache exactly at the limit evicts nothing', () async {
+    final c = cache(limit: 4 * _mb);
+    await c.open();
+    await add(c, 'a:1', 2, 1);
+    await add(c, 'a:2', 2, 2);
+    await c.evict();
+    expect(await c.fileFor('a:1'), isNotNull);
+    expect(await c.fileFor('a:2'), isNotNull);
+  });
+
+  test('a .part file is neither measured nor evicted', () async {
+    final c = cache(limit: 10 * _mb);
+    await c.open();
+    await add(c, 'a:1', 1, 1);
+    final stray = File(p.join(dir.path, 'x.m4a.part'))..writeAsBytesSync(List.filled(20 * _mb, 1));
+    await c.evict();
+    expect(c.usedBytes, 1 * _mb);
+    expect(await c.measure(), 1 * _mb);
+    expect(await c.fileFor('a:1'), isNotNull);
+    expect(stray.existsSync(), isTrue);
+  });
+
+  test('put without trim keeps everything; evict reports what it deletes', () async {
+    final c = cache(limit: 1 * _mb);
+    await c.open();
+    final gone = <String>[];
+    c.onEvicted = (f) => gone.add(p.basename(f.path));
+    await add(c, 'a:0', 2, 0); // older, unpinned: a trimming put would evict it
+    gone.clear();
+    await c.put('a:1', await part('a1.m4a', 2), trim: false);
+    expect(await c.fileFor('a:0'), isNotNull);
+    expect(await c.fileFor('a:1'), isNotNull);
+    expect(gone, isEmpty);
+    await c.evict();
+    expect(gone.first, 'a_0.m4a'); // least recently used first
+  });
 }

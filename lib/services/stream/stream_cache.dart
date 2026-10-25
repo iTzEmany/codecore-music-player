@@ -33,6 +33,10 @@ class StreamCache {
   final Future<int?> Function() _freeSpace;
   final Future<void> Function(File) _delete;
   final _pins = <String, int>{};
+  var _evicting = Future<void>.value();
+
+  /// Called with each file the cache deletes to make room (evict/clear).
+  void Function(File)? onEvicted;
 
   /// Bytes in the folder, measured after `open` and every `evict`.
   int usedBytes = 0;
@@ -67,7 +71,8 @@ class StreamCache {
 
   /// Moves a finished `<name>.<ext>.part` in as [key], then trims the cache.
   /// The new file is pinned during the trim so it is never its own victim.
-  Future<File> put(String key, File part) async {
+  /// With [trim] false nothing is evicted (a prefetch must not push out the near tracks).
+  Future<File> put(String key, File part, {bool trim = true}) async {
     await dir.create(recursive: true);
     final name = streamFileName(key);
     final ext = p.extension(p.basenameWithoutExtension(part.path));
@@ -75,6 +80,7 @@ class StreamCache {
       if (_stem(e.file) == name) await _remove(e.file);
     }
     final f = await part.rename(p.join(dir.path, '$name$ext'));
+    if (!trim) return f;
     pin(key);
     try {
       await evict();
@@ -106,7 +112,14 @@ class StreamCache {
   }
 
   /// Deletes least recently used files until under the limit, skipping pinned ones.
-  Future<void> evict() async {
+  Future<void> evict() {
+    // Serialized: concurrent puts must not trim against a stale measure.
+    final run = _evicting.then((_) => _evict());
+    _evicting = run.catchError((Object _) {});
+    return run;
+  }
+
+  Future<void> _evict() async {
     await _measure();
     final limit = await effectiveLimit(usedBytes);
     final files = await _files();
@@ -116,7 +129,10 @@ class StreamCache {
     for (final e in files) {
       if (used <= limit) break;
       if (pinned.contains(_stem(e.file))) continue;
-      if (await _remove(e.file)) used -= e.size;
+      if (await _remove(e.file)) {
+        used -= e.size;
+        onEvicted?.call(e.file);
+      }
     }
     await _measure(); // K-06: a failed delete is retried at the next evict
   }
@@ -125,7 +141,7 @@ class StreamCache {
   Future<void> clear({Set<String> keep = const {}}) async {
     final kept = {...keep, ..._pins.keys}.map(streamFileName).toSet();
     for (final e in await _files()) {
-      if (!kept.contains(_stem(e.file))) await _remove(e.file);
+      if (!kept.contains(_stem(e.file)) && await _remove(e.file)) onEvicted?.call(e.file);
     }
     await _measure();
   }

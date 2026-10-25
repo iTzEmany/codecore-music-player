@@ -55,7 +55,18 @@ class StreamPreparer {
     this.meteredAhead = 3,
     this.cooldown = const Duration(minutes: 5),
     this.attemptTimeout = const Duration(minutes: 5),
-  });
+  }) {
+    // An evicted file is no longer ready: the queue walk may fetch it again.
+    cache.onEvicted = (f) {
+      if (_disposed) return;
+      final stem = p.basenameWithoutExtension(f.path);
+      final gone = [
+        for (final e in phases.value.entries)
+          if (e.value == StreamPhase.ready && streamFileName(e.key) == stem) e.key
+      ];
+      if (gone.isNotEmpty) phases.value = {...phases.value}..removeWhere((k, _) => gone.contains(k));
+    };
+  }
 
   final StreamCache cache;
   final TrackRepository tracks;
@@ -199,11 +210,14 @@ class StreamPreparer {
     }
     final requested = _jobs.values.where((j) => j.requested && j.phase == StreamPhase.queued).toList()
       ..sort((a, b) => rank(a).compareTo(rank(b)));
+    // Requested jobs are limited only by other requested ones, never by prefetches.
+    var reqActive = _jobs.values.where((j) => j.requested && j.phase == StreamPhase.downloading).length;
     for (final j in requested) {
-      if (_active >= maxParallel) return;
+      if (reqActive++ >= maxParallel) return;
       _start(j);
     }
     if (_pausedUntil?.isAfter(DateTime.now()) ?? false) return;
+    bool? room;
     var metered = false;
     try {
       metered = await isMetered();
@@ -223,7 +237,10 @@ class StreamPreparer {
       if (_jobs.containsKey(i.key) || _active >= maxParallel || _disposed) continue; // changed meanwhile
       if (cached) {
         _setPhase(i.key, StreamPhase.ready);
-      } else {
+      } else if (room ??= await cache.measure() < await cache.effectiveLimit()) {
+        // A prefetch never evicts and can overshoot the limit by up to maxParallel
+        // files (trimmed by the next requested put/evict). Room is computed once per pass.
+        if (_jobs.containsKey(i.key) || _active >= maxParallel || _disposed) continue;
         _start(_jobs[i.key] = _Job(i.key, i.result));
       }
     }
@@ -263,6 +280,7 @@ class StreamPreparer {
           if (!j.requested) {
             // Prefetch only: forget it, the queue walk picks it up after the pause.
             _jobs.remove(j.key);
+            if (!j.rowId.isCompleted) j.rowId.completeError(e); // enrich must not wait forever
             if (!_disposed) phases.value = {...phases.value}..remove(j.key);
             return _finish();
           }
@@ -272,7 +290,7 @@ class StreamPreparer {
     if (_disposed) error = StateError('disposed');
     if (part != null && !_disposed) {
       try {
-        final file = await cache.put(j.key, part);
+        final file = await cache.put(j.key, part, trim: j.requested);
         j.rowId.complete(await tracks.upsertStreamRow(j.key, j.result, file));
         _jobs.remove(j.key);
         _setPhase(j.key, StreamPhase.ready);

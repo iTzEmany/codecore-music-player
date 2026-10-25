@@ -17,6 +17,7 @@ class _Yt implements YoutubeService {
   final started = <String>[];
   final failuresLeft = <String, int>{};
   final rateLimits = <String, int>{};
+  final forbidden = <String, int>{};
   final _gates = <String, Completer<void>>{};
   var open = 0, maxOpen = 0;
   var autoFinish = false;
@@ -35,6 +36,10 @@ class _Yt implements YoutubeService {
       if ((rateLimits[r.id] ?? 0) > 0) {
         rateLimits[r.id] = rateLimits[r.id]! - 1;
         throw const YtException(YtErrorKind.rateLimited, '429');
+      }
+      if ((forbidden[r.id] ?? 0) > 0) {
+        forbidden[r.id] = forbidden[r.id]! - 1;
+        throw const YtException(YtErrorKind.network, 'HTTP Error 403');
       }
       if ((failuresLeft[r.id] ?? 0) > 0) {
         failuresLeft[r.id] = failuresLeft[r.id]! - 1;
@@ -230,19 +235,115 @@ void main() {
   });
 
   test('requested jobs start in queue order: after fast skipping the current one is first', () async {
-    prep.setQueue([for (final n in ['a', 'b', 'c', 'd']) _i(n)]);
+    prep.setQueue([for (final n in ['w', 'x', 'c', 'd']) _i(n)]);
     await _until(() => yt.started.length == 2);
-    // The user skipped to d, then back to c: both asked, d first.
+    // Both slots are held by requested jobs; the user then skipped to d, back to c.
+    final w = prep.ready('youtube:w', _r('w'));
+    final x = prep.ready('youtube:x', _r('x'));
     final d = prep.ready('youtube:d', _r('d'));
     final c = prep.ready('youtube:c', _r('c'));
-    yt.finish('a');
+    yt.finish('w');
     await _until(() => yt.started.length == 3);
     expect(yt.started[2], 'c');
-    yt.finish('b');
+    yt.finish('x');
     await _until(() => yt.started.length == 4);
     yt.finish('c');
     yt.finish('d');
-    await Future.wait([c, d]);
+    await Future.wait([w, x, c, d]);
+  });
+
+  test('a user pick starts at once even when prefetches hold every slot', () async {
+    prep.setQueue([_i('a'), _i('b')]);
+    await _until(() => yt.started.length == 2);
+    final z = prep.ready('youtube:z', _r('z'));
+    await _until(() => yt.started.length == 3);
+    expect(yt.started, ['a', 'b', 'z']);
+    yt.finish('z');
+    await z;
+  });
+
+  test('unmetered prefetch stops at a full cache and never evicts what it downloaded', () async {
+    cache.limitBytes = 10; // 3-byte files
+    yt.autoFinish = true;
+    prep.setQueue([for (final n in ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']) _i(n)]);
+    await _quiet();
+    await _quiet();
+    expect(yt.started.length, lessThan(8));
+    for (final id in yt.started) {
+      expect(await cache.fileFor('youtube:$id'), isNotNull, reason: id);
+    }
+    expect(yt.started.take(3), ['a', 'b', 'c']);
+  });
+
+  test('an evicted key loses its ready phase and is fetched again', () async {
+    yt.autoFinish = true;
+    prep.setQueue([for (final n in ['a', 'b', 'c', 'd']) _i(n)]);
+    await _until(() => ['a', 'b', 'c', 'd'].every((n) => prep.phases.value['youtube:$n'] == StreamPhase.ready));
+    final limit = cache.limitBytes;
+    cache.limitBytes = 0;
+    await cache.evict(); // d is not pinned
+    expect(prep.phases.value.containsKey('youtube:d'), isFalse);
+    expect(prep.phases.value['youtube:c'], StreamPhase.ready);
+    cache.limitBytes = limit;
+    prep.setQueue([for (final n in ['a', 'b', 'c', 'd']) _i(n)]);
+    await _until(() => prep.phases.value['youtube:d'] == StreamPhase.ready);
+    expect(yt.started.where((id) => id == 'd').length, 2);
+  });
+
+  test('a rate-limited prefetch completes rowId with an error', () async {
+    final seen = Completer<Object>();
+    enrich = (r, rowId) async {
+      try {
+        await rowId;
+      } on Object catch (e) {
+        seen.complete(e);
+      }
+    };
+    make(cooldown: const Duration(minutes: 1));
+    yt.autoFinish = true;
+    yt.rateLimits['a'] = 1;
+    prep.setQueue([_i('a')]);
+    expect(await seen.future.timeout(const Duration(seconds: 2)), isA<YtException>());
+  });
+
+  for (final kind in ['429', '403']) {
+    test('after a $kind no new prefetch starts before the cooldown', () async {
+      make(cooldown: const Duration(minutes: 1));
+      yt.autoFinish = true;
+      (kind == '429' ? yt.rateLimits : yt.forbidden)['a'] = 1;
+      prep.setQueue([_i('a')]);
+      await _until(() => yt.started.isNotEmpty);
+      await _quiet();
+      prep.setQueue([_i('a'), _i('b')]); // pumps again
+      await _quiet();
+      expect(yt.started, ['a']);
+    });
+  }
+
+  test('a rate-limited prefetch is forgotten, a requested ready() still runs', () async {
+    make(cooldown: const Duration(minutes: 1));
+    yt.autoFinish = true;
+    yt.rateLimits['a'] = 1;
+    prep.setQueue([_i('a')]);
+    await _until(() => yt.started.isNotEmpty);
+    await _quiet();
+    expect(prep.phases.value.containsKey('youtube:a'), isFalse);
+    await prep.ready('youtube:a', _r('a')); // runs during the pause
+    expect(yt.started, ['a', 'a']);
+  });
+
+  test('ready() on a cached file pins it, refreshes its mtime and releases the pin', () async {
+    yt.autoFinish = true;
+    await prep.ready('youtube:a', _r('a'));
+    final f = (await cache.fileFor('youtube:a'))!;
+    await f.setLastModified(DateTime(2020));
+    cache.limitBytes = 0;
+    final r = prep.ready('youtube:a', _r('a'));
+    await cache.evict(); // ready's pin is already set
+    expect((await r).existsSync(), isTrue);
+    expect((await r).lastModifiedSync().year, greaterThan(2020));
+    await cache.evict(); // pin released
+    expect(await cache.fileFor('youtube:a'), isNull);
   });
 
   test('an attempt that hangs counts as failed: retry once, then error', () async {
