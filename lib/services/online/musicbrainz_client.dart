@@ -135,11 +135,15 @@ class MusicBrainzClient {
   /// A recording counts only if its title or its first artist is the local
   /// [title] / [artist] (an ISRC is sometimes reused for another song).
   Future<List<MbRecording>> recordingsByIsrc(String isrc, int durationMs,
-      {required String title, required String artist, CancelToken? cancel}) async {
+      {required String title, required String artist, CancelToken? cancel, bool strict = false}) async {
     final code = isrc.trim().toUpperCase();
     if (code.isEmpty) return const [];
     // 404 means an unknown ISRC: no retry.
-    final list = (await _get('isrc/$code', {'inc': 'artist-credits'}, cancel, retry: false))?['recordings'];
+    final data = await _get('isrc/$code', {'inc': 'artist-credits'}, cancel, retry: false);
+    // The web seam gives null for 404 and for no answer alike. [strict] (credits)
+    // takes it as «no answer», so «nothing found» is never remembered by mistake.
+    if (data == null && strict) throw MusicBrainzUnavailable('isrc/$code');
+    final list = data?['recordings'];
     if (list is! List) return const [];
     final wantTitle = matchKey(title);
     final wantArtist = matchKey(extractPrimaryArtist(artist));

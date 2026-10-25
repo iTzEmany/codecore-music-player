@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show ProviderListenable;
 
+import '../data/repositories/credits_repository.dart';
 import '../services/online/enrichment_service.dart';
 import '../services/online/http_client.dart';
 import '../services/online/itunes_client.dart';
@@ -91,6 +92,10 @@ Future<T?> ytmQuiet<T>(Future<T?> Function() body) async {
   }
 }
 
+final creditsRepositoryProvider = Provider(
+  (ref) => CreditsRepository(ref.watch(databaseProvider)),
+);
+
 final enrichmentServiceProvider = Provider<EnrichmentService>((ref) {
   final web = ref.watch(webClientProvider);
   return EnrichmentService(
@@ -100,6 +105,10 @@ final enrichmentServiceProvider = Provider<EnrichmentService>((ref) {
     itunes: ref.watch(itunesClientProvider),
     deezer: ref.watch(deezerClientProvider),
     useDeezer: () => ref.read(settingsProvider).deezerMeta,
+    gw: ref.watch(deezerGwClientProvider),
+    musicBrainz: ref.watch(musicBrainzClientProvider),
+    creditsRepo: ref.watch(creditsRepositoryProvider),
+    useCredits: () => ref.read(settingsProvider).creditsDetails,
     lrclib: ref.watch(lrclibClientProvider),
     wikipedia: ref.watch(wikipediaClientProvider),
     web: web,

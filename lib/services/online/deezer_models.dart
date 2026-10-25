@@ -123,6 +123,19 @@ class TrackDetails {
     physicalReleaseDate: j['physicalReleaseDate'] as String?,
   );
 
+  TrackDetails copyWith({String? copyright, String? physicalReleaseDate}) =>
+      TrackDetails(
+        bpm: bpm,
+        label: label,
+        digitalReleaseDate: digitalReleaseDate,
+        recordType: recordType,
+        rank: rank,
+        albumFans: albumFans,
+        explicit: explicit,
+        copyright: copyright ?? this.copyright,
+        physicalReleaseDate: physicalReleaseDate ?? this.physicalReleaseDate,
+      );
+
   Map<String, Object?> toJson() => {
     'bpm': bpm,
     'label': label,

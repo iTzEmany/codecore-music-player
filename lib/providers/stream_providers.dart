@@ -70,6 +70,7 @@ final streamPreparerProvider = Provider<StreamPreparer>((ref) {
           meta: proposal.meta,
           lyrics: proposal.lyrics,
           curiosity: proposal.curiosity,
+          credits: proposal.credits,
           disc: proposal.disc,
           isrc: proposal.isrc,
           source: proposal.source,
