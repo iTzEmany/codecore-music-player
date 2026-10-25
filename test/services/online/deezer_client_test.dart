@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:codecore/services/online/deezer_client.dart';
+import 'package:codecore/services/online/deezer_models.dart';
 import 'package:codecore/services/online/http_client.dart';
 import 'package:dio/dio.dart' show CancelToken;
 import 'package:flutter_test/flutter_test.dart';
@@ -11,10 +12,12 @@ Object _fixture(String name) =>
         as Object;
 
 class _Web implements WebClient {
-  _Web(this.answer);
+  _Web(this.answer, {this.byUrl = const {}});
 
   /// null mimics DioWebClient on a timeout.
   final Object? answer;
+  final Map<String, Object> byUrl;
+  final urls = <String>[];
   int calls = 0;
 
   @override
@@ -24,7 +27,8 @@ class _Web implements WebClient {
     CancelToken? cancel,
   }) async {
     calls++;
-    return answer;
+    urls.add(url);
+    return byUrl[url] ?? answer;
   }
 
   @override
@@ -36,6 +40,68 @@ class _Web implements WebClient {
 }
 
 void main() {
+  final albumUrl = 'https://api.deezer.com/album/119606';
+  _Web details(String track) => _Web(
+    null,
+    byUrl: {
+      'https://api.deezer.com/track/1': _fixture(track),
+      albumUrl: _fixture('album_details'),
+    },
+  );
+
+  test('trackDetails: fields from the track and the album fixtures', () async {
+    final web = details('track_details');
+    final d = (await DeezerClient(web).trackDetails(1))!;
+    expect(d.bpm, 171.6);
+    expect(d.rank, 980436);
+    expect(d.explicit, true);
+    expect(d.label, 'Daft Life Ltd./ADA France');
+    expect(d.albumFans, 344063);
+    expect(d.recordType, 'album');
+    expect(d.digitalReleaseDate, '2001-03-07');
+    expect(web.urls, ['https://api.deezer.com/track/1', albumUrl]);
+  });
+
+  test('trackDetails: an album already read saves the request', () async {
+    final web = details('track_details');
+    final alb = DeezerAlbum.fromJson(_fixture('album_details') as Map);
+    final d = await DeezerClient(web).trackDetails(1, album: alb);
+    expect(d!.label, alb.label);
+    expect(web.urls, ['https://api.deezer.com/track/1']);
+  });
+
+  test('trackDetails: bpm 0 is no bpm', () async {
+    final alb = DeezerAlbum.fromJson(_fixture('album_details') as Map);
+    final d = await DeezerClient(details('track_bpm_zero'))
+        .trackDetails(1, album: alb);
+    expect(d!.bpm, isNull);
+  });
+
+  test('trackDetails: rests on quota error like the other calls', () async {
+    final c = DeezerClient(
+      _Web({
+        'error': {'code': 4},
+      }),
+    );
+    await expectLater(c.trackDetails(1), throwsA(isA<RateLimitedException>()));
+    expect(c.isResting, isTrue);
+  });
+
+  test('TrackDetails: JSON round trip', () {
+    const d = TrackDetails(
+      bpm: 171.6,
+      label: 'L',
+      digitalReleaseDate: '2001-03-07',
+      recordType: 'album',
+      rank: 5,
+      albumFans: 7,
+      explicit: false,
+      copyright: 'c',
+      physicalReleaseDate: '2000-01-01',
+    );
+    expect(TrackDetails.fromJson(d.toJson()).toJson(), d.toJson());
+  });
+
   test('ISRC found: the fields are parsed', () async {
     final t = await DeezerClient(_Web(_fixture('track_isrc_corsi')))
         .trackByIsrc('ITZ042500021');

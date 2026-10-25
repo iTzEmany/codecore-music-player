@@ -5346,4 +5346,13 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get promoteFailed => 'Titel konnte nicht verschoben werden';
+
+  @override
+  String get creditsDetails => 'Credits und Details';
+
+  @override
+  String get creditsDetailsHint => 'Autoren, Produzenten und Titeldetails';
+
+  @override
+  String get creditsDetailsNote => 'Nutzt auch eine inoffizielle Deezer-API';
 }

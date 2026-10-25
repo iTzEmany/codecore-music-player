@@ -172,6 +172,57 @@ void main() {
     expect((await tracks.getById(keep))!.ignored, isFalse);
   });
 
+  Future<void> credit(int id, String name) =>
+      db.into(db.trackCredits).insert(TrackCreditsCompanion.insert(
+          trackId: id, name: name, nameKey: name, role: 'producer', source: 'deezer'));
+
+  Future<Set<String>> creditsOf(int id) async => {
+        for (final c in await (db.select(db.trackCredits)..where((t) => t.trackId.equals(id))).get()) c.name,
+      };
+
+  test('credits of the first duplicate that has them move to a kept track without', () async {
+    await build();
+    await credit(dupA, 'x');
+    await credit(dupA, 'y');
+    await credit(dupB, 'z');
+    await repo.merge(keep, [dupA, dupB]);
+    expect(await creditsOf(keep), {'x', 'y'});
+    expect(await creditsOf(dupA), isEmpty);
+    expect(await creditsOf(dupB), isEmpty);
+  });
+
+  test('a kept track with credits keeps its own and gets none from the duplicates', () async {
+    await build();
+    await credit(keep, 'mine');
+    await credit(dupA, 'x');
+    await repo.merge(keep, [dupA]);
+    expect(await creditsOf(keep), {'mine'});
+    expect(await creditsOf(dupA), isEmpty);
+  });
+
+  test('track_enrich merges column by column: keeper first, flag is an OR', () async {
+    await build();
+    await db.into(db.trackEnrich).insert(TrackEnrichCompanion.insert(
+        trackId: Value(keep), details: const Value('K'), mbid: const Value('mk')));
+    await db.into(db.trackEnrich).insert(TrackEnrichCompanion.insert(
+        trackId: Value(dupA), details: const Value('A'), deezerId: const Value(7), lyricsByUser: const Value(true)));
+    await db.into(db.trackEnrich).insert(TrackEnrichCompanion.insert(
+        trackId: Value(dupB), deezerId: const Value(8), creditsNoneAt: const Value(5)));
+    await repo.merge(keep, [dupA, dupB]);
+    final e = await db.select(db.trackEnrich).getSingle();
+    expect((e.trackId, e.details, e.mbid, e.deezerId, e.creditsNoneAt, e.lyricsByUser),
+        (keep, 'K', 'mk', 7, 5, true));
+  });
+
+  test('track_enrich of a duplicate is created for a kept track that has none', () async {
+    await build();
+    await db.into(db.trackEnrich).insert(TrackEnrichCompanion.insert(
+        trackId: Value(dupA), details: const Value('A')));
+    await repo.merge(keep, [dupA]);
+    final e = await db.select(db.trackEnrich).getSingle();
+    expect((e.trackId, e.details), (keep, 'A'));
+  });
+
   test('an error half way through leaves everything as it was', () async {
     await build(onStep: (step) {
       if (step == 'tags') throw StateError('disk full');
@@ -202,5 +253,27 @@ void main() {
     await expectLater(repo.merge(keep, [dupA, 9999]), throwsA(anything));
     expect((await tracks.getById(dupA))!.ignored, isFalse);
     expect((await tracks.getById(keep))!.playCount, 5);
+  });
+
+  test('credits of the keeper clear a none mark from a duplicate', () async {
+    await build();
+    await credit(keep, 'mine');
+    await db.into(db.trackEnrich).insert(TrackEnrichCompanion.insert(
+        trackId: Value(dupA), creditsNoneAt: const Value(5)));
+    await repo.merge(keep, [dupA]);
+    final e = await db.select(db.trackEnrich).getSingle();
+    expect(await creditsOf(keep), {'mine'});
+    expect(e.creditsNoneAt, isNull, reason: 'credits and none mark must not coexist');
+  });
+
+  test('moved credits clear a none mark from another duplicate', () async {
+    await build();
+    await credit(dupA, 'x');
+    await db.into(db.trackEnrich).insert(TrackEnrichCompanion.insert(
+        trackId: Value(dupB), creditsNoneAt: const Value(5)));
+    await repo.merge(keep, [dupA, dupB]);
+    final e = await db.select(db.trackEnrich).getSingle();
+    expect(await creditsOf(keep), {'x'});
+    expect(e.creditsNoneAt, isNull, reason: 'credits and none mark must not coexist');
   });
 }

@@ -4,12 +4,14 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show ProviderListenable;
 
+import '../data/repositories/credits_repository.dart';
 import '../services/online/enrichment_service.dart';
 import '../services/online/http_client.dart';
 import '../services/online/itunes_client.dart';
 import '../services/online/lrclib_client.dart';
 import '../services/online/curiosity_finder.dart';
 import '../services/online/deezer_client.dart';
+import '../services/online/deezer_gw_client.dart';
 import '../services/online/discogs_client.dart';
 import '../core/app_log.dart';
 import '../services/online/musicbrainz_client.dart';
@@ -44,6 +46,10 @@ final itunesClientProvider = Provider(
 );
 final deezerClientProvider = Provider(
   (ref) => DeezerClient(ref.watch(webClientProvider)),
+);
+final deezerGwClientProvider = Provider(
+  // shortcut: a one-off Registro line needs a LogEntry kind (phase 53); AppLog until then.
+  (ref) => DeezerGwClient(onPaused: () => AppLog.w('deezer_gw: paused for 24 hours after 3 errors')),
 );
 final lrclibClientProvider = Provider(
   (ref) => LrclibClient(ref.watch(webClientProvider)),
@@ -86,6 +92,10 @@ Future<T?> ytmQuiet<T>(Future<T?> Function() body) async {
   }
 }
 
+final creditsRepositoryProvider = Provider(
+  (ref) => CreditsRepository(ref.watch(databaseProvider)),
+);
+
 final enrichmentServiceProvider = Provider<EnrichmentService>((ref) {
   final web = ref.watch(webClientProvider);
   return EnrichmentService(
@@ -95,6 +105,10 @@ final enrichmentServiceProvider = Provider<EnrichmentService>((ref) {
     itunes: ref.watch(itunesClientProvider),
     deezer: ref.watch(deezerClientProvider),
     useDeezer: () => ref.read(settingsProvider).deezerMeta,
+    gw: ref.watch(deezerGwClientProvider),
+    musicBrainz: ref.watch(musicBrainzClientProvider),
+    creditsRepo: ref.watch(creditsRepositoryProvider),
+    useCredits: () => ref.read(settingsProvider).creditsDetails,
     lrclib: ref.watch(lrclibClientProvider),
     wikipedia: ref.watch(wikipediaClientProvider),
     web: web,

@@ -2888,5 +2888,8 @@
   "ytmAlbumQueue": "Añadir álbum a la cola",
   "addedToLibrary": "Añadida a la biblioteca",
   "promoteNoSpace": "No hay espacio suficiente para descargar la canción",
-  "promoteFailed": "No se pudo mover la canción"
+  "promoteFailed": "No se pudo mover la canción",
+  "creditsDetails": "Créditos y detalles",
+  "creditsDetailsHint": "Autores, productores y detalles de las canciones",
+  "creditsDetailsNote": "Usa también una API no oficial de Deezer"
 }

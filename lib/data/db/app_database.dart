@@ -8,7 +8,7 @@ import 'tables.dart';
 part 'app_database.g.dart';
 
 /// Bump with every migration step below.
-const kSchemaVersion = 14;
+const kSchemaVersion = 15;
 
 @DriftDatabase(
   tables: [
@@ -29,6 +29,9 @@ const kSchemaVersion = 14;
     FollowedArtists,
     ArtistReleases,
     ArtistLookups,
+    TrackCredits,
+    TrackEnrich,
+    ActivityLogRows,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -128,6 +131,37 @@ class AppDatabase extends _$AppDatabase {
             "FROM playlist_import_items WHERE isrc IS NOT NULL AND isrc <> '')",
           );
           await customStatement('DROP INDEX IF EXISTS tmp_items_track');
+        }
+      }
+      if (from < 15) {
+        await m.addColumn(tracks, tracks.coverSource);
+        await m.createTable(trackCredits);
+        await m.createIndex(trackCreditsNameKey);
+        await m.createTable(trackEnrich);
+        await m.createTable(activityLogRows);
+        await m.createIndex(activityLogAt);
+        // Old test fixtures have a bare tracks table.
+        final cols = await customSelect('PRAGMA table_info(tracks)').get();
+        final names = cols.map((c) => c.read<String>('name')).toSet();
+        if (names.containsAll(
+          ['enrich_status', 'user_edited', 'lyrics_plain', 'lyrics_synced'],
+        )) {
+          // "Not found" (status 2) becomes a dated mark (D-103).
+          const noLyrics =
+              "COALESCE(lyrics_plain, '') = '' AND COALESCE(lyrics_synced, '') = ''";
+          final now = nowMs();
+          await customStatement(
+            'INSERT INTO track_enrich (track_id, meta_none_at, lyrics_none_at) '
+            'SELECT id, ?, CASE WHEN $noLyrics THEN ? END '
+            'FROM tracks WHERE enrich_status = 2',
+            [now, now],
+          );
+          // Hand-edited lyrics are never overwritten by enrichment (D-121).
+          await customStatement(
+            'INSERT INTO track_enrich (track_id, lyrics_by_user) '
+            'SELECT id, 1 FROM tracks WHERE user_edited = 1 AND NOT ($noLyrics) '
+            'ON CONFLICT(track_id) DO UPDATE SET lyrics_by_user = 1',
+          );
         }
       }
     },

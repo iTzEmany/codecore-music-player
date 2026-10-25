@@ -667,4 +667,56 @@ void main() {
     expect(tmp, isEmpty);
     await db.close();
   });
+
+  test('a v14 database gets the enrichment tables and a dated mark for not-found parts', () async {
+    final before = DateTime.now().millisecondsSinceEpoch;
+    final db = AppDatabase(
+      NativeDatabase.memory(
+        setup: (raw) {
+          raw.execute(
+            'CREATE TABLE tracks (id INTEGER PRIMARY KEY AUTOINCREMENT, path TEXT NOT NULL, '
+            'title TEXT NOT NULL, lyrics_plain TEXT, lyrics_synced TEXT, '
+            'enrich_status INTEGER NOT NULL DEFAULT 0, user_edited INTEGER NOT NULL DEFAULT 0)',
+          );
+          raw.execute(
+            'INSERT INTO tracks (id, path, title, lyrics_plain, lyrics_synced, enrich_status, user_edited) VALUES '
+            "(1, '/1', 'none-nolyrics', NULL, '', 2, 0), "
+            "(2, '/2', 'none-lyrics', 'words', NULL, 2, 0), "
+            "(3, '/3', 'edited-lyrics', NULL, '[00:01]x', 0, 1), "
+            "(4, '/4', 'edited-nolyrics', '', NULL, 0, 1), "
+            "(5, '/5', 'edited-none-lyrics', 'w', NULL, 2, 1), "
+            "(6, '/6', 'plain', NULL, NULL, 0, 0)",
+          );
+          raw.userVersion = 14;
+        },
+      ),
+    );
+    final names = (await db.customSelect("SELECT name FROM sqlite_master").get())
+        .map((r) => r.read<String>('name'))
+        .toSet();
+    expect(names, containsAll(['track_credits', 'track_enrich', 'activity_log', 'track_credits_name_key', 'activity_log_at']));
+    final cols = await db.customSelect('PRAGMA table_info(tracks)').get();
+    expect(cols.map((c) => c.read<String>('name')), contains('cover_source'));
+
+    final rows = await db.customSelect('SELECT * FROM track_enrich ORDER BY track_id').get();
+    Map<int, Map<String, Object?>> byId = {for (final r in rows) r.read<int>('track_id'): r.data};
+    expect(byId.keys, [1, 2, 3, 5]);
+    expect(byId[1]!['meta_none_at'] as int, greaterThanOrEqualTo(before));
+    expect(byId[1]!['lyrics_none_at'], byId[1]!['meta_none_at'], reason: 'no lyrics: also marked');
+    expect(byId[1]!['lyrics_by_user'], 0);
+    expect(byId[2]!['meta_none_at'], isNotNull);
+    expect(byId[2]!['lyrics_none_at'], isNull);
+    expect(byId[3]!['meta_none_at'], isNull);
+    expect(byId[3]!['lyrics_by_user'], 1);
+    expect(byId[5]!['meta_none_at'], isNotNull);
+    expect(byId[5]!['lyrics_by_user'], 1, reason: 'upsert into the same row');
+
+    final t = await db.customSelect(
+      'SELECT id, path, title, lyrics_plain, lyrics_synced, enrich_status, user_edited, cover_source FROM tracks ORDER BY id',
+    ).get();
+    expect(t.map((r) => r.read<int>('enrich_status')), [2, 2, 0, 0, 2, 0]);
+    expect(t.map((r) => r.read<int>('cover_source')), everyElement(0));
+    expect(t.map((r) => r.read<String?>('lyrics_plain')), [null, 'words', null, '', 'w', null]);
+    await db.close();
+  });
 }

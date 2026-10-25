@@ -8390,6 +8390,24 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Impossibile spostare il brano'**
   String get promoteFailed;
+
+  /// No description provided for @creditsDetails.
+  ///
+  /// In it, this message translates to:
+  /// **'Crediti e dettagli'**
+  String get creditsDetails;
+
+  /// No description provided for @creditsDetailsHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Autori, produttori e dettagli dei brani'**
+  String get creditsDetailsHint;
+
+  /// No description provided for @creditsDetailsNote.
+  ///
+  /// In it, this message translates to:
+  /// **'Usa anche un\'API non ufficiale di Deezer'**
+  String get creditsDetailsNote;
 }
 
 class _AppLocalizationsDelegate

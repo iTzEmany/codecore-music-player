@@ -76,6 +76,8 @@ final streamPreparerProvider = Provider<StreamPreparer>((ref) {
         ),
         EnrichField.values.toSet(),
       );
+      // A shadow row had no id when `propose` ran, so its credits are saved here.
+      await enrichment.saveCredits(row.id, proposal.credits);
     },
   );
   ref.onDispose(preparer.dispose);
@@ -83,7 +85,7 @@ final streamPreparerProvider = Provider<StreamPreparer>((ref) {
 });
 
 /// What `propose` reads (title, artist, album, length) before the row exists.
-Track _syntheticTrack(YtResult r) => Track(
+Track _syntheticTrack(YtResult r) => Track(coverSource: 0, 
       id: 0,
       path: '',
       title: r.title,

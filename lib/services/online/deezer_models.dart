@@ -64,6 +64,8 @@ class DeezerAlbum {
     this.releaseDate,
     this.genres = const [],
     this.coverXl,
+    this.label,
+    this.fans,
   });
 
   factory DeezerAlbum.fromJson(Map<dynamic, dynamic> j) {
@@ -81,12 +83,75 @@ class DeezerAlbum {
             if (g is Map && g['name'] is String) g['name'] as String,
       ],
       coverXl: j['cover_xl'] as String?,
+      label: j['label'] as String?,
+      fans: (j['fans'] as num?)?.toInt(),
     );
   }
 
   final int id;
   final String title, recordType;
   final int nbTracks;
-  final String? releaseDate, coverXl;
+  final String? releaseDate, coverXl, label;
+  final int? fans;
   final List<String> genres;
+}
+
+/// Extra data of the public API (`/track/{id}` + `/album/{id}`). [copyright] and
+/// [physicalReleaseDate] come from the gw API (task 50.4), never from here.
+class TrackDetails {
+  const TrackDetails({
+    this.bpm,
+    this.label,
+    this.digitalReleaseDate,
+    this.recordType,
+    this.rank,
+    this.albumFans,
+    this.explicit,
+    this.copyright,
+    this.physicalReleaseDate,
+  });
+
+  factory TrackDetails.fromJson(Map<dynamic, dynamic> j) => TrackDetails(
+    bpm: (j['bpm'] as num?)?.toDouble(),
+    label: j['label'] as String?,
+    digitalReleaseDate: j['digitalReleaseDate'] as String?,
+    recordType: j['recordType'] as String?,
+    rank: (j['rank'] as num?)?.toInt(),
+    albumFans: (j['albumFans'] as num?)?.toInt(),
+    explicit: j['explicit'] as bool?,
+    copyright: j['copyright'] as String?,
+    physicalReleaseDate: j['physicalReleaseDate'] as String?,
+  );
+
+  TrackDetails copyWith({String? copyright, String? physicalReleaseDate}) =>
+      TrackDetails(
+        bpm: bpm,
+        label: label,
+        digitalReleaseDate: digitalReleaseDate,
+        recordType: recordType,
+        rank: rank,
+        albumFans: albumFans,
+        explicit: explicit,
+        copyright: copyright ?? this.copyright,
+        physicalReleaseDate: physicalReleaseDate ?? this.physicalReleaseDate,
+      );
+
+  Map<String, Object?> toJson() => {
+    'bpm': bpm,
+    'label': label,
+    'digitalReleaseDate': digitalReleaseDate,
+    'recordType': recordType,
+    'rank': rank,
+    'albumFans': albumFans,
+    'explicit': explicit,
+    'copyright': copyright,
+    'physicalReleaseDate': physicalReleaseDate,
+  };
+
+  /// Null when Deezer has none (it answers 0).
+  final double? bpm;
+  final String? label, digitalReleaseDate, recordType;
+  final String? copyright, physicalReleaseDate;
+  final int? rank, albumFans;
+  final bool? explicit;
 }

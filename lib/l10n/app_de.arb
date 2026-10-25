@@ -2888,5 +2888,8 @@
   "ytmAlbumQueue": "Album zur Warteschlange hinzufügen",
   "addedToLibrary": "Zur Bibliothek hinzugefügt",
   "promoteNoSpace": "Nicht genug Speicherplatz für den Download",
-  "promoteFailed": "Titel konnte nicht verschoben werden"
+  "promoteFailed": "Titel konnte nicht verschoben werden",
+  "creditsDetails": "Credits und Details",
+  "creditsDetailsHint": "Autoren, Produzenten und Titeldetails",
+  "creditsDetailsNote": "Nutzt auch eine inoffizielle Deezer-API"
 }

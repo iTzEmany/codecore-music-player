@@ -124,6 +124,23 @@ void main() {
       expect(staging.existsSync(), isFalse);
     });
 
+    test('a v14 backup is accepted and upgraded to the current schema', () async {
+      final old = AppDatabase(NativeDatabase.memory());
+      await old.into(old.tracks).insert(TracksCompanion.insert(
+          path: '/m/v14.mp3', title: 'v14', albumKey: 'k', format: 'mp3', sizeBytes: 1, mtimeMs: 1, addedAt: 1));
+      for (final t in ['track_credits', 'track_enrich', 'activity_log']) {
+        await old.customStatement('DROP TABLE $t');
+      }
+      await old.customStatement('ALTER TABLE tracks DROP COLUMN cover_source');
+      await old.customStatement('PRAGMA user_version = 14');
+      staging.createSync(recursive: true);
+      await old.customStatement('VACUUM INTO ?', [p.join(staging.path, 'codecore.sqlite')]);
+      await old.close();
+      File(p.join(staging.path, 'ready')).writeAsStringSync('1');
+      expect(await apply(), isTrue);
+      expect(await titles(dbFile), ['v14']);
+    });
+
     test('nothing staged: nothing happens', () async {
       expect(await apply(), isFalse);
       expect(await titles(dbFile), ['old']);

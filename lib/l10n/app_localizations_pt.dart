@@ -5331,4 +5331,13 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get promoteFailed => 'Não foi possível mover a faixa';
+
+  @override
+  String get creditsDetails => 'Créditos e detalhes';
+
+  @override
+  String get creditsDetailsHint => 'Autores, produtores e detalhes das faixas';
+
+  @override
+  String get creditsDetailsNote => 'Usa também uma API não oficial do Deezer';
 }

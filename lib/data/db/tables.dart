@@ -59,6 +59,9 @@ class Tracks extends Table {
 
   /// International Standard Recording Code; never overwritten once set.
   TextColumn get isrc => text().nullable()();
+
+  /// 0 automatic · 1 chosen by hand for the album · 2 chosen by hand for the track.
+  IntColumn get coverSource => integer().withDefault(const Constant(0))();
 }
 
 class Folders extends Table {
@@ -399,4 +402,55 @@ class ArtistLookups extends Table {
 
   @override
   Set<Column> get primaryKey => {artistKey};
+}
+
+/// A credit (writer, producer, ...) of a track, from an online source.
+@TableIndex(name: 'track_credits_name_key', columns: {#nameKey})
+@DataClassName('TrackCreditRow')
+class TrackCredits extends Table {
+  IntColumn get trackId =>
+      integer().references(Tracks, #id, onDelete: KeyAction.cascade)();
+  TextColumn get name => text()();
+  TextColumn get nameKey => text()();
+  TextColumn get role => text()();
+  TextColumn get source => text()();
+
+  @override
+  Set<Column> get primaryKey => {trackId, nameKey, role};
+}
+
+/// Enrichment state of a track; the *_none_at columns hold when a part was
+/// searched and not found (retried after 30 days).
+class TrackEnrich extends Table {
+  IntColumn get trackId =>
+      integer().references(Tracks, #id, onDelete: KeyAction.cascade)();
+  TextColumn get details => text().nullable()();
+  IntColumn get deezerId => integer().nullable()();
+  TextColumn get mbid => text().nullable()();
+  IntColumn get metaNoneAt => integer().nullable()();
+  IntColumn get lyricsNoneAt => integer().nullable()();
+  IntColumn get syncedNoneAt => integer().nullable()();
+  IntColumn get curioNoneAt => integer().nullable()();
+  IntColumn get creditsNoneAt => integer().nullable()();
+  BoolColumn get lyricsByUser => boolean().withDefault(const Constant(false))();
+
+  @override
+  Set<Column> get primaryKey => {trackId};
+}
+
+/// Log of background jobs (the «Registro»).
+@TableIndex(name: 'activity_log_at', columns: {#at})
+@DataClassName('ActivityLogRow')
+class ActivityLogRows extends Table {
+  @override
+  String get tableName => 'activity_log';
+
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get at => integer()();
+  TextColumn get kind => text()();
+  TextColumn get name => text()();
+  IntColumn get done => integer().withDefault(const Constant(0))();
+  IntColumn get total => integer().withDefault(const Constant(0))();
+  IntColumn get failed => integer().withDefault(const Constant(0))();
+  TextColumn get detail => text().nullable()();
 }

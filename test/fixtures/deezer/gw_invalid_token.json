@@ -1,0 +1,7 @@
+{
+ "error": {
+  "VALID_TOKEN_REQUIRED": "Invalid CSRF token"
+ },
+ "results": {},
+ "payload": null
+}

@@ -3132,5 +3132,8 @@
   "ytmAlbumQueue": "Ajouter l’album à la file",
   "addedToLibrary": "Ajouté à la bibliothèque",
   "promoteNoSpace": "Espace insuffisant pour télécharger le titre",
-  "promoteFailed": "Impossible de déplacer le titre"
+  "promoteFailed": "Impossible de déplacer le titre",
+  "creditsDetails": "Crédits et détails",
+  "creditsDetailsHint": "Auteurs, producteurs et détails des titres",
+  "creditsDetailsNote": "Utilise aussi une API Deezer non officielle"
 }

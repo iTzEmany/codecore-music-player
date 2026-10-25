@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 
 import '../../core/app_log.dart';
 import '../import/track_matcher.dart';
+import 'credits.dart';
 import 'http_client.dart';
 import 'query_cleaner.dart';
 import 'wikipedia_client.dart';
@@ -20,6 +21,16 @@ class MbRecording {
 
   /// Milliseconds, when MusicBrainz knows them.
   final int? length;
+}
+
+/// MusicBrainz did not answer (503 or network) even after the second try.
+class MusicBrainzUnavailable implements Exception {
+  const MusicBrainzUnavailable(this.what);
+
+  final String what;
+
+  @override
+  String toString() => 'MusicBrainzUnavailable($what)';
 }
 
 /// MusicBrainz, the open music database: it says *which* song and *which*
@@ -58,6 +69,20 @@ class MusicBrainzClient {
       if (attempt == 0) await _pause(const Duration(seconds: 2));
     }
     return null;
+  }
+
+  /// The credits of recording [mbid] in one request. Empty when unknown;
+  /// throws [MusicBrainzUnavailable] when the service does not answer after
+  /// the retry (the web seam gives null for 404 and 503 alike, so an unknown
+  /// mbid also lands here: callers pass ids MusicBrainz itself gave).
+  Future<List<TrackCredit>> recordingCredits(String mbid, {CancelToken? cancel}) async {
+    final data = await _get(
+      'recording/$mbid',
+      {'inc': 'artist-rels+work-rels+work-level-rels'},
+      cancel,
+    );
+    if (data == null) throw MusicBrainzUnavailable('recording/$mbid');
+    return parseMbCredits(Map<String, dynamic>.from(data));
   }
 
   /// The recordings called [title] by [artist], best first: the ones whose
@@ -110,11 +135,15 @@ class MusicBrainzClient {
   /// A recording counts only if its title or its first artist is the local
   /// [title] / [artist] (an ISRC is sometimes reused for another song).
   Future<List<MbRecording>> recordingsByIsrc(String isrc, int durationMs,
-      {required String title, required String artist, CancelToken? cancel}) async {
+      {required String title, required String artist, CancelToken? cancel, bool strict = false}) async {
     final code = isrc.trim().toUpperCase();
     if (code.isEmpty) return const [];
     // 404 means an unknown ISRC: no retry.
-    final list = (await _get('isrc/$code', {'inc': 'artist-credits'}, cancel, retry: false))?['recordings'];
+    final data = await _get('isrc/$code', {'inc': 'artist-credits'}, cancel, retry: false);
+    // The web seam gives null for 404 and for no answer alike. [strict] (credits)
+    // takes it as «no answer», so «nothing found» is never remembered by mistake.
+    if (data == null && strict) throw MusicBrainzUnavailable('isrc/$code');
+    final list = data?['recordings'];
     if (list is! List) return const [];
     final wantTitle = matchKey(title);
     final wantArtist = matchKey(extractPrimaryArtist(artist));

@@ -116,7 +116,7 @@ class _Host implements ShuffleHost {
   void fail() => _fail.add(const PlaybackFailure('x', PlaybackFailureReason.onlineUnavailable));
 }
 
-Track track(int id) => Track(
+Track track(int id) => Track(coverSource: 0, 
       id: id,
       path: '/m/$id.mp3',
       title: 'Song $id',
