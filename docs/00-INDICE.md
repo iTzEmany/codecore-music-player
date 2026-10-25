@@ -91,13 +91,12 @@ Un task deve stare in una sola sessione breve; se è troppo grande, spezzalo e a
 Avvia Claude Code nella radice del progetto (`codecore-music-player/`) e digita:
 | Comando | Effetto |
 |---|---|
-| `/obiettivo` | Esegue tutte le fasi rimaste, una dietro l'altra, fino alla fine o a un blocco (i task con pacchetti non approvati restano bloccati e si va avanti) |
+| `/obiettivo` | Esegue la prossima fase non chiusa |
 | `/obiettivo fase 2` | Solo quella fase |
 | `/obiettivo stato` | Riassunto: task fatti, prossimo, «Tocca a te» |
 | `/obiettivo pausa` | Si ferma subito (puoi anche premere Esc e scrivere «stop») |
 | `/obiettivo riprendi` | Riparte dal primo task non spuntato |
 
-Cosa fa: un task alla volta → `flutter analyze` + `flutter test` (+ build) → spunta `PROGRESS.md` → commit
-locale di checkpoint (repo git del progetto, nessun push). Le cose che solo tu puoi fare
+Cosa fa (skill globale `~/.claude/skills/obiettivo/`, profilo `.claude/obiettivo.md`): una PR per fase in auto-merge,
+un commit per task, test mirati in locale e suite completa in CI. Le cose che solo tu puoi fare
 (sudo, telefono, ascolto) finiscono in «Tocca a te» nel file `.claude/obiettivi/*.md` senza fermare il resto.
-Ripartenza da checkpoint: `git log --oneline`, poi `git checkout <commit>` o `git stash list` per i task bloccati.

@@ -41,5 +41,5 @@ flutter build linux / windows   # windows solo da una macchina Windows
 - Non toccare file fuori dalla cartella del progetto (la radice del repo, `codecore-music-player/`). Mai modificare la vecchia app Python.
 
 ## Modalità autonoma
-`/obiettivo` (skill in `.claude/skills/obiettivo/`) esegue il piano da solo, task dopo task, con test locali e
-commit di checkpoint. Vedi `docs/00-INDICE.md`. Avvia Claude Code **nella radice del progetto** (`codecore-music-player/`).
+`/obiettivo` (skill globale in `~/.claude/skills/obiettivo/`, profilo del progetto in `.claude/obiettivo.md`) esegue il piano
+da solo, una PR per fase. Vedi `docs/00-INDICE.md`. Avvia Claude Code **nella radice del progetto** (`codecore-music-player/`).
