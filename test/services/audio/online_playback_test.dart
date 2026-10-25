@@ -1,17 +1,24 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/data/repositories/play_history_repository.dart';
 import 'package:codecore/data/repositories/track_repository.dart';
+import 'package:codecore/providers/database_providers.dart';
+import 'package:codecore/providers/player_providers.dart';
+import 'package:audio_service/audio_service.dart' show AudioProcessingState;
 import 'package:codecore/services/audio/audio_backend.dart';
 import 'package:codecore/services/audio/codecore_audio_handler.dart';
 import 'package:codecore/services/audio/online_entries.dart';
 import 'package:codecore/services/audio/play_queue.dart';
-import 'package:codecore/services/audio/stream_address_cache.dart';
 import 'package:codecore/services/online/youtube_service.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/fake_backend.dart';
+import '../../support/fake_stream_preparer.dart';
 
 Future<void> settle() => pumpEventQueue();
 
@@ -30,73 +37,193 @@ void main() {
   late FakeBackend backend;
   late OnlineEntries online;
   late CodecoreAudioHandler handler;
+  late FakeStreamPreparer preparer;
+  late Directory dir;
   late List<int> ids;
   late List<PlaybackFailure> failures;
-  late List<String> asked;
-  late List<bool> askedFast;
-  final prefetched = <String>[];
-
-  // Every request answers with a fresh address (far from expiring).
-  Uri addressFor(String id, int n) {
-    final exp = DateTime.now().add(const Duration(hours: 5)).millisecondsSinceEpoch ~/ 1000;
-    return Uri.parse('https://stream.test/$id/$n?expire=$exp');
-  }
 
   setUp(() async {
     db = AppDatabase(NativeDatabase.memory());
     backend = FakeBackend();
     online = OnlineEntries();
     failures = [];
-    asked = [];
-    askedFast = [];
-    prefetched.clear();
+    dir = Directory.systemTemp.createTempSync('online_playback');
     for (final n in ['a', 'b']) {
       await db.into(db.tracks).insert(TracksCompanion.insert(
           path: '/m/$n.mp3', title: n, albumKey: 'k', format: 'mp3',
           sizeBytes: 1, mtimeMs: 1, addedAt: 1, durationMs: const Value(200000)));
     }
     ids = (await db.select(db.tracks).get()).map((t) => t.id).toList();
-    final cache = _SpyCache((r, {required fast}) async {
-      asked.add(r.id);
-      askedFast.add(fast);
-      return StreamAddress(addressFor(r.id, asked.length),
-          headers: const {'User-Agent': 'vr'}, fast: fast);
-    }, prefetched);
+    preparer = FakeStreamPreparer(TrackRepository(db), dir);
     handler = CodecoreAudioHandler(backend, PlayQueue(), TrackRepository(db),
         onError: failures.add,
         history: PlayHistoryRepository(db),
         online: online,
-        addresses: cache);
+        preparer: preparer);
   });
   tearDown(() async {
     await handler.dispose();
     await db.close();
+    dir.deleteSync(recursive: true);
   });
 
-  test('an online entry loads the address, not a file', () async {
+  Future<void> listenTo(int seconds) async {
+    for (var s = 0; s <= seconds; s += 5) {
+      backend.posC.add(Duration(seconds: s));
+      await Future<void>.delayed(Duration.zero);
+    }
+  }
+
+  test('an online entry loads the cached file, not an address', () async {
     final id = online.register(result('v1'));
-    await handler.playQueue([id], 0);
+    final gate = preparer.gates['youtube:v1'] = Completer<void>();
+    final started = handler.playQueue([id], 0);
+    await settle();
+    expect(handler.playbackState.value.processingState, AudioProcessingState.loading);
     expect(backend.loaded, isEmpty);
-    expect(backend.loadedUris.single.uri.host, 'stream.test');
-    expect(backend.loadedUris.single.uri.path, '/v1/1');
+    gate.complete();
+    await started;
+    expect(backend.loaded.single, endsWith('youtube_v1.m4a'));
+    expect(backend.loadedUris, isEmpty);
+    expect(preparer.queues.first, ['youtube:v1']); // told before the file was asked for
     expect(handler.currentTrack?.id, id);
   });
 
-  test('an expired address is dropped and asked for once more', () async {
-    final id = online.register(result('v1'));
-    backend.expiring.add(addressFor('v1', 1).toString());
-    await handler.playQueue([id], 0);
-    expect(asked, ['v1', 'v1']);
-    expect(backend.loadedUris.single.uri.path, '/v1/2');
-    expect(failures, isEmpty);
+  test('a row of kind 2 plays through the preparer with the key of its path', () async {
+    final file = File('${dir.path}/x.m4a')..writeAsStringSync('x');
+    final rowId = await TrackRepository(db).upsertStreamRow('youtube:v9', result('v9'), file);
+    await handler.playQueue([rowId], 0);
+    expect(preparer.asked, ['youtube:v9']);
+    expect(backend.loaded.single, endsWith('youtube_v9.m4a'));
   });
 
-  test('headers reach the backend; a refused quick address is asked again with the default clients', () async {
+  test('a preparer that fails skips the entry; too many failures end in idle', () async {
+    final bad = [for (final n in ['1', '2', '3', '4', '5']) online.register(result(n))];
+    preparer.failing.addAll([for (final n in ['1', '2', '3', '4', '5']) 'youtube:$n']);
+    await handler.playQueue([...bad, ids[0]], 0);
+    await settle();
+    expect(failures.length, CodecoreAudioHandler.maxConsecutiveErrors + 1);
+    expect(failures.first.reason, PlaybackFailureReason.onlineUnavailable);
+    expect(handler.playbackState.value.processingState, AudioProcessingState.idle);
+    expect(backend.loaded, isEmpty);
+  });
+
+  test('one failure skips to the next track', () async {
     final id = online.register(result('v1'));
-    backend.expiring.add(addressFor('v1', 1).toString());
+    preparer.failing.add('youtube:v1');
+    await handler.playQueue([id, ids[0]], 0);
+    await settle();
+    expect(failures.single.reason, PlaybackFailureReason.onlineUnavailable);
+    expect(handler.currentTrack?.id, ids[0]);
+  });
+
+  test('the next track still downloading at the end stays loading, then plays by itself', () async {
+    final id = online.register(result('v2'));
+    final gate = preparer.gates['youtube:v2'] = Completer<void>();
+    await handler.playQueue([ids[0], id], 0);
+    backend.stateC.add(BackendState.completed);
+    await settle();
+    expect(handler.currentTrack?.id, id);
+    expect(handler.playbackState.value.processingState, AudioProcessingState.loading);
+    expect(backend.loaded, ['/m/a.mp3']);
+    gate.complete();
+    await settle();
+    expect(backend.loaded.last, endsWith('youtube_v2.m4a'));
+    expect(backend.playing, isTrue);
+  });
+
+  test('the player never sets a streamed track as the backend next track', () async {
+    final id = online.register(result('v2'));
+    await handler.playQueue([ids[0], id], 0);
+    await settle();
+    expect(backend.nextCalls.whereType<String>(), isEmpty);
+  });
+
+  test('two full listens of a streamed track count on its shadow row', () async {
+    final id = online.register(result('v1'));
+    for (var i = 0; i < 2; i++) {
+      await handler.playQueue([id], 0);
+      await listenTo(100);
+      backend.stateC.add(BackendState.completed);
+      await settle();
+    }
+    final row = await TrackRepository(db).streamRow('youtube:v1');
+    final plays = await db.select(db.plays).get();
+    expect(plays.length, 2);
+    expect(plays.every((p) => p.trackId == row!.id), isTrue);
+    expect(row!.playCount, 2);
+  });
+
+  test('liveCurrentTrackProvider shows the shadow row once the enrichment wrote the lyrics', () async {
+    final id = online.register(result('v1'));
+    final container = ProviderContainer(overrides: [
+      databaseProvider.overrideWithValue(db),
+      audioHandlerProvider.overrideWithValue(handler),
+    ]);
+    addTearDown(container.dispose);
+    container.listen(liveCurrentTrackProvider, (_, _) {});
     await handler.playQueue([id], 0);
-    expect(askedFast, [true, false]);
-    expect(backend.loadedUris.single.headers, {'User-Agent': 'vr'});
+    await settle();
+    final row = (await TrackRepository(db).streamRow('youtube:v1'))!;
+    await (db.update(db.tracks)..where((t) => t.id.equals(row.id)))
+        .write(const TracksCompanion(lyricsPlain: Value('la la')));
+    await settle();
+    final live = container.read(liveCurrentTrackProvider).value;
+    expect(live?.id, id);
+    expect(live?.lyricsPlain, 'la la');
+  });
+
+  test('the old track pauses while the file comes; A ending meanwhile does not skip B', () async {
+    final id = online.register(result('v2'));
+    final gate = preparer.gates['youtube:v2'] = Completer<void>();
+    await handler.playQueue([ids[0], id], 0);
+    backend.playing = true;
+    backend.stateC.add(BackendState.playing);
+    await settle();
+    final started = handler.skipToNext();
+    await settle();
+    backend.stateC.add(BackendState.completed); // A ends while B is fetched
+    await settle();
+    expect(handler.currentTrack?.id, id);
+    expect(handler.playbackState.value.processingState, AudioProcessingState.loading);
+    gate.complete();
+    await started;
+    await settle();
+    expect(backend.loaded.last, endsWith('youtube_v2.m4a'));
+    expect(backend.playing, isTrue);
+    expect(handler.queueIds.length, 2);
+  });
+
+  test('pause while the file comes: it loads paused', () async {
+    final id = online.register(result('v2'));
+    final gate = preparer.gates['youtube:v2'] = Completer<void>();
+    final started = handler.playQueue([id], 0);
+    await settle();
+    await handler.pause();
+    gate.complete();
+    await started;
+    expect(backend.loaded.single, endsWith('youtube_v2.m4a'));
+    expect(backend.playing, isFalse);
+  });
+
+  test('no listen is counted for B before its file loads', () async {
+    final id = online.register(result('v2'));
+    final gate = preparer.gates['youtube:v2'] = Completer<void>();
+    final started = handler.playQueue([id], 0);
+    await settle();
+    await listenTo(100); // positions of the old track
+    expect(await db.select(db.plays).get(), isEmpty);
+    gate.complete();
+    await started;
+  });
+
+  test('a failed restore while paused does not start the next track', () async {
+    final bad = online.register(result('v1'));
+    preparer.failing.add('youtube:v1');
+    await handler.restore([bad, ids[0]], 0, Duration.zero);
+    await settle();
+    expect(handler.currentTrack?.id, ids[0]);
+    expect(backend.playing, isFalse);
   });
 
   test('replaceQueueId swaps a stream entry for a library track in place', () async {
@@ -112,34 +239,11 @@ void main() {
     expect(handler.replaceQueueId(-99, ids[1]), isFalse);
   });
 
-  test('two failures skip to the next track with the online reason', () async {
-    final id = online.register(result('v1'));
-    backend.expiring.addAll([addressFor('v1', 1).toString(), addressFor('v1', 2).toString()]);
-    await handler.playQueue([id, ids[0]], 0);
-    await settle();
-    expect(failures.single.reason, PlaybackFailureReason.onlineUnavailable);
-    expect(backend.loaded, ['/m/a.mp3']);
-    expect(handler.currentTrack?.id, ids[0]);
-  });
-
   test('an entry missing from the registry is skipped as not in library', () async {
     await handler.playQueue([-99, ids[0]], 0);
     await settle();
     expect(failures.single.reason, PlaybackFailureReason.notInLibrary);
     expect(handler.currentTrack?.id, ids[0]);
-  });
-
-  test('listening to an online entry to the end writes no history and no count', () async {
-    final id = online.register(result('v1'));
-    await handler.playQueue([id], 0);
-    for (var s = 0; s <= 100; s += 5) {
-      backend.posC.add(Duration(seconds: s));
-      await Future<void>.delayed(Duration.zero);
-    }
-    backend.stateC.add(BackendState.paused);
-    await settle();
-    expect(await db.select(db.plays).get(), isEmpty);
-    expect((await db.select(db.tracks).get()).every((t) => t.playCount == 0), isTrue);
   });
 
   test('the notification item comes from the synthetic track', () async {
@@ -153,13 +257,6 @@ void main() {
     expect(item.album, 'Alb');
     expect(item.artUri.toString(), 'https://lh3.googleusercontent.com/x=w544-h544-l90-rj');
     expect(item.extras, {'online': true});
-  });
-
-  test('the address of the next online entry is asked ahead of time', () async {
-    final id = online.register(result('v2'));
-    await handler.playQueue([ids[0], id], 0);
-    await settle();
-    expect(prefetched, ['v2']);
   });
 
   test('insertAt and removeQueueId change the queue and tell the listeners', () async {
@@ -177,15 +274,4 @@ void main() {
     expect(handler.sourceIds, [ids[0], ids[1]]);
     await sub.cancel();
   });
-}
-
-class _SpyCache extends StreamAddressCache {
-  _SpyCache(super.resolve, this.log);
-  final List<String> log;
-
-  @override
-  void prefetch(YtResult r) {
-    log.add(r.id);
-    super.prefetch(r);
-  }
 }

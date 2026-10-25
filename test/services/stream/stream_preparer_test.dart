@@ -76,7 +76,12 @@ void main() {
   StreamEnricher? enrich;
   late StreamPreparer prep;
 
-  StreamPreparer make({Duration cooldown = const Duration(minutes: 5)}) => prep = StreamPreparer(
+  StreamPreparer make({
+    Duration cooldown = const Duration(minutes: 5),
+    Duration attemptTimeout = const Duration(minutes: 5),
+  }) =>
+      prep = StreamPreparer(
+        attemptTimeout: attemptTimeout,
         cache: cache,
         tracks: tracks,
         youtube: yt,
@@ -221,6 +226,37 @@ void main() {
     final f = prep.ready('youtube:a', _r('a'));
     yt.finish('a');
     await f;
+    expect(yt.started, ['a']);
+  });
+
+  test('requested jobs start in queue order: after fast skipping the current one is first', () async {
+    prep.setQueue([for (final n in ['a', 'b', 'c', 'd']) _i(n)]);
+    await _until(() => yt.started.length == 2);
+    // The user skipped to d, then back to c: both asked, d first.
+    final d = prep.ready('youtube:d', _r('d'));
+    final c = prep.ready('youtube:c', _r('c'));
+    yt.finish('a');
+    await _until(() => yt.started.length == 3);
+    expect(yt.started[2], 'c');
+    yt.finish('b');
+    await _until(() => yt.started.length == 4);
+    yt.finish('c');
+    yt.finish('d');
+    await Future.wait([c, d]);
+  });
+
+  test('an attempt that hangs counts as failed: retry once, then error', () async {
+    make(attemptTimeout: const Duration(milliseconds: 30));
+    await expectLater(prep.ready('youtube:slow', _r('slow')), throwsA(isA<TimeoutException>()));
+    expect(yt.started, ['slow', 'slow']);
+  });
+
+  test('a cache hit without a shadow row makes the row', () async {
+    yt.autoFinish = true;
+    await prep.ready('youtube:a', _r('a'));
+    await db.delete(db.tracks).go();
+    await prep.ready('youtube:a', _r('a'));
+    expect(await tracks.streamRow('youtube:a'), isNotNull);
     expect(yt.started, ['a']);
   });
 

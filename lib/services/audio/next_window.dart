@@ -1,5 +1,6 @@
 import '../../data/db/app_database.dart';
 import '../../data/repositories/track_repository.dart';
+import 'online_entries.dart';
 import 'audio_backend.dart';
 import 'play_queue.dart';
 import 'resume_point.dart';
@@ -68,6 +69,8 @@ class NextWindow {
       next = id == current.id ? current : await _tracks.getById(id);
       if (token != _token) return;
     }
+    // Streamed tracks always start with a plain load (K-08).
+    if (next != null && isStreamTrack(next)) next = null;
     // A track with a saved place must start there: that is a normal load.
     if (next != null && resumeStartFor(next.resumePositionMs) != null) {
       next = null;

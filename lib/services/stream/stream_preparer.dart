@@ -54,6 +54,7 @@ class StreamPreparer {
     this.maxParallel = 2,
     this.meteredAhead = 3,
     this.cooldown = const Duration(minutes: 5),
+    this.attemptTimeout = const Duration(minutes: 5),
   });
 
   final StreamCache cache;
@@ -65,6 +66,9 @@ class StreamPreparer {
 
   /// Pause of the prefetch after a 403/429 (like Shuffle+'s source cooldown).
   final Duration cooldown;
+
+  /// Longest a single download attempt may take.
+  final Duration attemptTimeout;
 
   /// Phase per key, updated only when it changes (never the byte count).
   final phases = ValueNotifier<Map<String, StreamPhase>>({});
@@ -81,6 +85,7 @@ class StreamPreparer {
   /// The upcoming online entries, current first. Pins current + next 2.
   void setQueue(List<StreamItem> items) {
     if (_disposed) return;
+    if (items.isEmpty && _queue.isEmpty) return;
     _queue = List.of(items);
     final want = {for (final i in items.take(3)) i.key};
     for (final k in _pinned.difference(want)) {
@@ -97,10 +102,12 @@ class StreamPreparer {
     _jobs.removeWhere((k, j) =>
         !inQueue.contains(k) && !j.requested && j.phase != StreamPhase.downloading);
     final keep = {...inQueue, ..._jobs.keys};
-    phases.value = {
-      for (final e in phases.value.entries)
-        if (keep.contains(e.key)) e.key: e.value,
-    };
+    if (phases.value.keys.any((k) => !keep.contains(k))) {
+      phases.value = {
+        for (final e in phases.value.entries)
+          if (keep.contains(e.key)) e.key: e.value,
+      };
+    }
     _pump();
   }
 
@@ -114,6 +121,8 @@ class StreamPreparer {
       final file = await cache.fileFor(key);
       if (file != null) {
         await cache.touch(key);
+        // A file cached by an earlier session may have lost its row: plays need it.
+        if (await tracks.streamRow(key) == null) await tracks.upsertStreamRow(key, r, file);
         _setPhase(key, StreamPhase.ready);
         return file;
       }
@@ -180,7 +189,14 @@ class StreamPreparer {
   Future<void> _fill() async {
     if (_disposed) return;
     // Requested jobs first, whatever the network or the pause.
-    for (final j in _jobs.values.where((j) => j.requested && j.phase == StreamPhase.queued).toList()) {
+    // Queue order: the current track first, keys outside the queue last.
+    int rank(_Job j) {
+      final i = _queue.indexWhere((q) => q.key == j.key);
+      return i < 0 ? _queue.length : i;
+    }
+    final requested = _jobs.values.where((j) => j.requested && j.phase == StreamPhase.queued).toList()
+      ..sort((a, b) => rank(a).compareTo(rank(b)));
+    for (final j in requested) {
       if (_active >= maxParallel) return;
       _start(j);
     }
@@ -280,9 +296,14 @@ class StreamPreparer {
     final tmp = Directory(p.join(cache.dir.path, '.dl-$name'));
     try {
       String? path;
-      await for (final e in youtube.download(j.result, tmp, cancel: _cancel)) {
-        path = e.path ?? path;
-      }
+      // One attempt that hangs counts as a failed attempt.
+      path = await (() async {
+        String? found;
+        await for (final e in youtube.download(j.result, tmp, cancel: _cancel)) {
+          found = e.path ?? found;
+        }
+        return found;
+      })().timeout(attemptTimeout);
       if (path == null) throw StateError('download ended without a file');
       return await File(path).rename(p.join(cache.dir.path, '$name${p.extension(path)}.part'));
     } finally {

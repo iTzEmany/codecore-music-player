@@ -27,6 +27,8 @@ import 'providers/database_providers.dart';
 import 'providers/youtube_providers.dart' show createYtDlpService, ytDlpServiceProvider;
 import 'providers/library_providers.dart';
 import 'providers/player_providers.dart';
+import 'providers/stream_providers.dart';
+import 'services/stream/stream_cache.dart';
 import 'providers/radio_providers.dart' show radioClientProvider;
 import 'providers/settings_providers.dart';
 import 'providers/share_providers.dart';
@@ -199,7 +201,8 @@ Future<void> main() async {
   }
 
   if (kPerfBuild) PerfProbe.mark('deviceName', sinceMain);
-  runApp(ProviderScope(
+  final streamCache = await StreamCache.inAppSupport();
+  final container = ProviderContainer(
     overrides: [
       systemDeviceNameProvider.overrideWithValue(systemName),
       databaseProvider.overrideWithValue(db),
@@ -211,9 +214,18 @@ Future<void> main() async {
       playbackPersistenceProvider.overrideWithValue(persistence),
       playerErrorsProvider.overrideWithValue(errors.stream),
       coversDirProvider.overrideWithValue(covers.dir),
+      streamCacheProvider.overrideWithValue(streamCache),
     ],
-    child: const CodecoreApp(),
-  ));
+  );
+  runApp(UncontrolledProviderScope(container: container, child: const CodecoreApp()));
+  // The player downloads streamed tracks through the preparer (45.4); before
+  // the queue comes back, so a restored streamed track finds it.
+  try {
+    await streamCache.open();
+    container.listen(streamPreparerProvider, (_, p) => handler.preparer = p, fireImmediately: true);
+  } on Object catch (e, st) {
+    AppLog.e('stream cache could not be opened: streamed tracks will not play', e, st);
+  }
   // The last queue comes back right after the first frame, not before it:
   // preparing the current song in the player is not needed to draw the app.
   unawaited(() async {

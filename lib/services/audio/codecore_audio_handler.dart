@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:audio_service/audio_service.dart';
@@ -6,7 +7,10 @@ import 'package:audio_service/audio_service.dart';
 import '../../core/app_log.dart';
 import '../../data/db/app_database.dart';
 import '../../data/repositories/play_history_repository.dart';
+import '../../data/repositories/track_kinds.dart';
 import '../../data/repositories/track_repository.dart';
+import '../stream/stream_key.dart';
+import '../stream/stream_preparer.dart';
 import 'audio_backend.dart';
 import '../online/google_thumb.dart';
 import '../online/youtube_service.dart';
@@ -48,6 +52,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     this.onEpisodeHeard,
     this.online,
     this.addresses,
+    this.preparer,
     this.onRadioStart,
     DateTime Function()? clock,
   })  : _clock = clock ?? DateTime.now,
@@ -59,7 +64,8 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
       ..add(_backend.state.listen(_onBackendState))
       ..add(_backend.position.listen(_onPosition))
       ..add(_backend.duration.listen(_onBackendDuration))
-      ..add(_backend.streamTitle.listen(_onStreamTitle));
+      ..add(_backend.streamTitle.listen(_onStreamTitle))
+      ..add(_queueController.stream.listen((_) => unawaited(_syncPreparer())));
     if (backend is GaplessCapable) {
       _subs.add((backend as GaplessCapable)
           .advanced
@@ -93,6 +99,20 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   /// library tracks.
   final OnlineEntries? online;
   final StreamAddressCache? addresses;
+
+  /// Downloads online entries and `kind = 2` rows into the cache; null: they cannot play.
+  /// Set by main once the providers exist, before any queue is restored.
+  StreamPreparer? preparer;
+  int _syncToken = 0;
+
+  /// A streamed track is being fetched: the old one is paused, the backend's
+  /// events and positions are not the new track's. [play]/[pause] only set
+  /// [_playWhenReady] meanwhile.
+  bool _waitingStream = false;
+  bool _playWhenReady = true;
+
+  /// Shadow row of the online entry now playing, once the preparer made it.
+  int? _shadowId;
 
   /// Told (without waiting) each time a radio station starts, not on a
   /// reconnection: the click Radio Browser asks for, the «last played» of a
@@ -331,6 +351,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
 
   Future<void> _loadCurrent({required bool play, Duration? startAt}) async {
     final token = ++_loadToken;
+    _waitingStream = false;
     _cancelRadioTimers();
     final id = _queue.currentId;
     if (id == null) {
@@ -351,18 +372,58 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     _saveResume();
     _lastResumeSave = Duration.zero;
     // An explicit position (restoring a session) wins over the bookmark.
+    // Streams have neither a bookmark nor ReplayGain.
+    final streamKey = entry != null
+        ? entry.result.indexKey
+        : (track.kind == kStreamKind ? keyOfStreamPath(track.path) : null);
     final start = (startAt != null && startAt > Duration.zero)
         ? startAt
-        : (isOnline ? null : resumeStartFor(track.resumePositionMs));
+        : (isOnline || streamKey != null ? null : resumeStartFor(track.resumePositionMs));
     _enterTrack(track);
+    final synced = _syncPreparer();
+    unawaited(synced);
     _publish(AudioProcessingState.loading);
+    var playNow = play;
     try {
       if (radio != null) {
         _radioBusy = true;
         if (play) _notifyRadioStart(radio.station);
         await _backend.loadUri(_streamUri(radio.station));
-      } else if (entry != null) {
-        await _loadStream(entry.result);
+      } else if (streamKey != null) {
+        final p = preparer;
+        if (p == null) throw const BackendException('no stream preparer');
+        // The old track stops now; the new one starts when its file is there.
+        _waitingStream = true;
+        _playWhenReady = play;
+        if (_state == BackendState.playing) await _backend.pause();
+        if (token != _loadToken) return;
+        // The queue goes to the preparer first, so the current one runs first.
+        await synced;
+        if (token != _loadToken) return;
+        final File file;
+        try {
+          file = await p.ready(streamKey, entry?.result ?? _resultOfRow(streamKey, track));
+        } on Object catch (e, st) {
+          AppLog.w('stream $streamKey is not ready', e, st);
+          playNow = _playWhenReady;
+          throw BackendException('stream not ready: $e');
+        }
+        if (token != _loadToken) return;
+        playNow = _playWhenReady;
+        if (entry != null) {
+          try {
+            final row = await _tracks.streamRow(streamKey);
+            if (token != _loadToken) return;
+            if (row != null) {
+              _shadowId = row.id;
+              online?.bindRow(entry.id, row.id);
+            }
+          } on Object catch (e, st) {
+            AppLog.w('shadow row of $streamKey unreadable: plays are not counted', e, st);
+          }
+        }
+        _waitingStream = false;
+        await _backend.load(file.path);
       } else {
         await _backend.load(track.path);
       }
@@ -380,7 +441,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
       }
       _consecutiveErrors = 0;
       // A backend that was playing keeps playing a newly loaded file.
-      if (play) {
+      if (playNow) {
         await _backend.play();
       } else {
         await _backend.pause();
@@ -396,13 +457,16 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
         return;
       }
       await _failAndSkip(
-          isOnline
+          isOnline || streamKey != null
               ? PlaybackFailureReason.onlineUnavailable
               : e.fileMissing
                   ? PlaybackFailureReason.fileMissing
                   : PlaybackFailureReason.unplayable,
           track,
-          token);
+          token,
+          play: playNow);
+    } finally {
+      if (token == _loadToken) _waitingStream = false;
     }
   }
 
@@ -495,30 +559,56 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     if (t != null && _remote == null) mediaItem.add(_toMediaItem(t));
   }
 
-  /// Loads an online entry from its direct address. An address that answers
-  /// 403 / has expired is dropped and asked for once more; any other failure
-  /// (including the resolver's) ends as a [BackendException].
-  Future<void> _loadStream(YtResult r) async {
-    final cache = addresses;
-    if (cache == null) throw const BackendException('no stream resolver');
-    for (var attempt = 0;; attempt++) {
-      final StreamAddress addr;
-      try {
-        addr = await cache.address(r);
-      } on Object catch (e, st) {
-        AppLog.w('no stream address for ${r.id}', e, st);
-        throw BackendException('no stream address: $e');
-      }
-      try {
-        await _backend.loadUri(addr.uri, headers: addr.headers);
-        return;
-      } on BackendException catch (e) {
-        if (!e.expired || attempt > 0) rethrow;
-        AppLog.d('stream address of ${r.id} expired, asking again'
-            '${addr.fast ? ' (default clients)' : ''}');
-        cache.invalidate(r);
+  /// The download request of a shadow row, rebuilt from the row.
+  /// shortcut: a SoundCloud row loses its page address, fix with the first SoundCloud stream.
+  YtResult _resultOfRow(String key, Track row) {
+    final sep = key.indexOf(':');
+    final source = MediaSource.values.firstWhere((m) => m.name == key.substring(0, sep),
+        orElse: () => MediaSource.youtube);
+    final artist = row.artist;
+    return YtResult(
+      id: key.substring(sep + 1),
+      title: row.title,
+      channel: artist ?? '',
+      artists: artist == null ? const [] : [artist],
+      album: row.album,
+      duration: row.durationMs > 0 ? Duration(milliseconds: row.durationMs) : null,
+      source: source,
+    );
+  }
+
+  /// Tells the preparer the upcoming streamed tracks, current first. Online
+  /// entries need no lookup; only the next [_lookupAhead] library ids are read
+  /// from the DB to find kind-2 rows.
+  static const _lookupAhead = 30;
+  Future<void> _syncPreparer() async {
+    final p = preparer;
+    if (p == null) return;
+    final token = ++_syncToken;
+    final from = _queue.currentIndex < 0 ? 0 : _queue.currentIndex;
+    final ids = _queue.items.skip(from).toList();
+    final List<Track> rows;
+    try {
+      rows = await _tracks.getByIds(
+          [for (final i in ids) if (!isOnlineId(i)) i].take(_lookupAhead).toList());
+    } on Object catch (e, st) {
+      AppLog.w('could not read the queue for the stream preparer', e, st);
+      return;
+    }
+    if (token != _syncToken) return;
+    final byId = {for (final r in rows) r.id: r};
+    final out = <StreamItem>[];
+    for (final id in ids) {
+      if (isOnlineId(id)) {
+        final r = online?.entryOf(id)?.result;
+        if (r != null) out.add(StreamItem(r.indexKey, r));
+      } else {
+        final row = byId[id];
+        final key = row == null || row.kind != kStreamKind ? null : keyOfStreamPath(row.path);
+        if (key != null) out.add(StreamItem(key, _resultOfRow(key, row!)));
       }
     }
+    p.setQueue(out);
   }
 
   /// A podcast file's tags or the feed often carry a wrong length: once the
@@ -545,7 +635,8 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     _playedMs = 0;
     _flushedMs = 0;
     _lastTick = null;
-    _gainFactor = gainFactor(track.replayGainDb);
+    _shadowId = null;
+    _gainFactor = isStreamTrack(track) ? 1.0 : gainFactor(track.replayGainDb);
     if (_normalize) unawaited(_applyVolume());
     _position = Duration.zero;
     _duration = track.durationMs > 0 ? Duration(milliseconds: track.durationMs) : null;
@@ -559,7 +650,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   }
 
   Future<void> _failAndSkip(
-      PlaybackFailureReason reason, Track? track, int token) async {
+      PlaybackFailureReason reason, Track? track, int token, {bool play = true}) async {
     _consecutiveErrors++;
     onError(PlaybackFailure(track?.title, reason));
     if (_consecutiveErrors > maxConsecutiveErrors) {
@@ -571,10 +662,11 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
       await _goIdle();
       return;
     }
-    await _loadCurrent(play: true);
+    await _loadCurrent(play: play);
   }
 
   Future<void> _goIdle() async {
+    _waitingStream = false;
     _cancelRadioTimers();
     _radioRetries = 0;
     _radioStale = false;
@@ -635,6 +727,10 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     final wasPlaying = _state == BackendState.playing;
     final wasLive = wasPlaying || _state == BackendState.loading;
     _state = s;
+    if (_waitingStream) {
+      if (s != BackendState.completed) _publish(AudioProcessingState.loading);
+      return;
+    }
     final radio = _radioNow;
     if (radio != null) {
       if (wasPlaying && s == BackendState.paused) _radioPausedAt = _clock();
@@ -690,7 +786,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   /// A track played to its end has no place to come back to.
   void _forgetBookmarkOfFinished() {
     final finished = _current;
-    if (finished == null || isOnlineId(finished.id)) return;
+    if (finished == null || isStreamTrack(finished)) return;
     if (finished.kind == 1) _markHeard(finished);
     if (finished.resumePositionMs != null || _savedResume[finished.id] != null) {
       unawaited(_writeResume(finished, null));
@@ -720,6 +816,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     _consecutiveErrors = 0;
     _lastResumeSave = Duration.zero;
     _enterTrack(prepared);
+    unawaited(_syncPreparer());
     if (stay) {
       await _backend.pause();
       await _backend.seek(Duration.zero);
@@ -736,13 +833,6 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     final window = _window;
     final current = _current;
     if (current == null) return;
-    // The address of an online entry takes seconds: ask while the one before
-    // it plays.
-    final next = _queue.peekNext();
-    if (next != null && isOnlineId(next)) {
-      final r = online?.entryOf(next)?.result;
-      if (r != null) addresses?.prefetch(r);
-    }
     if (window == null) return;
     try {
       await window.refresh(
@@ -750,7 +840,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
         // Into and out of an online entry the change is a plain new load.
         enabled: _transition != TransitionMode.normal &&
             !_pauseAtTrackEnd &&
-            !isOnlineId(current.id),
+            !isStreamTrack(current),
         volumeFor: _volumeFor,
         overlap: (a, b) =>
             _transition == TransitionMode.crossfade &&
@@ -803,14 +893,14 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   }
 
   /// The track just counted as played: opens its row in the history.
-  void _beginListen(Track track) {
+  void _beginListen(Track track, int listenId) {
     final repo = history;
     // Podcast episodes are not music: they stay out of the history and the recap.
-    if (repo == null || !recordHistory || track.kind != 0) return;
+    if (repo == null || !recordHistory || !listenKinds.contains(track.kind)) return;
     _flushedMs = _playedMs;
     _playRow = repo
         .start(
-          track.id,
+          listenId,
           DateTime.now().millisecondsSinceEpoch,
           context: _contextKind,
           contextName: _contextName,
@@ -845,6 +935,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   }
 
   void _onPosition(Duration p) {
+    if (_waitingStream) return;
     _position = p;
     final track = _current;
     _tickPlayed(p);
@@ -856,16 +947,17 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
       _saveResume();
     }
     if (_playCounted || track == null || _state != BackendState.playing) return;
-    // Online entries are not in the database: no play count, no history.
-    if (isOnlineId(track.id)) return;
+    // An online entry counts on its shadow row; radio has none (and no row yet).
+    final listenId = isOnlineId(track.id) ? _shadowId : track.id;
+    if (listenId == null) return;
     final total = _duration;
     final half = total != null && total > Duration.zero && p * 2 >= total;
     if (half || p >= const Duration(seconds: 30)) {
       _playCounted = true;
-      _tracks.registerPlay(track.id).catchError((Object e, StackTrace st) {
+      _tracks.registerPlay(listenId).catchError((Object e, StackTrace st) {
         AppLog.w('registerPlay failed', e, st);
       });
-      _beginListen(track);
+      _beginListen(track, listenId);
     }
   }
 
@@ -911,6 +1003,10 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     final remote = _remote;
     if (remote != null) return remote.play();
     if (_queue.currentId == null) return;
+    if (_waitingStream) {
+      _playWhenReady = true;
+      return;
+    }
     if (_current == null ||
         _state == BackendState.idle ||
         _state == BackendState.completed) {
@@ -940,7 +1036,13 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   }
 
   @override
-  Future<void> pause() => _remote?.pause() ?? _backend.pause();
+  Future<void> pause() {
+    if (_waitingStream && _remote == null) {
+      _playWhenReady = false;
+      return Future.value();
+    }
+    return _remote?.pause() ?? _backend.pause();
+  }
 
   @override
   Future<void> stop() async {
@@ -1249,7 +1351,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   /// Stores where the current track is (only if it is long enough to matter).
   void _saveResume() {
     final t = _current;
-    if (t == null || isOnlineId(t.id)) return;
+    if (t == null || isStreamTrack(t)) return;
     final length = t.durationMs > 0 ? t.durationMs : (_duration?.inMilliseconds ?? 0);
     final episode = t.kind == 1;
     if (episode && episodeHeard(_position, length)) _markHeard(t);

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/data/repositories/track_repository.dart';
 import 'package:codecore/providers/database_providers.dart';
@@ -13,6 +15,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/fake_backend.dart';
+import '../support/fake_stream_preparer.dart';
 
 void main() {
   late AppDatabase db;
@@ -32,6 +35,7 @@ void main() {
       repo,
       onError: (_) {},
       online: online,
+      preparer: FakeStreamPreparer(repo, Directory.systemTemp.createTempSync('queue_provider')),
       addresses: StreamAddressCache(
         (r, {required fast}) async =>
             StreamAddress(Uri.parse('https://stream.test/${r.id}')),
@@ -96,6 +100,7 @@ void main() {
       c.listen(liveCurrentTrackProvider, (_, _) {});
       await pumpEventQueue();
       final t = await c.read(liveCurrentTrackProvider.future);
+      // Once the preparer made the shadow row its data comes under the entry's id.
       expect(t?.id, onlineId);
       expect(t?.title, 'Streamed');
     },

@@ -1,14 +1,18 @@
+import 'dart:io';
+
 import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/data/repositories/play_history_repository.dart';
 import 'package:codecore/data/repositories/track_repository.dart';
 import 'package:codecore/services/audio/audio_backend.dart';
 import 'package:codecore/services/audio/codecore_audio_handler.dart';
 import 'package:codecore/services/audio/play_queue.dart';
+import 'package:codecore/services/online/youtube_service.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/fake_backend.dart';
+import '../../support/fake_stream_preparer.dart';
 
 /// Lets every pending async step run, without waiting on the wall clock.
 Future<void> settle() => pumpEventQueue();
@@ -67,6 +71,26 @@ void main() {
     await handler.skipToNext();
     await settle();
     expect((await plays()).single.msPlayed, closeTo(40000, 500));
+  });
+
+  test('a streamed shadow row (kind 2) is listened to like a normal track', () async {
+    final dir = Directory.systemTemp.createTempSync('history_stream');
+    addTearDown(() => dir.deleteSync(recursive: true));
+    final repo = TrackRepository(db);
+    final file = File('${dir.path}/s.m4a')..writeAsStringSync('x');
+    final rowId = await repo.upsertStreamRow(
+        'youtube:s1', const YtResult(id: 's1', title: 'S', channel: 'C', duration: null), file);
+    await handler.dispose();
+    handler = CodecoreAudioHandler(backend, PlayQueue(), repo,
+        onError: (_) {},
+        history: PlayHistoryRepository(db),
+        preparer: FakeStreamPreparer(repo, dir));
+    await handler.playQueue([rowId], 0);
+    await play(0, 40);
+    await handler.stop();
+    await settle();
+    expect((await plays()).single.trackId, rowId);
+    expect((await repo.getById(rowId))!.playCount, 1);
   });
 
   test('a seek forward does not inflate the time', () async {
