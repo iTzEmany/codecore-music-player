@@ -146,6 +146,33 @@ class CreditsRepository {
     int trackId,
   ) async => (await portableOfMany([trackId]))[trackId]!;
 
+  /// [portableOf] again whenever this track's credits or details change.
+  /// Watches only a per-track query (not `tracks`): drift drops equal results.
+  Stream<({List<TrackCredit> credits, TrackDetails? details})> watchPortableOf(
+    int trackId,
+  ) => _db
+      .customSelect(
+        'SELECT name, role, source, NULL AS d FROM track_credits '
+        'WHERE track_id = ?1 UNION ALL '
+        'SELECT NULL, NULL, NULL, details FROM track_enrich WHERE track_id = ?1',
+        variables: [Variable<int>(trackId)],
+        readsFrom: {_db.trackCredits, _db.trackEnrich},
+      )
+      .watch()
+      .asyncMap((_) => portableOf(trackId));
+
+  /// [creditedTracks] again whenever credits with this key change.
+  Stream<List<({String role, Track track})>> watchCreditedTracks(
+    String nameKey,
+  ) => _db
+      .customSelect(
+        'SELECT track_id, role FROM track_credits WHERE name_key = ?',
+        variables: [Variable<String>(nameKey)],
+        readsFrom: {_db.trackCredits},
+      )
+      .watch()
+      .asyncMap((_) => creditedTracks(nameKey));
+
   /// [portableOf] for many tracks in two queries; every id has an entry.
   Future<Map<int, ({List<TrackCredit> credits, TrackDetails? details})>>
   portableOfMany(Iterable<int> ids) async {

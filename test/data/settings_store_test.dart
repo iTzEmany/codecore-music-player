@@ -48,6 +48,14 @@ void main() {
     expect(store.readSettings().creditsDetails, isTrue);
   });
 
+  test('autoCuriosities is off by default and round trips', () async {
+    SharedPreferences.setMockInitialValues({});
+    final store = await SettingsStore.open();
+    expect(store.readSettings().autoCuriosities, isFalse);
+    await store.writeSettings(const AppSettings(autoCuriosities: true));
+    expect(store.readSettings().autoCuriosities, isTrue);
+  });
+
   test('playback speed defaults to 1× and is kept within 0.5–2', () async {
     SharedPreferences.setMockInitialValues({});
     final store = await SettingsStore.open();

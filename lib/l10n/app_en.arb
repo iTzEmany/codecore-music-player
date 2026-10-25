@@ -2939,5 +2939,7 @@
         "type": "String"
       }
     }
-  }
+  },
+  "autoCuriosities": "Automatic trivia",
+  "autoCuriositiesHint": "Looks up trivia on Wikipedia for new tracks"
 }

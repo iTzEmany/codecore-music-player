@@ -3485,5 +3485,7 @@
         "type": "String"
       }
     }
-  }
+  },
+  "autoCuriosities": "Curiosità automatiche",
+  "autoCuriositiesHint": "Cerca le curiosità su Wikipedia per i brani nuovi"
 }

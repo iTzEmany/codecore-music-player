@@ -5457,4 +5457,11 @@ class AppLocalizationsIt extends AppLocalizations {
   String creditsOpenArtist(String name) {
     return 'Apri $name';
   }
+
+  @override
+  String get autoCuriosities => 'Curiosità automatiche';
+
+  @override
+  String get autoCuriositiesHint =>
+      'Cerca le curiosità su Wikipedia per i brani nuovi';
 }

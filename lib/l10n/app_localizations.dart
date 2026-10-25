@@ -8654,6 +8654,18 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Apri {name}'**
   String creditsOpenArtist(String name);
+
+  /// No description provided for @autoCuriosities.
+  ///
+  /// In it, this message translates to:
+  /// **'Curiosità automatiche'**
+  String get autoCuriosities;
+
+  /// No description provided for @autoCuriositiesHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Cerca le curiosità su Wikipedia per i brani nuovi'**
+  String get autoCuriositiesHint;
 }
 
 class _AppLocalizationsDelegate

@@ -1,0 +1,98 @@
+import '../../core/app_log.dart';
+import '../../data/db/app_database.dart' show Track;
+import '../../data/repositories/artist_info_repository.dart';
+import '../../data/repositories/track_repository.dart';
+import 'curiosity_finder.dart';
+import 'http_client.dart';
+import 'query_cleaner.dart';
+
+/// What the last search could not do, per part: `songLimited` / `artistLimited`
+/// = Wikipedia refused (too many requests), so «nothing found» would be a lie.
+class CuriosityOutcome {
+  const CuriosityOutcome({
+    this.songLimited = false,
+    this.artistLimited = false,
+    this.failed = false,
+    this.nothing = false,
+  });
+
+  final bool songLimited, artistLimited, failed, nothing;
+
+  bool get limited => songLimited || artistLimited;
+
+  /// Asked and answered with no page at all (not an error, not a refusal):
+  /// the only case worth a `curio_none_at` mark.
+  bool get foundEmpty => nothing && !failed && !limited;
+}
+
+/// The curiosity search of one track: finder, then song text on the track and
+/// artist bio in `artist_infos`. No Riverpod, so the enrichment chain can use it.
+class CuriosityService {
+  CuriosityService({
+    required this.finder,
+    required this.tracks,
+    required this.artistInfos,
+  });
+
+  final CuriosityFinder finder;
+  final TrackRepository tracks;
+  final ArtistInfoRepository artistInfos;
+
+  Future<CuriosityOutcome> fetch(Track t, String lang) async {
+    final c = cleanSearchQuery(t.title, t.artist ?? '');
+    var songLimited = false, artistLimited = false, failed = false;
+
+    // Identity first (MusicBrainz → Wikidata → the exact pages), the names
+    // after; each part reports on its own, so one failing does not lose the other.
+    final found = await finder.find(
+      c.title,
+      c.artist,
+      lang,
+      isrc: t.isrc,
+      durationMs: t.durationMs,
+    );
+    final song = found.song, artist = found.artist;
+    final songDone = found.songError == null;
+    for (final (err, isSong) in [
+      (found.songError, true),
+      (found.artistError, false),
+    ]) {
+      if (err == null) continue;
+      if (err is RateLimitedException) {
+        AppLog.w('curiosity refused', err);
+        isSong ? songLimited = true : artistLimited = true;
+      } else {
+        AppLog.w('curiosity lookup failed', err);
+        failed = true;
+      }
+    }
+    try {
+      // A new search replaces what was saved before, also with nothing: an
+      // older version could have saved the artist's page as the song's. A part
+      // that could not be asked is left as it was.
+      if (songDone) {
+        await tracks.setCuriosities(
+          t.id,
+          song == null ? null : '${song.text}\n${song.source}',
+        );
+      }
+      if (artist != null) {
+        await artistInfos.save(
+          c.artist,
+          body: artist.text,
+          source: artist.source,
+          lang: artist.lang,
+        );
+      }
+    } on Object catch (e, st) {
+      AppLog.w('could not save the curiosities', e, st);
+      failed = true;
+    }
+    return CuriosityOutcome(
+      songLimited: songLimited,
+      artistLimited: artistLimited,
+      failed: failed,
+      nothing: song == null && artist == null,
+    );
+  }
+}

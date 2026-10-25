@@ -44,7 +44,6 @@ class _CreditsCardState extends ConsumerState<CreditsCard> {
       failed = true;
     }
     if (!mounted) return;
-    ref.invalidate(trackCreditsProvider(t.id));
     setState(() => _busy = false);
     if (failed) showMsg(context, l.creditsRefreshFailed);
   }
