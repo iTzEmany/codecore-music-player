@@ -10,6 +10,7 @@ import '../services/online/itunes_client.dart';
 import '../services/online/lrclib_client.dart';
 import '../services/online/curiosity_finder.dart';
 import '../services/online/deezer_client.dart';
+import '../services/online/deezer_gw_client.dart';
 import '../services/online/discogs_client.dart';
 import '../core/app_log.dart';
 import '../services/online/musicbrainz_client.dart';
@@ -44,6 +45,10 @@ final itunesClientProvider = Provider(
 );
 final deezerClientProvider = Provider(
   (ref) => DeezerClient(ref.watch(webClientProvider)),
+);
+final deezerGwClientProvider = Provider(
+  // shortcut: a one-off Registro line needs a LogEntry kind (phase 53); AppLog until then.
+  (ref) => DeezerGwClient(onPaused: () => AppLog.w('deezer_gw: paused for 24 hours after 3 errors')),
 );
 final lrclibClientProvider = Provider(
   (ref) => LrclibClient(ref.watch(webClientProvider)),
