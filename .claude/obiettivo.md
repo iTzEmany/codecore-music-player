@@ -4,7 +4,7 @@
 
 ## Documenti da leggere all'avvio
 - `CLAUDE.md`, `docs/01-regole-di-lavoro.md`, `docs/PROGRESS.md`, `docs/decisioni.md`, `docs/handoff.md`, `docs/gotchas.md`
-- Feature in corso: `docs/feature-streaming.md` e solo il `docs/fase-N-*.md` corrente
+- Feature in corso: `docs/feature-arricchimento.md` (fasi 50–54) e solo il `docs/fase-N-*.md` corrente; `docs/feature-streaming.md` solo se serve
 
 ## Modalità
 - **PR**: ramo da `origin/master` → PR → `gh pr merge --auto --squash`. **Una PR per fase, un commit per task** (memoria).
@@ -33,9 +33,11 @@
 | mai | `build/metadata_god` (Rust, lungo da rifare), `~/.pub-cache`, file musicali del telefono |
 
 ## Regole extra del progetto
-- Aree a rischio (`/code-review high`): audio handler (`codecore_audio_handler.dart`), query su `tracks` (righe ombra K-02), protocollo Jam
-- Nessun pacchetto nuovo (fasi 45–49); schema DB invariato (v14)
+- Aree a rischio (`/code-review high`): audio handler (`codecore_audio_handler.dart`), query su `tracks` (righe ombra K-02), protocollo Jam; dalla fase 50: migrazione v15, backup e ripristino, `EnrichmentService` (arricchimento di oggi), query delle liste e della ricerca, chi scrive le copertine
+- Nessun pacchetto nuovo (fasi 45–54). Schema DB: v15 solo nella fase 50, in un solo passo di migrazione; poi invariato
+- Chiamate dal vivo a Deezer, MusicBrainz, NetEase, lyrics.ovh solo per salvare le risposte di test (fixture), mai nella suite
 - Telefono Mi A3 (`0d7ae9df206e`): installare, misurare, pilotare; disinstallare solo con `-k`; mai cancellare dati o file musicali; niente invii/Jam verso altri (D-91)
+- Motorola edge 40 (`ZY22HKD85K`, libreria vera) nelle fasi 50–54 (D-125, D-126): APK debug e prove con i brani presenti; prima chiedi all'utente un backup completo dall'app; firma diversa → fermati, backup confermato, poi `uninstall -k` e ripristino; mai cancellare file musicali
 
 ## Stime misurate
 - `sorveglia.sh`: la stima vuole l'unità (`6m`); un numero nudo vale secondi (2026-10-25)

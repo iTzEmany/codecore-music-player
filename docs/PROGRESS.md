@@ -675,6 +675,64 @@ Note: D-89 (Jam: tap e «Riproduci dopo» vanno in coda) nella UI; la coda condi
 - [x] 49.4 Controlli di fase (K-01, K-02)
 - [~] 49.5 Prove a mano (utente)
 
+## Fase 50 — Dati e fonti dei crediti (`fase-50-dati-e-fonti-crediti.md`)
+Feature «Arricchimento completo» (`docs/feature-arricchimento.md`, decisioni D-96…D-126, 2026-10-25). Una PR per la fase, un commit per task.
+- [ ] 50.1 Schema v15 e migrazione 14 → 15
+- [ ] 50.2 Fixture reali di Deezer e MusicBrainz
+- [ ] 50.3 `credits.dart`: modello, parser e `mergeCredits`
+- [ ] 50.4 `DeezerGwClient`: sessione anonima e pausa di 24 ore
+- [ ] 50.5 Dettagli dall'API pubblica di Deezer
+- [ ] 50.6 `MusicBrainzClient.recordingCredits`
+- [ ] 50.7 `CreditsRepository` e interruttore «Crediti e dettagli»
+- [ ] 50.8 Crediti e dettagli nell'arricchimento (`completeOne`, parte crediti)
+- [ ] 50.9 «Scarica» e doppioni non perdono i crediti
+- [ ] 50.10 Controlli di fase (K-AR-01, K-AR-02, K-AR-03, K-AR-04, K-AR-05)
+- [ ] 50.11 Prove a mano (utente)
+
+## Fase 51 — Crediti a schermo (`fase-51-crediti-a-schermo.md`)
+- [ ] 51.1 Tabella dei ruoli e traduzioni
+- [ ] 51.2 `CreditsSection` e card nella schermata di riproduzione
+- [ ] 51.3 «Aggiorna» nella card
+- [ ] 51.4 Crediti e dettagli nel backup, nell'invio e nella Jam
+- [ ] 51.5 Sezione nella Jam e nell'anteprima dell'arricchimento
+- [ ] 51.6 «Compare come» nella pagina artista
+- [ ] 51.7 Gruppo «Nei crediti» nella ricerca locale
+- [ ] 51.8 Controlli di fase (K-AR-01, K-AR-02, K-AR-03, K-AR-04)
+- [ ] 51.9 Prove a mano (utente)
+
+## Fase 52 — Testo e curiosità complete (`fase-52-testo-e-curiosita.md`)
+- [ ] 52.1 `NeteaseLyricsClient` e `LyricsOvhClient`
+- [ ] 52.2 `LyricsChain`
+- [ ] 52.3 `enrich_parts.dart`: stato per parte e attesa di 30 giorni
+- [ ] 52.4 Testo dell'utente (`lyrics_by_user`) e guardie
+- [ ] 52.5 `CuriosityService`
+- [ ] 52.6 «Curiosità automatiche» e arricchimento completo dopo il download
+- [ ] 52.7 Controlli di fase (K-AR-01, K-AR-02, K-AR-03, K-AR-04)
+- [ ] 52.8 Prove a mano (utente)
+
+## Fase 53 — Completamento e Registro (`fase-53-completamento-e-registro.md`)
+- [ ] 53.1 Registro nel database (30 giorni)
+- [ ] 53.2 Ogni attività finisce nel Registro
+- [ ] 53.3 `UserActivity`
+- [ ] 53.4 `EnrichCompleter` in modalità *piano*
+- [ ] 53.5 «Completa l'arricchimento» (modalità *subito*)
+- [ ] 53.6 Voce nel centro Attività con Pausa e Riprendi
+- [ ] 53.7 Riga per giro nel Registro con l'elenco dei brani
+- [ ] 53.8 Riga «Arricchimento» nella pagina Memoria
+- [ ] 53.9 Controlli di fase (K-AR-01, K-AR-02, K-AR-03, K-AR-04, RNF-05)
+- [ ] 53.10 Prove a mano (utente)
+
+## Fase 54 — Copertina a mano (`fase-54-copertina-a-mano.md`)
+- [ ] 54.1 `cover_ops.dart`: salvare e ripristinare
+- [ ] 54.2 Copertina d'album letta da `cover_source`
+- [ ] 54.3 Nessuno scrittore tocca una copertina a mano
+- [ ] 54.4 `cover_picker_sheet.dart`: file e libreria
+- [ ] 54.5 Proposte online con la misura
+- [ ] 54.6 «Cambia copertina» e «Ripristina copertina originale» nei menu
+- [ ] 54.7 Copertine a mano nel backup
+- [ ] 54.8 Controlli di fase (K-AR-01, K-AR-02, K-AR-03, K-AR-05)
+- [ ] 54.9 Prove a mano (utente)
+
 ## Note di deviazione
 <!-- una riga per deviazione: data — task — cosa è cambiato e perché -->
 - 2026-10-25 — 45.1 — limite effettivo = min(cursore, libero + usato − 500 MB): i byte della cache contano come spazio libero, altrimenti una cache piena si restringerebbe da sola.

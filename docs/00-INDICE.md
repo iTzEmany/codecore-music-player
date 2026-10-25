@@ -65,6 +65,11 @@ un'unica codebase Flutter per Android, Windows e Linux. Uso personale, niente co
 | 47 | `fase-47-jam-online.md` | Jam online: brani online accodati da host e ospiti e serviti dalla cache, uscita che scarica da sé, rotta `meta`, schermata del brano, via il FAB |
 | 48 | `fase-48-shuffle-tre-stati.md` | Shuffle a 3 stati senza interruttore (salta Shuffle+ quando la coda non lo permette), suggeriti inseriti/tolti subito, Play e shuffle separati in Home |
 | 49 | `fase-49-artisti-ospiti.md` | Artisti ospiti: nomi toccabili nel player e nella barra desktop, «Vai all'artista» con foglio di scelta, risoluzione libreria → online |
+| 50 | `fase-50-dati-e-fonti-crediti.md` | Dati e fonti dei crediti: schema v15 (`track_credits`, `track_enrich`, `cover_source`, `activity_log`), fixture reali, `DeezerGwClient` con pausa di 24 h, dettagli Deezer, crediti MusicBrainz, `mergeCredits`, interruttore «Crediti e dettagli», crediti salvati e spostati con «Scarica» e doppioni |
+| 51 | `fase-51-crediti-a-schermo.md` | Crediti a schermo: ruoli tradotti in 6 lingue, card «Crediti e dettagli» con «Mostra tutto», link e «Aggiorna», sezione in Jam e anteprima, «Compare come», «Nei crediti», crediti in backup, invio e Jam |
+| 52 | `fase-52-testo-e-curiosita.md` | Testo e curiosità complete: `LyricsChain` (LRCLIB → NetEase → lyrics.ovh), stato per parte con riprova a 30 giorni, testo dell'utente protetto, `CuriosityService`, «Curiosità automatiche», arricchimento completo dopo il download |
+| 53 | `fase-53-completamento-e-registro.md` | Completamento e Registro: `UserActivity`, `EnrichCompleter` piano e subito, «Completa l'arricchimento», voce con Pausa/Riprendi, Registro nel DB per 30 giorni con ogni attività e riga per giro, peso in Memoria, misura sul Mi A3 |
+| 54 | `fase-54-copertina-a-mano.md` | Copertina a mano: selettore unico (file, proposte online con la misura, libreria) per brano, album e playlist, copertina d'album da `cover_source`, protezione in ogni scrittore, «Ripristina copertina originale», backup |
 
 Dopo la **Fase 3** l'app è già usabile come lettore. Le fasi 5 e 6 sono indipendenti tra loro. La fase 8 (Jam) richiede la 6.
 

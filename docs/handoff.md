@@ -16,7 +16,7 @@
 - **Log dopo le prove:** niente 403/429 ripetuti (K-04).
 
 ## Dispositivi
-- **Motorola edge 40** `ZY22HKD85K`: libreria vera. Solo `install -r`; mai disinstallare né `pm clear`.
+- **Motorola edge 40** `ZY22HKD85K`: libreria vera. Solo `install -r`; mai disinstallare né `pm clear`. Eccezione per le fasi 50–54 (D-125, D-126): APK debug e prove sui brani presenti; prima un backup completo dall'app fatto dall'utente; firma diversa → fermarsi, backup confermato, poi `uninstall -k` e ripristino.
 - **Mi A3** `0d7ae9df206e`: si può disinstallare con `-k`; mai cancellare i file musicali. Misure solo con `com.codecore.player.perf` (D-19).
 - Misura: `JAVA_HOME=~/.jdks/jbr-17.0.14 PATH=$JAVA_HOME/bin:$PATH python3 scripts/perf_device.py 0d7ae9df206e --label <l> --playback [--no-push] [--only "A,B"]`.
 
@@ -26,7 +26,11 @@ Leggi docs/handoff.md, docs/gotchas.md e docs/PROGRESS.md. <obiettivo scelto fra
 ```
 
 ## Prossimi obiettivi
-0. **(Consigliato) I lavori 2b e 3 di `docs/prossimi-lavori.md`** (D-82 li metteva dopo lo streaming, ora chiuso). Prima le prove a mano qui sopra: un bug di streaming trovato a mano conviene correggerlo prima.
+0. **(Consigliato) Feature «Arricchimento completo» (lavoro 2b), fasi 50–54** — kickoff del 2026-10-25 fatto: `docs/feature-arricchimento.md` (stima del peso ≈ 20–25 MB per i 2196 brani, R-35…R-67, architettura, rischi), D-96…D-126, `docs/fase-50…54-*.md`. Prima le prove a mano qui sopra. Prompt in una sessione nuova in questa cartella:
+   ```
+   /obiettivo fasi 50–54 (docs/feature-arricchimento.md): arricchimento completo e copertina a mano, una PR per fase. Motorola secondo D-125/D-126: chiedimi il backup prima di installare.
+   ```
+   Poi il lavoro 3 di `docs/prossimi-lavori.md` (design).
 1. **Debito noto dello streaming** (in fondo a `docs/fase-47-jam-online.md`): tre meccanismi «online → libreria», `DownloadsNotifier` grande, prefetch che ricomincia da capo, file auto-scaricato dall'uscita Jam non fissato in cache, «Scarica» da una riga ombra senza messaggio; `gapless window edit failed` (IllegalArgumentException) al cambio di shuffle su una coda di 2 brani; `discovery: socket error` ogni 2 s senza rete.
 2. **Picchi di build al cambio di brano** (Swipe mini player, Apertura player): `cacheWidth`/`gaplessPlayback` in `track_art.dart`; misura prima e dopo con `--only`.
 3. **Memoria e avvio:** PSS ~213–270 MB contro 210 MB; misurare prima con la libreria di prova piccola.
