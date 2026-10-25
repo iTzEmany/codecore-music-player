@@ -82,8 +82,12 @@ class DeezerGwClient {
   Future<void> load() async {
     if (_loaded) return;
     _loaded = true;
-    final ms = (await _prefs()).getInt(pauseKey);
-    if (ms != null) _pausedUntil = DateTime.fromMillisecondsSinceEpoch(ms);
+    try {
+      final ms = (await _prefs()).getInt(pauseKey);
+      if (ms != null) _pausedUntil = DateTime.fromMillisecondsSinceEpoch(ms);
+    } catch (e) {
+      AppLog.w('deezer_gw: ignoring stored pause', e);
+    }
   }
 
   /// Contributors of Deezer track [sngId]. Throws [DeezerGwPausedException],

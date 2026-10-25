@@ -60,4 +60,31 @@ void main() {
     expect(merged.map((c) => '${c.name}|${c.role}|${c.source}'),
         ['A|composer|deezer', 'B|guitar|musicbrainz']);
   });
+
+  test('parseMbCredits skips malformed relations and blank names, keeps the rest', () {
+    Map<String, Object?> rel(Object? type, Object? name, {Object? attrs, Object? id}) => {
+          'target-type': 'artist',
+          'type': type,
+          'attributes': attrs ?? const <String>[],
+          'artist': {'name': name, 'id': id},
+        };
+    final r = parseMbCredits({
+      'relations': [
+        rel(5, 'Bad Type'),
+        rel('producer', 'Bad Attrs', attrs: 'x'),
+        rel('producer', 'Bad Id', id: 3),
+        rel('producer', '   '),
+        rel(' Mixer ', 'Ok'),
+      ],
+    });
+    expect(_pairs(r), {'Bad Id|producer', 'Ok|mixer'});
+  });
+
+  test('names without letters do not collapse in the dedupe', () {
+    final r = mergeCredits([
+      TrackCredit('!!!', 'author', 'deezer'),
+      TrackCredit('???', 'author', 'deezer'),
+    ], []);
+    expect(r, hasLength(2));
+  });
 }

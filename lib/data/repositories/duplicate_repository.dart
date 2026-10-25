@@ -137,6 +137,12 @@ class DuplicateRepository {
     }
     await (_db.delete(c)..where((t) => t.trackId.isIn(drops))).go();
 
+    // Credits and the «searched, nothing» mark never coexist.
+    final hasCredits = (await (_db.select(c)
+              ..where((t) => t.trackId.equals(keepId))
+              ..limit(1))
+            .get())
+        .isNotEmpty;
     final e = _db.trackEnrich;
     final rows = <TrackEnrichData>[
       for (final id in [keepId, ...drops])
@@ -154,7 +160,7 @@ class DuplicateRepository {
         lyricsNoneAt: Value(first((r) => r.lyricsNoneAt)),
         syncedNoneAt: Value(first((r) => r.syncedNoneAt)),
         curioNoneAt: Value(first((r) => r.curioNoneAt)),
-        creditsNoneAt: Value(first((r) => r.creditsNoneAt)),
+        creditsNoneAt: Value(hasCredits ? null : first((r) => r.creditsNoneAt)),
         lyricsByUser: Value(rows.any((r) => r.lyricsByUser)),
       ));
     }

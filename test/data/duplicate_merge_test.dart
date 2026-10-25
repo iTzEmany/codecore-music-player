@@ -254,4 +254,26 @@ void main() {
     expect((await tracks.getById(dupA))!.ignored, isFalse);
     expect((await tracks.getById(keep))!.playCount, 5);
   });
+
+  test('credits of the keeper clear a none mark from a duplicate', () async {
+    await build();
+    await credit(keep, 'mine');
+    await db.into(db.trackEnrich).insert(TrackEnrichCompanion.insert(
+        trackId: Value(dupA), creditsNoneAt: const Value(5)));
+    await repo.merge(keep, [dupA]);
+    final e = await db.select(db.trackEnrich).getSingle();
+    expect(await creditsOf(keep), {'mine'});
+    expect(e.creditsNoneAt, isNull, reason: 'credits and none mark must not coexist');
+  });
+
+  test('moved credits clear a none mark from another duplicate', () async {
+    await build();
+    await credit(dupA, 'x');
+    await db.into(db.trackEnrich).insert(TrackEnrichCompanion.insert(
+        trackId: Value(dupB), creditsNoneAt: const Value(5)));
+    await repo.merge(keep, [dupA, dupB]);
+    final e = await db.select(db.trackEnrich).getSingle();
+    expect(await creditsOf(keep), {'x'});
+    expect(e.creditsNoneAt, isNull, reason: 'credits and none mark must not coexist');
+  });
 }

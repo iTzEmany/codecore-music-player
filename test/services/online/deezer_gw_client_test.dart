@@ -113,4 +113,27 @@ void main() {
     await expectLater(c.pageTrack(1), throwsA(isA<DeezerNetworkException>()));
     expect(paused, 0);
   });
+
+  test('G4 still paused after 23 h', () async {
+    adapter.down = true;
+    final c = make();
+    for (var i = 0; i < 3; i++) {
+      await expectLater(c.pageTrack(1), throwsA(isA<DeezerNetworkException>()));
+    }
+    clock = clock.add(const Duration(hours: 23));
+    await expectLater(c.pageTrack(1), throwsA(isA<DeezerGwPausedException>()));
+    expect(make().isPaused, isFalse); // not loaded yet
+  });
+
+  test('G10 after the pause ends one error does not pause again', () async {
+    adapter.down = true;
+    final c = make();
+    for (var i = 0; i < 3; i++) {
+      await expectLater(c.pageTrack(1), throwsA(isA<DeezerNetworkException>()));
+    }
+    clock = clock.add(const Duration(hours: 25));
+    await expectLater(c.pageTrack(1), throwsA(isA<DeezerNetworkException>()));
+    expect(paused, 1);
+    expect(c.isPaused, isFalse);
+  });
 }

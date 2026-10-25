@@ -118,6 +118,12 @@ class _Gw extends DeezerGwClient {
   }
 }
 
+class _Rest extends DeezerClient {
+  _Rest(super.web);
+  @override
+  bool get isResting => true;
+}
+
 void main() {
   late AppDatabase db;
   late TrackRepository repo;
@@ -342,5 +348,47 @@ void main() {
     final prop = await svc.propose((await repo.getById(id))!, lyrics: false, curiosity: false);
     expect(prop.credits, isNull);
     expect(gw.calls, calls);
+  });
+
+  test('forced refresh with both sources down keeps stored credits and no mark', () async {
+    final id = await add();
+    await svc.completeOne(id, {EnrichPart.credits});
+    gw.paused = true;
+    web.mbDown = true;
+    await svc.completeOne(id, {EnrichPart.credits}, force: true);
+    expect(await creditsRepo.creditsOf(id), hasLength(2));
+    expect((await creditsRepo.enrichOf(id))!.creditsNoneAt, isNull);
+  });
+
+  test('found credits clear an old none mark', () async {
+    final id = await add();
+    await creditsRepo.save(id, const [],
+        TrackEnrichCompanion(trackId: Value(id), creditsNoneAt: const Value(5)));
+    expect(await svc.completeOne(id, {EnrichPart.credits}, force: true), isTrue);
+    expect((await creditsRepo.enrichOf(id))!.creditsNoneAt, isNull);
+  });
+
+  test('Deezer public API resting, MB empty and valid: no none mark', () async {
+    web.mbRecordings = [];
+    final id = await add();
+    final s2 = EnrichmentService(
+      db: db, tracks: repo, covers: CoverStore(Directory(p.join(tmp.path, 'c'))),
+      itunes: ItunesClient(web), deezer: _Rest(web), useDeezer: () => false,
+      gw: gw, musicBrainz: MusicBrainzClient(web, pause: (_) async {}),
+      creditsRepo: creditsRepo, useCredits: () => true,
+      lrclib: LrclibClient(web), wikipedia: WikipediaClient(web), web: web,
+      language: () => 'it', limiter: RateLimiter(minGap: Duration.zero));
+    await s2.completeOne(id, {EnrichPart.credits});
+    expect((await creditsRepo.enrichOf(id))?.creditsNoneAt, isNull);
+  });
+
+  test('enrichMany force re-asks credits of a track that has them', () async {
+    final id = await add();
+    await run(id);
+    final c = gw.calls;
+    await run(id);
+    expect(gw.calls, c, reason: 'not forced: not asked again');
+    await run(id, force: true);
+    expect(gw.calls, c + 1);
   });
 }
