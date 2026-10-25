@@ -5,10 +5,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 
 import '../core/paths.dart';
+import '../services/online/artist_link_resolver.dart';
 import '../services/online/catalog_cache.dart';
 import '../services/online/youtube_service.dart';
 import '../services/online/ytm_artist.dart';
 import '../services/online/ytm_catalog.dart';
+import 'library_providers.dart';
 import 'settings_providers.dart';
 import 'youtube_providers.dart';
 
@@ -28,6 +30,15 @@ final ytmCatalogProvider = Provider<YtmCatalog>((ref) => YtmCatalog(
 /// The `hl` YouTube Music is asked for: the app language when supported.
 final ytmLanguageProvider =
     Provider<String>((ref) => ytmLanguage(ref.watch(settingsProvider).language));
+
+/// Resolves a credited name to a library page, an online page or a choice.
+final artistLinkResolverProvider = Provider<ArtistLinkResolver>((ref) =>
+    ArtistLinkResolver(
+      library: ref.read(libraryQueriesProvider).artistByKey,
+      search: (name) => ref
+          .read(ytmCatalogProvider)
+          .searchArtists(name, ref.read(ytmLanguageProvider)),
+    ));
 
 /// An artist page. A failure is shown with its own «Riprova»: no silent retries.
 /// «Aggiorna» calls `YtmCatalog.artist(…, refresh: true)` and invalidates this.

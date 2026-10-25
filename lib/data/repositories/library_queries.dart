@@ -185,6 +185,28 @@ ORDER BY g.k COLLATE NOCASE
             ]);
   }
 
+  /// The library artist with [key] (same key as [watchArtists]); null when no
+  /// visible library track has it. No cover.
+  Future<ArtistSummary?> artistByKey(String key) async {
+    final r = await _db
+        .customSelect(
+          "SELECT MIN(artist) AS name, COUNT(*) AS n, COUNT(DISTINCT album_key) AS albums "
+          'FROM tracks WHERE missing = 0 AND ignored = 0 AND kind = 0 '
+          "AND lower(trim(COALESCE(artist, ''))) = ?",
+          variables: [Variable<String>(key)],
+          readsFrom: {_db.tracks},
+        )
+        .getSingle();
+    final n = r.read<int>('n');
+    if (n == 0) return null;
+    return ArtistSummary(
+      key: key,
+      name: r.read<String?>('name'),
+      trackCount: n,
+      albumCount: r.read<int>('albums'),
+    );
+  }
+
   /// Every track of an artist (same grouping key as [watchArtists]), by
   /// album, then disc and track number.
   Stream<List<Track>> watchArtistTracks(String artistKey) {

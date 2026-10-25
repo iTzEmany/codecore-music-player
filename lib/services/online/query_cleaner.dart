@@ -88,11 +88,30 @@ CleanQuery cleanSearchQuery(String rawTitle, String rawArtist) {
   return CleanQuery(title.trim(), artist.trim());
 }
 
-final _artistSplit =
+/// Splits a credit line like «A, B feat. C» into its artists.
+final artistSplit =
     RegExp(r'\s*(?:,|&|/)\s*|\s+(?:feat|ft)\.?\s+', caseSensitive: false);
 
+/// The names of [artist] in order, each with the separator text that follows it
+/// ('' for the last); empty pieces are dropped.
+List<({String name, String sep})> splitArtists(String artist) {
+  final out = <({String name, String sep})>[];
+  var pos = 0;
+  void add(String raw, String sep) {
+    final name = raw.trim();
+    if (name.isNotEmpty) out.add((name: name, sep: sep));
+  }
+
+  for (final m in artistSplit.allMatches(artist)) {
+    add(artist.substring(pos, m.start), m.group(0)!);
+    pos = m.end;
+  }
+  add(artist.substring(pos), '');
+  return out;
+}
+
 String extractPrimaryArtist(String artist) {
-  final first = artist.split(_artistSplit).first.trim();
+  final first = artist.split(artistSplit).first.trim();
   return first.isEmpty ? artist : first;
 }
 
