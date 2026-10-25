@@ -1014,6 +1014,9 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
+  String get jamJumpHere => 'Saltar para aqui';
+
+  @override
   String get jamYou => 'si';
 
   @override

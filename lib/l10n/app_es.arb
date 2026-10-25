@@ -382,6 +382,7 @@
       }
     }
   },
+  "jamJumpHere": "Saltar aquí",
   "jamYou": "ti",
   "jamAddToJam": "Añadir a la Jam",
   "jamAdded": "Añadidas a la Jam: {count}",

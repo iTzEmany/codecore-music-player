@@ -1013,6 +1013,9 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get jamJumpHere => 'Hier abspielen';
+
+  @override
   String get jamYou => 'dir';
 
   @override

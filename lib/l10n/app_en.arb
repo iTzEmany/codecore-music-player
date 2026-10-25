@@ -382,6 +382,7 @@
       }
     }
   },
+  "jamJumpHere": "Jump here",
   "jamYou": "you",
   "jamAddToJam": "Add to Jam",
   "jamAdded": "Added to the Jam: {count}",

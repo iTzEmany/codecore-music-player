@@ -550,6 +550,7 @@
       }
     }
   },
+  "jamJumpHere": "Saltar para aqui",
   "jamYou": "si",
   "jamAddToJam": "Adicionar à Jam",
   "jamAdded": "Adicionadas à Jam: {count}",

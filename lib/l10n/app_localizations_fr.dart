@@ -1017,6 +1017,9 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get jamJumpHere => 'Passer ici';
+
+  @override
   String get jamYou => 'vous';
 
   @override

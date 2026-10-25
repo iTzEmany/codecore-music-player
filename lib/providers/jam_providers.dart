@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 
@@ -19,10 +21,12 @@ import '../services/jam/jam_models.dart';
 import '../services/jam/jam_online_adder.dart';
 import '../services/jam/jam_output.dart';
 import '../services/online/youtube_service.dart' show YtResult;
+import '../services/share/track_meta.dart';
 import '../services/stream/stream_cache.dart';
 import '../services/jam/jam_transport.dart';
 import '../services/share/discovery.dart';
 import 'database_providers.dart';
+import 'library_providers.dart' show coverStoreProvider;
 import 'player_providers.dart';
 import 'settings_providers.dart';
 import 'share_hub.dart';
@@ -111,6 +115,25 @@ Future<List<Track>> jamSeedTracks(
 }
 
 const _ytPrefix = 'yt:';
+
+/// The owner's [TrackMeta] of [item] from [uri]; on no answer, 404 or garbage, the
+/// basic data the item carries (R-24). Never throws.
+Future<TrackMeta> jamFetchMeta(JamItem item, Uri? uri, Map<String, String> headers, {Dio? dio}) async {
+  final basic = TrackMeta(title: item.title, artist: item.artist, album: item.album);
+  if (uri == null) return basic;
+  try {
+    final r = await (dio ?? Dio(BaseOptions(connectTimeout: const Duration(seconds: 5)))).getUri<Object>(uri,
+        options: Options(
+            headers: headers,
+            responseType: ResponseType.json,
+            sendTimeout: const Duration(seconds: 5),
+            receiveTimeout: const Duration(seconds: 8)));
+    return TrackMeta.tryParse(r.data) ?? basic;
+  } on DioException catch (e) {
+    AppLog.w('jam: no meta for ${item.title}', e);
+    return basic;
+  }
+}
 
 /// The cache key of an online item's `ref` (`yt:<key>`), else null.
 String? jamCacheKey(JamItem i) {
@@ -304,6 +327,8 @@ class JamController extends Notifier<JamUiState> {
           }
           ..onItemFailed = _onItemFailed;
     _host?.resolveFile = _localFile;
+    _host?.resolveMeta = _localMeta;
+    _host?.resolveCover = _localCover;
     // The notification and the lock screen now speak for the Jam.
     final handler = ref.read(audioHandlerProvider);
     _attachedTo = handler;
@@ -373,7 +398,7 @@ class JamController extends Notifier<JamUiState> {
     send(JamCommand.trackEnded(id)); // skip to the next one
   }
 
-  Uri? _remoteUri(JamItem item) {
+  Uri? _remoteUri(JamItem item, {String route = 'file'}) {
     final s = state.jam;
     final sid = state.role == JamRole.guest
         ? _guest?.sessionId
@@ -389,7 +414,7 @@ class JamController extends Notifier<JamUiState> {
     } else if (owner.host.isNotEmpty) {
       base = 'http://${owner.host}:${owner.port}/jam';
     }
-    return base == null ? null : Uri.parse('$base/$sid/file/${item.id}');
+    return base == null ? null : Uri.parse('$base/$sid/$route/${item.id}');
   }
 
   Map<String, String> get _headers => {
@@ -417,6 +442,56 @@ class JamController extends Notifier<JamUiState> {
       if (own != null) return JamSource.local(own.path);
     }
     return _cache?.sourceFor(item, remote);
+  }
+
+  /// The row of an item this device owns: library, or the shadow row of a `yt:` track.
+  /// Full rows: lyrics and curiosities are there.
+  Future<Track?> _localRow(JamItem item) {
+    final tracks = ref.read(trackRepositoryProvider);
+    final key = jamCacheKey(item);
+    final id = int.tryParse(item.ref ?? '');
+    return key != null
+        ? tracks.streamRow(key)
+        : id == null
+            ? Future.value()
+            : tracks.getById(id);
+  }
+
+  Future<TrackMeta?> _localMeta(JamItem item) async {
+    final row = await _localRow(item);
+    return row == null ? null : TrackMeta.fromTrack(row);
+  }
+
+  Future<String?> _localCover(JamItem item) async {
+    final key = (await _localRow(item))?.coverKey;
+    return key == null ? null : ref.read(coverStoreProvider).fileFor(key)?.path;
+  }
+
+  /// The owner's cover image, or null (ours: the screen has it locally; any failure: no cover).
+  Future<Uint8List?> fetchCover(JamItem item) async {
+    final uri = item.ownerDeviceId == _ownId ? null : _remoteUri(item, route: 'cover');
+    if (uri == null) return null;
+    try {
+      final r = await Dio(BaseOptions(connectTimeout: const Duration(seconds: 5))).getUri<List<int>>(uri,
+          options: Options(
+              headers: _headers,
+              responseType: ResponseType.bytes,
+              receiveTimeout: const Duration(seconds: 8)));
+      final d = r.data;
+      return d == null ? null : Uint8List.fromList(d);
+    } on DioException catch (e) {
+      AppLog.w('jam: no cover for ${item.title}', e);
+      return null;
+    }
+  }
+
+  /// What the info screen shows: from the owner (ours: local), else the item's own fields.
+  Future<TrackMeta> fetchMeta(JamItem item) async {
+    if (item.ownerDeviceId == _ownId) {
+      return await _localMeta(item) ??
+          TrackMeta(title: item.title, artist: item.artist, album: item.album);
+    }
+    return jamFetchMeta(item, _remoteUri(item, route: 'meta'), _headers);
   }
 
   Future<File?> _selfFetch(JamItem item) {
@@ -581,6 +656,8 @@ class JamController extends Notifier<JamUiState> {
     _adder = null;
     _syncPins(null);
     _host?.resolveFile = null;
+    _host?.resolveMeta = null;
+    _host?.resolveCover = null;
     _host?.clearSession();
     final g = _guest;
     _guest = null;
@@ -605,6 +682,19 @@ class JamController extends Notifier<JamUiState> {
     if (state.phase == JamPhase.ended) state = const JamUiState();
   }
 }
+
+/// The cover bytes of another device's queue item [id] (null: show the placeholder).
+final jamTrackCoverProvider = FutureProvider.autoDispose.family<Uint8List?, int>((ref, id) {
+  final item = ref.read(jamProvider).jam?.items.where((i) => i.id == id).firstOrNull;
+  return item == null ? Future.value() : ref.read(jamProvider.notifier).fetchCover(item);
+});
+
+/// The meta of the queue item [id] for the info screen (47.6).
+final jamTrackMetaProvider = FutureProvider.autoDispose.family<TrackMeta, int>((ref, id) {
+  final ctrl = ref.read(jamProvider.notifier);
+  final item = ref.read(jamProvider).jam?.items.where((i) => i.id == id).firstOrNull;
+  return item == null ? Future.value(const TrackMeta()) : ctrl.fetchMeta(item);
+});
 
 final jamProvider = NotifierProvider<JamController, JamUiState>(
   JamController.new,

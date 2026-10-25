@@ -382,6 +382,7 @@
       }
     }
   },
+  "jamJumpHere": "Hier abspielen",
   "jamYou": "dir",
   "jamAddToJam": "Zur Jam hinzufügen",
   "jamAdded": "Zur Jam hinzugefügt: {count}",

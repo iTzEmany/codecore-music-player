@@ -27,6 +27,9 @@ typedef JamFileResolver = Future<String?> Function(JamItem item);
 /// Resolves an item this device owns to its [TrackMeta] (null: unknown).
 typedef JamMetaResolver = Future<TrackMeta?> Function(JamItem item);
 
+/// Path of the cover image of an item this device owns (null: none).
+typedef JamCoverResolver = Future<String?> Function(JamItem item);
+
 enum JamRequestStatus { pending, accepted, declined, expired, cancelled }
 
 class JamRequest {
@@ -84,6 +87,7 @@ class JamHost {
 
   JamFileResolver? resolveFile;
   JamMetaResolver? resolveMeta;
+  JamCoverResolver? resolveCover;
 
   /// A new valid request arrived (the UI asks the user).
   void Function(JamRequest request)? onRequest;
@@ -544,6 +548,19 @@ class JamHost {
       if (item == null) return err!;
       final meta = await resolveMeta?.call(item);
       return meta == null ? Response.notFound('not found') : _json(meta.toJson());
+    });
+
+    // Owner: the cover image of a queued item that this device owns.
+    router.get('/<sid>/cover/<n>', (Request r, String sid, String n) async {
+      final (:err, :item) = _ownedItem(r, sid, n);
+      if (item == null) return err!;
+      final path = await resolveCover?.call(item);
+      final file = path == null ? null : File(path);
+      if (file == null || !await file.exists()) return Response.notFound('not found');
+      return Response.ok(file.openRead(), headers: {
+        'content-type': path!.endsWith('.png') ? 'image/png' : 'image/jpeg',
+        'content-length': '${await file.length()}',
+      });
     });
 
     return router;

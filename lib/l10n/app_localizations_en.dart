@@ -1010,6 +1010,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get jamJumpHere => 'Jump here';
+
+  @override
   String get jamYou => 'you';
 
   @override

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:codecore/providers/jam_providers.dart';
 import 'package:codecore/services/jam/jam_cache.dart';
 import 'package:codecore/services/jam/jam_guest.dart';
 import 'package:codecore/services/jam/jam_host.dart';
@@ -27,6 +28,7 @@ JamError? err(JamState s, JamCommand c, String f) =>
 void main() {
   leaveTests();
   goneOwnerTests();
+  fetchMetaTests();
   group('reducer edges', () {
     test('empty queue: play/seek/jump/remove/move are rejected', () {
       final s = s0();
@@ -369,5 +371,30 @@ void goneOwnerTests() {
   test('a failed own download gives null, not an exception', () async {
     final got = await jamFetchByVideoId(yt('a'), (_, _) async => throw StateError('offline'));
     expect(got, isNull);
+  });
+}
+
+void fetchMetaTests() {
+  const item = JamItem(id: 3, ownerDeviceId: 'o', title: 'T', artist: 'A', album: 'Al', ext: 'mp3');
+
+  test('fetchMeta: the owner answers, or the item\'s basic data comes back', () async {
+    final srv = await HttpServer.bind('127.0.0.1', 0);
+    addTearDown(() => srv.close(force: true));
+    srv.listen((r) async {
+      if (r.uri.path == '/ok') {
+        r.response.headers.contentType = ContentType.json;
+        r.response.write(jsonEncode({'title': 'T', 'lyricsPlain': 'la la'}));
+      } else {
+        r.response.statusCode = 404;
+      }
+      await r.response.close();
+    });
+    Uri u(String p) => Uri.parse('http://127.0.0.1:${srv.port}$p');
+
+    expect((await jamFetchMeta(item, u('/ok'), {})).lyricsPlain, 'la la');
+    for (final uri in [u('/missing'), null, Uri.parse('http://127.0.0.1:1/x')]) {
+      final m = await jamFetchMeta(item, uri, {});
+      expect([m.title, m.artist, m.album, m.lyricsPlain], ['T', 'A', 'Al', null]);
+    }
   });
 }

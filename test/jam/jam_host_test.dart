@@ -217,4 +217,21 @@ void main() {
     expect((await call('GET', 'wrong/meta/1', headers: auth)).statusCode, 401);
     expect((await call('GET', '${s.sid}/meta/1')).statusCode, 401);
   });
+
+  test('serves the cover of queued owned items', () async {
+    final img = File(p.join(Directory.systemTemp.createTempSync('jc').path, 'c.jpg'))
+      ..writeAsBytesSync([1, 2, 3]);
+    host.resolveCover = (item) async => item.ref == 'lib' ? img.path : null;
+    final s = await startSession();
+    final auth = {'x-jam-file': host.fileToken!};
+    for (final ref in ['lib', 'none']) {
+      host.apply(JamCommand.add(
+          JamItem(id: 0, ownerDeviceId: 'host', title: ref, ext: 'mp3', ref: ref)));
+    }
+    final ok = await call('GET', '${s.sid}/cover/1', headers: auth);
+    expect(ok.statusCode, 200);
+    expect(await ok.read().expand((c) => c).toList(), [1, 2, 3]);
+    expect((await call('GET', '${s.sid}/cover/2', headers: auth)).statusCode, 404);
+    expect((await call('GET', 'wrong/cover/1', headers: auth)).statusCode, 401);
+  });
 }

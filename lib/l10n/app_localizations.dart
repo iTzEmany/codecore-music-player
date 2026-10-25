@@ -1768,6 +1768,12 @@ abstract class AppLocalizations {
   /// **'aggiunto da {name}'**
   String jamAddedBy(String name);
 
+  /// No description provided for @jamJumpHere.
+  ///
+  /// In it, this message translates to:
+  /// **'Salta qui'**
+  String get jamJumpHere;
+
   /// No description provided for @jamYou.
   ///
   /// In it, this message translates to:

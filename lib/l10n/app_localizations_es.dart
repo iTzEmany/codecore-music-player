@@ -1013,6 +1013,9 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get jamJumpHere => 'Saltar aquí';
+
+  @override
   String get jamYou => 'ti';
 
   @override

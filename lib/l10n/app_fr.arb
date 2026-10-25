@@ -550,6 +550,7 @@
       }
     }
   },
+  "jamJumpHere": "Passer ici",
   "jamYou": "vous",
   "jamAddToJam": "Ajouter à la Jam",
   "jamAdded": "Ajoutés à la Jam : {count}",

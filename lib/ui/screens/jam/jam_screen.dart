@@ -12,6 +12,7 @@ import '../../theme/tokens.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/ring_progress.dart';
 import 'jam_parts.dart';
+import 'jam_track_info_screen.dart';
 import 'jam_player_card.dart';
 import '../../widgets/show_msg.dart';
 import '../../widgets/cc_app_bar.dart';
@@ -257,7 +258,9 @@ class _JamQueue extends StatelessWidget {
             isCurrent: isCurrent,
             canRemove: isHost || (it.ownerDeviceId == ownId && !isCurrent),
             index: i,
-            onTap: isHost ? () => send(JamCommand.jump(it.id)) : null,
+            onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(
+                builder: (_) => JamTrackInfoScreen(itemId: it.id))),
+            onJump: isHost ? () => send(JamCommand.jump(it.id)) : null,
             onRemove: () => send(JamCommand.remove(it.id)),
           );
         },
