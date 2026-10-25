@@ -3,6 +3,9 @@ import 'package:drift/drift.dart';
 import '../../services/import/track_matcher.dart' show matchKey;
 import '../../services/online/query_cleaner.dart' show extractPrimaryArtist;
 import '../db/app_database.dart';
+import 'track_kinds.dart';
+
+final _listenKinds = listenKinds.join(',');
 
 /// A month or a year, in local time: [start] inclusive, [end] exclusive.
 class StatsPeriod {
@@ -369,12 +372,12 @@ class StatsQueries {
         ? await _q(
             'SELECT t.artist AS artist, COUNT(*) AS n, SUM(p.ms_played) AS ms '
             'FROM plays p JOIN tracks t ON t.id = p.track_id '
-            'WHERE p.played_at >= ? AND t.kind = 0 AND t.artist IS NOT NULL '
+            'WHERE p.played_at >= ? AND t.kind IN ($_listenKinds) AND t.artist IS NOT NULL '
             'GROUP BY t.artist',
             [Variable.withInt(from.millisecondsSinceEpoch)])
         : await _q(
             'SELECT artist, SUM(play_count) AS n, 0 AS ms FROM tracks '
-            'WHERE kind = 0 AND artist IS NOT NULL AND play_count > 0 GROUP BY artist',
+            'WHERE kind IN ($_listenKinds) AND artist IS NOT NULL AND play_count > 0 GROUP BY artist',
             const []);
     final groups = <String, ({String name, int n, int ms, int best})>{};
     for (final r in rows) {

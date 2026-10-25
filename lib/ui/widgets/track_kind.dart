@@ -1,4 +1,5 @@
 import '../../data/db/app_database.dart';
+import '../../data/repositories/track_kinds.dart';
 import '../../services/audio/online_entries.dart' show isOnlineId;
 
 /// Where a track comes from. Radio stations share the streamed ids: telling
@@ -9,7 +10,9 @@ extension TrackKindX on Track {
   /// Named `trackKind`: `Track.kind` is already the 0/1 library-or-episode column.
   TrackKind get trackKind => isOnlineId(id)
       ? TrackKind.online
-      : kind == 1
+      : kind == kStreamKind
+      ? TrackKind.online
+      : kind == kEpisodeKind
       ? TrackKind.episode
       : TrackKind.local;
 }

@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 
 import '../db/app_database.dart';
+import 'track_kinds.dart';
 
 /// The listening history (`plays`): one row per listen that counted as played.
 /// The Jam does not record anything here: it plays through its own backend,
@@ -47,7 +48,7 @@ class PlayHistoryRepository {
     ])
       ..where(_db.tracks.missing.equals(false) &
           _db.tracks.ignored.equals(false) &
-          _db.tracks.kind.equals(0) &
+          _db.tracks.kind.isIn(listenKinds) &
           (beforePlayedAt == null
               ? const Constant(true)
               : _db.plays.playedAt.isSmallerThanValue(beforePlayedAt)))

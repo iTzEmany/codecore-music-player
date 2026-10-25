@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:drift/drift.dart';
 import 'package:path/path.dart' as p;
 
@@ -6,8 +8,10 @@ import '../../core/text_utils.dart';
 import '../../services/share/track_meta.dart';
 import '../../services/library/rules/rule_ast.dart';
 import '../../services/library/rules/rule_sql.dart';
+import '../../services/online/youtube_service.dart' show YtResult;
 import '../db/app_database.dart';
 import 'light_tracks.dart';
+import 'track_kinds.dart';
 
 enum SortOption { defaultOrder, title, artist, album, year, addedAt, duration }
 
@@ -71,6 +75,43 @@ class TrackRepository {
           ),
         );
       }
+    });
+  }
+
+  /// The shadow row of the streamed track [key], if it has one.
+  Future<Track?> streamRow(String key) => byPath('stream:$key');
+
+  /// Creates or refreshes the shadow row (`kind = 2`) of the streamed track
+  /// [key] whose cached [file] is ready; one row per key. Returns its id.
+  Future<int> upsertStreamRow(String key, YtResult r, File file) async {
+    final stat = await file.stat();
+    final artist = r.artists.isEmpty ? r.channel : r.artists.join(', ');
+    final path = 'stream:$key';
+    final row = TracksCompanion.insert(
+      path: path,
+      title: r.title,
+      // Own key per stream: never shares (or overwrites) a library album's cover.
+      albumKey: 'stream|$key',
+      format: p.extension(file.path).replaceFirst('.', '').toLowerCase(),
+      sizeBytes: stat.size,
+      mtimeMs: stat.modified.millisecondsSinceEpoch,
+      addedAt: DateTime.now().millisecondsSinceEpoch,
+      artist: Value(artist),
+      album: Value(r.album),
+      durationMs: Value(r.duration?.inMilliseconds ?? 0),
+      kind: const Value(kStreamKind),
+    );
+    return _db.transaction(() async {
+      final existing = await byPath(path);
+      if (existing == null) return _db.into(_db.tracks).insert(row);
+      await (_db.update(_db.tracks)..where((t) => t.id.equals(existing.id)))
+          .write(TracksCompanion(
+        sizeBytes: row.sizeBytes,
+        mtimeMs: row.mtimeMs,
+        format: row.format,
+        missing: const Value(false),
+      ));
+      return existing.id;
     });
   }
 
@@ -393,7 +434,7 @@ class TrackRepository {
 
   Stream<List<Track>> watchIgnored() =>
       (_db.select(_db.tracks)
-            ..where((t) => t.ignored.equals(true))
+            ..where((t) => t.ignored.equals(true) & t.kind.isNotValue(kStreamKind))
             ..orderBy([
               (t) => OrderingTerm(expression: t.title.collate(Collate.noCase)),
             ]))
@@ -415,7 +456,10 @@ class TrackRepository {
 
   Stream<List<Track>> watchMissing() =>
       (_db.select(_db.tracks)
-            ..where((t) => t.missing.equals(true) & t.ignored.equals(false))
+            ..where((t) =>
+                t.missing.equals(true) &
+                t.ignored.equals(false) &
+                t.kind.isNotValue(kStreamKind))
             ..orderBy([(t) => OrderingTerm.asc(t.path)]))
           .watch();
 

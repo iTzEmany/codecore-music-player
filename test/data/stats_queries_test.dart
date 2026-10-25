@@ -1,6 +1,10 @@
+import 'dart:io';
+
 import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/data/repositories/play_history_repository.dart';
 import 'package:codecore/data/repositories/stats_queries.dart';
+import 'package:codecore/data/repositories/track_repository.dart';
+import 'package:codecore/services/online/youtube_service.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -135,6 +139,21 @@ void main() {
     await listen('Futura', _ms(2026, 10, 5, 8, 0));
     final s = await stats.period(StatsPeriod.month(2026, 10));
     expect(s.favouriteHour, 21);
+  });
+
+  test('two listens of a shadow row (a streamed track) count in the stats', () async {
+    final shadow = await TrackRepository(db).upsertStreamRow(
+        'youtube:abc',
+        const YtResult(
+            id: 'abc', title: 'Streamed', channel: 'C', duration: null, artists: ['Streamer']),
+        File('pubspec.yaml'));
+    await history.start(shadow, _ms(2026, 10, 3), msPlayed: 60000);
+    await history.start(shadow, _ms(2026, 10, 4), msPlayed: 60000);
+    final s = await stats.period(StatsPeriod.month(2026, 10));
+    expect(s.plays, 2);
+    expect(s.topTracks.single.name, 'Streamed');
+    expect(s.topTracks.single.plays, 2);
+    expect((await stats.topArtistsSince(DateTime(2026, 10, 1))).single.name, 'Streamer');
   });
 
   test('the first listen of the period', () async {

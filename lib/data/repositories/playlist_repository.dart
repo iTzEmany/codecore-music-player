@@ -6,6 +6,7 @@ import '../../core/playlist_order.dart';
 import '../db/app_database.dart';
 import 'hidden_playlists.dart';
 import 'light_tracks.dart';
+import 'track_kinds.dart';
 
 class PlaylistSummary {
   const PlaylistSummary(this.playlist, this.trackCount,
@@ -76,7 +77,8 @@ class PlaylistRepository {
           '(SELECT t.cover_key FROM playlist_tracks x JOIN tracks t ON t.id = x.track_id '
           'WHERE x.playlist_id = p.id AND t.cover_key IS NOT NULL '
           'ORDER BY x.position LIMIT 1) AS auto_cover, '
-          'COUNT(pt.track_id) AS n, '
+          '(SELECT COUNT(*) FROM playlist_tracks x JOIN tracks t ON t.id = x.track_id '
+          'WHERE x.playlist_id = p.id AND t.kind = 0) AS n, '
           '(SELECT MAX(t.last_played_at) FROM playlist_tracks x JOIN tracks t '
           'ON t.id = x.track_id WHERE x.playlist_id = p.id) AS last_played, '
           '(SELECT MAX(t.added_at) FROM playlist_tracks x JOIN tracks t '
@@ -124,17 +126,17 @@ class PlaylistRepository {
   }
 
   /// Returns how many tracks were actually added (duplicates are ignored, and
-  /// so are podcast episodes: a playlist holds music).
+  /// so is anything that is not music: episodes and shadow rows).
   Future<int> addTracks(int playlistId, List<int> trackIds) {
     return _db.transaction(() async {
-      final episodes = (await (_db.selectOnly(_db.tracks)
+      final notMusic = (await (_db.selectOnly(_db.tracks)
                 ..addColumns([_db.tracks.id])
-                ..where(_db.tracks.id.isIn(trackIds) & _db.tracks.kind.equals(1)))
+                ..where(_db.tracks.id.isIn(trackIds) & _db.tracks.kind.isNotValue(kMusicKind)))
               .map((r) => r.read(_db.tracks.id)!)
               .get())
           .toSet();
-      if (episodes.isNotEmpty) {
-        AppLog.i('playlist: ${episodes.length} podcast episodes not added');
+      if (notMusic.isNotEmpty) {
+        AppLog.i('playlist: ${notMusic.length} non-music tracks not added');
       }
       final existing = await (_db.select(_db.playlistTracks)
             ..where((t) => t.playlistId.equals(playlistId)))
@@ -145,7 +147,7 @@ class PlaylistRepository {
           : existing.map((e) => e.position).reduce((a, b) => a > b ? a : b) + 1;
       var added = 0;
       for (final id in trackIds) {
-        if (episodes.contains(id) || !have.add(id)) continue;
+        if (notMusic.contains(id) || !have.add(id)) continue;
         await _db.into(_db.playlistTracks).insert(PlaylistTracksCompanion.insert(
             playlistId: playlistId, trackId: id, position: next++));
         added++;
