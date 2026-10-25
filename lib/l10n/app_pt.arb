@@ -3132,5 +3132,8 @@
   "ytmAlbumQueue": "Adicionar álbum à fila",
   "addedToLibrary": "Adicionada à biblioteca",
   "promoteNoSpace": "Espaço insuficiente para transferir a faixa",
-  "promoteFailed": "Não foi possível mover a faixa"
+  "promoteFailed": "Não foi possível mover a faixa",
+  "creditsDetails": "Créditos e detalhes",
+  "creditsDetailsHint": "Autores, produtores e detalhes das faixas",
+  "creditsDetailsNote": "Usa também uma API não oficial do Deezer"
 }

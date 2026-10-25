@@ -3434,5 +3434,8 @@
   "ytmAlbumQueue": "Metti in coda l’album",
   "addedToLibrary": "Aggiunto alla libreria",
   "promoteNoSpace": "Spazio insufficiente per scaricare il brano",
-  "promoteFailed": "Impossibile spostare il brano"
+  "promoteFailed": "Impossibile spostare il brano",
+  "creditsDetails": "Crediti e dettagli",
+  "creditsDetailsHint": "Autori, produttori e dettagli dei brani",
+  "creditsDetailsNote": "Usa anche un'API non ufficiale di Deezer"
 }

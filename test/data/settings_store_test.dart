@@ -40,6 +40,14 @@ void main() {
     expect(store.readSettings().importReviewThreshold, 0.6);
   });
 
+  test('creditsDetails is off by default and round trips', () async {
+    SharedPreferences.setMockInitialValues({});
+    final store = await SettingsStore.open();
+    expect(store.readSettings().creditsDetails, isFalse);
+    await store.writeSettings(const AppSettings(creditsDetails: true));
+    expect(store.readSettings().creditsDetails, isTrue);
+  });
+
   test('playback speed defaults to 1× and is kept within 0.5–2', () async {
     SharedPreferences.setMockInitialValues({});
     final store = await SettingsStore.open();

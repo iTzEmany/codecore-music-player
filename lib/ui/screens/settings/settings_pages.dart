@@ -309,6 +309,13 @@ List<SettingsGroup> _online(BuildContext context, WidgetRef ref) {
           value: s.deezerMeta,
           onChanged: (v) => notifier.update((c) => c.copyWith(deezerMeta: v)),
         ),
+        SwitchListTile(
+          title: Text(l.creditsDetails),
+          subtitle: Text('${l.creditsDetailsHint}\n${l.creditsDetailsNote}'),
+          isThreeLine: true,
+          value: s.creditsDetails,
+          onChanged: (v) => notifier.update((c) => c.copyWith(creditsDetails: v)),
+        ),
       ],
     ),
     SettingsGroup(

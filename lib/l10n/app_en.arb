@@ -2888,5 +2888,8 @@
   "ytmAlbumQueue": "Add album to queue",
   "addedToLibrary": "Added to library",
   "promoteNoSpace": "Not enough space to download the track",
-  "promoteFailed": "Couldn't move the track"
+  "promoteFailed": "Couldn't move the track",
+  "creditsDetails": "Credits and details",
+  "creditsDetailsHint": "Writers, producers and track details",
+  "creditsDetailsNote": "Also uses an unofficial Deezer API"
 }
