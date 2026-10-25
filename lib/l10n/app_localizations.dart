@@ -1753,8 +1753,14 @@ abstract class AppLocalizations {
   /// No description provided for @jamEmpty.
   ///
   /// In it, this message translates to:
-  /// **'La coda è vuota. Aggiungi dei brani.'**
+  /// **'Metti in coda dalla libreria o dalla ricerca'**
   String get jamEmpty;
+
+  /// No description provided for @jamOnlineFailed.
+  ///
+  /// In it, this message translates to:
+  /// **'Impossibile aggiungere «{title}» alla Jam'**
+  String jamOnlineFailed(String title);
 
   /// No description provided for @jamAddedBy.
   ///
@@ -1767,12 +1773,6 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'te'**
   String get jamYou;
-
-  /// No description provided for @jamAddTracks.
-  ///
-  /// In it, this message translates to:
-  /// **'Aggiungi brani'**
-  String get jamAddTracks;
 
   /// No description provided for @jamAddToJam.
   ///

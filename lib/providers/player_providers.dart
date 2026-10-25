@@ -16,6 +16,9 @@ import '../services/audio/playback_persistence.dart';
 import '../services/online/youtube_service.dart';
 import 'youtube_providers.dart' show downloadIndexProvider;
 import 'database_providers.dart';
+import '../services/stream/stream_key.dart';
+import 'jam_providers.dart';
+import '../data/repositories/track_kinds.dart';
 import 'queue_tracks.dart';
 import 'settings_providers.dart';
 
@@ -70,6 +73,9 @@ class PlayerController {
     this.shufflePlus,
     this.setShufflePlus,
     this.libraryIdOf,
+    this.jamActive,
+    this.addToJam,
+    this.addOnlineToJam,
     Random? random,
   }) : _random = random ?? Random();
 
@@ -81,6 +87,14 @@ class PlayerController {
 
   /// The library track already holding [YtResult] (a download), if any.
   final Future<int?> Function(YtResult)? libraryIdOf;
+
+  /// With a Jam active queueing goes to the shared queue (D-89): library ids
+  /// to [addToJam], online results to [addOnlineToJam] (true = accepted).
+  final bool Function()? jamActive;
+  final void Function(List<int>)? addToJam;
+  final bool Function(YtResult)? addOnlineToJam;
+
+  bool get inJam => jamActive?.call() ?? false;
 
   final CodecoreAudioHandler _handler;
   final void Function(PlayContext?)? onContext;
@@ -94,6 +108,8 @@ class PlayerController {
     PlayContext? context,
   }) async {
     if (snapshot.isEmpty) return;
+    // D-89: in a Jam a tap queues the track in the shared queue, like a swipe.
+    if (inJam) return addToJam?.call([snapshot[index].id]);
     onContext?.call(context);
     _handler.setPlayContext(context?.kind.index, context?.name);
     _requestNotificationPermissionOnce();
@@ -144,8 +160,15 @@ class PlayerController {
   bool get hasQueueSource => _handler.hasSource;
   void restoreQueue(QueueState state) => _handler.restoreQueue(state);
 
-  void playNext(int trackId) => _handler.playNext(trackId);
-  void addToQueue(int trackId) => _handler.addToQueue(trackId);
+  void playNext(int trackId) {
+    if (inJam) return addToJam?.call([trackId]);
+    _handler.playNext(trackId);
+  }
+
+  void addToQueue(int trackId) {
+    if (inJam) return addToJam?.call([trackId]);
+    _handler.addToQueue(trackId);
+  }
 
   /// The queue id of [r]: its library track when downloaded (D-81), else a
   /// new online entry; null without an online registry.
@@ -174,8 +197,8 @@ class PlayerController {
 
   /// Tap on an online result: plays it right after the current track (R-01).
   /// A library id already in the queue appears twice (accepted).
-  /// shortcut: with a Jam active the UI routes taps (D-89, phase 47); here local only.
   Future<void> playOnline(YtResult r) async {
+    if (inJam) return _onlineToJam(r);
     final id = await _idOrLog(r);
     if (id == null) return;
     if (_handler.queueIds.isEmpty || _handler.isRadio) return _playAlone(id);
@@ -185,7 +208,13 @@ class PlayerController {
     await _handler.skipToQueueItem(at);
   }
 
+  /// In a Jam: before any id lookup (library and negative ids mean nothing to guests); returns once accepted.
+  void _onlineToJam(YtResult r) {
+    if (addOnlineToJam?.call(r) != true) AppLog.w('jam: ${r.indexKey} not accepted');
+  }
+
   Future<void> enqueueOnline(YtResult r) async {
+    if (inJam) return _onlineToJam(r);
     final id = await _idOrLog(r);
     if (id == null) return;
     if (_handler.isRadio) return _playAlone(id);
@@ -193,6 +222,7 @@ class PlayerController {
   }
 
   Future<void> playOnlineNext(YtResult r) async {
+    if (inJam) return _onlineToJam(r);
     final id = await _idOrLog(r);
     if (id == null) return;
     if (_handler.isRadio) return _playAlone(id);
@@ -202,6 +232,7 @@ class PlayerController {
   /// Plays [list] in order; [shuffle] turns plain shuffle on (else off), never Shuffle+ (R-18).
   Future<void> playOnlineList(List<YtResult> list, {bool shuffle = false}) async {
     if (list.isEmpty) return;
+    if (inJam) return list.forEach(_onlineToJam);
     final ids = <int>[];
     try {
       for (final r in list) {
@@ -276,12 +307,39 @@ final playerControllerProvider = Provider<PlayerController>(
     setShufflePlus: (on) => ref
         .read(settingsProvider.notifier)
         .update((c) => c.copyWith(shufflePlus: on)),
+    jamActive: () => ref.read(jamProvider).active,
+    addToJam: (ids) => unawaited(_libraryToJam(ref, ids)),
+    addOnlineToJam: (r) => ref.read(jamProvider.notifier).addOnline(r),
     libraryIdOf: (r) async {
       final path = (await ref.read(downloadIndexProvider.future))
           .pathFor(r.id, source: r.source);
       return path == null ? null : ref.read(trackRepositoryProvider).idForPath(path);
     },
   ),
+);
+
+/// Library ids to the shared queue; a shadow row (`stream:` path, no extension) goes as an online result.
+Future<void> _libraryToJam(Ref ref, List<int> ids) async {
+  try {
+    final jam = ref.read(jamProvider.notifier);
+    final files = <Track>[];
+    for (final t in await ref.read(trackRepositoryProvider).getByIds(ids)) {
+      final key = t.kind == kStreamKind ? keyOfStreamPath(t.path) : null;
+      if (key == null) {
+        files.add(t);
+      } else {
+        jam.addOnline(streamResultOfRow(key, t));
+      }
+    }
+    await jam.addTracks(files);
+  } on Object catch (e, st) {
+    AppLog.w('jam: could not queue $ids', e, st);
+  }
+}
+
+/// Online tracks the Jam accepted but could not download or add.
+final jamOnlineFailuresProvider = StreamProvider<YtResult>(
+  (ref) => ref.watch(jamProvider.notifier).onlineFailures,
 );
 
 final currentTrackProvider = StreamProvider<Track?>((ref) async* {

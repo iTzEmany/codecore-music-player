@@ -533,7 +533,15 @@
   "jamIncomingBody": "Écoutez ensemble depuis une file d’attente partagée.",
   "jamIncomingDialog": "La musique est diffusée depuis cet appareil et vous pouvez tous les deux ajouter des titres.",
   "jamQueue": "File d’attente partagée",
-  "jamEmpty": "La file d’attente est vide. Ajoutez des titres.",
+  "jamEmpty": "Ajoutez des titres à la file depuis la bibliothèque ou la recherche",
+  "jamOnlineFailed": "Impossible d’ajouter « {title} » à la Jam",
+  "@jamOnlineFailed": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
   "jamAddedBy": "ajouté par {name}",
   "@jamAddedBy": {
     "placeholders": {
@@ -543,7 +551,6 @@
     }
   },
   "jamYou": "vous",
-  "jamAddTracks": "Ajouter des titres",
   "jamAddToJam": "Ajouter à la Jam",
   "jamAdded": "Ajoutés à la Jam : {count}",
   "@jamAdded": {

@@ -557,7 +557,15 @@
   "jamIncomingBody": "Ascoltate insieme da una coda condivisa.",
   "jamIncomingDialog": "La musica parte da questo dispositivo e potete aggiungere brani entrambi.",
   "jamQueue": "Coda condivisa",
-  "jamEmpty": "La coda è vuota. Aggiungi dei brani.",
+  "jamEmpty": "Metti in coda dalla libreria o dalla ricerca",
+  "jamOnlineFailed": "Impossibile aggiungere «{title}» alla Jam",
+  "@jamOnlineFailed": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
   "jamAddedBy": "aggiunto da {name}",
   "@jamAddedBy": {
     "placeholders": {
@@ -567,7 +575,6 @@
     }
   },
   "jamYou": "te",
-  "jamAddTracks": "Aggiungi brani",
   "jamAddToJam": "Aggiungi alla Jam",
   "jamAdded": "Aggiunti alla Jam: {count}",
   "@jamAdded": {

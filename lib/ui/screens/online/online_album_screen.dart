@@ -6,7 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/app_log.dart';
 import '../../../l10n/l10n_ext.dart';
-import '../../../providers/jam_providers.dart';
 import '../../../providers/pending_playlist_adds.dart' show addToPlaylistTag;
 import '../../../providers/player_providers.dart';
 import '../../../providers/selection_providers.dart';
@@ -91,15 +90,13 @@ class OnlineAlbumScreen extends ConsumerWidget {
     }
   }
 
-  /// Play / Shuffle: opens the player in loading; with a Jam on, the album
-  /// goes to the shared queue instead (D-89).
+  /// Play / Shuffle: opens the player in loading; the controller queues the album
+  /// in the Jam instead when one is on (D-89), then no player opens.
   void _play(BuildContext context, WidgetRef ref, List<YtResult> songs, {bool shuffle = false}) {
     if (songs.isEmpty) return;
-    if (ref.read(jamProvider).active) {
-      unawaited(_queueAlbum(context, ref, songs));
-    } else {
-      unawaited(playOnlineListAndOpen(context, ref, songs, shuffle: shuffle));
-    }
+    unawaited(ref.read(playerControllerProvider).inJam
+        ? _queueAlbum(context, ref, songs)
+        : playOnlineListAndOpen(context, ref, songs, shuffle: shuffle));
   }
 
   Future<void> _queueAlbum(BuildContext context, WidgetRef ref, List<YtResult> songs) async {

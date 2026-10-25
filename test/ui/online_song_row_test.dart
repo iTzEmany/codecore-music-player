@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:codecore/app.dart';
-import 'package:codecore/providers/jam_providers.dart';
 import 'package:codecore/providers/player_providers.dart';
 import 'package:codecore/providers/selection_providers.dart';
 import 'package:codecore/providers/youtube_providers.dart';
@@ -28,6 +27,8 @@ const _r = YtResult(
 class _Ctrl implements PlayerController {
   final calls = <String>[];
   bool failEnqueue = false;
+  @override
+  bool inJam = false;
 
   @override
   Future<void> playOnline(YtResult r) async => calls.add('play');
@@ -51,17 +52,12 @@ class _Downloads extends DownloadsNotifier {
   void add(YtResult r, {String? tag}) => adds.add(tag ?? 'plain');
 }
 
-class _ActiveJam extends JamController {
-  @override
-  JamUiState build() => const JamUiState(phase: JamPhase.active);
-}
-
 void main() {
   late _Ctrl ctrl;
   late _Downloads downloads;
 
   Future<Harness> pumpRow(WidgetTester tester, {bool jam = false, Widget? child}) async {
-    ctrl = _Ctrl();
+    ctrl = _Ctrl()..inJam = jam;
     downloads = _Downloads();
     final h = await Harness.create(tester);
     await h.pump(
@@ -73,7 +69,6 @@ void main() {
       extraOverrides: [
         playerControllerProvider.overrideWithValue(ctrl),
         downloadsProvider.overrideWith(() => downloads),
-        if (jam) jamProvider.overrideWith(_ActiveJam.new),
       ],
     );
     return h;
@@ -165,7 +160,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Riproduci dopo'));
     await tester.pumpAndSettle();
-    expect(ctrl.calls, ['enqueue', 'enqueue']);
+    expect(ctrl.calls, ['enqueue', 'next']); // the controller does the Jam routing (D-89)
     await h.dispose(tester);
   });
 

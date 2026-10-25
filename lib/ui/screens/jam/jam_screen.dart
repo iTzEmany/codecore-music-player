@@ -3,12 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/app_localizations.dart';
 import '../../../l10n/l10n_ext.dart';
-import '../../../providers/track_ops.dart';
 import '../../../providers/jam_providers.dart';
 import '../../../providers/share_hub.dart';
 import '../../../services/jam/jam_guest.dart';
 import '../../../services/jam/jam_models.dart';
-import '../share/track_picker_screen.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/empty_state.dart';
@@ -47,18 +45,6 @@ class _JamScreenState extends ConsumerState<JamScreen> {
     _ => l.jamUnreachable,
   };
 
-  Future<void> _add() async {
-    final ids = await Navigator.of(context).push<Set<int>>(
-      MaterialPageRoute(builder: (_) => const TrackPickerScreen()),
-    );
-    if (ids == null || ids.isEmpty || !mounted) return;
-    final l = context.l10n;
-    final tracks = await ref.read(trackOpsProvider).byIds(ids.toList());
-    final n = await ref.read(jamProvider.notifier).addTracks(tracks);
-    if (!mounted) return;
-    showMsg(context, l.jamAdded(n));
-  }
-
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
@@ -90,7 +76,6 @@ class _JamScreenState extends ConsumerState<JamScreen> {
     }
     final ownId = ref.read(shareHubProvider.notifier).deviceId ?? '';
     final isHost = s.isHost;
-    final cc = context.cc;
     final theme = Theme.of(context).textTheme;
 
     String owner(JamItem i) {
@@ -142,17 +127,6 @@ class _JamScreenState extends ConsumerState<JamScreen> {
                       send: ctrl.send,
                     ),
                   ],
-                ),
-                Positioned(
-                  right: CcDims.margin,
-                  bottom: CcDims.margin,
-                  child: FloatingActionButton.extended(
-                    backgroundColor: cc.accent,
-                    foregroundColor: cc.onAccent,
-                    onPressed: _add,
-                    icon: const Icon(Icons.add),
-                    label: Text(l.jamAddTracks),
-                  ),
                 ),
               ],
             ),
@@ -268,7 +242,7 @@ class _JamQueue extends StatelessWidget {
       );
     }
     return SliverPadding(
-      padding: const EdgeInsets.only(bottom: 88),
+      padding: const EdgeInsets.only(bottom: CcDims.margin),
       sliver: SliverReorderableList(
         proxyDecorator: (child, _, anim) => ccDragProxy(context, child, anim),
         itemCount: jam.items.length,

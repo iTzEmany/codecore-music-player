@@ -365,7 +365,15 @@
   "jamIncomingBody": "Listen together from a shared queue.",
   "jamIncomingDialog": "The music plays from this device and you can both add tracks.",
   "jamQueue": "Shared queue",
-  "jamEmpty": "The queue is empty. Add some tracks.",
+  "jamEmpty": "Queue tracks from the library or from search",
+  "jamOnlineFailed": "Could not add “{title}” to the Jam",
+  "@jamOnlineFailed": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
   "jamAddedBy": "added by {name}",
   "@jamAddedBy": {
     "placeholders": {
@@ -375,7 +383,6 @@
     }
   },
   "jamYou": "you",
-  "jamAddTracks": "Add tracks",
   "jamAddToJam": "Add to Jam",
   "jamAdded": "Added to the Jam: {count}",
   "@jamAdded": {

@@ -1000,7 +1000,13 @@ class AppLocalizationsPt extends AppLocalizations {
   String get jamQueue => 'Fila partilhada';
 
   @override
-  String get jamEmpty => 'A fila está vazia. Adicione faixas.';
+  String get jamEmpty =>
+      'Ponha faixas na fila a partir da biblioteca ou da pesquisa';
+
+  @override
+  String jamOnlineFailed(String title) {
+    return 'Não foi possível adicionar «$title» à Jam';
+  }
 
   @override
   String jamAddedBy(String name) {
@@ -1009,9 +1015,6 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get jamYou => 'si';
-
-  @override
-  String get jamAddTracks => 'Adicionar faixas';
 
   @override
   String get jamAddToJam => 'Adicionar à Jam';

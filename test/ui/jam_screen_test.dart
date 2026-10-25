@@ -1,4 +1,8 @@
+import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/l10n/app_localizations.dart';
+import 'package:codecore/services/online/youtube_service.dart' show YtResult;
+import 'package:codecore/ui/screens/online/online_song_row.dart';
+import 'package:codecore/ui/widgets/track_row.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:codecore/providers/jam_providers.dart';
 import 'package:codecore/services/jam/jam_host.dart';
@@ -16,8 +20,23 @@ class _FakeJam extends JamController {
   final JamUiState initial;
   final sent = <JamCommand>[];
 
+  final addedTracks = <int>[];
+  final addedOnline = <String>[];
+
   @override
   JamUiState build() => initial;
+
+  @override
+  Future<int> addTracks(List<Track> tracks, {bool inherited = false}) async {
+    addedTracks.addAll(tracks.map((t) => t.id));
+    return tracks.length;
+  }
+
+  @override
+  bool addOnline(YtResult r) {
+    addedOnline.add(r.id);
+    return true;
+  }
 
   @override
   Future<JamError?> send(JamCommand cmd) async {
@@ -69,7 +88,7 @@ void main() {
       expect(find.text('Jam'), findsWidgets);
       expect(find.text('Prima'), findsWidgets);
       expect(find.text('Seconda'), findsOneWidget);
-      expect(find.text('Aggiungi brani'), findsOneWidget);
+      expect(find.byType(FloatingActionButton), findsNothing);
       expect(find.byTooltip('Brano successivo'),
           host ? findsOneWidget : findsNothing);
       expect(find.text(host ? 'Termina Jam' : 'Esci dalla Jam'), findsOneWidget);
@@ -173,6 +192,58 @@ void main() {
     ));
     await h.pump(tester, const JamScreen(), extraOverrides: [jamProvider.overrideWith(() => empty)]);
     expect(find.byType(EmptyState), findsOneWidget);
+    await h.dispose(tester);
+  });
+
+  testWidgets('an empty shared queue guides the user to queue from the library or search', (tester) async {
+    tester.view.physicalSize = const Size(500, 1000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final h = await Harness.create(tester);
+    final empty = _FakeJam(JamUiState(
+      phase: JamPhase.active,
+      role: JamRole.host,
+      peerName: 'Telefono',
+      peerId: 'peer',
+      jam: const JamState(version: 1, items: [], currentIndex: -1, playing: false, hostDeviceId: 'host', outputDeviceId: 'host'),
+    ));
+    await h.pump(tester, const JamScreen(), extraOverrides: [jamProvider.overrideWith(() => empty)]);
+    expect(find.text('Metti in coda dalla libreria o dalla ricerca'), findsOneWidget);
+    await h.dispose(tester);
+  });
+
+  testWidgets('with the Jam active a swipe queues a library row and an online row in the Jam',
+      (tester) async {
+    tester.view.physicalSize = const Size(500, 1000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final h = await Harness.create(tester, tracks: 1);
+    final t = (await tester.runAsync(() => h.db.select(h.db.tracks).get()))!.single;
+    final fake = _FakeJam(active(host: true));
+    await h.pump(
+      tester,
+      Scaffold(
+        body: Column(children: [
+          SizedBox(height: 64, child: LiveTrackRow(track: t, onTap: () {})),
+          const SizedBox(
+            height: 72,
+            child: OnlineSongTile(
+              result: YtResult(id: 'v1', title: 'Online song', channel: 'C', duration: null),
+              index: 0,
+              selectionKey: 'k',
+            ),
+          ),
+        ]),
+      ),
+      extraOverrides: [jamProvider.overrideWith(() => fake)],
+    );
+    await tester.dragFrom(Offset(100, tester.getCenter(find.text('Song 0')).dy), const Offset(250, 0));
+    await tester.pumpAndSettle();
+    await tester.dragFrom(Offset(100, tester.getCenter(find.text('Online song')).dy), const Offset(250, 0));
+    await tester.pumpAndSettle();
+    expect(fake.addedTracks, [t.id]);
+    expect(fake.addedOnline, ['v1']);
+    expect(h.handler.queueIds, isEmpty);
     await h.dispose(tester);
   });
 }

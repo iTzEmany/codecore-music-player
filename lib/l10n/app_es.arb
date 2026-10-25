@@ -365,7 +365,15 @@
   "jamIncomingBody": "Escuchad juntos desde una cola compartida.",
   "jamIncomingDialog": "La música suena en este dispositivo y los dos podéis añadir canciones.",
   "jamQueue": "Cola compartida",
-  "jamEmpty": "La cola está vacía. Añade canciones.",
+  "jamEmpty": "Pon canciones en cola desde la biblioteca o la búsqueda",
+  "jamOnlineFailed": "No se pudo añadir «{title}» a la Jam",
+  "@jamOnlineFailed": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
   "jamAddedBy": "añadido por {name}",
   "@jamAddedBy": {
     "placeholders": {
@@ -375,7 +383,6 @@
     }
   },
   "jamYou": "ti",
-  "jamAddTracks": "Añadir canciones",
   "jamAddToJam": "Añadir a la Jam",
   "jamAdded": "Añadidas a la Jam: {count}",
   "@jamAdded": {

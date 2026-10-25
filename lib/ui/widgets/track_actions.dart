@@ -13,7 +13,6 @@ import '../../core/platform.dart';
 import '../../data/db/app_database.dart';
 import '../../l10n/l10n_ext.dart';
 import '../../providers/equalizer_providers.dart';
-import '../../providers/jam_providers.dart';
 import '../../providers/pending_playlist_adds.dart' show addToPlaylistTag;
 import '../../providers/player_providers.dart';
 import '../../providers/preview_providers.dart';
@@ -198,17 +197,12 @@ List<TrackActionGroup> trackActions(
         }),
       TrackAction(Icons.playlist_play_rounded, l.playNext, () async {
         ctrl.playNext(track.id);
-        snack(l.playNextDone);
+        snack(ctrl.inJam ? l.addedToQueue : l.playNextDone);
       }, onStreamRow: true),
       TrackAction(Icons.queue_rounded, l.addToQueue, () async {
         ctrl.addToQueue(track.id);
         snack(l.addedToQueue);
       }, onStreamRow: true),
-      if (ref.read(jamProvider).active)
-        TrackAction(Icons.queue_music_rounded, l.jamAddToJam, () async {
-          final n = await ref.read(jamProvider.notifier).addTracks([track]);
-          snack(l.jamAdded(n));
-        }),
     ]),
     TrackActionGroup(l.groupCollection, [
       // A streamed shadow row: the download promotes it to a real library track.
@@ -497,7 +491,7 @@ class _DetailsDialog extends StatelessWidget {
 }
 
 /// The menu of an online row: play after, queue, playlist, download, artist
-/// (R-16). With a Jam on, «Riproduci dopo» goes to the shared queue (D-89).
+/// (R-16). With a Jam on, the controller sends it to the shared queue (D-89).
 List<TrackAction> onlineResultActions(
   BuildContext outer,
   WidgetRef ref,
@@ -505,11 +499,10 @@ List<TrackAction> onlineResultActions(
 ) {
   final l = outer.l10n;
   final ctrl = ref.read(playerControllerProvider);
-  final jam = ref.read(jamProvider).active;
   return [
     TrackAction(Icons.playlist_play_rounded, l.playNext, () async {
-      await (jam ? ctrl.enqueueOnline(r) : ctrl.playOnlineNext(r));
-      if (outer.mounted) showMsg(outer, jam ? l.addedToQueue : l.playNextDone);
+      await ctrl.playOnlineNext(r);
+      if (outer.mounted) showMsg(outer, ctrl.inJam ? l.addedToQueue : l.playNextDone);
     }),
     TrackAction(Icons.queue_rounded, l.addToQueue, () async {
       await ctrl.enqueueOnline(r);

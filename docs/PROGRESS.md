@@ -655,7 +655,7 @@ Note: D-89 (Jam: tap e «Riproduci dopo» vanno in coda) nella UI; la coda condi
 - [x] 47.2 Accodare brani online nella Jam (host e ospiti)
 - [x] 47.3 Proprietario uscito: l'uscita scarica da sé
 - [ ] 47.4 Rotta `meta`: copertina, testo e curiosità dal proprietario
-- [ ] 47.5 Via il FAB; swipe e «In coda» nella coda condivisa
+- [x] 47.5 Via il FAB; swipe e «In coda» nella coda condivisa
 - [ ] 47.6 Schermata del brano della Jam
 - [ ] 47.7 Controlli di fase (K-01, K-02)
 - [ ] 47.8 Prove a mano (utente)

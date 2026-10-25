@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:codecore/providers/jam_providers.dart';
 import 'package:codecore/providers/player_providers.dart';
 import 'package:codecore/providers/smart_search_providers.dart';
 import 'package:codecore/services/online/merge_results.dart';
@@ -87,14 +86,11 @@ SmartSearchState _state({
 class _EnqueueSpy implements PlayerController {
   final calls = <String>[];
   @override
+  bool inJam = true;
+  @override
   Future<void> enqueueOnline(YtResult r) async => calls.add(r.id);
   @override
   dynamic noSuchMethod(Invocation invocation) => null;
-}
-
-class _ActiveJam extends JamController {
-  @override
-  JamUiState build() => const JamUiState(phase: JamPhase.active);
 }
 
 const _pink = YtmArtistRef(
@@ -325,7 +321,6 @@ void main() {
     final spy = _EnqueueSpy();
     final h = await open(tester, more: [
       playerControllerProvider.overrideWithValue(spy),
-      jamProvider.overrideWith(_ActiveJam.new),
     ]);
     await emit(tester, _state(best: [_song('a', 'Mother', hasVideo: true)]));
     await tester.tap(find.byKey(const ValueKey('listen-video-a')));
