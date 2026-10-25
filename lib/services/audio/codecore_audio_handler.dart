@@ -60,7 +60,11 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
             : null {
     _subs
       ..add(_backend.state.listen(_onBackendState))
-      ..add(_backend.position.listen(_onPosition))
+      ..add(_backend.position.listen((p) {
+        _onPosition(p);
+        // While a stream loads, the backend still reports the old track.
+        _posOut.add(_waitingStream ? Duration.zero : p);
+      }))
       ..add(_backend.duration.listen(_onBackendDuration))
       ..add(_backend.streamTitle.listen(_onStreamTitle))
       ..add(_queueController.stream.listen((_) => unawaited(_syncPreparer())));
@@ -133,6 +137,9 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   /// [_playWhenReady] meanwhile.
   bool _waitingStream = false;
   bool _playWhenReady = true;
+
+  /// A load is under way; a pause meanwhile must stick (the old track is not the one to pause).
+  bool _loadBusy = false, _loadPaused = false;
 
   /// Shadow row of the online entry now playing, once the preparer made it.
   int? _shadowId;
@@ -261,8 +268,10 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   Track? get currentTrack => _current;
   Stream<Track?> get currentTrackStream => _trackController.stream;
   Stream<void> get queueChanges => _queueController.stream;
-  Stream<Duration> get positionStream => _backend.position;
-  Stream<Duration?> get durationStream => _backend.duration;
+  final _posOut = StreamController<Duration>.broadcast();
+  final _durOut = StreamController<Duration?>.broadcast();
+  Stream<Duration> get positionStream => _posOut.stream;
+  Stream<Duration?> get durationStream => _durOut.stream;
   BackendState get backendState => _state;
   bool get isPlaying => _state == BackendState.playing;
   List<int> get queueIds => _queue.items;
@@ -375,9 +384,12 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   Future<void> _loadCurrent({required bool play, Duration? startAt}) async {
     final token = ++_loadToken;
     _waitingStream = false;
+    _loadBusy = true;
+    _loadPaused = false;
     _cancelRadioTimers();
     final id = _queue.currentId;
     if (id == null) {
+      _loadBusy = false;
       await _goIdle();
       return;
     }
@@ -474,7 +486,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
       }
       _consecutiveErrors = 0;
       // A backend that was playing keeps playing a newly loaded file.
-      if (playNow) {
+      if (playNow && !_loadPaused) {
         await _backend.play();
       } else {
         await _backend.pause();
@@ -499,7 +511,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
           token,
           play: playNow);
     } finally {
-      if (token == _loadToken) _waitingStream = false;
+      if (token == _loadToken) _waitingStream = _loadBusy = false;
     }
   }
 
@@ -633,11 +645,14 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   /// A podcast file's tags or the feed often carry a wrong length: once the
   /// player knows the real one, the library row takes it.
   void _onBackendDuration(Duration? d) {
+    if (_waitingStream) return; // the old track's length
     if (isRadio) {
       _duration = null; // a live stream has no length
+      _durOut.add(null);
       return;
     }
     _duration = d;
+    _durOut.add(d);
     final t = _current;
     if (d == null || t == null || t.kind != 1) return;
     final ms = d.inMilliseconds;
@@ -660,6 +675,10 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     _position = Duration.zero;
     _duration = track.durationMs > 0 ? Duration(milliseconds: track.durationMs) : null;
     _current = track;
+    if (_waitingStream) {
+      _posOut.add(Duration.zero);
+      _durOut.add(_duration);
+    }
     if (_onAir != null) {
       _onAir = null;
       _onAirController.add(null);
@@ -1023,7 +1042,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
 
   Future<void> togglePlayPause() async {
     if (_queue.currentId == null) return;
-    if (_state == BackendState.playing) {
+    if (_state == BackendState.playing || (_waitingStream && _playWhenReady)) {
       await pause();
     } else {
       await play();
@@ -1035,6 +1054,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     final remote = _remote;
     if (remote != null) return remote.play();
     if (_queue.currentId == null) return;
+    _loadPaused = false;
     if (_waitingStream) {
       _playWhenReady = true;
       return;
@@ -1069,6 +1089,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
 
   @override
   Future<void> pause() {
+    if (_loadBusy) _loadPaused = true;
     if (_waitingStream && _remote == null) {
       _playWhenReady = false;
       return Future.value();
@@ -1428,6 +1449,8 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     for (final s in _subs) {
       await s.cancel();
     }
+    await _posOut.close();
+    await _durOut.close();
     await _trackController.close();
     await _queueController.close();
     await _pausedAtTrackEnd.close();

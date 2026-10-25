@@ -312,6 +312,53 @@ void main() {
     expect(backend.playing, isFalse);
   });
 
+  test('a pause before the entry is even known as a stream still sticks', () async {
+    final lookup = Completer<void>();
+    handler.libraryIdOf = (_) async {
+      await lookup.future;
+      return null;
+    };
+    final id = online.register(result('v2'));
+    final started = handler.playQueue([id], 0);
+    await settle();
+    await handler.pause();
+    lookup.complete();
+    await started;
+    expect(backend.loaded.single, endsWith('youtube_v2.m4a'));
+    expect(backend.playing, isFalse);
+  });
+
+  test('toggle while the file comes pauses it instead of playing', () async {
+    final id = online.register(result('v2'));
+    final gate = preparer.gates['youtube:v2'] = Completer<void>();
+    final started = handler.playQueue([id], 0);
+    await settle();
+    await handler.togglePlayPause();
+    gate.complete();
+    await started;
+    expect(backend.playing, isFalse);
+  });
+
+  test('while a stream loads the position is 0 and the length the result\'s, not the old track\'s', () async {
+    final id = online.register(result('v2'));
+    final gate = preparer.gates['youtube:v2'] = Completer<void>();
+    await handler.playQueue([ids[0]], 0);
+    final pos = <Duration>[], dur = <Duration?>[];
+    final subs = [handler.positionStream.listen(pos.add), handler.durationStream.listen(dur.add)];
+    final started = handler.playQueue([id], 0);
+    await settle();
+    backend.posC.add(const Duration(seconds: 137)); // the old track still reports
+    backend.durC.add(const Duration(seconds: 200));
+    await settle();
+    expect(pos, everyElement(Duration.zero));
+    expect(dur.last, const Duration(minutes: 3));
+    gate.complete();
+    await started;
+    for (final s in subs) {
+      await s.cancel();
+    }
+  });
+
   test('no listen is counted for B before its file loads', () async {
     final id = online.register(result('v2'));
     final gate = preparer.gates['youtube:v2'] = Completer<void>();
