@@ -27,6 +27,7 @@ import 'online_providers.dart';
 import 'yt_dlp_update_providers.dart' show locateYtDlp;
 import 'ytm_catalog_providers.dart' show ytmCatalogProvider;
 import 'settings_providers.dart';
+import 'pending_playlist_adds.dart' show parseAddToPlaylistTag;
 import 'stream_providers.dart' show streamPromoterProvider;
 
 /// The videos of a pasted playlist or channel address, read once per address.
@@ -216,8 +217,8 @@ class DownloadsNotifier extends Notifier<List<DownloadItem>> {
   /// A track already in the stream cache is moved to the downloads (R-10);
   /// anything else, and every import, goes to the queue as before.
   void add(YtResult r, {String? tag}) {
-    // shortcut: tagged adds (addto:, imports) always download until 46.4.
-    if (tag != null) return _queue.add(r, tag: tag);
+    // Imports (any tag but addto:) always download.
+    if (tag != null && parseAddToPlaylistTag(tag) == null) return _queue.add(r, tag: tag);
     if (!_promoting.add(r.indexKey)) return; // double tap while it is moving
     unawaited(_promoteOrQueue(r, tag).whenComplete(() => _promoting.remove(r.indexKey)));
   }
@@ -226,7 +227,10 @@ class DownloadsNotifier extends Notifier<List<DownloadItem>> {
 
   Future<void> _promoteOrQueue(YtResult r, String? tag) async {
     try {
-      if (await ref.read(streamPromoterProvider).promote(r)) return;
+      if (await ref.read(streamPromoterProvider).promote(r)) {
+        await _joinPlaylist(r, parseAddToPlaylistTag(tag));
+        return;
+      }
     } on StreamPromoteException catch (e) {
       AppLog.w('promotion failed: ${e.message}');
       _promoteErrors.add(e.message);
@@ -236,6 +240,19 @@ class DownloadsNotifier extends Notifier<List<DownloadItem>> {
     }
     if (ref.mounted) _queue.add(r, tag: tag);
   }
+
+  /// A promoted song is a library track already: the playlist of an `addto:` tag takes it now.
+  Future<void> _joinPlaylist(YtResult r, int? playlistId) async {
+    if (playlistId == null) return;
+    try {
+      final path = (await ref.read(downloadIndexProvider.future)).pathFor(r.id, source: r.source);
+      final id = path == null ? null : await ref.read(trackRepositoryProvider).idForPath(path);
+      if (id != null) await ref.read(playlistRepositoryProvider).addTracks(playlistId, [id]);
+    } on Object catch (e, st) {
+      AppLog.w('add to playlist after promotion failed for ${r.indexKey}', e, st);
+    }
+  }
+
   void cancel(int id) => _queue.cancel(id);
   void cancelWhere(bool Function(DownloadItem item) test) =>
       _queue.cancelWhere(test);

@@ -3,6 +3,8 @@ import 'dart:io';
 
 import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/data/repositories/folder_repository.dart';
+import 'package:codecore/data/repositories/playlist_repository.dart';
+import 'package:codecore/providers/pending_playlist_adds.dart';
 import 'package:codecore/data/repositories/track_repository.dart';
 import 'package:codecore/services/covers/cover_store.dart';
 import 'package:codecore/services/online/download_index.dart';
@@ -17,6 +19,7 @@ import 'package:codecore/services/stream/stream_promoter.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
 
@@ -55,7 +58,7 @@ class _FakePromoter implements StreamPromoter {
   dynamic noSuchMethod(Invocation i) => throw UnimplementedError();
 }
 
-Future<ProviderContainer> _notifierWith(StreamPromoter promoter) async {
+Future<ProviderContainer> _notifierWith(StreamPromoter promoter, {List<Override> extra = const []}) async {
   final db = AppDatabase(NativeDatabase.memory());
   addTearDown(db.close);
   final dir = await Directory.systemTemp.createTemp('dl');
@@ -66,6 +69,7 @@ Future<ProviderContainer> _notifierWith(StreamPromoter promoter) async {
     youtubeServiceProvider.overrideWithValue(_Yt()),
     settingsProvider.overrideWith(_Settings.new),
     streamPromoterProvider.overrideWithValue(promoter),
+    ...extra,
   ]);
   addTearDown(c.dispose);
   return c;
@@ -227,13 +231,43 @@ void main() {
     gate.complete();
   });
 
-  test('a tagged add (addto:, imports) skips the promoter', () async {
+  test('an import-tagged add skips the promoter', () async {
     final calls = <String>[];
     final c = await _notifierWith(_FakePromoter(calls));
-    c.read(downloadsProvider.notifier).add(_r, tag: 'addto:1');
+    c.read(downloadsProvider.notifier).add(_r, tag: 'import:1:2');
     await Future<void>.delayed(Duration.zero);
     expect(calls, isEmpty);
     expect(c.read(downloadsProvider), hasLength(1));
+  });
+
+  group('addto: with a cached track', () {
+    Future<(ProviderContainer, int)> setup(StreamPromoter pr) async {
+      final playlists = PlaylistRepository(db);
+      final pl = await playlists.create('P');
+      final c = await _notifierWith(pr, extra: [
+        trackRepositoryProvider.overrideWithValue(tracks),
+        playlistRepositoryProvider.overrideWithValue(playlists),
+        downloadIndexProvider.overrideWith((ref) async => index),
+      ]);
+      return (c, pl);
+    }
+
+    test('moves the file (no download) and the row joins the playlist', () async {
+      final (c, pl) = await setup(promoter);
+      c.read(downloadsProvider.notifier).add(_r, tag: addToPlaylistTag(pl));
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+      expect(c.read(downloadsProvider), isEmpty);
+      final rows = await (db.select(db.playlistTracks)..where((t) => t.playlistId.equals(pl))).get();
+      expect(rows.map((e) => e.trackId), [shadowId]);
+    });
+
+    test('without a cached file it downloads with the tag', () async {
+      cache.forget(_key);
+      final (c, pl) = await setup(promoter);
+      c.read(downloadsProvider.notifier).add(_r, tag: addToPlaylistTag(pl));
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+      expect(c.read(downloadsProvider).single.tag, addToPlaylistTag(pl));
+    });
   });
 }
 
