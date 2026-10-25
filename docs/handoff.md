@@ -41,7 +41,11 @@ Leggi docs/handoff.md, docs/gotchas.md e docs/PROGRESS.md. <obiettivo scelto fra
 ```
 
 ## Prossimi obiettivi
-1. **(Consigliato) Picchi di build al cambio di brano.** Swipe mini player 8 %, Apertura player p99 114 ms, Lettore dal dock.
+0. **(Consigliato) Feature «Streaming e coda online», fasi 45–49** (kickoff del 2026-10-25, D-61…D-88).
+   - Documento: `docs/feature-streaming.md` (requisiti R-01…R-34, architettura, rischi K-01…K-08); fasi `docs/fase-45-…` → `fase-49-…`.
+   - Una PR per fase. Prima dei lavori 2b e 3 di `docs/prossimi-lavori.md` (D-82).
+   - Comando: `/obiettivo fase 45` (poi 46, 47, 48, 49).
+1. **Picchi di build al cambio di brano.** Swipe mini player 8 %, Apertura player p99 114 ms, Lettore dal dock.
    - Il player si ricostruisce e decodifica la copertina.
    - Da guardare: `cacheWidth` e `gaplessPlayback` in `track_art.dart`, e le card che dipendono dal brano.
    - Misura prima e dopo con `--only`.

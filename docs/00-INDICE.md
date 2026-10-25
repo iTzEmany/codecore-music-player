@@ -60,6 +60,11 @@ un'unica codebase Flutter per Android, Windows e Linux. Uso personale, niente co
 | 42 | `fase-42-livelli-e-tipi.md` | Livelli e tipi: UI solo tramite provider (`TrackOps`, test di architettura), selezione unica, enum dei menu, `track.kind`, build corti, via l'importer Python |
 | 43 | `fase-43-nuovo-aspetto.md` | Nuovo aspetto dai mockup approvati: dock unico, Home, Libreria, Album/artista, In riproduzione, Onboarding con scansione |
 | 44 | `fase-44-chiusura-ui-fluida.md` | Chiusura di «ui-fluida»: misure finali, metriche di struttura, risultati in `analisi.md`, pulizia |
+| 45 | `fase-45-cache-streaming.md` | Streaming, cache e motore: `StreamCache` (LRU in MB), `StreamPreparer`, righe ombra `kind = 2` in cronologia e statistiche, lettore dal file, suggeriti di Shuffle+ sulla cache, via `StreamAddressCache`, cursore e «Svuota» |
+| 46 | `fase-46-streaming-ricerca.md` | Streaming dalla ricerca: tap/swipe/menu ⋮ sulle righe online, player in caricamento, album online con Play/Shuffle, «Scarica» e «Aggiungi a playlist» con spostamento dalla cache, via l'anteprima con le cuffie |
+| 47 | `fase-47-jam-online.md` | Jam online: brani online accodati da host e ospiti e serviti dalla cache, uscita che scarica da sé, rotta `meta`, schermata del brano, via il FAB |
+| 48 | `fase-48-shuffle-tre-stati.md` | Shuffle a 3 stati senza interruttore (salta Shuffle+ quando la coda non lo permette), suggeriti inseriti/tolti subito, Play e shuffle separati in Home |
+| 49 | `fase-49-artisti-ospiti.md` | Artisti ospiti: nomi toccabili nel player e nella barra desktop, «Vai all'artista» con foglio di scelta, risoluzione libreria → online |
 
 Dopo la **Fase 3** l'app è già usabile come lettore. Le fasi 5 e 6 sono indipendenti tra loro. La fase 8 (Jam) richiede la 6.
 
