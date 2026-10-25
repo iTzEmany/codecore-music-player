@@ -10,6 +10,7 @@ import '../data/repositories/library_search.dart' show creditedTracks;
 import '../data/repositories/smart_search.dart';
 import '../data/repositories/track_repository.dart';
 import '../services/covers/cover_store.dart';
+import '../services/online/credits.dart' show creditNameKey;
 import '../services/covers/cover_thumbnails.dart';
 import '../services/scanner/library_scanner.dart';
 import '../services/tags/audio_metadata_tag_reader.dart';
@@ -286,6 +287,11 @@ final resumableTracksProvider = StreamProvider.autoDispose<List<Track>>(
 
 final artistTracksProvider = StreamProvider.family<List<Track>, String>(
   (ref, key) => ref.watch(libraryQueriesProvider).watchArtistTracks(key),
+);
+
+/// Tracks where the artist is only credited (producer, author...), by role.
+final artistCreditedProvider = FutureProvider.family<List<({String role, Track track})>, String>(
+  (ref, name) => ref.watch(creditsRepositoryProvider).creditedTracks(creditNameKey(name)),
 );
 
 final artistAlbumsProvider = StreamProvider.family<List<AlbumSummary>, String>(

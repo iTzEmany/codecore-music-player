@@ -5,6 +5,7 @@ import '../../../data/db/app_database.dart';
 import '../../../data/repositories/library_queries.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/selection_providers.dart';
+import '../../../services/online/credit_roles.dart';
 import '../../../providers/library_providers.dart';
 import '../../../providers/player_providers.dart';
 import '../../../providers/settings_providers.dart';
@@ -35,6 +36,13 @@ class ArtistDetailScreen extends ConsumerWidget {
     final l = context.l10n;
     final albums = ref.watch(artistAlbumsProvider(artist.key));
     final tracks = ref.watch(artistTracksProvider(artist.key));
+    final credited = artist.name == null
+        ? const <({String role, Track track})>[]
+        : ref.watch(artistCreditedProvider(artist.name!)).value ?? const [];
+    final byRole = <String, List<Track>>{};
+    for (final c in credited) {
+      (byRole[c.role] ??= []).add(c.track);
+    }
     final compact = ref.watch(settingsProvider).compactMode;
     final ctrl = ref.read(playerControllerProvider);
     final name = artist.name ?? l.unknownArtist;
@@ -124,6 +132,24 @@ class ArtistDetailScreen extends ConsumerWidget {
                     ShellNav.open<void>(context, AlbumDetailScreen(album: a)),
               ),
             ),
+          ],
+          if (byRole.isNotEmpty) ...[
+            SliverToBoxAdapter(child: SectionHeader(l.creditsAppearsAs)),
+            for (final e in byRole.entries) ...[
+              SliverToBoxAdapter(child: SectionHeader(creditRoleLabel(l, e.key))),
+              SliverList.builder(
+                itemCount: e.value.length,
+                itemBuilder: (_, i) => SizedBox(
+                  height: extent,
+                  child: LiveTrackRow(
+                    track: e.value[i],
+                    compact: compact,
+                    albumAsSubtitle: true,
+                    onTap: () => ctrl.playFromList(e.value, i, context: playCtx),
+                  ),
+                ),
+              ),
+            ],
           ],
         ],
       ),
