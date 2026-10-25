@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/l10n_ext.dart';
-import '../../../providers/listen_providers.dart';
+import '../../../providers/player_providers.dart';
 import '../../../providers/selection_providers.dart';
 import '../../../providers/settings_providers.dart';
 import '../../../providers/smart_search_providers.dart';
@@ -28,7 +28,6 @@ import '../online/artist_page_screen.dart';
 import '../online/online_album_screen.dart';
 import '../online/online_selection_scope.dart';
 import '../online/online_song_row.dart';
-import 'listen_bar.dart';
 import 'online_results_sections.dart';
 import 'playlist_source_sheet.dart';
 
@@ -64,7 +63,6 @@ class OnlineResults extends ConsumerStatefulWidget {
 class _OnlineResultsState extends ConsumerState<OnlineResults> {
   /// Results are picked by their place in best + others (before any filter).
   static final _selectionKey = SelectionKey.online.key;
-  late final ListenNotifier _listen;
   SmartSearchRequest? _request;
   int _serial = 0;
 
@@ -73,18 +71,9 @@ class _OnlineResultsState extends ConsumerState<OnlineResults> {
   MediaKind? _filter;
   bool _othersOpen = false;
 
-  /// A listen has no player of its own outside the online pages: it ends with
-  /// the last of them (these results, an artist page opened from them…).
-  @override
-  void dispose() {
-    _listen.detach();
-    super.dispose();
-  }
-
   @override
   void initState() {
     super.initState();
-    _listen = ref.read(listenProvider.notifier)..attach();
     if (widget.submitted > 0) _search();
   }
 
@@ -238,7 +227,6 @@ class _OnlineResultsState extends ConsumerState<OnlineResults> {
             ),
           ],
           if (request != null && s == null && error == null) const Spacer(),
-          const ListenBar(),
         ],
       ),
     );
@@ -263,7 +251,7 @@ class _OnlineResultsState extends ConsumerState<OnlineResults> {
           selectionKey: _selectionKey,
           onArtistTap: _openArtist,
           onListenVideo: () =>
-              ref.read(listenProvider.notifier).toggle(r.alternatives.first),
+              ref.read(playerControllerProvider).playOnline(r.alternatives.first),
         ),
       );
     }

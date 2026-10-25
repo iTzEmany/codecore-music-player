@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/app_log.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../l10n/l10n_ext.dart';
+import '../../../providers/player_providers.dart';
 import '../../../providers/shuffle_plus_providers.dart';
 import '../../../providers/youtube_providers.dart';
 import '../../../services/online/youtube_service.dart';
@@ -11,7 +12,6 @@ import '../../../services/shuffle_plus/suggestion_log.dart';
 import '../../widgets/confirm.dart';
 import '../../widgets/empty_state.dart';
 import '../online/online_song_row.dart';
-import '../youtube/listen_bar.dart';
 import '../../widgets/cc_app_bar.dart';
 
 /// Newest first; waits for the file to be read.
@@ -118,7 +118,12 @@ class _SuggestionRow extends ConsumerWidget {
         ref.read(suggestionLogProvider).setOutcome(result.id, SuggestionOutcome.downloaded);
         ref.invalidate(suggestionRecordsProvider);
       },
-      listen: ListenButton(result: result),
+      listen: IconButton(
+        key: ValueKey('listen-${result.indexKey}'),
+        tooltip: l.listenAction,
+        icon: const Icon(Icons.headphones_rounded),
+        onPressed: () => ref.read(playerControllerProvider).playOnline(result),
+      ),
     );
   }
 }

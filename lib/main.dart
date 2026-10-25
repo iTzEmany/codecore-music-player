@@ -37,8 +37,6 @@ import 'services/audio/crossfade_engine.dart';
 import 'services/audio/just_audio_backend.dart';
 import 'services/audio/media_browse_tree.dart';
 import 'services/audio/online_entries.dart';
-import 'providers/listen_providers.dart' show fastClientGateProvider;
-import 'services/online/youtube_service.dart' show FastClientGate;
 import 'services/audio/mpris_controls.dart';
 import 'services/audio/smtc_controls.dart';
 import 'services/audio/play_queue.dart';
@@ -106,7 +104,6 @@ Future<void> main() async {
   // player (direct addresses of online entries) share it.
   final ytDlp = createYtDlpService();
   final onlineEntries = OnlineEntries();
-  final fastGate = FastClientGate();
   // Shared with the Radio page, so the chosen server is remembered once.
   final radioClient = RadioBrowserClient.standard();
   final radioRepo = RadioRepository(db);
@@ -205,7 +202,6 @@ Future<void> main() async {
       audioHandlerProvider.overrideWithValue(handler),
       radioClientProvider.overrideWithValue(radioClient),
       ytDlpServiceProvider.overrideWithValue(ytDlp),
-      fastClientGateProvider.overrideWithValue(fastGate),
       playbackPersistenceProvider.overrideWithValue(persistence),
       playerErrorsProvider.overrideWithValue(errors.stream),
       coversDirProvider.overrideWithValue(covers.dir),

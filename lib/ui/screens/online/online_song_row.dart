@@ -9,7 +9,6 @@ import '../../theme/tokens.dart';
 import '../../widgets/format_utils.dart';
 import '../../widgets/net_thumbnail.dart';
 import '../../widgets/track_row_selection.dart';
-import '../youtube/listen_bar.dart';
 import 'online_selection_scope.dart';
 import '../../widgets/show_msg.dart';
 
@@ -99,13 +98,12 @@ class OnlineSongTile extends ConsumerWidget {
       onTap: pick.onTap,
       onLongPress: pick.onLongPress,
       onDownload: () => ref.read(downloadsProvider.notifier).add(result),
-      listen: pick.selecting ? null : ListenButton(result: result),
     );
   }
 }
 
-/// One online song: picture, title, artist and length, «Ascolta» and
-/// «Scarica» (or the state of the download), 72 px tall.
+/// One online song: picture, title, artist and length, an optional
+/// extra button and «Scarica» (or the state of the download), 72 px tall.
 class OnlineSongRow extends StatelessWidget {
   const OnlineSongRow({
     super.key,
@@ -131,7 +129,7 @@ class OnlineSongRow extends StatelessWidget {
   final DownloadItem? item;
   final VoidCallback onDownload;
 
-  /// «Ascolta» (hidden while picking).
+  /// An extra button before «Scarica» (hidden while picking).
   final Widget? listen;
 
   /// While picking, a tick box leads the row and a tap picks or drops it.
@@ -258,7 +256,7 @@ class _DownloadState extends StatelessWidget {
     if (st == DownloadStatus.queued ||
         st == DownloadStatus.downloading ||
         st == DownloadStatus.waitingRetry) {
-      // As wide as a button: «Ascolta» keeps its place on every row.
+      // As wide as a button: the download state keeps the width of the button.
       trailing = SizedBox(
         width: 48,
         child: Center(

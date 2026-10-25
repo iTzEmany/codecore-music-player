@@ -26,7 +26,7 @@ import 'online_song_row.dart';
 import '../../widgets/show_msg.dart';
 
 /// An album, single or EP of YouTube Music: cover, numbered songs with
-/// «Ascolta» and «Scarica», and «Scarica album». [release] is what the page
+/// «Scarica», and «Scarica album». [release] is what the page
 /// was opened from (title and cover are shown while it loads).
 class OnlineAlbumScreen extends ConsumerWidget {
   const OnlineAlbumScreen({super.key, required this.browseId, this.release});

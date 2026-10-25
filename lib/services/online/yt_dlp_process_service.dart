@@ -172,6 +172,7 @@ YtException ytExceptionFromStderr(String err) {
     return YtException(YtErrorKind.rateLimited, err);
   }
   if (t.contains('name or service') ||
+      t.contains('no address associated') ||
       t.contains('network is unreachable') ||
       t.contains('temporary failure in name resolution') ||
       t.contains('timed out')) {
@@ -188,7 +189,7 @@ YtException ytExceptionFromStderr(String err) {
   return YtException(YtErrorKind.changed, err);
 }
 
-class YtDlpProcessService implements YoutubeService, StreamSource {
+class YtDlpProcessService implements YoutubeService {
   /// [locate] picks the binary to run (first call only); without it, and
   /// without [executable], `yt-dlp` is taken from the PATH.
   YtDlpProcessService({
@@ -347,23 +348,6 @@ class YtDlpProcessService implements YoutubeService, StreamSource {
       AppLog.w('yt-dlp music search output not JSON', e, st);
       throw const YtException(YtErrorKind.changed, 'bad output');
     }
-  }
-
-  @override
-  Future<StreamAddress> streamUrl(YtResult r, {bool fast = true}) async {
-    await _ensureTool();
-    final res = await _runSearch([
-      '-j',
-      '--no-warnings',
-      '--no-playlist',
-      '-f',
-      streamFormat,
-      ...await _jsArgs(),
-      r.downloadUrl,
-    ]);
-    if (res.code != 0) throw await _explain(res.err);
-    return parseStreamAddress(res.out) ??
-        (throw const YtException(YtErrorKind.changed, 'no stream address'));
   }
 
   @override
