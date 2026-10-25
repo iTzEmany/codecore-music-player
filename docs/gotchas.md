@@ -16,3 +16,7 @@
 - **`lower()` di SQLite abbassa solo ASCII**, `toLowerCase()` di Dart tutto Unicode: una chiave fatta in Dart non trova «Édith Piaf» in una colonna confrontata con `lower()`. Fai fare la minuscola a SQLite da entrambi i lati (`lower(trim(?))`), come `LibraryQueries.artistNamed`.
 - **Gli artisti di libreria sono raggruppati per credito intero** (`watchArtists`: «A, B feat. C» è un artista a sé). Per dire se un nome è «in libreria» non basta che esista la chiave del credito intero: vedi `creditedArtists` (D-95).
 - **Goldens e `--update-goldens`:** rigenera solo il file che fallisce; il comando riscrive anche immagini senza differenze reali (settings, home), da riportare con `git checkout`.
+- **Deezer gw (`gw-light.php`) vuole un corpo JSON `{}`** anche per `deezer.getUserData`: senza risponde 400. Il `checkForm` vale con il cookie `sid` della stessa sessione.
+- **`/search` di Deezer non porta il BPM**: serve `/track/{id}` (e `bpm: 0` vuol dire «non noto»).
+- **`WebClient` restituisce null sia per un 404 sia per rete o 5xx**: chi deve distinguere «niente» da «non risponde» (MusicBrainz per i crediti) oggi tratta null come «non risponde» (D-129). Da sistemare all'inizio della fase 52.
+- **`pr-attendi.sh` vuole la stima in minuti senza unità** (`15`, non `15m`): con l'unità esce subito con codice 2.
