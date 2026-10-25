@@ -90,6 +90,17 @@ R-22.
 con la Jam attiva lo swipe su una riga chiama `jam.addTracks` (libreria) e su una riga online `jam.addOnline`; a coda
 vuota c'è il testo guida. `grep -n "FloatingActionButton" lib/ui/screens/jam/jam_screen.dart` = 0. `flutter analyze` pulito.
 
+**Dalla review della fase 46:**
+- L'instradamento D-89 (tap e «Riproduci dopo» in Jam → coda condivisa) oggi è nella UI, in tre punti:
+  `tapOnline`, `_play` dell'album online e «Riproduci dopo» in `track_actions.dart`. Spostalo in
+  `PlayerController`, con un `bool Function()? jamActive` come `shufflePlus`, e togli i tre controlli.
+- In Jam `enqueueOnline` deve decidere prima di `_idOf`: un id di libreria o negativo non vuol dire niente
+  per gli ospiti. Deve tornare quando il brano è accettato, non a download finito, se no «Aggiunto alla
+  coda» arriva minuti dopo.
+- Una riga ombra (`kind = 2`) va in Jam con `jam.addOnline(streamResultOfRow(…))`, non con `addTracks`:
+  il percorso `stream:` non ha estensione e verrebbe saltato. Fino ad allora «Aggiungi alla Jam» non
+  compare sulle righe ombra.
+
 ### 47.6 — Schermata del brano della Jam
 **File:** `lib/ui/screens/jam/jam_track_info_screen.dart` (nuovo), `lib/ui/screens/jam/jam_screen.dart` (tap sulla
 riga, menu ⋮ con «Salta qui» solo per l'host), `lib/ui/screens/jam/jam_parts.dart`, ARB,
@@ -126,3 +137,12 @@ host il telefono):
 - Log esportato senza 403/429 ripetuti dopo una coda Jam di 15 brani online (K-04).
 
 **Fatto quando:** l'utente conferma le prove su Linux e Mi A3 (casella `[~]` → `[x]` in PROGRESS).
+
+## Debito noto (review della fase 46, da fare dopo la feature)
+- Tre modi di dire «questa voce online ora è un brano della libreria»: `PendingPlaylistAdds.replaceStream`, il
+  `libraryIdOf`/`_downloadedId` dell'handler al caricamento e `currentQueueId` (con il `gone` di `removeIds`).
+  Dopo una promozione riuscita basterebbe `online.idsOf(r)` → `replaceQueueId`, come fa `replaceStream`, e
+  tenere `libraryIdOf` solo per le code ripristinate.
+- `DownloadsNotifier` fa anche promozioni, `promoteErrors`, playlist e risincronizzazione del player, e i provider
+  si importano in cerchio (`player`↔`youtube`, `youtube`↔`stream`, `youtube`↔`pending_playlist_adds`). Seguito:
+  un solo `libraryIdOfProvider` accanto a `downloadIndexProvider`, e `addToPlaylistTag` fuori dai provider.
