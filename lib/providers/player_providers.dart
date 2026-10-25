@@ -13,6 +13,8 @@ import '../services/audio/online_entries.dart';
 import '../services/audio/play_queue.dart';
 import '../services/radio/radio_station.dart';
 import '../services/audio/playback_persistence.dart';
+import '../services/online/youtube_service.dart';
+import 'youtube_providers.dart' show downloadIndexProvider;
 import 'database_providers.dart';
 import 'queue_tracks.dart';
 import 'settings_providers.dart';
@@ -67,6 +69,7 @@ class PlayerController {
     this.onContext,
     this.shufflePlus,
     this.setShufflePlus,
+    this.libraryIdOf,
     Random? random,
   }) : _random = random ?? Random();
 
@@ -75,6 +78,9 @@ class PlayerController {
   /// The Shuffle+ flag of the settings, and a way to change it.
   final bool Function()? shufflePlus;
   final void Function(bool)? setShufflePlus;
+
+  /// The library track already holding [YtResult] (a download), if any.
+  final Future<int?> Function(YtResult)? libraryIdOf;
 
   final CodecoreAudioHandler _handler;
   final void Function(PlayContext?)? onContext;
@@ -141,6 +147,73 @@ class PlayerController {
   void playNext(int trackId) => _handler.playNext(trackId);
   void addToQueue(int trackId) => _handler.addToQueue(trackId);
 
+  /// The queue id of [r]: its library track when downloaded (D-81), else a
+  /// new online entry; null without an online registry.
+  Future<int?> _idOf(YtResult r) async =>
+      await libraryIdOf?.call(r) ?? _handler.online?.register(r);
+
+  /// Plays [id] alone, with the search context (empty queue, or radio: no stations to insert among).
+  Future<void> _playAlone(int id) {
+    onContext?.call(const PlayContext(PlayContextKind.search));
+    _handler.setPlayContext(PlayContextKind.search.index, null);
+    _requestNotificationPermissionOnce();
+    return _handler.playQueue([id], 0);
+  }
+
+  Future<int?> _idOrLog(YtResult r) async {
+    final id = await _idOf(r);
+    if (id == null) AppLog.w('online play ignored: no online registry');
+    return id;
+  }
+
+  /// Tap on an online result: plays it right after the current track (R-01).
+  /// A library id already in the queue appears twice (accepted).
+  /// shortcut: with a Jam active the UI routes taps (D-89, phase 47); here local only.
+  Future<void> playOnline(YtResult r) async {
+    final id = await _idOrLog(r);
+    if (id == null) return;
+    if (_handler.queueIds.isEmpty || _handler.isRadio) return _playAlone(id);
+    _requestNotificationPermissionOnce();
+    final at = _handler.currentIndex + 1;
+    _handler.insertAt(at, id);
+    await _handler.skipToQueueItem(at);
+  }
+
+  Future<void> enqueueOnline(YtResult r) async {
+    final id = await _idOrLog(r);
+    if (id == null) return;
+    if (_handler.isRadio) return _playAlone(id);
+    _handler.addToQueue(id);
+  }
+
+  Future<void> playOnlineNext(YtResult r) async {
+    final id = await _idOrLog(r);
+    if (id == null) return;
+    if (_handler.isRadio) return _playAlone(id);
+    _handler.playNext(id);
+  }
+
+  /// Plays [list] in order; [shuffle] turns plain shuffle on (else off), never Shuffle+ (R-18).
+  Future<void> playOnlineList(List<YtResult> list, {bool shuffle = false}) async {
+    if (list.isEmpty) return;
+    final ids = <int>[];
+    try {
+      for (final r in list) {
+        ids.add((await _idOf(r))!);
+      }
+    } on Object catch (e, st) {
+      AppLog.w('online list not played', e, st);
+      return;
+    }
+    onContext?.call(const PlayContext(PlayContextKind.search));
+    _handler.setPlayContext(PlayContextKind.search.index, null);
+    _requestNotificationPermissionOnce();
+    await _handler.playQueue(ids, 0);
+    // After playQueue: it would shuffle the upcoming of a shuffle already on.
+    setShufflePlus?.call(false);
+    await setShuffle(shuffle);
+  }
+
   Future<void> setVolume(double v) {
     _persistence?.setVolume(v);
     return _handler.setVolume(v);
@@ -197,6 +270,11 @@ final playerControllerProvider = Provider<PlayerController>(
     setShufflePlus: (on) => ref
         .read(settingsProvider.notifier)
         .update((c) => c.copyWith(shufflePlus: on)),
+    libraryIdOf: (r) async {
+      final path = (await ref.read(downloadIndexProvider.future))
+          .pathFor(r.id, source: r.source);
+      return path == null ? null : ref.read(trackRepositoryProvider).idForPath(path);
+    },
   ),
 );
 
