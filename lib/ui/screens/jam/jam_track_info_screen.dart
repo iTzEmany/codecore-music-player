@@ -6,6 +6,7 @@ import '../../../providers/jam_providers.dart';
 import '../../../services/jam/jam_models.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/cc_app_bar.dart';
+import '../../widgets/track_artists_sheet.dart';
 import 'jam_parts.dart';
 
 /// Info on a track of the shared queue: cover (own tracks), tags and lyrics from
@@ -52,6 +53,15 @@ class JamTrackInfoScreen extends ConsumerWidget {
           const SizedBox(height: CcDims.gap16),
           Text(meta?.title ?? item.title, style: theme.headlineSmall),
           if (line.isNotEmpty) Text(line, style: theme.bodyMedium),
+          if (jamArtists(item).isNotEmpty)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                icon: const Icon(Icons.person_outline_rounded),
+                label: Text(l.goToArtist),
+                onPressed: () => goToArtists(context, ref, jamArtists(item)),
+              ),
+            ),
           if (s.isHost) ...[
             const SizedBox(height: CcDims.gap16),
             Align(

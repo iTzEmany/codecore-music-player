@@ -259,6 +259,12 @@ void main() {
     await h.dispose(tester);
   });
 
+  testWidgets('«Vai all\'artista» is in the menu of a streamed track', (tester) async {
+    final h = await openSheet(tester, (t) => t.copyWith(id: -5));
+    expect(find.text('Vai all’artista'), findsOneWidget);
+    await h.dispose(tester);
+  });
+
   testWidgets('«Scarica»: in the menu of a streamed track, not of a local one', (tester) async {
     var h = await openSheet(tester, (t) => t);
     expect(find.text('Scarica'), findsNothing);

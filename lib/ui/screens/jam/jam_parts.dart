@@ -5,11 +5,19 @@ import '../../../l10n/l10n_ext.dart';
 import '../../../providers/import_providers.dart';
 import '../../../providers/share_hub.dart';
 import '../../../services/jam/jam_models.dart';
+import '../../../services/online/artist_link_resolver.dart';
+import '../../../services/online/query_cleaner.dart' show splitArtists;
 import '../../theme/app_theme.dart' show ccIconDensity;
 import '../../theme/tokens.dart';
 import '../../widgets/artist_avatar.dart';
 import '../../widgets/cover_image.dart';
 import '../../widgets/ring_progress.dart' show NowPlayingDot;
+import '../../widgets/track_artists_sheet.dart';
+
+/// The credited artists of a shared track (no YouTube Music ids on the wire).
+List<ArtistName> jamArtists(JamItem item) => [
+      for (final a in splitArtists(item.artist ?? '')) ArtistName(a.name, sep: a.sep),
+    ];
 
 /// Initials on a tint taken from the name.
 class JamAvatar extends StatelessWidget {
@@ -117,7 +125,7 @@ class JamParticipants extends StatelessWidget {
 }
 
 /// A row of the shared queue, laid out like a row of the play queue.
-class JamQueueRow extends StatelessWidget {
+class JamQueueRow extends ConsumerWidget {
   const JamQueueRow({
     super.key,
     required this.item,
@@ -141,10 +149,11 @@ class JamQueueRow extends StatelessWidget {
   final VoidCallback onRemove;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final cc = context.cc;
     final theme = Theme.of(context).textTheme;
     final l = context.l10n;
+    final artists = jamArtists(item);
     return InkWell(
       onTap: onTap,
       child: Padding(
@@ -205,12 +214,18 @@ class JamQueueRow extends StatelessWidget {
                 icon: Icon(Icons.close, color: cc.textMuted),
                 onPressed: onRemove,
               ),
-            if (onJump != null)
+            if (onJump != null || artists.isNotEmpty)
               PopupMenuButton<void>(
                 tooltip: l.moreActions,
                 icon: Icon(Icons.more_vert, color: cc.textMuted),
                 itemBuilder: (_) => [
-                  PopupMenuItem<void>(onTap: onJump, child: Text(l.jamJumpHere)),
+                  if (onJump != null)
+                    PopupMenuItem<void>(onTap: onJump, child: Text(l.jamJumpHere)),
+                  if (artists.isNotEmpty)
+                    PopupMenuItem<void>(
+                      onTap: () => goToArtists(context, ref, artists),
+                      child: Text(l.goToArtist),
+                    ),
                 ],
               ),
             ReorderableDragStartListener(
