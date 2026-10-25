@@ -1,0 +1,38 @@
+{
+ "error": [],
+ "results": {
+  "DATA": {
+   "SNG_ID": "3135553",
+   "SNG_TITLE": "One More Time",
+   "ART_ID": "27",
+   "ART_NAME": "Daft Punk",
+   "ALB_ID": "302127",
+   "ALB_TITLE": "Discovery",
+   "DURATION": "320",
+   "RANK_SNG": "896666",
+   "EXPLICIT_LYRICS": "0",
+   "ISRC": "GBDUW0000053",
+   "SNG_CONTRIBUTORS": {
+    "main_artist": [
+     "Daft Punk"
+    ],
+    "drum machine drums": [
+     "Guy-Manuel de Homem-Christo",
+     "Thomas Bangalter"
+    ],
+    "masteringengineer": [
+     "Nilesh Patel"
+    ],
+    "author": [
+     "Anthony Moore",
+     "Guy-Manuel de Homem-Christo",
+     "Thomas Bangalter"
+    ]
+   },
+   "COPYRIGHT": "© 2001 Daft Life Limited",
+   "PHYSICAL_RELEASE_DATE": "2001-03-12",
+   "VERSION": ""
+  },
+  "ISRC": {}
+ }
+}

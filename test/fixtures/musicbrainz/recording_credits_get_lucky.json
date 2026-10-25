@@ -1,0 +1,210 @@
+{
+ "id": "833f00e1-781f-4edd-90e4-e52712618862",
+ "title": "Get Lucky",
+ "length": 369000,
+ "relations": [
+  {
+   "type": "instrument",
+   "target-type": "artist",
+   "attributes": [
+    "keyboard"
+   ],
+   "artist": {
+    "id": "134f7e09-7170-4055-b81d-638a3f045c08",
+    "name": "Chris Caswell"
+   }
+  },
+  {
+   "type": "instrument",
+   "target-type": "artist",
+   "attributes": [
+    "synthesizer"
+   ],
+   "artist": {
+    "id": "056e4f3e-d505-4dad-8ec1-d04f521cbb56",
+    "name": "Daft Punk"
+   }
+  },
+  {
+   "type": "instrument",
+   "target-type": "artist",
+   "attributes": [
+    "bass guitar"
+   ],
+   "artist": {
+    "id": "aa82f6eb-ded9-4c0b-951d-2e638ca25c76",
+    "name": "Nathan East"
+   }
+  },
+  {
+   "type": "instrument",
+   "target-type": "artist",
+   "attributes": [
+    "drums (drum set)"
+   ],
+   "artist": {
+    "id": "63c97753-f233-4562-adfc-2c44b2129520",
+    "name": "Omar Hakim"
+   }
+  },
+  {
+   "type": "instrument",
+   "target-type": "artist",
+   "attributes": [
+    "guitar"
+   ],
+   "artist": {
+    "id": "035610f3-b143-4caf-85ca-8eb7efdae170",
+    "name": "Paul Jackson, Jr."
+   }
+  },
+  {
+   "type": "instrument",
+   "target-type": "artist",
+   "attributes": [
+    "guitar"
+   ],
+   "artist": {
+    "id": "c6d571dd-c0ae-4ac8-9500-780b1b9b25e5",
+    "name": "Nile Rodgers"
+   }
+  },
+  {
+   "type": "producer",
+   "target-type": "artist",
+   "attributes": [],
+   "artist": {
+    "id": "122a2714-24f8-4046-a532-64064b5076d2",
+    "name": "Thomas Bangalter"
+   }
+  },
+  {
+   "type": "producer",
+   "target-type": "artist",
+   "attributes": [],
+   "artist": {
+    "id": "83886397-adf2-431a-b841-dc4af744a6cc",
+    "name": "Guy‐Manuel de Homem‐Christo"
+   }
+  },
+  {
+   "type": "vocal",
+   "target-type": "artist",
+   "attributes": [],
+   "artist": {
+    "id": "056e4f3e-d505-4dad-8ec1-d04f521cbb56",
+    "name": "Daft Punk"
+   }
+  },
+  {
+   "type": "vocal",
+   "target-type": "artist",
+   "attributes": [],
+   "artist": {
+    "id": "149f91ef-1287-46da-9a8e-87fee02f1471",
+    "name": "Pharrell Williams"
+   }
+  },
+  {
+   "type": "performance",
+   "target-type": "work",
+   "attributes": [],
+   "work": {
+    "id": "b11bf816-1844-47e5-9075-9239b7609c6a",
+    "title": "Get Lucky",
+    "relations": [
+     {
+      "type": "writer",
+      "target-type": "artist",
+      "attributes": [],
+      "artist": {
+       "id": "122a2714-24f8-4046-a532-64064b5076d2",
+       "name": "Thomas Bangalter"
+      }
+     },
+     {
+      "type": "writer",
+      "target-type": "artist",
+      "attributes": [],
+      "artist": {
+       "id": "83886397-adf2-431a-b841-dc4af744a6cc",
+       "name": "Guy‐Manuel de Homem‐Christo"
+      }
+     },
+     {
+      "type": "writer",
+      "target-type": "artist",
+      "attributes": [],
+      "artist": {
+       "id": "c6d571dd-c0ae-4ac8-9500-780b1b9b25e5",
+       "name": "Nile Rodgers"
+      }
+     },
+     {
+      "type": "writer",
+      "target-type": "artist",
+      "attributes": [],
+      "artist": {
+       "id": "149f91ef-1287-46da-9a8e-87fee02f1471",
+       "name": "Pharrell Williams"
+      }
+     },
+     {
+      "type": "medley",
+      "target-type": "work",
+      "attributes": [],
+      "work": {
+       "id": "ee03f722-5e17-410c-a5b7-11486497df21",
+       "title": "Daft Punk"
+      },
+      "direction": "backward"
+     },
+     {
+      "type": "medley",
+      "target-type": "work",
+      "attributes": [],
+      "work": {
+       "id": "10e78e9c-4c8f-4f1a-8bcc-b1a9957551b9",
+       "title": "NOW That’s What I Call Polka!"
+      },
+      "direction": "backward"
+     },
+     {
+      "type": "medley",
+      "target-type": "work",
+      "attributes": [],
+      "work": {
+       "id": "f769a755-534e-41b9-b5cd-9f978d70544e",
+       "title": "Pharrell Mashup"
+      },
+      "direction": "backward"
+     },
+     {
+      "type": "other version",
+      "target-type": "work",
+      "attributes": [
+       "parody"
+      ],
+      "work": {
+       "id": "c93fb3fc-d502-4005-8f54-574fe378e64e",
+       "title": "Get LP"
+      },
+      "direction": "forward"
+     },
+     {
+      "type": "other version",
+      "target-type": "work",
+      "attributes": [
+       "parody"
+      ],
+      "work": {
+       "id": "e8e81e99-c604-4724-a8be-9272a059139d",
+       "title": "Get Messy"
+      },
+      "direction": "forward"
+     }
+    ]
+   }
+  }
+ ]
+}

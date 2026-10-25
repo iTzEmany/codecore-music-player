@@ -1,0 +1,29 @@
+{
+ "id": 3135553,
+ "title": "One More Time",
+ "title_short": "One More Time",
+ "isrc": "GBDUW0000053",
+ "duration": 320,
+ "track_position": 1,
+ "disk_number": 1,
+ "rank": 896666,
+ "release_date": "2001-03-12",
+ "explicit_lyrics": false,
+ "bpm": 0,
+ "contributors": [
+  {
+   "id": 27,
+   "name": "Daft Punk",
+   "role": "Main"
+  }
+ ],
+ "artist": {
+  "id": 27,
+  "name": "Daft Punk"
+ },
+ "album": {
+  "id": 302127,
+  "title": "Discovery",
+  "release_date": "2001-03-07"
+ }
+}

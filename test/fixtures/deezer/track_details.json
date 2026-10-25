@@ -1,0 +1,29 @@
+{
+ "id": 1109731,
+ "title": "Lose Yourself",
+ "title_short": "Lose Yourself",
+ "isrc": "USIR10211559",
+ "duration": 326,
+ "track_position": 6,
+ "disk_number": 1,
+ "rank": 980436,
+ "release_date": "2005-11-21",
+ "explicit_lyrics": true,
+ "bpm": 171.6,
+ "contributors": [
+  {
+   "id": 13,
+   "name": "Eminem",
+   "role": "Main"
+  }
+ ],
+ "artist": {
+  "id": 13,
+  "name": "Eminem"
+ },
+ "album": {
+  "id": 119606,
+  "title": "Curtain Call: The Hits",
+  "release_date": "2005-01-01"
+ }
+}

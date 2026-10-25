@@ -1,0 +1,50 @@
+{
+ "error": [],
+ "results": {
+  "DATA": {
+   "SNG_ID": "1109731",
+   "SNG_TITLE": "Lose Yourself",
+   "ART_ID": "13",
+   "ART_NAME": "Eminem",
+   "ALB_ID": "119606",
+   "ALB_TITLE": "Curtain Call: The Hits",
+   "DURATION": "326",
+   "RANK_SNG": "980436",
+   "EXPLICIT_LYRICS": "1",
+   "ISRC": "USIR10211559",
+   "SNG_CONTRIBUTORS": {
+    "main_artist": [
+     "Eminem"
+    ],
+    "mixingengineer": [
+     "Eminem",
+     "Steve King"
+    ],
+    "drumprogrammer": [
+     "Eminem"
+    ],
+    "additionalproducer": [
+     "Jeff Bass"
+    ],
+    "composer": [
+     "Jeff Bass",
+     "Luis Resto",
+     "Marshall Mathers"
+    ],
+    "author": [
+     "Jeff Bass",
+     "Luis Resto",
+     "Marshall Mathers"
+    ],
+    "recordingengineer": [
+     "Steve King",
+     "Mike Strange"
+    ]
+   },
+   "COPYRIGHT": "© 2005 Aftermath Entertainment/Interscope Records",
+   "PHYSICAL_RELEASE_DATE": "2005-12-06",
+   "VERSION": ""
+  },
+  "ISRC": {}
+ }
+}
