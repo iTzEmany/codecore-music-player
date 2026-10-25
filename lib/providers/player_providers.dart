@@ -19,7 +19,6 @@ import 'database_providers.dart';
 import 'jam_providers.dart' show jamProvider;
 import 'queue_tracks.dart';
 import 'settings_providers.dart';
-import 'shuffle_plus_providers.dart' show ShufflePlusBlock;
 import '../services/shuffle_plus/plus_allowed.dart';
 
 /// Overridden in `main` once the handler has been created (and, on Android,
@@ -275,7 +274,9 @@ class PlayerController {
   Future<ShufflePlusBlock?> cycleShuffle() {
     // Serialized: a second tap reads the state the first one left.
     final run = _cycle.then((_) => _cycleShuffle());
-    _cycle = run.then<void>((_) {}, onError: (Object _) {});
+    _cycle = run.then<void>((_) {}, onError: (Object e) {
+      AppLog.w('shuffle cycle failed', e);
+    });
     return run;
   }
 
@@ -321,17 +322,22 @@ class PlayerController {
 
 /// Why the shuffle button may not reach Shuffle+ now (null: it may).
 Future<ShufflePlusBlock?> plusAllowedNow(Ref ref) async {
-  final h = ref.read(audioHandlerProvider);
-  final local = await ref.read(trackRepositoryProvider).getByIdsLight([
-    for (final i in h.sourceIds ?? h.queueIds)
-      if (!isOnlineId(i)) i,
-  ]);
-  return plusAllowed(
-    queueIds: h.queueIds,
-    jam: ref.read(jamProvider).active,
-    radio: ref.read(playContextProvider)?.kind == PlayContextKind.radio,
-    localCount: local.where((t) => !t.missing && t.kind == 0).length,
-  );
+  try {
+    final h = ref.read(audioHandlerProvider);
+    final local = await ref.read(trackRepositoryProvider).getByIdsLight([
+      for (final i in h.sourceIds ?? h.queueIds)
+        if (!isOnlineId(i)) i,
+    ]);
+    return plusAllowed(
+      queueIds: h.queueIds,
+      jam: ref.read(jamProvider).active,
+      radio: ref.read(playContextProvider)?.kind == PlayContextKind.radio,
+      localCount: local.where((t) => !t.missing && t.kind == 0).length,
+    );
+  } on Object catch (e, st) {
+    AppLog.w('shuffle+ allowed check failed', e, st);
+    return null;
+  }
 }
 
 final playerControllerProvider = Provider<PlayerController>(

@@ -423,6 +423,20 @@ void main() {
     });
   }
 
+  test('a Jam that starts while a suggestion is being prepared inserts nothing', () async {
+    final gate = Completer<void>();
+    prepareHook = (r) async {
+      prepared.add(r.id);
+      await gate.future;
+    };
+    controller.start();
+    await until(() => prepared.isNotEmpty);
+    jam = true;
+    gate.complete();
+    await settle();
+    expect(host.queueIds.where(isOnlineId), isEmpty);
+  });
+
   test('Shuffle+ turned off while a suggestion is being prepared inserts nothing more', () async {
     final gate = Completer<void>();
     var calls = 0;
