@@ -35,6 +35,7 @@ JamError? err(JamState s, JamCommand c, String from) =>
     applyCommand(s, c, from: from, nowMs: 1000).error;
 
 void main() {
+  videoIdTests();
   test('add assigns ids, selects first, bumps version', () {
     var s = ok(start(), JamCommand.add(item(host)), host);
     s = ok(s, JamCommand.add(item(guest)), guest);
@@ -216,4 +217,20 @@ void main() {
     expect(JamItem.tryParse(item(host, inherited: true).toJson())!.inherited, true);
     expect(JamItem.tryParse(item(host).toJson())!.inherited, false);
   });
+}
+
+void videoIdTests() {
+  test('videoId round-trips JSON; JSON without it reads null', () {
+    final i = JamItem(
+        id: 1, ownerDeviceId: 'a', title: 't', ext: 'm4a', ref: 'yt:youtube:abc', videoId: 'abc');
+    final back = JamItem.tryParse(i.toJson()..['extra'] = 1)!;
+    expect(back.videoId, 'abc');
+    expect(back.ref, 'yt:youtube:abc');
+    expect(i.copyWith(id: 2).videoId, 'abc');
+    expect((i.toJson()..remove('vid')).let(JamItem.tryParse)!.videoId, isNull);
+  });
+}
+
+extension<T> on T {
+  R let<R>(R Function(T) f) => f(this);
 }

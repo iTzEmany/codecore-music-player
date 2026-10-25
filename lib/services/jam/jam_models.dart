@@ -25,6 +25,7 @@ class JamItem {
     this.sizeBytes = 0,
     this.available = true,
     this.ref,
+    this.videoId,
     this.inherited = false,
   });
 
@@ -43,6 +44,9 @@ class JamItem {
   /// Opaque key meaningful only to the owner (maps to a local file).
   final String? ref;
 
+  /// Online track only: visible to everyone (the library `ref` is not).
+  final String? videoId;
+
   /// Part of the host's seed queue: tracks added later are placed before it.
   final bool inherited;
 
@@ -57,6 +61,7 @@ class JamItem {
         sizeBytes: sizeBytes,
         available: available ?? this.available,
         ref: ref,
+        videoId: videoId,
         inherited: inherited ?? this.inherited,
       );
 
@@ -71,6 +76,7 @@ class JamItem {
         'size': sizeBytes,
         'ok': available,
         if (ref != null) 'ref': ref,
+        if (videoId != null) 'vid': videoId,
         if (inherited) 'inh': true,
       };
 
@@ -98,6 +104,7 @@ class JamItem {
       sizeBytes: size is int && size >= 0 ? size : 0,
       available: j['ok'] is bool ? j['ok'] as bool : true,
       ref: opt(j['ref']),
+      videoId: opt(j['vid']),
       inherited: j['inh'] == true,
     );
   }

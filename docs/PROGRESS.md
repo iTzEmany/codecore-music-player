@@ -651,7 +651,7 @@ Note: D-89 (Jam: tap e «Riproduci dopo» vanno in coda) nella UI; la coda condi
 - [~] 46.10 Prove a mano (utente, «Tocca a te» in handoff)
 
 ## Fase 47 — Jam online (`fase-47-jam-online.md`)
-- [ ] 47.1 `JamItem.videoId` e `ref` con prefisso
+- [x] 47.1 `JamItem.videoId` e `ref` con prefisso
 - [ ] 47.2 Accodare brani online nella Jam (host e ospiti)
 - [ ] 47.3 Proprietario uscito: l'uscita scarica da sé
 - [ ] 47.4 Rotta `meta`: copertina, testo e curiosità dal proprietario

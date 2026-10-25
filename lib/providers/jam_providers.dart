@@ -17,6 +17,7 @@ import '../services/jam/jam_guest.dart';
 import '../services/jam/jam_host.dart';
 import '../services/jam/jam_models.dart';
 import '../services/jam/jam_output.dart';
+import '../services/stream/stream_cache.dart';
 import '../services/jam/jam_transport.dart';
 import '../services/share/discovery.dart';
 import 'database_providers.dart';
@@ -24,6 +25,7 @@ import 'player_providers.dart';
 import 'settings_providers.dart';
 import 'share_hub.dart';
 import 'share_providers.dart';
+import 'stream_providers.dart';
 
 enum JamPhase { idle, requesting, active, ended }
 
@@ -106,6 +108,25 @@ Future<List<Track>> jamSeedTracks(
   ];
 }
 
+const _ytPrefix = 'yt:';
+
+/// The cache key of an online item's `ref` (`yt:<key>`), else null.
+String? jamCacheKey(JamItem i) {
+  final r = i.ref;
+  return r != null && r.startsWith(_ytPrefix) && r.length > _ytPrefix.length
+      ? r.substring(_ytPrefix.length)
+      : null;
+}
+
+/// The owner-side file of [item]: `yt:<key>` is a cache file, a number a library track
+/// (K-07); anything else has none.
+Future<String?> jamLocalFile(JamItem item, StreamCache cache, TrackRepository tracks) async {
+  final key = jamCacheKey(item);
+  if (key != null) return (await cache.fileFor(key))?.path;
+  final id = int.tryParse(item.ref ?? '');
+  return id == null ? null : (await tracks.getById(id))?.path;
+}
+
 class JamController extends Notifier<JamUiState> {
   JamGuest? _guest;
   JamOutput? _output;
@@ -119,6 +140,9 @@ class JamController extends Notifier<JamUiState> {
   var _syncLogs = 0;
   var _failures = 0;
   var _held = false;
+
+  /// Cache keys pinned for the queue (counted pins: the player's own pins add up).
+  final _pinned = <String>{};
 
   final _incoming = StreamController<JamRequest>.broadcast();
 
@@ -328,6 +352,7 @@ class JamController extends Notifier<JamUiState> {
     }
     unawaited(_output?.apply(s));
     _precache(s);
+    _syncPins(s);
   }
 
   void _onItemFailed(int id) {
@@ -378,11 +403,26 @@ class JamController extends Notifier<JamUiState> {
     return _cache?.sourceFor(item, remote);
   }
 
-  Future<String?> _localFile(JamItem item) async {
-    final id = int.tryParse(item.ref ?? '');
-    if (id == null) return null;
-    final track = await ref.read(trackRepositoryProvider).getById(id);
-    return track?.path;
+  Future<String?> _localFile(JamItem item) => jamLocalFile(
+      item, ref.read(streamCacheProvider), ref.read(trackRepositoryProvider));
+
+  /// Our own online items in the queue stay in the cache while they are there (D-81).
+  void _syncPins(JamState? s) {
+    final want = <String>{
+      for (final i in s?.items ?? const <JamItem>[])
+        if (i.ownerDeviceId == _ownId) ?jamCacheKey(i),
+    };
+    if (want.isEmpty && _pinned.isEmpty) return; // no cache needed in a library-only Jam
+    final cache = ref.read(streamCacheProvider);
+    for (final k in _pinned.difference(want)) {
+      cache.unpin(k);
+    }
+    for (final k in want.difference(_pinned)) {
+      cache.pin(k);
+    }
+    _pinned
+      ..clear()
+      ..addAll(want);
   }
 
   /// Next remote item goes to the cache; everything else is dropped.
@@ -499,6 +539,7 @@ class JamController extends Notifier<JamUiState> {
     _output = null;
     await _cache?.clear();
     _cache = null;
+    _syncPins(null);
     _host?.resolveFile = null;
     _host?.clearSession();
     final g = _guest;
