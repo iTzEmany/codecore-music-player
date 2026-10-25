@@ -33,6 +33,10 @@ Future<void> clearStreamCache(StreamCache cache, TrackRepository tracks, {Set<St
   await tracks.deleteUnplayedStreamRows(keepKeys: keep);
 }
 
+/// [clearStreamCache] with the app's cache and tracks, for the settings tile.
+final clearStreamCacheProvider = Provider<Future<void> Function(Set<String> keep)>((ref) =>
+    (keep) => clearStreamCache(ref.read(streamCacheProvider), ref.read(trackRepositoryProvider), keep: keep));
+
 void _applyLimit(StreamCache cache, int mb, void Function() done) {
   cache.limitBytes = mb * 1024 * 1024;
   // async I/O, never on the UI thread

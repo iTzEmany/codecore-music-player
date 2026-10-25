@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/app_log.dart';
 import '../../../l10n/l10n_ext.dart';
-import '../../../providers/database_providers.dart';
 import '../../../providers/player_providers.dart';
 import '../../../providers/settings_providers.dart';
 import '../../../providers/stream_providers.dart';
@@ -31,11 +30,8 @@ class _StreamCacheTileState extends ConsumerState<StreamCacheTile> {
     final currentKey = current == null ? null : keyOfStreamPath(current.path);
     setState(() => _busy = true);
     try {
-      await clearStreamCache(
-        ref.read(streamCacheProvider),
-        ref.read(trackRepositoryProvider),
-        keep: {?currentKey, ...ref.read(streamPreparerProvider).queuedKeys},
-      );
+      await ref.read(clearStreamCacheProvider)(
+          {?currentKey, ...ref.read(streamPreparerProvider).queuedKeys});
       ref.invalidate(streamCacheUsedProvider);
       if (mounted) showMsg(context, l.streamCacheCleared);
     } catch (e, st) {
