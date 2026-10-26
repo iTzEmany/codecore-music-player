@@ -8,6 +8,7 @@ import '../../services/backup/track_resolver.dart';
 import '../../services/backup/user_data.dart';
 import '../db/app_database.dart';
 import 'credits_repository.dart';
+import 'track_repository.dart';
 
 class MergeReport {
   MergeReport();
@@ -41,7 +42,7 @@ bool _blank(String? s) => s == null || s.trim().isEmpty;
 /// that an artist followed by hand in the backup becomes followed by hand here too. Imports are not merged (they depend
 /// on the other device's downloads).
 /// A hand-set cover (`coverSource`/`coverKey`) is taken only if its file is in
-/// [coversDir] and the track has no hand-set cover of its own (source 2).
+/// [coversDir] and the track has no hand-set cover of its own (source 1 or 2).
 Future<MergeReport> mergeUserData(AppDatabase db, UserData data, TrackResolver resolver,
     {Directory? coversDir}) {
   final report = MergeReport();
@@ -64,6 +65,10 @@ Future<MergeReport> mergeUserData(AppDatabase db, UserData data, TrackResolver r
       if (e != null && !t.userEdited) {
         final artist = _blankToNullTrim(e.artist), album = _blankToNullTrim(e.album);
         final albumArtist = _blankToNullTrim(e.albumArtist);
+        final newKey = computeAlbumKey(
+            albumArtist: albumArtist, artist: artist, album: album, directory: p.dirname(t.path));
+        // A row with an album pick leaves it behind when the edit moves it to another album.
+        await TrackRepository(db).settleMovedCover(t, newKey);
         upd = upd.copyWith(
           title: Value(e.title.trim()),
           artist: Value(artist),
@@ -72,8 +77,7 @@ Future<MergeReport> mergeUserData(AppDatabase db, UserData data, TrackResolver r
           year: Value(e.year),
           trackNumber: Value(e.trackNumber),
           genre: Value(_blankToNullTrim(e.genre)),
-          albumKey: Value(computeAlbumKey(
-              albumArtist: albumArtist, artist: artist, album: album, directory: p.dirname(t.path))),
+          albumKey: Value(newKey),
           userEdited: const Value(true),
         );
       }
@@ -86,7 +90,7 @@ Future<MergeReport> mergeUserData(AppDatabase db, UserData data, TrackResolver r
         upd = upd.copyWith(lastPlayedAt: Value(last));
       }
       final ck = u.coverKey;
-      if (u.coverSource > 0 && ck != null && t.coverSource != 2 && _coverFileExists(coversDir, ck)) {
+      if (u.coverSource > 0 && ck != null && t.coverSource == 0 && _coverFileExists(coversDir, ck)) {
         upd = upd.copyWith(coverSource: Value(u.coverSource), coverKey: Value(ck), hasCover: const Value(true));
       }
       await (db.update(db.tracks)..where((r) => r.id.equals(id))).write(upd);
