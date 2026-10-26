@@ -139,4 +139,46 @@ void main() {
     expect(albums.first.album.title, 'Album 2');
     expect(albums.first.sizeBytes, 66);
   });
+
+  test('enrichmentBytes counts the UTF-8 bytes kept, per part', () async {
+    final id = await add('a', 100);
+    await (db.update(db.tracks)..where((t) => t.id.equals(id))).write(
+      const TracksCompanion(
+        lyricsPlain: Value('abcd'),
+        lyricsSynced: Value('è'), // 2 bytes
+        curiosities: Value('xyz'),
+      ),
+    );
+    await add('no-text', 100);
+    await db.into(db.artistInfos).insert(
+      ArtistInfosCompanion.insert(
+        artistKey: 'k',
+        body: 'bio!',
+        sourceUrl: 'u',
+        lang: 'it',
+        fetchedAt: 1,
+      ),
+    );
+    await db.into(db.trackCredits).insert(
+      TrackCreditsCompanion.insert(
+        trackId: id,
+        name: 'Ann',
+        nameKey: 'ann',
+        role: 'writer',
+        source: 'mb',
+      ),
+    );
+    await db.into(db.trackEnrich).insert(
+      TrackEnrichCompanion.insert(trackId: Value(id), details: const Value('12345')),
+    );
+    final e = await q.enrichmentBytes();
+    expect(e.lyrics, 6);
+    expect(e.curiosities, 3 + 4);
+    expect(e.credits, (3 + 6 + 2) + 5);
+    expect(e.total, 6 + 7 + 16);
+  });
+
+  test('enrichmentBytes is zero on an empty database', () async {
+    expect((await q.enrichmentBytes()).total, 0);
+  });
 }

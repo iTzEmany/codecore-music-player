@@ -49,6 +49,7 @@ class _MemoryScreenState extends ConsumerState<MemoryScreen> {
     ref
       ..invalidate(memoryBreakdownProvider)
       ..invalidate(appDataUsageProvider)
+      ..invalidate(enrichmentBytesProvider)
       ..invalidate(musicDiskSpaceProvider);
   }
 
@@ -166,7 +167,7 @@ class _MemoryListState extends ConsumerState<_MemoryList> {
             child: ListView(
               physics: const AlwaysScrollableScrollPhysics(),
               padding: pad,
-              children: [...main, const MemoryAppDataSection()],
+              children: [...main, const MemoryAppDataSection(), const _EnrichmentRow()],
             ),
           ),
         ],
@@ -181,6 +182,7 @@ class _MemoryListState extends ConsumerState<_MemoryList> {
         ...never,
         ...tools,
         const MemoryAppDataSection(),
+        const _EnrichmentRow(),
       ],
     );
   }
@@ -455,4 +457,44 @@ class _TrackWeight extends ConsumerWidget {
     fraction: fraction,
     onTap: () => showTrackActions(context, ref, track),
   );
+}
+
+/// «Arricchimento»: what the lyrics, curiosities and credits take; no button
+/// to clear it.
+class _EnrichmentRow extends ConsumerWidget {
+  const _EnrichmentRow();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final e = ref.watch(enrichmentBytesProvider).value;
+    if (e == null || e.total == 0) return const SizedBox.shrink();
+    final l = context.l10n;
+    final locale = l.localeName;
+    final theme = Theme.of(context).textTheme;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        CcDims.margin,
+        CcDims.gap16,
+        CcDims.margin,
+        0,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l.memoryEnrichment(formatBytes(e.total, locale)),
+            style: theme.titleSmall,
+          ),
+          Text(
+            l.memoryEnrichmentDetail(
+              formatBytes(e.lyrics, locale),
+              formatBytes(e.curiosities, locale),
+              formatBytes(e.credits, locale),
+            ),
+            style: theme.bodySmall?.copyWith(color: context.cc.textMuted),
+          ),
+        ],
+      ),
+    );
+  }
 }

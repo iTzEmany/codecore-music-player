@@ -2,6 +2,7 @@ import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/providers/memory_providers.dart';
 import 'package:codecore/providers/nav_providers.dart';
 import 'package:codecore/providers/ui_providers.dart';
+import 'package:codecore/providers/user_activity_provider.dart';
 import 'package:codecore/services/memory/app_data.dart';
 import 'package:codecore/ui/screens/library/album_detail_screen.dart';
 import 'package:codecore/ui/screens/library/all_tracks_screen.dart';
@@ -709,5 +710,33 @@ void main() {
     final slider = tester.getCenter(inBar(find.byType(Slider)).first).dx;
     expect(slider, closeTo((left + right) / 2, 1));
     await h.dispose(tester);
+  });
+
+  testWidgets('scrolling a list in the shell touches the user activity', (t) async {
+    _phone(t);
+    final h = await Harness.create(t, tracks: 3);
+    await h.pump(t, const AppShell(), extraOverrides: memoryOverrides);
+    await t.tap(find.text('Memoria'));
+    await _settle(t);
+    final activity = _container(t).read(userActivityProvider);
+    expect(activity.lastActivityAt, isNull);
+    await t.drag(find.byType(Scrollable).last, const Offset(0, -100));
+    await t.pump();
+    expect(activity.lastActivityAt, isNotNull);
+    await h.dispose(t);
+  });
+
+  testWidgets('typing in the search touches the user activity', (t) async {
+    _phone(t);
+    final h = await Harness.create(t, tracks: 2);
+    await h.pump(t, const AppShell());
+    await t.tap(_bar('Cerca'));
+    await _settle(t);
+    final activity = _container(t).read(userActivityProvider);
+    expect(activity.lastActivityAt, isNull);
+    await t.enterText(_dockField(), 'abc');
+    await t.pump();
+    expect(activity.lastActivityAt, isNotNull);
+    await h.dispose(t);
   });
 }

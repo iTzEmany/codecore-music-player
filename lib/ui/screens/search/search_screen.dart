@@ -12,6 +12,7 @@ import '../../../l10n/l10n_ext.dart';
 import '../../../providers/credits_providers.dart';
 import '../../../providers/database_providers.dart';
 import '../../../providers/selection_providers.dart';
+import '../../../providers/user_activity_provider.dart';
 import '../../../providers/library_providers.dart';
 import '../../../providers/player_providers.dart';
 import '../../../providers/radio_providers.dart' show searchPrefillProvider;
@@ -45,6 +46,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   // Shared with the dock's field, which is where a phone types.
   late final _controller = ref.read(searchControllerProvider);
   Timer? _debounce;
+  late String _lastText = _controller.text;
   late String _text = _controller.text.trim();
   int _onlineSubmitted = 0;
   // Not remembered across launches: they start off every time.
@@ -83,6 +85,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   // Also fires on cursor moves, hence the comparison.
   void _onTextChanged() {
+    // Cursor moves also land here: only a changed text is the user typing.
+    if (_controller.text != _lastText) {
+      _lastText = _controller.text;
+      ref.read(userActivityProvider).touch();
+    }
     _debounce?.cancel();
     final v = _controller.text.trim();
     if (v == _text) return;

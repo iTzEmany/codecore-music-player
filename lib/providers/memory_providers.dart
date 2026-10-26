@@ -34,6 +34,11 @@ final memoryBreakdownProvider = FutureProvider.autoDispose<MemoryBreakdown>(
   (ref) => ref.watch(memoryQueriesProvider).breakdown(),
 );
 
+/// Size of the lyrics, curiosities and credits kept; read when the page opens.
+final enrichmentBytesProvider = FutureProvider.autoDispose<EnrichmentBytes>(
+  (ref) => ref.watch(memoryQueriesProvider).enrichmentBytes(),
+);
+
 /// Never-played music, for the list page.
 final neverPlayedTracksProvider = StreamProvider.autoDispose<List<Track>>(
   (ref) => ref.watch(memoryQueriesProvider).watchNeverPlayed(),

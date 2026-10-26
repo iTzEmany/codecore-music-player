@@ -76,6 +76,21 @@ class MemoryBreakdown {
   final int podcastBytes;
 }
 
+/// Bytes of the text kept by the enrichment, per part.
+class EnrichmentBytes {
+  const EnrichmentBytes({this.lyrics = 0, this.curiosities = 0, this.credits = 0});
+
+  /// Plain and synced lyrics.
+  final int lyrics;
+  /// Track curiosities and artist bios.
+  final int curiosities;
+
+  /// Credits and the per-track details.
+  final int credits;
+
+  int get total => lyrics + curiosities + credits;
+}
+
 /// The sums behind the «Memoria» tab. Everything is a GROUP BY: no track is
 /// loaded just to be added up.
 class MemoryQueries {
@@ -228,6 +243,37 @@ class MemoryQueries {
               )
               .getSingle())
           .read<int>('bytes');
+
+  /// UTF-8 bytes of a text column (length() alone counts characters).
+  static String _bytesOf(String table, String col) =>
+      'COALESCE((SELECT SUM(length(CAST($col AS BLOB))) FROM $table), 0)';
+
+  Future<EnrichmentBytes> enrichmentBytes() async {
+    final r = await _db
+        .customSelect(
+          'SELECT '
+          '(SELECT ${_bytesOf('tracks', 'lyrics_plain')} + '
+          '${_bytesOf('tracks', 'lyrics_synced')}) AS lyrics, '
+          '(SELECT ${_bytesOf('tracks', 'curiosities')} + '
+          '${_bytesOf('artist_infos', 'body')}) AS curio, '
+          '(SELECT ${_bytesOf('track_credits', 'name')} + '
+          '${_bytesOf('track_credits', 'role')} + '
+          '${_bytesOf('track_credits', 'source')}) AS credits, '
+          '(SELECT ${_bytesOf('track_enrich', 'details')}) AS details',
+          readsFrom: {
+            _db.tracks,
+            _db.artistInfos,
+            _db.trackCredits,
+            _db.trackEnrich,
+          },
+        )
+        .getSingle();
+    return EnrichmentBytes(
+      lyrics: r.read<int>('lyrics'),
+      curiosities: r.read<int>('curio'),
+      credits: r.read<int>('credits') + r.read<int>('details'),
+    );
+  }
 
   Future<MemoryBreakdown> breakdown() async {
     return MemoryBreakdown(

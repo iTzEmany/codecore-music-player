@@ -15,6 +15,7 @@ import '../../providers/shuffle_plus_providers.dart';
 import '../../services/shuffle_plus/shuffle_plus_controller.dart'
     show ShufflePlusNotice;
 import '../../providers/ui_providers.dart';
+import '../../providers/user_activity_provider.dart';
 import '../../providers/youtube_providers.dart' show ytDlpStatusProvider;
 import '../../services/audio/codecore_audio_handler.dart';
 import '../screens/library/library_screen.dart';
@@ -204,7 +205,20 @@ class AppShell extends ConsumerWidget {
         ),
       );
     }
-    return content;
+    // Any scroll counts as the user being active (read by the enrichment).
+    // Watched, not read: its busy listener only runs while it has a listener;
+    // the value never changes, so nothing rebuilds.
+    final activity = ref.watch(userActivityProvider);
+    return NotificationListener<ScrollNotification>(
+      onNotification: (n) {
+        // Only the user's own drag, not programmatic scrolls.
+        if (n is ScrollUpdateNotification && n.dragDetails != null) {
+          activity.touch();
+        }
+        return false;
+      },
+      child: content,
+    );
   }
 
   void _listen(BuildContext context, WidgetRef ref) {
