@@ -13,6 +13,7 @@ import 'activity_providers.dart';
 import 'database_providers.dart';
 import 'import_providers.dart';
 import 'library_providers.dart';
+import 'online_providers.dart';
 import 'podcast_providers.dart';
 import 'second_opinion_providers.dart';
 import 'youtube_providers.dart';
@@ -194,16 +195,27 @@ class ActivityLogNotifier extends Notifier<ActivityLogState> {
     final still = {for (final r in s.running) r.key};
     for (final r in prev?.running ?? const <ActivityItem>[]) {
       if (_oneLine.contains(r.kind) && !still.contains(r.key)) {
+        // The last snapshot seen may be the one before the end: the batch
+        // enrichment knows how it ended, so that is read instead.
+        final end = r.kind == ActivityKind.enrich
+            ? ref.read(enrichJobProvider).result
+            : null;
+        final done = end?.done ?? r.done;
+        final total = end?.total ?? r.total;
         add(
           LogEntry(
             at: now,
-            detail: r.total > 0 && r.done < r.total ? const {'stopped': true} : null,
+            detail: (end == null
+                    ? total > 0 && done < total
+                    : end.cancelled || end.rateLimited)
+                ? const {'stopped': true}
+                : null,
             item: ActivityItem(
               kind: r.kind,
               key: r.key,
               name: r.name,
-              done: r.done,
-              total: r.total,
+              done: done,
+              total: total,
               running: false,
               // A scan that ended on an error says so in its line.
               failed:

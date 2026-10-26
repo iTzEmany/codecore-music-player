@@ -7,6 +7,8 @@ import 'package:codecore/providers/activity_providers.dart';
 import 'package:codecore/providers/database_providers.dart';
 import 'package:codecore/providers/import_providers.dart';
 import 'package:codecore/providers/library_providers.dart';
+import 'package:codecore/providers/online_providers.dart';
+import 'package:codecore/services/online/enrichment_service.dart';
 import 'package:codecore/providers/second_opinion_providers.dart';
 import 'package:codecore/services/online/download_queue.dart';
 import 'package:codecore/providers/youtube_providers.dart';
@@ -38,6 +40,12 @@ class _SecondOpinion extends SecondOpinionNotifier {
 class _Scan extends ScanNotifier {
   @override
   ScanState build() => const ScanState(error: 'disk gone');
+}
+
+class _Job extends EnrichJobNotifier {
+  @override
+  EnrichJobState build() => const EnrichJobState();
+  void set(EnrichJobState s) => state = s;
 }
 
 final _activity = NotifierProvider<_Activity, ActivityState>(_Activity.new);
@@ -150,6 +158,44 @@ void main() {
       isTrue,
       reason: 'it left running with 2 of 5 done',
     );
+  });
+
+  test('a batch enrichment that finished is not «stopped» by a snapshot one short', () async {
+    final c = ProviderContainer(
+      overrides: [
+        databaseProvider.overrideWithValue(db),
+        activityProvider.overrideWith((ref) => ref.watch(_activity)),
+        enrichJobProvider.overrideWith(_Job.new),
+      ],
+    );
+    addTearDown(c.dispose);
+    c.listen(activityLogProvider, (_, _) {});
+    const last = ActivityItem(
+      kind: ActivityKind.enrich,
+      key: 'enrich',
+      name: null,
+      done: 2999,
+      total: 3000,
+    );
+    c.read(_activity.notifier).set(const ActivityState([last], []));
+    await pumpEventQueue();
+    (c.read(enrichJobProvider.notifier) as _Job).set(const EnrichJobState(
+      result: BatchProgress(done: 3000, total: 3000, finished: true),
+    ));
+    c.read(_activity.notifier).set(const ActivityState([], []));
+    await pumpEventQueue();
+    var line = c.read(activityLogProvider).entries.single;
+    expect([line.stopped, line.item!.done, line.item!.total], [false, 3000, 3000]);
+
+    c.read(_activity.notifier).set(const ActivityState([last], []));
+    await pumpEventQueue();
+    (c.read(enrichJobProvider.notifier) as _Job).set(const EnrichJobState(
+      result: BatchProgress(done: 40, total: 3000, finished: true, cancelled: true),
+    ));
+    c.read(_activity.notifier).set(const ActivityState([], []));
+    await pumpEventQueue();
+    line = c.read(activityLogProvider).entries.first;
+    expect([line.stopped, line.item!.done], [true, 40]);
   });
 
   test('a scan that ends with an error leaves its line as failed', () async {

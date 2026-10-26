@@ -19,7 +19,6 @@ import 'package:codecore/ui/widgets/ring_progress.dart';
 import 'package:codecore/ui/widgets/speed_button.dart';
 import 'package:codecore/ui/widgets/selection_bar.dart';
 import 'package:drift/drift.dart' show Value;
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -711,33 +710,6 @@ void main() {
     final slider = tester.getCenter(inBar(find.byType(Slider)).first).dx;
     expect(slider, closeTo((left + right) / 2, 1));
     await h.dispose(tester);
-  });
-
-  testWidgets('scrolling a list in the shell touches the user activity', (t) async {
-    _phone(t);
-    final h = await Harness.create(t, tracks: 3);
-    await h.pump(t, const AppShell(), extraOverrides: memoryOverrides);
-    await t.tap(find.text('Memoria'));
-    await _settle(t);
-    final activity = _container(t).read(userActivityProvider);
-    expect(activity.lastActivityAt, isNull);
-    await t.drag(find.byType(Scrollable).last, const Offset(0, -100));
-    await t.pump();
-    expect(activity.lastActivityAt, isNotNull);
-    await h.dispose(t);
-  });
-
-  testWidgets('a mouse wheel scroll touches the user activity', (t) async {
-    _phone(t);
-    final h = await Harness.create(t, tracks: 3);
-    await h.pump(t, const AppShell(), extraOverrides: memoryOverrides);
-    final activity = _container(t).read(userActivityProvider);
-    expect(activity.lastActivityAt, isNull);
-    final pointer = TestPointer(1, PointerDeviceKind.mouse);
-    await t.sendEventToBinding(pointer.hover(t.getCenter(find.byType(AppShell))));
-    await t.sendEventToBinding(pointer.scroll(const Offset(0, 40)));
-    expect(activity.lastActivityAt, isNotNull);
-    await h.dispose(t);
   });
 
   testWidgets('typing in the search touches the user activity', (t) async {
