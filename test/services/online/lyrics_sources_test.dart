@@ -42,8 +42,9 @@ class _Web implements WebClient {
 Future<Object?> Function() _never = () => Completer<Object?>().future;
 
 class _Adapter implements HttpClientAdapter {
-  _Adapter(this.code);
+  _Adapter(this.code, {this.body, this.type});
   final int code;
+  final String? body, type;
 
   @override
   Future<ResponseBody> fetch(
@@ -51,11 +52,11 @@ class _Adapter implements HttpClientAdapter {
     Stream<List<int>>? r,
     Future<void>? c,
   ) async => ResponseBody.fromString(
-    code == 200 ? '{"a":1}' : 'x',
+    body ?? (code == 200 ? '{"a":1}' : 'x'),
     code,
     headers: {
       Headers.contentTypeHeader: [
-        code == 200 ? 'application/json' : 'text/plain',
+        type ?? (code == 200 ? 'application/json' : 'text/plain'),
       ],
     },
   );
@@ -64,9 +65,9 @@ class _Adapter implements HttpClientAdapter {
   void close({bool force = false}) {}
 }
 
-DioWebClient _dio(int code) => DioWebClient(
+DioWebClient _dio(int code, {String? body, String? type}) => DioWebClient(
   Dio(BaseOptions(validateStatus: (_) => true))
-    ..httpClientAdapter = _Adapter(code),
+    ..httpClientAdapter = _Adapter(code, body: body, type: type),
 );
 
 void main() {
@@ -185,6 +186,31 @@ void main() {
       );
     });
 
+    test('length gap: 3.3 s refused, exactly 3 s accepted', () async {
+      Future<Object?> at(int ms) => NeteaseLyricsClient(
+        _Web({
+          ...ne(),
+          'search/get': () => {
+            'code': 200,
+            'result': {
+              'songs': [
+                {
+                  'id': 1,
+                  'name': 'Get Lucky',
+                  'duration': ms,
+                  'artists': [
+                    {'name': 'Daft Punk'},
+                  ],
+                },
+              ],
+            },
+          },
+        }),
+      ).find(title: 'Get Lucky', artist: 'Daft Punk', durationSec: 370);
+      expect(await at(373316), isNull);
+      expect(await at(373000), isNotNull);
+    });
+
     test('valid but empty lyric: null', () async {
       final w = _Web({
         ...ne(),
@@ -227,6 +253,15 @@ void main() {
       expect(w.asked.single.$3, isTrue);
     });
 
+    test('surrounding spaces are trimmed', () async {
+      final r = await LyricsOvhClient(
+        _Web({
+          'Lucky': () => {'lyrics': '  la la\n '},
+        }),
+      ).find(title: 'Lucky', artist: 'A');
+      expect(r!.plain, 'la la');
+    });
+
     test('empty lyrics: null; a 429 reaches the caller', () async {
       expect(
         await LyricsOvhClient(
@@ -247,6 +282,33 @@ void main() {
   });
 
   group('getJson strict', () {
+    test('a 200 that is not JSON is WebUnavailableException; not strict stays null', () async {
+      for (final c in [
+        _dio(200, body: '<html>portal</html>', type: 'text/html'),
+        _dio(200, body: '', type: 'text/html'),
+      ]) {
+        await expectLater(
+          c.getJson('https://x/a', strict: true),
+          throwsA(isA<WebUnavailableException>()),
+        );
+        expect(await c.getJson('https://x/a'), isNull);
+      }
+    });
+
+    test('an already cancelled token stays a cancellation', () async {
+      final tok = CancelToken()..cancel();
+      await expectLater(
+        _dio(200).getJson('https://x/a', strict: true, cancel: tok),
+        throwsA(
+          isA<DioException>().having(
+            (e) => CancelToken.isCancel(e),
+            'isCancel',
+            true,
+          ),
+        ),
+      );
+    });
+
     test('404 is null, 503 is WebUnavailableException', () async {
       expect(await _dio(404).getJson('https://x/a', strict: true), isNull);
       await expectLater(

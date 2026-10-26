@@ -279,6 +279,50 @@ void main() {
       },
     );
 
+    test('a generic curiosity error is failed and leaves no mark', () async {
+      final id = await r.add();
+      r.finder.pair = CuriosityPair(songError: Exception('boom'));
+      final out = await r.svc.completeOne(id, {EnrichPart.curio});
+      expect(out[EnrichPart.curio], PartOutcome.failed);
+      expect(await r.enrichOf(id), isNull);
+    });
+
+    test('a failed song lookup under force leaves the old curiosity', () async {
+      final id = await r.add(curiosities: 'old\nsrc');
+      r.finder.pair = CuriosityPair(songError: Exception('boom'));
+      await r.svc.completeOne(id, {EnrichPart.curio}, force: true);
+      expect((await r.repo.getById(id))!.curiosities, 'old\nsrc');
+    });
+
+    test(
+      'no lyrics at all: the lyrics part is marked, the synced one is not',
+      () async {
+        final id = await r.add();
+        r.chain.result = null;
+        await r.svc.completeOne(id, {EnrichPart.lyrics, EnrichPart.synced});
+        final e = (await r.enrichOf(id))!;
+        expect([e.lyricsNoneAt != null, e.syncedNoneAt], [true, null]);
+      },
+    );
+
+    test(
+      'lyrics asked without synced: the chain is told not to look for it',
+      () async {
+        final id = await r.add();
+        await r.svc.completeOne(id, {EnrichPart.lyrics});
+        expect(r.chain.wantSyncedSeen, isFalse);
+      },
+    );
+
+    test('only a synced text saved by the user meanwhile: the plain one is not added', () async {
+      final id = await r.add();
+      r.chain.during = () =>
+          r.repo.setLyrics(id, synced: '[00:01.00]mine', byUser: true);
+      await r.svc.completeOne(id, {EnrichPart.lyrics, EnrichPart.synced});
+      final t = (await r.repo.getById(id))!;
+      expect([t.lyricsPlain, t.lyricsSynced], [null, '[00:01.00]mine']);
+    });
+
     test('a refused curiosity search leaves no mark; an empty page marks, even with a bio', () async {
       final id = await r.add();
       r.finder.pair = CuriosityPair(songError: const RateLimitedException(429));

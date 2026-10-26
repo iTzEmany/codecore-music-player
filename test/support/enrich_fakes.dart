@@ -156,6 +156,7 @@ class FakeChain extends LyricsChain {
   );
   bool failed = false;
   bool syncedFailed = false;
+  bool? wantSyncedSeen;
 
   /// Runs while the search is «on the network», before it answers.
   Future<void> Function()? during;
@@ -167,6 +168,7 @@ class FakeChain extends LyricsChain {
     CancelToken? cancel,
   }) async {
     calls++;
+    wantSyncedSeen = wantSynced;
     await during?.call();
     return failed
         ? const LyricsChainResult(failed: true, syncedFailed: true)

@@ -98,7 +98,10 @@ class DioWebClient implements WebClient {
           if (strict && res.statusCode != 404) throw WebUnavailableException(url, res.statusCode);
           return null;
         }
-        return decodeJsonBody(res.data);
+        final body = decodeJsonBody(res.data);
+        // A 200 that is not JSON (captive portal, empty body) is no answer.
+        if (strict && body == null) throw WebUnavailableException(url, 200);
+        return body;
       }
     } on DioException catch (e, st) {
       if (CancelToken.isCancel(e)) rethrow;

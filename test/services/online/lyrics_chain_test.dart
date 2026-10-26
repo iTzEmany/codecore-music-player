@@ -203,6 +203,33 @@ void main() {
     },
   );
 
+  test('LRCLIB cancelled: the chain rethrows and asks nobody else', () async {
+    final ne = _Ne(_synced), ovh = _Ovh(_plain);
+    final c = LyricsChain(
+      lrclib: _Lrclib(
+        null,
+        error: DioException.requestCancelled(
+          requestOptions: RequestOptions(),
+          reason: 'x',
+        ),
+      ),
+      netease: ne,
+      ovh: ovh,
+    );
+    await expectLater(c.find(_track()), throwsA(isA<DioException>()));
+    expect(ne.calls + ovh.calls, 0);
+  });
+
+  test('NetEase gives the synced text: lyrics.ovh is not asked', () async {
+    final ovh = _Ovh(_plain);
+    await LyricsChain(
+      lrclib: _Lrclib(null),
+      netease: _Ne(_synced),
+      ovh: ovh,
+    ).find(_track());
+    expect(ovh.calls, 0);
+  });
+
   test('429 from a fallback is rethrown', () async {
     final c = LyricsChain(
       lrclib: _Lrclib(null),
