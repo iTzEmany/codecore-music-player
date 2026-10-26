@@ -391,7 +391,9 @@ class EnrichmentService {
     final meta = (await metaF)?.value;
     // Settled in the transaction: «found» means a field was filled.
     final metaAsked = metaF != null && !(await metaF).failed;
-    if (metaF != null && !metaAsked) out[EnrichPart.meta] = PartOutcome.failed;
+    if (metaF != null && !metaAsked) {
+      out[EnrichPart.meta] = _lost((await metaF).limited);
+    }
     String? plainW, syncedW;
     if (lyrF != null) {
       final r = await lyrF;
@@ -402,6 +404,7 @@ class EnrichmentService {
       final lost =
           r.failed ||
           (res?.failed ?? false); // no answer is not an empty answer
+      final lostO = _lost(r.limited);
       if (doLyrics) {
         plainW = hasPlain ? text!.plain : null;
         settle(
@@ -409,7 +412,7 @@ class EnrichmentService {
           hasPlain || hasSynced
               ? PartOutcome.found
               : lost
-              ? PartOutcome.failed
+              ? lostO
               : PartOutcome.none,
         );
       }
@@ -421,13 +424,14 @@ class EnrichmentService {
           hasSynced
               ? PartOutcome.found
               : r.failed || (res?.syncedFailed ?? false)
-              ? PartOutcome.failed
+              ? lostO
               : PartOutcome.none,
         );
       }
     }
 
     CreditsPart? creditsPart;
+    _throwIfCancelled(cancel);
     if (doCredits) {
       final r = await _attempt(
         'credits',
@@ -437,22 +441,25 @@ class EnrichmentService {
       creditsPart = r.value;
       // CreditsEnricher.save writes the credits mark itself.
       out[EnrichPart.credits] = creditsPart == null
-          ? PartOutcome.failed
+          ? _lost(r.limited)
           : creditsPart.credits.isNotEmpty
           ? PartOutcome.found
           : creditsPart.complete
           ? PartOutcome.none
-          : PartOutcome.failed;
+          : _lost(creditsPart.limited);
     }
+    _throwIfCancelled(cancel);
     if (doCurio) {
       final r = await _attempt(
         'curiosity',
-        () => curiosities!.fetch(t, language()),
+        () => curiosities!.fetch(t, language(), cancel: cancel),
         timeout: false,
       );
       final o = r.value;
-      if (o == null || o.failed || o.limited) {
-        out[EnrichPart.curio] = PartOutcome.failed;
+      if (o == null || o.failed) {
+        out[EnrichPart.curio] = _lost(r.limited);
+      } else if (o.limited) {
+        out[EnrichPart.curio] = PartOutcome.limited;
       } else {
         // The part is the track's own text: an artist bio alone leaves it empty.
         final has = (await tracks.getById(trackId))?.curiosities != null;
@@ -462,6 +469,7 @@ class EnrichmentService {
 
     Track? fresh;
     var albumKey = t.albumKey;
+    var coverPending = false; // the cover is the only thing meta would fill
     await db.transaction(() async {
       // The row may have changed (or be gone) while the sources were asked.
       fresh = await tracks.getById(trackId);
@@ -483,9 +491,15 @@ class EnrichmentService {
               (fields.contains(EnrichField.trackNumber) &&
                   (m.trackNumber != null ||
                       (meta!.disc != null && f.discNumber == null))) ||
-              (meta!.isrc != null && f.isrc == null) ||
-              (m.artworkUrl != null && !f.hasCover && f.coverSource == 0));
-      if (metaAsked) {
+              (meta!.isrc != null && f.isrc == null));
+      coverPending =
+          metaAsked &&
+          !fills &&
+          m?.artworkUrl != null &&
+          !f.hasCover &&
+          f.coverSource == 0;
+      // A cover that is yet to be downloaded settles meta after the download.
+      if (metaAsked && !coverPending) {
         settle(EnrichPart.meta, fills ? PartOutcome.found : PartOutcome.none);
       }
       // The user may have saved a text while the sources were asked.
@@ -509,7 +523,7 @@ class EnrichmentService {
           ),
           fields,
         )).$2;
-      } else if (metaAsked) {
+      } else if (metaAsked && !coverPending) {
         // Like enrichMany: nothing found for the track → status 2.
         await (db.update(db.tracks)..where((r) => r.id.equals(trackId))).write(
           const TracksCompanion(enrichStatus: Value(2)),
@@ -535,13 +549,19 @@ class EnrichmentService {
     final url = metaAsked ? meta?.match.artworkUrl : null;
     // Never over a hand-made cover (cover_source > 0) or an existing one.
     if (f != null && url != null && !f.hasCover && f.coverSource == 0) {
+      var saved = false;
       try {
-        await _applyCover(trackId, albumKey, url, false, cancel);
+        saved = await _applyCover(trackId, albumKey, url, false, cancel);
       } on DioException catch (e, st) {
         if (CancelToken.isCancel(e)) rethrow;
         AppLog.w('completion: cover of track $trackId failed', e, st);
       } on Object catch (e, st) {
         AppLog.w('completion: cover of track $trackId failed', e, st);
+      }
+      if (coverPending) {
+        // No cover, nothing else filled: not «found», and the mark stays (invariant 3).
+        out[EnrichPart.meta] = saved ? PartOutcome.found : PartOutcome.failed;
+        if (saved) await _markMetaFound(trackId);
       }
     }
     return out;
@@ -549,7 +569,7 @@ class EnrichmentService {
 
   /// One source of [completeOne]: its answer, or `failed` (logged) when it
   /// threw, timed out or was refused. A cancellation escapes.
-  Future<({T? value, bool failed})> _attempt<T>(
+  Future<({T? value, bool failed, bool limited})> _attempt<T>(
     String what,
     Future<T?> Function() ask, {
     bool timeout = true,
@@ -559,14 +579,45 @@ class EnrichmentService {
       return (
         value: await (timeout ? f.timeout(const Duration(seconds: 25)) : f),
         failed: false,
+        limited: false,
       );
     } on DioException catch (e, st) {
       if (CancelToken.isCancel(e)) rethrow;
       AppLog.w('completion: $what failed', e, st);
+    } on RateLimitedException catch (e) {
+      AppLog.w('completion: $what refused', e);
+      return (value: null, failed: true, limited: true);
     } on Object catch (e, st) {
       AppLog.w('completion: $what failed', e, st);
     }
-    return (value: null, failed: true);
+    return (value: null, failed: true, limited: false);
+  }
+
+  /// The cover was the only thing meta filled: clears the «nothing» mark.
+  Future<void> _markMetaFound(int trackId) => db.transaction(() async {
+    await (db.update(db.tracks)..where((r) => r.id.equals(trackId))).write(
+      const TracksCompanion(enrichStatus: Value(1)),
+    );
+    final row = TrackEnrichCompanion(
+      trackId: Value(trackId),
+      metaNoneAt: const Value(null),
+    );
+    await db.into(db.trackEnrich).insert(row, onConflict: DoUpdate((_) => row));
+  });
+
+  /// A part that got no answer: refused (`limited`) or broken (`failed`).
+  PartOutcome _lost(bool limited) =>
+      limited ? PartOutcome.limited : PartOutcome.failed;
+
+  /// Rethrows a cancellation the way a cancelled request does.
+  void _throwIfCancelled(CancelToken? cancel) {
+    if (cancel != null && cancel.isCancelled) {
+      throw cancel.cancelError ??
+          DioException.requestCancelled(
+            requestOptions: RequestOptions(),
+            reason: 'cancelled',
+          );
+    }
   }
 
   /// Writes only [fields]; `userEdited` tracks keep title/artist/album.

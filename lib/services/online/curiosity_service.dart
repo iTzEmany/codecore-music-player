@@ -1,3 +1,5 @@
+import 'package:dio/dio.dart' show CancelToken;
+
 import '../../core/app_log.dart';
 import '../../data/db/app_database.dart' show Track;
 import '../../data/repositories/artist_info_repository.dart';
@@ -38,7 +40,11 @@ class CuriosityService {
   final TrackRepository tracks;
   final ArtistInfoRepository artistInfos;
 
-  Future<CuriosityOutcome> fetch(Track t, String lang) async {
+  Future<CuriosityOutcome> fetch(
+    Track t,
+    String lang, {
+    CancelToken? cancel,
+  }) async {
     final c = cleanSearchQuery(t.title, t.artist ?? '');
     var songLimited = false, artistLimited = false, failed = false;
 
@@ -50,6 +56,7 @@ class CuriosityService {
       lang,
       isrc: t.isrc,
       durationMs: t.durationMs,
+      cancel: cancel,
     );
     final song = found.song, artist = found.artist;
     final songDone = found.songError == null;

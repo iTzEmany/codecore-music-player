@@ -36,7 +36,8 @@ class _CreditsCardState extends ConsumerState<CreditsCard> {
         EnrichPart.credits,
         EnrichPart.curio, // the switch is for the automatic search only
       }, force: true);
-      failed = out[EnrichPart.credits] == PartOutcome.failed;
+      final o = out[EnrichPart.credits];
+      failed = o == PartOutcome.failed || o == PartOutcome.limited;
     } on Object catch (e, st) {
       AppLog.w('credits refresh failed', e, st);
       failed = true;

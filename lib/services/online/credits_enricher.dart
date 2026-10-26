@@ -13,6 +13,7 @@ import 'deezer_client.dart';
 import 'deezer_gw_client.dart';
 import 'deezer_models.dart';
 import 'enrich_parts.dart' as enrich_parts;
+import 'http_client.dart' show RateLimitedException;
 import 'musicbrainz_client.dart';
 
 /// What the credits sources said about one track. Never touches `tracks`.
@@ -23,6 +24,7 @@ class CreditsPart {
     this.deezerId,
     this.mbid,
     this.failed = const {},
+    this.limited = false,
   });
 
   /// Deezer's first, then what MusicBrainz adds ([mergeCredits]).
@@ -35,6 +37,9 @@ class CreditsPart {
   /// when none failed (a valid empty answer counts) may an empty result be
   /// remembered as «searched, nothing» (invariant 3).
   final Set<String> failed;
+
+  /// A source refused (too many requests): [failed] holds it, but it is not a broken source.
+  final bool limited;
   bool get complete => failed.isEmpty;
 }
 
@@ -73,6 +78,7 @@ class CreditsEnricher {
     CancelToken? cancel,
   ) async {
     final failed = <String>{};
+    var limited = false;
     // [origin] is the credit source that gets no answer when [ask] fails
     // (no answer is not an empty answer: invariant 3).
     Future<T?> source<T>(
@@ -85,6 +91,9 @@ class CreditsEnricher {
       } on DioException catch (e) {
         if (CancelToken.isCancel(e)) rethrow;
         AppLog.w('credits source $name failed', e);
+      } on RateLimitedException catch (e) {
+        AppLog.w('credits source $name refused', e);
+        limited = true;
       } catch (e, st) {
         AppLog.w('credits source $name failed', e, st);
       }
@@ -181,6 +190,7 @@ class CreditsEnricher {
       deezerId: found?.id,
       mbid: mbid,
       failed: failed,
+      limited: limited,
     );
   }
 

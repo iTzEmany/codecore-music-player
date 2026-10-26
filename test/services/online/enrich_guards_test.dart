@@ -4,6 +4,7 @@ import 'package:codecore/services/online/curiosity_finder.dart';
 import 'package:codecore/services/online/enrichment_service.dart';
 import 'package:codecore/services/online/http_client.dart';
 import 'package:codecore/services/online/lrclib_client.dart';
+import 'package:dio/dio.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter_test/flutter_test.dart';
 
@@ -327,7 +328,7 @@ void main() {
       final id = await r.add();
       r.finder.pair = CuriosityPair(songError: const RateLimitedException(429));
       expect(await r.svc.completeOne(id, {EnrichPart.curio}), {
-        EnrichPart.curio: PartOutcome.failed,
+        EnrichPart.curio: PartOutcome.limited,
       });
       expect(await r.enrichOf(id), isNull);
 
@@ -362,5 +363,122 @@ void main() {
         expect(e.details, isNotNull);
       },
     );
+  });
+
+  group('refused, cancelled, cover', () {
+    test(
+      'a refusal (429) is «limited», never «nothing», and leaves no mark',
+      () async {
+        final id = await r.add(plain: 'x'); // synced alone is asked for
+        r.web.itunes = ItunesMode.limited;
+        r.chain.limited = true;
+        r.web.musicBrainzLimited = true;
+        r.web.deezerDown = true;
+        final out = await r.svc.completeOne(id, _all);
+        expect(out[EnrichPart.meta], PartOutcome.limited);
+        expect(out[EnrichPart.synced], PartOutcome.limited);
+        expect(out[EnrichPart.credits], PartOutcome.limited);
+        expect(out[EnrichPart.curio], PartOutcome.found);
+        final e = await r.enrichOf(id);
+        expect([
+          e?.metaNoneAt,
+          e?.syncedNoneAt,
+          e?.creditsNoneAt,
+        ], everyElement(isNull));
+      },
+    );
+
+    test(
+      'a refused lyrics search is limited, a broken one is failed',
+      () async {
+        final id = await r.add();
+        r.chain.limited = true;
+        expect(await r.svc.completeOne(id, {EnrichPart.lyrics}), {
+          EnrichPart.lyrics: PartOutcome.limited,
+        });
+        r.chain
+          ..limited = false
+          ..failed = true;
+        expect(await r.svc.completeOne(id, {EnrichPart.lyrics}), {
+          EnrichPart.lyrics: PartOutcome.failed,
+        });
+      },
+    );
+
+    test('cancelled while the lyrics are asked: neither credits nor curiosities are asked', () async {
+      final id = await r.add();
+      final token = CancelToken();
+      r.chain.during = () async => token.cancel();
+      await expectLater(
+        r.svc.completeOne(id, {
+          EnrichPart.lyrics,
+          EnrichPart.credits,
+          EnrichPart.curio,
+        }, cancel: token),
+        throwsA(
+          isA<DioException>().having(
+            (e) => CancelToken.isCancel(e),
+            'cancel',
+            isTrue,
+          ),
+        ),
+      );
+      expect(r.web.count('musicbrainz'), 0);
+      expect(r.finder.calls, 0);
+      expect(await r.enrichOf(id), isNull);
+    });
+
+    test(
+      'cancelled while the credits are asked: the curiosities are not',
+      () async {
+        final id = await r.add();
+        final token = CancelToken();
+        r.web.onUrl = (u) {
+          if (u.contains('musicbrainz')) token.cancel();
+        };
+        await expectLater(
+          r.svc.completeOne(id, {
+            EnrichPart.credits,
+            EnrichPart.curio,
+          }, cancel: token),
+          throwsA(isA<DioException>()),
+        );
+        expect(r.finder.calls, 0);
+      },
+    );
+
+    test('the cover is the only thing to fill and its download fails: failed, no mark cleared', () async {
+      final id = await r.add(
+        album: 'A',
+        genre: 'G',
+        year: 2000,
+        trackNumber: 1,
+      );
+      await r.credits.saveEnrich(
+        TrackEnrichCompanion(trackId: Value(id), metaNoneAt: const Value(1)),
+      );
+      r.web.coverDown = true;
+      final out = await r.svc.completeOne(id, {EnrichPart.meta}, force: true);
+      expect(out, {EnrichPart.meta: PartOutcome.failed});
+      expect((await r.enrichOf(id))!.metaNoneAt, 1);
+      expect((await r.repo.getById(id))!.hasCover, isFalse);
+    });
+
+    test('the cover is the only thing to fill and it is saved: found, mark cleared', () async {
+      final id = await r.add(
+        album: 'A',
+        genre: 'G',
+        year: 2000,
+        trackNumber: 1,
+      );
+      await r.credits.saveEnrich(
+        TrackEnrichCompanion(trackId: Value(id), metaNoneAt: const Value(1)),
+      );
+      final out = await r.svc.completeOne(id, {EnrichPart.meta}, force: true);
+      expect(out, {EnrichPart.meta: PartOutcome.found});
+      expect((await r.enrichOf(id))!.metaNoneAt, isNull);
+      final t = (await r.repo.getById(id))!;
+      expect([t.hasCover, t.enrichStatus], [true, 1]);
+    });
   });
 }

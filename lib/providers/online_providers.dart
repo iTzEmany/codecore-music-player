@@ -14,6 +14,7 @@ import '../services/online/lyrics_chain.dart';
 import '../services/online/lyrics_ovh_client.dart';
 import '../services/online/netease_lyrics_client.dart';
 import '../services/online/curiosity_finder.dart';
+import '../services/online/curiosity_service.dart';
 import '../services/online/deezer_client.dart';
 import '../services/online/deezer_gw_client.dart';
 import '../services/online/discogs_client.dart';
@@ -27,7 +28,6 @@ import '../services/library/track_file_sync.dart';
 import '../services/tags/tag_writer.dart';
 import '../services/online/wikipedia_client.dart';
 import '../services/online/ytm_artist_resolver.dart';
-import 'curiosity_provider.dart' show curiosityServiceProvider;
 import 'ytm_catalog_providers.dart';
 import 'database_providers.dart';
 import 'library_providers.dart';
@@ -112,6 +112,14 @@ Future<T?> ytmQuiet<T>(Future<T?> Function() body) async {
 
 final creditsRepositoryProvider = Provider(
   (ref) => CreditsRepository(ref.watch(databaseProvider)),
+);
+
+final curiosityServiceProvider = Provider(
+  (ref) => CuriosityService(
+    finder: ref.watch(curiosityFinderProvider),
+    tracks: ref.watch(trackRepositoryProvider),
+    artistInfos: ref.watch(artistInfoRepositoryProvider),
+  ),
 );
 
 final enrichmentServiceProvider = Provider<EnrichmentService>((ref) {

@@ -4,9 +4,10 @@ import '../../data/db/app_database.dart';
 enum EnrichPart { meta, lyrics, synced, curio, credits }
 
 /// What one part of [EnrichmentService.completeOne] came to. [failed]: a source
-/// did not answer and no «searched, nothing» mark was written; [skipped]: off,
-/// not due, or no source reachable (no call made).
-enum PartOutcome { found, none, failed, skipped }
+/// did not answer; [limited]: a source refused (too many requests). Neither
+/// writes a «searched, nothing» mark. [skipped]: off, not due, or no source
+/// reachable (no call made).
+enum PartOutcome { found, none, failed, limited, skipped }
 
 /// A «searched, nothing» answer is asked again after this long.
 const retryNoneAfter = Duration(days: 30);

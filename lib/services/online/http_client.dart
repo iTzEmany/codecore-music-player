@@ -153,13 +153,19 @@ class RateLimiter {
 
   final Duration minGap;
   DateTime? _last;
+  Future<void> _tail = Future<void>.value();
 
-  Future<void> wait() async {
-    final last = _last;
-    if (last != null && minGap > Duration.zero) {
-      final remaining = minGap - DateTime.now().difference(last);
-      if (remaining > Duration.zero) await Future<void>.delayed(remaining);
-    }
-    _last = DateTime.now();
+  /// Callers are served one after the other, so concurrent waits never start together.
+  Future<void> wait() {
+    final turn = _tail.then((_) async {
+      final last = _last;
+      if (last != null && minGap > Duration.zero) {
+        final remaining = minGap - DateTime.now().difference(last);
+        if (remaining > Duration.zero) await Future<void>.delayed(remaining);
+      }
+      _last = DateTime.now();
+    });
+    _tail = turn;
+    return turn;
   }
 }

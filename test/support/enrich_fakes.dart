@@ -22,12 +22,17 @@ import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:path/path.dart' as p;
 
-enum ItunesMode { match, empty, down }
+enum ItunesMode { match, empty, down, limited }
 
 /// iTunes, Deezer and MusicBrainz from memory; counts what was asked.
 class EnrichWeb implements WebClient {
   ItunesMode itunes = ItunesMode.match;
   bool deezerDown = false;
+  bool musicBrainzLimited = false;
+  bool coverDown = false;
+
+  /// Runs on every JSON request (e.g. to cancel a token «on the network»).
+  void Function(String url)? onUrl;
   final urls = <String>[];
   int bytes = 0;
 
@@ -41,8 +46,13 @@ class EnrichWeb implements WebClient {
     bool strict = false,
   }) async {
     urls.add(url);
+    onUrl?.call(url);
+    if (musicBrainzLimited && url.contains('musicbrainz')) {
+      throw const RateLimitedException(429);
+    }
     if (deezerDown && url.contains('deezer')) return null;
     if (url.contains('itunes')) {
+      if (itunes == ItunesMode.limited) throw const RateLimitedException(429);
       if (itunes == ItunesMode.down) {
         if (strict) throw WebUnavailableException(url, 503);
         return null;
@@ -129,7 +139,7 @@ class EnrichWeb implements WebClient {
     CancelToken? cancel,
   }) async {
     bytes++;
-    return [1, 2, 3];
+    return coverDown ? null : [1, 2, 3];
   }
 }
 
@@ -155,6 +165,7 @@ class FakeChain extends LyricsChain {
     synced: '[00:01.00]la la',
   );
   bool failed = false;
+  bool limited = false;
   bool syncedFailed = false;
   bool? wantSyncedSeen;
 
@@ -170,6 +181,7 @@ class FakeChain extends LyricsChain {
     calls++;
     wantSyncedSeen = wantSynced;
     await during?.call();
+    if (limited) throw const RateLimitedException(429);
     return failed
         ? const LyricsChainResult(failed: true, syncedFailed: true)
         : LyricsChainResult(
