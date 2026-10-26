@@ -62,6 +62,7 @@ finto: scroll in una lista della shell → occupato, libero dopo 5 s; download i
 testo nella ricerca → occupato. `flutter analyze` pulito.
 
 ### 53.4 — `EnrichCompleter` in modalità *piano*
+> Dalla fase 52: le curiosità (CuriosityFinder) e i crediti si identificano ancora ognuno per conto suo su MusicBrainz (K-AR-07 non rispettato del tutto): il finder vuole l'`artistId`, non solo l'MBID dei crediti. Prima del completamento di massa, far riusare a `_identify` l'MBID salvato in `track_enrich.mbid`, così un giro non raddoppia le chiamate.
 **File:** `lib/services/online/enrich_completer.dart` (nuovo), `lib/providers/enrich_completer_providers.dart` (nuovo),
 `lib/data/repositories/credits_repository.dart` (`dueTrackIds(parts, now, limit: 20)`: `tracks` `kind IN (0,2)` LEFT
 JOIN `track_enrich`, solo colonne leggere), `lib/providers/startup_providers.dart` (avvio dopo la scansione e a ogni cambio

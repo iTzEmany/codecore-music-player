@@ -1,6 +1,7 @@
-# Handoff — 2026-10-26 (dopo la fase 51)
+# Handoff — 2026-10-26 (dopo la fase 52)
 
 ## Stato
+- **Fase 52 (testo e curiosità complete)** in una PR: catena del testo LRCLIB → NetEase (titolo, artista, ±3 s, niente versioni live) → lyrics.ovh; `completeOne` per tutte le parti (metadati, testo, sincronia, curiosità, crediti) solo se accese, vuote e dovute, con «niente» per parte che scade dopo 30 giorni e mai su un errore; testo scelto a mano (`lyrics_by_user`) mai toccato; `CuriosityService`; interruttore «Curiosità automatiche» (spento, proposto nella guida); dopo un download si cerca tutto ciò che è acceso. Decisione in autonomia D-131 (`getJson(strict:)`, supera D-129). Rinviato a 53.4: MBID condiviso fra curiosità e crediti.
 - **Fase 51 (crediti a schermo) in #30**: card «Crediti e dettagli» nel player con «Mostra tutto» e «Aggiorna», nomi che aprono l'artista, sezione nell'info brano della Jam e nell'anteprima, «Compare come» nella pagina artista, «Nei crediti» nella ricerca locale; crediti e dettagli nel backup, nell'invio e nella Jam (parsing tollerante dei dati da fuori). `CreditsRepository` unico scrittore e unica query dei brani accreditati. Decisione in autonomia D-130 (card vuota visibile con l'interruttore acceso, per «Aggiorna»). Rinviato a 52.6: card e «Compare come» si aggiornano solo con «Aggiorna» (nota in testa al task).
 - **Fase 50 (dati e fonti dei crediti) fusa in #27**: schema v15 (`track_credits`, `track_enrich`, `activity_log`, `tracks.cover_source`), Deezer gw con pausa di 24 h, dettagli Deezer pubblici, crediti MusicBrainz, `completeOne` con esito per parte, interruttore «Crediti e dettagli». Nessuna UI dei crediti ancora (fase 51). Decisioni in autonomia D-127…D-129. Rilievi della review rinviati: note in testa a 51.1, 51.4, 52.1, 53.2.
 - Feature «Streaming e coda online» completa nel codice: fasi 45–49 fuse una PR per fase (#19 cache e motore, #20 streaming dalla ricerca, #21 Jam online, #22 shuffle a 3 stati e Home, #23 artisti ospiti). Decisioni D-89…D-95 in `docs/decisioni.md`.
@@ -10,6 +11,7 @@
 - Ogni fase ha avuto review di architettura (Opus) e la scheggia in modalità passo; i bug trovati sono corretti con il loro test. Scheggia in modalità fase sul Mi A3 per 45, 46 e un giro unico 47 (solo online, Jam vietata da D-91)–49: nomi artista troncati e crediti scaricati tenuti interi corretti nella PR di chiusura.
 
 ## Tocca a te
+- **52.8 prove a mano** (dettagli in `docs/fase-52-testo-e-curiosita.md`): Linux e Mi A3 (interruttore e guida, download con tutto acceso e con le curiosità spente, un brano senza testo su LRCLIB, testo scelto a mano che «Aggiorna» non cambia, log senza 429 a raffica); Motorola: prima il backup completo dall'app, poi `adb -s ZY22HKD85K install -r <apk>`, «Crediti e dettagli» e «Curiosità automatiche» accesi, un download completo.
 - **51.9 prove a mano** (dettagli in `docs/fase-51-crediti-a-schermo.md`): Linux e Mi A3 (card, lingue en/fr, «Aggiorna», Jam fra i due, «Compare come», «Nei crediti», backup e ripristino); Motorola: prima il backup completo dall'app, poi `adb -s ZY22HKD85K install -r <apk>`. La scheggia su Linux non ha provato: interruttore spento, «Mostra tutto» con più di 8 nomi, tocco su un nome di libreria, anteprima «Arricchisci», backup, finestra a 360 px.
 - **50.11 prove a mano** (dettagli in `docs/fase-50-dati-e-fonti-crediti.md`):
   - Linux: interruttore «Crediti e dettagli» nell'onboarding, backup vero e ripristino su una libreria di prova, unione di doppioni.
@@ -33,9 +35,9 @@ Leggi docs/handoff.md, docs/gotchas.md e docs/PROGRESS.md. <obiettivo scelto fra
 ```
 
 ## Prossimi obiettivi
-0. **(Consigliato) Fasi 52–54 dell'«Arricchimento completo»**, a partire dalla 52 (testo e curiosità). Prima le prove 50.11 e 51.9. Prompt:
+0. **(Consigliato) Fase 53 dell'«Arricchimento completo»** (completamento e Registro), poi la 54. Prima le prove 50.11, 51.9, 52.8. Prompt:
    ```
-   /obiettivo fasi 52–54 (docs/feature-arricchimento.md): una PR per fase. Motorola secondo D-125/D-126: chiedimi il backup prima di installare.
+   /obiettivo fase 53 (docs/fase-53-completamento-e-registro.md): una PR. Motorola secondo D-125/D-126: chiedimi il backup prima di installare.
    ```
    Poi il lavoro 3 di `docs/prossimi-lavori.md` (design).
 1. **Debito noto dello streaming** (in fondo a `docs/fase-47-jam-online.md`): tre meccanismi «online → libreria», `DownloadsNotifier` grande, prefetch che ricomincia da capo, file auto-scaricato dall'uscita Jam non fissato in cache, «Scarica» da una riga ombra senza messaggio; `gapless window edit failed` (IllegalArgumentException) al cambio di shuffle su una coda di 2 brani; `discovery: socket error` ogni 2 s senza rete.
