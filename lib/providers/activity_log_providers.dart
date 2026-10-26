@@ -12,6 +12,7 @@ import '../services/import/playlist_import_service.dart';
 import 'activity_providers.dart';
 import 'database_providers.dart';
 import 'import_providers.dart';
+import 'library_providers.dart';
 import 'podcast_providers.dart';
 import 'second_opinion_providers.dart';
 import 'youtube_providers.dart';
@@ -204,6 +205,10 @@ class ActivityLogNotifier extends Notifier<ActivityLogState> {
               done: r.done,
               total: r.total,
               running: false,
+              // A scan that ended on an error says so in its line.
+              failed:
+                  r.kind == ActivityKind.scan &&
+                  ref.read(scanStateProvider).error != null,
             ),
           ),
         );

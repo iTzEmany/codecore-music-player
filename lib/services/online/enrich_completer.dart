@@ -35,6 +35,7 @@ class EnrichCompleter {
 
   static const blockSize = 10;
   static const _chunk = 20;
+  static const _maxStuck = 5;
 
   final EnrichmentService service;
   final CreditsRepository repo;
@@ -98,10 +99,11 @@ class EnrichCompleter {
     final refused = <EnrichPart>{}; // a source that said «too many requests»: not again in this round
     final block = <EnrichGather>[];
     var wanted = parts();
+    var stuck = 0; // tracks in a row with no part found or answered «nothing» (offline)
     Set<EnrichPart> switchedOn() => wanted = parts().difference(refused);
     try {
       try {
-        while (!_cancelled && switchedOn().isNotEmpty) {
+        while (!_cancelled && stuck < _maxStuck && switchedOn().isNotEmpty) {
           final ids = await repo.dueTrackIds(
             wanted,
             DateTime.fromMillisecondsSinceEpoch(_nowMs()),
@@ -111,6 +113,7 @@ class EnrichCompleter {
           );
           if (ids.isEmpty) break;
           for (final id in ids) {
+            if (_cancelled) break;
             if (!_now) await _idle();
             await service.limiter.wait();
             if (_cancelled) break;
@@ -120,12 +123,22 @@ class EnrichCompleter {
             try {
               final g = await service.gather(id, wanted, ignoreMarks: _now);
               block.add(g);
+              final ok = g.out.values.any(
+                (o) => o == PartOutcome.found || o == PartOutcome.none,
+              );
+              stuck = ok ? 0 : stuck + 1;
               refused.addAll([
                 for (final e in g.out.entries)
                   if (e.value == PartOutcome.limited) e.key,
               ]);
             } on Object catch (e, st) {
               AppLog.w('completion: track $id not read', e, st);
+              stuck++;
+            }
+            if (stuck >= _maxStuck) {
+              AppLog.w('completion: $_maxStuck tracks in a row got no answer, round stopped');
+              round.failed = true;
+              break;
             }
             if (block.length >= blockSize) await _commit(block, round);
           }

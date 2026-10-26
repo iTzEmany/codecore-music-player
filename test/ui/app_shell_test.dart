@@ -19,6 +19,7 @@ import 'package:codecore/ui/widgets/ring_progress.dart';
 import 'package:codecore/ui/widgets/speed_button.dart';
 import 'package:codecore/ui/widgets/selection_bar.dart';
 import 'package:drift/drift.dart' show Value;
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -722,6 +723,19 @@ void main() {
     expect(activity.lastActivityAt, isNull);
     await t.drag(find.byType(Scrollable).last, const Offset(0, -100));
     await t.pump();
+    expect(activity.lastActivityAt, isNotNull);
+    await h.dispose(t);
+  });
+
+  testWidgets('a mouse wheel scroll touches the user activity', (t) async {
+    _phone(t);
+    final h = await Harness.create(t, tracks: 3);
+    await h.pump(t, const AppShell(), extraOverrides: memoryOverrides);
+    final activity = _container(t).read(userActivityProvider);
+    expect(activity.lastActivityAt, isNull);
+    final pointer = TestPointer(1, PointerDeviceKind.mouse);
+    await t.sendEventToBinding(pointer.hover(t.getCenter(find.byType(AppShell))));
+    await t.sendEventToBinding(pointer.scroll(const Offset(0, 40)));
     expect(activity.lastActivityAt, isNotNull);
     await h.dispose(t);
   });

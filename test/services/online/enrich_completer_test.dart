@@ -246,6 +246,27 @@ void main() {
       },
     );
 
+    test('cancel while gathering ends the run even if the user wait never returns', () async {
+      await track();
+      await track();
+      final c = completer(idle: () => Completer<void>().future);
+      final run = c.run(now: false);
+      await pumpEventQueue();
+      c.cancel();
+      expect((await run).worked, 0);
+      expect(c.running, isFalse);
+    });
+
+    test('offline: five tracks in a row with no answer stop the round as failed', () async {
+      r.chain.failed = true;
+      for (var n = 0; n < 8; n++) {
+        await track();
+      }
+      final round = await completer().run();
+      expect(r.chain.calls, 5);
+      expect(round.failed, isTrue);
+    });
+
     test('a round counts what was updated and what had no text', () async {
       r.chain.resultFor = (t) => t.path.endsWith('${i - 1}.mp3')
           ? null

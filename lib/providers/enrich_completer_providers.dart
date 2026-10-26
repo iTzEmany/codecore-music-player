@@ -93,8 +93,15 @@ class EnrichCompleterNotifier extends Notifier<EnrichCompleterState> {
   /// flag listens to the activity list). Without it nothing waits.
   UserActivity? activity;
 
+  bool _warnedNoActivity = false;
+
   Future<void> _waitIdle() async {
-    while (!_halt && !(activity?.idleFor(_idleFor) ?? true)) {
+    if (activity == null && !_warnedNoActivity) {
+      _warnedNoActivity = true;
+      AppLog.w('completion: no user activity wired, a plain run never starts');
+    }
+    // Fails closed: without the activity the user is never idle.
+    while (!_halt && !(activity?.idleFor(_idleFor) ?? false)) {
       await Future<void>.delayed(poll);
     }
   }
@@ -148,7 +155,7 @@ class EnrichCompleterNotifier extends Notifier<EnrichCompleterState> {
   /// progress turns into this one (its line goes to the Registro as one).
   Future<void> runNow() async {
     state = state.copyWith(paused: false);
-    if (state.running && !_halt) {
+    if (state.running && !_halt && _completer.running) {
       state = state.copyWith(manual: true);
       _completer.run(now: true).ignore(); // joins the run; _go logs its errors
       await _current;
@@ -156,6 +163,7 @@ class EnrichCompleterNotifier extends Notifier<EnrichCompleterState> {
     }
     _halt = true; // a run still counting stops at its next look
     await _current; // a stopped run is still ending
+    _again = false; // a queued restart would turn this into a plain run
     await start(now: true);
   }
 

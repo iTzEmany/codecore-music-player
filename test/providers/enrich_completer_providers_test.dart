@@ -220,6 +220,44 @@ void main() {
     },
   );
 
+  test('without the activity wired, a plain run never works a track', () async {
+    await track();
+    final notifier = c.read(enrichCompleterProvider.notifier)
+      ..poll = const Duration(milliseconds: 10);
+    unawaited(notifier.start());
+    await until(() => state().running);
+    await Future<void>.delayed(const Duration(milliseconds: 100));
+    expect(r.chain.calls, 0);
+    notifier.cancel();
+    await until(() => !state().running);
+  });
+
+  test('«Completa» while the run is writing its line starts a visible run', () async {
+    user = UserActivity(); // idle
+    final gate = Completer<void>();
+    c = open(
+      extra: [
+        activityLogRepositoryProvider.overrideWithValue(_GatedLog(r.db, gate)),
+      ],
+    );
+    await track();
+    final notifier = completer();
+    final first = notifier.start();
+    await until(() => r.chain.calls == 1);
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+    expect(state().running, isTrue, reason: 'the service is done, the line is not');
+    await track();
+    final seen = <bool>[];
+    r.chain.during = () async =>
+        seen.add(state().running && state().manual);
+    final now = notifier.runNow();
+    gate.complete();
+    await first;
+    await now;
+    expect(r.chain.calls, 2, reason: 'the new track was worked');
+    expect(seen.last, isTrue, reason: 'by a run the Attività centre shows');
+  });
+
   test('nothing due: no run shows up', () async {
     await r.add(plain: 'a', synced: '[00:01.00]a', path: '/done.mp3');
     await completer().start();

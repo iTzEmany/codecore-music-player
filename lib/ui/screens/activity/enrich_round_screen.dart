@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../data/db/app_database.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/activity_log_providers.dart';
@@ -22,6 +23,17 @@ String enrichPartLabel(AppLocalizations l, EnrichPart p) => switch (p) {
   EnrichPart.curio => l.enrichPartCurio,
   EnrichPart.credits => l.enrichPartCredits,
 };
+
+/// The songs of a group in the order of the rows, each once (a song can have
+/// several parts).
+@visibleForTesting
+List<Track> uniqueRoundTracks(List<EnrichRoundRow> rows) {
+  final seen = <int>{};
+  return [
+    for (final r in rows)
+      if (seen.add(r.track.id)) r.track,
+  ];
+}
 
 /// The songs of one round of the background completion: those that got
 /// something and those that were asked in vain, each with the part.
@@ -52,31 +64,39 @@ class EnrichRoundScreen extends ConsumerWidget {
                   message: l.enrichRoundGone,
                 );
               }
-              final groups = [
-                (l.enrichRoundUpdated, round.updated),
-                (l.enrichRoundNone, round.none),
-              ];
-              return ListView(
-                children: [
-                  for (final (title, rows) in groups)
-                    if (rows.isNotEmpty) ...[
-                      SectionHeader(title),
-                      for (var i = 0; i < rows.length; i++)
-                        SizedBox(
-                          height: extent,
-                          child: LiveTrackRow(
-                            track: rows[i].track,
-                            compact: compact,
-                            subtitleSuffix: enrichPartLabel(l, rows[i].part),
-                            onTap: () => ctrl.playFromList(
-                              [for (final r in rows) r.track],
-                              i,
-                              context: const PlayContext(PlayContextKind.library),
-                            ),
-                          ),
-                        ),
-                    ],
+              // One flat list, so only the rows on screen are built.
+              final items = <Object>[
+                if (round.updated.isNotEmpty) ...[
+                  l.enrichRoundUpdated,
+                  ...round.updated,
                 ],
+                if (round.none.isNotEmpty) ...[l.enrichRoundNone, ...round.none],
+              ];
+              return ListView.builder(
+                itemCount: items.length,
+                itemBuilder: (context, i) {
+                  final item = items[i];
+                  if (item is String) return SectionHeader(item);
+                  final row = item as EnrichRoundRow;
+                  return SizedBox(
+                    height: extent,
+                    child: LiveTrackRow(
+                      track: row.track,
+                      compact: compact,
+                      subtitleSuffix: enrichPartLabel(l, row.part),
+                      onTap: () {
+                        final queue = uniqueRoundTracks(
+                          round.updated.contains(row) ? round.updated : round.none,
+                        );
+                        ctrl.playFromList(
+                          queue,
+                          queue.indexWhere((t) => t.id == row.track.id),
+                          context: const PlayContext(PlayContextKind.library),
+                        );
+                      },
+                    ),
+                  );
+                },
               );
             },
           ),

@@ -2,6 +2,7 @@ import 'dart:ui' show DisplayFeatureType;
 
 import '../screens/share/pairing_dialogs.dart';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -209,15 +210,21 @@ class AppShell extends ConsumerWidget {
     // Watched, not read: its busy listener only runs while it has a listener;
     // the value never changes, so nothing rebuilds.
     final activity = ref.watch(userActivityProvider);
-    return NotificationListener<ScrollNotification>(
-      onNotification: (n) {
-        // Only the user's own drag, not programmatic scrolls.
-        if (n is ScrollUpdateNotification && n.dragDetails != null) {
-          activity.touch();
-        }
-        return false;
+    return Listener(
+      // Mouse wheel and trackpad (desktop) scroll without a drag.
+      onPointerSignal: (e) {
+        if (e is PointerScrollEvent) activity.touch();
       },
-      child: content,
+      child: NotificationListener<ScrollNotification>(
+        onNotification: (n) {
+          // Only the user's own drag, not programmatic scrolls.
+          if (n is ScrollUpdateNotification && n.dragDetails != null) {
+            activity.touch();
+          }
+          return false;
+        },
+        child: content,
+      ),
     );
   }
 

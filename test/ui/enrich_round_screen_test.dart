@@ -4,8 +4,10 @@ import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/providers/activity_log_providers.dart';
 import 'package:codecore/providers/activity_providers.dart';
 import 'package:codecore/ui/screens/activity/activity_log_screen.dart';
+import 'package:codecore/services/online/enrich_parts.dart';
 import 'package:codecore/ui/screens/activity/enrich_round_screen.dart';
 import 'package:drift/drift.dart' show Value;
+import 'package:codecore/providers/enrich_completer_providers.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/app_harness.dart';
@@ -47,6 +49,18 @@ void main() {
     expect(find.text('Song 2'), findsOneWidget);
     expect(find.textContaining('Testo'), findsNWidgets(3));
     expect(find.textContaining('Curiosità'), findsNothing);
+    await h.dispose(tester);
+  });
+
+  testWidgets('a song with two parts is queued once', (tester) async {
+    final h = await Harness.create(tester, tracks: 2);
+    final tracks = await h.db.select(h.db.tracks).get();
+    final rows = <EnrichRoundRow>[
+      (part: EnrichPart.lyrics, track: tracks[0]),
+      (part: EnrichPart.curio, track: tracks[0]),
+      (part: EnrichPart.lyrics, track: tracks[1]),
+    ];
+    expect(uniqueRoundTracks(rows).map((t) => t.id), [tracks[0].id, tracks[1].id]);
     await h.dispose(tester);
   });
 
