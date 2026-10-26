@@ -33,6 +33,7 @@ class _Lrclib extends LrclibClient {
   _Lrclib(this.result, {this.error}) : super(_NoWeb());
   final LyricsResult? result;
   final Object? error;
+  int calls = 0;
   @override
   Future<LyricsResult?> find({
     required String title,
@@ -42,6 +43,7 @@ class _Lrclib extends LrclibClient {
     CancelToken? cancel,
     bool strict = false,
   }) async {
+    calls++;
     if (error != null) throw error!;
     return result;
   }
@@ -100,6 +102,23 @@ const _synced = LyricsResult(synced: '[00:01.000] a');
 const _plain = LyricsResult(plain: 'a');
 
 void main() {
+  test(
+    'LRCLIB answering 503 rests: the next track does not ask it again',
+    () async {
+      var t = DateTime(2026);
+      final lr = _Lrclib(null, error: const WebUnavailableException('u', 503));
+      final chain = LyricsChain(lrclib: lr, ovh: _Ovh(_plain), now: () => t);
+      final first = await chain.find(_track());
+      final second = await chain.find(_track());
+      expect(lr.calls, 1);
+      expect([first.source, second.source], ['lyricsovh', 'lyricsovh']);
+      expect(second.failed, isFalse); // a text was found
+      t = t.add(const Duration(minutes: 11));
+      await chain.find(_track());
+      expect(lr.calls, 2);
+    },
+  );
+
   test('LRCLIB has the synced text: the fallbacks are not asked', () async {
     final ne = _Ne(_synced), ovh = _Ovh(_plain);
     final r = await LyricsChain(
