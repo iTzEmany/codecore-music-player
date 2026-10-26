@@ -93,6 +93,11 @@ class EnrichCompleterNotifier extends Notifier<EnrichCompleterState> {
   /// flag listens to the activity list). Without it nothing waits.
   UserActivity? activity;
 
+  /// The Registro's `add`, set by [enrichCompleterStartProvider] for the same
+  /// reason (the Registro listens to the activity list). Without it a round
+  /// leaves no line.
+  Future<void> Function(LogEntry)? addLog;
+
   bool _warnedNoActivity = false;
 
   Future<void> _waitIdle() async {
@@ -143,7 +148,9 @@ class EnrichCompleterNotifier extends Notifier<EnrichCompleterState> {
         total: c.total,
       );
       final round = await _completer.run(now: now);
-      if (round.worked > 0) await _log(round, stopped: _halt, failed: round.failed);
+      if (round.worked > 0) {
+        await _log(round, stopped: _halt, failed: round.failed);
+      }
     } on Object catch (e, st) {
       AppLog.w('completion failed', e, st);
     } finally {
@@ -198,33 +205,38 @@ class EnrichCompleterNotifier extends Notifier<EnrichCompleterState> {
     required bool stopped,
     required bool failed,
   }) {
-    Set<int> ids(Map<EnrichPart, List<int>> m) => {for (final l in m.values) ...l};
+    Set<int> ids(Map<EnrichPart, List<int>> m) => {
+      for (final l in m.values) ...l,
+    };
     Map<String, List<int>> byPart(Map<EnrichPart, List<int>> m) => {
       for (final e in m.entries) e.key.name: e.value,
     };
-    return ref
-        .read(activityLogProvider.notifier)
-        .add(
-          LogEntry(
-            at: DateTime.now(),
-            item: ActivityItem(
-              kind: ActivityKind.enrichBackground,
-              key: 'enrichBackground-${DateTime.now().microsecondsSinceEpoch}',
-              name: null,
-              // Distinct tracks that got something, and tracks asked in vain
-              // for every part (one that got a part is not counted twice).
-              done: ids(round.updated).length,
-              total: ids(round.none).difference(ids(round.updated)).length,
-              running: false,
-              failed: failed,
-            ),
-            detail: {
-              if (stopped) 'stopped': true,
-              'updated': byPart(round.updated),
-              'none': byPart(round.none),
-            },
-          ),
-        );
+    final add = addLog;
+    if (add == null) {
+      AppLog.w('completion: no Registro wired, the round leaves no line');
+      return Future.value();
+    }
+    return add(
+      LogEntry(
+        at: DateTime.now(),
+        item: ActivityItem(
+          kind: ActivityKind.enrichBackground,
+          key: 'enrichBackground-${DateTime.now().microsecondsSinceEpoch}',
+          name: null,
+          // Distinct tracks that got something, and tracks asked in vain
+          // for every part (one that got a part is not counted twice).
+          done: ids(round.updated).length,
+          total: ids(round.none).difference(ids(round.updated)).length,
+          running: false,
+          failed: failed,
+        ),
+        detail: {
+          if (stopped) 'stopped': true,
+          'updated': byPart(round.updated),
+          'none': byPart(round.none),
+        },
+      ),
+    );
   }
 }
 
