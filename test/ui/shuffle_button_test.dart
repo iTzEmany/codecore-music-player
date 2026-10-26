@@ -27,7 +27,7 @@ void main() {
     'ShufflePill: accent when on, badge with Shuffle+, long press opens the sheet',
     (tester) async {
       final h = await Harness.create(tester, tracks: 2);
-      await h.pump(tester, Scaffold(body: ShufflePill(onPressed: () {})));
+      await h.pump(tester, Scaffold(body: ShufflePill(ids: const [])));
       final c = ProviderScope.containerOf(
         tester.element(find.byType(ShufflePill)),
       );
@@ -146,12 +146,13 @@ void main() {
   Future<List<ShuffleMode>> cycle(
     WidgetTester tester,
     ProviderContainer c,
-    int taps,
-  ) async {
+    int taps, {
+    Finder? button,
+  }) async {
     final modes = <ShuffleMode>[];
     for (var i = 0; i < taps; i++) {
       await tester.runAsync(() async {
-        await tester.tap(find.byType(IconButton));
+        await tester.tap(button ?? find.byType(IconButton));
         await Future<void>.delayed(const Duration(milliseconds: 100));
       });
       await tester.pump(const Duration(milliseconds: 100));
@@ -239,6 +240,74 @@ void main() {
     expect(await cycle(tester, c, 3), full);
     await h.dispose(tester);
   });
+
+  // D-137: the control judges the list it plays, not the queue of before.
+  Future<ProviderContainer> startWith(
+    WidgetTester tester,
+    Harness h,
+    Widget control,
+    List<int> queue,
+  ) async {
+    await h.pump(tester, Scaffold(body: control));
+    final c = ProviderScope.containerOf(tester.element(find.byType(Scaffold)));
+    c.read(shufflePlusConfigProvider);
+    await tester.runAsync(() => h.handler.playQueue(queue, 0));
+    return c;
+  }
+
+  testWidgets(
+    'the Casuale pill reaches Shuffle+ for a 6-track list while 3 tracks play',
+    (tester) async {
+      final h = await Harness.create(tester, tracks: 6);
+      final all = await localIds(tester, h);
+      final c = await startWith(
+        tester,
+        h,
+        ShufflePill(ids: all),
+        all.take(3).toList(),
+      );
+      expect(
+        await cycle(tester, c, 3, button: find.byType(OutlinedButton)),
+        full,
+      );
+      await h.dispose(tester);
+    },
+  );
+
+  testWidgets(
+    'the Casuale pill of a 4-track list skips Shuffle+ even if 6 play',
+    (tester) async {
+      final h = await Harness.create(tester, tracks: 6);
+      final all = await localIds(tester, h);
+      final c = await startWith(
+        tester,
+        h,
+        ShufflePill(ids: all.take(4).toList()),
+        all,
+      );
+      expect(
+        await cycle(tester, c, 3, button: find.byType(OutlinedButton)),
+        blocked,
+      );
+      await h.dispose(tester);
+    },
+  );
+
+  testWidgets(
+    'the Home shuffle button judges the whole library, not the queue',
+    (tester) async {
+      final h = await Harness.create(tester, tracks: 6);
+      final all = await localIds(tester, h);
+      final c = await startWith(
+        tester,
+        h,
+        ShuffleModeButton(listIds: () async => all),
+        all.take(3).toList(),
+      );
+      expect(await cycle(tester, c, 3), full);
+      await h.dispose(tester);
+    },
+  );
 
   testWidgets('the reason is shown once per session', (tester) async {
     final h = await Harness.create(tester, tracks: 6);

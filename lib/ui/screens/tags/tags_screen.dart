@@ -102,7 +102,7 @@ class TagTracksScreen extends ConsumerWidget {
         onPlay: tracks.isEmpty
             ? null
             : () => ctrl.playAll(tracks, context: ctx),
-        onShuffle: tracks.isEmpty ? null : ctrl.toggleShuffle,
+        shuffleIds: tracks.isEmpty ? null : [for (final t in tracks) t.id],
         slivers: [
           if (tracks.isEmpty)
             SliverToBoxAdapter(

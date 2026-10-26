@@ -20,7 +20,7 @@ class CollectionScaffold extends StatefulWidget {
     this.meta,
     this.menu,
     this.onPlay,
-    this.onShuffle,
+    this.shuffleIds,
     this.barActions = const [],
     this.selectionBar,
   });
@@ -40,7 +40,10 @@ class CollectionScaffold extends StatefulWidget {
   final Widget? subtitle;
   final String? meta;
   final Widget? menu;
-  final VoidCallback? onPlay, onShuffle;
+  final VoidCallback? onPlay;
+
+  /// The ids the «Casuale» pill cycles Shuffle+ for; null: no pill.
+  final List<int>? shuffleIds;
   final List<Widget> barActions;
 
   /// Laid over the pinned bar while tracks are picked (a `SelectionBarSlot`).
@@ -74,7 +77,7 @@ class _CollectionScaffoldState extends State<CollectionScaffold> {
     final cc = context.cc;
     final actions = [
       if (widget.onPlay != null) PlayPill(onPressed: widget.onPlay),
-      if (widget.onShuffle != null) ShufflePill(onPressed: widget.onShuffle),
+      if (widget.shuffleIds != null) ShufflePill(ids: widget.shuffleIds!),
       ?widget.menu,
     ];
     return Scaffold(

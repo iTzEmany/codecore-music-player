@@ -45,14 +45,12 @@ class _AllTracksHeader extends StatelessWidget {
     required this.shown,
     required this.wide,
     required this.onPlay,
-    required this.onShuffle,
   });
 
   final bool loaded;
   final List<Track> shown;
   final bool wide;
   final VoidCallback onPlay;
-  final VoidCallback onShuffle;
 
   @override
   Widget build(BuildContext context) {
@@ -97,7 +95,7 @@ class _AllTracksHeader extends StatelessWidget {
                         PlayPill(
                           onPressed: onPlay,
                         ),
-                        ShufflePill(onPressed: onShuffle),
+                        ShufflePill(ids: [for (final t in shown) t.id]),
                       ],
                     ),
                   ],
@@ -221,7 +219,6 @@ class _AllTracksScreenState extends ConsumerState<AllTracksScreen> {
               shown: shown,
               wide: wide,
               onPlay: () => ctrl.playAll(shown, context: ctx),
-              onShuffle: ctrl.toggleShuffle,
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(

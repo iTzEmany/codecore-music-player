@@ -16,16 +16,36 @@ bool _explained = false;
 @visibleForTesting
 void resetShuffleExplained() => _explained = false;
 
+/// A tap of a shuffle control: the next state for the list it plays ([ids],
+/// null: the current queue; D-137), with the once-per-session «why not» note.
+Future<void> _cycleWithNotice(
+  BuildContext context,
+  WidgetRef ref,
+  Future<List<int>> Function()? ids,
+) async {
+  final l = context.l10n;
+  final messenger = ScaffoldMessenger.of(context);
+  final block = await ref
+      .read(playerControllerProvider)
+      .cycleShuffle(ids: await ids?.call());
+  if (block == null || _explained || !context.mounted) return;
+  _explained = true;
+  messenger.showSnackBar(SnackBar(content: Text(shufflePlusBlockText(l, block))));
+}
+
 /// The three-state shuffle button of the players: off, shuffle, Shuffle+
 /// (shuffle with a «+»). Tap goes to the next state, long press opens the
 /// Shuffle+ settings.
 class ShuffleModeButton extends ConsumerWidget {
-  const ShuffleModeButton({super.key, this.size = 28, this.dot = true});
+  const ShuffleModeButton({super.key, this.size = 28, this.dot = true, this.listIds});
 
   final double size;
 
   /// The dot under the icon (Now Playing); the desktop bar goes without.
   final bool dot;
+
+  /// The ids of the list the button's Play plays (Home); null: the queue.
+  final Future<List<int>> Function()? listIds;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -48,16 +68,7 @@ class ShuffleModeButton extends ConsumerWidget {
         triggerMode: TooltipTriggerMode.manual,
         message: message,
         child: IconButton(
-          onPressed: () async {
-            final block = await ref
-                .read(playerControllerProvider)
-                .cycleShuffle();
-            if (block == null || _explained || !context.mounted) return;
-            _explained = true;
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(shufflePlusBlockText(l, block))),
-            );
-          },
+          onPressed: () => _cycleWithNotice(context, ref, listIds),
           // The tooltip is hover-only, so the button needs its own label.
           icon: Semantics(
             label: message,
@@ -102,12 +113,13 @@ class ShuffleModeButton extends ConsumerWidget {
   }
 }
 
-/// «Casuale» word button of the collection headers: accent while shuffle is
-/// on, with the «+» badge in Shuffle+; long press opens the Shuffle+ sheet.
+/// «Casuale» word button of the collection headers: tap cycles the mode for
+/// the list [ids] (it never starts playback), accent while shuffle is on, with
+/// the «+» badge in Shuffle+; long press opens the Shuffle+ sheet.
 class ShufflePill extends ConsumerWidget {
-  const ShufflePill({super.key, required this.onPressed});
+  const ShufflePill({super.key, required this.ids});
 
-  final VoidCallback? onPressed;
+  final List<int> ids;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -125,7 +137,7 @@ class ShufflePill extends ConsumerWidget {
         child: GestureDetector(
           onLongPress: () => showShufflePlusSheet(context),
           child: OutlinedButton.icon(
-            onPressed: onPressed,
+            onPressed: () => _cycleWithNotice(context, ref, () async => ids),
             style: OutlinedButton.styleFrom(foregroundColor: color),
             icon: Stack(
               clipBehavior: Clip.none,
