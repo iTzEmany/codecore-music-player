@@ -49,12 +49,13 @@ class CoverOps {
 
   /// Returns false when nothing was saved (empty or too large).
   Future<bool> setTrackCover(int trackId, List<int> bytes, String? mime) async {
+    final before = await _tracks.getById(trackId);
+    if (before == null) return false;
     final key = await _save('track', trackId, bytes, mime);
     if (key == null) return false;
-    final before = await _tracks.getById(trackId);
-    final old = (before?.coverSource ?? 0) > 0 ? before?.coverKey : null;
+    final old = before.coverSource > 0 ? before.coverKey : null;
     await _tracks.setManualCover(trackId, key);
-    await _drop([old], [before!.albumKey]);
+    await _drop([old], [before.albumKey]);
     return true;
   }
 

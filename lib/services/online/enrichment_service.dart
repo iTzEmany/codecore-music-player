@@ -809,6 +809,7 @@ class EnrichmentService {
         enrichStatus: Value(found ? 1 : 2),
       ),
     );
+    await tracks.settleMovedCover(t, key);
     return (found, key);
   }
 

@@ -103,14 +103,47 @@ void main() {
     expect((await row(1)).coverSource, 0);
   });
 
-  test('clearing the cache keeps the hand-picked covers and removes the automatic ones', () async {
+  test('clearing the cache keeps hand-picked covers, thumbnails and playlist covers, and forces a rescan', () async {
     await ops.setTrackCover((await row(1)).id, [5, 5], null);
     final mine = (await row(1)).coverKey!;
+    await ops.setAlbumCover('alb', [6], null);
+    final pick = (await row(2)).coverKey!;
+    final thumb = File(p.join(store.dir.path, CoverStore.thumbName(pick)))..writeAsBytesSync([0]);
+    final pid = await db.into(db.playlists).insert(PlaylistsCompanion.insert(name: 'pl', createdAt: 1));
+    await ops.setPlaylistCover(pid, [3], null);
+    final pk = (await (db.select(db.playlists)..where((q) => q.id.equals(pid))).getSingle()).coverKey!;
     await ops.clearCache();
-    expect(store.fileFor(mine), isNotNull);
+
+    expect([store.fileFor(mine), store.fileFor(pick), store.fileFor(pk)], everyElement(isNotNull));
+    expect(thumb.existsSync(), isTrue);
     expect(store.fileFor(original), isNull);
-    final t = await row(1);
+    final t = await row(1), a = await row(2);
     expect([t.coverKey, t.coverSource], [mine, 2]);
-    expect((await row(2)).coverKey, isNull);
+    expect([a.coverKey, a.coverSource], [pick, 1]);
+    expect((await db.select(db.tracks).get()).map((r) => r.mtimeMs), everyElement(0));
+    expect((await (db.select(db.playlists)..where((q) => q.id.equals(pid))).getSingle()).coverKey, pk);
+  });
+
+  test('a second album pick deletes the first album pick file', () async {
+    await ops.setAlbumCover('alb', [1], null);
+    final first = (await row(1)).coverKey!;
+    await ops.setAlbumCover('alb', [2], null);
+    expect(store.fileFor(first), isNull);
+    expect(store.fileFor(original), isNotNull);
+  });
+
+  test('a key still used by another row survives a new pick', () async {
+    final id = (await row(1)).id;
+    await ops.setTrackCover(id, [1], null);
+    final shared = (await row(1)).coverKey!;
+    await tracks.setManualCover((await row(2)).id, shared);
+    await ops.setTrackCover(id, [2], null);
+    expect(store.fileFor(shared), isNotNull);
+  });
+
+  test('a cover for a track that does not exist is refused without leaving a file', () async {
+    final before = store.dir.listSync().length;
+    expect(await ops.setTrackCover(9999, [1, 2], null), isFalse);
+    expect(store.dir.listSync().length, before);
   });
 }

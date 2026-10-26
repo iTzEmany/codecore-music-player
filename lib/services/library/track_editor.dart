@@ -185,5 +185,6 @@ class TrackEditor {
         userEdited: const Value(false),
       ),
     );
+    await TrackRepository(_db).settleMovedCover(track, key);
   }
 }

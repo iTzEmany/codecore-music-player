@@ -201,10 +201,11 @@ void main() {
   });
 
   test('a hand-picked cover of the shadow row stays as it is after the promotion', () async {
-    await tracks.setManualCover(shadowId, 'manual:track:1:1');
+    final mine = (await covers.saveFromBytes('manual:track:$shadowId:1', [4, 4], 'image/jpeg'))!;
+    await tracks.setManualCover(shadowId, mine);
     await promoter.promote(_r);
     final row = (await tracks.getById(shadowId))!;
-    expect([row.coverKey, row.coverSource], ['manual:track:1:1', 2]);
+    expect([row.coverKey, row.coverSource], [mine, 2]);
     expect(covers.fileFor(CoverStore.coverKeyFor('artist|album')), isNull);
   });
 
