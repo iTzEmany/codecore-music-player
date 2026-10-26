@@ -108,6 +108,20 @@ void main() {
     expect(s.topAlbums.first.name, 'Discovery');
   });
 
+  test('album and artist covers: hand-picked album cover wins, a single track cover is ignored', () async {
+    await db.customStatement(
+        "UPDATE tracks SET cover_key = 'a', cover_source = 2 WHERE title = 'Digital Love'");
+    await listen('One More Time', _ms(2026, 10, 2));
+    await listen('Digital Love', _ms(2026, 10, 3));
+    var s = await stats.period(StatsPeriod.month(2026, 10));
+    expect(s.topAlbums.first.coverKey, 'c1');
+    expect(s.topArtists.first.coverKey, 'c1');
+    await db.customStatement(
+        "UPDATE tracks SET cover_key = 'z', cover_source = 1 WHERE title = 'Digital Love'");
+    s = await stats.period(StatsPeriod.month(2026, 10));
+    expect(s.topAlbums.first.coverKey, 'z');
+  });
+
   test('the bars: one per day of the month, one per month of the year, same total', () async {
     await listen('Futura', _ms(2026, 10, 1, 0, 0, 0), ms: 1000);
     await listen('Futura', _ms(2026, 10, 15), ms: 2000);

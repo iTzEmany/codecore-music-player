@@ -76,7 +76,7 @@ SELECT album_key,
   COUNT(*) AS track_count,
   SUM(duration_ms) AS duration_ms,
   MAX(year) AS year,
-  MIN(cover_key) AS cover_key,
+  COALESCE(MIN(CASE WHEN cover_source = 1 THEN cover_key END), MIN(CASE WHEN cover_source = 0 THEN cover_key END), MIN(cover_key)) AS cover_key,
   MAX(last_played_at) AS last_played,
   MAX(added_at) AS added,
   SUM(play_count) AS plays,
@@ -146,7 +146,7 @@ class LibraryQueries {
         .customSelect(
           '''
 WITH cov AS (
-  SELECT lower(trim(COALESCE(artist, ''))) AS k, cover_key, COUNT(*) AS n
+  SELECT lower(trim(COALESCE(artist, ''))) AS k, cover_key, SUM(cover_source < 2) AS n
   FROM tracks WHERE missing = 0 AND ignored = 0 AND kind = 0 AND cover_key IS NOT NULL GROUP BY k, cover_key
 ),
 best AS (
