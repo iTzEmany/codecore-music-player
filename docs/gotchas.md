@@ -28,3 +28,5 @@
 - **`perf_device.py` non torna in cima alle liste fra uno scenario e l'altro**: la Libreria tiene lo scroll, e uno scenario che tocca una riga in alto usa `dev.top()` prima di `dev.tap`.
 - **`build/perf_library/` sparisce con la pulizia**: rigenerala con `scripts/perf_library.py` (35 s) prima di `perf_device.py`, altrimenti esce subito con «manca la libreria di prova».
 - **`test/providers/shuffle_plus_test.dart` («a new list drops the pool») è fallito una volta in CI senza modifiche vicine**: verde al rilancio e in locale. Un rilancio con `gh run rerun <id> --failed`; se ricapita, va reso deterministico.
+- **`CoverStore.saveFromBytes` salva sotto `sha1(chiave)`**: la chiave di una copertina a mano (`manual:…`) non inizia con `manual:` nel database. Chi la cancella decide da `cover_source > 0` e dal conteggio delle righe che la usano, mai dal nome; l'originale `sha1(albumKey)` non si cancella mai (fase 54).
+- **Ogni scrittura che cambia `album_key` deve passare da `TrackRepository.settleMovedCover`**: altrimenti una riga con copertina d'album a mano (`cover_source = 1`) la porta nell'album d'arrivo (fase 54).

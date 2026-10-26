@@ -1,6 +1,7 @@
-# Handoff — 2026-10-26 (dopo la fase 53)
+# Handoff — 2026-10-26 (dopo la fase 54: feature «Arricchimento completo» chiusa nel codice)
 
 ## Stato
+- **Fase 54 (copertina a mano)** in una PR: `CoverOps` (brano, album, playlist; «Ripristina copertina originale»), selettore unico `cover_picker_sheet.dart` (dispositivo, libreria, proposte Deezer e iTunes con la misura, cercate solo all'apertura, al massimo 6 per fonte), voci nei menu di brano e album, copertina d'album letta da `cover_source`, nessuno scrittore tocca una copertina a mano (scansione, arricchimento, ricezione, promozione, duplicati, spostamenti d'album, «Svuota cache»), nel backup (unione solo su brani senza copertina a mano). Decisioni D-135 (Motorola all'utente), D-136 (album o artista in cui solo i brani a copertina del brano hanno una copertina → una di quelle).
 - **Fase 53 (completamento e Registro) in #32**, più una PR di correzioni dalla scheggia di fase.
   - Registro nel database per 30 giorni con l'esito vero di ogni attività.
   - `UserActivity`: scroll, rotellina, testo cercato, download e import mettono in pausa il lavoro in sottofondo per 5 s.
@@ -18,6 +19,7 @@
 - Ogni fase ha avuto review di architettura (Opus) e la scheggia in modalità passo; i bug trovati sono corretti con il loro test. Scheggia in modalità fase sul Mi A3 per 45, 46 e un giro unico 47 (solo online, Jam vietata da D-91)–49: nomi artista troncati e crediti scaricati tenuti interi corretti nella PR di chiusura.
 
 ## Tocca a te
+- **54.9 prove a mano** (dettagli in `docs/fase-54-copertina-a-mano.md`): Linux e Mi A3 (proposte online con «Metadati da Deezer» spento, brano da file e da un altro album, playlist da un suo brano, scansione e «Arricchisci» che non la cambiano, «Ripristina», «Scrivi i tag» senza la copertina a mano nel file, backup Linux → unione sul Mi A3); Motorola (D-135): prima il backup completo dall'app, poi `adb -s ZY22HKD85K install -r <apk>`, copertine uguali a prima, una copertina a mano che resiste a una scansione.
 - **53.10 prove a mano** (dettagli in `docs/fase-53-completamento-e-registro.md`).
   - Linux: pausa con la rotellina e ripresa dopo 5 s.
   - Linux e Mi A3: righe di podcast e radio nel Registro, completamento con titoli veri (gruppo «Aggiornati» nell'elenco del giro).
@@ -50,11 +52,7 @@ Leggi docs/handoff.md, docs/gotchas.md e docs/PROGRESS.md. <obiettivo scelto fra
 ```
 
 ## Prossimi obiettivi
-0. **(Consigliato) Fase 54 dell'«Arricchimento completo»** (copertina a mano). Prima le prove 50.11, 51.9, 52.8, 53.10. Prompt:
-   ```
-   /obiettivo fase 54 (docs/fase-54-copertina-a-mano.md): una PR. Motorola secondo D-125/D-126: chiedimi il backup prima di installare.
-   ```
-   Poi il lavoro 3 di `docs/prossimi-lavori.md` (design).
+0. **(Consigliato) Prove a mano 50.11–54.9**, poi le tre scelte «Da decidere» della scheggia 53, poi il lavoro 3 di `docs/prossimi-lavori.md` (design: Jam, Ricerca, menu ⋮, Home) con `/refactor`.
 1. **Debito noto dello streaming** (in fondo a `docs/fase-47-jam-online.md`): tre meccanismi «online → libreria», `DownloadsNotifier` grande, prefetch che ricomincia da capo, file auto-scaricato dall'uscita Jam non fissato in cache, «Scarica» da una riga ombra senza messaggio; `gapless window edit failed` (IllegalArgumentException) al cambio di shuffle su una coda di 2 brani; `discovery: socket error` ogni 2 s senza rete.
 2. **Picchi di build al cambio di brano** (Swipe mini player, Apertura player): `cacheWidth`/`gaplessPlayback` in `track_art.dart`; misura prima e dopo con `--only`.
 3. **Memoria e avvio:** PSS ~213–270 MB contro 210 MB; misurare prima con la libreria di prova piccola.
