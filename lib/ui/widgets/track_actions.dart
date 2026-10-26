@@ -1,5 +1,7 @@
 import '../../services/audio/online_entries.dart';
 import 'cc_sheet.dart';
+import 'cover_picker_sheet.dart';
+import '../../providers/cover_ops.dart';
 import 'track_artists_sheet.dart';
 import '../../services/online/artist_link_resolver.dart';
 
@@ -288,6 +290,23 @@ List<TrackActionGroup> trackActions(
         ),
     ]),
     TrackActionGroup(l.groupEdit, [
+      if (track.kind == 0) ...[
+        TrackAction(
+          Icons.image_outlined,
+          l.coverChange,
+          () => showCoverPicker(
+            outer,
+            save: (ops, bytes, mime) => ops.setTrackCover(track.id, bytes, mime),
+            online: (track.album ?? '').trim().isEmpty ? null : (album: track.album!, artist: track.artist ?? ''),
+          ),
+        ),
+        if (track.coverSource > 0)
+          TrackAction(
+            Icons.restore_rounded,
+            l.coverRestoreOriginal,
+            () => ref.read(coverOpsProvider).restoreTrackCover(track.id),
+          ),
+      ],
       TrackAction(
         Icons.edit_outlined,
         l.editInfo,

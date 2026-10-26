@@ -2,6 +2,7 @@ import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/ui/screens/playlists/playlist_detail_screen.dart';
 import 'package:codecore/ui/screens/playlists/playlists_screen.dart';
 import 'package:codecore/ui/screens/settings/settings_screen.dart';
+import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -84,6 +85,32 @@ void main() {
     await tester.pumpAndSettle();
     final left = await tester.runAsync(() => h.db.select(h.db.playlists).get());
     expect(left, hasLength(1));
+    await h.dispose(tester);
+  });
+
+  testWidgets('«Cambia copertina» of a playlist opens the picker with the covers of its tracks, no online', (tester) async {
+    final h = await Harness.create(tester, tracks: 2);
+    await tester.runAsync(() async {
+      final tracks = await h.db.select(h.db.tracks).get();
+      await (h.db.update(h.db.tracks)..where((t) => t.id.equals(tracks[0].id)))
+          .write(const TracksCompanion(coverKey: Value('cov-a')));
+      final id = await h.db.into(h.db.playlists).insert(PlaylistsCompanion.insert(name: 'Rock', createdAt: 1));
+      for (var i = 0; i < tracks.length; i++) {
+        await h.db.into(h.db.playlistTracks).insert(
+            PlaylistTracksCompanion.insert(playlistId: id, trackId: tracks[i].id, position: i));
+      }
+    });
+    final id = (await tester.runAsync(() => h.db.select(h.db.playlists).get()))!.single.id;
+    await h.pump(tester, PlaylistDetailScreen(playlist: Playlist(id: id, name: 'Rock', createdAt: 1, updatedAt: 1)));
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 150)));
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.tap(find.byWidgetPredicate((w) => w is PopupMenuButton));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Cambia copertina'));
+    await tester.pumpAndSettle();
+    expect(find.text('Dal dispositivo'), findsOneWidget);
+    expect(find.byKey(const ValueKey('library-cover-cov-a')), findsOneWidget);
+    expect(find.text('Online'), findsNothing);
     await h.dispose(tester);
   });
 }

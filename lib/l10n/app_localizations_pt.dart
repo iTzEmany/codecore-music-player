@@ -5556,4 +5556,24 @@ class AppLocalizationsPt extends AppLocalizations {
     );
     return 'Enriquecimento: $_temp0, $none sem resultado';
   }
+
+  @override
+  String get coverChange => 'Alterar capa';
+
+  @override
+  String get coverRestoreOriginal => 'Restaurar capa original';
+
+  @override
+  String get coverSourceDevice => 'Do dispositivo';
+
+  @override
+  String get coverSourceLibrary => 'Da biblioteca';
+
+  @override
+  String get coverSourceOnline => 'Online';
+
+  @override
+  String coverSizePx(int w, int h) {
+    return '$w × $h';
+  }
 }

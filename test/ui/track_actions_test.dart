@@ -269,6 +269,26 @@ void main() {
     await h.dispose(tester);
   });
 
+  testWidgets('«Cambia copertina» is in every library menu, «Ripristina» only with a hand-picked cover, never online', (tester) async {
+    var h = await openSheet(tester, (t) => t);
+    expect(find.text('Cambia copertina'), findsOneWidget);
+    expect(find.text('Ripristina copertina originale'), findsNothing);
+    await h.dispose(tester);
+
+    h = await openSheet(tester, (t) => t.copyWith(coverSource: 2));
+    expect(find.text('Ripristina copertina originale'), findsOneWidget);
+    await h.dispose(tester);
+
+    h = await openSheet(tester, (t) => t.copyWith(id: -5, coverSource: 2));
+    expect(find.text('Cambia copertina'), findsNothing);
+    expect(find.text('Ripristina copertina originale'), findsNothing);
+    await h.dispose(tester);
+
+    h = await openSheet(tester, (t) => t.copyWith(kind: kStreamKind, path: 'stream:youtube:abc'));
+    expect(find.text('Cambia copertina'), findsNothing);
+    await h.dispose(tester);
+  });
+
   testWidgets('«Scarica»: in the menu of a streamed track, not of a local one', (tester) async {
     var h = await openSheet(tester, (t) => t);
     expect(find.text('Scarica'), findsNothing);

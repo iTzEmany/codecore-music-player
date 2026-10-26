@@ -1,8 +1,6 @@
 import '../../widgets/cc_sheet.dart';
+import '../../widgets/cover_picker_sheet.dart';
 
-import 'dart:io';
-
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
 import '../../widgets/prompt_name.dart';
@@ -13,9 +11,7 @@ import '../../../data/db/app_database.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/database_providers.dart';
 import '../../../providers/playlist_ops.dart';
-import '../../../providers/library_providers.dart';
 import '../../../providers/player_providers.dart';
-import '../../../services/covers/cover_store.dart';
 import '../../../providers/selection_providers.dart';
 import '../../../providers/settings_providers.dart';
 import '../../theme/app_theme.dart';
@@ -35,7 +31,6 @@ import '../library/album_detail_screen.dart' show collectionMeta;
 import 'add_tracks_screen.dart';
 import 'export_dialog.dart';
 import '../../widgets/motion.dart';
-import '../../widgets/show_msg.dart';
 
 class PlaylistDetailScreen extends ConsumerStatefulWidget {
   const PlaylistDetailScreen({super.key, required this.playlist});
@@ -50,35 +45,6 @@ class PlaylistDetailScreen extends ConsumerStatefulWidget {
 class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
   late String _name = widget.playlist.name;
   bool _editing = false;
-
-  Future<void> _pickCover(int id) async {
-    final l = context.l10n;
-    final res = await FilePicker.pickFiles(type: FileType.image);
-    final path = res.isEmpty ? null : res.first.path;
-    if (path == null) return;
-    final bytes = await File(path).readAsBytes();
-    if (bytes.length > CoverStore.maxBytes) {
-      if (mounted) showMsg(context, l.coverTooLarge);
-      return;
-    }
-    final store = ref.read(coverStoreProvider);
-    // A new key per pick, so the image cache never shows the old picture.
-    final key = await store.saveFromBytes(
-      'playlist:$id:${DateTime.now().microsecondsSinceEpoch}',
-      bytes,
-      path.toLowerCase().endsWith('.png') ? 'image/png' : 'image/jpeg',
-    );
-    if (key == null) return;
-    final old = ref
-        .read(playlistsProvider)
-        .value
-        ?.where((p) => p.playlist.id == id)
-        .firstOrNull
-        ?.playlist
-        .coverKey;
-    await ref.read(playlistOpsProvider).setCover(id, key);
-    if (old != null) await store.fileFor(old)?.delete();
-  }
 
   Future<void> _onAction(
     _PlaylistAction v,
@@ -96,7 +62,11 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
       case _PlaylistAction.add:
         ShellNav.open<void>(context, AddTracksScreen(playlistId: id));
       case _PlaylistAction.cover:
-        await _pickCover(id);
+        await showCoverPicker(
+          context,
+          save: (ops, bytes, mime) => ops.setPlaylistCover(id, bytes, mime),
+          libraryKeys: {for (final t in tracks) ?t.coverKey}.toList(),
+        );
       case _PlaylistAction.clearCover:
         await ops.setCover(id, null);
       case _PlaylistAction.export:

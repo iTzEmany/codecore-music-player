@@ -3256,5 +3256,21 @@
         "type": "int"
       }
     }
+  },
+  "coverChange": "Changer la pochette",
+  "coverRestoreOriginal": "Rétablir la pochette d'origine",
+  "coverSourceDevice": "Depuis l'appareil",
+  "coverSourceLibrary": "Depuis la bibliothèque",
+  "coverSourceOnline": "En ligne",
+  "coverSizePx": "{w} × {h}",
+  "@coverSizePx": {
+    "placeholders": {
+      "w": {
+        "type": "int"
+      },
+      "h": {
+        "type": "int"
+      }
+    }
   }
 }

@@ -1,5 +1,11 @@
 import 'package:codecore/ui/screens/library/album_detail_screen.dart';
 import 'package:codecore/data/repositories/library_queries.dart';
+import 'package:codecore/data/repositories/track_repository.dart';
+import 'dart:io';
+
+import 'package:codecore/ui/widgets/cover_image.dart';
+import 'package:drift/drift.dart' show Value;
+import 'package:codecore/data/db/app_database.dart' show Track, TracksCompanion;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -33,6 +39,100 @@ void main() {
     // Two tracks of 3:05 in album 0.
     expect(find.text('3:05'), findsNWidgets(2));
     expect(tester.takeException(), isNull);
+    await h.dispose(tester);
+  });
+
+  testWidgets('the album menu has «Cambia copertina»; «Ripristina» appears once a track has a hand-picked album cover',
+      (tester) async {
+    final h = await Harness.create(tester, tracks: 4);
+    await h.pump(
+      tester,
+      const AlbumDetailScreen(
+        album: AlbumSummary(
+          albumKey: 'artist|album 0',
+          title: 'Album 0',
+          artist: 'Artist',
+          variousArtists: false,
+          trackCount: 2,
+          durationMs: 370000,
+          year: 2019,
+          coverKey: null,
+        ),
+      ),
+    );
+    Future<void> settle() async {
+      await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 150)));
+      await tester.pump(const Duration(milliseconds: 300));
+      await tester.pump(const Duration(milliseconds: 300));
+    }
+
+    await settle();
+    await tester.tap(find.byTooltip('Altre azioni'));
+    await tester.pumpAndSettle();
+    expect(find.text('Cambia copertina'), findsOneWidget);
+    expect(find.text('Ripristina copertina originale'), findsNothing);
+    await tester.tapAt(const Offset(5, 5));
+    await tester.pumpAndSettle();
+
+    await tester.runAsync(() => TrackRepository(h.db).setManualAlbumCover('artist|album 0', 'manual-key'));
+    await settle();
+    await tester.tap(find.byTooltip('Altre azioni'));
+    await tester.pumpAndSettle();
+    expect(find.text('Ripristina copertina originale'), findsOneWidget);
+    await h.dispose(tester);
+  });
+
+  testWidgets('picking a library cover gives the album a new cover key on screen, cover_source 1', (tester) async {
+    final dir = (await tester.runAsync(Directory.systemTemp.createTemp))!;
+    addTearDown(() => dir.deleteSync(recursive: true));
+    await tester.runAsync(() => File('${dir.path}/libkey.jpg').writeAsBytes([1, 2, 3]));
+    final h = await Harness.create(tester, tracks: 4);
+    h.coversDir = dir;
+    // Album 1 has a cover; album 0 (the one on screen) has none.
+    await tester.runAsync(() => (h.db.update(h.db.tracks)..where((t) => t.albumKey.equals('artist|album 1')))
+        .write(const TracksCompanion(coverKey: Value('libkey'))));
+    await h.pump(
+      tester,
+      const AlbumDetailScreen(
+        album: AlbumSummary(
+          albumKey: 'artist|album 0',
+          title: 'Album 0',
+          artist: 'Artist',
+          variousArtists: false,
+          trackCount: 2,
+          durationMs: 370000,
+          year: 2019,
+          coverKey: null,
+        ),
+      ),
+    );
+    Future<void> settle() async {
+      for (var i = 0; i < 3; i++) {
+        await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 100)));
+        await tester.pump(const Duration(milliseconds: 300));
+      }
+    }
+
+    await settle();
+    await tester.tap(find.byTooltip('Altre azioni'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Cambia copertina'));
+    await settle();
+    await tester.tap(find.byKey(const ValueKey('library-cover-libkey')));
+    // Several rounds: each file and DB step needs the real loop, then a pump.
+    Future<List<Track>> album0() async => (await tester.runAsync(() => h.db.select(h.db.tracks).get()))!
+        .where((t) => t.albumKey == 'artist|album 0')
+        .toList();
+    for (var i = 0; i < 20 && (await album0()).any((t) => t.coverSource != 1); i++) {
+      await settle();
+    }
+    final rows = await album0();
+    expect(rows.map((t) => t.coverSource), everyElement(1));
+    final newKey = rows.first.coverKey;
+    expect(newKey, isNot(anyOf(isNull, 'libkey')));
+    final covers = tester.widgetList<CoverImage>(find.byType(CoverImage)).toList()
+      ..sort((a, b) => b.size.compareTo(a.size));
+    expect(covers.first.coverKey, newKey, reason: 'the header follows the new key');
     await h.dispose(tester);
   });
 }

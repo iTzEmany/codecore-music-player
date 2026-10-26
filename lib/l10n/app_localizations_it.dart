@@ -5548,4 +5548,24 @@ class AppLocalizationsIt extends AppLocalizations {
     );
     return 'Arricchimento: $_temp0, $none senza risultato';
   }
+
+  @override
+  String get coverChange => 'Cambia copertina';
+
+  @override
+  String get coverRestoreOriginal => 'Ripristina copertina originale';
+
+  @override
+  String get coverSourceDevice => 'Dal dispositivo';
+
+  @override
+  String get coverSourceLibrary => 'Dalla libreria';
+
+  @override
+  String get coverSourceOnline => 'Online';
+
+  @override
+  String coverSizePx(int w, int h) {
+    return '$w × $h';
+  }
 }

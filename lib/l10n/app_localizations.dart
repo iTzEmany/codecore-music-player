@@ -8796,6 +8796,42 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Arricchimento: {done, plural, one{1 brano completato} other{{done} brani completati}}, {none} senza risultato'**
   String logEnrichRound(int done, int none);
+
+  /// No description provided for @coverChange.
+  ///
+  /// In it, this message translates to:
+  /// **'Cambia copertina'**
+  String get coverChange;
+
+  /// No description provided for @coverRestoreOriginal.
+  ///
+  /// In it, this message translates to:
+  /// **'Ripristina copertina originale'**
+  String get coverRestoreOriginal;
+
+  /// No description provided for @coverSourceDevice.
+  ///
+  /// In it, this message translates to:
+  /// **'Dal dispositivo'**
+  String get coverSourceDevice;
+
+  /// No description provided for @coverSourceLibrary.
+  ///
+  /// In it, this message translates to:
+  /// **'Dalla libreria'**
+  String get coverSourceLibrary;
+
+  /// No description provided for @coverSourceOnline.
+  ///
+  /// In it, this message translates to:
+  /// **'Online'**
+  String get coverSourceOnline;
+
+  /// No description provided for @coverSizePx.
+  ///
+  /// In it, this message translates to:
+  /// **'{w} × {h}'**
+  String coverSizePx(int w, int h);
 }
 
 class _AppLocalizationsDelegate

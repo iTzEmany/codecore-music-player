@@ -3558,5 +3558,21 @@
         "type": "int"
       }
     }
+  },
+  "coverChange": "Cambia copertina",
+  "coverRestoreOriginal": "Ripristina copertina originale",
+  "coverSourceDevice": "Dal dispositivo",
+  "coverSourceLibrary": "Dalla libreria",
+  "coverSourceOnline": "Online",
+  "coverSizePx": "{w} × {h}",
+  "@coverSizePx": {
+    "placeholders": {
+      "w": {
+        "type": "int"
+      },
+      "h": {
+        "type": "int"
+      }
+    }
   }
 }
