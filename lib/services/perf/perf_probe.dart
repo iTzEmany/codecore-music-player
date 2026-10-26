@@ -44,10 +44,12 @@ class PerfProbe {
   final _burst = Stopwatch();
   Future<void> _writing = Future.value();
 
-  /// Before `runApp`: no onboarding, no network on its own.
+  /// Before `runApp`: no onboarding; the background completion on (tags and
+  /// credits, phase 53: it must not cost frames), lyrics left to the fake ones.
   static Future<void> prepareSettings(SettingsStore store) => store.writeSettings(
       store.readSettings().copyWith(
-          onboardingDone: true, ytNoticeSeen: true, autoEnrich: false, autoLyrics: false));
+          onboardingDone: true, ytNoticeSeen: true, autoEnrich: true, creditsDetails: true,
+          autoLyrics: false));
 
   static Future<void> start({
     required AppDatabase db,
