@@ -5,6 +5,7 @@ Come si misura (28.1) e cosa è cambiato (28.10). Il telefono di riferimento è 
 Motorola edge 40, segnate come tali.
 
 ## Strumenti
+- **App vera** — `scripts/perf_device.py <id-adb> --real --apk <apk>` misura `com.codecore.player` con la libreria vera senza toccare i dati (APK con `--dart-define=CODECORE_PERF_REAL=true`: registra solo i frame; niente `pm clear`, push, riproduzione; cancella `perf/events.jsonl` alla fine).
 - **Telefono** — `scripts/perf_library.py` crea in `build/perf_library/` 3000 brani da 1 s in 300 album
   (copertina `cover.jpg` 1200×1200 per album, ~50 MB). `scripts/perf_device.py <id-adb> --label <nome>`
   compila la build *profile* come **app separata** `com.codecore.player.perf` (`CODECORE_PERF=1`, dati suoi:

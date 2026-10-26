@@ -25,6 +25,14 @@ import '../tags/audio_metadata_tag_reader.dart';
 /// `com.codecore.player.perf`: everything below touches that app's own data.
 const kPerfBuild = bool.fromEnvironment('CODECORE_PERF');
 
+/// True in builds made by `scripts/perf_device.py --real`
+/// (`--dart-define=CODECORE_PERF_REAL=true`) installed over the real app: it only
+/// records the frames, and never writes settings or the database.
+const kPerfReal = bool.fromEnvironment('CODECORE_PERF_REAL');
+
+/// Recording on (`mark`, `start`); the data preparation stays under [kPerfBuild].
+const kPerfProbe = kPerfBuild || kPerfReal;
+
 /// The measures of phase 28, as JSON lines in `perf/events.jsonl` of the app's
 /// external folder (adb reads it without root): time from `main` to the first
 /// frame, the library scan, and the frames of every burst of activity (a
@@ -34,8 +42,8 @@ class PerfProbe {
 
   static final _marks = <String, int>{};
 
-  /// Notes how far `main` has got (perf build only: call it under
-  /// `if (kPerfBuild)`), written with the first frame.
+  /// Notes how far `main` has got (perf builds only: call it under
+  /// `if (kPerfProbe)`), written with the first frame.
   static void mark(String step, Stopwatch sinceMain) => _marks[step] = sinceMain.elapsedMilliseconds;
 
   final File _out;
@@ -55,6 +63,7 @@ class PerfProbe {
     required AppDatabase db,
     required CoverStore covers,
     required Stopwatch sinceMain,
+    bool prepare = kPerfBuild, // false on the real app: it must stay untouched
   }) async {
     final external = Platform.isAndroid ? (await getExternalStorageDirectory())?.path : null;
     final dir = Directory(p.join(external ?? await appSupportDir(), 'perf'));
@@ -65,7 +74,7 @@ class PerfProbe {
       probe._log({'event': 'startup', ..._marks});
     }));
     SchedulerBinding.instance.addTimingsCallback(probe._onTimings);
-    if (external != null) unawaited(probe._prepareLibrary(db, covers, external));
+    if (external != null && prepare) unawaited(probe._prepareLibrary(db, covers, external));
   }
 
   void _onTimings(List<FrameTiming> timings) {

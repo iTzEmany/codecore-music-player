@@ -12,6 +12,15 @@ lo swipe del mini player e l'apertura del player. Tabella in build/perf/<etichet
     scripts/perf_device.py <id-adb> --label prima
     scripts/perf_device.py <id-adb> --label dopo --no-push   # stessa libreria, solo l'app nuova
 
+Con --real si misura invece l'app VERA (com.codecore.player) con la sua libreria, senza
+toccare i dati: niente `pm clear`, niente push, nessuna scrittura su impostazioni o database
+(l'APK ha CODECORE_PERF_REAL, che registra soltanto i frame); niente riproduzione. Vuole
+--apk (o costruisce da sé senza CODECORE_PERF), gli scenari di serie sono quelli che non
+dipendono dai nomi della libreria di prova (più gli avvii a freddo) e uno che non trova il
+suo nodo viene saltato. Alla fine cancella perf/events.jsonl dall'app.
+
+    scripts/perf_device.py <id-adb> --real --apk app-profile-real.apk --label vera
+
 Prende lo schermo per qualche minuto. Con --playback suona brani muti: un'altra
 app che sta suonando si mette in pausa.
 """
@@ -31,7 +40,8 @@ REMOTE = f'/sdcard/Android/data/{PKG}/files'
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FRAME_60HZ = 1000 / 60
 
-assert PKG.endswith('.perf'), 'only the perf app may be cleared'
+REAL_PKG = 'com.codecore.player'
+REAL_DEFAULT = 'Pallino schede,Tutti i brani,Album,Ricerca «notte»'
 
 
 class Device:
@@ -45,6 +55,11 @@ class Device:
         return r.stdout
 
     def sh(self, cmd, check=True):
+        # The phone may be in use: a tap or a text meant for the app must never land in another one.
+        if cmd.startswith('input ') and 'WAKEUP' not in cmd and 'MEDIA_PAUSE' not in cmd:
+            focus = self.adb('shell', 'dumpsys window | grep mCurrentFocus', check=False)
+            if f'{PKG}/' not in focus:
+                raise RuntimeError(f'{PKG} not in front ({focus.strip()}): «{cmd}» not sent')
         return self.adb('shell', cmd, check=check)
 
     def now_ms(self):
@@ -98,10 +113,14 @@ class Device:
         return [json.loads(l) for l in raw.splitlines() if l.strip().startswith('{')]
 
 
-def build():
-    env = dict(os.environ, CODECORE_PERF='1')
+def build(real=False):
+    # CODECORE_PERF in the environment makes gradle give the app the .perf package: never for --real.
+    env = {k: v for k, v in os.environ.items() if k != 'CODECORE_PERF'}
+    if not real:
+        env['CODECORE_PERF'] = '1'
+    define = 'CODECORE_PERF_REAL=true' if real else 'CODECORE_PERF=true'
     subprocess.run(['flutter', 'build', 'apk', '--profile', '--target-platform', 'android-arm64',
-                    '--dart-define=CODECORE_PERF=true'], cwd=ROOT, env=env, check=True)
+                    f'--dart-define={define}'], cwd=ROOT, env=env, check=True)
     return os.path.join(ROOT, 'build/app/outputs/flutter-apk/app-profile.apk')
 
 
@@ -158,13 +177,30 @@ def main():
     ap.add_argument('--playback', action='store_true', help='also «In riproduzione» (plays silent tracks)')
     ap.add_argument('--only', help='run only these scenarios (exact names, comma separated, e.g. "Fogli,Apertura player"); '
                                    'skips the cold starts; the playback ones imply --playback')
+    ap.add_argument('--real', action='store_true',
+                    help='measure the real app (com.codecore.player) without touching its data; needs --apk or builds one')
     args = ap.parse_args()
+    global PKG, ACTIVITY, REMOTE
+    if args.real:
+        PKG = REAL_PKG
+        ACTIVITY = f'{PKG}/com.codecore.player.MainActivity'
+        REMOTE = f'/sdcard/Android/data/{PKG}/files'
+        args.no_push = True
+        if args.no_build:
+            sys.exit('--real: usa --apk (app-profile.apk potrebbe essere la build .perf) oppure lascia costruire')
+        if args.playback:
+            sys.exit('--real: niente --playback (scriverebbe ascolti veri)')
+        if args.only is None:
+            args.only = REAL_DEFAULT
     only = {n.strip() for n in args.only.split(',') if n.strip()} if args.only is not None else None
     if only is not None:
         bad = sorted(only - set(SCENARIOS)) or ([''] if not only else [])
         if bad:
             sys.exit(f'--only: nomi non validi {bad}; validi: ' + ', '.join(SCENARIOS))
-        args.runs = 0
+        if not args.real:
+            args.runs = 0
+        if args.real and only & PLAYBACK_SCENARIOS:
+            sys.exit('--real: niente scenari di riproduzione')
         args.playback = args.playback or bool(only & PLAYBACK_SCENARIOS)
     dev = Device(args.device)
     lib = os.path.join(ROOT, 'build/perf_library')
@@ -176,12 +212,13 @@ def main():
     elif args.no_build:
         apk = os.path.join(ROOT, 'build/app/outputs/flutter-apk/app-profile.apk')
     else:
-        apk = build()
+        apk = build(args.real)
     print(dev.adb('install', '-r', apk).strip().splitlines()[-1])
     model = dev.sh('getprop ro.product.model').strip()
     dev.sh('input keyevent KEYCODE_WAKEUP')
 
     if not args.no_push:
+        assert PKG.endswith('.perf'), 'only the perf app may be cleared'
         dev.sh(f'pm clear {PKG}')
         dev.sh(f'mkdir -p {REMOTE}/Music')
         dev.adb('push', lib + '/.', f'{REMOTE}/Music/')
@@ -218,11 +255,16 @@ def main():
             if name == 'In riproduzione':  # starts the playback the later scenarios need
                 setup(), action()
             return
-        setup()
-        time.sleep(2.5)
-        t0 = dev.now_ms()
-        action()
-        time.sleep(2.5)
+        try:
+            setup()
+            time.sleep(2.5)
+            t0 = dev.now_ms()
+            action()
+            time.sleep(2.5)
+        except RuntimeError as e:
+            if not args.real:
+                raise
+            return print(f'  {name}: saltato ({e})')
         windows[name] = ([(t0, dev.now_ms() + 3000)], False)
         print(f'  {name}: fatto')
 
@@ -239,10 +281,15 @@ def main():
             time.sleep(wait)
             spans.append((t0, dev.now_ms()))
         timed.spans = spans
-        setup()
-        time.sleep(2.5)
-        action(timed)
-        time.sleep(1)
+        try:
+            setup()
+            time.sleep(2.5)
+            action(timed)
+            time.sleep(1)
+        except RuntimeError as e:
+            if not args.real:
+                raise
+            return print(f'  {name}: saltato ({e})')
         windows[name] = (spans, True)
         print(f'  {name}: fatto')
 
@@ -388,9 +435,12 @@ def main():
     pss = re.search(r'TOTAL PSS:\s*(\d+)', mem) or re.search(r'^\s*TOTAL\s+(\d+)', mem, re.M)
     events = dev.events()
     bursts = [e for e in events if e.get('event') == 'burst']
+    if args.real:
+        dev.sh(f'rm -f {REMOTE}/perf/events.jsonl', check=False)
 
     lines = [f'# Misure fase 28 — {args.label}', '',
-             f'Dispositivo: {model} ({args.device}), build profile, app separata `{PKG}`.', '']
+             f'Dispositivo: {model} ({args.device}), build profile, app `{PKG}`'
+             f'{" (vera, dati intatti)" if args.real else " (separata)"}.', '']
     if scan:
         lines.append(f'- Scansione: {scan["tracks"]} brani in {scan["ms"] / 1000:.1f} s')
     if starts:

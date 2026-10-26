@@ -72,7 +72,7 @@ Future<void> main() async {
     JustAudioMediaKit.ensureInitialized();
   }
 
-  if (kPerfBuild) PerfProbe.mark('binding', sinceMain);
+  if (kPerfProbe) PerfProbe.mark('binding', sinceMain);
   // A restore chosen in the last run replaces the database before it is opened.
   try {
     await applyPendingRestore(
@@ -86,7 +86,7 @@ Future<void> main() async {
     AppLog.e('pending restore could not run', e, st);
   }
 
-  if (kPerfBuild) PerfProbe.mark('pendingRestore', sinceMain);
+  if (kPerfProbe) PerfProbe.mark('pendingRestore', sinceMain);
   final db = AppDatabase.production();
   final tracks = TrackRepository(db);
   final covers = CoverStore(Directory(await coversDir()), thumbnails: encodeCoverThumbnail);
@@ -132,7 +132,7 @@ Future<void> main() async {
             t.coverKey == null ? null : covers.fileFor(t.coverKey!)?.path,
       );
 
-  if (kPerfBuild) PerfProbe.mark('covers', sinceMain);
+  if (kPerfProbe) PerfProbe.mark('covers', sinceMain);
   final CodecoreAudioHandler handler;
   if (isAndroid) {
     handler = await AudioService.init<CodecoreAudioHandler>(
@@ -148,19 +148,19 @@ Future<void> main() async {
     handler = build();
   }
 
-  if (kPerfBuild) PerfProbe.mark('audioService', sinceMain);
+  if (kPerfProbe) PerfProbe.mark('audioService', sinceMain);
   // Linux: the track and the media keys in the desktop (MPRIS). A failure is
   // logged and the app runs without.
   if (Platform.isLinux) unawaited(MprisControls().attach(handler));
   // Windows: the same through SMTC.
   if (Platform.isWindows) unawaited(SmtcControls().attach(handler));
 
-  if (kPerfBuild) PerfProbe.mark('platformControls', sinceMain);
+  if (kPerfProbe) PerfProbe.mark('platformControls', sinceMain);
   final settingsStore = await SettingsStore.open();
   if (kPerfBuild) await PerfProbe.prepareSettings(settingsStore);
   final persistence = PlaybackPersistence(handler, settingsStore);
 
-  if (kPerfBuild) PerfProbe.mark('settings', sinceMain);
+  if (kPerfProbe) PerfProbe.mark('settings', sinceMain);
   handler.browse = MediaBrowseTree(
     DbBrowseSource(TrackRepository(db), LibraryQueries(db), PlaylistRepository(db), radioRepo),
     labels: BrowseLabels.forLanguage(settingsStore.readSettings().language),
@@ -183,7 +183,7 @@ Future<void> main() async {
     await bridge.markReady();
   }
 
-  if (kPerfBuild) PerfProbe.mark('widget', sinceMain);
+  if (kPerfProbe) PerfProbe.mark('widget', sinceMain);
   var systemName = Platform.localHostname;
   if (Platform.isAndroid) {
     try {
@@ -195,7 +195,7 @@ Future<void> main() async {
     }
   }
 
-  if (kPerfBuild) PerfProbe.mark('deviceName', sinceMain);
+  if (kPerfProbe) PerfProbe.mark('deviceName', sinceMain);
   final streamCache = await StreamCache.inAppSupport();
   final container = ProviderContainer(
     overrides: [
@@ -232,7 +232,7 @@ Future<void> main() async {
     }
     persistence.start();
   }());
-  if (kPerfBuild) {
+  if (kPerfProbe) {
     unawaited(PerfProbe.start(db: db, covers: covers, sinceMain: sinceMain));
   }
   // Thumbnails of the covers saved before there were any: after start-up.
