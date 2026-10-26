@@ -50,7 +50,7 @@ void main() {
   });
 
   test(
-    'download, import and transfer in progress set busy; a scan does not',
+    'download, import, transfer, scan and enrichment in progress set busy; the background completion does not',
     () async {
       final notifier = NotifierProvider<_Running, ActivityState>(_Running.new);
       final c = ProviderContainer(
@@ -69,7 +69,7 @@ void main() {
         ActivityItem(kind: k, key: 'k', name: null),
       ], const []);
       expect(a.isBusy, isFalse);
-      await set(of(ActivityKind.scan));
+      await set(of(ActivityKind.enrichBackground));
       expect(a.isBusy, isFalse);
       await set(
         const ActivityState([
@@ -86,6 +86,8 @@ void main() {
         ActivityKind.download,
         ActivityKind.import,
         ActivityKind.transfer,
+        ActivityKind.scan,
+        ActivityKind.enrich,
       ]) {
         await set(of(k));
         expect(a.isBusy, isTrue, reason: '$k');

@@ -107,6 +107,8 @@ class EnrichCompleter {
           if (!_now) await _idle();
           await service.limiter.wait();
           if (_cancelled) break;
+          // The switches may have changed since the chunk was read.
+          if ((wanted = parts()).isEmpty) break;
           tried.add(id);
           try {
             block.add(await service.gather(id, wanted, ignoreMarks: _now));

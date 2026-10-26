@@ -12,6 +12,7 @@ import '../../widgets/empty_state.dart';
 import '../library/second_opinion_log_screen.dart';
 import '../../shell/shell_nav.dart';
 import 'activity_sheet.dart';
+import 'enrich_round_screen.dart';
 import '../../widgets/cc_app_bar.dart';
 
 /// What ended in the background (downloads, transfers, imports, scans and
@@ -86,12 +87,18 @@ class ActivityLogScreen extends ConsumerWidget {
                     final e = entries[i];
                     final item = e.item;
                     return ListTile(
-                      onTap: item?.kind == ActivityKind.secondOpinion
-                          ? () => ShellNav.open<void>(
+                      onTap: switch (item?.kind) {
+                        ActivityKind.secondOpinion => () => ShellNav.open<void>(
+                          context,
+                          const SecondOpinionLogScreen(),
+                        ),
+                        ActivityKind.enrichBackground => () =>
+                            ShellNav.open<void>(
                               context,
-                              const SecondOpinionLogScreen(),
-                            )
-                          : null,
+                              EnrichRoundScreen(entry: e),
+                            ),
+                        _ => null,
+                      },
                       leading: Icon(
                         _icon(e),
                         color: e.failed ? cc.error : cc.accentSoft,
@@ -100,6 +107,8 @@ class ActivityLogScreen extends ConsumerWidget {
                         item != null
                             ? (item.kind == ActivityKind.scan && item.total == 0
                                   ? l.activityScanEnded
+                                  : item.kind == ActivityKind.enrichBackground
+                                  ? l.logEnrichRound(item.done, item.total)
                                   : activityTitle(l, item))
                             : l.logImport(e.importName ?? ''),
                         maxLines: 1,

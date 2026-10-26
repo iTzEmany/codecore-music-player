@@ -37,10 +37,13 @@ class UserActivity {
   }
 }
 
+// Not enrichBackground: the completion would wait for itself.
 const _busyKinds = {
   ActivityKind.download,
   ActivityKind.import,
   ActivityKind.transfer,
+  ActivityKind.enrich,
+  ActivityKind.scan,
 };
 
 /// Keep it listened (the shell does): a provider nobody listens to is paused

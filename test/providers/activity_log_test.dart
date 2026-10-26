@@ -99,6 +99,7 @@ void main() {
     expect(await db.select(db.activityLogRows).get(), isEmpty);
   });
 
+  // The background completion writes its own line (enrich_completer_providers_test).
   test('a job leaves one line when it leaves running; a download that ends leaves one', () async {
     final c = ProviderContainer(
       overrides: [
@@ -113,7 +114,6 @@ void main() {
       ActivityKind.enrich,
       ActivityKind.cleanup,
       ActivityKind.releases,
-      ActivityKind.enrichBackground,
     ];
     final running = [
       for (final k in once)

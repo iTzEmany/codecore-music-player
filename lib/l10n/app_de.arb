@@ -2978,5 +2978,39 @@
     }
   },
   "activityStopped": "Gestoppt",
-  "activityScanEnded": "Scan"
+  "activityScanEnded": "Scan",
+  "enrichCompleteTitle": "Anreicherung vervollständigen",
+  "enrichCompleteHint": "Sucht sofort, was den Titeln fehlt, auch während du die App benutzt",
+  "enrichCompleteProgress": "{done} von {total} Titeln vollständig",
+  "@enrichCompleteProgress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "enrichCompleteStop": "Abbrechen",
+  "enrichRoundTitle": "Anreicherungsdurchlauf",
+  "enrichRoundUpdated": "Aktualisiert",
+  "enrichRoundNone": "Ohne Ergebnis",
+  "enrichRoundGone": "Keine Titel zum Anzeigen",
+  "enrichPartMeta": "Titeldaten",
+  "enrichPartLyrics": "Songtext",
+  "enrichPartSynced": "Synchronisierter Songtext",
+  "enrichPartCurio": "Wissenswertes",
+  "enrichPartCredits": "Credits",
+  "logEnrichRound": "Anreicherung: {done, plural, one{1 Titel vervollständigt} other{{done} Titel vervollständigt}}, {none} ohne Ergebnis",
+  "@logEnrichRound": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "none": {
+        "type": "int"
+      }
+    }
+  }
 }

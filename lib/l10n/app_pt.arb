@@ -3222,5 +3222,39 @@
     }
   },
   "activityStopped": "Parada",
-  "activityScanEnded": "Análise"
+  "activityScanEnded": "Análise",
+  "enrichCompleteTitle": "Completar o enriquecimento",
+  "enrichCompleteHint": "Procura já o que falta nas músicas, mesmo enquanto usas a app",
+  "enrichCompleteProgress": "{done} de {total} músicas completas",
+  "@enrichCompleteProgress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "enrichCompleteStop": "Interromper",
+  "enrichRoundTitle": "Ronda de enriquecimento",
+  "enrichRoundUpdated": "Atualizados",
+  "enrichRoundNone": "Sem resultado",
+  "enrichRoundGone": "Nenhuma música para mostrar",
+  "enrichPartMeta": "Dados da música",
+  "enrichPartLyrics": "Letra",
+  "enrichPartSynced": "Letra sincronizada",
+  "enrichPartCurio": "Curiosidades",
+  "enrichPartCredits": "Créditos",
+  "logEnrichRound": "Enriquecimento: {done, plural, one{1 música concluída} other{{done} músicas concluídas}}, {none} sem resultado",
+  "@logEnrichRound": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "none": {
+        "type": "int"
+      }
+    }
+  }
 }

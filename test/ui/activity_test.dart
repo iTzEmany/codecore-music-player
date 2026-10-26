@@ -1,5 +1,8 @@
 import 'package:codecore/l10n/app_localizations.dart';
 import 'package:codecore/providers/activity_providers.dart';
+import 'package:codecore/providers/enrich_completer_providers.dart';
+import 'package:codecore/providers/library_providers.dart' show ScanState;
+import 'package:codecore/providers/online_providers.dart' show EnrichJobState;
 import 'package:codecore/ui/widgets/activity_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -100,4 +103,94 @@ void main() {
     expect(find.byTooltip('Annulla'), findsOneWidget);
     await h.dispose(tester);
   });
+
+  testWidgets('the background completion: count, Pausa and Riprendi, Annulla',
+      (tester) async {
+    final fake = _FakeCompleter();
+    final h = await Harness.create(tester);
+    await tester.pumpWidget(ProviderScope(
+      overrides: [
+        ...h.overrides,
+        enrichCompleterProvider.overrideWith(() => fake),
+        activityProvider.overrideWith(
+          (ref) => buildActivity(
+            scan: const ScanState(),
+            enrich: const EnrichJobState(),
+            downloads: const [],
+            outgoing: const [],
+            enrichBackground: ref.watch(
+              enrichCompleterProvider.select(enrichBackgroundOf),
+            ),
+          ),
+        ),
+      ],
+      child: MaterialApp(
+        locale: const Locale('it'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: const Scaffold(body: Center(child: ActivityButton())),
+      ),
+    ));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.tap(find.byType(ActivityButton));
+    await tester.pump(); // the route
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text("Completamento dell'arricchimento: 1530 di 2196"),
+        findsOneWidget);
+    expect(find.byTooltip('Riprendi'), findsNothing);
+
+    await tester.tap(find.byTooltip('Pausa'));
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(fake.calls, ['pause']);
+    expect(find.byTooltip('Riprendi'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Riprendi'));
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(fake.calls, ['pause', 'resume']);
+    expect(find.byTooltip('Pausa'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Annulla'));
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(fake.calls.last, 'cancel');
+    await h.dispose(tester);
+  });
+
+  test('buildActivity: the completion is a line only while it is given', () {
+    ActivityState build(EnrichBackgroundProgress? p) => buildActivity(
+        scan: const ScanState(),
+        enrich: const EnrichJobState(),
+        downloads: const [],
+        outgoing: const [],
+        enrichBackground: p);
+    expect(build(null).running, isEmpty);
+    final item = build(const EnrichBackgroundProgress(1530, 2196, paused: true))
+        .running
+        .single;
+    expect([item.kind, item.done, item.total, item.paused],
+        [ActivityKind.enrichBackground, 1530, 2196, true]);
+    expect(item.cancellable, isTrue);
+  });
+}
+
+class _FakeCompleter extends EnrichCompleterNotifier {
+  final calls = <String>[];
+
+  @override
+  EnrichCompleterState build() =>
+      const EnrichCompleterState(running: true, complete: 1530, total: 2196);
+
+  @override
+  void pause() {
+    calls.add('pause');
+    state = state.copyWith(paused: true);
+  }
+
+  @override
+  Future<void> resume() async {
+    calls.add('resume');
+    state = state.copyWith(paused: false);
+  }
+
+  @override
+  void cancel() => calls.add('cancel');
 }

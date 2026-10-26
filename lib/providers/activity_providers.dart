@@ -4,6 +4,7 @@ import '../services/online/download_queue.dart';
 import '../services/online/retry_policy.dart';
 import '../services/share/offers.dart';
 import 'duplicate_providers.dart';
+import 'enrich_completer_providers.dart';
 import 'import_providers.dart';
 import 'library_providers.dart';
 import 'online_providers.dart';
@@ -74,6 +75,7 @@ class ActivityItem {
           kind == ActivityKind.import ||
           kind == ActivityKind.cleanup ||
           kind == ActivityKind.secondOpinion ||
+          kind == ActivityKind.enrichBackground ||
           kind == ActivityKind.enrich);
 }
 
@@ -83,6 +85,19 @@ class CleanupProgress {
 
   final int done, total;
 }
+
+/// The background completion, while it runs or is paused by hand.
+class EnrichBackgroundProgress extends CleanupProgress {
+  const EnrichBackgroundProgress(super.done, super.total, {this.paused = false});
+
+  final bool paused;
+}
+
+/// The completion as a line of the Activity centre (null: not shown).
+EnrichBackgroundProgress? enrichBackgroundOf(EnrichCompleterState c) =>
+    c.visible
+        ? EnrichBackgroundProgress(c.complete, c.total, paused: c.paused)
+        : null;
 
 class ActivityState {
   const ActivityState(this.running, this.completed);
@@ -105,7 +120,7 @@ ActivityState buildActivity({
   CleanupProgress? secondOpinion,
   bool podcastRefresh = false,
   bool radio = false,
-  CleanupProgress? enrichBackground,
+  EnrichBackgroundProgress? enrichBackground,
 }) {
   final running = <ActivityItem>[];
   final completed = <ActivityItem>[];
@@ -180,6 +195,7 @@ ActivityState buildActivity({
         done: enrichBackground.done,
         total: enrichBackground.total,
         progress: enrichBackground.total == 0 ? null : enrichBackground.done / enrichBackground.total,
+        paused: enrichBackground.paused,
       ),
     );
   }
@@ -266,6 +282,9 @@ final activityProvider = Provider<ActivityState>((ref) {
       secondOpinionJobProvider.select(
         (j) => j.running ? CleanupProgress(j.done, j.total) : null,
       ),
+    ),
+    enrichBackground: ref.watch(
+      enrichCompleterProvider.select(enrichBackgroundOf),
     ),
     cleanup: ref.watch(
       duplicateSearchProvider.select(

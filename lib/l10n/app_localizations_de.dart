@@ -5519,4 +5519,57 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get activityScanEnded => 'Scan';
+
+  @override
+  String get enrichCompleteTitle => 'Anreicherung vervollständigen';
+
+  @override
+  String get enrichCompleteHint =>
+      'Sucht sofort, was den Titeln fehlt, auch während du die App benutzt';
+
+  @override
+  String enrichCompleteProgress(int done, int total) {
+    return '$done von $total Titeln vollständig';
+  }
+
+  @override
+  String get enrichCompleteStop => 'Abbrechen';
+
+  @override
+  String get enrichRoundTitle => 'Anreicherungsdurchlauf';
+
+  @override
+  String get enrichRoundUpdated => 'Aktualisiert';
+
+  @override
+  String get enrichRoundNone => 'Ohne Ergebnis';
+
+  @override
+  String get enrichRoundGone => 'Keine Titel zum Anzeigen';
+
+  @override
+  String get enrichPartMeta => 'Titeldaten';
+
+  @override
+  String get enrichPartLyrics => 'Songtext';
+
+  @override
+  String get enrichPartSynced => 'Synchronisierter Songtext';
+
+  @override
+  String get enrichPartCurio => 'Wissenswertes';
+
+  @override
+  String get enrichPartCredits => 'Credits';
+
+  @override
+  String logEnrichRound(int done, int none) {
+    String _temp0 = intl.Intl.pluralLogic(
+      done,
+      locale: localeName,
+      other: '$done Titel vervollständigt',
+      one: '1 Titel vervollständigt',
+    );
+    return 'Anreicherung: $_temp0, $none ohne Ergebnis';
+  }
 }

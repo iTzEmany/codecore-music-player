@@ -31,6 +31,7 @@ import 'cleanup_tiles.dart';
 import 'advanced_section.dart';
 import 'backup_section.dart';
 import 'download_settings_tiles.dart';
+import 'enrich_complete_tile.dart';
 import 'equalizer_screen.dart';
 import 'log_export_tile.dart';
 import 'report_issue_tile.dart';
@@ -283,6 +284,7 @@ List<SettingsGroup> _online(BuildContext context, WidgetRef ref) {
           title: Text(l.enrichLibrary),
           onTap: () => _enrichLibrary(context, ref),
         ),
+        const EnrichCompleteTile(),
         SwitchListTile(
           title: Text(l.autoEnrich),
           subtitle: Text(l.autoEnrichHint),

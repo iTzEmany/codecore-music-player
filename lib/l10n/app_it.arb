@@ -3524,5 +3524,39 @@
     }
   },
   "activityStopped": "Fermata",
-  "activityScanEnded": "Scansione"
+  "activityScanEnded": "Scansione",
+  "enrichCompleteTitle": "Completa l'arricchimento",
+  "enrichCompleteHint": "Cerca subito ciò che manca ai brani, anche mentre usi l'app",
+  "enrichCompleteProgress": "{done} di {total} brani completi",
+  "@enrichCompleteProgress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "enrichCompleteStop": "Interrompi",
+  "enrichRoundTitle": "Giro di arricchimento",
+  "enrichRoundUpdated": "Aggiornati",
+  "enrichRoundNone": "Senza risultato",
+  "enrichRoundGone": "Nessun brano da mostrare",
+  "enrichPartMeta": "Dati del brano",
+  "enrichPartLyrics": "Testo",
+  "enrichPartSynced": "Testo sincronizzato",
+  "enrichPartCurio": "Curiosità",
+  "enrichPartCredits": "Crediti",
+  "logEnrichRound": "Arricchimento: {done, plural, one{1 brano completato} other{{done} brani completati}}, {none} senza risultato",
+  "@logEnrichRound": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "none": {
+        "type": "int"
+      }
+    }
+  }
 }

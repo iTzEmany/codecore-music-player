@@ -8712,6 +8712,90 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Scansione'**
   String get activityScanEnded;
+
+  /// No description provided for @enrichCompleteTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Completa l\'arricchimento'**
+  String get enrichCompleteTitle;
+
+  /// No description provided for @enrichCompleteHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Cerca subito ciò che manca ai brani, anche mentre usi l\'app'**
+  String get enrichCompleteHint;
+
+  /// No description provided for @enrichCompleteProgress.
+  ///
+  /// In it, this message translates to:
+  /// **'{done} di {total} brani completi'**
+  String enrichCompleteProgress(int done, int total);
+
+  /// No description provided for @enrichCompleteStop.
+  ///
+  /// In it, this message translates to:
+  /// **'Interrompi'**
+  String get enrichCompleteStop;
+
+  /// No description provided for @enrichRoundTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Giro di arricchimento'**
+  String get enrichRoundTitle;
+
+  /// No description provided for @enrichRoundUpdated.
+  ///
+  /// In it, this message translates to:
+  /// **'Aggiornati'**
+  String get enrichRoundUpdated;
+
+  /// No description provided for @enrichRoundNone.
+  ///
+  /// In it, this message translates to:
+  /// **'Senza risultato'**
+  String get enrichRoundNone;
+
+  /// No description provided for @enrichRoundGone.
+  ///
+  /// In it, this message translates to:
+  /// **'Nessun brano da mostrare'**
+  String get enrichRoundGone;
+
+  /// No description provided for @enrichPartMeta.
+  ///
+  /// In it, this message translates to:
+  /// **'Dati del brano'**
+  String get enrichPartMeta;
+
+  /// No description provided for @enrichPartLyrics.
+  ///
+  /// In it, this message translates to:
+  /// **'Testo'**
+  String get enrichPartLyrics;
+
+  /// No description provided for @enrichPartSynced.
+  ///
+  /// In it, this message translates to:
+  /// **'Testo sincronizzato'**
+  String get enrichPartSynced;
+
+  /// No description provided for @enrichPartCurio.
+  ///
+  /// In it, this message translates to:
+  /// **'Curiosità'**
+  String get enrichPartCurio;
+
+  /// No description provided for @enrichPartCredits.
+  ///
+  /// In it, this message translates to:
+  /// **'Crediti'**
+  String get enrichPartCredits;
+
+  /// No description provided for @logEnrichRound.
+  ///
+  /// In it, this message translates to:
+  /// **'Arricchimento: {done, plural, one{1 brano completato} other{{done} brani completati}}, {none} senza risultato'**
+  String logEnrichRound(int done, int none);
 }
 
 class _AppLocalizationsDelegate

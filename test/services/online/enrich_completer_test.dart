@@ -106,6 +106,23 @@ void main() {
       expect([r.chain.calls, r.finder.calls, idles], [0, 0, 0]);
     });
 
+    test('a part switched off during the run is not asked for again', () async {
+      for (var n = 0; n < 3; n++) {
+        await track();
+      }
+      var on = _lyrics;
+      r.chain.during = () async => on = const {};
+      final round = await EnrichCompleter(
+        service: r.svc,
+        repo: r.credits,
+        parts: () => on,
+        waitIdle: () async {},
+        nowMs: () => clock,
+      ).run();
+      expect(r.chain.calls, 1);
+      expect(round.updated[EnrichPart.lyrics], hasLength(1));
+    });
+
     test('no track is worked while the user is busy', () async {
       await track();
       await track();

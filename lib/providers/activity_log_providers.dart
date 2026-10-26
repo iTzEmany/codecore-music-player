@@ -120,14 +120,14 @@ class ActivityLogNotifier extends Notifier<ActivityLogState> {
   static const pageSize = 50;
 
   /// Jobs that leave one line when they leave `running` (the others write
-  /// their own: downloads, episodes, transfers, imports, second opinion, and
-  /// the podcast refresh and radio check, which know how they went).
+  /// their own: downloads, episodes, transfers, imports, second opinion, the
+  /// podcast refresh and radio check, and the background completion, which
+  /// know how they went).
   static const _oneLine = {
     ActivityKind.scan,
     ActivityKind.enrich,
     ActivityKind.cleanup,
     ActivityKind.releases,
-    ActivityKind.enrichBackground,
   };
 
   final _logged = <String>{};
