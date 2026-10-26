@@ -121,4 +121,37 @@ void main() {
     final web = await run(usable: true);
     expect(web.bytesUrls, ['https://d/cover.jpg']);
   });
+
+  test('a track with a hand-picked cover does not get the album cover', () async {
+    final tmp = Directory.systemTemp.createTempSync('cfa2');
+    final db = AppDatabase(NativeDatabase.memory());
+    addTearDown(() async {
+      await db.close();
+      tmp.deleteSync(recursive: true);
+    });
+    final web = _Web();
+    final repo = TrackRepository(db);
+    final svc = EnrichmentService(
+      db: db,
+      tracks: repo,
+      covers: CoverStore(Directory(p.join(tmp.path, 'c'))),
+      itunes: ItunesClient(web),
+      deezer: DeezerClient(web),
+      useDeezer: () => true,
+      lrclib: LrclibClient(web),
+      wikipedia: WikipediaClient(web),
+      web: web,
+      language: () => 'it',
+      limiter: RateLimiter(minGap: Duration.zero),
+    );
+    for (final n in ['a', 'b']) {
+      await db.into(db.tracks).insert(TracksCompanion.insert(
+          path: '/$n.mp3', title: 'Imagine', albumKey: 'k', format: 'mp3', sizeBytes: 1, mtimeMs: 1, addedAt: 1));
+    }
+    final a = (await repo.byPath('/a.mp3'))!;
+    await repo.setManualCover(a.id, 'manual:track:1:1');
+    expect(await svc.coverForAlbum(a, 'Imagine', 'John Lennon'), isTrue);
+    expect((await repo.byPath('/a.mp3'))!.coverKey, 'manual:track:1:1');
+    expect((await repo.byPath('/b.mp3'))!.coverKey, CoverStore.coverKeyFor('k'));
+  });
 }

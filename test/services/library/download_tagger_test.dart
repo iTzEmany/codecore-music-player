@@ -207,4 +207,14 @@ void main() {
     await Future.wait([tagger.tag(t.id), tagger.tag(t.id)]);
     expect(writer.calls, 1);
   });
+
+  test('a hand-picked cover is never written into the file', () async {
+    final t = await add(music.path, 'm.mp3');
+    await (db.update(db.tracks)..where((r) => r.id.equals(t.id)))
+        .write(const TracksCompanion(coverKey: Value('manual:track:1:1'), coverSource: Value(2)));
+    await tagger.tag(t.id);
+    final m = _tags(t.path);
+    expect(m['title'], 'Poetica');
+    expect(m.containsKey('cover'), isFalse);
+  });
 }

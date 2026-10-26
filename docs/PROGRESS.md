@@ -728,6 +728,7 @@ Feature «Arricchimento completo» (`docs/feature-arricchimento.md`, decisioni D
 - [ ] 54.1 `cover_ops.dart`: salvare e ripristinare
 - [ ] 54.2 Copertina d'album letta da `cover_source`
 - [ ] 54.3 Nessuno scrittore tocca una copertina a mano
+  - Audit 54.3: `resetCovers` ora azzera solo le righe `cover_source = 0` (la scansione mantiene le altre); `TrackEditor.saveMany/restoreMany` (unione album, annulla) e la fusione dei duplicati (`DuplicateRepository`) restano com'erano (scelta esplicita dell'utente, non scritture automatiche); `EpisodeDownloader` inserisce righe nuove (source 0).
 - [ ] 54.4 `cover_picker_sheet.dart`: file e libreria
 - [ ] 54.5 Proposte online con la misura
 - [ ] 54.6 «Cambia copertina» e «Ripristina copertina originale» nei menu

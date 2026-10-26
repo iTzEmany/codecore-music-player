@@ -200,6 +200,14 @@ void main() {
     expect(covers.fileFor(row.coverKey!)!.readAsBytesSync(), [9, 9]);
   });
 
+  test('a hand-picked cover of the shadow row stays as it is after the promotion', () async {
+    await tracks.setManualCover(shadowId, 'manual:track:1:1');
+    await promoter.promote(_r);
+    final row = (await tracks.getById(shadowId))!;
+    expect([row.coverKey, row.coverSource], ['manual:track:1:1', 2]);
+    expect(covers.fileFor(CoverStore.coverKeyFor('artist|album')), isNull);
+  });
+
   test('promote with no file in the cache does nothing', () async {
     await File((await cache.fileFor(_key))!.path).delete();
     cache = StreamCache(cache.dir, freeSpace: () async => null);

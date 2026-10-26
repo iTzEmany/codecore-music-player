@@ -99,7 +99,8 @@ class DownloadTagger {
     final info = await reader.read(t.path);
     // lofty appends a picture: add one only to a file that has none.
     final hasCover = info.coverBytes?.isNotEmpty ?? false;
-    final cover = hasCover ? null : await coverOf(t);
+    // Never a hand-picked picture in the file (invariant 7).
+    final cover = hasCover || t.coverSource > 0 ? null : await coverOf(t);
     String? text(String? s) => (s == null || s.trim().isEmpty) ? null : s;
     final c = TagChanges(
       title: text(t.title),

@@ -200,4 +200,14 @@ void main() {
     expect((await credits.portableOf(x.id)).details!.label, 'L');
     expect((await credits.creditsOf(y.id)).map((c) => c.name), ['Mine']);
   });
+
+  test('a hand-picked cover on the row is not replaced by the received one', () async {
+    await repo.upsertBatch([_row('/a/x.mp3')]);
+    final id = (await repo.byPath('/a/x.mp3'))!.id;
+    await repo.setManualCover(id, 'manual:track:1:1');
+    await applyReceivedPackage(repo, covers, '/a/x.mp3', meta,
+        fetchCover: () async => (bytes: Uint8List.fromList([1, 2, 3]), mime: 'image/png'));
+    final t = (await repo.byPath('/a/x.mp3'))!;
+    expect([t.coverKey, t.coverSource], ['manual:track:1:1', 2]);
+  });
 }

@@ -38,6 +38,7 @@ class TrackRepository {
         }
         final keepText = existing.userEdited;
         final keepCover =
+            existing.coverSource > 0 ||
             keepText && !(row.hasCover.present && row.hasCover.value);
         // A hash of the old bytes says nothing about the new ones.
         final changed =
@@ -68,6 +69,8 @@ class TrackRepository {
             // An edited row keeps the cover it was given when the scan finds none.
             hasCover: keepCover ? const Value.absent() : row.hasCover,
             coverKey: keepCover ? const Value.absent() : row.coverKey,
+            // A hand-picked cover stays; a row that joins a hand-picked album takes its source.
+            coverSource: existing.coverSource > 0 ? const Value.absent() : row.coverSource,
             replayGainDb: row.replayGainDb,
             isrc: (existing.isrc ?? '').isEmpty
                 ? row.isrc
@@ -242,6 +245,7 @@ class TrackRepository {
     });
   }
 
+  /// Automatic cover for the album; rows with a hand-picked cover keep theirs.
   Future<void> setCoverForAlbum(
     String albumKey,
     bool hasCover,
@@ -249,10 +253,63 @@ class TrackRepository {
   ) async {
     await (_db.update(
       _db.tracks,
-    )..where((t) => t.albumKey.equals(albumKey))).write(
+    )..where((t) => t.albumKey.equals(albumKey) & t.coverSource.equals(0))).write(
       TracksCompanion(hasCover: Value(hasCover), coverKey: Value(coverKey)),
     );
   }
+
+  /// A hand-picked cover for one track (`cover_source = 2`).
+  Future<void> setManualCover(int trackId, String coverKey) =>
+      (_db.update(_db.tracks)..where((t) => t.id.equals(trackId))).write(
+        TracksCompanion(
+          hasCover: const Value(true),
+          coverKey: Value(coverKey),
+          coverSource: const Value(2),
+        ),
+      );
+
+  /// A hand-picked cover for an album (`cover_source = 1`); tracks with their own stay.
+  Future<void> setManualAlbumCover(String albumKey, String coverKey) =>
+      (_db.update(_db.tracks)
+            ..where((t) => t.albumKey.equals(albumKey) & t.coverSource.isNotValue(2)))
+          .write(
+        TracksCompanion(
+          hasCover: const Value(true),
+          coverKey: Value(coverKey),
+          coverSource: const Value(1),
+        ),
+      );
+
+  /// Back to the automatic cover [coverKey] (null = none) for track [trackId], or,
+  /// with [albumKey], for the rows of that album whose cover was picked for the album.
+  Future<void> restoreCover({int? trackId, String? albumKey, required String? coverKey}) {
+    assert((trackId == null) != (albumKey == null));
+    final q = _db.update(_db.tracks)
+      ..where((t) => trackId != null
+          ? t.id.equals(trackId) & t.coverSource.isBiggerThanValue(0)
+          : t.albumKey.equals(albumKey!) & t.coverSource.equals(1));
+    return q.write(TracksCompanion(
+      hasCover: Value(coverKey != null),
+      coverKey: Value(coverKey),
+      coverSource: const Value(0),
+    ));
+  }
+
+  /// How many rows show the cover [key].
+  Future<int> countWithCoverKey(String key) async {
+    final n = _db.tracks.id.count();
+    final q = _db.selectOnly(_db.tracks)
+      ..addColumns([n])
+      ..where(_db.tracks.coverKey.equals(key));
+    return (await q.map((r) => r.read(n)).getSingle()) ?? 0;
+  }
+
+  /// A row of the album whose cover was picked for the album, if any.
+  Future<Track?> albumManualRow(String albumKey) =>
+      (_db.select(_db.tracks)
+            ..where((t) => t.albumKey.equals(albumKey) & t.coverSource.equals(1))
+            ..limit(1))
+          .getSingleOrNull();
 
   Stream<List<Track>> watchTracks({
     String query = '',
@@ -520,16 +577,12 @@ class TrackRepository {
   Future<void> deleteTrack(int id) =>
       (_db.delete(_db.tracks)..where((t) => t.id.equals(id))).go();
 
-  /// Forgets cover info and forces the next scan to re-read every file.
-  Future<void> resetCovers() => _db
-      .update(_db.tracks)
-      .write(
-        const TracksCompanion(
-          hasCover: Value(false),
-          coverKey: Value(null),
-          mtimeMs: Value(0),
-        ),
-      );
+  /// Forgets cover info (not the hand-picked ones) and forces the next scan to re-read every file.
+  Future<void> resetCovers() async {
+    await (_db.update(_db.tracks)..where((t) => t.coverSource.equals(0)))
+        .write(const TracksCompanion(hasCover: Value(false), coverKey: Value(null)));
+    await _db.update(_db.tracks).write(const TracksCompanion(mtimeMs: Value(0)));
+  }
 
   /// Id, title, artist and length of every available track, for matching an
   /// imported playlist against the library without loading whole rows.
