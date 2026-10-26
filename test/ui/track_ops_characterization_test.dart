@@ -10,6 +10,7 @@ import 'package:codecore/providers/settings_providers.dart';
 import 'package:codecore/services/audio/online_entries.dart';
 import 'package:codecore/services/export/playlist_exporter.dart';
 import 'package:codecore/services/online/lrclib_client.dart';
+import 'package:codecore/services/online/lyrics_chain.dart';
 import 'package:codecore/providers/database_providers.dart';
 import 'package:codecore/ui/screens/lyrics/lyrics_view.dart';
 import 'package:codecore/ui/screens/playlists/export_dialog.dart';
@@ -165,7 +166,7 @@ void main() {
       final h = await Harness.create(tester, tracks: 1);
       final t = (await _all(tester, h)).single;
       await h.pump(tester, Scaffold(body: LyricsView(track: t)),
-          extraOverrides: [lrclibClientProvider.overrideWithValue(_Lrclib(result))]);
+          extraOverrides: [lyricsChainProvider.overrideWithValue(LyricsChain(lrclib: _Lrclib(result)))]);
       await tester.tap(find.text('Cerca testo'));
       await _settle(tester);
       return h;
