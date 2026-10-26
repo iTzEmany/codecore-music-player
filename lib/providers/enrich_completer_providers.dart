@@ -136,7 +136,7 @@ class EnrichCompleterNotifier extends Notifier<EnrichCompleterState> {
         total: c.total,
       );
       final round = await _completer.run(now: now);
-      if (round.worked > 0) await _log(round, stopped: _halt);
+      if (round.worked > 0) await _log(round, stopped: _halt, failed: round.failed);
     } on Object catch (e, st) {
       AppLog.w('completion failed', e, st);
     } finally {
@@ -185,7 +185,11 @@ class EnrichCompleterNotifier extends Notifier<EnrichCompleterState> {
     if (_current != null) _completer.cancel();
   }
 
-  Future<void> _log(EnrichRound round, {required bool stopped}) {
+  Future<void> _log(
+    EnrichRound round, {
+    required bool stopped,
+    required bool failed,
+  }) {
     Set<int> ids(Map<EnrichPart, List<int>> m) => {for (final l in m.values) ...l};
     Map<String, List<int>> byPart(Map<EnrichPart, List<int>> m) => {
       for (final e in m.entries) e.key.name: e.value,
@@ -203,6 +207,7 @@ class EnrichCompleterNotifier extends Notifier<EnrichCompleterState> {
               done: ids(round.updated).length,
               total: ids(round.none).length,
               running: false,
+              failed: failed,
             ),
             detail: {
               if (stopped) 'stopped': true,
