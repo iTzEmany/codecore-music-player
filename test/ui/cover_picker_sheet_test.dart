@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -153,6 +154,36 @@ void main() {
     expect(saved, _png);
     expect(mime, 'image/png');
     expect(find.text('Online'), findsNothing, reason: 'the sheet is closed');
+    await h.dispose(tester);
+  });
+
+  testWidgets('two quick taps on a library cover save once and pop once', (tester) async {
+    final dir = (await tester.runAsync(Directory.systemTemp.createTemp))!;
+    addTearDown(() => dir.deleteSync(recursive: true));
+    await tester.runAsync(() => File('${dir.path}/k1.jpg').writeAsBytes([1, 2, 3]));
+    final h = await Harness.create(tester, tracks: 1);
+    h.coversDir = dir;
+    var saves = 0;
+    final gate = Completer<bool>();
+    await _open(tester, _Web(), harness: h, withOnline: false, libraryKeys: ['k1'], save: (ops, b, m) {
+      saves++;
+      return gate.future;
+    });
+    await tester.tap(find.text('open'));
+    await _settle(tester);
+    final cover = find.byKey(const ValueKey('library-cover-k1'));
+    await tester.tap(cover);
+    await tester.tap(cover);
+    // File reads need the real loop: wait until the first save is pending.
+    for (var i = 0; i < 20 && saves == 0; i++) {
+      await _settle(tester);
+    }
+    await _settle(tester);
+    expect(saves, 1);
+    gate.complete(true);
+    await _settle(tester);
+    expect(find.text('Dal dispositivo'), findsNothing, reason: 'the sheet is closed');
+    expect(find.text('open'), findsOneWidget, reason: 'the page under it was not popped');
     await h.dispose(tester);
   });
 
