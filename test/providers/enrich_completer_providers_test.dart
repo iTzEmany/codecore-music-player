@@ -10,6 +10,7 @@ import 'package:codecore/providers/online_providers.dart';
 import 'package:codecore/providers/settings_providers.dart';
 import 'package:codecore/providers/startup_providers.dart';
 import 'package:codecore/providers/user_activity_provider.dart';
+import 'package:codecore/services/online/lrclib_client.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
@@ -147,6 +148,18 @@ void main() {
       }
     },
   );
+
+  test('a track that got one part and missed another is counted once, as completed', () async {
+    user.busy = false;
+    final id = await track();
+    await track();
+    // Plain text found, no synced one: lyrics updated, synced «none» for the same track.
+    r.chain.resultFor = (t) =>
+        t.id == id ? const LyricsResult(plain: 'la la') : null;
+    await completer().runNow();
+    final row = (await r.db.select(r.db.activityLogRows).get()).single;
+    expect([row.done, row.total], [1, 1], reason: 'one completed, one without result');
+  });
 
   test(
     'a pause by hand holds the run until resumed or «Completa» overrides it',

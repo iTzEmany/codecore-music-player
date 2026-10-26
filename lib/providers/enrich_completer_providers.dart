@@ -211,9 +211,10 @@ class EnrichCompleterNotifier extends Notifier<EnrichCompleterState> {
               kind: ActivityKind.enrichBackground,
               key: 'enrichBackground-${DateTime.now().microsecondsSinceEpoch}',
               name: null,
-              // Tracks that got something, tracks that were asked in vain.
+              // Distinct tracks that got something, and tracks asked in vain
+              // for every part (one that got a part is not counted twice).
               done: ids(round.updated).length,
-              total: ids(round.none).length,
+              total: ids(round.none).difference(ids(round.updated)).length,
               running: false,
               failed: failed,
             ),
