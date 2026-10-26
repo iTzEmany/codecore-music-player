@@ -254,3 +254,26 @@ Stesso telefono e script (brani da 30 s, `--playback`); confronto con la base 30
 | PSS | 231 MB | 229 MB | — | — | sì |
 
 - Report: `build/perf/streaming-48.md`, `r48-*.md` (giri alternati con `--only`; «Album» e «Apri album» richiedono anche «Tutti i brani» nell'elenco, che apre la scheda).
+
+## Dopo la fase 53 (`arricchimento-53`, 26/10)
+
+Stesso telefono e script (brani da 30 s, `--playback`), con il completamento dell'arricchimento acceso in sottofondo (D-133: tag e crediti). Tolleranza un frame per scenario (D-85, D-90): contro «Finale» e, dove «Finale» usava lo script vecchio, contro la base 30 s della fase 47.
+
+| Scenario | Finale | Base 30 s | Fase 53 | Ripetuti (`--only`) | ok |
+|---|---|---|---|---|---|
+| Pallino schede | 4,3 % | 4,3 % | 3,4 % | — | sì |
+| Tutti i brani | 0,8 % | 1,4 % | 0,8 % | 0,3 · 0,7 % | sì |
+| Album | 0,8 % | 0,8 % | 1,3 % | 0,2 · 1,1 % | sì (rumore: i ripetuti stanno sotto e sopra «Finale») |
+| Ricerca «notte» | 4,5 % | 5,2 % | 0,7 % | — | sì |
+| Apri album | 7,9 % | 4,1 % | 1,9 % | 1,3 · 2,5 % | sì |
+| In riproduzione | — | 1,6 % | 0,5 % | — | sì |
+| Lettore dal dock | — | 2,6 % | 2,0 % | — | sì |
+| Swipe mini player | 8,1 % | 2,9 % | 1,5 % | — | sì |
+| Fogli | 1,8 % | 3,5 % | 3,2 % | 3,2 · 2,7 % | sì contro la base 30 s; sopra «Finale», misurato con i brani da 1 s (vedi fase 47) |
+| Apertura player | 7,4 % | 1,7 % | 1,5 % | — | sì |
+| Anello | — | 1,7 % | 2,2 % | 0,0 · 2,5 % | sì (rumore: ~300 frame, i ripetuti stanno sotto e sopra la base) |
+| Avvio a freddo | 2500 ms | 2756 ms | 2583 ms | — | sì |
+| PSS | 270 MB | 231 MB | 242 MB | — | sì |
+
+- Report: `build/perf/arricchimento-53.md`, `r53-1.md`, `r53-2.md`, `r53-anello-1.md`, `r53-anello-2.md`. Misurato sull'APK costruito prima delle correzioni della review di architettura (rotellina, giro senza rete, elenco del giro pigro): nessuna tocca le liste e i fogli misurati.
+- Il completamento era in corso durante gli scenari (pillola «1» nell'intestazione) e si mette in pausa mentre si scorre: nessuno scenario peggiora contro la base.
