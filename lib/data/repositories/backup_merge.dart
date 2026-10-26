@@ -87,7 +87,7 @@ Future<MergeReport> mergeUserData(AppDatabase db, UserData data, TrackResolver r
       }
       final ck = u.coverKey;
       if (u.coverSource > 0 && ck != null && t.coverSource != 2 && _coverFileExists(coversDir, ck)) {
-        upd = upd.copyWith(coverSource: Value(u.coverSource), coverKey: Value(ck));
+        upd = upd.copyWith(coverSource: Value(u.coverSource), coverKey: Value(ck), hasCover: const Value(true));
       }
       await (db.update(db.tracks)..where((r) => r.id.equals(id))).write(upd);
       if (u.credits.isNotEmpty || u.details != null) {

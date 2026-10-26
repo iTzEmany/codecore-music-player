@@ -68,6 +68,8 @@ void main() {
         coversDir: covers);
     expect(r.recognized, 3);
     expect(((await track('a')).coverSource, (await track('a')).coverKey), (2, 'manual_a'));
+    expect((await track('a')).hasCover, isTrue);
+    expect((await track('b')).hasCover, isFalse);
     expect(((await track('b')).coverSource, (await track('b')).coverKey), (0, null));
     expect(((await track('c')).coverSource, (await track('c')).coverKey), (0, null));
   });
