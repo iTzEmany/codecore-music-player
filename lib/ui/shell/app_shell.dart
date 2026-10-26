@@ -133,11 +133,16 @@ class AppShell extends ConsumerWidget {
     final body = TabFade(
       child: IndexedStack(
         index: index,
+        // Offstage does not stop tickers: a hidden tab's spinner would keep
+        // repainting the whole stack.
         children: [
-          tab(NavTab.home.index, const HomeScreen()),
-          tab(NavTab.search.index, const SearchScreen()),
-          tab(NavTab.library.index, const LibraryScreen()),
-          tab(NavTab.memory.index, const MemoryScreen()),
+          for (final (i, page) in [
+            (NavTab.home.index, const HomeScreen()),
+            (NavTab.search.index, const SearchScreen()),
+            (NavTab.library.index, const LibraryScreen()),
+            (NavTab.memory.index, const MemoryScreen()),
+          ])
+            TickerMode(enabled: i == index, child: tab(i, page)),
         ],
       ),
     );

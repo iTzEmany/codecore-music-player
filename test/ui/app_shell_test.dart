@@ -1,4 +1,5 @@
 import 'package:codecore/data/db/app_database.dart';
+import 'package:codecore/providers/activity_providers.dart';
 import 'package:codecore/providers/memory_providers.dart';
 import 'package:codecore/providers/nav_providers.dart';
 import 'package:codecore/providers/ui_providers.dart';
@@ -20,6 +21,7 @@ import 'package:codecore/ui/widgets/speed_button.dart';
 import 'package:codecore/ui/widgets/selection_bar.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -52,6 +54,27 @@ Finder _bar(String label) => find
     .hitTestable();
 
 void main() {
+  testWidgets('a spinner in a hidden tab does not tick; in the shown tab it does',
+      (t) async {
+    _phone(t);
+    final h = await Harness.create(t, tracks: 2);
+    await h.pump(t, const AppShell(), extraOverrides: [
+      activityProvider.overrideWithValue(const ActivityState([
+        ActivityItem(kind: ActivityKind.scan, key: 'scan', name: null),
+      ], [])),
+    ]);
+    await _settle(t);
+    expect(find.byType(CircularProgressIndicator), findsWidgets);
+    expect(SchedulerBinding.instance.transientCallbackCount, greaterThan(0));
+    await t.tap(_bar('Memoria'));
+    await _settle(t);
+    expect(SchedulerBinding.instance.transientCallbackCount, 0);
+    await t.tap(_bar('Home'));
+    await _settle(t);
+    expect(SchedulerBinding.instance.transientCallbackCount, greaterThan(0));
+    await h.dispose(t);
+  });
+
   testWidgets('no track: dock holds only the tabs', (t) async {
     _phone(t);
     final h = await Harness.create(t, tracks: 2);
@@ -177,6 +200,7 @@ void main() {
     final h = await Harness.create(tester);
     await h.pump(tester, const AppShell());
     await tester.tap(find.text('Libreria'));
+    await tester.pump(const Duration(milliseconds: 300));
     await tester.pump(const Duration(milliseconds: 300));
     expect(find.text('Aggiungi la tua cartella musicale'), findsWidgets);
     await h.dispose(tester);
