@@ -246,7 +246,7 @@ class StatsQueries {
     final artistCover = <String, ({String cover, int n})>{};
     if (artistEntries.isNotEmpty) {
       for (final r in await _q(
-        'SELECT lower(trim(artist)) AS k, cover_key, COUNT(*) AS n FROM tracks '
+        'SELECT lower(trim(artist)) AS k, cover_key, SUM(cover_source < 2) AS n FROM tracks '
         'WHERE missing = 0 AND ignored = 0 AND kind = 0 AND cover_key IS NOT NULL '
         'AND lower(trim(artist)) IN (${List.filled(artistEntries.length, '?').join(',')}) '
         'GROUP BY k, cover_key ORDER BY k, n DESC, cover_key',
@@ -278,7 +278,7 @@ class StatsQueries {
         ? const <String, String?>{}
         : {
             for (final r in await _q(
-              'SELECT album_key, MIN(cover_key) AS cover FROM tracks WHERE album_key IN '
+              'SELECT album_key, COALESCE(MIN(CASE WHEN cover_source = 1 THEN cover_key END), MIN(CASE WHEN cover_source = 0 THEN cover_key END), MIN(cover_key)) AS cover FROM tracks WHERE album_key IN '
               '(${List.filled(albumEntries.length, '?').join(',')}) GROUP BY album_key',
               [for (final e in albumEntries) Variable.withString(e.key)],
             ))

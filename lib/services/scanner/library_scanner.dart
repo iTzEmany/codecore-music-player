@@ -125,7 +125,7 @@ class LibraryScanner {
     var done = 0;
     yield ScanProgress(total: changed.length);
     final pending = <TracksCompanion>[];
-    final albumCovers = <String, String?>{};
+    final albumCovers = <String, ({String? key, int source})>{};
 
     for (var i = 0; i < changed.length; i += _group) {
       final end = i + _group > changed.length ? changed.length : i + _group;
@@ -179,7 +179,7 @@ class LibraryScanner {
     Folder folder,
     _Found f,
     TagInfo t,
-    Map<String, String?> albumCovers,
+    Map<String, ({String? key, int source})> albumCovers,
   ) async {
     final dir = p.dirname(f.path);
     final albumKey = computeAlbumKey(
@@ -188,16 +188,9 @@ class LibraryScanner {
       album: t.album,
       directory: dir,
     );
-    String? coverKey;
-    if (albumCovers.containsKey(albumKey)) {
-      coverKey = albumCovers[albumKey];
-    } else {
-      coverKey = await _resolveCover(albumKey, dir, t);
-      albumCovers[albumKey] = coverKey;
-      if (coverKey != null) {
-        await _tracks.setCoverForAlbum(albumKey, true, coverKey);
-      }
-    }
+    // An album with a hand-picked cover gives it to every new track.
+    final cover = albumCovers[albumKey] ??= await _albumCover(albumKey, dir, t);
+    final coverKey = cover.key;
     final ext = p.extension(f.path).replaceFirst('.', '').toLowerCase();
     var title = t.title ?? p.basenameWithoutExtension(f.path);
     var artist = t.artist;
@@ -229,9 +222,30 @@ class LibraryScanner {
       channels: Value(t.channels),
       hasCover: Value(coverKey != null),
       coverKey: Value(coverKey),
+      coverSource: Value(cover.source),
       replayGainDb: Value(t.replayGainDb),
       isrc: Value(t.isrc),
     );
+  }
+
+  Future<({String? key, int source})> _albumCover(String albumKey, String dir, TagInfo t) async {
+    final manual = await _tracks.albumManualRow(albumKey);
+    if (manual?.coverKey != null) return (key: manual!.coverKey, source: 1);
+    final key = await _resolveCover(albumKey, dir, t);
+    if (key != null) await _tracks.setCoverForAlbum(albumKey, true, key);
+    return (key: key, source: 0);
+  }
+
+  /// The automatic cover of [albumKey] for the file at [path]: the saved original,
+  /// else the picture in the file or the folder. Null when there is none.
+  Future<String?> originalCoverKey(String albumKey, String path) async {
+    if (_covers.fileFor(CoverStore.coverKeyFor(albumKey)) != null) return CoverStore.coverKeyFor(albumKey);
+    try {
+      return await _resolveCover(albumKey, p.dirname(path), await _tags.read(path));
+    } on Object catch (e, st) {
+      AppLog.w('original cover not resolved: $path', e, st);
+      return null;
+    }
   }
 
   Future<String?> _resolveCover(String albumKey, String dir, TagInfo t) async {

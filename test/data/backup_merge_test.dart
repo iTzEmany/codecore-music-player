@@ -53,6 +53,82 @@ void main() {
     expect((b.playCount, b.lastPlayedAt, b.lyricsPlain), (9, 900, 'mine'));
   });
 
+  test('a hand cover is taken only when its file is there; old backups leave covers alone', () async {
+    final covers = Directory.systemTemp.createTempSync('bm');
+    addTearDown(() => covers.deleteSync(recursive: true));
+    File('${covers.path}/manual_a.jpg').writeAsBytesSync([1]);
+    final r = await mergeUserData(
+        db,
+        UserData(createdAt: 1, tracks: [
+          TrackUserData(ref: ref('a'), coverSource: 2, coverKey: 'manual_a'),
+          TrackUserData(ref: ref('b'), coverSource: 1, coverKey: 'manual_gone'),
+          TrackUserData(ref: ref('c'), favorite: true),
+        ]),
+        await PlaylistSyncRepository(db).resolver(),
+        coversDir: covers);
+    expect(r.recognized, 3);
+    expect(((await track('a')).coverSource, (await track('a')).coverKey), (2, 'manual_a'));
+    expect((await track('a')).hasCover, isTrue);
+    expect((await track('b')).hasCover, isFalse);
+    expect(((await track('b')).coverSource, (await track('b')).coverKey), (0, null));
+    expect(((await track('c')).coverSource, (await track('c')).coverKey), (0, null));
+  });
+
+  group('hand cover safety', () {
+    final badKeys = ['../escape', '..', 'a/b'];
+
+    Future<MergeReport> mergeCovers(Directory covers, List<TrackUserData> tracks) async =>
+        mergeUserData(db, UserData(createdAt: 1, tracks: tracks),
+            await PlaylistSyncRepository(db).resolver(), coversDir: covers);
+
+    test('hostile coverKeys are ignored even when a file exists', () async {
+      final covers = Directory.systemTemp.createTempSync('bm');
+      final escape = File('${covers.parent.path}/escape.jpg')..writeAsBytesSync([1]);
+      addTearDown(() {
+        covers.deleteSync(recursive: true);
+        if (escape.existsSync()) escape.deleteSync();
+      });
+      File('${covers.path}/a').createSync();
+      File('${covers.path}/a.jpg').writeAsBytesSync([1]);
+      await mergeCovers(covers, [
+        for (final (i, k) in badKeys.indexed) TrackUserData(ref: ref(['a', 'b', 'c'][i]), coverSource: 1, coverKey: k),
+      ]);
+      for (final n in ['a', 'b', 'c']) {
+        expect(((await track(n)).coverSource, (await track(n)).coverKey), (0, null), reason: n);
+      }
+    });
+
+    test('coverSource 0 with a coverKey changes nothing', () async {
+      final covers = Directory.systemTemp.createTempSync('bm');
+      addTearDown(() => covers.deleteSync(recursive: true));
+      File('${covers.path}/k.jpg').writeAsBytesSync([1]);
+      await mergeCovers(covers, [TrackUserData(ref: ref('a'), coverKey: 'k')]);
+      final a = await track('a');
+      expect((a.coverSource, a.coverKey, a.hasCover), (0, null, false));
+    });
+
+    test('backup album pick does not split a locally picked album', () async {
+      final covers = Directory.systemTemp.createTempSync('bm');
+      addTearDown(() => covers.deleteSync(recursive: true));
+      File('${covers.path}/theirs.jpg').writeAsBytesSync([1]);
+      await (db.update(db.tracks)).write(const TracksCompanion(
+          coverSource: Value(1), coverKey: Value('mine'), hasCover: Value(true)));
+      await mergeCovers(covers, [TrackUserData(ref: ref('a'), coverSource: 1, coverKey: 'theirs')]);
+      expect({for (final n in ['a', 'b', 'c']) (await track(n)).coverKey}, {'mine'});
+    });
+
+    test('a backup edit that moves an album-pick row to another album leaves the old pick behind', () async {
+      await (db.update(db.tracks)).write(const TracksCompanion(
+          coverSource: Value(1), coverKey: Value('mine'), hasCover: Value(true)));
+      await merge(UserData(createdAt: 1, tracks: [
+        TrackUserData(ref: ref('a'), edit: const TrackEditData(title: 'a', artist: 'Art', album: 'Other')),
+      ]));
+      final a = await track('a');
+      expect((a.coverSource, a.coverKey), (0, null));
+      expect((await track('b')).coverKey, 'mine');
+    });
+  });
+
   test('a hand edit applies to an untouched track but never over a local edit', () async {
     await (db.update(db.tracks)..where((r) => r.title.equals('c'))).write(
         const TracksCompanion(userEdited: Value(true), genre: Value('Local')));

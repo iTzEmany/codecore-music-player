@@ -200,4 +200,42 @@ void main() {
     expect((await here.select(here.tracks).getSingle()).isFavorite, isTrue);
     expect(File(p.join(dest.path, 'c1.jpg')).readAsBytesSync(), [7]);
   });
+
+  test('mergeBackup puts back hand-set covers (track and album) with their files; a track with its own hand cover keeps it', () async {
+    final src = AppDatabase(NativeDatabase.memory());
+    Future<void> add(AppDatabase d, String t, {int source = 0, String? key}) =>
+        d.into(d.tracks).insert(TracksCompanion.insert(
+            path: '/m/$t.mp3', title: t, albumKey: 'k', format: 'mp3', sizeBytes: 1, mtimeMs: 1, addedAt: 1,
+            coverSource: Value(source), coverKey: Value(key)));
+    await add(src, 'one', source: 2, key: 'manual_one');
+    await add(src, 'two', source: 1, key: 'manual_alb');
+    await add(src, 'three', source: 2, key: 'manual_theirs');
+    await add(src, 'auto', key: 'auto_k');
+    SharedPreferences.setMockInitialValues({'deviceId': 'A'});
+    final covers = Directory(p.join(dir.path, 'h-covers'))..createSync();
+    for (final k in ['manual_one', 'manual_alb', 'manual_theirs', 'auto_k']) {
+      File(p.join(covers.path, '$k.jpg')).writeAsBytesSync(k.codeUnits);
+    }
+    final zip = File(p.join(dir.path, 'h.zip'));
+    await BackupService(
+      db: src, prefs: await SharedPreferences.getInstance(), coversDir: covers,
+      downloadsFile: File(p.join(dir.path, 'none.json')), deviceId: 'A',
+    ).createBackup(zip.path);
+    await src.close();
+
+    final here = AppDatabase(NativeDatabase.memory());
+    addTearDown(here.close);
+    for (final t in ['one', 'two', 'auto']) {
+      await add(here, t);
+    }
+    await add(here, 'three', source: 2, key: 'manual_mine');
+    final dest = Directory(p.join(dir.path, 'h-dest'));
+    await mergeBackup(zip, here, dest);
+    final rows = {for (final t in await here.select(here.tracks).get()) t.title: (t.coverSource, t.coverKey)};
+    expect(rows['one'], (2, 'manual_one'));
+    expect(rows['two'], (1, 'manual_alb'));
+    expect(rows['three'], (2, 'manual_mine'), reason: 'its own hand cover stays');
+    expect(rows['auto'], (0, null), reason: 'automatic covers are not carried by the merge');
+    expect(File(p.join(dest.path, 'manual_one.jpg')).readAsBytesSync(), 'manual_one'.codeUnits);
+  });
 }

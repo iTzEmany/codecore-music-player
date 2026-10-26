@@ -5572,4 +5572,24 @@ class AppLocalizationsDe extends AppLocalizations {
     );
     return 'Anreicherung: $_temp0, $none ohne Ergebnis';
   }
+
+  @override
+  String get coverChange => 'Cover ändern';
+
+  @override
+  String get coverRestoreOriginal => 'Originalcover wiederherstellen';
+
+  @override
+  String get coverSourceDevice => 'Vom Gerät';
+
+  @override
+  String get coverSourceLibrary => 'Aus der Mediathek';
+
+  @override
+  String get coverSourceOnline => 'Online';
+
+  @override
+  String coverSizePx(int w, int h) {
+    return '$w × $h';
+  }
 }

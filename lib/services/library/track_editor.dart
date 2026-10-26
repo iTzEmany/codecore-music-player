@@ -3,6 +3,7 @@ import 'package:path/path.dart' as p;
 
 import '../../core/text_utils.dart';
 import '../../data/db/app_database.dart';
+import '../../data/repositories/track_repository.dart';
 import '../tags/tag_reader.dart';
 import '../tags/tag_writer.dart';
 import 'track_file_sync.dart';
@@ -69,6 +70,13 @@ class TrackEditor {
     return files.write(tracks, changes);
   }
 
+  Future<bool> _isAlbumPick(String coverKey) async =>
+      await (_db.select(_db.tracks)
+            ..where((t) => t.coverKey.equals(coverKey) & t.coverSource.equals(1))
+            ..limit(1))
+          .getSingleOrNull() !=
+      null;
+
   Future<void> save(Track track, TrackEdit e) async {
     final artist = _blankToNull(e.artist);
     final album = _blankToNull(e.album);
@@ -92,6 +100,7 @@ class TrackEditor {
         userEdited: const Value(true),
       ),
     );
+    await TrackRepository(_db).settleMovedCover(track, key);
   }
 
   /// Puts [tracks] in the album [album] by [albumArtist] (merging with it if
@@ -107,25 +116,31 @@ class TrackEditor {
   }) async {
     final al = _blankToNull(album);
     final aa = _blankToNull(albumArtist);
+    final repo = TrackRepository(_db);
     await _db.transaction(() async {
+      // A hand-picked album cover travels with [cover]; a hand-picked track one never changes.
+      final pick = cover?.coverKey;
+      final source = pick != null && await _isAlbumPick(pick) ? 1 : 0;
       for (final t in tracks) {
+        final key = computeAlbumKey(
+          albumArtist: aa,
+          artist: t.artist,
+          album: al,
+          directory: p.dirname(t.path),
+        );
+        final withCover = cover != null && t.coverSource != 2;
         await (_db.update(_db.tracks)..where((r) => r.id.equals(t.id))).write(
           TracksCompanion(
             album: Value(al),
             albumArtist: Value(aa),
-            albumKey: Value(
-              computeAlbumKey(
-                albumArtist: aa,
-                artist: t.artist,
-                album: al,
-                directory: p.dirname(t.path),
-              ),
-            ),
+            albumKey: Value(key),
             userEdited: const Value(true),
-            hasCover: cover == null ? const Value.absent() : Value(cover.hasCover),
-            coverKey: cover == null ? const Value.absent() : Value(cover.coverKey),
+            hasCover: withCover ? Value(cover.hasCover) : const Value.absent(),
+            coverKey: withCover ? Value(cover.coverKey) : const Value.absent(),
+            coverSource: withCover ? Value(source) : const Value.absent(),
           ),
         );
+        if (cover == null) await repo.settleMovedCover(t, key);
       }
     });
     return tracks;
@@ -142,6 +157,7 @@ class TrackEditor {
           userEdited: Value(t.userEdited),
           hasCover: Value(t.hasCover),
           coverKey: Value(t.coverKey),
+          coverSource: Value(t.coverSource),
         ),
       );
     }
@@ -169,5 +185,6 @@ class TrackEditor {
         userEdited: const Value(false),
       ),
     );
+    await TrackRepository(_db).settleMovedCover(track, key);
   }
 }

@@ -5602,4 +5602,24 @@ class AppLocalizationsFr extends AppLocalizations {
     );
     return 'Enrichissement : $_temp0, $none sans résultat';
   }
+
+  @override
+  String get coverChange => 'Changer la pochette';
+
+  @override
+  String get coverRestoreOriginal => 'Rétablir la pochette d’origine';
+
+  @override
+  String get coverSourceDevice => 'Depuis l’appareil';
+
+  @override
+  String get coverSourceLibrary => 'Depuis la bibliothèque';
+
+  @override
+  String get coverSourceOnline => 'En ligne';
+
+  @override
+  String coverSizePx(int w, int h) {
+    return '$w × $h';
+  }
 }

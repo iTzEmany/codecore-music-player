@@ -1,3 +1,4 @@
+import 'package:codecore/services/online/deezer_client.dart';
 import 'package:codecore/services/online/itunes_client.dart';
 import 'package:codecore/services/online/lrc_parser.dart';
 import 'package:codecore/services/online/lrclib_client.dart';
@@ -136,6 +137,24 @@ void main() {
       expect(q, contains('A Song'));
       expect(q.toSet().length, q.length);
     });
+  });
+
+  test('albumCovers: iTunes and Deezer give one proposal per edition, at the big size', () async {
+    final it = await ItunesClient(FakeWeb((_, _) => {
+          'results': [
+            {'collectionName': 'A', 'artworkUrl100': 'https://x/100x100bb.jpg'},
+            {'collectionName': 'A (Deluxe)', 'artworkUrl100': 'https://y/100x100bb.jpg'},
+            {'collectionName': 'No art'},
+          ]
+        })).albumCovers('A', 'B');
+    expect([for (final c in it) c.url], ['https://x/600x600bb.jpg', 'https://y/600x600bb.jpg']);
+    final dz = await DeezerClient(FakeWeb((_, _) => {
+          'data': [
+            {'title': 'A', 'cover_xl': 'https://d/1.jpg'},
+            {'title': 'A 2', 'cover_xl': 'https://d/2.jpg'},
+          ]
+        })).albumCovers('A', 'B');
+    expect([for (final c in dz) c.title], ['A', 'A 2']);
   });
 
   group('LRC', () {

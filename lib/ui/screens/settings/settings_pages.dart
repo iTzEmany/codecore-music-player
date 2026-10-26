@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -8,6 +6,7 @@ import '../../../core/app_info.dart';
 import '../../../core/constants.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../l10n/l10n_ext.dart';
+import '../../../providers/cover_ops.dart';
 import '../../../providers/track_ops.dart';
 import '../../../providers/equalizer_providers.dart';
 import '../../../providers/library_providers.dart';
@@ -530,13 +529,7 @@ Future<void> _clearCovers(BuildContext context, WidgetRef ref) async {
   );
   if (!ok || !context.mounted) return;
   try {
-    final dir = ref.read(coversDirProvider);
-    if (await dir.exists()) {
-      await for (final e in dir.list()) {
-        if (e is File) await e.delete();
-      }
-    }
-    await ref.read(trackOpsProvider).resetCovers();
+    await ref.read(coverOpsProvider).clearCache();
     ref.invalidate(coverIndexProvider);
   } on Object catch (e, st) {
     AppLog.e('clear covers failed', e, st);

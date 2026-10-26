@@ -3012,5 +3012,21 @@
         "type": "int"
       }
     }
+  },
+  "coverChange": "Cover ändern",
+  "coverRestoreOriginal": "Originalcover wiederherstellen",
+  "coverSourceDevice": "Vom Gerät",
+  "coverSourceLibrary": "Aus der Mediathek",
+  "coverSourceOnline": "Online",
+  "coverSizePx": "{w} × {h}",
+  "@coverSizePx": {
+    "placeholders": {
+      "w": {
+        "type": "int"
+      },
+      "h": {
+        "type": "int"
+      }
+    }
   }
 }

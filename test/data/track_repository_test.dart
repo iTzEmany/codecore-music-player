@@ -152,4 +152,27 @@ void main() {
     await repo.setLyrics(id, plain: 'z');
     expect((await db.select(db.trackEnrich).getSingle()).lyricsByUser, true);
   });
+
+  test('a rescan with a new mtime and another cover keeps a track pick', () async {
+    await repo.upsertBatch([row('/a.mp3', 'A')]);
+    final id = (await repo.byPath('/a.mp3'))!.id;
+    await repo.setManualCover(id, 'mine');
+    await repo.upsertBatch([
+      row('/a.mp3', 'A', mtime: 9).copyWith(coverKey: const Value('auto2'), hasCover: const Value(true)),
+    ]);
+    final t = (await repo.byPath('/a.mp3'))!;
+    expect([t.coverKey, t.coverSource, t.mtimeMs], ['mine', 2, 9]);
+  });
+
+  test('a row that enters an album with a hand-picked cover takes its key and source', () async {
+    await repo.upsertBatch([row('/a.mp3', 'A'), row('/b.mp3', 'B')]);
+    await repo.setManualAlbumCover('k', 'pick');
+    final entering = row('/b.mp3', 'B', mtime: 9)
+        .copyWith(coverKey: const Value('pick'), hasCover: const Value(true), coverSource: const Value(1));
+    await repo.upsertBatch([entering, row('/c.mp3', 'C').copyWith(coverKey: const Value('pick'), coverSource: const Value(1))]);
+    for (final p in ['/b.mp3', '/c.mp3']) {
+      final t = (await repo.byPath(p))!;
+      expect([t.coverKey, t.coverSource], ['pick', 1], reason: p);
+    }
+  });
 }

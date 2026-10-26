@@ -65,8 +65,11 @@ class StreamPromoter {
     // Each step is logged on its own so one failure never skips the others.
     Track? row;
     String? oldCover;
+    var handPicked = false;
     await _step(key, 'row', () async {
-      oldCover = (await tracks.streamRow(key))?.coverKey;
+      final shadow = await tracks.streamRow(key);
+      oldCover = shadow?.coverKey;
+      handPicked = (shadow?.coverSource ?? 0) > 0;
       final existing = await tracks.byPath(dest);
       if (existing != null) {
         // A library row (e.g. missing) already owns this path: the shadow row merges into it.
@@ -76,7 +79,8 @@ class StreamPromoter {
       } else {
         row = await tracks.promoteStreamRow(key, dest, folder.id, File(dest));
         final r0 = row;
-        if (r0 != null) await _moveCover(oldCover, r0.albumKey);
+        // A hand-picked cover stays on its row (R-66).
+        if (r0 != null && !handPicked) await _moveCover(oldCover, r0.albumKey);
       }
     });
     await _step(key, 'index', () async => (await index()).add(r.id, dest, source: r.source));

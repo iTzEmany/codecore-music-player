@@ -3256,5 +3256,21 @@
         "type": "int"
       }
     }
+  },
+  "coverChange": "Alterar capa",
+  "coverRestoreOriginal": "Restaurar capa original",
+  "coverSourceDevice": "Do dispositivo",
+  "coverSourceLibrary": "Da biblioteca",
+  "coverSourceOnline": "Online",
+  "coverSizePx": "{w} × {h}",
+  "@coverSizePx": {
+    "placeholders": {
+      "w": {
+        "type": "int"
+      },
+      "h": {
+        "type": "int"
+      }
+    }
   }
 }

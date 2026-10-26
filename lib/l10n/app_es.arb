@@ -3012,5 +3012,21 @@
         "type": "int"
       }
     }
+  },
+  "coverChange": "Cambiar carátula",
+  "coverRestoreOriginal": "Restaurar carátula original",
+  "coverSourceDevice": "Del dispositivo",
+  "coverSourceLibrary": "De la biblioteca",
+  "coverSourceOnline": "En línea",
+  "coverSizePx": "{w} × {h}",
+  "@coverSizePx": {
+    "placeholders": {
+      "w": {
+        "type": "int"
+      },
+      "h": {
+        "type": "int"
+      }
+    }
   }
 }

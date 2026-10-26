@@ -189,4 +189,26 @@ void main() {
       'FIRST',
     );
   });
+
+  test('a rescan keeps a hand-picked cover and a new track of the album takes it', () async {
+    final d = music();
+    final folder = await folders.add(d.path);
+    await scanner.scan(folder).drain<void>();
+    await tracks.setManualAlbumCover(
+        (await tracks.byPath(p.join(d.path, 'a.mp3')))!.albumKey, 'manual:album:k:1');
+    final autoKey = CoverStore.coverKeyFor((await tracks.byPath(p.join(d.path, 'a.mp3')))!.albumKey);
+
+    // a changed file and a new one
+    File(p.join(d.path, 'a.mp3')).writeAsBytesSync(List.filled(500, 1));
+    File(p.join(d.path, 'd.mp3')).writeAsBytesSync([0, 1]);
+    reader.byName['d.mp3'] = const TagInfo(
+        title: 'd', artist: 'Art', album: 'Alb', coverBytes: [1, 2, 3], coverMime: 'image/jpeg');
+    await scanner.scan(folder).drain<void>();
+
+    for (final n in ['a.mp3', 'd.mp3']) {
+      final t = (await tracks.byPath(p.join(d.path, n)))!;
+      expect([t.coverKey, t.coverSource], ['manual:album:k:1', 1], reason: n);
+    }
+    expect(autoKey, isNot('manual:album:k:1'));
+  });
 }

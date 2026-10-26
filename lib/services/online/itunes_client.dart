@@ -126,6 +126,30 @@ class ItunesClient {
     return best;
   }
 
+  /// Several editions of an album, for the cover picker: `(title, big cover url)`.
+  Future<List<({String title, String url})>> albumCovers(String album, String artist,
+      {CancelToken? cancel}) async {
+    final data = await _web.getJson(_endpoint,
+        query: {
+          'term': '$artist $album'.trim(),
+          'media': 'music',
+          'entity': 'album',
+          'limit': '8',
+          ..._store(),
+        },
+        cancel: cancel);
+    final results = data is Map ? data['results'] : null;
+    return [
+      if (results is List)
+        for (final r in results)
+          if (r is Map && r['artworkUrl100'] is String)
+            (
+              title: '${r['collectionName'] ?? ''}',
+              url: (r['artworkUrl100'] as String).replaceFirst('100x100bb', '600x600bb'),
+            ),
+    ];
+  }
+
   ItunesMatch? _pickBest(List<dynamic> results, String title, String artist) {
     final wantTitle = _lc(title), wantTitleCore = _lc(coreTitle(title));
     final wantArtist = _lc(artist);

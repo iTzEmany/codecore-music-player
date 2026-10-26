@@ -16,6 +16,8 @@ import '../../theme/app_theme.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/collection_header.dart';
 import '../../widgets/cover_image.dart';
+import '../../widgets/cover_picker_sheet.dart';
+import '../../../providers/cover_ops.dart';
 import '../../widgets/async_body.dart';
 import '../../widgets/selection_bar.dart';
 import '../../widgets/track_row.dart';
@@ -66,6 +68,11 @@ class AlbumDetailScreen extends ConsumerWidget {
     final name = album.title ?? l.unknownAlbum;
     final playCtx = PlayContext(PlayContextKind.album, name);
     final list = tracks.value ?? const <Track>[];
+    // The summary is a snapshot: a new cover key shows up through the live list.
+    final coverKey = ref.watch(albumsProvider.select(
+          (a) => a.value?.where((x) => x.albumKey == album.albumKey).firstOrNull?.coverKey,
+        )) ??
+        album.coverKey;
     final ctrl = ref.read(playerControllerProvider);
 
     // Follow the rows once loaded: the summary is a snapshot (a track moved
@@ -133,9 +140,9 @@ EntranceScope(
         selectionBar: SelectionBarSlot(listKey: key, tracks: list),
         title: name,
         name: name,
-        coverKey: album.coverKey,
+        coverKey: coverKey,
         cover: (s) =>
-            CoverImage(coverKey: album.coverKey, size: s, radius: CcDims.rGrid),
+            CoverImage(coverKey: coverKey, size: s, radius: CcDims.rGrid),
         subtitle: _AlbumSubtitle(album: album),
         meta: meta,
         onPlay: list.isEmpty
@@ -231,6 +238,16 @@ class _AlbumMenu extends ConsumerWidget {
                 } else if (!ref.read(enrichJobProvider.notifier).start(todo)) {
                   showMsg(context, l.enrichBusy);
                 }
+              case _AlbumAction.cover:
+                showCoverPicker(
+                  context,
+                  save: (ops, bytes, mime) => ops.setAlbumCover(album.albumKey, bytes, mime),
+                  online: album.title == null
+                      ? null
+                      : (album: album.title!, artist: album.variousArtists ? '' : album.artist ?? ''),
+                );
+              case _AlbumAction.restoreCover:
+                ref.read(coverOpsProvider).restoreAlbumCover(album.albumKey);
               case _AlbumAction.merge:
                 // The album this page shows is gone once merged: leave it.
                 showAlbumMergeDialog(context, ref, album).then((merged) {
@@ -243,10 +260,13 @@ class _AlbumMenu extends ConsumerWidget {
             PopupMenuItem(value: _AlbumAction.playlist, child: Text(l.addToPlaylist)),
             PopupMenuItem(value: _AlbumAction.share, child: Text(l.shareMenu)),
             PopupMenuItem(value: _AlbumAction.enrich, child: Text(l.enrichAlbum)),
+            PopupMenuItem(value: _AlbumAction.cover, child: Text(l.coverChange)),
+            if (list.any((t) => t.coverSource == 1))
+              PopupMenuItem(value: _AlbumAction.restoreCover, child: Text(l.coverRestoreOriginal)),
             PopupMenuItem(value: _AlbumAction.merge, child: Text(l.albumMergeWith)),
           ],
         );
   }
 }
 
-enum _AlbumAction { queue, playlist, share, enrich, merge }
+enum _AlbumAction { queue, playlist, share, enrich, cover, restoreCover, merge }

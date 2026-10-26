@@ -147,6 +147,9 @@ class DuplicateRepository {
         coverKey: coverFrom == null
             ? const Value.absent()
             : Value(coverFrom.coverKey),
+        coverSource: coverFrom == null
+            ? const Value.absent()
+            : Value(coverFrom.coverSource),
         userEdited: edited == null ? const Value.absent() : const Value(true),
         title: edited == null ? const Value.absent() : Value(edited.title),
         artist: edited == null ? const Value.absent() : Value(edited.artist),

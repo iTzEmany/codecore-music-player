@@ -99,4 +99,16 @@ void main() {
     });
     expect((t.details!.label, t.details!.bpm, t.details!.explicit), (null, null, null));
   });
+
+  test('hand-set cover fields round trip; an old track without them reads as automatic', () {
+    const t = TrackUserData(ref: TrackRef(title: 'a'), coverSource: 2, coverKey: 'manual_x');
+    final back = TrackUserData.fromJson(jsonDecode(jsonEncode(t.toJson())) as Map<String, dynamic>);
+    expect((back.coverSource, back.coverKey), (2, 'manual_x'));
+    for (final v in <Object>[99, '1', -1, 1.5]) {
+      expect(TrackUserData.fromJson({'ref': {'title': 'a'}, 'coverSource': v}).coverSource, 0, reason: '$v');
+    }
+    final old = TrackUserData.fromJson({'ref': {'title': 'a'}, 'coverSource': 'x', 'coverKey': 5});
+    expect((old.coverSource, old.coverKey), (0, null));
+    expect(const TrackUserData(ref: TrackRef(title: 'a'), favorite: true).toJson().containsKey('coverSource'), isFalse);
+  });
 }

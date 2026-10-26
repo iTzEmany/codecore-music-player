@@ -82,4 +82,39 @@ void main() {
     expect(artists.firstWhere((a) => a.key == 'abba').coverKey, 'c2');
     expect(artists.firstWhere((a) => a.key == 'a').coverKey, isNull);
   });
+
+  test('album with no hand-picked cover: the lowest cover_key, as before', () async {
+    await db.customStatement("UPDATE tracks SET cover_key = 'b' WHERE path = '/1'");
+    await db.customStatement("UPDATE tracks SET cover_key = 'a' WHERE path = '/2'");
+    final albums = await q.watchAlbums().first;
+    expect(albums.firstWhere((a) => a.artist == 'Queen').coverKey, 'a');
+  });
+
+  test('album cover picked by hand (cover_source 1) wins over automatic ones', () async {
+    await db.customStatement("UPDATE tracks SET cover_key = 'a' WHERE path = '/1'");
+    await db.customStatement(
+        "UPDATE tracks SET cover_key = 'z', cover_source = 1 WHERE path = '/2'");
+    final albums = await q.watchAlbums().first;
+    expect(albums.firstWhere((a) => a.artist == 'Queen').coverKey, 'z');
+  });
+
+  test('a single track cover (cover_source 2) never becomes album or artist cover', () async {
+    await db.customStatement(
+        "UPDATE tracks SET cover_key = 'c1' WHERE path = '/1'");
+    await db.customStatement(
+        "UPDATE tracks SET cover_key = 'a', cover_source = 2 WHERE path = '/2'");
+    final albums = await q.watchAlbums().first;
+    expect(albums.firstWhere((a) => a.artist == 'Queen').coverKey, 'c1');
+    final artists = await q.watchArtists().first;
+    expect(artists.firstWhere((a) => a.key == 'queen').coverKey, 'c1');
+  });
+
+  test('album and artist with only single-track covers (cover_source 2) still get one', () async {
+    await db.customStatement(
+        "UPDATE tracks SET cover_key = 'a', cover_source = 2 WHERE path = '/1'");
+    final albums = await q.watchAlbums().first;
+    expect(albums.firstWhere((a) => a.artist == 'Queen').coverKey, 'a');
+    final artists = await q.watchArtists().first;
+    expect(artists.firstWhere((a) => a.key == 'queen').coverKey, 'a');
+  });
 }

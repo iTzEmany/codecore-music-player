@@ -39,6 +39,14 @@
 - Telefono Mi A3 (`0d7ae9df206e`): installare, misurare, pilotare; disinstallare solo con `-k`; mai cancellare dati o file musicali; niente invii/Jam verso altri (D-91)
 - Motorola edge 40 (`ZY22HKD85K`, libreria vera) nelle fasi 50–54 (D-125, D-126): APK debug e prove con i brani presenti; prima chiedi all'utente un backup completo dall'app; firma diversa → fermati, backup confermato, poi `uninstall -k` e ripristino; mai cancellare file musicali
 
+## Risparmio di token (dalla fase 51: 27,7M, metà nella chat principale)
+- **Chat principale**: fuori dalle aree a rischio leggi solo `git diff --stat` e l'esito del reviewer, mai il diff intero. Niente log lunghi in chat: la CI rossa va subito a `github-ci` con il numero della PR. Raggruppa i controlli in una sola chiamata Bash. A fine fase aggiorna `docs/handoff.md` e chiudi l'obiettivo, invece di proseguire fino alla compattazione.
+- **Task**: sotto la mezz'ora di lavoro (una sezione di schermata, un gruppo di ricerca, testi ARB) si accorpa al task vicino della stessa ondata. Al massimo 3–4 task per fase.
+- **Scheggia**: in modalità passo con effort `medium`, `high` solo nelle aree a rischio qui sopra. In modalità fase solo se la fase tocca aree a rischio. Per una fase di sola UI la saltiamo: la prova a vista è già nel passo «tuo» (es. 51.9).
+- **Review**: `/code-review high` solo sulle aree a rischio. La review di architettura di fine fase la fa Sonnet con effort high se la fase non tocca schema, backup o protocollo Jam; Opus negli altri casi.
+- **Test mirati di ogni task UI**: aggiungi sempre `test/ui/no_separator_literals_test.dart` e `test/ui/architecture_test.dart`, perché girano in pochi secondi (la CI era rossa in #30 per un `' · '`).
+- **Prompt degli implementer**: dai i simboli esatti da codegraph (file, nome, riga) e i test da scrivere, così l'agente non esplora da solo.
+
 ## Stime misurate
 - `sorveglia.sh`: la stima vuole l'unità (`6m`); un numero nudo vale secondi (2026-10-25)
 - `flutter test test/services/audio/ test/providers/` ~ 1m30 (2026-10-25)

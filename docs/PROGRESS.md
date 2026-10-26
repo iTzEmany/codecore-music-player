@@ -725,15 +725,16 @@ Feature «Arricchimento completo» (`docs/feature-arricchimento.md`, decisioni D
 - [~] 53.10 Prove a mano (utente)
 
 ## Fase 54 — Copertina a mano (`fase-54-copertina-a-mano.md`)
-- [ ] 54.1 `cover_ops.dart`: salvare e ripristinare
-- [ ] 54.2 Copertina d'album letta da `cover_source`
-- [ ] 54.3 Nessuno scrittore tocca una copertina a mano
-- [ ] 54.4 `cover_picker_sheet.dart`: file e libreria
-- [ ] 54.5 Proposte online con la misura
-- [ ] 54.6 «Cambia copertina» e «Ripristina copertina originale» nei menu
-- [ ] 54.7 Copertine a mano nel backup
-- [ ] 54.8 Controlli di fase (K-AR-01, K-AR-02, K-AR-03, K-AR-05)
-- [ ] 54.9 Prove a mano (utente)
+- [x] 54.1 `cover_ops.dart`: salvare e ripristinare
+- [x] 54.2 Copertina d'album letta da `cover_source`
+- [x] 54.3 Nessuno scrittore tocca una copertina a mano
+  - Audit 54.3: `resetCovers` azzera solo le righe `cover_source = 0`; «Svuota cache copertine» passa da `CoverOps.clearCache` e tiene i file a mano e delle playlist; `TrackEditor.save/saveMany/restoreMany/restoreFromFile`, l'arricchimento (`_writeFields`), `applyReceivedMeta` e l'unione da backup chiamano `settleMovedCover` quando cambia l'album (una riga a 1 prende la copertina dell'album d'arrivo); `saveMany` con copertina salta le righe a 2; la fusione dei duplicati copia anche `coverSource`; `EpisodeDownloader` inserisce righe nuove (source 0). Review Opus (8 rilievi) e scheggia (4 bug, 8 mutanti) corretti nella PR.
+- [x] 54.4 `cover_picker_sheet.dart`: file e libreria
+- [x] 54.5 Proposte online con la misura
+- [x] 54.6 «Cambia copertina» e «Ripristina copertina originale» nei menu
+- [x] 54.7 Copertine a mano nel backup
+- [x] 54.8 Controlli di fase (K-AR-01, K-AR-02, K-AR-03, K-AR-05)
+- [~] 54.9 Prove a mano (utente)
 
 ## Note di deviazione
 <!-- una riga per deviazione: data — task — cosa è cambiato e perché -->

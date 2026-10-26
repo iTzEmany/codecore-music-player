@@ -59,6 +59,26 @@ class DeezerClient {
     return j == null ? null : DeezerAlbum.fromJson(j);
   }
 
+  /// Several editions of an album, for the cover picker: `(title, big cover url)`.
+  Future<List<({String title, String url})>> albumCovers(
+    String album,
+    String artist, {
+    CancelToken? cancel,
+  }) async {
+    final j = await _get(
+      '$_base/search/album',
+      query: {'q': '$artist $album'.trim(), 'limit': '8'},
+      cancel: cancel,
+    );
+    final data = j?['data'];
+    return [
+      if (data is List)
+        for (final a in data)
+          if (a is Map && a['cover_xl'] is String)
+            (title: '${a['title'] ?? ''}', url: a['cover_xl'] as String),
+    ];
+  }
+
   /// [album] is an already-read album: it saves the `/album` request.
   Future<TrackDetails?> trackDetails(
     int deezerId, {

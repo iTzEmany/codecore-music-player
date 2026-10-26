@@ -3012,5 +3012,21 @@
         "type": "int"
       }
     }
+  },
+  "coverChange": "Change cover",
+  "coverRestoreOriginal": "Restore original cover",
+  "coverSourceDevice": "From device",
+  "coverSourceLibrary": "From library",
+  "coverSourceOnline": "Online",
+  "coverSizePx": "{w} × {h}",
+  "@coverSizePx": {
+    "placeholders": {
+      "w": {
+        "type": "int"
+      },
+      "h": {
+        "type": "int"
+      }
+    }
   }
 }

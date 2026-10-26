@@ -5535,4 +5535,24 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return 'Enrichment: $_temp0, $none with no result';
   }
+
+  @override
+  String get coverChange => 'Change cover';
+
+  @override
+  String get coverRestoreOriginal => 'Restore original cover';
+
+  @override
+  String get coverSourceDevice => 'From device';
+
+  @override
+  String get coverSourceLibrary => 'From library';
+
+  @override
+  String get coverSourceOnline => 'Online';
+
+  @override
+  String coverSizePx(int w, int h) {
+    return '$w × $h';
+  }
 }
