@@ -5607,10 +5607,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get coverChange => 'Changer la pochette';
 
   @override
-  String get coverRestoreOriginal => 'Rétablir la pochette d\'origine';
+  String get coverRestoreOriginal => 'Rétablir la pochette d’origine';
 
   @override
-  String get coverSourceDevice => 'Depuis l\'appareil';
+  String get coverSourceDevice => 'Depuis l’appareil';
 
   @override
   String get coverSourceLibrary => 'Depuis la bibliothèque';

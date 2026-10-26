@@ -3258,8 +3258,8 @@
     }
   },
   "coverChange": "Changer la pochette",
-  "coverRestoreOriginal": "Rétablir la pochette d'origine",
-  "coverSourceDevice": "Depuis l'appareil",
+  "coverRestoreOriginal": "Rétablir la pochette d’origine",
+  "coverSourceDevice": "Depuis l’appareil",
   "coverSourceLibrary": "Depuis la bibliothèque",
   "coverSourceOnline": "En ligne",
   "coverSizePx": "{w} × {h}",
