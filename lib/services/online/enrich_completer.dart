@@ -9,6 +9,10 @@ import 'enrichment_service.dart';
 /// something (`updated`) or were asked with an empty answer (`none`), per part.
 class EnrichRound {
   int worked = 0;
+
+  /// The run stopped on an error (logged): the rest of the library waits for
+  /// the next run; what was read before it is written and counted here.
+  bool failed = false;
   final Map<EnrichPart, List<int>> updated = {};
   final Map<EnrichPart, List<int>> none = {};
 }
@@ -91,37 +95,49 @@ class EnrichCompleter {
   Future<EnrichRound> _run() async {
     final round = EnrichRound();
     final tried = <int>{}; // a track that came out failed would be due again at once
+    final refused = <EnrichPart>{}; // a source that said «too many requests»: not again in this round
     final block = <EnrichGather>[];
     var wanted = parts();
+    Set<EnrichPart> switchedOn() => wanted = parts().difference(refused);
     try {
-      while (!_cancelled && (wanted = parts()).isNotEmpty) {
-        final ids = await repo.dueTrackIds(
-          wanted,
-          DateTime.fromMillisecondsSinceEpoch(_nowMs()),
-          limit: _chunk,
-          exclude: tried,
-          ignoreMarks: _now,
-        );
-        if (ids.isEmpty) break;
-        for (final id in ids) {
-          if (!_now) await _idle();
-          await service.limiter.wait();
-          if (_cancelled) break;
-          // The switches may have changed since the chunk was read.
-          if ((wanted = parts()).isEmpty) break;
-          tried.add(id);
-          try {
-            block.add(await service.gather(id, wanted, ignoreMarks: _now));
-          } on Object catch (e, st) {
-            AppLog.w('completion: track $id not read', e, st);
+      try {
+        while (!_cancelled && switchedOn().isNotEmpty) {
+          final ids = await repo.dueTrackIds(
+            wanted,
+            DateTime.fromMillisecondsSinceEpoch(_nowMs()),
+            limit: _chunk,
+            exclude: tried,
+            ignoreMarks: _now,
+          );
+          if (ids.isEmpty) break;
+          for (final id in ids) {
+            if (!_now) await _idle();
+            await service.limiter.wait();
+            if (_cancelled) break;
+            // The switches may have changed since the chunk was read.
+            if (switchedOn().isEmpty) break;
+            tried.add(id);
+            try {
+              final g = await service.gather(id, wanted, ignoreMarks: _now);
+              block.add(g);
+              refused.addAll([
+                for (final e in g.out.entries)
+                  if (e.value == PartOutcome.limited) e.key,
+              ]);
+            } on Object catch (e, st) {
+              AppLog.w('completion: track $id not read', e, st);
+            }
+            if (block.length >= blockSize) await _commit(block, round);
           }
-          if (block.length >= blockSize) await _commit(block, round, wanted);
+          await _commit(block, round);
         }
-        await _commit(block, round, wanted);
+      } finally {
+        // Whatever was read is written, also after an error or a cancel.
+        await _commit(block, round);
       }
-    } finally {
-      // Whatever was read is written, also after an error or a cancel.
-      await _commit(block, round, wanted);
+    } on Object catch (e, st) {
+      AppLog.w('completion: round stopped', e, st);
+      round.failed = true;
     }
     return round;
   }
@@ -129,7 +145,6 @@ class EnrichCompleter {
   Future<void> _commit(
     List<EnrichGather> block,
     EnrichRound round,
-    Set<EnrichPart> wanted,
   ) async {
     if (block.isEmpty) return;
     final items = [...block];
@@ -155,7 +170,7 @@ class EnrichCompleter {
       AppLog.w('completion: block of ${items.length} not saved', e, st);
     }
     final c = await repo.enrichCounts(
-      wanted,
+      parts(),
       DateTime.fromMillisecondsSinceEpoch(_nowMs()),
     );
     onProgress?.call(c.complete, c.total);

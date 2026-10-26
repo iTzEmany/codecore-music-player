@@ -5,6 +5,8 @@ import 'package:codecore/services/online/enrich_completer.dart';
 import 'package:codecore/services/online/enrich_parts.dart' as parts_lib;
 import 'package:codecore/services/online/enrichment_service.dart';
 import 'package:codecore/services/online/lrclib_client.dart';
+import 'package:codecore/services/online/http_client.dart' show RateLimiter;
+import 'package:dio/dio.dart' show CancelToken;
 import 'package:drift/drift.dart' show TableUpdateQuery, Value;
 import 'package:flutter_test/flutter_test.dart';
 
@@ -13,6 +15,35 @@ import '../../support/enrich_fakes.dart';
 const _lyrics = {EnrichPart.lyrics};
 const _lyricsAndSynced = {EnrichPart.lyrics, EnrichPart.synced};
 const _day = 24 * 3600 * 1000;
+
+/// A service whose first [failCommits] commits throw as a whole.
+class _Flaky implements EnrichmentService {
+  _Flaky(this.s, this.failCommits);
+
+  final EnrichmentService s;
+  int failCommits;
+
+  @override
+  RateLimiter get limiter => s.limiter;
+
+  @override
+  Future<EnrichGather> gather(
+    int trackId,
+    Set<EnrichPart> parts, {
+    bool force = false,
+    bool ignoreMarks = false,
+    CancelToken? cancel,
+  }) => s.gather(trackId, parts, force: force, ignoreMarks: ignoreMarks);
+
+  @override
+  Future<List<Map<EnrichPart, PartOutcome>>> commit(List<EnrichGather> items) {
+    if (failCommits-- > 0) throw StateError('disk full');
+    return s.commit(items);
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation i) => super.noSuchMethod(i);
+}
 
 void main() {
   late EnrichRig r;
@@ -308,6 +339,73 @@ void main() {
       expect(c.running, isFalse);
     });
 
+    test('a source that refuses is not asked again in the round', () async {
+      r.web.itunes = ItunesMode.limited;
+      final ids = [for (var n = 0; n < 30; n++) await track()];
+      final round = await completer(
+        parts: {EnrichPart.meta, EnrichPart.lyrics},
+      ).run();
+      expect(r.web.count('itunes'), 1);
+      expect(round.updated[EnrichPart.lyrics], ids); // the other part goes on
+      expect(round.updated[EnrichPart.meta], isNull);
+      expect((await r.enrichOf(ids[0]))?.metaNoneAt, isNull);
+    });
+
+    test('a refused part alone ends the round after one request', () async {
+      r.web.itunes = ItunesMode.limited;
+      for (var n = 0; n < 30; n++) {
+        await track();
+      }
+      final round = await completer(parts: {EnrichPart.meta}).run();
+      expect(r.web.count('itunes'), 1);
+      expect(round.worked, 0);
+    });
+
+    test('an error in the middle returns the round so far, written', () async {
+      final ids = [for (var n = 0; n < 5; n++) await track()];
+      var waits = 0;
+      final round = await completer(
+        idle: () async {
+          if (++waits == 3) throw StateError('boom');
+        },
+      ).run();
+      expect(round.failed, isTrue);
+      expect(round.worked, 2);
+      expect(round.updated[EnrichPart.lyrics], [ids[0], ids[1]]);
+      expect((await r.repo.getById(ids[1]))!.lyricsPlain, 'la la');
+      expect((await r.repo.getById(ids[2]))!.lyricsPlain, isNull);
+    });
+
+    test('a cancelled round writes what it read', () async {
+      final ids = [for (var n = 0; n < 3; n++) await track()];
+      final c = completer();
+      r.chain.during = () async {
+        if (r.chain.calls == 2) c.cancel();
+      };
+      final round = await c.run();
+      expect(round.failed, isFalse);
+      expect(round.updated[EnrichPart.lyrics], [ids[0], ids[1]]);
+      expect((await r.repo.getById(ids[1]))!.lyricsPlain, 'la la');
+    });
+
+    test('a block that cannot be saved: the round goes on and the counts follow', () async {
+      for (var n = 0; n < 25; n++) {
+        await track();
+      }
+      final progress = <(int, int)>[];
+      final round = await EnrichCompleter(
+        service: _Flaky(r.svc, 1),
+        repo: r.credits,
+        parts: () => _lyrics,
+        waitIdle: () async {},
+        onProgress: (c, t) => progress.add((c, t)),
+        nowMs: () => clock,
+      ).run();
+      expect(round.failed, isFalse);
+      expect(round.worked, 15);
+      expect(progress, [(0, 25), (10, 25), (15, 25)]);
+    });
+
     test('a track gone while it was read is skipped', () async {
       final ids = [await track(), await track()];
       r.chain.during = () async {
@@ -461,6 +559,81 @@ void main() {
         }
         final got = await r.credits.dueTrackIds({part}, now, limit: 1000);
         expect(got, expected, reason: '$part');
+      }
+    });
+
+    test('every part: a recent mark leaves out that part only, an old one lets it in', () async {
+      final now = DateTime.fromMillisecondsSinceEpoch(clock);
+      final marks = <int?>[
+        null,
+        clock - _day,
+        clock - 30 * _day, // isDue wants MORE than 30 days
+        clock - 30 * _day - 1,
+        clock - 31 * _day,
+      ];
+      const columns = {
+        EnrichPart.meta: 'meta_none_at',
+        EnrichPart.lyrics: 'lyrics_none_at',
+        EnrichPart.synced: 'synced_none_at',
+        EnrichPart.curio: 'curio_none_at',
+        EnrichPart.credits: 'credits_none_at',
+      };
+      for (final part in EnrichPart.values) {
+        final ids = <int>[];
+        for (final noneAt in marks) {
+          // Complete in every part but [part]; for meta only the cover is missing.
+          final id = await r.add(
+            path: '/p${i++}.mp3',
+            album: 'A',
+            genre: 'G',
+            year: 2000,
+            trackNumber: 1,
+            hasCover: part != EnrichPart.meta,
+            plain: part == EnrichPart.lyrics ? null : 'p',
+            synced: part == EnrichPart.lyrics || part == EnrichPart.synced
+                ? null
+                : 's',
+            curiosities: part == EnrichPart.curio ? null : 'c',
+          );
+          if (part != EnrichPart.credits) {
+            await r.db
+                .into(r.db.trackCredits)
+                .insert(
+                  TrackCreditsCompanion.insert(
+                    trackId: id,
+                    name: 'N',
+                    nameKey: 'n',
+                    role: 'composer',
+                    source: 'deezer',
+                  ),
+                );
+          }
+          await r.db.customStatement(
+            'INSERT INTO track_enrich (track_id, ${columns[part]}) '
+            'VALUES ($id, ${noneAt ?? 'NULL'})',
+          );
+          ids.add(id);
+        }
+        final expected = [
+          for (var n = 0; n < marks.length; n++)
+            if (marks[n] == null || marks[n]! < clock - 30 * _day) ids[n],
+        ];
+        expect(expected, hasLength(3), reason: '$part');
+        expect(await r.credits.dueTrackIds({part}, now), expected, reason: '$part');
+        // The same answer as the Dart rule.
+        for (final id in ids) {
+          final t = (await r.repo.getById(id))!;
+          final has = (await r.credits.creditsOf(id)).isNotEmpty;
+          expect(
+            parts_lib.isDue(part, t, await r.enrichOf(id), now, hasCredits: has),
+            expected.contains(id),
+            reason: '$part $id',
+          );
+        }
+        // Nothing else is due on these tracks.
+        final others = {...EnrichPart.values}..remove(part);
+        final due = await r.credits.dueTrackIds(others, now, limit: 1000);
+        expect(due.where(ids.contains), isEmpty, reason: '$part');
       }
     });
 
