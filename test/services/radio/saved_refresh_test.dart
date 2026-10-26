@@ -34,19 +34,26 @@ class _Prefs extends RadioPrefs {
 }
 
 RadioStation st(String id, {String url = 'http://s', bool ok = true}) =>
-    RadioStation(id: id, name: 'Station $id', streamUrl: '$url/$id', lastCheckOk: ok);
+    RadioStation(
+      id: id,
+      name: 'Station $id',
+      streamUrl: '$url/$id',
+      lastCheckOk: ok,
+    );
 
 void main() {
   late AppDatabase db;
   late RadioRepository repo;
   late _Client client;
   late _Prefs prefs;
+  var requests = 0;
   final now = DateTime(2026, 10, 22, 12);
 
   setUp(() async {
     db = AppDatabase(NativeDatabase.memory());
     repo = RadioRepository(db);
     client = _Client();
+    requests = 0;
     prefs = _Prefs();
     await repo.save(st('a'));
     await repo.save(st('b'));
@@ -54,10 +61,15 @@ void main() {
   });
   tearDown(() => db.close());
 
-  Future<bool> run() => refreshSavedRadios(repo: repo, client: client, prefs: prefs, now: () => now);
+  Future<bool> run() => refreshSavedRadios(
+    repo: repo,
+    client: client,
+    prefs: prefs,
+    now: () => now,
+    onRequest: () => requests++,
+  );
 
-  test('asks only for the Radio Browser stations; a new address is saved, a missing one is marked, none deleted',
-      () async {
+  test('asks only for the Radio Browser stations; a new address is saved, a missing one is marked, none deleted', () async {
     client.answer = [st('a', url: 'http://new')];
     expect(await run(), isTrue);
     expect(client.asked.single, ['a', 'b']);
@@ -68,19 +80,27 @@ void main() {
     expect(prefs.at, now.millisecondsSinceEpoch);
   });
 
-  test('a second visit within a day does not ask again; a day later it does', () async {
-    client.answer = [st('a'), st('b')];
-    await run();
-    expect(await run(), isFalse);
-    expect(client.asked, hasLength(1));
-    prefs.at = now.subtract(const Duration(hours: 25)).millisecondsSinceEpoch;
-    expect(await run(), isTrue);
-  });
+  test(
+    'a second visit within a day does not ask again; a day later it does',
+    () async {
+      client.answer = [st('a'), st('b')];
+      await run();
+      expect(await run(), isFalse);
+      expect(client.asked, hasLength(1));
+      expect(requests, 1, reason: 'the second visit made no request');
+      prefs.at = now.subtract(const Duration(hours: 25)).millisecondsSinceEpoch;
+      expect(await run(), isTrue);
+    },
+  );
 
-  test('an unreachable Radio Browser changes nothing and is tried again next time', () async {
-    client.error = const RadioOffline();
-    expect(await run(), isFalse);
-    expect(prefs.at, isNull);
-    expect((await repo.getAll()).every((r) => !r.unreachable), isTrue);
-  });
+  test(
+    'an unreachable Radio Browser changes nothing and is tried again next time',
+    () async {
+      client.error = const RadioOffline();
+      expect(await run(), isFalse);
+      expect(requests, 1, reason: 'a request was made, and failed');
+      expect(prefs.at, isNull);
+      expect((await repo.getAll()).every((r) => !r.unreachable), isTrue);
+    },
+  );
 }

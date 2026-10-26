@@ -86,6 +86,13 @@ class Device:
                 self.sh(f'input swipe {x} {y1} {x} {y2} 120')
                 time.sleep(0.4)
 
+    def top(self):
+        """Back to the top of the list on screen (it keeps its scroll between tabs)."""
+        w, h = map(int, re.search(r'(\d+)x(\d+)', self.sh('wm size')).groups())
+        for _ in range(2):
+            self.sh(f'input swipe {w // 2} {int(h * 0.3)} {w // 2} {int(h * 0.75)} 120')
+            time.sleep(0.4)
+
     def events(self):
         raw = self.sh(f'cat {REMOTE}/perf/events.jsonl', check=False)
         return [json.loads(l) for l in raw.splitlines() if l.strip().startswith('{')]
@@ -365,7 +372,7 @@ def main():
 
     if args.playback:
         scenario('In riproduzione',
-                 lambda: (leave_search(), tab('Libreria'), dev.tap(r'^Tutto$'), dev.tap(r'^Tutti i brani'),
+                 lambda: (leave_search(), tab('Libreria'), dev.tap(r'^Tutto$'), dev.top(), dev.tap(r'^Tutti i brani'),
                           dev.tap(r'^[A-Z].* \d+')),
                  lambda: (mini(), time.sleep(2), dev.sh('input keyevent KEYCODE_BACK')))
         scenario('Lettore dal dock', lambda: None,

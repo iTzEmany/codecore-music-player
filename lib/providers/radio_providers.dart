@@ -112,11 +112,22 @@ final radioCountriesProvider = FutureProvider.autoDispose<List<RadioCountry>>(
   retry: (_, _) => null,
 );
 
-/// Reads the saved stations again (once a day at most); called by the page.
+/// True while the saved stations are checked on Radio Browser: it shows in the Activity centre.
+class RadioChecking extends Notifier<bool> {
+  @override
+  bool build() => false;
+
+  void set(bool on) => state = on;
+}
+
+final radioCheckingProvider = NotifierProvider<RadioChecking, bool>(RadioChecking.new);
+
+/// Reads the saved stations again (once a day at most); called by [RadioOps.refreshSaved].
 final radioRefreshProvider = Provider<Future<bool> Function()>((ref) => () => refreshSavedRadios(
       repo: ref.read(radioRepositoryProvider),
       client: ref.read(radioClientProvider),
       prefs: ref.read(radioPrefsProvider),
+      onRequest: () => ref.read(radioCheckingProvider.notifier).set(true),
     ));
 
 /// A text for the Search tab to run in «Online» (from «Cerca questo brano»).

@@ -1,4 +1,8 @@
+import 'package:codecore/data/db/app_database.dart';
+import 'package:codecore/providers/memory_providers.dart';
 import 'package:codecore/services/memory/disk_space.dart';
+import 'package:drift/drift.dart' show Value;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:codecore/ui/screens/memory/memory_ring.dart';
 import 'package:codecore/ui/screens/memory/memory_screen.dart';
 import 'package:codecore/ui/widgets/format_utils.dart';
@@ -116,6 +120,32 @@ void main() {
     expect(find.byType(MemoryRing), findsOneWidget);
     expect(find.text('Strumenti'), findsOneWidget);
     expect(tester.takeException(), isNull);
+    await h.dispose(tester);
+  });
+
+  testWidgets('the Arricchimento row shows the size and detail, with no button', (tester) async {
+    await open(tester, disk: memoryDisk);
+    expect(find.textContaining('Arricchimento'), findsNothing);
+    await tester.runAsync(() async {
+      await (h.db.update(h.db.tracks)).write(
+        TracksCompanion(
+          lyricsPlain: Value('a' * (2 * 1024 * 1024)),
+          curiosities: const Value('b'),
+        ),
+      );
+    });
+    // The page reads it again when the tab is reopened or pulled.
+    final ctx = tester.element(find.byType(MemoryScreen));
+    ProviderScope.containerOf(ctx).invalidate(enrichmentBytesProvider);
+    for (var i = 0; i < 3; i++) {
+      await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    expect(find.textContaining('Arricchimento: '), findsOneWidget);
+    expect(find.textContaining('Testi '), findsOneWidget);
+    expect(find.textContaining('curiosità'), findsOneWidget);
+    expect(find.textContaining('crediti'), findsOneWidget);
+    expect(find.widgetWithText(OutlinedButton, 'Arricchimento'), findsNothing);
     await h.dispose(tester);
   });
 }

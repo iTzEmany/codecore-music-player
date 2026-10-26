@@ -7,6 +7,7 @@ import 'providers/jam_providers.dart' show jamOnlineFailuresProvider;
 import 'providers/player_providers.dart';
 import 'providers/settings_providers.dart';
 import 'providers/share_hub.dart';
+import 'providers/startup_providers.dart' show enrichCompleterStartProvider;
 import 'providers/theme_providers.dart';
 import 'providers/update_providers.dart';
 import 'providers/youtube_providers.dart' show promoteErrorsProvider;
@@ -34,6 +35,8 @@ class CodecoreApp extends ConsumerWidget {
     ref.watch(importNotificationProvider);
     // Checks for new releases of followed artists (starts once settled).
     ref.watch(releaseCheckControllerProvider);
+    // Completes the library in the background (starts once settled).
+    ref.watch(enrichCompleterStartProvider);
     // A new version, at most once a day and only if the user asked for it.
     ref.listen(updateOnStartProvider, (_, next) {
       final info = next.value;

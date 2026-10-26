@@ -5472,4 +5472,88 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get autoCuriositiesHint =>
       'Procura curiosidades na Wikipédia para as faixas novas';
+
+  @override
+  String memoryEnrichment(String size) {
+    return 'Enriquecimento: $size';
+  }
+
+  @override
+  String memoryEnrichmentDetail(
+    String lyrics,
+    String curiosities,
+    String credits,
+  ) {
+    return 'Letras $lyrics, curiosidades $curiosities, créditos $credits';
+  }
+
+  @override
+  String get activityPodcastRefresh => 'A atualizar os podcasts';
+
+  @override
+  String get activityRadio => 'A verificar as rádios guardadas';
+
+  @override
+  String activityEnrichBackground(int done, int total) {
+    return 'A completar o enriquecimento: $done de $total';
+  }
+
+  @override
+  String get activityStopped => 'Parada';
+
+  @override
+  String get activityScanEnded => 'Análise';
+
+  @override
+  String get enrichCompleteTitle => 'Completar o enriquecimento';
+
+  @override
+  String get enrichCompleteHint =>
+      'Procura já o que falta nas músicas, mesmo enquanto usas a app';
+
+  @override
+  String enrichCompleteProgress(int done, int total) {
+    return '$done de $total músicas completas';
+  }
+
+  @override
+  String get enrichCompleteStop => 'Interromper';
+
+  @override
+  String get enrichRoundTitle => 'Ronda de enriquecimento';
+
+  @override
+  String get enrichRoundUpdated => 'Atualizados';
+
+  @override
+  String get enrichRoundNone => 'Sem resultado';
+
+  @override
+  String get enrichRoundGone => 'Nenhuma música para mostrar';
+
+  @override
+  String get enrichPartMeta => 'Dados da música';
+
+  @override
+  String get enrichPartLyrics => 'Letra';
+
+  @override
+  String get enrichPartSynced => 'Letra sincronizada';
+
+  @override
+  String get enrichPartCurio => 'Curiosidades';
+
+  @override
+  String get enrichPartCredits => 'Créditos';
+
+  @override
+  String logEnrichRound(int done, int none) {
+    String _temp0 = intl.Intl.pluralLogic(
+      done,
+      locale: localeName,
+      other: '$done músicas concluídas',
+      one: '1 música concluída',
+    );
+    return 'Enriquecimento: $_temp0, $none sem resultado';
+  }
 }

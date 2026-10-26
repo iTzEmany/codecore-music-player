@@ -8,6 +8,7 @@ import '../../../l10n/l10n_ext.dart';
 import '../../../providers/activity_log_providers.dart';
 import '../../../providers/activity_providers.dart';
 import '../../../providers/duplicate_providers.dart';
+import '../../../providers/enrich_completer_providers.dart';
 import '../../../providers/import_providers.dart';
 import '../../../providers/online_providers.dart';
 import '../../../providers/podcast_providers.dart';
@@ -42,7 +43,7 @@ class ActivitySheet extends ConsumerWidget {
     final theme = Theme.of(context).textTheme;
     final state = ref.watch(activityProvider);
 
-    final log = ref.watch(activityLogProvider.select((e) => e.length));
+    final log = ref.watch(activityLogProvider.select((e) => e.total));
     // In the Library tab, below the bar: the sheet closes on the way.
     void open(Widget page) => ShellNav.openInLibrary(context, ref, page);
 
@@ -132,8 +133,12 @@ void _cancel(BuildContext context, WidgetRef ref, ActivityItem a) {
       ref.read(secondOpinionJobProvider.notifier).cancel();
     case ActivityKind.import:
       _cancelImport(context, ref, a);
+    case ActivityKind.enrichBackground:
+      ref.read(enrichCompleterProvider.notifier).cancel();
     case ActivityKind.scan:
     case ActivityKind.releases:
+    case ActivityKind.podcastRefresh:
+    case ActivityKind.radio:
       break;
   }
 }
@@ -227,6 +232,17 @@ class _ActivityRow extends ConsumerWidget {
                   a.paused ? svc.resumeChain(id) : svc.pauseChain(id);
                 },
               ),
+            if (a.kind == ActivityKind.enrichBackground)
+              IconButton(
+                tooltip: a.paused ? l.csvImportResume : l.csvImportPause,
+                icon: Icon(
+                  a.paused ? Icons.play_arrow_rounded : Icons.pause_rounded,
+                ),
+                onPressed: () {
+                  final c = ref.read(enrichCompleterProvider.notifier);
+                  a.paused ? c.resume() : c.pause();
+                },
+              ),
             if (a.cancellable)
               IconButton(
                 tooltip: l.cancel,
@@ -258,6 +274,9 @@ String activityTitle(AppLocalizations l, ActivityItem a) => switch (a.kind) {
   ActivityKind.cleanup => l.activityCleanup(a.done, a.total),
   ActivityKind.releases => l.activityReleases,
   ActivityKind.secondOpinion => l.activitySecondOpinion(a.done, a.total),
+  ActivityKind.podcastRefresh => l.activityPodcastRefresh,
+  ActivityKind.radio => l.activityRadio,
+  ActivityKind.enrichBackground => l.activityEnrichBackground(a.done, a.total),
   ActivityKind.import =>
     a.paused
         ? l.activityImportPaused(a.name ?? '', a.done, a.total)

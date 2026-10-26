@@ -713,16 +713,16 @@ Feature «Arricchimento completo» (`docs/feature-arricchimento.md`, decisioni D
 - Note 52: `WebClient.getJson(strict:)` opzionale (D-131, supera D-129). Il «niente» dei crediti ora scade dopo 30 giorni anche in `propose` (D-103). NetEase scarta live/remix/acoustic/demo/instrumental/karaoke e un «(Radio Edit)» se il titolo locale non lo ha (falso negativo, sicuro). Test del download completo in `test/providers/download_enrich_test.dart` (non in `download_promotion_test`). MBID non ancora condiviso fra curiosità e crediti: nota in testa a 53.4.
 
 ## Fase 53 — Completamento e Registro (`fase-53-completamento-e-registro.md`)
-- [ ] 53.1 Registro nel database (30 giorni)
-- [ ] 53.2 Ogni attività finisce nel Registro
-- [ ] 53.3 `UserActivity`
-- [ ] 53.4 `EnrichCompleter` in modalità *piano*
-- [ ] 53.5 «Completa l'arricchimento» (modalità *subito*)
-- [ ] 53.6 Voce nel centro Attività con Pausa e Riprendi
-- [ ] 53.7 Riga per giro nel Registro con l'elenco dei brani
-- [ ] 53.8 Riga «Arricchimento» nella pagina Memoria
-- [ ] 53.9 Controlli di fase (K-AR-01, K-AR-02, K-AR-03, K-AR-04, RNF-05)
-- [ ] 53.10 Prove a mano (utente)
+- [x] 53.1 Registro nel database (30 giorni)
+- [x] 53.2 Ogni attività finisce nel Registro
+- [x] 53.3 `UserActivity`
+- [x] 53.4 `EnrichCompleter` in modalità *piano*
+- [x] 53.5 «Completa l'arricchimento» (modalità *subito*)
+- [x] 53.6 Voce nel centro Attività con Pausa e Riprendi
+- [x] 53.7 Riga per giro nel Registro con l'elenco dei brani
+- [x] 53.8 Riga «Arricchimento» nella pagina Memoria
+- [x] 53.9 Controlli di fase (K-AR-01, K-AR-02, K-AR-03, K-AR-04, RNF-05)
+- [~] 53.10 Prove a mano (utente)
 
 ## Fase 54 — Copertina a mano (`fase-54-copertina-a-mano.md`)
 - [ ] 54.1 `cover_ops.dart`: salvare e ripristinare

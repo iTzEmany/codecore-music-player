@@ -5518,4 +5518,88 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get autoCuriositiesHint =>
       'Cherche des anecdotes sur Wikipédia pour les nouveaux titres';
+
+  @override
+  String memoryEnrichment(String size) {
+    return 'Enrichissement : $size';
+  }
+
+  @override
+  String memoryEnrichmentDetail(
+    String lyrics,
+    String curiosities,
+    String credits,
+  ) {
+    return 'Paroles $lyrics, anecdotes $curiosities, crédits $credits';
+  }
+
+  @override
+  String get activityPodcastRefresh => 'Mise à jour des podcasts';
+
+  @override
+  String get activityRadio => 'Vérification des radios enregistrées';
+
+  @override
+  String activityEnrichBackground(int done, int total) {
+    return 'Complétion de l’enrichissement : $done sur $total';
+  }
+
+  @override
+  String get activityStopped => 'Arrêtée';
+
+  @override
+  String get activityScanEnded => 'Analyse';
+
+  @override
+  String get enrichCompleteTitle => 'Compléter l’enrichissement';
+
+  @override
+  String get enrichCompleteHint =>
+      'Cherche tout de suite ce qui manque aux morceaux, même pendant que tu utilises l’appli';
+
+  @override
+  String enrichCompleteProgress(int done, int total) {
+    return '$done morceaux complets sur $total';
+  }
+
+  @override
+  String get enrichCompleteStop => 'Interrompre';
+
+  @override
+  String get enrichRoundTitle => 'Passage d’enrichissement';
+
+  @override
+  String get enrichRoundUpdated => 'Mis à jour';
+
+  @override
+  String get enrichRoundNone => 'Sans résultat';
+
+  @override
+  String get enrichRoundGone => 'Aucun morceau à afficher';
+
+  @override
+  String get enrichPartMeta => 'Infos du morceau';
+
+  @override
+  String get enrichPartLyrics => 'Paroles';
+
+  @override
+  String get enrichPartSynced => 'Paroles synchronisées';
+
+  @override
+  String get enrichPartCurio => 'Anecdotes';
+
+  @override
+  String get enrichPartCredits => 'Crédits';
+
+  @override
+  String logEnrichRound(int done, int none) {
+    String _temp0 = intl.Intl.pluralLogic(
+      done,
+      locale: localeName,
+      other: '$done morceaux complétés',
+      one: '1 morceau complété',
+    );
+    return 'Enrichissement : $_temp0, $none sans résultat';
+  }
 }

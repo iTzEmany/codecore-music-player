@@ -5488,4 +5488,88 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get autoCuriositiesHint =>
       'Sucht Wissenswertes auf Wikipedia für neue Titel';
+
+  @override
+  String memoryEnrichment(String size) {
+    return 'Anreicherung: $size';
+  }
+
+  @override
+  String memoryEnrichmentDetail(
+    String lyrics,
+    String curiosities,
+    String credits,
+  ) {
+    return 'Songtexte $lyrics, Wissenswertes $curiosities, Credits $credits';
+  }
+
+  @override
+  String get activityPodcastRefresh => 'Podcasts werden aktualisiert';
+
+  @override
+  String get activityRadio => 'Gespeicherte Sender werden geprüft';
+
+  @override
+  String activityEnrichBackground(int done, int total) {
+    return 'Anreicherung wird vervollständigt: $done von $total';
+  }
+
+  @override
+  String get activityStopped => 'Gestoppt';
+
+  @override
+  String get activityScanEnded => 'Scan';
+
+  @override
+  String get enrichCompleteTitle => 'Anreicherung vervollständigen';
+
+  @override
+  String get enrichCompleteHint =>
+      'Sucht sofort, was den Titeln fehlt, auch während du die App benutzt';
+
+  @override
+  String enrichCompleteProgress(int done, int total) {
+    return '$done von $total Titeln vollständig';
+  }
+
+  @override
+  String get enrichCompleteStop => 'Abbrechen';
+
+  @override
+  String get enrichRoundTitle => 'Anreicherungsdurchlauf';
+
+  @override
+  String get enrichRoundUpdated => 'Aktualisiert';
+
+  @override
+  String get enrichRoundNone => 'Ohne Ergebnis';
+
+  @override
+  String get enrichRoundGone => 'Keine Titel zum Anzeigen';
+
+  @override
+  String get enrichPartMeta => 'Titeldaten';
+
+  @override
+  String get enrichPartLyrics => 'Songtext';
+
+  @override
+  String get enrichPartSynced => 'Synchronisierter Songtext';
+
+  @override
+  String get enrichPartCurio => 'Wissenswertes';
+
+  @override
+  String get enrichPartCredits => 'Credits';
+
+  @override
+  String logEnrichRound(int done, int none) {
+    String _temp0 = intl.Intl.pluralLogic(
+      done,
+      locale: localeName,
+      other: '$done Titel vervollständigt',
+      one: '1 Titel vervollständigt',
+    );
+    return 'Anreicherung: $_temp0, $none ohne Ergebnis';
+  }
 }

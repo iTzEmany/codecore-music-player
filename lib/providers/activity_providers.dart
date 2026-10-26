@@ -4,17 +4,31 @@ import '../services/online/download_queue.dart';
 import '../services/online/retry_policy.dart';
 import '../services/share/offers.dart';
 import 'duplicate_providers.dart';
+import 'enrich_completer_providers.dart';
 import 'import_providers.dart';
 import 'library_providers.dart';
 import 'online_providers.dart';
 import 'podcast_providers.dart';
+import 'radio_providers.dart' show radioCheckingProvider;
 import 'releases_providers.dart' show manualReleaseCheckProvider;
 import 'second_opinion_providers.dart';
 import 'share_hub.dart';
 import 'youtube_providers.dart';
 import '../services/import/playlist_import_service.dart';
 
-enum ActivityKind { scan, enrich, download, transfer, import, cleanup, releases, secondOpinion }
+enum ActivityKind {
+  scan,
+  enrich,
+  download,
+  transfer,
+  import,
+  cleanup,
+  releases,
+  secondOpinion,
+  podcastRefresh,
+  radio,
+  enrichBackground,
+}
 
 /// One line of the Activity centre. [progress] is 0..1, null = indeterminate.
 class ActivityItem {
@@ -61,6 +75,7 @@ class ActivityItem {
           kind == ActivityKind.import ||
           kind == ActivityKind.cleanup ||
           kind == ActivityKind.secondOpinion ||
+          kind == ActivityKind.enrichBackground ||
           kind == ActivityKind.enrich);
 }
 
@@ -70,6 +85,19 @@ class CleanupProgress {
 
   final int done, total;
 }
+
+/// The background completion, while it runs or is paused by hand.
+class EnrichBackgroundProgress extends CleanupProgress {
+  const EnrichBackgroundProgress(super.done, super.total, {this.paused = false});
+
+  final bool paused;
+}
+
+/// The completion as a line of the Activity centre (null: not shown).
+EnrichBackgroundProgress? enrichBackgroundOf(EnrichCompleterState c) =>
+    c.visible
+        ? EnrichBackgroundProgress(c.complete, c.total, paused: c.paused)
+        : null;
 
 class ActivityState {
   const ActivityState(this.running, this.completed);
@@ -90,6 +118,9 @@ ActivityState buildActivity({
   List<EpisodeDownload> episodes = const [],
   bool releases = false,
   CleanupProgress? secondOpinion,
+  bool podcastRefresh = false,
+  bool radio = false,
+  EnrichBackgroundProgress? enrichBackground,
 }) {
   final running = <ActivityItem>[];
   final completed = <ActivityItem>[];
@@ -147,6 +178,26 @@ ActivityState buildActivity({
   if (releases) {
     running.add(const ActivityItem(
         kind: ActivityKind.releases, key: 'releases', name: null));
+  }
+  if (podcastRefresh) {
+    running.add(const ActivityItem(
+        kind: ActivityKind.podcastRefresh, key: 'podcastRefresh', name: null));
+  }
+  if (radio) {
+    running.add(const ActivityItem(kind: ActivityKind.radio, key: 'radio', name: null));
+  }
+  if (enrichBackground != null) {
+    running.add(
+      ActivityItem(
+        kind: ActivityKind.enrichBackground,
+        key: 'enrichBackground',
+        name: null,
+        done: enrichBackground.done,
+        total: enrichBackground.total,
+        progress: enrichBackground.total == 0 ? null : enrichBackground.done / enrichBackground.total,
+        paused: enrichBackground.paused,
+      ),
+    );
   }
   for (final i in imports) {
     running.add(
@@ -225,10 +276,15 @@ final activityProvider = Provider<ActivityState>((ref) {
     imports: ref.watch(importProgressProvider),
     episodes: ref.watch(podcastDownloadsProvider),
     releases: ref.watch(manualReleaseCheckProvider),
+    podcastRefresh: ref.watch(podcastRefreshingProvider),
+    radio: ref.watch(radioCheckingProvider),
     secondOpinion: ref.watch(
       secondOpinionJobProvider.select(
         (j) => j.running ? CleanupProgress(j.done, j.total) : null,
       ),
+    ),
+    enrichBackground: ref.watch(
+      enrichCompleterProvider.select(enrichBackgroundOf),
     ),
     cleanup: ref.watch(
       duplicateSearchProvider.select(

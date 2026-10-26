@@ -2941,5 +2941,76 @@
     }
   },
   "autoCuriosities": "Automatisches Wissenswertes",
-  "autoCuriositiesHint": "Sucht Wissenswertes auf Wikipedia für neue Titel"
+  "autoCuriositiesHint": "Sucht Wissenswertes auf Wikipedia für neue Titel",
+  "memoryEnrichment": "Anreicherung: {size}",
+  "@memoryEnrichment": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "memoryEnrichmentDetail": "Songtexte {lyrics}, Wissenswertes {curiosities}, Credits {credits}",
+  "@memoryEnrichmentDetail": {
+    "placeholders": {
+      "lyrics": {
+        "type": "String"
+      },
+      "curiosities": {
+        "type": "String"
+      },
+      "credits": {
+        "type": "String"
+      }
+    }
+  },
+  "activityPodcastRefresh": "Podcasts werden aktualisiert",
+  "activityRadio": "Gespeicherte Sender werden geprüft",
+  "activityEnrichBackground": "Anreicherung wird vervollständigt: {done} von {total}",
+  "@activityEnrichBackground": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "activityStopped": "Gestoppt",
+  "activityScanEnded": "Scan",
+  "enrichCompleteTitle": "Anreicherung vervollständigen",
+  "enrichCompleteHint": "Sucht sofort, was den Titeln fehlt, auch während du die App benutzt",
+  "enrichCompleteProgress": "{done} von {total} Titeln vollständig",
+  "@enrichCompleteProgress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "enrichCompleteStop": "Abbrechen",
+  "enrichRoundTitle": "Anreicherungsdurchlauf",
+  "enrichRoundUpdated": "Aktualisiert",
+  "enrichRoundNone": "Ohne Ergebnis",
+  "enrichRoundGone": "Keine Titel zum Anzeigen",
+  "enrichPartMeta": "Titeldaten",
+  "enrichPartLyrics": "Songtext",
+  "enrichPartSynced": "Synchronisierter Songtext",
+  "enrichPartCurio": "Wissenswertes",
+  "enrichPartCredits": "Credits",
+  "logEnrichRound": "Anreicherung: {done, plural, one{1 Titel vervollständigt} other{{done} Titel vervollständigt}}, {none} ohne Ergebnis",
+  "@logEnrichRound": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "none": {
+        "type": "int"
+      }
+    }
+  }
 }

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/l10n_ext.dart';
+import '../../../providers/radio_ops.dart';
 import '../../../providers/radio_providers.dart';
 import '../../../providers/settings_providers.dart';
 import '../../../services/radio/country_names.dart';
@@ -34,7 +35,7 @@ class _RadioScreenState extends ConsumerState<RadioScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       // The saved stations are read again once a day, without waiting for it.
-      unawaited(ref.read(radioRefreshProvider)());
+      unawaited(ref.read(radioOpsProvider).refreshSaved());
       // First visit: no region yet, so the sheet that asks for it opens by itself.
       if (ref.read(settingsProvider).radioRegion.isEmpty) {
         RadioRegionSheet.show(context);

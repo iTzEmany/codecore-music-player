@@ -5464,4 +5464,88 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get autoCuriositiesHint =>
       'Cerca le curiosità su Wikipedia per i brani nuovi';
+
+  @override
+  String memoryEnrichment(String size) {
+    return 'Arricchimento: $size';
+  }
+
+  @override
+  String memoryEnrichmentDetail(
+    String lyrics,
+    String curiosities,
+    String credits,
+  ) {
+    return 'Testi $lyrics, curiosità $curiosities, crediti $credits';
+  }
+
+  @override
+  String get activityPodcastRefresh => 'Aggiornamento dei podcast';
+
+  @override
+  String get activityRadio => 'Controllo delle radio salvate';
+
+  @override
+  String activityEnrichBackground(int done, int total) {
+    return 'Completamento dell\'arricchimento: $done di $total';
+  }
+
+  @override
+  String get activityStopped => 'Fermata';
+
+  @override
+  String get activityScanEnded => 'Scansione';
+
+  @override
+  String get enrichCompleteTitle => 'Completa l\'arricchimento';
+
+  @override
+  String get enrichCompleteHint =>
+      'Cerca subito ciò che manca ai brani, anche mentre usi l\'app';
+
+  @override
+  String enrichCompleteProgress(int done, int total) {
+    return '$done di $total brani completi';
+  }
+
+  @override
+  String get enrichCompleteStop => 'Interrompi';
+
+  @override
+  String get enrichRoundTitle => 'Giro di arricchimento';
+
+  @override
+  String get enrichRoundUpdated => 'Aggiornati';
+
+  @override
+  String get enrichRoundNone => 'Senza risultato';
+
+  @override
+  String get enrichRoundGone => 'Nessun brano da mostrare';
+
+  @override
+  String get enrichPartMeta => 'Dati del brano';
+
+  @override
+  String get enrichPartLyrics => 'Testo';
+
+  @override
+  String get enrichPartSynced => 'Testo sincronizzato';
+
+  @override
+  String get enrichPartCurio => 'Curiosità';
+
+  @override
+  String get enrichPartCredits => 'Crediti';
+
+  @override
+  String logEnrichRound(int done, int none) {
+    String _temp0 = intl.Intl.pluralLogic(
+      done,
+      locale: localeName,
+      other: '$done brani completati',
+      one: '1 brano completato',
+    );
+    return 'Arricchimento: $_temp0, $none senza risultato';
+  }
 }

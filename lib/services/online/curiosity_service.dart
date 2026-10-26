@@ -27,6 +27,20 @@ class CuriosityOutcome {
   bool get foundEmpty => nothing && !failed && !limited;
 }
 
+/// What [CuriosityService.find] found, not yet written. [artist] is the
+/// cleaned artist name the bio is saved under.
+class CuriosityLookup {
+  const CuriosityLookup({
+    required this.pair,
+    required this.artist,
+    required this.outcome,
+  });
+
+  final CuriosityPair pair;
+  final String artist;
+  final CuriosityOutcome outcome;
+}
+
 /// The curiosity search of one track: finder, then song text on the track and
 /// artist bio in `artist_infos`. No Riverpod, so the enrichment chain can use it.
 class CuriosityService {
@@ -40,7 +54,9 @@ class CuriosityService {
   final TrackRepository tracks;
   final ArtistInfoRepository artistInfos;
 
-  Future<CuriosityOutcome> fetch(
+  /// Asks the sources and writes nothing: [save] does, so a caller can put
+  /// the write in its own transaction.
+  Future<CuriosityLookup> find(
     Track t,
     String lang, {
     CancelToken? cancel,
@@ -58,8 +74,6 @@ class CuriosityService {
       durationMs: t.durationMs,
       cancel: cancel,
     );
-    final song = found.song, artist = found.artist;
-    final songDone = found.songError == null;
     for (final (err, isSong) in [
       (found.songError, true),
       (found.artistError, false),
@@ -73,19 +87,35 @@ class CuriosityService {
         failed = true;
       }
     }
+    return CuriosityLookup(
+      pair: found,
+      artist: c.artist,
+      outcome: CuriosityOutcome(
+        songLimited: songLimited,
+        artistLimited: artistLimited,
+        failed: failed,
+        nothing: found.song == null && found.artist == null,
+      ),
+    );
+  }
+
+  /// Writes what [find] found: the song text on the track, the bio in
+  /// `artist_infos`. The returned outcome has `failed` set when the write failed.
+  Future<CuriosityOutcome> save(int trackId, CuriosityLookup l) async {
+    final song = l.pair.song, artist = l.pair.artist;
     try {
       // A new search replaces what was saved before, also with nothing: an
       // older version could have saved the artist's page as the song's. A part
       // that could not be asked is left as it was.
-      if (songDone) {
+      if (l.pair.songError == null) {
         await tracks.setCuriosities(
-          t.id,
+          trackId,
           song == null ? null : '${song.text}\n${song.source}',
         );
       }
       if (artist != null) {
         await artistInfos.save(
-          c.artist,
+          l.artist,
           body: artist.text,
           source: artist.source,
           lang: artist.lang,
@@ -93,13 +123,20 @@ class CuriosityService {
       }
     } on Object catch (e, st) {
       AppLog.w('could not save the curiosities', e, st);
-      failed = true;
+      final o = l.outcome;
+      return CuriosityOutcome(
+        songLimited: o.songLimited,
+        artistLimited: o.artistLimited,
+        failed: true,
+        nothing: o.nothing,
+      );
     }
-    return CuriosityOutcome(
-      songLimited: songLimited,
-      artistLimited: artistLimited,
-      failed: failed,
-      nothing: song == null && artist == null,
-    );
+    return l.outcome;
   }
+
+  Future<CuriosityOutcome> fetch(
+    Track t,
+    String lang, {
+    CancelToken? cancel,
+  }) async => save(t.id, await find(t, lang, cancel: cancel));
 }

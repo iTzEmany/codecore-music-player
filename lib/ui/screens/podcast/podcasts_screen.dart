@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/repositories/podcast_repository.dart';
 import '../../../l10n/l10n_ext.dart';
+import '../../../providers/podcast_ops.dart';
 import '../../../providers/podcast_providers.dart';
 import '../../shell/shell_nav.dart';
 import '../../theme/tokens.dart';
@@ -30,7 +31,7 @@ class _PodcastsScreenState extends ConsumerState<PodcastsScreen> {
   Future<void> _refreshAll() async {
     final l = context.l10n;
     setState(() => _refreshing = true);
-    final report = await ref.read(podcastServiceProvider).refreshAll();
+    final report = await ref.read(podcastOpsProvider).refreshAll();
     if (!mounted) return;
     setState(() => _refreshing = false);
     final text = report.failed.isEmpty

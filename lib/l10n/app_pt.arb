@@ -3185,5 +3185,76 @@
     }
   },
   "autoCuriosities": "Curiosidades automáticas",
-  "autoCuriositiesHint": "Procura curiosidades na Wikipédia para as faixas novas"
+  "autoCuriositiesHint": "Procura curiosidades na Wikipédia para as faixas novas",
+  "memoryEnrichment": "Enriquecimento: {size}",
+  "@memoryEnrichment": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "memoryEnrichmentDetail": "Letras {lyrics}, curiosidades {curiosities}, créditos {credits}",
+  "@memoryEnrichmentDetail": {
+    "placeholders": {
+      "lyrics": {
+        "type": "String"
+      },
+      "curiosities": {
+        "type": "String"
+      },
+      "credits": {
+        "type": "String"
+      }
+    }
+  },
+  "activityPodcastRefresh": "A atualizar os podcasts",
+  "activityRadio": "A verificar as rádios guardadas",
+  "activityEnrichBackground": "A completar o enriquecimento: {done} de {total}",
+  "@activityEnrichBackground": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "activityStopped": "Parada",
+  "activityScanEnded": "Análise",
+  "enrichCompleteTitle": "Completar o enriquecimento",
+  "enrichCompleteHint": "Procura já o que falta nas músicas, mesmo enquanto usas a app",
+  "enrichCompleteProgress": "{done} de {total} músicas completas",
+  "@enrichCompleteProgress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "enrichCompleteStop": "Interromper",
+  "enrichRoundTitle": "Ronda de enriquecimento",
+  "enrichRoundUpdated": "Atualizados",
+  "enrichRoundNone": "Sem resultado",
+  "enrichRoundGone": "Nenhuma música para mostrar",
+  "enrichPartMeta": "Dados da música",
+  "enrichPartLyrics": "Letra",
+  "enrichPartSynced": "Letra sincronizada",
+  "enrichPartCurio": "Curiosidades",
+  "enrichPartCredits": "Créditos",
+  "logEnrichRound": "Enriquecimento: {done, plural, one{1 música concluída} other{{done} músicas concluídas}}, {none} sem resultado",
+  "@logEnrichRound": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "none": {
+        "type": "int"
+      }
+    }
+  }
 }

@@ -2941,5 +2941,76 @@
     }
   },
   "autoCuriosities": "Automatic trivia",
-  "autoCuriositiesHint": "Looks up trivia on Wikipedia for new tracks"
+  "autoCuriositiesHint": "Looks up trivia on Wikipedia for new tracks",
+  "memoryEnrichment": "Enrichment: {size}",
+  "@memoryEnrichment": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "memoryEnrichmentDetail": "Lyrics {lyrics}, trivia {curiosities}, credits {credits}",
+  "@memoryEnrichmentDetail": {
+    "placeholders": {
+      "lyrics": {
+        "type": "String"
+      },
+      "curiosities": {
+        "type": "String"
+      },
+      "credits": {
+        "type": "String"
+      }
+    }
+  },
+  "activityPodcastRefresh": "Updating podcasts",
+  "activityRadio": "Checking saved radios",
+  "activityEnrichBackground": "Completing enrichment: {done} of {total}",
+  "@activityEnrichBackground": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "activityStopped": "Stopped",
+  "activityScanEnded": "Scan",
+  "enrichCompleteTitle": "Complete the enrichment",
+  "enrichCompleteHint": "Look up what the songs are missing right now, even while you use the app",
+  "enrichCompleteProgress": "{done} of {total} songs complete",
+  "@enrichCompleteProgress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "enrichCompleteStop": "Stop",
+  "enrichRoundTitle": "Enrichment round",
+  "enrichRoundUpdated": "Updated",
+  "enrichRoundNone": "No result",
+  "enrichRoundGone": "No songs to show",
+  "enrichPartMeta": "Song details",
+  "enrichPartLyrics": "Lyrics",
+  "enrichPartSynced": "Synced lyrics",
+  "enrichPartCurio": "Trivia",
+  "enrichPartCredits": "Credits",
+  "logEnrichRound": "Enrichment: {done, plural, one{1 song completed} other{{done} songs completed}}, {none} with no result",
+  "@logEnrichRound": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "none": {
+        "type": "int"
+      }
+    }
+  }
 }
