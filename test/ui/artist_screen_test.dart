@@ -99,13 +99,13 @@ void main() {
           artistTracksProvider('a')
               .overrideWith((ref) => Stream.value([if (has) t(3, 'C1')])),
           artistCreditedProvider('A').overrideWith(
-            (ref) async => has
+            (ref) => Stream.value(has
                 ? [
                     (role: 'producer', track: t(1, 'P1')),
                     (role: 'producer', track: t(2, 'P2')),
                     (role: 'composer', track: t(3, 'C1')),
                   ]
-                : [],
+                : []),
           ),
         ],
       );

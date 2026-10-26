@@ -16,7 +16,7 @@ class _Web implements WebClient {
   final queries = <Map<String, String>?>[];
 
   @override
-  Future<Object?> getJson(String url, {Map<String, String>? query, CancelToken? cancel}) async {
+  Future<Object?> getJson(String url, {Map<String, String>? query, CancelToken? cancel, bool strict = false}) async {
     queries.add(query);
     return json;
   }

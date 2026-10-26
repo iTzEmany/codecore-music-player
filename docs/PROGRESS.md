@@ -702,14 +702,15 @@ Feature «Arricchimento completo» (`docs/feature-arricchimento.md`, decisioni D
 - [ ] 51.9 Prove a mano (utente)
 
 ## Fase 52 — Testo e curiosità complete (`fase-52-testo-e-curiosita.md`)
-- [ ] 52.1 `NeteaseLyricsClient` e `LyricsOvhClient`
-- [ ] 52.2 `LyricsChain`
-- [ ] 52.3 `enrich_parts.dart`: stato per parte e attesa di 30 giorni
-- [ ] 52.4 Testo dell'utente (`lyrics_by_user`) e guardie
-- [ ] 52.5 `CuriosityService`
-- [ ] 52.6 «Curiosità automatiche» e arricchimento completo dopo il download
-- [ ] 52.7 Controlli di fase (K-AR-01, K-AR-02, K-AR-03, K-AR-04)
+- [x] 52.1 `NeteaseLyricsClient` e `LyricsOvhClient`
+- [x] 52.2 `LyricsChain`
+- [x] 52.3 `enrich_parts.dart`: stato per parte e attesa di 30 giorni
+- [x] 52.4 Testo dell'utente (`lyrics_by_user`) e guardie
+- [x] 52.5 `CuriosityService`
+- [x] 52.6 «Curiosità automatiche» e arricchimento completo dopo il download
+- [x] 52.7 Controlli di fase (K-AR-01, K-AR-02, K-AR-03, K-AR-04)
 - [ ] 52.8 Prove a mano (utente)
+- Note 52: `WebClient.getJson(strict:)` opzionale (D-131, supera D-129). Il «niente» dei crediti ora scade dopo 30 giorni anche in `propose` (D-103). NetEase scarta live/remix/acoustic/demo/instrumental/karaoke e un «(Radio Edit)» se il titolo locale non lo ha (falso negativo, sicuro). Test del download completo in `test/providers/download_enrich_test.dart` (non in `download_promotion_test`). MBID non ancora condiviso fra curiosità e crediti: nota in testa a 53.4.
 
 ## Fase 53 — Completamento e Registro (`fase-53-completamento-e-registro.md`)
 - [ ] 53.1 Registro nel database (30 giorni)

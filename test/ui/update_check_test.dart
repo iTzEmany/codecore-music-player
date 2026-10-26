@@ -18,7 +18,7 @@ class _Web implements WebClient {
   final String tag;
   int calls = 0;
   @override
-  Future<Object?> getJson(String url, {Map<String, String>? query, CancelToken? cancel}) async {
+  Future<Object?> getJson(String url, {Map<String, String>? query, CancelToken? cancel, bool strict = false}) async {
     calls++;
     return [{'tag_name': tag, 'html_url': 'https://github.com/me/codecore/releases/tag/$tag', 'body': 'Novità della release'}];
   }

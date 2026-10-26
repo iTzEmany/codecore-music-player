@@ -14,7 +14,7 @@ class FakeWeb implements WebClient {
 
   @override
   Future<Object?> getJson(String url,
-      {Map<String, String>? query, CancelToken? cancel}) async {
+      {Map<String, String>? query, CancelToken? cancel, bool strict = false}) async {
     calls.add('$url ${query ?? {}}');
     return handler(url, query ?? {});
   }

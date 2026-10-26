@@ -16,11 +16,24 @@ class RateLimitedException implements Exception {
   String toString() => 'RateLimitedException($statusCode)';
 }
 
+/// Thrown by a strict [WebClient.getJson] when the service could not answer
+/// (network, timeout, 5xx or any other non-200 except 404).
+class WebUnavailableException implements Exception {
+  const WebUnavailableException(this.url, [this.statusCode]);
+
+  final String url;
+  final int? statusCode;
+
+  @override
+  String toString() => 'WebUnavailableException($url, $statusCode)';
+}
+
 /// Network seam used by every online client (faked in tests).
 abstract class WebClient {
-  /// Decoded JSON, or null on 404 / network errors.
+  /// Decoded JSON, or null on 404 / network errors. With [strict], 404 stays null
+  /// but network errors, timeouts and other non-200 answers throw [WebUnavailableException].
   Future<Object?> getJson(String url,
-      {Map<String, String>? query, CancelToken? cancel});
+      {Map<String, String>? query, CancelToken? cancel, bool strict = false});
 
   /// Raw bytes for https URLs up to [maxBytes]; null otherwise.
   Future<List<int>?> getBytes(String url,
@@ -64,7 +77,7 @@ class DioWebClient implements WebClient {
 
   @override
   Future<Object?> getJson(String url,
-      {Map<String, String>? query, CancelToken? cancel}) async {
+      {Map<String, String>? query, CancelToken? cancel, bool strict = false}) async {
     try {
       for (var attempt = 0;; attempt++) {
         if (isWikimediaHost(Uri.tryParse(url)?.host ?? '')) await _wikimedia.acquire();
@@ -81,12 +94,19 @@ class DioWebClient implements WebClient {
           continue;
         }
         _checkRateLimit(res.statusCode, url, res.headers.value('retry-after'), res.data);
-        if (res.statusCode != 200) return null;
-        return decodeJsonBody(res.data);
+        if (res.statusCode != 200) {
+          if (strict && res.statusCode != 404) throw WebUnavailableException(url, res.statusCode);
+          return null;
+        }
+        final body = decodeJsonBody(res.data);
+        // A 200 that is not JSON (captive portal, empty body) is no answer.
+        if (strict && body == null) throw WebUnavailableException(url, 200);
+        return body;
       }
     } on DioException catch (e, st) {
       if (CancelToken.isCancel(e)) rethrow;
       AppLog.w('GET failed: $url', e, st);
+      if (strict) throw WebUnavailableException(url);
       return null;
     }
   }
@@ -133,13 +153,19 @@ class RateLimiter {
 
   final Duration minGap;
   DateTime? _last;
+  Future<void> _tail = Future<void>.value();
 
-  Future<void> wait() async {
-    final last = _last;
-    if (last != null && minGap > Duration.zero) {
-      final remaining = minGap - DateTime.now().difference(last);
-      if (remaining > Duration.zero) await Future<void>.delayed(remaining);
-    }
-    _last = DateTime.now();
+  /// Callers are served one after the other, so concurrent waits never start together.
+  Future<void> wait() {
+    final turn = _tail.then((_) async {
+      final last = _last;
+      if (last != null && minGap > Duration.zero) {
+        final remaining = minGap - DateTime.now().difference(last);
+        if (remaining > Duration.zero) await Future<void>.delayed(remaining);
+      }
+      _last = DateTime.now();
+    });
+    _tail = turn;
+    return turn;
   }
 }

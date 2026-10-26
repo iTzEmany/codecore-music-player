@@ -86,7 +86,7 @@ class _Web implements WebClient {
   Future<Object?> getJson(
     String url, {
     Map<String, String>? query,
-    CancelToken? cancel,
+    CancelToken? cancel, bool strict = false,
   }) async => null;
   @override
   Future<List<int>?> getBytes(

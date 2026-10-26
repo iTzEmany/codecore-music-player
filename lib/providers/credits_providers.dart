@@ -9,11 +9,11 @@ import 'online_providers.dart';
 typedef TrackCreditsData = ({List<TrackCredit> credits, TrackDetails? details});
 
 /// Credits and details of one track, read on their own (not from the `tracks`
-/// streams). Invalidate it after a refresh.
-final trackCreditsProvider = FutureProvider.autoDispose
+/// streams); emits again when credits arrive in the background.
+final trackCreditsProvider = StreamProvider.autoDispose
     .family<TrackCreditsData, int>(
       (ref, trackId) =>
-          ref.watch(creditsRepositoryProvider).portableOf(trackId),
+          ref.watch(creditsRepositoryProvider).watchPortableOf(trackId),
     );
 
 /// Tracks found only through a credit; not for operators or quick filters.
@@ -34,9 +34,9 @@ final searchCreditedProvider = FutureProvider.autoDispose
     });
 
 /// Tracks where the artist is only credited (producer, author...), by role.
-final artistCreditedProvider = FutureProvider.autoDispose
+final artistCreditedProvider = StreamProvider.autoDispose
     .family<List<({String role, Track track})>, String>(
       (ref, name) => ref
           .watch(creditsRepositoryProvider)
-          .creditedTracks(creditNameKey(name)),
+          .watchCreditedTracks(creditNameKey(name)),
     );

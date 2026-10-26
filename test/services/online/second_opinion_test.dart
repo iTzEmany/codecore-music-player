@@ -30,7 +30,7 @@ class _Web implements WebClient {
   var mbLimited = false;
 
   @override
-  Future<Object?> getJson(String url, {Map<String, String>? query, CancelToken? cancel}) async {
+  Future<Object?> getJson(String url, {Map<String, String>? query, CancelToken? cancel, bool strict = false}) async {
     asked.add(Uri.parse(url).path);
     if (mbLimited && url.contains('musicbrainz')) throw const RateLimitedException(429);
     if (!url.contains('musicbrainz')) return null;

@@ -37,6 +37,7 @@ class AppSettings {
     this.autoLyrics = false,
     this.deezerMeta = false,
     this.creditsDetails = false,
+    this.autoCuriosities = false,
     this.showUndoSnackbar = true,
     this.deviceName,
     this.jamLatencyMs = 0,
@@ -89,7 +90,7 @@ class AppSettings {
   final bool compactMode, reducedMotion, autoEnrich, autoLyrics, showUndoSnackbar;
 
   /// Deezer as a metadata source (data only); off until the user asks.
-  final bool deezerMeta, creditsDetails;
+  final bool deezerMeta, creditsDetails, autoCuriosities;
 
   /// Applies ReplayGain (track gain) at playback time.
   final bool normalizeVolume;
@@ -183,6 +184,7 @@ class AppSettings {
     bool? autoLyrics,
     bool? deezerMeta,
     bool? creditsDetails,
+    bool? autoCuriosities,
     bool? showUndoSnackbar,
     String? deviceName,
     int? jamLatencyMs,
@@ -230,6 +232,7 @@ class AppSettings {
         autoLyrics: autoLyrics ?? this.autoLyrics,
         deezerMeta: deezerMeta ?? this.deezerMeta,
         creditsDetails: creditsDetails ?? this.creditsDetails,
+        autoCuriosities: autoCuriosities ?? this.autoCuriosities,
         showUndoSnackbar: showUndoSnackbar ?? this.showUndoSnackbar,
         deviceName: deviceName ?? this.deviceName,
         jamLatencyMs: jamLatencyMs ?? this.jamLatencyMs,
@@ -308,6 +311,7 @@ class SettingsStore {
         autoLyrics: _prefs.getBool('autoLyrics') ?? false,
         deezerMeta: _prefs.getBool('deezerMeta') ?? false,
         creditsDetails: _prefs.getBool('creditsDetails') ?? false,
+        autoCuriosities: _prefs.getBool('autoCuriosities') ?? false,
         showUndoSnackbar: _prefs.getBool('showUndoSnackbar') ?? true,
         deviceName: _prefs.getString('deviceName'),
         normalizeVolume: _prefs.getBool('normalizeVolume') ?? false,
@@ -386,6 +390,7 @@ class SettingsStore {
     await _prefs.setBool('autoLyrics', s.autoLyrics);
     await _prefs.setBool('deezerMeta', s.deezerMeta);
     await _prefs.setBool('creditsDetails', s.creditsDetails);
+    await _prefs.setBool('autoCuriosities', s.autoCuriosities);
     await _prefs.setBool('showUndoSnackbar', s.showUndoSnackbar);
     await _prefs.setBool('normalizeVolume', s.normalizeVolume);
     await _prefs.setBool('receiveFromLan', s.receiveFromLan);

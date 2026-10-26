@@ -24,7 +24,7 @@ class _World implements WebClient {
   final calls = <String>[];
 
   @override
-  Future<Object?> getJson(String url, {Map<String, String>? query, CancelToken? cancel}) async {
+  Future<Object?> getJson(String url, {Map<String, String>? query, CancelToken? cancel, bool strict = false}) async {
     final q = query ?? {};
     calls.add('${Uri.parse(url).host}${Uri.parse(url).path} ${q['titles'] ?? q['ids'] ?? q['query'] ?? q['gsrsearch'] ?? ''}');
     final host = Uri.parse(url).host;
@@ -282,7 +282,7 @@ class _ArtistsWeb implements WebClient {
   final List<Map<String, Object?>> artists;
 
   @override
-  Future<Object?> getJson(String url, {Map<String, String>? query, CancelToken? cancel}) async => {'artists': artists};
+  Future<Object?> getJson(String url, {Map<String, String>? query, CancelToken? cancel, bool strict = false}) async => {'artists': artists};
 
   @override
   Future<List<int>?> getBytes(String url, {int maxBytes = 0, CancelToken? cancel}) async => null;

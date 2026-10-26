@@ -5,11 +5,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show ProviderListenable;
 
 import '../data/repositories/credits_repository.dart';
+import '../data/settings/settings_store.dart' show AppSettings;
 import '../services/online/enrichment_service.dart';
 import '../services/online/http_client.dart';
 import '../services/online/itunes_client.dart';
 import '../services/online/lrclib_client.dart';
+import '../services/online/lyrics_chain.dart';
+import '../services/online/lyrics_ovh_client.dart';
+import '../services/online/netease_lyrics_client.dart';
 import '../services/online/curiosity_finder.dart';
+import '../services/online/curiosity_service.dart';
 import '../services/online/deezer_client.dart';
 import '../services/online/deezer_gw_client.dart';
 import '../services/online/discogs_client.dart';
@@ -54,6 +59,19 @@ final deezerGwClientProvider = Provider(
 final lrclibClientProvider = Provider(
   (ref) => LrclibClient(ref.watch(webClientProvider)),
 );
+final neteaseLyricsClientProvider = Provider(
+  (ref) => NeteaseLyricsClient(ref.watch(webClientProvider)),
+);
+final lyricsOvhClientProvider = Provider(
+  (ref) => LyricsOvhClient(ref.watch(webClientProvider)),
+);
+final lyricsChainProvider = Provider(
+  (ref) => LyricsChain(
+    lrclib: ref.watch(lrclibClientProvider),
+    netease: ref.watch(neteaseLyricsClientProvider),
+    ovh: ref.watch(lyricsOvhClientProvider),
+  ),
+);
 final wikipediaClientProvider = Provider(
   (ref) => WikipediaClient(ref.watch(webClientProvider)),
 );
@@ -96,6 +114,14 @@ final creditsRepositoryProvider = Provider(
   (ref) => CreditsRepository(ref.watch(databaseProvider)),
 );
 
+final curiosityServiceProvider = Provider(
+  (ref) => CuriosityService(
+    finder: ref.watch(curiosityFinderProvider),
+    tracks: ref.watch(trackRepositoryProvider),
+    artistInfos: ref.watch(artistInfoRepositoryProvider),
+  ),
+);
+
 final enrichmentServiceProvider = Provider<EnrichmentService>((ref) {
   final web = ref.watch(webClientProvider);
   return EnrichmentService(
@@ -110,6 +136,8 @@ final enrichmentServiceProvider = Provider<EnrichmentService>((ref) {
     creditsRepo: ref.watch(creditsRepositoryProvider),
     useCredits: () => ref.read(settingsProvider).creditsDetails,
     lrclib: ref.watch(lrclibClientProvider),
+    lyricsChain: ref.watch(lyricsChainProvider),
+    curiosities: ref.watch(curiosityServiceProvider),
     wikipedia: ref.watch(wikipediaClientProvider),
     web: web,
     language: () => ref.read(settingsProvider).language,
@@ -188,22 +216,25 @@ final enrichJobProvider = NotifierProvider<EnrichJobNotifier, EnrichJobState>(
   EnrichJobNotifier.new,
 );
 
-/// Downloaded songs get their lyrics and missing tags here, one at a time and
-/// without a line in the Activity centre (the batch job is for the user's
-/// own «Arricchisci»).
+/// The parts the switches turn on for a song that has just arrived.
+Set<EnrichPart> autoParts(AppSettings s) => {
+  if (s.autoEnrich) EnrichPart.meta,
+  if (s.autoLyrics) ...[EnrichPart.lyrics, EnrichPart.synced],
+  if (s.autoCuriosities) EnrichPart.curio,
+  if (s.creditsDetails) EnrichPart.credits,
+};
+
+/// Downloaded songs get every part that is on (tags, lyrics, curiosities,
+/// credits) here, one at a time and without a line in the Activity centre
+/// (the batch job is for the user's own «Arricchisci»).
 final downloadEnricherProvider = Provider<QuietEnricher>((ref) {
   final enricher = QuietEnricher(
     onDone: (id) => ref.read(downloadTaggerProvider).tag(id),
-    enabled: () {
-      final s = ref.read(settingsProvider);
-      return s.autoEnrich || s.autoLyrics;
-    },
-    enrich: (id) {
-      final s = ref.read(settingsProvider);
-      return ref
-          .read(enrichmentServiceProvider)
-          .enrichMany([id], includeLyrics: s.autoLyrics, includeMetadata: s.autoEnrich)
-          .drain<void>();
+    enabled: () => autoParts(ref.read(settingsProvider)).isNotEmpty,
+    enrich: (id) async {
+      final service = ref.read(enrichmentServiceProvider);
+      await service.limiter.wait();
+      await service.completeOne(id, autoParts(ref.read(settingsProvider)));
     },
   );
   ref.onDispose(enricher.dispose);
@@ -248,8 +279,7 @@ final downloadTaggerProvider = Provider<DownloadTagger>((ref) {
 /// write its tags now when enrichment is off.
 void afterDownload(Ref ref, int trackId) {
   try {
-    final s = ref.read(settingsProvider);
-    if (s.autoEnrich || s.autoLyrics) {
+    if (autoParts(ref.read(settingsProvider)).isNotEmpty) {
       ref.read(downloadEnricherProvider).add(trackId);
     } else {
       unawaited(ref.read(downloadTaggerProvider).tag(trackId));

@@ -55,7 +55,8 @@ class MusicBrainzClient {
   static const gap = Duration(milliseconds: 1100);
   DateTime? _last;
 
-  Future<Map?> _get(String path, Map<String, String> query, CancelToken? cancel, {bool retry = true}) async {
+  Future<Map?> _get(String path, Map<String, String> query, CancelToken? cancel,
+      {bool retry = true, bool strict = false}) async {
     // The service answers 503 now and then; a non-answer is tried once more.
     for (var attempt = 0; attempt < (retry ? 2 : 1); attempt++) {
       final last = _last;
@@ -64,7 +65,13 @@ class MusicBrainzClient {
         if (!wait.isNegative && wait > Duration.zero) await _pause(wait);
       }
       _last = _now();
-      final res = await _web.getJson('$_base/$path', query: {...query, 'fmt': 'json'}, cancel: cancel);
+      Object? res;
+      try {
+        res = await _web.getJson('$_base/$path', query: {...query, 'fmt': 'json'}, cancel: cancel, strict: strict);
+      } on WebUnavailableException catch (e) {
+        if (attempt == (retry ? 1 : 0)) throw MusicBrainzUnavailable(path);
+        AppLog.w('musicbrainz $path: $e');
+      }
       if (res is Map) return res;
       if (attempt == 0) await _pause(const Duration(seconds: 2));
     }
@@ -73,16 +80,15 @@ class MusicBrainzClient {
 
   /// The credits of recording [mbid] in one request. Empty when unknown;
   /// throws [MusicBrainzUnavailable] when the service does not answer after
-  /// the retry (the web seam gives null for 404 and 503 alike, so an unknown
-  /// mbid also lands here: callers pass ids MusicBrainz itself gave).
+  /// the retry (network, timeout, 5xx); an unknown mbid (404) is just empty.
   Future<List<TrackCredit>> recordingCredits(String mbid, {CancelToken? cancel}) async {
     final data = await _get(
       'recording/$mbid',
       {'inc': 'artist-rels+work-rels+work-level-rels'},
       cancel,
+      strict: true,
     );
-    if (data == null) throw MusicBrainzUnavailable('recording/$mbid');
-    return parseMbCredits(Map<String, dynamic>.from(data));
+    return data == null ? const [] : parseMbCredits(Map<String, dynamic>.from(data));
   }
 
   /// The recordings called [title] by [artist], best first: the ones whose
@@ -138,11 +144,10 @@ class MusicBrainzClient {
       {required String title, required String artist, CancelToken? cancel, bool strict = false}) async {
     final code = isrc.trim().toUpperCase();
     if (code.isEmpty) return const [];
-    // 404 means an unknown ISRC: no retry.
-    final data = await _get('isrc/$code', {'inc': 'artist-credits'}, cancel, retry: false);
-    // The web seam gives null for 404 and for no answer alike. [strict] (credits)
-    // takes it as «no answer», so «nothing found» is never remembered by mistake.
-    if (data == null && strict) throw MusicBrainzUnavailable('isrc/$code');
+    // 404 means an unknown ISRC: no retry. With [strict] (credits) a network
+    // error or 5xx throws MusicBrainzUnavailable while 404 is just «nothing
+    // found», so «nothing found» is never remembered by mistake.
+    final data = await _get('isrc/$code', {'inc': 'artist-credits'}, cancel, retry: false, strict: strict);
     final list = data?['recordings'];
     if (list is! List) return const [];
     final wantTitle = matchKey(title);

@@ -2939,5 +2939,7 @@
         "type": "String"
       }
     }
-  }
+  },
+  "autoCuriosities": "Automatisches Wissenswertes",
+  "autoCuriositiesHint": "Sucht Wissenswertes auf Wikipedia für neue Titel"
 }

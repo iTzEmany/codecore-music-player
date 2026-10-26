@@ -285,6 +285,14 @@ class OnlinePage extends ConsumerWidget {
         ),
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
+          title: Text(l.autoCuriosities),
+          subtitle: Text(l.autoCuriositiesHint),
+          value: s.autoCuriosities,
+          onChanged: (v) =>
+              notifier.update((c) => c.copyWith(autoCuriosities: v)),
+        ),
+        SwitchListTile(
+          contentPadding: EdgeInsets.zero,
           title: Text(l.deezerMeta),
           subtitle: Text(l.deezerMetaHint),
           value: s.deezerMeta,

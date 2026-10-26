@@ -62,6 +62,8 @@ finto: scroll in una lista della shell → occupato, libero dopo 5 s; download i
 testo nella ricerca → occupato. `flutter analyze` pulito.
 
 ### 53.4 — `EnrichCompleter` in modalità *piano*
+> Dalla fase 52: le curiosità (CuriosityFinder) e i crediti si identificano ancora ognuno per conto suo su MusicBrainz (K-AR-07 non rispettato del tutto): il finder vuole l'`artistId`, non solo l'MBID dei crediti. Prima del completamento di massa, far riusare a `_identify` l'MBID salvato in `track_enrich.mbid`, così un giro non raddoppia le chiamate.
+> Dalla review di architettura della fase 52, prima di 53.4: (a) dividere `completeOne` in `gather` (letture e rete, nessuna scrittura) e `commit(List)` (una transazione per blocco di 10, RNF/collaudo 53.9), con `CuriosityService` diviso in `find` e `save`: oggi curiosità e copertina scrivono `tracks` fuori dalla transazione del brano; (b) un brano `failed` non ha marca e torna dovuto subito: il completer tiene in memoria i brani già provati nel giro (`dueTrackIds(exclude:)`); (c) `fills` ripete le condizioni di `_writeFields`: farle restituire a `_writeFields` ciò che ha scritto; (d) estrarre il resolver Deezer/iTunes (con la cache `_albums`) da `enrichment_service.dart` (~800 righe), oggi passato a `CreditsEnricher` con callback.
 **File:** `lib/services/online/enrich_completer.dart` (nuovo), `lib/providers/enrich_completer_providers.dart` (nuovo),
 `lib/data/repositories/credits_repository.dart` (`dueTrackIds(parts, now, limit: 20)`: `tracks` `kind IN (0,2)` LEFT
 JOIN `track_enrich`, solo colonne leggere), `lib/providers/startup_providers.dart` (avvio dopo la scansione e a ogni cambio

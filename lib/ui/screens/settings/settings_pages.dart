@@ -296,6 +296,13 @@ List<SettingsGroup> _online(BuildContext context, WidgetRef ref) {
           onChanged: (v) => notifier.update((c) => c.copyWith(autoLyrics: v)),
         ),
         SwitchListTile(
+          title: Text(l.autoCuriosities),
+          subtitle: Text(l.autoCuriositiesHint),
+          value: s.autoCuriosities,
+          onChanged: (v) =>
+              notifier.update((c) => c.copyWith(autoCuriosities: v)),
+        ),
+        SwitchListTile(
           title: Text(l.deezerMeta),
           subtitle: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

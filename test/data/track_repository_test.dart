@@ -137,4 +137,19 @@ void main() {
       expect((await repo.watchResumable(limit: 1).first).single.title, 'T1');
     },
   );
+
+  test('setLyrics byUser marks the text as the user\'s; otherwise no mark', () async {
+    await repo.upsertBatch([row('/a.mp3', 'A')]);
+    final id = (await db.select(db.tracks).getSingle()).id;
+    await repo.setLyrics(id, plain: 'x');
+    expect(await db.select(db.trackEnrich).get(), isEmpty);
+    await db.into(db.trackEnrich).insert(
+        TrackEnrichCompanion.insert(trackId: Value(id), creditsNoneAt: const Value(7)));
+    await repo.setLyrics(id, plain: 'y', byUser: true);
+    expect((await db.select(db.trackEnrich).getSingle()).creditsNoneAt, 7);
+    expect((await db.select(db.trackEnrich).getSingle()).lyricsByUser, true);
+    expect((await db.select(db.tracks).getSingle()).lyricsPlain, 'y');
+    await repo.setLyrics(id, plain: 'z');
+    expect((await db.select(db.trackEnrich).getSingle()).lyricsByUser, true);
+  });
 }

@@ -3183,5 +3183,7 @@
         "type": "String"
       }
     }
-  }
+  },
+  "autoCuriosities": "Curiosidades automáticas",
+  "autoCuriositiesHint": "Procura curiosidades na Wikipédia para as faixas novas"
 }

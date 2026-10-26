@@ -3183,5 +3183,7 @@
         "type": "String"
       }
     }
-  }
+  },
+  "autoCuriosities": "Anecdotes automatiques",
+  "autoCuriositiesHint": "Cherche des anecdotes sur Wikipédia pour les nouveaux titres"
 }

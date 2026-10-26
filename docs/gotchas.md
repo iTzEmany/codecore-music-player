@@ -18,7 +18,7 @@
 - **Goldens e `--update-goldens`:** rigenera solo il file che fallisce; il comando riscrive anche immagini senza differenze reali (settings, home), da riportare con `git checkout`.
 - **Deezer gw (`gw-light.php`) vuole un corpo JSON `{}`** anche per `deezer.getUserData`: senza risponde 400. Il `checkForm` vale con il cookie `sid` della stessa sessione.
 - **`/search` di Deezer non porta il BPM**: serve `/track/{id}` (e `bpm: 0` vuol dire «non noto»).
-- **`WebClient` restituisce null sia per un 404 sia per rete o 5xx**: chi deve distinguere «niente» da «non risponde» (MusicBrainz per i crediti) oggi tratta null come «non risponde» (D-129). Da sistemare all'inizio della fase 52.
+- **`WebClient.getJson` di serie restituisce null sia per un 404 sia per rete o 5xx**: chi deve distinguere «niente» da «non risponde» passa `strict: true` (D-131). Un fake nuovo di `WebClient` deve accettare `strict` e, per simulare «giù», lanciare `WebUnavailableException` quando è strict (null vuol dire 404).
 - **`pr-attendi.sh` vuole la stima in minuti senza unità** (`15`, non `15m`): con l'unità esce subito con codice 2.
 - **Mai passare file grandi come `Uint8List` su un MethodChannel Android**: il codec li copia nell'heap Java (limite 256 MB sul Motorola) e l'app va in crash con `OutOfMemoryError`. `FilePicker.saveFile` vuole solo `bytes`: per i file grandi usa `saveFileAt` (canale `codecore/save`, copia a flusso).
 - **Mai `dart format` su una cartella** (`dart format lib/ui`): riformatta centinaia di file tracciati che oggi non seguono il formato. Solo sui file toccati, per nome (fase 51).

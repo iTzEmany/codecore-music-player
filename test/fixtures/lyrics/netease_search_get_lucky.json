@@ -1,0 +1,68 @@
+{
+ "result": {
+  "songs": [
+   {
+    "id": 26349642,
+    "name": "Get Lucky",
+    "duration": 369684,
+    "artists": [
+     {
+      "name": "Daft Punk"
+     },
+     {
+      "name": "Pharrell Williams"
+     },
+     {
+      "name": "Nile Rodgers"
+     }
+    ]
+   },
+   {
+    "id": 420480815,
+    "name": "Get Lucky (Radio Edit)",
+    "duration": 248476,
+    "artists": [
+     {
+      "name": "Nile Rodgers"
+     },
+     {
+      "name": "Pharrell Williams"
+     },
+     {
+      "name": "Daft Punk"
+     }
+    ]
+   },
+   {
+    "id": 27522491,
+    "name": "Get Lucky (Album Version)",
+    "duration": 367000,
+    "artists": [
+     {
+      "name": "Daft Punk"
+     },
+     {
+      "name": "Pharrell Williams"
+     }
+    ]
+   },
+   {
+    "id": 2046700582,
+    "name": "Get Lucky (feat. Pharrell Williams and Nile Rodgers)",
+    "duration": 369684,
+    "artists": [
+     {
+      "name": "Daft Punk"
+     },
+     {
+      "name": "Pharrell Williams"
+     },
+     {
+      "name": "Nile Rodgers"
+     }
+    ]
+   }
+  ]
+ },
+ "code": 200
+}

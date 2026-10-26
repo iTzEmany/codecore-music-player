@@ -52,6 +52,30 @@ void main() {
     expect((await repo.creditsOf(id)).map((c) => c.name), ['Cy']);
   });
 
+  test('watchPortableOf emits again when credits are saved', () async {
+    final seen = <int>[];
+    final sub = repo.watchPortableOf(id).listen((d) => seen.add(d.credits.length));
+    await pumpEventQueue();
+    await repo.saveCredits(id, [credit('Ann', 'composer')]);
+    await pumpEventQueue();
+    await sub.cancel();
+    expect(seen.first, 0);
+    expect(seen.last, 1);
+  });
+
+  test('watchCreditedTracks emits again with the track once credited', () async {
+    final seen = <List<int>>[];
+    final sub = repo
+        .watchCreditedTracks('ann')
+        .listen((r) => seen.add([for (final e in r) e.track.id]));
+    await pumpEventQueue();
+    await repo.saveCredits(id, [credit('Ann', 'composer')]);
+    await pumpEventQueue();
+    await sub.cancel();
+    expect(seen.first, isEmpty);
+    expect(seen.last, [id]);
+  });
+
   test('saveEnrich keeps the columns it does not set', () async {
     await repo.saveEnrich(
       TrackEnrichCompanion(

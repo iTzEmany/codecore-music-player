@@ -21,7 +21,7 @@ class _Web implements WebClient {
 
   @override
   Future<Object?> getJson(String url,
-      {Map<String, String>? query, CancelToken? cancel}) async {
+      {Map<String, String>? query, CancelToken? cancel, bool strict = false}) async {
     urls.add(url);
     if (url.contains('/track/isrc:')) {
       return {
