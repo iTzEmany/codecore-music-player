@@ -6,6 +6,7 @@ import 'package:codecore/providers/activity_log_providers.dart';
 import 'package:codecore/providers/activity_providers.dart';
 import 'package:codecore/providers/database_providers.dart';
 import 'package:codecore/providers/import_providers.dart';
+import 'package:codecore/providers/second_opinion_providers.dart';
 import 'package:codecore/services/online/download_queue.dart';
 import 'package:codecore/providers/youtube_providers.dart';
 import 'package:codecore/services/import/playlist_import_service.dart';
@@ -25,6 +26,12 @@ class _Downloads extends DownloadsNotifier {
   List<DownloadItem> build() => const [];
   @override
   void clearFinished() {}
+}
+
+class _SecondOpinion extends SecondOpinionNotifier {
+  @override
+  SecondOpinionState build() => const SecondOpinionState();
+  void set(SecondOpinionState s) => state = s;
 }
 
 final _activity = NotifierProvider<_Activity, ActivityState>(_Activity.new);
@@ -244,5 +251,61 @@ void main() {
     expect(s.total, 121);
     expect({for (final e in s.entries) e.item!.name}, hasLength(121));
     expect(s.entries.first.item!.name, 'new');
+  });
+
+  group('no doubles', () {
+    late ProviderContainer c;
+    setUp(() {
+      c = ProviderContainer(overrides: [
+        databaseProvider.overrideWithValue(db),
+        activityProvider.overrideWith((ref) => ref.watch(_activity)),
+        secondOpinionJobProvider.overrideWith(_SecondOpinion.new),
+      ]);
+      c.listen(activityLogProvider, (_, _) {});
+    });
+    tearDown(() => c.dispose());
+
+    test('an item that stays in completed over several states is written once', () async {
+      final done = _done('dl-1', 'Uno');
+      c.read(_activity.notifier).set(ActivityState(const [], [done]));
+      await pumpEventQueue();
+      c.read(_activity.notifier).set(ActivityState(const [], [done, _done('dl-2', 'Due')]));
+      await pumpEventQueue();
+      c.read(_activity.notifier).set(ActivityState(const [], [done, _done('dl-2', 'Due')]));
+      c.read(_activity.notifier).set(ActivityState(
+          const [ActivityItem(kind: ActivityKind.scan, key: 'scan', name: null)], [done, _done('dl-2', 'Due')]));
+      await pumpEventQueue();
+      expect(c.read(activityLogProvider).entries.map((e) => e.item!.name), ['Due', 'Uno']);
+    });
+
+    test('a finished second opinion is written once, not again at the next state', () async {
+      final so = c.read(secondOpinionJobProvider.notifier) as _SecondOpinion;
+      so.set(const SecondOpinionState(running: true, total: 3));
+      await pumpEventQueue();
+      so.set(const SecondOpinionState(done: 3, total: 3));
+      await pumpEventQueue();
+      so.set(const SecondOpinionState(done: 3, total: 3, updated: 1));
+      await pumpEventQueue();
+      expect(c.read(activityLogProvider).entries, hasLength(1));
+    });
+  });
+
+  test('loadMore with every row already loaded reads nothing more', () async {
+    for (var i = 1; i <= 3; i++) {
+      await db.into(db.activityLogRows).insert(
+          ActivityLogRowsCompanion.insert(at: DateTime.now().millisecondsSinceEpoch + i, kind: 'scan', name: 'n$i'));
+    }
+    final c = ProviderContainer(overrides: [
+      databaseProvider.overrideWithValue(db),
+      activityProvider.overrideWith((ref) => ref.watch(_activity)),
+    ]);
+    addTearDown(c.dispose);
+    c.listen(activityLogProvider, (_, _) {});
+    await pumpEventQueue();
+    // A row the notifier does not know about: only a read would show it.
+    await db.into(db.activityLogRows).insert(
+        ActivityLogRowsCompanion.insert(at: DateTime.now().millisecondsSinceEpoch, kind: 'scan', name: 'hidden'));
+    await c.read(activityLogProvider.notifier).loadMore();
+    expect(c.read(activityLogProvider).entries, hasLength(3));
   });
 }
