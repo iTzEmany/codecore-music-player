@@ -28,6 +28,7 @@ enum ItunesMode { match, empty, down, limited }
 class EnrichWeb implements WebClient {
   ItunesMode itunes = ItunesMode.match;
   bool deezerDown = false;
+  bool deezerLimited = false;
   bool musicBrainzLimited = false;
   bool coverDown = false;
 
@@ -48,6 +49,9 @@ class EnrichWeb implements WebClient {
     urls.add(url);
     onUrl?.call(url);
     if (musicBrainzLimited && url.contains('musicbrainz')) {
+      throw const RateLimitedException(429);
+    }
+    if (deezerLimited && url.contains('deezer')) {
       throw const RateLimitedException(429);
     }
     if (deezerDown && url.contains('deezer')) return null;
@@ -169,6 +173,9 @@ class FakeChain extends LyricsChain {
   bool syncedFailed = false;
   bool? wantSyncedSeen;
 
+  /// The answer for one track, instead of [result].
+  LyricsResult? Function(Track t)? resultFor;
+
   /// Runs while the search is «on the network», before it answers.
   Future<void> Function()? during;
 
@@ -185,7 +192,7 @@ class FakeChain extends LyricsChain {
     return failed
         ? const LyricsChainResult(failed: true, syncedFailed: true)
         : LyricsChainResult(
-            lyrics: result,
+            lyrics: resultFor == null ? result : resultFor!(t),
             syncedFailed: syncedFailed,
             source: 'fake',
           );
@@ -287,12 +294,17 @@ class EnrichRig {
     bool userEdited = false,
     int coverSource = 0,
     String? curiosities,
+    String path = '/a.mp3',
+    int kind = 0,
+    bool missing = false,
+    bool ignored = false,
+    bool hasCover = false,
   }) async {
     final id = await db
         .into(db.tracks)
         .insert(
           TracksCompanion.insert(
-            path: '/a.mp3',
+            path: path,
             title: 'Song',
             albumKey: 'k',
             format: 'mp3',
@@ -311,6 +323,10 @@ class EnrichRig {
             curiosities: Value(curiosities),
             userEdited: Value(userEdited),
             coverSource: Value(coverSource),
+            kind: Value(kind),
+            missing: Value(missing),
+            ignored: Value(ignored),
+            hasCover: Value(hasCover),
           ),
         );
     return id;
