@@ -2941,5 +2941,42 @@
     }
   },
   "autoCuriosities": "Automatisches Wissenswertes",
-  "autoCuriositiesHint": "Sucht Wissenswertes auf Wikipedia für neue Titel"
+  "autoCuriositiesHint": "Sucht Wissenswertes auf Wikipedia für neue Titel",
+  "memoryEnrichment": "Anreicherung: {size}",
+  "@memoryEnrichment": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "memoryEnrichmentDetail": "Songtexte {lyrics}, Wissenswertes {curiosities}, Credits {credits}",
+  "@memoryEnrichmentDetail": {
+    "placeholders": {
+      "lyrics": {
+        "type": "String"
+      },
+      "curiosities": {
+        "type": "String"
+      },
+      "credits": {
+        "type": "String"
+      }
+    }
+  },
+  "activityPodcastRefresh": "Podcasts werden aktualisiert",
+  "activityRadio": "Gespeicherte Sender werden geprüft",
+  "activityEnrichBackground": "Anreicherung wird vervollständigt: {done} von {total}",
+  "@activityEnrichBackground": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "activityStopped": "Gestoppt",
+  "activityScanEnded": "Scan"
 }

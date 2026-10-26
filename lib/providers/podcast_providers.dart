@@ -25,6 +25,16 @@ final podcastRepositoryProvider = Provider<PodcastRepository>(
 /// The albumKey every episode of a podcast shares (its cover hangs on it).
 String podcastAlbumKey(int podcastId) => podcastAlbumKeyOf(podcastId);
 
+/// True while all the podcasts are being read again: it shows in the Activity centre.
+class PodcastRefreshing extends Notifier<bool> {
+  @override
+  bool build() => false;
+
+  void set(bool on) => state = on;
+}
+
+final podcastRefreshingProvider = NotifierProvider<PodcastRefreshing, bool>(PodcastRefreshing.new);
+
 final podcastServiceProvider = Provider<PodcastService>((ref) {
   final web = DioWebClient();
   // The folder is known a moment after start-up; until then nothing is deleted.

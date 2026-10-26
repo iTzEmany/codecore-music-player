@@ -8666,6 +8666,52 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'Cerca le curiosità su Wikipedia per i brani nuovi'**
   String get autoCuriositiesHint;
+
+  /// No description provided for @memoryEnrichment.
+  ///
+  /// In it, this message translates to:
+  /// **'Arricchimento: {size}'**
+  String memoryEnrichment(String size);
+
+  /// No description provided for @memoryEnrichmentDetail.
+  ///
+  /// In it, this message translates to:
+  /// **'Testi {lyrics}, curiosità {curiosities}, crediti {credits}'**
+  String memoryEnrichmentDetail(
+    String lyrics,
+    String curiosities,
+    String credits,
+  );
+
+  /// No description provided for @activityPodcastRefresh.
+  ///
+  /// In it, this message translates to:
+  /// **'Aggiornamento dei podcast'**
+  String get activityPodcastRefresh;
+
+  /// No description provided for @activityRadio.
+  ///
+  /// In it, this message translates to:
+  /// **'Controllo delle radio salvate'**
+  String get activityRadio;
+
+  /// No description provided for @activityEnrichBackground.
+  ///
+  /// In it, this message translates to:
+  /// **'Completamento dell\'arricchimento: {done} di {total}'**
+  String activityEnrichBackground(int done, int total);
+
+  /// No description provided for @activityStopped.
+  ///
+  /// In it, this message translates to:
+  /// **'Fermata'**
+  String get activityStopped;
+
+  /// No description provided for @activityScanEnded.
+  ///
+  /// In it, this message translates to:
+  /// **'Scansione'**
+  String get activityScanEnded;
 }
 
 class _AppLocalizationsDelegate

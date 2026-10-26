@@ -1,7 +1,12 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../core/app_log.dart';
+import '../core/clock.dart';
+import '../data/db/app_database.dart';
+import '../data/repositories/activity_log_repository.dart';
 import '../services/import/import_chain.dart';
 import '../services/import/playlist_import_service.dart';
 import 'activity_providers.dart';
@@ -13,39 +18,134 @@ import 'youtube_providers.dart';
 
 /// One line of the Registro: something that ended, and when.
 class LogEntry {
-  const LogEntry({required this.at, this.item, this.importName, this.event});
+  const LogEntry({
+    required this.at,
+    this.item,
+    this.importName,
+    this.event,
+    this.detail,
+  });
 
   final DateTime at;
 
-  /// A download, an episode or a transfer that ended (done or not).
+  /// A download, an episode, a transfer or a background job that ended.
   final ActivityItem? item;
 
   /// An import that ended or stopped, with why.
   final String? importName;
   final ImportEventKind? event;
 
+  /// Optional JSON-encodable extras kept with the row (e.g. the song ids of an
+  /// enrichment round).
+  final Map<String, Object?>? detail;
+
+  /// A job that left `running` before its work was done (see [ActivityLogNotifier]).
+  bool get stopped => detail?['stopped'] == true;
+
   bool get failed =>
       (item?.failed ?? false) ||
-      (event != null && event != ImportEventKind.completed && event != ImportEventKind.planned);
+      (event != null &&
+          event != ImportEventKind.completed &&
+          event != ImportEventKind.planned);
+
+  static const _importKind = 'import';
+
+  LogEntry.fromRow(ActivityLogRow r)
+    : at = DateTime.fromMillisecondsSinceEpoch(r.at),
+      detail = _decode(r.detail),
+      importName = r.kind == _importKind ? r.name : null,
+      event = r.kind == _importKind
+          ? ImportEventKind.values.asNameMap()[_decode(r.detail)?['event']] ??
+                ImportEventKind.completed
+          : null,
+      item = r.kind == _importKind
+          ? null
+          : ActivityItem(
+              kind: _kindOf(r.kind),
+              key: 'log-${r.id}',
+              name: r.name.isEmpty ? null : r.name,
+              done: r.done,
+              total: r.total,
+              running: false,
+              failed: r.failed != 0,
+            );
+
+  /// An unknown kind (a newer app wrote it) is shown as a plain scan line.
+  static ActivityKind _kindOf(String name) {
+    final k = ActivityKind.values.asNameMap()[name];
+    if (k == null) AppLog.w('unknown activity_log kind $name');
+    return k ?? ActivityKind.scan;
+  }
+
+  static Map<String, Object?>? _decode(String? s) {
+    if (s == null) return null;
+    try {
+      final j = jsonDecode(s);
+      if (j is Map<String, Object?>) return j;
+    } on FormatException catch (e, st) {
+      AppLog.w('bad activity_log detail', e, st);
+    }
+    return null;
+  }
+
+  Future<int> _save(ActivityLogRepository repo) {
+    final i = item;
+    final d = {if (event != null) 'event': event!.name, ...?detail};
+    return repo.add(
+      at: at.millisecondsSinceEpoch,
+      kind: i?.kind.name ?? _importKind,
+      name: i?.name ?? importName ?? '',
+      done: i?.done ?? 0,
+      total: i?.total ?? 0,
+      failed: failed,
+      detail: d.isEmpty ? null : jsonEncode(d),
+    );
+  }
 }
 
-/// What ended in the background, newest first (at most [limit] lines, for this
-/// session). Kept alive from the app's root, so the times are the real ones
-/// also while the Activity centre is closed.
-class ActivityLogNotifier extends Notifier<List<LogEntry>> {
-  static const limit = 500;
+/// The loaded pages of the Registro (newest first) and how many rows exist.
+class ActivityLogState {
+  const ActivityLogState(this.entries, this.total);
+
+  final List<LogEntry> entries;
+  final int total;
+
+  bool get hasMore => entries.length < total;
+}
+
+/// What ended in the background, kept in the database for 30 days. Kept alive
+/// from the app's root, so the times are the real ones also while the Activity
+/// centre is closed. Other code adds a line with [add].
+class ActivityLogNotifier extends Notifier<ActivityLogState> {
+  static const pageSize = 50;
+
+  /// Jobs that leave one line when they leave `running` (the others write
+  /// their own: downloads, episodes, transfers, imports, second opinion, and
+  /// the podcast refresh and radio check, which know how they went).
+  static const _oneLine = {
+    ActivityKind.scan,
+    ActivityKind.enrich,
+    ActivityKind.cleanup,
+    ActivityKind.releases,
+    ActivityKind.enrichBackground,
+  };
+
   final _logged = <String>{};
+  Future<void> _tail = Future.value();
+  bool _paging = false;
+
+  ActivityLogRepository get _repo => ref.read(activityLogRepositoryProvider);
 
   @override
-  List<LogEntry> build() {
-    ref.listen<ActivityState>(activityProvider, (_, s) => _record(s));
+  ActivityLogState build() {
+    ref.listen<ActivityState>(activityProvider, (prev, s) => _record(prev, s));
     ref.listen<AsyncValue<ImportEvent>>(importEventsProvider, (_, e) {
       final event = e.value;
       if (event != null) unawaited(_recordImport(event));
     });
     ref.listen<SecondOpinionState>(secondOpinionJobProvider, (prev, s) {
       if (prev == null || !prev.running || s.running) return;
-      _add([
+      add(
         LogEntry(
           at: DateTime.now(),
           item: ActivityItem(
@@ -58,44 +158,114 @@ class ActivityLogNotifier extends Notifier<List<LogEntry>> {
             failed: s.throttled,
           ),
         ),
-      ]);
+      );
     });
-    return const [];
+    unawaited(
+      _run(() async {
+        await _repo.prune(nowMs());
+        final rows = await _repo.page(limit: pageSize);
+        final total = await _repo.count();
+        if (ref.mounted) {
+          state = ActivityLogState([
+            for (final r in rows) LogEntry.fromRow(r),
+          ], total);
+        }
+      }),
+    );
+    return const ActivityLogState([], 0);
   }
 
-  void _record(ActivityState s) {
+  /// Database jobs one after the other, so the lines keep their order.
+  Future<void> _run(Future<void> Function() job) =>
+      _tail = _tail.then((_) async {
+        try {
+          await job();
+        } on Object catch (e, st) {
+          AppLog.w('activity log write failed', e, st);
+        }
+      });
+
+  void _record(ActivityState? prev, ActivityState s) {
     final now = DateTime.now();
-    final fresh = [
-      for (final c in s.completed)
-        if (_logged.add(c.key)) LogEntry(at: now, item: c),
-    ];
-    if (fresh.isNotEmpty) _add(fresh);
+    for (final c in s.completed) {
+      if (_logged.add(c.key)) add(LogEntry(at: now, item: c));
+    }
+    final still = {for (final r in s.running) r.key};
+    for (final r in prev?.running ?? const <ActivityItem>[]) {
+      if (_oneLine.contains(r.kind) && !still.contains(r.key)) {
+        add(
+          LogEntry(
+            at: now,
+            detail: r.total > 0 && r.done < r.total ? const {'stopped': true} : null,
+            item: ActivityItem(
+              kind: r.kind,
+              key: r.key,
+              name: r.name,
+              done: r.done,
+              total: r.total,
+              running: false,
+            ),
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _recordImport(ImportEvent e) async {
     final imp = await ref.read(importRepositoryProvider).get(e.importId);
     if (!ref.mounted) return;
-    _add([
+    add(
       LogEntry(
         at: DateTime.now(),
         importName: imp == null ? null : importLabel(imp.sourceName),
         event: e.kind,
       ),
-    ]);
+    );
   }
 
-  void _add(List<LogEntry> fresh) {
-    final all = [...fresh.reversed, ...state];
-    state = all.length > limit ? all.sublist(0, limit) : all;
+  /// Writes [e] to the database (off the UI thread) and shows it at the top.
+  Future<void> add(LogEntry e) => _run(() async {
+    await e._save(_repo);
+    if (ref.mounted) {
+      state = ActivityLogState([e, ...state.entries], state.total + 1);
+    }
+  });
+
+  /// The next page, when the list reaches its end.
+  Future<void> loadMore() async {
+    if (_paging || !state.hasMore) return;
+    _paging = true;
+    await _run(() async {
+      final rows = await _repo.page(
+        limit: pageSize,
+        offset: state.entries.length,
+      );
+      if (ref.mounted) {
+        state = ActivityLogState([
+          ...state.entries,
+          for (final r in rows) LogEntry.fromRow(r),
+        ], state.total);
+      }
+    });
+    _paging = false;
   }
 
   /// Empties the Registro and forgets the finished downloads behind it.
-  void clear() {
+  Future<void> clear() {
     ref.read(downloadsProvider.notifier).clearFinished();
     ref.read(podcastDownloadsProvider.notifier).clearFinished();
-    state = const [];
+    return _run(() async {
+      await _repo.clear();
+      if (ref.mounted) state = const ActivityLogState([], 0);
+    });
   }
 }
 
+final activityLogRepositoryProvider = Provider<ActivityLogRepository>(
+  (ref) => ActivityLogRepository(ref.watch(databaseProvider)),
+);
+
 final activityLogProvider =
-    NotifierProvider<ActivityLogNotifier, List<LogEntry>>(ActivityLogNotifier.new);
+    NotifierProvider<ActivityLogNotifier, ActivityLogState>(
+      ActivityLogNotifier.new,
+    );

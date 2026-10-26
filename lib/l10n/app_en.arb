@@ -2941,5 +2941,42 @@
     }
   },
   "autoCuriosities": "Automatic trivia",
-  "autoCuriositiesHint": "Looks up trivia on Wikipedia for new tracks"
+  "autoCuriositiesHint": "Looks up trivia on Wikipedia for new tracks",
+  "memoryEnrichment": "Enrichment: {size}",
+  "@memoryEnrichment": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "memoryEnrichmentDetail": "Lyrics {lyrics}, trivia {curiosities}, credits {credits}",
+  "@memoryEnrichmentDetail": {
+    "placeholders": {
+      "lyrics": {
+        "type": "String"
+      },
+      "curiosities": {
+        "type": "String"
+      },
+      "credits": {
+        "type": "String"
+      }
+    }
+  },
+  "activityPodcastRefresh": "Updating podcasts",
+  "activityRadio": "Checking saved radios",
+  "activityEnrichBackground": "Completing enrichment: {done} of {total}",
+  "@activityEnrichBackground": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "activityStopped": "Stopped",
+  "activityScanEnded": "Scan"
 }

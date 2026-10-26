@@ -14,13 +14,18 @@ import '../../shell/shell_nav.dart';
 import 'activity_sheet.dart';
 import '../../widgets/cc_app_bar.dart';
 
-/// What ended in the background (downloads, transfers, imports), newest
-/// first, with the time and how it went.
+/// What ended in the background (downloads, transfers, imports, scans and
+/// other jobs), newest first, with the time and how it went.
 class ActivityLogScreen extends ConsumerWidget {
   const ActivityLogScreen({super.key});
 
   String _outcome(AppLocalizations l, LogEntry e) => switch (e.event) {
-    null => e.failed ? l.offerFailed : l.offerDone,
+    null =>
+      e.failed
+          ? l.offerFailed
+          : e.stopped
+          ? l.activityStopped
+          : l.offerDone,
     ImportEventKind.completed => l.offerDone,
     ImportEventKind.planned => l.csvImportPlanned,
     ImportEventKind.rateLimited => l.ytErrRateLimited,
@@ -35,8 +40,9 @@ class ActivityLogScreen extends ConsumerWidget {
     return switch (e.item?.kind) {
       ActivityKind.transfer => Icons.send_rounded,
       ActivityKind.secondOpinion => Icons.fact_check_outlined,
+      ActivityKind.download => Icons.download_done_rounded,
       null => Icons.playlist_add_check_rounded,
-      _ => Icons.download_done_rounded,
+      _ => Icons.task_alt_rounded,
     };
   }
 
@@ -45,7 +51,8 @@ class ActivityLogScreen extends ConsumerWidget {
     final l = context.l10n;
     final cc = context.cc;
     final theme = Theme.of(context).textTheme;
-    final entries = ref.watch(activityLogProvider);
+    final log = ref.watch(activityLogProvider);
+    final entries = log.entries;
     final time = DateFormat.Hm(Localizations.localeOf(context).toLanguageTag());
     return Scaffold(
       appBar: CcAppBar(
@@ -71,6 +78,11 @@ class ActivityLogScreen extends ConsumerWidget {
                   itemExtent: 64,
                   itemCount: entries.length,
                   itemBuilder: (_, i) {
+                    if (i == entries.length - 1 && log.hasMore) {
+                      Future.microtask(
+                        ref.read(activityLogProvider.notifier).loadMore,
+                      );
+                    }
                     final e = entries[i];
                     final item = e.item;
                     return ListTile(
@@ -86,7 +98,9 @@ class ActivityLogScreen extends ConsumerWidget {
                       ),
                       title: Text(
                         item != null
-                            ? activityTitle(l, item)
+                            ? (item.kind == ActivityKind.scan && item.total == 0
+                                  ? l.activityScanEnded
+                                  : activityTitle(l, item))
                             : l.logImport(e.importName ?? ''),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,

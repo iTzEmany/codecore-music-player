@@ -2941,5 +2941,42 @@
     }
   },
   "autoCuriosities": "Curiosidades automáticas",
-  "autoCuriositiesHint": "Busca curiosidades en Wikipedia para las canciones nuevas"
+  "autoCuriositiesHint": "Busca curiosidades en Wikipedia para las canciones nuevas",
+  "memoryEnrichment": "Enriquecimiento: {size}",
+  "@memoryEnrichment": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "memoryEnrichmentDetail": "Letras {lyrics}, curiosidades {curiosities}, créditos {credits}",
+  "@memoryEnrichmentDetail": {
+    "placeholders": {
+      "lyrics": {
+        "type": "String"
+      },
+      "curiosities": {
+        "type": "String"
+      },
+      "credits": {
+        "type": "String"
+      }
+    }
+  },
+  "activityPodcastRefresh": "Actualizando los podcasts",
+  "activityRadio": "Comprobando las radios guardadas",
+  "activityEnrichBackground": "Completando el enriquecimiento: {done} de {total}",
+  "@activityEnrichBackground": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "activityStopped": "Detenida",
+  "activityScanEnded": "Escaneo"
 }

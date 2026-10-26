@@ -5451,4 +5451,35 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get autoCuriositiesHint =>
       'Looks up trivia on Wikipedia for new tracks';
+
+  @override
+  String memoryEnrichment(String size) {
+    return 'Enrichment: $size';
+  }
+
+  @override
+  String memoryEnrichmentDetail(
+    String lyrics,
+    String curiosities,
+    String credits,
+  ) {
+    return 'Lyrics $lyrics, trivia $curiosities, credits $credits';
+  }
+
+  @override
+  String get activityPodcastRefresh => 'Updating podcasts';
+
+  @override
+  String get activityRadio => 'Checking saved radios';
+
+  @override
+  String activityEnrichBackground(int done, int total) {
+    return 'Completing enrichment: $done of $total';
+  }
+
+  @override
+  String get activityStopped => 'Stopped';
+
+  @override
+  String get activityScanEnded => 'Scan';
 }

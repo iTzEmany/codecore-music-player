@@ -8,13 +8,14 @@ const kSavedRefreshEvery = Duration(days: 1);
 /// Reads the saved Radio Browser stations again, at most once a day: a changed
 /// address is updated, a station Radio Browser no longer knows is marked as
 /// not answering (never deleted). Stations added by hand are left alone.
-/// Returns whether a request was made. A failure is logged, not thrown: the
+/// [onRequest] is called right before the request. Returns whether the request succeeded. A failure is logged, not thrown: the
 /// saved addresses keep working without Radio Browser.
 Future<bool> refreshSavedRadios({
   required RadioRepository repo,
   required RadioBrowserClient client,
   required RadioPrefs prefs,
   DateTime Function()? now,
+  void Function()? onRequest,
 }) async {
   final clock = (now ?? DateTime.now)();
   try {
@@ -28,6 +29,7 @@ Future<bool> refreshSavedRadios({
         if (!r.stationId.startsWith('manual:')) r.stationId,
     ];
     if (ids.isEmpty) return false;
+    onRequest?.call();
     final fresh = await client.byUuids(ids);
     final found = {for (final s in fresh) s.id};
     await repo.applyRefresh(fresh, [

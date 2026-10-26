@@ -8,13 +8,26 @@ import 'import_providers.dart';
 import 'library_providers.dart';
 import 'online_providers.dart';
 import 'podcast_providers.dart';
+import 'radio_providers.dart' show radioCheckingProvider;
 import 'releases_providers.dart' show manualReleaseCheckProvider;
 import 'second_opinion_providers.dart';
 import 'share_hub.dart';
 import 'youtube_providers.dart';
 import '../services/import/playlist_import_service.dart';
 
-enum ActivityKind { scan, enrich, download, transfer, import, cleanup, releases, secondOpinion }
+enum ActivityKind {
+  scan,
+  enrich,
+  download,
+  transfer,
+  import,
+  cleanup,
+  releases,
+  secondOpinion,
+  podcastRefresh,
+  radio,
+  enrichBackground,
+}
 
 /// One line of the Activity centre. [progress] is 0..1, null = indeterminate.
 class ActivityItem {
@@ -90,6 +103,9 @@ ActivityState buildActivity({
   List<EpisodeDownload> episodes = const [],
   bool releases = false,
   CleanupProgress? secondOpinion,
+  bool podcastRefresh = false,
+  bool radio = false,
+  CleanupProgress? enrichBackground,
 }) {
   final running = <ActivityItem>[];
   final completed = <ActivityItem>[];
@@ -147,6 +163,25 @@ ActivityState buildActivity({
   if (releases) {
     running.add(const ActivityItem(
         kind: ActivityKind.releases, key: 'releases', name: null));
+  }
+  if (podcastRefresh) {
+    running.add(const ActivityItem(
+        kind: ActivityKind.podcastRefresh, key: 'podcastRefresh', name: null));
+  }
+  if (radio) {
+    running.add(const ActivityItem(kind: ActivityKind.radio, key: 'radio', name: null));
+  }
+  if (enrichBackground != null) {
+    running.add(
+      ActivityItem(
+        kind: ActivityKind.enrichBackground,
+        key: 'enrichBackground',
+        name: null,
+        done: enrichBackground.done,
+        total: enrichBackground.total,
+        progress: enrichBackground.total == 0 ? null : enrichBackground.done / enrichBackground.total,
+      ),
+    );
   }
   for (final i in imports) {
     running.add(
@@ -225,6 +260,8 @@ final activityProvider = Provider<ActivityState>((ref) {
     imports: ref.watch(importProgressProvider),
     episodes: ref.watch(podcastDownloadsProvider),
     releases: ref.watch(manualReleaseCheckProvider),
+    podcastRefresh: ref.watch(podcastRefreshingProvider),
+    radio: ref.watch(radioCheckingProvider),
     secondOpinion: ref.watch(
       secondOpinionJobProvider.select(
         (j) => j.running ? CleanupProgress(j.done, j.total) : null,

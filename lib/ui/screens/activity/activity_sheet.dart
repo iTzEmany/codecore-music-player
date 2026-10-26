@@ -42,7 +42,7 @@ class ActivitySheet extends ConsumerWidget {
     final theme = Theme.of(context).textTheme;
     final state = ref.watch(activityProvider);
 
-    final log = ref.watch(activityLogProvider.select((e) => e.length));
+    final log = ref.watch(activityLogProvider.select((e) => e.total));
     // In the Library tab, below the bar: the sheet closes on the way.
     void open(Widget page) => ShellNav.openInLibrary(context, ref, page);
 
@@ -134,6 +134,9 @@ void _cancel(BuildContext context, WidgetRef ref, ActivityItem a) {
       _cancelImport(context, ref, a);
     case ActivityKind.scan:
     case ActivityKind.releases:
+    case ActivityKind.podcastRefresh:
+    case ActivityKind.radio:
+    case ActivityKind.enrichBackground:
       break;
   }
 }
@@ -258,6 +261,9 @@ String activityTitle(AppLocalizations l, ActivityItem a) => switch (a.kind) {
   ActivityKind.cleanup => l.activityCleanup(a.done, a.total),
   ActivityKind.releases => l.activityReleases,
   ActivityKind.secondOpinion => l.activitySecondOpinion(a.done, a.total),
+  ActivityKind.podcastRefresh => l.activityPodcastRefresh,
+  ActivityKind.radio => l.activityRadio,
+  ActivityKind.enrichBackground => l.activityEnrichBackground(a.done, a.total),
   ActivityKind.import =>
     a.paused
         ? l.activityImportPaused(a.name ?? '', a.done, a.total)

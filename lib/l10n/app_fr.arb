@@ -3185,5 +3185,42 @@
     }
   },
   "autoCuriosities": "Anecdotes automatiques",
-  "autoCuriositiesHint": "Cherche des anecdotes sur Wikipédia pour les nouveaux titres"
+  "autoCuriositiesHint": "Cherche des anecdotes sur Wikipédia pour les nouveaux titres",
+  "memoryEnrichment": "Enrichissement : {size}",
+  "@memoryEnrichment": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "memoryEnrichmentDetail": "Paroles {lyrics}, anecdotes {curiosities}, crédits {credits}",
+  "@memoryEnrichmentDetail": {
+    "placeholders": {
+      "lyrics": {
+        "type": "String"
+      },
+      "curiosities": {
+        "type": "String"
+      },
+      "credits": {
+        "type": "String"
+      }
+    }
+  },
+  "activityPodcastRefresh": "Mise à jour des podcasts",
+  "activityRadio": "Vérification des radios enregistrées",
+  "activityEnrichBackground": "Complétion de l’enrichissement : {done} sur {total}",
+  "@activityEnrichBackground": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "activityStopped": "Arrêtée",
+  "activityScanEnded": "Analyse"
 }

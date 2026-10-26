@@ -5488,4 +5488,35 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get autoCuriositiesHint =>
       'Sucht Wissenswertes auf Wikipedia für neue Titel';
+
+  @override
+  String memoryEnrichment(String size) {
+    return 'Anreicherung: $size';
+  }
+
+  @override
+  String memoryEnrichmentDetail(
+    String lyrics,
+    String curiosities,
+    String credits,
+  ) {
+    return 'Songtexte $lyrics, Wissenswertes $curiosities, Credits $credits';
+  }
+
+  @override
+  String get activityPodcastRefresh => 'Podcasts werden aktualisiert';
+
+  @override
+  String get activityRadio => 'Gespeicherte Sender werden geprüft';
+
+  @override
+  String activityEnrichBackground(int done, int total) {
+    return 'Anreicherung wird vervollständigt: $done von $total';
+  }
+
+  @override
+  String get activityStopped => 'Gestoppt';
+
+  @override
+  String get activityScanEnded => 'Scan';
 }
