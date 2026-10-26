@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:drift/drift.dart';
 import 'package:path/path.dart' as p;
 
@@ -38,7 +40,10 @@ bool _blank(String? s) => s == null || s.trim().isEmpty;
 /// added (never checked, so the first round stores their releases as seen), the ones here stay as they are, except
 /// that an artist followed by hand in the backup becomes followed by hand here too. Imports are not merged (they depend
 /// on the other device's downloads).
-Future<MergeReport> mergeUserData(AppDatabase db, UserData data, TrackResolver resolver) {
+/// A hand-set cover (`coverSource`/`coverKey`) is taken only if its file is in
+/// [coversDir] and the track has no hand-set cover of its own (source 2).
+Future<MergeReport> mergeUserData(AppDatabase db, UserData data, TrackResolver resolver,
+    {Directory? coversDir}) {
   final report = MergeReport();
   return db.transaction(() async {
     for (final u in data.tracks) {
@@ -79,6 +84,10 @@ Future<MergeReport> mergeUserData(AppDatabase db, UserData data, TrackResolver r
       final last = u.lastPlayedAt;
       if (last != null && (t.lastPlayedAt == null || last > t.lastPlayedAt!)) {
         upd = upd.copyWith(lastPlayedAt: Value(last));
+      }
+      final ck = u.coverKey;
+      if (u.coverSource > 0 && ck != null && t.coverSource != 2 && _coverFileExists(coversDir, ck)) {
+        upd = upd.copyWith(coverSource: Value(u.coverSource), coverKey: Value(ck));
       }
       await (db.update(db.tracks)..where((r) => r.id.equals(id))).write(upd);
       if (u.credits.isNotEmpty || u.details != null) {
@@ -162,6 +171,11 @@ Future<MergeReport> mergeUserData(AppDatabase db, UserData data, TrackResolver r
     return report;
   });
 }
+
+bool _coverFileExists(Directory? dir, String key) =>
+    dir != null &&
+    key == p.basename(key) &&
+    ['jpg', 'png'].any((e) => File(p.join(dir.path, '$key.$e')).existsSync());
 
 String? _blankToNullTrim(String? s) => _blank(s) ? null : s!.trim();
 

@@ -33,7 +33,8 @@ Future<UserData> collectUserData(AppDatabase db) {
           hasLyrics ||
           t.playCount > 0 ||
           portable[t.id]!.credits.isNotEmpty ||
-          portable[t.id]!.details != null)) {
+          portable[t.id]!.details != null ||
+          (t.coverSource > 0 && t.coverKey != null))) {
         continue;
       }
       userData.add(
@@ -58,6 +59,8 @@ Future<UserData> collectUserData(AppDatabase db) {
           lastPlayedAt: t.lastPlayedAt,
           credits: portable[t.id]!.credits,
           details: portable[t.id]!.details,
+          coverSource: t.coverKey == null ? 0 : t.coverSource,
+          coverKey: t.coverSource > 0 ? t.coverKey : null,
         ),
       );
     }

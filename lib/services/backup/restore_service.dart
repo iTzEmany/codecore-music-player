@@ -232,5 +232,5 @@ Future<MergeReport> mergeBackup(File zip, AppDatabase db, Directory coversDir) a
     await input.close();
   }
   final resolver = await PlaylistSyncRepository(db).resolver(caseInsensitive: windows);
-  return mergeUserData(db, data, resolver);
+  return mergeUserData(db, data, resolver, coversDir: coversDir);
 }

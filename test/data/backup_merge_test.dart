@@ -53,6 +53,25 @@ void main() {
     expect((b.playCount, b.lastPlayedAt, b.lyricsPlain), (9, 900, 'mine'));
   });
 
+  test('a hand cover is taken only when its file is there; old backups leave covers alone', () async {
+    final covers = Directory.systemTemp.createTempSync('bm');
+    addTearDown(() => covers.deleteSync(recursive: true));
+    File('${covers.path}/manual_a.jpg').writeAsBytesSync([1]);
+    final r = await mergeUserData(
+        db,
+        UserData(createdAt: 1, tracks: [
+          TrackUserData(ref: ref('a'), coverSource: 2, coverKey: 'manual_a'),
+          TrackUserData(ref: ref('b'), coverSource: 1, coverKey: 'manual_gone'),
+          TrackUserData(ref: ref('c'), favorite: true),
+        ]),
+        await PlaylistSyncRepository(db).resolver(),
+        coversDir: covers);
+    expect(r.recognized, 3);
+    expect(((await track('a')).coverSource, (await track('a')).coverKey), (2, 'manual_a'));
+    expect(((await track('b')).coverSource, (await track('b')).coverKey), (0, null));
+    expect(((await track('c')).coverSource, (await track('c')).coverKey), (0, null));
+  });
+
   test('a hand edit applies to an untouched track but never over a local edit', () async {
     await (db.update(db.tracks)..where((r) => r.title.equals('c'))).write(
         const TracksCompanion(userEdited: Value(true), genre: Value('Local')));

@@ -96,6 +96,8 @@ class TrackUserData {
     this.lastPlayedAt,
     this.credits = const [],
     this.details,
+    this.coverSource = 0,
+    this.coverKey,
   });
 
   final TrackRef ref;
@@ -109,6 +111,11 @@ class TrackUserData {
   final List<TrackCredit> credits;
   final TrackDetails? details;
 
+  /// Hand-set cover (1 album, 2 track) and its file key in the covers folder;
+  /// written only when the cover is by hand.
+  final int coverSource;
+  final String? coverKey;
+
   Map<String, Object?> toJson() => _nonNull({
         'ref': ref.toJson(),
         'favorite': favorite ? true : null,
@@ -120,6 +127,8 @@ class TrackUserData {
         'lastPlayedAt': lastPlayedAt,
         'credits': credits.isEmpty ? null : [for (final c in credits) c.toJson()],
         'details': details?.toJson(),
+        'coverSource': coverSource == 0 ? null : coverSource,
+        'coverKey': coverSource == 0 ? null : coverKey,
       });
 
   factory TrackUserData.fromJson(Map<String, dynamic> j) => TrackUserData(
@@ -135,6 +144,8 @@ class TrackUserData {
         lastPlayedAt: (j['lastPlayedAt'] as num?)?.toInt(),
         credits: parseCreditList(j['credits'], max: 2000),
         details: j['details'] is Map ? TrackDetails.fromJson(j['details'] as Map) : null,
+        coverSource: switch (j['coverSource']) { final num n when n == 1 || n == 2 => n.toInt(), _ => 0 },
+        coverKey: j['coverKey'] is String ? j['coverKey'] as String : null,
       );
 }
 
