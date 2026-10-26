@@ -102,4 +102,15 @@ void main() {
     expect(await ops.setAlbumCover('alb', List.filled(CoverStore.maxBytes + 1, 0), null), isFalse);
     expect((await row(1)).coverSource, 0);
   });
+
+  test('clearing the cache keeps the hand-picked covers and removes the automatic ones', () async {
+    await ops.setTrackCover((await row(1)).id, [5, 5], null);
+    final mine = (await row(1)).coverKey!;
+    await ops.clearCache();
+    expect(store.fileFor(mine), isNotNull);
+    expect(store.fileFor(original), isNull);
+    final t = await row(1);
+    expect([t.coverKey, t.coverSource], [mine, 2]);
+    expect((await row(2)).coverKey, isNull);
+  });
 }

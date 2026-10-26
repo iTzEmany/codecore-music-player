@@ -139,4 +139,45 @@ void main() {
       expect((await all()).single.albumKey, 'band|new');
     });
   });
+
+  group('hand-picked covers', () {
+    TracksCompanion r(String path, String albumKey, {String? cover}) => TracksCompanion.insert(
+        path: path,
+        title: path,
+        albumKey: albumKey,
+        format: 'mp3',
+        sizeBytes: 1,
+        mtimeMs: 1,
+        addedAt: 1,
+        artist: const Value('Band'),
+        album: Value(albumKey),
+        hasCover: Value(cover != null),
+        coverKey: Value(cover));
+    Future<Track> at(String path) => repo.byPath(path).then((t) => t!);
+
+    test('merging with a main cover leaves track covers alone and sets the source; undo restores it', () async {
+      await repo.upsertBatch([r('/m/1.mp3', 'x', cover: 'auto-x'), r('/m/2.mp3', 'x', cover: 'auto-x'), r('/m/3.mp3', 'y', cover: 'auto-y')]);
+      await repo.setManualCover((await at('/m/2.mp3')).id, 'mine');
+      await repo.setManualAlbumCover('y', 'pick-y');
+      final before = [await at('/m/1.mp3'), await at('/m/2.mp3'), await at('/m/3.mp3')];
+      final saved = await editor.saveMany(before,
+          album: 'x', albumArtist: '', cover: (hasCover: true, coverKey: 'pick-y'));
+      expect([for (final p in ['/m/1.mp3', '/m/2.mp3', '/m/3.mp3']) (await at(p)).coverKey], ['pick-y', 'mine', 'pick-y']);
+      expect([for (final p in ['/m/1.mp3', '/m/2.mp3', '/m/3.mp3']) (await at(p)).coverSource], [1, 2, 1]);
+      await editor.restoreMany(saved);
+      expect([for (final p in ['/m/1.mp3', '/m/3.mp3']) (await at(p)).coverSource], [0, 1]);
+      expect((await at('/m/1.mp3')).coverKey, 'auto-x');
+    });
+
+    final zKey = computeAlbumKey(albumArtist: null, artist: 'Band', album: 'z', directory: '/m');
+
+    test('a row with an album cover that moves to another album takes that album\'s cover', () async {
+      await repo.upsertBatch([r('/m/1.mp3', 'x', cover: 'auto-x'), r('/m/2.mp3', 'x', cover: 'auto-x'), r('/m/3.mp3', zKey, cover: 'auto-z')]);
+      await repo.setManualAlbumCover('x', 'pick-x');
+      await editor.saveMany([await at('/m/1.mp3')], album: 'z', albumArtist: '');
+      final moved = await at('/m/1.mp3');
+      expect([moved.albumKey, moved.coverKey, moved.coverSource], [zKey, 'auto-z', 0]);
+      expect((await at('/m/2.mp3')).coverSource, 1);
+    });
+  });
 }

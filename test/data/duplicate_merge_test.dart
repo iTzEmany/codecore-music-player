@@ -127,6 +127,15 @@ void main() {
     expect(k.coverKey, 'mine');
   });
 
+  test('a hand-picked cover of the duplicate keeps its source on the kept track', () async {
+    await build();
+    await tracks.setManualCover(dupB, 'manual-b');
+    await repo.merge(keep, [dupA, dupB]);
+    final k = (await tracks.getById(keep))!;
+    expect([k.coverKey, k.coverSource], ['manual-b', 2]);
+  });
+
+
   test('the duplicates are hidden, not deleted', () async {
     await build();
     await repo.merge(keep, [dupA, dupB]);

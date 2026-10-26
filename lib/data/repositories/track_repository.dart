@@ -27,8 +27,12 @@ class TrackRepository {
   Future<void> upsertBatch(List<TracksCompanion> rows) async {
     if (rows.isEmpty) return;
     await _db.transaction(() async {
-      for (final row in rows) {
+      for (var row in rows) {
         final path = row.path.value;
+        // The album's hand-picked cover may have changed since the scan read it.
+        if (row.coverSource.present && row.coverSource.value == 1) {
+          row = await _freshAlbumCover(row);
+        }
         final existing = await (_db.select(
           _db.tracks,
         )..where((t) => t.path.equals(path))).getSingleOrNull();
@@ -37,8 +41,14 @@ class TrackRepository {
           continue;
         }
         final keepText = existing.userEdited;
+        // A row moved to another album leaves the album's hand-picked cover behind.
+        final moved = existing.coverSource == 1 &&
+            !keepText &&
+            row.albumKey.present &&
+            row.albumKey.value != existing.albumKey;
+        final handPicked = existing.coverSource > 0 && !moved;
         final keepCover =
-            existing.coverSource > 0 ||
+            handPicked ||
             keepText && !(row.hasCover.present && row.hasCover.value);
         // A hash of the old bytes says nothing about the new ones.
         final changed =
@@ -70,7 +80,7 @@ class TrackRepository {
             hasCover: keepCover ? const Value.absent() : row.hasCover,
             coverKey: keepCover ? const Value.absent() : row.coverKey,
             // A hand-picked cover stays; a row that joins a hand-picked album takes its source.
-            coverSource: existing.coverSource > 0 ? const Value.absent() : row.coverSource,
+            coverSource: handPicked ? const Value.absent() : row.coverSource,
             replayGainDb: row.replayGainDb,
             isrc: (existing.isrc ?? '').isEmpty
                 ? row.isrc
@@ -211,6 +221,7 @@ class TrackRepository {
         userEdited: const Value(true),
       ),
     );
+    await settleMovedCover(t, key);
     return key;
   }
 
@@ -295,6 +306,51 @@ class TrackRepository {
     ));
   }
 
+  /// [row] with the hand-picked cover its album has now (automatic when it has none).
+  Future<TracksCompanion> _freshAlbumCover(TracksCompanion row) async {
+    final album = row.albumKey.value;
+    final manual = await albumManualRow(album);
+    if (manual?.coverKey != null) return row.copyWith(coverKey: Value(manual!.coverKey));
+    final auto = await _autoCoverOf(album);
+    return row.copyWith(hasCover: Value(auto != null), coverKey: Value(auto), coverSource: const Value(0));
+  }
+
+  Future<String?> _autoCoverOf(String albumKey) async =>
+      (await (_db.select(_db.tracks)
+                ..where((t) => t.albumKey.equals(albumKey) & t.coverSource.equals(0) & t.coverKey.isNotNull())
+                ..limit(1))
+              .getSingleOrNull())
+          ?.coverKey;
+
+  /// [before] (a row with a hand-picked album cover) now has album key [newKey]: it
+  /// leaves that cover behind and takes the one of the new album.
+  Future<void> settleMovedCover(Track before, String newKey) async {
+    if (before.coverSource != 1 || before.albumKey == newKey) return;
+    final manual = await albumManualRow(newKey, exceptId: before.id);
+    final key = manual?.coverKey ?? await _autoCoverOf(newKey);
+    await (_db.update(_db.tracks)..where((t) => t.id.equals(before.id))).write(TracksCompanion(
+      hasCover: Value(key != null),
+      coverKey: Value(key),
+      coverSource: Value(manual?.coverKey != null ? 1 : 0),
+    ));
+  }
+
+  /// Every cover key a hand-picked cover (track or album) points at.
+  Future<Set<String>> handPickedCoverKeys() async {
+    final rows = await (_db.select(_db.tracks)
+          ..where((t) => t.coverSource.isBiggerThanValue(0) & t.coverKey.isNotNull()))
+        .get();
+    return {for (final r in rows) r.coverKey!};
+  }
+
+  /// The distinct keys of the hand-picked covers of the album's rows.
+  Future<Set<String>> albumManualKeys(String albumKey) async {
+    final rows = await (_db.select(_db.tracks)
+          ..where((t) => t.albumKey.equals(albumKey) & t.coverSource.equals(1) & t.coverKey.isNotNull()))
+        .get();
+    return {for (final r in rows) r.coverKey!};
+  }
+
   /// How many rows show the cover [key].
   Future<int> countWithCoverKey(String key) async {
     final n = _db.tracks.id.count();
@@ -305,9 +361,10 @@ class TrackRepository {
   }
 
   /// A row of the album whose cover was picked for the album, if any.
-  Future<Track?> albumManualRow(String albumKey) =>
+  Future<Track?> albumManualRow(String albumKey, {int? exceptId}) =>
       (_db.select(_db.tracks)
-            ..where((t) => t.albumKey.equals(albumKey) & t.coverSource.equals(1))
+            ..where((t) =>
+                t.albumKey.equals(albumKey) & t.coverSource.equals(1) & t.id.equals(exceptId ?? -1).not())
             ..limit(1))
           .getSingleOrNull();
 
