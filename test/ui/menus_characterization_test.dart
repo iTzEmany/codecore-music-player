@@ -206,7 +206,7 @@ void main() {
   );
 
   testWidgets(
-    'album page: queue, playlist, share, enrich, merge; «queue» adds the album and says so',
+    'album page: queue, playlist, share, enrich, cover, merge; «queue» adds the album and says so',
     (tester) async {
       _phone(tester);
       final h = await Harness.create(tester, tracks: 4);
@@ -220,6 +220,7 @@ void main() {
         'playlist',
         'share',
         'enrich',
+        'cover',
         'merge',
       ]);
       await tester.tap(find.text('Aggiungi in coda'));
