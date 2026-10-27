@@ -737,12 +737,12 @@ Feature «Arricchimento completo» (`docs/feature-arricchimento.md`, decisioni D
 - [x] 54.9 Prove a mano (utente) — Motorola 2026-10-26: copertine uguali dopo `install -r`, copertina a mano di album e brano resiste alla scansione e si ripristina
 
 ## Fase 55 — Misura dello streaming (`fase-55-misura-streaming.md`)
-- [ ] 55.1 Cronometro nel preparer
-- [ ] 55.2 Tap → primo suono nell'handler
-- [ ] 55.3 `scripts/stream_times.py`
-- [ ] 55.4 Prova dell'URL col yt-dlp vero (solo misura)
-- [ ] 55.5 Tabella «Prima» (R-70)
-- [ ] 55.6 Controlli di fase
+- [x] 55.1 Cronometro nel preparer
+- [x] 55.2 Tap → primo suono nell'handler
+- [x] 55.3 `scripts/stream_times.py`
+- [~] 55.4 Prova dell'URL col yt-dlp vero (solo misura) — Linux fatta (URL a ~4 s, nessun 403); Mi A3 solo il tempo all'URL (38,9 s, su hotspot): avanzamento, 30 s e seek da provare
+- [~] 55.5 Tabella «Prima» (R-70) — Motorola (dati mobili) e Mi A3 (hotspot) misurati; da rifare su Wi-Fi vero, e Linux con 10 brani (oggi 4, play ~5,3 s)
+- [x] 55.6 Controlli di fase
 
 ## Fase 56 — Partenza dall'URL (`fase-56-partenza-da-url.md`)
 - [ ] 56.1 L'URL dalle righe di yt-dlp (desktop)

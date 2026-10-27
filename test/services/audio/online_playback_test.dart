@@ -15,6 +15,7 @@ import 'package:codecore/services/online/youtube_service.dart';
 import 'package:codecore/services/radio/radio_station.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
+import 'package:flutter/foundation.dart' show DebugPrintCallback, debugPrint;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -74,6 +75,42 @@ void main() {
       await Future<void>.delayed(Duration.zero);
     }
   }
+
+  // AppLog echoes to debugPrint in debug builds.
+  Future<List<String>> timingLines(Future<void> Function() body) async {
+    final lines = <String>[];
+    final DebugPrintCallback old = debugPrint;
+    debugPrint = (m, {wrapWidth}) => lines.add(m ?? '');
+    try {
+      await body();
+    } finally {
+      debugPrint = old;
+    }
+    return lines.where((l) => l.contains('stream timing')).toList();
+  }
+
+  test('the first sound of a streamed track logs play= from the cache', () async {
+    final id = online.register(result('v1'));
+    final lines = await timingLines(() async {
+      await handler.playQueue([id], 0);
+      backend.stateC.add(BackendState.playing);
+      backend.posC.add(const Duration(seconds: 1));
+      backend.posC.add(const Duration(seconds: 2));
+      await settle();
+    });
+    expect(lines, hasLength(1));
+    expect(lines.single, matches(RegExp(r'key=youtube:v1 play=\d+ from=cache$')));
+  });
+
+  test('the first sound of a library track logs from=file', () async {
+    final lines = await timingLines(() async {
+      await handler.playQueue([ids.first], 0);
+      backend.stateC.add(BackendState.playing);
+      backend.posC.add(const Duration(seconds: 1));
+      await settle();
+    });
+    expect(lines.single, matches(RegExp(r'key=track:\d+ play=\d+ from=file$')));
+  });
 
   test('an online entry loads the cached file, not an address', () async {
     final id = online.register(result('v1'));
