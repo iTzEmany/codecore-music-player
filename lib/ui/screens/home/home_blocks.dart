@@ -84,7 +84,12 @@ class ShuffleHero extends ConsumerWidget {
                   ),
                 ),
               ),
-              const ShuffleModeButton(),
+              ShuffleModeButton(
+                // What Play plays: the whole library, not the queue of before (D-137).
+                listIds: () async => [
+                  for (final t in await ref.read(trackOpsProvider).all()) t.id,
+                ],
+              ),
             ],
           ),
         ],

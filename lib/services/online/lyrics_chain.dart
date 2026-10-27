@@ -9,7 +9,12 @@ import 'netease_lyrics_client.dart';
 import 'query_cleaner.dart';
 
 class LyricsChainResult {
-  const LyricsChainResult({this.lyrics, this.failed = false, this.syncedFailed = false, this.source});
+  const LyricsChainResult({
+    this.lyrics,
+    this.failed = false,
+    this.syncedFailed = false,
+    this.source,
+  });
 
   final LyricsResult? lyrics;
 
@@ -25,11 +30,23 @@ class LyricsChainResult {
 
 /// LRCLIB, then NetEase for the synchronised text, then lyrics.ovh for any text (D-111).
 class LyricsChain {
-  LyricsChain({required this.lrclib, this.netease, this.ovh});
+  LyricsChain({
+    required this.lrclib,
+    this.netease,
+    this.ovh,
+    this.rest = const Duration(minutes: 10),
+    DateTime Function()? now,
+  }) : _now = now ?? DateTime.now;
 
   final LrclibClient lrclib;
   final NeteaseLyricsClient? netease;
   final LyricsOvhClient? ovh;
+
+  /// How long LRCLIB is left alone after it answered 5xx (overloaded); the
+  /// other sources carry on, and the track is not marked «nothing found».
+  final Duration rest;
+  final DateTime Function() _now;
+  DateTime? _lrclibRestUntil;
 
   static bool _has(String? s) => s != null && s.isNotEmpty;
 
@@ -56,16 +73,30 @@ class LyricsChain {
       }
     }
 
-    final lr = await fallback(
-      () => lrclib.find(
-        title: c.title,
-        artist: c.artist,
-        album: t.album,
-        durationSec: sec,
-        cancel: cancel,
-        strict: true,
-      ),
-    );
+    final resting = _lrclibRestUntil?.isAfter(_now()) ?? false;
+    if (resting) failed = true;
+    final lr = resting
+        ? null
+        : await fallback(() async {
+            try {
+              return await lrclib.find(
+                title: c.title,
+                artist: c.artist,
+                album: t.album,
+                durationSec: sec,
+                cancel: cancel,
+                strict: true,
+              );
+            } on WebUnavailableException catch (e) {
+              if ((e.statusCode ?? 0) >= 500) {
+                AppLog.w(
+                  'LRCLIB answered ${e.statusCode}: resting ${rest.inMinutes} min',
+                );
+                _lrclibRestUntil = _now().add(rest);
+              }
+              rethrow;
+            }
+          });
     var plain = lr?.plain, synced = lr?.synced;
     String? source = lr == null || lr.isEmpty ? null : 'lrclib';
     final ne = netease;
@@ -87,7 +118,11 @@ class LyricsChain {
     final o = ovh;
     if (!_has(plain) && !_has(synced) && o != null) {
       final r = await fallback(
-        () => o.find(title: c.title, artist: extractPrimaryArtist(c.artist), cancel: cancel),
+        () => o.find(
+          title: c.title,
+          artist: extractPrimaryArtist(c.artist),
+          cancel: cancel,
+        ),
       );
       if (r != null) {
         plain = r.plain;
@@ -97,6 +132,10 @@ class LyricsChain {
     final out = LyricsResult(plain: plain, synced: synced);
     return out.isEmpty
         ? LyricsChainResult(failed: failed, syncedFailed: syncedFailed)
-        : LyricsChainResult(lyrics: out, syncedFailed: syncedFailed, source: source);
+        : LyricsChainResult(
+            lyrics: out,
+            syncedFailed: syncedFailed,
+            source: source,
+          );
   }
 }

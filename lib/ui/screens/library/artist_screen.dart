@@ -83,7 +83,7 @@ class ArtistDetailScreen extends ConsumerWidget {
         onPlay: list.isEmpty
             ? null
             : () => ctrl.playAll(list, context: playCtx),
-        onShuffle: list.isEmpty ? null : ctrl.toggleShuffle,
+        shuffleIds: list.isEmpty ? null : [for (final t in list) t.id],
         slivers: [
           if (tracks.hasError || albums.hasError)
             SliverToBoxAdapter(

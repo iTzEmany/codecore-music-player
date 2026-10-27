@@ -277,3 +277,14 @@ Stesso telefono e script (brani da 30 s, `--playback`), con il completamento del
 
 - Report: `build/perf/arricchimento-53.md`, `r53-1.md`, `r53-2.md`, `r53-anello-1.md`, `r53-anello-2.md`. Misurato sull'APK costruito prima delle correzioni della review di architettura (rotellina, giro senza rete, elenco del giro pigro): nessuna tocca le liste e i fogli misurati.
 - Il completamento era in corso durante gli scenari (pillola «1» nell'intestazione) e si mette in pausa mentre si scorre: nessuno scenario peggiora contro la base.
+
+## Dopo la fase 54 e la correzione delle schede nascoste (27/10)
+Mi A3, app perf (`mia3-54-rip`, poi `mia3-54-fix` con `TickerMode` sulle schede nascoste e `RepaintBoundary` sulla rotellina, 12227c7).
+
+| Scenario | 54 (prima) | 54 + correzione | Fase 53 | Entro un frame |
+|---|---|---|---|---|
+| Tutti i brani | 2,1 · 2,8 % | 0,8 % | 0,3 · 1,4 % | sì |
+| Apri album | 2,5 % | 1,6 % | 1,3 · 2,5 % | sì |
+| Apertura player | 2,1 % | 3,2 % | 1,5 % | sì (rumore storico 1,5–3 %) |
+
+Motorola, app vera con `--real` (2312 brani veri, schermo a 120 Hz, conteggio contro 16,7 ms): «Pallino schede» da 8 · 17 % a 0,1 %, «Tutti i brani» da 0,2 % a 0,0 %. Causa: la rotellina indeterminata del pulsante Attività e le schede fuori schermo dell'`IndexedStack` che continuavano ad animare ridisegnavano tutto lo schermo a ~100 fps. Resta: la rotellina visibile ridisegna il suo riquadro a 120 fps mentre un'attività gira (~800 frame in 8 s, raster ~8 ms): costo di batteria, seguito possibile.

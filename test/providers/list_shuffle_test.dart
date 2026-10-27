@@ -107,7 +107,7 @@ void main() {
     final c = PlayerController(handler, null,
         shufflePlus: () => plus,
         setShufflePlus: (on) => plus = on,
-        plusBlock: () => gate.future);
+        plusBlock: (_) => gate.future);
     plus = false;
     await c.toggleShuffle(); // shuffle on, Shuffle+ off
     final first = c.cycleShuffle();
@@ -127,7 +127,7 @@ void main() {
     final ctl = PlayerController(handler, null,
         shufflePlus: () => plus,
         setShufflePlus: (on) => plus = on,
-        plusBlock: () => plusAllowedNow(c.read(_refProvider)));
+        plusBlock: (ids) => plusAllowedNow(c.read(_refProvider), ids: ids));
     plus = false;
     await ctl.toggleShuffle(); // shuffle on
     await ctl.cycleShuffle(); // lookup throws -> treated as allowed: Shuffle+

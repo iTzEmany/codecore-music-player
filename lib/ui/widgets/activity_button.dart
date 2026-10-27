@@ -29,12 +29,14 @@ class ActivityButton extends ConsumerWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              SizedBox(
-                width: 16,
-                height: 16,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: cc.accentSoft,
+              RepaintBoundary(
+                child: SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: cc.accentSoft,
+                  ),
                 ),
               ),
               const SizedBox(width: 8),

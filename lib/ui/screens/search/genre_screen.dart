@@ -57,7 +57,7 @@ class GenreScreen extends ConsumerWidget {
           durationMs: tracks.fold<int>(0, (sum, t) => sum + t.durationMs),
         ),
         onPlay: () => ctrl.playAll(tracks, context: ctx),
-        onShuffle: ctrl.toggleShuffle,
+        shuffleIds: tracks.isEmpty ? null : [for (final t in tracks) t.id],
         slivers: [
           SliverFixedExtentList.builder(
             itemExtent: trackRowExtentOf(context, compact),

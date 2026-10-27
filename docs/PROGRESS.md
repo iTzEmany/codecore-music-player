@@ -635,7 +635,7 @@ Feature «Streaming e coda online» (`docs/feature-streaming.md`, decisioni D-61
 - [x] 45.5 Suggeriti di Shuffle+ sulla cache; via `StreamAddressCache`
 - [x] 45.6 Impostazione `streamCacheMb`, cursore e «Svuota»
 - [x] 45.7 Controlli di fase (K-01, K-02, K-03)
-- [~] 45.8 Prove a mano (utente, «Tocca a te» in handoff)
+- [~] 45.8 Prove a mano (utente, «Tocca a te» in handoff) — Motorola 2026-10-27: «Svuota» da 51,4 a 2,6 MB tiene corrente e prossimi
 
 ## Fase 46 — Streaming dalla ricerca (`fase-46-streaming-ricerca.md`)
 Note: D-89 (Jam: tap e «Riproduci dopo» vanno in coda) nella UI; la coda condivisa arriva in 47.5. In più: watchdog di stallo del download (90 s al primo evento, 30 s fra eventi, spento al 100 %), voce online già scaricata suona dalla libreria (niente riga ombra doppia), «[Errno 7]» → errore di rete. La prova 45.8 «Svuota» tiene il brano in corso **e i 2 prossimi** (fissati).
@@ -648,7 +648,7 @@ Note: D-89 (Jam: tap e «Riproduci dopo» vanno in coda) nella UI; la coda condi
 - [x] 46.7 Album online: Play, Shuffle e menu ⋮
 - [x] 46.8 «Scarica» nel menu ⋮ del player per un brano in streaming
 - [x] 46.9 Controlli di fase (K-01, K-02, K-03)
-- [~] 46.10 Prove a mano (utente, «Tocca a te» in handoff)
+- [~] 46.10 Prove a mano (utente, «Tocca a te» in handoff) — Motorola 2026-10-27: tap → «Caricamento…» → suona, swipe e ⋮ ok; «Scarica» resta nel menu del player finché non si chiude
 
 ## Fase 47 — Jam online (`fase-47-jam-online.md`)
 - [x] 47.1 `JamItem.videoId` e `ref` con prefisso
@@ -658,7 +658,7 @@ Note: D-89 (Jam: tap e «Riproduci dopo» vanno in coda) nella UI; la coda condi
 - [x] 47.5 Via il FAB; swipe e «In coda» nella coda condivisa
 - [x] 47.6 Schermata del brano della Jam
 - [x] 47.7 Controlli di fase (K-01, K-02)
-- [~] 47.8 Prove a mano (utente)
+- [~] 47.8 Prove a mano (utente) — Motorola+Mi A3 2026-10-27: rilievi aperti in handoff (ordine, swipe online dell'ospite, ruoli, R-21)
 
 ## Fase 48 — Shuffle a 3 stati e Home (`fase-48-shuffle-tre-stati.md`)
 - [x] 48.1 `plusAllowed` e ciclo che salta Shuffle+
@@ -666,14 +666,14 @@ Note: D-89 (Jam: tap e «Riproduci dopo» vanno in coda) nella UI; la coda condi
 - [x] 48.3 Impostazioni e foglio Shuffle+ senza interruttore
 - [x] 48.4 Home: Play e shuffle separati in «Casuale su tutto»
 - [x] 48.5 Controlli di fase (K-01, K-02, K-03)
-- [~] 48.6 Prove a mano (utente)
+- [x] 48.6 Prove a mano (utente) — Motorola 2026-10-27, con D-137: ciclo a 3 stati da Home, Tutti i brani, playlist, artista, genere; < 5 brani salta Shuffle+. Il messaggio D-87 non si è visto: da verificare
 
 ## Fase 49 — Artisti ospiti (`fase-49-artisti-ospiti.md`)
 - [x] 49.1 `splitArtists` e `ArtistLinkResolver`
 - [x] 49.2 Nomi toccabili nel player e nella barra desktop
 - [x] 49.3 «Vai all'artista» con foglio di scelta
 - [x] 49.4 Controlli di fase (K-01, K-02)
-- [~] 49.5 Prove a mano (utente)
+- [~] 49.5 Prove a mano (utente) — Motorola 2026-10-27: nomi toccabili e foglio «Vai all'artista» ok; non provati brano in streaming con più artisti e la Jam
 
 ## Fase 50 — Dati e fonti dei crediti (`fase-50-dati-e-fonti-crediti.md`)
 Feature «Arricchimento completo» (`docs/feature-arricchimento.md`, decisioni D-96…D-126, 2026-10-25). Una PR per la fase, un commit per task.
@@ -688,7 +688,7 @@ Feature «Arricchimento completo» (`docs/feature-arricchimento.md`, decisioni D
 - [x] 50.9 «Scarica» e doppioni non perdono i crediti
 - [x] 50.10 Controlli di fase (K-AR-01, K-AR-02, K-AR-03, K-AR-04, K-AR-05)
 - [x] 50.12 Dopo la review di architettura: un solo salvataggio dei crediti, esito per parte, `TrackCreditRow`
-- [ ] 50.11 Prove a mano (utente)
+- [x] 50.11 Prove a mano (utente) — Motorola 2026-10-26: 1890 testi dell'utente intatti
 
 ## Fase 51 — Crediti a schermo (`fase-51-crediti-a-schermo.md`)
 - [x] 51.1 Tabella dei ruoli e traduzioni
@@ -699,7 +699,7 @@ Feature «Arricchimento completo» (`docs/feature-arricchimento.md`, decisioni D
 - [x] 51.6 «Compare come» nella pagina artista
 - [x] 51.7 Gruppo «Nei crediti» nella ricerca locale
 - [x] 51.8 Controlli di fase (K-AR-01, K-AR-02, K-AR-03, K-AR-04) (nota: punti 1–6 verdi in locale, 744 test; suite completa in CI; D-130: card vuota visibile con «Crediti e dettagli» acceso)
-- [ ] 51.9 Prove a mano (utente)
+- [x] 51.9 Prove a mano (utente) — Motorola 2026-10-26: ruoli MusicBrainz grezzi (es. «mixingsecondengineer»); «Nei crediti» trova solo nomi interi
 
 ## Fase 52 — Testo e curiosità complete (`fase-52-testo-e-curiosita.md`)
 - [x] 52.1 `NeteaseLyricsClient` e `LyricsOvhClient`
@@ -709,7 +709,7 @@ Feature «Arricchimento completo» (`docs/feature-arricchimento.md`, decisioni D
 - [x] 52.5 `CuriosityService`
 - [x] 52.6 «Curiosità automatiche» e arricchimento completo dopo il download
 - [x] 52.7 Controlli di fase (K-AR-01, K-AR-02, K-AR-03, K-AR-04)
-- [ ] 52.8 Prove a mano (utente)
+- [~] 52.8 Prove a mano (utente) — ok sul Mi A3; sul Motorola parziale (LRCLIB 503, ora riposo di 10 minuti)
 - Note 52: `WebClient.getJson(strict:)` opzionale (D-131, supera D-129). Il «niente» dei crediti ora scade dopo 30 giorni anche in `propose` (D-103). NetEase scarta live/remix/acoustic/demo/instrumental/karaoke e un «(Radio Edit)» se il titolo locale non lo ha (falso negativo, sicuro). Test del download completo in `test/providers/download_enrich_test.dart` (non in `download_promotion_test`). MBID non ancora condiviso fra curiosità e crediti: nota in testa a 53.4.
 
 ## Fase 53 — Completamento e Registro (`fase-53-completamento-e-registro.md`)
@@ -722,7 +722,7 @@ Feature «Arricchimento completo» (`docs/feature-arricchimento.md`, decisioni D
 - [x] 53.7 Riga per giro nel Registro con l'elenco dei brani
 - [x] 53.8 Riga «Arricchimento» nella pagina Memoria
 - [x] 53.9 Controlli di fase (K-AR-01, K-AR-02, K-AR-03, K-AR-04, RNF-05)
-- [~] 53.10 Prove a mano (utente)
+- [~] 53.10 Prove a mano (utente) — Motorola 2026-10-27: Pausa/Riprendi, Registro, riga Memoria (4,8 MB a ~287 brani) ok, nessuna raffica 429/503; completamento intero RINVIATO (in pausa a 421/2317, ~10 h)
 
 ## Fase 54 — Copertina a mano (`fase-54-copertina-a-mano.md`)
 - [x] 54.1 `cover_ops.dart`: salvare e ripristinare
@@ -734,7 +734,7 @@ Feature «Arricchimento completo» (`docs/feature-arricchimento.md`, decisioni D
 - [x] 54.6 «Cambia copertina» e «Ripristina copertina originale» nei menu
 - [x] 54.7 Copertine a mano nel backup
 - [x] 54.8 Controlli di fase (K-AR-01, K-AR-02, K-AR-03, K-AR-05)
-- [~] 54.9 Prove a mano (utente)
+- [x] 54.9 Prove a mano (utente) — Motorola 2026-10-26: copertine uguali dopo `install -r`, copertina a mano di album e brano resiste alla scansione e si ripristina
 
 ## Note di deviazione
 <!-- una riga per deviazione: data — task — cosa è cambiato e perché -->

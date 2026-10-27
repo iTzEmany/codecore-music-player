@@ -109,6 +109,7 @@ void main() {
   EnrichCompleterNotifier completer() {
     final notifier = c.read(enrichCompleterProvider.notifier)
       ..activity = user
+      ..addLog = c.read(activityLogProvider.notifier).add
       ..poll = const Duration(milliseconds: 10);
     return notifier;
   }

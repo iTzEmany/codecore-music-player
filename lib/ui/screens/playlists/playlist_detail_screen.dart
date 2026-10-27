@@ -232,7 +232,7 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
         onPlay: tracks.isEmpty
             ? null
             : () => ctrl.playAll(tracks, context: playCtx),
-        onShuffle: tracks.isEmpty ? null : ctrl.toggleShuffle,
+        shuffleIds: tracks.isEmpty ? null : [for (final t in tracks) t.id],
         menu: PopupMenuButton<_PlaylistAction>(
           tooltip: l.moreActions,
           icon: const Icon(Icons.more_horiz_rounded),

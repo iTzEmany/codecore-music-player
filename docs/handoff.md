@@ -1,50 +1,38 @@
-# Handoff — 2026-10-26 (dopo la fase 54: feature «Arricchimento completo» chiusa nel codice)
+# Handoff — 2026-10-27 (fase 54 chiusa, prove sul Motorola fatte)
 
 ## Stato
-- **Fase 54 (copertina a mano)** in una PR: `CoverOps` (brano, album, playlist; «Ripristina copertina originale»), selettore unico `cover_picker_sheet.dart` (dispositivo, libreria, proposte Deezer e iTunes con la misura, cercate solo all'apertura, al massimo 6 per fonte), voci nei menu di brano e album, copertina d'album letta da `cover_source`, nessuno scrittore tocca una copertina a mano (scansione, arricchimento, ricezione, promozione, duplicati, spostamenti d'album, «Svuota cache»), nel backup (unione solo su brani senza copertina a mano). Decisioni D-135 (Motorola all'utente), D-136 (album o artista in cui solo i brani a copertina del brano hanno una copertina → una di quelle).
-- **Fase 53 (completamento e Registro) in #32**, più una PR di correzioni dalla scheggia di fase.
-  - Registro nel database per 30 giorni con l'esito vero di ogni attività.
-  - `UserActivity`: scroll, rotellina, testo cercato, download e import mettono in pausa il lavoro in sottofondo per 5 s.
-  - `EnrichCompleter`: con gli interruttori accesi completa la libreria da solo; scritture in blocchi da 10; si ferma dopo 5 brani senza risposta.
-  - «Completa l'arricchimento» nelle impostazioni; voce Attività con Pausa e Riprendi; riga del giro con l'elenco dei brani; riga «Arricchimento» nella pagina Memoria.
-  - Decisioni: D-132 (Motorola all'utente), D-133 (app perf con il completamento acceso), D-134 (un 429 toglie la parte dal giro).
-  - Misure sul Mi A3 entro un frame dalla base (`misure.md`, «Dopo la fase 53»).
-- **Fase 52 (testo e curiosità complete)** in una PR: catena del testo LRCLIB → NetEase (titolo, artista, ±3 s, niente versioni live) → lyrics.ovh; `completeOne` per tutte le parti (metadati, testo, sincronia, curiosità, crediti) solo se accese, vuote e dovute, con «niente» per parte che scade dopo 30 giorni e mai su un errore; testo scelto a mano (`lyrics_by_user`) mai toccato; `CuriosityService`; interruttore «Curiosità automatiche» (spento, proposto nella guida); dopo un download si cerca tutto ciò che è acceso. Decisione in autonomia D-131 (`getJson(strict:)`, supera D-129). Rinviato a 53.4: MBID condiviso fra curiosità e crediti.
-- **Fase 51 (crediti a schermo) in #30**: card «Crediti e dettagli» nel player con «Mostra tutto» e «Aggiorna», nomi che aprono l'artista, sezione nell'info brano della Jam e nell'anteprima, «Compare come» nella pagina artista, «Nei crediti» nella ricerca locale; crediti e dettagli nel backup, nell'invio e nella Jam (parsing tollerante dei dati da fuori). `CreditsRepository` unico scrittore e unica query dei brani accreditati. Decisione in autonomia D-130 (card vuota visibile con l'interruttore acceso, per «Aggiorna»). Rinviato a 52.6: card e «Compare come» si aggiornano solo con «Aggiorna» (nota in testa al task).
-- **Fase 50 (dati e fonti dei crediti) fusa in #27**: schema v15 (`track_credits`, `track_enrich`, `activity_log`, `tracks.cover_source`), Deezer gw con pausa di 24 h, dettagli Deezer pubblici, crediti MusicBrainz, `completeOne` con esito per parte, interruttore «Crediti e dettagli». Nessuna UI dei crediti ancora (fase 51). Decisioni in autonomia D-127…D-129. Rilievi della review rinviati: note in testa a 51.1, 51.4, 52.1, 53.2.
-- Feature «Streaming e coda online» completa nel codice: fasi 45–49 fuse una PR per fase (#19 cache e motore, #20 streaming dalla ricerca, #21 Jam online, #22 shuffle a 3 stati e Home, #23 artisti ospiti). Decisioni D-89…D-95 in `docs/decisioni.md`.
-- Versione `1.3.0+4`; tag locale `v1.3.0` sul commit di chiusura (D-92), **non ancora pubblicato**.
-- Verifiche: `flutter analyze` pulito; test mirati di ogni fase e K-01/K-02 verdi in locale; suite completa verde in CI su ogni PR.
-- Fluidità (Mi A3, `docs/refactor/ui-fluida/misure.md`): fasi 45, 46, 48 entro un frame dalla base (D-85). La base 30 s a `1c5348a` sostituisce i giri con brani da 1 s, che non erano confrontabili.
-- Ogni fase ha avuto review di architettura (Opus) e la scheggia in modalità passo; i bug trovati sono corretti con il loro test. Scheggia in modalità fase sul Mi A3 per 45, 46 e un giro unico 47 (solo online, Jam vietata da D-91)–49: nomi artista troncati e crediti scaricati tenuti interi corretti nella PR di chiusura.
+- **Fasi 45–54 fuse** (feature «Streaming e coda online» e «Arricchimento completo»); fase 54 in #34. Versione `1.3.0+4`, tag locale `v1.3.0` **non pubblicato** (D-92).
+- **PR delle prove sul Motorola** (ramo `docs/54-prove-motorola`): prove a mano 45–54 sulla libreria vera (2312 brani) e sul Mi A3, più le correzioni trovate provando:
+  - Registro: la riga del giro di completamento arriva senza ciclo di provider (`EnrichCompleter.addLog`).
+  - LRCLIB riposa 10 minuti dopo un 5xx (prima: 503 a raffica).
+  - Prestazioni: schede nascoste senza ticker (`TickerMode`) e rotellina Attività in un `RepaintBoundary`. Sul Motorola il cambio scheda passa da 8–17 % di frame lenti a 0,1 % (`docs/refactor/ui-fluida/misure.md`, «Dopo la fase 54»).
+  - `scripts/perf_device.py --real`: misura l'app vera in sola lettura; ogni `input` controlla che l'app sia in primo piano.
+  - Shuffle+ da ogni pulsante casuale (D-137): la pillola «Casuale» delle liste fa il ciclo a 3 stati, Home giudica la libreria e non la coda.
+- Esiti in `docs/PROGRESS.md`: `[x]` 48.6, 50.11, 51.9, 54.9; `[~]` 45.8, 46.10, 47.8, 49.5, 52.8, 53.10 con la nota di cosa manca.
+
+## Rinviato alla prossima fase (scelta dell'utente, 27/10)
+- **53.10 completamento intero sul Motorola**: in pausa a 421/2317 (~9 brani ogni 3 minuti, ~10 h in tutto). Riprendilo dal centro Attività; controlla a fine giro log (niente 429/503 a raffica), riga Memoria (4,8 MB a ~287 brani: testi 4,5 MB) e temperatura.
+- **Jam (47.8), rilievi da capire nel codice** (Motorola avvia, Mi A3 si unisce):
+  1. Le aggiunte dell'ospite vanno subito dopo il brano corrente, non in fondo (D-80, D-89).
+  2. Sull'ospite lo swipe «in coda» su una riga online della ricerca non accoda nulla; ⋮ → «Aggiungi in coda» sì.
+  3. Ruoli: chi avvia vede l'altro come «host» e la Jam prende la coda dell'altro; «Esci dalla Jam» di chi ha avviato la chiude per tutti, quindi R-21 non si è potuto provare. Chiarire host/uscita.
+  4. «Scarica» resta nel menu ⋮ del player dopo che il brano è in libreria, finché non lo si chiude.
+- **Messaggio «perché niente Shuffle+»** (D-87): su un album da 1 brano non si è visto. Verificare con un widget test della pillola dentro `CollectionScaffold`.
+- **Completamento e interruttori**: cambiare un interruttore ferma il giro manuale (`stopped:true`); con «Arricchimento automatico» acceso ne riparte uno automatico, spento va riavviato a mano. Decidere se va bene.
 
 ## Tocca a te
-- **54.9 prove a mano** (dettagli in `docs/fase-54-copertina-a-mano.md`): Linux e Mi A3 (proposte online con «Metadati da Deezer» spento, brano da file e da un altro album, playlist da un suo brano, scansione e «Arricchisci» che non la cambiano, «Ripristina», «Scrivi i tag» senza la copertina a mano nel file, backup Linux → unione sul Mi A3); Motorola (D-135): prima il backup completo dall'app, poi `adb -s ZY22HKD85K install -r <apk>`, copertine uguali a prima, una copertina a mano che resiste a una scansione.
-- **53.10 prove a mano** (dettagli in `docs/fase-53-completamento-e-registro.md`).
-  - Linux: pausa con la rotellina e ripresa dopo 5 s.
-  - Linux e Mi A3: righe di podcast e radio nel Registro, completamento con titoli veri (gruppo «Aggiornati» nell'elenco del giro).
-  - Motorola: prima il backup completo dall'app, poi `adb -s ZY22HKD85K install -r <apk>`; completamento intero sulla libreria vera, nessun 429/503 a raffica, peso della riga Memoria, telefono non caldo in riproduzione.
-- **Da decidere (scheggia 53):**
-  - Il Registro si raggiunge solo dal pulsante Attività, che sparisce quando non gira nulla: una voce fissa?
-  - «Svuota» cancella 30 giorni senza conferma.
-  - Dopo un giro fallito per rete assente il completamento riparte solo con un riavvio, una scansione o un cambio di interruttori.
-- **52.8 prove a mano** (dettagli in `docs/fase-52-testo-e-curiosita.md`): Linux e Mi A3 (interruttore e guida, download con tutto acceso e con le curiosità spente, un brano senza testo su LRCLIB, testo scelto a mano che «Aggiorna» non cambia, log senza 429 a raffica); Motorola: prima il backup completo dall'app, poi `adb -s ZY22HKD85K install -r <apk>`, «Crediti e dettagli» e «Curiosità automatiche» accesi, un download completo.
-- **51.9 prove a mano** (dettagli in `docs/fase-51-crediti-a-schermo.md`): Linux e Mi A3 (card, lingue en/fr, «Aggiorna», Jam fra i due, «Compare come», «Nei crediti», backup e ripristino); Motorola: prima il backup completo dall'app, poi `adb -s ZY22HKD85K install -r <apk>`. La scheggia su Linux non ha provato: interruttore spento, «Mostra tutto» con più di 8 nomi, tocco su un nome di libreria, anteprima «Arricchisci», backup, finestra a 360 px.
-- **50.11 prove a mano** (dettagli in `docs/fase-50-dati-e-fonti-crediti.md`):
-  - Linux: interruttore «Crediti e dettagli» nell'onboarding, backup vero e ripristino su una libreria di prova, unione di doppioni.
-  - Motorola: prima il backup completo dall'app, poi «Arricchisci» con i crediti accesi.
-- **Pulizia:** `rm -r /tmp/codecore-savePFTLNZ` (zip di prova della scheggia, fuori dal progetto).
-- **Tag (D-92):** `git push origin v1.3.0` → costruisce APK, Linux e Windows e pubblica la release; controlla con `gh run list -w release.yml -L 1`.
-- **Mi A3, pulizia delle prove:** cancella `Da Funk (2).m4a`, `The Game of Love (Drumless Edition) (2).m4a` e la playlist «scheggia-46»; controlla che la dissolvenza non sia rimasta a 11 s (Impostazioni → Riproduzione).
-- **Prove a mano `[~]`** (Linux e Mi A3, elenco in ogni documento di fase): 45.8 cache, 46.10 streaming dalla ricerca, 47.8 Jam online (servono due dispositivi), 48.6 shuffle a 3 stati e Home, 49.5 artisti ospiti. Poi spunta `docs/PROGRESS.md`.
-- **Mi A3, lasciato dalla scheggia 47–49:** il brano «Talk to Me (feat. Tyla, Nile Rodgers)» di Damiano David (scaricato provando «Scarica»): tienilo o cancellalo tu.
-- **Da decidere:** in Home, con la coda corrente sotto i 5 brani, il pulsante shuffle salta Shuffle+ anche se il Play avvierebbe tutta la libreria (oggi vale la coda corrente, 48.1). E il pulsante «Casuale» delle intestazioni di lista resta a 2 stati: Shuffle+ si raggiunge da player, Home e barra desktop.
-- **Log dopo le prove:** niente 403/429 ripetuti (K-04).
+- **Rotazione dei telefoni**: durante il giro 3 `accelerometer_rotation` è tornata a 1 su entrambi senza nessun comando dei test (non la cambiano né `uiautomator dump` né `screencap`, provato). L'ho rimessa a 0: se la ritrovi accesa, dimmelo con l'ora.
+- **Tag (D-92):** `git push origin v1.3.0` → release; controlla con `gh run list -w release.yml -L 1`.
+- **Da decidere (scheggia 53):** voce fissa per il Registro; «Svuota» senza conferma; il completamento dopo un giro fallito per rete riparte solo con riavvio, scansione o cambio di interruttori.
+- **Mi A3, pulizia vecchie prove:** `Da Funk (2).m4a`, `The Game of Love (Drumless Edition) (2).m4a`, playlist «scheggia-46», dissolvenza non a 11 s; brano «Talk to Me» di Damiano David (tienilo o cancellalo). L'app `com.codecore.player.perf` sul Mi A3 serve solo alle misure.
+- **Motorola:** è installata la build di debug con tutte le correzioni; «Crediti e dettagli» e «Curiosità automatiche» rimessi spenti, casuale spento, «The Joker» in coda al posto di «My My, Hey Hey» (forse un ascolto in più nelle statistiche).
+- **Backup sul PC** (`.backup-motorola/`, 481 MB): cancellalo quando non ti serve più.
 
 ## Dispositivi
-- **Motorola edge 40** `ZY22HKD85K`: libreria vera. Solo `install -r`; mai disinstallare né `pm clear`. Eccezione per le fasi 50–54 (D-125, D-126): APK debug e prove sui brani presenti; prima un backup completo dall'app fatto dall'utente; firma diversa → fermarsi, backup confermato, poi `uninstall -k` e ripristino.
-- **Mi A3** `0d7ae9df206e`: si può disinstallare con `-k`; mai cancellare i file musicali. Misure solo con `com.codecore.player.perf` (D-19).
-- Misura: `JAVA_HOME=~/.jdks/jbr-17.0.14 PATH=$JAVA_HOME/bin:$PATH python3 scripts/perf_device.py 0d7ae9df206e --label <l> --playback [--no-push] [--only "A,B"]`.
+- **Motorola edge 40** `ZY22HKD85K`: libreria vera. Solo `install -r`; mai disinstallare né `pm clear`. Schermo a 120 Hz (budget 8,3 ms), lo script conta contro 16,7 ms.
+- **Mi A3** `0d7ae9df206e`: si può disinstallare con `-k`; mai cancellare i file musicali. Misure con `com.codecore.player.perf` (D-19).
+- Misure: `python3 scripts/perf_device.py <id> --label <l> [--no-push] [--only "A,B"]`; sull'app vera `--real --apk <apk>` (sola lettura).
+- Su entrambi: mai toccare rotazione o altre impostazioni di sistema; «Non disturbare» (`cmd notification set_dnd priority|off`) solo durante le misure, poi `off`.
 
 ## Prompt di avvio della prossima sessione
 ```
@@ -52,7 +40,6 @@ Leggi docs/handoff.md, docs/gotchas.md e docs/PROGRESS.md. <obiettivo scelto fra
 ```
 
 ## Prossimi obiettivi
-0. **(Consigliato) Prove a mano 50.11–54.9**, poi le tre scelte «Da decidere» della scheggia 53, poi il lavoro 3 di `docs/prossimi-lavori.md` (design: Jam, Ricerca, menu ⋮, Home) con `/refactor`.
-1. **Debito noto dello streaming** (in fondo a `docs/fase-47-jam-online.md`): tre meccanismi «online → libreria», `DownloadsNotifier` grande, prefetch che ricomincia da capo, file auto-scaricato dall'uscita Jam non fissato in cache, «Scarica» da una riga ombra senza messaggio; `gapless window edit failed` (IllegalArgumentException) al cambio di shuffle su una coda di 2 brani; `discovery: socket error` ogni 2 s senza rete.
-2. **Picchi di build al cambio di brano** (Swipe mini player, Apertura player): `cacheWidth`/`gaplessPlayback` in `track_art.dart`; misura prima e dopo con `--only`.
-3. **Memoria e avvio:** PSS ~213–270 MB contro 210 MB; misurare prima con la libreria di prova piccola.
+0. **(Consigliato) Il kickoff di `docs/prossimi-lavori.md`** scelto dall'utente; dentro o subito dopo, i rilievi della Jam e il completamento intero rinviati qui sopra.
+1. **Debito noto dello streaming** (in fondo a `docs/fase-47-jam-online.md`): tre meccanismi «online → libreria», `DownloadsNotifier` grande, prefetch che ricomincia, file auto-scaricato dall'uscita Jam non fissato, `gapless window edit failed` su una coda di 2 brani, `discovery: socket error` ogni 2 s senza rete.
+2. **Rotellina Attività a 120 fps** mentre un'attività gira (costo di batteria) e picchi di build al cambio di brano (`track_art.dart`); misura prima e dopo con `--only`.

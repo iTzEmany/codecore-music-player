@@ -148,9 +148,7 @@ EntranceScope(
         onPlay: list.isEmpty
             ? null
             : () => ctrl.playAll(list, context: playCtx),
-        onShuffle: list.isEmpty
-            ? null
-            : ctrl.toggleShuffle,
+        shuffleIds: list.isEmpty ? null : [for (final t in list) t.id],
         menu: _AlbumMenu(album: album, tracks: list),
         slivers: [
           SliverAsyncBody(

@@ -1,6 +1,8 @@
 import 'package:codecore/ui/screens/home/home_screen.dart';
 import 'package:codecore/ui/screens/library/album_detail_screen.dart';
 import 'package:codecore/data/db/app_database.dart';
+import 'package:codecore/providers/settings_providers.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
@@ -31,11 +33,11 @@ void main() {
     await h.dispose(tester);
   });
 
-  Future<Harness> openHome(WidgetTester tester) async {
+  Future<Harness> openHome(WidgetTester tester, {int tracks = 4}) async {
     tester.view.physicalSize = const Size(400, 800);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
-    final h = await Harness.create(tester, tracks: 4);
+    final h = await Harness.create(tester, tracks: tracks);
     await h.pump(tester, const HomeScreen());
     await _settle(tester);
     return h;
@@ -61,13 +63,37 @@ void main() {
     final h = await openHome(tester);
     await tester.tap(find.text('Casuale su tutto'));
     await _settle(tester);
-    expect(h.handler.shuffleEnabled, isFalse, reason: 'the title is not a button');
+    expect(
+      h.handler.shuffleEnabled,
+      isFalse,
+      reason: 'the title is not a button',
+    );
     await tester.tap(find.byIcon(Icons.shuffle_rounded));
     await _settle(tester);
     expect(h.handler.shuffleEnabled, isTrue);
     expect(h.handler.queueIds, isEmpty, reason: 'nothing starts');
     await h.dispose(tester);
   });
+
+  testWidgets(
+    'the Home shuffle button reaches Shuffle+ on a library of 6 while 2 tracks play (D-137)',
+    (tester) async {
+      final h = await openHome(tester, tracks: 6);
+      final ids = (await tester.runAsync(() => h.db.select(h.db.tracks).get()))!
+          .map((t) => t.id)
+          .toList();
+      await tester.runAsync(() => h.handler.playQueue(ids.take(2).toList(), 0));
+      for (var i = 0; i < 2; i++) {
+        await tester.tap(find.byIcon(Icons.shuffle_rounded));
+        await _settle(tester);
+      }
+      final c = ProviderScope.containerOf(
+        tester.element(find.byType(HomeScreen)),
+      );
+      expect(c.read(settingsProvider).shufflePlus, isTrue);
+      await h.dispose(tester);
+    },
+  );
 
   testWidgets('Play starts the library in order with shuffle off', (
     tester,
@@ -185,7 +211,10 @@ void main() {
     final h = await Harness.create(tester, tracks: 4);
     await h.pump(tester, const HomeScreen());
     await _settle(tester);
-    expect(tester.getSize(find.byType(ListView).first).width, greaterThan(1000));
+    expect(
+      tester.getSize(find.byType(ListView).first).width,
+      greaterThan(1000),
+    );
     final cover = find.byKey(const ValueKey('fan-cover-0'));
     expect(cover, findsOneWidget);
     expect(

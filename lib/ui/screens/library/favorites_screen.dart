@@ -97,7 +97,7 @@ SliverToBoxAdapter(
         onPlay: list.isEmpty
             ? null
             : () => ctrl.playAll(list, context: playCtx),
-        onShuffle: list.isEmpty ? null : ctrl.toggleShuffle,
+        shuffleIds: list.isEmpty ? null : [for (final t in list) t.id],
         menu: PopupMenuButton<SortOption>(
           tooltip: l.sortBy,
           icon: const Icon(Icons.sort_rounded),

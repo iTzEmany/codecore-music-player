@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'activity_log_providers.dart';
 import 'enrich_completer_providers.dart';
 import 'library_providers.dart' show scanStateProvider;
 import 'online_providers.dart' show autoParts;
@@ -23,8 +24,9 @@ final startupSettledProvider = FutureProvider<void>((ref) async {
 final enrichCompleterStartProvider = Provider<void>((ref) {
   final completer = ref.read(enrichCompleterProvider.notifier);
   // Given here and not read by the completer: the activity list watches the
-  // completer, and the busy flag listens to the activity list.
+  // completer, and the busy flag and the Registro listen to the activity list.
   completer.activity = ref.watch(userActivityProvider);
+  completer.addLog = ref.read(activityLogProvider.notifier).add;
   ref.listen(scanStateProvider.select((s) => s.running), (was, now) {
     if (was == true && !now) unawaited(completer.start());
   });

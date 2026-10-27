@@ -94,8 +94,9 @@ class PlayerController {
   final void Function(List<int>)? addToJam;
   final bool Function(YtResult)? addOnlineToJam;
 
-  /// Why Shuffle+ is out of the cycle for the current queue (null: it is in).
-  final Future<ShufflePlusBlock?> Function()? plusBlock;
+  /// Why Shuffle+ is out of the cycle for [ids] (the list the button plays) or,
+  /// without ids, for the current queue (null: it is in).
+  final Future<ShufflePlusBlock?> Function(List<int>? ids)? plusBlock;
 
   bool get inJam => jamActive?.call() ?? false;
 
@@ -271,9 +272,10 @@ class PlayerController {
 
   /// The shuffle button: off, shuffle, Shuffle+, off. Returns why it skipped
   /// Shuffle+ (then: off, shuffle, off), else null.
-  Future<ShufflePlusBlock?> cycleShuffle() {
+  /// [ids]: the list this button plays (D-137); null: the current queue.
+  Future<ShufflePlusBlock?> cycleShuffle({List<int>? ids}) {
     // Serialized: a second tap reads the state the first one left.
-    final run = _cycle.then((_) => _cycleShuffle());
+    final run = _cycle.then((_) => _cycleShuffle(ids));
     _cycle = run.then<void>((_) {}, onError: (Object e) {
       AppLog.w('shuffle cycle failed', e);
     });
@@ -282,14 +284,14 @@ class PlayerController {
 
   Future<void> _cycle = Future<void>.value();
 
-  Future<ShufflePlusBlock?> _cycleShuffle() async {
+  Future<ShufflePlusBlock?> _cycleShuffle(List<int>? ids) async {
     final plus = shufflePlus?.call() ?? false;
     if (!_handler.shuffleEnabled) {
       setShufflePlus?.call(false);
       await setShuffle(true);
       return null;
     }
-    final block = plus ? null : await plusBlock?.call();
+    final block = plus ? null : await plusBlock?.call(ids);
     if (!plus && block == null) {
       setShufflePlus?.call(true);
       return null;
@@ -321,15 +323,16 @@ class PlayerController {
 }
 
 /// Why the shuffle button may not reach Shuffle+ now (null: it may).
-Future<ShufflePlusBlock?> plusAllowedNow(Ref ref) async {
+/// [ids]: the list the button is going to play, instead of the queue now.
+Future<ShufflePlusBlock?> plusAllowedNow(Ref ref, {List<int>? ids}) async {
   try {
     final h = ref.read(audioHandlerProvider);
     final local = await ref.read(trackRepositoryProvider).getByIdsLight([
-      for (final i in h.sourceIds ?? h.queueIds)
+      for (final i in ids ?? h.sourceIds ?? h.queueIds)
         if (!isOnlineId(i)) i,
     ]);
     return plusAllowed(
-      queueIds: h.queueIds,
+      queueIds: ids ?? h.queueIds,
       jam: ref.read(jamProvider).active,
       radio: ref.read(playContextProvider)?.kind == PlayContextKind.radio,
       localCount: local.where((t) => !t.missing && t.kind == 0).length,
@@ -352,7 +355,7 @@ final playerControllerProvider = Provider<PlayerController>(
     jamActive: () => ref.read(jamProvider).active,
     addToJam: (ids) => unawaited(ref.read(jamProvider.notifier).addLibraryIds(ids)),
     addOnlineToJam: (r) => ref.read(jamProvider.notifier).addOnline(r),
-    plusBlock: () => plusAllowedNow(ref),
+    plusBlock: (ids) => plusAllowedNow(ref, ids: ids),
     libraryIdOf: (r) async {
       final path = (await ref.read(downloadIndexProvider.future))
           .pathFor(r.id, source: r.source);
