@@ -740,18 +740,18 @@ Feature «Arricchimento completo» (`docs/feature-arricchimento.md`, decisioni D
 - [x] 55.1 Cronometro nel preparer
 - [x] 55.2 Tap → primo suono nell'handler
 - [x] 55.3 `scripts/stream_times.py`
-- [~] 55.4 Prova dell'URL col yt-dlp vero (solo misura) — Linux fatta (URL a ~4 s, nessun 403); Mi A3 solo il tempo all'URL (38,9 s, su hotspot): avanzamento, 30 s e seek da provare
-- [~] 55.5 Tabella «Prima» (R-70) — Motorola (dati mobili) e Mi A3 (hotspot) misurati; da rifare su Wi-Fi vero, e Linux con 10 brani (oggi 4, play ~5,3 s)
+- [x] 55.4 Prova dell'URL col yt-dlp vero (solo misura) — Linux URL a ~4 s; Mi A3 (Wi-Fi UniBA) URL a ~36 s (25 s nelle sfide JS di QuickJS), avanzamento sì, ascolto MediaPlayer senza 403 ma lento a partire, seek non concluso in 5 s; i ~13 s erano l'aggiornamento di yt-dlp
+- [x] 55.5 Tabella «Prima» (R-70) — Motorola (dati mobili), Mi A3 (hotspot e Wi-Fi UniBA, play ~38,9 s), Linux in Xvfb (Wi-Fi UniBA, play ~6,6 s)
 - [x] 55.6 Controlli di fase
 
 ## Fase 56 — Partenza dall'URL (`fase-56-partenza-da-url.md`)
-- [ ] 56.1 L'URL dalle righe di yt-dlp (desktop)
-- [ ] 56.2 L'URL dal canale Android
-- [ ] 56.3 `StreamPreparer.start()`
-- [ ] 56.4 Il player parte dall'URL
-- [ ] 56.5 URL scaduto e cambio di rete
-- [ ] 56.6 Controlli di fase (K-SV-01, K-SV-04, K-SV-05)
-- [ ] 56.7 Prove a mano
+- [x] 56.1 L'URL dalle righe di yt-dlp (desktop)
+- [x] 56.2 L'URL dal canale Android
+- [x] 56.3 `StreamPreparer.start()`
+- [x] 56.4 Il player parte dall'URL
+- [x] 56.5 URL scaduto e cambio di rete
+- [x] 56.6 Controlli di fase (K-SV-01, K-SV-04, K-SV-05) — «Dopo 56»: Linux play 4,8 s (era 6,6), Mi A3 37,5 s (era 38,9); Motorola non misurato
+- [~] 56.7 Prove a mano — Linux e Mi A3 fatte; Wi-Fi spento a metà brano e Motorola all'utente
 
 ## Fase 57 — Coda e transizioni dello streaming (`fase-57-coda-e-transizioni.md`)
 - [ ] 57.1 Il brano dopo dall'URL anticipato

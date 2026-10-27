@@ -18,6 +18,10 @@ Jam. **Nessun pacchetto nuovo. Schema invariato.**
 ## Task
 
 ### 57.1 — Il brano dopo dall'URL anticipato
+> Dalla review di fine fase 56: prima di 57.1 raccogli lo stato del brano da URL (`_fromUrl`, `_urlKey`, `_urlEntry`,
+> `_urlResult`, `_recoveries`, `_recoveringToken`) in una piccola classe `UrlSession`, e fai restituire a `_loadStart` la
+> sorgente (`from`) invece di ritoccare la riga dei tempi dopo. Il gestore è passato da 1484 a 1623 righe nella 56.
+
 **File:** `lib/services/audio/codecore_audio_handler.dart`, `lib/services/stream/stream_preparer.dart` (se serve un
 getter), `test/services/audio/online_playback_test.dart`
 1. Al cambio verso un brano online non in cache, `start()` restituisce subito l'URL che il job del prefetch ha già (se

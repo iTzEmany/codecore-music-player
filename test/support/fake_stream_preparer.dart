@@ -33,6 +33,31 @@ class FakeStreamPreparer implements StreamPreparer {
     return file;
   }
 
+  /// Keys that start from an address, not the file (what `start` answers).
+  final urls = <String, (Uri, Map<String, String>)>{};
+
+  /// What `restart` answers per key, in order (an empty list: the file).
+  final restarts = <String, List<StreamStart>>{};
+  final restarted = <String>[];
+
+  /// Holds `restart` back until completed.
+  Completer<void>? restartGate;
+
+  @override
+  Future<StreamStart> start(String key, YtResult r) async {
+    final u = urls[key];
+    return u != null ? StreamStart.url(u.$1, u.$2) : StreamStart.file(await ready(key, r));
+  }
+
+  @override
+  Future<StreamStart> restart(String key, YtResult r) async {
+    restarted.add(key);
+    await restartGate?.future;
+    final next = restarts[key];
+    if (next != null && next.isNotEmpty) return next.removeAt(0);
+    return StreamStart.file(await ready(key, r));
+  }
+
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }

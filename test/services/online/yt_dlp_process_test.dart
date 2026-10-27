@@ -206,6 +206,41 @@ void main() {
       expect(alive(), isFalse, reason: 'the process must be gone');
     });
 
+    // Stand-in that prints [lines] and writes the output file named by -o.
+    YtDlpProcessService downloader(String lines) {
+      final f = File('${dir.path}/dl-yt-dlp')
+        ..writeAsStringSync('#!/bin/sh\n'
+            'if [ "\$1" = "--version" ]; then echo 2026.08.19; exit 0; fi\n'
+            'while [ \$# -gt 1 ]; do if [ "\$1" = "-o" ]; then o="\$2"; fi; shift; done\n'
+            '$lines'
+            'echo audio > "\$(echo "\$o" | sed \'s/%(ext)s/m4a/\')"\n');
+      Process.runSync('chmod', ['+x', f.path]);
+      return YtDlpProcessService(executable: f.path);
+    }
+
+    const yt = YtResult(id: 'abc', title: 'Song', channel: 'Band', duration: Duration.zero);
+    const opts = DownloadOptions(emitStreamUrl: true);
+
+    test('a download reports the stream address once, then the file', () async {
+      final svc = downloader('echo "CODECORE_URL https://v.example/a"\n'
+          'echo "https://v.example/b"\n'
+          'echo \'CODECORE_HDR {"User-Agent":"UA"}\'\n');
+      final ev = await svc.download(yt, dir, options: opts).toList();
+      final urls = ev.where((e) => e.streamUrl != null).toList();
+      expect(urls, hasLength(1));
+      expect(urls.single.streamUrl, Uri.parse('https://v.example/a'));
+      expect(urls.single.headers, {'User-Agent': 'UA'});
+      expect(ev.last.path, endsWith('.m4a'));
+    });
+
+    test('a broken header line gives no event and the download still ends', () async {
+      final svc = downloader('echo "CODECORE_URL https://v.example/a"\n'
+          'echo "CODECORE_HDR {oops"\n');
+      final ev = await svc.download(yt, dir, options: opts).toList();
+      expect(ev.where((e) => e.streamUrl != null), isEmpty);
+      expect(ev.last.path, endsWith('.m4a'));
+    });
+
     test('a missing tool has no version', () async {
       final svc = YtDlpProcessService(executable: '${dir.path}/nope');
       expect(await svc.toolVersion(), isNull);

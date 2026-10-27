@@ -33,6 +33,9 @@ class _Yt implements YoutubeService {
   /// Progress events (received, total) before the path, `gap` apart; then `silence` of nothing.
   List<(int, int)> progress = const [];
   Duration gap = Duration.zero, silence = Duration.zero;
+  /// Stream addresses handed out, one per download call (none left = no address event).
+  final urls = <String>[];
+  final optionsSeen = <DownloadOptions>[];
   final tokens = <String, List<CancelToken?>>{};
   final dirs = <String, List<String>>{};
 
@@ -42,6 +45,7 @@ class _Yt implements YoutubeService {
   Stream<DownloadProgress> download(YtResult r, Directory outDir,
       {CancelToken? cancel, DownloadOptions options = const DownloadOptions()}) async* {
     started.add(r.id);
+    optionsSeen.add(options);
     (tokens[r.id] ??= []).add(cancel);
     (dirs[r.id] ??= []).add(outDir.path);
     maxOpen = ++open > maxOpen ? open : maxOpen;
@@ -51,6 +55,9 @@ class _Yt implements YoutubeService {
       unawaited(cancel?.whenCancel.then((_) {
         if (!gate.isCompleted) gate.completeError(StateError('cancelled'));
       }));
+      if (urls.isNotEmpty) {
+        yield DownloadProgress(streamUrl: Uri.parse(urls.removeAt(0)), headers: const {'User-Agent': 'ua'});
+      }
       await gate.future;
       if ((rateLimits[r.id] ?? 0) > 0) {
         rateLimits[r.id] = rateLimits[r.id]! - 1;
@@ -207,7 +214,15 @@ void main() {
       yt.progress = const [(100, 100)];
       await prep.ready('youtube:a', _r('a'));
       expect(timing(),
-          '[I] stream timing key=youtube:a requested=1 attempt=1 spawn=10 downloaded=20 post=30 cached=40 result=ok');
+          '[I] stream timing key=youtube:a requested=1 attempt=1 spawn=10 url=- downloaded=20 post=30 cached=40 result=ok');
+    });
+
+    test('url: the moment the stream address arrived', () async {
+      make(clock: stepClock());
+      yt.autoFinish = true;
+      yt.urls.add('https://v/a?expire=4102444800');
+      await prep.ready('youtube:a', _r('a'));
+      expect(timing(), contains('spawn=10 url=20 downloaded=30'));
     });
 
     test('failure: missing values are dashes', () async {
@@ -216,7 +231,92 @@ void main() {
       yt.failuresLeft['bad'] = 2;
       await expectLater(prep.ready('youtube:bad', _r('bad')), throwsA(isA<YtException>()));
       expect(timing(),
-          '[I] stream timing key=youtube:bad requested=1 attempt=2 spawn=- downloaded=- post=- cached=- result=failed');
+          '[I] stream timing key=youtube:bad requested=1 attempt=2 spawn=- url=- downloaded=- post=- cached=- result=failed');
+    });
+  });
+
+  group('start and restart', () {
+    const far = 'https://v/a?expire=4102444800'; // year 2100
+    String urlOf(StreamStart s) => s.url.toString();
+
+    test('file in cache: the file, yt-dlp not started', () async {
+      yt.autoFinish = true;
+      await prep.ready('youtube:a', _r('a'));
+      yt.started.clear();
+      final s = await prep.start('youtube:a', _r('a'));
+      expect(s.file, isNotNull);
+      expect(s.url, isNull);
+      expect(yt.started, isEmpty);
+    });
+
+    test('address before file: the address with its headers; the download goes on with emitStreamUrl', () async {
+      yt.urls.add(far);
+      final s = await prep.start('youtube:a', _r('a'));
+      expect(urlOf(s), far);
+      expect(s.file, isNull);
+      expect(s.headers, {'User-Agent': 'ua'});
+      expect(yt.optionsSeen.single.emitStreamUrl, isTrue);
+      yt.finish('a');
+      await _until(() => prep.phases.value['youtube:a'] == StreamPhase.ready);
+    });
+
+    test('file before address: the file', () async {
+      yt.autoFinish = true;
+      final s = await prep.start('youtube:a', _r('a'));
+      expect(s.file, isNotNull);
+      expect(s.url, isNull);
+    });
+
+    test('an address already expired by expire= is not handed out: the file wins', () async {
+      yt.autoFinish = true;
+      yt.urls.add('https://v/a?expire=1');
+      final s = await prep.start('youtube:a', _r('a'));
+      expect(s.file, isNotNull);
+    });
+
+    test('an absurd expire= does not break the attempt: the address is taken as valid for 5 h', () async {
+      yt.urls.add('https://v/a?expire=99999999999999999');
+      final s = await prep.start('youtube:a', _r('a'));
+      expect(s.url, isNotNull);
+      expect(yt.started, ['a']);
+      yt.finish('a');
+    });
+
+    test('an address expiring within a minute is not handed out: the file wins', () async {
+      yt.autoFinish = true;
+      yt.urls.add('https://v/a?expire=${DateTime.now().millisecondsSinceEpoch ~/ 1000 + 30}');
+      expect((await prep.start('youtube:a', _r('a'))).file, isNotNull);
+    });
+
+    test('restart with the file ready: the file, no new yt-dlp', () async {
+      yt.urls.add(far);
+      expect(urlOf(await prep.start('youtube:a', _r('a'))), far);
+      yt.finish('a');
+      await _until(() => prep.phases.value['youtube:a'] == StreamPhase.ready);
+      final s = await prep.restart('youtube:a', _r('a'));
+      expect(s.file, isNotNull);
+      expect(yt.started, ['a']);
+    });
+
+    test('restart without the file: the attempt runs again for a new address; the key stays pinned', () async {
+      yt.urls.addAll([far, 'https://v/b?expire=4102444800']);
+      prep.setQueue([_i('a')]);
+      await prep.start('youtube:a', _r('a'));
+      final s = await prep.restart('youtube:a', _r('a'));
+      expect(urlOf(s), 'https://v/b?expire=4102444800');
+      expect(yt.started, ['a', 'a']);
+      expect(yt.tokens['a']![0]!.isCancelled, isTrue);
+      expect(prep.phases.value['youtube:a'], StreamPhase.downloading); // a cancel is not a failure
+      yt.finish('a');
+      await _until(() => prep.phases.value['youtube:a'] == StreamPhase.ready);
+    });
+
+    test('restart after a failed job: a new job', () async {
+      yt.failuresLeft['a'] = 2;
+      yt.autoFinish = true;
+      await expectLater(prep.start('youtube:a', _r('a')), throwsA(isA<YtException>()));
+      expect((await prep.restart('youtube:a', _r('a'))).file, isNotNull);
+      expect(yt.started, ['a', 'a', 'a']);
     });
   });
 

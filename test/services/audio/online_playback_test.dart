@@ -127,6 +127,68 @@ void main() {
     expect(handler.currentTrack?.id, id);
   });
 
+  final addr = Uri.parse('https://rr1.googlevideo.com/v1');
+
+  test('an address that arrives first is opened with loadUri and its headers, no file', () async {
+    final id = online.register(result('v1'));
+    preparer.urls['youtube:v1'] = (addr, {'User-Agent': 'x'});
+    final lines = await timingLines(() async {
+      await handler.playQueue([id], 0);
+      backend.stateC.add(BackendState.playing);
+      backend.posC.add(const Duration(seconds: 1));
+      backend.posC.add(const Duration(seconds: 2));
+      await settle();
+    });
+    expect(backend.loadedUris.single.uri, addr);
+    expect(backend.loadedUris.single.headers, {'User-Agent': 'x'});
+    expect(backend.loaded, isEmpty);
+    expect(lines.single, matches(RegExp(r'play=\d+ from=url$')));
+  });
+
+  test('an address that fails to open falls back to the file, with no error for the user', () async {
+    final id = online.register(result('v1'));
+    preparer.urls['youtube:v1'] = (addr, const {});
+    backend.failing.add(addr.toString());
+    await handler.playQueue([id], 0);
+    await settle();
+    expect(backend.loaded.single, endsWith('youtube_v1.m4a'));
+    expect(failures, isEmpty);
+  });
+
+  test('from the address, the plays count on the shadow row once the file is there', () async {
+    final id = online.register(result('v1'));
+    preparer.urls['youtube:v1'] = (addr, const {});
+    await handler.playQueue([id], 0);
+    await listenTo(100);
+    backend.stateC.add(BackendState.completed);
+    await settle();
+    final row = await TrackRepository(db).streamRow('youtube:v1');
+    expect(row!.playCount, 1);
+    expect(backend.loaded, isEmpty);
+  });
+
+  test('a stream that reports no length keeps the known one while it plays from the address', () async {
+    final id = online.register(result('v1'));
+    preparer.urls['youtube:v1'] = (addr, const {});
+    await handler.playQueue([id], 0);
+    final seen = <Duration?>[];
+    final sub = handler.durationStream.listen(seen.add);
+    backend.durC.add(null);
+    backend.durC.add(const Duration(minutes: 4));
+    await settle();
+    await sub.cancel();
+    expect(seen, [const Duration(minutes: 4)]);
+  });
+
+  test('a Shuffle+ suggestion starts from its address too', () async {
+    final id = online.register(result('v2'), suggested: true);
+    preparer.urls['youtube:v2'] = (addr, const {});
+    await handler.playQueue([id], 0);
+    await settle();
+    expect(backend.loadedUris.single.uri, addr);
+    expect(backend.loaded, isEmpty);
+  });
+
   test('a downloaded online entry is not prepared nor streamed; the other still is', () async {
     handler.libraryIdOf = (r) async => r.id == 'v1' ? ids[1] : null;
     final e = [online.register(result('v1')), online.register(result('v2'))];

@@ -25,6 +25,18 @@ class StreamItem {
 /// cached (or with an error if it never is).
 typedef StreamEnricher = Future<void> Function(YtResult r, Future<int> rowId);
 
+/// Where a streamed track starts from: the cached [file] or the stream [url]
+/// (with the [headers] to open it with). Exactly one of the two is set.
+class StreamStart {
+  const StreamStart.file(File this.file)
+      : url = null,
+        headers = const {};
+  const StreamStart.url(Uri this.url, this.headers) : file = null;
+  final File? file;
+  final Uri? url;
+  final Map<String, String> headers;
+}
+
 class _Job {
   _Job(this.key, this.result) {
     done.future.ignore(); // the error reaches ready() callers only
@@ -44,9 +56,20 @@ class _Job {
   CancelToken? cancel;
   var dropped = false;
 
+  /// The restart of the running attempt was asked for: its failure is not a failed attempt.
+  var restarting = false;
+
+  /// Last stream address of the running attempt, its headers and when it expires.
+  Uri? streamUrl;
+  Map<String, String> headers = const {};
+  DateTime? urlExpires;
+
+  /// Completed (and replaced) each time an address arrives: wakes who waits for it.
+  var urlWake = Completer<void>();
+
   /// Timings of the last attempt (ms from the start of `_download`); null = not reached.
   DateTime? t0;
-  int? spawn, downloaded, post, cached;
+  int? spawn, urlMs, downloaded, post, cached;
   var attempt = 0;
 }
 
@@ -163,25 +186,94 @@ class StreamPreparer {
     if (_disposed) throw StateError('disposed');
     cache.pin(key);
     try {
-      final file = await cache.fileFor(key);
-      if (file != null) {
-        await cache.touch(key);
-        // A file cached by an earlier session may have lost its row: plays need it.
-        if (await tracks.streamRow(key) == null) await tracks.upsertStreamRow(key, r, file);
-        _setPhase(key, StreamPhase.ready);
-        return file;
-      }
-      if (_disposed) throw StateError('disposed');
-      var job = _jobs[key];
-      if (job == null || job.phase == StreamPhase.failed) {
-        job = _jobs[key] = _Job(key, r);
-      }
-      job.requested = true;
-      _pump();
-      return await job.done.future;
+      return await _cached(key, r) ?? await _job(key, r).done.future;
     } finally {
       cache.unpin(key);
     }
+  }
+
+  /// Like [ready], but returns as soon as the stream address is known (R-71):
+  /// the first of a live address of the job and the cached file.
+  Future<StreamStart> start(String key, YtResult r) async {
+    if (_disposed) throw StateError('disposed');
+    cache.pin(key);
+    try {
+      final file = await _cached(key, r);
+      return file != null ? StreamStart.file(file) : await _firstOf(_job(key, r));
+    } finally {
+      cache.unpin(key);
+    }
+  }
+
+  /// A new start for a key whose address expired (R-76): the file when it is
+  /// there, else the running attempt is cancelled and run again for a fresh address.
+  Future<StreamStart> restart(String key, YtResult r) async {
+    if (_disposed) throw StateError('disposed');
+    cache.pin(key);
+    try {
+      final file = await _cached(key, r);
+      if (file != null) return StreamStart.file(file);
+      final running = _jobs[key]; // read after the await: it may have finished meanwhile
+      if (running != null && running.phase == StreamPhase.downloading) {
+        running.restarting = true;
+        running.cancel?.cancel('stream address expired');
+      }
+      final job = _job(key, r)..streamUrl = null;
+      return await _firstOf(job);
+    } finally {
+      cache.unpin(key);
+    }
+  }
+
+  /// The cached file of [key] (touched, with its shadow row), or null.
+  Future<File?> _cached(String key, YtResult r) async {
+    final file = await cache.fileFor(key);
+    if (file == null) return null;
+    await cache.touch(key);
+    // A file cached by an earlier session may have lost its row: plays need it.
+    if (await tracks.streamRow(key) == null) await tracks.upsertStreamRow(key, r, file);
+    _setPhase(key, StreamPhase.ready);
+    return file;
+  }
+
+  /// The job of [key] (new if absent or failed), marked as requested.
+  _Job _job(String key, YtResult r) {
+    if (_disposed) throw StateError('disposed');
+    var job = _jobs[key];
+    if (job == null || job.phase == StreamPhase.failed) {
+      job = _jobs[key] = _Job(key, r);
+    }
+    job.requested = true;
+    _pump();
+    return job;
+  }
+
+  /// The first of a live address and the file; throws if the job fails first.
+  Future<StreamStart> _firstOf(_Job job) async {
+    final file = job.done.future.then<StreamStart?>(StreamStart.file);
+    file.ignore(); // an early return must not leave its failure unhandled
+    while (true) {
+      final url = job.streamUrl;
+      // An address about to expire is no use to a player that opens it later.
+      if (url != null && clock().isBefore(job.urlExpires!.subtract(const Duration(minutes: 1)))) return StreamStart.url(url, job.headers);
+      final first = await Future.any([file, job.urlWake.future.then<StreamStart?>((_) => null)]);
+      if (first != null) return first;
+    }
+  }
+
+  void _onUrl(_Job j, Uri url, Map<String, String> headers) {
+    final now = clock();
+    final expire = int.tryParse(url.queryParameters['expire'] ?? '');
+    j
+      ..streamUrl = url
+      ..headers = headers
+      ..urlExpires = expire != null && expire > 0 && expire <= 8640000000000 // DateTime's range, in s
+          ? DateTime.fromMillisecondsSinceEpoch(expire * 1000)
+          : now.add(const Duration(hours: 5))
+      ..urlMs = now.difference(j.t0!).inMilliseconds;
+    final wake = j.urlWake;
+    j.urlWake = Completer<void>();
+    wake.complete();
   }
 
   void dispose() {
@@ -321,6 +413,11 @@ class StreamPreparer {
         part = await _download(j);
       } on Object catch (e, st) {
         if (j.dropped) break; // cancelled on purpose
+        if (j.restarting) {
+          j.restarting = false; // restart(): run the same attempt again
+          attempt--;
+          continue;
+        }
         AppLog.w('stream download of ${j.key} ($attempt)', e, st);
         error = e;
         if (_isRateLimited(e)) {
@@ -380,7 +477,7 @@ class StreamPreparer {
   void _logTiming(_Job j, String result) {
     String v(int? x) => x?.toString() ?? '-';
     AppLog.i('stream timing key=${j.key} requested=${j.requested ? 1 : 0} attempt=${j.attempt} '
-        'spawn=${v(j.spawn)} downloaded=${v(j.downloaded)} post=${v(j.post)} cached=${v(j.cached)} result=$result');
+        'spawn=${v(j.spawn)} url=${v(j.urlMs)} downloaded=${v(j.downloaded)} post=${v(j.post)} cached=${v(j.cached)} result=$result');
   }
 
   void _finish() {
@@ -396,7 +493,8 @@ class StreamPreparer {
     final tmp = Directory(p.join(cache.dir.path, '.dl-$name-${_tmpSeq++}'));
     final cancel = j.cancel = CancelToken();
     j.t0 = clock();
-    j.spawn = j.downloaded = j.post = j.cached = null;
+    j.spawn = j.urlMs = j.downloaded = j.post = j.cached = null;
+    j.streamUrl = null;
     try {
       String? path;
       // One attempt that hangs counts as a failed attempt.
@@ -413,8 +511,11 @@ class StreamPreparer {
         }
         arm(startTimeout);
         try {
-          await for (final e in youtube.download(j.result, tmp, cancel: cancel)) {
+          await for (final e in youtube.download(j.result, tmp,
+              cancel: cancel, options: const DownloadOptions(emitStreamUrl: true))) {
             j.spawn ??= _ms(j);
+            final u = e.streamUrl;
+            if (u != null) _onUrl(j, u, e.headers ?? const {});
             found = e.path ?? found;
             if (e.path != null) j.downloaded ??= _ms(j);
             // 100% reached: yt-dlp is silent while ffmpeg post-processes; only attemptTimeout applies.

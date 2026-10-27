@@ -91,20 +91,38 @@ enum DownloadFormat { original, m4a, mp3High, mp3Low }
 
 /// How a download is run; read from the settings when it starts.
 class DownloadOptions {
-  const DownloadOptions({this.rateLimitKBps, this.format = DownloadFormat.m4a});
+  const DownloadOptions({
+    this.rateLimitKBps,
+    this.format = DownloadFormat.m4a,
+    this.emitStreamUrl = false,
+  });
 
   /// `--limit-rate` in KB/s; null or 0 = unlimited.
   final int? rateLimitKBps;
   final DownloadFormat format;
+
+  /// Also report the stream address (with its headers) as soon as yt-dlp knows it.
+  final bool emitStreamUrl;
 }
 
 class DownloadProgress {
-  const DownloadProgress({this.received = 0, this.total = 0, this.path});
+  const DownloadProgress({
+    this.received = 0,
+    this.total = 0,
+    this.path,
+    this.streamUrl,
+    this.headers,
+  });
 
   final int received, total;
 
   /// Set only on the last event: the final file path.
   final String? path;
+
+  /// Set on one event only, with [DownloadOptions.emitStreamUrl]: the address
+  /// of the audio stream and the headers to open it with.
+  final Uri? streamUrl;
+  final Map<String, String>? headers;
 
   double get fraction => total <= 0 ? 0 : received / total;
 }
