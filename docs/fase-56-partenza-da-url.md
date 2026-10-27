@@ -101,6 +101,33 @@ dalla posizione (R-76, K-SV-04); secondo ascolto dello stesso brano → `from=ca
 l'ascolto → il file arriva in libreria (R-86).
 
 ## Tabella «Dopo 56»
-<!-- 56.6: da riempire -->
+Build di debug del ramo `feat/56-partenza-url`, 2026-10-27, Wi-Fi UniBA. 10 brani online mai ascoltati per dispositivo,
+dalla ricerca; tempi in ms, mediana / massimo, da `python3 scripts/stream_times.py --last 10`. `spawn` ora coincide con
+`url`: il primo evento del processo è la riga dell'URL.
+
+| Dispositivo | yt-dlp | url | downloaded | play (url) | Prima: play (cache) | Guadagno |
+|---|---|---|---|---|---|---|
+| Linux (Xvfb) | 2026.08.19 | 4186 / 4661 | 4846 / 5725 | 4840 / 5130 | 6632 / 8028 | −1,8 s |
+| Mi A3 `0d7ae9df206e` | 2026.10.26 | 35536 / 37413 | 37203 / 45222 | 37540 / 40450 | 38882 / 43197 | −1,3 s (fino a −11 s se il download è lento) |
+| Motorola edge 40 | — | non misurato: scollegato prima della prova | | | | |
+
+Linux: Imagine, Hey Jude, Rolling in the Deep, Seven Nation Army, Mr Brightside, Back in Black, Losing My Religion,
+Under Pressure, Stayin' Alive, Clocks. Mi A3: Bitter Sweet Symphony, Heroes, Black Hole Sun, Ring of
+Fire, Dreams, Gimme Shelter, Paint It Black, Karma Police, Fast Car, Sweet Dreams (Tainted Love e Sultans of Swing, i primi due, fuori da `--last 10`).
+
 
 ## Note
+- Mi A3: l'URL arriva a ~35 s perché QuickJS risolve le sfide JS di YouTube in ~25 s (vedi fase 55). Partire dall'URL
+  serve poco quando il download dopo l'URL dura 1-2 s; serve molto quando il download è lento (Sultans of Swing:
+  URL a 38,6 s, file a 56,3 s, suono a 45,3 s). Il vero collo di bottiglia su Android è prima dell'URL: da indagare
+  `--cache-dir` (la cache di yt-dlp non esiste nella cartella dell'app, quindi le sfide si risolvono a ogni brano).
+- Prove a mano, Linux (Xvfb): suono in ~4,8 s; seek all'80 % appena partito → riprende a 3:37 di 4:26, nessun errore;
+  secondo ascolto `from=cache` (315 ms); «Scarica» durante l'ascolto → file in `~/Music`, ascolto non interrotto.
+  Notifica: non applicabile.
+- Prove a mano, Mi A3: suono in ~37 s; seek all'80 % (tap sull'anello) → 3:27 di 4:49 in riproduzione; secondo ascolto
+  `from=cache` (620 ms); «Scarica» durante l'ascolto → promosso in Music (copia tra partizioni), ascolto non interrotto.
+  Durata subito visibile nel player (dalla ricerca). Notifica: controlli presenti, barra senza tempi, uguale col brano
+  dalla cache (comportamento di Android 11 sul Mi A3, non della 56).
+- Non provati: Wi-Fi spento a metà brano (R-76, K-SV-04): è un'impostazione di sistema, la prova è dell'utente. Motorola:
+  scollegato prima delle prove. Vedi «Tocca a te» nel file dell'obiettivo.
+- Mi A3: rotazione automatica trovata accesa alle 18:54, prima dell'installazione; non toccata.

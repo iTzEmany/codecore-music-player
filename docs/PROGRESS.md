@@ -745,13 +745,13 @@ Feature «Arricchimento completo» (`docs/feature-arricchimento.md`, decisioni D
 - [x] 55.6 Controlli di fase
 
 ## Fase 56 — Partenza dall'URL (`fase-56-partenza-da-url.md`)
-- [ ] 56.1 L'URL dalle righe di yt-dlp (desktop)
-- [ ] 56.2 L'URL dal canale Android
-- [ ] 56.3 `StreamPreparer.start()`
-- [ ] 56.4 Il player parte dall'URL
-- [ ] 56.5 URL scaduto e cambio di rete
-- [ ] 56.6 Controlli di fase (K-SV-01, K-SV-04, K-SV-05)
-- [ ] 56.7 Prove a mano
+- [x] 56.1 L'URL dalle righe di yt-dlp (desktop)
+- [x] 56.2 L'URL dal canale Android
+- [x] 56.3 `StreamPreparer.start()`
+- [x] 56.4 Il player parte dall'URL
+- [x] 56.5 URL scaduto e cambio di rete
+- [x] 56.6 Controlli di fase (K-SV-01, K-SV-04, K-SV-05) — «Dopo 56»: Linux play 4,8 s (era 6,6), Mi A3 37,5 s (era 38,9); Motorola non misurato
+- [~] 56.7 Prove a mano — Linux e Mi A3 fatte; Wi-Fi spento a metà brano e Motorola all'utente
 
 ## Fase 57 — Coda e transizioni dello streaming (`fase-57-coda-e-transizioni.md`)
 - [ ] 57.1 Il brano dopo dall'URL anticipato
