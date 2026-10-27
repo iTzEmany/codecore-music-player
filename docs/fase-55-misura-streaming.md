@@ -102,12 +102,24 @@ yt-dlp --no-playlist --no-warnings --newline --no-part \
 - Client usato: quello di serie (visionos). `android_vr` non serve, non provato.
 - Nota: la prima prova senza `--ytdl=no` e con header incompleti ha dato 403 (mpv passava l'URL a yt-dlp). Non è un 403 di YouTube.
 
-### Mi A3 (0d7ae9df206e): non eseguita, il telefono non ha rete
-- Il callback di `YtDlpChannel.kt` riceve già ogni riga (`progress, _, line`) ma la gira solo a Dart con `invokeMethod("progress", ... "line")`: nessun log Kotlin delle righe.
-- Costruito (ramo locale, non nella PR) un APK con `Log.i("probe55", ...)` col tempo dall'avvio e i due `--print` (`CODECORE_PERF=1 flutter build apk --debug --target-platform android-arm64 --build-number 55`), installato come `com.codecore.player.perf` con `install -r -d`.
-- Il telefono non ha rete: Wi-Fi acceso ma non connesso, dati mobili spenti (`Network is unreachable`, ping fallito). Nessuna impostazione toccata.
-- Mancano quindi: tempo fino all'URL, avanzamento, ascolto, seek, client. Da rifare con il telefono su Wi-Fi.
-- Worktree e build di prova eliminati. Sul Mi A3 resta l'app `.perf` con la riga di log e i `--print` (da sostituire in 55.5).
+### Mi A3 (0d7ae9df206e), 2026-10-27, Wi-Fi UniBA (ping 37 ms)
+Build di prova (ramo locale, non nella PR; diff salvato fuori dal repo): `CODECORE_PERF=1 flutter build apk --debug --target-platform android-arm64 --build-number 55`,
+installata come `com.codecore.player.perf`. In `YtDlpChannel.kt` aggiunge agli argomenti di oggi `--progress` e i due `--print`
+(`before_dl:URLMARK %(urls)s`, `before_dl:HDRMARK %(http_headers)j`) e scrive nel logcat (`probe55`) ogni riga con il tempo dall'avvio di `execute`.
+yt-dlp aggiornato da youtubedl-android all'avvio (canale stable).
+- URL prima del download: sì. `URLMARK`/`HDRMARK` escono subito prima di `[download] Destination`.
+- Tempo fino all'URL (dall'avvio del processo): 36,8 s (Levitating), 35,0 s (Bad Guy), 35,9 s (Dance Monkey), 38,5 s (Believer). Il download dopo l'URL dura 1-2 s.
+- Dove va il tempo (Believer, `--no-quiet`): avvio di Python fino alla prima riga 6,7 s; pagina e API 2,9 s; `Downloading player` 2,7 s;
+  **`[jsc:quickjs] Solving JS challenges using quickjs` 25,5 s**; m3u8 e scelta del formato 0,8 s. Su Linux tutta l'estrazione sta in ~4 s (node).
+- Avanzamento: sì. Con `--progress` le righe `[download] xx%` arrivano al callback come prima (percent 0→100).
+- 30 s di ascolto: sì ma lento. Prova con `android.media.MediaPlayer` (URL + header di yt-dlp, mentre yt-dlp scarica): `prepare` 27,9 s, dopo 30 s
+  la posizione è a 10,5 s (`playing=true`). Nessun errore, nessun 403. Il player dell'app è ExoPlayer, non MediaPlayer: da riverificare nella 56.7.
+- Seek all'80 %: nessun errore né 403; dopo 5 s la posizione è ferma sul punto richiesto (167,6 s), seek non completato entro 5 s.
+- Client: quello di serie (tv samsung + visionos, formato 140). Prova con `--extractor-args youtube:player_client=android_vr`: niente sfide JS,
+  URL a 8,4 s, ma c'è solo il formato 18 (video 360p) e il download fallisce (`result=failed`). Non usabile così: spunto per la revisione di RNF-08.
+- I ~13 s prima di yt-dlp (prova su hotspot): sono l'aggiornamento di yt-dlp in `ensureInit` alla prima chiamata del processo. Su Wi-Fi buono
+  `ensureInit` dura 0,5-0,6 s (init 0,14-0,19 s, controllo aggiornamento 0,3-0,4 s); dalla seconda chiamata 0.
+- La rotazione automatica del Mi A3 (`accelerometer_rotation`) torna a 1 dopo ogni `adb install -r -d` della build di prova (3 volte su 3): rimessa a 0.
 
 ## Tabella «Prima»
 Build di debug di questo ramo (`flutter build apk --debug --target-platform android-arm64`, `flutter build linux --debug`). 10 brani online mai ascoltati per dispositivo, scelti dalla ricerca (Online), tap, primo suono, brano dopo. Tempi in ms, mediana / massimo, da `python3 scripts/stream_times.py`.
@@ -116,7 +128,8 @@ Build di debug di questo ramo (`flutter build apk --debug --target-platform andr
 |---|---|---|---|---|---|---|---|---|
 | 2026-10-27 | Motorola edge 40 `ZY22HKD85K` | 2026.10.26 | dati mobili (Wi-Fi spento) | 3647 / 4041 | 21894 / 25144 | 22964 / 26289 | 23041 / 26355 | 23303 / 26626 |
 | 2026-10-27 | Mi A3 `0d7ae9df206e` | 2026.10.21 | Wi-Fi: hotspot del Motorola (dati mobili), ping 637 ms | 6207 / 11857 | 38675 / 43146 | 40238 / 44952 | 40352 / 45119 | 41181 / 46421 |
-| 2026-10-27 | Linux | 2026.08.19 | Wi-Fi di casa | da rifare (display isolato non disponibile) | | | | |
+| 2026-10-27 | Mi A3 `0d7ae9df206e` | 2026.10.26 | Wi-Fi UniBA (ping 37 ms) | 5908 / 6694 | 36722 / 41324 | 38155 / 42588 | 38304 / 42660 | 38882 / 43197 |
+| 2026-10-27 | Linux (Xvfb) | 2026.08.19 | Wi-Fi UniBA | 4815 / 5484 | 5100 / 6581 | 5884 / 7359 | 6252 / 7656 | 6632 / 8028 |
 
 Motorola (`--adb ZY22HKD85K`):
 
@@ -142,16 +155,34 @@ Mi A3 (`--log` sul log filtrato, vedi Note):
 | play (file) | 0 | - | - |
 | play (url) | 0 | - | - |
 
-Linux, parziale (solo 4 brani, non 10; prova fatta sul display dell'utente, poi sospesa): spawn 4006 / 4092, downloaded 4242 / 5094, post 4823 / 5653, cached 4983 / 5776, play (cache) 5270 / 5935. Non è la riga ufficiale.
+Mi A3 su Wi-Fi UniBA (`--adb 0d7ae9df206e --last 10`; Thunderstruck, Respect, Valerie, Feel Good Inc, Chandelier, Purple Rain, Creep, Zombie, Mamma Mia, Torn):
+
+| metric | n | median ms | max ms |
+|---|---|---|---|
+| spawn | 10 | 5907.5 | 6694 |
+| downloaded | 10 | 36721.5 | 41324 |
+| post | 10 | 38155 | 42588 |
+| cached | 10 | 38303.5 | 42660 |
+| play (cache) | 10 | 38881.5 | 43197 |
+
+Linux in Xvfb (`--log`; Bohemian Rhapsody, Billie Jean, Smells Like Teen Spirit, Take On Me, Africa, Wonderwall, Don't Stop Believin', Sweet Child O' Mine, Hotel California, Superstition):
+
+| metric | n | median ms | max ms |
+|---|---|---|---|
+| spawn | 10 | 4814.5 | 5484 |
+| downloaded | 10 | 5100 | 6581 |
+| post | 10 | 5883.5 | 7359 |
+| cached | 10 | 6252 | 7656 |
+| play (cache) | 10 | 6631.5 | 8028 |
 
 
 ## Note
-- Linux: da rifare. Il display isolato non è risultato pilotabile (gnome-shell headless: Xwayland senza risposta a xdpyinfo; Xvfb non installato) e l'utente sta lavorando sul suo unico schermo. Servono Xvfb o una sessione dedicata.
-- Rete: il Motorola aveva il Wi-Fi spento (misura su dati mobili); il Mi A3 era sul suo hotspot. Nessuna delle due righe è «Wi-Fi di casa»: da ripetere su Wi-Fi vero per un confronto pulito.
+- Linux: misurato in Xvfb (`xvfb-run`, schermo virtuale del profilo), mai sullo schermo dell'utente.
+- Rete: il Motorola aveva il Wi-Fi spento (misura su dati mobili); il Mi A3 era sul suo hotspot. Nessuna delle due righe è «Wi-Fi di casa»: da ripetere su Wi-Fi vero per un confronto pulito. Mi A3 e Linux rifatti sul Wi-Fi dell'università: il Mi A3 resta a ~37 s anche su buona rete, perché il tempo va nelle sfide JS di QuickJS (vedi «Prova dell'URL»), non nella rete.
 - D-146: `spawn` supera 4 s su Android. Motorola 3,6 s (max 4,0 s, al limite); Mi A3 mediana 6,2 s, max 11,9 s (il primo brano, a freddo). Si prosegue lo stesso.
 - Su Android il costo è il download: `downloaded` 22 s sul Motorola e 39 s sul Mi A3, contro 4,2 s su Linux. Post-elaborazione (ffmpeg) ~1,1-1,5 s, `cached` +0,1 s, `play` +0,3-1,0 s dopo `cached`: il primo suono arriva solo a download finito, come previsto dalla fase 56.
 - Mi A3, prima prova con `com.codecore.player.perf` (probe55, yt-dlp 2026.10.26): URL e header arrivano dopo 38,9 s dall'avvio del processo (`URLMARK` a T+38881 ms, `HDRMARK` a T+38894 ms), cioè prima del download; nello stesso brano `spawn`=51,9 s, `downloaded`=54,2 s. Il probe logga solo le righe `URLMARK`/`HDRMARK`, quindi l'avanzamento non si vede nel logcat: non verificato. Ascolto 30 s e seek sul telefono: non provati. Rete: hotspot del Motorola, che pesa molto sul tempo.
-- Dubbio da verificare: tra l'avvio di `_download` (spawn) e l'URL ci sono ~13 s sul Mi A3 prima del processo (possibile `ensureInit()` con l'aggiornamento di yt-dlp a ogni chiamata, vedi `docs/gotchas.md`).
+- Verificato: i ~13 s prima del processo sul Mi A3 erano l'aggiornamento di yt-dlp in `ensureInit()` sull'hotspot lento; sul Wi-Fi dell'università durano 0,5-0,6 s.
 - Mi A3: 4D7u5KF7SP8 (Get Lucky) era già nella cache di streaming del telefono (play=577 ms, senza riga del preparer). Tolta dal log (`grep -v`) e sostituita da un undicesimo brano (Happy); la tabella usa il log filtrato.
 - Motorola: la riga `play (file)` è un brano di libreria che la coda ha avviato da sola dopo il primo brano online. Volume musica 9/15 (altoparlante) com'era; il tentativo di abbassarlo con `cmd media_session` non ha funzionato, quindi le prove sono suonate al volume dell'utente. Riportato a 9 con i tasti. Non disturbare messo a `priority` solo durante la prova, poi `off`. Installato solo con `install -r`, nessun problema di firma.
 - Mi A3: installato con `install -r` il debug di questo ramo come `com.codecore.player` (era 1.3.0). Resta anche `com.codecore.player.perf` (non rimossa). Volume musica già a 1/15, non toccato. Non disturbare `off` a fine prova.

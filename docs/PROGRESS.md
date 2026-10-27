@@ -740,8 +740,8 @@ Feature «Arricchimento completo» (`docs/feature-arricchimento.md`, decisioni D
 - [x] 55.1 Cronometro nel preparer
 - [x] 55.2 Tap → primo suono nell'handler
 - [x] 55.3 `scripts/stream_times.py`
-- [~] 55.4 Prova dell'URL col yt-dlp vero (solo misura) — Linux fatta (URL a ~4 s, nessun 403); Mi A3 solo il tempo all'URL (38,9 s, su hotspot): avanzamento, 30 s e seek da provare
-- [~] 55.5 Tabella «Prima» (R-70) — Motorola (dati mobili) e Mi A3 (hotspot) misurati; da rifare su Wi-Fi vero, e Linux con 10 brani (oggi 4, play ~5,3 s)
+- [x] 55.4 Prova dell'URL col yt-dlp vero (solo misura) — Linux URL a ~4 s; Mi A3 (Wi-Fi UniBA) URL a ~36 s (25 s nelle sfide JS di QuickJS), avanzamento sì, ascolto MediaPlayer senza 403 ma lento a partire, seek non concluso in 5 s; i ~13 s erano l'aggiornamento di yt-dlp
+- [x] 55.5 Tabella «Prima» (R-70) — Motorola (dati mobili), Mi A3 (hotspot e Wi-Fi UniBA, play ~38,9 s), Linux in Xvfb (Wi-Fi UniBA, play ~6,6 s)
 - [x] 55.6 Controlli di fase
 
 ## Fase 56 — Partenza dall'URL (`fase-56-partenza-da-url.md`)
