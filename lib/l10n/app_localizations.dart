@@ -970,6 +970,12 @@ abstract class AppLocalizations {
   /// **'brano online non disponibile'**
   String get reasonOnlineUnavailable;
 
+  /// No description provided for @reasonAgeRestricted.
+  ///
+  /// In it, this message translates to:
+  /// **'vietato ai minori, nessuna traccia audio trovata'**
+  String get reasonAgeRestricted;
+
   /// No description provided for @searchWeb.
   ///
   /// In it, this message translates to:

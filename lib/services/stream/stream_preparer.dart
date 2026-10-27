@@ -7,6 +7,7 @@ import 'package:path/path.dart' as p;
 
 import '../../core/app_log.dart';
 import '../../data/repositories/track_repository.dart';
+import '../online/query_cleaner.dart';
 import '../online/youtube_service.dart';
 import 'stream_cache.dart';
 import 'stream_key.dart';
@@ -58,6 +59,10 @@ class _Job {
 
   /// The restart of the running attempt was asked for: its failure is not a failed attempt.
   var restarting = false;
+
+  /// Age-gated video: the YouTube Music track downloaded in its place (tried once).
+  YtResult? substitute;
+  var ageTried = false;
 
   /// Last stream address of the running attempt, its headers and when it expires.
   Uri? streamUrl;
@@ -420,6 +425,15 @@ class StreamPreparer {
         }
         AppLog.w('stream download of ${j.key} ($attempt)', e, st);
         error = e;
+        if (isAgeRestricted(e) && !j.ageTried) {
+          j.ageTried = true;
+          j.substitute = await _ageSubstitute(j.result);
+          if (j.substitute != null) {
+            attempt--; // not a failed attempt: same one, with the substitute
+            continue;
+          }
+        }
+        if (isAgeRestricted(e)) break; // a retry would be refused the same way
         if (_isRateLimited(e)) {
           _pausedUntil = DateTime.now().add(cooldown);
           _resume?.cancel();
@@ -471,6 +485,23 @@ class StreamPreparer {
     _finish();
   }
 
+  /// First YouTube Music song other than [r] lasting within 10 s of it (any, if [r] has no length).
+  Future<YtResult?> _ageSubstitute(YtResult r) async {
+    try {
+      final c = cleanSearchQuery(r.title, r.channel);
+      final found = await youtube.searchSongs('${c.title} ${c.artist}'.trim());
+      for (final s in found) {
+        final d = r.duration, sd = s.duration;
+        if (s.id == r.id || (d != null && (sd == null || (sd - d).inSeconds.abs() > 10))) continue;
+        AppLog.i('age fallback ${r.id} → ${s.id}');
+        return s;
+      }
+    } on Object catch (e, st) {
+      AppLog.w('age fallback search for ${r.id} failed', e, st);
+    }
+    return null;
+  }
+
   int _ms(_Job j) => clock().difference(j.t0!).inMilliseconds;
 
   /// One line per job: where the time of a streamed track went.
@@ -511,7 +542,7 @@ class StreamPreparer {
         }
         arm(startTimeout);
         try {
-          await for (final e in youtube.download(j.result, tmp,
+          await for (final e in youtube.download(j.substitute ?? j.result, tmp,
               cancel: cancel, options: const DownloadOptions(emitStreamUrl: true))) {
             j.spawn ??= _ms(j);
             final u = e.streamUrl;

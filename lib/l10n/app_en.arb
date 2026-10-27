@@ -200,6 +200,7 @@
   "reasonUnplayable": "file cannot be played",
   "reasonNotInLibrary": "track not in library",
   "reasonOnlineUnavailable": "online track not available",
+  "reasonAgeRestricted": "age-restricted video, no audio track found",
   "searchWeb": "Search info online",
   "enrichPreviewTitle": "Information preview",
   "currentValue": "Current",

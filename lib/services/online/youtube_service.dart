@@ -148,6 +148,13 @@ class YtException implements Exception {
   String toString() => 'YtException($kind, $detail)';
 }
 
+/// The video (not necessarily its audio) is age-gated: YouTube asks to sign in.
+bool isAgeRestricted(Object e) {
+  if (e is! YtException) return false;
+  final d = (e.detail ?? '').toLowerCase();
+  return d.contains('confirm your age') || d.contains('age-restricted');
+}
+
 /// A playlist or a channel's videos, as listed (no per-video lookups).
 class PlaylistListing {
   const PlaylistListing({

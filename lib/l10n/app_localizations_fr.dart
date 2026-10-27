@@ -558,6 +558,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get reasonOnlineUnavailable => 'titre en ligne non disponible';
 
   @override
+  String get reasonAgeRestricted =>
+      'restreint aux mineurs, aucune piste audio trouvée';
+
+  @override
   String get searchWeb => 'Rechercher des infos sur le web';
 
   @override

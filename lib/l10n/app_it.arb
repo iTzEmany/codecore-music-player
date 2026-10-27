@@ -269,6 +269,7 @@
   "reasonUnplayable": "file non riproducibile",
   "reasonNotInLibrary": "brano non presente in libreria",
   "reasonOnlineUnavailable": "brano online non disponibile",
+  "reasonAgeRestricted": "vietato ai minori, nessuna traccia audio trovata",
   "searchWeb": "Cerca info sul web",
   "enrichPreviewTitle": "Anteprima informazioni",
   "currentValue": "Attuale",

@@ -30,6 +30,7 @@ enum PlaybackFailureReason {
   unplayable,
   notInLibrary,
   onlineUnavailable,
+  ageRestricted,
   networkUnavailable,
   radioUnavailable,
 }
@@ -453,6 +454,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     _publish(AudioProcessingState.loading);
     var playNow = play;
     var offline = false; // the stream could not be fetched for lack of network
+    var ageGated = false; // age-restricted video with no audio-only substitute
     try {
       if (radio != null) {
         _radioBusy = true;
@@ -513,11 +515,14 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
       }
       if (streamKey != null && e is _StreamNotReady) {
         offline = e.offline;
+        ageGated = e.ageRestricted;
         playNow = _playWhenReady;
       }
       await _failAndSkip(
           offline
               ? PlaybackFailureReason.networkUnavailable
+              : ageGated
+              ? PlaybackFailureReason.ageRestricted
               : (isOnline && libTrack == null) || streamKey != null
               ? PlaybackFailureReason.onlineUnavailable
               : e.fileMissing
@@ -1621,6 +1626,8 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
 class _StreamNotReady extends BackendException {
   _StreamNotReady(Object cause)
       : offline = cause is YtException && cause.kind == YtErrorKind.network,
+        ageRestricted = isAgeRestricted(cause),
         super('stream not ready: $cause');
   final bool offline;
+  final bool ageRestricted;
 }

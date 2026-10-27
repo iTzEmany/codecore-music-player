@@ -555,6 +555,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get reasonOnlineUnavailable => 'faixa online não disponível';
 
   @override
+  String get reasonAgeRestricted =>
+      'restrito por idade, nenhuma faixa de áudio encontrada';
+
+  @override
   String get searchWeb => 'Pesquisar info na web';
 
   @override

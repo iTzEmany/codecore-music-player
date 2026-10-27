@@ -245,6 +245,7 @@
   "reasonUnplayable": "fichier illisible",
   "reasonNotInLibrary": "titre absent de la bibliothèque",
   "reasonOnlineUnavailable": "titre en ligne non disponible",
+  "reasonAgeRestricted": "restreint aux mineurs, aucune piste audio trouvée",
   "searchWeb": "Rechercher des infos sur le web",
   "enrichPreviewTitle": "Aperçu des informations",
   "currentValue": "Actuel",

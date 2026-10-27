@@ -225,6 +225,7 @@ class AppShell extends ConsumerWidget {
         PlaybackFailureReason.unplayable => l.reasonUnplayable,
         PlaybackFailureReason.notInLibrary => l.reasonNotInLibrary,
         PlaybackFailureReason.onlineUnavailable => l.reasonOnlineUnavailable,
+        PlaybackFailureReason.ageRestricted => l.reasonAgeRestricted,
         PlaybackFailureReason.networkUnavailable => l.ytErrNetwork,
         PlaybackFailureReason.radioUnavailable => l.reasonRadioUnavailable,
       };

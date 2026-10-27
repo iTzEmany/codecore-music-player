@@ -200,6 +200,7 @@
   "reasonUnplayable": "archivo no reproducible",
   "reasonNotInLibrary": "canción no está en la biblioteca",
   "reasonOnlineUnavailable": "canción en línea no disponible",
+  "reasonAgeRestricted": "restringido por edad, no se encontró pista de audio",
   "searchWeb": "Buscar info en la web",
   "enrichPreviewTitle": "Vista previa de información",
   "currentValue": "Actual",

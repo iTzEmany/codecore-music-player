@@ -27,6 +27,8 @@ class _Yt implements YoutubeService {
   final failuresLeft = <String, int>{};
   final rateLimits = <String, int>{};
   final forbidden = <String, int>{};
+  final ageGated = <String>{};
+  var songs = <YtResult>[];
   final _gates = <String, Completer<void>>{};
   var open = 0, maxOpen = 0;
   var autoFinish = false;
@@ -59,6 +61,9 @@ class _Yt implements YoutubeService {
         yield DownloadProgress(streamUrl: Uri.parse(urls.removeAt(0)), headers: const {'User-Agent': 'ua'});
       }
       await gate.future;
+      if (ageGated.contains(r.id)) {
+        throw const YtException(YtErrorKind.unavailable, 'ERROR: Sign in to confirm your age');
+      }
       if ((rateLimits[r.id] ?? 0) > 0) {
         rateLimits[r.id] = rateLimits[r.id]! - 1;
         throw const YtException(YtErrorKind.rateLimited, '429');
@@ -83,6 +88,9 @@ class _Yt implements YoutubeService {
       open--;
     }
   }
+
+  @override
+  Future<List<YtResult>> searchSongs(String query, {int limit = 5}) async => songs;
 
   @override
   dynamic noSuchMethod(Invocation i) => throw UnimplementedError('${i.memberName}');
@@ -188,6 +196,29 @@ void main() {
     await expectLater(prep.ready('youtube:bad', _r('bad')), throwsA(isA<YtException>()));
     expect(yt.started, ['bad', 'bad']);
     expect(prep.phases.value['youtube:bad'], StreamPhase.failed);
+  });
+
+  group('age-restricted fallback', () {
+    YtResult song(String id, int secs) =>
+        YtResult(id: id, title: 'T', channel: 'C', duration: Duration(seconds: secs));
+
+    test('a substitute within 10 s is downloaded; the file is cached under the original key', () async {
+      yt.autoFinish = true;
+      yt.ageGated.add('age');
+      yt.songs = [song('age', 200), song('far', 300), song('sub', 205)];
+      final f = await prep.ready('youtube:age', song('age', 200));
+      expect(yt.started, ['age', 'sub']);
+      expect(p.basename(f.path), 'youtube_age.m4a');
+      expect(await tracks.streamRow('youtube:age'), isNotNull);
+    });
+
+    test('no good substitute: the age error reaches the caller, nothing else is downloaded', () async {
+      yt.autoFinish = true;
+      yt.ageGated.add('age');
+      yt.songs = [song('far', 300)]; // 100 s off
+      await expectLater(prep.ready('youtube:age', song('age', 200)), throwsA(predicate(isAgeRestricted)));
+      expect(yt.started, ['age']);
+    });
   });
 
   group('stream timing line', () {
