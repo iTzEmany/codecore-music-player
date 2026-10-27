@@ -109,11 +109,13 @@ dalla ricerca; tempi in ms, mediana / massimo, da `python3 scripts/stream_times.
 |---|---|---|---|---|---|---|
 | Linux (Xvfb) | 2026.08.19 | 4186 / 4661 | 4846 / 5725 | 4840 / 5130 | 6632 / 8028 | −1,8 s |
 | Mi A3 `0d7ae9df206e` | 2026.10.26 | 35536 / 37413 | 37203 / 45222 | 37540 / 40450 | 38882 / 43197 | −1,3 s (fino a −11 s se il download è lento) |
-| Motorola edge 40 | — | non misurato: scollegato prima della prova | | | | |
+| Motorola edge 40 `ZY22HKD85K` | 2026.10.26 | 16430 / 17039 | 17424 / 17845 | 18197 / 19125 | 23303 / 26626 | −5,1 s (ma «Prima» era su dati mobili, «Dopo» sul Wi-Fi di casa TIM) |
 
 Linux: Imagine, Hey Jude, Rolling in the Deep, Seven Nation Army, Mr Brightside, Back in Black, Losing My Religion,
 Under Pressure, Stayin' Alive, Clocks. Mi A3: Bitter Sweet Symphony, Heroes, Black Hole Sun, Ring of
 Fire, Dreams, Gimme Shelter, Paint It Black, Karma Police, Fast Car, Sweet Dreams (Tainted Love e Sultans of Swing, i primi due, fuori da `--last 10`).
+Motorola (build di `master` dopo la #42, 2026-10-27 23:19, Wi-Fi di casa TIM): Wonderwall, Creep, Africa, Zombie,
+Every Breath You Take, Purple Rain, Livin' on a Prayer, Billie Jean, Smells Like Teen Spirit, Mr. Blue Sky.
 
 
 ## Note
@@ -128,6 +130,8 @@ Fire, Dreams, Gimme Shelter, Paint It Black, Karma Police, Fast Car, Sweet Dream
   `from=cache` (620 ms); «Scarica» durante l'ascolto → promosso in Music (copia tra partizioni), ascolto non interrotto.
   Durata subito visibile nel player (dalla ricerca). Notifica: controlli presenti, barra senza tempi, uguale col brano
   dalla cache (comportamento di Android 11 sul Mi A3, non della 56).
-- Non provati: Wi-Fi spento a metà brano (R-76, K-SV-04): è un'impostazione di sistema, la prova è dell'utente. Motorola:
-  scollegato prima delle prove. Vedi «Tocca a te» nel file dell'obiettivo.
+- Prove a mano, Motorola: suono in ~18 s; seek all'80 % (tap sull'anello) → 3:36 di 5:03, avanza; secondo ascolto
+  `from=cache` (293 ms); controlli nella scheda multimediale di Android. «Scarica» non provato per non aggiungere file
+  alla libreria vera (provato su Linux e Mi A3). Anche qui l'URL arriva a ~16 s: QuickJS, come sul Mi A3.
+- Non provato: Wi-Fi spento a metà brano (R-76, K-SV-04): è un'impostazione di sistema, la prova è dell'utente.
 - Mi A3: rotazione automatica trovata accesa alle 18:54, prima dell'installazione; non toccata.

@@ -1,10 +1,11 @@
-# Handoff — 2026-10-27 (fase 55 fusa: misura dello streaming)
+# Handoff — 2026-10-27 (fase 56 fusa: partenza dall'URL)
 
-## Fase 55 (#39)
-- Righe `stream timing` in `codecore.log` (preparer: spawn/downloaded/post/cached; player: tap → primo suono) e `scripts/stream_times.py` (`--log`/`--adb`, `--self-test`).
-- «Prima» (`docs/fase-55-misura-streaming.md`): il tempo è il download. Motorola su dati mobili: primo suono 23 s, spawn 3,6 s. Mi A3 su hotspot: 41 s, spawn 6,2 s. Linux: URL a ~4 s, prima del download, ascolto e seek senza 403.
-- 55.4 e 55.5 a `[~]`: Mi A3 da rimisurare fuori dall hotspot (i dati mobili del Motorola valgono: più veloci del Wi-Fi di casa), Linux con 10 brani (serve un display isolato: Xvfb non c'è; l'utente lavora sul suo unico schermo), Mi A3 avanzamento/ascolto/seek dall'URL.
-- Da capire prima della 56: sul Mi A3 l'URL è arrivato a 38,9 s (hotspot) e ~13 s passano prima che yt-dlp parta (forse `ensureInit` con l'aggiornamento).
+## Fasi 55–56 (#39, #42)
+- 55: righe `stream timing` e `scripts/stream_times.py` (`--log`/`--adb`). 55.4/55.5 chiuse nella #42 (Mi A3 sul Wi-Fi UniBA, Linux in Xvfb).
+- 56: il brano online parte dall'URL che yt-dlp stampa prima del download (`StreamPreparer.start`/`restart`), poi passa al file; URL scaduto → riparte dalla posizione, al massimo 2 recuperi per brano (R-76).
+- «Dopo 56» (`docs/fase-56-partenza-da-url.md`), primo suono mediano: Linux 4,8 s (era 6,6), Mi A3 37,5 s (era 38,9), Motorola 18,2 s (era 23,3 su dati mobili; ora Wi-Fi di casa).
+- **Il collo di bottiglia su Android è prima dell'URL**: ~16 s sul Motorola, ~35 s sul Mi A3, quasi tutto QuickJS che risolve le sfide JS di YouTube. RNF-08 (≤ 5 s sul Motorola) non è raggiunto. Pista: `--cache-dir` per yt-dlp nella cartella dell'app (oggi la cache non esiste, quindi le sfide si risolvono a ogni brano). `android_vr` dà l'URL in 8 s ma solo il formato 18 e il download è fallito.
+- Per la 57 (nota in `docs/fase-57-coda-e-transizioni.md`): raccogliere lo stato dell'URL del gestore audio in una piccola classe (`UrlSession`).
 
 ## Stato (prima della fase 55)
 - **Fasi 45–54 fuse** (feature «Streaming e coda online» e «Arricchimento completo»); fase 54 in #34. Versione `1.3.0+4`, tag locale `v1.3.0` **non pubblicato** (D-92).
@@ -31,7 +32,9 @@
 - **Tag (D-92):** `git push origin v1.3.0` → release; controlla con `gh run list -w release.yml -L 1`.
 - **Da decidere (scheggia 53):** voce fissa per il Registro; «Svuota» senza conferma; il completamento dopo un giro fallito per rete riparte solo con riavvio, scansione o cambio di interruttori.
 - **Mi A3, pulizia vecchie prove:** `Da Funk (2).m4a`, `The Game of Love (Drumless Edition) (2).m4a`, playlist «scheggia-46», dissolvenza non a 11 s; brano «Talk to Me» di Damiano David (tienilo o cancellalo). L'app `com.codecore.player.perf` sul Mi A3 serve solo alle misure.
-- **Motorola:** è installata la build di debug con tutte le correzioni; «Crediti e dettagli» e «Curiosità automatiche» rimessi spenti, casuale spento, «The Joker» in coda al posto di «My My, Hey Hey» (forse un ascolto in più nelle statistiche).
+- **Motorola:** è installata la build di debug di `master` dopo la #42 (27/10 23:18). Per la misura ho ascoltato 12 brani online dalla ricerca (più Hotel California dalla libreria, per errore): finiscono in cronologia e forse nelle statistiche. Il player è in pausa su «Mr. Blue Sky»; la coda di prima è stata sostituita.
+- **Wi-Fi spento a metà brano online** (R-76, K-SV-04) su un telefono: il brano si ferma senza crash; riacceso, ▶ riprende dalla posizione. Poi spunta 56.7 in `docs/PROGRESS.md`.
+- **Mi A3**: la rotazione automatica era accesa alle 18:54 (non toccata); `com.codecore.player.perf` ha ancora il codice di prova della 55 (android_vr): reinstallala da `master` se ti serve per le misure.
 - **Backup sul PC** (`.backup-motorola/`, 481 MB): cancellalo quando non ti serve più.
 
 ## Dispositivi
@@ -58,7 +61,7 @@ Leggi docs/handoff.md, docs/gotchas.md e docs/PROGRESS.md. <obiettivo scelto fra
 ```
 
 ## Prossimi obiettivi
-0. **(Consigliato) Fase 56, partenza dall'URL**: i dati mobili del Motorola valgono come rete buona (più veloci del Wi-Fi di casa, utente 27/10); da rimisurare solo il Mi A3 fuori dall hotspot (`python3 scripts/stream_times.py --adb <serial>`) e verifica dei ~13 s prima dell'avvio di yt-dlp su Android. Prompt: `/obiettivo fase 56`. Feature «Streaming veloce», fasi 55–57 (kickoff del 2026-10-27: `docs/feature-streaming-veloce.md`, R-68…R-87, D-138…D-146). Prompt: `/obiettivo fase 55` (poi 56 e 57, una PR per fase). La 55 misura soltanto e scrive la tabella «Prima»; se su Android l'avvio di yt-dlp supera 4 s si prosegue lo stesso (D-146). Motorola da /obiettivo se collegato (backup prima). `docs/prossimi-lavori.md` non è nel repo: la 57.5 lo aggiorna solo se c'è.
+0. **(Consigliato) Fase 57, coda e transizioni** (`docs/fase-57-coda-e-transizioni.md`): prompt `/obiettivo fase 57`. Prima, o come primo passo, prova `--cache-dir` su Android e misura con `stream_times.py --adb ZY22HKD85K --last 10`: è la leva più grande sul primo suono.
    Dopo, i rilievi della Jam e il completamento intero rinviati qui sopra.
 1. **Debito noto dello streaming** (in fondo a `docs/fase-47-jam-online.md`): tre meccanismi «online → libreria», `DownloadsNotifier` grande, prefetch che ricomincia, file auto-scaricato dall'uscita Jam non fissato, `gapless window edit failed` su una coda di 2 brani, `discovery: socket error` ogni 2 s senza rete.
 2. **Rotellina Attività a 120 fps** mentre un'attività gira (costo di batteria) e picchi di build al cambio di brano (`track_art.dart`); misura prima e dopo con `--only`.
