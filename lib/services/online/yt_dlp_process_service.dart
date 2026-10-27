@@ -423,9 +423,10 @@ class YtDlpProcessService implements YoutubeService {
     final cancelTimer = Timer.periodic(const Duration(milliseconds: 300), (_) {
       if (cancel?.isCancelled ?? false) proc.kill();
     });
+    final streamLines = StreamUrlLines();
     try {
       await for (final line in lines) {
-        final prog = parseProgressLine(line);
+        final prog = parseProgressLine(line) ?? streamLines.add(line);
         if (prog != null) yield prog;
       }
       final code = await proc.exitCode;

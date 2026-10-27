@@ -22,12 +22,22 @@ class AndroidYtDlpService implements YoutubeService {
   static const searchTimeout = Duration(seconds: 45);
 
   final _progress = <String, StreamController<DownloadProgress>>{};
+  final _streamLines = <String, StreamUrlLines>{};
   int _counter = 0;
 
   Future<dynamic> _onCall(MethodCall call) async {
     if (call.method != 'progress') return null;
     final args = call.arguments as Map;
-    final c = _progress['${args['processId']}'];
+    final id = '${args['processId']}';
+    final c = _progress[id];
+    final line = args['line'];
+    if (line is String && StreamUrlLines.isMarked(line)) {
+      final e = _streamLines[id]?.add(line);
+      if (e != null) c?.add(e);
+      return null;
+    }
+    // Extra addresses of `%(urls)s` (one per format) are not progress.
+    if (line is String && line.startsWith('http')) return null;
     // youtubedl-android says -1 until it knows the size.
     final percent = ((args['percent'] as num?)?.toDouble() ?? 0).clamp(0, 100);
     c?.add(DownloadProgress(received: percent.round(), total: 100));
@@ -137,6 +147,7 @@ class AndroidYtDlpService implements YoutubeService {
     final processId = 'dl-${_counter++}';
     final controller = StreamController<DownloadProgress>();
     _progress[processId] = controller;
+    if (options.emitStreamUrl) _streamLines[processId] = StreamUrlLines();
     unawaited(
       cancel?.whenCancel.then((_) {
         _channel.invokeMethod<void>('cancel', {'processId': processId});
@@ -152,6 +163,7 @@ class AndroidYtDlpService implements YoutubeService {
           'audioQuality': choice.quality,
           'processId': processId,
           'rateLimit': options.rateLimitKBps,
+          'emitStreamUrl': options.emitStreamUrl,
         })
         .then<String?>((path) => path)
         .catchError((Object e) {
@@ -180,6 +192,7 @@ class AndroidYtDlpService implements YoutubeService {
       yield DownloadProgress(received: 100, total: 100, path: path);
     } finally {
       _progress.remove(processId);
+      _streamLines.remove(processId);
     }
   }
 

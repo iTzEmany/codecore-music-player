@@ -96,4 +96,42 @@ void main() {
     expect(a.last, 'https://soundcloud.com/artist/track');
     expect(a, contains('--no-playlist'));
   });
+
+  test('stream URL options only with emitStreamUrl, together with --progress', () {
+    final a = args(options: const DownloadOptions(emitStreamUrl: true));
+    expect(a, containsAllInOrder(['--progress', '--print', 'before_dl:CODECORE_URL %(urls)s']));
+    expect(a, containsAllInOrder(['--print', 'before_dl:CODECORE_HDR %(http_headers)j']));
+    expect(args(), isNot(contains('--print')));
+    expect(args(), isNot(contains('--progress')));
+  });
+
+  group('StreamUrlLines', () {
+    const hdr = 'CODECORE_HDR {"User-Agent":"UA","Accept":"*/*"}';
+
+    test('url + headers give exactly one event', () {
+      final p = StreamUrlLines();
+      expect(p.add('CODECORE_URL https://v.example/a?x=1'), isNull);
+      final e = p.add(hdr)!;
+      expect(e.streamUrl, Uri.parse('https://v.example/a?x=1'));
+      expect(e.headers, {'User-Agent': 'UA', 'Accept': '*/*'});
+      expect(p.add(hdr), isNull);
+    });
+
+    test('two addresses: the first one', () {
+      final p = StreamUrlLines();
+      p.add('CODECORE_URL https://v.example/video');
+      p.add('https://v.example/audio');
+      expect(p.add(hdr)!.streamUrl, Uri.parse('https://v.example/video'));
+    });
+
+    test('broken or missing lines never give an event', () {
+      expect(StreamUrlLines().add(hdr), isNull);
+      for (final bad in ['CODECORE_HDR not json', 'CODECORE_HDR {"a":1}', 'CODECORE_HDR [1]']) {
+        final p = StreamUrlLines()..add('CODECORE_URL https://v.example/a');
+        expect(p.add(bad), isNull);
+      }
+      final p = StreamUrlLines()..add('CODECORE_URL http://v.example/a');
+      expect(p.add(hdr), isNull);
+    });
+  });
 }

@@ -105,6 +105,12 @@ class YtDlpChannel(private val applicationContext: Context) {
                     // force the native HLS downloader so the limit really applies.
                     req.addOption("--downloader", "m3u8:native")
                 }
+                if (call.argument<Boolean>("emitStreamUrl") == true) {
+                    // --print implies --quiet; --progress keeps the progress lines.
+                    req.addOption("--progress")
+                    req.addOption("--print", "before_dl:CODECORE_URL %(urls)s")
+                    req.addOption("--print", "before_dl:CODECORE_HDR %(http_headers)j")
+                }
                 req.addOption("-o", "$stem.%(ext)s")
                 YoutubeDL.getInstance().execute(req, processId) { progress, _, line ->
                     main.post {

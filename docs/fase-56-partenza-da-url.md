@@ -38,7 +38,8 @@ evento e download che finisce come oggi. Prova su Linux col vero yt-dlp: riga `C
 **File:** `android/app/src/full/kotlin/com/codecore/player/YtDlpChannel.kt`,
 `lib/services/online/android_yt_dlp_service.dart`
 1. Il lato Kotlin passa le stesse opzioni (`emitStreamUrl` nel dizionario del metodo `download`) e, nel callback di
-   youtubedl-android, inoltra le righe marcate a Dart con un metodo nuovo (`url`, con `processId`, URL e header).
+   youtubedl-android, inoltra le righe marcate a Dart nel campo `line` dell'evento `progress` che esiste già (nessun
+   metodo nuovo: decisione presa durante la fase, il probe 55 ha mostrato che le righe arrivano già così).
 2. `AndroidYtDlpService` le trasforma nello stesso evento della 56.1. Lite: nessun cambio.
 
 R-71 (Android).

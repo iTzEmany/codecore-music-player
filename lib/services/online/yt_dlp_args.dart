@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'youtube_service.dart';
 
 /// Containers a download can end up in (without ffmpeg the audio stays as
@@ -46,6 +48,14 @@ List<String> buildDownloadArgs({
     '--progress-template',
     'download:PROG %(progress.downloaded_bytes)s '
         '%(progress.total_bytes)s %(progress.total_bytes_estimate)s',
+    // --print implies --quiet; --progress keeps the PROG lines.
+    if (options.emitStreamUrl) ...[
+      '--progress',
+      '--print',
+      'before_dl:$streamUrlPrefix%(urls)s',
+      '--print',
+      'before_dl:$streamHeadersPrefix%(http_headers)j',
+    ],
     ...jsArgs,
     if (rate != null && rate > 0) ...['--limit-rate', '${rate}K'],
     '-f',
@@ -76,4 +86,43 @@ bool anyDownloadExtensionExists(String path, bool Function(String) exists) {
   final dot = path.lastIndexOf('.');
   final stem = dot < 0 ? path : path.substring(0, dot);
   return downloadExtensions.any((e) => exists('$stem.$e'));
+}
+
+const streamUrlPrefix = 'CODECORE_URL ';
+const streamHeadersPrefix = 'CODECORE_HDR ';
+
+/// Reads the marked lines of one download and reports the stream address
+/// once, when both the URL and the headers have arrived. Anything broken
+/// gives no event: the download goes on as without it.
+class StreamUrlLines {
+  Uri? _url;
+  bool _done = false;
+
+  /// True for lines this parser owns (they are not download progress).
+  static bool isMarked(String line) =>
+      line.startsWith(streamUrlPrefix) || line.startsWith(streamHeadersPrefix);
+
+  DownloadProgress? add(String line) {
+    if (_done) return null;
+    if (line.startsWith(streamUrlPrefix)) {
+      // Several addresses come on following lines (ignored): the first wins.
+      final u = Uri.tryParse(line.substring(streamUrlPrefix.length).trim());
+      if (_url == null && u != null && u.isAbsolute && u.scheme == 'https') {
+        _url = u;
+      }
+      return null;
+    }
+    if (!line.startsWith(streamHeadersPrefix) || _url == null) return null;
+    _done = true;
+    try {
+      final j = jsonDecode(line.substring(streamHeadersPrefix.length));
+      if (j is! Map || j.values.any((v) => v is! String)) return null;
+      return DownloadProgress(
+        streamUrl: _url,
+        headers: j.cast<String, String>(),
+      );
+    } on FormatException {
+      return null;
+    }
+  }
 }
