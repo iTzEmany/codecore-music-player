@@ -1038,3 +1038,61 @@ google_mlkit_translation — fase 22 — 2026-10-19
 xml — fase 23 — 2026-10-19
 basic_utils — fase 24 (in alternativa `pointycastle`) — 2026-10-19
 mobile_scanner — fase 24 — 2026-10-19
+
+## Fase 58 — Rete di sicurezza ui-jam-ricerca (`fase-58-rete-jam-ricerca.md`)
+- [ ] 58.1 Seek di oggi
+- [ ] 58.2 Jam di oggi
+- [ ] 58.3 Ricerca di oggi
+- [ ] 58.4 Menu di oggi
+- [ ] 58.5 Home e testo di oggi
+- [ ] 58.6 Golden di oggi
+- [ ] 58.7 Misure di partenza
+- [ ] 58.8 Controlli di fase
+
+## Fase 59 — Player e seek (`fase-59-player-e-seek.md`)
+- [ ] 59.1 Scheda del testo a larghezza piena e altezza fissa (F-58)
+- [ ] 59.2 `RingProgress` con posizione e `onSeek` iniettati
+- [ ] 59.3 Una sola fonte di posizione
+- [ ] 59.4 `SeekBar` condivisa e un solo stato di trascinamento
+- [ ] 59.5 Barra orizzontale di nuovo nel player
+- [ ] 59.6 Accessibilità del seek
+- [ ] 59.7 Controlli di fase
+
+## Fase 60 — Ricerca e dock (`fase-60-ricerca-e-dock.md`)
+- [ ] 60.1 ✕ svuota e resta
+- [ ] 60.2 Dock a due strati
+- [ ] 60.3 Back con la tastiera
+- [ ] 60.4 Nessun rebuild durante l'animazione della tastiera
+- [ ] 60.5 Bug noti da verificare (F-29, F-30)
+- [ ] 60.6 Controlli di fase
+
+## Fase 61 — Fogli ovunque (`fase-61-fogli-ovunque.md`)
+- [ ] 61.1 Helper dei fogli
+- [ ] 61.2 Brano, selezione, clic destro
+- [ ] 61.3 Collezioni, podcast e schermate di servizio
+- [ ] 61.4 Timer, «+» e ordinamenti
+- [ ] 61.5 Coda e ⋮ della riga
+- [ ] 61.6 Regola di architettura
+- [ ] 61.7 Controlli di fase
+
+## Fase 62 — Home «aggiunti da poco» (`fase-62-home-aggiunti.md`)
+- [ ] 62.1 20 album
+- [ ] 62.2 Aperto = riga che scorre
+- [ ] 62.3 Accessibilità e desktop
+- [ ] 62.4 Mockup di ui-fluida
+- [ ] 62.5 Controlli di fase
+
+## Fase 63 — Jam = player (`fase-63-jam-come-player.md`)
+- [ ] 63.1 Precedente e successivo per tutti
+- [ ] 63.2 La schermata della Jam è il player
+- [ ] 63.3 Intestazione della Jam
+- [ ] 63.4 Coda condivisa dal pulsante «Coda»
+- [ ] 63.5 Prova a mano con due telefoni
+- [ ] 63.6 Controlli di fase
+
+## Fase 64 — Chiusura ui-jam-ricerca (`fase-64-chiusura-jam-ricerca.md`)
+- [ ] 64.1 Misure finali sul Mi A3
+- [ ] 64.2 Metriche di arrivo
+- [ ] 64.3 Prova a mano
+- [ ] 64.4 «Risultati» in `analisi.md`
+- [ ] 64.5 Pulizia del disco

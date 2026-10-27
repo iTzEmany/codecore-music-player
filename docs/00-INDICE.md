@@ -73,6 +73,13 @@ un'unica codebase Flutter per Android, Windows e Linux. Uso personale, niente co
 | 55 | `fase-55-misura-streaming.md` | Misura dello streaming: cronometri nel preparer e tap → primo suono in `codecore.log`, `scripts/stream_times.py`, prova dell'URL col yt-dlp vero, tabella «Prima» su Linux, Mi A3 e Motorola |
 | 56 | `fase-56-partenza-da-url.md` | Partenza dall'URL: righe `--print before_dl` di yt-dlp (desktop e canale Android), `StreamPreparer.start()`/`restart()`, `loadUri` con header e ripiego sul file, URL scaduto e cambio di rete |
 | 57 | `fase-57-coda-e-transizioni.md` | Coda e transizioni: URL anticipato dal prefetch, gapless e crossfade da URL verso file, Jam invariata, misura finale (RNF-08…10), rimisura delle soglie della fase 38 |
+| 58 | `fase-58-rete-jam-ricerca.md` | Rete del refactor «ui-jam-ricerca»: caratterizzazione di seek, Jam, Ricerca, menu, Home e testo; golden di oggi; misure «Prima» sul Mi A3 |
+| 59 | `fase-59-player-e-seek.md` | Player e seek: scheda del testo a tutta larghezza e 5 righe fisse, `RingProgress` con posizione e `onSeek` iniettati, una sola fonte di posizione, `SeekBar` condivisa, barra di nuovo nel player |
+| 60 | `fase-60-ricerca-e-dock.md` | Ricerca e dock: ✕ svuota e resta, barra sopra mini player e schede, tastiera aperta = solo la barra, Back con la tastiera, niente rebuild sugli inset |
+| 61 | `fase-61-fogli-ovunque.md` | Fogli ovunque: helper sopra `showCcSheet`, ⋮ come unico glifo, timer, «+», ordinamenti e clic destro a foglio, niente `PopupMenuButton` |
+| 62 | `fase-62-home-aggiunti.md` | Home «aggiunti da poco»: 20 album, aperto una riga che scorre con quadrati da 84 dp, titolo e artista |
+| 63 | `fase-63-jam-come-player.md` | Jam = player: stessa schermata con intestazione Jam (partecipanti, «Termina» con conferma), coda dal pulsante «Coda», precedente e successivo per tutti |
+| 64 | `fase-64-chiusura-jam-ricerca.md` | Chiusura ui-jam-ricerca: misure finali contro la 58, metriche di arrivo, «Risultati» in analisi |
 
 Dopo la **Fase 3** l'app è già usabile come lettore. Le fasi 5 e 6 sono indipendenti tra loro. La fase 8 (Jam) richiede la 6.
 
