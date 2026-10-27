@@ -48,6 +48,7 @@
 - **Prompt degli implementer**: dai i simboli esatti da codegraph (file, nome, riga) e i test da scrivere, così l'agente non esplora da solo.
 
 ## Stime misurate
-- `sorveglia.sh`: la stima vuole l'unità (`6m`); un numero nudo vale secondi (2026-10-25)
+- `sorveglia.sh`: la stima vuole l'unità (`6m`); un numero nudo vale secondi (2026-10-25). `pr-attendi.sh` invece vuole i minuti come numero nudo (`15`): `15m` stampa l'uso ed esce con 2 (2026-10-26)
+- 54.8 (36 file di test mirati, 773 test) ~ 2m20 (2026-10-26)
 - `flutter test test/services/audio/ test/providers/` ~ 1m30 (2026-10-25)
 - Toccando `lib/ui`: lancia sempre anche `test/ui/architecture_test.dart` (la UI non usa repository né `databaseProvider`; CI rossa in #19)
