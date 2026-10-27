@@ -1,6 +1,7 @@
 # Trappole
 
 - **Un `TextScaler` su misura deve avere `==` e `hashCode`.** Senza, ogni rebuild del builder di `MaterialApp` passa a `MediaQuery` un valore «diverso», e ogni `Text` rifà il layout. Sul Mi A3 «Pallino schede» è passato dal 3 % al 12 % (fase 40), ed è tornato giù con 261f43e. Lo stesso vale per ogni valore messo in `MediaQuery`, `Theme` o in un `InheritedWidget`.
+- **App Linux in uno schermo virtuale: senza `env -u WAYLAND_DISPLAY GDK_BACKEND=x11` dentro `xvfb-run` la finestra si apre sullo schermo Wayland dell'utente** (provato il 27/10: con solo `xvfb-run` `xdotool` non trova finestre). Comando completo in `.claude/obiettivo.md`.
 - **Integration test su Linux un file per volta** (`for f in integration_test/*_test.dart; do flutter test $f -d linux; done`). Tutti insieme si bloccano fra un'app e l'altra.
 - **Il driver degli integration test deve chiamare `JustAudioMediaKit.ensureInitialized()`**, come `main`. Altrimenti `playback_test` fallisce senza audio (be3e937).
 - **`scripts/perf_device.py` dipende dalla semantica del mini player.** Lo trova come `android.widget.Button`, con «titolo\nartista», sulla riga del bottone «Dispositivi». Se cambia il mini player, vanno aggiornati `mini()` e `setup_mini()`.
