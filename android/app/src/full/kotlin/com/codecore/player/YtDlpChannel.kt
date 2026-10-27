@@ -127,6 +127,7 @@ class YtDlpChannel(private val applicationContext: Context) {
                     ?.absolutePath
                     ?: throw IllegalStateException("output file not found")
             }
+            "streamUrl" -> run(result) { NewPipeUrl.streamUrl(call.argument<String>("id")!!) }
             "version" -> run(result) {
                 ensureInit()
                 YoutubeDL.getInstance().version(applicationContext)

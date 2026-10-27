@@ -23,7 +23,45 @@ class AndroidYtDlpService implements YoutubeService {
 
   final _progress = <String, StreamController<DownloadProgress>>{};
   final _streamLines = <String, StreamUrlLines>{};
+  // Per download: start time, video id, and whether a stream URL went out.
+  final _started = <String, Stopwatch>{};
+  final _ids = <String, String>{};
+  final _emitted = <String>{};
   int _counter = 0;
+
+  /// Emits the first stream URL of a download, logs every source's outcome.
+  void _offerUrl(String pid, String source, DownloadProgress? e) {
+    final c = _progress[pid];
+    final used = e != null && c != null && !c.isClosed && _emitted.add(pid);
+    if (used) c.add(e);
+    AppLog.i(
+      'stream url source=$source key=youtube:${_ids[pid]} '
+      'ms=${_started[pid]?.elapsedMilliseconds ?? -1} '
+      'ok=${e == null ? 0 : 1} used=${used ? 1 : 0}',
+    );
+  }
+
+  /// Asks NewPipe for the stream URL. Without it (lite build, or any failure)
+  /// the yt-dlp line of the download is the fallback.
+  Future<void> _newPipeUrl(String pid, String id) async {
+    try {
+      final m = await _channel.invokeMapMethod<String, Object?>(
+        'streamUrl',
+        {'id': id},
+      );
+      final h = (m!['headers'] as Map?)?.cast<String, String>() ?? {};
+      _offerUrl(
+        pid,
+        'newpipe',
+        DownloadProgress(streamUrl: Uri.parse('${m['url']}'), headers: h),
+      );
+    } on MissingPluginException {
+      // Lite flavor has no NewPipe: silent fallback.
+    } catch (e, st) {
+      AppLog.w('newpipe stream url failed', e, st);
+      _offerUrl(pid, 'newpipe', null);
+    }
+  }
 
   Future<dynamic> _onCall(MethodCall call) async {
     if (call.method != 'progress') return null;
@@ -33,7 +71,7 @@ class AndroidYtDlpService implements YoutubeService {
     final line = args['line'];
     if (line is String && StreamUrlLines.isMarked(line)) {
       final e = _streamLines[id]?.add(line);
-      if (e != null) c?.add(e);
+      if (e != null) _offerUrl(id, 'ytdlp', e);
       return null;
     }
     // Extra addresses of `%(urls)s` (one per format) are not progress.
@@ -147,7 +185,12 @@ class AndroidYtDlpService implements YoutubeService {
     final processId = 'dl-${_counter++}';
     final controller = StreamController<DownloadProgress>();
     _progress[processId] = controller;
-    if (options.emitStreamUrl) _streamLines[processId] = StreamUrlLines();
+    if (options.emitStreamUrl) {
+      _streamLines[processId] = StreamUrlLines();
+      _started[processId] = Stopwatch()..start();
+      _ids[processId] = r.id;
+      unawaited(_newPipeUrl(processId, r.id));
+    }
     unawaited(
       cancel?.whenCancel.then((_) {
         _channel.invokeMethod<void>('cancel', {'processId': processId});
@@ -193,6 +236,9 @@ class AndroidYtDlpService implements YoutubeService {
     } finally {
       _progress.remove(processId);
       _streamLines.remove(processId);
+      _started.remove(processId);
+      _emitted.remove(processId);
+      _ids.remove(processId);
     }
   }
 
