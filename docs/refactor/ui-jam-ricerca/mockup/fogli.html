@@ -1,0 +1,265 @@
+<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=1320"><title>Mockup Fogli ⋮</title><link rel="stylesheet" href="../../ui-fluida/mockup/tokens.css"><style>
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:#F4F2F8}
+body{font:400 15px/1.5 Figtree,sans-serif;color:#1B1626;background:#F4F2F8;min-width:1320px;padding:32px 40px 80px}
+.wrap{max-width:1280px;margin:0 auto}
+.pg-h{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:8px}
+.pg-h h1{font:600 22px/1.2 Unbounded,sans-serif}
+.pg-h p{color:#5B5170;font-size:14px}
+h2.sec{font:700 17px/1.3 Figtree,sans-serif;margin:40px 0 12px}
+.row{display:flex;gap:40px;align-items:flex-start;flex-wrap:wrap;margin-bottom:24px}
+.col{flex:none;width:360px}
+.col h3{font:700 15px/1.3 Figtree,sans-serif;margin:0 0 8px}
+.col h3 em{font-style:normal;color:#5B2BB5;margin-right:6px}
+.note{margin-top:10px;font-size:13px;color:#4A4060;max-width:360px}
+.note b{color:#1B1626}
+.note code,.spec code{font:600 12px Figtree,sans-serif;background:#E7E2F1;border-radius:4px;padding:1px 5px}
+.f{display:inline-block;font:700 12px/1.4 Figtree,sans-serif;color:#5B2BB5;background:#E9E0FA;border-radius:4px;padding:0 6px;margin-right:2px}
+.spec{background:#fff;border:1px solid #D6D0E2;border-radius:12px;padding:20px 24px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px 40px;font-size:14px}
+.spec div{padding:4px 0}
+.spec b{display:block;font-size:13px;color:#5B2BB5}
+.ask{background:#fff;border:1px solid #D6D0E2;border-radius:12px;padding:16px 24px;font-size:14px;max-width:900px}
+.ask li{margin-left:18px;margin-bottom:4px}
+/* frames */
+.dev{color:var(--text);background:var(--bg);font:var(--body);overflow:hidden;position:relative;border:1px solid #CFC8DC}
+.dev button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+.phone{width:360px;height:800px;border-radius:24px}
+.i{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.i.fl{fill:currentColor;stroke:none}
+.btn{width:var(--target);height:var(--target);display:grid;place-items:center;border-radius:50%;color:var(--text);flex:none}
+.sb{position:absolute;left:0;right:0;top:0;height:28px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;font:600 12px/1 Figtree,sans-serif;background:var(--bg);z-index:1}
+.scr{position:absolute;left:0;right:0;top:28px;bottom:0;overflow:hidden}
+.hd{display:flex;align-items:center;padding:4px 4px 4px 16px;min-height:56px}
+.hd h1{font:var(--title);flex:1;white-space:nowrap;letter-spacing:-.01em}
+.hd.sel{background:var(--s2);padding-left:4px}
+.hd.sel span{font:var(--body-l);flex:1}
+.cv{display:block;flex:none;border-radius:var(--r-grid)}
+.c1{background:#6F7BE0}.c2{background:#D9885B}.c3{background:#4FA6A0}.c4{background:#B34F6E}.c5{background:#C7B14F}.c6{background:#4C5C8F}.c7{background:#8E7BB5}
+.li{position:relative;display:flex;align-items:center;gap:12px;min-height:64px;padding:6px 4px 6px 16px}
+.li::after{content:"";position:absolute;left:80px;right:16px;bottom:0;border-bottom:var(--sep)}
+.li .tx{flex:1;min-width:0}
+.li .t{font:var(--body-l);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.li .s{font:var(--small);color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.li.on .t{color:var(--accent-soft)}
+.li .ck{width:24px;height:24px;border-radius:50%;border:2px solid var(--faint);margin-right:12px;flex:none}
+.li .ck.y{background:var(--accent);border-color:var(--accent);color:var(--on-accent);display:grid;place-items:center}
+.li .ck.y .i{width:16px;height:16px;stroke-width:3}
+.tb{display:flex;align-items:center;justify-content:space-between;padding:0 4px 0 16px;min-height:var(--target)}
+.tb span{color:var(--muted)}
+.tb .so{display:flex;align-items:center;gap:2px;font:var(--body-l);padding:0 8px}
+.hdr{display:flex;gap:16px;padding:8px 16px 0;align-items:flex-end}
+.hdr h1{font:var(--title);letter-spacing:-.01em;margin:2px 0 6px}
+.hdr .ar{font:var(--body-l);color:var(--accent-soft)}
+.hdr .m{color:var(--muted)}
+.act{display:flex;align-items:center;padding:16px 16px 8px;gap:4px;position:relative}
+.btnp{display:inline-flex;align-items:center;gap:8px;height:var(--target);padding:0 24px;border-radius:var(--r-dock);background:var(--accent);color:var(--on-accent);font:var(--body-l)}
+/* dimmed screen + sheet */
+.scrim{position:absolute;inset:0;background:rgba(0,0,0,.62);z-index:5}
+.sheet{position:absolute;left:0;right:0;bottom:0;z-index:6;background:var(--s1);border-radius:var(--r-sheet) var(--r-sheet) 0 0;display:flex;flex-direction:column;max-height:85%}
+.sheet .hn{height:20px;flex:none;display:grid;place-items:center}
+.sheet .hn i{width:32px;height:4px;border-radius:2px;background:var(--s3)}
+.sheet .bd{overflow-y:auto;scrollbar-width:none;padding-bottom:8px}
+.sheet .bd::-webkit-scrollbar{display:none}
+.sheet .sa{height:24px;flex:none;display:grid;place-items:center}
+.sheet .sa i{width:108px;height:4px;border-radius:2px;background:var(--faint)}
+.sh-h{display:flex;gap:12px;padding:4px 16px 12px;align-items:center}
+.sh-h .tx{min-width:0}
+.sh-h .t{font:var(--body-l);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.sh-h .a{font:400 14px/1.35 Figtree,sans-serif;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sh-h .b{font:var(--small);color:var(--faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sh-t{font:var(--title);padding:4px 16px 12px}
+.it{display:flex;align-items:center;gap:16px;height:56px;padding:0 16px;font:400 15px/1.2 Figtree,sans-serif;width:100%;text-align:left}
+.it .i{color:var(--muted)}
+.it.bad,.it.bad .i{color:var(--error)}
+.it.foc{background:var(--s2);box-shadow:inset 0 0 0 2px var(--accent-soft)}
+.it.sel{font-weight:700}
+.it .ok{margin-left:auto;color:var(--accent-soft)}
+.it .ok .i{color:var(--accent-soft)}
+.it.sel .i:first-child{color:var(--accent-soft)}
+.gp{height:8px}
+.chips{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;padding:0 16px 8px}
+.chips button{min-height:var(--target);padding:0 4px;font:var(--body-l);background:var(--s2);border-radius:var(--r-sheet)}
+.chips button.on{background:var(--accent);color:var(--on-accent);font-weight:700}
+.chips button.cl{grid-column:1/3;background:none;color:var(--accent-soft)}
+.lbl{position:absolute;top:36px;right:12px;z-index:7;font:700 12px/1 Figtree,sans-serif;background:#fff;color:#1B1626;border-radius:4px;padding:4px 8px}
+/* Prima: popup */
+.pop{position:absolute;right:12px;top:262px;z-index:6;width:236px;background:var(--s2);border-radius:4px;padding:8px 0;box-shadow:0 6px 18px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.08)}
+.pop div{height:48px;display:flex;align-items:center;padding:0 16px;font:400 15px Figtree,sans-serif}
+.callout{position:absolute;z-index:7;font:700 12px/1.3 Figtree,sans-serif;color:#1B1626;background:#FFE08A;border-radius:4px;padding:4px 8px}
+/* desktop */
+.zoomer{width:1152px;height:720px}
+.desk{width:1280px;height:800px;zoom:.9;display:grid;grid-template-columns:240px 1fr;grid-template-rows:1fr 88px;border-radius:12px}
+.side{background:var(--s1);border-right:var(--sep);padding:8px 0}
+.side div{display:flex;align-items:center;gap:16px;height:48px;padding:0 16px;color:var(--muted);font:var(--body-l)}
+.side div.on{color:var(--text);font-weight:700}
+.main{position:relative;padding:0 32px;overflow:hidden}
+.dtab{display:grid;grid-template-columns:52px 1fr 160px 220px 48px;align-items:center;gap:16px;min-height:60px;position:relative;padding:6px 0}
+.dtab::after{content:"";position:absolute;left:68px;right:0;bottom:0;border-bottom:var(--sep)}
+.dtab .t{font:var(--body-l)}.dtab .k{color:var(--muted)}
+.dtab.rc{background:var(--s2);border-radius:var(--r-list)}
+.dbar{grid-column:1/3;background:var(--s1);border-top:var(--sep)}
+.dsheet{position:absolute;left:50%;transform:translateX(-50%);width:560px;bottom:0;z-index:6;background:var(--s1);border-radius:var(--r-sheet) var(--r-sheet) 0 0;display:flex;flex-direction:column;max-height:85%}
+.cursor{position:absolute;z-index:7;width:0;height:0}
+.kbd{display:inline-block;font:700 12px/1 Figtree,sans-serif;border:1px solid #B8B0CC;border-bottom-width:2px;border-radius:4px;padding:2px 6px;background:#fff}
+</style></head><body>
+<div class="wrap">
+<div class="pg-h"><h1>Fogli ⋮ — un solo foglio dal basso</h1><p>Refactor ui-jam-ricerca · D-148 niente menu fluttuanti · D-149 glifo ⋮ ovunque · D-157 un solo helper sopra <code>showCcSheet</code></p></div>
+
+<h2 class="sec">Anatomia comune (specifica)</h2>
+<div class="spec">
+<div><b>Maniglia</b>32×4 dp in s3, area 20 dp, sempre presente. Trascinabile e chiude con tocco sullo scrim.</div>
+<div><b>Intestazione (opzionale)</b>Brano e collezione: copertina 56, titolo su 2 righe, artista, album/«N brani». Selezione: solo testo «N selezionati». Ordinamento, timer: titolo Unbounded 20. «+»: nessuna.</div>
+<div><b>Gruppi</b>Voci in gruppi separati da 8 dp vuoti (niente linee, niente etichette di gruppo, come oggi). Ordine fisso: Coda · Raccolta · Vai a · Modifica · Altro.</div>
+<div><b>Voce</b>Altezza 56, icona 24 (muted) a sinistra, testo Figtree 15, margini 16, gap 16. Area di tocco a tutta larghezza, ≥ 48 dp (F-53).</div>
+<div><b>Distruttiva</b><code>destructive: true</code> → icona e testo in <code>--error</code>, sempre l'ultima voce dell'ultimo gruppo (F-57).</div>
+<div><b>Safe area</b>Padding in basso = inset di sistema (barra gestuale), minimo 8 dp; il foglio parte dal bordo schermo.</div>
+<div><b>Altezza massima</b>85% dell'altezza finestra; oltre, il corpo scorre (intestazione compresa) con la maniglia ferma. Resta sempre visibile uno scrim di almeno 15%.</div>
+<div><b>Desktop</b>Larghezza massima 560 dp, centrato in basso (F-54); sotto 560 dp occupa tutta la larghezza.</div>
+<div><b>Tastiera e accessibilità</b>Autofocus sulla prima voce, frecce ↑↓ per spostarsi (F-55), <span class="kbd">Esc</span> chiude, <code>barrierLabel</code> localizzato e titolo semantico (F-51). Dopo la scelta il foglio si chiude e poi esegue l'azione.</div>
+</div>
+
+<h2 class="sec">Telefono 360×800</h2>
+<div class="row">
+
+<div class="col"><h3><em>1</em>Prima (oggi)</h3>
+<div class="dev phone" id="f1"></div>
+<p class="note"><span class="f">F-40</span><span class="f">F-48</span> Il ⋯ nell'intestazione dell'album apre un <b>menu fluttuante</b> con 7 voci, senza intestazione né gruppi, voci da 48 dp, glifo ⋯ diverso dal ⋮ delle righe. Dopo: foglio del frame 3, glifo ⋮.</p></div>
+
+<div class="col"><h3><em>2</em>Brano, aperto da una playlist</h3>
+<div class="dev phone" id="f2"></div>
+<p class="note"><span class="f">F-50</span> «Rimuovi dalla playlist» sta <b>in cima</b>, in un gruppo suo: niente più foglio su foglio. Fuori da una playlist la voce non c'è. Dal player si aggiunge «Equalizzatore» in «Altro»; sulle tracce senza file locale mancano Modifica ed Elimina.</p></div>
+
+<div class="col"><h3><em>2b</em>Stesso foglio, scorso in fondo</h3>
+<div class="dev phone" id="f2b"></div>
+<p class="note"><span class="f">F-57</span> 14 voci × 56 non entrano: il corpo scorre. «Elimina dal dispositivo» è l'ultima, in rosso (solo musica con file).</p></div>
+
+<div class="col"><h3><em>3</em>Collezione (⋮ in cima all'album)</h3>
+<div class="dev phone" id="f3"></div>
+<p class="note"><span class="f">F-40</span><span class="f">F-49</span> Stesse 7 voci di oggi, ora con intestazione (copertina, titolo, artista, «12 brani») e tre gruppi. «Ripristina copertina originale» compare solo se una copertina è stata cambiata a mano. Vale anche per playlist e artista.</p></div>
+
+<div class="col"><h3><em>4</em>Selezione multipla</h3>
+<div class="dev phone" id="f4"></div>
+<p class="note"><span class="f">F-42</span> Titolo «3 selezionati», senza copertina. Voci da <code>bulkActions</code>, ora dallo stesso helper (niente codice duplicato). «Aggiungi alla Jam» solo con Jam attiva; «Rimuovi dalla playlist» solo dentro una playlist; «Rimuovi dalla libreria» solo per file mancanti.</p></div>
+
+<div class="col"><h3><em>5</em>Ordinamento (Libreria)</h3>
+<div class="dev phone" id="f5"></div>
+<p class="note"><span class="f">F-44</span> Tre opzioni, come in <code>LibrarySort</code>; la scelta corrente ha il segno ✓ e testo in grassetto (semantica «radio»). Il codice <b>non ha</b> una direzione (crescente/decrescente): non l'ho disegnata. Stesso foglio per i Preferiti.</p></div>
+
+<div class="col"><h3><em>6</em>Timer di spegnimento</h3>
+<div class="dev phone" id="f6"></div>
+<p class="note"><span class="f">F-43</span> Come <code>SpeedSheet</code>: titolo + blocchi piatti a scelta singola, non una lista. Opzioni del codice: 15/30/45/60 minuti, «A fine brano»; «Annulla timer» compare solo con il timer attivo (qui: 30 minuti).</p></div>
+
+<div class="col"><h3><em>7</em>«+» Nuova playlist</h3>
+<div class="dev phone" id="f7"></div>
+<p class="note"><span class="f">F-45</span> Tre voci, senza intestazione, un solo gruppo. Il foglio si ferma a ~ 230 dp: nessuno scorrimento.</p></div>
+
+</div>
+
+<h2 class="sec">Desktop 1280×800</h2>
+<div class="row"><div>
+<div class="zoomer"><div class="dev desk" id="fd"></div></div>
+<p class="note" style="max-width:900px;margin-top:8px"><span class="f">F-41</span><span class="f">F-54</span><span class="f">F-55</span> <b>Il clic destro su una riga apre lo stesso foglio</b> del ⋮ (D-148): niente <code>showMenu</code>. Larghezza massima 560 dp, centrato in basso, scrim sul resto. La prima voce ha il focus (riquadro chiaro): ↑↓ per scorrere, Invio per scegliere, <span class="kbd">Esc</span> per chiudere. Su desktop compaiono «Anteprima 20 s» e «Mostra nella cartella». Mockup ridotto al 90%.</p>
+</div></div>
+
+<h2 class="sec">Da confermare</h2>
+<ul class="ask">
+<li>Timer di spegnimento: blocchi a scelta singola come la velocità (disegnato) oppure lista da 56 dp come gli altri fogli.</li>
+<li>Collezione: i tre gruppi proposti [Coda/Raccolta/Condividi/Modifica] sono una mia scelta; oggi il menu non ha gruppi.</li>
+<li>Ordinamento: «Recenti» e «Aggiunti di recente» sono due voci con nomi quasi uguali (dall'ARB); rinominare una?</li>
+<li>Ordine dei gruppi nel foglio del brano: il codice li costruisce Coda · Raccolta · Vai a · Modifica · Altro; la spec lo conferma.</li>
+</ul>
+</div>
+
+<script>
+const P={
+play:'M7 4.5v15l12-7.5z',
+next:'M3 6h11M3 11h11M3 16h6M16 12v8l6-4z',
+que:'M4 6h12M4 11h12M4 16h7M17 14v6M14 17h6',
+heart:'M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z',
+pladd:'M4 6h11M4 11h11M4 16h6M18 12v8M14 16h8',
+plrem:'M4 6h11M4 11h11M4 16h6M15 17h7',
+label:'M4 6v5l9 9 6-6-9-9H5zM8.5 8.5h.01',
+labelOff:'M4 6v5l9 9 6-6-9-9H5zM3 3l18 18',
+album:'M12 3.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17zM12 10.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z',
+person:'M12 4.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7zM5 20a7 7 0 0 1 14 0',
+ytm:'M5 6h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2zM10 9.5v5l4.5-2.5z',
+img:'M6 5h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zM4 16l5-5 4 4 3-3 4 4',
+pen:'M5 19l1-4 10-10 3 3-10 10z',
+web:'M11 4.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13zM16 16l4.5 4.5',
+dev:'M3 7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v7H3zM1 18h14M18.5 10h2a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1v-8a1 1 0 0 1 1-1z',
+info:'M12 3.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17zM12 11v6M12 7.5v.5',
+trash:'M5 7h14M9 7V4h6v3M7 7l1 13h8l1-13M10 11v6M14 11v6',
+rest:'M4 12a8 8 0 1 0 3-6.2M4 4v4h4',
+spark:'M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z',
+merge:'M6 4v6a6 6 0 0 0 6 6M18 4v6a6 6 0 0 1-6 6v4',
+ck:'M5 12.5l4.5 4.5L19 7.5',
+fold:'M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z',
+ear:'M5 9a7 7 0 0 1 14 0c0 4-4 4-4 8a3 3 0 0 1-6 0',
+up:'M12 16V4M7 9l5-5 5 5M5 20h14',
+plus:'M12 5v14M5 12h14',
+x:'M6 6l12 12M18 6L6 18',
+dn:'M7 10l5 5 5-5',
+grid:'M4 4h6.5v6.5H4zM13.5 4H20v6.5h-6.5zM4 13.5h6.5V20H4zM13.5 13.5H20V20h-6.5z',
+back:'M15 5l-7 7 7 7',
+sort:'M4 7h16M7 12h10M10 17h4'};
+const ic=(n,c='')=>`<svg class="i ${c}" viewBox="0 0 24 24"><path d="${P[n]}"/></svg>`;
+const mv=(g)=>g==='h'?'<svg class="i fl" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>':'<svg class="i fl" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg>';
+const sb='<div class="sb"><span>9:41</span><span>●●● 82%</span></div>';
+const cv=(c,s)=>`<span class="cv ${c}" style="width:${s}px;height:${s}px"></span>`;
+const item=(i,l,o={})=>`<button class="it ${o.bad?'bad':''} ${o.foc?'foc':''} ${o.sel?'sel':''}">${ic(i)}<span>${l}</span>${o.sel?`<span class="ok">${ic('ck')}</span>`:''}</button>`;
+const groups=gs=>gs.map(g=>`<div class="gp"></div>`+g.map(a=>item(...a)).join('')).join('').replace('<div class="gp"></div>','');
+const sheet=(hd,body,extra='')=>`<div class="scrim"></div><div class="sheet" ${extra}><div class="hn"><i></i></div><div class="bd">${hd}${body}</div><div class="sa"><i></i></div></div>`;
+const trk=(t,a,b)=>`<div class="sh-h">${cv('c3',56)}<div class="tx"><div class="t">${t}</div><div class="a">${a}</div><div class="b">${b}</div></div></div>`;
+const rows=(n,on=-1,sel=false,more=true)=>[['Paranoid Android','Radiohead','c1'],['Teardrop','Massive Attack','c4'],['Svefn-g-englar','Sigur Rós','c6'],['Nude','Radiohead','c1'],['Roygbiv','Boards of Canada','c5'],['Re: Stacks','Bon Iver','c7'],['Windowlicker','Aphex Twin','c2']].slice(0,n).map((r,i)=>`<div class="li ${i===on?'on':''}">${sel?`<span class="ck ${i<3?'y':''}">${i<3?ic('ck'):''}</span>`:''}${cv(r[2],i===on?44:48)}<div class="tx"><div class="t">${r[0]}</div><div class="s">${r[1]}</div></div>${more?`<span class="btn">${mv('v')}</span>`:''}</div>`).join('');
+const page=(title,right,body)=>`${sb}<div class="scr"><div class="hd"><h1>${title}</h1>${right}</div>${body}</div>`;
+const put=(id,h)=>document.getElementById(id).innerHTML=h;
+
+/* gruppi del brano */
+const tr1=[['plrem','Rimuovi dalla playlist']];
+const trG=[
+ [['next','Riproduci dopo'],['que','Aggiungi in coda']],
+ [['heart','Preferito'],['pladd','Aggiungi a playlist…'],['label','Etichette…']],
+ [['album','Vai all’album'],['person','Vai all’artista']],
+ [['img','Cambia copertina'],['pen','Modifica info'],['web','Cerca info sul web']],
+ [['dev','Condividi…'],['info','Dettagli'],['trash','Elimina dal dispositivo',{bad:1}]]];
+const trackSheet=(extra)=>sheet(trk('Paranoid Android (Remastered 2009)','Radiohead','OK Computer'),groups([tr1,...trG]),extra);
+
+/* 1 Prima */
+put('f1',`${sb}<div class="scr"><div class="hd"><span class="btn">${ic('back')}</span><h1 style="font-size:15px;font-family:Figtree;font-weight:600;padding-left:4px">Album</h1></div>
+<div class="hdr">${cv('c1',132)}<div style="padding-bottom:4px"><div class="m" style="font:var(--small)">Album · 1997</div><h1>OK Computer</h1><div class="ar">Radiohead</div><div class="m">12 brani · 53 min</div></div></div>
+<div class="act"><span class="btnp">${ic('play','fl')}Riproduci</span><span style="flex:1"></span><span class="btn" style="outline:2px solid #FFE08A;outline-offset:-4px">${mv('h')}</span></div>
+${rows(4)}</div>
+<div class="pop"><div>Aggiungi in coda</div><div>Aggiungi a playlist…</div><div>Condividi…</div><div>Arricchisci album</div><div>Cambia copertina</div><div>Ripristina copertina originale</div><div>Unisci con…</div></div>
+<div class="callout" style="left:16px;top:332px;display:none">⋯ glifo diverso dal ⋮ delle righe</div>
+<div class="callout" style="left:16px;top:690px">Menu fluttuante, senza intestazione</div>`);
+/* 2 e 2b */
+put('f2',page('Serata lenta',`<span class="btn">${mv('v')}</span>`,rows(7,0))+trackSheet());
+put('f2b',page('Serata lenta',`<span class="btn">${mv('v')}</span>`,rows(7,0))+trackSheet());
+document.querySelector('#f2b .bd').scrollTop=9999;
+/* 3 */
+put('f3',page('OK Computer',`<span class="btn">${mv('v')}</span>`,`<div class="hdr">${cv('c1',132)}<div style="padding-bottom:4px"><div class="m" style="font:var(--small)">Album · 1997</div><h1>OK Computer</h1><div class="ar">Radiohead</div></div></div><div style="height:16px"></div>`+rows(4))+
+ sheet(`<div class="sh-h">${cv('c1',56)}<div class="tx"><div class="t">OK Computer</div><div class="a">Radiohead</div><div class="b">12 brani</div></div></div>`,
+ groups([[['que','Aggiungi in coda'],['pladd','Aggiungi a playlist…']],[['dev','Condividi…']],[['spark','Arricchisci album'],['img','Cambia copertina'],['rest','Ripristina copertina originale'],['merge','Unisci con…']]])));
+/* 4 */
+put('f4',`${sb}<div class="scr"><div class="hd sel"><span class="btn">${ic('x')}</span><span>3 selezionati</span><span class="btn">${ic('pladd')}</span><span class="btn">${ic('heart')}</span><span class="btn">${mv('v')}</span></div>${rows(7,-1,true)}</div>`+
+ sheet(`<div class="sh-t" style="font:var(--body-l);padding-top:4px;padding-bottom:12px;font-size:17px">3 selezionati</div>`,
+ groups([[['play','Riproduci'],['next','Riproduci dopo'],['que','Aggiungi in coda']],[['heart','Aggiungi ai preferiti'],['pladd','Aggiungi a playlist…'],['label','Aggiungi etichetta…'],['labelOff','Togli etichetta…'],['album','Sposta in un nuovo album…']],[['trash','Elimina dal dispositivo',{bad:1}]]])));
+/* 5 */
+put('f5',page('Libreria',`<span class="btn">${ic('grid')}</span>`,`<div class="tb"><span>1.248 brani</span><span class="so">Recenti ${ic('dn')}</span></div>`+rows(6))+
+ sheet(`<div class="sh-t">Ordina per</div>`,groups([[['sort','Recenti',{sel:1}],['sort','A–Z'],['sort','Aggiunti di recente']]])));
+/* 6 */
+put('f6',`${sb}<div class="scr"><div class="hd"><span class="btn">${ic('dn')}</span><h1 style="font:var(--body-l);padding-left:8px">In riproduzione</h1></div><div style="padding:16px"><span class="cv c1" style="width:328px;height:328px;border-radius:var(--r-card)"></span><div style="font:var(--title);margin-top:20px">Paranoid Android</div><div style="color:var(--muted);margin-top:4px">Radiohead</div></div></div>`+
+ sheet(`<div class="sh-t">Timer di spegnimento</div>`,`<div class="chips"><button>15 minuti</button><button class="on">30 minuti</button><button>45 minuti</button><button>60 minuti</button><button class="cl" style="background:var(--s2);color:var(--text)">A fine brano</button><button class="cl">Annulla timer</button></div>`));
+/* 7 */
+put('f7',page('Playlist',`<span class="btn">${ic('plus')}</span>`,rows(6,-1,false,false))+
+ sheet('',groups([[['pladd','Nuova playlist'],['spark','Nuova playlist intelligente'],['up','Importa da Exportify (CSV)']]])));
+/* desktop */
+const drow=(t,a,al,d,c,x='')=>`<div class="dtab ${x}">${cv(c,44)}<div class="t">${t}</div><div class="k">${a}</div><div class="k">${al}</div><div class="k">${d}</div></div>`;
+const dr=[['Paranoid Android','Radiohead','OK Computer','6:23','c1'],['Teardrop','Massive Attack','Mezzanine','5:30','c4'],['Svefn-g-englar','Sigur Rós','Ágætis byrjun','10:04','c6'],['Nude','Radiohead','In Rainbows','4:15','c1'],['Roygbiv','Boards of Canada','Music Has the Right…','2:31','c5'],['Re: Stacks','Bon Iver','For Emma, Forever Ago','6:41','c7']];
+put('fd',`<div class="side"><div style="font:var(--title);color:var(--text);height:64px">Codecore</div><div>Home</div><div>Cerca</div><div class="on">Libreria</div><div>Playlist</div><div>Impostazioni</div></div>
+<div class="main"><div class="hd" style="padding-left:0"><h1>Libreria</h1></div>${dr.map((r,i)=>drow(...r,i===2?'rc':'')).join('')}
+</div>
+<div class="dbar"></div><div class="scrim"></div>
+<div class="dsheet"><div class="hn"><i></i></div><div class="bd" style="padding-bottom:8px;overflow:hidden">${trk('Svefn-g-englar','Sigur Rós','Ágætis byrjun')}${(()=>{const g=[[['ear','Anteprima 20 s',{foc:1}],['next','Riproduci dopo'],['que','Aggiungi in coda']],[['heart','Preferito'],['pladd','Aggiungi a playlist…'],['label','Etichette…']],[['album','Vai all’album'],['person','Vai all’artista']],[['img','Cambia copertina'],['pen','Modifica info'],['web','Cerca info sul web']],[['dev','Condividi…'],['info','Dettagli'],['fold','Mostra nella cartella'],['trash','Elimina dal dispositivo',{bad:1}]]];return groups(g)})()}</div><div class="sa" style="height:8px"></div></div>`);
+</script>
+</body></html>

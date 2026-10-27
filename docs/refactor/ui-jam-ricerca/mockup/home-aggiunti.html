@@ -1,0 +1,226 @@
+<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=1700"><title>Mockup Home aggiunti</title><link rel="stylesheet" href="../../ui-fluida/mockup/tokens.css"><style>
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:#F4F2F8}
+body{font:400 15px/1.5 Figtree,sans-serif;color:#1B1626;background:#F4F2F8;min-width:1320px;padding:32px 40px 80px}
+.pg-h{max-width:1280px;margin:0 auto 8px;display:flex;align-items:baseline;gap:16px;flex-wrap:wrap}
+.pg-h h1{font:600 22px/1.2 Unbounded,sans-serif}
+.pg-h p{color:#5B5170;font-size:14px}
+.nav{max-width:1280px;margin:0 auto 24px;font-size:14px;color:#5B5170}
+.nav a{color:#5B2BB5;margin-right:16px}
+h2.cap{font:700 16px/1.3 Figtree,sans-serif;margin:0 0 12px}
+.wrap{max-width:1280px;margin:0 auto}
+.row{display:flex;gap:40px;align-items:flex-start;flex-wrap:wrap;margin-bottom:56px}
+.col{flex:none}
+.col.prima img{display:block;width:360px;height:auto;border:1px solid #D6D0E2}
+.col.prima img.d{width:640px}
+.note{margin-top:8px;font-size:13px;color:#5B5170;max-width:360px}
+.ann{max-width:400px;flex:1 1 320px}
+.ann ol{list-style:none;counter-reset:a}
+.ann li{counter-increment:a;position:relative;padding:0 0 14px 40px;font-size:14px;color:#1B1626}
+.ann li::before{content:counter(a);position:absolute;left:0;top:0;width:26px;height:26px;border-radius:50%;background:#5B2BB5;color:#fff;font:700 13px/26px Figtree,sans-serif;text-align:center}
+.ann li b{display:block;font-size:14px}
+.ann li span{color:#4A4060}
+.dev{color:var(--text);background:var(--bg);font:var(--body);overflow:hidden;position:relative;border:1px solid #CFC8DC}
+.dev button,.dev a{font:inherit;color:inherit;background:none;border:0;text-decoration:none;cursor:pointer}
+.i{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.i.f{fill:currentColor;stroke:none}
+.btn{width:var(--target);height:var(--target);display:grid;place-items:center;border-radius:50%;color:var(--text);flex:none}
+.btn.m{color:var(--muted)}
+.phone{width:360px;height:780px;border-radius:24px}
+.sb{position:absolute;left:0;right:0;top:0;height:28px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;font:600 12px/1 Figtree,sans-serif;color:var(--text);z-index:3;background:var(--bg)}
+.sb .r{display:flex;gap:6px;align-items:center}
+.sb svg{width:14px;height:14px;fill:currentColor}
+.scr{position:absolute;left:0;right:0;top:28px;bottom:0;overflow-y:auto;padding-bottom:176px;scrollbar-width:none}
+.scr::-webkit-scrollbar{display:none}
+/* screen title: Unbounded 20 */
+.hd{display:flex;align-items:center;padding:4px 4px 4px 16px;min-height:56px}
+.hd h1{font:var(--title);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.01em}
+/* floating dock, flat, no shadow */
+.dock{position:absolute;left:12px;right:12px;bottom:16px;background:var(--s2);border-radius:var(--r-dock);padding:8px 8px 6px;z-index:4}
+.mini{display:flex;align-items:center;gap:10px;height:64px;padding-left:4px}
+.mini .tx{flex:1;min-width:0}
+.mini .t{font:var(--body-l);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mini .s{font:var(--small);color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dock hr{border:0;border-top:1px solid var(--s3);margin:2px 8px 4px}
+.tabs{display:flex;height:56px}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--muted);font:var(--small);position:relative}
+.tab.on{color:var(--text);font-weight:700}
+.tab .ic{position:relative;display:block;height:24px}
+.tab.on .ic::after{content:"";position:absolute;right:-6px;top:-3px;width:6px;height:6px;border-radius:50%;background:var(--accent)}
+/* the ring: the only graphic sign. SVG stroke, no gradient. */
+.rw{position:relative;display:block;flex:none}
+.rw svg.rg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg);overflow:visible}
+.rw .tr{fill:none;stroke:var(--s3)}
+.rw .ar{fill:none;stroke:var(--accent)}
+.rw .cv{position:absolute}
+.cv{display:block}
+.c1{background:#6F7BE0}.c2{background:#D9885B}.c3{background:#4FA6A0}.c4{background:#B34F6E}.c5{background:#C7B14F}.c6{background:#4C5C8F}.c7{background:#8E7BB5}
+.ph{background:var(--s3);display:grid;place-items:center;color:var(--accent-soft)}
+/* list rows: 1px separators, no tiles */
+.li{position:relative;display:flex;align-items:center;gap:12px;min-height:64px;padding:6px 16px 6px 16px}
+.li::after{content:"";position:absolute;left:80px;right:16px;bottom:0;border-bottom:var(--sep)}
+.li.last::after{display:none}
+.li .tx{flex:1;min-width:0}
+.li .t{font:var(--body-l);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.li .s{font:var(--small);color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.li.now .t{color:var(--accent-soft)}
+.sec{display:flex;align-items:center;justify-content:space-between;padding:16px 16px 0 16px;min-height:48px}
+.sec h2{font:700 15px/1.3 Figtree,sans-serif}
+.sec .a{color:var(--accent-soft);font:var(--body-l);min-height:var(--target);padding:0 0 0 16px}
+.txtbtn{min-height:var(--target);padding:0 12px;font:var(--body-l);color:var(--accent-soft)}
+.txtbtn.m{color:var(--muted)}
+.btnp{display:inline-flex;align-items:center;gap:8px;height:var(--target);padding:0 24px;border-radius:var(--r-dock);background:var(--accent);color:var(--on-accent);font:var(--body-l)}
+.btng{display:inline-flex;align-items:center;gap:8px;height:var(--target);padding:0 16px;color:var(--text);font:var(--body-l)}
+.seek{height:4px;background:var(--s3);border-radius:2px;position:relative;flex:1}
+.seek i{position:absolute;left:0;top:0;bottom:0;background:var(--accent);border-radius:2px}
+.seek b{position:absolute;top:-4px;width:12px;height:12px;border-radius:50%;background:var(--accent)}
+/* desktop */
+.desk{width:1280px;height:800px;display:grid;grid-template-columns:240px 1fr;grid-template-rows:1fr 88px}
+.side{background:var(--s1);border-right:var(--sep);padding:8px 0;display:flex;flex-direction:column;overflow:hidden}
+.nv{display:flex;align-items:center;gap:16px;height:48px;padding:0 16px;color:var(--muted);font:var(--body-l);position:relative}
+.nv.on{color:var(--text);font-weight:700}
+.nv.on .ic::after{content:"";position:absolute;right:-6px;top:-3px;width:6px;height:6px;border-radius:50%;background:var(--accent)}
+.nv .ic{position:relative;display:block;height:24px}
+.nv .btn{margin-left:auto;margin-right:-8px}
+.side hr{border:0;border-top:var(--sep);margin:8px 16px}
+.pl{display:flex;align-items:center;gap:12px;padding:4px 16px;min-height:56px}
+.pl .t{font:var(--body-l);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pl .s{font:var(--small);color:var(--muted)}
+.pl .tx{min-width:0}
+.main{overflow:hidden;position:relative}
+.main .in{position:absolute;inset:0;overflow-y:auto;padding:0 32px 24px;scrollbar-width:none}
+.main .in::-webkit-scrollbar{display:none}
+.bar{grid-column:1/3;background:var(--s1);border-top:var(--sep);display:grid;grid-template-columns:1fr 2fr 1fr;align-items:center;padding:0 16px}
+.bar .l{display:flex;align-items:center;gap:12px;min-width:0}
+.bar .c{display:flex;flex-direction:column;align-items:center;gap:0}
+.bar .ctl{display:flex;align-items:center;gap:8px}
+.bar .sk{display:flex;align-items:center;gap:12px;width:100%;font:var(--small);color:var(--muted);margin-top:-4px}
+.bar .r{display:flex;align-items:center;justify-content:flex-end;gap:0}
+.chip{font:var(--small);color:var(--accent-soft);background:var(--s2);border-radius:var(--r-card);padding:4px 10px}
+.dev .play{background:var(--accent);color:var(--on-accent)}
+.play{width:var(--target);height:var(--target);border-radius:50%;background:var(--accent);color:var(--on-accent);display:grid;place-items:center}
+.vol{width:96px}
+
+.invite{display:block;padding:8px 16px 0}
+.invite h2{font:var(--display);letter-spacing:-.025em;white-space:nowrap}
+.invite .r{display:flex;align-items:center;justify-content:space-between;min-height:56px}
+.invite .r span{font:var(--body);color:var(--muted)}
+.cnt{display:flex;margin:8px 16px 0;border-top:var(--sep);border-bottom:var(--sep)}
+.cnt a{flex:1;min-height:var(--target);display:flex;align-items:baseline;justify-content:center;gap:6px;padding-top:12px;font:var(--body);color:var(--muted)}
+.cnt a b{font:var(--body-l);color:var(--text)}
+.cnt a+a{border-left:var(--sep)}
+.fan{display:flex;padding:8px 16px 0;align-items:center;min-height:100px}
+.fan .cv{width:84px;height:84px;border-radius:var(--r-list);border:3px solid var(--bg);margin-left:-28px}
+.fan .cv:first-child{margin-left:0}
+.fanh{font:var(--small);color:var(--muted);padding:4px 16px 0}
+.note-n{margin:24px 16px 0;padding:12px 0 0;border-top:var(--sep)}
+.note-n p{font:var(--body-l);font-weight:500;max-width:30ch}
+.note-n .ac{display:flex;justify-content:flex-end;border-bottom:var(--sep)}
+.dv{margin:8px 16px 0;padding:0}
+.exp{margin:8px 16px 0;border-top:var(--sep);border-bottom:var(--sep);padding:4px 0 0}
+.exp .tp{display:flex;align-items:center;gap:12px;min-height:48px;font:var(--body-l)}
+.exp .ac{display:flex;justify-content:flex-end}
+.hint{color:var(--accent-soft)}
+.dev .btnp{background:var(--accent);color:var(--on-accent)}.dev .sec .a{color:var(--accent-soft)}.dev .txtbtn{color:var(--accent-soft)}
+html{background:#F4F2F8}
+body{min-width:0;padding:32px 40px 80px}
+.wrap{max-width:1680px}
+.phone{height:800px}
+.row{gap:32px}
+.col .cap{max-width:360px}
+.note{max-width:360px}
+.deskwrap{width:960px;height:600px;position:relative;border-radius:18px;overflow:hidden}
+.deskwrap .desk{transform:scale(.75);transform-origin:0 0;position:absolute;left:0;top:0}
+.prima-card{width:360px;min-height:300px;border:1px solid #CFC8DC;border-radius:24px;padding:24px;background:#fff;color:#1B1626}
+.prima-card p{font-size:14px;margin-bottom:12px;color:#1B1626}
+.prima-card b{color:#5B2BB5}
+/* search */
+.fld{display:flex;align-items:center;height:48px;border-radius:var(--r-dock);background:var(--s3);padding-left:12px;gap:8px;color:var(--text)}
+.fld.focus{outline:2px solid var(--accent);outline-offset:-2px}
+.fld .tx{flex:1;font:var(--body-l);display:flex;align-items:center;min-width:0;white-space:nowrap;overflow:hidden}
+.fld .ph{background:none;display:block;place-items:unset;color:var(--muted);font:400 15px/1.35 Figtree,sans-serif}
+.fld .car{display:inline-block;width:2px;height:20px;background:var(--accent);margin-left:1px}
+.fld .btn{width:var(--target);height:var(--target);color:var(--muted)}
+.dock .fld{margin:0 0 4px}
+.dock.solo{padding:8px}
+.chips{display:flex;gap:8px;padding:0 16px}
+.chip2{height:var(--target);display:flex;align-items:center}
+.chip2 span{display:flex;align-items:center;gap:6px;height:36px;padding:0 14px;border-radius:var(--r-card);background:var(--s2);font:var(--body-l);color:var(--text)}
+.chip2.on span{background:var(--accent-soft);color:var(--on-accent)}
+.chip2 svg{width:18px;height:18px}
+.seg{display:flex;gap:4px;margin:0 16px;padding:4px 0}
+.seg a{flex:1;height:var(--target);display:grid;place-items:center;border-radius:var(--r-card);background:var(--s2);font:var(--body-l);color:var(--muted)}
+.seg a.on{background:var(--accent);color:var(--on-accent)}
+.rc{display:flex;align-items:center;gap:12px;min-height:var(--target);padding:0 4px 0 16px;font:var(--body-l)}
+.rc .tx{flex:1}
+.rc svg{color:var(--muted)}
+.empty{margin:16px;padding:16px 0;border-top:var(--sep);border-bottom:var(--sep)}
+.empty p{font:var(--body);color:var(--muted);margin-bottom:12px}
+.empty p b{color:var(--text);font:var(--body-l)}
+.tag{font:var(--small);color:var(--accent-soft);background:var(--s2);border-radius:var(--r-card);padding:4px 10px}
+/* keyboard */
+.kb{position:absolute;left:0;right:0;bottom:0;height:272px;background:#2B2B31;z-index:5;padding:0 4px 8px;font-family:Figtree,sans-serif;color:#F2F2F4}
+.kb .sg{height:44px;display:flex;align-items:center;justify-content:space-around;font-size:15px;color:#D6D6DC;border-bottom:1px solid #3A3A42;margin:0 -4px 8px}
+.kb .sg i{width:1px;height:20px;background:#4A4A52}
+.kr{display:flex;gap:5px;justify-content:center;margin-bottom:8px}
+.kr b{flex:1;max-width:34px;height:48px;border-radius:6px;background:#4A4A52;display:grid;place-items:center;font:500 20px/1 Figtree,sans-serif}
+.kr b.w{max-width:48px;background:#3A3A42;font-size:15px}
+.kr b.sp{max-width:none;flex:5;font-size:13px;color:#B8B8C0;background:#4A4A52}
+.kr b.go{max-width:56px;background:#C9BBEA;color:#12081F;font-size:13px;font-weight:700}
+.kr b.m{max-width:48px;background:#3A3A42;font-size:14px}
+.kr.pad{padding:0 3%}
+.ann ul{list-style:none}
+.ann li{padding:0 0 12px 0;font-size:14px}
+.ann li::before{display:none}
+.ann{padding-top:0}
+.tag-f{font-weight:700;color:#5B2BB5}
+
+.orow{display:flex;gap:var(--gap-3);overflow-x:auto;scroll-snap-type:x proximity;scroll-padding-left:16px;padding:8px 16px 8px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.orow::-webkit-scrollbar{display:none}
+.oi{flex:none;width:84px;scroll-snap-align:start;display:block;min-height:var(--target);cursor:pointer}
+.oi .cv{width:84px;height:84px;border-radius:var(--r-list);margin-bottom:var(--gap-2)}
+.ot{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font:600 13px/1.3 Figtree,sans-serif;color:var(--text)}
+.oa{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font:var(--small);color:var(--muted);margin-top:2px}
+.orow:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.fan.small{gap:8px;padding-top:12px}
+.fan.small .cv{width:59px;height:59px;margin-left:0;border:0}
+.ps{background:#fff;border:1px solid #CFC8DC;border-radius:12px;padding:16px;max-width:360px;margin-top:12px;font-size:14px;color:#1B1626}
+.demo{position:relative;height:100px;overflow:hidden;margin:12px 0;background:var(--bg);border-radius:12px;width:360px}
+.demo .cv{position:absolute;top:8px;left:16px;width:84px;height:84px;border-radius:var(--r-list);border:3px solid var(--bg);transform:translateX(calc(var(--i)*56px));animation:spread 4s infinite}
+@keyframes spread{0%,15%{transform:translateX(calc(var(--i)*56px));animation-timing-function:cubic-bezier(.33,1,.68,1)}35%,80%{transform:translateX(calc(var(--i)*96px))}95%,100%{transform:translateX(calc(var(--i)*56px))}}
+@media (prefers-reduced-motion:reduce){.demo .cv{animation:none;transform:translateX(calc(var(--i)*96px))}}
+.seq{display:flex;gap:8px;align-items:center;font:var(--small);color:#4A4060;margin-top:4px;max-width:360px}
+.seq b{color:#5B2BB5}
+</style></head><body><svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="home" viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/></symbol>
+<symbol id="search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></symbol>
+<symbol id="lib" viewBox="0 0 24 24"><rect x="8" y="3.5" width="12.5" height="12.5" rx="2"/><path d="M4 8v10a2 2 0 0 0 2 2h10"/><circle cx="12.6" cy="12.6" r="1.4"/><path d="M14 12.6V7.5l3 .8"/></symbol>
+<symbol id="mem" viewBox="0 0 24 24"><rect x="3.5" y="4" width="17" height="4.5" rx="1.2"/><rect x="3.5" y="10" width="17" height="4.5" rx="1.2"/><rect x="3.5" y="16" width="17" height="4.5" rx="1.2"/></symbol>
+<symbol id="set" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.5"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></symbol>
+<symbol id="act" viewBox="0 0 24 24"><path d="M3 12h4l3-7 4 14 3-7h4"/></symbol>
+<symbol id="shuf" viewBox="0 0 24 24"><path d="M3 7h4l10 10h4M3 17h4l3-3M14 10l3-3h4M18 4l3 3-3 3M18 14l3 3-3 3"/></symbol>
+<symbol id="dev" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v7H3zM1 18h14M18.5 10h2a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1v-8a1 1 0 0 1 1-1z"/></symbol>
+<symbol id="heart" viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></symbol>
+<symbol id="play" viewBox="0 0 24 24"><path d="M7 4.5v15l12-7.5z"/></symbol>
+<symbol id="pause" viewBox="0 0 24 24"><rect x="6" y="4.5" width="4" height="15" rx="1"/><rect x="14" y="4.5" width="4" height="15" rx="1"/></symbol>
+<symbol id="mv" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></symbol>
+<symbol id="mh" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></symbol>
+<symbol id="plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="dn" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5"/></symbol>
+<symbol id="grid" viewBox="0 0 24 24"><rect x="4" y="4" width="6.5" height="6.5" rx="1"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1"/></symbol>
+<symbol id="prev" viewBox="0 0 24 24"><path d="M6 5v14M19 5.5v13L9 12z"/></symbol>
+<symbol id="next" viewBox="0 0 24 24"><path d="M18 5v14M5 5.5v13L15 12z"/></symbol>
+<symbol id="rep" viewBox="0 0 24 24"><path d="M4 11V9a3 3 0 0 1 3-3h13l-3-3M20 13v2a3 3 0 0 1-3 3H4l3 3"/></symbol>
+<symbol id="lyr" viewBox="0 0 24 24"><path d="M4 5h16M4 10h10M4 15h7M17 14v6M17 14l3 1"/></symbol>
+<symbol id="que" viewBox="0 0 24 24"><path d="M4 6h12M4 11h12M4 16h7M18 14v6M18 14l3 1"/></symbol>
+<symbol id="vol" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4zM15.5 9a4.5 4.5 0 0 1 0 6M18 6.5a8 8 0 0 1 0 11"/></symbol>
+<symbol id="bell" viewBox="0 0 24 24"><path d="M6 17V11a6 6 0 0 1 12 0v6l1.5 2h-15zM10 21h4"/></symbol>
+<symbol id="ytm" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M10 9.5v5l4.5-2.5z"/></symbol>
+<symbol id="sync" viewBox="0 0 24 24"><path d="M20 8a8 8 0 0 0-14-2L4 8M4 4v4h4M4 16a8 8 0 0 0 14 2l2-2M20 20v-4h-4"/></symbol>
+<symbol id="star" viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.4 6.7 19.4l1.2-6L3.4 9.3l6-.7z"/></symbol>
+<symbol id="bars" viewBox="0 0 24 24"><path d="M6 20v-7M12 20V5M18 20v-10"/></symbol>
+<symbol id="back" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol>
+<symbol id="close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+<symbol id="clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+<symbol id="globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c3 3 3 14 0 17M12 3.5c-3 3-3 14 0 17"/></symbol>
+</defs></svg><div class="pg-h"><h1>Home: aggiunti da poco</h1><p>Dopo: decisioni D-152, D-153, D-155. Stile approvato di ui-fluida, dati di esempio.</p></div><div class="nav"><a href="ricerca.html">Ricerca</a><a href="home-aggiunti.html">Home: aggiunti da poco</a><a href="../../ui-fluida/mockup/home.html">Mockup approvato (ui-fluida)</a></div><div class="wrap"><div class="row"><div class="col prima"><h2 class="cap">1a · Prima (schermata attuale)</h2><img src="img/phone_100_home.png" alt="Home attuale"><p class="note">Home di oggi: il blocco «Aggiunti da poco» è il ventaglio chiuso.</p></div><div class="col"><h2 class="cap">1b · Prima: ventaglio aperto</h2><div class="dev phone"><div class="sb"><span>14:32</span><span class="r"><svg viewBox="0 0 24 24"><path d="M2 20h20L22 4z"/></svg><svg viewBox="0 0 24 24"><path d="M12 20l-3-3a4.2 4.2 0 0 1 6 0zM5.5 12.5a9.2 9.2 0 0 1 13 0l-2 2a6.4 6.4 0 0 0-9 0zM2 9a14 14 0 0 1 20 0l-2 2a11 11 0 0 0-16 0z"/></svg><svg viewBox="0 0 24 24"><rect x="7" y="3" width="10" height="19" rx="2"/></svg><span>82%</span></span></div><div class="scr" style="padding-bottom:190px"><div class="hd"><h1>Buon pomeriggio</h1><button class="btn m" aria-label="Attività"><svg class="i " ><use href="#act"/></svg></button><button class="btn m" aria-label="Impostazioni"><svg class="i " ><use href="#set"/></svg></button></div><a class="invite" aria-label="Casuale su tutto"><h2>Casuale su tutto</h2><div class="r"><span>33 brani, 1 ora</span><span class="play" style="width:48px;height:48px"><svg class="i " ><use href="#shuf"/></svg></span></div></a><div class="cnt"><a><b>6</b>Preferiti</a><a><b>2</b>Playlist</a><a><b>0</b>Radio</a></div><div class="sec"><h2>Riprendi</h2></div><div class="li last"><span class="rw" style="width:52px;height:52px"><span class="cv c1" style="inset:4px;border-radius:4px"></span></span><div class="tx"><div class="t">Cara</div><div class="s">Brano 3 di 6 da In macchina</div></div></div><div class="sec"><h2>Aggiunti da poco</h2><button class="a">Tutti</button></div><div class="fan small"><span class="cv c1"></span><span class="cv c3"></span><span class="cv c4"></span><span class="cv c6"></span><span class="cv c2"></span></div><div class="fanh">Aperto: 5 copertine da ~59 dp, senza nome</div><div class="sec"><h2>I più ascoltati</h2></div><div class="li"><span class="rw" style="width:52px;height:52px"><span class="cv c1" style="inset:4px;border-radius:4px"></span></span><div class="tx"><div class="t">Futura</div><div class="s">Lucio Dalla</div></div></div></div></div><p class="note">F-31: aperto, le 5 copertine si rimpiccioliscono da 84 a ~59 dp per stare in 360 dp, senza titolo né artista (F-32).</p></div><div class="col"><h2 class="cap">2 · Chiuso</h2><div class="dev phone"><div class="sb"><span>14:32</span><span class="r"><svg viewBox="0 0 24 24"><path d="M2 20h20L22 4z"/></svg><svg viewBox="0 0 24 24"><path d="M12 20l-3-3a4.2 4.2 0 0 1 6 0zM5.5 12.5a9.2 9.2 0 0 1 13 0l-2 2a6.4 6.4 0 0 0-9 0zM2 9a14 14 0 0 1 20 0l-2 2a11 11 0 0 0-16 0z"/></svg><svg viewBox="0 0 24 24"><rect x="7" y="3" width="10" height="19" rx="2"/></svg><span>82%</span></span></div><div class="scr" style="padding-bottom:190px"><div class="hd"><h1>Buon pomeriggio</h1><button class="btn m" aria-label="Attività"><svg class="i " ><use href="#act"/></svg></button><button class="btn m" aria-label="Impostazioni"><svg class="i " ><use href="#set"/></svg></button></div><a class="invite" aria-label="Casuale su tutto"><h2>Casuale su tutto</h2><div class="r"><span>33 brani, 1 ora</span><span class="play" style="width:48px;height:48px"><svg class="i " ><use href="#shuf"/></svg></span></div></a><div class="cnt"><a><b>6</b>Preferiti</a><a><b>2</b>Playlist</a><a><b>0</b>Radio</a></div><div class="sec"><h2>Riprendi</h2></div><div class="li last"><span class="rw" style="width:52px;height:52px"><span class="cv c1" style="inset:4px;border-radius:4px"></span></span><div class="tx"><div class="t">Cara</div><div class="s">Brano 3 di 6 da In macchina</div></div></div><div class="sec"><h2>Aggiunti da poco</h2><button class="a">Mostra tutti</button></div><div class="fan" role="button" aria-label="Apri i brani aggiunti da poco"><span class="cv c1"></span><span class="cv c3"></span><span class="cv c4"></span><span class="cv c6"></span><span class="cv c2"></span></div><div class="fanh">Tocca per aprire</div><div class="sec"><h2>I più ascoltati</h2></div><div class="li"><span class="rw" style="width:52px;height:52px"><span class="cv c1" style="inset:4px;border-radius:4px"></span></span><div class="tx"><div class="t">Futura</div><div class="s">Lucio Dalla</div></div></div></div></div><p class="note">Come nel mockup approvato: 5 copertine da 84 dp sovrapposte, «Tocca per aprire». Si apre con un tocco (o con Invio e Spazio, F-35).</p></div></div><div class="row"><div class="col"><h2 class="cap">3 · Aperto</h2><div class="dev phone"><div class="sb"><span>14:32</span><span class="r"><svg viewBox="0 0 24 24"><path d="M2 20h20L22 4z"/></svg><svg viewBox="0 0 24 24"><path d="M12 20l-3-3a4.2 4.2 0 0 1 6 0zM5.5 12.5a9.2 9.2 0 0 1 13 0l-2 2a6.4 6.4 0 0 0-9 0zM2 9a14 14 0 0 1 20 0l-2 2a11 11 0 0 0-16 0z"/></svg><svg viewBox="0 0 24 24"><rect x="7" y="3" width="10" height="19" rx="2"/></svg><span>82%</span></span></div><div class="scr" style="padding-bottom:190px"><div class="hd"><h1>Buon pomeriggio</h1><button class="btn m" aria-label="Attività"><svg class="i " ><use href="#act"/></svg></button><button class="btn m" aria-label="Impostazioni"><svg class="i " ><use href="#set"/></svg></button></div><a class="invite" aria-label="Casuale su tutto"><h2>Casuale su tutto</h2><div class="r"><span>33 brani, 1 ora</span><span class="play" style="width:48px;height:48px"><svg class="i " ><use href="#shuf"/></svg></span></div></a><div class="cnt"><a><b>6</b>Preferiti</a><a><b>2</b>Playlist</a><a><b>0</b>Radio</a></div><div class="sec"><h2>Riprendi</h2></div><div class="li last"><span class="rw" style="width:52px;height:52px"><span class="cv c1" style="inset:4px;border-radius:4px"></span></span><div class="tx"><div class="t">Cara</div><div class="s">Brano 3 di 6 da In macchina</div></div></div><div class="sec"><h2>Aggiunti da poco</h2><button class="a">Mostra tutti</button></div><div class="orow" tabindex="0" role="list" aria-label="Aggiunti da poco, scorre di lato"><a class="oi" role="listitem" aria-label="Blonde, Frank Ocean"><span class="cv c1"></span><span class="ot">Blonde</span><span class="oa">Frank Ocean</span></a><a class="oi" role="listitem" aria-label="Kid A, Radiohead"><span class="cv c3"></span><span class="ot">Kid A</span><span class="oa">Radiohead</span></a><a class="oi" role="listitem" aria-label="Random Access Memories, Daft Punk"><span class="cv c4"></span><span class="ot">Random Access Memories</span><span class="oa">Daft Punk</span></a><a class="oi" role="listitem" aria-label="La voce del padrone, Franco Battiato"><span class="cv c6"></span><span class="ot">La voce del padrone</span><span class="oa">Franco Battiato</span></a><a class="oi" role="listitem" aria-label="The Dark Side of the Moon, Pink Floyd"><span class="cv c2"></span><span class="ot">The Dark Side of the Moon</span><span class="oa">Pink Floyd</span></a><a class="oi" role="listitem" aria-label="Il dado, Daniele Silvestri"><span class="cv c5"></span><span class="ot">Il dado</span><span class="oa">Daniele Silvestri</span></a><a class="oi" role="listitem" aria-label="Rumours, Fleetwood Mac"><span class="cv c7"></span><span class="ot">Rumours</span><span class="oa">Fleetwood Mac</span></a><a class="oi" role="listitem" aria-label="Homogenic, Björk"><span class="cv c1"></span><span class="ot">Homogenic</span><span class="oa">Björk</span></a><a class="oi" role="listitem" aria-label="Currents, Tame Impala"><span class="cv c3"></span><span class="ot">Currents</span><span class="oa">Tame Impala</span></a><a class="oi" role="listitem" aria-label="Canzoni, Lucio Dalla"><span class="cv c4"></span><span class="ot">Canzoni</span><span class="oa">Lucio Dalla</span></a><a class="oi" role="listitem" aria-label="Studio Uno, Mina"><span class="cv c6"></span><span class="ot">Studio Uno</span><span class="oa">Mina</span></a><a class="oi" role="listitem" aria-label="To Pimp a Butterfly, Kendrick Lamar"><span class="cv c2"></span><span class="ot">To Pimp a Butterfly</span><span class="oa">Kendrick Lamar</span></a><a class="oi" role="listitem" aria-label="Ágætis byrjun, Sigur Rós"><span class="cv c5"></span><span class="ot">Ágætis byrjun</span><span class="oa">Sigur Rós</span></a><a class="oi" role="listitem" aria-label="Hounds of Love, Kate Bush"><span class="cv c7"></span><span class="ot">Hounds of Love</span><span class="oa">Kate Bush</span></a><a class="oi" role="listitem" aria-label="Pet Sounds, The Beach Boys"><span class="cv c1"></span><span class="ot">Pet Sounds</span><span class="oa">The Beach Boys</span></a><a class="oi" role="listitem" aria-label="Discovery, Daft Punk"><span class="cv c3"></span><span class="ot">Discovery</span><span class="oa">Daft Punk</span></a><a class="oi" role="listitem" aria-label="Crêuza de mä, Fabrizio De André"><span class="cv c4"></span><span class="ot">Crêuza de mä</span><span class="oa">Fabrizio De André</span></a><a class="oi" role="listitem" aria-label="OK Computer, Radiohead"><span class="cv c6"></span><span class="ot">OK Computer</span><span class="oa">Radiohead</span></a><a class="oi" role="listitem" aria-label="Nevermind, Nirvana"><span class="cv c2"></span><span class="ot">Nevermind</span><span class="oa">Nirvana</span></a><a class="oi" role="listitem" aria-label="Abbey Road, The Beatles"><span class="cv c5"></span><span class="ot">Abbey Road</span><span class="oa">The Beatles</span></a></div><div class="sec"><h2>I più ascoltati</h2></div><div class="li"><span class="rw" style="width:52px;height:52px"><span class="cv c1" style="inset:4px;border-radius:4px"></span></span><div class="tx"><div class="t">Futura</div><div class="s">Lucio Dalla</div></div></div></div><nav class="dock" aria-label="Lettore e schede"><div class="mini"><span class="rw" style="width:52px;height:52px"><svg class="rg" viewBox="0 0 52 52"><circle class="tr" cx="26.0" cy="26.0" r="24.5" stroke-width="3"/><circle class="ar" cx="26.0" cy="26.0" r="24.5" stroke-width="3" pathLength="100" stroke-dasharray="38 100"/></svg><span class="cv c1" style="inset:6px;border-radius:50%"></span></span><div class="tx"><div class="t">Cara</div><div class="s">Lucio Dalla</div></div><button class="btn m" aria-label="Dispositivi"><svg class="i "><use href="#dev"/></svg></button><button class="btn " style="color:var(--accent)" aria-label="Rimuovi dai preferiti"><svg class="i f"><use href="#heart"/></svg></button><button class="btn " aria-label="Pausa"><svg class="i f"><use href="#pause"/></svg></button></div><hr><div class="tabs"><a class="tab on" aria-label="Home"><span class="ic"><svg class="i "><use href="#home"/></svg></span>Home</a><a class="tab" aria-label="Cerca"><span class="ic"><svg class="i "><use href="#search"/></svg></span>Cerca</a><a class="tab" aria-label="Libreria"><span class="ic"><svg class="i "><use href="#lib"/></svg></span>Libreria</a><a class="tab" aria-label="Memoria"><span class="ic"><svg class="i "><use href="#mem"/></svg></span>Memoria</a></div></nav></div><p class="note">F-31..F-35, D-152: 20 album, quadrati fissi da 84 dp, titolo (2 righe) e artista (1 riga) sotto. La riga esce dal bordo destro per far capire che scorre (prova a trascinarla).</p><div class="demo" aria-hidden="true"><span class="cv c1" style="--i:0"></span><span class="cv c3" style="--i:1"></span><span class="cv c4" style="--i:2"></span><span class="cv c6" style="--i:3"></span><span class="cv c2" style="--i:4"></span></div><div class="seq"><b>Chiuso</b> sovrapposte → <b>Aperto</b> distanziate, poi la riga scorre. 320 ms, easeOutCubic. Con «riduci movimento» salta allo stato finale.</div></div><div class="ann"><h2 class="cap">Cosa cambia (D-152)</h2><ul><li><b class="tag-f">F-31</b> Quadrati da 84 dp fissi, mai più piccoli. Su desktop il ventaglio usa già 84 dp (<code>min(w·0,26; 84)</code>): resta 84.</li><li><b class="tag-f">F-32</b> Titolo (max 2 righe) e artista (1 riga, grigio) sotto ogni copertina.</li><li><b class="tag-f">F-33</b> 20 album invece di 5. Chiuso resta il ventaglio dei primi 5.</li><li><b class="tag-f">F-34</b> Questo mockup aggiunge lo stato aperto.</li><li><b class="tag-f">F-35</b> Etichetta «titolo, artista»; si apre da tastiera.</li><li><b class="tag-f">D-152</b> Desktop: l’hover apre; si chiude con un tocco fuori o con il secondo tocco, non quando esce il mouse.</li></ul></div></div><div class="row"><div class="col"><h2 class="cap">4 · Desktop aperto (1280 px, ridotto al 75%)</h2><div class="deskwrap"><div class="dev desk"><aside class="side"><div class="nv on"><span class="ic"><svg class="i "><use href="#home"/></svg></span>Home</div><div class="nv"><span class="ic"><svg class="i "><use href="#search"/></svg></span>Cerca</div><hr><div class="nv"><span class="ic"><svg class="i "><use href="#lib"/></svg></span>La tua libreria<button class="btn m" aria-label="Nuova playlist"><svg class="i "><use href="#plus"/></svg></button></div><div class="pl"><span class="rw" style="width:52px;height:52px"><span class="cv ph" style="inset:4px;border-radius:4px"><svg class="i f" style="width:20px;height:20px"><use href="#heart"/></svg></span></span><div class="tx"><div class="t">Preferiti</div><div class="s">Playlist di 6 brani</div></div></div><div class="pl"><span class="rw" style="width:52px;height:52px"><svg class="rg" viewBox="0 0 52 52" style="transform:none"><rect class="ar" x="1.0" y="1.0" width="50" height="50" rx="7.0" stroke-width="2" pathLength="100" stroke-dasharray="100 100"/></svg><span class="cv c1" style="inset:4px;border-radius:4px;display:grid;place-items:center"></span></span><div class="tx"><div class="t">In macchina</div><div class="s">Playlist di 12 brani</div></div></div><div class="pl"><span class="rw" style="width:52px;height:52px"><span class="cv c4" style="inset:4px;border-radius:4px;display:grid;place-items:center"></span></span><div class="tx"><div class="t">Notte</div><div class="s">Playlist di 5 brani</div></div></div><div style="flex:1"></div><hr><div class="nv"><span class="ic"><svg class="i "><use href="#mem"/></svg></span>Memoria</div></aside><main class="main"><div class="in"><div class="hd" style="padding-left:0"><h1>Buon pomeriggio</h1><button class="btn m" aria-label="Attività"><svg class="i " ><use href="#act"/></svg></button><button class="btn m" aria-label="Impostazioni"><svg class="i " ><use href="#set"/></svg></button></div><div style="margin:0 -16px;max-width:520px"><a class="invite" aria-label="Casuale su tutto"><h2>Casuale su tutto</h2><div class="r"><span>33 brani, 1 ora</span><span class="play" style="width:48px;height:48px"><svg class="i " ><use href="#shuf"/></svg></span></div></a><div class="cnt"><a><b>6</b>Preferiti</a><a><b>2</b>Playlist</a><a><b>0</b>Radio</a></div></div><div style="margin:0 -16px"><div class="sec"><h2>Aggiunti da poco</h2><button class="a">Mostra tutti</button></div><div class="orow" tabindex="0" role="list" aria-label="Aggiunti da poco, scorre di lato"><a class="oi" role="listitem" aria-label="Blonde, Frank Ocean"><span class="cv c1"></span><span class="ot">Blonde</span><span class="oa">Frank Ocean</span></a><a class="oi" role="listitem" aria-label="Kid A, Radiohead"><span class="cv c3"></span><span class="ot">Kid A</span><span class="oa">Radiohead</span></a><a class="oi" role="listitem" aria-label="Random Access Memories, Daft Punk"><span class="cv c4"></span><span class="ot">Random Access Memories</span><span class="oa">Daft Punk</span></a><a class="oi" role="listitem" aria-label="La voce del padrone, Franco Battiato"><span class="cv c6"></span><span class="ot">La voce del padrone</span><span class="oa">Franco Battiato</span></a><a class="oi" role="listitem" aria-label="The Dark Side of the Moon, Pink Floyd"><span class="cv c2"></span><span class="ot">The Dark Side of the Moon</span><span class="oa">Pink Floyd</span></a><a class="oi" role="listitem" aria-label="Il dado, Daniele Silvestri"><span class="cv c5"></span><span class="ot">Il dado</span><span class="oa">Daniele Silvestri</span></a><a class="oi" role="listitem" aria-label="Rumours, Fleetwood Mac"><span class="cv c7"></span><span class="ot">Rumours</span><span class="oa">Fleetwood Mac</span></a><a class="oi" role="listitem" aria-label="Homogenic, Björk"><span class="cv c1"></span><span class="ot">Homogenic</span><span class="oa">Björk</span></a><a class="oi" role="listitem" aria-label="Currents, Tame Impala"><span class="cv c3"></span><span class="ot">Currents</span><span class="oa">Tame Impala</span></a><a class="oi" role="listitem" aria-label="Canzoni, Lucio Dalla"><span class="cv c4"></span><span class="ot">Canzoni</span><span class="oa">Lucio Dalla</span></a><a class="oi" role="listitem" aria-label="Studio Uno, Mina"><span class="cv c6"></span><span class="ot">Studio Uno</span><span class="oa">Mina</span></a><a class="oi" role="listitem" aria-label="To Pimp a Butterfly, Kendrick Lamar"><span class="cv c2"></span><span class="ot">To Pimp a Butterfly</span><span class="oa">Kendrick Lamar</span></a><a class="oi" role="listitem" aria-label="Ágætis byrjun, Sigur Rós"><span class="cv c5"></span><span class="ot">Ágætis byrjun</span><span class="oa">Sigur Rós</span></a><a class="oi" role="listitem" aria-label="Hounds of Love, Kate Bush"><span class="cv c7"></span><span class="ot">Hounds of Love</span><span class="oa">Kate Bush</span></a><a class="oi" role="listitem" aria-label="Pet Sounds, The Beach Boys"><span class="cv c1"></span><span class="ot">Pet Sounds</span><span class="oa">The Beach Boys</span></a><a class="oi" role="listitem" aria-label="Discovery, Daft Punk"><span class="cv c3"></span><span class="ot">Discovery</span><span class="oa">Daft Punk</span></a><a class="oi" role="listitem" aria-label="Crêuza de mä, Fabrizio De André"><span class="cv c4"></span><span class="ot">Crêuza de mä</span><span class="oa">Fabrizio De André</span></a><a class="oi" role="listitem" aria-label="OK Computer, Radiohead"><span class="cv c6"></span><span class="ot">OK Computer</span><span class="oa">Radiohead</span></a><a class="oi" role="listitem" aria-label="Nevermind, Nirvana"><span class="cv c2"></span><span class="ot">Nevermind</span><span class="oa">Nirvana</span></a><a class="oi" role="listitem" aria-label="Abbey Road, The Beatles"><span class="cv c5"></span><span class="ot">Abbey Road</span><span class="oa">The Beatles</span></a></div><div class="fanh">Aperto con il mouse. Si chiude con un tocco fuori o con un secondo tocco.</div></div><div style="margin:0 -16px;max-width:520px"><div class="sec"><h2>Riprendi</h2></div><div class="li"><span class="rw" style="width:52px;height:52px"><span class="cv c1" style="inset:4px;border-radius:4px"></span></span><div class="tx"><div class="t">Cara</div><div class="s">Brano 3 di 6 da In macchina</div></div></div><div class="li last"><span class="rw" style="width:52px;height:52px"><span class="cv c1" style="inset:4px;border-radius:4px"></span></span><div class="tx"><div class="t">Futura</div><div class="s">Mancano 2 minuti</div></div></div></div></div></main><footer class="bar"><div class="l"><span class="rw" style="width:56px;height:56px"><svg class="rg" viewBox="0 0 56 56"><circle class="tr" cx="28.0" cy="28.0" r="26.5" stroke-width="3"/><circle class="ar" cx="28.0" cy="28.0" r="26.5" stroke-width="3" pathLength="100" stroke-dasharray="38 100"/></svg><span class="cv c1" style="inset:6px;border-radius:50%"></span></span><div style="min-width:0"><div style="font:var(--body-l)">Cara</div><div style="font:var(--small);color:var(--muted)">Lucio Dalla</div></div><button class="btn " style="color:var(--accent)" aria-label="Rimuovi dai preferiti"><svg class="i f"><use href="#heart"/></svg></button></div><div class="c"><div class="ctl"><button class="btn m" aria-label="Casuale"><svg class="i "><use href="#shuf"/></svg></button><button class="btn " aria-label="Precedente"><svg class="i f"><use href="#prev"/></svg></button><button class="play" aria-label="Pausa"><svg class="i f"><use href="#pause"/></svg></button><button class="btn " aria-label="Successivo"><svg class="i f"><use href="#next"/></svg></button><button class="btn m" aria-label="Ripeti"><svg class="i "><use href="#rep"/></svg></button></div><div class="sk"><span>1:38</span><div class="seek"><i style="width:38%"></i><b style="left:calc(38% - 6px)"></b></div><span>4:19</span><span class="chip">1×</span></div></div><div class="r"><button class="btn m" aria-label="Testo"><svg class="i "><use href="#lyr"/></svg></button><button class="btn m" aria-label="Coda"><svg class="i "><use href="#que"/></svg></button><button class="btn m" aria-label="Dispositivi"><svg class="i "><use href="#dev"/></svg></button><button class="btn m" aria-label="Muto"><svg class="i "><use href="#vol"/></svg></button><div class="seek vol"><i style="width:70%"></i><b style="left:calc(70% - 6px)"></b></div></div></footer></div></div><p class="note" style="max-width:none">Quadrati ancora da 84 dp (stesso token del telefono): sono visibili 10 album, gli altri 10 si raggiungono con lo scorrimento orizzontale.</p></div></div></div></body></html>

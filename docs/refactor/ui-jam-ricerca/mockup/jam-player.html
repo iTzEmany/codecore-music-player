@@ -1,0 +1,219 @@
+<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Jam e player - prima e dopo</title>
+<link rel="stylesheet" href="../../ui-fluida/mockup/tokens.css"><style>*{box-sizing:border-box;margin:0}
+html{background:var(--s1)}
+body{background:var(--s1);color:var(--text);font:var(--body);padding:24px;min-width:0}
+h1{font:var(--title);margin-bottom:4px}
+.lead{color:var(--muted);margin-bottom:24px;max-width:90ch}
+h2{font:var(--body-l);color:var(--accent-soft);margin:32px 0 12px;border-bottom:var(--sep);padding-bottom:8px}
+.cols{display:flex;gap:32px;align-items:flex-start;flex-wrap:wrap}
+.col{flex:none}
+.cap{font:var(--small);color:var(--muted);margin:8px 0 0;max-width:360px}
+.cap b{color:var(--text);font-weight:600;display:block;margin-bottom:2px}
+.prima{width:360px;display:block;border:1px solid var(--s3);border-radius:var(--r-sheet)}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent-soft);outline-offset:2px}
+svg.i{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+svg.i.f{fill:currentColor}
+.ph{position:relative;width:360px;height:780px;background:var(--bg);border:1px solid var(--s3);border-radius:var(--r-sheet);overflow:hidden;display:flex;flex-direction:column}
+.sb{height:24px;display:flex;justify-content:space-between;align-items:center;padding:0 16px;font:var(--small);flex:none}
+.sb span:last-child{display:flex;gap:6px;align-items:center}
+.sb i{display:block;width:14px;height:8px;border:1.5px solid var(--text);border-radius:2px}
+.sb b{display:block;width:12px;height:10px;background:var(--text);clip-path:polygon(0 100%,100% 0,100% 100%)}
+.gest{height:20px;flex:none;display:flex;justify-content:center;align-items:center;margin-top:auto}
+.gest::after{content:"";width:108px;height:4px;border-radius:2px;background:var(--faint)}
+.ib{width:var(--target);height:var(--target);display:grid;place-items:center;border-radius:50%;color:var(--text);flex:none}
+.ib.m{color:var(--muted)}
+.ib:active{transform:scale(.92);transition:transform var(--t-press) var(--ease-out)}
+.mut{color:var(--muted)}.num{font-variant-numeric:tabular-nums}.small{font:var(--small)}
+.hd{height:56px;display:flex;align-items:center;justify-content:space-between;flex:none}
+.hc{text-align:center;display:flex;flex-direction:column;min-width:0}.hc b{font:600 13px/1.3 Figtree,sans-serif}
+.rg{display:flex;justify-content:center;align-items:center;flex:none;padding:4px 0}
+.ti{display:flex;align-items:center;padding:0 8px 0 16px;gap:8px;flex:none}
+.t{font:var(--title);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-top:4px}
+.ar{color:var(--muted);font:var(--body-l);font-weight:400;min-height:var(--target);text-align:left;display:block}
+.ar.txt{min-height:28px;display:flex;align-items:center}
+.chips{display:flex;justify-content:center}
+.chip{display:inline-flex;align-items:center;min-height:var(--target);padding:0 4px}
+.chip span{background:var(--s2);color:var(--accent-soft);font:var(--small);border-radius:var(--r-grid);padding:6px 8px}
+.ctl{display:flex;justify-content:space-evenly;align-items:center;padding:0 8px;flex:none}
+.ib.big svg{width:32px;height:32px}
+.play{width:72px;height:72px;border-radius:50%;background:var(--accent);color:var(--on-accent);display:grid;place-items:center}.play svg{width:32px;height:32px}
+.play.s{width:64px;height:64px}
+.rep{position:relative}.rep em{position:absolute;bottom:8px;width:4px;height:4px;border-radius:50%;background:var(--accent)}.rep svg{color:var(--accent-soft)}
+.ir{display:flex;justify-content:space-around;padding:4px 8px 0;border-top:var(--sep);margin:8px 16px 0;flex:none}
+.lb{min-width:var(--target);min-height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--muted);font:var(--small)}
+/* seek bar */
+.br{display:flex;align-items:center;padding:0 8px 0 16px;gap:4px;flex:none}
+.br .el{min-width:36px;font:var(--small);color:var(--muted)}
+.br .tot{min-width:48px;min-height:48px;display:flex;align-items:center;justify-content:flex-end;font:var(--small);color:var(--muted)}
+.bar{flex:1;height:48px;position:relative;cursor:pointer;touch-action:none}
+.bar .trk{position:absolute;left:0;right:0;top:22px;height:4px;border-radius:2px;background:var(--s3)}
+.bar .fill{position:absolute;left:0;top:0;bottom:0;border-radius:2px;background:var(--accent)}
+.bar .kn{position:absolute;top:16px;width:16px;height:16px;margin-left:-8px;border-radius:50%;background:var(--accent-soft)}
+.bar.drag .kn{transform:scale(1.5);box-shadow:none}
+.bar .halo{display:none;position:absolute;top:0;width:48px;height:48px;margin-left:-24px;border-radius:50%;background:var(--accent);opacity:.28;pointer-events:none}
+.bar .tip{display:none;position:absolute;top:-30px;transform:translateX(-50%);background:var(--accent-soft);color:var(--on-accent);font:600 12px/1 Figtree,sans-serif;padding:6px 8px;border-radius:var(--r-grid);pointer-events:none}
+.bar.drag .halo,.bar.drag .tip{display:block}
+.el.on{color:var(--accent-soft);font-weight:700}
+/* jam */
+.pp{display:flex;align-items:center;justify-content:space-between;padding:0 8px 0 16px;flex:none;min-height:48px}
+.av{display:flex;padding-left:10px}
+.av span{width:32px;height:32px;margin-left:-10px;border-radius:50%;border:2px solid var(--bg);display:grid;place-items:center;font:600 12px/1 Figtree,sans-serif}
+.pn{padding:0 16px;font:var(--body);color:var(--muted);flex:none;min-height:20px}.pn b{color:var(--text);font-weight:600}
+.txb{min-height:var(--target);padding:0 8px;font:var(--body-l);display:inline-flex;align-items:center;border-radius:var(--r-grid)}
+.txb.end{color:var(--error)}.txb.out{color:var(--text)}
+.qh{display:flex;justify-content:space-between;align-items:baseline;padding:8px 16px 0;flex:none}.qh h3{font:var(--body-l)}
+.qr{display:flex;align-items:center;gap:8px;min-height:64px;padding:0 0 0 16px;border-bottom:var(--sep)}
+.qr .cv{width:52px;height:52px;display:grid;place-items:center;flex:none}
+.qr .tx{flex:1;min-width:0}.qr b{display:block;font:var(--body-l);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qr.now b{color:var(--accent-soft)}
+.qr span.s{display:block;font:var(--small);color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qs{overflow:hidden;flex:1;min-height:0}
+.cd{padding:16px 0;border-bottom:var(--sep)}.cd h3{font:var(--body-l)}.cd h4{font:var(--small);color:var(--muted);margin-top:12px}
+.ch{display:flex;justify-content:space-between;align-items:center;min-height:32px}.cd p{margin-top:4px}
+.ly{font:var(--body-l);font-weight:400;padding:4px 0}.ly.cur{font-weight:600}
+.tx2{min-height:var(--target);padding:0 8px;color:var(--accent-soft);font:var(--body-l);display:inline-flex;align-items:center}
+.scr{padding:0 16px;overflow:hidden;flex:1}
+.sheet{position:absolute;left:0;right:0;bottom:0;height:560px;background:var(--s1);border-radius:var(--r-sheet) var(--r-sheet) 0 0;border-top:1px solid var(--s3);z-index:6;display:flex;flex-direction:column;overflow:hidden}
+.sheet .hdl{width:32px;height:4px;border-radius:2px;background:var(--faint);margin:12px auto 4px;flex:none}
+.sheet .qh{padding-top:8px}.sheet .qh h3{font:var(--title)}
+.dim{position:absolute;inset:0;background:rgba(7,5,12,.72);z-index:5}
+.dlg{position:absolute;left:32px;right:32px;top:50%;transform:translateY(-50%);background:var(--s2);border-radius:var(--r-dock);padding:24px 24px 12px;z-index:6}
+.dlg h3{font:var(--title)}.dlg p{margin-top:12px;color:var(--muted);font:var(--body-l);font-weight:400}
+.dlg .ac{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+.sc{transform-origin:0 0}
+.fr{border:1px solid var(--s3);border-radius:var(--r-sheet);overflow:hidden;background:var(--bg);display:flex;flex-direction:column;width:1280px;height:800px}
+.dsk{display:flex;flex:1;justify-content:center;gap:48px;min-height:0;padding-bottom:16px}
+.dsk .pl{width:520px;display:flex;flex-direction:column;justify-content:center}.dsk .side{width:440px;display:flex;flex-direction:column;min-height:0;padding-top:24px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head><body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<symbol id="down" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+<symbol id="more" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></symbol>
+<symbol id="more-h" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></symbol>
+<symbol id="car" viewBox="0 0 24 24"><path d="M4 16v-4l2-5h12l2 5v4zM4 16v3h3v-3M17 16v3h3v-3M4 12h16"/></symbol>
+<symbol id="heart" viewBox="0 0 24 24"><path d="M12 20s-8-4.8-8-10.5A4.3 4.3 0 0 1 12 7a4.3 4.3 0 0 1 8 2.5C20 15.200 12 20 12 20z"/></symbol>
+<symbol id="shuffle" viewBox="0 0 24 24"><path d="M3 7h3c5 0 5 10 10 10h5M3 17h3c1.500 0 2.600-.8 3.500-2M13.500 9C14.400 7.800 15.500 7 17 7h4M18 4l3 3-3 3M18 14l3 3-3 3"/></symbol>
+<symbol id="prev" viewBox="0 0 24 24"><path d="M6 5v14M19 5v14L9 12z"/></symbol>
+<symbol id="next" viewBox="0 0 24 24"><path d="M18 5v14M5 5v14l10-7z"/></symbol>
+<symbol id="pause" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14" stroke-width="3.500"/></symbol>
+<symbol id="repeat" viewBox="0 0 24 24"><path d="M4 11V9a2 2 0 0 1 2-2h13M16 4l3 3-3 3M20 13v2a2 2 0 0 1-2 2H5M8 20l-3-3 3-3"/></symbol>
+<symbol id="devices" viewBox="0 0 24 24"><path d="M3 6h14v9H3zM7 19h6M19 9h2v10h-4v-4"/></symbol>
+<symbol id="moon" viewBox="0 0 24 24"><path d="M20 14.500A8 8 0 0 1 9.500 4 8 8 0 1 0 20 14.500z"/></symbol>
+<symbol id="queue" viewBox="0 0 24 24"><path d="M4 6h13M4 11h13M4 16h6M16 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM18 18v-5l3 1"/></symbol>
+<symbol id="grip" viewBox="0 0 24 24"><path d="M5 9h14M5 15h14"/></symbol>
+<symbol id="cov" viewBox="0 0 100 100"><rect width="100" height="100" fill="#C94B2B"/><circle cx="62" cy="38" r="22" fill="#F2C14E"/><rect y="64" width="100" height="36" fill="#1F2A44"/><rect y="64" width="100" height="5" fill="#F4F0FA"/></symbol>
+<symbol id="cov2" viewBox="0 0 100 100"><rect width="100" height="100" fill="#2E6F6A"/><circle cx="30" cy="70" r="26" fill="#E9D8A6"/></symbol>
+<symbol id="cov3" viewBox="0 0 100 100"><rect width="100" height="100" fill="#6B4C9A"/><rect x="20" y="20" width="60" height="60" fill="#F4F0FA"/></symbol>
+<symbol id="cov4" viewBox="0 0 100 100"><rect width="100" height="100" fill="#B8872B"/><circle cx="50" cy="50" r="18" fill="#12081F"/></symbol>
+</svg>
+
+<h1>Player e Jam - prima e dopo</h1>
+<p class="lead">Stesso linguaggio approvato di «In riproduzione» (anello vivo, Disco, Quaderno): la Jam diventa il player con una copertina più piccola, i partecipanti e la coda condivisa. Trascina sull'anello o sulla barra: si muovono insieme.</p>
+
+<h2>Player (F-07, F-03)</h2>
+<div class="cols" id="c-player"></div>
+<h2>Jam, telefono 360 × 780 (F-01, F-02, F-11, F-12, F-13)</h2>
+<div class="cols" id="c-jam"></div>
+<h2>Jam, desktop 1280 × 800 (mostrato al 62%)</h2>
+<div class="cols" id="c-desk"></div>
+
+<script>
+const $=id=>document.getElementById(id);
+const fmt=s=>{s=Math.round(s);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
+const ic=(n,c='')=>`<svg class="i ${c}" aria-hidden="true"><use href="#${n}"/></svg>`;
+const GAP=40, SPAN=320; // gap 40° a destra in alto: l'identità dell'anello (F-03)
+const G={pa:{dur:310,f:.30,anim:1},pd:{dur:310,f:.5},ja:{dur:310,f:.30,anim:1},jg:{dur:310,f:.30,anim:1},jd:{dur:310,f:.30},js:{dur:310,f:.30},dk:{dur:310,f:.30,anim:1}};
+let uid=0;
+function ring(g,S){
+ const c=S/2,r=S/2-6,C=2*Math.PI*r,L=C*SPAN/360,ri=r-12,id='cl'+(uid++);
+ return `<svg class="rs" data-g="${g}" data-c="${c}" data-r="${r}" data-L="${L}" data-C="${C}" width="${S}" height="${S}" viewBox="0 0 ${S} ${S}" role="slider" tabindex="0" aria-label="Posizione nel brano" aria-valuemin="0" aria-valuemax="310" style="touch-action:none;cursor:pointer;flex:none">
+<circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="var(--s3)" stroke-width="12" stroke-linecap="round" stroke-dasharray="${L} ${C}" transform="rotate(${GAP-90} ${c} ${c})"/>
+<circle class="arc" cx="${c}" cy="${c}" r="${r}" fill="none" stroke="var(--accent)" stroke-width="12" stroke-linecap="round" transform="rotate(${GAP-90} ${c} ${c})"/>
+<clipPath id="${id}"><circle cx="${c}" cy="${c}" r="${ri}"/></clipPath>
+<g clip-path="url(#${id})"><svg x="${c-ri}" y="${c-ri}" width="${2*ri}" height="${2*ri}" viewBox="0 0 100 100"><use href="#cov" width="100" height="100"/></svg></g>
+<circle class="th" r="11" fill="var(--accent-soft)" stroke="var(--bg)" stroke-width="3"/>
+<circle class="hit" cx="${c}" cy="${c}" r="${r}" fill="none" stroke="transparent" stroke-width="48"/></svg>`;}
+const bar=(g,drag)=>`<div class="br"><span class="el num" data-g="${g}" data-k="el">0:00</span><div class="bar${drag?' drag':''}" data-g="${g}" role="slider" tabindex="0" aria-label="Posizione nel brano (barra)" aria-valuemin="0" aria-valuemax="310"><div class="trk"><div class="fill"></div></div><div class="halo"></div><div class="tip"></div><div class="kn"></div></div><span class="tot num" aria-label="Durata 5:10">5:10</span></div>`;
+const sb='<div class="sb"><span>9:41</span><span><b></b><i></i></span></div>';
+const covers=['cov','cov2','cov3','cov4'];
+function qrow(i,t,s,now){
+ const cv=now?`<svg width="52" height="52" viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="25" fill="none" stroke="var(--accent)" stroke-width="2" stroke-dasharray="100 160" transform="rotate(-90 26 26)"/><clipPath id="qc${uid}"><circle cx="26" cy="26" r="22"/></clipPath><g clip-path="url(#qc${uid++})"><svg x="4" y="4" width="44" height="44" viewBox="0 0 100 100"><use href="#${covers[i]}" width="100" height="100"/></svg></g></svg>`
+  :`<svg width="48" height="48" viewBox="0 0 100 100" style="border-radius:var(--r-list)" aria-hidden="true"><use href="#${covers[i]}" width="100" height="100"/></svg>`;
+ return `<div class="qr${now?' now':''}"><div class="cv">${cv}</div><div class="tx"><b>${t}</b><span class="s">${s}</span></div><button class="ib m" aria-label="Altre azioni su ${t}">${ic('more')}</button><button class="ib m" aria-label="Riordina ${t}">${ic('grip')}</button></div>`;}
+const queue=`<div class="qh"><h3>Coda condivisa</h3><span class="small mut">4 brani</span></div><div class="qs">${
+ qrow(0,'Futura','Lucio Dalla · aggiunto da Emanuele',1)+qrow(1,'Get Lucky','Daft Punk · aggiunto da Giulia')+qrow(2,'Caruso','Lucio Dalla · aggiunto da Marco')+qrow(3,'Anna e Marco','Lucio Dalla · aggiunto da Sara')}</div>`;
+const avatars=`<div class="av" role="img" aria-label="5 partecipanti: Emanuele (host), Giulia, Marco, Sara, Luca">
+<span style="background:var(--accent);color:var(--on-accent)">E</span><span style="background:var(--accent-soft);color:var(--on-accent)">G</span><span style="background:color-mix(in srgb,var(--accent) 45%,var(--s2));color:var(--text)">M</span><span style="background:var(--s3);color:var(--accent-soft)">S</span><span style="background:var(--s2);color:var(--muted);outline:1px solid var(--s3);outline-offset:-3px">+1</span></div>`;
+const names='<div class="pn"><b>Emanuele (host)</b>, Giulia, Marco +2</div>';
+const act=h=>h?'<button class="txb end">Termina Jam</button>':'<button class="txb out">Esci dalla Jam</button>';
+function player(g,drag){
+ return `<div class="ph">${sb}<div class="hd"><button class="ib" aria-label="Indietro" style="margin-left:8px">${ic('down')}</button><div class="hc"><span class="small mut">In riproduzione da</span><b>Album · Dalla</b></div><div style="display:flex;width:96px;justify-content:flex-end;margin-right:8px"><button class="ib" aria-label="Modalità in auto">${ic('car')}</button><button class="ib" aria-label="Altre azioni">${ic('more-h')}</button></div></div>
+<div class="rg">${ring(g,328)}</div>
+<div class="ti"><div style="min-width:0;flex:1"><div class="t">Futura</div><button class="ar">Lucio Dalla</button></div><button class="ib" aria-label="Rimuovi dai preferiti" style="color:var(--accent)">${ic('heart','f')}</button></div>
+${bar(g,drag)}
+<div class="chips"><button class="chip" aria-label="Qualità: MP3, 320 kbps"><span>MP3 320 kbps</span></button><button class="chip" aria-label="Velocità: 1x"><span>1×</span></button></div>
+<div class="ctl"><button class="ib m" aria-label="Casuale">${ic('shuffle')}</button><button class="ib big" aria-label="Precedente">${ic('prev','f')}</button><button class="play" aria-label="Pausa">${ic('pause')}</button><button class="ib big" aria-label="Successivo">${ic('next','f')}</button><button class="ib rep" aria-label="Ripeti: tutti">${ic('repeat')}<em></em></button></div>
+<div class="ir"><button class="lb">${ic('devices')}<span>Dispositivi</span></button><button class="lb">${ic('moon')}<span>Timer</span></button><button class="lb">${ic('queue')}<span>Coda</span></button></div><div class="gest"></div></div>`;}
+const hdJam=`<div class="hd"><button class="ib" aria-label="Indietro" style="margin-left:8px">${ic('down')}</button><div class="hc"><span class="small mut">Sessione condivisa</span><b>Jam</b></div><div style="display:flex;width:96px;justify-content:flex-end;margin-right:8px"><button class="ib" aria-label="Modalità in auto">${ic('car')}</button><button class="ib" aria-label="Altre azioni">${ic('more-h')}</button></div></div>`;
+const ctlJam=`<div class="ctl"><button class="ib m" aria-label="Casuale">${ic('shuffle')}</button><button class="ib big" aria-label="Precedente">${ic('prev','f')}</button><button class="play" aria-label="Pausa">${ic('pause')}</button><button class="ib big" aria-label="Successivo">${ic('next','f')}</button><button class="ib rep" aria-label="Ripeti: tutti">${ic('repeat')}<em></em></button></div>`;
+const irJam=`<div class="ir"><button class="lb">${ic('devices')}<span>Dispositivi</span></button><button class="lb">${ic('moon')}<span>Timer</span></button><button class="lb">${ic('queue')}<span>Coda</span></button></div>`;
+const chipsJam='<div class="chips"><button class="chip" aria-label="Qualità: MP3, 320 kbps"><span>MP3 320 kbps</span></button><button class="chip" aria-label="Velocità: 1x"><span>1×</span></button></div>';
+const tiJam=`<div class="ti"><div style="min-width:0;flex:1"><div class="t">Futura</div><button class="ar">Lucio Dalla</button></div><button class="ib" aria-label="Rimuovi dai preferiti" style="color:var(--accent)">${ic('heart','f')}</button></div>`;
+const sheet=`<div class="dim"></div><div class="sheet" role="dialog" aria-label="Coda condivisa"><div class="hdl"></div>${queue.replace('<div class="qs">','<div class="qs" style="margin-top:8px">')}</div>`;
+const dlgH=`<div class="dim"></div><div class="dlg" role="alertdialog" aria-label="Terminare la Jam per tutti?"><h3>Terminare la Jam per tutti?</h3><p>I 4 ospiti verranno disconnessi e la coda condivisa verrà chiusa.</p><div class="ac"><button class="txb" style="color:var(--accent-soft)">Annulla</button><button class="txb end">Termina</button></div></div>`;
+function jam(g,host,ov){
+ return `<div class="ph">${sb}${hdJam}<div class="pp">${avatars}${act(host)}</div>${names}
+<div class="rg" style="padding:4px 0">${ring(g,260)}</div>${tiJam}${bar(g)}${chipsJam}${ctlJam}${irJam}<div class="gest"></div>${ov==='dlg'?dlgH:ov==='sheet'?sheet:''}</div>`;}
+const lyr='<section class="cd"><div class="ch"><h3>Testo</h3><button class="tx2">Traduci</button></div><p class="ly mut">Riga precedente del testo sincronizzato</p><p class="ly cur">Riga corrente, evidenziata</p><p class="ly mut">Riga successiva del testo</p></section>';
+const cur='<section class="cd"><div class="ch"><h3>Curiosità</h3></div><h4>Sul brano</h4><p>«Futura» apre l’album «Dalla», uscito nel 1980. Racconta un amore che nasce sotto lo sguardo di un futuro incerto.</p><h4>Sull’artista</h4><p>Lucio Dalla (Bologna, 1943 - Montreux, 2012), cantautore e polistrumentista.</p><div style="display:flex;justify-content:space-between;align-items:center"><span class="small mut">Fonte: Wikipedia</span><button class="tx2">Copia link</button></div></section>';
+const jamScroll=`<div class="ph">${sb}<div style="height:40px;flex:none"></div><div class="scr">${lyr}${cur}</div><div class="gest"></div></div>`;
+const col=(cap,inner,w)=>`<div class="col"${w?` style="width:${w}px"`:''}>${inner}<div class="cap">${cap}</div></div>`;
+const img=(f,alt)=>`<img class="prima" src="img/${f}" width="360" alt="${alt}">`;
+$('c-player').innerHTML=
+ col('<b>Prima</b>Solo l’anello: nessuna barra (F-07).',img('phone_now_playing.png','Player attuale'))+
+ col('<b>Dopo - anello e barra in sincrono</b>F-07: barra rimessa tra i due tempi, sotto titolo e artista. Tempi ai lati della barra, chip qualità e velocità sotto, centrati: la riga del seek resta pulita e i chip tengono il bersaglio da 48 dp. Anello 12 dp con vuoto da 40° in alto a destra e pallino a fine arco (F-03).',player('pa'))+
+ col('<b>Dopo - trascinando la barra</b>Il dito è sulla barra: l’anello segue con la stessa frazione e il tempo trascinato (2:35) compare sul pallino e al posto di quello trascorso. Seek al rilascio.',player('pd',1));
+$('c-jam').innerHTML=
+ col('<b>Prima</b>Due «player» diversi: anello pieno da 4 dp non seekable, «Termina Jam» senza conferma, ✕ ⋮ ≡ che troncano il testo.',img('phone_jam.png','Jam attuale'))+
+ col('<b>Dopo - host</b>F-01/F-02: è il player: stessa copertina con anello 12 dp seekable, stessa barra, stessi comandi con precedente e successivo per tutti (D-160: prev torna all’inizio dopo 3 s, entro 3 s va al brano prima) e stessa riga Dispositivi · Timer · Coda. Cambia solo l’intestazione (D-159, F-11, F-12): «Jam» al centro, avatar 32 dp con i colori dell’accento e i nomi, «Termina Jam» in colore errore sotto le frecce. La copertina scende a 260 dp, quanto serve all’intestazione più alta.',jam('ja',1))+
+ col('<b>Dopo - scorrendo</b>Come nel player: sotto i comandi, Testo e Curiosità. Niente coda sullo schermo (D-159).',jamScroll)+
+ col('<b>Dopo - «Coda» aperta</b>F-13: la coda condivisa è un foglio dal basso, dal tasto «Coda». Righe con cover 48, titolo, «Artista · aggiunto da…», solo ⋮ e ≡ da 48 dp (via ✕: la rimozione sta nel ⋮); anello da 2 dp sul brano in corso.',jam('js',1,'sheet'))+
+ col('<b>Dopo - ospite</b>Uguale all’host (anche i comandi, D-160): cambia solo l’azione, «Esci dalla Jam» in colore normale, senza conferma perché non chiude per gli altri.',jam('jg',0))+
+ col('<b>Conferma di «Termina»</b>F-11: la Jam si chiude per tutti solo dopo la conferma. «Termina» in colore errore, «Annulla» in accento chiaro, 48 dp.',jam('jd',1,'dlg'));
+$('c-desk').innerHTML=col(`<b>Desktop - dopo</b>Come il desktop del player (D-159, D-160): colonna sinistra con anello 360 dp, barra e tutti i comandi; a destra Testo, Curiosità e la Coda condivisa come pannello laterale, perché sul desktop il player tiene già Prossimi in quella colonna. Solo l’intestazione cambia: «Jam», partecipanti, «Termina Jam». F-01/F-11/F-12/F-13.`,
+ `<div style="width:800px;height:500px"><div class="sc" style="transform:scale(.625)"><div class="fr"><div class="sb" style="height:32px;padding:0 24px"><span>Codecore</span><span class="mut">Linux · 1280×800</span></div>
+<div class="hd" style="padding:0 24px;max-width:1012px;width:100%;margin:0 auto"><button class="ib" aria-label="Indietro">${ic('down')}</button><div class="hc"><span class="small mut">Sessione condivisa</span><b>Jam</b></div><button class="ib" aria-label="Altre azioni">${ic('more-h')}</button></div>
+<div style="display:flex;align-items:center;gap:16px;justify-content:center;flex:none"><div class="pp" style="padding:0">${avatars}</div><div class="pn" style="padding:0;flex:none"><b>Emanuele (host)</b>, Giulia, Marco +2</div>${act(1)}</div>
+<div class="dsk" style="padding-top:8px"><div class="pl"><div class="rg">${ring('dk',300)}</div><div class="ti" style="padding-left:0"><div style="flex:1;min-width:0"><div class="t">Futura</div><button class="ar">Lucio Dalla</button></div><button class="ib" style="color:var(--accent)">${ic('heart','f')}</button></div><div style="margin:0 -8px 0 -16px">${bar('dk')}</div>${ctlJam}</div>
+<div class="side" style="padding-top:0;overflow:hidden">${lyr}${cur.replace('<h4>Sull’artista</h4><p>Lucio Dalla (Bologna, 1943 - Montreux, 2012), cantautore e polistrumentista.</p>','')}${queue}</div></div></div></div></div>`);
+// seek: stato per gruppo, anello e barra in sincrono
+const q=g=>document.querySelectorAll(`[data-g="${g}"]`);
+function draw(g){const s=G[g],f=s.f,t=f*s.dur;
+ q(g).forEach(e=>{
+  if(e.classList.contains('rs')){const c=+e.dataset.c,r=+e.dataset.r,a=(GAP+SPAN*f)*Math.PI/180;
+   e.querySelector('.arc').setAttribute('stroke-dasharray',`${e.dataset.L*f} ${e.dataset.C}`);
+   const th=e.querySelector('.th');th.setAttribute('cx',c+r*Math.sin(a));th.setAttribute('cy',c-r*Math.cos(a));
+   e.setAttribute('aria-valuenow',Math.round(t));e.setAttribute('aria-valuetext',fmt(t)+' di '+fmt(s.dur));}
+  else if(e.classList.contains('bar')){e.querySelector('.fill').style.width=f*100+'%';e.querySelector('.kn').style.left=f*100+'%';
+   e.querySelector('.halo').style.left=f*100+'%';const tp=e.querySelector('.tip');tp.style.left=f*100+'%';tp.textContent=fmt(t);
+   e.setAttribute('aria-valuenow',Math.round(t));e.setAttribute('aria-valuetext',fmt(t)+' di '+fmt(s.dur));}
+  else if(e.dataset.k==='el'){e.textContent=fmt(t);e.classList.toggle('on',!!e.closest('.ph')&&G[g]===G.pd);}
+ });}
+const dragging={};
+document.querySelectorAll('.rs,.bar').forEach(e=>{const g=e.dataset.g,s=G[g];
+ const at=ev=>{const b=e.getBoundingClientRect();
+  if(e.classList.contains('bar')){s.f=Math.min(1,Math.max(0,(ev.clientX-b.left)/b.width));}
+  else{const k=b.width/e.viewBox.baseVal.width,c=e.viewBox.baseVal.width/2,x=(ev.clientX-b.left)/k-c,y=(ev.clientY-b.top)/k-c;
+   let d=Math.atan2(x,-y)*180/Math.PI;if(d<0)d+=360;if(d<GAP)d=d<GAP/2?0:GAP;
+   const n=(d-GAP)/SPAN;s.f=d===0?(s.f>.5?1:0):Math.min(1,Math.max(0,n));}
+  draw(g);};
+ e.addEventListener('pointerdown',ev=>{dragging[g]=1;e.setPointerCapture(ev.pointerId);at(ev)});
+ e.addEventListener('pointermove',ev=>dragging[g]&&at(ev));
+ e.addEventListener('pointerup',()=>dragging[g]=0);
+ e.addEventListener('keydown',ev=>{const d={ArrowRight:5,ArrowUp:5,ArrowLeft:-5,ArrowDown:-5}[ev.key];if(d){s.f=Math.min(1,Math.max(0,s.f+d/s.dur));draw(g);ev.preventDefault()}});});
+Object.keys(G).forEach(draw);
+// avanzamento lento (un giro in ~60 s), fermo con «riduci movimento»
+if(!matchMedia('(prefers-reduced-motion:reduce)').matches){let p=performance.now();
+ const tick=n=>{const dt=(n-p)/1000;p=n;for(const g in G)if(G[g].anim&&!dragging[g]){G[g].f=(G[g].f+dt/60)%1;draw(g)}requestAnimationFrame(tick)};requestAnimationFrame(tick)}
+</script></body></html>

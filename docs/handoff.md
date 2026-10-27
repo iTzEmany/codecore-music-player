@@ -34,6 +34,18 @@
 - Misure: `python3 scripts/perf_device.py <id> --label <l> [--no-push] [--only "A,B"]`; sull'app vera `--real --apk <apk>` (sola lettura).
 - Su entrambi: mai toccare rotazione o altre impostazioni di sistema; «Non disturbare» (`cmd notification set_dnd priority|off`) solo durante le misure, poi `off`.
 
+## Prossimo: refactor «ui-jam-ricerca» (fasi 58–64, piano del 2026-10-27)
+Jam = player con anello e barra, Ricerca con la barra sopra il dock, ⋮ sempre a foglio, Home «aggiunti da poco» che scorre, scheda del testo stabile.
+Ordine: 58 rete · 59 player e seek (testo per primo) · 60 Ricerca e dock · 61 fogli ovunque · 62 Home · 63 Jam = player · 64 chiusura.
+
+Prompt: `/obiettivo fase 58`, **dopo** le fasi 55–57 dello streaming veloce (Prossimi obiettivi, punto 0).
+
+### Da sapere
+- Analisi e rilievi F-01..F-58: `docs/refactor/ui-jam-ricerca/analisi.md` (sezioni «Scelte», «Arrivo — UI», «Rete»).
+- Mockup approvati (specifica visiva): `docs/refactor/ui-jam-ricerca/mockup/jam-player.html`, `ricerca.html`, `home-aggiunti.html`, `fogli.html`; stile e token da `docs/refactor/ui-fluida/mockup/tokens.css`.
+- Decisioni D-147..D-162 in `docs/decisioni.md` (D-161 presa in autonomia: scheda del testo a tutta larghezza e 5 righe fisse).
+- `docs/prossimi-lavori.md` non è tracciato da git: F-29/F-30 si verificano in 60.5.
+
 ## Prompt di avvio della prossima sessione
 ```
 Leggi docs/handoff.md, docs/gotchas.md e docs/PROGRESS.md. <obiettivo scelto fra quelli sotto>
