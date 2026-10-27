@@ -40,6 +40,7 @@ Leggi docs/handoff.md, docs/gotchas.md e docs/PROGRESS.md. <obiettivo scelto fra
 ```
 
 ## Prossimi obiettivi
-0. **(Consigliato) Il kickoff di `docs/prossimi-lavori.md`** scelto dall'utente; dentro o subito dopo, i rilievi della Jam e il completamento intero rinviati qui sopra.
+0. **(Consigliato) Feature «Streaming veloce», fasi 55–57** (kickoff del 2026-10-27: `docs/feature-streaming-veloce.md`, R-68…R-87, D-138…D-146). Prompt: `/obiettivo fase 55` (poi 56 e 57, una PR per fase). La 55 misura soltanto e scrive la tabella «Prima»; se su Android l'avvio di yt-dlp supera 4 s si prosegue lo stesso (D-146). Motorola da /obiettivo se collegato (backup prima). `docs/prossimi-lavori.md` non è nel repo: la 57.5 lo aggiorna solo se c'è.
+   Dopo, i rilievi della Jam e il completamento intero rinviati qui sopra.
 1. **Debito noto dello streaming** (in fondo a `docs/fase-47-jam-online.md`): tre meccanismi «online → libreria», `DownloadsNotifier` grande, prefetch che ricomincia, file auto-scaricato dall'uscita Jam non fissato, `gapless window edit failed` su una coda di 2 brani, `discovery: socket error` ogni 2 s senza rete.
 2. **Rotellina Attività a 120 fps** mentre un'attività gira (costo di batteria) e picchi di build al cambio di brano (`track_art.dart`); misura prima e dopo con `--only`.

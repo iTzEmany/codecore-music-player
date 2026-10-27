@@ -70,6 +70,9 @@ un'unica codebase Flutter per Android, Windows e Linux. Uso personale, niente co
 | 52 | `fase-52-testo-e-curiosita.md` | Testo e curiosità complete: `LyricsChain` (LRCLIB → NetEase → lyrics.ovh), stato per parte con riprova a 30 giorni, testo dell'utente protetto, `CuriosityService`, «Curiosità automatiche», arricchimento completo dopo il download |
 | 53 | `fase-53-completamento-e-registro.md` | Completamento e Registro: `UserActivity`, `EnrichCompleter` piano e subito, «Completa l'arricchimento», voce con Pausa/Riprendi, Registro nel DB per 30 giorni con ogni attività e riga per giro, peso in Memoria, misura sul Mi A3 |
 | 54 | `fase-54-copertina-a-mano.md` | Copertina a mano: selettore unico (file, proposte online con la misura, libreria) per brano, album e playlist, copertina d'album da `cover_source`, protezione in ogni scrittore, «Ripristina copertina originale», backup |
+| 55 | `fase-55-misura-streaming.md` | Misura dello streaming: cronometri nel preparer e tap → primo suono in `codecore.log`, `scripts/stream_times.py`, prova dell'URL col yt-dlp vero, tabella «Prima» su Linux, Mi A3 e Motorola |
+| 56 | `fase-56-partenza-da-url.md` | Partenza dall'URL: righe `--print before_dl` di yt-dlp (desktop e canale Android), `StreamPreparer.start()`/`restart()`, `loadUri` con header e ripiego sul file, URL scaduto e cambio di rete |
+| 57 | `fase-57-coda-e-transizioni.md` | Coda e transizioni: URL anticipato dal prefetch, gapless e crossfade da URL verso file, Jam invariata, misura finale (RNF-08…10), rimisura delle soglie della fase 38 |
 
 Dopo la **Fase 3** l'app è già usabile come lettore. Le fasi 5 e 6 sono indipendenti tra loro. La fase 8 (Jam) richiede la 6.
 

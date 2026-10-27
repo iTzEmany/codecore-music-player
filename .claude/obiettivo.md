@@ -4,7 +4,7 @@
 
 ## Documenti da leggere all'avvio
 - `CLAUDE.md`, `docs/01-regole-di-lavoro.md`, `docs/PROGRESS.md`, `docs/decisioni.md`, `docs/handoff.md`, `docs/gotchas.md`
-- Feature in corso: `docs/feature-arricchimento.md` (fasi 50–54) e solo il `docs/fase-N-*.md` corrente; `docs/feature-streaming.md` solo se serve
+- Feature in corso: `docs/feature-streaming-veloce.md` (fasi 55–57) e solo il `docs/fase-N-*.md` corrente; `docs/feature-streaming.md` e `docs/feature-arricchimento.md` solo se servono
 
 ## Modalità
 - **PR**: ramo da `origin/master` → PR → `gh pr merge --auto --squash`. **Una PR per fase, un commit per task** (memoria).
@@ -37,7 +37,7 @@
 - Nessun pacchetto nuovo (fasi 45–54). Schema DB: v15 solo nella fase 50, in un solo passo di migrazione; poi invariato
 - Chiamate dal vivo a Deezer, MusicBrainz, NetEase, lyrics.ovh solo per salvare le risposte di test (fixture), mai nella suite
 - Telefono Mi A3 (`0d7ae9df206e`): installare, misurare, pilotare; disinstallare solo con `-k`; mai cancellare dati o file musicali; niente invii/Jam verso altri (D-91)
-- Motorola edge 40 (`ZY22HKD85K`, libreria vera) nelle fasi 50–54 (D-125, D-126): APK debug e prove con i brani presenti; prima chiedi all'utente un backup completo dall'app; firma diversa → fermati, backup confermato, poi `uninstall -k` e ripristino; mai cancellare file musicali
+- Motorola edge 40 (`ZY22HKD85K`, libreria vera) nelle fasi 50–54 e 55–57 (D-125, D-126, D-146): APK debug e prove con i brani presenti; prima chiedi all'utente un backup completo dall'app; firma diversa → fermati, backup confermato, poi `uninstall -k` e ripristino; mai cancellare file musicali
 
 ## Risparmio di token (dalla fase 51: 27,7M, metà nella chat principale)
 - **Chat principale**: fuori dalle aree a rischio leggi solo `git diff --stat` e l'esito del reviewer, mai il diff intero. Niente log lunghi in chat: la CI rossa va subito a `github-ci` con il numero della PR. Raggruppa i controlli in una sola chiamata Bash. A fine fase aggiorna `docs/handoff.md` e chiudi l'obiettivo, invece di proseguire fino alla compattazione.
