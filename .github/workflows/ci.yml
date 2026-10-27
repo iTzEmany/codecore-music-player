@@ -29,31 +29,57 @@ jobs:
     name: Analyze and test
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    outputs:
+      docs: ${{ steps.scope.outputs.docs }}
     steps:
       - uses: actions/checkout@v7
-      - uses: subosito/flutter-action@v2
+        with:
+          # On a PR HEAD is the merge commit: HEAD^1 is the base tip.
+          fetch-depth: 2
+      # A PR touching only documentation skips the toolchain and the suite.
+      # The job always runs (a required check must report); anything unclear
+      # (push, no parent, empty diff) means docs=false, so everything runs.
+      - name: Detect documentation-only PR
+        id: scope
+        run: |
+          docs=false
+          if [ "${{ github.event_name }}" = pull_request ] && files=$(git diff --name-only HEAD^1 HEAD) && [ -n "$files" ]; then
+            docs=true
+            while IFS= read -r f; do
+              case "$f" in docs/*|*.md|.claude/obiettivo.md) ;; *) docs=false ;; esac
+            done <<< "$files"
+          fi
+          echo "docs=$docs" >> "$GITHUB_OUTPUT"
+          echo "Documentation only: $docs"
+      - if: steps.scope.outputs.docs != 'true'
+        uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
           cache: true
-      - run: flutter pub get
-      - name: Generated code is up to date
+      - if: steps.scope.outputs.docs != 'true'
+        run: flutter pub get
+      - if: steps.scope.outputs.docs != 'true'
+        name: Generated code is up to date
         run: |
           dart run build_runner build --delete-conflicting-outputs
           git diff --exit-code -- '*.g.dart'
-      - name: Localisations are up to date
+      - if: steps.scope.outputs.docs != 'true'
+        name: Localisations are up to date
         run: |
           flutter gen-l10n
           git diff --exit-code -- lib/l10n
       - name: Documentation links
         run: python3 scripts/check_docs_links.py
       # Covers lib, test, test/live, test_shots and integration_test.
-      - run: flutter analyze
+      - if: steps.scope.outputs.docs != 'true'
+        run: flutter analyze
       # Opt-in live tests skip themselves (they need CODECORE_LIVE=1).
-      - run: flutter test --reporter expanded
+      - if: steps.scope.outputs.docs != 'true'
+        run: flutter test --reporter expanded
       # A golden that differs leaves its images here: download them to see why.
       - uses: actions/upload-artifact@v7
-        if: failure()
+        if: failure() && steps.scope.outputs.docs != 'true'
         with:
           name: golden-failures
           path: test/goldens/failures/
@@ -65,6 +91,7 @@ jobs:
   test-windows:
     name: Test (Windows)
     needs: check
+    if: needs.check.outputs.docs != 'true'
     runs-on: windows-latest
     timeout-minutes: 30
     steps:
