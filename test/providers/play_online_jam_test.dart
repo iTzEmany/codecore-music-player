@@ -8,6 +8,10 @@ import 'package:codecore/providers/player_providers.dart';
 import 'package:codecore/services/audio/codecore_audio_handler.dart';
 import 'package:codecore/services/audio/online_entries.dart';
 import 'package:codecore/services/audio/play_queue.dart';
+import 'package:codecore/services/jam/jam_models.dart';
+import 'package:codecore/services/jam/jam_online_adder.dart';
+import 'package:codecore/services/stream/stream_cache.dart';
+import 'package:codecore/services/stream/stream_preparer.dart';
 import 'package:codecore/services/online/youtube_service.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
@@ -129,6 +133,44 @@ void main() {
     expect(jamCtl.online, ['abc']);
     expect(jamCtl.files, [ids[0]]);
   });
+
+  test('a Jam entry (own add and own fetch) waits for the file through ready(), never an address (R-83)', () async {
+    final dir = Directory.systemTemp.createTempSync('jam_ready');
+    final prep = _UrlTrapPreparer(TrackRepository(db), dir);
+    final fetched = await jamFetchByVideoId(
+        const JamItem(
+            id: 1, ownerDeviceId: 'o', title: 'Tv', ext: 'm4a', ref: 'yt:youtube:v', videoId: 'v'),
+        prep.ready);
+    expect(fetched!.existsSync(), isTrue);
+
+    final cache = StreamCache(Directory('${dir.path}/c'), freeSpace: () async => null);
+    await cache.open();
+    final sent = <String>[];
+    JamOnlineAdder(
+      ownId: 'me',
+      cache: cache,
+      ready: prep.ready,
+      send: (c) async {
+        sent.add(c.item!.title);
+        return null;
+      },
+      onFailed: (_) {},
+    ).add(_r('w'));
+    await Future<void>.delayed(const Duration(milliseconds: 200));
+    expect(prep.asked, ['youtube:v', 'youtube:w']);
+    expect(sent, ['Tw']);
+  });
+}
+
+/// A preparer that has a YouTube address for every key: asking it for one fails the test.
+class _UrlTrapPreparer extends FakeStreamPreparer {
+  _UrlTrapPreparer(super.tracks, super.dir);
+
+  @override
+  Future<StreamStart> start(String key, YtResult r) => throw StateError('Jam asked for an address');
+
+  @override
+  Future<StreamStart> restart(String key, YtResult r) => throw StateError('Jam asked for an address');
 }
 
 class _SpyJam extends JamController {
