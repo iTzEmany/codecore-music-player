@@ -43,6 +43,11 @@ class _Job {
   /// Token of the running attempt; cancelled on timeout, on leaving the queue, on dispose.
   CancelToken? cancel;
   var dropped = false;
+
+  /// Timings of the last attempt (ms from the start of `_download`); null = not reached.
+  DateTime? t0;
+  int? spawn, downloaded, post, cached;
+  var attempt = 0;
 }
 
 /// Downloads the queue's online tracks into the [StreamCache] ahead of the
@@ -61,6 +66,7 @@ class StreamPreparer {
     this.attemptTimeout = const Duration(minutes: 5),
     this.startTimeout = const Duration(seconds: 90),
     this.stallTimeout = const Duration(seconds: 30),
+    this.clock = DateTime.now,
   }) {
     // A key promoted out of the cache (StreamCache.forget) is no longer ready.
     cache.onForgotten = (key) {
@@ -97,6 +103,9 @@ class StreamPreparer {
 
   /// An attempt that reports no progress for this long is aborted (hung network).
   final Duration stallTimeout;
+
+  /// Time source of the `stream timing` log line (injectable for tests).
+  final DateTime Function() clock;
 
   /// Phase per key, updated only when it changes (never the byte count).
   final phases = ValueNotifier<Map<String, StreamPhase>>({});
@@ -308,6 +317,7 @@ class StreamPreparer {
     Object? error;
     for (var attempt = 1; attempt <= 2 && part == null && !_disposed && !j.dropped; attempt++) {
       try {
+        j.attempt = attempt;
         part = await _download(j);
       } on Object catch (e, st) {
         if (j.dropped) break; // cancelled on purpose
@@ -323,6 +333,7 @@ class StreamPreparer {
             if (mine) _jobs.remove(j.key);
             if (!j.rowId.isCompleted) j.rowId.completeError(e); // enrich must not wait forever
             if (mine && !_disposed) phases.value = {...phases.value}..remove(j.key);
+            _logTiming(j, 'failed');
             return _finish();
           }
         }
@@ -339,6 +350,7 @@ class StreamPreparer {
           return leftover; // File.delete's future type
         }));
       }
+      _logTiming(j, 'dropped');
       return _finish();
     }
     if (_disposed) error = StateError('disposed');
@@ -346,6 +358,8 @@ class StreamPreparer {
       try {
         final file = await cache.put(j.key, part, trim: j.requested);
         j.rowId.complete(await tracks.upsertStreamRow(j.key, j.result, file));
+        j.cached = _ms(j);
+        _logTiming(j, 'ok');
         if (identical(_jobs[j.key], j)) _jobs.remove(j.key);
         _setPhase(j.key, StreamPhase.ready);
         j.done.complete(file);
@@ -355,8 +369,18 @@ class StreamPreparer {
         error = e;
       }
     }
+    _logTiming(j, 'failed');
     _fail(j, error ?? StateError('no download'));
     _finish();
+  }
+
+  int _ms(_Job j) => clock().difference(j.t0!).inMilliseconds;
+
+  /// One line per job: where the time of a streamed track went.
+  void _logTiming(_Job j, String result) {
+    String v(int? x) => x?.toString() ?? '-';
+    AppLog.i('stream timing key=${j.key} requested=${j.requested ? 1 : 0} attempt=${j.attempt} '
+        'spawn=${v(j.spawn)} downloaded=${v(j.downloaded)} post=${v(j.post)} cached=${v(j.cached)} result=$result');
   }
 
   void _finish() {
@@ -371,6 +395,8 @@ class StreamPreparer {
     // A folder and a token per attempt: a hung attempt must not share them with the retry.
     final tmp = Directory(p.join(cache.dir.path, '.dl-$name-${_tmpSeq++}'));
     final cancel = j.cancel = CancelToken();
+    j.t0 = clock();
+    j.spawn = j.downloaded = j.post = j.cached = null;
     try {
       String? path;
       // One attempt that hangs counts as a failed attempt.
@@ -388,10 +414,13 @@ class StreamPreparer {
         arm(startTimeout);
         try {
           await for (final e in youtube.download(j.result, tmp, cancel: cancel)) {
+            j.spawn ??= _ms(j);
             found = e.path ?? found;
+            if (e.path != null) j.downloaded ??= _ms(j);
             // 100% reached: yt-dlp is silent while ffmpeg post-processes; only attemptTimeout applies.
             if (e.total > 0 && e.received >= e.total) downloaded = true;
             if (downloaded) {
+              j.downloaded ??= _ms(j);
               dog?.cancel();
             } else {
               arm(stallTimeout);
@@ -404,6 +433,7 @@ class StreamPreparer {
           dog?.cancel();
         }
         if (stalled) throw TimeoutException('download stalled', stallTimeout);
+        j.post = _ms(j);
         return found;
       })().timeout(attemptTimeout, onTimeout: () {
         cancel.cancel('attempt timed out');

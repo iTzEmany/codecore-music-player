@@ -9,6 +9,7 @@ import 'package:codecore/services/stream/stream_preparer.dart';
 import 'package:dio/dio.dart' show CancelToken;
 import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
+import 'package:flutter/foundation.dart' show debugPrint, DebugPrintCallback;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
 
@@ -109,6 +110,7 @@ void main() {
     Duration attemptTimeout = const Duration(minutes: 5),
     Duration stallTimeout = const Duration(minutes: 5),
     Duration startTimeout = const Duration(minutes: 5),
+    DateTime Function()? clock,
   }) =>
       prep = StreamPreparer(
         attemptTimeout: attemptTimeout,
@@ -120,6 +122,7 @@ void main() {
         isMetered: () async => metered,
         enrich: enrich,
         cooldown: cooldown,
+        clock: clock ?? DateTime.now,
       );
 
   setUp(() async {
@@ -178,6 +181,43 @@ void main() {
     await expectLater(prep.ready('youtube:bad', _r('bad')), throwsA(isA<YtException>()));
     expect(yt.started, ['bad', 'bad']);
     expect(prep.phases.value['youtube:bad'], StreamPhase.failed);
+  });
+
+  group('stream timing line', () {
+    late DebugPrintCallback saved;
+    late List<String> lines;
+    // Each clock read is 10 ms after the previous one.
+    DateTime Function() stepClock() {
+      var n = 0;
+      return () => DateTime(2026).add(Duration(milliseconds: 10 * n++));
+    }
+
+    setUp(() {
+      saved = debugPrint;
+      lines = [];
+      debugPrint = (String? m, {int? wrapWidth}) => lines.add(m ?? '');
+    });
+    tearDown(() => debugPrint = saved);
+
+    String timing() => lines.singleWhere((l) => l.contains('stream timing'));
+
+    test('ok: spawn, downloaded, post and cached in order', () async {
+      make(clock: stepClock());
+      yt.autoFinish = true;
+      yt.progress = const [(100, 100)];
+      await prep.ready('youtube:a', _r('a'));
+      expect(timing(),
+          '[I] stream timing key=youtube:a requested=1 attempt=1 spawn=10 downloaded=20 post=30 cached=40 result=ok');
+    });
+
+    test('failure: missing values are dashes', () async {
+      make(clock: stepClock());
+      yt.autoFinish = true;
+      yt.failuresLeft['bad'] = 2;
+      await expectLater(prep.ready('youtube:bad', _r('bad')), throwsA(isA<YtException>()));
+      expect(timing(),
+          '[I] stream timing key=youtube:bad requested=1 attempt=2 spawn=- downloaded=- post=- cached=- result=failed');
+    });
   });
 
   test('one failure is retried and succeeds', () async {
