@@ -171,6 +171,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   // error there asks the preparer for a new start (R-76).
   bool _fromUrl = false, _recoverOnPlay = false, _errorWhileLoading = false;
   int? _recoveringToken; // the load whose recovery is running
+  int _recoveries = 0; // of this load: after two the file is waited for
   String? _urlKey;
   int? _urlEntry;
   YtResult? _urlResult;
@@ -397,6 +398,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     _loadBusy = true;
     _loadPaused = false;
     _fromUrl = _recoverOnPlay = _errorWhileLoading = false;
+    _recoveries = 0;
     _playWhenReady = play;
     _cancelRadioTimers();
     final id = _queue.currentId;
@@ -547,6 +549,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   /// background) or else the file (waited for). False: a newer load took over.
   Future<bool> _loadStart(StreamPreparer p, StreamStart began, String key,
       YtResult res, int? entryId, int token) async {
+    if (token != _loadToken) return false;
     var file = began.file;
     if (file == null) {
       _waitingStream = false;
@@ -906,7 +909,12 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     final pos = _position;
     _waitingStream = true;
     try {
-      final began = await _asStream(key, p.restart(key, r));
+      final StreamStart began;
+      if (++_recoveries > 2) {
+        began = StreamStart.file(await _asStream<File>(key, p.ready(key, r))); // no more addresses
+      } else {
+        began = await _asStream(key, p.restart(key, r));
+      }
       if (!await _loadStart(p, began, key, r, _urlEntry, token)) return;
       if (_speed != 1.0) await _backend.setSpeed(_speed);
       if (token != _loadToken) return;

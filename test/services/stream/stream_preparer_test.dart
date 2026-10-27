@@ -274,6 +274,14 @@ void main() {
       expect(s.file, isNotNull);
     });
 
+    test('an absurd expire= does not break the attempt: the address is taken as valid for 5 h', () async {
+      yt.urls.add('https://v/a?expire=99999999999999999');
+      final s = await prep.start('youtube:a', _r('a'));
+      expect(s.url, isNotNull);
+      expect(yt.started, ['a']);
+      yt.finish('a');
+    });
+
     test('an address expiring within a minute is not handed out: the file wins', () async {
       yt.autoFinish = true;
       yt.urls.add('https://v/a?expire=${DateTime.now().millisecondsSinceEpoch ~/ 1000 + 30}');

@@ -40,6 +40,9 @@ class FakeStreamPreparer implements StreamPreparer {
   final restarts = <String, List<StreamStart>>{};
   final restarted = <String>[];
 
+  /// Holds `restart` back until completed.
+  Completer<void>? restartGate;
+
   @override
   Future<StreamStart> start(String key, YtResult r) async {
     final u = urls[key];
@@ -49,6 +52,7 @@ class FakeStreamPreparer implements StreamPreparer {
   @override
   Future<StreamStart> restart(String key, YtResult r) async {
     restarted.add(key);
+    await restartGate?.future;
     final next = restarts[key];
     if (next != null && next.isNotEmpty) return next.removeAt(0);
     return StreamStart.file(await ready(key, r));

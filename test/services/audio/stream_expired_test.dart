@@ -33,6 +33,7 @@ void main() {
     late AppDatabase db;
     late FakeBackend backend;
     late FakeStreamPreparer preparer;
+    late OnlineEntries online;
     late CodecoreAudioHandler handler;
     late Directory dir;
     late List<PlaybackFailure> failures;
@@ -43,7 +44,7 @@ void main() {
       failures = [];
       dir = Directory.systemTemp.createTempSync('stream_expired');
       preparer = FakeStreamPreparer(TrackRepository(db), dir);
-      final online = OnlineEntries();
+      online = OnlineEntries();
       handler = CodecoreAudioHandler(backend, PlayQueue(), TrackRepository(db),
           onError: failures.add, online: online, preparer: preparer);
       preparer.urls['youtube:v1'] = (first, const {});
@@ -110,6 +111,42 @@ void main() {
       fail();
       await pumpEventQueue();
       expect(failures.first.reason, PlaybackFailureReason.networkUnavailable);
+    });
+
+    test('a skip during the recovery: the old address is not loaded over the new track', () async {
+      final gate = preparer.restartGate = Completer<void>();
+      preparer.restarts['youtube:v1'] = [StreamStart.url(second, const {})];
+      fail();
+      await pumpEventQueue();
+      await handler.playQueue([online.register(YtResult(
+          id: 'v2', title: 'Two', channel: 'C', artists: const ['A'], album: 'B',
+          duration: const Duration(minutes: 3)))], 0);
+      gate.complete();
+      await pumpEventQueue();
+      expect(backend.loadedUris.map((u) => u.uri), [first]);
+    });
+
+    test('an error during the restart does not start another one; nor does play', () async {
+      final gate = preparer.restartGate = Completer<void>();
+      fail();
+      await pumpEventQueue();
+      fail();
+      await handler.play();
+      await pumpEventQueue();
+      expect(preparer.restarted, ['youtube:v1']);
+      gate.complete();
+      await pumpEventQueue();
+      expect(preparer.restarted, ['youtube:v1']);
+    });
+
+    test('three errors in a row: two restarts, then the file', () async {
+      preparer.restarts['youtube:v1'] = [StreamStart.url(second, const {}), StreamStart.url(second, const {})];
+      for (var i = 0; i < 3; i++) {
+        fail();
+        await pumpEventQueue();
+      }
+      expect(preparer.restarted.length, 2);
+      expect(backend.loaded.single, endsWith('youtube_v1.m4a'));
     });
 
     test('paused: nothing happens until play', () async {

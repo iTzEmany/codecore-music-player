@@ -267,7 +267,7 @@ class StreamPreparer {
     j
       ..streamUrl = url
       ..headers = headers
-      ..urlExpires = expire != null
+      ..urlExpires = expire != null && expire > 0 && expire <= 8640000000000 // DateTime's range, in s
           ? DateTime.fromMillisecondsSinceEpoch(expire * 1000)
           : now.add(const Duration(hours: 5))
       ..urlMs = now.difference(j.t0!).inMilliseconds;
