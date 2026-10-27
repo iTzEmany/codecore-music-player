@@ -164,6 +164,8 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   Duration? _duration;
   Track? _current;
   int _loadToken = 0;
+  // Tap-to-first-sound timing of the load in flight (logged once, see _onPosition).
+  ({int token, String key, String from, DateTime t0, Duration pos0})? _timing;
   int _consecutiveErrors = 0;
   bool _playCounted = false;
   RemoteTransport? _remote;
@@ -417,6 +419,15 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     final streamKey = entry != null
         ? entry.result.indexKey
         : (track.kind == kStreamKind ? keyOfStreamPath(track.path) : null);
+    _timing = play && radio == null
+        ? (
+            token: token,
+            key: streamKey ?? 'track:${track.id}',
+            from: streamKey != null ? 'cache' : 'file',
+            t0: _clock(),
+            pos0: startAt ?? Duration.zero,
+          )
+        : null;
     final start = (startAt != null && startAt > Duration.zero)
         ? startAt
         : ((isOnline && libTrack == null) || streamKey != null ? null : resumeStartFor(track.resumePositionMs));
@@ -980,6 +991,14 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   void _onPosition(Duration p) {
     if (_waitingStream) return;
     _position = p;
+    final timing = _timing;
+    if (timing != null && _state == BackendState.playing && p > timing.pos0) {
+      _timing = null;
+      if (timing.token == _loadToken) {
+        final ms = _clock().difference(timing.t0).inMilliseconds;
+        AppLog.i('stream timing key=${timing.key} play=$ms from=${timing.from}');
+      }
+    }
     final track = _current;
     _tickPlayed(p);
     if (_playRow != null && _playedMs - _flushedMs >= 30000) _flushListen();
