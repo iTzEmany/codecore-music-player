@@ -110,6 +110,50 @@ yt-dlp --no-playlist --no-warnings --newline --no-part \
 - Worktree e build di prova eliminati. Sul Mi A3 resta l'app `.perf` con la riga di log e i `--print` (da sostituire in 55.5).
 
 ## Tabella «Prima»
-<!-- 55.5: da riempire -->
+Build di debug di questo ramo (`flutter build apk --debug --target-platform android-arm64`, `flutter build linux --debug`). 10 brani online mai ascoltati per dispositivo, scelti dalla ricerca (Online), tap, primo suono, brano dopo. Tempi in ms, mediana / massimo, da `python3 scripts/stream_times.py`.
+
+| Data | Dispositivo | yt-dlp | Rete | spawn | downloaded | post | cached | play (cache) |
+|---|---|---|---|---|---|---|---|---|
+| 2026-10-27 | Motorola edge 40 `ZY22HKD85K` | 2026.10.26 | dati mobili (Wi-Fi spento) | 3647 / 4041 | 21894 / 25144 | 22964 / 26289 | 23041 / 26355 | 23303 / 26626 |
+| 2026-10-27 | Mi A3 `0d7ae9df206e` | 2026.10.21 | Wi-Fi: hotspot del Motorola (dati mobili), ping 637 ms | 6207 / 11857 | 38675 / 43146 | 40238 / 44952 | 40352 / 45119 | 41181 / 46421 |
+| 2026-10-27 | Linux | 2026.08.19 | Wi-Fi di casa | da rifare (display isolato non disponibile) | | | | |
+
+Motorola (`--adb ZY22HKD85K`):
+
+| metric | n | median ms | max ms |
+|---|---|---|---|
+| spawn | 10 | 3647 | 4041 |
+| downloaded | 10 | 21893.5 | 25144 |
+| post | 10 | 22963.5 | 26289 |
+| cached | 10 | 23040.5 | 26355 |
+| play (cache) | 10 | 23303 | 26626 |
+| play (file) | 1 | 114 | 114 |
+| play (url) | 0 | - | - |
+
+Mi A3 (`--log` sul log filtrato, vedi Note):
+
+| metric | n | median ms | max ms |
+|---|---|---|---|
+| spawn | 10 | 6207 | 11857 |
+| downloaded | 10 | 38674.5 | 43146 |
+| post | 10 | 40238 | 44952 |
+| cached | 10 | 40351.5 | 45119 |
+| play (cache) | 10 | 41180.5 | 46421 |
+| play (file) | 0 | - | - |
+| play (url) | 0 | - | - |
+
+Linux, parziale (solo 4 brani, non 10; prova fatta sul display dell'utente, poi sospesa): spawn 4006 / 4092, downloaded 4242 / 5094, post 4823 / 5653, cached 4983 / 5776, play (cache) 5270 / 5935. Non è la riga ufficiale.
+
 
 ## Note
+- Linux: da rifare. Il display isolato non è risultato pilotabile (gnome-shell headless: Xwayland senza risposta a xdpyinfo; Xvfb non installato) e l'utente sta lavorando sul suo unico schermo. Servono Xvfb o una sessione dedicata.
+- Rete: il Motorola aveva il Wi-Fi spento (misura su dati mobili); il Mi A3 era sul suo hotspot. Nessuna delle due righe è «Wi-Fi di casa»: da ripetere su Wi-Fi vero per un confronto pulito.
+- D-146: `spawn` supera 4 s su Android. Motorola 3,6 s (max 4,0 s, al limite); Mi A3 mediana 6,2 s, max 11,9 s (il primo brano, a freddo). Si prosegue lo stesso.
+- Su Android il costo è il download: `downloaded` 22 s sul Motorola e 39 s sul Mi A3, contro 4,2 s su Linux. Post-elaborazione (ffmpeg) ~1,1-1,5 s, `cached` +0,1 s, `play` +0,3-1,0 s dopo `cached`: il primo suono arriva solo a download finito, come previsto dalla fase 56.
+- Mi A3, prima prova con `com.codecore.player.perf` (probe55, yt-dlp 2026.10.26): URL e header arrivano dopo 38,9 s dall'avvio del processo (`URLMARK` a T+38881 ms, `HDRMARK` a T+38894 ms), cioè prima del download; nello stesso brano `spawn`=51,9 s, `downloaded`=54,2 s. Il probe logga solo le righe `URLMARK`/`HDRMARK`, quindi l'avanzamento non si vede nel logcat: non verificato. Ascolto 30 s e seek sul telefono: non provati. Rete: hotspot del Motorola, che pesa molto sul tempo.
+- Dubbio da verificare: tra l'avvio di `_download` (spawn) e l'URL ci sono ~13 s sul Mi A3 prima del processo (possibile `ensureInit()` con l'aggiornamento di yt-dlp a ogni chiamata, vedi `docs/gotchas.md`).
+- Mi A3: 4D7u5KF7SP8 (Get Lucky) era già nella cache di streaming del telefono (play=577 ms, senza riga del preparer). Tolta dal log (`grep -v`) e sostituita da un undicesimo brano (Happy); la tabella usa il log filtrato.
+- Motorola: la riga `play (file)` è un brano di libreria che la coda ha avviato da sola dopo il primo brano online. Volume musica 9/15 (altoparlante) com'era; il tentativo di abbassarlo con `cmd media_session` non ha funzionato, quindi le prove sono suonate al volume dell'utente. Riportato a 9 con i tasti. Non disturbare messo a `priority` solo durante la prova, poi `off`. Installato solo con `install -r`, nessun problema di firma.
+- Mi A3: installato con `install -r` il debug di questo ramo come `com.codecore.player` (era 1.3.0). Resta anche `com.codecore.player.perf` (non rimossa). Volume musica già a 1/15, non toccato. Non disturbare `off` a fine prova.
+- Script: il percorso `files/codecore.log` e `--adb` funzionano sul Motorola e sul Mi A3, nessuna correzione necessaria. Il Mi A3 è stato letto con `--log` per poter togliere la riga della cache.
+- Brani usati: Blinding Lights (solo Motorola/Linux), Mr Brightside, Rolling in the Deep, Uptown Funk, Hey Ya!, Viva la Vida, Seven Nation Army, Shape of You, Crazy in Love, Get Lucky (Motorola), Somebody That I Used to Know e Happy (Mi A3). Controllati prima con «Nessun risultato in libreria».
