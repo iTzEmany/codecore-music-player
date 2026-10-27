@@ -736,6 +736,32 @@ Feature «Arricchimento completo» (`docs/feature-arricchimento.md`, decisioni D
 - [x] 54.8 Controlli di fase (K-AR-01, K-AR-02, K-AR-03, K-AR-05)
 - [x] 54.9 Prove a mano (utente) — Motorola 2026-10-26: copertine uguali dopo `install -r`, copertina a mano di album e brano resiste alla scansione e si ripristina
 
+## Fase 55 — Misura dello streaming (`fase-55-misura-streaming.md`)
+- [ ] 55.1 Cronometro nel preparer
+- [ ] 55.2 Tap → primo suono nell'handler
+- [ ] 55.3 `scripts/stream_times.py`
+- [ ] 55.4 Prova dell'URL col yt-dlp vero (solo misura)
+- [ ] 55.5 Tabella «Prima» (R-70)
+- [ ] 55.6 Controlli di fase
+
+## Fase 56 — Partenza dall'URL (`fase-56-partenza-da-url.md`)
+- [ ] 56.1 L'URL dalle righe di yt-dlp (desktop)
+- [ ] 56.2 L'URL dal canale Android
+- [ ] 56.3 `StreamPreparer.start()`
+- [ ] 56.4 Il player parte dall'URL
+- [ ] 56.5 URL scaduto e cambio di rete
+- [ ] 56.6 Controlli di fase (K-SV-01, K-SV-04, K-SV-05)
+- [ ] 56.7 Prove a mano
+
+## Fase 57 — Coda e transizioni dello streaming (`fase-57-coda-e-transizioni.md`)
+- [ ] 57.1 Il brano dopo dall'URL anticipato
+- [ ] 57.2 Gapless e crossfade da URL verso file
+- [ ] 57.3 Jam e «Scarica» (regressioni)
+- [ ] 57.4 Misura finale (RNF-08, RNF-09, RNF-10, R-81)
+- [ ] 57.5 Rimisura delle soglie della fase 38 (R-87)
+- [ ] 57.6 Controlli di fase (K-SV-02, K-SV-06)
+- [ ] 57.7 Prove a mano
+
 ## Note di deviazione
 <!-- una riga per deviazione: data — task — cosa è cambiato e perché -->
 - 2026-10-25 — 45.1 — limite effettivo = min(cursore, libero + usato − 500 MB): i byte della cache contano come spazio libero, altrimenti una cache piena si restringerebbe da sola.
