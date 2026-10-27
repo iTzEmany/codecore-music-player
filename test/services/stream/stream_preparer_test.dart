@@ -280,19 +280,12 @@ void main() {
       expect((await prep.start('youtube:a', _r('a'))).file, isNotNull);
     });
 
-    test('a key that left the queue is forgotten by restart', () async {
-      yt.autoFinish = true;
-      await prep.start('youtube:a', _r('a')); // job done, nothing queued
-      prep.setQueue([_i('b')]);
-      await expectLater(prep.restart('youtube:a'), throwsStateError);
-    });
-
     test('restart with the file ready: the file, no new yt-dlp', () async {
       yt.urls.add(far);
       expect(urlOf(await prep.start('youtube:a', _r('a'))), far);
       yt.finish('a');
       await _until(() => prep.phases.value['youtube:a'] == StreamPhase.ready);
-      final s = await prep.restart('youtube:a');
+      final s = await prep.restart('youtube:a', _r('a'));
       expect(s.file, isNotNull);
       expect(yt.started, ['a']);
     });
@@ -301,7 +294,7 @@ void main() {
       yt.urls.addAll([far, 'https://v/b?expire=4102444800']);
       prep.setQueue([_i('a')]);
       await prep.start('youtube:a', _r('a'));
-      final s = await prep.restart('youtube:a');
+      final s = await prep.restart('youtube:a', _r('a'));
       expect(urlOf(s), 'https://v/b?expire=4102444800');
       expect(yt.started, ['a', 'a']);
       expect(yt.tokens['a']![0]!.isCancelled, isTrue);
@@ -314,7 +307,7 @@ void main() {
       yt.failuresLeft['a'] = 2;
       yt.autoFinish = true;
       await expectLater(prep.start('youtube:a', _r('a')), throwsA(isA<YtException>()));
-      expect((await prep.restart('youtube:a')).file, isNotNull);
+      expect((await prep.restart('youtube:a', _r('a'))).file, isNotNull);
       expect(yt.started, ['a', 'a', 'a']);
     });
   });

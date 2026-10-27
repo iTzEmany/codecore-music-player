@@ -136,7 +136,6 @@ class StreamPreparer {
   var _queue = <StreamItem>[];
   final _jobs = <String, _Job>{};
   final _pinned = <String>{};
-  final _starts = <String, YtResult>{}; // what restart() needs to download again
   var _tmpSeq = 0;
   var _active = 0;
   final _yielding = <_Job>{};
@@ -171,7 +170,6 @@ class StreamPreparer {
       return true;
     });
     final keep = {...inQueue, ..._jobs.keys};
-    _starts.removeWhere((k, _) => !keep.contains(k));
     if (phases.value.keys.any((k) => !keep.contains(k))) {
       phases.value = {
         for (final e in phases.value.entries)
@@ -198,7 +196,6 @@ class StreamPreparer {
   /// the first of a live address of the job and the cached file.
   Future<StreamStart> start(String key, YtResult r) async {
     if (_disposed) throw StateError('disposed');
-    _starts[key] = r;
     cache.pin(key);
     try {
       final file = await _cached(key, r);
@@ -210,9 +207,8 @@ class StreamPreparer {
 
   /// A new start for a key whose address expired (R-76): the file when it is
   /// there, else the running attempt is cancelled and run again for a fresh address.
-  Future<StreamStart> restart(String key) async {
+  Future<StreamStart> restart(String key, YtResult r) async {
     if (_disposed) throw StateError('disposed');
-    final r = _starts[key] ?? (throw StateError('restart before start: $key'));
     cache.pin(key);
     try {
       final file = await _cached(key, r);
