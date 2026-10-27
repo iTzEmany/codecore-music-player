@@ -3,7 +3,7 @@
 ## Fase 55 (#39)
 - Righe `stream timing` in `codecore.log` (preparer: spawn/downloaded/post/cached; player: tap → primo suono) e `scripts/stream_times.py` (`--log`/`--adb`, `--self-test`).
 - «Prima» (`docs/fase-55-misura-streaming.md`): il tempo è il download. Motorola su dati mobili: primo suono 23 s, spawn 3,6 s. Mi A3 su hotspot: 41 s, spawn 6,2 s. Linux: URL a ~4 s, prima del download, ascolto e seek senza 403.
-- 55.4 e 55.5 a `[~]`: misure su Wi-Fi vero, Linux con 10 brani (serve un display isolato: Xvfb non c'è; l'utente lavora sul suo unico schermo), Mi A3 avanzamento/ascolto/seek dall'URL.
+- 55.4 e 55.5 a `[~]`: Mi A3 da rimisurare fuori dall hotspot (i dati mobili del Motorola valgono: più veloci del Wi-Fi di casa), Linux con 10 brani (serve un display isolato: Xvfb non c'è; l'utente lavora sul suo unico schermo), Mi A3 avanzamento/ascolto/seek dall'URL.
 - Da capire prima della 56: sul Mi A3 l'URL è arrivato a 38,9 s (hotspot) e ~13 s passano prima che yt-dlp parta (forse `ensureInit` con l'aggiornamento).
 
 ## Stato (prima della fase 55)
@@ -58,7 +58,7 @@ Leggi docs/handoff.md, docs/gotchas.md e docs/PROGRESS.md. <obiettivo scelto fra
 ```
 
 ## Prossimi obiettivi
-0. **(Consigliato) Fase 56, partenza dall'URL**: prima rimisura su Wi-Fi di casa (Motorola e Mi A3, `python3 scripts/stream_times.py --adb <serial>`) e verifica dei ~13 s prima dell'avvio di yt-dlp su Android. Prompt: `/obiettivo fase 56`. Feature «Streaming veloce», fasi 55–57 (kickoff del 2026-10-27: `docs/feature-streaming-veloce.md`, R-68…R-87, D-138…D-146). Prompt: `/obiettivo fase 55` (poi 56 e 57, una PR per fase). La 55 misura soltanto e scrive la tabella «Prima»; se su Android l'avvio di yt-dlp supera 4 s si prosegue lo stesso (D-146). Motorola da /obiettivo se collegato (backup prima). `docs/prossimi-lavori.md` non è nel repo: la 57.5 lo aggiorna solo se c'è.
+0. **(Consigliato) Fase 56, partenza dall'URL**: i dati mobili del Motorola valgono come rete buona (più veloci del Wi-Fi di casa, utente 27/10); da rimisurare solo il Mi A3 fuori dall hotspot (`python3 scripts/stream_times.py --adb <serial>`) e verifica dei ~13 s prima dell'avvio di yt-dlp su Android. Prompt: `/obiettivo fase 56`. Feature «Streaming veloce», fasi 55–57 (kickoff del 2026-10-27: `docs/feature-streaming-veloce.md`, R-68…R-87, D-138…D-146). Prompt: `/obiettivo fase 55` (poi 56 e 57, una PR per fase). La 55 misura soltanto e scrive la tabella «Prima»; se su Android l'avvio di yt-dlp supera 4 s si prosegue lo stesso (D-146). Motorola da /obiettivo se collegato (backup prima). `docs/prossimi-lavori.md` non è nel repo: la 57.5 lo aggiorna solo se c'è.
    Dopo, i rilievi della Jam e il completamento intero rinviati qui sopra.
 1. **Debito noto dello streaming** (in fondo a `docs/fase-47-jam-online.md`): tre meccanismi «online → libreria», `DownloadsNotifier` grande, prefetch che ricomincia, file auto-scaricato dall'uscita Jam non fissato, `gapless window edit failed` su una coda di 2 brani, `discovery: socket error` ogni 2 s senza rete.
 2. **Rotellina Attività a 120 fps** mentre un'attività gira (costo di batteria) e picchi di build al cambio di brano (`track_art.dart`); misura prima e dopo con `--only`.
