@@ -28,6 +28,7 @@ void main() {
       expect(tester.takeException(), isNull);
       await tester.tap(find.text('Libreria'));
       await tester.pump(const Duration(milliseconds: 400));
+      await tester.pump(const Duration(milliseconds: 400));
       await tester.tap(find.text('Tutti i brani'));
       await tester.runAsync(
           () => Future<void>.delayed(const Duration(milliseconds: 100)));
