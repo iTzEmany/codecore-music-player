@@ -750,8 +750,8 @@ Feature «Arricchimento completo» (`docs/feature-arricchimento.md`, decisioni D
 - [x] 56.3 `StreamPreparer.start()`
 - [x] 56.4 Il player parte dall'URL
 - [x] 56.5 URL scaduto e cambio di rete
-- [x] 56.6 Controlli di fase (K-SV-01, K-SV-04, K-SV-05) — «Dopo 56»: Linux play 4,8 s (era 6,6), Mi A3 37,5 s (era 38,9); Motorola non misurato
-- [~] 56.7 Prove a mano — Linux e Mi A3 fatte; Wi-Fi spento a metà brano e Motorola all'utente
+- [x] 56.6 Controlli di fase (K-SV-01, K-SV-04, K-SV-05) — «Dopo 56»: Linux play 4,8 s (era 6,6), Mi A3 37,5 s (era 38,9); Motorola 18,2 s (era 23,3 su dati mobili)
+- [~] 56.7 Prove a mano — Linux, Mi A3 e Motorola fatte; Wi-Fi spento a metà brano all'utente
 
 ## Fase 57 — Coda e transizioni dello streaming (`fase-57-coda-e-transizioni.md`)
 - [ ] 57.1 Il brano dopo dall'URL anticipato
