@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart' as p;
+import 'package:youtube_explode_dart/youtube_explode_dart.dart' as yt;
 
 import '../../core/app_log.dart';
 import 'yt_dlp_args.dart';
@@ -25,6 +26,67 @@ class AndroidYtDlpService implements YoutubeService {
   final _streamLines = <String, StreamUrlLines>{};
   int _counter = 0;
 
+  /// Prototype: where the stream URL comes from (newpipe | explode | ytdlp).
+  static const _urlSource = String.fromEnvironment(
+    'CODECORE_URL_SOURCE',
+    defaultValue: 'newpipe',
+  );
+  // Per download: start time, video id, and whether a stream URL went out.
+  final _started = <String, Stopwatch>{};
+  final _ids = <String, String>{};
+  final _emitted = <String>{};
+
+  /// Emits the first stream URL of a download, logs every source's outcome.
+  void _offerUrl(String pid, String source, String id, DownloadProgress? e) {
+    final c = _progress[pid];
+    final used = e != null && c != null && !c.isClosed && _emitted.add(pid);
+    if (used) c.add(e);
+    final ms = _started[pid]?.elapsedMilliseconds ?? -1;
+    AppLog.i(
+      'stream url source=$source key=youtube:$id ms=$ms '
+      'ok=${e == null ? 0 : 1} used=${used ? 1 : 0}',
+    );
+  }
+
+  Future<void> _protoUrl(String pid, String id) async {
+    try {
+      if (_urlSource == 'newpipe') {
+        final m = await _channel.invokeMapMethod<String, Object?>(
+          'streamUrl',
+          {'id': id},
+        );
+        final u = Uri.parse('${m!['url']}');
+        final h = (m['headers'] as Map?)?.cast<String, String>() ?? {};
+        _offerUrl(pid, 'newpipe', id, DownloadProgress(streamUrl: u, headers: h));
+      } else {
+        final ex = yt.YoutubeExplode();
+        try {
+          final man = await ex.videos.streams.getManifest(
+            id,
+            ytClients: [yt.YoutubeApiClient.androidSdkless],
+          );
+          final audio = man.audioOnly.toList()
+            ..sort((a, b) {
+              final m = (b.container == yt.StreamContainer.mp4 ? 1 : 0) -
+                  (a.container == yt.StreamContainer.mp4 ? 1 : 0);
+              return m != 0 ? m : b.bitrate.compareTo(a.bitrate);
+            });
+          _offerUrl(
+            pid,
+            'explode',
+            id,
+            DownloadProgress(streamUrl: audio.first.url, headers: const {}),
+          );
+        } finally {
+          ex.close();
+        }
+      }
+    } catch (e, st) {
+      AppLog.w('prototype stream url ($_urlSource) failed', e, st);
+      _offerUrl(pid, _urlSource, id, null);
+    }
+  }
+
   Future<dynamic> _onCall(MethodCall call) async {
     if (call.method != 'progress') return null;
     final args = call.arguments as Map;
@@ -33,7 +95,7 @@ class AndroidYtDlpService implements YoutubeService {
     final line = args['line'];
     if (line is String && StreamUrlLines.isMarked(line)) {
       final e = _streamLines[id]?.add(line);
-      if (e != null) c?.add(e);
+      if (e != null) _offerUrl(id, 'ytdlp', '${_ids[id]}', e);
       return null;
     }
     // Extra addresses of `%(urls)s` (one per format) are not progress.
@@ -147,7 +209,12 @@ class AndroidYtDlpService implements YoutubeService {
     final processId = 'dl-${_counter++}';
     final controller = StreamController<DownloadProgress>();
     _progress[processId] = controller;
-    if (options.emitStreamUrl) _streamLines[processId] = StreamUrlLines();
+    if (options.emitStreamUrl) {
+      _streamLines[processId] = StreamUrlLines();
+      _started[processId] = Stopwatch()..start();
+      _ids[processId] = r.id;
+      if (_urlSource != 'ytdlp') unawaited(_protoUrl(processId, r.id));
+    }
     unawaited(
       cancel?.whenCancel.then((_) {
         _channel.invokeMethod<void>('cancel', {'processId': processId});
@@ -193,6 +260,9 @@ class AndroidYtDlpService implements YoutubeService {
     } finally {
       _progress.remove(processId);
       _streamLines.remove(processId);
+      _started.remove(processId);
+      _emitted.remove(processId);
+      _ids.remove(processId);
     }
   }
 

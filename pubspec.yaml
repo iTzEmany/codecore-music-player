@@ -49,6 +49,7 @@ dependencies:
   permission_handler: ^13.0.2
   shared_preferences: ^2.5.6
   dio: ^5.11.1
+  youtube_explode_dart: ^3.1.0 # prototype: url source comparison
   crypto: ^3.0.7
   collection: ^1.19.1
   intl: ^0.20.3
@@ -161,3 +162,7 @@ flutter_launcher_icons:
     generate: true
     image_path: "assets/icon/icon.png"
     icon_size: 256
+
+# prototype: youtube_explode_dart pins xml ^6
+dependency_overrides:
+  xml: ^7.1.0
