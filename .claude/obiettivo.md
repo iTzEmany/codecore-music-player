@@ -33,6 +33,7 @@
 | mai | `build/metadata_god` (Rust, lungo da rifare), `~/.pub-cache`, file musicali del telefono |
 
 ## Regole extra del progetto
+- **App desktop su Linux (prove, misure, scheggia): sempre su uno schermo virtuale, mai sullo schermo dell'utente** (lavora sull'unico monitor, 27/10). Comando: `HOME=<scratch>/home env -u WAYLAND_DISPLAY GDK_BACKEND=x11 xvfb-run -a -s "-screen 0 1280x800x24" <comando>`; `xdotool` e screenshot solo dentro quel `xvfb-run` (il suo `DISPLAY`). Mai `wpctl`/volume generale del PC; l'audio esce dalle casse vere: volume basso dall'app. Integration test su Linux: stesso `xvfb-run`.
 - Aree a rischio (`/code-review high`): audio handler (`codecore_audio_handler.dart`), query su `tracks` (righe ombra K-02), protocollo Jam; dalla fase 50: migrazione v15, backup e ripristino, `EnrichmentService` (arricchimento di oggi), query delle liste e della ricerca, chi scrive le copertine
 - Nessun pacchetto nuovo (fasi 45–54). Schema DB: v15 solo nella fase 50, in un solo passo di migrazione; poi invariato
 - Chiamate dal vivo a Deezer, MusicBrainz, NetEase, lyrics.ovh solo per salvare le risposte di test (fixture), mai nella suite
