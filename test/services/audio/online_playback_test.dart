@@ -102,6 +102,20 @@ void main() {
     expect(lines.single, matches(RegExp(r'key=youtube:v1 play=\d+ from=cache$')));
   });
 
+  test('a streamed track from the address logs from=url; after a natural end it also logs gap=', () async {
+    final id = online.register(result('v1'));
+    preparer.urls['youtube:v1'] = (Uri.parse('https://rr1.googlevideo.com/v1'), const {});
+    final lines = await timingLines(() async {
+      await handler.playQueue([ids.first, id], 0);
+      backend.stateC.add(BackendState.completed);
+      await settle();
+      backend.stateC.add(BackendState.playing);
+      backend.posC.add(const Duration(seconds: 1));
+      await settle();
+    });
+    expect(lines.single, matches(RegExp(r'key=youtube:v1 play=\d+ from=url gap=\d+$')));
+  });
+
   test('the first sound of a library track logs from=file', () async {
     final lines = await timingLines(() async {
       await handler.playQueue([ids.first], 0);

@@ -342,6 +342,45 @@ void main() {
       await _until(() => prep.phases.value['youtube:a'] == StreamPhase.ready);
     });
 
+    test('the prefetch already has the address: start hands it out, no new yt-dlp', () async {
+      yt.urls.add(far);
+      prep.setQueue([_i('a')]);
+      await _until(() => yt.started.isNotEmpty);
+      await _quiet();
+      expect(urlOf(await prep.start('youtube:a', _r('a'))), far);
+      expect(yt.started, ['a']);
+      yt.finish('a');
+    });
+
+    test('the address of the prefetch expired meanwhile: start runs a new attempt for a fresh one', () async {
+      var shift = Duration.zero;
+      make(clock: () => DateTime.now().add(shift));
+      final soon = DateTime.now().millisecondsSinceEpoch ~/ 1000 + 600;
+      yt.urls.addAll(['https://v/a?expire=$soon', far]);
+      prep.setQueue([_i('a')]);
+      await _until(() => yt.started.isNotEmpty);
+      await _quiet();
+      shift = const Duration(minutes: 20);
+      expect(urlOf(await prep.start('youtube:a', _r('a'))), far);
+      expect(yt.started, ['a', 'a']);
+      yt.finish('a');
+    });
+
+    test('the address expired but the download is through: no new attempt, the file arrives', () async {
+      var shift = Duration.zero;
+      make(clock: () => DateTime.now().add(shift));
+      yt.urls.add('https://v/a?expire=${DateTime.now().millisecondsSinceEpoch ~/ 1000 + 600}');
+      yt.progress = const [(100, 100)];
+      yt.silence = const Duration(milliseconds: 200); // post-processing after 100%
+      prep.setQueue([_i('a')]);
+      yt.autoFinish = true;
+      await _until(() => yt.started.isNotEmpty);
+      await Future<void>.delayed(const Duration(milliseconds: 60));
+      shift = const Duration(minutes: 20);
+      expect((await prep.start('youtube:a', _r('a'))).file, isNotNull);
+      expect(yt.started, ['a']);
+    });
+
     test('restart after a failed job: a new job', () async {
       yt.failuresLeft['a'] = 2;
       yt.autoFinish = true;

@@ -204,7 +204,12 @@ class StreamPreparer {
     cache.pin(key);
     try {
       final file = await _cached(key, r);
-      return file != null ? StreamStart.file(file) : await _firstOf(_job(key, r));
+      if (file != null) return StreamStart.file(file);
+      // The address the prefetch got has expired meanwhile: ask for a new one (R-79),
+      // unless the download is through and only the file is left to wait for.
+      final old = _jobs[key];
+      if (old != null && old.streamUrl != null && old.downloaded == null && !_live(old)) return await restart(key, r);
+      return await _firstOf(_job(key, r));
     } finally {
       cache.unpin(key);
     }
@@ -253,14 +258,17 @@ class StreamPreparer {
     return job;
   }
 
+  /// True while the address is still usable: an address about to expire is no
+  /// use to a player that opens it later.
+  bool _live(_Job job) =>
+      job.streamUrl != null && clock().isBefore(job.urlExpires!.subtract(const Duration(minutes: 1)));
+
   /// The first of a live address and the file; throws if the job fails first.
   Future<StreamStart> _firstOf(_Job job) async {
     final file = job.done.future.then<StreamStart?>(StreamStart.file);
     file.ignore(); // an early return must not leave its failure unhandled
     while (true) {
-      final url = job.streamUrl;
-      // An address about to expire is no use to a player that opens it later.
-      if (url != null && clock().isBefore(job.urlExpires!.subtract(const Duration(minutes: 1)))) return StreamStart.url(url, job.headers);
+      if (_live(job)) return StreamStart.url(job.streamUrl!, job.headers);
       final first = await Future.any([file, job.urlWake.future.then<StreamStart?>((_) => null)]);
       if (first != null) return first;
     }

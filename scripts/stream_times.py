@@ -27,7 +27,7 @@ def parse(text):
         kv = dict(KV.findall(line.split('stream timing', 1)[1]))
         try:
             if 'play' in kv:
-                ok = kv['from'] in ('cache', 'file', 'url') and int(kv['play']) >= 0
+                ok = kv['from'] in ('cache', 'file', 'url') and int(kv['play']) >= 0 and int(kv.get('gap', 0)) >= 0
             else:
                 ok = 'key' in kv and all(kv[m] == '-' or int(kv[m]) >= 0 for m in PREP)
         except (KeyError, ValueError):
@@ -43,6 +43,7 @@ def table(text, last):
     rows, bad = parse(text)
     series = [(m, [int(r[m]) for r in rows if r.get(m, '-') != '-']) for m in PREP]
     series += [(f'play ({f})', [int(r['play']) for r in rows if r.get('from') == f]) for f in ('cache', 'file', 'url')]
+    series.append(('gap (end of track to first sound)', [int(r['gap']) for r in rows if 'gap' in r]))
     out = ['| metric | n | median ms | max ms |', '|---|---|---|---|']
     stats = {}
     for name, vals in series:
@@ -63,19 +64,22 @@ SAMPLE = '''2026-01-01T10:00:00.000 [INFO] stream timing key=a requested=1 attem
 2026-01-01T10:00:05.500 [INFO] stream timing key=d play=10 from=cloud
 2026-01-01T10:00:06.000 [INFO] unrelated line
 2026-01-01T10:00:07.000 [INFO] stream timing key=e play=60 from=cache
+2026-01-01T10:00:08.000 [INFO] stream timing key=f play=50 from=url gap=300
+2026-01-01T10:00:09.000 [INFO] stream timing key=g play=50 from=cache gap=100
 '''
 
 
 def self_test():
     _, st, bad = table(SAMPLE, 10)
     assert bad == 2, bad
+    assert st['gap (end of track to first sound)'] == (2, 200, 300)
     assert st['spawn'] == (3, 200, 300), st['spawn']
     assert st['downloaded'] == (2, 6000, 7000), st['downloaded']
     assert st['post'] == (2, 400, 500) and st['cached'] == (2, 6550, 7700)
-    assert st['play (cache)'] == (2, 50, 60) and st['play (url)'] == (1, 1200, 1200)
+    assert st['play (cache)'] == (3, 50, 60) and st['play (url)'] == (2, 625, 1200)
     assert st['play (file)'] == (0, None, None)
     _, st, _ = table(SAMPLE, 1)  # --last 1 keeps only the latest line per metric
-    assert st['spawn'] == (1, 200, 200) and st['play (cache)'] == (1, 60, 60)
+    assert st['spawn'] == (1, 200, 200) and st['play (cache)'] == (1, 50, 50)
     print('OK')
 
 
