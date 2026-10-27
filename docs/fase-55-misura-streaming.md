@@ -82,7 +82,32 @@ sì/no, 30 s di ascolto sì/no, seek sì/no, client usato.
 diff (revisione: solo righe di log, cronometri e lo script). Spunta in `docs/PROGRESS.md`.
 
 ## Prova dell'URL
-<!-- 55.4: da riempire -->
+### Linux (2026-10-27)
+Client: yt-dlp 2026.08.19 (`~/.local/bin/yt-dlp`), `--js-runtimes node`, client di serie (URL con `c=VISIONOS`, itag 251).
+Comando: gli argomenti di `buildDownloadArgs` (formato originale, con ffmpeg) più `--progress` e due `--print`:
+```
+yt-dlp --no-playlist --no-warnings --newline --no-part \
+  --progress-template 'download:PROG %(progress.downloaded_bytes)s %(progress.total_bytes)s %(progress.total_bytes_estimate)s' \
+  --js-runtimes node --progress -f 'bestaudio/best' -x \
+  --print 'before_dl:URLMARK %(urls)s' --print 'before_dl:HDRMARK %(http_headers)j' \
+  -o '<stem>.%(ext)s' 'https://www.youtube.com/watch?v=<id>'
+```
+- URL prima del download: sì. Le righe `URLMARK` e `HDRMARK` escono prima di ogni `PROG`.
+- Tempo fino all'URL (dall'avvio): 4,05 s (dQw4w9WgXcQ), 4,33 s (9bZkp7q19f0).
+- Avanzamento: sì. Con `--progress` e `--progress-template` le righe `PROG` arrivano come prima.
+- Ascolto: `mpv --ytdl=no --no-video --volume=20 --http-header-fields=<User-Agent, Accept, Accept-Language, Sec-Fetch-Mode> --length=30 <url>`, con yt-dlp ancora in download (prova con `--limit-rate 200K`, finiva a 21-24 s).
+- 30 s di ascolto: sì, su entrambi i brani. Nessun 403.
+- Seek all'80 %: sì (`--start=80%`, nuova richiesta con lo stesso URL), nessun 403, parte a 2:57 su 3:33 e a 3:28 su 4:12.
+- Senza `--limit-rate` il download di 3,4 MB finisce in 0,4 s dopo l'URL: la prova «mentre scarica» ha senso solo con il limite.
+- Client usato: quello di serie (visionos). `android_vr` non serve, non provato.
+- Nota: la prima prova senza `--ytdl=no` e con header incompleti ha dato 403 (mpv passava l'URL a yt-dlp). Non è un 403 di YouTube.
+
+### Mi A3 (0d7ae9df206e): non eseguita, il telefono non ha rete
+- Il callback di `YtDlpChannel.kt` riceve già ogni riga (`progress, _, line`) ma la gira solo a Dart con `invokeMethod("progress", ... "line")`: nessun log Kotlin delle righe.
+- Costruito (ramo locale, non nella PR) un APK con `Log.i("probe55", ...)` col tempo dall'avvio e i due `--print` (`CODECORE_PERF=1 flutter build apk --debug --target-platform android-arm64 --build-number 55`), installato come `com.codecore.player.perf` con `install -r -d`.
+- Il telefono non ha rete: Wi-Fi acceso ma non connesso, dati mobili spenti (`Network is unreachable`, ping fallito). Nessuna impostazione toccata.
+- Mancano quindi: tempo fino all'URL, avanzamento, ascolto, seek, client. Da rifare con il telefono su Wi-Fi.
+- Worktree e build di prova eliminati. Sul Mi A3 resta l'app `.perf` con la riga di log e i `--print` (da sostituire in 55.5).
 
 ## Tabella «Prima»
 <!-- 55.5: da riempire -->
