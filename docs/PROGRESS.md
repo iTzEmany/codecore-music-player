@@ -754,6 +754,8 @@ Feature «Arricchimento completo» (`docs/feature-arricchimento.md`, decisioni D
 - [~] 56.7 Prove a mano — Linux, Mi A3 e Motorola fatte; Wi-Fi spento a metà brano all'utente
 
 ## Fase 57 — Coda e transizioni dello streaming (`fase-57-coda-e-transizioni.md`)
+- [ ] 57.0a URL del flusso da NewPipeExtractor (Android)
+- [ ] 57.0b Brani vietati ai minori: ripiego su YouTube Music
 - [ ] 57.1 Il brano dopo dall'URL anticipato
 - [ ] 57.2 Gapless e crossfade da URL verso file
 - [ ] 57.3 Jam e «Scarica» (regressioni)
