@@ -995,6 +995,9 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     }
     _consecutiveErrors = 0;
     _lastResumeSave = Duration.zero;
+    // The gapless next track is a file: an error there is not the old address's.
+    _fromUrl = _recoverOnPlay = _errorWhileLoading = false;
+    _recoveries = 0;
     _enterTrack(prepared);
     unawaited(_syncPreparer());
     if (stay) {
