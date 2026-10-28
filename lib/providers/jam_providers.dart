@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 
@@ -579,6 +580,10 @@ class JamController extends Notifier<JamUiState> {
     final r = await _guest?.send(cmd);
     return r?.error;
   }
+
+  @visibleForTesting
+  // ignore: use_setters_to_change_properties
+  void debugSetClock(JamClock c) => _clock = c;
 
   /// The Jam's reference clock (the host's), the one `JamState.positionAt` is on.
   int jamNowMs() => _clock?.jamNowMs() ?? DateTime.now().millisecondsSinceEpoch;

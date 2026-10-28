@@ -186,6 +186,8 @@ JamResult _advance(JamState s, int nowMs, JamResult Function(JamState) commit) {
 /// to the start; within 3 s, a jump to the item before the current one.
 JamCommand jamPreviousCommand(JamState s, int nowMs) {
   final i = s.currentIndex;
-  if (i <= 0 || s.positionAtTime(nowMs) > 3000) return const JamCommand.seek(0);
+  if (i <= 0 || i >= s.items.length || s.positionAtTime(nowMs) > 3000) {
+    return const JamCommand.seek(0);
+  }
   return JamCommand.jump(s.items[i - 1].id);
 }

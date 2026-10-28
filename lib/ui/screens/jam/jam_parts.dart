@@ -17,10 +17,9 @@ import '../../widgets/track_artists_sheet.dart';
 /// url (which is not shown); null when there is none.
 String? jamTriviaText(String? raw) {
   if (raw == null) return null;
-  final cut = raw.lastIndexOf('\n');
-  final text = cut > 0 && raw.substring(cut + 1).startsWith('http')
-      ? raw.substring(0, cut)
-      : raw;
+  final lines = raw.trim().split('\n');
+  if (lines.last.trim().startsWith('http')) lines.removeLast();
+  final text = lines.join('\n').trim();
   return text.isEmpty ? null : text;
 }
 

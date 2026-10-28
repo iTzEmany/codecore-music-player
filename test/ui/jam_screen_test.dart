@@ -11,6 +11,7 @@ import 'package:codecore/ui/screens/jam/jam_request_dialog.dart';
 import 'package:codecore/ui/screens/jam/jam_screen.dart';
 import 'package:codecore/ui/widgets/empty_state.dart';
 import 'package:codecore/ui/widgets/ring_progress.dart';
+import 'package:codecore/ui/widgets/play_buttons.dart';
 import 'package:codecore/ui/widgets/seek_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -431,6 +432,69 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Terminare la Jam per tutti?'), findsNothing);
     expect(fake.ended, 0);
+    await h.dispose(tester);
+  });
+
+  testWidgets('toccare fuori o il tasto indietro chiudono il dialogo senza terminare', (tester) async {
+    final (fake, h) = await openJam(tester, state: withPeople(true, 3));
+    await tester.tap(find.text('Termina Jam'));
+    await tester.pumpAndSettle();
+    await tester.tapAt(const Offset(5, 5));
+    await tester.pumpAndSettle();
+    expect(find.text('Terminare la Jam per tutti?'), findsNothing);
+    await tester.tap(find.text('Termina Jam'));
+    await tester.pumpAndSettle();
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(find.text('Terminare la Jam per tutti?'), findsNothing);
+    expect(find.text('Termina Jam'), findsOneWidget);
+    expect(fake.ended, 0);
+    await h.dispose(tester);
+  });
+
+  testWidgets('senza brano corrente precedente, play e successivo sono spenti', (tester) async {
+    final base = active(host: true);
+    final (_, h) = await openJam(
+      tester,
+      state: JamUiState(
+        phase: base.phase,
+        role: base.role,
+        peerName: base.peerName,
+        peerId: base.peerId,
+        jam: base.jam!.copyWith(currentIndex: -1, playing: false),
+      ),
+    );
+    IconButton btn(IconData i) => tester.widget<IconButton>(
+        find.ancestor(of: find.byIcon(i), matching: find.byType(IconButton)).first);
+    expect(btn(Icons.skip_previous_rounded).onPressed, isNull);
+    expect(btn(Icons.skip_next_rounded).onPressed, isNull);
+    expect(tester.widget<PlayCircleButton>(find.byType(PlayCircleButton)).onPressed, isNull);
+    await h.dispose(tester);
+  });
+
+  testWidgets('un seek rifiutato riporta la barra alla posizione della Jam', (tester) async {
+    final base = active(host: false);
+    final (fake, h) = await openJam(
+      tester,
+      host: false,
+      sendResult: JamError.invalid,
+      state: JamUiState(
+        phase: base.phase,
+        role: base.role,
+        peerName: base.peerName,
+        peerId: base.peerId,
+        jam: base.jam!.copyWith(playing: false, positionMs: 30000, positionAt: 0),
+      ),
+    );
+    final slider = find.descendant(of: find.byType(SeekBar), matching: find.byType(Slider));
+    final r = tester.getRect(slider);
+    final g = await tester.startGesture(r.center);
+    await g.moveTo(Offset(r.right - 2, r.center.dy));
+    await g.up();
+    await tester.pump();
+    await tester.pump();
+    expect(fake.sent.single.type, JamCommandType.seek);
+    expect(find.text('0:30'), findsOneWidget);
     await h.dispose(tester);
   });
 
