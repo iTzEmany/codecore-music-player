@@ -169,6 +169,7 @@ ThemeData buildThemeFromColors(CcColors c, bool compact, {bool pageBackdrop = fa
       surfaceTintColor: Colors.transparent,
       modalBackgroundColor: c.surface1,
       showDragHandle: true,
+      constraints: const BoxConstraints(maxWidth: 560),
       dragHandleColor: c.surface3,
       shape: top(CcDims.rSheet),
     ),

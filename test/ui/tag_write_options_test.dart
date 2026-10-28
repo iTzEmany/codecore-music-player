@@ -16,6 +16,7 @@ import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/app_harness.dart';
+import '../support/menu_support.dart';
 
 Future<void> _settle(WidgetTester tester) async {
   await tester.runAsync(
@@ -168,7 +169,7 @@ void main() {
       expect(find.textContaining('4,0 MB'), findsOneWidget);
 
       // Cancel at the confirmation: nothing is restored.
-      await tester.tap(find.byWidgetPredicate((w) => w is PopupMenuButton));
+      await tester.tap(menuButton());
       await _settle(tester);
       await tester.tap(find.text('Ripristina originale').last);
       await _settle(tester);
@@ -180,7 +181,7 @@ void main() {
       await _settle(tester);
       expect(store.restored, isEmpty);
 
-      await tester.tap(find.byWidgetPredicate((w) => w is PopupMenuButton));
+      await tester.tap(menuButton());
       await _settle(tester);
       await tester.tap(find.text('Ripristina originale').last);
       await _settle(tester);
@@ -189,7 +190,7 @@ void main() {
       expect(store.restored, ['1']);
       expect(find.text('Originale ripristinato'), findsOneWidget);
 
-      await tester.tap(find.byWidgetPredicate((w) => w is PopupMenuButton));
+      await tester.tap(menuButton());
       await _settle(tester);
       await tester.tap(find.text('Elimina backup'));
       await _settle(tester);
