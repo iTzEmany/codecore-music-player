@@ -402,12 +402,13 @@ void main() {
       expect(weightOf('Line 3'), FontWeight.w500);
       expect(find.text('Line 1'), findsNothing);
 
-      // Last lines: the window is cut short (today: 4 lines shown, F-58).
+      // Last lines: the window steps back and keeps 5 lines (F-58, D-161).
       pos.add(const Duration(seconds: 71));
       await tester.pump();
       await tester.pump();
       expect(weightOf('Line 7'), FontWeight.w700);
-      expect(find.text('Line 4'), findsNothing);
+      expect(find.text('Line 2'), findsNothing);
+      expect(find.text('Line 3'), findsOneWidget);
       expect(find.text('Line 5'), findsOneWidget);
       await h.dispose(tester);
     });
