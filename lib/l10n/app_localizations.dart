@@ -2482,6 +2482,30 @@ abstract class AppLocalizations {
   /// **'Posizione non valida per questo brano'**
   String get jamSeekInvalid;
 
+  /// No description provided for @jamEndConfirmTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Terminare la Jam per tutti?'**
+  String get jamEndConfirmTitle;
+
+  /// No description provided for @jamEndConfirmBody.
+  ///
+  /// In it, this message translates to:
+  /// **'{n, plural, one{L’ospite verrà disconnesso e la coda condivisa verrà chiusa.} other{I {n} ospiti verranno disconnessi e la coda condivisa verrà chiusa.}}'**
+  String jamEndConfirmBody(int n);
+
+  /// No description provided for @jamEndConfirmAction.
+  ///
+  /// In it, this message translates to:
+  /// **'Termina'**
+  String get jamEndConfirmAction;
+
+  /// No description provided for @jamParticipantsLabel.
+  ///
+  /// In it, this message translates to:
+  /// **'{n, plural, one{1 partecipante: {names}} other{{n} partecipanti: {names}}}'**
+  String jamParticipantsLabel(int n, String names);
+
   /// No description provided for @jamWaitingEmpty.
   ///
   /// In it, this message translates to:

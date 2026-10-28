@@ -26,11 +26,23 @@ Future<void> showJamQueueSheet(BuildContext context) => showCcSheet<void>(
   ),
 );
 
-/// Rows with ⋮ («Salta qui», «Rimuovi») and ≡ (drag to move).
-class JamQueueSheet extends ConsumerWidget {
+/// The sheet: the queue in a scroll view of its own.
+class JamQueueSheet extends StatelessWidget {
   const JamQueueSheet({super.key, required this.scrollController});
 
   final ScrollController scrollController;
+
+  @override
+  Widget build(BuildContext context) => CustomScrollView(
+    controller: scrollController,
+    slivers: const [JamQueueSliver()],
+  );
+}
+
+/// Title and rows with ⋮ («Salta qui», «Rimuovi») and ≡ (drag to move): the
+/// sheet's body, and the desktop's side panel.
+class JamQueueSliver extends ConsumerWidget {
+  const JamQueueSliver({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -46,8 +58,7 @@ class JamQueueSheet extends ConsumerWidget {
     }
 
     final items = jam?.items ?? const <JamItem>[];
-    return CustomScrollView(
-      controller: scrollController,
+    return SliverMainAxisGroup(
       slivers: [
         SliverToBoxAdapter(
           child: Padding(
@@ -64,11 +75,13 @@ class JamQueueSheet extends ConsumerWidget {
           ),
         ),
         if (items.isEmpty)
-          SliverFillRemaining(
-            hasScrollBody: false,
-            child: EmptyState(
-              icon: Icons.queue_music_rounded,
-              message: l.jamEmpty,
+          SliverToBoxAdapter(
+            child: SizedBox(
+              height: 240,
+              child: EmptyState(
+                icon: Icons.queue_music_rounded,
+                message: l.jamEmpty,
+              ),
             ),
           )
         else

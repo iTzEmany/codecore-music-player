@@ -1443,6 +1443,35 @@ class AppLocalizationsFr extends AppLocalizations {
   String get jamSeekInvalid => 'Position non valide pour ce titre';
 
   @override
+  String get jamEndConfirmTitle => 'Terminer la Jam pour tous ?';
+
+  @override
+  String jamEndConfirmBody(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other:
+          'Les $n invités seront déconnectés et la file partagée sera fermée.',
+      one: 'L’invité sera déconnecté et la file partagée sera fermée.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get jamEndConfirmAction => 'Terminer';
+
+  @override
+  String jamParticipantsLabel(int n, String names) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n participants : $names',
+      one: '1 participant : $names',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get jamWaitingEmpty => 'Aucune Jam en cours';
 
   @override

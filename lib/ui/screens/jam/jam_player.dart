@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -104,6 +106,7 @@ class _JamPlayerViewState extends ConsumerState<JamPlayerView> {
     }
     final dur = Duration(milliseconds: cur?.durationMs ?? 0);
     final wide = MediaQuery.sizeOf(context).width >= _wideBreakpoint;
+    final textScale = MediaQuery.textScalerOf(context).scale(1);
     final cards = <Widget>[
       if (cur != null) ...[
         JamLyricsCard(item: cur),
@@ -121,6 +124,8 @@ class _JamPlayerViewState extends ConsumerState<JamPlayerView> {
             smooth: _smooth,
             duration: dur,
             onSeek: _seek,
+            // Phone: the taller header leaves the cover 260 dp at most.
+            maxRing: wide ? 460 : 260,
           );
           if (wide) {
             return Center(
@@ -134,11 +139,16 @@ class _JamPlayerViewState extends ConsumerState<JamPlayerView> {
                       padding: const EdgeInsets.only(right: CcDims.margin),
                       child: SizedBox(
                         width: 420,
-                        child: ListView(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: CcDims.gap16,
-                          ),
-                          children: cards,
+                        // Testo, Curiosità and the shared queue, as the
+                        // desktop player keeps «Prossimi» in this column.
+                        child: CustomScrollView(
+                          slivers: [
+                            SliverPadding(
+                              padding: const EdgeInsets.only(top: CcDims.gap16),
+                              sliver: SliverList.list(children: cards),
+                            ),
+                            const JamQueueSliver(),
+                          ],
                         ),
                       ),
                     ),
@@ -150,7 +160,11 @@ class _JamPlayerViewState extends ConsumerState<JamPlayerView> {
           return CustomScrollView(
             slivers: [
               SliverToBoxAdapter(
-                child: SizedBox(height: c.maxHeight, child: player),
+                // At big text the content outgrows the screen: the page scrolls.
+                child: SizedBox(
+                  height: math.max(c.maxHeight, 200 + 360 * textScale),
+                  child: player,
+                ),
               ),
               SliverPadding(
                 padding: const EdgeInsets.fromLTRB(
@@ -177,8 +191,10 @@ class _JamPlayer extends ConsumerWidget {
     required this.smooth,
     required this.duration,
     required this.onSeek,
+    required this.maxRing,
   });
 
+  final double maxRing;
   final Widget header;
   final JamState jam;
   final SmoothPosition smooth;
@@ -203,7 +219,7 @@ class _JamPlayer extends ConsumerWidget {
                 Expanded(
                   child: LayoutBuilder(
                     builder: (_, c) {
-                      final s = c.biggest.shortestSide.clamp(80.0, 460.0);
+                      final s = c.biggest.shortestSide.clamp(80.0, maxRing);
                       const stroke = 12.0;
                       final inner = RingProgress.innerSize(s, stroke: stroke);
                       return Center(

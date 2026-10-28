@@ -848,6 +848,27 @@
   "jamOutputsAndSync": "Uscite e sincronia",
   "jamHostTag": "host",
   "jamSeekInvalid": "Posizione non valida per questo brano",
+  "jamEndConfirmTitle": "Terminare la Jam per tutti?",
+  "jamEndConfirmBody": "{n, plural, one{L’ospite verrà disconnesso e la coda condivisa verrà chiusa.} other{I {n} ospiti verranno disconnessi e la coda condivisa verrà chiusa.}}",
+  "@jamEndConfirmBody": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "jamEndConfirmAction": "Termina",
+  "jamParticipantsLabel": "{n, plural, one{1 partecipante: {names}} other{{n} partecipanti: {names}}}",
+  "@jamParticipantsLabel": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "names": {
+        "type": "String"
+      }
+    }
+  },
   "jamWaitingEmpty": "Nessuna Jam in corso",
   "activityTitle": "Attività",
   "activityScan": "Scansione: {done} di {total}",

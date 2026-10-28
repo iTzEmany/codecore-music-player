@@ -11,7 +11,6 @@ import '../../../services/online/artist_link_resolver.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/artist_avatar.dart';
 import '../../widgets/cover_image.dart';
-import '../../widgets/ring_progress.dart' show NowPlayingDot;
 import '../../widgets/track_artists_sheet.dart';
 
 /// The credited artists of a shared track (no YouTube Music ids on the wire).
@@ -109,22 +108,21 @@ class JamQueueRow extends ConsumerWidget {
         ),
         child: Row(
           children: [
-            Stack(
-              alignment: Alignment.center,
-              children: [
-                JamCover(item: item, size: 48),
-                if (isCurrent)
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: cc.bg.withValues(alpha: 0.5),
-                      borderRadius: BorderRadius.circular(CcDims.rList),
-                    ),
-                    alignment: Alignment.center,
-                    child: const NowPlayingDot(),
-                  ),
-              ],
+            // The playing item: a 2 dp accent ring round a round cover.
+            SizedBox.square(
+              dimension: 52,
+              child: isCurrent
+                  ? DecoratedBox(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: cc.accent, width: 2),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(2),
+                        child: JamCover(item: item, size: 44, radius: 22),
+                      ),
+                    )
+                  : Center(child: JamCover(item: item, size: 48)),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -136,7 +134,9 @@ class JamQueueRow extends ConsumerWidget {
                     item.title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: theme.bodyLarge,
+                    style: isCurrent
+                        ? theme.bodyLarge?.copyWith(color: cc.accentSoft)
+                        : theme.bodyLarge,
                   ),
                   const SizedBox(height: 2),
                   Text(
@@ -144,7 +144,7 @@ class JamQueueRow extends ConsumerWidget {
                       if (item.artist != null) item.artist!,
                       l.jamAddedBy(who),
                       if (!item.available) l.jamUnavailable,
-                    ].join(', '),
+                    ].join(' · '),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: theme.bodySmall,
@@ -154,6 +154,8 @@ class JamQueueRow extends ConsumerWidget {
             ),
             IconButton(
               tooltip: l.moreActions,
+              visualDensity: VisualDensity.standard,
+              constraints: const BoxConstraints.tightFor(width: 48, height: 48),
               icon: Icon(Icons.more_vert_rounded, color: cc.textMuted),
               onPressed: () => showCcActionSheet<String>(
                 context: context,
@@ -184,8 +186,8 @@ class JamQueueRow extends ConsumerWidget {
             ),
             ReorderableDragStartListener(
               index: index,
-              child: Padding(
-                padding: const EdgeInsets.all(CcDims.gap8),
+              child: SizedBox.square(
+                dimension: 48,
                 child: Icon(Icons.drag_handle_rounded, color: cc.textMuted),
               ),
             ),
