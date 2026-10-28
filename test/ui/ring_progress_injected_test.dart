@@ -1,5 +1,8 @@
 import 'package:codecore/l10n/app_localizations.dart';
 import 'package:codecore/ui/widgets/ring_progress.dart';
+import 'package:codecore/ui/widgets/seek_bar.dart';
+import 'package:codecore/ui/widgets/smooth_position.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,7 +14,11 @@ void main() {
   final pos = ValueNotifier(const Duration(seconds: 25));
   final seeks = <Duration>[];
 
-  Future<void> pump(WidgetTester tester) => tester.pumpWidget(
+  Future<void> pump(
+    WidgetTester tester, {
+    bool live = false,
+    ValueListenable<Duration>? position,
+  }) => tester.pumpWidget(
     ProviderScope(
       child: MaterialApp(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -22,7 +29,8 @@ void main() {
             size: 300,
             stroke: 12,
             seekable: true,
-            position: pos,
+            live: live,
+            position: position ?? pos,
             duration: const Duration(seconds: 100),
             onSeek: seeks.add,
             child: const SizedBox.expand(),
@@ -87,5 +95,73 @@ void main() {
       '0:25 / 1:40',
     );
     h.dispose();
+  });
+
+  testWidgets('live mid-drag releases the shared drag', (tester) async {
+    await pump(tester);
+    final box = ProviderScope.containerOf(tester.element(find.byType(RingProgress)));
+    final c = tester.getCenter(find.byType(RingProgress));
+    final g = await tester.startGesture(c + const Offset(0, 139));
+    await g.moveBy(const Offset(4, 0));
+    expect(box.read(seekDragProvider), isNotNull);
+    await pump(tester, live: true); // e.g. the track changed to a radio
+    await tester.pump(); // the microtask that lets go
+    expect(box.read(seekDragProvider), isNull);
+    await g.up();
+    expect(seeks, isEmpty);
+  });
+
+  testWidgets('closing the ring mid-drag lets go of the shared drag', (
+    tester,
+  ) async {
+    final box = ProviderContainer();
+    addTearDown(box.dispose);
+    Widget host(bool ring) => UncontrolledProviderScope(
+      container: box,
+      child: MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('it'),
+        home: Center(
+          child: ring
+              ? RingProgress(
+                  size: 300,
+                  stroke: 12,
+                  seekable: true,
+                  position: pos,
+                  duration: const Duration(seconds: 100),
+                  onSeek: seeks.add,
+                  child: const SizedBox.expand(),
+                )
+              : const SizedBox(),
+        ),
+      ),
+    );
+    await tester.pumpWidget(host(true));
+    final g = await tester.startGesture(
+      tester.getCenter(find.byType(RingProgress)) + const Offset(0, 139),
+    );
+    expect(box.read(seekDragProvider), isNotNull);
+    await tester.pumpWidget(host(false));
+    await tester.pump();
+    expect(box.read(seekDragProvider), isNull);
+    await g.cancel();
+  });
+
+  testWidgets('release and keys hold the target on a SmoothPosition', (
+    tester,
+  ) async {
+    final smooth = SmoothPosition()
+      ..update(const Duration(seconds: 25), playing: false);
+    addTearDown(smooth.dispose);
+    await pump(tester, position: smooth);
+    final g = await tester.startGesture(
+      tester.getCenter(find.byType(RingProgress)) + const Offset(0, 139),
+    );
+    await g.up();
+    expect(smooth.value, seeks.single, reason: 'no fall back to 0:25');
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    expect(smooth.value, seeks.last);
   });
 }

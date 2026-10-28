@@ -125,4 +125,15 @@ void main() {
     expect(p.value, const Duration(seconds: 5));
     await end(tester);
   });
+
+  testWidgets('speed 2: advances twice as fast, also after jumpTo', (tester) async {
+    await pump(tester);
+    p.update(const Duration(seconds: 5), playing: true, speed: 2);
+    await tester.pump(const Duration(seconds: 1));
+    expect(p.value, const Duration(seconds: 7));
+    p.jumpTo(const Duration(seconds: 20));
+    await tester.pump(const Duration(seconds: 1));
+    expect(p.value, const Duration(seconds: 22));
+    await end(tester);
+  });
 }

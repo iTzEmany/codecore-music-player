@@ -221,6 +221,32 @@ void main() {
           seeks.single.inMilliseconds.toDouble());
     });
 
+    testWidgets('closing the bar mid-drag lets go of the shared drag', (tester) async {
+      final pos = ValueNotifier(const Duration(seconds: 10));
+      addTearDown(pos.dispose);
+      final box = ProviderContainer();
+      addTearDown(box.dispose);
+      Widget host(bool bar) => UncontrolledProviderScope(
+        container: box,
+        child: MaterialApp(
+          home: Scaffold(
+            body: bar
+                ? SeekBar(position: pos, duration: _dur, onSeek: (_) {})
+                : const SizedBox(),
+          ),
+        ),
+      );
+      await tester.pumpWidget(host(true));
+      final g = await tester.startGesture(tester.getCenter(find.byType(Slider)));
+      await g.moveBy(const Offset(1, 0));
+      await tester.pump();
+      expect(box.read(seekDragProvider), isNotNull);
+      await tester.pumpWidget(host(false));
+      await tester.pump();
+      expect(box.read(seekDragProvider), isNull);
+      await g.cancel();
+    });
+
     testWidgets('the Jam bar does not write the player drag state', (tester) async {
       const jam = JamState(
         hostDeviceId: 'h',

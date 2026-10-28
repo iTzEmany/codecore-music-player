@@ -82,6 +82,11 @@ class _RingProgressState extends ConsumerState<RingProgress> {
   @override
   void didUpdateWidget(RingProgress old) {
     super.didUpdateWidget(old);
+    if (widget.live && _drag != null) {
+      // The gesture recognizer is gone: its end never comes.
+      _drag = null;
+      Future.microtask(() => _dragNotifier.set(null));
+    }
     _ensureOwn();
     _own?.bindTickerMode(context);
   }
@@ -99,9 +104,14 @@ class _RingProgressState extends ConsumerState<RingProgress> {
   // Same step for the keyboard and for screen readers.
   static const _step = Duration(seconds: 5);
 
-  void _seekTo(Duration d) => widget.onSeek != null
-      ? widget.onSeek!(d)
-      : ref.read(playerControllerProvider).seek(d);
+  void _seekTo(Duration d) {
+    // Hold the target until the player answers, as the bar does.
+    final p = widget.position ?? _own;
+    if (p is SmoothPosition) p.jumpTo(d);
+    widget.onSeek != null
+        ? widget.onSeek!(d)
+        : ref.read(playerControllerProvider).seek(d);
+  }
 
   Duration? _readDuration() =>
       widget.duration ?? ref.read(durationProvider).value;
