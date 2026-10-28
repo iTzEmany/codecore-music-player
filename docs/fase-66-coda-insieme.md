@@ -33,10 +33,10 @@ In cima al foglio «Coda condivisa» una riga con due scelte («Coda dell'host»
 
 **Fatto quando:** test della scelta con seme fisso (pesi, esclusione, ripiego, libreria vuota → nessun suggerito); test host+ospite: la parte vuota riceve un suggerito al suo turno.
 
-### 66.6 — Ritorno, ingresso e uscita (R-104, R-105, D-193, D-210)
-`setMode(host)` lascia gli item dove sono e ferma i feeder; da lì le aggiunte vanno in fila come R-88. Durante `together` chi entra va in fondo al giro; chi esce lo lascia, i suoi brani di libreria si tolgono e quelli online restano al loro posto (D-93).
+### 66.6 — Ritorno, ingresso e uscita (R-91, R-104, R-105, D-193, D-210, D-221)
+`setMode(host)` lascia gli item dove sono e ferma i feeder; da lì le aggiunte vanno in fila come R-88. Durante `together` chi entra va in fondo al giro; chi esce lo lascia, i suoi brani di libreria si tolgono e quelli online restano al loro posto (D-93). In entrambe le modalità, se esce l'unico ospite la Jam resta aperta con il solo host, che continua la coda (D-221): `JamHost.removeMember` non chiama più `endSession()` quando `_members` è vuoto.
 
-**Fatto quando:** test del reducer e della simulazione per i tre casi.
+**Fatto quando:** test del reducer e della simulazione per i tre casi; test host + un ospite in memoria: l'ospite esce con un brano online non suonato → la Jam resta attiva sull'host, il brano è in coda e l'host lo prepara da sé.
 
 ### 66.7 — Controlli di fase
 `flutter analyze`, comando mirato, suite completa in CI, `/code-review high`, scheggia in modalità passo su 66.2 e 66.4 e in modalità fase (Linux + Mi A3 da soli non bastano per la Jam: prova a mano in 68.3), review di architettura Opus.

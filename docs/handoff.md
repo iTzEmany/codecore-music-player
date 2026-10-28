@@ -1,7 +1,7 @@
 # Handoff — 2026-10-28 (fase 65 «Rilievi della Jam», PR #59)
 
 ## Prima di tutto (per la prossima chat)
-Kickoff della feature «Jam: cassa e coda insieme» fatto il 28/10 (`docs/feature-jam-cassa.md`, R-88…R-119, D-177…D-220). Fasi 65–68 in `docs/PROGRESS.md`. La 65 è nella PR #59 (rilievi chiusi tranne R-91, vedi sotto); si prosegue con `/obiettivo fase 66`. Prima rispondi alla scelta su R-91.
+Kickoff della feature «Jam: cassa e coda insieme» fatto il 28/10 (`docs/feature-jam-cassa.md`, R-88…R-119, D-177…D-220). Fasi 65–68 in `docs/PROGRESS.md`. La 65 è nella PR #59 (rilievi chiusi tranne R-91, vedi sotto); si prosegue con `/obiettivo fase 66`.
 
 ## Stato
 - **57** (#45, #46): URL da NewPipeExtractor su Android (D-164, D-173 desugaring per API < 33), vietati ai minori → traccia di YouTube Music, `UrlSession`, brano dopo dall'URL anticipato, gapless e crossfade da URL verso file; crossfade senza esaurire l'Equalizer sul Mi A3.
@@ -29,7 +29,7 @@ Kickoff della feature «Jam: cassa e coda insieme» fatto il 28/10 (`docs/featur
 - Misure: `python3 scripts/perf_device.py <id> --label <l> [--no-build --no-push --apk <apk>] [--only "A,B"]`. Per confrontare due commit: un worktree per commit, due APK `--profile` con `CODECORE_PERF=1`, run alternati A,B,A,B con `--only`.
 
 ## Jam: rilievi (fase 65, prova sui telefoni del 28/10)
-1. Ruoli e uscita dell'ospite: chiuso per R-90 (coda di prima, in pausa, stesso punto). **Aperto R-91**: con un solo ospite la sua uscita chiude la Jam (`JamHost.removeMember` → `endSession` quando resta solo l'host) e i suoi brani online non suonati si perdono; con ≥ 2 ospiti restano. Scelta di prodotto: l'host continua da solo con la coda della Jam, o la Jam finisce come oggi?
+1. Ruoli e uscita dell'ospite: chiuso per R-90 (coda di prima, in pausa, stesso punto). **R-91 nella fase 66.6**: con un solo ospite la sua uscita chiude la Jam e i suoi brani online si perdono; deciso che l'host continua da solo con la coda della Jam (D-221).
 2. Aggiunte dell'ospite in fila dopo il corrente: chiuso (65.1, R-88).
 3. Swipe «in coda» online dell'ospite: chiuso, funziona sui telefoni (65.2).
 4. «Scarica» nel ⋮ a foglio aperto: chiuso (65.5, R-93).
