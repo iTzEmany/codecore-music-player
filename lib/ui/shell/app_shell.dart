@@ -55,7 +55,7 @@ class AppShell extends ConsumerWidget {
     control: true,
   );
 
-  Map<ShortcutActivator, VoidCallback> _shortcuts(WidgetRef ref) {
+  Map<ShortcutActivator, VoidCallback> _shortcuts(WidgetRef ref, {required bool preview}) {
     void back() => ref
         .read(tabNavigatorKeysProvider)[ref.read(navIndexProvider)]
         .currentState
@@ -85,11 +85,11 @@ class AppShell extends ConsumerWidget {
         );
       },
       const SingleActivator(LogicalKeyboardKey.arrowLeft, alt: true): back,
-      // Ends a 20 s preview started from the menu.
-      const SingleActivator(LogicalKeyboardKey.escape): () {
-        final preview = ref.read(previewProvider);
-        if (preview.active) ref.read(previewProvider.notifier).stop();
-      },
+      // Ends a 20 s preview started from the menu. Only bound while one
+      // runs: ShellKeys would swallow the Esc a sheet in a tab needs.
+      if (preview)
+        const SingleActivator(LogicalKeyboardKey.escape): () =>
+            ref.read(previewProvider.notifier).stop(),
       _volUp: () => bump(0.05),
       _volDown: () => bump(-0.05),
     };
@@ -200,7 +200,10 @@ class AppShell extends ConsumerWidget {
     );
     if (isDesktop) {
       content = ShellKeys(
-        bindings: _shortcuts(ref),
+        bindings: _shortcuts(
+          ref,
+          preview: ref.watch(previewProvider.select((p) => p.active)),
+        ),
         textOnly: const {_space, _volUp, _volDown},
         // Any click ends a preview started from the menu.
         child: Listener(

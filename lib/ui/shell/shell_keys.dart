@@ -57,8 +57,14 @@ class _ShellKeysState extends State<ShellKeys> {
 
   /// Focus sits on a scope itself (the route's, or the root): nothing below it
   /// is focused, so key events never reach [_node].
-  static bool _lostFocus() =>
-      FocusManager.instance.primaryFocus is FocusScopeNode;
+  /// Not the scope of a sheet or dialog: focus there is on purpose, and taking
+  /// it would stop Esc from reaching the sheet.
+  static bool _lostFocus() {
+    final f = FocusManager.instance.primaryFocus;
+    if (f is! FocusScopeNode) return false;
+    final ctx = f.context;
+    return ctx == null || ModalRoute.of(ctx) is! PopupRoute;
+  }
 
   static bool _typing() {
     final ctx = FocusManager.instance.primaryFocus?.context;
