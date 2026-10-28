@@ -11,6 +11,7 @@ import '../../../providers/player_providers.dart';
 import '../../../providers/sleep_timer_provider.dart';
 import '../../../services/audio/play_queue.dart';
 import '../../theme/tokens.dart';
+import '../../widgets/cc_sheet.dart';
 import '../../widgets/format_utils.dart';
 import '../../widgets/play_buttons.dart';
 import '../../widgets/quality_tag.dart';
@@ -359,25 +360,23 @@ class _SleepChipState extends ConsumerState<_SleepChip> {
     } else if (timer.atTrackEnd) {
       label = l.sleepChipEnd;
     }
-    return PopupMenuButton<int>(
-      key: const Key('np-sleep-chip'),
-      tooltip: l.sleepTimer,
-      onSelected: (v) {
-        switch (v) {
-          case 0:
-            notifier.cancel();
-          case -1:
-            notifier.startAtTrackEnd();
-          default:
-            notifier.startMinutes(v);
-        }
-      },
-      itemBuilder: (_) => [
-        for (final m in const [15, 30, 45, 60])
-          PopupMenuItem(value: m, child: Text(l.sleepMinutes(m))),
-        PopupMenuItem(value: -1, child: Text(l.sleepEndOfTrack)),
-        if (timer.active) PopupMenuItem(value: 0, child: Text(l.sleepCancel)),
-      ],
+    return Tooltip(
+      message: l.sleepTimer,
+      child: InkWell(
+        key: const Key('np-sleep-chip'),
+        borderRadius: BorderRadius.circular(CcDims.rPill),
+        onTap: () async {
+          final v = await _showSleepSheet(context, timer);
+          if (v == null) return;
+          switch (v) {
+            case 0:
+              notifier.cancel();
+            case -1:
+              notifier.startAtTrackEnd();
+            default:
+              notifier.startMinutes(v);
+          }
+        },
       child: Container(
         padding: const EdgeInsets.symmetric(
           horizontal: CcDims.gap12,
@@ -406,6 +405,60 @@ class _SleepChipState extends ConsumerState<_SleepChip> {
           ],
         ),
       ),
+      ),
     );
   }
+}
+
+/// Single-choice blocks like the speed sheet; pops 15/30/45/60, -1 (end of track) or 0 (cancel).
+Future<int?> _showSleepSheet(BuildContext context, SleepTimerState timer) {
+  final l = context.l10n;
+  return showCcSheet<int>(
+    context: context,
+    useRootNavigator: true,
+    builder: (sheet) => SafeArea(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(
+          CcDims.margin,
+          0,
+          CcDims.margin,
+          CcDims.margin,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(l.sleepTimer, style: Theme.of(sheet).textTheme.titleMedium),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final m in const [15, 30, 45, 60])
+                  ChoiceChip(
+                    key: ValueKey<Object>(m),
+                    label: Text(l.sleepMinutes(m)),
+                    selected: false,
+                    onSelected: (_) => Navigator.of(sheet).pop(m),
+                  ),
+                ChoiceChip(
+                  key: const ValueKey<Object>(-1),
+                  label: Text(l.sleepEndOfTrack),
+                  selected: timer.atTrackEnd,
+                  onSelected: (_) => Navigator.of(sheet).pop(-1),
+                ),
+                if (timer.active)
+                  ChoiceChip(
+                    key: const ValueKey<Object>(0),
+                    label: Text(l.sleepCancel),
+                    selected: false,
+                    onSelected: (_) => Navigator.of(sheet).pop(0),
+                  ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
 }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../data/repositories/library_entries.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../theme/tokens.dart';
+import '../../widgets/cc_sheet.dart';
 
 /// Under the blocks: the count on the left, the sort menu and the list/grid
 /// toggle on the right.
@@ -48,12 +49,25 @@ class LibraryToolbar extends StatelessWidget {
             // Right-aligned: the flexible slot is half the row, sort sits by the grid button.
             child: Align(
               alignment: Alignment.centerRight,
-              child: PopupMenuButton<LibrarySort>(
-                onSelected: onSort,
-                itemBuilder: (_) => [
-                  for (final s in LibrarySort.values)
-                    PopupMenuItem(value: s, child: Text(name(s))),
-                ],
+              child: InkWell(
+                onTap: () async {
+                  final s = await showCcActionSheet<LibrarySort>(
+                    context: context,
+                    title: l.sortBy,
+                    groups: [
+                      [
+                        for (final o in LibrarySort.values)
+                          CcAction(
+                            icon: Icons.sort_rounded,
+                            label: name(o),
+                            value: o,
+                            selected: o == sort,
+                          ),
+                      ],
+                    ],
+                  );
+                  if (s != null) onSort(s);
+                },
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: CcDims.gap8,

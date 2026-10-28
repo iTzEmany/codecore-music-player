@@ -41,6 +41,7 @@ import 'package:codecore/providers/sleep_timer_provider.dart';
 import 'package:codecore/services/jam/jam_models.dart';
 import 'package:codecore/ui/screens/jam/jam_screen.dart';
 import 'package:codecore/ui/screens/library/favorites_screen.dart';
+import 'package:codecore/ui/screens/library/library_toolbar.dart';
 import 'package:codecore/ui/screens/now_playing/now_playing_screen.dart';
 import 'package:codecore/ui/screens/now_playing/queue_sheet.dart';
 import 'package:codecore/ui/screens/now_playing/suggestions_screen.dart';
@@ -584,9 +585,28 @@ void main() {
     await _choose(tester, 'A–Z');
     expect(
       find.descendant(
-        of: menuButton(),
+        of: find.byType(LibraryToolbar),
         matching: find.text('A–Z'),
       ),
+      findsOneWidget,
+    );
+    await h.dispose(tester);
+  });
+
+  testWidgets('library sort: the current order is marked in the sheet', (tester) async {
+    _phone(tester);
+    final h = await Harness.create(tester, tracks: 2);
+    await h.pump(tester, const Scaffold(body: LibraryScreen()));
+    await _settle(tester);
+    await tester.tap(find.text('Recenti'));
+    await _settle(tester);
+    final marked = find.descendant(
+      of: find.byType(BottomSheet),
+      matching: find.byWidgetPredicate((w) => w is ListTile && w.selected),
+    );
+    expect(marked, findsOneWidget);
+    expect(
+      find.descendant(of: marked, matching: find.text('Recenti')),
       findsOneWidget,
     );
     await h.dispose(tester);
@@ -634,7 +654,7 @@ void main() {
     await h.dispose(tester);
   });
 
-  testWidgets('queue sheet: one entry, «Suggeriti di recente», opens the suggestions page', (tester) async {
+  testWidgets('queue sheet: direct button «Suggeriti di recente» (no menu), opens the suggestions page', (tester) async {
     _phone(tester);
     final h = await Harness.create(tester, tracks: 3);
     final rows = await _tracks(tester, h);
@@ -643,8 +663,12 @@ void main() {
     addTearDown(sc.dispose);
     await h.pump(tester, Scaffold(body: QueueSheet(scrollController: sc)));
     await _settle(tester);
-    expect(await _open(tester, menuButton()), _queueMenu);
-    await _choose(tester, 'Suggeriti di recente');
+    expect(find.byType(PopupMenuButton), findsNothing);
+    expect(
+      find.widgetWithText(TextButton, _queueMenu.single),
+      findsOneWidget,
+    );
+    await _choose(tester, _queueMenu.single);
     expect(find.byType(SuggestionsScreen), findsOneWidget);
     await h.dispose(tester);
   });

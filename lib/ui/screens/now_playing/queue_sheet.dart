@@ -286,14 +286,15 @@ class _QueueTitleRow extends StatelessWidget {
           ),
           if (hasUpcoming)
             TextButton(onPressed: onClear, child: Text(l.queueClear)),
-          PopupMenuButton<void>(
-            tooltip: l.moreOptions,
-            itemBuilder: (_) => [
-              PopupMenuItem<void>(
-                onTap: () => openSuggestions(context),
-                child: Text(l.suggestionsRecentTitle),
+          Flexible(
+            child: TextButton(
+              onPressed: () => openSuggestions(context),
+              child: Text(
+                l.suggestionsRecentTitle,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-            ],
+            ),
           ),
         ],
       ),
