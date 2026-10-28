@@ -22,6 +22,10 @@ typedef JamSourceResolver = Future<JamSource?> Function(JamItem item);
 
 const jamDriftTolerance = Duration(milliseconds: 1500);
 
+/// Single output: re-seek when the position is this far off (clock skew is
+/// seconds; start latency and position jitter are not worth a jump).
+const jamSingleOutputReseek = Duration(milliseconds: 500);
+
 /// Plays the shared state on this device when it is the output device.
 /// Applies `playing`/`position` with a drift tolerance (no sync promised).
 class JamOutput {
@@ -37,7 +41,10 @@ class JamOutput {
     this.latencyMs = 0,
     this.syncController = const JamSyncController(),
     this.syncInterval = const Duration(milliseconds: 500),
-  }) : _nowMs = nowMs ?? (() => DateTime.now().millisecondsSinceEpoch) {
+  }) : _nowMs = nowMs ??
+           (clock != null
+               ? clock.jamNowMs // the shared position is in the host's clock
+               : () => DateTime.now().millisecondsSinceEpoch) {
     _subs
       ..add(backend.position.listen((p) => _position = p))
       ..add(backend.state.listen(_onBackend));
@@ -188,6 +195,18 @@ class JamOutput {
       if (s.playing && !_backendPlaying && s.outputs.contains(deviceId)) {
         await backend.play();
       }
+      // The Jam clock settles after the first state: re-check the position.
+      // Not in the first second after the (re)start: the player is still
+      // starting up.
+      final since = _nowMs() - s.positionAt;
+      if (c != null && s.playing && _backendPlaying && since > 1000) {
+        final target = s.positionAtTime(_nowMs());
+        final drift = backend.positionNow.inMilliseconds - target;
+        if (drift.abs() > jamSingleOutputReseek.inMilliseconds) {
+          AppLog.d('jam sync: single output drift ${drift}ms, seek to $target');
+          await backend.seek(Duration(milliseconds: target));
+        }
+      }
       return;
     }
     _ticking = true;
@@ -207,6 +226,12 @@ class JamOutput {
         final expected =
             s.positionMs + (c.jamNowMs() - s.positionAt) + latencyMs;
         onSyncError?.call(measured - expected);
+      }
+      if (!a.isNoop) {
+        AppLog.d(
+          'jam sync: measured ${measured}ms, offset ${c.offsetMs}ms, '
+          'lat ${latencyMs}ms -> $a',
+        );
       }
       if (a.seekToMs != null) {
         await backend.seek(Duration(milliseconds: a.seekToMs! < 0 ? 0 : a.seekToMs!));

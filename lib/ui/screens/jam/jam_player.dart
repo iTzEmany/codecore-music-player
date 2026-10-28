@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/app_log.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/jam_providers.dart';
 import '../../../services/jam/jam_models.dart';
@@ -38,14 +40,22 @@ class _JamPlayerViewState extends ConsumerState<JamPlayerView> {
   // Own drag state: the Jam's clock is not the local player's (ring, bar, times).
   final _scope = [seekDragProvider.overrideWith(SeekDrag.new)];
 
+  // The Jam clock is refined after the first state arrives: re-read it.
+  Timer? _refresh;
+
   JamState get _jam => widget.state.jam!;
 
-  void _feed() {
+  bool _seeking = false; // a user seek waits for the host's answer
+
+  void _feed({bool refresh = false}) {
     final jam = _jam;
+    final shown = jam.positionAtTime(ref.read(jamProvider.notifier).jamNowMs());
+    final was = _smooth.value.inMilliseconds;
+    if (refresh && jam.playing && (was - shown).abs() > 100) {
+      AppLog.d('jam ui: shown position moved ${shown - was}ms on refresh');
+    }
     _smooth.update(
-      Duration(
-        milliseconds: jam.positionAtTime(ref.read(jamProvider.notifier).jamNowMs()),
-      ),
+      Duration(milliseconds: shown),
       playing: jam.playing && jam.current != null,
       duration: Duration(milliseconds: jam.current?.durationMs ?? 0),
     );
@@ -55,6 +65,9 @@ class _JamPlayerViewState extends ConsumerState<JamPlayerView> {
   void initState() {
     super.initState();
     _feed();
+    _refresh = Timer.periodic(const Duration(seconds: 3), (_) {
+      if (!_seeking) _feed(refresh: true);
+    });
   }
 
   @override
@@ -71,14 +84,21 @@ class _JamPlayerViewState extends ConsumerState<JamPlayerView> {
 
   @override
   void dispose() {
+    _refresh?.cancel();
     _smooth.dispose();
     super.dispose();
   }
 
   Future<void> _seek(Duration d) async {
-    final err = await ref
-        .read(jamProvider.notifier)
-        .send(JamCommand.seek(d.inMilliseconds));
+    _seeking = true;
+    final JamError? err;
+    try {
+      err = await ref
+          .read(jamProvider.notifier)
+          .send(JamCommand.seek(d.inMilliseconds));
+    } finally {
+      _seeking = false;
+    }
     if (err != JamError.invalid || !mounted) return;
     _feed(); // back to the Jam's position
     showMsg(context, context.l10n.jamSeekInvalid);
