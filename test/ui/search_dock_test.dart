@@ -138,13 +138,13 @@ void main() {
     c.read(searchFocusProvider).unfocus();
     await t.pump();
     await t.tap(_tab('Cerca'));
-    await t.pump();
+    await _settle(t);
     expect(c.read(searchFocusProvider).hasFocus, isTrue);
     // Android Back hides the keyboard but keeps the focus: Cerca shows it.
     t.testTextInput.hide();
     await t.pump();
     await t.tap(_tab('Cerca'));
-    await t.pump();
+    await _settle(t);
     expect(t.testTextInput.isVisible, isTrue);
     await h.dispose(t);
   });

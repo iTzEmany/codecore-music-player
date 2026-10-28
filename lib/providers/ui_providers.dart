@@ -1,4 +1,3 @@
-import 'package:flutter/services.dart' show SystemChannels;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -54,17 +53,27 @@ class SearchBarNotifier extends Notifier<bool> {
     return false;
   }
 
+  /// Whether the field takes the focus (and the keyboard) when it appears.
+  bool focusOnShow = true;
+
   /// Shows the field above the dock, on the Search tab.
   void open() {
     ref.read(navIndexProvider.notifier).set(NavTab.search.index);
-    // Already shown with the keyboard hidden by hand: Cerca brings it back
-    // (Android Back hides the keyboard but leaves the focus, so ask for it).
+    focusOnShow = true;
+    // Already shown with the keyboard hidden by hand: Cerca brings it back.
+    // Android Back hides the keyboard but leaves the focus, so drop it first.
     if (state) {
       final focus = ref.read(searchFocusProvider);
-      focus.hasFocus
-          ? SystemChannels.textInput.invokeMethod<void>('TextInput.show')
-          : focus.requestFocus();
+      if (focus.hasFocus) focus.unfocus();
+      WidgetsBinding.instance.addPostFrameCallback((_) => focus.requestFocus());
     }
+    state = true;
+  }
+
+  /// Back to the root of Search from a page: the field returns, no keyboard.
+  void reopen() {
+    if (ref.read(navIndexProvider) != NavTab.search.index) return;
+    focusOnShow = false;
     state = true;
   }
 

@@ -126,7 +126,10 @@ class AppShell extends ConsumerWidget {
       // A page opened from Search brings the tabs back, so Back pops it.
       observers: [
         if (i == NavTab.search.index)
-          _OnPush(ref.read(searchBarProvider.notifier).close),
+          _SearchPages(
+            onPush: ref.read(searchBarProvider.notifier).close,
+            onReturn: ref.read(searchBarProvider.notifier).reopen,
+          ),
       ],
       onGenerateRoute: (_) => MaterialPageRoute<void>(builder: (_) => root),
     );
@@ -359,14 +362,19 @@ class _WideShell extends ConsumerWidget {
   }
 }
 
-class _OnPush extends NavigatorObserver {
-  _OnPush(this.onPush);
+class _SearchPages extends NavigatorObserver {
+  _SearchPages({required this.onPush, required this.onReturn});
 
-  final VoidCallback onPush;
+  final VoidCallback onPush, onReturn;
 
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
     // The tab's root route is pushed while the navigator builds.
     if (previousRoute != null) onPush();
+  }
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    if (previousRoute?.isFirst ?? false) onReturn();
   }
 }

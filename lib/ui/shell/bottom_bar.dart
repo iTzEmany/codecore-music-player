@@ -141,7 +141,10 @@ class _DockFrame extends StatelessWidget {
               // Offstage alone would leave the tabs focusable.
               ExcludeFocus(
                 excluding: keyboard > 0,
-                child: Offstage(offstage: keyboard > 0, child: layers),
+                child: TickerMode(
+                  enabled: keyboard == 0,
+                  child: Offstage(offstage: keyboard > 0, child: layers),
+                ),
               ),
             ],
           ),
@@ -163,6 +166,7 @@ class _SearchFieldState extends ConsumerState<_SearchField> {
   @override
   void initState() {
     super.initState();
+    if (!ref.read(searchBarProvider.notifier).focusOnShow) return;
     // autofocus loses to a focus the tapped tab may have left in the scope.
     WidgetsBinding.instance.addPostFrameCallback(
       (_) => mounted ? ref.read(searchFocusProvider).requestFocus() : null,
@@ -174,34 +178,36 @@ class _SearchFieldState extends ConsumerState<_SearchField> {
     final l = context.l10n;
     final online = ref.watch(searchOnlineProvider);
     final controller = ref.watch(searchControllerProvider);
+    final focus = ref.watch(searchFocusProvider);
     return ConstrainedBox(
       constraints: const BoxConstraints(minHeight: CcDims.bottomBarHeight),
       // heightFactor: the bottom bar slot is as tall as the screen.
       child: Center(
         heightFactor: 1,
-        child: TextField(
-          controller: controller,
-          focusNode: ref.watch(searchFocusProvider),
-          textInputAction: TextInputAction.search,
-          onSubmitted: (_) => ref.read(searchSubmitProvider.notifier).submit(),
-          decoration: InputDecoration(
-            hintText: online ? l.ytHint : l.searchHint,
-            prefixIcon: const Icon(Icons.search_rounded),
-            // ✕ only while there is text to clear.
-            suffixIcon: ValueListenableBuilder<TextEditingValue>(
-              valueListenable: controller,
-              builder: (_, v, _) => v.text.isEmpty
-                  ? const SizedBox.shrink()
+        child: ValueListenableBuilder<TextEditingValue>(
+          valueListenable: controller,
+          builder: (_, v, _) => TextField(
+            controller: controller,
+            focusNode: focus,
+            textInputAction: TextInputAction.search,
+            onSubmitted: (_) =>
+                ref.read(searchSubmitProvider.notifier).submit(),
+            decoration: InputDecoration(
+              hintText: online ? l.ytHint : l.searchHint,
+              prefixIcon: const Icon(Icons.search_rounded),
+              // ✕ only while there is text to clear.
+              suffixIcon: v.text.isEmpty
+                  ? null
                   : IconButton(
                       tooltip: l.clearSearch,
                       icon: const Icon(Icons.close_rounded),
                       onPressed: ref.read(searchBarProvider.notifier).dismiss,
                     ),
+              filled: false,
+              border: InputBorder.none,
+              enabledBorder: InputBorder.none,
+              focusedBorder: InputBorder.none,
             ),
-            filled: false,
-            border: InputBorder.none,
-            enabledBorder: InputBorder.none,
-            focusedBorder: InputBorder.none,
           ),
         ),
       ),

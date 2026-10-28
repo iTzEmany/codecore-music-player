@@ -678,6 +678,29 @@ void main() {
     await h.dispose(t);
   });
 
+  testWidgets('back from a page opened in Search: the field returns, no keyboard',
+      (t) async {
+    _phone(t);
+    final h = await Harness.create(t, tracks: 2);
+    await h.pump(t, const AppShell());
+    await t.tap(_bar('Cerca'));
+    await _settle(t);
+    await t.enterText(_dockField(), 'Song');
+    await _settle(t);
+    final c = _container(t);
+    c.read(tabNavigatorKeysProvider)[NavTab.search.index].currentState!.push(
+        MaterialPageRoute<void>(builder: (_) => const Text('Pushed page')));
+    await _settle(t);
+    expect(_dockField(), findsNothing);
+    await t.binding.handlePopRoute();
+    await _settle(t);
+    expect(c.read(navIndexProvider), NavTab.search.index);
+    expect(_dockField(), findsOneWidget);
+    expect(c.read(searchControllerProvider).text, 'Song');
+    expect(c.read(searchFocusProvider).hasFocus, isFalse);
+    await h.dispose(t);
+  });
+
   testWidgets('keyboard lifts only the search field', (t) async {
     _phone(t);
     final h = await Harness.create(t, tracks: 2);
