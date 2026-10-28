@@ -33,7 +33,7 @@ void main() {
   late List<JamCommand> sent;
   late int now;
 
-  JamTransport make({bool canSkip = true}) {
+  JamTransport make() {
     sent = [];
     now = 1000;
     return JamTransport(
@@ -41,7 +41,6 @@ void main() {
         sent.add(c);
         return null;
       },
-      canSkip: canSkip,
       nowMs: () => now,
     );
   }
@@ -96,11 +95,15 @@ void main() {
     expect(sent.last.positionMs, 30000);
   });
 
-  test('a guest cannot skip: no command is sent', () async {
-    final t = make(canSkip: false)..update(state());
-    expect(t.status.canSkip, isFalse);
-    await t.next();
-    expect(sent, isEmpty);
+  test('everyone can skip, and previous follows the player rule', () async {
+    final t = make()..update(state(index: 1, pos: 0, at: 1000));
+    expect(t.status.canSkip, isTrue);
+    await t.previous(); // 0 s in: back to the item before
+    now = 1000 + 5000;
+    await t.previous(); // 5 s in: restart
+    expect(sent.map((c) => c.type), [JamCommandType.jump, JamCommandType.seek]);
+    expect(sent.first.itemId, 1);
+    expect(sent.last.positionMs, 0);
   });
 
   test('every state change is announced', () async {

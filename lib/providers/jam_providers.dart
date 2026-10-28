@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 
@@ -22,6 +23,7 @@ import '../services/jam/jam_host.dart';
 import '../services/jam/jam_models.dart';
 import '../services/jam/jam_online_adder.dart';
 import '../services/jam/jam_output.dart';
+import '../services/jam/jam_state.dart';
 import '../services/online/download_index.dart';
 import '../services/online/youtube_service.dart' show YtResult;
 import '../services/share/track_meta.dart';
@@ -353,8 +355,7 @@ class JamController extends Notifier<JamUiState> {
     _attachedTo = handler;
     final transport = _transport = JamTransport(
       send: send,
-      canSkip: role == JamRole.host,
-      nowMs: () => _clock?.jamNowMs() ?? DateTime.now().millisecondsSinceEpoch,
+      nowMs: jamNowMs,
     );
     handler.attachRemote(transport);
     state = state.copyWith(phase: JamPhase.active, role: role, jam: s);
@@ -578,6 +579,20 @@ class JamController extends Notifier<JamUiState> {
     }
     final r = await _guest?.send(cmd);
     return r?.error;
+  }
+
+  @visibleForTesting
+  // ignore: use_setters_to_change_properties
+  void debugSetClock(JamClock c) => _clock = c;
+
+  /// The Jam's reference clock (the host's), the one `JamState.positionAt` is on.
+  int jamNowMs() => _clock?.jamNowMs() ?? DateTime.now().millisecondsSinceEpoch;
+
+  /// «Previous» as in the player (D-160): restart, or the item before.
+  Future<JamError?> previous() {
+    final s = state.jam;
+    if (s == null) return Future.value(JamError.ended);
+    return send(jamPreviousCommand(s, jamNowMs()));
   }
 
   /// Library ids to the shared queue; a shadow row (`stream:` path, no extension) goes as an online result.

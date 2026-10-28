@@ -72,7 +72,7 @@ void main() {
     expect(o, JamJoinOutcome.accepted);
   }
 
-  test('guest and host edit the same queue, guest cannot jump', () async {
+  test('guest and host edit the same queue, guest can jump', () async {
     await join();
     expect(guest.state!.hostDeviceId, 'host');
 
@@ -89,7 +89,7 @@ void main() {
     expect(guest.state!.items.map((i) => i.title), ['G', 'H']);
 
     final j = await guest.send(const JamCommand.jump(2));
-    expect(j.error, JamError.forbidden);
+    expect(j.isOk, true);
     final rm = await guest.send(const JamCommand.remove(2));
     expect(rm.error, JamError.forbidden);
     final mv = await guest.send(const JamCommand.move(2, 0));

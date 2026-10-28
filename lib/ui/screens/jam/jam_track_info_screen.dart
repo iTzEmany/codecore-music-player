@@ -35,14 +35,7 @@ class JamTrackInfoScreen extends ConsumerWidget {
     ].whereType<String>().join(', ');
     final lyrics = meta?.lyricsPlain;
     final cover = ref.watch(jamTrackCoverProvider(itemId)).value;
-    // «text\nurl»: the url is the source, not shown here.
-    final raw = meta?.curiosities;
-    final cut = raw?.lastIndexOf('\n') ?? -1;
-    final trivia = raw == null
-        ? null
-        : (cut > 0 && raw.substring(cut + 1).startsWith('http')
-              ? raw.substring(0, cut)
-              : raw);
+    final trivia = jamTriviaText(meta?.curiosities);
     return Scaffold(
       appBar: CcAppBar(title: l.trackInfo),
       body: ListView(
@@ -74,20 +67,18 @@ class JamTrackInfoScreen extends ConsumerWidget {
                     goToArtists(context, ref, jamArtists(item, ref)),
               ),
             ),
-          if (s.isHost) ...[
-            const SizedBox(height: CcDims.gap16),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: FilledButton(
-                onPressed: () {
-                  ref.read(jamProvider.notifier).send(JamCommand.jump(item.id));
-                  Navigator.of(context).maybePop();
-                },
-                child: Text(l.jamJumpHere),
-              ),
+          const SizedBox(height: CcDims.gap16),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: FilledButton(
+              onPressed: () {
+                ref.read(jamProvider.notifier).send(JamCommand.jump(item.id));
+                Navigator.of(context).maybePop();
+              },
+              child: Text(l.jamJumpHere),
             ),
-          ],
-          if (trivia != null && trivia.isNotEmpty) ...[
+          ),
+          if (trivia != null) ...[
             const SizedBox(height: CcDims.gap24),
             Text(l.fieldCuriosity, style: theme.titleMedium),
             const SizedBox(height: CcDims.gap8),

@@ -1087,12 +1087,12 @@ mobile_scanner — fase 24 — 2026-10-19
 - [x] 62.5 Controlli di fase
 
 ## Fase 63 — Jam = player (`fase-63-jam-come-player.md`)
-- [ ] 63.1 Precedente e successivo per tutti
-- [ ] 63.2 La schermata della Jam è il player
-- [ ] 63.3 Intestazione della Jam
-- [ ] 63.4 Coda condivisa dal pulsante «Coda»
-- [ ] 63.5 Prova a mano con due telefoni
-- [ ] 63.6 Controlli di fase
+- [x] 63.1 Precedente e successivo per tutti
+- [x] 63.2 La schermata della Jam è il player
+- [x] 63.3 Intestazione della Jam
+- [x] 63.4 Coda condivisa dal pulsante «Coda»
+- [ ] 63.5 Prova a mano con due telefoni — in «Tocca a te»: richiede il Motorola come host (D-169, solo Mi A3 e Linux in autonomia). Da provare: seek da anello e barra da entrambi, precedente e successivo dall'ospite, «Termina» con conferma, coda dal pulsante; annotare i rilievi aperti di 47.8 in `docs/handoff.md`.
+- [x] 63.6 Controlli di fase
 
 ## Fase 64 — Chiusura ui-jam-ricerca (`fase-64-chiusura-jam-ricerca.md`)
 - [ ] 64.1 Misure finali sul Mi A3

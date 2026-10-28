@@ -10,6 +10,9 @@ import 'package:codecore/services/jam/jam_models.dart';
 import 'package:codecore/ui/screens/jam/jam_request_dialog.dart';
 import 'package:codecore/ui/screens/jam/jam_screen.dart';
 import 'package:codecore/ui/widgets/empty_state.dart';
+import 'package:codecore/ui/widgets/ring_progress.dart';
+import 'package:codecore/ui/widgets/play_buttons.dart';
+import 'package:codecore/ui/widgets/seek_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -19,6 +22,7 @@ class _FakeJam extends JamController {
   _FakeJam(this.initial);
   final JamUiState initial;
   final sent = <JamCommand>[];
+  JamError? sendResult;
 
   final addedTracks = <int>[];
   final addedOnline = <String>[];
@@ -38,10 +42,21 @@ class _FakeJam extends JamController {
     return true;
   }
 
+  int ended = 0;
+
+  /// A host clock that differs from the device's.
+  int? clockMs;
+
+  @override
+  int jamNowMs() => clockMs ?? super.jamNowMs();
+
+  @override
+  Future<void> end() async => ended++;
+
   @override
   Future<JamError?> send(JamCommand cmd) async {
     sent.add(cmd);
-    return null;
+    return sendResult;
   }
 }
 
@@ -87,10 +102,10 @@ void main() {
       await tester.pump(const Duration(milliseconds: 100));
       expect(find.text('Jam'), findsWidgets);
       expect(find.text('Prima'), findsWidgets);
-      expect(find.text('Seconda'), findsOneWidget);
       expect(find.byType(FloatingActionButton), findsNothing);
-      expect(find.byTooltip('Brano successivo'),
-          host ? findsOneWidget : findsNothing);
+      // Next and previous for everyone (D-160); the queue is in the «Coda» sheet.
+      expect(find.byTooltip('Brano successivo'), findsOneWidget);
+      expect(find.byTooltip('Brano precedente'), findsOneWidget);
       expect(find.text(host ? 'Termina Jam' : 'Esci dalla Jam'), findsOneWidget);
       // Strict symmetry: Play sits at the screen centre for host and guest.
       expect(tester.getCenter(find.byTooltip('Pausa')).dx, closeTo(250, 1));
@@ -166,7 +181,7 @@ void main() {
       ),
     ));
     await tester.pump(const Duration(milliseconds: 100));
-    await tester.tap(find.byTooltip('Uscite e sincronia'));
+    await tester.tap(find.text('Dispositivi'));
     await tester.pump(const Duration(milliseconds: 400));
     expect(find.text('Sincronizzato, scarto 12 ms'), findsOneWidget);
     expect(find.textContaining('Latenza di questa uscita'), findsOneWidget);
@@ -246,4 +261,302 @@ void main() {
     expect(h.handler.queueIds, isEmpty);
     await h.dispose(tester);
   });
+
+  Future<(_FakeJam, Harness)> openJam(
+    WidgetTester tester, {
+    bool host = true,
+    JamUiState? state,
+    JamError? sendResult,
+    Size size = const Size(500, 1000),
+    double textScale = 1,
+  }) async {
+    tester.view.physicalSize = size;
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final h = await Harness.create(tester);
+    final fake = _FakeJam(state ?? active(host: host))..sendResult = sendResult;
+    await h.pump(
+      tester,
+      const JamScreen(),
+      textScale: textScale,
+      extraOverrides: [jamProvider.overrideWith(() => fake)],
+    );
+    return (fake, h);
+  }
+
+  for (final host in [true, false]) {
+    testWidgets(
+        'seek dall\'anello nella Jam invia JamCommand.seek (${host ? 'host' : 'ospite'})',
+        (tester) async {
+      final (fake, h) = await openJam(tester, host: host);
+      final ring = tester.getRect(find.byType(RingProgress));
+      // A touch at the bottom of the ring seeks at 115/320 of the track.
+      final g = await tester.startGesture(ring.center + Offset(0, ring.width * 0.48));
+      await g.up();
+      await tester.pump();
+      final seeks = fake.sent.where((c) => c.type == JamCommandType.seek);
+      expect(seeks, hasLength(1));
+      expect(seeks.single.positionMs, closeTo(180000 * 115 / 320, 2000));
+      await h.dispose(tester);
+    });
+  }
+
+  testWidgets('la barra della Jam invia JamCommand.seek e un esito invalid mostra il messaggio',
+      (tester) async {
+    final (fake, h) = await openJam(tester, host: false, sendResult: JamError.invalid);
+    final g = await tester.startGesture(tester.getCenter(find.descendant(of: find.byType(SeekBar), matching: find.byType(Slider))));
+    await g.moveBy(const Offset(1, 0));
+    await g.up();
+    await tester.pump();
+    await tester.pump();
+    expect(fake.sent.single.type, JamCommandType.seek);
+    expect(find.text('Posizione non valida per questo brano'), findsOneWidget);
+    // The Jam keeps its own drag state: the player's one is untouched.
+    final box = ProviderScope.containerOf(tester.element(find.byType(JamScreen)));
+    expect(box.read(seekDragProvider), isNull);
+    await h.dispose(tester);
+  });
+
+  testWidgets('la posizione in riproduzione segue l\'orologio dell\'host', (tester) async {
+    final base = active(host: false);
+    tester.view.physicalSize = const Size(500, 1000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final h = await Harness.create(tester);
+    // The host clock is far from the device's: only jamNowMs() gives 0:40.
+    final fake = _FakeJam(JamUiState(
+      phase: base.phase,
+      role: base.role,
+      peerName: base.peerName,
+      peerId: base.peerId,
+      jam: base.jam!.copyWith(playing: true, positionMs: 30000, positionAt: 5000000),
+    ))
+      ..clockMs = 5010000;
+    await h.pump(tester, const JamScreen(), extraOverrides: [jamProvider.overrideWith(() => fake)]);
+    expect(find.text('0:40'), findsOneWidget);
+    await tester.pumpWidget(const SizedBox());
+    await h.dispose(tester);
+  });
+
+  testWidgets('desktop: la Jam non mostra il volume locale', (tester) async {
+    final (_, h) = await openJam(tester, size: const Size(1280, 900));
+    expect(find.byIcon(Icons.volume_up_rounded), findsNothing);
+    expect(find.byIcon(Icons.volume_off_rounded), findsNothing);
+    await h.dispose(tester);
+  });
+
+  testWidgets('posizione della Jam ferma in pausa', (tester) async {
+    final base = active(host: true);
+    final (fake, h) = await openJam(
+      tester,
+      state: JamUiState(
+        phase: base.phase,
+        role: base.role,
+        peerName: base.peerName,
+        peerId: base.peerId,
+        jam: base.jam!.copyWith(
+          playing: false,
+          positionMs: 30000,
+          positionAt: 0,
+        ),
+      ),
+    );
+    expect(fake.sent, isEmpty);
+    expect(find.text('0:30'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 5));
+    expect(find.text('0:30'), findsOneWidget);
+    await h.dispose(tester);
+  });
+
+  testWidgets('precedente e successivo per tutti, play e pausa dalla Jam', (tester) async {
+    final (fake, h) = await openJam(tester, host: false);
+    await tester.tap(find.byTooltip('Brano successivo'));
+    await tester.tap(find.byTooltip('Pausa'));
+    await tester.pump();
+    expect(fake.sent.map((c) => c.type), [JamCommandType.next, JamCommandType.pause]);
+    await h.dispose(tester);
+  });
+
+  testWidgets('riga con ⋮ + ≡ nel foglio «Coda», senza ✕', (tester) async {
+    final (fake, h) = await openJam(tester, host: true);
+    await tester.tap(find.text('Coda'));
+    await tester.pumpAndSettle();
+    expect(find.text('Seconda'), findsOneWidget);
+    expect(find.byIcon(Icons.close), findsNothing);
+    expect(find.byIcon(Icons.more_vert_rounded), findsNWidgets(2));
+    expect(find.byIcon(Icons.drag_handle_rounded), findsNWidgets(2));
+    // ⋮ of the second row: «Salta qui» and «Rimuovi» (host: any item).
+    await tester.tap(find.byIcon(Icons.more_vert_rounded).last);
+    await tester.pumpAndSettle();
+    expect(find.text('Rimuovi'), findsOneWidget);
+    await tester.tap(find.text('Salta qui'));
+    await tester.pumpAndSettle();
+    expect(fake.sent.single.type, JamCommandType.jump);
+    expect(fake.sent.single.itemId, 2);
+    await h.dispose(tester);
+  });
+
+  testWidgets('un ospite rimuove solo i propri brani non in riproduzione', (tester) async {
+    final (_, h) = await openJam(tester, host: false);
+    await tester.tap(find.text('Coda'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.more_vert_rounded).first);
+    await tester.pumpAndSettle();
+    expect(find.text('Salta qui'), findsOneWidget);
+    expect(find.text('Rimuovi'), findsNothing);
+    await h.dispose(tester);
+  });
+
+  JamUiState withPeople(bool host, int n) {
+    final base = active(host: host);
+    return JamUiState(
+      phase: base.phase,
+      role: base.role,
+      peerName: base.peerName,
+      peerId: base.peerId,
+      jam: base.jam!.copyWith(participants: [
+        const JamParticipant(id: 'host', name: 'Emanuele'),
+        for (var i = 1; i < n; i++) JamParticipant(id: 'p$i', name: 'Ospite$i'),
+      ]),
+    );
+  }
+
+  testWidgets('Annulla non chiude la Jam', (tester) async {
+    final (fake, h) = await openJam(tester, state: withPeople(true, 3));
+    await tester.tap(find.text('Termina Jam'));
+    await tester.pumpAndSettle();
+    expect(find.text('Terminare la Jam per tutti?'), findsOneWidget);
+    expect(find.text('I 2 ospiti verranno disconnessi e la coda condivisa verrà chiusa.'),
+        findsOneWidget);
+    await tester.tap(find.text('Annulla'));
+    await tester.pumpAndSettle();
+    expect(find.text('Terminare la Jam per tutti?'), findsNothing);
+    expect(fake.ended, 0);
+    await h.dispose(tester);
+  });
+
+  testWidgets('toccare fuori o il tasto indietro chiudono il dialogo senza terminare', (tester) async {
+    final (fake, h) = await openJam(tester, state: withPeople(true, 3));
+    await tester.tap(find.text('Termina Jam'));
+    await tester.pumpAndSettle();
+    await tester.tapAt(const Offset(5, 5));
+    await tester.pumpAndSettle();
+    expect(find.text('Terminare la Jam per tutti?'), findsNothing);
+    await tester.tap(find.text('Termina Jam'));
+    await tester.pumpAndSettle();
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(find.text('Terminare la Jam per tutti?'), findsNothing);
+    expect(find.text('Termina Jam'), findsOneWidget);
+    expect(fake.ended, 0);
+    await h.dispose(tester);
+  });
+
+  testWidgets('senza brano corrente precedente, play e successivo sono spenti', (tester) async {
+    final base = active(host: true);
+    final (_, h) = await openJam(
+      tester,
+      state: JamUiState(
+        phase: base.phase,
+        role: base.role,
+        peerName: base.peerName,
+        peerId: base.peerId,
+        jam: base.jam!.copyWith(currentIndex: -1, playing: false),
+      ),
+    );
+    IconButton btn(IconData i) => tester.widget<IconButton>(
+        find.ancestor(of: find.byIcon(i), matching: find.byType(IconButton)).first);
+    expect(btn(Icons.skip_previous_rounded).onPressed, isNull);
+    expect(btn(Icons.skip_next_rounded).onPressed, isNull);
+    expect(tester.widget<PlayCircleButton>(find.byType(PlayCircleButton)).onPressed, isNull);
+    await h.dispose(tester);
+  });
+
+  testWidgets('un seek rifiutato riporta la barra alla posizione della Jam', (tester) async {
+    final base = active(host: false);
+    final (fake, h) = await openJam(
+      tester,
+      host: false,
+      sendResult: JamError.invalid,
+      state: JamUiState(
+        phase: base.phase,
+        role: base.role,
+        peerName: base.peerName,
+        peerId: base.peerId,
+        jam: base.jam!.copyWith(playing: false, positionMs: 30000, positionAt: 0),
+      ),
+    );
+    final slider = find.descendant(of: find.byType(SeekBar), matching: find.byType(Slider));
+    final r = tester.getRect(slider);
+    final g = await tester.startGesture(r.center);
+    await g.moveTo(Offset(r.right - 2, r.center.dy));
+    await g.up();
+    await tester.pump();
+    await tester.pump();
+    expect(fake.sent.single.type, JamCommandType.seek);
+    expect(find.text('0:30'), findsOneWidget);
+    await h.dispose(tester);
+  });
+
+  testWidgets('Termina con conferma chiama end', (tester) async {
+    final (fake, h) = await openJam(tester, state: withPeople(true, 3));
+    await tester.tap(find.text('Termina Jam'));
+    await tester.pumpAndSettle();
+    expect(fake.ended, 0);
+    final ok = find.widgetWithText(TextButton, 'Termina');
+    expect(tester.getSize(ok).height, greaterThanOrEqualTo(48));
+    await tester.tap(ok);
+    await tester.pumpAndSettle();
+    expect(fake.ended, 1);
+    await h.dispose(tester);
+  });
+
+  testWidgets('Esci dalla Jam (ospite) esce subito, senza conferma', (tester) async {
+    final (fake, h) = await openJam(tester, host: false);
+    expect(find.text('Termina Jam'), findsNothing);
+    await tester.tap(find.text('Esci dalla Jam'));
+    await tester.pumpAndSettle();
+    expect(find.text('Terminare la Jam per tutti?'), findsNothing);
+    expect(fake.ended, 1);
+    await h.dispose(tester);
+  });
+
+  testWidgets('+N con semantica: 6 partecipanti, +2 e una sola etichetta', (tester) async {
+    final handle = tester.ensureSemantics();
+    final (_, h) = await openJam(tester, state: withPeople(true, 6));
+    expect(find.textContaining('Emanuele (host), Ospite1, Ospite2, Ospite3 +2'), findsOneWidget);
+    expect(
+      find.bySemanticsLabel(RegExp(r'^6 partecipanti: Emanuele \(host\), Ospite1, .*Ospite5$')),
+      findsOneWidget,
+    );
+    handle.dispose();
+    await h.dispose(tester);
+  });
+
+  testWidgets('intestazione a textScaler 2.0 senza tagli', (tester) async {
+    final (_, h) = await openJam(
+      tester,
+      state: withPeople(true, 6),
+      size: const Size(360, 780),
+      textScale: 2,
+    );
+    expect(tester.takeException(), isNull);
+    final b = tester.getRect(find.text('Termina Jam'));
+    expect(b.left, greaterThanOrEqualTo(0));
+    expect(b.right, lessThanOrEqualTo(360));
+    expect(tester.getRect(find.text('Jam').first).right, lessThanOrEqualTo(360));
+    await h.dispose(tester);
+  });
+
+  testWidgets('desktop: coda nel pannello di destra, sul telefono solo nel foglio', (tester) async {
+    final (_, h) = await openJam(tester, size: const Size(1280, 800));
+    expect(find.text('Coda condivisa'), findsOneWidget);
+    expect(find.text('Seconda'), findsOneWidget);
+    expect(find.byIcon(Icons.drag_handle_rounded), findsNWidgets(2));
+    await h.dispose(tester);
+    final (_, h2) = await openJam(tester, size: const Size(500, 1000));
+    expect(find.text('Coda condivisa'), findsNothing);
+    await h2.dispose(tester);
+  }
+  );
 }

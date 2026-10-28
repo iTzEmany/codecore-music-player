@@ -17,7 +17,7 @@ class RemoteStatus {
   final Duration position;
   final bool playing;
 
-  /// «Next» is offered (in a Jam only the host can skip).
+  /// «Next» is offered.
   final bool canSkip;
 
   bool get hasItem => title != null;
@@ -32,5 +32,6 @@ abstract class RemoteTransport {
   Future<void> play();
   Future<void> pause();
   Future<void> next();
+  Future<void> previous();
   Future<void> seek(Duration position);
 }

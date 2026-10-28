@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show ValueListenable;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -24,10 +25,22 @@ import '../../widgets/shuffle_button.dart';
 
 /// «Elapsed · bar · total» (tap the total for the rest), the quality tag and
 /// the speed centred below.
+///
+/// The Jam injects its own [position], [duration] and [onSeek] (all three, and
+/// no [track]: no quality tag and no speed there); the player uses its own.
 class NpSeekRow extends ConsumerStatefulWidget {
-  const NpSeekRow({super.key, required this.track});
+  const NpSeekRow({
+    super.key,
+    this.track,
+    this.position,
+    this.duration,
+    this.onSeek,
+  });
 
-  final Track track;
+  final Track? track;
+  final ValueListenable<Duration>? position;
+  final Duration? duration;
+  final ValueChanged<Duration>? onSeek;
 
   @override
   ConsumerState<NpSeekRow> createState() => _NpSeekRowState();
@@ -40,11 +53,12 @@ const npEdge = 12.0;
 class _NpSeekRowState extends ConsumerState<NpSeekRow> {
   final _smooth = SmoothPosition();
   bool _remaining = false;
+  ValueListenable<Duration> get _pos => widget.position ?? _smooth;
 
   @override
   void initState() {
     super.initState();
-    _smooth.followPlayer(ref);
+    if (widget.position == null) _smooth.followPlayer(ref);
   }
 
   @override
@@ -66,7 +80,8 @@ class _NpSeekRowState extends ConsumerState<NpSeekRow> {
       color: cc.textMuted,
       fontFeatures: const [FontFeature.tabularFigures()],
     );
-    final dur = ref.watch(durationProvider).value ?? Duration.zero;
+    final dur =
+        widget.duration ?? ref.watch(durationProvider).value ?? Duration.zero;
     // Never below the widest «m:ss», so the bar does not move as time runs.
     const side = BoxConstraints(minWidth: 44);
     return Column(
@@ -77,7 +92,7 @@ class _NpSeekRowState extends ConsumerState<NpSeekRow> {
             children: [
               ConstrainedBox(
                 constraints: side,
-                child: SeekTime(position: _smooth, duration: dur, style: style),
+                child: SeekTime(position: _pos, duration: dur, style: style),
               ),
               // The ring is the one slider for a screen reader (±5 s).
               Expanded(
@@ -97,9 +112,11 @@ class _NpSeekRowState extends ConsumerState<NpSeekRow> {
                       ),
                     ),
                     child: SeekBar(
-                      position: _smooth,
+                      position: _pos,
                       duration: dur,
-                      onSeek: (d) => ref.read(playerControllerProvider).seek(d),
+                      onSeek:
+                          widget.onSeek ??
+                          (d) => ref.read(playerControllerProvider).seek(d),
                     ),
                   ),
                 ),
@@ -112,7 +129,7 @@ class _NpSeekRowState extends ConsumerState<NpSeekRow> {
                     alignment: AlignmentDirectional.centerEnd,
                     child: _remaining
                         ? SeekTime(
-                            position: _smooth,
+                            position: _pos,
                             duration: dur,
                             remaining: true,
                             style: style,
@@ -124,32 +141,48 @@ class _NpSeekRowState extends ConsumerState<NpSeekRow> {
             ],
           ),
         ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            QualityTag(widget.track),
-            const SizedBox(width: 8),
-            const SpeedButton(),
-          ],
-        ),
+        if (widget.track != null)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              QualityTag(widget.track!),
+              const SizedBox(width: 8),
+              const SpeedButton(),
+            ],
+          ),
       ],
     );
   }
 }
 
 /// Shuffle · previous · play · next · repeat.
+///
+/// The Jam (with [live]) injects [playing] and the three callbacks (null =
+/// disabled).
 class NpControls extends ConsumerWidget {
-  const NpControls({super.key, this.live = false});
+  const NpControls({
+    super.key,
+    this.live = false,
+    this.playing,
+    this.onPrevious,
+    this.onPlayPause,
+    this.onNext,
+  });
 
   /// A radio: no shuffle and no repeat, only the stations' own previous / next.
   final bool live;
+  final bool? playing;
+  final VoidCallback? onPrevious, onPlayPause, onNext;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
     final cc = context.cc;
-    final playing = ref.watch(isPlayingProvider).value ?? false;
-    final loading = ref.watch(streamLoadingProvider).value ?? false;
+    final injected = this.playing != null;
+    final playing =
+        this.playing ?? (ref.watch(isPlayingProvider).value ?? false);
+    final loading =
+        !injected && (ref.watch(streamLoadingProvider).value ?? false);
     final repeat = ref.watch(repeatProvider).value ?? PlayRepeat.off;
     final ctrl = ref.read(playerControllerProvider);
     final repeatOn = repeat != PlayRepeat.off;
@@ -160,7 +193,7 @@ class NpControls extends ConsumerWidget {
         IconButton(
           tooltip: l.previousTrack,
           iconSize: 36,
-          onPressed: ctrl.previous,
+          onPressed: injected ? onPrevious : ctrl.previous,
           icon: const Icon(Icons.skip_previous_rounded),
         ),
         if (loading)
@@ -178,12 +211,12 @@ class NpControls extends ConsumerWidget {
           PlayCircleButton(
             size: 64,
             playing: playing,
-            onPressed: ctrl.togglePlayPause,
+            onPressed: injected ? onPlayPause : ctrl.togglePlayPause,
           ),
         IconButton(
           tooltip: l.nextTrack,
           iconSize: 36,
-          onPressed: ctrl.next,
+          onPressed: injected ? onNext : ctrl.next,
           icon: const Icon(Icons.skip_next_rounded),
         ),
         if (!live)
@@ -217,8 +250,22 @@ class NpControls extends ConsumerWidget {
 }
 
 /// Devices (or «Jam» while one is active) · sleep timer chip · queue.
+///
+/// The Jam injects what the two side buttons open and the devices label.
 class NpBottomRow extends ConsumerWidget {
-  const NpBottomRow({super.key});
+  const NpBottomRow({
+    super.key,
+    this.onDevices,
+    this.onQueue,
+    this.devicesLabel,
+    this.volume = true,
+  });
+
+  final VoidCallback? onDevices, onQueue;
+  final String? devicesLabel;
+
+  /// The desktop volume row; the Jam hides it (its volume is in the outputs sheet).
+  final bool volume;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -227,7 +274,7 @@ class NpBottomRow extends ConsumerWidget {
     final jam = ref.watch(jamProvider).active;
     return Column(
       children: [
-        if (isDesktop) const _VolumeRow(),
+        if (isDesktop && volume) const _VolumeRow(),
         Row(
           children: [
             // Equal side slots keep the sleep chip at the exact centre.
@@ -235,14 +282,14 @@ class NpBottomRow extends ConsumerWidget {
               child: Align(
                 alignment: AlignmentDirectional.centerStart,
                 child: TextButton.icon(
-                  onPressed: () => DevicesSheet.show(context),
+                  onPressed: onDevices ?? () => DevicesSheet.show(context),
                   icon: Icon(
                     Icons.devices_rounded,
                     size: 20,
                     color: jam ? cc.accent : cc.textMuted,
                   ),
                   label: Text(
-                    jam ? l.devicesJamShort : l.devicesTitle,
+                    devicesLabel ?? (jam ? l.devicesJamShort : l.devicesTitle),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(color: jam ? cc.accent : cc.textMuted),
@@ -255,7 +302,7 @@ class NpBottomRow extends ConsumerWidget {
               child: Align(
                 alignment: AlignmentDirectional.centerEnd,
                 child: TextButton.icon(
-                  onPressed: () => showQueueSheet(context),
+                  onPressed: onQueue ?? () => showQueueSheet(context),
                   icon: Icon(
                     Icons.queue_music_rounded,
                     size: 20,

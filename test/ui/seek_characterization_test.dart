@@ -4,12 +4,12 @@ import 'dart:math' as math;
 
 import 'package:codecore/l10n/app_localizations.dart';
 import 'package:codecore/providers/player_providers.dart';
-import 'package:codecore/services/jam/jam_models.dart';
-import 'package:codecore/ui/screens/jam/jam_seek_bar.dart';
 import 'package:codecore/ui/shell/app_shell.dart';
 import 'package:codecore/ui/shell/desktop_player_bar.dart';
 import 'package:codecore/ui/widgets/ring_progress.dart';
+import 'package:codecore/ui/screens/now_playing/now_playing_controls.dart';
 import 'package:codecore/ui/widgets/seek_bar.dart';
+import 'package:codecore/ui/widgets/smooth_position.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -25,6 +25,8 @@ class _Spy implements PlayerController {
   @override
   dynamic noSuchMethod(Invocation invocation) => null;
 }
+
+const _dur = Duration(seconds: 100);
 
 double _deg(double d) => d * math.pi / 180;
 
@@ -192,36 +194,28 @@ void main() {
     });
   });
 
-  group('JamSeekBar (guest)', () {
-    testWidgets('dragging sends one seek(ms) on release, shows the finger '
-        'position meanwhile', (tester) async {
-      final sent = <int>[];
-      const jam = JamState(
-        hostDeviceId: 'h',
-        outputDeviceId: 'h',
-        currentIndex: 0,
-        items: [
-          JamItem(
-            id: 1,
-            ownerDeviceId: 'h',
-            title: 'T',
-            durationMs: 100000,
-            ext: 'mp3',
-          ),
-        ],
-      );
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: SizedBox(
-                width: 400,
-                child: JamSeekBar(jam: jam, onSeek: sent.add),
+  group('NpSeekRow with an injected position (the Jam)', () {
+    Widget host(SmoothPosition pos, Duration dur, ValueChanged<Duration> on) =>
+        ProviderScope(
+          child: MaterialApp(
+            home: Scaffold(
+              body: Center(
+                child: SizedBox(
+                  width: 400,
+                  child: NpSeekRow(position: pos, duration: dur, onSeek: on),
+                ),
               ),
             ),
           ),
-        ),
-      );
+        );
+
+    testWidgets('dragging sends one seek on release, shows the finger '
+        'position meanwhile', (tester) async {
+      final pos = SmoothPosition()
+        ..update(Duration.zero, playing: false, duration: _dur);
+      addTearDown(pos.dispose);
+      final sent = <Duration>[];
+      await tester.pumpWidget(host(pos, _dur, sent.add));
       expect(find.text('0:00'), findsOneWidget);
       expect(find.text('1:40'), findsOneWidget);
       final g = await tester.startGesture(
@@ -234,25 +228,14 @@ void main() {
       await g.up();
       await tester.pump();
       expect(sent, hasLength(1));
-      expect(sent.single, inInclusiveRange(30000, 70000));
-      // The command the screen builds from it keeps this wire shape.
-      expect(JamCommand.seek(sent.single).positionMs, sent.single);
+      expect(sent.single.inMilliseconds, inInclusiveRange(30000, 70000));
       await tester.pumpWidget(const SizedBox());
     });
 
-    testWidgets('without a current item the slider is disabled', (
-      tester,
-    ) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: JamSeekBar(
-              jam: const JamState(hostDeviceId: 'h', outputDeviceId: 'h'),
-              onSeek: (_) {},
-            ),
-          ),
-        ),
-      );
+    testWidgets('without a duration the slider is disabled', (tester) async {
+      final pos = SmoothPosition();
+      addTearDown(pos.dispose);
+      await tester.pumpWidget(host(pos, Duration.zero, (_) {}));
       expect(tester.widget<Slider>(find.byType(Slider)).onChanged, isNull);
       await tester.pumpWidget(const SizedBox());
     });

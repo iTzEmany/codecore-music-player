@@ -60,12 +60,38 @@ void main() {
     expect(s.version, v + 2);
   });
 
-  // Phase 63 lets the guest next/jump: rewrite only this case.
-  test('guest next and jump are forbidden today', () {
+  test('ospite può next/jump (D-160)', () {
     var s = ok(start(), JamCommand.add(item(host)), host);
     s = ok(s, JamCommand.add(item(host)), host);
-    expect(err(s, const JamCommand.next(), guest), JamError.forbidden);
-    expect(err(s, const JamCommand.jump(2), guest), JamError.forbidden);
+    s = ok(s, JamCommand.add(item(host)), host);
+    s = ok(s, const JamCommand.jump(2), guest);
+    expect(s.currentIndex, 1);
+    expect(s.playing, true);
+    s = ok(s, const JamCommand.next(), guest);
+    expect(s.currentIndex, 2);
+    expect(err(s, const JamCommand.jump(99), guest), JamError.notFound);
+  });
+
+  group('jamPreviousCommand', () {
+    JamState at(int index, int posMs) => seeded(2).copyWith(
+        currentIndex: index, positionMs: posMs, positionAt: 1000, playing: true);
+
+    test('precedente > 3 s → seek(0)', () {
+      final c = jamPreviousCommand(at(1, 0), 1000 + 3001);
+      expect(c.type, JamCommandType.seek);
+      expect(c.positionMs, 0);
+    });
+
+    test('≤ 3 s → jump al precedente', () {
+      final s = at(1, 0);
+      final c = jamPreviousCommand(s, 1000 + 3000);
+      expect(c.type, JamCommandType.jump);
+      expect(c.itemId, s.items[0].id);
+    });
+
+    test('primo brano → seek(0)', () {
+      expect(jamPreviousCommand(at(0, 0), 1000).type, JamCommandType.seek);
+    });
   });
 
   test('next and jump messages keep their exact JSON', () {

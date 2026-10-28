@@ -109,11 +109,13 @@ void main() {
     expect(st['version'], v0 + 1);
     expect(host.state!.items.single.ownerDeviceId, 'guest');
 
-    // guest cannot jump / end
-    for (final c in [const JamCommand.jump(1), const JamCommand.end()]) {
-      final r = await call('POST', '${s.sid}/cmd', body: c.toJson(), headers: auth);
-      expect(r.statusCode, 403);
-    }
+    // guest can jump (D-160) but cannot end
+    final jr = await call('POST', '${s.sid}/cmd',
+        body: const JamCommand.jump(1).toJson(), headers: auth);
+    expect(jr.statusCode, 200);
+    final er = await call('POST', '${s.sid}/cmd',
+        body: const JamCommand.end().toJson(), headers: auth);
+    expect(er.statusCode, 403);
     // garbage
     expect((await call('POST', '${s.sid}/cmd', body: {'cmd': 'x'}, headers: auth))
         .statusCode, 400);

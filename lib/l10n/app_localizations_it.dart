@@ -1430,6 +1430,38 @@ class AppLocalizationsIt extends AppLocalizations {
   String get jamHostTag => 'host';
 
   @override
+  String get jamSeekInvalid => 'Posizione non valida per questo brano';
+
+  @override
+  String get jamEndConfirmTitle => 'Terminare la Jam per tutti?';
+
+  @override
+  String jamEndConfirmBody(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other:
+          'I $n ospiti verranno disconnessi e la coda condivisa verrà chiusa.',
+      one: 'L’ospite verrà disconnesso e la coda condivisa verrà chiusa.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get jamEndConfirmAction => 'Termina';
+
+  @override
+  String jamParticipantsLabel(int n, String names) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n partecipanti: $names',
+      one: '1 partecipante: $names',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get jamWaitingEmpty => 'Nessuna Jam in corso';
 
   @override

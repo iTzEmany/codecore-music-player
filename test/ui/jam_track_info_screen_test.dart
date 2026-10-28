@@ -83,12 +83,10 @@ void main() {
           ),
         );
         await tester.pump(const Duration(milliseconds: 100));
-        // «Salta qui» is in the row menu for the host only
-        // «Vai all'artista» is in the menu of a row with an artist; «Salta qui» only for the host.
-        expect(
-          find.byTooltip('Altre azioni'),
-          host ? findsNWidgets(2) : findsOneWidget,
-        );
+        // The shared queue opens from «Coda»: every row has its ⋮.
+        await tester.tap(find.text('Coda'));
+        await tester.pumpAndSettle();
+        expect(find.byTooltip('Altre azioni'), findsNWidgets(2));
 
         await tester.tap(find.text('Seconda'));
         await tester.pumpAndSettle();
@@ -96,14 +94,13 @@ void main() {
         expect(find.text('parole'), findsOneWidget);
         expect(find.text('Una storia'), findsOneWidget);
         expect(find.text('Curiosità'), findsOneWidget);
-        expect(find.text('Salta qui'), host ? findsOneWidget : findsNothing);
+        // «Salta qui» for everyone (D-160).
+        expect(find.text('Salta qui'), findsOneWidget);
         expect(find.text('Vai all’artista'), findsOneWidget);
-        if (host) {
-          await tester.tap(find.text('Salta qui'));
-          await tester.pumpAndSettle();
-          expect(fake.sent.single.type, JamCommandType.jump);
-          expect(fake.sent.single.itemId, 2);
-        }
+        await tester.tap(find.text('Salta qui'));
+        await tester.pumpAndSettle();
+        expect(fake.sent.single.type, JamCommandType.jump);
+        expect(fake.sent.single.itemId, 2);
         await tester.pumpWidget(const SizedBox());
         await h.dispose(tester);
       },
@@ -137,6 +134,8 @@ void main() {
       ),
     );
     await tester.pump(const Duration(milliseconds: 100));
+    await tester.tap(find.text('Coda'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Seconda'));
     await tester.pumpAndSettle();
     expect(find.text('Band'), findsWidgets);
@@ -173,6 +172,8 @@ void main() {
       ),
     );
     await tester.pump(const Duration(milliseconds: 100));
+    await tester.tap(find.text('Coda'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Seconda'));
     await tester.pumpAndSettle();
     expect(find.text('Crediti e dettagli'), findsOneWidget);

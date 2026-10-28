@@ -49,7 +49,13 @@ class _FakeJam extends JamController {
                 artist: 'Daft Punk', durationMs: 248000),
           ],
           currentIndex: 0,
-          playing: true,
+          // Paused at 30 %: the ring and the times are the same on every run.
+          playing: false,
+          positionMs: 54000,
+          participants: [
+            JamParticipant(id: 'host', name: 'Emanuele'),
+            JamParticipant(id: 'peer', name: 'Anna'),
+          ],
           hostDeviceId: 'host',
           outputDeviceId: 'host',
         ),

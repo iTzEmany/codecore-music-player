@@ -228,8 +228,8 @@ const _favoritesSort = [
   'defaultOrder', 'title', 'artist', 'album', 'year', 'addedAt', 'duration',
 ];
 const _queueMenu = ['Suggeriti di recente'];
-const _jamHostRow = ['Salta qui', 'Vai all’artista'];
-const _jamGuestRow = ['Vai all’artista'];
+const _jamHostRow = ['Salta qui', 'Vai all’artista', 'Rimuovi'];
+const _jamGuestRow = ['Salta qui', 'Vai all’artista'];
 // The context menu has the actions of the sheet, without its header; "Mostra nella cartella" is desktop-only (the test runs on Linux, like the CI).
 const _contextMenu = [
   'Anteprima 20 s',
@@ -674,7 +674,7 @@ void main() {
   });
 
   for (final host in [true, false]) {
-    testWidgets('jam queue row ⋮ as ${host ? 'host' : 'guest'}: ${host ? 'jump, artist' : 'artist only'}; host «Salta qui» sends jump', (tester) async {
+    testWidgets('jam queue row ⋮ as ${host ? 'host' : 'guest'}: ${host ? 'jump, artist, remove' : 'jump, artist'}; «Salta qui» sends jump', (tester) async {
       tester.view.physicalSize = const Size(500, 1000);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);
@@ -688,15 +688,16 @@ void main() {
           jamTrackCoverProvider.overrideWith((ref, id) async => null),
         ],
       );
+      // The shared queue opens from «Coda».
+      await tester.tap(find.text('Coda'));
+      await _settle(tester);
       expect(
         await _open(tester, find.byTooltip('Altre azioni').last),
         host ? _jamHostRow : _jamGuestRow,
       );
-      if (host) {
-        await _choose(tester, 'Salta qui');
-        expect(fake.sent.single.type, JamCommandType.jump);
-        expect(fake.sent.single.itemId, 2);
-      }
+      await _choose(tester, 'Salta qui');
+      expect(fake.sent.single.type, JamCommandType.jump);
+      expect(fake.sent.single.itemId, 2);
       await h.dispose(tester);
     });
   }
