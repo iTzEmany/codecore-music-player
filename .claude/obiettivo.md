@@ -4,7 +4,7 @@
 
 ## Documenti da leggere all'avvio
 - `CLAUDE.md`, `docs/01-regole-di-lavoro.md`, `docs/PROGRESS.md`, `docs/decisioni.md`, `docs/handoff.md`, `docs/gotchas.md`
-- Feature in corso: `docs/feature-streaming-veloce.md` (fasi 55–57) e solo il `docs/fase-N-*.md` corrente; `docs/feature-streaming.md` e `docs/feature-arricchimento.md` solo se servono
+- Feature in corso: `docs/feature-jam-cassa.md` (fasi 65–68) e solo il `docs/fase-N-*.md` corrente; `docs/feature-streaming-veloce.md`, `docs/feature-streaming.md` e `docs/feature-arricchimento.md` solo se servono
 
 ## Modalità
 - **PR**: ramo da `origin/master` → PR → `gh pr merge --auto --squash`. **Una PR per fase, un commit per task** (memoria).
@@ -34,7 +34,7 @@
 
 ## Regole extra del progetto
 - **App desktop su Linux (prove, misure, scheggia): sempre su uno schermo virtuale, mai sullo schermo dell'utente** (lavora sull'unico monitor, 27/10). Comando: `HOME=<scratch>/home env -u WAYLAND_DISPLAY GDK_BACKEND=x11 xvfb-run -a -s "-screen 0 1280x800x24" <comando>`; `xdotool` e screenshot solo dentro quel `xvfb-run` (il suo `DISPLAY`). Mai `wpctl`/volume generale del PC; l'audio esce dalle casse vere: volume basso dall'app. Integration test su Linux: stesso `xvfb-run`.
-- Aree a rischio (`/code-review high`): audio handler (`codecore_audio_handler.dart`), query su `tracks` (righe ombra K-02), protocollo Jam; dalla fase 50: migrazione v15, backup e ripristino, `EnrichmentService` (arricchimento di oggi), query delle liste e della ricerca, chi scrive le copertine
+- Aree a rischio (`/code-review high`): audio handler (`codecore_audio_handler.dart`), query su `tracks` (righe ombra K-02), protocollo Jam; dalla fase 50: migrazione v15, backup e ripristino, `EnrichmentService` (arricchimento di oggi), query delle liste e della ricerca, chi scrive le copertine; dalla fase 65: ordine della coda della Jam (`jam_state.dart`, `jam_turns.dart`, `jam_part_feeder.dart`), lato nativo Bluetooth e permessi del manifest (fase 67)
 - Nessun pacchetto nuovo (fasi 45–54). Schema DB: v15 solo nella fase 50, in un solo passo di migrazione; poi invariato
 - Chiamate dal vivo a Deezer, MusicBrainz, NetEase, lyrics.ovh solo per salvare le risposte di test (fixture), mai nella suite
 - Telefono Mi A3 (`0d7ae9df206e`): installare, misurare, pilotare; disinstallare solo con `-k`; mai cancellare dati o file musicali; niente invii/Jam verso altri (D-91)

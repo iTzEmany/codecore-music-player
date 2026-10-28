@@ -1,14 +1,7 @@
-# Handoff — 2026-10-28 (fasi 57–64 fuse: streaming veloce e refactor «ui-jam-ricerca»)
+# Handoff — 2026-10-28 (kickoff «Jam: cassa e coda insieme»; fasi 57–64 fuse)
 
 ## Prima di tutto (per la prossima chat)
-L'utente vuole fare un `/kickoff`. **Prima di partire, riassumigli i rilievi aperti della Jam (47.8 e prova 63.5, sezione «Jam: rilievi aperti» qui sotto) e fagli le domande per decidere**, con `AskUserQuestion`:
-- ruoli: chi tocca «Jam» su un dispositivo diventa ospite e chi accetta diventa host (`JamController.request`, voluto dal codice): va bene o va invertito? E «Esci dalla Jam» dell'ospite / «Termina» dell'host come devono comportarsi (R-21)?
-- aggiunte dell'ospite: in fondo alla coda (D-89) o subito dopo il brano corrente? Oggi arrivano dopo il corrente.
-- swipe «in coda» dell'ospite su una riga online della ricerca: oggi non accoda niente (il ⋮ → «Aggiungi in coda» sì). Deve accodare come il ⋮?
-- «Scarica» che resta nel ⋮ del player dopo che il brano è in libreria: va tolto subito?
-- copertine che mancano all'ospite, «Rimuovi» non visibile nel ⋮ della coda dell'ospite, ~2 s di scarto fra i telefoni: dentro il kickoff o a parte?
-- cassa Bluetooth e modalità della coda («Coda dell'host» / «Coda insieme»): leggi `docs/prossimi-lavori.md` (file dell'utente non tracciato), sezione «Cassa Bluetooth e modalità della coda», e fagli le «Domande aperte per il kickoff» che ci sono; poi chiedigli se il kickoff comprende anche la «Jam a distanza» della stessa sezione 2.
-Scrivi le risposte in `docs/decisioni.md` prima di pianificare.
+Kickoff della feature «Jam: cassa e coda insieme» fatto il 28/10 (`docs/feature-jam-cassa.md`, R-88…R-119, D-177…D-220). Fasi 65–68 in `docs/PROGRESS.md`. Si parte con `/obiettivo fase 65`.
 
 ## Stato
 - **57** (#45, #46): URL da NewPipeExtractor su Android (D-164, D-173 desugaring per API < 33), vietati ai minori → traccia di YouTube Music, `UrlSession`, brano dopo dall'URL anticipato, gapless e crossfade da URL verso file; crossfade senza esaurire l'Equalizer sul Mi A3.
@@ -42,7 +35,7 @@ Da 47.8 (27/10) e dalla prova 63.5 (28/10, Motorola che avvia, Mi A3 che accetta
 3. Sull'ospite lo swipe «in coda» su una riga online della ricerca non accoda nulla; ⋮ → «Aggiungi in coda» sì. Non riprovato.
 4. «Scarica» resta nel ⋮ del player dopo che il brano è in libreria, finché non lo si chiude.
 5. Nuovi il 28/10: l'ospite mostra una nota al posto delle copertine (player e coda); nel ⋮ di una riga della coda l'ospite non vede «Rimuovi» (foglio forse tagliato); ~2 s di scarto fra i telefoni; una volta «precedente» subito dopo «successivo» è ripartito da 0:22.
-Per provarli serve l'hotspot di un telefono (non UniBA, `docs/gotchas.md`).
+Per provarli serve l'hotspot di un telefono (non UniBA, `docs/gotchas.md`). Pianificati nella fase 65; «Rimuovi» dell'ospite è voluto (D-195).
 
 ## Rinviato (dal handoff precedente, ancora aperto)
 - 53.10 completamento intero sul Motorola (in pausa a 421/2317, ~10 h).
@@ -51,12 +44,12 @@ Per provarli serve l'hotspot di un telefono (non UniBA, `docs/gotchas.md`).
 
 ## Prompt di avvio della prossima sessione
 ```
-Leggi docs/handoff.md, docs/gotchas.md e docs/PROGRESS.md. Riassumimi i rilievi aperti della Jam e fammi le domande di «Prima di tutto», poi /kickoff.
+/obiettivo fase 65
 ```
 
 ## Prossimi obiettivi
-1. **(Consigliato, scelto dall'utente) `/kickoff` sui rilievi della Jam** (sezione «Jam: rilievi aperti»), dopo le domande di «Prima di tutto».
+1. **(Consigliato) Fasi 65–68, feature «Jam: cassa e coda insieme»** (`docs/feature-jam-cassa.md`): rilievi della Jam, «Coda insieme», Jam della cassa, scoperta e chiusura. Prova finale (68.3) con i due telefoni sull'hotspot e le cuffie JBL segnate come cassa.
 2. **Prove d'ascolto 57.7** e APK di release con NewPipe (vedi «Tocca a te»).
 3. **Ricerca «notte» build p99** (D-176): l'ultimo scenario fuori soglia; misurare con `--only "Ricerca «notte»"` prima e dopo.
-4. **Scoperta dei dispositivi su reti non /24** (visto su UniBA, /16, il 28/10: i telefoni non si vedono e la Jam non parte; sull'hotspot sì). `LanDiscovery._targets` in `lib/services/share/discovery.dart` manda il broadcast diretto a `a.b.c.255` supponendo una /24. Dart non dà la maschera: leggerla dal lato nativo (Android `LinkProperties`, Linux/Windows dal sistema) o provare anche `a.b.255.255`. Reti che filtrano ogni broadcast restano escluse: lì serve il collegamento manuale per la Jam.
+4. **Scoperta dei dispositivi su reti non /24** (ora nella fase 68.1, D-206) (visto su UniBA, /16, il 28/10: i telefoni non si vedono e la Jam non parte; sull'hotspot sì). `LanDiscovery._targets` in `lib/services/share/discovery.dart` manda il broadcast diretto a `a.b.c.255` supponendo una /24. Dart non dà la maschera: leggerla dal lato nativo (Android `LinkProperties`, Linux/Windows dal sistema) o provare anche `a.b.255.255`. Reti che filtrano ogni broadcast restano escluse: lì serve il collegamento manuale per la Jam.
 5. **Debito dello streaming** (in fondo a `docs/fase-47-jam-online.md`): tre meccanismi «online → libreria», `DownloadsNotifier` grande, `discovery: socket error` ogni 2 s senza rete.

@@ -80,6 +80,10 @@ un'unica codebase Flutter per Android, Windows e Linux. Uso personale, niente co
 | 62 | `fase-62-home-aggiunti.md` | Home «aggiunti da poco»: 20 album, aperto una riga che scorre con quadrati da 84 dp, titolo e artista |
 | 63 | `fase-63-jam-come-player.md` | Jam = player: stessa schermata con intestazione Jam (partecipanti, «Termina» con conferma), coda dal pulsante «Coda», precedente e successivo per tutti |
 | 64 | `fase-64-chiusura-jam-ricerca.md` | Chiusura ui-jam-ricerca: misure finali contro la 58, metriche di arrivo, «Risultati» in analisi |
+| 65 | `fase-65-rilievi-jam.md` | Rilievi della Jam (47.8, 63.5): aggiunte in fila, swipe online dell'ospite, uscita con la coda ritrovata, copertine, «Scarica», «precedente» deciso dall'host, scarto (feature `feature-jam-cassa.md`) |
+| 66 | `fase-66-coda-insieme.md` | Coda insieme: modalità scelta dall'host, turno a giro, aggiunte in testa alla propria parte, finestra di 200, suggeriti locali, niente trascinamento |
+| 67 | `fase-67-jam-della-cassa.md` | Jam della cassa (Android): uscite A2DP dal nativo, permesso, «È una cassa?», Jam aperta da sé e annunciata in LAN, banner, solo l'host suona, cassa assente |
+| 68 | `fase-68-scoperta-e-chiusura-jam.md` | Scoperta con la maschera vera, misure di fluidità, prova a mano con due telefoni e la «cassa» |
 
 Dopo la **Fase 3** l'app è già usabile come lettore. Le fasi 5 e 6 sono indipendenti tra loro. La fase 8 (Jam) richiede la 6.
 
