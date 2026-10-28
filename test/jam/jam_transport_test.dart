@@ -102,6 +102,19 @@ void main() {
     expect(sent.map((c) => c.type), [JamCommandType.previous]);
   });
 
+  test('previous does not fall back on an error other than invalid', () async {
+    sent = [];
+    final t = JamTransport(
+      send: (c) async {
+        sent.add(c);
+        return JamError.forbidden;
+      },
+      nowMs: () => 1000,
+    )..update(state(index: 1, pos: 0, at: 1000));
+    await t.previous();
+    expect(sent.map((c) => c.type), [JamCommandType.previous]);
+  });
+
   test('previous falls back to the player rule on an old host (invalid)', () async {
     sent = [];
     now = 1000;

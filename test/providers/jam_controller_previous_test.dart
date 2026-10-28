@@ -61,6 +61,14 @@ void main() {
     expect(jam.sent.last.itemId, 10);
   });
 
+  test('previous() does not fall back on an error other than invalid', () async {
+    final (c, jam) = _make(_state(index: 1, positionMs: 1000));
+    jam.oldHost = JamError.forbidden;
+    jam.debugSetClock(JamClock(probe: () async => null, localNowMs: () => 5000));
+    expect(await c.read(jamProvider.notifier).previous(), JamError.forbidden);
+    expect(jam.sent.map((c) => c.type), [JamCommandType.previous]);
+  });
+
   test('fallback to an old host restarts after 3 s and on the first one', () async {
     final (c, jam) = _make(_state(index: 1, positionMs: 1000));
     jam.oldHost = JamError.invalid;
