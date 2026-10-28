@@ -7,6 +7,7 @@ L'utente vuole fare un `/kickoff`. **Prima di partire, riassumigli i rilievi ape
 - swipe «in coda» dell'ospite su una riga online della ricerca: oggi non accoda niente (il ⋮ → «Aggiungi in coda» sì). Deve accodare come il ⋮?
 - «Scarica» che resta nel ⋮ del player dopo che il brano è in libreria: va tolto subito?
 - copertine che mancano all'ospite, «Rimuovi» non visibile nel ⋮ della coda dell'ospite, ~2 s di scarto fra i telefoni: dentro il kickoff o a parte?
+- cassa Bluetooth e modalità della coda («Coda dell'host» / «Coda insieme»): leggi `docs/prossimi-lavori.md` (file dell'utente non tracciato), sezione «Cassa Bluetooth e modalità della coda», e fagli le «Domande aperte per il kickoff» che ci sono; poi chiedigli se il kickoff comprende anche la «Jam a distanza» della stessa sezione 2.
 Scrivi le risposte in `docs/decisioni.md` prima di pianificare.
 
 ## Stato
