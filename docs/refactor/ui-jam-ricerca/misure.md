@@ -54,6 +54,18 @@ Stesso comando con `--only "Pallino schede,Tutti i brani,Album,Ricerca «notte»
 | Ricerca «notte» | 143 | 5.2 / 27.5 | 7.6 / 14.6 | 4,9 % | ≤ 3 %, build p99 ≤ 16 ms | no | 2,8 %, build p99 34,5 | 3,6 %, build p99 31,5 |
 
 Esito: Album rientra (0,6 %, uguale alla soglia; Prima 0,5) e Tutti i brani rientra. Ricerca «notte»: build p99 27,5 ms (meglio di Prima -20 % e di -60 -13 %) ma ancora sopra 16 ms, e i frame > 16,7 ms salgono a 4,9 % (7 su 143; Prima 2,8, -60 3,6): peggio di Prima, blocca secondo D-170. Pallino schede 5,4 % è un peggioramento forte (Prima 0,9) dovuto al raster (p90 13,4, p99 20,4) mentre il build è invariato: scenario che non tocca la ricerca, possibile rumore del telefono o effetto del lavoro in isolate; da riconfermare con una seconda misura prima di attribuirlo al codice.
+### Dopo la review (`ui-jam-ricerca-60c`, bbf2879)
+
+Stesso comando di `-60b` con `--only "Pallino schede,Tutti i brani,Album,Ricerca «notte»"`. File grezzo: `build/perf/ui-jam-ricerca-60c.md`. PSS 221 MB (Prima 247), scansione 17,4 s. Nota: in `-60b` il precaricamento al focus non era attivo (non partiva); in `-60c` lo è.
+
+| Scenario | Frame | build p90/p99 ms | raster p90/p99 ms | > 16,7 ms | Soglia | ok | Prima | -60 | -60b |
+|---|---|---|---|---|---|---|---|---|---|
+| Pallino schede | 1707 | 6.1 / 9.9 | 7.1 / 10.5 | 0,5 % | ≤ 2 % | sì | 0,9 % | 1,2 % | 5,4 % |
+| Tutti i brani | 460 | 6.0 / 13.7 | 8.2 / 11.8 | 0,9 % | ≤ 1 % | sì | 4,0 % | 1,1 % | 0,6 % |
+| Album | 1180 | 4.5 / 9.6 | 7.3 / 16.0 | 0,9 % | ≤ 0,6 % | no (+0,3 pt) | 0,5 % | 1,6 % | 0,6 % |
+| Ricerca «notte» | 139 | 6.4 / 26.1 | 7.1 / 16.1 | 2,9 % | ≤ 3 %, build p99 ≤ 16 ms | no (solo build p99) | 2,8 %, p99 34,5 | 3,6 %, p99 31,5 | 4,9 %, p99 27,5 |
+
+Esito: Ricerca «notte» ha ora la quota di frame lenti dentro soglia (2,9 %, praticamente come Prima 2,8) e build p99 26,1 ms: -24 % rispetto a Prima (34,5) ma ancora oltre i 16 ms. Non peggio di Prima, ma resta fuori soglia come Prima. Album 0,9 % è sopra 0,6 % (Prima 0,5, +0,4 pt; 11 frame su 1180, variazione tra run vista anche in `-60b`/`-60`): peggio di Prima, per D-170 blocca. Pallino schede e Tutti i brani in soglia.
 
 ## Dopo (fase 64)
 
