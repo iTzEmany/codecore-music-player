@@ -37,6 +37,7 @@ class _CoverFanState extends State<CoverFan>
   bool _open = false;
   Offset? _downOutside;
   bool _focused = false;
+  final _node = FocusNode(debugLabel: 'CoverFan');
 
   @override
   void didChangeDependencies() {
@@ -47,6 +48,7 @@ class _CoverFanState extends State<CoverFan>
   @override
   void dispose() {
     _c.dispose();
+    _node.dispose();
     super.dispose();
   }
 
@@ -54,6 +56,8 @@ class _CoverFanState extends State<CoverFan>
     if (open == _open) return;
     setState(() => _open = open);
     open ? _c.forward() : _c.reverse();
+    // Opened by hover: take focus so Esc (DismissIntent) reaches the fan.
+    if (open && !_node.hasFocus) _node.requestFocus();
   }
 
   @override
@@ -86,7 +90,13 @@ class _CoverFanState extends State<CoverFan>
           final covers = [
             for (var i = 0; i < n; i++) _cover(albums[i], i, size),
           ];
-          return TapRegion(
+          // Back closes an open fan first; the shell's Back then stays on Home.
+          return PopScope(
+            canPop: !_open,
+            onPopInvokedWithResult: (didPop, _) {
+              if (!didPop) _setOpen(false);
+            },
+            child: TapRegion(
             // A real tap only: a drag (page scroll) that starts outside keeps it open.
             onTapOutside: (e) => _downOutside = e.position,
             onTapUpOutside: (e) {
@@ -98,6 +108,7 @@ class _CoverFanState extends State<CoverFan>
             child: MouseRegion(
               onEnter: (_) => _setOpen(true),
               child: FocusableActionDetector(
+                focusNode: _node,
                 // Always enabled, so the focus stays on the fan once it is open.
                 onShowFocusHighlight: (v) => setState(() => _focused = v),
                 shortcuts: const {
@@ -162,6 +173,7 @@ class _CoverFanState extends State<CoverFan>
                 ),
               ),
             ),
+          ),
           );
         },
       );

@@ -5,7 +5,10 @@ import 'package:codecore/providers/nav_providers.dart';
 import 'package:codecore/providers/ui_providers.dart';
 import 'package:codecore/providers/user_activity_provider.dart';
 import 'package:codecore/services/memory/app_data.dart';
+import 'package:codecore/ui/screens/home/home_screen.dart';
 import 'package:codecore/ui/screens/library/album_detail_screen.dart';
+import 'package:codecore/ui/widgets/cc_sheet.dart';
+import 'package:codecore/ui/widgets/track_row.dart';
 import 'package:codecore/ui/screens/library/all_tracks_screen.dart';
 import 'package:codecore/ui/screens/now_playing/now_playing_screen.dart';
 import 'package:codecore/ui/shell/app_shell.dart';
@@ -20,6 +23,7 @@ import 'package:codecore/ui/widgets/ring_progress.dart';
 import 'package:codecore/ui/widgets/speed_button.dart';
 import 'package:codecore/ui/widgets/selection_bar.dart';
 import 'package:drift/drift.dart' show Value;
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -53,7 +57,48 @@ Finder _bar(String label) => find
     .descendant(of: find.byType(ShellDock), matching: find.text(label))
     .hitTestable();
 
+Future<void> _openTabSheet(WidgetTester t) async {
+  showCcSheet<void>(
+    context: t.element(find.byType(HomeScreen)),
+    builder: (_) => const ListTile(autofocus: true, title: Text('TAB SHEET')),
+  );
+  await t.pump(const Duration(milliseconds: 400));
+  expect(find.text('TAB SHEET'), findsOneWidget);
+}
+
 void main() {
+  testWidgets('Esc closes a sheet opened inside a tab', (t) async {
+    _phone(t);
+    final h = await Harness.create(t);
+    await h.pump(t, const AppShell());
+    await _openTabSheet(t);
+    await t.sendKeyEvent(LogicalKeyboardKey.escape);
+    await t.pump(const Duration(milliseconds: 400));
+    expect(find.text('TAB SHEET'), findsNothing);
+    await h.dispose(t);
+  });
+
+  testWidgets('wide: a tab sheet blocks the queue panel behind it', (t) async {
+    t.view.physicalSize = const Size(1280, 800);
+    t.view.devicePixelRatio = 1;
+    addTearDown(t.view.reset);
+    final h = await Harness.create(t, tracks: 3);
+    final rows = await t.runAsync(() => h.db.select(h.db.tracks).get());
+    await t.runAsync(() => h.handler.playQueue([for (final r in rows!) r.id], 0));
+    await h.pump(t, const AppShell());
+    await _settle(t);
+    await _openTabSheet(t);
+    final row = find.descendant(
+      of: find.byType(SidePanelView),
+      matching: find.byType(TrackRow),
+    );
+    await t.tapAt(t.getCenter(row.last), buttons: kSecondaryButton);
+    await t.pump(const Duration(milliseconds: 400));
+    // The barrier eats the click: at most the tab sheet, never a second one.
+    expect(find.byType(BottomSheet).evaluate().length, lessThan(2));
+    await h.dispose(t);
+  });
+
   testWidgets('a spinner in a hidden tab does not tick; in the shown tab it does',
       (t) async {
     _phone(t);

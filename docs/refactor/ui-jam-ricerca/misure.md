@@ -69,7 +69,22 @@ Esito: Ricerca «notte» ha ora la quota di frame lenti dentro soglia (2,9 %, pr
 
 ## Dopo (fase 64)
 
-Da riempire con lo stesso comando e la stessa tabella.
+Data: 2026-10-28. Ramo `chore/64-chiusura-jam-ricerca` (= `d7a528a`), stesso dispositivo e comando di «Prima» (`--label ui-jam-ricerca-dopo`, tutti e 8 gli scenari). File grezzo: `build/perf/ui-jam-ricerca-dopo.md`. PSS 252 MB (Prima 247, soglia ≤ 210 MB, fuori come prima), scansione 17,2 s (Prima 18,2).
+
+| Scenario | Frame | build p90/p99 ms | raster p90/p99 ms | > 16,7 ms | Soglia | ok | Prima |
+|---|---|---|---|---|---|---|---|
+| Pallino schede | 1678 | 7.5 / 11.7 | 9.7 / 20.0 | 4,1 % | ≤ 2 % | no | 0,9 % |
+| Tutti i brani | 466 | 4.9 / 7.5 | 7.3 / 13.7 | 0,9 % | ≤ 1 % | sì | 4,0 % |
+| Album | 1192 | 3.6 / 5.7 | 6.4 / 9.5 | 0,1 % | ≤ 0,6 % | sì | 0,5 % |
+| Ricerca «notte» | 134 | 4.7 / 21.3 | 9.4 / 27.7 | 9,0 % | ≤ 3 %, build p99 ≤ 16 ms | no | 2,8 %, build p99 34,5 |
+| Swipe mini player | 504 | 5.7 / 13.8 | 7.7 / 12.5 | 0,4 % | ≤ 2 % | sì | 0,3 % |
+| Fogli | 1603 | 11.3 / 24.0 | 7.5 / 12.3 | 2,7 % | ≤ 3 % | sì | 3,7 % |
+| Apertura player | 451 | 5.9 / 22.0 | 8.3 / 14.4 | 2,0 % | ≤ 3 %, p99 ≤ 33 ms | sì | 2,4 %, build p99 35,1 |
+| Anello | 491 | 6.6 / 13.4 | 5.8 / 10.2 | 0,4 % | — | — | 0,3 % |
+
+Esito: fuori soglia restano Pallino schede (4,1 % contro ≤ 2 %, +3,2 pt rispetto a Prima, raster p90 9,7 / p99 20,0 con build invariato) e Ricerca «notte» (9,0 % contro ≤ 3 % e build p99 21,3 ms contro 16: D-176, ma -38 % rispetto a Prima 34,5; i frame lenti sono 12 su 134 e dominati dal raster p99 27,7). Tutti gli altri scenari sono in soglia e Tutti i brani, Fogli e Apertura player migliorano rispetto a Prima.
+Rumore: seconda misura (`ui-jam-ricerca-dopo-b`, `build/perf/ui-jam-ricerca-dopo-b.md`, PSS 243 MB) più rumorosa: Pallino 5,6 %, Tutti i brani 5,3 %, Album 9,6 % (raster p90 12-16 ms in scenari non toccati dalla fase: rumore del telefono), Fogli 3,6 %; Ricerca «notte» 2,2 % ma build p99 22,0 ms (D-176 confermato), Swipe 0,4 %, Apertura 1,6 %, Anello 0,9 %. Pallino schede è fuori soglia in entrambe le run (4,1 e 5,6 %), quindi non è solo rumore; la sua % di frame lenti è dominata dal raster, non dal build. Il 9,0 % di Ricerca nella prima run è rumore di raster (2,2 % nella seconda).
+Storia di Pallino schede sullo stesso codice delle schede: Prima 0,9 · -60 1,2 · -60b 5,4 · -60c 0,5 · -61 7,4 · -61b 0,5 · dopo 4,1 · dopo-b 5,6 %. È bimodale: con raster p90 ~7 ms sta in soglia, con raster p90 13-16 ms (telefono caldo o occupato) no, e fra -60b e -60c non è cambiato nulla delle schede. Terza misura (`-dopo-c`, telefono sbloccato, batteria 28,5 °C, nessun cool-down a schermo spento): 4,7 % (1558 frame), raster p90/p99 15,7 / 18,5 ms, build p90/p99 7,1 / 12,5 ms: ancora fuori soglia (≤ 2 %), raster alto come in -60b/-61/dopo-b. Prova A/B (richiesta dell'utente, telefono sbloccato, stessa libreria, solo «Pallino schede», APK alternati): `7eb133f` (prima della fase 62) 1,8 % e 5,1 %; `d7a528a` (master, fase 63) 0,6 % e 0,6 % (raster p90 7,8 / 7,9 ms). File grezzi `build/perf/ab-61-1.md`, `ab-63-1.md`, `ab-61-2.md`, `ab-63-2.md`. Il codice attuale non è peggiore di quello di prima e sta in soglia in entrambe le run: i valori alti erano rumore del telefono. **Pallino schede: in soglia.**
 
 ## Dopo la fase 61 (`ui-jam-ricerca-61`, e386916)
 

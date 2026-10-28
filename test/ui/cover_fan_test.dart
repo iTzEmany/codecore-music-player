@@ -167,6 +167,30 @@ void main() {
       expect(find.byType(ListView), findsNothing);
     });
 
+    testWidgets('system Back closes the open fan and nothing else', (t) async {
+      await pump(t, 3);
+      await t.tap(find.byKey(const ValueKey('fan-cover-0')));
+      await t.pumpAndSettle();
+      expect(find.byType(ListView), findsOneWidget);
+      await t.binding.handlePopRoute();
+      await t.pumpAndSettle();
+      expect(find.byType(ListView), findsNothing);
+      expect(find.byType(CoverFan), findsOneWidget);
+    });
+
+    testWidgets('opened by hover, Escape closes it', (t) async {
+      await pump(t, 3);
+      final mouse = await t.createGesture(kind: PointerDeviceKind.mouse);
+      await mouse.addPointer(location: Offset.zero);
+      addTearDown(mouse.removePointer);
+      await mouse.moveTo(t.getCenter(find.byKey(const ValueKey('fan-cover-2'))));
+      await t.pumpAndSettle();
+      expect(find.byType(ListView), findsOneWidget);
+      await t.sendKeyEvent(LogicalKeyboardKey.escape);
+      await t.pumpAndSettle();
+      expect(find.byType(ListView), findsNothing);
+    });
+
     testWidgets('hover opens, leaving and scrolling do not close', (t) async {
       await pump(t, 8);
       final mouse = await t.createGesture(kind: PointerDeviceKind.mouse);
