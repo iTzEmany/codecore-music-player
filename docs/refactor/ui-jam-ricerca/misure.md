@@ -21,6 +21,40 @@ PSS 247 MB (soglia ≤ 210 MB, fuori). Scansione 3000 brani in 18,2 s.
 | Apertura player | 412 | 4.7 / 35.1 | 8.3 / 13.2 | 2,4 % | ≤ 3 %, p99 ≤ 33 ms | no (build p99 35,1) |
 | Anello | 305 | 9.7 / 13.6 | 5.2 / 8.4 | 0,3 % | — | — |
 
+## Dopo la fase 60 (`ui-jam-ricerca-60`)
+
+Data: 2026-10-28. Commit `0acd0f1` (ramo `refactor/60-ricerca-e-dock`), stesso dispositivo e comando di «Prima» con `--only "Pallino schede,Tutti i brani,Album,Ricerca «notte»,Fogli,Swipe mini player"`. File grezzo: `build/perf/ui-jam-ricerca-60.md`.
+
+PSS 249 MB (Prima 247, +0,8 %; soglia ≤ 210 MB, fuori come prima). Scansione 3000 brani in 17,0 s (Prima 18,2).
+
+| Scenario | Frame | build p90/p99 ms | raster p90/p99 ms | > 16,7 ms | Soglia | ok | Confronto con Prima |
+|---|---|---|---|---|---|---|---|
+| Pallino schede | 1623 | 6.8 / 11.4 | 7.1 / 16.2 | 1,2 % | ≤ 2 % | sì | > 16,7: 0,9 → 1,2 % (+0,3 pt), build p99 migliore |
+| Tutti i brani | 455 | 5.6 / 12.4 | 8.1 / 15.3 | 1,1 % | ≤ 1 % | no (di 0,1 pt) | 4,0 → 1,1 %: molto meglio |
+| Album | 1179 | 5.0 / 9.1 | 7.6 / 17.7 | 1,6 % | ≤ 0,6 % | no | 0,5 → 1,6 %: PEGGIO (+1,1 pt), raster p99 13,6 → 17,7 |
+| Ricerca «notte» | 138 | 6.6 / 31.5 | 6.9 / 12.4 | 3,6 % | ≤ 3 %, build p99 ≤ 16 ms | no (> 3 % e build p99) | build p99 34,5 → 31,5 (-9 %, ancora il doppio della soglia); > 16,7: 2,8 → 3,6 % (+0,8 pt, +29 % relativo): PEGGIO |
+| Swipe mini player | 423 | 6.4 / 15.6 | 7.9 / 10.3 | 0,9 % | ≤ 2 % | sì | 0,3 → 0,9 %, build p99 14,2 → 15,6 (+10 %), dentro soglia |
+| Fogli | 1350 | 9.1 / 22.8 | 7.1 / 12.0 | 2,7 % | ≤ 3 % | sì | 3,7 → 2,7 %: meglio, ora dentro soglia |
+
+Esito (D-170: oltre soglia ≤ 10 % accettato, peggio blocca):
+- Swipe mini player: dentro soglia (0,9 % ≤ 2 %), nessun blocco.
+- Ricerca «notte»: build p99 31,5 ms resta oltre 16 ms ma è migliorato del 9 % rispetto a Prima (34,5): non peggiora. La quota di frame > 16,7 ms invece sale da 2,8 a 3,6 % ed esce dalla soglia ≤ 3 %: peggio rispetto a Prima, quindi blocca secondo D-170. Campione piccolo (138 frame: 5 frame lenti contro 4).
+- Album peggiora (0,5 → 1,6 %, oltre soglia 0,6 %) in raster, non in build: blocca secondo D-170.
+- Tutti i brani resta 0,1 pt sopra soglia ma migliora molto (4,0 → 1,1 %): non è un peggioramento, accettato come miglioramento parziale.
+- Pallino schede +0,3 pt (dentro soglia). Fogli passa in soglia.
+### Dopo la correzione 60.6 (`ui-jam-ricerca-60b`, 9aae22d)
+
+Stesso comando con `--only "Pallino schede,Tutti i brani,Album,Ricerca «notte»"`. File grezzo: `build/perf/ui-jam-ricerca-60b.md`. PSS 224 MB (Prima 247, -60: 249), scansione 16,9 s.
+
+| Scenario | Frame | build p90/p99 ms | raster p90/p99 ms | > 16,7 ms | Soglia | ok | Prima | -60 |
+|---|---|---|---|---|---|---|---|---|
+| Pallino schede | 1626 | 6.9 / 12.1 | 13.4 / 20.4 | 5,4 % | ≤ 2 % | no | 0,9 % | 1,2 % |
+| Tutti i brani | 463 | 5.3 / 13.2 | 8.3 / 15.4 | 0,6 % | ≤ 1 % | sì | 4,0 % | 1,1 % |
+| Album | 1183 | 4.0 / 6.8 | 6.8 / 13.0 | 0,6 % | ≤ 0,6 % | sì | 0,5 % | 1,6 % |
+| Ricerca «notte» | 143 | 5.2 / 27.5 | 7.6 / 14.6 | 4,9 % | ≤ 3 %, build p99 ≤ 16 ms | no | 2,8 %, build p99 34,5 | 3,6 %, build p99 31,5 |
+
+Esito: Album rientra (0,6 %, uguale alla soglia; Prima 0,5) e Tutti i brani rientra. Ricerca «notte»: build p99 27,5 ms (meglio di Prima -20 % e di -60 -13 %) ma ancora sopra 16 ms, e i frame > 16,7 ms salgono a 4,9 % (7 su 143; Prima 2,8, -60 3,6): peggio di Prima, blocca secondo D-170. Pallino schede 5,4 % è un peggioramento forte (Prima 0,9) dovuto al raster (p90 13,4, p99 20,4) mentre il build è invariato: scenario che non tocca la ricerca, possibile rumore del telefono o effetto del lavoro in isolate; da riconfermare con una seconda misura prima di attribuirlo al codice.
+
 ## Dopo (fase 64)
 
 Da riempire con lo stesso comando e la stessa tabella.
