@@ -70,3 +70,31 @@ Esito: Ricerca «notte» ha ora la quota di frame lenti dentro soglia (2,9 %, pr
 ## Dopo (fase 64)
 
 Da riempire con lo stesso comando e la stessa tabella.
+
+## Dopo la fase 61 (`ui-jam-ricerca-61`, e386916)
+
+Data: 2026-10-28. Ramo `refactor/61-fogli-ovunque`, stesso dispositivo e comando di «Prima» con `--only "Pallino schede,Tutti i brani,Album,Ricerca «notte»,Fogli"`. File grezzo: `build/perf/ui-jam-ricerca-61.md`. PSS 258 MB (Prima 247, -60c 221), scansione 20,7 s (Prima 18,2).
+
+| Scenario | Frame | build p90/p99 ms | raster p90/p99 ms | > 16,7 ms | Soglia | ok | Prima | -60c |
+|---|---|---|---|---|---|---|---|---|
+| Pallino schede | 1697 | 7.5 / 11.6 | 16.1 / 20.1 | 7,4 % | ≤ 2 % | no | 0,9 % | 0,5 % |
+| Tutti i brani | 457 | 6.1 / 11.4 | 12.7 / 20.6 | 5,3 % | ≤ 1 % | no | 4,0 % | 0,9 % |
+| Album | 1179 | 5.4 / 8.7 | 8.4 / 16.7 | 1,1 % | ≤ 0,6 % | no | 0,5 % | 0,9 % |
+| Ricerca «notte» | 135 | 4.8 / 23.7 | 7.2 / 21.4 | 4,4 % | ≤ 3 %, build p99 ≤ 16 ms | no | 2,8 %, p99 34,5 | 2,9 %, p99 26,1 |
+| Fogli | 1278 | 10.4 / 25.6 | 7.9 / 12.3 | 3,4 % | ≤ 3 % | no (+0,4 pt) | 3,7 % | 2,7 % (-60) |
+
+Esito: Fogli 3,4 % è sopra la soglia ≤ 3 % (Prima 3,7, -60 2,7): meglio di Prima, peggio di -60. Build p99 25,6 ms (-60: 22,8), raster invariato (p90 7,9). Pallino schede e Tutti i brani hanno raster p90 alto (16,1 e 12,7 ms) in scenari che la fase non tocca, come già visto in `-60b` (Pallino 5,4 %): telefono rumoroso (PSS e scansione più alti del solito), da riconfermare con una seconda misura prima di attribuire la regressione al codice.
+
+### Seconda misura (`ui-jam-ricerca-61b`, 7d43e2a)
+
+Stesso comando; telefono a riposo (batteria 29,8 °C, solo l'app di misura in primo piano). File grezzo: `build/perf/ui-jam-ricerca-61b.md`. PSS 247 MB (come Prima), scansione 15,9 s (-61: 20,7).
+
+| Scenario | Frame | build p90/p99 ms | raster p90/p99 ms | > 16,7 ms | Soglia | ok | -61 | Prima |
+|---|---|---|---|---|---|---|---|---|
+| Pallino schede | 1748 | 6.6 / 11.8 | 6.8 / 11.0 | 0,5 % | ≤ 2 % | sì | 7,4 % | 0,9 % |
+| Tutti i brani | 469 | 4.6 / 9.4 | 7.3 / 16.8 | 1,1 % | ≤ 1 % | no (+0,1 pt) | 5,3 % | 4,0 % |
+| Album | 1177 | 3.7 / 7.3 | 6.5 / 13.0 | 0,3 % | ≤ 0,6 % | sì | 1,1 % | 0,5 % |
+| Ricerca «notte» | 140 | 5.0 / 33.4 | 6.8 / 10.8 | 4,3 % | ≤ 3 %, build p99 ≤ 16 ms | no | 4,4 %, p99 23,7 | 2,8 %, p99 34,5 |
+| Fogli | 1430 | 11.8 / 22.2 | 7.4 / 12.4 | 2,9 % | ≤ 3 % | sì | 3,4 % | 3,7 % |
+
+Esito: la misura -61 era rumore del telefono; Fogli rientra (2,9 % ≤ 3 %, Prima 3,7). Ricerca «notte» resta fuori soglia come in Prima (fuori fase 61).
