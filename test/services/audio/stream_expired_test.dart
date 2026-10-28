@@ -17,6 +17,15 @@ import 'package:just_audio/just_audio.dart';
 import '../../support/fake_backend.dart';
 import '../../support/fake_stream_preparer.dart';
 
+/// Waits for [done] (the file of a restart comes through real I/O, which a fixed
+/// number of event turns does not cover), then lets the recovery end.
+Future<void> until(bool Function() done) async {
+  for (var i = 0; i < 500 && !done(); i++) {
+    await Future<void>.delayed(const Duration(milliseconds: 10));
+  }
+  await pumpEventQueue();
+}
+
 void main() {
   test('a refused stream is told by the status or by ExoPlayer\'s «Source error»', () {
     expect(streamLooksExpired(Exception('Response code: 403')), isTrue);
@@ -67,7 +76,7 @@ void main() {
 
     test('the file is there: it loads and goes on from the same place', () async {
       fail();
-      await pumpEventQueue();
+      await until(() => backend.loaded.isNotEmpty);
       expect(preparer.restarted, ['youtube:v1']);
       expect(backend.loaded.single, endsWith('youtube_v1.m4a'));
       expect(backend.seeks.last, pos);
@@ -88,7 +97,7 @@ void main() {
       preparer.restarts['youtube:v1'] = [StreamStart.url(second, const {})];
       backend.expiring.add(second.toString());
       fail();
-      await pumpEventQueue();
+      await until(() => backend.loaded.isNotEmpty);
       expect(backend.loaded.single, endsWith('youtube_v1.m4a'));
       expect(backend.seeks.last, pos);
       expect(failures, isEmpty);
@@ -100,7 +109,7 @@ void main() {
       await pumpEventQueue();
       await handler.pause();
       gate.complete();
-      await pumpEventQueue();
+      await until(() => backend.loaded.isNotEmpty);
       expect(backend.loaded.single, endsWith('youtube_v1.m4a'));
       expect(backend.playing, isFalse);
     });
@@ -135,16 +144,18 @@ void main() {
       await pumpEventQueue();
       expect(preparer.restarted, ['youtube:v1']);
       gate.complete();
-      await pumpEventQueue();
+      await until(() => backend.loaded.isNotEmpty);
       expect(preparer.restarted, ['youtube:v1']);
     });
 
     test('three errors in a row: two restarts, then the file', () async {
       preparer.restarts['youtube:v1'] = [StreamStart.url(second, const {}), StreamStart.url(second, const {})];
-      for (var i = 0; i < 3; i++) {
+      for (final loads in [2, 3]) {
         fail();
-        await pumpEventQueue();
+        await until(() => backend.loadedUris.length == loads);
       }
+      fail();
+      await until(() => backend.loaded.isNotEmpty);
       expect(preparer.restarted.length, 2);
       expect(backend.loaded.single, endsWith('youtube_v1.m4a'));
     });
@@ -155,7 +166,7 @@ void main() {
       await pumpEventQueue();
       expect(preparer.restarted, isEmpty);
       await handler.play();
-      await pumpEventQueue();
+      await until(() => backend.loaded.isNotEmpty);
       expect(preparer.restarted, ['youtube:v1']);
       expect(backend.loaded.single, endsWith('youtube_v1.m4a'));
       expect(backend.seeks.last, pos);

@@ -114,9 +114,11 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
 
   StreamPreparer? _preparer;
 
-  // The file of what follows may arrive while the current track plays (R-80).
+  // The file of what follows may arrive while the current track plays (R-80), or move
+  // (a download): a library track in the window stays, a cached one is looked up again.
   void _onPhases() {
-    if (_current == null || _window?.track != null || _loadBusy || _waitingStream) return;
+    final next = _window?.track;
+    if (_current == null || (next != null && !isStreamTrack(next)) || _loadBusy || _waitingStream) return;
     _window?.invalidate();
     unawaited(_refreshWindow());
   }

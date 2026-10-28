@@ -432,6 +432,16 @@ void main() {
       expect(fb.nextPath, file.path);
     });
 
+    test('the cached file of B moves (a download): the window follows it', () async {
+      final old = cacheB();
+      await start();
+      expect(fb.nextPath, old.path);
+      final moved = prep.cached['youtube:v2'] = File('${dir.path}/moved_v2.m4a')..writeAsStringSync('x');
+      prep.phases.value = {'youtube:v2': StreamPhase.ready};
+      await settle();
+      expect(fb.nextPath, moved.path);
+    });
+
     test('a late file of the track left by a join does not take the plays of the new one', () async {
       final gate = prep.gates['youtube:v1'] = Completer<void>();
       final file = cacheB();
