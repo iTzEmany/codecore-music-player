@@ -4,6 +4,7 @@ import 'package:codecore/ui/screens/playlists/playlist_detail_screen.dart';
 import 'package:codecore/ui/widgets/track_row.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/app_harness.dart';
@@ -52,12 +53,23 @@ void main() {
     await h.dispose(tester);
   });
 
-  Future<void> row(WidgetTester tester, Harness h, Track t) => h.pump(
+  // The harness theme is a phone's: desktop rows need the platform said.
+  Future<void> row(
+    WidgetTester tester,
+    Harness h,
+    Track t, {
+    TargetPlatform platform = TargetPlatform.android,
+  }) => h.pump(
     tester,
-    Scaffold(
-      body: SizedBox(
-        height: 64,
-        child: LiveTrackRow(track: t, onTap: () {}),
+    Builder(
+      builder: (c) => Theme(
+        data: Theme.of(c).copyWith(platform: platform),
+        child: Scaffold(
+          body: SizedBox(
+            height: 64,
+            child: LiveTrackRow(track: t, onTap: () {}),
+          ),
+        ),
       ),
     ),
   );
@@ -78,7 +90,7 @@ void main() {
     _size(tester, const Size(1400, 900));
     final h = await Harness.create(tester, tracks: 1);
     final t = (await tester.runAsync(() => h.db.select(h.db.tracks).getSingle()))!;
-    await row(tester, h, t);
+    await row(tester, h, t, platform: TargetPlatform.linux);
     await _settle(tester);
     expect(find.byTooltip('Altre opzioni'), findsNothing);
     final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
@@ -90,5 +102,25 @@ void main() {
     expect(size.width, greaterThanOrEqualTo(48));
     expect(size.height, greaterThanOrEqualTo(48));
     await h.dispose(tester);
+  });
+
+  testWidgets('wide row: ⋮ shows on a touch platform, and on keyboard focus', (tester) async {
+    _size(tester, const Size(1400, 900));
+    final h = await Harness.create(tester, tracks: 1);
+    final t = (await tester.runAsync(() => h.db.select(h.db.tracks).getSingle()))!;
+    await row(tester, h, t, platform: TargetPlatform.linux);
+    await _settle(tester);
+    expect(find.byTooltip('Altre opzioni'), findsNothing);
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+    expect(find.byTooltip('Altre opzioni'), findsOneWidget);
+    await h.dispose(tester);
+
+    final h2 = await Harness.create(tester, tracks: 1);
+    final t2 = (await tester.runAsync(() => h2.db.select(h2.db.tracks).getSingle()))!;
+    await row(tester, h2, t2);
+    await _settle(tester);
+    expect(find.byTooltip('Altre opzioni'), findsOneWidget);
+    await h2.dispose(tester);
   });
 }

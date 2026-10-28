@@ -362,7 +362,10 @@ class _SleepChipState extends ConsumerState<_SleepChip> {
     }
     return Tooltip(
       message: l.sleepTimer,
-      child: InkWell(
+      child: Semantics(
+        button: true,
+        label: l.sleepTimer,
+        child: InkWell(
         key: const Key('np-sleep-chip'),
         borderRadius: BorderRadius.circular(CcDims.rPill),
         onTap: () async {
@@ -404,6 +407,7 @@ class _SleepChipState extends ConsumerState<_SleepChip> {
             ],
           ],
         ),
+      ),
       ),
       ),
     );

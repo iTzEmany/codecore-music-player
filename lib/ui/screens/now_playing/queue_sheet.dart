@@ -286,7 +286,11 @@ class _QueueTitleRow extends StatelessWidget {
           ),
           if (hasUpcoming)
             TextButton(onPressed: onClear, child: Text(l.queueClear)),
-          Flexible(
+          // Intrinsic width; the cap only guards against overflow.
+          ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: MediaQuery.sizeOf(context).width * 0.5,
+            ),
             child: TextButton(
               onPressed: () => openSuggestions(context),
               child: Text(

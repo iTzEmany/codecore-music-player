@@ -45,12 +45,45 @@ Future<void> _open(WidgetTester tester, {String? title, bool wide = false}) asyn
 }
 
 void main() {
+  testWidgets('a long label at 2x text grows the row without overflow', (tester) async {
+    tester.view.physicalSize = const Size(400, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: buildThemeFromColors(CcColors.notte, false),
+        locale: const Locale('it'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        builder: (c, child) => MediaQuery(
+          data: MediaQuery.of(c).copyWith(textScaler: const TextScaler.linear(2)),
+          child: child!,
+        ),
+        home: Builder(
+          builder: (c) => TextButton(
+            onPressed: () => showCcActionSheet<String>(
+              context: c,
+              groups: [
+                [CcAction(icon: Icons.add, label: 'Un\'etichetta molto molto lunga che va a capo ' * 2)],
+              ],
+            ),
+            child: const Text('open'),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(tester.getSize(find.byType(ListTile).first).height, greaterThan(59));
+  });
+
   testWidgets('header, rows of 59 dp, destructive last and red', (tester) async {
     await _open(tester, title: 'Brano');
     expect(find.text('Brano'), findsOneWidget);
     expect(find.text('Sub'), findsOneWidget);
     expect(shownMenuEntries(tester), ['add', 'sort', 'del']);
-    expect(tester.getSize(find.ancestor(of: find.text('Aggiungi'), matching: find.byType(SizedBox)).first).height, 59);
+    expect(tester.getSize(find.ancestor(of: find.text('Aggiungi'), matching: find.byType(ConstrainedBox)).first).height, 59);
     final red = tester.widget<Text>(find.text('Elimina')).style!.color;
     expect(red, CcColors.notte.error);
   });

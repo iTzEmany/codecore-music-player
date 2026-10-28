@@ -103,6 +103,19 @@ class TrackRow extends StatefulWidget {
 
 class _TrackRowState extends State<TrackRow> {
   bool _hover = false;
+  bool _focused = false;
+
+  /// The wide row hides its ⋮ until the pointer is over it or focus is in it;
+  /// a touch screen has no hover, so it always shows.
+  bool _revealMore(BuildContext context) =>
+      _hover ||
+      _focused ||
+      switch (Theme.of(context).platform) {
+        TargetPlatform.android ||
+        TargetPlatform.iOS ||
+        TargetPlatform.fuchsia => true,
+        _ => false,
+      };
 
   String _subtitle(BuildContext context) {
     final t = widget.track;
@@ -243,7 +256,7 @@ class _TrackRowState extends State<TrackRow> {
           width: 48,
           child: widget.onMore == null
               ? null
-              : _moreButton(context, visible: _hover),
+              : _moreButton(context, visible: _revealMore(context)),
         ),
       ],
     );
@@ -288,7 +301,7 @@ class _TrackRowState extends State<TrackRow> {
         );
       case _:
     }
-    final showActions = !wide || _hover || fav;
+    final showActions = !wide || _revealMore(context) || fav;
     final actions = Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -441,7 +454,11 @@ class _TrackRowState extends State<TrackRow> {
     return MouseRegion(
       onEnter: (_) => setState(() => _hover = true),
       onExit: (_) => setState(() => _hover = false),
-      child: Semantics(
+      child: Focus(
+        canRequestFocus: false,
+        skipTraversal: true,
+        onFocusChange: (f) => setState(() => _focused = f),
+        child: Semantics(
         selected: widget.selectionMode ? widget.selected : null,
         value: widget.selected
             ? (widget.selectedPosition == null
@@ -482,6 +499,7 @@ class _TrackRowState extends State<TrackRow> {
             ),
           ),
         ),
+      ),
       ),
     );
   }

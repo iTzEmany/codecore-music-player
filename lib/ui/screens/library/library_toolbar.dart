@@ -49,7 +49,11 @@ class LibraryToolbar extends StatelessWidget {
             // Right-aligned: the flexible slot is half the row, sort sits by the grid button.
             child: Align(
               alignment: Alignment.centerRight,
-              child: InkWell(
+              child: Semantics(
+                button: true,
+                label: '${l.sortBy}: ${name(sort)}',
+                excludeSemantics: true,
+                child: InkWell(
                 onTap: () async {
                   final s = await showCcActionSheet<LibrarySort>(
                     context: context,
@@ -88,6 +92,7 @@ class LibraryToolbar extends StatelessWidget {
                     ],
                   ),
                 ),
+              ),
               ),
             ),
           ),

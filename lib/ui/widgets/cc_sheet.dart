@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+
+import '../../core/app_log.dart';
 
 import '../../l10n/l10n_ext.dart';
 import '../theme/tokens.dart';
@@ -41,7 +44,7 @@ class CcAction<T> {
   final IconData icon;
   final String label;
   final T? value;
-  final VoidCallback? onTap;
+  final FutureOr<void> Function()? onTap;
 
   /// Marks the current choice (sort orders): shows a check at the end.
   final bool selected;
@@ -83,7 +86,6 @@ Future<T?> showCcActionSheet<T>({
     barrierLabel: context.l10n.close,
     builder: (sheet) {
       final cc = sheet.cc;
-      var first = true;
       return ConstrainedBox(
         constraints: BoxConstraints(
           maxHeight: MediaQuery.sizeOf(sheet).height * 0.85,
@@ -91,50 +93,49 @@ Future<T?> showCcActionSheet<T>({
         child: Semantics(
           scopesRoute: true,
           explicitChildNodes: true,
-          namesRoute: true,
+          namesRoute: title != null,
           label: title,
-          child: CallbackShortcuts(
-            bindings: {
-              const SingleActivator(LogicalKeyboardKey.escape): () =>
-                  Navigator.of(sheet).maybePop(),
-            },
-            child: SafeArea(
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (head != null) Semantics(header: true, child: head),
-                    for (var i = 0; i < all.length; i++) ...[
-                      if (i > 0 || head != null) const Divider(height: 1),
-                      for (final a in all[i])
-                        SizedBox(
-                          height: 59,
-                          child: ListTile(
-                            key: ValueKey<Object>(a.value ?? a.label),
-                            autofocus: first && !(first = false),
-                            leading: Icon(
-                              a.icon,
-                              color: a.destructive ? cc.error : null,
-                            ),
-                            title: Text(
-                              a.label,
-                              style: a.destructive
-                                  ? TextStyle(color: cc.error)
-                                  : null,
-                            ),
-                            trailing: a.selected
-                                ? Icon(Icons.check_rounded, color: cc.accent)
-                                : null,
-                            selected: a.selected,
-                            onTap: () {
-                              Navigator.of(sheet).pop(a.value);
-                              a.onTap?.call();
-                            },
+          child: SafeArea(
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (head != null) Semantics(header: true, child: head),
+                  for (var i = 0; i < all.length; i++) ...[
+                    if (i > 0 || head != null) const Divider(height: 1),
+                    for (final (j, a) in all[i].indexed)
+                      // At least 59 dp: a long label or a big text scale grows the row.
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(minHeight: 59),
+                        child: ListTile(
+                          key: ValueKey<Object>(a.value ?? a.label),
+                          autofocus: i == 0 && j == 0,
+                          leading: Icon(
+                            a.icon,
+                            color: a.destructive ? cc.error : null,
                           ),
+                          title: Text(
+                            a.label,
+                            style: a.destructive
+                                ? TextStyle(color: cc.error)
+                                : null,
+                          ),
+                          trailing: a.selected
+                              ? Icon(Icons.check_rounded, color: cc.accent)
+                              : null,
+                          selected: a.selected,
+                          onTap: () async {
+                            Navigator.of(sheet).pop(a.value);
+                            try {
+                              await a.onTap?.call();
+                            } on Object catch (e, st) {
+                              AppLog.w('sheet action failed: ${a.label}', e, st);
+                            }
+                          },
                         ),
-                    ],
+                      ),
                   ],
-                ),
+                ],
               ),
             ),
           ),

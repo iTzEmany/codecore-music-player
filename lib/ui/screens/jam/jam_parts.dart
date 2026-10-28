@@ -226,12 +226,11 @@ class JamQueueRow extends ConsumerWidget {
                   groups: [
                     [
                       if (onJump != null)
-                        CcAction(icon: Icons.near_me_outlined, label: l.jamJumpHere, value: l.jamJumpHere, onTap: onJump),
+                        CcAction(icon: Icons.near_me_outlined, label: l.jamJumpHere, onTap: onJump),
                       if (artists.isNotEmpty)
                         CcAction(
                           icon: Icons.person_outline_rounded,
                           label: l.goToArtist,
-                          value: l.goToArtist,
                           onTap: () => goToArtists(context, ref, artists),
                         ),
                     ],
