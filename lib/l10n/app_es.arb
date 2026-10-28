@@ -366,6 +366,10 @@
   "jamIncomingBody": "Escuchad juntos desde una cola compartida.",
   "jamIncomingDialog": "La música suena en este dispositivo y los dos podéis añadir canciones.",
   "jamQueue": "Cola compartida",
+  "jamModeHost": "Cola del anfitrión",
+  "jamModeTogether": "Cola conjunta",
+  "jamModeGuestHint": "El anfitrión elige el modo de la cola",
+  "jamSuggested": "Sugerido",
   "jamEmpty": "Pon canciones en cola desde la biblioteca o la búsqueda",
   "jamOnlineFailed": "No se pudo añadir «{title}» a la Jam",
   "@jamOnlineFailed": {

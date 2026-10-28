@@ -123,7 +123,11 @@ class JamQueueRow extends ConsumerWidget {
     required this.onTap,
     required this.onJump,
     this.onRemove,
+    this.showHandle = true,
   });
+
+  /// False in «Coda insieme»: the queue is not draggable.
+  final bool showHandle;
 
   final JamItem item;
   final String who;
@@ -187,6 +191,7 @@ class JamQueueRow extends ConsumerWidget {
                     [
                       if (item.artist != null) item.artist!,
                       l.jamAddedBy(who),
+                      if (item.suggested) l.jamSuggested,
                       if (!item.available) l.jamUnavailable,
                     ].join(', '),
                     maxLines: 1,
@@ -228,13 +233,14 @@ class JamQueueRow extends ConsumerWidget {
                 ],
               ),
             ),
-            ReorderableDragStartListener(
-              index: index,
-              child: SizedBox.square(
-                dimension: 48,
-                child: Icon(Icons.drag_handle_rounded, color: cc.textMuted),
+            if (showHandle)
+              ReorderableDragStartListener(
+                index: index,
+                child: SizedBox.square(
+                  dimension: 48,
+                  child: Icon(Icons.drag_handle_rounded, color: cc.textMuted),
+                ),
               ),
-            ),
           ],
         ),
       ),

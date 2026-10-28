@@ -366,6 +366,10 @@
   "jamIncomingBody": "Listen together from a shared queue.",
   "jamIncomingDialog": "The music plays from this device and you can both add tracks.",
   "jamQueue": "Shared queue",
+  "jamModeHost": "Host's queue",
+  "jamModeTogether": "Shared turns",
+  "jamModeGuestHint": "The host chooses the queue mode",
+  "jamSuggested": "Suggested",
   "jamEmpty": "Queue tracks from the library or from search",
   "jamOnlineFailed": "Could not add “{title}” to the Jam",
   "@jamOnlineFailed": {

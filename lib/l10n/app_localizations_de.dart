@@ -1004,6 +1004,18 @@ class AppLocalizationsDe extends AppLocalizations {
   String get jamQueue => 'Gemeinsame Warteschlange';
 
   @override
+  String get jamModeHost => 'Warteschlange des Hosts';
+
+  @override
+  String get jamModeTogether => 'Gemeinsam';
+
+  @override
+  String get jamModeGuestHint => 'Der Host wählt den Warteschlangenmodus';
+
+  @override
+  String get jamSuggested => 'Vorgeschlagen';
+
+  @override
   String get jamEmpty => 'Reihe Titel aus der Bibliothek oder der Suche ein';
 
   @override

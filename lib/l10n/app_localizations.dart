@@ -1756,6 +1756,30 @@ abstract class AppLocalizations {
   /// **'Coda condivisa'**
   String get jamQueue;
 
+  /// No description provided for @jamModeHost.
+  ///
+  /// In it, this message translates to:
+  /// **'Coda dell\'host'**
+  String get jamModeHost;
+
+  /// No description provided for @jamModeTogether.
+  ///
+  /// In it, this message translates to:
+  /// **'Coda insieme'**
+  String get jamModeTogether;
+
+  /// No description provided for @jamModeGuestHint.
+  ///
+  /// In it, this message translates to:
+  /// **'La modalità della coda la sceglie l\'host'**
+  String get jamModeGuestHint;
+
+  /// No description provided for @jamSuggested.
+  ///
+  /// In it, this message translates to:
+  /// **'Suggerito'**
+  String get jamSuggested;
+
   /// No description provided for @jamEmpty.
   ///
   /// In it, this message translates to:

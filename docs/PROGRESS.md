@@ -1125,7 +1125,7 @@ mobile_scanner — fase 24 — 2026-10-19
 ## Fase 66 — Coda insieme (`fase-66-coda-insieme.md`)
 - [x] 66.1 Modalità nello stato della Jam
 - [x] 66.2 Ordine a turno
-- [ ] 66.3 Riga della modalità e niente trascinamento
+- [x] 66.3 Riga della modalità e niente trascinamento
 - [ ] 66.4 Parte di ognuno e feeder
 - [ ] 66.5 Suggeriti locali
 - [ ] 66.6 Ritorno, ingresso e uscita (reducer e removeMember fatti, D-221; mancano ingresso/uscita nel feeder)

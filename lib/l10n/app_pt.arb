@@ -534,6 +534,10 @@
   "jamIncomingBody": "Ouçam juntos a partir de uma fila partilhada.",
   "jamIncomingDialog": "A música toca neste dispositivo e ambos podem adicionar faixas.",
   "jamQueue": "Fila partilhada",
+  "jamModeHost": "Fila do anfitrião",
+  "jamModeTogether": "Fila conjunta",
+  "jamModeGuestHint": "O anfitrião escolhe o modo da fila",
+  "jamSuggested": "Sugerido",
   "jamEmpty": "Ponha faixas na fila a partir da biblioteca ou da pesquisa",
   "jamOnlineFailed": "Não foi possível adicionar «{title}» à Jam",
   "@jamOnlineFailed": {

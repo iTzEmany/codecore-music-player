@@ -1003,6 +1003,18 @@ class AppLocalizationsEs extends AppLocalizations {
   String get jamQueue => 'Cola compartida';
 
   @override
+  String get jamModeHost => 'Cola del anfitrión';
+
+  @override
+  String get jamModeTogether => 'Cola conjunta';
+
+  @override
+  String get jamModeGuestHint => 'El anfitrión elige el modo de la cola';
+
+  @override
+  String get jamSuggested => 'Sugerido';
+
+  @override
   String get jamEmpty =>
       'Pon canciones en cola desde la biblioteca o la búsqueda';
 

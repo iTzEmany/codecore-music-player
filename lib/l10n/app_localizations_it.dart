@@ -1001,6 +1001,18 @@ class AppLocalizationsIt extends AppLocalizations {
   String get jamQueue => 'Coda condivisa';
 
   @override
+  String get jamModeHost => 'Coda dell\'host';
+
+  @override
+  String get jamModeTogether => 'Coda insieme';
+
+  @override
+  String get jamModeGuestHint => 'La modalità della coda la sceglie l\'host';
+
+  @override
+  String get jamSuggested => 'Suggerito';
+
+  @override
   String get jamEmpty => 'Metti in coda dalla libreria o dalla ricerca';
 
   @override

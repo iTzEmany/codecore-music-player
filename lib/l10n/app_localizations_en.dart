@@ -1001,6 +1001,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get jamQueue => 'Shared queue';
 
   @override
+  String get jamModeHost => 'Host\'s queue';
+
+  @override
+  String get jamModeTogether => 'Shared turns';
+
+  @override
+  String get jamModeGuestHint => 'The host chooses the queue mode';
+
+  @override
+  String get jamSuggested => 'Suggested';
+
+  @override
   String get jamEmpty => 'Queue tracks from the library or from search';
 
   @override

@@ -1004,6 +1004,18 @@ class AppLocalizationsPt extends AppLocalizations {
   String get jamQueue => 'Fila partilhada';
 
   @override
+  String get jamModeHost => 'Fila do anfitrião';
+
+  @override
+  String get jamModeTogether => 'Fila conjunta';
+
+  @override
+  String get jamModeGuestHint => 'O anfitrião escolhe o modo da fila';
+
+  @override
+  String get jamSuggested => 'Sugerido';
+
+  @override
   String get jamEmpty =>
       'Ponha faixas na fila a partir da biblioteca ou da pesquisa';
 
