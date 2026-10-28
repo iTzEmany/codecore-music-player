@@ -38,3 +38,4 @@
 - **Il Mi A3 a schermo spento si blocca col PIN**: `perf_device.py` poi non trova i nodi. Niente pause a schermo spento fra una misura e l'altra; controlla `dumpsys window | grep isKeyguardShowing` prima di partire.
 - **Uno scenario fuori soglia sul Mi A3 non basta a dire che è il codice**: «Pallino schede» è bimodale (0,5 % o 4–7 % sullo stesso codice, a seconda del raster). Prima di cercare il commit, prova A/B con due APK alternati (handoff, «Dispositivi»).
 - **Prima di correggere un «bug» della prova a mano, cerca in `docs/decisioni.md`**: «✕ di Ricerca chiude la tastiera» sembrava un difetto ed è D-155.
+- **Su UniBA (Wi-Fi dell'università, /16) i telefoni non si scoprono**: il broadcast è filtrato e quello diretto dell'app suppone una /24. Per provare Jam e invii usa l'hotspot di un telefono (28/10).
