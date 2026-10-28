@@ -84,7 +84,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   void _warmIndex() {
     if (!_focus.hasFocus) return;
     _focus.removeListener(_warmIndex);
-    ref.read(searchIndexProvider);
+    // Kept (closed with this State): a plain read would pause it at once.
+    ref.listenManual(searchIndexProvider, (_, _) {});
   }
 
   @override

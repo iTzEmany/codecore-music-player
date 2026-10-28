@@ -240,9 +240,10 @@ Future<SearchIndex> _buildIndex(
 
 // Does not wait for the tags (a late answer builds the index again).
 final searchIndexProvider = FutureProvider<SearchIndex>((ref) async {
+  // Both watched before the await, so neither stream is dropped meanwhile.
+  final tagsAsync = ref.watch(_indexTagsProvider);
   final tracks = await ref.watch(_indexTracksProvider.future);
-  final tags = ref.watch(_indexTagsProvider).value ?? const {};
-  return _buildIndex(tracks, tags);
+  return _buildIndex(tracks, tagsAsync.value ?? const {});
 });
 
 // autoDispose (here and below): one entry per text typed, and an entry left
@@ -276,12 +277,12 @@ final searchTracksProvider = Provider.autoDispose
       // `.value`, not `whenData`: while the index is rebuilt after a change of
       // the library the rows of the old one stay, instead of going empty.
       final index = ref.watch(searchIndexProvider);
-      final i = index.value;
-      if (i == null) {
-        return index.hasError
-            ? AsyncError(index.error!, index.stackTrace!)
-            : const AsyncLoading();
+      if (index.hasError) {
+        AppLog.w('search index failed', index.error, index.stackTrace);
+        return AsyncError(index.error!, index.stackTrace!);
       }
+      final i = index.value;
+      if (i == null) return const AsyncLoading();
       return AsyncData(
         smartSearch(
           i,

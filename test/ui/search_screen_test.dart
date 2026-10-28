@@ -63,7 +63,8 @@ void main() {
     expect(c.exists(searchIndexProvider), isFalse);
     await tester.tap(find.byType(TextField));
     await tester.pump();
-    expect(c.exists(searchIndexProvider), isTrue);
+    await indexReady(tester);
+    expect(c.read(searchIndexProvider).hasValue, isTrue);
     await h.dispose(tester);
   });
 

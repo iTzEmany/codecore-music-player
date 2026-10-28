@@ -17,20 +17,29 @@ void submitSearch(WidgetTester t) =>
     _container(t).read(searchSubmitProvider.notifier).submit();
 
 /// The search index is built on another isolate, which the test clock does
-/// not wait for: pump and give the real loop a turn until it is there.
+/// not wait for: pump and give the real loop a turn until it is there. A
+/// failed build fails the test.
 Future<void> indexReady(WidgetTester t) async {
-  // First let a write reach the index (drift's notice is on the test clock).
-  for (var i = 0; i < 3; i++) {
-    await t.pump(const Duration(milliseconds: 50));
-    await t.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 10)));
-  }
   final c = ProviderScope.containerOf(t.element(find.byType(MaterialApp)));
-  if (!c.exists(searchIndexProvider)) return; // nothing asked for it (yet)
-  var done = false;
-  void finish([Object? _]) => done = true;
-  c.read(searchIndexProvider.future).then(finish, onError: finish);
-  for (var i = 0; i < 100 && !done; i++) {
+  Future<void> turn() async {
     await t.pump(const Duration(milliseconds: 50));
     await t.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 10)));
   }
+
+  await turn(); // a write reaches the index through drift's notice
+  if (!c.exists(searchIndexProvider)) return; // nothing asked for it (yet)
+  Object? failure;
+  var done = false;
+  c.read(searchIndexProvider.future).then(
+    (_) => done = true,
+    onError: (Object e) {
+      failure = e;
+      done = true;
+    },
+  );
+  for (var i = 0; i < 100 && !done; i++) {
+    await turn();
+  }
+  if (failure != null) throw failure!;
+  expect(done, isTrue, reason: 'search index not built');
 }
