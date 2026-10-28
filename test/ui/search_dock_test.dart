@@ -4,6 +4,7 @@ import 'package:codecore/ui/shell/app_shell.dart';
 import 'package:codecore/ui/shell/bottom_bar.dart';
 import 'package:codecore/ui/widgets/mini_player.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -59,6 +60,20 @@ void main() {
     expect(find.bySemanticsLabel('Home'), findsNothing);
     expect(t.getRect(_field()).bottom, lessThanOrEqualTo(800 - 300));
     semantics.dispose();
+    await h.dispose(t);
+  });
+
+  testWidgets('keyboard up: Tab never lands on the hidden tabs', (t) async {
+    final h = await _shell(t);
+    await t.tap(_tab('Cerca'));
+    await _settle(t);
+    await _keyboard(t, 300);
+    for (var i = 0; i < 6; i++) {
+      await t.sendKeyEvent(LogicalKeyboardKey.tab);
+      await t.pump();
+      final focus = FocusManager.instance.primaryFocus?.context;
+      expect(focus?.findAncestorWidgetOfExactType<DockLayers>(), isNull);
+    }
     await h.dispose(t);
   });
 
