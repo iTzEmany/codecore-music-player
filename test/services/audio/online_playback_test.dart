@@ -346,13 +346,12 @@ void main() {
 
   Future<int?> resumeOf(int id) async => (await TrackRepository(db).getById(id))!.resumePositionMs;
 
-  test('a shadow row is a stream: no next-track window, no ReplayGain, no bookmark on leaving', () async {
+  test('a shadow row is a stream: no ReplayGain, no bookmark on leaving', () async {
     final row = await shadowRow('s1');
     await handler.setNormalize(true);
     await handler.setTransition(TransitionMode.gapless);
     await handler.playQueue([row, ids[1]], 0);
     await settle();
-    expect(backend.nextCalls.whereType<String>(), isEmpty);
     expect(backend.volumes.last, 1.0);
     expect(backend.seeks, isEmpty);
     await listenTo(100);

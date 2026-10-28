@@ -235,6 +235,9 @@ class StreamPreparer {
     }
   }
 
+  /// The cached file of [key] (with its shadow row), or null: no download starts.
+  Future<File?> cachedFile(String key, YtResult r) => _cached(key, r);
+
   /// The cached file of [key] (touched, with its shadow row), or null.
   Future<File?> _cached(String key, YtResult r) async {
     final file = await cache.fileFor(key);
@@ -501,7 +504,7 @@ class StreamPreparer {
       for (final s in found) {
         final d = r.duration, sd = s.duration;
         if (s.id == r.id || (d != null && (sd == null || (sd - d).inSeconds.abs() > 10))) continue;
-        AppLog.i('age fallback ${r.id} → ${s.id}');
+        AppLog.i('age fallback ${r.id} -> ${s.id}');
         return s;
       }
     } on Object catch (e, st) {
