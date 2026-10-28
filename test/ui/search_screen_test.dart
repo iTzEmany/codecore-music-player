@@ -435,4 +435,26 @@ void main() {
     expect(find.text('Song 0'), findsOneWidget);
     await h.dispose(tester);
   });
+
+  testWidgets('desktop: ✕ clears the field and the page stays on Search', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1400, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final h = await Harness.create(tester, tracks: 2);
+    await h.pump(tester, const SearchScreen());
+    await _settle(tester);
+    await tester.enterText(find.byType(TextField), 'Song');
+    await tester.pump(const Duration(milliseconds: 400));
+    await _settle(tester);
+    expect(find.byTooltip('Annulla'), findsOneWidget);
+    await tester.tap(find.byTooltip('Annulla'));
+    await _settle(tester);
+    expect(tester.widget<TextField>(find.byType(TextField)).controller!.text,
+        isEmpty);
+    expect(find.byTooltip('Annulla'), findsNothing);
+    expect(find.byType(SearchScreen), findsOneWidget);
+    await h.dispose(tester);
+  });
 }

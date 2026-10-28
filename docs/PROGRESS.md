@@ -1044,14 +1044,14 @@ basic_utils — fase 24 (in alternativa `pointycastle`) — 2026-10-19
 mobile_scanner — fase 24 — 2026-10-19
 
 ## Fase 58 — Rete di sicurezza ui-jam-ricerca (`fase-58-rete-jam-ricerca.md`)
-- [ ] 58.1 Seek di oggi
-- [ ] 58.2 Jam di oggi
-- [ ] 58.3 Ricerca di oggi
-- [ ] 58.4 Menu di oggi
-- [ ] 58.5 Home e testo di oggi
-- [ ] 58.6 Golden di oggi
-- [ ] 58.7 Misure di partenza
-- [ ] 58.8 Controlli di fase
+- [x] 58.1 Seek di oggi
+- [x] 58.2 Jam di oggi
+- [x] 58.3 Ricerca di oggi
+- [x] 58.4 Menu di oggi
+- [x] 58.5 Home e testo di oggi
+- [x] 58.6 Golden di oggi
+- [x] 58.7 Misure di partenza — Mi A3: fuori soglia Tutti i brani, Ricerca (build p99), Fogli, Apertura (p99), PSS 247 MB; vedi docs/refactor/ui-jam-ricerca/misure.md
+- [x] 58.8 Controlli di fase
 
 ## Fase 59 — Player e seek (`fase-59-player-e-seek.md`)
 - [ ] 59.1 Scheda del testo a larghezza piena e altezza fissa (F-58)

@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:codecore/data/db/app_database.dart';
 import 'package:codecore/providers/player_providers.dart';
 import 'package:codecore/ui/screens/library/artist_screen.dart';
 import 'package:codecore/ui/screens/now_playing/now_playing_screen.dart';
@@ -11,6 +14,7 @@ import 'package:codecore/ui/widgets/cover_backdrop.dart';
 import 'package:codecore/ui/widgets/ring_progress.dart';
 import 'package:codecore/ui/theme/custom_theme.dart';
 import 'package:codecore/providers/theme_providers.dart';
+import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -353,4 +357,59 @@ void main() {
     await h.dispose(tester);
     // Linux: the desktop theme shrink-wraps the mute button.
   }, variant: TargetPlatformVariant.only(TargetPlatform.linux));
+
+  group('LyricsCard today', () {
+    testWidgets('the bold line follows the position; the window slides', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(400, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final h = await Harness.create(tester, tracks: 1);
+      final track = await tester.runAsync(() async {
+        await h.db.update(h.db.tracks).write(
+          TracksCompanion(
+            lyricsSynced: Value(
+              [for (var i = 0; i < 8; i++) '[00:${(i * 10).toString().padLeft(2, '0')}.00]Line $i'].join('\n'),
+            ),
+          ),
+        );
+        return (await h.db.select(h.db.tracks).get()).single;
+      });
+      final pos = StreamController<Duration>();
+      addTearDown(pos.close);
+      await h.pump(
+        tester,
+        Scaffold(body: LyricsCard(track: track!)),
+        extraOverrides: [positionProvider.overrideWith((_) => pos.stream)],
+      );
+      FontWeight? weightOf(String t) =>
+          tester.widget<Text>(find.text(t)).style?.fontWeight;
+
+      pos.add(const Duration(seconds: 31));
+      await tester.pump();
+      await tester.pump();
+      // Current line 3: window is lines 1..5.
+      expect(weightOf('Line 3'), FontWeight.w700);
+      expect(weightOf('Line 2'), FontWeight.w500);
+      expect(find.text('Line 0'), findsNothing);
+      expect(find.text('Line 6'), findsNothing);
+
+      pos.add(const Duration(seconds: 51));
+      await tester.pump();
+      await tester.pump();
+      expect(weightOf('Line 5'), FontWeight.w700);
+      expect(weightOf('Line 3'), FontWeight.w500);
+      expect(find.text('Line 1'), findsNothing);
+
+      // Last lines: the window is cut short (today: 4 lines shown, F-58).
+      pos.add(const Duration(seconds: 71));
+      await tester.pump();
+      await tester.pump();
+      expect(weightOf('Line 7'), FontWeight.w700);
+      expect(find.text('Line 4'), findsNothing);
+      expect(find.text('Line 5'), findsOneWidget);
+      await h.dispose(tester);
+    });
+  });
 }

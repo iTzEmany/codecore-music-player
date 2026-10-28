@@ -577,6 +577,29 @@ void main() {
     await h.dispose(tester);
   });
 
+  testWidgets('phone: the query survives closing the keyboard by hand and switching tab',
+      (tester) async {
+    _phone(tester);
+    final h = await Harness.create(tester, tracks: 4);
+    await h.pump(tester, const AppShell());
+    await tester.tap(_bar('Cerca'));
+    await _settle(tester);
+    await tester.enterText(_dockField(), 'Song 2');
+    await _settle(tester);
+    final c = _container(tester);
+    c.read(searchFocusProvider).unfocus(); // keyboard dismissed, not Back
+    await _settle(tester);
+    // Today the field (and the hidden tabs) stay until the user leaves.
+    expect(c.read(searchBarProvider), isTrue);
+    expect(_bar('Home'), findsNothing);
+    c.read(navIndexProvider.notifier).set(NavTab.home.index);
+    await _settle(tester);
+    await tester.tap(_bar('Cerca'));
+    await _settle(tester);
+    expect(tester.widget<TextField>(_dockField()).controller!.text, 'Song 2');
+    await h.dispose(tester);
+  });
+
   testWidgets('the dock field keeps the height of the tabs', (t) async {
     _phone(t);
     final h = await Harness.create(t, tracks: 2);

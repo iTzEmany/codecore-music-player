@@ -35,6 +35,21 @@ import 'package:codecore/ui/screens/smart/smart_playlist_screen.dart';
 import 'package:codecore/ui/shell/desktop_sidebar.dart';
 import 'package:drift/drift.dart'
     show BooleanExpressionOperators, OrderingTerm, Value;
+import 'package:codecore/providers/jam_providers.dart';
+import 'package:codecore/providers/selection_providers.dart';
+import 'package:codecore/providers/sleep_timer_provider.dart';
+import 'package:codecore/services/jam/jam_models.dart';
+import 'package:codecore/ui/screens/jam/jam_screen.dart';
+import 'package:codecore/ui/screens/library/favorites_screen.dart';
+import 'package:codecore/ui/screens/now_playing/now_playing_screen.dart';
+import 'package:codecore/ui/screens/now_playing/queue_sheet.dart';
+import 'package:codecore/ui/screens/now_playing/suggestions_screen.dart';
+import 'package:codecore/ui/widgets/selection_bar.dart';
+import 'package:codecore/ui/widgets/track_actions.dart';
+import 'package:codecore/ui/widgets/track_row.dart';
+import 'package:codecore/ui/widgets/track_row_selection.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -54,17 +69,49 @@ void _phone(WidgetTester tester) {
   addTearDown(tester.view.reset);
 }
 
-/// Opens the menu behind [button] and returns the values of its items, in order.
+// ---- How a menu is opened and read: the ONLY part phase 61 changes. ----
+
+/// Name of one entry: enum name, number as text, TrackAction label, or the
+/// text of the child for value-less entries.
+String _entry(PopupMenuItem i) {
+  final v = i.value;
+  if (v is Enum) return v.name;
+  if (v is TrackAction) return v.label;
+  if (v != null) return '$v';
+  return (i.child as Text).data!;
+}
+
+/// The entries shown now, in order.
+List<String> _shown(WidgetTester tester) => [
+  for (final i in tester.widgetList<PopupMenuItem>(
+    find.byWidgetPredicate((w) => w is PopupMenuItem),
+  ))
+    _entry(i),
+];
+
+/// Opens the menu behind [button] and returns its entries, in order.
 Future<List<String>> _open(WidgetTester tester, Finder button) async {
   await tester.tap(button);
   await _settle(tester);
-  return [
-    for (final i in tester.widgetList<PopupMenuItem>(
-      find.byWidgetPredicate((w) => w is PopupMenuItem),
-    ))
-      // Menus are enums now (42.5); the names are the old string values.
-      i.value is Enum ? (i.value as Enum).name : i.value as String,
-  ];
+  return _shown(tester);
+}
+
+/// Right click on [target] (desktop context menu) and returns the entries.
+Future<List<String>> _openContext(WidgetTester tester, Finder target) async {
+  final g = await tester.startGesture(
+    tester.getCenter(target),
+    kind: PointerDeviceKind.mouse,
+    buttons: kSecondaryMouseButton,
+  );
+  await g.up();
+  await _settle(tester);
+  return _shown(tester);
+}
+
+/// Taps the entry named [label] in the menu now open.
+Future<void> _choose(WidgetTester tester, String label) async {
+  await tester.tap(find.text(label).last);
+  await _settle(tester);
 }
 
 Future<List<Track>> _tracks(WidgetTester tester, Harness h) async =>
@@ -109,7 +156,120 @@ class _FakeStore extends TagBackupStore {
   Future<List<TagBackup>> list() async => List.of(items);
 }
 
+
+const _selKey = 'menus-sel';
+
+class _SelPage extends ConsumerWidget {
+  const _SelPage(this.tracks);
+  final List<Track> tracks;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ids = [for (final t in tracks) t.id];
+    final active = ref.watch(
+      selectionProvider(_selKey).select((s) => s.active),
+    );
+    return SelectionScope(
+      listKey: _selKey,
+      visibleIds: ids,
+      child: Scaffold(
+        appBar: active
+            ? SelectionBar(listKey: _selKey, tracks: tracks)
+            : AppBar(title: const Text('List')),
+        body: ListView(
+          children: [
+            for (final t in tracks)
+              SizedBox(
+                height: 64,
+                child: LiveTrackRow(
+                  track: t,
+                  onTap: () {},
+                  selection: RowSelection(listKey: _selKey, visibleIds: ids),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _FakeJam extends JamController {
+  _FakeJam(this.initial);
+  final JamUiState initial;
+  final sent = <JamCommand>[];
+  @override
+  JamUiState build() => initial;
+  @override
+  Future<JamError?> send(JamCommand cmd) async {
+    sent.add(cmd);
+    return null;
+  }
+}
+
+JamUiState _jam({required bool host}) => JamUiState(
+  phase: JamPhase.active,
+  role: host ? JamRole.host : JamRole.guest,
+  peerName: 'Telefono',
+  jam: const JamState(
+    version: 3,
+    items: [
+      JamItem(id: 1, ownerDeviceId: 'host', title: 'Prima', ext: 'mp3'),
+      JamItem(
+        id: 2,
+        ownerDeviceId: 'peer',
+        title: 'Seconda',
+        ext: 'mp3',
+        artist: 'Band',
+      ),
+    ],
+    currentIndex: 0,
+    hostDeviceId: 'host',
+    outputDeviceId: 'host',
+  ),
+);
+
+// ---- Expected entries, in order: they stay the same in phase 61. ----
 const _newMenu = ['create', 'smart', 'csv'];
+const _sleepIdle = ['15', '30', '45', '60', '-1'];
+const _sleepActive = ['15', '30', '45', '60', '-1', '0'];
+const _librarySort = ['recent', 'alpha', 'added'];
+const _favoritesSort = [
+  'defaultOrder', 'title', 'artist', 'album', 'year', 'addedAt', 'duration',
+];
+const _queueMenu = ['Suggeriti di recente'];
+const _jamHostRow = ['Salta qui', 'Vai all’artista'];
+const _jamGuestRow = ['Vai all’artista'];
+// The context menu has the actions of the sheet, without its header; "Mostra nella cartella" is desktop-only (the test runs on Linux, like the CI).
+const _contextMenu = [
+  'Anteprima 20 s',
+  'Riproduci dopo',
+  'Aggiungi in coda',
+  'Preferito',
+  'Aggiungi a playlist…',
+  'Etichette…',
+  'Vai all’album',
+  'Vai all’artista',
+  'Artista su YouTube Music',
+  'Cambia copertina',
+  'Modifica info',
+  'Cerca info sul web',
+  'Condividi…',
+  'Dettagli',
+  'Mostra nella cartella',
+  'Elimina dal dispositivo',
+];
+const _selectionMenu = [
+  'Riproduci',
+  'Riproduci dopo',
+  'Aggiungi in coda',
+  'Aggiungi ai preferiti',
+  'Aggiungi a playlist…',
+  'Aggiungi etichetta…',
+  'Togli etichetta…',
+  'Sposta in un nuovo album…',
+  'Elimina dal dispositivo',
+];
 
 void main() {
   testWidgets(
@@ -407,4 +567,124 @@ void main() {
     );
     await h.dispose(tester);
   });
+
+  testWidgets('sleep timer (moon): 15/30/45/60/end of track; «15» starts it, then «cancel» appears', (tester) async {
+    _phone(tester);
+    final h = await Harness.create(tester, tracks: 2);
+    final rows = await _tracks(tester, h);
+    await tester.runAsync(() => h.handler.playQueue([rows.first.id], 0));
+    await h.pump(tester, const NowPlayingScreen(desktop: false));
+    await _settle(tester);
+    final chip = find.byKey(const Key('np-sleep-chip'));
+    expect(await _open(tester, chip), _sleepIdle);
+    await _choose(tester, '15 minuti');
+    final c = ProviderScope.containerOf(tester.element(chip));
+    expect(c.read(sleepTimerProvider).endsAt, isNotNull);
+    expect(await _open(tester, chip), _sleepActive);
+    await _choose(tester, 'Annulla timer');
+    expect(c.read(sleepTimerProvider).active, isFalse);
+    await h.dispose(tester);
+  });
+
+  testWidgets('library sort: recent, alpha, added; «A–Z» becomes the shown order', (tester) async {
+    _phone(tester);
+    final h = await Harness.create(tester, tracks: 2);
+    await h.pump(tester, const Scaffold(body: LibraryScreen()));
+    await _settle(tester);
+    expect(await _open(tester, find.text('Recenti')), _librarySort);
+    await _choose(tester, 'A–Z');
+    expect(
+      find.descendant(
+        of: find.byWidgetPredicate((w) => w is PopupMenuButton),
+        matching: find.text('A–Z'),
+      ),
+      findsOneWidget,
+    );
+    await h.dispose(tester);
+  });
+
+  testWidgets('favourites sort: seven orders; «Titolo» sets the query sort', (tester) async {
+    _phone(tester);
+    final h = await Harness.create(tester, tracks: 2);
+    await h.pump(tester, const FavoritesScreen());
+    await _settle(tester);
+    expect(await _open(tester, find.byTooltip('Ordina per')), _favoritesSort);
+    await _choose(tester, 'Titolo');
+    final c = ProviderScope.containerOf(tester.element(find.byType(FavoritesScreen)));
+    expect(c.read(trackQueryProvider(true)).sort, SortOption.title);
+    await h.dispose(tester);
+  });
+
+  testWidgets('desktop right click on a row (showTrackContextMenu): same actions as the sheet; first one is driven', (tester) async {
+    _phone(tester);
+    final h = await Harness.create(tester, tracks: 2);
+    final rows = await _tracks(tester, h);
+    await h.pump(tester, _SelPage(rows));
+    await _settle(tester);
+    final labels = await _openContext(tester, find.text('Song 0'));
+    expect(labels, _contextMenu);
+    await _choose(tester, 'Aggiungi in coda');
+    expect(h.handler.queueIds, [rows[0].id]);
+    await h.dispose(tester);
+  });
+
+  testWidgets('selection bar ⋮: the bulk actions of the picked rows; «Aggiungi in coda» queues them', (tester) async {
+    _phone(tester);
+    final h = await Harness.create(tester, tracks: 4);
+    final rows = await _tracks(tester, h);
+    await h.pump(tester, _SelPage(rows));
+    await _settle(tester);
+    await tester.longPress(find.text('Song 0'));
+    await _settle(tester);
+    await tester.tap(find.text('Song 2'));
+    await _settle(tester);
+    expect(find.text('2 selezionati'), findsOneWidget);
+    expect(await _open(tester, find.byTooltip('Azioni')), _selectionMenu);
+    await _choose(tester, 'Aggiungi in coda');
+    expect(h.handler.queueIds, [rows[0].id, rows[2].id]);
+    await h.dispose(tester);
+  });
+
+  testWidgets('queue sheet: one entry, «Suggeriti di recente», opens the suggestions page', (tester) async {
+    _phone(tester);
+    final h = await Harness.create(tester, tracks: 3);
+    final rows = await _tracks(tester, h);
+    await tester.runAsync(() => h.handler.playQueue([for (final t in rows) t.id], 0));
+    final sc = ScrollController();
+    addTearDown(sc.dispose);
+    await h.pump(tester, Scaffold(body: QueueSheet(scrollController: sc)));
+    await _settle(tester);
+    expect(await _open(tester, find.byWidgetPredicate((w) => w is PopupMenuButton)), _queueMenu);
+    await _choose(tester, 'Suggeriti di recente');
+    expect(find.byType(SuggestionsScreen), findsOneWidget);
+    await h.dispose(tester);
+  });
+
+  for (final host in [true, false]) {
+    testWidgets('jam queue row ⋮ as ${host ? 'host' : 'guest'}: ${host ? 'jump, artist' : 'artist only'}; host «Salta qui» sends jump', (tester) async {
+      tester.view.physicalSize = const Size(500, 1000);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final h = await Harness.create(tester);
+      final fake = _FakeJam(_jam(host: host));
+      await h.pump(
+        tester,
+        const JamScreen(),
+        extraOverrides: [
+          jamProvider.overrideWith(() => fake),
+          jamTrackCoverProvider.overrideWith((ref, id) async => null),
+        ],
+      );
+      expect(
+        await _open(tester, find.byTooltip('Altre azioni').last),
+        host ? _jamHostRow : _jamGuestRow,
+      );
+      if (host) {
+        await _choose(tester, 'Salta qui');
+        expect(fake.sent.single.type, JamCommandType.jump);
+        expect(fake.sent.single.itemId, 2);
+      }
+      await h.dispose(tester);
+    });
+  }
 }
