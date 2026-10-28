@@ -57,7 +57,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get searchHint => 'Rechercher';
 
   @override
-  String get closeSearch => 'Fermer la recherche';
+  String get clearSearch => 'Effacer';
 
   @override
   String get sortBy => 'Trier par';

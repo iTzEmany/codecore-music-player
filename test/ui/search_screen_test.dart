@@ -448,12 +448,12 @@ void main() {
     await tester.enterText(find.byType(TextField), 'Song');
     await tester.pump(const Duration(milliseconds: 400));
     await _settle(tester);
-    expect(find.byTooltip('Annulla'), findsOneWidget);
-    await tester.tap(find.byTooltip('Annulla'));
+    expect(find.byTooltip('Cancella'), findsOneWidget);
+    await tester.tap(find.byTooltip('Cancella'));
     await _settle(tester);
     expect(tester.widget<TextField>(find.byType(TextField)).controller!.text,
         isEmpty);
-    expect(find.byTooltip('Annulla'), findsNothing);
+    expect(find.byTooltip('Cancella'), findsNothing);
     expect(find.byType(SearchScreen), findsOneWidget);
     await h.dispose(tester);
   });

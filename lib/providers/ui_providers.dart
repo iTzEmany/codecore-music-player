@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart' show SystemChannels;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -42,7 +43,7 @@ final searchSubmitProvider = NotifierProvider<SearchSubmitNotifier, int>(
   SearchSubmitNotifier.new,
 );
 
-/// True while the phone's dock is the Search field.
+/// True while the phone's dock carries the Search field (on the Search tab).
 class SearchBarNotifier extends Notifier<bool> {
   @override
   bool build() {
@@ -53,30 +54,30 @@ class SearchBarNotifier extends Notifier<bool> {
     return false;
   }
 
-  // The tab ✕ goes back to; never Search itself.
-  int _previous = NavTab.home.index;
-
-  /// Turns the dock into the field, on the Search tab.
+  /// Shows the field above the dock, on the Search tab.
   void open() {
-    final nav = ref.read(navIndexProvider.notifier);
-    final current = ref.read(navIndexProvider);
-    if (current != NavTab.search.index) _previous = current;
-    nav.set(NavTab.search.index);
+    ref.read(navIndexProvider.notifier).set(NavTab.search.index);
+    // Already shown with the keyboard hidden by hand: Cerca brings it back
+    // (Android Back hides the keyboard but leaves the focus, so ask for it).
+    if (state) {
+      final focus = ref.read(searchFocusProvider);
+      focus.hasFocus
+          ? SystemChannels.textInput.invokeMethod<void>('TextInput.show')
+          : focus.requestFocus();
+    }
     state = true;
   }
 
-  /// Back: the tabs return, Search stays with its text.
+  /// A page opened from Search: the field goes, the text stays.
   void close() {
     ref.read(searchFocusProvider).unfocus();
     state = false;
   }
 
-  /// ✕: forgets the text and goes back to the previous tab.
+  /// ✕: forgets the text and hides the keyboard; the field and the tab stay.
   void dismiss() {
     ref.read(searchControllerProvider).clear();
     ref.read(searchFocusProvider).unfocus();
-    state = false;
-    ref.read(navIndexProvider.notifier).set(_previous);
   }
 }
 
