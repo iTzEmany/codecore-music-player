@@ -1,7 +1,7 @@
-# Handoff — 2026-10-28 (kickoff «Jam: cassa e coda insieme»; fasi 57–64 fuse)
+# Handoff — 2026-10-28 (fase 65 «Rilievi della Jam», PR #59)
 
 ## Prima di tutto (per la prossima chat)
-Kickoff della feature «Jam: cassa e coda insieme» fatto il 28/10 (`docs/feature-jam-cassa.md`, R-88…R-119, D-177…D-220). Fasi 65–68 in `docs/PROGRESS.md`. Si parte con `/obiettivo fase 65`.
+Kickoff della feature «Jam: cassa e coda insieme» fatto il 28/10 (`docs/feature-jam-cassa.md`, R-88…R-119, D-177…D-220). Fasi 65–68 in `docs/PROGRESS.md`. La 65 è nella PR #59 (rilievi chiusi tranne R-91, vedi sotto); si prosegue con `/obiettivo fase 66`. Prima rispondi alla scelta su R-91.
 
 ## Stato
 - **57** (#45, #46): URL da NewPipeExtractor su Android (D-164, D-173 desugaring per API < 33), vietati ai minori → traccia di YouTube Music, `UrlSession`, brano dopo dall'URL anticipato, gapless e crossfade da URL verso file; crossfade senza esaurire l'Equalizer sul Mi A3.
@@ -43,11 +43,11 @@ Nuovi, rimandati: la posizione mostrata salta indietro di ~1,3 s a ogni avvio di
 
 ## Prompt di avvio della prossima sessione
 ```
-/obiettivo fase 65
+/obiettivo fase 66
 ```
 
 ## Prossimi obiettivi
-1. **(Consigliato) Fasi 65–68, feature «Jam: cassa e coda insieme»** (`docs/feature-jam-cassa.md`): rilievi della Jam, «Coda insieme», Jam della cassa, scoperta e chiusura. Prova finale (68.3) con i due telefoni sull'hotspot e le cuffie JBL segnate come cassa.
+1. **(Consigliato) Fasi 66–68, feature «Jam: cassa e coda insieme»** (`docs/feature-jam-cassa.md`): «Coda insieme», Jam della cassa, scoperta e chiusura. Prova finale (68.3) con i due telefoni sull'hotspot e le cuffie JBL segnate come cassa.
 2. **Prove d'ascolto 57.7** e APK di release con NewPipe (vedi «Tocca a te»).
 3. **Ricerca «notte» build p99** (D-176): l'ultimo scenario fuori soglia; misurare con `--only "Ricerca «notte»"` prima e dopo.
 4. **Scoperta dei dispositivi su reti non /24** (ora nella fase 68.1, D-206) (visto su UniBA, /16, il 28/10: i telefoni non si vedono e la Jam non parte; sull'hotspot sì). `LanDiscovery._targets` in `lib/services/share/discovery.dart` manda il broadcast diretto a `a.b.c.255` supponendo una /24. Dart non dà la maschera: leggerla dal lato nativo (Android `LinkProperties`, Linux/Windows dal sistema) o provare anche `a.b.255.255`. Reti che filtrano ogni broadcast restano escluse: lì serve il collegamento manuale per la Jam.
