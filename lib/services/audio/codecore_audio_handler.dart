@@ -504,6 +504,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
       }
       if (start != null && start > Duration.zero) {
         await _backend.seek(start);
+        _position = start; // a paused backend emits no position
       }
       _consecutiveErrors = 0;
       // A backend that was playing keeps playing a newly loaded file.

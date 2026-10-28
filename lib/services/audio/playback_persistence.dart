@@ -31,6 +31,7 @@ class PlaybackPersistence {
   Timer? _timer;
   double _volume = 1.0;
   Duration _position = Duration.zero;
+  bool _held = false;
 
   /// Restores the saved queue paused at the saved position.
   Future<void> restore() async {
@@ -65,7 +66,22 @@ class PlaybackPersistence {
     });
   }
 
+  /// Saves now, then keeps the disk as it is until [release]: a Jam guest's
+  /// queue from before the Jam is what a restart in the middle of it finds.
+  Future<void> hold(Duration position) async {
+    _position = position;
+    await flush();
+    _held = true;
+  }
+
+  /// The disk follows again, from [position] (where the restored track waits).
+  void release(Duration position) {
+    _position = position;
+    _held = false;
+  }
+
   Future<void> flush() async {
+    if (_held) return;
     try {
       final q = savedQueue(
           _handler.queueIds, _handler.currentIndex < 0 ? 0 : _handler.currentIndex);
