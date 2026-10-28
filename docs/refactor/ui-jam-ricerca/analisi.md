@@ -149,3 +149,78 @@ Nessuna direzione estetica nuova: si applica quella di `ui-fluida` (D-21, token 
 - Ricerca: `flutter test test/ui/app_shell_test.dart test/ui/search_screen_test.dart test/ui/search_sources_test.dart test/ui/shell_keys_test.dart test/ui/transitions_characterization_test.dart`;
 - menu: `flutter test test/ui/menus_characterization_test.dart test/ui/track_actions_test.dart test/ui/selection_bar_test.dart test/ui/settings_and_playlists_test.dart test/ui/tag_write_options_test.dart test/ui/architecture_test.dart test/ui/lists_sheets_characterization_test.dart`;
 - Home e testo: `flutter test test/ui/cover_fan_test.dart test/ui/home_test.dart test/ui/home_screen_test.dart test/ui/lyrics_screen_test.dart test/ui/now_playing_test.dart`.
+
+## Risultati
+
+Fasi 58–63 (PR #47–#52), tutte fuse su `master`; fase 64 = chiusura. Stato: fatto / in parte / non fatto / tuo.
+
+| Rilievo | Stato | Commit | Nota |
+|---|---|---|---|
+| F-01 | in parte | d7a528a (#52, fase 63) | la Jam è il player (D-159); senza chip qualità/velocità/shuffle né cuore, senza volume locale su desktop |
+| F-02 | fatto | d7a528a (#52, fase 63) | anello con progresso reale e seek (su `RingProgress` iniettato da 59.2) |
+| F-03 | fatto | d9dc1d3 (#48, fase 59) | vuoto di 40° tenuto, come deciso |
+| F-04 | fatto | d9dc1d3 (#48, fase 59) | posizione, durata e `onSeek` parametri |
+| F-05 | fatto | d7a528a (#52, fase 63) | `onSeek` = `JamCommand.seek` |
+| F-06 | fatto | d9dc1d3 (#48, fase 59) | una sola fonte di posizione |
+| F-07 | fatto | d9dc1d3 (#48, fase 59) | barra di nuovo fra i due tempi |
+| F-08, F-09 | fatto | d9dc1d3 (#48, fase 59) | `SeekBar` condivisa e un solo stato di drag |
+| F-10 | fatto | d7a528a (#52, fase 63) | token al posto dei letterali |
+| F-11 | fatto | d7a528a (#52, fase 63) | conferma «Termina Jam» (D-150) |
+| F-12 | fatto | d7a528a (#52, fase 63) | avatar + nomi, «+N», semantica |
+| F-13 | fatto | d7a528a (#52, fase 63) | ⋮ + ≡ nel foglio «Coda» (D-151) |
+| F-14, F-15 | fatto | d9dc1d3 (#48, fase 59) | un solo slider per TalkBack; tempi a 12 sp |
+| F-16 | fatto | d7a528a (#52, fase 63) | intestazione a testo 200 % |
+| F-17, F-18 | fatto | d9dc1d3 (#48, fase 59) | repaint isolato tenuto; tick solo se suona |
+| F-19 | fatto | 489cae5 (#47, fase 58) + 59–63 | caratterizzazione in 58, riscritture di proposito nelle fasi dei rilievi, golden rigenerati a fine fase |
+| F-20, F-26, F-28 | fatto | e359c28 (#49, fase 60) | ✕ «Cancella» svuota e resta, anche su desktop (D-155) |
+| F-21, F-22, F-25 | fatto | e359c28 (#49, fase 60) | dock a due strati; il push chiude ancora il campo (come deciso) |
+| F-23 | fatto | e359c28 (#49, fase 60) | nessun rebuild durante la tastiera (probe nel test) |
+| F-24 | fatto | e359c28 (#49, fase 60) | tastiera → campo → pagina (D-153) |
+| F-27 | fatto | 489cae5 (#47, fase 58) + e359c28 (#49, fase 60) | caratterizzazione in 58, riscrittura in 60 |
+| F-29, F-30 | fatto | e359c28 (#49, fase 60) | verificati sul Mi A3, nessuna correzione (già in d7e5eca) |
+| F-31, F-32, F-36 | fatto | ea5f9ad (#51, fase 62) | riga che scorre, 84 dp fissi, nomi, lista lazy (D-152) |
+| F-33 | fatto | ea5f9ad (#51, fase 62) | 20 album |
+| F-34 | fatto | ea5f9ad (#51, fase 62) | stato aperto aggiunto al mockup di `ui-fluida` |
+| F-35, F-38 | fatto | ea5f9ad (#51, fase 62) | etichette, Enter/Spazio; hover desktop solo apre |
+| F-37 | fatto | 489cae5 (#47, fase 58) + ea5f9ad (#51, fase 62) | caratterizzazione in 58, riscrittura in 62 |
+| F-39 | non mappato | — | il numero non è nell'analisi (salto di numerazione) |
+| F-40, F-47, F-48 | fatto | 7eb133f (#50, fase 61) | helper `showCcActionSheet`; glifo unico ⋮ (grep `more_horiz` vuoto) |
+| F-41, F-42, F-50 | fatto | 7eb133f (#50, fase 61) | clic destro a foglio (D-148), «N selezionati», «Rimuovi dalla playlist» in cima |
+| F-43, F-44, F-45 | fatto | 7eb133f (#50, fase 61) | timer, ordinamenti e «+» a foglio (D-148); il timer segna solo «A fine brano» |
+| F-46, F-52, F-53 | fatto | 7eb133f (#50, fase 61) | pulsante diretto nella coda; ⋮ fuori da semantica/focus; ≥ 48 dp |
+| F-49, F-51, F-54, F-55, F-57 | fatto | 7eb133f (#50, fase 61) | intestazione, `barrierLabel`, 560 dp, autofocus, distruttive in rosso nell'helper |
+| F-56 | fatto | 489cae5 (#47, fase 58) + 7eb133f (#50, fase 61) | caratterizzazione in 58, helper dei test sul BottomSheet in 61 |
+| F-58 | fatto | d9dc1d3 (#48, fase 59) | schede a tutta larghezza, corpo di 5 righe fisso (D-161) |
+
+Non fatto: nessun rilievo. Tuo: la verifica a mano di 63.5 e della parte Motorola di 64.3 (D-169).
+
+### Prima e dopo
+Mi A3, quota di frame > 16,7 ms (dettagli e build/raster in `misure.md`, sezioni «Prima» e «Dopo (fase 64)»):
+
+| Scenario | Prima | Dopo | Soglia | ok |
+|---|---|---|---|---|
+| Pallino schede | 0,9 % | 0,6 % | ≤ 2 % | sì (A/B: master 0,6 e 0,6 %; i 4,1-5,6 % erano rumore del telefono) |
+| Tutti i brani | 4,0 % | 0,9 % | ≤ 1 % | sì |
+| Album | 0,5 % | 0,1 % | ≤ 0,6 % | sì |
+| Ricerca «notte» | 2,8 %, build p99 34,5 | 9,0 % (2,2 % nella seconda run), build p99 21,3 | ≤ 3 %, build p99 ≤ 16 ms | no (build p99, D-176) |
+| Swipe mini player | 0,3 % | 0,4 % | ≤ 2 % | sì |
+| Fogli | 3,7 % | 2,7 % | ≤ 3 % | sì |
+| Apertura player | 2,4 %, build p99 35,1 | 2,0 %, build p99 22,0 | ≤ 3 %, p99 ≤ 33 ms | sì |
+| Anello | 0,3 % | 0,4 % | — | — |
+
+### Cambi di comportamento avvenuti
+- D-148: niente menu fluttuanti; timer, «+», ordinamenti e clic destro sono fogli.
+- D-150: «Termina Jam» chiede conferma (solo host).
+- D-151: righe della coda della Jam con ⋮ + ≡ (via ✕).
+- D-152: Home «aggiunti da poco» con 20 album; aperta = riga che scorre con nomi.
+- D-153: Back con la tastiera la chiude soltanto; a tastiera chiusa come le altre schede.
+- D-155: ✕ della Ricerca svuota e resta; barra sopra il dock, tastiera aperta = solo la barra.
+- D-159: la Jam è la schermata del player; cambia solo l'intestazione.
+- D-160: precedente, successivo e «Salta qui» per tutti; precedente > 3 s torna all'inizio, ≤ 3 s al brano prima.
+- D-161: scheda del testo a tutta larghezza e ad altezza fissa di 5 righe.
+
+### Soglie non raggiunte e scarti accettati
+- D-176: Ricerca «notte» build p99 26,1 ms sul Mi A3 (Prima 34,5, soglia 16): −24 % ma fuori soglia; il residuo (`smartSearch` e righe nel thread UI) si rimisura in 64.1. Quota > 16,7 ms 2,9 % in soglia; Album 0,9 % è rumore fra i run.
+- Jam, scarti accettati: nessun chip qualità/velocità/shuffle né cuore; nessun volume locale su desktop; «precedente» entro 3 s riprende una Jam in pausa.
+- 63.5 (due telefoni) e la parte Motorola di 64.3 restano all'utente (D-169: prove su Mi A3 e Linux).
+- Fase 61: il timer di spegnimento segna solo «A fine brano».

@@ -1095,8 +1095,12 @@ mobile_scanner — fase 24 — 2026-10-19
 - [x] 63.6 Controlli di fase
 
 ## Fase 64 — Chiusura ui-jam-ricerca (`fase-64-chiusura-jam-ricerca.md`)
-- [ ] 64.1 Misure finali sul Mi A3
-- [ ] 64.2 Metriche di arrivo
-- [ ] 64.3 Prova a mano
-- [ ] 64.4 «Risultati» in `analisi.md`
-- [ ] 64.5 Pulizia del disco
+- [x] 64.1 Misure finali sul Mi A3 (Pallino in soglia con la prova A/B; Ricerca build p99 21,3 ms: D-176)
+- [x] 64.2 Metriche di arrivo
+- [ ] 64.3 Prova a mano (Linux e Mi A3 fatte; Jam e Motorola: «Tocca a te»)
+  - Mi A3 (debug da master d7a528a): Ricerca ok (✕ svuota, tastiera e back, dock sopra la tastiera); ⋮ in sheet ok ovunque (Libreria, Album, Playlist, riga brano, player, coda) e back li chiude; testo del player stabile; Home «aggiunti da poco» ok (apre, nomi, scorre oltre 4 album, tocco fuori chiude).
+  - Jam: non raggiungibile (si avvia solo dal tasto «Jam» accanto a un altro dispositivo, vietato in prova). Parte Motorola: lasciata all'utente.
+  - Bug 1: back con il ventaglio «aggiunti da poco» aperto esce dall'app invece di chiudere il ventaglio. Corretto in a73da96.
+  - Minori: ✕ della ricerca svuota ma chiude anche la tastiera e toglie il focus (è D-155, resta così); il tocco fuori dal ventaglio chiude e inoltra anche il tocco alla riga sotto (apre un album): comportamento standard di `TapRegion`, resta così.
+- [x] 64.4 «Risultati» in `analisi.md`
+- [x] 64.5 Pulizia del disco
