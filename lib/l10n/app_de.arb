@@ -608,6 +608,7 @@
   "queueRebuilt": "Warteschlange aus der laufenden Liste neu erstellt",
   "jamOutputsAndSync": "Ausgänge und Sync",
   "jamHostTag": "Host",
+  "jamSeekInvalid": "Ungültige Position für diesen Titel",
   "jamWaitingEmpty": "Keine Jam aktiv",
   "activityTitle": "Aktivität",
   "activityScan": "Scan: {done} von {total}",

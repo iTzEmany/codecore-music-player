@@ -776,6 +776,7 @@
   "queueRebuilt": "Fila recriada a partir da lista em reprodução",
   "jamOutputsAndSync": "Saídas e sincronização",
   "jamHostTag": "anfitrião",
+  "jamSeekInvalid": "Posição inválida para esta faixa",
   "jamWaitingEmpty": "Nenhuma Jam em curso",
   "activityTitle": "Atividade",
   "activityScan": "Análise: {done} de {total}",

@@ -1433,6 +1433,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get jamHostTag => 'anfitrião';
 
   @override
+  String get jamSeekInvalid => 'Posição inválida para esta faixa';
+
+  @override
   String get jamWaitingEmpty => 'Nenhuma Jam em curso';
 
   @override

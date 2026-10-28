@@ -22,8 +22,9 @@ import 'queue_sheet.dart';
 import '../../widgets/track_art.dart';
 import '../../widgets/show_msg.dart';
 
-class _Card extends StatelessWidget {
-  const _Card({required this.title, required this.child, this.onTap});
+/// The titled rounded card of the player (the Jam reuses it for its text cards).
+class NpCard extends StatelessWidget {
+  const NpCard({super.key, required this.title, required this.child, this.onTap});
 
   final String title;
   final Widget child;
@@ -99,7 +100,7 @@ class LyricsCard extends ConsumerWidget {
         ],
       );
     }
-    return _Card(
+    return NpCard(
       title: l.lyrics,
       onTap: () => _openLyrics(context),
       // Fixed 5-line body: the cards below never jump (F-58, D-161).
@@ -216,7 +217,7 @@ class _InfoCardState extends ConsumerState<InfoCard> {
       child: CircularProgressIndicator(strokeWidth: 2),
     );
     if (raw == null && artistInfo == null && !searched) {
-      return _Card(
+      return NpCard(
         title: l.fieldCuriosity,
         child: Align(
           alignment: Alignment.centerLeft,
@@ -231,7 +232,7 @@ class _InfoCardState extends ConsumerState<InfoCard> {
     }
     final muted = Theme.of(context).textTheme.bodyMedium?.copyWith(color: cc.textMuted);
     final idx = raw?.lastIndexOf('\n') ?? -1;
-    return _Card(
+    return NpCard(
       title: l.fieldCuriosity,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -471,7 +472,7 @@ class UpNextCard extends ConsumerWidget {
     ref.watch(currentTrackProvider.select((t) => t.value?.id));
     final at = ref.read(audioHandlerProvider).currentIndex;
     final next = at < 0 ? const <Track>[] : queue.skip(at + 1).take(3).toList();
-    return _Card(
+    return NpCard(
       title: l.upNext,
       onTap: () => showQueueSheet(context),
       child: Column(

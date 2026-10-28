@@ -8,7 +8,6 @@ import '../../../providers/library_providers.dart' show artistsProvider;
 import '../../../providers/share_hub.dart';
 import '../../../services/jam/jam_models.dart';
 import '../../../services/online/artist_link_resolver.dart';
-import '../../theme/app_theme.dart' show ccIconDensity;
 import '../../theme/tokens.dart';
 import '../../widgets/artist_avatar.dart';
 import '../../widgets/cover_image.dart';
@@ -70,62 +69,6 @@ class JamCover extends ConsumerWidget {
   }
 }
 
-/// Overlapping initials, then the host's name with the «host» tag.
-class JamParticipants extends StatelessWidget {
-  const JamParticipants({super.key, required this.jam});
-
-  final JamState jam;
-
-  static const _size = 32.0, _step = 22.0;
-
-  @override
-  Widget build(BuildContext context) {
-    final cc = context.cc;
-    final ps = jam.participants;
-    final host = ps.where((p) => p.id == jam.hostDeviceId).firstOrNull;
-    final n = ps.length;
-    return Row(
-      children: [
-        SizedBox(
-          width: n == 0 ? 0 : _size + _step * (n - 1),
-          height: _size + 4,
-          child: Stack(
-            children: [
-              for (var i = 0; i < n; i++)
-                Positioned(
-                  left: i * _step,
-                  top: 0,
-                  child: Tooltip(
-                    message: ps[i].name,
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: cc.bg, width: 2),
-                      ),
-                      child: JamAvatar(name: ps[i].name, size: _size),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ),
-        if (host != null) ...[
-          const SizedBox(width: 12),
-          Flexible(
-            child: Text(
-              '${host.name}, ${context.l10n.jamHostTag}',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.bodySmall
-                  ?.copyWith(color: cc.textMuted),
-            ),
-          ),
-        ],
-      ],
-    );
-  }
-}
-
 /// A row of the shared queue, laid out like a row of the play queue.
 class JamQueueRow extends ConsumerWidget {
   const JamQueueRow({
@@ -133,22 +76,23 @@ class JamQueueRow extends ConsumerWidget {
     required this.item,
     required this.who,
     required this.isCurrent,
-    required this.canRemove,
     required this.index,
     required this.onTap,
-    this.onJump,
-    required this.onRemove,
+    required this.onJump,
+    this.onRemove,
   });
 
   final JamItem item;
   final String who;
-  final bool isCurrent, canRemove;
+  final bool isCurrent;
   final int index;
   final VoidCallback onTap;
 
-  /// Host only: «Salta qui» in the ⋮ menu.
-  final VoidCallback? onJump;
-  final VoidCallback onRemove;
+  /// «Salta qui» in the ⋮ sheet.
+  final VoidCallback onJump;
+
+  /// «Rimuovi» in the ⋮ sheet; null where the removal is not allowed.
+  final VoidCallback? onRemove;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -208,35 +152,36 @@ class JamQueueRow extends ConsumerWidget {
                 ],
               ),
             ),
-            // The ✕ only appears where the removal is allowed.
-            if (canRemove)
-              IconButton(
-                tooltip: l.delete,
-                visualDensity: ccIconDensity,
-                icon: Icon(Icons.close, color: cc.textMuted),
-                onPressed: onRemove,
-              ),
-            if (onJump != null || artists.isNotEmpty)
-              IconButton(
-                tooltip: l.moreActions,
-                icon: Icon(Icons.more_vert_rounded, color: cc.textMuted),
-                onPressed: () => showCcActionSheet<String>(
-                  context: context,
-                  title: item.title,
-                  groups: [
-                    [
-                      if (onJump != null)
-                        CcAction(icon: Icons.near_me_outlined, label: l.jamJumpHere, onTap: onJump),
-                      if (artists.isNotEmpty)
-                        CcAction(
-                          icon: Icons.person_outline_rounded,
-                          label: l.goToArtist,
-                          onTap: () => goToArtists(context, ref, artists),
-                        ),
-                    ],
+            IconButton(
+              tooltip: l.moreActions,
+              icon: Icon(Icons.more_vert_rounded, color: cc.textMuted),
+              onPressed: () => showCcActionSheet<String>(
+                context: context,
+                title: item.title,
+                groups: [
+                  [
+                    CcAction(
+                      icon: Icons.near_me_outlined,
+                      label: l.jamJumpHere,
+                      onTap: onJump,
+                    ),
+                    if (artists.isNotEmpty)
+                      CcAction(
+                        icon: Icons.person_outline_rounded,
+                        label: l.goToArtist,
+                        onTap: () => goToArtists(context, ref, artists),
+                      ),
+                    if (onRemove != null)
+                      CcAction(
+                        icon: Icons.delete_outline_rounded,
+                        label: l.removeFromList,
+                        destructive: true,
+                        onTap: onRemove,
+                      ),
                   ],
-                ),
+                ],
               ),
+            ),
             ReorderableDragStartListener(
               index: index,
               child: Padding(

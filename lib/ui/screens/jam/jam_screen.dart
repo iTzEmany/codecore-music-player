@@ -4,16 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/jam_providers.dart';
-import '../../../providers/share_hub.dart';
 import '../../../services/jam/jam_guest.dart';
-import '../../../services/jam/jam_models.dart';
-import '../../theme/app_theme.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/ring_progress.dart';
-import 'jam_parts.dart';
-import 'jam_track_info_screen.dart';
-import 'jam_player_card.dart';
+import 'jam_parts.dart' show JamAvatar;
+import 'jam_player.dart';
 import '../../widgets/show_msg.dart';
 import '../../widgets/cc_app_bar.dart';
 
@@ -75,62 +71,13 @@ class _JamScreenState extends ConsumerState<JamScreen> {
         ),
       );
     }
-    final ownId = ref.read(shareHubProvider.notifier).deviceId ?? '';
-    final isHost = s.isHost;
-    final theme = Theme.of(context).textTheme;
-
-    String owner(JamItem i) {
-      if (i.ownerDeviceId == ownId) return l.jamYou;
-      final n = jam.nameOf(i.ownerDeviceId);
-      return n.isEmpty ? s.peerName : n;
-    }
-
     return Scaffold(
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 720),
-            child: Stack(
-              children: [
-                CustomScrollView(
-                  slivers: [
-                    SliverToBoxAdapter(
-                      child: _JamHeader(isHost: isHost, onEnd: ctrl.end),
-                    ),
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(
-                          CcDims.margin,
-                          0,
-                          CcDims.margin,
-                          CcDims.gap12,
-                        ),
-                        child: JamParticipants(jam: jam),
-                      ),
-                    ),
-                    SliverToBoxAdapter(child: JamPlayerCard(state: s)),
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(
-                          CcDims.margin,
-                          CcDims.gap16,
-                          CcDims.margin,
-                          CcDims.gap4,
-                        ),
-                        child: Text(l.jamQueue, style: theme.titleMedium),
-                      ),
-                    ),
-                    _JamQueue(
-                      jam: jam,
-                      isHost: isHost,
-                      ownId: ownId,
-                      owner: owner,
-                      send: ctrl.send,
-                    ),
-                  ],
-                ),
-              ],
-            ),
+            // Wide enough for the player's two columns (cover | cards).
+            constraints: const BoxConstraints(maxWidth: 1012),
+            child: JamPlayerView(state: s),
           ),
         ),
       ),
@@ -163,107 +110,6 @@ class _Requesting extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _JamHeader extends StatelessWidget {
-  const _JamHeader({required this.isHost, required this.onEnd});
-
-  final bool isHost;
-  final VoidCallback onEnd;
-
-  @override
-  Widget build(BuildContext context) {
-    final l = context.l10n;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        CcDims.gap4,
-        CcDims.gap8,
-        CcDims.margin,
-        CcDims.gap4,
-      ),
-      child: Row(
-        children: [
-          IconButton(
-            tooltip: l.back,
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () => Navigator.of(context).maybePop(),
-          ),
-          Text(l.jamTitle, style: Theme.of(context).textTheme.titleLarge),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Align(
-              alignment: Alignment.centerRight,
-              // Collection-style pill, as the header actions.
-              child: OutlinedButton(
-                onPressed: onEnd,
-                style: isHost
-                    ? OutlinedButton.styleFrom(foregroundColor: context.cc.error)
-                    : null,
-                child: Text(
-                  isHost ? l.jamEnd : l.jamLeave,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _JamQueue extends StatelessWidget {
-  const _JamQueue({
-    required this.jam,
-    required this.isHost,
-    required this.ownId,
-    required this.owner,
-    required this.send,
-  });
-
-  final JamState jam;
-  final bool isHost;
-  final String ownId;
-  final String Function(JamItem) owner;
-  final void Function(JamCommand) send;
-
-  @override
-  Widget build(BuildContext context) {
-    if (jam.items.isEmpty) {
-      return SliverFillRemaining(
-        hasScrollBody: false,
-        child: EmptyState(
-          icon: Icons.queue_music_rounded,
-          message: context.l10n.jamEmpty,
-        ),
-      );
-    }
-    return SliverPadding(
-      padding: const EdgeInsets.only(bottom: CcDims.margin),
-      sliver: SliverReorderableList(
-        proxyDecorator: (child, _, anim) => ccDragProxy(context, child, anim),
-        itemCount: jam.items.length,
-        onReorderItem: (from, to) => send(JamCommand.move(jam.items[from].id, to)),
-        itemBuilder: (_, i) {
-          final it = jam.items[i];
-          final isCurrent = i == jam.currentIndex;
-          return JamQueueRow(
-            key: ValueKey(it.id),
-            item: it,
-            who: owner(it),
-            isCurrent: isCurrent,
-            canRemove: isHost || (it.ownerDeviceId == ownId && !isCurrent),
-            index: i,
-            onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(
-                builder: (_) => JamTrackInfoScreen(itemId: it.id))),
-            onJump: isHost ? () => send(JamCommand.jump(it.id)) : null,
-            onRemove: () => send(JamCommand.remove(it.id)),
-          );
-        },
       ),
     );
   }

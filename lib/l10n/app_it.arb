@@ -847,6 +847,7 @@
   "queueRebuilt": "Coda ricreata dalla lista in ascolto",
   "jamOutputsAndSync": "Uscite e sincronia",
   "jamHostTag": "host",
+  "jamSeekInvalid": "Posizione non valida per questo brano",
   "jamWaitingEmpty": "Nessuna Jam in corso",
   "activityTitle": "Attività",
   "activityScan": "Scansione: {done} di {total}",

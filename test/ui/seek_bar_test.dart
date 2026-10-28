@@ -1,15 +1,11 @@
 // Phase 59.4 / 59.6: the ring and the bar share one drag state and one position;
 // a screen reader meets one slider.
 import 'package:codecore/l10n/app_localizations.dart';
-import 'package:codecore/ui/screens/jam/jam_seek_bar.dart';
 import 'package:codecore/ui/screens/now_playing/now_playing_controls.dart';
 import 'package:codecore/ui/screens/now_playing/now_playing_screen.dart';
-import 'package:codecore/ui/theme/app_theme.dart';
-import 'package:codecore/ui/theme/tokens.dart';
 import 'package:codecore/ui/widgets/ring_progress.dart';
 import 'package:codecore/ui/widgets/seek_bar.dart';
 import 'package:codecore/ui/widgets/smooth_position.dart';
-import 'package:codecore/services/jam/jam_models.dart';
 import 'package:codecore/providers/player_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -165,37 +161,9 @@ void main() {
       handle.dispose();
       await h.dispose(tester);
     });
-
-    testWidgets('the Jam bar, with no seekable ring, stays the one slider',
-        (tester) async {
-      final handle = tester.ensureSemantics();
-      const jam = JamState(
-        hostDeviceId: 'h',
-        outputDeviceId: 'h',
-        currentIndex: 0,
-        items: [
-          JamItem(id: 1, ownerDeviceId: 'h', title: 'T', durationMs: 100000, ext: 'mp3'),
-        ],
-      );
-      await tester.pumpWidget(
-        ProviderScope(
-          child: MaterialApp(
-            theme: buildThemeFromColors(CcColors.notte, false),
-            home: Scaffold(body: JamSeekBar(jam: jam, onSeek: (_) {})),
-          ),
-        ),
-      );
-      expect(_sliders(tester), 1);
-      expect(
-        tester.widget<Text>(find.text('1:40')).style!.fontSize,
-        greaterThanOrEqualTo(12),
-      );
-      handle.dispose();
-      await tester.pumpWidget(const SizedBox());
-    });
   });
 
-  group('the bar after release and in the Jam', () {
+  group('the bar after release', () {
     testWidgets('on release the position holds the target until the player answers',
         (tester) async {
       final pos = SmoothPosition()
@@ -245,32 +213,6 @@ void main() {
       await tester.pump();
       expect(box.read(seekDragProvider), isNull);
       await g.cancel();
-    });
-
-    testWidgets('the Jam bar does not write the player drag state', (tester) async {
-      const jam = JamState(
-        hostDeviceId: 'h',
-        outputDeviceId: 'h',
-        currentIndex: 0,
-        items: [
-          JamItem(id: 1, ownerDeviceId: 'h', title: 'T', durationMs: 100000, ext: 'mp3'),
-        ],
-      );
-      await tester.pumpWidget(
-        ProviderScope(
-          child: MaterialApp(
-            home: Scaffold(body: JamSeekBar(jam: jam, onSeek: (_) {})),
-          ),
-        ),
-      );
-      final box = ProviderScope.containerOf(tester.element(find.byType(JamSeekBar)));
-      final g = await tester.startGesture(tester.getCenter(find.byType(Slider)));
-      await g.moveBy(const Offset(1, 0));
-      await tester.pump();
-      expect(find.text('0:00'), findsNothing, reason: 'its own times follow');
-      expect(box.read(seekDragProvider), isNull);
-      await g.up();
-      await tester.pumpWidget(const SizedBox());
     });
   });
 }

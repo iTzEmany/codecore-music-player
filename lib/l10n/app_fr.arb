@@ -776,6 +776,7 @@
   "queueRebuilt": "File d’attente recréée depuis la liste en lecture",
   "jamOutputsAndSync": "Sorties et synchro",
   "jamHostTag": "hôte",
+  "jamSeekInvalid": "Position non valide pour ce titre",
   "jamWaitingEmpty": "Aucune Jam en cours",
   "activityTitle": "Activité",
   "activityScan": "Analyse : {done} sur {total}",

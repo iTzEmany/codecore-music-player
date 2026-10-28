@@ -608,6 +608,7 @@
   "queueRebuilt": "Queue rebuilt from what is playing",
   "jamOutputsAndSync": "Outputs and sync",
   "jamHostTag": "host",
+  "jamSeekInvalid": "That position is not valid for this track",
   "jamWaitingEmpty": "No Jam in progress",
   "activityTitle": "Activity",
   "activityScan": "Scanning: {done} of {total}",

@@ -2476,6 +2476,12 @@ abstract class AppLocalizations {
   /// **'host'**
   String get jamHostTag;
 
+  /// No description provided for @jamSeekInvalid.
+  ///
+  /// In it, this message translates to:
+  /// **'Posizione non valida per questo brano'**
+  String get jamSeekInvalid;
+
   /// No description provided for @jamWaitingEmpty.
   ///
   /// In it, this message translates to:

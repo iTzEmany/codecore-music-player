@@ -608,6 +608,7 @@
   "queueRebuilt": "Cola recreada a partir de la lista en reproducción",
   "jamOutputsAndSync": "Salidas y sincronía",
   "jamHostTag": "anfitrión",
+  "jamSeekInvalid": "Posición no válida para esta pista",
   "jamWaitingEmpty": "No hay ninguna Jam en curso",
   "activityTitle": "Actividad",
   "activityScan": "Escaneo: {done} de {total}",

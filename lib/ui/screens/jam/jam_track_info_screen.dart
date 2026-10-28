@@ -74,19 +74,17 @@ class JamTrackInfoScreen extends ConsumerWidget {
                     goToArtists(context, ref, jamArtists(item, ref)),
               ),
             ),
-          if (s.isHost) ...[
-            const SizedBox(height: CcDims.gap16),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: FilledButton(
-                onPressed: () {
-                  ref.read(jamProvider.notifier).send(JamCommand.jump(item.id));
-                  Navigator.of(context).maybePop();
-                },
-                child: Text(l.jamJumpHere),
-              ),
+          const SizedBox(height: CcDims.gap16),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: FilledButton(
+              onPressed: () {
+                ref.read(jamProvider.notifier).send(JamCommand.jump(item.id));
+                Navigator.of(context).maybePop();
+              },
+              child: Text(l.jamJumpHere),
             ),
-          ],
+          ),
           if (trivia != null && trivia.isNotEmpty) ...[
             const SizedBox(height: CcDims.gap24),
             Text(l.fieldCuriosity, style: theme.titleMedium),

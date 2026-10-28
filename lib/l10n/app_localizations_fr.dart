@@ -1440,6 +1440,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get jamHostTag => 'hôte';
 
   @override
+  String get jamSeekInvalid => 'Position non valide pour ce titre';
+
+  @override
   String get jamWaitingEmpty => 'Aucune Jam en cours';
 
   @override

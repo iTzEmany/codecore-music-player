@@ -1430,6 +1430,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get jamHostTag => 'host';
 
   @override
+  String get jamSeekInvalid => 'Posizione non valida per questo brano';
+
+  @override
   String get jamWaitingEmpty => 'Nessuna Jam in corso';
 
   @override

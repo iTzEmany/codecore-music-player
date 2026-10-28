@@ -1,0 +1,109 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../l10n/l10n_ext.dart';
+import '../../../providers/jam_providers.dart';
+import '../../../providers/share_hub.dart';
+import '../../../services/jam/jam_models.dart';
+import '../../theme/app_theme.dart';
+import '../../theme/tokens.dart';
+import '../../widgets/cc_sheet.dart';
+import '../../widgets/empty_state.dart';
+import 'jam_parts.dart';
+import 'jam_track_info_screen.dart';
+
+/// The shared queue as a draggable modal sheet, opened by the «Coda» button
+/// (as the player's queue).
+Future<void> showJamQueueSheet(BuildContext context) => showCcSheet<void>(
+  context: context,
+  isScrollControlled: true,
+  useRootNavigator: true,
+  builder: (_) => DraggableScrollableSheet(
+    expand: false,
+    initialChildSize: 0.7,
+    maxChildSize: 0.95,
+    builder: (_, sc) => JamQueueSheet(scrollController: sc),
+  ),
+);
+
+/// Rows with ⋮ («Salta qui», «Rimuovi») and ≡ (drag to move).
+class JamQueueSheet extends ConsumerWidget {
+  const JamQueueSheet({super.key, required this.scrollController});
+
+  final ScrollController scrollController;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    final s = ref.watch(jamProvider);
+    final jam = s.jam;
+    final ctrl = ref.read(jamProvider.notifier);
+    final ownId = ref.read(shareHubProvider.notifier).deviceId ?? '';
+    String owner(JamItem i) {
+      if (i.ownerDeviceId == ownId) return l.jamYou;
+      final n = jam?.nameOf(i.ownerDeviceId) ?? '';
+      return n.isEmpty ? s.peerName : n;
+    }
+
+    final items = jam?.items ?? const <JamItem>[];
+    return CustomScrollView(
+      controller: scrollController,
+      slivers: [
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+              CcDims.margin,
+              CcDims.gap8,
+              CcDims.margin,
+              CcDims.gap4,
+            ),
+            child: Text(
+              l.jamQueue,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+          ),
+        ),
+        if (items.isEmpty)
+          SliverFillRemaining(
+            hasScrollBody: false,
+            child: EmptyState(
+              icon: Icons.queue_music_rounded,
+              message: l.jamEmpty,
+            ),
+          )
+        else
+          SliverPadding(
+            padding: const EdgeInsets.only(bottom: CcDims.margin),
+            sliver: SliverReorderableList(
+              proxyDecorator: (child, _, anim) =>
+                  ccDragProxy(context, child, anim),
+              itemCount: items.length,
+              onReorderItem: (from, to) =>
+                  ctrl.send(JamCommand.move(items[from].id, to)),
+              itemBuilder: (_, i) {
+                final it = items[i];
+                final isCurrent = i == jam!.currentIndex;
+                return JamQueueRow(
+                  key: ValueKey(it.id),
+                  item: it,
+                  who: owner(it),
+                  isCurrent: isCurrent,
+                  index: i,
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => JamTrackInfoScreen(itemId: it.id),
+                    ),
+                  ),
+                  onJump: () => ctrl.send(JamCommand.jump(it.id)),
+                  // Host: any item; guest: only their own, not the playing one.
+                  onRemove: s.isHost || (it.ownerDeviceId == ownId && !isCurrent)
+                      ? () => ctrl.send(JamCommand.remove(it.id))
+                      : null,
+                );
+              },
+            ),
+          ),
+      ],
+    );
+  }
+}
