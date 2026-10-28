@@ -1111,3 +1111,38 @@ mobile_scanner — fase 24 — 2026-10-19
   - Minori: ✕ della ricerca svuota ma chiude anche la tastiera e toglie il focus (è D-155, resta così); il tocco fuori dal ventaglio chiude e inoltra anche il tocco alla riga sotto (apre un album): comportamento standard di `TapRegion`, resta così.
 - [x] 64.4 «Risultati» in `analisi.md`
 - [x] 64.5 Pulizia del disco
+
+## Fase 65 — Rilievi della Jam (`fase-65-rilievi-jam.md`)
+- [ ] 65.1 Caratterizzazione della coda della Jam
+- [ ] 65.2 Swipe e ⋮ online dell'ospite
+- [ ] 65.3 Uscita dell'ospite con la coda ritrovata
+- [ ] 65.4 Copertine dei brani degli altri
+- [ ] 65.5 «Scarica» che segue lo stato del brano
+- [ ] 65.6 «Precedente» deciso dall'host
+- [ ] 65.7 Scarto fra i telefoni
+- [ ] 65.8 Controlli di fase
+
+## Fase 66 — Coda insieme (`fase-66-coda-insieme.md`)
+- [ ] 66.1 Modalità nello stato della Jam
+- [ ] 66.2 Ordine a turno
+- [ ] 66.3 Riga della modalità e niente trascinamento
+- [ ] 66.4 Parte di ognuno e feeder
+- [ ] 66.5 Suggeriti locali
+- [ ] 66.6 Ritorno, ingresso e uscita
+- [ ] 66.7 Controlli di fase
+
+## Fase 67 — Jam della cassa (`fase-67-jam-della-cassa.md`)
+- [ ] 67.1 Uscite Bluetooth dal lato nativo
+- [ ] 67.2 Permesso e «È una cassa?»
+- [ ] 67.3 Impostazioni «Jam sulla cassa»
+- [ ] 67.4 Jam aperta da sé e annunciata
+- [ ] 67.5 Banner e «Dispositivi»
+- [ ] 67.6 Cassa assente
+- [ ] 67.7 La cassa di un ospite salva la Jam ferma
+- [ ] 67.8 Controlli di fase
+
+## Fase 68 — Scoperta e chiusura (`fase-68-scoperta-e-chiusura-jam.md`)
+- [ ] 68.1 Maschera di rete vera
+- [ ] 68.2 Misure di fluidità
+- [ ] 68.3 Prova a mano con due telefoni (utente)
+- [ ] 68.4 Chiusura
