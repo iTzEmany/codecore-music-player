@@ -24,6 +24,13 @@ class _Side {
   bool ready = false; // holds the prepared next track
   Duration? duration;
 
+  /// Silences the side without tearing its native player down (see
+  /// [GaplessCapable.park]); a backend that cannot park is stopped.
+  Future<void> park() {
+    final b = backend;
+    return b is GaplessCapable ? (b as GaplessCapable).park() : b.stop();
+  }
+
   void apply() {
     backend.setVolume((volume * factor).clamp(0.0, 1.0).toDouble()).catchError(
         (Object e, StackTrace st) => AppLog.w('crossfade: volume failed', e, st));
@@ -177,7 +184,7 @@ class CrossfadeEngine implements AudioBackend, GaplessCapable {
     final other = _other;
     if (other != null && (other.ready || other.duration != null)) {
       other.ready = false;
-      await other.backend.stop();
+      await other.park();
     }
   }
 
@@ -249,7 +256,7 @@ class CrossfadeEngine implements AudioBackend, GaplessCapable {
     outgoing.ready = false;
     outgoing.factor = 1;
     outgoing.duration = null;
-    await outgoing.backend.stop();
+    await outgoing.park();
     final pending = _pending;
     _pending = null;
     if (pending != null) {
@@ -275,7 +282,7 @@ class CrossfadeEngine implements AudioBackend, GaplessCapable {
     dropped.ready = false;
     dropped.factor = 1;
     dropped.duration = null;
-    await dropped.backend.stop();
+    await dropped.park();
     _pending = null;
     if (keepNext && path != null) {
       await _prepareOther(path, volume, ++_prepToken);
@@ -312,7 +319,7 @@ class CrossfadeEngine implements AudioBackend, GaplessCapable {
       dropped.factor = 1;
       dropped.ready = false;
       dropped.duration = null;
-      await dropped.backend.stop();
+      await dropped.park();
     }
     await _releaseOther();
   }
@@ -335,6 +342,9 @@ class CrossfadeEngine implements AudioBackend, GaplessCapable {
     }
     await _main.backend.pause();
   }
+
+  @override
+  Future<void> park() => stop(); // nothing wraps the engine
 
   @override
   Future<void> stop() async {

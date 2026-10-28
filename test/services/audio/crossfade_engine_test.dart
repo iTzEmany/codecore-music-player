@@ -126,7 +126,7 @@ void main() {
     ticks.tick(10);
     await pump();
     expect(fakes[0].volumes.last, closeTo(0.0, 1e-9));
-    expect(fakes[0].stopCalls, 1);
+    expect(fakes[0].parkCalls, 1);
     expect(fakes[1].volumes.last, closeTo(0.5, 1e-9));
     expect(ticks.running, isFalse);
   });
@@ -166,7 +166,7 @@ void main() {
     expect(ticks.running, isTrue);
     ticks.tick(15);
     await pump();
-    expect(fakes[0].stopCalls, 1);
+    expect(fakes[0].parkCalls, 1);
     expect(fakes[1].volumes.last, closeTo(0.5, 1e-9));
   });
 
@@ -175,7 +175,7 @@ void main() {
     await at(94);
     ticks.tick(3);
     await engine.seek(const Duration(seconds: 50));
-    expect(fakes[1].stopCalls, 1);
+    expect(fakes[1].parkCalls, 1);
     expect(fakes[0].volumes.last, 1.0);
     expect(fakes[0].seeks.last, const Duration(seconds: 50));
     expect(ticks.running, isFalse);
@@ -193,10 +193,10 @@ void main() {
     await pump();
     expect(advances, 1);
     await engine.seek(const Duration(seconds: 20));
-    expect(fakes[0].stopCalls, 1, reason: 'the old track stops at once');
+    expect(fakes[0].parkCalls, 1, reason: 'the old track stops at once');
     expect(fakes[1].volumes.last, closeTo(0.5, 1e-9));
     expect(fakes[1].seeks.last, const Duration(seconds: 20));
-    expect(fakes[1].stopCalls, 0);
+    expect(fakes[1].parkCalls, 0);
   });
 
   test('loading another track during the fade stops the one that was fading', () async {
@@ -205,7 +205,7 @@ void main() {
     ticks.tick(4);
     await engine.load('/m/z.mp3');
     expect(ticks.running, isFalse);
-    expect(fakes[1].stopCalls, 1);
+    expect(fakes[1].parkCalls, 1);
     expect(fakes[0].loaded.last, '/m/z.mp3');
     expect(fakes[0].volumes.last, 1.0);
   });
@@ -253,7 +253,7 @@ void main() {
   test('moving from a fade to a plain join clears the other player', () async {
     await aThenB();
     await engine.setNext('/m/c.mp3', overlap: false);
-    expect(fakes[1].stopCalls, 1);
+    expect(fakes[1].parkCalls, 1);
     expect(fakes[0].nextPath, '/m/c.mp3');
     await at(95);
     expect(ticks.timers, isEmpty, reason: 'no fade towards a track given for a plain join');
@@ -334,6 +334,26 @@ void main() {
     expect(eqs[1].gainCalls.last, [0, 0, 0, 0, 0]);
   });
 
+  test('many track changes never stop the players nor create a third one', () async {
+    // stop() rebuilds the native player (and its Android audio effect) at the
+    // next load: at every change that exhausted the system's effects.
+    await engine.load('/m/a.mp3');
+    for (var i = 0; i < 6; i++) {
+      fakes[i % 2].durC.add(const Duration(seconds: 100));
+      await pump();
+      await engine.setNext('/m/n$i.mp3');
+      fakes[(i + 1) % 2].durC.add(const Duration(seconds: 80));
+      await pump();
+      await engine.play();
+      await at(94, player: i % 2);
+      ticks.tick(20);
+      await pump();
+    }
+    expect(fakes, hasLength(2));
+    expect(fakes.map((f) => f.stopCalls), everyElement(0));
+    expect(fakes[0].parkCalls + fakes[1].parkCalls, 6);
+  });
+
   test('without equalizers on the players, the engine has none', () async {
     expect(engine.equalizer, isNull);
   });
@@ -342,7 +362,7 @@ void main() {
     await aThenB();
     await engine.stop();
     expect(fakes[0].stopCalls, 1);
-    expect(fakes[1].stopCalls, 1);
+    expect(fakes[1].parkCalls, 1);
     await at(95);
     expect(ticks.timers, isEmpty);
   });

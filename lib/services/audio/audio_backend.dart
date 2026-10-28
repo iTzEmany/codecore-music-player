@@ -65,4 +65,10 @@ abstract class GaplessCapable {
 
   /// Fires when playback has moved on to the track given to [setNext].
   Stream<void> get advanced;
+
+  /// Silences the player and drops what follows, but keeps its native side
+  /// alive for the next load. Unlike `stop`, which on Android tears the native
+  /// player down and builds a new one (with a new audio effect) at the next
+  /// load: done at every track change it exhausts the system's audio effects.
+  Future<void> park();
 }

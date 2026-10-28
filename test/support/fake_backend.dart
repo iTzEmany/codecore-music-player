@@ -91,6 +91,13 @@ class FakeBackend implements AudioBackend, GaplessCapable {
   }
 
   @override
+  Future<void> park() async {
+    parkCalls++;
+    playing = false;
+    stateC.add(BackendState.paused);
+  }
+
+  @override
   Future<void> stop() async {
     stopCalls++;
     playing = false;
@@ -105,6 +112,7 @@ class FakeBackend implements AudioBackend, GaplessCapable {
   final volumes = <double>[];
   bool disposed = false;
   int stopCalls = 0;
+  int parkCalls = 0;
 
   @override
   Future<void> setVolume(double volume) async => volumes.add(volume);

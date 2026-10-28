@@ -181,6 +181,12 @@ class JustAudioBackend implements AudioBackend, GaplessCapable {
   Future<void> pause() => _player.pause();
 
   @override
+  Future<void> park() {
+    _resetWindow();
+    return _player.pause();
+  }
+
+  @override
   Future<void> stop() => _player.stop();
 
   @override
