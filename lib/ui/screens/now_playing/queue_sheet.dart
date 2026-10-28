@@ -277,7 +277,7 @@ class _QueueTitleRow extends StatelessWidget {
         CcDims.gap8,
         0,
       ),
-      child: Row(
+      child: LayoutBuilder(builder: (context, box) => Row(
         children: [
           Expanded(
             child: showTitle
@@ -289,7 +289,7 @@ class _QueueTitleRow extends StatelessWidget {
           // Intrinsic width; the cap only guards against overflow.
           ConstrainedBox(
             constraints: BoxConstraints(
-              maxWidth: MediaQuery.sizeOf(context).width * 0.5,
+              maxWidth: box.maxWidth * 0.5,
             ),
             child: TextButton(
               onPressed: () => openSuggestions(context),
@@ -301,7 +301,7 @@ class _QueueTitleRow extends StatelessWidget {
             ),
           ),
         ],
-      ),
+      )),
     );
   }
 }
