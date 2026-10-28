@@ -1343,7 +1343,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   Future<void> skipToPrevious() async {
     final remote = _remote;
     if (remote != null) {
-      await remote.seek(Duration.zero); // a Jam has no «previous»
+      await remote.previous();
       return;
     }
     if (_queue.currentId == null) return;

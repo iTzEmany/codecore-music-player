@@ -36,6 +36,8 @@ class FakeRemote implements RemoteTransport {
   @override
   Future<void> next() async => calls.add('next');
   @override
+  Future<void> previous() async => calls.add('previous');
+  @override
   Future<void> seek(Duration position) async =>
       calls.add('seek ${position.inSeconds}');
 }
@@ -103,7 +105,7 @@ void main() {
     expect(st.controls, [MediaControl.pause, MediaControl.skipToNext]);
   });
 
-  test('a guest gets no «next» button', () async {
+  test('a remote without «next» shows no button', () async {
     handler.attachRemote(
       FakeRemote(
         const RemoteStatus(title: 'x', playing: false, canSkip: false),
@@ -129,7 +131,7 @@ void main() {
       'play',
       'next',
       'seek 90',
-      'seek 0',
+      'previous',
       'pause',
     ]);
     expect(

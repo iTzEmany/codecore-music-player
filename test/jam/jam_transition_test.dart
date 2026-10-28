@@ -32,6 +32,8 @@ class _Remote implements RemoteTransport {
   @override
   Future<void> next() async => calls.add('next');
   @override
+  Future<void> previous() async => calls.add('previous');
+  @override
   Future<void> seek(Duration position) async => calls.add('seek');
 }
 

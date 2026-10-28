@@ -2,19 +2,17 @@ import 'dart:async';
 
 import '../audio/remote_transport.dart';
 import 'jam_models.dart';
+import 'jam_state.dart';
 
 /// The Jam seen as a [RemoteTransport]: its state becomes the notification, and
-/// the buttons become Jam commands (so the Jam's own rules apply: a guest
-/// cannot skip).
+/// the buttons become Jam commands (everyone can skip, D-160).
 class JamTransport implements RemoteTransport {
   JamTransport({
     required this.send,
-    required this.canSkip,
     required this.nowMs,
   });
 
   final Future<Object?> Function(JamCommand cmd) send;
-  final bool canSkip;
 
   /// The Jam's reference clock (the host's).
   final int Function() nowMs;
@@ -34,7 +32,7 @@ class JamTransport implements RemoteTransport {
   RemoteStatus get status {
     final s = _state;
     final item = s?.current;
-    if (s == null || item == null) return RemoteStatus(canSkip: canSkip);
+    if (s == null || item == null) return const RemoteStatus(canSkip: true);
     final duration = item.durationMs > 0 ? Duration(milliseconds: item.durationMs) : null;
     var ms = s.positionMs + (s.playing ? nowMs() - s.positionAt : 0);
     if (ms < 0) ms = 0;
@@ -46,7 +44,7 @@ class JamTransport implements RemoteTransport {
       duration: duration,
       position: Duration(milliseconds: ms),
       playing: s.playing,
-      canSkip: canSkip,
+      canSkip: true,
     );
   }
 
@@ -57,8 +55,12 @@ class JamTransport implements RemoteTransport {
   Future<void> pause() => send(const JamCommand.pause());
 
   @override
-  Future<void> next() async {
-    if (canSkip) await send(const JamCommand.next());
+  Future<void> next() => send(const JamCommand.next());
+
+  @override
+  Future<void> previous() {
+    final s = _state;
+    return send(s == null ? const JamCommand.seek(0) : jamPreviousCommand(s, nowMs()));
   }
 
   @override

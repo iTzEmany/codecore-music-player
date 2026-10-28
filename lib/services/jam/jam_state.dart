@@ -4,9 +4,8 @@ import 'jam_models.dart';
 ///
 /// [from] is the device id issuing the command; [nowMs] is the host clock.
 /// Rules (docs/fase-8-jam.md): the guest can add, move, play/pause, seek,
-/// volume and change the output device, but cannot change the current track
-/// (`next`, `jump`, removing the current item) and cannot end the session
-/// for the host's items; each participant removes their own items, the host
+/// volume, skip (`next`, `jump`, D-160) and change the output device, but
+/// cannot remove the current item nor end the session; each participant removes their own items, the host
 /// removes any. An added track goes right after the current one (after earlier
 /// adds, before the host's inherited seed); a full queue drops the last
 /// inherited track instead of refusing.
@@ -151,11 +150,9 @@ JamResult applyCommand(
       return commit(n.playing ? n.copyWith(positionAt: startAt(n)) : n);
 
     case JamCommandType.next:
-      if (!isHost) return const JamResult.fail(JamError.forbidden);
       return _advance(s, nowMs, commit);
 
     case JamCommandType.jump:
-      if (!isHost) return const JamResult.fail(JamError.forbidden);
       final idx = indexOf(cmd.itemId);
       if (idx < 0) return const JamResult.fail(JamError.notFound);
       return commit(s.copyWith(
@@ -183,4 +180,12 @@ JamResult _advance(JamState s, int nowMs, JamResult Function(JamState) commit) {
       currentIndex: n,
       positionMs: 0,
       positionAt: s.synced ? nowMs + jamStartLeadMs : nowMs));
+}
+
+/// «Previous» as in the player (D-160): past 3 s, or on the first item, back
+/// to the start; within 3 s, a jump to the item before the current one.
+JamCommand jamPreviousCommand(JamState s, int nowMs) {
+  final i = s.currentIndex;
+  if (i <= 0 || s.positionAtTime(nowMs) > 3000) return const JamCommand.seek(0);
+  return JamCommand.jump(s.items[i - 1].id);
 }

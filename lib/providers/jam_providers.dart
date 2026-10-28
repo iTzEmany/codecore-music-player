@@ -22,6 +22,7 @@ import '../services/jam/jam_host.dart';
 import '../services/jam/jam_models.dart';
 import '../services/jam/jam_online_adder.dart';
 import '../services/jam/jam_output.dart';
+import '../services/jam/jam_state.dart';
 import '../services/online/download_index.dart';
 import '../services/online/youtube_service.dart' show YtResult;
 import '../services/share/track_meta.dart';
@@ -353,7 +354,6 @@ class JamController extends Notifier<JamUiState> {
     _attachedTo = handler;
     final transport = _transport = JamTransport(
       send: send,
-      canSkip: role == JamRole.host,
       nowMs: () => _clock?.jamNowMs() ?? DateTime.now().millisecondsSinceEpoch,
     );
     handler.attachRemote(transport);
@@ -578,6 +578,13 @@ class JamController extends Notifier<JamUiState> {
     }
     final r = await _guest?.send(cmd);
     return r?.error;
+  }
+
+  /// «Previous» as in the player (D-160): restart, or the item before.
+  Future<JamError?> previous() {
+    final s = state.jam;
+    if (s == null) return Future.value(JamError.ended);
+    return send(jamPreviousCommand(s, _clock?.jamNowMs() ?? DateTime.now().millisecondsSinceEpoch));
   }
 
   /// Library ids to the shared queue; a shadow row (`stream:` path, no extension) goes as an online result.
