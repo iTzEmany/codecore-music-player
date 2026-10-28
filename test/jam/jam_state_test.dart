@@ -45,14 +45,34 @@ void main() {
     expect(s.version, 2);
   });
 
-  test('guest cannot next or jump; host can', () {
+  test('host next and jump move the index, start playing and bump version', () {
+    var s = ok(start(), JamCommand.add(item(host)), host);
+    s = ok(s, JamCommand.add(item(host)), host);
+    s = ok(s, JamCommand.add(item(host)), host);
+    final v = s.version;
+    s = ok(s, const JamCommand.jump(2), host);
+    expect(s.currentIndex, 1);
+    expect(s.playing, true);
+    expect(s.version, v + 1);
+    s = ok(s, const JamCommand.next(), host);
+    expect(s.currentIndex, 2);
+    expect(s.playing, true);
+    expect(s.version, v + 2);
+  });
+
+  // Phase 63 lets the guest next/jump: rewrite only this case.
+  test('guest next and jump are forbidden today', () {
     var s = ok(start(), JamCommand.add(item(host)), host);
     s = ok(s, JamCommand.add(item(host)), host);
     expect(err(s, const JamCommand.next(), guest), JamError.forbidden);
     expect(err(s, const JamCommand.jump(2), guest), JamError.forbidden);
-    s = ok(s, const JamCommand.jump(2), host);
-    expect(s.currentIndex, 1);
-    expect(s.playing, true);
+  });
+
+  test('next and jump messages keep their exact JSON', () {
+    expect(const JamCommand.next().toJson(), {'cmd': 'next'});
+    expect(const JamCommand.jump(7).toJson(), {'cmd': 'jump', 'itemId': 7});
+    expect(JamCommand.tryParse({'cmd': 'jump', 'itemId': 7})!.itemId, 7);
+    expect(JamCommand.tryParse({'cmd': 'next'})!.type, JamCommandType.next);
   });
 
   test('remove keeps current index coherent', () {
