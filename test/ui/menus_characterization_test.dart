@@ -41,6 +41,7 @@ import 'package:codecore/providers/sleep_timer_provider.dart';
 import 'package:codecore/services/jam/jam_models.dart';
 import 'package:codecore/ui/screens/jam/jam_screen.dart';
 import 'package:codecore/ui/screens/library/favorites_screen.dart';
+import 'package:codecore/ui/screens/library/library_toolbar.dart';
 import 'package:codecore/ui/screens/now_playing/now_playing_screen.dart';
 import 'package:codecore/ui/screens/now_playing/queue_sheet.dart';
 import 'package:codecore/ui/screens/now_playing/suggestions_screen.dart';
@@ -54,6 +55,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/app_harness.dart';
+import '../support/menu_support.dart';
 
 Future<void> _settle(WidgetTester tester) async {
   await tester.runAsync(
@@ -71,23 +73,11 @@ void _phone(WidgetTester tester) {
 
 // ---- How a menu is opened and read: the ONLY part phase 61 changes. ----
 
-/// Name of one entry: enum name, number as text, TrackAction label, or the
-/// text of the child for value-less entries.
-String _entry(PopupMenuItem i) {
-  final v = i.value;
-  if (v is Enum) return v.name;
-  if (v is TrackAction) return v.label;
-  if (v != null) return '$v';
-  return (i.child as Text).data!;
-}
-
-/// The entries shown now, in order.
-List<String> _shown(WidgetTester tester) => [
-  for (final i in tester.widgetList<PopupMenuItem>(
-    find.byWidgetPredicate((w) => w is PopupMenuItem),
-  ))
-    _entry(i),
-];
+/// The entries shown now, in order (PopupMenu or action sheet).
+List<String> _shown(WidgetTester tester) => shownMenuEntries(
+  tester,
+  named: (v) => v is TrackAction ? v.label : menuEntryName(v, null),
+);
 
 /// Opens the menu behind [button] and returns its entries, in order.
 Future<List<String>> _open(WidgetTester tester, Finder button) async {
@@ -427,7 +417,7 @@ void main() {
       expect(
         await _open(
           tester,
-          find.byWidgetPredicate((w) => w is PopupMenuButton),
+          menuButton(),
         ),
         ['ignore', 'remove'],
       );
@@ -562,7 +552,7 @@ void main() {
     );
     await _settle(tester);
     expect(
-      await _open(tester, find.byWidgetPredicate((w) => w is PopupMenuButton)),
+      await _open(tester, menuButton()),
       ['restore', 'delete'],
     );
     await h.dispose(tester);
@@ -595,9 +585,28 @@ void main() {
     await _choose(tester, 'A–Z');
     expect(
       find.descendant(
-        of: find.byWidgetPredicate((w) => w is PopupMenuButton),
+        of: find.byType(LibraryToolbar),
         matching: find.text('A–Z'),
       ),
+      findsOneWidget,
+    );
+    await h.dispose(tester);
+  });
+
+  testWidgets('library sort: the current order is marked in the sheet', (tester) async {
+    _phone(tester);
+    final h = await Harness.create(tester, tracks: 2);
+    await h.pump(tester, const Scaffold(body: LibraryScreen()));
+    await _settle(tester);
+    await tester.tap(find.text('Recenti'));
+    await _settle(tester);
+    final marked = find.descendant(
+      of: find.byType(BottomSheet),
+      matching: find.byWidgetPredicate((w) => w is ListTile && w.selected),
+    );
+    expect(marked, findsOneWidget);
+    expect(
+      find.descendant(of: marked, matching: find.text('Recenti')),
       findsOneWidget,
     );
     await h.dispose(tester);
@@ -645,7 +654,7 @@ void main() {
     await h.dispose(tester);
   });
 
-  testWidgets('queue sheet: one entry, «Suggeriti di recente», opens the suggestions page', (tester) async {
+  testWidgets('queue sheet: direct button «Suggeriti di recente» (no menu), opens the suggestions page', (tester) async {
     _phone(tester);
     final h = await Harness.create(tester, tracks: 3);
     final rows = await _tracks(tester, h);
@@ -654,8 +663,12 @@ void main() {
     addTearDown(sc.dispose);
     await h.pump(tester, Scaffold(body: QueueSheet(scrollController: sc)));
     await _settle(tester);
-    expect(await _open(tester, find.byWidgetPredicate((w) => w is PopupMenuButton)), _queueMenu);
-    await _choose(tester, 'Suggeriti di recente');
+    expect(find.byType(PopupMenuButton), findsNothing);
+    expect(
+      find.widgetWithText(TextButton, _queueMenu.single),
+      findsOneWidget,
+    );
+    await _choose(tester, _queueMenu.single);
     expect(find.byType(SuggestionsScreen), findsOneWidget);
     await h.dispose(tester);
   });

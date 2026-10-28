@@ -80,27 +80,16 @@ class SelectionBar extends ConsumerWidget implements PreferredSizeWidget {
                   icon: Icon(a.icon),
                   onPressed: picked.isEmpty ? null : a.run,
                 ),
-            PopupMenuButton<TrackAction>(
+            IconButton(
               tooltip: l.bulkActions,
-              enabled: picked.isNotEmpty,
               icon: const Icon(Icons.more_vert_rounded),
-              onSelected: (a) => a.run(),
-              itemBuilder: (_) => [
-                for (var g = 0; g < groups.length; g++) ...[
-                  if (g > 0) const PopupMenuDivider(),
-                  for (final a in groups[g].actions)
-                    PopupMenuItem<TrackAction>(
-                      value: a,
-                      child: Row(
-                        children: [
-                          Icon(a.icon, size: 20),
-                          const SizedBox(width: 12),
-                          Flexible(child: Text(a.label)),
-                        ],
-                      ),
+              onPressed: picked.isEmpty
+                  ? null
+                  : () => showTrackActionGroups(
+                      context,
+                      groups,
+                      title: l.selectedCount(selection.count),
                     ),
-                ],
-              ],
             ),
           ],
         );

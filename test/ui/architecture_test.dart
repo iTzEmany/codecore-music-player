@@ -18,4 +18,16 @@ void main() {
     ]..sort();
     expect(offenders, isEmpty);
   });
+
+  test('no lib/ui file uses PopupMenuButton or showMenu(: menus are sheets', () {
+    final menu = RegExp(r'PopupMenuButton|showMenu\(');
+    final offenders = [
+      for (final f in Directory('lib/ui').listSync(recursive: true))
+        if (f is File &&
+            f.path.endsWith('.dart') &&
+            menu.hasMatch(f.readAsStringSync()))
+          f.path.replaceAll(r'\', '/'),
+    ]..sort();
+    expect(offenders, isEmpty);
+  });
 }

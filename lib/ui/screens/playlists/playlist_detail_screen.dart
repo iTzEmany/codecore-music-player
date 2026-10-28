@@ -102,29 +102,50 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
     }
   }
 
-  List<PopupMenuEntry<_PlaylistAction>> _menuItems(bool hasCustomCover) {
+  List<List<CcAction<_PlaylistAction>>> _menuGroups(bool hasCustomCover) {
     final l = context.l10n;
     return [
-      PopupMenuItem(
-        value: _PlaylistAction.edit,
-        child: Text(_editing ? l.finishEditing : l.editOrder),
-      ),
-      PopupMenuItem(value: _PlaylistAction.add, child: Text(l.addSongs)),
-      PopupMenuItem(
-        value: _PlaylistAction.cover,
-        child: Text(l.playlistChangeCover),
-      ),
-      if (hasCustomCover)
-        PopupMenuItem(
-          value: _PlaylistAction.clearCover,
-          child: Text(l.playlistRemoveCover),
+      [
+        CcAction(
+          icon: Icons.swap_vert_rounded,
+          label: _editing ? l.finishEditing : l.editOrder,
+          value: _PlaylistAction.edit,
         ),
-      PopupMenuItem(
-        value: _PlaylistAction.export,
-        child: Text(l.exportPlaylist),
-      ),
-      PopupMenuItem(value: _PlaylistAction.rename, child: Text(l.rename)),
-      PopupMenuItem(value: _PlaylistAction.delete, child: Text(l.delete)),
+        CcAction(
+          icon: Icons.playlist_add_rounded,
+          label: l.addSongs,
+          value: _PlaylistAction.add,
+        ),
+        CcAction(
+          icon: Icons.image_outlined,
+          label: l.playlistChangeCover,
+          value: _PlaylistAction.cover,
+        ),
+        if (hasCustomCover)
+          CcAction(
+            icon: Icons.hide_image_outlined,
+            label: l.playlistRemoveCover,
+            value: _PlaylistAction.clearCover,
+          ),
+        CcAction(
+          icon: Icons.ios_share_rounded,
+          label: l.exportPlaylist,
+          value: _PlaylistAction.export,
+        ),
+        CcAction(
+          icon: Icons.edit_outlined,
+          label: l.rename,
+          value: _PlaylistAction.rename,
+        ),
+      ],
+      [
+        CcAction(
+          icon: Icons.delete_outline_rounded,
+          label: l.delete,
+          value: _PlaylistAction.delete,
+          destructive: true,
+        ),
+      ],
     ];
   }
 
@@ -204,7 +225,11 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
                   track: t,
                   compact: compact,
                   selection: selection,
-                  onMore: () => _rowMenu(context, ref, t, () => remove(t, i)),
+                  lead: TrackAction(
+                    Icons.playlist_remove_rounded,
+                    l.removeFromPlaylistAction,
+                    () => remove(t, i),
+                  ),
                   onTap: () => ctrl.playFromList(tracks, i, context: playCtx),
                 ),
               ),
@@ -233,11 +258,16 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
             ? null
             : () => ctrl.playAll(tracks, context: playCtx),
         shuffleIds: tracks.isEmpty ? null : [for (final t in tracks) t.id],
-        menu: PopupMenuButton<_PlaylistAction>(
+        menu: IconButton(
           tooltip: l.moreActions,
-          icon: const Icon(Icons.more_horiz_rounded),
-          onSelected: (v) => _onAction(v, id, key, tracks),
-          itemBuilder: (_) => _menuItems(custom != null),
+          icon: const Icon(Icons.more_vert_rounded),
+          onPressed: () async {
+            final v = await showCcActionSheet<_PlaylistAction>(
+              context: context,
+              groups: _menuGroups(custom != null),
+            );
+            if (v != null) _onAction(v, id, key, tracks);
+          },
         ),
         slivers: [
           SliverToBoxAdapter(child: ImportBanner(playlistId: id)),
@@ -249,41 +279,6 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
 }
 
 enum _PlaylistAction { edit, add, cover, clearCover, export, rename, delete }
-
-void _rowMenu(
-  BuildContext context,
-  WidgetRef ref,
-  Track t,
-  VoidCallback remove,
-) {
-  final l = context.l10n;
-  showCcSheet<void>(
-    context: context,
-    builder: (sheet) => SafeArea(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          ListTile(
-            leading: const Icon(Icons.playlist_remove_rounded),
-            title: Text(l.removeFromPlaylistAction),
-            onTap: () {
-              Navigator.of(sheet).pop();
-              remove();
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.more_horiz_rounded),
-            title: Text(l.moreActions),
-            onTap: () {
-              Navigator.of(sheet).pop();
-              showTrackActions(context, ref, t);
-            },
-          ),
-        ],
-      ),
-    ),
-  );
-}
 
 class _EditRow extends StatelessWidget {
   const _EditRow({

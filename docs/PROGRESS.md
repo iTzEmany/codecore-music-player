@@ -1071,13 +1071,13 @@ mobile_scanner — fase 24 — 2026-10-19
 - [ ] 60.6 Controlli di fase — analyze, test, review high e scheggia ok; perf Mi A3 **bloccata** per D-170 (D-176): Ricerca «notte» dopo un tentativo (indice in isolate + precaricato) > 16,7 ms 2,9 % (ok) ma build p99 26,1 ms (Prima 34,5, soglia 16); Album 0,9 % (rumore fra run); gli altri in soglia
 
 ## Fase 61 — Fogli ovunque (`fase-61-fogli-ovunque.md`)
-- [ ] 61.1 Helper dei fogli
-- [ ] 61.2 Brano, selezione, clic destro
-- [ ] 61.3 Collezioni, podcast e schermate di servizio
-- [ ] 61.4 Timer, «+» e ordinamenti
-- [ ] 61.5 Coda e ⋮ della riga
-- [ ] 61.6 Regola di architettura
-- [ ] 61.7 Controlli di fase
+- [x] 61.1 Helper dei fogli
+- [x] 61.2 Brano, selezione, clic destro
+- [x] 61.3 Collezioni, podcast e schermate di servizio
+- [x] 61.4 Timer, «+» e ordinamenti
+- [x] 61.5 Coda e ⋮ della riga
+- [x] 61.6 Regola di architettura
+- [x] 61.7 Controlli di fase
 
 ## Fase 62 — Home «aggiunti da poco» (`fase-62-home-aggiunti.md`)
 - [ ] 62.1 20 album

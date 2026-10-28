@@ -9,6 +9,7 @@ import '../../../providers/player_providers.dart';
 import '../../../providers/settings_providers.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/tokens.dart';
+import '../../widgets/cc_sheet.dart';
 import '../../widgets/collection_header.dart';
 import '../../shell/shell_nav.dart';
 import '../../widgets/empty_state.dart';
@@ -98,17 +99,31 @@ SliverToBoxAdapter(
             ? null
             : () => ctrl.playAll(list, context: playCtx),
         shuffleIds: list.isEmpty ? null : [for (final t in list) t.id],
-        menu: PopupMenuButton<SortOption>(
+        menu: IconButton(
           tooltip: l.sortBy,
           icon: const Icon(Icons.sort_rounded),
-          initialValue: query.sort,
-          onSelected: (s) => ref
-              .read(trackQueryProvider(true).notifier)
-              .update((q) => q.copyWith(sort: s)),
-          itemBuilder: (_) => [
-            for (final o in SortOption.values)
-              PopupMenuItem(value: o, child: Text(_sortLabel(context, o))),
-          ],
+          onPressed: () async {
+            final s = await showCcActionSheet<SortOption>(
+              context: context,
+              title: l.sortBy,
+              groups: [
+                [
+                  for (final o in SortOption.values)
+                    CcAction(
+                      icon: Icons.sort_rounded,
+                      label: _sortLabel(context, o),
+                      value: o,
+                      selected: o == query.sort,
+                    ),
+                ],
+              ],
+            );
+            if (s != null) {
+              ref
+                  .read(trackQueryProvider(true).notifier)
+                  .update((q) => q.copyWith(sort: s));
+            }
+          },
         ),
         slivers: [
           SliverAsyncBody(

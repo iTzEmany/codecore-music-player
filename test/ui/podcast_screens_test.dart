@@ -421,7 +421,7 @@ void main() {
 
       await tester.tap(find.byKey(const ValueKey('podcast-menu')));
       await _settle(tester);
-      await tester.tap(find.byKey(const ValueKey('unsubscribe')));
+      await tester.tap(find.text('Annulla l’iscrizione'));
       await _settle(tester);
       expect(find.text('Annullare l’iscrizione?'), findsOneWidget);
       expect(find.textContaining('1 episodio scaricato'), findsOneWidget);
@@ -431,7 +431,7 @@ void main() {
 
       await tester.tap(find.byKey(const ValueKey('podcast-menu')));
       await _settle(tester);
-      await tester.tap(find.byKey(const ValueKey('unsubscribe')));
+      await tester.tap(find.text('Annulla l’iscrizione'));
       await _settle(tester);
       await tester.tap(find.widgetWithText(FilledButton, 'Annulla l’iscrizione'));
       for (var i = 0; i < 10 && File(path).existsSync(); i++) {

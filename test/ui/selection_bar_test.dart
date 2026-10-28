@@ -124,6 +124,15 @@ void main() {
     await h.dispose(tester);
   });
 
+  testWidgets('the ⋮ sheet is titled «N selezionati»', (tester) async {
+    await open(tester);
+    await pick(tester, [0, 2]);
+    await tester.tap(find.byTooltip('Azioni'));
+    await settle(tester);
+    expect(find.text('2 selezionati'), findsNWidgets(2));
+    await h.dispose(tester);
+  });
+
   testWidgets('«Seleziona tutto» picks every row shown', (tester) async {
     await open(tester);
     await pick(tester, [1]);

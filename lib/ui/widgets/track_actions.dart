@@ -362,134 +362,95 @@ List<TrackActionGroup> trackActions(
   ];
 }
 
+/// The track sheet; [lead] goes first (e.g. «Rimuovi dalla playlist»). Also the
+/// desktop right click, and the ⋮ of a selection through [showTrackActionGroups].
 Future<void> showTrackActions(
   BuildContext context,
   WidgetRef ref,
-  Track track,
-) {
-  final groups = trackActions(context, ref, track);
-  return showCcSheet<void>(
-    context: context,
-    isScrollControlled: true,
-    builder: (sheet) => _TrackActionsSheet(track: track, groups: groups),
-  );
-}
+  Track track, {
+  TrackAction? lead,
+}) => showTrackActionGroups(
+  context,
+  [
+    if (lead != null) TrackActionGroup('', [lead]),
+    ...trackActions(context, ref, track),
+  ],
+  header: _TrackHeader(track: track),
+);
 
-/// Right click on desktop: the same actions as a menu at the pointer.
-Future<void> showTrackContextMenu(
+/// Shows [groups] as an action sheet; the chosen action runs once it is closed.
+Future<void> showTrackActionGroups(
   BuildContext context,
-  WidgetRef ref,
-  Track track,
-  Offset position,
-) async {
-  final groups = trackActions(context, ref, track);
-  // `showMenu` positions inside the nearest overlay, which is offset from
-  // the window (sidebar, nested navigators): convert the pointer position.
-  final overlay = Overlay.of(context).context.findRenderObject()! as RenderBox;
-  final local = overlay.globalToLocal(position);
-  final entries = <PopupMenuEntry<TrackAction>>[];
-  for (var g = 0; g < groups.length; g++) {
-    if (g > 0) entries.add(const PopupMenuDivider());
-    for (final a in groups[g].actions) {
-      entries.add(
-        PopupMenuItem<TrackAction>(
-          value: a,
-          child: Row(
-            children: [
-              Icon(a.icon, size: 20),
-              const SizedBox(width: 12),
-              Flexible(child: Text(a.label)),
-            ],
+  List<TrackActionGroup> groups, {
+  Widget? header,
+  String? title,
+}) => showCcActionSheet<TrackAction>(
+  context: context,
+  header: header,
+  title: title,
+  groups: [
+    for (final g in groups)
+      [
+        for (final a in g.actions)
+          CcAction<TrackAction>(
+            icon: a.icon,
+            label: a.label,
+            value: a,
+            destructive: a.destructive,
+            onTap: () => a.run(),
           ),
-        ),
-      );
-    }
-  }
-  final picked = await showMenu<TrackAction>(
-    context: context,
-    position: RelativeRect.fromRect(
-      Rect.fromLTWH(local.dx, local.dy, 0, 0),
-      Offset.zero & overlay.size,
-    ),
-    items: entries,
-  );
-  if (picked != null) await picked.run();
-}
+      ],
+  ],
+);
 
-class _TrackActionsSheet extends StatelessWidget {
-  const _TrackActionsSheet({required this.track, required this.groups});
+class _TrackHeader extends StatelessWidget {
+  const _TrackHeader({required this.track});
 
   final Track track;
-  final List<TrackActionGroup> groups;
 
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
     final cc = context.cc;
     final theme = Theme.of(context).textTheme;
-    return SafeArea(
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                CcDims.gap16,
-                CcDims.gap4,
-                CcDims.gap16,
-                CcDims.gap12,
-              ),
-              child: Row(
-                children: [
-                  TrackArt(track: track, size: 56),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          track.title,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.titleSmall,
-                        ),
-                        Text(
-                          track.artist ?? l.unknownArtist,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.bodyMedium,
-                        ),
-                        if (track.album != null && track.album!.isNotEmpty)
-                          Text(
-                            track.album!,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.bodySmall?.copyWith(
-                              color: cc.textFaint,
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            for (final (i, g) in groups.indexed) ...[
-              if (i > 0) const SizedBox(height: 8),
-              for (final a in g.actions)
-                ListTile(
-                  leading: Icon(a.icon),
-                  iconColor: a.destructive ? cc.error : null,
-                  textColor: a.destructive ? cc.error : null,
-                  title: Text(a.label),
-                  onTap: () {
-                    Navigator.of(context).pop();
-                    a.run();
-                  },
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        CcDims.gap16,
+        CcDims.gap4,
+        CcDims.gap16,
+        CcDims.gap12,
+      ),
+      child: Row(
+        children: [
+          TrackArt(track: track, size: 56),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  track.title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.titleSmall,
                 ),
-            ],
-          ],
-        ),
+                Text(
+                  track.artist ?? l.unknownArtist,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.bodyMedium,
+                ),
+                if (track.album != null && track.album!.isNotEmpty)
+                  Text(
+                    track.album!,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.bodySmall?.copyWith(color: cc.textFaint),
+                  ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

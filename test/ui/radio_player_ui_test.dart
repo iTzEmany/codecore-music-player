@@ -81,7 +81,7 @@ void main() {
   testWidgets('the menu of a radio has only save, search and remove from the queue',
       (tester) async {
     await play(tester, const NowPlayingScreen());
-    await tester.tap(find.byIcon(Icons.more_horiz_rounded));
+    await tester.tap(find.byIcon(Icons.more_vert_rounded));
     await _settle(tester);
     expect(find.text('Salva in Le mie radio'), findsWidgets);
     expect(find.text('Rimuovi dalla coda'), findsOneWidget);

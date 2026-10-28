@@ -1,3 +1,4 @@
+import '../../widgets/cc_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -102,20 +103,27 @@ class TagBackupsScreen extends ConsumerWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                       isThreeLine: true,
-                      trailing: PopupMenuButton<_BackupAction>(
-                        onSelected: (v) => v == _BackupAction.restore
-                            ? _restore(context, ref, b)
-                            : _delete(context, ref, b),
-                        itemBuilder: (_) => [
-                          PopupMenuItem(
-                            value: _BackupAction.restore,
-                            child: Text(l.tagBackupRestore),
-                          ),
-                          PopupMenuItem(
-                            value: _BackupAction.delete,
-                            child: Text(l.tagBackupDelete),
-                          ),
-                        ],
+                      trailing: IconButton(
+                        tooltip: l.moreActions,
+                        icon: const Icon(Icons.more_vert_rounded),
+                        onPressed: () async {
+                          final v = await showCcActionSheet<_BackupAction>(
+                            context: context,
+                            title: p.basename(b.path),
+                            groups: [
+                              [
+                                CcAction(icon: Icons.restore_rounded, label: l.tagBackupRestore, value: _BackupAction.restore),
+                                CcAction(icon: Icons.delete_outline_rounded, label: l.tagBackupDelete, value: _BackupAction.delete, destructive: true),
+                              ],
+                            ],
+                          );
+                          if (v == null || !context.mounted) return;
+                          if (v == _BackupAction.restore) {
+                            _restore(context, ref, b);
+                          } else {
+                            _delete(context, ref, b);
+                          }
+                        },
                       ),
                     );
                   },

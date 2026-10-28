@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/app_harness.dart';
+import '../support/menu_support.dart';
 
 void main() {
   testWidgets('settings builds (with a Backup group) and theme choice is persisted in state',
@@ -67,7 +68,7 @@ void main() {
             name: 'Rock', createdAt: 1))))!;
     final pl = Playlist(id: id, name: 'Rock', createdAt: 1, updatedAt: 1);
     await h.pump(tester, PlaylistDetailScreen(playlist: pl));
-    await tester.tap(find.byWidgetPredicate((w) => w is PopupMenuButton));
+    await tester.tap(menuButton());
     await tester.pumpAndSettle();
     await tester.tap(find.text('Rinomina'));
     await tester.pumpAndSettle();
@@ -76,7 +77,7 @@ void main() {
     await tester.tap(find.text('Annulla'));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byWidgetPredicate((w) => w is PopupMenuButton));
+    await tester.tap(menuButton());
     await tester.pumpAndSettle();
     await tester.tap(find.text('Elimina'));
     await tester.pumpAndSettle();
@@ -104,7 +105,7 @@ void main() {
     await h.pump(tester, PlaylistDetailScreen(playlist: Playlist(id: id, name: 'Rock', createdAt: 1, updatedAt: 1)));
     await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 150)));
     await tester.pump(const Duration(milliseconds: 300));
-    await tester.tap(find.byWidgetPredicate((w) => w is PopupMenuButton));
+    await tester.tap(find.byTooltip('Altre azioni'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Cambia copertina'));
     await tester.pumpAndSettle();

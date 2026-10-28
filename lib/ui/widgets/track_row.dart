@@ -103,6 +103,19 @@ class TrackRow extends StatefulWidget {
 
 class _TrackRowState extends State<TrackRow> {
   bool _hover = false;
+  bool _focused = false;
+
+  /// The wide row hides its ⋮ until the pointer is over it or focus is in it;
+  /// a touch screen has no hover, so it always shows.
+  bool _revealMore(BuildContext context) =>
+      _hover ||
+      _focused ||
+      switch (Theme.of(context).platform) {
+        TargetPlatform.android ||
+        TargetPlatform.iOS ||
+        TargetPlatform.fuchsia => true,
+        _ => false,
+      };
 
   String _subtitle(BuildContext context) {
     final t = widget.track;
@@ -240,20 +253,23 @@ class _TrackRowState extends State<TrackRow> {
           ),
         ),
         SizedBox(
-          width: 40,
+          width: 48,
           child: widget.onMore == null
               ? null
-              : Opacity(
-                  opacity: _hover ? 1 : 0,
-                  child: IconButton(
-                    tooltip: l.moreOptions,
-                    onPressed: widget.onMore,
-                    visualDensity: ccIconDensity,
-                    icon: Icon(Icons.more_horiz_rounded, color: cc.textMuted),
-                  ),
-                ),
+              : _moreButton(context, visible: _revealMore(context)),
         ),
       ],
+    );
+  }
+
+  /// The ⋮; hidden it is out of semantics and focus, and always >= 48 dp to hit.
+  Widget _moreButton(BuildContext context, {required bool visible}) {
+    if (!visible) return const SizedBox(width: 48, height: 48);
+    return IconButton(
+      tooltip: context.l10n.moreOptions,
+      onPressed: widget.onMore,
+      constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+      icon: Icon(Icons.more_vert_rounded, color: context.cc.textMuted),
     );
   }
 
@@ -285,7 +301,7 @@ class _TrackRowState extends State<TrackRow> {
         );
       case _:
     }
-    final showActions = !wide || _hover || fav;
+    final showActions = !wide || _revealMore(context) || fav;
     final actions = Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -306,18 +322,7 @@ class _TrackRowState extends State<TrackRow> {
             child: Icon(Icons.favorite_rounded, size: 16, color: cc.accent),
           ),
         if (widget.onMore != null)
-          Opacity(
-            opacity: showActions ? 1 : 0,
-            child: IconButton(
-              tooltip: l.moreOptions,
-              onPressed: widget.onMore,
-              visualDensity: ccIconDensity,
-              icon: Icon(
-                wide ? Icons.more_horiz_rounded : Icons.more_vert_rounded,
-                color: cc.textMuted,
-              ),
-            ),
-          ),
+          _moreButton(context, visible: showActions),
       ],
     );
     // Same width whether or not the actions show, so the columns line up.
@@ -449,7 +454,11 @@ class _TrackRowState extends State<TrackRow> {
     return MouseRegion(
       onEnter: (_) => setState(() => _hover = true),
       onExit: (_) => setState(() => _hover = false),
-      child: Semantics(
+      child: Focus(
+        canRequestFocus: false,
+        skipTraversal: true,
+        onFocusChange: (f) => setState(() => _focused = f),
+        child: Semantics(
         selected: widget.selectionMode ? widget.selected : null,
         value: widget.selected
             ? (widget.selectedPosition == null
@@ -491,6 +500,7 @@ class _TrackRowState extends State<TrackRow> {
           ),
         ),
       ),
+      ),
     );
   }
 }
@@ -506,6 +516,7 @@ class LiveTrackRow extends ConsumerWidget {
     this.index,
     this.albumArtist,
     this.onMore,
+    this.lead,
     this.reorderIndex,
     this.selection,
     this.subtitleSuffix,
@@ -526,8 +537,11 @@ class LiveTrackRow extends ConsumerWidget {
   final RowSelection? selection;
   final String? subtitleSuffix;
 
-  /// Replaces the default actions sheet (e.g. «Rimuovi dalla playlist»).
+  /// Replaces the default actions sheet.
   final VoidCallback? onMore;
+
+  /// First entry of the track sheet (e.g. «Rimuovi dalla playlist»).
+  final TrackAction? lead;
   final int? reorderIndex;
 
   @override
@@ -539,7 +553,7 @@ class LiveTrackRow extends ConsumerWidget {
       currentTrackProvider.select((t) => t.value?.id == track.id),
     );
     final playing = isCurrent && (ref.watch(isPlayingProvider).value ?? false);
-    void actions() => showTrackActions(context, ref, track);
+    void actions() => showTrackActions(context, ref, track, lead: lead);
     final sel = selection;
     final (active, position) = sel == null
         ? (false, -1)
@@ -587,7 +601,7 @@ class LiveTrackRow extends ConsumerWidget {
       selectedPosition: picked ? position + 1 : null,
       subtitleSuffix: subtitleSuffix,
       albumAsSubtitle: albumAsSubtitle,
-      onSecondaryTap: (pos) => showTrackContextMenu(context, ref, track, pos),
+      onSecondaryTap: (_) => actions(),
       onFavorite: () => toggleFavorite(context, ref, track),
       compact: compact,
       index: index,

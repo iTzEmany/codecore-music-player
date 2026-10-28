@@ -277,7 +277,7 @@ class _QueueTitleRow extends StatelessWidget {
         CcDims.gap8,
         0,
       ),
-      child: Row(
+      child: LayoutBuilder(builder: (context, box) => Row(
         children: [
           Expanded(
             child: showTitle
@@ -286,17 +286,22 @@ class _QueueTitleRow extends StatelessWidget {
           ),
           if (hasUpcoming)
             TextButton(onPressed: onClear, child: Text(l.queueClear)),
-          PopupMenuButton<void>(
-            tooltip: l.moreOptions,
-            itemBuilder: (_) => [
-              PopupMenuItem<void>(
-                onTap: () => openSuggestions(context),
-                child: Text(l.suggestionsRecentTitle),
+          // Intrinsic width; the cap only guards against overflow.
+          ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: box.maxWidth * 0.5,
+            ),
+            child: TextButton(
+              onPressed: () => openSuggestions(context),
+              child: Text(
+                l.suggestionsRecentTitle,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-            ],
+            ),
           ),
         ],
-      ),
+      )),
     );
   }
 }

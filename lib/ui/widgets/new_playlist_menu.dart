@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../l10n/l10n_ext.dart';
 import '../screens/import/import_flow.dart';
+import 'cc_sheet.dart';
 import 'create_flows.dart';
 
 enum _NewPlaylistAction { create, smart, csv }
@@ -17,10 +18,33 @@ class NewPlaylistMenu extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
-    return PopupMenuButton<_NewPlaylistAction>(
+    return IconButton(
       tooltip: l.newPlaylist,
       icon: const Icon(Icons.add_rounded),
-      onSelected: (v) async {
+      onPressed: () async {
+        final v = await showCcActionSheet<_NewPlaylistAction>(
+          context: context,
+          groups: [
+            [
+              CcAction(
+                icon: Icons.playlist_add_rounded,
+                label: l.newPlaylist,
+                value: _NewPlaylistAction.create,
+              ),
+              CcAction(
+                icon: Icons.auto_awesome_rounded,
+                label: l.smartPlaylistNew,
+                value: _NewPlaylistAction.smart,
+              ),
+              CcAction(
+                icon: Icons.upload_file_rounded,
+                label: l.csvImportMenu,
+                value: _NewPlaylistAction.csv,
+              ),
+            ],
+          ],
+        );
+        if (v == null || !context.mounted) return;
         switch (v) {
           case _NewPlaylistAction.csv:
             startCsvImport(context, ref);
@@ -30,20 +54,6 @@ class NewPlaylistMenu extends ConsumerWidget {
             await createPlaylistFlow(context, ref);
         }
       },
-      itemBuilder: (_) => [
-        PopupMenuItem(
-          value: _NewPlaylistAction.create,
-          child: Text(l.newPlaylist),
-        ),
-        PopupMenuItem(
-          value: _NewPlaylistAction.smart,
-          child: Text(l.smartPlaylistNew),
-        ),
-        PopupMenuItem(
-          value: _NewPlaylistAction.csv,
-          child: Text(l.csvImportMenu),
-        ),
-      ],
     );
   }
 }

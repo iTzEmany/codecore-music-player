@@ -76,7 +76,7 @@ void main() {
   Future<void> menu(WidgetTester tester, String key) async {
     await tester.tap(find.byKey(const ValueKey('album-more')));
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(ValueKey(key)));
+    await tester.tap(find.byKey(ValueKey<Object>(key)));
     await tester.pumpAndSettle();
   }
 
@@ -112,9 +112,9 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('album-more')));
     await tester.pumpAndSettle();
     for (final k in ['download', 'queue', 'playlist', 'share']) {
-      expect(find.byKey(ValueKey('album-menu-$k')), findsOneWidget, reason: k);
+      expect(find.byKey(ValueKey<Object>('album-menu-$k')), findsOneWidget, reason: k);
     }
-    await tester.tap(find.byKey(const ValueKey('album-menu-queue')));
+    await tester.tap(find.byKey(const ValueKey<Object>('album-menu-queue')));
     await tester.pumpAndSettle();
     expect(ctrl.calls, ['enqueue a', 'enqueue b']);
 
