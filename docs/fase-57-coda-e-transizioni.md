@@ -154,3 +154,9 @@ Together, Wish You Were Here, Lithium, Enter Sandman, Sweet Home Alabama, Under 
   ready: unplayable file»); il cambio ripiega sul caricamento normale dal file in cache (gap ~530 ms). Seguito in
   `docs/prossimi-lavori.md`.
 - La riga `stream timing play=` esce solo sul percorso `loadUri`: i cambi fatti dal crossfade o dal gapless non hanno `gap=`.
+
+## Seguito (dalla review di architettura della fase)
+- Vietati ai minori su Android: riconoscere l'errore età già da NewPipe (`AgeRestrictedContentException` → codice `AGE`) invece di aspettare yt-dlp (16–37 s).
+- Una sola scelta della sorgente (`_sourceOf`) per `_loadCurrent` e `_nextFile`; `StreamPreparer.cachedFile` senza scritture (oggi tocca la cache, la riga ombra e la fase).
+- NewPipe solo per i job richiesti, non per il prefetch (due estrazioni per brano verso YouTube); stato per pid di `android_yt_dlp_service.dart` in un record; 429 di NewPipe → `cooldown`.
+- Crossfade sul Mi A3: `AudioEffect: set/get parameter error` dopo alcuni cambi (vedi «Note»).
