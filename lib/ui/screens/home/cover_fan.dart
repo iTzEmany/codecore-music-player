@@ -90,7 +90,13 @@ class _CoverFanState extends State<CoverFan>
           final covers = [
             for (var i = 0; i < n; i++) _cover(albums[i], i, size),
           ];
-          return TapRegion(
+          // Back closes an open fan first; the shell's Back then stays on Home.
+          return PopScope(
+            canPop: !_open,
+            onPopInvokedWithResult: (didPop, _) {
+              if (!didPop) _setOpen(false);
+            },
+            child: TapRegion(
             // A real tap only: a drag (page scroll) that starts outside keeps it open.
             onTapOutside: (e) => _downOutside = e.position,
             onTapUpOutside: (e) {
@@ -167,6 +173,7 @@ class _CoverFanState extends State<CoverFan>
                 ),
               ),
             ),
+          ),
           );
         },
       );
