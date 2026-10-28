@@ -554,6 +554,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reasonOnlineUnavailable => 'online track not available';
 
   @override
+  String get reasonAgeRestricted =>
+      'age-restricted video, no audio track found';
+
+  @override
   String get searchWeb => 'Search info online';
 
   @override

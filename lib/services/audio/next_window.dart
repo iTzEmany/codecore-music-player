@@ -1,6 +1,4 @@
 import '../../data/db/app_database.dart';
-import '../../data/repositories/track_repository.dart';
-import 'online_entries.dart';
 import 'audio_backend.dart';
 import 'play_queue.dart';
 import 'resume_point.dart';
@@ -9,13 +7,13 @@ import 'resume_point.dart';
 /// (`peekNext`), the backend only holds what it is told. Asked again after any
 /// change of the queue, it does nothing when nothing changed.
 class NextWindow {
-  NextWindow(this._queue, this._tracks, this._backend);
+  NextWindow(this._queue, this._backend);
 
   final PlayQueue _queue;
-  final TrackRepository _tracks;
   final GaplessCapable _backend;
 
   Track? _track;
+  int? _id;
   int _token = 0;
   int? _forCurrent;
   int _forRevision = -1;
@@ -23,6 +21,9 @@ class NextWindow {
 
   /// The track the backend was told to play next, if any.
   Track? get track => _track;
+
+  /// The queue id [track] was chosen for (an online entry's id, not its row's).
+  int? get id => _id;
 
   /// Returns the prepared track and forgets it (the backend has moved on).
   Track? consume() {
@@ -38,18 +39,22 @@ class NextWindow {
   void clear() {
     _token++;
     _track = null;
+    _id = null;
     _forCurrent = null;
     _forRevision = -1;
   }
 
   /// Prepares what follows [current]. With [enabled] false nothing follows.
   /// [volumeFor] and [overlap] give the volume of the next track and whether
-  /// the two may play over each other (a crossfade).
+  /// the two may play over each other (a crossfade). [resolve] gives, for a
+  /// queue id, the track to enter and the file to hand the backend; null: it
+  /// cannot be prepared (not a file), and the change is a plain load (K-08).
   Future<void> refresh(
     Track current, {
     required bool enabled,
     required double Function(Track next) volumeFor,
     required bool Function(Track current, Track next) overlap,
+    required Future<({Track track, String path})?> Function(int id) resolve,
   }) async {
     if (_forCurrent == current.id &&
         _forRevision == _queue.revision &&
@@ -65,22 +70,24 @@ class NextWindow {
     final id = enabled ? _queue.peekNext() : null;
     final revision = _queue.revision;
     Track? next;
+    String? path;
     if (id != null) {
-      next = id == current.id ? current : await _tracks.getById(id);
+      final found = await resolve(id);
       if (token != _token) return;
+      next = found?.track;
+      path = found?.path;
     }
-    // Streamed tracks always start with a plain load (K-08).
-    if (next != null && isStreamTrack(next)) next = null;
     // A track with a saved place must start there: that is a normal load.
     if (next != null && resumeStartFor(next.resumePositionMs) != null) {
       next = null;
     }
     _track = next;
+    _id = next == null ? null : id;
     _forCurrent = current.id;
     _forRevision = revision;
     _forEnabled = enabled;
     await _backend.setNext(
-      next?.path,
+      next == null ? null : path,
       volume: next == null ? 1.0 : volumeFor(next),
       overlap: next != null && overlap(current, next),
     );

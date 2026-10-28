@@ -27,6 +27,8 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+        // NewPipeExtractor uses Java 10+ APIs (URLDecoder.decode(String, Charset)) missing before API 33.
+        isCoreLibraryDesugaringEnabled = true
     }
 
     defaultConfig {
@@ -95,10 +97,12 @@ kotlin {
 }
 
 dependencies {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs_nio:2.1.4")
     // yt-dlp + Python + QuickJS (JS challenge solver) embedded in the app.
     if (!lite) {
         implementation("io.github.junkfood02.youtubedl-android:library:0.18.1")
         implementation("io.github.junkfood02.youtubedl-android:ffmpeg:0.18.1")
+        implementation("com.github.TeamNewPipe:NewPipeExtractor:v0.26.5")
     }
 }
 

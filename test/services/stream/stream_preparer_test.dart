@@ -27,6 +27,10 @@ class _Yt implements YoutubeService {
   final failuresLeft = <String, int>{};
   final rateLimits = <String, int>{};
   final forbidden = <String, int>{};
+  final ageGated = <String>{};
+  var songs = <YtResult>[];
+  var searches = 0;
+  var searchHangs = false;
   final _gates = <String, Completer<void>>{};
   var open = 0, maxOpen = 0;
   var autoFinish = false;
@@ -59,6 +63,9 @@ class _Yt implements YoutubeService {
         yield DownloadProgress(streamUrl: Uri.parse(urls.removeAt(0)), headers: const {'User-Agent': 'ua'});
       }
       await gate.future;
+      if (ageGated.contains(r.id)) {
+        throw const YtException(YtErrorKind.unavailable, 'ERROR: Sign in to confirm your age');
+      }
       if ((rateLimits[r.id] ?? 0) > 0) {
         rateLimits[r.id] = rateLimits[r.id]! - 1;
         throw const YtException(YtErrorKind.rateLimited, '429');
@@ -82,6 +89,13 @@ class _Yt implements YoutubeService {
     } finally {
       open--;
     }
+  }
+
+  @override
+  Future<List<YtResult>> searchSongs(String query, {int limit = 5}) async {
+    searches++;
+    if (searchHangs) await Completer<void>().future;
+    return songs;
   }
 
   @override
@@ -117,12 +131,14 @@ void main() {
     Duration attemptTimeout = const Duration(minutes: 5),
     Duration stallTimeout = const Duration(minutes: 5),
     Duration startTimeout = const Duration(minutes: 5),
+    Duration ageSearchTimeout = const Duration(seconds: 20),
     DateTime Function()? clock,
   }) =>
       prep = StreamPreparer(
         attemptTimeout: attemptTimeout,
         stallTimeout: stallTimeout,
         startTimeout: startTimeout,
+        ageSearchTimeout: ageSearchTimeout,
         cache: cache,
         tracks: tracks,
         youtube: yt,
@@ -188,6 +204,53 @@ void main() {
     await expectLater(prep.ready('youtube:bad', _r('bad')), throwsA(isA<YtException>()));
     expect(yt.started, ['bad', 'bad']);
     expect(prep.phases.value['youtube:bad'], StreamPhase.failed);
+  });
+
+  group('age-restricted fallback', () {
+    YtResult song(String id, int secs) =>
+        YtResult(id: id, title: 'T', channel: 'C', duration: Duration(seconds: secs));
+
+    test('a substitute within 10 s is downloaded; the file is cached under the original key', () async {
+      yt.autoFinish = true;
+      yt.ageGated.add('age');
+      yt.songs = [song('age', 200), song('far', 300), song('sub', 205)];
+      final f = await prep.ready('youtube:age', song('age', 200));
+      expect(yt.started, ['age', 'sub']);
+      expect(p.basename(f.path), 'youtube_age.m4a');
+      expect(await tracks.streamRow('youtube:age'), isNotNull);
+    });
+
+    test('no good substitute: the age error reaches the caller, nothing else is downloaded', () async {
+      yt.autoFinish = true;
+      yt.ageGated.add('age');
+      yt.songs = [song('far', 300)]; // 100 s off
+      await expectLater(prep.ready('youtube:age', song('age', 200)), throwsA(predicate(isAgeRestricted)));
+      expect(yt.started, ['age']);
+    });
+
+    test('a substitute that is age-restricted too: the age error, one substitute only', () async {
+      yt.autoFinish = true;
+      yt.ageGated.addAll(['age', 'sub']);
+      yt.songs = [song('sub', 205)];
+      await expectLater(prep.ready('youtube:age', song('age', 200)), throwsA(predicate(isAgeRestricted)));
+      expect(yt.started, ['age', 'sub']);
+      expect(yt.searches, 1);
+    });
+
+    test('a search that never answers is given up: the age error, the slot is free', () async {
+      make(ageSearchTimeout: const Duration(milliseconds: 50));
+      yt.autoFinish = true;
+      yt.ageGated.add('age');
+      yt.searchHangs = true;
+      await expectLater(prep.ready('youtube:age', song('age', 200)), throwsA(predicate(isAgeRestricted)));
+      expect(yt.started, ['age']);
+    });
+
+    test('isAgeRestricted reads both wordings of the error', () {
+      expect(isAgeRestricted(const YtException(YtErrorKind.unavailable, 'This video is age-restricted')), isTrue);
+      expect(isAgeRestricted(const YtException(YtErrorKind.unavailable, 'Video unavailable')), isFalse);
+      expect(isAgeRestricted(StateError('confirm your age')), isFalse);
+    });
   });
 
   group('stream timing line', () {
@@ -309,6 +372,46 @@ void main() {
       expect(prep.phases.value['youtube:a'], StreamPhase.downloading); // a cancel is not a failure
       yt.finish('a');
       await _until(() => prep.phases.value['youtube:a'] == StreamPhase.ready);
+    });
+
+    test('the prefetch already has the address: start hands it out, no new yt-dlp', () async {
+      yt.urls.add(far);
+      prep.setQueue([_i('a')]);
+      await _until(() => yt.started.isNotEmpty);
+      await _quiet();
+      expect(urlOf(await prep.start('youtube:a', _r('a'))), far);
+      expect(yt.started, ['a']);
+      yt.finish('a');
+    });
+
+    test('the address of the prefetch expired meanwhile: start runs a new attempt for a fresh one', () async {
+      var shift = Duration.zero;
+      make(clock: () => DateTime.now().add(shift));
+      final soon = DateTime.now().millisecondsSinceEpoch ~/ 1000 + 600;
+      yt.urls.addAll(['https://v/a?expire=$soon', far]);
+      prep.setQueue([_i('a')]);
+      await _until(() => yt.started.isNotEmpty);
+      await _quiet();
+      shift = const Duration(minutes: 20);
+      expect(urlOf(await prep.start('youtube:a', _r('a'))), far);
+      expect(yt.started, ['a', 'a']);
+      yt.finish('a');
+    });
+
+    test('the address expired but the download is through: no new attempt, the file arrives', () async {
+      var shift = Duration.zero;
+      make(clock: () => DateTime.now().add(shift));
+      yt.urls.add('https://v/a?expire=${DateTime.now().millisecondsSinceEpoch ~/ 1000 + 600}');
+      yt.progress = const [(100, 100)];
+      yt.silence = const Duration(milliseconds: 200); // post-processing after 100%
+      prep.setQueue([_i('a')]);
+      yt.autoFinish = true;
+      await _until(() => yt.started.isNotEmpty);
+      await Future<void>.delayed(const Duration(milliseconds: 60));
+      shift = const Duration(minutes: 20);
+      expect((await prep.start('youtube:a', _r('a'))).file, isNotNull);
+      expect(yt.started, ['a']);
+      expect(yt.tokens['a']!.single!.isCancelled, isFalse);
     });
 
     test('restart after a failed job: a new job', () async {
@@ -563,6 +666,27 @@ void main() {
       ..gap = const Duration(milliseconds: 60);
     expect((await prep.ready('youtube:a', _r('a'))).existsSync(), isTrue);
     expect(yt.started, ['a']);
+  });
+
+  test('an address-only event does not shorten the start timeout', () async {
+    make(startTimeout: const Duration(seconds: 2), stallTimeout: const Duration(milliseconds: 30));
+    yt
+      ..urls.add('https://x/a')
+      ..autoFinish = true
+      ..progress = [(10, 100)]
+      ..gap = const Duration(milliseconds: 120);
+    expect((await prep.ready('youtube:a', _r('a'))).existsSync(), isTrue);
+    expect(yt.started, ['a']);
+  });
+
+  test('silence after real progress is a stall', () async {
+    make(startTimeout: const Duration(seconds: 2), stallTimeout: const Duration(milliseconds: 40));
+    yt
+      ..autoFinish = true
+      ..progress = [(10, 100)]
+      ..silence = const Duration(milliseconds: 200);
+    await expectLater(prep.ready('youtube:a', _r('a')), throwsA(isA<TimeoutException>()));
+    expect(yt.started, ['a', 'a']);
   });
 
   test('silence after 100% (post-processing) is not a stall', () async {

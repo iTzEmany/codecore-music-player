@@ -102,6 +102,20 @@ void main() {
     expect(lines.single, matches(RegExp(r'key=youtube:v1 play=\d+ from=cache$')));
   });
 
+  test('a streamed track from the address logs from=url; after a natural end it also logs gap=', () async {
+    final id = online.register(result('v1'));
+    preparer.urls['youtube:v1'] = (Uri.parse('https://rr1.googlevideo.com/v1'), const {});
+    final lines = await timingLines(() async {
+      await handler.playQueue([ids.first, id], 0);
+      backend.stateC.add(BackendState.completed);
+      await settle();
+      backend.stateC.add(BackendState.playing);
+      backend.posC.add(const Duration(seconds: 1));
+      await settle();
+    });
+    expect(lines.single, matches(RegExp(r'key=youtube:v1 play=\d+ from=url gap=\d+$')));
+  });
+
   test('the first sound of a library track logs from=file', () async {
     final lines = await timingLines(() async {
       await handler.playQueue([ids.first], 0);
@@ -282,6 +296,15 @@ void main() {
     expect(failures.single.reason, PlaybackFailureReason.networkUnavailable);
   });
 
+  test('an age-restricted video with no substitute is reported as ageRestricted', () async {
+    final id = online.register(result('v1'));
+    preparer.failing.add('youtube:v1');
+    preparer.failure = const YtException(YtErrorKind.unavailable, 'ERROR: Sign in to confirm your age');
+    await handler.playQueue([id, ids[0]], 0);
+    await settle();
+    expect(failures.single.reason, PlaybackFailureReason.ageRestricted);
+  });
+
   test('a non-network YtException is reported as onlineUnavailable', () async {
     final id = online.register(result('v1'));
     preparer.failing.add('youtube:v1');
@@ -332,13 +355,12 @@ void main() {
 
   Future<int?> resumeOf(int id) async => (await TrackRepository(db).getById(id))!.resumePositionMs;
 
-  test('a shadow row is a stream: no next-track window, no ReplayGain, no bookmark on leaving', () async {
+  test('a shadow row is a stream: no ReplayGain, no bookmark on leaving', () async {
     final row = await shadowRow('s1');
     await handler.setNormalize(true);
     await handler.setTransition(TransitionMode.gapless);
     await handler.playQueue([row, ids[1]], 0);
     await settle();
-    expect(backend.nextCalls.whereType<String>(), isEmpty);
     expect(backend.volumes.last, 1.0);
     expect(backend.seeks, isEmpty);
     await listenTo(100);

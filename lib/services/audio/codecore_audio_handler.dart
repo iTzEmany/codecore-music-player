@@ -30,6 +30,7 @@ enum PlaybackFailureReason {
   unplayable,
   notInLibrary,
   onlineUnavailable,
+  ageRestricted,
   networkUnavailable,
   radioUnavailable,
 }
@@ -51,13 +52,13 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     this.history,
     this.onEpisodeHeard,
     this.online,
-    this.preparer,
+    StreamPreparer? preparer,
     this.onRadioStart,
     DateTime Function()? clock,
   })  : _clock = clock ?? DateTime.now,
         _backend = backend,
         _window = backend is GaplessCapable
-            ? NextWindow(_queue, _tracks, backend as GaplessCapable)
+            ? NextWindow(_queue, backend as GaplessCapable)
             : null {
     _subs
       ..add(_backend.state.listen(_onBackendState))
@@ -69,6 +70,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
       ..add(_backend.duration.listen(_onBackendDuration))
       ..add(_backend.streamTitle.listen(_onStreamTitle))
       ..add(_queueController.stream.listen((_) => unawaited(_syncPreparer())));
+    this.preparer = preparer;
     if (backend is GaplessCapable) {
       _subs.add((backend as GaplessCapable)
           .advanced
@@ -103,7 +105,23 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
 
   /// Downloads online entries and `kind = 2` rows into the cache; null: they cannot play.
   /// Set by main once the providers exist, before any queue is restored.
-  StreamPreparer? preparer;
+  StreamPreparer? get preparer => _preparer;
+  set preparer(StreamPreparer? p) {
+    _preparer?.phases.removeListener(_onPhases);
+    _preparer = p;
+    p?.phases.addListener(_onPhases);
+  }
+
+  StreamPreparer? _preparer;
+
+  // The file of what follows may arrive while the current track plays (R-80), or move
+  // (a download): a library track in the window stays, a cached one is looked up again.
+  void _onPhases() {
+    final next = _window?.track;
+    if (_current == null || (next != null && !isStreamTrack(next)) || _loadBusy || _waitingStream) return;
+    _window?.invalidate();
+    unawaited(_refreshWindow());
+  }
 
   /// The library track already holding an online result (a download), if any
   /// (D-81). Set by main; null: every online entry streams.
@@ -165,16 +183,12 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   Track? _current;
   int _loadToken = 0;
   // Tap-to-first-sound timing of the load in flight (logged once, see _onPosition).
-  ({int token, String key, String from, DateTime t0, Duration pos0})? _timing;
+  _Timing? _timing;
   int _consecutiveErrors = 0;
   // The current streamed track plays from its address (not the cached file): an
   // error there asks the preparer for a new start (R-76).
-  bool _fromUrl = false, _recoverOnPlay = false, _errorWhileLoading = false;
-  int? _recoveringToken; // the load whose recovery is running
-  int _recoveries = 0; // of this load: after two the file is waited for
-  String? _urlKey;
-  int? _urlEntry;
-  YtResult? _urlResult;
+  _UrlSession? _url;
+  bool _recoverOnPlay = false, _errorWhileLoading = false;
   bool _playCounted = false;
   RemoteTransport? _remote;
   StreamSubscription<RemoteStatus>? _remoteSub;
@@ -392,13 +406,14 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     await _loadCurrent(play: false, startAt: position);
   }
 
-  Future<void> _loadCurrent({required bool play, Duration? startAt}) async {
+  /// [ended]: when the track before ended by itself (for the gap of the timing line).
+  Future<void> _loadCurrent({required bool play, Duration? startAt, DateTime? ended}) async {
     final token = ++_loadToken;
     _waitingStream = false;
     _loadBusy = true;
     _loadPaused = false;
-    _fromUrl = _recoverOnPlay = _errorWhileLoading = false;
-    _recoveries = 0;
+    _url = null;
+    _recoverOnPlay = _errorWhileLoading = false;
     _playWhenReady = play;
     _cancelRadioTimers();
     final id = _queue.currentId;
@@ -430,15 +445,11 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     final streamKey = entry != null
         ? entry.result.indexKey
         : (track.kind == kStreamKind ? keyOfStreamPath(track.path) : null);
-    _timing = play && radio == null
-        ? (
-            token: token,
-            key: streamKey ?? 'track:${track.id}',
-            from: streamKey != null ? 'cache' : 'file',
-            t0: _clock(),
-            pos0: startAt ?? Duration.zero,
-          )
-        : null;
+    final t0 = _clock();
+    _Timing timingOf(String key, String from) =>
+        (token: token, key: key, from: from, t0: t0, pos0: startAt ?? Duration.zero, ended: ended);
+    // A stream's line is set once its source is known (below).
+    _timing = play && radio == null && streamKey == null ? timingOf('track:${track.id}', 'file') : null;
     final start = (startAt != null && startAt > Duration.zero)
         ? startAt
         : ((isOnline && libTrack == null) || streamKey != null ? null : resumeStartFor(track.resumePositionMs));
@@ -453,6 +464,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     _publish(AudioProcessingState.loading);
     var playNow = play;
     var offline = false; // the stream could not be fetched for lack of network
+    var ageGated = false; // age-restricted video with no audio-only substitute
     try {
       if (radio != null) {
         _radioBusy = true;
@@ -473,12 +485,11 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
         final began = await _asStream(streamKey, p.start(streamKey, res));
         if (token != _loadToken) return;
         playNow = _playWhenReady;
-        if (!await _loadStart(p, began, streamKey, res, entry?.id, token)) return;
+        final fromUrl = await _loadStart(p, began, streamKey, res, entry?.id, token);
+        if (fromUrl == null) return;
         playNow = _playWhenReady;
-        final t = _timing;
-        if (_fromUrl && t != null && t.token == token) {
-          _timing = (token: t.token, key: t.key, from: 'url', t0: t.t0, pos0: t.pos0);
-        }
+        if (fromUrl) _url = _UrlSession(streamKey, res, entry?.id);
+        if (play) _timing = timingOf(streamKey, fromUrl ? 'url' : 'cache');
       } else {
         await _backend.load(track.path);
       }
@@ -501,6 +512,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
       } else {
         await _backend.pause();
       }
+      _window?.invalidate(); // the load dropped the backend's window
       unawaited(_refreshWindow());
     } on BackendException catch (e) {
       if (token != _loadToken) return;
@@ -513,11 +525,14 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
       }
       if (streamKey != null && e is _StreamNotReady) {
         offline = e.offline;
+        ageGated = e.ageRestricted;
         playNow = _playWhenReady;
       }
       await _failAndSkip(
           offline
               ? PlaybackFailureReason.networkUnavailable
+              : ageGated
+              ? PlaybackFailureReason.ageRestricted
               : (isOnline && libTrack == null) || streamKey != null
               ? PlaybackFailureReason.onlineUnavailable
               : e.fileMissing
@@ -529,7 +544,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     } finally {
       if (token == _loadToken) {
         _waitingStream = _loadBusy = false;
-        if (_errorWhileLoading && _fromUrl) _onUrlError();
+        if (_errorWhileLoading && _url != null) _onUrlError();
         _errorWhileLoading = false;
       }
     }
@@ -546,39 +561,35 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   }
 
   /// Gets [began] loaded: its address (opened, the file follows in the
-  /// background) or else the file (waited for). False: a newer load took over.
-  Future<bool> _loadStart(StreamPreparer p, StreamStart began, String key,
+  /// background) or else the file (waited for). Returns where it plays from
+  /// (true: the address, false: the file), or null when a newer load took over.
+  Future<bool?> _loadStart(StreamPreparer p, StreamStart began, String key,
       YtResult res, int? entryId, int token) async {
-    if (token != _loadToken) return false;
+    if (token != _loadToken) return null;
     var file = began.file;
     if (file == null) {
       _waitingStream = false;
       try {
         await _backend.loadUri(began.url!, headers: began.headers);
-        if (token != _loadToken) return false;
-        _fromUrl = true;
-        _urlKey = key;
-        _urlResult = res;
-        _urlEntry = entryId;
+        if (token != _loadToken) return null;
         // Plays count on the shadow row, which exists once the file does (the same job).
         unawaited(p.ready(key, res).then((_) => _bindShadow(key, entryId, token),
             onError: (Object e, StackTrace st) => AppLog.w('stream $key: no file after the address', e, st)));
         return true;
       } on BackendException catch (e) {
-        if (token != _loadToken) return false;
+        if (token != _loadToken) return null;
         // No message to the user: the file comes, a little later (R-75).
         AppLog.i('stream timing key=$key fallback=${e.expired ? 'expired' : 'load-failed'}');
         _waitingStream = true;
       }
     }
     final File ready = file ?? await _asStream<File>(key, p.ready(key, res));
-    if (token != _loadToken) return false;
+    if (token != _loadToken) return null;
     await _bindShadow(key, entryId, token);
-    if (token != _loadToken) return false;
+    if (token != _loadToken) return null;
     _waitingStream = false;
     await _backend.load(ready.path);
-    _fromUrl = false;
-    return token == _loadToken;
+    return token == _loadToken ? false : null;
   }
 
   Future<void> _bindShadow(String key, int? entryId, int token) async {
@@ -734,7 +745,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   void _onBackendDuration(Duration? d) {
     if (_waitingStream) return; // the old track's length
     // The stream has not told its length yet: the one we know stays (K-SV-08).
-    if (d == null && _fromUrl && _duration != null) return;
+    if (d == null && _url != null && _duration != null) return;
     if (isRadio) {
       _duration = null; // a live stream has no length
       _durOut.add(null);
@@ -794,6 +805,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
 
   Future<void> _goIdle() async {
     _waitingStream = false;
+    _url = null;
     _cancelRadioTimers();
     _radioRetries = 0;
     _radioStale = false;
@@ -873,10 +885,11 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     } else if (s == BackendState.error) {
       // A player error nobody asked about: the load that caused it reports it.
       AppLog.w('player reported an error');
-      if (_fromUrl) {
+      final url = _url;
+      if (url != null) {
         if (_loadBusy) {
           _errorWhileLoading = true; // the load is still going: it asks when done
-        } else if (_recoveringToken != _loadToken) {
+        } else if (!url.recovering) {
           _onUrlError();
         }
       }
@@ -901,21 +914,24 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   /// The address of the streamed track failed while playing (expired, network
   /// change): asks the preparer again and goes on from the same position (R-76).
   Future<void> _recoverFromUrl() async {
-    final key = _urlKey, r = _urlResult, p = preparer;
+    final s = _url, p = preparer;
     final token = _loadToken;
-    if (!_fromUrl || _recoveringToken == token || key == null || r == null || p == null) return;
-    _recoveringToken = token;
+    if (s == null || s.recovering || p == null) return;
+    final key = s.key, r = s.res;
+    s.recovering = true;
     _recoverOnPlay = false;
     final pos = _position;
     _waitingStream = true;
     try {
       final StreamStart began;
-      if (++_recoveries > 2) {
+      if (++s.recoveries > 2) {
         began = StreamStart.file(await _asStream<File>(key, p.ready(key, r))); // no more addresses
       } else {
         began = await _asStream(key, p.restart(key, r));
       }
-      if (!await _loadStart(p, began, key, r, _urlEntry, token)) return;
+      final fromUrl = await _loadStart(p, began, key, r, s.entry, token);
+      if (fromUrl == null) return;
+      if (!fromUrl && _url == s) _url = null;
       if (_speed != 1.0) await _backend.setSpeed(_speed);
       if (token != _loadToken) return;
       if (pos > Duration.zero) await _backend.seek(pos);
@@ -926,6 +942,8 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
       } else {
         await _backend.pause();
       }
+      _window?.invalidate(); // the new load dropped the backend's window
+      unawaited(_refreshWindow());
     } on Object catch (e, st) {
       AppLog.w('stream $key could not be restarted', e, st);
       if (token == _loadToken) {
@@ -939,7 +957,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
             play: _playWhenReady);
       }
     } finally {
-      if (_recoveringToken == token) _recoveringToken = null;
+      s.recovering = false;
       if (token == _loadToken) _waitingStream = false;
     }
   }
@@ -947,6 +965,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   Future<void> _onCompleted() async {
     if (_handlingCompleted) return;
     _handlingCompleted = true;
+    final ended = _clock();
     try {
       _forgetBookmarkOfFinished();
       final next = _queue.next(auto: true);
@@ -955,7 +974,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
       if (next == null) {
         await _goIdle();
       } else {
-        await _loadCurrent(play: !stay);
+        await _loadCurrent(play: !stay, ended: ended);
       }
       if (stay) _pausedAtTrackEnd.add(null);
     } finally {
@@ -975,7 +994,9 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
 
   /// The backend moved on by itself to the track prepared in the window.
   Future<void> _onAdvanced() async {
+    final ended = _clock();
     _endListen();
+    final preparedFor = _window?.id;
     final prepared = _window?.consume();
     _forgetBookmarkOfFinished();
     final id = _queue.next(auto: true);
@@ -983,22 +1004,27 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     // itself: the next track has started, so stop it at its very beginning.
     final stay = _pauseAtTrackEnd;
     _pauseAtTrackEnd = false;
-    if (prepared == null || id != prepared.id) {
+    if (prepared == null || id != preparedFor) {
       // The queue changed after the window was set: play what the queue says.
       if (id == null) {
         await _goIdle();
       } else {
-        await _loadCurrent(play: !stay);
+        await _loadCurrent(play: !stay, ended: ended);
       }
       if (stay) _pausedAtTrackEnd.add(null);
       return;
     }
     _consecutiveErrors = 0;
     _lastResumeSave = Duration.zero;
+    // The old load's late callbacks (a file arriving, a recovery) are not the new track's.
+    _loadToken++;
     // The gapless next track is a file: an error there is not the old address's.
-    _fromUrl = _recoverOnPlay = _errorWhileLoading = false;
-    _recoveries = 0;
+    _url = null;
+    _recoverOnPlay = _errorWhileLoading = false;
     _enterTrack(prepared);
+    // An online entry joined from its cached file: plays count on its row.
+    final entry = online?.entryOf(prepared.id);
+    if (entry != null) unawaited(_bindShadow(entry.result.indexKey, entry.id, _loadToken));
     unawaited(_syncPreparer());
     if (stay) {
       await _backend.pause();
@@ -1010,7 +1036,26 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   }
 
   double _volumeFor(Track t) =>
-      (_baseVolume * (_normalize ? gainFactor(t.replayGainDb) : 1.0)).clamp(0, 1).toDouble();
+      (_baseVolume * (_normalize && !isStreamTrack(t) ? gainFactor(t.replayGainDb) : 1.0)).clamp(0, 1).toDouble();
+
+  /// What the window may prepare for queue id [id]: a track with a file (the
+  /// library's, or a streamed one in the cache), else null: a plain load (R-80).
+  Future<({Track track, String path})?> _nextFile(int id) async {
+    final cur = _current;
+    if (cur != null && cur.id == id && !isStreamTrack(cur)) return (track: cur, path: cur.path); // repeat one
+    final entry = online?.entryOf(id);
+    if (isOnlineId(id) && entry == null) return null; // radio or forgotten
+    final libId = entry == null ? null : await _downloadedId(entry.result);
+    final lib = libId == null ? null : await _tracks.getById(libId);
+    if (lib != null) return (track: lib, path: lib.path);
+    final track = entry == null ? await _tracks.getById(id) : online?.trackOf(id);
+    if (track == null) return null;
+    if (!isStreamTrack(track)) return (track: track, path: track.path);
+    final key = entry?.result.indexKey ?? keyOfStreamPath(track.path);
+    final res = entry?.result ?? (key == null ? null : streamResultOfRow(key, track));
+    final file = key == null || res == null ? null : await preparer?.cachedFile(key, res);
+    return file == null ? null : (track: track, path: file.path);
+  }
 
   Future<void> _refreshWindow() async {
     final window = _window;
@@ -1020,14 +1065,15 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     try {
       await window.refresh(
         current,
-        // Into and out of an online entry the change is a plain new load.
-        enabled: _transition != TransitionMode.normal &&
-            !_pauseAtTrackEnd &&
-            !isStreamTrack(current),
+        enabled: _transition != TransitionMode.normal && !_pauseAtTrackEnd,
         volumeFor: _volumeFor,
         overlap: (a, b) =>
             _transition == TransitionMode.crossfade &&
-            !(_plainInAlbum && a.albumKey == b.albumKey),
+            !(_plainInAlbum &&
+                a.albumKey == b.albumKey &&
+                // Online entries have no album key: two of them are not «the same album».
+                (a.albumKey.isNotEmpty || (!isStreamTrack(a) && !isStreamTrack(b)))),
+        resolve: _nextFile,
       );
     } on Object catch (e, st) {
       AppLog.w('could not prepare the next track', e, st);
@@ -1124,8 +1170,11 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     if (timing != null && _state == BackendState.playing && p > timing.pos0) {
       _timing = null;
       if (timing.token == _loadToken) {
-        final ms = _clock().difference(timing.t0).inMilliseconds;
-        AppLog.i('stream timing key=${timing.key} play=$ms from=${timing.from}');
+        final now = _clock();
+        final ms = now.difference(timing.t0).inMilliseconds;
+        final end = timing.ended;
+        final gap = end == null ? '' : ' gap=${now.difference(end).inMilliseconds}';
+        AppLog.i('stream timing key=${timing.key} play=$ms from=${timing.from}$gap');
       }
     }
     final track = _current;
@@ -1209,7 +1258,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     if (_queue.currentId == null) return;
     _loadPaused = false;
     _playWhenReady = true;
-    if (_recoverOnPlay && _fromUrl) {
+    if (_recoverOnPlay && _url != null) {
       await _recoverFromUrl();
       return;
     }
@@ -1604,6 +1653,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     _cancelRadioTimers();
     _endListen();
     await _remoteSub?.cancel();
+    preparer = null;
     for (final s in _subs) {
       await s.cancel();
     }
@@ -1617,10 +1667,24 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
   }
 }
 
+typedef _Timing = ({int token, String key, String from, DateTime t0, Duration pos0, DateTime? ended});
+
+/// The streamed track plays from its address: what a recovery (R-76) needs.
+class _UrlSession {
+  _UrlSession(this.key, this.res, this.entry);
+  final String key;
+  final YtResult res;
+  final int? entry;
+  int recoveries = 0; // after two the file is waited for
+  bool recovering = false;
+}
+
 /// The stream of a track could not be had; [offline] when the network is why.
 class _StreamNotReady extends BackendException {
   _StreamNotReady(Object cause)
       : offline = cause is YtException && cause.kind == YtErrorKind.network,
+        ageRestricted = isAgeRestricted(cause),
         super('stream not ready: $cause');
   final bool offline;
+  final bool ageRestricted;
 }

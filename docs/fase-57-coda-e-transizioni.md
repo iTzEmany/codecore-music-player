@@ -127,6 +127,36 @@ online appena cercati → ogni cambio entro 1 s; brani in libreria con gapless e
 rete lenta (hotspot) nessun buffering ripetuto nei primi 10 s (K-SV-06).
 
 ## Tabella «Dopo»
-<!-- 57.4: da riempire -->
+Build di debug del ramo `feat/57-coda-e-transizioni`, 2026-10-28, Wi-Fi di casa. 10 brani online mai ascoltati dalla
+ricerca (tap → suono) e una coda online con fine naturale dei brani; tempi in ms, mediana / massimo. Motorola non collegato.
+
+| Dispositivo | fonte dell'URL | url | play (url) | Dopo 56: play (url) | gap al cambio (n) | play (file) |
+|---|---|---|---|---|---|---|
+| Linux (Xvfb) | yt-dlp | 3435 / 3755 | 3766 / 8604 | 4840 / 5130 | 142 / 199 (11, tutti `from=cache`) | 110–135 (5) |
+| Mi A3 `0d7ae9df206e` | NewPipe 10/10 | 1798 / 2037 | 3902 / 4625 | 37540 / 40450 | 528 / 536 (4, `from=cache`) | ~169 (6) |
+| Motorola edge 40 | — | non misurato | | 18197 / 19125 | | |
+
+- **RNF-08** (≤ 3 s Linux, ≤ 5 s Motorola): Linux 3,8 s, mancato di poco (−1,1 s rispetto alla 56); Motorola da misurare
+  (NewPipe sul Mi A3, più lento del Motorola, sta già sotto 4 s). Traguardo rivisto in D-174.
+- **RNF-09** (≤ 1 s): raggiunto su Linux (142 ms) e sul Mi A3 (528 ms).
+- **R-81**: nessun nuovo `attempt` al cambio su entrambi; ogni cambio misurato è `from=cache`.
+- **RNF-10**: `play (file)` resta tra 57 e 370 ms, come «Prima» (114 ms, n = 1).
+
+Linux: 23 brani in tutto, una 403 di yt-dlp ripresa dal secondo tentativo. Mi A3: Stand By Me, Space Oddity, Hurt, Come
+Together, Wish You Were Here, Lithium, Enter Sandman, Sweet Home Alabama, Under the Bridge, Let It Be; coda: «Abbey Road
+(Super Deluxe Edition)», 30 download `ok`, nessuno bloccato.
 
 ## Note
+- Mi A3 (Android 11): NewPipe falliva sempre (`URLDecoder.decode(String, Charset)` esiste solo da API 33) → desugaring (D-173).
+  Poi il file in cache non arrivava mai: l'evento dell'URL riarmava il watchdog a 30 s e yt-dlp sul Mi A3 dà il primo
+  progresso a ~35 s (corretto in a6b561b, con test).
+- Mi A3: dopo alcuni cambi riusciti il crossfade fallisce sempre (`AudioEffect: set/get parameter error`, «next track not
+  ready: unplayable file»); il cambio ripiega sul caricamento normale dal file in cache (gap ~530 ms). Seguito in
+  `docs/prossimi-lavori.md`.
+- La riga `stream timing play=` esce solo sul percorso `loadUri`: i cambi fatti dal crossfade o dal gapless non hanno `gap=`.
+
+## Seguito (dalla review di architettura della fase)
+- Vietati ai minori su Android: riconoscere l'errore età già da NewPipe (`AgeRestrictedContentException` → codice `AGE`) invece di aspettare yt-dlp (16–37 s).
+- Una sola scelta della sorgente (`_sourceOf`) per `_loadCurrent` e `_nextFile`; `StreamPreparer.cachedFile` senza scritture (oggi tocca la cache, la riga ombra e la fase).
+- NewPipe solo per i job richiesti, non per il prefetch (due estrazioni per brano verso YouTube); stato per pid di `android_yt_dlp_service.dart` in un record; 429 di NewPipe → `cooldown`.
+- Crossfade sul Mi A3: `AudioEffect: set/get parameter error` dopo alcuni cambi (vedi «Note»).

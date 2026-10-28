@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart' show ValueNotifier;
 import 'package:codecore/data/repositories/track_repository.dart';
 import 'package:codecore/services/online/youtube_service.dart';
 import 'package:codecore/services/stream/stream_preparer.dart';
@@ -18,6 +19,14 @@ class FakeStreamPreparer implements StreamPreparer {
   final failing = <String>{};
   Object failure = StateError('download failed'); // what a failing key throws
   final gates = <String, Completer<void>>{};
+  @override
+  final phases = ValueNotifier<Map<String, StreamPhase>>({});
+
+  /// Files already in the cache, by key.
+  final cached = <String, File>{};
+
+  @override
+  Future<File?> cachedFile(String key, YtResult r) async => cached[key];
 
   @override
   void setQueue(List<StreamItem> items) => queues.add([for (final i in items) i.key]);

@@ -553,6 +553,10 @@ class AppLocalizationsIt extends AppLocalizations {
   String get reasonOnlineUnavailable => 'brano online non disponibile';
 
   @override
+  String get reasonAgeRestricted =>
+      'vietato ai minori, nessuna traccia audio trovata';
+
+  @override
   String get searchWeb => 'Cerca info sul web';
 
   @override

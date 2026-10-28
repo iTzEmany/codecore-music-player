@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:audio_service/audio_service.dart';
@@ -7,12 +8,16 @@ import 'package:codecore/data/repositories/track_repository.dart';
 import 'package:codecore/services/audio/audio_backend.dart';
 import 'package:codecore/services/audio/codecore_audio_handler.dart';
 import 'package:codecore/services/audio/crossfade_engine.dart';
+import 'package:codecore/services/audio/online_entries.dart';
 import 'package:codecore/services/audio/play_queue.dart';
+import 'package:codecore/services/online/youtube_service.dart';
+import 'package:codecore/services/stream/stream_preparer.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/fake_backend.dart';
+import '../../support/fake_stream_preparer.dart';
 
 /// Lets every pending async step run, without waiting on the wall clock.
 Future<void> settle() => pumpEventQueue();
@@ -366,6 +371,172 @@ void main() {
       expect(ticks.timers, isEmpty);
     });
   });
+
+  group('from an address to a cached file (R-80)', () {
+    late OnlineEntries online;
+    late FakeStreamPreparer prep;
+    late Directory dir;
+    late CodecoreAudioHandler h;
+    late int a, b;
+    late FakeBackend fb;
+    final addr = Uri.parse('https://rr1.googlevideo.com/v1');
+
+    YtResult res(String id) => YtResult(id: id, title: 'Song $id', channel: 'C', duration: const Duration(minutes: 3));
+
+    setUp(() async {
+      dir = Directory.systemTemp.createTempSync('gapless_url');
+      fb = FakeBackend();
+      online = OnlineEntries();
+      prep = FakeStreamPreparer(repo, dir);
+      h = CodecoreAudioHandler(fb, queue, repo, onError: errors.add, online: online, preparer: prep);
+      a = online.register(res('v1'));
+      b = online.register(res('v2'));
+      prep.urls['youtube:v1'] = (addr, const {});
+    });
+    tearDown(() async {
+      await h.dispose();
+      dir.deleteSync(recursive: true);
+    });
+
+    File cacheB() => prep.cached['youtube:v2'] = File('${dir.path}/youtube_v2.m4a')..writeAsStringSync('x');
+
+    Future<void> start() async {
+      await h.playQueue([a, b], 0);
+      await h.setTransition(TransitionMode.gapless);
+      await settle();
+    }
+
+    test('A from its address and B in the cache: B is the backend next track and the join plays it', () async {
+      final file = cacheB();
+      await start();
+      expect(fb.loadedUris, hasLength(1));
+      expect(fb.nextPath, file.path);
+      final loads = fb.loaded.length;
+      fb.advance();
+      await settle();
+      expect(h.currentTrack!.id, b);
+      expect(fb.loaded.length, loads);
+    });
+
+    test('B with an address only: no next track is set', () async {
+      await start();
+      expect(fb.nextPath, isNull);
+    });
+
+    test('B reaching the cache while A plays is set as next track', () async {
+      await start();
+      expect(fb.nextPath, isNull);
+      final file = cacheB();
+      prep.phases.value = {'youtube:v2': StreamPhase.ready};
+      await settle();
+      expect(fb.nextPath, file.path);
+    });
+
+    test('the cached file of B moves (a download): the window follows it', () async {
+      final old = cacheB();
+      await start();
+      expect(fb.nextPath, old.path);
+      final moved = prep.cached['youtube:v2'] = File('${dir.path}/moved_v2.m4a')..writeAsStringSync('x');
+      prep.phases.value = {'youtube:v2': StreamPhase.ready};
+      await settle();
+      expect(fb.nextPath, moved.path);
+    });
+
+    test('a late file of the track left by a join does not take the plays of the new one', () async {
+      final gate = prep.gates['youtube:v1'] = Completer<void>();
+      final file = cacheB();
+      await repo.upsertStreamRow('youtube:v2', res('v2'), file);
+      await start();
+      fb.advance();
+      await settle();
+      expect(h.currentTrack!.id, b);
+      gate.complete(); // the file of A arrives now
+      await settle();
+      await h.play();
+      fb.posC.add(const Duration(seconds: 40));
+      await settle();
+      expect((await repo.streamRow('youtube:v2'))!.playCount, 1);
+    });
+
+    test('a downloaded online entry is prepared from the library file, the join loads nothing', () async {
+      h.libraryIdOf = (r) async => r.id == 'v2' ? ids.first : null;
+      await start();
+      expect(fb.nextPath, '/m/a.mp3');
+      final loads = fb.loaded.length;
+      fb.advance();
+      await settle();
+      expect(h.currentTrack!.id, ids.first);
+      expect(fb.loaded.length, loads);
+    });
+
+    test('the next track survives the load of an address-streamed current one', () async {
+      final slow = _SlowStart(repo, dir)..urls['youtube:v1'] = (addr, const {});
+      h.preparer = slow;
+      final started = h.playQueue([a, ids.first], 0);
+      await h.setTransition(TransitionMode.gapless);
+      await settle();
+      slow.gate.complete();
+      await started;
+      await settle();
+      expect(fb.nextPath, '/m/a.mp3');
+    });
+
+    test('the next track survives a recovery of the address', () async {
+      await h.playQueue([a, ids.first], 0);
+      await h.setTransition(TransitionMode.gapless);
+      await settle();
+      expect(fb.nextPath, '/m/a.mp3');
+      prep.restarts['youtube:v1'] = [StreamStart.url(addr, const {})];
+      fb.stateC.add(BackendState.error);
+      await settle();
+      expect(fb.loadedUris, hasLength(2));
+      expect(fb.nextPath, '/m/a.mp3');
+    });
+
+    test('with the crossfade engine B is prepared from its file on the other player', () async {
+      final players = <FakeBackend>[];
+      final fader = CodecoreAudioHandler(
+        CrossfadeEngine(() {
+          final f = FakeBackend();
+          players.add(f);
+          return f;
+        }, ticker: _Ticks().ticker),
+        PlayQueue(),
+        repo,
+        onError: errors.add,
+        online: online,
+        preparer: prep,
+      );
+      addTearDown(fader.dispose);
+      final file = cacheB();
+      await fader.playQueue([a, b], 0);
+      await fader.setTransition(TransitionMode.crossfade, crossfadeSeconds: 6);
+      await settle();
+      players[0].durC.add(const Duration(seconds: 100));
+      players[1].durC.add(const Duration(seconds: 100));
+      await settle();
+      expect(players[0].loadedUris, hasLength(1));
+      expect(players[1].loaded, [file.path]);
+    });
+  });
+}
+
+/// `start` waits for [gate]; the current entry shows as downloading, like the real one.
+class _SlowStart extends FakeStreamPreparer {
+  _SlowStart(super.tracks, super.dir);
+  final gate = Completer<void>();
+
+  @override
+  Future<StreamStart> start(String key, YtResult r) async {
+    await gate.future;
+    return super.start(key, r);
+  }
+
+  @override
+  void setQueue(List<StreamItem> items) {
+    super.setQueue(items);
+    if (items.isNotEmpty) phases.value = {...phases.value, items.first.key: StreamPhase.downloading};
+  }
 }
 
 class _FakeTimer implements Timer {

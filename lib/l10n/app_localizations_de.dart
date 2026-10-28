@@ -554,6 +554,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get reasonOnlineUnavailable => 'Online-Titel nicht verfügbar';
 
   @override
+  String get reasonAgeRestricted =>
+      'altersbeschränkt, keine Audiospur gefunden';
+
+  @override
   String get searchWeb => 'Infos im Web suchen';
 
   @override

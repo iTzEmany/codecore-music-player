@@ -7,6 +7,7 @@ import 'package:path/path.dart' as p;
 
 import '../../core/app_log.dart';
 import '../../data/repositories/track_repository.dart';
+import '../online/query_cleaner.dart';
 import '../online/youtube_service.dart';
 import 'stream_cache.dart';
 import 'stream_key.dart';
@@ -59,6 +60,10 @@ class _Job {
   /// The restart of the running attempt was asked for: its failure is not a failed attempt.
   var restarting = false;
 
+  /// Age-gated video: the YouTube Music track downloaded in its place (tried once).
+  YtResult? substitute;
+  var ageTried = false;
+
   /// Last stream address of the running attempt, its headers and when it expires.
   Uri? streamUrl;
   Map<String, String> headers = const {};
@@ -89,6 +94,7 @@ class StreamPreparer {
     this.attemptTimeout = const Duration(minutes: 5),
     this.startTimeout = const Duration(seconds: 90),
     this.stallTimeout = const Duration(seconds: 30),
+    this.ageSearchTimeout = const Duration(seconds: 20),
     this.clock = DateTime.now,
   }) {
     // A key promoted out of the cache (StreamCache.forget) is no longer ready.
@@ -126,6 +132,9 @@ class StreamPreparer {
 
   /// An attempt that reports no progress for this long is aborted (hung network).
   final Duration stallTimeout;
+
+  /// Longest wait for the search of an age-restricted video's substitute.
+  final Duration ageSearchTimeout;
 
   /// Time source of the `stream timing` log line (injectable for tests).
   final DateTime Function() clock;
@@ -199,7 +208,12 @@ class StreamPreparer {
     cache.pin(key);
     try {
       final file = await _cached(key, r);
-      return file != null ? StreamStart.file(file) : await _firstOf(_job(key, r));
+      if (file != null) return StreamStart.file(file);
+      // The address the prefetch got has expired meanwhile: ask for a new one (R-79),
+      // unless the download is through and only the file is left to wait for.
+      final old = _jobs[key];
+      if (old != null && old.streamUrl != null && old.downloaded == null && !_live(old)) return await restart(key, r);
+      return await _firstOf(_job(key, r));
     } finally {
       cache.unpin(key);
     }
@@ -225,6 +239,9 @@ class StreamPreparer {
     }
   }
 
+  /// The cached file of [key] (with its shadow row), or null: no download starts.
+  Future<File?> cachedFile(String key, YtResult r) => _cached(key, r);
+
   /// The cached file of [key] (touched, with its shadow row), or null.
   Future<File?> _cached(String key, YtResult r) async {
     final file = await cache.fileFor(key);
@@ -248,14 +265,17 @@ class StreamPreparer {
     return job;
   }
 
+  /// True while the address is still usable: an address about to expire is no
+  /// use to a player that opens it later.
+  bool _live(_Job job) =>
+      job.streamUrl != null && clock().isBefore(job.urlExpires!.subtract(const Duration(minutes: 1)));
+
   /// The first of a live address and the file; throws if the job fails first.
   Future<StreamStart> _firstOf(_Job job) async {
     final file = job.done.future.then<StreamStart?>(StreamStart.file);
     file.ignore(); // an early return must not leave its failure unhandled
     while (true) {
-      final url = job.streamUrl;
-      // An address about to expire is no use to a player that opens it later.
-      if (url != null && clock().isBefore(job.urlExpires!.subtract(const Duration(minutes: 1)))) return StreamStart.url(url, job.headers);
+      if (_live(job)) return StreamStart.url(job.streamUrl!, job.headers);
       final first = await Future.any([file, job.urlWake.future.then<StreamStart?>((_) => null)]);
       if (first != null) return first;
     }
@@ -420,6 +440,15 @@ class StreamPreparer {
         }
         AppLog.w('stream download of ${j.key} ($attempt)', e, st);
         error = e;
+        if (isAgeRestricted(e) && !j.ageTried) {
+          j.ageTried = true;
+          j.substitute = await _ageSubstitute(j.result);
+          if (j.substitute != null) {
+            attempt--; // not a failed attempt: same one, with the substitute
+            continue;
+          }
+        }
+        if (isAgeRestricted(e)) break; // a retry would be refused the same way
         if (_isRateLimited(e)) {
           _pausedUntil = DateTime.now().add(cooldown);
           _resume?.cancel();
@@ -471,6 +500,23 @@ class StreamPreparer {
     _finish();
   }
 
+  /// First YouTube Music song other than [r] lasting within 10 s of it (any, if [r] has no length).
+  Future<YtResult?> _ageSubstitute(YtResult r) async {
+    try {
+      final c = cleanSearchQuery(r.title, r.channel);
+      final found = await youtube.searchSongs('${c.title} ${c.artist}'.trim()).timeout(ageSearchTimeout);
+      for (final s in found) {
+        final d = r.duration, sd = s.duration;
+        if (s.id == r.id || (d != null && (sd == null || (sd - d).inSeconds.abs() > 10))) continue;
+        AppLog.i('age fallback ${r.id} -> ${s.id}');
+        return s;
+      }
+    } on Object catch (e, st) {
+      AppLog.w('age fallback search for ${r.id} failed', e, st);
+    }
+    return null;
+  }
+
   int _ms(_Job j) => clock().difference(j.t0!).inMilliseconds;
 
   /// One line per job: where the time of a streamed track went.
@@ -511,7 +557,7 @@ class StreamPreparer {
         }
         arm(startTimeout);
         try {
-          await for (final e in youtube.download(j.result, tmp,
+          await for (final e in youtube.download(j.substitute ?? j.result, tmp,
               cancel: cancel, options: const DownloadOptions(emitStreamUrl: true))) {
             j.spawn ??= _ms(j);
             final u = e.streamUrl;
@@ -523,7 +569,8 @@ class StreamPreparer {
             if (downloaded) {
               j.downloaded ??= _ms(j);
               dog?.cancel();
-            } else {
+            } else if (e.received > 0 || e.path != null || u == null) {
+              // An address-only event is not download progress: keep startTimeout until real progress.
               arm(stallTimeout);
             }
           }
