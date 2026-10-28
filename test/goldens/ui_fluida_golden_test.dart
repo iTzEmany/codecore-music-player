@@ -5,12 +5,14 @@
 import 'dart:io';
 
 import 'package:codecore/providers/nav_providers.dart';
+import 'package:codecore/providers/ui_providers.dart';
 import 'package:codecore/ui/screens/car/car_mode_screen.dart';
 import 'package:codecore/ui/screens/home/home_screen.dart' show clockProvider;
 import 'package:codecore/ui/shell/app_shell.dart';
 import 'package:codecore/ui/widgets/cover_image.dart';
 import 'package:codecore/ui/widgets/track_row.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../test_shots/support/shot_harness.dart';
@@ -69,10 +71,15 @@ void main() {
   // Phase 58.6: search, cover fan and track ⋮ sheet, as they look today.
   testWidgets('search with results on phone', (tester) => withGoldenShot(tester, ShotSize.phone, (s) async {
         await s.show(const AppShell(), extra: [clock, navIndexProvider.overrideWith(_SearchTab.new)]);
+        // Phase 60: the field sits above the tabs (keyboard down).
+        final container = ProviderScope.containerOf(tester.element(find.byType(AppShell)));
+        container.read(searchBarProvider.notifier).open();
         typeSearch(tester, 'a');
         await tester.pump(const Duration(milliseconds: 400));
         await s.settle();
         await tester.pump(const Duration(seconds: 2)); // let the fade-in finish
+        container.read(searchFocusProvider).unfocus(); // no cursor handle in the shot
+        await tester.pump(const Duration(seconds: 1));
         await s.expectGolden('phone_100_search.png');
       }));
 

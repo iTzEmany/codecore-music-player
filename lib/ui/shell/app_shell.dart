@@ -126,7 +126,10 @@ class AppShell extends ConsumerWidget {
       // A page opened from Search brings the tabs back, so Back pops it.
       observers: [
         if (i == NavTab.search.index)
-          _OnPush(ref.read(searchBarProvider.notifier).close),
+          _SearchPages(
+            onPush: ref.read(searchBarProvider.notifier).close,
+            onReturn: ref.read(searchBarProvider.notifier).reopen,
+          ),
       ],
       onGenerateRoute: (_) => MaterialPageRoute<void>(builder: (_) => root),
     );
@@ -168,16 +171,18 @@ class AppShell extends ConsumerWidget {
         ),
       );
     }
-    // Android back: nested navigator first, then Home, then leave the app.
+    // Android back: keyboard, nested navigator, Home, then leave the app.
     content = PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) async {
         if (didPop) return;
-        // The phone's Search field closes first (the text stays).
+        // The phone's Search field with the keyboard up: Back only hides the
+        // keyboard. (View, not MediaQuery: no rebuild on each keyboard frame.)
         if (!wide &&
             index == NavTab.search.index &&
-            ref.read(searchBarProvider)) {
-          ref.read(searchBarProvider.notifier).close();
+            ref.read(searchBarProvider) &&
+            View.of(context).viewInsets.bottom > 0) {
+          ref.read(searchFocusProvider).unfocus();
           return;
         }
         final nav = keys[index].currentState;
@@ -357,14 +362,19 @@ class _WideShell extends ConsumerWidget {
   }
 }
 
-class _OnPush extends NavigatorObserver {
-  _OnPush(this.onPush);
+class _SearchPages extends NavigatorObserver {
+  _SearchPages({required this.onPush, required this.onReturn});
 
-  final VoidCallback onPush;
+  final VoidCallback onPush, onReturn;
 
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
     // The tab's root route is pushed while the navigator builds.
     if (previousRoute != null) onPush();
+  }
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    if (previousRoute?.isFirst ?? false) onReturn();
   }
 }

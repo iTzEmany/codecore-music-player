@@ -42,7 +42,7 @@ final searchSubmitProvider = NotifierProvider<SearchSubmitNotifier, int>(
   SearchSubmitNotifier.new,
 );
 
-/// True while the phone's dock is the Search field.
+/// True while the phone's dock carries the Search field (on the Search tab).
 class SearchBarNotifier extends Notifier<bool> {
   @override
   bool build() {
@@ -53,30 +53,40 @@ class SearchBarNotifier extends Notifier<bool> {
     return false;
   }
 
-  // The tab ✕ goes back to; never Search itself.
-  int _previous = NavTab.home.index;
+  /// Whether the field takes the focus (and the keyboard) when it appears.
+  bool focusOnShow = true;
 
-  /// Turns the dock into the field, on the Search tab.
+  /// Shows the field above the dock, on the Search tab.
   void open() {
-    final nav = ref.read(navIndexProvider.notifier);
-    final current = ref.read(navIndexProvider);
-    if (current != NavTab.search.index) _previous = current;
-    nav.set(NavTab.search.index);
+    ref.read(navIndexProvider.notifier).set(NavTab.search.index);
+    focusOnShow = true;
+    // Already shown with the keyboard hidden by hand: Cerca brings it back.
+    // Android Back hides the keyboard but leaves the focus, so drop it first.
+    if (state) {
+      final focus = ref.read(searchFocusProvider);
+      if (focus.hasFocus) focus.unfocus();
+      WidgetsBinding.instance.addPostFrameCallback((_) => focus.requestFocus());
+    }
     state = true;
   }
 
-  /// Back: the tabs return, Search stays with its text.
+  /// Back to the root of Search from a page: the field returns, no keyboard.
+  void reopen() {
+    if (ref.read(navIndexProvider) != NavTab.search.index) return;
+    focusOnShow = false;
+    state = true;
+  }
+
+  /// A page opened from Search: the field goes, the text stays.
   void close() {
     ref.read(searchFocusProvider).unfocus();
     state = false;
   }
 
-  /// ✕: forgets the text and goes back to the previous tab.
+  /// ✕: forgets the text and hides the keyboard; the field and the tab stay.
   void dismiss() {
     ref.read(searchControllerProvider).clear();
     ref.read(searchFocusProvider).unfocus();
-    state = false;
-    ref.read(navIndexProvider.notifier).set(_previous);
   }
 }
 

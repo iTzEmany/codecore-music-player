@@ -1063,12 +1063,12 @@ mobile_scanner — fase 24 — 2026-10-19
 - [x] 59.7 Controlli di fase — review high: 7 rilievi applicati; SmoothPosition unica per schermata nel seguito
 
 ## Fase 60 — Ricerca e dock (`fase-60-ricerca-e-dock.md`)
-- [ ] 60.1 ✕ svuota e resta
-- [ ] 60.2 Dock a due strati
-- [ ] 60.3 Back con la tastiera
-- [ ] 60.4 Nessun rebuild durante l'animazione della tastiera
-- [ ] 60.5 Bug noti da verificare (F-29, F-30)
-- [ ] 60.6 Controlli di fase
+- [x] 60.1 ✕ svuota e resta
+- [x] 60.2 Dock a due strati
+- [x] 60.3 Back con la tastiera
+- [x] 60.4 Nessun rebuild durante l'animazione della tastiera
+- [x] 60.5 Bug noti da verificare (F-29, F-30) — Mi A3 (D-169): entrambi risolti, nessuna correzione
+- [ ] 60.6 Controlli di fase — analyze, test, review high e scheggia ok; perf Mi A3 **bloccata** per D-170 (D-176): Ricerca «notte» dopo un tentativo (indice in isolate + precaricato) > 16,7 ms 2,9 % (ok) ma build p99 26,1 ms (Prima 34,5, soglia 16); Album 0,9 % (rumore fra run); gli altri in soglia
 
 ## Fase 61 — Fogli ovunque (`fase-61-fogli-ovunque.md`)
 - [ ] 61.1 Helper dei fogli

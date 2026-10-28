@@ -10,7 +10,7 @@ import '../../services/radio/radio_station.dart' show RadioStation;
 import '../screens/devices/devices_sheet.dart';
 import '../screens/jam/jam_screen.dart';
 import '../screens/now_playing/now_playing_screen.dart';
-import '../shell/bottom_bar.dart' show ShellDock;
+import '../shell/bottom_bar.dart' show DockLayers;
 import '../theme/app_theme.dart' show ccIconDensity;
 import '../theme/tokens.dart';
 import 'favorite_actions.dart';
@@ -93,12 +93,12 @@ class _MiniPlayerState extends ConsumerState<MiniPlayer>
     await _animateTo(0);
   }
 
-  /// Global rect of the dock this mini-player sits in (its own box if it is
-  /// shown outside one).
+  /// Global rect of the dock layers this mini-player sits in (its own box if
+  /// it is shown outside one).
   Rect _dockRect() {
     RenderBox? box;
     context.visitAncestorElements((e) {
-      if (e.widget is! ShellDock) return true;
+      if (e.widget is! DockLayers) return true;
       box = e.findRenderObject() as RenderBox?;
       return false;
     });

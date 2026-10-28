@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
@@ -230,13 +231,19 @@ final _indexTagsProvider = StreamProvider<Map<int, List<String>>>(
   (ref) => ref.watch(tagRepositoryProvider).watchNamesByTrack(),
 );
 
-final searchIndexProvider = Provider<AsyncValue<SearchIndex>>((ref) {
-  final tracks = ref.watch(_indexTracksProvider);
-  final tags = ref.watch(_indexTagsProvider);
-  if (tracks.hasError) return AsyncError(tracks.error!, tracks.stackTrace!);
-  final list = tracks.value;
-  if (list == null) return const AsyncLoading();
-  return AsyncData(SearchIndex(list, tags.value ?? const {}));
+/// Built on another isolate: normalising the whole library takes tens of ms
+/// on a phone. Its own function so the closure sends only these two values.
+Future<SearchIndex> _buildIndex(
+  List<Track> tracks,
+  Map<int, List<String>> tags,
+) => Isolate.run(() => SearchIndex(tracks, tags));
+
+// Does not wait for the tags (a late answer builds the index again).
+final searchIndexProvider = FutureProvider<SearchIndex>((ref) async {
+  // Both watched before the await, so neither stream is dropped meanwhile.
+  final tagsAsync = ref.watch(_indexTagsProvider);
+  final tracks = await ref.watch(_indexTracksProvider.future);
+  return _buildIndex(tracks, tagsAsync.value ?? const {});
 });
 
 // autoDispose (here and below): one entry per text typed, and an entry left
@@ -267,17 +274,24 @@ final searchTracksProvider = Provider.autoDispose
               ),
             );
       }
-      return ref
-          .watch(searchIndexProvider)
-          .whenData(
-            (i) => smartSearch(
-              i,
-              q.text,
-              favorites: q.favorites,
-              recent: q.recent,
-              nowMs: now,
-            ),
-          );
+      // `.value`, not `whenData`: while the index is rebuilt after a change of
+      // the library the rows of the old one stay, instead of going empty.
+      final index = ref.watch(searchIndexProvider);
+      if (index.hasError) {
+        AppLog.w('search index failed', index.error, index.stackTrace);
+        return AsyncError(index.error!, index.stackTrace!);
+      }
+      final i = index.value;
+      if (i == null) return const AsyncLoading();
+      return AsyncData(
+        smartSearch(
+          i,
+          q.text,
+          favorites: q.favorites,
+          recent: q.recent,
+          nowMs: now,
+        ),
+      );
     });
 
 final topTracksProvider = StreamProvider<List<Track>>(

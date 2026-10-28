@@ -589,9 +589,9 @@ void main() {
     final c = _container(tester);
     c.read(searchFocusProvider).unfocus(); // keyboard dismissed, not Back
     await _settle(tester);
-    // Today the field (and the hidden tabs) stay until the user leaves.
+    // Phase 60: the field stays, the tabs are visible with the keyboard down.
     expect(c.read(searchBarProvider), isTrue);
-    expect(_bar('Home'), findsNothing);
+    expect(_bar('Home'), findsOneWidget);
     c.read(navIndexProvider.notifier).set(NavTab.home.index);
     await _settle(tester);
     await tester.tap(_bar('Cerca'));
@@ -600,37 +600,7 @@ void main() {
     await h.dispose(tester);
   });
 
-  testWidgets('the dock field keeps the height of the tabs', (t) async {
-    _phone(t);
-    final h = await Harness.create(t, tracks: 2);
-    await h.pump(t, const AppShell());
-    await _settle(t);
-    final tabs = t.getSize(find.byType(ShellDock)).height;
-    await t.tap(_bar('Cerca'));
-    await _settle(t);
-    expect(t.getSize(find.byType(ShellDock)).height, tabs);
-    await h.dispose(t);
-  });
-
-  testWidgets('tapping Cerca turns the bar into a focused field', (t) async {
-    _phone(t);
-    final h = await Harness.create(t, tracks: 2);
-    await h.pump(t, const AppShell());
-    await t.tap(_bar('Cerca'));
-    await _settle(t);
-    expect(_dockField(), findsOneWidget);
-    expect(_bar('Home'), findsNothing);
-    expect(
-        find.ancestor(
-            of: find.byKey(const ValueKey('tab-dot')),
-            matching:
-                find.byWidgetPredicate((w) => w is Visibility && !w.visible)),
-        findsOneWidget);
-    expect(_container(t).read(searchFocusProvider).hasFocus, isTrue);
-    await h.dispose(t);
-  });
-
-  testWidgets('✕ clears the field and returns to the previous tab', (t) async {
+  testWidgets('✕ clears the text and stays on Search', (t) async {
     _phone(t);
     final h = await Harness.create(t, tracks: 2);
     await h.pump(t, const AppShell());
@@ -640,17 +610,35 @@ void main() {
     await _settle(t);
     await t.enterText(_dockField(), 'Song');
     await _settle(t);
-    await t.tap(find.byTooltip('Chiudi la ricerca'));
+    await t.tap(find.byTooltip('Cancella'));
     await _settle(t);
     final c = _container(t);
-    expect(c.read(navIndexProvider), NavTab.library.index);
+    expect(c.read(navIndexProvider), NavTab.search.index);
     expect(c.read(searchControllerProvider).text, isEmpty);
-    expect(c.read(searchBarProvider), isFalse);
-    expect(_bar('Home'), findsOneWidget);
+    expect(c.read(searchBarProvider), isTrue);
+    expect(c.read(searchFocusProvider).hasFocus, isFalse);
+    expect(_dockField(), findsOneWidget);
     await h.dispose(t);
   });
 
-  testWidgets('Back closes the field before leaving Search', (t) async {
+  testWidgets('✕ shows only while there is text', (t) async {
+    _phone(t);
+    final h = await Harness.create(t, tracks: 2);
+    await h.pump(t, const AppShell());
+    await t.tap(_bar('Cerca'));
+    await _settle(t);
+    expect(find.byTooltip('Cancella'), findsNothing);
+    await t.enterText(_dockField(), 'Song');
+    await t.pump();
+    expect(find.byTooltip('Cancella'), findsOneWidget);
+    await t.tap(find.byTooltip('Cancella'));
+    await t.pump();
+    expect(find.byTooltip('Cancella'), findsNothing);
+    await h.dispose(t);
+  });
+
+  testWidgets('Back with the keyboard down leaves Search like the other tabs',
+      (t) async {
     _phone(t);
     final h = await Harness.create(t, tracks: 4);
     await h.pump(t, const AppShell());
@@ -661,18 +649,12 @@ void main() {
     await t.binding.handlePopRoute();
     await _settle(t);
     final c = _container(t);
+    expect(c.read(navIndexProvider), NavTab.home.index);
     expect(c.read(searchBarProvider), isFalse);
-    expect(c.read(navIndexProvider), NavTab.search.index);
-    expect(find.text('Song 2'), findsWidgets); // results still shown
-    expect(_bar('Home'), findsOneWidget);
-    // Cerca again reopens the field with the kept text; ✕ still goes back
-    // to the tab we came from, not to Search.
+    // Cerca again reopens the field with the kept text.
     await t.tap(_bar('Cerca'));
     await _settle(t);
     expect(c.read(searchControllerProvider).text, 'Song 2');
-    await t.tap(find.byTooltip('Chiudi la ricerca'));
-    await _settle(t);
-    expect(c.read(navIndexProvider), NavTab.home.index);
     await h.dispose(t);
   });
 
@@ -693,6 +675,29 @@ void main() {
     await _settle(t);
     expect(find.text('Pushed page'), findsNothing);
     expect(c.read(navIndexProvider), NavTab.search.index);
+    await h.dispose(t);
+  });
+
+  testWidgets('back from a page opened in Search: the field returns, no keyboard',
+      (t) async {
+    _phone(t);
+    final h = await Harness.create(t, tracks: 2);
+    await h.pump(t, const AppShell());
+    await t.tap(_bar('Cerca'));
+    await _settle(t);
+    await t.enterText(_dockField(), 'Song');
+    await _settle(t);
+    final c = _container(t);
+    c.read(tabNavigatorKeysProvider)[NavTab.search.index].currentState!.push(
+        MaterialPageRoute<void>(builder: (_) => const Text('Pushed page')));
+    await _settle(t);
+    expect(_dockField(), findsNothing);
+    await t.binding.handlePopRoute();
+    await _settle(t);
+    expect(c.read(navIndexProvider), NavTab.search.index);
+    expect(_dockField(), findsOneWidget);
+    expect(c.read(searchControllerProvider).text, 'Song');
+    expect(c.read(searchFocusProvider).hasFocus, isFalse);
     await h.dispose(t);
   });
 

@@ -25,12 +25,9 @@ const _dotSize = 6.0;
 // its top edge (no track playing).
 const _dotLift = 4.0;
 
-// The «Cerca» tab's centre, horizontally, in the dock (second of four).
-const _searchTabAlign = Alignment(-0.33, 0);
-
-/// One block at the bottom: the mini-player (when something plays) above the
-/// always-labelled tabs, with a dot on the active tab's icon. While the Search
-/// field is open it is replaced by the field alone.
+/// One block at the bottom: on Search the field, then the mini-player (when
+/// something plays) and the always-labelled tabs, with a dot on the active
+/// tab's icon. While the keyboard is up only the field shows.
 class ShellDock extends ConsumerWidget {
   const ShellDock({
     super.key,
@@ -56,27 +53,80 @@ class ShellDock extends ConsumerWidget {
         (track != null || ref.watch(jamProvider.select((j) => j.active)));
     final field =
         ref.watch(searchBarProvider) && selected == NavTab.search.index;
+    // 1 dp rule between two layers of the dock.
+    final rule = [
+      Divider(
+        height: 1,
+        thickness: 1,
+        indent: CcDims.gap8,
+        endIndent: CcDims.gap8,
+        color: cc.separator,
+      ),
+      const SizedBox(height: CcDims.gap4),
+    ];
+    return _DockFrame(
+      searching: field,
+      // Both children are built here, not in the frame: the keyboard moving
+      // rebuilds the frame only.
+      field: const _SearchField(),
+      layers: DockLayers(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (field) ...rule,
+            if (hasPlayer) ...[const MiniPlayer(), ...rule],
+            _Tabs(items: items, selected: selected, onSelect: onSelect),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Marks the dock's lower layers (mini player and tabs): the box the player
+/// opens from, which leaves out the Search field above.
+class DockLayers extends StatelessWidget {
+  const DockLayers({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => child;
+}
+
+/// The only dock widget that follows the keyboard (it rebuilds on each frame
+/// of its animation): lifts the dock over it and hides the layers under the
+/// field, out of paint, taps and semantics.
+class _DockFrame extends StatelessWidget {
+  const _DockFrame({
+    required this.searching,
+    required this.field,
+    required this.layers,
+  });
+
+  final bool searching;
+  final Widget field, layers;
+
+  @override
+  Widget build(BuildContext context) {
     const m = CcDims.dockMargin;
+    // The Scaffold does not lift its bottom bar: the field clears the
+    // keyboard by itself.
+    final keyboard = searching ? MediaQuery.viewInsetsOf(context).bottom : 0.0;
     return Padding(
       padding: EdgeInsets.fromLTRB(
         m,
         m,
         m,
-        // The Scaffold does not lift its bottom bar: the field clears the
-        // keyboard by itself.
-        CcDims.dockBottom +
-            MediaQuery.paddingOf(context).bottom +
-            (field ? MediaQuery.viewInsetsOf(context).bottom : 0),
+        CcDims.dockBottom + MediaQuery.paddingOf(context).bottom + keyboard,
       ),
       // Material (not a coloured Container) so the ink of the taps shows.
       child: Material(
-        color: cc.surface2,
+        color: context.cc.surface2,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(CcDims.dockRadius),
         ),
         clipBehavior: Clip.antiAlias,
-        // Opacity and a horizontal scale from the «Cerca» tab; the dock takes
-        // the new height at once, so no size is animated.
         child: Padding(
           padding: const EdgeInsets.fromLTRB(
             CcDims.gap8,
@@ -84,79 +134,19 @@ class ShellDock extends ConsumerWidget {
             CcDims.gap8,
             6,
           ),
-          child: AnimatedSwitcher(
-            duration: ccDuration(context, CcMotion.page),
-            switchInCurve: CcMotion.curveIn,
-            switchOutCurve: CcMotion.curveOut,
-            layoutBuilder: (current, previous) => Stack(
-              children: [
-                for (final p in previous)
-                  Positioned(
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    child: IgnorePointer(child: p),
-                  ),
-                ?current,
-              ],
-            ),
-            transitionBuilder: (child, a) => FadeTransition(
-              opacity: a,
-              child: AnimatedBuilder(
-                animation: a,
-                builder: (_, child) => Transform.scale(
-                  scaleX: 0.5 + 0.5 * a.value,
-                  alignment: _searchTabAlign,
-                  child: child,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (searching) field,
+              // Offstage alone would leave the tabs focusable.
+              ExcludeFocus(
+                excluding: keyboard > 0,
+                child: TickerMode(
+                  enabled: keyboard == 0,
+                  child: Offstage(offstage: keyboard > 0, child: layers),
                 ),
-                child: child,
               ),
-            ),
-            child: field
-                ? Stack(
-                    key: const ValueKey('dock-field'),
-                    alignment: Alignment.center,
-                    children: [
-                      // Hidden tabs hold the dock's height: the page above
-                      // keeps its size and its scroll offset.
-                      // Sized only: no taps, focus or TalkBack on them.
-                      Visibility(
-                        visible: false,
-                        maintainSize: true,
-                        maintainAnimation: true,
-                        maintainState: true,
-                        child: _Tabs(
-                          items: items,
-                          selected: selected,
-                          onSelect: onSelect,
-                        ),
-                      ),
-                      const _SearchField(),
-                    ],
-                  )
-                : Column(
-                    key: const ValueKey('dock-tabs'),
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (hasPlayer) ...[
-                        const MiniPlayer(),
-                        // 1 dp rule between the player and the tabs.
-                        Divider(
-                          height: 1,
-                          thickness: 1,
-                          indent: CcDims.gap8,
-                          endIndent: CcDims.gap8,
-                          color: cc.separator,
-                        ),
-                        const SizedBox(height: CcDims.gap4),
-                      ],
-                      _Tabs(
-                        items: items,
-                        selected: selected,
-                        onSelect: onSelect,
-                      ),
-                    ],
-                  ),
+            ],
           ),
         ),
       ),
@@ -164,7 +154,7 @@ class ShellDock extends ConsumerWidget {
   }
 }
 
-/// The dock while searching: the shared Search field and a ✕.
+/// The dock's top layer on Search: the shared Search field and a ✕.
 class _SearchField extends ConsumerStatefulWidget {
   const _SearchField();
 
@@ -176,6 +166,7 @@ class _SearchFieldState extends ConsumerState<_SearchField> {
   @override
   void initState() {
     super.initState();
+    if (!ref.read(searchBarProvider.notifier).focusOnShow) return;
     // autofocus loses to a focus the tapped tab may have left in the scope.
     WidgetsBinding.instance.addPostFrameCallback(
       (_) => mounted ? ref.read(searchFocusProvider).requestFocus() : null,
@@ -186,28 +177,37 @@ class _SearchFieldState extends ConsumerState<_SearchField> {
   Widget build(BuildContext context) {
     final l = context.l10n;
     final online = ref.watch(searchOnlineProvider);
+    final controller = ref.watch(searchControllerProvider);
+    final focus = ref.watch(searchFocusProvider);
     return ConstrainedBox(
       constraints: const BoxConstraints(minHeight: CcDims.bottomBarHeight),
       // heightFactor: the bottom bar slot is as tall as the screen.
       child: Center(
         heightFactor: 1,
-        child: TextField(
-          controller: ref.watch(searchControllerProvider),
-          focusNode: ref.watch(searchFocusProvider),
-          textInputAction: TextInputAction.search,
-          onSubmitted: (_) => ref.read(searchSubmitProvider.notifier).submit(),
-          decoration: InputDecoration(
-            hintText: online ? l.ytHint : l.searchHint,
-            prefixIcon: const Icon(Icons.search_rounded),
-            suffixIcon: IconButton(
-              tooltip: l.closeSearch,
-              icon: const Icon(Icons.close_rounded),
-              onPressed: ref.read(searchBarProvider.notifier).dismiss,
+        child: ValueListenableBuilder<TextEditingValue>(
+          valueListenable: controller,
+          builder: (_, v, _) => TextField(
+            controller: controller,
+            focusNode: focus,
+            textInputAction: TextInputAction.search,
+            onSubmitted: (_) =>
+                ref.read(searchSubmitProvider.notifier).submit(),
+            decoration: InputDecoration(
+              hintText: online ? l.ytHint : l.searchHint,
+              prefixIcon: const Icon(Icons.search_rounded),
+              // ✕ only while there is text to clear.
+              suffixIcon: v.text.isEmpty
+                  ? null
+                  : IconButton(
+                      tooltip: l.clearSearch,
+                      icon: const Icon(Icons.close_rounded),
+                      onPressed: ref.read(searchBarProvider.notifier).dismiss,
+                    ),
+              filled: false,
+              border: InputBorder.none,
+              enabledBorder: InputBorder.none,
+              focusedBorder: InputBorder.none,
             ),
-            filled: false,
-            border: InputBorder.none,
-            enabledBorder: InputBorder.none,
-            focusedBorder: InputBorder.none,
           ),
         ),
       ),
