@@ -128,16 +128,17 @@ rete lenta (hotspot) nessun buffering ripetuto nei primi 10 s (K-SV-06).
 
 ## Tabella «Dopo»
 Build di debug del ramo `feat/57-coda-e-transizioni`, 2026-10-28, Wi-Fi di casa. 10 brani online mai ascoltati dalla
-ricerca (tap → suono) e una coda online con fine naturale dei brani; tempi in ms, mediana / massimo. Motorola non collegato.
+ricerca (tap → suono) e una coda online con fine naturale dei brani; tempi in ms, mediana / massimo. Motorola misurato il 2026-10-28 su build di master badd8bb (5 brani da ricerca, vedi riga; gap non misurato).
 
 | Dispositivo | fonte dell'URL | url | play (url) | Dopo 56: play (url) | gap al cambio (n) | play (file) |
 |---|---|---|---|---|---|---|
 | Linux (Xvfb) | yt-dlp | 3435 / 3755 | 3766 / 8604 | 4840 / 5130 | 142 / 199 (11, tutti `from=cache`) | 110–135 (5) |
 | Mi A3 `0d7ae9df206e` | NewPipe 10/10 | 1798 / 2037 | 3902 / 4625 | 37540 / 40450 | 528 / 536 (4, `from=cache`) | ~169 (6) |
-| Motorola edge 40 | — | non misurato | | 18197 / 19125 | | |
+| Motorola edge 40 | NewPipe 5/5 | 1880 / 2955 | 4343 / 5823 (n = 5) | 18197 / 19125 | non misurato | non misurato |
 
-- **RNF-08** (≤ 3 s Linux, ≤ 5 s Motorola): Linux 3,8 s, mancato di poco (−1,1 s rispetto alla 56); Motorola da misurare
-  (NewPipe sul Mi A3, più lento del Motorola, sta già sotto 4 s). Traguardo rivisto in D-174.
+- **RNF-08** (≤ 3 s Linux, ≤ 5 s Motorola): Linux 3,8 s, mancato di poco (−1,1 s rispetto alla 56); Motorola **raggiunto**: mediana 4,3 s
+  (n = 5, max 5,8 s sul primo brano a freddo; 3,4–4,4 s gli altri). Un sesto brano ha avuto l'URL di NewPipe in 1,8 s ma il suono solo
+  dalla cache a 19,3 s (`from=cache`, brano `NmeJbI1l2YA`, visto una volta): da indagare. Traguardo rivisto in D-174.
 - **RNF-09** (≤ 1 s): raggiunto su Linux (142 ms) e sul Mi A3 (528 ms).
 - **R-81**: nessun nuovo `attempt` al cambio su entrambi; ogni cambio misurato è `from=cache`.
 - **RNF-10**: `play (file)` resta tra 57 e 370 ms, come «Prima» (114 ms, n = 1).
