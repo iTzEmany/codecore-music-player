@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -78,7 +80,8 @@ class LyricsCard extends ConsumerWidget {
         track.lyricsPlain!,
         maxLines: 5,
         overflow: TextOverflow.ellipsis,
-        style: theme.bodyLarge,
+        strutStyle: _lyricsStrut(theme),
+        style: _lyricsStyle(theme),
       );
     } else {
       body = Row(
@@ -99,10 +102,36 @@ class LyricsCard extends ConsumerWidget {
     return _Card(
       title: l.lyrics,
       onTap: () => _openLyrics(context),
-      child: body,
+      // Fixed 5-line body: the cards below never jump (F-58, D-161).
+      child: SizedBox(
+        height: _lyricsRowHeight(context) * 5,
+        child: Align(alignment: Alignment.topLeft, child: body),
+      ),
     );
   }
 }
+
+const _lyricsLineHeight = 1.5;
+
+/// One line (strut height) plus 2 dp of air above and below.
+double _lyricsRowHeight(BuildContext context) =>
+    MediaQuery.textScalerOf(context).scale(
+          _lyricsFontSize(Theme.of(context).textTheme),
+        ) *
+        _lyricsLineHeight +
+    4;
+
+double _lyricsFontSize(TextTheme t) => t.bodyLarge?.fontSize ?? 16;
+
+TextStyle? _lyricsStyle(TextTheme t) =>
+    t.bodyLarge?.copyWith(height: _lyricsLineHeight);
+
+// Forced strut: every line is exactly as tall, whatever glyph (note) it holds.
+StrutStyle _lyricsStrut(TextTheme t) => StrutStyle(
+  fontSize: _lyricsFontSize(t),
+  height: _lyricsLineHeight,
+  forceStrutHeight: true,
+);
 
 class _SyncedLines extends ConsumerWidget {
   const _SyncedLines({required this.lines});
@@ -119,21 +148,26 @@ class _SyncedLines extends ConsumerWidget {
       ),
     );
     final center = index < 0 ? 0 : index;
-    final from = (center - 2).clamp(0, lines.length - 1);
+    // Near the end the window moves back instead of getting shorter.
+    final from = (center - 2).clamp(0, math.max(0, lines.length - 5)).toInt();
     final to = (from + 5).clamp(0, lines.length);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         for (var i = from; i < to; i++)
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 2),
-            child: Text(
-              lines[i].text.isEmpty ? '♪' : lines[i].text,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                fontWeight: i == index ? FontWeight.w700 : FontWeight.w500,
-                color: i == index ? cc.text : cc.textMuted,
+          SizedBox(
+            height: _lyricsRowHeight(context),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                lines[i].text.isEmpty ? '♪' : lines[i].text,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                strutStyle: _lyricsStrut(Theme.of(context).textTheme),
+                style: _lyricsStyle(Theme.of(context).textTheme)?.copyWith(
+                  fontWeight: i == index ? FontWeight.w700 : FontWeight.w500,
+                  color: i == index ? cc.text : cc.textMuted,
+                ),
               ),
             ),
           ),

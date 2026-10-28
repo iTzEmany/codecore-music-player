@@ -9,6 +9,7 @@ import 'package:codecore/ui/screens/jam/jam_seek_bar.dart';
 import 'package:codecore/ui/shell/app_shell.dart';
 import 'package:codecore/ui/shell/desktop_player_bar.dart';
 import 'package:codecore/ui/widgets/ring_progress.dart';
+import 'package:codecore/ui/widgets/seek_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -114,21 +115,22 @@ void main() {
       expect(spy.seeks.single, Duration.zero);
     });
 
-    testWidgets('while dragging ringDragProvider holds the finger fraction, '
+    // 59.4: ringDragProvider is now the shared seekDragProvider.
+    testWidgets('while dragging seekDragProvider holds the finger fraction, '
         'null after release; a cancelled gesture does not seek', (
       tester,
     ) async {
       final box = await pump(tester);
       final c = tester.getCenter(find.byType(RingProgress));
       var g = await tester.startGesture(c + _at(90, 139));
-      expect(box.read(ringDragProvider), closeTo(115 / 320, 0.02));
+      expect(box.read(seekDragProvider), closeTo(115 / 320, 0.02));
       await g.up();
-      expect(box.read(ringDragProvider), isNull);
+      expect(box.read(seekDragProvider), isNull);
       expect(spy.seeks, hasLength(1));
 
       g = await tester.startGesture(c + _at(90, 139));
       await g.cancel();
-      expect(box.read(ringDragProvider), isNull);
+      expect(box.read(seekDragProvider), isNull);
       expect(spy.seeks, hasLength(1), reason: 'cancel must not seek');
     });
   });

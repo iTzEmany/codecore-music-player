@@ -1054,13 +1054,13 @@ mobile_scanner — fase 24 — 2026-10-19
 - [x] 58.8 Controlli di fase
 
 ## Fase 59 — Player e seek (`fase-59-player-e-seek.md`)
-- [ ] 59.1 Scheda del testo a larghezza piena e altezza fissa (F-58)
-- [ ] 59.2 `RingProgress` con posizione e `onSeek` iniettati
-- [ ] 59.3 Una sola fonte di posizione
-- [ ] 59.4 `SeekBar` condivisa e un solo stato di trascinamento
-- [ ] 59.5 Barra orizzontale di nuovo nel player
-- [ ] 59.6 Accessibilità del seek
-- [ ] 59.7 Controlli di fase
+- [x] 59.1 Scheda del testo a larghezza piena e altezza fissa (F-58)
+- [x] 59.2 `RingProgress` con posizione e `onSeek` iniettati
+- [x] 59.3 Una sola fonte di posizione
+- [x] 59.4 `SeekBar` condivisa e un solo stato di trascinamento
+- [x] 59.5 Barra orizzontale di nuovo nel player
+- [x] 59.6 Accessibilità del seek
+- [x] 59.7 Controlli di fase — review high: 7 rilievi applicati; SmoothPosition unica per schermata nel seguito
 
 ## Fase 60 — Ricerca e dock (`fase-60-ricerca-e-dock.md`)
 - [ ] 60.1 ✕ svuota e resta

@@ -155,6 +155,7 @@ class _NowPlayingScreenState extends ConsumerState<NowPlayingScreen> {
       : [
           RiseIn(
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 if (!online) ...[
                   LyricsCard(track: track),

@@ -244,4 +244,26 @@ void main() {
       handle.dispose();
     });
   });
+
+  testWidgets('live turning off while mounted: the ring starts to follow the player',
+      (tester) async {
+    Widget ring({required bool live}) => ProviderScope(
+      overrides: [
+        positionProvider.overrideWith((_) => Stream.value(Duration.zero)),
+        durationProvider.overrideWith(
+          (_) => Stream.value(const Duration(seconds: 100)),
+        ),
+      ],
+      child: MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: RingProgress(size: 100, live: live, child: const SizedBox.expand()),
+      ),
+    );
+    await tester.pumpWidget(ring(live: true));
+    await tester.pumpWidget(ring(live: false));
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox());
+  });
 }
