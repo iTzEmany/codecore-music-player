@@ -668,6 +668,27 @@ void main() {
     expect(yt.started, ['a']);
   });
 
+  test('an address-only event does not shorten the start timeout', () async {
+    make(startTimeout: const Duration(seconds: 2), stallTimeout: const Duration(milliseconds: 30));
+    yt
+      ..urls.add('https://x/a')
+      ..autoFinish = true
+      ..progress = [(10, 100)]
+      ..gap = const Duration(milliseconds: 120);
+    expect((await prep.ready('youtube:a', _r('a'))).existsSync(), isTrue);
+    expect(yt.started, ['a']);
+  });
+
+  test('silence after real progress is a stall', () async {
+    make(startTimeout: const Duration(seconds: 2), stallTimeout: const Duration(milliseconds: 40));
+    yt
+      ..autoFinish = true
+      ..progress = [(10, 100)]
+      ..silence = const Duration(milliseconds: 200);
+    await expectLater(prep.ready('youtube:a', _r('a')), throwsA(isA<TimeoutException>()));
+    expect(yt.started, ['a', 'a']);
+  });
+
   test('silence after 100% (post-processing) is not a stall', () async {
     make(startTimeout: const Duration(seconds: 2), stallTimeout: const Duration(milliseconds: 40));
     yt

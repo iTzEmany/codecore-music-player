@@ -569,7 +569,8 @@ class StreamPreparer {
             if (downloaded) {
               j.downloaded ??= _ms(j);
               dog?.cancel();
-            } else {
+            } else if (e.received > 0 || e.path != null || u == null) {
+              // An address-only event is not download progress: keep startTimeout until real progress.
               arm(stallTimeout);
             }
           }
