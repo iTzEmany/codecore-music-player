@@ -1,4 +1,5 @@
 import 'jam_models.dart';
+import 'jam_turns.dart';
 
 /// Pure reducer for the authoritative Jam state (lives on the host).
 ///
@@ -23,6 +24,13 @@ JamResult applyCommand(
 
   int indexOf(int? id) => id == null ? -1 : items.indexWhere((i) => i.id == id);
 
+  final together = s.mode == JamMode.together;
+  final order = [for (final p in s.participants) p.id];
+
+  /// In together mode the items after the current one take turns (D-187).
+  List<JamItem> reordered(List<JamItem> l, int cur) =>
+      together ? togetherOrder(l, cur, order) : l;
+
   /// State with position frozen at "now" so play/pause keep the clock honest.
   JamState frozen() =>
       s.copyWith(positionMs: s.positionAtTime(nowMs), positionAt: nowMs);
@@ -45,8 +53,16 @@ JamResult applyCommand(
         if (victim <= s.currentIndex) return const JamResult.fail(JamError.full);
         items.removeAt(victim);
       }
-      if (inherited || first) {
+      if (first || (inherited && !together)) {
         items.add(added);
+      } else if (together) {
+        // Head of the sender's part, then the turns are redone (D-214).
+        var p = inherited
+            ? -1 // a seed track goes to the back of the host's part
+            : items.indexWhere((i) => i.ownerDeviceId == from, s.currentIndex + 1);
+        if (p < 0) p = items.length;
+        items.insert(p, added);
+        items.replaceRange(0, items.length, reordered(items, s.currentIndex));
       } else {
         var p = s.currentIndex + 1;
         while (p < items.length && !items[p].inherited) {
@@ -81,9 +97,10 @@ JamResult applyCommand(
         if (cur >= items.length) cur = items.isEmpty ? -1 : items.length - 1;
         out = s.copyWith(positionMs: 0, positionAt: nowMs, playing: items.isEmpty ? false : s.playing);
       }
-      return commit(out.copyWith(items: items, currentIndex: cur));
+      return commit(out.copyWith(items: reordered(items, cur), currentIndex: cur));
 
     case JamCommandType.move:
+      if (together) return const JamResult.fail(JamError.forbidden); // R-103
       final idx = indexOf(cmd.itemId);
       if (idx < 0) return const JamResult.fail(JamError.notFound);
       final to = cmd.toIndex!;
@@ -156,6 +173,7 @@ JamResult applyCommand(
       final idx = indexOf(cmd.itemId);
       if (idx < 0) return const JamResult.fail(JamError.notFound);
       return commit(s.copyWith(
+          items: reordered(items, idx),
           currentIndex: idx, positionMs: 0, positionAt: startAt(s), playing: true));
 
     case JamCommandType.trackEnded:
@@ -168,6 +186,17 @@ JamResult applyCommand(
       // Nothing to go back from: a no-op, so `invalid` only means «old host».
       if (s.current == null) return JamResult.ok(s);
       return applyCommand(s, jamPreviousCommand(s, nowMs), from: from, nowMs: nowMs);
+
+    case JamCommandType.setMode:
+      if (!isHost) return const JamResult.fail(JamError.forbidden);
+      final m = cmd.mode!;
+      if (m == s.mode) return JamResult.ok(s);
+      // Going back to host mode leaves the items where they are (R-104).
+      return commit(s.copyWith(
+          mode: m,
+          items: m == JamMode.together
+              ? togetherOrder(items, s.currentIndex, order)
+              : null));
 
     case JamCommandType.end:
       if (!isHost) return const JamResult.fail(JamError.forbidden);

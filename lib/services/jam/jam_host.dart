@@ -10,6 +10,7 @@ import '../share/lan_server.dart';
 import '../share/offers.dart';
 import '../share/track_meta.dart';
 import 'jam_models.dart';
+import 'jam_turns.dart';
 import 'jam_state.dart';
 
 const jamRequestTtl = Duration(minutes: 5);
@@ -145,7 +146,16 @@ class JamHost {
       ];
 
   void _publish(JamState s) {
-    _state = s.copyWith(version: s.version + 1, participants: _roster());
+    final roster = _roster();
+    // Someone joined or left during together mode: the turns are redone (D-210).
+    _state = s.copyWith(
+      version: s.version + 1,
+      participants: roster,
+      items: s.mode == JamMode.together
+          ? togetherOrder(
+              s.items, s.currentIndex, [for (final p in roster) p.id])
+          : null,
+    );
     _notify();
   }
 
@@ -221,8 +231,8 @@ class JamHost {
   }
 
   /// Removes a guest and the items it owns, except the online ones not yet played:
-  /// the output downloads those by video id (D-93). The session ends when nobody is
-  /// left but the host.
+  /// the output downloads those by video id (D-93). The Jam stays open with the host
+  /// alone, who goes on with the queue (D-221).
   void removeMember(String id) {
     if (_members.remove(id) == null || _state == null) return;
     var s = _state!;
@@ -247,7 +257,6 @@ class JamHost {
               outputDeviceIds: left.length == 1 ? const [] : left);
     }
     _publish(s);
-    if (_members.isEmpty) endSession();
   }
 
   /// Drops guests that have not been heard from for [timeout]; returns them.

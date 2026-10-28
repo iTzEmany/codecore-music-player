@@ -160,6 +160,35 @@ void main() {
     expect(host.state!.items.map((i) => i.title), ['cur']);
   });
 
+  test('the only guest leaves with an online track: the Jam stays on the host (D-221)', () async {
+    await startSession();
+    host.apply(
+      const JamCommand.add(
+        JamItem(id: 0, ownerDeviceId: 'host', title: 'H', ext: 'mp3'),
+      ),
+      from: 'host',
+    );
+    host.apply(
+      const JamCommand.add(
+        JamItem(
+          id: 0,
+          ownerDeviceId: 'guest',
+          title: 'yt',
+          ext: 'm4a',
+          ref: 'yt:youtube:abc',
+          videoId: 'abc',
+        ),
+      ),
+      from: 'guest',
+    );
+
+    host.removeMember('guest');
+
+    expect(host.memberIds, isEmpty);
+    expect(host.state!.ended, false);
+    expect(host.state!.items.map((i) => i.title), ['H', 'yt']);
+  });
+
   test('long poll wakes up on change and times out otherwise', () async {
     final s = await startSession();
     final auth = {'x-jam-token': s.token};
