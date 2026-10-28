@@ -432,6 +432,57 @@ void main() {
       expect(fb.nextPath, file.path);
     });
 
+    test('a late file of the track left by a join does not take the plays of the new one', () async {
+      final gate = prep.gates['youtube:v1'] = Completer<void>();
+      final file = cacheB();
+      await repo.upsertStreamRow('youtube:v2', res('v2'), file);
+      await start();
+      fb.advance();
+      await settle();
+      expect(h.currentTrack!.id, b);
+      gate.complete(); // the file of A arrives now
+      await settle();
+      await h.play();
+      fb.posC.add(const Duration(seconds: 40));
+      await settle();
+      expect((await repo.streamRow('youtube:v2'))!.playCount, 1);
+    });
+
+    test('a downloaded online entry is prepared from the library file, the join loads nothing', () async {
+      h.libraryIdOf = (r) async => r.id == 'v2' ? ids.first : null;
+      await start();
+      expect(fb.nextPath, '/m/a.mp3');
+      final loads = fb.loaded.length;
+      fb.advance();
+      await settle();
+      expect(h.currentTrack!.id, ids.first);
+      expect(fb.loaded.length, loads);
+    });
+
+    test('the next track survives the load of an address-streamed current one', () async {
+      final slow = _SlowStart(repo, dir)..urls['youtube:v1'] = (addr, const {});
+      h.preparer = slow;
+      final started = h.playQueue([a, ids.first], 0);
+      await h.setTransition(TransitionMode.gapless);
+      await settle();
+      slow.gate.complete();
+      await started;
+      await settle();
+      expect(fb.nextPath, '/m/a.mp3');
+    });
+
+    test('the next track survives a recovery of the address', () async {
+      await h.playQueue([a, ids.first], 0);
+      await h.setTransition(TransitionMode.gapless);
+      await settle();
+      expect(fb.nextPath, '/m/a.mp3');
+      prep.restarts['youtube:v1'] = [StreamStart.url(addr, const {})];
+      fb.stateC.add(BackendState.error);
+      await settle();
+      expect(fb.loadedUris, hasLength(2));
+      expect(fb.nextPath, '/m/a.mp3');
+    });
+
     test('with the crossfade engine B is prepared from its file on the other player', () async {
       final players = <FakeBackend>[];
       final fader = CodecoreAudioHandler(
@@ -458,6 +509,24 @@ void main() {
       expect(players[1].loaded, [file.path]);
     });
   });
+}
+
+/// `start` waits for [gate]; the current entry shows as downloading, like the real one.
+class _SlowStart extends FakeStreamPreparer {
+  _SlowStart(super.tracks, super.dir);
+  final gate = Completer<void>();
+
+  @override
+  Future<StreamStart> start(String key, YtResult r) async {
+    await gate.future;
+    return super.start(key, r);
+  }
+
+  @override
+  void setQueue(List<StreamItem> items) {
+    super.setQueue(items);
+    if (items.isNotEmpty) phases.value = {...phases.value, items.first.key: StreamPhase.downloading};
+  }
 }
 
 class _FakeTimer implements Timer {

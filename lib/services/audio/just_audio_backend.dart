@@ -156,6 +156,7 @@ class JustAudioBackend implements AudioBackend, GaplessCapable {
     Uri uri, {
     Map<String, String> headers = const {},
   }) async {
+    _resetWindow();
     try {
       // An empty (non-null) map would still start just_audio's local proxy,
       // which breaks HLS: relative segments after a redirect.

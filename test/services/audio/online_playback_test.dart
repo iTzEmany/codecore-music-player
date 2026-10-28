@@ -296,6 +296,15 @@ void main() {
     expect(failures.single.reason, PlaybackFailureReason.networkUnavailable);
   });
 
+  test('an age-restricted video with no substitute is reported as ageRestricted', () async {
+    final id = online.register(result('v1'));
+    preparer.failing.add('youtube:v1');
+    preparer.failure = const YtException(YtErrorKind.unavailable, 'ERROR: Sign in to confirm your age');
+    await handler.playQueue([id, ids[0]], 0);
+    await settle();
+    expect(failures.single.reason, PlaybackFailureReason.ageRestricted);
+  });
+
   test('a non-network YtException is reported as onlineUnavailable', () async {
     final id = online.register(result('v1'));
     preparer.failing.add('youtube:v1');

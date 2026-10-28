@@ -94,6 +94,7 @@ class StreamPreparer {
     this.attemptTimeout = const Duration(minutes: 5),
     this.startTimeout = const Duration(seconds: 90),
     this.stallTimeout = const Duration(seconds: 30),
+    this.ageSearchTimeout = const Duration(seconds: 20),
     this.clock = DateTime.now,
   }) {
     // A key promoted out of the cache (StreamCache.forget) is no longer ready.
@@ -131,6 +132,9 @@ class StreamPreparer {
 
   /// An attempt that reports no progress for this long is aborted (hung network).
   final Duration stallTimeout;
+
+  /// Longest wait for the search of an age-restricted video's substitute.
+  final Duration ageSearchTimeout;
 
   /// Time source of the `stream timing` log line (injectable for tests).
   final DateTime Function() clock;
@@ -500,7 +504,7 @@ class StreamPreparer {
   Future<YtResult?> _ageSubstitute(YtResult r) async {
     try {
       final c = cleanSearchQuery(r.title, r.channel);
-      final found = await youtube.searchSongs('${c.title} ${c.artist}'.trim());
+      final found = await youtube.searchSongs('${c.title} ${c.artist}'.trim()).timeout(ageSearchTimeout);
       for (final s in found) {
         final d = r.duration, sd = s.duration;
         if (s.id == r.id || (d != null && (sd == null || (sd - d).inSeconds.abs() > 10))) continue;

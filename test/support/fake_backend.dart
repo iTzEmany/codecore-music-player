@@ -73,6 +73,7 @@ class FakeBackend implements AudioBackend, GaplessCapable {
     if (failing.contains(uri.toString())) {
       throw const BackendException('unreachable');
     }
+    nextPath = null;
     loadedUris.add((uri: uri, headers: headers));
     stateC.add(BackendState.paused);
   }

@@ -49,11 +49,13 @@ class AndroidYtDlpService implements YoutubeService {
         'streamUrl',
         {'id': id},
       );
+      final url = m?['url'];
+      if (url is! String) throw StateError('newpipe answered without a url');
       final h = (m!['headers'] as Map?)?.cast<String, String>() ?? {};
       _offerUrl(
         pid,
         'newpipe',
-        DownloadProgress(streamUrl: Uri.parse('${m['url']}'), headers: h),
+        DownloadProgress(streamUrl: Uri.parse(url), headers: h),
       );
     } on MissingPluginException {
       // Lite flavor has no NewPipe: silent fallback.

@@ -116,7 +116,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
 
   // The file of what follows may arrive while the current track plays (R-80).
   void _onPhases() {
-    if (_current == null || _window?.track != null) return;
+    if (_current == null || _window?.track != null || _loadBusy || _waitingStream) return;
     _window?.invalidate();
     unawaited(_refreshWindow());
   }
@@ -510,6 +510,7 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
       } else {
         await _backend.pause();
       }
+      _window?.invalidate(); // the load dropped the backend's window
       unawaited(_refreshWindow());
     } on BackendException catch (e) {
       if (token != _loadToken) return;
@@ -939,6 +940,8 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
       } else {
         await _backend.pause();
       }
+      _window?.invalidate(); // the new load dropped the backend's window
+      unawaited(_refreshWindow());
     } on Object catch (e, st) {
       AppLog.w('stream $key could not be restarted', e, st);
       if (token == _loadToken) {
@@ -1011,6 +1014,8 @@ class CodecoreAudioHandler extends BaseAudioHandler with SeekHandler {
     }
     _consecutiveErrors = 0;
     _lastResumeSave = Duration.zero;
+    // The old load's late callbacks (a file arriving, a recovery) are not the new track's.
+    _loadToken++;
     // The gapless next track is a file: an error there is not the old address's.
     _url = null;
     _recoverOnPlay = _errorWhileLoading = false;

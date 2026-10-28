@@ -29,6 +29,8 @@ class _Yt implements YoutubeService {
   final forbidden = <String, int>{};
   final ageGated = <String>{};
   var songs = <YtResult>[];
+  var searches = 0;
+  var searchHangs = false;
   final _gates = <String, Completer<void>>{};
   var open = 0, maxOpen = 0;
   var autoFinish = false;
@@ -90,7 +92,11 @@ class _Yt implements YoutubeService {
   }
 
   @override
-  Future<List<YtResult>> searchSongs(String query, {int limit = 5}) async => songs;
+  Future<List<YtResult>> searchSongs(String query, {int limit = 5}) async {
+    searches++;
+    if (searchHangs) await Completer<void>().future;
+    return songs;
+  }
 
   @override
   dynamic noSuchMethod(Invocation i) => throw UnimplementedError('${i.memberName}');
@@ -125,12 +131,14 @@ void main() {
     Duration attemptTimeout = const Duration(minutes: 5),
     Duration stallTimeout = const Duration(minutes: 5),
     Duration startTimeout = const Duration(minutes: 5),
+    Duration ageSearchTimeout = const Duration(seconds: 20),
     DateTime Function()? clock,
   }) =>
       prep = StreamPreparer(
         attemptTimeout: attemptTimeout,
         stallTimeout: stallTimeout,
         startTimeout: startTimeout,
+        ageSearchTimeout: ageSearchTimeout,
         cache: cache,
         tracks: tracks,
         youtube: yt,
@@ -218,6 +226,30 @@ void main() {
       yt.songs = [song('far', 300)]; // 100 s off
       await expectLater(prep.ready('youtube:age', song('age', 200)), throwsA(predicate(isAgeRestricted)));
       expect(yt.started, ['age']);
+    });
+
+    test('a substitute that is age-restricted too: the age error, one substitute only', () async {
+      yt.autoFinish = true;
+      yt.ageGated.addAll(['age', 'sub']);
+      yt.songs = [song('sub', 205)];
+      await expectLater(prep.ready('youtube:age', song('age', 200)), throwsA(predicate(isAgeRestricted)));
+      expect(yt.started, ['age', 'sub']);
+      expect(yt.searches, 1);
+    });
+
+    test('a search that never answers is given up: the age error, the slot is free', () async {
+      make(ageSearchTimeout: const Duration(milliseconds: 50));
+      yt.autoFinish = true;
+      yt.ageGated.add('age');
+      yt.searchHangs = true;
+      await expectLater(prep.ready('youtube:age', song('age', 200)), throwsA(predicate(isAgeRestricted)));
+      expect(yt.started, ['age']);
+    });
+
+    test('isAgeRestricted reads both wordings of the error', () {
+      expect(isAgeRestricted(const YtException(YtErrorKind.unavailable, 'This video is age-restricted')), isTrue);
+      expect(isAgeRestricted(const YtException(YtErrorKind.unavailable, 'Video unavailable')), isFalse);
+      expect(isAgeRestricted(StateError('confirm your age')), isFalse);
     });
   });
 
@@ -379,6 +411,7 @@ void main() {
       shift = const Duration(minutes: 20);
       expect((await prep.start('youtube:a', _r('a'))).file, isNotNull);
       expect(yt.started, ['a']);
+      expect(yt.tokens['a']!.single!.isCancelled, isFalse);
     });
 
     test('restart after a failed job: a new job', () async {

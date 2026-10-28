@@ -94,6 +94,17 @@ void main() {
     expect(urls, [_ytdlpUrl]);
   });
 
+  test('NewPipe answers without a url: the yt-dlp url is used', () async {
+    final urls = await _run(
+      () async => {'headers': {'User-Agent': 'x'}},
+      () async {
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+        await _ytdlpLines();
+      },
+    );
+    expect(urls, [_ytdlpUrl]);
+  });
+
   test('NewPipe after yt-dlp: ignored', () async {
     final urls = await _run(
       () async {
