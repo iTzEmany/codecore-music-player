@@ -365,6 +365,7 @@ class JamController extends Notifier<JamUiState> {
     } on Object catch (e, st) {
       // Do not leave the disk held for the whole session.
       AppLog.w('jam: start failed', e, st);
+      state = state.copyWith(phase: JamPhase.ended, lost: true);
       await _teardown();
       rethrow;
     }

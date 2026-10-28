@@ -82,6 +82,8 @@ class JamOutput {
   final _subs = <StreamSubscription<Object?>>[];
   Duration _position = Duration.zero;
   int? _loadedId;
+  // Clock offset of the last single-output position check (once per offset).
+  int? _checkedOffset;
   bool _backendPlaying = false;
   double _volume = -1;
   Future<void> _chain = Future.value();
@@ -144,6 +146,7 @@ class JamOutput {
         return;
       }
       _loadedId = item.id;
+      _checkedOffset = null;
       _position = Duration.zero;
       if (!syncMode && target > Duration.zero) await backend.seek(target);
     } else if (!syncMode) {
@@ -199,7 +202,13 @@ class JamOutput {
       // Not in the first second after the (re)start: the player is still
       // starting up.
       final since = _nowMs() - s.positionAt;
-      if (c != null && s.playing && _backendPlaying && since > 1000) {
+      if (c != null &&
+          _loadedId == s.current?.id &&
+          s.playing &&
+          _backendPlaying &&
+          since > 1000 &&
+          c.offsetMs != _checkedOffset) {
+        _checkedOffset = c.offsetMs;
         final target = s.positionAtTime(_nowMs());
         final drift = backend.positionNow.inMilliseconds - target;
         if (drift.abs() > jamSingleOutputReseek.inMilliseconds) {

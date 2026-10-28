@@ -70,8 +70,9 @@ class PlaybackPersistence {
   /// queue from before the Jam is what a restart in the middle of it finds.
   Future<void> hold(Duration position) async {
     _position = position;
-    await flush();
+    final f = flush(); // reads _held synchronously: a release meanwhile stays
     _held = true;
+    await f;
   }
 
   /// The disk follows again, from [position] (where the restored track waits).

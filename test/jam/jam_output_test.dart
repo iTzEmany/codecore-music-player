@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:codecore/services/audio/audio_backend.dart';
 import 'package:codecore/services/jam/jam_clock.dart';
 import 'package:codecore/services/jam/jam_models.dart';
@@ -103,6 +105,47 @@ void main() {
     await c.sync();
     await Future<void>.delayed(const Duration(milliseconds: 300));
     expect(backend.seeks.single, const Duration(milliseconds: 5000));
+    await o.dispose();
+  });
+
+  test('single output: one re-check per clock offset, none while the next item loads',
+      () async {
+    var local = 100000;
+    var skew = 0;
+    final gate = Completer<void>();
+    final c = JamClock(
+      probe: () async => (t0: local, hostMs: local + skew, t1: local),
+      localNowMs: () => local,
+    );
+    final o = JamOutput(
+      deviceId: 'me',
+      backend: backend,
+      clock: c,
+      syncInterval: const Duration(milliseconds: 50),
+      resolve: (i) async {
+        if (i.id == 2) await gate.future;
+        return const JamSource.local('/m.mp3');
+      },
+    );
+    await o.apply(st(at: 100000));
+    local += 3000;
+    // New item still resolving: the old one must not be moved to its position.
+    unawaited(o.apply(st(cur: 1, at: 100000)));
+    backend.positionValue = Duration.zero;
+    await Future<void>.delayed(const Duration(milliseconds: 300));
+    expect(backend.seeks, isEmpty);
+    gate.complete();
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+    backend.seeks.clear();
+    skew = 2000;
+    await c.sync();
+    backend.positionValue = Duration.zero;
+    await Future<void>.delayed(const Duration(milliseconds: 600));
+    expect(backend.seeks, hasLength(1)); // drift persists, same offset: no 2nd seek
+    skew = 3000;
+    await c.sync();
+    await Future<void>.delayed(const Duration(milliseconds: 300));
+    expect(backend.seeks, hasLength(2));
     await o.dispose();
   });
 

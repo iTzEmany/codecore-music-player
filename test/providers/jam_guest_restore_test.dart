@@ -124,9 +124,20 @@ void main() {
     await expectLater(
         c.read(jamProvider.notifier).debugBegin(JamRole.guest, jamState),
         throwsStateError);
+    expect(c.read(jamProvider).phase, JamPhase.ended);
     expectBack();
     await handler.playQueue([ids[3]], 0);
     await c.read(playbackPersistenceProvider)!.flush();
+    expect(store.readPlayback().queueIds, [ids[3]]);
+  });
+
+  test('a release during hold is not overridden by the late hold', () async {
+    final p = c.read(playbackPersistenceProvider)!;
+    final h = p.hold(Duration.zero);
+    p.release(Duration.zero);
+    await h;
+    await handler.playQueue([ids[3]], 0);
+    await p.flush();
     expect(store.readPlayback().queueIds, [ids[3]]);
   });
 
