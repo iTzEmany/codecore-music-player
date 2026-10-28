@@ -5,7 +5,8 @@ import 'package:codecore/providers/ui_providers.dart';
 import 'package:codecore/services/online/credits.dart' show creditNameKey;
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:codecore/providers/library_providers.dart' show SearchQuery;
+import 'package:codecore/providers/library_providers.dart'
+    show SearchQuery, searchIndexProvider;
 import 'package:codecore/ui/screens/search/search_screen.dart';
 import 'package:codecore/ui/screens/search/search_section_screen.dart';
 import 'package:codecore/ui/widgets/empty_state.dart';
@@ -18,6 +19,7 @@ import '../support/app_harness.dart';
 import '../support/search_input.dart';
 
 Future<void> _settle(WidgetTester tester) async {
+  await indexReady(tester);
   await tester.runAsync(
     () => Future<void>.delayed(const Duration(milliseconds: 150)),
   );
@@ -49,6 +51,22 @@ Future<void> _insertDiscs(Harness h) async {
 }
 
 void main() {
+  testWidgets('search: focusing the field builds the index before any key', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1400, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final h = await Harness.create(tester, tracks: 4);
+    await h.pump(tester, const SearchScreen());
+    final c = ProviderScope.containerOf(tester.element(find.byType(SearchScreen)));
+    expect(c.exists(searchIndexProvider), isFalse);
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+    expect(c.exists(searchIndexProvider), isTrue);
+    await h.dispose(tester);
+  });
+
   testWidgets('search: typing shows library sections, never starts YouTube', (
     tester,
   ) async {

@@ -45,6 +45,7 @@ class SearchScreen extends ConsumerStatefulWidget {
 class _SearchScreenState extends ConsumerState<SearchScreen> {
   // Shared with the dock's field, which is where a phone types.
   late final _controller = ref.read(searchControllerProvider);
+  late final _focus = ref.read(searchFocusProvider);
   Timer? _debounce;
   late String _lastText = _controller.text;
   late String _text = _controller.text.trim();
@@ -57,6 +58,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   void initState() {
     super.initState();
     _controller.addListener(_onTextChanged);
+    _focus.addListener(_warmIndex);
     // A text sent here before this tab was ever opened.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _applyPrefill(ref.read(searchPrefillProvider));
@@ -76,10 +78,20 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     });
   }
 
+  /// The first focus loads the library and normalises it into the search
+  /// index (tens of ms on a phone, all in one go); doing it here, before the
+  /// first key, keeps that frame out of the typing.
+  void _warmIndex() {
+    if (!_focus.hasFocus) return;
+    _focus.removeListener(_warmIndex);
+    ref.read(searchIndexProvider);
+  }
+
   @override
   void dispose() {
     _debounce?.cancel();
     _controller.removeListener(_onTextChanged);
+    _focus.removeListener(_warmIndex);
     super.dispose();
   }
 

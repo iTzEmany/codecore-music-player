@@ -11,7 +11,7 @@ import '../support/search_input.dart';
 Future<void> _settle(WidgetTester tester) async {
   await tester.runAsync(() => Future<void>.delayed(Duration.zero));
   await tester.pump(const Duration(milliseconds: 400));
-  await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+  await indexReady(tester);
   await tester.pump(const Duration(milliseconds: 400));
 }
 
