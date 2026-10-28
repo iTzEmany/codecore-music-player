@@ -240,20 +240,23 @@ class _TrackRowState extends State<TrackRow> {
           ),
         ),
         SizedBox(
-          width: 40,
+          width: 48,
           child: widget.onMore == null
               ? null
-              : Opacity(
-                  opacity: _hover ? 1 : 0,
-                  child: IconButton(
-                    tooltip: l.moreOptions,
-                    onPressed: widget.onMore,
-                    visualDensity: ccIconDensity,
-                    icon: Icon(Icons.more_horiz_rounded, color: cc.textMuted),
-                  ),
-                ),
+              : _moreButton(context, visible: _hover),
         ),
       ],
+    );
+  }
+
+  /// The ⋮; hidden it is out of semantics and focus, and always >= 48 dp to hit.
+  Widget _moreButton(BuildContext context, {required bool visible}) {
+    if (!visible) return const SizedBox(width: 48, height: 48);
+    return IconButton(
+      tooltip: context.l10n.moreOptions,
+      onPressed: widget.onMore,
+      constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+      icon: Icon(Icons.more_vert_rounded, color: context.cc.textMuted),
     );
   }
 
@@ -306,18 +309,7 @@ class _TrackRowState extends State<TrackRow> {
             child: Icon(Icons.favorite_rounded, size: 16, color: cc.accent),
           ),
         if (widget.onMore != null)
-          Opacity(
-            opacity: showActions ? 1 : 0,
-            child: IconButton(
-              tooltip: l.moreOptions,
-              onPressed: widget.onMore,
-              visualDensity: ccIconDensity,
-              icon: Icon(
-                wide ? Icons.more_horiz_rounded : Icons.more_vert_rounded,
-                color: cc.textMuted,
-              ),
-            ),
-          ),
+          _moreButton(context, visible: showActions),
       ],
     );
     // Same width whether or not the actions show, so the columns line up.
@@ -506,6 +498,7 @@ class LiveTrackRow extends ConsumerWidget {
     this.index,
     this.albumArtist,
     this.onMore,
+    this.lead,
     this.reorderIndex,
     this.selection,
     this.subtitleSuffix,
@@ -526,8 +519,11 @@ class LiveTrackRow extends ConsumerWidget {
   final RowSelection? selection;
   final String? subtitleSuffix;
 
-  /// Replaces the default actions sheet (e.g. «Rimuovi dalla playlist»).
+  /// Replaces the default actions sheet.
   final VoidCallback? onMore;
+
+  /// First entry of the track sheet (e.g. «Rimuovi dalla playlist»).
+  final TrackAction? lead;
   final int? reorderIndex;
 
   @override
@@ -539,7 +535,7 @@ class LiveTrackRow extends ConsumerWidget {
       currentTrackProvider.select((t) => t.value?.id == track.id),
     );
     final playing = isCurrent && (ref.watch(isPlayingProvider).value ?? false);
-    void actions() => showTrackActions(context, ref, track);
+    void actions() => showTrackActions(context, ref, track, lead: lead);
     final sel = selection;
     final (active, position) = sel == null
         ? (false, -1)
@@ -587,7 +583,7 @@ class LiveTrackRow extends ConsumerWidget {
       selectedPosition: picked ? position + 1 : null,
       subtitleSuffix: subtitleSuffix,
       albumAsSubtitle: albumAsSubtitle,
-      onSecondaryTap: (pos) => showTrackContextMenu(context, ref, track, pos),
+      onSecondaryTap: (_) => actions(),
       onFavorite: () => toggleFavorite(context, ref, track),
       compact: compact,
       index: index,

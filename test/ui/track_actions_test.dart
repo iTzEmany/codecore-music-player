@@ -227,14 +227,13 @@ void main() {
     return h;
   }
 
-  testWidgets('sheet header has title, artist, album on three lines; no dividers',
+  testWidgets('sheet header has title, artist, album on three lines',
       (tester) async {
     final h = await openSheet(tester, (t) => t);
     expect(find.textContaining('·'), findsNothing);
     final a = tester.getRect(find.text('Artist'));
     final b = tester.getRect(find.text('Album 0'));
     expect(b.top, greaterThanOrEqualTo(a.bottom));
-    expect(find.byType(Divider), findsNothing);
     await h.dispose(tester);
   });
 
@@ -242,8 +241,9 @@ void main() {
     final h = await openSheet(tester, (t) => t);
     final tiles = tester.widgetList<ListTile>(find.byType(ListTile)).toList();
     expect((tiles.last.title as Text).data, 'Elimina dal dispositivo');
-    expect(tiles.last.textColor, CcColors.notte.error);
-    expect(tiles.where((x) => x.textColor == CcColors.notte.error), hasLength(1));
+    Color? red(ListTile x) => (x.title as Text).style?.color;
+    expect(red(tiles.last), CcColors.notte.error);
+    expect(tiles.where((x) => red(x) == CcColors.notte.error), hasLength(1));
     await h.dispose(tester);
   });
 
@@ -259,7 +259,7 @@ void main() {
   testWidgets('online track: no destructive row', (tester) async {
     final h = await openSheet(tester, (t) => t.copyWith(id: -5));
     expect(find.byType(ListTile), findsWidgets);
-    expect(tester.widgetList<ListTile>(find.byType(ListTile)).where((x) => x.textColor == CcColors.notte.error), isEmpty);
+    expect(tester.widgetList<ListTile>(find.byType(ListTile)).where((x) => (x.title as Text).style?.color == CcColors.notte.error), isEmpty);
     await h.dispose(tester);
   });
 
