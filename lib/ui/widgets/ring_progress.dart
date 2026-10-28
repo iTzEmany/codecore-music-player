@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +11,7 @@ import '../../l10n/l10n_ext.dart';
 import '../../providers/player_providers.dart';
 import '../theme/tokens.dart';
 import 'format_utils.dart';
+import 'smooth_position.dart';
 
 /// Playback fraction 0..1, or null when the duration is unknown.
 double? ringProgress(Duration position, Duration? duration) {
@@ -32,6 +34,10 @@ class RingDrag extends Notifier<double?> {
 /// the gap and a dot marks the playhead. [live] (radio, Jam) paints it full.
 /// With [seekable] (the full player) dragging on the ring seeks, and the ring
 /// is a screen-reader slider.
+///
+/// [position], [duration] and [onSeek] default to the local player; the Jam
+/// passes its own (a [SmoothPosition] fed from JamState). A [position] given
+/// at first build must stay given.
 class RingProgress extends ConsumerStatefulWidget {
   const RingProgress({
     super.key,
@@ -40,6 +46,9 @@ class RingProgress extends ConsumerStatefulWidget {
     this.live = false,
     this.stroke = 3,
     this.seekable = false,
+    this.position,
+    this.duration,
+    this.onSeek,
   });
 
   final double size;
@@ -47,6 +56,9 @@ class RingProgress extends ConsumerStatefulWidget {
   final bool live;
   final double stroke;
   final bool seekable;
+  final ValueListenable<Duration>? position;
+  final Duration? duration;
+  final ValueChanged<Duration>? onSeek;
 
   /// Side of the circle the cover is clipped to inside a ring of [size].
   static double innerSize(double size, {double stroke = 3}) =>
@@ -61,6 +73,24 @@ class RingProgress extends ConsumerStatefulWidget {
 }
 
 class _RingProgressState extends ConsumerState<RingProgress> {
+  /// The player's position when none is injected (never for [live]).
+  SmoothPosition? _own;
+  ValueListenable<Duration> get _pos => widget.position ?? _own!;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.position == null && !widget.live) {
+      _own = SmoothPosition()..followPlayer(ref);
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _own?.bindTickerMode(context);
+  }
+
   /// Fraction under the finger while dragging; the seek happens on release.
   double? _drag;
   bool _focused = false;
@@ -68,7 +98,12 @@ class _RingProgressState extends ConsumerState<RingProgress> {
   // Same step for the keyboard and for screen readers.
   static const _step = Duration(seconds: 5);
 
-  void _seekTo(Duration d) => ref.read(playerControllerProvider).seek(d);
+  void _seekTo(Duration d) => widget.onSeek != null
+      ? widget.onSeek!(d)
+      : ref.read(playerControllerProvider).seek(d);
+
+  Duration? _readDuration() =>
+      widget.duration ?? ref.read(durationProvider).value;
 
   late final RingDrag _dragNotifier = ref.read(ringDragProvider.notifier);
 
@@ -76,6 +111,7 @@ class _RingProgressState extends ConsumerState<RingProgress> {
   void dispose() {
     // Closed mid-drag: the elapsed time must not stay on the finger.
     if (_drag != null) Future.microtask(() => _dragNotifier.set(null));
+    _own?.dispose();
     super.dispose();
   }
 
@@ -85,11 +121,13 @@ class _RingProgressState extends ConsumerState<RingProgress> {
     final size = widget.size;
     final inner = RingProgress.innerSize(size, stroke: widget.stroke);
     // Own layer: position ticks re-record the ring only, not the cover.
-    Widget paint(double? progress) => RepaintBoundary(
+    Widget paint({Duration? dur, double? fixed}) => RepaintBoundary(
       child: CustomPaint(
         size: Size.square(size),
         painter: RingPainter(
-          progress: progress,
+          progress: fixed,
+          position: fixed == null && !widget.live ? _pos : null,
+          duration: dur,
           arc: cc.accent,
           rest: cc.surface3,
           stroke: widget.stroke,
@@ -97,33 +135,39 @@ class _RingProgressState extends ConsumerState<RingProgress> {
       ),
     );
     final ring = widget.live
-        ? paint(null)
+        ? paint()
         : Consumer(
             builder: (_, ref, _) {
-              final pos = ref.watch(positionProvider).value ?? Duration.zero;
-              final dur = ref.watch(durationProvider).value;
-              final p = _drag ?? ringProgress(pos, dur);
+              final dur = widget.duration ?? ref.watch(durationProvider).value;
+              final ringPaint = paint(dur: dur, fixed: _drag);
               if (!widget.seekable || dur == null || dur <= Duration.zero) {
-                return paint(p);
+                return ringPaint;
               }
-              final shown = _drag == null ? pos : dur * _drag!;
               Duration clamp(Duration d) =>
                   d < Duration.zero ? Duration.zero : (d > dur ? dur : d);
-              return Semantics(
-                slider: true,
-                label: context.l10n.seekPosition,
-                value:
-                    '${formatDuration(shown.inMilliseconds)} / '
-                    '${formatDuration(dur.inMilliseconds)}',
-                increasedValue: formatDuration(
-                  clamp(shown + _step).inMilliseconds,
-                ),
-                decreasedValue: formatDuration(
-                  clamp(shown - _step).inMilliseconds,
-                ),
-                onIncrease: () => _seekTo(clamp(shown + _step)),
-                onDecrease: () => _seekTo(clamp(shown - _step)),
-                child: paint(p),
+              // Only the semantics node rebuilds on a tick, not the painter.
+              return ValueListenableBuilder<Duration>(
+                valueListenable: _pos,
+                child: ringPaint,
+                builder: (_, pos, child) {
+                  final shown = _drag == null ? pos : dur * _drag!;
+                  return Semantics(
+                    slider: true,
+                    label: context.l10n.seekPosition,
+                    value:
+                        '${formatDuration(shown.inMilliseconds)} / '
+                        '${formatDuration(dur.inMilliseconds)}',
+                    increasedValue: formatDuration(
+                      clamp(shown + _step).inMilliseconds,
+                    ),
+                    decreasedValue: formatDuration(
+                      clamp(shown - _step).inMilliseconds,
+                    ),
+                    onIncrease: () => _seekTo(clamp(shown + _step)),
+                    onDecrease: () => _seekTo(clamp(shown - _step)),
+                    child: child,
+                  );
+                },
               );
             },
           );
@@ -154,12 +198,11 @@ class _RingProgressState extends ConsumerState<RingProgress> {
             _ => null,
           };
           if (step == null || e is KeyUpEvent) return KeyEventResult.ignored;
-          final dur = ref.read(durationProvider).value;
+          final dur = _readDuration();
           if (dur == null || dur <= Duration.zero) {
             return KeyEventResult.ignored;
           }
-          final pos = ref.read(positionProvider).value ?? Duration.zero;
-          final to = pos + step;
+          final to = _pos.value + step;
           _seekTo(to < Duration.zero ? Duration.zero : (to > dur ? dur : to));
           return KeyEventResult.handled;
         },
@@ -208,7 +251,7 @@ class _RingProgressState extends ConsumerState<RingProgress> {
                     final f = _drag;
                     setState(() => _drag = null);
                     _dragNotifier.set(null);
-                    final dur = ref.read(durationProvider).value;
+                    final dur = _readDuration();
                     if (commit && f != null && dur != null) {
                       _seekTo(dur * f);
                     }
@@ -309,11 +352,21 @@ class RingPainter extends CustomPainter {
     required this.arc,
     required this.rest,
     required this.stroke,
-  });
+    this.position,
+    this.duration,
+  }) : super(repaint: position);
 
+  /// Fixed fraction (null: whole arc, no dot) unless [position] is given.
   final double? progress;
+
+  /// When set, the painter follows it by itself (`repaint:`): its ticks
+  /// repaint the ring without rebuilding anything.
+  final ValueListenable<Duration>? position;
+  final Duration? duration;
   final Color arc, rest;
   final double stroke;
+  double? get _progress =>
+      position == null ? progress : ringProgress(position!.value, duration);
 
   static const _gap = 40 * math.pi / 180;
   static const _sweep = 2 * math.pi - _gap;
@@ -342,7 +395,7 @@ class RingPainter extends CustomPainter {
       ..strokeWidth = stroke
       ..strokeCap = StrokeCap.round;
     canvas.drawArc(rect, _start, _sweep, false, line..color = rest);
-    final p = progress;
+    final p = _progress;
     final played = _sweep * (p ?? 1);
     if (played > 0) {
       canvas.drawArc(rect, _start, played, false, line..color = arc);
@@ -359,6 +412,8 @@ class RingPainter extends CustomPainter {
   @override
   bool shouldRepaint(RingPainter o) =>
       o.progress != progress ||
+      o.position != position ||
+      o.duration != duration ||
       o.arc != arc ||
       o.rest != rest ||
       o.stroke != stroke;
