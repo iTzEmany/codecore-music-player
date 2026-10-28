@@ -97,6 +97,25 @@ void main() {
     expect(hostJam.state!.items.first.title, 'H');
   });
 
+  test('an unknown command reaches the guest as invalid (old host)', () async {
+    final odd = JamGuest(
+        local: guestJam,
+        dio: Dio(BaseOptions(validateStatus: (_) => true))
+          ..interceptors.add(InterceptorsWrapper(onRequest: (o, h) {
+            if (o.path.endsWith('/cmd')) o.data = {'cmd': 'bogus'};
+            h.next(o);
+          })),
+        requestPoll: const Duration(milliseconds: 50),
+        backoff: const Duration(milliseconds: 20),
+        maxFailures: 3);
+    addTearDown(odd.dispose);
+    final o = await odd.join(
+        host: '127.0.0.1', port: hostPort, ownDeviceId: 'guest',
+        ownName: 'Phone', ownPort: guestPort);
+    expect(o, JamJoinOutcome.accepted);
+    expect((await odd.send(const JamCommand.previous())).error, JamError.invalid);
+  });
+
   test('declined and ended', () async {
     hostJam.onRequest = (r) => hostJam.decline(r.id);
     final o = await guest.join(

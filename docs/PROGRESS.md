@@ -1118,7 +1118,7 @@ mobile_scanner — fase 24 — 2026-10-19
 - [x] 65.3 Uscita dell'ospite con la coda ritrovata. Fatto: la coda locale è congelata su disco all'ingresso da ospite (`PlaybackPersistence.hold/release`) e rimessa in pausa dal `_teardown`. R-21 già coperto da `test/jam/jam_host_test.dart` (removeMember).
 - [x] 65.4 Copertine dei brani degli altri
 - [x] 65.5 «Scarica» che segue lo stato del brano
-- [ ] 65.6 «Precedente» deciso dall'host
+- [x] 65.6 «Precedente» deciso dall'host
 - [~] 65.7 Scarto fra i telefoni
 - [ ] 65.8 Controlli di fase
 

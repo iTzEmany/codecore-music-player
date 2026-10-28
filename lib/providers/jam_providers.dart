@@ -643,11 +643,18 @@ class JamController extends Notifier<JamUiState> {
   /// The Jam's reference clock (the host's), the one `JamState.positionAt` is on.
   int jamNowMs() => _clock?.jamNowMs() ?? DateTime.now().millisecondsSinceEpoch;
 
+  /// The host decides (R-95); a host from before `previous` answers `invalid`
+  /// and we fall back to the rule on our own state.
+  Future<JamError?> _previousOrFallback(JamState s) async {
+    final e = await send(const JamCommand.previous());
+    return e == JamError.invalid ? send(jamPreviousCommand(s, jamNowMs())) : e;
+  }
+
   /// «Previous» as in the player (D-160): restart, or the item before.
   Future<JamError?> previous() {
     final s = state.jam;
     if (s == null) return Future.value(JamError.ended);
-    return send(jamPreviousCommand(s, jamNowMs()));
+    return _previousOrFallback(s);
   }
 
   /// Library ids to the shared queue; a shadow row (`stream:` path, no extension) goes as an online result.

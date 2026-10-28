@@ -95,14 +95,33 @@ void main() {
     expect(sent.last.positionMs, 30000);
   });
 
-  test('everyone can skip, and previous follows the player rule', () async {
+  test('previous is sent to the host, who decides (R-95)', () async {
     final t = make()..update(state(index: 1, pos: 0, at: 1000));
     expect(t.status.canSkip, isTrue);
+    await t.previous();
+    expect(sent.map((c) => c.type), [JamCommandType.previous]);
+  });
+
+  test('previous falls back to the player rule on an old host (invalid)', () async {
+    sent = [];
+    now = 1000;
+    final t = JamTransport(
+      send: (c) async {
+        sent.add(c);
+        return c.type == JamCommandType.previous ? JamError.invalid : null;
+      },
+      nowMs: () => now,
+    )..update(state(index: 1, pos: 0, at: 1000));
     await t.previous(); // 0 s in: back to the item before
     now = 1000 + 5000;
     await t.previous(); // 5 s in: restart
-    expect(sent.map((c) => c.type), [JamCommandType.jump, JamCommandType.seek]);
-    expect(sent.first.itemId, 1);
+    expect(sent.map((c) => c.type), [
+      JamCommandType.previous,
+      JamCommandType.jump,
+      JamCommandType.previous,
+      JamCommandType.seek,
+    ]);
+    expect(sent[1].itemId, 1);
     expect(sent.last.positionMs, 0);
   });
 

@@ -312,6 +312,8 @@ enum JamCommandType {
   jump,
   trackEnded,
   end,
+  // Last: an older host does not know it and answers `invalid` (R-95).
+  previous,
 }
 
 class JamCommand {
@@ -345,6 +347,9 @@ class JamCommand {
   const JamCommand.trackEnded(int itemId)
       : this._(JamCommandType.trackEnded, itemId: itemId);
   const JamCommand.end() : this._(JamCommandType.end);
+
+  /// «Previous» decided by the host on its own state (D-215).
+  const JamCommand.previous() : this._(JamCommandType.previous);
 
   final JamCommandType type;
   final JamItem? item;
@@ -415,6 +420,8 @@ class JamCommand {
         return id == null ? null : JamCommand.trackEnded(id);
       case JamCommandType.end:
         return const JamCommand.end();
+      case JamCommandType.previous:
+        return const JamCommand.previous();
     }
   }
 }

@@ -58,9 +58,12 @@ class JamTransport implements RemoteTransport {
   Future<void> next() => send(const JamCommand.next());
 
   @override
-  Future<void> previous() {
+  Future<void> previous() async {
+    // The host decides; an old host answers `invalid`, then the local rule.
+    final r = await send(const JamCommand.previous());
+    if (r != JamError.invalid) return;
     final s = _state;
-    return send(s == null ? const JamCommand.seek(0) : jamPreviousCommand(s, nowMs()));
+    await send(s == null ? const JamCommand.seek(0) : jamPreviousCommand(s, nowMs()));
   }
 
   @override

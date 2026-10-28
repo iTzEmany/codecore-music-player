@@ -94,6 +94,39 @@ void main() {
     });
   });
 
+  group('previous decided by the host (R-95)', () {
+    JamState host2() => seeded(2).copyWith(playing: true, positionAt: 1000);
+
+    test('next then previous within 3 s: the host state plays the item before from 0', () {
+      var s = ok(host2(), const JamCommand.next(), guest, now: 1000);
+      s = ok(s, const JamCommand.previous(), guest, now: 2000);
+      expect(s.currentIndex, 0);
+      expect(s.positionMs, 0);
+      expect(s.playing, true);
+    });
+
+    test('after 3 s it restarts the current item', () {
+      var s = ok(host2(), const JamCommand.next(), host, now: 1000);
+      s = ok(s, const JamCommand.previous(), guest, now: 1000 + 3500);
+      expect(s.currentIndex, 1);
+      expect(s.positionMs, 0);
+    });
+
+    test('on the first item it restarts it; with no item it changes nothing', () {
+      final s = ok(host2(), const JamCommand.previous(), guest);
+      expect(s.currentIndex, 0);
+      expect(s.positionMs, 0);
+      final empty = ok(start(), const JamCommand.previous(), guest);
+      expect(empty.version, start().version);
+      expect(empty.items, isEmpty);
+    });
+
+    test('previous JSON round trip', () {
+      expect(const JamCommand.previous().toJson(), {'cmd': 'previous'});
+      expect(JamCommand.tryParse({'cmd': 'previous'})!.type, JamCommandType.previous);
+    });
+  });
+
   test('next and jump messages keep their exact JSON', () {
     expect(const JamCommand.next().toJson(), {'cmd': 'next'});
     expect(const JamCommand.jump(7).toJson(), {'cmd': 'jump', 'itemId': 7});

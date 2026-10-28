@@ -38,6 +38,8 @@ Comando nuovo `JamCommandType.previous`: l'host applica la regola di `jamPreviou
 
 **Fatto quando:** test del reducer («successivo» poi «precedente» entro 3 s con stato dell'ospite in ritardo → brano prima da 0); test del ripiego verso un host vecchio; `remote_transport_test` aggiornato di proposito.
 
+`remote_transport_test` non cambia perché usa un trasporto finto; il ripiego è provato da `jam_transport_test`, `jam_controller_previous_test` e dal test HTTP in `jam_integration_test` (comando sconosciuto → `JamError.invalid`).
+
 ### 65.7 — Scarto fra i telefoni (R-94, D-204, K-JC-05)
 Prima la misura: log di `JamSyncController.decide` e di `onSyncError` sull'ospite e posizione mostrata nel player della Jam contro quella attesa (`JamState.positionAtTime(jamNowMs)`). Se lo scarto è nella posizione mostrata, si corregge la fonte della posizione della schermata (stessa `SmoothPosition` del player, fase 59); se è nell'audio, si corregge `jam_output.dart`. Risultato «Prima / Dopo» scritto in questo documento.
 

@@ -163,6 +163,12 @@ JamResult applyCommand(
       if (s.current?.id != cmd.itemId) return JamResult.ok(s);
       return _advance(s, nowMs, commit);
 
+    case JamCommandType.previous:
+      // The host's own state decides (D-160 rule), never a guest's stale one.
+      // Nothing to go back from: a no-op, so `invalid` only means «old host».
+      if (s.current == null) return JamResult.ok(s);
+      return applyCommand(s, jamPreviousCommand(s, nowMs), from: from, nowMs: nowMs);
+
     case JamCommandType.end:
       if (!isHost) return const JamResult.fail(JamError.forbidden);
       return JamResult.ok(
