@@ -16,6 +16,7 @@ import '../services/stream/stream_key.dart';
 import '../services/audio/audio_backend.dart';
 import '../services/audio/codecore_audio_handler.dart';
 import '../services/audio/just_audio_backend.dart';
+import '../services/audio/playback_persistence.dart';
 import '../services/jam/jam_cache.dart';
 import '../services/jam/jam_clock.dart';
 import '../services/jam/jam_guest.dart';
@@ -313,16 +314,77 @@ class JamController extends Notifier<JamUiState> {
 
   void decline(JamRequest req) => _host?.decline(req.id);
 
+  /// The guest's own queue from before the Jam (R-90); null for a host.
+  ({List<int> ids, int index, Duration position})? _saved;
+  PlaybackPersistence? _persistence;
+  CodecoreAudioHandler? _localHandler;
+
+  /// Keeps the local queue, track and position on disk and in memory.
+  @visibleForTesting
+  Future<void> saveLocalQueue() async {
+    final handler = ref.read(audioHandlerProvider);
+    _localHandler = handler;
+    // The live position: a paused player emits none, so the stream can be 0.
+    final position = handler.playbackState.value.position;
+    _saved = (
+      ids: List.of(handler.queueIds),
+      index: handler.currentIndex < 0 ? 0 : handler.currentIndex,
+      position: position,
+    );
+    await (_persistence = ref.read(playbackPersistenceProvider))
+        ?.hold(position);
+  }
+
+  /// Puts the queue back as it was, paused, and lets the disk follow again.
+  Future<void> _restoreLocalQueue() async {
+    final s = _saved;
+    _saved = null;
+    if (s == null) return;
+    try {
+      await _localHandler?.restore(s.ids, s.index, s.position);
+    } on Object catch (e, st) {
+      AppLog.w('jam: could not restore the local queue', e, st);
+    }
+    _persistence?.release(s.position);
+    await _persistence?.flush();
+    _persistence = null;
+  }
+
+  @visibleForTesting
+  Future<void> debugFinish({bool lost = false}) => _finish(lost: lost);
+
+  @visibleForTesting
+  Future<void> debugBegin(JamRole role, JamState s) => _begin(role, s);
+
   Future<void> _begin(JamRole role, JamState s) async {
+    if (role == JamRole.guest) await saveLocalQueue();
+    // Lost or ended while saving: _finish already tore everything down.
+    if (state.phase == JamPhase.ended) return;
+    try {
+      await _beginJam(role, s);
+    } on Object catch (e, st) {
+      // Do not leave the disk held for the whole session.
+      AppLog.w('jam: start failed', e, st);
+      state = state.copyWith(phase: JamPhase.ended, lost: true);
+      await _teardown();
+      rethrow;
+    }
+  }
+
+  Future<void> _beginJam(JamRole role, JamState s) async {
     // Local playback yields to the Jam.
     try {
       await ref.read(audioHandlerProvider).pause();
     } on Object catch (e) {
       AppLog.d('jam: could not pause local player', e);
     }
+    if (state.phase == JamPhase.ended) return;
     final dir = await ref.read(jamCacheDirProvider.future);
-    _cache = JamCache(dir);
-    await _cache!.clear();
+    if (state.phase == JamPhase.ended) return;
+    final cache = JamCache(dir);
+    await cache.clear();
+    if (state.phase == JamPhase.ended) return;
+    _cache = cache;
     _failures = 0;
     final clock = _clock = _makeClock(role);
     _output =
@@ -588,11 +650,18 @@ class JamController extends Notifier<JamUiState> {
   /// The Jam's reference clock (the host's), the one `JamState.positionAt` is on.
   int jamNowMs() => _clock?.jamNowMs() ?? DateTime.now().millisecondsSinceEpoch;
 
+  /// The host decides (R-95); a host from before `previous` answers `invalid`
+  /// and we fall back to the rule on our own state.
+  Future<JamError?> _previousOrFallback(JamState s) async {
+    final e = await send(const JamCommand.previous());
+    return e == JamError.invalid ? send(jamPreviousCommand(s, jamNowMs())) : e;
+  }
+
   /// «Previous» as in the player (D-160): restart, or the item before.
   Future<JamError?> previous() {
     final s = state.jam;
     if (s == null) return Future.value(JamError.ended);
-    return send(jamPreviousCommand(s, jamNowMs()));
+    return _previousOrFallback(s);
   }
 
   /// Library ids to the shared queue; a shadow row (`stream:` path, no extension) goes as an online result.
@@ -701,6 +770,8 @@ class JamController extends Notifier<JamUiState> {
     // Give the system controls back to the local player.
     _attachedTo?.attachRemote(null);
     _attachedTo = null;
+    // Not while the app itself is going away: the saved queue stays on disk.
+    if (release) await _restoreLocalQueue();
     await _transport?.dispose();
     _transport = null;
     await _output?.dispose();

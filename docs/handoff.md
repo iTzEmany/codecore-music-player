@@ -1,7 +1,7 @@
-# Handoff — 2026-10-28 (kickoff «Jam: cassa e coda insieme»; fasi 57–64 fuse)
+# Handoff — 2026-10-28 (fase 65 «Rilievi della Jam», PR #59)
 
 ## Prima di tutto (per la prossima chat)
-Kickoff della feature «Jam: cassa e coda insieme» fatto il 28/10 (`docs/feature-jam-cassa.md`, R-88…R-119, D-177…D-220). Fasi 65–68 in `docs/PROGRESS.md`. Si parte con `/obiettivo fase 65`.
+Kickoff della feature «Jam: cassa e coda insieme» fatto il 28/10 (`docs/feature-jam-cassa.md`, R-88…R-119, D-177…D-220). Fasi 65–68 in `docs/PROGRESS.md`. La 65 è nella PR #59 (rilievi chiusi tranne R-91, vedi sotto); si prosegue con `/obiettivo fase 66`. Prima rispondi alla scelta su R-91.
 
 ## Stato
 - **57** (#45, #46): URL da NewPipeExtractor su Android (D-164, D-173 desugaring per API < 33), vietati ai minori → traccia di YouTube Music, `UrlSession`, brano dopo dall'URL anticipato, gapless e crossfade da URL verso file; crossfade senza esaurire l'Equalizer sul Mi A3.
@@ -28,14 +28,13 @@ Kickoff della feature «Jam: cassa e coda insieme» fatto il 28/10 (`docs/featur
 - Su entrambi: mai toccare rotazione o impostazioni di sistema; «Non disturbare» (`cmd notification set_dnd priority|off`) solo durante le misure.
 - Misure: `python3 scripts/perf_device.py <id> --label <l> [--no-build --no-push --apk <apk>] [--only "A,B"]`. Per confrontare due commit: un worktree per commit, due APK `--profile` con `CODECORE_PERF=1`, run alternati A,B,A,B con `--only`.
 
-## Jam: rilievi aperti
-Da 47.8 (27/10) e dalla prova 63.5 (28/10, Motorola che avvia, Mi A3 che accetta, hotspot):
-1. Ruoli: chi avvia è ospite, chi accetta è host e porta la sua coda (`JamController.request` / `acceptRequest`); R-21 (uscita dell'ospite) non provato.
-2. Le aggiunte dell'ospite vanno subito dopo il brano corrente, non in fondo (D-80, D-89). Non riprovato il 28/10.
-3. Sull'ospite lo swipe «in coda» su una riga online della ricerca non accoda nulla; ⋮ → «Aggiungi in coda» sì. Non riprovato.
-4. «Scarica» resta nel ⋮ del player dopo che il brano è in libreria, finché non lo si chiude.
-5. Nuovi il 28/10: l'ospite mostra una nota al posto delle copertine (player e coda); nel ⋮ di una riga della coda l'ospite non vede «Rimuovi» (foglio forse tagliato); ~2 s di scarto fra i telefoni; una volta «precedente» subito dopo «successivo» è ripartito da 0:22.
-Per provarli serve l'hotspot di un telefono (non UniBA, `docs/gotchas.md`). Pianificati nella fase 65; «Rimuovi» dell'ospite è voluto (D-195).
+## Jam: rilievi (fase 65, prova sui telefoni del 28/10)
+1. Ruoli e uscita dell'ospite: chiuso per R-90 (coda di prima, in pausa, stesso punto). **Aperto R-91**: con un solo ospite la sua uscita chiude la Jam (`JamHost.removeMember` → `endSession` quando resta solo l'host) e i suoi brani online non suonati si perdono; con ≥ 2 ospiti restano. Scelta di prodotto: l'host continua da solo con la coda della Jam, o la Jam finisce come oggi?
+2. Aggiunte dell'ospite in fila dopo il corrente: chiuso (65.1, R-88).
+3. Swipe «in coda» online dell'ospite: chiuso, funziona sui telefoni (65.2).
+4. «Scarica» nel ⋮ a foglio aperto: chiuso (65.5, R-93).
+5. Copertine dell'ospite, scarto di ~2 s e «precedente» da 0:22: chiusi (65.4, 65.7 con orologi a 2,2 s di distanza ora compensati, 65.6). «Rimuovi» dell'ospite è voluto (D-195).
+Nuovi, rimandati: la posizione mostrata salta indietro di ~1,3 s a ogni avvio di brano (`jam ui: shown position moved`); sul Motorola la scoperta è rimasta vuota finché l'app non è stata riavviata (fase 68.1).
 
 ## Rinviato (dal handoff precedente, ancora aperto)
 - 53.10 completamento intero sul Motorola (in pausa a 421/2317, ~10 h).
@@ -44,11 +43,11 @@ Per provarli serve l'hotspot di un telefono (non UniBA, `docs/gotchas.md`). Pian
 
 ## Prompt di avvio della prossima sessione
 ```
-/obiettivo fase 65
+/obiettivo fase 66
 ```
 
 ## Prossimi obiettivi
-1. **(Consigliato) Fasi 65–68, feature «Jam: cassa e coda insieme»** (`docs/feature-jam-cassa.md`): rilievi della Jam, «Coda insieme», Jam della cassa, scoperta e chiusura. Prova finale (68.3) con i due telefoni sull'hotspot e le cuffie JBL segnate come cassa.
+1. **(Consigliato) Fasi 66–68, feature «Jam: cassa e coda insieme»** (`docs/feature-jam-cassa.md`): «Coda insieme», Jam della cassa, scoperta e chiusura. Prova finale (68.3) con i due telefoni sull'hotspot e le cuffie JBL segnate come cassa.
 2. **Prove d'ascolto 57.7** e APK di release con NewPipe (vedi «Tocca a te»).
 3. **Ricerca «notte» build p99** (D-176): l'ultimo scenario fuori soglia; misurare con `--only "Ricerca «notte»"` prima e dopo.
 4. **Scoperta dei dispositivi su reti non /24** (ora nella fase 68.1, D-206) (visto su UniBA, /16, il 28/10: i telefoni non si vedono e la Jam non parte; sull'hotspot sì). `LanDiscovery._targets` in `lib/services/share/discovery.dart` manda il broadcast diretto a `a.b.c.255` supponendo una /24. Dart non dà la maschera: leggerla dal lato nativo (Android `LinkProperties`, Linux/Windows dal sistema) o provare anche `a.b.255.255`. Reti che filtrano ogni broadcast restano escluse: lì serve il collegamento manuale per la Jam.

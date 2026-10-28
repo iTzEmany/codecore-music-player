@@ -9,6 +9,7 @@ class _Jam extends JamController {
   _Jam(this.initial);
   final JamUiState initial;
   final sent = <JamCommand>[];
+  JamError? oldHost; // answer to `previous` (null: the host knows it)
 
   @override
   JamUiState build() => initial;
@@ -16,7 +17,7 @@ class _Jam extends JamController {
   @override
   Future<JamError?> send(JamCommand cmd) async {
     sent.add(cmd);
-    return null;
+    return cmd.type == JamCommandType.previous ? oldHost : null;
   }
 }
 
@@ -51,20 +52,35 @@ void main() {
     final (c, jam) = _make(_state(index: 1, positionMs: 1000));
     jam.debugSetClock(JamClock(probe: () async => null, localNowMs: () => 5000));
     await c.read(jamProvider.notifier).previous();
-    expect(jam.sent.single.type, JamCommandType.jump);
-    expect(jam.sent.single.itemId, 10);
+    expect(jam.sent.single.type, JamCommandType.previous);
+
+    jam.oldHost = JamError.invalid;
+    jam.sent.clear();
+    await c.read(jamProvider.notifier).previous();
+    expect(jam.sent.map((c) => c.type), [JamCommandType.previous, JamCommandType.jump]);
+    expect(jam.sent.last.itemId, 10);
   });
 
-  test('previous() restarts the item after 3 s and on the first one', () async {
+  test('previous() does not fall back on an error other than invalid', () async {
     final (c, jam) = _make(_state(index: 1, positionMs: 1000));
+    jam.oldHost = JamError.forbidden;
+    jam.debugSetClock(JamClock(probe: () async => null, localNowMs: () => 5000));
+    expect(await c.read(jamProvider.notifier).previous(), JamError.forbidden);
+    expect(jam.sent.map((c) => c.type), [JamCommandType.previous]);
+  });
+
+  test('fallback to an old host restarts after 3 s and on the first one', () async {
+    final (c, jam) = _make(_state(index: 1, positionMs: 1000));
+    jam.oldHost = JamError.invalid;
     jam.debugSetClock(JamClock(probe: () async => null, localNowMs: () => 9000));
     await c.read(jamProvider.notifier).previous();
-    expect(jam.sent.single.type, JamCommandType.seek);
+    expect(jam.sent.last.type, JamCommandType.seek);
 
     final (c2, jam2) = _make(_state(index: 0, positionMs: 1000));
+    jam2.oldHost = JamError.invalid;
     jam2.debugSetClock(JamClock(probe: () async => null, localNowMs: () => 5000));
     await c2.read(jamProvider.notifier).previous();
-    expect(jam2.sent.single.type, JamCommandType.seek);
+    expect(jam2.sent.last.type, JamCommandType.seek);
   });
 
   test('jamNowMs() is the host clock: the local one plus the synced offset', () async {

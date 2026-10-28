@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:codecore/services/audio/audio_backend.dart';
 import 'package:codecore/services/jam/jam_clock.dart';
 import 'package:codecore/services/jam/jam_models.dart';
@@ -52,6 +54,99 @@ void main() {
     )
       ..onTrackEnded = ended.add
       ..onItemFailed = failed.add;
+  });
+
+  test('single output with a Jam clock seeks by the host clock, not the local one (R-94)',
+      () async {
+    var local = 100000; // this phone's clock; the host's is 2 s ahead
+    final c = JamClock(
+      probe: () async => (t0: local, hostMs: local + 2000, t1: local),
+      localNowMs: () => local,
+    );
+    await c.sync();
+    final o = JamOutput(
+      deviceId: 'me',
+      backend: backend,
+      clock: c,
+      syncInterval: const Duration(hours: 1),
+      resolve: (i) async => const JamSource.local('/m.mp3'),
+    );
+    // Host started the item at its own time 102000 from 0 ms; 3 s later
+    // (host time 105000) it must be at 3 s.
+    await o.apply(st(at: 102000));
+    local += 3000;
+    await o.apply(st(at: 102000)); // same item, re-applied
+    expect(backend.seeks.last, const Duration(milliseconds: 3000));
+    await o.dispose();
+  });
+
+  test('single output re-checks the position when the Jam clock settles', () async {
+    var local = 100000;
+    var skew = 0; // clock not synced yet
+    final c = JamClock(
+      probe: () async => (t0: local, hostMs: local + skew, t1: local),
+      localNowMs: () => local,
+    );
+    final o = JamOutput(
+      deviceId: 'me',
+      backend: backend,
+      clock: c,
+      syncInterval: const Duration(milliseconds: 50),
+      resolve: (i) async => const JamSource.local('/m.mp3'),
+    );
+    await o.apply(st(at: 100000));
+    local += 3000;
+    // Host clock (offset 0): the player 300 ms late is left alone.
+    backend.positionValue = const Duration(milliseconds: 2700);
+    await Future<void>.delayed(const Duration(milliseconds: 300));
+    expect(backend.seeks, isEmpty);
+    backend.positionValue = Duration.zero;
+    skew = 2000; // the host is 2 s ahead: the output is 2 s behind
+    await c.sync();
+    await Future<void>.delayed(const Duration(milliseconds: 300));
+    expect(backend.seeks.single, const Duration(milliseconds: 5000));
+    await o.dispose();
+  });
+
+  test('single output: one re-check per clock offset, none while the next item loads',
+      () async {
+    var local = 100000;
+    var skew = 0;
+    final gate = Completer<void>();
+    final c = JamClock(
+      probe: () async => (t0: local, hostMs: local + skew, t1: local),
+      localNowMs: () => local,
+    );
+    final o = JamOutput(
+      deviceId: 'me',
+      backend: backend,
+      clock: c,
+      syncInterval: const Duration(milliseconds: 50),
+      resolve: (i) async {
+        if (i.id == 2) await gate.future;
+        return const JamSource.local('/m.mp3');
+      },
+    );
+    await o.apply(st(at: 100000));
+    local += 3000;
+    // New item still resolving: the old one must not be moved to its position.
+    unawaited(o.apply(st(cur: 1, at: 100000)));
+    backend.positionValue = Duration.zero;
+    await Future<void>.delayed(const Duration(milliseconds: 300));
+    expect(backend.seeks, isEmpty);
+    gate.complete();
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+    backend.seeks.clear();
+    skew = 2000;
+    await c.sync();
+    backend.positionValue = Duration.zero;
+    await Future<void>.delayed(const Duration(milliseconds: 600));
+    expect(backend.seeks, hasLength(1)); // drift persists, same offset: no 2nd seek
+    skew = 3000;
+    await c.sync();
+    await Future<void>.delayed(const Duration(milliseconds: 300));
+    expect(backend.seeks, hasLength(2));
+    await o.dispose();
   });
 
   test('plays own item locally, remote item with the token header', () async {

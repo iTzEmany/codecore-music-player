@@ -107,11 +107,13 @@ List<TrackActionGroup> onlineTrackActions(
 
   return [
     TrackActionGroup(l.groupCollection, [
-      TrackAction(Icons.download_rounded, l.ytDownload, () async {
-        if (entryInLibrary(ref, track.id)) return snack(l.ytAlreadyInLibrary);
-        final now = await actions.downloadEntry(track.id);
-        if (now != null) snack(now ? l.addedToLibrary : l.suggestionDownloadStarted);
-      }),
+      // Gone as soon as the entry is in the library, also with the sheet open (R-93).
+      if (!entryInLibrary(ref, track.id))
+        TrackAction(Icons.download_rounded, l.ytDownload, () async {
+          if (entryInLibrary(ref, track.id)) return snack(l.ytAlreadyInLibrary);
+          final now = await actions.downloadEntry(track.id);
+          if (now != null) snack(now ? l.addedToLibrary : l.suggestionDownloadStarted);
+        }),
       TrackAction(Icons.playlist_add_rounded, l.addToPlaylist, () async {
         final picked = await pickPlaylist(outer, ref);
         if (picked == null) return;
@@ -250,7 +252,9 @@ List<TrackActionGroup> trackActions(
     ]),
     TrackActionGroup(l.groupCollection, [
       // A streamed shadow row: the download promotes it to a real library track.
-      if (track.kind == kStreamKind && keyOfStreamPath(track.path) != null)
+      if (track.kind == kStreamKind &&
+          keyOfStreamPath(track.path) != null &&
+          ref.read(downloadIndexProvider).value?.pathForKey(keyOfStreamPath(track.path)!) == null)
         TrackAction(Icons.download_rounded, l.ytDownload, () async {
           ref
               .read(downloadsProvider.notifier)
@@ -369,14 +373,30 @@ Future<void> showTrackActions(
   WidgetRef ref,
   Track track, {
   TrackAction? lead,
-}) => showTrackActionGroups(
-  context,
-  [
+}) {
+  List<TrackActionGroup> build() => [
     if (lead != null) TrackActionGroup('', [lead]),
     ...trackActions(context, ref, track),
-  ],
-  header: _TrackHeader(track: track),
-);
+  ];
+  var last = build();
+  // The caller may be gone while the sheet is open: keep the last groups then.
+  List<TrackActionGroup> groups() => context.mounted ? last = build() : last;
+  // An online entry or streamed row: the groups follow the download index while the sheet is open.
+  final changed = isOnlineId(track.id) || track.kind == kStreamKind ? ValueNotifier(0) : null;
+  final sub = changed == null
+      ? null
+      : ref.listenManual(downloadIndexProvider, (_, _) => changed.value++);
+  return showTrackActionGroups(
+    context,
+    last,
+    header: _TrackHeader(track: track),
+    refresh: changed,
+    regroup: groups,
+  ).whenComplete(() {
+    sub?.close();
+    changed?.dispose();
+  });
+}
 
 /// Shows [groups] as an action sheet; the chosen action runs once it is closed.
 Future<void> showTrackActionGroups(
@@ -384,12 +404,11 @@ Future<void> showTrackActionGroups(
   List<TrackActionGroup> groups, {
   Widget? header,
   String? title,
-}) => showCcActionSheet<TrackAction>(
-  context: context,
-  header: header,
-  title: title,
-  groups: [
-    for (final g in groups)
+  Listenable? refresh,
+  List<TrackActionGroup> Function()? regroup,
+}) {
+  List<List<CcAction<TrackAction>>> rows(List<TrackActionGroup> gs) => [
+    for (final g in gs)
       [
         for (final a in g.actions)
           CcAction<TrackAction>(
@@ -400,8 +419,16 @@ Future<void> showTrackActionGroups(
             onTap: () => a.run(),
           ),
       ],
-  ],
-);
+  ];
+  return showCcActionSheet<TrackAction>(
+    context: context,
+    header: header,
+    title: title,
+    groups: rows(groups),
+    refresh: refresh,
+    regroup: regroup == null ? null : () => rows(regroup()),
+  );
+}
 
 class _TrackHeader extends StatelessWidget {
   const _TrackHeader({required this.track});

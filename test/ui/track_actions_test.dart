@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:codecore/data/db/app_database.dart' show Track;
 import 'package:codecore/data/repositories/track_repository.dart';
 import 'package:codecore/data/repositories/track_kinds.dart' show kStreamKind;
@@ -5,6 +7,7 @@ import 'package:codecore/providers/player_providers.dart' show onlineEntriesProv
 import 'package:codecore/providers/youtube_providers.dart';
 import 'package:codecore/services/audio/online_entries.dart';
 import 'package:codecore/services/online/download_queue.dart' show DownloadItem;
+import 'package:codecore/services/online/download_index.dart' show DownloadIndex;
 import 'package:codecore/services/online/youtube_service.dart' show YtResult;
 import 'package:codecore/ui/theme/tokens.dart';
 import 'package:codecore/ui/widgets/track_actions.dart';
@@ -308,6 +311,49 @@ void main() {
     await _settle(tester);
     expect(downloads.added.single.id, 'abc');
     expect(downloads.added.single.title, 'Streamed');
+    await h.dispose(tester);
+  });
+
+  testWidgets('«Scarica» goes away from the open sheet when the entry joins the library (R-93)', (tester) async {
+    final dir = Directory.systemTemp.createTempSync('dl_idx');
+    addTearDown(() => dir.deleteSync(recursive: true));
+    final index = DownloadIndex(File('${dir.path}/downloads.json'));
+    final online = OnlineEntries();
+    final id = online.register(
+        const YtResult(id: 'v1', title: 'Streamed', channel: 'Chan', duration: null));
+    final h = await openSheet(
+      tester,
+      (_) => online.trackOf(id)!,
+      extra: [
+        onlineEntriesProvider.overrideWithValue(online),
+        downloadIndexProvider.overrideWith((ref) async => index),
+      ],
+    );
+    expect(find.text('Scarica'), findsOneWidget);
+    final file = File('${dir.path}/v1.m4a')..writeAsStringSync('x');
+    await tester.runAsync(() => index.add('v1', file.path));
+    ProviderScope.containerOf(tester.element(find.text('Scarica'))).invalidate(downloadIndexProvider);
+    await _settle(tester);
+    expect(find.text('Scarica'), findsNothing);
+    expect(find.text('Aggiungi a playlist…'), findsOneWidget); // the sheet is still open
+    await h.dispose(tester);
+  });
+
+  testWidgets('«Scarica» of a streamed row goes away when its key joins the download index', (tester) async {
+    final dir = Directory.systemTemp.createTempSync('dl_idx');
+    addTearDown(() => dir.deleteSync(recursive: true));
+    final index = DownloadIndex(File('${dir.path}/downloads.json'));
+    final h = await openSheet(
+      tester,
+      (t) => t.copyWith(kind: kStreamKind, path: 'stream:youtube:v1'),
+      extra: [downloadIndexProvider.overrideWith((ref) async => index)],
+    );
+    expect(find.text('Scarica'), findsOneWidget);
+    final file = File('${dir.path}/v1.m4a')..writeAsStringSync('x');
+    await tester.runAsync(() => index.add('v1', file.path));
+    ProviderScope.containerOf(tester.element(find.text('Scarica'))).invalidate(downloadIndexProvider);
+    await _settle(tester);
+    expect(find.text('Scarica'), findsNothing);
     await h.dispose(tester);
   });
 

@@ -4,13 +4,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/l10n_ext.dart';
 import '../../../providers/import_providers.dart';
+import '../../../providers/jam_providers.dart' show jamTrackCoverProvider;
 import '../../../providers/library_providers.dart' show artistsProvider;
 import '../../../providers/share_hub.dart';
 import '../../../services/jam/jam_models.dart';
 import '../../../services/online/artist_link_resolver.dart';
+import '../../../services/online/youtube_service.dart' show smallVideoThumbnail;
 import '../../theme/tokens.dart';
 import '../../widgets/artist_avatar.dart';
 import '../../widgets/cover_image.dart';
+import '../../widgets/net_thumbnail.dart';
 import '../../widgets/track_artists_sheet.dart';
 
 /// A curiosity as the owner sends it, «text\nurl»: the text without the source
@@ -52,8 +55,9 @@ class JamAvatar extends StatelessWidget {
   }
 }
 
-/// The cover of an item this device added (its [JamItem.ref] is the local
-/// track id); the other devices' items have no cover in the protocol.
+/// The cover of a queue item: the local one for this device's items, the
+/// YouTube thumbnail for online ones, the owner's bytes (`/cover/<n>`) for the
+/// other devices' library items; the note placeholder when there is none.
 class JamCover extends ConsumerWidget {
   const JamCover({
     super.key,
@@ -74,7 +78,37 @@ class JamCover extends ConsumerWidget {
     final key = id == null
         ? null
         : ref.watch(importedTrackProvider(id)).value?.coverKey;
-    return CoverImage(coverKey: key, size: size, radius: radius);
+    if (key != null || it == null) {
+      return CoverImage(coverKey: key, size: size, radius: radius);
+    }
+    final vid = it.videoId;
+    if (vid != null) {
+      return NetThumbnail(
+        url: smallVideoThumbnail(vid),
+        width: size,
+        height: size,
+        radius: radius,
+        icon: Icons.music_note_rounded,
+      );
+    }
+    // Cached per queue item by the autoDispose family while this widget watches it.
+    final bytes = own || int.tryParse(it.ref ?? '') == null
+        ? null
+        : ref.watch(jamTrackCoverProvider(it.id)).value;
+    if (bytes == null) return CoverImage(coverKey: null, size: size, radius: radius);
+    final px = (size * MediaQuery.devicePixelRatioOf(context)).round();
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(radius),
+      child: Image.memory(
+        bytes,
+        width: size,
+        height: size,
+        cacheWidth: px,
+        fit: BoxFit.cover,
+        gaplessPlayback: true,
+        errorBuilder: (_, _, _) => CoverImage(coverKey: null, size: size, radius: radius),
+      ),
+    );
   }
 }
 
