@@ -210,16 +210,13 @@ void main() {
           ),
         ],
       );
-      // 59.4: SeekBar keeps the drag in seekDragProvider, so it needs a scope.
       await tester.pumpWidget(
-        ProviderScope(
-          child: MaterialApp(
-            home: Scaffold(
-              body: Center(
-                child: SizedBox(
-                  width: 400,
-                  child: JamSeekBar(jam: jam, onSeek: sent.add),
-                ),
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: SizedBox(
+                width: 400,
+                child: JamSeekBar(jam: jam, onSeek: sent.add),
               ),
             ),
           ),
@@ -247,13 +244,11 @@ void main() {
       tester,
     ) async {
       await tester.pumpWidget(
-        ProviderScope(
-          child: MaterialApp(
-            home: Scaffold(
-              body: JamSeekBar(
-                jam: const JamState(hostDeviceId: 'h', outputDeviceId: 'h'),
-                onSeek: (_) {},
-              ),
+        MaterialApp(
+          home: Scaffold(
+            body: JamSeekBar(
+              jam: const JamState(hostDeviceId: 'h', outputDeviceId: 'h'),
+              onSeek: (_) {},
             ),
           ),
         ),

@@ -8,6 +8,7 @@ import 'package:codecore/ui/theme/app_theme.dart';
 import 'package:codecore/ui/theme/tokens.dart';
 import 'package:codecore/ui/widgets/ring_progress.dart';
 import 'package:codecore/ui/widgets/seek_bar.dart';
+import 'package:codecore/ui/widgets/smooth_position.dart';
 import 'package:codecore/services/jam/jam_models.dart';
 import 'package:codecore/providers/player_providers.dart';
 import 'package:flutter/material.dart';
@@ -190,6 +191,59 @@ void main() {
         greaterThanOrEqualTo(12),
       );
       handle.dispose();
+      await tester.pumpWidget(const SizedBox());
+    });
+  });
+
+  group('the bar after release and in the Jam', () {
+    testWidgets('on release the position holds the target until the player answers',
+        (tester) async {
+      final pos = SmoothPosition()
+        ..update(const Duration(seconds: 10), playing: false, duration: _dur);
+      addTearDown(pos.dispose);
+      final seeks = <Duration>[];
+      await tester.pumpWidget(
+        ProviderScope(
+          child: MaterialApp(
+            home: Scaffold(
+              body: SeekBar(position: pos, duration: _dur, onSeek: seeks.add),
+            ),
+          ),
+        ),
+      );
+      final g = await tester.startGesture(tester.getCenter(find.byType(Slider)));
+      await g.moveBy(const Offset(1, 0));
+      await g.up();
+      await tester.pump();
+      expect(seeks, hasLength(1));
+      expect(pos.value, seeks.single, reason: 'no fall back to 0:10');
+      expect(tester.widget<Slider>(find.byType(Slider)).value,
+          seeks.single.inMilliseconds.toDouble());
+    });
+
+    testWidgets('the Jam bar does not write the player drag state', (tester) async {
+      const jam = JamState(
+        hostDeviceId: 'h',
+        outputDeviceId: 'h',
+        currentIndex: 0,
+        items: [
+          JamItem(id: 1, ownerDeviceId: 'h', title: 'T', durationMs: 100000, ext: 'mp3'),
+        ],
+      );
+      await tester.pumpWidget(
+        ProviderScope(
+          child: MaterialApp(
+            home: Scaffold(body: JamSeekBar(jam: jam, onSeek: (_) {})),
+          ),
+        ),
+      );
+      final box = ProviderScope.containerOf(tester.element(find.byType(JamSeekBar)));
+      final g = await tester.startGesture(tester.getCenter(find.byType(Slider)));
+      await g.moveBy(const Offset(1, 0));
+      await tester.pump();
+      expect(find.text('0:00'), findsNothing, reason: 'its own times follow');
+      expect(box.read(seekDragProvider), isNull);
+      await g.up();
       await tester.pumpWidget(const SizedBox());
     });
   });

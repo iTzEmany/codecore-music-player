@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'format_utils.dart';
+import 'smooth_position.dart';
 
 /// Fraction (0..1) under the finger while the ring or the bar is dragged (null
 /// otherwise): both draw it and the elapsed time follows it. The seek itself
-/// happens on release.
+/// happens on release. A subtree that must not share it (the Jam's own clock)
+/// wraps itself in a `ProviderScope` that overrides this provider.
 final seekDragProvider = NotifierProvider<SeekDrag, double?>(SeekDrag.new);
 
 class SeekDrag extends Notifier<double?> {
@@ -67,9 +69,13 @@ class _SeekBarState extends ConsumerState<SeekBar> {
                 _drag.set(v / max);
               },
         onChangeEnd: (v) {
+          final target = Duration(milliseconds: v.round());
           _active = false;
+          // Hold the target until the player answers, then let go of the finger.
+          final p = widget.position;
+          if (p is SmoothPosition) p.jumpTo(target);
           _drag.set(null);
-          widget.onSeek(Duration(milliseconds: v.round()));
+          widget.onSeek(target);
         },
       ),
     );

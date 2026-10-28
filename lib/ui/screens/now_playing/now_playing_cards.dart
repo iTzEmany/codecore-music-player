@@ -116,8 +116,9 @@ const _lyricsLineHeight = 1.5;
 /// One line (strut height) plus 2 dp of air above and below.
 double _lyricsRowHeight(BuildContext context) =>
     MediaQuery.textScalerOf(context).scale(
-      _lyricsFontSize(Theme.of(context).textTheme) * _lyricsLineHeight,
-    ) +
+          _lyricsFontSize(Theme.of(context).textTheme),
+        ) *
+        _lyricsLineHeight +
     4;
 
 double _lyricsFontSize(TextTheme t) => t.bodyLarge?.fontSize ?? 16;

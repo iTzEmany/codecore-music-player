@@ -375,6 +375,12 @@ final isPlayingProvider = StreamProvider<bool>((ref) {
   return h.playbackState.map((s) => s.playing).distinct();
 });
 
+/// Playback rate as published by the handler (1 for a radio).
+final playbackSpeedProvider = StreamProvider<double>((ref) {
+  final h = ref.watch(audioHandlerProvider);
+  return h.playbackState.map((s) => s.speed).distinct();
+});
+
 /// A stream is loading (R-02): a bool of its own, so nothing rebuilds for the download progress (K-03).
 final streamLoadingProvider = StreamProvider<bool>((ref) {
   final h = ref.watch(audioHandlerProvider);

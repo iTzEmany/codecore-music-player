@@ -67,12 +67,23 @@ class _RingProgressState extends ConsumerState<RingProgress> {
   SmoothPosition? _own;
   ValueListenable<Duration> get _pos => widget.position ?? _own!;
 
+  // [live] can change while mounted (radio, Jam): made when first needed.
+  void _ensureOwn() {
+    if (widget.position != null || widget.live || _own != null) return;
+    _own = SmoothPosition()..followPlayer(ref);
+  }
+
   @override
   void initState() {
     super.initState();
-    if (widget.position == null && !widget.live) {
-      _own = SmoothPosition()..followPlayer(ref);
-    }
+    _ensureOwn();
+  }
+
+  @override
+  void didUpdateWidget(RingProgress old) {
+    super.didUpdateWidget(old);
+    _ensureOwn();
+    _own?.bindTickerMode(context);
   }
 
   @override

@@ -114,4 +114,15 @@ void main() {
     expect(seen.last, const Duration(milliseconds: 7100));
     await end(tester);
   });
+
+  testWidgets('covered route: a new fact does not notify, the return catches up',
+      (tester) async {
+    await pump(tester, tickerMode: false);
+    seen.clear();
+    p.update(const Duration(seconds: 5), playing: true);
+    expect(seen, isEmpty);
+    await tester.pumpWidget(TickerMode(enabled: true, child: _Host(p: p)));
+    expect(p.value, const Duration(seconds: 5));
+    await end(tester);
+  });
 }

@@ -59,20 +59,29 @@ class SmoothPosition extends ChangeNotifier
     _playing = playing;
     _speed = speed;
     _max = duration != null && duration > Duration.zero ? duration : null;
-    _emit();
+    // Covered route: only keep the fact, [_onMode] catches up on return.
+    if (_enabled) _emit();
     _syncTimer();
   }
 
-  /// Follows the local player (position, duration, play state) until [ref]'s
-  /// owner is disposed. Call once, in `initState`.
+  /// Moves to [position] at once, keeping the play state: a seek whose answer
+  /// has not come back yet, so the bar does not fall back to the old position.
+  void jumpTo(Duration position) =>
+      update(position, playing: _playing, speed: _speed, duration: _max);
+
+  /// Follows the local player (position, duration, play state, speed) until
+  /// [ref]'s owner is disposed. Call once, in `initState`. Playing is false
+  /// while the backend buffers, so the position stands still then.
   void followPlayer(WidgetRef ref) {
     void push() => update(
       ref.read(positionProvider).value ?? Duration.zero,
       playing: ref.read(isPlayingProvider).value ?? false,
+      speed: ref.read(playbackSpeedProvider).value ?? 1,
       duration: ref.read(durationProvider).value,
     );
     ref.listenManual(positionProvider, (_, _) => push());
     ref.listenManual(isPlayingProvider, (_, _) => push());
+    ref.listenManual(playbackSpeedProvider, (_, _) => push());
     ref.listenManual(durationProvider, (_, _) => push());
     push();
   }

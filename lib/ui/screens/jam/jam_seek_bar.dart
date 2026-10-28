@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../services/jam/jam_models.dart';
 import '../../theme/tokens.dart';
@@ -20,6 +21,8 @@ class JamSeekBar extends StatefulWidget {
 
 class _JamSeekBarState extends State<JamSeekBar> {
   final _smooth = SmoothPosition();
+  // Own drag state: the Jam's clock is not the local player's (ring, times).
+  final _scope = [seekDragProvider.overrideWith(SeekDrag.new)];
 
   // SmoothPosition advances it between Jam states.
   void _feed() {
@@ -62,24 +65,27 @@ class _JamSeekBarState extends State<JamSeekBar> {
     final dur = Duration(milliseconds: widget.jam.current?.durationMs ?? 0);
     final style = Theme.of(context).textTheme.labelSmall
         ?.copyWith(color: context.cc.textMuted);
-    return Column(
-      children: [
-        SeekBar(
-          position: _smooth,
-          duration: dur,
-          onSeek: (d) => widget.onSeek(d.inMilliseconds),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: CcDims.gap16),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              SeekTime(position: _smooth, duration: dur, style: style),
-              Text(formatDuration(dur.inMilliseconds), style: style),
-            ],
+    return ProviderScope(
+      overrides: _scope,
+      child: Column(
+        children: [
+          SeekBar(
+            position: _smooth,
+            duration: dur,
+            onSeek: (d) => widget.onSeek(d.inMilliseconds),
           ),
-        ),
-      ],
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: CcDims.gap16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                SeekTime(position: _smooth, duration: dur, style: style),
+                Text(formatDuration(dur.inMilliseconds), style: style),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
