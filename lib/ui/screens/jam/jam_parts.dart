@@ -1,3 +1,4 @@
+import '../../widgets/cc_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -216,18 +217,26 @@ class JamQueueRow extends ConsumerWidget {
                 onPressed: onRemove,
               ),
             if (onJump != null || artists.isNotEmpty)
-              PopupMenuButton<void>(
+              IconButton(
                 tooltip: l.moreActions,
-                icon: Icon(Icons.more_vert, color: cc.textMuted),
-                itemBuilder: (_) => [
-                  if (onJump != null)
-                    PopupMenuItem<void>(onTap: onJump, child: Text(l.jamJumpHere)),
-                  if (artists.isNotEmpty)
-                    PopupMenuItem<void>(
-                      onTap: () => goToArtists(context, ref, artists),
-                      child: Text(l.goToArtist),
-                    ),
-                ],
+                icon: Icon(Icons.more_vert_rounded, color: cc.textMuted),
+                onPressed: () => showCcActionSheet<String>(
+                  context: context,
+                  title: item.title,
+                  groups: [
+                    [
+                      if (onJump != null)
+                        CcAction(icon: Icons.near_me_outlined, label: l.jamJumpHere, value: l.jamJumpHere, onTap: onJump),
+                      if (artists.isNotEmpty)
+                        CcAction(
+                          icon: Icons.person_outline_rounded,
+                          label: l.goToArtist,
+                          value: l.goToArtist,
+                          onTap: () => goToArtists(context, ref, artists),
+                        ),
+                    ],
+                  ],
+                ),
               ),
             ReorderableDragStartListener(
               index: index,

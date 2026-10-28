@@ -1,3 +1,4 @@
+import '../../widgets/cc_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -95,22 +96,27 @@ class _MissingTracksScreenState extends ConsumerState<MissingTracksScreen> {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  trailing: PopupMenuButton<_MissingAction>(
+                  trailing: IconButton(
                     tooltip: l.moreActions,
-                    onSelected: (v) {
+                    icon: const Icon(Icons.more_vert_rounded),
+                    onPressed: () async {
+                      final v = await showCcActionSheet<_MissingAction>(
+                        context: context,
+                        title: t.title,
+                        groups: [
+                          [
+                            CcAction(icon: Icons.visibility_off_outlined, label: l.ignore, value: _MissingAction.ignore),
+                            CcAction(icon: Icons.delete_outline_rounded, label: l.removeFromLibrary, value: _MissingAction.remove, destructive: true),
+                          ],
+                        ],
+                      );
+                      if (v == null || !mounted) return;
                       if (v == _MissingAction.ignore) {
                         setState(() => _ignored.add(t.id));
                       } else {
                         _confirmRemove(t.id);
                       }
                     },
-                    itemBuilder: (_) => [
-                      PopupMenuItem(value: _MissingAction.ignore, child: Text(l.ignore)),
-                      PopupMenuItem(
-                        value: _MissingAction.remove,
-                        child: Text(l.removeFromLibrary),
-                      ),
-                    ],
                   ),
                 );
               },

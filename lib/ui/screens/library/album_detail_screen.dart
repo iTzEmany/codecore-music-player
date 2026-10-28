@@ -1,3 +1,4 @@
+import '../../widgets/cc_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -209,61 +210,65 @@ class _AlbumMenu extends ConsumerWidget {
     final l = context.l10n;
     final list = tracks;
     final ctrl = ref.read(playerControllerProvider);
-    return PopupMenuButton<_AlbumAction>(
-          tooltip: l.moreActions,
-          icon: const Icon(Icons.more_horiz_rounded),
-          onSelected: (v) {
-            switch (v) {
-              case _AlbumAction.queue:
-                for (final t in list) {
-                  ctrl.addToQueue(t.id);
-                }
-                showMsg(context, l.addedToQueue);
-              case _AlbumAction.playlist:
-                showAddToPlaylistSheet(context, ref, list);
-              case _AlbumAction.share:
-                DevicesSheet.show(
-                  context,
-                  trackIds: [for (final t in list) t.id],
-                );
-              case _AlbumAction.enrich:
-                final todo = [
-                  for (final t in list)
-                    if (needsEnrichment(t)) t.id,
-                ];
-                if (todo.isEmpty) {
-                  showMsg(context, l.enrichNothingToDo);
-                } else if (!ref.read(enrichJobProvider.notifier).start(todo)) {
-                  showMsg(context, l.enrichBusy);
-                }
-              case _AlbumAction.cover:
-                showCoverPicker(
-                  context,
-                  save: (ops, bytes, mime) => ops.setAlbumCover(album.albumKey, bytes, mime),
-                  online: album.title == null
-                      ? null
-                      : (album: album.title!, artist: album.variousArtists ? '' : album.artist ?? ''),
-                );
-              case _AlbumAction.restoreCover:
-                ref.read(coverOpsProvider).restoreAlbumCover(album.albumKey);
-              case _AlbumAction.merge:
-                // The album this page shows is gone once merged: leave it.
-                showAlbumMergeDialog(context, ref, album).then((merged) {
-                  if (merged && context.mounted) Navigator.of(context).maybePop();
-                });
-            }
-          },
-          itemBuilder: (_) => [
-            PopupMenuItem(value: _AlbumAction.queue, child: Text(l.addToQueue)),
-            PopupMenuItem(value: _AlbumAction.playlist, child: Text(l.addToPlaylist)),
-            PopupMenuItem(value: _AlbumAction.share, child: Text(l.shareMenu)),
-            PopupMenuItem(value: _AlbumAction.enrich, child: Text(l.enrichAlbum)),
-            PopupMenuItem(value: _AlbumAction.cover, child: Text(l.coverChange)),
-            if (list.any((t) => t.coverSource == 1))
-              PopupMenuItem(value: _AlbumAction.restoreCover, child: Text(l.coverRestoreOriginal)),
-            PopupMenuItem(value: _AlbumAction.merge, child: Text(l.albumMergeWith)),
+    return IconButton(
+      tooltip: l.moreActions,
+      icon: const Icon(Icons.more_vert_rounded),
+      onPressed: () async {
+        final v = await showCcActionSheet<_AlbumAction>(
+          context: context,
+          title: album.title ?? l.unknownAlbum,
+          groups: [
+            [
+              CcAction(icon: Icons.queue_music_rounded, label: l.addToQueue, value: _AlbumAction.queue),
+              CcAction(icon: Icons.playlist_add_rounded, label: l.addToPlaylist, value: _AlbumAction.playlist),
+              CcAction(icon: Icons.share_rounded, label: l.shareMenu, value: _AlbumAction.share),
+              CcAction(icon: Icons.auto_fix_high_rounded, label: l.enrichAlbum, value: _AlbumAction.enrich),
+              CcAction(icon: Icons.image_outlined, label: l.coverChange, value: _AlbumAction.cover),
+              if (list.any((t) => t.coverSource == 1))
+                CcAction(icon: Icons.restore_rounded, label: l.coverRestoreOriginal, value: _AlbumAction.restoreCover),
+              CcAction(icon: Icons.merge_rounded, label: l.albumMergeWith, value: _AlbumAction.merge),
+            ],
           ],
         );
+        if (v == null || !context.mounted) return;
+        switch (v) {
+          case _AlbumAction.queue:
+            for (final t in list) {
+              ctrl.addToQueue(t.id);
+            }
+            showMsg(context, l.addedToQueue);
+          case _AlbumAction.playlist:
+            showAddToPlaylistSheet(context, ref, list);
+          case _AlbumAction.share:
+            DevicesSheet.show(context, trackIds: [for (final t in list) t.id]);
+          case _AlbumAction.enrich:
+            final todo = [
+              for (final t in list)
+                if (needsEnrichment(t)) t.id,
+            ];
+            if (todo.isEmpty) {
+              showMsg(context, l.enrichNothingToDo);
+            } else if (!ref.read(enrichJobProvider.notifier).start(todo)) {
+              showMsg(context, l.enrichBusy);
+            }
+          case _AlbumAction.cover:
+            showCoverPicker(
+              context,
+              save: (ops, bytes, mime) => ops.setAlbumCover(album.albumKey, bytes, mime),
+              online: album.title == null
+                  ? null
+                  : (album: album.title!, artist: album.variousArtists ? '' : album.artist ?? ''),
+            );
+          case _AlbumAction.restoreCover:
+            ref.read(coverOpsProvider).restoreAlbumCover(album.albumKey);
+          case _AlbumAction.merge:
+            // The album this page shows is gone once merged: leave it.
+            showAlbumMergeDialog(context, ref, album).then((merged) {
+              if (merged && context.mounted) Navigator.of(context).maybePop();
+            });
+        }
+      },
+    );
   }
 }
 

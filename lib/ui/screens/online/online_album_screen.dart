@@ -137,22 +137,15 @@ class OnlineAlbumScreen extends ConsumerWidget {
           () => _addToPlaylist(context, ref, songs)),
       ('album-menu-share', Icons.share_rounded, l.shareMenu, () => _share(context)),
     ];
-    return showCcSheet<void>(
+    return showCcActionSheet<String>(
       context: context,
-      builder: (sheet) => SafeArea(
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
+      title: album.title,
+      groups: [
+        [
           for (final (key, icon, label, run) in items)
-            ListTile(
-              key: ValueKey(key),
-              leading: Icon(icon),
-              title: Text(label),
-              onTap: () {
-                Navigator.of(sheet).pop();
-                run();
-              },
-            ),
-        ]),
-      ),
+            CcAction<String>(icon: icon, label: label, value: key, onTap: run),
+        ],
+      ],
     );
   }
 

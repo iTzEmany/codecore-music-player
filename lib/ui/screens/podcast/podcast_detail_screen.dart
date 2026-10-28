@@ -1,3 +1,4 @@
+import '../../widgets/cc_sheet.dart';
 import '../../../providers/podcast_ops.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -129,18 +130,27 @@ class _PodcastDetailScreenState extends ConsumerState<PodcastDetailScreen> {
             icon: const Icon(Icons.refresh_rounded),
             onPressed: _refresh,
           ),
-        PopupMenuButton<_PodcastAction>(
+        IconButton(
           key: const ValueKey('podcast-menu'),
           tooltip: l.moreActions,
-          onSelected: (v) {
+          icon: const Icon(Icons.more_vert_rounded),
+          onPressed: () async {
+            final v = await showCcActionSheet<_PodcastAction>(
+              context: context,
+              title: podcast.title,
+              groups: [
+                [
+                  CcAction(
+                    icon: Icons.unsubscribe_outlined,
+                    label: l.podcastUnsubscribe,
+                    value: _PodcastAction.unsubscribe,
+                    destructive: true,
+                  ),
+                ],
+              ],
+            );
             if (v == _PodcastAction.unsubscribe) _unsubscribe(podcast, downloadedCount);
           },
-          itemBuilder: (_) => [
-            PopupMenuItem(
-              value: _PodcastAction.unsubscribe,
-              child: Text(l.podcastUnsubscribe, key: const ValueKey('unsubscribe')),
-            ),
-          ],
         ),
       ],
       slivers: [
@@ -290,26 +300,41 @@ class _EpisodeTile extends ConsumerWidget {
               ),
             ),
             action,
-            PopupMenuButton<_EpisodeAction>(
+            IconButton(
               key: ValueKey('menu-${e.id}'),
               tooltip: l.moreActions,
-              onSelected: (v) async {
+              icon: const Icon(Icons.more_vert_rounded),
+              onPressed: () async {
+                final v = await showCcActionSheet<_EpisodeAction>(
+                  context: context,
+                  title: e.title,
+                  groups: [
+                    [
+                      CcAction(
+                        icon: e.played ? Icons.radio_button_unchecked_rounded : Icons.check_circle_outline_rounded,
+                        label: e.played ? l.podcastMarkNotHeard : l.podcastMarkHeard,
+                        value: _EpisodeAction.heard,
+                      ),
+                      if (row.downloaded)
+                        CcAction(
+                          icon: Icons.delete_outline_rounded,
+                          label: l.podcastDeleteFile,
+                          value: _EpisodeAction.delete,
+                          destructive: true,
+                        ),
+                    ],
+                  ],
+                );
                 switch (v) {
                   case _EpisodeAction.heard:
                     await podcastOps.markPlayed(e.id, !e.played);
                   case _EpisodeAction.delete:
                     final d = await ref.read(episodeDownloaderProvider.future);
                     await d.deleteFile(e.id);
+                  case null:
+                    break;
                 }
               },
-              itemBuilder: (_) => [
-                PopupMenuItem(
-                  value: _EpisodeAction.heard,
-                  child: Text(e.played ? l.podcastMarkNotHeard : l.podcastMarkHeard),
-                ),
-                if (row.downloaded)
-                  PopupMenuItem(value: _EpisodeAction.delete, child: Text(l.podcastDeleteFile)),
-              ],
             ),
           ],
         ),

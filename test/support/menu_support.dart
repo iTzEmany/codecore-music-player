@@ -29,11 +29,11 @@ List<String> shownMenuEntries(
   final sheet = find.descendant(
     of: find.byType(BottomSheet),
     matching: find.byWidgetPredicate(
-      (w) => w is ListTile && w.key is ValueKey<Object>,
+      (w) => (w is ListTile || w is ChoiceChip) && w.key is ValueKey<Object>,
     ),
   );
   return [
-    for (final t in tester.widgetList<ListTile>(sheet))
+    for (final t in tester.widgetList<Widget>(sheet))
       name((t.key! as ValueKey<Object>).value),
   ];
 }
@@ -46,5 +46,7 @@ Finder menuButton() => find.byWidgetPredicate(
       (w is IconButton &&
           w.icon is Icon &&
           ((w.icon as Icon).icon == Icons.more_vert ||
-              (w.icon as Icon).icon == Icons.more_horiz)),
+              (w.icon as Icon).icon == Icons.more_vert_rounded ||
+              (w.icon as Icon).icon == Icons.more_horiz ||
+              (w.icon as Icon).icon == Icons.more_horiz_rounded)),
 );

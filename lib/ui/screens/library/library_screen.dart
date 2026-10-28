@@ -224,9 +224,22 @@ class _LibraryHeader extends ConsumerWidget {
             onSmart: () =>
                 ShellNav.open<bool>(context, const SmartPlaylistEditor()),
           ),
-          PopupMenuButton<_LibraryMenuAction>(
+          IconButton(
             tooltip: l.moreActions,
-            onSelected: (v) {
+            icon: const Icon(Icons.more_vert_rounded),
+            onPressed: () async {
+              final v = await showCcActionSheet<_LibraryMenuAction>(
+                context: context,
+                groups: [
+                  [
+                    CcAction(icon: Icons.folder_open_rounded, label: l.folders, value: _LibraryMenuAction.folders),
+                    CcAction(icon: Icons.refresh_rounded, label: l.refreshLibrary, value: _LibraryMenuAction.scan),
+                    CcAction(icon: Icons.share_rounded, label: l.shareTitle, value: _LibraryMenuAction.share),
+                    CcAction(icon: Icons.upload_file_rounded, label: l.exportAllPlaylists, value: _LibraryMenuAction.exportAll),
+                  ],
+                ],
+              );
+              if (v == null || !context.mounted) return;
               switch (v) {
                 case _LibraryMenuAction.folders:
                   showCcSheet<void>(
@@ -241,24 +254,6 @@ class _LibraryHeader extends ConsumerWidget {
                   exportAllPlaylistsFlow(context, ref);
               }
             },
-            itemBuilder: (_) => [
-              PopupMenuItem(
-                value: _LibraryMenuAction.folders,
-                child: Text(l.folders),
-              ),
-              PopupMenuItem(
-                value: _LibraryMenuAction.scan,
-                child: Text(l.refreshLibrary),
-              ),
-              PopupMenuItem(
-                value: _LibraryMenuAction.share,
-                child: Text(l.shareTitle),
-              ),
-              PopupMenuItem(
-                value: _LibraryMenuAction.exportAll,
-                child: Text(l.exportAllPlaylists),
-              ),
-            ],
           ),
         ],
       ),

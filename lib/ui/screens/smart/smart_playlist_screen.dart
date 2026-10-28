@@ -1,3 +1,4 @@
+import '../../widgets/cc_sheet.dart';
 import '../../../providers/selection_providers.dart';
 import '../../../providers/playlist_ops.dart';
 import 'package:flutter/material.dart';
@@ -90,10 +91,22 @@ class SmartPlaylistScreen extends ConsumerWidget {
             ? null
             : () => ctrl.playAll(tracks, context: playCtx),
         shuffleIds: tracks.isEmpty ? null : [for (final t in tracks) t.id],
-        menu: PopupMenuButton<_SmartAction>(
+        menu: IconButton(
           tooltip: l.moreActions,
-          icon: const Icon(Icons.more_horiz_rounded),
-          onSelected: (v) async {
+          icon: const Icon(Icons.more_vert_rounded),
+          onPressed: () async {
+            final v = await showCcActionSheet<_SmartAction>(
+              context: context,
+              title: p.name,
+              groups: [
+                [
+                  CcAction(icon: Icons.edit_outlined, label: l.smartPlaylistEdit, value: _SmartAction.edit),
+                  CcAction(icon: Icons.playlist_add_check_rounded, label: l.smartConvert, value: _SmartAction.convert),
+                  CcAction(icon: Icons.delete_outline_rounded, label: l.delete, value: _SmartAction.delete, destructive: true),
+                ],
+              ],
+            );
+            if (v == null || !context.mounted) return;
             switch (v) {
               case _SmartAction.edit:
                 await ShellNav.open<bool>(context, SmartPlaylistEditor(existing: p));
@@ -103,11 +116,6 @@ class SmartPlaylistScreen extends ConsumerWidget {
                 await _delete(context, ref, p);
             }
           },
-          itemBuilder: (_) => [
-            PopupMenuItem(value: _SmartAction.edit, child: Text(l.smartPlaylistEdit)),
-            PopupMenuItem(value: _SmartAction.convert, child: Text(l.smartConvert)),
-            PopupMenuItem(value: _SmartAction.delete, child: Text(l.delete)),
-          ],
         ),
         slivers: [
           SliverList.builder(
