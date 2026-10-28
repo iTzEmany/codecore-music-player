@@ -11,23 +11,13 @@ import '../../l10n/l10n_ext.dart';
 import '../../providers/player_providers.dart';
 import '../theme/tokens.dart';
 import 'format_utils.dart';
+import 'seek_bar.dart';
 import 'smooth_position.dart';
 
 /// Playback fraction 0..1, or null when the duration is unknown.
 double? ringProgress(Duration position, Duration? duration) {
   if (duration == null || duration <= Duration.zero) return null;
   return (position.inMilliseconds / duration.inMilliseconds).clamp(0.0, 1.0);
-}
-
-/// Fraction under the finger while dragging the full player's ring (null
-/// otherwise), so the elapsed time can follow it.
-final ringDragProvider = NotifierProvider<RingDrag, double?>(RingDrag.new);
-
-class RingDrag extends Notifier<double?> {
-  @override
-  double? build() => null;
-
-  void set(double? f) => state = f;
 }
 
 /// The cover inside an open ring (the app logo): the arc fills clockwise from
@@ -105,7 +95,7 @@ class _RingProgressState extends ConsumerState<RingProgress> {
   Duration? _readDuration() =>
       widget.duration ?? ref.read(durationProvider).value;
 
-  late final RingDrag _dragNotifier = ref.read(ringDragProvider.notifier);
+  late final SeekDrag _dragNotifier = ref.read(seekDragProvider.notifier);
 
   @override
   void dispose() {
@@ -139,7 +129,9 @@ class _RingProgressState extends ConsumerState<RingProgress> {
         : Consumer(
             builder: (_, ref, _) {
               final dur = widget.duration ?? ref.watch(durationProvider).value;
-              final ringPaint = paint(dur: dur, fixed: _drag);
+              // The bar's drag counts too: both show the same fraction.
+              final drag = _drag ?? ref.watch(seekDragProvider);
+              final ringPaint = paint(dur: dur, fixed: drag);
               if (!widget.seekable || dur == null || dur <= Duration.zero) {
                 return ringPaint;
               }
@@ -150,7 +142,7 @@ class _RingProgressState extends ConsumerState<RingProgress> {
                 valueListenable: _pos,
                 child: ringPaint,
                 builder: (_, pos, child) {
-                  final shown = _drag == null ? pos : dur * _drag!;
+                  final shown = drag == null ? pos : dur * drag;
                   return Semantics(
                     slider: true,
                     label: context.l10n.seekPosition,

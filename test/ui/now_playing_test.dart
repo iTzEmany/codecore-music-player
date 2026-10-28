@@ -12,6 +12,8 @@ import 'package:codecore/ui/screens/now_playing/now_playing_controls.dart';
 import 'package:codecore/ui/theme/tokens.dart';
 import 'package:codecore/ui/widgets/cover_backdrop.dart';
 import 'package:codecore/ui/widgets/ring_progress.dart';
+import 'package:codecore/ui/widgets/seek_bar.dart';
+import 'package:codecore/ui/widgets/speed_button.dart';
 import 'package:codecore/ui/theme/custom_theme.dart';
 import 'package:codecore/providers/theme_providers.dart';
 import 'package:drift/drift.dart' show Value;
@@ -62,6 +64,15 @@ void main() {
                 matching: find.byType(RingProgress)))
             .seekable,
         isTrue);
+    // 59.5: the bar is back between the two times; the quality tag and the
+    // speed sit below it, centred (the ring keeps its gap).
+    final bar = tester.getRect(find.byType(SeekBar));
+    expect(tester.getCenter(find.text('0:00').first).dy, closeTo(bar.center.dy, 1));
+    expect(tester.getCenter(find.text('0:00').first).dx, lessThan(bar.left));
+    expect(tester.getCenter(find.byType(QualityTag)).dy, greaterThan(bar.bottom - 8));
+    final chips = tester.getRect(find.byType(QualityTag)).expandToInclude(
+        tester.getRect(find.byType(SpeedButton)));
+    expect(chips.center.dx, closeTo(200, 1));
     // Without a context the header just says «In riproduzione».
     expect(find.text('In riproduzione'), findsOneWidget);
     await h.dispose(tester);
@@ -212,6 +223,14 @@ void main() {
       await g.moveBy(const Offset(0, 4));
       await tester.pump();
       expect(find.text('0:00'), findsNothing);
+      // 59.4: the bar follows the ring's drag (same fraction, same time).
+      expect(
+          tester
+                  .widget<Slider>(find.descendant(
+                      of: find.byType(NpSeekRow), matching: find.byType(Slider)))
+                  .value /
+              100000,
+          closeTo(0.36, 0.02));
       await g.up();
       expect(seeks, hasLength(1));
       expect(seeks.single.inMilliseconds / 1000, closeTo(36, 2));

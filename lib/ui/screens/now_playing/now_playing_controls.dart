@@ -14,13 +14,15 @@ import '../../theme/tokens.dart';
 import '../../widgets/format_utils.dart';
 import '../../widgets/play_buttons.dart';
 import '../../widgets/quality_tag.dart';
-import '../../widgets/ring_progress.dart';
+import '../../widgets/seek_bar.dart';
+import '../../widgets/smooth_position.dart';
 import '../../widgets/speed_button.dart';
 import '../devices/devices_sheet.dart';
 import 'queue_sheet.dart';
 import '../../widgets/shuffle_button.dart';
 
-/// «Elapsed · quality tag · total» (tap the total for the rest).
+/// «Elapsed · bar · total» (tap the total for the rest), the quality tag and
+/// the speed centred below.
 class NpSeekRow extends ConsumerStatefulWidget {
   const NpSeekRow({super.key, required this.track});
 
@@ -30,12 +32,31 @@ class NpSeekRow extends ConsumerStatefulWidget {
   ConsumerState<NpSeekRow> createState() => _NpSeekRowState();
 }
 
-/// Inset from the page margin shared by the title, the seek track (the slider
-/// overlay radius) and the glyphs of the 48 px icon buttons at the row ends.
+/// Inset from the page margin shared by the title, the seek row and the glyphs
+/// of the 48 px icon buttons at the row ends.
 const npEdge = 12.0;
 
 class _NpSeekRowState extends ConsumerState<NpSeekRow> {
+  final _smooth = SmoothPosition();
   bool _remaining = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _smooth.followPlayer(ref);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _smooth.bindTickerMode(context);
+  }
+
+  @override
+  void dispose() {
+    _smooth.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,53 +66,70 @@ class _NpSeekRowState extends ConsumerState<NpSeekRow> {
       fontFeatures: const [FontFeature.tabularFigures()],
     );
     final dur = ref.watch(durationProvider).value ?? Duration.zero;
-    final max = dur.inMilliseconds.toDouble();
-    // Only the position consumers rebuild on each tick, not the whole row.
-    double shownOf(WidgetRef ref) {
-      final drag = ref.watch(ringDragProvider);
-      if (drag != null) return drag * max;
-      final pos = ref.watch(positionProvider).value ?? Duration.zero;
-      return pos.inMilliseconds.toDouble().clamp(0.0, max <= 0 ? 1.0 : max);
-    }
-
+    // Never below the widest «m:ss», so the bar does not move as time runs.
+    const side = BoxConstraints(minWidth: 44);
     return Column(
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: npEdge),
           child: Row(
             children: [
+              ConstrainedBox(
+                constraints: side,
+                child: SeekTime(position: _smooth, duration: dur, style: style),
+              ),
+              // The ring is the one slider for a screen reader (±5 s).
               Expanded(
-                child: Align(
-                  alignment: AlignmentDirectional.centerStart,
-                  child: Consumer(
-                    builder: (context, ref, _) => Text(
-                      formatDuration(shownOf(ref).round()),
-                      style: style,
+                child: ExcludeSemantics(
+                  // Accent bar and soft knob, as in the mockup.
+                  child: SliderTheme(
+                    data: SliderTheme.of(context).copyWith(
+                      activeTrackColor: cc.accent,
+                      inactiveTrackColor: cc.surface3,
+                      thumbColor: cc.accentSoft,
+                      thumbShape: const RoundSliderThumbShape(
+                        enabledThumbRadius: 8,
+                      ),
+                      overlayColor: cc.accent.withValues(alpha: 0.28),
+                      overlayShape: const RoundSliderOverlayShape(
+                        overlayRadius: 16,
+                      ),
+                    ),
+                    child: SeekBar(
+                      position: _smooth,
+                      duration: dur,
+                      onSeek: (d) => ref.read(playerControllerProvider).seek(d),
                     ),
                   ),
                 ),
               ),
-              QualityTag(widget.track),
-              const SizedBox(width: 8),
-              const SpeedButton(),
-              Expanded(
-                child: Align(
-                  alignment: AlignmentDirectional.centerEnd,
-                  child: InkWell(
-                    onTap: () => setState(() => _remaining = !_remaining),
-                    child: Consumer(
-                      builder: (context, ref, _) => Text(
-                        _remaining
-                            ? '-${formatDuration((max - shownOf(ref)).round())}'
-                            : formatDuration(max.round()),
-                        style: style,
-                      ),
-                    ),
+              InkWell(
+                onTap: () => setState(() => _remaining = !_remaining),
+                child: ConstrainedBox(
+                  constraints: side.copyWith(minHeight: 48),
+                  child: Align(
+                    alignment: AlignmentDirectional.centerEnd,
+                    child: _remaining
+                        ? SeekTime(
+                            position: _smooth,
+                            duration: dur,
+                            remaining: true,
+                            style: style,
+                          )
+                        : Text(formatDuration(dur.inMilliseconds), style: style),
                   ),
                 ),
               ),
             ],
           ),
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            QualityTag(widget.track),
+            const SizedBox(width: 8),
+            const SpeedButton(),
+          ],
         ),
       ],
     );
