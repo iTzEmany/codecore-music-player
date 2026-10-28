@@ -45,6 +45,53 @@ Future<void> _open(WidgetTester tester, {String? title, bool wide = false}) asyn
 }
 
 void main() {
+  testWidgets('an action that throws after an await closes the sheet and is logged', (tester) async {
+    tester.view.physicalSize = const Size(400, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final logged = <String?>[];
+    final oldPrint = debugPrint;
+    debugPrint = (m, {wrapWidth}) => logged.add(m);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: buildThemeFromColors(CcColors.notte, false),
+        locale: const Locale('it'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Builder(
+          builder: (c) => TextButton(
+            onPressed: () => showCcActionSheet<String>(
+              context: c,
+              groups: [
+                [
+                  CcAction(
+                    icon: Icons.bolt,
+                    label: 'Boom',
+                    onTap: () async {
+                      await Future<void>.delayed(Duration.zero);
+                      throw StateError('x');
+                    },
+                  ),
+                ],
+              ],
+            ),
+            child: const Text('open'),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Boom'));
+    await tester.pumpAndSettle();
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
+    await tester.pumpAndSettle();
+    expect(find.text('Boom'), findsNothing);
+    expect(tester.takeException(), isNull);
+    debugPrint = oldPrint; // before the framework checks its debug variables
+    expect(logged.where((m) => m != null && m.startsWith('[W] sheet action failed: Boom')), isNotEmpty);
+  });
+
   testWidgets('a long label at 2x text grows the row without overflow', (tester) async {
     tester.view.physicalSize = const Size(400, 900);
     tester.view.devicePixelRatio = 1;
