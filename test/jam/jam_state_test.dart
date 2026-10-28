@@ -260,6 +260,75 @@ void main() {
     expect(s.items[1].inherited, false);
   });
 
+  test('R-88: three guest adds in a row keep arrival order before the inherited', () {
+    var s = seeded(2);
+    for (final n in ['g1', 'g2', 'g3']) {
+      s = ok(s, JamCommand.add(item(guest, title: n)), guest);
+    }
+    expect(s.items.map((i) => i.title),
+        ['cur', 'g1', 'g2', 'g3', 'i0', 'i1']);
+    expect(s.items.map((i) => i.inherited), [false, false, false, false, true, true]);
+  });
+
+  test('host inherited add goes to the end and keeps the flag', () {
+    final s = ok(seeded(1), JamCommand.add(item(host, title: 'h', inherited: true)), host);
+    expect(s.items.map((i) => i.title), ['cur', 'i0', 'h']);
+    expect(s.items.last.inherited, true);
+  });
+
+  test('host remove of the current: next slides in, rewound; last falls back; empty stops', () {
+    var s = ok(seeded(1), const JamCommand.play(), host);
+    s = ok(s, JamCommand.remove(s.current!.id), host);
+    expect(s.current!.title, 'i0');
+    expect(s.currentIndex, 0);
+    expect(s.positionMs, 0);
+    expect(s.playing, true);
+    s = ok(s, JamCommand.remove(s.current!.id), host);
+    expect(s.items, isEmpty);
+    expect(s.currentIndex, -1);
+    expect(s.playing, false);
+    var t = ok(seeded(1), const JamCommand.next(), host);
+    t = ok(t, JamCommand.remove(t.current!.id), host);
+    expect(t.items.map((i) => i.title), ['cur']);
+    expect(t.currentIndex, 0);
+  });
+
+  test('next on the last item stops, rewound, without moving the index', () {
+    var s = ok(seeded(1), const JamCommand.next(), host);
+    s = ok(s, const JamCommand.play(), host);
+    s = ok(s, const JamCommand.next(), host, now: 5000);
+    expect(s.currentIndex, 1);
+    expect(s.playing, false);
+    expect(s.positionMs, 0);
+  });
+
+  test('trackEnded on the last item stops; on an earlier one advances rewound', () {
+    var s = seeded(1);
+    s = ok(s, JamCommand.trackEnded(s.current!.id), guest);
+    expect(s.currentIndex, 1);
+    expect(s.positionMs, 0);
+    s = ok(s, JamCommand.trackEnded(s.current!.id), host);
+    expect(s.currentIndex, 1);
+    expect(s.playing, false);
+  });
+
+  test('jump to an item starts it playing from 0', () {
+    var s = ok(seeded(2), const JamCommand.seek(500), host);
+    s = ok(s, JamCommand.jump(s.items[2].id), guest);
+    expect(s.currentIndex, 2);
+    expect(s.positionMs, 0);
+    expect(s.playing, true);
+  });
+
+  test('move to the head adopts the neighbour flag and keeps the current item', () {
+    var s = ok(seeded(2), JamCommand.add(item(guest, title: 'g')), guest);
+    s = ok(s, JamCommand.move(s.items[2].id, 0), host);
+    expect(s.items.map((i) => i.title), ['i0', 'cur', 'g', 'i1']);
+    expect(s.items[0].inherited, false); // adopts the flag of 'cur' next to it
+    expect(s.current!.title, 'cur');
+    expect(s.currentIndex, 1);
+  });
+
   test('JamItem json keeps inherited', () {
     expect(JamItem.tryParse(item(host, inherited: true).toJson())!.inherited, true);
     expect(JamItem.tryParse(item(host).toJson())!.inherited, false);
