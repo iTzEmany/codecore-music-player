@@ -1080,11 +1080,11 @@ mobile_scanner — fase 24 — 2026-10-19
 - [x] 61.7 Controlli di fase
 
 ## Fase 62 — Home «aggiunti da poco» (`fase-62-home-aggiunti.md`)
-- [ ] 62.1 20 album
-- [ ] 62.2 Aperto = riga che scorre
-- [ ] 62.3 Accessibilità e desktop
-- [ ] 62.4 Mockup di ui-fluida
-- [ ] 62.5 Controlli di fase
+- [x] 62.1 20 album
+- [x] 62.2 Aperto = riga che scorre
+- [x] 62.3 Accessibilità e desktop
+- [x] 62.4 Mockup di ui-fluida
+- [x] 62.5 Controlli di fase
 
 ## Fase 63 — Jam = player (`fase-63-jam-come-player.md`)
 - [ ] 63.1 Precedente e successivo per tutti

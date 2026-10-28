@@ -217,7 +217,7 @@ class _Shortcut extends StatelessWidget {
   }
 }
 
-/// «Aggiunti da poco»: the fan, and «Mostra tutti» for the full list by date.
+/// «Aggiunti da poco»: the fan (20 albums once open), and «Mostra tutti» for the full list by date.
 class AddedLately extends ConsumerWidget {
   const AddedLately({super.key});
 
@@ -226,7 +226,7 @@ class AddedLately extends ConsumerWidget {
     final l = context.l10n;
     final albums = recentlyAddedAlbums(
       ref.watch(albumsProvider).value ?? const [],
-      limit: 5,
+      limit: 20,
     );
     if (albums.isEmpty) return const SizedBox.shrink();
     return Column(
