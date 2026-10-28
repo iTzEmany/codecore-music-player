@@ -24,6 +24,8 @@ class _Jam extends JamController {
     super.build();
     return const JamUiState();
   }
+
+  void setPhase(JamPhase p) => state = state.copyWith(phase: p);
 }
 
 class _Hub extends ShareHubNotifier {
@@ -37,8 +39,10 @@ void main() {
   late SettingsStore store;
   late ProviderContainer c;
   late List<int> ids;
+  var cacheFails = false;
 
   setUp(() async {
+    cacheFails = false;
     SharedPreferences.setMockInitialValues({});
     store = SettingsStore(await SharedPreferences.getInstance());
     final db = AppDatabase(NativeDatabase.memory());
@@ -66,7 +70,10 @@ void main() {
       jamProvider.overrideWith(_Jam.new),
       audioHandlerProvider.overrideWithValue(handler),
       playbackPersistenceProvider.overrideWithValue(persistence),
-      jamCacheDirProvider.overrideWith((ref) async => Directory.systemTemp.createTemp('jam_restore')),
+      jamCacheDirProvider.overrideWith((ref) async {
+        if (cacheFails) throw StateError('no cache dir');
+        return Directory.systemTemp.createTemp('jam_restore');
+      }),
       jamBackendFactoryProvider.overrideWithValue(FakeBackend.new),
     ]);
     addTearDown(c.dispose);
@@ -83,7 +90,9 @@ void main() {
     await c.read(jamProvider.notifier).debugBegin(role, jamState);
     // The Jam (or the app, meanwhile) leaves another queue behind.
     await handler.playQueue([ids[3]], 0);
-    await c.read(playbackPersistenceProvider)!.flush();
+    // Whatever the disk holds now differs from the restored queue.
+    await store.writePlayback(SavedPlayback(queueIds: [ids[3]], positionMs: 5000));
+    backend.seeks.clear();
   }
 
   void expectBack() {
@@ -100,6 +109,37 @@ void main() {
     await enterAndChange();
     await c.read(jamProvider.notifier).end();
     expectBack();
+    // The disk follows the player again.
+    await handler.playQueue([ids[3]], 0);
+    await c.read(playbackPersistenceProvider)!.flush();
+    expect(store.readPlayback().queueIds, [ids[3]]);
+  });
+
+  test('a Jam that cannot start gives the queue and the disk back', () async {
+    cacheFails = true;
+    await handler.playQueue([ids[3]], 0);
+    await store.writePlayback(SavedPlayback(queueIds: [ids[3]]));
+    await handler.restore(ids.take(3).toList(), 1, const Duration(minutes: 1));
+    backend.seeks.clear();
+    await expectLater(
+        c.read(jamProvider.notifier).debugBegin(JamRole.guest, jamState),
+        throwsStateError);
+    expectBack();
+    await handler.playQueue([ids[3]], 0);
+    await c.read(playbackPersistenceProvider)!.flush();
+    expect(store.readPlayback().queueIds, [ids[3]]);
+  });
+
+  test('lost while the guest queue is being saved: the Jam never starts', () async {
+    final jam = c.read(jamProvider.notifier) as _Jam;
+    jam.setPhase(JamPhase.requesting);
+    await Future.wait([
+      jam.debugBegin(JamRole.guest, jamState),
+      jam.debugFinish(lost: true),
+    ]);
+    expect(c.read(jamProvider).phase, JamPhase.ended);
+    expect(handler.queueIds, ids.take(3));
+    expect(handler.isPlaying, false);
   });
 
   test('the host ends the Jam, or the Jam is lost: same queue back, paused', () async {
@@ -120,9 +160,12 @@ void main() {
   });
 
   test('a restart mid-Jam finds the queue from before the Jam', () async {
-    await enterAndChange();
+    await c.read(jamProvider.notifier).debugBegin(JamRole.guest, jamState);
+    await handler.playQueue([ids[3]], 0);
+    await c.read(playbackPersistenceProvider)!.flush();
     final saved = store.readPlayback();
     expect(saved.queueIds, ids.take(3));
     expect(saved.index, 1);
+    expect(saved.positionMs, 60000);
   });
 }

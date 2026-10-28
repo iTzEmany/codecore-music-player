@@ -358,6 +358,8 @@ class JamController extends Notifier<JamUiState> {
 
   Future<void> _begin(JamRole role, JamState s) async {
     if (role == JamRole.guest) await saveLocalQueue();
+    // Lost or ended while saving: _finish already tore everything down.
+    if (state.phase == JamPhase.ended) return;
     try {
       await _beginJam(role, s);
     } on Object catch (e, st) {
@@ -375,9 +377,13 @@ class JamController extends Notifier<JamUiState> {
     } on Object catch (e) {
       AppLog.d('jam: could not pause local player', e);
     }
+    if (state.phase == JamPhase.ended) return;
     final dir = await ref.read(jamCacheDirProvider.future);
-    _cache = JamCache(dir);
-    await _cache!.clear();
+    if (state.phase == JamPhase.ended) return;
+    final cache = JamCache(dir);
+    await cache.clear();
+    if (state.phase == JamPhase.ended) return;
+    _cache = cache;
     _failures = 0;
     final clock = _clock = _makeClock(role);
     _output =
