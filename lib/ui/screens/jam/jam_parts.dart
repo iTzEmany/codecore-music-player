@@ -154,7 +154,7 @@ class JamQueueRow extends ConsumerWidget {
                       if (item.artist != null) item.artist!,
                       l.jamAddedBy(who),
                       if (!item.available) l.jamUnavailable,
-                    ].join(' · '),
+                    ].join(', '),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: theme.bodySmall,
