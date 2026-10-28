@@ -1098,6 +1098,7 @@ mobile_scanner — fase 24 — 2026-10-19
 - [x] 64.1 Misure finali sul Mi A3 (Pallino in soglia con la prova A/B; Ricerca build p99 21,3 ms: D-176)
 - [x] 64.2 Metriche di arrivo
 - [ ] 64.3 Prova a mano (Linux e Mi A3 fatte; Jam e Motorola: «Tocca a te»)
+  - Motorola (debug da master badd8bb): Ricerca ok (✕ svuota il testo e chiude la tastiera; barra sopra la tastiera e sopra il dock; Back chiude prima la tastiera e resta su Cerca). ⋮ a foglio, mai popup, e Back lo chiude: Libreria, Playlist, riga brano, player, coda. Non provati: ⋮ di un Album, Home «aggiunti da poco» (ventaglio e Back), scheda del testo (tempo finito). Jam non provata: servono due telefoni.
   - Mi A3 (debug da master d7a528a): Ricerca ok (✕ svuota, tastiera e back, dock sopra la tastiera); ⋮ in sheet ok ovunque (Libreria, Album, Playlist, riga brano, player, coda) e back li chiude; testo del player stabile; Home «aggiunti da poco» ok (apre, nomi, scorre oltre 4 album, tocco fuori chiude).
   - Jam: non raggiungibile (si avvia solo dal tasto «Jam» accanto a un altro dispositivo, vietato in prova). Parte Motorola: lasciata all'utente.
   - Bug 1: back con il ventaglio «aggiunti da poco» aperto esce dall'app invece di chiudere il ventaglio. Corretto in a73da96.
