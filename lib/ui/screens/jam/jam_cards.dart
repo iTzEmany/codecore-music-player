@@ -6,6 +6,7 @@ import '../../../providers/jam_providers.dart';
 import '../../../services/jam/jam_models.dart';
 import '../../theme/tokens.dart';
 import '../now_playing/now_playing_cards.dart' show NpCard;
+import 'jam_parts.dart' show jamTriviaText;
 import 'jam_track_info_screen.dart';
 
 // The player's LyricsCard and InfoCard are built on a local `Track` (synced
@@ -61,13 +62,8 @@ class JamInfoCard extends ConsumerWidget {
     final l = context.l10n;
     final theme = Theme.of(context).textTheme;
     final raw = ref.watch(jamTrackMetaProvider(item.id)).value?.curiosities;
-    final cut = raw?.lastIndexOf('\n') ?? -1;
-    final text = raw == null
-        ? null
-        : (cut > 0 && raw.substring(cut + 1).startsWith('http')
-              ? raw.substring(0, cut)
-              : raw);
-    final has = text != null && text.isNotEmpty;
+    final text = jamTriviaText(raw);
+    final has = text != null;
     return NpCard(
       title: l.fieldCuriosity,
       onTap: () => _openInfo(context, item),

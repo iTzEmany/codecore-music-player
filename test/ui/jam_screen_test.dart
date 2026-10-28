@@ -43,6 +43,12 @@ class _FakeJam extends JamController {
 
   int ended = 0;
 
+  /// A host clock that differs from the device's.
+  int? clockMs;
+
+  @override
+  int jamNowMs() => clockMs ?? super.jamNowMs();
+
   @override
   Future<void> end() async => ended++;
 
@@ -307,6 +313,34 @@ void main() {
     // The Jam keeps its own drag state: the player's one is untouched.
     final box = ProviderScope.containerOf(tester.element(find.byType(JamScreen)));
     expect(box.read(seekDragProvider), isNull);
+    await h.dispose(tester);
+  });
+
+  testWidgets('la posizione in riproduzione segue l\'orologio dell\'host', (tester) async {
+    final base = active(host: false);
+    tester.view.physicalSize = const Size(500, 1000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final h = await Harness.create(tester);
+    // The host clock is far from the device's: only jamNowMs() gives 0:40.
+    final fake = _FakeJam(JamUiState(
+      phase: base.phase,
+      role: base.role,
+      peerName: base.peerName,
+      peerId: base.peerId,
+      jam: base.jam!.copyWith(playing: true, positionMs: 30000, positionAt: 5000000),
+    ))
+      ..clockMs = 5010000;
+    await h.pump(tester, const JamScreen(), extraOverrides: [jamProvider.overrideWith(() => fake)]);
+    expect(find.text('0:40'), findsOneWidget);
+    await tester.pumpWidget(const SizedBox());
+    await h.dispose(tester);
+  });
+
+  testWidgets('desktop: la Jam non mostra il volume locale', (tester) async {
+    final (_, h) = await openJam(tester, size: const Size(1280, 900));
+    expect(find.byIcon(Icons.volume_up_rounded), findsNothing);
+    expect(find.byIcon(Icons.volume_off_rounded), findsNothing);
     await h.dispose(tester);
   });
 

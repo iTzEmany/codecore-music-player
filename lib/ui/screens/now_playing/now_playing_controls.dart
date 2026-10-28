@@ -157,7 +157,8 @@ class _NpSeekRowState extends ConsumerState<NpSeekRow> {
 
 /// Shuffle · previous · play · next · repeat.
 ///
-/// The Jam (with [live]) injects [playing] and the three callbacks.
+/// The Jam (with [live]) injects [playing] and the three callbacks (null =
+/// disabled).
 class NpControls extends ConsumerWidget {
   const NpControls({
     super.key,
@@ -177,7 +178,7 @@ class NpControls extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
     final cc = context.cc;
-    final injected = onPlayPause != null;
+    final injected = this.playing != null;
     final playing =
         this.playing ?? (ref.watch(isPlayingProvider).value ?? false);
     final loading =
@@ -192,7 +193,7 @@ class NpControls extends ConsumerWidget {
         IconButton(
           tooltip: l.previousTrack,
           iconSize: 36,
-          onPressed: onPrevious ?? ctrl.previous,
+          onPressed: injected ? onPrevious : ctrl.previous,
           icon: const Icon(Icons.skip_previous_rounded),
         ),
         if (loading)
@@ -210,12 +211,12 @@ class NpControls extends ConsumerWidget {
           PlayCircleButton(
             size: 64,
             playing: playing,
-            onPressed: onPlayPause ?? ctrl.togglePlayPause,
+            onPressed: injected ? onPlayPause : ctrl.togglePlayPause,
           ),
         IconButton(
           tooltip: l.nextTrack,
           iconSize: 36,
-          onPressed: onNext ?? ctrl.next,
+          onPressed: injected ? onNext : ctrl.next,
           icon: const Icon(Icons.skip_next_rounded),
         ),
         if (!live)
@@ -257,10 +258,14 @@ class NpBottomRow extends ConsumerWidget {
     this.onDevices,
     this.onQueue,
     this.devicesLabel,
+    this.volume = true,
   });
 
   final VoidCallback? onDevices, onQueue;
   final String? devicesLabel;
+
+  /// The desktop volume row; the Jam hides it (its volume is in the outputs sheet).
+  final bool volume;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -269,7 +274,7 @@ class NpBottomRow extends ConsumerWidget {
     final jam = ref.watch(jamProvider).active;
     return Column(
       children: [
-        if (isDesktop) const _VolumeRow(),
+        if (isDesktop && volume) const _VolumeRow(),
         Row(
           children: [
             // Equal side slots keep the sleep chip at the exact centre.

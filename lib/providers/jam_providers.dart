@@ -354,7 +354,7 @@ class JamController extends Notifier<JamUiState> {
     _attachedTo = handler;
     final transport = _transport = JamTransport(
       send: send,
-      nowMs: () => _clock?.jamNowMs() ?? DateTime.now().millisecondsSinceEpoch,
+      nowMs: jamNowMs,
     );
     handler.attachRemote(transport);
     state = state.copyWith(phase: JamPhase.active, role: role, jam: s);
@@ -580,11 +580,14 @@ class JamController extends Notifier<JamUiState> {
     return r?.error;
   }
 
+  /// The Jam's reference clock (the host's), the one `JamState.positionAt` is on.
+  int jamNowMs() => _clock?.jamNowMs() ?? DateTime.now().millisecondsSinceEpoch;
+
   /// «Previous» as in the player (D-160): restart, or the item before.
   Future<JamError?> previous() {
     final s = state.jam;
     if (s == null) return Future.value(JamError.ended);
-    return send(jamPreviousCommand(s, _clock?.jamNowMs() ?? DateTime.now().millisecondsSinceEpoch));
+    return send(jamPreviousCommand(s, jamNowMs()));
   }
 
   /// Library ids to the shared queue; a shadow row (`stream:` path, no extension) goes as an online result.

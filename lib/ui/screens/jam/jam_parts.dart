@@ -13,6 +13,17 @@ import '../../widgets/artist_avatar.dart';
 import '../../widgets/cover_image.dart';
 import '../../widgets/track_artists_sheet.dart';
 
+/// A curiosity as the owner sends it, «text\nurl»: the text without the source
+/// url (which is not shown); null when there is none.
+String? jamTriviaText(String? raw) {
+  if (raw == null) return null;
+  final cut = raw.lastIndexOf('\n');
+  final text = cut > 0 && raw.substring(cut + 1).startsWith('http')
+      ? raw.substring(0, cut)
+      : raw;
+  return text.isEmpty ? null : text;
+}
+
 /// The credited artists of a shared track (no YouTube Music ids on the wire).
 List<ArtistName> jamArtists(JamItem item, WidgetRef ref) => creditedArtists(
       item.artist ?? '',

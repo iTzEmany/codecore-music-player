@@ -73,13 +73,7 @@ class _JamScreenState extends ConsumerState<JamScreen> {
     }
     return Scaffold(
       body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            // Wide enough for the player's two columns (cover | cards).
-            constraints: const BoxConstraints(maxWidth: 1012),
-            child: JamPlayerView(state: s),
-          ),
-        ),
+        child: JamPlayerView(state: s),
       ),
     );
   }

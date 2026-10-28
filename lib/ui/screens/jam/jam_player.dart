@@ -44,7 +44,7 @@ class _JamPlayerViewState extends ConsumerState<JamPlayerView> {
     final jam = _jam;
     _smooth.update(
       Duration(
-        milliseconds: jam.positionAtTime(DateTime.now().millisecondsSinceEpoch),
+        milliseconds: jam.positionAtTime(ref.read(jamProvider.notifier).jamNowMs()),
       ),
       playing: jam.playing && jam.current != null,
       duration: Duration(milliseconds: jam.current?.durationMs ?? 0),
@@ -105,7 +105,6 @@ class _JamPlayerViewState extends ConsumerState<JamPlayerView> {
       );
     }
     final dur = Duration(milliseconds: cur?.durationMs ?? 0);
-    final wide = MediaQuery.sizeOf(context).width >= _wideBreakpoint;
     final textScale = MediaQuery.textScalerOf(context).scale(1);
     final cards = <Widget>[
       if (cur != null) ...[
@@ -118,6 +117,7 @@ class _JamPlayerViewState extends ConsumerState<JamPlayerView> {
       overrides: _scope,
       child: LayoutBuilder(
         builder: (context, c) {
+          final wide = c.maxWidth >= _wideBreakpoint;
           final player = _JamPlayer(
             header: header,
             jam: jam,
@@ -126,6 +126,7 @@ class _JamPlayerViewState extends ConsumerState<JamPlayerView> {
             onSeek: _seek,
             // Phone: the taller header leaves the cover 260 dp at most.
             maxRing: wide ? 460 : 260,
+            hasCurrent: cur != null,
           );
           if (wide) {
             return Center(
@@ -192,9 +193,11 @@ class _JamPlayer extends ConsumerWidget {
     required this.duration,
     required this.onSeek,
     required this.maxRing,
+    required this.hasCurrent,
   });
 
   final double maxRing;
+  final bool hasCurrent;
   final Widget header;
   final JamState jam;
   final SmoothPosition smooth;
@@ -275,17 +278,21 @@ class _JamPlayer extends ConsumerWidget {
                 NpControls(
                   live: true,
                   playing: jam.playing,
-                  onPrevious: () => ctrl.previous(),
-                  onPlayPause: cur == null
-                      ? () {}
-                      : () => ctrl.send(
+                  // Nothing playing: the three buttons are disabled.
+                  onPrevious: hasCurrent ? () => ctrl.previous() : null,
+                  onPlayPause: hasCurrent
+                      ? () => ctrl.send(
                           jam.playing
                               ? const JamCommand.pause()
                               : const JamCommand.play(),
-                        ),
-                  onNext: () => ctrl.send(const JamCommand.next()),
+                        )
+                      : null,
+                  onNext: hasCurrent
+                      ? () => ctrl.send(const JamCommand.next())
+                      : null,
                 ),
                 NpBottomRow(
+                  volume: false,
                   devicesLabel: l.devicesTitle,
                   onDevices: () => JamOutputsSheet.show(context),
                   onQueue: () => showJamQueueSheet(context),
