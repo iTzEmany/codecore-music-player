@@ -105,7 +105,7 @@ void main() {
     await h.pump(tester, PlaylistDetailScreen(playlist: Playlist(id: id, name: 'Rock', createdAt: 1, updatedAt: 1)));
     await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 150)));
     await tester.pump(const Duration(milliseconds: 300));
-    await tester.tap(menuButton());
+    await tester.tap(find.byTooltip('Altre azioni'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Cambia copertina'));
     await tester.pumpAndSettle();

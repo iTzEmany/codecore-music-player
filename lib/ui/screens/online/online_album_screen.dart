@@ -127,7 +127,7 @@ class OnlineAlbumScreen extends ConsumerWidget {
     if (context.mounted) showMsg(context, context.l10n.copied);
   }
 
-  Future<void> _showMenu(BuildContext context, WidgetRef ref, YtmAlbum album, List<YtResult> songs) {
+  Future<void> _openMenu(BuildContext context, WidgetRef ref, YtmAlbum album, List<YtResult> songs) {
     final l = context.l10n;
     final items = <(String, IconData, String, VoidCallback)>[
       ('album-menu-download', Icons.download_rounded, l.ytmDownloadAlbum,
@@ -177,7 +177,7 @@ class OnlineAlbumScreen extends ConsumerWidget {
             release: release,
             onPlay: songs.isEmpty ? null : () => _play(context, ref, songs),
             onShuffle: songs.isEmpty ? null : () => _play(context, ref, songs, shuffle: true),
-            onMore: album == null ? null : () => _showMenu(context, ref, album, songs),
+            onMore: album == null ? null : () => _openMenu(context, ref, album, songs),
           ),
         ),
         if (data != null && data.stale)

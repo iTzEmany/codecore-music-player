@@ -260,7 +260,7 @@ class _PlaylistDetailScreenState extends ConsumerState<PlaylistDetailScreen> {
         shuffleIds: tracks.isEmpty ? null : [for (final t in tracks) t.id],
         menu: IconButton(
           tooltip: l.moreActions,
-          icon: const Icon(Icons.more_vert),
+          icon: const Icon(Icons.more_vert_rounded),
           onPressed: () async {
             final v = await showCcActionSheet<_PlaylistAction>(
               context: context,
