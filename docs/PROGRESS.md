@@ -754,14 +754,16 @@ Feature «Arricchimento completo» (`docs/feature-arricchimento.md`, decisioni D
 - [~] 56.7 Prove a mano — Linux, Mi A3 e Motorola fatte; Wi-Fi spento a metà brano all'utente
 
 ## Fase 57 — Coda e transizioni dello streaming (`fase-57-coda-e-transizioni.md`)
-- [ ] 57.0a URL del flusso da NewPipeExtractor (Android)
-- [ ] 57.0b Brani vietati ai minori: ripiego su YouTube Music
-- [ ] 57.1 Il brano dopo dall'URL anticipato
-- [ ] 57.2 Gapless e crossfade da URL verso file
-- [ ] 57.3 Jam e «Scarica» (regressioni)
-- [ ] 57.4 Misura finale (RNF-08, RNF-09, RNF-10, R-81)
-- [ ] 57.5 Rimisura delle soglie della fase 38 (R-87)
-- [ ] 57.6 Controlli di fase (K-SV-02, K-SV-06)
+- [x] 57.0a URL del flusso da NewPipeExtractor (Android)
+- [x] 57.0b Brani vietati ai minori: ripiego su YouTube Music
+- [x] 57.1 Il brano dopo dall'URL anticipato
+- [x] 57.2 Gapless e crossfade da URL verso file
+- [x] 57.3 Jam e «Scarica» (regressioni)
+- [x] 57.4 Misura finale (RNF-08, RNF-09, RNF-10, R-81)
+- [x] 57.5 Rimisura delle soglie della fase 38 (R-87)
+- [x] 57.6 Controlli di fase (K-SV-02, K-SV-06)
+  - 28/10: `flutter analyze` pulito, 1049 test mirati verdi; build APK debug full e lite ok; K-SV-02/K-SV-06 (ascolto) in 57.7.
+  - 57.4: tabella «Dopo» (Linux, Mi A3; Motorola non collegato), D-173, D-174. 57.5: D-175.
 - [ ] 57.7 Prove a mano
 
 ## Note di deviazione
