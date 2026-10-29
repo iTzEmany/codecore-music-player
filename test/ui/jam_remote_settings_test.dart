@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:codecore/providers/jam_broker_providers.dart';
+import 'package:codecore/providers/settings_providers.dart';
 import 'package:codecore/services/jam/remote/broker_entry.dart';
 import 'package:codecore/services/jam/remote/mqtt_link.dart';
 import 'package:codecore/ui/screens/settings/jam_remote_settings.dart';
@@ -13,8 +14,9 @@ import '../support/app_harness.dart';
 
 /// Echoes every publish back; [fail] makes connect throw.
 class FakeMqttLink implements MqttLink {
-  FakeMqttLink({this.fail = false});
+  FakeMqttLink({this.fail = false, this.echo = true});
   final bool fail;
+  final bool echo;
   final _ctl = StreamController<MqttIncoming>.broadcast();
   bool disconnected = false;
 
@@ -29,7 +31,7 @@ class FakeMqttLink implements MqttLink {
   void unsubscribe(String topic) {}
   @override
   void publish(String topic, Uint8List bytes, {bool retain = false}) =>
-      scheduleMicrotask(() => _ctl.add((topic: topic, payload: bytes)));
+      echo ? scheduleMicrotask(() => _ctl.add((topic: topic, payload: bytes))) : null;
   @override
   Stream<MqttIncoming> get messages => _ctl.stream;
   @override
@@ -114,5 +116,29 @@ void main() {
     await t.pumpAndSettle();
     expect(find.textContaining('non riesco a collegarmi'), findsOneWidget);
     await h.dispose(t);
+  });
+
+  testWidgets('every change is written to jamBrokers and the last broker has no Togli', (t) async {
+    final h = await open(t);
+    final c = box(t);
+    await t.tap(find.byTooltip('Togli').first);
+    await t.pumpAndSettle();
+    expect(decodeBrokers(c.read(settingsStoreProvider).readJamBrokersRaw()).map((b) => b.host), ['test.mosquitto.org']);
+    expect(find.byTooltip('Togli'), findsNothing);
+    c.read(jamBrokersProvider.notifier).remove(c.read(jamBrokersProvider).single);
+    expect(c.read(jamBrokersProvider).length, 1);
+    await h.dispose(t);
+  });
+
+  test('Prova without an echo fails after the timeout and still disconnects', () async {
+    final link = FakeMqttLink(echo: false);
+    expect(await testBroker(link, kDefaultJamBrokers[0], timeout: const Duration(milliseconds: 50)), isFalse);
+    expect(link.disconnected, isTrue);
+  });
+
+  test('Prova with a refused connection still disconnects', () async {
+    final link = FakeMqttLink(fail: true);
+    expect(await testBroker(link, kDefaultJamBrokers[0]), isFalse);
+    expect(link.disconnected, isTrue);
   });
 }

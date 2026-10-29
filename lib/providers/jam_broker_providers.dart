@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/app_log.dart';
@@ -30,7 +32,10 @@ class JamBrokersNotifier extends Notifier<List<BrokerEntry>> {
     return true;
   }
 
-  void remove(BrokerEntry b) => _set([...state]..remove(b));
+  /// The last broker stays (D-270).
+  void remove(BrokerEntry b) {
+    if (state.length > 1) _set([...state]..remove(b));
+  }
 
   void move(int from, int to) {
     final l = [...state];
@@ -49,13 +54,17 @@ final mqttLinkFactoryProvider = Provider<MqttLink Function()>((_) => MqttClientL
 
 /// Connects, subscribes and publishes on a random channel, waits for the message
 /// to come back (5 s), disconnects. True = ok (the reason goes to the log).
-Future<bool> testBroker(MqttLink link, BrokerEntry b) async {
+Future<bool> testBroker(MqttLink link, BrokerEntry b,
+    {Duration timeout = const Duration(seconds: 5)}) async {
   final r = Random.secure();
   final topic = 'ccj1/t/${randomClientId(r)}';
   final payload = Uint8List.fromList([for (var i = 0; i < 8; i++) r.nextInt(256)]);
   try {
     await link.connect(b);
-    final back = link.messages.firstWhere((m) => m.topic == topic).timeout(const Duration(seconds: 5));
+    final back = link.messages
+        .firstWhere((m) => m.topic == topic && listEquals(m.payload, payload))
+        .timeout(timeout);
+    back.ignore();
     link.subscribe(topic);
     link.publish(topic, payload);
     await back;

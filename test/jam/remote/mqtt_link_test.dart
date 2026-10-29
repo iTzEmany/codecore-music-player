@@ -27,4 +27,12 @@ void main() {
     expect(randomClientId().length, 20);
     expect(randomClientId(), isNot(randomClientId()));
   });
+
+  test('one bad entry drops only itself, duplicates go, nothing valid gives the defaults', () {
+    const raw = '[{"host":"a.org","port":1883,"tls":false},5,{"host":"b.org","port":8883.0},'
+        '{"host":"a.org","port":1883,"tls":false},{"host":"c.org","port":0}]';
+    expect(decodeBrokers(raw), [const BrokerEntry(host: 'a.org', port: 1883, tls: false)]);
+    expect(decodeBrokers('[]'), kDefaultJamBrokers);
+    expect(decodeBrokers('[{"host":"","port":1}]'), kDefaultJamBrokers);
+  });
 }

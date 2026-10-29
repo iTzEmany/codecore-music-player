@@ -72,7 +72,8 @@ class _JamRemoteSettingsState extends ConsumerState<JamRemoteSettings> {
                       icon: const Icon(Icons.arrow_upward),
                       onPressed: () => notifier.move(i, i - 1),
                     ),
-                  IconButton(
+                  if (brokers.length > 1)
+                    IconButton(
                     tooltip: l.jamBrokerRemove,
                     icon: const Icon(Icons.delete_outline),
                     onPressed: () => notifier.remove(brokers[i]),

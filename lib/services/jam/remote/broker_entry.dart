@@ -35,21 +35,26 @@ const kDefaultJamBrokers = [
 
 String encodeBrokers(List<BrokerEntry> l) => jsonEncode([for (final b in l) b.toJson()]);
 
-/// Reads `[{host, port, tls}]`; null or broken text gives the defaults, invalid entries are dropped.
+/// Reads `[{host, port, tls}]`. A broken entry drops only itself, duplicates go;
+/// null, broken text or nothing valid gives the defaults (D-270).
 List<BrokerEntry> decodeBrokers(String? raw) {
   if (raw == null) return kDefaultJamBrokers;
+  final out = <BrokerEntry>[];
   try {
-    final out = <BrokerEntry>[
-      for (final e in jsonDecode(raw) as List)
-        BrokerEntry(
+    for (final e in jsonDecode(raw) as List) {
+      try {
+        final b = BrokerEntry(
           host: ((e as Map)['host'] as String).trim(),
           port: e['port'] as int,
           tls: e['tls'] as bool? ?? true,
-        ),
-    ].where((b) => b.isValid).toList();
-    return out;
+        );
+        if (b.isValid && !out.contains(b)) out.add(b);
+      } on Object catch (err, st) {
+        AppLog.w('jamBrokers: entry dropped', err, st);
+      }
+    }
   } on Object catch (e, st) {
-    AppLog.w('jamBrokers unreadable, using the defaults', e, st);
-    return kDefaultJamBrokers;
+    AppLog.w('jamBrokers unreadable', e, st);
   }
+  return out.isEmpty ? kDefaultJamBrokers : out;
 }
