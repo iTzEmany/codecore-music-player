@@ -36,6 +36,15 @@ void main() {
     expect(s.outputs[1].deviceClass, isNull);
   });
 
+  test('ok: absent means true, false is kept, channel error is a failed read', () async {
+    mock((_) async => {'permission': true, 'outputs': []});
+    expect((await fetchBluetoothOutputs()).ok, isTrue);
+    mock((_) async => {'permission': true, 'outputs': [], 'ok': false});
+    expect((await fetchBluetoothOutputs()).ok, isFalse);
+    mock((_) async => throw PlatformException(code: 'x'));
+    expect((await fetchBluetoothOutputs()).ok, isFalse);
+  });
+
   test('permission false and channel error give the empty snapshot', () async {
     mock((_) async => {'permission': false, 'outputs': []});
     expect((await fetchBluetoothOutputs()).permission, isFalse);

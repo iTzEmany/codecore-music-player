@@ -156,9 +156,16 @@ class SpeakerMonitor {
     if (!_answers.containsKey(address)) _dismissed.add(address);
   }
 
+  var _readGen = 0;
+
   Future<void> _read() async {
+    final gen = ++_readGen;
     final snap = await _fetch();
-    if (_disposed) return;
+    if (_disposed || gen != _readGen) return; // a newer read supersedes this one
+    if (!snap.ok) {
+      AppLog.w('speaker: outputs read failed, keeping the last state');
+      return;
+    }
     _snapshot = snap;
     final linked = {for (final o in _snapshot.outputs) o.address};
     _prompted.retainAll(linked); // gone and back: ask again if still unanswered

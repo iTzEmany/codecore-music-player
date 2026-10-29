@@ -80,6 +80,7 @@ class MainActivity : AudioServiceActivity() {
             when (call.method) {
                 "outputRoute" -> result.success(currentOutputRoute())
                 "bluetoothOutputs" -> bluetoothOutputs(result)
+                "netPrefix" -> netPrefix(result)
                 "bluetoothOutputActive" -> result.success(bluetoothOutputActive())
                 "bluetoothPermission" -> result.success(hasBluetoothPermission())
                 "requestBluetoothPermission" -> requestBluetoothPermission(result)
@@ -259,13 +260,34 @@ class MainActivity : AudioServiceActivity() {
         btReceiver = null
     }
 
+    /**
+     * `[{address, prefix}]` of the up, non-loopback IPv4 interfaces. NetworkInterface
+     * (not ConnectivityManager's LinkProperties) because it also lists the hotspot's.
+     */
+    private fun netPrefix(result: MethodChannel.Result) {
+        Thread {
+            val out = try {
+                java.util.Collections.list(java.net.NetworkInterface.getNetworkInterfaces())
+                    .filter { it.isUp && !it.isLoopback }
+                    .flatMap { it.interfaceAddresses }
+                    .filter { it.address is java.net.Inet4Address }
+                    .map { mapOf("address" to it.address.hostAddress, "prefix" to it.networkPrefixLength.toInt()) }
+            } catch (e: Exception) {
+                android.util.Log.w("Codecore", "net prefix failed", e)
+                emptyList()
+            }
+            main.post { result.success(out) }
+        }.start()
+    }
+
     /** `{permission, outputs: [{name, address, deviceClass}]}`; never throws, answers once. */
     private fun bluetoothOutputs(result: MethodChannel.Result) {
         var answered = false
-        fun reply(permission: Boolean, outputs: List<Map<String, Any?>>) {
+        // ok=false: the read failed (timeout, exception); an empty list with ok=true is real.
+        fun reply(permission: Boolean, outputs: List<Map<String, Any?>>, ok: Boolean = true) {
             if (answered) return
             answered = true
-            result.success(mapOf("permission" to permission, "outputs" to outputs))
+            result.success(mapOf("permission" to permission, "outputs" to outputs, "ok" to ok))
         }
         if (!hasBluetoothPermission()) return reply(false, emptyList())
         try {
@@ -278,7 +300,7 @@ class MainActivity : AudioServiceActivity() {
                 proxy = null
             }
             val timeout = Runnable {
-                reply(hasBluetoothPermission(), emptyList())
+                reply(hasBluetoothPermission(), emptyList(), false)
                 close()
             }
             val ok = adapter.getProfileProxy(this, object : BluetoothProfile.ServiceListener {
@@ -295,17 +317,17 @@ class MainActivity : AudioServiceActivity() {
                         })
                     } catch (e: Exception) {
                         android.util.Log.w("Codecore", "bluetooth outputs failed", e)
-                        reply(hasBluetoothPermission(), emptyList())
+                        reply(hasBluetoothPermission(), emptyList(), false)
                     } finally {
                         close()
                     }
                 }
                 override fun onServiceDisconnected(profile: Int) {}
             }, BluetoothProfile.A2DP)
-            if (ok) main.postDelayed(timeout, 3000) else reply(true, emptyList())
+            if (ok) main.postDelayed(timeout, 3000) else reply(true, emptyList(), false)
         } catch (e: Exception) {
             android.util.Log.w("Codecore", "bluetooth outputs failed", e)
-            reply(hasBluetoothPermission(), emptyList())
+            reply(hasBluetoothPermission(), emptyList(), false)
         }
     }
 

@@ -218,4 +218,41 @@ void main() {
     await _settle();
     expect(asked, hasLength(2));
   });
+
+  test('a failed read keeps the speaker connected and emits nothing', () async {
+    final r = _Rig()..connect([_out('a', 0x0414)]);
+    final m = r.monitor();
+    final events = <bool>[];
+    m.speakerConnected.listen(events.add);
+    await m.start();
+    expect(m.connected, isTrue);
+    r.snap = const BluetoothSnapshot(permission: true, ok: false);
+    r.changed.add(null);
+    await _settle();
+    expect(m.connected, isTrue);
+    expect(events, [true]);
+  });
+
+  test('overlapping reads: the older one finishing last is discarded', () async {
+    final first = Completer<BluetoothSnapshot>();
+    var calls = 0;
+    final changed = StreamController<void>.broadcast();
+    final m = SpeakerMonitor(
+      fetch: () => ++calls == 1
+          ? first.future
+          : Future.value(BluetoothSnapshot(permission: true, outputs: [_out('a', 0x0414)])),
+      changed: changed.stream,
+      seen: const Stream.empty(),
+      active: () async => false,
+      request: () async => true,
+    );
+    final started = m.start(); // read 1 hangs
+    await _settle();
+    changed.add(null); // read 2 answers at once: speaker connected
+    await _settle();
+    expect(m.connected, isTrue);
+    first.complete(const BluetoothSnapshot(permission: true)); // stale: nothing connected
+    await started;
+    expect(m.connected, isTrue);
+  });
 }

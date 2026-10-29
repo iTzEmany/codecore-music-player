@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import '../../core/app_log.dart';
+import 'net_prefix.dart';
 import 'offers.dart';
 
 /// Magic string carried by every beacon; anything else is ignored.
@@ -200,6 +201,18 @@ class LanDiscovery {
     }
   }
 
+  Map<String, int> _prefixCache = const {};
+  DateTime _prefixAt = DateTime.fromMillisecondsSinceEpoch(0);
+
+  /// Prefixes cost a process or a channel call: re-read at most every 30 s.
+  Future<Map<String, int>> _prefixes() async {
+    if (DateTime.now().difference(_prefixAt) < const Duration(seconds: 30)) {
+      return _prefixCache;
+    }
+    _prefixAt = DateTime.now();
+    return _prefixCache = await readNetPrefixes();
+  }
+
   Future<List<({InternetAddress address, int port})>> _targets() async {
     final fixed = _fixedTargets;
     if (fixed != null) return fixed;
@@ -209,15 +222,14 @@ class LanDiscovery {
     try {
       final ifaces = await NetworkInterface.list(
           type: InternetAddressType.IPv4, includeLoopback: false);
-      for (final i in ifaces) {
-        for (final a in i.addresses) {
-          final b = a.rawAddress;
-          // Directed broadcast, assuming a /24 like most home networks.
-          out.add((
-            address: InternetAddress('${b[0]}.${b[1]}.${b[2]}.255'),
-            port: port,
-          ));
-        }
+      final prefixes = await _prefixes();
+      final bcast = broadcastTargets(
+        [for (final i in ifaces) for (final a in i.addresses) a.address],
+        prefixes,
+        windows: Platform.isWindows,
+      );
+      for (final b in bcast) {
+        out.add((address: InternetAddress(b), port: port));
       }
     } on SocketException catch (e) {
       AppLog.w('discovery: interface list failed', e);
