@@ -21,8 +21,15 @@ Decisioni D-264…D-273 in `docs/decisioni.md`. Si riparte dalla fase 70 (`docs/
   - `test.mosquitto.org:8886` chiude dopo il CONNECT.
 
 ## Tocca a te
-- **69.4** (Motorola host con le JBL, Mi A3 ospite, hotspot del Motorola): la checklist è in `docs/fase-69-fondamenta-jam-distanza.md` §69.4 e copre i rilievi della 68.3 rifatti a mano. Gli esiti si scrivono lì.
-  - Prima: `flutter build apk --debug` e `adb -s ZY22HKD85K install -r build/app/outputs/flutter-apk/app-debug.apk`.
+- **Resti della 69.4**: la prova sui due telefoni l'ho fatta io (D-274) e gli esiti sono in `docs/fase-69-fondamenta-jam-distanza.md` §69.4. Restano da provare a mano:
+  - R-89 (swipe di un brano online);
+  - R-91;
+  - R-92 (copertine dell'ospite);
+  - R-93 («Scarica»);
+  - lo scarto;
+  - il brano suggerito di «Coda insieme»;
+  - l'aggiunta che entra nei 20 posti di una Jam nata corta.
+- **Volume del Mi A3**: il volume Bluetooth (A2DP) è rimasto a 0 (prima era 7). Rialzalo con le cuffie collegate.
 - **Mosquitto 8886 da decidere** (D-258): chiude ogni connessione dopo il CONNECT, in tre giri, con TLS valido. Puoi toglierlo dalla lista predefinita (`kDefaultJamBrokers`) o sostituirlo con un altro broker TLS pubblico.
 - **Prova a mano del gate**:
   - «Fino alla fine della Jam» durante una Jam vera, e che sparisca al riavvio;
