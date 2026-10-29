@@ -11,11 +11,18 @@ import '../../core/app_log.dart';
 import '../../data/db/app_database.dart';
 import '../../data/repositories/backup_queries.dart';
 import '../../data/repositories/track_kinds.dart';
+import '../../data/settings/jam_secret_store.dart';
 
 const kBackupFormat = 1;
 
 /// Settings that belong to this device and never travel in a backup.
-const kDeviceBoundKeys = {'deviceId', 'deviceName', 'trustedDevices'};
+const kDeviceBoundKeys = {
+  'deviceId',
+  'deviceName',
+  'trustedDevices',
+  jamBlockedKey,
+  jamSuspendedKey,
+};
 
 class BackupSummary {
   const BackupSummary({
