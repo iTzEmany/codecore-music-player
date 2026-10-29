@@ -113,3 +113,18 @@ Stesso comando; telefono a riposo (batteria 29,8 °C, solo l'app di misura in pr
 | Fogli | 1430 | 11.8 / 22.2 | 7.4 / 12.4 | 2,9 % | ≤ 3 % | sì | 3,4 % | 3,7 % |
 
 Esito: la misura -61 era rumore del telefono; Fogli rientra (2,9 % ≤ 3 %, Prima 3,7). Ricerca «notte» resta fuori soglia come in Prima (fuori fase 61).
+
+## Fase 68
+
+Data: 2026-10-29. Mi A3 (`0d7ae9df206e`), app perf separata (`com.codecore.player.perf`, libreria già sul telefono). Ramo `feat/68-scoperta-chiusura` (HEAD `7b6d68e`, con il banner della Jam della fase 67 sopra il dock). Comando: `python3 scripts/perf_device.py 0d7ae9df206e --label fase68 --no-push --only "Pallino schede,Fogli,Apertura player,Swipe mini player"`; seconda run `--label fase68-b --no-build --apk <stesso APK>`. File grezzi: `build/perf/fase68.md`, `build/perf/fase68-b.md`. PSS 234 / 219 MB.
+
+| Scenario | Frame | build p90/p99 ms | raster p90/p99 ms | > 16,7 ms (run 1 / run 2) | Soglia | fase 64 (run 1 / `-b`) |
+|---|---|---|---|---|---|---|
+| Pallino schede | 1655 / 1653 | 6.0 / 10.8 · 6.8 / 11.5 | 7.7 / 17.5 · 14.5 / 19.7 | 1,6 % / 5,6 % | ≤ 2 % | 4,1 % / 5,6 % |
+| Swipe mini player | 401 / 390 | 3.8 / 15.5 · 5.7 / 13.8 | 7.2 / 10.8 · 7.3 / 11.6 | 1,0 % / 0,5 % | ≤ 2 % | 0,4 % / 0,4 % |
+| Fogli | 1382 / 1326 | 12.9 / 26.2 · 11.3 / 26.0 | 8.5 / 16.1 · 7.7 / 13.6 | 5,1 % / 3,4 % | ≤ 3 % | 2,7 % / 3,6 % |
+| Apertura player | 419 / 436 | 5.4 / 20.5 · 6.8 / 19.3 | 8.6 / 15.7 · 9.3 / 17.6 | 2,9 % / 3,0 % | ≤ 3 %, p99 ≤ 33 ms | 2,0 % / 1,6 % |
+
+Esito: nessun peggioramento oltre il rumore. Pallino schede è bimodale come noto (1,6 % con raster p90 7,7; 5,6 % con raster p90 14,5 a build invariato). Swipe e Apertura player in soglia. Fogli supera 3 % in entrambe le run (5,1 e 3,4 %) ma build p90/p99 è uguale alla fase 64 (11,3 / 24,0) e il valore della seconda run coincide con `-b` della fase 64 (3,6 %): non è peggio oltre il rumore.
+
+Prova A/B su Fogli (richiesta di §68.2, telefono sbloccato, stessa libreria, APK alternati A B A B, perf build `--profile` con `CODECORE_PERF`): A = `310ce66` (prima della fase 66), B = `7b6d68e` (fase 68, l'APK delle due run). Fogli > 16,7 ms: A 2,4 % e 3,0 %, B 2,3 % e 4,0 %; build p90/p99 A 8,0 / 23,9 e 11,8 / 23,8, B 8,4 / 22,1 e 12,2 / 26,5; raster p90 7,2-7,8 ovunque. File grezzi `build/perf/ab68-A1.md`, `ab68-B1.md`, `ab68-A2.md`, `ab68-B2.md`. Esito: la variazione tra due run dello stesso APK (A 2,4 contro 3,0; B 2,3 contro 4,0) è più grande della differenza tra A e B: B non è peggio di A. **Fogli: nessun peggioramento dovuto alle fasi 66-68** (il 5,1 % della prima run era rumore del telefono, build p90 12,9 ms come A2).

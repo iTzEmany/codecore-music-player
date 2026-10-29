@@ -1143,6 +1143,6 @@ mobile_scanner — fase 24 — 2026-10-19
 
 ## Fase 68 — Scoperta e chiusura (`fase-68-scoperta-e-chiusura-jam.md`)
 - [x] 68.1 Maschera di rete vera
-- [ ] 68.2 Misure di fluidità
+- [x] 68.2 Misure di fluidità
 - [ ] 68.3 Prova a mano con due telefoni (utente)
 - [ ] 68.4 Chiusura
