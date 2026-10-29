@@ -2,6 +2,7 @@ import 'package:codecore/ui/screens/library/album_detail_screen.dart';
 import 'package:codecore/data/repositories/library_queries.dart';
 import 'package:codecore/data/repositories/track_repository.dart';
 import 'dart:io';
+import 'package:codecore/core/app_log.dart';
 
 import 'package:codecore/ui/widgets/cover_image.dart';
 import 'package:drift/drift.dart' show Value;
@@ -84,7 +85,14 @@ void main() {
 
   testWidgets('picking a library cover gives the album a new cover key on screen, cover_source 1', (tester) async {
     final dir = (await tester.runAsync(Directory.systemTemp.createTemp))!;
-    addTearDown(() => dir.deleteSync(recursive: true));
+    // Windows: the cover file can still be open here; a leftover temp dir is harmless.
+    addTearDown(() {
+      try {
+        dir.deleteSync(recursive: true);
+      } on FileSystemException catch (e) {
+        AppLog.w('test: temp dir kept', e);
+      }
+    });
     await tester.runAsync(() => File('${dir.path}/libkey.jpg').writeAsBytes([1, 2, 3]));
     final h = await Harness.create(tester, tracks: 4);
     h.coversDir = dir;

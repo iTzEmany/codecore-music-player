@@ -77,8 +77,9 @@ class MqttClientLink implements MqttLink {
 
   @override
   void subscribe(String topic) {
-    if (topic.contains('#') || topic.contains('+'))
+    if (topic.contains('#') || topic.contains('+')) {
       throw ArgumentError.value(topic, 'topic', 'wildcards are not allowed');
+    }
     _c!.subscribe(topic, MqttQos.atLeastOnce);
   }
 
