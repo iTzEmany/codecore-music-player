@@ -58,6 +58,8 @@ La validazione di `POST /request` passa in `JamHost.admitRequest(...)`, che il r
 
 **Fatto quando:** `test/jam/remote/jam_crypto_test.dart` verde con i vettori di RFC 5869 A.1 (HKDF-SHA-256), draft-irtf-cfrg-xchacha-03 A.3.1 (XChaCha20-Poly1305), libsodium per `kx` e `auth`, più un andata e ritorno di `pad`/`unpad`; `flutter build apk --debug` e `flutter build linux --debug` verdi in locale; la CI della PR verde con i tempi annotati nel documento di fase (anche le build Windows e macOS, se girano sulla PR). Hook fallito o CI oltre il doppio dei tempi di oggi → fermati e scrivilo in «Tocca a te» (K-JD-07).
 
+**Esiti (29/10):** `jam_crypto_test.dart` 6 test verdi in 5 s (22 s la prima volta, hook libsodium compreso); `flutter build apk --debug` 3m26s (compila libsodium); `flutter build linux --debug` 1m00s. Vettore HKDF: PRK di RFC 5869 A.1 (l'`info` 0xf0… non è una `String` valida: `expand` prende `context` come testo), OKM da A.3 (info vuota).
+
 ### 69.9 — Broker e «Prova connessione» (R-122, R-129, D-244, D-251, D-258, K-JD-04)
 `mqtt_client` ^10.14.0. `lib/services/jam/remote/mqtt_link.dart`: `MqttLink` e `MqttClientLink` come in §Componenti (TLS con `SecurityContext.defaultContext`, `onBadCertificate` null, `autoReconnect` false, `clientId` casuale). `BrokerEntry` (host, porta, TLS) e `jamBrokers` in shared_preferences con `kDefaultJamBrokers`. `lib/ui/screens/settings/jam_remote_settings.dart`: lista dei broker (aggiungi, togli, riordina, «Ripristina»), avviso per una voce senza TLS, «Prova connessione» (connessione, iscrizione e pubblicazione su un canale casuale, ritorno del messaggio entro 5 s).
 

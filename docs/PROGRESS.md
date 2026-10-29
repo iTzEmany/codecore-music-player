@@ -1155,7 +1155,7 @@ mobile_scanner — fase 24 — 2026-10-19
 - [ ] 69.5 `JamGuestLink` senza spostare codice
 - [ ] 69.6 `admitRequest` e `JamGate`
 - [ ] 69.7 Sospendi, Blocca e l'avviso dell'ospite
-- [ ] 69.8 `sodium` nella build e vettori noti
+- [x] 69.8 `sodium` nella build e vettori noti
 - [ ] 69.9 Broker e «Prova connessione»
 - [ ] 69.10 Controlli di fase
 
