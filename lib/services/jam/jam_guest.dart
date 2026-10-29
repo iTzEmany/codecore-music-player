@@ -5,15 +5,16 @@ import 'package:dio/dio.dart';
 import '../../core/app_log.dart';
 import '../share/offers.dart' show newToken;
 import 'jam_clock.dart';
+import 'jam_guest_link.dart';
 import 'jam_host.dart';
 import 'jam_models.dart';
 
-enum JamJoinOutcome { accepted, declined, expired, busy, unreachable, cancelled }
+enum JamJoinOutcome { accepted, declined, expired, busy, unreachable, cancelled, tooSoon }
 
 /// Client side of a Jam: asks the host, follows its state by long polling and
 /// sends commands. The guest also serves the files it owns through [local]
 /// (its [JamHost] routes), using the state this client keeps up to date.
-class JamGuest {
+class JamGuest implements JamGuestLink {
   JamGuest({
     required this.local,
     Dio? dio,
@@ -42,15 +43,21 @@ class JamGuest {
   final _states = StreamController<JamState>.broadcast();
   final _lost = StreamController<void>.broadcast();
 
+  @override
   JamState? get state => _state;
   bool get active => _running;
+  @override
   String? get hostBase => _base;
+  @override
   String? get sessionId => _sid;
   String? get sessionToken => _token;
+  @override
   String? get fileToken => _fileToken;
+  @override
   Stream<JamState> get states => _states.stream;
 
   /// Fires when the host stops answering (the session is gone).
+  @override
   Stream<void> get lost => _lost.stream;
 
   Map<String, String> get _auth => {jamTokenHeader: _token ?? ''};
@@ -133,6 +140,7 @@ class JamGuest {
   }
 
   /// Gives up on a pending request.
+  @override
   void cancelJoin() => _cancel = true;
 
   Future<void> _bootstrap() async {
@@ -199,6 +207,7 @@ class JamGuest {
   }
 
   /// Sends [cmd] to the host. Returns the new state or the error.
+  @override
   Future<JamResult> send(JamCommand cmd) async {
     if (!_running) return const JamResult.fail(JamError.ended);
     try {
@@ -234,6 +243,7 @@ class JamGuest {
   }
 
   /// One timestamp exchange with the host (null when it fails).
+  @override
   Future<JamTimeSample?> probeHostTime(int Function() localNow) async {
     if (!_running || _base == null) return null;
     final t0 = localNow();
@@ -252,6 +262,7 @@ class JamGuest {
 
   /// This device (a guest) accepted [request] from a newcomer: ask the host to
   /// admit it and hand it the host's address and credentials.
+  @override
   Future<bool> invite(JamRequest request) async {
     if (!_running || _base == null) return false;
     try {
@@ -279,6 +290,7 @@ class JamGuest {
   }
 
   /// Leaves the Jam. The host keeps running with the guest gone.
+  @override
   Future<void> leave() async {
     if (_running && _base != null) {
       try {
@@ -293,6 +305,7 @@ class JamGuest {
     await _close();
   }
 
+  @override
   Future<void> dispose() async {
     await _close();
     await _states.close();

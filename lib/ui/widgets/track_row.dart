@@ -635,9 +635,9 @@ class LiveTrackRow extends ConsumerWidget {
     if (active) return draggable(row);
     return SwipeToQueue(
       swipeKey: 'swipe-queue-${track.id}',
-      onQueue: () {
-        ref.read(playerControllerProvider).addToQueue(track.id);
-        showMsg(context, context.l10n.addedToQueue);
+      onQueue: () async {
+        final added = await ref.read(playerControllerProvider).addToQueue(track.id);
+        if (context.mounted) showQueued(context, added);
       },
       child: draggable(row),
     );

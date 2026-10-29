@@ -29,7 +29,7 @@
 |---|---|
 | dopo ogni passo fuso | `build/app/outputs/apk`, `build/perf/*` già riportati in misure.md, log in scratchpad |
 | a fine fase | `build/linux` se la fase dopo non lo usa |
-| disco ≥ 90 % | `build/app/intermediates`, `build/test_cache`, `build/bench` |
+| disco ≥ 90 % | `build/app/intermediates`, `build/test_cache`, `build/bench`, `.dart_tool/flutter_build` (6 GB, cache dei test e delle build, si rifà da sola) |
 | mai | `build/metadata_god` (Rust, lungo da rifare), `~/.pub-cache`, file musicali del telefono |
 
 ## Regole extra del progetto

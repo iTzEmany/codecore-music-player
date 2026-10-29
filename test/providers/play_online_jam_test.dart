@@ -70,7 +70,10 @@ void main() {
       handler,
       null,
       jamActive: () => jam,
-      addToJam: toJam.add,
+      addToJam: (ids) async {
+        toJam.add(ids);
+        return (added: ids.length, full: false);
+      },
       addOnlineToJam: (r) {
         onlineToJam.add(r.id);
         return true;
@@ -183,8 +186,8 @@ class _SpyJam extends JamController {
   }
 
   @override
-  Future<int> addTracks(List<Track> tracks, {bool inherited = false}) async {
+  Future<JamAddResult> addTracks(List<Track> tracks, {bool inherited = false}) async {
     files.addAll(tracks.map((t) => t.id));
-    return tracks.length;
+    return (added: tracks.length, full: false);
   }
 }

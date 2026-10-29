@@ -69,6 +69,8 @@ dependencies:
   # Local copy: 1.1.0 does not build on Android with Gradle 9 (docs/patches).
   metadata_god:
     path: third_party/metadata_god
+  sodium: ^4.1.2
+  mqtt_client: ^10.14.0
 
 dev_dependencies:
   flutter_test:

@@ -1,40 +1,39 @@
-# Handoff — 2026-10-29 (fasi 66–68 «Jam: cassa e coda insieme», kickoff della «Jam a distanza»)
+# Handoff — 2026-10-29 (fase 69 «Fondamenta della Jam a distanza»)
 
 ## Prima di tutto (per la prossima chat)
-Kickoff della feature «Jam a distanza» fatto: requisiti, stack, architettura, protocollo di sicurezza e rischi in `docs/feature-jam-distanza.md`, decisioni D-228…D-262, piano nelle fasi 69–73 (`docs/00-INDICE.md`). Pacchetti nuovi ammessi: solo `sodium` e `mqtt_client`. Si parte dalla fase 69.
+La fase 69 è nel codice (PR #67). Comprende i rilievi della prova 68.3 (69.1…69.3) e i mattoni della Jam a distanza:
+- `JamGuestLink`;
+- `JamGate` (2 richieste al minuto, Sospendi, Blocca), salvato in `JamSecretStore`;
+- `jam_crypto` su `sodium`;
+- broker MQTT con «Prova connessione».
 
-La feature «Jam: cassa e coda insieme» (`docs/feature-jam-cassa.md`) è nel codice: 66 (#61), 67 (#62), 68 (questa PR). Resta solo la prova a mano 68.3 con il Motorola e le JBL, più le voci di «Tocca a te». Le decisioni della notte sono D-222…D-227 in `docs/decisioni.md`.
+Decisioni D-264…D-273 in `docs/decisioni.md`. Si riparte dalla fase 70 (`docs/fase-70-ponte-jam-distanza.md`): prima la sezione «Rilievi dalla fase 69», poi 70.1.
 
 ## Stato
-- **66** «Coda insieme»: modalità della coda, turni fra i partecipanti, l'host continua da solo quando esce l'unico ospite (R-91, D-221).
-- **67** «Jam della cassa»: uscite Bluetooth dal nativo, «È una cassa?» con la stima dalla classe (D-212), interruttore «Jam sulla cassa», Jam «in attesa» con il solo annuncio (D-226), «Collega una cassa» e fine dopo 10 minuti, offerta della cassa dell'ospite (R-119). 67.1 e 67.2 sono `[~]`: manca la prova sul Motorola.
-- **68**:
-  - il broadcast della scoperta usa il prefisso vero (R-117). Android lo legge da `NetworkInterface`, che vede anche l'hotspot (D-227); Linux da `ip`; Windows ripiega su a.b.c.255 e a.b.255.255;
-  - una lettura fallita delle uscite Bluetooth non è più una cassa sparita;
-  - misure sul Mi A3 in `docs/refactor/ui-jam-ricerca/misure.md` §Fase 68.
+- **69.1**: la Jam della cassa si riapre quando l'hub torna attivo.
+- **69.2**: l'ospite che esce di sua volontà vede «Sei uscito dalla Jam» (D-266).
+- **69.3**: 20 posti per le aggiunte a mano (D-264). «Jam piena» solo quando lo è davvero, altrimenti «Non aggiunto alla Jam».
+- **69.5–69.9**: interfaccia dell'ospite, gate con le liste in «Rete e dispositivi» (D-271), cifratura, broker. Secondo archivio delle cose segrete: `jam_secrets.json` su desktop, DataStore su Android, fuori dai backup (D-269).
+- **69.10**: prova in LAN sul Mi A3 con Linux riuscita (esiti nel documento di fase).
+- Broker in diretta:
+  - `broker.emqx.io:8883` funziona;
+  - `test.mosquitto.org:8883` è rifiutato per il certificato, come previsto;
+  - `test.mosquitto.org:8886` chiude dopo il CONNECT.
 
 ## Tocca a te
-- **68.3** (Motorola host con le JBL segnate come cassa, Mi A3 ospite, hotspot del Motorola): checklist in `docs/fase-68-scoperta-e-chiusura-jam.md` §68.3, esiti scritti lì, uno per riga.
+- **69.4** (Motorola host con le JBL, Mi A3 ospite, hotspot del Motorola): la checklist è in `docs/fase-69-fondamenta-jam-distanza.md` §69.4 e copre i rilievi della 68.3 rifatti a mano. Gli esiti si scrivono lì.
   - Prima: `flutter build apk --debug` e `adb -s ZY22HKD85K install -r build/app/outputs/flutter-apk/app-debug.apk`.
-  - Log utili: `adb -s ZY22HKD85K logcat | grep -iE 'speaker|jam|a2dp'`.
-- **Fase 67 sul Motorola**: evento A2DP collegando le JBL; permesso rifiutato e poi riattivato; «È una cassa?» (D-223).
-- **Scoperta su /16** (UniBA): i due telefoni sulla rete dell'università devono vedersi e la Jam partire (R-117).
-- **Fase 66 a mano**:
-  - Mi A3: in «Coda insieme» la maniglia sparisce e torna in «Coda dell'host»;
-  - Linux ospite su schermo vero: «Coda dell'host»/«Coda insieme» non cambia la modalità;
-  - l'ospite esce con un brano online non suonato e l'host lo prepara da sé (R-91).
-- **Mi A3 + Linux abbinati**: Jam normale senza «Collega una cassa» né banner.
-- **Mi A3, pulizia e controlli**:
-  - 6 file di prova in `/sdcard/Music/CodecoreTest/Scheggia66`: toglili se vuoi;
-  - controlla che il bordo verde di sistema visto a fine scheggia 67 sia sparito;
-  - l'app `com.codecore.player.perf` è ancora installata.
-- **Da decidere**: l'ospite che esce di sua volontà vede «La Jam è terminata» anche se la Jam continua sull'host.
-- **`docs/prossimi-lavori.md`** (non tracciato): segna a mano come fatto il §2 «Cassa Bluetooth e modalità della coda».
-- Dal handoff precedente:
-  - ascolto 57.7;
-  - APK di release con NewPipe mai provato a runtime;
-  - seek a mano della fase 59;
-  - tag `v1.3.0` da pubblicare (`git push origin v1.3.0`).
+- **Mosquitto 8886 da decidere** (D-258): chiude ogni connessione dopo il CONNECT, in tre giri, con TLS valido. Puoi toglierlo dalla lista predefinita (`kDefaultJamBrokers`) o sostituirlo con un altro broker TLS pubblico.
+- **Prova a mano del gate**:
+  - «Fino alla fine della Jam» durante una Jam vera, e che sparisca al riavvio;
+  - una sospensione di 15 minuti che scade.
+- **Dalle fasi 66–68** (sezione «Tocca a te» del handoff precedente, nella storia di git):
+  - fase 67 sul Motorola;
+  - scoperta su /16;
+  - fase 66 a mano;
+  - pulizia del Mi A3 (Scheggia66, `com.codecore.player.perf`);
+  - «La Jam è terminata» per l'ospite che esce: risolto da D-266, da riprovare in 69.4;
+  - ascolto 57.7, APK di release con NewPipe, tag `v1.3.0`.
 
 ## Dispositivi
 - **Motorola edge 40** `ZY22HKD85K`: libreria vera. Solo `install -r`; mai disinstallare né `pm clear`. 120 Hz.
@@ -58,12 +57,11 @@ La feature «Jam: cassa e coda insieme» (`docs/feature-jam-cassa.md`) è nel co
 
 ## Prompt di avvio della prossima sessione
 ```
-/obiettivo fase 69 (prima i rilievi della 68.3, 69.1 … 69.4, poi feature «Jam a distanza», docs/feature-jam-distanza.md)
+/obiettivo fase 70 (ponte e protocollo della «Jam a distanza», docs/fase-70-ponte-jam-distanza.md: prima §Rilievi dalla fase 69)
 ```
 
 ## Prossimi obiettivi
-1. **(Consigliato) Jam a distanza, fasi 69–73**: `/obiettivo fase 69`. La 73.2 (due telefoni, uno su 4G) è a mano.
-2. **Esiti della 68.3**: rilievi della prova con la cassa vera, poi 67.1, 67.2 e 68.3 da `[~]` a `[x]`.
-3. **Unificare le due code delle domande sulla cassa**: un solo punto che decide cosa mostrare. Oggi la coda del monitor e quella della UI possono mostrarne due di fila.
-4. **Ricerca «notte», build p99** (D-176): l'ultimo scenario fuori soglia. Misura con `--only "Ricerca «notte»"` prima e dopo.
-5. **Prove d'ascolto 57.7** e APK di release con NewPipe.
+1. **(Consigliato) Fase 70, ponte e protocollo**: si parte dai rilievi della fase 69 scritti in cima al documento di fase. La prima scelta è il tipo delle chiavi in `JamCrypto` (D-272).
+2. **69.4 a mano**: chiude anche i `[~]` delle fasi 67 e 68.
+3. **Unificare le due code delle domande sulla cassa**.
+4. **Ricerca «notte», build p99** (D-176) e prove d'ascolto 57.7.

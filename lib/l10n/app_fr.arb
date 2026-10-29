@@ -3323,6 +3323,55 @@
   },
   "jamInviteDismiss": "Masquer",
   "speakerAwayNotice": "Connecte une enceinte",
+  "jamFull": "La Jam est pleine",
+  "jamAddFailed": "Non ajouté à la Jam",
+  "jamLeft": "Vous avez quitté la Jam",
+  "speakerContinueOnPhone": "Continuer sur le téléphone",
+  "speakerContinueOnPhoneLabel": "Continuer sur le téléphone : la Jam joue sur le haut-parleur de ce téléphone, sans l’enceinte",
   "speakerOfferTitle": "Jouer la Jam sur ton enceinte ?",
-  "speakerOfferBody": "Ton enceinte est connectée et la Jam est en pause. Si tu veux, la musique repart d’ici."
+  "speakerOfferBody": "Ton enceinte est connectée et la Jam est en pause. Si tu veux, la musique repart d’ici.",
+  "jamRemoteTitle": "Jam à distance",
+  "jamRemoteHint": "Les brokers (serveurs) de la Jam à distance, par ordre de préférence.",
+  "jamBrokerAdd": "Ajouter un broker",
+  "jamBrokerHost": "Adresse",
+  "jamBrokerPort": "Port",
+  "jamBrokerTls": "Connexion chiffrée (TLS)",
+  "jamBrokerNoTls": "Sans TLS, n’importe qui sur le réseau peut lire ce qui passe par le broker. À n’utiliser que si tu sais ce que tu fais.",
+  "jamBrokerInvalid": "Adresse ou port non valides",
+  "jamBrokerTest": "Tester la connexion",
+  "jamBrokerTestOk": "{broker} : connexion réussie",
+  "@jamBrokerTestOk": {
+    "placeholders": {
+      "broker": {
+        "type": "String"
+      }
+    }
+  },
+  "jamBrokerTestFail": "{broker} : connexion impossible (réseau, certificat ou serveur injoignable)",
+  "@jamBrokerTestFail": {
+    "placeholders": {
+      "broker": {
+        "type": "String"
+      }
+    }
+  },
+  "jamBrokerRestore": "Rétablir",
+  "jamBrokerMoveUp": "Monter",
+  "jamBrokerRemove": "Retirer",
+  "jamSuspend": "Suspendre",
+  "jamBlock": "Bloquer",
+  "jamSuspendTitle": "Suspendre pour combien de temps ?",
+  "jamUntilJamEnds": "Jusqu’à la fin de la Jam",
+  "jamBlockedTitle": "Appareils bloqués",
+  "jamSuspendedTitle": "Suspendus",
+  "jamUnblock": "Débloquer",
+  "jamSuspendedUntil": "Jusqu’à {time}",
+  "@jamSuspendedUntil": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "jamTooSoon": "Attends un instant avant de réessayer"
 }

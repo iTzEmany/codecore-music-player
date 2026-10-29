@@ -9,6 +9,7 @@ import '../../core/app_log.dart';
 import '../share/lan_server.dart';
 import '../share/offers.dart';
 import '../share/track_meta.dart';
+import 'jam_gate.dart';
 import 'jam_models.dart';
 import 'jam_turns.dart';
 import 'jam_state.dart';
@@ -42,11 +43,15 @@ class JamRequest {
     required this.fromPort,
     required this.token,
     required this.receivedAt,
+    this.silent = false,
   });
 
   final String id, fromId, fromName, fromHost, token;
   final int fromPort;
   final DateTime receivedAt;
+
+  /// Sender is blocked or suspended: kept only so it expires unanswered.
+  final bool silent;
   JamRequestStatus status = JamRequestStatus.pending;
 
   /// Credentials handed to the requester once accepted.
@@ -78,6 +83,7 @@ class JamHost {
     this.pollWait = jamPollWait,
     this.maxRequestsPerMinute = 5,
     this.maxParticipants = maxJamParticipants,
+    this.gate,
   }) : _now = now ?? DateTime.now;
 
   final String deviceId, deviceName;
@@ -85,6 +91,7 @@ class JamHost {
   final Duration pollWait;
   final int maxRequestsPerMinute, maxParticipants;
   final DateTime Function() _now;
+  final JamGate? gate;
 
   JamFileResolver? resolveFile;
   JamMetaResolver? resolveMeta;
@@ -135,6 +142,9 @@ class JamHost {
         r.status = JamRequestStatus.expired;
       }
     }
+    // Answerable for a while after the TTL, then gone (silent or not alike).
+    requests.removeWhere(
+        (_, r) => r.receivedAt.isBefore(limit.subtract(jamRequestTtl)));
   }
 
   // ---- host API ------------------------------------------------------------
@@ -302,6 +312,7 @@ class JamHost {
     _sid = null;
     _fileToken = null;
     _members.clear();
+    gate?.clearEndOfJam();
     _notify();
   }
 
@@ -362,6 +373,57 @@ class JamHost {
     return null;
   }
 
+  /// Validates and registers a join request. [ip] is null for requests that
+  /// do not come from the LAN (the remote bridge); the per-IP limit lives in
+  /// the router. Blocked or suspended senders get a normal 202 but the request
+  /// stays silent: never shown, never "busy", it just expires.
+  Response admitRequest(Object? body, {String? ip}) {
+    if (body is! Map) return Response(400, body: 'bad request');
+    final fromId = body['fromId'], fromName = body['fromName'];
+    final port = body['port'], token = body['token'];
+    if (fromId is! String ||
+        fromId.isEmpty ||
+        fromId.length > 64 ||
+        fromName is! String ||
+        port is! int ||
+        port < 1 ||
+        port > 65535 ||
+        token is! String ||
+        token.length < 8 ||
+        token.length > 64) {
+      return Response(400, body: 'bad request');
+    }
+    expire();
+    // Muted senders go through the same checks as everybody else.
+    if (hosting && _members.length + 1 >= maxParticipants) {
+      return Response(409, body: 'full');
+    }
+    if (requests.values
+        .any((q) => q.status == JamRequestStatus.pending && (!q.silent || q.fromId == fromId))) {
+      return Response(409, body: 'busy');
+    }
+    if (gate != null && !gate!.allow(fromId)) {
+      return Response(429, body: 'too many requests');
+    }
+    final silent = gate?.isMuted(fromId) ?? false;
+    final req = JamRequest(
+      id: newToken(),
+      fromId: fromId,
+      fromName: fromName.length > 60 ? fromName.substring(0, 60) : fromName,
+      fromHost: ip ?? '',
+      fromPort: port,
+      token: token,
+      receivedAt: _now(),
+      silent: silent,
+    );
+    requests[req.id] = req;
+    if (!silent) {
+      _notify();
+      onRequest?.call(req);
+    }
+    return _json({'requestId': req.id}, 202);
+  }
+
   Router buildRouter({String Function(Request)? clientIp}) {
     final router = Router();
 
@@ -373,12 +435,6 @@ class JamHost {
         return Response.forbidden('local network only');
       }
       expire();
-      if (hosting && _members.length + 1 >= maxParticipants) {
-        return Response(409, body: 'full');
-      }
-      if (requests.values.any((q) => q.status == JamRequestStatus.pending)) {
-        return Response(409, body: 'busy');
-      }
       final times = _recent.putIfAbsent(ip, () => []);
       final cutoff = _now().subtract(const Duration(minutes: 1));
       times.removeWhere((t) => t.isBefore(cutoff));
@@ -391,35 +447,9 @@ class JamHost {
       } on FormatException {
         return Response(400, body: 'bad json');
       }
-      if (body is! Map) return Response(400, body: 'bad request');
-      final fromId = body['fromId'], fromName = body['fromName'];
-      final port = body['port'], token = body['token'];
-      if (fromId is! String ||
-          fromId.isEmpty ||
-          fromId.length > 64 ||
-          fromName is! String ||
-          port is! int ||
-          port < 1 ||
-          port > 65535 ||
-          token is! String ||
-          token.length < 8 ||
-          token.length > 64) {
-        return Response(400, body: 'bad request');
-      }
-      times.add(_now());
-      final req = JamRequest(
-        id: newToken(),
-        fromId: fromId,
-        fromName: fromName.length > 60 ? fromName.substring(0, 60) : fromName,
-        fromHost: ip,
-        fromPort: port,
-        token: token,
-        receivedAt: _now(),
-      );
-      requests[req.id] = req;
-      _notify();
-      onRequest?.call(req);
-      return _json({'requestId': req.id}, 202);
+      final res = admitRequest(body, ip: ip);
+      if (res.statusCode == 202) times.add(_now());
+      return res;
     });
 
     // The requester polls the answer (token = its own request token).
@@ -524,6 +554,8 @@ class JamHost {
           !isLocalNetworkAddress(host, allowLoopback: allowLoopback)) {
         return Response(400, body: 'bad request');
       }
+      // A muted device cannot get in through a guest either.
+      if (gate?.isMuted(id) ?? false) return Response(409, body: 'blocked');
       final c = addMember(
           id: id,
           name: name.length > 60 ? name.substring(0, 60) : name,

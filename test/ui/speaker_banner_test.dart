@@ -41,13 +41,21 @@ class _Jam extends JamController {
   _Jam([this.initial = const JamUiState()]);
   final JamUiState initial;
   final requested = <String>[];
-  var opened = 0;
+  var opened = 0, continued = 0;
   @override
   JamUiState build() => initial;
   @override
+  Future<JamError?> continueOnPhone() async {
+    continued++;
+    return null;
+  }
+  @override
   Future<void> request(Peer peer) async => requested.add(peer.id);
   @override
-  Future<void> openSpeakerJam() async => opened++;
+  Future<bool> openSpeakerJam() async {
+    opened++;
+    return true;
+  }
 }
 
 Future<void> _app(WidgetTester t, Harness h, _Hub hub, _Jam jam) => h.pump(
@@ -137,6 +145,25 @@ void main() {
     await _app(t, h, _Hub(), _Jam(away));
     expect(find.text('Collega una cassa'), findsOneWidget);
     await h.dispose(t);
+  });
+
+  testWidgets('away notice: «Continua sul telefono» only for the host, and it sends', (t) async {
+    JamUiState away(JamRole r) => JamUiState(
+      phase: JamPhase.active,
+      role: r,
+      jam: const JamState(version: 1, hostDeviceId: 'host', outputDeviceId: 'host', speaker: true, speakerAwaySince: 5),
+    );
+    final h = await Harness.create(t);
+    await _app(t, h, _Hub(), _Jam(away(JamRole.guest)));
+    expect(find.text('Continua sul telefono'), findsNothing);
+    await h.dispose(t);
+    final h2 = await Harness.create(t);
+    final jam = _Jam(away(JamRole.host));
+    await _app(t, h2, _Hub(), jam);
+    await t.tap(find.text('Continua sul telefono'));
+    await t.pump();
+    expect(jam.continued, 1);
+    await h2.dispose(t);
   });
 
   testWidgets('offer sheet: Si accepts the offer', (t) async {
@@ -263,6 +290,27 @@ void main() {
     await h.dispose(t);
   });
 
+  testWidgets('offer: shows above a full screen pushed over the shell and can be answered', (t) async {
+    final h = await Harness.create(t);
+    final port = _Port();
+    final sj = _offerJam(port);
+    late BuildContext ctx;
+    await _openerFor(t, h, (c) {
+      ctx = c;
+      Navigator.of(c).push(MaterialPageRoute<void>(builder: (_) => const Scaffold(body: Text('Schermata Jam'))));
+    });
+    await t.tap(find.text('open'));
+    await t.pumpAndSettle();
+    showSpeakerOffer(ctx, sj);
+    await t.pumpAndSettle();
+    expect(find.text('Suonare la Jam sulla tua cassa?'), findsOneWidget);
+    await t.tap(find.text('No'));
+    await t.pumpAndSettle();
+    expect(find.text('Suonare la Jam sulla tua cassa?'), findsNothing);
+    expect(sj.offerPending.value, isFalse);
+    await h.dispose(t);
+  });
+
   testWidgets('offer: swiping the sheet away declines it', (t) async {
     final h = await Harness.create(t);
     final sj = _offerJam(_Port());
@@ -308,7 +356,7 @@ class _Port implements SpeakerJamPort {
   @override
   Stream<void> get changes => const Stream.empty();
   @override
-  Future<void> open() async {}
+  Future<bool> open() async => true;
   @override
   Future<void> closeSilently() async {}
   @override

@@ -268,6 +268,11 @@ JamResult applyCommand(
           outputDeviceIds: const [],
           clearSpeakerAway: true));
 
+    case JamCommandType.continueOnPhone:
+      if (!isHost) return const JamResult.fail(JamError.forbidden);
+      if (s.speakerAwaySince == null) return const JamResult.fail(JamError.invalid);
+      return commit(s.copyWith(speaker: false, clearSpeakerAway: true));
+
     case JamCommandType.end:
       if (!isHost) return const JamResult.fail(JamError.forbidden);
       return JamResult.ok(

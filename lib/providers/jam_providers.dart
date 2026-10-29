@@ -20,6 +20,7 @@ import '../services/audio/playback_persistence.dart';
 import '../services/jam/jam_cache.dart';
 import '../services/jam/jam_clock.dart';
 import '../services/jam/jam_guest.dart';
+import '../services/jam/jam_guest_link.dart';
 import '../services/jam/jam_host.dart';
 import '../services/jam/jam_models.dart';
 import '../services/jam/jam_online_adder.dart';
@@ -59,6 +60,7 @@ class JamUiState {
     this.peerId = '',
     this.outcome,
     this.lost = false,
+    this.left = false,
     this.syncErrorMs,
   });
 
@@ -70,6 +72,9 @@ class JamUiState {
   /// Result of the last request (declined, busy, unreachable...).
   final JamJoinOutcome? outcome;
   final bool lost;
+
+  /// A guest that left by itself (D-266): the Jam goes on for the others.
+  final bool left;
 
   /// Last measured offset from the shared position while synchronised (ms).
   final int? syncErrorMs;
@@ -85,6 +90,7 @@ class JamUiState {
     String? peerId,
     JamJoinOutcome? outcome,
     bool? lost,
+    bool? left,
     int? syncErrorMs,
   }) => JamUiState(
     phase: phase ?? this.phase,
@@ -94,6 +100,7 @@ class JamUiState {
     peerId: peerId ?? this.peerId,
     outcome: outcome ?? this.outcome,
     lost: lost ?? this.lost,
+    left: left ?? this.left,
     syncErrorMs: syncErrorMs ?? this.syncErrorMs,
   );
 }
@@ -107,7 +114,7 @@ class _SpeakerPort implements SpeakerJamPort {
   @override
   Stream<void> get changes => _c._speakerChanges.stream;
   @override
-  Future<void> open() => _c.openSpeakerJam();
+  Future<bool> open() => _c.openSpeakerJam();
   @override
   Future<void> closeSilently() => _c.closeSpeakerJamSilently();
   @override
@@ -195,7 +202,15 @@ Set<String> jamPinKeys(JamState? s, String ownId) => {
     };
 
 class JamController extends Notifier<JamUiState> {
-  JamGuest? _guest;
+  JamGuestLink? _guest;
+  /// When our requests left, per peer id (the host lets 2 per minute through).
+  final _recentRequests = <String, List<DateTime>>{};
+
+  @visibleForTesting
+  DateTime Function() now = DateTime.now;
+
+  @visibleForTesting
+  JamGuest Function(JamHost) guestFactory = (h) => JamGuest(local: h);
   JamOutput? _output;
   JamCache? _cache;
   JamClock? _clock;
@@ -249,6 +264,8 @@ class JamController extends Notifier<JamUiState> {
     listenSelf((_, _) => _speakerChanges.add(null));
     _speakerPending = false;
     final hub = _hub = ref.read(shareHubProvider.notifier);
+    // The hub gets its Jam after it starts: let SpeakerJam retry an open it could not do.
+    ref.listen(shareHubProvider.select((s) => s.active), (_, _) => _speakerChanges.add(null));
     _reqSub = hub.newJamRequests.listen(_incoming.add);
     hub.onJamEnd = end;
     hub.onJamAction = (req, accept) =>
@@ -271,6 +288,17 @@ class JamController extends Notifier<JamUiState> {
   /// Asks [peer] to start a Jam with this device (this device is the guest).
   Future<void> request(Peer peer) async {
     if (state.phase == JamPhase.requesting || state.active) return;
+    // Third request within a minute: do not send it (the host would mute us anyway).
+    final sentAt = now(), cutoff = sentAt.subtract(const Duration(minutes: 1));
+    final recent = _recentRequests[peer.id] = [
+      for (final t in _recentRequests[peer.id] ?? const <DateTime>[])
+        if (t.isAfter(cutoff)) t,
+    ];
+    if (recent.length >= 2) {
+      // The Jam screen reads this outcome when it opens (see JamScreen.initState).
+      state = JamUiState(phase: JamPhase.idle, peerName: peer.name, peerId: peer.id, outcome: JamJoinOutcome.tooSoon);
+      return;
+    }
     if (_speakerPending) {
       // Joining another Jam: the waiting speaker Jam is given up.
       _speakerPending = false;
@@ -292,7 +320,7 @@ class JamController extends Notifier<JamUiState> {
       );
       return;
     }
-    final guest = JamGuest(local: host);
+    final guest = guestFactory(host);
     _guest = guest;
     final outcome = await guest.join(
       host: peer.host,
@@ -301,6 +329,8 @@ class JamController extends Notifier<JamUiState> {
       ownName: ref.read(deviceNameProvider),
       ownPort: port,
     );
+    // An unreachable device never saw the request: it does not count.
+    if (outcome != JamJoinOutcome.unreachable) recent.add(sentAt);
     if (outcome != JamJoinOutcome.accepted) {
       _guest = null;
       await guest.dispose();
@@ -363,18 +393,38 @@ class JamController extends Notifier<JamUiState> {
 
   /// A running host Jam becomes the speaker's (D-218). From idle the Jam only waits
   /// ("in attesa") until a request is accepted; a guest does nothing.
-  Future<void> openSpeakerJam() async {
+  /// False only when the hub has no Jam yet, so the caller can retry once it has.
+  Future<bool> openSpeakerJam() async {
     final host = _host;
-    if (host == null || state.role == JamRole.guest || _speakerPending) return;
+    if (host == null) return false;
+    if (state.role == JamRole.guest || _speakerPending) return true;
+    if (_phoneOnly) return true; // «Continua sul telefono»: this Jam stays on the phone (D-263)
     if (state.active) {
       host.makeSpeaker();
     } else if (state.phase != JamPhase.idle || _starting) {
-      return;
+      return true;
     } else {
       _speakerPending = true;
       _speakerChanges.add(null);
     }
     _hub.speakerJamName = ref.read(deviceNameProvider);
+    return true;
+  }
+
+  var _phoneOnly = false;
+
+  /// The host stops waiting for the speaker and plays on the phone; the speaker coming
+  /// back later does not turn this Jam into the speaker's again.
+  Future<JamError?> continueOnPhone() async {
+    final was = _phoneOnly;
+    _phoneOnly = true; // before the send: the state change must already find it set
+    final e = await send(const JamCommand.continueOnPhone());
+    if (e != null) {
+      _phoneOnly = was;
+    } else {
+      _hub.speakerJamName = null; // the LAN announcement of the speaker's Jam stops
+    }
+    return e;
   }
 
   /// Closes the speaker's Jam with nobody in it, without any message (R-115, D-211).
@@ -437,7 +487,7 @@ class JamController extends Notifier<JamUiState> {
     // What does not fit in the Jam stays in our part for «Coda insieme» (R-99).
     await _begin(JamRole.host, host.state ?? s, seed: [for (final t in seed) t.id]);
     if (seed.isNotEmpty) {
-      final n = await _addTracks(seed, inherited: true, keyed: true);
+      final n = (await _addTracks(seed, inherited: true, keyed: true)).added;
       AppLog.i('jam: $n of ${seed.length} queued tracks added to the Jam');
       // Music that was playing keeps playing, from the same point.
       if (n > 0 && wasPlaying) {
@@ -824,45 +874,65 @@ class JamController extends Notifier<JamUiState> {
   }
 
   /// Library ids to the shared queue; a shadow row (`stream:` path, no extension) goes as an online result.
-  Future<void> addLibraryIds(List<int> ids) async {
+  /// Online ones count once accepted.
+  Future<JamAddResult> addLibraryIds(List<int> ids) async {
     try {
+      var online = 0, full = false;
       final files = <Track>[];
       for (final t in await ref.read(trackRepositoryProvider).getByIds(ids)) {
         final key = t.kind == kStreamKind ? keyOfStreamPath(t.path) : null;
         if (key == null) {
           files.add(t);
         } else {
-          addOnline(streamResultOfRow(key, t));
+          if (addOnline(streamResultOfRow(key, t))) {
+            online++;
+          } else if (queueFull) {
+            full = true;
+          }
         }
       }
-      await addTracks(files);
+      final r = await addTracks(files);
+      return (added: online + r.added, full: full || r.full);
     } on Object catch (e, st) {
       AppLog.w('jam: could not queue $ids', e, st);
+      return (added: 0, full: false);
     }
   }
 
   /// Adds library tracks, owned by this device, to the shared queue.
-  Future<int> addTracks(List<Track> tracks, {bool inherited = false}) =>
+  Future<JamAddResult> addTracks(List<Track> tracks, {bool inherited = false}) =>
       _addTracks(tracks, inherited: inherited);
 
   /// [keyed]: each track carries its part key (the host's seed, see [jamPartKeys]).
-  Future<int> _addTracks(List<Track> tracks, {bool inherited = false, bool keyed = false}) async {
-    var added = 0;
+  Future<JamAddResult> _addTracks(List<Track> tracks, {bool inherited = false, bool keyed = false}) async {
+    var added = 0, full = false;
     final keys = keyed ? jamPartKeys(tracks.map((t) => t.id)) : null;
     for (final (n, t) in tracks.indexed) {
+      // The rest of the seed stays in the feeder, the last seats are for hand-made adds (D-264).
+      final hs = _host?.state;
+      if (keyed && hs != null && hs.mode == JamMode.together && jamAutoFillFull(hs)) break;
       final item = jamItemOfTrack(t, _ownId, inherited: inherited, partKey: keys?[n]);
       if (item == null) continue;
       final err = await send(JamCommand.add(item));
       if (err == null) added++;
-      if (err == JamError.full) break;
+      if (err == JamError.full) {
+        full = true;
+        break;
+      }
     }
-    return added;
+    return (added: added, full: full);
+  }
+
+  /// «Coda insieme» is full from the current track back: the reducer refuses every add (D-194).
+  bool get queueFull {
+    final s = (state.isHost ? _host?.state : null) ?? state.jam; // the host's own state is the freshest
+    return s != null && s.mode == JamMode.together && s.items.length >= maxJamItems && s.currentIndex <= 0;
   }
 
   /// Accepts [r] for the shared queue right away (false: no Jam). It is added when its
   /// file is ready, in the order of the calls; a failed download goes to [onlineFailures].
   bool addOnline(YtResult r) {
-    if (!state.active) return false;
+    if (!state.active || queueFull) return false;
     (_adder ??= JamOnlineAdder(
       ownId: _ownId,
       cache: ref.read(streamCacheProvider),
@@ -899,16 +969,17 @@ class JamController extends Notifier<JamUiState> {
       _part.exitPart = _part.remaining(state.jam);
       await _guest?.leave();
     }
-    await _finish();
+    await _finish(left: state.role != JamRole.host);
   }
 
-  Future<void> _finish({bool lost = false}) async {
+  Future<void> _finish({bool lost = false, bool left = false}) async {
     if (state.phase == JamPhase.ended || state.phase == JamPhase.idle) return;
-    state = state.copyWith(phase: JamPhase.ended, lost: lost);
+    state = state.copyWith(phase: JamPhase.ended, lost: lost, left: left);
     await _teardown();
   }
 
   Future<void> _teardown({bool release = true}) async {
+    _phoneOnly = false;
     _hub.speakerJamName = null;
     _alive?.cancel();
     _alive = null;
@@ -961,7 +1032,9 @@ class JamController extends Notifier<JamUiState> {
 
   /// Back to idle after the "ended" screen was shown.
   void reset() {
-    if (state.phase == JamPhase.ended) state = const JamUiState();
+    if (state.phase == JamPhase.ended || (state.phase == JamPhase.idle && state.outcome != null)) {
+      state = const JamUiState();
+    }
   }
 }
 

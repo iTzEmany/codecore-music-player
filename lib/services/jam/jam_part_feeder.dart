@@ -182,6 +182,7 @@ class JamPartFeeder {
   }
 
   Future<bool> _stepInner(JamState s) async {
+    if (jamAutoFillFull(s, inFlight: _pending.length + _uncertain.length)) return false; // the last seats are for hand-made adds (D-264)
     final quota = (maxJamItems / max(1, s.participants.length)).ceil();
     var mine = _pending.length + _uncertain.length + (_sugVersion == null ? 0 : 1);
     for (final (n, it) in s.items.indexed) {

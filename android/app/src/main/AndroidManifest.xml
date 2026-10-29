@@ -16,6 +16,8 @@
         android:label="${appLabel}"
         android:usesCleartextTraffic="true"
         android:extractNativeLibs="true"
+        android:fullBackupContent="@xml/backup_rules"
+        android:dataExtractionRules="@xml/data_extraction_rules"
         android:name=".CodecoreApp"
         android:icon="@mipmap/ic_launcher">
         <activity

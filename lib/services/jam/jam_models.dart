@@ -1,5 +1,8 @@
 const maxJamItems = 200;
 
+/// Places the automatic fill (feeder, host seed) leaves free for hand-made adds (D-264).
+const jamManualSeats = 20;
+
 /// Host included.
 const maxJamParticipants = 5;
 
@@ -369,6 +372,8 @@ enum JamCommandType {
   speakerAway,
   speakerBack,
   offerSpeaker,
+  // After `offerSpeaker`, same reason: an older host answers `invalid`.
+  continueOnPhone,
 }
 
 class JamCommand {
@@ -419,6 +424,9 @@ class JamCommand {
 
   /// A guest offers its own output while the speaker is away.
   const JamCommand.offerSpeaker() : this._(JamCommandType.offerSpeaker);
+
+  /// Host only (D-263): stops waiting for the speaker and plays on the host's phone.
+  const JamCommand.continueOnPhone() : this._(JamCommandType.continueOnPhone);
 
   final JamCommandType type;
   final JamMode? mode;
@@ -502,6 +510,8 @@ class JamCommand {
         return const JamCommand.speakerBack();
       case JamCommandType.offerSpeaker:
         return const JamCommand.offerSpeaker();
+      case JamCommandType.continueOnPhone:
+        return const JamCommand.continueOnPhone();
     }
   }
 }
@@ -524,3 +534,12 @@ class JamResult {
   final JamError? error;
   bool get isOk => state != null;
 }
+
+/// The automatic fill stops here: from the current track on, only [jamManualSeats] seats are left (D-264).
+/// [inFlight]: adds sent but not yet in [s].
+bool jamAutoFillFull(JamState s, {int inFlight = 0}) =>
+    s.items.length + inFlight - (s.currentIndex < 0 ? 0 : s.currentIndex) >= maxJamItems - jamManualSeats;
+
+/// What an add to the shared queue did: how many got in, and whether a full queue refused one (D-194).
+typedef JamAddResult = ({int added, bool full});
+const JamAddResult jamFullResult = (added: 0, full: true);

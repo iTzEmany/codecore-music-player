@@ -58,12 +58,36 @@ La validazione di `POST /request` passa in `JamHost.admitRequest(...)`, che il r
 
 **Fatto quando:** `test/jam/remote/jam_crypto_test.dart` verde con i vettori di RFC 5869 A.1 (HKDF-SHA-256), draft-irtf-cfrg-xchacha-03 A.3.1 (XChaCha20-Poly1305), libsodium per `kx` e `auth`, più un andata e ritorno di `pad`/`unpad`; `flutter build apk --debug` e `flutter build linux --debug` verdi in locale; la CI della PR verde con i tempi annotati nel documento di fase (anche le build Windows e macOS, se girano sulla PR). Hook fallito o CI oltre il doppio dei tempi di oggi → fermati e scrivilo in «Tocca a te» (K-JD-07).
 
+**Esiti (29/10):** `jam_crypto_test.dart` 6 test verdi in 5 s (22 s la prima volta, hook libsodium compreso); `flutter build apk --debug` 3m26s (compila libsodium); `flutter build linux --debug` 1m00s. Vettore HKDF: PRK di RFC 5869 A.1 (l'`info` 0xf0… non è una `String` valida: `expand` prende `context` come testo), OKM da A.3 (info vuota).
+
 ### 69.9 — Broker e «Prova connessione» (R-122, R-129, D-244, D-251, D-258, K-JD-04)
 `mqtt_client` ^10.14.0. `lib/services/jam/remote/mqtt_link.dart`: `MqttLink` e `MqttClientLink` come in §Componenti (TLS con `SecurityContext.defaultContext`, `onBadCertificate` null, `autoReconnect` false, `clientId` casuale). `BrokerEntry` (host, porta, TLS) e `jamBrokers` in shared_preferences con `kDefaultJamBrokers`. `lib/ui/screens/settings/jam_remote_settings.dart`: lista dei broker (aggiungi, togli, riordina, «Ripristina»), avviso per una voce senza TLS, «Prova connessione» (connessione, iscrizione e pubblicazione su un canale casuale, ritorno del messaggio entro 5 s).
 
 **Fatto quando:** test della validazione (host non vuoto, porta 1–65535), test widget di aggiunta, riordino, ripristino, avviso senza TLS e «Prova» con un `FakeMqttLink` riuscito e fallito; `test/live/jam_broker_live_test.dart` (si salta da sé senza `CODECORE_LIVE=1`, come gli altri di `test/live/`) eseguito una volta in locale: `broker.emqx.io:8883` e `test.mosquitto.org:8886` riusciti, `test.mosquitto.org:8883` rifiutato per il certificato (R-129); esiti con la data in questo documento.
 
+Esiti (29/10): `broker.emqx.io:8883` riuscito (connessione, iscrizione, pubblicazione e ritorno del messaggio); `test.mosquitto.org:8883` rifiutato per il certificato (`CERTIFICATE_VERIFY_FAILED`, R-129); `test.mosquitto.org:8886` **fallito** in due giri: il TLS si stabilisce (`openssl` e `SecureSocket` ok) ma il server chiude la connessione subito dopo il CONNECT MQTT (verificato anche con un CONNECT scritto a mano in Python, con altri clientId), quindi nessun messaggio torna (K-JD-04). Terzo giro alle 18:02, dopo le correzioni della scheggia: emqx riuscito, mosquitto 8883 rifiutato come atteso, 8886 ancora chiuso dopo il CONNECT. La lista predefinita resta quella di D-258: decide l'utente se toglierlo.
+
 ### 69.10 — Controlli di fase
 `flutter analyze`, comando mirato, build di debug, `/code-review high` su 69.3 (comando nuovo del protocollo Jam), 69.6 e 69.8, scheggia in modalità passo su 69.1 (apertura della Jam della cassa), 69.6 (gate) e 69.9 (validazione dei broker), review di architettura Opus di `JamGuestLink` e `admitRequest`. Prova sul Mi A3 col Linux in LAN (D-91): richieste ripetute, Sospendi 15 min, Blocca e Sblocca.
 
 **Fatto quando:** tutto verde; esiti della prova qui sotto; colonna Fase di R-147 … R-149 e RNF-17 compilata.
+
+**Esiti (29/10)**
+- `flutter analyze` pulito; test mirati verdi; build apk e linux di debug riuscite.
+- Review Opus fatte su 69.3, 69.6, 69.7, 69.8 e 69.9. Scheggia passo su 69.1, 69.6 e 69.9: 5 bug corretti.
+- Review di architettura della fase: 3 correzioni subito (c3b86e3). Gli altri rilievi stanno in D-272, D-273 e in `docs/fase-70-ponte-jam-distanza.md` §Rilievi dalla fase 69.
+
+Prova in LAN, con l'host sull'app Linux (schermo virtuale) e il Mi A3 come ospite:
+- **Richieste ripetute**: OK. Alla terza richiesta in pochi secondi il telefono dice «Aspetta un momento prima di riprovare» e sull'host non compare nessun dialogo.
+- **Sospendi 15 min**: OK.
+  - La scelta è fra 15, 30, 45 e 60. «Fino alla fine della Jam» non c'è, perché nessuna Jam era attiva.
+  - Il telefono riceve un rifiuto normale.
+  - Le richieste successive non arrivano all'host. Il telefono resta in attesa fino alla scadenza (D-238).
+  - In «Rete e dispositivi» compare «Sospesi».
+- **Blocca e Sblocca**: OK.
+  - Bloccato: nessuna richiesta arriva e compare «Dispositivi bloccati».
+  - Sbloccato: la richiesta torna ad arrivare.
+  - Anche Sblocca dalla lista dei sospesi funziona.
+- La pagina «Jam a distanza» è stata vista senza premere «Prova connessione».
+- La scoperta funziona solo finché sull'host è aperto il foglio dei dispositivi (visibilità temporanea, come prima).
+- **Restano a mano**: «Fino alla fine della Jam» durante una Jam vera (e la sua scomparsa al riavvio), e la scadenza dei 15 minuti.

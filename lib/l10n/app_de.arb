@@ -3079,6 +3079,55 @@
   },
   "jamInviteDismiss": "Ausblenden",
   "speakerAwayNotice": "Lautsprecher verbinden",
+  "jamFull": "Die Jam ist voll",
+  "jamAddFailed": "Nicht zur Jam hinzugefügt",
+  "jamLeft": "Du hast die Jam verlassen",
+  "speakerContinueOnPhone": "Auf dem Handy weiter",
+  "speakerContinueOnPhoneLabel": "Auf dem Handy weiter: Die Jam spielt über den Lautsprecher dieses Handys, ohne Box",
   "speakerOfferTitle": "Den Jam auf deinem Lautsprecher abspielen?",
-  "speakerOfferBody": "Dein Lautsprecher ist verbunden und der Jam pausiert. Wenn du möchtest, startet die Musik von hier."
+  "speakerOfferBody": "Dein Lautsprecher ist verbunden und der Jam pausiert. Wenn du möchtest, startet die Musik von hier.",
+  "jamRemoteTitle": "Jam aus der Ferne",
+  "jamRemoteHint": "Die Broker (Server) für die Jam aus der Ferne, nach Vorrang geordnet.",
+  "jamBrokerAdd": "Broker hinzufügen",
+  "jamBrokerHost": "Adresse",
+  "jamBrokerPort": "Port",
+  "jamBrokerTls": "Verschlüsselte Verbindung (TLS)",
+  "jamBrokerNoTls": "Ohne TLS kann jeder im Netzwerk mitlesen, was über den Broker läuft. Nur nutzen, wenn du weißt, was du tust.",
+  "jamBrokerInvalid": "Ungültige Adresse oder ungültiger Port",
+  "jamBrokerTest": "Verbindung testen",
+  "jamBrokerTestOk": "{broker}: Verbindung erfolgreich",
+  "@jamBrokerTestOk": {
+    "placeholders": {
+      "broker": {
+        "type": "String"
+      }
+    }
+  },
+  "jamBrokerTestFail": "{broker}: keine Verbindung möglich (Netzwerk, Zertifikat oder Server nicht erreichbar)",
+  "@jamBrokerTestFail": {
+    "placeholders": {
+      "broker": {
+        "type": "String"
+      }
+    }
+  },
+  "jamBrokerRestore": "Zurücksetzen",
+  "jamBrokerMoveUp": "Nach oben",
+  "jamBrokerRemove": "Entfernen",
+  "jamSuspend": "Pausieren",
+  "jamBlock": "Blockieren",
+  "jamSuspendTitle": "Wie lange pausieren?",
+  "jamUntilJamEnds": "Bis die Jam endet",
+  "jamBlockedTitle": "Blockierte Geräte",
+  "jamSuspendedTitle": "Pausiert",
+  "jamUnblock": "Entsperren",
+  "jamSuspendedUntil": "Bis {time}",
+  "@jamSuspendedUntil": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "jamTooSoon": "Warte einen Moment, bevor du es erneut versuchst"
 }

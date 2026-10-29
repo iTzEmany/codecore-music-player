@@ -101,8 +101,10 @@ class SpeakerAwayNotice extends ConsumerWidget {
       jamProvider.select((j) => j.jam?.speakerAwaySince != null),
     );
     if (!away) return const SizedBox.shrink();
+    final isHost = ref.watch(jamProvider.select((j) => j.isHost));
     final cc = context.cc;
-    final text = context.l10n.speakerAwayNotice;
+    final l = context.l10n;
+    final text = l.speakerAwayNotice;
     return Padding(
       padding: const EdgeInsets.fromLTRB(CcDims.margin, 4, CcDims.margin, 0),
       child: Semantics(
@@ -117,6 +119,16 @@ class SpeakerAwayNotice extends ConsumerWidget {
                 Icon(Icons.speaker_rounded, color: cc.accent),
                 const SizedBox(width: 12),
                 Expanded(child: Text(text)),
+                if (isHost)
+                  Semantics(
+                    button: true,
+                    label: l.speakerContinueOnPhoneLabel,
+                    excludeSemantics: true,
+                    child: TextButton(
+                      onPressed: () => unawaited(ref.read(jamProvider.notifier).continueOnPhone()),
+                      child: Text(l.speakerContinueOnPhone),
+                    ),
+                  ),
               ],
             ),
           ),

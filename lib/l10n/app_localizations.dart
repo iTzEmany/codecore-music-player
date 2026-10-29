@@ -9007,6 +9007,36 @@ abstract class AppLocalizations {
   /// **'Collega una cassa'**
   String get speakerAwayNotice;
 
+  /// No description provided for @jamFull.
+  ///
+  /// In it, this message translates to:
+  /// **'La Jam è piena'**
+  String get jamFull;
+
+  /// No description provided for @jamAddFailed.
+  ///
+  /// In it, this message translates to:
+  /// **'Non aggiunto alla Jam'**
+  String get jamAddFailed;
+
+  /// No description provided for @jamLeft.
+  ///
+  /// In it, this message translates to:
+  /// **'Sei uscito dalla Jam'**
+  String get jamLeft;
+
+  /// No description provided for @speakerContinueOnPhone.
+  ///
+  /// In it, this message translates to:
+  /// **'Continua sul telefono'**
+  String get speakerContinueOnPhone;
+
+  /// No description provided for @speakerContinueOnPhoneLabel.
+  ///
+  /// In it, this message translates to:
+  /// **'Continua sul telefono: la Jam suona dall’altoparlante di questo telefono, senza la cassa'**
+  String get speakerContinueOnPhoneLabel;
+
   /// No description provided for @speakerOfferTitle.
   ///
   /// In it, this message translates to:
@@ -9018,6 +9048,144 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'La tua cassa è collegata e la Jam è ferma. Se vuoi, la musica riparte da qui.'**
   String get speakerOfferBody;
+
+  /// No description provided for @jamRemoteTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Jam a distanza'**
+  String get jamRemoteTitle;
+
+  /// No description provided for @jamRemoteHint.
+  ///
+  /// In it, this message translates to:
+  /// **'I broker (server) per la Jam a distanza, in ordine di preferenza.'**
+  String get jamRemoteHint;
+
+  /// No description provided for @jamBrokerAdd.
+  ///
+  /// In it, this message translates to:
+  /// **'Aggiungi broker'**
+  String get jamBrokerAdd;
+
+  /// No description provided for @jamBrokerHost.
+  ///
+  /// In it, this message translates to:
+  /// **'Indirizzo'**
+  String get jamBrokerHost;
+
+  /// No description provided for @jamBrokerPort.
+  ///
+  /// In it, this message translates to:
+  /// **'Porta'**
+  String get jamBrokerPort;
+
+  /// No description provided for @jamBrokerTls.
+  ///
+  /// In it, this message translates to:
+  /// **'Connessione cifrata (TLS)'**
+  String get jamBrokerTls;
+
+  /// No description provided for @jamBrokerNoTls.
+  ///
+  /// In it, this message translates to:
+  /// **'Senza TLS chiunque sulla rete può leggere ciò che passa dal broker. Usalo solo se sai cosa fai.'**
+  String get jamBrokerNoTls;
+
+  /// No description provided for @jamBrokerInvalid.
+  ///
+  /// In it, this message translates to:
+  /// **'Indirizzo o porta non validi'**
+  String get jamBrokerInvalid;
+
+  /// No description provided for @jamBrokerTest.
+  ///
+  /// In it, this message translates to:
+  /// **'Prova connessione'**
+  String get jamBrokerTest;
+
+  /// No description provided for @jamBrokerTestOk.
+  ///
+  /// In it, this message translates to:
+  /// **'{broker}: connessione riuscita'**
+  String jamBrokerTestOk(String broker);
+
+  /// No description provided for @jamBrokerTestFail.
+  ///
+  /// In it, this message translates to:
+  /// **'{broker}: non riesco a collegarmi (rete, certificato o server non raggiungibile)'**
+  String jamBrokerTestFail(String broker);
+
+  /// No description provided for @jamBrokerRestore.
+  ///
+  /// In it, this message translates to:
+  /// **'Ripristina'**
+  String get jamBrokerRestore;
+
+  /// No description provided for @jamBrokerMoveUp.
+  ///
+  /// In it, this message translates to:
+  /// **'Sposta su'**
+  String get jamBrokerMoveUp;
+
+  /// No description provided for @jamBrokerRemove.
+  ///
+  /// In it, this message translates to:
+  /// **'Togli'**
+  String get jamBrokerRemove;
+
+  /// No description provided for @jamSuspend.
+  ///
+  /// In it, this message translates to:
+  /// **'Sospendi'**
+  String get jamSuspend;
+
+  /// No description provided for @jamBlock.
+  ///
+  /// In it, this message translates to:
+  /// **'Blocca'**
+  String get jamBlock;
+
+  /// No description provided for @jamSuspendTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Sospendi per quanto tempo?'**
+  String get jamSuspendTitle;
+
+  /// No description provided for @jamUntilJamEnds.
+  ///
+  /// In it, this message translates to:
+  /// **'Fino alla fine della Jam'**
+  String get jamUntilJamEnds;
+
+  /// No description provided for @jamBlockedTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Dispositivi bloccati'**
+  String get jamBlockedTitle;
+
+  /// No description provided for @jamSuspendedTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Sospesi'**
+  String get jamSuspendedTitle;
+
+  /// No description provided for @jamUnblock.
+  ///
+  /// In it, this message translates to:
+  /// **'Sblocca'**
+  String get jamUnblock;
+
+  /// No description provided for @jamSuspendedUntil.
+  ///
+  /// In it, this message translates to:
+  /// **'Fino alle {time}'**
+  String jamSuspendedUntil(String time);
+
+  /// No description provided for @jamTooSoon.
+  ///
+  /// In it, this message translates to:
+  /// **'Aspetta un momento prima di riprovare'**
+  String get jamTooSoon;
 }
 
 class _AppLocalizationsDelegate

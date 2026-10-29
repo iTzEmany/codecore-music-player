@@ -5698,9 +5698,102 @@ class AppLocalizationsPt extends AppLocalizations {
   String get speakerAwayNotice => 'Liga uma coluna';
 
   @override
+  String get jamFull => 'A Jam está cheia';
+
+  @override
+  String get jamAddFailed => 'Não adicionado à Jam';
+
+  @override
+  String get jamLeft => 'Saiu da Jam';
+
+  @override
+  String get speakerContinueOnPhone => 'Continuar no telemóvel';
+
+  @override
+  String get speakerContinueOnPhoneLabel =>
+      'Continuar no telemóvel: a Jam toca no altifalante deste telemóvel, sem a coluna';
+
+  @override
   String get speakerOfferTitle => 'Tocar a Jam na tua coluna?';
 
   @override
   String get speakerOfferBody =>
       'A tua coluna está ligada e a Jam está parada. Se quiseres, a música continua a partir daqui.';
+
+  @override
+  String get jamRemoteTitle => 'Jam à distância';
+
+  @override
+  String get jamRemoteHint =>
+      'Os brokers (servidores) da Jam à distância, por ordem de preferência.';
+
+  @override
+  String get jamBrokerAdd => 'Adicionar broker';
+
+  @override
+  String get jamBrokerHost => 'Endereço';
+
+  @override
+  String get jamBrokerPort => 'Porta';
+
+  @override
+  String get jamBrokerTls => 'Ligação cifrada (TLS)';
+
+  @override
+  String get jamBrokerNoTls =>
+      'Sem TLS, qualquer pessoa na rede pode ler o que passa pelo broker. Usa só se souberes o que fazes.';
+
+  @override
+  String get jamBrokerInvalid => 'Endereço ou porta inválidos';
+
+  @override
+  String get jamBrokerTest => 'Testar ligação';
+
+  @override
+  String jamBrokerTestOk(String broker) {
+    return '$broker: ligação bem-sucedida';
+  }
+
+  @override
+  String jamBrokerTestFail(String broker) {
+    return '$broker: não consigo ligar (rede, certificado ou servidor inacessível)';
+  }
+
+  @override
+  String get jamBrokerRestore => 'Repor';
+
+  @override
+  String get jamBrokerMoveUp => 'Subir';
+
+  @override
+  String get jamBrokerRemove => 'Remover';
+
+  @override
+  String get jamSuspend => 'Suspender';
+
+  @override
+  String get jamBlock => 'Bloquear';
+
+  @override
+  String get jamSuspendTitle => 'Suspender por quanto tempo?';
+
+  @override
+  String get jamUntilJamEnds => 'Até ao fim da Jam';
+
+  @override
+  String get jamBlockedTitle => 'Dispositivos bloqueados';
+
+  @override
+  String get jamSuspendedTitle => 'Suspensos';
+
+  @override
+  String get jamUnblock => 'Desbloquear';
+
+  @override
+  String jamSuspendedUntil(String time) {
+    return 'Até às $time';
+  }
+
+  @override
+  String get jamTooSoon => 'Espera um momento antes de tentar de novo';
 }

@@ -101,15 +101,21 @@ class OnlineAlbumScreen extends ConsumerWidget {
 
   Future<void> _queueAlbum(BuildContext context, WidgetRef ref, List<YtResult> songs) async {
     final ctrl = ref.read(playerControllerProvider);
+    var added = 0, full = false;
     try {
       for (final r in songs) {
+        if (ctrl.jamQueueFull) {
+          full = true;
+          break;
+        }
         await ctrl.enqueueOnline(r);
+        added++;
       }
     } on Object catch (e, st) {
       AppLog.w('album queue failed', e, st);
       return;
     }
-    if (context.mounted) showMsg(context, context.l10n.addedToQueue);
+    if (context.mounted) showQueued(context, (added: added, full: full), wanted: songs.length);
   }
 
   Future<void> _addToPlaylist(BuildContext context, WidgetRef ref, List<YtResult> songs) async {

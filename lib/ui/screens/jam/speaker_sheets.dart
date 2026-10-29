@@ -86,6 +86,17 @@ void closeSpeakerOffer() {
   r.navigator?.removeRoute(r);
 }
 
+/// A dialog or sheet is up. A full screen (the Jam one) is not a reason to wait:
+/// the sheet opens on the root navigator, above it.
+bool _dialogOnTop(BuildContext context) {
+  Route<dynamic>? top;
+  Navigator.of(context).popUntil((r) {
+    top = r;
+    return true;
+  });
+  return top is PopupRoute;
+}
+
 void _next() {
   _retry?.cancel();
   if (_open || _queue.isEmpty) return;
@@ -95,7 +106,7 @@ void _next() {
     _queue.removeAt(0);
     return _next();
   }
-  if (ModalRoute.of(context)?.isCurrent == false) {
+  if (_dialogOnTop(context)) {
     _retry = Timer(const Duration(seconds: 1), _next);
     return;
   }

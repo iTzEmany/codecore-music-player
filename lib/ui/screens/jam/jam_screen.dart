@@ -25,6 +25,20 @@ class JamScreen extends ConsumerStatefulWidget {
 class _JamScreenState extends ConsumerState<JamScreen> {
   bool _popped = false;
 
+  @override
+  void initState() {
+    super.initState();
+    // An outcome set before this screen existed (e.g. «wait a moment»): ref.listen misses it.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final s = ref.read(jamProvider);
+      if (s.phase == JamPhase.idle && s.outcome != null) {
+        final t = _outcomeText(context.l10n, s);
+        _leave(t.isEmpty ? null : t);
+      }
+    });
+  }
+
   void _leave(String? message) {
     if (_popped || !mounted) return;
     _popped = true;
@@ -40,6 +54,7 @@ class _JamScreenState extends ConsumerState<JamScreen> {
     JamJoinOutcome.declined => l.jamDeclined(s.peerName),
     JamJoinOutcome.busy => l.jamBusy(s.peerName),
     JamJoinOutcome.cancelled => '',
+    JamJoinOutcome.tooSoon => l.jamTooSoon,
     _ => l.jamUnreachable,
   };
 
@@ -53,7 +68,7 @@ class _JamScreenState extends ConsumerState<JamScreen> {
         final t = _outcomeText(l, next);
         _leave(t.isEmpty ? null : t);
       } else if (next.phase == JamPhase.ended) {
-        _leave(next.lost ? l.jamLost : l.jamEnded);
+        _leave(next.lost ? l.jamLost : next.left ? l.jamLeft : l.jamEnded);
       }
     });
     final ctrl = ref.read(jamProvider.notifier);

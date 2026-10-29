@@ -42,6 +42,9 @@ class _Ctrl implements PlayerController {
   Future<void> playOnlineNext(YtResult r) async => calls.add('next');
 
   @override
+  bool get jamQueueFull => false;
+
+  @override
   dynamic noSuchMethod(Invocation invocation) => null;
 }
 

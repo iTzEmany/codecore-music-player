@@ -734,6 +734,7 @@ void speakerTests() {
         const JamCommand.speakerAway(),
         const JamCommand.speakerBack(),
         const JamCommand.offerSpeaker(),
+        const JamCommand.continueOnPhone(),
       ]) {
         expect(JamCommand.tryParse(c.toJson())!.type, c.type);
       }
@@ -790,6 +791,18 @@ void speakerTests() {
     test('speakerAway without a speaker is invalid', () {
       expect(err(start(), const JamCommand.speakerAway(), host), JamError.invalid);
       expect(err(start(), const JamCommand.speakerBack(), host), JamError.invalid);
+    });
+
+    test('continueOnPhone: only the host, only while waiting, then play works', () {
+      const c = JamCommand.continueOnPhone();
+      final s = speakerJam(away: 10);
+      expect(err(s, c, guest), JamError.forbidden);
+      expect(err(speakerJam(), c, host), JamError.invalid);
+      final n = ok(s, c, host);
+      expect(n.speaker, false);
+      expect(n.speakerAwaySince, isNull);
+      expect(err(s, const JamCommand.play(), host), JamError.noSpeaker);
+      expect(err(n, const JamCommand.play(), host), isNull);
     });
 
     test('speakerBack: host only, stays paused', () {

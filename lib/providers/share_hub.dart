@@ -12,6 +12,7 @@ import '../core/app_log.dart';
 import '../data/db/app_database.dart';
 import '../data/repositories/playlist_sync_repository.dart';
 import '../services/jam/jam_host.dart';
+import 'jam_remote_providers.dart';
 import '../services/share/device_identity.dart';
 import '../services/share/discovery.dart';
 import '../services/share/lan_client.dart';
@@ -317,9 +318,12 @@ class ShareHubNotifier extends Notifier<ShareHubState> {
               }
               _surfaceIncoming(o);
             };
+      final gate = ref.read(jamGateProvider);
+      await gate.ready;
       final jam = JamHost(
         deviceId: service.deviceId,
         deviceName: service.deviceName,
+        gate: gate,
       )..onRequest = _surfaceJamRequest;
       // HTTPS needs the device identity; without it (it could not be made) the
       // hub runs plain HTTP as before (R59).
