@@ -1175,7 +1175,13 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String jamPeople(int n) {
-    return 'Jam, $n personnes';
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Jam, $n personnes',
+      one: 'Jam, 1 personne',
+    );
+    return '$_temp0';
   }
 
   @override

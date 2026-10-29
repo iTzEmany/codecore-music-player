@@ -58,8 +58,9 @@ class JamItem {
   /// Picked by the owner's device because its part was empty (R-102).
   final bool suggested;
 
-  /// Key of the item in its owner's part, set by the feeder; the reducer only
-  /// keeps it (invariant 3). At most 64 characters.
+  /// Key of the item in its owner's part, set by the feeder; the reducer drops
+  /// a duplicate add (same owner + key) and puts feeder items last in the
+  /// sender's part. At most 64 characters.
   final String? partKey;
 
   /// A YouTube track any output can download again by its video id.

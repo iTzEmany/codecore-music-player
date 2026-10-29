@@ -638,7 +638,7 @@
   "navSearch": "Rechercher",
   "devicesTitle": "Appareils",
   "devicesJamActive": "Jam active",
-  "jamPeople": "Jam, {n} personnes",
+  "jamPeople": "{n, plural, one{Jam, 1 personne} other{Jam, {n} personnes}}",
   "@jamPeople": {
     "placeholders": {
       "n": {

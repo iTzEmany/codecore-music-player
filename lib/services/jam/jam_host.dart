@@ -221,7 +221,8 @@ class JamHost {
         from: from ?? deviceId, nowMs: _now().millisecondsSinceEpoch);
     if (r.isOk) {
       if (cmd.type == JamCommandType.add &&
-          r.state!.items.length <= s.items.length) {
+          s.mode == JamMode.host &&
+          r.state!.items.length == s.items.length) {
         AppLog.i('jam: queue full, dropped an inherited track for ${cmd.item?.title}');
       }
       _state = r.state;

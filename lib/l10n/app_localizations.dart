@@ -2047,7 +2047,7 @@ abstract class AppLocalizations {
   /// No description provided for @jamPeople.
   ///
   /// In it, this message translates to:
-  /// **'Jam, {n} persone'**
+  /// **'{n, plural, one{Jam, 1 persona} other{Jam, {n} persone}}'**
   String jamPeople(int n);
 
   /// No description provided for @devicesVisibleTitle.
