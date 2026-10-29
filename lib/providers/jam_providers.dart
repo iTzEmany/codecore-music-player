@@ -31,6 +31,7 @@ import '../services/online/youtube_service.dart' show YtResult;
 import '../services/share/track_meta.dart';
 import '../services/stream/stream_cache.dart';
 import '../services/jam/jam_transport.dart';
+import '../services/jam/speaker_jam.dart';
 import '../services/share/discovery.dart';
 import 'database_providers.dart';
 import 'library_providers.dart' show coverStoreProvider, libraryQueriesProvider;
@@ -95,6 +96,24 @@ class JamUiState {
     lost: lost ?? this.lost,
     syncErrorMs: syncErrorMs ?? this.syncErrorMs,
   );
+}
+
+class _SpeakerPort implements SpeakerJamPort {
+  _SpeakerPort(this._c);
+  final JamController _c;
+
+  @override
+  SpeakerJamView get view => _c._speakerView;
+  @override
+  Stream<void> get changes => _c._speakerChanges.stream;
+  @override
+  Future<void> open() => _c.openSpeakerJam();
+  @override
+  Future<void> closeSilently() => _c.closeSpeakerJamSilently();
+  @override
+  Future<void> send(JamCommand cmd) => _c.send(cmd);
+  @override
+  Future<void> end() => _c.end();
 }
 
 /// Creates the backend used for Jam playback (overridden in tests).
@@ -224,6 +243,9 @@ class JamController extends Notifier<JamUiState> {
   @override
   JamUiState build() {
     ref.onDispose(_dispose);
+    listenSelf((_, _) {
+      if (!_speakerChanges.isClosed) _speakerChanges.add(null);
+    });
     final hub = _hub = ref.read(shareHubProvider.notifier);
     _reqSub = hub.newJamRequests.listen(_incoming.add);
     hub.onJamEnd = end;
@@ -237,6 +259,7 @@ class JamController extends Notifier<JamUiState> {
     await _teardown(release: false);
     await _incoming.close();
     await _onlineFailed.close();
+    await _speakerChanges.close();
   }
 
   String get _ownId => _hub.deviceId ?? '';
@@ -310,12 +333,62 @@ class JamController extends Notifier<JamUiState> {
     await _startAsHost(s, seed);
   }
 
+  /// Opens the Jam of the speaker: no guests yet, nothing changes on screen and the
+  /// player goes on as before (R-111). A running host Jam becomes the speaker's (D-218);
+  /// a guest does nothing.
+  Future<void> openSpeakerJam() async {
+    final host = _host;
+    if (host == null || state.role == JamRole.guest) return;
+    if (state.active) {
+      host.makeSpeaker();
+      _hub.speakerJamName = ref.read(deviceNameProvider);
+      return;
+    }
+    if (state.phase != JamPhase.idle) return;
+    host.open(speaker: true);
+    final s = host.state;
+    if (s == null || s.ended) return;
+    final seed = await jamSeedTracks(
+      ref.read(audioHandlerProvider),
+      ref.read(trackRepositoryProvider),
+    );
+    await _startAsHost(s, seed, speaker: true);
+  }
+
+  /// Closes the speaker's Jam with nobody in it, without any message (R-115, D-211).
+  Future<void> closeSpeakerJamSilently() async {
+    if (!state.isHost || state.jam?.speaker != true) return;
+    if (_host?.memberIds.isNotEmpty ?? true) return;
+    await _teardown();
+    state = const JamUiState();
+  }
+
+  late final _speakerChanges = StreamController<void>.broadcast();
+
+  /// The controller as [SpeakerJam] sees it.
+  late final SpeakerJamPort speakerPort = _SpeakerPort(this);
+
+  SpeakerJamView get _speakerView {
+    final j = state.jam;
+    final role = switch (state.phase) {
+      JamPhase.idle => SpeakerRole.none,
+      JamPhase.active => state.isHost ? SpeakerRole.host : SpeakerRole.guest,
+      _ => SpeakerRole.busy,
+    };
+    return SpeakerJamView(
+      role: role,
+      speaker: j?.speaker ?? false,
+      awaySince: j?.speakerAwaySince,
+      guests: j == null ? 0 : j.participants.where((p) => p.id != j.hostDeviceId).length,
+      iAmOutput: j != null && j.outputs.length == 1 && j.outputs.first == _ownId,
+    );
+  }
+
   /// Opens the Jam as its host with [seed] as the starting queue; what was playing keeps playing.
-  // TODO(67 C): pass [speaker] to JamHost/JamState.
-  // ignore: unused_element_parameter
   Future<void> _startAsHost(JamState s, List<Track> seed, {bool speaker = false}) async {
     final host = _host;
     if (host == null) return;
+    if (speaker) _hub.speakerJamName = ref.read(deviceNameProvider);
     await _hold();
     _hostSub = host.changes.listen((_) {
       final js = host.state;
@@ -799,6 +872,7 @@ class JamController extends Notifier<JamUiState> {
   }
 
   Future<void> _teardown({bool release = true}) async {
+    _hub.speakerJamName = null;
     _alive?.cancel();
     _alive = null;
     await _hostSub?.cancel();

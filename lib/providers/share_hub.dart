@@ -77,6 +77,15 @@ class ShareHubNotifier extends Notifier<ShareHubState> {
   OfferNode? _node;
   JamHost? _jam;
   LanDiscovery? _discovery;
+  String? _speakerJamName;
+
+  /// The name the beacon announces for the speaker's Jam; null = none.
+  String? get speakerJamName => _speakerJamName;
+  set speakerJamName(String? v) {
+    _speakerJamName = v;
+    _discovery?.speakerJamName = v;
+  }
+
   StreamSubscription<List<Peer>>? _peerSub;
   StreamSubscription<void>? _changeSub;
   Timer? _sweep;
@@ -336,6 +345,7 @@ class ShareHubNotifier extends Notifier<ShareHubState> {
         deviceId: service.deviceId,
         deviceName: service.deviceName,
       );
+      discovery.speakerJamName = _speakerJamName;
       await discovery.start(port, tlsPort: node.tlsPort);
       if (!ref.mounted) {
         await discovery.dispose();

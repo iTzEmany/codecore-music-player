@@ -160,17 +160,26 @@ class JamHost {
   }
 
   /// Starts the session if it is not open yet (idempotent); no guest needed.
-  void open() {
+  void open({bool speaker = false}) {
     if (_state != null) return;
     _sid = newToken();
     _fileToken = newToken();
     _state = JamState(
       hostDeviceId: deviceId,
       outputDeviceId: deviceId,
+      speaker: speaker,
       positionAt: _now().millisecondsSinceEpoch,
       participants: [JamParticipant(id: deviceId, name: deviceName)],
     );
     AppLog.i('jam: session started');
+  }
+
+  /// A running Jam becomes the speaker's: the host is the only output (D-218).
+  void makeSpeaker() {
+    final s = _state;
+    if (s == null || s.ended || s.speaker) return;
+    _publish(s.copyWith(
+        speaker: true, outputDeviceId: deviceId, outputDeviceIds: const []));
   }
 
   /// Registers a guest and returns its credentials; starts the session if
@@ -249,8 +258,14 @@ class JamHost {
           from: deviceId, nowMs: now);
       if (r.isOk) s = r.state!;
     }
-    // The output cannot be a device that left.
-    if (s.outputs.contains(id)) {
+    // The speaker's only output left: the host takes over, paused (D-220).
+    final away = s.speaker && s.outputs.contains(id)
+        ? applyCommand(s, const JamCommand.speakerAway(), from: deviceId, nowMs: now)
+        : null;
+    if (away != null && away.isOk) {
+      s = away.state!;
+    } else if (s.outputs.contains(id)) {
+      // The output cannot be a device that left.
       final left = s.outputs.where((o) => o != id).toList();
       s = left.isEmpty
           ? s.copyWith(

@@ -294,4 +294,25 @@ void main() {
     expect((await call('GET', '${s.sid}/cover/2', headers: auth)).statusCode, 404);
     expect((await call('GET', 'wrong/cover/1', headers: auth)).statusCode, 401);
   });
+
+  test('the guest that plays for the speaker leaves: speakerAway, the host takes over (D-220)', () {
+    host.open(speaker: true);
+    host.addMember(id: 'g', name: 'Phone', host: '192.168.1.50', port: 4000);
+    host.apply(const JamCommand.speakerAway());
+    expect(host.apply(const JamCommand.offerSpeaker(), from: 'g').isOk, isTrue);
+    expect(host.state!.outputs, ['g']);
+    host.removeMember('g');
+    final s = host.state!;
+    expect(s.speaker, isTrue);
+    expect(s.speakerAwaySince, isNotNull);
+    expect(s.outputs, ['host']);
+    expect(s.playing, isFalse);
+  });
+
+  test('makeSpeaker turns a running Jam into the speaker one', () {
+    host.addMember(id: 'g', name: 'Phone', host: '192.168.1.50', port: 4000);
+    host.makeSpeaker();
+    expect(host.state!.speaker, isTrue);
+    expect(host.state!.outputs, ['host']);
+  });
 }
