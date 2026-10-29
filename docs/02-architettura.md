@@ -114,6 +114,7 @@ Scritture con debounce 400 ms, mai in un handler di slider a ogni tick.
 - Fase 66: coda insieme. `JamMode` (`host`/`together`) in `JamState`; in `together` il riduttore ordina con `togetherOrder` (`jam_turns.dart`, turni tra i partecipanti).
   `JamPartFeeder` (`jam_part_feeder.dart`) manda i brani della parte di ognuno con `partKey`, i suggeriti locali vengono da `pickSuggestion` (`jam_suggestion.dart`).
   D-221: l'host resta in Jam anche da solo (niente chiusura quando gli ospiti escono).
+- Fase 67: Jam della cassa. `JamState.speaker`/`speakerAwaySince`; comandi `speakerAway`, `speakerBack`, `offerSpeaker` (cassa assente: comandi di riproduzione rifiutati con `noSpeaker`, HTTP 409). La politica è in `SpeakerJam` (`speaker_jam.dart`, pura, porta `SpeakerJamPort`), alimentata da `SpeakerMonitor` (`speaker_monitor.dart`) e cablata in `speaker_providers.dart`; `JamController.openSpeakerJam()` entra in «in attesa» (solo annuncio `jam` in LAN, D-226) e la Jam nasce alla prima richiesta accettata.
 
 ## Interfaccia (fase 11)
 - **Navigazione:** quattro schede (`NavTab.home|search|library|memory`), ciascuna con un `Navigator` annidato (chiavi in
