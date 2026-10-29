@@ -142,9 +142,9 @@ class JamHost {
         r.status = JamRequestStatus.expired;
       }
     }
-    // Silent ones stay answerable for a while (like the others), then go.
-    requests.removeWhere((_, r) =>
-        r.silent && r.receivedAt.isBefore(limit.subtract(jamRequestTtl)));
+    // Answerable for a while after the TTL, then gone (silent or not alike).
+    requests.removeWhere(
+        (_, r) => r.receivedAt.isBefore(limit.subtract(jamRequestTtl)));
   }
 
   // ---- host API ------------------------------------------------------------
@@ -399,7 +399,7 @@ class JamHost {
       return Response(409, body: 'full');
     }
     if (requests.values
-        .any((q) => q.status == JamRequestStatus.pending && !q.silent)) {
+        .any((q) => q.status == JamRequestStatus.pending && (!q.silent || q.fromId == fromId))) {
       return Response(409, body: 'busy');
     }
     if (gate != null && !gate!.allow(fromId)) {

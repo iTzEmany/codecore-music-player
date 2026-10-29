@@ -93,9 +93,32 @@ void main() {
 
     test('a blocked id is rate-limited like anyone', () {
       gate.block('x', 'X');
-      expect(h.admitRequest(body('x')).statusCode, 202);
-      expect(h.admitRequest(body('x')).statusCode, 202);
+      for (var i = 0; i < 2; i++) {
+        expect(h.admitRequest(body('x')).statusCode, 202);
+        h.decline(h.requests.values.last.id);
+      }
       expect(h.admitRequest(body('x')).statusCode, 429);
+    });
+
+    test('a blocked id and a normal id get the same statuses, also after expiry', () async {
+      gate.block('x', 'X');
+      Future<List<int>> run(String id) async {
+        final out = <int>[];
+        String? rid;
+        for (var i = 0; i < 2; i++) {
+          final r = h.admitRequest(body(id));
+          out.add(r.statusCode);
+          if (r.statusCode == 202) rid = jsonDecode(await r.readAsString())['requestId'] as String;
+        }
+        now = now.add(jamRequestTtl * 2 + const Duration(seconds: 1));
+        h.expire();
+        out.add(h.requests.containsKey(rid) ? 200 : 401);
+        h.requests.clear();
+        now = now.add(const Duration(minutes: 2));
+        return out;
+      }
+
+      expect(await run('x'), await run('ok'));
     });
 
     test('clearSession drops end-of-Jam suspensions', () {
@@ -110,6 +133,59 @@ void main() {
         h.decline(h.requests.values.last.id);
       }
       expect(h.admitRequest(body('a')).statusCode, 429);
+    });
+  });
+
+  test('suspend then block: the id is only in blocked', () {
+    gate.suspend('a', 'A', null);
+    gate.block('a', 'A');
+    expect(gate.suspended, isEmpty);
+    expect(gate.blocked.map((e) => e.id), ['a']);
+  });
+
+  test('a clock moved back by an hour does not freeze the window', () {
+    expect(gate.allow('a'), isTrue);
+    expect(gate.allow('a'), isTrue);
+    expect(gate.allow('a'), isFalse);
+    now = now.subtract(const Duration(hours: 1));
+    expect(gate.allow('a'), isTrue);
+  });
+
+  test('a bad element drops only itself, a broken list not the other, end-of-Jam is cleared', () async {
+    data[jamBlockedKey] = '[{"id":"b1","name":"B"},5,{"id":"b2","name":"B2","at":"2026-01-01T10:00:00.000"}]';
+    data[jamSuspendedKey] = 'not json';
+    gate = await open();
+    expect(gate.blocked.map((e) => e.id), ['b1', 'b2']);
+    data[jamBlockedKey] = 'broken';
+    data[jamSuspendedKey] =
+        '[{"id":"e","name":"E","until":null},{"name":"no id"},{"id":"s","name":"S","until":"2026-01-01T13:00:00.000"}]';
+    gate = await open();
+    expect(gate.blocked, isEmpty);
+    expect(gate.suspended.map((e) => e.id), ['s']);
+  });
+
+  group('FileJamSecretStore', () {
+    late Directory dir;
+    setUp(() async {
+      dir = await Directory.systemTemp.createTemp('jamsecrets');
+      addTearDown(() => dir.delete(recursive: true));
+    });
+
+    for (final junk in ['', '{"jamBlo', 'not json']) {
+      test('an unreadable file ("$junk") starts empty', () async {
+        File('${dir.path}/jam_secrets.json').writeAsStringSync(junk);
+        final g = JamGate(FileJamSecretStore(dir.path), now: () => now);
+        await g.ready;
+        expect(g.blocked, isEmpty);
+        expect(g.suspended, isEmpty);
+      });
+    }
+
+    test('concurrent writes do not fail, the last wins, no .tmp is left', () async {
+      final s = FileJamSecretStore(dir.path);
+      await Future.wait([for (var i = 0; i < 5; i++) s.write('k', 'v$i')]);
+      expect(await FileJamSecretStore(dir.path).read('k'), 'v4');
+      expect(dir.listSync().map((e) => e.path.split('/').last), ['jam_secrets.json']);
     });
   });
 

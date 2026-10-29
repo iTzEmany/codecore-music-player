@@ -52,8 +52,17 @@ class FileJamSecretStore implements JamSecretStore {
   @override
   Future<String?> read(String key) async => (await _load())[key];
 
+  Future<void> _last = Future.value();
+
+  // One write at a time: they share the tmp file.
   @override
-  Future<void> write(String key, String value) async {
+  Future<void> write(String key, String value) {
+    final run = _last.then((_) => _write(key, value));
+    _last = run.catchError((Object _) {}); // the caller of [run] sees the error
+    return run;
+  }
+
+  Future<void> _write(String key, String value) async {
     final m = await _load();
     m[key] = value;
     final tmp = File('${_file.path}.tmp');

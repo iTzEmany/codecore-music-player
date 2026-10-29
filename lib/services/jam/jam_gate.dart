@@ -47,10 +47,13 @@ class JamGate extends ChangeNotifier {
 
   /// Sliding window of [perMinute] per id; records the attempt when allowed.
   bool allow(String id) {
-    final cutoff = _now().subtract(const Duration(minutes: 1));
-    _recent.removeWhere((_, t) => t.isEmpty || !t.last.isAfter(cutoff));
+    final now = _now();
+    final cutoff = now.subtract(const Duration(minutes: 1));
+    // A clock moved back leaves timestamps in the future: they are dropped too.
+    bool old(DateTime t) => !t.isAfter(cutoff) || t.isAfter(now);
+    _recent.removeWhere((_, t) => t.isEmpty || t.every(old));
     final times = _recent.putIfAbsent(id, () => []);
-    times.removeWhere((t) => !t.isAfter(cutoff));
+    times.removeWhere(old);
     if (times.length >= perMinute) return false;
     times.add(_now());
     return true;
@@ -108,23 +111,31 @@ class JamGate extends ChangeNotifier {
   }
 
   Future<void> _load() async {
-    try {
-      _read(await _store.read(jamBlockedKey), 'at', _blocked);
-      _read(await _store.read(jamSuspendedKey), 'until', _suspended);
-      // "Until the end of the Jam" does not survive a restart.
-      clearEndOfJam();
-    } on Object catch (e, st) {
-      AppLog.w('jam gate: cannot load the lists', e, st);
+    for (final (key, field, into) in [
+      (jamBlockedKey, 'at', _blocked),
+      (jamSuspendedKey, 'until', _suspended),
+    ]) {
+      try {
+        _read(await _store.read(key), field, into);
+      } on Object catch (e, st) {
+        AppLog.w('jam gate: cannot load $key', e, st);
+      }
     }
+    // "Until the end of the Jam" does not survive a restart.
+    clearEndOfJam();
   }
 
   static void _read(String? raw, String field, Map<String, JamGateEntry> into) {
     if (raw == null) return;
     for (final e in jsonDecode(raw) as List) {
-      final m = e as Map;
-      final w = m[field];
-      into[m['id'] as String] =
-          JamGateEntry(m['id'] as String, m['name'] as String, w is String ? DateTime.tryParse(w) : null);
+      try {
+        final m = e as Map;
+        final w = m[field];
+        into[m['id'] as String] =
+            JamGateEntry(m['id'] as String, m['name'] as String, w is String ? DateTime.tryParse(w) : null);
+      } on Object catch (err, st) {
+        AppLog.w('jam gate: entry dropped', err, st);
+      }
     }
   }
 }
