@@ -24,7 +24,7 @@ class MainActivity : AudioServiceActivity() {
     private val main = Handler(Looper.getMainLooper())
     private var deviceCallback: AudioDeviceCallback? = null
     private var btReceiver: BroadcastReceiver? = null
-    private var btPermissionResult: MethodChannel.Result? = null
+    private val btPermissionResults = mutableListOf<MethodChannel.Result>()
 
     // A restored activity gets its old launch intent again: not a new file.
     private var restored = false
@@ -80,6 +80,7 @@ class MainActivity : AudioServiceActivity() {
             when (call.method) {
                 "outputRoute" -> result.success(currentOutputRoute())
                 "bluetoothOutputs" -> bluetoothOutputs(result)
+                "bluetoothOutputActive" -> result.success(bluetoothOutputActive())
                 "bluetoothPermission" -> result.success(hasBluetoothPermission())
                 "requestBluetoothPermission" -> requestBluetoothPermission(result)
                 else -> result.notImplemented()
@@ -168,6 +169,7 @@ class MainActivity : AudioServiceActivity() {
         }
         deviceCallback = null
         unregisterBluetoothReceiver()
+        answerPermissionRequests()
         ShareBridge.channel = null
         ImportBridge.channel = null
         NotifyBridge.detach()
@@ -187,6 +189,7 @@ class MainActivity : AudioServiceActivity() {
 
     override fun onDestroy() {
         unregisterBluetoothReceiver()
+        answerPermissionRequests()
         super.onDestroy()
     }
 
@@ -194,8 +197,7 @@ class MainActivity : AudioServiceActivity() {
         requestCode: Int, permissions: Array<out String>, grantResults: IntArray,
     ) {
         if (requestCode == BT_REQUEST) {
-            btPermissionResult?.success(hasBluetoothPermission())
-            btPermissionResult = null
+            answerPermissionRequests()
             return
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
@@ -208,9 +210,26 @@ class MainActivity : AudioServiceActivity() {
 
     private fun requestBluetoothPermission(result: MethodChannel.Result) {
         if (hasBluetoothPermission()) return result.success(true)
-        if (btPermissionResult != null) return result.error("busy", "request in progress", null)
-        btPermissionResult = result
-        requestPermissions(arrayOf(Manifest.permission.BLUETOOTH_CONNECT), BT_REQUEST)
+        val first = btPermissionResults.isEmpty()
+        btPermissionResults.add(result)
+        if (first) requestPermissions(arrayOf(Manifest.permission.BLUETOOTH_CONNECT), BT_REQUEST)
+    }
+
+    /** Every waiting request gets the same, current answer. */
+    private fun answerPermissionRequests() {
+        val granted = hasBluetoothPermission()
+        val waiting = btPermissionResults.toList()
+        btPermissionResults.clear()
+        waiting.forEach { it.success(granted) }
+    }
+
+    private fun bluetoothOutputActive(): Boolean = try {
+        (getSystemService(AUDIO_SERVICE) as AudioManager)
+            .getDevices(AudioManager.GET_DEVICES_OUTPUTS)
+            .any { it.type == AudioDeviceInfo.TYPE_BLUETOOTH_A2DP }
+    } catch (e: Exception) {
+        android.util.Log.w("Codecore", "bluetooth active check failed", e)
+        false
     }
 
     private fun registerBluetoothReceiver(audio: MethodChannel) {
@@ -223,7 +242,7 @@ class MainActivity : AudioServiceActivity() {
         btReceiver = r
         try {
             val f = IntentFilter(BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED)
-            if (Build.VERSION.SDK_INT >= 33) registerReceiver(r, f, Context.RECEIVER_EXPORTED)
+            if (Build.VERSION.SDK_INT >= 33) registerReceiver(r, f, Context.RECEIVER_NOT_EXPORTED)
             else registerReceiver(r, f)
         } catch (e: Exception) {
             android.util.Log.w("Codecore", "bluetooth receiver failed", e)
@@ -240,35 +259,50 @@ class MainActivity : AudioServiceActivity() {
         btReceiver = null
     }
 
-    /** `{permission, outputs: [{name, address, deviceClass}]}`; never throws. */
+    /** `{permission, outputs: [{name, address, deviceClass}]}`; never throws, answers once. */
     private fun bluetoothOutputs(result: MethodChannel.Result) {
-        fun reply(permission: Boolean, outputs: List<Map<String, Any?>>) =
+        var answered = false
+        fun reply(permission: Boolean, outputs: List<Map<String, Any?>>) {
+            if (answered) return
+            answered = true
             result.success(mapOf("permission" to permission, "outputs" to outputs))
+        }
         if (!hasBluetoothPermission()) return reply(false, emptyList())
         try {
             val adapter = (getSystemService(BLUETOOTH_SERVICE) as? BluetoothManager)?.adapter
-                ?: return reply(true, emptyList())
+            // With Bluetooth off the proxy would only connect once it is turned on.
+            if (adapter == null || !adapter.isEnabled) return reply(true, emptyList())
+            var proxy: BluetoothProfile? = null
+            fun close() {
+                proxy?.let { adapter.closeProfileProxy(BluetoothProfile.A2DP, it) }
+                proxy = null
+            }
+            val timeout = Runnable {
+                reply(hasBluetoothPermission(), emptyList())
+                close()
+            }
             val ok = adapter.getProfileProxy(this, object : BluetoothProfile.ServiceListener {
-                override fun onServiceConnected(profile: Int, proxy: BluetoothProfile) {
+                override fun onServiceConnected(profile: Int, p: BluetoothProfile) {
+                    main.removeCallbacks(timeout)
+                    proxy = p
                     try {
-                        val list = proxy.connectedDevices.map {
+                        reply(true, p.connectedDevices.map {
                             mapOf(
                                 "name" to it.name,
                                 "address" to it.address,
                                 "deviceClass" to it.bluetoothClass?.deviceClass,
                             )
-                        }
-                        reply(true, list)
+                        })
                     } catch (e: Exception) {
                         android.util.Log.w("Codecore", "bluetooth outputs failed", e)
                         reply(hasBluetoothPermission(), emptyList())
                     } finally {
-                        adapter.closeProfileProxy(profile, proxy)
+                        close()
                     }
                 }
                 override fun onServiceDisconnected(profile: Int) {}
             }, BluetoothProfile.A2DP)
-            if (!ok) reply(true, emptyList())
+            if (ok) main.postDelayed(timeout, 3000) else reply(true, emptyList())
         } catch (e: Exception) {
             android.util.Log.w("Codecore", "bluetooth outputs failed", e)
             reply(hasBluetoothPermission(), emptyList())
