@@ -340,7 +340,7 @@ class JamState {
       ended: j['ended'] == true,
       mode: j['mode'] == JamMode.together.name ? JamMode.together : JamMode.host,
       speaker: j['spk'] == true,
-      speakerAwaySince: j['spkAway'] is int && (j['spkAway'] as int) >= 0
+      speakerAwaySince: j['spk'] == true && j['spkAway'] is int && (j['spkAway'] as int) >= 0
           ? j['spkAway'] as int
           : null,
     );

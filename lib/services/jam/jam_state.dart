@@ -213,6 +213,8 @@ JamResult applyCommand(
           currentIndex: idx, positionMs: 0, positionAt: startAt(s), playing: true));
 
     case JamCommandType.trackEnded:
+      // A late report from the speaker that just went away must not advance a stopped Jam.
+      if (s.speakerAwaySince != null) return JamResult.ok(s);
       // Natural end of a track, reported by the output device (either role).
       if (s.current?.id != cmd.itemId) return JamResult.ok(s);
       return _advance(s, nowMs, commit);

@@ -215,7 +215,9 @@ class JamGuest {
         case 404:
           return const JamResult.fail(JamError.notFound);
         case 409:
-          return const JamResult.fail(JamError.full);
+          // The host answers 409 for both; old guests keep reading `full`.
+          return JamResult.fail(
+              r.data.toString().trim() == 'no speaker' ? JamError.noSpeaker : JamError.full);
         case 410:
           return const JamResult.fail(JamError.ended);
         default:

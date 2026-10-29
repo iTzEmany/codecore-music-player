@@ -725,6 +725,8 @@ void speakerTests() {
       expect(junk.speakerAwaySince, isNull);
       expect(JamState.tryParse({...plain, 'spkAway': -3})!.speakerAwaySince, isNull);
       expect(s.copyWith(clearSpeakerAway: true).speakerAwaySince, isNull);
+      // spkAway without spk would block play forever.
+      expect(JamState.tryParse({...plain, 'spkAway': 5})!.speakerAwaySince, isNull);
     });
 
     test('new commands round trip', () {
@@ -775,6 +777,14 @@ void speakerTests() {
       expect(n.outputs, [host]);
       expect(n.speakerAwaySince, 1000);
       expect(err(s, const JamCommand.speakerAway(), sg2), JamError.forbidden);
+    });
+
+    test('a late trackEnded while the speaker is away changes nothing', () {
+      final s = speakerJam(away: 10).copyWith(
+          items: [item(host), item(host)].indexed.map((e) => e.$2.copyWith(id: e.$1 + 1)).toList());
+      final r = applyCommand(s, const JamCommand.trackEnded(1), from: host, nowMs: 2000);
+      expect(r.state!.currentIndex, s.currentIndex);
+      expect(r.state!.version, s.version);
     });
 
     test('speakerAway without a speaker is invalid', () {
