@@ -2,6 +2,8 @@ import 'dart:typed_data';
 
 import 'package:sodium/sodium_sumo.dart';
 
+import '../../../core/app_log.dart';
+
 /// Only the libsodium primitives the remote Jam protocol needs (D-250, D-252).
 abstract interface class JamCrypto {
   Uint8List randomBytes(int length);
@@ -9,12 +11,16 @@ abstract interface class JamCrypto {
   Uint8List keyBytes(SecureKey key);
 
   KeyPair kxKeyPair();
-  SessionKeys kxClientSessionKeys({
+
+  /// Null for a low-order or invalid peer public key.
+  SessionKeys? kxClientSessionKeys({
     required Uint8List clientPublicKey,
     required SecureKey clientSecretKey,
     required Uint8List serverPublicKey,
   });
-  SessionKeys kxServerSessionKeys({
+
+  /// Null for a low-order or invalid peer public key.
+  SessionKeys? kxServerSessionKeys({
     required Uint8List serverPublicKey,
     required SecureKey serverSecretKey,
     required Uint8List clientPublicKey,
@@ -51,15 +57,17 @@ abstract interface class JamCrypto {
 
   Uint8List genericHash(Uint8List message, {required int outLen});
 
-  /// Argon2id (interactive limits) raw output; blocking, run it in an isolate.
-  SecureKey pwhash({
+  /// Argon2id (interactive limits) raw output, computed in a separate isolate.
+  Future<SecureKey> pwhash({
     required String password,
     required Uint8List salt,
     required int outLen,
   });
 
   Uint8List pad(Uint8List data, int blockSize);
-  Uint8List unpad(Uint8List data, int blockSize);
+
+  /// Null when the padding is invalid.
+  Uint8List? unpad(Uint8List data, int blockSize);
 }
 
 class SodiumJamCrypto implements JamCrypto {
@@ -88,7 +96,9 @@ class SodiumJamCrypto implements JamCrypto {
 
   @override
   KeyPair kxKeyPair() {
-    final seed = _s.secureCopy(_random(_c.kx.seedBytes));
+    final raw = _random(_c.kx.seedBytes);
+    final seed = _s.secureCopy(raw);
+    raw.fillRange(0, raw.length, 0);
     try {
       return _c.kx.seedKeyPair(seed);
     } finally {
@@ -97,26 +107,40 @@ class SodiumJamCrypto implements JamCrypto {
   }
 
   @override
-  SessionKeys kxClientSessionKeys({
+  SessionKeys? kxClientSessionKeys({
     required Uint8List clientPublicKey,
     required SecureKey clientSecretKey,
     required Uint8List serverPublicKey,
-  }) => _c.kx.clientSessionKeys(
-    clientPublicKey: clientPublicKey,
-    clientSecretKey: clientSecretKey,
-    serverPublicKey: serverPublicKey,
-  );
+  }) {
+    try {
+      return _c.kx.clientSessionKeys(
+        clientPublicKey: clientPublicKey,
+        clientSecretKey: clientSecretKey,
+        serverPublicKey: serverPublicKey,
+      );
+    } on SodiumException catch (e) {
+      AppLog.d('jam kx client: peer key refused', e);
+      return null;
+    }
+  }
 
   @override
-  SessionKeys kxServerSessionKeys({
+  SessionKeys? kxServerSessionKeys({
     required Uint8List serverPublicKey,
     required SecureKey serverSecretKey,
     required Uint8List clientPublicKey,
-  }) => _c.kx.serverSessionKeys(
-    serverPublicKey: serverPublicKey,
-    serverSecretKey: serverSecretKey,
-    clientPublicKey: clientPublicKey,
-  );
+  }) {
+    try {
+      return _c.kx.serverSessionKeys(
+        serverPublicKey: serverPublicKey,
+        serverSecretKey: serverSecretKey,
+        clientPublicKey: clientPublicKey,
+      );
+    } on SodiumException catch (e) {
+      AppLog.d('jam kx server: peer key refused', e);
+      return null;
+    }
+  }
 
   @override
   SecureKey hkdfExtract({Uint8List? salt, required Uint8List ikm}) =>
@@ -176,29 +200,42 @@ class SodiumJamCrypto implements JamCrypto {
     required SecureKey key,
     required Uint8List message,
     required Uint8List tag,
-  }) => _c.auth.verify(tag: tag, message: message, key: key);
+  }) =>
+      tag.length == _c.auth.bytes &&
+      _c.auth.verify(tag: tag, message: message, key: key);
 
   @override
   Uint8List genericHash(Uint8List message, {required int outLen}) =>
       _c.genericHash(message: message, outLen: outLen);
 
   @override
-  SecureKey pwhash({
+  Future<SecureKey> pwhash({
     required String password,
     required Uint8List salt,
     required int outLen,
-  }) => _c.pwhash.callStr(
-    outLen: outLen,
-    password: password,
-    salt: salt,
-    opsLimit: _c.pwhash.opsLimitInteractive,
-    memLimit: _c.pwhash.memLimitInteractive,
-    alg: CryptoPwhashAlgorithm.argon2id13,
-  );
+  }) {
+    final s = _s; // capture the sodium instance, not `this` (holds _random)
+    return s.runIsolated(
+      (keys, pairs) => s.crypto.pwhash.callStr(
+        outLen: outLen,
+        password: password,
+        salt: salt,
+        opsLimit: s.crypto.pwhash.opsLimitInteractive,
+        memLimit: s.crypto.pwhash.memLimitInteractive,
+        alg: CryptoPwhashAlgorithm.argon2id13,
+      ),
+    );
+  }
 
   @override
   Uint8List pad(Uint8List data, int blockSize) => _s.pad(data, blockSize);
 
   @override
-  Uint8List unpad(Uint8List data, int blockSize) => _s.unpad(data, blockSize);
+  Uint8List? unpad(Uint8List data, int blockSize) {
+    try {
+      return _s.unpad(data, blockSize);
+    } on SodiumException {
+      return null; // invalid padding: the caller drops the message
+    }
+  }
 }

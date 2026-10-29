@@ -87,42 +87,44 @@ void main() {
     // seeds as in libsodium kx.c: client 0..31, server = same seed incremented (byte 0 + 1)
     final seed = Uint8List.fromList(List.generate(32, (i) => i));
     final seed2 = Uint8List.fromList(seed)..[0] = 1;
-    final k = SodiumJamCrypto.create(random: (_) => seed);
-    return Future.wait([k, SodiumJamCrypto.create(random: (_) => seed2)])
-        .then((l) {
-          final client = l[0].kxKeyPair();
-          final server = l[1].kxKeyPair();
-          expect(
-            toHex(client.publicKey),
-            '0e0216223f147143d32615a91189c288c1728cba3cc5f9f621b1026e03d83129',
-          );
-          final cs = c.kxClientSessionKeys(
-            clientPublicKey: client.publicKey,
-            clientSecretKey: client.secretKey,
-            serverPublicKey: server.publicKey,
-          );
-          final ss = c.kxServerSessionKeys(
-            serverPublicKey: server.publicKey,
-            serverSecretKey: server.secretKey,
-            clientPublicKey: client.publicKey,
-          );
-          expect(
-            toHex(c.keyBytes(ss.rx)),
-            '62c8f4fa81800abd0577d99918d129b65deb789af8c8351f391feb0cbf238604',
-          );
-          expect(
-            toHex(c.keyBytes(ss.tx)),
-            '749519c68059bce69f7cfcc7b387a3de1a1e8237d110991323bf62870115731a',
-          );
-          expect(
-            toHex(c.keyBytes(cs.rx)),
-            '749519c68059bce69f7cfcc7b387a3de1a1e8237d110991323bf62870115731a',
-          );
-          expect(
-            toHex(c.keyBytes(cs.tx)),
-            '62c8f4fa81800abd0577d99918d129b65deb789af8c8351f391feb0cbf238604',
-          );
-        });
+    final k = SodiumJamCrypto.create(random: (_) => Uint8List.fromList(seed));
+    return Future.wait([
+      k,
+      SodiumJamCrypto.create(random: (_) => Uint8List.fromList(seed2)),
+    ]).then((l) {
+      final client = l[0].kxKeyPair();
+      final server = l[1].kxKeyPair();
+      expect(
+        toHex(client.publicKey),
+        '0e0216223f147143d32615a91189c288c1728cba3cc5f9f621b1026e03d83129',
+      );
+      final cs = c.kxClientSessionKeys(
+        clientPublicKey: client.publicKey,
+        clientSecretKey: client.secretKey,
+        serverPublicKey: server.publicKey,
+      );
+      final ss = c.kxServerSessionKeys(
+        serverPublicKey: server.publicKey,
+        serverSecretKey: server.secretKey,
+        clientPublicKey: client.publicKey,
+      );
+      expect(
+        toHex(c.keyBytes(ss!.rx)),
+        '62c8f4fa81800abd0577d99918d129b65deb789af8c8351f391feb0cbf238604',
+      );
+      expect(
+        toHex(c.keyBytes(ss.tx)),
+        '749519c68059bce69f7cfcc7b387a3de1a1e8237d110991323bf62870115731a',
+      );
+      expect(
+        toHex(c.keyBytes(cs!.rx)),
+        '749519c68059bce69f7cfcc7b387a3de1a1e8237d110991323bf62870115731a',
+      );
+      expect(
+        toHex(c.keyBytes(cs.tx)),
+        '62c8f4fa81800abd0577d99918d129b65deb789af8c8351f391feb0cbf238604',
+      );
+    });
   });
 
   test('auth: libsodium test/default/auth.exp (HMAC-SHA-512-256)', () {
@@ -143,6 +145,65 @@ void main() {
     final padded = c.pad(data, 256);
     expect(padded.length, 256);
     expect(c.unpad(padded, 256), data);
+  });
+
+  test('kx: an all-zero (low-order) peer key gives null on both sides', () {
+    final kp = c.kxKeyPair();
+    final zero = Uint8List(32);
+    expect(
+      c.kxClientSessionKeys(
+        clientPublicKey: kp.publicKey,
+        clientSecretKey: kp.secretKey,
+        serverPublicKey: zero,
+      ),
+      isNull,
+    );
+    expect(
+      c.kxServerSessionKeys(
+        serverPublicKey: kp.publicKey,
+        serverSecretKey: kp.secretKey,
+        clientPublicKey: zero,
+      ),
+      isNull,
+    );
+  });
+
+  test('unpad on invalid padding gives null', () {
+    expect(c.unpad(Uint8List(256), 256), isNull);
+  });
+
+  test('macVerify with a short tag is false', () {
+    final key = c.keyFromBytes(Uint8List(32));
+    expect(
+      c.macVerify(key: key, message: Uint8List(1), tag: Uint8List(5)),
+      isFalse,
+    );
+  });
+
+  test('aeadDecrypt: wrong AD or too-short input gives null', () {
+    final key = c.keyFromBytes(Uint8List(32));
+    final sealed = c.aeadEncrypt(
+      key: key,
+      message: Uint8List.fromList([1, 2, 3]),
+      additionalData: Uint8List.fromList([9]),
+    );
+    expect(
+      c.aeadDecrypt(
+        key: key,
+        nonceAndCipher: sealed,
+        additionalData: Uint8List.fromList([8]),
+      ),
+      isNull,
+    );
+    expect(c.aeadDecrypt(key: key, nonceAndCipher: Uint8List(39)), isNull);
+  });
+
+  test('pwhash: 64 B and deterministic for the same input', () async {
+    final salt = Uint8List.fromList(utf8.encode('codecore-jam-c1!'));
+    final a = await c.pwhash(password: 'ABCD2345', salt: salt, outLen: 64);
+    final b = await c.pwhash(password: 'ABCD2345', salt: salt, outLen: 64);
+    expect(a.length, 64);
+    expect(c.keyBytes(a), c.keyBytes(b));
   });
 }
 
