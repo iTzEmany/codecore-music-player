@@ -5608,4 +5608,59 @@ class AppLocalizationsEn extends AppLocalizations {
   String coverSizePx(int w, int h) {
     return '$w × $h';
   }
+
+  @override
+  String get speakerPermTitle => 'Bluetooth permission';
+
+  @override
+  String get speakerPermBody =>
+      'To recognise your speaker, Codecore needs to see which Bluetooth devices are connected. It reads nothing else.';
+
+  @override
+  String get speakerPermAllow => 'Allow';
+
+  @override
+  String get speakerNotNow => 'Not now';
+
+  @override
+  String speakerAskTitle(String name) {
+    return 'Is $name a speaker?';
+  }
+
+  @override
+  String get speakerAskBody =>
+      'If it is, Codecore opens a Jam by itself when it connects, so others can join.';
+
+  @override
+  String get speakerYes => 'Yes';
+
+  @override
+  String get speakerNo => 'No';
+
+  @override
+  String get speakerJamSection => 'Speaker Jam';
+
+  @override
+  String get speakerJamHint =>
+      'When a Bluetooth speaker connects, Codecore opens a Jam by itself that others can join.';
+
+  @override
+  String get speakerNoDevices => 'No device marked yet';
+
+  @override
+  String get speakerIsSpeaker => 'Speaker';
+
+  @override
+  String get speakerNotSpeaker => 'Not a speaker';
+
+  @override
+  String get speakerPermDenied => 'Bluetooth permission denied';
+
+  @override
+  String get speakerPermRetry => 'Tap to ask again';
+
+  @override
+  String speakerChange(String name) {
+    return 'Change $name';
+  }
 }

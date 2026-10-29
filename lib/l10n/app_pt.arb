@@ -3282,5 +3282,35 @@
         "type": "int"
       }
     }
+  },
+  "speakerPermTitle": "Permissão de Bluetooth",
+  "speakerPermBody": "Para reconhecer a tua coluna, o Codecore precisa de ver que dispositivos Bluetooth estão ligados. Não lê mais nada.",
+  "speakerPermAllow": "Permitir",
+  "speakerNotNow": "Agora não",
+  "speakerAskTitle": "{name} é uma coluna?",
+  "@speakerAskTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "speakerAskBody": "Se for, ao ligar o Codecore abre sozinho uma Jam a que os outros se podem juntar.",
+  "speakerYes": "Sim",
+  "speakerNo": "Não",
+  "speakerJamSection": "Jam na coluna",
+  "speakerJamHint": "Quando uma coluna Bluetooth se liga, o Codecore abre sozinho uma Jam a que os outros se podem juntar.",
+  "speakerNoDevices": "Ainda não há dispositivos marcados",
+  "speakerIsSpeaker": "Coluna",
+  "speakerNotSpeaker": "Não é uma coluna",
+  "speakerPermDenied": "Permissão de Bluetooth recusada",
+  "speakerPermRetry": "Toca para pedir de novo",
+  "speakerChange": "Alterar {name}",
+  "@speakerChange": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   }
 }

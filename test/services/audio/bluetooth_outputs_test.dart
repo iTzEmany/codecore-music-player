@@ -46,6 +46,18 @@ void main() {
     expect(await bluetoothPermission(), isFalse);
   });
 
+  test('bluetoothOutputActive asks the exact method; error gives false', () async {
+    String? method;
+    mock((c) async {
+      method = c.method;
+      return true;
+    });
+    expect(await bluetoothOutputActive(), isTrue);
+    expect(method, 'bluetoothOutputActive');
+    mock((_) async => throw PlatformException(code: 'x'));
+    expect(await bluetoothOutputActive(), isFalse);
+  });
+
   test('non-Android never calls the channel', () async {
     debugDefaultTargetPlatformOverride = TargetPlatform.linux;
     var called = false;

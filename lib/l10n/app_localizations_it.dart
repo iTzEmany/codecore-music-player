@@ -5622,4 +5622,59 @@ class AppLocalizationsIt extends AppLocalizations {
   String coverSizePx(int w, int h) {
     return '$w × $h';
   }
+
+  @override
+  String get speakerPermTitle => 'Permesso Bluetooth';
+
+  @override
+  String get speakerPermBody =>
+      'Per riconoscere la tua cassa, Codecore deve vedere quali dispositivi Bluetooth sono collegati. Non legge altro.';
+
+  @override
+  String get speakerPermAllow => 'Consenti';
+
+  @override
+  String get speakerNotNow => 'Non ora';
+
+  @override
+  String speakerAskTitle(String name) {
+    return '$name è una cassa?';
+  }
+
+  @override
+  String get speakerAskBody =>
+      'Se lo è, quando si collega Codecore apre da solo una Jam a cui gli altri possono unirsi.';
+
+  @override
+  String get speakerYes => 'Sì';
+
+  @override
+  String get speakerNo => 'No';
+
+  @override
+  String get speakerJamSection => 'Jam sulla cassa';
+
+  @override
+  String get speakerJamHint =>
+      'Quando si collega una cassa Bluetooth, apre da solo una Jam a cui gli altri possono unirsi.';
+
+  @override
+  String get speakerNoDevices => 'Nessun dispositivo segnato finora';
+
+  @override
+  String get speakerIsSpeaker => 'Cassa';
+
+  @override
+  String get speakerNotSpeaker => 'Non è una cassa';
+
+  @override
+  String get speakerPermDenied => 'Permesso Bluetooth negato';
+
+  @override
+  String get speakerPermRetry => 'Tocca per chiederlo di nuovo';
+
+  @override
+  String speakerChange(String name) {
+    return 'Cambia $name';
+  }
 }

@@ -84,6 +84,9 @@ Future<bool> requestBluetoothPermission() => _bool('requestBluetoothPermission')
 
 Future<bool> bluetoothPermission() => _bool('bluetoothPermission');
 
+/// A Bluetooth A2DP output is active now (needs no permission).
+Future<bool> bluetoothOutputActive() => _bool('bluetoothOutputActive');
+
 Future<bool> _bool(String method) async {
   if (!_android) return false;
   try {

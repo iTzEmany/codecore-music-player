@@ -3601,5 +3601,35 @@
         "type": "int"
       }
     }
+  },
+  "speakerPermTitle": "Permesso Bluetooth",
+  "speakerPermBody": "Per riconoscere la tua cassa, Codecore deve vedere quali dispositivi Bluetooth sono collegati. Non legge altro.",
+  "speakerPermAllow": "Consenti",
+  "speakerNotNow": "Non ora",
+  "speakerAskTitle": "{name} è una cassa?",
+  "@speakerAskTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "speakerAskBody": "Se lo è, quando si collega Codecore apre da solo una Jam a cui gli altri possono unirsi.",
+  "speakerYes": "Sì",
+  "speakerNo": "No",
+  "speakerJamSection": "Jam sulla cassa",
+  "speakerJamHint": "Quando si collega una cassa Bluetooth, apre da solo una Jam a cui gli altri possono unirsi.",
+  "speakerNoDevices": "Nessun dispositivo segnato finora",
+  "speakerIsSpeaker": "Cassa",
+  "speakerNotSpeaker": "Non è una cassa",
+  "speakerPermDenied": "Permesso Bluetooth negato",
+  "speakerPermRetry": "Tocca per chiederlo di nuovo",
+  "speakerChange": "Cambia {name}",
+  "@speakerChange": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   }
 }

@@ -8892,6 +8892,102 @@ abstract class AppLocalizations {
   /// In it, this message translates to:
   /// **'{w} × {h}'**
   String coverSizePx(int w, int h);
+
+  /// No description provided for @speakerPermTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'Permesso Bluetooth'**
+  String get speakerPermTitle;
+
+  /// No description provided for @speakerPermBody.
+  ///
+  /// In it, this message translates to:
+  /// **'Per riconoscere la tua cassa, Codecore deve vedere quali dispositivi Bluetooth sono collegati. Non legge altro.'**
+  String get speakerPermBody;
+
+  /// No description provided for @speakerPermAllow.
+  ///
+  /// In it, this message translates to:
+  /// **'Consenti'**
+  String get speakerPermAllow;
+
+  /// No description provided for @speakerNotNow.
+  ///
+  /// In it, this message translates to:
+  /// **'Non ora'**
+  String get speakerNotNow;
+
+  /// No description provided for @speakerAskTitle.
+  ///
+  /// In it, this message translates to:
+  /// **'{name} è una cassa?'**
+  String speakerAskTitle(String name);
+
+  /// No description provided for @speakerAskBody.
+  ///
+  /// In it, this message translates to:
+  /// **'Se lo è, quando si collega Codecore apre da solo una Jam a cui gli altri possono unirsi.'**
+  String get speakerAskBody;
+
+  /// No description provided for @speakerYes.
+  ///
+  /// In it, this message translates to:
+  /// **'Sì'**
+  String get speakerYes;
+
+  /// No description provided for @speakerNo.
+  ///
+  /// In it, this message translates to:
+  /// **'No'**
+  String get speakerNo;
+
+  /// No description provided for @speakerJamSection.
+  ///
+  /// In it, this message translates to:
+  /// **'Jam sulla cassa'**
+  String get speakerJamSection;
+
+  /// No description provided for @speakerJamHint.
+  ///
+  /// In it, this message translates to:
+  /// **'Quando si collega una cassa Bluetooth, apre da solo una Jam a cui gli altri possono unirsi.'**
+  String get speakerJamHint;
+
+  /// No description provided for @speakerNoDevices.
+  ///
+  /// In it, this message translates to:
+  /// **'Nessun dispositivo segnato finora'**
+  String get speakerNoDevices;
+
+  /// No description provided for @speakerIsSpeaker.
+  ///
+  /// In it, this message translates to:
+  /// **'Cassa'**
+  String get speakerIsSpeaker;
+
+  /// No description provided for @speakerNotSpeaker.
+  ///
+  /// In it, this message translates to:
+  /// **'Non è una cassa'**
+  String get speakerNotSpeaker;
+
+  /// No description provided for @speakerPermDenied.
+  ///
+  /// In it, this message translates to:
+  /// **'Permesso Bluetooth negato'**
+  String get speakerPermDenied;
+
+  /// No description provided for @speakerPermRetry.
+  ///
+  /// In it, this message translates to:
+  /// **'Tocca per chiederlo di nuovo'**
+  String get speakerPermRetry;
+
+  /// No description provided for @speakerChange.
+  ///
+  /// In it, this message translates to:
+  /// **'Cambia {name}'**
+  String speakerChange(String name);
 }
 
 class _AppLocalizationsDelegate

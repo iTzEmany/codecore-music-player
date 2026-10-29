@@ -23,6 +23,8 @@ import '../screens/share/incoming_offer_dialog.dart';
 import '../../providers/jam_providers.dart';
 import '../../providers/share_hub.dart';
 import '../screens/jam/jam_request_dialog.dart';
+import '../screens/jam/speaker_sheets.dart';
+import '../../providers/speaker_providers.dart';
 import '../screens/search/search_screen.dart';
 import '../screens/home/home_screen.dart';
 import '../screens/releases/new_releases_screen.dart';
@@ -293,6 +295,11 @@ class AppShell extends ConsumerWidget {
         context: context,
         builder: (_) => JamRequestDialog(request: r),
       );
+    });
+    // Permission and «È una cassa?» (Android; the stream is silent elsewhere).
+    ref.listen(speakerPromptsProvider, (_, next) {
+      final p = next.value;
+      if (p != null) showSpeakerPrompt(context, p);
     });
   }
 }
