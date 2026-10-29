@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:codecore/data/settings/jam_secret_store.dart';
 import 'package:codecore/services/jam/jam_gate.dart';
@@ -90,6 +91,19 @@ void main() {
       expect(silent.status, JamRequestStatus.expired);
     });
 
+    test('a blocked id is rate-limited like anyone', () {
+      gate.block('x', 'X');
+      expect(h.admitRequest(body('x')).statusCode, 202);
+      expect(h.admitRequest(body('x')).statusCode, 202);
+      expect(h.admitRequest(body('x')).statusCode, 429);
+    });
+
+    test('clearSession drops end-of-Jam suspensions', () {
+      gate.suspend('a', 'A', null);
+      h.clearSession();
+      expect(gate.isMuted('a'), isFalse);
+    });
+
     test('third request in a minute from the same id is 429', () {
       for (var i = 0; i < 2; i++) {
         expect(h.admitRequest(body('a')).statusCode, 202);
@@ -97,5 +111,14 @@ void main() {
       }
       expect(h.admitRequest(body('a')).statusCode, 429);
     });
+  });
+
+  test('file store round trip, own file', () async {
+    final dir = await Directory.systemTemp.createTemp('jamsecrets');
+    addTearDown(() => dir.delete(recursive: true));
+    await FileJamSecretStore(dir.path).write('k', 'v');
+    expect(await FileJamSecretStore(dir.path).read('k'), 'v');
+    expect(File('${dir.path}/jam_secrets.json').existsSync(), isTrue);
+    expect(File('${dir.path}/shared_preferences.json').existsSync(), isFalse);
   });
 }

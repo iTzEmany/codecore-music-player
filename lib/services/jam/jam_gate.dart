@@ -47,8 +47,9 @@ class JamGate extends ChangeNotifier {
 
   /// Sliding window of [perMinute] per id; records the attempt when allowed.
   bool allow(String id) {
-    final times = _recent.putIfAbsent(id, () => []);
     final cutoff = _now().subtract(const Duration(minutes: 1));
+    _recent.removeWhere((_, t) => t.isEmpty || !t.last.isAfter(cutoff));
+    final times = _recent.putIfAbsent(id, () => []);
     times.removeWhere((t) => !t.isAfter(cutoff));
     if (times.length >= perMinute) return false;
     times.add(_now());
@@ -86,7 +87,8 @@ class JamGate extends ChangeNotifier {
     final n = _now();
     final before = _suspended.length;
     _suspended.removeWhere((_, e) => e.when != null && e.when!.isBefore(n));
-    if (_suspended.length != before) _changed();
+    // Getters call this: save only, never notify.
+    if (_suspended.length != before) _save(jamSuspendedKey, _suspended, 'until');
   }
 
   void _changed() {

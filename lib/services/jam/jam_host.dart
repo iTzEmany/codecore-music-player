@@ -142,6 +142,9 @@ class JamHost {
         r.status = JamRequestStatus.expired;
       }
     }
+    // Silent ones stay answerable for a while (like the others), then go.
+    requests.removeWhere((_, r) =>
+        r.silent && r.receivedAt.isBefore(limit.subtract(jamRequestTtl)));
   }
 
   // ---- host API ------------------------------------------------------------
@@ -300,7 +303,6 @@ class JamHost {
 
   /// Marks the session ended; guests see `ended` on their next poll.
   void endSession() {
-    gate?.clearEndOfJam();
     if (_state != null && !_state!.ended) apply(const JamCommand.end());
   }
 
@@ -310,6 +312,7 @@ class JamHost {
     _sid = null;
     _fileToken = null;
     _members.clear();
+    gate?.clearEndOfJam();
     _notify();
   }
 
@@ -390,19 +393,19 @@ class JamHost {
         token.length > 64) {
       return Response(400, body: 'bad request');
     }
-    final silent = gate?.isMuted(fromId) ?? false;
-    if (!silent) {
-      if (hosting && _members.length + 1 >= maxParticipants) {
-        return Response(409, body: 'full');
-      }
-      if (requests.values
-          .any((q) => q.status == JamRequestStatus.pending && !q.silent)) {
-        return Response(409, body: 'busy');
-      }
-      if (gate != null && !gate!.allow(fromId)) {
-        return Response(429, body: 'too many requests');
-      }
+    expire();
+    // Muted senders go through the same checks as everybody else.
+    if (hosting && _members.length + 1 >= maxParticipants) {
+      return Response(409, body: 'full');
     }
+    if (requests.values
+        .any((q) => q.status == JamRequestStatus.pending && !q.silent)) {
+      return Response(409, body: 'busy');
+    }
+    if (gate != null && !gate!.allow(fromId)) {
+      return Response(429, body: 'too many requests');
+    }
+    final silent = gate?.isMuted(fromId) ?? false;
     final req = JamRequest(
       id: newToken(),
       fromId: fromId,

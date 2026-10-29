@@ -1,4 +1,10 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:path/path.dart' as p;
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../core/app_log.dart';
 
 const jamBlockedKey = 'jamBlocked';
 const jamSuspendedKey = 'jamSuspended';
@@ -19,6 +25,42 @@ class PrefsJamSecretStore implements JamSecretStore {
 
   @override
   Future<void> write(String key, String value) => _prefs.setString(key, value);
+}
+
+/// Desktop: SharedPreferencesAsync shares `shared_preferences.json` with the
+/// legacy settings and the two caches overwrite each other (D-269).
+class FileJamSecretStore implements JamSecretStore {
+  FileJamSecretStore(this.dir);
+  final String dir;
+  Map<String, String>? _cache;
+
+  File get _file => File(p.join(dir, 'jam_secrets.json'));
+
+  Future<Map<String, String>> _load() async {
+    if (_cache != null) return _cache!;
+    try {
+      if (await _file.exists()) {
+        final m = jsonDecode(await _file.readAsString()) as Map;
+        return _cache = {for (final e in m.entries) '${e.key}': '${e.value}'};
+      }
+    } on Object catch (e, st) {
+      AppLog.w('jam secrets: unreadable file, starting empty', e, st);
+    }
+    return _cache = {};
+  }
+
+  @override
+  Future<String?> read(String key) async => (await _load())[key];
+
+  @override
+  Future<void> write(String key, String value) async {
+    final m = await _load();
+    m[key] = value;
+    final tmp = File('${_file.path}.tmp');
+    await tmp.parent.create(recursive: true);
+    await tmp.writeAsString(jsonEncode(m), flush: true);
+    await tmp.rename(_file.path);
+  }
 }
 
 class MemoryJamSecretStore implements JamSecretStore {
