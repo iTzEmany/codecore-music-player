@@ -16,9 +16,12 @@ class BluetoothOutput {
 }
 
 class BluetoothSnapshot {
-  const BluetoothSnapshot({this.permission = false, this.outputs = const []});
+  const BluetoothSnapshot({this.permission = false, this.outputs = const [], this.ok = true});
   final bool permission;
   final List<BluetoothOutput> outputs;
+
+  /// False when the read itself failed (timeout, error): the list says nothing.
+  final bool ok;
 
   static const empty = BluetoothSnapshot();
 
@@ -41,7 +44,7 @@ class BluetoothSnapshot {
         ));
       }
     }
-    return BluetoothSnapshot(permission: raw['permission'] == true, outputs: outputs);
+    return BluetoothSnapshot(permission: raw['permission'] == true, outputs: outputs, ok: raw['ok'] != false);
   }
 }
 
@@ -76,7 +79,7 @@ Future<BluetoothSnapshot> fetchBluetoothOutputs() async {
     return BluetoothSnapshot.parse(await _channel.invokeMethod<Object>('bluetoothOutputs'));
   } catch (e, st) {
     AppLog.w('bluetooth outputs unavailable', e, st);
-    return BluetoothSnapshot.empty;
+    return const BluetoothSnapshot(ok: false);
   }
 }
 

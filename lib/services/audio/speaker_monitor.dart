@@ -50,6 +50,7 @@ class SpeakerMonitor {
     Stream<void>? seen,
     Future<bool> Function()? request,
     Future<bool> Function()? active,
+    this.retryDelay = const Duration(seconds: 2),
   })  : _open = prefs ?? SharedPreferences.getInstance,
         _fetch = fetch ?? fetchBluetoothOutputs,
         _changed = changed ?? bluetoothChanged,
@@ -67,6 +68,9 @@ class SpeakerMonitor {
   final Stream<void> _seen;
   final Future<bool> Function() _request;
   final Future<bool> Function() _active;
+  /// Wait before the single retry of a failed read.
+  final Duration retryDelay;
+  Timer? _retry;
 
   SharedPreferences? _prefs;
   final _answers = <String, SpeakerAnswer>{};
@@ -135,6 +139,7 @@ class SpeakerMonitor {
 
   void dispose() {
     _disposed = true;
+    _retry?.cancel();
     for (final s in _subs) {
       s.cancel();
     }
@@ -156,10 +161,25 @@ class SpeakerMonitor {
     if (!_answers.containsKey(address)) _dismissed.add(address);
   }
 
-  Future<void> _read() async {
+  var _readGen = 0;
+  var _appliedGen = 0;
+
+  Future<void> _read({bool retry = true}) async {
+    final gen = ++_readGen;
     final snap = await _fetch();
-    if (_disposed) return;
-    _snapshot = snap;
+    // Only a result older than one already applied is stale.
+    if (_disposed || gen < _appliedGen) return;
+    if (snap.ok) {
+      _appliedGen = gen;
+      _snapshot = snap;
+    } else {
+      // A failed read says nothing: keep the last outputs, try once more soon.
+      AppLog.w('speaker: outputs read failed, keeping the last state');
+      if (retry) {
+        _retry?.cancel();
+        _retry = Timer(retryDelay, () => _read(retry: false));
+      }
+    }
     final linked = {for (final o in _snapshot.outputs) o.address};
     _prompted.retainAll(linked); // gone and back: ask again if still unanswered
     final now = _snapshot.outputs.any(

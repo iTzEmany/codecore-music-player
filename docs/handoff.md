@@ -1,54 +1,66 @@
-# Handoff — 2026-10-28 (fase 65 «Rilievi della Jam», PR #59)
+# Handoff — 2026-10-29 (fasi 66–68 «Jam: cassa e coda insieme»)
 
 ## Prima di tutto (per la prossima chat)
-Kickoff della feature «Jam: cassa e coda insieme» fatto il 28/10 (`docs/feature-jam-cassa.md`, R-88…R-119, D-177…D-220). Fasi 65–68 in `docs/PROGRESS.md`. La 65 è nella PR #59 (rilievi chiusi tranne R-91, vedi sotto); si prosegue con `/obiettivo fase 66`.
+La feature «Jam: cassa e coda insieme» (`docs/feature-jam-cassa.md`) è nel codice: 66 (#61), 67 (#62), 68 (questa PR). Resta solo la prova a mano 68.3 con il Motorola e le JBL, più le voci di «Tocca a te». Le decisioni della notte sono D-222…D-227 in `docs/decisioni.md`.
 
 ## Stato
-- **57** (#45, #46): URL da NewPipeExtractor su Android (D-164, D-173 desugaring per API < 33), vietati ai minori → traccia di YouTube Music, `UrlSession`, brano dopo dall'URL anticipato, gapless e crossfade da URL verso file; crossfade senza esaurire l'Equalizer sul Mi A3.
-- **58** (#47) test di caratterizzazione e «Prima» del refactor · **59** (#48) player e seek, scheda del testo stabile · **60** (#49) Ricerca con la barra sopra il dock · **61** (#50) ⋮ sempre a foglio (`showCcActionSheet`) · **62** (#51) Home «aggiunti da poco» che scorre · **63** (#52) la Jam usa la schermata del player · **64** chiusura: misure, metriche, prova a mano, «Risultati» in `docs/refactor/ui-jam-ricerca/analisi.md`.
-- Misure finali sul Mi A3 (`docs/refactor/ui-jam-ricerca/misure.md`, «Dopo»): tutti gli scenari in soglia tranne Ricerca «notte», build p99 21,3 ms contro 16 (D-176, −38 % rispetto a Prima). Pallino schede: la prova A/B dà 0,6 % su master contro 1,8–5,1 % sul codice di prima; i 4–5 % delle prime run erano rumore del telefono.
-- Prova a mano 64.3 su Linux e Mi A3 fatta; corretti Esc sui fogli dentro una scheda, Esc sul ventaglio aperto col mouse, un solo foglio alla volta su desktop largo, Back col ventaglio aperto.
+- **66** «Coda insieme»: modalità della coda, turni fra i partecipanti, l'host continua da solo quando esce l'unico ospite (R-91, D-221).
+- **67** «Jam della cassa»: uscite Bluetooth dal nativo, «È una cassa?» con la stima dalla classe (D-212), interruttore «Jam sulla cassa», Jam «in attesa» con il solo annuncio (D-226), «Collega una cassa» e fine dopo 10 minuti, offerta della cassa dell'ospite (R-119). 67.1 e 67.2 sono `[~]`: manca la prova sul Motorola.
+- **68**:
+  - il broadcast della scoperta usa il prefisso vero (R-117). Android lo legge da `NetworkInterface`, che vede anche l'hotspot (D-227); Linux da `ip`; Windows ripiega su a.b.c.255 e a.b.255.255;
+  - una lettura fallita delle uscite Bluetooth non è più una cassa sparita;
+  - misure sul Mi A3 in `docs/refactor/ui-jam-ricerca/misure.md` §Fase 68.
 
 ## Tocca a te
-- **Fatto il 28/10 pomeriggio** (#54, #55): sul Motorola c'è la build di `master` badd8bb; 57.4 RNF-08 raggiunto (mediana 4,3 s, n = 5; il gap al cambio non misurato); 64.3 parte Motorola quasi tutta; 63.5 Jam sull'hotspot del Motorola fatta (su UniBA i telefoni non si vedono). 63.5 e 64.3 restano aperte per i rilievi della Jam.
-- **Volume del Motorola**: lasciato a 6, era 7 (da adb si muove solo coi tasti, di 2 in 2).
-- **Da indagare**: il brano `NmeJbI1l2YA` ha avuto l'URL di NewPipe in 1,8 s ma ha suonato dalla cache a 19,3 s (visto una volta).
-- **57.7 ascolto**: crossfade e gapless fra brani online in coda; vietato ai minori → suona la traccia di YouTube Music; hotspot lento → niente buffering nei primi 10 s. Sul Mi A3 senti se il crossfade è brusco.
-- **APK di release con NewPipe**: mai provato a runtime (Rhino senza `jdk.dynalink`); nel log cerca `stream url source=newpipe ... used=1`.
-- **Fase 59, seek a mano**: trascina l'anello e intanto passa a una radio, poi rilascia; chiudi il player a drag aperto; rilascia a 0,5× e sulla radio.
-- **Da sapere**:
-  - il timer di spegnimento segna come scelta solo «A fine brano» (lo stato non conserva i minuti);
-  - un tocco fuori dal ventaglio aperto lo chiude e apre anche ciò che c'è sotto (comportamento di `TapRegion`, lasciato così);
-  - ✕ di Ricerca chiude la tastiera per D-155.
-- Tag `v1.3.0` ancora non pubblicato (D-92): `git push origin v1.3.0`.
+- **68.3** (Motorola host con le JBL segnate come cassa, Mi A3 ospite, hotspot del Motorola): checklist in `docs/fase-68-scoperta-e-chiusura-jam.md` §68.3, esiti scritti lì, uno per riga.
+  - Prima: `flutter build apk --debug` e `adb -s ZY22HKD85K install -r build/app/outputs/flutter-apk/app-debug.apk`.
+  - Log utili: `adb -s ZY22HKD85K logcat | grep -iE 'speaker|jam|a2dp'`.
+- **Fase 67 sul Motorola**: evento A2DP collegando le JBL; permesso rifiutato e poi riattivato; «È una cassa?» (D-223).
+- **Scoperta su /16** (UniBA): i due telefoni sulla rete dell'università devono vedersi e la Jam partire (R-117).
+- **Fase 66 a mano**:
+  - Mi A3: in «Coda insieme» la maniglia sparisce e torna in «Coda dell'host»;
+  - Linux ospite su schermo vero: «Coda dell'host»/«Coda insieme» non cambia la modalità;
+  - l'ospite esce con un brano online non suonato e l'host lo prepara da sé (R-91).
+- **Mi A3 + Linux abbinati**: Jam normale senza «Collega una cassa» né banner.
+- **Mi A3, pulizia e controlli**:
+  - 6 file di prova in `/sdcard/Music/CodecoreTest/Scheggia66`: toglili se vuoi;
+  - controlla che il bordo verde di sistema visto a fine scheggia 67 sia sparito;
+  - l'app `com.codecore.player.perf` è ancora installata.
+- **Da decidere**: l'ospite che esce di sua volontà vede «La Jam è terminata» anche se la Jam continua sull'host.
+- **`docs/prossimi-lavori.md`** (non tracciato): segna a mano come fatto il §2 «Cassa Bluetooth e modalità della coda».
+- Dal handoff precedente:
+  - ascolto 57.7;
+  - APK di release con NewPipe mai provato a runtime;
+  - seek a mano della fase 59;
+  - tag `v1.3.0` da pubblicare (`git push origin v1.3.0`).
 
 ## Dispositivi
 - **Motorola edge 40** `ZY22HKD85K`: libreria vera. Solo `install -r`; mai disinstallare né `pm clear`. 120 Hz.
-- **Mi A3** `0d7ae9df206e`: si disinstalla solo con `-k`; mai cancellare i file musicali. Misure con `com.codecore.player.perf`. Volume musica originale 0. A schermo spento si blocca col PIN: non spegnerlo durante le misure.
-- Su entrambi: mai toccare rotazione o impostazioni di sistema; «Non disturbare» (`cmd notification set_dnd priority|off`) solo durante le misure.
-- Misure: `python3 scripts/perf_device.py <id> --label <l> [--no-build --no-push --apk <apk>] [--only "A,B"]`. Per confrontare due commit: un worktree per commit, due APK `--profile` con `CODECORE_PERF=1`, run alternati A,B,A,B con `--only`.
+- **Mi A3** `0d7ae9df206e`:
+  - si disinstalla solo con `-k`; mai cancellare i file musicali;
+  - le misure vanno sull'app `com.codecore.player.perf`;
+  - volume della musica a 0;
+  - a schermo spento si blocca col PIN.
+- **JBL**: si spengono da sole dopo circa 20 minuti senza suono.
+- Su entrambi i telefoni: mai toccare la rotazione o le impostazioni di sistema.
+- **Misure**: `python3 scripts/perf_device.py <id> --label <l> [--no-build --no-push --apk <apk>] [--only "A,B"]`. Per un A/B: un worktree per commit e run alternati A, B, A, B.
+- **APK**: si compila con `JAVA_HOME=~/.jdks/jbr-17.0.14` (`docs/gotchas.md`).
 
-## Jam: rilievi (fase 65, prova sui telefoni del 28/10)
-1. Ruoli e uscita dell'ospite: chiuso per R-90 (coda di prima, in pausa, stesso punto). **R-91 nella fase 66.6**: con un solo ospite la sua uscita chiude la Jam e i suoi brani online si perdono; deciso che l'host continua da solo con la coda della Jam (D-221).
-2. Aggiunte dell'ospite in fila dopo il corrente: chiuso (65.1, R-88).
-3. Swipe «in coda» online dell'ospite: chiuso, funziona sui telefoni (65.2).
-4. «Scarica» nel ⋮ a foglio aperto: chiuso (65.5, R-93).
-5. Copertine dell'ospite, scarto di ~2 s e «precedente» da 0:22: chiusi (65.4, 65.7 con orologi a 2,2 s di distanza ora compensati, 65.6). «Rimuovi» dell'ospite è voluto (D-195).
-Nuovi, rimandati: la posizione mostrata salta indietro di ~1,3 s a ogni avvio di brano (`jam ui: shown position moved`); sul Motorola la scoperta è rimasta vuota finché l'app non è stata riavviata (fase 68.1).
-
-## Rinviato (dal handoff precedente, ancora aperto)
-- 53.10 completamento intero sul Motorola (in pausa a 421/2317, ~10 h).
-- Messaggio «perché niente Shuffle+» (D-87) su un album da 1 brano.
-- Interruttori del completamento che fermano il giro manuale.
+## Rinviato
+- **Due code per le domande sulla cassa** (`SpeakerMonitor._pending` e la coda della UI): da unificare.
+- La posizione mostrata nella Jam salta indietro di circa 1,3 s a ogni avvio di brano (`jam ui: shown position moved`).
+- 53.10 completamento intero sul Motorola (fermo a 421/2317).
+- Il messaggio «perché niente Shuffle+» (D-87) su un album da 1 brano.
+- Gli interruttori del completamento che fermano il giro manuale.
+- Il debito dello streaming, in fondo a `docs/fase-47-jam-online.md`.
 
 ## Prompt di avvio della prossima sessione
 ```
-/obiettivo fase 66
+Leggi docs/handoff.md. Ho fatto la prova 68.3: gli esiti sono in docs/fase-68-scoperta-e-chiusura-jam.md §68.3. Trasforma i KO in una fase di rilievi e lanciala con /obiettivo.
 ```
 
 ## Prossimi obiettivi
-1. **(Consigliato) Fasi 66–68, feature «Jam: cassa e coda insieme»** (`docs/feature-jam-cassa.md`): «Coda insieme», Jam della cassa, scoperta e chiusura. Prova finale (68.3) con i due telefoni sull'hotspot e le cuffie JBL segnate come cassa.
-2. **Prove d'ascolto 57.7** e APK di release con NewPipe (vedi «Tocca a te»).
-3. **Ricerca «notte» build p99** (D-176): l'ultimo scenario fuori soglia; misurare con `--only "Ricerca «notte»"` prima e dopo.
-4. **Scoperta dei dispositivi su reti non /24** (ora nella fase 68.1, D-206) (visto su UniBA, /16, il 28/10: i telefoni non si vedono e la Jam non parte; sull'hotspot sì). `LanDiscovery._targets` in `lib/services/share/discovery.dart` manda il broadcast diretto a `a.b.c.255` supponendo una /24. Dart non dà la maschera: leggerla dal lato nativo (Android `LinkProperties`, Linux/Windows dal sistema) o provare anche `a.b.255.255`. Reti che filtrano ogni broadcast restano escluse: lì serve il collegamento manuale per la Jam.
-5. **Debito dello streaming** (in fondo a `docs/fase-47-jam-online.md`): tre meccanismi «online → libreria», `DownloadsNotifier` grande, `discovery: socket error` ogni 2 s senza rete.
+1. **(Consigliato) Esiti della 68.3**: rilievi della prova con la cassa vera, poi 67.1, 67.2 e 68.3 da `[~]` a `[x]`.
+2. **Unificare le due code delle domande sulla cassa**: un solo punto che decide cosa mostrare. Oggi la coda del monitor e quella della UI possono mostrarne due di fila.
+3. **Ricerca «notte», build p99** (D-176): l'ultimo scenario fuori soglia. Misura con `--only "Ricerca «notte»"` prima e dopo.
+4. **Prove d'ascolto 57.7** e APK di release con NewPipe.
