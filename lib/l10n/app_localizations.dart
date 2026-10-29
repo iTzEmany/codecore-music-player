@@ -9013,6 +9013,12 @@ abstract class AppLocalizations {
   /// **'La Jam è piena'**
   String get jamFull;
 
+  /// No description provided for @jamAddFailed.
+  ///
+  /// In it, this message translates to:
+  /// **'Non aggiunto alla Jam'**
+  String get jamAddFailed;
+
   /// No description provided for @jamLeft.
   ///
   /// In it, this message translates to:

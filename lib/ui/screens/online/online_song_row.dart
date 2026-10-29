@@ -17,6 +17,7 @@ import '../../widgets/format_utils.dart';
 import '../../widgets/net_thumbnail.dart';
 import '../../widgets/track_row_selection.dart';
 import 'online_selection_scope.dart';
+import '../../../services/jam/jam_models.dart' show jamFullResult;
 import '../../widgets/show_msg.dart';
 
 /// Starts a download for each of [picked] (in this order) that is not already
@@ -65,13 +66,15 @@ void tapOnline(BuildContext context, WidgetRef ref, YtResult r) {
 
 /// Swipe or «In coda» on an online row; says so only when it worked.
 Future<void> queueOnline(BuildContext context, WidgetRef ref, YtResult r) async {
+  final ctrl = ref.read(playerControllerProvider);
+  final full = ctrl.jamQueueFull;
   try {
-    await ref.read(playerControllerProvider).enqueueOnline(r);
+    await ctrl.enqueueOnline(r);
   } on Object catch (e, st) {
     AppLog.w('enqueue online failed for ${r.indexKey}', e, st);
     return;
   }
-  if (context.mounted) showMsg(context, context.l10n.addedToQueue);
+  if (context.mounted) showQueued(context, full ? jamFullResult : null);
 }
 
 /// A song of an artist page, an album or a long list: the row, with its

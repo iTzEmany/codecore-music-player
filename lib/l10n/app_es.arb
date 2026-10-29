@@ -3080,6 +3080,7 @@
   "jamInviteDismiss": "Ocultar",
   "speakerAwayNotice": "Conecta un altavoz",
   "jamFull": "La Jam está llena",
+  "jamAddFailed": "No añadido a la Jam",
   "jamLeft": "Has salido de la Jam",
   "speakerContinueOnPhone": "Seguir en el teléfono",
   "speakerContinueOnPhoneLabel": "Seguir en el teléfono: la Jam suena por el altavoz de este teléfono, sin la caja",

@@ -5701,6 +5701,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get jamFull => 'A Jam está cheia';
 
   @override
+  String get jamAddFailed => 'Não adicionado à Jam';
+
+  @override
   String get jamLeft => 'Saiu da Jam';
 
   @override

@@ -16,6 +16,7 @@ import '../services/audio/playback_persistence.dart';
 import '../services/online/youtube_service.dart';
 import 'youtube_providers.dart' show downloadIndexProvider;
 import 'database_providers.dart';
+import '../services/jam/jam_models.dart' show JamAddResult;
 import 'jam_providers.dart' show jamProvider;
 import 'queue_tracks.dart';
 import 'settings_providers.dart';
@@ -74,6 +75,7 @@ class PlayerController {
     this.libraryIdOf,
     this.jamActive,
     this.addToJam,
+    this.jamQueueFullNow,
     this.addOnlineToJam,
     this.plusBlock,
     Random? random,
@@ -92,7 +94,11 @@ class PlayerController {
   /// to [addToJam], online results to [addOnlineToJam] (true = accepted).
   final bool Function()? jamActive;
   /// Returns how many of the ids got in (a full Jam refuses).
-  final Future<int> Function(List<int>)? addToJam;
+  final Future<JamAddResult> Function(List<int>)? addToJam;
+
+  /// The shared queue refuses every add now (online adds cannot tell later).
+  final bool Function()? jamQueueFullNow;
+  bool get jamQueueFull => inJam && (jamQueueFullNow?.call() ?? false);
   final bool Function(YtResult)? addOnlineToJam;
 
   /// Why Shuffle+ is out of the cycle for [ids] (the list the button plays) or,
@@ -169,13 +175,13 @@ class PlayerController {
   void restoreQueue(QueueState state) => _handler.restoreQueue(state);
 
   /// Null outside a Jam; in one, how many tracks the shared queue took (0 or 1).
-  Future<int?> playNext(int trackId) async {
+  Future<JamAddResult?> playNext(int trackId) async {
     if (inJam) return addToJam?.call([trackId]);
     _handler.playNext(trackId);
     return null;
   }
 
-  Future<int?> addToQueue(int trackId) async {
+  Future<JamAddResult?> addToQueue(int trackId) async {
     if (inJam) return addToJam?.call([trackId]);
     _handler.addToQueue(trackId);
     return null;
@@ -361,6 +367,7 @@ final playerControllerProvider = Provider<PlayerController>(
         .update((c) => c.copyWith(shufflePlus: on)),
     jamActive: () => ref.read(jamProvider).active,
     addToJam: ref.read(jamProvider.notifier).addLibraryIds,
+    jamQueueFullNow: () => ref.read(jamProvider.notifier).queueFull,
     addOnlineToJam: (r) => ref.read(jamProvider.notifier).addOnline(r),
     plusBlock: (ids) => plusAllowedNow(ref, ids: ids),
     libraryIdOf: (r) async {

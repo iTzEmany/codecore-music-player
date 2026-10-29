@@ -36,6 +36,9 @@ class _Ctrl implements PlayerController {
   Future<void> enqueueOnline(YtResult r) async => calls.add('enqueue ${r.id}');
 
   @override
+  bool get jamQueueFull => false;
+
+  @override
   dynamic noSuchMethod(Invocation invocation) => null;
 }
 

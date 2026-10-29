@@ -45,12 +45,13 @@ void main() {
   late CodecoreAudioHandler handler;
   late FakeBackend backend;
   late List<int> ids;
+  late AppDatabase db;
 
   setUp(() async {
     _host.clearSession();
     SharedPreferences.setMockInitialValues({});
     final store = SettingsStore(await SharedPreferences.getInstance());
-    final db = AppDatabase(NativeDatabase.memory());
+    db = AppDatabase(NativeDatabase.memory());
     addTearDown(db.close);
     backend = FakeBackend();
     handler = CodecoreAudioHandler(
@@ -124,6 +125,7 @@ void main() {
     await jam.openSpeakerJam();
     await jam.send(const JamCommand.speakerAway());
     expect(await jam.continueOnPhone(), isNull);
+    expect(c.read(shareHubProvider.notifier).speakerJamName, isNull);
     expect(_host.state!.speaker, isFalse);
     await jam.openSpeakerJam();
     expect(_host.state!.speaker, isFalse);
@@ -185,5 +187,74 @@ void main() {
     await jam.acceptRequest(req());
     final titles = [for (final i in c.read(jamProvider).jam!.items) i.title];
     expect(titles, ['Song 2', 'Song 3', 'Song 0', 'Song 1']);
+  });
+
+  Future<List<int>> manyTracks(int n) async => [
+        for (var i = 0; i < n; i++)
+          await db.into(db.tracks).insert(TracksCompanion.insert(
+                path: '/m/many$i.mp3',
+                title: 'Many $i',
+                albumKey: 'k',
+                format: 'mp3',
+                sizeBytes: 1,
+                mtimeMs: 1,
+                addedAt: 100 + i,
+              )),
+      ];
+
+  test('«Continua sul telefono», the end, a new Jam: the speaker opens it again', () async {
+    final jam = c.read(jamProvider.notifier);
+    _host.open();
+    await jam.debugBegin(JamRole.host, _host.state!);
+    await jam.openSpeakerJam();
+    await jam.send(const JamCommand.speakerAway());
+    await jam.continueOnPhone();
+    await jam.end();
+    jam.reset();
+    _host.open();
+    await jam.debugBegin(JamRole.host, _host.state!);
+    await jam.openSpeakerJam();
+    expect(_host.state!.speaker, isTrue);
+  });
+
+  test('a full «Coda insieme» with the first track playing refuses and says so', () async {
+    final jam = c.read(jamProvider.notifier);
+    _host.open();
+    await jam.debugBegin(JamRole.host, _host.state!);
+    await jam.send(const JamCommand.setMode(JamMode.together));
+    for (var i = 0; i < maxJamItems; i++) {
+      await jam.send(JamCommand.add(JamItem(id: 0, ownerDeviceId: 'me', title: 't$i', ext: 'mp3')));
+    }
+    await Future<void>.delayed(Duration.zero);
+    expect(jam.queueFull, isTrue);
+    final tracks = await c.read(trackRepositoryProvider).getByIds(ids);
+    expect(await jam.addTracks(tracks), (added: 0, full: true));
+  });
+
+  test('a guest that leaves is marked as left; a host that ends is not', () async {
+    final jam = c.read(jamProvider.notifier);
+    await jam.debugBegin(JamRole.guest, const JamState(version: 1, hostDeviceId: 'h', outputDeviceId: 'h'));
+    await jam.end();
+    expect(c.read(jamProvider).left, isTrue);
+    jam.reset();
+    _host.open();
+    await jam.debugBegin(JamRole.host, _host.state!);
+    await jam.end();
+    expect(c.read(jamProvider).phase, JamPhase.ended);
+    expect(c.read(jamProvider).left, isFalse);
+  });
+
+  test('a 300-track seed in «Coda insieme» puts 180 in the Jam, the rest stays in the part', () async {
+    final many = await manyTracks(300);
+    await handler.playQueue(many, 0);
+    _host.open();
+    _host.apply(const JamCommand.setMode(JamMode.together));
+    final jam = c.read(jamProvider.notifier);
+    await jam.openSpeakerJam();
+    _host.requests['r3'] = JamRequest(
+        id: 'r3', fromId: 'g3', fromName: 'Phone', fromHost: '192.168.1.6', fromPort: 4000, token: 't', receivedAt: DateTime.now());
+    await jam.acceptRequest(_host.requests['r3']!);
+    expect(_host.state!.items.length, maxJamItems - jamManualSeats);
+    await jam.end(); // stops the feeder before the container goes
   });
 }

@@ -3080,6 +3080,7 @@
   "jamInviteDismiss": "Ausblenden",
   "speakerAwayNotice": "Lautsprecher verbinden",
   "jamFull": "Die Jam ist voll",
+  "jamAddFailed": "Nicht zur Jam hinzugefügt",
   "jamLeft": "Du hast die Jam verlassen",
   "speakerContinueOnPhone": "Auf dem Handy weiter",
   "speakerContinueOnPhoneLabel": "Auf dem Handy weiter: Die Jam spielt über den Lautsprecher dieses Handys, ohne Box",

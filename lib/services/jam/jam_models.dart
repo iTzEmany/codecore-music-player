@@ -536,5 +536,10 @@ class JamResult {
 }
 
 /// The automatic fill stops here: from the current track on, only [jamManualSeats] seats are left (D-264).
-bool jamAutoFillFull(JamState s) =>
-    s.items.length - (s.currentIndex < 0 ? 0 : s.currentIndex) >= maxJamItems - jamManualSeats;
+/// [inFlight]: adds sent but not yet in [s].
+bool jamAutoFillFull(JamState s, {int inFlight = 0}) =>
+    s.items.length + inFlight - (s.currentIndex < 0 ? 0 : s.currentIndex) >= maxJamItems - jamManualSeats;
+
+/// What an add to the shared queue did: how many got in, and whether a full queue refused one (D-194).
+typedef JamAddResult = ({int added, bool full});
+const JamAddResult jamFullResult = (added: 0, full: true);

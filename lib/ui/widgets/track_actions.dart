@@ -50,6 +50,7 @@ import 'delete_tracks.dart';
 import 'favorite_actions.dart';
 import 'format_utils.dart';
 import 'quality_tag.dart';
+import '../../services/jam/jam_models.dart' show jamFullResult;
 import 'show_msg.dart';
 
 /// One entry of the track menu.
@@ -555,14 +556,16 @@ List<TrackAction> onlineResultActions(
   final ctrl = ref.read(playerControllerProvider);
   return [
     TrackAction(Icons.playlist_play_rounded, l.playNext, () async {
+      final full = ctrl.jamQueueFull;
       await ctrl.playOnlineNext(r);
       if (outer.mounted) {
-        showMsg(outer, ctrl.inJam ? l.addedToQueue : l.playNextDone);
+        showQueued(outer, full ? jamFullResult : null, ok: ctrl.inJam ? l.addedToQueue : l.playNextDone);
       }
     }),
     TrackAction(Icons.queue_rounded, l.addToQueue, () async {
+      final full = ctrl.jamQueueFull;
       await ctrl.enqueueOnline(r);
-      if (outer.mounted) showMsg(outer, l.addedToQueue);
+      if (outer.mounted) showQueued(outer, full ? jamFullResult : null);
     }),
     TrackAction(Icons.playlist_add_rounded, l.addToPlaylist, () async {
       final picked = await pickPlaylist(outer, ref);

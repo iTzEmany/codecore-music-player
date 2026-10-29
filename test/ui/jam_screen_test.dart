@@ -32,9 +32,9 @@ class _FakeJam extends JamController {
   JamUiState build() => initial;
 
   @override
-  Future<int> addTracks(List<Track> tracks, {bool inherited = false}) async {
+  Future<JamAddResult> addTracks(List<Track> tracks, {bool inherited = false}) async {
     addedTracks.addAll(tracks.map((t) => t.id));
-    return tracks.length;
+    return (added: tracks.length, full: false);
   }
 
   @override
@@ -42,6 +42,9 @@ class _FakeJam extends JamController {
     addedOnline.add(r.id);
     return true;
   }
+
+  @override
+  bool get queueFull => false;
 
   int ended = 0;
 
@@ -589,7 +592,13 @@ void main() {
     });
   }
 
-  for (final (added, text) in [(0, 'La Jam è piena'), (3, 'Aggiunti alla Jam: 3'), (null, 'Aggiunto in coda')]) {
+  const JamAddResult? none = null;
+  for (final (added, text) in [
+    ((added: 0, full: true), 'La Jam è piena'),
+    ((added: 0, full: false), 'Non aggiunto alla Jam'),
+    ((added: 3, full: false), 'Aggiunti alla Jam: 3'),
+    (none, 'Aggiunto in coda'),
+  ]) {
     testWidgets('queue add confirmation: $text', (tester) async {
       final h = await Harness.create(tester);
       await h.pump(

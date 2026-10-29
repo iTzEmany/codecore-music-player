@@ -90,6 +90,9 @@ class _EnqueueSpy implements PlayerController {
   @override
   Future<void> enqueueOnline(YtResult r) async => calls.add(r.id);
   @override
+  bool get jamQueueFull => false;
+
+  @override
   dynamic noSuchMethod(Invocation invocation) => null;
 }
 

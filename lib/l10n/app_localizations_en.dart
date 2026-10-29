@@ -5679,6 +5679,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get jamFull => 'The Jam is full';
 
   @override
+  String get jamAddFailed => 'Not added to the Jam';
+
+  @override
   String get jamLeft => 'You left the Jam';
 
   @override
