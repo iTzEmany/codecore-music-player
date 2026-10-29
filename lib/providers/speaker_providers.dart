@@ -74,7 +74,14 @@ final announcedJamProvider = Provider<Peer?>((ref) {
     return null;
   }
   final peers = ref.watch(shareHubProvider.select((h) => h.peers));
-  return peers.where((p) => p.jamName != null).firstOrNull;
+  // A device that stops announcing is forgotten, so its next Jam shows again.
+  Future.microtask(() {
+    if (ref.mounted) ref.read(jamInviteDismissedProvider.notifier).keepOnly(peers);
+  });
+  final hidden = ref.watch(jamInviteDismissedProvider);
+  return peers
+      .where((p) => p.jamName != null && !hidden.contains(jamInviteKey(p)))
+      .firstOrNull;
 });
 
 String jamInviteKey(Peer p) => '${p.id}|${p.jamName}';
@@ -85,6 +92,14 @@ class JamInviteDismissed extends Notifier<Set<String>> {
   Set<String> build() => const {};
 
   void hide(Peer p) => state = {...state, jamInviteKey(p)};
+
+  /// Keeps only the keys of Jams still announced: a new Jam from the same
+  /// device invites again.
+  void keepOnly(Iterable<Peer> peers) {
+    final live = {for (final p in peers) if (p.jamName != null) jamInviteKey(p)};
+    final kept = state.where(live.contains).toSet();
+    if (kept.length != state.length) state = kept;
+  }
 }
 
 final jamInviteDismissedProvider =

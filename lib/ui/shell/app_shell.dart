@@ -310,6 +310,8 @@ class AppShell extends ConsumerWidget {
     ref.listen(speakerOfferProvider, (_, next) {
       if (next.value == true) {
         showSpeakerOffer(context, speakerJam);
+      } else {
+        closeSpeakerOffer();
       }
     });
   }

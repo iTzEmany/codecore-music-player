@@ -8,9 +8,7 @@ import '../../../providers/jam_providers.dart';
 import '../../../providers/speaker_providers.dart';
 import '../../../services/jam/jam_models.dart';
 import '../../../services/share/discovery.dart';
-import '../../../services/jam/speaker_jam.dart';
 import '../../theme/tokens.dart';
-import '../../widgets/cc_sheet.dart';
 import '../../widgets/show_msg.dart';
 import 'jam_screen.dart';
 
@@ -39,10 +37,7 @@ class JamInviteBanner extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final peer = ref.watch(announcedJamProvider);
-    if (peer == null ||
-        ref.watch(jamInviteDismissedProvider).contains(jamInviteKey(peer))) {
-      return const SizedBox.shrink();
-    }
+    if (peer == null) return const SizedBox.shrink();
     final l = context.l10n;
     final cc = context.cc;
     final text = l.jamInviteBanner(peer.jamName!);
@@ -129,64 +124,4 @@ class SpeakerAwayNotice extends ConsumerWidget {
       ),
     );
   }
-}
-
-/// Guest side (R-119): the Jam is stopped and the guest's speaker is on.
-/// Closing the sheet without choosing counts as «No».
-Future<void> showSpeakerOffer(BuildContext context, SpeakerJam jam) async {
-  var answered = false;
-  await showCcSheet<void>(
-    context: context,
-    useRootNavigator: true,
-    builder: (ctx) {
-      final l = ctx.l10n;
-      void reply(bool yes) {
-        answered = true;
-        Navigator.of(ctx).pop();
-        yes ? unawaited(jam.acceptOffer()) : jam.declineOffer();
-      }
-
-      return SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(
-            CcDims.margin,
-            0,
-            CcDims.margin,
-            CcDims.margin,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Semantics(
-                header: true,
-                child: Text(
-                  l.speakerOfferTitle,
-                  style: Theme.of(ctx).textTheme.titleMedium,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(l.speakerOfferBody),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                spacing: 8,
-                children: [
-                  TextButton(
-                    onPressed: () => reply(false),
-                    child: Text(l.speakerNo),
-                  ),
-                  FilledButton(
-                    onPressed: () => reply(true),
-                    child: Text(l.speakerYes),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      );
-    },
-  );
-  if (!answered) jam.declineOffer();
 }

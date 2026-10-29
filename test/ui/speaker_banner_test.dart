@@ -10,6 +10,7 @@ import 'package:codecore/services/jam/speaker_jam.dart';
 import 'package:codecore/services/share/discovery.dart';
 import 'package:codecore/ui/screens/devices/devices_sheet.dart';
 import 'package:codecore/ui/screens/jam/speaker_notices.dart';
+import 'package:codecore/ui/screens/jam/speaker_sheets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -193,7 +194,112 @@ void main() {
     expect(jam.opened, 1);
     await h.dispose(t);
   });
+
+  testWidgets('banner: hiding the first invite shows the second', (t) async {
+    final h = await Harness.create(t);
+    await _app(t, h, _Jams(), _Jam());
+    expect(find.text('Unisciti alla Jam di Cucina'), findsOneWidget);
+    await t.tap(find.byTooltip('Nascondi'));
+    await t.pump();
+    expect(find.text('Unisciti alla Jam di Studio'), findsOneWidget);
+    await h.dispose(t);
+  });
+
+  testWidgets('banner: a hidden Jam that stops and starts again invites again', (t) async {
+    final h = await Harness.create(t);
+    final hub = _Hub();
+    await _app(t, h, hub, _Jam());
+    await t.tap(find.byTooltip('Nascondi'));
+    await t.pump();
+    hub.setPeers([const Peer(id: 'h1', name: 'Telefono di Ale', host: '10.0.0.5', port: 8000, platform: 'android')]);
+    await t.pump();
+    await t.pump();
+    hub.setPeers([_host]);
+    await t.pump();
+    expect(find.text('Unisciti alla Jam di Cucina'), findsOneWidget);
+    await h.dispose(t);
+  });
+
+  testWidgets('offer: true, false, true leaves one sheet and the old one is closed unanswered', (t) async {
+    final h = await Harness.create(t);
+    final sj = _offerJam(_Port());
+    await _openerFor(t, h, (c) => showSpeakerOffer(c, sj));
+    await t.tap(find.text('open'));
+    await t.pumpAndSettle();
+    expect(find.text('Suonare la Jam sulla tua cassa?'), findsOneWidget);
+    closeSpeakerOffer();
+    await t.pumpAndSettle();
+    expect(find.text('Suonare la Jam sulla tua cassa?'), findsNothing);
+    expect(sj.offerPending.value, isTrue); // closed by us, not declined
+    await t.tap(find.text('open'));
+    await t.tap(find.text('open'), warnIfMissed: false);
+    await t.pumpAndSettle();
+    expect(find.text('Suonare la Jam sulla tua cassa?'), findsOneWidget);
+    closeSpeakerOffer();
+    await t.pumpAndSettle();
+    await h.dispose(t);
+  });
+
+  testWidgets('offer: waits for an open dialog to close', (t) async {
+    final h = await Harness.create(t);
+    final sj = _offerJam(_Port());
+    late BuildContext ctx;
+    await _openerFor(t, h, (c) {
+      ctx = c;
+      showDialog<void>(context: c, builder: (_) => const AlertDialog(title: Text('Dialogo')));
+    });
+    await t.tap(find.text('open'));
+    await t.pumpAndSettle();
+    showSpeakerOffer(ctx, sj);
+    await t.pump(const Duration(seconds: 2));
+    expect(find.text('Suonare la Jam sulla tua cassa?'), findsNothing);
+    Navigator.of(ctx).pop();
+    await t.pumpAndSettle();
+    await t.pump(const Duration(seconds: 2));
+    await t.pumpAndSettle();
+    expect(find.text('Suonare la Jam sulla tua cassa?'), findsOneWidget);
+    closeSpeakerOffer();
+    await t.pumpAndSettle();
+    await h.dispose(t);
+  });
+
+  testWidgets('offer: swiping the sheet away declines it', (t) async {
+    final h = await Harness.create(t);
+    final sj = _offerJam(_Port());
+    await _openerFor(t, h, (c) => showSpeakerOffer(c, sj));
+    await t.tap(find.text('open'));
+    await t.pumpAndSettle();
+    await t.tapAt(const Offset(5, 5));
+    await t.pumpAndSettle();
+    expect(find.text('Suonare la Jam sulla tua cassa?'), findsNothing);
+    expect(sj.offerPending.value, isFalse);
+    await h.dispose(t);
+  });
 }
+
+class _Jams extends _Hub {
+  @override
+  ShareHubState build() => const ShareHubState(
+    active: true,
+    peers: [
+      _host,
+      Peer(id: 'h2', name: 'Tablet', host: '10.0.0.6', port: 8000, platform: 'android', jamName: 'Studio'),
+    ],
+  );
+}
+
+SpeakerJam _offerJam(_Port port) => SpeakerJam(
+  speakerConnected: const Stream.empty(),
+  connected: () => true,
+  enabled: () => true,
+  port: port,
+);
+
+Future<void> _openerFor(WidgetTester t, Harness h, void Function(BuildContext) f) => h.pump(
+  t,
+  Builder(builder: (c) => TextButton(onPressed: () => f(c), child: const Text('open'))),
+);
+
 
 class _Port implements SpeakerJamPort {
   final sent = <JamCommandType>[];
