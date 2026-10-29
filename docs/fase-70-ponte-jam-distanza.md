@@ -6,6 +6,21 @@
 
 **Comando mirato:** `flutter test test/jam test/ui/jam_screen_test.dart test/ui/settings_index_test.dart`; build `flutter build apk --debug` quando si tocca il servizio (con `sorveglia.sh --pesante`).
 
+## Rilievi dalla fase 69 (review di architettura, da fare dentro i task sotto)
+- **70.1, primo passo**: in `JamCrypto` le chiavi sono tipi di `sodium` (`SecureKey`, `KeyPair`, `SessionKeys`). `JamProtocol` le prende così come sono e un cambio di libreria tocca anche l'interfaccia (D-272).
+- **70.2**: `MqttLink.messages` è legato al singolo client, quindi va spostato su un controller broadcast del link. Serve anche un segnale di disconnessione (`onDisconnected` → stream), per passare a `retrying` e al broker di riserva. `testBroker` passa da `jam_broker_providers.dart` a `lib/services/jam/remote/`, così `JamBridge` lo riusa.
+- **70.3/70.4**:
+  - `admitRequest` restituisce una `Response` di shelf e vuole `port` e `token` della LAN. Va cambiata così: risultato tipizzato (accettata / full / busy / tooMany / bad) e parametri tipizzati (`id`, `name`, `port?`, `token?`, `remote`, `ttl`), con il router che converte il risultato in `Response`.
+  - Sul ponte `gate.allow` va prima di full e busy: ogni «NO busy» costa una cifratura e una pubblicazione.
+- **70.4**:
+  - Estrarre `_attach(JamGuestLink)` da `JamController.request`, cioè la parte che collega `lost`, `states`, contatore e rilascio, perché `requestRemote` la riusi. `guestFactory` deve restituire `JamGuestLink`.
+  - Il contatore delle richieste va condiviso con `requestRemote`.
+  - In `JamGuestLink`, `sessionId`/`hostBase`/`fileToken` diventano un solo valore nullable («accesso ai file dell'host»), invece del `sessionId` null usato come interruttore. Si aggiunge lo stato del collegamento (`JamUiState.link`).
+- **Ordine sparso, bassa priorità**:
+  - la regola «coda piena» è scritta tre volte (`JamController.queueFull`, `jamAutoFillFull`, riduttore): serve un predicato unico accanto al riduttore;
+  - `jamGateProvider` e `jamSecretStoreProvider` servono anche alla LAN ma stanno in `jam_remote_providers.dart`;
+  - `pwhash` in un isolate non ha un test che ne controlli il risultato.
+
 ## Task
 
 ### 70.1 — `JamProtocol` (R-130 … R-134, R-139, R-140, RNF-14, K-JD-03, K-JD-08)
