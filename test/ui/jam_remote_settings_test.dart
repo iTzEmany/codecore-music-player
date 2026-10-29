@@ -157,6 +157,7 @@ void main() {
     expect(n.add(kDefaultJamBrokers[0]), isFalse);
     expect(n.add(const BrokerEntry(host: 'p.net', port: 0)), isFalse);
     expect(n.add(const BrokerEntry(host: 'p.net', port: 1)), isTrue);
+    expect(n.add(const BrokerEntry(host: 'P.NET', port: 1)), isFalse);
   });
 
   test('move down by one swaps the neighbours; restore removes the saved key', () async {

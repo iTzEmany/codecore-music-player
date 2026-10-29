@@ -123,6 +123,16 @@ class JamGate extends ChangeNotifier {
     }
     // "Until the end of the Jam" does not survive a restart.
     clearEndOfJam();
+    // Listeners (the settings lists) may be built before the load ends.
+    if (!_disposed) notifyListeners();
+  }
+
+  bool _disposed = false;
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
   }
 
   static void _read(String? raw, String field, Map<String, JamGateEntry> into) {

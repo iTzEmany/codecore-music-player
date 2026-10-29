@@ -554,6 +554,8 @@ class JamHost {
           !isLocalNetworkAddress(host, allowLoopback: allowLoopback)) {
         return Response(400, body: 'bad request');
       }
+      // A muted device cannot get in through a guest either.
+      if (gate?.isMuted(id) ?? false) return Response(409, body: 'blocked');
       final c = addMember(
           id: id,
           name: name.length > 60 ? name.substring(0, 60) : name,

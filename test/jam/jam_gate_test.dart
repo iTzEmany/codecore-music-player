@@ -5,6 +5,7 @@ import 'package:codecore/data/settings/jam_secret_store.dart';
 import 'package:codecore/services/jam/jam_gate.dart';
 import 'package:codecore/services/jam/jam_host.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shelf/shelf.dart';
 
 void main() {
   late DateTime now;
@@ -63,6 +64,28 @@ void main() {
     gate.unblock('a');
     gate = await open();
     expect(gate.isMuted('a'), isFalse);
+  });
+
+  test('listeners are told when the saved lists finish loading', () async {
+    gate.block('a', 'Phone');
+    final g = JamGate(MemoryJamSecretStore(data), now: () => now);
+    var calls = 0;
+    g.addListener(() => calls++);
+    await g.ready;
+    expect(calls, 1);
+    expect(g.blocked.single.id, 'a');
+  });
+
+  test('invite of a muted id is refused with 409 and adds nobody', () async {
+    final h = JamHost(deviceId: 'h', deviceName: 'PC', now: () => now, gate: gate);
+    final a = h.addMember(id: 'a', name: 'A', host: '192.168.1.6', port: 1000)!;
+    gate.block('x', 'X');
+    final r = await h.buildRouter(clientIp: (_) => '192.168.1.5').call(Request(
+        'POST', Uri.parse('http://x/${a.sid}/invite'),
+        body: jsonEncode({'id': 'x', 'name': 'X', 'host': '192.168.1.7', 'port': 1001}),
+        headers: {'x-jam-token': a.token}));
+    expect(r.statusCode, 409);
+    expect(h.memberIds, ['a']);
   });
 
   group('admitRequest', () {

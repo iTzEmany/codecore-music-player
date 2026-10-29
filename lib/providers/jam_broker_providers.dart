@@ -27,7 +27,7 @@ class JamBrokersNotifier extends Notifier<List<BrokerEntry>> {
 
   /// False when [b] is invalid or already there.
   bool add(BrokerEntry b) {
-    if (!b.isValid || state.contains(b)) return false;
+    if (!b.isValid || state.any(b.sameAs)) return false;
     _set([...state, b]);
     return true;
   }
