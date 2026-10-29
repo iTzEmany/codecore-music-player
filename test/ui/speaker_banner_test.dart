@@ -47,7 +47,10 @@ class _Jam extends JamController {
   @override
   Future<void> request(Peer peer) async => requested.add(peer.id);
   @override
-  Future<void> openSpeakerJam() async => opened++;
+  Future<bool> openSpeakerJam() async {
+    opened++;
+    return true;
+  }
 }
 
 Future<void> _app(WidgetTester t, Harness h, _Hub hub, _Jam jam) => h.pump(
@@ -263,6 +266,27 @@ void main() {
     await h.dispose(t);
   });
 
+  testWidgets('offer: shows above a full screen pushed over the shell and can be answered', (t) async {
+    final h = await Harness.create(t);
+    final port = _Port();
+    final sj = _offerJam(port);
+    late BuildContext ctx;
+    await _openerFor(t, h, (c) {
+      ctx = c;
+      Navigator.of(c).push(MaterialPageRoute<void>(builder: (_) => const Scaffold(body: Text('Schermata Jam'))));
+    });
+    await t.tap(find.text('open'));
+    await t.pumpAndSettle();
+    showSpeakerOffer(ctx, sj);
+    await t.pumpAndSettle();
+    expect(find.text('Suonare la Jam sulla tua cassa?'), findsOneWidget);
+    await t.tap(find.text('No'));
+    await t.pumpAndSettle();
+    expect(find.text('Suonare la Jam sulla tua cassa?'), findsNothing);
+    expect(sj.offerPending.value, isFalse);
+    await h.dispose(t);
+  });
+
   testWidgets('offer: swiping the sheet away declines it', (t) async {
     final h = await Harness.create(t);
     final sj = _offerJam(_Port());
@@ -308,7 +332,7 @@ class _Port implements SpeakerJamPort {
   @override
   Stream<void> get changes => const Stream.empty();
   @override
-  Future<void> open() async {}
+  Future<bool> open() async => true;
   @override
   Future<void> closeSilently() async {}
   @override
