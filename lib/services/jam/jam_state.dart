@@ -18,6 +18,16 @@ JamResult applyCommand(
 }) {
   if (s.ended) return const JamResult.fail(JamError.ended);
   final isHost = from == s.hostDeviceId;
+  if (s.speakerAwaySince != null &&
+      const {
+        JamCommandType.play,
+        JamCommandType.seek,
+        JamCommandType.next,
+        JamCommandType.jump,
+        JamCommandType.previous,
+      }.contains(cmd.type)) {
+    return const JamResult.fail(JamError.noSpeaker);
+  }
   final items = [...s.items];
 
   JamResult commit(JamState n) => JamResult.ok(n.copyWith(version: s.version + 1));
@@ -161,6 +171,10 @@ JamResult applyCommand(
 
     case JamCommandType.setOutput:
       final d = cmd.deviceId!;
+      // Invariant 4: with a speaker the host is the only output.
+      if (s.speaker && d != s.hostDeviceId) {
+        return const JamResult.fail(JamError.forbidden);
+      }
       // Any participant can be the output. Before a roster exists (tests,
       // old peers) only the host and the sender are accepted.
       final known = s.participants.isEmpty
@@ -175,6 +189,9 @@ JamResult applyCommand(
 
     case JamCommandType.setOutputs:
       final ids = cmd.deviceIds!.toSet().toList();
+      if (s.speaker && (ids.length != 1 || ids.first != s.hostDeviceId)) {
+        return const JamResult.fail(JamError.forbidden);
+      }
       final allKnown = s.participants.isEmpty
           ? ids.every((d) => d == s.hostDeviceId || d == from || isHost)
           : ids.every((d) => s.participant(d) != null);
@@ -216,6 +233,38 @@ JamResult applyCommand(
           items: m == JamMode.together
               ? togetherOrder(items, s.currentIndex, order)
               : null));
+
+    case JamCommandType.speakerAway:
+      if (!s.speaker) return const JamResult.fail(JamError.invalid);
+      if (!isHost && !(s.outputs.length == 1 && s.outputs.first == from)) {
+        return const JamResult.fail(JamError.forbidden);
+      }
+      if (s.speakerAwaySince != null) return JamResult.ok(s);
+      return commit(frozen().copyWith(
+          playing: false,
+          speakerAwaySince: nowMs,
+          outputDeviceId: s.hostDeviceId,
+          outputDeviceIds: const []));
+
+    case JamCommandType.speakerBack:
+      if (!isHost) return const JamResult.fail(JamError.forbidden);
+      if (!s.speaker) return const JamResult.fail(JamError.invalid);
+      if (s.speakerAwaySince == null) return JamResult.ok(s);
+      return commit(s.copyWith(clearSpeakerAway: true));
+
+    case JamCommandType.offerSpeaker:
+      if (isHost) return const JamResult.fail(JamError.forbidden);
+      if (!s.speaker || s.speakerAwaySince == null) {
+        return const JamResult.fail(JamError.invalid);
+      }
+      if (s.participants.isNotEmpty && s.participant(from) == null) {
+        return const JamResult.fail(JamError.invalid);
+      }
+      return commit(frozen().copyWith(
+          playing: false,
+          outputDeviceId: from,
+          outputDeviceIds: const [],
+          clearSpeakerAway: true));
 
     case JamCommandType.end:
       if (!isHost) return const JamResult.fail(JamError.forbidden);

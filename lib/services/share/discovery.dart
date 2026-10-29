@@ -22,6 +22,7 @@ class Peer {
     required this.port,
     required this.platform,
     this.tlsPort,
+    this.jamName,
   });
 
   final String id, name, host, platform;
@@ -31,6 +32,9 @@ class Peer {
 
   /// HTTPS port of the same endpoint; null for a device without identity (v2).
   final int? tlsPort;
+
+  /// Name of the speaker Jam this device is hosting, if it announces one.
+  final String? jamName;
 }
 
 /// Announces this device and lists the Codecore devices on the same network
@@ -59,6 +63,9 @@ class LanDiscovery {
   final _blocked = <String>{};
   int _httpPort = 0;
   int? _tlsPort;
+
+  /// While set, the beacon carries `jam: {name}` (a speaker Jam to join).
+  String? speakerJamName;
   final _peers = <String, ({Peer peer, DateTime seen})>{};
   final _controller = StreamController<List<Peer>>.broadcast();
 
@@ -156,7 +163,11 @@ class LanDiscovery {
       if (id is! String || name is! String || port is! int) return;
       if (id == deviceId || id.isEmpty || id.length > 64) return;
       if (port < 1 || port > 65535) return;
-      final isNew = !_peers.containsKey(id);
+      final old = _peers[id]?.peer;
+      final jam = j['jam'];
+      final jn = jam is Map && jam['name'] is String && (jam['name'] as String).isNotEmpty
+          ? (jam['name'] as String)
+          : null;
       _peers[id] = (
         peer: Peer(
           id: id,
@@ -167,10 +178,14 @@ class LanDiscovery {
               ? j['tlsPort'] as int
               : null,
           platform: j['p'] is String ? j['p'] as String : 'other',
+          jamName: jn != null && jn.length > 60 ? jn.substring(0, 60) : jn,
         ),
         seen: DateTime.now(),
       );
-      if (isNew && !_controller.isClosed) _controller.add(current);
+      if ((old == null || old.jamName != _peers[id]!.peer.jamName) &&
+          !_controller.isClosed) {
+        _controller.add(current);
+      }
     } on FormatException {
       // Not one of ours.
     }
@@ -220,6 +235,7 @@ class LanDiscovery {
       'port': _httpPort,
       'tlsPort': ?_tlsPort,
       'p': platformName,
+      if (speakerJamName != null) 'jam': {'name': speakerJamName},
     }));
     for (final t in await _targets()) {
       try {

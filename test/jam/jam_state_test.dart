@@ -37,6 +37,7 @@ JamError? err(JamState s, JamCommand c, String from) =>
     applyCommand(s, c, from: from, nowMs: 1000).error;
 
 void main() {
+  speakerTests();
   videoIdTests();
   togetherTests();
   unsafeIdsTests();
@@ -689,4 +690,132 @@ void togetherTests() {
       s = ok(s, const JamCommand.jump(0), host);
       expect(after(s), 'guest3 host1 host2');
     });
+}
+
+const sg2 = 'guest2';
+
+JamState speakerJam({int? away, List<String> outs = const [], String out = host}) =>
+    ok(start(), JamCommand.add(item(host)), host).copyWith(
+      speaker: true,
+      speakerAwaySince: away,
+      outputDeviceId: out,
+      outputDeviceIds: outs,
+      participants: const [
+        JamParticipant(id: host, name: 'H'),
+        JamParticipant(id: guest, name: 'G'),
+        JamParticipant(id: sg2, name: 'G2'),
+      ],
+    );
+
+void speakerTests() {
+  group('speaker', () {
+    test('JSON round trip, absent fields mean no speaker, junk is ignored', () {
+      final s = speakerJam(away: 5000);
+      final back = JamState.tryParse(s.toJson())!;
+      expect(back.speaker, true);
+      expect(back.speakerAwaySince, 5000);
+      final plain = start().toJson();
+      expect(plain.containsKey('spk'), false);
+      expect(plain.containsKey('spkAway'), false);
+      final p = JamState.tryParse(plain)!;
+      expect(p.speaker, false);
+      expect(p.speakerAwaySince, isNull);
+      final junk = JamState.tryParse({...plain, 'spk': 'x', 'spkAway': 'y'})!;
+      expect(junk.speaker, false);
+      expect(junk.speakerAwaySince, isNull);
+      expect(JamState.tryParse({...plain, 'spkAway': -3})!.speakerAwaySince, isNull);
+      expect(s.copyWith(clearSpeakerAway: true).speakerAwaySince, isNull);
+    });
+
+    test('new commands round trip', () {
+      for (final c in [
+        const JamCommand.speakerAway(),
+        const JamCommand.speakerBack(),
+        const JamCommand.offerSpeaker(),
+      ]) {
+        expect(JamCommand.tryParse(c.toJson())!.type, c.type);
+      }
+    });
+
+    test('with the speaker away play, seek, next, jump, previous are refused', () {
+      final s = speakerJam(away: 10);
+      for (final c in [
+        const JamCommand.play(),
+        const JamCommand.seek(5),
+        const JamCommand.next(),
+        const JamCommand.jump(1),
+        const JamCommand.previous(),
+      ]) {
+        expect(err(s, c, host), JamError.noSpeaker, reason: c.type.name);
+      }
+      expect(err(s, JamCommand.add(item(guest)), guest), isNull);
+      expect(err(s, const JamCommand.setMode(JamMode.together), host), isNull);
+      expect(err(s, const JamCommand.volume(0.5), guest), isNull);
+      expect(err(s, const JamCommand.remove(1), host), isNull);
+      // Present: all fine.
+      expect(err(speakerJam(), const JamCommand.play(), host), isNull);
+    });
+
+    test('speakerAway from host freezes and pauses', () {
+      final s = speakerJam().copyWith(playing: true, positionMs: 100, positionAt: 1000);
+      final n = ok(s, const JamCommand.speakerAway(), host, now: 3000);
+      expect(n.playing, false);
+      expect(n.positionMs, 2100);
+      expect(n.speakerAwaySince, 3000);
+      expect(n.version, s.version + 1);
+      // Already away: no-op.
+      final again = ok(n, const JamCommand.speakerAway(), host, now: 9000);
+      expect(again.speakerAwaySince, 3000);
+      expect(again.version, n.version);
+    });
+
+    test('speakerAway from the only guest output resets outputs to the host', () {
+      final s = speakerJam(out: guest).copyWith(playing: true);
+      final n = ok(s, const JamCommand.speakerAway(), guest);
+      expect(n.outputs, [host]);
+      expect(n.speakerAwaySince, 1000);
+      expect(err(s, const JamCommand.speakerAway(), sg2), JamError.forbidden);
+    });
+
+    test('speakerAway without a speaker is invalid', () {
+      expect(err(start(), const JamCommand.speakerAway(), host), JamError.invalid);
+      expect(err(start(), const JamCommand.speakerBack(), host), JamError.invalid);
+    });
+
+    test('speakerBack: host only, stays paused', () {
+      final s = speakerJam(away: 10);
+      expect(err(s, const JamCommand.speakerBack(), guest), JamError.forbidden);
+      final n = ok(s, const JamCommand.speakerBack(), host);
+      expect(n.speakerAwaySince, isNull);
+      expect(n.playing, false);
+      expect(ok(n, const JamCommand.speakerBack(), host).version, n.version);
+    });
+
+    test('offerSpeaker with the Jam stopped makes the guest the output', () {
+      final s = speakerJam(away: 10);
+      final n = ok(s, const JamCommand.offerSpeaker(), guest);
+      expect(n.outputs, [guest]);
+      expect(n.speakerAwaySince, isNull);
+      expect(n.playing, false);
+    });
+
+    test('offerSpeaker is refused with the speaker present, from the host or unknown', () {
+      expect(err(speakerJam(), const JamCommand.offerSpeaker(), guest), JamError.invalid);
+      expect(err(start(), const JamCommand.offerSpeaker(), guest), JamError.invalid);
+      final away = speakerJam(away: 10);
+      expect(err(away, const JamCommand.offerSpeaker(), host), JamError.forbidden);
+      expect(err(away, const JamCommand.offerSpeaker(), 'ghost'), JamError.invalid);
+    });
+
+    test('setOutput with a speaker accepts only the host', () {
+      final s = speakerJam();
+      expect(err(s, const JamCommand.setOutput(guest), host), JamError.forbidden);
+      expect(err(s, const JamCommand.setOutput(guest), guest), JamError.forbidden);
+      expect(err(s, const JamCommand.setOutputs([host, guest]), host), JamError.forbidden);
+      expect(err(s, const JamCommand.setOutput(host), host), isNull);
+      // Normal Jam unchanged.
+      final plain = speakerJam().copyWith(speaker: false);
+      expect(ok(plain, const JamCommand.setOutput(guest), host).outputs, [guest]);
+    });
+  });
 }
