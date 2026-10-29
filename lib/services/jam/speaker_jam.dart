@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart' show ValueListenable, ValueNotifier;
 
+import '../../core/app_log.dart';
 import 'jam_models.dart';
 
 /// Where this device stands in the Jam, as [SpeakerJam] needs to see it.
@@ -54,7 +55,10 @@ class SpeakerJam {
     required this.port,
     Timer Function(Duration, void Function())? timer,
   }) : _timer = timer ?? Timer.new {
-    _subs = [speakerConnected.listen((_) => refresh()), port.changes.listen((_) => refresh())];
+    _subs = [speakerConnected.listen((_) => refresh()), port.changes.listen((_) {
+      _closing = false;
+      refresh();
+    })];
     refresh();
   }
 
@@ -69,7 +73,7 @@ class SpeakerJam {
   ValueListenable<bool> get offerPending => _offer;
 
   bool? _prev;
-  var _opened = false, _awaySent = false, _backSent = false;
+  var _opened = false, _awaySent = false, _backSent = false, _closing = false;
   int? _declinedAway;
   Timer? _grace;
 
@@ -79,7 +83,8 @@ class SpeakerJam {
     final conn = connected();
     final changed = conn != _prev;
     _prev = conn;
-    if (!conn) _opened = _awaySent = false;
+    if (!conn) _opened = false;
+    if (conn) _awaySent = false;
     switch (v.role) {
       case SpeakerRole.host:
         _host(v, conn, changed);
@@ -105,18 +110,22 @@ class SpeakerJam {
     if (v.awaySince != null) {
       _grace ??= _timer(speakerJamGrace, () {
         _grace = null;
-        unawaited(port.end());
+        // Nobody is waiting: no message (R-115).
+        unawaited(port.view.guests == 0 ? port.closeSilently() : port.end());
       });
     } else {
       _cancelGrace();
     }
     if (!conn) {
-      if (!changed) return;
+      if (v.awaySince != null) return;
       if (v.guests == 0) {
-        unawaited(port.closeSilently());
-      } else if (v.awaySince == null && !_awaySent) {
+        if (!_closing) {
+          _closing = true;
+          unawaited(port.closeSilently());
+        }
+      } else if (v.iAmOutput && !_awaySent) {
         _awaySent = true;
-        unawaited(port.send(const JamCommand.speakerAway()));
+        _run('speakerAway', () => port.send(const JamCommand.speakerAway()));
       }
     } else if (v.awaySince != null) {
       // Ours is there: back to play, even if a guest's speaker was the one that went (D-220).
@@ -133,8 +142,15 @@ class SpeakerJam {
   void _openIfPlugged(bool conn) {
     if (conn && enabled() && !_opened) {
       _opened = true;
-      unawaited(port.open());
+      _run('open', port.open, () => _opened = false);
     }
+  }
+
+  void _run(String what, Future<void> Function() f, [void Function()? onFail]) {
+    unawaited(f().catchError((Object e, StackTrace st) {
+      AppLog.w('speaker jam: $what failed', e, st);
+      onFail?.call();
+    }));
   }
 
   void _guest(SpeakerJamView v, bool conn, bool changed) {
@@ -143,9 +159,9 @@ class SpeakerJam {
     _offer.value = away != null && conn && enabled() && _declinedAway != away;
     if (away == null) {
       _declinedAway = null;
-      if (v.iAmOutput && !conn && changed && !_awaySent) {
+      if (v.iAmOutput && !conn && !_awaySent) {
         _awaySent = true;
-        unawaited(port.send(const JamCommand.speakerAway()));
+        _run('speakerAway', () => port.send(const JamCommand.speakerAway()));
       }
     }
   }

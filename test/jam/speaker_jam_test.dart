@@ -18,8 +18,12 @@ class _Port implements SpeakerJamPort {
 
   @override
   Stream<void> get changes => _c.stream;
+  Future<void> Function()? onOpen;
   @override
-  Future<void> open() async => log.add('open');
+  Future<void> open() async {
+    log.add('open');
+    await onOpen?.call();
+  }
   @override
   Future<void> closeSilently() async => log.add('close');
   @override
@@ -55,7 +59,8 @@ void main() {
   Future<void> pump() => Future<void>.delayed(Duration.zero);
 
   const host = SpeakerJamView(role: SpeakerRole.host, speaker: true);
-  const hostWith = SpeakerJamView(role: SpeakerRole.host, speaker: true, guests: 1);
+  const hostWith =
+      SpeakerJamView(role: SpeakerRole.host, speaker: true, guests: 1, iAmOutput: true);
 
   setUp(() {
     port = _Port();
@@ -150,6 +155,63 @@ void main() {
     port.view = hostWith;
     s.refresh();
     expect(port.log, isEmpty);
+    s.dispose();
+  });
+
+  test('the guest plays: our speaker going again does not stop the Jam (D-220)', () async {
+    connected = true;
+    port.view = const SpeakerJamView(role: SpeakerRole.host, speaker: true, guests: 1);
+    final s = make();
+    await plug(false);
+    expect(port.log, isEmpty);
+    s.dispose();
+  });
+
+  test('the speaker went while the open was running: closes when the Jam shows up', () async {
+    connected = true;
+    final s = make();
+    expect(port.log, ['open']);
+    await plug(false); // role is still none: nothing to close
+    expect(port.log, ['open']);
+    await port.set(host);
+    expect(port.log, ['open', 'close']);
+    s.dispose();
+  });
+
+  test('close refused because a guest joined: falls back to speakerAway', () async {
+    connected = true;
+    port.view = host;
+    final s = make();
+    await plug(false);
+    expect(port.log, ['close']);
+    await port.set(hostWith);
+    expect(port.log, ['close', 'speakerAway']);
+    s.dispose();
+  });
+
+  test('10 minutes with nobody left: closes silently, no end', () async {
+    connected = false;
+    port.view = hostWith;
+    final s = make();
+    port.log.clear();
+    await port.set(const SpeakerJamView(
+        role: SpeakerRole.host, speaker: true, awaySince: 5));
+    timers.single.$2();
+    expect(port.log, ['close']);
+    s.dispose();
+  });
+
+  test('a failed open is retried on the next event', () async {
+    var fail = true;
+    port.onOpen = () async {
+      if (fail) throw StateError('x');
+    };
+    final s = make();
+    await plug(true);
+    await pump();
+    fail = false;
+    await plug(true);
+    expect(port.log, ['open', 'open']);
     s.dispose();
   });
 

@@ -243,9 +243,8 @@ class JamController extends Notifier<JamUiState> {
   @override
   JamUiState build() {
     ref.onDispose(_dispose);
-    listenSelf((_, _) {
-      if (!_speakerChanges.isClosed) _speakerChanges.add(null);
-    });
+    listenSelf((_, _) => _speakerChanges.add(null));
+    _speakerPending = false;
     final hub = _hub = ref.read(shareHubProvider.notifier);
     _reqSub = hub.newJamRequests.listen(_incoming.add);
     hub.onJamEnd = end;
@@ -259,7 +258,6 @@ class JamController extends Notifier<JamUiState> {
     await _teardown(release: false);
     await _incoming.close();
     await _onlineFailed.close();
-    await _speakerChanges.close();
   }
 
   String get _ownId => _hub.deviceId ?? '';
@@ -321,8 +319,24 @@ class JamController extends Notifier<JamUiState> {
       }
       return;
     }
-    final s = host.accept(req.id);
+    if (_starting) return;
+    _starting = true;
+    try {
+      await _acceptFirst(host, req);
+    } finally {
+      _starting = false;
+    }
+  }
+
+  Future<void> _acceptFirst(JamHost host, JamRequest req) async {
+    var s = host.accept(req.id);
     if (s == null) return;
+    final speaker = _speakerPending;
+    _speakerPending = false;
+    if (speaker) {
+      host.makeSpeaker();
+      s = host.state ?? s;
+    }
     state = state.copyWith(peerName: req.fromName, peerId: req.fromId);
     // Read before the Jam pauses the local player: what was queued here
     // becomes the Jam's starting queue.
@@ -330,46 +344,60 @@ class JamController extends Notifier<JamUiState> {
       ref.read(audioHandlerProvider),
       ref.read(trackRepositoryProvider),
     );
-    await _startAsHost(s, seed);
+    await _startAsHost(s, seed, speaker: speaker);
   }
 
-  /// Opens the Jam of the speaker: no guests yet, nothing changes on screen and the
-  /// player goes on as before (R-111). A running host Jam becomes the speaker's (D-218);
-  /// a guest does nothing.
+  /// The speaker's Jam waits for its first guest: only the announcement is up and the
+  /// player, the UI and the service are untouched (R-111).
+  var _speakerPending = false;
+  var _closing = false, _starting = false;
+
+  /// A running host Jam becomes the speaker's (D-218). From idle the Jam only waits
+  /// ("in attesa") until a request is accepted; a guest does nothing.
   Future<void> openSpeakerJam() async {
     final host = _host;
-    if (host == null || state.role == JamRole.guest) return;
+    if (host == null || state.role == JamRole.guest || _speakerPending) return;
     if (state.active) {
       host.makeSpeaker();
-      _hub.speakerJamName = ref.read(deviceNameProvider);
+    } else if (state.phase != JamPhase.idle || _starting) {
       return;
+    } else {
+      _speakerPending = true;
+      _speakerChanges.add(null);
     }
-    if (state.phase != JamPhase.idle) return;
-    host.open(speaker: true);
-    final s = host.state;
-    if (s == null || s.ended) return;
-    final seed = await jamSeedTracks(
-      ref.read(audioHandlerProvider),
-      ref.read(trackRepositoryProvider),
-    );
-    await _startAsHost(s, seed, speaker: true);
+    _hub.speakerJamName = ref.read(deviceNameProvider);
   }
 
   /// Closes the speaker's Jam with nobody in it, without any message (R-115, D-211).
   Future<void> closeSpeakerJamSilently() async {
-    if (!state.isHost || state.jam?.speaker != true) return;
+    if (_speakerPending) {
+      _speakerPending = false;
+      _hub.speakerJamName = null;
+      _speakerChanges.add(null);
+      return;
+    }
+    if (_closing || !state.isHost || state.jam?.speaker != true) return;
     if (_host?.memberIds.isNotEmpty ?? true) return;
-    await _teardown();
-    state = const JamUiState();
+    _closing = true;
+    try {
+      await _teardown();
+      state = const JamUiState();
+    } finally {
+      _closing = false;
+    }
   }
 
-  late final _speakerChanges = StreamController<void>.broadcast();
+  // Never closed: a rebuild of the provider reuses this instance and its subscribers.
+  final _speakerChanges = StreamController<void>.broadcast();
 
   /// The controller as [SpeakerJam] sees it.
   late final SpeakerJamPort speakerPort = _SpeakerPort(this);
 
   SpeakerJamView get _speakerView {
     final j = state.jam;
+    if (_speakerPending) {
+      return const SpeakerJamView(role: SpeakerRole.host, speaker: true, iAmOutput: true);
+    }
     final role = switch (state.phase) {
       JamPhase.idle => SpeakerRole.none,
       JamPhase.active => state.isHost ? SpeakerRole.host : SpeakerRole.guest,
