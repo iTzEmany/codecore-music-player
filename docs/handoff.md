@@ -58,11 +58,7 @@ La feature «Jam: cassa e coda insieme» (`docs/feature-jam-cassa.md`) è nel co
 
 ## Prompt di avvio della prossima sessione
 ```
-/obiettivo fase 69 (feature «Jam a distanza», docs/feature-jam-distanza.md)
-```
-Dopo la prova 68.3, invece:
-```
-Leggi docs/handoff.md. Ho fatto la prova 68.3: gli esiti sono in docs/fase-68-scoperta-e-chiusura-jam.md §68.3. Trasforma i KO in una fase di rilievi e lanciala con /obiettivo.
+/obiettivo fase 69 (prima i rilievi della 68.3, 69.1 … 69.4, poi feature «Jam a distanza», docs/feature-jam-distanza.md)
 ```
 
 ## Prossimi obiettivi
