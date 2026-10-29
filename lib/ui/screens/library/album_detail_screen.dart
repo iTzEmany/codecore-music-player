@@ -233,10 +233,11 @@ class _AlbumMenu extends ConsumerWidget {
         if (v == null || !context.mounted) return;
         switch (v) {
           case _AlbumAction.queue:
+            var added = 0;
             for (final t in list) {
-              ctrl.addToQueue(t.id);
+              added += await ctrl.addToQueue(t.id) ?? 1;
             }
-            showMsg(context, l.addedToQueue);
+            if (context.mounted) showQueued(context, added, wanted: list.length);
           case _AlbumAction.playlist:
             showAddToPlaylistSheet(context, ref, list);
           case _AlbumAction.share:

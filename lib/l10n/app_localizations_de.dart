@@ -5714,6 +5714,19 @@ class AppLocalizationsDe extends AppLocalizations {
   String get speakerAwayNotice => 'Lautsprecher verbinden';
 
   @override
+  String get jamFull => 'Die Jam ist voll';
+
+  @override
+  String get jamLeft => 'Du hast die Jam verlassen';
+
+  @override
+  String get speakerContinueOnPhone => 'Auf dem Handy weiter';
+
+  @override
+  String get speakerContinueOnPhoneLabel =>
+      'Auf dem Handy weiter: Die Jam spielt über den Lautsprecher dieses Handys, ohne Box';
+
+  @override
   String get speakerOfferTitle => 'Den Jam auf deinem Lautsprecher abspielen?';
 
   @override

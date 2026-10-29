@@ -9007,6 +9007,30 @@ abstract class AppLocalizations {
   /// **'Collega una cassa'**
   String get speakerAwayNotice;
 
+  /// No description provided for @jamFull.
+  ///
+  /// In it, this message translates to:
+  /// **'La Jam è piena'**
+  String get jamFull;
+
+  /// No description provided for @jamLeft.
+  ///
+  /// In it, this message translates to:
+  /// **'Sei uscito dalla Jam'**
+  String get jamLeft;
+
+  /// No description provided for @speakerContinueOnPhone.
+  ///
+  /// In it, this message translates to:
+  /// **'Continua sul telefono'**
+  String get speakerContinueOnPhone;
+
+  /// No description provided for @speakerContinueOnPhoneLabel.
+  ///
+  /// In it, this message translates to:
+  /// **'Continua sul telefono: la Jam suona dall’altoparlante di questo telefono, senza la cassa'**
+  String get speakerContinueOnPhoneLabel;
+
   /// No description provided for @speakerOfferTitle.
   ///
   /// In it, this message translates to:

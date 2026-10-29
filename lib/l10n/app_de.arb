@@ -3079,6 +3079,10 @@
   },
   "jamInviteDismiss": "Ausblenden",
   "speakerAwayNotice": "Lautsprecher verbinden",
+  "jamFull": "Die Jam ist voll",
+  "jamLeft": "Du hast die Jam verlassen",
+  "speakerContinueOnPhone": "Auf dem Handy weiter",
+  "speakerContinueOnPhoneLabel": "Auf dem Handy weiter: Die Jam spielt über den Lautsprecher dieses Handys, ohne Box",
   "speakerOfferTitle": "Den Jam auf deinem Lautsprecher abspielen?",
   "speakerOfferBody": "Dein Lautsprecher ist verbunden und der Jam pausiert. Wenn du möchtest, startet die Musik von hier."
 }

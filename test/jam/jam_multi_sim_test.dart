@@ -312,17 +312,18 @@ void feederTests() {
       expect(left.toSet().intersection({...played, ...inJam}), isEmpty);
     });
 
-    test('a full Jam with nothing played refuses; the key stays in the part and enters after the first played track', () async {
+    test('the fill stops 20 seats short of the limit; the keys stay in the part and enter as tracks are played', () async {
       final sim = _Sim(['h', 'a', 'b'], parts: {'h': 100, 'a': 100, 'b': 100});
       await sim.settle();
       int total() => sim.s.items.length + [for (final f in sim.feeders.values) ...f.unsent].length;
-      expect(sim.s.items.length, maxJamItems);
+      const free = maxJamItems - jamManualSeats;
+      expect(sim.s.items.length, free);
       expect(total(), 300);
       sim.send('h', JamCommand.trackEnded(sim.s.current!.id));
       await sim.settle();
-      expect(sim.s.items.length, maxJamItems);
-      expect(total(), 299); // the first one played slid out, nothing else lost
-      expect([for (final f in sim.feeders.values) ...f.unsent], hasLength(99));
+      expect(sim.s.items.length, greaterThan(free)); // a seat opened: they are counted from the current track
+      expect(sim.s.items.length, lessThan(maxJamItems));
+      expect(total(), 300); // nothing lost
     });
 
     test('a track removed from the Jam unplayed stays removed, by the host or by its owner', () async {

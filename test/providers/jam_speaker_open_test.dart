@@ -117,6 +117,18 @@ void main() {
     expect(c.read(shareHubProvider.notifier).speakerJamName, 'Salotto');
   });
 
+  test('«Continua sul telefono»: the speaker coming back does not turn the Jam into the speaker one', () async {
+    final jam = c.read(jamProvider.notifier);
+    _host.open();
+    await jam.debugBegin(JamRole.host, _host.state!);
+    await jam.openSpeakerJam();
+    await jam.send(const JamCommand.speakerAway());
+    expect(await jam.continueOnPhone(), isNull);
+    expect(_host.state!.speaker, isFalse);
+    await jam.openSpeakerJam();
+    expect(_host.state!.speaker, isFalse);
+  });
+
   test('joining another Jam gives up the waiting speaker Jam', () async {
     final jam = c.read(jamProvider.notifier);
     await jam.openSpeakerJam();

@@ -5698,6 +5698,19 @@ class AppLocalizationsPt extends AppLocalizations {
   String get speakerAwayNotice => 'Liga uma coluna';
 
   @override
+  String get jamFull => 'A Jam está cheia';
+
+  @override
+  String get jamLeft => 'Saiu da Jam';
+
+  @override
+  String get speakerContinueOnPhone => 'Continuar no telemóvel';
+
+  @override
+  String get speakerContinueOnPhoneLabel =>
+      'Continuar no telemóvel: a Jam toca no altifalante deste telemóvel, sem a coluna';
+
+  @override
   String get speakerOfferTitle => 'Tocar a Jam na tua coluna?';
 
   @override

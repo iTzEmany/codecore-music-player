@@ -3079,6 +3079,10 @@
   },
   "jamInviteDismiss": "Hide",
   "speakerAwayNotice": "Connect a speaker",
+  "jamFull": "The Jam is full",
+  "jamLeft": "You left the Jam",
+  "speakerContinueOnPhone": "Continue on the phone",
+  "speakerContinueOnPhoneLabel": "Continue on the phone: the Jam plays from this phone’s speaker, without the speaker",
   "speakerOfferTitle": "Play the Jam on your speaker?",
   "speakerOfferBody": "Your speaker is connected and the Jam is paused. If you like, the music restarts from here."
 }

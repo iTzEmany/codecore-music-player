@@ -3642,6 +3642,10 @@
   },
   "jamInviteDismiss": "Nascondi",
   "speakerAwayNotice": "Collega una cassa",
+  "jamFull": "La Jam è piena",
+  "jamLeft": "Sei uscito dalla Jam",
+  "speakerContinueOnPhone": "Continua sul telefono",
+  "speakerContinueOnPhoneLabel": "Continua sul telefono: la Jam suona dall’altoparlante di questo telefono, senza la cassa",
   "speakerOfferTitle": "Suonare la Jam sulla tua cassa?",
   "speakerOfferBody": "La tua cassa è collegata e la Jam è ferma. Se vuoi, la musica riparte da qui."
 }

@@ -70,7 +70,10 @@ void main() {
       handler,
       null,
       jamActive: () => jam,
-      addToJam: toJam.add,
+      addToJam: (ids) async {
+        toJam.add(ids);
+        return ids.length;
+      },
       addOnlineToJam: (r) {
         onlineToJam.add(r.id);
         return true;

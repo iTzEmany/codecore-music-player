@@ -111,17 +111,19 @@ List<TrackActionGroup> bulkActions(
       TrackAction(Icons.playlist_play_rounded, l.playNext, () async {
         // Each one goes right after the playing track: reversed, so the order
         // of the picks is the play order.
+        var added = 0;
         for (final t in tracks.reversed) {
-          ctrl.playNext(t.id);
+          added += await ctrl.playNext(t.id) ?? 1;
         }
-        snack(l.playNextMany(n));
+        if (outer.mounted) showQueued(outer, added, wanted: n, ok: l.playNextMany(n));
         done();
       }),
       TrackAction(Icons.queue_rounded, l.addToQueue, () async {
+        var added = 0;
         for (final t in tracks) {
-          ctrl.addToQueue(t.id);
+          added += await ctrl.addToQueue(t.id) ?? 1;
         }
-        snack(l.addedToQueueMany(n));
+        if (outer.mounted) showQueued(outer, added, wanted: n, ok: l.addedToQueueMany(n));
         done();
       }),
       if (ref.read(jamProvider).active)

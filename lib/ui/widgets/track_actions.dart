@@ -203,7 +203,6 @@ List<TrackActionGroup> trackActions(
   if (isOnlineId(track.id)) return onlineTrackActions(outer, ref, track);
   final l = outer.l10n;
   final ctrl = ref.read(playerControllerProvider);
-  void snack(String text) => showMsg(outer, text);
 
   Future<void> goToAlbum() async {
     final albums = await ref.read(albumsProvider.future);
@@ -242,12 +241,13 @@ List<TrackActionGroup> trackActions(
           },
         ),
       TrackAction(Icons.playlist_play_rounded, l.playNext, () async {
-        ctrl.playNext(track.id);
-        snack(ctrl.inJam ? l.addedToQueue : l.playNextDone);
+        final inJam = ctrl.inJam;
+        final added = await ctrl.playNext(track.id);
+        if (outer.mounted) showQueued(outer, added, ok: inJam ? l.addedToQueue : l.playNextDone);
       }, onStreamRow: true),
       TrackAction(Icons.queue_rounded, l.addToQueue, () async {
-        ctrl.addToQueue(track.id);
-        snack(l.addedToQueue);
+        final added = await ctrl.addToQueue(track.id);
+        if (outer.mounted) showQueued(outer, added);
       }, onStreamRow: true),
     ]),
     TrackActionGroup(l.groupCollection, [

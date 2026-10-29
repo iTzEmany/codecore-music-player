@@ -1150,7 +1150,7 @@ mobile_scanner — fase 24 — 2026-10-19
 ## Fase 69 — Fondamenta della Jam a distanza (`fase-69-fondamenta-jam-distanza.md`)
 - [x] 69.1 La Jam della cassa con la cassa già collegata all'avvio (KO 3 della 68.3)
 - [x] 69.2 L'offerta della cassa sopra la schermata della Jam (KO 4)
-- [ ] 69.3 Jam piena non muta e «Continua sul telefono» (KO 1, D-263)
+- [x] 69.3 Jam piena non muta e «Continua sul telefono» (KO 1, D-263)
 - [ ] 69.4 Prova a mano dei rilievi e resti della 68.3 (utente)
 - [ ] 69.5 `JamGuestLink` senza spostare codice
 - [ ] 69.6 `admitRequest` e `JamGate`

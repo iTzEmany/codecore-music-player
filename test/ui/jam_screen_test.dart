@@ -13,6 +13,7 @@ import 'package:codecore/ui/widgets/empty_state.dart';
 import 'package:codecore/ui/widgets/ring_progress.dart';
 import 'package:codecore/ui/widgets/play_buttons.dart';
 import 'package:codecore/ui/widgets/seek_bar.dart';
+import 'package:codecore/ui/widgets/show_msg.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -43,6 +44,8 @@ class _FakeJam extends JamController {
   }
 
   int ended = 0;
+
+  void setState(JamUiState s) => state = s;
 
   /// A host clock that differs from the device's.
   int? clockMs;
@@ -559,4 +562,49 @@ void main() {
     await h2.dispose(tester);
   }
   );
+
+  for (final left in [true, false]) {
+    testWidgets('a guest that ${left ? 'left' : 'was ended by the host'} reads the right message', (tester) async {
+      final h = await Harness.create(tester);
+      final fake = _FakeJam(active(host: false));
+      await h.pump(
+        tester,
+        Scaffold(
+          body: Builder(
+            builder: (c) => TextButton(
+              onPressed: () => Navigator.of(c).push(MaterialPageRoute<void>(builder: (_) => const JamScreen())),
+              child: const Text('apri'),
+            ),
+          ),
+        ),
+        extraOverrides: [jamProvider.overrideWith(() => fake)],
+      );
+      await tester.tap(find.text('apri'));
+      await tester.pump(const Duration(milliseconds: 400));
+      fake.setState(fake.state.copyWith(phase: JamPhase.ended, left: left));
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(find.text(left ? 'Sei uscito dalla Jam' : 'La Jam è terminata'), findsOneWidget);
+      await tester.pumpAndSettle();
+      await h.dispose(tester);
+    });
+  }
+
+  for (final (added, text) in [(0, 'La Jam è piena'), (3, 'Aggiunti alla Jam: 3'), (null, 'Aggiunto in coda')]) {
+    testWidgets('queue add confirmation: $text', (tester) async {
+      final h = await Harness.create(tester);
+      await h.pump(
+        tester,
+        Builder(
+          builder: (c) => Scaffold(
+            body: TextButton(onPressed: () => showQueued(c, added, wanted: 5), child: const Text('aggiungi')),
+          ),
+        ),
+      );
+      await tester.tap(find.text('aggiungi'));
+      await tester.pump();
+      expect(find.text(text), findsOneWidget);
+      await tester.pumpAndSettle(const Duration(seconds: 5));
+      await h.dispose(tester);
+    });
+  }
 }

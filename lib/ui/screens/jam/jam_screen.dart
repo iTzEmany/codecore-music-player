@@ -53,7 +53,7 @@ class _JamScreenState extends ConsumerState<JamScreen> {
         final t = _outcomeText(l, next);
         _leave(t.isEmpty ? null : t);
       } else if (next.phase == JamPhase.ended) {
-        _leave(next.lost ? l.jamLost : l.jamEnded);
+        _leave(next.lost ? l.jamLost : next.left ? l.jamLeft : l.jamEnded);
       }
     });
     final ctrl = ref.read(jamProvider.notifier);

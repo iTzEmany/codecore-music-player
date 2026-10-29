@@ -3323,6 +3323,10 @@
   },
   "jamInviteDismiss": "Masquer",
   "speakerAwayNotice": "Connecte une enceinte",
+  "jamFull": "La Jam est pleine",
+  "jamLeft": "Vous avez quitté la Jam",
+  "speakerContinueOnPhone": "Continuer sur le téléphone",
+  "speakerContinueOnPhoneLabel": "Continuer sur le téléphone : la Jam joue sur le haut-parleur de ce téléphone, sans l’enceinte",
   "speakerOfferTitle": "Jouer la Jam sur ton enceinte ?",
   "speakerOfferBody": "Ton enceinte est connectée et la Jam est en pause. Si tu veux, la musique repart d’ici."
 }

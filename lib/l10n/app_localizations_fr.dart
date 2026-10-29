@@ -5744,6 +5744,19 @@ class AppLocalizationsFr extends AppLocalizations {
   String get speakerAwayNotice => 'Connecte une enceinte';
 
   @override
+  String get jamFull => 'La Jam est pleine';
+
+  @override
+  String get jamLeft => 'Vous avez quitté la Jam';
+
+  @override
+  String get speakerContinueOnPhone => 'Continuer sur le téléphone';
+
+  @override
+  String get speakerContinueOnPhoneLabel =>
+      'Continuer sur le téléphone : la Jam joue sur le haut-parleur de ce téléphone, sans l’enceinte';
+
+  @override
   String get speakerOfferTitle => 'Jouer la Jam sur ton enceinte ?';
 
   @override

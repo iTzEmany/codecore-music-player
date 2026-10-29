@@ -34,6 +34,45 @@ void main() {
     expect(f.unsent, ['1', '2']); // sent, waiting to be seen in the Jam
   });
 
+  JamState fullTo(int n) => JamState(
+      version: 1,
+      hostDeviceId: 'h',
+      outputDeviceId: 'h',
+      mode: JamMode.together,
+      currentIndex: 0,
+      items: [
+        for (var i = 0; i < n; i++)
+          JamItem(id: i + 1, ownerDeviceId: 'b', title: 't$i', ext: 'mp3'),
+      ]);
+
+  test('the fill leaves the last seats to hand-made adds, which take them', () async {
+    final sent = <String>[];
+    JamPartFeeder feeder() => JamPartFeeder(
+          ownId: 'a',
+          part: ['1'],
+          send: (c) async {
+            sent.add(c.item!.partKey!);
+            return const JamResult.fail(JamError.notFound);
+          },
+          itemOf: (k) async => JamItem(id: 0, ownerDeviceId: 'a', title: k, ext: 'mp3', partKey: k),
+          suggest: (_) async => null,
+        );
+    const free = maxJamItems - jamManualSeats;
+    await feeder().update(fullTo(free));
+    expect(sent, isEmpty);
+    await feeder().update(fullTo(free - 1));
+    expect(sent, ['1']);
+    var s = fullTo(free);
+    for (var i = 0; i < jamManualSeats; i++) {
+      final r = applyCommand(s,
+          JamCommand.add(JamItem(id: 0, ownerDeviceId: 'a', title: 'm$i', ext: 'mp3')),
+          from: 'a', nowMs: 1);
+      expect(r.isOk, true, reason: 'seat $i');
+      s = r.state!;
+    }
+    expect(s.items.length, maxJamItems);
+  });
+
   JamState st(int v, [List<JamItem> items = const []]) => JamState(
       version: v,
       hostDeviceId: 'h',

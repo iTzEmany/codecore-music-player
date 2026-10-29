@@ -5707,6 +5707,19 @@ class AppLocalizationsEs extends AppLocalizations {
   String get speakerAwayNotice => 'Conecta un altavoz';
 
   @override
+  String get jamFull => 'La Jam está llena';
+
+  @override
+  String get jamLeft => 'Has salido de la Jam';
+
+  @override
+  String get speakerContinueOnPhone => 'Seguir en el teléfono';
+
+  @override
+  String get speakerContinueOnPhoneLabel =>
+      'Seguir en el teléfono: la Jam suena por el altavoz de este teléfono, sin la caja';
+
+  @override
   String get speakerOfferTitle => '¿Reproducir la Jam en tu altavoz?';
 
   @override

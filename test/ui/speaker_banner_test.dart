@@ -41,9 +41,14 @@ class _Jam extends JamController {
   _Jam([this.initial = const JamUiState()]);
   final JamUiState initial;
   final requested = <String>[];
-  var opened = 0;
+  var opened = 0, continued = 0;
   @override
   JamUiState build() => initial;
+  @override
+  Future<JamError?> continueOnPhone() async {
+    continued++;
+    return null;
+  }
   @override
   Future<void> request(Peer peer) async => requested.add(peer.id);
   @override
@@ -140,6 +145,25 @@ void main() {
     await _app(t, h, _Hub(), _Jam(away));
     expect(find.text('Collega una cassa'), findsOneWidget);
     await h.dispose(t);
+  });
+
+  testWidgets('away notice: «Continua sul telefono» only for the host, and it sends', (t) async {
+    JamUiState away(JamRole r) => JamUiState(
+      phase: JamPhase.active,
+      role: r,
+      jam: const JamState(version: 1, hostDeviceId: 'host', outputDeviceId: 'host', speaker: true, speakerAwaySince: 5),
+    );
+    final h = await Harness.create(t);
+    await _app(t, h, _Hub(), _Jam(away(JamRole.guest)));
+    expect(find.text('Continua sul telefono'), findsNothing);
+    await h.dispose(t);
+    final h2 = await Harness.create(t);
+    final jam = _Jam(away(JamRole.host));
+    await _app(t, h2, _Hub(), jam);
+    await t.tap(find.text('Continua sul telefono'));
+    await t.pump();
+    expect(jam.continued, 1);
+    await h2.dispose(t);
   });
 
   testWidgets('offer sheet: Si accepts the offer', (t) async {
