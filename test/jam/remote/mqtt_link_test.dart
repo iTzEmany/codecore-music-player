@@ -9,6 +9,10 @@ void main() {
     expect(ok('', 8883), isFalse);
     expect(ok('a b', 8883), isFalse);
     expect(ok('h', 0), isFalse);
+    expect(ok('h', 1), isTrue);
+    for (final bad in ['http://h', 'h:1883', 'h/x', 'a\u00a0b', 'a\u200bb', 'a\u200cb', 'a\u200db', 'a\ufeffb', 'a\tb', 'a\u3000b']) {
+      expect(ok(bad, 8883), isFalse, reason: bad);
+    }
     expect(ok('h', 65536), isFalse);
     expect(ok('h', 65535), isTrue);
   });
@@ -21,6 +25,10 @@ void main() {
     expect(decodeBrokers('not json'), kDefaultJamBrokers);
     expect(kDefaultJamBrokers.map((b) => '$b'), ['broker.emqx.io:8883', 'test.mosquitto.org:8886']);
     expect(kDefaultJamBrokers.every((b) => b.tls), isTrue);
+  });
+
+  test('hosts that differ only in case are duplicates', () {
+    expect(decodeBrokers('[{"host":"X.org","port":1},{"host":"x.org","port":1}]'), [const BrokerEntry(host: 'X.org', port: 1)]);
   });
 
   test('the client id has 20 characters and changes every time', () {

@@ -10,9 +10,17 @@ class BrokerEntry {
   final int port;
   final bool tls;
 
-  /// Host not empty and without spaces, port 1..65535.
+  /// A bare host name (no scheme, port, path, whitespace or invisible
+  /// characters), port 1..65535.
   bool get isValid =>
-      host.isNotEmpty && !host.contains(RegExp(r'\s')) && port >= 1 && port <= 65535;
+      host.isNotEmpty &&
+      !host.contains(RegExp(r'[\s:/\x00-\x1f\x7f-\x9f\u200b-\u200f\u2028\u2029\u2060\ufeff]')) &&
+      port >= 1 &&
+      port <= 65535;
+
+  /// Same broker, host compared ignoring case.
+  bool sameAs(BrokerEntry o) =>
+      o.host.toLowerCase() == host.toLowerCase() && o.port == port && o.tls == tls;
 
   Map<String, Object> toJson() => {'host': host, 'port': port, 'tls': tls};
 
@@ -48,7 +56,7 @@ List<BrokerEntry> decodeBrokers(String? raw) {
           port: e['port'] as int,
           tls: e['tls'] as bool? ?? true,
         );
-        if (b.isValid && !out.contains(b)) out.add(b);
+        if (b.isValid && !out.any((o) => o.sameAs(b))) out.add(b);
       } on Object catch (err, st) {
         AppLog.w('jamBrokers: entry dropped', err, st);
       }

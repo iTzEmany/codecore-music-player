@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:codecore/providers/jam_broker_providers.dart';
+import 'package:codecore/data/settings/settings_store.dart';
 import 'package:codecore/providers/settings_providers.dart';
 import 'package:codecore/services/jam/remote/broker_entry.dart';
 import 'package:codecore/services/jam/remote/mqtt_link.dart';
@@ -9,6 +10,7 @@ import 'package:codecore/ui/screens/settings/jam_remote_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../support/app_harness.dart';
 
@@ -17,6 +19,7 @@ class FakeMqttLink implements MqttLink {
   FakeMqttLink({this.fail = false, this.echo = true});
   final bool fail;
   final bool echo;
+  final subscribed = <String>{};
   final _ctl = StreamController<MqttIncoming>.broadcast();
   bool disconnected = false;
 
@@ -26,12 +29,14 @@ class FakeMqttLink implements MqttLink {
   }
 
   @override
-  void subscribe(String topic) {}
+  void subscribe(String topic) => subscribed.add(topic);
   @override
   void unsubscribe(String topic) {}
   @override
   void publish(String topic, Uint8List bytes, {bool retain = false}) =>
-      echo ? scheduleMicrotask(() => _ctl.add((topic: topic, payload: bytes))) : null;
+      echo && subscribed.contains(topic)
+          ? scheduleMicrotask(() => _ctl.add((topic: topic, payload: bytes)))
+          : null;
   @override
   Stream<MqttIncoming> get messages => _ctl.stream;
   @override
@@ -136,9 +141,57 @@ void main() {
     expect(link.disconnected, isTrue);
   });
 
+  test('Prova fails when the message comes back on another topic or with another payload', () async {
+    for (final mangle in [true, false]) {
+      final link = _WrongEchoLink(mangleTopic: mangle);
+      expect(await testBroker(link, kDefaultJamBrokers[0], timeout: const Duration(milliseconds: 50)), isFalse);
+    }
+  });
+
+  test('add of a duplicate or an invalid broker returns false; port 1 is valid, port 0 is not', () async {
+    SharedPreferences.setMockInitialValues({});
+    final store = await SettingsStore.open();
+    final c = ProviderContainer(overrides: [settingsStoreProvider.overrideWithValue(store)]);
+    addTearDown(c.dispose);
+    final n = c.read(jamBrokersProvider.notifier);
+    expect(n.add(kDefaultJamBrokers[0]), isFalse);
+    expect(n.add(const BrokerEntry(host: 'p.net', port: 0)), isFalse);
+    expect(n.add(const BrokerEntry(host: 'p.net', port: 1)), isTrue);
+  });
+
+  test('move down by one swaps the neighbours; restore removes the saved key', () async {
+    SharedPreferences.setMockInitialValues({});
+    final store = await SettingsStore.open();
+    final c = ProviderContainer(overrides: [settingsStoreProvider.overrideWithValue(store)]);
+    addTearDown(c.dispose);
+    final n = c.read(jamBrokersProvider.notifier);
+    n.add(const BrokerEntry(host: 'c.net', port: 1));
+    n.move(0, 2); // the UI passes index + 1 for "down by one"
+    expect(c.read(jamBrokersProvider).map((b) => b.host), ['test.mosquitto.org', 'broker.emqx.io', 'c.net']);
+    await Future<void>.delayed(Duration.zero);
+    expect(store.readJamBrokersRaw(), isNotNull);
+    n.restore();
+    await Future<void>.delayed(Duration.zero);
+    expect(store.readJamBrokersRaw(), isNull);
+  });
+
   test('Prova with a refused connection still disconnects', () async {
     final link = FakeMqttLink(fail: true);
     expect(await testBroker(link, kDefaultJamBrokers[0]), isFalse);
     expect(link.disconnected, isTrue);
   });
+}
+
+/// Subscribes fine but echoes on another topic, or the same topic with another payload.
+class _WrongEchoLink extends FakeMqttLink {
+  _WrongEchoLink({required this.mangleTopic});
+  final bool mangleTopic;
+  final _out = StreamController<MqttIncoming>.broadcast();
+  @override
+  Stream<MqttIncoming> get messages => _out.stream;
+  @override
+  void publish(String topic, Uint8List bytes, {bool retain = false}) => scheduleMicrotask(() => _out.add((
+        topic: mangleTopic ? '$topic/x' : topic,
+        payload: mangleTopic ? bytes : Uint8List.fromList([for (final b in bytes) b ^ 1]),
+      )));
 }
