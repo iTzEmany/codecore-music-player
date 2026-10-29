@@ -3284,7 +3284,7 @@
     }
   },
   "speakerPermTitle": "Autorisation Bluetooth",
-  "speakerPermBody": "Pour reconnaître ton enceinte, Codecore doit voir quels appareils Bluetooth sont connectés. Il ne lit rien d'autre.",
+  "speakerPermBody": "Pour reconnaître ton enceinte, Codecore doit voir quels appareils Bluetooth sont connectés. Il ne lit rien d’autre.",
   "speakerPermAllow": "Autoriser",
   "speakerNotNow": "Pas maintenant",
   "speakerAskTitle": "{name} est-elle une enceinte ?",
@@ -3298,9 +3298,9 @@
   "speakerAskBody": "Si oui, Codecore ouvre tout seul une Jam à la connexion, que les autres peuvent rejoindre.",
   "speakerYes": "Oui",
   "speakerNo": "Non",
-  "speakerJamSection": "Jam sur l'enceinte",
+  "speakerJamSection": "Jam sur l’enceinte",
   "speakerJamHint": "Quand une enceinte Bluetooth se connecte, Codecore ouvre tout seul une Jam que les autres peuvent rejoindre.",
-  "speakerNoDevices": "Aucun appareil enregistré pour l'instant",
+  "speakerNoDevices": "Aucun appareil enregistré pour l’instant",
   "speakerIsSpeaker": "Enceinte",
   "speakerNotSpeaker": "Pas une enceinte",
   "speakerPermDenied": "Autorisation Bluetooth refusée",
@@ -3324,5 +3324,5 @@
   "jamInviteDismiss": "Masquer",
   "speakerAwayNotice": "Connecte une enceinte",
   "speakerOfferTitle": "Jouer la Jam sur ton enceinte ?",
-  "speakerOfferBody": "Ton enceinte est connectée et la Jam est en pause. Si tu veux, la musique repart d'ici."
+  "speakerOfferBody": "Ton enceinte est connectée et la Jam est en pause. Si tu veux, la musique repart d’ici."
 }

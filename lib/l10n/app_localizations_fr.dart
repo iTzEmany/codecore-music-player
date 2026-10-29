@@ -5682,7 +5682,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get speakerPermBody =>
-      'Pour reconnaître ton enceinte, Codecore doit voir quels appareils Bluetooth sont connectés. Il ne lit rien d\'autre.';
+      'Pour reconnaître ton enceinte, Codecore doit voir quels appareils Bluetooth sont connectés. Il ne lit rien d’autre.';
 
   @override
   String get speakerPermAllow => 'Autoriser';
@@ -5706,14 +5706,14 @@ class AppLocalizationsFr extends AppLocalizations {
   String get speakerNo => 'Non';
 
   @override
-  String get speakerJamSection => 'Jam sur l\'enceinte';
+  String get speakerJamSection => 'Jam sur l’enceinte';
 
   @override
   String get speakerJamHint =>
       'Quand une enceinte Bluetooth se connecte, Codecore ouvre tout seul une Jam que les autres peuvent rejoindre.';
 
   @override
-  String get speakerNoDevices => 'Aucun appareil enregistré pour l\'instant';
+  String get speakerNoDevices => 'Aucun appareil enregistré pour l’instant';
 
   @override
   String get speakerIsSpeaker => 'Enceinte';
@@ -5748,5 +5748,5 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get speakerOfferBody =>
-      'Ton enceinte est connectée et la Jam est en pause. Si tu veux, la musique repart d\'ici.';
+      'Ton enceinte est connectée et la Jam est en pause. Si tu veux, la musique repart d’ici.';
 }
