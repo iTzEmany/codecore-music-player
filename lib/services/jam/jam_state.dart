@@ -46,25 +46,39 @@ JamResult applyCommand(
       final inherited = isHost && item.inherited;
       final added = item.copyWith(id: s.nextItemId, inherited: inherited);
       final first = s.currentIndex < 0;
+      var cur = s.currentIndex;
       if (items.length >= maxJamItems) {
-        final victim = inherited
-            ? -1
-            : items.lastIndexWhere((i) => i.inherited, items.length - 1);
-        if (victim <= s.currentIndex) return const JamResult.fail(JamError.full);
-        items.removeAt(victim);
+        if (together && cur > 0) {
+          // The window slides: the oldest played track makes room (D-194).
+          items.removeAt(0);
+          cur--;
+        } else if (together) {
+          return const JamResult.fail(JamError.full); // together never drops an unplayed track
+        } else {
+          final victim = inherited
+              ? -1
+              : items.lastIndexWhere((i) => i.inherited, items.length - 1);
+          if (victim <= cur) return const JamResult.fail(JamError.full);
+          items.removeAt(victim);
+        }
       }
       if (first || (inherited && !together)) {
         items.add(added);
       } else if (together) {
-        // Head of the sender's part, then the turns are redone (D-214).
-        var p = inherited
-            ? -1 // a seed track goes to the back of the host's part
-            : items.indexWhere((i) => i.ownerDeviceId == from, s.currentIndex + 1);
-        if (p < 0) p = items.length;
+        // A fed track (seed or part key) goes to the back of the sender's part,
+        // keeping the part's order; any other add to its head. Turns are redone (D-214).
+        var p = items.length;
+        if (inherited || added.partKey != null) {
+          final last = items.lastIndexWhere((i) => i.ownerDeviceId == from);
+          if (last > cur) p = last + 1;
+        } else {
+          final head = items.indexWhere((i) => i.ownerDeviceId == from, cur + 1);
+          if (head >= 0) p = head;
+        }
         items.insert(p, added);
-        items.replaceRange(0, items.length, reordered(items, s.currentIndex));
+        items.replaceRange(0, items.length, reordered(items, cur));
       } else {
-        var p = s.currentIndex + 1;
+        var p = cur + 1;
         while (p < items.length && !items[p].inherited) {
           p++;
         }
@@ -73,7 +87,7 @@ JamResult applyCommand(
       return commit(s.copyWith(
         items: items,
         nextItemId: s.nextItemId + 1,
-        currentIndex: first ? items.length - 1 : s.currentIndex,
+        currentIndex: first ? items.length - 1 : cur,
         positionMs: first ? 0 : null,
         positionAt: first ? nowMs : null,
       ));

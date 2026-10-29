@@ -1,3 +1,5 @@
+import 'dart:math' show min;
+
 import 'package:drift/drift.dart';
 
 import '../db/app_database.dart';
@@ -281,5 +283,43 @@ ORDER BY g.k COLLATE NOCASE
                 expression: t.title.collate(Collate.noCase)),
           ]))
         .watch();
+  }
+
+  /// How many of the library tracks [ids] have each genre (key `lower(trim(genre))`):
+  /// the weights of the Jam suggestions (R-102).
+  Future<Map<String, int>> genreCounts(List<int> ids) async {
+    final out = <String, int>{};
+    for (var i = 0; i < ids.length; i += 500) {
+      final chunk = ids.sublist(i, min(i + 500, ids.length));
+      final rows = await _db
+          .customSelect(
+            'SELECT lower(trim(genre)) AS g, COUNT(*) AS n FROM tracks '
+            "WHERE id IN (${List.filled(chunk.length, '?').join(',')}) AND missing = 0 AND ignored = 0 AND kind = 0 "
+            "AND genre IS NOT NULL AND trim(genre) <> '' GROUP BY g",
+            variables: [for (final id in chunk) Variable<int>(id)],
+            readsFrom: {_db.tracks},
+          )
+          .get();
+      for (final r in rows) {
+        out.update(r.read<String>('g'), (n) => n + r.read<int>('n'),
+            ifAbsent: () => r.read<int>('n'));
+      }
+    }
+    return out;
+  }
+
+  /// Up to [limit] random visible library tracks, of genre [genre] when given
+  /// (compared as `lower(trim(?))` on both sides).
+  Future<List<Track>> randomTracks({String? genre, int limit = 200}) async {
+    final rows = await _db
+        .customSelect(
+          'SELECT ${lightTrackColumns(_db)} FROM tracks WHERE missing = 0 AND ignored = 0 AND kind = 0 '
+          '${genre == null ? '' : 'AND lower(trim(genre)) = lower(trim(?)) '}'
+          'ORDER BY random() LIMIT ?',
+          variables: [if (genre != null) Variable<String>(genre), Variable<int>(limit)],
+          readsFrom: {_db.tracks},
+        )
+        .get();
+    return [for (final r in rows) _db.tracks.map(r.data)];
   }
 }

@@ -626,5 +626,39 @@ void togetherTests() {
         }
       }
     });
+
+    test('a full Jam slides in together mode: the oldest played track makes room (D-194)', () {
+      JamState full(JamMode m, int cur) => startTogether().copyWith(
+            mode: m,
+            nextItemId: maxJamItems,
+            currentIndex: cur,
+            items: [
+              for (var i = 0; i < maxJamItems; i++)
+                JamItem(id: i, ownerDeviceId: i.isEven ? host : guest, title: 'p$i', ext: 'mp3'),
+            ],
+          );
+      var s = ok(full(JamMode.together, 5), JamCommand.add(item(guest, title: 'new')), guest);
+      expect(s.items.length, maxJamItems);
+      expect((s.items.first.title, s.currentIndex, s.current!.title), ('p1', 4, 'p5'));
+      expect(s.items.any((i) => i.title == 'new'), true);
+      // Nothing played yet: refused, and together never drops an unplayed track.
+      expect(err(full(JamMode.together, 0), JamCommand.add(item(guest)), guest), JamError.full);
+      expect(err(full(JamMode.together, 0), JamCommand.add(item(host, inherited: true)), host), JamError.full);
+      // «Coda dell'host»: no sliding.
+      expect(err(full(JamMode.host, 5), JamCommand.add(item(guest)), guest), JamError.full);
+    });
+
+    test('a fed track (partKey) goes to the back of its owner part, an add to the head', () {
+      JamItem fed(String o, String t) => JamItem(
+          id: 0, ownerDeviceId: o, title: t, ext: 'mp3', partKey: t);
+      var s = ok(startTogether(), JamCommand.add(item(host, title: 'cur')), host);
+      s = ok(s, const JamCommand.setMode(JamMode.together), host);
+      for (final t in ['a', 'b', 'c']) {
+        s = ok(s, JamCommand.add(fed(guest, t)), guest);
+      }
+      expect(after(s), 'a b c');
+      s = ok(s, JamCommand.add(item(guest, title: 'now')), guest);
+      expect(after(s), 'now a b c');
+    });
   });
 }

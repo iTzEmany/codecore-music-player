@@ -1126,9 +1126,9 @@ mobile_scanner — fase 24 — 2026-10-19
 - [x] 66.1 Modalità nello stato della Jam
 - [x] 66.2 Ordine a turno
 - [x] 66.3 Riga della modalità e niente trascinamento
-- [ ] 66.4 Parte di ognuno e feeder
-- [ ] 66.5 Suggeriti locali
-- [ ] 66.6 Ritorno, ingresso e uscita (reducer e removeMember fatti, D-221; mancano ingresso/uscita nel feeder)
+- [x] 66.4 Parte di ognuno e feeder
+- [x] 66.5 Suggeriti locali
+- [x] 66.6 Ritorno, ingresso e uscita (reducer, removeMember e controller; D-221)
 - [ ] 66.7 Controlli di fase
 
 ## Fase 67 — Jam della cassa (`fase-67-jam-della-cassa.md`)

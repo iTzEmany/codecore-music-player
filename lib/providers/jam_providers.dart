@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math' show Random;
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
@@ -24,6 +25,8 @@ import '../services/jam/jam_host.dart';
 import '../services/jam/jam_models.dart';
 import '../services/jam/jam_online_adder.dart';
 import '../services/jam/jam_output.dart';
+import '../services/jam/jam_part_feeder.dart';
+import '../services/jam/jam_suggestion.dart';
 import '../services/jam/jam_state.dart';
 import '../services/online/download_index.dart';
 import '../services/online/youtube_service.dart' show YtResult;
@@ -32,7 +35,7 @@ import '../services/stream/stream_cache.dart';
 import '../services/jam/jam_transport.dart';
 import '../services/share/discovery.dart';
 import 'database_providers.dart';
-import 'library_providers.dart' show coverStoreProvider;
+import 'library_providers.dart' show coverStoreProvider, libraryQueriesProvider;
 import 'online_providers.dart' show creditsRepositoryProvider;
 import 'player_providers.dart';
 import 'settings_providers.dart';
@@ -122,6 +125,27 @@ Future<List<Track>> jamSeedTracks(
   ];
 }
 
+/// The Jam item of library track [t] owned by [ownId]; null when its format cannot go in a Jam.
+JamItem? jamItemOfTrack(Track t, String ownId,
+    {bool inherited = false, String? partKey, bool suggested = false}) {
+  final ext = p.extension(t.path).replaceFirst('.', '').toLowerCase();
+  if (!jamExts.contains(ext)) return null;
+  return JamItem(
+    id: 0,
+    ownerDeviceId: ownId,
+    title: t.title,
+    artist: t.artist,
+    album: t.album,
+    durationMs: t.durationMs,
+    ext: ext,
+    sizeBytes: t.sizeBytes,
+    ref: t.id.toString(),
+    inherited: inherited,
+    suggested: suggested,
+    partKey: partKey,
+  );
+}
+
 const _ytPrefix = 'yt:';
 
 /// The owner's [TrackMeta] of [item] from [uri]; on no answer, 404 or garbage, the
@@ -181,6 +205,23 @@ class JamController extends Notifier<JamUiState> {
   var _syncLogs = 0;
   var _failures = 0;
   var _held = false;
+
+  /// Our part of «Coda insieme» (R-99): fed into the Jam while the mode is `together`.
+  JamPartFeeder? _feeder;
+
+  /// The library ids of our queue from before the Jam: the genres of the suggestions (R-102).
+  var _beforeIds = const <int>[];
+
+  /// Our part worked out when the guest presses «Esci», before the host drops our tracks.
+  List<int>? _exitPart;
+
+  @visibleForTesting
+  JamPartFeeder? get debugFeeder => _feeder;
+
+  @visibleForTesting
+  void debugState(JamState s) => _onState(s);
+  Map<String, int>? _genres;
+  final _random = Random();
 
   /// Cache keys pinned for the queue (counted pins: the player's own pins add up).
   final _pinned = <String>{};
@@ -300,7 +341,9 @@ class JamController extends Notifier<JamUiState> {
     final position = ref.read(positionProvider).value ?? Duration.zero;
     await _begin(JamRole.host, host.state ?? s);
     if (seed.isNotEmpty) {
-      final n = await addTracks(seed, inherited: true);
+      // What does not fit in the Jam stays in our part for «Coda insieme» (R-99).
+      if (state.active) _startFeeder([for (final t in seed) t.id]);
+      final n = await _addTracks(seed, inherited: true, keyed: true);
       AppLog.i('jam: $n of ${seed.length} queued tracks added to the Jam');
       // Music that was playing keeps playing, from the same point.
       if (n > 0 && wasPlaying) {
@@ -336,18 +379,81 @@ class JamController extends Notifier<JamUiState> {
   }
 
   /// Puts the queue back as it was, paused, and lets the disk follow again.
+  /// A Jam left in «Coda insieme» gives back our part not yet played, from its first
+  /// track (D-209); never an empty queue when there was one before (invariant 6).
   Future<void> _restoreLocalQueue() async {
     final s = _saved;
     _saved = null;
     if (s == null) return;
+    var (ids, index, position) = (s.ids, s.index, s.position);
+    final part = _exitPart ?? _unplayedPart();
+    if (part.isNotEmpty) (ids, index, position) = (part, 0, Duration.zero);
     try {
-      await _localHandler?.restore(s.ids, s.index, s.position);
+      await _localHandler?.restore(ids, index, position);
     } on Object catch (e, st) {
       AppLog.w('jam: could not restore the local queue', e, st);
     }
-    _persistence?.release(s.position);
+    _persistence?.release(position);
     await _persistence?.flush();
     _persistence = null;
+  }
+
+  /// Library ids of our part left to play when the Jam was in «Coda insieme»: our items after
+  /// the current one, in order, then what the feeder still holds. Online items stay in the
+  /// Jam for the host (D-93) and are not part of the queue given back. Empty in «Coda dell'host».
+  List<int> _unplayedPart() {
+    final js = state.jam, feeder = _feeder;
+    if (js == null || feeder == null || js.mode != JamMode.together) return const [];
+    final inJam = {
+      for (final (n, i) in js.items.indexed)
+        if (n > js.currentIndex && i.ownerDeviceId == _ownId) i.partKey,
+    };
+    return [
+      for (final (n, i) in js.items.indexed)
+        if (n > js.currentIndex && i.ownerDeviceId == _ownId) ?int.tryParse(i.ref ?? ''),
+      for (final k in feeder.unsent)
+        if (!inJam.contains(k)) ?jamPartKeyId(k),
+    ];
+  }
+
+  void _startFeeder(List<int> ids) {
+    _beforeIds = ids;
+    _genres = null;
+    _feeder = JamPartFeeder(
+      ownId: _ownId,
+      part: jamPartKeys(ids),
+      send: _sendResult,
+      itemOf: _partItem,
+      suggest: _suggestion,
+    );
+  }
+
+  Future<JamItem?> _partItem(String key) async {
+    final id = jamPartKeyId(key);
+    final t = id == null ? null : await ref.read(trackRepositoryProvider).getById(id);
+    return t == null || t.missing ? null : jamItemOfTrack(t, _ownId, partKey: key);
+  }
+
+  /// A track for a part that ran out: by the genres of our queue from before, none played in this Jam.
+  Future<JamItem?> _suggestion(JamState s) async {
+    final q = ref.read(libraryQueriesProvider);
+    final genres = _genres ??= await q.genreCounts(_beforeIds);
+    final played = s.items.take(s.currentIndex + 1);
+    final ids = {
+      for (final i in played)
+        if (i.ownerDeviceId == _ownId) ?int.tryParse(i.ref ?? ''),
+    };
+    final titles = {for (final i in played) suggestionKey(i.title, i.artist)};
+    final t = await pickSuggestion<Track>(
+      genreWeights: genres,
+      random: _random,
+      candidates: (g) async => [
+        for (final t in await q.randomTracks(genre: g))
+          if (jamItemOfTrack(t, _ownId) != null) t,
+      ],
+      isPlayed: (t) => ids.contains(t.id) || titles.contains(suggestionKey(t.title, t.artist)),
+    );
+    return t == null ? null : jamItemOfTrack(t, _ownId, suggested: true);
   }
 
   @visibleForTesting
@@ -360,6 +466,12 @@ class JamController extends Notifier<JamUiState> {
     if (role == JamRole.guest) await saveLocalQueue();
     // Lost or ended while saving: _finish already tore everything down.
     if (state.phase == JamPhase.ended) return;
+    final saved = _saved;
+    if (role == JamRole.guest && saved != null) {
+      _startFeeder(rotateQueueFromCurrent(saved.ids, saved.index));
+    } else if (role == JamRole.host) {
+      _startFeeder(const []); // an empty queue still gets suggestions (R-102); the seed replaces it
+    }
     try {
       await _beginJam(role, s);
     } on Object catch (e, st) {
@@ -459,6 +571,8 @@ class JamController extends Notifier<JamUiState> {
 
   void _onState(JamState s) {
     if (state.phase != JamPhase.active) return;
+    // Leaving: the part to give back is already worked out; a late state without our tracks is ignored.
+    if (_exitPart != null) return;
     state = state.copyWith(jam: s);
     _transport?.update(s);
     if (s.ended) {
@@ -469,6 +583,7 @@ class JamController extends Notifier<JamUiState> {
     _precache(s);
     _syncPins(s);
     _adder?.seen(s.items);
+    unawaited(_feeder?.update(s));
   }
 
   void _onItemFailed(int id) {
@@ -635,12 +750,26 @@ class JamController extends Notifier<JamUiState> {
 
   Future<JamError?> send(JamCommand cmd) async {
     if (!state.active) return JamError.ended;
-    if (state.role == JamRole.host) {
-      final r = _host?.apply(cmd);
-      return r?.error;
-    }
-    final r = await _guest?.send(cmd);
-    return r?.error;
+    // Removing our own fed track takes it out of our part for good (R-100): before the
+    // new state reaches the feeder, which would see it as lost.
+    final key = _ownPartKey(cmd);
+    if (key != null) _feeder?.forget(key);
+    return (await _dispatch(cmd))?.error;
+  }
+
+  Future<JamResult?> _dispatch(JamCommand cmd) async =>
+      state.role == JamRole.host ? _host?.apply(cmd) : await _guest?.send(cmd);
+
+  Future<JamResult> _sendResult(JamCommand cmd) async {
+    if (!state.active) return const JamResult.fail(JamError.ended);
+    return await _dispatch(cmd) ?? const JamResult.fail(JamError.notFound);
+  }
+
+  /// The part key of our own item that [cmd] removes, if any.
+  String? _ownPartKey(JamCommand cmd) {
+    if (cmd.type != JamCommandType.remove) return null;
+    final i = state.jam?.items.where((i) => i.id == cmd.itemId).firstOrNull;
+    return i?.ownerDeviceId == _ownId ? i?.partKey : null;
   }
 
   @visibleForTesting
@@ -683,27 +812,17 @@ class JamController extends Notifier<JamUiState> {
   }
 
   /// Adds library tracks, owned by this device, to the shared queue.
-  Future<int> addTracks(List<Track> tracks, {bool inherited = false}) async {
+  Future<int> addTracks(List<Track> tracks, {bool inherited = false}) =>
+      _addTracks(tracks, inherited: inherited);
+
+  /// [keyed]: each track carries its part key (the host's seed, see [jamPartKeys]).
+  Future<int> _addTracks(List<Track> tracks, {bool inherited = false, bool keyed = false}) async {
     var added = 0;
-    for (final t in tracks) {
-      final ext = p.extension(t.path).replaceFirst('.', '').toLowerCase();
-      if (!jamExts.contains(ext)) continue;
-      final err = await send(
-        JamCommand.add(
-          JamItem(
-            id: 0,
-            ownerDeviceId: _ownId,
-            title: t.title,
-            artist: t.artist,
-            album: t.album,
-            durationMs: t.durationMs,
-            ext: ext,
-            sizeBytes: t.sizeBytes,
-            ref: t.id.toString(),
-            inherited: inherited,
-          ),
-        ),
-      );
+    final keys = keyed ? jamPartKeys(tracks.map((t) => t.id)) : null;
+    for (final (n, t) in tracks.indexed) {
+      final item = jamItemOfTrack(t, _ownId, inherited: inherited, partKey: keys?[n]);
+      if (item == null) continue;
+      final err = await send(JamCommand.add(item));
       if (err == null) added++;
       if (err == JamError.full) break;
     }
@@ -747,6 +866,7 @@ class JamController extends Notifier<JamUiState> {
       _host?.endSession();
       await Future<void>.delayed(const Duration(milliseconds: 300));
     } else {
+      _exitPart = _unplayedPart();
       await _guest?.leave();
     }
     await _finish();
@@ -770,8 +890,13 @@ class JamController extends Notifier<JamUiState> {
     // Give the system controls back to the local player.
     _attachedTo?.attachRemote(null);
     _attachedTo = null;
+    _feeder?.dispose();
     // Not while the app itself is going away: the saved queue stays on disk.
     if (release) await _restoreLocalQueue();
+    _feeder = null;
+    _beforeIds = const [];
+    _genres = null;
+    _exitPart = null;
     await _transport?.dispose();
     _transport = null;
     await _output?.dispose();

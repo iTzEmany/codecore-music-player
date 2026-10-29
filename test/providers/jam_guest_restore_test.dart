@@ -1,8 +1,11 @@
 import 'dart:io';
 
 import 'package:codecore/data/db/app_database.dart';
+import 'package:codecore/data/repositories/library_queries.dart';
 import 'package:codecore/data/repositories/track_repository.dart';
+import 'package:codecore/providers/library_providers.dart' show libraryQueriesProvider;
 import 'package:codecore/data/settings/settings_store.dart';
+import 'package:codecore/providers/database_providers.dart' show trackRepositoryProvider;
 import 'package:codecore/providers/jam_providers.dart';
 import 'package:codecore/providers/player_providers.dart';
 import 'package:codecore/services/jam/jam_models.dart';
@@ -68,6 +71,8 @@ void main() {
       settingsStoreProvider.overrideWithValue(store),
       shareHubProvider.overrideWith(_Hub.new),
       jamProvider.overrideWith(_Jam.new),
+      libraryQueriesProvider.overrideWithValue(LibraryQueries(db)),
+      trackRepositoryProvider.overrideWithValue(TrackRepository(db)),
       audioHandlerProvider.overrideWithValue(handler),
       playbackPersistenceProvider.overrideWithValue(persistence),
       jamCacheDirProvider.overrideWith((ref) async {
@@ -178,5 +183,55 @@ void main() {
     expect(saved.queueIds, ids.take(3));
     expect(saved.index, 1);
     expect(saved.positionMs, 60000);
+  });
+
+  JamItem mine(String ref, {String? key, int id = 0}) => JamItem(
+      id: id, ownerDeviceId: '', title: 't$id', ext: 'mp3', ref: ref, partKey: key ?? ref);
+
+  JamState together(List<JamItem> items, int cur) => JamState(
+      version: 2,
+      hostDeviceId: 'h',
+      outputDeviceId: 'h',
+      mode: JamMode.together,
+      items: items,
+      currentIndex: cur);
+
+  const other = JamItem(id: 9, ownerDeviceId: 'h', title: 'cur', ext: 'mp3');
+
+  test('leaving «Coda insieme»: the part not yet played, in order, paused on the first (D-209)', () async {
+    // Saved queue [0,1,2] from the current one (1): the part is 1, 2, 0.
+    // Track 1 is already in the Jam, after the current one.
+    await c.read(jamProvider.notifier).debugBegin(
+        JamRole.guest, together([other, mine('${ids[1]}', id: 1)], 0));
+    await handler.playQueue([ids[3]], 0);
+    await c.read(jamProvider.notifier).end();
+    expect(handler.queueIds, [ids[1], ids[2], ids[0]]);
+    expect(handler.currentIndex, 0);
+    expect(handler.isPlaying, false);
+    expect(store.readPlayback().queueIds, [ids[1], ids[2], ids[0]]);
+  });
+
+  test('leaving «Coda insieme» with the whole part played: the saved queue, never an empty one', () async {
+    await c.read(jamProvider.notifier).debugBegin(
+        JamRole.guest,
+        together([for (final (n, i) in [ids[1], ids[2], ids[0]].indexed) mine('$i', id: n)], 2));
+    await handler.playQueue([ids[3]], 0);
+    await c.read(jamProvider.notifier).end();
+    expectBack();
+  });
+
+  test('a state without our tracks arriving after «Esci» does not shrink the part given back', () async {
+    final jam = c.read(jamProvider.notifier);
+    await jam.debugBegin(JamRole.guest, together([other, mine('${ids[1]}', id: 1)], 0));
+    final leaving = jam.end(); // the part is worked out here
+    jam.debugState(together([other], 0)); // the host already dropped our tracks
+    await leaving;
+    expect(handler.queueIds, [ids[1], ids[2], ids[0]]);
+  });
+
+  test('a host with an empty queue still has a feeder (suggestions)', () async {
+    await handler.playQueue([ids[3]], 0);
+    await c.read(jamProvider.notifier).debugBegin(JamRole.host, together(const [], -1));
+    expect(c.read(jamProvider.notifier).debugFeeder, isNotNull);
   });
 }
