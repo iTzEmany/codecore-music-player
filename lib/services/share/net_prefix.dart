@@ -24,8 +24,8 @@ Map<String, int> parseIpAddrShow(String out) {
   for (final line in out.split('\n')) {
     final m = re.firstMatch(line.trim());
     if (m == null || m[1] == 'lo') continue;
-    final p = int.parse(m[3]!);
-    if (p > 32) continue;
+    final p = int.tryParse(m[3]!);
+    if (p == null || p > 32) continue;
     res[m[2]!] = p;
   }
   return res;
@@ -42,9 +42,10 @@ Set<String> broadcastTargets(
   final out = <String>{};
   for (final a in addresses) {
     final b = a.split('.').map(int.parse).toList();
-    if (prefixes.containsKey(a)) {
+    final known = prefixes[a];
+    if (known != null && known >= 8) {
       // Known prefix: /31 and /32 (VPNs) have no broadcast, so no guess either.
-      final real = directedBroadcast(b, prefixes[a]!);
+      final real = directedBroadcast(b, known);
       if (real != null) out.add(real);
       continue;
     }

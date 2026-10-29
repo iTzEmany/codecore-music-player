@@ -33,6 +33,20 @@ void main() {
         {'10.0.0.2': 24, '10.0.1.2': 16});
   });
 
+  test('parseIpAddrShow: a broken line does not hide the others; plain /32 kept', () {
+    expect(
+        parseIpAddrShow('2: a    inet 10.0.0.1/099999999999999999999 scope global a\n'
+            '3: b    inet 10.0.0.2/24 scope global b\n'
+            '4: c    inet 100.64.0.2/32 scope global c\n'),
+        {'10.0.0.2': 24, '100.64.0.2': 32});
+  });
+
+  test('broadcastTargets: implausible known prefix falls back to the guess', () {
+    for (final p in [0, 7, -1]) {
+      expect(broadcastTargets(['10.0.0.1'], {'10.0.0.1': p}, windows: false), {'10.0.0.255'});
+    }
+  });
+
   test('broadcastTargets: known /32 gives no guess', () {
     expect(broadcastTargets(['100.64.0.2'], {'100.64.0.2': 32}, windows: true), isEmpty);
   });

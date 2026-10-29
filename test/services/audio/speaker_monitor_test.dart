@@ -299,4 +299,43 @@ void main() {
     expect(m.connected, isFalse);
     m.dispose();
   });
+
+  test('a read that keeps failing is fetched exactly twice', () async {
+    var calls = 0;
+    final m = SpeakerMonitor(
+      fetch: () async {
+        calls++;
+        return const BluetoothSnapshot(ok: false);
+      },
+      changed: const Stream.empty(),
+      seen: const Stream.empty(),
+      active: () async => false,
+      request: () async => true,
+      retryDelay: const Duration(milliseconds: 10),
+    );
+    await m.start();
+    await Future<void>.delayed(const Duration(milliseconds: 150));
+    expect(calls, 2);
+    m.dispose();
+  });
+
+  test('dispose while active() is pending: no prompt, no error', () async {
+    final active = Completer<bool>();
+    final m = SpeakerMonitor(
+      fetch: () async => const BluetoothSnapshot(),
+      changed: const Stream.empty(),
+      seen: const Stream.empty(),
+      active: () => active.future,
+      request: () async => true,
+    );
+    final prompts = <SpeakerPrompt>[];
+    m.prompts.listen(prompts.add);
+    final started = m.start();
+    await _settle();
+    m.dispose();
+    active.complete(true);
+    await started;
+    expect(prompts, isEmpty);
+    expect(m.pending, isEmpty);
+  });
 }
