@@ -49,4 +49,8 @@ void main() {
     expect(suggestionKey(' Hello ', 'ADELE'), suggestionKey('hello', 'adele '));
     expect(suggestionKey('a', null), isNot(suggestionKey('a', 'b')));
   });
+
+  test('weights that are all zero fall back without drawing from nothing', () async {
+    expect(await pick({'rock': 0, 'jazz': 0}, Random(1)), isNotNull);
+  });
 }

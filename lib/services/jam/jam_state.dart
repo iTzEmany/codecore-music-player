@@ -43,6 +43,11 @@ JamResult applyCommand(
     case JamCommandType.add:
       final item = cmd.item!;
       if (item.ownerDeviceId != from) return const JamResult.fail(JamError.forbidden);
+      // A fed track sent twice (lost answer, resend) is in the Jam once (invariant 3).
+      final pk = item.partKey;
+      if (pk != null && items.any((i) => i.ownerDeviceId == from && i.partKey == pk)) {
+        return JamResult.ok(s);
+      }
       final inherited = isHost && item.inherited;
       final added = item.copyWith(id: s.nextItemId, inherited: inherited);
       final first = s.currentIndex < 0;

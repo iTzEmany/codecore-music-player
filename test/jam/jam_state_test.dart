@@ -661,4 +661,32 @@ void togetherTests() {
       expect(after(s), 'now a b c');
     });
   });
+
+    test('an add with a (owner, partKey) already in the Jam is a no-op, in both modes', () {
+      JamItem fed(String o, String k) =>
+          JamItem(id: 0, ownerDeviceId: o, title: k, ext: 'mp3', partKey: k);
+      for (final m in [JamMode.host, JamMode.together]) {
+        var s = ok(startTogether(), JamCommand.add(item(host, title: 'cur')), host);
+        if (m == JamMode.together) s = ok(s, const JamCommand.setMode(JamMode.together), host);
+        s = ok(s, JamCommand.add(fed(guest, 'k')), guest);
+        final again = ok(s, JamCommand.add(fed(guest, 'k')), guest);
+        expect((again.version, again.items.length), (s.version, s.items.length), reason: '$m');
+        // Same key from someone else, or no key: a different track.
+        expect(ok(s, JamCommand.add(fed(g2, 'k')), g2).items.length, s.items.length + 1);
+      }
+    });
+
+    test('jump in together mode redoes the turns after the new current', () {
+      var s = startTogether().copyWith(
+        mode: JamMode.together,
+        nextItemId: 4,
+        items: [
+          for (final (n, o) in [host, host, host, guest].indexed)
+            JamItem(id: n, ownerDeviceId: o, title: '$o$n', ext: 'mp3'),
+        ],
+        currentIndex: 3,
+      );
+      s = ok(s, const JamCommand.jump(0), host);
+      expect(after(s), 'guest3 host1 host2');
+    });
 }

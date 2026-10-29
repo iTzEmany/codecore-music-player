@@ -72,4 +72,8 @@ void main() {
   for (final (name, l, cur, want) in cases) {
     test(name, () => expect(run(l, cur, name.startsWith('G1 left') ? ['h', 'g2'] : order), want));
   }
+
+  test('a current index below -1 is treated as nothing playing', () {
+    expect(run([it('h', 'h0'), it('a', 'a1'), it('h', 'h1')], -2, order), 'h0 a1 h1');
+  });
 }

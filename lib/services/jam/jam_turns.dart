@@ -1,3 +1,5 @@
+import 'dart:math' show max;
+
 import 'jam_models.dart';
 
 /// Turn-by-turn order of «Coda insieme» (D-187, D-214).
@@ -13,7 +15,7 @@ List<JamItem> togetherOrder(
   int currentIndex,
   List<String> participantOrder,
 ) {
-  final start = currentIndex + 1;
+  final start = max(0, currentIndex + 1);
   if (start >= items.length) return items;
   final parts = <String, List<JamItem>>{};
   for (final i in items.skip(start)) {

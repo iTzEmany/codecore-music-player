@@ -57,9 +57,9 @@ class JamPartFeeder {
   var _inJam = <String>{};
   final _pending = <String, int>{}; // sent, not observed yet: key -> state version after the add
   // Sent but the answer was lost (transport error): the host may have applied it.
-  // key -> [version when sent, later states that lacked it]. shortcut: two lacking
-  // states stand for «not applied», a slow host could still make a double.
-  final _uncertain = <String, List<int>>{};
+  // key -> version when sent. A state past it without the key: resend; a resend of a
+  // key the host did apply is a no-op in the reducer.
+  final _uncertain = <String, int>{};
   String? _flying; // taken from the part, being sent right now
   int? _sugVersion; // a suggestion sent, not observed yet
   JamState? _last;
@@ -127,7 +127,7 @@ class JamPartFeeder {
     final retry = <String>[];
     _uncertain.removeWhere((k, v) {
       if (inJam.contains(k)) return true;
-      if (s.version > v[0] && ++v[1] >= 2) {
+      if (s.version > v) {
         retry.add(k);
         return true;
       }
@@ -197,7 +197,7 @@ class JamPartFeeder {
         return true;
       }
       void unsure() {
-        if (_ord.containsKey(key)) _uncertain[key] = [s.version, 0];
+        if (_ord.containsKey(key)) _uncertain[key] = s.version;
       }
       try {
         final r = await send(JamCommand.add(item));
