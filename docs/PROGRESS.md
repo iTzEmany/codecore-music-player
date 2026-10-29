@@ -1157,7 +1157,7 @@ mobile_scanner — fase 24 — 2026-10-19
 - [x] 69.7 Sospendi, Blocca e l'avviso dell'ospite
 - [x] 69.8 `sodium` nella build e vettori noti
 - [x] 69.9 Broker e «Prova connessione»
-- [ ] 69.10 Controlli di fase
+- [x] 69.10 Controlli di fase
 
 ## Fase 70 — Ponte e protocollo (`fase-70-ponte-jam-distanza.md`)
 - [ ] 70.1 `JamProtocol`
