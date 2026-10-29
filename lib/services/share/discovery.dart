@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart' show setEquals;
+
 import '../../core/app_log.dart';
 import 'net_prefix.dart';
 import 'offers.dart';
@@ -202,14 +204,18 @@ class LanDiscovery {
   }
 
   Map<String, int> _prefixCache = const {};
+  Set<String> _prefixFor = const {};
   DateTime _prefixAt = DateTime.fromMillisecondsSinceEpoch(0);
 
-  /// Prefixes cost a process or a channel call: re-read at most every 30 s.
-  Future<Map<String, int>> _prefixes() async {
-    if (DateTime.now().difference(_prefixAt) < const Duration(seconds: 30)) {
+  /// Prefixes cost a process or a channel call: re-read when the set of local
+  /// addresses changes (network switch, hotspot) or after 30 s.
+  Future<Map<String, int>> _prefixes(Set<String> local) async {
+    if (setEquals(local, _prefixFor) &&
+        DateTime.now().difference(_prefixAt) < const Duration(seconds: 30)) {
       return _prefixCache;
     }
     _prefixAt = DateTime.now();
+    _prefixFor = local;
     return _prefixCache = await readNetPrefixes();
   }
 
@@ -222,10 +228,10 @@ class LanDiscovery {
     try {
       final ifaces = await NetworkInterface.list(
           type: InternetAddressType.IPv4, includeLoopback: false);
-      final prefixes = await _prefixes();
+      final local = {for (final i in ifaces) for (final a in i.addresses) a.address};
       final bcast = broadcastTargets(
-        [for (final i in ifaces) for (final a in i.addresses) a.address],
-        prefixes,
+        local,
+        await _prefixes(local),
         windows: Platform.isWindows,
       );
       for (final b in bcast) {

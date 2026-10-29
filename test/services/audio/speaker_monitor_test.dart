@@ -16,7 +16,8 @@ class _Rig {
   var requestResult = true;
   var active = false;
 
-  SpeakerMonitor monitor() => SpeakerMonitor(
+  SpeakerMonitor monitor({Duration retry = const Duration(minutes: 1)}) => SpeakerMonitor(
+        retryDelay: retry,
         fetch: () async => snap,
         changed: changed.stream,
         seen: seen.stream,
@@ -254,5 +255,48 @@ void main() {
     first.complete(const BluetoothSnapshot(permission: true)); // stale: nothing connected
     await started;
     expect(m.connected, isTrue);
+  });
+
+  test('an older ok read finishing after a newer failed one is applied', () async {
+    final first = Completer<BluetoothSnapshot>();
+    var calls = 0;
+    final changed = StreamController<void>.broadcast();
+    final m = SpeakerMonitor(
+      fetch: () => ++calls == 1
+          ? first.future
+          : Future.value(const BluetoothSnapshot(permission: true, ok: false)),
+      changed: changed.stream,
+      seen: const Stream.empty(),
+      active: () async => false,
+      request: () async => true,
+      retryDelay: const Duration(minutes: 1),
+    );
+    final started = m.start();
+    await _settle();
+    changed.add(null); // read 2 fails
+    await _settle();
+    first.complete(BluetoothSnapshot(permission: true, outputs: [_out('a', 0x0414)]));
+    await started;
+    expect(m.connected, isTrue);
+    m.dispose();
+  });
+
+  test('answer applies even when the read fails; a failed read is retried once', () async {
+    final r = _Rig()..connect([_out('a', 0x0200)]);
+    final m = r.monitor(retry: const Duration(milliseconds: 20));
+    await m.start();
+    expect(m.connected, isFalse);
+    var changes = 0;
+    m.changes.listen((_) => changes++);
+    r.snap = const BluetoothSnapshot(permission: true, ok: false);
+    await m.answer('a', true);
+    await _settle();
+    expect(m.connected, isTrue);
+    expect(changes, greaterThan(0));
+    // the retry finds the real state: the device is gone
+    r.snap = const BluetoothSnapshot(permission: true);
+    await Future<void>.delayed(const Duration(milliseconds: 60));
+    expect(m.connected, isFalse);
+    m.dispose();
   });
 }

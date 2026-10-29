@@ -300,7 +300,8 @@ class MainActivity : AudioServiceActivity() {
                 proxy = null
             }
             val timeout = Runnable {
-                reply(hasBluetoothPermission(), emptyList(), false)
+                // Bluetooth turned off meanwhile: the speaker really is gone.
+                reply(hasBluetoothPermission(), emptyList(), !adapter.isEnabled)
                 close()
             }
             val ok = adapter.getProfileProxy(this, object : BluetoothProfile.ServiceListener {

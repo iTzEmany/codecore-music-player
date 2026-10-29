@@ -1,6 +1,7 @@
+import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import '../../core/app_log.dart';
@@ -41,9 +42,10 @@ Set<String> broadcastTargets(
   final out = <String>{};
   for (final a in addresses) {
     final b = a.split('.').map(int.parse).toList();
-    final real = prefixes[a] == null ? null : directedBroadcast(b, prefixes[a]!);
-    if (real != null) {
-      out.add(real);
+    if (prefixes.containsKey(a)) {
+      // Known prefix: /31 and /32 (VPNs) have no broadcast, so no guess either.
+      final real = directedBroadcast(b, prefixes[a]!);
+      if (real != null) out.add(real);
       continue;
     }
     out.add('${b[0]}.${b[1]}.${b[2]}.255');
@@ -55,7 +57,7 @@ Set<String> broadcastTargets(
 /// Reads address -> prefix for the local interfaces; empty when unavailable.
 Future<Map<String, int>> readNetPrefixes() async {
   try {
-    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+    if (Platform.isAndroid) {
       final raw = await const MethodChannel('codecore/audio')
           .invokeMethod<List<Object?>>('netPrefix');
       return {
@@ -65,8 +67,17 @@ Future<Map<String, int>> readNetPrefixes() async {
       };
     }
     if (Platform.isLinux) {
-      final r = await Process.run('ip', ['-o', '-4', 'addr', 'show']);
-      if (r.exitCode == 0) return parseIpAddrShow(r.stdout as String);
+      final p = await Process.start('ip', ['-o', '-4', 'addr', 'show']);
+      final out = p.stdout.transform(utf8.decoder).join();
+      p.stderr.drain<void>();
+      try {
+        if (await p.exitCode.timeout(const Duration(seconds: 2)) == 0) {
+          return parseIpAddrShow(await out);
+        }
+      } on TimeoutException {
+        p.kill();
+        AppLog.w('net prefix: ip timed out');
+      }
     }
   } catch (e, st) {
     AppLog.w('net prefix unavailable', e, st);

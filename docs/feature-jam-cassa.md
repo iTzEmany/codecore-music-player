@@ -56,7 +56,7 @@ Il rilievo «Rimuovi non visibile nel ⋮ della coda dell'ospite» è voluto: l'
 ### Scoperta
 | ID | Requisito | Priorità | Criterio di accettazione (verificabile) | Fase |
 |---|---|---|---|---|
-| R-117 | Il broadcast diretto della scoperta usa la maschera vera della rete (Android dal lato nativo, Linux e Windows dal sistema), non una /24 supposta; le reti che filtrano ogni broadcast restano escluse (D-206) | U | Test della funzione che calcola gli indirizzi (/24, /16, /22); prova a mano su UniBA o su una rete /16 | 68 ✓ (prova su /16 a mano: Tocca a te) |
+| R-117 | Il broadcast diretto della scoperta usa la maschera vera della rete (Android dal lato nativo, Linux da `ip`; su Windows nessun prefisso, quindi a.b.c.255 e a.b.255.255), non una /24 supposta; le reti che filtrano ogni broadcast restano escluse (D-206) | U | Test della funzione che calcola gli indirizzi (/24, /16, /22); prova a mano su UniBA o su una rete /16 | 68 ✓ (prova su /16 a mano: Tocca a te) |
 
 ### Prove a mano
 | ID | Requisito | Priorità | Criterio di accettazione (verificabile) | Fase |

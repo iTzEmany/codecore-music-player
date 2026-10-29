@@ -25,6 +25,18 @@ void main() {
     expect(parseIpAddrShow('garbage\n\n5: x inet 1.2.3.4/99 \n6: y inet6 fe80::1/64\n'), isEmpty);
   });
 
+  test('parseIpAddrShow: peer line skipped, secondary address kept', () {
+    expect(
+        parseIpAddrShow('5: tun0    inet 100.64.0.2 peer 100.64.0.1/32 scope global tun0\n'
+            '2: eth0    inet 10.0.0.2/24 brd 10.0.0.255 scope global eth0\n'
+            '2: eth0    inet 10.0.1.2/16 brd 10.0.255.255 scope global secondary eth0\n'),
+        {'10.0.0.2': 24, '10.0.1.2': 16});
+  });
+
+  test('broadcastTargets: known /32 gives no guess', () {
+    expect(broadcastTargets(['100.64.0.2'], {'100.64.0.2': 32}, windows: true), isEmpty);
+  });
+
   test('broadcastTargets: real prefix, fallback /24, Windows guess', () {
     expect(broadcastTargets(['10.1.2.3'], {'10.1.2.3': 16}, windows: false), {'10.1.255.255'});
     expect(broadcastTargets(['10.1.2.3'], {}, windows: false), {'10.1.2.255'});
