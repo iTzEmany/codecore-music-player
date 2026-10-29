@@ -20,6 +20,7 @@ import '../services/audio/playback_persistence.dart';
 import '../services/jam/jam_cache.dart';
 import '../services/jam/jam_clock.dart';
 import '../services/jam/jam_guest.dart';
+import '../services/jam/jam_guest_link.dart';
 import '../services/jam/jam_host.dart';
 import '../services/jam/jam_models.dart';
 import '../services/jam/jam_online_adder.dart';
@@ -201,7 +202,7 @@ Set<String> jamPinKeys(JamState? s, String ownId) => {
     };
 
 class JamController extends Notifier<JamUiState> {
-  JamGuest? _guest;
+  JamGuestLink? _guest;
   JamOutput? _output;
   JamCache? _cache;
   JamClock? _clock;

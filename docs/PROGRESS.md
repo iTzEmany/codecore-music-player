@@ -1152,11 +1152,11 @@ mobile_scanner — fase 24 — 2026-10-19
 - [x] 69.2 L'offerta della cassa sopra la schermata della Jam (KO 4)
 - [x] 69.3 Jam piena non muta e «Continua sul telefono» (KO 1, D-263)
 - [ ] 69.4 Prova a mano dei rilievi e resti della 68.3 (utente)
-- [ ] 69.5 `JamGuestLink` senza spostare codice
-- [ ] 69.6 `admitRequest` e `JamGate`
+- [x] 69.5 `JamGuestLink` senza spostare codice
+- [x] 69.6 `admitRequest` e `JamGate`
 - [ ] 69.7 Sospendi, Blocca e l'avviso dell'ospite
 - [x] 69.8 `sodium` nella build e vettori noti
-- [ ] 69.9 Broker e «Prova connessione»
+- [x] 69.9 Broker e «Prova connessione»
 - [ ] 69.10 Controlli di fase
 
 ## Fase 70 — Ponte e protocollo (`fase-70-ponte-jam-distanza.md`)
