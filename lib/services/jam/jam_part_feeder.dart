@@ -71,6 +71,23 @@ class JamPartFeeder {
   List<String> get unsent =>
       {..._pending.keys, ..._uncertain.keys, ?_flying, ..._waiting}.toList()..sort((a, b) => _ord[a]!.compareTo(_ord[b]!));
 
+  /// Library ids of our part left to play, for [js] in «Coda insieme»: our items after the
+  /// current one, in order, then what the feeder still holds. Online items stay in the Jam
+  /// for the host (D-93) and are not part of it. Empty in «Coda dell'host».
+  List<int> remaining(JamState js) {
+    if (js.mode != JamMode.together) return const [];
+    final inJam = {
+      for (final (n, i) in js.items.indexed)
+        if (n > js.currentIndex && i.ownerDeviceId == ownId) i.partKey,
+    };
+    return [
+      for (final (n, i) in js.items.indexed)
+        if (n > js.currentIndex && i.ownerDeviceId == ownId) ?int.tryParse(i.ref ?? ''),
+      for (final k in unsent)
+        if (!inJam.contains(k)) ?jamPartKeyId(k),
+    ];
+  }
+
   /// The owner removed [key] from the Jam: it leaves the part for good (R-100).
   void forget(String key) {
     _ord.remove(key);

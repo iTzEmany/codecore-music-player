@@ -77,6 +77,18 @@ void main() {
     expect(st['status'], 'declined');
   });
 
+  test('open() starts the session without guests, idempotent; addMember after it does not reopen', () {
+    host.open();
+    expect(host.hosting, true);
+    expect(host.state!.participants.map((p) => p.id), ['host']);
+    final sid = host.sessionId;
+    host.open();
+    expect(host.sessionId, sid);
+    final c = host.addMember(id: 'g', name: 'G', host: '1.2.3.4', port: 1);
+    expect(c!.sid, sid);
+    expect(host.state!.participants, hasLength(2));
+  });
+
   test('request expires and refuses non-local', () async {
     await call('POST', 'request', body: reqBody());
     now = now.add(const Duration(minutes: 6));
