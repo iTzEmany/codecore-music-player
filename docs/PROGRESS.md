@@ -1146,3 +1146,36 @@ mobile_scanner — fase 24 — 2026-10-19
 - [x] 68.2 Misure di fluidità
 - [~] 68.3 Prova a mano con due telefoni (utente, D-224)
 - [x] 68.4 Chiusura (il §2 di `docs/prossimi-lavori.md`, non tracciato, lo segna l'utente)
+
+## Fase 69 — Fondamenta della Jam a distanza (`fase-69-fondamenta-jam-distanza.md`)
+- [ ] 69.1 `JamGuestLink` senza spostare codice
+- [ ] 69.2 `admitRequest` e `JamGate`
+- [ ] 69.3 Sospendi, Blocca e l'avviso dell'ospite
+- [ ] 69.4 `sodium` nella build e vettori noti
+- [ ] 69.5 Broker e «Prova connessione»
+- [ ] 69.6 Controlli di fase
+
+## Fase 70 — Ponte e protocollo (`fase-70-ponte-jam-distanza.md`)
+- [ ] 70.1 `JamProtocol`
+- [ ] 70.2 `JamBridge` e riserva
+- [ ] 70.3 Ospiti remoti in `JamHost`
+- [ ] 70.4 `JamBridgeHost` e `RemoteJamGuest`
+- [ ] 70.5 Accensione, servizio e fogli
+- [ ] 70.6 Controlli di fase
+
+## Fase 71 — Coda dell'ospite remoto (`fase-71-coda-remota.md`)
+- [ ] 71.1 `JamRemoteItems` e aggiunte
+- [ ] 71.2 «Coda insieme» da remoto
+- [ ] 71.3 Copertine, scheda e testo
+- [ ] 71.4 Controlli di fase
+
+## Fase 72 — Bluetooth e amici (`fase-72-bluetooth-e-amici.md`)
+- [ ] 72.1 `JamBeaconBridge.kt` e permessi
+- [ ] 72.2 Annuncio dell'host e Jam vicine
+- [ ] 72.3 Amici della Jam
+- [ ] 72.4 Controlli di fase
+
+## Fase 73 — Misure e prova a mano (`fase-73-chiusura-jam-distanza.md`)
+- [ ] 73.1 Costo della cifratura
+- [ ] 73.2 Prova a mano con due telefoni (utente)
+- [ ] 73.3 Chiusura

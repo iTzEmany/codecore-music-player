@@ -13,7 +13,8 @@ cartella padre (`../codecore/`), usata solo come riferimento di logica.
 ## Stack (non cambiarlo senza chiedere)
 Flutter 3.47 / Dart · `flutter_riverpod` (stato) · `drift` + SQLite (DB) · `just_audio` +
 `just_audio_media_kit` (audio) · `audio_service` (notifica Android) · `audio_metadata_reader`
-(tag, solo lettura) · `dio` (HTTP) · `youtube_explode_dart` (download) · `shared_preferences`.
+(tag, solo lettura) · `dio` (HTTP) · `youtube_explode_dart` (download) · `shared_preferences` ·
+`mqtt_client` + `sodium` (Jam a distanza, D-251/D-252).
 
 ## Comandi
 ```

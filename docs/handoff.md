@@ -1,6 +1,8 @@
-# Handoff — 2026-10-29 (fasi 66–68 «Jam: cassa e coda insieme»)
+# Handoff — 2026-10-29 (fasi 66–68 «Jam: cassa e coda insieme», kickoff della «Jam a distanza»)
 
 ## Prima di tutto (per la prossima chat)
+Kickoff della feature «Jam a distanza» fatto: requisiti, stack, architettura, protocollo di sicurezza e rischi in `docs/feature-jam-distanza.md`, decisioni D-228…D-262, piano nelle fasi 69–73 (`docs/00-INDICE.md`). Pacchetti nuovi ammessi: solo `sodium` e `mqtt_client`. Si parte dalla fase 69.
+
 La feature «Jam: cassa e coda insieme» (`docs/feature-jam-cassa.md`) è nel codice: 66 (#61), 67 (#62), 68 (questa PR). Resta solo la prova a mano 68.3 con il Motorola e le JBL, più le voci di «Tocca a te». Le decisioni della notte sono D-222…D-227 in `docs/decisioni.md`.
 
 ## Stato
@@ -56,11 +58,16 @@ La feature «Jam: cassa e coda insieme» (`docs/feature-jam-cassa.md`) è nel co
 
 ## Prompt di avvio della prossima sessione
 ```
+/obiettivo fase 69 (feature «Jam a distanza», docs/feature-jam-distanza.md)
+```
+Dopo la prova 68.3, invece:
+```
 Leggi docs/handoff.md. Ho fatto la prova 68.3: gli esiti sono in docs/fase-68-scoperta-e-chiusura-jam.md §68.3. Trasforma i KO in una fase di rilievi e lanciala con /obiettivo.
 ```
 
 ## Prossimi obiettivi
-1. **(Consigliato) Esiti della 68.3**: rilievi della prova con la cassa vera, poi 67.1, 67.2 e 68.3 da `[~]` a `[x]`.
-2. **Unificare le due code delle domande sulla cassa**: un solo punto che decide cosa mostrare. Oggi la coda del monitor e quella della UI possono mostrarne due di fila.
-3. **Ricerca «notte», build p99** (D-176): l'ultimo scenario fuori soglia. Misura con `--only "Ricerca «notte»"` prima e dopo.
-4. **Prove d'ascolto 57.7** e APK di release con NewPipe.
+1. **(Consigliato) Jam a distanza, fasi 69–73**: `/obiettivo fase 69`. La 73.2 (due telefoni, uno su 4G) è a mano.
+2. **Esiti della 68.3**: rilievi della prova con la cassa vera, poi 67.1, 67.2 e 68.3 da `[~]` a `[x]`.
+3. **Unificare le due code delle domande sulla cassa**: un solo punto che decide cosa mostrare. Oggi la coda del monitor e quella della UI possono mostrarne due di fila.
+4. **Ricerca «notte», build p99** (D-176): l'ultimo scenario fuori soglia. Misura con `--only "Ricerca «notte»"` prima e dopo.
+5. **Prove d'ascolto 57.7** e APK di release con NewPipe.
